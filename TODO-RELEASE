@@ -12,7 +12,7 @@ Fix before releasing 7.11.0
 
 17. Diego Casorran's AmigaOS patch (feedback sent to Diego, awaiting response)
 
-19. Resolve Giuseppe Attardi's "elusive cache bug"
+19. Resolve Giuseppe Attardi's "elusive cache bug" (work in progress)
 
 To get fixed in 7.11.1
 ======================
@@ -40,3 +40,7 @@ To get fixed in 7.11.1
     proxy after a CONNECT request. (correct behavior on this is not certain)
 
 18. Modified Accept: header in the default HTTP request (being discussed)
+
+20. Directory listing support for file:///dir/ (patch by David Hull)
+    http://sourceforge.net/tracker/index.php?func=detail&aid=844036&group_id=976&atid=300976
+    This patch needs work to become portable.
