@@ -21,6 +21,9 @@
  * This exact source code has not been verified to work.
  */
 
+/* to make this work under windows, use the win32-functions from the
+   win32socket.c file as well */
+
 #include <stdio.h>
 
 #include <curl/curl.h>

@@ -1,3 +1,16 @@
+/*****************************************************************************
+ *                                  _   _ ____  _     
+ *  Project                     ___| | | |  _ \| |    
+ *                             / __| | | | |_) | |    
+ *                            | (__| |_| |  _ <| |___ 
+ *                             \___|\___/|_| \_\_____|
+ *
+ * $Id$
+ */
+
+/* to make this work under windows, use the win32-functions from the
+   win32socket.c file as well */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
