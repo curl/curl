@@ -6,7 +6,9 @@
 
                                 Java Interface
 
- This is very much work in progress and it does not work.
+ This is not a complete implementation of a libcurl interface. I've made the
+core work and it needs additional code to be added to get the rest of the
+stuff supported.
 
  The interface is not set yet, bring your suggestions!
 
