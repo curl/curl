@@ -98,27 +98,6 @@
 #define MAX(x,y) ((x)>(y)?(x):(y))
 #endif
 
-/* Type of handle. All publicly returned 'handles' in the curl interface
-   have a handle first in the struct that describes what kind of handle it
-   is. Used to detect bad handle usage. */
-typedef enum {
-  STRUCT_NONE,
-  STRUCT_OPEN,
-  STRUCT_CONNECT,
-  STRUCT_LAST
-} Handle;
-
-/* Connecting to a remote server using the curl interface is moving through
-   a state machine, this type is used to store the current state */
-typedef enum {
-  CONN_NONE,  /* illegal state */
-  CONN_INIT,  /* curl_connect() has been called */
-  CONN_DO,    /* curl_do() has been called successfully */
-  CONN_DONE,  /* curl_done() has been called successfully */
-  CONN_ERROR, /* and error has occurred */
-  CONN_LAST   /* illegal state */
-} ConnState;
-
 #ifdef KRB4
 /* Types needed for krb4-ftp connections */
 struct krb4buffer {
@@ -201,6 +180,7 @@ struct ConnectBits {
   bool close; /* if set, we close the connection after this request */
   bool reuse; /* if set, this is a re-used connection */
   bool chunk; /* if set, this is a chunked transfer-encoding */
+  bool httpproxy; /* if set, this transfer is done through a http proxy */
 };
 
 /*
@@ -209,17 +189,9 @@ struct ConnectBits {
  */
 struct connectdata {
   /**** Fields set when inited and not modified again */
-
-  /* To better see what kind of struct that is passed as input, *ALL* publicly
-     returned handles MUST have this initial 'Handle'. */
-  Handle handle; /* struct identifier */
   struct UrlData *data; /* link to the root CURL struct */
-
   int connectindex; /* what index in the connects index this particular
                        struct has */
-
-  /**** curl_connect() phase fields */
-  ConnState state; /* for state dependent actions */
 
   long protocol; /* PROT_* flags concerning the protocol set */
 #define PROT_MISSING (1<<0)
@@ -250,6 +222,9 @@ struct connectdata {
                                  not the proxy port! */
   char *ppath;
   long bytecount;
+
+  char *proxyhost; /* name of the http proxy host */
+
   struct timeval now; /* current time */
   int firstsocket;     /* the main socket to use */
   int secondarysocket; /* for i.e ftp transfers */
@@ -308,6 +283,9 @@ struct connectdata {
     char *cookie; /* free later if not NULL! */
     char *host; /* free later if not NULL */
   } allocptr;
+
+  char *newurl; /* This can only be set if a Location: was in the
+		   document headers */
 
 #ifdef KRB4
 
@@ -423,14 +401,6 @@ struct Configbits {
   bool urlstringalloc;   /* the URL string is malloc()'ed */
 };
 
-/* What type of interface that intiated this struct */
-typedef enum {
-  CURLI_NONE,
-  CURLI_EASY,
-  CURLI_NORMAL,
-  CURLI_LAST
-} CurlInterface;
-
 /*
  * As of April 11, 2000 we're now trying to split up the urldata struct in
  * three different parts:
@@ -457,9 +427,6 @@ typedef enum {
  */
 
 struct UrlData {
-  Handle handle; /* struct identifier */
-  CurlInterface interf; /* created by WHAT interface? */
-
   /*************** Global - specific items  ************/
   FILE *err;    /* the stderr writes goes here */
   char *errorbuffer; /* store failure messages in here */
@@ -535,9 +502,6 @@ struct UrlData {
 
   char *cookie;       /* HTTP cookie string to send */
 
-  char *newurl; /* This can only be set if a Location: was in the
-		   document headers */
-
   struct curl_slist *headers; /* linked list of extra headers */
   struct HttpPost *httppost;  /* linked list of POST data */
 
@@ -597,191 +561,26 @@ struct UrlData {
 #define LIBCURL_NAME "libcurl"
 #define LIBCURL_ID LIBCURL_NAME " " LIBCURL_VERSION " " SSL_ID
 
+CURLcode Curl_getinfo(CURL *curl, CURLINFO info, ...);
+
 /*
  * Here follows function prototypes from what we used to plan to call
  * the "low level" interface. It is no longer prioritized and it is not likely
  * to ever be supported to external users.
+ *
+ * I removed all the comments to them as well, as they were no longer accurate
+ * and they're not meant for "public use" anymore.
  */
 
-/*
- * NAME	curl_init()
- *
- * DESCRIPTION
- *
- * Inits libcurl globally. This must be used before any libcurl calls can
- * be used. This may install global plug-ins or whatever. (This does not
- * do winsock inits in Windows.)
- *
- * EXAMPLE
- *
- * curl_init();
- *
- */
-CURLcode curl_init(void);
-
-/*
- * NAME	curl_init()
- *
- * DESCRIPTION
- *
- * Frees libcurl globally. This must be used after all libcurl calls have
- * been used. This may remove global plug-ins or whatever. (This does not
- * do winsock cleanups in Windows.)
- *
- * EXAMPLE
- *
- * curl_free(curl);
- *
- */
-void curl_free(void);
-
-/*
- * NAME curl_open()
- *
- * DESCRIPTION
- *
- * Opens a general curl session. It does not try to connect or do anything
- * on the network because of this call. The specified URL is only required
- * to enable curl to figure out what protocol to "activate".
- *
- * A session should be looked upon as a series of requests to a single host.  A
- * session interacts with one host only, using one single protocol.
- *
- * The URL is not required. If set to "" or NULL, it can still be set later
- * using the curl_setopt() function. If the curl_connect() function is called
- * without the URL being known, it will return error.
- *
- * EXAMPLE
- *
- * CURLcode result;
- * CURL *curl;
- * result = curl_open(&curl, "http://curl.haxx.nu/libcurl/");
- * if(result != CURL_OK) {
- *   return result;
- * }
- * */
-CURLcode curl_open(CURL **curl, char *url);
-
-/*
- * NAME curl_setopt()
- *
- * DESCRIPTION
- *
- * Sets a particular option to the specified value.
- *
- * EXAMPLE
- *
- * CURL curl;
- * curl_setopt(curl, CURL_HTTP_FOLLOW_LOCATION, TRUE);
- */
-CURLcode curl_setopt(CURL *handle, CURLoption option, ...);
-
-/*
- * NAME curl_close()
- *
- * DESCRIPTION
- *
- * Closes a session previously opened with curl_open()
- *
- * EXAMPLE
- *
- * CURL *curl;
- * CURLcode result;
- *
- * result = curl_close(curl);
- */
-CURLcode curl_close(CURL *curl); /* the opposite of curl_open() */
-
-CURLcode curl_read(CURLconnect *c_conn, char *buf, size_t buffersize,
-                   ssize_t *n);
-CURLcode curl_write(CURLconnect *c_conn, char *buf, size_t amount,
-                    size_t *n);
-
-/*
- * NAME curl_connect()
- *
- * DESCRIPTION
- *
- * Connects to the peer server and performs the initial setup. This function
- * writes a connect handle to its second argument that is a unique handle for
- * this connect. This allows multiple connects from the same handle returned
- * by curl_open().
- *
- * By setting 'allow_port' to FALSE, the data->use_port will *NOT* be
- * respected.
- *
- * EXAMPLE
- *
- * CURLCode result;
- * CURL curl;
- * CURLconnect connect;
- * result = curl_connect(curl, &connect); */
-
-CURLcode curl_connect(CURL *curl,
-                      CURLconnect **in_connect,
+CURLcode Curl_open(CURL **curl, char *url);
+CURLcode Curl_setopt(CURL *handle, CURLoption option, ...);
+CURLcode Curl_close(CURL *curl); /* the opposite of curl_open() */
+CURLcode Curl_connect(struct UrlData *,
+                      struct connectdata **,
                       bool allow_port);
-
-/*
- * NAME curl_do()
- *
- * DESCRIPTION
- *
- * (Note: May 3rd 2000: this function does not currently allow you to
- * specify a document, it will use the one set previously)
- *
- * This function asks for the particular document, file or resource that
- * resides on the server we have connected to. You may specify a full URL,
- * just an absolute path or even a relative path. That means, if you're just
- * getting one file from the remote site, you can use the same URL as input
- * for both curl_open() as well as for this function.
- *
- * In the even there is a host name, port number, user name or password parts
- * in the URL, you can use the 'flags' argument to ignore them completely, or
- * at your choice, make the function fail if you're trying to get a URL from
- * different host than you connected to with curl_connect().
- *
- * You can only get one document at a time using the same connection. When one
- * document has been received you can although request again.
- *
- * When the transfer is done, curl_done() MUST be called.
- *
- * EXAMPLE
- *
- * CURLCode result;
- * char *url;
- * CURLconnect *connect;
- * result = curl_do(connect, url, CURL_DO_NONE); */
-CURLcode curl_do(CURLconnect *in_conn);
-
-/*
- * NAME curl_done()
- *
- * DESCRIPTION
- *
- * When the transfer following a curl_do() call is done, this function should
- * get called.
- *
- * EXAMPLE
- *
- * CURLCode result;
- * char *url;
- * CURLconnect *connect;
- * result = curl_done(connect); */
-CURLcode curl_done(CURLconnect *connect);
-
-/*
- * NAME curl_disconnect()
- *
- * DESCRIPTION
- *
- * Disconnects from the peer server and performs connection cleanup.
- *
- * EXAMPLE
- *
- * CURLcode result;
- * CURLconnect *connect;
- * result = curl_disconnect(connect); */
-CURLcode curl_disconnect(CURLconnect *connect);
+CURLcode Curl_do(struct connectdata *);
+CURLcode Curl_done(struct connectdata *);
+CURLcode Curl_disconnect(struct connectdata *);
 
 
 #endif
