@@ -14,6 +14,10 @@ isn't because there's no Proxy-Authorization: NTLM header
 
 # Client-side
 <client>
+# NTLM only works if SSL-support is present
+<features>
+SSL
+</features>
 <server>
 http
 </server>
