@@ -5,6 +5,8 @@ beginning.
 
 This release includes the following changes:
 
+ o large file support was added. Use one of the new options: INFILESIZE_LARGE,
+   RESUME_FROM_LARGE and MAXFILESIZE_LARGE
  o the new --ftp-pasv overrides a previous --ftpport
  o CURLOPT_FTPSSL and ftps:// now do ssl over FTP "The Right Way" (the curl
    tool now features the --ftp-ssl option)
@@ -66,6 +68,7 @@ advice from friends like these:
  Peter Sylvester, Siddhartha Prakash Jain, Mathias Axelsson, Maciej
  W. Rozycki, Nicolas Croiset, Josh Kapell, Gaz Iqbal, Dave May, Markus
  Moeller, James Clancy, Giuseppe Attardi, swalkaus at yahoo.com, Steve Green,
- Marty Kuhrt, Dominick Meglio, Diego Casorran, David Byron, John McGowan
+ Marty Kuhrt, Dominick Meglio, Diego Casorran, David Byron, John McGowan,
+ David J Meyer
  
         Thanks! (and sorry if I forgot to mention someone)
