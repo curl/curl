@@ -335,10 +335,13 @@ prompt function.
 .SH HTTP OPTIONS
 .TP 0.4i
 .B CURLOPT_ENCODING
-Two encodings are supported \fIdentity\fP, which does nothing, and
-\fIdeflate\fP to request the server to compress its reponse using the
-zlib algorithm. This is not an order, the server may or may not do it.
-See the special file lib/README.encoding for details.
+Three encodings are supported: \fIidentity\fP, which does nothing,
+\fIdeflate\fP which requests the server to compress its response using the
+zlib algorithm, and \fIgzip\fP which requests the gzip algorithm. This
+is a request, not an order; the server may or may not do it.  This
+option must be set (to any value) or else any unsolicited encoding done
+by the server is ignored. See the special file lib/README.encoding for
+details.
 .TP
 .B CURLOPT_FOLLOWLOCATION
 A non-zero parameter tells the library to follow any Location: header that the
