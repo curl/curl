@@ -6,7 +6,20 @@
 
                                   Changelog
 
+Daniel (18 March 2004)
+- Tor Arntsen brought some info about SGI IRIX:
+
+  IRIX supports 3 different executable/object formats, -32, -n32 and -64.
+  -n32 is default 32-bit format, -32 is the "old" 32-bit format, and -64 is
+  the 64-bit format.  Libraries for the different formats are in lib, lib32
+  and lib64 respectively.
+
+  We've now adjusted the configure script to adapt to this when scanning for
+  3rd party libs, such as OpenSSL.
+
 Daniel (17 March 2004)
+- Watz pointed out a few missing files in the MSVC project description file.
+
 - Günter Knauf brought patches, code and makefiles to build curl on Novell
   NetWare.
 
