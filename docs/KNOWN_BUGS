@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* IPv6 support on AIX 4.3.3 doesn't work due to a missing sockaddr_storage
+  struct. It has been reported to work on AIX 5.1 though.
+
 * Running 'make test' on Mac OS X gives 4 errors. This seems to be related
   to some kind of libtool problem:
   http://curl.haxx.se/mail/archive-2002-03/0029.html and
