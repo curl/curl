@@ -196,8 +196,10 @@ CURLcode http_auth_headers(struct connectdata *conn,
   if(!data->state.authstage) {
     if(conn->bits.httpproxy && conn->bits.proxy_user_passwd)
       Curl_http_auth_stage(data, 407);
-    else
+    else if(conn->bits.user_passwd)
       Curl_http_auth_stage(data, 401);
+    else
+      return CURLE_OK; /* no authentication with no user or password */
   }
 
   /* To prevent the user+password to get sent to other than the original
