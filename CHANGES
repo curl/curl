@@ -6,6 +6,13 @@
 
                                History of Changes
 
+Daniel (7 November 2001)
+- docs/VERSIONS is a new file in the archive that explains the version number
+  system we use in the curl project.
+
+- Did some more fixes that now makes libcurl only ignore signals as long as
+  it needs to, and then restore (if any) previous signal handler again.
+
 Daniel (6 November 2001)
 - Enrik Berkhan posted bug report #478780, in which he very correctly pointed
   out two bad timeout matters in libcurl: we didn't restore the sigaction
