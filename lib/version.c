@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -38,20 +38,28 @@ char *curl_version(void)
 
 #ifdef USE_SSLEAY
 
-#if (SSLEAY_VERSION_NUMBER >= 0x906000)
+#if (SSLEAY_VERSION_NUMBER >= 0x905000)
   {
     char sub[2];
+    unsigned long ssleay_value;
     sub[1]='\0';
-    if(SSLEAY_VERSION_NUMBER&0xff0) {
-      sub[0]=((SSLEAY_VERSION_NUMBER>>4)&0xff) + 'a' -1;
-    }
-    else
+    ssleay_value=SSLeay();
+    if(ssleay_value < 0x906000) {
+      ssleay_value=SSLEAY_VERSION_NUMBER;
       sub[0]='\0';
+    }
+    else {
+      if(ssleay_value&0xff0) {
+        sub[0]=((ssleay_value>>4)&0xff) + 'a' -1;
+      }
+      else
+        sub[0]='\0';
+    }
 
     sprintf(ptr, " (OpenSSL %lx.%lx.%lx%s)",
-            (SSLEAY_VERSION_NUMBER>>28)&0xf,
-            (SSLEAY_VERSION_NUMBER>>20)&0xff,
-            (SSLEAY_VERSION_NUMBER>>12)&0xff,
+            (ssleay_value>>28)&0xf,
+            (ssleay_value>>20)&0xff,
+            (ssleay_value>>12)&0xff,
             sub);
   }
 
