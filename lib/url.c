@@ -627,11 +627,17 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Set cookie file to read and parse. Can be used multiple times.
      */
     cookiefile = (char *)va_arg(param, void *);
-    if(cookiefile)
+    if(cookiefile) {
+      struct curl_slist *cl;
       /* append the cookie file name to the list of file names, and deal with
          them later */
-      data->change.cookielist =
-        curl_slist_append(data->change.cookielist, cookiefile);
+      cl = curl_slist_append(data->change.cookielist, cookiefile);
+
+      if(!cl)
+        return CURLE_OUT_OF_MEMORY;
+
+      data->change.cookielist = cl;
+    }
     break;
 
   case CURLOPT_COOKIEJAR:
@@ -2420,26 +2426,39 @@ static CURLcode CreateConnection(struct SessionHandle *data,
                                  "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
                                  "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
                                  proxyuser, proxypasswd))) {
+            CURLcode res = CURLE_OK;
+
             /* found user and password, rip them out */
             Curl_safefree(conn->proxyuser);
             conn->proxyuser = strdup(proxyuser);
 
             if(!conn->proxyuser)
-              return CURLE_OUT_OF_MEMORY;
-            
-            Curl_safefree(conn->proxypasswd);
-            conn->proxypasswd = strdup(proxypasswd);
+              res = CURLE_OUT_OF_MEMORY;
+            else {
+              Curl_safefree(conn->proxypasswd);
+              conn->proxypasswd = strdup(proxypasswd);
 
-            if(!conn->proxypasswd)
-              return CURLE_OUT_OF_MEMORY;
-            
-            conn->bits.proxy_user_passwd = TRUE; /* enable it */
+              if(!conn->proxypasswd)
+                res = CURLE_OUT_OF_MEMORY;
+            }
 
-            ptr = strdup(ptr+1); /* the right side of the @-letter */
-            free(proxy); /* free the former data */
-            proxy = ptr; /* now use this instead */
+            if(CURLE_OK == res) {
+              conn->bits.proxy_user_passwd = TRUE; /* enable it */
+              ptr = strdup(ptr+1); /* the right side of the @-letter */
+
+              if(ptr) {
+                free(proxy); /* free the former proxy string */
+                proxy = ptr; /* now use this instead */
+              }
+              else
+                res = CURLE_OUT_OF_MEMORY;
+            }
+
+            if(res) {
+              free(proxy); /* free the allocated proxy string */
+              return res;
+            }
           }
-
 
           data->change.proxy = proxy;
           data->change.proxy_alloc=TRUE; /* this needs to be freed later */
