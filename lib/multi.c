@@ -380,7 +380,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       case CURLM_STATE_WAITRESOLVE:
         /* awaiting an asynch name resolve to complete */
       {
-        struct Curl_dns_entry *dns;
+        struct Curl_dns_entry *dns = NULL;
 
         /* check if we have the name resolved by now */
         easy->result = Curl_is_resolved(easy->easy_conn, &dns);
