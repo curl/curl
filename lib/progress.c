@@ -59,11 +59,11 @@ static char *max5data(double bytes, char *max5)
 #define ONE_MEGABYTE (1024*1024)
 
   if(bytes < 100000) {
-    sprintf(max5, "%5d", (int)bytes);
+    sprintf(max5, "%5Od", (curl_off_t)bytes);
     return max5;
   }
   if(bytes < (10000*ONE_KILOBYTE)) {
-    sprintf(max5, "%4dk", (int)bytes/ONE_KILOBYTE);
+    sprintf(max5, "%4Odk", (curl_off_t)bytes/ONE_KILOBYTE);
     return max5;
   }
   if(bytes < (100*ONE_MEGABYTE)) {
@@ -71,7 +71,7 @@ static char *max5data(double bytes, char *max5)
     sprintf(max5, "%4.1fM", bytes/ONE_MEGABYTE);
     return max5;
   }
-  sprintf(max5, "%4dM", (int)bytes/ONE_MEGABYTE);
+  sprintf(max5, "%4OdM", (curl_off_t)bytes/ONE_MEGABYTE);
   return max5;
 }
 
