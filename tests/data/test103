@@ -24,6 +24,8 @@ ftp://%HOSTIP:%FTPPORT/a/path/103 -P -
 <verify>
 <strip>
 ^PORT .*
+^EPRT.*
+^LPRT.*
 </strip>
 <protocol>
 USER anonymous
