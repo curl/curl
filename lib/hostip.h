@@ -57,7 +57,8 @@ int Curl_resolv(struct connectdata *conn,
                 int port,
                 struct Curl_dns_entry **dnsentry);
 
-CURLcode Curl_is_resolved(struct connectdata *conn, bool *done);
+CURLcode Curl_is_resolved(struct connectdata *conn,
+                          struct Curl_dns_entry **dns);
 CURLcode Curl_wait_for_resolv(struct connectdata *conn,
                               struct Curl_dns_entry **dnsentry);
 CURLcode Curl_multi_ares_fdset(struct connectdata *conn,

@@ -360,12 +360,12 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     case CURLM_STATE_WAITRESOLVE:
       /* awaiting an asynch name resolve to complete */
       {
-        bool done;
+        struct Curl_dns_entry *dns;
 
         /* check if we have the name resolved by now */
-        easy->result = Curl_is_resolved(easy->easy_conn, &done);
+        easy->result = Curl_is_resolved(easy->easy_conn, &dns);
 
-        if(done) {
+        if(dns) {
           /* Perform the next step in the connection phase, and then move on
              to the WAITCONNECT state */
           easy->result = Curl_async_resolved(easy->easy_conn);

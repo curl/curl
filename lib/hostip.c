@@ -320,10 +320,16 @@ int Curl_resolv(struct connectdata *conn,
     Curl_addrinfo *addr = my_getaddrinfo(conn, hostname, port, &wait);
     
     if (!addr) {
-      if(wait)
+      if(wait) {
         /* the response to our resolve call will come asynchronously at 
            a later time, good or bad */
-        rc = 1;
+        /* First, check that we haven't received the info by now */
+        (void)Curl_is_resolved(conn, &dns);
+        if(dns)
+          rc = 0; /* pointer provided */
+        else
+          rc = 1; /* no info yet */
+      }
     }
     else
       /* we got a response, store it in the cache */
@@ -401,7 +407,8 @@ CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
 }
 
 /* called to check if the name is resolved now */
-CURLcode Curl_is_resolved(struct connectdata *conn, bool *done)
+CURLcode Curl_is_resolved(struct connectdata *conn,
+                          struct Curl_dns_entry **dns)
 {
   fd_set read_fds, write_fds;
   static const struct timeval tv={0,0};
@@ -419,12 +426,12 @@ CURLcode Curl_is_resolved(struct connectdata *conn, bool *done)
   if(count)
     ares_process(data->state.areschannel, &read_fds, &write_fds);
 
-  *done = FALSE;
+  *dns = NULL;
 
   if(conn->async.done) {
     if(!conn->async.dns)
       return CURLE_COULDNT_RESOLVE_HOST;
-    *done = TRUE;
+    *dns = conn->async.dns;
   }
 
   return CURLE_OK;
@@ -557,7 +564,8 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
       ares_gethostbyname(data->state.areschannel, hostname, PF_INET,
                          host_callback, conn);
 
-      *waitp = TRUE; /* please wait for the response */      
+      
+      *waitp = TRUE; /* please wait for the response */
     }
     else
       ares_destroy(data->state.areschannel);
@@ -590,12 +598,13 @@ CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode Curl_is_resolved(struct connectdata *conn, bool *done)
+CURLcode Curl_is_resolved(struct connectdata *conn,
+                          struct Curl_dns_entry **dns)
 {
   (void)conn;
-  *done = TRUE;
+  *dns = NULL;
 
-  return CURLE_OK;
+  return CURLE_COULDNT_RESOLVE_HOST;
 }
 
 #endif
