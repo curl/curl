@@ -35,7 +35,7 @@
   06-Nov-94 08:49:37 GMT
   Nov  6 08:49:37 1994
 
-  without the time zone (we always assume GMT):
+  without the time zone:
 
   06 Nov 1994 08:49:37
   06-Nov-94 08:49:37
@@ -52,10 +52,20 @@
   06-Nov-94
   Sun Nov 6 94
 
-  odd separators:
+  unusual separators:
 
   1994.Nov.6
   Sun/Nov/6/94/GMT
+
+  commonly used time zone names:
+
+  Sun, 06 Nov 1994 08:49:37 CET
+  06 Nov 1994 08:49:37 EST
+
+  time zones specified using RFC822 style:
+
+  Sun, 12 Sep 2004 15:05:58 -0700
+  Sat, 11 Sep 2004 21:32:11 +0200
 
 */
 #include "setup.h"
