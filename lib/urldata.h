@@ -170,6 +170,11 @@ struct connectdata {
    */ 
   CURLcode (*curl_connect)(struct connectdata *connect);
 
+  /* This function *MAY* be set to a protocol-dependent function that is run
+   * in the curl_close() function if protocol-specific cleanups are required.
+   */ 
+  CURLcode (*curl_close)(struct connectdata *connect);
+
   /**** curl_get() phase fields */
 
   /* READ stuff */
@@ -264,6 +269,7 @@ struct Configbits {
   bool use_netrc;
   bool user_passwd;
   bool verbose;
+  bool this_is_a_follow; /* this is a followed Location: request */
 };
 
 /* What type of interface that intiated this struct */
@@ -416,6 +422,11 @@ struct UrlData {
 
 #define MAX_CURL_USER_LENGTH 128
 #define MAX_CURL_PASSWORD_LENGTH 128
+
+  char *auth_host; /* if set, this is the allocated string to the host name
+                    * to which to send the authorization data to, and no other
+                    * host (which location-following otherwise could lead to)
+                    */
 
   char user[MAX_CURL_USER_LENGTH];
   char passwd[MAX_CURL_PASSWORD_LENGTH];
