@@ -68,6 +68,8 @@ my $retrweirdo=0;
 my $retrnosize=0;
 my $srcdir=".";
 my $nosave=0;
+my $controldelay=0; # set to 1 to delay the control connect data sending to
+ # test that curl deals with that nicely
 
 my $port = 8921; # just a default
 do {
@@ -101,6 +103,32 @@ logmsg "FTP server started on port $port\n";
 open(PID, ">.ftp$ftpdnum.pid");
 print PID $$;
 close(PID);
+
+# Send data to the client on the control stream, which happens to be plain
+# stdout.
+
+sub sendcontrol {
+    if(!$controldelay) {
+        # spit it all out at once
+        print @_;
+    }
+    else {
+        my $a = join("", @_);
+        my @a = split("", $a);
+
+        for(@a) {
+            print $_;
+            select(undef, undef, undef, 0.1);
+        }
+    }
+
+}
+
+# Send data to the client on the data stream
+
+sub senddata {
+    print SOCK @_;
+}
 
 my $waitedpid = 0;
 my $paddr;
@@ -210,12 +238,12 @@ my @ftpdir=("total 20\r\n",
 
     logmsg "pass LIST data on data connection\n";
     for(@ftpdir) {
-        print SOCK $_;
+        senddata $_;
     }
     close_dataconn();
     logmsg "done passing data\n";
 
-    print "226 ASCII transfer complete\r\n";
+    sendcontrol "226 ASCII transfer complete\r\n";
     return 0;
 }
 
@@ -223,10 +251,10 @@ sub NLST_command {
     my @ftpdir=("file", "with space", "fake", "..", " ..", "funny", "README");
     logmsg "pass NLST data on data connection\n";
     for(@ftpdir) {
-        print SOCK "$_\r\n";
+        senddata "$_\r\n";
     }
     close_dataconn();
-    print "226 ASCII transfer complete\r\n";
+    sendcontrol "226 ASCII transfer complete\r\n";
     return 0;
 }
 
@@ -243,15 +271,15 @@ sub MDTM_command {
     chomp $reply;
 
     if($reply <0) {
-        print "550 $testno: no such file.\r\n";
+        sendcontrol "550 $testno: no such file.\r\n";
         logmsg "MDTM $testno: no such file\n";
     }
     elsif($reply) {
-        print "$reply\r\n";
+        sendcontrol "$reply\r\n";
         logmsg "MDTM $testno returned $reply\n";
     }
     else {
-        print "500 MDTM: no such command.\r\n";
+        sendcontrol "500 MDTM: no such command.\r\n";
         logmsg "MDTM: no such command\n";
     }
     return 0;
@@ -270,11 +298,11 @@ sub SIZE_command {
 
     if($size) {
         if($size > -1) {
-            print "213 $size\r\n";
+            sendcontrol "213 $size\r\n";
             logmsg "SIZE $testno returned $size\n";
         }
         else {
-            print "550 $testno: No such file or directory.\r\n";
+            sendcontrol "550 $testno: No such file or directory.\r\n";
             logmsg "SIZE $testno: no such file\n";
         }
     }
@@ -285,11 +313,11 @@ sub SIZE_command {
             $size += length($_);
         }
         if($size) {
-            print "213 $size\r\n";
+            sendcontrol "213 $size\r\n";
             logmsg "SIZE $testno returned $size\n";
         }
         else {
-            print "550 $testno: No such file or directory.\r\n";
+            sendcontrol "550 $testno: No such file or directory.\r\n";
             logmsg "SIZE $testno: no such file\n";
         }
     }
@@ -306,11 +334,11 @@ sub RETR_command {
         # the curl test server
         my $response = "WE ROOLZ: $$\r\n";
         my $len = length($response);
-        print "150 Binary junk ($len bytes).\r\n";
+        sendcontrol "150 Binary junk ($len bytes).\r\n";
         logmsg "pass our pid on the data connection\n";
-        print SOCK "WE ROOLZ: $$\r\n";
+        senddata "WE ROOLZ: $$\r\n";
         close_dataconn();
-        print "226 File transfer complete\r\n";
+        sendcontrol "226 File transfer complete\r\n";
         if($verbose) {
             print STDERR "FTPD: We returned proof we are the test server\n";
         }
@@ -340,14 +368,14 @@ sub RETR_command {
             $rest = 0; # reset REST offset again
         }
         if($retrweirdo) {
-            print "150 Binary data connection for $testno () ($size bytes).\r\n",
+            sendcontrol "150 Binary data connection for $testno () ($size bytes).\r\n",
             "226 File transfer complete\r\n";
             logmsg "150+226 in one shot!\n";
 
             logmsg "pass RETR data on data connection\n";
             for(@data) {
                 my $send = $_;
-                print SOCK $send;
+                senddata $send;
             }
             close_dataconn();
             $retrweirdo=0; # switch off the weirdo again!
@@ -358,20 +386,20 @@ sub RETR_command {
                 $sz = "size?";
             }
 
-            print "150 Binary data connection for $testno () $sz.\r\n";
+            sendcontrol "150 Binary data connection for $testno () $sz.\r\n";
             logmsg "150 Binary data connection for $testno () $sz.\n";
 
             logmsg "pass RETR data on data connection\n";
             for(@data) {
                 my $send = $_;
-                print SOCK $send;
+                senddata $send;
             }
             close_dataconn();
-            print "226 File transfer complete\r\n";
+            sendcontrol "226 File transfer complete\r\n";
         }
     }
     else {
-        print "550 $testno: No such file or directory.\r\n";
+        sendcontrol "550 $testno: No such file or directory.\r\n";
         logmsg "550 $testno: no such file\n";
     }
     return 0;
@@ -384,7 +412,7 @@ sub STOR_command {
 
     logmsg "STOR test number $testno in $filename\n";
 
-    print "125 Gimme gimme gimme!\r\n";
+    sendcontrol "125 Gimme gimme gimme!\r\n";
 
     logmsg "retrieve STOR data on data connection\n";
 
@@ -405,7 +433,7 @@ sub STOR_command {
 
     logmsg "received $ulsize bytes upload\n";
 
-    print "226 File transfer complete\r\n";
+    sendcontrol "226 File transfer complete\r\n";
     return 0;
 }
 
@@ -431,7 +459,7 @@ sub PASV_command {
         $pasvport+= 3; # try another port please
     }
     if(!$ok) {
-        print "500 no free ports!\r\n";
+        sendcontrol "500 no free ports!\r\n";
         logmsg "couldn't find free port\n";
         return 0;
     }
@@ -485,7 +513,7 @@ sub PORT_command {
 
     if($arg !~ /(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/) {
         logmsg "bad PORT-line: $arg\n";
-        print "500 silly you, go away\r\n";
+        sendcontrol "500 silly you, go away\r\n";
         return 0;
     }
     #my $iaddr = inet_aton("$1.$2.$3.$4");
@@ -580,7 +608,7 @@ for ( $waitedpid = 0;
     
     &customize(); # read test control instructions
 
-    print @welcome;
+    sendcontrol @welcome;
     if($verbose) {
         for(@welcome) {
             print STDERR "OUT: $_";
@@ -598,7 +626,7 @@ for ( $waitedpid = 0;
         s/[\n\r]+$//;
 
         unless (m/^([A-Z]{3,4})\s?(.*)/i) {
-            print "500 '$_': command not understood.\r\n";
+            sendcontrol "500 '$_': command not understood.\r\n";
             logmsg "unknown crap received, bailing out hard\n";
             last;
         }
@@ -614,7 +642,7 @@ for ( $waitedpid = 0;
 
         my $ok = $commandok{$FTPCMD};
         if($ok !~ /$state/) {
-            print "500 $FTPCMD not OK in state: $state!\r\n";
+            sendcontrol "500 $FTPCMD not OK in state: $state!\r\n";
             next;
         }
 
@@ -650,7 +678,7 @@ for ( $waitedpid = 0;
             logmsg "$FTPCMD made to send '$text'\n";
         }
         if($text) {
-            print "$text\r\n";
+            sendcontrol "$text\r\n";
         }
 
         if($fake eq "") {
