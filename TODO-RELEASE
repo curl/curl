@@ -1,14 +1,29 @@
 Issues not sorted in any particular order.
 
-To get fixed in 7.12.4 (planned release: February 2005)
+To get fixed in 7.13.0 (planned release: February 2005)
+======================
+
+
+To get fixed in 7.13.1 (planned release: April 2005)
 ======================
 
 47 - Peter Sylvester's patch for SRP on the TLS layer
      Awaits OpenSSL support for this, no need to support this in libcurl before
      there's an OpenSSL release that does it.
 
-To get fixed in 7.13.0
-======================
-
 54 - Turn the FTP code into a state machine to support the multi interface
      100% non-blocking.
+
+To get fixed in 7.14.0
+======================
+
+55 - Add a function to the multi interface that gets file descriptors, as an
+     alternative to the curl_multi_fdset(). This is necessary to allow apps to
+     properly avoid the FD_SETSIZE problem.
+
+56 - Make curl_easy_perform() a wrapper-function that simply creates a multi
+     handle, adds the easy handle to it, runs curl_multi_perform() until the
+     transfer is done, then detach the easy handle, destroy the multi handle
+     and return the easy handle's return code. This will thus make everything
+     internally use and assume the multi interface. The select()-loop should
+     use the new function from (55).
