@@ -569,7 +569,10 @@ struct UserDefined {
   bool hide_progress;
   bool http_fail_on_error;
   bool http_follow_location;
+
   bool http_include_header;
+#define include_header http_include_header
+
   bool http_set_referer;
   bool http_auto_referer; /* set "correct" referer when following location: */
   bool no_body;
