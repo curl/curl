@@ -70,6 +70,7 @@
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #define EISCONN     WSAEISCONN
+#define ENOTSOCK    WSAENOTSOCK
 #endif
 
 #include "urldata.h"
@@ -190,11 +191,6 @@ int waitconnect(int sockfd, /* socket */
 static CURLcode bindlocal(struct connectdata *conn,
                           int sockfd)
 {
-#if !defined(WIN32)||defined(__CYGWIN32__)
-  /* We don't generally like checking for OS-versions, we should make this
-     HAVE_XXXX based, although at the moment I don't have a decent test for
-     this! */
-
 #ifdef HAVE_INET_NTOA
 
   struct SessionHandle *data = conn->data;
@@ -342,7 +338,6 @@ static CURLcode bindlocal(struct connectdata *conn,
 
   } /* end of device selection support */
 #endif /* end of HAVE_INET_NTOA */
-#endif /* end of not WIN32 */
 
   return CURLE_HTTP_PORT_FAILED;
 }
