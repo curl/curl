@@ -6,6 +6,19 @@
 
                                History of Changes
 
+Daniel (12 Jun 2002)
+- Chris Combes provided a patch that added three new options for
+  curl_formadd(): CURLFORM_BUFFER, CURLFORM_BUFFERPTR, CURLFORM_BUFFERLENGTH
+  They are used to create a multipart that appears as a regular file upload,
+  but the data is provided with a pointer and length.
+  
+- Nico Baggus made the VMS version use sigsetjmp() too.
+
+- Jörn Hartroth fixed the mingw32 build using the mm lib.
+
+- Applied patches by Kris Kennaway that correct format string problems in
+  lib/ftp.c and lib/ldap.c.
+
 Version 7.9.8-pre3
 
 Daniel (11 Jun 2002)
