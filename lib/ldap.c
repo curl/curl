@@ -276,7 +276,7 @@ CURLcode Curl_ldap(struct connectdata *conn)
   DYNA_GET_FUNCTION(void (*)(void *), ldap_memfree);
   DYNA_GET_FUNCTION(void (*)(void *, int), ber_free);
 
-  server = (*ldap_init)(conn->host.name, conn->port);
+  server = (*ldap_init)(conn->host.name, (int)conn->port);
   if (server == NULL) {
     failf(data, "LDAP local: Cannot connect to %s:%d",
           conn->host.name, conn->port);
