@@ -83,6 +83,12 @@ TODO
    encoding. [http://curl.haxx.se/dev/HTTP-PUT-stdin.txt] When the filter
    system mentioned above gets real, it'll be a piece of cake to add.
 
+ * Pass a list of host name to libcurl to which we allow the user name and
+   password to get sent to. Currently, it only get sent to the host name that
+   the first URL uses (to prevent others from being able to read it), but this
+   also prevents the authentication info from getting sent when following
+   locations to legitimate other host names.
+
  * "Content-Encoding: compress/gzip/zlib" HTTP 1.1 clearly defines how to get
    and decode compressed documents. There is the zlib that is pretty good at
    decompressing stuff. This work was started in October 1999 but halted again
