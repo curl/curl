@@ -564,7 +564,7 @@ HTTPS
   from sites that require valid certificates. The only drawback is that the
   certificate needs to be in PEM-format. PEM is a standard and open format to
   store certificates with, but it is not used by the most commonly used
-  browsers (Netscape and MSEI both use the so called PKCS#12 format). If you
+  browsers (Netscape and MSIE both use the so called PKCS#12 format). If you
   want curl to use the certificates you use with your (favourite) browser, you
   may need to download/compile a converter that can convert your browser's
   formatted certificates to PEM formatted ones. This kind of converter is
@@ -842,13 +842,13 @@ MAILING LISTS
 
     Receives notifications on all CVS commits done to the curl source module.
     This can become quite a large amount of mails during intense development,
-    be aware. This is for us who liks email...
+    be aware. This is for us who like email...
 
   curl-www-commits
 
     Receives notifications on all CVS commits done to the curl www module
     (basicly the web site).  This can become quite a large amount of mails
-    during intense changing, be aware. This is for us who liks email...
+    during intense changing, be aware. This is for us who like email...
 
   Please direct curl questions, feature requests and trouble reports to one of
   these mailing lists instead of mailing any individual.
