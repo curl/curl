@@ -185,11 +185,11 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
   WSASetLastError (conn->async.status = NO_DATA); /* pending status */
   he = gethostbyname (conn->async.hostname);
   if (he) {
-    Curl_addrinfo_callback(conn, CURL_ASYNC_SUCCESS, he);
+    Curl_addrinfo4_callback(conn, CURL_ASYNC_SUCCESS, he);
     rc = 1;
   }
   else {
-    Curl_addrinfo_callback(conn, (int)WSAGetLastError(), NULL);
+    Curl_addrinfo4_callback(conn, (int)WSAGetLastError(), NULL);
     rc = 0;
   }
   TRACE(("Winsock-error %d, addr %s\n", conn->async.status,
@@ -451,7 +451,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   in = inet_addr(hostname);
   if (in != CURL_INADDR_NONE)
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(in, hostname);
+    return Curl_ip2addr(in, hostname, port);
 
   /* fire up a new resolver thread! */
   if (init_resolve_thread(conn, hostname, port, NULL)) {
