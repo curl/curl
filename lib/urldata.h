@@ -974,7 +974,8 @@ struct SessionHandle {
                                   other dynamic purposes */
   struct PureInfo info;        /* stats, reports and info data */
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
-  ENGINE*  engine;
+  ENGINE *engine;
+  struct curl_slist *engine_list; /* list of names from ENGINE_get_id() */
 #endif /* USE_SSLEAY */
 };
 

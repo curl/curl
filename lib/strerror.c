@@ -200,6 +200,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_SSL_ENGINE_SETFAILED:
     return "can not set SSL crypto engine as default";
 
+  case CURLE_SSL_ENGINE_INITFAILED:
+    return "failed to initialise SSL crypto engine";
+
   case CURLE_SEND_ERROR:
     return "failed sending data to the peer";
 
