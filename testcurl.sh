@@ -106,10 +106,30 @@ fi
 cd curl
 
 echo "testcurl: update from CVS"
-# update quietly to the latest CVS
-cvs -Q up -dP 2>&1
 
-cvsstat=$?
+cvsup() {
+  # update quietly to the latest CVS
+  echo "testcurl: run cvs up"
+  cvs -Q up -dP 2>&1
+
+  cvsstat=$?
+
+  # return (1 - RETURNVALUE) so that errors return 0 while goodness
+  # returns 1
+  return `expr 1 - $?`
+}
+
+att="0"
+while cvsup; do
+  att=`expr $att + 1`
+  echo "testcurl: failed CVS update attempt number $att."
+  if [ $att -gt 50 ]; then
+    cvsstat="BADNESS"
+    break # get out of the loop
+  fi
+  sleep 5
+done
+
 echo "testcurl: cvs returned: $cvsstat"
 
 if [ "$cvsstat" -ne "0" ]; then
