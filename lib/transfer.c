@@ -356,10 +356,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                * If we requested a "no body", this is a good time to get
                * out and return home.
                */
-              if(data->set.no_body)
-                return CURLE_OK;
+              bool stop_reading = FALSE;
 
-              if(!conn->bits.close) {
+              if(data->set.no_body)
+                stop_reading = TRUE;
+              else if(!conn->bits.close) {
                 /* If this is not the last request before a close, we must
                    set the maximum download size to the size of the
                    expected document or else, we won't know when to stop
@@ -370,10 +371,18 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 /* If max download size is *zero* (nothing) we already
                    have nothing and can safely return ok now! */
                 if(0 == conn->maxdownload)
-                  return CURLE_OK;
+                  stop_reading = TRUE;
                     
                 /* What to do if the size is *not* known? */
               }
+
+              if(stop_reading) {
+                /* we make sure that this socket isn't read more now */
+                k->keepon &= ~KEEP_READ;
+                FD_ZERO(&k->rkeepfd);
+                return CURLE_OK;
+              }
+
               break;		/* exit header line loop */
             }
 
