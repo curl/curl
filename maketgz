@@ -9,8 +9,6 @@ if [ -z "$version" ]; then
   exit
 fi
 
-echo $version
-
 libversion="$version"
 
 #
@@ -30,26 +28,14 @@ CHEADER=src/version.h
 # Replace version number in header file:
 sed -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g' \
     -e 's/^#define LIBCURL_VERSION_NUM .*/#define LIBCURL_VERSION_NUM 0x'$numeric'/g' \
- $HEADER >$HEADER.new
-
-# Save old header file
-cp -p $HEADER $HEADER.old
-
-# Make new header:
-mv $HEADER.new $HEADER
+ $HEADER >$HEADER.dist
 
 # Replace version number in header file:
-sed 's/#define CURL_VERSION.*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER >$CHEADER.new
+sed 's/#define CURL_VERSION.*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER >$CHEADER.dist
 
 echo "curl version $curlversion"
 echo "libcurl version $libversion"
 echo "libcurl numerical $numeric"
-
-# Save old header file
-cp -p $CHEADER $CHEADER.old
-
-# Make new header:
-mv $CHEADER.new $CHEADER
 
 findprog()
 {
@@ -91,10 +77,10 @@ fi
 #
 # Make sure we have updated HTML versions of all man pages:
 #
-make html
+make -s html
 
 # And the PDF versions
-make pdf
+make -s pdf
 
 ############################################################################
 #
@@ -102,7 +88,7 @@ make pdf
 #
 
 targz="curl-$version.tar.gz"
-make dist
+make -s dist VERSION=$version
 
 ############################################################################
 #
