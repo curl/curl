@@ -262,6 +262,8 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
   /* Set the default size of the SSL session ID cache */
   data->set.ssl.numsessions = 5;
+
+  data->set.proxyport = 1080;
   
   /* create an array with connection data struct pointers */
   data->state.numconnects = 5; /* hard-coded right now */
