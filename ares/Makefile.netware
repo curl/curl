@@ -67,7 +67,6 @@ MPKXDC	= mkxdc
 
 # Global flags for all compilers
 CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
-CFLAGS	+= -D_AIX
 
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
