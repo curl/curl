@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -99,6 +99,15 @@ static CURLcode ftp_cwd(struct connectdata *conn, char *path);
 /* easy-to-use macro: */
 #define FTPSENDF(x,y,z) if((result = Curl_ftpsendf(x,y,z))) return result
 
+/***********************************************************************
+ *
+ * AllowServerConnect()
+ *
+ * When we've issue the PORT command, we have told the server to connect
+ * to us. This function will sit and wait here until the server has
+ * connected.
+ *
+ */
 static CURLcode AllowServerConnect(struct SessionHandle *data,
                                    struct connectdata *conn,
                                    int sock)
@@ -533,8 +542,15 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   return CURLE_OK;
 }
 
-
-/* argument is already checked for validity */
+/***********************************************************************
+ *
+ * Curl_ftp_done()
+ *
+ * The DONE function. This does what needs to be done after a single DO has
+ * performed.
+ *
+ * Input argument is already checked for validity.
+ */
 CURLcode Curl_ftp_done(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
@@ -596,6 +612,13 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/***********************************************************************
+ *
+ * ftp_sendquote()
+ *
+ * Where a 'quote' means a list of custom commands to send to the server.
+ * The quote list is passed as an argument.
+ */
 
 static 
 CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
@@ -627,6 +650,13 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
   return CURLE_OK;
 }
 
+/***********************************************************************
+ *
+ * ftp_cwd()
+ *
+ * Send 'CWD' to the remote server to Change Working Directory.
+ * It is the ftp version of the unix 'cd' command.
+ */
 static 
 CURLcode ftp_cwd(struct connectdata *conn, char *path)
 {
@@ -648,6 +678,12 @@ CURLcode ftp_cwd(struct connectdata *conn, char *path)
   return CURLE_OK;
 }
 
+/***********************************************************************
+ *
+ * ftp_getfiletime()
+ *
+ * Get the timestamp of the given file.
+ */
 static
 CURLcode ftp_getfiletime(struct connectdata *conn, char *file)
 {
@@ -684,6 +720,13 @@ CURLcode ftp_getfiletime(struct connectdata *conn, char *file)
   return  result;
 }
 
+/***********************************************************************
+ *
+ * ftp_transfertype()
+ *
+ * Set transfer type. We only deal with ASCII or BINARY so this function
+ * sets one of them.
+ */
 static CURLcode ftp_transfertype(struct connectdata *conn,
                                   bool ascii)
 {
@@ -707,6 +750,13 @@ static CURLcode ftp_transfertype(struct connectdata *conn,
 
   return CURLE_OK;
 }
+
+/***********************************************************************
+ *
+ * ftp_getsize()
+ *
+ * Returns the file size (in bytes) of the given remote file.
+ */
 
 static
 CURLcode ftp_getsize(struct connectdata *conn, char *file,
@@ -850,10 +900,13 @@ ftp_pasv_verbose(struct connectdata *conn,
 #endif
 }
 
-/**********
- * PORT is the ftp client's way of telling the server that *WE* open a port
- * that we listen on an awaits the server to connect to. This is the opposite
- * of PASV.
+/***********************************************************************
+ *
+ * ftp_use_port()
+ *
+ * Send the proper PORT command. PORT is the ftp client's way of telling the
+ * server that *WE* open a port that we listen on an awaits the server to
+ * connect to. This is the opposite of PASV.
  */
 
 static
@@ -1186,10 +1239,13 @@ CURLcode ftp_use_port(struct connectdata *conn)
   return CURLE_OK;
 }
 
-/**********
- * PASV is the ftp client's way of asking the server to open a second port
- * that we can connect to (for the data transfer). This is the opposite of
- * PORT.
+/***********************************************************************
+ *
+ * ftp_use_pasv()
+ *
+ * Send the PASV command. PASV is the ftp client's way of asking the server to
+ * open a second port that we can connect to (for the data transfer). This is
+ * the opposite of PORT.
  */
 
 static
@@ -1314,6 +1370,13 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/***********************************************************************
+ *
+ * ftp_perform()
+ *
+ * This is the actual DO function for FTP. Get a file/directory according to
+ * the options previously setup.
+ */
 
 static
 CURLcode ftp_perform(struct connectdata *conn)
@@ -1772,9 +1835,15 @@ CURLcode ftp_perform(struct connectdata *conn)
   return CURLE_OK;
 }
 
-/* -- deal with the ftp server!  -- */
-
-/* argument is already checked for validity */
+/***********************************************************************
+ *
+ * Curl_ftp()
+ *
+ * This function is registered as 'curl_do' function. It decodes the path
+ * parts etc as a wrapper to the actual DO function (ftp_perform).
+ *
+ * The input argument is already checked for validity.
+ */
 CURLcode Curl_ftp(struct connectdata *conn)
 {
   CURLcode retcode;
@@ -1837,12 +1906,14 @@ CURLcode Curl_ftp(struct connectdata *conn)
   return retcode;
 }
 
-/*
- * Curl_ftpsendf() sends the formated string as a ftp command to a ftp server
+/***********************************************************************
+ *
+ * Curl_ftpsendf()
+ *
+ * Sends the formated string as a ftp command to a ftp server
  *
  * NOTE: we build the command in a fixed-length buffer, which sets length
  * restrictions on the command!
- *
  */
 CURLcode Curl_ftpsendf(struct connectdata *conn,
                        const char *fmt, ...)
@@ -1868,7 +1939,13 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   return (bytes_written==write_len)?CURLE_OK:CURLE_WRITE_ERROR;
 }
 
-
+/***********************************************************************
+ *
+ * Curl_ftp_disconnect()
+ *
+ * Disconnect from an FTP server. Cleanup protocol-specific per-connection
+ * resources
+ */
 CURLcode Curl_ftp_disconnect(struct connectdata *conn)
 {
   struct FTP *ftp= conn->proto.ftp;
