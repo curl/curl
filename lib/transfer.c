@@ -1801,8 +1801,15 @@ CURLcode Curl_follow(struct SessionHandle *data,
       /* We got a new absolute path for this server, cut off from the
          first slash */
       pathsep = strchr(protsep, '/');
-      if(pathsep)
+      if(pathsep) {
+        /* When people use badly formatted URLs, such as
+           "http://www.url.com?dir=/home/daniel" we must not use the first
+           slash, if there's a ?-letter before it! */
+        char *sep = strchr(protsep, '?');
+        if(sep && (sep < pathsep))
+          pathsep = sep;
         *pathsep=0;
+      }
       else {
         /* There was no slash. Now, since we might be operating on a badly
            formatted URL, such as "http://www.url.com?id=2380" which doesn't
