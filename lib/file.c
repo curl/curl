@@ -174,8 +174,6 @@ CURLcode Curl_file(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   char *buf = data->state.buffer;
   curl_off_t bytecount = 0;
-  struct timeval start = Curl_tvnow();
-  struct timeval now = start;
   int fd;
 
   /* get the fd from the connection phase */
@@ -261,11 +259,9 @@ CURLcode Curl_file(struct connectdata *conn)
     if(res)
       return res;
 
-    now = Curl_tvnow();
     if(Curl_pgrsUpdate(conn))
       res = CURLE_ABORTED_BY_CALLBACK;
   }
-  now = Curl_tvnow();
   if(Curl_pgrsUpdate(conn))
     res = CURLE_ABORTED_BY_CALLBACK;
 
