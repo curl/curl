@@ -126,3 +126,5 @@ visitors to the curl.haxx.se site. Five official web mirrors.
 December 2003, full-fledged SSL for FTP is supported.
 
 January 2004: curl 7.11.0 introduced large file support.
+
+June 2004: curl 7.12.0 introduced IDN support. 10 official web mirrors.
