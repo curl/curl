@@ -773,16 +773,24 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         /* convert LF to CRLF if so asked */
         if (data->set.crlf) {
           for(i = 0, si = 0; i < nread; i++, si++) {
-            if (k->buf[i] == 0x0a) {
+            if (conn->upload_fromhere[i] == 0x0a) {
               data->state.scratch[si++] = 0x0d;
               data->state.scratch[si] = 0x0a;
             }
-            else {
-              data->state.scratch[si] = k->uploadbuf[i];
-            }
+            else
+              data->state.scratch[si] = conn->upload_fromhere[i];
           }
-          nread = si;
-          k->buf = data->state.scratch; /* point to the new buffer */
+          if(si != nread) {
+            /* only perform the special operation if we really did replace
+               anything */
+            nread = si;
+
+            /* upload from the new (replaced) buffer instead */
+            conn->upload_fromhere = data->state.scratch;
+
+            /* set the new amount too */
+            conn->upload_present = nread;
+          }
         }
       }
       else {
@@ -808,8 +816,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
            is to happen */
         conn->upload_fromhere += bytes_written;
       }
-      else if(data->set.crlf)
-        k->buf = data->state.buffer; /* put it back on the buffer */
       else {
         /* we've uploaded that buffer now */
         conn->upload_fromhere = k->uploadbuf;
