@@ -770,16 +770,32 @@ CURLcode _ftp(struct connectdata *conn)
 # endif
 
         address = inet_addr(newhost);
-# if defined(HAVE_GETHOSTBYADDR_R)
+# ifdef HAVE_GETHOSTBYADDR_R
 
-#  if (GETHOSTBYADDR_R_NARGS < 8)
+#  ifdef HAVE_GETHOSTBYADDR_R_5
+        /* AIX, Digital Unix style:
+           extern int gethostbyaddr_r(char *addr, size_t len, int type,
+           struct hostent *htent, struct hostent_data *ht_data); */
+
+        /* Daniel: this implementation is really just guessing, please
+           verify this before trusting this. I don't have access to any
+           such system to try out! */
+        if(gethostbyaddr_r((char *) &address,
+                           sizeof(address), AF_INET,
+                           (struct hostent *)hostent_buf,
+                           hostent_buf + sizeof(*answer))
+           answer=NULL;
+                           
+#  endif
+#  ifdef HAVE_GETHOSTBYADDR_R_7
         /* Solaris and IRIX */
         answer = gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
                                  (struct hostent *)hostent_buf,
                                  hostent_buf + sizeof(*answer),
                                  sizeof(hostent_buf) - sizeof(*answer),
                                  &h_errnop);
-#  else
+#  endif
+#  ifdef HAVE_GETHOSTBYADDR_R_8
         /* Linux style */
         if(gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
                            (struct hostent *)hostent_buf,

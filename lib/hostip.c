@@ -116,31 +116,45 @@ struct hostent *GetHost(struct UrlData *data,
     h->h_name = *(h->h_addr_list) + h->h_length;
     /* bad one h->h_name = (char*)(h->h_addr_list + h->h_length); */
     MakeIP(ntohl(in),h->h_name,buf_size - (long)(h->h_name) + (long)buf);
-#if defined(HAVE_GETHOSTBYNAME_R)
   }
+#if defined(HAVE_GETHOSTBYNAME_R)
   else {
     int h_errnop;
     memset(buf,0,buf_size);	/* workaround for gethostbyname_r bug in qnx nto */
-#if (GETHOSTBYNAME_R_NARGS < 6)
+#ifdef HAVE_GETHOSTBYNAME_R_5
     /* Solaris, IRIX and more */
     if ((h = gethostbyname_r(hostname,
-                             (struct hostent *)buf,buf +
-                             sizeof(struct hostent),buf_size -
-                             sizeof(struct hostent),&h_errnop)) == NULL )
-#else
-      /* Linux */
-      if( gethostbyname_r(hostname,
-                          (struct hostent *)buf,buf +
-                          sizeof(struct hostent),buf_size -
-                          sizeof(struct hostent),
-                          &h, /* DIFFERENCE */
-                          &h_errnop))
+                             (struct hostent *)buf,
+                             buf + sizeof(struct hostent),
+                             buf_size - sizeof(struct hostent),
+                             &h_errnop)) == NULL )
+#endif
+#ifdef HAVE_GETHOSTBYNAME_R_6
+    /* Linux */
+    if( gethostbyname_r(hostname,
+                        (struct hostent *)buf,
+                        buf + sizeof(struct hostent),
+                        buf_size - sizeof(struct hostent),
+                        &h, /* DIFFERENCE */
+                        &h_errnop))
+#endif
+#ifdef HAVE_GETHOSTBYNAME_R_3
+    /* AIX, Digital Unix, more? */
+
+    /* August 4th, 2000. I don't have any such system around so I write this
+       blindly in hope it might work or that someone else will help me fix
+       this. */
+
+    h = gethostbyname_r(hostname,
+                        (struct hostent *)buf,
+                        (struct hostent_data *) buf +  sizeof(struct hostent));
+    *h_errnop= errno; /* we don't deal with this, but set it anyway */
+    if(NULL == h)
 #endif
       {
       infof(data, "gethostbyname_r(2) failed for %s\n", hostname);
     }
 #else
-  }
   else {
     if ((h = gethostbyname(hostname)) == NULL ) {
       infof(data, "gethostbyname(2) failed for %s\n", hostname);
