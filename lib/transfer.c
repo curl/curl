@@ -1946,15 +1946,14 @@ CURLcode Curl_perform(struct SessionHandle *data)
         res = Transfer(conn); /* now fetch that URL please */
         if(res == CURLE_OK) {
 
-          if((conn->keep.bytecount == 0) &&
-             (conn->sockerror == ECONNRESET) &&
+          if((conn->keep.bytecount+conn->headerbytecount == 0) &&
              conn->bits.reuse) {
-            /* We got no data, the connection was reset and we did attempt
-               to re-use a connection. This smells like we were too fast to
-               re-use a connection that was closed when we wanted to read
-               from it. Bad luck. Let's simulate a redirect to the same URL
-               to retry! */
-            infof(data, "Connection reset, retrying a fresh connect\n");
+            /* We got no data and we attempted to re-use a connection. This
+               might happen if the connection was left alive when we were done
+               using it before, but that was closed when we wanted to read
+               from it again. Bad luck. Retry the same request on a fresh
+               connect! */
+            infof(data, "Connection died, retrying a fresh connect\n");
             newurl = strdup(conn->data->change.url);
 
             conn->bits.close = TRUE; /* close this connection */

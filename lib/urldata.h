@@ -577,8 +577,6 @@ struct connectdata {
                                single requests! */
   struct ntlmdata proxyntlm; /* NTLM data for proxy */
 
-  int sockerror; /* errno stored by Curl_read() if the underlying layer returns
-                    error */
   char syserr_buf [256]; /* buffer for Curl_strerror() */
 
 #if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)

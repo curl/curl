@@ -417,7 +417,6 @@ int Curl_read(struct connectdata *conn, /* connection data */
 
     if(-1 == nread) {
       int err = Curl_ourerrno();
-      conn->sockerror = err;
 #ifdef WIN32
       if(WSAEWOULDBLOCK == err)
 #else
@@ -425,8 +424,6 @@ int Curl_read(struct connectdata *conn, /* connection data */
 #endif
         return -1;
     }
-    else
-      conn->sockerror = 0; /* no error */
 
 #ifdef USE_SSLEAY
   }
