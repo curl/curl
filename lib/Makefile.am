@@ -7,7 +7,7 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 noinst_LIBRARIES = libcurl.a
 
 # Some flags needed when trying to cause warnings ;-)
-CFLAGS = -g #-Wall -pedantic
+#CFLAGS = -g -Wall -pedantic
 
 INCLUDES = -I$(top_srcdir)/include
 
