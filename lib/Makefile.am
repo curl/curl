@@ -106,7 +106,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
 
 libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
 
-WIN32SOURCES = $(CSOURCES)
+WIN32SOURCES = $(CSOURCES) libcurl.def
 WIN32HEADERS = $(HHEADERS) config-win32.h
 
 BUILT_SOURCES = $(srcdir)/getdate.c $(top_builddir)/lib/ca-bundle.h
