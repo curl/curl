@@ -920,6 +920,7 @@ AC_CHECK_FUNCS( socket \
                 tcgetattr \
                 perror \
                 closesocket \
+                siginterrupt \
                 sigaction \
                 signal \
                 getpass_r \
