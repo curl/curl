@@ -5,7 +5,7 @@ HTTP/1.1 200 OK
 Server: Microsoft-IIS/4.0
 Date: Tue, 25 Sep 2001 19:37:44 GMT
 Content-Type: text/html
-Set-Cookie: ckyPersistent=permanent; expires=Tue, 01-Jan-2002 05:00:00 GMT; path=/
+Set-Cookie: ckyPersistent=permanent; expires=Tue, 01-Jan-2010 05:00:00 GMT; path=/
 Set-Cookie: ckySession=temporary; path=/
 Set-Cookie: ASPSESSIONIDQGGQQSJJ=GKNBDIFAAOFDPDAIEAKDIBKE; path=/
 Cache-control: private
@@ -55,7 +55,7 @@ Cookie: mooo=indeed
 www.fake.come	FALSE	/	FALSE	1022144953	cookiecliente	si
 www.loser.com	FALSE	/	FALSE	1139150993	UID	99
 127.0.0.1	FALSE	/	FALSE	1139150993	mooo	indeed
-127.0.0.1	FALSE	/	FALSE	1009861200	ckyPersistent	permanent
+127.0.0.1	FALSE	/	FALSE	1014678000	ckyPersistent	permanent
 127.0.0.1	FALSE	/	FALSE	0	ckySession	temporary
 127.0.0.1	FALSE	/	FALSE	0	ASPSESSIONIDQGGQQSJJ	GKNBDIFAAOFDPDAIEAKDIBKE
 </file>
