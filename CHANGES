@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (5 August 2004)
+- Enrico Scholz fixed the HTTP-Negotiate service name to be uppercase as
+  reported in bug report #1004105
+
 Daniel (4 August 2004)
 - Gisle Vanem provided a fix for the multi interface and connecting to a host
   using multiple IP (bad) addresses.
