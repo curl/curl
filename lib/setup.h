@@ -160,7 +160,7 @@ typedef unsigned char bool;
 #define WIN32_LEAN_AND_MEAN  /* Prevent including <winsock*.h> in <windows.h> */
 #endif
 
-#if HAVE_WINSOCK2_H
+#ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>        /* required by telnet.c */
 #endif
 
