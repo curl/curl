@@ -10,7 +10,7 @@
 HTTPS GET over HTTP proxy fails
  </name>
  <command>
- -U fake:user -x %HOSTIP:%HOSTPORT https://ssl.fakeurl-to.test/slash/302
+-k -U fake:user -x %HOSTIP:%HOSTPORT https://ssl.fakeurl-to.test/slash/302
 </command>
 </test>
 

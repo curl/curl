@@ -23,7 +23,7 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 FTPS dir list PASV
  </name>
  <command>
-ftps://%HOSTIP:%FTPSPORT/
+-k ftps://%HOSTIP:%FTPSPORT/
 </command>
 <file name="log/ftpserver.cmd">
 REPLY EPSV 500 no such command

@@ -9,7 +9,7 @@ moooooooo
 FTPS download with strict timeout and slow CWD
  </name>
  <command>
-ftps://%HOSTIP:%FTPSPORT/path/to/file/401 -m 4
+-k ftps://%HOSTIP:%FTPSPORT/path/to/file/401 -m 4
 </command>
 <file name="log/ftpserver.cmd">
 DELAY CWD 15

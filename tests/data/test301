@@ -18,7 +18,7 @@ Funny-head: yesyes
 HTTPS GET with user and password
  </name>
  <command>
- -u fake:user https://%HOSTIP:%HTTPSPORT/2
+-k -u fake:user https://%HOSTIP:%HTTPSPORT/2
 </command>
 </test>
 

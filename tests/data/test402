@@ -9,7 +9,7 @@ moooooooo
 FTPS operation to FTP port
  </name>
  <command>
-ftps://%HOSTIP:%FTPPORT/path/to/file/402
+-k ftps://%HOSTIP:%FTPPORT/path/to/file/402
 </command>
 </test>
 

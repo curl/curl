@@ -16,7 +16,7 @@ blablabla
 HTTPS multipart formpost
  </name>
  <command>
-https://%HOSTIP:%HTTPSPORT/we/want/304 -F name=daniel -F tool=curl -F file=@log/test304.txt
+-k https://%HOSTIP:%HTTPSPORT/we/want/304 -F name=daniel -F tool=curl -F file=@log/test304.txt
 </command>
 # We create this file before the command is invoked!
 <file name="log/test304.txt">
