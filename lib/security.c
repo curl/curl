@@ -491,8 +491,7 @@ Curl_sec_login(struct connectdata *conn)
     Curl_ftpsendf(conn,
                   "AUTH %s", (*m)->name);
     /* wait for feedback */
-    nread = Curl_GetFTPResponse(conn->firstsocket,
-                                conn->data->state.buffer, conn, NULL);
+    nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
     if(nread < 0)
       return /*CURLE_OPERATION_TIMEOUTED*/-1;
     if(/*ret != CONTINUE*/conn->data->state.buffer[0] != '3'){
