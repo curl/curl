@@ -452,6 +452,31 @@ else
   AC_MSG_RESULT(no)
 fi
 
+dnl Detect the pkg-config tool, as it may have extra info about the
+dnl openssl installation we can use. I *believe* this is what we are
+dnl expected to do on really recent Redhat Linux hosts.
+AC_PATH_PROG( PKGCONFIG, pkg-config, no, $PATH:/usr/bin:/usr/local/bin)
+if test "$PKGCONFIG" != "no" ; then
+  AC_MSG_CHECKING([for OpenSSL options using pkg-config])
+
+  $PKGCONFIG --exists openssl
+  SSL_EXISTS=$?
+
+  if test "$SSL_EXISTS" -eq "0"; then
+    SSL_LIBS=`$PKGCONFIG --libs-only-l openssl 2>/dev/null`
+    SSL_LDFLAGS=`$PKGCONFIG --libs-only-L openssl 2>/dev/null`
+    SSL_CFLAGS=`$PKGCONFIG --cflags openssl 2>/dev/null`
+
+    LIBS="$LIBS $SSL_LIBS"
+    CFLAGS="$CFLAGS $SSL_CFLAGS"
+    LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
+
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+  fi
+
+fi
 
 dnl **********************************************************************
 dnl Check for the presence of SSL libraries and headers
