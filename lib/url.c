@@ -2526,14 +2526,17 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       /* the name is given, get user+password */
       sscanf(data->set.userpwd, "%127[^:]:%127[^\n]",
              data->state.user, data->state.passwd);
+      if(strchr(data->set.userpwd, ':'))
+        /* a colon means the password was given, even if blank */
+        data->state.passwdgiven = TRUE;
     }
     else
-      /* no name given, get the password only */
+      /* no name given, starts with a colon, get the password only */
       sscanf(data->set.userpwd+1, "%127[^\n]", data->state.passwd);
   }
 
   if (data->set.use_netrc != CURL_NETRC_IGNORED &&
-      data->state.passwd[0] == '\0' ) {  /* need passwd */
+      !data->state.passwdgiven) {  /* need passwd */
     if(Curl_parsenetrc(conn->hostname,
                        data->state.user,
                        data->state.passwd)) {
@@ -2544,8 +2547,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
 
   /* if we have a user but no password, ask for one */
-  if(conn->bits.user_passwd &&
-     !data->state.passwd[0] ) {
+  if(conn->bits.user_passwd && !data->state.passwdgiven ) {
     if(data->set.fpasswd(data->set.passwd_client,
                          "password:", data->state.passwd,
                          sizeof(data->state.passwd)))
@@ -2556,9 +2558,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   /* If our protocol needs a password and we have none, use the defaults */
   if ( (conn->protocol & (PROT_FTP|PROT_HTTP)) &&
-       !conn->bits.user_passwd) {
+       !conn->bits.user_passwd &&
+       !data->state.passwdgiven) {
+
     strcpy(data->state.user, CURL_DEFAULT_USER);
     strcpy(data->state.passwd, CURL_DEFAULT_PASSWORD);
+
     /* This is the default password, so DON'T set conn->bits.user_passwd */
   }
 

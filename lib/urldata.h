@@ -570,6 +570,9 @@ struct UrlState {
   char proxyuser[MAX_CURL_USER_LENGTH];
   char proxypasswd[MAX_CURL_PASSWORD_LENGTH];
 
+  bool passwdgiven; /* set TRUE if an application-provided password has been
+                       set */
+
   struct timeval keeps_speed; /* for the progress meter really */
 
   /* 'connects' will be an allocated array with pointers. If the pointer is
