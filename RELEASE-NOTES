@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o ftps:// now uses port 990 by default
  o the "configure --with-spnego" action was improved
  o fixed a rare follow-redirect problem
  o curl-configure --feature now outputs AsynchDNS if enabled
@@ -66,6 +67,7 @@ Other curl-related news since the previous public release:
    US California - http://curl.mirrors.redwire.net
    Germany -       http://curl.mirror.at.stealer.net
    Thailand -      http://curl.siamu.ac.th
+ o Dan Fandrich stepped forward and helps maintaining the download web page
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
