@@ -102,7 +102,12 @@ char *curl_version(void)
 {
   static char version[200];
   char *ptr=version;
+  /* to prevent compier warnings, we only declare len if we have code
+     that uses it */
+#if defined(USE_SSLEAY) || defined(HAVE_LIBZ) || defined(USE_ARES) || \
+  defined(USE_LIBIDN)
   int len;
+#endif
   size_t left = sizeof(version);
   strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION );
   ptr=strchr(ptr, '\0');
