@@ -1,5 +1,23 @@
   Changelog for the c-ares project
 
+* June 10
+- Gisle Vanem's init patch for Windows:
+
+  The init_by_resolv_conf() function fetches the DNS-server(s)
+  from a series of registry branches.
+
+  This can be wrong in the case where DHCP has assigned nameservers, but the
+  user has overridden these servers with other prefered settings. Then it's
+  wrong to use the DHCPNAMESERVER setting in registry.
+
+  In the case of no global DHCP-assigned or fixed servers, but DNS server(s)
+  per adapter, one has to query the adapter branches.  But how can c-ares know
+  which adapter is valid for use? AFAICS it can't. There could be one adapter
+  that is down (e.g. a VPN adapter).
+
+  So it's better to leave this to the IP Helper API (iphlapi) available in
+  Win-98/2000 and later. My patch falls-back to the old way if not available.
+
 * June 8
 - James Bursa fixed an init issue for RISC OS.
 

@@ -17,6 +17,8 @@
 
 #ifdef WIN32
 #include "nameser.h"
+#include <iphlpapi.h>
+#include <malloc.h>
 #else
 #include <sys/param.h>
 #include <sys/time.h>
@@ -231,24 +233,24 @@ static int init_by_environment(ares_channel channel)
 
   return ARES_SUCCESS;
 }
-#ifdef WIN32
-static int get_res_size_nt(HKEY hKey, char *subkey, int *size)
-{
-  return RegQueryValueEx(hKey, subkey, 0, NULL, NULL, size);
-}
 
-/* Warning: returns a dynamically allocated buffer, the user MUST
+#ifdef WIN32
+/*
+ * Warning: returns a dynamically allocated buffer, the user MUST
  * use free() if the function returns 1
  */
-static int get_res_nt(HKEY hKey, char *subkey, char **obuf)
+static int get_res_nt(HKEY hKey, const char *subkey, char **obuf)
 {
   /* Test for the size we need */
-  int size = 0;
+  DWORD size = 0;
   int result;
+
   result = RegQueryValueEx(hKey, subkey, 0, NULL, NULL, &size);
   if ((result != ERROR_SUCCESS && result != ERROR_MORE_DATA) || !size)
     return 0;
   *obuf = malloc(size+1);
+  if (!*obuf)
+    return 0;
 
   if (RegQueryValueEx(hKey, subkey, 0, NULL, *obuf, &size) != ERROR_SUCCESS)
   {
@@ -263,28 +265,98 @@ static int get_res_nt(HKEY hKey, char *subkey, char **obuf)
   return 1;
 }
 
-static int get_res_interfaces_nt(HKEY hKey, char *subkey, char **obuf)
+static int get_res_interfaces_nt(HKEY hKey, const char *subkey, char **obuf)
 {
   char enumbuf[39]; /* GUIDs are 38 chars + 1 for NULL */
-  int enum_size = 39;
+  DWORD enum_size = 39;
   int idx = 0;
   HKEY hVal;
+
   while (RegEnumKeyEx(hKey, idx++, enumbuf, &enum_size, 0,
                       NULL, NULL, NULL) != ERROR_NO_MORE_ITEMS)
   {
+    int rc;
+
     enum_size = 39;
     if (RegOpenKeyEx(hKey, enumbuf, 0, KEY_QUERY_VALUE, &hVal) !=
         ERROR_SUCCESS)
       continue;
-    if (!get_res_nt(hVal, subkey, obuf))
+    rc = get_res_nt(hVal, subkey, obuf);
       RegCloseKey(hVal);
-    else
-    {
-      RegCloseKey(hVal);
+    if (rc)
       return 1;
     }
-  }
   return 0;
+}
+
+static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
+{
+  FIXED_INFO    *fi   = alloca (sizeof(*fi));
+  DWORD          size = sizeof (*fi);
+  DWORD WINAPI (*GetNetworkParams) (FIXED_INFO*, DWORD*);  /* available only on Win-98/2000+ */
+  HMODULE        handle;
+  IP_ADDR_STRING *ipAddr;
+  int            i, count = 0;
+  int            debug  = 0;
+  size_t         ip_size = sizeof("255.255.255.255,")-1;
+  size_t         left = ret_size;
+  char          *ret = ret_buf;
+
+  if (!fi)
+     return (0);
+
+  handle = LoadLibrary ("iphlpapi.dll");
+  if (!handle)
+     return (0);
+
+  (void*)GetNetworkParams = GetProcAddress (handle, "GetNetworkParams");
+  if (!GetNetworkParams)
+     goto quit;
+
+  if ((*GetNetworkParams) (fi, &size) != ERROR_BUFFER_OVERFLOW)
+     goto quit;
+
+  fi = alloca (size);
+  if (!fi || (*GetNetworkParams) (fi, &size) != ERROR_SUCCESS)
+     goto quit;
+
+  if (debug)
+  {
+    printf ("Host Name: %s\n", fi->HostName);
+    printf ("Domain Name: %s\n", fi->DomainName);
+    printf ("DNS Servers:\n"
+            "    %s (primary)\n", fi->DnsServerList.IpAddress.String);
+  }
+  if (inet_addr(fi->DnsServerList.IpAddress.String) != INADDR_NONE &&
+      left > ip_size)
+  {
+    ret += sprintf (ret, "%s,", fi->DnsServerList.IpAddress.String);
+    left -= ret - ret_buf;
+    count++;
+  }
+
+  for (i = 0, ipAddr = fi->DnsServerList.Next; ipAddr && left > ip_size;
+       ipAddr = ipAddr->Next, i++)
+  {
+    if (inet_addr(ipAddr->IpAddress.String) != INADDR_NONE)
+    {
+       ret += sprintf (ret, "%s,", ipAddr->IpAddress.String);
+       left -= ret - ret_buf;
+       count++;
+    }
+    if (debug)
+       printf ("    %s (secondary %d)\n", ipAddr->IpAddress.String, i+1);
+  }
+
+quit:
+  if (handle)
+     FreeLibrary (handle);
+
+  if (debug && left <= ip_size)
+     printf ("Too many nameservers. Truncating to %d addressess", count);
+  if (ret > ret_buf)
+     ret[-1] = '\0';
+  return (count);
 }
 #endif
 
@@ -298,6 +370,11 @@ static int init_by_resolv_conf(ares_channel channel)
 #ifdef WIN32
 
     /*
+  NameServer info via IPHLPAPI (IP helper API):
+    GetNetworkParams() should be the trusted source for this.
+    Available in Win-98/2000 and later. If that fail, fall-back to
+    registry information.
+
   NameServer Registry:
 
    On Windows 9X, the DNS server can be found in:
@@ -320,9 +397,17 @@ DhcpNameServer
   DWORD data_type;
   DWORD bytes;
   DWORD result;
-  DWORD keysize = MAX_PATH;
+  char  buf[256];
 
-  status = ARES_EFILE;
+  if (channel->nservers > -1)  /* don't override ARES_OPT_SERVER */
+     return ARES_SUCCESS;
+
+  if (get_iphlpapi_dns_info(buf,sizeof(buf)) > 0)
+  {
+    status = config_nameserver(&servers, &nservers, buf);
+    if (status == ARES_SUCCESS)
+       goto okay;
+  }
 
   if (IsNT)
   {
@@ -388,15 +473,8 @@ DhcpNameServer
     RegCloseKey(mykey);
   }
 
-  if (status != ARES_EFILE)
-  {
-    /*
-      if (!channel->lookups) {
-      status = config_lookup(channel, "file bind");
-      }
-    */
+  if (status == ARES_SUCCESS)
     status = ARES_EOF;
-  }
 
 #elif defined(riscos)
 
@@ -474,6 +552,7 @@ DhcpNameServer
     }
 
   /* If we got any name server entries, fill them in. */
+okay:
   if (servers)
     {
       channel->servers = servers;
