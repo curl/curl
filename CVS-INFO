@@ -30,6 +30,11 @@ To build after having extracted everything from CVS, do this:
 ./configure
 make
 
+  Daniel uses a ./configure line similar to this for easier development:
+
+  ./configure --disable-shared --enable-debug --enable-maintainer-mode
+
+
 REQUIREMENTS
 
  You need the following software installed:
