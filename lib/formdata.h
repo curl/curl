@@ -8,7 +8,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -44,6 +44,9 @@ typedef struct FormInfo {
   long contentslength;
   char *contenttype;
   long flags;
+
+  char *showfilename; /* The file name to show. If not set, the actual
+                         file name will be used */
   struct curl_slist* contentheader;
   struct FormInfo *more;
 } FormInfo;

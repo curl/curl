@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -171,8 +171,8 @@ static void GetStr(char **string,
 
 static
 int FormParse(char *input,
-	      struct HttpPost **httppost,
-	      struct HttpPost **last_post)
+	      struct curl_httppost **httppost,
+	      struct curl_httppost **last_post)
 {
   /* nextarg MUST be a string in the format 'name=contents' and we'll
      build a linked list with the info */
@@ -186,8 +186,8 @@ int FormParse(char *input,
   char *prevtype = NULL;
   char *sep;
   char *sep2;
-  struct HttpPost *post;
-  struct HttpPost *subpost; /* a sub-node */
+  struct curl_httppost *post;
+  struct curl_httppost *subpost; /* a sub-node */
   unsigned int i;
 
   /* Preallocate contents to the length of input to make sure we don't
@@ -296,9 +296,9 @@ int FormParse(char *input,
 	  /* For the first file name, we allocate and initiate the main list
 	     node */
 
-	  post = (struct HttpPost *)malloc(sizeof(struct HttpPost));
+	  post = (struct curl_httppost *)malloc(sizeof(struct curl_httppost));
 	  if(post) {
-	    memset(post, 0, sizeof(struct HttpPost));
+	    memset(post, 0, sizeof(struct curl_httppost));
 	    GetStr(&post->name, name);      /* get the name */
 	    GetStr(&post->contents, contp); /* get the contents */
             post->contentslength = 0;
@@ -320,9 +320,10 @@ int FormParse(char *input,
 	else {
 	  /* we add a file name to the previously allocated node, known as
              'post' now */
-	  subpost =(struct HttpPost *)malloc(sizeof(struct HttpPost));
+	  subpost =(struct curl_httppost *)
+            malloc(sizeof(struct curl_httppost));
 	  if(subpost) {
-	     memset(subpost, 0, sizeof(struct HttpPost));
+	     memset(subpost, 0, sizeof(struct curl_httppost));
 	     GetStr(&subpost->name, name);      /* get the name */
 	     GetStr(&subpost->contents, contp); /* get the contents */
              subpost->contentslength = 0;
@@ -342,9 +343,9 @@ int FormParse(char *input,
       } while(sep && *sep); /* loop if there's another file name */
     }
     else {
-      post = (struct HttpPost *)malloc(sizeof(struct HttpPost));
+      post = (struct curl_httppost *)malloc(sizeof(struct curl_httppost));
       if(post) {
-	memset(post, 0, sizeof(struct HttpPost));
+	memset(post, 0, sizeof(struct curl_httppost));
 	GetStr(&post->name, name);      /* get the name */
 	if( contp[0]=='<' ) {
 	  GetStr(&post->contents, contp+1); /* get the contents */
@@ -378,8 +379,8 @@ int FormParse(char *input,
 }
 
 int curl_formparse(char *input,
-                   struct HttpPost **httppost,
-                   struct HttpPost **last_post)
+                   struct curl_httppost **httppost,
+                   struct curl_httppost **last_post)
 {
   return FormParse(input, httppost, last_post);
 }
@@ -394,27 +395,28 @@ int curl_formparse(char *input,
  * Returns newly allocated HttpPost on success and NULL if malloc failed.
  *
  ***************************************************************************/
-static struct HttpPost * AddHttpPost(char * name,
-                                     long namelength,
-                                     char * value,
-                                     long contentslength,
-                                     char *contenttype,
-                                     long flags,
-                                     struct curl_slist* contentHeader,
-                                     struct HttpPost *parent_post,
-                                     struct HttpPost **httppost,
-                                     struct HttpPost **last_post)
+static struct curl_httppost *
+AddHttpPost(char * name, long namelength,
+            char * value, long contentslength,
+            char *contenttype,
+            long flags,
+            struct curl_slist* contentHeader,
+            char *showfilename,
+            struct curl_httppost *parent_post,
+            struct curl_httppost **httppost,
+            struct curl_httppost **last_post)
 {
-  struct HttpPost *post;
-  post = (struct HttpPost *)malloc(sizeof(struct HttpPost));
+  struct curl_httppost *post;
+  post = (struct curl_httppost *)malloc(sizeof(struct curl_httppost));
   if(post) {
-    memset(post, 0, sizeof(struct HttpPost));
+    memset(post, 0, sizeof(struct curl_httppost));
     post->name = name;
     post->namelength = name?(namelength?namelength:(long)strlen(name)):0;
     post->contents = value;
     post->contentslength = contentslength;
     post->contenttype = contenttype;
     post->contentheader = contentHeader;
+    post->showfilename = showfilename;
     post->flags = flags;
   }
   else
@@ -627,14 +629,14 @@ typedef enum {
 } FORMcode;
 
 static
-FORMcode FormAdd(struct HttpPost **httppost,
-                 struct HttpPost **last_post,
+FORMcode FormAdd(struct curl_httppost **httppost,
+                 struct curl_httppost **last_post,
                  va_list params)
 {
   FormInfo *first_form, *current_form, *form;
   FORMcode return_value = FORMADD_OK;
   const char *prevtype = NULL;
-  struct HttpPost *post = NULL;
+  struct curl_httppost *post = NULL;
   CURLformoption option;
   struct curl_forms *forms = NULL;
   const char *array_value; /* value read from an array */
@@ -677,9 +679,9 @@ FORMcode FormAdd(struct HttpPost **httppost,
         continue;
       }
       else {
-        /* check that the option is OK in an array */
+        /* Check that the option is OK in an array.
+           TODO: make ALL options work in arrays */
 
-        /* Daniel's note: do we really need to do this? */
         if ( (option <= CURLFORM_ARRAY_START) ||
              (option >= CURLFORM_ARRAY_END) ) {
           return_value = FORMADD_ILLEGAL_ARRAY;
@@ -829,13 +831,23 @@ FORMcode FormAdd(struct HttpPost **httppost,
         if( array_state )
           list = (struct curl_slist*)array_value;
         else
-          list = va_arg(params,struct curl_slist*);
+          list = va_arg(params, struct curl_slist*);
         
         if( current_form->contentheader )
           return_value = FORMADD_OPTION_TWICE;
         else
           current_form->contentheader = list;
         
+        break;
+      }
+    case CURLFORM_FILENAME:
+      {
+        char *filename = array_state?(char *)array_value:
+          va_arg(params, char *);
+        if( current_form->showfilename )
+          return_value = FORMADD_OPTION_TWICE;
+        else
+          current_form->showfilename = strdup(filename);
         break;
       }
     default:
@@ -889,7 +901,7 @@ FORMcode FormAdd(struct HttpPost **httppost,
         post = AddHttpPost(form->name, form->namelength,
                            form->value, form->contentslength,
                            form->contenttype, form->flags,
-                           form->contentheader,
+                           form->contentheader, form->showfilename,
                            post, httppost,
                            last_post);
         
@@ -915,8 +927,8 @@ FORMcode FormAdd(struct HttpPost **httppost,
   return return_value;
 }
 
-int curl_formadd(struct HttpPost **httppost,
-                 struct HttpPost **last_post,
+int curl_formadd(struct curl_httppost **httppost,
+                 struct curl_httppost **last_post,
                  ...)
 {
   va_list arg;
@@ -1009,9 +1021,9 @@ void Curl_formclean(struct FormData *form)
 }
 
 /* external function to free up a whole form post chain */
-void curl_formfree(struct HttpPost *form)
+void curl_formfree(struct curl_httppost *form)
 {
-  struct HttpPost *next;
+  struct curl_httppost *next;
 
   if(!form)
     /* no form to free, just get out of this */
@@ -1030,18 +1042,20 @@ void curl_formfree(struct HttpPost *form)
       free(form->contents); /* free the contents */
     if(form->contenttype)
       free(form->contenttype); /* free the content type */
+    if(form->showfilename)
+      free(form->showfilename); /* free the faked file name */
     free(form);       /* free the struct */
 
   } while((form=next)); /* continue */
 }
 
-struct FormData *Curl_getFormData(struct HttpPost *post,
+struct FormData *Curl_getFormData(struct curl_httppost *post,
                                   int *sizep)
 {
   struct FormData *form = NULL;
   struct FormData *firstform;
 
-  struct HttpPost *file;
+  struct curl_httppost *file;
 
   int size =0;
   char *boundary;
@@ -1093,16 +1107,25 @@ struct FormData *Curl_getFormData(struct HttpPost *post,
     file = post;
 
     do {
+
+      /* If 'showfilename' is set, that is a faked name passed on to us
+         to use to in the formpost. If that is not set, the actually used
+         local file name should be added. */
+
       if(post->more) {
 	/* if multiple-file */
 	size += AddFormDataf(&form,
-			     "\r\n--%s\r\nContent-Disposition: attachment; filename=\"%s\"",
-			     fileboundary, file->contents);
+			     "\r\n--%s\r\nContent-Disposition: "
+                             "attachment; filename=\"%s\"",
+			     fileboundary,
+                             (file->showfilename?file->showfilename:
+                              file->contents));
       }
       else if(post->flags & HTTPPOST_FILENAME) {
 	size += AddFormDataf(&form,
 			     "; filename=\"%s\"",
-			     post->contents);
+			     (post->showfilename?post->showfilename:
+                              post->contents));
       }
       
       if(file->contenttype) {
@@ -1294,8 +1317,8 @@ int Curl_FormReadOneLine(char *buffer,
 
 #ifdef _FORM_DEBUG
 int FormAddTest(const char * errormsg,
-                 struct HttpPost **httppost,
-                 struct HttpPost **last_post,
+                 struct curl_httppost **httppost,
+                 struct curl_httppost **last_post,
                  ...)
 {
   int result;
@@ -1341,8 +1364,8 @@ int main()
   int size;
   int nread;
   char buffer[4096];
-  struct HttpPost *httppost=NULL;
-  struct HttpPost *last_post=NULL;
+  struct curl_httppost *httppost=NULL;
+  struct curl_httppost *last_post=NULL;
   struct curl_forms forms[4];
 
   struct FormData *form;
@@ -1451,9 +1474,9 @@ int main(int argc, char **argv)
 #endif
   int i;
   char *nextarg;
-  struct HttpPost *httppost=NULL;
-  struct HttpPost *last_post=NULL;
-  struct HttpPost *post;
+  struct curl_httppost *httppost=NULL;
+  struct curl_httppost *last_post=NULL;
+  struct curl_httppost *post;
   int size;
   int nread;
   char buffer[4096];
