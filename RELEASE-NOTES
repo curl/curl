@@ -2,12 +2,17 @@ Curl and libcurl 7.12.0.
 
  Public curl release number:               81
  Releases counted from the very beginning: 108
- Available command line options:           95
+ Available command line options:           96
  Available curl_easy_setopt() options:     113
  Number of public functions in libcurl:    36
 
+A special thanks to the recent project sponsors:
+
+ archivas.com and Alan Pinstein, for paying me to focus on their requests
+
 This release includes the following changes:
 
+ o added ability to "upload" to file:// URLs
  o added curl_global_init_mem()
  o removed curl_formparse()
  o the MSVC project file in the release archive is automatically built
@@ -16,11 +21,13 @@ This release includes the following changes:
  o added curl_easy_strerror(), curl_multi_strerror() and curl_share_strerror()
  o IPv6-enabled Windows hosts now resolves names threaded/asynch as well
  o configure --with-libidn can be used to point out the root dir of a libidn
-   installation for curl to use, then libcurl can resolve and use IDNA names
-   (domain names with "international" letters)
+   installation (version 0.4.5 or later) for curl to use, then libcurl can
+   resolve and use IDNA names (domain names with "international" letters)
 
 This release includes the following bugfixes:
 
+ o incoming cookies with domains set with a prefixed dot now works better
+ o CURLOPT_COOKIEFILE and CURLOPT_COOKIE can be used in the same request
  o improved peer certificate name verification
  o allocation failures cause no leaks nor crashes
  o the progress meter display now handles file sizes up to full 8 exabytes
@@ -45,6 +52,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, Tommy Tam, Luca Altea, James Bursa, Mihai Ionescu, Michael
- Benedict, Andrés García, Joe Halpin, Seshubabu Pasam, Peter Sylvester
+ Benedict, Andrés García, Joe Halpin, Seshubabu Pasam, Peter Sylvester,
+ Robert D. Young, Jesse Noller, David Byron, Massimiliano Ziccardi
 
         Thanks! (and sorry if I forgot to mention someone)
