@@ -442,7 +442,7 @@ sub singletest {
 
     # name of the test
     open(N, "<$TESTDIR/name$NUMBER.txt") ||
-        print "** Couldn't read name on test $NUMBER\n";
+        return -1; # not a test
     my $DESC=<N>;
     close(N);
     $DESC =~ s/[\r\n]//g;
