@@ -54,6 +54,7 @@
 #define LIBCURL_VERSION_PATCH 0
 
 #include <stdio.h>
+#include <limits.h>
 
 /* The include stuff here below is mainly for time_t! */
 #ifdef vms
@@ -72,21 +73,37 @@ extern "C" {
 
 /*
  * We want the typedef curl_off_t setup for large file support on all
- * platforms.
+ * platforms. We also provide a CURL_FORMAT_OFF_T define to use in *printf
+ * format strings when outputting a variable of type curl_off_t.
  */
 #if defined(_MSC_VER)
 /* MSVC */
   typedef signed __int64 curl_off_t;
-#else
+#define CURL_FORMAT_OFF_T "%I64d"
+#else /* MSC_VER */
 #if (defined(__GNUC__) && defined(WIN32)) || defined(__WATCOMC__)
 /* gcc on windows or Watcom */
   typedef long long curl_off_t;
-#else
-/* "normal" approach, do note that this does not necessarily mean that
+#define CURL_FORMAT_OFF_T "%I64d"
+#else /* GCC or Watcom on Windows  */
+
+/* "normal" POSIX approach, do note that this does not necessarily mean that
    the type is >32 bits, see the SIZEOF_CURL_OFF_T define for that! */
   typedef off_t curl_off_t;
+
+/* Check a range of defines to detect large file support. On Linux it seems
+   none of these are set by default, so if you don't explicitly switches on
+   large file support, this define will be made for "small file" support. */
+#if defined(_LARGE_FILES) || (_FILE_OFFSET_BITS > 32) || (FILESIZEBITS > 32) \
+   || defined(_LARGEFILE_SOURCE) || defined(_LARGEFILE64_SOURCE)
+  /* For now, we assume at least one of these to be set for large files to
+     work! */
+#define CURL_FORMAT_OFF_T "%lld"
+#else /* LARGE_FILE support */
+#define CURL_FORMAT_OFF_T "%ld"
 #endif
-#endif
+#endif /* GCC or Watcom on Windows */
+#endif /* MSC_VER */
 
 struct curl_httppost {
   struct curl_httppost *next;       /* next entry in the list */
@@ -453,7 +470,7 @@ typedef enum {
      since 1 Jan 1970 */
   CINIT(TIMEVALUE, LONG, 34),
 
-  CINIT(HTTPREQUEST, OBJECTPOINT, 35), /* OBSOLETE */
+  /* 35 = OBSOLETE */
 
   /* Custom request, for customizing the get command like
      HTTP: DELETE, TRACE and others
@@ -490,12 +507,10 @@ typedef enum {
 
   CINIT(FOLLOWLOCATION, LONG, 52),  /* use Location: Luke! */
 
-  CINIT(FTPASCII, LONG, 53),     /* OBSOLETE */
-
   CINIT(TRANSFERTEXT, LONG, 53), /* transfer data in text/ASCII format */
   CINIT(PUT, LONG, 54),          /* PUT the input file */
 
-  CINIT(MUTE, LONG, 55),         /* OBSOLETE */
+  /* 55 = OBSOLETE */
 
   /* Function that will be called instead of the internal progress display
    * function. This function should be defined as the curl_progress_callback
@@ -533,8 +548,8 @@ typedef enum {
      this option is used only if SSL_VERIFYPEER is true */
   CINIT(CAINFO, OBJECTPOINT, 65),
 
-  CINIT(PASSWDFUNCTION, FUNCTIONPOINT, 66),   /* OBSOLETE */
-  CINIT(PASSWDDATA, OBJECTPOINT, 67),   /* OBSOLETE */
+  /* 66 = OBSOLETE */
+  /* 67 = OBSOLETE */
   
   /* Maximum number of http redirects to follow */
   CINIT(MAXREDIRS, LONG, 68),
@@ -553,8 +568,7 @@ typedef enum {
      up */
   CINIT(CLOSEPOLICY, LONG, 72),
 
-  /* Callback to use when CURLCLOSEPOLICY_CALLBACK is set. NOT USED. */
-  CINIT(CLOSEFUNCTION, FUNCTIONPOINT, 73), /* OBSOLETE */
+  /* 73 = OBSOLETE */
 
   /* Set to explicitly use a new connection for the upcoming transfer.
      Do not use this unless you're absolutely sure of this, as it makes the
@@ -626,7 +640,7 @@ typedef enum {
   CINIT(SSLENGINE_DEFAULT, LONG, 90),
 
   /* Non-zero value means to use the global dns cache */
-  CINIT(DNS_USE_GLOBAL_CACHE, LONG, 91),
+  CINIT(DNS_USE_GLOBAL_CACHE, LONG, 91), /* To become OBSOLETE soon */
 
   /* DNS cache timeout */
   CINIT(DNS_CACHE_TIMEOUT, LONG, 92),
@@ -761,10 +775,25 @@ typedef enum {
 #define CURL_IPRESOLVE_V4       1 /* resolve to ipv4 addresses */
 #define CURL_IPRESOLVE_V6       2 /* resolve to ipv6 addresses */
 
-  /* two convenient "aliases" that follow the name scheme better */
+  /* three convenient "aliases" that follow the name scheme better */
 #define CURLOPT_WRITEDATA CURLOPT_FILE
 #define CURLOPT_READDATA  CURLOPT_INFILE 
 #define CURLOPT_HEADERDATA CURLOPT_WRITEHEADER
+
+#ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
+                          the obsolete stuff removed! */
+#define CURLOPT_HTTPREQUEST    0
+#define CURLOPT_FTPASCII       CURLOPT_TRANSFERTEXT
+#define CURLOPT_MUTE           0
+#define CURLOPT_PASSWDFUNCTION 0
+#define CURLOPT_PASSWDDATA     0
+#define CURLOPT_CLOSEFUNCTION  0
+
+#else
+/* This is set if CURL_NO_OLDIES is defined at compile-time */
+#define curl_formparse "curl_formparse is obsolete"
+#undef CURLOPT_DNS_USE_GLOBAL_CACHE /* soon obsolete */
+#endif
 
 
   /* These enums are for use with the CURLOPT_HTTP_VERSION option. */
@@ -1203,6 +1232,7 @@ typedef struct {
 #define CURL_VERSION_DEBUG     (1<<6) /* built with debug capabilities */
 #define CURL_VERSION_ASYNCHDNS (1<<7)
 #define CURL_VERSION_SPNEGO    (1<<8)
+#define CURL_VERSION_LARGEFILE (1<<9) /* supports files bigger than 2GB */
 
 /*
  * NAME curl_version_info()
