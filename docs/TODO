@@ -69,6 +69,10 @@ TODO
 
  FTP
 
+ * Support the most common FTP proxies, Philip Newton provided a list
+   allegedly from ncftp:
+   http://curl.haxx.se/mail/archive-2003-04/0126.html
+
  * Make CURLOPT_FTPPORT support an additional port number on the IP/if/name,
    like "blabla:[port]" or possibly even "blabla:[portfirst]-[portsecond]".
 
