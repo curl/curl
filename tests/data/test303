@@ -1,0 +1,40 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Connection: close
+
+<html>result</html>
+</data>
+<postcmd>
+wait 10
+</postcmd>
+</reply>
+
+# Client-side
+<client>
+ <name>
+HTTPS with 2 secs timeout
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/want/303 -m 2
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /want/303 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+<errorcode>
+28
+</errorcode>
+</verify>
