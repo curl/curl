@@ -277,7 +277,8 @@ char *next_url(URLGlob *glob) {
 	*buf++ = pat->content.CharRange.ptr_c;
 	break;
       case UPTNumRange:
-	buf += sprintf(buf, "%0*d", pat->content.NumRange.padlength, pat->content.NumRange.ptr_n); 
+	sprintf(buf, "%0*d", pat->content.NumRange.padlength, pat->content.NumRange.ptr_n); 
+        buf += strlen(buf); /* make no sprint() return code assumptions */
 	break;
       default:
 	printf("internal error: invalid pattern type (%d)\n", pat->type);
@@ -316,7 +317,8 @@ char *match_url(char *filename, URLGlob glob) {
 	*buf++ = pat.content.CharRange.ptr_c;
 	break;
       case UPTNumRange:
-	buf += sprintf(buf, "%0*d", pat.content.NumRange.padlength, pat.content.NumRange.ptr_n);
+	sprintf(buf, "%0*d", pat.content.NumRange.padlength, pat.content.NumRange.ptr_n);
+        buf += strlen(buf);
 	break;
       default:
 	printf("internal error: invalid pattern type (%d)\n", pat.type);
