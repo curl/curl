@@ -6,6 +6,21 @@
 
                                   Changelog
 
+Daniel (27 Feb)
+- Avery Fay pointed out the very misleading curl_multi_info_read man page, and
+  I updated it to become more accurate.
+
+- Salvatore Sorrentino found a problem with FTP downloading that turned out to
+  be his FTP server returning size zero (0 bytes) when SIZE was used on a file
+  while being in BINARY mode. We now make a second check for the actual size
+  by scanning the RETR reply anyway, even if the SIZE command returned 0.
+
+Daniel (26 Feb)
+- Kyle Sallee reported a case where he would do a transfer that didn't update
+  the progress meter properly. It turned out to be a case where libcurl would
+  loop a little too eagerly in the tranfer loop, which isn't really good for
+  the APIs, especially not the multi API.
+
 Version 7.10.4-pre2 (24 Feb 2003)
 
 Daniel (24 Feb)
