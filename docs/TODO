@@ -36,6 +36,9 @@ TODO
  * Use 'struct lifreq' and SIOCGLIFADDR instead of 'struct ifreq' and
    SIOCGIFADDR on newer Solaris versions as they claim the latter is obsolete.
 
+ * Add the following to curl_easy_getinfo(): GET_HTTP_IP, GET_FTP_IP and
+   GET_FTP_DATA_IP. Return a string with the used IP. Suggested by Alan.
+
  LIBCURL - multi interface
 
  * Add a curl_multi_fdset() alternative that returns only two arrays with file
