@@ -72,9 +72,9 @@ timeout every now and then, should you want that.
 A little note here about the return codes from the multi functions, and
 especially the \fIcurl_multi_perform\fP: if you receive
 \fICURLM_CALL_MULTI_PERFORM\fP, this basicly means that you should call
-\fIcurlm_call_multi_perform\fP again, before you select() on more actions. You
-don't have to do it immediately, but the return code means that libcurl may
-have more data available to return or that there may be more data to send off
+\fIcurl_multi_perform\fP again, before you select() on more actions. You don't
+have to do it immediately, but the return code means that libcurl may have
+more data available to return or that there may be more data to send off
 before it is "satisfied".
 
 \fIcurl_multi_perform\fP stores the number of still running transfers in one
