@@ -1414,6 +1414,13 @@ CURLcode Curl_perform(struct SessionHandle *data)
   if(!res && res2)
     res = res2;
 
+  if(conn && (-1 !=conn->secondarysocket)) {
+    /* if we failed anywhere, we must clean up the secondary socket if it
+       was used */
+    sclose(conn->secondarysocket);
+    conn->secondarysocket=-1;
+  }
+
   return res;
 }
 
