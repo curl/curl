@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "11 Sep 2001" "Curl 7.9" "Curl Manual"
+.TH curl 1 "12 Sep 2001" "Curl 7.9" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -91,6 +91,12 @@ also be enforced by using an URL that ends with ";type=A". This option causes
 data sent to stdout to be in text mode for win32 systems.
 
 If this option is used twice, the second one will disable ASCII usage.
+.IP "--ciphers <list of ciphers>"
+(SSL) Specifies which ciphers to use in the connection. The list of ciphers
+must be using valid ciphers. Read up on SSL cipher list details on this URL:
+.I http://www.openssl.org/docs/apps/ciphers.html (Option added in curl 7.9)
+
+If this option is used severl times, the last one will override the others.
 .IP "--connect-timeout <seconds>"
 Maximum time in seconds that you allow the connection to the server to take.
 This only limits the connection phase, once curl has connected this option is
@@ -106,7 +112,7 @@ operation. Curl writes all cookies previously read from a specified file as
 well as all cookies received from remote server(s). If no cookies are known,
 no file will be written. The file will be written using the Netscape cookie
 file format. If you set the file name to a single dash, "-", the cookies will
-be written to stdout.
+be written to stdout. (Option added in curl 7.9)
 
 If this option is used several times, the last specfied file name will be
 used.
@@ -238,7 +244,7 @@ added in curl 7.6)
 When used, this option will make all data specified with -d/--data or
 --data-binary to be used in a HTTP GET request instead of the POST request
 that otherwise would be used. The data will be appended to the URL with a '?'
-separator.
+separator. (Option added in curl 7.9)
 .IP "-h/--help"
 Usage help.
 .IP "-H/--header <header>"
