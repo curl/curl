@@ -76,8 +76,11 @@ typedef unsigned char bool;
 #define _REENTRANT
 #endif
 
-
 #include <stdio.h>
+#ifdef HAVE_ASSERT_H
+#include <assert.h>
+#endif
+
 #ifndef OS
 #ifdef WIN32
 #define OS "win32"
@@ -114,6 +117,14 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #ifdef _AIX
 #include <curl/stdcheaders.h>
 #endif
+#endif
+
+#if defined(CURLDEBUG) && defined(HAVE_ASSERT_H)
+#define NDEBUG
+#define curlassert(x) assert(x)
+#else
+/* does nothing without CURLDEBUG defined */
+#define curlassert(x)
 #endif
 
 #ifdef MSG_NOSIGNAL
