@@ -95,6 +95,12 @@ is no other alternatives. Using this of course requires subsequent tests to
 restart servers.
 </killserver>
 
+<precheck>
+A command line that if set gets run by the test script before the test. If an
+output is displayed by the command line, the test will be skipped and the
+(single-line) output will be displayed as reason for not running the test.
+</precheck>
+
 <tool>
 Name of tool to use instead of "curl". This tool must be built and exist
 in the libtest/ directory.

@@ -888,6 +888,21 @@ sub singletest {
         $serverproblem = serverfortest($testnum);
     }
 
+    if(!$serverproblem) {
+        my @precheck = getpart("client", "precheck");
+        my $cmd = $precheck[0];
+        chomp $cmd;
+        if($cmd) {
+            my @o = `$cmd 2>/dev/null`;
+            if($o[0]) {
+                $serverproblem = 15;
+                $why = $o[0];
+                chomp $why;
+            }
+        }
+    }
+
+
     if($serverproblem) {
         # there's a problem with the server, don't run
         # this particular server, but count it as "skipped"

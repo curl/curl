@@ -39,24 +39,20 @@
 #endif
 
 #if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
-int test(char *URL)
+
+static int rlimit(void)
 {
   struct rlimit rl;
-  int fd[NUM_OPEN];
-  int i;
-  CURLcode res;
-  CURL *curl;
-
   /* get open file limits */
   if (getrlimit(RLIMIT_NOFILE, &rl) == -1) {
     fprintf(stderr, "warning: getrlimit: failed to get RLIMIT_NOFILE\n");
-    goto skip_open;
+    return -1;
   }
 
   /* check that hard limit is high enough */
   if (rl.rlim_max < NUM_NEEDED) {
     fprintf(stderr, "warning: RLIMIT_NOFILE hard limit is too low\n");
-    goto skip_open;
+    return -1;
   }
 
   /* increase soft limit if needed */
@@ -64,9 +60,31 @@ int test(char *URL)
     rl.rlim_cur = NUM_NEEDED;
     if (setrlimit(RLIMIT_NOFILE, &rl) == -1) {
       fprintf(stderr, "warning: setrlimit: failed to set RLIMIT_NOFILE\n");
-      goto skip_open;
+      return -1;
     }
   }
+  return 0;
+}
+
+int test(char *URL)
+{
+  int fd[NUM_OPEN];
+  int i;
+  CURLcode res;
+  CURL *curl;
+
+  if(!strcmp(URL, "check")) {
+    /* used by the test script to ask if we can run this test or not */
+    if(rlimit()) {
+      printf("rlimit problems\n");
+      return 1;
+    }
+    return 0; /* sure, run this! */
+  }
+
+  if(rlimit())
+    /* failure */
+    return 100;
 
   /* open a dummy descriptor */
   fd[0] = open(DEV_NULL, O_RDONLY);
@@ -86,8 +104,6 @@ int test(char *URL)
     }
   }
 
-skip_open:
-
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
@@ -104,7 +120,7 @@ skip_open:
 int test(char *URL)
 {
   (void)URL;
-  fprintf(stderr, "system lacks necessary system function(s)");
+  printf("system lacks necessary system function(s)");
   return 1;
 }
 #endif
