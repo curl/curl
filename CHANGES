@@ -8,6 +8,9 @@
 
 
 Daniel (4 October)
+- Jon Turner fixed a problem libcurl had when it failed on an FTP transfer due
+  to a bad path, it would cause the next transfer to use a bad path as well.
+
 - Siddhartha Prakash Jain provided a patch with a fix for libcurl with ares,
   when working on IP-only names as we then could return "wait" status when the
   name in fact already was resolved. I edited the patch slightly to not expose
