@@ -6,8 +6,17 @@
 
                                   Changelog
 
+Daniel (20 Jan 2003)
+- David Thiel pointed out that the .netrc file was not being dealt with
+  properly anymore. I broke this in the password prompting "fix".
+
+- Markus F.X.J. Oberhumer patched libcurl to allocate the scratch buffer only
+  on demand and thus we save 32KB in each curl handle that don't use that
+  buffer. This need appeared when some people started using thousands of
+  simultaneous curl handles... :-)
+
 Daniel (16 Jan 2003)
-- Markus Oberhumer fixed curl-config -cflags when the prefix was not
+- Markus Oberhumer fixed curl-config --cflags when the includedir was not
   /usr/include.
 
 - Markus Oberhumer fixed CURLINFO_PRIVATE to properly return NULL if it was
@@ -1592,4 +1601,4 @@ Daniel (2 January 2002)
   changes done on dec-20 made test case 104 cease to work (in both branches).
 
 - Philip Gladstone pointed out a few portability problems in the source code
-  that didn't compile on 64-bit sparcs using Sun's native 
+  that didn't compile on 64-bit sparcs using Sun's native compiler.
