@@ -42,7 +42,7 @@
 
 #include "base64.h"
 
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
