@@ -27,6 +27,7 @@
    Wilke. Thanks a bunch!
 
  */
+#include "setup.h" /* portability help from the lib directory */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,7 +65,7 @@ spitout(FILE *stream,
 #define DEFAULT_LOGFILE "log/sws.log"
 #endif
 
-#define VERSION "cURL test suite HTTP server/0.1"
+#define SWSVERSION "cURL test suite HTTP server/0.1"
 
 #define REQUEST_DUMP  "log/server.input"
 #define RESPONSE_DUMP "log/server.response"
@@ -98,7 +99,7 @@ static const char *docbadconnect =
 
 /* send back this on 404 file not found */
 static const char *doc404 = "HTTP/1.1 404 Not Found\n"
-    "Server: " VERSION "\n"
+    "Server: " SWSVERSION "\n"
     "Connection: close\n"
     "Content-Type: text/html\n"
     "\n"
@@ -108,7 +109,7 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\n"
     "</HEAD><BODY>\n"
     "<H1>Not Found</H1>\n"
     "The requested URL was not found on this server.\n"
-    "<P><HR><ADDRESS>" VERSION "</ADDRESS>\n" "</BODY></HTML>\n";
+    "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
 
 #ifdef HAVE_SIGNAL
 static volatile int sigpipe;
@@ -241,7 +242,7 @@ static int get_request(int sock, int *part, int *open)
   *open = TRUE; /* connection should remain open and wait for more commands */
 
   while (offset < REQBUFSIZ) {
-    int got = recv(sock, reqbuf + offset, REQBUFSIZ - offset, 0);
+    int got = sread(sock, reqbuf + offset, REQBUFSIZ - offset);
     if (got <= 0) {
       if (got < 0) {
         perror("recv");
@@ -471,7 +472,7 @@ static int send_doc(int sock,
   }
 
   do {
-    written = send(sock, buffer, count, 0);
+    written = swrite(sock, buffer, count);
     if (written < 0) {
       logmsg("Sending response failed and we bailed out!");
       return -1;
@@ -609,13 +610,13 @@ int main(int argc, char *argv[])
     } while(open || (doc == DOCNUMBER_CONNECT));
 
     logmsg("Closing client connection");
-    close(msgsock);
+    sclose(msgsock);
 
     if (doc == DOCNUMBER_QUIT)
       break;
   }
   
-  close(sock);
+  sclose(sock);
   fclose(logfp);
   
   return 0;

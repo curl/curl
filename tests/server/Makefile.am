@@ -5,6 +5,8 @@
 
 AUTOMAKE_OPTIONS = foreign
 
+INCLUDES = -I$(top_srcdir)/lib
+
 noinst_PROGRAMS = sws
 
 sws_SOURCES= sws.c getpart.c
