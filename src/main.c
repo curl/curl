@@ -2505,11 +2505,12 @@ operate(struct Configurable *config, int argc, char *argv[])
           struct stat fileinfo;
 
 /*VMS?? -- Danger, the filesize is only valid for stream files */
-          if(0 == stat(outfile, &fileinfo)) {
+          if(0 == stat(outfile, &fileinfo))
             /* set offset to current file size: */
             config->resume_from = fileinfo.st_size;
-          }
-          /* else let offset remain 0 */
+          else
+            /* let offset be 0 */
+            config->resume_from = 0;
         }
       
         if(config->resume_from) {
