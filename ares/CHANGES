@@ -1,5 +1,19 @@
   Changelog for the c-ares project
 
+* September 26
+
+- Dominick Meglio patched: C-ares on Windows assumed that the HOSTS file is
+  located in a static location. It assumed
+  C:\Windows\System32\Drivers\Etc. This is a poor assumption to make. In fact,
+  the location of the HOSTS file can be changed via a registry setting.
+
+  There is a key called DatabasePath which specifies the path to the HOSTS
+  file:
+  http://www.microsoft.com/technet/itsolutions/network/deploy/depovg/tcpip2k.mspx
+
+  The patch will make c-ares correctly consult the registry for the location
+  of this file.
+
 * August 29
 
 - Gisle Vanem fixed the MSVC build files.

@@ -46,8 +46,8 @@
 #define WIN_NS_NT_KEY  "System\\CurrentControlSet\\Services\\Tcpip\\Parameters"
 #define NAMESERVER     "NameServer"
 #define DHCPNAMESERVER "DhcpNameServer"
-#define PATH_HOSTS_NT  "\\drivers\\etc\\hosts"
-#define PATH_HOSTS_9X  "\\hosts"
+#define DATABASEPATH   "DatabasePath"
+#define WIN_PATH_HOSTS  "\\hosts"
 
 #elif defined(WATT32)
 
