@@ -192,10 +192,11 @@ typedef enum {
   CURLE_SSL_PEER_CERTIFICATE,    /* 51 - peer's certificate wasn't ok */
   CURLE_GOT_NOTHING,             /* 52 - when this is a specific error */
   CURLE_SSL_ENGINE_NOTFOUND,     /* 53 - SSL crypto engine not found */
-  CURLE_SSL_ENGINE_SETFAILED,    /* 54 - can not set SSL crypto engine as default */
+  CURLE_SSL_ENGINE_SETFAILED,    /* 54 - can not set SSL crypto engine as
+                                    default */
   CURLE_SEND_ERROR,              /* 55 - failed sending network data */
   CURLE_RECV_ERROR,              /* 56 - failure in receiving network data */
-
+  CURLE_SHARE_IN_USE,            /* 57 - share is in use */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -562,9 +563,13 @@ typedef enum {
   /* Instruct libcurl to use a smaller receive buffer */
   CINIT(BUFFERSIZE, LONG, 98),
 
-  /* Instruct libcurl to do not use any signal/alarm handlers, even with timeouts. */
+  /* Instruct libcurl to never use any signal/alarm handlers, even with
+     timeouts. */
   CINIT(NOSIGNAL, LONG, 99),
   
+  /* Provide a CURLShare for mutexing non-ts data */
+  CINIT(SHARE, OBJECTPOINT, 100),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
@@ -838,6 +843,41 @@ typedef enum {
 #define CURL_GLOBAL_ALL (CURL_GLOBAL_SSL|CURL_GLOBAL_WIN32)
 #define CURL_GLOBAL_NOTHING 0
 #define CURL_GLOBAL_DEFAULT CURL_GLOBAL_ALL
+
+
+/*****************************************************************************
+ * Setup defines, protos etc for the sharing stuff.
+ */
+
+/* Different types of locks that a share can aquire */
+typedef enum {
+  CURL_LOCK_TYPE_NONE = 0,
+  CURL_LOCK_TYPE_COOKIE = 1<<0,
+  CURL_LOCK_TYPE_DNS = 1<<1,
+  CURL_LOCK_TYPE_SSL_SESSION = 2<<1,
+  CURL_LOCK_TYPE_CONNECT = 2<<2,
+  CURL_LOCK_TYPE_LAST
+} curl_lock_type;
+
+typedef void (*curl_lock_function)(CURL *, curl_lock_type, void *);
+typedef void (*curl_unlock_function)(CURL *, curl_lock_type, void *);
+
+typedef struct {
+  unsigned int specifier;
+  unsigned int locked;
+  unsigned int dirty;
+  
+  curl_lock_function lockfunc;
+  curl_unlock_function unlockfunc;
+  void *clientdata;
+} curl_share;
+
+curl_share *curl_share_init (void);
+CURLcode curl_share_setopt (curl_share *, curl_lock_type, int);
+CURLcode curl_share_set_lock_function (curl_share *, curl_lock_function);
+CURLcode curl_share_set_unlock_function (curl_share *, curl_unlock_function);
+CURLcode curl_share_set_lock_data (curl_share *, void *);
+CURLcode curl_share_destroy (curl_share *);
 
 #ifdef  __cplusplus
 }

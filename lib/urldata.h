@@ -694,7 +694,8 @@ struct UserDefined {
  * 'struct urlstate' instead.  */
 
 struct SessionHandle {
-  curl_hash          *hostcache;
+  curl_hash *hostcache;
+  curl_share *share;           /* Share, handles global variable mutexing */
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */
 

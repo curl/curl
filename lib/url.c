@@ -178,6 +178,10 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_SSL_Close_All(data);
 #endif
 
+  /* No longer a dirty share, if it exists */
+  if (data->share)
+    data->share->dirty--;
+
   if(data->state.auth_host)
     free(data->state.auth_host);
 
@@ -1030,6 +1034,18 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * even when using a timeout.
      */
     data->set.no_signal = va_arg(param, long) ? TRUE : FALSE;
+    break;
+
+  case CURLOPT_SHARE:
+    {
+      curl_share *set;
+      set = va_arg(param, curl_share *);
+      if(data->share)
+        data->share->dirty--;
+
+      data->share = set;
+      data->share->dirty++;
+    }
     break;
 
   default:
