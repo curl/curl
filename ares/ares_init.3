@@ -14,7 +14,7 @@
 .\" this software for any purpose.  It is provided "as is"
 .\" without express or implied warranty.
 .\"
-.TH ARES_INIT 3 "21 July 1998"
+.TH ARES_INIT 3 "7 December 2004"
 .SH NAME
 ares_init, ares_init_options \- Initialize a resolver channel
 .SH SYNOPSIS
@@ -25,31 +25,20 @@ ares_init, ares_init_options \- Initialize a resolver channel
 .B int ares_init_options(ares_channel *\fIchannel\fP,
 .B 	struct ares_options *\fIoptions\fP, int \fIoptmask\fP)
 .PP
-.B cc file.c -lares
+.B cc file.c -lcares
 .fi
 .SH DESCRIPTION
-The
-.B ares_init
-function initializes a communications channel for name service
-lookups.  If it returns successfully,
-.B ares_init
-will set the variable pointed to by
-.I channel
-to a handle used to identify the name service channel.  The caller
-should invoke
+The \fBares_init\fP function initializes a communications channel for name
+service lookups.  If it returns successfully, \fBares_init\fP will set the
+variable pointed to by \fIchannel\fP to a handle used to identify the name
+service channel.  The caller should invoke
 .BR ares_destroy (3)
 on the handle when the channel is no longer needed.
 .PP
-The
-.B ares_init_options
-function also initializes a name service channel, with additional
-options useful for applications requiring more control over name
-service configuration.  The
-.I optmask
-parameter specifies which fields in the structure pointed to by
-.I options
-are set, as follows:
-.PP
+The \fBares_init_options\fP function also initializes a name service channel,
+with additional options useful for applications requiring more control over
+name service configuration. The \fIoptmask\fP parameter specifies which fields
+in the structure pointed to by \fIoptions\fP are set, as follows:
 .TP 18
 .B ARES_OPT_FLAGS
 .B int \fIflags\fP;
@@ -127,9 +116,11 @@ If a truncated response to a UDP query is received, do not fall back
 to TCP; simply continue on with the truncated response.
 .TP 23
 .B ARES_FLAG_NORECURSE
-Do not set the "recursion desired" bit on outgoing queries, so that
-the name server being contacted will not try to fetch the answer from
-other servers if it doesn't know the answer locally.
+Do not set the "recursion desired" bit on outgoing queries, so that the name
+server being contacted will not try to fetch the answer from other servers if
+it doesn't know the answer locally. Be aware that ares will not do the
+recursion for you.  Recursion must be handled by the application calling ares
+if \fIARES_FLAG_NORECURSE\fP is set.
 .TP 23
 .B ARES_FLAG_STAYOPEN
 Do not close communciations sockets when the number of active queries
