@@ -20,21 +20,21 @@
 
 
 typedef struct sslctxparm_st {
-   CURL* curl;
-   int accesstype ;
-   unsigned char * accessinfoURL ;
-
+  CURL* curl;
+  int accesstype;
+  unsigned char * accessinfoURL;
 } sslctxparm;
 
 
 static unsigned char *i2s_ASN1_IA5STRING( ASN1_IA5STRING *ia5)
 {
-	unsigned char *tmp;
-	if(!ia5 || !ia5->length) return NULL;
-	tmp = OPENSSL_malloc(ia5->length + 1);
-	memcpy(tmp, ia5->data, ia5->length);
-	tmp[ia5->length] = 0;
-	return tmp;
+  unsigned char *tmp;
+  if(!ia5 || !ia5->length)
+    return NULL;
+  tmp = OPENSSL_malloc(ia5->length + 1);
+  memcpy(tmp, ia5->data, ia5->length);
+  tmp[ia5->length] = 0;
+  return tmp;
 }
 
 /* A conveniance routine to get an access URI. */
@@ -45,10 +45,10 @@ static unsigned char *my_get_ext(X509 * cert, const int type,
   int i;
   STACK_OF(ACCESS_DESCRIPTION) * accessinfo ;
   accessinfo =  X509_get_ext_d2i(cert, extensiontype, NULL, NULL) ;
-  
+
   if (!sk_ACCESS_DESCRIPTION_num(accessinfo))
     return NULL;
-  
+
   for (i = 0; i < sk_ACCESS_DESCRIPTION_num(accessinfo); i++) {
     ACCESS_DESCRIPTION * ad = sk_ACCESS_DESCRIPTION_value(accessinfo, i);
     if (OBJ_obj2nid(ad->method) == type) {
@@ -57,7 +57,7 @@ static unsigned char *my_get_ext(X509 * cert, const int type,
       }
       return NULL;
     }
-  }	
+  }
   return NULL;
 }
 
@@ -73,16 +73,16 @@ static int ssl_app_verify_callback(X509_STORE_CTX *ctx, void *arg)
 
 #if OPENSSL_VERSION_NUMBER<0x00907000L
 /* not necessary in openssl 0.9.7 or later */
-        
+
   fprintf(stderr,"This version %s of openssl does not support a parm (%p)"
           ", getting a global static %p \n",
           OPENSSL_VERSION_TEXT, (void *)p, (void *)globalparm);
-  
+
   p = globalparm;
 #endif
 
 /* The following error should not occur. We test this to avoid segfault. */
-  if (!p || !ctx) { 
+  if (!p || !ctx) {
     fprintf(stderr,"Internal error in ssl_app_verify_callback "
             "sslctxparm=%p ctx=%p\n",(void *)p,(void*)ctx);
     return 0;
@@ -96,7 +96,7 @@ static int ssl_app_verify_callback(X509_STORE_CTX *ctx, void *arg)
 #if 1
   if (err == X509_V_ERR_DEPTH_ZERO_SELF_SIGNED_CERT ||
       err == X509_V_ERR_UNABLE_TO_GET_ISSUER_CERT_LOCALLY) {
-    fprintf(stderr,"X509_verify_cert: repairing self signed\n") ; 
+    fprintf(stderr,"X509_verify_cert: repairing self signed\n") ;
     X509_STORE_CTX_set_error(ctx,X509_V_OK);
     ok = 1;
   }
@@ -104,20 +104,20 @@ static int ssl_app_verify_callback(X509_STORE_CTX *ctx, void *arg)
 
   if (ok && ctx->cert) {
     unsigned char * accessinfoURL ;
-		
+
     accessinfoURL = my_get_ext(ctx->cert,p->accesstype ,NID_info_access);
     if (accessinfoURL) {
 
-      if (strcmp((char *)p->accessinfoURL, (char *)accessinfoURL)) {	
+      if (strcmp((char *)p->accessinfoURL, (char *)accessinfoURL)) {
         fprintf(stderr, "Setting URL <%s>, was <%s>\n",
                 (char *)accessinfoURL, (char *)p->accessinfoURL);
         OPENSSL_free(p->accessinfoURL);
         p->accessinfoURL = accessinfoURL;
         curl_easy_setopt(p->curl, CURLOPT_URL,p->accessinfoURL);
       }
-      else 
+      else
         OPENSSL_free(accessinfoURL);
-    }           
+    }
   }
   return(ok);
 }
@@ -126,11 +126,11 @@ static int ssl_app_verify_callback(X509_STORE_CTX *ctx, void *arg)
 static CURLcode sslctxfun(CURL * curl, void * sslctx, void * parm)
 {
   sslctxparm * p = (sslctxparm *) parm;
-	
+
   SSL_CTX * ctx = (SSL_CTX *) sslctx ;
   fprintf(stderr,"sslctxfun start curl=%p ctx=%p parm=%p\n",
           (void *)curl,(void *)ctx,(void *)p);
-		
+
   SSL_CTX_set_quiet_shutdown(ctx,1);
   SSL_CTX_set_cipher_list(ctx,"RC4-MD5");
   SSL_CTX_set_mode(ctx, SSL_MODE_AUTO_RETRY);
@@ -139,7 +139,7 @@ static CURLcode sslctxfun(CURL * curl, void * sslctx, void * parm)
    but it still does, see the error handling in the call back */
 
   SSL_CTX_set_verify_depth(ctx,0);
-  SSL_CTX_set_verify(ctx,SSL_VERIFY_NONE,NULL); 
+  SSL_CTX_set_verify(ctx,SSL_VERIFY_NONE,NULL);
 
 #if OPENSSL_VERSION_NUMBER<0x00907000L
 /* in newer openssl versions we can set a parameter for the call back. */
@@ -148,9 +148,9 @@ static CURLcode sslctxfun(CURL * curl, void * sslctx, void * parm)
   /* this is only done to support 0.9.6 version */
   globalparm = parm;
 
-/* in 0.9.6 the parm is not taken */ 
+/* in 0.9.6 the parm is not taken */
 #endif
-  SSL_CTX_set_cert_verify_callback(ctx, ssl_app_verify_callback, parm); 
+  SSL_CTX_set_cert_verify_callback(ctx, ssl_app_verify_callback, parm);
   fprintf(stderr,"sslctxfun end\n");
 
   return CURLE_OK ;
@@ -166,17 +166,17 @@ int test(char *URL)
 
   curl_global_init(CURL_GLOBAL_ALL);
 
-  p.curl = curl_easy_init(); 
+  p.curl = curl_easy_init();
 
   p.accessinfoURL = (unsigned char *) strdup(URL);
   p.accesstype = OBJ_obj2nid(OBJ_txt2obj("AD_DVCS",0)) ;
- 
+
   curl_easy_setopt(p.curl, CURLOPT_URL, p.accessinfoURL);
 
-  curl_easy_setopt(p.curl, CURLOPT_SSL_CTX_FUNCTION, sslctxfun)  ; 
-  curl_easy_setopt(p.curl, CURLOPT_SSL_CTX_DATA, &p);  
+  curl_easy_setopt(p.curl, CURLOPT_SSL_CTX_FUNCTION, sslctxfun)  ;
+  curl_easy_setopt(p.curl, CURLOPT_SSL_CTX_DATA, &p);
 
-  curl_easy_setopt(p.curl, CURLOPT_SSL_VERIFYPEER, FALSE); 
+  curl_easy_setopt(p.curl, CURLOPT_SSL_VERIFYPEER, FALSE);
   curl_easy_setopt(p.curl, CURLOPT_SSL_VERIFYHOST, 1);
 
   fprintf(stderr, "Going to perform %s\n", (char *)p.accessinfoURL);
@@ -208,7 +208,7 @@ int test(char *URL)
       }
       if(done)
         break;
-      
+
       if (res != CURLM_OK) {
         fprintf(stderr, "not okay???\n");
         i = 80;
@@ -246,10 +246,10 @@ int test(char *URL)
   curl_easy_cleanup(p.curl);
   curl_multi_cleanup(multi);
 
-  curl_global_cleanup(); 
+  curl_global_cleanup();
   free(p.accessinfoURL);
 
-  return i; 
+  return i;
 }
 #else /* USE_SSLEAY */
 int test(char *URL)
