@@ -423,7 +423,8 @@ static void help(void)
        "    --location-trusted Same, and continue to send authentication when \n"
        "                    following locations, even when hostname changed\n"
        " -m/--max-time <seconds> Maximum time allowed for the transfer\n"
-       " -M/--manual        Display huge help text\n"
+       "    --max-redirs <num> Set maximum number of redirections allowed (H)");
+  puts(" -M/--manual        Display huge help text\n"
        " -n/--netrc         Must read .netrc for user name and password\n"
        "    --netrc-optional  Use either .netrc or URL; overrides -n\n"
        "    --ntlm          Enable HTTP NTLM authentication (H)");
@@ -435,6 +436,7 @@ static void help(void)
        " -q                 When used as the first parameter disables .curlrc\n"
        " -Q/--quote <cmd>   Send QUOTE command to FTP before file transfer (F)");
   puts(" -r/--range <range> Retrieve a byte range from a HTTP/1.1 or FTP server\n"
+       "    --random-file <file> File to use for reading random data from (SSL)\n"
        " -R/--remote-time   Set the remote file's time on the local output\n"
        " -s/--silent        Silent mode. Don't output anything\n"
        " -S/--show-error    Show error. With -s, make curl show errors when they occur");
@@ -454,12 +456,10 @@ static void help(void)
 #endif
   puts(" -w/--write-out [format] What to output after completion\n"
        " -x/--proxy <host[:port]>  Use proxy. (Default port is 1080)\n"
-       "    --random-file <file> File to use for reading random data from (SSL)\n"
        " -X/--request <command> Specific request command to use");
   puts(" -y/--speed-time    Time needed to trig speed-limit abort. Defaults to 30\n"
        " -Y/--speed-limit   Stop transfer if below speed-limit for 'speed-time' secs\n"
        " -z/--time-cond <time> Includes a time condition to the server (H)\n"
-       " -Z/--max-redirs <num> Set maximum number of redirections allowed (H)\n"
        " -0/--http1.0       Force usage of HTTP 1.0 (H)\n"
        " -1/--tlsv1         Force usage of TLSv1 (H)\n"
        " -2/--sslv2         Force usage of SSLv2 (H)\n"
@@ -1088,6 +1088,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5p", "wdebug",     FALSE},
 #endif
     {"5q", "ftp-create-dirs", FALSE},    
+    {"5r", "create-dirs", FALSE},
+    {"5s", "max-redirs",   TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1095,7 +1097,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"a", "append",      FALSE},
     {"A", "user-agent",  TRUE},
     {"b", "cookie",      TRUE},
-    {"B", "ftp-ascii",   FALSE}, /* this long format is OBSOLETE now! */
     {"B", "use-ascii",   FALSE},
     {"c", "cookie-jar",  TRUE},
     {"C", "continue-at", TRUE},
@@ -1154,9 +1155,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"Y", "speed-limit",  TRUE},
     {"y", "speed-time", TRUE},
     {"z", "time-cond",   TRUE},
-    {"Z", "max-redirs",   TRUE},
     {"#", "progress-bar",FALSE},
-    {"@", "create-dirs", FALSE},
   };
 
   if(('-' != flag[0]) ||
@@ -1337,8 +1336,17 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         dbug_init();
         break;
 #endif
-      case 'q': /* --ftp-create_dirs */
+      case 'q': /* --ftp-create-dirs */
         config->ftp_create_dirs ^= TRUE;
+        break;
+
+      case 'r': /* --create-dirs */
+        config->create_dirs = TRUE;
+        break;
+
+      case 's': /* --max-redirs */
+        /* specified max no of redirects (http(s)) */
+        config->maxredirs = atoi(nextarg);
         break;
 
       default: /* the URL! */
@@ -1863,15 +1871,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         }
       }
       break;
-    case 'Z':
-      /* specified max no of redirects (http(s)) */
-      config->maxredirs = atoi(nextarg);
-      break;
-
-    case '@':
-      config->create_dirs = TRUE;
-      break;
-
     default: /* unknown flag */
       return PARAM_OPTION_UNKNOWN;
     }
