@@ -407,7 +407,7 @@ Curl_SSLConnect(struct connectdata *conn)
       return CURLE_SSL_PEER_CERTIFICATE;
     }
 
-    if (strcasecmp(peer_CN, conn->hostname) != 0) {
+    if (!strequal(peer_CN, conn->hostname)) {
       if (data->ssl.verifyhost > 1) {
         failf(data, "SSL: certificate subject name '%s' does not match target host name '%s'",
             peer_CN, conn->hostname);
