@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (19 October 2004)
+- Test case 165 modified to use a charset define older iconv versions
+  understand. ISO-8859-1 instead of ISO8859-1. Bug report #1049275 (anonymous)
+
 Daniel (18 October 2004)
 - Peter Wullinger pointed out that curl should call setlocale() properly to
   initiate the specific language operations, to make the IDN stuff work
