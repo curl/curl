@@ -122,18 +122,7 @@ static unsigned int ConnectionStore(struct UrlData *data,
                                     struct connectdata *conn);
 
 
-/* does nothing, returns OK */
-CURLcode curl_init(void)
-{
-  return CURLE_OK;
-}
-
-/* does nothing */
-void curl_free(void)
-{
-}
-
-CURLcode curl_close(CURL *curl)
+CURLcode Curl_close(CURL *curl)
 {
   struct UrlData *data=(struct UrlData *)curl;
   
@@ -178,10 +167,6 @@ CURLcode curl_close(CURL *curl)
   free(data->connects);
 
   free(data);
-
-  /* global cleanup */
-  curl_free();
-
   return CURLE_OK;
 }
 
@@ -197,7 +182,7 @@ int my_getpass(void *clientp, char *prompt, char* buffer, int buflen )
 }
 
 
-CURLcode curl_open(CURL **curl, char *url)
+CURLcode Curl_open(CURL **curl, char *url)
 {
   /* We don't yet support specifying the URL at this point */
   struct UrlData *data;
@@ -206,8 +191,6 @@ CURLcode curl_open(CURL **curl, char *url)
   data = (struct UrlData *)malloc(sizeof(struct UrlData));
   if(data) {
     memset(data, 0, sizeof(struct UrlData));
-    data->handle = STRUCT_OPEN;
-    data->interf = CURLI_NORMAL; /* normal interface by default */
 
     /* We do some initial setup here, all those fields that can't be just 0 */
 
@@ -258,7 +241,7 @@ CURLcode curl_open(CURL **curl, char *url)
   return CURLE_OUT_OF_MEMORY;
 }
 
-CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
+CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
 {
   struct UrlData *data = curl;
   va_list param;
@@ -510,10 +493,8 @@ RETSIGTYPE alarmfunc(int signal)
 }
 #endif
 
-CURLcode curl_disconnect(CURLconnect *c_connect)
+CURLcode Curl_disconnect(struct connectdata *conn)
 {
-  struct connectdata *conn = c_connect;
-
   if(conn->curl_disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->curl_disconnect(conn);
@@ -570,6 +551,9 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
   if(conn->allocptr.host)
     free(conn->allocptr.host);
 
+  if(conn->proxyhost)
+    free(conn->proxyhost);
+
   free(conn); /* free all the connection oriented data */
 
   return CURLE_OK;
@@ -623,30 +607,42 @@ ConnectionExists(struct UrlData *data,
     if(!check)
       /* NULL pointer means not filled-in entry */
       continue;
-    if(strequal(needle->protostr, check->protostr) &&
-       strequal(needle->name, check->name) &&
-       (needle->port == check->port) ) {
-      if(strequal(needle->protostr, "FTP")) {
-        /* This is FTP, verify that we're using the same name and
-           password as well */
-        if(!strequal(needle->data->user, check->proto.ftp->user) ||
-           !strequal(needle->data->passwd, check->proto.ftp->passwd)) {
-          /* one of them was different */
-          continue;
-        }
-      }
-      {
+    if(!needle->bits.httpproxy) {
+      /* The requested connection does not use a HTTP proxy */
+
+      if(strequal(needle->protostr, check->protostr) &&
+         strequal(needle->name, check->name) &&
+         (needle->port == check->port) ) {
         bool dead;
+        if(strequal(needle->protostr, "FTP")) {
+          /* This is FTP, verify that we're using the same name and
+             password as well */
+          if(!strequal(needle->data->user, check->proto.ftp->user) ||
+             !strequal(needle->data->passwd, check->proto.ftp->passwd)) {
+            /* one of them was different */
+            continue;
+          }
+        }
         dead = SocketIsDead(check->firstsocket);
         if(dead) {
           infof(data, "Connection %d seems to be dead!\n", i);
-          curl_disconnect(check); /* disconnect resources */
+          Curl_disconnect(check); /* disconnect resources */
           data->connects[i]=NULL; /* nothing here */
           continue; /* try another one now */
         }
       }
       *usethis = check;
       return TRUE; /* yes, we found one to use! */
+    }
+    else { /* The requested needle connection is using a proxy,
+              is the checked one using the same? */
+      if(check->bits.httpproxy &&
+         strequal(needle->proxyhost, check->proxyhost) &&
+         needle->port == check->port) {
+        /* This is the same proxy connection, use it! */
+        *usethis = check;
+        return TRUE;
+      }
     }
   }
   return FALSE; /* no matching connecting exists */
@@ -690,7 +686,7 @@ ConnectionKillOne(struct UrlData *data)
   if(connindex >= 0) {
 
     /* the winner gets the honour of being disconnected */
-    result = curl_disconnect(data->connects[connindex]);
+    result = Curl_disconnect(data->connects[connindex]);
 
     /* clean the array entry */
     data->connects[connindex] = NULL;
@@ -811,7 +807,7 @@ static CURLcode ConnectPlease(struct UrlData *data,
 	
           size = sizeof(add);
           if(getsockname(conn->firstsocket, (struct sockaddr *) &add,
-                         (int *)&size)<0) {
+                         (socklen_t *)&size)<0) {
             failf(data, "getsockname() failed");
             return CURLE_HTTP_PORT_FAILED;
           }
@@ -945,15 +941,14 @@ static CURLcode ConnectPlease(struct UrlData *data,
   return CURLE_OK;
 }
 
-static CURLcode _connect(CURL *curl,
-                         CURLconnect **in_connect,
-                         bool allow_port) /* allow data->use_port ? */
+static CURLcode Connect(struct UrlData *data,
+                        struct connectdata **in_connect,
+                        bool allow_port) /* allow data->use_port ? */
 {
   char *tmp;
   char *buf;
   CURLcode result;
   char resumerange[40]="";
-  struct UrlData *data = curl;
   struct connectdata *conn;
   struct connectdata *conn_temp;
   char endbracket;
@@ -965,9 +960,6 @@ static CURLcode _connect(CURL *curl,
   /*************************************************************
    * Check input data
    *************************************************************/
-
-  if(!data || (data->handle != STRUCT_OPEN))
-    return CURLE_BAD_FUNCTION_ARGUMENT; /* TBD: make error codes */
 
   if(!data->url)
     return CURLE_URL_MALFORMAT;
@@ -991,13 +983,12 @@ static CURLcode _connect(CURL *curl,
   memset(conn, 0, sizeof(struct connectdata));
 
   /* and we setup a few fields in case we end up actually using this struct */
-  conn->handle = STRUCT_CONNECT; /* this is a connection handle */
   conn->data = data;           /* remember our daddy */
-  conn->state = CONN_INIT;     /* init state */
   conn->upload_bufsize = UPLOAD_BUFSIZE; /* default upload buffer size */
   conn->firstsocket = -1;     /* no file descriptor */
   conn->secondarysocket = -1; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
+  conn->bits.httpproxy = data->bits.httpproxy; /* proxy-or-not status */
 
   /* Default protocol-indepent behaveiour doesn't support persistant
      connections, so we set this to force-close. Protocols that support
@@ -1567,67 +1558,11 @@ static CURLcode _connect(CURL *curl,
     conn->remote_port = atoi(tmp);
   }
 
-  /*************************************************************
-   * Check the current list of connections to see if we can
-   * re-use an already existing one or if we have to create a
-   * new one.
-   *************************************************************/
+  if(data->bits.httpproxy) {
+    /* If this is supposed to use a proxy, we need to figure out the proxy
+       host name name, so that we can re-use an existing connection
+       that may exist registered to the same proxy host. */
 
-  if(ConnectionExists(data, conn, &conn_temp)) {
-    /*
-     * We already have a connection for this, we got the former connection
-     * in the conn_temp variable and thus we need to cleanup the one we
-     * just allocated before we can move along and use the previously
-     * existing one.
-     */
-    char *path = conn->path; /* setup the current path pointer properly */
-    free(conn);              /* we don't need this new one */
-    conn = conn_temp;        /* use this connection from now on */
-    free(conn->path);        /* free the previous path pointer */
-    conn->path = path;       /* use this one */
-    conn->ppath = path;      /* set this too */
-
-    /* re-use init */
-    conn->maxdownload = 0;   /* might have been used previously! */
-    conn->bits.reuse = TRUE; /* yes, we're re-using here */
-
-    infof(data, "Re-using existing connection! (#%d)\n", conn->connectindex);
-  }
-  else {
-    /*
-     * This is a brand new connection, so let's store it in the connection
-     * cache of ours!
-     */
-    ConnectionStore(data, conn);
-  }
-
-  /*************************************************************
-   * Resolve the name of the server or proxy
-   *************************************************************/
-  if(!data->bits.httpproxy) {
-    /* If not connecting via a proxy, extract the port from the URL, if it is
-     * there, thus overriding any defaults that might have been set above. */
-    conn->port =  conn->remote_port; /* it is the same port */
-
-    /* Resolve target host right on */
-    if(!conn->hp) {
-#ifdef ENABLE_IPV6
-      /* it might already be set if reusing a connection */
-      conn->hp = Curl_getaddrinfo(data, conn->name, conn->port);
-#else
-      /* it might already be set if reusing a connection */
-      conn->hp = Curl_gethost(data, conn->name, &conn->hostent_buf);
-#endif
-    }
-    if(!conn->hp)
-    {
-      failf(data, "Couldn't resolve host '%s'", conn->name);
-      return CURLE_COULDNT_RESOLVE_HOST;
-    }
-  }
-  else if(!conn->hp) {
-    /* This is a proxy that hasn't been resolved yet. It may be resolved
-       if we're reusing an existing connection. */
 #ifdef ENABLE_IPV6
     failf(data, "proxy yet to be supported");
     return CURLE_OUT_OF_MEMORY;
@@ -1672,15 +1607,85 @@ static CURLcode _connect(CURL *curl,
       conn->port = data->proxyport;
     }
 
-    /* resolve proxy */
-    conn->hp = Curl_gethost(data, proxyptr, &conn->hostent_buf);
-    if(!conn->hp) {
-      failf(data, "Couldn't resolve proxy '%s'", proxyptr);
-      return CURLE_COULDNT_RESOLVE_PROXY;
-    }
+    /* now, clone the cleaned proxy host name */
+    conn->proxyhost = strdup(proxyptr);
 
     free(proxydup); /* free the duplicate pointer and not the modified */
+#endif /* end of IPv4-section */
+  }
+
+  /*************************************************************
+   * Check the current list of connections to see if we can
+   * re-use an already existing one or if we have to create a
+   * new one.
+   *************************************************************/
+
+  if(ConnectionExists(data, conn, &conn_temp)) {
+    /*
+     * We already have a connection for this, we got the former connection
+     * in the conn_temp variable and thus we need to cleanup the one we
+     * just allocated before we can move along and use the previously
+     * existing one.
+     */
+    char *path = conn->path; /* setup the current path pointer properly */
+    if(conn->proxyhost)
+      free(conn->proxyhost);
+    free(conn);              /* we don't need this new one */
+    conn = conn_temp;        /* use this connection from now on */
+    free(conn->path);        /* free the previous path pointer */
+    conn->path = path;       /* use this one */
+    conn->ppath = path;      /* set this too */
+
+    /* re-use init */
+    conn->maxdownload = 0;   /* might have been used previously! */
+    conn->bits.reuse = TRUE; /* yes, we're re-using here */
+
+    *in_connect = conn;      /* return this instead! */
+
+    infof(data, "Re-using existing connection! (#%d)\n", conn->connectindex);
+  }
+  else {
+    /*
+     * This is a brand new connection, so let's store it in the connection
+     * cache of ours!
+     */
+    ConnectionStore(data, conn);
+  }
+
+  /*************************************************************
+   * Resolve the name of the server or proxy
+   *************************************************************/
+  if(!data->bits.httpproxy) {
+    /* If not connecting via a proxy, extract the port from the URL, if it is
+     * there, thus overriding any defaults that might have been set above. */
+    conn->port =  conn->remote_port; /* it is the same port */
+
+    /* Resolve target host right on */
+    if(!conn->hp) {
+#ifdef ENABLE_IPV6
+      /* it might already be set if reusing a connection */
+      conn->hp = Curl_getaddrinfo(data, conn->name, conn->port);
+#else
+      /* it might already be set if reusing a connection */
+      conn->hp = Curl_gethost(data, conn->name, &conn->hostent_buf);
 #endif
+    }
+    if(!conn->hp)
+    {
+      failf(data, "Couldn't resolve host '%s'", conn->name);
+      return CURLE_COULDNT_RESOLVE_HOST;
+    }
+  }
+  else if(!conn->hp) {
+    /* This is a proxy that hasn't been resolved yet. It may be resolved
+       if we're reusing an existing connection. */
+
+    /* resolve proxy */
+    conn->hp = Curl_gethost(data, conn->proxyhost, &conn->hostent_buf);
+    if(!conn->hp) {
+      failf(data, "Couldn't resolve proxy '%s'", conn->proxyhost);
+      return CURLE_COULDNT_RESOLVE_PROXY;
+    }
   }
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
@@ -1784,25 +1789,24 @@ static CURLcode _connect(CURL *curl,
   return CURLE_OK;
 }
 
-CURLcode curl_connect(CURL *curl, CURLconnect **in_connect,
+CURLcode Curl_connect(struct UrlData *data,
+                      struct connectdata **in_connect,
                       bool allow_port)
 {
   CURLcode code;
   struct connectdata *conn;
 
   /* call the stuff that needs to be called */
-  code = _connect(curl, in_connect, allow_port);
+  code = Connect(data, in_connect, allow_port);
 
   if(CURLE_OK != code) {
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
     conn = (struct connectdata *)*in_connect;
     if(conn) {
-      struct UrlData *data;
       int index;
-      data = conn->data;
       index = conn->connectindex; /* get the index */
-      curl_disconnect(conn);      /* close the connection */
+      Curl_disconnect(conn);      /* close the connection */
       data->connects[index]=NULL; /* clear the pointer */
     }
   }
@@ -1810,41 +1814,12 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect,
 }
 
 
-/*
- * NAME curl_connect()
- *
- * DESCRIPTION
- *
- * Connects to the peer server and performs the initial setup. This function
- * writes a connect handle to its second argument that is a unique handle for
- * this connect. This allows multiple connects from the same handle returned
- * by curl_open().
- *
- * EXAMPLE
- *
- * CURLCode result;
- * CURL curl;
- * CURLconnect connect;
- * result = curl_connect(curl, &connect);
- */
-
-
-
-
-CURLcode curl_done(CURLconnect *c_connect)
+CURLcode Curl_done(struct connectdata *conn)
 {
-  struct connectdata *conn = c_connect;
   struct UrlData *data;
   CURLcode result;
   int index;
 
-  if(!conn || (conn->handle!= STRUCT_CONNECT)) {
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
-  if(conn->state != CONN_DO) {
-    /* This can only be called after a curl_do() */
-    return CURLE_BAD_CALLING_ORDER;
-  }
   data = conn->data;
 
   /* this calls the protocol-specific function pointer previously set */
@@ -1855,48 +1830,25 @@ CURLcode curl_done(CURLconnect *c_connect)
 
   Curl_pgrsDone(data); /* done with the operation */
 
-  conn->state = CONN_DONE;
-
   /* if bits.close is TRUE, it means that the connection should be closed
      in spite of all our efforts to be nice */
   if((CURLE_OK == result) && conn->bits.close) {
     index = conn->connectindex;     /* get the index */
-    result = curl_disconnect(conn); /* close the connection */
+    result = Curl_disconnect(conn); /* close the connection */
     data->connects[index]=NULL;     /* clear the pointer */
   }
 
   return result;
 }
 
-CURLcode curl_do(CURLconnect *in_conn)
+CURLcode Curl_do(struct connectdata *conn)
 {
-  struct connectdata *conn = in_conn;
-  CURLcode result;
+  CURLcode result=CURLE_OK;
 
-  if(!conn || (conn->handle!= STRUCT_CONNECT)) {
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  }
-  switch(conn->state) {
-  case CONN_INIT:
-  case CONN_DONE:
-    /* these two states are OK */
-    break;
-  default:
-    /* anything else is bad */
-    return CURLE_BAD_CALLING_ORDER;
-  }
-
-  if(conn->curl_do) {
+  if(conn->curl_do)
     /* generic protocol-specific function pointer set in curl_connect() */
     result = conn->curl_do(conn);
-    if(result) {
-      conn->state = CONN_ERROR;
-      return result;
-    }
-  }
 
-  conn->state = CONN_DO; /* we have entered this state */
-
-  return CURLE_OK;
+  return result;
 }
 
