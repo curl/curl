@@ -1034,7 +1034,7 @@ typedef enum {
   PARAM_BAD_USE,
   PARAM_HELP_REQUESTED,
   PARAM_GOT_EXTRA_PARAMETER,
-
+  PARAM_BAD_NUMERIC,
   PARAM_LAST
 } ParameterError;
 
@@ -1051,6 +1051,23 @@ static void cleanarg(char *str)
 #else
   (void)str;
 #endif
+}
+
+/*
+ * Parse the string and write the integer in the given address. Return
+ * non-zero on failure, zero on success.
+ *
+ * The string must start with a digit to be valid.
+ */
+
+static int str2num(int *val, char *str)
+{
+  int retcode = 0;
+  if(isdigit((int)*str))
+    *val = atoi(str);
+  else
+    retcode = 1; /* badness */
+  return retcode;  
 }
 
 static void checkpasswd(const char *kind, /* for what purpose */
@@ -1296,7 +1313,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->egd_file, nextarg);
         break;
       case 'c': /* connect-timeout */
-        config->connecttimeout=atoi(nextarg);
+        if(str2num(&config->connecttimeout, nextarg))
+          return PARAM_BAD_NUMERIC;
         break;
       case 'd': /* ciphers */
         GetStr(&config->cipher_list, nextarg);
@@ -1379,7 +1397,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
       case 's': /* --max-redirs */
         /* specified max no of redirects (http(s)) */
-        config->maxredirs = atoi(nextarg);
+        if(str2num(&config->maxredirs, nextarg))
+          return PARAM_BAD_NUMERIC;
         break;
 
       case 't': /* --proxy-ntlm */
@@ -1408,7 +1427,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->krb4level, nextarg);
         break;
       case 'y': /* --max-filesize */
-        config->max_filesize = atoi(nextarg);
+        if(str2num(&config->max_filesize, nextarg))
+          return PARAM_BAD_NUMERIC;
         break;
       case 'z': /* --disable-eprt */
         config->disable_eprt ^= TRUE;
@@ -1499,7 +1519,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case 'C':
       /* This makes us continue an ftp transfer at given position */
       if(!curl_strequal(nextarg, "-")) {
-        config->resume_from= atoi(nextarg);
+        if(str2num(&config->resume_from, nextarg))
+          return PARAM_BAD_NUMERIC;
         config->resume_from_current = FALSE;
       }
       else {
@@ -1706,7 +1727,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'm':
       /* specified max time */
-      config->timeout = atoi(nextarg);
+      if(str2num(&config->timeout, nextarg))
+        return PARAM_BAD_NUMERIC;
       break;
     case 'M': /* M for manual, huge help */
       hugehelp();
@@ -1928,13 +1950,15 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'y':
       /* low speed time */
-      config->low_speed_time = atoi(nextarg);
+      if(str2num(&config->low_speed_time, nextarg))
+        return PARAM_BAD_NUMERIC;
       if(!config->low_speed_limit)
 	config->low_speed_limit = 1;
       break;
     case 'Y':
       /* low speed limit */
-      config->low_speed_limit = atoi(nextarg);
+      if(str2num(&config->low_speed_limit, nextarg))
+        return PARAM_BAD_NUMERIC;
       if(!config->low_speed_time)
 	config->low_speed_time=30;
       break;
@@ -2140,6 +2164,9 @@ static int parseconfig(const char *filename,
             break;
           case PARAM_BAD_USE:
             reason = "is badly used here";
+            break;
+          case PARAM_BAD_NUMERIC:
+            reason = "expected a proper numerical parameter";
             break;
           }
           fprintf(stderr, "%s:%d: warning: '%s' %s\n",
@@ -2669,6 +2696,10 @@ operate(struct Configurable *config, int argc, char *argv[])
             break;
           case PARAM_BAD_USE:
             helpf("option %s was wrongly used!\n", origopt);
+            break;
+          case PARAM_BAD_NUMERIC:
+            helpf("option %s expected a proper numerical parameter\n",
+                  origopt);
             break;
           case PARAM_HELP_REQUESTED:
             /* no text */
