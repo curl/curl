@@ -7,6 +7,29 @@
                                History of Changes
 
 
+Daniel (14 January 2002)
+- I made all socket reads (recv) handle EWOULDBLOCK. I hope nicely. Now we
+  only need to address all writes (send) too and then I'm ready for another
+  pre-release...
+
+- Stoned Elipot patched the in_addr_t configure test to make it work better on
+  more platforms.
+
+Daniel (9 January 2002)
+- Cris Bailiff found out that filling up curl's SSL session cache caused a
+  crash!
+
+- Posted the curl questionnaire on the web site. If you haven't posted your
+  opinions there yet, go there and do it now while it is still there:
+
+        http://curl.haxx.se/q/
+
+- Georg Horn quickly found out that the SSL reading no longer worked as
+  supposed since the switch to non-blocking sockets. I've made a quick patch
+  (for reading only) but we should improve it even further.
+
+Version 7.9.3-pre1
+
 Daniel (7 January 2002)
 - I made the 'bool' typedef use an "unsigned char". It makes it the same on
   all platforms, no matter what the platform thinks the default format for
