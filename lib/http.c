@@ -1614,8 +1614,8 @@ CURLcode Curl_http(struct connectdata *conn)
             /* Append the POST data chunky-style */
             add_bufferf(req_buffer, "%x\r\n", postsize);
             add_buffer(req_buffer, data->set.postfields, postsize);
-            add_buffer(req_buffer, "\r\n0\r\n", 5); /* end of a chunked
-                                                       transfer stream */
+            add_buffer(req_buffer, "\r\n0\r\n\r\n", 7); /* end of a chunked
+                                                           transfer stream */
           }
         }
         else {
