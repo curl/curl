@@ -449,10 +449,9 @@ char *glob_match_url(char *filename, URLGlob *glob)
 
   while (*filename) {
     if (*filename == '#' && isdigit((int)filename[1])) {
-      /* only '#1' ... '#9' allowed */
       unsigned long i;
+      char *ptr = filename;
       unsigned long num = strtoul(&filename[1], &filename, 10);
-
       i = num-1;
 
       if (num && (i <= glob->size / 2)) {
@@ -481,6 +480,12 @@ char *glob_match_url(char *filename, URLGlob *glob)
           free(target);
           return NULL;
         }
+      }
+      else {
+        /* #[num] out of range, use the #[num] in the output */
+        filename = ptr;
+        appendthis=filename++;
+        appendlen=1;
       }
     }
     else {
