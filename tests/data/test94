@@ -17,6 +17,9 @@ bing
 <server>
 http
 </server>
+<features>
+SSL
+</features>
  <name>
 HTTPS GET with failed proxy auth
  </name>
