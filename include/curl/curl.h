@@ -197,8 +197,10 @@ typedef enum {
   CURLE_SEND_ERROR,              /* 55 - failed sending network data */
   CURLE_RECV_ERROR,              /* 56 - failure in receiving network data */
   CURLE_SHARE_IN_USE,            /* 57 - share is in use */
-  CURLE_SSL_INSECURE,            /* 58 - connect attempt without certificate
-                                    but SSL_INSECURE not explicitly allowed */
+  CURLE_SSL_CERTPROBLEM,         /* 58 - problem with the local certificate */
+  CURLE_SSL_CIPHER,              /* 59 - couldn't use specified cipher */
+  CURLE_SSL_CACERT,              /* 60 - problem with the CA cert (path?) */
+
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -579,12 +581,9 @@ typedef enum {
   /* Provide a CURLShare for mutexing non-ts data */
   CINIT(SHARE, OBJECTPOINT, 100),
 
-  /* Explicitly allow insecure SSL connects */
-  CINIT(SSL_INSECURE, LONG, 101),
-
   /* indicates type of proxy. accepted values are CURLPROXY_HTTP (default),
      CURLPROXY_SOCKS4 and CURLPROXY_SOCKS5. */
-  CINIT(PROXYTYPE, LONG, 102), 
+  CINIT(PROXYTYPE, LONG, 101),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -111,6 +111,7 @@
 #include "ldap.h"
 #include "url.h"
 #include "connect.h"
+#include "ca-bundle.h"
 
 #include <curl/types.h>
 
@@ -293,12 +294,23 @@ CURLcode Curl_open(struct SessionHandle **curl)
     free(data);
     return CURLE_OUT_OF_MEMORY;
   }
-  
+
+  /*
+   * libcurl 7.10 introduces SSL verification *by default*! This needs to be
+   * switched off unless wanted.
+   */
+  data->set.ssl.verifypeer = TRUE;
+  data->set.ssl.verifyhost = 2;
+#ifdef CURL_CA_BUNDLE
+  /* This is our prefered CA cert bundle since install time */
+  data->set.ssl.CAfile = CURL_CA_BUNDLE;
+#endif
+
+
   memset(data->state.connects, 0,
          sizeof(struct connectdata *)*data->state.numconnects);
 
   *curl = data;
-
   return CURLE_OK;
 }
 
@@ -1049,10 +1061,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
       data->share = set;
       data->share->dirty++;
     }
-    break;
-
-  case CURLOPT_SSL_INSECURE:
-    data->set.ssl.allow_insecure = va_arg(param, long)?TRUE:FALSE;
     break;
 
   case CURLOPT_PROXYTYPE:
@@ -2246,17 +2254,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     failf(data, "Unsupported protocol: %s", conn->protostr);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
-
-  if(conn->protocol & PROT_SSL) {
-    /* If SSL is requested, require security level info */
-
-    if(!data->set.ssl.allow_insecure &&
-       !(data->set.ssl.CAfile || data->set.ssl.CApath)) {
-      failf(data, "Insecure SSL connect attempted without explicit permission granted");
-      return CURLE_SSL_INSECURE;
-    }
-  }
-
 
   /*************************************************************
    * Figure out the remote port number

@@ -722,7 +722,7 @@ Curl_SSLConnect(struct connectdata *conn)
                     data->set.key,
                     data->set.key_type)) {
       /* failf() is already done in cert_stuff() */
-      return CURLE_SSL_CONNECT_ERROR;
+      return CURLE_SSL_CERTPROBLEM;
     }
   }
 
@@ -730,7 +730,7 @@ Curl_SSLConnect(struct connectdata *conn)
     if (!SSL_CTX_set_cipher_list(conn->ssl.ctx,
                                  data->set.ssl.cipher_list)) {
       failf(data, "failed setting cipher list");
-      return CURLE_SSL_CONNECT_ERROR;
+      return CURLE_SSL_CIPHER;
     }
   }
 
@@ -743,7 +743,7 @@ Curl_SSLConnect(struct connectdata *conn)
                                        data->set.ssl.CAfile,
                                        data->set.ssl.CApath)) {
       failf(data,"error setting cerficate verify locations");
-      return CURLE_SSL_CONNECT_ERROR;
+      return CURLE_SSL_CACERT;
     }
   }
   else

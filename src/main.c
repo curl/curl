@@ -2721,13 +2721,21 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_SSLKEYPASSWD, config->key_passwd);
 
       if(config->cacert || config->capath) {
-        if (config->cacert) curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);
-        if (config->capath) curl_easy_setopt(curl, CURLOPT_CAPATH, config->capath);
+        if (config->cacert)
+          curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);
+
+        if (config->capath)
+          curl_easy_setopt(curl, CURLOPT_CAPATH, config->capath);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
       }
-      else
+      else {
+        if(config->insecure_ok)
+          /* new stuff needed for libcurl 7.10 */
+          curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
+      }
       
       if((config->conf&CONF_NOBODY) ||
          config->remote_time) {
@@ -2798,9 +2806,6 @@ operate(struct Configurable *config, int argc, char *argv[])
       }
       curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
 
-      /* new in curl 7.10 */
-      curl_easy_setopt(curl, CURLOPT_SSL_INSECURE, config->insecure_ok);
-      
       res = curl_easy_perform(curl);
         
       if((config->progressmode == CURL_PROGRESS_BAR) &&
@@ -2823,28 +2828,8 @@ operate(struct Configurable *config, int argc, char *argv[])
         vms_show = VMSSTS_HIDE;
       }
 #else
-      if((res!=CURLE_OK) && config->showerror) {
-        switch(res) {
-        case CURLE_SSL_INSECURE:
-          /* Since this breaks how curl used to work, we need a slightly more
-             verbose and descriptive error here to educate people what is
-             happening and what to do to make it work. At least for a
-             while. */
-          fprintf(config->errors, "curl: (%d) %s\n%s", res,
-                  errorbuffer,
-                  "      Since SSL doesn't offer any true security if you don't use a CA\n"
-                  "      certificate to verify the peer certificate with, you must either\n"
-                  "      provide one to make sure that the server really is the server you\n"
-                  "      think it is, or you must explicitly tell curl that insecure SSL\n"
-                  "      connects are fine.\n"
-                  "      Allow insecure SSL operations with -k/--insecure\n"
-                  );
-          break;
-        default:
-          fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
-          break;
-        }
-      }
+      if((res!=CURLE_OK) && config->showerror)
+        fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
 #endif
 
       if (outfile && !strequal(outfile, "-") && outs.stream)

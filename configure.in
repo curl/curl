@@ -710,7 +710,7 @@ if test "x$ca" = "xno"; then
   dnl let's not keep "no" as path name, blank it instead
   ca=""
 else
-  AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE, $ca, [CA bundle full path name])
+  AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE, "$ca", [CA bundle full path name])
 fi
 
 CURL_CA_BUNDLE="$ca"

@@ -144,8 +144,6 @@ struct ssl_config_data {
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
-  bool allow_insecure;   /* allow connects without any CA certificate */
-
   long numsessions;      /* SSL session id cache size */
 };
 

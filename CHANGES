@@ -6,15 +6,24 @@
 
                                   Changelog
 
+Daniel (30 Aug 2002)
+- Applied an anonymous SOCKS5-proxy patch. Not properly working in all
+  situations though, as all getaddrinfo()-using libcurls will fail on this.
+
+- Fixed up the SSL cert fixes from the other day even more after more inputs
+  from Cris. Added three new error codes to make the CURLE_SSL_CONNECT_ERROR
+  slightly less overloaded.
+
 Daniel (27 Aug 2002)
 - After lots of talk with Tom Zerucha, Nick Gimbrone and Cris Bailiff I
-  decided to talk the bold path and I now introduced the CURLOPT_SSL_INSECURE
-  option that needs to be set to TRUE to allow libcurl to connect to SSL sites
-  without using a CA certificate to verify it with.
+  decided to talk the bold path and I now made libcurl do CA certificate
+  verification by default. Thus library users need to explicitly turn this off
+  if you want to connect to sites without proper checking. We also install a
+  CA cert bundle on 'make install' now.
 
-  The curl tool similarly requires the -k/--insecure optin in order to allow
+  The curl tool now requires the -k/--insecure option in order to allow
   connections and operations on SSL sites that aren't properly verified with
-  -cafile or --capath
+  -cafile or --capath.
 
 Daniel (26 Aug 2002)
 - Andrew Francis cleaned up some code that now compiles fine without the need
