@@ -183,7 +183,8 @@ static void end_squery(struct search_query *squery, int status,
 /* Concatenate two domains. */
 static int cat_domain(const char *name, const char *domain, char **s)
 {
-  int nlen = strlen(name), dlen = strlen(domain);
+  size_t nlen = strlen(name);
+  size_t dlen = strlen(domain);
 
   *s = malloc(nlen + 1 + dlen + 1);
   if (!*s)
@@ -201,7 +202,7 @@ static int cat_domain(const char *name, const char *domain, char **s)
  */
 static int single_domain(ares_channel channel, const char *name, char **s)
 {
-  int len = strlen(name);
+  size_t len = strlen(name);
   const char *hostaliases;
   FILE *fp;
   char *line = NULL;
