@@ -94,11 +94,12 @@
 /* Emulate a connect-then-transfer protocol. We connect to the file here */
 CURLcode Curl_file_connect(struct connectdata *conn)
 {
-  char *actual_path = curl_unescape(conn->path, 0);
+  char *real_path = curl_unescape(conn->path, 0);
   struct FILE *file;
   int fd;
 #if defined(WIN32) || defined(__EMX__)
   int i;
+  char *actual_path;
 #endif
 
   file = (struct FILE *)malloc(sizeof(struct FILE));
@@ -109,6 +110,28 @@ CURLcode Curl_file_connect(struct connectdata *conn)
   conn->proto.file = file;
 
 #if defined(WIN32) || defined(__EMX__)
+  /* If the first character is a slash, and there's
+     something that looks like a drive at the beginning of
+     the path, skip the slash.  If we remove the initial
+     slash in all cases, paths without drive letters end up
+     relative to the current directory which isn't how
+     browsers work.
+
+     Some browsers accept | instead of : as the drive letter
+     separator, so we do too.
+
+     On other platforms, we need the slash to indicate an
+     absolute pathname.  On Windows, absolute paths start
+     with a drive letter.
+  */
+  actual_path = real_path;
+  if (*actual_path == '/' &&
+      (actual_path[2] == ':' || actual_path[2] == '|'))
+  {
+    actual_path[2] = ':';
+    actual_path++;
+  }
+
   /* change path separators from '/' to '\\' for Windows and OS/2 */
   for (i=0; actual_path[i] != '\0'; ++i)
     if (actual_path[i] == '/')
@@ -116,9 +139,9 @@ CURLcode Curl_file_connect(struct connectdata *conn)
 
   fd = open(actual_path, O_RDONLY | O_BINARY);	/* no CR/LF translation! */
 #else
-  fd = open(actual_path, O_RDONLY);
+  fd = open(real_path, O_RDONLY);
 #endif
-  free(actual_path);
+  free(real_path);
 
   if(fd == -1) {
     failf(conn->data, "Couldn't open file %s", conn->path);
