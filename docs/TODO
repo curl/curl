@@ -25,6 +25,10 @@ To do for the 7.8 release:
 
 To do in a future release:
 
+ * Add configure options that disables certain protocols in libcurl to
+   decrease footprint.  '--disable-[protocol]' where protocol is http, ftp,
+   telnet, ldap, dict or file.
+
  * Extend the test suite to include telnet and https. The telnet could just do
    ftp or http operations (for which we have test servers) and the https would
    probably work against/with some of the openssl tools.
