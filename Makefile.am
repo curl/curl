@@ -10,6 +10,10 @@ EXTRA_DIST = \
 
 SUBDIRS = docs lib src include tests packages
 
+# create a root makefile in the distribution:
+dist-hook:
+	cp Makefile.dist $(distdir)/Makefile
+
 test:
 	@(cd tests; make quiet-test)
 

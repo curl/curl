@@ -1,4 +1,6 @@
-EXTRA_DIST = data ftpserver.pl httpserver.pl runtests.pl
+EXTRA_DIST = ftpserver.pl httpserver.pl runtests.pl
+
+SUBDIRS = data
 
 all:
 install:

@@ -615,6 +615,7 @@ AC_OUTPUT( Makefile \
 	   src/Makefile \
            lib/Makefile \
            tests/Makefile \
+           tests/data/Makefile \
 	   packages/Makefile \
 	   packages/Win32/Makefile \
 	   packages/Linux/Makefile \
