@@ -40,11 +40,14 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 UrgError 
-Download (struct UrlData *data,
-	  int sockfd,		/* socket to read from */
+Transfer (struct UrlData *data,
+	  int sockfd,		/* socket to read from or -1 */
 	  int size,		/* -1 if unknown at this point */
 	  bool getheader,	/* TRUE if header parsing is wanted */
-	  long *bytecountp	/* return number of bytes read */
+	  long *bytecountp,	/* return number of bytes read */
+          int writesockfd,      /* socket to write to, it may very well be
+                                   the same we read from. -1 disables */
+          long *writebytecountp /* return number of bytes written */
 );
 
 #endif
