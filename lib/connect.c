@@ -72,6 +72,16 @@
 #include "memdebug.h"
 #endif
 
+static
+int geterrno(void)
+{
+#ifdef WIN32
+  return (int)GetLastError();
+#else
+  return errno;
+#endif
+}
+
 /*************************************************************************
  * Curl_nonblock
  *
@@ -300,6 +310,19 @@ static CURLcode bindlocal(struct connectdata *conn,
 }
 #endif /* end of ipv4-specific section */
 
+static
+int socketerror(int sockfd)
+{
+  int err = 0;
+  socklen_t errSize = sizeof(err);
+
+  if( -1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR,
+                       (void *)&err, &errSize))
+    err = geterrno();
+  
+  return err;
+}
+
 /*
  * TCP connect to the given host with timeout, proxy or remote doesn't matter.
  * There might be more than one IP address to try out. Fill in the passed
@@ -355,6 +378,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
    */
   {
     struct addrinfo *ai;
+    port =0; /* prevent compiler warning */
 
     for (ai = remotehost; ai; ai = ai->ai_next, aliasindex++) {
       sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
@@ -367,12 +391,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       rc = connect(sockfd, ai->ai_addr, ai->ai_addrlen);
 
       if(-1 == rc) {
-        int error;
-#ifdef WIN32
-        error = (int)GetLastError();
-#else
-        error = errno;
-#endif
+        int error=geterrno();
+
         switch (error) {
         case EINPROGRESS:
         case EWOULDBLOCK:
@@ -391,29 +411,35 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         case ECONNREFUSED: /* no one listening */
         default:
           /* unknown error, fallthrough and try another address! */
-          failf(data, "Failed to connect to IP number %d", aliasindex+1);
+          failf(data, "Failed to connect");
           break;
         }
       }
-      if(0 == rc)
-        /* direct connect, awesome! */
-        break;
+      if(0 == rc) {
+        /* we might be connected, if the socket says it is OK! Ask it! */
+        int err;
 
-      else {
-        /* connect failed or timed out */
-        sclose(sockfd);
-        sockfd = -1;
-
-        /* get a new timeout for next attempt */
-        after = Curl_tvnow();
-        timeout_ms -= (long)(Curl_tvdiff(after, before)*1000);
-        if(timeout_ms < 0) {
-          failf(data, "connect() timed out!");
-          return CURLE_OPERATION_TIMEOUTED;
-        }
-        before = after;
-        continue;
+        err = socketerror(sockfd);
+        if ((0 == err) || (EISCONN == err)) {
+          /* we are connected, awesome! */
+          break;
+	}
+        /* we are _not_ connected, it was a false alert, continue please */
       }
+
+      /* connect failed or timed out */
+      sclose(sockfd);
+      sockfd = -1;
+
+      /* get a new timeout for next attempt */
+      after = Curl_tvnow();
+      timeout_ms -= (long)(Curl_tvdiff(after, before)*1000);
+      if(timeout_ms < 0) {
+        failf(data, "connect() timed out!");
+        return CURLE_OPERATION_TIMEOUTED;
+      }
+      before = after;
+      continue;
     }
     if (sockfd < 0) {
       failf(data, "connect() failed");
@@ -466,12 +492,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                  sizeof(serv_addr));
 
     if(-1 == rc) {
-      int error;
-#ifdef WIN32
-      error = (int)GetLastError();
-#else
-      error = errno;
-#endif
+      int error=geterrno();
+
       switch (error) {
       case EINPROGRESS:
       case EWOULDBLOCK:
