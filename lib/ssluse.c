@@ -223,33 +223,13 @@ int cert_stuff(struct connectdata *conn,
       SSL_CTX_set_default_passwd_cb(conn->ssl.ctx, passwd_callback);
     }
 
-#if 0
-    if (SSL_CTX_use_certificate_file(conn->ssl.ctx,
-				     cert_file,
-				     SSL_FILETYPE_PEM) != 1) {
-      failf(data, "unable to set certificate file (wrong password?)");
-      return(0);
-    }
-    if (key_file == NULL)
-      key_file=cert_file;
-
-    if (SSL_CTX_use_PrivateKey_file(conn->ssl.ctx,
-				    key_file,
-				    SSL_FILETYPE_PEM) != 1) {
-      failf(data, "unable to set public key file");
-      return(0);
-    }
-#else
-    /* The '#ifdef 0' section above was removed on 17-dec-2001 */
-
     file_type = do_file_type(cert_type);
 
     switch(file_type) {
     case SSL_FILETYPE_PEM:
     case SSL_FILETYPE_ASN1:
-      if (SSL_CTX_use_certificate_file(conn->ssl.ctx,
-                                       cert_file,
-                                       file_type) != 1) {
+      if (SSL_CTX_use_certificate_chain_file(conn->ssl.ctx,
+                                             cert_file) != 1) {
         failf(data, "unable to set certificate file (wrong password?)");
         return 0;
       }
@@ -315,8 +295,6 @@ int cert_stuff(struct connectdata *conn,
       return 0;
     }
 
-#endif
-    
     ssl=SSL_new(conn->ssl.ctx);
     x509=SSL_get_certificate(ssl);
     
