@@ -206,6 +206,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   fd_set *readfdp = k->readfdp;
   fd_set *writefdp = k->writefdp;
+  long contentlength;
   
   if((k->keepon & KEEP_READ) && !readfdp) {
     /* reading is requested, but no socket descriptor pointer was set */
@@ -474,8 +475,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                      "Content-Length: 0" still prevents us from attempting to
                      read the (missing) response-body.
                   */
-                  if(-1 != conn->size)
+                  /* According to RFC2616 section 4.4, we MUST ignore
+                     Content-Length: headers if we are now receiving data
+                     using chunked Transfer-Encoding.
+                  */
+                  if(conn->bits.chunk)
+                    conn->size=-1;
+
+                  if(-1 != conn->size) {
+                    Curl_pgrsSetDownloadSize(data, conn->size);
                     conn->maxdownload = conn->size;
+                  }
                 }
                 /* If max download size is *zero* (nothing) we already
                    have nothing and can safely return ok now! */
@@ -590,14 +600,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                info about the true size of the document we didn't get now. */
             if ((k->httpcode != 416) &&
                 checkprefix("Content-Length:", k->p) &&
-                sscanf (k->p+15, " %ld", &k->contentlength)) {
-              if (data->set.max_filesize && k->contentlength > 
+                sscanf (k->p+15, " %ld", &contentlength)) {
+              if (data->set.max_filesize && contentlength > 
                   data->set.max_filesize) {
                 failf(data, "Maximum file size exceeded");
                 return CURLE_FILESIZE_EXCEEDED;
               }
-              conn->size = k->contentlength;
-              Curl_pgrsSetDownloadSize(data, k->contentlength);
+              conn->size = contentlength;
             }
             /* check for Content-Type: header lines to get the mime-type */
             else if (checkprefix("Content-Type:", k->p)) {
@@ -1215,11 +1224,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
      * returning.
      */
 
-    if(!(data->set.no_body) && k->contentlength &&
-       (k->bytecount != k->contentlength) &&
+    if(!(data->set.no_body) && (conn->size != -1) &&
+       (k->bytecount != conn->size) &&
        !conn->newurl) {
       failf(data, "transfer closed with %d bytes remaining to read",
-            k->contentlength-k->bytecount);
+            conn->size - k->bytecount);
       return CURLE_PARTIAL_FILE;
     }
     else if(conn->bits.chunk && conn->proto.http->chunk.datasize) {

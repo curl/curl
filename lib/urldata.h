@@ -306,7 +306,6 @@ struct ConnectBits {
 struct Curl_transfer_keeper {
   int bytecount;                /* total number of bytes read */
   int writebytecount;           /* number of bytes written */
-  long contentlength;           /* size of incoming data */
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
   bool header;	                /* incoming data has HTTP header */

@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (3 December)
+- swalkaus at yahoo.com patched libcurl to ignore Content-Length: headers
+  when Tranfer-Encoding: chunked is used, as mandated by RFC2616.
+
 Daniel (2 December)
 - --ftp-pasv was added, which serves the only purpose of overriding a
   previously set --ftpport option. Starting now, --ftp-port is a recognized
