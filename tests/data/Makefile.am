@@ -4,7 +4,7 @@ install:
 test:
 	[ -f command1.txt ] || ln -s $(srcdir)/*.txt .
 
-EXTRA_DIST = command1.txt      error113.txt      name17.txt        prot8.txt \
+EXTRA_DIST = command1.txt error113.txt name17.txt prot8.txt \
 command10.txt  error114.txt name18.txt  prot9.txt \
 command100.txt error115.txt name19.txt  reply1.txt \
 command101.txt error116.txt name2.txt   reply10.txt \
@@ -67,3 +67,5 @@ command34.txt prot34.txt reply340001.txt name34.txt reply34.txt \
 command35.txt  name35.txt     prot35.txt     reply35.txt \
 command36.txt  error36.txt  name36.txt  reply36.txt \
 command37.txt  name37.txt  prot37.txt  reply37.txt
+command38.txt prot38.txt reply380001.txt \
+name38.txt reply38.txt

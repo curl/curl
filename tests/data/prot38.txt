@@ -1,0 +1,11 @@
+GET /38 HTTP/1.1
+Authorization: Basic dXNlcjpwd2Q=
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET /ffffooooooooooooooooooooooooooooooooooooooooooooooooooo/37?fake HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+

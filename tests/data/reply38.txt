@@ -1,0 +1,4 @@
+HTTP/1.0 301 OK
+Location: http://127.0.0.1:8999/ffffooooooooooooooooooooooooooooooooooooooooooooooooooo/37?fake
+
+blah

@@ -1,0 +1,1 @@
+HTTP GET with user+password in URL and Location: and --include
