@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "28 November 2000" "Curl 7.5" "libcurl Manual"
+.TH curl_easy_setopt 3 "2 February 2001" "Curl 7.5" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -35,6 +35,12 @@ Data pointer to pass instead of FILE * to the file write function. Note that
 if you specify the
 .I CURLOPT_WRITEFUNCTION
 , this is the pointer you'll get as input.
+
+NOTE: If you're using libcurl as a win32 .DLL, you MUST use a
+.I CURLOPT_WRITEFUNCTION
+if you set the
+.I CURLOPT_FILE
+option.
 .TP
 .B CURLOPT_WRITEFUNCTION
 Function pointer that should use match the following prototype:
@@ -53,6 +59,12 @@ Data pointer to pass instead of FILE * to the file read function. Note that if
 you specify the
 .I CURLOPT_READFUNCTION
 , this is the pointer you'll get as input.
+
+NOTE: If you're using libcurl as a win32 .DLL, you MUST use a
+.I CURLOPT_READFUNCTION
+if you set the
+.I CURLOPT_INFILE
+option.
 .TP
 .B CURLOPT_READFUNCTION
 Function pointer that should use match the following prototype:
