@@ -487,7 +487,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   ftp->passwd = conn->passwd;
   ftp->response_time = 3600; /* set default response time-out */
 
-  if (data->set.tunnel_thru_httpproxy) {
+  if (conn->bits.tunnel_proxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
     result = Curl_ConnectHTTPProxyTunnel(conn, FIRSTSOCKET,
                                          conn->host.name, conn->remote_port);
@@ -1702,7 +1702,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(conn, conninfo, newhostp, connectport);
   
-  if(data->set.tunnel_thru_httpproxy) {
+  if(conn->bits.tunnel_proxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
     result = Curl_ConnectHTTPProxyTunnel(conn, SECONDARYSOCKET,
                                          newhostp, newport);

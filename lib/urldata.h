@@ -309,6 +309,10 @@ struct ConnectBits {
   bool retry;         /* this connection is about to get closed and then
                          re-attempted at another connection. */
   bool no_body;       /* CURLOPT_NO_BODY (or similar) was set */
+  bool tunnel_proxy;  /* if CONNECT is used to "tunnel" through the proxy.
+                         This is implicit when SSL-protocols are used through
+                         proxies, but can also be enabled explicitly by
+                         apps */
 };
 
 struct hostname {

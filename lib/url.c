@@ -2137,6 +2137,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->bits.user_passwd = data->set.userpwd?1:0;
   conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
   conn->bits.no_body = data->set.opt_no_body;
+  conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
 
   /* This initing continues below, see the comment "Continue connectdata
    * initialization here" */
@@ -2836,6 +2837,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     free(proxydup); /* free the duplicate pointer and not the modified */
   }
+
+  /*************************************************************
+   * If the protcol is using SSL and HTTP proxy is used, we set
+   * the tunnel_proxy bit.
+   *************************************************************/
+  if((conn->protocol&PROT_SSL) && conn->bits.httpproxy)
+    conn->bits.tunnel_proxy = TRUE;
 
   /*************************************************************
    * Take care of user and password authentication stuff
