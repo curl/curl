@@ -134,6 +134,7 @@ void Curl_pgrsTime(struct UrlData *data, timerid timer)
 
 void Curl_pgrsStartNow(struct UrlData *data)
 {
+  data->progress.speeder_c = 0; /* reset the progress meter display */
   data->progress.start = Curl_tvnow();
 }
 
