@@ -51,8 +51,6 @@ LFLAGSSSL = /LIBPATH:$(OPENSSL_PATH)/out32dll
 LINKLIBS  = ws2_32.lib
 SSLLIBS   = libeay32.lib ssleay32.lib RSAglue.lib
 CFGSET    = FALSE
-LFLAGSSSL=
-SSLLIBS  =
 
 ######################
 # release
