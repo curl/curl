@@ -9,11 +9,16 @@
 ## Comments to: Troy Engel <tengel@sonic.net> or
 ##              Joern Hartroth <hartroth@acm.org>
 
+ifndef OPENSSL_PATH
+OPENSSL_PATH = ../../openssl-0.9.7d
+endif
+ifndef ZLIB_PATH
+ZLIB_PATH = ../../zlib-1.2.1
+endif
+
 CC = gcc
 RM = rm -f
 STRIP = strip -s
-OPENSSL_PATH = ../../openssl-0.9.7d
-ZLIB_PATH = ../../zlib-1.2.1
 
 # We may need these someday
 # PERL = perl
@@ -32,8 +37,6 @@ COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 
 curl_PROGRAMS = curl.exe
-curl_OBJECTS = main.o hugehelp.o urlglob.o writeout.o getpass.o homedir.o
-curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c getpass.c homedir.c
 ifdef DYN
   curl_DEPENDENCIES = ../lib/libcurldll.a ../lib/libcurl.dll
   curl_LDADD = -L../lib -lcurldll
@@ -46,9 +49,13 @@ ifdef SSL
   curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32
 endif
 
-PROGRAMS = $(curl_PROGRAMS)
-SOURCES = $(curl_SOURCES)
-OBJECTS = $(curl_OBJECTS)
+# Makefile.inc provides the CSOURCES and HHEADERS defines
+include Makefile.inc
+
+curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_SOURCES)))
+# curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_ONES))))
+# vpath %.c ../lib
+
 
 all: curl.exe
 

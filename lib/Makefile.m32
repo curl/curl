@@ -1,19 +1,26 @@
 #############################################################
+# $Id$
 #
 ## Makefile for building libcurl.a with MingW32 (GCC-3.2) and
 ## optionally OpenSSL (0.9.7)
+##
 ## Use: make -f Makefile.m32
 ##
 ## Comments to: Troy Engel <tengel@sonic.net> or
 ##              Joern Hartroth <hartroth@acm.org>
+
+ifndef OPENSSL_PATH
+OPENSSL_PATH = ../../openssl-0.9.7d
+endif
+ifndef ZLIB_PATH
+ZLIB_PATH = ../../zlib-1.2.1
+endif
 
 CC = gcc
 AR = ar
 RM = rm -f 
 RANLIB = ranlib
 STRIP = strip -g
-OPENSSL_PATH = ../../openssl-0.9.7d
-ZLIB_PATH = ../../zlib-1.2.1
 
 ########################################################
 ## Nothing more to do below this line!
@@ -32,38 +39,13 @@ ifdef ZLIB
 endif
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 
+# Makefile.inc provides the CSOURCES and HHEADERS defines
+include Makefile.inc
+
+libcurl_a_OBJECTS := $(patsubst %.c,%.o,$(strip $(CSOURCES)))
+
 libcurl_a_LIBRARIES = libcurl.a
-
-libcurl_a_SOURCES = arpa_telnet.h file.c netrc.h timeval.c base64.c \
-	file.h hostip.c progress.c timeval.h base64.h formdata.c hostip.h     \
-	progress.h cookie.c formdata.h http.c sendf.c cookie.h ftp.c	      \
-	http.h sendf.h url.c dict.c ftp.h if2ip.c speedcheck.c url.h	      \
-	dict.h getdate.c if2ip.h speedcheck.h urldata.h transfer.c getdate.h  \
-	ldap.c ssluse.c version.c transfer.h getenv.c			      \
-	ldap.h ssluse.h escape.c getenv.h mprintf.c telnet.c escape.h	      \
-	netrc.c telnet.h getinfo.c strequal.c strequal.h easy.c     \
-	security.h security.c krb4.h krb4.c memdebug.h memdebug.c	      \
-	inet_ntoa_r.h http_chunks.h http_chunks.c			      \
-	strtok.c connect.c hash.c llist.c multi.c share.c share.h	      \
-	content_encoding.h content_encoding.c http_digest.h http_digest.c     \
-	http_negotiate.c http_negotiate.h http_ntlm.c http_ntlm.h md5.h	      \
-	md5.c strtoofft.c inet_pton.c strerror.c hostares.c hostasyn.c	      \
-	hostip4.c hostip6.c hostsyn.c hostthre.c inet_ntop.c
-
-libcurl_a_OBJECTS =  file.o timeval.o base64.o hostip.o progress.o \
-	formdata.o cookie.o http.o sendf.o ftp.o url.o dict.o if2ip.o \
-	speedcheck.o getdate.o transfer.o ldap.o ssluse.o version.o \
-	getenv.o escape.o mprintf.o telnet.o netrc.o getinfo.o \
-	strequal.o easy.o security.o krb4.o memdebug.o http_chunks.o \
-	strtok.o connect.o hash.o llist.o multi.o share.o \
-	content_encoding.o http_digest.o http_negotiate.o http_ntlm.o md5.o \
-	strtoofft.o inet_pton.o strerror.o hostares.o hostasyn.o hostip4.o \
-	hostip6.o hostsyn.o hostthre.o inet_ntop.o
-
-LIBRARIES =  $(libcurl_a_LIBRARIES)
-SOURCES = $(libcurl_a_SOURCES)
-OBJECTS = $(libcurl_a_OBJECTS)
-
+libcurl_a_DEPENDENCIES = $(strip $(CSOURCES) $(HHEADERS))
 
 all: libcurl.a libcurl.dll libcurldll.a
 
