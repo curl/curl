@@ -1,7 +1,25 @@
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at http://curl.haxx.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
 #
 # $Id$
-#
-
+###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
 EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	\
@@ -37,16 +55,16 @@ VERSION=-version-info 2:2:0
 # that the current interface number gets larger faster.
 #
 # 3.If the library source code has changed at all since the last update, then
-# increment revision (c:r:a becomes c:r+1:a).
+# increment revision (c:r+1:a)
 #
 # 4.If any interfaces have been added, removed, or changed since the last
-# update, increment current, and set revision to 0.
+# update, increment current, and set revision to 0. (c+1:r=0:a)
 #
 # 5.If any interfaces have been added since the last public release, then
-# increment age.
+# increment age. (c:r:a+1)
 #
 # 6.If any interfaces have been removed since the last public release, then
-# set age to 0.
+# set age to 0. (c:r:a=0)
 #
 
 if NO_UNDEFINED
