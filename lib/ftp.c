@@ -632,7 +632,7 @@ CURLcode _ftp_cwd(struct connectdata *conn, char *path)
     return CURLE_OPERATION_TIMEOUTED;
 
   if (ftpcode != 250) {
-    failf(conn->data, "Couldn't change back to directory %s", path);
+    failf(conn->data, "Couldn't cd to %s", path);
     return CURLE_FTP_ACCESS_DENIED;
   }
 
