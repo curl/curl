@@ -1,3 +1,5 @@
+#ifndef _CURL_STRTOOFFT_H
+#define _CURL_STRTOOFFT_H
 /***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -21,8 +23,10 @@
  * $Id$
  ***************************************************************************/
 
-#ifndef _CURL_STRTOOFFT_R_H
-#define _CURL_STRTOOFFT_R_H
+/*
+ * CAUTION: this header is designed to work when included by the app-side
+ * as well as the library. Do not mix with library internals!
+ */
 
 #include "setup.h"
 #include <stddef.h>
@@ -38,7 +42,7 @@
 #if HAVE_STRTOLL
 #define strtoofft strtoll
 #else
-curl_off_t Curl_strtoll(const char *nptr, char **endptr, int base);
+curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
 #define strtoofft Curl_strtoll
 #define NEED_CURL_STRTOLL
 #endif

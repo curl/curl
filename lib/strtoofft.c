@@ -36,7 +36,7 @@ static int get_char(char c, int base);
  * value from the given input string and returns it.
  */
 curl_off_t
-Curl_strtoll(const char *nptr, char **endptr, int base)
+curlx_strtoll(const char *nptr, char **endptr, int base)
 {
   char *end;
   int is_negative = 0;
