@@ -711,6 +711,7 @@ CURLcode _ftp(struct connectdata *conn)
     int sslen;
     char hbuf[NI_MAXHOST];
     char *localaddr;
+    struct sockaddr *sa=(struct sockaddr *)&ss;
 #ifdef NI_WITHSCOPEID
     const int niflags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
 #else
@@ -737,7 +738,10 @@ CURLcode _ftp(struct connectdata *conn)
       return CURLE_FTP_PORT_FAILED;
 
     memset(&hints, 0, sizeof(hints));
-    hints.ai_family = ss.ss_family;
+    hints.ai_family = sa->sa_family;
+    /*hints.ai_family = ss.ss_family;
+      this way can be used if sockaddr_storage is properly defined, as glibc 
+      2.1.X doesn't do*/
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
     if (getaddrinfo(hbuf, "0", &hints, &res))
@@ -770,7 +774,7 @@ CURLcode _ftp(struct connectdata *conn)
     }
 
     sslen = sizeof(ss);
-    if (getsockname(portsock, (struct sockaddr *)&ss, &sslen) < 0) {
+    if (getsockname(portsock, sa, &sslen) < 0) {
       failf(data, strerror(errno));
       freeaddrinfo(res);
       return CURLE_FTP_PORT_FAILED;
@@ -779,7 +783,7 @@ CURLcode _ftp(struct connectdata *conn)
     for (modep = mode; modep && *modep; modep++) {
       int lprtaf, eprtaf;
 
-      switch (ss.ss_family) {
+      switch (sa->sa_family) {
       case AF_INET:
 	ap = (char *)&((struct sockaddr_in *)&ss)->sin_addr;
 	alen = sizeof(((struct sockaddr_in *)&ss)->sin_addr);
@@ -809,7 +813,7 @@ CURLcode _ftp(struct connectdata *conn)
 	    portmsgbuf, sizeof(portmsgbuf), tmp, sizeof(tmp), niflags))
 	  continue;
 	/* do not transmit IPv6 scope identifier to the wire */
-	if (ss.ss_family == AF_INET6) {
+	if (sa->sa_family == AF_INET6) {
 	  char *q = strchr(portmsgbuf, '%');
 	  if (q)
 	    *q = '\0';
@@ -821,7 +825,7 @@ CURLcode _ftp(struct connectdata *conn)
 
         if (strcmp(*modep, "LPRT") == 0 && lprtaf < 0)
 	  continue;
-        if (strcmp(*modep, "PORT") == 0 && ss.ss_family != AF_INET)
+        if (strcmp(*modep, "PORT") == 0 && sa->sa_family != AF_INET)
 	  continue;
 
 	portmsgbuf[0] = '\0';

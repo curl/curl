@@ -66,3 +66,29 @@ int Curl_strnequal(const char *first, const char *second, size_t max)
 #endif
 }
 
+#ifndef HAVE_STRLCAT
+/*
+ * The strlcat() function appends the NUL-terminated string src to the end
+ * of dst. It will append at most size - strlen(dst) - 1 bytes, NUL-termi-
+ * nating the result.
+ *
+ * The strlcpy() and strlcat() functions return the total length of the
+ * string they tried to create.  For strlcpy() that means the length of src.
+ * For strlcat() that means the initial length of dst plus the length of
+ * src. While this may seem somewhat confusing it was done to make trunca-
+ * tion detection simple.
+ */
+size_t strlcat(char *dst, const char *src, size_t size)
+{
+  size_t len = strlen(dst);
+  size_t orglen = len;
+  int index=0;
+  
+  while(src[index] && (len < (size-1)) ) {
+    dst[len++] = src[index++];
+  }
+  dst[len]=0;
+
+  return orglen + strlen(src);
+}
+#endif
