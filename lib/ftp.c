@@ -492,11 +492,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
   /* The first thing we do is wait for the "220*" line: */
   nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-  if((signed int)nread < 0)
-#else
   if(nread < 0)
-#endif
     return CURLE_OPERATION_TIMEOUTED;
 
   if(ftpcode != 220) {
@@ -527,11 +523,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
   /* wait for feedback */
   nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-  if((signed int)nread < 0)
-#else
   if(nread < 0)
-#endif
     return CURLE_OPERATION_TIMEOUTED;
 
   if(ftpcode == 530) {
@@ -545,11 +537,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
        (the server requires to send the user's password too) */
     ftpsendf(conn->firstsocket, conn, "PASS %s", ftp->passwd);
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-    if((signed int)nread < 0)
-#else
     if(nread < 0)
-#endif
       return CURLE_OPERATION_TIMEOUTED;
 
     if(ftpcode == 530) {
@@ -597,11 +585,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
   /* wait for feedback */
   nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-  if((signed int)nread < 0)
-#else
   if(nread < 0)
-#endif
     return CURLE_OPERATION_TIMEOUTED;
 
   if(ftpcode == 257) {
@@ -657,7 +641,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
 {
   struct UrlData *data = conn->data;
   struct FTP *ftp = conn->proto.ftp;
-  size_t nread;
+  ssize_t nread;
   char *buf = data->buffer; /* this is our buffer */
   struct curl_slist *qitem; /* QUOTE item */
   int ftpcode;
@@ -694,11 +678,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
     /* now let's see what the server says about the transfer we
        just performed: */
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-    if((signed int)nread < 0)
-#else
     if(nread < 0)
-#endif
       return CURLE_OPERATION_TIMEOUTED;
 
     /* 226 Transfer complete, 250 Requested file action okay, completed. */
@@ -720,11 +700,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
         ftpsendf(conn->firstsocket, conn, "%s", qitem->data);
 
         nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-        if((signed int)nread < 0)
-#else
         if(nread < 0)
-#endif
           return CURLE_OPERATION_TIMEOUTED;
 
         if (ftpcode >= 400) {
@@ -746,7 +722,7 @@ static
 CURLcode _ftp(struct connectdata *conn)
 {
   /* this is FTP and no proxy */
-  size_t nread;
+  ssize_t nread;
   CURLcode result;
   struct UrlData *data=conn->data;
   char *buf = data->buffer; /* this is our buffer */
@@ -798,11 +774,7 @@ CURLcode _ftp(struct connectdata *conn)
        where we ended up after login: */
     ftpsendf(conn->firstsocket, conn, "CWD %s", ftp->entrypath);
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-    if((signed int)nread < 0)
-#else
     if(nread < 0)
-#endif
       return CURLE_OPERATION_TIMEOUTED;
     
     if(ftpcode != 250) {
@@ -817,11 +789,7 @@ CURLcode _ftp(struct connectdata *conn)
   if(ftp->dir && ftp->dir[0]) {
     ftpsendf(conn->firstsocket, conn, "CWD %s", ftp->dir);
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-    if((signed int)nread < 0)
-#else
     if(nread < 0)
-#endif
       return CURLE_OPERATION_TIMEOUTED;
 
     if(ftpcode != 250) {
@@ -836,11 +804,7 @@ CURLcode _ftp(struct connectdata *conn)
     ftpsendf(conn->firstsocket, conn, "MDTM %s", ftp->file);
 
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-    if((signed int)nread < 0)
-#else
     if(nread < 0)
-#endif
       return CURLE_OPERATION_TIMEOUTED;
 
     if(ftpcode == 213) {
@@ -877,11 +841,7 @@ CURLcode _ftp(struct connectdata *conn)
              (data->bits.ftp_ascii)?"A":"I");
 
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-    if((signed int)nread < 0)
-#else
     if(nread < 0)
-#endif
       return CURLE_OPERATION_TIMEOUTED;
 
     if(ftpcode != 200) {
@@ -1086,11 +1046,7 @@ CURLcode _ftp(struct connectdata *conn)
       }
 
       nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-      if((signed int)nread < 0)
-#else
       if(nread < 0)
-#endif
 	return CURLE_OPERATION_TIMEOUTED;
 
       if (ftpcode != 200) {
@@ -1208,11 +1164,7 @@ again:;
     }
 
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-    if((signed int)nread < 0)
-#else
     if(nread < 0)
-#endif
       return CURLE_OPERATION_TIMEOUTED;
 
     if(ftpcode != 200) {
@@ -1227,7 +1179,7 @@ again:;
     char *mode[] = { "EPSV", "LPSV", "PASV", NULL };
     int results[] = { 229, 228, 227, 0 };
 #else
-    char *mode[] = { "PASV", NULL };
+    const char *mode[] = { "PASV", NULL };
     int results[] = { 227, 0 };
 #endif
     int modeoff;
@@ -1235,11 +1187,7 @@ again:;
     for (modeoff = 0; mode[modeoff]; modeoff++) {
       ftpsendf(conn->firstsocket, conn, mode[modeoff]);
       nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-      if((signed int)nread < 0)
-#else
       if(nread < 0)
-#endif
 	return CURLE_OPERATION_TIMEOUTED;
 
       if (ftpcode == results[modeoff])
@@ -1485,11 +1433,7 @@ again:;
           (data->bits.ftp_ascii)?"A":"I");
 
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-    if((signed int)nread < 0)
-#else
     if(nread < 0)
-#endif
       return CURLE_OPERATION_TIMEOUTED;
 
     if(ftpcode != 200) {
@@ -1520,11 +1464,7 @@ again:;
         ftpsendf(conn->firstsocket, conn, "SIZE %s", ftp->file);
 
         nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-        if((signed int)nread < 0)
-#else
         if(nread < 0)
-#endif
           return CURLE_OPERATION_TIMEOUTED;
 
         if(ftpcode != 213) {
@@ -1594,11 +1534,7 @@ again:;
       ftpsendf(conn->firstsocket, conn, "STOR %s", ftp->file);
 
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-    if((signed int)nread < 0)
-#else
     if(nread < 0)
-#endif
       return CURLE_OPERATION_TIMEOUTED;
 
     if(ftpcode>=400) {
@@ -1679,11 +1615,7 @@ again:;
       ftpsendf(conn->firstsocket, conn, "TYPE A");
 	
       nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-      if((signed int)nread < 0)
-#else
       if(nread < 0)
-#endif
         return CURLE_OPERATION_TIMEOUTED;
 	
       if(ftpcode != 200) {
@@ -1705,11 +1637,7 @@ again:;
                (data->bits.ftp_ascii)?"A":"I");
 
       nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-      if((signed int)nread < 0)
-#else
       if(nread < 0)
-#endif
         return CURLE_OPERATION_TIMEOUTED;
 
       if(ftpcode != 200) {
@@ -1730,11 +1658,7 @@ again:;
         ftpsendf(conn->firstsocket, conn, "SIZE %s", ftp->file);
 
         nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-        if((signed int)nread < 0)
-#else
         if(nread < 0)
-#endif
           return CURLE_OPERATION_TIMEOUTED;
 
         if(ftpcode != 213) {
@@ -1791,11 +1715,7 @@ again:;
         ftpsendf(conn->firstsocket, conn, "REST %d", conn->resume_from);
 
         nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-        if((signed int)nread < 0)
-#else
         if(nread < 0)
-#endif
           return CURLE_OPERATION_TIMEOUTED;
 
         if(ftpcode != 350) {
@@ -1808,11 +1728,7 @@ again:;
     }
 
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-#ifdef VMS
-    if((signed int)nread < 0)
-#else
     if(nread < 0)
-#endif
       return CURLE_OPERATION_TIMEOUTED;
 
     if((ftpcode == 150) || (ftpcode == 125)) {
@@ -1972,7 +1888,8 @@ CURLcode Curl_ftp(struct connectdata *conn)
  * restrictions on the command!
  *
  */
-size_t Curl_ftpsendf(int fd, struct connectdata *conn, char *fmt, ...)
+size_t Curl_ftpsendf(int fd, struct connectdata *conn,
+                     const char *fmt, ...)
 {
   size_t bytes_written;
   char s[256];
