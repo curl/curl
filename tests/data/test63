@@ -35,7 +35,7 @@ GET http://we.want.that.site.com/63 HTTP/1.1
 Proxy-authorization: Basic aHR0cDovL2Zha2U6dXNlcg==
 Host: we.want.that.site.com
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 
 </protocol>
 </verify>

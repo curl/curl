@@ -35,7 +35,7 @@ more than one byte
 PUT /bzz/60 HTTP/1.1
 Host: 127.0.0.1:8999
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 Transfer-Encoding: chunked
 Content-Length: 1
 

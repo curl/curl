@@ -39,7 +39,7 @@ POST /we/want/9 HTTP/1.1
 User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 Content-Length: 411
 Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763

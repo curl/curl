@@ -51,7 +51,7 @@ POST /we/want/that/page/95 HTTP/1.1
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 Content-Length: 27
 Content-Type: application/x-www-form-urlencoded
 

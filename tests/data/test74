@@ -48,12 +48,12 @@ HTTP, urlglob {}-retrieval and -o #[num] usage
 GET /74 HTTP/1.1
 Host: 127.0.0.1:8999
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 
 GET /740001 HTTP/1.1
 Host: 127.0.0.1:8999
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 
 </protocol>
 <file name="log/dumpit740001.dump">

@@ -33,7 +33,7 @@ text/html; charset=ISO-8859-4
 GET /57 HTTP/1.1
 Host: 127.0.0.1:8999
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 
 </protocol>
 </verify>

@@ -43,7 +43,7 @@ Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
 GET /we/want/8 HTTP/1.1
 Host: 127.0.0.1:8999
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 Cookie: partmatch=present; foobar=name
 
 </protocol>

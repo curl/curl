@@ -36,7 +36,7 @@ ftp://%HOSTIP:%HOSTPORT/we/want/that/page/79 -x %HOSTIP:%HOSTPORT
 GET ftp://127.0.0.1:8999/we/want/that/page/79 HTTP/1.1
 Host: 127.0.0.1:8999
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 
 </protocol>
 </verify>

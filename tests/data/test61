@@ -38,7 +38,7 @@ http://%HOSTIP:%HOSTPORT/we/want/61 -c log/jar61.txt -H "Host: www.host.foo.com"
 <protocol>
 GET /we/want/61 HTTP/1.1
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 Host: www.host.foo.com
 
 </protocol>

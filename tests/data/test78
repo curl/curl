@@ -52,7 +52,7 @@ http://%HOSTIP:%HOSTPORT/78 -z "1999-12-12 12:00:00 MET"
 GET /78 HTTP/1.1
 Host: 127.0.0.1:8999
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 If-Modified-Since: Sun, 12 Dec 1999 11:00:00 GMT
 
 </protocol>

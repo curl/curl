@@ -43,7 +43,7 @@ POST /3 HTTP/1.1
 Authorization: Basic ZmFrZTotdXNlcg==
 Host: 127.0.0.1:8999
 Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Accept: */*
 Content-Length: 37
 Content-Type: application/x-www-form-urlencoded
 
