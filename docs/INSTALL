@@ -237,7 +237,7 @@ IBM OS/2
    If you want to build with OpenSSL or OpenLDAP support, you'll need to
    download those libraries, too. Dirk Ohme has done some work to port SSL
    libraries under OS/2, but it looks like he doesn't care about emx.  You'll
-   find his patches on: http://come.to/Dirk.Ohme
+   find his patches on: http://come.to/Dirk_Ohme
 
    If during the linking you get an error about _errno being an undefined
    symbol referenced from the text segment, you need to add -D__ST_MT_ERRNO__
