@@ -1,0 +1,20 @@
+
+This package is based on ares 1.1.1 (written by Greg Hudson). I've decided to
+put together and release my own ares archives since the ares maintainer
+doesn't want these improvements.
+
+The package is thus dubbed 'c-ares' since I (Daniel Stenberg) want this for
+use within the curl project (hence the letter C) and it makes a nice
+pun. Also, c-ares will not remain API compatible with the original ares, so
+picking a new name makes it more obvious to the public.
+
+The full source code is available in the 'c-ares' release archives, and in the
+'ares' subdir of the curl CVS source repostitory.
+
+If you find bugs, correct flaws, have questions or have comments in general in
+regard to c-ares (or by all means the original ares too), get in touch with us
+on the curl-library mailing list.
+
+c-ares is of course distributed under the same MIT-style license as the
+original ares.
+
