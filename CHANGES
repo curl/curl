@@ -6,7 +6,22 @@
 
                                   Changelog
 
+Daniel (23 May)
+- Jis in bug report #741841, fixed a bug in the SOCKS5 proxy-using code.
+
+Daniel (22 May)
+- David Remahl set up a test-server for me providing Digest authentication,
+  and I wrote the first working code that support it. The test suite was
+  modified slightly as well to work better for it and --digest was added to
+  the command line options (and CURLOPT_HTTPDIGEST to the library)...  RFC2617
+  has all the gory details.
+
 Daniel (21 May)
+- David Balazic pointed out that curl_unescape() didn't check that %-codes
+  were correctly followed by two hexadecimal digits when it unescape strings.
+  Now, we do the check and only %XX codes are unescaped if the X letters are
+  hexadecimals.
+
 - Gisle Vanem made curl build with djgpp on DOS.
 
 - Gisle Vanem improved the mkhelp.pl script to make a nicer manual that is
