@@ -322,10 +322,11 @@ information see IETF draft draft-brezak-spnego-http-04.txt.
 this to work.
 .IP CURLAUTH_NTLM
 HTTP NTLM authentication. A proprietary protocol invented and used by
-Microsoft. It uses a challenge-response and hash concept similar to Digest to
+Microsoft. It uses a challenge-response and hash concept similar to Digest, to
 prevent the password from being evesdropped.
 
-\fBNOTE\fP that you need to build libcurl with a SSL support for this to work.
+\fBNOTE\fP that you need to build libcurl with SSL support for this option to
+work.
 .IP CURLAUTH_ANY
 This is a convenience macro that sets all bits and thus makes libcurl pick any
 it finds suitable. libcurl will automaticly select the one it finds most
