@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (12 September)
+- Based on a bug report by David Kimdon, I made the runtests.pl script clear
+  all possible proxy environment variables before the tests are run.
+
 Version 7.10.8-pre1 (8 September 2003)
 
 Daniel (7 September)
