@@ -6,10 +6,10 @@ default. This is done by installing a default CA cert bundle on 'make install'
 (or similar), that CA bundle package is used by default on operations against
 SSL servers.
 
-Alas, if you communicate with HTTPS servers using certifcates that are signed
+Alas, if you communicate with HTTPS servers using certificates that are signed
 by CAs present in the bundle, you will not notice any changed behavior and you
-will seeminglessly get a higher security level on your SSL connections since
-can be sure that the remote server really is the one it claims to be.
+will seamlessly get a higher security level on your SSL connections since can
+be sure that the remote server really is the one it claims to be.
 
 If the remote server uses a self-signed certificate, or if you don't install
 curl's CA cert bundle or if it uses a certificate signed by a CA that isn't
