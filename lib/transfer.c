@@ -960,7 +960,6 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   k->now = k->start;   /* current time is now */
   k->header = TRUE; /* assume header */
   k->httpversion = -1; /* unknown at this point */
-  k->conn = (struct connectdata *)conn; /* store the connection */
 
   data = conn->data; /* there's the root struct */
   k->buf = data->state.buffer;

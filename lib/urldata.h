@@ -248,9 +248,6 @@ struct Curl_transfer_keeper {
   long bodywrites;
   int writetype;
 
-  /* the highest fd we use + 1 */
-  struct SessionHandle *data;
-  struct connectdata *conn;
   char *buf;
   char *uploadbuf;
   int maxfd;
