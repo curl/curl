@@ -3,7 +3,7 @@ Curl and libcurl 7.11.1. A bugfix release.
  Public curl release number:               79
  Releases counted from the very beginning: 106
  Available command line options:           94
- Available curl_easy_setopt() options:     117
+ Available curl_easy_setopt() options:     111
 
 This release includes the following changes:
 
