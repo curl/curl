@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel (8 November 2004)
+- Ian Gulliver reported in debian bug report #278691: if curl is invoked in an
+  environment where stderr is closed the -v output will still be sent to file
+  descriptor 2 which then might be the network socket handle! Now we have a
+  weird hack instead that attempts to make sure that file descriptor 2 is
+  opened (with a call to pipe()) before libcurl is called to do the transfer.
+  configure now checks for pipe() and systems without pipe don't get the weird
+  hack done.
+
 Daniel (5 November 2004)
 - Tim Sneddon made libcurl send no more than 64K in a single first chunk when
   doing a huge POST on VMS, as this is a system limitation. Default on general

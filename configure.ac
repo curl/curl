@@ -1227,6 +1227,7 @@ AC_CHECK_FUNCS( strtoll \
                 basename \
                 setlocale \
                 ftruncate \
+                pipe \
                 poll,
 dnl if found
 [],

@@ -3771,11 +3771,34 @@ operate(struct Configurable *config, int argc, char *argv[])
   return res;
 }
 
+static void checkfds(void);
+
+static void checkfds(void)
+{
+#ifdef HAVE_PIPE
+  int fd[2] = { STDIN_FILENO, STDIN_FILENO };
+  while( fd[0] == STDIN_FILENO ||
+         fd[0] == STDOUT_FILENO ||
+         fd[0] == STDERR_FILENO ||
+         fd[1] == STDIN_FILENO ||
+         fd[1] == STDOUT_FILENO ||
+         fd[1] == STDERR_FILENO )
+    pipe(fd);
+
+  close(fd[0]);
+  close(fd[1]);
+#endif
+}
+
+
+
 int main(int argc, char *argv[])
 {
   int res;
   struct Configurable config;
   memset(&config, 0, sizeof(struct Configurable));
+
+  checkfds();
 
   res = operate(&config, argc, argv);
   free_config_fields(&config);
