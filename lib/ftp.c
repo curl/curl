@@ -637,6 +637,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
        !data->set.crlf) {
       failf(data, "Uploaded unaligned file size (%d out of %d bytes)",
             *ftp->bytecountp, data->set.infilesize);
+      conn->bits.close = TRUE; /* close this connection since we don't
+                                  know what state this error leaves us in */
       return CURLE_PARTIAL_FILE;
     }
   }
@@ -644,6 +646,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
     if((-1 != conn->size) && (conn->size != *ftp->bytecountp) &&
        (conn->maxdownload != *ftp->bytecountp)) {
       failf(data, "Received only partial file: %d bytes", *ftp->bytecountp);
+      conn->bits.close = TRUE; /* close this connection since we don't
+                                  know what state this error leaves us in */
       return CURLE_PARTIAL_FILE;
     }
     else if(!ftp->dont_check &&
