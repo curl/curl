@@ -766,11 +766,11 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   if(!conn)
     return CURLE_OK; /* this is closed and fine already */
 
-  infof(conn->data, "Closing live connection (#%d)\n", conn->connectindex);
-
-  if(-1 != conn->connectindex)
+  if(-1 != conn->connectindex) {
     /* unlink ourselves! */
+    infof(conn->data, "Closing live connection (#%d)\n", conn->connectindex);
     conn->data->connects[conn->connectindex] = NULL;
+  }
 
   if(conn->curl_disconnect)
     /* This is set if protocol-specific cleanups should be made */
@@ -1162,12 +1162,14 @@ static CURLcode ConnectPlease(struct UrlData *data,
 #ifdef ENABLE_IPV6
   conn->firstsocket = -1;
   for (ai = conn->hp; ai; ai = ai->ai_next) {
-    conn->firstsocket = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+    conn->firstsocket = socket(ai->ai_family,
+                               ai->ai_socktype,
+                               ai->ai_protocol);
     if (conn->firstsocket < 0)
       continue;
 
     if (connect(conn->firstsocket, ai->ai_addr, ai->ai_addrlen) < 0) {
-      close(conn->firstsocket);
+      sclose(conn->firstsocket);
       conn->firstsocket = -1;
       continue;
     }
@@ -1862,10 +1864,6 @@ static CURLcode Connect(struct UrlData *data,
        host name name, so that we can re-use an existing connection
        that may exist registered to the same proxy host. */
 
-#ifdef ENABLE_IPV6
-    failf(data, "proxy yet to be supported");
-    return CURLE_OUT_OF_MEMORY;
-#else
     char *prox_portno;
     char *endofprot;
 
@@ -1910,7 +1908,6 @@ static CURLcode Connect(struct UrlData *data,
     conn->proxyhost = strdup(proxyptr);
 
     free(proxydup); /* free the duplicate pointer and not the modified */
-#endif /* end of IPv4-section */
   }
 
   /*************************************************************
@@ -1990,7 +1987,12 @@ static CURLcode Connect(struct UrlData *data,
        if we're reusing an existing connection. */
 
     /* resolve proxy */
+#ifdef ENABLE_IPV6
+      /* it might already be set if reusing a connection */
+    conn->hp = Curl_getaddrinfo(data, conn->proxyhost, conn->port);
+#else
     conn->hp = Curl_gethost(data, conn->proxyhost, &conn->hostent_buf);
+#endif
     if(!conn->hp) {
       failf(data, "Couldn't resolve proxy '%s'", conn->proxyhost);
       return CURLE_COULDNT_RESOLVE_PROXY;
