@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "1 June 2001" "libcurl 7.8" "libcurl Manual"
+.TH curl_easy_setopt 3 "9 August 2001" "libcurl 7.8" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -202,10 +202,12 @@ library. The buffer must be at least CURL_ERROR_SIZE big.
 .TP
 .B CURLOPT_TIMEOUT
 Pass a long as parameter containing the maximum time in seconds that you allow
-the libcurl transfer operation to take. Do note that normally, name lookups
-maky take a considerable time and that limiting the operation to less than a
-few minutes risk aborting perfectly normal operations. This option will cause
-curl to use the SIGALRM to enable timeouting system calls.
+the libcurl transfer operation to take. Normally, name lookups can take a
+considerable time and limiting operations to less than a few minutes risk
+aborting perfectly normal operations. This option will cause curl to use the
+SIGALRM to enable timeouting system calls.
+.B NOTE
+that this does not work in multi-threaded programs!
 .TP
 .B CURLOPT_POSTFIELDS
 Pass a char * as parameter, which should be the full data to post in a HTTP
@@ -498,6 +500,18 @@ connection timeout (it will then only timeout on the system's internal
 timeouts). See also the
 .I CURLOPT_TIMEOUT
 option.
+.B NOTE
+that this does not work in multi-threaded programs!
+.TP
+.B CURLOPT_HTTPGET
+Pass a long. If the long is non-zero, this forces the HTTP request to get back
+to GET. Only really usable if POST, PUT or a custom request have been used
+previously using the same curl handle. (Added in 7.8.1)
+.TP
+.B CURLOPT_SSL_VERIFYHOST
+Pass a long. Set if we should verify the Common name from the peer certificate
+in the SSL handshake, set 1 to check existence, 2 to ensure that it matches
+the provided hostname. (Added in 7.8.1)
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as
