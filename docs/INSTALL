@@ -483,7 +483,9 @@ NetWare
 
    To compile curl.nlm / libcurl.nlm you need:
    - either any gcc / nlmconv, or CodeWarrior 7 PDK 4 or later.
-   - gnu make running on the platform you compile on.
+   - gnu make and awk running on the platform you compile on;
+     native Win32 versions can be downloaded from:
+     http://www.gknw.com/development/prgtools/ 
    - recent Novell LibC SDK availabable from:
      http://developer.novell.com/ndk/libc.htm
    - optional zlib sources (at the moment only dynamic linking with zlib.imp); 
@@ -500,7 +502,8 @@ NetWare
    other options are currently not supported, although partly prepared.
    The Ares lib builds arlready fine, and both test tools work fine at least 
    when build with CodeWarrior...; dont know yet why they fail when build with
-   gcc though; also I've not tested yet including libcares into curl.
+   gcc though; if you want to compile with Ares support then set an env var
+   WITH_ARES=1; I've not tested yet including libcares into curl.
    Any help in testing appreciated!
    Buils automatically created 4 times a day from current CVS are here:
    http://www.gknw.com/mirror/curl/autobuilds/
@@ -584,4 +587,12 @@ OpenLDAP
    You'll find OpenLDAP information at:
 
       http://www.openldap.org
+
+Zlib
+====
+
+   You'll find Zlib information at:
+
+      http://www.gzip.org/zlib/
+
 
