@@ -1,15 +1,5 @@
 Curl and libcurl 7.10.8 is out! A bugfix release.
 
-Download from http://curl.haxx.se/download.html. As usual, allow some time
-before the popular binary archives are up-to-date with this release.
-
-Get curl from your favorite mirror by using this service:
-http://curl.haxx.se/latest.cgi
-
-Make sure the files haven't been tampered with by the time they land in your
-filesystem by using these MD5 sums:
-
-
 This release includes the following changes:
 
  o CURLOPT_IPRESOLVE lets you select pure IPv6 or IPv4 resolved addresses
