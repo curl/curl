@@ -21,22 +21,22 @@ cygwinbin:
 	rm -rf $(cygwintmp)
 	rm -rf $(cygwintmp)-dev
 	$(MAKE) -C $(top_builddir) DESTDIR=$(cygwintmp) install-strip
-	# $(STRIP) $(cygwintmp)/usr/bin/cygcurl-?.dll
+# $(STRIP) $(cygwintmp)/usr/bin/cygcurl-?.dll
 	$(mkinstalldirs) \
 	  $(cygwintmp)/usr/doc/Cygwin \
 	  $(cygwintmp)/usr/doc/$(PACKAGE)-$(VERSION) \
 	  $(cygwintmp)-dev/usr/doc/$(PACKAGE)-$(VERSION)/libcurl \
 	  $(cygwintmp)-dev/usr/doc/$(PACKAGE)-$(VERSION)/examples \
 	  $(cygwintmp)-dev/usr/man
-	#
-	# copy some files into the binary install dir
+#
+# copy some files into the binary install dir
 	cp $(srcdir)/README \
 	  $(cygwintmp)/usr/doc/Cygwin/$(PACKAGE)-$(VERSION)-$(CYGBUILD).README
 	cd $(top_srcdir) ; cp CHANGES COPYING README UPGRADE docs/* \
 	  $(cygwintmp)/usr/doc/$(PACKAGE)-$(VERSION) ; pwd
 	cd $(cygwintmp)/usr/doc/$(PACKAGE)-$(VERSION) ; rm *.1 Makefile*
-	#
-	# copy some files into the -dev install dir, remove some from binary
+#
+# copy some files into the -dev install dir, remove some from binary
 	cp $(top_srcdir)/docs/libcurl/*.html \
 	  $(cygwintmp)-dev/usr/doc/$(PACKAGE)-$(VERSION)/libcurl
 	cp $(top_srcdir)/docs/examples/* \
@@ -51,12 +51,12 @@ cygwinbin:
 	mv $(cygwintmp)/usr/include $(cygwintmp)-dev/usr
 	mv $(cygwintmp)/usr/lib $(cygwintmp)-dev/usr
 	mv $(cygwintmp)/usr/man/man3 $(cygwintmp)-dev/usr/man
-	#
-	# create both tar files, and delete tmp folders
+#
+# create both tar files, and delete tmp folders
 	cd $(cygwintmp) ; tar cjf \
 	  $(PACKAGE)-$(VERSION)-$(CYGBUILD).tar.bz2 usr
 	mv $(cygwintmp)/*.tar.bz2 . && rm -rf $(cygwintmp)
-	#
+#
 	cd $(cygwintmp)-dev ; tar cjf \
 	  $(PACKAGE)-devel-$(VERSION)-$(CYGBUILD).tar.bz2 usr
 	mv $(cygwintmp)-dev/*.tar.bz2 . && rm -rf $(cygwintmp)-dev
