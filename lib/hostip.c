@@ -473,16 +473,16 @@ static char *MakeIP(unsigned long num,char *addr, int addr_len)
 static void hostcache_fixoffset(struct hostent *h, int offset)
 {
   int i=0;
-  h->h_name=(char *)((int)h->h_name+offset);
-  h->h_aliases=(char **)((int)h->h_aliases+offset);
+  h->h_name=(char *)((long)h->h_name+offset);
+  h->h_aliases=(char **)((long)h->h_aliases+offset);
   while(h->h_aliases[i]) {
-    h->h_aliases[i]=(char *)((int)h->h_aliases[i]+offset);
+    h->h_aliases[i]=(char *)((long)h->h_aliases[i]+offset);
     i++;
   }
-  h->h_addr_list=(char **)((int)h->h_addr_list+offset);
+  h->h_addr_list=(char **)((long)h->h_addr_list+offset);
   i=0;
   while(h->h_addr_list[i]) {
-    h->h_addr_list[i]=(char *)((int)h->h_addr_list[i]+offset);
+    h->h_addr_list[i]=(char *)((long)h->h_addr_list[i]+offset);
     i++;
   }
 }
@@ -509,7 +509,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
 
   if ( (in=inet_addr(hostname)) != INADDR_NONE ) {
     struct in_addr *addrentry;
-    int *buf = (int *)malloc(128);
+    long *buf = (long *)malloc(sizeof(struct hostent)+128);
     if(!buf)
       return NULL; /* major failure */
     *bufp = (char *)buf;
@@ -524,7 +524,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
     h->h_length = sizeof(*addrentry);
     h->h_name = *(h->h_addr_list) + h->h_length;
     /* bad one h->h_name = (char*)(h->h_addr_list + h->h_length); */
-    MakeIP(ntohl(in),h->h_name, 128 - (long)(h->h_name) + (long)buf);
+    MakeIP(ntohl(in),h->h_name, sizeof(struct hostent)+128 -
+           (long)(h->h_name) + (long)buf);
   }
 #if defined(HAVE_GETHOSTBYNAME_R)
   else {
@@ -566,7 +567,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
     if(h) {
       int offset;
       h=(struct hostent *)realloc(buf, step_size);
-      offset=(int)h-(int)buf;
+      offset=(long)h-(long)buf;
       hostcache_fixoffset(h, offset);
       buf=(int *)h;
       *bufp=(char *)buf;
@@ -590,7 +591,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
     if(!res) {
       int offset;
       h=(struct hostent *)realloc(buf, step_size);
-      offset=(int)h-(int)buf;
+      offset=(long)h-(long)buf;
       hostcache_fixoffset(h, offset);
       buf=(int *)h;
       *bufp=(char *)buf;
