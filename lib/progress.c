@@ -328,7 +328,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
       curl_off_t amount = data->progress.speeder[nowindex]-
         data->progress.speeder[checkindex];
 
-      if(amount > 0xffffffff/1000)
+      if(amount > 4294967 /* 0xffffffff/1000 */)
         /* the 'amount' value is bigger than would fit in 32 bits if
            multiplied with 1000, so we use the double math for this */
         data->progress.current_speed = (curl_off_t)
