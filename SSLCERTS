@@ -1,9 +1,10 @@
-Upgrading to curl/libcurl 7.10 from any previous version
-========================================================
+                      Peer SSL Certificate Verification
+                      =================================
 
-libcurl 7.10 performs peer SSL certificate verification by default. This is
-done by installing a default CA cert bundle on 'make install' (or similar),
-that CA bundle package is used by default on operations against SSL servers.
+Starting in 7.10, libcurl performs peer SSL certificate verification by
+default. This is done by installing a default CA cert bundle on 'make install'
+(or similar), that CA bundle package is used by default on operations against
+SSL servers.
 
 Alas, if you communicate with HTTPS servers using certifcates that are signed
 by CAs present in the bundle, you will not notice any changed behavior and you
