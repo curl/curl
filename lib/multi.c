@@ -120,6 +120,8 @@ CURLM *curl_multi_init(void)
     memset(multi, 0, sizeof(struct Curl_multi));
     multi->type = CURL_MULTI_HANDLE;
   }
+  else
+    return NULL;
 
   multi->hostcache = Curl_mk_dnscache();
   if(!multi->hostcache) {
