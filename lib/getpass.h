@@ -3,6 +3,6 @@
 /*
  * Returning NULL will abort the continued operation!
  */
-char* getpass_r(char *prompt, char* buffer, int buflen );
+char* getpass_r(char *prompt, char* buffer, size_t buflen );
 
 #endif
