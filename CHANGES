@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.11.2 (26 April 2004)
+
 Daniel (25 April 2004)
 - Erwin Authried pointed out that configure --disable-manual didn't do right
   if you already had a src/hugehelp.c source file present (which most people
