@@ -3,6 +3,12 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* LDAP output is garbled. Hardly anyone seems to care about LDAP functionality
+  in curl/libcurl why this report has been closed and set to be solved later.
+  If you feel this is something you want fixed, get in touch and we'll start
+  working.
+  http://sourceforge.net/tracker/index.php?func=detail&aid=735752&group_id=976&atid=100976
+
 * IPv6 support on AIX 4.3.3 doesn't work due to a missing sockaddr_storage
   struct. It has been reported to work on AIX 5.1 though.
 
