@@ -2322,8 +2322,6 @@ operate(struct Configurable *config, int argc, char *argv[])
       if(config->headerfile && !headerfilep && heads.stream)
         fclose(heads.stream);
 
-      if(urlbuffer)
-        free(urlbuffer);
       if (outfile && !strequal(outfile, "-") && outs.stream)
         fclose(outs.stream);
 
