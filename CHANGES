@@ -7,6 +7,33 @@
                                   Changelog
 
 Daniel (27 October 2004)
+- Dan Fandrich:
+
+  An improvement to the gzip handling of libcurl. There were two problems with
+  the old version: it was possible for a malicious gzip file to cause libcurl
+  to leak memory, as a buffer was malloced to hold the header and never freed
+  if the header ended with no file contents.  The second problem is that the
+  64 KiB decompression buffer was allocated on the stack, which caused
+  unexpectedly high stack usage and overflowed the stack on some systems
+  (someone complained about that in the mailing list about a year ago).
+
+  Both problems are fixed by this patch. The first one is fixed when a recent
+  (1.2) version of zlib is used, as it takes care of gzip header parsing
+  itself.  A check for the version number is done at run-time and libcurl uses
+  that feature if it's present. I've created a define OLD_ZLIB_SUPPORT that
+  can be commented out to save some code space if libcurl is guaranteed to be
+  using a 1.2 version of zlib.
+
+  The second problem is solved by dynamically allocating the memory buffer
+  instead of storing it on the stack. The allocation/free is done for every
+  incoming packet, which is suboptimal, but should be dwarfed by the actual
+  decompression computation.
+ 
+  I've also factored out some common code between deflate and gzip to reduce
+  the code footprint somewhat.  I've tested the gzip code on a few test files
+  and I tried deflate using the freshmeat.net server, and it all looks OK. I
+  didn't try running it with valgrind, however.
+
 - Added a --retry option to curl that takes a numerical option for the number
   of times the operation should be retried. It is retried if a transient error
   is detected or if a timeout occurred. By default, it will first wait one
