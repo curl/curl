@@ -710,11 +710,17 @@ else
   case "$OPT_SSL" in
   yes)
     dnl --with-ssl (without path) used
-    PKGTEST="yes"
+    if test x$cross_compiling != xyes; then
+      dnl only do pkg-config magic when not cross-compiling
+      PKGTEST="yes"
+    fi
     EXTRA_SSL=/usr/local/ssl ;;
   off)
     dnl no --with-ssl option given, just check default places
-    PKGTEST="yes"
+    if test x$cross_compiling != xyes; then
+      dnl only do pkg-config magic when not cross-compiling
+      PKGTEST="yes"
+    fi
     EXTRA_SSL= ;;
   *)
     dnl check the given --with-ssl spot

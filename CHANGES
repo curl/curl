@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (1 November 2004)
+- When cross-compiling, the configure script no longer attempts to use
+  pkg-config on the build host in order to detect OpenSSL compiler options.
+
 Daniel (27 October 2004)
 - Dan Fandrich:
 
