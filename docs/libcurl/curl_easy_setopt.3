@@ -469,16 +469,27 @@ data should be set with \fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE\fP.
 This option is deprecated and starting with version 7.12.1 you should instead
 use \fICURLOPT_UPLOAD\fP.
 .IP CURLOPT_POST
-A non-zero parameter tells the library to do a regular HTTP post. This is a
-normal application/x-www-form-urlencoded kind, which is the most commonly used
-one by HTML forms. See the \fICURLOPT_POSTFIELDS\fP option for how to specify
-the data to post and \fICURLOPT_POSTFIELDSIZE\fP in how to set the data
-size. Using the \fICURLOPT_POSTFIELDS\fP option implies this option.
+A non-zero parameter tells the library to do a regular HTTP post. This will
+also make the library use the a "Content-Type:
+application/x-www-form-urlencoded" header. (This is by far the most commonly
+used POST method).
+
+Use the \fICURLOPT_POSTFIELDS\fP option to specify what data to post and
+\fICURLOPT_POSTFIELDSIZE\fP to set the data size. Optionally, you can provide
+data to POST using the \fICURLOPT_READFUNCTION\FP and \fICURLOPT_READDATA\fP
+options.
+
+You can override the default POST Content-Type: header by setting your own
+with \fICURLOPT_HTTPHEADER\fP.
+
+NOTE: if you have issued a POST request and want to make a HEAD or GET
+instead, you must explictly pick the new request type using
+\fICURLOPT_NOBODY\fP or \fICURLOPT_HTTPGET\fP or similar.
 .IP CURLOPT_POSTFIELDS
 Pass a char * as parameter, which should be the full data to post in an HTTP
-post operation. You need to make sure that the data is formatted the way you
-want the server to receive it. libcurl will not convert or encode it for
-you. Most web servers will assume this data to be url-encoded. Take note.
+POST operation. You must make sure that the data is formatted the way you want
+the server to receive it. libcurl will not convert or encode it for you. Most
+web servers will assume this data to be url-encoded. Take note.
 
 This POST is a normal application/x-www-form-urlencoded kind (and libcurl will
 set that Content-Type by default when this option is used), which is the most
