@@ -64,10 +64,11 @@ sub REAPER {
 my %commandok = (
                  "USER" => "fresh",
                  "PASS" => "passwd",
-                 "PASV" => "loggedin",
-                 "PORT" => "loggedin",
+                 "PASV" => "loggedin|twosock",
+                 "PORT" => "loggedin|twosock",
                  "TYPE" => "loggedin|twosock",
                  "LIST" => "twosock",
+                 "NLST" => "twosock",
                  "RETR" => "twosock",
                  "STOR" => "twosock",
                  "CWD"  => "loggedin",
@@ -88,6 +89,7 @@ my %displaytext = ('USER' => '331 We are happy you popped in!', # output FTP lin
                    'PORT' => '200 You said PORT - I say FINE',
                    'TYPE' => '200 I modify TYPE as you wanted',
                    'LIST' => '150 here comes a directory',
+                   'NLST' => '150 here comes a directory',
                    'CWD'  => '250 CWD command successful.',
                    'QUIT' => '221 bye bye baby',
                    );
@@ -95,6 +97,7 @@ my %displaytext = ('USER' => '331 We are happy you popped in!', # output FTP lin
 # callback functions for certain commands
 my %commandfunc = ( 'PORT' => \&PORT_command,
                     'LIST' => \&LIST_command,
+                    'NLST' => \&LIST_command, # use LIST for now
                     'PASV' => \&PASV_command,
                     'RETR' => \&RETR_command,   
                     'SIZE' => \&SIZE_command,
@@ -120,7 +123,6 @@ sub LIST_command {
     logmsg "$$: pass data to child pid\n";
     for(@ftpdir) {
         print SOCK $_;
-        print STDERR "PASS: $_";
     }
     close(SOCK);
     logmsg "$$: done passing data to child pid\n";
@@ -186,7 +188,7 @@ sub STOR_command {
 
     my $filename = "log/ftpout.$testno";
 
-    print "200 Gimme gimme gimme!\r\n";
+    print "125 Gimme gimme gimme!\r\n";
 
     open(FILE, ">$filename") ||
         return 0; # failed to open output
