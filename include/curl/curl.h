@@ -70,9 +70,23 @@
 extern "C" {
 #endif
 
-/* silly trick to preserve functionality with older code, but making it use
-   our name space for the future */
-#define HttpPost curl_httppost
+/*
+ * We want the typedef curl_off_t setup for large file support on all
+ * platforms.
+ */
+#if defined(_MSC_VER)
+/* MSVC */
+  typedef signed __int64 curl_off_t;
+#else
+#if (defined(__GNUC__) && defined(WIN32)) || defined(__WATCOMC__)
+/* gcc on windows or Watcom */
+  typedef long long curl_off_t;
+#else
+/* "normal" approach, do not that this does not necessarily mean that
+   the type is >32 bits, see the SIZEOF_CURL_OFF_T define for that! */
+  typedef off_t curl_off_t;
+#endif
+#endif
 
 struct curl_httppost {
   struct curl_httppost *next;       /* next entry in the list */
