@@ -434,6 +434,7 @@ PORTS
         - i386 SCO unix
         - i386 Solaris 2.7
         - i386 Windows 95, 98, ME, NT, 2000
+        - i386 QNX 6
         - ia64 Linux 2.3.99
         - m68k AmigaOS 3
         - m68k Linux
