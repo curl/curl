@@ -1,5 +1,5 @@
-#ifndef __NONBLOCK_H
-#define __NONBLOCK_H
+#ifndef __CONNECT_H
+#define __CONNECT_H
 /*****************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -24,6 +24,7 @@
  *****************************************************************************/
 
 CURLcode Curl_connecthost(struct connectdata *conn,
-                          int sockfd, /* input socket, or -1 if none */
-                          int *socket);
+                          long timeout, /* milliseconds */
+                          int sockfd,   /* input socket, or -1 if none */
+                          int *socket); /* not set if error is returned */
 #endif
