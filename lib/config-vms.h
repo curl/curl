@@ -372,3 +372,10 @@
 
 /* Define to 1 if you have the <setjmp.h> header file. */
 #define HAVE_SETJMP_H 1
+
+/*
+ * This needs to be defined for OpenSSL 0.9.7 and other versions that have the
+ * ENGINE stuff supported. If an include of "openssl/engine.h" fails, then
+ * undefine the define below.
+*/
+#define HAVE_OPENSSL_ENGINE_H 1
