@@ -203,15 +203,32 @@ Win32
       ----------------------------
         Please read the OpenSSL documentation on how to compile and install
         the OpenSSL library.  This generates the libeay32.dll and ssleay32.dll
-        files.
+        files in the out32dll subdirectory in the OpenSSL home directory.  If
+        you compiled OpenSSL static libraries (libeay32.lib, ssleay32.lib,
+        RSAglue.lib) they are created in the out32 subdirectory.
 
         Run the 'vcvars32.bat' file to get the proper environment variables
-        set. Edit the makefile.vc6 in the lib directory and define
-        OPENSSL_PATH.  Set the location of the OpenSSL library and run 'nmake
-        vc-ssl' in the root directory.
+        set. The vcvars32.bat file is part of the Microsoft development
+        environment and you may find it in 'C:\Program Files\Microsoft Visual
+        Studio\vc98\bin' if you installed Visual C/C++ 6 in the default
+        directory.
 
-        The vcvars32.bat file is part of the Microsoft development
-        environment.
+        Before running nmake define the OPENSSL_PATH environment variable with
+        the root/base directory of OpenSSL, for example:
+
+          set OPENSSL_PATH=c:\openssl-0.9.6b
+
+        Then run 'nmake vc-ssl' or 'nmake vc-ssl-dll' in the curl's root
+        directory.  'nmake vc-ssl' will create a libcurl static and dynamic
+        libraries in the lib subdirectory, as well as a statically linked
+        version of curl.exe in the scr subdirectory.  This statically linked
+        version is a standalone executable not requiring any DLL at
+        runtime. This making method requires that you have build the static
+        libraries of OpenSSL available in OpenSSL's out32 subdirectory.
+	'nmake vc-ssl-dll' creates the libcurl dynamic library and
+	links curl.exe against libcurl and OpenSSL dynamically.
+	This executables requires libcurl.dll and the OpenSSL DLLs
+	at runtime.
 
       Microsoft / Borland style
       -------------------------
