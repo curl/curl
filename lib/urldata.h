@@ -185,6 +185,12 @@ typedef enum {
   NTLMSTATE_LAST
 } curlntlm;
 
+/* for 3rd party transfers to decide which side that issues PASV */
+typedef enum {
+  CURL_TARGET_PASV,
+  CURL_SOURCE_PASV
+} curl_pasv_side;
+
 /* Struct used for NTLM challenge-response authentication */
 struct ntlmdata {
   curlntlm state;
@@ -601,6 +607,8 @@ struct connectdata {
   /* data used for the asynch name resolve callback */
   struct Curl_async async;
 #endif
+  struct connectdata *sec_conn;   /* secondary connection for 3rd party
+                                     transfer */
 };
 
 /* The end of connectdata. */
@@ -845,7 +853,11 @@ struct UserDefined {
   bool crlf;            /* convert crlf on ftp upload(?) */
   struct curl_slist *quote;     /* after connection is established */
   struct curl_slist *postquote; /* after the transfer */
-  struct curl_slist *prequote; /* before the transfer, after type (Wesley Laxton)*/
+  struct curl_slist *prequote; /* before the transfer, after type */
+  struct curl_slist *source_prequote;  /* in 3rd party transfer mode - before
+                                          the transfer on source host */
+  struct curl_slist *source_postquote; /* in 3rd party transfer mode - after
+                                          the transfer on source host */
   struct curl_slist *telnet_options; /* linked list of telnet options */
   curl_TimeCond timecondition; /* kind of time/date comparison */
   time_t timevalue;       /* what time to compare with */
@@ -874,10 +886,17 @@ struct UserDefined {
 
   curl_off_t max_filesize; /* Maximum file size to download */
 
+  char *source_host;     /* for 3rd party transfer */
+  char *source_port;     /* for 3rd party transfer */
+  char *source_userpwd;  /* for 3rd party transfer */
+  char *source_path;     /* for 3rd party transfer */
+  curl_pasv_side pasvHost; /* for 3rd party transfer indicates passive host */
+
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
    and they don't change during operations. */
 
+  bool printhost;       /* printing host name in debug info */
   bool get_filetime;
   bool tunnel_thru_httpproxy;
   bool ftp_append;

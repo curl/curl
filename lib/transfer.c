@@ -875,7 +875,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
             if(data->set.verbose)
               Curl_debug(data, CURLINFO_HEADER_IN,
-                         k->p, k->hbuflen);
+                         k->p, k->hbuflen, conn->host.dispname);
 
             result = Curl_client_write(data, writetype, k->p, k->hbuflen);
             if(result)
@@ -962,12 +962,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           if(data->set.verbose) {
             if(k->badheader) {
               Curl_debug(data, CURLINFO_DATA_IN, data->state.headerbuff,
-                         k->hbuflen);
+                         k->hbuflen, conn->host.dispname);
               if(k->badheader == HEADER_PARTHEADER)
-                Curl_debug(data, CURLINFO_DATA_IN, k->str, nread);
+                Curl_debug(data, CURLINFO_DATA_IN, k->str, nread, conn->host.dispname);
             }
             else
-              Curl_debug(data, CURLINFO_DATA_IN, k->str, nread);
+              Curl_debug(data, CURLINFO_DATA_IN, k->str, nread, conn->host.dispname);
           }
 
           if(conn->bits.chunk) {
@@ -1187,7 +1187,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         if(data->set.verbose)
           /* show the data before we change the pointer upload_fromhere */
           Curl_debug(data, CURLINFO_DATA_OUT, conn->upload_fromhere,
-                     bytes_written);
+                     bytes_written, conn->host.dispname);
 
         if(conn->upload_present != bytes_written) {
           /* we only wrote a part of the buffer (if anything), deal with it! */
@@ -1919,6 +1919,50 @@ CURLcode Curl_follow(struct SessionHandle *data,
   return CURLE_OK;
 }
 
+static CURLcode
+Curl_connect_host(struct SessionHandle *data,
+                  struct connectdata **conn)
+{
+  CURLcode res = CURLE_OK;
+  int urlchanged = FALSE;
+
+  do {
+    bool async;
+    Curl_pgrsTime(data, TIMER_STARTSINGLE);
+    data->change.url_changed = FALSE;
+    res = Curl_connect(data, conn, &async);
+
+    if((CURLE_OK == res) && async) {
+      /* Now, if async is TRUE here, we need to wait for the name
+         to resolve */
+      res = Curl_wait_for_resolv(*conn, NULL);
+      if(CURLE_OK == res)
+        /* Resolved, continue with the connection */
+        res = Curl_async_resolved(*conn);
+    }
+    if(res)
+      break;
+
+    /* If a callback (or something) has altered the URL we should use within
+       the Curl_connect(), we detect it here and act as if we are redirected
+       to the new URL */
+    urlchanged = data->change.url_changed;
+    if ((CURLE_OK == res) && urlchanged) {
+      res = Curl_done(conn, res);
+      if(CURLE_OK == res) {
+        char *gotourl = strdup(data->change.url);
+        res = Curl_follow(data, gotourl);
+        if(res)
+          free(gotourl);
+      }
+    }
+  } while (urlchanged && res == CURLE_OK);
+
+  return res;
+}
+
+
+
 /*
  * Curl_perform() is the internal high-level function that gets called by the
  * external curl_easy_perform() function. It inits, performs and cleans up a
@@ -1945,43 +1989,21 @@ CURLcode Curl_perform(struct SessionHandle *data)
    */
 
   do {
-    int urlchanged = FALSE;
-    do {
-      bool async;
-      Curl_pgrsTime(data, TIMER_STARTSINGLE);
-      data->change.url_changed = FALSE;
-      res = Curl_connect(data, &conn, &async);
-
-      if((CURLE_OK == res) && async) {
-        /* Now, if async is TRUE here, we need to wait for the name
-           to resolve */
-        res = Curl_wait_for_resolv(conn, NULL);
-        if(CURLE_OK == res)
-          /* Resolved, continue with the connection */
-          res = Curl_async_resolved(conn);
-      }
-      if(res)
-        break;
-
-      /* If a callback (or something) has altered the URL we should use within
-         the Curl_connect(), we detect it here and act as if we are redirected
-         to the new URL */
-      urlchanged = data->change.url_changed;
-      if ((CURLE_OK == res) && urlchanged) {
-        res = Curl_done(&conn, res);
-        if(CURLE_OK == res) {
-          char *gotourl = strdup(data->change.url);
-          res = Curl_follow(data, gotourl);
-          if(res)
-            free(gotourl);
-        }
-      }
-    } while (urlchanged && res == CURLE_OK);
+    res = Curl_connect_host(data, &conn);   /* primary connection */
 
     if(res == CURLE_OK) {
+      if (data->set.source_host) /* 3rd party transfer */
+        res = Curl_pretransfersec(conn);
+      else
+        conn->sec_conn = NULL;
+    }
+
+    if(res == CURLE_OK) {
+
       res = Curl_do(&conn);
 
-      if(res == CURLE_OK) {
+      /* for non 3rd party transfer only */
+      if(res == CURLE_OK && !data->set.source_host) {
         res = Transfer(conn); /* now fetch that URL please */
         if(res == CURLE_OK) {
 
@@ -2098,4 +2120,36 @@ Curl_Transfer(struct connectdata *c_conn, /* connection data */
 
   return CURLE_OK;
 
+}
+
+/*
+ * Curl_pretransfersec() prepares the secondary connection (used for 3rd party
+ * FTP transfers).
+ */
+CURLcode Curl_pretransfersec(struct connectdata *conn)
+{
+  CURLcode status = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+  struct connectdata *sec_conn = NULL;   /* secondary connection */
+
+  /* update data with source host options */
+  char *url = aprintf( "%s://%s/", conn->protostr, data->set.source_host);
+
+  if(!url)
+    return CURLE_OUT_OF_MEMORY;
+
+  if(data->change.url_alloc)
+    free(data->change.url);
+
+  data->change.url_alloc = TRUE;
+  data->change.url = url;
+  data->set.ftpport = data->set.source_port;
+  data->set.userpwd = data->set.source_userpwd;
+
+  /* secondary connection */
+  status = Curl_connect_host(data, &sec_conn);
+  sec_conn->data = data;
+  conn->sec_conn = sec_conn;
+
+  return status;
 }

@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -123,7 +123,7 @@ void curl_slist_free_all(struct curl_slist *list)
   item = list;
   do {
     next = item->next;
-		
+
     if (item->data) {
       free(item->data);
     }
@@ -142,7 +142,7 @@ void Curl_infof(struct SessionHandle *data, const char *fmt, ...)
     va_start(ap, fmt);
     vsnprintf(print_buffer, 1024, fmt, ap);
     va_end(ap);
-    Curl_debug(data, CURLINFO_TEXT, print_buffer, strlen(print_buffer));
+    Curl_debug(data, CURLINFO_TEXT, print_buffer, strlen(print_buffer), NULL);
   }
 }
 
@@ -166,7 +166,7 @@ void Curl_failf(struct SessionHandle *data, const char *fmt, ...)
         data->set.errorbuffer[len] = '\n';
         data->set.errorbuffer[++len] = '\0';
       }
-      Curl_debug(data, CURLINFO_TEXT, data->set.errorbuffer, len);
+      Curl_debug(data, CURLINFO_TEXT, data->set.errorbuffer, len, NULL);
       if(doneit)
         /* cut off the newline again */
         data->set.errorbuffer[--len]=0;
@@ -204,7 +204,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
       break;
 
     if(data->set.verbose)
-      Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written);
+      Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written, conn->host.dispname);
 
     if((size_t)bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease
@@ -250,7 +250,7 @@ CURLcode Curl_write(struct connectdata *conn,
 
     if(rc < 0) {
       err = SSL_get_error(conn->ssl[num].handle, rc);
-    
+
       switch(err) {
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
@@ -355,7 +355,7 @@ CURLcode Curl_client_write(struct SessionHandle *data,
       return CURLE_WRITE_ERROR;
     }
   }
-  
+
   return CURLE_OK;
 }
 
@@ -440,8 +440,8 @@ int Curl_read(struct connectdata *conn, /* connection data */
 }
 
 /* return 0 on success */
-int Curl_debug(struct SessionHandle *data, curl_infotype type,
-               char *ptr, size_t size)
+static int showit(struct SessionHandle *data, curl_infotype type,
+                  char *ptr, size_t size)
 {
   static const char * const s_infotype[CURLINFO_END] = {
     "* ", "< ", "> ", "{ ", "} " };
@@ -461,4 +461,19 @@ int Curl_debug(struct SessionHandle *data, curl_infotype type,
     break;
   }
   return 0;
+}
+
+int Curl_debug(struct SessionHandle *data, curl_infotype type,
+               char *ptr, size_t size, char *host)
+{
+  int rc;
+  if(data->set.printhost && host) {
+    char buffer[160];
+    snprintf(buffer, sizeof(buffer), "[Chunk to/from %s]", host);
+    rc = showit(data, CURLINFO_TEXT, buffer, strlen(buffer));
+    if(rc)
+      return rc;
+  }
+  rc = showit(data, type, ptr, size);
+  return rc;
 }
