@@ -531,7 +531,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   /* If we have been told to fail hard on HTTP-errors,
                      here is the check for that: */
                   /* serious error, go home! */
-                  failf (data, "The requested file was not found");
+                  failf (data, "The requested URL returned error: %d",
+                         k->httpcode);
                   return CURLE_HTTP_RETURNED_ERROR;
                 }
 
