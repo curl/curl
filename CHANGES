@@ -6,6 +6,23 @@
 
                                   Changelog
 
+Daniel (19 August)
+- I made curl support multiple -T options, as well as -T "{file1,file2}"
+  style globbing. One -T for each URL is supported.
+
+- Jeff Pohlmeyer found a segfault when using ares-enabled libcurl and the
+  multi interface when trying a non-existing host name. Now 
+
+- Made the libcurl printf code support long longs if available.
+
+- Loren Kirkby pointed out that we did not clean up all SSL-allocated memory
+  in curl_global_cleanup().
+
+Daniel (17 August)
+- Setting CURLOPT_WRITEFUNCTION or CURLOPT_READFUNCTION to NULL will now make
+  them get the internal defaults restored. Previously this could cause a
+  segfault.
+
 Version 7.10.7 (15 August 2003)
 
 Daniel (14 August)
