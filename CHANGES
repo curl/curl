@@ -6,7 +6,23 @@
 
                                   Changelog
 
+Daniel (10 June)
+- A missing ending bracket (']') while doing URL globbing could lead to a
+  segfault. While fixing this, I also introduced better error reporting in the
+  globbing code. (All this is application code outside libcurl.)
+
+Daniel (6 June)
+- David Orrell found out that sending a huge GET request over HTTPS could
+  make libcurl fail and return an error code.
+
 Daniel (2 June)
+- Richard Bramante found out that "Content-Length: 0" was not properly used by
+  libcurl if the response-headers indicated that the connection would be
+  closed.
+
+- David Byron's patch was applied, that makes the --progress-bar take the
+  local size into account when doing resumed downloads.
+
 - Feedback from Serge Semashko made me change the error message returned when
   CURLE_HTTP_RETURNED_ERROR is returned.
 
