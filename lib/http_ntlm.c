@@ -286,8 +286,8 @@ static void ascii_to_unicode(unsigned char *destunicode,
 CURLcode Curl_output_ntlm(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
-  const char *domain="HEMMA";
-  const char *host="LILLASYSTER";
+  const char *domain="CURL";
+  const char *host="HAXX";
   int domlen=strlen(domain);
   int hostlen = strlen(host);
   int hostoff; /* host name offset */
