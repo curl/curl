@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "20 September 2000" "Curl 7.3" "Curl Manual"
+.TH curl 1 "26 September 2000" "Curl 7.3" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -72,6 +72,7 @@ Use ASCII transfer when getting an FTP file or LDAP info. For FTP, this can
 also be enforced by using an URL that ends with ";type=A". This option causes
 data sent to stdout to be in text mode for win32 systems.
 .IP "-c/--continue"
+.B Deprecated. Use '-C -' instead.
 Continue/Resume a previous file transfer. This instructs curl to
 continue appending data on the file where it was previously left,
 possibly because of a broken connection to the server. There must be
@@ -332,6 +333,7 @@ Curl mute.
 .IP "-S/--show-error"
 When used with -s it makes curl show error message if it fails.
 .IP "-t/--upload"
+.B Deprecated. Use '-T -' instead.
 Transfer the stdin data to the specified file. Curl will read
 everything from stdin until EOF and store with the supplied name. If
 this is used on a http(s) server, the PUT command will be used.

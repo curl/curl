@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "15 September 2000" "Curl 7.3" "libcurl Manual"
+.TH curl_easy_setopt 3 "26 September 2000" "Curl 7.3" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -316,6 +316,18 @@ your server supports the command first.
 .B CURLOPT_STDERR
 Pass a FILE * as parameter. This is the stream to use instead of stderr
 internally when reporting errors.
+.TP
+.B CURLOPT_INTERFACE
+Pass a char * as parameter. This set the interface name to use as outgoing
+network interface. The name can be an interface name, an IP address or a host
+name. (Added in libcurl 7.3)
+.TP
+.B CURLOPT_KRB4LEVEL
+Pass a char * as parameter. Set the krb4 security level, this also enables
+krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
+'private'.  If the string is set but doesn't match one of these, 'private'
+will be used. Set the string to NULL to disable kerberos4. The kerberos
+support only works for FTP. (Added in libcurl 7.3)
 .TP
 .B CURLOPT_WRITEINFO
 Pass a pointer to a zero terminated string as parameter. It will be used to
