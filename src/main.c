@@ -980,38 +980,31 @@ static int parseconfig(char *filename,
   else
     file = stdin;
   
-  if(file)
-  {
+  if(file) {
     char *line;
     char *tok1;
     char *tok2;
-
-    while (NULL != (line = my_get_line(file)))
-    {
+    
+    while (NULL != (line = my_get_line(file))) {
       /* lines with # in the fist column is a comment! */
-      if ('#' == line[0])
-      {
+      if ('#' == line[0]) {
         free(line);
         continue;
       }
 
-      if (NULL == (tok1 = my_get_token(line)))
-      {
+      if (NULL == (tok1 = my_get_token(line))) {
         free(line);
         continue;
       }
-      if ('-' != tok1[0])
-      {
+      if ('-' != tok1[0]) {
         if (config->url)
           free(config->url);
         config->url = tok1;
       }
 
-      while ((NULL != tok1) && ('-' == tok1[0]))
-      {
+      while ((NULL != tok1) && ('-' == tok1[0])) {
         tok2 = my_get_token(NULL);
-        while (NULL == tok2)
-        {
+        while (NULL == tok2) {
           free(line);
           if (NULL == (line = my_get_line(file)))
             break;
@@ -1022,10 +1015,18 @@ static int parseconfig(char *filename,
 
         res = getparameter(tok1 + 1, tok2, &usedarg, config);
         free(tok1);
-        if (!usedarg)
-          tok1 = tok2;
-        else
-        {
+        if (!usedarg) {
+          if ('-' != tok2[0]) {
+            /* this is not an option, this is a URL */
+            if (config->url)
+              free(config->url);
+            config->url = tok2;
+            break;
+          }
+          else
+            tok1 = tok2;
+        }
+        else {
           free(tok2);
           break;
         }
