@@ -78,9 +78,11 @@ fi
 #
 # Make sure we have updated HTML versions of all man pages:
 #
+echo "make html"
 make -s html
 
 # And the PDF versions
+echo "make pdf"
 make -s pdf
 
 ############################################################################
@@ -88,6 +90,7 @@ make -s pdf
 # Now run make dist to generate a tar.gz archive
 #
 
+echo "make dist"
 targz="curl-$version.tar.gz"
 make -s dist VERSION=$version
 
