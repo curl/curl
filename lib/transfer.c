@@ -437,8 +437,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  * NOT contain a message-body, and thus is always terminated
                  * by the first empty line after the header fields.  */
                 conn->size=0;
+                break;
               default:
                 /* nothing */
+                break;
               }
             }
             else {
