@@ -144,7 +144,8 @@ int random_the_seed(struct SessionHandle *data)
   {
     /* If there's an option and a define, the option overrides the
        define */
-    int ret = RAND_egd(data->set.ssl.egdsocket?data->set.ssl.egdsocket:EGD_SOCKET);
+    int ret = RAND_egd(data->set.ssl.egdsocket?
+                       data->set.ssl.egdsocket:EGD_SOCKET);
     if(-1 != ret) {
       nread += ret;
       if(seed_enough(nread))
@@ -162,14 +163,24 @@ int random_the_seed(struct SessionHandle *data)
 #else
   {
     int len;
-    char *area = Curl_FormBoundary();
-    if(!area)
-      return 3; /* out of memory */
-	
-    len = strlen(area);
-    RAND_seed(area, len);
+    char *area;
 
-    free(area); /* now remove the random junk */
+    /* Changed call to RAND_seed to use the underlying RAND_add implementation
+     * directly.  Do this in a loop, with the amount of additional entropy
+     * being dependent upon the algorithm used by Curl_FormBoundary(): N bytes
+     * of a 7-bit ascii set. -- Richard Gorton, March 11 2003.
+     */
+	
+    do {
+      area = Curl_FormBoundary();
+      if(!area)
+        return 3; /* out of memory */
+	
+      len = strlen(area);
+      RAND_add(area, len, (len >> 1));
+
+      free(area); /* now remove the random junk */
+    } while (!RAND_status());
   }
 #endif
 
