@@ -6,6 +6,20 @@
 
                                History of Changes
 
+Version 7.0.6beta
+
+Daniel (14 June 2000)
+- Björn Stenberg pointed out several problems (related to win32 compiling):
+  lib/strequal.c had a bad #ifdef for one of the string comparisons (win32)
+  src/main.c had several minor problems
+  lib/makefile.m32 had getpass.[co] twice
+  src/config-win32.h lacked the HAVE_FCNTL_H define
+  both config-win32.h files now only set the HAVE_UNISTD_H define if the
+  define MINGW32 is set, and I modified src/makefile.m32 and lib/makefile.m32
+  to set it.
+
+Version 7.0.5beta
+
 Daniel (14 June 2000)
 - Applied Luong Dinh Dung's comments about a few win32 compile problems.
 
