@@ -38,6 +38,7 @@ RELEASE_OBJS= \
 	formdatar.obj \
 	ftpr.obj \
 	httpr.obj \
+	http_chunksr.obj \
 	ldapr.obj \
 	dictr.obj \
 	telnetr.obj \
@@ -68,6 +69,7 @@ DEBUG_OBJS= \
 	formdatad.obj \
 	ftpd.obj \
 	httpd.obj \
+	http_chunksd.obj \
 	ldapd.obj \
 	dictd.obj \
 	telnetd.obj \
@@ -98,6 +100,7 @@ RELEASE_SSL_OBJS= \
 	formdatars.obj \
 	ftprs.obj \
 	httprs.obj \
+	http_chunksrs.obj \
 	ldaprs.obj \
 	dictrs.obj \
 	telnetrs.obj \
@@ -128,6 +131,7 @@ LINK_OBJS= \
 	formdata.obj \
 	ftp.obj \
 	http.obj \
+	http_chunks.obj \
 	ldap.obj \
 	dict.obj \
 	telnet.obj \
@@ -176,6 +180,8 @@ ftpr.obj: ftp.c
 	$(CCR) $(CFLAGS) ftp.c
 httpr.obj: http.c
 	$(CCR) $(CFLAGS) http.c
+http_chunksr.obj: http_chunks.c
+	$(CCR) $(CFLAGS) http_chunks.c
 ldapr.obj: ldap.c
 	$(CCR) $(CFLAGS) ldap.c
 dictr.obj: dict.c
@@ -234,6 +240,8 @@ ftpd.obj: ftp.c
 	$(CCD) $(CFLAGS) ftp.c
 httpd.obj: http.c
 	$(CCD) $(CFLAGS) http.c
+http_chunksd.obj: http_chunks.c
+	$(CCD) $(CFLAGS) http_chunks.c
 ldapd.obj: ldap.c
 	$(CCD) $(CFLAGS) ldap.c
 dictd.obj: dict.c
@@ -291,8 +299,8 @@ formdatars.obj: formdata.c
 	$(CCRS) $(CFLAGS) formdata.c
 ftprs.obj: ftp.c
 	$(CCRS) $(CFLAGS) ftp.c
-httprs.obj: http.c
-	$(CCRS) $(CFLAGS) http.c
+http_chunksrs.obj: http_chunks.c
+	$(CCRS) $(CFLAGS) http_chunks.c
 ldaprs.obj: ldap.c
 	$(CCRS) $(CFLAGS) ldap.c
 dictrs.obj: dict.c
