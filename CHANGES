@@ -6,6 +6,17 @@
 
                                History of Changes
 
+Daniel (30 December 2000)
+- Made all FTP commands get sent with the trailing CRLF in one single write()
+  as splitting them up seems to confuse at least some firewalls (FW-1 being
+  one major).
+
+Daniel (19 December 2000)
+- Added file desrciptor and FILE handle leak detection to the memdebug system
+  and thus I found and removed a file handler leakage in the ftp parts.
+
+- Added an include <stdio.h> in <curl/curl.h> since it uses FILE *.
+
 Daniel (12 December 2000)
 - Multiple URL downloads with -O was still bugging. Not anymore I think or
   hope, or at least I've tried... :-O
