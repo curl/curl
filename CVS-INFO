@@ -10,8 +10,8 @@ This file is only present in the CVS - never in release archives. It contains
 information about other files and things that the CVS repository keeps in its
 inner sanctum.
 
-Use autoconf 2.50 and no earlier. Also, try having automake 1.4 and libtool
-1.4 at least.
+Use autoconf 2.50 and no earlier. Also, try having automake 1.5 and libtool
+1.4.1 at least.
 
 You will need perl to generate the src/hugehelp.c file. The file
 src/hugehelp.c.cvs is a one-shot file that you can rename to src/hugehelp.c if
