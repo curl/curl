@@ -354,7 +354,7 @@ static CURLcode bindlocal(struct connectdata *conn,
 #endif
         if(!bindworked) {
           int err = Curl_ourerrno();
-          switch(errno) {
+          switch(err) {
           case EBADF:
             failf(data, "Invalid descriptor: %d", err);
             break;
