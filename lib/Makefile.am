@@ -24,7 +24,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 DSP = curllib.dsp
 
-EXTRA_DIST = getdate.y Makefile.b32 Makefile.m32	\
+EXTRA_DIST = Makefile.b32 Makefile.m32	\
   Makefile.vc6 Makefile.riscos libcurl.def $(DSP) curllib.dsw		\
   config-vms.h config-win32.h config-riscos.h config-mac.h config.h.in	\
   ca-bundle.crt README.encoding README.memoryleak README.ares		\
@@ -33,7 +33,7 @@ EXTRA_DIST = getdate.y Makefile.b32 Makefile.m32	\
   makefile.amiga Makefile.netware nwlib.c libcurl.imp	\
   msvcproj.head msvcproj.foot
 
-CLEANFILES = $(DSP) getdate.c
+CLEANFILES = $(DSP)
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -93,12 +93,7 @@ libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
 WIN32SOURCES = $(CSOURCES) libcurl.def
 WIN32HEADERS = $(HHEADERS) config-win32.h
 
-BUILT_SOURCES = $(srcdir)/getdate.c $(top_builddir)/lib/ca-bundle.h
-
-# Say $(srcdir), so GNU make does not report an ambiguity with the .y.c rule.
-$(srcdir)/getdate.c: getdate.y
-	cd $(srcdir) && $(YACC) $(YFLAGS) getdate.y && \
-	sed -e 's:YYSTYPE yylval;:YYSTYPE yylval = {0}; /* post-bison fix */:' < y.tab.c > getdate.c && rm -f y.tab.c
+BUILT_SOURCES = $(top_builddir)/lib/ca-bundle.h
 
 $(top_builddir)/lib/ca-bundle.h: Makefile.in Makefile
 	@if test -f $@; then \

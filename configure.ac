@@ -1282,22 +1282,6 @@ then
   USE_MANUAL="no";
 fi
 
-AC_PROG_YACC
-
-if test -z "$YACC"
-then
-  AC_MSG_CHECKING([if OK to build without bison/yacc])
-  dnl no yacc is a big deal if we have no pre-fixed getdate.y
-  if test -r "$srcdir/lib/getdate.c"
-  then
-    dnl all is well, we don't have to generate it!
-    AC_MSG_RESULT(yes)
-  else
-    AC_MSG_RESULT(no)
-    AC_MSG_ERROR([no yacc or bison found, can't build libcurl!])
-  fi
-fi
-
 dnl *************************************************************************
 dnl If the manual variable still is set, then we go with providing a built-in
 dnl manual

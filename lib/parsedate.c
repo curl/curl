@@ -67,7 +67,7 @@
   Sun, 12 Sep 2004 15:05:58 -0700
   Sat, 11 Sep 2004 21:32:11 +0200
 
-  compact numerical date strings ISO846-style:
+  compact numerical date strings:
 
   20040912 15:05:58 -0700
   20040911 +0200

@@ -10,8 +10,8 @@ Daniel (11 September 2004)
 - Added parsedate.[ch] that contains a rewrite of the date parser currently
   provided by getdate.y. The new one is MUCH smaller and will allow us to run
   away from the yacc/bison jungle. It is also slightly lacking in features
-  compared to the old one, but it should still support parsing of all date
-  formats HTTP might involve (and a fair bunch of others).
+  compared to the old one, but it supports parsing of all date formats HTTP
+  involves (and a fair bunch of others).
 
 Daniel (10 September 2004)
 - As found out by Jonas Forsman, curl didn't allow -F to set Content-Type on
