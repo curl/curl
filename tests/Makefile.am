@@ -41,3 +41,6 @@ quiet-test: all
 
 full-test: all
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -a -p
+
+torture-test: all
+	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -t
