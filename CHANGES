@@ -7,8 +7,26 @@
                                   Changelog
 
 
+Daniel (5 January 2004)
+- David J Meyer's patch that introduce large file support to libcurl was
+  applied. New curl_easy_setopt options that accept 'off_t' arguments are:
+
+  INFILESIZE_LARGE
+  RESUME_FROM_LARGE
+  MAXFILESIZE_LARGE
+
+Daniel (4 January 2004)
+- Based on Dominick Meglio's comments, I made our private version of
+  gettimeofday() declared static. This would otherwise collide with the same
+  function in other libs (like ares for example).
+
+- Added Dominick Meglio's description on how to build libcurl with ares
+  on win32.
+
 Daniel (19 December)
 - CURLOPT_IPRESOLVE was not possible to set.
+
+- Gisle Vanem updated the djgpp build files.
 
 Daniel (18 December)
 - John McGowan reported a redirect-problem that happened if a site used a URL
