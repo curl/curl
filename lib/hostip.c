@@ -621,6 +621,14 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   else if(conn->data->set.timeout)
     timeout = conn->data->set.timeout;
 
+  /* We convert the number of seconds into number of milliseconds here: */
+  if(timeout < 2147483)
+    /* maximum amount of seconds that can be multiplied with 1000 and
+       still fit within 31 bits */
+    timeout *= 1000;
+  else
+    timeout = 0x7fffffff; /* ridiculous amount of time anyway */
+
   /* Wait for the name resolve query to complete. */
   while (1) {
     int nfds=0;
@@ -628,9 +636,10 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     struct timeval *tvp, tv, store;
     int count;
     struct timeval now = Curl_tvnow();
+    long timediff;
 
-    store.tv_sec = (int)timeout;
-    store.tv_usec = 0;
+    store.tv_sec = (int)timeout/1000;
+    store.tv_usec = (timeout%1000)*1000;
     
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
@@ -645,7 +654,8 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
     ares_process(data->state.areschannel, &read_fds, &write_fds);
 
-    timeout -= Curl_tvdiff(Curl_tvnow(), now)/1000; /* spent time */
+    timediff = Curl_tvdiff(Curl_tvnow(), now); /* spent time */
+    timeout -= timediff?timediff:1; /* always deduct at least 1 */
     if (timeout < 0) {
       /* our timeout, so we cancel the ares operation */
       ares_cancel(data->state.areschannel);
