@@ -1666,6 +1666,15 @@ CURLcode Curl_follow(struct SessionHandle *data,
       pathsep = strchr(protsep, '/');
       if(pathsep)
         *pathsep=0;
+      else {
+        /* There was no slash. Now, since we might be operating on a badly
+           formatted URL, such as "http://www.url.com?id=2380" which doesn't
+           use a slash separator as it is supposed to, we need to check for a
+           ?-letter as well! */
+        pathsep = strchr(protsep, '?');
+        if(pathsep)
+          *pathsep=0;
+      }
     }
 
     /* If the new part contains a space, this is a mighty stupid redirect
