@@ -62,6 +62,10 @@ int main(int argc, char **argv)
   /* we pass our 'chunk' struct to the callback function */
   curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
 
+  /* some servers don't like requests that are made withput a user-agent
+     field, so we provide one */
+  curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
+
   /* get it! */
   curl_easy_perform(curl_handle);
 
