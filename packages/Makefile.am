@@ -1,3 +1,3 @@
-SUBDIRS = Win32 Linux Solaris EPM DOS
+SUBDIRS = Win32 Linux Solaris EPM DOS vms
 
 EXTRA_DIST = README
