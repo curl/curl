@@ -455,6 +455,15 @@ with one transfer in case there comes a succeeding one that can re-use them.
 This option should be used with caution and only if you understand what it
 does. Set to 0 to have libcurl keep the connection open for possibly later
 re-use. (Added in 7.7)
+.TP
+.B CURLOPT_RANDOM_FILE
+Pass a char * to a zero terminated file name. The file will be used to read
+from to seed the random engine for SSL. The more random the specified file is,
+the more secure will the SSL connection become.
+.TP
+.B CURLOPT_FORBID_REUSE
+Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
+socket. It will be used to seed the random engine for SSL.
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as
