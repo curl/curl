@@ -126,5 +126,6 @@ char *curl_unescape(const char *string, int length)
    the library's memory system */
 void curl_free(void *p)
 {
-  free(p);
+  if(p)
+    free(p);
 }
