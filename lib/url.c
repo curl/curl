@@ -765,6 +765,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Password prompt callback
      */
     data->set.fpasswd = va_arg(param, curl_passwd_callback);
+    /*
+     * if the callback provided is null, reset the default callback
+     */
+    if(!data->set.fpasswd)
+    {
+      data->set.fpasswd = my_getpass;
+    }
     break;
   case CURLOPT_PASSWDDATA:
     /*
@@ -1456,11 +1463,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     /* check for password, if no ask for one */
     if( !data->state.passwd[0] ) {
-      if(!data->set.fpasswd ||
+      if(!data->set.fpasswd || 
          data->set.fpasswd(data->set.passwd_client,
-                       "password:", data->state.passwd,
+                           "password:", data->state.passwd,
                            sizeof(data->state.passwd)))
+      {
+        failf(data, "Bad password from password callback");
         return CURLE_BAD_PASSWORD_ENTERED;
+      }
     }
   }
 
@@ -1486,8 +1496,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
          data->set.fpasswd( data->set.passwd_client,
                         "proxy password:",
                         data->state.proxypasswd,
-                        sizeof(data->state.proxypasswd)))
+                        sizeof(data->state.proxypasswd))) {
+        failf(data, "Bad password from password callback");
         return CURLE_BAD_PASSWORD_ENTERED;
+      }
     }
 
   }
@@ -1860,8 +1872,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         if(!data->set.fpasswd ||
            data->set.fpasswd(data->set.passwd_client,
                              "password:", data->state.passwd,
-                             sizeof(data->state.passwd)))
+                             sizeof(data->state.passwd))) {
+          failf(data, "Bad password from password callback");
           return CURLE_BAD_PASSWORD_ENTERED;
+        }
       }
       else {
         /* we have a password found in the URL, decode it! */
