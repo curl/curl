@@ -227,9 +227,21 @@ int cert_stuff(struct connectdata *conn,
 
     switch(file_type) {
     case SSL_FILETYPE_PEM:
-    case SSL_FILETYPE_ASN1:
+      /* SSL_CTX_use_certificate_chain_file() only works on PEM files */
       if (SSL_CTX_use_certificate_chain_file(conn->ssl.ctx,
                                              cert_file) != 1) {
+        failf(data, "unable to set certificate file (wrong password?)");
+        return 0;
+      }
+      break;
+
+    case SSL_FILETYPE_ASN1:
+      /* SSL_CTX_use_certificate_file() works with either PEM or ASN1, but
+         we use the case above for PEM so this can only be performed with
+         ASN1 files. */
+      if (SSL_CTX_use_certificate_file(conn->ssl.ctx,
+                                       cert_file,
+                                       file_type) != 1) {
         failf(data, "unable to set certificate file (wrong password?)");
         return 0;
       }
