@@ -170,8 +170,8 @@ UPLOADING
 
         curl -T - http://www.upload.com/myfile
 
-  Note that the http server must've been configured to accept PUT before this
-  can be done successfully.
+  Note that the http server must have been configured to accept PUT before
+  this can be done successfully.
 
   For other ways to do http data upload, see the POST section below.
 
@@ -370,7 +370,7 @@ COOKIES
         curl -b headers www.example.com
 
   While saving headers to a file is a working way to store cookies, it is
-  however error-prone and not the prefered way to do this. Instead, make curl
+  however error-prone and not the preferred way to do this. Instead, make curl
   save the incoming cookies using the well-known netscape cookie format like
   this:
 
@@ -388,7 +388,7 @@ COOKIES
   file contents.  In the above command, curl will parse the header and store
   the cookies received from www.example.com.  curl will send to the server the
   stored cookies which match the request as it follows the location.  The
-  file "empty.txt" may be a non-existant file.
+  file "empty.txt" may be a nonexistent file.
 
   Alas, to both read and write cookies from a netscape cookie file, you can
   set both -b and -c to use the same file:
@@ -417,7 +417,7 @@ PROGRESS METER
    Upload        - the average transfer speed of the upload
    Time Total    - expected time to complete the operation
    Time Current  - time passed since the invoke
-   Time Left     - expected time left to completetion
+   Time Left     - expected time left to completion
    Curr.Speed    - the average transfer speed the last 5 seconds (the first
                    5 seconds of a transfer is based on less time of course.)
 
@@ -437,14 +437,14 @@ SPEED LIMIT
         curl -Y 3000 -y 60 www.far-away-site.com
 
   This can very well be used in combination with the overall time limit, so
-  that the above operatioin must be completed in whole within 30 minutes:
+  that the above operation must be completed in whole within 30 minutes:
 
         curl -m 1800 -Y 3000 -y 60 www.far-away-site.com
 
   Forcing curl not to transfer data faster than a given rate is also possible,
   which might be useful if you're using a limited bandwidth connection and you
   don't want your transfer to use all of it (sometimes referred to as
-  "bandwith throttle").
+  "bandwidth throttle").
 
   Make curl transfer data no faster than 10 kilobytes per second:
 
@@ -590,7 +590,7 @@ HTTPS
 
   Secure HTTP requires SSL libraries to be installed and used when curl is
   built. If that is done, curl is capable of retrieving and posting documents
-  using the HTTPS procotol.
+  using the HTTPS protocol.
 
   Example:
 
@@ -765,7 +765,7 @@ NETRC
   to specify name and password for commonly visited ftp sites in a file so
   that you don't have to type them in each time you visit those sites. You
   realize this is a big security risk if someone else gets hold of your
-  passwords, so therefor most unix programs won't read this file unless it is
+  passwords, so therefore most unix programs won't read this file unless it is
   only readable by yourself (curl doesn't care though).
 
   Curl supports .netrc files if told so (using the -n/--netrc and
@@ -830,22 +830,22 @@ TELNET
   to track when the login prompt is received and send the username and
   password accordingly.
 
-PERSISTANT CONNECTIONS
+PERSISTENT CONNECTIONS
 
   Specifying multiple files on a single command line will make curl transfer
   all of them, one after the other in the specified order.
 
-  libcurl will attempt to use persistant connections for the transfers so that
+  libcurl will attempt to use persistent connections for the transfers so that
   the second transfer to the same host can use the same connection that was
   already initiated and was left open in the previous transfer. This greatly
   decreases connection time for all but the first transfer and it makes a far
   better use of the network.
 
-  Note that curl cannot use persistant connections for transfers that are used
+  Note that curl cannot use persistent connections for transfers that are used
   in subsequence curl invokes. Try to stuff as many URLs as possible on the
   same command line if they are using the same host, as that'll make the
-  transfers faster. If you use a http proxy for file transfers, practicly
-  all transfers will be persistant.
+  transfers faster. If you use a http proxy for file transfers, practically
+  all transfers will be persistent.
 
 MAILING LISTS
 

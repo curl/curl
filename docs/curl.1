@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "2 Nov 2004" "Curl 7.12.3" "Curl Manual"
+.TH curl 1 "7 Dec 2004" "Curl 7.12.3" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -165,12 +165,12 @@ won't fail or even report an error clearly. Using -v will get a warning
 displayed, but that is the only visible feedback you get about this possibly
 lethal situation.
 
-If this option is used several times, the last specfied file name will be
+If this option is used several times, the last specified file name will be
 used.
 .IP "-C/--continue-at <offset>"
 Continue/Resume a previous file transfer at the given offset. The given offset
 is the exact number of bytes that will be skipped counted from the beginning
-of the source file before it is transfered to the destination.  If used with
+of the source file before it is transferred to the destination.  If used with
 uploads, the ftp server command SIZE will not be used by curl.
 
 Use "-C -" to tell curl to automatically find out where/how to resume the
@@ -241,7 +241,7 @@ active FTP transfers. Curl will normally always first attempt to use EPRT,
 then LPRT before using PORT, but with this option, it will use PORT right
 away. EPRT and LPRT are extensions to the original FTP protocol, may not work
 on all servers but enable more functionality in a better way than the
-traditional PORT command. (Aded in 7.10.5)
+traditional PORT command. (Added in 7.10.5)
 
 If this option is used several times, each occurrence will toggle this on/off.
 .IP "--disable-epsv"
@@ -333,7 +333,7 @@ will instead attempt to create missing directories. (Added in 7.10.7)
 If this option is used twice, the second will again disable silent failure.
 .IP "--ftp-pasv"
 (FTP) Use PASV when transfering. PASV is the internal default behavior, but
-using this option can be used to override a previos --ftp-port option. (Added
+using this option can be used to override a previous --ftp-port option. (Added
 in 7.11.0)
 
 If this option is used twice, the second will again disable silent failure.
@@ -345,7 +345,7 @@ If this option is used twice, the second will again disable this.
 (HTTP) This lets curl emulate a filled in form in which a user has pressed the
 submit button. This causes curl to POST data using the Content-Type
 multipart/form-data according to RFC1867. This enables uploading of binary
-files etc. To force the 'content' part to be be a file, prefix the file name
+files etc. To force the 'content' part to be a file, prefix the file name
 with an @ sign. To just get the content part from a file, prefix the file name
 with the letter <. The difference between @ and < is then that @ makes a file
 get attached in the post as a file upload, while the < makes a text field and
@@ -357,7 +357,7 @@ input:
 
 \fBcurl\fP -F password=@/etc/passwd www.mypasswords.com
 
-To read the file's content from stdin insted of a file, use - where the file
+To read the file's content from stdin instead of a file, use - where the file
 name should've been. This goes for both @ and < constructs.
 
 You can also tell curl what Content-Type to use by using 'type=', in a manner
@@ -425,7 +425,7 @@ time only.
 If this option is used twice, the second will again disable header only.
 .IP "-j/--junk-session-cookies"
 (HTTP) When curl is told to read cookies from a given file, this option will
-make it discard all "session cookies". This will basicly have the same effect
+make it discard all "session cookies". This will basically have the same effect
 as if a new session is started. Typical browsers always discard session
 cookies when they're closed down. (Added in 7.9.7)
 
@@ -453,7 +453,7 @@ If this option is used several times, the last one will be used.
 should be one of 'clear', 'safe', 'confidential' or 'private'. Should you use
 a level that is not one of these, 'private' will instead be used.
 
-This option requiures that the library was built with kerberos4 support. This
+This option requires that the library was built with kerberos4 support. This
 is not very common. Use \fI-V/--version\fP to see if your curl supports it.
 
 If this option is used several times, the last one will be used.
@@ -563,12 +563,12 @@ Very similar to \fI--netrc\fP, but this option makes the .netrc usage
 \fBoptional\fP and not mandatory as the \fI--netrc\fP does.
 .IP "--negotiate"
 (HTTP) Enables GSS-Negotiate authentication. The GSS-Negotiate method was
-designed by Microsoft and is used in their web aplications. It is primarily
+designed by Microsoft and is used in their web applications. It is primarily
 meant as a support for Kerberos5 authentication but may be also used along
 with another authentication methods. For more information see IETF draft
 draft-brezak-spnego-http-04.txt. (Added in 7.10.6)
 
-This option requiures that the library was built with GSSAPI support. This is
+This option requires that the library was built with GSSAPI support. This is
 not very common. Use \fI-V/--version\fP to see if your version supports
 GSS-Negotiate.
 
@@ -592,7 +592,7 @@ authentication method instead. Such as Digest. (Added in 7.10.6)
 If you want to enable NTLM for your proxy authentication, then use
 \fI--proxy-ntlm\fP.
 
-This option requiures that the library was built with SSL support. Use
+This option requires that the library was built with SSL support. Use
 \fI-V/--version\fP to see if your curl supports NTLM.
 
 If this option is used several times, the following occurrences make no
@@ -741,7 +741,7 @@ using \fI--retry-delay\fP you disable this exponential backoff algorithm. See
 also \fI--retry-max-time\fP to limit the total time allowed for
 retries. (Option added in 7.12.3)
 
-If this option is used multiple times, the last occurance decide the amount.
+If this option is used multiple times, the last occurrence decide the amount.
 .IP "--retry-delay <seconds>"
 Make curl sleep this amount of time between each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
@@ -749,7 +749,7 @@ between retries). This option is only interesting if \fI--retry\fP is also
 used. Setting this delay to zero will make curl use the default backoff time.
 (Option added in 7.12.3)
 
-If this option is used multiple times, the last occurance decide the amount.
+If this option is used multiple times, the last occurrence decide the amount.
 .IP "--retry-max-time <seconds>"
 The retry timer is reset before the first transfer attempt. Retries will be
 done as usual (see \fI--retry\fP) as long as the timer hasn't reached this
@@ -758,7 +758,7 @@ will be made and while performing, it may take longer than this given time
 period. To limit a single request\'s maximum time, use \fI-m/--max-time\fP.
 Set this option to zero to not timeout retries. (Option added in 7.12.3)
 
-If this option is used multiple times, the last occurance decide the amount.
+If this option is used multiple times, the last occurrence decide the amount.
 .IP "-s/--silent"
 Silent mode. Don't show progress meter or error messages.  Makes
 Curl mute.
@@ -786,7 +786,7 @@ If this option is used several times, the last one will be used.
 Turn on the TCP_NODELAY option. See the \fIcurl_easy_setopt(3)\fP man page for
 details about this option. (Added in 7.11.2)
 
-If this option is used several times, each occurance toggles this on/off.
+If this option is used several times, each occurrence toggles this on/off.
 .IP "-t/--telnet-option <OPT=val>"
 Pass options to the telnet protocol. Supported options are:
 
@@ -884,16 +884,16 @@ HTTPS and FTPS are supported.
 .IP "libz"
 Automatic decompression of compressed files over HTTP is supported.
 .IP "NTLM"
-NTLM authenticaion is supported.
+NTLM authentication is supported.
 .IP "GSS-Negotiate"
-Negotiate authenticaion is supported.
+Negotiate authentication is supported.
 .IP "Debug"
 This curl uses a libcurl built with Debug. This enables more error-tracking
 and memory debugging etc. For curl-developers only!
 .IP "AsynchDNS"
 This curl uses asynchronous name resolves.
 .IP "SPNEGO"
-SPNEGO Negotiate authenticaion is supported.
+SPNEGO Negotiate authentication is supported.
 .IP "Largefile"
 This curl supports transfers of large files, files larger than 2GB.
 .IP "IDN"
@@ -951,7 +951,7 @@ redirections. (Added in 7.12.3)
 .TP
 .B time_starttransfer
 The time, in seconds, it took from the start until the first byte is just about
-to be transfered. This includes time_pretransfer and also the time the
+to be transferred. This includes time_pretransfer and also the time the
 server needs to calculate the result.
 .TP
 .B size_download
@@ -992,7 +992,7 @@ use. If there's an environment variable setting a proxy, you can set proxy to
 \&"" to override it.
 
 \fBNote\fP that all operations that are performed over a HTTP proxy will
-transparantly be converted to HTTP. It means that certain protocol specific
+transparently be converted to HTTP. It means that certain protocol specific
 operations might not be available. This is not the case if you can tunnel
 through the proxy, as done with the \fI-p/--proxytunnel\fP option.
 
@@ -1125,7 +1125,7 @@ FTP can't reconnect. Couldn't connect to the host we got in the 227-line.
 .IP 17
 FTP couldn't set binary. Couldn't change transfer method to binary.
 .IP 18
-Partial file. Only a part of the file was transfered.
+Partial file. Only a part of the file was transferred.
 .IP 19
 FTP couldn't download/access the given file, the RETR (or similar) command
 failed.
