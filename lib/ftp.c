@@ -2165,7 +2165,7 @@ CURLcode ftp_perform(struct connectdata *conn,
 
   {
     int i; /* counter for loop */
-    for (i=0; ftp->dirs[i]; i++) {
+    for (i=0; i < ftp->dirdepth; i++) {
       /* RFC 1738 says empty components should be respected too, but
          that is plain stupid since CWD can't be used with an empty argument */
       if ((result = ftp_cwd_and_mkd(conn, ftp->dirs[i])) != CURLE_OK)
