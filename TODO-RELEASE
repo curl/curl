@@ -6,6 +6,20 @@ Issues not sorted in any particular order.
 To get fixed in 7.11.2 (planned release late April/early May 2004)
 ======================
 
+36. autobuild test failures on Tru64/IRIX (test case 88 for example)
+
+   The problem is once again (this is the same scenario we had before in the
+   notorious test case 91 failure bug hunt) that when doing a second request,
+   the client hasn't yet found out that the previous connection is on its way
+   to get closed. It then re-uses the connection only to find it closed right
+   away.
+
+   We have code starting at lib/transfer.c:1949 that is supposed to detect
+   this situation and enforce a retry. This retry never happens on these
+   failures, indicating that the check is bad or that some code has ruined the
+   values used in the check.
+
+
 To get fixed in 7.12.0 (no date)
 ======================
 
