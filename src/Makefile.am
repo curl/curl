@@ -42,12 +42,12 @@ BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c
 NROFF=@NROFF@ @MANOPT@ # figured out by the configure script
 
-EXTRA_DIST = mkhelp.pl curlmsg.msg makefile.dj \
+EXTRA_DIST = mkhelp.pl makefile.dj \
 	Makefile.vc6 Makefile.b32 Makefile.m32 Makefile.riscos config.h.in \
 	macos/curl.mcp.xml.sit.hqx \
 	macos/MACINSTALL.TXT \
 	macos/src/curl_GUSIConfig.cpp \
-	macos/src/macos_main.cpp curlmsg.h curlmsg.sdl curlmsg_vms.h \
+	macos/src/macos_main.cpp \
 	config-amigaos.h makefile.amiga curl.rc \
 	Makefile.netware config-netware.h
 
