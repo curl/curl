@@ -57,5 +57,14 @@ int Curl_http_should_fail(struct connectdata *conn);
    public curl/curl.h header. */
 #define CURLAUTH_PICKNONE (1<<30) /* don't use auth */
 
+/* MAX_INITIAL_POST_SIZE indicates the number of kilobytes that will be sent
+   in the initial part of a multi-part POST message. This is primarily for
+   OpenVMS where the maximum number of bytes allowed per I/O is 64K.  For
+   other systems that do not define this, the default is (as it was
+   previously) 100K. */
+#ifndef MAX_INITIAL_POST_SIZE
+#define MAX_INITIAL_POST_SIZE (100*1024)
+#endif
+
 #endif
 #endif

@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (5 November 2004)
+- Tim Sneddon made libcurl send no more than 64K in a single first chunk when
+  doing a huge POST on VMS, as this is a system limitation. Default on general
+  systems is 100K.
+
 Daniel (4 November 2004)
 - Andres Garcia made it build on mingw againa, my --retry code broke the build.
 

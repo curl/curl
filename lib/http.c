@@ -1925,14 +1925,15 @@ CURLcode Curl_http(struct connectdata *conn)
       if(data->set.postfields) {
 
         if((data->state.authhost.done || data->state.authproxy.done )
-           && (postsize < (100*1024))) {
+           && (postsize < MAX_INITIAL_POST_SIZE)) {
           /* If we're not done with the authentication phase, we don't expect
              to actually send off any data yet. Hence, we delay the sending of
              the body until we receive that friendly 100-continue response */
 
-          /* The post data is less than 100K, then append it to the header.
-             This limit is no magic limit but only set to prevent really huge
-             POSTs to get the data duplicated with malloc() and family. */
+          /* The post data is less than MAX_INITIAL_PORT_SIZE, then append it
+             to the header. This limit is no magic limit but only set to
+             prevent really huge POSTs to get the data duplicated with
+             malloc() and family. */
 
           result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
           if(result)

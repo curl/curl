@@ -2,6 +2,7 @@
 /* MSK, 03/09/04, Seems to work for all platforms I've built on so far.    */
 /*      Added HAVE_SYS_IOCTL_H, IOCTL_3_ARGS and SIZEOF_CURL_OFF_T defines */
 /* MSK, 06/04/04, Added HAVE_INET_NTOP                                     */
+/* TES, 11/05/04, Added MAX_INITIAL_POST_SIZE, HAVE_BASENAME               */
 
 /* Define cpu-machine-OS */
 #ifdef __ALPHA
@@ -13,6 +14,12 @@
 #define OS "IA64-HP-VMS"
 #endif
 #endif
+
+/* Define to set number of kilobytes in initial POST message. On VMS systems
+   this is important as the default is 100 and the maximum amount of data
+   transferable in a VMS $QIO is 64K. All VMS versions prior to Alpha/I64
+   V8.2 and TCP/IP V5.5 are affected by this. */
+#define MAX_INITIAL_POST_SIZE (60*1024)
 
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
@@ -31,6 +38,9 @@
 
 /* Define if you have the geteuid function.  */
 #define HAVE_GETEUID 1
+
+/* Define if you have the basename function. */
+#define HAVE_BASENAME 1
 
 /* Define if you have the gethostbyaddr function.  */
 #define HAVE_GETHOSTBYADDR 1

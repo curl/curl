@@ -17,6 +17,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o huge POSTs on VMS
  o configure no longer uses pkg-config on cross-compiles
  o potential gzip decompress memory leak
  o "-C - --fail" on a HTTP page already downloaded
@@ -27,11 +28,13 @@ Other curl-related news since the previous public release:
 
  o pycurl 7.12.2: http://pycurl.sf.net/
  o TclCurl 0.12.2: http://personal1.iddeo.es/andresgarci/tclcurl/english/
+ o libcurl.NET 1.1: http://www.seasideresearch.com/downloads.html
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Peter Wullinger, Guillaume Arluison, Alexander Krasnostavsky, Mohun Biswas,
- Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan
+ Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia,
+ Tim Sneddon
 
         Thanks! (and sorry if I forgot to mention someone)
