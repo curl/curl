@@ -7,6 +7,16 @@
                                   Changelog
 
 
+Daniel (8 March 2005)
+- Dominick Meglio reported that using CURLOPT_FILETIME when transferring a FTP
+  file got a Last-Modified: header written to the data stream, corrupting the
+  actual data. This was because some conditions from the previous FTP code was
+  not properly brought into the new FTP code. I fixed and I added test case
+  520 to verify. (This bug was introduced in 7.13.1)
+
+- Dan Fandrich fixed the configure --with-zlib option to always consider the
+  given path before any standard paths.
+
 Daniel (6 March 2005)
 - Randy McMurchy was the first to report that valgrind.pm was missing from the
   release archive and thus 'make test' fails.

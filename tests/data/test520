@@ -1,0 +1,45 @@
+#
+# Server-side
+<reply>
+<data>
+contents of file
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib520
+</tool>
+
+ <name>
+FTP RETR with FILETIME
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/520
+</command>
+<file name="log/ftpserver.cmd">
+REPLY MDTM 213 20030405060708
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+MDTM 520
+EPSV
+TYPE I
+SIZE 520
+RETR 520
+QUIT
+</protocol>
+</verify>
