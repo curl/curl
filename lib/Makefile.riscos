@@ -5,11 +5,12 @@
 # Project objects:
 objs =	o.base64 o.connect o.cookie o.dict \
 	o.dllinit o.easy o.escape o.file \
-	o.formdata o.ftp o.getdate o.getenv \
-	o.getinfo o.getpass o.hostip o.http \
-	o.http_chunks o.if2ip o.krb4 o.ldap \
-	o.memdebug o.mprintf o.netrc o.progress \
-	o.security o.sendf o.speedcheck o.ssluse \
+	o.formdata o.ftp o.getenv \
+	o.getinfo o.getpass o.hostip \
+    o.hostip4 o.hostsyn o.http \
+	o.http_chunks o.inet_ntop o.inet_pton o.if2ip o.krb4 o.ldap \
+	o.memdebug o.mprintf o.netrc o.parsedate o.progress \
+	o.security o.select o.sendf o.speedcheck o.ssluse \
 	o.strequal o.strtok o.telnet o.timeval \
 	o.transfer o.url o.version o.strtoofft
 
@@ -52,9 +53,6 @@ o.formdata:	c.formdata
 o.ftp:	c.ftp
 		gcc $(compileropts) -c -o ftp.o c.ftp
 
-o.getdate:	c.getdate
-		gcc $(compileropts) -c -o getdate.o c.getdate
-
 o.getenv:	c.getenv
 		gcc $(compileropts) -c -o getenv.o c.getenv
 
@@ -67,6 +65,12 @@ o.getpass:	c.getpass
 o.hostip:	c.hostip
 		gcc $(compileropts) -c -o hostip.o c.hostip
 
+o.hostip4:	c.hostip4
+		gcc $(compileropts) -c -o hostip4.o c.hostip4
+
+o.hostsyn:	c.hostsyn
+		gcc $(compileropts) -c -o hostsyn.o c.hostsyn
+
 o.http:	c.http
 		gcc $(compileropts) -c -o http.o c.http
 
@@ -75,6 +79,12 @@ o.http_chunks:	c.http_chunks
 
 o.if2ip:	c.if2ip
 		gcc $(compileropts) -c -o if2ip.o c.if2ip
+
+o.inet_ntop:	c.inet_ntop
+		gcc $(compileropts) -c -o inet_ntop.o c.inet_ntop
+
+o.inet_pton:	c.inet_pton
+		gcc $(compileropts) -c -o inet_pton.o c.inet_pton
 
 o.krb4:	c.krb4
 		gcc $(compileropts) -c -o krb4.o c.krb4
@@ -91,11 +101,17 @@ o.mprintf:	c.mprintf
 o.netrc:	c.netrc
 		gcc $(compileropts) -c -o netrc.o c.netrc
 
+o.parsedate:	c.parsedate
+		gcc $(compileropts) -c -o parsedate.o c.parsedate
+
 o.progress:	c.progress
 		gcc $(compileropts) -c -o progress.o c.progress
 
 o.security:	c.security
 		gcc $(compileropts) -c -o security.o c.security
+
+o.select:	c.select
+		gcc $(compileropts) -c -o select.o c.select
 
 o.sendf:	c.sendf
 		gcc $(compileropts) -c -o sendf.o c.sendf
