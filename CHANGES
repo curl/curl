@@ -6,6 +6,54 @@
 
                                History of Changes
 
+Daniel (25 July 2000)
+- Kristian Köhntopp <kris at koehntopp.de> brought be a fix that makes libcurl
+  libtoolified, just as we've wanted for a while now. He also made the
+  recently added man pages get installed properly on 'make install' and some
+  other nice cleanups.
+
+- In a discussion with Eetu Ojanen it struck me that if we use curl to get a
+  page using a password, and that page then sends a Location: to another
+  server that curl follows, curl will send the user name and password to that
+  server as well.
+
+  Now, I'll never be able to make curl do Location: following all that perfect
+  and you're all sooner or later required to write a script to do several
+  fetches when you're doing advanced stuff, but now I've modified curl to at
+  least *only* send the user name and password to the original server. Which
+  means that if get a page from server A with a password, that forwards curl
+  to server B, curl won't use the password there. If server B then forwards
+  curl back to server A again, the password will be used again.
+
+  This is not a perfect implementation, as in a browser case it would only use
+  the password if the left-prefix of the first path is the same. I just think
+  that this fix prevents a somewhat lurky "security hole".
+
+  As a side-note in this subject: HTTP passwords are sent in cleartext and
+  will never be considered to be safe or secure. Use HTTPS for that.
+
+- As discussed on the mailing list, I converted the FTP response reading
+  function into using select() which then allows timeouts (even under win32!)
+  if the command-reply session gets too slow or dies completely. I made a
+  default timeout on 3600 seconds unless anything else is specified, since I
+  don't think anyone wants to wait more than that for a single character to
+  get received...
+
+- Torsten Foertsch <torsten.foertsch at gmx.net> brought a set of fixes for
+  the rfc1867 form posts. He introduced 'name=<file' which brings a means to
+  suuply very large text chunks read from the given file name. It differs from
+  'name=@file' in the way that this latter thing is marked in the uploaded
+  contents as a file upload, while the first is just text (as in a input or
+  textarea field). Torsten also corrected a bug that would happen if you used
+  %s or similar in a -F file name.
+
+- As discovered by Nico Baggus <Nico.Baggus at mail.ing.nl>, when transferring
+  files to/from FTP using type ASCII curl should not expect the transfer to be
+  the exact size reported by the server as the file size. Since ASCII may very
+  well mean that the content is translated while transfered, the final size
+  may very well differ. Therefor, curl now ignores the file size when doing
+  ASCII transfers in FTP.
+
 Daniel (24 July 2000)
 - Added CURLOPT_PROXYPORT to the curl_easy_setopt() call to allow the proxy
   port number to be set separately from the proxy host name.
