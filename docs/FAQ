@@ -1,4 +1,4 @@
-Updated: November 20, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: November 27, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -154,9 +154,9 @@ FAQ
   have them inserted in the main sources (of course on the condition that
   developers agree on that the fixes are good).
 
-  The list of contributors in the bottom of the man page is only a small part
-  of all the people that every day provide us with bug reports, suggestions,
-  ideas and source code.
+  The list of contributors in the docs/THANKS file is only a small part of all
+  the people that every day provide us with bug reports, suggestions, ideas
+  and source code.
 
   curl is developed by a community, with Daniel at the wheel.
 
