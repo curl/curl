@@ -1,0 +1,139 @@
+# Perl interface for libcurl. Check out the file README for more info.
+
+package Curl::easy;
+
+use strict;
+use Carp;
+use vars qw($VERSION @ISA @EXPORT @EXPORT_OK $AUTOLOAD);
+
+require Exporter;
+require DynaLoader;
+require AutoLoader;
+
+@ISA = qw(Exporter DynaLoader);
+# Items to export into callers namespace by default. Note: do not export
+# names by default without a very good reason. Use EXPORT_OK instead.
+# Do not simply export all your public functions/methods/constants.
+@EXPORT = qw(
+CURLOPT_AUTOREFERER
+CURLOPT_COOKIE
+CURLOPT_COOKIEFILE
+CURLOPT_CRLF
+CURLOPT_CUSTOMREQUEST
+CURLOPT_ERRORBUFFER
+CURLOPT_FAILONERROR
+CURLOPT_FILE
+CURLOPT_FOLLOWLOCATION
+CURLOPT_FTPAPPEND
+CURLOPT_FTPASCII
+CURLOPT_FTPLISTONLY
+CURLOPT_FTPPORT
+CURLOPT_HEADER
+CURLOPT_HTTPHEADER
+CURLOPT_HTTPPOST
+CURLOPT_HTTPPROXYTUNNEL
+CURLOPT_HTTPREQUEST
+CURLOPT_INFILE
+CURLOPT_INFILESIZE
+CURLOPT_INTERFACE
+CURLOPT_KRB4LEVEL
+CURLOPT_LOW_SPEED_LIMIT
+CURLOPT_LOW_SPEED_TIME
+CURLOPT_MUTE
+CURLOPT_NETRC
+CURLOPT_NOBODY
+CURLOPT_NOPROGRESS
+CURLOPT_NOTHING
+CURLOPT_PORT
+CURLOPT_POST
+CURLOPT_POSTFIELDS
+CURLOPT_POSTFIELDSIZE
+CURLOPT_POSTQUOTE
+CURLOPT_PROGRESSDATA
+CURLOPT_PROGRESSFUNCTION
+CURLOPT_PROXY
+CURLOPT_PROXYPORT
+CURLOPT_PROXYUSERPWD
+CURLOPT_PUT
+CURLOPT_QUOTE
+CURLOPT_RANGE
+CURLOPT_READFUNCTION
+CURLOPT_REFERER
+CURLOPT_RESUME_FROM
+CURLOPT_SSLCERT
+CURLOPT_SSLCERTPASSWD
+CURLOPT_SSLVERSION
+CURLOPT_STDERR
+CURLOPT_TIMECONDITION
+CURLOPT_TIMEOUT
+CURLOPT_TIMEVALUE
+CURLOPT_TRANSFERTEXT
+CURLOPT_UPLOAD
+CURLOPT_URL
+CURLOPT_USERAGENT
+CURLOPT_USERPWD
+CURLOPT_VERBOSE
+CURLOPT_WRITEFUNCTION
+CURLOPT_WRITEHEADER
+
+CURLINFO_EFFECTIVE_URL
+CURLINFO_HTTP_CODE
+CURLINFO_TOTAL_TIME
+CURLINFO_NAMELOOKUP_TIME
+CURLINFO_CONNECT_TIME
+CURLINFO_PRETRANSFER_TIME
+CURLINFO_SIZE_UPLOAD
+CURLINFO_SIZE_DOWNLOAD
+CURLINFO_SPEED_DOWNLOAD
+CURLINFO_SPEED_UPLOAD
+CURLINFO_HEADER_SIZE
+CURLINFO_REQUEST_SIZE
+);
+$VERSION = '1.0.1';
+
+sub AUTOLOAD {
+    # This AUTOLOAD is used to 'autoload' constants from the constant()
+    # XS function.
+
+    (my $constname = $AUTOLOAD) =~ s/.*:://;
+    return constant($constname, 0);
+}
+
+bootstrap Curl::easy $VERSION;
+
+# Preloaded methods go here.
+
+# Autoload methods go after =cut, and are processed by the autosplit program.
+
+1;
+__END__
+# Below is the stub of documentation for your module. You better edit it!
+
+=head1 NAME
+
+Curl::easy - Perl extension for libcurl
+
+=head1 SYNOPSIS
+
+  use Curl::easy;
+  
+  $CURL = curl_easy_init();
+  $CURLcode = curl_easy_setopt($CURL, CURLoption, Value);
+  $CURLcode = curl_easy_perform($CURL);
+  curl_easy_cleanup($CURL);
+  
+
+=head1 DESCRIPTION
+
+This perl module provides an interface to the libcurl C library. See
+http://curl.haxx.se/ for more information on cURL and libcurl.
+
+=head1 AUTHOR
+
+Georg Horn <horn@koblenz-net.de>
+
+=head1 SEE ALSO
+
+http://curl.haxx.se/
+
+=cut

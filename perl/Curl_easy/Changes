@@ -1,0 +1,35 @@
+Revision history for Perl extension Curl::easy.
+Check out the file README for more info.
+
+1.0.2  Tue Oct 10 2000:
+    - runs with libcurl 7.4
+    - modified curl_easy_getinfo(). It now calls curl_getinfo() that has
+      been added to libcurl in version 7.4.
+
+1.0.1  Tue Oct 10 2000:
+    - Added some missing features of curl_easy_setopt():
+      - CURLOPT_ERRORBUFFER now works by passing the name of a perl
+        variable that shall be crated and the errormessage (if any)
+	be stored to.
+      - Passing filehandles (Options FILE, INFILE and WRITEHEADER) now works.
+    Have a look at test.pl to see how it works...
+
+    - Added a new function, curl_easy_getinfo(), that for now always
+      returns the number of bytes that where written to disk during the last
+      download. If the curl_easy_getinfo() function is included in libcurl,
+      (as promised by Daniel ;-)) i will turn this into just a call to this
+      function.
+
+1.0  Thu Oct 5 2000:
+    - first released version
+    - runs with libcurl 7.3
+    - some features of curl_easy_setopt() are still missing:
+      - passing function pointers doesn't work (options WRITEFUNCTION,
+	READFUNCTION and PROGRESSFUNCTION).
+      - passing FILE * pointers doesn't work (options FILE, INFILE and
+	WRITEHEADER).
+      - passing linked lists doesn't work (options HTTPHEADER and
+	HTTPPOST).
+      - setting the buffer where to store error messages in doesn't work
+	(option ERRORBUFFER).
+
