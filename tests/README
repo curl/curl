@@ -69,6 +69,7 @@ TEST CASE NUMBERS
  200 - 299   FILE
  300 - 399   HTTPS
  400 - 499   FTPS
+ 500 - 599   libcurl source code tests, not using the curl command tool
 
  Since 30-apr-2003, there's nothing in the system that requires us to keep
  within these number series. Each test case now specify their own server
