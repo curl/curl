@@ -178,19 +178,27 @@ typedef enum {
 
 #define CURL_ERROR_SIZE 256
 
+/* long may be 32 or 64 bits, but we should never depend on anything else
+   but 32 */
+#define CURLOPTTYPE_LONG          0
+#define CURLOPTTYPE_OBJECTPOINT   10000
+#define CURLOPTTYPE_FUNCTIONPOINT 20000
+
 /* name is uppercase CURLOPT_<name>,
    type is one of the defined CURLOPTTYPE_<type>
    number is unique identifier */
 #ifdef CINIT
 #undef CINIT
 #endif
+#ifdef __STDC__
 #define CINIT(name,type,number) CURLOPT_ ## name = CURLOPTTYPE_ ## type + number
-
-/* long may be 32 or 64 bits, but we should never depend on anything else
-   but 32 */
-#define CURLOPTTYPE_LONG          0
-#define CURLOPTTYPE_OBJECTPOINT   10000
-#define CURLOPTTYPE_FUNCTIONPOINT 20000
+#else
+/* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
+#define LONG          CURLOPTTYPE_LONG
+#define OBJECTPOINT   CURLOPTTYPE_OBJECTPOINT
+#define FUNCTIONPOINT CURLOPTTYPE_FUNCTIONPOINT
+#define CINIT(name,type,number) CURLOPT_/**/name = type + number
+#endif
 
 typedef enum {
   CINIT(NOTHING, LONG, 0), /********* the first one is unused ************/
@@ -562,7 +570,12 @@ int curl_formparse(char *, struct curl_httppost **,
 #ifdef CFINIT
 #undef CFINIT
 #endif
+#ifdef __STDC__
 #define CFINIT(name) CURLFORM_ ## name
+#else
+/* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
+#define CFINIT(name) CURLFORM_/**/name
+#endif
 
 typedef enum {
   CFINIT(NOTHING),        /********* the first one is unused ************/
@@ -624,7 +637,7 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.9.6-pre1"
+#define LIBCURL_VERSION "7.9.6-pre2"
 #define LIBCURL_VERSION_NUM 0x070906
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
