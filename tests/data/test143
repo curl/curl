@@ -1,0 +1,34 @@
+# Server-side
+<reply>
+<data>
+bla bla bla
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP URL with type=a
+ </name>
+ <command>
+"ftp://%HOSTIP:%FTPPORT/%2ftmp/moo/143;type=a"
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD /tmp
+CWD moo
+EPSV
+TYPE A
+SIZE 143
+RETR 143
+</protocol>
+</verify>
