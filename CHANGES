@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (22 April 2004)
+- If a transfer is found out to be only partial, libcurl will now treat that
+  as a problem serious enough to skip the final QUIT command before closing
+  the control connection. To avoid the risk that it will "hang" waiting for
+  the QUIT response. Added test case 161 to verify this.
+
 Daniel (21 April 2004)
 - Modified the heuristics for dealing with the test 160 scenario. When a
   connection is re-used and nothing at all is received from it (because the
