@@ -7,7 +7,7 @@
                                 How To Compile
 
 Curl has been compiled and built on numerous different operating systems. The
-way to proceed is mainly divided in two different ways: the unix way or the
+way to proceed is mainly divided in two different ways: the unix way or the 
 windows way.
 
 If you're using Windows (95/98/NT/ME/2000 or whatever) or OS/2, you should
@@ -183,9 +183,9 @@ Win32
         For VC++ 6, there's an included Makefile.vc6 that should be possible
         to use out-of-the-box.
 
-        Microsoft note: add /Zm200 to the compiler options, as the hugehelp.c
-        won't compile otherwise due to "too long puts string" or something
-        like that!
+        Microsoft note: add /Zm200 to the compiler options to increase the 
+		compiler's memory allocation limit, as the hugehelp.c won't compile
+		due to "too long puts string".
 
 
    With SSL:
@@ -251,7 +251,7 @@ IBM OS/2
 
 PORTS
 =====
-   Just to show off, this is a probably incomplete list of known hardware and
+   This is a probably incomplete list of known hardware and
    operating systems that curl has been compiled for:
 
         - Ultrix

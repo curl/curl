@@ -15,10 +15,6 @@ SIMPLE USAGE
 
         curl ftp://ftp.funet.fi/README
 
-  Get a gopher document from funet's gopher server:
-
-        curl gopher://gopher.funet.fi
-
   Get a web page from a server using port 8000:
 
         curl http://www.weirdserver.com:8000/
@@ -26,6 +22,10 @@ SIMPLE USAGE
   Get a list of the root directory of an FTP site:
 
         curl ftp://cool.haxx.se/
+
+  Get a gopher document from funet's gopher server:
+
+        curl gopher://gopher.funet.fi
 
   Get the definition of curl from a dictionary:
 
@@ -186,7 +186,7 @@ DETAILED INFORMATION
   -D/--dump-header option when getting files from both FTP and HTTP, and it
   will then store the headers in the specified file.
 
-  Store the HTTP headers in a separate file:
+  Store the HTTP headers in a separate file (headers.txt in the example):
 
         curl --dump-header headers.txt curl.haxx.se
 
@@ -245,32 +245,32 @@ POST (HTTP)
 
   -F accepts parameters like -F "name=contents". If you want the contents to
   be read from a file, use <@filename> as contents. When specifying a file,
-  you can also specify which content type the file is, by appending
-  ';type=<mime type>' to the file name. You can also post contents of several
-  files in one field. So that the field name 'coolfiles' can be sent three
-  files with different content types in a manner similar to:
+  you can also specify the file content type by appending ';type=<mime type>'
+  to the file name. You can also post the contents of several files in one field.
+  For example, the field name 'coolfiles' is used to send three  files, with
+  different content types using the following syntax:
 
         curl -F "coolfiles=@fil1.gif;type=image/gif,fil2.txt,fil3.html" \
         http://www.post.com/postit.cgi
 
-  If content-type is not specified, curl will try to guess from the extension
-  (it only knows a few), or use the previously specified type (from an earlier
-  file if several files are specified in a list) or finally using the default
-  type 'text/plain'.
+  If the content-type is not specified, curl will try to guess from the file
+  extension  (it only knows a few), or use the previously specified type
+  (from an earlier file if several files are specified in a list) or else it
+  will  using the default type 'text/plain'.
 
   Emulate a fill-in form with -F. Let's say you fill in three fields in a
   form. One field is a file name which to post, one field is your name and one
   field is a file description. We want to post the file we have written named
   "cooltext.txt". To let curl do the posting of this data instead of your
-  favourite browser, you have to check out the HTML of the form page to get to
-  know the names of the input fields. In our example, the input field names are
+  favourite browser, you have to read the HTML source of the form page and find
+  the names of the input fields. In our example, the input field names are
   'file', 'yourname' and 'filedescription'.
 
         curl -F "file=@cooltext.txt" -F "yourname=Daniel" \
              -F "filedescription=Cool text file with cool text inside" \
              http://www.post.com/postit.cgi
 
-  So, to send two files in one post you can do it in two ways:
+  To send two files in one post you can do it in two ways:
 
   1. Send multiple files in a single "field" with a single field name:
  
@@ -280,11 +280,11 @@ POST (HTTP)
 
         curl -F "docpicture=@dog.gif" -F "catpicture=@cat.gif" 
 
-REFERER
+REFERRER
 
   A HTTP request has the option to include information about which address
-  that referred to actual page, and curl allows the user to specify that
-  referrer to get specified on the command line. It is especially useful to
+  that referred to actual page.  Curl allows you to specify the
+  referrer to be used on the command line. It is especially useful to
   fool or trick stupid servers or CGI scripts that rely on that information
   being available or contain certain data.
 
@@ -353,13 +353,17 @@ COOKIES
   Note that by specifying -b you enable the "cookie awareness" and with -L
   you can make curl follow a location: (which often is used in combination
   with cookies). So that if a site sends cookies and a location, you can
-  use a non-existing file to trig the cookie awareness like:
+  use a non-existing file to trigger the cookie awareness like:
 
-        curl -L -b empty-file www.example.com
+        curl -L -b empty.txt www.example.com
 
   The file to read cookies from must be formatted using plain HTTP headers OR
   as netscape's cookie file. Curl will determine what kind it is based on the
-  file contents.
+  file contents.  In the above command, curl will parse the header and store
+  the cookies received from www.example.com.  curl will send to the server the
+  stored cookies which match the request as it follows the location.  The
+  file "empty.txt" may be a non-existant file.
+  
 
 PROGRESS METER
 
@@ -392,12 +396,12 @@ PROGRESS METER
 
 SPEED LIMIT
 
-  Curl offers the user to set conditions regarding transfer speed that must
-  be met to let the transfer keep going. By using the switch -y and -Y you
-  can make curl abort transfers if the transfer speed doesn't exceed your
-  given lowest limit for a specified time.
+  Curl allows the user to set the transfer speed conditions that must be met
+  to let the transfer keep going. By using the switch -y and -Y you
+  can make curl abort transfers if the transfer speed is below the specified
+  lowest limit for a specified time.
 
-  To let curl abandon downloading this page if its slower than 3000 bytes per
+  To have curl abort the download if the speed is slower than 3000 bytes per
   second for 1 minute, run:
 
         curl -y 3000 -Y 60 www.far-away-site.com
@@ -610,7 +614,7 @@ RESUMING FILE TRANSFERS
  (*1) = This requires that the ftp server supports the non-standard command
         SIZE. If it doesn't, curl will say so.
 
- (*2) = This requires that the wb server supports at least HTTP/1.1. If it
+ (*2) = This requires that the web server supports at least HTTP/1.1. If it
         doesn't, curl will say so.
 
 TIME CONDITIONS

@@ -84,10 +84,11 @@ FAQ
 
   1.2 What is libcurl?
 
-  libcurl is a reliable, higly portable multiprotocol file transfer library.
+  libcurl is a reliable and portable library which provides you with an easy
+  interface to a range of common internet protocols.
 
-  Any application is free to use libcurl, even commercial or closed-source
-  ones.
+  You can use libcurl for free in your application even if it is commercial
+  or closed-source.
 
   1.3 What is cURL not?
   
@@ -499,7 +500,7 @@ FAQ
   available way to do multiple requests was to init/perform/cleanup for each
   transfer.
 
-  5.4 Does libcurl do Winsock initing on win32 systems?
+  5.4 Does libcurl do Winsock initialization on win32 systems?
 
   No.
 
