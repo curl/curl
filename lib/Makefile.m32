@@ -33,13 +33,15 @@ libcurl_a_SOURCES = arpa_telnet.h file.c getpass.h netrc.h timeval.c base64.c \
 	urldata.h transfer.c getdate.h ldap.c ssluse.c version.c transfer.h getenv.c	\
 	ldap.h ssluse.h escape.c getenv.h mprintf.c telnet.c escape.h getpass.c netrc.c	\
 	telnet.h getinfo.c strequal.c strequal.h easy.c security.h		\
-	security.c krb4.h krb4.c memdebug.h memdebug.c inet_ntoa_r.h http_chunks.h http_chunks.c
+	security.c krb4.h krb4.c memdebug.h memdebug.c inet_ntoa_r.h http_chunks.h http_chunks.c \
+	strtok.c
 
 libcurl_a_OBJECTS =  file.o timeval.o base64.o hostip.o progress.o \
 	formdata.o cookie.o http.o sendf.o ftp.o url.o dict.o if2ip.o \
 	speedcheck.o getdate.o transfer.o ldap.o ssluse.o version.o \
 	getenv.o escape.o mprintf.o telnet.o getpass.o netrc.o getinfo.o \
-	strequal.o easy.o security.o krb4.o memdebug.o http_chunks.o
+	strequal.o easy.o security.o krb4.o memdebug.o http_chunks.o \
+	strtok.o
 
 LIBRARIES =  $(libcurl_a_LIBRARIES)
 SOURCES = $(libcurl_a_SOURCES)
