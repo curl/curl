@@ -2,13 +2,13 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_formparse 3 "6 June 2000" "Curl 7.0" "libcurl Manual"
+.TH curl_formparse 3 "8 February 2001" "Curl 7.0" "libcurl Manual"
 .SH NAME
 curl_formparse - add a section to a multipart/formdata HTTP POST
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "CURLcode *curl_formparse(char *" string, "struct HttpPost **" firstitem,
+.BI "CURLcode curl_formparse(char *" string, "struct HttpPost **" firstitem,
 .BI "struct HttpPost ** "lastitem ");"
 .ad
 .SH DESCRIPTION
