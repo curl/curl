@@ -1054,9 +1054,13 @@ AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
        dnl and the includes are in $val/include. This is the default setup for
        dnl ares so it should not be a problem.
        if test "x$enableval" = "xyes" ; then
-         aresdir=`cd $srcdir/ares && pwd`
-         CPPFLAGS="$CPPFLAGS -I$aresdir"
-         LDFLAGS="$LDFLAGS -L$aresdir"
+         if test -d "$srcdir/ares"; then
+            AC_CONFIG_SUBDIRS(ares)
+            aresinc=`cd $srcdir/ares && pwd`
+            CPPFLAGS="$CPPFLAGS -I$aresinc"
+            areslib=`cd ares && pwd`
+            LDFLAGS="$LDFLAGS -L$areslib"
+         fi
        else
          CPPFLAGS="$CPPFLAGS -I$enableval/include"
          LDFLAGS="$LDFLAGS -L$enableval/lib"
