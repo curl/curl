@@ -1543,17 +1543,32 @@ sub displaylogcontent {
 }
 
 sub displaylogs {
+    my ($testnum)=@_;
     opendir(DIR, "$LOGDIR") ||
         die "can't open dir: $!";
     my @logs = readdir(DIR);
     closedir DIR;
     my $log;
+
+    my %interest=('curl.log' => 1,
+                  'server.input' => 1,
+                  'server.response' => 1,
+                  'sws.log' => 1,
+                  'ftpd.log' => 1,
+                  );
+
     print "== Contents of files in the log/ dir:\n";
     foreach $log (sort @logs) {
-        # ignore . and .. and the file has nonzero size
-        if(($log !~ /^\.(\.|)$/) && (-s "$LOGDIR/$log")) {
+        my $num = $log;
+        $num =~ s/[^0-9]//g; # cut off all non-digits
+
+        # the log file is:
+        # generally interesting OR
+        # contains our test case number AND
+        # contains more than zero bytes
+        if(($interest{$log} || ($num  == $testnum)) && (-s "$LOGDIR/$log")) {
             print "== Start of file $log\n";
-            #displaylogcontent("$LOGDIR/$log");
+            displaylogcontent("$LOGDIR/$log");
             print "== End of file $log\n";
         }
     }
@@ -1585,7 +1600,7 @@ foreach $testnum (split(" ", $TESTCASES)) {
         $failed.= "$testnum ";
         if($postmortem) {
             # display all files in log/ in a nice way
-            displaylogs();
+            displaylogs($testnum);
         }
         if(!$anyway) {
             # a test failed, abort
