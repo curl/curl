@@ -7,6 +7,12 @@
 #define EAT_SPACE(ptr) while( ptr && *ptr && isspace(*ptr) ) ptr++
 #define EAT_WORD(ptr) while( ptr && *ptr && !isspace(*ptr) && ('>' != *ptr)) ptr++
 
+#ifdef DEBUG
+#define show(x) printf x
+#else
+#define show(x)
+#endif
+
 char *appendstring(char *string, /* original string */
                    char *buffer, /* to append */
                    int *stringlen, int *stralloc)
@@ -60,9 +66,9 @@ char *spitout(FILE *stream, char *main, char *sub, int *size)
 
     if('<' != *ptr) {
       if(display) {
-        printf("=> %s", buffer);
+        show(("=> %s", buffer));
         string = appendstring(string, buffer, &stringlen, &stralloc);
-        printf("* %s\n", buffer);
+        show(("* %s\n", buffer));
       }
       continue;
     }
@@ -113,17 +119,17 @@ char *spitout(FILE *stream, char *main, char *sub, int *size)
     }
     if(display) {
       string = appendstring(string, buffer, &stringlen, &stralloc);
-      printf("* %s\n", buffer);
+      show(("* %s\n", buffer));
     }
 
     if((STATE_INSUB == state) &&
        !strcmp(cmain, main) &&
        !strcmp(csub, sub)) {
-      printf("* (%d bytes) %s\n", stringlen, buffer);
+      show(("* (%d bytes) %s\n", stringlen, buffer));
       display = 1; /* start displaying */
     }
     else {
-      printf("%d (%s/%s): %s\n", state, cmain, csub, buffer);
+      show(("%d (%s/%s): %s\n", state, cmain, csub, buffer));
       display = 0; /* no display */
     }
   }

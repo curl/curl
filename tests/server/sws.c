@@ -17,7 +17,7 @@
 #define DEFAULT_PORT 8999
 
 #ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "/dev/null"
+#define DEFAULT_LOGFILE "log/sws.log"
 #endif
 
 #define DOCBUFSIZE 4
@@ -25,7 +25,7 @@
 
 #define VERSION "cURL test suite HTTP server/0.1"
 
-#define REQUEST_DUMP "http-request.dump"
+#define REQUEST_DUMP "log/http-request.dump"
 
 #define TEST_DATA_PATH "data/test%d"
 
@@ -56,7 +56,9 @@ static void logmsg(const char *msg)
     strcpy(loctime, asctime(curr_time));
     loctime[strlen(loctime) - 1] = '\0';
     fprintf(logfp, "%s: pid %d: %s\n", loctime, getpid(), msg);
+#ifdef DEBUG
     fprintf(stderr, "%s: pid %d: %s\n", loctime, getpid(), msg);
+#endif
     fflush(logfp);
 }
 
@@ -265,8 +267,6 @@ int main(int argc, char *argv[])
     
     if(argc>1)
       port = atoi(argv[1]);
-
-    logfile = "logfile";
 
     /* FIX: write our pid to a file name */
 
