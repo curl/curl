@@ -17,7 +17,9 @@ AC_PROG_CC
 dnl Check for AIX weirdos
 AC_AIX
 
+dnl check for how to do large files
 AC_SYS_LARGEFILE
+
 dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
@@ -247,7 +249,11 @@ exit (rc != 0 ? 1 : 0); }],[
 	    AC_DEFINE(HAVE_GETHOSTBYNAME_R_6)
             ac_cv_gethostbyname_args=6],[
 	    AC_MSG_RESULT(no)
-	    have_missing_r_funcs="$have_missing_r_funcs gethostbyname_r"])])])])])
+	    have_missing_r_funcs="$have_missing_r_funcs gethostbyname_r"],
+	    [ac_cv_gethostbyname_args=0])],
+	  [ac_cv_gethostbyname_args=0])],
+	[ac_cv_gethostbyname_args=0])],
+      [ac_cv_gethostbyname_args=0])])
 
   dnl check for number of arguments to gethostbyaddr_r. it might take
   dnl either 5, 7, or 8 arguments.
@@ -470,6 +476,3 @@ dnl	   perl/checklinks.pl \
 dnl	   perl/getlinks.pl \
 dnl        perl/formfind.pl \
 dnl	   perl/recursiveftpget.pl  )
-
-
-
