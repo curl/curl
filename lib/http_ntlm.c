@@ -46,6 +46,7 @@
 #include "base64.h"
 #include "http_ntlm.h"
 #include "url.h"
+#include "http.h" /* for Curl_http_auth_stage() */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
