@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_init 3 "5 March 2001" "libcurl 7.6.1" "libcurl Manual"
+.TH curl_easy_init 3 "31 Jan 2001" "libcurl 7.9.4" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - Extract information from a curl session (added in 7.4)
 .SH SYNOPSIS
@@ -95,6 +95,12 @@ is the value read from the Content-Length: field.  (Added in 7.6.1)
 .B CURLINFO_CONTENT_LENGTH_UPLOAD
 Pass a pointer to a double to receive the specified size of the upload.
 (Added in 7.6.1)
+.TP
+.B CURLINFO_CONTENT_TYPE
+Pass a pointer to a 'char *' to receive the content-type of the downloaded
+object. This is the value read from the Content-Type: field. If you get NULL,
+it means that the server didn't send a valid Content-Type header or that the
+protocol used doesn't support this.  (Added in 7.9.4)
 .PP
 
 .SH RETURN VALUE
