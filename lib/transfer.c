@@ -797,12 +797,8 @@ Transfer(struct connectdata *c_conn)
         if((keepon & KEEP_WRITE) && FD_ISSET(conn->writesockfd, &writefd)) {
           /* write */
 
-          char scratch[BUFSIZE * 2];
           int i, si;
           size_t bytes_written;
-
-          if(data->set.crlf)
-            buf = data->state.buffer; /* put it back on the buffer */
 
           nread = data->set.fread(buf, 1, conn->upload_bufsize, data->set.in);
 
@@ -821,15 +817,15 @@ Transfer(struct connectdata *c_conn)
           if (data->set.crlf) {
             for(i = 0, si = 0; i < (int)nread; i++, si++) {
               if (buf[i] == 0x0a) {
-                scratch[si++] = 0x0d;
-                scratch[si] = 0x0a;
+                data->state.scratch[si++] = 0x0d;
+                data->state.scratch[si] = 0x0a;
               }
               else {
-                scratch[si] = buf[i];
+                data->state.scratch[si] = buf[i];
               }
             }
             nread = si;
-            buf = scratch; /* point to the new buffer */
+            buf = data->state.scratch; /* point to the new buffer */
           }
 
           /* write to socket */
@@ -840,6 +836,8 @@ Transfer(struct connectdata *c_conn)
             failf(data, "Failed uploading data");
             return CURLE_WRITE_ERROR;
           }
+          if(data->set.crlf)
+            buf = data->state.buffer; /* put it back on the buffer */
 
         }
 
