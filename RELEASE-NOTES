@@ -1,7 +1,7 @@
-Curl and libcurl 7.13.2
+Curl and libcurl 7.13.3
 
- Public curl release number:               87
- Releases counted from the very beginning: 114
+ Public curl release number:               88
+ Releases counted from the very beginning: 115
  Available command line options:           106
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
@@ -10,48 +10,19 @@ Curl and libcurl 7.13.2
 
 This release includes the following changes:
 
- o Added --form-string
- o libcurl can be built with SSPI support. curl_version_info() then returns
-   a new feature bit: CURL_VERSION_SSPI. configure --enable-sspi added
- o Added --proxy-anyauth
- o Added runtests.1 and testcurl.1 man pages
+ o 
 
 This release includes the following bugfixes:
 
- o the MSVC libcurl Makefile was fixed
- o libcurl on Windows crash if resolver was active when easy handle was killed
- o HTTP POST with auth and an initial 100 response before the 401/407
- o configure's SSL-detection for msys/mingw
- o better connection keep-alive when POSTing with HTTP Digest
- o FTP-SSL
- o reading FTP server response in multiple reads
- o picking one out of multiple proxy auth methods
- o inet_ntoa_r() when built with uClibc
- o the so name issue for the LDAP library dynamic load
- o crash when using SOCKS4 proxy
- o a debug printf() was removed
- o CURLOPT_FILETIME when downloading FTP corrupted data
- o FTP upload resume now works even if no file is present on the site
- o SSL seeding no longer attempts to read the whole random file
+ o 
 
 Other curl-related news since the previous public release:
 
- o the cURL project is now over 7 years old
- o daily curl binary builds for Windows fresh from CVS:
-   http://cool.haxx.se/curl-daily/
- o curl-tracker is a new mailinglist for "tracker" activities:
-   http://cool.haxx.se/mailman/listinfo/curl-tracker
- o libcurl binding for Common Lisp: http://common-lisp.net/project/cl-curl/
- o pycurl 7.13.1 http://pycurl.sf.net
- o http://curl.tolix.org is a new Californian mirror
- o http://curl.seekmeup.com/ is a new mirror in US Texas
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Ignacio Vazquez-Abrams, Randy McMurchy, Dominick Meglio,
- Jean-Marc Ranger, Tor Arntsen, Nodak Sodak, David Houlder, Gisle Vanem,
- Christopher R. Palmer, Gwenole Beauchesne, Augustus Saunders, Jesper Jensen,
- Tom Moers, Andres Garcia, Hardeep Singh, Marcelo Juchem
+
 
         Thanks! (and sorry if I forgot to mention someone)
