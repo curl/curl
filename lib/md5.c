@@ -1,3 +1,33 @@
+/***************************************************************************
+ *                                  _   _ ____  _     
+ *  Project                     ___| | | |  _ \| |    
+ *                             / __| | | | |_) | |    
+ *                            | (__| |_| |  _ <| |___ 
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2003, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * $Id$
+ ***************************************************************************/
+
+#include "setup.h"
+
+#ifndef USE_SSLEAY
+/* This code segment is only used if OpenSSL is not provided, as if it is
+   we use the MD5-function provided there instead. No good duplicating
+   code! */
+
 /* Copyright (C) 1991-2, RSA Data Security, Inc. Created 1991. All
 rights reserved.
 
@@ -22,9 +52,6 @@ documentation and/or software.
 
 #include <string.h>
 
-/* UINT2 defines a two byte word */
-typedef unsigned short int UINT2;
-
 /* UINT4 defines a four byte word */
 typedef unsigned long int UINT4;
 
@@ -35,9 +62,11 @@ struct md5_ctx {
   unsigned char buffer[64];                         /* input buffer */
 };
 
-static void MD5Init(struct md5_ctx *);
-static void MD5Update(struct md5_ctx *, unsigned char *, unsigned int);
-static void MD5Final(unsigned char [16], struct md5_ctx *);
+typedef struct md5_ctx MD5_CTX;
+
+static void MD5_Init(struct md5_ctx *);
+static void MD5_Update(struct md5_ctx *, unsigned char *, unsigned int);
+static void MD5_Final(unsigned char [16], struct md5_ctx *);
 
 /* Constants for MD5Transform routine.
  */
@@ -109,7 +138,7 @@ Rotation is separate from addition to prevent recomputation.
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-static void MD5Init (context)
+static void MD5_Init (context)
 struct md5_ctx *context;                                        /* context */
 {
   context->count[0] = context->count[1] = 0;
@@ -125,7 +154,7 @@ struct md5_ctx *context;                                        /* context */
   operation, processing another message block, and updating the
   context.
  */
-static void MD5Update (context, input, inputLen)
+static void MD5_Update (context, input, inputLen)
 struct md5_ctx *context;                                        /* context */
 unsigned char *input;                                /* input block */
 unsigned int inputLen;                     /* length of input block */
@@ -164,7 +193,7 @@ unsigned int inputLen;                     /* length of input block */
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
   the message digest and zeroizing the context.
  */
-static void MD5Final (digest, context)
+static void MD5_Final (digest, context)
 unsigned char digest[16];                         /* message digest */
 struct md5_ctx *context;                                       /* context */
 {
@@ -177,10 +206,10 @@ struct md5_ctx *context;                                       /* context */
   /* Pad out to 56 mod 64. */
   index = (unsigned int)((context->count[0] >> 3) & 0x3f);
   padLen = (index < 56) ? (56 - index) : (120 - index);
-  MD5Update (context, PADDING, padLen);
+  MD5_Update (context, PADDING, padLen);
 
   /* Append length (before padding) */
-  MD5Update (context, bits, 8);
+  MD5_Update (context, bits, 8);
 
   /* Store state in digest */
   Encode (digest, context->state, 16);
@@ -310,11 +339,18 @@ static void Decode (UINT4 *output,
       (((UINT4)input[j+2]) << 16) | (((UINT4)input[j+3]) << 24);
 }
 
+#else
+/* If OpenSSL is present */
+#include <openssl/md5.h>
+#include <string.h>
+#endif
+
+
 void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
                 unsigned char *input)
 {
-  struct md5_ctx ctx;
-  MD5Init(&ctx);
-  MD5Update(&ctx, input, strlen((char *)input));
-  MD5Final(outbuffer, &ctx);
+  MD5_CTX ctx;
+  MD5_Init(&ctx);
+  MD5_Update(&ctx, input, strlen((char *)input));
+  MD5_Final(outbuffer, &ctx);
 }
