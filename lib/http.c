@@ -731,7 +731,7 @@ CURLcode Curl_http(struct connectdata *conn)
   char *request;
 
   if(!data->state.authstage) {
-    if(conn->bits.httpproxy)
+    if(conn->bits.httpproxy && conn->bits.proxy_user_passwd)
       Curl_http_auth_stage(data, 407);
     else
       Curl_http_auth_stage(data, 401);
