@@ -66,6 +66,20 @@
 #include "memdebug.h"
 #endif
 
+/*
+ * This is a wrapper function for freeing name information in a protocol
+ * independent way. This takes care of using the appropriate underlaying
+ * proper function.
+ */
+void Curl_freeaddrinfo(void *freethis)
+{
+#ifdef ENABLE_IPV6
+  freeaddrinfo(freethis);
+#else
+  free(freethis);
+#endif
+}
+
 /* --- resolve name or IP-number --- */
 
 #ifdef ENABLE_IPV6
@@ -102,20 +116,6 @@ void curl_freeaddrinfo(struct addrinfo *freethis,
 #endif
 
 /*
- * This is a wrapper function for freeing name information in a protocol
- * independent way. This takes care of using the appropriate underlaying
- * proper function.
- */
-void Curl_freeaddrinfo(void *freethis)
-{
-#ifdef ENABLE_IPV6
-  freeaddrinfo(freethis);
-#else
-  free(freethis);
-#endif
-}
-
-/*
  * Return name information about the given hostname and port number. If
  * successful, the 'addrinfo' is returned and the forth argument will point to
  * memory we need to free after use. That meory *MUST* be freed with
@@ -146,6 +146,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
 }
 #else /* following code is IPv4-only */
 
+#ifndef HAVE_GETHOSTBYNAME_R
 /**
  * Performs a "deep" copy of a hostent into a buffer 
  * (returns a pointer to the copy).
@@ -214,6 +215,7 @@ static struct hostent* pack_hostent(char* buf, struct hostent* orig)
 
   return copy;
 }
+#endif
 
 static char *MakeIP(unsigned long num,char *addr, int addr_len)
 {
