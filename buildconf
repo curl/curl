@@ -101,6 +101,10 @@ libtool=`findtool glibtool 2>/dev/null`
 if test ! -x "$libtool"; then
   libtool=`findtool libtool`
 fi
+
+# set the LIBTOOLIZE here so that glibtoolize is used if glibtool was found
+LIBTOOLIZE="${libtool}ize"
+
 lt_pversion=`$libtool --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//g' -e 's/[- ].*//'`
 if test -z "$lt_pversion"; then
   echo "buildconf: libtool not found."

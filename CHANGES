@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (30 September 2004)
+- Jean-Philippe Barrette-LaPierre made buildconf run better on Mac OS X by
+  properly using glibtoolize instead of plain libtoolize. (This is made if
+  glibtool was found and used instead of plain libtool.)
+
 Daniel (29 September 2004)
 - Bertrand Demiddelaer fixed curl_easy_reset() so that it doesn't mistakingly
   enable the progress meter.
