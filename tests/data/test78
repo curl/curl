@@ -1,0 +1,59 @@
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 1990 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+<foo>
+</data>
+<datacheck>
+HTTP/1.1 200 OK
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 1990 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP with -z "newer date"
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/78 -z "1999-12-12 12:00:00 MET"
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /78 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+If-Modified-Since: Sun, 12 Dec 1999 11:00:00 GMT
+
+</protocol>
+</verify>
