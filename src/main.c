@@ -935,10 +935,105 @@ int my_fwrite(void *buffer, size_t size, size_t nmemb, FILE *stream)
   return fwrite(buffer, size, nmemb, out->stream);
 }
 
+struct ProgressData {
+  size_t total;
+  size_t prev;
+  size_t point;
+  int width;
+};
+
+int myprogress (void *clientp,
+                size_t dltotal,
+                size_t dlnow,
+                size_t ultotal,
+                size_t ulnow)
+{
+  /* The original progress-bar source code was written for curl by Lars Aas,
+     and this new edition inherites some of his concepts. */
+  
+  char line[256];
+  char outline[256];
+  char format[40];
+  float frac;
+  float percent;
+  int barwidth;
+  int num;
+  int i;
+  int prevblock;
+  int thisblock;
+
+  struct ProgressData *bar = (struct ProgressData *)clientp;
+  size_t total = dltotal + ultotal;
+
+  bar->point = dlnow + ulnow; /* we've come this far */
+
+  if(0 == total) {
+    int prevblock = bar->prev / 1024;
+    int thisblock = bar->point / 1024;
+    while ( thisblock > prevblock ) {
+      fprintf( stderr, "#" );
+      prevblock++;
+    }
+  }
+  else {
+    frac = (float) bar->point / (float) total;
+    percent = frac * 100.0f;
+    barwidth = bar->width - 7;
+    num = (int) (((float)barwidth) * frac);
+    i = 0;
+    for ( i = 0; i < num; i++ ) {
+      line[i] = '#';
+    }
+    line[i] = '\0';
+    sprintf( format, "%%-%ds %%5.1f%%%%", barwidth );
+    sprintf( outline, format, line, percent );
+    fprintf( stderr, "\r%s", outline );
+  }
+  bar->prev = bar->point;
+
+  return 0;
+}
+
+void progressbarinit(struct ProgressData *bar)
+{
+#ifdef __EMX__
+  /* 20000318 mgs */
+  int scr_size [2];
+#endif
+  char *colp;
+
+  memset(bar, 0, sizeof(struct ProgressData));
+
+/* TODO: get terminal width through ansi escapes or something similar.
+         try to update width when xterm is resized... - 19990617 larsa */
+#ifndef __EMX__
+  /* 20000318 mgs
+   * OS/2 users most likely won't have this env var set, and besides that
+   * we're using our own way to determine screen width */
+  colp = curl_getenv("COLUMNS");
+  if (colp != NULL) {
+    bar->width = atoi(colp);
+    free(colp);
+  }
+  else
+    bar->width = 79;
+#else
+  /* 20000318 mgs
+   * We use this emx library call to get the screen width, and subtract
+   * one from what we got in order to avoid a problem with the cursor
+   * advancing to the next line if we print a string that is as long as
+   * the screen is wide. */
+ 
+  _scrsize(scr_size);
+  bar->width = scr_size[0] - 1;
+#endif
+
+}
 
 int main(int argc, char *argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
+  struct ProgressData progressbar;
 
   struct OutStruct outs;
   struct OutStruct heads;
@@ -1311,8 +1406,20 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_TIMEVALUE, config.condtime);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, config.customrequest);
     curl_easy_setopt(curl, CURLOPT_STDERR, config.errors);
-    curl_easy_setopt(curl, CURLOPT_PROGRESSMODE, config.progressmode);
     curl_easy_setopt(curl, CURLOPT_WRITEINFO, config.writeout);
+
+#if 0 /* old-style */
+    curl_easy_setopt(curl, CURLOPT_PROGRESSMODE, config.progressmode);
+#else
+    if((config.progressmode == CURL_PROGRESS_BAR) &&
+       !(config.conf&(CONF_NOPROGRESS|CONF_MUTE))) {
+      /* we want the alternative style, then we have to implement it
+         ourselves! */
+      progressbarinit(&progressbar);
+      curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, myprogress);
+      curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
+    }
+#endif
 
     res = curl_easy_perform(curl);
 
