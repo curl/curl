@@ -1,4 +1,12 @@
-/*
+/*****************************************************************************
+ *                                  _   _ ____  _     
+ *  Project                     ___| | | |  _ \| |    
+ *                             / __| | | | |_) | |    
+ *                            | (__| |_| |  _ <| |___ 
+ *                             \___|\___/|_| \_\_____|
+ *
+ * $Id$
+ *
  * This is an example application source code using the multi interface.
  */
 
@@ -9,10 +17,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-
-/* To start with, we include the header from the lib directory. This should
-   later of course be moved to the proper include dir. */
-#include "../lib/multi.h"
+/* curl stuff */
+#include <curl/curl.h>
 
 /*
  * Download a HTTP file and upload an FTP file simultaneously.

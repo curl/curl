@@ -1,4 +1,12 @@
-/*
+/*****************************************************************************
+ *                                  _   _ ____  _     
+ *  Project                     ___| | | |  _ \| |    
+ *                             / __| | | | |_) | |    
+ *                            | (__| |_| |  _ <| |___ 
+ *                             \___|\___/|_| \_\_____|
+ *
+ * $Id$
+ *
  * This is a very simple example using the multi interface.
  */
 
@@ -9,9 +17,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 
-/* To start with, we include the header from the lib directory. This should
-   later of course be moved to the proper include dir. */
-#include "../lib/multi.h"
+/* curl stuff */
+#include <curl/curl.h>
 
 /*
  * Simply download a HTTP file.
