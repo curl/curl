@@ -810,7 +810,7 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 
   int i;
   char *str;
-  int len;
+  size_t len;
 
   bufptr = *buf;
   copy = (struct hostent*)bufptr;
