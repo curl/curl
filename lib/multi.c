@@ -42,7 +42,8 @@ struct Curl_one_easy {
   struct Curl_one_easy *prev;
   
   CURL *easy_handle; /* this is the easy handle for this unit */
-  CURLMstate state; /* the handle's state */
+  CURLMstate state;  /* the handle's state */
+  CURLcode result;   /* previous result */
 };
 
 
@@ -193,7 +194,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
       /* after the transfer is done, go DONE */
       break;
     }
-
+    easy = easy->next; /* check next handle */
   }
 
   return CURLM_OK;
@@ -209,30 +210,62 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   easy=multi->first.next;
   while(easy) {
+
     switch(easy->state) {
     case CURLM_STATE_INIT:
+      /* init this transfer */
+      easy->result = Curl_init(easy->easy_handle);     
       /* after init, go CONNECT */
+      if(CURLE_OK == easy->result)
+        easy->state = CURLM_STATE_CONNECT;
       break;
     case CURLM_STATE_CONNECT:
+      /* connect */
+      easy->result = Curl_connect(easy->easy_handle);     
       /* after connect, go DO */
+      if(CURLE_OK == easy->result)
+        easy->state = CURLM_STATE_DO;
       break;
     case CURLM_STATE_DO:
+      /* Do the fetch or put request */
+      easy->result = Curl_do(easy->easy_handle);
       /* after do, go PERFORM */
+      if(CURLE_OK == easy->result)
+        easy->state = CURLM_STATE_PERFORM;
       break;
     case CURLM_STATE_PERFORM:
       /* read/write data if it is ready to do so */
+      easy->result = Curl_readwrite(easy->easy_handle, &done);
       /* after the transfer is done, go DONE */
+      if(TRUE == done)
+        easy->state = CURLM_STATE_DONE;
       break;
     case CURLM_STATE_DONE:
+      /* post-transfer command */
+      easy->result = Curl_done(easy->easy_handle);
       /* after we have DONE what we're supposed to do, go COMPLETED */
+      if(CURLE_OK == easy->result)
+        easy->state = CURLM_STATE_COMPLETED;
       break;
     case CURLM_STATE_COMPLETED:
-      /* this is a completed transfer */
+      /* this is a completed transfer, it is likely to still be connected */
+
+      /* This node should be delinked from the list now and we should post
+         an information message that we are complete. */
       break;
     }
+    if((CURLM_STATE_COMPLETED != easy->state) &&
+       (CURLE_OK != easy->result)) {
+      /*
+       * If an error was returned, and we aren't in completed now,
+       * then we go to completed and consider this transfer aborted.
+       */
+      easy->state = CURLM_STATE_COMPLETED;
+    }
 
+    easy = easy->next; /* operate on next handle */
   }
-
+  return CURLM_OK;
 }
 
 CURLMcode curl_multi_cleanup(CURLM *multi_handle);
