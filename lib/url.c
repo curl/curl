@@ -1217,6 +1217,8 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     free(conn->allocptr.cookie);
   if(conn->allocptr.host)
     free(conn->allocptr.host);
+  if(conn->allocptr.cookiehost)
+    free(conn->allocptr.cookiehost);
 
   if(conn->proxyhost)
     free(conn->proxyhost);
