@@ -8,6 +8,12 @@
 
 
 Daniel (6 November)
+- I added three new global defines in the curl/curl.h header:
+  LIBCURL_VERSION_MAJOR, LIBCURL_VERSION_MINOR and LIBCURL_VERSION_PATCH. They
+  are the three numbers in the library's version number, separated for easier
+  usage. 'maketgz' was updated accordingly to generate these numbers properly
+  when building release-archives.
+
 - Unitialized variable fix, reported by both Marty Kuhrt and Benjamin Gerard.
 
 - Matt Veenstra provided build files to build libcurl as a "framework" under
