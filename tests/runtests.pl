@@ -6,17 +6,19 @@
 #######################################################################
 # These should be the only variables that might be needed to get edited:
 
-$HOSTIP="127.0.0.1";
-$HOSTPORT=8999;
-$CURL="../src/curl";
-$LOGDIR="log";
-$TESTDIR="data";
-$SERVERIN="$LOGDIR/server.input";
-$CURLOUT="$LOGDIR/curl.out";
+use strict;
+
+my $HOSTIP="127.0.0.1";
+my $HOSTPORT=8999;
+my $CURL="../src/curl";
+my $LOGDIR="log";
+my $TESTDIR="data";
+my $SERVERIN="$LOGDIR/server.input";
+my $CURLOUT="$LOGDIR/curl.out";
 
 # Normally, all test cases should be run, but at times it is handy to
 # simply run a particular one:
-$TESTCASES="all";
+my $TESTCASES="all";
 
 # To run specific test cases, set them like:
 # $TESTCASES="1 2 3 7 8";
@@ -25,7 +27,14 @@ $TESTCASES="all";
 # No variables below this point should need to be modified
 #
 
-$PIDFILE=".server.pid";
+my $PIDFILE=".server.pid";
+
+#######################################################################
+# variables the command line options may set
+#
+
+my $short;
+my $verbose;
 
 #######################################################################
 # Return the pid of the http server as found in the pid file
@@ -44,8 +53,8 @@ sub serverpid {
 sub stopserver {
     # check for pidfile
     if ( -f $PIDFILE ) {
-        $PID = serverpid();
-        $res = kill (9, $PID); # die!
+        my $PID = serverpid();
+        my $res = kill (9, $PID); # die!
         unlink $PIDFILE; # server is killed
 
         if($res) {
@@ -59,9 +68,11 @@ sub stopserver {
 # test server on the test-port!
 #
 sub runserver {
+    my $STATUS;
+    my $RUNNING;
     # check for pidfile
     if ( -f $PIDFILE ) {
-        $PID=serverpid();
+        my $PID=serverpid();
         if ($PID ne "" && kill(0, $PID)) {
             $STATUS="httpd (pid $PID) running";
             $RUNNING=1;
@@ -84,7 +95,7 @@ sub runserver {
         print "$STATUS\n";
 
         # verify that our server is one one running on this port:
-        $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver`;
+        my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver`;
 
         if ( $data !~ /WE ROOLZ/ ) {
             print "Another HTTP server is running on port $HOSTPORT\n",
@@ -103,6 +114,7 @@ sub runserver {
 sub comparefiles {
     my $source=$_[0];
     my $dest=$_[1];
+    my $res=0;
 
     open(S, "<$source") ||
         return 1;
@@ -113,19 +125,21 @@ sub comparefiles {
     binmode S;
     binmode D;
     
-    $m = 20;
+    my $m = 20;
+    my ($snum, $dnum, $s, $d);
     do {
         $snum = read(S, $s, $m);
         $dnum = read(D, $d, $m);
         if(($snum != $dnum) ||
            ($s ne $d)) {
             print "$source and $dest differ\n";
+            $res=1;
             last;
         }
     } while($snum);
     close(S);
     close(D);
-    return 0;
+    return $res;
 }
 
 #######################################################################
@@ -134,6 +148,7 @@ sub comparefiles {
 sub cleardir {
     my $dir = $_[0];
     my $count;
+    my $file;
 
     # Get all files
     opendir(DIR, $dir) ||
@@ -186,6 +201,7 @@ sub compare {
     my $sec=$_[1];
     my $text=$_[2];
     my $strip=$_[3];
+    my $res;
 
     if ($strip ne "") {
         filteroff($first, $strip, "$LOGDIR/generated.tmp");
@@ -233,14 +249,14 @@ sub singletest {
     }
 
     # curl command to run
-    $CURLCMD="$TESTDIR/command$NUMBER.txt";
+    my $CURLCMD="$TESTDIR/command$NUMBER.txt";
 
     # this is the valid HTTP we should generate
-    $HTTP="$TESTDIR/http$NUMBER.txt";
+    my $HTTP="$TESTDIR/http$NUMBER.txt";
 
     # name of the test
     open(N, "<$TESTDIR/name$NUMBER.txt");
-    $DESC=<N>;
+    my $DESC=<N>;
     close(N);
     $DESC =~ s/[\r\n]//g;
 
@@ -249,7 +265,7 @@ sub singletest {
     $STDERR="$LOGDIR/stderr$NUMBER";
 
     # if this file exist, we verify that the stdout contained this:
-    $VALIDOUT="$TESTDIR/stdout$NUMBER.txt";
+    my $VALIDOUT="$TESTDIR/stdout$NUMBER.txt";
 
     print "test $NUMBER...";
     if(!$short) {
@@ -259,24 +275,24 @@ sub singletest {
     # get the command line options to use
 
     open(COMMAND, "<$CURLCMD");
-    $cmd=<COMMAND>;
+    my $cmd=<COMMAND>;
     chomp $cmd;
     close(COMMAND);
 
     # make some nice replace operations
     $cmd =~ s/%HOSTIP/$HOSTIP/g;
     $cmd =~ s/%HOSTPORT/$HOSTPORT/g;
-    $cmd =~ s/%HOSTNAME/$HOSTNAME/g;
+    #$cmd =~ s/%HOSTNAME/$HOSTNAME/g;
 
     # run curl, add -v for debug information output
-    $CMDLINE="$CURL --output $CURLOUT --include --silent $cmd >$STDOUT 2>$STDERR";
+    my $CMDLINE="$CURL --output $CURLOUT --include --silent $cmd >$STDOUT 2>$STDERR";
 
     if($verbose) {
         print "$CMDLINE\n";
     }
 
     # run the command line we built
-    $res = system("$CMDLINE");
+    my $res = system("$CMDLINE");
     $res /= 256;
 
     if ($res != 0) {
@@ -394,6 +410,7 @@ if ( $TESTCASES eq "all") {
 # The main test-loop
 #
 
+my $testnum;
 foreach $testnum (split(" ", $TESTCASES)) {
 
     singletest($testnum);
