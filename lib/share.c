@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -135,7 +135,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 
   case CURLSHOPT_UNLOCKFUNC:
     unlockfunc = va_arg(param, curl_unlock_function);
-    share->unlockfunc = unlockfunc;    
+    share->unlockfunc = unlockfunc;
     break;
 
   case CURLSHOPT_USERDATA:
@@ -154,15 +154,17 @@ CURLSHcode
 curl_share_cleanup(CURLSH *sh)
 {
   struct Curl_share *share = (struct Curl_share *)sh;
-  
+
   if (share == NULL)
     return CURLSHE_INVALID;
-  
-  share->lockfunc(NULL, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE,
-                  share->clientdata);
-  
+
+  if(share->lockfunc)
+    share->lockfunc(NULL, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE,
+                    share->clientdata);
+
   if (share->dirty) {
-    share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);
+    if(share->unlockfunc)
+      share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);
     return CURLSHE_IN_USE;
   }
 
@@ -174,9 +176,10 @@ curl_share_cleanup(CURLSH *sh)
     Curl_cookie_cleanup(share->cookies);
 #endif   /* CURL_DISABLE_HTTP */
 
-  share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);
-  free (share);
-  
+  if(share->unlockfunc)
+    share->unlockfunc(NULL, CURL_LOCK_DATA_SHARE, share->clientdata);
+  free(share);
+
   return CURLSHE_OK;
 }
 
