@@ -6,20 +6,29 @@
 
 TODO
 
- Things to do in project cURL. Please tell me what you think, contribute and
- send me patches that improve things! Also check the http://curl.haxx.se/dev
- web section for various development notes.
+ Things to do in project cURL. Please tell us what you think, contribute and
+ send us patches that improve things! Also check the http://curl.haxx.se/dev
+ web section for various technical development notes.
 
  LIBCURL
 
- * Consider an interface to libcurl that allows applications to easier get to
-   know what cookies that are sent back in the response headers.
+ * Introduce an interface to libcurl that allows applications to easier get to
+   know what cookies that are received. Pushing interface that calls a
+   callback on each received cookie? Querying interface that asks about
+   existing cookies? We probably need both.
 
  * Make content encoding/decoding internally be made using a filter system.
 
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
    [http://curl.haxx.se/dev/no_copy_callbacks.txt]
+
+ * Run-time querying about library characterics. What protocols do this
+   running libcurl support? What is the version number of the running libcurl
+   (returning the well-defined version-#define). This could possibly be made
+   by allowing curl_easy_getinfo() work with a NULL pointer for global info,
+   but perhaps better would be to introduce a new curl_getinfo() (or similar)
+   function for global info reading.
 
  * Add asynchronous name resolving (http://daniel.haxx.se/resolver/). This
    should be made to work on most of the supported platforms, or otherwise it
@@ -34,10 +43,6 @@ TODO
    too. The actual mutex implementations will be left for the application to
    implement, libcurl will merely call 'getmutex' and 'leavemutex' callbacks.
    Part of the sharing suggestion at: http://curl.haxx.se/dev/sharing.txt
-
- * No-faster-then-this transfers. Many people have limited bandwidth and they
-   want the ability to make sure their transfers never use more bandwith than
-   they think is good.
 
  * Set the SO_KEEPALIVE socket option to make libcurl notice and disconnect
    very long time idle connections.
@@ -55,7 +60,8 @@ TODO
 
  * CURLOPT_MAXFILESIZE. Prevent downloads that are larger than the specified
    size. CURLE_FILESIZE_EXCEEDED would then be returned. Gautam Mani
-   requested.
+   requested. That is, the download should even begin but be aborted
+   immediately.
 
  DOCUMENTATION
 
