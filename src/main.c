@@ -1881,7 +1881,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         /* available from libcurl 7.5: */
         curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
       }
+      else
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
       
       if(config->conf&(CONF_NOBODY|CONF_USEREMOTETIME)) {
         /* no body or use remote time */

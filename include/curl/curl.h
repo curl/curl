@@ -448,6 +448,11 @@ typedef enum {
    */
   CINIT(HTTPGET, LONG, 80),
 
+  /* Set if we should verify the Common name from the peer certificate in ssl
+   * handshake, set 1 to check existence, 2 to ensure that it matches the
+   * provided hostname. */
+  CINIT(SSL_VERIFYHOST, LONG, 81),
+  
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
