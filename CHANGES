@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel(29 January 2004)
+- Stadler Stephan pointed out that src/hugehelp.c included config.h without
+  checking the define if its present...
+
 - Ken Hirsch provided patches to make curl build fine on the MPE/iX operating
   system.
 
