@@ -7,6 +7,32 @@
                                History of Changes
 
 
+Daniel (18 February 2002)
+- Emil found and corrected a bad connection timeout comparison that made curl
+  use the longest of connect-timeout and timout as a timeout value, instead of
+  the shortest as it was supposed to!
+
+- Aron Roberts provided updated information about LDAP URL syntax to go into
+  the manual as a replacement for the old references.
+
+Daniel (17 February 2002)
+- Philip Gladstone pointed out two missing include files that made curl core
+  dump on 64bit architectures. We need to pay more attention on these details.
+  It is *lethal* to for example forget the malloc() prototype, as 'int' is
+  32bit and malloc() must return a 64bit pointer on these platforms.
+
+- Giaslas Georgios fixed a problem with Host: headers on repeated requests on
+  the same handle using a proxy.
+
+Daniel (8 February 2002)
+- Hanno L. Kranzhoff accurately found out that disabling the Expect: header
+  when doing multipart formposts didn't work very well. It disabled other
+  parts of the request header too, resulting in a broken header. When I fixed
+  this, I also noticed that the Content-Type wasn't possible to disable. It is
+  now, even though it probably is really stupid to try to do this (because of
+  the boundary string that is included in the internally generated header,
+  used as form part separator.)
+
 Daniel (7 February 2002)
 - I moved the config*.h files from the root directory to the lib/ directory.
 
