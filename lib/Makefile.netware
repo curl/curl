@@ -168,7 +168,7 @@ nlm: prebuild $(TARGET).nlm
 
 lib: prebuild $(TARGET).lib 
 
-prebuild: $(OBJDIR) $(OBJDIR)/version.inc config.h ca-bundle.h getdate.c
+prebuild: $(OBJDIR) $(OBJDIR)/version.inc config.h ca-bundle.h
 
 $(OBJDIR)/%.o: %.c
 #	@echo Compiling $<
@@ -191,7 +191,7 @@ install: $(INSTDIR) all
 	@$(CP) ../RELEASE-NOTES $(INSTDIR)
 
 clean:
-	-$(RM) config.h ca-bundle.h y.tab.c getdate.c
+	-$(RM) config.h ca-bundle.h
 	-$(RM) -r $(OBJDIR)
 
 $(INSTDIR):
@@ -374,11 +374,6 @@ ca-bundle.h: Makefile.netware
 	@echo $(DL)** All your changes will be lost!!$(DL) >> $@
 	@echo $(DL)*/$(DL) >> $@
 	@echo $(DL)#define CURL_CA_BUNDLE getenv("CURL_CA_BUNDLE")$(DL) >> $@
-
-getdate.c:
-	@echo Creating $@
-	@-$(RM) getdate.y
-	@$(CP) getdate.c.cvs $@
 
 url.c: ca-bundle.h
 

@@ -70,7 +70,6 @@ all:	$(LIBCURLLIB)
 clean:
 	-$(RM) $(LIBCURLLIB)
 	-$(RM) *.obj
-	-$(RM) getdate.c
 
 $(LIBCURLLIB): $(OBJECTS)
 	@-$(RM) $@
@@ -82,10 +81,5 @@ $(LIBCURLLIB): $(OBJECTS)
 $(LIBCURLDLL): $(OBJECTS) $(LINKLIB)
 	@-$(RM) $@
 	$(LD) $(LDFLAGS) -e$@ $**
-
-getdate.c: getdate.c.cvs
-	@echo Creating $@
-	@-$(RM) getdate.y
-	@$(CP) $** $@
 
 
