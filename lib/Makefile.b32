@@ -16,8 +16,12 @@ RM	   = del
 LIB	   = tlib
 TOPDIR	   = ..
 CURNTDIR   = .
-CXXFLAGS   = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
-DEFINES    = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS
+CXXFLAGS   = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu \
+             -w-pro -tWM
+
+# If you build without SSL support, remove "-DUSE_SSLEAY" from the line below.
+DEFINES    = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS \
+             -DUSE_SSLEAY
 INCDIRS    = -I$(CURNTDIR);$(TOPDIR)\include\
 
 # 'BCCDIR' has to be set up in your c:\autoexec.bat
@@ -39,6 +43,7 @@ SOURCES	   = \
 	http.c \
         http_chunks.c \
 	http_digest.c \
+	http_ntlm.c \
 	ldap.c \
 	dict.c \
 	telnet.c \
@@ -51,6 +56,7 @@ SOURCES	   = \
 	netrc.c \
 	progress.c \
 	sendf.c \
+	inet_pton.c \
 	speedcheck.c \
 	ssluse.c \
 	timeval.c \
