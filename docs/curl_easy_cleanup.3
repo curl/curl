@@ -1,0 +1,25 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by Daniel.Stenberg@haxx.nu
+.\"
+.TH curl_easy_cleanup 3 "22 May 2000" "Curl 7.0" "libcurl Manual"
+.SH NAME
+curl_easy_cleanup - End a libcurl "easy" session
+.SH SYNOPSIS
+.B #include <curl/easy.h>
+.sp
+.BI "curl_easy_cleanup(CURL *" handle ");
+.ad
+.SH DESCRIPTION
+This function must be the last function to call for a curl session. It is the
+opposite of the
+.I curl_easy_init
+function and must be called with the same
+.I handle
+as input as the curl_easy_init call returned.
+.SH RETURN VALUE
+None
+.SH "SEE ALSO"
+.BR curl_easy_init "(3), "
+.SH BUGS
+Surely there are some, you tell me!

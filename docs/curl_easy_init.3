@@ -1,0 +1,25 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by Daniel.Stenberg@haxx.nu
+.\"
+.TH curl_easy_init 3 "22 May 2000" "Curl 7.0" "libcurl Manual"
+.SH NAME
+curl_easy_init - Start a libcurl "easy" session
+.SH SYNOPSIS
+.B #include <curl/easy.h>
+.sp
+.BI "CURL *curl_easy_init( );"
+.ad
+.SH DESCRIPTION
+This function must be the first function to call, and it returns a CURL handle
+that you shall use as input to the other easy-functions. The init calls
+intializes curl and this call MUST have a corresponding call to
+.I curl_easy_cleanup
+when the operation is complete.
+.SH RETURN VALUE
+If this function returns NULL, something went wrong and you cannot use the
+other curl functions.
+.SH "SEE ALSO"
+.BR curl_easy_cleanup "(3), "
+.SH BUGS
+Surely there are some, you tell me!

@@ -1,0 +1,75 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by Daniel.Stenberg@haxx.nu
+.\"
+.TH curl_easy_setopt 3 "22 May 2000" "Curl 7.0" "libcurl Manual"
+.SH NAME
+curl_easy_setopt - Set curl easy-session options
+.SH SYNOPSIS
+.B #include <curl/easy.h>
+.sp
+.BI "CURLcode curl_easy_setopt(CURL *" handle ", CURLoption "option ", ...);
+.ad
+.SH DESCRIPTION
+curl_easy_setopt() is called to tell libcurl how to behave in a number of
+ways. Most operations in libcurl have default actions, and by using the
+appropriate options you can make them behave differently (as documented).  All
+options are set with the
+.I option
+followed by a parameter. That parameter can be a long, a function pointer or
+an object pointer, all depending on what the option in question expects. Read
+this manual carefully as bad input values may cause libcurl to behave badly!
+
+The
+.I "handle"
+is the return code from the
+.I "curl_easy_init"
+call.
+.SH OPTIONS
+.TP 0.8i
+.B CURLOPT_FILE
+Data pointer to pass instead of FILE * to the file write function. Note that
+if you specify the
+.I CURLOPT_WRITEFUNCTION
+, this is the pointer you'll get as input.
+.TP
+.B CURLOPT_WRITEFUNCTION
+Function pointer that should use match the following prototype:
+.BI "size_t function( void *ptr, size_t size, size_t nmemb, FILE *stream);"
+This function gets called by libcurl as soon as there is received data that
+needs to be written down. The size of the data pointed to by
+.I ptr 
+is
+.I size
+multiplied with
+.I nmemb.
+Return the number of bytes actually written or return -1 to signal error to the library (it will cause it to abort the transfer).
+.TP
+.B CURLOPT_INFILE
+Data pointer to pass instead of FILE * to the file read function. Note that if
+you specify the
+.I CURLOPT_READFUNCTION
+, this is the pointer you'll get as input.
+.TP
+.B CURLOPT_READFUNCTION
+Function pointer that should use match the following prototype:
+.BI "size_t function( void *ptr, size_t size, size_t nmemb, FILE *stream);"
+This function gets called by libcurl as soon as it needs to read data in order
+to send it to the peer. The data area pointed at by the pointer
+.I ptr
+may be filled with at most
+.I size
+multiplied with
+.I nmemb
+number of bytes. Your function must return the actual number of bytes that you
+stored in that memory area. Returning -1 will signal an error to the library
+and cause it to abort the current transfer immediately.
+.PP
+.SH RETURN VALUE
+0 means the option was set properly, non-zero means an error as
+.I <curl/curl.h>
+defines
+.SH "SEE ALSO"
+.BR curl_easy_init "(3), " curl_easy_cleanup "(3), "
+.SH BUGS
+Surely there are some, you tell me!
