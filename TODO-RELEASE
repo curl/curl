@@ -15,4 +15,6 @@ To get fixed in 7.12.2 (planned release: mid October 2004)
 
 45 - Chris' suspected race condition in the windows threaded resolver
 
+46 - Casey O'Donnell's multi.h winsock header fix
+
  Bugfixes reported until late November
