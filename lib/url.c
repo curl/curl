@@ -1581,6 +1581,23 @@ static int handleSock5Proxy(const char *proxy_name,
                             const char *proxy_password,
                             struct connectdata *conn)
 {
+  /*
+    According to the RFC1928, section "6.  Replies". This is what a SOCK5
+    replies:
+
+        +----+-----+-------+------+----------+----------+
+        |VER | REP |  RSV  | ATYP | BND.ADDR | BND.PORT |
+        +----+-----+-------+------+----------+----------+
+        | 1  |  1  | X'00' |  1   | Variable |    2     |
+        +----+-----+-------+------+----------+----------+
+
+    Where:
+
+    o  VER    protocol version: X'05'
+    o  REP    Reply field:
+    o  X'00' succeeded
+  */
+
   unsigned char socksreq[600]; /* room for large user/pw (255 max each) */
   ssize_t actualread;
   ssize_t written;
@@ -1651,7 +1668,7 @@ static int handleSock5Proxy(const char *proxy_name,
       return 1;
     }
 
-    if ((socksreq[0] != 1) || /* version */
+    if ((socksreq[0] != 5) || /* version */
         (socksreq[1] != 0)) { /* status */
       failf(conn->data, "User was rejected by the SOCKS5 server (%d %d).",
             socksreq[0], socksreq[1]);
