@@ -56,7 +56,7 @@ struct Curl_one_easy {
 
 #define CURL_MULTI_HANDLE 0x000bab1e
 
-#define GOOD_MULTI_HANDLE(x) ((x) && ((x)->type == CURL_MULTI_HANDLE))
+#define GOOD_MULTI_HANDLE(x) ((x)&&(((struct Curl_multi *)x)->type == CURL_MULTI_HANDLE))
 #define GOOD_EASY_HANDLE(x) (x)
 
 /* This is the struct known as CURLM on the outside */
@@ -229,11 +229,14 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
     switch(easy->state) {
     case CURLM_STATE_INIT:
-      /* init this transfer */
-      easy->result = Curl_init(easy->easy_handle);     
+      /* init this transfer. Hm, uh, I can't think of anything to init
+         right now, let's skip over to CONNECT at once!
+
+         easy->result = Curl_init(easy->easy_handle);     
+         if(CURLE_OK == easy->result)
+      */
       /* after init, go CONNECT */
-      if(CURLE_OK == easy->result)
-        easy->state = CURLM_STATE_CONNECT;
+      easy->state = CURLM_STATE_CONNECT;
       break;
     case CURLM_STATE_CONNECT:
       /* connect */
@@ -252,6 +255,8 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     case CURLM_STATE_PERFORM:
       /* read/write data if it is ready to do so */
       easy->result = Curl_readwrite(easy->easy_handle, &done);
+      /* hm, when we follow redirects, we may need to go back to the CONNECT
+         state */
       /* after the transfer is done, go DONE */
       if(TRUE == done)
         easy->state = CURLM_STATE_DONE;
