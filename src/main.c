@@ -3787,9 +3787,6 @@ show_error:
         if(headerfilep)
           fclose(headerfilep);
 
-        if (httpgetfields)
-          free(httpgetfields);
-
         if(url)
           free(url);
 
@@ -3832,6 +3829,9 @@ show_error:
   } /* while-loop through all URLs */
 
 quit_curl:
+  if (httpgetfields)
+    free(httpgetfields);
+
   if (config->engine)
     free(config->engine);
 
