@@ -51,11 +51,6 @@
 
 #include <curl/curl.h>
 
-#if (LIBCURL_VERSION_NUM < 0x070907)
-#error "too old libcurl version, get the latest!"
-#endif
-
-
 enum fcurl_type_e { CFTYPE_NONE=0, CFTYPE_FILE=1, CFTYPE_CURL=2 };
 
 struct fcurl_data
