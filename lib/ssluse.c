@@ -744,6 +744,16 @@ cert_hostcheck(const char *certname, const char *hostname)
   return 0;
 }
 
+/* this subjectAltName patch is code originating from OpenLDAP, which uses
+   a license as described here: 
+   http://www.openldap.org/software/release/license.html
+
+   It is not GPL-compatible, so we cannot have this situation in a release-
+   version of libcurl.
+
+   This needs to be addressed!
+*/
+
 static CURLcode verifyhost(struct connectdata *conn)
 {
   char peer_CN[257];
