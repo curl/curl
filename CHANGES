@@ -6,6 +6,25 @@
 
                                History of Changes
 
+Daniel (2 November 2000)
+- When I added --interface, the new error code that was added with it was
+  inserted in the wrong place and thus all error codes from 35 and upwards got
+  increased one step. This is now corrected, we're back at the previous
+  numbers. All new exit codes should be added at the end.
+
+Daniel (1 November 2000)
+- Added a check for signal() in the configure script so that if sigaction()
+  isn't present, we can use signal() instead.
+
+- I'm having a license discussion going on privately. The issue is yet again
+  GPL-licensed programs that have problems with MPL. I am leaning towards
+  making a kind of dual-license that will solve this once and for all...
+
+Daniel (31 October 2000)
+- Added the packages/ directory. I intend to let this contain some docs and
+  templates on how to generate custom-format packages for various platforms.
+  I've now removed the RPM related curl.spec files from the archive root.
+
 Daniel (30 October 2000)
 - T. Bharath brought a set of patches that bring new functionality to
   curl_easy_getinfo() and curl_easy_setopt(). Now you can request peer
