@@ -6,6 +6,19 @@
 
                                History of Changes
 
+Daniel (22 March 2001)
+- The configure script now fails with an error message if gethostbyname_r() is
+  detected but it couldn't figure out how to invoke it (what amount of
+  arguments it is supposed to get). Reports from Andrés García made me aware
+  of this need.
+
+- Talking with Jim Drash made me finally put the curl_escape and curl_unescape
+  functions in the curl.h include file and write man pages for them. The
+  escape function was modified to use the same interface as the unescape one
+  had.
+
+- No bug reports at all on the latest betas. Release time coming up.
+
 Version 7.7-beta5
 
 Daniel (19 March 2001)
