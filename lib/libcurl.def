@@ -40,3 +40,4 @@ EXPORTS
 	curl_multi_perform @ 31;
 	curl_multi_cleanup @ 32;
 	curl_multi_info_read @ 33;
+        curl_free @ 34;

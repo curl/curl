@@ -100,6 +100,11 @@ char *curl_unescape(const char *string, int length)
   
 }
 
+void curl_free(void *p)
+{
+  free(p);
+}
+
 /*
  * local variables:
  * eval: (load-file "../curl-mode.el")
