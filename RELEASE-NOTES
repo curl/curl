@@ -7,11 +7,15 @@ Curl and libcurl 7.11.2. A bugfix release.
 
 This release includes the following changes:
 
+ o the ares build now requires c-ares 1.2.0 or later
  o --tcp-nodelay and CURLOPT_TCP_NODELAY were added
  o curl/curlver.h contains the libcurl version info now
 
 This release includes the following bugfixes:
 
+ o curl_strnqual.3 "refer-to" man page fix
+ o fixed a minor very old progress meter final update bug
+ o added checks for a working NI_WITHSCOPEID before that is used
  o fixed a flaw that prevented ares name resolve timeouts to occur
  o getting user name from http_proxy env variable works now
  o fixed too early name resolve timeouts with ares
@@ -38,6 +42,6 @@ advice from friends like these:
 
  Thomas Schwinge, Marty Kuhrt, Günter Knauf, Kevin Roth, Glen Nakamura,
  Gisle Vanem, Greg Hewgill, Joe Halpin, Tor Arntsen, Dirk Manske, Roy Shan,
- Mitz Wark, Andrés García
+ Mitz Wark, Andrés García, Robin Kay
 
         Thanks! (and sorry if I forgot to mention someone)
