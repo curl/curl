@@ -1028,9 +1028,11 @@ CURLcode Curl_http_done(struct connectdata *conn)
   else if(HTTPREQ_PUT == data->set.httpreq)
     conn->bytecount = http->readbytecount + http->writebytecount;
 
-  if(0 == (http->readbytecount + conn->headerbytecount)) {
-    /* nothing was read from the HTTP server, this can't be right
-       so we return an error here */
+  if(!conn->bits.retry &&
+     !(http->readbytecount + conn->headerbytecount)) {
+    /* If this connection isn't simply closed to be retried, AND nothing was
+       read from the HTTP server, this can't be right so we return an error
+       here */
     failf(data, "Empty reply from server");
     return CURLE_GOT_NOTHING;
   }

@@ -296,6 +296,8 @@ struct ConnectBits {
   bool tcpconnect;    /* the tcp stream (or simimlar) is connected, this
                          is set the first time on the first connect function
                          call */
+  bool retry;         /* this connection is about to get closed and then
+                         re-attempted at another connection. */
 };
 
 /*

@@ -29,7 +29,9 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
 #include <sys/stat.h>
 
 #include <errno.h>
@@ -44,7 +46,9 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #include <sys/time.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -56,7 +60,9 @@
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
 #endif
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
 #include <signal.h>
 
 #ifdef HAVE_SYS_PARAM_H
@@ -1910,6 +1916,11 @@ CURLcode Curl_perform(struct SessionHandle *data)
             newurl = strdup(conn->data->change.url);
 
             conn->bits.close = TRUE; /* close this connection */
+            conn->bits.retry = TRUE; /* mark this as a connection we're about
+                                        to retry. Marking it this way should
+                                        prevent i.e HTTP transfers to return
+                                        error just because nothing has been
+                                        transfered! */
           }
           else
             /*
