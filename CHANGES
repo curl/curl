@@ -7,6 +7,16 @@
                                History of Changes
 
 
+Daniel (7 February 2002)
+- I moved the config*.h files from the root directory to the lib/ directory.
+
+- I've added the new test suite HTTP server to the CVS repository, It seems to
+  work pretty good now, but we must make it get used by the test scripts
+  properly and then we need to make sure that it compiles, builds and runs on
+  most operating systems.
+
+Version 7.9.5-pre1
+
 Daniel (6 February 2002)
 - Miklos Nemeth provided updated windows makefiles and INSTALL docs.
 
