@@ -133,7 +133,7 @@ Content-Disposition: form-data; name="FILECONTENT"
 
 /* What kind of Content-Type to use on un-specified files with unrecognized
    extensions. */
-#define HTTPPOST_CONTENTTYPE_DEFAULT "text/plain"
+#define HTTPPOST_CONTENTTYPE_DEFAULT "application/octet-stream"
 
 /* This is a silly duplicate of the function in main.c to enable this source
    to compile stand-alone for better debugging */
@@ -267,7 +267,7 @@ int FormParse(char *input,
 	    {".jpg",  "image/jpeg"},
 	    {".jpeg", "image/jpeg"},
 	    {".txt",  "text/plain"},
-	    {".html", "text/plain"}
+	    {".html", "text/html"}
 	  };
 
 	  if(prevtype)
