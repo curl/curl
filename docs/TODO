@@ -68,11 +68,6 @@ TODO
  * Since USERPWD always override the user and password specified in URLs, we
    might need another way to specify user+password for anonymous ftp logins.
 
- * Add FTPS support with SSL for the data connection too.  This should be made
-   according to the specs written in draft-murray-auth-ftp-ssl-12.txt,
-   "Securing FTP with TLS", valid until 28th February, 2004.
-   http://curl.haxx.se/rfc/draft-murray-auth-ftp-ssl-12.txt
-
  HTTP
 
  * Digest and GSS-Negotiate support for HTTP proxies. They only work on
@@ -152,6 +147,9 @@ TODO
 
    which should overwrite the program reasonable defaults (plain/text,
    8bit...) (Idea brough to us by kromJx)
+
+ * --data-encode that URL encodes the data before posting
+   http://curl.haxx.se/mail/archive-2003-11/0091.html (Kevin Roth suggested)
 
  TEST SUITE
 
