@@ -40,9 +40,9 @@ REQUIREMENTS
 
  You need the following software installed:
 
- o autoconf 2.50 (or later)
- o automake 1.5 (or later)
- o libtool  1.4 (or later)
+ o autoconf 2.57 (or later)
+ o automake 1.7 (or later)
+ o libtool  1.5 (or later)
  o GNU m4 (required by autoconf)
 
  o nroff + perl
