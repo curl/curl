@@ -90,7 +90,7 @@
 #include <sys/utime.h>
 #endif
 
-#endif
+#endif /* HAVE_UTIME_H */
 
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
@@ -98,6 +98,10 @@
 
 #ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
+#endif
+
+#ifdef HAVE_LOCALE_H
+#include <locale.h> /* for setlocale() */
 #endif
 
 #define ENABLE_CURLX_PRINTF
@@ -2789,6 +2793,11 @@ operate(struct Configurable *config, int argc, char *argv[])
   curlinfo = curl_version_info(CURLVERSION_NOW);
 
   errorbuffer[0]=0; /* prevent junk from being output */
+
+  /* setup proper locale from environment */
+#ifdef HAVE_SETLOCALE
+  setlocale(LC_ALL, "");
+#endif
 
   /* inits */
   if (main_init() != CURLE_OK) {

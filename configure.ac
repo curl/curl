@@ -1121,6 +1121,7 @@ AC_CHECK_HEADERS(
         sys/utime.h \
         sys/poll.h \
         libgen.h \
+        locale.h \
         setjmp.h,
 dnl to do if not found
 [],
@@ -1217,6 +1218,7 @@ AC_CHECK_FUNCS( strtoll \
                 utime \
                 sigsetjmp \
                 basename \
+                setlocale \
                 poll,
 dnl if found
 [],

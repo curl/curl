@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (18 October 2004)
+- Peter Wullinger pointed out that curl should call setlocale() properly to
+  initiate the specific language operations, to make the IDN stuff work
+  better.
+
 Version 7.12.2 (18 October 2004)
 
 Daniel (16 October 2004)
