@@ -1016,12 +1016,18 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Set data write callback
      */
     data->set.fwrite = va_arg(param, curl_write_callback);
+    if(!data->set.fwrite)
+      /* When set to NULL, reset to our internal default function */
+      data->set.fwrite = (curl_write_callback)fwrite;
     break;
   case CURLOPT_READFUNCTION:
     /*
      * Read data callback
      */
     data->set.fread = va_arg(param, curl_read_callback);
+    if(!data->set.fread)
+      /* When set to NULL, reset to our internal default function */
+      data->set.fread = (curl_read_callback)fread;
     break;
   case CURLOPT_SSLCERT:
     /*
