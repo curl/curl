@@ -123,6 +123,7 @@ typedef size_t (*curl_read_callback)(char *buffer,
                                      size_t nitems,
                                      void *instream);
 
+  /* not used since 7.10.8, will be removed in a future release */
 typedef int (*curl_passwd_callback)(void *clientp,
                                     const char *prompt,
                                     char *buffer,
@@ -503,11 +504,10 @@ typedef enum {
      this option is used only if SSL_VERIFYPEER is true */
   CINIT(CAINFO, OBJECTPOINT, 65),
 
-  /* Function pointer to replace the internal password prompt */
+  /* OBSOLETE since 7.10.8 */
   CINIT(PASSWDFUNCTION, FUNCTIONPOINT, 66),
 
-  /* Custom pointer that gets passed as first argument to the password
-     function */
+  /* OBSOLETE since 7.10.8 */
   CINIT(PASSWDDATA, OBJECTPOINT, 67),
   
   /* Maximum number of http redirects to follow */

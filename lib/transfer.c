@@ -86,7 +86,6 @@
 #include "transfer.h"
 #include "sendf.h"
 #include "speedcheck.h"
-#include "getpass.h"
 #include "progress.h"
 #include "getdate.h"
 #include "http.h"

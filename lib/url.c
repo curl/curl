@@ -97,7 +97,6 @@
 #include "if2ip.h"
 #include "transfer.h"
 #include "sendf.h"
-#include "getpass.h"
 #include "progress.h"
 #include "cookie.h"
 #include "strequal.h"
@@ -241,20 +240,6 @@ CURLcode Curl_close(struct SessionHandle *data)
   return CURLE_OK;
 }
 
-static
-int my_getpass(void *clientp, const char *prompt, char* buffer, int buflen )
-{
-  char *retbuf;
-  clientp=NULL; /* prevent compiler warning */
-
-  retbuf = getpass_r(prompt, buffer, buflen);
-  if(NULL == retbuf)
-    return 1;
-  else
-    return 0; /* success */
-}
-
-
 CURLcode Curl_open(struct SessionHandle **curl)
 {
   /* We don't yet support specifying the URL at this point */
@@ -286,9 +271,6 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
   /* use fread as default function to read input */
   data->set.fread = (curl_read_callback)fread;
-
-  /* set the default passwd function */
-  data->set.fpasswd = my_getpass;
 
   data->set.infilesize = -1; /* we don't know any size */
 
@@ -948,25 +930,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Custom client data to pass to the progress callback
      */
     data->set.progress_client = va_arg(param, void *);
-    break;
-  case CURLOPT_PASSWDFUNCTION:
-    /*
-     * Password prompt callback
-     */
-    data->set.fpasswd = va_arg(param, curl_passwd_callback);
-    /*
-     * if the callback provided is null, reset the default callback
-     */
-    if(!data->set.fpasswd)
-    {
-      data->set.fpasswd = my_getpass;
-    }
-    break;
-  case CURLOPT_PASSWDDATA:
-    /*
-     * Custom client data to pass to the password callback
-     */
-    data->set.passwd_client = va_arg(param, void *);
     break;
   case CURLOPT_PROXYUSERPWD:
     /*
@@ -1936,8 +1899,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   char endbracket;
   char user[MAX_CURL_USER_LENGTH];
   char passwd[MAX_CURL_PASSWORD_LENGTH];
-  bool passwdgiven=FALSE; /* set TRUE if an application-provided password has
-                             been set */
   int rc;
 
 #ifdef HAVE_SIGACTION
@@ -2157,32 +2118,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(conn->bits.proxy_user_passwd) {
     char proxyuser[MAX_CURL_USER_LENGTH]="";
     char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";
-    passwdgiven = FALSE;
 
-    if(*data->set.proxyuserpwd != ':') {
-      /* the name is given, get user+password */
-      sscanf(data->set.proxyuserpwd, "%127[^:]:%127[^\n]",
-             proxyuser, proxypasswd);
-      if(strchr(data->set.proxyuserpwd, ':'))
-        /* a colon means the password was given, even if blank */
-        passwdgiven = TRUE;  
-    }
-    else {
-      /* no name given, get the password only */
-      sscanf(data->set.proxyuserpwd+1, "%127[^\n]", proxypasswd);
-      passwdgiven = TRUE;
-    }
-
-    /* check for password, if no ask for one */
-    if( !proxypasswd[0] && !passwdgiven) {
-      if(data->set.fpasswd( data->set.passwd_client,
-                            "proxy password:",
-                            proxypasswd,
-                            sizeof(proxypasswd))) {
-        failf(data, "Bad password from password callback");
-        return CURLE_BAD_PASSWORD_ENTERED;
-      }
-    }
+    sscanf(data->set.proxyuserpwd, "%127[^:]:%127[^\n]",
+           proxyuser, proxypasswd);
 
     conn->proxyuser = strdup(proxyuser);
     if(!conn->proxyuser)
@@ -2728,7 +2666,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   user[0] =0;   /* to make everything well-defined */
   passwd[0]=0;
-  passwdgiven = FALSE; /* none given so far */
 
   if (conn->protocol & (PROT_FTP|PROT_HTTP)) {
     /* This is a FTP or HTTP URL, we will now try to extract the possible
@@ -2777,9 +2714,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
             strcpy(passwd, newpasswd);
           }
           free(newpasswd);
-
-          /* we have set the password */
-          passwdgiven = TRUE;
         }
       }
     }
@@ -2795,47 +2729,24 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * so it doesn't have to be set in this block
    */
   if (data->set.userpwd != NULL) {
-    if(*data->set.userpwd != ':') {
-      /* the name is given, get user+password */
-      sscanf(data->set.userpwd, "%127[^:]:%127[^\n]",
-             user, passwd);
-      if(strchr(data->set.userpwd, ':'))
-        /* a colon means the password was given, even if blank */
-        passwdgiven = TRUE;
-    }
-    else
-      /* no name given, starts with a colon, get the password only */
-      sscanf(data->set.userpwd+1, "%127[^\n]", passwd);
+    /* the name is given, get user+password */
+    sscanf(data->set.userpwd, "%127[^:]:%127[^\n]",
+           user, passwd);
   }
 
-  if ((data->set.use_netrc != CURL_NETRC_IGNORED) &&
-      !passwdgiven) {  /* need passwd */
+  if (data->set.use_netrc != CURL_NETRC_IGNORED) {
     if(Curl_parsenetrc(conn->hostname,
-                       user,
-                       passwd)) {
+                       user, passwd)) {
       infof(data, "Couldn't find host %s in the .netrc file, using defaults",
             conn->hostname);
     }
-    else {
+    else
       conn->bits.user_passwd = 1; /* enable user+password */
-      passwdgiven = TRUE;
-    }
   }
-
-  /* if we have a user but no password, ask for one */
-  if(conn->bits.user_passwd && !passwdgiven ) {
-    if(data->set.fpasswd(data->set.passwd_client,
-                         "password:", passwd,
-                         sizeof(passwd)))
-      return CURLE_BAD_PASSWORD_ENTERED;
-  }
-
-  /* So we could have a password but no user; that's just too bad. */
 
   /* If our protocol needs a password and we have none, use the defaults */
   if ( (conn->protocol & (PROT_FTP|PROT_HTTP)) &&
-       !conn->bits.user_passwd &&
-       !passwdgiven) {
+       !conn->bits.user_passwd) {
 
     strcpy(user, CURL_DEFAULT_USER);
     strcpy(passwd, CURL_DEFAULT_PASSWORD);
