@@ -1155,10 +1155,13 @@ struct FormData *Curl_getFormData(struct HttpPost *post,
 	  }
           if(fileread != stdin)
             fclose(fileread);
-	} else {
-	  size += AddFormData(&form, "[File wasn't found by client]", 0);
 	}
-      } else {
+        else {
+          /* File wasn't found, add a nothing field! */
+	  size += AddFormData(&form, "", 0);
+	}
+      }
+ else {
 	/* include the contents we got */
 	size += AddFormData(&form, post->contents, post->contentslength);
       }
