@@ -432,6 +432,7 @@ static void help(void)
     " -o/--output <file> Write output to <file> instead of stdout",
     " -O/--remote-name   Write output to a file named as the remote file",
     " -p/--proxytunnel   Perform non-HTTP services through a HTTP proxy",
+    "    --proxy-ntlm    Use NTLM authentication on the proxy (H)",
     " -P/--ftpport <address> Use PORT with address instead of PASV when ftping (F)",
     " -q                 When used as the first parameter disables .curlrc",
     " -Q/--quote <cmd>   Send QUOTE command to FTP before file transfer (F)",
@@ -546,6 +547,7 @@ struct Configurable {
   bool insecure_ok; /* set TRUE to allow insecure SSL connects */
   bool create_dirs;
   bool ftp_create_dirs;
+  bool proxyntlm;
 
   char *writeout; /* %-styled format string to output */
   bool writeenv; /* write results to environment, if available */
@@ -1094,6 +1096,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5q", "ftp-create-dirs", FALSE},    
     {"5r", "create-dirs", FALSE},
     {"5s", "max-redirs",   TRUE},
+    {"5t", "proxy-ntlm",   FALSE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1351,6 +1354,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 's': /* --max-redirs */
         /* specified max no of redirects (http(s)) */
         config->maxredirs = atoi(nextarg);
+        break;
+
+      case 't': /* --proxy-ntlm */
+        config->proxyntlm ^= TRUE;
         break;
 
       default: /* the URL! */
@@ -3109,6 +3116,8 @@ operate(struct Configurable *config, int argc, char *argv[])
       /* new in curl 7.10.7 */
       curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
                        config->ftp_create_dirs);
+      if(config->proxyntlm)
+        curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
 
       res = curl_easy_perform(curl);
         
