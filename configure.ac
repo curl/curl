@@ -1043,7 +1043,9 @@ AC_HELP_STRING([--disable-ares],[Disable using ares for name lookups]),
        fi
 
        AC_DEFINE(USE_ARES, 1, [Define if you want to enable ares support])
-
+       dnl substitute HAVE_ARES for curl-config and similar
+       HAVE_ARES="1"
+       AC_SUBST(HAVE_ARES)
        ares="yes"
        ;;
   esac ],

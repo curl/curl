@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (8 December)
+- Based on a patch from Dominick Meglio, curl-config --feature now outputs
+  'AsynchDNS' as a feature if libcurl was built with ares. The feature name
+  is the same that 'curl -V' outputs, for simplicity.
+
 Daniel (3 December)
 - Marty Kuhrt made the build up-to-date on VMS, and moved most of the VMS-
   specific stuff in the client code to a separate header file.

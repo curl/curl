@@ -90,6 +90,9 @@ while test $# -gt 0; do
 	if test "@CURL_DISABLE_DICT@" = "1"; then
           echo "DICT-disabled"
         fi
+	if test "@HAVE_ARES@" = "1"; then
+          echo "AsynchDNS"
+        fi
 	;;
 
     --version)
