@@ -1269,20 +1269,23 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
 
     LPSV is RFC1639, expect:
     228 Entering Long Passive Mode (4,4,a1,a2,a3,a4,2,p1,p2)
-    (Is this actually supported *anywhere*?)
 
     EPSV is RFC2428, expect:
     229 Entering Extended Passive Mode (|||port|)
 
   */
 
+#if 1
+  const char *mode[] = { "EPSV", "PASV", NULL };
+  int results[] = { 229, 227, 0 };
+#else
 #if 0
-  /* no support for IPv6 passive mode yet */
   char *mode[] = { "EPSV", "LPSV", "PASV", NULL };
   int results[] = { 229, 228, 227, 0 };
 #else
   const char *mode[] = { "PASV", NULL };
   int results[] = { 227, 0 };
+#endif
 #endif
   int modeoff;
   unsigned short connectport; /* the local port connect() should use! */
@@ -1292,15 +1295,17 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   /* newhost must be able to hold a full IP-style address in ASCII, which
      in the IPv6 case means 5*8-1 = 39 letters */
   char newhost[48];
+  char *newhostp=NULL;
   
   for (modeoff = 0; mode[modeoff]; modeoff++) {
-    FTPSENDF(conn, mode[modeoff], "");
+    result = Curl_ftpsendf(conn, mode[modeoff]);
+    if(result)
+      return result;
     nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
-    
-      if (ftpcode == results[modeoff])
-        break;
+    if (ftpcode == results[modeoff])
+      break;
   }
 
   if (!mode[modeoff]) {
@@ -1337,13 +1342,10 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
     }
 
     sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+    newhostp = newhost;
     newport = (port[0]<<8) + port[1];
-
-    /* we should compare to see if this is the same IP like the one
-       we're already connected to, as then we can skip the name function
-       call below, in similar style that we do for the EPSV reply */
   }
-#if 0
+#if 1
   else if (229 == results[modeoff]) {
     char *ptr = strchr(buf, '(');
     if(ptr) {
@@ -1360,7 +1362,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
         newport = num;
 
         /* we should use the same host we already are connected to */
-        addr = conn->hostaddr;
+        newhostp = conn->name;
       }                      
       else
         ptr=NULL;
@@ -1384,9 +1386,9 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
     connectport =
       (unsigned short)conn->port; /* we connect to the proxy's port */
   }
-  else if(!addr) {
+  else {
     /* normal, direct, ftp connection */
-    addr = Curl_getaddrinfo(data, newhost, newport, &hostdataptr);
+    addr = Curl_getaddrinfo(data, newhostp, newport, &hostdataptr);
     if(!addr) {
       failf(data, "Can't resolve new host %s", newhost);
       return CURLE_FTP_CANT_GET_HOST;
@@ -1719,10 +1721,19 @@ CURLcode ftp_perform(struct connectdata *conn)
             (data->set.ftp_list_only?"NLST":"LIST"));
     }
     else {
+      ssize_t foundsize;
+
       /* Set type to binary (unless specified ASCII) */
       result = ftp_transfertype(conn, data->set.ftp_ascii);
       if(result)
         return result;
+
+      /* Attempt to get the size, it'll be useful in some cases: for resumed
+         downloads and when talking to servers that don't give away the size
+         in the RETR response line. */
+      result = ftp_getsize(conn, ftp->file, &foundsize);
+      if(CURLE_OK == result)
+        downloadsize = foundsize;
 
       if(conn->resume_from) {
 
@@ -1730,11 +1741,12 @@ CURLcode ftp_perform(struct connectdata *conn)
          *
          * We start with trying to use the SIZE command to figure out the size
          * of the file we're gonna get. If we can get the size, this is by far
-         * the best way to know if we're trying to resume beyond the EOF.  */
-        ssize_t foundsize;
-        
-        result = ftp_getsize(conn, ftp->file, &foundsize);
-
+         * the best way to know if we're trying to resume beyond the EOF.
+         *
+         * Daniel, November 28, 2001. We *always* get the size on downloads
+         * now, so it is done before this even when not doing resumes. I saved
+         * the comment above for nostalgical reasons! ;-)
+         */
         if(CURLE_OK != result) {
           infof(data, "ftp server doesn't support SIZE\n");
           /* We couldn't get the size and therefore we can't know if there
