@@ -191,6 +191,7 @@ CURLcode add_buffer_send(send_buffer *in,
   char *ptr;
   int size;
   struct HTTP *http = conn->proto.http;
+  int sendsize;
 
   /* The looping below is required since we use non-blocking sockets, but due
      to the circumstances we will just loop and try again and again etc */
@@ -198,7 +199,28 @@ CURLcode add_buffer_send(send_buffer *in,
   ptr = in->buffer;
   size = in->size_used;
 
-  res = Curl_write(conn, sockfd, ptr, size, &amount);
+  if(conn->protocol & PROT_HTTPS) {
+    /* We never send more than CURL_MAX_WRITE_SIZE bytes in one single chunk
+       when we speak HTTPS, as if only a fraction of it is sent now, this data
+       needs to fit into the normal read-callback buffer later on and that
+       buffer is using this size.
+    */
+
+    sendsize= (size > CURL_MAX_WRITE_SIZE)?CURL_MAX_WRITE_SIZE:size;
+
+    /* OpenSSL is very picky and we must send the SAME buffer pointer to the
+       library when we attempt to re-send this buffer. Sending the same data
+       is not enough, we must use the exact same address. For this reason, we
+       must copy the data to the uploadbuffer first, since that is the buffer
+       we will be using if this send is retried later.
+    */
+    memcpy(conn->data->state.uploadbuffer, ptr, sendsize);
+    ptr = conn->data->state.uploadbuffer;
+  }
+  else
+    sendsize = size;
+  
+  res = Curl_write(conn, sockfd, ptr, sendsize, &amount);
 
   if(CURLE_OK == res) {
 
