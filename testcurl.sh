@@ -218,7 +218,7 @@ if { grep "define USE_ARES" lib/config.h; } then
   cd ares
   make 2>&1 | sed -e "s:$pwd::g"
 
-  if [ -f libcares.a]; then
+  if [ -f libcares.a ]; then
     log "ares is now built successfully"
   else
     log "ares build failed"
