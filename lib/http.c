@@ -146,7 +146,7 @@ CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
 
     if(conn->data->set.verbose)
       /* this data _may_ contain binary stuff */
-      Curl_debug(conn->data, CURLINFO_DATA_OUT, ptr, amount);
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, amount);
 
     if(amount != size) {
       size -= amount;
