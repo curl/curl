@@ -13,6 +13,7 @@ bin_PROGRAMS = curl #memtest
 noinst_HEADERS = setup.h \
 	config-win32.h \
 	config-mac.h \
+	config-vms.h \
 	urlglob.h \
 	version.h \
 	writeout.h

@@ -33,7 +33,7 @@
 
 #ifdef HAVE_CONFIG_H
 #ifdef VMS
-#include "../config-vms.h"
+#include "config-vms.h"
 #else
 #include "config.h" /* the configure script results */
 #endif
