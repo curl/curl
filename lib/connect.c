@@ -88,9 +88,9 @@ int geterrno(void)
  * Description:
  *  Set the socket to either blocking or non-blocking mode.
  */
-static
-int nonblock(int socket,    /* operate on this */
-             int nonblock   /* TRUE or FALSE */)
+
+int Curl_nonblock(int socket,    /* operate on this */
+                  int nonblock   /* TRUE or FALSE */)
 {
 #undef SETBLOCK
 #ifdef HAVE_O_NONBLOCK
@@ -389,7 +389,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         continue;
 
       /* set socket non-blocking */
-      nonblock(sockfd, TRUE);
+      Curl_nonblock(sockfd, TRUE);
 
       rc = connect(sockfd, ai->ai_addr, ai->ai_addrlen);
 
@@ -450,7 +450,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
 
     /* now disable the non-blocking mode again */
-    nonblock(sockfd, FALSE);
+    Curl_nonblock(sockfd, FALSE);
 
     if(addr)
       *addr = ai; /* the address we ended up connected to */
@@ -481,7 +481,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   }
 
   /* Convert socket to non-blocking type */
-  nonblock(sockfd, TRUE);
+  Curl_nonblock(sockfd, TRUE);
 
   /* This is the loop that attempts to connect to all IP-addresses we
      know for the given host. One by one. */
@@ -546,7 +546,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   }
   
   /* now disable the non-blocking mode again */
-  nonblock(sockfd, FALSE);
+  Curl_nonblock(sockfd, FALSE);
 
   if(addr)
     /* this is the address we've connected to */

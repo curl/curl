@@ -23,6 +23,9 @@
  * $Id$
  *****************************************************************************/
 
+int Curl_nonblock(int socket,    /* operate on this */
+                  int nonblock   /* TRUE or FALSE */);
+
 CURLcode Curl_connecthost(struct connectdata *conn,
                           Curl_addrinfo *host, /* connect to this */
                           long port,      /* connect to this port number */

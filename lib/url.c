@@ -955,8 +955,27 @@ static bool SocketIsDead(struct connectdata *conn, int sock)
 #ifdef USE_SSLEAY
     /* the socket seems fine, but is the SSL later fine too? */
     if(conn->ssl.use) {
-      if(SSL_get_shutdown(conn->ssl.handle))
-        return TRUE; /* this connection is dead! */
+      int peek;
+      int error;
+      Curl_nonblock(sock, TRUE);
+
+      peek = SSL_peek(conn->ssl.handle,
+                      conn->data->state.buffer, BUFSIZE);
+
+      infof(conn->data, "SSL_peek returned %d\n", peek);
+
+      if(-1 == peek) {
+        error = SSL_get_error(conn->ssl.handle, peek);
+        infof(conn->data, "SSL_error returned %d\n", error);
+        
+        if(SSL_ERROR_WANT_READ != error)
+          ret_val = TRUE;
+      }
+      else
+        /* peek did not return -1 */
+        ret_val = TRUE;
+      
+      Curl_nonblock(sock, FALSE);      
     }
 #endif
   }
