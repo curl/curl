@@ -52,6 +52,33 @@ For the future
    be possible to get specified *exactly* as it is done on a shell command
    line).
 
+   Alternatively, and preferably, we rewrite the entire config file to become
+   a true config file that uses its own format instead of the currently
+   crippled and stupid format:
+
+        [option] = [value]
+
+   Where [option] would be the same as the --long-option and [value] would
+   either be 'on/off/true/false' for booleans or a plain value for [option]s
+   that accept variable input (such as -d, -o, -H, -d, -F etc).
+
+   [value] could be written as plain text, and then the initial and trailing
+   white spaces would be stripped off, or it can be specified within quotes
+   and then all white spaces within the quotes will count.
+
+   [value] could then be made to accept some format to specify an environment
+   variable. I could even think of supporting
+
+        [option] += [value]
+
+   for appending stuff to an option.
+
+   As has been suggested, ${name} could be used to read environment variables
+   and possibly other options. That could then be used instead of += operators
+   like:
+
+        bar = "foo ${bar}"
+
  * rtsp:// support -- "Real Time Streaming Protocol" (RFC 2326)
 
  * "Content-Encoding: compress/gzip/zlib"
