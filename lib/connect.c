@@ -176,11 +176,12 @@ int waitconnect(int sockfd, /* socket */
   fd_set errfd;
   struct timeval interval;
   int rc;
-
+#ifdef mpeix
   /* Call this function once now, and ignore the results. We do this to
      "clear" the error state on the socket so that we can later read it
      reliably. This is reported necessary on the MPE/iX operating system. */
   verifyconnect(sockfd);
+#endif
 
   /* now select() until we get connect or timeout */
   FD_ZERO(&fd);
