@@ -6,7 +6,7 @@
 
 README
 
-  Curl is a command line tool for transfering data specified with URL
+  Curl is a command line tool for transferring data specified with URL
   syntax. Find out how to use Curl by reading the curl.1 man page or the
   MANUAL document. Find out how to install Curl by reading the INSTALL
   document.
