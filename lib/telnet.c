@@ -811,7 +811,6 @@ static CURLcode check_telnet_options(struct connectdata *conn)
 static void suboption(struct connectdata *conn)
 {
   struct curl_slist *v;
-  unsigned char subchar;
   unsigned char temp[2048];
   int len;
   int tmplen;
@@ -821,7 +820,7 @@ static void suboption(struct connectdata *conn)
   struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
 
   printsub(data, '<', (unsigned char *)tn->subbuffer, CURL_SB_LEN(tn)+2);
-  switch (subchar = CURL_SB_GET(tn)) {
+  switch (CURL_SB_GET(tn)) {
     case CURL_TELOPT_TTYPE:
       len = strlen(tn->subopt_ttype) + 4 + 2;
       snprintf((char *)temp, sizeof(temp),
