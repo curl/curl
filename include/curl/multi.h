@@ -67,7 +67,9 @@
 #include <sys/select.h>
 #endif
 
+#ifndef _WIN32_WCE
 #include <sys/socket.h>
+#endif
 #include <sys/time.h>
 #include <sys/types.h>
 #endif
