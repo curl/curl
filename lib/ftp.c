@@ -544,7 +544,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
        The directory name can contain any character; embedded double-quotes
        should be escaped by double-quotes (the "quote-doubling" convention).
     */
-    if('\"' == *ptr) {
+    if(dir && ('\"' == *ptr)) {
       /* it started good */
       ptr++;
       while(ptr && *ptr) {
@@ -570,6 +570,8 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
     }
     else {
       /* couldn't get the path */
+      free(dir);
+      infof(data, "Failed to figure out path\n");
     }
 
   }
