@@ -57,6 +57,7 @@ install:
 	${RANLIB} ${DESTDIR}${libdir}/$(LIB)
 	chmod u-w ${DESTDIR}${libdir}/$(LIB)
 	${INSTALL} -m 444 ${srcdir}/ares.h ${DESTDIR}${includedir}
+	${INSTALL} -m 444 ${srcdir}/ares_version.h ${DESTDIR}${includedir}
 	${INSTALL} -m 444 ${srcdir}/ares_destroy.3 ${DESTDIR}${mandir}/man3
 	${INSTALL} -m 444 ${srcdir}/ares_expand_name.3 ${DESTDIR}${mandir}/man3
 	${INSTALL} -m 444 ${srcdir}/ares_fds.3 ${DESTDIR}${mandir}/man3
