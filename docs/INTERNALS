@@ -34,8 +34,7 @@ Windows vs Unix
 
  (3) is simply avoided by not trying any funny tricks on file descriptors.
 
- (4) is left alone, giving windows users problems when they pipe binary data
- through stdout...
+ (4) we set stdout to binary under windows
 
  Inside the source code, I do make an effort to avoid '#ifdef WIN32'. All
  conditionals that deal with features *should* instead be in the format
@@ -83,10 +82,6 @@ Library
  frequent interval (or at the user's choice, a specified callback might get
  called). The speedcheck functions in lib/speedcheck.c are also used to verify
  that the transfer is as fast as required.
-
- When the operation is done, the writeout() function in lib/writeout.c may be
- called to report about the operation as specified previously in the arguments
- to curl_easy_setopt().
 
  When completed curl_easy_cleanup() should be called to free up used
  resources.
@@ -157,4 +152,10 @@ Client
  calls the curl_easy_*() functions of the library and when it gets back
  control after the curl_easy_perform() it cleans up the library, checks status
  and exits.
+
+ When the operation is done, the ourWriteOut() function in src/writeout.c may
+ be called to report about the operation. That function is using the
+ curl_easy_getinfo() function to extract useful information from the curl
+ session.
+
 
