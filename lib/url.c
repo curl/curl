@@ -142,12 +142,12 @@ void curl_free(void)
 {
 }
 
-void urlfree(struct UrlData *data, bool totally)
+void static urlfree(struct UrlData *data, bool totally)
 {
 #ifdef USE_SSLEAY
   if (data->use_ssl) {
     if(data->ssl) {
-      SSL_shutdown(data->ssl);
+      (void)SSL_shutdown(data->ssl);
       SSL_set_connect_state(data->ssl);
 
       SSL_free (data->ssl);
