@@ -361,6 +361,22 @@ Transfer(struct connectdata *c_conn)
                    */
                   if(data->bits.no_body)
                     return CURLE_OK;
+
+                  if(!conn->bits.close) {
+                    /* If this is not the last request before a close, we must
+                       set the maximum download size to the size of the
+                       expected document or else, we won't know when to stop
+                       reading! */
+                    if(-1 != conn->size)
+                      conn->maxdownload = conn->size;
+
+                    /* If max download size is *zero* (nothing) we already
+                       have nothing and can safely return ok now! */
+                    if(0 == conn->maxdownload)
+                      return CURLE_OK;
+                    
+                    /* What to do if the size is *not* known? */
+                  }
                   break;		/* exit header line loop */
                 }
 
@@ -582,16 +598,6 @@ Transfer(struct connectdata *c_conn)
                     } /* switch */
                   } /* two valid time strings */
                 } /* we have a time condition */
-
-                if(!conn->bits.close) {
-                  /* If this is not the last request before a close, we must
-                     set the maximum download size to the size of the expected
-                     document or else, we won't know when to stop reading! */
-                  if(-1 != conn->size)
-                    conn->maxdownload = conn->size;
-
-                  /* What to do if the size is *not* known? */
-                }
 
               } /* this is HTTP */
             } /* this is the first time we write a body part */
