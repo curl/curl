@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.12.0 (2 June 2004)
+
 Daniel (1 June 2004)
 - I clarified the --create-dirs option somewhat in the curl man page.
 
