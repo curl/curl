@@ -402,8 +402,9 @@ CURLcode Curl_http_auth(struct connectdata *conn,
       }
       else if(checkprefix("Basic", start)) {
         *availp |= CURLAUTH_BASIC;
-        if((data->state.authwant == CURLAUTH_BASIC) && (httpcode == 401)) {
-          /* We asked for Basic authentication but got a 401 back
+        if((data->state.authwant == CURLAUTH_BASIC) &&
+           (httpcode == data->state.authstage)) {
+          /* We asked for Basic authentication but got a 40X back
              anyway, which basicly means our name+password isn't
              valid. */
           data->state.authavail = CURLAUTH_NONE;
