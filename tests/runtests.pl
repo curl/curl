@@ -635,7 +635,7 @@ sub checkcurl {
 
     my $curl;
     my $libcurl;
-    my @version=`strace $CURL --version 2>fump`;
+    my @version=`$CURL --version 2>/dev/null`;
     for(@version) {
         chomp;
 
