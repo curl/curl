@@ -6,6 +6,27 @@
 
                                History of Changes
 
+Daniel (11 April 2001)
+- SM brought a patch that make curl use non-blocking connects on windows when
+  connection timeout is set, as it allows windows users to set that timeout!  
+
+- Hirotaka Matsuyuki wrote a Ruby interface to libcurl!
+
+- Cris Bailiff, Forrest Cahoon and Georg Horn work on the Perl interface.
+
+- I've written a first shot at a Java interface to libcurl. Many thanks to
+  Daniel Marell for tirelessly answering to all my basic Java questions. The
+  interface doesn't work yet, but I'm getting closer...
+
+Daniel (10 April 2001)
+- The progress display could get silly when doing multiple file transfers, as
+  it wasn't properly reset between transfers!
+
+- Discussions with Cris Bailiff who writes a Perl interface to libcurl, made
+  me add CURLOPT_HEADERFUNCTION. It can be used to set a separate callback
+  function for writing headers. Previously you could only set a different FILE
+  * when headers are written from within libcurl.
+
 Daniel (7 April 2001)
 - Andrés García fixed a problem in curl_escape() and pointed out a flaw in
   the curl_easy_setopt man page.
