@@ -54,12 +54,13 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+typedef void * (*dynafunc)(void *input);
 
 #define DYNA_GET_FUNCTION(type, fnc) \
   (fnc) = (type)DynaGetFunction(#fnc); \
   if ((fnc) == NULL) { \
     return CURLE_FUNCTION_NOT_FOUND; \
-  } \
+  }
 
 /***********************************************************************
  */
@@ -106,13 +107,13 @@ static void DynaClose(void)
 #endif
 }
 
-static void * DynaGetFunction(const char *name)
+static dynafunc DynaGetFunction(const char *name)
 {
-  void *func = NULL;
+  dynafunc func = (dynafunc)NULL;
 
 #if defined(HAVE_DLOPEN) || defined(HAVE_LIBDL)
   if (libldap) {
-    func = dlsym(libldap, name);
+    func = (dynafunc) dlsym(libldap, name);
   }
 #endif
   
@@ -203,20 +204,24 @@ CURLcode Curl_ldap(struct connectdata *conn)
     failf(data, "LDAP: Cannot connect to %s:%d",
 	  conn->hostname, conn->port);
     status = CURLE_COULDNT_CONNECT;
-  } else {
+  }
+  else {
     rc = ldap_simple_bind_s(server,
                             conn->bits.user_passwd?conn->user:NULL,
                             conn->bits.user_passwd?conn->passwd:NULL);
     if (rc != 0) {
       failf(data, "LDAP: %s", ldap_err2string(rc));
       status = CURLE_LDAP_CANNOT_BIND;
-    } else {
+    }
+    else {
       rc = ldap_url_parse(data->change.url, &ludp);
       if (rc != 0) {
 	failf(data, "LDAP: %s", ldap_err2string(rc));
 	status = CURLE_LDAP_INVALID_URL;
-      } else {
-	rc = ldap_search_s(server, ludp->lud_dn, ludp->lud_scope, ludp->lud_filter, ludp->lud_attrs, 0, &result);
+      }
+      else {
+	rc = ldap_search_s(server, ludp->lud_dn, ludp->lud_scope,
+                           ludp->lud_filter, ludp->lud_attrs, 0, &result);
 	if (rc != 0) {
 	  failf(data, "LDAP: %s", ldap_err2string(rc));
 	  status = CURLE_LDAP_SEARCH_FAILED;
@@ -224,40 +229,39 @@ CURLcode Curl_ldap(struct connectdata *conn)
 	else {
 	  for (entryIterator = ldap_first_entry(server, result);
 	       entryIterator;
-	       entryIterator = ldap_next_entry(server, entryIterator))
-	    {
-	       char *dn = ldap_get_dn(server, entryIterator);
-	       char **vals;
-               int i;
+	       entryIterator = ldap_next_entry(server, entryIterator)) {
+            char *dn = ldap_get_dn(server, entryIterator);
+            char **vals;
+            int i;
+            
+            Curl_client_write(data, CLIENTWRITE_BODY, (char *)"DN: ", 4);
+            Curl_client_write(data, CLIENTWRITE_BODY, dn, 0);
+            Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+            for(attribute = ldap_first_attribute(server, entryIterator,
+                                                 &ber); 
+                attribute; 
+                attribute = ldap_next_attribute(server, entryIterator,
+                                                ber) ) {
+              vals = ldap_get_values(server, entryIterator, attribute);
+              if (vals != NULL) {
+                for(i = 0; (vals[i] != NULL); i++) {
+                  Curl_client_write(data, CLIENTWRITE_BODY, (char*)"\t", 1);
+                  Curl_client_write(data, CLIENTWRITE_BODY, attribute, 0);
+                  Curl_client_write(data, CLIENTWRITE_BODY, (char *)": ", 2);
+                  Curl_client_write(data, CLIENTWRITE_BODY, vals[i], 0);
+                  Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 0);
+                }
+              }
 
-	       Curl_client_write(data, CLIENTWRITE_BODY, (char *)"DN: ", 4);
-	       Curl_client_write(data, CLIENTWRITE_BODY, dn, 0);
-	       Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
-	       for(attribute = ldap_first_attribute(server, entryIterator,
-                                                    &ber); 
-                   attribute; 
-                   attribute = ldap_next_attribute(server, entryIterator,
-                                                   ber) ) {
-                 vals = ldap_get_values(server, entryIterator, attribute);
-		 if (vals != NULL) {
-                   for(i = 0; (vals[i] != NULL); i++) {
-                     Curl_client_write(data, CLIENTWRITE_BODY, (char*)"\t", 1);
-                     Curl_client_write(data, CLIENTWRITE_BODY, attribute, 0);
-                     Curl_client_write(data, CLIENTWRITE_BODY, (char *)": ", 2);
-                     Curl_client_write(data, CLIENTWRITE_BODY, vals[i], 0);
-                     Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 0);
-                   }
-	         }
-
-		 /* Free memory used to store values */
-		 ldap_value_free(vals);
-	       }
-	       Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
-
-               ldap_memfree(attribute);
-	       ldap_memfree(dn);
-	       if (ber) ber_free(ber, 0);
-	    }
+              /* Free memory used to store values */
+              ldap_value_free(vals);
+            }
+            Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
+            
+            ldap_memfree(attribute);
+            ldap_memfree(dn);
+            if (ber) ber_free(ber, 0);
+          }
 	}
 
 	ldap_free_urldesc(ludp);
