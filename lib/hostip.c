@@ -292,7 +292,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
   char sbuf[NI_MAXSERV];
 
   memset(&hints, 0, sizeof(hints));
-  hints.ai_family = PF_UNSPEC;
+  hints.ai_family = PF_INET;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_CANONNAME;
   snprintf(sbuf, sizeof(sbuf), "%d", port);
