@@ -1,2 +1,0 @@
-SUBDIRS = examples
-EXTRA_DIST = README
