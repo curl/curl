@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_formadd 3 "21 May 2002" "libcurl 7.9.8" "libcurl Manual"
+.TH curl_formadd 3 "15 June 2002" "libcurl 7.9.8" "libcurl Manual"
 .SH NAME
 curl_formadd - add a section to a multipart/formdata HTTP POST
 .SH SYNOPSIS
@@ -29,9 +29,10 @@ name). All options that use the word COPY in their names copy the given
 contents, while the ones with PTR in their names simply points to the (static)
 data you must make sure remain until curl no longer needs it.
 
-The four options for providing values are: \fBCURLFORM_COPYCONTENTS\fP,
-\fBCURLFORM_PTRCONTENTS\fP, \fBCURLFORM_FILE\fP, or \fBCURLFORM_FILECONTENT\fP
-followed by a char or void pointer (allowed for PTRCONTENTS).
+The options for providing values are: \fBCURLFORM_COPYCONTENTS\fP,
+\fBCURLFORM_PTRCONTENTS\fP, \fBCURLFORM_FILE\fP, \fBCURLFORM_BUFFER\fP,
+or \fBCURLFORM_FILECONTENT\fP followed by a char or void pointer
+(allowed for PTRCONTENTS).
 
 \fBCURLFORM_FILECONTENT\fP does a normal post like \fBCURLFORM_COPYCONTENTS\fP
 but the actual value is read from the filename given as a string.
@@ -47,6 +48,20 @@ given the library will use strlen to determine the length).
 For \fBCURLFORM_FILE\fP the user may send multiple files in one section by
 providing multiple \fBCURLFORM_FILE\fP arguments each followed by the filename
 (and each FILE is allowed to have a CONTENTTYPE).
+
+\fBCURLFORM_BUFFER\fP 
+tells libcurl that a buffer is to be used to upload data instead of using a
+file. The value of the next parameter is used as the value of the "filename"
+parameter in the content header.
+
+\fBCURLFORM_BUFFERPTR\fP
+tells libcurl that the address of the next parameter is a pointer to the buffer
+containing data to upload. The buffer containing this data must not be freed
+until after curl_easy_cleanup is called.
+
+\fBCURLFORM_BUFFERLENGTH\fP
+tells libcurl that the length of the buffer to upload is the value of the
+next parameter.
 
 Another possibility to send single or multiple files in one section is to use
 \fBCURLFORM_ARRAY\fP that gets a struct curl_forms array pointer as its
@@ -148,6 +163,13 @@ defines.
  forms[1].option = CURLFORM_FILE;
  forms[1].value  = file2;
  forms[2].option  = CURLFORM_END;
+
+ /* Add a buffer to upload */
+ curl_formadd(&post, &last,
+              CURLFORM_BUFFER, "data",
+              CURLFORM_BUFFERPTR, record,
+              CURLFORM_BUFFERLENGTH, record_length,
+              CURLFORM_END);
 
  /* no option needed for the end marker */
  curl_formadd(&post, &last, CURLFORM_COPYNAME, "pictures",
