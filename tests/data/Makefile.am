@@ -14,5 +14,5 @@ test103  test110  test118  test125  test2    test24   test4    test9 \
 test104  test111  test119  test13   test20   test25   test400  test47 \
 test105  test112  test12   test14   test200  test26   test43   test46 \
 test34 test36 test37 test27 test28 test29 test303 test126 test400 \
-test401
+test401 test30
 
