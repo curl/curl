@@ -38,11 +38,13 @@ use strict;
 
 require "getpart.pm";
 
+my $ftpdnum="";
+
 # open and close each time to allow removal at any time
 sub logmsg {
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
         localtime(time);
-    open(FTPLOG, ">>log/ftpd.log");
+    open(FTPLOG, ">>log/ftpd$ftpdnum.log");
     printf FTPLOG ("%02d:%02d:%02d ", $hour, $min, $sec);
     print FTPLOG @_;
     close(FTPLOG);
@@ -50,8 +52,8 @@ sub logmsg {
 
 sub ftpmsg {
   # append to the server.input file
-  open(INPUT, ">>log/server.input") ||
-    logmsg "failed to open log/server.input\n";
+  open(INPUT, ">>log/server$ftpdnum.input") ||
+    logmsg "failed to open log/server$ftpdnum.input\n";
 
   INPUT->autoflush(1);
   print INPUT @_;
@@ -77,6 +79,10 @@ do {
         $srcdir=$ARGV[1];
         shift @ARGV;
     }
+    elsif($ARGV[0] eq "--id") {
+        $ftpdnum=$ARGV[1];
+        shift @ARGV;
+    }
     elsif($ARGV[0] =~ /^(\d+)$/) {
         $port = $1;
     }
@@ -90,9 +96,10 @@ setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
 bind(Server, sockaddr_in($port, INADDR_ANY))|| die "bind: $!";
 listen(Server,SOMAXCONN) || die "listen: $!";
 
-#print "FTP server started on port $port\n";
 
-open(PID, ">.ftp.pid");
+logmsg "FTP server started on port $port\n";
+
+open(PID, ">.ftp$ftpdnum.pid");
 print PID $$;
 close(PID);
 
