@@ -210,6 +210,7 @@ static enum {
       return GZIP_UNDERFLOW;
 
     len -= (extra_len + 2);
+    data += (extra_len + 2);
   }
 
   if (flags & ORIG_NAME) {
