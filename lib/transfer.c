@@ -922,6 +922,28 @@ CURLcode Curl_perform(struct SessionHandle *data)
     res = Curl_connect(data, &conn, port);
     if(res == CURLE_OK) {
       res = Curl_do(conn);
+
+      if((CURLE_WRITE_ERROR == res) && conn->bits.reuse) {
+        /* This was a re-use of a connection and we got a write error in the
+         * DO-phase. Then we DISCONNECT this connection and have another
+         * attempt to CONNECT and then DO again! The retry cannot possibly
+         * find another connection to re-use, since we only keep one possible
+         * connection for each.
+         */
+
+        infof(data, "The re-used connection seems dead, get a new one\n");
+
+        conn->bits.close = TRUE; /* enforce close of this connetion */
+        res = Curl_done(conn);   /* we are so done with this */
+        if(CURLE_OK == res) {
+          /* Now, redo the connect */
+          res = Curl_connect(data, &conn, port);
+          if(CURLE_OK == res)
+            /* ... finally back to actually retry the DO phase */
+            res = Curl_do(conn);
+        }
+      }
+
       if(res == CURLE_OK) {
         CURLcode res2; /* just a local extra result container */
 
