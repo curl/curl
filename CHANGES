@@ -8,6 +8,28 @@
 
 Version XX
 
+Daniel (24 February 2000):
+- Applied Jörn Hartroth's fixes for config-win32.h and lib/Makefile.w32.
+
+  I should also make a note here, if nothing else to myself, that when using
+  the %-syntax for variables in DOS command prompts, you must use two %-
+  letters for each one since that is an escape letter there! Maybe I should
+  use another letter instead!
+
+- Added more variables to -w:
+
+  'http_code'
+  'namelookup_time'
+  'connect_time'
+  'pretransfer_time'
+  'effective_url'
+
+- Made -w@filename read the syntax from a file and -w@- reads the syntax from
+  stdin in the good old "standard" curl way.
+
+Daniel (22 February 2000):
+- Released a 6.5pre1 version to get some test and user feedback.
+
 Daniel (21 February 2000):
 
 - I added the -w/--write-out flag and some variables to go with it. -w is a
