@@ -1176,8 +1176,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           config->postfields=postdata;
       }
 
-/*      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
-        return PARAM_BAD_USE;*/
+      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
+        return PARAM_BAD_USE;
       break;
     case 'D':
       /* dump-header to given file name */
