@@ -486,7 +486,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
            * possibly know if the connection is in a good shape or not now. */
           easy->easy_conn->bits.close = TRUE;
 
-          if(-1 !=easy->easy_conn->sock[SECONDARYSOCKET]) {
+          if(CURL_SOCKET_BAD != easy->easy_conn->sock[SECONDARYSOCKET]) {
             /* if we failed anywhere, we must clean up the secondary socket if
                it was used */
             sclose(easy->easy_conn->sock[SECONDARYSOCKET]);

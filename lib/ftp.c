@@ -166,7 +166,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
   default:
     /* we have received data here */
     {
-      int s;
+      curl_socket_t s;
       size_t size = sizeof(struct sockaddr_in);
       struct sockaddr_in add;
 
@@ -175,7 +175,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
 
       sclose(sock); /* close the first socket */
 
-      if (-1 == s) {
+      if (CURL_SOCKET_BAD == s) {
         /* DIE! */
         failf(data, "Error accept()ing server connect");
       	return CURLE_FTP_PORT_FAILED;
@@ -766,7 +766,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
 #endif
   /* shut down the socket to inform the server we're done */
   sclose(conn->sock[SECONDARYSOCKET]);
-  conn->sock[SECONDARYSOCKET] = -1;
+  conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
 
   if(!ftp->no_transfer) {
     /* Let's see what the server says about the transfer we just performed,
@@ -2379,10 +2379,10 @@ CURLcode Curl_ftp(struct connectdata *conn)
     if(connected)
       retcode = Curl_ftp_nextconnect(conn);
 
-    if(retcode && (conn->sock[SECONDARYSOCKET] >= 0)) {
+    if(retcode && (conn->sock[SECONDARYSOCKET] != CURL_SOCKET_BAD)) {
       /* Failure detected, close the second socket if it was created already */
       sclose(conn->sock[SECONDARYSOCKET]);
-      conn->sock[SECONDARYSOCKET] = -1;
+      conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
     }
 
     if(ftp->no_transfer)

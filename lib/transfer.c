@@ -1312,13 +1312,13 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   if(conn->bits.getheader || !data->set.no_body) {
 
     FD_ZERO (&k->readfd);               /* clear it */
-    if(conn->sockfd != -1) {
+    if(conn->sockfd != CURL_SOCKET_BAD) {
       FD_SET (conn->sockfd, &k->readfd); /* read socket */
       k->keepon |= KEEP_READ;
     }
 
     FD_ZERO (&k->writefd);              /* clear it */
-    if(conn->writesockfd != -1) {
+    if(conn->writesockfd != CURL_SOCKET_BAD) {
       /* HTTP 1.1 magic:
 
          Even if we require a 100-return code before uploading data, we might
@@ -1408,7 +1408,7 @@ Transfer(struct connectdata *conn)
        is different*/
     Curl_readwrite_init(conn);
 
-  if((conn->sockfd == -1) && (conn->writesockfd == -1))
+  if((conn->sockfd == CURL_SOCKET_BAD) && (conn->writesockfd == CURL_SOCKET_BAD))
     /* nothing to read, nothing to write, we're already OK! */
     return CURLE_OK;
 
@@ -1953,11 +1953,11 @@ CURLcode Curl_perform(struct SessionHandle *data)
            * possibly know if the connection is in a good shape or not now. */
           conn->bits.close = TRUE;
 
-          if(-1 != conn->sock[SECONDARYSOCKET]) {
+          if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET]) {
             /* if we failed anywhere, we must clean up the secondary socket if
                it was used */
             sclose(conn->sock[SECONDARYSOCKET]);
-            conn->sock[SECONDARYSOCKET]=-1;
+            conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
           }
         }
 

@@ -1091,12 +1091,12 @@ CURLcode Curl_telnet(struct connectdata *conn)
   HANDLE stdin_handle;
   HANDLE objs[2];
   DWORD waitret;
-  DWORD nread;
+  DWORD readfile_read;
 #else
   fd_set readfd;
   fd_set keepfd;
-  ssize_t nread;  
 #endif
+  ssize_t nread;  
   bool keepon = TRUE;
   char *buf = data->state.buffer;
   struct TELNET *tn;
@@ -1203,10 +1203,11 @@ CURLcode Curl_telnet(struct connectdata *conn)
       char *buffer = buf;
               
       if(!ReadFile(stdin_handle, buf, sizeof(data->state.buffer),
-                   (LPDWORD)&nread, NULL)) {
+                   &readfile_read, NULL)) {
         keepon = FALSE;
         break;
       }
+      nread = readfile_read;
         
       while(nread--) {
         outbuf[0] = *buffer++;

@@ -63,6 +63,7 @@ static int gettimeofday(struct timeval *tp, void *nothing)
   tp->tv_sec = Sec;
   tp->tv_usec = Usec;
 #endif /* WITHOUT_MM_LIB */
+  (void)nothing;
   return 0;
 }
 #else /* WIN32 */

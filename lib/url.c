@@ -1341,9 +1341,9 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_SSL_Close(conn);
 
   /* close possibly still open sockets */
-  if(-1 != conn->sock[SECONDARYSOCKET])
+  if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
     sclose(conn->sock[SECONDARYSOCKET]);
-  if(-1 != conn->sock[FIRSTSOCKET])
+  if(CURL_SOCKET_BAD != conn->sock[FIRSTSOCKET])
     sclose(conn->sock[FIRSTSOCKET]);
 
   Curl_safefree(conn->user);
@@ -2022,8 +2022,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   /* and we setup a few fields in case we end up actually using this struct */
   conn->data = data;           /* remember our daddy */
-  conn->sock[FIRSTSOCKET] = -1;     /* no file descriptor */
-  conn->sock[SECONDARYSOCKET] = -1; /* no file descriptor */
+  conn->sock[FIRSTSOCKET] = CURL_SOCKET_BAD;     /* no file descriptor */
+  conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
   conn->bits.httpproxy = (data->change.proxy && *data->change.proxy &&
                           (data->set.proxytype == CURLPROXY_HTTP))?
@@ -3164,7 +3164,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
   conn->bytecount = 0;
   conn->headerbytecount = 0;
 
-  if(-1 == conn->sock[FIRSTSOCKET]) {
+  if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
     bool connected;
 
     /* Connect only if not already connected! */

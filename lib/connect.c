@@ -417,6 +417,7 @@ static bool verifyconnect(curl_socket_t sockfd)
   /* This wasn't a successful connect */
   return FALSE;
 #else
+  (void)sockfd;
   return TRUE;
 #endif
 }
@@ -571,7 +572,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
    */
   for (ai = remotehost->addr; ai; ai = ai->ai_next, aliasindex++) {
     sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-    if (sockfd < 0)
+    if (sockfd == CURL_SOCKET_BAD)
       continue;
 #else
   /*
@@ -681,7 +682,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
     before = after;
   }
-  if (sockfd < 0) {
+  if (sockfd == CURL_SOCKET_BAD) {
     /* no good connect was made */
     *sockconn = -1;
     failf(data, "Connect failed");
