@@ -25,8 +25,6 @@
 #include <string.h>
 
 #include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
 
 #define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
