@@ -26,4 +26,6 @@
 +getinfo.obj &
 +version.obj &
 +easy.obj &
-+strequal.obj
++strequal.obj &
++strtok.obj
+
