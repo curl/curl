@@ -12,6 +12,10 @@ Daniel (31 January 2001)
   be able to return -1. The telnet support crashed due to this and there was
   a possibility to weird behaviour all over.
 
+- Added a configure.in check for a working getaddrinfo() if IPv6 is requested.
+  I also made the configure script feature --enable-debug which sets a couple
+  of compiler options when used. It assumes gcc.
+
 Daniel (30 January 2001)
 - I finally took a stab at the long-term FIXME item I've had on myself, and
   now libcurl will properly work when doing a HTTP range-request that follows
