@@ -537,6 +537,8 @@ int main(int argc, char *argv[])
 
 #ifdef HAVE_SIGNAL
   signal(SIGPIPE, sigpipe_handler);
+#endif
+#ifdef HAVE_SIGINTERRUPT
   siginterrupt(SIGPIPE, 1);
 #endif
 
