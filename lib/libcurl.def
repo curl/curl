@@ -2,7 +2,7 @@
 ; Definition file for the DLL version of the LIBCURL library from curl
 ;
 
-LIBRARY		LIBCURL
+LIBRARY		CURL
 
 DESCRIPTION	'curl libcurl - http://curl.haxx.se'
 
@@ -32,11 +32,11 @@ EXPORTS
 	curl_unescape @ 23 ; 
 	curl_version @ 24 ; 
 	curl_write @ 25 ; 
-	maprintf @ 26 ; 
- 	mfprintf @ 27 ;
- 	mprintf @ 28 ;
- 	msprintf @ 29 ;
- 	msnprintf @ 30 ;
- 	mvfprintf @ 31 ;
-	strequal @ 32 ; 
-	strnequal @ 33 ; 
+	curl_maprintf @ 26 ; 
+ 	curl_mfprintf @ 27 ;
+ 	curl_mprintf @ 28 ;
+ 	curl_msprintf @ 29 ;
+ 	curl_msnprintf @ 30 ;
+ 	curl_mvfprintf @ 31 ;
+	Curl_strequal @ 32 ; 
+	Curl_strnequal @ 33 ; 
