@@ -383,6 +383,9 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     easy = multi->easy.next;
     while(easy) {
       nexteasy=easy->next;
+      /* clear out the usage of the shared DNS cache */
+      easy->easy_handle->hostcache = NULL;
+
       free(easy);
       easy = nexteasy;
     }
