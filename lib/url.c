@@ -547,8 +547,8 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
     free(conn->proto.generic);
 
 #ifdef ENABLE_IPV6
-  if(conn->res) /* host name info */
-    freeaddrinfo(conn->res);
+  if(conn->hp) /* host name info */
+    freeaddrinfo(conn->hp);
 #else
   if(conn->hostent_buf) /* host name info */
     free(conn->hostent_buf);
@@ -708,6 +708,9 @@ static CURLcode ConnectPlease(struct UrlData *data,
          conn->hp->h_addr, conn->hp->h_length);
   conn->serv_addr.sin_family = conn->hp->h_addrtype;
   conn->serv_addr.sin_port = htons(data->port);
+#else
+  /* IPv6-style */
+  struct addrinfo *ai;
 #endif
 
 #if !defined(WIN32)||defined(__CYGWIN32__)
@@ -836,21 +839,22 @@ static CURLcode ConnectPlease(struct UrlData *data,
    * Connect to server/proxy
    *************************************************************/
 #ifdef ENABLE_IPV6
-  data->firstsocket = -1;
-  for (ai = conn->res; ai; ai = ai->ai_next) {
-    data->firstsocket = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-    if (data->firstsocket < 0)
+  conn->firstsocket = -1;
+  for (ai = conn->hp; ai; ai = ai->ai_next) {
+    conn->firstsocket = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+    if (conn->firstsocket < 0)
       continue;
 
-    if (connect(data->firstsocket, ai->ai_addr, ai->ai_addrlen) < 0) {
-      close(data->firstsocket);
-      data->firstsocket = -1;
+    if (connect(conn->firstsocket, ai->ai_addr, ai->ai_addrlen) < 0) {
+      close(conn->firstsocket);
+      conn->firstsocket = -1;
       continue;
     }
 
     break;
   }
-  if (data->firstsocket < 0) {
+  conn->ai = ai;
+  if (conn->firstsocket < 0) {
     failf(data, strerror(errno));
     return CURLE_COULDNT_CONNECT;
   }
@@ -923,9 +927,6 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   struct sigaction sigact;
 #endif
   int urllen;
-#ifdef ENABLE_IPV6
-  struct addrinfo *ai;
-#endif
 
   /*************************************************************
    * Check input data
@@ -1562,17 +1563,16 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     data->port =  data->remote_port; /* it is the same port */
 
     /* Resolve target host right on */
+    if(!conn->hp) {
 #ifdef ENABLE_IPV6
-    if(!conn->res)
       /* it might already be set if reusing a connection */
-      conn->res = Curl_getaddrinfo(data, conn->name, data->port);
-    if(!conn->res)
+      conn->hp = Curl_getaddrinfo(data, conn->name, data->port);
 #else
-    if(!conn->hp)
       /* it might already be set if reusing a connection */
       conn->hp = Curl_gethost(data, conn->name, &conn->hostent_buf);
-    if(!conn->hp)
 #endif
+    }
+    if(!conn->hp)
     {
       failf(data, "Couldn't resolve host '%s'", conn->name);
       return CURLE_COULDNT_RESOLVE_HOST;
@@ -1702,6 +1702,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 #else
     const int niflags = NI_NUMERICHOST;
 #endif
+    struct addrinfo *ai = conn->ai;
+
     if (getnameinfo(ai->ai_addr, ai->ai_addrlen, hbuf, sizeof(hbuf), NULL, 0,
 	niflags)) {
       snprintf(hbuf, sizeof(hbuf), "?");
@@ -1751,8 +1753,8 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
       if(conn->path)
         free(conn->path);
 #ifdef ENABLE_IPV6
-      if(conn->res)
-        freeaddrinfo(conn->res);
+      if(conn->hp)
+        freeaddrinfo(conn->hp);
 #else
       if(conn->hostent_buf)
         free(conn->hostent_buf);

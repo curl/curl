@@ -218,7 +218,8 @@ struct connectdata {
 #define PROT_FILE    (1<<8)
 
 #ifdef ENABLE_IPV6
-  struct addrinfo *res;
+  struct addrinfo *hp; /* host info pointer list */
+  struct addrinfo *ai; /* the particular host we use */
 #else
   char *hostent_buf; /* pointer to allocated memory for name info */
   struct hostent *hp;

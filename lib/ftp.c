@@ -1058,7 +1058,7 @@ again:;
          * previous lookup.
          */
 #ifdef ENABLE_IPV6
-        res = conn->res;
+        res = conn->hp;
 #else
         he = conn->hp;
 #endif
