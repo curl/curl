@@ -1389,18 +1389,8 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
 
   */
 
-#if 1
   const char *mode[] = { "EPSV", "PASV", NULL };
   int results[] = { 229, 227, 0 };
-#else
-#if 0
-  char *mode[] = { "EPSV", "LPSV", "PASV", NULL };
-  int results[] = { 229, 228, 227, 0 };
-#else
-  const char *mode[] = { "PASV", NULL };
-  int results[] = { 227, 0 };
-#endif
-#endif
   int modeoff;
   unsigned short connectport; /* the local port connect() should use! */
   unsigned short newport=0; /* remote port, not necessary the local one */
@@ -1459,7 +1449,6 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
     newhostp = newhost;
     newport = (port[0]<<8) + port[1];
   }
-#if 1
   else if (229 == results[modeoff]) {
     char *ptr = strchr(buf, '(');
     if(ptr) {
@@ -1472,11 +1461,23 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
                       &separator[2],
                       &num,
                       &separator[3])) {
-        /* the four separators should be identical */
-        newport = num;
+        char sep1 = separator[0];
+        int i;
 
-        /* we should use the same host we already are connected to */
-        newhostp = conn->name;
+        /* The four separators should be identical, or else this is an oddly
+           formatted reply and we bail out immediately. */
+        for(i=1; i<4; i++) {
+          if(separator[i] != sep1) {
+            ptr=NULL; /* set to NULL to signal error */
+            break;
+          }
+        }
+        if(ptr) {
+          newport = num;
+
+          /* we should use the same host we already are connected to */
+          newhostp = conn->name;
+        }
       }                      
       else
         ptr=NULL;
@@ -1486,7 +1487,6 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
       return CURLE_FTP_WEIRD_PASV_REPLY;
     }
   }
-#endif
   else
     return CURLE_FTP_CANT_RECONNECT;
 
