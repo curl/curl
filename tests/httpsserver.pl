@@ -23,8 +23,8 @@ if(!$stunnel) {
 
 my $verbose=0; # set to 1 for debugging
 
-my $port = 8433; # just a default
-my $http = 8999; # http-port
+my $port = 8433; # just our default, weird enough
+my $target_port = 8999; # test http-server port
 do {
     if($ARGV[0] eq "-v") {
         $verbose=1;
@@ -33,7 +33,7 @@ do {
         return 0; # return success, means we have stunnel working!
     }
     elsif($ARGV[0] eq "-r") {
-        $http=$ARGV[1];
+        $target_port=$ARGV[1];
         shift @ARGV;
     }
     elsif($ARGV[0] =~ /^(\d+)$/) {
@@ -43,9 +43,39 @@ do {
 
 my $path = `pwd`;
 chomp $path;
-my $cmd = "$stunnel -p $path/stunnel.pem -P $path/.https.pid -d $port -r $http";
+
+my $conffile="$path/stunnel.conf";	# stunnel configuration data
+my $certfile="$path/stunnel.pem";	# stunnel server certificate
+my $pidfile="$path/.https.pid";		# stunnel process pid file
+
+open(CONF, ">$conffile") || return 1;
+print CONF "
+	CApath=$path
+	cert = $certfile
+	pid = $pidfile
+	debug = 0
+	output = /dev/null
+	foreground = yes
+	
+	[curltest]
+	accept = $port
+	connect = $target_port
+";
+close CONF; 
+system("chmod go-rwx $conffile $path/stunnel.pem");	# secure permissions
+
+		# works only with stunnel versions < 4.00
+my $cmd="$stunnel -p $certfile -P $pidfile -d $port -r $target_port 2>/dev/null";
+
+# use some heuristics to determine stunnel version
+my $version_ge_4=system("$stunnel -V 2>&1|grep '^stunnel.* on '>/dev/null 2>&1");
+		# works only with stunnel versions >= 4.00
+if ($version_ge_4) { $cmd="$stunnel $conffile"; }
 
 if($verbose) {
-    print "$cmd\n";
+    print "HTTPS server: $cmd\n";
 }
+
 system($cmd);
+
+unlink $conffile;
