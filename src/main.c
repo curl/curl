@@ -2117,12 +2117,21 @@ static int parseconfig(const char *filename,
           line++;
         *line=0; /* zero terminate */
       }
+
+      if (param && !*param) {
+        /* do this so getparameter can check for required parameters.
+           Otherwise it always thinks there's a parameter. */
+        if (alloced_param)
+          free(param);
+        param = NULL;
+      }
+
 #ifdef DEBUG_CONFIG
-      fprintf(stderr, "PARAM: \"%s\"\n", param);
+      fprintf(stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
       res = getparameter(option, param, &usedarg, config);
 
-      if(*param && !usedarg)
+      if (param && *param && !usedarg)
         /* we passed in a parameter that wasn't used! */
         res = PARAM_GOT_EXTRA_PARAMETER;
 
@@ -2139,7 +2148,10 @@ static int parseconfig(const char *filename,
       }
 
       if(alloced_param)
+      {
         free(param);
+	param = NULL;
+      }
 
       free(aline);
     }
@@ -3371,7 +3383,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   if(config->headerfile && !headerfilep && heads.stream)
     fclose(heads.stream);
 
-  if(config->trace_fopened)
+  if(config->trace_fopened && config->trace_stream)
     fclose(config->trace_stream);
 
   if(allocuseragent)
