@@ -5,7 +5,7 @@
  *
  *   1) This header remain in tact.
  *   2) The prototype for getpass is not changed from:
- *         char *getpass(const char *prompt)
+ *      int getpass_r(const char *prompt, char *buffer, int buflen)
  *   3) This source code is not used outside of this(getpass.c) file.
  *   3) Any changes to this(getpass.c) source code are made publicly available.
  *
@@ -68,7 +68,7 @@
 #  define perror(x) fprintf(stderr, "Error in: %s\n", x)
 #endif
 
-int my_getpass(void *client, const char *prompt, char *buffer, int buflen)
+int getpass_r(const char *prompt, char *buffer, int buflen)
 {
   FILE *infp;
   FILE *outfp;
@@ -181,7 +181,7 @@ int my_getpass(void *client, const char *prompt, char *buffer, int buflen)
 #else /* WIN32 */
 #include <stdio.h>
 #include <conio.h>
-int my_getpass(void *client, const char *prompt, char *buffer, int buflen)
+int getpass_r(const char *prompt, char *buffer, int buflen)
 {
   int i;
   printf("%s", prompt);

@@ -264,6 +264,12 @@ CURLcode curl_close(CURL *curl)
   return CURLE_OK;
 }
 
+int my_getpass(void *clientp, char *prompt, char* buffer, int buflen )
+{
+  return getpass_r(prompt, buffer, buflen);
+}
+
+
 CURLcode curl_open(CURL **curl, char *url)
 {
   /* We don't yet support specifying the URL at this point */

@@ -3,6 +3,6 @@
 /*
  * Returning non-zero will abort the continued operation!
  */
-int my_getpass(void *client, char *prompt, char* buffer, int buflen );
+int getpass_r(char *prompt, char* buffer, int buflen );
 
 #endif
