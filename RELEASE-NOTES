@@ -4,7 +4,7 @@ Curl and libcurl 7.12.0.
  Releases counted from the very beginning: 108
  Available command line options:           95
  Available curl_easy_setopt() options:     113
- Number of public functions in libcurl:    35
+ Number of public functions in libcurl:    36
 
 This release includes the following changes:
 
