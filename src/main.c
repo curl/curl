@@ -2763,6 +2763,12 @@ operate(struct Configurable *config, int argc, char *argv[])
           char *storefile = outfile;
           outfile = glob_match_url(storefile, urls);
           free(storefile);
+          if(!outfile) {
+            /* bad globbing */
+            helpf("bad output glob!\n");
+            return CURLE_FAILED_INIT;
+          }
+
         }
       
         /* Create the directory hierarchy, if not pre-existant to a multiple
