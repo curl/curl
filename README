@@ -30,8 +30,9 @@ README
         Sweden    -- ftp://ftp.sunet.se/pub/www/utilities/curl/
         Sweden    -- http://cool.haxx.se/curl/
         Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
-        Australia -- http://curl.planetmirror.com/pub/curl/
-        US        -- http://curl.sourceforge.net/download.html
+        Australia -- http://curl.planetmirror.com/download/
+        US        -- http://curl.sourceforge.net/download/
+        Hongkong  -- http://www.execve.net/curl/
 
   To download the very latest source off the CVS server do this:
 
