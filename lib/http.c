@@ -188,23 +188,23 @@ void Curl_http_auth_act(struct connectdata *conn)
   }
 }
 
-/*
+/**
  * Setup the authentication headers for the host/proxy and the correct
- * authentication method.
+ * authentication method.  @p conn->data->state.authdone set to TRUE
+ * when authentication is done.
+ *
+ * @param conn all information about the current connection
  */
-
 static CURLcode http_auth_headers(struct connectdata *conn,
                                   char *request,
-                                  char *path,
-                                  bool *ready) /* set TRUE when the auth phase
-                                           is done and ready to do the *actual*
-                                           request */
+                                  char *path)
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   char *auth=NULL;
 
-  *ready = FALSE; /* default is no */
+  curlassert(data);
+  data->state.authdone = FALSE; /* default is no */
 
   if(!data->state.authstage) {
     if(conn->bits.httpproxy && conn->bits.proxy_user_passwd)
@@ -212,7 +212,7 @@ static CURLcode http_auth_headers(struct connectdata *conn,
     else if(conn->bits.user_passwd)
       Curl_http_auth_stage(data, 401);
     else {
-      *ready = TRUE;
+      data->state.authdone = TRUE;
       return CURLE_OK; /* no authentication with no user or password */
     }
   }
@@ -229,7 +229,7 @@ static CURLcode http_auth_headers(struct connectdata *conn,
 #ifdef USE_SSLEAY
       if(data->state.authwant == CURLAUTH_NTLM) {
         auth=(char *)"NTLM";
-        result = Curl_output_ntlm(conn, TRUE, ready);
+        result = Curl_output_ntlm(conn, TRUE);
         if(result)
           return result;
       }
@@ -244,7 +244,7 @@ static CURLcode http_auth_headers(struct connectdata *conn,
           if(result)
             return result;
         }
-        *ready = TRUE;
+        data->state.authdone = TRUE;
         /* Switch to web authentication after proxy authentication is done */
         Curl_http_auth_stage(data, 401);
       }
@@ -262,14 +262,14 @@ static CURLcode http_auth_headers(struct connectdata *conn,
         result = Curl_output_negotiate(conn);
         if (result)
           return result;
-        *ready = TRUE;
+        data->state.authdone = TRUE;
       }
       else
 #endif
 #ifdef USE_SSLEAY
       if(data->state.authwant == CURLAUTH_NTLM) {
         auth=(char *)"NTLM";
-        result = Curl_output_ntlm(conn, FALSE, ready);
+        result = Curl_output_ntlm(conn, FALSE);
         if(result)
           return result;
       }
@@ -284,7 +284,7 @@ static CURLcode http_auth_headers(struct connectdata *conn,
                                       (unsigned char *)path);
           if(result)
             return result;
-          *ready = TRUE;
+          data->state.authdone = TRUE;
         }
         else if(data->state.authwant == CURLAUTH_BASIC) {/* Basic */
           if(conn->bits.user_passwd &&
@@ -295,7 +295,7 @@ static CURLcode http_auth_headers(struct connectdata *conn,
               return result;
           }
           /* basic is always ready */
-          *ready = TRUE;
+          data->state.authdone = TRUE;
         }
       }
       if(auth)
@@ -304,7 +304,7 @@ static CURLcode http_auth_headers(struct connectdata *conn,
     }
   }
   else
-    *ready = TRUE;
+    data->state.authdone = TRUE;
 
   return result;
 }
@@ -438,6 +438,83 @@ CURLcode Curl_http_auth(struct connectdata *conn,
   return CURLE_OK;
 }
 
+/**
+ * determine whether an http response has gotten us into an
+ * error state or not.
+ *
+ * @param conn all information about the current connection
+ *
+ * @retval 0 communications should continue
+ *
+ * @retval 1 communications should not continue
+ */
+int Curl_http_should_fail(struct connectdata *conn)
+{
+  struct SessionHandle *data;
+  struct Curl_transfer_keeper *k;
+
+  curlassert(conn);
+  data = conn->data;
+  curlassert(data);
+
+  /*
+  ** For readability
+  */
+  k = &conn->keep;
+
+  /*
+  ** If we haven't been asked to fail on error,
+  ** don't fail.
+  */
+  if (!data->set.http_fail_on_error)
+    return 0;
+
+  /*
+  ** Any code < 400 is never terminal.
+  */
+  if (k->httpcode < 400)
+    return 0;
+
+  /*
+  ** Any code >= 400 that's not 401 or 407 is always
+  ** a terminal error
+  */
+  if ((k->httpcode != 401) &&
+      (k->httpcode != 407))
+    return 1;
+
+  /*
+  ** All we have left to deal with is 401 and 407
+  */
+  curlassert((k->httpcode == 401) || (k->httpcode == 407));
+
+  /*
+  ** Examine the current authentication state to see if this
+  ** is an error.  The idea is for this function to get
+  ** called after processing all the headers in a response
+  ** message.  So, if we've been to asked to authenticate a
+  ** particular stage, and we've done it, we're OK.  But, if
+  ** we're already completely authenticated, it's not OK to
+  ** get another 401 or 407.
+  **
+  ** It is possible for authentication to go stale such that
+  ** the client needs to reauthenticate.  Once that info is
+  ** available, use it here.
+  */
+  infof(data,"%s: authstage = %d\n",__FUNCTION__,data->state.authstage);
+  infof(data,"%s: httpcode = %d\n",__FUNCTION__,k->httpcode);
+  infof(data,"%s: authdone = %d\n",__FUNCTION__,data->state.authdone);
+
+  if (data->state.authstage &&
+      (data->state.authstage == k->httpcode))
+    return data->state.authdone;
+
+  /*
+  ** Either we're not authenticating, or we're supposed to
+  ** be authenticating something else.  This is an error.
+  */
+  return 1;
+}
 
 /* fread() emulation to provide POST and/or request data */
 static size_t readmoredata(char *buffer,
@@ -760,9 +837,6 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   infof(data, "Establish HTTP proxy tunnel to %s:%d\n", hostname, remote_port);
 
   do {
-    bool auth; /* we don't really have to know when the auth phase is done,
-                  but this variable will be set to true then */
-
     if(conn->newurl) {
       /* This only happens if we've looped here due to authentication reasons,
          and we don't really use the newly cloned URL here then. Just free()
@@ -776,7 +850,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY;
 
     /* Setup the proxy-authorization header, if any */
-    result = http_auth_headers(conn, (char *)"CONNECT", host_port, &auth);
+    result = http_auth_headers(conn, (char *)"CONNECT", host_port);
     if(CURLE_OK == result) {
 
       /* OK, now send the connect request to the proxy */
@@ -1066,7 +1140,6 @@ CURLcode Curl_http(struct connectdata *conn)
   const char *te = ""; /* tranfer-encoding */
   char *ptr;
   char *request;
-  bool authdone=TRUE; /* if the authentication phase is done */
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -1105,7 +1178,7 @@ CURLcode Curl_http(struct connectdata *conn)
   }
 
   /* setup the authentication headers */
-  result = http_auth_headers(conn, request, ppath, &authdone);
+  result = http_auth_headers(conn, request, ppath);
   if(result)
     return result;
 
@@ -1535,8 +1608,8 @@ CURLcode Curl_http(struct connectdata *conn)
         /* setup variables for the upcoming transfer */
         result = Curl_Transfer(conn, FIRSTSOCKET, -1, TRUE,
                                &http->readbytecount,
-                               authdone?FIRSTSOCKET:-1,
-                               authdone?&http->writebytecount:NULL);
+                               data->state.authdone?FIRSTSOCKET:-1,
+                               data->state.authdone?&http->writebytecount:NULL);
       if(result) {
         Curl_formclean(http->sendit); /* free that whole lot */
         return result;
@@ -1574,8 +1647,8 @@ CURLcode Curl_http(struct connectdata *conn)
         /* prepare for transfer */
         result = Curl_Transfer(conn, FIRSTSOCKET, -1, TRUE,
                                &http->readbytecount,
-                               authdone?FIRSTSOCKET:-1,
-                               authdone?&http->writebytecount:NULL);
+                               data->state.authdone?FIRSTSOCKET:-1,
+                               data->state.authdone?&http->writebytecount:NULL);
       if(result)
         return result;
       break;
@@ -1606,7 +1679,7 @@ CURLcode Curl_http(struct connectdata *conn)
 
       if(data->set.postfields) {
 
-        if(authdone && (postsize < (100*1024))) {
+        if(data->state.authdone && (postsize < (100*1024))) {
           /* If we're not done with the authentication phase, we don't expect
              to actually send off any data yet. Hence, we delay the sending of
              the body until we receive that friendly 100-continue response */
@@ -1642,7 +1715,7 @@ CURLcode Curl_http(struct connectdata *conn)
           /* set the upload size to the progress meter */
           Curl_pgrsSetUploadSize(data, http->postsize);
 
-          if(!authdone && !checkheaders(data, "Expect:")) {
+          if(!data->state.authdone && !checkheaders(data, "Expect:")) {
             /* if not disabled explicitly we add a Expect: 100-continue to the
                headers which actually speeds up post operations (as there is
                one packet coming back from the web server) */

@@ -441,6 +441,16 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 FD_ZERO(&k->wkeepfd);
               }
 
+              /*
+              ** Now that all of the headers have been parsed, see
+              ** if we should give up and return an error.
+              */
+              if (Curl_http_should_fail(conn)) {
+                failf (data, "The requested URL returned error: %d",
+                       k->httpcode);
+                return CURLE_HTTP_RETURNED_ERROR;
+              }
+
               /* now, only output this if the header AND body are requested:
                */
               writetype = CLIENTWRITE_HEADER;
@@ -576,9 +586,21 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 data->info.httpcode = k->httpcode;
                 data->info.httpversion = k->httpversion;
 
-                /* 404 -> URL not found! */
+                /*
+                ** This code executes as part of processing
+                ** the header.  As a result, it's not
+                ** totally clear how to interpret the
+                ** response code yet as that depends on what
+                ** other headers may be present.  401 and
+                ** 407 may be errors, but may be OK
+                ** depending on how authentication is
+                ** working.  Other codes are definitely
+                ** errors, so give up here.
+                */
                 if (data->set.http_fail_on_error &&
-                    (k->httpcode >= 400)) {
+                    (k->httpcode >= 400) &&
+                    (k->httpcode != 401) &&
+                    (k->httpcode != 407)) {
                   /* If we have been told to fail hard on HTTP-errors,
                      here is the check for that: */
                   /* serious error, go home! */

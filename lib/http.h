@@ -42,9 +42,13 @@ CURLcode Curl_http_connect(struct connectdata *conn);
 void Curl_httpchunk_init(struct connectdata *conn);
 CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
                               ssize_t length, ssize_t *wrote);
+
+/* These functions are in http.c */
 void Curl_http_auth_stage(struct SessionHandle *data, int stage);
 CURLcode Curl_http_auth(struct connectdata *conn,
                         int httpcode, char *header);
 void Curl_http_auth_act(struct connectdata *conn);
+
+int Curl_http_should_fail(struct connectdata *conn);
 #endif
 #endif
