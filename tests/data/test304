@@ -16,7 +16,7 @@ blablabla
 HTTPS multipart formpost
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/304 -F name=daniel -F tool=curl -F file=@log/test304.txt
+https://%HOSTIP:%HTTPSPORT/we/want/304 -F name=daniel -F tool=curl -F file=@log/test304.txt
 </command>
 # We create this file before the command is invoked!
 <file name="log/test304.txt">
@@ -32,7 +32,7 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 <protocol>
 POST /we/want/304 HTTP/1.1
 User-Agent: curl/7.9.5-pre4 (sparc-sun-solaris2.7) libcurl 7.9.5-pre4 (OpenSSL 0.9.6c) (krb4 enabled)
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:8433
 Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
 Content-Length: 1354
