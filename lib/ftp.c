@@ -1080,7 +1080,8 @@ CURLcode ftp_use_port(struct connectdata *conn)
     return CURLE_FTP_PORT_FAILED;
   }
 
-  for (modep = (char **)mode; modep && *modep; modep++) {
+  for (modep = (char **)(data->set.ftp_use_eprt?&mode[0]:&mode[2]);
+       modep && *modep; modep++) {
     int lprtaf, eprtaf;
     int alen=0, plen=0;
     
