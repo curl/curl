@@ -26,6 +26,11 @@
 #define YYDEBUG 0
 #endif
 
+#ifndef YYSTACK_USE_ALLOCA
+  /* to satisfy gcc -Wundef, we set this to 0 */
+#define YYSTACK_USE_ALLOCA 0
+#endif
+
 /* Since the code of getdate.y is not included in the Emacs executable
    itself, there is no need to #define static in this file.  Even if
    the code were included in the Emacs executable, it probably
