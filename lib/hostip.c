@@ -252,9 +252,7 @@ struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
     return NULL;
 
   if(data->share)
-  {
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-  }
 
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->hostcache, entry_id, entry_len+1);
@@ -297,14 +295,13 @@ struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
 void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
 {
   if(data->share)
-  {
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-  }
+
   dns->inuse--;
+
   if(data->share)
-  {
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-  }
+
 }
 
 /*
