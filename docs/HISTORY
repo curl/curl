@@ -42,7 +42,7 @@ lines of code, we switched over to the MPL license to restrict the effects of
 
 November 1998, configure script and reported successful compiles on several
 major operating systems. The never-quite-understood -F option was added and
-curl could now simulate quite a lot of a browser.
+curl could now simulate quite a lot of a browser. TELNET support was added.
 
 Curl 5 was released in December 1998 and introduced the first ever curl man
 page. People started making Linux RPM packages out of it.
@@ -90,6 +90,8 @@ curl supports HTTP 1.1 starting with the release of 7.7, March 22 2001. This
 also introduced libcurl's ability to do persistent connections. 24000 lines of
 code.
 
+The first experimental ftps:// support was added in March 2001.
+
 August 2001. curl is bundled in Mac OS X, 10.1. It was already becoming more
 and more of a standard utility of Linux distributions and a regular in the BSD
 ports collections. The curl web site gets 8000 visits weekly. Curl Corporation
@@ -114,3 +116,11 @@ license only.
 
 February 2003, the curl site averages at 20000 visits weekly. At any given
 moment, there's an average of 3 people browsing the curl.haxx.se site.
+
+Multiple new authentication schemes are supported: Digest (May), NTLM (June)
+and Negotiate (June).
+
+November 2003: curl 7.10.8 is released. 45000 lines of code. ~55000 unique
+visitors to the curl.haxx.se site. Five official web mirrors.
+
+December 2003, full-fledged SSL for FTP is supported.
