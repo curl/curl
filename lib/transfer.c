@@ -737,6 +737,9 @@ CURLcode Curl_perform(CURL *curl)
   struct connectdata *conn=NULL;
   bool port=TRUE; /* allow data->use_port to set port to use */
 
+  data->followlocation=0; /* reset the location-follow counter */
+  data->bits.this_is_a_follow = FALSE; /* reset this */
+
   Curl_pgrsStartNow(data);
 
   do {
