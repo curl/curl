@@ -332,7 +332,8 @@ want the transfer to start from.
 .B CURLOPT_COOKIE
 Pass a pointer to a zero terminated string as parameter. It will be used to
 set a cookie in the http request. The format of the string should be
-\[NAME]=[CONTENTS]; Where NAME is the cookie name.
+NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie
+should contain.
 
 If you need to set mulitple cookies, you need to set them all using a single
 option and thus you need to concat them all in one single string. Set multiple
