@@ -594,10 +594,10 @@ dnl AC_SUBST(RANLIB)
 AC_CONFIG_FILES([Makefile \
 	   docs/Makefile \
            docs/examples/Makefile \
+           docs/libcurl/Makefile \
 	   include/Makefile \
 	   include/curl/Makefile \
 	   src/Makefile \
-	   multi/Makefile \
            lib/Makefile \
            tests/Makefile \
            tests/data/Makefile \
