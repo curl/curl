@@ -187,18 +187,25 @@ void Curl_http_auth_act(struct connectdata *conn)
 
 CURLcode http_auth_headers(struct connectdata *conn,
                            char *request,
-                           char *path)
+                           char *path,
+                           bool *ready) /* set TRUE when the auth phase is
+                                           done and ready to do the *actual*
+                                           request */
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+
+  *ready = FALSE; /* default is no */
 
   if(!data->state.authstage) {
     if(conn->bits.httpproxy && conn->bits.proxy_user_passwd)
       Curl_http_auth_stage(data, 407);
     else if(conn->bits.user_passwd)
       Curl_http_auth_stage(data, 401);
-    else
+    else {
+      *ready = TRUE;
       return CURLE_OK; /* no authentication with no user or password */
+    }
   }
 
   /* To prevent the user+password to get sent to other than the original
@@ -212,7 +219,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
     if (data->state.authstage == 407) {
 #ifdef USE_SSLEAY
       if(data->state.authwant == CURLAUTH_NTLM) {
-        result = Curl_output_ntlm(conn, TRUE);
+        result = Curl_output_ntlm(conn, TRUE, ready);
         if(result)
           return result;
       }
@@ -224,6 +231,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
         result = Curl_output_basic_proxy(conn);
         if(result)
           return result;
+        *ready = TRUE;
         /* Switch to web authentication after proxy authentication is done */
         Curl_http_auth_stage(data, 401);
       }
@@ -237,12 +245,13 @@ CURLcode http_auth_headers(struct connectdata *conn,
         result = Curl_output_negotiate(conn);
         if (result)
           return result;
+        *ready = TRUE;
       }
       else
 #endif
 #ifdef USE_SSLEAY
       if(data->state.authwant == CURLAUTH_NTLM) {
-        result = Curl_output_ntlm(conn, FALSE);
+        result = Curl_output_ntlm(conn, FALSE, ready);
         if(result)
           return result;
       }
@@ -256,6 +265,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
                                       (unsigned char *)path);
           if(result)
             return result;
+          *ready = TRUE;
         }
         else if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
                 conn->bits.user_passwd &&
@@ -263,10 +273,13 @@ CURLcode http_auth_headers(struct connectdata *conn,
           result = Curl_output_basic(conn);
           if(result)
             return result;
+          *ready = TRUE;
         }
       }
     }
   }
+  else
+    *ready = TRUE;
 
   return result;
 }
@@ -706,6 +719,9 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   infof(data, "Establish HTTP proxy tunnel to %s:%d\n", hostname, remote_port);
 
   do {
+    bool auth; /* we don't really have to know when the auth phase is done,
+                  but this variable will be set to true then */
+
     if(conn->newurl) {
       /* This only happens if we've looped here due to authentication reasons,
          and we don't really use the newly cloned URL here then. Just free()
@@ -719,7 +735,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY;
 
     /* Setup the proxy-authorization header, if any */
-    result = http_auth_headers(conn, (char *)"CONNECT", host_port);
+    result = http_auth_headers(conn, (char *)"CONNECT", host_port, &auth);
     if(CURLE_OK == result) {
 
       /* OK, now send the connect request to the proxy */
@@ -993,6 +1009,8 @@ CURLcode Curl_http(struct connectdata *conn)
   const char *te = ""; /* tranfer-encoding */
   char *ptr;
   char *request;
+  bool authdone=TRUE; /* if the authentication phase is done */
+  Curl_HttpReq httpreq;  /* type of HTTP request */
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -1031,7 +1049,7 @@ CURLcode Curl_http(struct connectdata *conn)
   }
 
   /* setup the authentication headers */
-  result = http_auth_headers(conn, request, ppath);
+  result = http_auth_headers(conn, request, ppath, &authdone);
   if(result)
     return result;
 
@@ -1384,7 +1402,13 @@ CURLcode Curl_http(struct connectdata *conn)
     http->postdata = NULL;  /* nothing to post at this point */
     Curl_pgrsSetUploadSize(data, 0); /* upload size is 0 atm */
 
-    switch(data->set.httpreq) {
+    if(!authdone)
+      /* until the auth is done, pretend we only do GET */
+      httpreq = HTTPREQ_GET;
+    else
+      httpreq = data->set.httpreq;
+
+    switch(httpreq) {
 
     case HTTPREQ_POST_FORM:
       if(Curl_FormInit(&http->form, http->sendit)) {
