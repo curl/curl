@@ -637,9 +637,9 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
       failf(data, "Received only partial file: %d bytes", *ftp->bytecountp);
       return CURLE_PARTIAL_FILE;
     }
-    else if(!conn->bits.resume_done &&
-            !data->set.no_body &&
-            (!*ftp->bytecountp && (conn->size>0))) {
+    else if(!ftp->dont_check &&
+            !*ftp->bytecountp &&
+            (conn->size>0)) {
       /* We consider this an error, but there's no true FTP error received
          why we need to continue to "read out" the server response too.
          We don't want to leave a "waiting" server reply if we'll get told
@@ -656,20 +656,23 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   sclose(conn->secondarysocket);
   conn->secondarysocket = -1;
 
-  if(!data->set.no_body) {
+  if(!data->set.no_body && !ftp->dont_check) {
     /* now let's see what the server says about the transfer we just
        performed: */
     nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
-    if(!conn->bits.resume_done) {  
-      /* 226 Transfer complete, 250 Requested file action okay, completed. */
-      if((ftpcode != 226) && (ftpcode != 250)) {
-        failf(data, "server did not report OK, got %d", ftpcode);
-        return CURLE_FTP_WRITE_ERROR;
-      }
+    /* 226 Transfer complete, 250 Requested file action okay, completed. */
+    if((ftpcode != 226) && (ftpcode != 250)) {
+      failf(data, "server did not report OK, got %d", ftpcode);
+      return CURLE_FTP_WRITE_ERROR;
     }
+  }
+  if(ftp->dont_check) {
+    /* if we don't check, we can't re-use this connection as it leaves the
+       control connection in a weird status */
+    conn->bits.close = TRUE;
   }
 
   conn->bits.resume_done = FALSE; /* clean this for next connection */
@@ -1601,7 +1604,7 @@ CURLcode ftp_perform(struct connectdata *conn)
 
   if(data->set.no_body)
     /* don't transfer the data */
-    ;
+    ftp->dont_check = TRUE;
   /* Get us a second connection up and connected */
   else if(data->set.ftp_use_port) {
     /* We have chosen to use the PORT command */
@@ -1697,10 +1700,11 @@ CURLcode ftp_perform(struct connectdata *conn)
             /* no data to transfer */
             result=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
             
-            /* Set resume done so that we won't get any error in
-             * Curl_ftp_done() because we didn't transfer the amount of bytes
-             * that the local file file obviously is */
+            /* Set resume done and dont_check so that we won't get any error
+             * in Curl_ftp_done() because we didn't transfer the amount of
+             * bytes that the local file file obviously is */
             conn->bits.resume_done = TRUE; 
+            ftp->dont_check = TRUE;
 
             return CURLE_OK;
           }
@@ -1790,6 +1794,7 @@ CURLcode ftp_perform(struct connectdata *conn)
       infof(data, "range-download from %d to %d, totally %d bytes\n",
             from, to, totalsize);
       conn->bits.resume_done = TRUE; /* to prevent some error due to this */
+      ftp->dont_check = TRUE; /* dont check for successful transfer */
     }
 
     if((data->set.ftp_list_only) || !ftp->file) {
@@ -1886,6 +1891,7 @@ CURLcode ftp_perform(struct connectdata *conn)
            * because we didn't transfer the amount of bytes that the remote
            * file obviously is */
           conn->bits.resume_done = TRUE; 
+          ftp->dont_check = TRUE;
 
           return CURLE_OK;
         }

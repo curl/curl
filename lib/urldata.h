@@ -179,7 +179,9 @@ struct FTP {
   char *entrypath; /* the PWD reply when we logged on */
 
   char *cache;       /* data cache between getresponse()-calls */
-  size_t cache_size; /* size of cache in bytes */                    
+  size_t cache_size; /* size of cache in bytes */
+  bool dont_check;  /* set to TRUE to prevent the final (post-transfer)
+                       file size and 226/250 status check */
 };
 
 /****************************************************************************
