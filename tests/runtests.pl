@@ -1195,23 +1195,21 @@ sub singletest {
         }        
     }
 
-    if($errorcode || $cmdres) {
-        if($errorcode == $cmdres) {
-            $errorcode =~ s/\n//;
-            if($verbose) {
-                print " received errorcode $errorcode OK";
-            }
-            elsif(!$short) {
-                print " error OK";
-            }
+    if($errorcode == $cmdres) {
+        $errorcode =~ s/\n//;
+        if($verbose) {
+            print " received exitcode $errorcode OK";
         }
-        else {
-            if(!$short) {
-                print "curl returned $cmdres, ".(0+$errorcode)." was expected\n";
-            }
-            print " error FAILED\n";
-            return 1;
+        elsif(!$short) {
+            print " exit OK";
         }
+    }
+    else {
+        if(!$short) {
+            print "curl returned $cmdres, ".(0+$errorcode)." was expected\n";
+        }
+        print " exit FAILED\n";
+        return 1;
     }
 
     # the test succeeded, remove all log files
@@ -1259,6 +1257,37 @@ sub singletest {
                 }
             }
         }
+    }
+    if($valgrind) {
+        opendir(DIR, "log") ||
+            return 0; # can't open log dir
+        my @files = readdir(DIR);
+        closedir DIR;
+        my $f;
+        my $l;
+        foreach $f (@files) {
+            if($f =~ /^valgrind$testnum/) {
+                $l = $f;
+                last;
+            }
+        }
+        my $leak;
+        open(VAL, "<$l");
+        while(<VAL>) {
+            if($_ =~ /definitely lost: (\d*) bytes/) {
+                $leak = $1;
+                last;
+            }
+        }
+        close(VAL);
+        if($leak) {
+            print " valgrind ERROR ";
+        }
+        elsif(!$short) {
+            print " valgrind OK";
+        }
+
+        
     }
     if($short) {
         print "OK";
