@@ -1120,6 +1120,7 @@ AC_CHECK_HEADERS(
         dlfcn.h \
         alloca.h \
         winsock.h \
+        winsock2.h \
         time.h \
         io.h \
         pwd.h \
@@ -1225,6 +1226,7 @@ AC_CHECK_FUNCS( strtoll \
                 sigsetjmp \
                 basename \
                 setlocale \
+                ftruncate \
                 poll,
 dnl if found
 [],
