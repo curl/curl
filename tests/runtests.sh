@@ -15,7 +15,10 @@ NC=nc
 
 # Normally, all test cases should be run, but at times it is handy to
 # simply run a particular one:
-TESTCASES="9"
+TESTCASES=all
+
+# To run specific test cases, set them like:
+# TESTCASES="1 2 3 7 8"
 
 #######################################################################
 # No variables below this point should need to be modified
@@ -185,6 +188,10 @@ runserver
 #######################################################################
 # The main test-loop
 #
+
+if [ x$TESTCASES = xall ]; then
+  TESTCASES=`ls -1 data/command*.txt | sed -e 's/[a-z\/\.]*//g'`
+fi
 
 for NUMBER in $TESTCASES; do
 
