@@ -136,12 +136,12 @@ CURLcode Curl_dict(struct connectdata *conn)
     }
 
     result = Curl_sendf(sockfd, conn,
-                        "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
+                        "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
                         "MATCH "
                         "%s "    /* database */
                         "%s "    /* strategy */
-                        "%s\n"   /* word */
-                        "QUIT\n",
+                        "%s\r\n" /* word */
+                        "QUIT\r\n",
 
                         database,
                         strategy,
@@ -180,11 +180,11 @@ CURLcode Curl_dict(struct connectdata *conn)
     }
 
     result = Curl_sendf(sockfd, conn,
-                        "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
+                        "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
                         "DEFINE "
                         "%s "     /* database */
-                        "%s\n"    /* word */
-                        "QUIT\n",
+                        "%s\r\n"  /* word */
+                        "QUIT\r\n",
                         database,
                         word);
     if(result)
@@ -209,9 +209,9 @@ CURLcode Curl_dict(struct connectdata *conn)
           ppath[i] = ' ';
       }
       result = Curl_sendf(sockfd, conn,
-                          "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
-                          "%s\n"
-                          "QUIT\n", ppath);
+                          "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\r\n"
+                          "%s\r\n"
+                          "QUIT\r\n", ppath);
       if(result)
         failf(data, "Failed sending DICT request");
       else
