@@ -603,6 +603,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             return result;
 
           data->info.header_size += k->hbuflen;
+          conn->headerbytecount += k->hbuflen;
               
           /* reset hbufp pointer && hbuflen */
           k->hbufp = data->state.headerbuff;
