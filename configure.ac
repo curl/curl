@@ -758,28 +758,60 @@ case "$OPT_ZLIB" in
     dnl check for the lib first without setting any new path, since many
     dnl people have it in the default path
 
-    AC_CHECK_LIB(z, inflateEnd, ,
+    AC_CHECK_LIB(z, inflateEnd,
+                   dnl libz found, set the variable
+                   [HAVE_LIBZ="1"],
+                   dnl if no lib found, try to add the given library
                    [if test -d "$OPT_ZLIB"; then
                       CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
                       LDFLAGS="$LDFLAGS -L$OPT_ZLIB/lib"
                    fi])
 
-    AC_CHECK_HEADER(zlib.h,[
-      AC_CHECK_LIB(z, gzread,
-                   [HAVE_LIBZ="1"
-                   AC_SUBST(HAVE_LIBZ)
-                   AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
-                   AC_DEFINE(HAVE_LIBZ, 1, [If zlib is available])],
-                   [ CPPFLAGS=$_cppflags
-                   LDFLAGS=$_ldflags])],
-      [ CPPFLAGS=$_cppflags
-      LDFLAGS=$_ldflags]
-    )
+    AC_CHECK_HEADER(zlib.h,
+      [
+      dnl zlib.h was found
+      HAVE_ZLIB_H="1"
+      dnl if the lib wasn't found already, try again with the new paths
+      if test "$HAVE_LIBZ" != "1"; then
+        AC_CHECK_LIB(z, gzread,
+                     [
+                     dnl the lib was found!
+                     HAVE_LIBZ="1"
+                     ],
+                     [ CPPFLAGS=$_cppflags
+                     LDFLAGS=$_ldflags])
+      fi
+      ],
+      [
+        dnl zlib.h was not found, restore the flags
+        CPPFLAGS=$_cppflags
+        LDFLAGS=$_ldflags]
+      )
+
+    if test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" != "1"
+    then
+      AC_MSG_WARN([configure found only the libz lib, not the header file!])
+    elif test "$HAVE_LIBZ" != "1" && test "$HAVE_ZLIB_H" = "1"
+    then
+      AC_MSG_WARN([configure found only the libz header file, not the lib!])
+    elif test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" = "1"
+    then
+      dnl both header and lib were found!
+      AC_SUBST(HAVE_LIBZ)
+      AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
+      AC_DEFINE(HAVE_LIBZ, 1, [if zlib is available])
+
+      LIBS="$LIBS -lz"
+
+      dnl replace 'HAVE_LIBZ' in the automake makefile.ams
+      AMFIXLIB="1"
+      AC_MSG_NOTICE([found both libz and libz.h header])
+    fi
     ;;
 esac
 
 dnl set variable for use in automakefile(s)
-AM_CONDITIONAL(HAVE_LIBZ, test x"$HAVE_LIBZ" = x1)
+AM_CONDITIONAL(HAVE_LIBZ, test x"$AMFIXLIB" = x1)
 
 dnl Default is to try the thread-safe versions of a few functions
 OPT_THREAD=on
