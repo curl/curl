@@ -101,7 +101,7 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-static bool verifyconnect(curl_socket_t sockfd);
+static bool verifyconnect(curl_socket_t sockfd, int *error);
 
 /*
  * Curl_ourerrno() returns the errno (or equivalent) on this platform to
@@ -203,7 +203,7 @@ int waitconnect(curl_socket_t sockfd, /* socket */
   /* Call this function once now, and ignore the results. We do this to
      "clear" the error state on the socket so that we can later read it
      reliably. This is reported necessary on the MPE/iX operating system. */
-  verifyconnect(sockfd);
+  verifyconnect(sockfd, NULL);
 #endif
 
   /* now select() until we get connect or timeout */
@@ -397,25 +397,50 @@ static CURLcode bindlocal(struct connectdata *conn,
 /*
  * verifyconnect() returns TRUE if the connect really has happened.
  */
-static bool verifyconnect(curl_socket_t sockfd)
+static bool verifyconnect(curl_socket_t sockfd, int *error)
 {
-#if defined(SO_ERROR) && !defined(WIN32)
+  bool rc = TRUE;
+#ifdef SO_ERROR
   int err = 0;
   socklen_t errSize = sizeof(err);
+
+#ifdef WIN32
+  /*
+   * In October 2003 we effectively nullified this function on Windows due to
+   * problems with it using all CPU in multi-threaded cases.
+   *
+   * In May 2004, we bring it back to offer more info back on connect failures.
+   * Gisle Vanem could reproduce the former problems with this function, but
+   * could avoid them by adding this SleepEx() call below:
+   *
+   *    "I don't have Rational Quantify, but the hint from his post was
+   *    ntdll::NtRemoveIoCompletion(). So I'd assume the SleepEx (or maybe
+   *    just Sleep(0) would be enough?) would release whatever
+   *    mutex/critical-section the ntdll call is waiting on.
+   *
+   *    Someone got to verify this on Win-NT 4.0, 2000."
+   */
+  SleepEx(0, FALSE);
+#endif
+
   if( -1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR,
                        (void *)&err, &errSize))
     err = Curl_ourerrno();
 
   if ((0 == err) || (EISCONN == err))
     /* we are connected, awesome! */
-    return TRUE;
-  
-  /* This wasn't a successful connect */
-  return FALSE;
+    rc = TRUE;
+  else
+    /* This wasn't a successful connect */
+    rc = FALSE;
+  if (error)
+    *error = err;
 #else
   (void)sockfd;
-  return TRUE;
+  if (error)
+    *error = Curl_ourerrno();
 #endif
+  return rc;
 }
 
 /*
@@ -466,7 +491,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   rc = waitconnect(sockfd, 0);
 
   if(0 == rc) {
-    if (verifyconnect(sockfd)) {
+    if (verifyconnect(sockfd,NULL)) {
       /* we are connected, awesome! */
       *connected = TRUE;
       return CURLE_OK;
@@ -524,7 +549,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                           bool *connected)           /* really connected? */
 {
   struct SessionHandle *data = conn->data;
-  int rc;
+  int rc, error;
   curl_socket_t sockfd= CURL_SOCKET_BAD;
   int aliasindex=0;
   char *hostname;
@@ -642,7 +667,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 #endif
 
     if(-1 == rc) {
-      int error=Curl_ourerrno();
+      error = Curl_ourerrno();
 
       switch (error) {
       case EINPROGRESS:
@@ -679,7 +704,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
       
     if(0 == rc) {
-      if (verifyconnect(sockfd)) {
+      if (verifyconnect(sockfd,NULL)) {
         /* we are connected, awesome! */
         *connected = TRUE; /* this is a true connect */
         break;
@@ -687,10 +712,12 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       /* nope, not connected for real */
       rc = -1;
     }
+    else
+      verifyconnect(sockfd,&error);    /* get non-blocking error */
 
     /* connect failed or timed out */
     sclose(sockfd);
-    sockfd = -1;
+    sockfd = CURL_SOCKET_BAD;
 
     /* get a new timeout for next attempt */
     after = Curl_tvnow();
@@ -704,7 +731,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   if (sockfd == CURL_SOCKET_BAD) {
     /* no good connect was made */
     *sockconn = -1;
-    failf(data, "Connect failed; %s", Curl_strerror(conn,Curl_ourerrno()));
+    failf(data, "Connect failed; %s", Curl_strerror(conn,error));
     return CURLE_COULDNT_CONNECT;
   }
 
