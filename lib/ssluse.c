@@ -719,6 +719,7 @@ Curl_SSLConnect(struct connectdata *conn)
 #ifdef USE_SSLEAY
   struct SessionHandle *data = conn->data;
   int err;
+  int what=0;
   char * str;
   SSL_METHOD *req_method;
   SSL_SESSION *ssl_sessionid=NULL;
@@ -816,7 +817,6 @@ Curl_SSLConnect(struct connectdata *conn)
   SSL_set_fd(conn->ssl.handle, conn->firstsocket);
 
   do {
-    int what;
     fd_set writefd;
     fd_set readfd;
     struct timeval interval;
@@ -824,17 +824,21 @@ Curl_SSLConnect(struct connectdata *conn)
 
     err = SSL_connect(conn->ssl.handle);
 
-    what = SSL_get_error(conn->ssl.handle, err);
-
     FD_ZERO(&writefd);
     FD_ZERO(&readfd);
 
-    if(SSL_ERROR_WANT_READ == what)
-      FD_SET(conn->firstsocket, &readfd);
-    else if(SSL_ERROR_WANT_WRITE == what)
-      FD_SET(conn->firstsocket, &writefd);
-    else
-      break; /* untreated error */
+    if(1 != err) {
+      /* anything besides 1 returned fom SSL_connect() is not OK */
+
+      what = SSL_get_error(conn->ssl.handle, err);
+
+      if(SSL_ERROR_WANT_READ == what)
+        FD_SET(conn->firstsocket, &readfd);
+      else if(SSL_ERROR_WANT_WRITE == what)
+        FD_SET(conn->firstsocket, &writefd);
+      else
+        break; /* untreated error */
+    }
 
     /* Find out if any timeout is set. If not, use 300 seconds.
        Otherwise, figure out the most strict timeout of the two possible one
@@ -892,8 +896,11 @@ Curl_SSLConnect(struct connectdata *conn)
      0  is "not successful but was shut down controlled"
      <0 is "handshake was not successful, because a fatal error occurred" */
   if (err <= 0) {
-    err = ERR_get_error(); 
-    failf(data, "SSL: %s", ERR_error_string(err, NULL));
+    char error_buffer[120]; /* OpenSSL documents that this must be at least
+                               120 bytes long. */
+
+    /* what is already set to the SSL error before */
+    failf(data, "SSL: %s", ERR_error_string(what, error_buffer));
     return CURLE_SSL_CONNECT_ERROR;
   }
 
