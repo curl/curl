@@ -5,6 +5,9 @@
 **  a couple of people on Usenet.  Completely overhauled by Rich $alz
 **  <rsalz@bbn.com> and Jim Berets <jberets@bbn.com> in August, 1990.
 **
+**  This code has been modified since it was included in curl, to make it
+**  thread-safe and to make compilers complain less about it.
+**
 **  This code is in the public domain and has no copyright.
 */
 
