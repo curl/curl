@@ -183,6 +183,9 @@ static curl_version_info_data version_info = {
 #ifdef CURLDEBUG
   | CURL_VERSION_DEBUG
 #endif
+#ifdef USE_ARES
+  | CURL_VERSION_ASYNCHDNS
+#endif
   ,
   NULL, /* ssl_version */
   0,    /* ssl_version_num */
