@@ -32,4 +32,5 @@ EXPORTS
 	curl_strequal @ 23 ;
 	curl_strnequal @ 24 ;
         curl_easy_duphandle @ 25 ;
+        curl_formadd @ 26 ;
 
