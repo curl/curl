@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "15 March 2001" "Curl 7.7" "Curl Manual"
+.TH curl 1 "24 March 2001" "Curl 7.7" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -128,7 +128,7 @@ content-type application/x-www-form-urlencoded. Compare to -F. If more than
 one -d/--data option is used on the same command line, the data pieces
 specified will be merged together with a separating &-letter. Thus, using '-d
 name=daniel -d skill=lousy' would generate a post chunk that looks like
-'name=daniel&skill=lousy'.
+\&'name=daniel&skill=lousy'.
 
 If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from stdin.  The
@@ -215,7 +215,7 @@ get attached in the post as a file upload, while the < makes a text field and
 just get the contents for that text field from a file.
 
 Example, to send your password file to the server, where
-'password' is the name of the form-field to which /etc/passwd will be the
+\&'password' is the name of the form-field to which /etc/passwd will be the
 input:
 
 .B curl
@@ -325,7 +325,7 @@ directory.
 A quick and very simple example of how to setup a
 .I .netrc
 to allow curl to ftp to the machine host.domain.com with user name
-'myself' and password 'secret' should look similar to:
+\&'myself' and password 'secret' should look similar to:
 
 .B "machine host.domain.com login myself password secret"
 
