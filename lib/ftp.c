@@ -319,7 +319,6 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
           if(*ptr=='\n') {
             /* a newline is CRLF in ftp-talk, so the CR is ignored as
                the line isn't really terminated until the LF comes */
-            CURLcode result;
 
             /* output debug output if that is requested */
             if(data->set.verbose)
@@ -1908,9 +1907,9 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         char *bytes;
         bytes=strstr(buf, " bytes");
         if(bytes--) {
-          int index=bytes-buf;
+          int in=bytes-buf;
           /* this is a hint there is size information in there! ;-) */
-          while(--index) {
+          while(--in) {
             /* scan for the parenthesis and break there */
             if('(' == *bytes)
               break;

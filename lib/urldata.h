@@ -454,29 +454,29 @@ struct connectdata {
 
   /* These two functions MUST be set by the curl_connect() function to be
      be protocol dependent */
-  CURLcode (*curl_do)(struct connectdata *connect);
-  CURLcode (*curl_done)(struct connectdata *connect);
+  CURLcode (*curl_do)(struct connectdata *);
+  CURLcode (*curl_done)(struct connectdata *);
 
   /* If the curl_do() function is better made in two halves, this
    * curl_do_more() function will be called afterwards, if set. For example
    * for doing the FTP stuff after the PASV/PORT command.
    */
-  CURLcode (*curl_do_more)(struct connectdata *connect);
+  CURLcode (*curl_do_more)(struct connectdata *);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * after the connect() and everything is done, as a step in the connection.
    */ 
-  CURLcode (*curl_connect)(struct connectdata *connect);
+  CURLcode (*curl_connect)(struct connectdata *);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * by the curl_disconnect(), as a step in the disconnection.
    */ 
-  CURLcode (*curl_disconnect)(struct connectdata *connect);
+  CURLcode (*curl_disconnect)(struct connectdata *);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * in the curl_close() function if protocol-specific cleanups are required.
    */ 
-  CURLcode (*curl_close)(struct connectdata *connect);
+  CURLcode (*curl_close)(struct connectdata *);
 
   /**** curl_get() phase fields */
 

@@ -23,7 +23,7 @@
  * $Id$
  ***************************************************************************/
 
-int Curl_nonblock(int socket,    /* operate on this */
+int Curl_nonblock(int sockfd,    /* operate on this */
                   int nonblock   /* TRUE or FALSE */);
 
 CURLcode Curl_is_connected(struct connectdata *conn,

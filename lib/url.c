@@ -157,10 +157,10 @@ static bool safe_strequal(char* str1, char* str2);
 extern sigjmp_buf curl_jmpenv;
 #endif
 static
-RETSIGTYPE alarmfunc(int signal)
+RETSIGTYPE alarmfunc(int sig)
 {
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
-  (void)signal;
+  (void)sig;
 #ifdef HAVE_SIGSETJMP
   siglongjmp(curl_jmpenv, 1);
 #endif
@@ -2248,8 +2248,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         if(proxy && *proxy) {
           /* we have a proxy here to set */
           char *ptr;
-          char user[MAX_CURL_USER_LENGTH];
-          char passwd[MAX_CURL_PASSWORD_LENGTH];
+          char proxyuser[MAX_CURL_USER_LENGTH];
+          char proxypasswd[MAX_CURL_PASSWORD_LENGTH];
 
           /* skip the possible protocol piece */
           ptr=strstr(proxy, "://");
@@ -2262,16 +2262,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           ptr = strchr(ptr, '@');
           if(ptr && (2 == sscanf(proxy, "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
                                  "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
-                                 user, passwd))) {
+                                 proxyuser, proxypasswd))) {
             /* found user and password, rip them out */
             Curl_safefree(conn->proxyuser);
-            conn->proxyuser = strdup(user);
+            conn->proxyuser = strdup(proxyuser);
 
             if(!conn->proxyuser)
               return CURLE_OUT_OF_MEMORY;
             
             Curl_safefree(conn->proxypasswd);
-            conn->proxypasswd = strdup(passwd);
+            conn->proxypasswd = strdup(proxypasswd);
 
             if(!conn->proxypasswd)
               return CURLE_OUT_OF_MEMORY;
