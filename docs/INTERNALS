@@ -1,0 +1,140 @@
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
+
+INTERNALS
+
+ The project is kind of split in two. The library and the client. The client
+ part uses the library, but the library is meant to be designed to allow other
+ applications to use it.
+
+ Thus, the largest amount of code and complexity is in the library part.
+
+Windows vs Unix
+===============
+
+ There are a few differences in how to program curl the unix way compared to
+ the Windows way. The four most notable details are:
+
+ 1. Different function names for close(), read(), write()
+ 2. Windows requires a couple of init calls
+ 3. The file descriptors for network communication and file operations are
+    not easily interchangable as in unix
+ 4. When writing data to stdout, Windows makes end-of-lines the DOS way, thus
+    destroying binary data, although you do want that conversion if it is
+    text coming through... (sigh)
+
+ In curl, (1) and (2) are done with defines and macros, so that the source
+ looks the same at all places except for the header file that defines them.
+
+ (3) is simply avoided by not trying any funny tricks on file descriptors.
+
+ (4) is left alone, giving windows users problems when they pipe binary data
+ through stdout...
+
+ Inside the source code, I do make an effort to avoid '#ifdef WIN32'. All
+ conditionals that deal with features *should* instead be in the format
+ '#ifdef HAVE_THAT_WEIRD_FUNCTION'. Since Windows can't run configure scripts,
+ I maintain two config-win32.h files (one in / and one in src/) that are
+ supposed to look exactly as a config.h file would have looked like on a
+ Windows machine!
+
+Library
+=======
+
+ There is a few entry points to the library, namely each publicly defined
+ function that libcurl offers to applications. All of those functions are
+ rather small and easy-to-follow, accept the one single and do-it-all named
+ curl_urlget() (entry point in lib/url.c).
+
+ curl_urlget() takes a variable amount of arguments, and they must all be
+ passed in pairs, the parameter-ID and the parameter-value. The list of
+ arguments must be ended with a end-of-arguments parameter-ID.
+
+ The function then continues to analyze the URL, get the different components
+ and connects to the remote host. This may involve using a proxy and/or using
+ SSL. The GetHost() function in lib/hostip.c is used for looking up host
+ names.
+
+ When connected, the proper function is called. The functions are named after
+ the protocols they handle. ftp(), http(), dict(), etc. They all reside in
+ their respective files (ftp.c, http.c and dict.c).
+
+ The protocol-specific functions deal with protocol-specific negotiations and
+ setup. They have access to the sendf() (from lib/sendf.c) function to send
+ printf-style formatted data to the remote host and when they're ready to make
+ the actual file transfer they call the Transfer() function (in
+ lib/download.c) to do the transfer. All printf()-style functions use the
+ supplied clones in lib/mprintf.c.
+
+ While transfering, the progress functions in lib/progress.c are called at a
+ frequent interval. The speedcheck functions in lib/speedcheck.c are also used
+ to verify that the transfer is as fast as required.
+
+ When the operation is done, the writeout() function in lib/writeout.c may be
+ called to report about the operation as specified previously in the arguments
+ to curl_urlget().
+
+ HTTP(S)
+
+ HTTP offers a lot and is the protocol in curl that uses the most lines of
+ code. There is a special file (lib/formdata.c) that offers all the multipart
+ post functions.
+
+ base64-functions for user+password stuff is in (lib/base64.c) and all
+ functions for parsing and sending cookies are found in
+ (lib/cookie.c).
+
+ HTTPS uses in almost every means the same procedure as HTTP, with only two
+ exceptions: the connect procedure is different and the function used
+
+ FTP
+
+ The if2ip() function can be used for getting the IP number of a specified
+ network interface, and it resides in lib/if2ip.c
+
+ TELNET
+
+ Telnet is implemented in lib/telnet.c.
+
+ FILE
+
+ The file:// protocol is dealt with in lib/file.c.
+
+ LDAP
+
+ Everything LDAP is in lib/ldap.c.
+
+ GENERAL
+
+ URL encoding and decoding, called escaping and unescaping in the source code,
+ is found in lib/escape.c.
+
+ While transfering data in Transfer() a few functions might get
+ used. get_date() in lib/getdate.c is for HTTP date comparisons.
+
+ lib/getenv.c is for reading environment variables in a neat platform
+ independent way. That's used in the client, but also in lib/url.c when
+ checking the PROXY variables.
+
+ lib/netrc.c keeps the .netrc parser
+
+ lib/timeval.c features replacement functions for systems that don't have
+ 
+ A function named curl_version() that returns the full curl version string is
+ found in lib/version.c.
+
+Client
+======
+
+ main() resides in src/main.c together with most of the client
+ code. src/hugehelp.c is automatically generated by the mkhelp.pl perl script
+ to display the complete "manual" and the src/urlglob.c file holds the
+ functions used for the multiple-URL support.
+
+ The client mostly mess around to setup its config struct properly, then it
+ calls the curl_urlget() function in the library and when it gets back control
+ it checks status and exits.
+

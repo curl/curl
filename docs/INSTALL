@@ -1,0 +1,259 @@
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
+
+                                How To Compile
+
+Curl has been compiled and built on numerous different operating systems. The
+way to proceed is mainly divided in two different ways: the unix way or the
+windows way.
+
+If you're using Windows (95, 98, NT) or OS/2, you should continue reading from
+the Win32 header below. All other systems should be capable of being installed
+as described in the the UNIX header.
+
+PORTS
+=====
+   Just to show off, this is a probably incomplete list of known hardware and
+   operating systems that curl has been compiled for:
+
+        - Ultrix
+        - SINIX-Z v5
+        Alpha DEC OSF 4
+        HP-PA HP-UX 10.X 11.X
+        MIPS IRIX 6.2, 6.5
+        Power AIX 4.2, 4.3.1
+        PowerPC Darwin 1.0
+        PowerPC Mac OS X
+        Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7
+        Sparc SunOS 4.1.*
+        i386 BeOS
+        i386 FreeBSD
+        i386 Linux 1.3, 2.0, 2.2
+        i386 NetBSD
+        i386 OS/2
+        i386 OpenBSD
+        i386 Solaris 2.7
+        i386 Windows 95, 98, NT
+        m68k AmigaOS 3
+        m68k OpenBSD
+
+UNIX
+====
+
+   The configure script *always* tries to find a working SSL library unless
+   explicitly told not to.  If you have OpenSSL installed in the default
+   search path for your compiler/linker, you don't need to do anything
+   special.
+
+   If you have OpenSSL installed in /usr/local/ssl, you can run configure
+   like:
+
+	./configure --with-ssl
+
+   If you have OpenSSL installed somewhere else (for example, /opt/OpenSSL,)
+   you can run configure like this:
+
+	./configure --with-ssl=/opt/OpenSSL
+
+   If you insist on forcing a build *without* SSL support, even though you may
+   have it installed in your system, you can run configure like this:
+
+        ./configure --without-ssl
+
+   If you have OpenSSL installed, but with the libraries in one place and the
+   header files somewhere else, you'll have to set the LDFLAGS and CPPFLAGS
+   environment variables prior to running configure.  Something like this
+   should work:
+
+     (with the Bourne shell and its clones):
+
+       CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" \
+           ./configure
+
+     (with csh, tcsh and their clones):
+     
+       env CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" \
+       ./configure
+
+   If your SSL library was compiled with rsaref (usually for use in
+   the United States), you may also need to set:
+
+     LIBS=-lRSAglue -lrsaref
+     (from Doug Kaufman <dkaufman@rahul.net>)
+
+   Without SSL support, just run:
+
+     ./configure
+
+   Then run:
+
+     make
+
+   Use the executable `curl` in src/ directory.
+
+   'make install' copies the curl file to /usr/local/bin/ (or $prefix/bin
+   if you used the --prefix option to configure) and copies the curl.1
+   man page to a suitable place too.
+
+   KNOWN PROBLEMS
+
+     If you happen to have autoconf installed, but a version older than
+     2.12 you will get into trouble. Then you can still build curl by
+     issuing these commands: (from Ralph Beckmann <rabe@uni-paderborn.de>)
+
+       ./configure [...]
+       cd lib; make; cd ..
+       cd src; make; cd ..
+       cp src/curl elsewhere/bin/
+
+   OPTIONS
+
+     Remember, to force configure to use the standard cc compiler if both
+     cc and gcc are present, run configure like
+
+       CC=cc ./configure
+         or
+       env Cc=cc ./configure
+
+
+Win32
+=====
+ 
+   Without SSL:
+
+      MingW32 (GCC-2.95) style
+      ------------------------
+        Run the 'mingw32.bat' file to get the proper environment variables
+        set, then run 'make -f Makefile.m32' in the lib/ dir and then
+        'make -f Makefile.m32' in the src/ dir.
+
+        If you have any problems linking libraries or finding header files,
+        be sure to look at the provided "Makefile.m32" files for the proper
+        paths, and adjust as necessary.
+
+      Cygwin style
+      ------------
+        Almost identical to the unix installation. Run the configure script
+        in the curl root with 'sh configure'. Make sure you have the sh
+        executable in /bin/ or you'll see the configure fail towards the
+        end.
+
+        Run 'make'
+
+      Microsoft command line style
+      ----------------------------
+        Run the 'vcvars32.bat' file to get the proper environment variables
+        set, then run 'nmake -f Makefile.vc6' in the lib/ dir and then
+        'nmake -f Makefile.vc6' in the src/ dir.
+
+      IDE-style
+      -------------------------
+        If you use VC++, Borland or similar compilers. Include all lib source
+        files in a static lib "project" (all .c and .h files that is).
+        (you should name it libcurl or similar)
+
+        Make the sources in the src/ drawer be a "win32 console application"
+        project. Name it curl.
+
+        With VC++, add 'wsock32.lib' to the link libs when you build curl!
+        Borland seems to do that itself magically. Of course you have to
+        make sure it links with the libcurl too!
+
+        For VC++ 6, there's an included Makefile.vc6 that should be possible
+        to use out-of-the-box.
+
+        Microsoft note: add /Zm200 to the compiler options, as the hugehelp.c
+        won't compile otherwise due to "too long puts string" or something
+        like that!
+
+
+   With SSL:
+
+      MingW32 (GCC-2.95) style
+      ------------------------
+        Run the 'mingw32.bat' file to get the proper environment variables
+        set, then run 'make -f Makefile.m32 SSL=1' in the lib/ dir and then
+        'make -f Makefile.m32 SSL=1' in the src/ dir.
+
+        If you have any problems linking libraries or finding header files,
+        be sure to look at the provided "Makefile.m32" files for the proper
+        paths, and adjust as necessary.
+
+      Cygwin style
+      ------------
+
+        Haven't done, nor got any reports on how to do. It should although be
+        identical to the unix setup for the same purpose. See above.
+
+      Microsoft command line style
+      ----------------------------
+        Run the 'vcvars32.bat' file to get the proper environment variables
+        set, then run 'nmake -f Makefile.vc6 release-ssl' in the lib/ dir and
+        then 'nmake -f Makefile.vc6' in the src/ dir.
+
+      Microsoft / Borland style
+      -------------------------
+        If you have OpenSSL, and want curl to take advantage of it, edit your
+        project properties to use the SSL include path, link with the SSL libs
+        and define the USE_SSLEAY symbol.
+
+
+IBM OS/2
+========
+
+   Building under OS/2 is not much different from building under unix.
+   You need:
+
+      - emx 0.9d
+      - GNU make
+      - GNU patch
+      - ksh
+      - GNU bison
+      - GNU file utilities
+      - GNU sed
+      - autoconf 2.13
+
+   If you want to build with OpenSSL or OpenLDAP support, you'll need to
+   download those libraries, too. Dirk Ohme has done some work to port SSL
+   libraries under OS/2, but it looks like he doesn't care about emx.  You'll
+   find his patches on: http://come.to/Dirk.Ohme
+
+   If during the linking you get an error about _errno being an undefined
+   symbol referenced from the text segment, you need to add -D__ST_MT_ERRNO__
+   in your definitions.
+
+   If everything seems to work fine but there's no curl.exe, you need to add
+   -Zexe to your linker flags.
+
+   If you're getting huge binaries, probably your makefiles have the -g in
+   CFLAGS.
+
+OpenSSL
+=======
+
+   You'll find OpenSSL information at:
+
+      http://www.openssl.org
+
+
+MingW32/Cygwin
+==============
+
+   You'll find MingW32 and Cygwin information at:
+
+      http://www.xraylith.wisc.edu/~khan/software/gnu-win32/index.html
+
+OpenLDAP
+========
+
+   You'll find OpenLDAP information at:
+
+      http://www.openldap.org
+
+   You need to install it with shared libraries, which is enabled when running
+   the ldap configure script with "--enable-shared". With my linux 2.0.36
+   kernel I also had to disable using threads (with --without-threads),
+   because the configure script couldn't figure out my system.

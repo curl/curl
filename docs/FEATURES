@@ -1,0 +1,82 @@
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
+
+FEATURES
+
+Misc
+ - full URL syntax
+ - custom maximum download time
+ - custom least download speed acceptable
+ - custom output result after completion
+ - multiple URLs
+ - guesses protocol from host name unless specified
+ - uses .netrc
+ - progress bar/time specs while downloading
+ - PROXY environment variables support
+ - config file support
+ - compiles on win32
+
+HTTP
+ - GET
+ - PUT
+ - HEAD
+ - POST
+ - multipart POST
+ - authentication
+ - resume
+ - follow redirects
+ - custom HTTP request
+ - cookie get/send
+ - understands the netscape cookie file
+ - custom headers (that can replace internally generated headers)
+ - custom user-agent string
+ - custom referer string
+ - range
+ - proxy authentication
+ - time conditions
+ - via http-proxy
+
+HTTPS (*1)
+ - (all the HTTP features)
+ - using certificates
+ - via http-proxy
+
+FTP
+ - download
+ - authentication
+ - PORT or PASV
+ - single file size information (compare to HTTP HEAD)
+ - 'type=' URL support
+ - dir listing
+ - dir listing names-only
+ - upload
+ - upload append
+ - upload via http-proxy as HTTP PUT
+ - download resume
+ - upload resume
+ - QUOT commands (before and/or after the transfer)
+ - simple "range" support
+ - via http-proxy
+
+TELNET
+ - connection negotiation
+ - stdin/stdout I/O
+
+LDAP (*2)
+ - full LDAP URL support
+
+DICT
+ - extended DICT URL support
+
+GOPHER
+ - GET
+ - via http-proxy
+
+FILE
+ - URL support
+
+        *1 = requires OpenSSL
+        *2 = requires OpenLDAP

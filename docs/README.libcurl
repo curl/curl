@@ -1,0 +1,108 @@
+                         _ _ _                     _ 
+                        | (_) |__   ___ _   _ _ __| |
+                        | | | '_ \ / __| | | | '__| |
+                        | | | |_) | (__| |_| | |  | |
+                        |_|_|_.__/ \___|\__,_|_|  |_|
+
+
+                     How To Use Libcurl In Your Program:
+                                 (by Ralph Beckmann <rabe@uni-paderborn.de>)
+
+NOTE: If you plan to use libcurl.a in Threads under Linux, do not use the old
+gcc-2.7.x because the function 'gethostbyname' seems not to be thread-safe,
+that is to say an unavoidable SEGMENTATION FAULT might occur.
+
+
+1. a) In a C-Program:
+      #include "curl.h"
+   
+   b) In a C++-Program:
+      extern "C" {
+      #include "curl.h"
+      }
+ 
+2. char *url="http://www.domain.com";
+   curl_urlget (URGTAG_URL, url, 
+          URGTAG_FLAGS, CONF_NOPROGRESS,
+          URGTAG_ERRORBUFFER, errorBuffer,
+          URGTAG_WRITEFUNCTION, (size_t (*)(void *, int, int, FILE
+*))handle_data,
+          URGTAG_TIMEOUT, 30,         /* or anything You want             */
+   ...
+          URGTAG_DONE);
+
+3. size_t handle_data (const void *ptr, size_t size, size_t nitems,
+                       FILE *stream)
+   {
+      (void)stream;                   /* stop complaining using g++ -Wall */
+      if ((int)nitems <= 0) {
+         return (size_t)0;
+      }
+      fprintf(stdout, (char *)ptr);   /* or do anything else with it      */
+      return nitems;
+   }
+
+4. Compile Your Program with  -I$(CURL_DIR)/include
+
+5. Link Your Program together with  $(CURL_DIR)/lib/libcurl.a
+
+                     Small Example of How To Use libcurl
+
+----------------------------------------------------------------------
+/* Full example that uses libcurl.a to fetch web pages.                    */
+/* curlthreads.c                                                           */
+/* - Test-Program by Ralph Beckmann for using curl in POSIX-Threads        */
+/* Change *url1 and *url2 to textual long and slow non-FRAMESET websites!  */
+/* 
+   1. Compile with gcc or g++ as $(CC): 
+       $(CC) -c -Wall -pedantic curlthreads.c -I$(CURL_DIR)/include
+
+   2. Link with:
+      - Linux:
+        $(CC) -o curlthreads curlthreads.o $(CURL_DIR)/lib/libcurl.a -lpthread
+-lm 
+      - Solaris:
+        $(CC) -o curlthreads curlthreads.o $(CURL_DIR)/lib/libcurl.a -lpthread
+-lm -lsocket -lnsl
+*/
+
+#include <pthread.h> 
+#include <stdio.h>
+#ifdef __cplusplus
+extern "C" {
+#include "curl.h"
+}
+#else
+#include "curl.h"
+#endif
+
+size_t storedata (const void *ptr, size_t size, size_t nitems, FILE *stream) {
+  (void)ptr; (void)stream;            /* just to stop g++ -Wall complaining */
+  fprintf(stdout, "Thread #%i reads %i Bytes.\n", 
+                   (int)pthread_self(), (int)(nitems*size));
+  return (nitems);
+}
+
+void *urlfetcher(void *url) {
+  curl_urlget (URGTAG_URL,            url, 
+               URGTAG_FLAGS,          CONF_NOPROGRESS | CONF_FAILONERROR,
+               URGTAG_WRITEFUNCTION,  (size_t (*)(void *, int, int, FILE
+*))storedata,
+               URGTAG_DONE);
+  return NULL; 
+}
+
+int main(void) {
+  char *url1="www.sun.com";  
+  char *url2="www.microsoft.com";
+
+  pthread_t thread_id1, thread_id2;
+  pthread_create(&thread_id1, NULL, urlfetcher, (void *)url1);
+  pthread_create(&thread_id2, NULL, urlfetcher, (void *)url2);
+  pthread_join(thread_id1, NULL);
+  pthread_join(thread_id2, NULL);
+ 
+  fprintf(stdout, "Ready.\n");
+
+  return 0;
+}
