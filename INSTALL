@@ -22,10 +22,15 @@ PORTS
         Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7
         Sparc SunOS 4.1.*
         i386 Linux 1.3, 2.0, 2.2
-        MIPS IRIX
+        MIPS IRIX 6.2, 6.5
         HP-PA HP-UX
+        Alpha DEC OSF 4
+        i386 Solaris 2.7
         PowerPC Mac OS X
+        Power AIX 4.3.1
         - Ultrix
+        i386 FreeBSD
+        i386 NetBSD
         i386 OpenBSD
         m68k OpenBSD
         i386 Windows 95, 98, NT
@@ -192,6 +197,36 @@ Win32
         edit your project properties to use the SSL include path, link with
         the SSL libs and define the USE_SSLEAY symbol.
 
+
+IBM OS/2
+========
+
+   Building under OS/2 is not much different from building under unix.
+   You need:
+
+      - emx 0.9d
+      - GNU make
+      - GNU patch
+      - ksh
+      - GNU bison
+      - GNU file utilities
+      - GNU sed
+      - autoconf 2.13
+
+   If you want to build with OpenSSL, SSLeay, or OpenLDAP support, you'll
+   need to download those libraries, too. Dirk Ohme has done some work to
+   port SSL libraries under OS/2, but it looks like he doesn't care about emx.
+   You'll find his patches on: http://come.to/Dirk.Ohme
+
+   If during the linking you get an error about _errno being an undefined
+   symbol referenced from the text segment, you need to add -D__ST_MT_ERRNO__
+   in your definitions.
+
+   If everything seems to work fine but there's no curl.exe, you need to add
+   -Zexe to your linker flags.
+
+   If you're getting huge binaries, probably your makefiles have the -g in
+   CFLAGS.
 
 OpenSSL/SSLeay
 ==============
