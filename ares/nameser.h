@@ -157,6 +157,7 @@ typedef enum __ns_rcode {
 #define SERVFAIL        ns_r_servfail
 #define NOTIMP          ns_r_notimpl
 #define REFUSED         ns_r_refused
+#undef NOERROR /* it seems this is already defined in winerror.h */
 #define NOERROR         ns_r_noerror
 #define FORMERR         ns_r_formerr
 #define NXDOMAIN        ns_r_nxdomain
