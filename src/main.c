@@ -76,6 +76,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+
 /* Just a set of bits */
 #define CONF_DEFAULT  0
 #define CONF_VERBOSE  (1<<5) /* talk a lot */
