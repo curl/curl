@@ -15,15 +15,10 @@ bin_PROGRAMS = curl #memtest
 #memtest_LDADD = $(top_srcdir)/lib/libcurl.la
 
 curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c setup.h \
-	config-win32.h \
-	config-mac.h \
-	config-vms.h \
+	config-win32.h config-mac.h config-vms.h config-riscos.h \
 	urlglob.h \
 	version.h \
-	writeout.h \
-	config-win32.h \
-	config-mac.h \
-	config-vms.h	
+	writeout.h
 
 curl_LDADD = ../lib/libcurl.la
 curl_DEPENDENCIES = ../lib/libcurl.la
