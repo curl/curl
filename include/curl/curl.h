@@ -928,9 +928,11 @@ typedef void (*curl_unlock_function)(CURL *handle,
 typedef void CURLSH;
 
 typedef enum {
-  CURLSH_OK,  /* all is fine */
-  CURLSH_BAD_OPTION, /* 1 */
-  CURLSH_LAST /* never use */
+  CURLSHE_OK,  /* all is fine */
+  CURLSHE_BAD_OPTION, /* 1 */
+  CURLSHE_IN_USE,     /* 2 */
+  CURLSHE_INVALID,    /* 3 */
+  CURLSHE_LAST /* never use */
 } CURLSHcode;
 
 typedef enum {
