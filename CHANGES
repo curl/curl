@@ -8,6 +8,24 @@
 
 Version XX
 
+Daniel (13 March 2000):
+- <curl@spam.wolvesbane.net> pointed out that the way curl sent cookies in a
+  single line wasn't enjoyed by IIS4.0 servers. In my view, that is not what
+  the standards say, but I added a white space between the name/value pairs to
+  perhaps make them work better.
+
+- Added the perl check back in the configure.in again since the mkhelp.pl
+  script needs it!
+
+- Made some beautifications in the curl man page.
+
+Daniel (3 March 2000):
+- Jörn helped me update the config-win32.h files with HAVE_SETVBUF and
+  HAVE_STRDUP.
+
+Daniel (3 March 2000):
+- Uploaded the 6.5pre2 package.
+
 Daniel (2 March 2000):
 - Removed the perl-programs from the distribution, they never made many people
   happy and I'll still keep them available on the web.
