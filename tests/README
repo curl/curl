@@ -48,7 +48,8 @@ Debug:
 
 Logs:
   All logs are generated in the logs/ subdirctory (it is emtpied first
-  in the runtests.pl script)
+  in the runtests.pl script). Use runtests.pl -k to make the temporary files
+  to be kept after the test run.
 
 Data:
   All test-data are put in the data/ subdirctory. Each test is stored in the
@@ -69,12 +70,10 @@ TEST CASE NUMBERS
  300 - 399   HTTPS
  400 - 499   FTPS
 
-  ... if we run out of test numbers for a particular protocol, then we need
-  to fix it.
+ Since 30-apr-2003, there's nothing in the system that requires us to keep
+ within these number series. Each test case now specify their own server
+ requirements, independent of test number.
 
 TODO:
 
-  * Port old test cases to the new file format
-
-  * Make httpserver.pl work when we PUT without Content-Length:
   * Add persistant connection support and test cases
