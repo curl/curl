@@ -7,6 +7,17 @@
                                   Changelog
 
 Daniel (31 Mar)
+- More fixes for the SSL session ID cache checks when SSL configs are changed
+  between connections. Based on tests and talks with Richard Bramante.
+
+- Guillaume Cottenceau provided a patch that added CURLOPT_UNRESTRICTED_AUTH.
+  When enabled, it will prevent libcurl from limiting to which host it sends
+  user+password to when following locations. By default, libcurl only sends
+  name and password to the original host used in the first URL, but with this
+  option set it will send the auth info to all hosts it follows location
+  headers to. The new tool command line option for this is named
+  "--location-trusted".
+
 - Frankie Fong reported a problem with libcurl if you re-used an easy handle
   with a proxy, and you first made a https:// connction to a host and then
   switched to a http:// one to the same host. libcurl would then wrongly re-use
