@@ -104,6 +104,7 @@
 #endif
 
 #include <strtoofft.h> /* header from the libcurl directory */
+#include <timeval.h>   /* header from the libcurl directory */
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG
@@ -495,20 +496,15 @@ struct Configurable {
   HttpReq httpreq;
 
   /* for bandwidth limiting features: */
-
   size_t sendpersecond; /* send to peer */
   size_t recvpersecond; /* receive from peer */
-
-  time_t lastsendtime;
+  struct timeval lastsendtime;
   size_t lastsendsize;
-
-  time_t lastrecvtime;
+  struct timeval lastrecvtime;
   size_t lastrecvsize;
 
   bool ftp_ssl;
-
   char *socks5proxy;
-
   bool tcp_nodelay;
 };
 
@@ -2216,7 +2212,8 @@ static void go_sleep(long ms)
   /* Other systems must use select() for this */
   struct timeval timeout;
 
-  timeout.tv_sec = 0;
+  timeout.tv_sec = ms/1000;
+  ms -= ms/1000;
   timeout.tv_usec = ms * 1000;
 
   select(0, NULL,  NULL, NULL, &timeout);
@@ -2231,11 +2228,12 @@ struct OutStruct {
   struct Configurable *config;
 };
 
-static int my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
+static int my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
 {
   int rc;
   struct OutStruct *out=(struct OutStruct *)stream;
   struct Configurable *config = out->config;
+  curl_off_t size = sz * nmemb;
   if(out && !out->stream) {
     /* open file for writing */
     out->stream=fopen(out->filename, "wb");
@@ -2250,31 +2248,49 @@ static int my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
      * If we're faster, sleep a while *before* doing the fwrite() here.
      */
 
-    time_t timediff;
-    time_t now;
-    time_t sleep_time;
+    struct timeval now;
+    long timediff;
+    long sleep_time;
 
-    now = time(NULL);
-    timediff = now - config->lastrecvtime;
-    if( size*nmemb > config->recvpersecond*timediff) {
-      /* figure out how many milliseconds to rest */
-      sleep_time = (size*nmemb)*1000/config->recvpersecond - timediff*1000;
+    static curl_off_t addit = 0;
 
-      /*
-       * Make sure we don't sleep for so long that we trigger the speed limit.
-       * This won't limit the bandwidth quite the way we've been asked to, but
-       * at least the transfer has a chance.
-       */
-      if (config->low_speed_time > 0)
-        sleep_time = MIN(sleep_time,(config->low_speed_time * 1000) / 2);
+    now = curlx_tvnow();
+    timediff = curlx_tvdiff(now, config->lastrecvtime); /* milliseconds */
 
-      go_sleep (sleep_time);
-      now = time(NULL);
+    if((config->recvpersecond > CURL_MAX_WRITE_SIZE) && (timediff < 100) ) {
+      /* If we allow a rather speedy transfer, add this amount for later
+       * checking. Also, do not modify the lastrecvtime as we will use a
+       * longer scope due to this addition.  We wait for at least 100 ms to
+       * pass to get better values to do better math for the sleep. */
+      addit += size;
     }
-    config->lastrecvtime = now;
+    else {
+      size += addit; /* add up the possibly added bonus rounds from the
+                        zero timediff calls */
+      addit = 0; /* clear the addition pool */
+
+      if( size*1000 > config->recvpersecond*timediff) {
+        /* figure out how many milliseconds to rest */
+        sleep_time = size*1000/config->recvpersecond - timediff;
+
+        /*
+         * Make sure we don't sleep for so long that we trigger the speed
+         * limit.  This won't limit the bandwidth quite the way we've been
+         * asked to, but at least the transfer has a chance.
+         */
+        if (config->low_speed_time > 0)
+          sleep_time = MIN(sleep_time,(config->low_speed_time * 1000) / 2);
+        
+        if(sleep_time > 0) {
+          go_sleep(sleep_time);
+          now = curlx_tvnow();
+        }
+      }
+      config->lastrecvtime = now;
+    }
   }
 
-  rc = fwrite(buffer, size, nmemb, out->stream);
+  rc = fwrite(buffer, sz, nmemb, out->stream);
   
   if(config->nobuffer)
     /* disable output buffering */
@@ -2288,11 +2304,11 @@ struct InStruct {
   struct Configurable *config;
 };
 
-static int my_fread(void *buffer, size_t size, size_t nmemb, void *userp)
+static int my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
 {
   struct InStruct *in=(struct InStruct *)userp;
-
   struct Configurable *config = in->config;
+  curl_off_t size = sz * nmemb;
 
   if(config->sendpersecond) {
     /*
@@ -2302,29 +2318,51 @@ static int my_fread(void *buffer, size_t size, size_t nmemb, void *userp)
      * Also, make no larger fread() than should be sent this second!
      */
 
-    time_t timediff;
-    time_t now;
+    struct timeval now;
+    long timediff;
+    long sleep_time;
 
-    now = time(NULL);
-    timediff = now - config->lastsendtime;
-    if( config->lastsendsize > config->sendpersecond*timediff) {
-      /* figure out how many milliseconds to rest */
-      go_sleep ( config->lastsendsize*1000/config->sendpersecond -
-                 timediff*1000 );
-      now = time(NULL);
-    }
-    config->lastsendtime = now;
+    static curl_off_t addit = 0;
 
-    if(size*nmemb > config->sendpersecond) {
-      /* lower the size to actually read */
-      nmemb = config->sendpersecond;
-      size = 1;
+    now = curlx_tvnow();
+    timediff = curlx_tvdiff(now, config->lastsendtime); /* milliseconds */
+
+    if((config->sendpersecond > CURL_MAX_WRITE_SIZE) &&
+       (timediff < 100)) {
+      /*
+       * We allow very fast transfers, then allow at least 100 ms between
+       * each sleeping mile-stone to create more accurate long-term rates.
+       */
+      addit += size;
     }
-    config->lastsendsize = size*nmemb;    
+    else {
+      /* If 'addit' is non-zero, it contains the total amount of bytes
+         uploaded during the last 'timediff' milliseconds. If it is zero,
+         we use the stored previous size. */
+      curl_off_t xfered = addit?addit:config->lastsendsize;
+      addit = 0; /* clear it for the next round */
+
+      if( xfered*1000 > config->sendpersecond*timediff) {
+        /* figure out how many milliseconds to rest */
+        sleep_time = xfered*1000/config->sendpersecond - timediff;
+        if(sleep_time > 0) {
+          go_sleep (sleep_time);
+          now = curlx_tvnow();
+        }
+      }
+      config->lastsendtime = now;
+      
+      if(size > config->sendpersecond) {
+        /* lower the size to actually read */
+        nmemb = config->sendpersecond;
+        sz = 1;
+      }
+    }
+
+    config->lastsendsize = sz*nmemb;
   }
 
-
-  return fread(buffer, size, nmemb, in->stream);
+  return fread(buffer, sz, nmemb, in->stream);
 }
 
 struct ProgressData {
@@ -2677,6 +2715,8 @@ operate(struct Configurable *config, int argc, char *argv[])
   config->conf=CONF_DEFAULT;
   config->use_httpget=FALSE;
   config->create_dirs=FALSE;
+  config->lastrecvtime = curlx_tvnow();
+  config->lastsendtime = curlx_tvnow();
 
   if(argc>1 &&
      (!curl_strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
@@ -2959,7 +2999,7 @@ operate(struct Configurable *config, int argc, char *argv[])
             
             struct stat fileinfo;
 
-            /*VMS?? -- Danger, the filesize is only valid for stream files */
+            /* VMS -- Danger, the filesize is only valid for stream files */
             if(0 == stat(outfile, &fileinfo))
               /* set offset to current file size: */
               config->resume_from = fileinfo.st_size;
@@ -3036,15 +3076,20 @@ operate(struct Configurable *config, int argc, char *argv[])
               url = urlbuffer; /* use our new URL instead! */
             }
           }
-/*VMS??-- Reading binary from files can be a problem... */
-/*VMS??   Only FIXED, VAR etc WITHOUT implied CC will work */
-/*VMS??   Others need a \n appended to a line */
-/*VMS??-- Stat gives a size but this is UNRELIABLE in VMS */
-/*VMS??   As a f.e. a fixed file with implied CC needs to have a byte added */
-/*VMS??   for every record processed, this can by derived from Filesize & recordsize */
-/*VMS??   for VARiable record files the records need to be counted! */
-/*VMS??   for every record add 1 for linefeed and subtract 2 for the record header */
-/*VMS??   for VARIABLE header files only the bare record data needs to be considered with one appended if implied CC */
+          /* VMS Note:
+           * 
+           * Reading binary from files can be a problem...  Only FIXED, VAR
+           * etc WITHOUT implied CC will work Others need a \n appended to a
+           * line
+           *
+           * - Stat gives a size but this is UNRELIABLE in VMS As a f.e. a
+           * fixed file with implied CC needs to have a byte added for every
+           * record processed, this can by derived from Filesize & recordsize
+           * for VARiable record files the records need to be counted!  for
+           * every record add 1 for linefeed and subtract 2 for the record
+           * header for VARIABLE header files only the bare record data needs
+           * to be considered with one appended if implied CC
+           */
 
           infd=(FILE *) fopen(uploadfile, "rb");
           if (!infd || stat(uploadfile, &fileinfo)) {

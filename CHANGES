@@ -7,6 +7,15 @@
                                   Changelog
 
 Daniel (6 April 2004)
+- The --limit-rate logic was corrected and now it works a lot better for
+  higher speeds, such as '10m' or similar. Reported in bug report #930249.
+
+- Introducing curlx_tvnow() and curlx_tvdiff() using the new curlx_* fashion.
+  #include "timeval.h" from the lib dir to get the protos etc.  Note that
+  these are NOT part of the libcurl API. The curl app simply uses the same
+  source files as the library does and therefore the file needs to be compiled
+  and linked with curl too, not just when creating libcurl.
+
 - lib/strerror.c no longer uses sys_nerr on non-windows platforms since it
   isn't portable enough
 
