@@ -34,15 +34,12 @@ curl:
 	@cd $(top_builddir) && $(MAKE)
 
 test: sws
-	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
 
 quiet-test: sws
-	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -s -a
 
 full-test: sws
-	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -a
 
 sws:
