@@ -420,7 +420,7 @@ CURLcode Curl_http_connect(struct connectdata *conn)
    * has occured, can we start talking SSL
    */
 
-  if(data->change.proxy &&
+  if(data->change.proxy && (data->set.proxytype == CURLPROXY_HTTP) &&
      ((conn->protocol & PROT_HTTPS) || data->set.tunnel_thru_httpproxy)) {
 
     /* either HTTPS over proxy, OR explicitly asked for a tunnel */

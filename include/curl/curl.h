@@ -202,6 +202,12 @@ typedef enum {
   CURL_LAST /* never use! */
 } CURLcode;
 
+typedef enum {
+  CURLPROXY_HTTP = 0,
+  CURLPROXY_SOCKS4 = 4,
+  CURLPROXY_SOCKS5 = 5
+} curl_proxytype;
+
 /* this was the error code 50 in 7.7.3 and a few earlier versions, this
    is no longer used by libcurl but is instead #defined here only to not
    make programs break */
@@ -575,6 +581,10 @@ typedef enum {
 
   /* Explicitly allow insecure SSL connects */
   CINIT(SSL_INSECURE, LONG, 101),
+
+  /* indicates type of proxy. accepted values are CURLPROXY_HTTP (default),
+     CURLPROXY_SOCKS4 and CURLPROXY_SOCKS5. */
+  CINIT(PROXYTYPE, LONG, 102), 
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

@@ -2698,7 +2698,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
       curl_easy_setopt(curl, CURLOPT_TIMEOUT, config->timeout);
       curl_easy_setopt(curl, CURLOPT_POSTFIELDS, config->postfields);
-        
+
       /* new in libcurl 7.2: */
       curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, config->postfieldsize);
         

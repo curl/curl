@@ -645,6 +645,8 @@ struct UserDefined {
   char *krb4_level; /* what security level */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
 
+  curl_proxytype proxytype; /* what kind of proxy that is in use */
+
   int dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
   
