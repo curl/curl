@@ -693,6 +693,9 @@ AC_CHECK_SIZEOF(long long, 4)
 # check for ssize_t
 AC_CHECK_TYPE(ssize_t, int)
 
+# check for socklen_t (getsockname() wants that)
+AC_CHECK_TYPE(socklen_t, int)
+
 dnl Get system canonical name
 AC_CANONICAL_HOST
 AC_DEFINE_UNQUOTED(OS, "${host}")
@@ -764,6 +767,5 @@ AC_OUTPUT( Makefile \
 	   packages/Linux/Makefile \
 	   packages/Linux/RPM/Makefile \
 	   packages/Linux/RPM/curl.spec \
-	   packages/Linux/RPM/curl-ssl.spec \
-           tiny/Makefile )
+	   packages/Linux/RPM/curl-ssl.spec )
 
