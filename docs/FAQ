@@ -1,4 +1,4 @@
-Updated: December 8, 2003 (http://curl.haxx.se/docs/faq.html)
+Updated: December 22, 2003 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -40,6 +40,7 @@ FAQ
   3.12 Why do FTP specific features over HTTP proxy fail?
   3.13 Why does my single/double quotes fail?
   3.14 Does curl support javascript or pac (automated proxy config)?
+  3.15 Can I do recursive fetches with curl?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -454,6 +455,14 @@ FAQ
 
     - Ask your admins to stop this, for a static proxy setup or similar.
 
+  3.15 Can I do recursive fetches with curl?
+
+  No. curl itself has no code that performs recursive operations, such as
+  those performed by wget.
+
+  There exist wrapper scripts with that functionality (for example the
+  curlmirror perl script), and you can write programs based on libcurl to do
+  it, but the command line tool curl itself cannot.
 
 4. Running Problems
 
