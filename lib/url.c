@@ -210,9 +210,11 @@ CURLcode Curl_close(struct SessionHandle *data)
     free(data->state.headerbuff);
 
 #ifndef CURL_DISABLE_HTTP
-  if(data->set.cookiejar)
+  if(data->set.cookiejar) {
     /* we have a "destination" for all the cookies to get dumped to */
-    Curl_cookie_output(data->cookies, data->set.cookiejar);
+    if(Curl_cookie_output(data->cookies, data->set.cookiejar))
+      infof(data, "WARNING: failed to save cookies in given jar\n");
+  }
 
   Curl_cookie_cleanup(data->cookies);
 #endif
