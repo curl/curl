@@ -145,6 +145,10 @@ pwd=`echo $ipwd | sed -e 's/$//g'`
 if [ -d "$CURLDIR" ]; then
   if [ $CVS -eq 1 -a -d $CURLDIR/CVS ]; then
     log "curl is verified to be a fine source dir"
+    # remove the generated sources to force them to be re-generated each
+    # time we run this test
+    rm -f $CURLDIR/lib/getdate.c
+    rm -f $CURLDIR/src/hugehelp.c
   elif [ $CVS -eq 0 -a -f $CURLDIR/testcurl.sh ]; then
     log "curl is verified to be a fine daily source dir"
   else
