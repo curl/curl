@@ -39,5 +39,6 @@ TYPE I
 SIZE 110
 REST 20
 RETR 110
+QUIT
 </protocol>
 </verify>

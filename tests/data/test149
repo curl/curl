@@ -39,6 +39,7 @@ CWD dir2
 EPSV
 TYPE I
 STOR 148
+QUIT
 </protocol>
 <file name="log/upload148">
 send away this contents

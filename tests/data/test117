@@ -31,5 +31,6 @@ PWD
 EPSV
 PASV
 TYPE I
+QUIT
 </protocol>
 </verify>

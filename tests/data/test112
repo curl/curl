@@ -31,6 +31,7 @@ PWD
 EPSV
 TYPE I
 APPE 112
+QUIT
 </protocol>
 <upload>
  gonna upload

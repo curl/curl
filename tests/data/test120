@@ -38,5 +38,6 @@ TYPE I
 SIZE 120
 RETR 120
 DELE file
+QUIT
 </protocol>
 </verify>

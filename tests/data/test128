@@ -33,6 +33,7 @@ PWD
 EPSV
 TYPE I
 STOR 128
+QUIT
 </protocol>
 <upload>
 file

@@ -37,5 +37,6 @@ PASS curl_by_daniel@haxx.se
 PWD
 CWD attempt
 MKD attempt
+QUIT
 </protocol>
 </verify>

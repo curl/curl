@@ -31,5 +31,6 @@ EPSV
 PASV
 TYPE I
 SIZE 122
+QUIT
 </protocol>
 </verify>

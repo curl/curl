@@ -32,5 +32,6 @@ REPLY PORT 314 bluah you f00l!
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
+QUIT
 </protocol>
 </verify>

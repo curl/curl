@@ -28,5 +28,6 @@ USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
 CWD path
+QUIT
 </protocol>
 </verify>

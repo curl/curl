@@ -33,5 +33,6 @@ PASV
 TYPE I
 SIZE 118
 RETR 118
+QUIT
 </protocol>
 </verify>

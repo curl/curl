@@ -30,5 +30,6 @@ PASS curl_by_daniel@haxx.se
 PWD
 EPSV
 PASV
+QUIT
 </protocol>
 </verify>

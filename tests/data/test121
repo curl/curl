@@ -35,5 +35,6 @@ TYPE I
 SIZE 121
 RETR 121
 DELE after_transfer
+QUIT
 </protocol>
 </verify>

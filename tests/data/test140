@@ -28,5 +28,6 @@ PASS curl_by_daniel@haxx.se
 PWD
 CWD blalbla
 MDTM 140
+QUIT
 </protocol>
 </verify>

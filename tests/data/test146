@@ -42,5 +42,6 @@ EPSV
 TYPE I
 SIZE 146
 RETR 146
+QUIT
 </protocol>
 </verify>

@@ -35,5 +35,6 @@ PWD
 TYPE I
 SIZE 119
 RETR 119
+QUIT
 </protocol>
 </verify>

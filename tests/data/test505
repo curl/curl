@@ -44,4 +44,15 @@ upload
 
 works?
 </upload>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+EPSV
+TYPE I
+STOR 505
+RNFR 505
+RNTO 505-forreal
+QUIT
+</protocol>
 </verify>

@@ -38,5 +38,6 @@ PWD
 PORT 127,0,0,1,243,212
 TYPE A
 NLST
+QUIT
 </protocol>
 </verify>

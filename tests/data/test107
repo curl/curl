@@ -37,5 +37,6 @@ PWD
 EPSV
 TYPE I
 STOR 107
+QUIT
 </protocol>
 </verify>

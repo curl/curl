@@ -26,5 +26,6 @@ PASS curl_by_daniel@haxx.se
 PWD
 EPSV
 TYPE I
+QUIT
 </protocol>
 </verify>

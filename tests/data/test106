@@ -35,5 +35,6 @@ EPSV
 TYPE A
 SIZE 106
 RETR 106
+QUIT
 </protocol>
 </verify>

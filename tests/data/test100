@@ -43,5 +43,6 @@ PWD
 EPSV
 TYPE A
 LIST
+QUIT
 </protocol>
 </verify>

@@ -30,5 +30,6 @@ MDTM 103
 TYPE I
 SIZE 103
 REST 0
+QUIT
 </protocol>
 </verify>

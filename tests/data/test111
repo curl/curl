@@ -32,5 +32,6 @@ PWD
 EPSV
 TYPE I
 SIZE 111
+QUIT
 </protocol>
 </verify>

@@ -2288,12 +2288,14 @@ CURLcode ftp_perform(struct connectdata *conn,
  * parts etc as a wrapper to the actual DO function (ftp_perform).
  *
  * The input argument is already checked for validity.
+ *
+ * ftp->ctl_valid starts out as FALSE, and gets set to TRUE if we reach the
+ * end of the function.
  */
 CURLcode Curl_ftp(struct connectdata *conn)
 {
   CURLcode retcode=CURLE_OK;
   bool connected=0;
-
   struct SessionHandle *data = conn->data;
   struct FTP *ftp;
 
@@ -2304,6 +2306,7 @@ CURLcode Curl_ftp(struct connectdata *conn)
 
   /* the ftp struct is already inited in ftp_connect() */
   ftp = conn->proto.ftp;
+  ftp->ctl_valid = FALSE;
   conn->size = -1; /* make sure this is unknown at this point */
 
   Curl_pgrsSetUploadCounter(data, 0);
@@ -2386,6 +2389,7 @@ CURLcode Curl_ftp(struct connectdata *conn)
   else
     freedirs(ftp);
 
+  ftp->ctl_valid = TRUE;
   return retcode;
 }
 
@@ -2452,11 +2456,13 @@ CURLcode Curl_ftp_quit(struct connectdata *conn)
 {
   ssize_t nread;
   int ftpcode;
-  CURLcode ret;
+  CURLcode ret = CURLE_OK;
 
-  ret = Curl_ftpsendf(conn, "%s", "QUIT");
-  if(CURLE_OK == ret)
-    ret = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+  if(conn->proto.ftp->ctl_valid) {
+    ret = Curl_ftpsendf(conn, "%s", "QUIT");
+    if(CURLE_OK == ret)
+      ret = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+  }
 
   return ret;
 }
@@ -2472,15 +2478,14 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
 {
   struct FTP *ftp= conn->proto.ftp;
 
-#if 0
   /* We cannot send quit unconditionally. If this connection is stale or
      bad in any way, sending quit and waiting around here will make the
      disconnect wait in vain and cause more problems than we need to.
-     
-     Until fixed, we keep this #if 0'ed. To be fixed in 7.11.1. Stay tuned.
+
+     Curl_ftp_quit() will check the state of ftp->ctl_valid. If it's ok it
+     will try to send the QUIT command, otherwise it will just return.
   */
   (void)Curl_ftp_quit(conn); /* ignore errors on the QUIT */
-#endif
 
   /* The FTP session may or may not have been allocated/setup at this point! */
   if(ftp) {
