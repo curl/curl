@@ -4,8 +4,8 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST = CHANGES LEGAL maketgz MITX.txt MPL-1.1.txt UPGRADE		\
-	reconf Makefile.dist curl-config.in build_vms.com curl-mode.el
+EXTRA_DIST = CHANGES COPYING maketgz UPGRADE reconf Makefile.dist	\
+curl-config.in build_vms.com curl-mode.el
 
 bin_SCRIPTS = curl-config
 
