@@ -16,6 +16,12 @@
 
 #define NUM_OPEN (FD_SETSIZE + 10)
 
+#if defined(WIN32) || defined(_WIN32) || defined(MSDOS)
+#define DEV_NULL "NUL"
+#else
+#define DEV_NULL "/dev/null"
+#endif
+
 int test(char *URL)
 {
   CURLcode res;
@@ -25,9 +31,9 @@ int test(char *URL)
 
   /* open a lot of file descriptors */
   for (i = 0; i < NUM_OPEN; i++) {
-    fd[i] = open("/dev/null", O_RDONLY);
+    fd[i] = open(DEV_NULL, O_RDONLY);
     if (fd[i] == -1) {
-      fprintf(stderr, "open: attempt #%i: failed to open /dev/null\n", i);
+      fprintf(stderr, "open: attempt #%i: failed to open %s\n", i, DEV_NULL);
       for (i--; i >= 0; i--)
         close(fd[i]);
       return CURLE_FAILED_INIT;
