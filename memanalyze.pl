@@ -24,7 +24,7 @@ while(<STDIN>) {
         $linenum = $2;
         $function = $3;
 
-        if($function =~ /free\(([0-9a-f]*)/) {
+        if($function =~ /free\(0x([0-9a-f]*)/) {
             $addr = $1;
             if($sizeataddr{$addr} <= 0) {
                 print "FREE ERROR: No memory allocated: $line\n";
@@ -35,7 +35,7 @@ while(<STDIN>) {
                 $getmem{$addr}=""; # forget after a good free()
             }
         }
-        elsif($function =~ /malloc\((\d*)\) = ([0-9a-f]*)/) {
+        elsif($function =~ /malloc\((\d*)\) = 0x([0-9a-f]*)/) {
             $size = $1;
             $addr = $2;
             $sizeataddr{$addr}=$size;
@@ -43,7 +43,7 @@ while(<STDIN>) {
 
             $getmem{$addr}="$source:$linenum";
         }
-        elsif($function =~ /realloc\(([0-9a-f]*), (\d*)\) = ([0-9a-f]*)/) {
+        elsif($function =~ /realloc\(0x([0-9a-f]*), (\d*)\) = 0x([0-9a-f]*)/) {
             $oldaddr = $1;
             $newsize = $2;
             $newaddr = $3;
@@ -57,7 +57,7 @@ while(<STDIN>) {
             $getmem{$oldaddr}="";
             $getmem{$newaddr}="$source:$linenum";
         }
-        elsif($function =~ /strdup\(([0-9a-f]*)\) \((\d*)\) = ([0-9a-f]*)/) {
+        elsif($function =~ /strdup\(0x([0-9a-f]*)\) \((\d*)\) = 0x([0-9a-f]*)/) {
             # strdup(a5b50) (8) = df7c0
 
             $dup = $1;
