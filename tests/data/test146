@@ -1,0 +1,46 @@
+# Server-side
+<reply>
+<data>
+this is file contents
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+persistant FTP with different paths
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/first/dir/here/146 ftp://%HOSTIP:%FTPPORT/146
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+# strip all kinds of PORT, EPRT and LPRT curl can do
+<strip>
+^PORT 127,0,0,1,.*
+^EPRT.*
+^LPRT.*
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD first
+CWD dir
+CWD here
+EPSV
+TYPE I
+SIZE 146
+RETR 146
+CWD /nowhere/anywhere
+EPSV
+TYPE I
+SIZE 146
+RETR 146
+</protocol>
+</verify>
