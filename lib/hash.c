@@ -156,14 +156,15 @@ Curl_hash_add(curl_hash *h, char *key, size_t key_len, void *p)
   }
 
   he = mk_hash_element(key, key_len, p);
-  if (!he) 
-    return NULL; /* failure */
-
-  if (Curl_llist_insert_next(l, l->tail, he)) {
-    ++h->size;
-    return p; /* return the new entry */
+  if (he) {
+    if(Curl_llist_insert_next(l, l->tail, he)) {
+      ++h->size;
+      return p; /* return the new entry */
+    }
+    /* couldn't insert it, destroy the 'he' element again */
+    hash_element_dtor(h, he);
   }
-
+  h->dtor(p); /* remove the NEW entry */
   return NULL; /* failure */
 }
 
