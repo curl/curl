@@ -29,7 +29,7 @@ INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/src -I$(top_srcdir)/src
 
 bin_PROGRAMS = curl
 
-curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c setup.h \
+curl_SOURCES = main.c hugehelp.c hugehelp.h urlglob.c writeout.c setup.h \
 	config-win32.h config-mac.h config-vms.h config-riscos.h \
 	urlglob.h version.h writeout.h writeenv.c writeenv.h \
 	getpass.c getpass.h homedir.c homedir.h $(top_srcdir)/lib/strtoofft.c
