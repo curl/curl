@@ -9,7 +9,7 @@
 
 # Edit the path below to point to the base of your Novell NDK.
 ifndef NDKBASE
-NDKBASE	= /novell
+NDKBASE	= c:/novell
 endif
 INSTDIR	= ..\curl-$(LIBCURL_VERSION_STR)-bin-nw
 
@@ -34,6 +34,7 @@ endif
 # must be equal to DEBUG or NDEBUG
 DB	= NDEBUG
 # DB	= DEBUG
+# DB	= CURLDEBUG
 # Optimization: -O<n> or debugging: -g
 ifeq ($(DB),NDEBUG)
 	OPT	= -O2
@@ -65,7 +66,9 @@ CFLAGS	= $(OPT) -D$(DB) -DNETWARE -nostdinc
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
 LDFLAGS	= -nostdlib $(PRELUDE) $(OBJDIR)/*.o -o $(OBJDIR)/$(TARGET).nlm -commandfile
-CFLAGS	+= -gccinc -inline off -opt nointrinsics -proc 586
+AR	= mwldnlm
+ARFLAGS	= -type library -w nocmdline $(OBJDIR)/*.o -o
+CFLAGS	+= -msgstyle gcc -gccinc -inline off -opt nointrinsics -proc 586
 CFLAGS	+= -relax_pointers
 #CFLAGS	+= -w on
 ifeq ($(LIBARCH),LIBC)
@@ -81,6 +84,8 @@ endif
 else
 LD	= nlmconv
 LDFLAGS	= -T
+AR	= ar
+ARFLAGS	= -cq
 CFLAGS	+= -fno-builtin -fpack-struct -fpcc-struct-return
 CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
@@ -122,6 +127,12 @@ endif
 CFLAGS	+= $(INCLUDES)
 
 ifeq ($(MTSAFE),YES)
+	XDCOPT = -n
+endif
+ifeq ($(MTSAFE),NO)
+	XDCOPT = -u
+endif
+ifdef XDCOPT
 	XDCDATA = $(OBJDIR)/$(TARGET).xdc
 endif
 
@@ -182,10 +193,14 @@ OBJS	= \
 	$(OBJDIR)/hostsyn.o \
 	$(OBJDIR)/hostthre.o \
 	$(OBJDIR)/inet_ntop.o \
-	$(OBJDIR)/nwlib.o
 
+OBJL	= $(OBJS) $(OBJDIR)/nwlib.o
 
-all: $(OBJDIR) $(OBJDIR)/version.inc $(OBJDIR)/$(TARGET).nlm 
+nlm: $(OBJDIR) $(OBJDIR)/version.inc $(OBJDIR)/$(TARGET).nlm 
+
+lib: $(OBJDIR) $(OBJDIR)/$(TARGET).lib 
+
+all: lib nlm
 
 $(OBJDIR)/%.o: %.c
 #	@echo Compiling $<
@@ -215,7 +230,12 @@ $(INSTDIR):
 $(OBJDIR):
 	@mkdir $(OBJDIR)
 
-$(OBJDIR)/$(TARGET).nlm: $(OBJS) $(OBJDIR)/$(TARGET).def $(XDCDATA)
+$(OBJDIR)/$(TARGET).lib: $(OBJS)
+	@echo Creating $@
+	@-$(RM) $@
+	@$(AR) $(ARFLAGS) $@ $^
+
+$(OBJDIR)/$(TARGET).nlm: $(OBJL) $(OBJDIR)/$(TARGET).def $(XDCDATA)
 	@echo Linking $@
 	@-$(RM) $@
 	@$(LD) $(LDFLAGS) $(OBJDIR)/$(TARGET).def
@@ -262,11 +282,7 @@ ifeq ($(LIBARCH),CLIB)
 #	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
 	@echo $(DL)module clib$(DL) >> $@
 else
-ifeq ($(LD),nlmconv)
 	@echo $(DL)flag_on 64$(DL) >> $@
-else
-	@echo $(DL)autounload$(DL) >> $@
-endif
 	@echo $(DL)pseudopreemption$(DL) >> $@
 	@echo $(DL)start _LibCPrelude$(DL) >> $@
 	@echo $(DL)exit _LibCPostlude$(DL) >> $@

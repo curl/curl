@@ -9,7 +9,7 @@
 
 # Edit the path below to point to the base of your Novell NDK.
 ifndef NDKBASE
-NDKBASE	= /novell
+NDKBASE	= c:/novell
 endif
 INSTDIR	= ..\curl-$(LIBCURL_VERSION_STR)-bin-nw
 
@@ -26,6 +26,8 @@ STACK	= 64000
 SCREEN	= $(TARGET) commandline utility
 MODULES	= libcurl.nlm
 IMPORTS	= @../lib/libcurl.imp
+# Comment the line below if you dont want to load protected automatically.
+LDRING	= 3
 
 # Edit the var below to point to your lib architecture.
 ifndef LIBARCH
@@ -125,6 +127,12 @@ endif
 CFLAGS	+= $(INCLUDES)
 
 ifeq ($(MTSAFE),YES)
+	XDCOPT = -n
+endif
+ifeq ($(MTSAFE),NO)
+	XDCOPT = -u
+endif
+ifdef XDCOPT
 	XDCDATA = $(OBJDIR)/$(TARGET).xdc
 endif
 
@@ -205,6 +213,12 @@ endif
 ifdef XDCDATA
 	@echo $(DL)xdcdata $(XDCDATA)$(DL) >> $@
 endif
+ifeq ($(LDRING),0)
+	@echo $(DL)flag_on 16$(DL) >> $@
+endif
+ifeq ($(LDRING),3)
+	@echo $(DL)flag_on 512$(DL) >> $@
+endif
 ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)start _Prelude$(DL) >> $@
 	@echo $(DL)exit _Stop$(DL) >> $@
@@ -217,11 +231,7 @@ ifeq ($(LIBARCH),CLIB)
 #	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
 	@echo $(DL)module clib$(DL) >> $@
 else
-ifeq ($(LD),nlmconv)
 	@echo $(DL)flag_on 64$(DL) >> $@
-else
-	@echo $(DL)autounload$(DL) >> $@
-endif
 	@echo $(DL)pseudopreemption$(DL) >> $@
 	@echo $(DL)start _LibCPrelude$(DL) >> $@
 	@echo $(DL)exit _LibCPostlude$(DL) >> $@
