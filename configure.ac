@@ -1181,6 +1181,7 @@ AC_CHECK_HEADERS(
         sys/resource.h \
         libgen.h \
         locale.h \
+        errno.h \
         setjmp.h,
 dnl to do if not found
 [],
