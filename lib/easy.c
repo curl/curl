@@ -243,9 +243,16 @@ CURLcode curl_easy_perform(CURL *curl)
       data->hostcache = Curl_global_host_cache_get();
     }
 
-    if (!data->hostcache)
+    if (!data->hostcache) {
       data->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
 
+      if(!data->hostcache)
+        /* While we possibly could survive and do good without a host cache,
+           the fact that creating it failed indicates that things are truly
+           screwed up and we should bail out! */
+        return CURLE_OUT_OF_MEMORY;
+    }
+    
   }
   
   return Curl_perform(data);
