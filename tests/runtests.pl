@@ -850,25 +850,8 @@ if($testthis[0] ne "") {
 
 print <<EOM
  ***************************************************************************
-
     THIS DOES NOT WORK
-
  ***************************************************************************
-
- Things in curl-land have changed, but the test suite has not been fixed
- accordingly and thus, the test suite is currently more or less useless.
-
- *PLEASE* help us fixing this. We have to make our new test server written
- in C work and get used instead of the perl version previously used.
-
- The working version of the test server is found in the tests/server
- directory in the CVS tree.
-
- If you run this in the tests/ directory and run the server in there, you
- can actually get test-responses if you do like this:
-
- \$ ./server/sws 8080 &
- \$ curl localhost:8080/3
 
 EOM
     ;
