@@ -637,7 +637,7 @@ FORMcode FormAdd(struct HttpPost **httppost,
   struct HttpPost *post = NULL;
   CURLformoption option;
   struct curl_forms *forms = NULL;
-  int array_index = 0;
+  const char *array_value; /* value read from an array */
 
   /* This is a state variable, that if TRUE means that we're parsing an
      array that we got passed to us. If FALSE we're parsing the input
@@ -667,7 +667,10 @@ FORMcode FormAdd(struct HttpPost **httppost,
     /* first see if we have more parts of the array param */
     if ( array_state ) {
       /* get the upcoming option from the given array */
-      option = forms[array_index++].option;
+      option = forms->option;
+      array_value = forms->value;
+
+      forms++; /* advance this to next entry */
       if (CURLFORM_END == option) {
         /* end of array state */
         array_state = FALSE;
@@ -694,10 +697,8 @@ FORMcode FormAdd(struct HttpPost **httppost,
     switch (option) {
     case CURLFORM_ARRAY:
       forms = va_arg(params, struct curl_forms *);
-      if (forms) {
+      if (forms)
         array_state = TRUE;
-        array_index = 0;
-      }
       else
         return_value = FORMADD_NULL;
       break;
@@ -768,7 +769,7 @@ FORMcode FormAdd(struct HttpPost **httppost,
       {
         const char *filename = NULL;
         if (array_state)
-          filename = forms[array_index].value;
+          filename = array_value;
         else
           filename = va_arg(params, const char *);
         if (current_form->value) {
@@ -797,7 +798,7 @@ FORMcode FormAdd(struct HttpPost **httppost,
       {
 	const char *contenttype = NULL;
         if (array_state)
-          contenttype = forms[array_index].value;
+          contenttype = array_value;
         else
           contenttype = va_arg(params, const char *);
         if (current_form->contenttype) {
