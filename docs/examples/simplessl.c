@@ -40,7 +40,7 @@ int main(int argc, char **argv)
   FILE *headerfile;
 
   const char *pCertFile = "testcert.pem";
-  const char *pCACertFile="cacert.pem"
+  const char *pCACertFile="cacert.pem";
 
   const char *pKeyName;
   const char *pKeyType;
