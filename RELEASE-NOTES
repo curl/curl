@@ -10,6 +10,7 @@ Curl and libcurl 7.12.4
 
 This release includes the following changes:
 
+ o -Q "+[command]" was added
  o src/getpass.c license issue sorted (code was rewritten)
  o curl -w now supports 'http_connect' for the proxy's response to CONNECT
  o introducing "curl-config --protocols"
@@ -42,6 +43,6 @@ advice from friends like these:
  Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt,
  Hzhijun, Pavel Orehov, Bruce Mitchener, Cyrill Osterwalder, Dan Torop,
  Martijn Koster, Alex aka WindEagle, Cody Jones, Samuel Díaz García,
- Stephan Bergmann
+ Stephan Bergmann, Philippe Hameau
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -1,0 +1,46 @@
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP with quote ops
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/227 -Q "NOOP 1" -Q "+NOOP 2" -Q "-NOOP 3"
+</command>
+</test>
+<file name="log/ftpserver.cmd">
+REPLY EPSV 500 no such command
+</file>
+
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+NOOP 1
+EPSV
+PASV
+TYPE I
+NOOP 2
+SIZE 227
+RETR 227
+NOOP 3
+QUIT
+</protocol>
+</verify>

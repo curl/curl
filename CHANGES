@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (20 January 2005)
+- Philippe Hameau found out that -Q "+[command]" didn't work, although some
+  code was written for it. I fixed and added test case 227 to verify it.
+  The curl.1 man page didn't mention the '+' so I added it.
+
 Daniel (19 January 2005)
 - Stephan Bergmann made libcurl return CURLE_URL_MALFORMAT if an FTP URL
   contains %0a or %0d in the user, password or CWD parts. (A future fix would

@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "7 Dec 2004" "Curl 7.12.3" "Curl Manual"
+.TH curl 1 "20 Jan 2005" "Curl 7.12.4" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -677,9 +677,11 @@ If used as the first parameter on the command line, the \fI$HOME/.curlrc\fP
 file will not be read and used as a config file.
 .IP "-Q/--quote <comand>"
 (FTP) Send an arbitrary command to the remote FTP server. Quote commands are
-sent BEFORE the transfer is taking place. To make commands take place after a
-successful transfer, prefix them with a dash '-'. You may specify any amount
-of commands to be run before and after the transfer. If the server returns
+sent BEFORE the transfer is taking place (just after the initial PWD command
+to be exact). To make commands take place after a successful transfer, prefix
+them with a dash '-'. To make commands get sent after libcurl has changed
+working directory, just before the transfer command(s), prefix the command
+with '+'. You may specify any amount of commands. If the server returns
 failure for one of the commands, the entire operation will be aborted. You
 must send syntactically correct FTP commands as RFC959 defines.
 

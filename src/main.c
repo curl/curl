@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2784,8 +2784,9 @@ static void free_config_fields(struct Configurable *config)
     free(config->cookiejar);
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
-  curl_slist_free_all(config->postquote); /*  */
-  curl_slist_free_all(config->headers); /*  */
+  curl_slist_free_all(config->prequote);
+  curl_slist_free_all(config->postquote);
+  curl_slist_free_all(config->headers);
 }
 
 #if defined(WIN32) && !defined(__CYGWIN32__)
@@ -3490,6 +3491,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_CRLF, config->crlf);
         curl_easy_setopt(curl, CURLOPT_QUOTE, config->quote);
         curl_easy_setopt(curl, CURLOPT_POSTQUOTE, config->postquote);
+        curl_easy_setopt(curl, CURLOPT_PREQUOTE, config->prequote);
         curl_easy_setopt(curl, CURLOPT_WRITEHEADER,
                          config->headerfile?&heads:NULL);
         curl_easy_setopt(curl, CURLOPT_COOKIEFILE, config->cookiefile);
