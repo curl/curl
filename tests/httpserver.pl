@@ -137,6 +137,9 @@ for ( $waitedpid = 0;
                 $testnum=0;
             }
             open(INPUT, ">>log/server.input");
+
+            binmode(INPUT,":raw"); # this makes it work better on cygwin
+
             for(@headers) {
                 print INPUT $_;
             }

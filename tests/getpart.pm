@@ -119,7 +119,11 @@ sub compareparts {
  for(1 .. $sizefirst) {
      my $index = $_ - 1;
      if($firstref->[$index] ne $secondref->[$index]) {
-         return 1+$index;
+         (my $aa = $firstref->[$index]) =~ s/\r+\n$/\n/;
+         (my $bb = $secondref->[$index]) =~ s/\r+\n$/\n/;
+         if($aa ne $bb) {
+             return 1+$index;
+         }
      }
  }
  return 0;
@@ -132,6 +136,7 @@ sub writearray {
     my ($filename, $arrayref)=@_;
 
     open(TEMP, ">$filename");
+    binmode(TEMP,":raw"); # cygwin fix by Kevin Roth
     for(@$arrayref) {
         print TEMP $_;
     }
