@@ -6,6 +6,28 @@
 
                                   Changelog
 
+Daniel (12 Mar)
+- Thomas Tonino found out that if you used the curl tool to do PUT operations
+  as in 'curl www.foo.com/dir/ -T file' and the file name included for example
+  space or other characters that don't belong in URLs, curl did not properly
+  URL encode them before using them in the URL.
+
+- Added an option to configure called --enable-libgcc that simply adds -lgcc
+  to the LIBS variable, as this seems to be a common problem.
+
+- I modified the configure.in file, so that the headers are now checked in an
+  order of "viality". We must also make sure to use the "default headers"
+  parameter to AC_CHECK_HEADERS() so that headers are checked with the proper
+  prerequisites included (i.e all the major and generally important header
+  files are included there by default). This might be what we need for various
+  Sun, HP, AIX and Tru64 systems to behave good again on the header check
+  front.
+
+- Rick Jones pointed out a few compiler warnings on HP-UX that I addressed.
+
+- I made the configure --help output nicer by using AC_HELP_STRING() a lot
+  more.
+
 Daniel (11 Mar)
 - Christophe Demory fixed the socket sending code to work better on HP-UX
   when sending data to a socket that would block. It then returns EAGAIN, not
