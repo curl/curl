@@ -37,11 +37,13 @@ that only one lick is given at any time for each kind of data.
 .IP CURLSHOPT_SHARE
 The \fIparameter\fP specifies a type of data that should be shared. This may
 be set to one of the values described below.
+.RS
 .IP CURL_LOCK_DATA_COOKIE
-COOKIE data will be shared across the easy handles using this shared object.
+Cookie data will be shared across the easy handles using this shared object.
 .IP CURL_LOCK_DATA_DNS
 Cached DNS hosts will be shared across the easy handles using this shared
 object.
+.RE
 .IP CURLSHOPT_UNSHARE
 This option does the opposite of \fICURLSHOPT_SHARE\fP. It specifies that
 the specified \fIparameter\fP will no longer be shared. Valid values are 
