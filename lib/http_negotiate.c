@@ -66,9 +66,9 @@ get_gss_name(struct connectdata *conn, gss_name_t *server)
   /* IIS uses the <service>@<fqdn> form but uses 'http' as the service name */
 
   if (neg_ctx->gss)
-    service = "khttp";
+    service = "KHTTP";
   else
-    service = "http";
+    service = "HTTP";
 
   token.length = strlen(service) + 1 + strlen(conn->host.name) + 1;
   if (token.length + 1 > sizeof(name))
