@@ -1169,16 +1169,27 @@ CURLcode Curl_http(struct connectdata *conn)
 
       add_buffer(req_buffer, "\r\n", 2);
 
-      /* and here we setup the pointers to the actual data */
       if(data->set.postfields) {
 
-        if(!conn->bits.upload_chunky) {
-          /* We have a static chunk of data to POST, and we're not sending
-             it 'chunked', then we can just as well append it to the request
-             already now to reduce the number if send() calls */
-          add_buffer(req_buffer, data->set.postfields, postsize);
+        if(postsize < (100*1024)) {
+          /* The post data is less than 100K, then append it to the header.
+             This limit is no magic limit but only set to prevent really huge
+             POSTs to get the data duplicated with malloc() and family. */
+
+          if(!conn->bits.upload_chunky)
+            /* We're not sending it 'chunked', append it to the request
+               already now to reduce the number if send() calls */
+            add_buffer(req_buffer, data->set.postfields, postsize);
+          else {
+            /* Append the POST data chunky-style */
+            add_bufferf(req_buffer, "%x\r\n", postsize);
+            add_buffer(req_buffer, data->set.postfields, postsize);
+            add_buffer(req_buffer, "\r\n0\r\n", 5); /* end of a chunked
+                                                       transfer stream */
+          }
         }
         else {
+          /* A huge POST coming up, do data separate from the request */
           http->postsize = postsize;
           http->postdata = data->set.postfields;
 
