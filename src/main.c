@@ -2966,8 +2966,22 @@ operate(struct Configurable *config, int argc, char *argv[])
         vms_show = VMSSTS_HIDE;
       }
 #else
-      if((res!=CURLE_OK) && config->showerror)
-        fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
+      if((res!=CURLE_OK) && config->showerror) {
+        if(CURLE_SSL_CACERT == res) {
+          fprintf(config->errors, "curl: (%d) %s\n\n", res, errorbuffer);
+#define CURL_CA_CERT_ERRORMSG \
+"More details here: http://curl.haxx.se/docs/sslcerts.html\n\n" \
+"curl does peer SSL certificate verification by default. If you\n" \
+"communicate with HTTPS servers using certificates that are signed by CAs\n" \
+"present in the bundle, you will get truly secure SSL connections.\n" \
+"Since you get this error, you probably forgot to point out a working CA\n" \
+"cert for your server, or you forgot to use the -k (or --insecure) option.\n"
+
+          fprintf(config->errors, "%s", CURL_CA_CERT_ERRORMSG);
+        }
+        else
+          fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
+      }
 #endif
 
       if (outfile && !curl_strequal(outfile, "-") && outs.stream)
