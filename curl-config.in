@@ -16,6 +16,7 @@ Usage: curl-config [OPTION]
 
 Available values for OPTION include:
 
+  --cc        compiler
   --cflags    pre-processor and compiler flags
   --feature   newline separated list of enabled features
   --help      display this help and exit
@@ -42,6 +43,10 @@ while test $# -gt 0; do
     esac
 
     case "$1" in
+    --cc)
+	echo @CC@
+	;;
+
     --prefix)
 	echo $prefix
 	;;
