@@ -1,4 +1,14 @@
 
+* February 4, 2004
+- ares_free_errmem() is subject for removal, it is simply present for future
+  purposes, and since we removed the extra parameter in strerror() it won't
+  be used by c-ares!
+- configure --enable-debug now enables picky compiler options if gcc is used
+- fixed several compiler warnings --enable-debug showed and Joerg Mueller-Tolk
+  reported
+
+Version 1.0.0 (February 3, 2004)
+
 * February 3, 2004
 - now we produce the libcares.a library instead of the previous libares.a
   since we are no longer compatible
