@@ -68,7 +68,8 @@
 #include "memdebug.h"
 
 /* WLdap32.dll functions are *not* stdcall. Must call these via __cdecl
- * pointers in case libcurl was compiled as fastcall (-Gr).
+ * pointers in case libcurl was compiled as fastcall (cl -Gr). Watcom
+ * uses fastcall by default.
  */
 #if !defined(WIN32) && !defined(__cdecl)
 #define __cdecl
@@ -265,25 +266,25 @@ CURLcode Curl_ldap(struct connectdata *conn)
   /* The types are needed because ANSI C distinguishes between
    * pointer-to-object (data) and pointer-to-function.
    */
-  DYNA_GET_FUNCTION(void *(*)(char *, int), ldap_init);
-  DYNA_GET_FUNCTION(int (*)(void *, char *, char *), ldap_simple_bind_s);
-  DYNA_GET_FUNCTION(int (*)(void *), ldap_unbind_s);
+  DYNA_GET_FUNCTION(void *(__cdecl *)(char *, int), ldap_init);
+  DYNA_GET_FUNCTION(int (__cdecl *)(void *, char *, char *), ldap_simple_bind_s);
+  DYNA_GET_FUNCTION(int (__cdecl *)(void *), ldap_unbind_s);
 #ifndef WIN32
   DYNA_GET_FUNCTION(int (*)(char *, LDAPURLDesc **), ldap_url_parse);
   DYNA_GET_FUNCTION(void (*)(void *), ldap_free_urldesc);
 #endif
-  DYNA_GET_FUNCTION(int (*)(void *, char *, int, char *, char **, int,
+  DYNA_GET_FUNCTION(int (__cdecl *)(void *, char *, int, char *, char **, int,
                             void **), ldap_search_s);
-  DYNA_GET_FUNCTION(void *(*)(void *, void *), ldap_first_entry);
-  DYNA_GET_FUNCTION(void *(*)(void *, void *), ldap_next_entry);
-  DYNA_GET_FUNCTION(char *(*)(int), ldap_err2string);
-  DYNA_GET_FUNCTION(char *(*)(void *, void *), ldap_get_dn);
-  DYNA_GET_FUNCTION(char *(*)(void *, void *, void **), ldap_first_attribute);
-  DYNA_GET_FUNCTION(char *(*)(void *, void *, void *), ldap_next_attribute);
-  DYNA_GET_FUNCTION(char **(*)(void *, void *, const char *), ldap_get_values);
-  DYNA_GET_FUNCTION(void (*)(char **), ldap_value_free);
-  DYNA_GET_FUNCTION(void (*)(void *), ldap_memfree);
-  DYNA_GET_FUNCTION(void (*)(void *, int), ber_free);
+  DYNA_GET_FUNCTION(void *(__cdecl *)(void *, void *), ldap_first_entry);
+  DYNA_GET_FUNCTION(void *(__cdecl *)(void *, void *), ldap_next_entry);
+  DYNA_GET_FUNCTION(char *(__cdecl *)(int), ldap_err2string);
+  DYNA_GET_FUNCTION(char *(__cdecl *)(void *, void *), ldap_get_dn);
+  DYNA_GET_FUNCTION(char *(__cdecl *)(void *, void *, void **), ldap_first_attribute);
+  DYNA_GET_FUNCTION(char *(__cdecl *)(void *, void *, void *), ldap_next_attribute);
+  DYNA_GET_FUNCTION(char **(__cdecl *)(void *, void *, const char *), ldap_get_values);
+  DYNA_GET_FUNCTION(void (__cdecl *)(char **), ldap_value_free);
+  DYNA_GET_FUNCTION(void (__cdecl *)(void *), ldap_memfree);
+  DYNA_GET_FUNCTION(void (__cdecl *)(void *, int), ber_free);
 
   server = (*ldap_init)(conn->host.name, (int)conn->port);
   if (server == NULL) {
