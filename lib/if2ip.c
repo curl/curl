@@ -81,7 +81,7 @@
 
 #define SYS_ERROR -1
 
-char *Curl_if2ip(char *interface, char *buf, int buf_size)
+char *Curl_if2ip(const char *interface, char *buf, int buf_size)
 {
   int dummy;
   char *ip=NULL;
@@ -125,8 +125,11 @@ char *Curl_if2ip(char *interface, char *buf, int buf_size)
 
 /* -- end of if2ip() -- */
 #else
-char *Curl_if2ip(char *interface, char *buf, int buf_size)
+char *Curl_if2ip(const char *interface, char *buf, int buf_size)
 {
+    (void) interface;
+    (void) buf;
+    (void) buf_size;
     return NULL;
 }
 #endif
