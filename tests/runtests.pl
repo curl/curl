@@ -129,9 +129,9 @@ sub displaydata {
     my $hosttype=`uname -a`;
 
     print "Running tests on:\n",
-    "$version",
-    "host $hostname",
-    "system $hosttype";
+    "* $version",
+    "* host $hostname",
+    "* system $hosttype";
 }
 
 sub singletest {
@@ -152,8 +152,9 @@ sub singletest {
     # name of the test
     $DESC=`cat $TESTDIR/name$NUMBER.txt | tr -d '\012'`;
 
-    # redirected stdout here
+    # redirected stdout/stderr here
     $STDOUT="$LOGDIR/stdout$NUMBER";
+    $STDERR="$LOGDIR/stderr$NUMBER";
 
     # if this file exist, we verify that the stdout contained this:
     $VALIDOUT="$TESTDIR/stdout$NUMBER.txt";
@@ -173,7 +174,7 @@ sub singletest {
     $cmd =~ s/%HOSTNAME/$HOSTNAME/g;
 
     # run curl, add -v for debug information output
-    $CMDLINE="$CURL --output $CURLOUT --include --silent $cmd >$STDOUT";
+    $CMDLINE="$CURL --output $CURLOUT --include --silent $cmd >$STDOUT 2>$STDERR";
 
     if($verbose) {
         print "$CMDLINE\n";
@@ -184,7 +185,10 @@ sub singletest {
     $res /= 256;
 
     if ($res != 0) {
-        print "Failed to invoke curl for test $NUMBER\n";
+        print "*** Failed to invoke curl for test $NUMBER ***\n",
+        "*** [$DESC] ***\n",
+        "*** The command line was: ***\n $CMDLINE\n";
+        exit;
     }
     else {
         # verify the received data
@@ -218,8 +222,9 @@ sub singletest {
             }
         }
 
-        # remove the stdout file
-        unlink("$STDOUT");
+        # remove the stdout and stderr files
+        unlink($STDOUT);
+        unlink($STDERR);
 
     }
 
