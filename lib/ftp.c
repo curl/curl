@@ -2472,7 +2472,7 @@ static CURLcode ftp_cwd_and_mkd(struct connectdata *conn, char *path)
       result = ftp_cwd(conn, path);
     }
     if(result)
-      failf(conn->data, "Couldn't cd to %s", path);
+      failf(conn->data, "Couldn't CWD to %s", path);
   }
   return result;
 }
