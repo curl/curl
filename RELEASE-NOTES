@@ -13,6 +13,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o improved resolution for the CURLINFO_*_TIME info variables
  o getting only a 100 Continue response and nothing else, when talking HTTP,
    is now treated as an error by libcurl
  o fixed minor memory leak in libcurl for Windows when staticly linked
@@ -42,7 +43,11 @@ This release includes the following bugfixes:
 Other curl-related news since the previous public release:
 
  o PycURL 7.11.1 was released: http://pycurl.sf.net/
+ o CURLHandle 1.9 was relased: http://curlhandle.sourceforge.net/
+ o A curl module for the Q language was announced:
+   http://q-lang.sourceforge.net/
  o New German web mirror: http://curl.netmirror.org/
+ o c-ares 1.2.0 was released: http://daniel.haxx.se/projects/c-ares/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
