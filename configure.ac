@@ -133,8 +133,8 @@ AC_HELP_STRING([--disable-http],[Disable HTTP support]),
        AC_DEFINE(CURL_DISABLE_HTTP, 1, [to disable HTTP])
        AC_MSG_WARN([disable HTTP disables FTP over proxy and GOPHER too])
        AC_DEFINE(CURL_DISABLE_GOPHER, 1, [to disable GOPHER])
-       AC_SUBST(CURL_DISABLE_HTTP)
-       AC_SUBST(CURL_DISABLE_GOPHER)
+       AC_SUBST(CURL_DISABLE_HTTP, [1])
+       AC_SUBST(CURL_DISABLE_GOPHER, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -149,7 +149,7 @@ AC_HELP_STRING([--disable-ftp],[Disable FTP support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_FTP, 1, [to disable FTP])
-       AC_SUBST(CURL_DISABLE_FTP)
+       AC_SUBST(CURL_DISABLE_FTP, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -164,7 +164,7 @@ AC_HELP_STRING([--disable-gopher],[Disable GOPHER support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_GOPHER, 1, [to disable GOPHER])
-       AC_SUBST(CURL_DISABLE_GOPHER)
+       AC_SUBST(CURL_DISABLE_GOPHER, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -179,7 +179,7 @@ AC_HELP_STRING([--disable-file],[Disable FILE support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_FILE, 1, [to disable FILE])
-       AC_SUBST(CURL_DISABLE_FILE)
+       AC_SUBST(CURL_DISABLE_FILE, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -194,7 +194,7 @@ AC_HELP_STRING([--disable-ldap],[Disable LDAP support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-       AC_SUBST(CURL_DISABLE_LDAP)
+       AC_SUBST(CURL_DISABLE_LDAP, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -209,7 +209,7 @@ AC_HELP_STRING([--disable-dict],[Disable DICT support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_DICT, 1, [to disable DICT])
-       AC_SUBST(CURL_DISABLE_DICT)
+       AC_SUBST(CURL_DISABLE_DICT, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
@@ -224,7 +224,7 @@ AC_HELP_STRING([--disable-telnet],[Disable TELNET support]),
   no)
        AC_MSG_RESULT(no)
        AC_DEFINE(CURL_DISABLE_TELNET, 1, [to disable TELNET])
-       AC_SUBST(CURL_DISABLE_TELNET)
+       AC_SUBST(CURL_DISABLE_TELNET, [1])
        ;;
   *)   AC_MSG_RESULT(yes)
        ;;
