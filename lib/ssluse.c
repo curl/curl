@@ -739,7 +739,8 @@ Curl_SSLConnect(struct connectdata *conn)
                        SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
                        SSL_VERIFY_CLIENT_ONCE,
                        cert_verify_callback);
-    if (!SSL_CTX_load_verify_locations(conn->ssl.ctx,
+    if ((data->set.ssl.CAfile || data->set.ssl.CApath) &&
+        !SSL_CTX_load_verify_locations(conn->ssl.ctx,
                                        data->set.ssl.CAfile,
                                        data->set.ssl.CApath)) {
       failf(data,"error setting cerficate verify locations");
