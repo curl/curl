@@ -34,20 +34,27 @@ WEB SITE
 
         Sweden    -- http://curl.haxx.se/
         Australia -- http://curl.planetmirror.com/
+        Austria   -- http://curl.gds.tuwien.ac.at/
         Denmark   -- http://curl.cofman.dk/
         Estonia   -- http://curl.wildyou.net/
+        France    -- http://curl.mirror.internet.tp/
+        Germany   -- http://curl.kgt.org/
         Germany   -- http://curl.mirror.at.stealer.net/
         Germany   -- http://curl.netmirror.org/
         Russia    -- http://curl.tsuren.net/
+        Taiwan    -- http://curl.cs.pu.edu.tw/
         Thailand  -- http://curl.siamu.ac.th/
         US (CA)   -- http://curl.mirror.redwire.net/
-        US        -- http://curl.signal42.com/
+        US (CA)   -- http://curl.mirrormonster.com/
+        US (CA)   -- http://curl.signal42.com/
+        US (TX)   -- http://curl.109k.com/
 
 DOWNLOAD
 
   The official download mirror sites are:
 
         Australia -- http://curl.planetmirror.com/download.html
+        Austria   -- http://curl.gds.tuwien.ac.at/download.html
         Estonia   -- http://curl.wildyou.net/download.html
         Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
         Germany   -- http://curl.mirror.at.stealer.net/download.html
@@ -57,8 +64,12 @@ DOWNLOAD
         Russia    -- http://curl.tsuren.net/download.html
         Sweden    -- ftp://ftp.sunet.se/pub/www/utilities/curl/
         Sweden    -- http://cool.haxx.se/curl/
+        Taiwan    -- http://curl.cs.pu.edu.tw/download.html
         Thailand  -- http://curl.siamu.ac.th/download.html
         US (CA)   -- http://curl.mirror.redwire.net/download.html
+        US (CA)   -- http://curl.mirrormonster.com/download.html
+        US (CA)   -- http://curl.signal42.com/download.html
+        US (TX)   -- http://curl.109k.com/download.html
 
 CVS
 
