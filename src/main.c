@@ -365,6 +365,7 @@ static void help(void)
   puts(" -j/--junk-session-cookies Ignore session cookies read from file (H)\n"
        "    --interface <interface> Specify the interface to be used\n"
        "    --krb4 <level>  Enable krb4 with specified security level (F)\n"
+       " -k/--insecure      Allow curl to connect to SSL sites without certs (H)\n"
        " -K/--config        Specify which config file to read\n"
        " -l/--list-only     List only names of an FTP directory (F)\n"
        "    --limit-rate <rate> Limit how fast transfers to allow");
@@ -480,6 +481,7 @@ struct Configurable {
   bool nobuffer;
   bool globoff;
   bool use_httpget;
+  bool insecure_ok; /* set TRUE to allow insecure SSL connects */
 
   char *writeout; /* %-styled format string to output */
   bool writeenv; /* write results to environment, if available */
@@ -1030,6 +1032,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"i", "include",     FALSE},
     {"I", "head",        FALSE},
     {"j", "junk-session-cookies", FALSE},
+    {"k", "insecure",    FALSE},
     {"K", "config",      TRUE},
     {"l", "list-only",   FALSE},
     {"L", "location",    FALSE},
@@ -1468,7 +1471,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           return PARAM_BAD_USE;
       }
       break;
-    case 'K':
+    case 'k': /* allow insecure SSL connects */
+      config->insecure_ok ^= TRUE;
+      break;
+    case 'K': /* parse config file */
       res = parseconfig(nextarg, config);
       config->configread = TRUE;
       if(res)
@@ -2791,6 +2797,9 @@ operate(struct Configurable *config, int argc, char *argv[])
         config->conf |= CONF_VERBOSE; /* force verbose */
       }
       curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
+
+      /* new in curl 7.10 */
+      curl_easy_setopt(curl, CURLOPT_SSL_INSECURE, config->insecure_ok);
       
       res = curl_easy_perform(curl);
         
@@ -2814,8 +2823,28 @@ operate(struct Configurable *config, int argc, char *argv[])
         vms_show = VMSSTS_HIDE;
       }
 #else
-      if((res!=CURLE_OK) && config->showerror)
-        fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
+      if((res!=CURLE_OK) && config->showerror) {
+        switch(res) {
+        case CURLE_SSL_INSECURE:
+          /* Since this breaks how curl used to work, we need a slightly more
+             verbose and descriptive error here to educate people what is
+             happening and what to do to make it work. At least for a
+             while. */
+          fprintf(config->errors, "curl: (%d) %s\n%s", res,
+                  errorbuffer,
+                  "      Since SSL doesn't offer any true security if you don't use a CA\n"
+                  "      certificate to verify the peer certificate with, you must either\n"
+                  "      provide one to make sure that the server really is the server you\n"
+                  "      think it is, or you must explicitly tell curl that insecure SSL\n"
+                  "      connects are fine.\n"
+                  "      Allow insecure SSL operations with -k/--insecure\n"
+                  );
+          break;
+        default:
+          fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
+          break;
+        }
+      }
 #endif
 
       if (outfile && !strequal(outfile, "-") && outs.stream)
