@@ -235,6 +235,9 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
         /* this is basicly the EWOULDBLOCK equivalent */
         *written = 0;
         return CURLE_OK;
+      case SSL_ERROR_SYSCALL:
+        failf(conn->data, "SSL_write() returned SYSCALL, errno = %d\n", errno);
+        return CURLE_SEND_ERROR;
       }
       /* a true error */
       failf(conn->data, "SSL_write() return error %d\n", err);
@@ -328,36 +331,31 @@ int Curl_read(struct connectdata *conn,
               ssize_t *n)
 {
   ssize_t nread;
+  *n=0; /* reset amount to zero */
 
 #ifdef USE_SSLEAY
   if (conn->ssl.use) {
-    bool loop=TRUE;
-    int err;
-    do {
-      nread = SSL_read(conn->ssl.handle, buf, buffersize);
+    nread = SSL_read(conn->ssl.handle, buf, buffersize);
 
-      if(nread >= 0)
-        /* successful read */
-        break;
-
-      err = SSL_get_error(conn->ssl.handle, nread);
+    if(nread < 0) {
+      /* failed SSL_read */
+      int err = SSL_get_error(conn->ssl.handle, nread);
 
       switch(err) {
       case SSL_ERROR_NONE: /* this is not an error */
       case SSL_ERROR_ZERO_RETURN: /* no more data */
-        loop=0; /* get out of loop */
         break;
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
         /* if there's data pending, then we re-invoke SSL_read() */
+        if(SSL_pending(conn->ssl.handle))
+          return -1; /* basicly EWOULDBLOCK */
         break;
       default:
         failf(conn->data, "SSL read error: %d", err);
         return CURLE_RECV_ERROR;
       }
-    } while(loop);
-    if(loop && SSL_pending(conn->ssl.handle))
-      return -1; /* basicly EWOULDBLOCK */
+    }
   }
   else {
 #endif
