@@ -330,8 +330,8 @@ dnl we cross-compile:
 ]) dnl end of AC_CACHE_CHECK
 
 if test "$ac_cv_working_ni_withscopeid" = "yes"; then
-  AC_DEFINE(HAVE_NI_SCOPEWITHID, 1,
-            [Define if NI_SCOPEWITHID exists and works])
+  AC_DEFINE(HAVE_NI_WITHSCOPEID, 1,
+            [Define if NI_WITHSCOPEID exists and works])
 fi
 
 ]) dnl end of AC_DEFUN
