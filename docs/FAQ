@@ -333,7 +333,7 @@ FAQ
   HTML-files. There's no difference to curl and it doesn't even know what kind
   of language that generated the page.
 
-  See also item 3.13 regarding javascript.
+  See also item 3.14 regarding javascript.
 
   3.7. Can I use curl to delete/rename a file through FTP?
 
