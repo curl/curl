@@ -601,6 +601,7 @@ AC_CONFIG_FILES([Makefile \
            lib/Makefile \
            tests/Makefile \
            tests/data/Makefile \
+           tests/server/Makefile \
 	   packages/Makefile \
 	   packages/Win32/Makefile \
 	   packages/Win32/cygwin/Makefile \
