@@ -94,6 +94,75 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
 }
 #else /* following code is IPv4-only */
 
+/**
+ * Performs a "deep" copy of a hostent into a buffer 
+ * (returns a pointer to the copy).
+ *
+ * Keith McGuigan 
+ * 10/3/2001
+ */
+static struct hostent* pack_hostent(char* buf, struct hostent* orig)
+{
+  char* bufptr;
+  struct hostent* copy;
+
+  int i;
+  char* str;
+  int len;
+
+  bufptr = buf;
+  copy = (struct hostent*)bufptr;
+
+  bufptr += sizeof(struct hostent);
+  copy->h_name = bufptr;
+  len = strlen(orig->h_name) + 1;
+  strncpy(bufptr, orig->h_name, len);
+  bufptr += len;
+
+  copy->h_aliases = (char**)bufptr;
+
+  /* Figure out how many aliases there are */
+  for (i = 0; orig->h_aliases[i] != NULL; ++i);
+
+  /* Reserve room for the array */
+  bufptr += (i + 1) * sizeof(char*);
+
+  i = 0;
+  str = orig->h_aliases[i];
+  while (str != NULL) {
+    len = strlen(str) + 1;
+    strncpy(bufptr, str, len);
+    copy->h_aliases[i] = bufptr;
+    bufptr += len;
+    str = orig->h_aliases[++i];
+  }
+  copy->h_aliases[i] = NULL;
+
+  copy->h_addrtype = orig->h_addrtype;
+  copy->h_length = orig->h_length;
+    
+  copy->h_addr_list = (char**)bufptr;
+
+  /* Figure out how many addresses there are */
+  for (i = 0; orig->h_addr_list[i] != NULL; ++i);
+
+  /* Reserve room for the array */
+  bufptr += (i + 1) * sizeof(char*);
+
+  i = 0;
+  len = orig->h_length;
+  str = orig->h_addr_list[i];
+  while (str != NULL) {
+    memcpy(bufptr, str, len);
+    copy->h_addr_list[i] = bufptr;
+    bufptr += len;
+    str = orig->h_addr_list[++i];
+  }
+  copy->h_addr_list[i] = NULL;
+
+  return copy;
+}
+
 static char *MakeIP(unsigned long num,char *addr, int addr_len)
 {
 #if defined(HAVE_INET_NTOA) || defined(HAVE_INET_NTOA_R)
@@ -217,6 +286,11 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
       free(buf);
       *bufp=NULL;
     }
+    else 
+      /* we make a copy of the hostent right now, right here, as the
+         static one we got a pointer to might get removed when we don't
+         want/expect that */
+      h = pack_hostent(buf, h);
 #endif
   }
   return (h);
