@@ -689,6 +689,11 @@ Transfer(struct connectdata *c_conn)
           contentlength-bytecount);
     return CURLE_PARTIAL_FILE;
   }
+  else if(conn->bits.chunk && conn->proto.http->chunk.datasize) {
+    failf(data, "transfer closed with at least %d bytes remaining",
+          conn->proto.http->chunk.datasize);
+    return CURLE_PARTIAL_FILE;
+  }
   if(Curl_pgrsUpdate(data))
     return CURLE_ABORTED_BY_CALLBACK;
 
