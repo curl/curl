@@ -83,7 +83,8 @@ void ProgressInit(struct UrlData *data, int max)
 
   if ( data->progressmode == CURL_PROGRESS_STATS )
     fprintf(data->err,
-            "  %%   Received   Total  Speed   Time left  Total   Curr.Speed\n");
+            "  %%   Received    Total    Speed  Estimated   Time      Left   Curr.Speed\n");
+
 }
 
 void time2str(char *r, int t)
@@ -144,18 +145,21 @@ void ProgressShow(struct UrlData *data,
         return;
 
       if(-1 != progressmax) {
-        char left[20],estim[20];
+        char left[20];
+        char estim[20];
+        char timespent[20];
         int estimate = progressmax/(int) speed;
     
         time2str(left,estimate-(int) spent); 
         time2str(estim,estimate);
+        time2str(timespent,spent);
 
         percen=(double)point/progressmax;
         percen=percen*100;
 
-        fprintf(data->err, "\r%3d %8d  %8d %6.0lf %s %s %6.0lf   ",
+        fprintf(stderr, "\r%3d %10d %10d %6.0lf %s %s %s %6.0lf   ",
                 (int)percen, point, progressmax,
-                speed, left, estim, data->current_speed);
+                speed, estim, timespent, left, data->current_speed);
       }
       else
         fprintf(data->err,
