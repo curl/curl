@@ -10,13 +10,14 @@ can lead to for end users.
 
 I am not a lawyer and this is not legal advice!
 
-One common dilemma is that GPL[*]-licensed code is not allowed to be linked
+One common dilemma is that GPL[1]-licensed code is not allowed to be linked
 with code licensed under the Original BSD license (with the announcement
 clause, unless there's a specified exception in the GPL-licensed module). You
 may still build your own copies that use them all, but distributing them as
-binaries would be to violate the GPL license. This particular problem was
-addressed when the Modified BSD license was created, which does not have the
-annoncement clause that collides with GPL.
+binaries would be to violate the GPL license - unless you accompany your
+license with an exception[2]. This particular problem was addressed when the
+Modified BSD license was created, which does not have the annoncement clause
+that collides with GPL.
 
 libcurl http://curl.haxx.se/docs/copyright.html
 
@@ -80,4 +81,6 @@ OpenLDAP http://www.openldap.org/software/release/license.html
         linked with libcurl in an app.
 
 
-[*] = GPL - GNU General Public License: http://www.gnu.org/licenses/gpl.html
+[1] = GPL - GNU General Public License: http://www.gnu.org/licenses/gpl.html
+[2] = http://www.fsf.org/licenses/gpl-faq.html#GPLIncompatibleLibs details on
+      how to write such an exception to the GPL
