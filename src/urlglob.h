@@ -50,6 +50,7 @@ typedef struct {
   int size;
   int urllen;
   char *glob_buffer;
+  char beenhere;
 } URLGlob;
 
 int glob_url(URLGlob**, char*, int *);
