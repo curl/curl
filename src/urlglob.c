@@ -258,6 +258,8 @@ static GlobCode glob_word(URLGlob *glob, char *pattern, int pos, int *amount)
   litindex = glob->size / 2;
   /* literals 0,1,2,... correspond to size=0,2,4,... */
   glob->literal[litindex] = strdup(glob->glob_buffer);
+  if(!glob->literal[litindex])
+    return GLOB_ERROR;
   ++glob->size;
 
   switch (*pattern) {
@@ -334,9 +336,12 @@ void glob_cleanup(URLGlob* glob)
   for (i = glob->size - 1; i >= 0; --i) {
     if (!(i & 1)) {	/* even indexes contain literals */
       free(glob->literal[i/2]);
-    } else {		/* odd indexes contain sets or ranges */
+    }
+    else {		/* odd indexes contain sets or ranges */
       if (glob->pattern[i/2].type == UPTSet) {
-	for (elem = glob->pattern[i/2].content.Set.size - 1; elem >= 0; --elem) {
+	for (elem = glob->pattern[i/2].content.Set.size - 1;
+             elem >= 0;
+             --elem) {
 	  free(glob->pattern[i/2].content.Set.elements[elem]);
 	}
 	free(glob->pattern[i/2].content.Set.elements);
@@ -394,7 +399,7 @@ char *glob_next_url(URLGlob *glob)
   }
 
   for (i = 0; i < glob->size; ++i) {
-    if (!(i % 2)) {			/* every other term (i even) is a literal */
+    if (!(i % 2)) {            /* every other term (i even) is a literal */
       lit = glob->literal[i/2];
       strcpy(buf, lit);
       buf += strlen(lit);
@@ -410,7 +415,8 @@ char *glob_next_url(URLGlob *glob)
 	*buf++ = pat->content.CharRange.ptr_c;
 	break;
       case UPTNumRange:
-	sprintf(buf, "%0*d", pat->content.NumRange.padlength, pat->content.NumRange.ptr_n); 
+	sprintf(buf, "%0*d",
+                pat->content.NumRange.padlength, pat->content.NumRange.ptr_n); 
         buf += strlen(buf); /* make no sprint() return code assumptions */
 	break;
       default:
