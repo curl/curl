@@ -8,6 +8,10 @@
 
 
 Daniel (4 October)
+- Vincent Bronner pointed out that if you set CURLOPT_COOKIE for a transfer
+  and then set it to NULL in a subsequent one, the previous cookie was still
+  sent off!
+
 - Jon Turner fixed a problem libcurl had when it failed on an FTP transfer due
   to a bad path, it would cause the next transfer to use a bad path as well.
 

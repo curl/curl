@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURLOPT_COOKIE set to NULL no longer sends the previously set cookie
  o if an FTP transfer used a bad path, the next transfer could fail too
  o ares-built libcurl resolves IP-only names properly
  o changed the curl_lock_function proto to prevent warnings on some compilers
@@ -59,6 +60,6 @@ advice from friends like these:
  Sanders, John McGowan, Henrik Storner, Jörg Mueller-Tolk, Peter Pentchev,
  Early Ehlinger, Kevin Fisk, Jurij Smakov, Bjorn Reese, Tim Bartley, David
  Kimdon, Dominick Meglio, Markus Moeller, Giuseppe Attardi, James MacMillan,
- Neil Spring, Siddhartha Prakash Jain, Jon Turner
+ Neil Spring, Siddhartha Prakash Jain, Jon Turner, Vincent Bronner
  
         Thanks! (and sorry if I forgot to mention someone)
