@@ -326,8 +326,6 @@ typedef enum {
  */
 
 typedef enum {
-  CINIT(NOTHING, LONG, 0), /********* the first one is unused ************/
-  
   /* This is the FILE * or void * the regular output should be written to. */
   CINIT(FILE, OBJECTPOINT, 1),
 
@@ -455,9 +453,7 @@ typedef enum {
      since 1 Jan 1970 */
   CINIT(TIMEVALUE, LONG, 34),
 
-  /* HTTP request, for odd commands like DELETE, TRACE and others */
-  /* OBSOLETE DEFINE, left for tradition only */
-  CINIT(HTTPREQUEST, OBJECTPOINT, 35),
+  CINIT(HTTPREQUEST, OBJECTPOINT, 35), /* OBSOLETE */
 
   /* Custom request, for customizing the get command like
      HTTP: DELETE, TRACE and others
@@ -494,14 +490,12 @@ typedef enum {
 
   CINIT(FOLLOWLOCATION, LONG, 52),  /* use Location: Luke! */
 
-  /* This FTPASCII name is now obsolete, to be removed, use the TRANSFERTEXT
-     instead. It goes for more protocols than just ftp... */
-  CINIT(FTPASCII, LONG, 53),     /* use TYPE A for transfer */
+  CINIT(FTPASCII, LONG, 53),     /* OBSOLETE */
 
   CINIT(TRANSFERTEXT, LONG, 53), /* transfer data in text/ASCII format */
   CINIT(PUT, LONG, 54),          /* PUT the input file */
 
-  CINIT(MUTE, LONG, 55),         /* OBSOLETE OPTION, removed in 7.8 */
+  CINIT(MUTE, LONG, 55),         /* OBSOLETE */
 
   /* Function that will be called instead of the internal progress display
    * function. This function should be defined as the curl_progress_callback
@@ -539,11 +533,8 @@ typedef enum {
      this option is used only if SSL_VERIFYPEER is true */
   CINIT(CAINFO, OBJECTPOINT, 65),
 
-  /* OBSOLETE since 7.10.8 */
-  CINIT(PASSWDFUNCTION, FUNCTIONPOINT, 66),
-
-  /* OBSOLETE since 7.10.8 */
-  CINIT(PASSWDDATA, OBJECTPOINT, 67),
+  CINIT(PASSWDFUNCTION, FUNCTIONPOINT, 66),   /* OBSOLETE */
+  CINIT(PASSWDDATA, OBJECTPOINT, 67),   /* OBSOLETE */
   
   /* Maximum number of http redirects to follow */
   CINIT(MAXREDIRS, LONG, 68),
@@ -562,8 +553,8 @@ typedef enum {
      up */
   CINIT(CLOSEPOLICY, LONG, 72),
 
-  /* Callback to use when CURLCLOSEPOLICY_CALLBACK is set */
-  CINIT(CLOSEFUNCTION, FUNCTIONPOINT, 73),
+  /* Callback to use when CURLCLOSEPOLICY_CALLBACK is set. NOT USED. */
+  CINIT(CLOSEFUNCTION, FUNCTIONPOINT, 73), /* OBSOLETE */
 
   /* Set to explicitly use a new connection for the upcoming transfer.
      Do not use this unless you're absolutely sure of this, as it makes the
