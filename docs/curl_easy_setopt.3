@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by Daniel.Stenberg@haxx.nu
 .\"
-.TH curl_easy_setopt 3 "22 May 2000" "Curl 7.0" "libcurl Manual"
+.TH curl_easy_setopt 3 "16 June 2000" "Curl 7.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -295,10 +295,6 @@ your server supports the command first.
 .B CURLOPT_STDERR
 Pass a FILE * as parameter. This is the stream to use instead of stderr
 internally when reporting errors.
-.TP
-.B CURLOPT_PROGRESSMODE
-This is currently unsupported, and is likely to be removed in future
-versions. TBD
 .TP
 .B CURLOPT_WRITEINFO
 Pass a pointer to a zero terminated string as parameter. It will be used to
