@@ -103,6 +103,12 @@ CURLcode curl_getinfo(CURL *curl, CURLINFO info, ...)
   case CURLINFO_SSL_VERIFYRESULT:
     *param_longp = data->ssl.certverifyresult;
     break;
+  case CURLINFO_CONTENT_LENGTH_DOWNLOAD:
+    *param_doublep = data->progress.size_dl;
+    break;
+  case CURLINFO_CONTENT_LENGTH_UPLOAD:
+    *param_doublep = data->progress.size_ul;
+    break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
