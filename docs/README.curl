@@ -534,6 +534,26 @@ HTTPS
 
   Otherwise, curl will first attempt to use v3 and then v2.
 
+  To use OpenSSL to convert your favourite browser's certificate into a PEM
+  formatted one that curl can use, do something like this (assuming netscape,
+  but IE is likely to work similarly):
+
+    You start with hitting the 'security' menu button in netscape. 
+
+    Select 'certificates->yours' and then pick a certificate in the list 
+
+    Press the 'export' button 
+
+    enter your PIN code for the certs 
+
+    select a proper place to save it 
+
+    Run the 'openssl' application to convert the certificate. If you cd to the
+    openssl installation, you can do it like:
+
+     # ./apps/openssl pkcs12 -certfile [file you saved] -out [PEMfile]
+
+
 RESUMING FILE TRANSFERS
 
  To continue a file transfer where it was previously aborted, curl supports
