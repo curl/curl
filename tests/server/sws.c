@@ -58,6 +58,10 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 
+#ifdef ENABLE_IPV6
+#define SWS_IPV6
+#endif
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -709,19 +713,46 @@ static void win32_cleanup(void)
 }
 #endif
 
+char use_ipv6=FALSE;
+
 int main(int argc, char *argv[])
 {
   struct sockaddr_in me;
+#ifdef ENABLE_IPV6
+  struct sockaddr_in6 me6;
+#endif /* ENABLE_IPV6 */
   int sock, msgsock, flag;
   unsigned short port = DEFAULT_PORT;
   FILE *pidfile;
   struct httprequest req;
+  int rc;
 
   if(argc>1) {
-    port = (unsigned short)atoi(argv[1]);
+    int arg=1;
+    if(!strcmp("--version", argv[arg])) {
+      printf("sws IPv4%s\n",
+#ifdef ENABLE_IPV6
+             "/IPv6"
+#else
+             ""
+#endif
+             );
+      return 0;
+    }
+    if(!strcmp("--ipv6", argv[arg])) {
+#ifdef ENABLE_IPV6
+      use_ipv6=TRUE;
+#endif
+      arg++;
+    }
+    if(argc>arg) {
 
-    if(argc>2) {
-      path = argv[2];
+      if(atoi(argv[arg]))
+        port = (unsigned short)atoi(argv[arg++]);
+
+      if(argc>arg)
+        path = argv[arg];
+
     }
   }
 
@@ -740,10 +771,18 @@ int main(int argc, char *argv[])
 #endif
 #endif
 
-  sock = socket(AF_INET, SOCK_STREAM, 0);
+#ifdef ENABLE_IPV6
+  if(!use_ipv6)
+#endif
+    sock = socket(AF_INET, SOCK_STREAM, 0);
+#ifdef ENABLE_IPV6
+  else
+    sock = socket(AF_INET6, SOCK_STREAM, 0);
+#endif
+
   if (sock < 0) {
     perror("opening stream socket");
-    logmsg("Error opening socket -- aborting\n");
+    logmsg("Error opening socket");
     exit(1);
   }
 
@@ -754,12 +793,26 @@ int main(int argc, char *argv[])
     perror("setsockopt(SO_REUSEADDR)");
   }
 
-  me.sin_family = AF_INET;
-  me.sin_addr.s_addr = INADDR_ANY;
-  me.sin_port = htons(port);
-  if (bind(sock, (struct sockaddr *) &me, sizeof me) < 0) {
+#ifdef ENABLE_IPV6
+  if(!use_ipv6) {
+#endif
+    me.sin_family = AF_INET;
+    me.sin_addr.s_addr = INADDR_ANY;
+    me.sin_port = htons(port);
+    rc = bind(sock, (struct sockaddr *) &me, sizeof(me));
+#ifdef ENABLE_IPV6
+  }
+  else {
+    memset(&me6, 0, sizeof(struct sockaddr_in6));
+    me6.sin6_family = AF_INET6;
+    me6.sin6_addr = in6addr_any;
+    me6.sin6_port = htons(port);
+    rc = bind(sock, (struct sockaddr *) &me6, sizeof(me6));
+  }
+#endif /* ENABLE_IPV6 */
+  if(rc < 0) {
     perror("binding stream socket");
-    logmsg("Error binding socket -- aborting\n");
+    logmsg("Error binding socket");
     exit(1);
   }
 
@@ -770,6 +823,14 @@ int main(int argc, char *argv[])
   }
   else
     fprintf(stderr, "Couldn't write pid file\n");
+
+  logmsg("Running IPv%d version",
+#ifdef ENABLE_IPV6
+         (use_ipv6?6:4)
+#else
+         4
+#endif
+    );
 
   /* start accepting connections */
   listen(sock, 5);

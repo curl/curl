@@ -77,10 +77,8 @@ reply is sent
 <client>
 
 <server>
-protocols as in 'http' 'ftp' etc. Give only one per line. Used for test cases
-500+ (at this point) to specify which servers the test case requires. In the
-future all test cases should use this. Makes us independent of the test
-case number.
+What server(s) this test case requires/uses:
+'http' 'ftp', 'https', 'ftps', 'http-ipv6'. Give only one per line.
 </server>
 
 <features>
