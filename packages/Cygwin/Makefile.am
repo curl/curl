@@ -1,2 +1,0 @@
-EXTRA_DIST = README
-

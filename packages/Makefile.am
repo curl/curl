@@ -1,3 +1,3 @@
-SUBDIRS = Win32 Linux Solaris Cygwin
+SUBDIRS = Win32 Linux Solaris
 
 EXTRA_DIST = README
