@@ -266,7 +266,12 @@ CURLcode curl_close(CURL *curl)
 
 int my_getpass(void *clientp, char *prompt, char* buffer, int buflen )
 {
-  return getpass_r(prompt, buffer, buflen);
+  char *retbuf;
+  retbuf = getpass_r(prompt, buffer, buflen);
+  if(NULL == retbuf)
+    return 1;
+  else
+    return 0; /* success */
 }
 
 
