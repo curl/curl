@@ -1090,7 +1090,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
       {
         unsigned char outbuf[2];
         int out_count = 0;
-        size_t bytes_written;
+        ssize_t bytes_written;
         char *buffer = buf;
               
         if(!ReadFile(stdin_handle, buf, 255, &nread, NULL)) {
@@ -1160,7 +1160,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
       if(FD_ISSET(0, &readfd)) { /* read from stdin */
         unsigned char outbuf[2];
         int out_count = 0;
-        size_t bytes_written;
+        ssize_t bytes_written;
         char *buffer = buf;
         
         nread = read(0, buf, 255);
