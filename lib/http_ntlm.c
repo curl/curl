@@ -412,15 +412,15 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
        */
       ntlm->p_identity = &ntlm->identity;
       memset(ntlm->p_identity, 0, sizeof(*ntlm->p_identity));
-      if ((ntlm->identity.User = strdup(user)) == NULL)
+      if ((ntlm->identity.User = (unsigned char *)strdup(user)) == NULL)
         return CURLE_OUT_OF_MEMORY;
       ntlm->identity.UserLength = strlen(user);
-      if ((ntlm->identity.Password = strdup(passwdp)) == NULL)
+      if ((ntlm->identity.Password = (unsigned char *)strdup(passwdp)) == NULL)
         return CURLE_OUT_OF_MEMORY;
       ntlm->identity.PasswordLength = strlen(passwdp);
       if ((ntlm->identity.Domain = malloc(domlen+1)) == NULL)
         return CURLE_OUT_OF_MEMORY;
-      strncpy(ntlm->identity.Domain, domain, domlen);
+      strncpy((char *)ntlm->identity.Domain, domain, domlen);
       ntlm->identity.Domain[domlen] = '\0';
       ntlm->identity.DomainLength = domlen;
       ntlm->identity.Flags = SEC_WINNT_AUTH_IDENTITY_ANSI;
@@ -430,7 +430,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
 
     if (AcquireCredentialsHandle(
-          NULL, "NTLM", SECPKG_CRED_OUTBOUND, NULL, ntlm->p_identity,
+          NULL, (char *)"NTLM", SECPKG_CRED_OUTBOUND, NULL, ntlm->p_identity,
           NULL, NULL, &ntlm->handle, NULL
         ) != SEC_E_OK) {
       return CURLE_OUT_OF_MEMORY;

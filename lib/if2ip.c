@@ -31,6 +31,8 @@
 #include <unistd.h>
 #endif
 
+#include "if2ip.h"
+
 #if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN32__) && \
     !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE)
 
@@ -55,7 +57,6 @@
 #include <sys/ioctl.h>
 #endif
 
-/* -- if2ip() -- */
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
@@ -72,7 +73,6 @@
 #include <inet.h>
 #endif
 
-#include "if2ip.h"
 #include "memory.h"
 
 /* The last #include file should be: */
