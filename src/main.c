@@ -80,6 +80,16 @@
 #include <fcntl.h>
 #endif
 
+typedef enum {
+  HTTPREQ_UNSPEC,
+  HTTPREQ_GET,
+  HTTPREQ_HEAD,
+  HTTPREQ_POST,
+  HTTPREQ_SIMPLEPOST,
+  HTTPREQ_CUSTOM,
+  HTTPREQ_LAST
+} HttpReq;
+
 /* Just a set of bits */
 #define CONF_DEFAULT  0
 
@@ -186,6 +196,16 @@ void main_free(void)
   win32_cleanup();
 }
 
+int SetHTTPrequest(HttpReq req, HttpReq *store)
+{
+  if((*store == HTTPREQ_UNSPEC) ||
+     (*store == req)) {
+    *store = req;
+    return CURLE_OK;
+  }
+  fprintf(stderr, "You can only select one HTTP request!\n");
+  return CURLE_FAILED_INIT;
+}
 
 static void helpf(char *fmt, ...)
 {
@@ -313,6 +333,8 @@ struct Configurable {
 
   struct HttpPost *httppost;
   struct HttpPost *last_post;
+
+  HttpReq httpreq;
 };
 
 static int parseconfig(char *filename,
@@ -610,6 +632,8 @@ static int getparameter(char *flag, /* f or -long-flag */
       }
       if(config->postfields)
         config->conf |= CONF_POST;
+      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
+        return CURLE_FAILED_INIT;
       break;
     case 'D':
       /* dump-header to given file name */
@@ -650,6 +674,8 @@ static int getparameter(char *flag, /* f or -long-flag */
                         &config->httppost,
                         &config->last_post))
 	return CURLE_FAILED_INIT;    
+      if(SetHTTPrequest(HTTPREQ_POST, &config->httpreq))
+        return CURLE_FAILED_INIT;
       break;
 
     case 'h': /* h for help */
@@ -665,6 +691,8 @@ static int getparameter(char *flag, /* f or -long-flag */
     case 'I':
       config->conf ^= CONF_HEADER; /* include the HTTP header in the output */
       config->conf ^= CONF_NOBODY; /* don't fetch the body at all */
+      if(SetHTTPrequest(HTTPREQ_HEAD, &config->httpreq))
+        return CURLE_FAILED_INIT;
       break;
     case 'K':
       res = parseconfig(nextarg, config);
@@ -794,6 +822,8 @@ static int getparameter(char *flag, /* f or -long-flag */
     case 'X':
       /* HTTP request */
       GetStr(&config->customrequest, nextarg);
+      if(SetHTTPrequest(HTTPREQ_CUSTOM, &config->httpreq))
+        return CURLE_FAILED_INIT;
       break;
     case 'y':
       /* low speed time */
