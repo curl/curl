@@ -7,6 +7,8 @@
                                   Changelog
 
 
+Version 7.10.2 (18 Nov 2002)
+
 Daniel (11 Nov 2002)
 - Dave Halbakken added curl_version_info to lib/libcurl.def to make libcurl
   properly build with MSVC on Windows.
