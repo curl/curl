@@ -1935,7 +1935,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
        */
-      if((1 > sscanf(data->change.url, "%512[^\n/]%[^\n]",
+      if((1 > sscanf(data->change.url, "%512[^\n/?]%[^\n]",
                      conn->gname, conn->path)) ) {
         /*
          * We couldn't even get this format.
