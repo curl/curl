@@ -200,7 +200,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 {
   struct Curl_transfer_keeper *k = &conn->keep;
   struct SessionHandle *data = conn->data;
-  int result;
+  CURLcode result;
   ssize_t nread; /* number of bytes read */
   int didwhat=0;
   
@@ -251,10 +251,15 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           data->set.buffer_size:BUFSIZE -1;
 
         /* receive data from the network! */
-        result = Curl_read(conn, conn->sockfd, k->buf, buffersize, &nread);
+        int readrc = Curl_read(conn, conn->sockfd, k->buf, buffersize, &nread);
 
-        if(0>result)
+        /* subzero, this would've blocked */
+        if(0>readrc)
           break; /* get out of loop */
+
+        /* get the CURLcode from the int */
+        result = (CURLcode)readrc;
+
         if(result>0)
           return result;
 
@@ -988,7 +993,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if(k->badheader < HEADER_ALLBAD) {
               /* This switch handles various content encodings. If there's an
                  error here, be sure to check over the almost identical code
-                 in http_chunks.c. 08/29/02 jhrg
+                 in http_chunks.c.
                  Make sure that ALL_CONTENT_ENCODINGS contains all the
                  encodings handled here. */
 #ifdef HAVE_LIBZ
@@ -997,8 +1002,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 #endif
                 /* This is the default when the server sends no
                    Content-Encoding header. See Curl_readwrite_init; the
-                   memset() call initializes k->content_encoding to zero.
-                   08/28/02 jhrg */
+                   memset() call initializes k->content_encoding to zero. */
                 if(!k->ignorebody)
                   result = Curl_client_write(data, CLIENTWRITE_BODY, k->str, 
                                              nread);
@@ -1015,7 +1019,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 result = Curl_unencode_gzip_write(data, k, nread);
                 break;
 
-              case COMPRESS:          /* FIXME 08/27/02 jhrg */
+              case COMPRESS:
               default:
                 failf (data, "Unrecognized content encoding type. "
                        "libcurl understands `identity', `deflate' and `gzip' "
