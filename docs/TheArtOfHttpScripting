@@ -1,5 +1,5 @@
 Online:  http://curl.haxx.se/docs/httpscripting.shtml
-Date:    December 7, 2004
+Date:    December 9, 2004
 
                 The Art Of Scripting HTTP Requests Using Curl
                 =============================================
@@ -137,11 +137,11 @@ Date:    December 7, 2004
   you need to replace that space with %20 etc. Failing to comply with this
   will most likely cause your data to be received wrongly and messed up.
 
- 4.3 FILE UPLOAD POST
+ 4.3 File Upload POST
 
-  Back in late 1995 they defined a new way to post data over HTTP. It was
-  documented in the RFC 1867, why this method sometimes is referred to as
-  a RFC1867-posting.
+  Back in late 1995 they defined an additional way to post data over HTTP. It
+  is documented in the RFC 1867, why this method sometimes is referred to as
+  RFC1867-posting.
 
   This method is mainly designed to better support file uploads. A form that
   allows a user to upload a file could be written like this in HTML:
@@ -158,7 +158,7 @@ Date:    December 7, 2004
 
         curl -F upload=@localfilename -F press=OK [URL]
 
- 4.4 HIDDEN FIELDS
+ 4.4 Hidden Fields
 
   A very common way for HTML based application to pass state information
   between pages is to add hidden fields to the forms. Hidden fields are
@@ -179,7 +179,7 @@ Date:    December 7, 2004
 
         curl -d "birthyear=1905&press=OK&person=daniel" [URL]
 
- 4.5 FIGURE OUT WHAT A POST LOOKS LIKE
+ 4.5 Figure Out What A POST Looks Like
 
   When you're about fill in a form and send to a server by using curl instead
   of a browser, you're of course very interested in sending a POST exactly the
@@ -202,7 +202,7 @@ Date:    December 7, 2004
 
         curl -T uploadfile www.uploadhttp.com/receive.cgi
 
-6. AUTHENTICATION
+6. Authentication
 
  Authentication is the ability to tell the server your username and password
  so that it can verify that you're allowed to do the request you're doing. The
@@ -237,7 +237,7 @@ Date:    December 7, 2004
  able to watch your passwords if you pass them as plain command line
  options. There are ways to circumvent this.
 
-7. REFERER
+7. Referer
 
  A HTTP request may include a 'referer' field (yes it is misspelled), which
  can be used to tell from which URL the client got to this particular
@@ -251,7 +251,7 @@ Date:    December 7, 2004
 
         curl -e http://curl.haxx.se daniel.haxx.se
 
-8. USER AGENT
+8. User Agent
 
  Very similar to the referer field, all HTTP requests may set the User-Agent
  field. It names what user agent (client) that is being used. Many
@@ -273,7 +273,7 @@ Date:    December 7, 2004
 
         curl -A "Mozilla/4.73 [en] (X11; U; Linux 2.2.15 i686)" [URL]
 
-9. REDIRECTS
+9. Redirects
 
  When a resource is requested from a server, the reply from the server may
  include a hint about where the browser should go next to find this page, or a
@@ -292,7 +292,7 @@ Date:    December 7, 2004
  page, you can safely use -L and -d/-F together. Curl will only use POST in
  the first request, and then revert to GET in the following operations.
 
-10. COOKIES
+10. Cookies
 
  The way the web browsers do "client side state control" is by using
  cookies. Cookies are just names with associated contents. The cookies are
@@ -364,7 +364,7 @@ Date:    December 7, 2004
 
         curl https://that.secure.server.com
 
- 11.1 CERTIFICATES
+ 11.1 Certificates
 
   In the HTTPS world, you use certificates to validate that you are the one
   you you claim to be, as an addition to normal passwords. Curl supports
@@ -387,7 +387,57 @@ Date:    December 7, 2004
 
         http://curl.haxx.se/docs/sslcerts.html
 
-12. REFERENCES
+12. Custom Request Elements
+
+ Doing fancy stuff, you may need to add or change elements of a single curl
+ request.
+
+ For example, you can change the POST request to a PROPFIND and send the data
+ as "Content-Type: text/xml" (instead of the default Content-Type) like this:
+
+        curl -d "<xml>" -H "Content-Type: text/xml" -X PROPFIND url.com
+
+ You can delete a default header by providing one without content. Like you
+ can ruin the request by chopping off the Host: header:
+
+        curl -H "Host:" http://mysite.com
+
+ You can add headers the same way. Your server may want a "Destination:"
+ header, and you can add it:
+
+        curl -H "Destination: http://moo.com/nowhere" http://url.com
+
+13. Debug
+
+ Many times when you run curl on a site, you'll notice that the site doesn't
+ seem to respond the same way to your curl requests as it does to your
+ browser's.
+
+ Then you need to start making your curl requests more similar to your
+ browser's requests:
+
+ * Use the --trace-ascii option to store fully detailed logs of the requests
+   for easier analyzing and better understanding
+
+ * Make sure you check for and use cookies when needed (both reading with -b
+   and writing with -c)
+
+ * Set user-agent to one like a recent popular browser does
+
+ * Set referer like it is set by the browser
+
+ * If you use POST, make sure you send all the fields and in the same order as
+   the browser does it. (See chapter 4.5 above)
+
+ A very good helper to make sure you do this right, is the LiveHTTPHeader tool
+ that lets you view all headers you send and receive with Mozilla/Firefox
+ (even when using HTTPS).
+
+ A more raw approach is to capture the HTTP traffic on the network with tools
+ such as ethereal or tcpdump and check what headers that were sent and
+ received by the browser. (HTTPS makes this technique inefficient.)
+
+14. References
 
  RFC 2616 is a must to read if you want in-depth understanding of the HTTP
  protocol.
