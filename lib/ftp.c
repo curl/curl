@@ -2103,8 +2103,8 @@ CURLcode ftp_perform(struct connectdata *conn,
 #else
       tm = localtime((time_t *)&data->info.filetime);
 #endif
-      /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-      strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S GMT\r\n",
+      /* format: "Tue, 15 Nov 1994 12:45:26" */
+      strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S\r\n",
                tm);
       result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
       if(result)
