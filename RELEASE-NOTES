@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o HTTP resume was refused if redirected
  o configure's gethostbyname check when both nsl and socket libs are required
  o configure --with-libidn now checks the given path before defaults
  o a race condition sometimes resulting in CURLE_COULDNT_RESOLVE_HOST in the
@@ -63,6 +64,6 @@ advice from friends like these:
  Tarendash, Daniel at touchtunes, Bertrand Demiddelaer, Andreas Rieke,
  Jean-Claude Chauve, Dan Fandrich, Peter Sylvester, "Mekonikum", Jean-Philippe
  Barrette-LaPierre, Günter Knauf, Larry Campbell, Fedor Karpelevitch,
- Aleksandar Milivojevic, Gisle Vanem, Chris "Bob Bob"
+ Aleksandar Milivojevic, Gisle Vanem, Chris "Bob Bob", Chih-Chung Chang
 
         Thanks! (and sorry if I forgot to mention someone)

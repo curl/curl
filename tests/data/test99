@@ -8,7 +8,17 @@ Connection: close
 Content-Length: 13
 Funny-head: yesyes
 
+0123456789123
 </data>
+
+<datacheck>
+HTTP/1.1 404 Nah
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Connection: close
+Content-Length: 13
+Funny-head: yesyes
+
+</datacheck>
 </reply>
 
 #

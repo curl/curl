@@ -488,20 +488,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               if (conn->resume_from &&
                   !k->content_range &&
-                  (data->set.httpreq==HTTPREQ_GET)) {
-                if(k->httpcode == 416) {
-                  /* "Requested Range Not Satisfiable" */
-                  stop_reading = TRUE;
-                }
-                else {
-                  /* we wanted to resume a download, although the server
-                   * doesn't seem to support this and we did this with a GET
-                   * (if it wasn't a GET we did a POST or PUT resume) */
-                  failf (data, "HTTP server doesn't seem to support "
-                         "byte ranges. Cannot resume.");
-                  return CURLE_HTTP_RANGE_ERROR;
-                }
+                  (data->set.httpreq==HTTPREQ_GET) &&
+                  (k->httpcode == 416)) {
+                /* "Requested Range Not Satisfiable" */
+                stop_reading = TRUE;
               }
+
 #ifndef CURL_DISABLE_HTTP
               if(!stop_reading) {
                 /* Curl_http_auth_act() checks what authentication methods
@@ -956,6 +948,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 k->ignorebody = TRUE;
                 infof(data, "Ignoring the response-body\n");
               }
+              if (conn->resume_from && !k->content_range &&
+                  (data->set.httpreq==HTTPREQ_GET) &&
+                  !k->ignorebody) {
+                /* we wanted to resume a download, although the server doesn't
+                 * seem to support this and we did this with a GET (if it
+                 * wasn't a GET we did a POST or PUT resume) */
+                failf (data, "HTTP server doesn't seem to support "
+                       "byte ranges. Cannot resume.");
+                return CURLE_HTTP_RANGE_ERROR;
+              }
+
               if(data->set.timecondition && !conn->range) {
                 /* A time condition has been set AND no ranges have been
                    requested. This seems to be what chapter 13.3.4 of

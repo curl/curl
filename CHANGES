@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel (6 October 2004)
+- Chih-Chung Chang reported that if you use CURLOPT_RESUME_FROM and enabled
+  CURLOPT_FOLLOWLOCATION, libcurl reported error if a redirect happened even
+  if the new URL would provide the resumed file. Test case 188 added to verify
+  the fix (together with existing test 99).
+
 - Dan Fandrich fixed a configure flaw for systems that need both nsl and socket
   libs to use gethostbyname().
 
