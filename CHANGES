@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (24 November)
+- Gaz Iqbal fixed a range string memory leak.
+
+- Gisle Vanem fixed the Windows builds.
+
+- Added the new FTPSSL defines in curl/curl.h
+
 Daniel (20 November)
 - Joshua Kapell filed bug report #845247 as he found an endless loop when
   getting a 407 back from a proxy when no user+password was given.
