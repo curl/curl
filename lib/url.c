@@ -107,6 +107,7 @@
 #include "strtok.h"
 #include "share.h"
 #include "content_encoding.h"
+#include "http_digest.h"
 
 /* And now for the protocols */
 #include "ftp.h"
