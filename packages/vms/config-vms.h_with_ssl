@@ -160,7 +160,7 @@
 */
 #define HAVE_OPENSSL_ENGINE_H 1
 
-#endif /* OPENSSL_ENABLED */
+#endif /* USE_SSLEAY */
 /* OpenSSL section ends here */
 
 /* Define if you have the <pwd.h> header file.  */

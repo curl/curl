@@ -806,10 +806,11 @@ else
       fi
     fi
 
+    if test X"$OPENSSL_ENABLED" = X"1"; then
+       AC_DEFINE(USE_SSLEAY, 1, [if SSL is enabled])
+    fi
     USE_SSLEAY="$OPENSSL_ENABLED"
-    AC_DEFINE_UNQUOTED(USE_SSLEAY, $USE_SSLEAY, [if SSL is enabled])
     AC_SUBST(USE_SSLEAY)
-    AC_SUBST(USE_OPENSSL)
 
     if test X"$OPT_SSL" != Xoff &&
        test "$OPENSSL_ENABLED" != "1"; then
