@@ -427,12 +427,12 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     if (user) {
       domain = userp;
-      domlen = user - domain;
+      domlen = (int)(user - domain);
       user++;
     }
     else
       user = userp;
-    userlen = strlen(user);
+    userlen = (int)strlen(user);
 
     mkhash(passwdp, &ntlm->nonce[0], lmresp
 #ifdef USE_NTRESPONSES
