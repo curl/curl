@@ -736,8 +736,78 @@ Curl_SSLConnect(struct connectdata *conn)
   }
 
   /* pass the raw socket into the SSL layers */
-  SSL_set_fd (conn->ssl.handle, conn->firstsocket);
-  err = SSL_connect (conn->ssl.handle);
+  SSL_set_fd(conn->ssl.handle, conn->firstsocket);
+
+  do {
+    int what;
+    fd_set writefd;
+    fd_set readfd;
+    struct timeval interval;
+    long timeout_ms;
+
+    err = SSL_connect(conn->ssl.handle);
+
+    what = SSL_get_error(conn->ssl.handle, err);
+
+    FD_ZERO(&writefd);
+    FD_ZERO(&readfd);
+
+    if(SSL_ERROR_WANT_READ == what)
+      FD_SET(conn->firstsocket, &readfd);
+    else if(SSL_ERROR_WANT_WRITE == what)
+      FD_SET(conn->firstsocket, &writefd);
+    else
+      break; /* untreated error */
+
+    /* Find out if any timeout is set. If not, use 300 seconds.
+       Otherwise, figure out the most strict timeout of the two possible one
+       and then how much time that has elapsed to know how much time we
+       allow for the connect call */
+    if(data->set.timeout || data->set.connecttimeout) {
+      double has_passed;
+
+      /* Evaluate in milliseconds how much time that has passed */
+      has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
+
+#ifndef min
+#define min(a, b)   ((a) < (b) ? (a) : (b))
+#endif
+
+      /* get the most strict timeout of the ones converted to milliseconds */
+      if(data->set.timeout &&
+         (data->set.timeout>data->set.connecttimeout))
+        timeout_ms = data->set.timeout*1000;
+      else
+        timeout_ms = data->set.connecttimeout*1000;
+      
+      /* subtract the passed time */
+      timeout_ms -= (long)has_passed;
+      
+      if(timeout_ms < 0)
+        /* a precaution, no need to continue if time already is up */
+        return CURLE_OPERATION_TIMEOUTED;      
+    }
+    else
+      /* no particular time-out has been set */
+      timeout_ms=300000; /* milliseconds, default to five minutes */
+
+    interval.tv_sec = timeout_ms/1000;
+    timeout_ms -= interval.tv_sec*1000;
+
+    interval.tv_usec = timeout_ms*1000;
+
+    what = select(conn->firstsocket+1, &readfd, &writefd, NULL, &interval);
+    if(what > 0)
+      /* reabable or writable, go loop yourself */
+      continue;
+    else if(0 == what) {
+      /* timeout */
+      failf(data, "SSL connection timeout");
+      return CURLE_OPERATION_TIMEOUTED;
+    }
+    else
+      break; /* get out of loop */
+  } while(1);
 
   /* 1  is fine
      0  is "not successful but was shut down controlled"
