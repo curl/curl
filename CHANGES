@@ -6,6 +6,16 @@
 
                                History of Changes
 
+Daniel (26 October 2001)
+- Added test28 which verifies that "Location:"-following works even if the
+  contents is separated with more than one space.
+
+Daniel (25 October 2001)
+- Ramana Mokkapati pointed out that LDAP transfers would 'hang' after the
+  correct data has been output.
+
+Version 7.9.1-pre5
+
 Daniel (24 October 2001)
 - T. Bharath found a memory leak in the cookie engine. When we update a cookie
   that we already knew about, we lost a chunk of memory in the progress... The
@@ -28,7 +38,7 @@ Daniel (22 October 2001)
   used for the errors that know that for a fact. We have to close the
   connection for the cases where we abort for example a HTTP transfer in the
   middle, or otherwise we might re-use that connection later with lots of data
-  still being sent to us on it.
+  still being sent to us on it. [http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/curl/curl/lib/transfer.c.diff?r1=1.63&r2=1.64]
 
 Daniel (19 October 2001)
 - CURLE_GOT_NOTHING is now returned when a HTTP server doesn't return
