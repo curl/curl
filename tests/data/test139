@@ -1,0 +1,34 @@
+# Server-side
+<reply>
+<data>
+this is file contents
+</data>
+<mdtm>
+213 20030409102659
+</mdtm>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP download a newer file with -z
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/blalbla/139 -z "1 jan 1989"
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD blalbla
+MDTM 139
+EPSV
+TYPE I
+SIZE 139
+RETR 139
+</protocol>
+</verify>

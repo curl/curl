@@ -1,0 +1,29 @@
+# Server-side
+<reply>
+<data>
+</data>
+<mdtm>
+213 20030409102659
+</mdtm>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP download file with -z, expected to not transfer
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/blalbla/140 -z "1 jan 2004"
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD blalbla
+MDTM 140
+</protocol>
+</verify>

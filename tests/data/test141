@@ -1,0 +1,34 @@
+# Server-side
+<reply>
+<data>
+</data>
+<mdtm>
+213 20030409102659
+</mdtm>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP download info with -I
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/blalbla/141 -I
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD blalbla
+MDTM 141
+TYPE I
+SIZE 141
+</protocol>
+<stdout>
+Last-Modified: Wed, 09 Apr 2003 10:26:59 GMT
+</stdout>
+</verify>
