@@ -242,6 +242,8 @@ static int send_doc(int sock, int doc, int part_no)
   char *buffer;
   char *ptr;
   FILE *stream;
+  char *cmd=NULL;
+  int cmdsize;
 
   char filename[256];
   char partbuf[80]="data";
@@ -258,6 +260,11 @@ static int send_doc(int sock, int doc, int part_no)
     count = strlen(buffer);
   }
   else {
+    if(0 != part_no) {
+      sprintf(partbuf, "data%d", part_no);
+    }
+
+
     sprintf(filename, TEST_DATA_PATH, doc);
 
     stream=fopen(filename, "rb");
@@ -265,19 +272,27 @@ static int send_doc(int sock, int doc, int part_no)
       logmsg("Couldn't open test file");
       return 0;
     }
-
-    if(0 != part_no) {
-      sprintf(partbuf, "data%d", part_no);
+    else {
+      ptr = buffer = spitout(stream, "reply", partbuf, &count);
+      fclose(stream);
     }
 
-    ptr = buffer = spitout(stream, "reply", partbuf, &count);
+    /* re-open the same file again */
+    stream=fopen(filename, "rb");
+    if(!stream) {
+      logmsg("Couldn't open test file");
+      return 0;
+    }
+    else {    
+      /* get the custom server control "commands" */
+      cmd = spitout(stream, "reply", "postcmd", &cmdsize);
+      fclose(stream);
+    }
   }
 
   do {
     written = send(sock, buffer, count, 0);
     if (written < 0) {
-      if(stream)
-        fclose(stream);
       return -1;
     }
     count -= written;
@@ -286,8 +301,28 @@ static int send_doc(int sock, int doc, int part_no)
 
   if(ptr)
     free(ptr);
-  if(stream)
-    fclose(stream);
+
+  if(cmdsize > 0 ) {
+    char command[32];
+    int num;
+    char *ptr=cmd;
+    do {
+      if(2 == sscanf(ptr, "%31s %d", command, &num)) {
+        if(!strcmp("wait", command))
+          sleep(num); /* wait this many seconds */
+        else {
+          logmsg("Unknown command in reply command section");
+        }
+      }
+      ptr = strchr(ptr, '\n');
+      if(ptr)
+        ptr++;
+      else
+        ptr = NULL;
+    } while(ptr && *ptr);
+  }
+  if(cmd)
+    free(cmd);
 
   return 0;
 }
@@ -312,6 +347,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
+#ifdef HAVE_SIGNAL
   /* FIX: make a more portable signal handler */
   signal(SIGPIPE, sigpipe_handler);
   signal(SIGINT, sigterm_handler);
@@ -320,6 +356,7 @@ int main(int argc, char *argv[])
   siginterrupt(SIGPIPE, 1);
   siginterrupt(SIGINT, 1);
   siginterrupt(SIGTERM, 1);
+#endif
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
