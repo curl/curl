@@ -97,9 +97,8 @@ BUILT_SOURCES = $(srcdir)/getdate.c $(top_builddir)/lib/ca-bundle.h
 
 # Say $(srcdir), so GNU make does not report an ambiguity with the .y.c rule.
 $(srcdir)/getdate.c: getdate.y
-	cd $(srcdir) && \
-	  $(YACC) $(YFLAGS) getdate.y; \
-	  mv -f y.tab.c getdate.c
+	cd $(srcdir) && $(YACC) $(YFLAGS) getdate.y && \
+	sed -e 's:YYSTYPE yylval;:YYSTYPE yylval = {0}; /* post-bison fix */:' < y.tab.c > getdate.c && rm -f y.tab.c
 
 $(top_builddir)/lib/ca-bundle.h: Makefile.in Makefile
 	@if test -f $@; then \
