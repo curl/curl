@@ -562,7 +562,13 @@ CURLcode Curl_http(struct connectdata *conn)
   if(HTTPREQ_POST_FORM == data->set.httpreq) {
     /* we must build the whole darned post sequence first, so that we have
        a size of the whole shebang before we start to send it */
-    http->sendit = Curl_getFormData(data->set.httppost, &http->postsize);
+     result = Curl_getFormData(&http->sendit, data->set.httppost,
+                               &http->postsize);
+     if(CURLE_OK != result) {
+       /* Curl_getFormData() doesn't use failf() */
+       failf(data, "failed creating formpost data");
+       return result;
+     }
   }
 
   if(!checkheaders(data, "Host:")) {

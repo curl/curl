@@ -1044,22 +1044,24 @@ void curl_formfree(struct curl_httppost *form)
   } while((form=next)); /* continue */
 }
 
-struct FormData *Curl_getFormData(struct curl_httppost *post,
-                                  int *sizep)
+CURLcode Curl_getFormData(struct FormData **finalform,
+                          struct curl_httppost *post,
+                          int *sizep)
 {
   struct FormData *form = NULL;
   struct FormData *firstform;
-
   struct curl_httppost *file;
+  CURLcode result = CURLE_OK;
 
   int size =0;
   char *boundary;
   char *fileboundary=NULL;
   struct curl_slist* curList;
 
+  *finalform=NULL; /* default form is empty */
 
   if(!post)
-    return NULL; /* no input => no output! */
+    return result; /* no input => no output! */
 
   boundary = Curl_FormBoundary();
   
@@ -1166,20 +1168,24 @@ struct FormData *Curl_getFormData(struct curl_httppost *post,
 /*VMS?? Stream files are OK, as are FIXED & VAR files WITHOUT implied CC */
 /*VMS?? For implied CC, every record needs to have a \n appended & 1 added to SIZE */
 	if(fileread) {
-	  while((nread = fread(buffer, 1, 1024, fileread))) {
-	    size += AddFormData(&form,
-				buffer,
-				nread);
-	  }
+	  while((nread = fread(buffer, 1, 1024, fileread)))
+	    size += AddFormData(&form, buffer, nread);
+
           if(fileread != stdin)
             fclose(fileread);
 	}
         else {
+#if 0
           /* File wasn't found, add a nothing field! */
 	  size += AddFormData(&form, "", 0);
+#endif
+          Curl_formclean(firstform);
+          free(boundary);
+          *finalform = NULL;
+          return CURLE_READ_ERROR;
 	}
       }
- else {
+      else {
 	/* include the contents we got */
 	size += AddFormData(&form, post->contents, post->contentslength);
       }
@@ -1205,7 +1211,9 @@ struct FormData *Curl_getFormData(struct curl_httppost *post,
 
   free(boundary);
 
-  return firstform;
+  *finalform=firstform;
+
+  return result;
 }
 
 int Curl_FormInit(struct Form *form, struct FormData *formdata )

@@ -53,8 +53,10 @@ typedef struct FormInfo {
 
 int Curl_FormInit(struct Form *form, struct FormData *formdata );
 
-struct FormData *Curl_getFormData(struct HttpPost *post,
-                                  int *size);
+CURLcode
+Curl_getFormData(struct FormData **,
+                 struct HttpPost *post,
+                 int *size);
 
 /* fread() emulation */
 int Curl_FormReader(char *buffer,
