@@ -13,9 +13,6 @@
  * This exact source code has not been verified to work.
  */
 
-/* to make this work under windows, use the win32-functions from the
-   win32socket.c file as well */
-
 #include <stdio.h>
 
 #include <curl/curl.h>
@@ -50,6 +47,8 @@ int main(int argc, char **argv)
 
   chunk.memory=NULL; /* we expect realloc(NULL, size) to work */
   chunk.size = 0;    /* no data at this point */
+
+  curl_global_init(CURL_GLOBAL_ALL);
 
   /* init the curl session */
   curl_handle = curl_easy_init();
