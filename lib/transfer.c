@@ -913,6 +913,9 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   Curl_pgrsTime(data, TIMER_PRETRANSFER);
   Curl_speedinit(data);
 
+  Curl_pgrsSetUploadCounter(data, 0);
+  Curl_pgrsSetDownloadCounter(data, 0);
+
   if (!conn->getheader) {
     k->header = FALSE;
     if(conn->size > 0)
