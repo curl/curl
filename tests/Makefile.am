@@ -6,6 +6,8 @@ SUBDIRS = data server libtest
 
 PERLFLAGS = -I$(srcdir)
 
+CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid
+
 curl:
 	@cd $(top_builddir) && $(MAKE)
 
