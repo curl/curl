@@ -230,7 +230,9 @@ static void help(void)
        " -B/--use-ascii     Use ASCII/text transfer\n"
        " -c/--continue      Resume a previous transfer where we left it\n"
        " -C/--continue-at <offset> Specify absolute resume offset\n"
-       " -d/--data          POST data (H)\n"
+       " -d/--data <data>   HTTP POST data (H)\n"
+       "    --data-ascii <data>   HTTP POST ASCII data (H)\n"
+       "    --data-binary <data>  HTTP POST binary data (H)\n"
        " -D/--dump-header <file> Write the headers to this file\n"
        " -e/--referer       Referer page (H)\n"
        " -E/--cert <cert:passwd> Specifies your certificate file and password (HTTPS)\n"
@@ -292,6 +294,7 @@ struct Configurable {
   bool use_resume;
   int resume_from;
   char *postfields;
+  long postfieldsize;
   char *referer;
   long timeout;
   char *outfile;
@@ -385,6 +388,36 @@ static char *file2string(FILE *file)
     return NULL; /* no string */
 }
 
+static char *file2memory(FILE *file, long *size)
+{
+  char buffer[1024];
+  char *ptr;
+  char *string=NULL;
+  char *newstring=NULL;
+  long len=0;
+  long stringlen=0;
+
+  if(file) {
+    while(len = fread(buffer, 1, sizeof(buffer), file)) {
+      if(string) {
+        newstring = realloc(string, len+stringlen);
+        if(newstring)
+          string = newstring;
+        else
+          break; /* no more strings attached! :-) */
+      }
+      else
+        string = malloc(len);
+      memcpy(&string[stringlen], buffer, len);
+      stringlen+=len;
+    }
+    *size = stringlen;
+    return string;
+  }
+  else
+    return NULL; /* no string */
+}
+
 static int getparameter(char *flag, /* f or -long-flag */
 			char *nextarg, /* NULL if unset */
 			bool *usedarg, /* set to TRUE if the arg has been
@@ -392,11 +425,14 @@ static int getparameter(char *flag, /* f or -long-flag */
 			struct Configurable *config)
 {
   char letter;
+  char subletter=0; /* subletters can only occur on long options */
+
   char *parse=NULL;
   int res;
   int j;
   time_t now;
   int hit=-1;
+  bool longopt=FALSE;
 
   /* single-letter,
      long-name,
@@ -416,6 +452,8 @@ static int getparameter(char *flag, /* f or -long-flag */
     {"c", "continue",    FALSE},
     {"C", "continue-at", TRUE},
     {"d", "data",        TRUE},
+    {"da", "data-ascii", TRUE},
+    {"db", "data-binary", TRUE},
     {"D", "dump-header", TRUE},
     {"e", "referer",     TRUE},
     {"E", "cert",        TRUE},
@@ -465,6 +503,7 @@ static int getparameter(char *flag, /* f or -long-flag */
     int fnam=strlen(&flag[1]);
     for(j=0; j< sizeof(aliases)/sizeof(aliases[0]); j++) {
       if(strnequal(aliases[j].lname, &flag[1], fnam)) {
+        longopt = TRUE;
         if(strequal(aliases[j].lname, &flag[1])) {
           parse = aliases[j].letter;
           hit = j;
@@ -492,7 +531,12 @@ static int getparameter(char *flag, /* f or -long-flag */
   do {
     /* we can loop here if we have multiple single-letters */
 
-    letter = parse?*parse:'\0';
+    if(!longopt)
+      letter = parse?*parse:'\0';
+    else {
+      letter = parse[0];
+      subletter = parse[1];
+    }
     *usedarg = FALSE; /* default is that we don't use the arg */
 
 #if 0
@@ -500,7 +544,7 @@ static int getparameter(char *flag, /* f or -long-flag */
 #endif
     if(hit < 0) {
       for(j=0; j< sizeof(aliases)/sizeof(aliases[0]); j++) {
-	if(letter == *aliases[j].letter) {
+	if(letter == aliases[j].letter[0]) {
 	  hit = j;
 	  break;
 	}
@@ -618,12 +662,19 @@ static int getparameter(char *flag, /* f or -long-flag */
         /* the data begins with a '@' letter, it means that a file name
            or - (stdin) follows */
         FILE *file;
+        char *ptr;
+
         nextarg++; /* pass the @ */
+
         if(strequal("-", nextarg))
           file = stdin;
         else 
           file = fopen(nextarg, "r");
-        config->postfields = file2string(file);
+
+        if(subletter == 'b') /* forced binary */
+          config->postfields = file2memory(file, &config->postfieldsize);
+        else
+          config->postfields = file2string(file);
         if(file && (file != stdin))
           fclose(stdin);
       }
@@ -1422,6 +1473,10 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, config.timeout);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, config.postfields);
+
+    /* new in libcurl 7.2: */
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, config.postfieldsize);
+
     curl_easy_setopt(curl, CURLOPT_REFERER, config.referer);
     curl_easy_setopt(curl, CURLOPT_AUTOREFERER, config.conf&CONF_AUTO_REFERER);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, config.useragent);
