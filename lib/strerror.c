@@ -295,6 +295,9 @@ curl_share_strerror(CURLSHcode error)
   case CURLSHE_INVALID:
     return "invalid share handle";
 
+  case CURLSHE_NOMEM:
+    return "out of memory";
+
   case CURLSHE_LAST:
     break;
   }
