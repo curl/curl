@@ -124,11 +124,11 @@ FAQ
    In general unix shells, the & letter is treated special and when used it
    runs the specified command in the background. To safely send the & as a
    part of a URL, you should qoute the entire URL by using single (') or
-   double (") quotes round it.
+   double (") quotes around it.
 
    An example that would invoke a remote CGI that uses &-letters could be:
 
-   # curl "http://www.altavista.com/cgi-bin/query?text=yes&q=curl"
+     curl 'http://www.altavista.com/cgi-bin/query?text=yes&q=curl'
 
 10. How can I use {, }, [ or ] to specify multiple URLs?
 
@@ -137,7 +137,7 @@ FAQ
 
    An example that downloads two URLs (sequentially) would do:
 
-   # curl '{curl,www}.haxx.se'
+    curl '{curl,www}.haxx.se'
 
 11. Where can I find a copy of LIBEAY32.DLL?
 
@@ -222,5 +222,5 @@ FAQ
 
    One example would be to delete a file after you have downloaded it:
 
-   # curl -O ftp://download.com/coolfile -Q "-DELE coolfile"
+     curl -O ftp://download.com/coolfile -Q '-DELE coolfile'
 
