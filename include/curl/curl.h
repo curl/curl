@@ -84,7 +84,7 @@ typedef size_t (*curl_read_callback)(char *buffer,
                                      void *instream);
 
 typedef int (*curl_passwd_callback)(void *clientp,
-                                    char *prompt,
+                                    const char *prompt,
                                     char *buffer,
                                     int buflen);
 
@@ -285,11 +285,6 @@ typedef enum {
   /* send FILE * or void * to store headers to, if you use a callback it
      is simply passed to the callback unmodified */
   CINIT(WRITEHEADER, OBJECTPOINT, 29),
-
-#ifdef MULTIDOC
-  /* send linked list of MoreDoc structs */
-  CINIT(MOREDOCS, OBJECTPOINT, 30),
-#endif
 
   /* point to a file to read the initial cookies from, also enables
      "cookie awareness" */
@@ -511,10 +506,8 @@ CURLcode curl_global_init(long flags);
    that uses libcurl */
 void curl_global_cleanup(void);
 
-
-
 /* This is the version number */
-#define LIBCURL_VERSION "7.8.1-pre3"
+#define LIBCURL_VERSION "7.8.1-pre5"
 #define LIBCURL_VERSION_NUM 0x070801
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
