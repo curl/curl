@@ -10,7 +10,7 @@
 
 Daniel (27 February 2004)
 - Joe Halpin made the FTP code send QUIT on the control connection before
-  disconnecting the TCP connection. This is waht good-behaving ftp clients
+  disconnecting the TCP connection. This is what good-behaving ftp clients
   should do.
 
 Daniel (26 February 2004)
@@ -144,7 +144,7 @@ Daniel (6 February 2004)
 - Andrés García made the configure script find gethostbyname() fine when run
   with mingw on windows.
 
-- Modifed the ldap code to use proper function pointers all over (instead of
+- Modified the ldap code to use proper function pointers all over (instead of
   mixed data and function pointers) to work-around the picky MIPSPro compiler
   warnings.
 
@@ -239,7 +239,7 @@ Daniel (29 January 2004)
 - Ken Hirsch provided patches to make curl build fine on the MPE/iX operating
   system.
 
-- Dan Fandrich compiled curl with lots of aggresively pedantic compiler
+- Dan Fandrich compiled curl with lots of aggressively pedantic compiler
   options and thus found a few minor errors and did some general cleanups to
   avoid them.
 
@@ -271,7 +271,7 @@ Daniel (23 January 2004)
   set.
 
 - Vincent Bronner spotted a problem with proxy username/password when re-using
-  a persistant connection.
+  a persistent connection.
 
 - Fixed the progress meter display for files larger than 2^31 bytes. Gisle
   Vanem reported.
@@ -292,7 +292,7 @@ Daniel (22 January 2004)
   file support work on more platforms. The configure script now checks the
   size of the curl_off_t instead of the plain off_t.
 
-Version 7.11.0 (22 Januari 2004)
+Version 7.11.0 (22 January 2004)
 
 Daniel (21 January 2004)
 - Removed the defines in the public header file with TIMECOND_ prefixes. They
@@ -422,7 +422,7 @@ Daniel (10 December)
 Daniel (8 December)
 - Fixed the flaw that made -lz appear twice on the link command line.
 
-- After correspondance with Gisle Vanem, I changed the 'connection aborted'
+- After correspondence with Gisle Vanem, I changed the 'connection aborted'
   error text when the FTP response reader failed to more specificly identify
   what the problem is.
 
@@ -438,7 +438,7 @@ Daniel (3 December)
   code fail.
 
 - swalkaus at yahoo.com patched libcurl to ignore Content-Length: headers
-  when Tranfer-Encoding: chunked is used, as mandated by RFC2616.
+  when Transfer-Encoding: chunked is used, as mandated by RFC2616.
 
 Daniel (2 December)
 - --ftp-pasv was added, which serves the only purpose of overriding a
@@ -645,7 +645,7 @@ Daniel (29 October)
 Daniel (28 October)
 - Dan C tracked down yet another weird behavior in the glibc gethostbyname_r()
   function for some specific versions (reported on 2.2.5 and 2.1.1), and
-  provided a fix. On Linux machines with these glibc versioins, non-ipv6
+  provided a fix. On Linux machines with these glibc versions, non-ipv6
   builds of libcurl would often fail to resolve perfectly resolvable host
   names.
 
@@ -793,7 +793,7 @@ Daniel (4 October)
 - Siddhartha Prakash Jain provided a patch with a fix for libcurl with ares,
   when working on IP-only names as we then could return "wait" status when the
   name in fact already was resolved. I edited the patch slightly to not expose
-  async details to non-ares aware source code.
+  asynch details to non-ares aware source code.
 
 Daniel (3 October)
 - Neil Spring posted the debian bug report #213180, and pointed out that using
@@ -1027,7 +1027,7 @@ Daniel (5 August)
 
 - Salvatore Sorrentino filed bug report #783116 and Early Ehlinger posted a
   bug report to the libcurl list, both identifying a problem with FTP
-  persitent connections and how the dir hiearchy was not properly reset
+  persistent connections and how the dir hierarchy was not properly reset
   between files.
 
 - David Byron's thoughts on a fixed Makefile in tests/ were applied.
@@ -1109,8 +1109,8 @@ Daniel (30 July)
   more portably...
 
   He also indicated that distributing the src/hugehelp.c in a compressed state
-  like I acccidentally did may not be the smartest move... I've now fixed the
-  distribute procudere to automaticly generate an uncompressed version when I
+  like I accidentally did may not be the smartest move... I've now fixed the
+  distribute procedure to automatically generate an uncompressed version when I
   make release archives.
 
 Daniel (29 July)
@@ -1172,7 +1172,7 @@ Daniel (18 July)
 
 - Since NTLM authenticates connections instead of single requests, I had to
   re-arrange how we store the NTLM data and I had to improve the test suite to
-  finally work properly with persistancy to make the NTLM tests run fine
+  finally work properly with persistency to make the NTLM tests run fine
   again. This also forced me to have to update lots of HTTP test cases.
 
 Daniel (16 July)
@@ -1186,7 +1186,7 @@ Daniel (5 July)
 - Doug Kaufman provided additional fixes for the DOS port.
 
 Daniel (4 July)
-- Rick Richardson pointed out that using setvbuf() to achive non-buffering
+- Rick Richardson pointed out that using setvbuf() to achieve non-buffering
   on output is no-good for SCO Xenix and other unixes. We switched over to
   using plain fflush() instead.
 
@@ -1240,7 +1240,7 @@ Daniel (17 June)
   type(s) you want to use. If more than one is set, libcurl will use one of
   the selected one and the one it considers is more secure. Test case 67 and
   68 (for NTLM) were fixed and we've reduced a round-trip for specific --ntlm
-  featches, and test case 69 and 70 were added for testing authentication
+  fetches, and test case 69 and 70 were added for testing authentication
   "picking". --anyauth is the new command line tool option, and I also added
   --basic for completeness (that's the default type).
 
@@ -1273,7 +1273,7 @@ Version 7.10.6-pre2 (16 June 2003)
 Daniel (16 June)
 - curl_version_info() now returns bitmasked information weather NTLM and
   GSSNEGOTIATE are supported, since it is doomed to vary on different
-  installatiions.
+  installations.
 
 - I remade the HTTP Digest code to use the MD5-code provided by OpenSSL if
   that is present, and only use our own MD5-code if it isn't.
@@ -1566,7 +1566,7 @@ Daniel (6 Apr)
 
 Daniel (4 Apr)
 - Martijn Broenland found another cases where a server application didn't
-  like the boundary string used by curl when foing a multi-part/formpost. We
+  like the boundary string used by curl when doing a multi-part/formpost. We
   modified the boundary string to look like the one IE uses, as this is
   probably gonna make curl work with more applications.
 
@@ -1604,7 +1604,7 @@ Daniel (31 Mar)
   "--location-trusted".
 
 - Frankie Fong reported a problem with libcurl if you re-used an easy handle
-  with a proxy, and you first made a https:// connction to a host and then
+  with a proxy, and you first made a https:// connection to a host and then
   switched to a http:// one to the same host. libcurl would then wrongly re-use
   the same connection for it and fail to get the second URL properly
 
@@ -1633,19 +1633,19 @@ Daniel (25 Mar)
 Daniel (24 Mar)
 - Götz Babin-Ebell pointed out that the ca-bundle.crt file contained a
   certificate from Trustcenter that was a demo certificate only that was never
-  indended to be part of a CA bundle.
+  intended to be part of a CA bundle.
 
 Daniel (21 Mar)
 - Life is a mystery. Within a time period of 17 hours, Tim Pope and Michael
   Churchill filed one bug report each, both identifying problems with a second
-  transfer when doing persistant transfers re-using a connection. Tim's one is
+  transfer when doing persistent transfers re-using a connection. Tim's one is
   #706624, labeled "Multiple uploads per handle fail" and Michael's #707003
   "Does not send Authorization: header when reusing connection". I could track
   both down to the same piece of logic and it turned out libcurl was not using
   new settings properly when re-using an existing connection. This concerned
   both uploading and downloading and involved exactly those pieces these two
   reports identified. This code has been this faulty since the day I
-  introduced persistant connection support in libcurl, more than 2 years ago.
+  introduced persistent connection support in libcurl, more than 2 years ago.
 
 Daniel (20 Mar 2003)
 - Five year anniversary. Today five years ago, the first ever curl release saw
@@ -1764,7 +1764,7 @@ Daniel (27 Feb)
 Daniel (26 Feb)
 - Kyle Sallee reported a case where he would do a transfer that didn't update
   the progress meter properly. It turned out to be a case where libcurl would
-  loop a little too eagerly in the tranfer loop, which isn't really good for
+  loop a little too eagerly in the transfer loop, which isn't really good for
   the APIs, especially not the multi API.
 
 Version 7.10.4-pre2 (24 Feb 2003)
