@@ -34,6 +34,7 @@
 
 /* now typedef our socket type */
 #ifdef WIN32
+#include <winsock.h>
 typedef SOCKET ares_socket_t;
 #define ARES_SOCKET_BAD INVALID_SOCKET
 #else

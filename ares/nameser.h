@@ -26,6 +26,9 @@ struct iovec
 
 #define getpid() _getpid()
 
+int ares_writev (SOCKET s, const struct iovec *vector, size_t count);
+#define writev(s,vect,count)  ares_writev(s,vect,count)
+
 struct timezone { int dummy; };
 
 int ares_gettimeofday(struct timeval *tv, struct timezone *tz);

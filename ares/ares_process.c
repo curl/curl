@@ -51,12 +51,12 @@ static void process_timeouts(ares_channel channel, time_t now);
 static void process_answer(ares_channel channel, unsigned char *abuf,
 			   int alen, int whichserver, int tcp, int now);
 static void handle_error(ares_channel channel, int whichserver, time_t now);
-static void next_server(ares_channel channel, struct query *query, time_t now);
+static struct query *next_server(ares_channel channel, struct query *query, time_t now);
 static int open_tcp_socket(ares_channel channel, struct server_state *server);
 static int open_udp_socket(ares_channel channel, struct server_state *server);
 static int same_questions(const unsigned char *qbuf, int qlen,
 			  const unsigned char *abuf, int alen);
-static void end_query(ares_channel channel, struct query *query, int status,
+static struct query *end_query(ares_channel channel, struct query *query, int status,
 		      unsigned char *abuf, int alen);
 
 /* Something interesting happened on the wire, or there was a timeout.
@@ -98,16 +98,10 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
       for (sendreq = server->qhead; sendreq; sendreq = sendreq->next)
 	n++;
 
-#ifdef WIN32
-      vec = NULL;
-#else
       /* Allocate iovecs so we can send all our data at once. */
       vec = malloc(n * sizeof(struct iovec));
-#endif
       if (vec)
 	{
-#ifdef WIN32
-#else
 	  /* Fill in the iovecs and send. */
 	  n = 0;
 	  for (sendreq = server->qhead; sendreq; sendreq = sendreq->next)
@@ -143,7 +137,6 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
 		  break;
 		}
 	    }
-#endif
 	}
       else
 	{
@@ -284,7 +277,7 @@ static void process_timeouts(ares_channel channel, time_t now)
       if (query->timeout != 0 && now >= query->timeout)
 	{
 	  query->error_status = ARES_ETIMEOUT;
-	  next_server(channel, query, now);
+	  next = next_server(channel, query, now);
 	}
     }
 }
@@ -360,7 +353,7 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
 
 static void handle_error(ares_channel channel, int whichserver, time_t now)
 {
-  struct query *query;
+  struct query *query, *next;
 
   /* Reset communications with this server. */
   ares__close_sockets(&channel->servers[whichserver]);
@@ -368,17 +361,19 @@ static void handle_error(ares_channel channel, int whichserver, time_t now)
   /* Tell all queries talking to this server to move on and not try
    * this server again.
    */
-  for (query = channel->queries; query; query = query->next)
+
+  for (query = channel->queries; query; query = next)
     {
+      next = query->next;
       if (query->server == whichserver)
 	{
 	  query->skip_server[whichserver] = 1;
-	  next_server(channel, query, now);
+	  next = next_server(channel, query, now);
 	}
     }
 }
 
-static void next_server(ares_channel channel, struct query *query, time_t now)
+static struct query *next_server(ares_channel channel, struct query *query, time_t now)
 {
   /* Advance to the next server or try. */
   query->server++;
@@ -389,7 +384,7 @@ static void next_server(ares_channel channel, struct query *query, time_t now)
 	  if (!query->skip_server[query->server])
 	    {
 	      ares__send_query(channel, query, now);
-	      return;
+	      return (query->next);
 	    }
 	}
       query->server = 0;
@@ -398,7 +393,7 @@ static void next_server(ares_channel channel, struct query *query, time_t now)
       if (query->using_tcp)
 	break;
     }
-  end_query(channel, query, query->error_status, NULL, 0);
+  return end_query(channel, query, query->error_status, NULL, 0);
 }
 
 void ares__send_query(ares_channel channel, struct query *query, time_t now)
@@ -421,9 +416,12 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
 	      return;
 	    }
 	}
-      sendreq = malloc(sizeof(struct send_request));
+      sendreq = calloc(sizeof(struct send_request), 1);
       if (!sendreq)
+        {
 	end_query(channel, query, ARES_ENOMEM, NULL, 0);
+          return;
+        }
       sendreq->data = query->tcpbuf;
       sendreq->len = query->tcplen;
       sendreq->next = NULL;
@@ -503,6 +501,7 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
     }
   }
 
+  server->tcp_buffer_pos = 0;
   server->tcp_socket = s;
   return 0;
 }
@@ -611,10 +610,10 @@ static int same_questions(const unsigned char *qbuf, int qlen,
   return 1;
 }
 
-static void end_query(ares_channel channel, struct query *query, int status,
+static struct query *end_query (ares_channel channel, struct query *query, int status,
 		      unsigned char *abuf, int alen)
 {
-  struct query **q;
+  struct query **q, *next;
   int i;
 
   query->callback(query->arg, status, abuf, alen);
@@ -624,6 +623,10 @@ static void end_query(ares_channel channel, struct query *query, int status,
 	break;
     }
   *q = query->next;
+  if (*q)
+    next = (*q)->next;
+  else
+    next = NULL;
   free(query->tcpbuf);
   free(query->skip_server);
   free(query);
@@ -636,4 +639,5 @@ static void end_query(ares_channel channel, struct query *query, int status,
       for (i = 0; i < channel->nservers; i++)
 	ares__close_sockets(&channel->servers[i]);
     }
+  return (next);
 }

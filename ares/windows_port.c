@@ -5,6 +5,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#include <errno.h>
+#include <malloc.h>
 
 #include "nameser.h"
 
@@ -52,4 +54,36 @@ ares_gettimeofday(struct timeval *tv, struct timezone *tz)
     return 0;
 }
 
+int
+ares_writev (SOCKET s, const struct iovec *vector, size_t count)
+{
+  char *buffer, *bp;
+  size_t i, bytes = 0;
+
+  /* Find the total number of bytes to write
+   */
+  for (i = 0; i < count; i++)
+      bytes += vector[i].iov_len;
+
+  if (bytes == 0)   /* not an error */
+     return (0);
+
+  /* Allocate a temporary buffer to hold the data
+   */
+  buffer = bp = (char*) alloca (bytes);
+  if (!buffer)
+  {
+    errno = ENOMEM;
+    return (-1);
+  }
+
+  /* Copy the data into buffer.
+   */
+  for (i = 0; i < count; ++i)
+  {
+    memcpy (bp, vector[i].iov_base, vector[i].iov_len);
+    bp += vector[i].iov_len;
+  }
+  return send (s, (const void*)buffer, bytes, 0);
+}
 #endif /* WIN32 builds only */
