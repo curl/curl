@@ -2442,7 +2442,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     }
   }
 
-  if(!config->url_list) {
+  if(!config->url_list || !config->url_list->url) {
     helpf("no URL specified!\n");
     return CURLE_FAILED_INIT;
   }
