@@ -34,7 +34,8 @@ man_MANS = \
 	curl_multi_init.3 \
 	curl_multi_perform.3 \
 	curl_multi_remove_handle.3 \
-	libcurl-multi.3
+	libcurl-multi.3 \
+	libcurl-errors.3
 
 HTMLPAGES = \
 	curl_easy_cleanup.html \
@@ -67,6 +68,7 @@ HTMLPAGES = \
 	curl_multi_perform.html \
 	curl_multi_remove_handle.html \
 	libcurl-multi.html \
+	libcurl-errors.html \
 	index.html
 
 EXTRA_DIST = $(man_MANS) $(HTMLPAGES)
