@@ -2724,12 +2724,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
   }
 
-    if(data->set.encoding) {
-      if(conn->allocptr.accept_encoding)
-        free(conn->allocptr.accept_encoding);
-      conn->allocptr.accept_encoding =
-        aprintf("Accept-Encoding: %s\015\012", data->set.encoding);
-    }
+  if(data->set.encoding) {
+    if(conn->allocptr.accept_encoding)
+      free(conn->allocptr.accept_encoding);
+    conn->allocptr.accept_encoding =
+      aprintf("Accept-Encoding: %s\015\012", data->set.encoding);
+  }
+
   conn->bytecount = 0;
   conn->headerbytecount = 0;
   
