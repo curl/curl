@@ -148,6 +148,11 @@ CURLcode Curl_close(struct UrlData *data)
   /* Loop through all open connections and kill them one by one */
   while(-1 != ConnectionKillOne(data));
 
+#ifdef USE_SSLEAY
+  /* Close down all open info open SSL and sessions */
+  Curl_SSL_Close_All(data);
+#endif
+
   if(data->bits.proxystringalloc) {
     data->bits.proxystringalloc=FALSE;;
     free(data->proxy);
@@ -241,6 +246,9 @@ CURLcode Curl_open(struct UrlData **curl)
     /* make libcurl quiet by default: */
     data->bits.hide_progress = TRUE;  /* CURLOPT_NOPROGRESS changes these */
     data->progress.flags |= PGRS_HIDE;
+
+    /* Set the default size of the SSL session ID cache */
+    data->ssl.numsessions = 5;
 
     /* create an array with connection data struct pointers */
     data->numconnects = 5; /* hard-coded right now */
@@ -875,31 +883,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     free(conn->path);
 
 #ifdef USE_SSLEAY
-  if (conn->ssl.use) {
-    /*
-      ERR_remove_state() frees the error queue associated with
-      thread pid.  If pid == 0, the current thread will have its
-      error queue removed.
-
-      Since error queue data structures are allocated
-      automatically for new threads, they must be freed when
-      threads are terminated in oder to avoid memory leaks.
-    */
-    ERR_remove_state(0);
-
-    if(conn->ssl.handle) {
-      (void)SSL_shutdown(conn->ssl.handle);
-      SSL_set_connect_state(conn->ssl.handle);
-
-      SSL_free (conn->ssl.handle);
-      conn->ssl.handle = NULL;
-    }
-    if(conn->ssl.ctx) {
-      SSL_CTX_free (conn->ssl.ctx);
-      conn->ssl.ctx = NULL;
-    }
-    conn->ssl.use = FALSE; /* get back to ordinary socket usage */
-  }
+  Curl_SSL_Close(conn);
 #endif /* USE_SSLEAY */
 
   /* close possibly still open sockets */

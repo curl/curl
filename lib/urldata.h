@@ -125,6 +125,13 @@ struct ssl_connect_data {
 #endif /* USE_SSLEAY */
 };
 
+/* information about one single SSL session */
+struct curl_ssl_session {
+  char *name;       /* host name for which this ID was used */
+  void *sessionid;  /* as returned from the SSL layer */
+  long age;         /* just a number, the higher the more recent */
+};
+
 struct ssl_config_data {
   long version;          /* what version the client wants to use */
   long certverifyresult; /* result from the certificate verification */
@@ -134,6 +141,10 @@ struct ssl_config_data {
   char *CAfile;          /* cerficate to verify peer against */
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
+
+  struct curl_ssl_session *session; /* array of 'numsessions' size */
+  long numsessions;                 /* SSL session id cache size */
+  long sessionage;                  /* number of the most recent session */
 };
 
 /****************************************************************************

@@ -278,10 +278,43 @@ void Curl_SSL_init(void)
 #endif
 }
 
+/*
+ * This function is called when an SSL connection is closed.
+ */
+void Curl_SSL_Close(struct connectdata *conn)
+{
+  if (conn->ssl.use) {
+    /*
+      ERR_remove_state() frees the error queue associated with
+      thread pid.  If pid == 0, the current thread will have its
+      error queue removed.
+
+      Since error queue data structures are allocated
+      automatically for new threads, they must be freed when
+      threads are terminated in oder to avoid memory leaks.
+    */
+    ERR_remove_state(0);
+
+    if(conn->ssl.handle) {
+      (void)SSL_shutdown(conn->ssl.handle);
+      SSL_set_connect_state(conn->ssl.handle);
+
+      SSL_free (conn->ssl.handle);
+      conn->ssl.handle = NULL;
+    }
+    if(conn->ssl.ctx) {
+      SSL_CTX_free (conn->ssl.ctx);
+      conn->ssl.ctx = NULL;
+    }
+    conn->ssl.use = FALSE; /* get back to ordinary socket usage */
+  }
+}
+
 /* Global cleanup */
 void Curl_SSL_cleanup(void)
 {
 #ifdef USE_SSLEAY
+  
   if(init_ssl) {
     /* only cleanup if we did a previous init */
 
@@ -295,6 +328,140 @@ void Curl_SSL_cleanup(void)
 #endif  
 }
 
+/*
+ * This sets up a session cache to the specified size.
+ */
+CURLcode Curl_SSL_InitSessions(struct UrlData *data, long amount)
+{
+  struct curl_ssl_session *session;
+
+  if(data->ssl.session)
+    /* this is just a precaution to prevent multiple inits */
+    return CURLE_OK;
+
+  session = (struct curl_ssl_session *)
+    malloc(amount * sizeof(struct curl_ssl_session));
+  if(!session)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* "blank out" the newly allocated memory */
+  memset(session, 0, amount * sizeof(struct curl_ssl_session));
+
+  /* store the info in the SSL section */
+  data->ssl.numsessions = amount;
+  data->ssl.session = session;
+  data->ssl.sessionage = 1; /* this is brand new */
+
+  return CURLE_OK;
+}
+
+/*
+ * Check if there's a session ID for the given connection in the cache,
+ * and if there's one suitable, it is returned.
+ */
+static int Get_SSL_Session(struct connectdata *conn,
+                           SSL_SESSION **ssl_sessionid)
+{
+  struct curl_ssl_session *check;
+  struct UrlData *data = conn->data;
+  long i;
+
+  for(i=0; i< data->ssl.numsessions; i++) {
+    check = &data->ssl.session[i];
+    if(!check->sessionid)
+      /* not session ID means blank entry */
+      continue;
+    if(strequal(conn->name, check->name)) {
+      /* yes, we have a session ID! */
+      data->ssl.sessionage++;            /* increase general age */
+      check->age = data->ssl.sessionage; /* set this as used in this age */
+      *ssl_sessionid = check->sessionid;
+      return FALSE;
+    }
+  }
+  *ssl_sessionid = (SSL_SESSION *)NULL;
+  return TRUE;
+}
+
+/*
+ * Kill a single session ID entry in the cache.
+ */
+static int Kill_Single_Session(struct curl_ssl_session *session)
+{
+  if(session->sessionid) {
+    /* defensive check */
+
+    /* free the ID */
+    SSL_SESSION_free(session->sessionid);
+    session->sessionid=NULL;
+    session->age = 0; /* fresh */
+    free(session->name);
+    session->name = NULL; /* no name */
+
+    return 0; /* ok */
+  }
+  else
+    return 1;
+}
+
+/*
+ * This function is called when the 'data' struct is going away. Close
+ * down everything and free all resources!
+ */
+int Curl_SSL_Close_All(struct UrlData *data)
+{
+  int i;
+  for(i=0; i< data->ssl.numsessions; i++)
+    /* the single-killer function handles empty table slots */
+    Kill_Single_Session(&data->ssl.session[i]);
+
+  /* free the cache data */
+  free(data->ssl.session);
+
+  return 0;
+}
+
+/*
+ * Extract the session id and store it in the session cache.
+ */
+static int Store_SSL_Session(struct connectdata *conn)
+{
+  SSL_SESSION *ssl_sessionid;
+  struct curl_ssl_session *store;
+  int i;
+  struct UrlData *data=conn->data; /* the mother of all structs */
+  int oldest_age=data->ssl.session[0].age; /* zero if unused */
+
+  /* ask OpenSSL, say please */
+  ssl_sessionid = SSL_get1_session(conn->ssl.handle);
+
+  /* SSL_get1_session() will increment the reference
+     count and the session will stay in memory until explicitly freed with
+     SSL_SESSION_free(3), regardless of its state. */
+
+  /* Now we should add the session ID and the host name to the cache, (remove
+     the oldest if necessary) */
+
+  /* find an empty slot for us, or find the oldest */
+  for(i=0; (i<data->ssl.numsessions) && data->ssl.session[i].sessionid; i++) {
+    if(data->ssl.session[i].age < oldest_age) {
+      oldest_age = data->ssl.session[i].age;
+      store = &data->ssl.session[i];
+    }
+  }
+  if(i == data->ssl.numsessions)
+    /* cache is full, we must "kill" the oldest entry! */
+    Kill_Single_Session(store);
+  else
+    store = &data->ssl.session[i]; /* use this slot */
+  
+  /* now init the session struct wisely */
+  store->sessionid = ssl_sessionid;
+  store->age = data->ssl.sessionage; /* set current age */
+  store->name = strdup(conn->name);   /* clone host name */
+
+  return 0;
+}
 
 /* ====================================================== */
 CURLcode
@@ -307,6 +474,7 @@ Curl_SSLConnect(struct connectdata *conn)
   int err;
   char * str;
   SSL_METHOD *req_method;
+  SSL_SESSION *ssl_sessionid=NULL;
 
   /* mark this is being ssl enabled from here on out. */
   conn->ssl.use = TRUE;
@@ -362,6 +530,17 @@ Curl_SSLConnect(struct connectdata *conn)
 
   conn->ssl.server_cert = 0x0;
 
+  if(!conn->bits.reuse) {
+    /* We're not re-using a connection, check if there's a cached ID we
+       can/should use here! */
+    if(!Get_SSL_Session(conn, &ssl_sessionid)) {
+      /* we got a session id, use it! */
+      SSL_set_session(conn->ssl.handle, ssl_sessionid);
+      /* Informational message */
+      infof (data, "SSL re-using session ID\n");
+    }
+  }
+
   /* pass the raw socket into the SSL layers */
   SSL_set_fd (conn->ssl.handle, conn->firstsocket);
   err = SSL_connect (conn->ssl.handle);
@@ -375,6 +554,13 @@ Curl_SSLConnect(struct connectdata *conn)
   /* Informational message */
   infof (data, "SSL connection using %s\n",
          SSL_get_cipher(conn->ssl.handle));
+
+  if(!ssl_sessionid) {
+    /* Since this is not a cached session ID, then we want to stach this one
+       in the cache! */
+    Store_SSL_Session(conn);
+  }
+
   
   /* Get server's certificate (note: beware of dynamic allocation) - opt */
   /* major serious hack alert -- we should check certificates
