@@ -124,6 +124,10 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+#ifdef KRB4
+#include "security.h"
+#endif
+
 /* -- -- */
 
 
@@ -500,6 +504,10 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
   case CURLOPT_INTERFACE:
     data->device = va_arg(param, char *);
     break;
+  case CURLOPT_KRB4LEVEL:
+    data->krb4_level = va_arg(param, char *);
+    data->bits.krb4=data->krb4_level?TRUE:FALSE;
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_READ_ERROR; /* correct this */
@@ -576,7 +584,12 @@ CURLcode curl_write(CURLconnect *c_conn, char *buf, size_t amount,
   }
   else {
 #endif
-    bytes_written = swrite(conn->writesockfd, buf, amount);
+#ifdef KRB4
+    if(conn->sec_complete)
+      bytes_written = sec_write(conn, conn->sockfd, buf, amount);
+    else
+#endif
+      bytes_written = swrite(conn->writesockfd, buf, amount);
 #ifdef USE_SSLEAY
   }
 #endif /* USE_SSLEAY */
@@ -602,7 +615,12 @@ CURLcode curl_read(CURLconnect *c_conn, char *buf, size_t buffersize,
   }
   else {
 #endif
-    nread = sread (conn->sockfd, buf, buffersize);
+#ifdef KRB4
+    if(conn->sec_complete)
+      nread = sec_read(conn, conn->sockfd, buf, buffersize);
+    else
+#endif
+      nread = sread (conn->sockfd, buf, buffersize);
 #ifdef USE_SSLEAY
   }
 #endif /* USE_SSLEAY */
@@ -615,6 +633,9 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
   struct connectdata *conn = c_connect;
 
   struct UrlData *data = conn->data;
+
+  if(conn->hostent_buf) /* host name info */
+    free(conn->hostent_buf);
 
   free(conn); /* free the connection oriented data */
 
@@ -651,12 +672,6 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   char resumerange[12]="";
   struct UrlData *data = curl;
   struct connectdata *conn;
-
-  /* I believe the longest possible name in a DNS is set to 255 letters, FQDN.
-     Although the buffer required for storing all possible aliases and IP
-     numbers is according to Stevens' Unix Network Programming 2nd editor,
-     p. 304: 8192 bytes. Let's go with that! */
-  char hostent_buf[8192];
 
   if(!data || (data->handle != STRUCT_OPEN))
     return CURLE_BAD_FUNCTION_ARGUMENT; /* TBD: make error codes */
@@ -1106,7 +1121,8 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     }
     
     /* Connect to target host right on */
-    if(!(conn->hp = GetHost(data, conn->name, hostent_buf, sizeof(hostent_buf)))) {
+    conn->hp = GetHost(data, conn->name, &conn->hostent_buf);
+    if(!conn->hp) {
       failf(data, "Couldn't resolv host '%s'", conn->name);
       return CURLE_COULDNT_RESOLVE_HOST;
     }
@@ -1161,7 +1177,8 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     }
 
     /* connect to proxy */
-    if(!(conn->hp = GetHost(data, proxyptr, hostent_buf, sizeof(hostent_buf)))) {
+    conn->hp = GetHost(data, proxyptr, &conn->hostent_buf);
+    if(!conn->hp) {
       failf(data, "Couldn't resolv proxy '%s'", proxyptr);
       return CURLE_COULDNT_RESOLVE_PROXY;
     }
@@ -1191,21 +1208,22 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     struct ifreq ifr;
     struct sockaddr_in sa;
     struct hostent *h=NULL;
+    char *hostdataptr;
     size_t size;
     unsigned short porttouse;
     char myhost[256] = "";
     unsigned long in;
 
     if(if2ip(data->device, myhost, sizeof(myhost))) {
-      h = GetHost(data, myhost, hostent_buf, sizeof(hostent_buf));
+      h = GetHost(data, myhost, &hostdataptr);
     }
     else {
       if(strlen(data->device)>1) {
-        h = GetHost(data, data->device, hostent_buf,
-                    sizeof(hostent_buf));
+        h = GetHost(data, data->device, &hostdataptr);
       }
       if(h) {
-        strcpy(myhost,data->device);
+        /* we know data->device is shorter than the myhost array */
+        strcpy(myhost, data->device);
       }
     }
 
@@ -1297,13 +1315,14 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 	failf(data,"could't find my own IP address (%s)", myhost);
 	return CURLE_HTTP_PORT_FAILED;
       }
-
     } /* end of inet_addr */
 
     else {
       failf(data, "could't find my own IP address (%s)", myhost);
       return CURLE_HTTP_PORT_FAILED;
     }
+
+    free(hostdataptr); /* allocated by GetHost() */
 
   } /* end of device selection support */
 #endif  /* end of HAVE_INET_NTOA */
@@ -1371,12 +1390,13 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   }
 
   if(data->bits.proxy_user_passwd) {
-    char authorization[512];
+    char *authorization;
     sprintf(data->buffer, "%s:%s", data->proxyuser, data->proxypasswd);
-    base64Encode(data->buffer, authorization);
-
-    data->ptr_proxyuserpwd = maprintf("Proxy-authorization: Basic %s\015\012",
-				      authorization);
+    if(base64Encode(data->buffer, 0, &authorization) >= 0) {
+      data->ptr_proxyuserpwd =
+        maprintf("Proxy-authorization: Basic %s\015\012", authorization);
+      free(authorization);
+    }
   }
   if((conn->protocol&PROT_HTTP) || data->bits.httpproxy) {
     if(data->useragent) {
