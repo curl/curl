@@ -218,7 +218,11 @@ set a cookie in the http request. The format of the string should be
 .B CURLOPT_HTTPHEADER
 Pass a pointer to a linked list of HTTP headers to pass to the server in your
 HTTP request. The linked list should be a fully valid list of 'struct
-HttpHeader' structs properly filled in. TBD!
+curl_slist' structs properly filled in. Use
+.I curl_slist_append(3)
+to create the list and
+.I curl_slist_free_all(3)
+to clean up an entire list.
 .TP
 .B CURLOPT_HTTPPOST
 Pass a pointer to a linked list of HTTP post data to pass to the server in
