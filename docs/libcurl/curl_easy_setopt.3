@@ -721,6 +721,8 @@ when doing an ftp directory listing. This is useful for doing DELETE or other
 more or less obscure HTTP requests. Don't do this at will, make sure your
 server supports the command first.
 
+Restore to the internal default by setting this to NULL.
+
 \fBNOTE:\fP Many people have wrongly used this option to replace the entire
 request with their own, including multiple headers and POST contents. While
 that might work in many cases, it will cause libcurl to send invalid requests
