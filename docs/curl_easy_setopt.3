@@ -244,12 +244,17 @@ TBD.
 .B CURLOPT_QUOTE
 Pass a pointer to a linked list of FTP commands to pass to the server prior to
 your ftp request. The linked list should be a fully valid list of 'struct
-curl_slist' structs properly filled in. TBD!
+curl_slist' structs properly filled in. Use
+.I curl_slist_append(3)
+to append strings (commands) to the list, and clear the entire list afterwards
+with
+.I curl_slist_free_all(3)
 .TP
 .B CURLOPT_POSTQUOTE
 Pass a pointer to a linked list of FTP commands to pass to the server after
 your ftp transfer request. The linked list should be a fully valid list of
-'struct curl_slist' structs properly filled in. TBD!
+struct curl_slist structs properly filled in as described for
+.I "CURLOPT_QUOTE"
 .TP
 .B CURLOPT_WRITEHEADER
 Pass a FILE * to be used to write the header part of the received data to.
