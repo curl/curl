@@ -15,13 +15,13 @@ further reading on how to do programming with libcurl.
 There exist more than a dozen custom bindings that bring libcurl access to
 your favourite language. Look elsewhere for documentation on those.
 
-All applications that use libcurl should call \fIcurl_global_init()\fP exactly
-once before any libcurl function can be used. After all usage of libcurl is
-complete, it \fBmust\fP call \fIcurl_global_cleanup()\fP. In between those two
-calls, you can use libcurl as described below.
+All applications that use libcurl should call \fIcurl_global_init(3)\fP
+exactly once before any libcurl function can be used. After all usage of
+libcurl is complete, it \fBmust\fP call \fIcurl_global_cleanup(3)\fP. In
+between those two calls, you can use libcurl as described below.
 
 To transfer files, you always set up an "easy handle" using
-\fIcurl_easy_init()\fP, but when you want the file(s) transfered you have the
+\fIcurl_easy_init(3)\fP, but when you want the file(s) transfered you have the
 option of using the "easy" interface, or the "multi" interface.
 
 The easy interface is a synchronous interface with which you call
@@ -60,7 +60,7 @@ get information about a performed transfer
 helps building a HTTP form POST
 .TP
 .B curl_formfree()
-free a list built with curl_formparse()/curl_formadd()
+free a list built with \fIcurl_formadd(3)\fP
 .TP
 .B curl_slist_append()
 builds a linked list
@@ -107,15 +107,15 @@ Persistent connections means that libcurl can re-use the same connection for
 several transfers, if the conditions are right.
 
 libcurl will *always* attempt to use persistent connections. Whenever you use
-\fIcurl_easy_perform()\fP or \fIcurl_multi_perform()\fP, libcurl will attempt
-to use an existing connection to do the transfer, and if none exists it'll
-open a new one that will be subject for re-use on a possible following call to
-\fIcurl_easy_perform()\fP or \fIcurl_multi_perform()\fP.
+\fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP, libcurl will
+attempt to use an existing connection to do the transfer, and if none exists
+it'll open a new one that will be subject for re-use on a possible following
+call to \fIcurl_easy_perform(3)\fP or \fIcurl_multi_perform(3)\fP.
 
 To allow libcurl to take full advantage of persistent connections, you should
 do as many of your file transfers as possible using the same curl handle. When
-you call \fIcurl_easy_cleanup()\fP, all the possibly open connections held by
+you call \fIcurl_easy_cleanup(3)\fP, all the possibly open connections held by
 libcurl will be closed and forgotten.
 
-Note that the options set with \fIcurl_easy_setopt()\fP will be used in on
-every repeated \fIcurl_easy_perform()\fP call.
+Note that the options set with \fIcurl_easy_setopt(3)\fP will be used in on
+every repeated \fIcurl_easy_perform(3)\fP call.
