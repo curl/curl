@@ -25,6 +25,7 @@
 #define HAVE_IO_H              1
 #define HAVE_IOCTLSOCKET       1
 #define HAVE_INET_PTON         1
+#define HAVE_INET_NTOP         1
 #define HAVE_LONGLONG          1
 #define HAVE_MALLOC_H          1
 #define HAVE_MEMORY_H          1
@@ -89,7 +90,7 @@
   #define OPENSSL_NO_KRB5        1
 #endif
 
-/* Because djgpp < 2.03 doesn't have snprintf() etc.
+/* Because djgpp <= 2.03 doesn't have snprintf() etc.
  */
 #if (DJGPP_MINOR < 4)
   #define _MPRINTF_REPLACE

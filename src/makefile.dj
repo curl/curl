@@ -21,9 +21,9 @@ CFLAGS += -DUSE_MANUAL -DUSE_ENVIRONMENT
 
 PROGRAM = ../curl.exe
 SOURCES = getpass.c homedir.c hugehelp.c main.c urlglob.c writeenv.c writeout.c
-OBJECTS = $(SOURCES:.c=.o)
+OBJECTS = $(addprefix $(OBJ_DIR)/, $(SOURCES:.c=.o))
 
-all: config.h $(PROGRAM)
+all: $(OBJ_DIR) config.h $(PROGRAM)
 
 $(PROGRAM): $(OBJECTS) ../lib/libcurl.a
 	$(CC) -o $@ $^ $(EX_LIBS)
@@ -45,23 +45,27 @@ realclean vclean: clean
 	- rm -f $(PROGRAM) hugehelp.c
 
 # DO NOT DELETE THIS LINE
-getpass.o: getpass.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h getpass.h ../lib/memdebug.h
-homedir.o: homedir.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h homedir.h ../lib/memdebug.h
-hugehelp.o: hugehelp.c hugehelp.h
-main.o: main.c setup.h config.h ../lib/config.dj ../lib/setup.h \
+djgpp/getpass.o: getpass.c setup.h config.h ../lib/config.dj ../lib/setup.h \
+  ../lib/config.h getpass.h
+djgpp/homedir.o: homedir.c setup.h config.h ../lib/config.dj ../lib/setup.h \
+  ../lib/config.h homedir.h
+djgpp/hugehelp.o: hugehelp.c setup.h config.h ../lib/config.dj ../lib/setup.h \
+  ../lib/config.h hugehelp.h e:/djgpp/contrib/zlib/zlib.h \
+  e:/djgpp/contrib/zlib/zconf.h
+djgpp/main.o: main.c setup.h config.h ../lib/config.dj ../lib/setup.h \
   ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
-  ../include/curl/mprintf.h urlglob.h writeout.h getpass.h homedir.h \
-  hugehelp.h version.h ../lib/strtoofft.h ../lib/memdebug.h
-urlglob.o: urlglob.c setup.h config.h ../lib/config.dj ../lib/setup.h \
+  ../include/curl/easy.h ../include/curl/multi.h urlglob.h writeout.h \
+  getpass.h homedir.h hugehelp.h writeenv.h version.h ../lib/curlx.h \
+  ../include/curl/mprintf.h ../lib/strequal.h ../lib/strtoofft.h \
+  ../lib/timeval.h ../lib/memdebug.h ../lib/memory.h
+djgpp/urlglob.o: urlglob.c setup.h config.h ../lib/config.dj ../lib/setup.h \
   ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
-  ../include/curl/mprintf.h urlglob.h ../lib/memdebug.h
-writeenv.o: writeenv.c setup.h config.h ../lib/config.dj ../lib/setup.h \
-  ../lib/config.h
-writeout.o: writeout.c setup.h config.h ../lib/config.dj ../lib/setup.h \
+  ../include/curl/easy.h ../include/curl/multi.h \
+  ../include/curl/mprintf.h urlglob.h
+djgpp/writeenv.o: writeenv.c setup.h config.h ../lib/config.dj ../lib/setup.h \
   ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  ../include/curl/easy.h ../include/curl/multi.h
+djgpp/writeout.o: writeout.c setup.h config.h ../lib/config.dj ../lib/setup.h \
+  ../lib/config.h ../include/curl/curl.h ../include/curl/curlver.h \
+  ../include/curl/easy.h ../include/curl/multi.h \
   ../include/curl/mprintf.h writeout.h

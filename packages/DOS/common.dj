@@ -9,6 +9,7 @@
 .SUFFIXES: .exe .y
 
 MAKEFILE = Makefile.dj
+OBJ_DIR = djgpp
 
 #
 # OpenSSL is available from www.openssl.org and builds okay
@@ -48,7 +49,7 @@ YACC = bison -y
 CFLAGS = -g -O2 -I. -I../include -I../lib -Wall -DHAVE_CONFIG_H
 
 ifeq ($(USE_SSL),1)
-  CFLAGS += -DUSE_SSLEAY
+  CFLAGS += -DUSE_SSLEAY -I$(OPENSSL_ROOT)
 endif
 
 ifeq ($(USE_ZLIB),1)
@@ -62,6 +63,13 @@ endif
 ifeq ($(USE_DEBUG),1)
   CFLAGS += -DDEBUG=1 -DCURLDEBUG #-DMALLOCDEBUG=1 -DDPRINTF_DEBUG2=1
 endif
+
+$(OBJ_DIR):
+	mkdir $(OBJ_DIR)
+
+$(OBJ_DIR)/%.o: %.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+	@echo
 
 #
 # Generated dependencies; Due to some hacks in gcc 2.95+ and djgpp 2.03
@@ -78,6 +86,7 @@ depend: $(DEPEND_PREREQ)
 	@echo "*cpp: %(cpp_cpu) %{posix:-D_POSIX_SOURCE} -remap" > $(MM_SPECS)
 	sed -e "/^# DO NOT DELETE THIS LINE/,$$d" < Makefile.bak > $(MAKEFILE)
 	echo "# DO NOT DELETE THIS LINE"                        >> $(MAKEFILE)
-	$(CC) -MM -specs=$(MM_SPECS) $(CFLAGS) $(SOURCES)       >> $(MAKEFILE)
+	$(CC) -MM -specs=$(MM_SPECS) $(CFLAGS) $(SOURCES) | \
+	  sed -e 's/^\([a-zA-Z0-9_-]*\.o:\)/'$(OBJ_DIR)'\/\1/'  >> $(MAKEFILE)
 	rm -f $(MM_SPECS)
 
