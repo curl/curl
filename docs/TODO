@@ -89,8 +89,8 @@ TODO
 
  HTTP
 
- * Digest and GSS-Negotiate support for HTTP proxies. They only work on
-   direct-connections to the server.
+ * GSS-Negotiate support for HTTP proxies. They only work on direct
+   connections to the server.
 
  * Pipelining. Sending multiple requests before the previous one(s) are done.
    This could possibly be implemented using the multi interface to queue
@@ -113,9 +113,6 @@ TODO
 
  * Evaluate/apply Gertjan van Wingerde's SSL patches:
    http://curl.haxx.se/mail/lib-2004-03/0087.html
-
- * Peter Sylvester's "Most Significant Common Name" change. Feedback welcome.
-   At least the UTF8 conversion and comparison should be done. Patch?
 
  * If you really want to improve the SSL situation, you should probably have a
    look at SSL cafile loading as well - quick traces look to me like these are
@@ -183,6 +180,18 @@ TODO
 
  * --data-encode that URL encodes the data before posting
    http://curl.haxx.se/mail/archive-2003-11/0091.html (Kevin Roth suggested)
+
+ * Provide a way to make options bound to a specific URL among several on the
+   command line. Possibly by adding a new option that separates options
+   between URLs, similar to this:
+
+      curl --data foo --url url.com --optionseparator
+           --url url2.com --optionseparator \
+          --url url3.com --data foo3
+
+   (--optionseparator used to show my point, it would need a better name)
+
+   The example would do a POST-GET-POST combination on a single command line.
 
  BUILD
 
