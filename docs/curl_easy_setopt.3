@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "5 March 2001" "libcurl 7.5" "libcurl Manual"
+.TH curl_easy_setopt 3 "6 March 2001" "libcurl 7.5" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -21,6 +21,10 @@ an object pointer, all depending on what the option in question expects. Read
 this manual carefully as bad input values may cause libcurl to behave badly!
 You can only set one option in each function call. A typical application uses
 many curl_easy_setopt() calls in the setup phase.
+
+NOTE: strings passed to libcurl as 'char *' arguments, will not be copied by
+the library. Instead you should keep them available until libcurl no longer
+needs them. Failing to do so will cause very odd behaviour or even crashes.
 
 The
 .I "handle"
@@ -86,14 +90,16 @@ libcurl what the expected size of the infile is.
 .TP
 .B CURLOPT_URL
 The actual URL to deal with. The parameter should be a char * to a zero
-terminated string. NOTE: this option is currently required!
+terminated string. The string must remain present until curl no longer needs
+it, as it doesn't copy the string. NOTE: this option is required to be set
+before curl_easy_perform() is called.
 .TP
 .B CURLOPT_PROXY
 If you need libcurl to use a http proxy to access the outside world, set the
 proxy string with this option. The parameter should be a char * to a zero
-terminated string. To specify port number in this string, append":[port]" to
+terminated string. To specify port number in this string, append :[port] to
 the end of the host name. The proxy string may be prefixed with
-"[protocol]://" since any such prefix will be ignored.
+[protocol]:// since any such prefix will be ignored.
 .TP
 .B CURLOPT_PROXYPORT
 Set this long with this option to set the proxy port to use unless it is
@@ -189,9 +195,11 @@ prompted for it.
 .TP
 .B CURLOPT_RANGE
 Pass a char * as parameter, which should contain the specified range you
-want. It should be in the format "X-Y", where X or Y may be left out. The HTTP
+want. It should be in the format "X-Y", where X or Y may be left out. HTTP
 transfers also support several intervals, separated with commas as in
-.I "X-Y,N-M".
+.I "X-Y,N-M"
+. Using this kind of multiple intervals will cause the HTTP server to send the
+response document in pieces.
 .TP
 .B CURLOPT_ERRORBUFFER
 Pass a char * to a buffer that the libcurl may store human readable error
@@ -202,7 +210,8 @@ library. The buffer must be at least CURL_ERROR_SIZE big.
 Pass a long as parameter containing the maximum time in seconds that you allow
 the libcurl transfer operation to take. Do note that normally, name lookups
 maky take a considerable time and that limiting the operation to less than a
-few minutes risk aborting perfectly normal operations.
+few minutes risk aborting perfectly normal operations. This option will cause
+curl to use the SIGALRM to enable timeouting system calls.
 .TP
 .B CURLOPT_POSTFIELDS
 Pass a char * as parameter, which should be the full data to post in a HTTP

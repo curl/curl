@@ -7,6 +7,10 @@
                                History of Changes
 
 
+Daniel (8 March 2001)
+- "Transfer-Encoding: chunked" is no longer any trouble for libcurl. I've
+  added two source files and I've run some test downloads that look fine.
+
 Daniel (5 March 2001)
 - The current 57 test cases now pass OK. It would suggest that libcurl works
   using the old-style with one connection per handle. The test suite doesn't

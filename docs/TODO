@@ -6,12 +6,10 @@
 
 TODO
 
- Ok, this is what I wanna do with Curl. Please tell me what you think, and
- please don't hesitate to contribute and send me patches that improve this
- product! (Yes, you may add things not mentioned here, these are just a
- few teasers...)
+ Things to do in project cURL. Please tell me what you think, contribute and
+ send me patches that improve things!
 
-To be done for the 7.7 release:
+To do for the 7.7 release:
 
  * Fix the random seeding. Add --egd-socket and --random-file options to the
    curl client and libcurl curl_easy_setopt() interface.
@@ -20,10 +18,16 @@ To be done for the 7.7 release:
 
  * Add a special connection-timeout that only goes for the connection phase.
 
-To be done after the 7.7 release:
+To do for the 7.8 release:
 
  * Make SSL session ids get used if multiple HTTPS documents from the same
    host is requested.
+
+To do in a future release:
+
+ * Extend the test suite to include telnet and https. The telnet could just do
+   ftp or http operations (for which we have test servers) and the https would
+   probably work against/with some of the openssl tools.
 
  * Add a command line option that allows the output file to get the same time
    stamp as the remote file. libcurl already is capable of fetching the remote
@@ -36,6 +40,8 @@ To be done after the 7.7 release:
  * Add asynchronous name resolving, as this enables full timeout support for
    fork() systems.
 
+ * Non-blocking connect(), also to make timeouts work on windows.
+
  * Move non-URL related functions that are used by both the lib and the curl
    application to a separate "portability lib".
 
@@ -43,13 +49,13 @@ To be done after the 7.7 release:
    something being worked on in this area) and perl (we have seen the first
    versions of this!) comes to mind. Python anyone?
 
- * "Content-Encoding: compress/gzip/zlib"
-   HTTP 1.1 clearly defines how to get and decode compressed documents. There
-   is the zlib that is pretty good at decompressing stuff. This work was
-   started in October 1999 but halted again since it proved more work than we
-   thought. It is still a good idea to implement though.
+ * "Content-Encoding: compress/gzip/zlib" HTTP 1.1 clearly defines how to get
+   and decode compressed documents. There is the zlib that is pretty good at
+   decompressing stuff. This work was started in October 1999 but halted again
+   since it proved more work than we thought. It is still a good idea to
+   implement though.
 
- * Authentication: NTLM. It would be  to support that MS crap called NTLM
+ * Authentication: NTLM. Support for that MS crap called NTLM
    authentication. MS proxies and servers sometime require that. Since that
    protocol is a proprietary one, it involves reverse engineering and network
    sniffing. This should however be a library-based functionality. There are a
@@ -61,10 +67,9 @@ To be done after the 7.7 release:
 
  * RFC2617 compliance, "Digest Access Authentication"
    A valid test page seem to exist at:
-    http://hopf.math.nwu.edu/testpage/digest/
+   http://hopf.math.nwu.edu/testpage/digest/
    And some friendly person's server source code is available at
-    http://hopf.math.nwu.edu/digestauth/index.html
-
+   http://hopf.math.nwu.edu/digestauth/index.html
    Then there's the Apache mod_digest source code too of course.  It seems as
    if Netscape doesn't support this, and not many servers do. Although this is
    a lot better authentication method than the more common "Basic". Basic
