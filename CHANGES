@@ -6,6 +6,9 @@
 
                                History of Changes
 
+Daniel (9 June 2000)
+- Updated the RESOURCES file, added a README.win32 file.
+
 Daniel (8 June 2000)
 - So I finally added the progress callback to the *setopt() options and it
   should work now. I don't have the energy to write any test program for it
