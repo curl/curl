@@ -45,6 +45,7 @@
 #include "urldata.h"
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 /*
  * Note that these debug functions are very simple and they are meant to
