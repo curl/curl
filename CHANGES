@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Daniel (18 July)
+- Cris pointed out that my fix on July 16th didn't work fully. His pointing
+  out this (and his patch) also made me realize that we have a very similar
+  bug in the FTP connection re-use code. We must store a separate user and
+  password field for each connection we keep (at least for FTP and HTTP+NTLM
+  connections, so I made us do this unconditionally).
+
+- Since NTLM authenticates connections instead of single requests, I had to
+  re-arrange how we store the NTLM data and I had to improve the test suite to
+  finally work properly with persistancy to make the NTLM tests run fine
+  again. This also forced me to have to update lots of HTTP test cases.
+
 Daniel (16 July)
 - Cris Bailiff's bug report 768275 pointed out that using Basic auth with
   wrong user+password caused an endless loop. Fixed now. He also found out that
