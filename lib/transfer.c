@@ -1951,6 +1951,8 @@ Curl_Transfer(struct connectdata *c_conn, /* connection data */
   if(!conn)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  curlassert(sockindex <= 1);
+
   /* now copy all input parameters */
   conn->sockfd = sockindex==-1?-1:conn->sock[sockindex];
   conn->size = size;
