@@ -11,7 +11,6 @@
 #
 
 use Socket;
-use Carp;
 use FileHandle;
 
 use strict;
@@ -572,5 +571,4 @@ for ( $waitedpid = 0;
             
     } # while(1)
     close(Client);
-    close(Client2);
 }
