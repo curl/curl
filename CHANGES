@@ -6,6 +6,31 @@
 
                                   Changelog
 
+Daniel (22 Apr)
+- Peter Sylvester pointed out that curl_easy_setopt() will always (wrongly)
+  return CURLE_OK no matter what happens.
+
+Daniel (16 Apr)
+- Fixed minor typo in man page, reported in the Debian bug tracker.
+
+Daniel (15 Apr)
+- Fixed some FTP tests in the test suite that failed on my Solaris host, due
+  to the config.h not being included before the system headers. When done that
+  way, it did get a mixed sense of if big files are supported or not and then
+  stat() and fstat() (as used in test case 505) got confused and failed to
+  return a proper file size.
+
+- Formposting a file using a .html suffix is now properly set to Content-Type:    text/html.
+
+Daniel (14 Apr)
+- Fixed the SSL error handling to return proper SSL error messages again, they
+  broke in 7.10.4. I also attempt to track down CA cert problems and then
+  return the CURLE_SSL_CACERT error code.
+
+- The curl tool now intercepts the CURLE_SSL_CACERT error code and displays
+  a fairly big and explanatory error message. Kevin Roth helped me out with
+  the wording.
+
 Daniel (11 Apr)
 - Nic Hines provided a second patch for gzip decompression, and fixed a bug
   when deflate or gzip contents were downloaded using chunked encoding.
