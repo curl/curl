@@ -165,8 +165,8 @@ static void idna_init (void)
 #endif  /* USE_LIBIDN */
 
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
-static unsigned int  initialized = 0;
-static long          init_flags  = 0;
+static unsigned int  initialized;
+static long          init_flags;
 
 /*
  * If a memory-using function (like curl_getenv) is used before

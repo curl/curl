@@ -1539,7 +1539,7 @@ void curl_formfree(struct curl_httppost *form)
 char *Curl_FormBoundary(void)
 {
   char *retstring;
-  static int randomizer=0; /* this is just so that two boundaries within
+  static int randomizer;   /* this is just so that two boundaries within
                               the same form won't be identical */
   size_t i;
 
