@@ -27,5 +27,5 @@
 +version.obj &
 +easy.obj &
 +strequal.obj &
-+strtok.obj
-
++strtok.obj &
++connect.obj
