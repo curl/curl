@@ -409,7 +409,7 @@ static char *MakeIP(unsigned long num,char *addr, int addr_len)
    considerably. */
 
 #ifndef INADDR_NONE
-#define INADDR_NONE (unsigned long) ~0
+#define INADDR_NONE (in_addr_t) ~0
 #endif
 
 Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
