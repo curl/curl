@@ -124,7 +124,7 @@ write_callback(char *buffer,
 
 /* use to attempt to fill the read buffer up to requested number of bytes */
 static int
-curl_fill_buffer(URL_FILE *file,int want,int waittime)
+fill_buffer(URL_FILE *file,int want,int waittime)
 {
     fd_set fdread;
     fd_set fdwrite;
@@ -179,7 +179,7 @@ curl_fill_buffer(URL_FILE *file,int want,int waittime)
 
 /* use to remove want bytes from the front of a files buffer */
 static int
-curl_use_buffer(URL_FILE *file,int want)
+use_buffer(URL_FILE *file,int want)
 {
     /* sort out buffer */
     if((file->buffer_pos - want) <=0)
@@ -333,9 +333,9 @@ url_fread(void *ptr, size_t size, size_t nmemb, URL_FILE *file)
     case CFTYPE_CURL:
         want = nmemb * size;
 
-        curl_fill_buffer(file,want,1);
+        fill_buffer(file,want,1);
 
-        /* check if theres data in the buffer - if not curl_fill_buffer()
+        /* check if theres data in the buffer - if not fill_buffer()
          * either errored or EOF */
         if(!file->buffer_pos)
             return 0;
@@ -347,7 +347,7 @@ url_fread(void *ptr, size_t size, size_t nmemb, URL_FILE *file)
         /* xfer data to caller */
         memcpy(ptr, file->buffer, want);
 
-        curl_use_buffer(file,want);
+        use_buffer(file,want);
 
         want = want / size;     /* number of items - nb correct op - checked
                                  * with glibc code*/
@@ -377,7 +377,7 @@ url_fgets(char *ptr, int size, URL_FILE *file)
         break;
 
     case CFTYPE_CURL:
-        curl_fill_buffer(file,want,1);
+        fill_buffer(file,want,1);
 
         /* check if theres data in the buffer - if not fill either errored or
          * EOF */
@@ -403,7 +403,7 @@ url_fgets(char *ptr, int size, URL_FILE *file)
         memcpy(ptr, file->buffer, want);
         ptr[want]=0;/* allways null terminate */
 
-        curl_use_buffer(file,want);
+        use_buffer(file,want);
 
         /*printf("(fgets) return %d bytes %d left\n", want,file->buffer_pos);*/
         break;
