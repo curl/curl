@@ -899,45 +899,22 @@ sub singletest {
 
 sub serverfortest {
     my ($testnum)=@_;
-    my @what;
 
-    if($testnum< 100) {
-        # 0 - 99 is for HTTP
-        push @what, "http";
-    }
-    elsif($testnum< 200) {
-        # 100 - 199 is for FTP
-        push @what, "ftp";
-    }
-    elsif($testnum< 300) {
-        # 200 - 299 is for FILE, no server!
-        push @what, "file";
-    }
-    elsif($testnum< 400) {
-        # 300 - 399 is for HTTPS
-        push @what, "https";
-    }
-    elsif($testnum< 500) {
-        # 400 - 499 is for FTPS
-        push @what, "ftps";
-    }
-
-    if(!@what) {
-        # load the test case file definition
-        if(loadtest("${TESTDIR}/test${testnum}")) {
-            if($verbose) {
-                # this is not a test
-                print "$testnum doesn't look like a test case!\n";
-            }
-            return 100;
+    # load the test case file definition
+    if(loadtest("${TESTDIR}/test${testnum}")) {
+        if($verbose) {
+            # this is not a test
+            print "$testnum doesn't look like a test case!\n";
         }
-        @what = getpart("client", "server");
-
-        if(!$what[0]) {
-            warn "Test case $testnum has no server(s) specified!";
-            return 100;
-        }
+        return 100;
     }
+    my @what = getpart("client", "server");
+
+    if(!$what[0]) {
+        warn "Test case $testnum has no server(s) specified!";
+        return 100;
+    }
+
     for(@what) {
         my $what = lc($_);
         $what =~ s/[^a-z]//g;
