@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o configure's gethostbyname check when both nsl and socket libs are required
  o configure --with-libidn now checks the given path before defaults
  o a race condition sometimes resulting in CURLE_COULDNT_RESOLVE_HOST in the
    windows threaded name resolver code

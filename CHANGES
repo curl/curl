@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (6 October 2004)
+- Dan Fandrich fixed a configure flaw for systems that need both nsl and socket
+  libs to use gethostbyname().
+
+- Removed tabs and trailing whitespace from lots of source files.
+
 Daniel (5 October 2004)
 - Made configure --with-libidn=PATH try the given PATH before the default
   paths to make it possible to override.
