@@ -1394,9 +1394,6 @@ Transfer(struct connectdata *conn)
         done = TRUE; /* no more read or write */
       continue;
     case 0:  /* timeout */
-      result = Curl_readwrite(conn, &done);
-      break;
-
     default: /* readable descriptors */
       result = Curl_readwrite(conn, &done);
       break;
