@@ -54,6 +54,7 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   pro->t_pretransfer = 0;
   pro->t_starttransfer = 0;
   pro->timespent = 0;
+  pro->t_redirect = 0;
 
   info->httpcode = 0;
   info->httpversion=0;
@@ -147,6 +148,12 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     break;
   case CURLINFO_CONTENT_LENGTH_UPLOAD:
     *param_doublep = data->progress.size_ul;
+    break;
+  case CURLINFO_REDIRECT_TIME:
+    *param_doublep =  data->progress.t_redirect;
+    break;
+  case CURLINFO_REDIRECT_COUNT:
+    *param_longp = data->set.followlocation;
     break;
   case CURLINFO_CONTENT_TYPE:
     *param_charp = data->info.contenttype;

@@ -451,6 +451,7 @@ struct Progress {
   double t_connect;
   double t_pretransfer;
   double t_starttransfer;
+  double t_redirect;
 
   struct timeval start;
   struct timeval t_startsingle;

@@ -6,6 +6,21 @@
 
                                History of Changes
 
+Daniel (16 April 2002)
+- Dirk Manske brought a patch that introduced two new CURLINFO_* values:
+  CURLINFO_REDIRECT_TIME and CURLINFO_REDIRECT_COUNT.
+
+Daniel (15 April 2002)
+- Jonatan Lander patched the verbose text 'Disables POST, goes with GET' to
+  reflect reality better, like when the first request isn't POST and when
+  the second isn't GET... :-)
+
+- Craig Davison pointed out that when curl_formadd()ing a file that doesn't
+  exist, libcurl doesn't return error. Now, curl_easy_perform() will return
+  CURLE_READ_ERROR if that is the case. Test 41 was added to verify this.
+
+Version 7.9.6
+
 Daniel (14 April 2002)
 - Dirk Manske brought a fix that makes libcurl strip off white spaces from the
   beginning of cookie contents.

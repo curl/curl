@@ -1312,6 +1312,8 @@ CURLcode Curl_perform(struct SessionHandle *data)
            */
           break;
         }
+        Curl_pgrsTime(data, TIMER_REDIRECT);
+        Curl_pgrsResetTimes(data);
         continue;
       }
     }

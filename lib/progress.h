@@ -34,6 +34,7 @@ typedef enum {
   TIMER_STARTTRANSFER,
   TIMER_POSTRANSFER,
   TIMER_STARTSINGLE,
+  TIMER_REDIRECT,
   TIMER_LAST /* must be last */
 } timerid;
   
@@ -44,6 +45,7 @@ void Curl_pgrsSetUploadSize(struct SessionHandle *data, double size);
 void Curl_pgrsSetDownloadCounter(struct SessionHandle *data, double size);
 void Curl_pgrsSetUploadCounter(struct SessionHandle *data, double size);
 int Curl_pgrsUpdate(struct connectdata *);
+void Curl_pgrsResetTimes(struct SessionHandle *data);
 void Curl_pgrsTime(struct SessionHandle *data, timerid timer);
 
 

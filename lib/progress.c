@@ -103,6 +103,15 @@ void Curl_pgrsDone(struct connectdata *conn)
   }
 }
 
+/* reset all times except redirect */
+void Curl_pgrsResetTimes(struct SessionHandle *data)
+{
+  data->progress.t_nslookup = 0.0;
+  data->progress.t_connect = 0.0;
+  data->progress.t_pretransfer = 0.0;
+  data->progress.t_starttransfer = 0.0;
+}
+
 void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
 {
   switch(timer) {
@@ -133,6 +142,10 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
     break;
   case TIMER_POSTRANSFER:
     /* this is the normal end-of-transfer thing */
+    break;
+  case TIMER_REDIRECT:
+    data->progress.t_redirect =
+      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000.0;
     break;
   }
 }

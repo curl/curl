@@ -718,9 +718,12 @@ typedef enum {
 
   CURLINFO_CONTENT_TYPE = CURLINFO_STRING + 18,
 
+  CURLINFO_REDIRECT_TIME   = CURLINFO_DOUBLE + 19,
+  CURLINFO_REDIRECT_COUNT  = CURLINFO_LONG + 20,
+
   /* Fill in new entries here! */
 
-  CURLINFO_LASTONE          = 19
+  CURLINFO_LASTONE          = 21
 } CURLINFO;
 
 /* unfortunately, the easy.h and multi.h include files need options and info
