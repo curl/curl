@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -49,7 +49,7 @@
 #endif
 #ifdef _XOPEN_SOURCE_EXTENDED
 /* This define is "almost" required to build on HPUX 11 */
-#include <arpa/inet.h> 
+#include <arpa/inet.h>
 #endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -183,7 +183,7 @@ static void logmsg(const char *msg, ...)
   struct tm *curr_time = localtime(&t);
   char buffer[256]; /* possible overflow if you pass in a huge string */
   FILE *logfp;
-   
+
   va_start(ap, msg);
   vsprintf(buffer, msg, ap);
   va_end(ap);
@@ -270,7 +270,7 @@ int ProcessRequest(struct httprequest *req)
         sprintf(logbuf, "Got a *HUGE* request HTTP/%d.%d",
                 prot_major, prot_minor);
       logmsg(logbuf);
-      
+
       if(!strncmp("/verifiedserver", ptr, 15)) {
         logmsg("Are-we-friendly question received");
         req->testno = DOCNUMBER_WERULEZ;
@@ -306,7 +306,7 @@ int ProcessRequest(struct httprequest *req)
         logmsg("Couldn't open test file %d", req->testno);
         return 0;
       }
-      else {    
+      else {
         char *cmd = NULL;
         size_t cmdsize = 0;
 
@@ -328,7 +328,7 @@ int ProcessRequest(struct httprequest *req)
     else {
       if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
                 doc, &prot_major, &prot_minor) == 3) {
-        sprintf(logbuf, "Receiced a CONNECT %s HTTP/%d.%d request", 
+        sprintf(logbuf, "Receiced a CONNECT %s HTTP/%d.%d request",
                 doc, prot_major, prot_minor);
         logmsg(logbuf);
 
@@ -500,7 +500,7 @@ static int get_request(int sock, struct httprequest *req)
   }
   else
     reqbuf[req->offset]=0;
-  
+
   /* dump the request to an external file */
   storerequest(reqbuf);
 
@@ -587,7 +587,7 @@ static int send_doc(int sock, struct httprequest *req)
       logmsg("Couldn't open test file");
       return 0;
     }
-    else {    
+    else {
       /* get the custom server control "commands" */
       cmd = (char *)spitout(stream, "reply", "postcmd", &cmdsize);
       fclose(stream);
@@ -670,23 +670,23 @@ static int send_doc(int sock, struct httprequest *req)
 #if defined(WIN32) && !defined(__CYGWIN__)
 static void win32_init(void)
 {
-  WORD wVersionRequested;  
-  WSADATA wsaData; 
-  int err; 
-  wVersionRequested = MAKEWORD(2, 0); 
-    
-  err = WSAStartup(wVersionRequested, &wsaData); 
-    
+  WORD wVersionRequested;
+  WSADATA wsaData;
+  int err;
+  wVersionRequested = MAKEWORD(2, 0);
+
+  err = WSAStartup(wVersionRequested, &wsaData);
+
   if (err != 0) {
     perror("Winsock init failed");
     logmsg("Error initialising winsock -- aborting\n");
     exit(1);
   }
-    
-  if ( LOBYTE( wsaData.wVersion ) != 2 || 
-       HIBYTE( wsaData.wVersion ) != 0 ) { 
- 
-    WSACleanup(); 
+
+  if ( LOBYTE( wsaData.wVersion ) != 2 ||
+       HIBYTE( wsaData.wVersion ) != 0 ) {
+
+    WSACleanup();
     perror("Winsock init failed");
     logmsg("No suitable winsock.dll found -- aborting\n");
     exit(1);
@@ -705,7 +705,7 @@ int main(int argc, char *argv[])
   unsigned short port = DEFAULT_PORT;
   FILE *pidfile;
   struct httprequest req;
-  
+
   if(argc>1) {
     port = (unsigned short)atoi(argv[1]);
 
@@ -713,7 +713,7 @@ int main(int argc, char *argv[])
       path = argv[2];
     }
   }
-  
+
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
   win32_init();
   atexit(win32_cleanup);
@@ -765,10 +765,10 @@ int main(int argc, char *argv[])
 
   while (1) {
     msgsock = accept(sock, NULL, NULL);
-    
+
     if (msgsock == -1)
       continue;
-    
+
     logmsg("** New client connected");
 
     do {
@@ -807,9 +807,9 @@ int main(int argc, char *argv[])
     if (req.testno == DOCNUMBER_QUIT)
       break;
   }
-  
+
   sclose(sock);
-  
+
   return 0;
 }
 
