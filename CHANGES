@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Version 7.10.5 (19 May 2003)
+
+Daniel (15 May)
+- Changed the order for the in_addr_t testing, as 'unsigned long' seems to be
+  a very common type inet_addr() returns.
+
 Daniel (14 May)
 - George Comninos provided a fix that calls the progress meter when waiting
   for FTP command responses take >1 second. It'll make applications more
