@@ -99,6 +99,35 @@ while(<STDIN>) {
             }
         }
     }
+    # FILE url.c:1282 fopen("blabla") = 0x5ddd
+    elsif($_ =~ /^FILE ([^:]*):(\d*) (.*)/) {
+        # generic match for the filename+linenumber
+        $source = $1;
+        $linenum = $2;
+        $function = $3;
+
+        if($function =~ /fopen\(\"([^\"]*)\"\) = (\(nil\)|0x([0-9a-f]*))/) {
+            if($2 eq "(nil)") {
+                ;
+            }
+            else {
+                $fopen{$3}=1;
+                $fopenfile{$3}="$source:$linenum";
+                $fopens++;
+            }
+        }
+        # fclose(0x1026c8)
+        elsif($function =~ /fclose\(0x([0-9a-f]*)\)/) {
+            print "CLOSE $1\n";
+            if(!$fopen{$1}) {
+                print "fclose() without fopen(): $line\n";
+            }
+            else {
+                $fopen{$1}=0;
+                $fopens--;
+            }
+        }
+    }
     else {
         print "Not recognized prefix line: $line\n";
     }
@@ -124,6 +153,15 @@ if($openfile) {
     for(keys %filedes) {
         if($filedes{$_} == 1) {
             print "Open file descriptor created at ".$getfile{$_}."\n";
+        }
+    }
+}
+
+if($fopens) {
+    print "Open FILE handles left at:\n";
+    for(keys %fopen) {
+        if($fopen{$_} == 1) {
+            print "fopen() called at ".$fopenfile{$_}."\n";
         }
     }
 }
