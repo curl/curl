@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "14 June 2000" "Curl 7.0" "Curl Manual"
+.TH curl 1 "25 July 2000" "Curl 7.0" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -107,10 +107,12 @@ This option is handy to use when you want to store the cookies that a HTTP
 site sends to you. The cookies could then be read in a second curl invoke by
 using the -b/--cookie option!
 .IP "-e/--referer <URL>"
-(HTTP)
-Sends the "Referer Page" information to the HTTP server. Some badly
-done CGIs fail if it's not set. This can also be set with the -H/--header
-flag of course.
+(HTTP) Sends the "Referer Page" information to the HTTP server. This can also
+be set with the -H/--header flag of course.  When used with
+.I -L/--location 
+you can append ";auto" to the referer URL to make curl automatically set the
+previous URL when it follows a Location: header. The ";auto" string can be
+used alone, even if you don't set an initial referer.
 .IP "-E/--cert <certificate[:password]>"
 (HTTPS)
 Tells curl to use the specified certificate file when getting a file
@@ -193,7 +195,7 @@ Makes curl scan the
 file in the user's home directory for login name and password. This is
 typically used for ftp on unix. If used with http, curl will enable user
 authentication. See
-.BR netrc(5)
+.BR netrc(4)
 for details on the file format. Curl will not complain if that file
 hasn't the right permissions (it should not be world nor group
 readable). The environment variable "HOME" is used to find the home
