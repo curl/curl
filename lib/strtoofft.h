@@ -26,6 +26,7 @@
 
 #include "setup.h"
 #include <stddef.h>
+#include <curl/curl.h> /* for the curl_off_t type */
 
 /* Determine what type of file offset conversion handling we wish to use.  For
  * systems with a 32-bit curl_off_t type, we should use strtol.  For systems
