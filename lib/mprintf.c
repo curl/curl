@@ -38,6 +38,15 @@
 #include <ctype.h>
 #include <string.h>
 
+#ifndef SIZEOF_LONG_LONG
+/* prevents warnings on picky compilers */
+#define SIZEOF_LONG_LONG 0
+#endif
+#ifndef SIZEOF_LONG_DOUBLE
+#define SIZEOF_LONG_DOUBLE 0
+#endif
+
+
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
 #include "memdebug.h"
@@ -1129,7 +1138,7 @@ int main()
 {
   char buffer[129];
   char *ptr;
-#ifdef SIZEOF_LONG_LONG
+#if SIZEOF_LONG_LONG>0
   long long hullo;
   dprintf("%3$12s %1$s %2$qd %4$d\n", "daniel", hullo, "stenberg", 65);
 #endif
