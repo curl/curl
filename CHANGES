@@ -8,6 +8,19 @@
 
 Version XX
 
+Daniel (4 April 2000):
+- Marco G. Salvagno <mgs@whiz.cjb.net> supplied me with two fixes that
+  appearantly makes the OS/2 port work better with multiple URLs.
+
+Daniel (2 April 2000):
+- Another Location: fix. This time, when curl connected to a port and then
+  followed a location with an absolute URL to another port, it misbehaved.
+
+Daniel (27 March 2000):
+- H. Daphne Luong <daphne@tellme.com> pointed out that curl was wrongly
+  messing up the proxy string when fetching a document through a http proxy,
+  which screwed up multiple fetches such as in location: followings.
+
 Daniel (23 March 2000):
 - Marco G. Salvagno <mgs@whiz.cjb.net> corrected my badly applied patch he
   actually already told me about!
