@@ -48,6 +48,15 @@ pdf:
 
 check: test
 
+if CROSSCOMPILING
+test-full: test
+test-torture: test
+
+test:
+	@echo "NOTICE: we can't run the tests when cross-compiling!"
+
+else
+
 test:
 	@(cd tests; $(MAKE) all quiet-test)
 
@@ -56,6 +65,8 @@ test-full:
 
 test-torture:
 	@(cd tests; $(MAKE) all torture-test)
+
+endif
 
 #
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
