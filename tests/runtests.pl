@@ -637,7 +637,8 @@ sub singletest {
         subVariables \$fileContent;
 #        print "DEBUG: writing file " . $filename . "\n";
         open OUTFILE, ">$filename";
-        print OUTFILE   $fileContent;
+        binmode OUTFILE; # for crapage systems, use binary       
+        print OUTFILE $fileContent;
         close OUTFILE;
     }
 

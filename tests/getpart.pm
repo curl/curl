@@ -95,6 +95,7 @@ sub loadtest {
     undef @xml;
     open(XML, "<$file") ||
         return 1; # failure!
+    binmode XML; # for crapage systems, use binary
     while(<XML>) {
         push @xml, $_;
     }
