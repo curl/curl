@@ -31,7 +31,6 @@
 #include <idna.h>
 #endif
 
-#include "multi.h"
 #include "strerror.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */

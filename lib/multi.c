@@ -43,8 +43,8 @@
 #include "connect.h"
 #include "progress.h"
 #include "memory.h"
-#include "easy.h"
-#include "multi.h"
+#include "easyif.h"
+#include "multiif.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"

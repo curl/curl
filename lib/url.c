@@ -118,7 +118,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "http_digest.h"
 #include "http_negotiate.h"
 #include "select.h"
-#include "multi.h"
+#include "multiif.h"
 
 /* And now for the protocols */
 #include "ftp.h"

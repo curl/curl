@@ -1,5 +1,5 @@
-#ifndef __EASY_H
-#define __EASY_H
+#ifndef __MULTIIF_H
+#define __MULTIIF_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,13 +23,9 @@
  * $Id$
  ***************************************************************************/
 
-/* This file shadows for <curl/easy.h> in some compilers
- */
-#include <curl/easy.h>
-
 /*
- * Prototypes for library-wide functions provided by easy.c
+ * Prototypes for library-wide functions provided by multi.c
  */
-void Curl_easy_addmulti(struct SessionHandle *data, void *multi);
+void Curl_multi_rmeasy(void *multi, CURL *data);
 
-#endif /* __EASY_H */
+#endif /* __MULTIIF_H */

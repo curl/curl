@@ -82,7 +82,7 @@
 #include "share.h"
 #include "memory.h"
 #include "progress.h"
-#include "easy.h"
+#include "easyif.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
