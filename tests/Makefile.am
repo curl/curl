@@ -7,19 +7,19 @@ SUBDIRS = data server libtest
 PERLFLAGS = -I$(srcdir)
 
 curl:
-	@(cd ..; make)
+	@cd $(top_builddir) && $(MAKE)
 
-test: server/sws
+test: sws
 	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
 
-quiet-test: server/sws
+quiet-test: sws
 	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -s -a
 
-full-test: server/sws
+full-test: sws
 	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -a
 
-server/sws:
-	cd server; make sws
+sws:
+	@cd server && $(MAKE)
