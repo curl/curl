@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "12 Apr 2002" "libcurl 7.9.6" "libcurl Manual"
+.TH curl_easy_setopt 3 "22 Apr 2002" "libcurl 7.9.6" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -428,8 +428,8 @@ TIMECOND_IFUNMODSINCE. This is a HTTP-only feature. (TBD)
 .TP
 .B CURLOPT_TIMEVALUE
 Pass a long as parameter. This should be the time in seconds since 1 jan 1970,
-and the time will be used as specified in CURLOPT_TIMECONDITION or if that
-isn't used, it will be TIMECOND_IFMODSINCE by default.
+and the time will be used in a condition as specified with
+CURLOPT_TIMECONDITION.
 .TP
 .B CURLOPT_CUSTOMREQUEST
 Pass a pointer to a zero terminated string as parameter. It will be user
