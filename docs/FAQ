@@ -1,4 +1,4 @@
-Updated: January 11, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: January 15, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -33,7 +33,7 @@ FAQ
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
-  4.2 Why do I get problems when I use & in the URL?
+  4.2 Why do I get problems when I use & or % in the URL?
   4.3 How can I use {, }, [ or ] to specify multiple URLs?
   4.4 Why do I get downloaded data even though the web page doesn't exist?
   4.5 Why do I get return code XXX from a HTTP server?
@@ -298,7 +298,7 @@ FAQ
   I have also seen examples where the remote server didn't like the SSLv2
   request and instead you had to force curl to use SSLv3 with -3/--sslv3.
 
-  4.2. Why do I get problems when I use & in the URL?
+  4.2. Why do I get problems when I use & or % in the URL?
 
   In general unix shells, the & letter is treated special and when used it
   runs the specified command in the background. To safely send the & as a part
@@ -309,6 +309,9 @@ FAQ
 
      curl 'http://www.altavista.com/cgi-bin/query?text=yes&q=curl'
 
+  In win32, the standard DOS shell treats the %-letter specially and you may
+  need to quote the string properly when % is used in it.
+
   4.3. How can I use {, }, [ or ] to specify multiple URLs?
 
   Because those letters have a special meaning to the shell, and to be used in
@@ -317,6 +320,12 @@ FAQ
   An example that downloads two URLs (sequentially) would do:
 
     curl '{curl,www}.haxx.se'
+
+  To be able to use those letters as actual parts of the URL (without using
+  them for the curl URL "globbing" system), use the -g/--globoff option
+  (included in curl 7.6 and later):
+
+    curl -g 'www.site.com/weirdname[].html'
 
   4.4. Why do I get downloaded data even though the web page doesn't exist?
 
