@@ -203,7 +203,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   *waitp = 0; /* don't wait, we act synchronously */
 
-  if(1 == inet_pton(AF_INET, hostname, &in))
+  if(1 == Curl_inet_pton(AF_INET, hostname, &in))
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(in, hostname, port);
 
