@@ -1,4 +1,6 @@
 ############################################################
+# $Id$
+#
 #  Makefile.b32 - Borland's C++ Compiler 5.X
 #
 #  'lib' directory

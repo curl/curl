@@ -1,4 +1,6 @@
 #############################################################
+# $Id: Makefile.am,v 1.20 2001/08/08 07:46:44 bagder Exp $
+#
 ## Makefile for building libcurl.lib with MSVC6
 ## Use: nmake -f makefile.vc6 [release | release-ssl | debug]
 ##      (default is release)
