@@ -20,7 +20,7 @@ http
 HTTP URL with slash but with "parameter"
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT?mooo/59
+"http://%HOSTIP:%HTTPPORT?mooo/59"
 </command>
 </client>
 
