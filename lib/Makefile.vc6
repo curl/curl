@@ -47,7 +47,6 @@ CFLAGS = /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB
 LNKDLL    = link.exe /DLL  /def:libcurl.def
 LNKLIB    = link.exe -lib
 LFLAGS    = /nologo
-LFLAGSSSL = /LIBPATH:$(OPENSSL_PATH)/out32dll
 LINKLIBS  = ws2_32.lib
 SSLLIBS   = libeay32.lib ssleay32.lib RSAglue.lib
 CFGSET    = FALSE
@@ -80,8 +79,9 @@ CFGSET = TRUE
 !IF "$(CFG)" == "release-ssl"
 TARGET   =$(LIB_NAME).lib
 DIROBJ   =.\$(CFG)
+LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32"
 LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
-LINKLIBS = $(LINKLIBS) $(SSLLIBS)
+LINKLIBS = $(LINKLIBS)
 CC       = $(CCNODBG) $(CFLAGSSSL)
 CFGSET   = TRUE
 !ENDIF
@@ -92,14 +92,12 @@ CFGSET   = TRUE
 !IF "$(CFG)" == "release-ssl-dll"
 TARGET   =$(LIB_NAME).dll
 DIROBJ   =.\$(CFG)
+LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32dll"
 LNK      = $(LNKDLL) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
 LINKLIBS = $(LINKLIBS) $(SSLLIBS)
 CC       = $(CCNODBG)  $(CFLAGSSSL)
 CFGSET   = TRUE
 !ENDIF
-
-
-
 
 ######################
 # debug
@@ -130,7 +128,7 @@ CFGSET = TRUE
 TARGET   = $(LIB_NAME_DEBUG).lib
 DIROBJ   =.\$(CFG)
 LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
-LINKLIBS = $(LINKLIBS) $(SSLLIBS)
+LINKLIBS = $(LINKLIBS)
 CC       = $(CCDEBUG) $(CFLAGSSSL)
 CFGSET   = TRUE
 !ENDIF

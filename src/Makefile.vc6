@@ -45,6 +45,20 @@ LINK_OBJS= \
 	urlglob.obj \
 	main.obj
 
+ 
+######################
+# release-ssl
+ 
+!IF "$(CFG)" == "release-ssl"
+!IFNDEF OPENSSL_PATH
+OPENSSL_PATH   = ../../openssl-0.9.6
+!ENDIF
+LFLAGSSSL = /LIBPATH:"$(OPENSSL_PATH)/out32"
+SSLLIBS   = libeay32.lib ssleay32.lib RSAglue.lib gdi32.lib 
+LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
+LFLAGS = $(LFLAGS) $(LFLAGSSSL)
+!ENDIF
+ 
 all : release
 
 release: $(RELEASE_OBJS)
