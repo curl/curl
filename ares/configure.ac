@@ -67,6 +67,8 @@ AC_CHECK_HEADERS(
        sys/socket.h \
        winsock.h \
        netinet/in.h \
+       arpa/nameser.h \
+       arpa/nameser_compat.h
   )
 
 dnl check for AF_INET6
