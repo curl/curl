@@ -42,3 +42,8 @@ To get fixed in 7.11.1
 20. Directory listing support for file:///dir/ (patch by David Hull)
     http://sourceforge.net/tracker/index.php?func=detail&aid=844036&group_id=976&atid=300976
     This patch needs work to become portable.
+
+21. Send QUIT before closing an FTP connection. Joe Halpin has volunteered
+    to provide a patch.
+
+22. Dan Fandrich's improvement for easier building with the compressed manual.
