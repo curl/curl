@@ -1,8 +1,7 @@
 .libs
 Makefile.in
-stamp-h3.in
 sws
 .deps
-stamp-h3
+stamp-h*
 config.h
 Makefile
