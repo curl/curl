@@ -16,7 +16,7 @@ lib_LTLIBRARIES = libcurl.la
 INCLUDES = -I$(top_srcdir)/include
 
 
-libcurl_la_LDFLAGS = -version-info 2:1:0
+libcurl_la_LDFLAGS = -version-info 2:2:0
 # This flag accepts an argument of the form current[:revision[:age]]. So,
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
 # 1.
