@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel (9 Jan 2003)
+- Updated lib/share.c quite a bit to match the design document at
+  http://curl.haxx.se/dev/sharing.txt a lot more.
+
+  I'll try to update the document soonish. share.c is still not actually used
+  by libcurl, but the API is slowly getting there and we can start
+  implementing code that takes advantage of this system.
+
 Daniel (8 Jan 2003)
 - Updated share stuff in curl/curl.h, including data types, structs and
   function prototypes. The corresponding files in lib/ were also modified
