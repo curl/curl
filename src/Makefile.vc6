@@ -42,6 +42,8 @@ RELEASE_OBJS= \
 	urlglobr.obj \
 	getpassr.obj \
 	homedirr.obj \
+	timevalr.obj \
+	strtoofftr.obj \
 	mainr.obj \
 	curlr.res
 
@@ -51,6 +53,8 @@ DEBUG_OBJS= \
 	urlglobd.obj \
 	getpassd.obj \
 	homedird.obj \
+	timevald.obj \
+	strtoofftd.obj \
 	maind.obj \
 	curld.res
 	
@@ -68,6 +72,22 @@ LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
 LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS)
 LFLAGS = $(LFLAGS) $(LFLAGSSSL)
 !ENDIF
+
+######################
+# release-libcurl-ssl-dll
+
+!IF "$(CFG)" == "release-libcurl-ssl-dll"
+!IFNDEF OPENSSL_PATH
+OPENSSL_PATH   = ../../openssl-0.9.7a
+!ENDIF
+LFLAGSSSL = /LIBPATH:"$(OPENSSL_PATH)/out32"
+SSLLIBS   = libeay32.lib ssleay32.lib gdi32.lib 
+CFLAGS = $(CFLAGS) -DUSE_SSLEAY
+LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
+LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS)
+LFLAGS = $(LFLAGS) $(LFLAGSSSL)
+!ENDIF
+
 
 all : release
 
@@ -88,6 +108,10 @@ getpassr.obj: getpass.c
 	$(CCR) $(CFLAGS) /Fo"$@" getpass.c
 homedirr.obj: homedir.c
 	$(CCR) $(CFLAGS) /Fo"$@" homedir.c
+timevalr.obj: ../lib/timeval.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/timeval.c
+strtoofftr.obj: ../lib/strtoofft.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 mainr.obj: main.c
 	$(CCR) $(CFLAGS) /Fo"$@" main.c
 curlr.res : curl.rc
@@ -104,6 +128,10 @@ getpassd.obj: getpass.c
 	$(CCD) $(CFLAGS) /Fo"$@" getpass.c
 homedird.obj: homedir.c
 	$(CCD) $(CFLAGS) /Fo"$@" homedir.c
+timevald.obj: timeval.c
+	$(CCR) $(CFLAGS) /Fo"$@" timeval.c
+strtoofftd.obj: ../lib/strtoofft.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 maind.obj: main.c
 	$(CCD) $(CFLAGS) /Fo"$@" main.c
 curld.res : curl.rc

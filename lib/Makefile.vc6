@@ -39,12 +39,17 @@ CCNODBG   = cl.exe /MD /O2 /D "NDEBUG"
 CCDEBUG   = cl.exe /MDd /Od /Gm /Zi  /D "_DEBUG" /GZ
 CFLAGSSSL = /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
 CFLAGSZLIB = /D "HAVE_ZLIB_H" /D "HAVE_ZLIB" /D "HAVE_LIBZ" /I "$(ZLIB_PATH)"
-CFLAGS = /I "." /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS"
-
+CFLAGS = /I "." /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS" 
 LNKDLL    = link.exe /DLL  /def:libcurl.def
 LNKLIB    = link.exe /lib
 LFLAGS    = /nologo
 SSLLIBS   = libeay32.lib ssleay32.lib
+!IFDEF USEMM_LIBS
+WINLIBS   = wsock32.lib winmm.lib
+!ELSE
+WINLIBS   = wsock32.lib 
+CFLAGS		= $(CFLAGS) /D "WITHOUT_MM_LIB"
+!ENDIF
 #  RSAglue.lib was formerly needed in the SSLLIBS
 CFGSET    = FALSE
 
@@ -90,7 +95,7 @@ CFGSET   = TRUE
 TARGET   =$(LIB_NAME).dll
 DIROBJ   =.\$(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32dll"
-LNK      = $(LNKDLL) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
+LNK      = $(LNKDLL) $(SSLLIBS) $(WINLIBS) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
 CC       = $(CCNODBG)  $(CFLAGSSSL)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
@@ -98,7 +103,6 @@ RESOURCE = $(DIROBJ)\libcurl.res
 
 ######################
 # release-ssl-zlib
-
 !IF "$(CFG)" == "release-ssl-zlib"
 TARGET   =$(LIB_NAME).lib
 DIROBJ   =.\$(CFG)
@@ -115,7 +119,7 @@ CFGSET   = TRUE
 TARGET   =$(LIB_NAME).lib
 DIROBJ   =.\$(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32dll"
-LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
+LNK      = $(LNKLIB) $(SSLLIBS) $(LFLAGSSSL) /out:$(TARGET)
 CC       = $(CCNODBG)  $(CFLAGSSSL)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
