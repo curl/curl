@@ -6,6 +6,44 @@
 
                                   Changelog
 
+Daniel (5 Nov 2002)
+- Lehel Bernadt found out and fixed. libcurl sent error message to the debug
+  output when it stored the error message.
+
+- Avery Fay found some problems with the DNS cache (when the cache time was
+  set to 0 we got a memory leak, but when the leak was fixed he got a crash
+  when he used the CURLOPT_INTERFACE with that) that had me do some real
+  restructuring so that we now have a reference counter in the dns cache
+  entries to prevent an entry to get flushed while still actually in use.
+
+  I also detected that we previously didn't update the time stamp when we
+  extracted an entry from the cache so that must've been a reason for some
+  very weird dns cache bugs.
+
+Version 7.10.2-pre3
+
+Daniel (31 Oct 2002)
+- Downgraded automake to 1.6.3 in an attempt to fix cygwin problems.
+
+- Disable the DNS cache (by setting the timeout to 0) made libcurl leak
+  memory. Avery Fay brought the example code that proved this.
+
+Version 7.10.2-pre2
+
+Daniel (28 Oct 2002)
+- Upgraded to autoconf 2.54 and automake 1.7 on the release-build host.
+
+- Kevin Roth made the command line tool check for a CURL_CA_BUNDLE environment
+  variable (if --cacert isn't used) and if not set, the Windows version will
+  check for a file named "curl-ca-bundle.crt" in the current directory or the
+  directory where curl is located. That file is then used as CA root cert
+  bundle.
+
+- Avery Fay pointed out that curl's configure scrip didn't get right if you
+  used autoconf newer than 2.52. This was due to some badly quoted code.
+
+Version 7.10.2-pre1
+
 Daniel (23 Oct 2002)
 - Emiliano Ida confirmed that we now build properly with the Borland C++
   compiler too. We needed yet another fix for the ISO cpp check in the curl.h
