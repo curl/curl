@@ -478,7 +478,7 @@ then
       AC_CHECK_FUNCS(krb_get_our_ip_for_realm)
 
       dnl add define KRB4
-      AC_DEFINE(KRB4, 1,
+      AC_DEFINE(HAVE_KRB4, 1,
       [if you have the Kerberos4 libraries (including -ldes)])
 
       dnl substitute it too!
