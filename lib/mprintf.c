@@ -92,13 +92,12 @@
  *
  ****************************************************************************/
 
-static const char rcsid[] = "@(#)$Id$";
-
-/*
+*
  * To test:
  *
  * Use WIDTH, PRECISION and NUMBERED ARGUMENT combined.
  */
+#include "setup.h"
 
 #include <sys/types.h>
 #include <stdio.h>
