@@ -58,7 +58,10 @@ curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
 #define curlx_strtoofft strtol
 #endif
 
-#ifdef HAVE_LL
+#if defined(_MSC_VER)
+#define CURL_LLONG_MIN 0x8000000000000000i64
+#define CURL_LLONG_MAX 0x7FFFFFFFFFFFFFFFi64
+#elif defined(HAVE_LL)
 #define CURL_LLONG_MIN 0x8000000000000000LL
 #define CURL_LLONG_MAX 0x7FFFFFFFFFFFFFFFLL
 #else
