@@ -925,7 +925,7 @@ sub singletest {
 
     print CMDLOG "$CMDLINE\n";
 
-    my $res;
+    my $cmdres;
     # run the command line we built
     if($gdbthis) {
         open(GDBCMD, ">log/gdbcmd");
@@ -933,18 +933,18 @@ sub singletest {
         print GDBCMD "show args\n";
         close(GDBCMD);
         system("gdb --directory libtest $DBGCURL -x log/gdbcmd");
-        $res =0; # makes it always continue after a debugged run
+        $cmdres=0; # makes it always continue after a debugged run
     }
     else {
-        $res = system("$CMDLINE");
-        my $signal_num  = $res & 127;
-        my $dumped_core = $res & 128;
+        $cmdres = system("$CMDLINE");
+        my $signal_num  = $cmdres & 127;
+        my $dumped_core = $cmdres & 128;
 
         if(!$anyway && ($signal_num || $dumped_core)) {
-            $res = 1000;
+            $cmdres = 1000;
         }
         else {
-            $res /= 256;
+            $cmdres /= 256;
         }
     }
 
@@ -959,25 +959,7 @@ sub singletest {
     my @err = getpart("verify", "errorcode");
     my $errorcode = $err[0];
 
-    if($errorcode || $res) {
-        if($errorcode == $res) {
-            $errorcode =~ s/\n//;
-            if($verbose) {
-                print " received errorcode $errorcode OK";
-            }
-            elsif(!$short) {
-                print " error OK";
-            }
-        }
-        else {
-            if(!$short) {
-                print "curl returned $res, ".(0+$errorcode)." was expected\n";
-            }
-            print " error FAILED\n";
-            return 1;
-        }
-    }
-
+    my $res;
     if (@validstdout) {
         # verify redirected stdout
         my @actual = loadarray($STDOUT);
@@ -1068,6 +1050,25 @@ sub singletest {
         if(!$short) {
             print " output OK";
         }        
+    }
+
+    if($errorcode || $cmdres) {
+        if($errorcode == $cmdres) {
+            $errorcode =~ s/\n//;
+            if($verbose) {
+                print " received errorcode $errorcode OK";
+            }
+            elsif(!$short) {
+                print " error OK";
+            }
+        }
+        else {
+            if(!$short) {
+                print "curl returned $cmdres, ".(0+$errorcode)." was expected\n";
+            }
+            print " error FAILED\n";
+            return 1;
+        }
     }
 
     if(!$keepoutfiles) {
