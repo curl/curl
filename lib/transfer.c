@@ -466,6 +466,31 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             conn->size = k->contentlength;
             Curl_pgrsSetDownloadSize(data, k->contentlength);
           }
+          /* check for Content-Type: header lines to get the mime-type */
+          else if (strnequal("Content-Type:", k->p, 13)) {
+            char *start;
+            char *end;
+            int len;
+
+            /* Find the first non-space letter */
+            for(start=k->p+14;
+                *start && isspace((int)*start);
+                start++);
+
+            /* count all non-space letters following */
+            for(end=start+1, len=0;
+                *end && !isspace((int)*end);
+                end++, len++);
+
+            /* allocate memory of a cloned copy */
+            data->info.contenttype = malloc(len + 1);
+            if (NULL == data->info.contenttype)
+	      return CURLE_OUT_OF_MEMORY;
+
+            /* copy the content-type string */
+	    memcpy(data->info.contenttype, start, len);
+            data->info.contenttype[len] = 0; /* zero terminate */
+          }
           else if((k->httpversion == 10) &&
                   conn->bits.httpproxy &&
                   compareheader(k->p, "Proxy-Connection:", "keep-alive")) {

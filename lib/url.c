@@ -191,6 +191,9 @@ CURLcode Curl_close(struct SessionHandle *data)
   /* free the connection cache */
   free(data->state.connects);
 
+  if(data->info.contenttype)
+    free(data->info.contenttype);
+
   free(data);
   return CURLE_OK;
 }

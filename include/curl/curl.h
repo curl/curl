@@ -666,7 +666,11 @@ typedef enum {
 
   CURLINFO_STARTTRANSFER_TIME = CURLINFO_DOUBLE + 17,
 
-  CURLINFO_LASTONE          = 18
+  CURLINFO_CONTENT_TYPE = CURLINFO_STRING + 18,
+
+  /* Fill in new entries here! */
+
+  CURLINFO_LASTONE          = 19
 } CURLINFO;
 
 /* unfortunately, the easy.h include file needs the options and info stuff

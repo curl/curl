@@ -48,9 +48,13 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   info->httpcode = 0;
   info->httpversion=0;
   info->filetime=-1; /* -1 is an illegal time and thus means unknown */
+  
+  if (info->contenttype)
+    free(info->contenttype);
+  info->contenttype = NULL;
+
   info->header_size = 0;
   info->request_size = 0;
-
   return CURLE_OK;
 }
 
@@ -133,6 +137,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     break;
   case CURLINFO_CONTENT_LENGTH_UPLOAD:
     *param_doublep = data->progress.size_ul;
+    break;
+  case CURLINFO_CONTENT_TYPE:
+    *param_charp = data->info.contenttype;
     break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
