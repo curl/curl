@@ -1,4 +1,4 @@
-Updated: February 25, 2003 (http://curl.haxx.se/docs/faq.html)
+Updated: May 9, 2003 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -97,6 +97,12 @@ FAQ
   We spell it cURL or just curl. We pronounce it with an initial k sound:
   [kurl].
 
+  NOTE: there are numerous sub-projects and related projects that also use the
+  word curl in the project names in various combinations, but you should take
+  notice that this FAQ is directed at the command-line tool named curl (and
+  libcurl the library), and may therefore not be valid for other curl
+  projects.
+
   1.2 What is libcurl?
 
   libcurl is a reliable and portable library which provides you with an easy
@@ -132,11 +138,9 @@ FAQ
   better. We do however believe in a few rules when it comes to the future of
   curl:
 
-  * Curl is to remain a command line tool. If you want GUIs or fancy scripting
-    capabilities, you're free to write another tool that uses libcurl and that
-    offers this. There's no point in having a single tool that does every
-    imaginable thing. That's also one of the great advantages of having the
-    core of curl as a library.
+  * Curl -- the command line tool -- is to remain a non-graphical command line
+    tool. If you want GUIs or fancy scripting capabilities, you should look
+    for another tool that uses libcurl.
 
   * We do not add things to curl that other small and available tools already
     do very fine at the side. Curl's output is fine to pipe into another
