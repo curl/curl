@@ -201,7 +201,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
         default:
           failf (conn->data,
                  "Unrecognized content encoding type. "
-                 "libcurl understands `identity' and `deflate' "
+                 "libcurl understands `identity', `deflate' and `gzip' "
                  "content encodings.");
           return CHUNKE_BAD_ENCODING;
       }

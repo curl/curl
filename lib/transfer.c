@@ -915,7 +915,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               case COMPRESS:          /* FIXME 08/27/02 jhrg */
               default:
                 failf (data, "Unrecognized content encoding type. "
-                       "libcurl understands `identity' and `deflate' "
+                       "libcurl understands `identity', `deflate' and `gzip' "
                        "content encodings.");
                 result = CURLE_BAD_CONTENT_ENCODING;
                 break;
