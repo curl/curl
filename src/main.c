@@ -195,6 +195,8 @@ struct Configurable {
 
 static int parseconfig(char *filename,
 		       struct Configurable *config);
+static char *my_get_line(FILE *fp);
+static char *my_get_token(const char *line);
 
 static void GetStr(char **string,
 		   char *value)
@@ -716,90 +718,58 @@ static int parseconfig(char *filename,
   else
     file = stdin;
   
-  if(file) {
-    char *tok;
+  if(file)
+  {
+    char *line;
+    char *tok1;
     char *tok2;
-    while(fgets(configbuffer, sizeof(configbuffer), file)) {
+
+    while (NULL != (line = my_get_line(file)))
+    {
       /* lines with # in the fist column is a comment! */
-
-#if 0
-      fprintf(stderr, "%s", configbuffer);
-#endif
-      if('#' == configbuffer[0])
-	continue;
-      tok = configbuffer;
-
-      while(*tok && isspace((int)*tok))
-	tok++;
-/*      tok=strtok(configbuffer, " \t\n"); */
-#if 0
-      fprintf(stderr, "TOK: %s\n", tok);
-#endif
-      if('-' != tok[0]) {
-	char *nl;
-	if(config->url)
-	  free(config->url);
-	config->url = strdup(tok);
-	nl = strchr(config->url, '\n');
-	if(nl)
-	  *nl=0;
+      if ('#' == line[0])
+      {
+        free(line);
+        continue;
       }
-      while(('-' == tok[0])) {
-	/* this is a flag */
-	char *firsttok = strdup(tok);
-	char *nl;
 
-	/* remove newline from firsttok */
-	nl = strchr(firsttok, '\n');
-	if(nl)
-	  *nl=0;
-
-	/* pass the -flag */
-	tok2=tok;
-	while(*tok2 && !isspace((int)*tok2))
-	  tok2++;
-
-	/* pass the following white space */
-	while(*tok2 && isspace((int)*tok2))
-	  tok2++;
-	
-	while(!*tok2 &&
-	      fgets(configbuffer, sizeof(configbuffer), file)) {
-	  /* lines with # in the fist column is a comment! */
-#if 0
-	  fprintf(stderr, "%s", configbuffer);
-#endif
-	  if('#' == configbuffer[0])
-	    continue;
-	  tok2 = configbuffer;
-	  /*	    tok2=strtok(configbuffer, " \t\n"); */
-	  /* pass white space */
-	  while(*tok2 && isspace((int)*tok2))
-	    tok2++;
-	}
-	/* remove newline from tok2 */
-	nl = strchr(tok2, '\n');
-	if(nl)
-	  *nl=0;
-
-	res = getparameter(firsttok+1,
-			   *tok2?tok2:NULL,
-			   &usedarg,
-			   config);
-	free(firsttok);
-#if 0
-	fprintf(stderr, "TOK %s TOK2: %s RES: %d\n",
-		firsttok, tok2?tok2:"NULL", res);
-#endif
-	if(res)
-	  return res;
-	if(!usedarg) {
-	  /* tok2 is unused,  */
-	  tok = tok2;
-	}
-	else 
-	  break; /* we've used both our words */
+      if (NULL == (tok1 = my_get_token(line)))
+      {
+        free(line);
+        continue;
       }
+      if ('-' != tok1[0])
+      {
+        if (config->url)
+          free(config->url);
+        config->url = tok1;
+      }
+
+      while ((NULL != tok1) && ('-' == tok1[0]))
+      {
+        tok2 = my_get_token(NULL);
+        while (NULL == tok2)
+        {
+          free(line);
+          if (NULL == (line = my_get_line(file)))
+            break;
+          if ('#' == line[0])
+            continue;
+          tok2 = my_get_token(line);
+        }
+
+        res = getparameter(tok1 + 1, tok2, &usedarg, config);
+        free(tok1);
+        if (!usedarg)
+          tok1 = tok2;
+        else
+        {
+          free(tok2);
+          break;
+        }
+      }
+
+      free(line);
     }
     if(file != stdin)
       fclose(file);
@@ -1163,4 +1133,65 @@ int main(int argc, char *argv[])
   curl_slist_free_all(config.quote); /* the checks for config.quote == NULL */
 
   return(res);
+}
+
+static char *my_get_line(FILE *fp)
+{
+   char buf[4096];
+   char *nl = NULL;
+   char *retval = NULL;
+
+   do
+   {
+      if (NULL == fgets(buf, sizeof(buf), fp))
+         break;
+      if (NULL == retval)
+         retval = strdup(buf);
+      else
+      {
+         if (NULL == (retval = realloc(retval,
+                                       strlen(retval) + strlen(buf) + 1)))
+            break;
+         strcat(retval, buf);
+      }
+   }
+   while (NULL == (nl = strchr(retval, '\n')));
+
+   if (NULL != nl)
+     *nl = '\0';
+
+   return retval;
+}
+
+static char *my_get_token(const char *line)
+{
+  static const char *save = NULL;
+  const char *first = NULL;
+  const char *last = NULL;
+  char *retval = NULL;
+  size_t size;
+
+  if (NULL == line)
+    line = save;
+  if (NULL == line)
+    return NULL;
+
+  while (('\0' != *line) && (isspace(*line)))
+    line++;
+  first = line;
+  while (('\0' != *line) && (!isspace(*line)))
+    line++;
+  save = line;
+  while ('\0' != *line)
+    line++;
+  last = line;
+
+  size = last - first;
+  if (0 == size)
+    return NULL;
+  if (NULL == (retval = malloc(size + 1)))
+    return NULL;
+  memcpy(retval, first, size);
+  retval[size] = '\0';
+  return retval;
 }
