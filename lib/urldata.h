@@ -307,6 +307,7 @@ struct Configbits {
   bool proxystringalloc; /* the http proxy string is malloc()'ed */
   bool set_port;
   bool set_range;
+  bool rangestringalloc; /* the range string is malloc()'ed */
   bool upload;
   bool use_netrc;
   bool user_passwd;

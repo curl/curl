@@ -183,6 +183,11 @@ void static urlfree(struct UrlData *data, bool totally)
        switch off that knowledge again... */
     data->bits.httpproxy=FALSE;
   }
+  
+  if(data->bits.rangestringalloc) {
+    free(data->range);
+    data->range=NULL;
+  }
 
   if(data->ptr_proxyuserpwd) {
     free(data->ptr_proxyuserpwd);
@@ -906,7 +911,8 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     if(!data->bits.set_range) {
       /* if it already was in use, we just skip this */
       sprintf(resumerange, "%d-", data->resume_from);
-      data->range=resumerange; /* tell ourselves to fetch this range */
+      data->range=strdup(resumerange); /* tell ourselves to fetch this range */
+      data->bits.rangestringalloc = TRUE; /* mark as allocated */
       data->bits.set_range = 1; /* switch on range usage */
     }
   }
