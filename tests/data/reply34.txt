@@ -1,0 +1,13 @@
+HTTP/1.1 200 funky chunky!
+Server: fakeit/1.0
+Transfer-Encoding: chunked
+Connection: mooo
+
+40
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+30
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+20;heresatest=moooo
+ccccccccccccccccccccccccccccccc
+0
+muuu

@@ -1,0 +1,6 @@
+GET /34 HTTP/1.1
+User-Agent: curl/7.7-alpha2 (sparc-sun-solaris2.7) libcurl 7.7-alpha2 (SSL 0.9.6) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
