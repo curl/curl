@@ -29,6 +29,15 @@ my $TESTCASES="all";
 
 my $PIDFILE=".server.pid";
 
+# this gets set if curl is compiled with memory debugging:
+my $memory_debug=0;
+
+# name of the file that the memory debugging creates:
+my $memdump="memdump";
+
+# the path to the script that analyzes the memory debug output file:
+my $memanalyze="../memanalyze.pl";
+
 #######################################################################
 # variables the command line options may set
 #
@@ -68,6 +77,7 @@ sub stopserver {
 # test server on the test-port!
 #
 sub runserver {
+    my $verbose = $_[0];
     my $STATUS;
     my $RUNNING;
     # check for pidfile
@@ -211,7 +221,7 @@ sub compare {
         $sec="$LOGDIR/stored.tmp";
     }
 
-    comparefiles($first, $sec);
+    $res = comparefiles($first, $sec);
     if ($res != 0) {
         print " $text FAILED";
         return 1;
@@ -225,6 +235,9 @@ sub compare {
 # display information about curl and the host the test suite runs on
 #
 sub displaydata {
+
+    unlink($memdump); # remove this if there was one left
+
     my $version=`$CURL -V`;
     my $hostname=`hostname`;
     my $hosttype=`uname -a`;
@@ -233,6 +246,14 @@ sub displaydata {
     "* $version",
     "* host $hostname",
     "* system $hosttype";
+
+    if( -r $memdump) {
+        # if this exists, curl was compiled with memory debugging
+        # enabled and we shall verify that no memory leaks exist
+        # after each and every test!
+        $memory_debug=1;
+        print "** Memory debugging ENABLED\n";
+    }
 }
 
 #######################################################################
@@ -255,7 +276,8 @@ sub singletest {
     my $HTTP="$TESTDIR/http$NUMBER.txt";
 
     # name of the test
-    open(N, "<$TESTDIR/name$NUMBER.txt");
+    open(N, "<$TESTDIR/name$NUMBER.txt") ||
+        print "** Couldn't read name on test $NUMBER\n";
     my $DESC=<N>;
     close(N);
     $DESC =~ s/[\r\n]//g;
@@ -284,8 +306,22 @@ sub singletest {
     $cmd =~ s/%HOSTPORT/$HOSTPORT/g;
     #$cmd =~ s/%HOSTNAME/$HOSTNAME/g;
 
+    if($memory_debug) {
+        unlink($memdump);
+    }
+
+    my $out="";
+    if ( ! -r "$VALIDOUT" ) {
+        $out="--output $CURLOUT ";
+    }
+
     # run curl, add -v for debug information output
-    my $CMDLINE="$CURL --output $CURLOUT --include --silent $cmd >$STDOUT 2>$STDERR";
+    my $CMDLINE="$CURL $out--include --silent $cmd >$STDOUT 2>$STDERR";
+
+    my $STDINFILE="$TESTDIR/stdin$NUMBER.txt";
+    if(-f $STDINFILE) {
+        $CMDLINE .= " < $STDINFILE";
+    }
 
     if($verbose) {
         print "$CMDLINE\n";
@@ -299,40 +335,74 @@ sub singletest {
         print "*** Failed to invoke curl for test $NUMBER ***\n",
         "*** [$DESC] ***\n",
         "*** The command line was: ***\n $CMDLINE\n";
-        exit;
+        return 1;
     }
     else {
-        # verify the received data
-        $res = compare($CURLOUT, $REPLY, "data");
-        if ($res) {
-            exit;
+        if ( -r "$VALIDOUT" ) {
+            # verify redirected stdout
+            $res = compare($STDOUT, $VALIDOUT, "data");
+            if($res) {
+                return 1;
+            }
+        }
+        else {
+            if (! -r $REPLY) {
+                print "** Missing reply data file for test $NUMBER",
+                ", should be similar to $CURLOUT\n";
+                return 1;            
+            }
+
+            # verify the received data
+            $res = compare($CURLOUT, $REPLY, "data");
+            if ($res) {
+                return 1;
+            }
         }
 
-        # verify the sent request
-        $res = compare($SERVERIN, $HTTP, "http",
-                       "^(User-Agent:|--curl|Content-Type: multipart/form-data; boundary=).*\r\n");
+        if (! -r $HTTP) {
+            print "** Missing HTTP file for test $NUMBER",
+            ", should be similar to $SERVERIN\n";
+            return 1;
+        }
 
-        # The strip pattern above is for stripping off User-Agent: since
+        # The strip pattern below is for stripping off User-Agent: since
         # that'll be different in all versions, and the lines in a
         # RFC1876-post that are randomly generated and therefore are doomed to
         # always differ!
 
+        # verify the sent request
+        $res = compare($SERVERIN, $HTTP, "http",
+                       "^(User-Agent:|--curl|Content-Type: multipart/form-data; boundary=).*\r\n");
         if($res) {
-            exit;
-        }
-
-        if ( -r "$VALIDOUT" ) {
-
-            $res = compare($STDOUT, $VALIDOUT, "stdout");
-            if($res) {
-                exit;
-            }
+            return 1;
         }
 
         # remove the stdout and stderr files
         unlink($STDOUT);
         unlink($STDERR);
 
+        if($memory_debug) {
+            if(! -f $memdump) {
+                print "\n** ALERT! memory debuggin without any output file?\n";
+            }
+            else {
+                my @memdata=`$memanalyze < $memdump`;
+                my $leak=0;
+                for(@memdata) {
+                    if($_ =~ /Leak detected/) {
+                        $leak=1;
+                    }
+                }
+                if($leak) {
+                    print "\n** MEMORY LEAK\n";
+                    print @memdata;
+                    return 1;
+                }
+                else {
+                    print " memory OK";
+                }
+            }
+        }
     }
     print "\n";
 
@@ -386,7 +456,7 @@ mkdir($LOGDIR, 0777);
 # First, start the TCP server
 #
 
-runserver();
+runserver($verbose);
 
 #######################################################################
 # If 'all' tests are requested, find out all test numbers
@@ -417,7 +487,11 @@ if ( $TESTCASES eq "all") {
 my $testnum;
 foreach $testnum (split(" ", $TESTCASES)) {
 
-    singletest($testnum);
+    if(singletest($testnum)) {
+        # a test failed, abort
+        print "\n - abort tests\n";
+        last;
+    }
 
     # loop for next test
 }
