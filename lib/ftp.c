@@ -564,6 +564,9 @@ CURLcode _ftp(struct connectdata *conn)
 #if defined (HAVE_INET_NTOA_R)
   char ntoa_buf[64];
 #endif
+#ifdef ENABLE_IPV6
+  struct addrinfo *ai;
+#endif
 
   struct curl_slist *qitem; /* QUOTE item */
   /* the ftp struct is already inited in ftp_connect() */
@@ -702,6 +705,174 @@ CURLcode _ftp(struct connectdata *conn)
 
   /* We have chosen to use the PORT command */
   if(data->bits.ftp_use_port) {
+#ifdef ENABLE_IPV6
+    struct addrinfo hints, *res, *ai;
+    struct sockaddr_storage ss;
+    int sslen;
+    char hbuf[NI_MAXHOST];
+    char *localaddr;
+#ifdef NI_WITHSCOPEID
+    const int niflags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
+#else
+    const int niflags = NI_NUMERICHOST | NI_NUMERICSERV;
+#endif
+    unsigned char *ap;
+    unsigned char *pp;
+    int alen, plen;
+    char portmsgbuf[4096], tmp[4096];
+    char *p;
+    char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
+    char **modep;
+
+    /*
+     * we should use Curl_if2ip?  given pickiness of recent ftpd,
+     * I believe we should use the same address as the control connection.
+     */
+    sslen = sizeof(ss);
+    if (getsockname(data->firstsocket, (struct sockaddr *)&ss, &sslen) < 0)
+      return CURLE_FTP_PORT_FAILED;
+
+    if (getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL, 0,
+	niflags))
+      return CURLE_FTP_PORT_FAILED;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = ss.ss_family;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+    if (getaddrinfo(hbuf, "0", &hints, &res))
+      return CURLE_FTP_PORT_FAILED;
+
+    portsock = -1;
+    for (ai = res; ai; ai = ai->ai_next) {
+      portsock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+      if (portsock < 0)
+	continue;
+
+      if (bind(portsock, ai->ai_addr, ai->ai_addrlen) < 0) {
+	close(portsock);
+	portsock = -1;
+	continue;
+      }
+
+      if (listen(portsock, 1) < 0) {
+	close(portsock);
+	portsock = -1;
+	continue;
+      }
+
+      break;
+    }
+    if (portsock < 0) {
+      failf(data, strerror(errno));
+      freeaddrinfo(res);
+      return CURLE_FTP_PORT_FAILED;
+    }
+
+    sslen = sizeof(ss);
+    if (getsockname(portsock, (struct sockaddr *)&ss, &sslen) < 0) {
+      failf(data, strerror(errno));
+      freeaddrinfo(res);
+      return CURLE_FTP_PORT_FAILED;
+    }
+
+    for (modep = mode; modep && *modep; modep++) {
+      int lprtaf, eprtaf;
+
+      switch (ss.ss_family) {
+      case AF_INET:
+	ap = (char *)&((struct sockaddr_in *)&ss)->sin_addr;
+	alen = sizeof(((struct sockaddr_in *)&ss)->sin_addr);
+	pp = (char *)&((struct sockaddr_in *)&ss)->sin_port;
+	plen = sizeof(((struct sockaddr_in *)&ss)->sin_port);
+	lprtaf = 4;
+	eprtaf = 1;
+	break;
+      case AF_INET6:
+	ap = (char *)&((struct sockaddr_in6 *)&ss)->sin6_addr;
+	alen = sizeof(((struct sockaddr_in6 *)&ss)->sin6_addr);
+	pp = (char *)&((struct sockaddr_in6 *)&ss)->sin6_port;
+	plen = sizeof(((struct sockaddr_in6 *)&ss)->sin6_port);
+	lprtaf = 6;
+	eprtaf = 2;
+	break;
+      default:
+	ap = pp = NULL;
+	lprtaf = eprtaf = -1;
+	break;
+      }
+
+      if (strcmp(*modep, "EPRT") == 0) {
+	if (eprtaf < 0)
+	  continue;
+	if (getnameinfo((struct sockaddr *)&ss, sslen,
+	    portmsgbuf, sizeof(portmsgbuf), tmp, sizeof(tmp), niflags))
+	  continue;
+	/* do not transmit IPv6 scope identifier to the wire */
+	if (ss.ss_family == AF_INET6) {
+	  char *q = strchr(portmsgbuf, '%');
+	  if (q)
+	    *q = '\0';
+	}
+	ftpsendf(data->firstsocket, conn, "%s |%d|%s|%s|", *modep, eprtaf,
+	    portmsgbuf, tmp);
+      } else if (strcmp(*modep, "LPRT") == 0 || strcmp(*modep, "PORT") == 0) {
+	int i;
+
+        if (strcmp(*modep, "LPRT") == 0 && lprtaf < 0)
+	  continue;
+        if (strcmp(*modep, "PORT") == 0 && ss.ss_family != AF_INET)
+	  continue;
+
+	portmsgbuf[0] = '\0';
+        if (strcmp(*modep, "LPRT") == 0) {
+	  snprintf(tmp, sizeof(tmp), "%d,%d", lprtaf, alen);
+	  if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf)) {
+	    goto again;
+	  }
+	}
+	for (i = 0; i < alen; i++) {
+	  if (portmsgbuf[0])
+	    snprintf(tmp, sizeof(tmp), ",%u", ap[i]);
+	  else
+	    snprintf(tmp, sizeof(tmp), "%u", ap[i]);
+	  if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf)) {
+	    goto again;
+	  }
+	}
+        if (strcmp(*modep, "LPRT") == 0) {
+	  snprintf(tmp, sizeof(tmp), ",%d", plen);
+	  if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf))
+	    goto again;
+	}
+	for (i = 0; i < plen; i++) {
+	  snprintf(tmp, sizeof(tmp), ",%u", pp[i]);
+	  if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf)) {
+	    goto again;
+	  }
+	}
+	ftpsendf(data->firstsocket, conn, "%s %s", *modep, portmsgbuf);
+      }
+
+      nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+      if (nread < 0)
+	return CURLE_OPERATION_TIMEOUTED;
+
+      if (ftpcode != 200) {
+	failf(data, "Server does not grok %s", *modep);
+	continue;
+      } else
+	      break;
+again:;
+    }
+
+    if (!*modep) {
+      close(portsock);
+      freeaddrinfo(res);
+      return CURLE_FTP_PORT_FAILED;
+    }
+
+#else
     struct sockaddr_in sa;
     struct hostent *h=NULL;
     char *hostdataptr=NULL;
@@ -809,26 +980,43 @@ CURLcode _ftp(struct connectdata *conn)
       failf(data, "Server does not grok PORT, try without it!");
       return CURLE_FTP_PORT_FAILED;
     }     
+#endif /* ENABLE_IPV6 */
   }
   else { /* we use the PASV command */
+#if 0
+    char *mode[] = { "EPSV", "LPSV", "PASV", NULL };
+    int results[] = { 229, 228, 227, 0 };
+#else
+    char *mode[] = { "PASV", NULL };
+    int results[] = { 227, 0 };
+#endif
+    int modeoff;
 
-    ftpsendf(data->firstsocket, conn, "PASV");
+    for (modeoff = 0; mode[modeoff]; modeoff++) {
+      ftpsendf(data->firstsocket, conn, mode[modeoff]);
+      nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+      if(nread < 0)
+	return CURLE_OPERATION_TIMEOUTED;
 
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
-    if(nread < 0)
-      return CURLE_OPERATION_TIMEOUTED;
+      if (ftpcode == results[modeoff])
+	break;
+    }
 
-    if(ftpcode != 227) {
+    if (!mode[modeoff]) {
       failf(data, "Odd return code after PASV");
       return CURLE_FTP_WEIRD_PASV_REPLY;
     }
-    else {
+    else if (strcmp(mode[modeoff], "PASV") == 0) {
       int ip[4];
       int port[2];
       unsigned short newport; /* remote port, not necessary the local one */
       unsigned short connectport; /* the local port connect() should use! */
       char newhost[32];
+#ifdef ENABLE_IPV6
+      struct addrinfo *res;
+#else
       struct hostent *he;
+#endif
       char *str=buf,*ip_addr;
       char *hostdataptr=NULL;
 
@@ -863,20 +1051,78 @@ CURLcode _ftp(struct connectdata *conn)
          * proxy again here. We already have the name info for it since the
          * previous lookup.
          */
+#ifdef ENABLE_IPV6
+        res = conn->res;
+#else
         he = conn->hp;
+#endif
         connectport =
           (unsigned short)data->port; /* we connect to the proxy's port */
       }
       else {
         /* normal, direct, ftp connection */
+#ifdef ENABLE_IPV6
+        res = Curl_getaddrinfo(data, newhost, newport);
+        if(!res)
+#else
         he = Curl_gethost(data, newhost, &hostdataptr);
-        if(!he) {
+        if(!he)
+#endif
+        {
           failf(data, "Can't resolve new host %s", newhost);
           return CURLE_FTP_CANT_GET_HOST;
         }
         connectport = newport; /* we connect to the remote port */
       }
 	
+#ifdef ENABLE_IPV6
+      data->secondarysocket = -1;
+      for (ai = res; ai; ai = ai->ai_next) {
+	/* XXX for now, we can do IPv4 only */
+	if (ai->ai_family != AF_INET)
+	  continue;
+
+	data->secondarysocket = socket(ai->ai_family, ai->ai_socktype,
+	    ai->ai_protocol);
+	if (data->secondarysocket < 0)
+	  continue;
+
+	if(data->bits.verbose) {
+	  char hbuf[NI_MAXHOST];
+	  char nbuf[NI_MAXHOST];
+	  char sbuf[NI_MAXSERV];
+#ifdef NI_WITHSCOPEID
+	  const int niflags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
+#else
+	  const int niflags = NI_NUMERICHOST | NI_NUMERICSERV;
+#endif
+	  if (getnameinfo(res->ai_addr, res->ai_addrlen, nbuf, sizeof(nbuf),
+	      sbuf, sizeof(sbuf), niflags)) {
+	    snprintf(nbuf, sizeof(nbuf), "?");
+	    snprintf(sbuf, sizeof(sbuf), "?");
+	  }
+	  if (getnameinfo(res->ai_addr, res->ai_addrlen, hbuf, sizeof(hbuf),
+	      NULL, 0, 0)) {
+	    infof(data, "Connecting to %s port %s\n", nbuf, sbuf);
+	  } else {
+	    infof(data, "Connecting to %s (%s) port %s\n", hbuf, nbuf, sbuf);
+	  }
+	}
+
+	if (connect(data->secondarysocket, ai->ai_addr, ai->ai_addrlen) < 0) {
+	  close(data->secondarysocket);
+	  data->secondarysocket = -1;
+	  continue;
+	}
+
+	break;
+      }
+
+      if (data->secondarysocket < 0) {
+	failf(data, strerror(errno));
+        return CURLE_FTP_CANT_RECONNECT;
+      }
+#else
       data->secondarysocket = socket(AF_INET, SOCK_STREAM, 0);
 
       memset((char *) &serv_addr, '\0', sizeof(serv_addr));
@@ -971,6 +1217,7 @@ CURLcode _ftp(struct connectdata *conn)
         }
         return CURLE_FTP_CANT_RECONNECT;
       }
+#endif /*ENABLE_IPV6*/
 
       if (data->bits.tunnel_thru_httpproxy) {
         /* We want "seamless" FTP operations through HTTP proxy tunnel */
@@ -979,6 +1226,8 @@ CURLcode _ftp(struct connectdata *conn)
         if(CURLE_OK != result)
           return result;
       }
+    } else {
+      return CURLE_FTP_CANT_RECONNECT;
     }
   }
   /* we have the (new) data connection ready */

@@ -83,6 +83,29 @@ static char *MakeIP(unsigned long num,char *addr, int addr_len)
   return (addr);
 }
 
+#ifdef ENABLE_IPV6
+struct addrinfo *Curl_getaddrinfo(struct UrlData *data,
+			       char *hostname,
+			       int port)
+{
+  struct addrinfo hints, *res;
+  int error;
+  char sbuf[NI_MAXSERV];
+
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = PF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags = AI_CANONNAME;
+  snprintf(sbuf, sizeof(sbuf), "%d", port);
+  error = getaddrinfo(hostname, sbuf, &hints, &res);
+  if (error) {
+    infof(data, "getaddrinfo(3) failed for %s\n", hostname);
+    return NULL;
+  }
+  return res;
+}
+#endif
+
 /* The original code to this function was once stolen from the Dancer source
    code, written by Bjorn Reese, it has since been patched and modified
    considerably. */

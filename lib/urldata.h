@@ -159,9 +159,13 @@ struct connectdata {
 #define PROT_LDAP    (1<<7)
 #define PROT_FILE    (1<<8)
 
+#ifdef ENABLE_IPV6
+  struct addrinfo *res;
+#else
   char *hostent_buf; /* pointer to allocated memory for name info */
   struct hostent *hp;
   struct sockaddr_in serv_addr;
+#endif
   char proto[64];  /* store the protocol string in this buffer */
   char gname[257]; /* store the hostname in this buffer */
   char *name;      /* host name pointer to fool around with */

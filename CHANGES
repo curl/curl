@@ -8,6 +8,9 @@
 
 
 Daniel (5 February 2001)
+- Jun-ichiro itojun Hagino brought a big patch that brings IPv6-awareness to
+  a bunch of different areas within libcurl.
+
 - Robert Weaver told me about the problems the MS VC++ 6.0 compiler has with
   the 'static' keyword on a number of libcurl functions. I might need to add a
   patch that redefines static when libcurl is compiled with that compiler.

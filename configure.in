@@ -53,15 +53,9 @@ dnl
 AC_DEFUN(CURL_CHECK_WORKING_GETADDRINFO,[
   AC_CACHE_CHECK(for working getaddrinfo, ac_cv_working_getaddrinfo,[
   AC_TRY_RUN( [
-#ifdef HAVE_NETDB_H
 #include <netdb.h>
-#endif
-#ifdef HAVE_STRING_H
-#include <string.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
+#include <sys/types.h>
 #include <sys/socket.h>
-#endif
 
 void main(void) {
     struct addrinfo hints, *ai;
@@ -434,6 +428,10 @@ AC_MSG_CHECKING([if Kerberos4 support is requested])
 
 if test "$want_krb4" = yes
 then
+  if test "$ipv6" = "yes"; then
+    echo krb4 is not compatible with IPv6
+    exit 1
+  fi
   AC_MSG_RESULT(yes)
 
   dnl Check for & handle argument to --with-krb4
@@ -691,7 +689,8 @@ AC_CHECK_FUNCS( socket \
                 setvbuf \
                 sigaction \
                 signal \
-                getpass_r
+                getpass_r \
+                strlcat
 )
 
 dnl removed 'getpass' check on October 26, 2000

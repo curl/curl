@@ -23,6 +23,11 @@
  * $Id$
  *****************************************************************************/
 
+struct addrinfo;
+struct addrinfo *Curl_getaddrinfo(struct UrlData *data,
+                             char *hostname,
+                             int port);
+
 struct hostent *Curl_gethost(struct UrlData *data,
                              char *hostname,
                              char **bufp);

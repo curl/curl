@@ -562,8 +562,13 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
 
   struct UrlData *data = conn->data;
 
+#ifdef ENABLE_IPV6
+  if(conn->res) /* host name info */
+    freeaddrinfo(conn->res);
+#else
   if(conn->hostent_buf) /* host name info */
     free(conn->hostent_buf);
+#endif
 
   if(conn->path) /* the URL path part */
     free(conn->path);
@@ -589,6 +594,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   struct sigaction sigact;
 #endif
   int urllen;
+#ifdef ENABLE_IPV6
+  struct addrinfo *ai;
+#endif
 
   /*************************************************************
    * Check input data
@@ -1189,13 +1197,23 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     data->port =  data->remote_port; /* it is the same port */
 
     /* Connect to target host right on */
+#ifdef ENABLE_IPV6
+    conn->res = Curl_getaddrinfo(data, conn->name, data->port);
+    if(!conn->res)
+#else
     conn->hp = Curl_gethost(data, conn->name, &conn->hostent_buf);
-    if(!conn->hp) {
+    if(!conn->hp)
+#endif
+    {
       failf(data, "Couldn't resolve host '%s'", conn->name);
       return CURLE_COULDNT_RESOLVE_HOST;
     }
   }
   else {
+#ifdef ENABLE_IPV6
+    failf(data, "proxy yet to be supported");
+    return CURLE_OUT_OF_MEMORY;
+#else
     char *prox_portno;
     char *endofprot;
 
@@ -1244,9 +1262,11 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     }
 
     free(proxydup); /* free the duplicate pointer and not the modified */
+#endif
   }
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
+#ifndef ENABLE_IPV6
   data->firstsocket = socket(AF_INET, SOCK_STREAM, 0);
 
   memset((char *) &conn->serv_addr, '\0', sizeof(conn->serv_addr));
@@ -1254,6 +1274,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
          conn->hp->h_addr, conn->hp->h_length);
   conn->serv_addr.sin_family = conn->hp->h_addrtype;
   conn->serv_addr.sin_port = htons(data->port);
+#endif
 
 #if !defined(WIN32)||defined(__CYGWIN32__)
   /* We don't generally like checking for OS-versions, we should make this
@@ -1266,6 +1287,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 #define INADDR_NONE (unsigned long) ~0
 #endif
 
+#ifndef ENABLE_IPV6
   /*************************************************************
    * Select device to bind socket to
    *************************************************************/
@@ -1374,10 +1396,31 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   } /* end of device selection support */
 #endif  /* end of HAVE_INET_NTOA */
 #endif /* end of not WIN32 */
+#endif /*ENABLE_IPV6*/
 
   /*************************************************************
    * Connect to server/proxy
    *************************************************************/
+#ifdef ENABLE_IPV6
+  data->firstsocket = -1;
+  for (ai = conn->res; ai; ai = ai->ai_next) {
+    data->firstsocket = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+    if (data->firstsocket < 0)
+      continue;
+
+    if (connect(data->firstsocket, ai->ai_addr, ai->ai_addrlen) < 0) {
+      close(data->firstsocket);
+      data->firstsocket = -1;
+      continue;
+    }
+
+    break;
+  }
+  if (data->firstsocket < 0) {
+    failf(data, strerror(errno));
+    return CURLE_COULDNT_CONNECT;
+  }
+#else
   if (connect(data->firstsocket,
               (struct sockaddr *) &(conn->serv_addr),
               sizeof(conn->serv_addr)
@@ -1426,6 +1469,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     }
     return CURLE_COULDNT_CONNECT;
   }
+#endif
 
   /*************************************************************
    * Proxy authentication
@@ -1473,11 +1517,31 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   conn->bytecount = 0;
   
   /* Figure out the ip-number and display the first host name it shows: */
+#ifdef ENABLE_IPV6
+  {
+    char hbuf[NI_MAXHOST];
+#ifdef NI_WITHSCOPEID
+    const int niflags = NI_NUMERICHOST | NI_WITHSCOPEID;
+#else
+    const int niflags = NI_NUMERICHOST;
+#endif
+    if (getnameinfo(ai->ai_addr, ai->ai_addrlen, hbuf, sizeof(hbuf), NULL, 0,
+	niflags)) {
+      snprintf(hbuf, sizeof(hbuf), "?");
+    }
+    if (ai->ai_canonname) {
+      infof(data, "Connected to %s (%s)\n", ai->ai_canonname, hbuf);
+    } else {
+      infof(data, "Connected to %s\n", hbuf);
+    }
+  }
+#else
   {
     struct in_addr in;
     (void) memcpy(&in.s_addr, *conn->hp->h_addr_list, sizeof (in.s_addr));
     infof(data, "Connected to %s (%s)\n", conn->hp->h_name, inet_ntoa(in));
   }
+#endif
 
 #ifdef __EMX__
   /* 20000330 mgs
@@ -1509,8 +1573,13 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     if(conn) {
       if(conn->path)
         free(conn->path);
+#ifdef ENABLE_IPV6
+      if(conn->res)
+        freeaddrinfo(conn->res);
+#else
       if(conn->hostent_buf)
         free(conn->hostent_buf);
+#endif
       free(conn);
       *in_connect=NULL;
     }
