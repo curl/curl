@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (18 June 2004)
+- Gisle Vanem's patch that provides more details from the SSL layers (if you
+  use an OpenSSL version that supports it). It also introduces two new types
+  of data that can be sent to the debug callback: CURLINFO_SSL_DATA_IN and
+  CURLINFO_SSL_DATA_OUT.
+
+- With David Byron's test server I could repeat his problem and make sure that
+  POSTing over HTTPS:// with NTLM works fine now. There was a general problem
+  with multi-pass authentication with non-GET operations with CONNECT.
+
 Daniel (16 June 2004)
 - Modified to keep the upload byte counter in an curl_off_t, not an int as
   before. 32bits is not enough. This is most likely the bug Jean-Louis Lemaire

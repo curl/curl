@@ -204,7 +204,8 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
       break;
 
     if(data->set.verbose)
-      Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written, conn->host.dispname);
+      Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written,
+                 conn->host.dispname);
 
     if((size_t)bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease
@@ -444,7 +445,7 @@ static int showit(struct SessionHandle *data, curl_infotype type,
                   char *ptr, size_t size)
 {
   static const char * const s_infotype[CURLINFO_END] = {
-    "* ", "< ", "> ", "{ ", "} " };
+    "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
 
   if(data->set.fdebug)
     return (*data->set.fdebug)(data, type, ptr, size,

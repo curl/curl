@@ -1892,7 +1892,7 @@ static int handleSock5Proxy(const char *proxy_name,
     }
 #else
     failf(conn->data,
-          "%s:%d has an internal error an needs to be fixed to work",
+          "%s:%d has an internal error and needs to be fixed to work",
           __FILE__, __LINE__);
 #endif
   }

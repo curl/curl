@@ -2572,7 +2572,6 @@ int my_trace(CURL *handle, curl_infotype type,
   struct Configurable *config = (struct Configurable *)userp;
   FILE *output=config->errors;
   const char *text;
-
   (void)handle; /* prevent compiler warning */
 
   if(!config->trace_stream) {
@@ -2605,6 +2604,12 @@ int my_trace(CURL *handle, curl_infotype type,
     break;
   case CURLINFO_DATA_IN:
     text = "<= Recv data";
+    break;
+  case CURLINFO_SSL_DATA_IN:
+    text = "<= Recv SSL data";
+    break;
+  case CURLINFO_SSL_DATA_OUT:
+    text = "<= Send SSL data";
     break;
   }
 

@@ -47,6 +47,9 @@
 #include "connect.h" /* Curl_ourerrno() proto */
 #include "strequal.h"
 
+#define _MPRINTF_REPLACE /* use the internal *printf() functions */
+#include <curl/mprintf.h>
+
 #ifdef USE_SSLEAY
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
@@ -55,6 +58,10 @@
 
 /* The last #include file should be: */
 #include "memdebug.h"
+
+#ifndef min
+#define min(a, b)   ((a) < (b) ? (a) : (b))
+#endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090581fL
 #define HAVE_SSL_GET1_SESSION 1
@@ -859,6 +866,7 @@ static CURLcode verifyhost(struct connectdata *conn,
           /* Is this a wildcard match? */
           else if((altptr[0] == '*') &&
                   (domainlen == altlen-1) &&
+                  domain &&
                   curl_strnequal(domain, altptr+1, domainlen))
             matched = TRUE;
           break;
@@ -938,6 +946,115 @@ static CURLcode verifyhost(struct connectdata *conn,
 }
 #endif
 
+/* The SSL_CTRL_SET_MSG_CALLBACK doesn't exist in ancient OpenSSL versions
+   and thus this cannot be done there. */
+#ifdef SSL_CTRL_SET_MSG_CALLBACK
+
+static const char *ssl_msg_type(int ssl_ver, int msg)
+{
+  if (ssl_ver == SSL2_VERSION_MAJOR) {
+    switch (msg) {
+      case SSL2_MT_ERROR:
+        return "Error";
+      case SSL2_MT_CLIENT_HELLO:
+        return "Client hello";
+      case SSL2_MT_CLIENT_MASTER_KEY:
+        return "Client key";
+      case SSL2_MT_CLIENT_FINISHED:
+        return "Client finished";
+      case SSL2_MT_SERVER_HELLO:
+        return "Server hello";
+      case SSL2_MT_SERVER_VERIFY:
+        return "Server verify";
+      case SSL2_MT_SERVER_FINISHED:
+        return "Server finished";
+      case SSL2_MT_REQUEST_CERTIFICATE:
+        return "Request CERT";
+      case SSL2_MT_CLIENT_CERTIFICATE:
+        return "Client CERT";
+    }
+  }
+  else if (ssl_ver == SSL3_VERSION_MAJOR) {
+    switch (msg) {
+      case SSL3_MT_HELLO_REQUEST:
+        return "Hello request";
+      case SSL3_MT_CLIENT_HELLO:
+        return "Client hello";
+      case SSL3_MT_SERVER_HELLO:
+        return "Server hello";
+      case SSL3_MT_CERTIFICATE:
+        return "CERT";
+      case SSL3_MT_SERVER_KEY_EXCHANGE:
+        return "Server key exchange";
+      case SSL3_MT_CLIENT_KEY_EXCHANGE:
+        return "Client key exchange";
+      case SSL3_MT_CERTIFICATE_REQUEST:
+        return "Request CERT";
+      case SSL3_MT_SERVER_DONE:
+        return "Server finished";
+      case SSL3_MT_CERTIFICATE_VERIFY:
+        return "CERT verify";
+      case SSL3_MT_FINISHED:
+        return "Finished";
+    }
+  }
+  return "Unknown";
+}
+
+static const char *tls_rt_type(int type)
+{
+  return (
+    type == SSL3_RT_CHANGE_CIPHER_SPEC ? "TLS change cipher, " :
+    type == SSL3_RT_ALERT              ? "TLS alert, "         :
+    type == SSL3_RT_HANDSHAKE          ? "TLS handshake, "     :
+    type == SSL3_RT_APPLICATION_DATA   ? "TLS app data, "      :
+                                         "TLS Unknown, ");
+}
+
+
+/*
+ * Our callback from the SSL/TLS layers.
+ */
+static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
+                          const void *buf, size_t len, const SSL *ssl,
+                          struct connectdata *conn)
+{
+  struct SessionHandle *data = conn->data;
+  const char *msg_name, *tls_rt_name;
+  char ssl_buf[1024];
+  int  ver, msg_type, txt_len;
+
+  if (!conn || !conn->data || !conn->data->set.fdebug ||
+      (direction != 0 && direction != 1))
+    return;
+
+  data = conn->data;
+  ssl_ver >>= 8;
+  ver = (ssl_ver == SSL2_VERSION_MAJOR ? '2' :
+         ssl_ver == SSL3_VERSION_MAJOR ? '3' : '?');
+
+  /* SSLv2 doesn't seem to have TLS record-type headers, so OpenSSL
+   * always pass-up content-type as 0. But the interesting message-tupe
+   * is at 'buf[0]'.
+   */
+  if (ssl_ver == SSL3_VERSION_MAJOR && content_type != 0)
+    tls_rt_name = tls_rt_type(content_type);
+  else
+    tls_rt_name = "";
+
+  msg_type = *(char*)buf;
+  msg_name = ssl_msg_type(ssl_ver, msg_type);
+
+  txt_len = 1 + sprintf(ssl_buf, "SSLv%c, %s%s (%d):\n",
+                        ver, tls_rt_name, msg_name, msg_type);
+  Curl_debug(data, CURLINFO_TEXT, ssl_buf, txt_len, NULL);
+
+  Curl_debug(data, (direction == 1) ? CURLINFO_SSL_DATA_OUT :
+             CURLINFO_SSL_DATA_IN, buf, len, NULL);
+  (void) ssl;
+}
+#endif
+
 /* ====================================================== */
 CURLcode
 Curl_SSLConnect(struct connectdata *conn,
@@ -991,6 +1108,14 @@ Curl_SSLConnect(struct connectdata *conn,
     return CURLE_OUT_OF_MEMORY;
   }
 
+#ifdef SSL_CTRL_SET_MSG_CALLBACK
+  if (data->set.fdebug) {
+    SSL_CTX_callback_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK,
+                          ssl_tls_trace);
+    SSL_CTX_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK_ARG, 0, conn);
+  }
+#endif
+
   /* OpenSSL contains code to work-around lots of bugs and flaws in various
      SSL-implementations. SSL_CTX_set_options() is used to enabled those
      work-arounds. The man page for this option states that SSL_OP_ALL enables
@@ -1000,6 +1125,16 @@ Curl_SSLConnect(struct connectdata *conn,
 
   */
   SSL_CTX_set_options(connssl->ctx, SSL_OP_ALL);
+
+#if 0
+  /*
+   * Not sure it's needed to tell SSL_connect() that socket is
+   * non-blocking. It doesn't seem to care, but just return with
+   * SSL_ERROR_WANT_x.
+   */
+  if (data->state.used_interface == Curl_if_multi)
+    SSL_CTX_ctrl(connssl->ctx, BIO_C_SET_NBIO, 1, NULL);
+#endif
 
   if(data->set.cert) {
     if(!cert_stuff(conn,
@@ -1105,10 +1240,6 @@ Curl_SSLConnect(struct connectdata *conn,
       /* Evaluate in milliseconds how much time that has passed */
       has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
 
-#ifndef min
-#define min(a, b)   ((a) < (b) ? (a) : (b))
-#endif
-
       /* get the most strict timeout of the ones converted to milliseconds */
       if(data->set.timeout &&
          (data->set.timeout>data->set.connecttimeout))
@@ -1150,6 +1281,8 @@ Curl_SSLConnect(struct connectdata *conn,
         unsigned long errdetail;
         char error_buffer[120]; /* OpenSSL documents that this must be at least
                                    120 bytes long. */
+        CURLcode rc;
+        const char *cert_problem = NULL;
 
         errdetail = ERR_get_error(); /* Gets the earliest error code from the
                                         thread's error queue and removes the
@@ -1161,16 +1294,34 @@ Curl_SSLConnect(struct connectdata *conn,
              SSL routines:
              SSL2_SET_CERTIFICATE:
              certificate verify failed */
+          /* fall-through */
         case 0x14090086:
           /* 14090086:
              SSL routines:
              SSL3_GET_SERVER_CERTIFICATE:
              certificate verify failed */
-          failf(data,
-                "SSL certificate problem, verify that the CA cert is OK");
-          return CURLE_SSL_CACERT;
+          cert_problem = "SSL certificate problem, verify that the CA cert is"
+                         " OK. Details:\n";
+          rc = CURLE_SSL_CACERT;
+          break;
         default:
+          rc = CURLE_SSL_CONNECT_ERROR;
+          break;
+        }
+
           /* detail is already set to the SSL error above */
+
+        /* If we e.g. use SSLv2 request-method and the server doesn't like us
+         * (RST connection etc.), OpenSSL gives no explanation whatsoever and
+         * the SO_ERROR is also lost.
+         */
+        if (CURLE_SSL_CONNECT_ERROR == rc && errdetail == 0) {
+	  failf(data, "Unknown SSL protocol error in connection to %s:%d ",
+                conn->host.name, conn->port);
+          return rc;
+        }
+        /* Could be a CERT problem */
+
 #ifdef HAVE_ERR_ERROR_STRING_N
           /* OpenSSL 0.9.6 and later has a function named
              ERRO_error_string_n() that takes the size of the buffer as a
@@ -1179,10 +1330,8 @@ Curl_SSLConnect(struct connectdata *conn,
 #else
           ERR_error_string(errdetail, error_buffer);
 #endif
-
-          failf(data, "SSL: %s", error_buffer);
-          return CURLE_SSL_CONNECT_ERROR;
-        }
+        failf(data, "%s%s", cert_problem ? cert_problem : "", error_buffer);
+        return rc;
       }
     }
     else
@@ -1278,18 +1427,18 @@ Curl_SSLConnect(struct connectdata *conn,
     /* We could do all sorts of certificate verification stuff here before
        deallocating the certificate. */
 
-    data->set.ssl.certverifyresult=SSL_get_verify_result(connssl->handle);
+    err = data->set.ssl.certverifyresult=SSL_get_verify_result(connssl->handle);
     if(data->set.ssl.certverifyresult != X509_V_OK) {
       if(data->set.ssl.verifypeer) {
         /* We probably never reach this, because SSL_connect() will fail
            and we return earlyer if verifypeer is set? */
-        failf(data, "SSL certificate verify result: %d",
-              data->set.ssl.certverifyresult);
+        failf(data, "SSL certificate verify result: %s (%d)",
+              X509_verify_cert_error_string(err), err);
         retcode = CURLE_SSL_PEER_CERTIFICATE;
       }
       else
-        infof(data, "SSL certificate verify result: %d, continuing anyway.\n",
-              data->set.ssl.certverifyresult);
+        infof(data, "SSL certificate verify result: %s (%d), continuing anyway.\n",
+              X509_verify_cert_error_string(err), err);
     }
     else
       infof(data, "SSL certificate verify ok.\n");
