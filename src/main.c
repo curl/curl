@@ -1389,7 +1389,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
 
       case 't': /* --proxy-ntlm */
-        config->proxyntlm ^= TRUE;
+        if(curlinfo->features & CURL_VERSION_NTLM)
+          config->proxyntlm ^= TRUE;
+        else
+          return PARAM_LIBCURL_DOESNT_SUPPORT;        
         break;
 
       case 'u': /* --crlf */
