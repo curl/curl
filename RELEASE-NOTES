@@ -8,7 +8,6 @@ Curl and libcurl 7.11.1. A bugfix release.
 This release includes the following changes:
 
  o SO_BINDTODEVICE is used for network interface binding
- o large file fix for Content-Length
  o configure --disable-manual disables the built-in huge manual from the
    command line tool
  o the default Accept: header used in HTTP requests changed
@@ -19,8 +18,12 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o fixed verbose output problem with ipv6-enabled re-used connections
+ o fixed the socks5 code to check version in the socks response properly
+ o dns cache bug - fixed the 'inuse' counter
+ o large file fix for Content-Length
  o better docs for the share interface
- o configure with mingw now detects gethostbyname and OpenSSL
+ o several configure fixes for mingw/msys
  o setting a Host: header is no longer affecting the Host: header used when
    libcurl follows a Location:
  o fixed numerous compiler warnings on several operating systems and compilers
@@ -48,6 +51,9 @@ Other curl-related news since the previous public release:
  o c-ares 1.0.0 was relased: http://daniel.haxx.se/projects/c-ares/
  o TclCurl 0.11.0 was released:
    http://personal1.iddeo.es/andresgarci/tclcurl/english/
+ o PycURL 7.11.0 was released: http://pycurl.sourceforge.net/
+ o the libcurl D binding was released:
+   http://www.atari-soldiers.com/libcurl.html
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
@@ -55,6 +61,6 @@ advice from friends like these:
  Gisle Vanem, Vincent Bronner, Richard Bramante, Dirk Manske, Dan Fandrich,
  Ken Hirsch, Stadler Stephan, Domenico Andreoli, Patrick Smith, Tor Arntsen,
  Andrés García, Tim Baker, Len Krause, Gilad, Ken Rastatter, P R Schaffner,
- Greg Hewgill, Ben Greear
+ Greg Hewgill, Ben Greear, Jeff Lawson, Grigory Entin
 
         Thanks! (and sorry if I forgot to mention someone)
