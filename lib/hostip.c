@@ -117,6 +117,7 @@ struct hostent *GetHost(struct UrlData *data,
   char *buf = (char *)malloc(CURL_NAMELOOKUP_SIZE);
   if(!buf)
     return NULL; /* major failure */
+  *bufp = buf;
 
   if ( (in=inet_addr(hostname)) != INADDR_NONE ) {
     struct in_addr *addrentry;
