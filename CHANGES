@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel(22 January 2004)
+- Removed the '#define HttpPost' from the public header file, as curl_httppost
+  is the proper name and it has been for quite some time now. Fixes another
+  name space pollution.
+
+- Added 'curl_off_t' typedef in the public header file, to be used to provide
+  large file sizes to the *_LARGE options. Adjusted the code all over to use
+  this variable type instead of 'off_t'. This is an attempt to make the large
+  file support work on more platforms. The configure script now checks the
+  size of the curl_off_t instead of the plain off_t.
+
 Version 7.11.0 (22 Januari 2004)
 
 Daniel (21 January 2004)
