@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (16 December 2004)
+- Dinar in bug report #1086121, found a file handle leak when a multipart
+  formpost (including a file upload part) was aborted before the whole file
+  was sent.
+
 Daniel (15 December 2004)
 - Tom Lee found out that globbing of strings with backslashes didn't work as
   you'd expect. Backslashes are such a central part of windows file names that

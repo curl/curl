@@ -357,10 +357,15 @@ sub runhttpserver {
     my $data;
 
     if($res && $verbose) {
-        print "RUN: curl command returned $res\nRUN: ";
         open(ERR, "<log/verifystderr");
-        print <ERR>;
+        my @e = <ERR>;
         close(ERR);
+        print "RUN: curl command returned $res\n";
+        for(@e) {
+            if($_ !~ /^([ \t]*)$/) {
+                print "RUN: $_";
+            }
+        }
     }
     open(FILE, "<log/verifiedserver");
     my @file=<FILE>;

@@ -1299,6 +1299,9 @@ CURLcode Curl_http_done(struct connectdata *conn,
     conn->bytecount = http->readbytecount + http->writebytecount;
 
     Curl_formclean(http->sendit); /* Now free that whole lot */
+    if(http->form.fp)
+      /* a file being uploaded was left opened, close it! */
+      fclose(http->form.fp);
   }
   else if(HTTPREQ_PUT == data->set.httpreq)
     conn->bytecount = http->readbytecount + http->writebytecount;
