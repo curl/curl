@@ -143,13 +143,23 @@ RETSIGTYPE alarmfunc(int signal)
 }
 #endif
 
+
+/*
+ * This is the internal function curl_easy_cleanup() calls. This should
+ * cleanup and free all resources associated with this sessionhandle.
+ *
+ * NOTE: if we ever add something that attempts to write to a socket or
+ * similar here, we must ignore SIGPIPE first. It is currently only done
+ * when curl_easy_perform() is invoked.
+ */
+
 CURLcode Curl_close(struct SessionHandle *data)
 {
   /* Loop through all open connections and kill them one by one */
   while(-1 != ConnectionKillOne(data));
 
 #ifdef USE_SSLEAY
-  /* Close down all open info open SSL and sessions */
+  /* Close down all open SSL info and sessions */
   Curl_SSL_Close_All(data);
 #endif
 
@@ -258,13 +268,6 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
   *curl = data;
 
-  /*************************************************************
-   * Tell signal handler to ignore SIGPIPE
-   *************************************************************/
-#if defined(HAVE_SIGNAL) && defined(SIGPIPE)
-  (void) signal(SIGPIPE, SIG_IGN);
-#endif
-  
   return CURLE_OK;
 }
 
@@ -1141,7 +1144,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 {
   char *tmp;
   char *buf;
-  CURLcode result;
+  CURLcode result=CURLE_OK;
   char resumerange[40]="";
   struct connectdata *conn;
   struct connectdata *conn_temp;
@@ -1154,6 +1157,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
   bool keep_copysig;              /* did copy it? */
+#else
+#ifdef HAVE_SIGNAL
+  void *keep_sigact;              /* store the old handler here */
+#endif
 #endif
 
   /*************************************************************
@@ -1941,7 +1948,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #else
     /* no sigaction(), revert to the much lamer signal() */
 #ifdef HAVE_SIGNAL
-    signal(SIGALRM, alarmfunc);
+    keep_sigact = signal(SIGALRM, alarmfunc);
 #endif
 #endif
 
@@ -2006,6 +2013,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
          and clean */
       sigaction(SIGALRM, &keep_sigact, NULL); /* put it back */
     }
+#else
+#ifdef HAVE_SIGNAL
+    /* restore the previous SIGALRM handler */
+    signal(SIGALRM, keep_sigact);
+#endif
 #endif
     /* switch back the alarm() to either zero or to what it was before minus
        the time we spent until now! */

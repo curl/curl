@@ -900,6 +900,10 @@ CURLcode Curl_perform(struct SessionHandle *data)
   struct connectdata *conn=NULL;
   bool port=TRUE; /* allow data->set.use_port to set port to use */
   char *newurl = NULL; /* possibly a new URL to follow to! */
+#ifdef HAVE_SIGNAL
+  /* storage for the previous signal handler */
+  void (*prev_signal)(int sig);
+#endif
 
   if(!data->change.url)
     /* we can't do anything wihout URL */
@@ -916,9 +920,22 @@ CURLcode Curl_perform(struct SessionHandle *data)
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
 
-  Curl_initinfo(data); /* reset session-specific information "variables" */
+#if defined(HAVE_SIGNAL) && defined(SIGPIPE)
+  /*************************************************************
+   * Tell signal handler to ignore SIGPIPE
+   *************************************************************/
+  prev_signal = signal(SIGPIPE, SIG_IGN);
+#endif  
 
+  Curl_initinfo(data); /* reset session-specific information "variables" */
   Curl_pgrsStartNow(data);
+
+  /*
+   * It is important that there is NO 'return' from this function any any
+   * other place than falling down the bottom! This is because we have cleanup
+   * stuff that must be done before we get back, and that is only performed
+   * after this do-while loop.
+   */
 
   do {
     Curl_pgrsTime(data, TIMER_STARTSINGLE);
@@ -1035,8 +1052,10 @@ CURLcode Curl_perform(struct SessionHandle *data)
              point to read-only data */
           char *url_clone=strdup(data->change.url);
 
-          if(!url_clone)
-            return CURLE_OUT_OF_MEMORY;
+          if(!url_clone) {
+            res = CURLE_OUT_OF_MEMORY;
+            break; /* skip out of this loop NOW */
+          }
 
           /* protsep points to the start of the host name */
           protsep=strstr(url_clone, "//");
@@ -1070,8 +1089,10 @@ CURLcode Curl_perform(struct SessionHandle *data)
                                  1 + /* possible slash */
                                  strlen(newurl) + 1/* zero byte */);
 
-          if(!newest)
-            return CURLE_OUT_OF_MEMORY;
+          if(!newest) {
+            res = CURLE_OUT_OF_MEMORY;
+            break; /* go go go out from this loop */
+          }
           sprintf(newest, "%s%s%s", url_clone, ('/' == newurl[0])?"":"/",
                   newurl);
           free(newurl);
@@ -1158,6 +1179,11 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
   if(newurl)
     free(newurl);
+
+#if defined(HAVE_SIGNAL) && defined(SIGPIPE)
+  /* restore the signal handler for SIGPIPE before we get back */
+  signal(SIGPIPE, prev_signal);
+#endif  
 
   return res;
 }
