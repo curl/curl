@@ -456,9 +456,10 @@ struct UrlData {
   long header_size;  /* size of read header(s) in bytes */
   long request_size; /* the amount of bytes sent in the request(s) */
 
-  FILE *out;    /* the fetched file goes here */
-  FILE *in;     /* the uploaded file is read from here */
-  FILE *writeheader; /* write the header to this is non-NULL */
+  void *out;         /* the fetched file goes here */
+  void *in;          /* the uploaded file is read from here */
+  void *writeheader; /* write the header to this is non-NULL */
+
   char *url;   /* what to get */
   char *freethis; /* if non-NULL, an allocated string for the URL */
   long use_port;  /* which port to use (when not using default) */

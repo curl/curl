@@ -76,12 +76,12 @@ typedef int (*curl_progress_callback)(void *clientp,
 typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t size,
                                       size_t nitems,
-                                      FILE *outstream);
+                                      void *outstream);
 
 typedef size_t (*curl_read_callback)(char *buffer,
                                      size_t size,
                                      size_t nitems,
-                                     FILE *instream);
+                                     void *instream);
 
 typedef int (*curl_passwd_callback)(void *clientp,
                                     char *prompt,
@@ -173,7 +173,7 @@ typedef enum {
 typedef enum {
   CINIT(NOTHING, LONG, 0), /********* the first one is unused ************/
   
-  /* This is the FILE * the regular output should be written to. */
+  /* This is the FILE * or void * the regular output should be written to. */
   CINIT(FILE, OBJECTPOINT, 1),
 
   /* The full URL to get/put */
@@ -276,7 +276,8 @@ typedef enum {
   /* send linked-list of QUOTE commands */
   CINIT(QUOTE, OBJECTPOINT, 28),
 
-  /* send FILE * to store headers to */
+  /* send FILE * or void * to store headers to, if you use a callback it
+     is simply passed to the callback unmodified */
   CINIT(WRITEHEADER, OBJECTPOINT, 29),
 
 #ifdef MULTIDOC

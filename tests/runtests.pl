@@ -20,7 +20,6 @@ my $CURL="../src/curl"; # what curl executable to run on the tests
 my $LOGDIR="log";
 my $TESTDIR="data";
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
-my $CURLOUT="$LOGDIR/curl.out"; # curl output if not stdout
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
 
@@ -59,7 +58,8 @@ my $short;
 my $verbose;
 my $debugprotocol;
 my $anyway;
-my $gdbthis; # run test case with gdb debugger
+my $gdbthis;      # run test case with gdb debugger
+my $keepoutfiles; # keep stdout and stderr files after tests
 
 #######################################################################
 # Return the pid of the server as found in the given pid file
@@ -432,6 +432,8 @@ sub singletest {
     # if this file exists, it is FTP server instructions:
     my $ftpservercmd="$TESTDIR/ftpd$NUMBER.txt";
 
+    my $CURLOUT="$LOGDIR/curl$NUMBER.out"; # curl output if not stdout
+
     if(! -r $CURLCMD) {
         if($verbose) {
             # this is not a test
@@ -603,12 +605,15 @@ sub singletest {
 
     }
 
-    # remove the stdout and stderr files
-    unlink($STDOUT);
-    unlink($STDERR);
+    if(!$keepoutfiles) {
+        # remove the stdout and stderr files
+        unlink($STDOUT);
+        unlink($STDERR);
+        unlink($CURLOUT); # remove the downloaded results
 
-    unlink("$LOGDIR/upload.$NUMBER");  # remove upload leftovers
-    unlink($CURLOUT); # remove the downloaded results
+        unlink("$LOGDIR/upload.$NUMBER");  # remove upload leftovers
+    }
+
     unlink($FTPDCMD); # remove the instructions for this test
 
     if($memory_debug) {
@@ -737,6 +742,10 @@ do {
         # continue anyway, even if a test fail
         $anyway=1;
     }
+    elsif($ARGV[0] eq "-k") {
+        # keep stdout and stderr files after tests
+        $keepoutfiles=1;
+    }
     elsif($ARGV[0] eq "-h") {
         # show help text
         print <<EOHELP
@@ -745,6 +754,7 @@ Usage: runtests.pl [options]
   -d       display server debug info
   -g       run the test case with gdb
   -h       this help text
+  -k       keep stdout and stderr files present after tests
   -s       short output
   -v       verbose output
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only

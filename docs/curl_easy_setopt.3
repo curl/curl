@@ -42,54 +42,43 @@ call.
 These options are in a bit of random order, but you'll figure it out!
 .TP 0.8i
 .B CURLOPT_FILE
-Data pointer to pass instead of FILE * to the file write function. Note that
-if you specify the
+Data pointer to pass to file write function. Note that if you specify the
 .I CURLOPT_WRITEFUNCTION
-, this is the pointer you'll get as input.
+, this is the pointer you'll get as input. If you don't use a callback, you
+must pass a 'FILE *' as libcurl passes it to fwrite() when writing data.
 
-NOTE: If you're using libcurl as a win32 .DLL, you MUST use a
-.I CURLOPT_WRITEFUNCTION
-if you set the
-.I CURLOPT_FILE
-option.
+NOTE: If you're using libcurl as a win32 DLL, you MUST use the
+\fICURLOPT_WRITEFUNCTION\fP if you set this option.
 .TP
 .B CURLOPT_WRITEFUNCTION
 Function pointer that should match the following prototype:
-.BI "size_t function( void *ptr, size_t size, size_t nmemb, FILE *stream);"
+.BI "size_t function( void *ptr, size_t size, size_t nmemb, void *stream);"
 This function gets called by libcurl as soon as there is received data that
-needs to be written down. The size of the data pointed to by
-.I ptr 
-is
-.I size
-multiplied with
-.I nmemb.
-Return the number of bytes actually written or return -1 to signal error to the library (it will cause it to abort the transfer).
+needs to be written down. The size of the data pointed to by \fIptr\fP is
+\fIsize\fP multiplied with \fInmemb\fP.  Return the number of bytes actually
+written or return -1 to signal error to the library (it will cause it to abort
+the transfer with CURLE_WRITE_ERROR).
+
+Set the \fIstream\fP argument with the \fBCURLOPT_FILE\fP option.
 .TP
 .B CURLOPT_INFILE
-Data pointer to pass instead of FILE * to the file read function. Note that if
-you specify the
-.I CURLOPT_READFUNCTION
-, this is the pointer you'll get as input.
+Data pointer to pass to the file read function. Note that if you specify the
+\fICURLOPT_READFUNCTION\fP, this is the pointer you'll get as input. If you
+don't specify a read callback, this must be a valid FILE *.
 
-NOTE: If you're using libcurl as a win32 .DLL, you MUST use a
-.I CURLOPT_READFUNCTION
-if you set the
-.I CURLOPT_INFILE
-option.
+NOTE: If you're using libcurl as a win32 DLL, you MUST use a
+\fICURLOPT_READFUNCTION\fP if you set this option.
 .TP
 .B CURLOPT_READFUNCTION
 Function pointer that should match the following prototype:
-.BI "size_t function( void *ptr, size_t size, size_t nmemb, FILE *stream);"
+.BI "size_t function( void *ptr, size_t size, size_t nmemb, void *stream);"
 This function gets called by libcurl as soon as it needs to read data in order
-to send it to the peer. The data area pointed at by the pointer
-.I ptr
-may be filled with at most
-.I size
-multiplied with
-.I nmemb
-number of bytes. Your function must return the actual number of bytes that you
-stored in that memory area. Returning -1 will signal an error to the library
-and cause it to abort the current transfer immediately.
+to send it to the peer. The data area pointed at by the pointer \fIptr\fP may
+be filled with at most \fIsize\fP multiplied with \fInmemb\fP number of
+bytes. Your function must return the actual number of bytes that you stored in
+that memory area. Returning -1 will signal an error to the library and cause
+it to abort the current transfer immediately (with a CURLE_READ_ERROR return
+code).
 .TP
 .B CURLOPT_INFILESIZE
 When uploading a file to a remote site, this option should be used to tell
@@ -317,16 +306,15 @@ struct curl_slist structs properly filled in as described for
 .I "CURLOPT_QUOTE"
 .TP
 .B CURLOPT_WRITEHEADER
-Pass a FILE * to be used to write the header part of the received data to. The
-headers are guaranteed to be written one-by-one to this file handle and only
-complete lines are written. Parsing headers should be easy enough using
-this. See also the
-.I CURLOPT_HEADERFUNCTION
-option.
+Pass a pointer to be used to write the header part of the received data to. If
+you don't use a callback to take care of the writing, this must be a FILE
+*. The headers are guaranteed to be written one-by-one and only complete lines
+are written. Parsing headers should be easy enough using this. See also the
+\fICURLOPT_HEADERFUNCTION\fP option.
 .TP
 .B CURLOPT_HEADERFUNCTION
 Function pointer that should match the following prototype:
-.BI "size_t function( void *ptr, size_t size, size_t nmemb, FILE *stream);"
+.BI "size_t function( void *ptr, size_t size, size_t nmemb, void *stream);"
 This function gets called by libcurl as soon as there is received header data
 that needs to be written down. The function will be called once for each
 header with a complete header line in each invoke. The size of the data

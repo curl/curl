@@ -1268,7 +1268,7 @@ struct OutStruct {
   struct Configurable *config;
 };
 
-int my_fwrite(void *buffer, size_t size, size_t nmemb, FILE *stream)
+int my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
 {
   struct OutStruct *out=(struct OutStruct *)stream;
   if(out && !out->stream) {
