@@ -3348,14 +3348,6 @@ static CURLcode SetupConnection(struct connectdata *conn,
     }
   }
 
-  if(data->set.encoding) {
-    Curl_safefree(conn->allocptr.accept_encoding);
-    conn->allocptr.accept_encoding =
-      aprintf("Accept-Encoding: %s\015\012", data->set.encoding);
-    if(!conn->allocptr.accept_encoding)
-      return CURLE_OUT_OF_MEMORY;
-  }
-
   conn->bytecount = 0;
   conn->headerbytecount = 0;
 

@@ -1325,6 +1325,15 @@ CURLcode Curl_http(struct connectdata *conn)
   if(data->set.cookie && !checkheaders(data, "Cookie:"))
     addcookies = data->set.cookie;
 
+  if(!checkheaders(data, "Accept-Encoding:") &&
+     data->set.encoding) {
+    Curl_safefree(conn->allocptr.accept_encoding);
+    conn->allocptr.accept_encoding =
+      aprintf("Accept-Encoding: %s\015\012", data->set.encoding);
+    if(!conn->allocptr.accept_encoding)
+      return CURLE_OUT_OF_MEMORY;
+  }
+
   if(!conn->bits.upload_chunky && (httpreq != HTTPREQ_GET)) {
     /* not a chunky transfer yet, but data is to be sent */
     ptr = checkheaders(data, "Transfer-Encoding:");
