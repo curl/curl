@@ -938,6 +938,12 @@ The time, in seconds, it took from the start until the file transfer is just
 about to begin. This includes all pre-transfer commands and negotiations that
 are specific to the particular protocol(s) involved.
 .TP
+.B time_redirect
+The time, in seconds, it took for all redirection steps include name lookup,
+connect, pretransfer and transfer before final transaction was
+started. time_redirect shows the complete execution time for multiple
+redirections. (Added in 7.12.3)
+.TP
 .B time_starttransfer
 The time, in seconds, it took from the start until the first byte is just about
 to be transfered. This includes time_pretransfer and also the time the
@@ -966,6 +972,9 @@ The Content-Type of the requested document, if there was any. (Added in 7.9.5)
 .TP
 .B num_connects
 Number of new connects made in the recent transfer. (Added in 7.12.3)
+.TP
+.B num_redirects
+Number of redirects that were followed in the request. (Added in 7.12.3)
 .RE
 
 If this option is used several times, the last one will be used.
