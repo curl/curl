@@ -155,19 +155,17 @@ AC_DEFUN([TYPE_IN_ADDR_T],
          # Systems have either "struct sockaddr *" or
          # "void *" as the second argument to getpeername
          curl_cv_in_addr_t_equiv=
-         for arg2 in "struct sockaddr" void; do
-            for t in int size_t unsigned long "unsigned long"; do
-               AC_TRY_COMPILE([
-                  #include <sys/types.h>
-                  #include <sys/socket.h>
-                  #include <arpa/inet.h>
-               ],[
-                  $arg data = inet_addr ("1.2.3.4");
-               ],[
-                  curl_cv_in_addr_t_equiv="$t"
-                  break
-               ])
-            done
+         for t in int size_t unsigned long "unsigned long"; do
+            AC_TRY_COMPILE([
+               #include <sys/types.h>
+               #include <sys/socket.h>
+               #include <arpa/inet.h>
+            ],[
+               $t data = inet_addr ("1.2.3.4");
+            ],[
+               curl_cv_in_addr_t_equiv="$t"
+               break
+            ])
          done
 
          if test "x$curl_cv_in_addr_t_equiv" = x; then
