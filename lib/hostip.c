@@ -191,7 +191,7 @@ hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
 
   user.cache_timeout = cache_timeout;
   user.now = now;
-  
+
   Curl_hash_clean_with_criterium(hostcache, 
                                  (void *) &user, 
                                  hostcache_timestamp_remove);
@@ -367,8 +367,10 @@ int Curl_resolv(struct connectdata *conn,
         rc = 0;
     }
   }
-  else
+  else {
+    dns->inuse++; /* we use it! */
     rc = 0;
+  }
 
   *entry = dns;
 
@@ -382,9 +384,15 @@ void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
 
   dns->inuse--;
 
+#ifdef CURLDEBUG
+  if(dns->inuse < 0) {
+    infof(data, "Interal host cache screw-up!");
+    *(char **)0=NULL;
+  }
+#endif
+
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-
 }
 
 /*
