@@ -462,9 +462,9 @@ sub runftpserver {
                 $pid = 0+$1;
             }
         }
-        if(!$pid || ($took > 2)) {
+        if(!$pid && $data[0]) {
             # this is not a known server
-            print "RUN: Unknown server on our favourite port: $FTPPORT\n";
+            print "RUN: Unknown server on our favourite FTP port: $FTPPORT\n";
             return -1;
         }
     }
