@@ -195,24 +195,24 @@ SOURCE=..\..\ahost.c
 !IF  "$(CFG)" == "ahost - Win32 Release"
 
 "areslib - Win32 Release" : 
-   cd ".\areslib"
+   cd "..\areslib"
    $(MAKE) /$(MAKEFLAGS) /F ".\areslib.mak" CFG="areslib - Win32 Release" 
    cd "..\ahost"
 
 "areslib - Win32 ReleaseCLEAN" : 
-   cd ".\areslib"
+   cd "..\areslib"
    $(MAKE) /$(MAKEFLAGS) /F ".\areslib.mak" CFG="areslib - Win32 Release" RECURSE=1 CLEAN 
    cd "..\ahost"
 
 !ELSEIF  "$(CFG)" == "ahost - Win32 Debug"
 
 "areslib - Win32 Debug" : 
-   cd ".\areslib"
+   cd "..\areslib"
    $(MAKE) /$(MAKEFLAGS) /F ".\areslib.mak" CFG="areslib - Win32 Debug" 
    cd "..\ahost"
 
 "areslib - Win32 DebugCLEAN" : 
-   cd ".\areslib"
+   cd "..\areslib"
    $(MAKE) /$(MAKEFLAGS) /F ".\areslib.mak" CFG="areslib - Win32 Debug" RECURSE=1 CLEAN 
    cd "..\ahost"
 

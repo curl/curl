@@ -185,24 +185,24 @@ SOURCE=..\..\getopt.c
 !IF  "$(CFG)" == "adig - Win32 Release"
 
 "areslib - Win32 Release" : 
-   cd ".\areslib"
+   cd "..\areslib"
    $(MAKE) /$(MAKEFLAGS) /F ".\areslib.mak" CFG="areslib - Win32 Release" 
    cd "..\adig"
 
 "areslib - Win32 ReleaseCLEAN" : 
-   cd ".\areslib"
+   cd "..\areslib"
    $(MAKE) /$(MAKEFLAGS) /F ".\areslib.mak" CFG="areslib - Win32 Release" RECURSE=1 CLEAN 
    cd "..\adig"
 
 !ELSEIF  "$(CFG)" == "adig - Win32 Debug"
 
 "areslib - Win32 Debug" : 
-   cd ".\areslib"
+   cd "..\areslib"
    $(MAKE) /$(MAKEFLAGS) /F ".\areslib.mak" CFG="areslib - Win32 Debug" 
    cd "..\adig"
 
 "areslib - Win32 DebugCLEAN" : 
-   cd ".\areslib"
+   cd "..\areslib"
    $(MAKE) /$(MAKEFLAGS) /F ".\areslib.mak" CFG="areslib - Win32 Debug" RECURSE=1 CLEAN 
    cd "..\adig"
 
