@@ -4,9 +4,13 @@
 /* Windows-only header file provided by liren@vivisimo.com to make his Windows
    port build */
 
+#ifndef NETWARE
 #include <windows.h>
 #include <process.h> /* for the _getpid() proto */
+#endif  /* !NETWARE */
 #include <sys/types.h>
+
+#ifndef NETWARE
 
 #define MAXHOSTNAMELEN 256
 
@@ -26,6 +30,8 @@ struct timezone { int dummy; };
 
 int ares_gettimeofday(struct timeval *tv, struct timezone *tz);
 #define gettimeofday(tv,tz) ares_gettimeofday(tv,tz)
+
+#endif  /* !NETWARE */
 
 #define NS_CMPRSFLGS  0xc0  
 
@@ -212,7 +218,7 @@ typedef enum __ns_rcode {
 #define T_MAILA         ns_t_maila
 #define T_ANY           ns_t_any
 
-#ifndef __MINGW32__
+#if !(defined(__MINGW32__) || defined(NETWARE))
 /* protos for the functions we provide in windows_port.c */
 int ares_strncasecmp(const char *s1, const char *s2, size_t n);
 int ares_strcasecmp(const char *s1, const char *s2);
