@@ -17,8 +17,13 @@ AC_CONFIG_SRCDIR([lib/urldata.h])
 AM_CONFIG_HEADER(lib/config.h src/config.h tests/server/config.h )
 AM_MAINTAINER_MODE
 
+dnl SED is needed by some of the tools
 AC_PATH_PROG( SED, sed, , $PATH:/usr/bin:/usr/local/bin)
 AC_SUBST(SED)
+
+dnl AR is used by libtool, and try the odd Solaris path too
+AC_PATH_PROG( AR, ar, , $PATH:/usr/bin:/usr/local/bin:/usr/ccs/bin)
+AC_SUBST(AR)
 
 dnl figure out the libcurl version
 VERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curl.h`
