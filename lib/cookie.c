@@ -99,8 +99,9 @@ struct Cookie *cookie_add(struct CookieInfo *c,
 
     semiptr=strchr(lineptr, ';'); /* first, find a semicolon */
     ptr = lineptr;
-    while(semiptr) {
-      *semiptr='\0'; /* zero terminate for a while */
+    do {
+      if(semiptr)
+        *semiptr='\0'; /* zero terminate for a while */
       /* we have a <what>=<this> pair or a 'secure' word here */
       if(strchr(ptr, '=')) {
         name[0]=what[0]=0; /* init the buffers */
@@ -156,12 +157,15 @@ struct Cookie *cookie_add(struct CookieInfo *c,
             ; /* unsupported keyword without assign! */
         }
       }
+      if(!semiptr)
+        continue; /* we already know there are no more cookies */
+
       *semiptr=';'; /* put the semicolon back */
       ptr=semiptr+1;
       while(ptr && *ptr && isspace((int)*ptr))
         ptr++;
       semiptr=strchr(ptr, ';'); /* now, find the next semicolon */
-    }
+    } while(semiptr);
   }
   else {
     /* This line is NOT a HTTP header style line, we do offer support for
