@@ -900,6 +900,7 @@ AC_CHECK_FUNCS( socket \
                 gettimeofday \
                 inet_addr \
                 inet_ntoa \
+                inet_pton \
                 tcsetattr \
                 tcgetattr \
                 perror \
