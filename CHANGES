@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel(2 February 2004)
+- Added test case 97, a simple POST with a custom Content-Type header
+  replacing the original application/x-www-form-urlencoded one.
+
 Daniel(30 January 2004)
 - Added code that attempts to fix the test 91 failure. As has been figured out
   by Patrick Smith, the error happens because we re-use a connection that the
