@@ -190,4 +190,7 @@ the file's contents must be identical to this
 <upload>
 the contents of the upload data curl should have sent
 </upload>
+<valgrind>
+disable - disables the valgrind log check for this test
+</valgrind>
 </verify>

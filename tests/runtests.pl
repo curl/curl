@@ -1351,13 +1351,6 @@ sub singletest {
         return 1;
     }
 
-    # the test succeeded, remove all log files
-    if(!$keepoutfiles) {
-        cleardir($LOGDIR);
-    }
-
-    unlink($FTPDCMD); # remove the instructions for this test
-
     @what = getpart("client", "killserver");
     for(@what) {
         my $serv = $_;
@@ -1398,40 +1391,74 @@ sub singletest {
         }
     }
     if($valgrind) {
-        opendir(DIR, "log") ||
-            return 0; # can't open log dir
-        my @files = readdir(DIR);
-        closedir DIR;
-        my $f;
-        my $l;
-        foreach $f (@files) {
-            if($f =~ /^valgrind$testnum/) {
-                $l = $f;
-                last;
+        # this is the valid protocol blurb curl should generate
+        my @disable= getpart("verify", "valgrind");
+
+        if($disable[0] !~ /disable/) {
+
+            opendir(DIR, "log") ||
+                return 0; # can't open log dir
+            my @files = readdir(DIR);
+            closedir DIR;
+            my $f;
+            my $l;
+            foreach $f (@files) {
+                if($f =~ /^valgrind$testnum\.pid/) {
+                    $l = $f;
+                    last;
+            }
+            }
+            my $leak;
+            my $invalidread;
+            my $error;
+
+            open(VAL, "<log/$l");
+            while(<VAL>) {
+                if($_ =~ /definitely lost: (\d*) bytes/) {
+                    $leak = $1;
+                    if($leak) {
+                        $error++;
+                    }
+                    last;
+                }
+                if($_ =~ /Invalid read of size (\d+)/) {
+                    $invalidread = $1;
+                    $error++;
+                    last;
+                }
+            }
+            close(VAL);
+            if($error) {
+                print " valgrind ERROR ";
+                if($leak) {
+                    print "\n Leaked $leak bytes\n";
+                }
+                if($invalidread) {
+                    print "\n Read $invalidread invalid bytes\n";
+                }
+                return 1;
+            }
+            elsif(!$short) {
+                print " valgrind OK";
             }
         }
-        my $leak;
-        open(VAL, "<$l");
-        while(<VAL>) {
-            if($_ =~ /definitely lost: (\d*) bytes/) {
-                $leak = $1;
-                last;
+        else {
+            if(!$short) {
+                print " valgrind SKIPPED";
             }
         }
-        close(VAL);
-        if($leak) {
-            print " valgrind ERROR ";
-        }
-        elsif(!$short) {
-            print " valgrind OK";
-        }
-
-
     }
     if($short) {
         print "OK";
     }
     print "\n";
+
+    # the test succeeded, remove all log files
+    if(!$keepoutfiles) {
+        cleardir($LOGDIR);
+    }
+
+    unlink($FTPDCMD); # remove the instructions for this test
 
     return 0;
 }
