@@ -184,17 +184,23 @@ sub STOR_command {
 
     logmsg "STOR test number $testno\n";
 
-    my $filename = "log/ftp.upload";
+    my $filename = "log/ftpout.$testno";
+
+    print "200 Gimme gimme gimme!\r\n";
 
     open(FILE, ">$filename") ||
         return 0; # failed to open output
 
     my $line;
+    my $ulsize=0;
     while (defined($line = <SOCK>)) {
+        $ulsize += length($line);
         print FILE $line;
     }
     close(FILE);
     close(SOCK);
+
+    logmsg "received $ulsize bytes upload\n";
 
     print "226 File transfer complete\r\n";
     return 0;
