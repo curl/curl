@@ -169,9 +169,9 @@ Curl_cookie_add(struct CookieInfo *c,
             co->name = strdup(name);
             co->value = strdup(what);
           }
-          else
-            ;/* this is the second (or more) name we don't know
-                about! */
+          /*
+            else this is the second (or more) name we don't know
+            about! */
         }
         else {
           /* this is an "illegal" <what>=<this> pair */
@@ -182,8 +182,9 @@ Curl_cookie_add(struct CookieInfo *c,
                   what)) {
           if(strequal("secure", what))
             co->secure = TRUE;
-          else
-            ; /* unsupported keyword without assign! */
+          /* else,
+             unsupported keyword without assign! */
+
         }
       }
       if(!semiptr)
