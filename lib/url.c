@@ -1561,7 +1561,7 @@ static CURLcode _connect(CURL *curl,
     if(!conn->hp) {
 #ifdef ENABLE_IPV6
       /* it might already be set if reusing a connection */
-      conn->hp = Curl_getaddrinfo(data, conn->name, data->port);
+      conn->hp = Curl_getaddrinfo(data, conn->name, conn->port);
 #else
       /* it might already be set if reusing a connection */
       conn->hp = Curl_gethost(data, conn->name, &conn->hostent_buf);
