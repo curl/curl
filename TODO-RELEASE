@@ -3,14 +3,9 @@ Issues not sorted in any particular order.
 To get fixed in 7.12.2 (planned release: mid October 2004)
 ======================
 
-50 - threaded windows resolver problem reported by Traian Nicolescu
-
 To get fixed in 7.12.3 (planned release: December 2004)
 ======================
 
 47 - Peter Sylvester's patch for SRP on the TLS layer
 
 48 - MSVC Makefile improvements by Samuel Díaz García
-
-49 - 3rd party FTP fix for CURLOPT_FTP_CREATE_MISSING_DIRS by Alexander
-     Krasnostavsky

@@ -21,6 +21,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURLOPT_FTP_CREATE_MISSING_DIRS works for third party transfers
+ o memory leak for cookies received with max-age set
+ o potential memory leaks in the window name resolver
  o URLs with ?-letters in the user name or password fields
  o libcurl error message is now provided when send() fails
  o no more SIGPIPE on Mac OS X and other SO_NOSIGPIPE-supporting platforms
@@ -73,7 +76,8 @@ advice from friends like these:
  Tarendash, Daniel at touchtunes, Bertrand Demiddelaer, Andreas Rieke,
  Jean-Claude Chauve, Dan Fandrich, Peter Sylvester, "Mekonikum", Jean-Philippe
  Barrette-LaPierre, Günter Knauf, Larry Campbell, Fedor Karpelevitch,
- Aleksandar Milivojevic, Gisle Vanem, Chris "Bob Bob", Chih-Chung Chang,
- Andy Cedilnik, Alan Pinstein, Eric Vergnaud 
+ Aleksandar Milivojevic, Gisle Vanem, Chris "Bob Bob", Chih-Chung Chang, Andy
+ Cedilnik, Alan Pinstein, Eric Vergnaud, Traian Nicolescu, runekl at
+ opoint.com
 
         Thanks! (and sorry if I forgot to mention someone)
