@@ -313,9 +313,8 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         easy->easy_handle->hostcache = Curl_global_host_cache_get();
       }
       else {
-        if (multi->hostcache == NULL) {
-          multi->hostcache = Curl_hash_alloc(7, Curl_freeaddrinfo);
-        }
+        if (multi->hostcache == NULL)
+          multi->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
 
         easy->easy_handle->hostcache = multi->hostcache;
       }
