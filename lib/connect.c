@@ -473,6 +473,10 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   struct timeval after;
   struct timeval before = Curl_tvnow();
 
+#ifdef ENABLE_IPV6
+  struct addrinfo *ai;
+#endif  
+
   /*************************************************************
    * Figure out what maximum time we have left
    *************************************************************/
@@ -513,118 +517,21 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   }
 
   hostname = data->change.proxy?conn->proxyhost:conn->hostname;
-  infof(data, "About to connect() to %s%s%s:%d\n",
-        conn->bits.ipv6_ip?"[":"",
-        hostname,
-        conn->bits.ipv6_ip?"]":"",
-        port);
+  infof(data, "About to connect() to %s port %d\n",
+        hostname, port);
 
 #ifdef ENABLE_IPV6
   /*
-   * Connecting with IPv6 support is so much easier and cleanly done
+   * Connecting with a getaddrinfo chain
    */
-  {
-    struct addrinfo *ai;
-    port =0; /* prevent compiler warning */
-
-    for (ai = remotehost->addr; ai; ai = ai->ai_next, aliasindex++) {
-      sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-      if (sockfd < 0)
-        continue;
-
-      if(conn->data->set.device) {
-        /* user selected to bind the outgoing socket to a specified "device"
-           before doing connect */
-        CURLcode res = bindlocal(conn, sockfd);
-        if(res)
-          return res;
-      }
-
-      /* set socket non-blocking */
-      Curl_nonblock(sockfd, TRUE);
-
-      rc = connect(sockfd, ai->ai_addr, ai->ai_addrlen);
-
-      if(-1 == rc) {
-        int error=Curl_ourerrno();
-
-        switch (error) {
-        case EINPROGRESS:
-        case EWOULDBLOCK:
-#if defined(EAGAIN) && EAGAIN != EWOULDBLOCK
-          /* On some platforms EAGAIN and EWOULDBLOCK are the
-           * same value, and on others they are different, hence
-           * the odd #if
-           */
-        case EAGAIN:
-#endif
-        case EINTR:
-          /* asynchronous connect, wait for connect or timeout */
-          if(data->state.used_interface == Curl_if_multi)
-            /* don't hang when doing multi */
-            timeout_ms = 0;
-
-          rc = waitconnect(sockfd, timeout_ms);
-          break;
-        case ECONNREFUSED: /* no one listening */
-        default:
-          /* unknown error, fallthrough and try another address! */
-          failf(data, "Failed connect to %s: %d", hostname, error);
-          break;
-        }
-      }
-
-      if(0 == rc) {
-        /* we might be connected, if the socket says it is OK! Ask it! */
-        if(verifyconnect(sockfd)) {
-          /* we are connected, awesome! */
-          *connected = TRUE; /* this is truly a connect */
-          break;
-	}
-        failf(data, "socket error");
-        /* we are _not_ connected, it was a false alert, continue please */
-      }
-      else if(2 == rc)
-        /* waitconnect() returned error */
-        ;
-      else if(data->state.used_interface == Curl_if_multi) {
-        /* When running the multi interface, we bail out here */
-        rc = 0;
-        break;
-      }
-
-      /* connect failed or timed out */
-      sclose(sockfd);
-      sockfd = -1;
-
-      /* get a new timeout for next attempt */
-      after = Curl_tvnow();
-      timeout_ms -= Curl_tvdiff(after, before);
-      if(timeout_ms < 0) {
-        failf(data, "connect() timed out!");
-        return CURLE_OPERATION_TIMEOUTED;
-      }
-      before = after;
-      continue;
-    }
+  for (ai = remotehost->addr; ai; ai = ai->ai_next, aliasindex++) {
+    sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
     if (sockfd < 0)
-      return CURLE_COULDNT_CONNECT;
-
-    /* leave the socket in non-blocking mode */
-
-    if(addr)
-      *addr = ai; /* the address we ended up connected to */
-  }
+      continue;
 #else
   /*
-   * Connecting with IPv4-only support
+   * Connecting with old style IPv4-only support
    */
-  if(!remotehost->addr->h_addr_list[0]) {
-    /* If there is no addresses in the address list, then we return
-       error right away */
-    failf(data, "no address available");
-    return CURLE_COULDNT_CONNECT;
-  }
 
   /* This is the loop that attempts to connect to all IP-addresses we
      know for the given host. One by one. */
@@ -639,7 +546,16 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       failf(data, "couldn't create socket");
       return CURLE_COULDNT_CONNECT; /* big time error */
     }
-  
+
+    /* nasty address work before connect can be made */
+    memset((char *) &serv_addr, '\0', sizeof(serv_addr));
+    memcpy((char *)&(serv_addr.sin_addr),
+           (struct in_addr *)remotehost->addr->h_addr_list[aliasindex],
+           sizeof(struct in_addr));
+    serv_addr.sin_family = remotehost->addr->h_addrtype;
+    serv_addr.sin_port = htons((unsigned short)port);
+#endif
+
     if(conn->data->set.device) {
       /* user selected to bind the outgoing socket to a specified "device"
          before doing connect */
@@ -648,19 +564,16 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         return res;
     }
 
-    /* Convert socket to non-blocking type */
+    /* set socket non-blocking */
     Curl_nonblock(sockfd, TRUE);
 
-    /* do this nasty work to do the connect */
-    memset((char *) &serv_addr, '\0', sizeof(serv_addr));
-    memcpy((char *)&(serv_addr.sin_addr),
-           (struct in_addr *)remotehost->addr->h_addr_list[aliasindex],
-           sizeof(struct in_addr));
-    serv_addr.sin_family = remotehost->addr->h_addrtype;
-    serv_addr.sin_port = htons((unsigned short)port);
-  
-    rc = connect(sockfd, (struct sockaddr *)&serv_addr,
-                 sizeof(serv_addr));
+    rc = connect(sockfd,
+#ifdef ENABLE_IPV6
+                 ai->ai_addr, ai->ai_addrlen
+#else
+                 (struct sockaddr *)&serv_addr, sizeof(serv_addr)
+#endif
+                 );
 
     if(-1 == rc) {
       int error=Curl_ourerrno();
@@ -679,7 +592,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         if(data->state.used_interface == Curl_if_multi)
           /* don't hang when doing multi */
           timeout_ms = 0;
-
+        
         rc = waitconnect(sockfd, timeout_ms);
         break;
       default:
@@ -698,7 +611,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       rc = 0;
       break;
     }
-
+      
     if(0 == rc) {
       if (verifyconnect(sockfd)) {
         /* we are connected, awesome! */
@@ -709,22 +622,20 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       rc = -1;
     }
 
-    if(0 != rc) {
-      /* get a new timeout for next attempt */
-      sclose(sockfd);
-      after = Curl_tvnow();
-      timeout_ms -= Curl_tvdiff(after, before);
-      if(timeout_ms < 0) {
-        failf(data, "Connect timeout on IP number %d", aliasindex+1);
-        break;
-      }
-      before = after;
-      continue; /* try next address */
-    }
-    break;
-  }
+    /* connect failed or timed out */
+    sclose(sockfd);
+    sockfd = -1;
 
-  if(0 != rc) {
+    /* get a new timeout for next attempt */
+    after = Curl_tvnow();
+    timeout_ms -= Curl_tvdiff(after, before);
+    if(timeout_ms < 0) {
+      failf(data, "connect() timed out!");
+      return CURLE_OPERATION_TIMEOUTED;
+    }
+    before = after;
+  }
+  if (sockfd < 0) {
     /* no good connect was made */
     *sockconn = -1;
     failf(data, "Connect failed");
@@ -733,10 +644,14 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   /* leave the socket in non-blocking mode */
 
-  if(addr)
-    /* this is the address we've connected to */
+  /* store the address we use */
+  if(addr) {
+#ifdef ENABLE_IPV6
+    *addr = ai;
+#else
     *addr = (struct in_addr *)remotehost->addr->h_addr_list[aliasindex];
 #endif
+  }
 
   /* allow NULL-pointers to get passed in */
   if(sockconn)
@@ -744,4 +659,3 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   return CURLE_OK;
 }
-

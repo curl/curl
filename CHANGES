@@ -7,6 +7,22 @@
                                   Changelog
 
 
+Daniel (13 November)
+- Default Content-Type for parts in multipart formposts has changed to
+  "application/octet-stream".  This seems more appropriate, and I believe
+  mozilla and the likes do this. In the same area: .html files now get
+  text/html as Content-Type. (Pointed out in bug report #839806)
+
+- Gisle Vanem corrected the --progress-bar output by doing a flush of the
+  output, which apparently makes it look better on at least windows, but
+  possibly other platforms too.
+
+- Peter Sylvester identified a problem in the connect code, which made the
+  multi interface on a ipv6-enabled solaris box do bad. Test case 504 to be
+  specific. I've spent some time to clean-up the Curl_connecthost() function
+  now to use less duplicated code for the two different sections: ipv6 and
+  ipv4.
+
 Daniel (11 November)
 - Added CURLOPT_NETRC_FILE. Use this to tell libcurl which file to use instead
   of trying to find a .netrc in the current user's home directory. The
