@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+19. FTP 3rd party transfers with the multi interface doesn't work. Test:
+  define CURL_MULTIEASY, rebuild curl, run test case 230 - 232.
+
 18. test case 57 has </test> that should be </client> but when corrected, the
   test case fails!
 

@@ -1,11 +1,13 @@
 Issues not sorted in any particular order.
 
-To get fixed in 7.13.0 (planned release: February 2005)
-======================
-
-
 To get fixed in 7.13.1 (planned release: April 2005)
 ======================
+
+58 - Fix KNOWN_BUGS #19: "FTP 3rd party transfers with the multi interface
+     doesn't work"
+
+59 - Figure out a fix for David Byron's SSL problems:
+     http://curl.haxx.se/mail/lib-2005-01/0240.html
 
 47 - Peter Sylvester's patch for SRP on the TLS layer
      Awaits OpenSSL support for this, no need to support this in libcurl before

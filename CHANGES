@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Version 7.13.0 (1 February 2005)
+
+Daniel (31 January 2005)
+- Added Lars Nilsson's htmltitle.cc example
+
 Daniel (30 January 2005)
 - Fixed a memory leak when using the multi interface and the DO operation
   failed (as in test case 205).

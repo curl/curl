@@ -22,6 +22,10 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o re-sending a request when retrying on a fresh connection with multi
+   interface
+ o improved valgrind report parser in the test suite
+ o several valgrind reports
  o CURLOPT_FTPPORT and -P work when built ipv6-enabled
  o FTP third party transfers was much improved
  o proxy environment variables are now ignored when built HTTP-disabled
@@ -51,6 +55,6 @@ advice from friends like these:
  Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt,
  Hzhijun, Pavel Orehov, Bruce Mitchener, Cyrill Osterwalder, Dan Torop,
  Martijn Koster, Alex aka WindEagle, Cody Jones, Samuel Díaz García,
- Stephan Bergmann, Philippe Hameau, Ian Ford, Stephen More
+ Stephan Bergmann, Philippe Hameau, Ian Ford, Stephen More, Lars Nilsson
 
         Thanks! (and sorry if I forgot to mention someone)
