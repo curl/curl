@@ -80,12 +80,11 @@ typedef unsigned char bool;
 #endif
 #endif /* HAVE_LONGLONG */
 
-/* We set up our internal prefered CURL_FORMAT_OFF_T here */
-#undef CURL_FORMAT_OFF_T
-#if SIZEOF_CURL_OFF_T > 4
-#define CURL_FORMAT_OFF_T "%lld"
+/* We set up our internal prefered (CURL_)FORMAT_OFF_T here */
+#if defined(SIZEOF_CURL_OFF_T) && (SIZEOF_CURL_OFF_T > 4)
+#define FORMAT_OFF_T "%lld"
 #else
-#define CURL_FORMAT_OFF_T "%ld"
+#define FORMAT_OFF_T "%ld"
 #endif
 
 
