@@ -1,0 +1,64 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 301 This is a weirdo text message
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Location: data.cgi?moo=http://&/110002
+Connection: close
+
+This server reply is for testing a simple Location: following
+
+</data>
+<data2>
+HTTP/1.1 200 Followed here fine
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+If this is received, the location following worked
+
+</data2>
+<datacheck>
+HTTP/1.1 301 This is a weirdo text message
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Location: data.cgi?moo=http://&/110002
+Connection: close
+
+HTTP/1.1 200 Followed here fine
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+If this is received, the location following worked
+
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+ <name>
+simple HTTP Location: without protocol in initial URL
+ </name>
+ <command>
+%HOSTIP:%HOSTPORT/want/45 -L
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /want/45 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET /want/data.cgi?moo=http://&/110002 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
