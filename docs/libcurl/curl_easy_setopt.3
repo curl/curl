@@ -617,9 +617,9 @@ name of your file holding cookie data to read. The cookie data may be in
 Netscape / Mozilla cookie data format or just regular HTTP-style headers
 dumped to a file.
 
-Given an empty or non-existing file, this option will enable cookies for this
-curl handle, making it understand and parse received cookies and then use
-matching cookies in future request.
+Given an empty or non-existing file or by passing the empty string (""), this
+option will enable cookies for this curl handle, making it understand and
+parse received cookies and then use matching cookies in future request.
 .IP CURLOPT_COOKIEJAR
 Pass a file name as char *, zero terminated. This will make libcurl write all
 internally known cookies to the specified file when \fIcurl_easy_cleanup(3)\fP

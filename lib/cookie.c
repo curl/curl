@@ -651,6 +651,10 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
     fp = stdin;
     fromfile=FALSE;
   }
+  else if(file && !*file) {
+    /* points to a "" string */
+    fp = NULL;
+  }
   else
     fp = file?fopen(file, "r"):NULL;
 

@@ -10,6 +10,7 @@ Curl and libcurl 7.13.1
 
 This release includes the following changes:
 
+ o CURLOPT_COOKIEFILE set to "" is now activating the cookie engine
  o FTP code overhaul => multi interface much less blocking
  o Added CURLE_LOGIN_DENIED to be returned when curl is denied login to FTP
    servers
@@ -39,6 +40,6 @@ advice from friends like these:
 
  Gisle Vanem, David Byron, Marty Kuhrt, Maruko, Eric Vergnaud, Christopher
  R. Palmer, Mike Dobbs, David in bug report #1124588, Ralph Mitchell,
- Rene Rebe
+ Rene Rebe, Dave Dribin
 
         Thanks! (and sorry if I forgot to mention someone)
