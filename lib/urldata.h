@@ -527,7 +527,6 @@ struct connectdata {
     char *userpwd; /* free later if not NULL! */
     char *rangeline; /* free later if not NULL! */
     char *ref; /* free later if not NULL! */
-    char *cookie; /* free later if not NULL! */
     char *host; /* free later if not NULL */
     char *cookiehost; /* free later if not NULL */
   } allocptr;

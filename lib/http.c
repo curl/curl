@@ -1236,6 +1236,7 @@ CURLcode Curl_http(struct connectdata *conn)
   char *ptr;
   char *request;
   Curl_HttpReq httpreq = data->set.httpreq;
+  char *addcookies = NULL;
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -1316,11 +1317,8 @@ CURLcode Curl_http(struct connectdata *conn)
   else
     conn->allocptr.ref = NULL;
 
-  Curl_safefree(conn->allocptr.cookie);
   if(data->set.cookie && !checkheaders(data, "Cookie:"))
-    conn->allocptr.cookie = aprintf("Cookie: %s\015\012", data->set.cookie);
-  else
-    conn->allocptr.cookie = NULL;
+    addcookies = data->set.cookie;
 
   if(!conn->bits.upload_chunky && (httpreq != HTTPREQ_GET)) {
     /* not a chunky transfer yet, but data is to be sent */
@@ -1578,7 +1576,6 @@ CURLcode Curl_http(struct connectdata *conn)
                   "%s" /* userpwd */
                   "%s" /* range */
                   "%s" /* user agent */
-                  "%s" /* cookie */
                   "%s" /* host */
                   "%s" /* pragma */
                   "%s" /* accept */
@@ -1596,7 +1593,6 @@ CURLcode Curl_http(struct connectdata *conn)
                 conn->allocptr.rangeline:"",
                 (data->set.useragent && *data->set.useragent && conn->allocptr.uagent)?
                 conn->allocptr.uagent:"",
-                (conn->allocptr.cookie?conn->allocptr.cookie:""), /* Cookie: <data> */
                 (conn->allocptr.host?conn->allocptr.host:""), /* Host: host */
                 http->p_pragma?http->p_pragma:"",
                 http->p_accept?http->p_accept:"",
@@ -1609,18 +1605,19 @@ CURLcode Curl_http(struct connectdata *conn)
     if(result)
       return result;
 
-    if(data->cookies) {
-      struct Cookie *co; /* no cookies from start */
+    if(data->cookies || addcookies) {
+      struct Cookie *co=NULL; /* no cookies from start */
+      int count=0;
 
-      Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-      co = Curl_cookie_getlist(data->cookies,
-                               conn->allocptr.cookiehost?
-                               conn->allocptr.cookiehost:host, ppath,
-                               (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
-      Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
-
+      if(data->cookies) {
+        Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+        co = Curl_cookie_getlist(data->cookies,
+                                 conn->allocptr.cookiehost?
+                                 conn->allocptr.cookiehost:host, ppath,
+                                 (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
+        Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+      }
       if(co) {
-        int count=0;
         struct Cookie *store=co;
         /* now loop through all cookies that matched */
         while(co) {
@@ -1639,11 +1636,21 @@ CURLcode Curl_http(struct connectdata *conn)
           }
           co = co->next; /* next cookie please */
         }
-        if(count && (CURLE_OK == result))
-          result = add_buffer(req_buffer, "\r\n", 2);
-        
         Curl_cookie_freelist(store); /* free the cookie list */
       }
+      if(addcookies && (CURLE_OK == result)) {
+        if(!count)
+          result = add_bufferf(req_buffer, "Cookie: ");
+        if(CURLE_OK == result) {
+          result = add_bufferf(req_buffer, "%s%s",
+                               count?"; ":"",
+                               addcookies);
+          count++;
+        }
+      }
+      if(count && (CURLE_OK == result))
+        result = add_buffer(req_buffer, "\r\n", 2);
+
       if(result)
         return result;
     }
