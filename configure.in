@@ -418,7 +418,7 @@ dnl ucb lib?
 AC_CHECK_FUNC(gethostname, , AC_CHECK_LIB(ucb, gethostname))
 
 dnl dl lib?
-AC_CHECK_FUNC(dlopen, , AC_CHECK_LIB(dl, dlopen))
+AC_CHECK_FUNC(dlclose, , AC_CHECK_LIB(dl, dlopen))
 
 dnl **********************************************************************
 dnl Check for the random seed preferences 
@@ -799,7 +799,8 @@ AC_CHECK_FUNCS( socket \
                 getpass_r \
                 strlcat \
                 getpwuid \
-                geteuid
+                geteuid \
+                dlopen
 )
 
 dnl removed 'getpass' check on October 26, 2000
