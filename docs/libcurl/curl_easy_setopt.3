@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "28 May 2002" "libcurl 7.9.8" "libcurl Manual"
+.TH curl_easy_setopt 3 "5 Aug 2002" "libcurl 7.9.8" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -46,7 +46,8 @@ fwrite() when writing data.
 \fICURLOPT_WRITEFUNCTION\fP if you set this option or you will experience
 crashes.
 
-This option is also known with the older name \fBCURLOPT_FILE\fP.
+This option is also known with the older name \fBCURLOPT_FILE\fP, the name
+CURLOPT_WRITEDATA was introduced in 7.9.7.
 .TP
 .B CURLOPT_WRITEFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
@@ -73,7 +74,8 @@ don't specify a read callback, this must be a valid FILE *.
 \fBNOTE:\fP If you're using libcurl as a win32 DLL, you MUST use a
 \fICURLOPT_READFUNCTION\fP if you set this option.
 
-This option is also known with the older name \fBCURLOPT_INFILE\fP.
+This option is also known with the older name \fBCURLOPT_INFILE\fP, the name
+CURLOPT_READDATA was introduced in 7.9.7.
 .TP
 .B CURLOPT_READFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
@@ -123,7 +125,7 @@ specified in the proxy string \fICURLOPT_PROXY\fP.
 Set the parameter to non-zero to get the library to tunnel all operations
 through a given HTTP proxy. Note that there is a big difference between using
 a proxy and to tunnel through it. If you don't know what this means, you
-probably don't want this tunneling option. (Added in libcurl 7.3)
+probably don't want this tunneling option. (Added in 7.3)
 .TP
 .B CURLOPT_VERBOSE
 Set the parameter to non-zero to get the library to display a lot of verbose
@@ -453,7 +455,7 @@ multiplied with \fInmemb\fP.  The pointer named \fIstream\fP will be the one
 you passed to libcurl with the \fICURLOPT_WRITEHEADER\fP option.  Return the
 number of bytes actually written or return -1 to signal error to the library
 (it will cause it to abort the transfer with a \fICURLE_WRITE_ERROR\fP return
-code). (Added in libcurl 7.7.2)
+code). (Added in 7.7.2)
 .TP
 .B CURLOPT_COOKIEFILE
 Pass a pointer to a zero terminated string as parameter. It should contain the
@@ -489,14 +491,14 @@ internally when reporting errors.
 .B CURLOPT_INTERFACE
 Pass a char * as parameter. This set the interface name to use as outgoing
 network interface. The name can be an interface name, an IP address or a host
-name. (Added in libcurl 7.3)
+name. (Added in 7.3)
 .TP
 .B CURLOPT_KRB4LEVEL
 Pass a char * as parameter. Set the krb4 security level, this also enables
 krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
 \&'private'.  If the string is set but doesn't match one of these, 'private'
 will be used. Set the string to NULL to disable kerberos4. The kerberos
-support only works for FTP. (Added in libcurl 7.3)
+support only works for FTP. (Added in 7.3)
 .TP
 .B CURLOPT_PROGRESSFUNCTION
 Function pointer that should match the \fIcurl_progress_callback\fP prototype
@@ -602,7 +604,7 @@ re-use (default behavior). (Added in 7.7)
 .B CURLOPT_RANDOM_FILE
 Pass a char * to a zero terminated file name. The file will be used to read
 from to seed the random engine for SSL. The more random the specified file is,
-the more secure will the SSL connection become.
+the more secure the SSL connection will become.
 .TP
 .B CURLOPT_EGDSOCKET
 Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
@@ -632,7 +634,7 @@ the provided hostname. (Added in 7.8.1)
 Pass a file name as char *, zero terminated. This will make libcurl dump all
 internally known cookies to the specified file when \fIcurl_easy_cleanup(3)\fP
 is called. If no cookies are known, no file will be created. Specify "-" to
-instead have the cookies written to stdout.
+instead have the cookies written to stdout. (Added in 7.9)
 .TP
 .B CURLOPT_SSL_CIPHER_LIST
 Pass a char *, pointing to a zero terminated string holding the list of
@@ -665,7 +667,7 @@ Enforce HTTP 1.1 requests.
 .TP
 .B CURLOPT_FTP_USE_EPSV
 Pass a long. If the value is non-zero, it tells curl to use the EPSV command
-when doing passive FTP downloads (which is always does by default). Using EPSV
+when doing passive FTP downloads (which it always does by default). Using EPSV
 means that it will first attempt to use EPSV before using PASV, but if you
 pass FALSE (zero) to this option, it will not try using EPSV, only plain PASV.
 .TP
@@ -673,12 +675,12 @@ pass FALSE (zero) to this option, it will not try using EPSV, only plain PASV.
 Pass a long, this sets the timeout in seconds. Name resolves will be kept in
 memory for this number of seconds. Set to zero (0) to completely disable
 caching, or set to -1 to make the cached entries remain forever. By default,
-libcurl caches info for 60 seconds. (Added in libcurl 7.9.3)
+libcurl caches info for 60 seconds. (Added in 7.9.3)
 .TP
 .B CURLOPT_DNS_USE_GLOBAL_CACHE
 Pass a long. If the value is non-zero, it tells curl to use a global DNS cache
-that will survive between easy handles creations and deletions. This is not
-thread-safe and this will use a global varible. (Added in libcurl 7.9.3)
+that will survive between easy handle creations and deletions. This is not
+thread-safe and this will use a global varible. (Added in 7.9.3)
 .TP
 .B CURLOPT_DEBUGFUNCTION
 Function pointer that should match the following prototype: \fIint
