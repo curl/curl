@@ -28,7 +28,6 @@ man_MANS = \
 	curl_mprintf.3 \
 	curl_global_init.3 \
 	curl_global_cleanup.3 \
-	libcurl.3 \
 	curl_multi_add_handle.3 \
 	curl_multi_cleanup.3 \
 	curl_multi_fdset.3 \
@@ -36,7 +35,11 @@ man_MANS = \
 	curl_multi_init.3 \
 	curl_multi_perform.3 \
 	curl_multi_remove_handle.3 \
+        curl_share_cleanup.3 curl_share_init.3 curl_share_setopt.3 \
+	libcurl.3 \
+	libcurl-easy.3 \
 	libcurl-multi.3 \
+	libcurl-share.3 \
 	libcurl-errors.3
 
 HTMLPAGES = \
@@ -63,7 +66,6 @@ HTMLPAGES = \
 	curl_mprintf.html \
 	curl_global_init.html \
 	curl_global_cleanup.html \
-	libcurl.html \
 	curl_multi_add_handle.html \
 	curl_multi_cleanup.html \
 	curl_multi_fdset.html \
@@ -71,7 +73,11 @@ HTMLPAGES = \
 	curl_multi_init.html \
 	curl_multi_perform.html \
 	curl_multi_remove_handle.html \
+        curl_share_cleanup.html curl_share_init.html curl_share_setopt.html \
+	libcurl.html \
 	libcurl-multi.html \
+	libcurl-easy.html \
+	libcurl-share.html \
 	libcurl-errors.html \
 	index.html
 
@@ -99,7 +105,6 @@ PDFPAGES = \
 	curl_mprintf.pdf \
 	curl_global_init.pdf \
 	curl_global_cleanup.pdf \
-	libcurl.pdf \
 	curl_multi_add_handle.pdf \
 	curl_multi_cleanup.pdf \
 	curl_multi_fdset.pdf \
@@ -107,8 +112,14 @@ PDFPAGES = \
 	curl_multi_init.pdf \
 	curl_multi_perform.pdf \
 	curl_multi_remove_handle.pdf \
+        curl_share_cleanup.pdf curl_share_init.pdf curl_share_setopt.pdf \
+	libcurl.pdf \
 	libcurl-multi.pdf \
+	libcurl-easy.pdf \
+	libcurl-share.pdf \
 	libcurl-errors.pdf
+
+CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
 
 EXTRA_DIST = $(man_MANS) $(HTMLPAGES) $(PDFPAGES)
 
@@ -129,4 +140,5 @@ pdf:
 	  foo=`echo $$file | sed -e 's/\.[0-9]$$//g'`; \
 	  groff -Tps -man $$file >$$foo.ps; \
 	  ps2pdf $$foo.ps $$foo.pdf; \
+	  rm $$foo.ps; \
 	done
