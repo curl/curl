@@ -34,6 +34,8 @@
   ;; c-mode-base-map because of inheritance ...
   (define-key c-mode-base-map "\M-q" 'c-fill-paragraph)
   (setq c-recognize-knr-p nil)
+  (add-hook 'write-file-hooks 'delete-trailing-whitespace)
+  (setq show-trailing-whitespace t)
   )
 
 ;; Set this is in your .emacs if you want to use the c-mode-hook as
