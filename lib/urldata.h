@@ -401,7 +401,6 @@ struct Configbits {
   bool http_set_referer;
   bool http_auto_referer; /* set "correct" referer when following location: */
   bool httpproxy;
-  bool mute;
   bool no_body;
   bool set_port;
   bool set_range;

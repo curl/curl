@@ -142,11 +142,6 @@ void Curl_failf(struct UrlData *data, char *fmt, ...)
   va_start(ap, fmt);
   if(data->errorbuffer)
     vsnprintf(data->errorbuffer, CURL_ERROR_SIZE, fmt, ap);
-  else if(!data->bits.mute) {
-    /* no errorbuffer receives this, write to data->err instead */
-    vfprintf(data->err, fmt, ap);
-    fprintf(data->err, "\n");
-  }
   va_end(ap);
 }
 
