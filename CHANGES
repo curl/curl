@@ -8,6 +8,10 @@
 
 
 Daniel (24 October)
+- Based on David Hull's fix in bug report 804599, we now check for solaris and
+  gcc in configure and set the -mimpure-text link flag for linking the lib
+  better.
+
 - I've introduced a -t option to the runtests.pl script. With that option set,
   the script runs special "memory torture" tests. For each test command line
   in that section, the script first runs the command line and counts the total
