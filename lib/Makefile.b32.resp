@@ -5,6 +5,7 @@
 +formdata.obj &
 +ftp.obj &
 +http.obj &
++http_chunks.obj &
 +ldap.obj &
 +dict.obj &
 +telnet.obj &

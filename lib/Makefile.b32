@@ -14,7 +14,7 @@ RM	   = del
 LIB	   = tlib
 TOPDIR	   = ..
 CURNTDIR   = .
-CXXFLAGS   = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro
+CXXFLAGS   = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
 DEFINES    = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS
 INCDIRS    = -I$(CURNTDIR);$(TOPDIR)/include/
 
@@ -34,6 +34,7 @@ SOURCES	   = \
 	formdata.c \
 	ftp.c \
 	http.c \
+        http_chunks.c \
 	ldap.c \
 	dict.c \
 	telnet.c \
@@ -64,11 +65,11 @@ OBJECTS = $(SOURCES:.c=.obj)
 all:	$(LIBCURLLIB)
 
 clean:
-	$(RM) $(LIBCURLLIB)
-        $(RM) *.obj
+	-$(RM) $(LIBCURLLIB)
+        -$(RM) *.obj
 
 $(LIBCURLLIB):  $(LINKLIB) $(OBJECTS) Makefile.b32.resp
-	$(RM) $(LIBCURLLIB)
+	-$(RM) $(LIBCURLLIB)
 	$(LIB) $(LIBCURLLIB) @Makefile.b32.resp
 
 
