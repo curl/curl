@@ -41,19 +41,10 @@ may have been fixed since this was written!
 * IPv6 support on AIX 4.3.3 doesn't work due to a missing sockaddr_storage
   struct. It has been reported to work on AIX 5.1 though.
 
-* Running 'make test' on Mac OS X gives 4 errors. This seems to be related
-  to some kind of libtool problem:
-  http://curl.haxx.se/mail/archive-2002-03/0029.html and
-  http://curl.haxx.se/mail/archive-2002-03/0033.html
-
-* libcurl does not deal nicely with files larger than 2GB
-
 * GOPHER transfers seem broken
 
 * configure --disable-http is not fully supported. All other protocols seem
   to work to disable.
-
-* The -m parameter does not work when using telnet with curl on Windows.
 
 * If a HTTP server responds to a HEAD request and includes a body (thus
   violating the RFC2616), curl won't wait to read the response but just stop
