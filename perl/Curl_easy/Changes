@@ -1,6 +1,40 @@
 Revision history for Perl extension Curl::easy.
 Check out the file README for more info.
 
+1.1.3  Wed Apr 18 2001: - Cris Bailiff <c.bailiff@devsecure.com>
+	- Change/shorten module function names:
+		Curl::easy::curl_easy_setopt  becomes Curl::easy::setopt etc.
+		This requires minor changes to existing scripts....
+    - Added callback function support to pass arbitrary SV * (including
+	  FILE globs) from perl through libcurl to the perl callback.
+	- Make callbacks still work with existing scripts which use STDIO
+	- Initial support for libcurl 7.7.2 HEADERFUNCTION callback feature
+	- Minor API cleanups/changes in the callback function signatures
+	- Added Curl::easy::version function to return curl version string
+	- Callback documentation added in easy.pm
+    - More tests in test.pl
+
+1.1.2  Mon Apr 16 2001: - Georg Horn <horn@koblenz-net.de>
+    - Added support for callback functions. This is for the curl_easy_setopt()
+      options WRITEFUNCTION, READFUNCTION, PROGRESSFUNCTION and PASSWDFUNCTION.
+      Still missing, but not really neccessary: Passing a FILE * pointer,
+      that is passed in from libcurl, on to the perl callback function.
+    - Various cleanups, fixes and enhancements to easy.xs and test.pl.
+
+1.1.1  Thu Apr 12 2001:
+    - Made more options of curl_easy_setopt() work: Options that require
+      a list of curl_slist structs to be passed in, like CURLOPT_HTTPHEADER,
+      are now working by passing a perl array containing the list elements.
+      As always, look at the test script test.pl for an example.
+
+1.1.0  Wed Apr 11 2001:
+    - tested against libcurl 7.7
+    - Added new function Curl::easy::internal_setopt(). By calling
+      Curl::easy::internal_setopt(Curl::easy::USE_INTERNAL_VARS, 1);
+      the headers and content of the fetched page are no longer stored
+      into files (or written to stdout) but are stored into internal
+      Variables $Curl::easy::headers and $Curl::easy::content.
+
 1.0.2  Tue Oct 10 2000:
     - runs with libcurl 7.4
     - modified curl_easy_getinfo(). It now calls curl_getinfo() that has
