@@ -8,6 +8,8 @@
 
 
 Daniel (5 January 2004)
+- Dan Fandrich provided a fix on our zlib usage.
+
 - David J Meyer's patch that introduce large file support to libcurl was
   applied. New curl_easy_setopt options that accept 'off_t' arguments are:
 
