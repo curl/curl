@@ -88,6 +88,8 @@
 #include "../lib/memdebug.h"
 #endif
 
+#define DEBUG_CONFIG
+
 #ifndef __cplusplus        /* (rabe) */
 typedef char bool;
 #endif                     /* (rabe) */
@@ -1046,12 +1048,31 @@ static int parseconfig(char *filename,
         ptr=param;
         while(*line && (*line != '\"')) {
           if(*line == '\\') {
+            char out;
             line++;
-            if(!*line) {
+
+            /* default is to output the letter after the backslah */
+            switch(out = *line) {
+            case '\0':
+              continue; /* this'll break out of the loop */
+            case 't':
+              out='\t';
+              break;
+            case 'n':
+              out='\n';
+              break;
+            case 'r':
+              out='\r';
+              break;
+            case 'v':
+              out='\v';
               break;
             }
+            *ptr++=out;
+            line++;
           }
-          *ptr++=*line++;
+          else
+            *ptr++=*line++;
         }
         *ptr=0; /* always zero terminate */
 
