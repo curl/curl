@@ -6,14 +6,17 @@
 # MEM mprintf.c:1103 realloc(e5718, 64) = e6118
 # MEM sendf.c:232 free(f6520)
 
-do {
+while(1) {
     if($ARGV[0] eq "-v") {
         $verbose=1;
+        shift @ARGV;
     }
     elsif($ARGV[0] eq "-t") {
         $trace=1;
+        shift @ARGV;
     }
-} while (shift @ARGV);
+    last;
+}
 
 my $maxmem;
 
@@ -26,7 +29,19 @@ sub newtotal {
     }
 }
 
-while(<STDIN>) {
+my $file = $ARGV[0];
+
+if(! -f $file) {
+    print "Usage: memanalyze.pl [options] <dump file>\n",
+    "Options:\n",
+    " -v  Verbose\n",
+    " -t  Trace\n";
+    exit;
+}
+
+open(FILE, "<$file");
+
+while(<FILE>) {
     chomp $_;
     $line = $_;
 
@@ -219,6 +234,7 @@ while(<STDIN>) {
         print "Not recognized prefix line: $line\n";
     }
 }
+close(FILE);
 
 if($totalmem) {
     print "Leak detected: memory still allocated: $totalmem bytes\n";

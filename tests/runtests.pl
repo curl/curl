@@ -777,7 +777,7 @@ sub singletest {
             print "\n** ALERT! memory debuggin without any output file?\n";
         }
         else {
-            my @memdata=`$memanalyze < $memdump`;
+            my @memdata=`$memanalyze $memdump`;
             my $leak=0;
             for(@memdata) {
                 if($_ ne "") {
