@@ -1241,7 +1241,8 @@ ConnectionStore(struct SessionHandle *data,
   return i;
 }
 
-static CURLcode ConnectPlease(struct connectdata *conn)
+static CURLcode ConnectPlease(struct connectdata *conn,
+                              Curl_addrinfo *hostaddr)
 {
   CURLcode result;
   Curl_ipconnect *addr;
@@ -1250,7 +1251,7 @@ static CURLcode ConnectPlease(struct connectdata *conn)
    * Connect to server/proxy
    *************************************************************/
   result= Curl_connecthost(conn,
-                           conn->hostaddr,
+                           hostaddr,
                            conn->port,
                            &conn->firstsocket,
                            &addr);
@@ -1264,7 +1265,7 @@ static CURLcode ConnectPlease(struct connectdata *conn)
     memset((char *) &conn->serv_addr, '\0', sizeof(conn->serv_addr));
     memcpy((char *)&(conn->serv_addr.sin_addr),
            (struct in_addr *)addr, sizeof(struct in_addr));
-    conn->serv_addr.sin_family = conn->hostaddr->h_addrtype;
+    conn->serv_addr.sin_family = hostaddr->h_addrtype;
     conn->serv_addr.sin_port = htons(conn->port);
 #endif
   }
@@ -1272,7 +1273,8 @@ static CURLcode ConnectPlease(struct connectdata *conn)
   return result;
 }
 
-static void verboseconnect(struct connectdata *conn)
+static void verboseconnect(struct connectdata *conn,
+                           Curl_addrinfo *hostaddr)
 {
 #ifdef HAVE_INET_NTOA_R
   char ntoa_buf[64];
@@ -1281,6 +1283,7 @@ static void verboseconnect(struct connectdata *conn)
 
   /* Figure out the ip-number and display the first host name it shows: */
 #ifdef ENABLE_IPV6
+  (void)hostaddr; /* not used in the IPv6 enabled version */
   {
     char hbuf[NI_MAXHOST];
 #ifdef NI_WITHSCOPEID
@@ -1305,7 +1308,7 @@ static void verboseconnect(struct connectdata *conn)
   {
     struct in_addr in;
     (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
-    infof(data, "Connected to %s (%s) port %d\n", conn->hostaddr->h_name,
+    infof(data, "Connected to %s (%s) port %d\n", hostaddr->h_name,
 #if defined(HAVE_INET_NTOA_R)
           inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)),
 #else
@@ -1327,6 +1330,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   struct connectdata *conn_temp;
   char endbracket;
   int urllen;
+  Curl_addrinfo *hostaddr;
 #ifdef HAVE_ALARM
   unsigned int prev_alarm;
 #endif
@@ -2178,27 +2182,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->port =  conn->remote_port; /* it is the same port */
 
     /* Resolve target host right on */
-    if(!conn->hostaddr) {
-      /* it might already be set if reusing a connection */
-      conn->hostaddr = Curl_resolv(data, conn->name, conn->port,
-                                   &conn->hostent_buf);
-    }
-    if(!conn->hostaddr) {
+    hostaddr = Curl_resolv(data, conn->name, conn->port);
+
+    if(!hostaddr) {
       failf(data, "Couldn't resolve host '%s'", conn->name);
       result =  CURLE_COULDNT_RESOLVE_HOST;
       /* don't return yet, we need to clean up the timeout first */
     }
   }
-  else if(!conn->hostaddr) {
-    /* This is a proxy that hasn't been resolved yet. It may be resolved
-       if we're reusing an existing connection. */
+  else {
+    /* This is a proxy that hasn't been resolved yet. */
 
     /* resolve proxy */
-    /* it might already be set if reusing a connection */
-    conn->hostaddr = Curl_resolv(data, conn->proxyhost, conn->port,
-                                 &conn->hostent_buf);
+    hostaddr = Curl_resolv(data, conn->proxyhost, conn->port);
 
-    if(!conn->hostaddr) {
+    if(!hostaddr) {
       failf(data, "Couldn't resolve proxy '%s'", conn->proxyhost);
       result = CURLE_COULDNT_RESOLVE_PROXY;
       /* don't return yet, we need to clean up the timeout first */
@@ -2282,14 +2280,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   
   if(-1 == conn->firstsocket) {
     /* Connect only if not already connected! */
-    result = ConnectPlease(conn);
+    result = ConnectPlease(conn, hostaddr);
     Curl_pgrsTime(data, TIMER_CONNECT); /* connect done, good or bad */
 
     if(CURLE_OK != result)
       return result;
 
     if(data->set.verbose)
-      verboseconnect(conn);
+      verboseconnect(conn, hostaddr);
 
     if(conn->curl_connect) {
       /* is there a protocol-specific connect() procedure? */
@@ -2308,7 +2306,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   else {
     Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
     if(data->set.verbose)
-      verboseconnect(conn);
+      verboseconnect(conn, hostaddr);
   }
 
   conn->now = Curl_tvnow(); /* time this *after* the connect is done, we

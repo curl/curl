@@ -1360,7 +1360,6 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   int modeoff;
   unsigned short connectport; /* the local port connect() should use! */
   unsigned short newport; /* remote port, not necessary the local one */
-  char *hostdataptr=NULL;
   
   /* newhost must be able to hold a full IP-style address in ASCII, which
      in the IPv6 case means 5*8-1 = 39 letters */
@@ -1450,16 +1449,19 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   if(data->change.proxy) {
     /*
      * This is a tunnel through a http proxy and we need to connect to the
-     * proxy again here. We already have the name info for it since the
-     * previous lookup.
+     * proxy again here.
+     *
+     * We don't want to rely on a former host lookup that might've expired
+     * now, instead we remake the lookup here and now!
      */
-    addr = conn->hostaddr;
+    addr = Curl_resolv(data, conn->proxyhost, conn->port);
     connectport =
-      (unsigned short)conn->port; /* we connect to the proxy's port */
+      (unsigned short)conn->port; /* we connect to the proxy's port */    
+
   }
   else {
     /* normal, direct, ftp connection */
-    addr = Curl_resolv(data, newhostp, newport, &hostdataptr);
+    addr = Curl_resolv(data, newhostp, newport);
     if(!addr) {
       failf(data, "Can't resolve new host %s:%d", newhostp, newport);
       return CURLE_FTP_CANT_GET_HOST;

@@ -193,18 +193,18 @@ _curl_hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
 
 Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
                            char *hostname,
-                           int port,
-                           char **bufp)
+                           int port)
 {
   char *entry_id = NULL;
   struct curl_dns_cache_entry *p = NULL;
   ssize_t entry_len;
   time_t now;
+  char *bufp;
 
   /* If the host cache timeout is 0, we don't do DNS cach'ing
      so fall through */
   if (data->set.dns_cache_timeout == 0) {
-    return Curl_getaddrinfo(data, hostname, port, bufp);
+    return Curl_getaddrinfo(data, hostname, port, &bufp);
   }
 
   time(&now);
@@ -220,7 +220,7 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
   /* If we can't create the entry id, don't cache, just fall-through
      to the plain Curl_getaddrinfo() */
   if (!entry_id) {
-    return Curl_getaddrinfo(data, hostname, port, bufp);
+    return Curl_getaddrinfo(data, hostname, port, &bufp);
   }
   
   /* See if its already in our dns cache */
@@ -236,7 +236,7 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
    _hostcache_return(NULL);
   }
 
-  p->addr = Curl_getaddrinfo(data, hostname, port, bufp);
+  p->addr = Curl_getaddrinfo(data, hostname, port, &bufp);
   if (!p->addr) {
     free(p);
     _hostcache_return(NULL);

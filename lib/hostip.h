@@ -37,8 +37,7 @@ curl_hash *Curl_global_host_cache_get(void);
 
 Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
 			   char *hostname,
-			   int port,
-			   char **bufp);
+			   int port);
 
 /* Get name info */
 Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,

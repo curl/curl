@@ -207,7 +207,6 @@ static CURLcode bindlocal(struct connectdata *conn,
   if (strlen(data->set.device)<255) {
     struct sockaddr_in sa;
     Curl_addrinfo *h=NULL;
-    char *hostdataptr=NULL;
     size_t size;
     char myhost[256] = "";
     in_addr_t in;
@@ -216,7 +215,7 @@ static CURLcode bindlocal(struct connectdata *conn,
       /*
        * We now have the numerical IPv4-style x.y.z.w in the 'myhost' buffer
        */
-      h = Curl_resolv(data, myhost, 0, &hostdataptr);
+      h = Curl_resolv(data, myhost, 0);
     }
     else {
       if(strlen(data->set.device)>1) {
@@ -224,7 +223,7 @@ static CURLcode bindlocal(struct connectdata *conn,
          * This was not an interface, resolve the name as a host name
          * or IP number
          */
-        h = Curl_resolv(data, data->set.device, 0, &hostdataptr);
+        h = Curl_resolv(data, data->set.device, 0);
         if(h) {
           /* we know data->set.device is shorter than the myhost array */
           strcpy(myhost, data->set.device);
@@ -354,6 +353,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   int rc;
   int sockfd=-1;
   int aliasindex=0;
+  char *hostname;
 
   struct timeval after;
   struct timeval before = Curl_tvnow();
@@ -394,8 +394,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
   }
 
-  infof(data, "About to connect() to %s:%d\n",
-        data->change.proxy?conn->proxyhost:conn->hostname, port);
+  hostname = data->change.proxy?conn->proxyhost:conn->hostname;
+  infof(data, "About to connect() to %s:%d\n", hostname, port);
 
 #ifdef ENABLE_IPV6
   /*
@@ -444,7 +444,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         case ECONNREFUSED: /* no one listening */
         default:
           /* unknown error, fallthrough and try another address! */
-          failf(data, "Failed to connect: %d", error);
+          failf(data, "Failed connect to %s: %d", hostname, error);
           break;
         }
       }
@@ -474,10 +474,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       before = after;
       continue;
     }
-    if (sockfd < 0) {
-      failf(data, "connect() failed");
+    if (sockfd < 0)
       return CURLE_COULDNT_CONNECT;
-    }
 
     /* leave the socket in non-blocking mode */
 
@@ -549,8 +547,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         break;
       default:
         /* unknown error, fallthrough and try another address! */
-        failf(data, "Failed to connect to IP number %d: %d",
-              aliasindex+1, error);
+        failf(data, "Failed to connect to %s IP number %d: %d",
+              hostname, aliasindex+1, error);
         break;
       }
     }
@@ -582,7 +580,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     /* no good connect was made */
     sclose(sockfd);
     *sockconn = -1;
-    failf(data, "Couldn't connect to host");
     return CURLE_COULDNT_CONNECT;
   }
 

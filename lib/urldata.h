@@ -282,9 +282,6 @@ struct connectdata {
 #define PROT_FTPS    (1<<9)
 #define PROT_SSL     (1<<10) /* protocol requires SSL */
 
-  Curl_addrinfo *hostaddr; /* IP-protocol independent host info pointer list */
-  char *hostent_buf; /* pointer to allocated memory for name info */
-
 #ifdef ENABLE_IPV6
   struct addrinfo *serv_addr;   /* the particular host we use */
 #else
