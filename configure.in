@@ -529,7 +529,8 @@ AC_CHECK_FUNCS( socket \
                 perror \
                 closesocket \
                 setvbuf \
-                sigaction
+                sigaction \
+                signal
 )
 
 dnl removed 'getpass' check on October 26, 2000
@@ -553,8 +554,6 @@ dnl   $PATH:/usr/bin/:/usr/local/bin )
 dnl AC_SUBST(RANLIB)
 
 AC_OUTPUT( Makefile \
-           curl.spec \
-           curl-ssl.spec \
 	   docs/Makefile \
 	   include/Makefile \
 	   include/curl/Makefile \

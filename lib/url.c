@@ -726,6 +726,12 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   sigact.sa_handler = alarmfunc;
   sigact.sa_flags &= ~SA_RESTART;
   sigaction(SIGALRM, &sigact, NULL);
+#else
+  /* no sigaction(), revert to the much lamer signal() */
+#ifdef HAVE_SIGNAL
+  signal(SIGALRM, alarmfunc);
+#endif
+
 #endif
 
   /* Parse <url> */
