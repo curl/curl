@@ -37,9 +37,10 @@ or you can get sequences of alphanumeric series by using [] as in:
  ftp://ftp.numericals.com/file[001-100].txt    (with leading zeros)
  ftp://ftp.letters.com/file[a-z].txt
 
-No nesting of the sequences is supported at the moment:
+No nesting of the sequences is supported at the moment, but you can use
+several ones next to each other:
 
- http://www.any.org/archive[1996-1999]/volume[1-4]part{a,b,c,index}.html
+ http://any.org/archive[1996-1999]/vol[1-4]/part{a,b,c}.html
 
 You can specify any amount of URLs on the command line. They will be fetched
 in a sequential manner in the specified order.
