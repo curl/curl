@@ -21,13 +21,14 @@ integer pointed to with \fImsgs_in_queue\fP will contain the number of
 remaining messages after this function was called.
 
 The data the returned pointer points to will not survive calling
-curl_multi_cleanup().
+\fIcurl_multi_cleanup(3)\fP.
 
 The 'CURLMsg' struct is very simple and only contain very basic informations.
 If more involved information is wanted, the particular "easy handle" in
 present in that struct and can thus be used in subsequent regular
-curl_easy_getinfo() calls (or similar):
+\fIcurl_easy_getinfo(3)\fP calls (or similar):
 
+.NF
  struct CURLMsg {
    CURLMSG msg;       /* what this message means */
    CURL *easy_handle; /* the handle it concerns */
