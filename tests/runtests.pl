@@ -1653,6 +1653,9 @@ sub displaylogs {
     foreach $log (sort @logs) {
         # the log file is not "." or ".." and contains more than zero bytes
         if(($log !~ /\.(\.|)$/) && -s "$LOGDIR/$log") {
+            if($log =~ /^\.nfs/) {
+                next;
+            }
             print "== Start of file $log\n";
             displaylogcontent("$LOGDIR/$log");
             print "== End of file $log\n";
