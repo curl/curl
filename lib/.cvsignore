@@ -8,3 +8,4 @@ config.h
 stamp-*
 ca-bundle.h
 getdate.c
+curllib.dsp
