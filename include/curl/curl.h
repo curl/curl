@@ -493,7 +493,7 @@ void curl_formfree(struct HttpPost *form);
 
 /* Unix and Win32 getenv function call, this returns a malloc()'ed string that
    MUST be free()ed after usage is complete. */
-char *curl_getenv(char *variable);
+char *curl_getenv(const char *variable);
 
 /* Returns a static ascii string of the libcurl version. */
 char *curl_version(void);
