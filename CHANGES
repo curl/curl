@@ -6,6 +6,22 @@
 
                                History of Changes
 
+Daniel (12 December 2000)
+- Multiple URL downloads with -O was still bugging. Not anymore I think or
+  hope, or at least I've tried... :-O
+
+- Francois Petitjean fixed another -O problem
+
+Version 7.5.1
+
+Daniel (11 December 2000)
+- Cleaned up a few of the makefiles to use unix-style newlines only. As Kevin
+  P Roth found out, at least one CVS client behaved wrongly when it found
+  different newline conventions within the same file.
+
+- Albert Chin-A-Young corrected the LDFLAGS use in the configure script for
+  the SSL stuff.
+
 Daniel (6 December 2000)
 - Massimo Squillace correctly described how libcurl could use session ids when
   doing SSL connections.
