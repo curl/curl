@@ -75,6 +75,11 @@ Java
   Maintained by Vic Hanson
   http://curl.haxx.se/libcurl/java/
 
+Lisp
+
+  Written by Liam Healy
+  http://common-lisp.net/project/cl-curl/
+
 Lua
 
   Written by Steve Dekorte
