@@ -7,7 +7,7 @@
 The cURL Test Suite
 
 Requires:
-  perl
+  perl (and a unix-style shell)
 
 Run:
   'make test'. This invokes the 'runtests.pl' perl script. Edit the top
@@ -15,7 +15,8 @@ Run:
 
   The script breaks on the first test that doesn't do OK. Use -a to prevent
   the script to abort on the first error. Run the script with -v for more
-  verbose output.
+  verbose output. Use -d to run the test servers with debug output enabled as
+  well.
 
   Use -s fort shorter output, or pass a string with test numbers to run
   specific tests only (like ./runtests.pl "3 4" to test 3 and 4 only)
@@ -33,9 +34,17 @@ Debug:
   then just type 'run' in the debugger to perform the command through the
   debugger.
 
+  If a test case causes a core dump, analyze it by running gdb like:
+
+          # gdb ../curl/src core
+
+  ... and get a stack trace with the gdb command:
+
+          (gdb) where
+
 Logs:
   All logs are generated in the logs/ subdirctory (it is emtpied first
-  in the runtests.sh script)
+  in the runtests.pl script)
 
 Data:
   All test-data are put in the data/ subdirctory.
@@ -70,7 +79,7 @@ Data:
                of the ftp server. It uses a simple syntax that is left to
                describe here!
 
-FIX:
+TODO:
 
   * Make httpserver.pl work when we PUT without Content-Length:
-
+  * Add persistant connection support and test cases
