@@ -1081,7 +1081,7 @@ sub singletest {
 
     if($dumped_core) {
         print "core dumped!\n";
-        if($gdb) {
+        if(0+ && $gdb) {
             print "running gdb for post-mortem analysis:\n";
             open(GDBCMD, ">log/gdbcmd2");
             print GDBCMD "bt\n";
