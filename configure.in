@@ -295,6 +295,14 @@ exit (rc != 0 ? 1 : 0); }],[
 	[ac_cv_gethostbyname_args=0])],
       [ac_cv_gethostbyname_args=0])])
 
+if test "$ac_cv_func_gethostbyname_r" = "yes"; then
+  if test "$ac_cv_gethostbyname_args" = "0"; then
+    dnl there's a gethostbyname_r() function, but we don't know how
+    dnl many arguments it wants!
+    AC_MSG_ERROR([couldn't figure out how to use gethostbyname_r()])
+  fi
+fi
+
 ])
 
 dnl **********************************************************************
