@@ -678,16 +678,6 @@ FORMcode FormAdd(struct curl_httppost **httppost,
         array_state = FALSE;
         continue;
       }
-      else {
-        /* Check that the option is OK in an array.
-           TODO: make ALL options work in arrays */
-
-        if ( (option <= CURLFORM_ARRAY_START) ||
-             (option >= CURLFORM_ARRAY_END) ) {
-          return_value = FORMADD_ILLEGAL_ARRAY;
-          break;
-        }
-      }
     }
     else {
       /* This is not array-state, get next option */
@@ -698,11 +688,16 @@ FORMcode FormAdd(struct curl_httppost **httppost,
 
     switch (option) {
     case CURLFORM_ARRAY:
-      forms = va_arg(params, struct curl_forms *);
-      if (forms)
-        array_state = TRUE;
-      else
-        return_value = FORMADD_NULL;
+      if(array_state)
+        /* we don't support an array from within an array */
+        return_value = FORMADD_ILLEGAL_ARRAY;
+      else {
+        forms = va_arg(params, struct curl_forms *);
+        if (forms)
+          array_state = TRUE;
+        else
+          return_value = FORMADD_NULL;
+      }
       break;
 
       /*
@@ -714,7 +709,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       if (current_form->name)
         return_value = FORMADD_OPTION_TWICE;
       else {
-        char *name = va_arg(params, char *);
+        char *name = array_state?array_value:va_arg(params, char *);
         if (name)
           current_form->name = name; /* store for the moment */
         else
@@ -725,7 +720,8 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       if (current_form->namelength)
         return_value = FORMADD_OPTION_TWICE;
       else
-        current_form->namelength = va_arg(params, long);
+        current_form->namelength =
+          array_state?array_value:va_arg(params, long);
       break;
 
       /*
@@ -737,7 +733,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       if (current_form->value)
         return_value = FORMADD_OPTION_TWICE;
       else {
-        char *value = va_arg(params, char *);
+        char *value = array_state?array_value:va_arg(params, char *);
         if (value)
           current_form->value = value; /* store for the moment */
         else
@@ -748,7 +744,8 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       if (current_form->contentslength)
         return_value = FORMADD_OPTION_TWICE;
       else
-        current_form->contentslength = va_arg(params, long);
+        current_form->contentslength =
+          array_state?array_value:va_arg(params, long);
       break;
 
       /* Get contents from a given file name */
@@ -756,7 +753,8 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       if (current_form->flags != 0)
         return_value = FORMADD_OPTION_TWICE;
       else {
-        char *filename = va_arg(params, char *);
+        char *filename = array_state?
+          array_value:va_arg(params, char *);
         if (filename) {
           current_form->value = strdup(filename);
           current_form->flags |= HTTPPOST_READFILE;
@@ -769,11 +767,9 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       /* We upload a file */
     case CURLFORM_FILE:
       {
-        const char *filename = NULL;
-        if (array_state)
-          filename = array_value;
-        else
-          filename = va_arg(params, const char *);
+        const char *filename = array_state?array_value:
+          va_arg(params, const char *);
+
         if (current_form->value) {
           if (current_form->flags & HTTPPOST_FILENAME) {
             if (filename) {
@@ -798,11 +794,8 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       }
     case CURLFORM_CONTENTTYPE:
       {
-	const char *contenttype = NULL;
-        if (array_state)
-          contenttype = array_value;
-        else
-          contenttype = va_arg(params, const char *);
+	const char *contenttype =
+          array_state?array_value:va_arg(params, const char *);
         if (current_form->contenttype) {
           if (current_form->flags & HTTPPOST_FILENAME) {
             if (contenttype) {
@@ -827,11 +820,9 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       }
     case CURLFORM_CONTENTHEADER:
       {
-        struct curl_slist* list = NULL;
-        if( array_state )
-          list = (struct curl_slist*)array_value;
-        else
-          list = va_arg(params, struct curl_slist*);
+        struct curl_slist* list = array_state?
+          (struct curl_slist*)array_value:
+          va_arg(params, struct curl_slist*);
         
         if( current_form->contentheader )
           return_value = FORMADD_OPTION_TWICE;
@@ -842,7 +833,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       }
     case CURLFORM_FILENAME:
       {
-        char *filename = array_state?(char *)array_value:
+        char *filename = array_state?array_value:
           va_arg(params, char *);
         if( current_form->showfilename )
           return_value = FORMADD_OPTION_TWICE;
