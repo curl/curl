@@ -62,13 +62,22 @@ typedef enum {
   CURLM_LAST
 } CURLMcode;
 
+typedef enum {
+  CURLMSG_NONE, /* first, not used */
+  CURLMSG_DONE, /* This easy handle has completed. 'whatever' points to
+                   the CURLcode of the transfer */
+  CURLMSG_LAST /* last, not used */
+} CURLMSG;
+
 struct CURLMsg {
-  CURL *easy_handle;
-  void *whatever;
+  CURLMSG msg;       /* what this message means */
+  CURL *easy_handle; /* the handle it concerns */
+  union {
+    void *whatever;    /* message-specific data */
+    CURLcode result;   /* return code for transfer */
+  } data;
 };
 typedef struct CURLMsg CURLMsg;
-
-typedef void * CURLMinfo;
 
 /*
  * Name:    curl_multi_init()

@@ -22,8 +22,15 @@
  *****************************************************************************/
 
 #include "setup.h"
+#include <curl/curl.h>
 
 #include "multi.h" /* will become <curl/multi.h> soon */
+
+struct Curl_message {
+  /* the 'CURLMsg' is the part that is visible to the external user */
+  struct CURLMsg extmsg;
+  struct Curl_message *next;
+};
 
 typedef enum {
   CURLM_STATE_INIT,
@@ -59,9 +66,15 @@ struct Curl_multi {
   long type;
 
   /* We have a linked list with easy handles */
-  struct Curl_one_easy first; 
+  struct Curl_one_easy easy; 
   /* This is the amount of entries in the linked list above. */
   int num_easy;
+
+  /* this is a linked list of posted messages */
+  struct Curl_message *msgs;
+  /* amount of messages in the queue */
+  int num_msgs;
+
 };
 
 
@@ -107,11 +120,11 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   
   /* We add this new entry first in the list. We make our 'next' point to the
      previous next and our 'prev' point back to the 'first' struct */
-  easy->next = multi->first.next;
-  easy->prev = &multi->first; 
+  easy->next = multi->easy.next;
+  easy->prev = &multi->easy; 
 
   /* make 'easy' the first node in the chain */
-  multi->first.next = easy;
+  multi->easy.next = easy;
 
   /* if there was a next node, make sure its 'prev' pointer links back to
      the new node */
@@ -139,7 +152,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     return CURLM_BAD_EASY_HANDLE;
 
   /* scan through the list and remove the 'curl_handle' */
-  easy = multi->first.next;
+  easy = multi->easy.next;
   while(easy) {
     if(easy->easy_handle == curl_handle)
       break;
@@ -160,6 +173,8 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
        We do not touch the easy handle here! */
     free(easy);
 
+    multi->num_easy--; /* one less to care about now */
+
     return CURLM_OK;
   }
   else
@@ -179,7 +194,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
-  easy=multi->first.next;
+  easy=multi->easy.next;
   while(easy) {
     switch(easy->state) {
     case CURLM_STATE_INIT:
@@ -204,11 +219,12 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
   struct Curl_one_easy *easy;
+  bool done;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
-  easy=multi->first.next;
+  easy=multi->easy.next;
   while(easy) {
 
     switch(easy->state) {
@@ -268,7 +284,21 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   return CURLM_OK;
 }
 
-CURLMcode curl_multi_cleanup(CURLM *multi_handle);
+CURLMcode curl_multi_cleanup(CURLM *multi_handle)
+{
+  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  if(GOOD_MULTI_HANDLE(multi)) {
+    multi->type = 0; /* not good anymore */
+
+    /* remove all easy handles */
+
+    free(multi);
+
+    return CURLM_OK;
+  }
+  else
+    return CURLM_BAD_HANDLE;
+}
 
 CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue);
 
