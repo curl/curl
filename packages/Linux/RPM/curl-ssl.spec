@@ -31,7 +31,7 @@ Authors:
 
 
 %prep
-%setup -n curl-7.4.2
+%setup -n %{name}-%{version}
 
 
 %build
