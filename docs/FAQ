@@ -1,4 +1,4 @@
-Updated: October 23, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: November 1, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -97,10 +97,9 @@ FAQ
 
   1.3 What is cURL not?
   
-  Curl is *not*, I repeat, *not* a wget clone even though that is a very
-  common misconception. Never, during curl's development, have I intended curl
-  to replace wget or compete on its market. Curl is targeted at single-shot
-  file transfers.
+  Curl is *not* a wget clone even though that is a very common misconception.
+  Never, during curl's development, have we intended curl to replace wget or
+  compete on its market. Curl is targeted at single-shot file transfers.
 
   Curl is not a web site mirroring program. If you wanna use curl to mirror
   something: fine, go ahead and write a script that wraps around curl to make
@@ -135,7 +134,7 @@ FAQ
 
   * We focus on protocol related issues and improvements. If you wanna do more
     magic with the supported protocols than curl currently does, chances are
-    big I will agree. If you wanna add more protocols, I may very well
+    big we will agree. If you wanna add more protocols, we may very well
     agree.
 
   * If you want someone else to make all the work while you wait for us to
