@@ -197,7 +197,7 @@ if (!$confopts) {
 }
 
 
-if ($fixed > 0) {
+if ($fixed < 4) {
   open(F, ">$setupfile") or die;
   print F "name='$name'\n";
   print F "email='$email'\n";
