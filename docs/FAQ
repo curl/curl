@@ -1,4 +1,4 @@
-Updated: February 12, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: February 16, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -183,11 +183,8 @@ FAQ
   2.2. Does curl work/build with other SSL libraries?
 
   Curl has been written to use OpenSSL, although I doubt there would be much
-  problems using a different library. I just don't know any other free one and
-  that has limited my possibilities to develop against anything else.
-
-  If anyone does "port" curl to use a commercial SSL library, I am of course
-  very interested in getting the patch!
+  problems using a different library. If anyone does "port" curl to use a
+  different SSL library, I am of course very interested in getting the patch!
 
   2.3. Where can I find a copy of LIBEAY32.DLL?
 
