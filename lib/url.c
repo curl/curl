@@ -1984,6 +1984,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     /* we need these pointers if we speak over a proxy */
     conn->hostname = old_conn->gname;
+    conn->name = old_conn->name;
 
     free(conn->path);    /* free the previously allocated path pointer */
 
