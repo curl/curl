@@ -75,7 +75,42 @@ HTMLPAGES = \
 	libcurl-errors.html \
 	index.html
 
-EXTRA_DIST = $(man_MANS) $(HTMLPAGES)
+PDFPAGES = \
+	curl_easy_cleanup.pdf \
+	curl_easy_getinfo.pdf \
+	curl_easy_init.pdf \
+	curl_easy_perform.pdf \
+	curl_easy_setopt.pdf \
+	curl_easy_duphandle.pdf \
+	curl_formadd.pdf \
+	curl_formparse.pdf \
+	curl_formfree.pdf \
+	curl_getdate.pdf \
+	curl_getenv.pdf \
+	curl_slist_append.pdf \
+	curl_slist_free_all.pdf \
+	curl_version.pdf \
+	curl_version_info.pdf \
+	curl_escape.pdf \
+	curl_unescape.pdf \
+	curl_free.pdf \
+	curl_strequal.pdf \
+	curl_strnequal.pdf \
+	curl_mprintf.pdf \
+	curl_global_init.pdf \
+	curl_global_cleanup.pdf \
+	libcurl.pdf \
+	curl_multi_add_handle.pdf \
+	curl_multi_cleanup.pdf \
+	curl_multi_fdset.pdf \
+	curl_multi_info_read.pdf \
+	curl_multi_init.pdf \
+	curl_multi_perform.pdf \
+	curl_multi_remove_handle.pdf \
+	libcurl-multi.pdf \
+	libcurl-errors.pdf
+
+EXTRA_DIST = $(man_MANS) $(HTMLPAGES) $(PDFPAGES)
 
 MAN2HTML= gnroff -man $< | man2html >$@
 
@@ -88,3 +123,10 @@ html: $(HTMLPAGES)
 
 .1.html:
 	$(MAN2HTML)
+
+pdf:
+	for file in $(man_MANS); do \
+	  foo=`echo $$file | sed -e 's/\.[0-9]$$//g'`; \
+	  groff -Tps -man $$file >$$foo.ps; \
+	  ps2pdf $$foo.ps $$foo.pdf; \
+	done

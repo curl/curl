@@ -18,6 +18,9 @@ dist-hook:
 html:
 	cd docs; make html
 
+pdf:
+	cd docs; make pdf
+
 check: test
 
 test:

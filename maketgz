@@ -35,6 +35,10 @@ mv $HEADER.new $HEADER
 # Replace version number in header file:
 sed 's/#define CURL_VERSION.*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER >$CHEADER.new
 
+echo "curl version $curlversion"
+echo "libcurl version $libversion"
+echo "libcurl numerical $numeric"
+
 # Save old header file
 cp -p $CHEADER $CHEADER.old
 
@@ -82,6 +86,9 @@ fi
 # Make sure we have updated HTML versions of all man pages:
 #
 make html
+
+# And the PDF versions
+make pdf
 
 ############################################################################
 #
