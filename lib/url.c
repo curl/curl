@@ -483,9 +483,11 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
   case CURLOPT_WRITEFUNCTION:
     data->fwrite = va_arg(param, curl_write_callback);
     break;
+#if 0
   case CURLOPT_WRITEINFO:
     data->writeinfo = va_arg(param, char *);
     break;
+#endif
   case CURLOPT_READFUNCTION:
     data->fread = va_arg(param, curl_read_callback);
     break;
