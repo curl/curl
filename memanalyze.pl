@@ -118,7 +118,6 @@ while(<STDIN>) {
         }
         # fclose(0x1026c8)
         elsif($function =~ /fclose\(0x([0-9a-f]*)\)/) {
-            print "CLOSE $1\n";
             if(!$fopen{$1}) {
                 print "fclose() without fopen(): $line\n";
             }
