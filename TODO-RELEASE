@@ -6,9 +6,6 @@ Issues not sorted in any particular order.
 To get fixed in 7.11.1 (planned release in March 2004)
 ======================
 
-12. PUT and POST with multiple auth bits or simply with NTLM or Digest do
-    wrong. #862835 Patch posted to list. (Awaiting feedback)
-
 To get fixed in 7.11.2 (planned release May/June 2004)
 ======================
 
@@ -24,3 +21,6 @@ To get fixed in 7.11.2 (planned release May/June 2004)
 23. Peter Sylvester's "Most Significant Common Name" patch. Feedback welcome.
     At least the UTF8 conversion and comparison should be done. Patch?
     UNASSIGNED
+
+24. Make the progress meter use one digit more for the hour time fields.
+    Accomplish this by removing one of the times displayed.
