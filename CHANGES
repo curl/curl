@@ -6,13 +6,29 @@
 
                                History of Changes
 
+Daniel (6 November 2001)
+- We got bug report #478780 posted, which very correctly pointed out two bad
+  timeouet things in libcurl: we didn't restore the sigaction struct (alarm
+  handler for the SIGALRM) nor did we restore the previous alarm() timeout
+  that could've been set by a "parent" process or similar. We do that now
+  though! The reporter was anonymous.
+
+- Kevin Roth made the cygwin binary get stripped before install.
+
 Daniel (5 November 2001)
 - Detlef Schmier reported that curl didn't compile using Solaris 8 with the
   native cc compiler. It was due to a bad function prototype. Fixed now.
   Unfortunately, I can't enable the -Wstrict-prototypes in my debug builds
   though, as gcc then complains like crazy on OpenSSL include files... :-(
 
-- John Lask provided SSL over HTTP proxy fixes.
+- John Lask provided SSL over HTTP proxy fixes (that I didn't quite agree on,
+  we need to work on this).
+
+- John Lask added the -1/--TLSv1 options that forces SSL into using TLS
+  version 1 when speaking HTTPS.
+
+- John Lask brought a brand new VC++ makefile for the lib directory, that
+  works a lot better than the previous!
 
 - Ramana Mokkapati brought some clever insights on the LDAP failures, and his
   suggested changes are now applied.
@@ -45,8 +61,8 @@ Daniel (1 November 2001)
 Version 7.9.1-pre7
 
 Daniel (31 October 2001)
-- The curl_easy_getinfo() timers accidentally lost they're subsecond accuracy
-  as the calculations used longs instead of doubles! Paul Harrington reported.
+- The curl_easy_getinfo() timers accidentally lost their subsecond accuracy as
+  the calculations used longs instead of doubles! Paul Harrington reported.
 
 - The SSL SocketIsDead() checks weren't good enough (as expected really), so I
   had to add a generic internal try-it-out system. If the request on a re-used
