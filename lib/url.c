@@ -2035,7 +2035,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
              used truly as a separator */
           ptr++;
 
-        strcpy(conn->path, ptr);
+        /* This cannot be made with strcpy, as the memory chunks overlap! */
+        memmove(conn->path, ptr, strlen(ptr)+1);
       }
     }
 
