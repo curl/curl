@@ -7,7 +7,27 @@
                                History of Changes
 
 
+Daniel (20 February 2002)
+- Andrés García provided a solution to bug report #515228. the total time
+  counter was not set correctly when -I was used during some conditions (all
+  headers were read in one single read).
+
+- Nico Baggus provided a huge patch with minor tweaks all over to make curl
+  compile nicely on VMS.
+
+Daniel (19 February 2002)
+- Rick Richardson found out that by replacing PF_UNSPEC with PF_INET in the
+  getaddrinfo() calls, he could speed up some name resolving calls with an
+  order of magnitudes on his Redhat Linux 7.2.
+
+- Philip Gladstone found a second INADDR_NONE problem where we used long
+  intead of in_addr_t which caused 64bit problemos. We really shouldn't define
+  that on two different places.
+
 Daniel (18 February 2002)
+- Philip Gladstone found a problem in how HTTP requests were sent if the
+  request couldn't be sent all at once.
+
 - Emil found and corrected a bad connection timeout comparison that made curl
   use the longest of connect-timeout and timout as a timeout value, instead of
   the shortest as it was supposed to!
