@@ -8,7 +8,7 @@ WriteMakefile(
     'NAME'	=> 'Curl::easy',
     'VERSION_FROM' => 'easy.pm', # finds $VERSION
     'LIBS'	=> ['-lcurl '],   # e.g., '-lm' 
-    'DEFINE'	=> '',     # e.g., '-DHAVE_SOMETHING' 
+    'DEFINE'	=> '-Wall',     # e.g., '-DHAVE_SOMETHING' 
     'INC'	=> '',     # e.g., '-I/usr/include/other' 
     'clean'	=> {FILES => "head.out body.out"}
 );
