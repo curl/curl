@@ -64,6 +64,231 @@ multiplied with
 number of bytes. Your function must return the actual number of bytes that you
 stored in that memory area. Returning -1 will signal an error to the library
 and cause it to abort the current transfer immediately.
+.TP
+.B CURLOPT_INFILESIZE
+When uploading a file to a remote site, this option should be used to tell
+libcurl what the expected size of the infile is.
+.TP
+.B CURLOPT_URL
+The actual URL to deal with. The parameter should be a char * to a zero
+terminated string. NOTE: this option is currently required!
+.TP
+.B CURLOPT_PROXY
+If you need libcurl to use a http proxy to access the outside world, set the
+proxy string with this option. The parameter should be a char * to a zero
+terminated string.
+.TP
+.B CURLOPT_VERBOSE
+Set the parameter to non-zero to get the library to display a lot of verbose
+information about its operations.
+.TP
+.B CURLOPT_HEADER
+A non-zero parameter tells the library to include the header in the
+output. This is only relevant for protocols that actually has a header
+preceeding the data (like HTTP).
+.TP
+.B CURLOPT_NOPROGRESS
+A non-zero parameter tells the library to shut of the built-in progress meter
+completely. (NOTE: future versions of the lib is likely to not have any
+built-in progress meter at all).
+.TP
+.B CURLOPT_NOBODY
+A non-zero parameter tells the library to not include the body-part in the
+output. This is only relevant for protocols that have a separate header and
+body part.
+.TP
+.B CURLOPT_FAILONERROR
+A non-zero parameter tells the library to fail silently if the HTTP code
+returned is equal or larger than 300. The default action would be to return
+the page normally, ignoring that code.
+.TP
+.B CURLOPT_UPLOAD
+A non-zero parameter tells the library to prepare for an upload. The
+CURLOPT_INFILE and CURLOPT_INFILESIZE are also interesting for uploads.
+.TP
+.B CURLOPT_POST
+A non-zero parameter tells the library to do a regular HTTP post. This is a
+normal application/x-www-form-urlencoded kind, which is the most commonly used
+one by HTML forms. See the CURLOPT_POSTFIELDS option for how to specify the
+data to post.
+.TP
+.B CURLOPT_FTPLISTONLY
+A non-zero parameter tells the library to just list the names of an ftp
+directory, instead of doing a full directory listin that would include file
+sizes, dates etc.
+.TP
+.B CURLOPT_FTPAPPEND
+A non-zero parameter tells the library to append to the remote file instead of
+overwrite it. This is only useful when uploading to a ftp site.
+.TP
+.B CURLOPT_NETRC
+A non-zero parameter tells the library to scan your
+.I ~/.netrc
+file to find user name and password for the remote site you are about to
+access. Do note that curl does not verify that the file has the correct
+properties set (as the standard unix ftp client does), and that only machine
+name, user name and password is taken into account (init macros and similar
+things aren't supported).
+.TP
+.B CURLOPT_FOLLOWLOCATION
+A non-zero parameter tells the library to follow any Location: header that the
+server sends as part of a HTTP header. NOTE that this means that the library
+will resend the same request on the new location and follow new Location:
+headers all the way until no more such headers are returned.
+.TP
+.B CURLOPT_FTPASCII
+A non-zero parameter tells the library to use ASCII mode for ftp transfers,
+instead of the default binary transfer. This will only be useable when
+transfering text data between system with different views on certain
+characters, such as newlines or similar.
+.TP
+.B CURLOPT_PUT
+A non-zero parameter tells the library to use HTTP PUT a file. The file to put
+must be set with CURLOPT_INFILE and CURLOPT_INFILESIZE.
+.TP
+.B CURLOPT_MUTE
+A non-zero parameter tells the library to be completely quiet.
+.TP
+.B CURLOPT_USERPWD
+Pass a char * as parameter, which should be [username]:[password] to use for
+the connection. If the password is left out, you will be prompted for it.
+.TP
+.B CURLOPT_PROXYUSERPWD
+Pass a char * as parameter, which should be [username]:[password] to use for
+the connection to the HTTP proxy. If the password is left out, you will be
+prompted for it.
+.TP
+.B CURLOPT_RANGE
+Pass a char * as parameter, which should contain the specified range you
+want. It should be in the format "X-Y", where X or Y may be left out. The HTTP
+transfers also support several intervals, separated with commas as in
+.I "X-Y,N-M".
+.TP
+.B CURLOPT_ERRORBUFFER
+Pass a char * to a buffer that the libcurl may store human readable error
+messages in. This may be more helpful than just the return code from the
+library. The buffer must be at least CURL_ERROR_SIZE big.
+.TP
+.B CURLOPT_TIMEOUT
+Pass a long as parameter containing the maximum time in seconds that you allow
+the libcurl transfer operation to take. Do note that normally, name lookups
+maky take a considerable time and that limiting the operation to less than a
+few minutes risk aborting perfectly normal operations.
+.TP
+.B CURLOPT_POSTFIELDS
+Pass a char * as parameter, which should be the full data to post in a HTTP
+post operation. See also the CURLOPT_POST.
+.TP
+.B CURLOPT_REFERER
+Pass a pointer to a zero terminated string as parameter. It will be used to
+set the referer: header in the http request sent to the remote server. This
+can be used to fool servers or scripts.
+.TP
+.B CURLOPT_USERAGENT
+Pass a pointer to a zero terminated string as parameter. It will be used to
+set the user-agent: header in the http request sent to the remote server. This
+can be used to fool servers or scripts.
+.TP
+.B CURLOPT_FTPPORT
+Pass a pointer to a zero terminated string as parameter. It will be used to
+get the IP address to use for the ftp PORT instruction. The PORT instruction
+tells the remote server to connect to our specified IP address. The string may
+be a plain IP address, a host name, an network interface name (under unix) or
+just a '-' letter to let the library use your systems default IP address.
+.TP
+.B CURLOPT_LOW_SPEED_LIMIT
+Pass a long as parameter. It contains the transfer speed in bytes per second
+that the transfer should be below during CURLOPT_LOW_SPEED_TIME seconds for
+the library to consider it too slow and abort.
+.TP
+.B CURLOPT_LOW_SPEED_TIME
+Pass a long as parameter. It contains the time in seconds that the transfer
+should be below the CURLOPT_LOW_SPEED_LIMIT for the library to consider it too
+slow and abort.
+.TP
+.B CURLOPT_RESUME_FROM
+Pass a long as parameter. It contains the offset in number of bytes that you
+want the transfer to start from.
+.TP
+.B CURLOPT_COOKIE
+Pass a pointer to a zero terminated string as parameter. It will be used to
+set a cookie in the http request. The format of the string should be
+'[NAME]=[CONTENTS];' Where NAME is the cookie name.
+.TP
+.B CURLOPT_HTTPHEADER
+Pass a pointer to a linked list of HTTP headers to pass to the server in your
+HTTP request. The linked list should be a fully valid list of 'struct
+HttpHeader' structs properly filled in. TBD!
+.TP
+.B CURLOPT_HTTPPOST
+Pass a pointer to a linked list of HTTP post data to pass to the server in
+your http request.  The linked list should be a fully valid list of 'struct
+HttpPost' structs properly filled in. TBD!
+.TP
+.B CURLOPT_SSLCERT
+Pass a pointer to a zero terminated string as parameter. The string should be
+the file name of your certficicate in PEM format.
+.TP
+.B CURLOPT_SSLCERTPASSWD
+Pass a pointer to a zero terminated string as parameter. It will be used as
+the password required to use the CURLOPT_SSLCERT certificate. If the password
+is not supplied, you will be prompted for it.
+.TP
+.B CURLOPT_CRLF
+TBD.
+.TP
+.B CURLOPT_QUOTE
+Pass a pointer to a linked list of FTP commands to pass to the server prior to
+your ftp request. The linked list should be a fully valid list of 'struct
+curl_slist' structs properly filled in. TBD!
+.TP
+.B CURLOPT_POSTQUOTE
+Pass a pointer to a linked list of FTP commands to pass to the server after
+your ftp transfer request. The linked list should be a fully valid list of
+'struct curl_slist' structs properly filled in. TBD!
+.TP
+.B CURLOPT_WRITEHEADER
+Pass a FILE * to be used to write the header part of the received data to.
+.TP
+.B CURLOPT_COOKIEFILE
+Pass a pointer to a zero terminated string as parameter. It should contain the
+name of your file holding cookie data. The cookie data may be in netscape
+cookie data format or just regular HTTP-style headers dumped to a file.
+.TP
+.B CURLOPT_SSLVERSION
+Pass a long as parameter. Set what version of SSL to attempt to use, 2 or
+3. By default, the SSL library will try to solve this by itself although some
+servers make this difficult why you at times will have to use this option.
+.TP
+.B CURLOPT_TIMECONDITION
+Pass a long as parameter. This defines how the CURLOPT_TIMEVALUE time value is
+treated. You can set this parameter to TIMECOND_IFMODSINCE or
+TIMECOND_IFUNMODSINCE. This is aa HTTP-only feature. (TBD)
+.TP
+.B CURLOPT_TIMEVALUE
+Pass a long as parameter. This should be the time in seconds since 1 jan 1970,
+and the time will be used as specified in CURLOPT_TIMECONDITION or if that
+isn't used, it will be TIMECOND_IFMODSINCE by default.
+.TP
+.B CURLOPT_CUSTOMREQUEST
+Pass a pointer to a zero terminated string as parameter. It will be user
+instead of GET or HEAD when doing the HTTP request. This is useful for doing
+DELETE or other more obscure HTTP requests. Don't do this at will, make sure
+your server supports the command first.
+.TP
+.B CURLOPT_STDERR
+Pass a FILE * as parameter. This is the stream to use instead of stderr
+internally when reporting errors.
+.TP
+.B CURLOPT_PROGRESSMODE
+This is currently unsupported, and is likely to be removed in future
+versions. TBD
+.TP
+.B CURLOPT_WRITEINFO
+Pass a pointer to a zero terminated string as parameter. It will be used to
+report information after a successful request. This string may contain
+variables that will be substituted by their contents when output. Described
+elsewhere.
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as
