@@ -1,4 +1,15 @@
 #!/usr/bin/perl
+#
+# $Id$
+# This is the FTP server designed for the curl test suite.
+#
+# It is meant to excersive curl, it is not meant to become a fully working
+# or even very standard compliant server.
+#
+# You may optionally specify port on the command line, otherwise it'll
+# default to port 8921.
+#
+
 use Socket;
 use Carp;
 use FileHandle;
@@ -11,6 +22,8 @@ open(FTPLOG, ">log/ftpd.log") ||
     print STDERR "failed to open log file, runs without logging\n";
 
 sub logmsg { print FTPLOG @_; }
+
+sub ftpmsg { print INPUT @_; }
 
 my $verbose=0; # set to 1 for debugging
 
@@ -46,7 +59,7 @@ my $paddr;
 sub REAPER {
     $waitedpid = wait;
     $SIG{CHLD} = \&REAPER;  # loathe sysV
-  #  logmsg "reaped $waitedpid" . ($? ? " with exit $?" : '');
+    logmsg "reaped $waitedpid" . ($? ? " with exit $?\n" : "\n");
 }
 
 # USER is ok in fresh state
@@ -58,6 +71,7 @@ my %commandok = ( "USER" => "fresh",
                   "LIST" => "twosock",
                   "RETR" => "twosock",
                   "CWD"  => "loggedin",
+                  "QUIT"  => "loggedin|twosock",
                   );
 
 # initially, we're in 'fresh' state
@@ -74,7 +88,7 @@ my %displaytext = ('USER' => '331 We are happy you popped in!', # output FTP lin
                    'TYPE' => '200 I modify TYPE as you wanted',
                    'LIST' => '150 here comes a directory',
                    'CWD'  => '250 CWD command successful.',
-
+                   'QUIT' => '221 bye bye baby',
                    );
 
 # callback functions for certain commands
@@ -182,6 +196,10 @@ sub PASV_command {
         }
         $port++; # try next port please
     }
+    if(11000 == $port) {
+        print "500 no free ports!\r\n";
+        exit;
+    }
     listen(Server2,SOMAXCONN) || die "listen: $!";
 
     printf("227 Entering Passive Mode (127,0,0,1,%d,%d)\n",
@@ -194,7 +212,7 @@ sub PASV_command {
     my($port,$iaddr) = sockaddr_in($paddr);
     my $name = gethostbyaddr($iaddr,AF_INET);
 
-    logmsg "connection from $name [", inet_ntoa($iaddr), "] at port $port\n";
+    logmsg "data connection from $name [", inet_ntoa($iaddr), "] at port $port\n";
 
     open(STDOUT, ">&Client2")   || die "can't dup client to stdout";
 
@@ -232,8 +250,8 @@ sub PORT_command {
 
     if($arg !~ /(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/) {
         logmsg "bad PORT-line: $arg\n";
-        print "314 silly you, go away\r\n";
-        return 1;
+        print "500 silly you, go away\r\n";
+        exit;
     }
     my $iaddr = inet_aton("$1.$2.$3.$4");
     my $paddr = sockaddr_in(($5<<8)+$6, $iaddr);
@@ -307,26 +325,25 @@ for ( $waitedpid = 0;
 
             last unless defined ($_ = <STDIN>);
 
+            ftpmsg $_;
 
             # Remove trailing CRLF.
             s/[\n\r]+$//;
 
             unless (m/^([A-Z]{3,4})\s?(.*)/i) {
-                print STDERR
-                    "badly formed command received: ".$_;
-                exit 0;
+                print "500 '$_': command not understood.\r\n";
+                next;
             }
             my $FTPCMD=$1;
             my $FTPARG=$2;
             my $full=$_;
                  
             logmsg "GOT: ($1) $_\n";
-            print INPUT "$$: $full\n";
 
             my $ok = $commandok{$FTPCMD};
             if($ok !~ /$state/) {
-                print "314 $FTPCMD not OK ($ok) in state: $state!\r\n";
-                exit;
+                print "500 $FTPCMD not OK in state: $state!\r\n";
+                next;
             }
 
             my $newstate=$statechange{$FTPCMD};
@@ -363,11 +380,9 @@ for ( $waitedpid = 0;
 sub spawn {
     my $coderef = shift;
 
-
     unless (@_ == 0 && $coderef && ref($coderef) eq 'CODE') {
         confess "usage: spawn CODEREF";
     }
-
 
     my $pid;
     if (!defined($pid = fork)) {
