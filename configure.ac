@@ -287,7 +287,7 @@ then
   AC_TRY_LINK( ,
              [gethostbyname();],
              [ dnl found it!
-             HAVE_GETHOSTBYNAME="1",
+             HAVE_GETHOSTBYNAME="1"
              AC_MSG_RESULT([yes])],
              [ dnl failed!
              AC_MSG_RESULT([no])
