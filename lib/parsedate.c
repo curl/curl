@@ -62,10 +62,10 @@
 static const char *wkday[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 static const char *weekday[] = { "Monday", "Tuesday", "Wednesday", "Thursday",
                                  "Friday", "Saturday", "Sunday" };
-static const char *month[]= { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
-                              "Aug", "Sep", "Oct", "Nov", "Dec" };
+const char *Curl_month[]= { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
+                            "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-static const char *tz[]= { "GMT", "UTC" };
+static const char *tz[]= { "GMT", "UTC", "MET" };
 
 /* returns:
    -1 no day
@@ -97,7 +97,7 @@ static int checkmonth(char *check)
   const char **what;
   bool found= FALSE;
 
-  what = &month[0];
+  what = &Curl_month[0];
   for(i=0; i<12; i++) {
     if(curl_strequal(check, what[0])) {
       found=TRUE;
@@ -256,6 +256,15 @@ time_t Curl_parsedate(const char *date)
     part++;
   }
 
+  if(-1 == secnum)
+    secnum = minnum = hournum = 0; /* no time, make it zero */
+
+  if((-1 == mdaynum) ||
+     (-1 == monnum) ||
+     (-1 == yearnum))
+    /* lacks vital info, fail */
+    return -1;
+
   tm.tm_sec = secnum;
   tm.tm_min = minnum;
   tm.tm_hour = hournum;
@@ -268,8 +277,7 @@ time_t Curl_parsedate(const char *date)
 
   t = mktime(&tm);
 
-  /* We have the time-stamp now, but in our local time zone, we must now
-     adjust it to GMT. */
+  /* time zone adjust */
   {
     struct tm *gmt;
     long delta;
@@ -296,34 +304,3 @@ time_t curl_getdate(const char *p, const time_t *now)
   (void)now;
   return Curl_parsedate(p);
 }
-
-#ifdef TESTIT
-
-int main(void)
-{
-  char buffer[1024];
-  char cmd[1024];
-  time_t t;
-
-  while(fgets(buffer, sizeof(buffer), stdin)) {
-    size_t len = strlen(buffer);
-
-    buffer[len-1]=0; /* cut off newline */
-
-    t = curl_getdate(buffer, NULL);
-
-    printf("curl_getdate(): %d\n", t);
-
-    sprintf(cmd, "date -d \"%s\" +%%s", buffer);
-
-    printf("GNU date:\n");
-    system(cmd);
-
-    t = parse_a_date(buffer);
-    printf("parse_a_date: %d\n===================\n\n", t);
-  }
-
-  return 0;
-}
-
-#endif
