@@ -6,6 +6,17 @@
 
                                History of Changes
 
+Daniel (3 May 2001)
+- Cris Bailiff fixed a chunked transfer encoding problem with persistent
+  connection that made libcurl fail if the persistent connection used mixed
+  chunked and non-chunked transfers.
+
+- Cris Bailiff fixed a bad treatment of 304-replies, as they would not be
+  treated as content-length 0 replies but would cause a "hang" until the
+  server timed-out and closed the connection.
+
+- Brad Burdick found a problem in the docs/examples/Makefile.am
+
 Daniel (27 April 2001)
 - Updated the INTERALS document again. It was lagging a bit. I think I made it
   more easy to follow now as well.
