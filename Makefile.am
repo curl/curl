@@ -17,7 +17,7 @@ dist-hook:
 check: test
 
 test:
-	@(cd tests; make quiet-test)
+	@(cd tests; $(MAKE) quiet-test)
 
 #
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
