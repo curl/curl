@@ -17,7 +17,7 @@ Single-threaded
 
 Build
 
-  Rebuild libcurl with -DMALLOCDEBUG (usually, rerunning configure with
+  Rebuild libcurl with -DCURLDEBUG (usually, rerunning configure with
   --enable-debug fixes this). 'make clean' first, then 'make' so that all
   files actually are rebuilt properly. It will also make sense to build
   libcurl with the debug option (usually -g to the compiler) so that debugging
