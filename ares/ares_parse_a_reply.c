@@ -85,7 +85,7 @@ int ares_parse_a_reply(const unsigned char *abuf, int alen,
   naliases = 0;
 
   /* Examine each answer resource record (RR) in turn. */
-  for (i = 0; i < ancount; i++)
+  for (i = 0; i < (int)ancount; i++)
     {
       /* Decode the RR up to the data field. */
       status = ares_expand_name(aptr, abuf, alen, &rr_name, &len);

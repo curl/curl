@@ -66,7 +66,7 @@ int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
 
   /* Examine each answer resource record (RR) in turn. */
   hostname = NULL;
-  for (i = 0; i < ancount; i++)
+  for (i = 0; i < (int)ancount; i++)
     {
       /* Decode the RR up to the data field. */
       status = ares_expand_name(aptr, abuf, alen, &rr_name, &len);
