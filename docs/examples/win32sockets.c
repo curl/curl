@@ -1,5 +1,11 @@
 
 /*
+ * Note: This is only required if you use curl 7.8 or lower, later 
+ * versions provide an option to curl_global_init() that does the
+ * win32 initialization for you.
+ */
+
+/*
  * These are example functions doing socket init that Windows
  * require. If you don't use windows, you can safely ignore this crap.
  */
