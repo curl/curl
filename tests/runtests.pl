@@ -104,20 +104,24 @@ sub serverpid {
 # stop the given test server
 #
 sub stopserver {
-    my $PIDFILE = $_[0];
+    my $pid = $_[0];
     # check for pidfile
-    if ( -f $PIDFILE ) {
-        my $PID = serverpid($PIDFILE);
-
-        my $res = kill (9, $PID); # die!
+    if ( -f $pid ) {
+        my $PIDFILE = $pid;
+        $pid = serverpid($PIDFILE);
         unlink $PIDFILE; # server is killed
+    }
+    elsif($pid <= 0) {
+        return; # this is not a good pid
+    }
 
-        if($res && $verbose) {
-            print "RUN: Test server pid $PID signalled to die\n";
-        }
-        elsif($verbose) {
-            print "RUN: Test server pid $PID didn't exist\n";
-        }
+    my $res = kill (9, $pid); # die!
+
+    if($res && $verbose) {
+        print "RUN: Test server pid $pid signalled to die\n";
+    }
+    elsif($verbose) {
+        print "RUN: Test server pid $pid didn't exist\n";
     }
 }
 
@@ -126,24 +130,19 @@ sub stopserver {
 #
 sub checkserver {
     my ($pidfile)=@_;
-    my $RUNNING=0;
-    my $PID=0;
+    my $pid=0;
 
     # check for pidfile
     if ( -f $pidfile ) {
-        $PID=serverpid($pidfile);
-        if ($PID ne "" && kill(0, $PID)) {
-            $RUNNING=1;
+        $pid=serverpid($pidfile);
+        if ($pid ne "" && kill(0, $pid)) {
+            return $pid;
         }
         else {
-            $RUNNING=0;
-            $PID = -$PID; # negative means dead process
+            return -$pid; # negative means dead process
         }
     }
-    else {
-        $RUNNING=0;
-    }
-    return $PID
+    return 0;
 }
 
 #######################################################################
@@ -177,7 +176,7 @@ sub runhttpserver {
     }
     elsif($data) {
         print "RUN: Unknown HTTP server is running on port $HOSTPORT\n";
-        return 2;
+        return -2;
     }
 
     if($pid > 0) {
@@ -202,25 +201,26 @@ sub runhttpserver {
         # verify that our server is up and running:
         my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null`;
 
-        if ( $data !~ /WE ROOLZ: (\d+)/ ) {
-            sleep(1);
-            next;
-        }
-        else {
+        if ( $data =~ /WE ROOLZ: (\d+)/ ) {
+            $pid = 0+$1;
             $verified = 1;
             last;
+        }
+        else {
+            sleep(1);
+            next;
         }
     }
     if(!$verified) {
         print STDERR "RUN: failed to start our HTTP server\n";
-        return 1;
+        return -1;
     }
 
     if($verbose) {
         print "RUN: HTTP server is now verified to be our server\n";
     }
 
-    return 0;
+    return $pid;
 }
 
 #######################################################################
@@ -230,12 +230,12 @@ sub runhttpsserver {
     my $verbose = $_[0];
     my $STATUS;
     my $RUNNING;
-    my $PID=checkserver($HTTPSPIDFILE );
+    my $pid=checkserver($HTTPSPIDFILE );
 
-    if($PID > 0) {
+    if($pid > 0) {
         # kill previous stunnel!
         if($verbose) {
-            print "RUN: kills off running stunnel at $PID\n";
+            print "RUN: kills off running stunnel at $pid\n";
         }
         stopserver($HTTPSPIDFILE);
     }
@@ -247,6 +247,9 @@ sub runhttpsserver {
         print "CMD: $cmd\n";
     }
     sleep(1);
+    $pid=checkserver($HTTPSPIDFILE);
+
+    return $pid;
 }
 
 #######################################################################
@@ -273,13 +276,13 @@ sub runftpserver {
         
         if ( $data =~ /WE ROOLZ: (\d+)/ ) {
             # this is our test server with a known pid!
-            $pid = $1;
+            $pid = 0+$1;
         }
         else {
             if($data || ($took > 2)) {
                 # this is not a known server
                 print "RUN: Unknown server on our favourite port: $FTPPORT\n";
-                return 1;
+                return -1;
             }
         }
     }
@@ -290,7 +293,7 @@ sub runftpserver {
         if(!$res) {
             print "RUN: Failed to kill our FTP test server, do it manually and",
             " restart the tests.\n";
-            exit;
+            return -1;
         }
         sleep(1);
     }
@@ -308,27 +311,29 @@ sub runftpserver {
         # verify that our server is up and running:
         my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver 2>/dev/null`;
 
-        if ( $data !~ /WE ROOLZ: (\d+)/ ) {
+        if ( $data =~ /WE ROOLZ: (\d+)/ ) {
+            $pid = 0+$1;
+            $verified = 1;
+            last;
+        }
+        else {
             if($verbose) {
                 print STDERR "RUN: Retrying FTP server existance in 1 sec\n";
             }
             sleep(1);
             next;
         }
-        else {
-            $verified = 1;
-            last;
-        }
     }
     if(!$verified) {
-        die "RUN: failed to start our FTP server\n";
+        warn "RUN: failed to start our FTP server\n";
+        return -2;
     }
 
     if($verbose) {
         print "RUN: FTP server is now verified to be our server\n";
     }
 
-    return 0;
+    return $pid;
 }
 
 #######################################################################
@@ -338,12 +343,12 @@ sub runftpsserver {
     my $verbose = $_[0];
     my $STATUS;
     my $RUNNING;
-    my $PID=checkserver($FTPSPIDFILE );
+    my $pid=checkserver($FTPSPIDFILE );
 
-    if($PID > 0) {
+    if($pid > 0) {
         # kill previous stunnel!
         if($verbose) {
-            print "kills off running stunnel at $PID\n";
+            print "kills off running stunnel at $pid\n";
         }
         stopserver($FTPSPIDFILE);
     }
@@ -355,6 +360,10 @@ sub runftpsserver {
         print "CMD: $cmd\n";
     }
     sleep(1);
+
+    $pid=checkserver($FTPSPIDFILE );
+
+    return $pid;
 }
 
 #######################################################################
@@ -871,7 +880,7 @@ sub singletest {
         chomp $serv;
         if($run{$serv}) {
             stopserver($run{$serv}); # the pid file is in the hash table
-            $run{$serv}=""; # clear it
+            $run{$serv}=0; # clear pid
         }
         else {
             print STDERR "RUN: The $serv server is not running\n";
@@ -919,6 +928,7 @@ sub singletest {
 
 sub serverfortest {
     my ($testnum)=@_;
+    my $pid;
 
     # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
@@ -941,18 +951,20 @@ sub serverfortest {
         $what =~ s/[^a-z]//g;
         if($what eq "ftp") {
             if(!$run{'ftp'}) {
-                if(runftpserver($verbose)) {
+                $pid = runftpserver($verbose);
+                if($pid <= 0) {
                     return 2; # error starting it
                 }
-                $run{'ftp'}=$FTPPIDFILE;
+                $run{'ftp'}=$pid;
             }
         }
         elsif($what eq "http") {
             if(!$run{'http'}) {
-                if(runhttpserver($verbose)) {
+                $pid = runhttpserver($verbose);
+                if($pid <= 0) {
                     return 2; # error starting
                 }
-                $run{'http'}=$HTTPPIDFILE;
+                $run{'http'}=$pid;
             }
         }
         elsif($what eq "ftps") {
@@ -962,14 +974,18 @@ sub serverfortest {
                 return 1;
             }
             if(!$run{'ftp'}) {
-                if(runftpserver($verbose)) {
+                $pid = runftpserver($verbose);
+                if($pid <= 0) {
                     return 2; # error starting it
                 }
-                $run{'ftp'}=$FTPPIDFILE;
+                $run{'ftp'}=$pid;
             }
             if(!$run{'ftps'}) {
-                runftpsserver($verbose);
-                $run{'ftps'}=$FTPSPIDFILE;
+                $pid = runftpsserver($verbose);
+                if($pid <= 0) {
+                    return 2;
+                }
+                $run{'ftps'}=$pid;
             }
         }
         elsif($what eq "file") {
@@ -982,14 +998,18 @@ sub serverfortest {
                 return 1;
             }
             if(!$run{'http'}) {
-                if(runhttpserver($verbose)) {
+                $pid = runhttpserver($verbose);
+                if($pid <= 0) {
                     return 2; # problems starting server
                 }
-                $run{'http'}=$HTTPPIDFILE;
+                $run{'http'}=$pid;
             }
             if(!$run{'https'}) {
-                runhttpsserver($verbose);
-                $run{'https'}=$HTTPSPIDFILE;
+                $pid = runhttpsserver($verbose);
+                if($pid <= 0) {
+                    return 2;
+                }
+                $run{'https'}=$pid;
             }
         }
         elsif($what eq "none") {
@@ -1165,7 +1185,9 @@ close(CMDLOG);
 # Tests done, stop the servers
 #
 
+print "Shutting down test suite servers:\n" if (!$short);
 for(keys %run) {
+    printf STDERR ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if(!$short);
     stopserver($run{$_}); # the pid file is in the hash table
 }
 
