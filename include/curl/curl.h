@@ -216,6 +216,7 @@ typedef enum {
   CURLE_SSL_CIPHER,              /* 59 - couldn't use specified cipher */
   CURLE_SSL_CACERT,              /* 60 - problem with the CA cert (path?) */
   CURLE_BAD_CONTENT_ENCODING,    /* 61 - Unrecognized transfer encoding */
+  CURLE_LDAP_INVALID_URL,        /* 62 - Invalid LDAP URL */
 
   CURL_LAST /* never use! */
 } CURLcode;
