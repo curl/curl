@@ -12,6 +12,7 @@
 CC = gcc
 STRIP = strip -s
 OPENSSL_PATH = ../../openssl-0.9.6d
+ZLIB_PATH = ../../zlib-1.1.3
 
 # We may need these someday
 # PERL = perl
@@ -39,6 +40,9 @@ endif
 curl_LDADD += -lwsock32 -lws2_32 -lwinmm
 ifdef SSL
   curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32 -lRSAglue
+endif
+ifdef ZLIB
+  curl_LDADD += -L$(ZLIB_PATH) -lz
 endif
 
 PROGRAMS = $(curl_PROGRAMS)
