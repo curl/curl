@@ -13,6 +13,14 @@ For the future
  product! (Yes, you may add things not mentioned here, these are just a
  few teasers...)
 
+ * Improve the command line option parser to accept '-m300' as well as the '-m
+   300' convention. It should be able to work if '-m300' is considered to be
+   space separated to the next option.
+
+ * Make the SSL layer option capable of using the Mozilla Security Services as
+   an alternative to OpenSSL:
+   http://www.mozilla.org/projects/security/pki/nss/
+
  * Make sure the low-level interface works. highlevel.c should basically be
    possible to write using that interface. Document the low-level interface
 
