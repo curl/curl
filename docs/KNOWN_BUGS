@@ -91,7 +91,3 @@ may have been fixed since this was written!
   and havoc is what happens.
   More details on this is found in this libcurl mailing list thread:
   http://curl.haxx.se/mail/lib-2002-08/0000.html
-
-1. LDAP support requires that not only the OpenLDAP shared libraries be
-   present at run time, but the development libraries (liblber.so and
-   libldap.so) as well (not applicable to Windows).

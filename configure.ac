@@ -372,6 +372,55 @@ AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
 )
 
 dnl **********************************************************************
+dnl Check for the name of dynamic OpenLDAP libraries
+dnl **********************************************************************
+
+LDAPLIBNAME=""
+AC_ARG_WITH(ldap-lib,
+AC_HELP_STRING([--with-ldap-lib=libname],[Specify name of dynamic ldap lib file]),
+ [LDAPLIBNAME="$withval"])
+
+LBERLIBNAME=""
+AC_ARG_WITH(lber-lib,
+AC_HELP_STRING([--with-lber-lib=libname],[Specify name of dynamic lber lib file]),
+ [LBERLIBNAME="$withval"])
+
+if test x$CURL_DISABLE_LDAP != x1 ; then
+
+  if test -z "$LDAPLIBNAME" ; then
+    case $host in
+      *-*-cygwin | *-*-mingw* | *-*-pw32*)
+        dnl Windows uses a single and unique OpenLDAP DLL name
+        LDAPLIBNAME="wldap32.dll"
+        LBERLIBNAME="no"
+        ;;
+    esac
+  fi
+
+  if test "$LDAPLIBNAME" ; then
+    AC_DEFINE_UNQUOTED(DL_LDAP_FILE, "$LDAPLIBNAME")
+    AC_MSG_CHECKING([name of dynamic library ldap])
+    AC_MSG_RESULT($LDAPLIBNAME)
+  else
+    dnl Try to find the right ldap library name for this system
+    CURL_DLLIB_NAME(DL_LDAP_FILE, ldap)
+  fi
+
+  if test "$LBERLIBNAME" ; then
+    dnl If name is "no" then don't define this variable at all
+    dnl (it's only needed if libldap.so's dependencies are broken).
+    if test "$LBERLIBNAME" != "no" ; then 
+      AC_DEFINE_UNQUOTED(DL_LBER_FILE, "$LBERLIBNAME")
+    fi
+    AC_MSG_CHECKING([name of dynamic library lber])
+    AC_MSG_RESULT($LBERLIBNAME)
+  else
+    dnl Try to find the right lber library name for this system
+    CURL_DLLIB_NAME(DL_LBER_FILE, lber)
+  fi
+fi
+
+dnl **********************************************************************
 dnl Check for the presence of the winmm library.
 dnl **********************************************************************
 

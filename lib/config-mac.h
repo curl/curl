@@ -36,6 +36,8 @@
 #       define USE_OPENSSL      1
 #endif
 
+#define CURL_DISABLE_LDAP       1
+
 #define HAVE_RAND_STATUS        1
 #define HAVE_RAND_EGD           1
 

@@ -57,6 +57,8 @@
 
 #define USE_OPENSSL 1
 #define USE_SSLEAY 1
+#define CURL_DISABLE_LDAP 1
+
 
 #define OS "AmigaOS"
 

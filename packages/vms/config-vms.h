@@ -274,3 +274,6 @@
 
 /* Somewhere around 7.12.0 HAVE_INET_NTOP was introduced. */
 #define HAVE_INET_NTOP 1
+
+/* to disable LDAP */
+#define CURL_DISABLE_LDAP 1

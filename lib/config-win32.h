@@ -232,6 +232,12 @@
 /* use ioctlsocket() for non-blocking sockets */
 #define HAVE_IOCTLSOCKET
 
+/* lber dynamic library file */
+/* #undef DL_LBER_FILE */
+
+/* ldap dynamic library file */
+#define DL_LDAP_FILE "wldap32.dll"
+
 /*************************************************
  * This section is for compiler specific defines.*
  *************************************************/

@@ -110,7 +110,7 @@ typedef void * (*dynafunc)(void *input);
  */
 #if defined(HAVE_DLOPEN) || defined(HAVE_LIBDL) || defined(WIN32)
 static void *libldap = NULL;
-#ifndef WIN32
+#if defined(DL_LBER_FILE)
 static void *liblber = NULL;
 #endif
 #endif
@@ -120,24 +120,26 @@ static int DynaOpen(const char **mod_name)
 #if defined(HAVE_DLOPEN) || defined(HAVE_LIBDL)
   if (libldap == NULL) {
     /*
-     * libldap.so should be able to resolve its dependency on
-     * liblber.so automatically, but since it does not we will
+     * libldap.so can normally resolve its dependency on liblber.so
+     * automatically, but in broken installation it does not so
      * handle it here by opening liblber.so as global.
      */
-    *mod_name = "liblber.so";
+#ifdef DL_LBER_FILE
+    *mod_name = DL_LBER_FILE;
     liblber = dlopen(*mod_name, DLOPEN_MODE);
+    if (!liblber)
+      return 0;
+#endif
 
     /* Assume loading libldap.so will fail if loading of liblber.so failed
      */
-    if (liblber)  {
-      *mod_name = "libldap.so";
-      libldap = dlopen(*mod_name, RTLD_LAZY);
-    }
+    *mod_name = DL_LDAP_FILE;
+    libldap = dlopen(*mod_name, RTLD_LAZY);
   }
-  return (libldap != NULL && liblber != NULL);
+  return (libldap != NULL);
 
 #elif defined(WIN32)
-  *mod_name = "wldap32.dll";
+  *mod_name = DL_LDAP_FILE;
   if (!libldap)
     libldap = (void*)LoadLibrary(*mod_name);
   return (libldap != NULL);
@@ -155,10 +157,12 @@ static void DynaClose(void)
     dlclose(libldap);
     libldap=NULL;
   }
+#ifdef DL_LBER_FILE
   if (liblber) {
     dlclose(liblber);
     liblber=NULL;
   }
+#endif
 #elif defined(WIN32)
   if (libldap) {
     FreeLibrary ((HMODULE)libldap);

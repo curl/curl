@@ -766,3 +766,58 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
 
 ]) dnl end of AC_DEFUN()
 
+
+dnl Determine the name of the library to pass to dlopen() based on the name
+dnl that would normally be given to AC_CHECK_LIB.  The preprocessor symbol
+dnl given is set to the quoted library file name. 
+dnl The standard dynamic library file name is first generated, based on the
+dnl current system type, then a search is performed for that file on the
+dnl standard dynamic library path.  If it is a symbolic link, the destination
+dnl of the link is used as the file name, after stripping off any minor
+dnl version numbers. If a library file can't be found, a guess is made.
+dnl This macro assumes AC_PROG_LIBTOOL has been called and requires perl
+dnl to be available.
+dnl
+dnl CURL_DLLIB_NAME(VARIABLE, library_name)
+dnl e.g. CURL_DLLIB_NAME(LDAP_NAME, ldap) on a Linux system might result
+dnl in LDAP_NAME holding the string "libldap.so.2".
+
+AC_DEFUN([CURL_DLLIB_NAME],
+[
+AC_MSG_CHECKING([name of dynamic library $2])
+
+dnl Create the dynamic library name of the correct form for this platform
+DLGUESSLIB=`name=$2 eval echo "$libname_spec"`
+DLGUESSFILE=`libname=$DLGUESSLIB release="" major="" eval echo "$soname_spec"`
+
+if test "$cross_compiling" = yes; then
+  dnl Can't look at filesystem when cross-compiling
+  AC_DEFINE_UNQUOTED($1, "$DLGUESSFILE", [$2 dynamic library file])
+  AC_MSG_RESULT([$DLGUESSFILE (guess while cross-compiling)])
+else
+
+  DLFOUNDFILE=""
+  if test "$sys_lib_dlsearch_path_spec" ; then
+    for direc in $sys_lib_dlsearch_path_spec ; do
+      DLTRYFILE="$direc/$DLGUESSFILE"
+      dnl Find where the symbolic link for this name points
+      changequote(<<, >>)dnl
+      <<
+      DLFOUNDFILE=`perl -e 'use File::Basename; (basename(readlink($ARGV[0])) =~ /^(.*[^\d]\.\d+)[\d\.]*$/ && print ${1}) || exit 1;' "$DLTRYFILE" 2>&5`
+      >>
+      changequote([, ])dnl
+      if test "$?" -eq "0"; then
+        dnl Found the file link
+        break
+      fi
+    done
+  fi
+
+  if test -z "$DLFOUNDFILE" ; then
+    DLFOUNDFILE="$DLGUESSFILE"
+  fi
+
+  AC_DEFINE_UNQUOTED($1, "$DLFOUNDFILE", [$2 dynamic library file])
+  AC_MSG_RESULT($DLFOUNDFILE)
+fi
+])

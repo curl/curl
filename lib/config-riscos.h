@@ -388,3 +388,6 @@
 
 #define HAVE_FIONBIO
 
+/* to disable LDAP */
+#define CURL_DISABLE_LDAP
+

@@ -93,6 +93,9 @@
   #define USE_OPENSSL            1
 #endif
 
+/* to disable LDAP */
+#define CURL_DISABLE_LDAP        1
+
 /* Because djgpp <= 2.03 doesn't have snprintf() etc.
  */
 #if (DJGPP_MINOR < 4)
