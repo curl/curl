@@ -112,10 +112,6 @@ typedef unsigned char bool;
 #include <floss.h>
 #endif
 
-#ifndef OS
-#error "There is no OS string defined!"
-#endif
-
 #if defined(HAVE_X509_H) && defined(HAVE_SSL_H) && defined(HAVE_RSA_H) && \
 defined(HAVE_PEM_H) && defined(HAVE_ERR_H) && defined(HAVE_CRYPTO_H) && \
 defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
