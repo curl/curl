@@ -1928,7 +1928,7 @@ CURLcode ftp_perform(struct connectdata *conn,
   /* This is a re-used connection. Since we change directory to where the
      transfer is taking place, we must now get back to the original dir
      where we ended up after login: */
-  if (conn->bits.reuse) {
+  if (conn->bits.reuse && ftp->entrypath) {
     if ((result = ftp_cwd(conn, ftp->entrypath)) != CURLE_OK)
       return result;
   }
