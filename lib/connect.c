@@ -98,6 +98,7 @@
 #include "connect.h"
 #include "memory.h"
 #include "select.h"
+#include "url.h" /* for Curl_safefree() */
 
 /* The last #include file should be: */
 #include "memdebug.h"
