@@ -4,8 +4,6 @@ Fix before releasing 7.11.0
 
 3. Apply Peter Sylvester's multi patches (awaiting updated patch)
 
-5. Large-file support (patch is almost complete, work by Dave Meyer)
-
 6. REST fix for servers not behaving well on >2GB requests (some outstanding
    issues, Dave Meyer works on this)
 
@@ -40,6 +38,8 @@ To get fixed in 7.11.1
 
 Fixed in 7.11
 =============
+
+5. Large-file support (work by Dave Meyer)
 
 7. Apply Gisle Vanem's djgpp patches
 
