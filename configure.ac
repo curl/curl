@@ -849,6 +849,7 @@ AC_CHECK_HEADERS(
         sys/time.h \
         sys/select.h \
         sys/socket.h \
+        assert.h \
         unistd.h \
         malloc.h \
         stdlib.h \
