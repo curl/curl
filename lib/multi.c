@@ -24,6 +24,11 @@
 #include "setup.h"
 #include <stdlib.h>
 #include <string.h>
+
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
 #include <curl/curl.h>
 
 #include "urldata.h"
