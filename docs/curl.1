@@ -662,13 +662,12 @@ instead of PORT by using \fI--disable-eprt\fP. EPRT is really PORT++.
 If used as the first parameter on the command line, the \fI$HOME/.curlrc\fP
 file will not be read and used as a config file.
 .IP "-Q/--quote <comand>"
-(FTP) Send an arbitrary command to the remote FTP server, by using the QUOTE
-command of the server. Not all servers support this command, and the set of
-QUOTE commands are server specific! Quote commands are sent BEFORE the
-transfer is taking place. To make commands take place after a successful
-transfer, prefix them with a dash '-'. You may specify any amount of commands
-to be run before and after the transfer. If the server returns failure for one
-of the commands, the entire operation will be aborted.
+(FTP) Send an arbitrary command to the remote FTP server. Quote commands are
+sent BEFORE the transfer is taking place. To make commands take place after a
+successful transfer, prefix them with a dash '-'. You may specify any amount
+of commands to be run before and after the transfer. If the server returns
+failure for one of the commands, the entire operation will be aborted. You
+must send syntactically correct FTP commands as RFC959 defines.
 
 This option can be used multiple times.
 .IP "--random-file <file>"
