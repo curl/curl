@@ -55,6 +55,7 @@
 #include "urldata.h"
 #include "sendf.h"
 
+#define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
 
 #ifdef KRB4
@@ -87,7 +88,7 @@ void failf(struct UrlData *data, char *fmt, ...)
   va_list ap;
   va_start(ap, fmt);
   if(data->errorbuffer)
-    vsprintf(data->errorbuffer, fmt, ap);
+    vsnprintf(data->errorbuffer, CURL_ERROR_SIZE, fmt, ap);
   else /* no errorbuffer receives this, write to data->err instead */
     vfprintf(data->err, fmt, ap);
   va_end(ap);
