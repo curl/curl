@@ -10,7 +10,7 @@ PROGRAMMING WITH LIBCURL
 About this Document
 
  This document will attempt to describe the general principle and some basic
- approach to consider when programming with libcurl. The text will focus
+ approaches to consider when programming with libcurl. The text will focus
  mainly on the C/C++ interface but might apply fairly well on other interfaces
  as well as they usually follow the C one pretty closely.
 
@@ -23,11 +23,43 @@ About this Document
 
 Building
 
+  There are many different ways to build C programs. This chapter will assume
+  a unix-style build process
+
   Compiling the Program
+
+    Your compiler needs to know where the libcurl headers are
+    located. Therefore you must set your compiler's include path to point to
+    the directory where you installed them. The 'curl-config' tool can be used
+    to get this information:
+
+        $ curl-config --cflags
 
   Linking the Program with libcurl
 
+    When having compiled the program, you need to link your object files to
+    create a single executable. For that to succeed, you need to link with
+    libcurl and possibly also with other libraries that libcurl itself depends
+    on. Like OpenSSL librararies, but even some standard OS libraries may be
+    needed on the command line. To figure out which flags to use, once again
+    the 'curl-config' tool comes to the rescue:
+
+        $ curl-config --libs
+
   SSL or Not
+
+    libcurl can be built and customized in many ways. One of the things that
+    varies from different libraries and builds is the support for SSL-based
+    transfers, like HTTPS and FTPS. If OpenSSL was detected properly at
+    build-time, libcurl will be built with SSL support. To figure out if an
+    installed libcurl has been built with SSL support enabled, use
+    'curl-config' like this:
+
+        $ curl-config --feature
+
+    And if SSL is supported, the keyword 'SSL' will be written to stdout,
+    possibly together with a few other features that can be on and off on
+    different libcurls.
 
 
 Global Preparation
@@ -198,6 +230,27 @@ Upload Data to a Remote Site
  possible in every invoke, as that is likely to make the upload perform as
  fast as possible. The callback should return the number of bytes it wrote in
  the buffer. Returning 0 will signal the end of the upload.
+
+libcurl with C++
+
+ There's basicly only one thing to keep in mind when using C++ instead of C
+ when interfacing libcurl:
+
+    "The Callbacks Must Be Plain C"
+
+ So if you want a write callback set in libcurl, you should put it within
+ 'extern'. Similar to this:
+
+     extern "C" {
+       size_t write_data(void *ptr, size_t size, size_t nmemb,
+                         void *ourpointer)
+       {
+         /* do what you want with the data */
+       }
+    }
+
+ This will of course effectively turn the callback code into C. There won't be
+ any "this" pointer available etc.
 
 
 -----
