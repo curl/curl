@@ -1,5 +1,5 @@
-#ifndef __URL_H
-#define __URL_H
+#ifndef __CURL_H
+#define __CURL_H
 /*****************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -112,14 +112,6 @@
 
 #define CONF_LDAP     (1<<31) /* LDAP:// protocol */
 
-#ifdef MULTIDOC
-struct MoreDoc {
-  struct MoreDoc *next; /* next entry in the list */
-  char *path; /* pointer to allocated path */
-  FILE *store; /* where to put the doc */
-};
-#endif
-
 struct HttpHeader {
   struct HttpHeader *next; /* next entry in the list */
   char *header; /* pointer to allocated line without newline */
@@ -135,7 +127,6 @@ struct HttpPost {
   long flags;     /* as defined below */
 #define HTTPPOST_FILENAME (1<<0) /* specified content is a file name */
 };
-
 
 /* All possible error codes from this version of urlget(). Future versions
    may return other values, stay prepared. */
@@ -369,6 +360,10 @@ typedef enum {
   /* send linked-list of post-transfer QUOTE commands */
   T(POSTQUOTE, OBJECTPOINT, 39),
 
+  /* Pass a pointer to string of the output using full variable-replacement
+     as described elsewhere. */
+  T(WRITEINFO, OBJECTPOINT, 40),
+
   URGTAG_LASTENTRY /* the last unusued */
 } UrgTag;
 
@@ -423,7 +418,7 @@ char *curl_GetEnv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "6.3.1"
+#define LIBCURL_VERSION "6.5pre1"
 
 /* linked-list structure for QUOTE */
 struct curl_slist {
