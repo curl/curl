@@ -51,6 +51,7 @@ typedef struct {
   int urllen;
   char *glob_buffer;
   char beenhere;
+  char errormsg[80]; /* error message buffer */
 } URLGlob;
 
 int glob_url(URLGlob**, char*, int *, FILE *);
