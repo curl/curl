@@ -1646,7 +1646,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
                                Curl_addrinfo *hostaddr)
 {
   struct SessionHandle *data = conn->data;
-  CURLcode result;
+  CURLcode result=CURLE_OK;
   
   Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
 
