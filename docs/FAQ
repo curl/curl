@@ -1,4 +1,4 @@
-Updated: December 21, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: January 22, 2002 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -163,9 +163,8 @@ FAQ
 
   1.6 What do you get for making cURL?
 
-  Project cURL is entirely free and open, without any commercial interests or
-  money involved. No person gets paid in any way for developing curl. We all
-  do this voluntarily on our spare time.
+  Project cURL is entirely free and open. No person gets paid in any way for
+  developing curl. We all do this voluntarily on our spare time.
 
   We get some help from companies. Contactor Data hosts the curl web site and
   the main mailing list, Haxx owns the curl web site's domain and
