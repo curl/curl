@@ -428,6 +428,8 @@ int Curl_read(struct connectdata *conn,
 #endif
         return -1;
     }
+    else
+      conn->sockerror = 0; /* no error */
 
 #ifdef USE_SSLEAY
   }
