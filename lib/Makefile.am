@@ -6,7 +6,7 @@ AUTOMAKE_OPTIONS = foreign
 
 EXTRA_DIST = getdate.y \
        Makefile.b32 Makefile.b32.resp Makefile.m32 Makefile.vc6 \
-       libcurl.def dllinit.c
+       libcurl.def dllinit.c curllib.dsp curllib.dsw
 
 lib_LTLIBRARIES = libcurl.la
 
