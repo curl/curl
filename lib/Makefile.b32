@@ -5,76 +5,40 @@
 #
 #  'lib' directory
 #
+#  'BCCDIR' has to be set up to point to the base directory
+#  of the compiler, i.e. SET BCCDIR = c:\Borland\BCC55
+#  where c:\Borland\BCC55 is the compiler is installed
+#
 #  Requires 'Makefile.b32.resp'
 #
 #  Written by Jaepil Kim, pit@paradise.net.nz
 ############################################################
 
 # Setup environment
-CXX	   = bcc32
-RM	   = del
-LIB	   = tlib
-TOPDIR	   = ..
-CURNTDIR   = .
-CXXFLAGS   = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu \
-             -w-pro -tWM
+CXX      = bcc32
+CP       = copy
+RM       = del
+LIB      = tlib
+TOPDIR   = ..
+CURNTDIR = .
+
+CXXFLAGS = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
 
 # If you build without SSL support, remove "-DUSE_SSLEAY" from the line below.
-DEFINES    = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS \
-             -DUSE_SSLEAY
-INCDIRS    = -I$(CURNTDIR);$(TOPDIR)\include\
+DEFINES  = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS -DUSE_SSLEAY
+# DEFINES  = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS
 
-# 'BCCDIR' has to be set up in your c:\autoexec.bat
-# i.e. SET BCCDIR = c:\Borland\BCC55
-# where c:\Borland\BCC55 is the compiler is installed
-LINKLIB	   = $(BCCDIR)\lib\psdk\ws2_32.lib
+INCDIRS  = -I$(CURNTDIR);$(TOPDIR)\include
+LINKLIB  = $(BCCDIR)\lib\psdk\ws2_32.lib
+
 LIBCURLLIB = libcurl.lib
 
 .SUFFIXES: .c
 
-SOURCES	   = \
-	base64.c \
-	md5.c \
-	cookie.c \
-	transfer.c \
-	escape.c \
-	formdata.c \
-	ftp.c \
-	http.c \
-        http_chunks.c \
-	http_digest.c \
-	http_ntlm.c \
-	ldap.c \
-	dict.c \
-	telnet.c \
-	getdate.c \
-	getenv.c \
-	hostip.c \
-	if2ip.c \
-	mprintf.c \
-	netrc.c \
-	progress.c \
-	sendf.c \
-	inet_pton.c \
-	speedcheck.c \
-	ssluse.c \
-	timeval.c \
-	url.c \
-	file.c \
-	getinfo.c \
-	version.c \
-	easy.c \
-	strequal.c \
-	strtok.c \
-	strtoofft.c \
-	connect.c \
-        hash.c \
-        share.c \
-        llist.c \
-        multi.c \
-        content_encoding.c
+# Makefile.inc provides the CSOURCES and HHEADERS defines
+!include Makefile.inc
 
-OBJECTS = $(SOURCES:.c=.obj)
+OBJECTS = $(CSOURCES:.c=.obj)
 
 .c.obj:
 	$(CXX) -c $(INCDIRS) $(CXXFLAGS) $(DEFINES) $<
@@ -83,8 +47,16 @@ all:	$(LIBCURLLIB)
 
 clean:
 	-$(RM) $(LIBCURLLIB)
-        -$(RM) *.obj
+	-$(RM) *.obj
 
-$(LIBCURLLIB):  $(LINKLIB) $(OBJECTS) Makefile.b32.resp
+$(LIBCURLLIB): $(LINKLIB) $(OBJECTS) Makefile.b32.resp
 	-$(RM) $(LIBCURLLIB)
 	$(LIB) $(LIBCURLLIB) @Makefile.b32.resp
+
+getdate.c:
+	@echo Creating $@
+	@-$(RM) getdate.y
+	@$(CP) getdate.c.cvs $@
+
+
+
