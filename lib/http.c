@@ -670,7 +670,9 @@ CURLcode Curl_http(struct connectdata *conn)
     if(result)
       return result;
   }
-  else if((conn->bits.user_passwd) && !checkheaders(data, "Authorization:")) {
+  else if(!data->set.httpdigest && /* not if Digest is enabled */
+          conn->bits.user_passwd &&
+          !checkheaders(data, "Authorization:")) {
     char *authorization;
 
     /* To prevent the user+password to get sent to other than the original

@@ -65,7 +65,8 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
   if(checkprefix("Digest", header)) {
     header += strlen("Digest");
 
-    data->state.digest.algo = CURLDIGESTALGO_MD5; /* default algorithm */
+    /* clear off any former leftovers and init to defaults */
+    Curl_digest_cleanup(data);
 
     while(more) {
       char value[32];
@@ -205,6 +206,23 @@ CURLcode Curl_output_digest(struct connectdata *conn,
              request_digest );
 
   return CURLE_OK;
+}
+
+void Curl_digest_cleanup(struct SessionHandle *data)
+{
+  if(data->state.digest.nonce)
+    free(data->state.digest.nonce);
+  data->state.digest.nonce = NULL;
+
+  if(data->state.digest.cnonce)
+    free(data->state.digest.cnonce);
+  data->state.digest.cnonce = NULL;
+
+  if(data->state.digest.realm)
+    free(data->state.digest.realm);
+  data->state.digest.realm = NULL;
+
+  data->state.digest.algo = CURLDIGESTALGO_MD5; /* default algorithm */
 }
 
 #endif

@@ -671,6 +671,7 @@ struct UserDefined {
   char *set_proxy;   /* proxy to use */
   long use_port;     /* which port to use (when not using default) */
   char *userpwd;     /* <user:password>, if used */
+  bool httpdigest;   /* if HTTP Digest is enabled */
   char *set_range;   /* range, if used. See README for detailed specification
                         on this syntax. */
   long followlocation; /* as in HTTP Location: */

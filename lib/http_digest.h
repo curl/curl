@@ -43,4 +43,6 @@ CURLdigest Curl_input_digest(struct connectdata *conn, char *header);
 CURLcode Curl_output_digest(struct connectdata *conn,
                             unsigned char *request,
                             unsigned char *uripath);
+void Curl_digest_cleanup(struct SessionHandle *data);
+
 #endif

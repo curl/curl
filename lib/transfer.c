@@ -704,15 +704,20 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
             else if(checkprefix("WWW-Authenticate:", k->p) &&
                     (401 == k->httpcode) &&
-                    1 /* TODO: replace with a check for Digest authentication
-                         activated */) {
-              CURLdigest dig = Curl_input_digest(conn, k->p+
-                                                 strlen("WWW-Authenticate:"));
-              if(CURLDIGEST_FINE == dig) {
+                    data->set.httpdigest /* Digest authentication is 
+                                            activated */) {
+              CURLdigest dig = CURLDIGEST_BAD;
+
+              if(data->state.digest.nonce)
+                infof(data, "Authentication problem. Ignoring this.");
+              else
+                dig = Curl_input_digest(conn,
+                                        k->p+strlen("WWW-Authenticate:"));
+
+              if(CURLDIGEST_FINE == dig)
                 /* We act on it. Store our new url, which happens to be
                    the same one we already use! */
                 conn->newurl = strdup(data->change.url); /* clone string */
-              }
             }
             else if ((k->httpcode >= 300 && k->httpcode < 400) &&
                      checkprefix("Location:", k->p)) {
@@ -797,7 +802,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               /* HTTP-only checks */
               if (conn->newurl) {
                 /* abort after the headers if "follow Location" is set */
-                infof (data, "Follow to new URL: %s\n", conn->newurl);
+                infof (data, "Send request to this URL: %s\n", conn->newurl);
                 k->keepon &= ~KEEP_READ;
                 FD_ZERO(&k->rkeepfd);
                 *done = TRUE;
@@ -1568,7 +1573,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
   data->change.url = newurl;
   newurl = NULL; /* don't free! */
 
-  infof(data, "Follows Location: to new URL: '%s'\n", data->change.url);
+  infof(data, "Issue another request to this URL: '%s'\n", data->change.url);
 
   /*
    * We get here when the HTTP code is 300-399. We need to perform
