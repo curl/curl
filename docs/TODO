@@ -6,22 +6,22 @@
 
 TODO
 
-For the future
-
  Ok, this is what I wanna do with Curl. Please tell me what you think, and
  please don't hesitate to contribute and send me patches that improve this
  product! (Yes, you may add things not mentioned here, these are just a
  few teasers...)
 
+To be done for the 7.7 relase:
+
+ * Fix the random seeding. Add --egd-socket and --random-file options to the
+   curl client and libcurl curl_easy_setopt() interface.
+
+ * Support persistant connections (fully detailed elsewhere)
+
+To be done after the 7.7 release:
+
  * Make SSL session ids get used if multiple HTTPS documents from the same
    host is requested.
-
- * Make the curl tool support URLs that start with @ that would then mean that
-   the following is a plain list with URLs to download. Thus @filename.txt
-   reads a list of URLs from a local file. A fancy option would then be to
-   support @http://whatever.com that would first load a list and then get the
-   URLs mentioned in the list. I figure -O or something would have to be
-   implied by such an action.
 
  * Add a command line option that allows the output file to get the same time
    stamp as the remote file. libcurl already is capable of fetching the remote
@@ -30,13 +30,6 @@ For the future
  * Make the SSL layer option capable of using the Mozilla Security Services as
    an alternative to OpenSSL:
    http://www.mozilla.org/projects/security/pki/nss/
-
- * Make sure the low-level interface works. highlevel.c should basically be
-   possible to write using that interface. Document the low-level interface
-
- * Make the easy-interface support multiple file transfers. If they're done
-   to the same host, they should use persistant connections or similar.
-   Figure out a nice design for this.
 
  * Add asynchronous name resolving, as this enables full timeout support for
    fork() systems.
@@ -49,7 +42,6 @@ For the future
    versions of this!) comes to mind. Python anyone?
 
  * "Content-Encoding: compress/gzip/zlib"
-
    HTTP 1.1 clearly defines how to get and decode compressed documents. There
    is the zlib that is pretty good at decompressing stuff. This work was
    started in October 1999 but halted again since it proved more work than we
@@ -77,23 +69,13 @@ For the future
    sends the password in cleartext over the network, this "Digest" method uses
    a challange-response protocol which increases security quite a lot.
 
- * Multiple Proxies?
-   Is there anyone that actually uses serial-proxies? I mean, send CONNECT to
-   the first proxy to connect to the second proxy to which you send CONNECT to
-   connect to the remote host (or even more iterations). Is there anyone
-   wanting curl to support it? (Not that it would be hard, just confusing...)
-
  * Other proxies
    Ftp-kind proxy, Socks5, whatever kind of proxies are there?
 
- * IPv6 Awareness and support
-   Where ever it would fit.  configure search for v6-versions of a few
-   functions and then use them instead is of course the first thing to do...
-   RFC 2428 "FTP Extensions for IPv6 and NATs" will be interesting. PORT
-   should be replaced with EPRT for IPv6, and EPSV instead of PASV.
+ * IPv6 Awareness and support. (This is partly done.)  RFC 2428 "FTP
+   Extensions for IPv6 and NATs" is interesting. PORT should be replaced with
+   EPRT for IPv6 (done), and EPSV instead of PASV.  HTTP proxies are left to
+   add support for.
 
  * SSL for more protocols, like SSL-FTP...
    (http://search.ietf.org/internet-drafts/draft-murray-auth-ftp-ssl-05.txt)
-
- * HTTP POST resume using Range:
-
