@@ -2629,6 +2629,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * new one.
    *************************************************************/
 
+  /* get a cloned copy of the SSL config situation stored in the 
+     connection struct */
+  if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config))
+    return CURLE_OUT_OF_MEMORY;
+
   /* reuse_fresh is set TRUE if we are told to use a fresh connection
      by force */
   if(!data->set.reuse_fresh &&
@@ -2644,6 +2649,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     char *ppath = old_conn->ppath; /* this is the modified path pointer */
     if(old_conn->proxyhost)
       free(old_conn->proxyhost);
+
+    /* free the SSL config struct from this connection struct as this was
+       allocated in vain and is targeted for destruction */
+    Curl_free_ssl_config(&conn->ssl_config);
 
     conn = conn_temp;        /* use this connection from now on */
 
@@ -2708,9 +2717,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      */
     ConnectionStore(data, conn);
   }
-
-  if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config))
-    return CURLE_OUT_OF_MEMORY;
 
   /* Continue connectdata initialization here.
    *
