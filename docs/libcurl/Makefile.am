@@ -122,7 +122,7 @@ CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
 
 EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES)
 
-MAN2HTML= $(NROFF) -man $< | man2html >$@
+MAN2HTML= roffit < $< >$@
 
 SUFFIXES = .3 .html
 
