@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "10 Dec 2001" "libcurl 7.9.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "2 Apr 2002" "libcurl 7.9.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -615,6 +615,17 @@ Pass a long. If the value is non-zero, it tells curl to use the EPSV command
 when doing passive FTP downloads (which is always does by default). Using EPSV
 means that it will first attempt to use EPSV before using PASV, but if you
 pass FALSE (zero) to this option, it will not try using EPSV, only plain PASV.
+.TP
+.B CURLOPT_DNS_CACHE_TIMEOUT
+Pass a long, this sets the timeout in seconds. Name resolves will be kept in
+memory for this number of seconds. Set to zero (0) to completely disable
+caching, or set to -1 to make the cached entries remain forever. By default,
+libcurl caches info for 60 seconds. (Added in libcurl 7.9.3)
+.TP
+.B CURLOPT_DNS_USE_GLOBAL_CACHE
+Pass a long. If the value is non-zero, it tells curl to use a global DNS cache
+that will survive between easy handles creations and deletions. This is not
+thread-safe and this will use a global varible. (Added in libcurl 7.9.3)
 .PP
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, non-zero means an
