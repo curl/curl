@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -71,7 +71,7 @@ struct Curl_one_easy {
   /* first, two fields for the linked list of these */
   struct Curl_one_easy *next;
   struct Curl_one_easy *prev;
-  
+
   struct SessionHandle *easy_handle; /* the easy handle for this unit */
   struct connectdata *easy_conn;     /* the "unit's" connection */
 
@@ -99,7 +99,7 @@ struct Curl_multi {
   long type;
 
   /* We have a linked list with easy handles */
-  struct Curl_one_easy easy; 
+  struct Curl_one_easy easy;
   /* This is the amount of entries in the linked list above. */
   int num_easy;
 
@@ -141,7 +141,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
-  
+
   /* Verify that we got a somewhat good easy handle too */
   if(!GOOD_EASY_HANDLE(easy_handle))
     return CURLM_BAD_EASY_HANDLE;
@@ -150,7 +150,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   easy = (struct Curl_one_easy *)malloc(sizeof(struct Curl_one_easy));
   if(!easy)
     return CURLM_OUT_OF_MEMORY;
-  
+
   /* clean it all first (just to be sure) */
   memset(easy, 0, sizeof(struct Curl_one_easy));
 
@@ -160,11 +160,11 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 
   /* for multi interface connections, we share DNS cache automaticly */
   easy->easy_handle->hostcache = multi->hostcache;
-  
+
   /* We add this new entry first in the list. We make our 'next' point to the
      previous next and our 'prev' point back to the 'first' struct */
   easy->next = multi->easy.next;
-  easy->prev = &multi->easy; 
+  easy->prev = &multi->easy;
 
   /* make 'easy' the first node in the chain */
   multi->easy.next = easy;
@@ -189,7 +189,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
-  
+
   /* Verify that we got a somewhat good easy handle too */
   if(!GOOD_EASY_HANDLE(curl_handle))
     return CURLM_BAD_EASY_HANDLE;
@@ -207,14 +207,14 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
     /* clear out the usage of the shared DNS cache */
     easy->easy_handle->hostcache = NULL;
-    
+
     /* make the previous node point to our next */
     if(easy->prev)
       easy->prev->next = easy->next;
     /* make our next point to our previous node */
     if(easy->next)
       easy->next->prev = easy->prev;
-    
+
     /* NOTE NOTE NOTE
        We do not touch the easy handle here! */
     if (easy->msg)
@@ -273,7 +273,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
           /* When in DO_MORE state, we could be either waiting for us
              to connect to a remote site, or we could wait for that site
              to connect to us. It makes a difference in the way: if we
-             connect to the site we wait for the socket to become writable, if 
+             connect to the site we wait for the socket to become writable, if
              the site connects to us we wait for it to become readable */
           sockfd = conn->sock[SECONDARYSOCKET];
           FD_SET(sockfd, write_fd_set);
@@ -334,15 +334,19 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         easy->result = Curl_done(easy->easy_conn, CURLE_OK);
         if(CURLE_OK == easy->result) {
           gotourl = strdup(easy->easy_handle->change.url);
-          easy->easy_handle->change.url_changed = FALSE;
-          easy->result = Curl_follow(easy->easy_handle, gotourl);
-          if(CURLE_OK == easy->result)
-            easy->state = CURLM_STATE_CONNECT;
+          if(gotourl) {
+            easy->easy_handle->change.url_changed = FALSE;
+            easy->result = Curl_follow(easy->easy_handle, gotourl);
+            if(CURLE_OK == easy->result)
+              easy->state = CURLM_STATE_CONNECT;
+            else
+              free(gotourl);
+          }
           else
-            free(gotourl);
+            easy->result = CURLE_OUT_OF_MEMORY;
         }
       }
-    
+
       easy->easy_handle->change.url_changed = FALSE;
 
       switch(easy->state) {
@@ -353,8 +357,8 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         if(CURLE_OK == easy->result) {
           /* after init, go CONNECT */
           easy->state = CURLM_STATE_CONNECT;
-          result = CURLM_CALL_MULTI_PERFORM; 
-        
+          result = CURLM_CALL_MULTI_PERFORM;
+
           easy->easy_handle->state.used_interface = Curl_if_multi;
         }
         break;
@@ -397,7 +401,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
           easy->state = CURLM_STATE_WAITCONNECT;
         }
-        
+
         if(CURLE_OK != easy->result) {
           /* failure detected */
           Curl_disconnect(easy->easy_conn); /* disconnect properly */
@@ -425,7 +429,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         if(connected) {
           /* after the connect has completed, go DO */
           easy->state = CURLM_STATE_DO;
-          result = CURLM_CALL_MULTI_PERFORM; 
+          result = CURLM_CALL_MULTI_PERFORM;
         }
         break;
 
@@ -446,7 +450,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
             easy->result = Curl_readwrite_init(easy->easy_conn);
             if(CURLE_OK == easy->result) {
               easy->state = CURLM_STATE_PERFORM;
-              result = CURLM_CALL_MULTI_PERFORM; 
+              result = CURLM_CALL_MULTI_PERFORM;
             }
           }
         }
@@ -471,7 +475,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
           if(CURLE_OK == easy->result) {
             easy->state = CURLM_STATE_PERFORM;
-            result = CURLM_CALL_MULTI_PERFORM; 
+            result = CURLM_CALL_MULTI_PERFORM;
           }
         }
         break;
@@ -516,7 +520,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
           }
           else {
             easy->state = CURLM_STATE_DONE;
-            result = CURLM_CALL_MULTI_PERFORM; 
+            result = CURLM_CALL_MULTI_PERFORM;
           }
         }
         break;
@@ -619,7 +623,7 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
 
   if(GOOD_MULTI_HANDLE(multi)) {
     struct Curl_one_easy *easy;
-    
+
     if(!multi->num_msgs)
       return NULL; /* no messages left to return */
 
