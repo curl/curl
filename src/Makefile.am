@@ -33,7 +33,10 @@ EXTRA_DIST = mkhelp.pl curlmsg.msg \
 	macos/curl.mcp.xml.sit.hqx \
 	macos/MACINSTALL.TXT \
 	macos/src/curl_GUSIConfig.cpp \
-	macos/src/macos_main.cpp
+	macos/src/macos_main.cpp \
+	config-win32.h \
+	config-mac.h \
+	config-vms.h	
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
