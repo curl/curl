@@ -97,6 +97,7 @@
 #include "http_digest.h"
 #include "http_ntlm.h"
 #include "http_negotiate.h"
+#include "share.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -706,7 +707,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
             else if(data->cookies &&
                     checkprefix("Set-Cookie:", k->p)) {
-              Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+              Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
+                              CURL_LOCK_ACCESS_SINGLE);
               Curl_cookie_add(data->cookies, TRUE, k->p+11,
                               /* If there is a custom-set Host: name, use it
                                  here, or else use real peer host name. */

@@ -92,6 +92,7 @@
 #include "http_ntlm.h"
 #include "http_negotiate.h"
 #include "url.h"
+#include "share.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
