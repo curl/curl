@@ -4,7 +4,7 @@
 
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-INCLUDES = -I$(top_srcdir)/include/curl
+INCLUDES = -I$(top_srcdir)/include/curl -I$(top_srcdir)/lib
 
 LIBDIR = ../../lib
 
