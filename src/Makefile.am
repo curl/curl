@@ -46,4 +46,8 @@ MKHELP=$(top_srcdir)/src/mkhelp.pl
 # This generates the hugehelp.c file
 hugehelp.c: $(README) $(MANPAGE)  mkhelp.pl
 	rm -f hugehelp.c
-	$(NROFF) -man $(MANPAGE) | $(PERL) -s $(MKHELP) $(MKHELPOPT) $(README) > hugehelp.c
+	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) $(MKHELPOPT) $(README) > hugehelp.c
+
+# for distribution, generate an uncompressed help file!
+dist-hook:
+	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) $(README) > $(distdir)/hugehelp.c
