@@ -934,7 +934,6 @@ static int formparse(char *input,
   }
   else {
     fprintf(stderr, "Illegally formatted input field!\n");
-    free(contents);
     return 1;
   }
   free(contents);
