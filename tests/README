@@ -27,7 +27,7 @@ Run:
 
 Memory:
   The test script will check that all allocated memory is freed properly IF
-  curl has been built with the MALLOCDEBUG define set. The script will
+  curl has been built with the CURLDEBUG define set. The script will
   automatically detect if that is the case, and it will use the ../memanalyze
   script to analyze the memory debugging output.
 
@@ -52,7 +52,7 @@ Logs:
   to be kept after the test run.
 
 Data:
-  All test-data are put in the data/ subdirctory. Each test is stored in the
+  All test cases are put in the data/ subdirctory. Each test is stored in the
   file named according to the test number.
 
   The test case file format is simply a way to store different sections within
@@ -72,7 +72,7 @@ TEST CASE NUMBERS
  500 - 599   libcurl source code tests, not using the curl command tool
 
  Since 30-apr-2003, there's nothing in the system that requires us to keep
- within these number series. Each test case now specify their own server
+ within these number series. Each test case now specifies its own server
  requirements, independent of test number.
 
 TODO:
