@@ -7,11 +7,18 @@
                                   Changelog
 
 Daniel (9 December 2004)
+- Ton Voon provided a configure fix that should fix the notorious (mostly
+  reported on Solaris) problem where the size_t check fails due to the SSL
+  libs being found in a dir not searched through by the run-time linker.
+  patch-tracker entry #1081707.
+
 - Bryan Henderson pointed out in bug report #1081788 that the curl-config
   --vernum output wasn't zero prefixed properly (as claimed in documentation).
   This is fixed in maketgz now.
   
 Daniel (8 December 2004)
+- Matt Veenstra updated the mach-O framework files for Mac OS X.
+
 - Rene Bernhardt found and fixed a buffer overrun in the NTLM code, where
   libcurl always and unconditionally overwrote a stack-based array with 3 zero
   bytes. This is not an exploitable buffer overflow. No need to get alarmed.

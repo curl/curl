@@ -872,6 +872,12 @@ AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
   if test X"$OPT_SSL" != Xoff &&
      test "$OPENSSL_ENABLED" != "1"; then
     AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
+  elif test "$OPENSSL_ENABLED" = "1"; then
+    dnl when the ssl shared libs were found in a path that the run-time linker
+    dnl doesn't search through, we need to add it to LD_LIBRARY_PATH to
+    dnl prevent further configure tests to fail due to this
+    LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$EXTRA_SSL/lib$libsuff"
+    export LD_LIBRARY_PATH
   fi
 
 fi
