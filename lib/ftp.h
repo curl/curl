@@ -32,7 +32,6 @@ CURLcode Curl_ftpsendf(struct connectdata *, const char *fmt, ...);
 CURLcode Curl_GetFTPResponse(ssize_t *nread, struct connectdata *conn,
                              int *ftpcode);
 CURLcode Curl_ftp_nextconnect(struct connectdata *conn);
-CURLcode Curl_ftp_quit(struct connectdata *conn);
 #endif
 
 #endif
