@@ -107,11 +107,11 @@
  */
 bool static checkheaders(struct UrlData *data, char *thisheader)
 {
-  struct HttpHeader *head;
+  struct curl_slist *head;
   size_t thislen = strlen(thisheader);
 
   for(head = data->headers; head; head=head->next) {
-    if(strnequal(head->header, thisheader, thislen)) {
+    if(strnequal(head->data, thisheader, thislen)) {
       return TRUE;
     }
   }
@@ -280,6 +280,7 @@ CURLcode http(struct connectdata *conn)
     http->p_accept = "Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*\r\n";
 
   do {
+    struct curl_slist *headers=data->headers;
     sendf(data->firstsocket, data,
           "%s " /* GET/HEAD/POST/PUT */
           "%s HTTP/1.0\r\n" /* path */
@@ -362,11 +363,11 @@ CURLcode http(struct connectdata *conn)
       }
     }
 
-    while(data->headers) {
+    while(headers) {
       sendf(data->firstsocket, data,
             "%s\015\012",
-            data->headers->header);
-      data->headers = data->headers->next;
+            headers->data);
+      headers = headers->next;
     }
 
     if(data->bits.http_post || data->bits.http_formpost) {

@@ -390,7 +390,7 @@ struct UrlData {
   char *newurl; /* This can only be set if a Location: was in the
 		   document headers */
 
-  struct HttpHeader *headers; /* linked list of extra headers */
+  struct curl_slist *headers; /* linked list of extra headers */
   struct HttpPost *httppost;  /* linked list of POST data */
 
   char *cert; /* PEM-formatted certificate */
