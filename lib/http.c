@@ -485,6 +485,7 @@ CURLcode Curl_http(struct connectdata *conn)
   struct Cookie *co=NULL; /* no cookies from start */
   char *ppath = conn->ppath; /* three previous function arguments */
   char *host = conn->name;
+  const char *te = ""; /* tranfer-encoding */
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -544,6 +545,14 @@ CURLcode Curl_http(struct connectdata *conn)
     if(conn->allocptr.cookie)
       free(conn->allocptr.cookie);
     conn->allocptr.cookie = aprintf("Cookie: %s\015\012", data->set.cookie);
+  }
+
+  if(conn->upload_chunky) {
+    if(!checkheaders(data, "Transfer-Encoding:")) {
+      te = "Transfer-Encoding: chunked\r\n";
+    }
+    /* else
+       our header was already added, what to do now? */
   }
 
   if(data->cookies) {
@@ -717,7 +726,8 @@ CURLcode Curl_http(struct connectdata *conn)
                 "%s" /* pragma */
                 "%s" /* accept */
                 "%s" /* accept-encoding */
-                "%s", /* referer */
+                "%s" /* referer */
+                "%s",/* transfer-encoding */
 
                 data->set.customrequest?data->set.customrequest:
                 (data->set.no_body?"HEAD":
@@ -739,7 +749,8 @@ CURLcode Curl_http(struct connectdata *conn)
                 http->p_accept?http->p_accept:"",
                 (data->set.encoding && *data->set.encoding && conn->allocptr.accept_encoding)?
                 conn->allocptr.accept_encoding:"", /* 08/28/02 jhrg */
-                (data->change.referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> <CRLF> */
+                (data->change.referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> <CRLF> */,
+                te
                 );
 
     if(co) {

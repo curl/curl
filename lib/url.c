@@ -1769,6 +1769,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      is later set "for real" using Curl_pgrsStartNow(). */
   conn->data->progress.start = conn->created; 
 
+  conn->upload_chunky =
+    ((conn->protocol&PROT_HTTP) &&
+     data->set.upload &&
+     (data->set.infilesize == -1) &&
+     (data->set.httpversion != CURL_HTTP_VERSION_1_0))?
+    /* HTTP, upload, unknown file size and not HTTP 1.0 */
+    TRUE:
+  /* else, no chunky upload */
+  FALSE;
+
   /***********************************************************
    * We need to allocate memory to store the path in. We get the size of the
    * full URL to be sure, and we need to make it at least 256 bytes since

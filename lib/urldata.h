@@ -285,6 +285,8 @@ struct Curl_transfer_keeper {
   fd_set wkeepfd;
   int keepon;
 
+  bool upload_done; /* set to TRUE when doing chunked transfer-encoding upload
+                       and we're uploading the last chunk */
 };
 
 
@@ -450,6 +452,9 @@ struct connectdata {
 
   bool do_more; /* this is set TRUE if the ->curl_do_more() function is
                    supposed to be called, after ->curl_do() */
+
+  bool upload_chunky; /* set TRUE if we are doing chunked transfer-encoding
+                         on upload */
 };
 
 /* The end of connectdata. 08/27/02 jhrg */
