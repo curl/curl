@@ -1,4 +1,4 @@
-Updated: September 3, 2002 (http://curl.haxx.se/docs/faq.html)
+Updated: October 8, 2002 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -66,6 +66,7 @@ FAQ
   5.4 Does libcurl do Winsock initing on win32 systems?
   5.5 Does CURLOPT_FILE and CURLOPT_INFILE work on win32 ?
   5.6 What about Keep-Alive or persistent connections?
+  5.7 Link errors when building libcurl on Windows!
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -685,6 +686,19 @@ FAQ
   transfers that are made using the same libcurl handle.
 
   Previous versions had no persistent connection support.
+
+  5.7 Link errors when building libcurl on Windows!
+
+  You need to make sure that your project, and all the libraries (both static
+  and dynamic) that it links against, are compiled/linked against the same run
+  time library.
+
+  This is determined by the /MD, /ML, /MT (and their corresponding /M?d)
+  options to the command line compiler. /MD (linking against MSVCRT dll) seems
+  to be the most commonly used option.
+
+  (Provided by Andrew Francis)
+
 
 6. License Issues
 
