@@ -1,16 +1,23 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(ares_init.c)
+AM_CONFIG_HEADER(config.h)
+AM_MAINTAINER_MODE
+AM_INIT_AUTOMAKE(c-ares, CVS)
 
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_PROG_RANLIB
 
-AC_CANONICAL_HOST
+AM_PROG_LIBTOOL
+
 case $host_os in
 solaris*)
-	AC_DEFINE(ETC_INET)
+	AC_DEFINE(ETC_INET, 1, [if a /etc/inet dir is being used])
 	;;
 esac
+
+# check for ssize_t
+AC_CHECK_TYPE(ssize_t, ,
+   AC_DEFINE(ssize_t, int, [the signed version of size_t]))
 
 AC_SEARCH_LIBS(gethostbyname, nsl)
 AC_SEARCH_LIBS(socket, socket)

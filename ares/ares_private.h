@@ -82,8 +82,8 @@ struct send_request {
 
 struct server_state {
   struct in_addr addr;
-  int udp_socket;
-  int tcp_socket;
+  ares_socket_t udp_socket;
+  ares_socket_t tcp_socket;
 
   /* Mini-buffer for reading the length word */
   unsigned char tcp_lenbuf[2];

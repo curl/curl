@@ -1,5 +1,6 @@
 /* $Id$ */
 
+#include "setup.h"
 #include "ares_version.h"
 
 const char *ares_version(int *version)

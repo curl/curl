@@ -13,6 +13,7 @@
  * without express or implied warranty.
  */
 
+#include "setup.h"
 #include <sys/types.h>
 
 #ifdef WIN32
@@ -80,13 +81,15 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
   struct server_state *server;
   struct send_request *sendreq;
   struct iovec *vec;
-  int i, n, count;
+  int i;
+  ssize_t count;
+  size_t n;
 
   for (i = 0; i < channel->nservers; i++)
     {
       /* Make sure server has data to send and is selected in write_fds. */
       server = &channel->servers[i];
-      if (!server->qhead || server->tcp_socket == -1
+      if (!server->qhead || server->tcp_socket == ARES_SOCKET_BAD
 	  || !FD_ISSET(server->tcp_socket, write_fds))
 	continue;
 
@@ -185,7 +188,8 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
     {
       /* Make sure the server has a socket and is selected in read_fds. */
       server = &channel->servers[i];
-      if (server->tcp_socket == -1 || !FD_ISSET(server->tcp_socket, read_fds))
+      if (server->tcp_socket == ARES_SOCKET_BAD ||
+          !FD_ISSET(server->tcp_socket, read_fds))
 	continue;
 
       if (server->tcp_lenbuf_pos != 2)
@@ -257,7 +261,8 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
       /* Make sure the server has a socket and is selected in read_fds. */
       server = &channel->servers[i];
 
-      if (server->udp_socket == -1 || !FD_ISSET(server->udp_socket, read_fds))
+      if (server->udp_socket == ARES_SOCKET_BAD ||
+          !FD_ISSET(server->udp_socket, read_fds))
 	continue;
 
       count = recv(server->udp_socket, buf, sizeof(buf), 0);
@@ -407,7 +412,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
       /* Make sure the TCP socket for this server is set up and queue
        * a send request.
        */
-      if (server->tcp_socket == -1)
+      if (server->tcp_socket == ARES_SOCKET_BAD)
 	{
 	  if (open_tcp_socket(channel, server) == -1)
 	    {
@@ -431,7 +436,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
     }
   else
     {
-      if (server->udp_socket == -1)
+      if (server->udp_socket == ARES_SOCKET_BAD)
 	{
 	  if (open_udp_socket(channel, server) == -1)
 	    {
@@ -454,12 +459,13 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
 
 static int open_tcp_socket(ares_channel channel, struct server_state *server)
 {
-  int s, flags;
+  ares_socket_t s;
+  int flags;
   struct sockaddr_in sockin;
 
   /* Acquire a socket. */
   s = socket(AF_INET, SOCK_STREAM, 0);
-  if (s == -1)
+  if (s == ARES_SOCKET_BAD)
     return -1;
 
   /* Set the socket non-blocking. */
@@ -472,13 +478,13 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
 
   if (flags == -1)
     {
-      close(s);
+      closesocket(s);
       return -1;
     }
   flags |= O_NONBLOCK;
   if (fcntl(s, F_SETFL, flags) == -1)
     {
-      close(s);
+      closesocket(s);
       return -1;
     }
 #endif
@@ -503,12 +509,12 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
 
 static int open_udp_socket(ares_channel channel, struct server_state *server)
 {
-  int s;
+  ares_socket_t s;
   struct sockaddr_in sockin;
 
   /* Acquire a socket. */
   s = socket(AF_INET, SOCK_DGRAM, 0);
-  if (s == -1)
+  if (s == ARES_SOCKET_BAD)
     return -1;
 
   /* Connect to the server. */

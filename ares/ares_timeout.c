@@ -13,6 +13,7 @@
  * without express or implied warranty.
  */
 
+#include "setup.h"
 #include <sys/types.h>
 
 #ifdef WIN32

@@ -1,5 +1,30 @@
   Changelog for the c-ares project
 
+* July 20
+- Fixed a few variable return types for some system calls. Made configure
+  check for ssize_t to make it possible to use that when receiving the send()
+  error code. This is necessary to prevent compiler warnings on some systems.
+
+- Made configure create config.h, and all source files now include setup.h that
+  might include the proper config.h (or a handicrafted alternative).
+
+- Switched to 'ares_socket_t' type for sockets in ares, since Windows don't
+  use 'int' for that.
+
+- automake-ified and libool-ified c-ares. Now it builds libcares as a shared
+  lib on most platforms if wanted. (This bloated the size of the release
+  archive with another 200K!)
+
+- Makefile.am now uses Makefile.inc for the c sources, h headers and man
+  pages, to make it easier for other makefiles to use the exact same set of
+  files.
+
+- Adjusted 'maketgz' to use the new automake magic when building distribution
+  archives.
+
+- Anyone desires HTML and/or PDF versions of the man pages in the release
+  archives?
+
 * July 3
 - Günter Knauf made c-ares build and run on Novell Netware.
 

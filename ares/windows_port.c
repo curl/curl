@@ -1,3 +1,6 @@
+#include "setup.h"
+
+#ifdef WIN32 /* only do the following on windows */
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -26,8 +29,8 @@ ares_strcasecmp(const char *a, const char *b)
 }
 #endif
 
-int 
-ares_gettimeofday(struct timeval *tv, struct timezone *tz) 
+int
+ares_gettimeofday(struct timeval *tv, struct timezone *tz)
 {
     FILETIME        ft;
     LARGE_INTEGER   li;
@@ -46,18 +49,7 @@ ares_gettimeofday(struct timeval *tv, struct timezone *tz)
         tv->tv_usec = (long)(t % 1000000);
     }
 
-#if 0
-    if (tz)
-    {
-        if (!tzflag)
-        {
-            _tzset();
-            tzflag++;
-        }
-        tz->tz_minuteswest = _timezone / 60;
-        tz->tz_dsttime = _daylight;
-    }
-#endif
-
     return 0;
 }
+
+#endif /* WIN32 builds only */

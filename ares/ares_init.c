@@ -13,6 +13,7 @@
  * without express or implied warranty.
  */
 
+#include "setup.h"
 #include <sys/types.h>
 
 #ifdef WIN32
@@ -127,8 +128,8 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   for (i = 0; i < channel->nservers; i++)
     {
       server = &channel->servers[i];
-      server->udp_socket = -1;
-      server->tcp_socket = -1;
+      server->udp_socket = ARES_SOCKET_BAD;
+      server->tcp_socket = ARES_SOCKET_BAD;
       server->tcp_lenbuf_pos = 0;
       server->tcp_buffer = NULL;
       server->qhead = NULL;

@@ -1,3 +1,6 @@
+Major changes since:
+* see the CHANGES file
+
 Major changes in release 1.1.1:
 * ares should now compile as C++ code (no longer uses reserved word
   "class").

@@ -13,6 +13,7 @@
  * without express or implied warranty.
  */
 
+#include "setup.h"
 #include <sys/types.h>
 
 #ifdef WIN32
@@ -37,13 +38,13 @@ int ares_fds(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
   for (i = 0; i < channel->nservers; i++)
     {
       server = &channel->servers[i];
-      if (server->udp_socket != -1)
+      if (server->udp_socket != ARES_SOCKET_BAD)
 	{
 	  FD_SET(server->udp_socket, read_fds);
 	  if (server->udp_socket >= nfds)
 	    nfds = server->udp_socket + 1;
 	}
-      if (server->tcp_socket != -1)
+      if (server->tcp_socket != ARES_SOCKET_BAD)
 	{
 	  FD_SET(server->tcp_socket, read_fds);
 	  if (server->qhead)

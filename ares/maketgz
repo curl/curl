@@ -2,8 +2,6 @@
 
 $version = $ARGV[0];
 
-$name="c-ares";
-
 if($version eq "") {
     print "Enter version number!\n";
     exit;
@@ -15,86 +13,25 @@ if(!-f "ares.h") {
 }
 
 if(!-f "configure") {
-    `autoconf`;
+    print "running buildconf\n";
+    `./buildconf`;
 }
+print "adding $version in the configure.ac file\n";
+`sed -e 's/AM_INIT_AUTOMAKE(c-ares, CVS)/AM_INIT_AUTOMAKE(c-ares, $version)/' < configure.ac > configure.ac-rel`;
 
-@files=`find . -name FILES`;
+# now make a new configure script with this
+print "makes a new configure script\n";
+`autoconf configure.ac-rel`;
 
-my @entries;
+# now run this new configure to get a fine makefile
+print "running configure\n";
+`./configure`;
 
-sub dirpart {
-    my ($file)=@_;
-    my @p=split("/", $file);
-    $p[$#p]=""; # blank the last one
-    my $dir=join("/", @p);
+# now make the actual tarball
+print "running make dist\n";
+`make dist`;
 
-    $dir =~ s/^\.\///; # cut off ./ beginnings
-
-    $dir =~ s/\/$//;  # off / trailers
-
-    if(!$dir) {
-        $dir = ".";
-    }
-
-    return $dir;
-}
-
-sub add {
-    my ($file)=@_;
-
-    my $dir=dirpart($file);
-
-    open(FILE, "<$file");
-    while(<FILE>) {
-        if($_ =~ /^ *\#/) {
-            next;
-        }
-        chomp;
-        push @entries, "$dir/$_";
-    }
-    close(FILE);
-}
-
-for(@files) {
-    chomp;
-    add($_);
-}
-
-sub mkalldir {
-    my ($dir) = @_;
-
-    my @parts = split("/", $dir);
-
-    #print "IN: $dir\n";
-
-    my $sub="";
-    for(@parts) {
-        #print "PART: $_\n";
-
-        $sub .= "$_";
-        if($_ eq "") {
-            next;
-        }
-        mkdir($sub, 0777);
-        #print "make $sub\n";
-        $sub .= "/";
-    }
-    
-}
-
-for(@entries) {
-    my $dir = dirpart("$name-$version/$_");
- #   print "Create $dir\n";
-    mkalldir($dir);
- #   print "Copy $_ to $dir\n";
-    `cp -p $_ $dir`;
-}
-
-# make a tarball
-`tar -cf $name-$version.tar $name-$version`;
-# gzip the tarball
-`gzip -9 $name-$version.tar`;
-# remove the dir
-`rm -rf $name-$version`;
+print "removing temporary configure.ac file\n";
+`rm configure.ac-rel`;
 
 print "NOTE: now cvs tag this release!\n";
