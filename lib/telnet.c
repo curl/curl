@@ -1050,7 +1050,6 @@ CURLcode Curl_telnet(struct connectdata *conn)
   char *buf = data->state.buffer;
   ssize_t nread;
   struct TELNET *tn;
-  struct timeval now;           /* current time */
 
   code = init_telnet(conn);
   if(code)
@@ -1205,6 +1204,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
       }
     }
     if(data->set.timeout) {
+      struct timeval now;           /* current time */
       now = Curl_tvnow();
       if(Curl_tvdiff(now, conn->created)/1000 >= data->set.timeout) {
         failf(data, "Time-out");
