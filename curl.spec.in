@@ -9,7 +9,7 @@ Release:	%rel
 Copyright:	MPL
 Group:		Utilities/Console
 Source:		%{name}-%{version}.tar.gz
-URL:		http://@PACKAGE@.haxx.nu
+URL:		http://@PACKAGE@.haxx.se
 BuildRoot:	/tmp/%{name}-%{version}-%{rel}-root
 Packager:	Fill In As You Wish
 Docdir:		%{prefix}/doc
@@ -26,7 +26,7 @@ resume and more.
 Note: this version is compiled without SSL (https:) support.
 
 Authors:
-	Daniel Stenberg <Daniel.Stenberg@haxx.nu>
+	Daniel Stenberg <daniel@haxx.se>
 
 
 %prep

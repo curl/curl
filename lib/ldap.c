@@ -26,7 +26,7 @@
  * Contributor(s):
  *  Bjørn Reese <breese@mail1.stofanet.dk>
  *
- * 	http://curl.haxx.nu
+ * 	http://curl.haxx.se
  *
  * $Source$
  * $Revision$

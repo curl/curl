@@ -24,9 +24,9 @@
  *
  * ------------------------------------------------------------
  * Main author:
- * - Daniel Stenberg <Daniel.Stenberg@haxx.nu>
+ * - Daniel Stenberg <daniel@haxx.se>
  *
- * 	http://curl.haxx.nu
+ * 	http://curl.haxx.se
  *
  * $Source$
  * $Revision$
@@ -691,7 +691,7 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   }
   else {
     /* Set default host and default path */
-    strcpy(conn->gname, "curl.haxx.nu");
+    strcpy(conn->gname, "curl.haxx.se");
     strcpy(conn->path, "/");
 
     if (2 > sscanf(data->url,

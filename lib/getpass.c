@@ -31,7 +31,7 @@
  *   Angus Mackay <amackay@gus.ml.org>
  *
  * Contributor(s):
- *   Daniel Stenberg <Daniel.Stenberg@haxx.nu>
+ *   Daniel Stenberg <daniel@haxx.se>
  */
 
 #ifndef WIN32

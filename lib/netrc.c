@@ -28,17 +28,17 @@
  *   Linas Vepstas <linas@linas.org>
  *   Bjorn Reese <breese@imada.ou.dk>
  *   Johan Anderson <johan@homemail.com>
- *   Kjell Ericson <Kjell.Ericson@haxx.nu>
+ *   Kjell Ericson <Kjell.Ericson@haxx.se>
  *   Troy Engel <tengel@palladium.net>
  *   Ryan Nelson <ryan@inch.com>
- *   Bjorn Stenberg <Bjorn.Stenberg@haxx.nu>
+ *   Bjorn Stenberg <Bjorn.Stenberg@haxx.se>
  *   Angus Mackay <amackay@gus.ml.org>
  *
  * ------------------------------------------------------------
  * Main author:
- * - Daniel Stenberg <Daniel.Stenberg@haxx.nu>
+ * - Daniel Stenberg <daniel@haxx.se>
  *
- * 	http://curl.haxx.nu
+ * 	http://curl.haxx.se
  *
  * $Source$
  * $Revision$

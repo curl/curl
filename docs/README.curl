@@ -3,7 +3,7 @@ LATEST VERSION
   You always find news about what's going on as well as the latest versions
   from the curl web pages, located at:
 
-        http://curl.haxx.nu
+        http://curl.haxx.se
 
 SIMPLE USAGE
 
@@ -178,7 +178,7 @@ DETAILED INFORMATION
 
   Store the HTTP headers in a separate file:
 
-        curl --dump-header headers.txt curl.haxx.nu
+        curl --dump-header headers.txt curl.haxx.se
 
   Note that headers stored in a separate file can be very useful at a later
   time if you want curl to use cookies sent by the server. More about that in
@@ -676,7 +676,7 @@ NETRC
 
   A very simple .netrc file could look something like:
 
-        machine curl.haxx.nu login iamdaniel password mysecret
+        machine curl.haxx.se login iamdaniel password mysecret
 
 CUSTOM OUTPUT
 
