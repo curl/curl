@@ -66,7 +66,7 @@
 #include <sys/select.h>
 #endif
 
-#endif
+#endif  /* WIN32 ... */
 
 #include "urldata.h"
 #include <curl/curl.h>
@@ -138,6 +138,28 @@ static CURLcode win32_init(void) { return CURLE_OK; }
 static void win32_cleanup(void) { }
 #endif
 
+#ifdef USE_LIBIDN
+/*
+ * Initialise use of IDNA library.
+ * It falls back to ASCII if $CHARSET isn't defined. This doesn't work for
+ * idna_to_ascii_lz().
+ */
+static void idna_init (void)
+{
+#ifdef WIN32
+  char buf[60];
+  UINT cp = GetACP();
+
+  if (!getenv("CHARSET") && cp > 0) {
+    snprintf(buf, sizeof(buf), "CHARSET=cp%u", cp);
+    putenv(buf);
+  }
+#else
+  /* to do? */
+#endif
+}
+#endif  /* USE_LIBIDN */
+
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized = 0;
 static long          init_flags  = 0;
@@ -161,6 +183,10 @@ CURLcode curl_global_init(long flags)
 #ifdef _AMIGASF
   if(!amiga_init())
     return CURLE_FAILED_INIT;
+#endif
+
+#ifdef USE_LIBIDN
+  idna_init();
 #endif
 
   initialized = 1;
