@@ -46,7 +46,7 @@
 # --mktarball=[command]    Command to run after completed test
 # --name=[name]            Set name to report as
 # --nocvsup                Don't update from CVS even though it is a CVS tree
-# --runtestsopts=[options] Options to pass to runtests.pl
+# --runtestopts=[options]  Options to pass to runtests.pl
 # --setup=[file name]      File name to read setup from (deprecated)
 # --target=[your os]       Specify your target environment.
 #
@@ -130,6 +130,7 @@ if ($^O eq 'MSWin32' || $targetos) {
     $libext = '.a' if ($targetos =~ /mingw32/);
   }
   elsif ($targetos =~ /netware/) {
+    $configurebuild = 0;
     $binext = '.nlm';
     $libext = '.lib';
   }
