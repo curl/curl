@@ -280,6 +280,7 @@ int Curl_resolv(struct connectdata *conn,
   ssize_t entry_len;
   int wait;
   struct SessionHandle *data = conn->data;
+  CURLcode result;
 
   /* default to failure */
   int rc = -1;
@@ -327,7 +328,9 @@ int Curl_resolv(struct connectdata *conn,
         /* the response to our resolve call will come asynchronously at 
            a later time, good or bad */
         /* First, check that we haven't received the info by now */
-        (void)Curl_is_resolved(conn, &dns);
+        result = Curl_is_resolved(conn, &dns);
+        if(result) /* error detected */
+          return -1;
         if(dns)
           rc = 0; /* pointer provided */
         else
