@@ -77,4 +77,14 @@ void pgrsUpdate(struct UrlData *data);
 #define PGRS_HEADERS_OUT (1<<7) /* set when the headers have been written */
 
 
+typedef enum {
+  TIMER_NONE,
+  TIMER_NAMELOOKUP,
+  TIMER_CONNECT,
+  TIMER_PRETRANSFER,
+  TIMER_POSTRANSFER,
+  TIMER_LAST /* must be last */
+} timerid;
+  
+
 #endif /* __PROGRESS_H */
