@@ -1,3 +1,5 @@
+#ifndef __HTTP_DIGEST_H
+#define __HTTP_DIGEST_H
 /***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -41,3 +43,4 @@ CURLdigest Curl_input_digest(struct connectdata *conn, char *header);
 CURLcode Curl_output_digest(struct connectdata *conn,
                             unsigned char *request,
                             unsigned char *uripath);
+#endif
