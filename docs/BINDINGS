@@ -45,9 +45,14 @@ Lua
   Written by Steve Dekorte.
   http://curl.haxx.se/libcurl/lua/
 
+Object-Pascal
+
+ Free Pascal, Delphi and Kylix binding written by Christophe Espern.
+ http://www.tekool.com/opcurl
+
 Pascal
 
-  Free Pascal binding written by Jeffrey Pohlmeyer.
+  Free Pascal, Delphi and Kylix binding written by Jeffrey Pohlmeyer.
   http://houston.quik.com/jkp/curlpas/
 
 Perl
