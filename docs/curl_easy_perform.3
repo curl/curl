@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_perform 3 "26 May 2000" "Curl 7.0" "libcurl Manual"
+.TH curl_easy_perform 3 "25 Jan 2001" "Curl 7.0" "libcurl Manual"
 .SH NAME
 curl_easy_perform - Do the actual transfer in a "easy" session
 .SH SYNOPSIS
@@ -16,6 +16,10 @@ are made, and will perform the transfer as described in the options.
 It must be called with the same
 .I handle
 as input as the curl_easy_init call returned.
+
+You are only allowed to call this function once using the same handle. If you
+want to do repeated calls, you must call curl_easy_cleanup and curl_easy_init
+again first.
 .SH RETURN VALUE
 0 means everything was ok, non-zero means an error occurred as
 .I <curl/curl.h>
