@@ -761,11 +761,13 @@ else
 
   AC_CHECK_LIB(crypto, CRYPTO_lock,[
      HAVECRYPTO="yes"
+     LIBS="-lcrypto $LIBS"
      ],[
      LDFLAGS="$CLEANLDFLAGS -L$EXTRA_SSL/lib$libsuff"
      CPPFLAGS="$CLEANCPPFLAGS -I$EXTRA_SSL/include/openssl -I$EXTRA_SSL/include"
      AC_CHECK_LIB(crypto, CRYPTO_add_lock,[
-       HAVECRYPTO="yes" ], [
+       HAVECRYPTO="yes"
+       LIBS="-lcrypto $LIBS"], [
        LDFLAGS="$CLEANLDFLAGS"
        CPPFLAGS="$CLEANCPPFLAGS"
        LIBS="$CLEANLIBS"
@@ -794,7 +796,6 @@ else
                AC_MSG_RESULT(no)]
               )
 
-    AC_CHECK_LIB(crypto, CRYPTO_add_lock)
     AC_CHECK_LIB(ssl, SSL_connect)
 
     if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
@@ -832,7 +833,11 @@ else
 
        dnl is there a pkcs12.h header present?
        AC_CHECK_HEADERS(openssl/pkcs12.h)
+    else
+       LIBS="$CLEANLIBS"
     fi
+    dnl USE_SSLEAY is the historical name for what configure calls
+    dnl OPENSSL_ENABLED; the names should really be unified
     USE_SSLEAY="$OPENSSL_ENABLED"
     AC_SUBST(USE_SSLEAY)
 
