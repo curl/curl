@@ -4,7 +4,7 @@
 
 INCLUDES = -I$(top_srcdir)/include
 
-bin_PROGRAMS = app single double
+noinst_PROGRAMS = app single double
 
 app_SOURCES = app.c
 app_LDADD = ../lib/libcurl.la
