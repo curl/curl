@@ -621,7 +621,11 @@ sub singletest {
 
     if($errorcode || $res) {
         if($errorcode == $res) {
-            if(!$short) {
+            $errorcode =~ s/\n//;
+            if($verbose) {
+                print " received errorcode $errorcode OK";
+            }
+            elsif(!$short) {
                 print " error OK";
             }
         }
