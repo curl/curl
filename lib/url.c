@@ -644,9 +644,11 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   struct UrlData *data = curl;
   struct connectdata *conn;
 
-  /* I believe the longest possible name in a DNS is set to 255 letters, FQDN
-     so this should be safe: */
-  char hostent_buf[512];
+  /* I believe the longest possible name in a DNS is set to 255 letters, FQDN.
+     Although the buffer required for storing all possible aliases and IP
+     numbers is according to Stevens' Unix Network Programming 2nd editor,
+     p. 304: 8192 bytes. Let's go with that! */
+  char hostent_buf[8192];
 
   if(!data || (data->handle != STRUCT_OPEN))
     return CURLE_BAD_FUNCTION_ARGUMENT; /* TBD: make error codes */
