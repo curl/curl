@@ -263,7 +263,6 @@ static int init_ssl=0;
 void Curl_SSL_init(void)
 {
 #ifdef USE_SSLEAY
-
   /* make sure this is only done once */
   if(0 != init_ssl)
     return;
@@ -275,8 +274,31 @@ void Curl_SSL_init(void)
 
   /* Setup all the global SSL stuff */
   SSLeay_add_ssl_algorithms();
+#else
+  /* SSL disabled, do nothing */
 #endif
 }
+
+/* Global cleanup */
+void Curl_SSL_cleanup(void)
+{
+#ifdef USE_SSLEAY
+  if(init_ssl) {
+    /* only cleanup if we did a previous init */
+
+    /* Free the SSL error strings */
+    ERR_free_strings();
+  
+    /* EVP_cleanup() removes all ciphers and digests from the
+       table. */
+    EVP_cleanup();
+  }
+#else
+  /* SSL disabled, do nothing */
+#endif
+}
+
+#ifdef USE_SSLEAY
 
 /*
  * This function is called when an SSL connection is closed.
@@ -310,23 +332,6 @@ void Curl_SSL_Close(struct connectdata *conn)
   }
 }
 
-/* Global cleanup */
-void Curl_SSL_cleanup(void)
-{
-#ifdef USE_SSLEAY
-  
-  if(init_ssl) {
-    /* only cleanup if we did a previous init */
-
-    /* Free the SSL error strings */
-    ERR_free_strings();
-  
-    /* EVP_cleanup() removes all ciphers and digests from the
-       table. */
-    EVP_cleanup();
-  }
-#endif  
-}
 
 /*
  * This sets up a session cache to the specified size.
@@ -466,6 +471,8 @@ static int Store_SSL_Session(struct connectdata *conn)
 
   return 0;
 }
+
+#endif  
 
 /* ====================================================== */
 CURLcode
