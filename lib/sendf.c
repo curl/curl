@@ -213,23 +213,6 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
   return CURLE_OK;
 }
 
-/*
- * External write-function, writes to the data-socket.
- * Takes care of plain sockets, SSL or kerberos transparently.
- */
-CURLcode curl_write(CURLconnect *c_conn, char *buf, size_t amount,
-                   size_t *n)
-{
-  struct connectdata *conn = (struct connectdata *)c_conn;
-
-  if(!n || !conn || (conn->handle != STRUCT_CONNECT))
-    return CURLE_FAILED_INIT;
-
-  return Curl_write(conn, conn->sockfd, buf, amount, n);
-}
-
-
-
 /* client_write() sends data to the write callback(s)
 
    The bit pattern defines to what "streams" to write to. Body and/or header.
@@ -297,21 +280,5 @@ CURLcode Curl_read(struct connectdata *conn, int sockfd,
 #endif /* USE_SSLEAY */
   *n = nread;
   return CURLE_OK;
-}
-
-/*
- * The public read function reads from the 'sockfd' file descriptor only.
- * Use the Curl_read() internally when you want to specify fd.
- */
-
-CURLcode curl_read(CURLconnect *c_conn, char *buf, size_t buffersize,
-                   ssize_t *n)
-{
-  struct connectdata *conn = (struct connectdata *)c_conn;
-
-  if(!n || !conn || (conn->handle != STRUCT_CONNECT))
-    return CURLE_FAILED_INIT;
-
-  return Curl_read(conn, conn->sockfd, buf, buffersize, n);
 }
 
