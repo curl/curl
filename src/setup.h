@@ -37,10 +37,6 @@
 /* include the hand-modified win32 adjusted config.h! */
 #include "config-win32.h"
 #endif
-#ifdef NETWARE
-/* hand-modified NetWare config.h! */
-#include "config-netware.h"
-#endif
 #ifdef macintosh
 /* this is not the same as Mac OS X */
 #include "config-mac.h"
