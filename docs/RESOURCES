@@ -38,7 +38,7 @@ Standards
 
   RFC 2109 - HTTP State Management Mechanism (cookie stuff)
            - Also, read Netscape's specification at
-             http://www.netscape.com/newsref/std/cookie_spec.html
+             http://curl.haxx.se/rfc/cookie_spec.html
 
   RFC 2183 - "The Content-Disposition Header Field"
 
@@ -50,11 +50,11 @@ Standards
              Character Sets, Languages, and Continuations"
 
   RFC 2388 - "Returning Values from Forms: multipart/form-data"
-             Use this as an addition to the 1867 
+             Use this as an addition to the RFC1867 
 
   RFC 2396 - "Uniform Resource Identifiers: Generic Syntax and Semantics" This
-             one obsoletes 1738, but since 1738 is often mentioned I've left
-             it in this list.
+             one obsoletes RFC 1738, but since RFC 1738 is often mentioned
+             I've left it in this list.
 
   RFC 2428 - "FTP Extensions for IPv6 and NATs"
 
@@ -68,21 +68,21 @@ Standards
 
 Compilers
 ---------
-  MingW32 - http://www.mingw.org
+  MingW32 - http://www.mingw.org/
 
   gcc     - http://www.gnu.org/software/gcc/gcc.html
 
 Software
 --------
-  OpenSSL -  http://www.openssl.org
+  OpenSSL -  http://www.openssl.org/
 
-  OpenLDAP - http://www.openldap.org
+  OpenLDAP - http://www.openldap.org/
 
   zlib -     http://www.cdrom.com/pub/infozip/zlib/
 
 Similar Tools
 -------------
-  wget    - http://www.gnu.org/software/wget/wget.html
+  wget    - http://sunsite.dk/wget/
 
   snarf   - http://www.xach.com/snarf/
 
