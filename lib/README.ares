@@ -49,3 +49,38 @@ Ares and ipv6
 
 If the configure script enables IPv6 support you need to explicitly disable
 that (--disable-ipv6) since ares isn't IPv6 compatible (yet).
+
+Ares on win32
+=============
+(description brought by Dominick Meglio)
+
+First I compiled curl-ares. I changed the default C runtime library to be the
+single-threaded rather than the multi-threaded (this seems to be required to
+prevent linking errors later on). Then I simply build the areslib project (the
+other projects adig/ahost seem to fail under MSVC).
+
+Next was libcurl. I opened lib/config-win32.h and I added a:
+ #define USE_ARES 1
+
+Next thing I added was, near the HAVE_GETTIMEOFDAY checks I added:
+#ifdef USE_ARES
+#define HAVE_GETTIMEOFDAY 1
+#endif
+
+The reason is, it seems curl-ares has a gettimeofday function in it (perhaps
+this should be made static in ares to avoid this kludge?) To prevent a
+duplicate symbol error, I had to make sure libcurl didn't also try and create
+a gettimeofday() function.
+
+Next thing I did was I added the path for the ares includes to the include
+path, and the libares.lib to the libraries.
+
+Lastly, I also changed libcurl to be single-threaded rather than
+multi-threaded, again this was to prevent some duplicate symbol errors. I'm
+not sure why I needed to change everything to single-threaded, but when I
+didn't I got redefinition errors for several CRT functions (malloc, stricmp,
+etc.)
+
+I would have modified the MSVC++ project files, but I only have VC.NET and it
+uses a different format than VC6.0 so I didn't want to go and change
+everything and remove VC6.0 support from libcurl.
