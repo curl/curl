@@ -372,7 +372,9 @@ struct Progress {
   bool callback;  /* set when progress callback is used */
   int width; /* screen width at download start */
   int flags; /* see progress.h */
-  double timespent;
+
+  long timespent;
+
   double dlspeed;
   double ulspeed;
 
@@ -382,9 +384,10 @@ struct Progress {
 
   struct timeval start;
   struct timeval t_startsingle;
-#define CURR_TIME 5
+#define CURR_TIME (5+1) /* 6 entries for 5 seconds */
 
   double speeder[ CURR_TIME ];
+  struct timeval speeder_time[ CURR_TIME ];
   int speeder_c;
 };
 
