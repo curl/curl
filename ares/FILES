@@ -10,6 +10,7 @@ maketgz
 aclocal.m4
 acinclude.m4
 Makefile.in
+Makefile.dj
 install-sh
 mkinstalldirs
 configure
