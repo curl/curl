@@ -46,6 +46,9 @@
 /* this is not the same as Mac OS X */
 #include "config-mac.h"
 #endif
+#ifdef __riscos__
+#include "config-riscos.h"
+#endif
 #endif
 
 #ifndef OS
@@ -75,6 +78,10 @@ int fileno( FILE *stream);
 #define DOT_CHAR      "."
 
 #endif
+#endif
+
+#ifdef __riscos__
+#define USE_ENVIRONMENT
 #endif
 
 #endif /* __SETUP_H */
