@@ -86,14 +86,14 @@
 
 static time_t Curl_parsedate(const char *date);
 
-static const char * const wkday[] =
-  {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+const char * const Curl_wkday[] =
+{"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 static const char * const weekday[] =
-  { "Monday", "Tuesday", "Wednesday", "Thursday",
-                                 "Friday", "Saturday", "Sunday" };
-static const char * const month[]=
-  { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+{ "Monday", "Tuesday", "Wednesday", "Thursday",
+  "Friday", "Saturday", "Sunday" };
+const char * const Curl_month[]=
+{ "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
 struct tzinfo {
   const char *name;
@@ -161,7 +161,7 @@ static int checkday(char *check, size_t len)
   if(len > 3)
     what = &weekday[0];
   else
-    what = &wkday[0];
+    what = &Curl_wkday[0];
   for(i=0; i<7; i++) {
     if(curl_strequal(check, what[0])) {
       found=TRUE;
@@ -178,7 +178,7 @@ static int checkmonth(char *check)
   const char * const *what;
   bool found= FALSE;
 
-  what = &month[0];
+  what = &Curl_month[0];
   for(i=0; i<12; i++) {
     if(curl_strequal(check, what[0])) {
       found=TRUE;

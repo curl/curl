@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (11 February 2005)
+- Removed all uses of strftime() since it uses the localised version of the
+  week day names and month names and servers don't like that.
+
 Daniel (10 February 2005)
 - Now the test script disables valgrind-testing when the test suite runs if
   libcurl is built shared. Otherwise valgrind only tests the shell that runs

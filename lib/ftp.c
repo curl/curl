@@ -94,6 +94,7 @@
 #include "memory.h"
 #include "inet_ntop.h"
 #include "select.h"
+#include "parsedate.h" /* for the week day and month names */
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
@@ -1738,7 +1739,6 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
       /* If we asked for a time of the file and we actually got one as well,
          we "emulate" a HTTP-style header in our output. */
 
-#ifdef HAVE_STRFTIME
       if(data->set.get_filetime && (data->info.filetime>=0) ) {
         struct tm *tm;
         time_t clock = (time_t)data->info.filetime;
@@ -1749,13 +1749,19 @@ static CURLcode ftp_state_mdtm_resp(struct connectdata *conn,
         tm = gmtime(&clock);
 #endif
         /* format: "Tue, 15 Nov 1994 12:45:26" */
-        strftime(buf, BUFSIZE-1,
-                 "Last-Modified: %a, %d %b %Y %H:%M:%S GMT\r\n", tm);
+        snprintf(buf, BUFSIZE-1,
+                 "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+                 Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+                 tm->tm_mday,
+                 Curl_month[tm->tm_mon],
+                 tm->tm_year + 1900,
+                 tm->tm_hour,
+                 tm->tm_min,
+                 tm->tm_sec);
         result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
         if(result)
           return result;
       }
-#endif
     }
     break;
   default:

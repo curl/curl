@@ -22,10 +22,11 @@ This release includes the following bugfixes:
  o inflate buffer usage bugfix
  o better DICT protocol adherence
  o disable valgrind-checking while testing if libcurl is built shared
+ o locale names in some date strings
 
 Other curl-related news since the previous public release:
 
- o 
+ o pycurl 7.13.0: http://pycurl.sf.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:

@@ -95,6 +95,7 @@
 #include "http.h"
 #include "memory.h"
 #include "select.h"
+#include "parsedate.h" /* for the week day and month names */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -1783,7 +1784,7 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 #endif
 
     if(data->set.timecondition) {
-      struct tm *thistime;
+      struct tm *tm;
 
       /* Phil Karn (Fri, 13 Apr 2001) pointed out that the If-Modified-Since
        * header family should have their times set in GMT as RFC2616 defines:
@@ -1795,18 +1796,22 @@ CURLcode Curl_http(struct connectdata *conn, bool *done)
 #ifdef HAVE_GMTIME_R
       /* thread-safe version */
       struct tm keeptime;
-      thistime = (struct tm *)gmtime_r(&data->set.timevalue, &keeptime);
+      tm = (struct tm *)gmtime_r(&data->set.timevalue, &keeptime);
 #else
-      thistime = gmtime(&data->set.timevalue);
+      tm = gmtime(&data->set.timevalue);
 #endif
 
-#ifdef HAVE_STRFTIME
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-      strftime(buf, BUFSIZE-1, "%a, %d %b %Y %H:%M:%S GMT", thistime);
-#else
-      /* TODO: Right, we *could* write a replacement here */
-      strcpy(buf, "no strftime() support");
-#endif
+      snprintf(buf, BUFSIZE-1,
+               "%s, %02d %s %4d %02d:%02d:%02d GMT",
+               Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+               tm->tm_mday,
+               Curl_month[tm->tm_mon],
+               tm->tm_year + 1900,
+               tm->tm_hour,
+               tm->tm_min,
+               tm->tm_sec);
+
       switch(data->set.timecondition) {
       case CURL_TIMECOND_IFMODSINCE:
       default:
