@@ -12,8 +12,13 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o better tread-safety thanks to the new strerror() replacement
- o better tread-safety on AIX thanks to better function detection
+ o fixed a flaw that prevented ares name resolve timeouts to occur
+ o getting user name from http_proxy env variable works now
+ o fixed too early name resolve timeouts with ares
+ o HTTP Digest "re-negotiation" works now
+ o CURLOPT_FAILONERROR (-f/--fail) works with all kinds of authentication
+ o better thread-safety thanks to the internal strerror() replacement
+ o better thread-safety on AIX thanks to better function detection
  o minor ipv6 build fix for windows
  o the test suite runs fine with mingw-built curl
  o the postit2.c example works now
@@ -21,8 +26,8 @@ This release includes the following bugfixes:
  o the progress meter now displays very long times better
  o CURLINFO_CONTENT_LENGTH_DOWNLOAD with CURLOPT_NOBODY set TRUE now works
  o passwords longer than 14 letters work with NTLM
- o 'make netware' works better now
- o VMS builds fine again and even nicer than before
+ o 'make netware' in the root dir works now
+ o builds fine on VMS again and even nicer than before
 
 Other curl-related news since the previous public release:
 
@@ -32,6 +37,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Thomas Schwinge, Marty Kuhrt, Günter Knauf, Kevin Roth, Glen Nakamura,
- Gisle Vanem, Greg Hewgill, Joe Halpin, Tor Arntsen
+ Gisle Vanem, Greg Hewgill, Joe Halpin, Tor Arntsen, Dirk Manske, Roy Shan,
+ Mitz Wark, Andrés García
 
         Thanks! (and sorry if I forgot to mention someone)
