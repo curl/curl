@@ -1729,9 +1729,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->firstsocket = -1;     /* no file descriptor */
   conn->secondarysocket = -1; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
-  conn->bits.httpproxy = data->change.proxy?TRUE:FALSE; /* proxy-or-not */
+  conn->bits.httpproxy = (data->change.proxy && *data->change.proxy &&
+                          (data->set.proxytype == CURLPROXY_HTTP))?
+    TRUE:FALSE; /* http proxy or not */
   conn->bits.use_range = data->set.set_range?TRUE:FALSE; /* range status */
-  conn->range = data->set.set_range;               /* clone the range setting */
+  conn->range = data->set.set_range;              /* clone the range setting */
   conn->resume_from = data->set.set_resume_from;   /* inherite resume_from */
 
   /* Default protocol-independent behavior doesn't support persistant
