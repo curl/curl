@@ -20,10 +20,6 @@
 #
 # $Id$
 ###########################################################################
-# sws is the Silly Web Server
-#
-# Original http server code contributed by Georg Horn. Heavily modified since.
-#
 
 AUTOMAKE_OPTIONS = foreign
 
