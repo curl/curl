@@ -2160,6 +2160,6 @@ CURLcode Curl_do(struct connectdata *conn)
  * local variables:
  * eval: (load-file "../curl-mode.el")
  * end:
- * vim600: et sw=2 ts=2 sts=2 tw=78 fdm=marker
- * vim<600: et sw=2 ts=2 sts=2 tw=78
+ * vim600: fdm=marker
+ * vim: et sw=2 ts=2 sts=2 tw=78
  */
