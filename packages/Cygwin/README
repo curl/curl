@@ -1,0 +1,34 @@
+cURL (as of 7.9.1) builds completely OOTB. The Cygwin specific files
+(README is the only one so far) are located in a non-standard location:
+ <srctop>/packages/Cygwin/
+
+This release (v7.9) includes the patch needed in CYGWIN-PATCHES,
+however future releases should eliminate this directory.
+
+
+Direct Dependencies:
+  OpenSSL 0.9.6b
+
+Canonical Homepage:
+  http://curl.haxx.se/
+
+Canonical Download:
+  http://curl.haxx.se/download.html
+
+
+Build Instructions:
+
+  unpack curl-<ver>-X-src.tar.bz2
+  cd curl-<ver>
+  ./configure --prefix=/usr 
+  make
+  (optionally) make test (*)
+  make install (**)
+
+  (*) until v7.9.1, 'make test' requires Cygwin's mounts set to binmode / Unix
+  (**) if you need to bootstrap, make install will require libtool 1.4.3
+       (which contains a patch related to the ".exe" extension on curl.exe
+
+
+Cygwin "port" maintained by: Kevin Roth <kproth at bigfoot dot com>
+
