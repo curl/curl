@@ -8,15 +8,18 @@
 **  This code is in the public domain and has no copyright.
 */
 
-#define _REENTRANT /* Necessary to use in Solaris, since the silly guys at Sun
-                      made the localtime_r() prototype dependent on it (or
-                      _POSIX_C_SOURCE or _POSIX_PTHREAD_SEMANTICS). */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 # ifdef HAVE_ALLOCA_H
 #  include <alloca.h>
 # endif
+
+# ifdef NEED_REENTRANT
+# define _REENTRANT /* Necessary to use in Solaris, since the silly guys at
+                       Sun made the localtime_r() prototype dependent on it
+                       (or _POSIX_C_SOURCE or _POSIX_PTHREAD_SEMANTICS) */
+# endif
+
 # ifdef HAVE_TIME_H
 #  include <time.h>
 # endif

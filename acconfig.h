@@ -27,3 +27,9 @@
 
 /* Define if you have the gethostbyname_r() function with 6 arguments */
 #undef HAVE_GETHOSTBYNAME_R_6
+
+/* Define if you have the inet_ntoa_r function declared. */
+#undef HAVE_INET_NTOA_R_DECL
+
+/* Define if you need the _REENTRANT define for some functions */
+#undef NEED_REENTRANT
