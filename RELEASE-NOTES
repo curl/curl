@@ -6,7 +6,7 @@ Curl and libcurl 7.12.3
  Available curl_easy_setopt() options:     121
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        13
- Number of known libcurl bindings:         28
+ Number of known libcurl bindings:         29
 
 This release includes the following changes:
 
@@ -38,6 +38,8 @@ Other curl-related news since the previous public release:
  o TclCurl 0.12.2: http://personal1.iddeo.es/andresgarci/tclcurl/english/
  o libcurl.NET 1.1: http://www.seasideresearch.com/downloads.html
  o RCurl 0.5.1: http://www.omegahat.org/RCurl/
+ o libcurl.mono 1.0:
+   http://forge.novell.com/modules/xfmod/project/?libcurl-mono
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:

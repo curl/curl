@@ -76,6 +76,16 @@ Lua
   Written by Steve Dekorte
   http://curl.haxx.se/libcurl/lua/
 
+.NET
+
+  Written by Jeffrey Phillips
+  http://www.seasideresearch.com/downloads.html
+
+Mono
+
+  Written by Jeffrey Phillips
+  http://forge.novell.com/modules/xfmod/project/?libcurl-mono
+
 Object-Pascal
 
   Free Pascal, Delphi and Kylix binding written by Christophe Espern.
