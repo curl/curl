@@ -1829,7 +1829,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
               conn->maxdownload);
       }
       infof(data, "range-download from %d to %d, totally %d bytes\n",
-            from, to, totalsize);
+            from, to, conn->maxdownload);
       ftp->dont_check = TRUE; /* dont check for successful transfer */
     }
 
@@ -2040,6 +2040,9 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 	if(result)
 	  return result;
       }
+
+      if(size > conn->maxdownload)
+        size = conn->size = conn->maxdownload;
 
       infof(data, "Getting file with size: %d\n", size);
 
