@@ -52,6 +52,8 @@ my $memanalyze="../memanalyze.pl";
 
 my $checkstunnel = &checkstunnel;
 
+my $ssl_version; # set if libcurl is built with SSL support
+
 #######################################################################
 # variables the command line options may set
 #
@@ -253,7 +255,6 @@ sub runftpsserver {
 
     my $flag=$debugprotocol?"-v ":"";
     my $cmd="perl $srcdir/ftpsserver.pl $flag -r $FTPPORT $FTPSPORT &";
-    print "CMD: $cmd\n";
     system($cmd);
     if($verbose) {
         print "ftpd stunnel started\n";
@@ -401,6 +402,10 @@ sub displaydata {
     "* Host: $hostname",
     "* System: $hosttype";
 
+    if($libcurl =~ /SSL/i) {
+        $ssl_version=1;
+    }
+
     if( -r $memdump) {
         # if this exists, curl was compiled with memory debugging
         # enabled and we shall verify that no memory leaks exist
@@ -410,6 +415,7 @@ sub displaydata {
     printf("* Memory debugging: %s\n", $memory_debug?"ON":"OFF");
     printf("* HTTPS server:     %s\n", $checkstunnel?"ON":"OFF");
     printf("* FTPS server:      %s\n", $checkstunnel?"ON":"OFF");
+    printf("* libcurl SSL:      %s\n", $ssl_version?"ON":"OFF");
     print "***************************************** \n";
 }
 
@@ -690,8 +696,9 @@ sub serverfortest {
     elsif($testnum< 400) {
         # 300 - 399 is for HTTPS, two servers!
 
-        if(!$checkstunnel) {
+        if(!$checkstunnel || !$ssl_version) {
             # we can't run https tests without stunnel
+            # or if libcurl is SSL-less
             return 1;
         }
 
@@ -707,8 +714,9 @@ sub serverfortest {
     elsif($testnum< 500) {
         # 400 - 499 is for FTPS, also two servers
 
-        if(!$checkstunnel) {
+        if(!$checkstunnel || !$ssl_version) {
             # we can't run https tests without stunnel
+            # or if libcurl is SSL-less
             return 1;
         }
         if(!$run{'ftp'}) {
@@ -916,5 +924,5 @@ else {
     print "No tests were performed!\n";
 }
 if($skipped) {
-    print "$skipped tests were skipped due to server problems\n";
+    print "$skipped tests were skipped due to restraints\n";
 }
