@@ -235,11 +235,11 @@ int Curl_GetFTPResponse(char *buf,
   keepon=TRUE;
 
   while((nread<BUFSIZE) && (keepon && !error)) {
-    readfd = rkeepfd;		   /* set every lap */
-    interval.tv_sec = timeout;
-    interval.tv_usec = 0;
+    if(!ftp->cache) {
+      readfd = rkeepfd;		   /* set every lap */
+      interval.tv_sec = timeout;
+      interval.tv_usec = 0;
 
-    if(!ftp->cache)
       switch (select (sockfd+1, &readfd, NULL, NULL, &interval)) {
       case -1: /* select() error, stop reading */
         error = SELECT_ERROR;
@@ -253,6 +253,7 @@ int Curl_GetFTPResponse(char *buf,
         error = SELECT_OK;
         break;
       }
+    }
     if(SELECT_OK == error) {
       /*
        * This code previously didn't use the kerberos sec_read() code
