@@ -327,5 +327,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
           max5data(data->progress.current_speed, max5[5]) /* current speed */
           );
 
+  /* we flush the output stream to make it appear as soon as possible */
+  fflush(data->err);
+
   return 0;
 }
