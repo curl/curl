@@ -29,12 +29,6 @@ To do in a future release (random order):
 
  * Suggested on the mailing list: CURLOPT_FTP_MKDIR...!
 
- * Rewrite parts of the test suite. Make a (XML?) format to store all
-   test-data in a single for a single test case. The current system makes far
-   too many separate files. We also need to have the test suite support
-   different behaviors, like when libcurl is compiled for IPv6 support and
-   thus performs a different set of FTP commands.
-
  * Add configure options that disables certain protocols in libcurl to
    decrease footprint.  '--disable-[protocol]' where protocol is http, ftp,
    telnet, ldap, dict or file.
