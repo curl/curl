@@ -302,6 +302,7 @@ Transfer(struct connectdata *c_conn)
              we bail out from this! */
           else if (0 >= (signed int) nread) {
             keepon &= ~KEEP_READ;
+            FD_ZERO(&rkeepfd);
             break;
           }
 
@@ -711,6 +712,7 @@ Transfer(struct connectdata *c_conn)
               else if(CHUNKE_STOP == res) {
                 /* we're done reading chunks! */
                 keepon &= ~KEEP_READ; /* read no more */
+                FD_ZERO(&rkeepfd);
 
                 /* There are now possibly N number of bytes at the end of the
                    str buffer that weren't written to the client, but we don't
@@ -724,7 +726,9 @@ Transfer(struct connectdata *c_conn)
               nread = conn->maxdownload - bytecount;
               if((signed int)nread < 0 ) /* this should be unusual */
                 nread = 0;
+
               keepon &= ~KEEP_READ; /* we're done reading */
+              FD_ZERO(&rkeepfd);
             }
 
             bytecount += nread;
@@ -758,6 +762,7 @@ Transfer(struct connectdata *c_conn)
           if ((signed int)nread<=0) {
             /* done */
             keepon &= ~KEEP_WRITE; /* we're done writing */
+            FD_ZERO(&wkeepfd);
             break;
           }
           writebytecount += nread;
