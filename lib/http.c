@@ -471,6 +471,64 @@ CURLcode Curl_http(struct connectdata *conn)
   if(!checkheaders(data, "Accept:"))
     http->p_accept = "Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*\r\n";
 
+  if((data->bits.http_post ||
+      data->bits.http_formpost ||
+      data->bits.http_put) &&
+     data->resume_from) {
+    /**********************************************************************
+     * Resuming upload in HTTP means that we PUT or POST and that we have
+     * got a resume_from value set. The resume value has already created
+     * a Range: header that will be passed along. We need to "fast forward"
+     * the file the given number of bytes and decrease the assume upload
+     * file size before we continue this venture in the dark lands of HTTP.
+     *********************************************************************/
+   
+    if(data->resume_from < 0 ) {
+      /*
+       * This is meant to get the size of the present remote-file by itself.
+       * We don't support this now. Bail out!
+       */
+       data->resume_from = 0;
+    }
+
+    if(data->resume_from) {
+      /* do we still game? */
+      int passed=0;
+
+      /* Now, let's read off the proper amount of bytes from the
+         input. If we knew it was a proper file we could've just
+         fseek()ed but we only have a stream here */
+      do {
+        int readthisamountnow = (data->resume_from - passed);
+        int actuallyread;
+
+        if(readthisamountnow > BUFSIZE)
+          readthisamountnow = BUFSIZE;
+
+        actuallyread =
+          data->fread(data->buffer, 1, readthisamountnow, data->in);
+
+        passed += actuallyread;
+        if(actuallyread != readthisamountnow) {
+          failf(data, "Could only read %d bytes from the input\n",
+                passed);
+          return CURLE_READ_ERROR;
+        }
+      } while(passed != data->resume_from); /* loop until done */
+
+      /* now, decrease the size of the read */
+      if(data->infilesize>0) {
+        data->infilesize -= data->resume_from;
+
+        if(data->infilesize <= 0) {
+          failf(data, "File already completely uploaded\n");
+          return CURLE_PARTIAL_FILE;
+        }
+      }
+      /* we've passed, proceed as normal */
+    }
+  }
+
   do {
     send_buffer *req_buffer;
     struct curl_slist *headers=data->headers;
