@@ -572,6 +572,8 @@ struct connectdata {
 
   int sockerror; /* errno stored by Curl_read() if the underlying layer returns
                     error */
+  char syserr_buf [256]; /* buffer for Curl_strerror() */
+
 #if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
   /* data used for the asynch name resolve callback */
   struct Curl_async async;

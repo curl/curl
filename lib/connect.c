@@ -86,6 +86,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "if2ip.h"
+#include "curl_strerror.h"
 #include "connect.h"
 
 /* The last #include file should be: */
@@ -295,7 +296,7 @@ static CURLcode bindlocal(struct connectdata *conn,
       if (setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
                      data->set.device, strlen(data->set.device)+1) != 0) {
         /* printf("Failed to BINDTODEVICE, socket: %d  device: %s error: %s\n",
-           sockfd, data->set.device, strerror(Curl_ourerrno())); */
+           sockfd, data->set.device, Curl_strerror(Curl_ourerrno())); */
         infof(data, "SO_BINDTODEVICE %s failed\n",
               data->set.device);
         /* This is typically "errno 1, error: Operation not permitted" if
@@ -353,38 +354,9 @@ static CURLcode bindlocal(struct connectdata *conn,
         }
 #endif
         if(!bindworked) {
-          int err = Curl_ourerrno();
-          switch(err) {
-          case EBADF:
-            failf(data, "Invalid descriptor: %d", err);
-            break;
-          case EINVAL:
-            failf(data, "Invalid request: %d", err);
-            break;
-          case EACCES:
-            failf(data, "Address is protected, user not superuser: %d", err);
-            break;
-          case ENOTSOCK:
-            failf(data,
-                  "Argument is a descriptor for a file, not a socket: %d",
-                  err);
-            break;
-          case EFAULT:
-            failf(data, "Inaccessable memory error: %d", err);
-            break;
-          case ENAMETOOLONG:
-            failf(data, "Address too long: %d", err);
-            break;
-          case ENOMEM:
-            failf(data, "Insufficient kernel memory was available: %d", err);
-            break;
-          default:
-            failf(data, "errno %d", err);
-            break;
-          } /* end of switch(err) */
-	
+          failf(data, "%s", Curl_strerror(conn, Curl_ourerrno()));
           return CURLE_HTTP_PORT_FAILED;
-        } /* end of else */
+        }
 	
       } /* end of if  h */
       else {
@@ -489,8 +461,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   }
   else if(1 != rc) {
     int error = Curl_ourerrno();
-    failf(data, "Failed connect to %s:%d, errno: %d",
-          conn->hostname, conn->port, error);
+    failf(data, "Failed connect to %s:%d; %s",
+          conn->hostname, conn->port, Curl_strerror(conn,error));
     return CURLE_COULDNT_CONNECT;
   }
   /*
@@ -652,8 +624,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         break;
       default:
         /* unknown error, fallthrough and try another address! */
-        failf(data, "Failed to connect to %s IP number %d: %d",
-              hostname, aliasindex+1, error);
+        failf(data, "Failed to connect to %s IP number %d: %s",
+              hostname, aliasindex+1, Curl_strerror(conn,error));
         break;
       }
     }

@@ -91,6 +91,7 @@
 #include "strequal.h"
 #include "ssluse.h"
 #include "connect.h"
+#include "curl_strerror.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
@@ -1138,6 +1139,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
   const char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
   char **modep;
   int rc;
+  int error;
 
   /*
    * we should use Curl_if2ip?  given pickiness of recent ftpd,
@@ -1172,6 +1174,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
   }
   
   portsock = CURL_SOCKET_BAD;
+  error = 0;
   for (ai = res; ai; ai = ai->ai_next) {
     /*
      * Workaround for AIX5 getaddrinfo() problem (it doesn't set ai_socktype):
@@ -1180,16 +1183,20 @@ CURLcode ftp_use_port(struct connectdata *conn)
       ai->ai_socktype = hints.ai_socktype;
 
     portsock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-    if (portsock == CURL_SOCKET_BAD)
+    if (portsock == CURL_SOCKET_BAD) {
+      error = Curl_ourerrno();
       continue;
+    }
 
     if (bind(portsock, ai->ai_addr, ai->ai_addrlen) < 0) {
+      error = Curl_ourerrno();
       sclose(portsock);
       portsock = CURL_SOCKET_BAD;
       continue;
     }
       
     if (listen(portsock, 1) < 0) {
+      error = Curl_ourerrno();
       sclose(portsock);
       portsock = CURL_SOCKET_BAD;
       continue;
@@ -1199,13 +1206,13 @@ CURLcode ftp_use_port(struct connectdata *conn)
   }
   freeaddrinfo(res);
   if (portsock == CURL_SOCKET_BAD) {
-    failf(data, "%s", strerror(errno));
+    failf(data, "%s", Curl_strerror(conn,error));
     return CURLE_FTP_PORT_FAILED;
   }
 
   sslen = sizeof(ss);
   if (getsockname(portsock, sa, &sslen) < 0) {
-    failf(data, "%s", strerror(errno));
+    failf(data, "%s", Curl_strerror(conn,Curl_ourerrno()));
     return CURLE_FTP_PORT_FAILED;
   }
 
@@ -1248,18 +1255,19 @@ CURLcode ftp_use_port(struct connectdata *conn)
       /* do not transmit IPv6 scope identifier to the wire */
       if (sa->sa_family == AF_INET6) {
         char *q = strchr(portmsgbuf, '%');
-          if (q)
-            *q = '\0';
+        if (q)
+          *q = '\0';
       }
 
       result = Curl_ftpsendf(conn, "%s |%d|%s|%s|", *modep, eprtaf,
                              portmsgbuf, tmp);
       if(result)
         return result;
-    } else if (strcmp(*modep, "LPRT") == 0 ||
-               strcmp(*modep, "PORT") == 0) {
+    }
+    else if (strcmp(*modep, "LPRT") == 0 ||
+             strcmp(*modep, "PORT") == 0) {
       int i;
-      
+
       if (strcmp(*modep, "LPRT") == 0 && lprtaf < 0)
         continue;
       if (strcmp(*modep, "PORT") == 0 && sa->sa_family != AF_INET)

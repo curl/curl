@@ -4,14 +4,13 @@
 
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	    \
-       Makefile.vc6 Makefile.riscos libcurl.def curllib.dsp		    \
-       curllib.dsw config-vms.h config-win32.h config-riscos.h config-mac.h \
-       config.h.in ca-bundle.crt README.encoding README.memoryleak	    \
-       README.ares makefile.dj config.dj				    \
-       libcurl.framework.make libcurl.plist libcurl.rc \
-       config-amigaos.h amigaos.c amigaos.h makefile.amiga config-netware.h \
-       Makefile.netware nwlib.c libcurl.imp
+EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	\
+  Makefile.vc6 Makefile.riscos libcurl.def curllib.dsp curllib.dsw	\
+  config-vms.h config-win32.h config-riscos.h config-mac.h config.h.in	\
+  ca-bundle.crt README.encoding README.memoryleak README.ares		\
+  makefile.dj config.dj libcurl.framework.make libcurl.plist		\
+  libcurl.rc config-amigaos.h amigaos.c amigaos.h makefile.amiga	\
+  config-netware.h Makefile.netware nwlib.c libcurl.imp
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -63,20 +62,20 @@ endif
 
 libcurl_la_LDFLAGS = $(UNDEF) $(VERSION) $(MIMPURE)
 
-libcurl_la_SOURCES = arpa_telnet.h file.c netrc.h timeval.c	\
-base64.c file.h hostip.c progress.c timeval.h base64.h formdata.c	\
-hostip.h progress.h cookie.c formdata.h http.c sendf.c cookie.h ftp.c	\
-http.h sendf.h url.c dict.c ftp.h if2ip.c speedcheck.c url.h dict.h	\
-getdate.c if2ip.h speedcheck.h urldata.h getdate.h ldap.c ssluse.c	\
-version.c getenv.c ldap.h ssluse.h escape.c mprintf.c telnet.c escape.h	\
-netrc.c telnet.h getinfo.c getinfo.h transfer.c strequal.c	\
-strequal.h easy.c security.h security.c krb4.c krb4.h memdebug.c	\
-memdebug.h inet_ntoa_r.h http_chunks.c http_chunks.h strtok.c strtok.h	\
-connect.c connect.h llist.c llist.h hash.c hash.h multi.c		\
-content_encoding.c content_encoding.h share.c share.h http_digest.c \
-md5.c md5.h http_digest.h http_negotiate.c http_negotiate.h \
-http_ntlm.c http_ntlm.h ca-bundle.h inet_pton.c inet_pton.h \
-strtoofft.c strtoofft.h
+libcurl_la_SOURCES = arpa_telnet.h file.c netrc.h timeval.c base64.c	\
+  file.h hostip.c progress.c timeval.h base64.h formdata.c hostip.h	\
+  progress.h cookie.c formdata.h http.c sendf.c cookie.h ftp.c http.h	\
+  sendf.h url.c dict.c ftp.h if2ip.c speedcheck.c url.h dict.h		\
+  getdate.c if2ip.h speedcheck.h urldata.h getdate.h ldap.c ssluse.c	\
+  version.c getenv.c ldap.h ssluse.h escape.c mprintf.c telnet.c	\
+  escape.h netrc.c telnet.h getinfo.c getinfo.h transfer.c strequal.c	\
+  strequal.h easy.c security.h security.c krb4.c krb4.h memdebug.c	\
+  memdebug.h inet_ntoa_r.h http_chunks.c http_chunks.h strtok.c		\
+  strtok.h connect.c connect.h llist.c llist.h hash.c hash.h multi.c	\
+  content_encoding.c content_encoding.h share.c share.h http_digest.c	\
+  md5.c md5.h http_digest.h http_negotiate.c http_negotiate.h		\
+  http_ntlm.c http_ntlm.h ca-bundle.h inet_pton.c inet_pton.h		\
+  strtoofft.c strtoofft.h curl_strerror.c
 
 noinst_HEADERS = setup.h transfer.h
 
