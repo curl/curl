@@ -7,6 +7,17 @@
                                   Changelog
 
 Daniel (23 May)
+- Ricardo Cadime found a socket leak when listing directories without
+  contents. Test cases 144 and 145 were added to verify the fix.
+
+- Rudy Koento found yet another problem when a HTTP server returns only a
+  single-line of contents without any headers at all. libcurl then failed to
+  count the data, thus returning error 52 "no contents". Test case 66 was
+  added to verify that we now do right.
+
+Version 7.10.6-pre1 (23 May 2003)
+
+Daniel (23 May)
 - Jis in bug report #741841, fixed a bug in the SOCKS5 proxy-using code.
 
 Daniel (22 May)
