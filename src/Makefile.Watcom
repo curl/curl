@@ -17,7 +17,7 @@ CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm     &
          -dSIZEOF_CURL_OFF_T=8 -dCURLDEBUG -dCURLTOOLDEBUG -dENABLE_IPV6    &
          -dHAVE_WINSOCK2_H -I..\include -I..\lib
 
-!if "STATIC" == "0"
+!ifeq STATIC 0
 LIBCURL = ..\lib\libcurl_wc_imp.lib
 
 !else
