@@ -152,7 +152,7 @@ struct asprintf {
 
 int curl_msprintf(char *buffer, const char *format, ...);
 
-static int dprintf_DollarString(char *input, char **end)
+static long dprintf_DollarString(char *input, char **end)
 {
   int number=0;
   while(isdigit((int)*input)) {
@@ -285,12 +285,12 @@ static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list a
 {
   char *fmt = format;
   int param_num = 0;
-  int this_param;
-  int width;
-  int precision;
+  long this_param;
+  long width;
+  long precision;
   int flags;
-  int max_param=0;
-  int i;
+  long max_param=0;
+  long i;
 
   while (*fmt) {
     if (*fmt++ == '%') {
@@ -461,13 +461,21 @@ static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list a
       case 'f':
 	vto[i].type = FORMAT_DOUBLE;
 	break;
-      case 'e': case 'E':
+      case 'e':
 	vto[i].type = FORMAT_DOUBLE;
-	flags |= FLAGS_FLOATE| (('E' == *fmt)?FLAGS_UPPER:0);
+	flags |= FLAGS_FLOATE;
 	break;
-      case 'g': case 'G':
+      case 'E':
 	vto[i].type = FORMAT_DOUBLE;
-	flags |= FLAGS_FLOATG| (('G' == *fmt)?FLAGS_UPPER:0);
+	flags |= FLAGS_FLOATE|FLAGS_UPPER;
+	break;
+      case 'g':
+	vto[i].type = FORMAT_DOUBLE;
+	flags |= FLAGS_FLOATG;
+	break;	
+      case 'G':
+	vto[i].type = FORMAT_DOUBLE;
+	flags |= FLAGS_FLOATG|FLAGS_UPPER;
 	break;	
       default:
 	vto[i].type = FORMAT_UNKNOWN;
@@ -580,7 +588,7 @@ static int dprintf_formatf(
   char *f;
 
   /* Number of characters written.  */
-  register size_t done = 0;
+  int done = 0;
 
   long param; /* current parameter to read */
   long param_num=0; /* parameter counter */
@@ -734,7 +742,7 @@ static int dprintf_formatf(
       /* Number of base BASE.  */
       {
 	char *workend = &work[sizeof(work) - 1];
-	register char *w;
+	char *w;
 	
 	/* Supply a default precision if none was given.  */
 	if (prec == -1)
@@ -863,7 +871,7 @@ static int dprintf_formatf(
 	else {
 	  /* Write "(nil)" for a nil pointer.  */
 	  static char strnil[] = "(nil)";
-	  register char *point;
+	  char *point;
 	  
 	  width -= sizeof(strnil) - 1;
 	  if (p->flags & FLAGS_LEFT)
