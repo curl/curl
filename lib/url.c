@@ -851,36 +851,24 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
   {
     curl_httpauth auth = va_arg(param, long);
     switch(auth) {
-    case CURLHTTP_BASIC:
-      /* default */
-      data->set.httpdigest = FALSE;
-      data->set.httpnegotiate = FALSE;
-      data->set.httpntlm = FALSE;      
+    case CURLAUTH_BASIC:
+    case CURLAUTH_DIGEST:
+      data->set.httpauth = auth;      
       break;
-    case CURLHTTP_DIGEST:
-      /* Enable HTTP Digest authentication */
-      data->set.httpdigest = TRUE;
-      data->set.httpnegotiate = FALSE;
-      data->set.httpntlm = FALSE;      
-      break;
-    case CURLHTTP_NTLM:
+    case CURLAUTH_NTLM:
       /* Enable HTTP NTLM authentication */
 #ifdef USE_SSLEAY
       /* We can only support NTLM if OpenSSL is present, as we need their
          crypto package for it */
-      data->set.httpdigest = FALSE;
-      data->set.httpnegotiate = FALSE;
-      data->set.httpntlm = TRUE;      
+      data->set.httpauth = auth;
       break;
 #else
       /* fall-through */
 #endif
-    case CURLHTTP_NEGOTIATE:
+    case CURLAUTH_GSSNEGOTIATE:
 #ifdef GSSAPI
       /* Enable HTTP Negotaiate authentication */
-      data->set.httpdigest = FALSE;
-      data->set.httpnegotiate = TRUE;
-      data->set.httpntlm = FALSE;      
+      data->set.httpauth = auth;
       break;
 #else
       /* fall-through */

@@ -705,9 +705,9 @@ struct UserDefined {
   char *set_proxy;   /* proxy to use */
   long use_port;     /* which port to use (when not using default) */
   char *userpwd;     /* <user:password>, if used */
-  bool httpdigest;    /* if HTTP Digest authentication is enabled */
-  bool httpnegotiate; /* if HTTP Negotiate authentication is enabled */
-  bool httpntlm;      /* if HTTP NTLM authentication is enabled */
+
+  curl_httpauth httpauth; /* what kind of HTTP authentication to use */
+
   char *set_range;   /* range, if used. See README for detailed specification
                         on this syntax. */
   long followlocation; /* as in HTTP Location: */

@@ -727,7 +727,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 	    else if (Curl_compareheader(k->p, "WWW-Authenticate:",
                                         "GSS-Negotiate") &&
 		     (401 == k->httpcode) &&
-		     data->set.httpnegotiate) {
+		     (data->set.httpauth == CURLAUTH_GSSNEGOTIATE)) {
 	      int neg;
 
 	      neg = Curl_input_negotiate(conn,
@@ -742,8 +742,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             else if(Curl_compareheader(k->p,
                                        "WWW-Authenticate:", "NTLM") &&
                     (401 == k->httpcode) &&
-                    data->set.httpntlm /* NTLM authentication is 
-                                          activated */) {
+                    (data->set.httpauth == CURLAUTH_NTLM)
+                    /* NTLM authentication is activated */) {
               CURLntlm ntlm =
                 Curl_input_ntlm(conn, k->p+strlen("WWW-Authenticate:"));
 
@@ -753,10 +753,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 infof(data, "Authentication problem. Ignoring this.\n");
             }
 #endif
-            else if(checkprefix("WWW-Authenticate:", k->p) &&
+            else if(Curl_compareheader(k->p,
+                                       "WWW-Authenticate:", "Digest") &&
                     (401 == k->httpcode) &&
-                    data->set.httpdigest /* Digest authentication is 
-                                            activated */) {
+                    (data->set.httpauth == CURLAUTH_DIGEST)
+                    /* Digest authentication is activated */) {
               CURLdigest dig = CURLDIGEST_BAD;
 
               if(data->state.digest.nonce)

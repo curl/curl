@@ -709,7 +709,7 @@ CURLcode Curl_http(struct connectdata *conn)
     if(result)
       return result;
   }
-  else if(!data->set.httpdigest && /* not if Digest is enabled */
+  else if((data->set.httpauth == CURLAUTH_BASIC) && /* if Basic is desired */
           conn->bits.user_passwd &&
           !checkheaders(data, "Authorization:")) {
     char *authorization;
