@@ -143,12 +143,8 @@ Transfer (struct UrlData *data,
 #define KEEP_READ  1
 #define KEEP_WRITE 2
 
-  pgrsStartNow(data);
   if (!getheader) {
     header = FALSE;
-#if 0
-    ProgressInit (data, size);
-#endif
     if(size > 0)
       pgrsSetDownloadSize(data, size);
   }
@@ -301,9 +297,6 @@ Transfer (struct UrlData *data,
                 if ('\n' == *p)
                   p++;		/* pass the \n byte */
 
-#if 0                
-                ProgressInit (data, size);	/* init progress meter */
-#endif
                 pgrsSetDownloadSize(data, size);
 
                 header = FALSE;	/* no more header to parse! */
@@ -546,11 +539,6 @@ Transfer (struct UrlData *data,
       }
 
       now = tvnow();
-#if 0
-      if (!header) {
-	ProgressShow (data, bytecount, start, now, FALSE);
-      }
-#endif
       pgrsUpdate(data);
 
       urg = speedcheck (data, now);
@@ -576,9 +564,6 @@ Transfer (struct UrlData *data,
           contentlength-bytecount);
     return URG_PARTIAL_FILE;
   }
-#if 0
-  ProgressShow (data, bytecount, start, now, TRUE);
-#endif
   pgrsUpdate(data);
 
   if(bytecountp)
