@@ -283,7 +283,9 @@ krb4_auth(void *app_data, struct connectdata *conn)
     u_int32_t cs;
     struct krb4_data *d = app_data;
     struct sockaddr_in *localaddr  = (struct sockaddr_in *)LOCAL_ADDR;
+#if 0
     struct sockaddr_in *remoteaddr = (struct sockaddr_in *)REMOTE_ADDR;
+#endif
     char *host = conn->hp->h_name;
     size_t nread;
     int l = sizeof(local_addr);
@@ -313,7 +315,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
       else {
 	if (natAddr.s_addr != localaddr->sin_addr.s_addr) {
 	  printf("Using NAT IP address (%s) for kerberos 4\n",
-		 inet_ntoa(natAddr));
+		 (char *)inet_ntoa(natAddr));
 	  localaddr->sin_addr = natAddr;
 	  
 	  /*
@@ -399,7 +401,6 @@ void krb_kauth(struct connectdata *conn)
     KTEXT_ST tkt, tktcopy;
     char *name;
     char *p;
-    int overbose;
     char passwd[100];
     int tmp;
     size_t nread;
@@ -417,12 +418,10 @@ void krb_kauth(struct connectdata *conn)
 	return /*CURLE_OPERATION_TIMEOUTED*/;
 
     if(/*ret != CONTINUE*/conn->data->buffer[0] != '3'){
-	/*verbose = overbose;***/
 	set_command_prot(conn, save);
 	/*code = -1;***/
 	return;
     }
-    /*verbose = overbose;***/
     p = strstr(/*reply_string***/conn->data->buffer, "T=");
     if(!p){
 	printf("Bad reply from server.\n");
@@ -444,7 +443,6 @@ void krb_kauth(struct connectdata *conn)
     p = strstr(/*reply_string***/conn->data->buffer, "P=");
     if(!p){
 	printf("Bad reply from server.\n");
-	/*verbose = overbose;***/
 	set_command_prot(conn, save);
 	/*code = -1;***/
 	return;
