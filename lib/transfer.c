@@ -903,7 +903,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
   bool port=TRUE; /* allow data->set.use_port to set port to use */
   char *newurl = NULL; /* possibly a new URL to follow to! */
 #ifdef HAVE_SIGNAL
-  /* storage for the previous signal handler */
+  /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
   void (*prev_signal)(int sig);
 #endif
 
