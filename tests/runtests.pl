@@ -49,6 +49,7 @@ my $LOGDIR="log";
 my $TESTDIR="$srcdir/data";
 my $LIBDIR="./libtest";
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
+my $SERVER2IN="$LOGDIR/server2.input"; # what curl sent the second server
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
 
@@ -409,7 +410,7 @@ sub runhttpserver {
     }
 
     my $verified;
-    for(1 .. 10) {
+    for(1 .. 30) {
         # verify that our server is up and running:
         my $data=`$CURL --silent -g \"$ip:$port/verifiedserver\" 2>/dev/null`;
 
@@ -420,9 +421,9 @@ sub runhttpserver {
         }
         else {
             if($verbose) {
-                print STDERR "RUN: Retrying HTTP$nameext server existence in 3 sec\n";
+                print STDERR "RUN: Retrying HTTP$nameext server existence in 1 sec\n";
             }
-            sleep(3);
+            sleep(1);
             next;
         }
     }
@@ -468,14 +469,14 @@ sub runhttpsserver {
     }
     sleep(1);
 
-    for(1 .. 10) {
+    for(1 .. 30) {
         $pid=checkserver($HTTPSPIDFILE);
 
         if($pid <= 0) {
             if($verbose) {
-                print STDERR "RUN: waiting 3 sec for HTTPS server\n";
+                print STDERR "RUN: waiting one sec for HTTPS server\n";
             }
-            sleep(3);
+            sleep(1);
         }
         else {
             last;
@@ -546,7 +547,7 @@ sub runftpserver {
 
     my $verified;
     $pid = 0;
-    for(1 .. 10) {
+    for(1 .. 30) {
         # verify that our server is up and running:
         my $line;
         my $cmd="$CURL --silent ftp://$HOSTIP:$port/verifiedserver 2>/dev/null";
@@ -561,9 +562,9 @@ sub runftpserver {
         }
         if(!$pid) {
             if($verbose) {
-                print STDERR "RUN: Retrying FTP$id server existence in 3 sec\n";
+                print STDERR "RUN: Retrying FTP$id server existence in a sec\n";
             }
-            sleep(3);
+            sleep(1);
             next;
         }
         else {
@@ -611,15 +612,15 @@ sub runftpsserver {
     }
     sleep(1);
 
-    for(1 .. 10) {
+    for(1 .. 30) {
 
         $pid=checkserver($FTPSPIDFILE );
 
         if($pid <= 0) {
             if($verbose) {
-                print STDERR "RUN: waiting 3 sec for FTPS server\n";
+                print STDERR "RUN: waiting one sec for FTPS server\n";
             }
-            sleep(3);
+            sleep(1);
         }
         else {
             last;
@@ -1046,8 +1047,9 @@ sub singletest {
         chomp $tool;
     }
 
-    # remove previous server output logfile
+    # remove server output logfiles
     unlink($SERVERIN);
+    unlink($SERVER2IN);
 
     if(@ftpservercmd) {
         # write the instructions to file
@@ -1337,6 +1339,16 @@ sub singletest {
             exit;
         }
         my @generated=loadarray($filename);
+
+        # what parts to cut off from the file
+        my @stripfile = getpart("verify", "stripfile");
+        my $strip;
+        for $strip (@stripfile) {
+            chomp $strip;
+            for(@generated) {
+                eval $strip;
+            }
+        }
 
         $res = compare("output", \@generated, \@outfile);
         if($res) {

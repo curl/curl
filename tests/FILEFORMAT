@@ -187,6 +187,10 @@ This verfies that this data was passed to stdout.
 <file name="log/filename">
 the file's contents must be identical to this
 </file>
+<stripfile>
+One perl op per line that operates on the file before being compared. This is
+pretty advanced. Example: "s/^EPRT .*/EPRT stripped/"
+</stripfile>
 <upload>
 the contents of the upload data curl should have sent
 </upload>
