@@ -965,6 +965,7 @@ typedef enum {
   CURL_FORMADD_UNKNOWN_OPTION,
   CURL_FORMADD_INCOMPLETE,
   CURL_FORMADD_ILLEGAL_ARRAY,
+  CURL_FORMADD_DISABLED, /* libcurl was built with this disabled */
 
   CURL_FORMADD_LAST /* last */
 } CURLFORMcode;
