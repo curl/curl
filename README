@@ -19,11 +19,20 @@ README
 
   Study the COPYING file for distribution terms and similar.
 
+CONTACT
+
+  If you have problems, questions, ideas or suggestions, please contact us
+  by posting to a suitable mailing list. See http://curl.haxx.se/mail/
+
+WEB SITE
+
   Visit the curl web site or mirrors for the latest news:
 
-        http://curl.haxx.se/
-        http://curl.sf.net/
-        http://curl.planetmirror.com/
+        Sweden    -- http://curl.haxx.se/
+        US        -- http://curl.sf.net/
+        Australia -- http://curl.planetmirror.com/
+
+DOWNLOAD
 
   The official download mirror sites are:
 
@@ -33,6 +42,8 @@ README
         Australia -- http://curl.planetmirror.com/download/
         US        -- http://curl.sourceforge.net/download/
         Hongkong  -- http://www.execve.net/curl/
+
+CVS
 
   To download the very latest source off the CVS server do this:
 
@@ -47,6 +58,8 @@ README
     cvs -d :pserver:anonymous@cvs.curl.sourceforge.net:/cvsroot/curl logout
         
   (you're off the hook!)
+
+NOTICE
 
   Curl contains pieces of source code that is Copyright (c) 1998, 1999
   Kungliga Tekniska Högskolan. This notice is included here to comply with the
