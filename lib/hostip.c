@@ -200,6 +200,11 @@ hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
 void Curl_hostcache_prune(struct SessionHandle *data)
 {
   time_t now;
+
+  if(data->set.dns_cache_timeout == -1)
+    /* cache forever means never prune! */
+    return;
+
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
