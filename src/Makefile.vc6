@@ -18,34 +18,33 @@ ZLIB_PATH = ../../zlib-1.2.1
 !ENDIF
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.9d
+OPENSSL_PATH = ../../openssl-0.9.7d
 !ENDIF
 
 ########################################################
 ## Nothing more to do below this line!
-CFLAGSZLIB = /D "HAVE_ZLIB_H" /D "HAVE_ZLIB" /D "HAVE_LIBZ" /I "$(ZLIB_PATH)"
+CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
 LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 ZLIBLIBS   = zlib.lib
 SSLINC     = /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
-CFLAGSSSL  = /D "USE_SSLEAY"
+CFLAGSSSL  = /DUSE_SSLEAY
 LFLAGSSSL  = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSLLIBS    = libeay32.lib ssleay32.lib gdi32.lib
 
 ## Release
-CCR = cl.exe /MD /O2 /D "NDEBUG"
-LINKR = link.exe /incremental:no /libpath:"../lib"
-RCR = rc.exe /dCURLDEBUG=0
+CCR   = cl.exe /MD /O2 /DNDEBUG
+LINKR = link.exe /incremental:no /libpath:../lib
+RCR   = rc.exe /dCURLDEBUG=0
 
 ## Debug
-CCD = cl.exe /MDd /Gm /ZI /Od /D "_DEBUG" /GZ
-LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
-RCD = rc.exe /dCURLDEBUG=1
+CCD   = cl.exe /MDd /Gm /ZI /Od /D_DEBUG /GZ
+LINKD = link.exe /incremental:yes /debug /libpath:../lib
+RCD   = rc.exe /dCURLDEBUG=1
 
-CFLAGS = /I "../lib" /I "../include" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-LFLAGS = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
-RESFLAGS = /i "../include"
-LINKLIBS = wsock32.lib libcurl.lib winmm.lib
-LINKLIBS_DEBUG = wsock32.lib libcurld.lib winmm.lib
+CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c
+LFLAGS   = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
+RESFLAGS = /i../include
+
 
 RELEASE_OBJS= \
 	hugehelpr.obj \
@@ -69,46 +68,58 @@ DEBUG_OBJS= \
 	maind.obj \
 	curld.res
 
-######################
-# release-zlib
+#################################################
+# release-zlib (static libcurl + zlib)
 
 !IF "$(CFG)" == "release-zlib"
-CFLAGS = $(CFLAGS) $(CFLAGSZLIB) /DCURL_STATICLIB
-LINKLIBS = $(LINKLIBS) $(ZLIBLIBS)
-LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) $(ZLIBLIBS)
-LFLAGS = $(LFLAGS) $(LFLAGSZLIB)
+CFLAGS         = $(CFLAGS) $(CFLAGSZLIB) /DCURL_STATICLIB
+LINKLIBS       = libcurl.lib  $(ZLIBLIBS)
+LINKLIBS_DEBUG = libcurld.lib $(ZLIBLIBS)
+LFLAGS         = $(LFLAGS) $(LFLAGSZLIB)
 !ENDIF
 
-######################
-# release-ssl
+#################################################
+# release-ssl (static libcurl + ssl)
 
 !IF "$(CFG)" == "release-ssl"
-CFLAGS = $(CFLAGS) $(CFLAGSSSL) /DCURL_STATICLIB
-LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
-LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS)
-LFLAGS = $(LFLAGS) $(LFLAGSSSL)
+CFLAGS         = $(CFLAGS) $(CFLAGSSSL) /DCURL_STATICLIB
+LINKLIBS       = libcurl.lib  $(SSLLIBS)
+LINKLIBS_DEBUG = libcurld.lib $(SSLLIBS)
+LFLAGS         = $(LFLAGS) $(LFLAGSSSL)
 !ENDIF
 
-######################
-# release-libcurl-ssl-dll
+#################################################
+# release-libcurl-ssl-dll (libcurl.dll + ssl)
 
 !IF "$(CFG)" == "release-libcurl-ssl-dll"
-CFLAGS = $(CFLAGS) $(CFLAGSSSL)
-LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
-LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS)
-LFLAGS = $(LFLAGS) $(LFLAGSSSL)
+CFLAGS         = $(CFLAGS) $(CFLAGSSSL)
+LINKLIBS       = libcurl_imp.lib  $(SSLLIBS)
+LINKLIBS_DEBUG = libcurld_imp.lib $(SSLLIBS)
+LFLAGS         = $(LFLAGS) $(LFLAGSSSL)
 !ENDIF
 
-######################
-# release-ssl-zlib
+#################################################
+# release-ssl-zlib (static libcurl +  ssl + zlib)
 
 !IF "$(CFG)" == "release-ssl-zlib"
-CFLAGS = $(CFLAGS) $(CFLAGSSSL) $(CFLAGSZLIB)
-LINKLIBS  = $(LINKLIBS) $(SSLLIBS) $(ZLIBLIBS)
-LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS) $(ZLIBLIBS)
-LFLAGS = $(LFLAGS) $(LFLAGSSSL) $(LFLAGSZLIB)
+CFLAGS         = $(CFLAGS) $(CFLAGSSSL) $(CFLAGSZLIB) /DCURL_STATICLIB
+LINKLIBS       = libcurl.lib  $(SSLLIBS) $(ZLIBLIBS)
+LINKLIBS_DEBUG = libcurld.lib $(SSLLIBS) $(ZLIBLIBS)
+LFLAGS         = $(LFLAGS) $(LFLAGSSSL) $(LFLAGSZLIB)
 !ENDIF
 
+#################################################
+# If CFG not specified, use static libs
+
+!IF "$(CFG)." == "."
+CFLAGS         = $(CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = libcurl.lib
+LINKLIBS_DEBUG = libcurld.lib
+!ENDIF
+
+
+LINKLIBS       = $(LINKLIBS) wsock32.lib winmm.lib
+LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) wsock32.lib winmm.lib
 
 all : release
 
