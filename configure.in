@@ -693,8 +693,27 @@ AC_CHECK_SIZEOF(long long, 4)
 # check for ssize_t
 AC_CHECK_TYPE(ssize_t, int)
 
-# check for socklen_t (getsockname() wants that)
-AC_CHECK_TYPE(socklen_t, int)
+dnl
+dnl We can't just AC_CHECK_TYPE() for socklen_t since it doesn't appear
+dnl in the standard headers. We egrep for it in the socket headers and
+dnl if it is used there we assume we have the type defined, otherwise
+dnl we search for it with AC_CHECK_TYPE() the "normal" way
+dnl
+
+if test "$ac_cv_header_sys_socket_h" = "yes"; then
+   AC_MSG_CHECKING(for socklen_t in sys/socket.h)
+   AC_EGREP_HEADER(socklen_t,
+    sys/socket.h,
+    socklen_t=yes
+    AC_MSG_RESULT(yes),
+    AC_MSG_RESULT(no))
+fi
+
+if test "$socklen_t" != "yes"; then
+  # check for socklen_t the standard way if it wasn't found before
+  AC_CHECK_TYPE(socklen_t, int)
+fi
+
 
 dnl Get system canonical name
 AC_CANONICAL_HOST
