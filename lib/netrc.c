@@ -146,13 +146,17 @@ int Curl_parsenetrc(char *host,
   file = fopen(netrcbuffer, "r");
   if(file) {
     char *tok;
-	char *tok_buf;
-    while(fgets(netrcbuffer, sizeof(netrcbuffer), file)) {
-      tok=strtok_r(netrcbuffer, " \t\n", &tok_buf);
-      while(tok) {
+    char *tok_buf;
+    bool done=FALSE;
 
-        if (login[0] && password[0])
-          goto done;
+    while(!done && fgets(netrcbuffer, sizeof(netrcbuffer), file)) {
+      tok=strtok_r(netrcbuffer, " \t\n", &tok_buf);
+      while(!done && tok) {
+
+        if (login[0] && password[0]) {
+          done=TRUE;
+          break;
+        }
 
 	switch(state) {
 	case NOTHING:
@@ -182,7 +186,8 @@ int Curl_parsenetrc(char *host,
 	  if(state_login) {
             if (specific_login) {
               state_our_login = strequal(login, tok);
-            }else{
+            }
+            else {
               strncpy(login, tok, LOGINSIZE-1);
 #ifdef _NETRC_DEBUG
 	      printf("LOGIN: %s\n", login);
@@ -215,7 +220,6 @@ int Curl_parsenetrc(char *host,
       } /* while (tok) */
     } /* while fgets() */
 
-done:
     fclose(file);
   }
 
