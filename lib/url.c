@@ -1258,6 +1258,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.ftp_ssl = va_arg(param, long);
     break;
 
+  case CURLOPT_IPRESOLVE:
+    data->set.ip_version = va_arg(param, long);
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_FAILED_INIT; /* correct this */
