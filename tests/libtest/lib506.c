@@ -3,6 +3,8 @@
 #include <ctype.h>
 #include <errno.h>
 
+#include <mprintf.h>
+
 const char *HOSTHEADER = "Host: www.host.foo.com";
 const char *JAR = "log/jar506";
 #define THREADS 2
@@ -120,15 +122,7 @@ void *fire(void *ptr)
 /* build request url */
 char *suburl(char *base, int i)
 {
-  size_t len = strlen(base);
-  char *url = (char *)malloc(len+5);
-  if (!url) {
-    abort();
-  }
-  strcpy(url, base);
-  strcat(url, "0000");
-  url[len+3] = 48+i;
-  return url;
+  return curl_maprintf("%s000%c", base, 48+i);
 }
 
 
@@ -168,14 +162,14 @@ int test(char *URL)
   for (i=1; i<=THREADS; i++ ) {
     
     /* set thread data */
-    tdata.url   = suburl( URL, i ); /* must be freed */
+    tdata.url   = suburl( URL, i ); /* must be curl_free()d */
     tdata.share = share;
 
     /* simulate thread, direct call of "thread" function */
     printf( "*** run %d\n",i );
     fire( &tdata );
 
-    free( tdata.url );
+    curl_free( tdata.url );
 
   }
 
@@ -211,8 +205,8 @@ int test(char *URL)
   printf( "CLEANUP\n" );
   curl_easy_cleanup( curl );
   curl_slist_free_all( headers );
-  free(url);
-  
+
+  curl_free(url);
   
   /* free share */
   printf( "SHARE_CLEANUP\n" );
