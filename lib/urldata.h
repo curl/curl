@@ -87,6 +87,7 @@
 #endif
 #endif
 
+#include "timeval.h"
 
 /* Download buffer size, keep it fairly big for speed reasons */
 #define BUFSIZE (1024*50)
@@ -96,6 +97,8 @@
 #define HEADERSIZE 256
 
 struct Progress {
+  long lastshow; /* time() of the last displayed progress meter or NULL to
+                    force redraw at next call */
   double size_dl;
   double size_ul;
   double downloaded;
