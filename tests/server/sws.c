@@ -25,7 +25,7 @@ char *spitout(FILE *stream, char *main, char *sub, int *size);
 
 #define VERSION "cURL test suite HTTP server/0.1"
 
-#define REQUEST_DUMP "log/http-request.dump"
+#define REQUEST_DUMP "log/server.input"
 
 #define TEST_DATA_PATH "data/test%d"
 

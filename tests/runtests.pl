@@ -22,7 +22,7 @@ my $FTPSPORT=8821;  # this is the FTPS server port
 my $CURL="../src/curl"; # what curl executable to run on the tests
 my $LOGDIR="log";
 my $TESTDIR="data";
-my $SERVERIN="$LOGDIR/http-request.dump"; # what curl sent the server
+my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
 
