@@ -934,7 +934,7 @@ curl_getdate (const char *p, const time_t *now)
   yyInput = p;
   Start = now ? *now : time ((time_t *) NULL);
 #ifdef HAVE_LOCALTIME_R
-  tmp = localtime_r(&Start, &keeptime);
+  tmp = (struct tm *)localtime_r(&Start, &keeptime);
 #else
   tmp = localtime (&Start);
 #endif
