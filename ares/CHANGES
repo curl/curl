@@ -1,5 +1,14 @@
   Changelog for the c-ares project
 
+* November 7
+
+- Fixed the VC project and makefile to use ares_cancel and ares_version
+
+* October 24
+
+- The released ares_version.h from 1.2.1 says 1.2.0 due to a maketgz flaw.
+  This is now fixed.
+
 Version 1.2.1 (October 20, 2004)
 
 * September 29
