@@ -1,6 +1,7 @@
-#
-# A very simple PHP example that sends a HTTP POST to a remote site
-#
+<?php
+//
+// A very simple PHP example that sends a HTTP POST to a remote site
+//
 
 $ch = curl_init();
 
@@ -10,3 +11,4 @@ curl_setopt($ch, CURLOPT_POSTFIELDS, "postvar1=value1&postvar2=value2&postvar3=v
 
 curl_exec ($ch);
 curl_close ($ch); 
+?>
