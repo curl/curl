@@ -39,11 +39,16 @@ sub ftpmsg {
 my $verbose=0; # set to 1 for debugging
 my $retrweirdo=0;
 my $retrnosize=0;
+my $srcdir=".";
 
 my $port = 8921; # just a default
 do {
     if($ARGV[0] eq "-v") {
         $verbose=1;
+    }
+    elsif($ARGV[0] eq "-s") {
+        $srcdir=$ARGV[1];
+        shift @ARGV;
     }
     elsif($ARGV[0] =~ /^(\d+)$/) {
         $port = $1;
@@ -185,7 +190,7 @@ sub NLST_command {
 sub MDTM_command {
     my $testno = $_[0];
 
-    loadtest("data/test$testno");
+    loadtest("$srcdir/data/test$testno");
 
     logmsg "MDTM $testno\n";
 
@@ -212,7 +217,7 @@ sub MDTM_command {
 sub SIZE_command {
     my $testno = $_[0];
 
-    loadtest("data/test$testno");
+    loadtest("$srcdir/data/test$testno");
 
     logmsg "SIZE number $testno\n";
 
@@ -267,7 +272,7 @@ sub RETR_command {
         return 0;
     }
 
-    loadtest("data/test$testno");
+    loadtest("$srcdir/data/test$testno");
 
     my @data = getpart("reply", "data");
 

@@ -489,6 +489,7 @@ sub runftpserver {
     
     # now (re-)start our server:
     my $flag=$debugprotocol?"-v ":"";
+    $flag .= "-s \"$srcdir\"";
     my $cmd="$perl $srcdir/ftpserver.pl $flag $FTPPORT &";
     if($verbose) {
         print "CMD: $cmd\n";
