@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -467,8 +467,8 @@ struct Configurable {
 
   struct curl_slist *headers;
 
-  struct HttpPost *httppost;
-  struct HttpPost *last_post;
+  struct curl_httppost *httppost;
+  struct curl_httppost *last_post;
 
   struct curl_slist *telnet_options;
         
@@ -598,13 +598,16 @@ struct multi_files {
 
 /* Add a new list entry possibly with a type_name
  */
-static void *AddMultiFiles (const char *file_name,
-                            const char *type_name,
-                            struct multi_files **multi_start,
-                            struct multi_files **multi_current)
+static struct multi_files *
+AddMultiFiles (const char *file_name,
+               const char *type_name,
+               const char *show_filename,
+               struct multi_files **multi_start,
+               struct multi_files **multi_current)
 {
   struct multi_files *multi;
   struct multi_files *multi_type = NULL;
+  struct multi_files *multi_name = NULL;
   multi = (struct multi_files *)malloc(sizeof(struct multi_files));
   if (multi) {
     memset(multi, 0, sizeof(struct multi_files));
@@ -613,6 +616,10 @@ static void *AddMultiFiles (const char *file_name,
   }
   else
     return NULL;
+
+  if (!*multi_start)
+    *multi_start = multi;
+
   if (type_name) {
     multi_type = (struct multi_files *)malloc(sizeof(struct multi_files));
     if (multi_type) {
@@ -620,41 +627,46 @@ static void *AddMultiFiles (const char *file_name,
       multi_type->form.option = CURLFORM_CONTENTTYPE;
       multi_type->form.value = type_name;
       multi->next = multi_type;
+
+      multi = multi_type;
     }
     else {
       free (multi);
       return NULL;
     }
   }
-  if (!*multi_start)
-    *multi_start = multi;
-  if (!*multi_current) {
-    if (multi_type)
-      *multi_current = multi_type;
-    else
-      *multi_current = multi;
-  }
-  else {
-    if (multi_type) {
-      (*multi_current)->next = multi;
-      *multi_current = multi_type;
+  if (show_filename) {
+    multi_name = (struct multi_files *)malloc(sizeof(struct multi_files));
+    if (multi_name) {
+      memset(multi_name, 0, sizeof(struct multi_files));
+      multi_name->form.option = CURLFORM_FILENAME;
+      multi_name->form.value = show_filename;
+      multi->next = multi_name;
+
+      multi = multi_name;
     }
     else {
-      (*multi_current)->next = multi;
-      *multi_current = multi;
+      free (multi);
+      return NULL;
     }
   }
+
+  if (*multi_current)
+    (*multi_current)->next = multi;
+
+  *multi_current = multi;
+
   return *multi_current;
 }
 
 /* Free the items of the list.
  */
-static void FreeMultiInfo (struct multi_files **multi_start)
+static void FreeMultiInfo (struct multi_files *multi_start)
 {
   struct multi_files *multi;
-  while (*multi_start) {
-    multi = *multi_start;
-    *multi_start = (*multi_start)->next;
+  while (multi_start) {
+    multi = multi_start;
+    multi_start = multi_start->next;
     free (multi);
   }
 }
@@ -677,8 +689,19 @@ static void FreeMultiInfo (struct multi_files **multi_start)
  *
  * 'name=@filename;type=image/gif,filename2,filename3'
  *
- * Does use curl_formadd to fulfill it's job. Is heavily based on the
- * old curl_formparse code.
+ * If you want custom headers added for a single part, write them in a separate
+ * file and do like this:
+ *
+ * 'name=foo;headers=@headerfile' or why not
+ * 'name=@filemame;headers=@headerfile'
+ *
+ * To upload a file, but to fake the file name that will be included in the
+ * formpost, do like this:
+ *
+ * 'name=@filename;filename=/dev/null'
+ *
+ * This function uses curl_formadd to fulfill it's job. Is heavily based on
+ * the old curl_formparse code.
  *
  ***************************************************************************/
 
@@ -686,8 +709,8 @@ static void FreeMultiInfo (struct multi_files **multi_start)
 #define FORM_TYPE_SEPARATOR ';'
 
 static int formparse(char *input,
-                     struct HttpPost **httppost,
-                     struct HttpPost **last_post)
+                     struct curl_httppost **httppost,
+                     struct curl_httppost **last_post)
 {
   /* nextarg MUST be a string in the format 'name=contents' and we'll
      build a linked list with the info */
@@ -718,7 +741,9 @@ static int formparse(char *input,
 
       do {
 	/* since this was a file, it may have a content-type specifier
-	   at the end too */
+	   at the end too, or a filename. Or both. */
+        char *ptr;
+        char *filename=NULL;
 
 	sep=strchr(contp, FORM_TYPE_SEPARATOR);
 	sep2=strchr(contp, FORM_FILE_SEPARATOR);
@@ -729,35 +754,67 @@ static int formparse(char *input,
 
 	  /* no type was specified! */
 	}
+
+        type = NULL;
+
 	if(sep) {
 
 	  /* if we got here on a comma, don't do much */
-	  if(FORM_FILE_SEPARATOR != *sep)
-	    type = strstr(sep+1, "type=");
+	  if(FORM_FILE_SEPARATOR == *sep)
+	    ptr = NULL;
 	  else
-	    type=NULL;
+            ptr = sep+1;
 
 	  *sep=0; /* terminate file name at separator */
 
-	  if(type) {
-	    type += strlen("type=");
-	    
-	    if(2 != sscanf(type, "%127[^/]/%127[^,\n]",
-			   major, minor)) {
-	      fprintf(stderr, "Illegally formatted content-type field!\n");
-              free(contents);
-              FreeMultiInfo (&multi_start);
-	      return 2; /* illegal content-type syntax! */
-	    }
-	    /* now point beyond the content-type specifier */
-	    sep = (char *)type + strlen(major)+strlen(minor)+1;
+	  while(ptr && (FORM_FILE_SEPARATOR!= *ptr)) {
 
-	    /* find the following comma */
-	    sep=strchr(sep, FORM_FILE_SEPARATOR);
+            /* pass all white spaces */
+            while(isspace((int)*ptr))
+              ptr++;
+
+            if(curl_strnequal("type=", ptr, 5)) {
+
+              /* set type pointer */
+              type = &ptr[5];
+	    
+              /* verify that this is a fine type specifier */
+              if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
+                             major, minor)) {
+                fprintf(stderr, "Illegally formatted content-type field!\n");
+                free(contents);
+                FreeMultiInfo (multi_start);
+                return 2; /* illegal content-type syntax! */
+              }
+              /* now point beyond the content-type specifier */
+              sep = (char *)type + strlen(major)+strlen(minor)+1;
+
+              *sep=0; /* zero terminate type string */
+
+              ptr=sep+1;
+            }
+            else if(curl_strnequal("filename=", ptr, 9)) {
+              filename = &ptr[9];
+              ptr=strchr(filename, FORM_TYPE_SEPARATOR);
+              if(!ptr) {
+                ptr=strchr(filename, FORM_FILE_SEPARATOR);
+              }
+              if(ptr) {
+                *ptr=0; /* zero terminate */
+                ptr++;
+              }
+            }
+            else
+              /* confusion, bail out of loop */
+              break;
 	  }
+          /* find the following comma */
+          if(ptr)
+            sep=strchr(ptr, FORM_FILE_SEPARATOR);
+          else
+            sep=NULL;
 	}
 	else {
-	  type=NULL;
 	  sep=strchr(contp, FORM_FILE_SEPARATOR);
 	}
 	if(sep) {
@@ -767,14 +824,17 @@ static int formparse(char *input,
 	}
         /* if type == NULL curl_formadd takes care of the problem */
 
-        if (!AddMultiFiles (contp, type, &multi_start, &multi_current)) {
+        if (!AddMultiFiles (contp, type, filename, &multi_start,
+                            &multi_current)) {
           fprintf(stderr, "Error building form post!\n");
           free(contents);
-          FreeMultiInfo (&multi_start);
+          FreeMultiInfo (multi_start);
           return 3;
         }
 	contp = sep; /* move the contents pointer to after the separator */
+
       } while(sep && *sep); /* loop if there's another file name */
+
       /* now we add the multiple files section */
       if (multi_start) {
         struct curl_forms *forms = NULL;
@@ -790,7 +850,7 @@ static int formparse(char *input,
         {
           fprintf(stderr, "Error building form post!\n");
           free(contents);
-          FreeMultiInfo (&multi_start);
+          FreeMultiInfo (multi_start);
           return 4;
         }
         for (i = 0, ptr = multi_start; i < count; ++i, ptr = ptr->next)
@@ -799,7 +859,7 @@ static int formparse(char *input,
           forms[i].value = ptr->form.value;
         }
         forms[count].option = CURLFORM_END;
-        FreeMultiInfo (&multi_start);
+        FreeMultiInfo (multi_start);
         if (curl_formadd (httppost, last_post,
                           CURLFORM_COPYNAME, name,
                           CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {
