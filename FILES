@@ -21,6 +21,8 @@ docs/Makefile.in
 docs/Makefile.am
 docs/TheArtOfHttpScripting
 docs/*.3
+docs/examples/README
+docs/examples/*.c
 maketgz
 Makefile.in
 Makefile.am
@@ -40,9 +42,15 @@ reconf
 stamp-h.in
 ltconfig
 ltmain.sh
-src/*.[ch]
-src/*in
-src/*am
+src/config-win32.h
+src/hugehelp.c
+src/main.c
+src/setup.h
+src/urlglob.c
+src/urlglob.h
+src/version.h
+src/*.in
+src/*.am
 src/mkhelp.pl
 src/Makefile.vc6
 src/*m32
