@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -95,7 +95,7 @@ Example set of cookies:
 
 /****************************************************************************
  *
- * cookie_add()
+ * Curl_cookie_add()
  *
  * Add a single cookie line to the cookie keeping object.
  *
@@ -112,6 +112,7 @@ Curl_cookie_add(struct CookieInfo *c,
   char *ptr;
   char *semiptr;
   struct Cookie *co;
+  struct Cookie *lastc=NULL;
   time_t now = time(NULL);
   bool replace_old = FALSE;
 
@@ -129,13 +130,11 @@ Curl_cookie_add(struct CookieInfo *c,
     semiptr=strchr(lineptr, ';'); /* first, find a semicolon */
     ptr = lineptr;
     do {
-      if(semiptr)
-        *semiptr='\0'; /* zero terminate for a while */
       /* we have a <what>=<this> pair or a 'secure' word here */
       if(strchr(ptr, '=')) {
         name[0]=what[0]=0; /* init the buffers */
         if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^=]=%"
-                       MAX_COOKIE_LINE_TXT "[^\r\n]",
+                       MAX_COOKIE_LINE_TXT "[^;\r\n]",
                        name, what)) {
           /* this is a legal <what>=<this> pair */
           if(strequal("path", name)) {
@@ -178,7 +177,7 @@ Curl_cookie_add(struct CookieInfo *c,
         }
       }
       else {
-        if(sscanf(ptr, "%" MAX_COOKIE_LINE_TXT "[^\r\n]",
+        if(sscanf(ptr, "%" MAX_COOKIE_LINE_TXT "[^;\r\n]",
                   what)) {
           if(strequal("secure", what))
             co->secure = TRUE;
@@ -190,7 +189,6 @@ Curl_cookie_add(struct CookieInfo *c,
       if(!semiptr)
         continue; /* we already know there are no more cookies */
 
-      *semiptr=';'; /* put the semicolon back */
       ptr=semiptr+1;
       while(ptr && *ptr && isspace((int)*ptr))
         ptr++;
@@ -245,6 +243,7 @@ Curl_cookie_add(struct CookieInfo *c,
 
            We don't currently take advantage of this knowledge.
         */
+        co->field1=strequal(ptr, "TRUE")+1; /* store information */
         break;
       case 2:
         /* It turns out, that sometimes the file format allows the path
@@ -293,6 +292,8 @@ Curl_cookie_add(struct CookieInfo *c,
 
   }
 
+  co->livecookie = c->running;
+
   /* now, we have parsed the incoming line, we must now check if this
      superceeds an already existing cookie, which it may if the previous have
      the same domain and path as this */
@@ -327,6 +328,26 @@ Curl_cookie_add(struct CookieInfo *c,
         
       }
 
+      if(replace_old && !co->livecookie && clist->livecookie) {
+        /* Both cookies matched fine, except that the already present
+           cookie is "live", which means it was set from a header, while
+           the new one isn't "live" and thus only read from a file. We let
+           live cookies stay alive */
+
+        /* Free the newcomer and get out of here! */
+        if(co->domain)
+          free(co->domain);
+        if(co->path)
+          free(co->path);
+        if(co->name)
+          free(co->name);
+        if(co->value)
+          free(co->value);
+
+        free(co);
+        return NULL;
+      }
+
       if(replace_old) {
         co->next = clist->next; /* get the next-pointer first */
 
@@ -351,39 +372,49 @@ Curl_cookie_add(struct CookieInfo *c,
       }
 
     }
+    lastc = clist;
     clist = clist->next;
   }
 
   if(!replace_old) {
-
-    /* first, point to our "next" */
-    co->next = c->cookies;
-    /* then make ourselves first in the list */
-    c->cookies = co;
+    /* then make the last item point on this new one */
+    if(lastc)
+      lastc->next = co;
+    else
+      c->cookies = co;
   }
+
   return co;
 }
 
 /*****************************************************************************
  *
- * cookie_init()
+ * Curl_cookie_init()
  *
  * Inits a cookie struct to read data from a local file. This is always
  * called before any cookies are set. File may be NULL.
  *
  ****************************************************************************/
-struct CookieInfo *Curl_cookie_init(char *file)
+struct CookieInfo *Curl_cookie_init(char *file, struct CookieInfo *inc)
 {
   char line[MAX_COOKIE_LINE];
   struct CookieInfo *c;
   FILE *fp;
   bool fromfile=TRUE;
   
-  c = (struct CookieInfo *)malloc(sizeof(struct CookieInfo));
-  if(!c)
-    return NULL; /* failed to get memory */
-  memset(c, 0, sizeof(struct CookieInfo));
-  c->filename = strdup(file?file:"none"); /* copy the name just in case */
+  if(NULL == inc) {
+    /* we didn't get a struct, create one */
+    c = (struct CookieInfo *)malloc(sizeof(struct CookieInfo));
+    if(!c)
+      return NULL; /* failed to get memory */
+    memset(c, 0, sizeof(struct CookieInfo));
+    c->filename = strdup(file?file:"none"); /* copy the name just in case */
+  }
+  else {
+    /* we got an already existing one, use that */
+    c = inc;
+  }
+  c->running = FALSE; /* this is not running, this is init */
 
   if(strequal(file, "-")) {
     fp = stdin;
@@ -393,34 +424,35 @@ struct CookieInfo *Curl_cookie_init(char *file)
     fp = file?fopen(file, "r"):NULL;
 
   if(fp) {
+    char *lineptr;
+    bool headerline;
     while(fgets(line, MAX_COOKIE_LINE, fp)) {
       if(strnequal("Set-Cookie:", line, 11)) {
         /* This is a cookie line, get it! */
-        char *lineptr=&line[11];
-        while(*lineptr && isspace((int)*lineptr))
-          lineptr++;
-
-        Curl_cookie_add(c, TRUE, lineptr);
+        lineptr=&line[11];
+        headerline=TRUE;
       }
       else {
-        /* This might be a netscape cookie-file line, get it! */
-        char *lineptr=line;
-        while(*lineptr && isspace((int)*lineptr))
-          lineptr++;
-
-        Curl_cookie_add(c, FALSE, lineptr);
+        lineptr=line;
+        headerline=FALSE;
       }
+      while(*lineptr && isspace((int)*lineptr))
+        lineptr++;
+
+      Curl_cookie_add(c, headerline, lineptr);
     }
     if(fromfile)
       fclose(fp);
   }
+
+  c->running = TRUE; /* now, we're running */
 
   return c;
 }
 
 /*****************************************************************************
  *
- * cookie_getlist()
+ * Curl_cookie_getlist()
  *
  * For a given host and path, return a linked list of cookies that the
  * client should send to the server if used now. The secure boolean informs
@@ -492,9 +524,9 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 
 /*****************************************************************************
  *
- * cookie_freelist()
+ * Curl_cookie_freelist()
  *
- * Free a list previously returned by cookie_getlist();
+ * Free a list of cookies previously returned by Curl_cookie_getlist();
  *
  ****************************************************************************/
 
@@ -513,7 +545,7 @@ void Curl_cookie_freelist(struct Cookie *co)
 
 /*****************************************************************************
  *
- * cookie_cleanup()
+ * Curl_cookie_cleanup()
  *
  * Free a "cookie object" previous created with cookie_init().
  *
@@ -552,3 +584,76 @@ void Curl_cookie_cleanup(struct CookieInfo *c)
    }
 }
 
+#ifdef COOKIE /* experiemental functions for the upcoming cookie jar stuff */
+
+/*
+ * On my Solaris box, this command line builds this test program:
+ *
+ * gcc -g -o cooktest -DCOOKIE=1 -DHAVE_CONFIG_H -I.. -I../include cookie.c strequal.o getdate.o memdebug.o mprintf.o strtok.o -lnsl -lsocket
+ *
+ */
+
+void Curl_cookie_output(struct CookieInfo *c)
+{
+  struct Cookie *co;
+  struct Cookie *next;
+  if(c) {
+#if COOKIE > 1
+    if(c->filename)
+      printf("Got these cookies from: \"%s\"\n", c->filename);
+#else
+    puts("# Netscape HTTP Cookie File\n"
+         "# http://www.netscape.com/newsref/std/cookie_spec.html\n"
+         "# This is generated by libcurl!  Do not edit.\n");
+#endif
+    
+    co = c->cookies;
+     
+    while(co) {
+#if COOKIE > 1
+      printf("Name: %s\n", co->name?co->name:"");
+      printf(" Value: %s\n", co->value?co->value:"");
+      printf(" Domain: %s\n", co->domain?co->domain:"");
+      printf(" Path: %s\n", co->path?co->path:"");
+      printf(" Expire: %s\n", co->expirestr?co->expirestr:"");
+      printf(" Version: %s\n", co->version?co->version:"");
+      printf(" Max-Age: %s\n\n", co->maxage?co->maxage:"");
+#endif
+      printf("%s\t" /* domain */
+             "%s\t" /* field1 */
+             "%s\t" /* path */
+             "%s\t" /* secure */
+             "%d\t" /* expires */
+             "%s\t" /* name */
+             "%s\n", /* value */
+             co->domain,
+             co->field1==2?"TRUE":"FALSE",
+             co->path,
+             co->secure?"TRUE":"FALSE",
+             co->expires,
+             co->name,
+             co->value);
+
+      co=co->next;
+    }
+  }
+}
+
+int main(int argc, char **argv)
+{
+  struct CookieInfo *c=NULL;
+  if(argc>1) {
+    c = Curl_cookie_init(argv[1], c);
+    c = Curl_cookie_init(argv[1], c);
+    c = Curl_cookie_init(argv[1], c);
+
+    Curl_cookie_add(c, TRUE, "PERSONALIZE=none;expires=Monday, 13-Jun-1988 03:04:55 GMT; domain=.fidelity.com; path=/ftgw; secure");
+
+    Curl_cookie_output(c);
+    Curl_cookie_cleanup(c);
+    return 0;
+  }
+  return 1;
+}
+
+#endif

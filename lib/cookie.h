@@ -40,19 +40,23 @@ struct Cookie {
   char *domain;      /* domain = <this> */
   time_t expires;    /* expires = <this> */
   char *expirestr;   /* the plain text version */
+
+  char field1;       /* read from a cookie file, 1 => FALSE, 2=> TRUE */
   
   /* RFC 2109 keywords. Version=1 means 2109-compliant cookie sending */
   char *version;     /* Version = <value> */
   char *maxage;      /* Max-Age = <value> */
   
   bool secure;       /* whether the 'secure' keyword was used */
+  bool livecookie;   /* updated from a server, not a stored file */
 };
 
 struct CookieInfo {
-   /* linked list of cookies we know of */
-   struct Cookie *cookies;
+  /* linked list of cookies we know of */
+  struct Cookie *cookies;
 
-   char *filename; /* file we read from/write to */
+  char *filename; /* file we read from/write to */
+  bool running;   /* state info, for cookie adding information */
 };
 
 /* This is the maximum line length we accept for a cookie line */
@@ -64,7 +68,7 @@ struct CookieInfo {
 #define MAX_NAME_TXT "255"
 
 struct Cookie *Curl_cookie_add(struct CookieInfo *, bool, char *);
-struct CookieInfo *Curl_cookie_init(char *);
+struct CookieInfo *Curl_cookie_init(char *, struct CookieInfo *);
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *, char *, char *, bool);
 void Curl_cookie_freelist(struct Cookie *);
 void Curl_cookie_cleanup(struct CookieInfo *);
