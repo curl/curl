@@ -1,15 +1,13 @@
                       Peer SSL Certificate Verification
                       =================================
 
-Since version 7.10, libcurl performs peer SSL certificate verification by
-default. This is done by installing a default CA cert bundle on 'make install'
-(or similar), that CA bundle package is used by default on operations against
-SSL servers.
+libcurl performs peer SSL certificate verification by default. This is done by
+installing a default CA cert bundle on 'make install' (or similar), that CA
+bundle package is used by default on operations against SSL servers.
 
-Alas, if you communicate with HTTPS servers using certificates that are signed
-by CAs present in the bundle, you will not notice any changed behavior and you
-will seamlessly get a higher security level on your SSL connections since you
-can be sure that the remote server really is the one it claims to be.
+If you communicate with HTTPS or FTPS servers using certificates that are
+signed by CAs present in the bundle, you can be sure that the remote server
+really is the one it claims to be.
 
 If the remote server uses a self-signed certificate, if you don't install
 curl's CA cert bundle, if the server uses a certificate signed by a CA that
@@ -46,6 +44,12 @@ server, do one of the following:
       3. Windows System directory (e.g. C:\windows\system32)
       4. Windows Directory (e.g. C:\windows)
       5. all directories along %PATH%
+
+ 4. Get a better/different/newer CA cert bundle! One option is to extract the
+    one a recent Mozilla browser uses, by following the instruction found
+    here:
+
+        http://curl.haxx.se/docs/caextract.html
 
 Neglecting to use one of the above methods when dealing with a server using a
 certificate that isn't signed by one of the certificates in the installed CA
