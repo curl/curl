@@ -431,11 +431,9 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     data->proxy = va_arg(param, char *);
     data->bits.httpproxy = data->proxy?1:0;
     break;
-#if 0
-  case CURLOPT_FLAGS:
-    conf_to_internal(data, va_arg(param, long));
+  case CURLOPT_PROXYPORT:
+    data->proxyport = va_arg(param, long);
     break;
-#endif
   case CURLOPT_TIMEOUT:
     data->timeout = va_arg(param, long);
     break;
@@ -606,6 +604,8 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
   struct connectdata *conn = c_connect;
 
   struct UrlData *data = conn->data;
+
+  free(conn); /* free the connection oriented data */
 
   /* clean up the sockets and SSL stuff from the previous "round" */
   urlfree(data, FALSE);
@@ -1104,6 +1104,11 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
       /* now set the local port number */
       data->port = atoi(prox_portno);
     }
+    else if(data->proxyport) {
+      /* None given in the proxy string, then get the default one if it is
+         given */
+      data->port = data->proxyport;
+    }
 
     /* connect to proxy */
     if(!(conn->hp = GetHost(data, proxyptr, hostent_buf, sizeof(hostent_buf)))) {
@@ -1163,6 +1168,8 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   if(conn->curl_connect) {
     /* is there a post-connect() procedure? */
     result = conn->curl_connect(conn);
+    if(result != CURLE_OK)
+      return result; /* pass back errors */
   }
 
   pgrsTime(data, TIMER_CONNECT);
