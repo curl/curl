@@ -41,6 +41,13 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
+#ifndef FALSE
+#define FALSE 0
+#endif
+#ifndef TRUE
+#define TRUE 1
+#endif
+
 const char *
 spitout(FILE *stream,
         const char *main,
@@ -54,7 +61,8 @@ spitout(FILE *stream,
 
 #define VERSION "cURL test suite HTTP server/0.1"
 
-#define REQUEST_DUMP "log/server.input"
+#define REQUEST_DUMP  "log/server.input"
+#define RESPONSE_DUMP "log/server.response"
 
 #define TEST_DATA_PATH "data/test%d"
 
@@ -106,6 +114,7 @@ int ProcessRequest(char *request)
 {
   char *line=request;
   unsigned long contentlength=0;
+  char chunked=FALSE;
 
 #define END_OF_HEADERS "\r\n\r\n"
 
@@ -128,8 +137,23 @@ int ProcessRequest(char *request)
    */
 
   do {
-    if(!strncasecmp("Content-Length:", line, 15))
+    if(!strncasecmp("Content-Length:", line, 15)) {
       contentlength = strtol(line+15, &line, 10);
+      break;
+    }
+    else if(!strncasecmp("Transfer-Encoding: chunked", line,
+                         strlen("Transfer-Encoding: chunked"))) {
+      /* chunked data coming in */
+      chunked = TRUE;
+    }
+
+    if(chunked) {
+      if(strstr(request, "\r\n0\r\n"))
+        /* end of chunks reached */
+        return 1; /* done */
+      else
+        return 0; /* not done */
+    }
 
     line = strchr(line, '\n');
     if(line)
@@ -269,11 +293,14 @@ static int send_doc(int sock, int doc, int part_no)
   FILE *stream;
   char *cmd=NULL;
   int cmdsize=0;
+  FILE *dump;
 
   char filename[256];
   char partbuf[80]="data";
 
   if(doc < 0) {
+    logmsg("Negative document number received, magic reply coming up");
+
     if(-2 == doc)
       /* we got a "friends?" question, reply back that we sure are */
       buffer = docfriends;
@@ -285,6 +312,8 @@ static int send_doc(int sock, int doc, int part_no)
     count = strlen(buffer);
   }
   else {
+    logmsg("Fetch response data");
+
     if(0 != part_no)
       sprintf(partbuf, "data%d", part_no);
 
@@ -314,14 +343,28 @@ static int send_doc(int sock, int doc, int part_no)
     }
   }
 
+  dump = fopen(RESPONSE_DUMP, "ab"); /* b is for windows-preparing */
+  if(!dump) {
+    logmsg("couldn't create logfile: " RESPONSE_DUMP);
+    return -1;
+  }
+
   do {
     written = send(sock, buffer, count, 0);
     if (written < 0) {
+      logmsg("Sending response failed and we bailed out!");
       return -1;
     }
+    /* write to file as well */
+    fwrite(buffer, 1, written, dump);
+
     count -= written;
     buffer += written;
   } while(count>0);
+
+  fclose(dump);
+
+  logmsg("Response sent!");
 
   if(ptr)
     free(ptr);
@@ -334,9 +377,8 @@ static int send_doc(int sock, int doc, int part_no)
       if(2 == sscanf(ptr, "%31s %d", command, &num)) {
         if(!strcmp("wait", command))
           sleep(num); /* wait this many seconds */
-        else {
+        else
           logmsg("Unknown command in reply command section");
-        }
       }
       ptr = strchr(ptr, '\n');
       if(ptr)
@@ -427,8 +469,10 @@ int main(int argc, char *argv[])
     logmsg("New client connected");
 
     doc = get_request(msgsock, &part_no);
+    logmsg("Received request, now send response");
     send_doc(msgsock, doc, part_no);
 
+    logmsg("Closing client connection");
     close(msgsock);
   }
   
