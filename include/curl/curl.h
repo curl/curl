@@ -166,10 +166,6 @@ typedef enum {
 
 #define CURL_ERROR_SIZE 256
 
-/* maximum URL length we deal with in headers */
-#define URL_MAX_LENGTH 4096 
-#define URL_MAX_LENGTH_TXT "4095"
-
 /* name is uppercase CURLOPT_<name>,
    type is one of the defined CURLOPTTYPE_<type>
    number is unique identifier */
