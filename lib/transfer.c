@@ -109,7 +109,7 @@
 CURLcode static
 _Transfer(struct connectdata *c_conn)
 {
-  size_t nread;                 /* number of bytes read */
+  ssize_t nread;                /* number of bytes read */
   int bytecount = 0;            /* total number of bytes read */
   int writebytecount = 0;       /* number of bytes written */
   long contentlength=0;         /* size of incoming data */
