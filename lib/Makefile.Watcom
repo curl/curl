@@ -8,7 +8,7 @@ TARGETS = libcurl_wc.lib libcurl_wc.dll libcurl_wc_imp.lib
 
 CC = wcc386
 
-CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm -bt=nt &
+CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm -bt=nt -bd &
          -d+ -dWIN32 -dHAVE_LONGLONG -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE") &
          -dBUILDING_LIBCURL -dWITHOUT_MM_LIB -dHAVE_SPNEGO=1 -dENABLE_IPV6     &
          -dDEBUG_THREADING_GETADDRINFO -dDEBUG=1 -dCURLDEBUG -I. -I..\include
@@ -75,14 +75,283 @@ $(RESOURCE): libcurl.rc
 	$(CC) $[@ $(CFLAGS) -fo=$@
 	@echo .
 
-$(LIB_ARG):
+$(LIB_ARG): $(__MAKEFILES__)
 	%create $^@
-	for %f in ($(OBJS)) do %append $^@ +- %f
+	for %f in ($(OBJS)) do @%append $^@ +- %f
 
-$(LINK_ARG):
+$(LINK_ARG): $(__MAKEFILES__)
 	%create $^@
 	@%append $^@ system nt dll
 	@%append $^@ file { $(OBJS) }
 	@%append $^@ option quiet, map, caseexact, eliminate, implib=libcurl_wc_imp.lib,
 	@%append $^@ res=$(RESOURCE) libpath $(%watcom)\lib386;$(%watcom)\lib386\nt
 	@%append $^@ library clib3r.lib, ws2_32.lib
+
+#
+# Dependencies based on "gcc -MM .."
+#
+$(OBJ_DIR)\file.obj: file.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h progress.h sendf.h escape.h file.h &
+  speedcheck.h getinfo.h transfer.h url.h memory.h ..\include\curl\mprintf.h &
+  memdebug.h
+
+$(OBJ_DIR)\timeval.obj: timeval.c timeval.h setup.h config-win32.h
+
+$(OBJ_DIR)\base64.obj: base64.c setup.h config-win32.h ..\include\curl\mprintf.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h base64.h memory.h ..\include\curl\curl.h &
+  memdebug.h
+
+$(OBJ_DIR)\hostip.obj: hostip.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h &
+  inet_ntop.h ..\include\curl\mprintf.h memory.h memdebug.h
+
+$(OBJ_DIR)\progress.obj: progress.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h ..\include\curl\multi.h &
+  ..\include\curl\curl.h urldata.h cookie.h formdata.h timeval.h http_chunks.h &
+  hostip.h hash.h llist.h sendf.h progress.h ..\include\curl\mprintf.h
+
+$(OBJ_DIR)\formdata.obj: formdata.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h strequal.h &
+  memory.h ..\include\curl\mprintf.h memdebug.h
+
+$(OBJ_DIR)\cookie.obj: cookie.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h strequal.h strtok.h sendf.h &
+  memory.h memdebug.h
+
+$(OBJ_DIR)\http.obj: http.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h transfer.h sendf.h progress.h &
+  base64.h strequal.h ssluse.h http_digest.h http_ntlm.h http_negotiate.h &
+  url.h share.h http.h memory.h select.h ..\include\curl\mprintf.h memdebug.h
+
+$(OBJ_DIR)\sendf.obj: sendf.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h ..\include\curl\multi.h &
+  ..\include\curl\curl.h urldata.h cookie.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h connect.h &
+  ..\include\curl\mprintf.h memory.h strerror.h memdebug.h
+
+$(OBJ_DIR)\ftp.obj: ftp.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h urldata.h cookie.h &
+  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h sendf.h &
+  if2ip.h progress.h transfer.h escape.h http.h ftp.h strtoofft.h &
+  strequal.h ssluse.h connect.h strerror.h memory.h inet_ntop.h select.h &
+  ..\include\curl\mprintf.h memdebug.h
+
+$(OBJ_DIR)\url.obj: url.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h netrc.h base64.h ssluse.h if2ip.h &
+  transfer.h sendf.h progress.h strequal.h strerror.h escape.h strtok.h &
+  share.h content_encoding.h http_digest.h http_negotiate.h select.h multiif.h &
+  ftp.h dict.h telnet.h http.h file.h ldap.h url.h connect.h inet_ntop.h &
+  ./ca-bundle.h ..\include\curl\mprintf.h memory.h memdebug.h
+
+$(OBJ_DIR)\dict.obj: dict.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h transfer.h sendf.h progress.h &
+  strequal.h dict.h ..\include\curl\mprintf.h
+
+$(OBJ_DIR)\if2ip.obj: if2ip.c setup.h config-win32.h
+
+$(OBJ_DIR)\speedcheck.obj: speedcheck.c setup.h config-win32.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h urldata.h cookie.h &
+  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h sendf.h &
+  speedcheck.h
+
+$(OBJ_DIR)\ldap.obj: ldap.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h escape.h transfer.h &
+  strequal.h strtok.h ldap.h memory.h ..\include\curl\mprintf.h memdebug.h
+
+$(OBJ_DIR)\ssluse.obj: ssluse.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h url.h inet_pton.h &
+  ssluse.h connect.h strequal.h select.h ..\include\curl\mprintf.h
+
+$(OBJ_DIR)\version.obj: version.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h ..\include\curl\multi.h &
+  ..\include\curl\curl.h urldata.h cookie.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h ..\include\curl\mprintf.h
+
+$(OBJ_DIR)\getenv.obj: getenv.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h memory.h memdebug.h
+
+$(OBJ_DIR)\escape.obj: escape.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h memory.h &
+  ..\include\curl\mprintf.h memdebug.h
+
+$(OBJ_DIR)\mprintf.obj: mprintf.c setup.h config-win32.h ..\include\curl\mprintf.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h memory.h ..\include\curl\curl.h memdebug.h
+
+$(OBJ_DIR)\telnet.obj: telnet.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h transfer.h sendf.h telnet.h &
+  ..\include\curl\mprintf.h arpa_telnet.h memory.h select.h memdebug.h
+
+$(OBJ_DIR)\netrc.obj: netrc.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h netrc.h strequal.h &
+  strtok.h memory.h ..\include\curl\mprintf.h memdebug.h
+
+$(OBJ_DIR)\getinfo.obj: getinfo.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h urldata.h cookie.h &
+  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h &
+  getinfo.h memory.h ssluse.h memdebug.h
+
+$(OBJ_DIR)\transfer.obj: transfer.c setup.h config-win32.h strtoofft.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h strequal.h urldata.h &
+  cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h &
+  netrc.h content_encoding.h transfer.h sendf.h speedcheck.h progress.h &
+  http.h url.h getinfo.h ssluse.h http_digest.h http_ntlm.h &
+  http_negotiate.h share.h memory.h select.h ..\include\curl\mprintf.h &
+  memdebug.h
+
+$(OBJ_DIR)\strequal.obj: strequal.c setup.h config-win32.h strequal.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h
+
+$(OBJ_DIR)\easy.obj: easy.c setup.h config-win32.h strequal.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h urldata.h cookie.h &
+  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h &
+  transfer.h ssluse.h url.h getinfo.h share.h memory.h progress.h &
+  easyif.h ..\include\curl\mprintf.h memdebug.h
+
+$(OBJ_DIR)\security.obj: security.c setup.h config-win32.h
+
+$(OBJ_DIR)\krb4.obj: krb4.c setup.h config-win32.h
+
+$(OBJ_DIR)\memdebug.obj: memdebug.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h ..\include\curl\multi.h &
+  ..\include\curl\curl.h ..\include\curl\mprintf.h urldata.h cookie.h &
+  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h memory.h memdebug.h
+
+$(OBJ_DIR)\http_chunks.obj: http_chunks.c setup.h config-win32.h urldata.h &
+  cookie.h ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
+  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h sendf.h &
+  content_encoding.h http.h memory.h ..\include\curl\mprintf.h memdebug.h
+
+$(OBJ_DIR)\strtok.obj: strtok.c setup.h config-win32.h strtok.h
+
+$(OBJ_DIR)\connect.obj: connect.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h if2ip.h strerror.h connect.h &
+  memory.h select.h memdebug.h
+
+$(OBJ_DIR)\llist.obj: llist.c setup.h config-win32.h llist.h memory.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h memdebug.h
+
+$(OBJ_DIR)\hash.obj: hash.c setup.h config-win32.h hash.h llist.h memory.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h memdebug.h
+
+$(OBJ_DIR)\multi.obj: multi.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h urldata.h cookie.h &
+  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h &
+  transfer.h url.h connect.h progress.h memory.h easyif.h multiif.h &
+  memdebug.h
+
+$(OBJ_DIR)\content_encoding.obj: content_encoding.c setup.h config-win32.h urldata.h &
+  cookie.h ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
+  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h sendf.h &
+  content_encoding.h memory.h memdebug.h
+
+$(OBJ_DIR)\share.obj: share.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h ..\include\curl\multi.h &
+  ..\include\curl\curl.h urldata.h cookie.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h share.h memory.h memdebug.h
+
+$(OBJ_DIR)\http_digest.obj: http_digest.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h strequal.h base64.h md5.h &
+  http_digest.h strtok.h url.h memory.h ..\include\curl\mprintf.h memdebug.h
+
+$(OBJ_DIR)\md5.obj: md5.c setup.h config-win32.h md5.h
+
+$(OBJ_DIR)\http_negotiate.obj: http_negotiate.c setup.h config-win32.h
+
+$(OBJ_DIR)\http_ntlm.obj: http_ntlm.c setup.h config-win32.h
+
+$(OBJ_DIR)\inet_pton.obj: inet_pton.c setup.h config-win32.h inet_pton.h
+
+$(OBJ_DIR)\strtoofft.obj: strtoofft.c setup.h config-win32.h strtoofft.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h
+
+$(OBJ_DIR)\strerror.obj: strerror.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h strerror.h urldata.h &
+  cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h &
+  ..\include\curl\mprintf.h
+
+$(OBJ_DIR)\hostares.obj: hostares.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h &
+  ..\include\curl\mprintf.h memory.h memdebug.h
+
+$(OBJ_DIR)\hostasyn.obj: hostasyn.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h &
+  ..\include\curl\mprintf.h memory.h memdebug.h
+
+$(OBJ_DIR)\hostip4.obj: hostip4.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h &
+  ..\include\curl\mprintf.h memory.h memdebug.h
+
+$(OBJ_DIR)\hostip6.obj: hostip6.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h &
+  ..\include\curl\mprintf.h memory.h memdebug.h
+
+$(OBJ_DIR)\hostsyn.obj: hostsyn.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h &
+  ..\include\curl\mprintf.h memory.h memdebug.h
+
+$(OBJ_DIR)\hostthre.obj: hostthre.c setup.h config-win32.h urldata.h cookie.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h formdata.h timeval.h &
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h &
+  ..\include\curl\mprintf.h inet_ntop.h memory.h memdebug.h
+
+$(OBJ_DIR)\inet_ntop.obj: inet_ntop.c setup.h config-win32.h ..\include\curl\mprintf.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h inet_ntop.h
+
+$(OBJ_DIR)\parsedate.obj: parsedate.c setup.h config-win32.h ..\include\curl\curl.h &
+  ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h
+
+$(OBJ_DIR)\select.obj: select.c setup.h config-win32.h select.h
