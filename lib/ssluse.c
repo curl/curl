@@ -575,7 +575,6 @@ void Curl_SSL_Close(struct connectdata *conn)
 {
   (void)conn;
 }
-
 #endif
 
 
@@ -1221,7 +1220,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
                           const void *buf, size_t len, const SSL *ssl,
                           struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
+  struct SessionHandle *data;
   const char *msg_name, *tls_rt_name;
   char ssl_buf[1024];
   int  ver, msg_type, txt_len;
