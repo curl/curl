@@ -6,6 +6,30 @@
 
                                   Changelog
 
+Daniel (22 March 2004)
+- Enabled "NT responses" in the NTLM authentication. Doing this simply means
+  that we provide an extra chunk of data in each "type-3 message". The only
+  reason for doing this is that it seems that using only the "Lanmanager hash"
+  (as we've been doing until now) doesn't support passwords longer than 14
+  characters and it turns out there are users out there who want to use
+  libcurl and NTLM with such passwords! ;-) Seven NTLM-related test cases were
+  updated accordingly. Mentioned as issue 29 in TODO-RELEASE, bug report
+  #915609
+
+- Moved the generated libcurl version info to a new header file, named
+  curl/curlver.h. Now interested parties can include ONLY version info, should
+  anyone want that (and it seems at least some windows resource files would).
+  Mentioned as issue 27 in TODO-RELEASE.
+
+Daniel (21 March 2004)
+- Fixed the root Makefile to use tabs for the netware target. Günter Knauf
+  pointed this out.
+
+- Marty Kuhrt's VMS cleanup
+
+- Thomas Schwinge made buildconf recognize ACLOCAL_FLAGS to invoke aclocal
+  with particular pre-determined options.
+
 Version 7.11.1 (19 March 2004)
 
 Daniel (18 March 2004)

@@ -77,7 +77,7 @@
 #endif
 
 /* Define this to make the type-3 message include the NT response message */
-#undef USE_NTRESPONSES
+#define USE_NTRESPONSES 1
 
 /*
   (*) = A "security buffer" is a triplet consisting of two shorts and one
