@@ -23,7 +23,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o no more extra progress neter newline output after each Location: followed
+ o no more extra progress meter newline output after each Location: followed
  o HTTP PUT/POST with Digest, NTLM or Negotiate no longer uses HEAD
  o now gracefully bails out when exceeding FD_SETSIZE file descriptors
  o CURLINFO_REDIRECT_TIME works
