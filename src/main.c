@@ -1450,10 +1450,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       GetStr(&config->proxy, nextarg);
       break;
     case 'X':
-      /* HTTP request */
+      /* set custom request */
       GetStr(&config->customrequest, nextarg);
-      if(SetHTTPrequest(HTTPREQ_CUSTOM, &config->httpreq))
-        return PARAM_BAD_USE;
       break;
     case 'y':
       /* low speed time */
