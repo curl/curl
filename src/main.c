@@ -1890,12 +1890,17 @@ operate(struct Configurable *config, int argc, char *argv[])
   int res = 0;
   int i;
 
-  errorbuffer[0]=0; /* prevent junk from being output */
-
 #ifdef MALLOCDEBUG
   /* this sends all memory debug messages to a logfile named memdump */
-  curl_memdebug("memdump");
+  char *env;
+  env = curl_getenv("CURL_MEMDEBUG");
+  if(env) {
+    free(env);
+    curl_memdebug("memdump");
+  }
 #endif
+
+  errorbuffer[0]=0; /* prevent junk from being output */
 
   main_init(); /* inits */
 
