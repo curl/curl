@@ -467,7 +467,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
     /* Linux */
     if( gethostbyname_r(hostname,
                         (struct hostent *)buf,
-                        buf + sizeof(struct hostent),
+                        (char *)buf + sizeof(struct hostent),
                         CURL_NAMELOOKUP_SIZE - sizeof(struct hostent),
                         &h, /* DIFFERENCE */
                         &h_errnop))
