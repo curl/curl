@@ -7,6 +7,26 @@
                                   Changelog
 
 
+Version 7.10 (1 Oct 2002)
+
+Daniel (30 Sep 2002)
+- Modified the curl_version_info() proto and returned struct once again, and
+  updated the man page accordingly.
+
+- Cris Bailiff found out that the pre-releases crashed on name lookups on
+  names such as "a:" or "baz:" (on Linux versions not being ipv6-enabled) due
+  to some weird return codes from gethostbyname_r(). I'll blame the complete
+  lack of docs in that department. Cris provided a fix, which I modified only
+  slightly.
+
+Daniel (27 Sep 2002)
+- After a suggestion from Christian Kurz to Debian curl package maintainer
+  Domenico Andreoli, I made it possible to override the proxy environment
+  variables better. Now, by setting -x "" you can explicitly tell libcurl to
+  not use a proxy, no matter whan the environment variables say.
+
+Version 7.10-pre4
+
 Daniel (26 Sep 2002)
 - Extended curl_version_info() more and wrote a man page for it.
 
@@ -16,6 +36,10 @@ Daniel (25 Sep 2002)
 - Walter J. Mack provided code and docs for the new curl_free() function that
   shall be used to free memory that is allocated by libcurl and returned back
   to the application, as curl_escape() and curl_unescape() do.
+
+- Yarram Sunil pointed out a flaw in the multi interface where a failed
+  connection didn't close down properly and thus a second transfer using the
+  same handle failed.
 
 - Andrés García fixed a flaw that made (among other things) dict-fetches
   return a random value.
