@@ -325,10 +325,15 @@ int cert_stuff(struct connectdata *conn,
 
     ssl=SSL_new(conn->ssl.ctx);
     x509=SSL_get_certificate(ssl);
-    
-    if (x509 != NULL)
-      EVP_PKEY_copy_parameters(X509_get_pubkey(x509),
-			       SSL_get_privatekey(ssl));
+
+    /* This version was provided by Evan Jordan and is supposed to not
+       leak memory as the previous version: */
+    if (x509 != NULL) {
+      EVP_PKEY *pktmp = X509_get_pubkey(x509);
+      EVP_PKEY_copy_parameters(pktmp,SSL_get_privatekey(ssl));
+      EVP_PKEY_free(pktmp);
+    }
+
     SSL_free(ssl);
 
     /* If we are using DSA, we can copy the parameters from
