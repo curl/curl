@@ -6,6 +6,9 @@
 
                                History of Changes
 
+Daniel (3 September 2001)
+- Installed libtool 1.4.1, libtoolized and everything.
+
 Daniel (1 September 2001)
 - Heikki Korpela pointed out that I did not ship the proper libtool stuff in 
   the pre-releases, even though that was my intention. libtoolize has now

@@ -55,8 +55,8 @@ modename="$progname"
 # Constants.
 PROGRAM=ltmain.sh
 PACKAGE=libtool
-VERSION=1.4.0a
-TIMESTAMP=" (1.922.2.27 2001/08/18 22:31:47)"
+VERSION=1.4.1
+TIMESTAMP=" (1.922.2.34 2001/09/03 01:22:13)"
 
 default_mode=
 help="Try \`$progname --help' for more information."
@@ -1040,18 +1040,18 @@ compiler."
 	    # These systems don't actually have a C library (as such)
 	    test "X$arg" = "X-lc" && continue
 	    ;;
-          *-*-openbsd*)
-            # Do not include libc due to us having libc/libc_r.
-            test "X$arg" = "X-lc" && continue
-            ;;
-          esac
-         fi
-         if test "X$arg" = "X-lc_r"; then
-          case $host in
-          *-*-openbsd*)
-            # Do not include libc_r directly, use -pthread flag.
-            continue
-            ;;
+	  *-*-openbsd*)
+	    # Do not include libc due to us having libc/libc_r.
+	    test "X$arg" = "X-lc" && continue
+	    ;;
+	  esac
+	 fi
+	 if test "X$arg" = "X-lc_r"; then
+	  case $host in
+	  *-*-openbsd*)
+	    # Do not include libc_r directly, use -pthread flag.
+	    continue
+	    ;;
 	  esac
 	fi
 	deplibs="$deplibs $arg"
@@ -1932,17 +1932,17 @@ compiler."
 	      echo "*** Therefore, libtool will create a static module, that should work "
 	      echo "*** as long as the dlopening application is linked with the -dlopen flag."
 	      if test -z "$global_symbol_pipe"; then
-	        echo
-	        echo "*** However, this would only work if libtool was able to extract symbol"
-	        echo "*** lists from a program, using \`nm' or equivalent, but libtool could"
-	        echo "*** not find such a program.  So, this module is probably useless."
-	        echo "*** \`nm' from GNU binutils and a full rebuild may help."
+		echo
+		echo "*** However, this would only work if libtool was able to extract symbol"
+		echo "*** lists from a program, using \`nm' or equivalent, but libtool could"
+		echo "*** not find such a program.  So, this module is probably useless."
+		echo "*** \`nm' from GNU binutils and a full rebuild may help."
 	      fi
 	      if test "$build_old_libs" = no; then
-	        build_libtool_libs=module
-	        build_old_libs=yes
+		build_libtool_libs=module
+		build_old_libs=yes
 	      else
-	        build_libtool_libs=no
+		build_libtool_libs=no
 	      fi
 	    fi
 	  else
@@ -2333,6 +2333,16 @@ compiler."
 	if test -z "$vinfo" && test -n "$release"; then
 	  major=
 	  verstring="0.0"
+	  case $version_type in
+	  darwin)
+	    # we can't check for "0.0" in archive_cmds due to quoting
+	    # problems, so we reset it completely
+	    verstring=""
+	    ;;
+	  *)
+	    verstring="0.0"
+	    ;;
+	  esac
 	  if test "$need_version" = no; then
 	    versuffix=
 	  else
@@ -2429,9 +2439,9 @@ compiler."
 	  *-*-netbsd*)
 	    # Don't link with libc until the a.out ld.so is fixed.
 	    ;;
-          *-*-openbsd*)
-            # Do not include libc due to us having libc/libc_r.
-            ;;
+	  *-*-openbsd*)
+	    # Do not include libc due to us having libc/libc_r.
+	    ;;
 	  *)
 	    # Add libc to deplibs on all other systems if necessary.
 	    if test $build_libtool_need_lc = "yes"; then
@@ -3642,7 +3652,7 @@ else
     if test -n \"\$relink_command\"; then
       if relink_command_output=\`eval \$relink_command 2>&1\`; then :
       else
-        $echo \"\$relink_command_output\" >&2
+	$echo \"\$relink_command_output\" >&2
 	$rm \"\$progdir/\$file\"
 	exit 1
       fi
@@ -4660,14 +4670,14 @@ relink_command=\"$relink_command\""
 
       # Don't error if the file doesn't exist and rm -f was used.
       if (test -L "$file") >/dev/null 2>&1 \
-        || (test -h "$file") >/dev/null 2>&1 \
+	|| (test -h "$file") >/dev/null 2>&1 \
 	|| test -f "$file"; then
-        :
+	:
       elif test -d "$file"; then
-        exit_status=1
+	exit_status=1
 	continue
       elif test "$rmforce" = yes; then
-        continue
+	continue
       fi
 
       rmfiles="$file"
