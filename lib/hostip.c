@@ -154,12 +154,11 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
 
 #ifndef HAVE_GETHOSTBYNAME_R
 /**
- * Performs a "deep" copy of a hostent into a buffer 
- * (returns a pointer to the copy).
+ * Performs a "deep" copy of a hostent into a buffer (returns a pointer to the
+ * copy). Make absolutely sure the destination buffer is big enough!
  *
  * Keith McGuigan 
- * 10/3/2001
- */
+ * 10/3/2001 */
 static struct hostent* pack_hostent(char* buf, struct hostent* orig)
 {
   char* bufptr;
@@ -178,7 +177,11 @@ static struct hostent* pack_hostent(char* buf, struct hostent* orig)
   strncpy(bufptr, orig->h_name, len);
   bufptr += len;
 
-  copy->h_aliases = (char**)bufptr;
+  /* we align on even 64bit boundaries for safety */
+#define MEMALIGN(x) (((unsigned long)(x)&0xfffffff8)+8)
+
+  /* This must be aligned properly to work on many CPU architectures! */
+  copy->h_aliases = (char**)MEMALIGN(bufptr);
 
   /* Figure out how many aliases there are */
   for (i = 0; orig->h_aliases[i] != NULL; ++i);
@@ -186,20 +189,22 @@ static struct hostent* pack_hostent(char* buf, struct hostent* orig)
   /* Reserve room for the array */
   bufptr += (i + 1) * sizeof(char*);
 
-  i = 0;
-  str = orig->h_aliases[i];
-  while (str != NULL) {
+  /* Clone all known aliases */
+  for(i = 0; (str = orig->h_aliases[i]); i++) {
     len = strlen(str) + 1;
     strncpy(bufptr, str, len);
     copy->h_aliases[i] = bufptr;
     bufptr += len;
-    str = orig->h_aliases[++i];
   }
+  /* Terminate the alias list with a NULL */
   copy->h_aliases[i] = NULL;
 
   copy->h_addrtype = orig->h_addrtype;
   copy->h_length = orig->h_length;
     
+  /* align it for (at least) 32bit accesses */
+  bufptr = (char *)MEMALIGN(bufptr);
+
   copy->h_addr_list = (char**)bufptr;
 
   /* Figure out how many addresses there are */
