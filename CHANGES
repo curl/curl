@@ -8,6 +8,10 @@
 
 
 Daniel (8 December)
+- After correspondance with Gisle Vanem, I changed the 'connection aborted'
+  error text when the FTP response reader failed to more specificly identify
+  what the problem is.
+
 - Based on a patch from Dominick Meglio, curl-config --feature now outputs
   'AsynchDNS' as a feature if libcurl was built with ares. The feature name
   is the same that 'curl -V' outputs, for simplicity.
