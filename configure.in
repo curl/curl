@@ -736,6 +736,9 @@ AC_PATH_PROG( PERL, perl, ,
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
 AC_SUBST(PERL)
 
+AC_PATH_PROG( SED, sed, , $PATH:/usr/bin:/usr/local/bin)
+AC_SUBST(SED)
+
 AC_PATH_PROGS( NROFF, gnroff nroff, , 
   $PATH:/usr/bin/:/usr/local/bin )
 AC_SUBST(NROFF)
