@@ -249,6 +249,10 @@ struct Curl_transfer_keeper {
   char *uploadbuf;
   int maxfd;
 
+  /* pointers to the actual descriptors we check */
+  fd_set *readfdp;
+  fd_set *writefdp;
+
   /* the file descriptors to play with */
   fd_set readfd;
   fd_set writefd;
