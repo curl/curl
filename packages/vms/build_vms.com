@@ -38,6 +38,9 @@ $!                   directory before build.  The .msg file will be compiled
 $!                   to get the .obj for messages, but the .h and .sdl files 
 $!                   are not automatically created since they partly rely on 
 $!                   the freeware SDL tool.
+$!  8-FEB-2005, MSK, merged the two config-vms.h* files into one that uses
+$!                   USE_SSLEAY to define if the target has SSL support built
+$!                   in.  Changed the cc/define parameter accordingly.
 $!
 $ on control_y then goto Common_Exit
 $ ctrl_y  = 1556 
@@ -83,6 +86,7 @@ $ then
 $    if f$trnlnm( "OPENSSL") .nes. "" 
 $    then
 $       openssl = 1
+$       cc_qual = "/define=(HAVE_CONFIG_H=1,USE_SSLEAY=1)/OBJ=OBJDIR:"
 $       if ( f$trnlnm( "SSL$INCLUDE") .nes. "") .and. -
            ( f$trnlnm( "CURL_BUILD_NOHPSSL") .eqs. "")
 $       then hpssl = 1
@@ -95,11 +99,10 @@ $!
 $ if ( openssl .eq. 1) .or. ( hpssl .eq. 1)
 $ then
 $    'vo_c' "%CURL-I-BLDSSL, building with SSL support"
-$    config_h = "CONFIG-VMS.H_WITH_SSL"
 $ else
 $    'vo_c' "%CURL-I-BLDNOSSL, building without SSL support"
-$    config_h = "CONFIG-VMS.H_WITHOUT_SSL"
 $ endif
+$ config_h = "CONFIG-VMS.H"
 $!
 $! Only do the copy if the source and destination files are different.
 $!

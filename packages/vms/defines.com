@@ -8,6 +8,9 @@ $! level and then try to build against hp's SSL product, you will need to
 $! deassign the openssl logical at the process level or the link will most
 $! probably fail, or define CURL_BUILD_NOHPSSL to anything.
 $!
+$!  8-FEB-2005, MSK, changed the openssl, libssl and libcrypto defines
+$!                   to not override previously defined logicals.
+$!
 $ proc = f$environment( "PROCEDURE")
 $ thisdev = f$parse( proc,,,"DEVICE")
 $ thisdir = f$parse( proc,,,"DIRECTORY") - ".PACKAGES.VMS]"
@@ -29,9 +32,9 @@ $       exedir = exedir + ".IA64]"
 $       ssldir = "IA64"
 $    endif
 $ endif
-$ define/nolog exedir 'exedir'
-$ define/nolog objdir 'exedir'
-$ define/nolog lisdir 'exedir'
+$ def/nolog exedir 'exedir'
+$ def/nolog objdir 'exedir'
+$ def/nolog lisdir 'exedir'
 $!
 $ def/nolog curl      'THISDEV''THISDIR'.INCLUDE.CURL]
 $ def/nolog libsrc    'THISDEV''THISDIR'.LIB]
@@ -40,9 +43,18 @@ $!
 $! If you're going to build against an OpenSSL dist, you'll want to define
 $! the following logicals to point to the dist location.
 $! 
-$ def/nolog openssl   'THISDEV'[OPENSSL-0_9_7C.INCLUDE.OPENSSL]
-$ def/nolog libssl    'THISDEV'[OPENSSL-0_9_7C.'ssldir'.EXE.SSL]LIBSSL.OLB
-$ def/nolog libcrypto 'THISDEV'[OPENSSL-0_9_7C.'ssldir'.EXE.CRYPTO]LIBCRYPTO.OLB
+$ if ( f$trnlnm( "openssl") .eqs. "") 
+$ then
+$    def/nolog openssl   'THISDEV'[OPENSSL.OPENSSL-0_9_7E.INCLUDE.OPENSSL]
+$ endif
+$ if ( f$trnlnm( "libssl") .eqs. "") 
+$ then
+$    def/nolog libssl    'THISDEV'[OPENSSL.OPENSSL-0_9_7E.'ssldir'.EXE.SSL]LIBSSL.OLB
+$ endif
+$ if ( f$trnlnm( "libcrypto") .eqs. "") 
+$ then
+$    def/nolog libcrypto 'THISDEV'[OPENSSL.OPENSSL-0_9_7E.'ssldir'.EXE.CRYPTO]LIBCRYPTO.OLB
+$ endif
 $! 
 $! If you have hp's SSL product installed, and you still want to build
 $! against an OpenSSL distribution, you'll need to define the following
