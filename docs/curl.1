@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "16 Aug 2001" "Curl 7.8.1" "Curl Manual"
+.TH curl 1 "29 Aug 2001" "Curl 7.9" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -100,15 +100,15 @@ also the
 option.
 
 If this option is used several times, the last one will be used.
-.IP "-c/--continue"
-.B Deprecated. Use '-C -' instead.
-Continue/Resume a previous file transfer. This instructs curl to
-continue appending data on the file where it was previously left,
-possibly because of a broken connection to the server. There must be
-a named physical file to append to for this to work.
-Note: Upload resume is depening on a command named SIZE not always
-present in all ftp servers! Upload resume is for FTP only.
-HTTP resume is only possible with HTTP/1.1 or later servers.
+.IP "-c/--cookie-jar <file name>"
+Specify to which file you want curl to write all cookies after a completed
+operation. Curl writes all cookies previously read from a specified file as
+well as all cookies received from remote server(s). If no cookies are known,
+no file will be written. The file will be written using the Netscape cookie
+file format.
+
+If this option is used several times, the last specfied file name will be
+used.
 .IP "-C/--continue-at <offset>"
 Continue/Resume a previous file transfer at the given offset. The
 given offset is the exact number of bytes that will be skipped
