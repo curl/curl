@@ -109,6 +109,9 @@ echo "testcurl: update from CVS"
 # update quietly to the latest CVS
 cvs -Q up -dP 2>&1
 
+cvsstat=$?
+echo "testcurl: cvs returned: $cvsstat"
+
 # figure out the current collected CVS status
 newstat="../allcvs.log"
 oldstat="../oldcvs.log"
