@@ -3,7 +3,7 @@ Issues not sorted in any particular order.
 To get fixed in 7.12.2 (planned release: mid October 2004)
 ======================
 
-40 - Larry Campbell's curl_easy_getinfo patch
+40 - fixed
 
 41 - Fedor Karpelevitch's formpost path basename patch
 
@@ -15,7 +15,7 @@ To get fixed in 7.12.2 (planned release: mid October 2004)
 
 45 - Chris' suspected race condition in the windows threaded resolver
 
-46 - Casey O'Donnell's multi.h winsock header fix
+46 - fixed
 
 47 - Peter Sylvester's patch related to the new SRP on the TLS layer
 

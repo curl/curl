@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -56,7 +56,7 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   info->httpcode = 0;
   info->httpversion=0;
   info->filetime=-1; /* -1 is an illegal time and thus means unknown */
-  
+
   if (info->contenttype)
     free(info->contenttype);
   info->contenttype = NULL;
@@ -78,7 +78,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   case CURLINFO_STRING:
-    param_charp = va_arg(arg, char **);  
+    param_charp = va_arg(arg, char **);
     if(NULL == param_charp)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
@@ -93,7 +93,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     break;
   }
-  
+
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
     *param_charp = data->change.url?data->change.url:(char *)"";
@@ -166,6 +166,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     break;
   case CURLINFO_PROXYAUTH_AVAIL:
     *param_longp = data->info.proxyauthavail;
+    break;
+  case CURLINFO_OS_ERRNO:
+    *param_longp = data->state.os_errno;
     break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;

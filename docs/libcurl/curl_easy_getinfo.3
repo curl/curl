@@ -110,6 +110,8 @@ CURLOPT_HTTPAUTH option for \fIcurl_easy_setopt(3)\fP.  (Added in 7.10.8)
 .IP CURLINFO_PROXYAUTH_AVAIL
 Pass a pointer to a long to receive a bitmask indicating the authentication
 method(s) available for your proxy authentication.  (Added in 7.10.8)
+.IP CURLINFO_OS_ERRNO
+Pass a pointer to a long to receive the errno variable from a connect failure.
 .SH RETURN VALUE
 If the operation was successful, CURLE_OK is returned. Otherwise an
 appropriate error code will be returned.

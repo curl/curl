@@ -355,7 +355,8 @@ static CURLcode bindlocal(struct connectdata *conn,
         }
 
         if(!bindworked) {
-          failf(data, "%s", Curl_strerror(conn, Curl_ourerrno()));
+          data->state.os_errno = Curl_ourerrno();
+          failf(data, "%s", Curl_strerror(conn, data->state.os_errno));
           return CURLE_HTTP_PORT_FAILED;
         }
 
@@ -508,12 +509,14 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   rc = waitconnect(sockfd, 0);
 
   if(WAITCONN_CONNECTED == rc) {
-    if (verifyconnect(sockfd, NULL)) {
+    int error;
+    if (verifyconnect(sockfd, &error)) {
       /* we are connected, awesome! */
       *connected = TRUE;
       return CURLE_OK;
     }
     /* nope, not connected for real */
+    data->state.os_errno = error;
     infof(data, "Connection failed\n");
     if(trynextip(conn, sockindex, connected)) {
       code = CURLE_COULDNT_CONNECT;
@@ -635,8 +638,10 @@ singleipconnect(struct connectdata *conn,
   }
   else if(WAITCONN_TIMEOUT == rc)
     infof(data, "Timeout\n");
-  else
+  else {
+    data->state.os_errno = error;
     infof(data, "%s\n", Curl_strerror(conn, error));
+  }
 
   /* connect failed or timed out */
   sclose(sockfd);
