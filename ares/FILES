@@ -21,8 +21,6 @@ vc/adig/adig.dsp
 vc/adig/adig.mak
 vc/adig/adig.plg
 vc/vc.dsw
-vc/vc.ncb
-vc/vc.opt
 vc/ahost/ahost.dep
 vc/ahost/ahost.dsp
 vc/ahost/ahost.mak
