@@ -38,6 +38,6 @@ const char *ares_strerror(int code)
     "Out of memory"
   };
 
-  assert(code >= 0 && code < (sizeof(errtext) / sizeof(*errtext)));
+  assert(code >= 0 && code < (int)(sizeof(errtext) / sizeof(*errtext)));
   return errtext[code];
 }
