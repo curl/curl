@@ -1886,19 +1886,29 @@ CURLcode Curl_http(struct connectdata *conn)
              This limit is no magic limit but only set to prevent really huge
              POSTs to get the data duplicated with malloc() and family. */
 
-          add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+          result == add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+          if(result)
+            return result;
 
-          if(!conn->bits.upload_chunky)
+          if(!conn->bits.upload_chunky) {
             /* We're not sending it 'chunked', append it to the request
                already now to reduce the number if send() calls */
-            add_buffer(req_buffer, data->set.postfields, (size_t)postsize);
+            result = add_buffer(req_buffer, data->set.postfields,
+                                (size_t)postsize);
+          }
           else {
             /* Append the POST data chunky-style */
-            add_bufferf(req_buffer, "%x\r\n", (int)postsize);
-            add_buffer(req_buffer, data->set.postfields, (size_t)postsize);
-            add_buffer(req_buffer, "\r\n0\r\n\r\n", 7); /* end of a chunked
-                                                           transfer stream */
+            result = add_bufferf(req_buffer, "%x\r\n", (int)postsize);
+            if(CURLE_OK == result)
+              result = add_buffer(req_buffer, data->set.postfields,
+                                  (size_t)postsize);
+            if(CURLE_OK == result)
+              result = add_buffer(req_buffer,
+                                  "\r\n0\r\n\r\n", 7); /* end of a chunked
+                                                          transfer stream */
           }
+          if(result)
+            return result;
         }
         else {
           /* A huge POST coming up, do data separate from the request */
