@@ -23,13 +23,18 @@
 # CHANGE LOG
 # ------------------------------------------------------------
 # 05.11.2001   John Lask   Initial Release
+# 02.05.2002   Miklos Nemeth OPENSSL_PATH environment; no need
+#              for OpenSSL libraries when creating a 
+#              static libcurl.lib
 #
 #
 ##############################################################
 
 LIB_NAME       = libcurl
 LIB_NAME_DEBUG = libcurld
+!IFNDEF OPENSSL_PATH
 OPENSSL_PATH   = ../../openssl-0.9.6
+!ENDIF
 
 #############################################################
 ## Nothing more to do below this line!
@@ -46,6 +51,8 @@ LFLAGSSSL = /LIBPATH:$(OPENSSL_PATH)/out32dll
 LINKLIBS  = ws2_32.lib
 SSLLIBS   = libeay32.lib ssleay32.lib RSAglue.lib
 CFGSET    = FALSE
+LFLAGSSSL=
+SSLLIBS  =
 
 ######################
 # release
