@@ -1775,7 +1775,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
                                  struct connectdata **in_connect)
 {
   char *tmp;
-  char *buf;
   CURLcode result=CURLE_OK;
   char resumerange[40]="";
   struct connectdata *conn;
@@ -1921,9 +1920,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* Set default host and default path */
     strcpy(conn->gname, "curl.haxx.se");
     strcpy(conn->path, "/");
-
+    /* We need to search for '/' OR '?' - whichever comes first after host
+     * name but before the path. We need to change that to handle things like
+     * http://example.com?param= (notice the missing '/'). Later we'll insert
+     * that missing slash at the beginning of the path.
+     */
     if (2 > sscanf(data->change.url,
-                   "%64[^\n:]://%512[^\n/]%[^\n]",
+                   "%64[^\n:]://%512[^\n/?]%[^\n]",
                    conn->protostr, conn->gname, conn->path)) {
 
       /*
@@ -1972,7 +1975,17 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
   }
 
-  buf = data->state.buffer; /* this is our buffer */
+  /* If the URL is malformatted (missing a '/' after hostname before path) we
+   * insert a slash here. The only letter except '/' we accept to start a path
+   * is '?'.
+   */
+  if(conn->path[0] == '?') {
+    /* We need this function to deal with overlapping memory areas. We know
+       that the memory area 'path' points to is 'urllen' bytes big and that
+       is bigger than the path. */
+    memmove(&conn->path[1], conn->path, strlen(conn->path));
+    conn->path[0] = '/';
+  }
 
   /*
    * So if the URL was A://B/C,
