@@ -60,9 +60,9 @@ static int config_nameserver(struct server_state **servers, int *nservers,
 static int set_search(ares_channel channel, const char *str);
 static int set_options(ares_channel channel, const char *str);
 static const char *try_option(const char *p, const char *q, const char *opt);
+#ifndef WIN32
 static int ip_addr(const char *s, int len, struct in_addr *addr);
 static void natural_mask(struct apattern *pat);
-#ifndef WIN32
 static int config_domain(ares_channel channel, char *str);
 static int config_lookup(ares_channel channel, const char *str,
                          const char *bindch, const char *filech);
@@ -267,7 +267,8 @@ static int get_res_nt(HKEY hKey, const char *subkey, char **obuf)
   if (!*obuf)
     return 0;
 
-  if (RegQueryValueEx(hKey, subkey, 0, NULL, *obuf, &size) != ERROR_SUCCESS)
+  if (RegQueryValueEx(hKey, subkey, 0, NULL,
+                      (LPBYTE)*obuf, &size) != ERROR_SUCCESS)
   {
     free(*obuf);
     return 0;
@@ -967,6 +968,7 @@ static const char *try_option(const char *p, const char *q, const char *opt)
   return ((size_t)(q - p) > len && !strncmp(p, opt, len)) ? &p[len] : NULL;
 }
 
+#ifndef WIN32
 static int ip_addr(const char *s, int len, struct in_addr *addr)
 {
   char ipbuf[16];
@@ -1002,3 +1004,4 @@ static void natural_mask(struct apattern *pat)
   else
     pat->mask.s_addr = htonl(IN_CLASSC_NET);
 }
+#endif
