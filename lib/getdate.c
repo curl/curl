@@ -390,7 +390,7 @@ static const short yycheck[] = {     0,
     56
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
-#line 3 "/opt/TWWfsw/bison/share/bison.simple"
+#line 3 "/usr/local/share/bison.simple"
 /* This file comes from bison-1.28.  */
 
 /* Skeleton output parser for bison,
@@ -604,7 +604,7 @@ __yy_memcpy (char *to, char *from, unsigned int count)
 #endif
 #endif
 
-#line 217 "/opt/TWWfsw/bison/share/bison.simple"
+#line 217 "/usr/local/share/bison.simple"
 
 /* The user can define YYPARSE_PARAM as the name of an argument to be passed
    into yyparse.  The argument should have type void *.
@@ -1295,7 +1295,7 @@ case 50:
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
-#line 543 "/opt/TWWfsw/bison/share/bison.simple"
+#line 543 "/usr/local/share/bison.simple"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1981,7 +1981,7 @@ curl_getdate (const char *p, const time_t *now)
   yyInput = p;
   Start = now ? *now : time ((time_t *) NULL);
 #ifdef HAVE_LOCALTIME_R
-  tmp = localtime_r(&Start, &keeptime);
+  tmp = (struct tm *)localtime_r(&Start, &keeptime);
 #else
   tmp = localtime (&Start);
 #endif
