@@ -382,14 +382,36 @@ char *MakeFormBoundary(void)
 
   return retstring;
 }
- 
 
+/* Used from http.c */ 
 void FormFree(struct FormData *form)
 {
   struct FormData *next;
   do {
     next=form->next;  /* the following form line */
     free(form->line); /* free the line */
+    free(form);       /* free the struct */
+  
+  } while((form=next)); /* continue */
+}
+
+/* external function to free up a whole form post chain */
+void curl_formfree(struct HttpPost *form)
+{
+  struct HttpPost *next;
+  do {
+    next=form->next;  /* the following form line */
+
+    /* recurse to sub-contents */
+    if(form->more)
+      curl_formfree(form->more);
+
+    if(form->name)
+      free(form->name); /* free the name */
+    if(form->contents)
+      free(form->contents); /* free the contents */
+    if(form->contenttype)
+      free(form->contenttype); /* free the content type */
     free(form);       /* free the struct */
 
   } while((form=next)); /* continue */
