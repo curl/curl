@@ -906,13 +906,14 @@ CURLcode Curl_http(struct connectdata *conn)
     }
   }
 
-  do {
+  {
     /* Use 1.1 unless the use specificly asked for 1.0 */
     const char *httpstring=
       data->set.httpversion==CURL_HTTP_VERSION_1_0?"1.0":"1.1";
 
     send_buffer *req_buffer;
     struct curl_slist *headers=data->set.headers;
+    size_t postsize;
 
     /* initialize a dynamic send-buffer */
     req_buffer = add_buffer_init();
@@ -1146,6 +1147,11 @@ CURLcode Curl_http(struct connectdata *conn)
     case HTTPREQ_POST:
       /* this is the simple POST, using x-www-form-urlencoded style */
 
+      /* store the size of the postfields */
+      postsize = data->set.postfieldsize?
+        data->set.postfieldsize:
+        (data->set.postfields?strlen(data->set.postfields):0);
+      
       if(!conn->bits.upload_chunky) {
         /* We only set Content-Length and allow a custom Content-Length if
            we don't upload data chunked, as RFC2616 forbids us to set both
@@ -1154,11 +1160,7 @@ CURLcode Curl_http(struct connectdata *conn)
         if(!checkheaders(data, "Content-Length:"))
           /* we allow replacing this header, although it isn't very wise to
              actually set your own */
-          add_bufferf(req_buffer,
-                      "Content-Length: %d\r\n",
-                      data->set.postfieldsize?
-                      data->set.postfieldsize:
-                      (data->set.postfields?strlen(data->set.postfields):0) );
+          add_bufferf(req_buffer, "Content-Length: %d\r\n", postsize);
       }
 
       if(!checkheaders(data, "Content-Type:"))
@@ -1169,19 +1171,25 @@ CURLcode Curl_http(struct connectdata *conn)
 
       /* and here we setup the pointers to the actual data */
       if(data->set.postfields) {
-        if(data->set.postfieldsize)
-          http->postsize = data->set.postfieldsize;
-        else
-          http->postsize = strlen(data->set.postfields);
-        http->postdata = data->set.postfields;
 
-        http->sending = HTTPSEND_BODY;
+        if(!conn->bits.upload_chunky) {
+          /* We have a static chunk of data to POST, and we're not sending
+             it 'chunked', then we can just as well append it to the request
+             already now to reduce the number if send() calls */
+          add_buffer(req_buffer, data->set.postfields, postsize);
+        }
+        else {
+          http->postsize = postsize;
+          http->postdata = data->set.postfields;
 
-        conn->fread = (curl_read_callback)readmoredata;
-        conn->fread_in = (void *)conn;
+          http->sending = HTTPSEND_BODY;
 
-        /* set the upload size to the progress meter */
-        Curl_pgrsSetUploadSize(data, http->postsize);
+          conn->fread = (curl_read_callback)readmoredata;
+          conn->fread_in = (void *)conn;
+
+          /* set the upload size to the progress meter */
+          Curl_pgrsSetUploadSize(data, http->postsize);
+        }
       }
       else
         /* set the upload size to the progress meter */
@@ -1197,8 +1205,8 @@ CURLcode Curl_http(struct connectdata *conn)
         result =
           Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
                         &http->readbytecount,
-                        conn->firstsocket,
-                        &http->writebytecount);
+                        http->postdata?conn->firstsocket:-1,
+                        http->postdata?&http->writebytecount:NULL);
       break;
 
     default:
@@ -1219,8 +1227,7 @@ CURLcode Curl_http(struct connectdata *conn)
     }
     if(result)
       return result;
-  } while (0); /* this is just a left-over from the multiple document download
-                  attempts */
+  }
 
   return CURLE_OK;
 }
