@@ -72,7 +72,7 @@ void *curl_domalloc(size_t size, int line, char *source)
   return mem;
 }
 
-char *curl_dostrdup(char *str, int line, char *source)
+char *curl_dostrdup(const char *str, int line, char *source)
 {
   char *mem;
   size_t len;

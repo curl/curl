@@ -7,7 +7,7 @@
 void *curl_domalloc(size_t size, int line, char *source);
 void *curl_dorealloc(void *ptr, size_t size, int line, char *source);
 void curl_dofree(void *ptr, int line, char *source);
-char *curl_dostrdup(char *str, int line, char *source);
+char *curl_dostrdup(const char *str, int line, char *source);
 void curl_memdebug(char *logname);
 
 /* file descriptor manipulators */
