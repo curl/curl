@@ -21,8 +21,8 @@
 # $Id$
 ###########################################################################
 
-HTMLPAGES = curl.html curl-config.html
-PDFPAGES = curl.pdf curl-config.pdf
+HTMLPAGES = testcurl.html runtests.html
+PDFPAGES = testcurl.pdf runtests.pdf
 
 EXTRA_DIST = ftpserver.pl httpserver.pl httpsserver.pl runtests.pl	\
  ftpsserver.pl getpart.pm FILEFORMAT README stunnel.pem memanalyze.pl	\
