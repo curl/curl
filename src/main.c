@@ -933,8 +933,9 @@ typedef enum {
   PARAM_LAST
 } ParameterError;
 
-static const char *param2text(ParameterError error)
+static const char *param2text(int res)
 {
+  ParameterError error = (ParameterError)res;
   switch(error) {
   case PARAM_GOT_EXTRA_PARAMETER:
     return "had unsupported trailing garbage";
