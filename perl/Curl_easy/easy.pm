@@ -110,7 +110,7 @@ CURLINFO_CONTENT_LENGTH_UPLOAD
 USE_INTERNAL_VARS
 );
 
-$VERSION = '1.1.6';
+$VERSION = '1.1.7';
 
 $Curl::easy::headers = "";
 $Curl::easy::content = "";

@@ -1,6 +1,10 @@
 Revision history for Perl extension Curl::easy.
 Check out the file README for more info.
 
+1.1.7  Thu Sep 13 2001: - Cris Bailiff <c.bailiff@devsecure.com>
+    - Documentation Update only - Explicitly state that Curl_easy
+      is released under the MIT-X/MPL dual licence. No code changes.
+
 1.1.6  Mon Sep 10 2001: - Cris Bailiff <c.bailiff@devsecure.com>
     - Fix segfault due to changes in header callback behaviour
       since curl-7.8.1-pre3
