@@ -6,6 +6,27 @@
 
                                History of Changes
 
+Version 7.8-pre3
+
+Daniel (31 May 2001)
+- Once and for all fixed the _REENTRANT mess for Solaris compiles to present
+  less warnings.
+
+- Sterling Hughes tirelessly points out and corrects my mistakes...! So,
+  curl_global_init() now lets the argument flags *SET* what parts to
+  init. CURL_GLOBAL_DEFAULT makes a nice default, CURL_GLOBAL_ALL inits all
+  known subsystems and CURL_GLOBAL_NONE inits nothing more than absolutely
+  necessary. Man page updated accordingly.
+
+- Fixed the strtok.h include file as it wouldn't compile on all platforms!
+
+Daniel (30 May 2001)
+- Made libcurl by default act as if CURLOPT_MUTE and CURLOPT_NOPROGRESS were
+  set TRUE. Set them to FALSE to make libcurl more talkative. The *_MUTE
+  option is subject for complete removal...
+
+Version 7.8-pre2
+
 Daniel (30 May 2001)
 - Cris Bailiff wrote a makefile for building Solaris packages.
 
