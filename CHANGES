@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (11 October 2004)
+- libcurl now uses SO_NOSIGPIPE for systems that support it (Mac OS X 10.2 or
+  later is one) to inhibit the SIGPIPE signal when writing to a socket while
+  the peer dies. The same effect is provide by the MSG_NOSIGNAL parameter to
+  send() on other systems. Alan Pinstein verified the fix.
+
 Gisle (6 October 2004)
 - For USE_LIBIDN builds: Added Top-Level-Domain (TLD) check of host-name
   used in fix_hostname(). Checks if characters in 'host->name' (indirectly

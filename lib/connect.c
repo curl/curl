@@ -558,6 +558,23 @@ static void tcpnodelay(struct connectdata *conn,
 #endif
 }
 
+#ifdef SO_NOSIGPIPE
+/* The preferred method on Mac OS X (10.2 and later) to prevent SIGPIPEs when
+   sending data to a dead peer (instead of relying on the 4th argument to send
+   being MSG_NOSIGNAL). Possibly also existing and in use on other BSD
+   systems? */
+static void nosigpipe(struct connectdata *conn,
+                      curl_socket_t sockfd)
+{
+  struct SessionHandle *data= conn->data;
+  int onoff = 1;
+  if(setsockopt(sockfd, SOL_SOCKET, SO_NOSIGPIPE, (void *)&onoff,
+                sizeof(onoff)) < 0)
+    infof(data, "Could not set SO_NOSIGPIPE: %s\n",
+          Curl_strerror(conn, Curl_ourerrno()));
+}
+#endif
+
 /* singleipconnect() connects to the given IP only, and it may return without
    having connected if used from the multi interface. */
 static curl_socket_t
@@ -584,6 +601,9 @@ singleipconnect(struct connectdata *conn,
   if(data->set.tcp_nodelay)
     tcpnodelay(conn, sockfd);
 
+#ifdef SO_NOSIGPIPE
+  nosigpipe(conn, sockfd);
+#endif
   if(conn->data->set.device) {
     /* user selected to bind the outgoing socket to a specified "device"
        before doing connect */
