@@ -47,6 +47,11 @@
 
 /* DONT include memdebug.h here! */
 
+struct memdebug {
+  int size;
+  char mem[1];
+};
+
 /*
  * Note that these debug functions are very simple and they are meant to
  * remain so. For advanced analysis, record a log file and write perl scripts
@@ -67,15 +72,21 @@ void curl_memdebug(const char *logname)
 }
 
 
-void *curl_domalloc(size_t size, int line, const char *source)
+void *curl_domalloc(size_t wantedsize, int line, const char *source)
 {
-  void *mem=(malloc)(size);
+  void *mem;
+  size_t size;
+
+  /* alloc at least 64 bytes */
+  size = wantedsize>64?wantedsize:64;
+
+  mem=(malloc)(size);
   if(mem)
     /* fill memory with junk */
     memset(mem, 0xA5, size);
-  if(logfile)
+  if(logfile && source)
     fprintf(logfile, "MEM %s:%d malloc(%d) = %p\n",
-            source, line, size, mem);
+            source, line, wantedsize, mem);
   return mem;
 }
 
@@ -90,20 +101,28 @@ char *curl_dostrdup(const char *str, int line, const char *source)
     exit(2);
   }
 
-  mem=(strdup)(str);
   len=strlen(str)+1;
+
+  mem=curl_domalloc(len, 0, NULL); /* NULL prevents logging */
+  memcpy(mem, str, len);
+
   if(logfile)
     fprintf(logfile, "MEM %s:%d strdup(%p) (%d) = %p\n",
             source, line, str, len, mem);
   return mem;
 }
 
-void *curl_dorealloc(void *ptr, size_t size, int line, const char *source)
+void *curl_dorealloc(void *ptr, size_t wantedsize,
+                     int line, const char *source)
 {
-  void *mem=(realloc)(ptr, size);
+  void *mem;
+
+  size_t size = wantedsize>64?wantedsize:64;
+
+  mem=(realloc)(ptr, size);
   if(logfile)
     fprintf(logfile, "MEM %s:%d realloc(%p, %d) = %p\n",
-            source, line, ptr, size, mem);
+            source, line, ptr, wantedsize, mem);
   return mem;
 }
 
@@ -114,7 +133,10 @@ void curl_dofree(void *ptr, int line, const char *source)
             source, line);
     exit(2);
   }
+  /* we know this is least 64 bytes, destroy this much */
+  memset(ptr, 0x13, 64);
 
+  /* free for real */
   (free)(ptr);
 
   if(logfile)
