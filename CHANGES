@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (12 October)
+- Dirk Manske made the share locking around DNS lookups slightly different to
+  allow the share system's DNS lookups to run somewhat more
+  independent/faster.
+
 Daniel (9 October)
 - Lachlan O'Dea fixed a resume problem: "If I set CURLOPT_RESUME_FROM, perform
   an HTTP download, then reset CURLOPT_RESUME_FROM to 0, the next download
