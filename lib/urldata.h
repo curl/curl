@@ -410,15 +410,6 @@ struct Curl_transfer_keeper {
   char *uploadbuf;
   curl_socket_t maxfd;
 
-  /* pointers to the actual descriptors we check */
-  fd_set *readfdp;
-  fd_set *writefdp;
-
-  /* the file descriptors to play with */
-  fd_set readfd;
-  fd_set writefd;
-  fd_set rkeepfd;
-  fd_set wkeepfd;
   int keepon;
 
   bool upload_done; /* set to TRUE when doing chunked transfer-encoding upload

@@ -16,12 +16,8 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
 .SH DESCRIPTION
 This function extracts file descriptor information from a given multi_handle.
 libcurl returns its fd_set sets. The application can use these to select()
-on. The \fIcurl_multi_perform(3)\fI function should be called as soon as one
+on. The \fIcurl_multi_perform(3)\fP function should be called as soon as one
 of them are ready to be read from or written to.
-
-NOTE that once this call is made, you must not remove the sets you point to,
-as libcurl will need to be able to read them. It needs them after select()
-calls, to know if certain sockets are readable or writable.
 
 You should also be aware that when doing select(), you should consider using a
 rather small (single-digit number of seconds) timeout and call

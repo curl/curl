@@ -464,7 +464,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
                   k->write_after_100_header = FALSE;
                   k->keepon |= KEEP_WRITE;
-                  k->wkeepfd = k->writefd;
                 }
               }
               else
@@ -1192,7 +1191,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  go into the Expect: 100 state and await such a header */
               k->wait100_after_headers = FALSE; /* headers sent */
               k->write_after_100_header = TRUE; /* wait for the header */
-              k->wkeepfd = k->writefd;          /* set the keeper variable */
               k->keepon &= ~KEEP_WRITE;         /* disable writing */
               k->start100 = Curl_tvnow();       /* timeout count starts now */
               didwhat &= ~KEEP_WRITE;  /* we didn't write anything actually */
@@ -1336,7 +1334,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         /* we've waited long enough, continue anyway */
         k->write_after_100_header = FALSE;
         k->keepon |= KEEP_WRITE;
-        k->wkeepfd = k->writefd;
       }
     }
   }
@@ -1463,12 +1460,6 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
         k->keepon |= KEEP_WRITE;
       }
     }
-
-    /* get these in backup variables to be able to restore them on each lap in
-       the select() loop */
-    k->rkeepfd = k->readfd;
-    k->wkeepfd = k->writefd;
-
   }
 
   return CURLE_OK;
@@ -1491,7 +1482,6 @@ void Curl_single_fdset(struct connectdata *conn,
   if(conn->keep.keepon & KEEP_READ) {
     FD_SET(conn->sockfd, read_fd_set);
     *max_fd = conn->sockfd;
-    conn->keep.readfdp = read_fd_set; /* store the address of the set */
   }
   if(conn->keep.keepon & KEEP_WRITE) {
     FD_SET(conn->writesockfd, write_fd_set);
@@ -1500,7 +1490,6 @@ void Curl_single_fdset(struct connectdata *conn,
        to compare it nicely */
     if((int)conn->writesockfd > *max_fd)
       *max_fd = conn->writesockfd;
-    conn->keep.writefdp = write_fd_set; /* store the address of the set */
   }
   /* we don't use exceptions, only touch that one to prevent compiler
      warnings! */
@@ -1542,9 +1531,6 @@ Transfer(struct connectdata *conn)
   /* we want header and/or body, if neither then don't do this! */
   if(!conn->bits.getheader && conn->bits.no_body)
     return CURLE_OK;
-
-  k->writefdp = &k->writefd; /* store the address of the set */
-  k->readfdp = &k->readfd;   /* store the address of the set */
 
   while (!done) {
     int fd_read;
