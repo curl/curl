@@ -554,6 +554,12 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
 
        CFLAGS="$CFLAGS $WARN"
 
+      AC_MSG_NOTICE([Added this set of compiler options: $WARN])
+
+    else dnl $GCC = yes
+
+      AC_MSG_NOTICE([Added no extra compiler options])
+
     fi dnl $GCC = yes
 
     dnl strip off optimizer flags
