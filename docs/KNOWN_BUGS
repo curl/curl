@@ -3,9 +3,6 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
-* NTLM authentication with passwords longer than 14 letters fail. There is
-  a known fix for this, planned to come in curl 7.11.2
-
 * Doing resumed upload over HTTP does not work with '-C -', because curl
   doesn't do a HEAD first to get the initial size. This needs to be done
   manually for HTTP PUT resume to work, and then '-C [index]'.
