@@ -2,14 +2,8 @@
 
 #ifdef USE_SSLEAY
 
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #include <sys/time.h>
 #include <sys/types.h>
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
 
 #include <openssl/opensslv.h>
 #include <openssl/x509v3.h>
