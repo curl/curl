@@ -78,3 +78,8 @@ pkgadd:
 # resulting .tar.bz2 file will end up at packages/Win32/cygwin
 cygwinbin:
 	$(MAKE) -C packages/Win32/cygwin cygwinbin
+
+# We extend the standard install with a custom hook:
+install-data-hook:
+	cd include && $(MAKE) install
+	cd docs && $(MAKE) install
