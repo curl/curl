@@ -51,6 +51,9 @@ changing protocol data such as port numbers or user-agent strings.
 <protocol>
 the protocol dump curl should transmit
 </protocol>
+<file name="log/filename">
+the file's contents must be identical to this
+</file>
 <upload>
 the contents of the upload data curl should have sent
 </upload>
