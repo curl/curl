@@ -12,10 +12,10 @@ EXTRA_DIST = README
 #
 
 # Cygwin build number (default to "1")
-CYGBUILD ?= 1
+CYGBUILD = 1
 
 # Cygwin tarball build dir (fully-qualified name, gets deleted when done)
-cygwintmp := $(CURDIR)/cygwinbin-builddir
+cygwintmp = $(CURDIR)/cygwinbin-builddir
 
 cygwinbin:
 	rm -rf $(cygwintmp)
