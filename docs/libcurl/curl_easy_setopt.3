@@ -1,7 +1,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.TH curl_easy_setopt 3 "13 Sep 2003" "libcurl 7.10.8" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -171,13 +171,30 @@ set a custom get-all-headers callback.
 .B CURLOPT_DEBUGFUNCTION
 Function pointer that should match the following prototype: \fIint
 curl_debug_callback (CURL *, curl_infotype, char *, size_t, void *);\fP
-This function will receive debug information if CURLOPT_VERBOSE is
-enabled. The curl_infotype argument specifies what kind of information it
-is. This funtion must return 0.
+CURLOPT_DEBUGFUNCTION replaces the standard debug function used when
+CURLOPT_VERBOSE is in effect. This callback receives debug information, as
+specified with the \fIcurl_infotype\fP argument. This funtion must return 0.
+The data pointed to by the char * passed to this function WILL NOT be zero
+terminated, but will be exactly of the size as told by the size_t argument.
 
-NOTE: the data pointed to by the char * passed to this function WILL NOT be
-zero terminated, but will be exactly of the size as told by the size_t
-argument.
+Available curl_infotype values:
+.RS
+.TP 5
+.B CURLINFO_TEXT
+The data is informational text.
+.TP
+.B CURLINFO_HEADER_IN
+The data is header (or header-like) data received from the peer.
+.TP
+.B CURLINFO_HEADER_OUT
+The data is header (or header-like) data sent to the peer.
+.TP
+.B CURLINFO_DATA_IN
+The data is protocol data received from the peer.
+.TP
+.B CURLINFO_DATA_OUT
+The data is protocol data sent to the peer.
+.RE
 .TP
 .B CURLOPT_DEBUGDATA
 Pass a pointer to whatever you want passed in to your CURLOPT_DEBUGFUNCTION in
