@@ -37,6 +37,7 @@ int main(int argc, char **argv)
   FILE *headerfile;
 
   const char *pCertFile = "testcert.pem";
+  const char *pCACertFile="cacert.pem"
 
   const char *pKeyName;
   const char *pKeyType;
@@ -96,6 +97,10 @@ int main(int argc, char **argv)
        curl_easy_setopt(curl,CURLOPT_SSLKEYTYPE,pKeyType);
                                 /* set the private key (file or ID in engine) */
        curl_easy_setopt(curl,CURLOPT_SSLKEY,pKeyName);
+                                /* set the file with the certs vaildating the server */
+       curl_easy_setopt(curl,CURLOPT_CAINFO,pCACertFile);
+                                /* disconnect if we can't validate server's cert */
+       curl_easy_setopt(curl,CURLOPT_SSL_VERIFYPEER,1);
        
        res = curl_easy_perform(curl);
        break;                   /* we are done... */
