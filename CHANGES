@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (11 January 2005)
+- Bruce Mitchener identified (bug report #1099640) the never-ending SOCKS5
+  problem with the version byte and the check for bad versions. Bruce has lots
+  of clues on this, and based on his suggestion I've now removed the check of
+  that byte since it seems to be able to contain 1 or 5.
+
 Daniel (10 January 2005)
 - Pavel Orehov reported memory problems with the multi interface in bug report
   #1098843. In short, a shared DNS cache was setup for a multi handle and when

@@ -1829,8 +1829,8 @@ static int handleSock5Proxy(const char *proxy_name,
       return 1;
     }
 
-    if ((socksreq[0] != 5) || /* version */
-        (socksreq[1] != 0)) { /* status */
+    /* ignore the first (VER) byte */
+    if (socksreq[1] != 0) { /* status */
       failf(conn->data, "User was rejected by the SOCKS5 server (%d %d).",
             socksreq[0], socksreq[1]);
       return 1;

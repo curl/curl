@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o SOCKS5 version check
  o memory problem with cleaning up multi interface
  o SSL certificate name memory leak
  o -d with -G to multiple URLs crashed
@@ -34,6 +35,6 @@ advice from friends like these:
 
  Dan Fandrich, Peter Pentchev, Marcin Konicki, Rune Kleveland, David Shaw,
  Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt,
- Hzhijun, Pavel Orehov
+ Hzhijun, Pavel Orehov, Bruce Mitchener
 
         Thanks! (and sorry if I forgot to mention someone)
