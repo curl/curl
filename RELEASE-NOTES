@@ -7,6 +7,8 @@ Curl and libcurl 7.11.1. A bugfix release.
 
 This release includes the following changes:
 
+ o SO_BINDTODEVICE is used for network interface binding
+ o large file fix for Content-Length
  o configure --disable-manual disables the built-in huge manual from the
    command line tool
  o the default Accept: header used in HTTP requests changed
@@ -52,6 +54,7 @@ advice from friends like these:
 
  Gisle Vanem, Vincent Bronner, Richard Bramante, Dirk Manske, Dan Fandrich,
  Ken Hirsch, Stadler Stephan, Domenico Andreoli, Patrick Smith, Tor Arntsen,
- Andrés García, Tim Baker, Len Krause, Gilad, Ken Rastatter, P R Schaffner
+ Andrés García, Tim Baker, Len Krause, Gilad, Ken Rastatter, P R Schaffner,
+ Greg Hewgill, Ben Greear
 
         Thanks! (and sorry if I forgot to mention someone)
