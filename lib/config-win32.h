@@ -45,7 +45,7 @@
 /* #define TIME_WITH_SYS_TIME 1 */
 
 /* Define cpu-machine-OS */
-#define OS "win32"
+#define OS "i386-pc-win32"
 
 /* The number of bytes in a long double.  */
 #define SIZEOF_LONG_DOUBLE 16
