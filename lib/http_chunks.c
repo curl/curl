@@ -102,8 +102,9 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
                               size_t length,
                               size_t *wrote)
 {
-  CURLcode result;
+  CURLcode result=CURLE_OK;
   struct Curl_chunker *ch = &conn->proto.http->chunk;
+  struct Curl_transfer_keeper *k = &conn->keep;
   int piece;
   *wrote = 0; /* nothing yet */
 
@@ -180,8 +181,9 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       switch (conn->keep.content_encoding) {
         case IDENTITY:
 #endif
-          result = Curl_client_write(conn->data, CLIENTWRITE_BODY, datap,
-                                     piece);
+          if(!k->ignorebody)
+            result = Curl_client_write(conn->data, CLIENTWRITE_BODY, datap,
+                                       piece);
 #ifdef HAVE_LIBZ
           break;
 
