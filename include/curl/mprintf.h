@@ -1,54 +1,25 @@
-/*************************************************************************
+/***************************************************************************
+ *                                  _   _ ____  _     
+ *  Project                     ___| | | |  _ \| |    
+ *                             / __| | | | |_) | |    
+ *                            | (__| |_| |  _ <| |___ 
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2003, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
  *
  * $Id$
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
- * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
- * MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
- * CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
- *
- *************************************************************************
- *
- * Preliminary documentation
- *
- * printf conversions:
- *
- *  conversion ::= '%%' | '%' [position] ( number | float | string )
- *  position ::= digits '$'
- *  number ::= [number-flags] ( 'd' | 'i' | 'o' | 'x' | 'X' | 'u')
- *  number-flags ::= 'h' | 'l' | 'L' ...
- *  float ::= [float-flags] ( 'f' | 'e' | 'E' | 'g' | 'G' )
- *  string ::= [string-flags] 's'
- *  string-flags ::= padding | '#'
- *  digits ::= (digit)+
- *  digit ::= 0-9
- *
- *  c
- *  p
- *  n
- *
- * qualifiers
- *
- *  -     : left adjustment
- *  +     : show sign
- *  SPACE : padding
- *  #     : alterative
- *  .     : precision
- *  *     : width
- *  0     : padding / size
- *  1-9   : size
- *  h     : short
- *  l     : long
- *  ll    : longlong
- *  L     : long double
- *  Z     : long / longlong
- *  q     : longlong
- *
- ************************************************************************/
+ ***************************************************************************/
 
 #ifndef H_MPRINTF
 #define H_MPRINTF
