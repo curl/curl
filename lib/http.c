@@ -715,29 +715,6 @@ CURLcode Curl_http(struct connectdata *conn)
     }
   }
 
-  if(data->cookies) {
-    co = Curl_cookie_getlist(data->cookies,
-                             host, ppath,
-                             (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
-  }
-  if (data->change.proxy && *data->change.proxy &&
-      !data->set.tunnel_thru_httpproxy &&
-      !(conn->protocol&PROT_HTTPS))  {
-    /* The path sent to the proxy is in fact the entire URL */
-    ppath = data->change.url;
-  }
-  if(HTTPREQ_POST_FORM == data->set.httpreq) {
-    /* we must build the whole darned post sequence first, so that we have
-       a size of the whole shebang before we start to send it */
-     result = Curl_getFormData(&http->sendit, data->set.httppost,
-                               &http->postsize);
-     if(CURLE_OK != result) {
-       /* Curl_getFormData() doesn't use failf() */
-       failf(data, "failed creating formpost data");
-       return result;
-     }
-  }
-
   ptr = checkheaders(data, "Host:");
   if(ptr) {
     /* If we have a given custom Host: header, we extract the host name
@@ -788,6 +765,32 @@ CURLcode Curl_http(struct connectdata *conn)
                                     conn->bits.ipv6_ip?"]":"",
                                     conn->remote_port);
   }
+
+  if(data->cookies) {
+    co = Curl_cookie_getlist(data->cookies,
+                             conn->allocptr.cookiehost?
+                             conn->allocptr.cookiehost:host, ppath,
+                             (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
+  }
+
+  if (data->change.proxy && *data->change.proxy &&
+      !data->set.tunnel_thru_httpproxy &&
+      !(conn->protocol&PROT_HTTPS))  {
+    /* The path sent to the proxy is in fact the entire URL */
+    ppath = data->change.url;
+  }
+  if(HTTPREQ_POST_FORM == data->set.httpreq) {
+    /* we must build the whole darned post sequence first, so that we have
+       a size of the whole shebang before we start to send it */
+     result = Curl_getFormData(&http->sendit, data->set.httppost,
+                               &http->postsize);
+     if(CURLE_OK != result) {
+       /* Curl_getFormData() doesn't use failf() */
+       failf(data, "failed creating formpost data");
+       return result;
+     }
+  }
+
 
   if(!checkheaders(data, "Pragma:"))
     http->p_pragma = "Pragma: no-cache\r\n";
