@@ -298,7 +298,7 @@ typedef enum {
   CINIT(COOKIEFILE, OBJECTPOINT, 31),
 
   /* What version to specifly try to use.
-     3 = SSLv3, 2 = SSLv2, all else makes it try v3 first then v2 */
+     See CURL_SSLVERSION defines below. */
   CINIT(SSLVERSION, LONG, 32),
 
   /* What kind of HTTP time condition to use, see defines */
@@ -478,6 +478,15 @@ enum {
   CURL_HTTP_VERSION_1_1,  /* please use HTTP 1.1 in the request */
   
   CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
+};
+
+enum {
+  CURL_SSLVERSION_DEFAULT,
+  CURL_SSLVERSION_TLSv1,
+  CURL_SSLVERSION_SSLv2,
+  CURL_SSLVERSION_SSLv3,
+
+  CURL_SSLVERSION_LAST /* never use, keep last */
 };
 
 
