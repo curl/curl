@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (23 August 2004)
+- Roman Koifman pointed out that libcurl send Expect: 100-continue on POSTs
+  even when told to use HTTP 1.0, which is not correct.
+
 Daniel (20 August 2004)
 - Alexander Krasnostavsky made the write callback get called even when a zero
   byte file is downloaded.

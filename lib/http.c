@@ -1765,10 +1765,12 @@ CURLcode Curl_http(struct connectdata *conn)
           return result;
       }
 
-      if(!checkheaders(data, "Expect:")) {
-        /* if not disabled explicitly we add a Expect: 100-continue
-           to the headers which actually speeds up post operations (as
-           there is one packet coming back from the web server) */
+      if((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
+         !checkheaders(data, "Expect:")) {
+        /* if not doing HTTP 1.0 or disabled explicitly, we add a Expect:
+           100-continue to the headers which actually speeds up post
+           operations (as there is one packet coming back from the web
+           server) */
         result = add_bufferf(req_buffer,
                              "Expect: 100-continue\r\n");
         if(result)
@@ -1832,10 +1834,12 @@ CURLcode Curl_http(struct connectdata *conn)
           return result;
       }
 
-      if(!checkheaders(data, "Expect:")) {
-        /* if not disabled explicitly we add a Expect: 100-continue
-           to the headers which actually speeds up post operations (as
-           there is one packet coming back from the web server) */
+      if((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
+         !checkheaders(data, "Expect:")) {
+        /* if not HTTP 1.0 or disabled explicitly, we add a Expect:
+           100-continue to the headers which actually speeds up post
+           operations (as there is one packet coming back from the web
+           server) */
         result = add_bufferf(req_buffer,
                              "Expect: 100-continue\r\n");
         if(result)
@@ -1945,10 +1949,12 @@ CURLcode Curl_http(struct connectdata *conn)
           /* set the upload size to the progress meter */
           Curl_pgrsSetUploadSize(data, http->postsize);
 
-          if(!checkheaders(data, "Expect:")) {
-            /* if not disabled explicitly we add a Expect: 100-continue to the
-               headers which actually speeds up post operations (as there is
-               one packet coming back from the web server) */
+          if((data->set.httpversion != CURL_HTTP_VERSION_1_0) &&
+             !checkheaders(data, "Expect:")) {
+            /* if not HTTP 1.0 or disabled explicitly, we add a Expect:
+               100-continue to the headers which actually speeds up post
+               operations (as there is one packet coming back from the web
+               server) */
             add_bufferf(req_buffer,
                         "Expect: 100-continue\r\n");
             data->set.expect100header = TRUE;
