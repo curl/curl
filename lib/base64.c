@@ -132,6 +132,8 @@ size_t Curl_base64_encode(const char *inp, size_t insize, char **outptr)
 
   char *indata = (char *)inp;
 
+  *outptr = NULL; /* set to NULL in case of failure before we reach the end */
+
   if(0 == insize)
     insize = strlen(indata);
 
