@@ -233,6 +233,11 @@ CURLcode Curl_close(struct SessionHandle *data)
 
   Curl_digest_cleanup(data);
 
+#ifdef USE_ARES
+  /* this destroys the channel and we cannot use it anymore after this */
+  ares_destroy(data->state.areschannel);
+#endif
+
   /* No longer a dirty share, if it exists */
   if (data->share)
     data->share->dirty--;
@@ -252,6 +257,15 @@ CURLcode Curl_open(struct SessionHandle **curl)
     return CURLE_OUT_OF_MEMORY;
 
   memset(data, 0, sizeof(struct SessionHandle));
+
+#ifdef USE_ARES
+  if(ARES_SUCCESS != ares_init(&data->state.areschannel)) {
+    free(data);
+    return CURLE_FAILED_INIT;
+  }
+  /* make sure that all other returns from this function should destroy the
+     ares channel before returning error! */
+#endif
 
   /* We do some initial setup here, all those fields that can't be just 0 */
 
@@ -318,7 +332,6 @@ CURLcode Curl_open(struct SessionHandle **curl)
   /* This is our prefered CA cert bundle since install time */
   data->set.ssl.CAfile = (char *)CURL_CA_BUNDLE;
 #endif
-
 
   memset(data->state.connects, 0,
          sizeof(struct connectdata *)*data->state.numconnects);

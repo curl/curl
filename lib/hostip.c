@@ -469,7 +469,6 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
   if(conn->async.done) {
     /* we're done, kill the ares handle */
-    ares_destroy(data->state.areschannel);
     if(!conn->async.dns)
       return CURLE_COULDNT_RESOLVE_HOST;
     *dns = conn->async.dns;
@@ -536,9 +535,6 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   /* Operation complete, if the lookup was successful we now have the entry
      in the cache. */
     
-  /* this destroys the channel and we cannot use it anymore after this */
-  ares_destroy(data->state.areschannel);
-
   if(entry)
     *entry = conn->async.dns;
 
@@ -613,35 +609,27 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
                                      int port,
                                      int *waitp)
 {
-  int rc;
   char *bufp;
   struct SessionHandle *data = conn->data;
 
-  rc = ares_init(&data->state.areschannel);
-
   *waitp = FALSE;
   
-  if(!rc) {
-    /* only if success */
+  bufp = strdup(hostname);
 
-    bufp = strdup(hostname);
+  if(bufp) {
+    Curl_safefree(conn->async.hostname);
+    conn->async.hostname = bufp;
+    conn->async.port = port;
+    conn->async.done = FALSE; /* not done */
+    conn->async.status = 0;   /* clear */
+    conn->async.dns = NULL;   /* clear */
 
-    if(bufp) {
-      Curl_safefree(conn->async.hostname);
-      conn->async.hostname = bufp;
-      conn->async.port = port;
-      conn->async.done = FALSE; /* not done */
-      conn->async.status = 0;   /* clear */
-      conn->async.dns = NULL;   /* clear */
-      
-      ares_gethostbyname(data->state.areschannel, hostname, PF_INET,
-                         host_callback, conn);
+    /* areschannel is already setup in the Curl_open() function */
+    ares_gethostbyname(data->state.areschannel, hostname, PF_INET,
+                       host_callback, conn);
 
       
-      *waitp = TRUE; /* please wait for the response */
-    }
-    else
-      ares_destroy(data->state.areschannel);
+    *waitp = TRUE; /* please wait for the response */
   }
 
   return NULL; /* no struct yet */
