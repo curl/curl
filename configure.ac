@@ -941,71 +941,78 @@ dnl Check for & handle argument to --with-zlib.
 
 _cppflags=$CPPFLAGS
 _ldflags=$LDFLAGS
-OPT_ZLIB="/usr/local"
 AC_ARG_WITH(zlib,
 AC_HELP_STRING([--with-zlib=PATH],[search for zlib in PATH])
 AC_HELP_STRING([--without-zlib],[disable use of zlib]),
                [OPT_ZLIB="$withval"])
 
-case "$OPT_ZLIB" in
-  no)
-    AC_MSG_WARN([zlib disabled]) ;;
-  *)
+if test "$OPT_ZLIB" = "no" ; then
+    AC_MSG_WARN([zlib disabled])
+else
+  if test "$OPT_ZLIB" = "yes" ; then
+     OPT_ZLIB=""
+  fi
+
+  if test -z "$OPT_ZLIB" ; then
     dnl check for the lib first without setting any new path, since many
     dnl people have it in the default path
 
     AC_CHECK_LIB(z, inflateEnd,
                    dnl libz found, set the variable
                    [HAVE_LIBZ="1"],
-                   dnl if no lib found, try to add the given library
-                   [if test -d "$OPT_ZLIB"; then
-                      CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
-                      LDFLAGS="$LDFLAGS -L$OPT_ZLIB/lib$libsuff"
-                   fi])
+                   dnl if no lib found, try /usr/local
+                   [OPT_ZLIB="/usr/local"])
 
-    AC_CHECK_HEADER(zlib.h,
-      [
-      dnl zlib.h was found
-      HAVE_ZLIB_H="1"
-      dnl if the lib wasn't found already, try again with the new paths
-      if test "$HAVE_LIBZ" != "1"; then
-        AC_CHECK_LIB(z, gzread,
-                     [
-                     dnl the lib was found!
-                     HAVE_LIBZ="1"
-                     ],
-                     [ CPPFLAGS=$_cppflags
-                     LDFLAGS=$_ldflags])
-      fi
-      ],
-      [
-        dnl zlib.h was not found, restore the flags
-        CPPFLAGS=$_cppflags
-        LDFLAGS=$_ldflags]
-      )
+  fi
 
-    if test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" != "1"
-    then
-      AC_MSG_WARN([configure found only the libz lib, not the header file!])
-    elif test "$HAVE_LIBZ" != "1" && test "$HAVE_ZLIB_H" = "1"
-    then
-      AC_MSG_WARN([configure found only the libz header file, not the lib!])
-    elif test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" = "1"
-    then
-      dnl both header and lib were found!
-      AC_SUBST(HAVE_LIBZ)
-      AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
-      AC_DEFINE(HAVE_LIBZ, 1, [if zlib is available])
+  dnl Add a nonempty path to the compiler flags
+  if test -n "$OPT_ZLIB"; then
+     CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
+     LDFLAGS="$LDFLAGS -L$OPT_ZLIB/lib$libsuff"
+  fi
 
-      LIBS="$LIBS -lz"
-
-      dnl replace 'HAVE_LIBZ' in the automake makefile.ams
-      AMFIXLIB="1"
-      AC_MSG_NOTICE([found both libz and libz.h header])
-      curl_zlib_msg="enabled"
+  AC_CHECK_HEADER(zlib.h,
+    [
+    dnl zlib.h was found
+    HAVE_ZLIB_H="1"
+    dnl if the lib wasn't found already, try again with the new paths
+    if test "$HAVE_LIBZ" != "1"; then
+      AC_CHECK_LIB(z, gzread,
+                   [
+                   dnl the lib was found!
+                   HAVE_LIBZ="1"
+                   ],
+                   [ CPPFLAGS=$_cppflags
+                   LDFLAGS=$_ldflags])
     fi
-    ;;
-esac
+    ],
+    [
+      dnl zlib.h was not found, restore the flags
+      CPPFLAGS=$_cppflags
+      LDFLAGS=$_ldflags]
+    )
+
+  if test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" != "1"
+  then
+    AC_MSG_WARN([configure found only the libz lib, not the header file!])
+  elif test "$HAVE_LIBZ" != "1" && test "$HAVE_ZLIB_H" = "1"
+  then
+    AC_MSG_WARN([configure found only the libz header file, not the lib!])
+  elif test "$HAVE_LIBZ" = "1" && test "$HAVE_ZLIB_H" = "1"
+  then
+    dnl both header and lib were found!
+    AC_SUBST(HAVE_LIBZ)
+    AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
+    AC_DEFINE(HAVE_LIBZ, 1, [if zlib is available])
+
+    LIBS="$LIBS -lz"
+
+    dnl replace 'HAVE_LIBZ' in the automake makefile.ams
+    AMFIXLIB="1"
+    AC_MSG_NOTICE([found both libz and libz.h header])
+    curl_zlib_msg="enabled"
+  fi
+fi
 
 dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(HAVE_LIBZ, test x"$AMFIXLIB" = x1)
