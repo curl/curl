@@ -6,6 +6,21 @@
 
                                History of Changes
 
+Daniel (12 June 2001)
+- Salvador Dávila provided a fix for FTP range downloads.
+
+- Added a few more test cases from the former test suite to the new file
+  format. We're now at a total of 26 tests.
+
+Daniel (11 June 2001)
+- libcurl's version-info was wrong, as noted by both Domenico Andreoli and
+  David Odin.
+
+Daniel (7 June 2001)
+- Jörn fixed the curl_unescape duplicate entry in lib/libcurl.def
+
+- I made SSL certificate failure messages to be more detailed.
+
 Version 7.8
 
 Daniel (7 June 2001)
