@@ -1,5 +1,5 @@
 #
-# c-ares Makefile for djgpp/gcc/Watt-32
+# c-ares Makefile for djgpp/gcc/Watt-32.
 #   By Gisle Vanem <giva@bgnett.no> 2004.
 #
 .SUFFIXES: .exe
@@ -7,7 +7,6 @@
 include Makefile.inc
 
 WATT32_ROOT = $(subst \,/,$(WATT_ROOT))
-ZLIB_ROOT   = /dev/env/DJGPP/contrib/zlib
 
 CC      = gcc
 CFLAGS  = -O2 -Wall -DWATT32 -Dselect=select_s -I$(WATT32_ROOT)/inc
@@ -17,7 +16,6 @@ EX_LIBS = $(WATT32_ROOT)/lib/libwatt.a
 OBJ_DIR = djgpp
 
 OBJECTS = $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
-
 
 all: $(OBJ_DIR) libcares.a ahost.exe adig.exe
 	@echo Welcome to c-ares.
