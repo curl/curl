@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "12 March 2001" "libcurl 7.7" "libcurl Manual"
+.TH curl_easy_setopt 3 "13 March 2001" "libcurl 7.7" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -437,8 +437,14 @@ with this curl handle, setting a smaller MAXCONNECTS than before may cause
 open connections to unnecessarily get closed. (Added in 7.7)
 .TP
 .B CURLOPT_CLOSEPOLICY
-Pass a long. This must be one of the CURLCLOSEPOLICY_* defines. This is still
-not supported as of this writing. (Added in 7.7)
+Pass a long. This option sets what policy libcurl should use when the
+connection cache is filled and one of the open connections has to be closed to
+make room for a new connection. This must be one of the CURLCLOSEPOLICY_*
+defines. Use CURLCLOSEPOLICY_LEAST_RECENTLY_USED to make libcurl close the
+connection that was least recently used, that connection is also least likely
+to be capable of re-use. Use CURLCLOSEPOLICY_OLDEST to make libcurl close the
+oldest connection, the one that was created first among the ones in the
+connection cache. The other close policies are not support yet. (Added in 7.7)
 .TP
 .B CURLOPT_FRESH_CONNECT
 Pass a long. Set to non-zero to make the next transfer use a new connection by

@@ -7,6 +7,15 @@
                                History of Changes
 
 
+Daniel (13 March 2001)
+- Added the policy stuff to the curl_easy_setopt man page for the two supported
+  policies.
+
+- Implemented some support for the CURLOPT_CLOSEPOLICY option. The policies
+  CURLCLOSEPOLICY_LEAST_RECENTLY_USED and CURLCLOSEPOLICY_OLDEST are now
+  supported, and the "least recently used" is used as default if no policy
+  is chosen.
+
 Daniel (12 March 2001)
 - Added CURLOPT_RANDOM_FILE and CURLOPT_EGDSOCKET to libcurl for seeding the
   SSL random engine. The random seeding support was also brought to the curl
