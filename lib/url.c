@@ -85,7 +85,7 @@
 #include "ssluse.h"
 #include "hostip.h"
 #include "if2ip.h"
-#include "download.h"
+#include "transfer.h"
 #include "sendf.h"
 #include "getpass.h"
 #include "progress.h"
@@ -1063,7 +1063,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     conn->curl_do = file;
     /* no done() function */
 
-    result = Transfer(conn, -1, -1, FALSE, NULL, /* no download */
+    result = Curl_Transfer(conn, -1, -1, FALSE, NULL, /* no download */
                       -1, NULL); /* no upload */
 
     return CURLE_OK;

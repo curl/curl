@@ -71,7 +71,7 @@
 
 #include "urldata.h"
 #include <curl/curl.h>
-#include "download.h"
+#include "transfer.h"
 #include "sendf.h"
 
 #include "progress.h"
@@ -154,7 +154,7 @@ CURLcode Curl_dict(struct connectdata *conn)
           word
           );
     
-    result = Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
+    result = Curl_Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
                       -1, NULL); /* no upload */
       
     if(result)
@@ -202,7 +202,7 @@ CURLcode Curl_dict(struct connectdata *conn)
           word
           );
     
-    result = Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
+    result = Curl_Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
                       -1, NULL); /* no upload */
       
     if(result)
@@ -226,7 +226,7 @@ CURLcode Curl_dict(struct connectdata *conn)
             "QUIT\n",
             ppath);
       
-      result = Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
+      result = Curl_Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
                         -1, NULL);
       
       if(result)

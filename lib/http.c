@@ -87,7 +87,7 @@
 
 #include "urldata.h"
 #include <curl/curl.h>
-#include "download.h"
+#include "transfer.h"
 #include "sendf.h"
 #include "formdata.h"
 #include "progress.h"
@@ -616,7 +616,7 @@ CURLcode Curl_http(struct connectdata *conn)
 
       data->request_size = 
         add_buffer_send(data->firstsocket, conn, req_buffer);
-      result = Transfer(conn, data->firstsocket, -1, TRUE,
+      result = Curl_Transfer(conn, data->firstsocket, -1, TRUE,
                         &http->readbytecount,
                           data->firstsocket,
                         &http->writebytecount);
@@ -644,7 +644,7 @@ CURLcode Curl_http(struct connectdata *conn)
         add_buffer_send(data->firstsocket, conn, req_buffer);
 
       /* prepare for transfer */
-      result = Transfer(conn, data->firstsocket, -1, TRUE,
+      result = Curl_Transfer(conn, data->firstsocket, -1, TRUE,
                         &http->readbytecount,
                         data->firstsocket,
                         &http->writebytecount);
@@ -690,7 +690,7 @@ CURLcode Curl_http(struct connectdata *conn)
         add_buffer_send(data->firstsocket, conn, req_buffer);
 
       /* HTTP GET/HEAD download: */
-      result = Transfer(conn, data->firstsocket, -1, TRUE, bytecount,
+      result = Curl_Transfer(conn, data->firstsocket, -1, TRUE, bytecount,
                         -1, NULL); /* nothing to upload */
     }
     if(result)

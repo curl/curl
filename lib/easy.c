@@ -72,7 +72,7 @@
 
 #include "urldata.h"
 #include <curl/curl.h>
-#include "highlevel.h"
+#include "transfer.h"
 #include <curl/types.h>
 
 #define _MPRINTF_REPLACE /* use our functions only */
