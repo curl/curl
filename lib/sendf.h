@@ -46,4 +46,18 @@ size_t ssend(int fd, struct connectdata *, void *fmt, size_t len);
 void infof(struct UrlData *, char *fmt, ...);
 void failf(struct UrlData *, char *fmt, ...);
 
+struct send_buffer {
+  char *buffer;
+  long size_max;
+  long size_used;
+};
+typedef struct send_buffer send_buffer;
+
+
+send_buffer *add_buffer_init(void);
+CURLcode add_buffer(send_buffer *in, void *inptr, size_t size);
+CURLcode add_bufferf(send_buffer *in, char *fmt, ...);
+size_t add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in);
+
+
 #endif

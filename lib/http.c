@@ -340,35 +340,41 @@ CURLcode http(struct connectdata *conn)
     http->p_accept = "Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*\r\n";
 
   do {
+    send_buffer *req_buffer;
     struct curl_slist *headers=data->headers;
-    sendf(data->firstsocket, data,
-          "%s " /* GET/HEAD/POST/PUT */
-          "%s HTTP/1.0\r\n" /* path */
-          "%s" /* proxyuserpwd */
-          "%s" /* userpwd */
-          "%s" /* range */
-          "%s" /* user agent */
-          "%s" /* cookie */
-          "%s" /* host */
-          "%s" /* pragma */
-          "%s" /* accept */
-          "%s", /* referer */
 
-          data->customrequest?data->customrequest:
-          (data->bits.no_body?"HEAD":
-           (data->bits.http_post || data->bits.http_formpost)?"POST":
-           (data->bits.http_put)?"PUT":"GET"),
-          ppath,
-          (data->bits.proxy_user_passwd && data->ptr_proxyuserpwd)?data->ptr_proxyuserpwd:"",
-          (data->bits.user_passwd && data->ptr_userpwd)?data->ptr_userpwd:"",
-          (data->bits.set_range && data->ptr_rangeline)?data->ptr_rangeline:"",
-          (data->useragent && *data->useragent && data->ptr_uagent)?data->ptr_uagent:"",
-          (data->ptr_cookie?data->ptr_cookie:""), /* Cookie: <data> */
-          (data->ptr_host?data->ptr_host:""), /* Host: host */
-          http->p_pragma?http->p_pragma:"",
-          http->p_accept?http->p_accept:"",
-          (data->bits.http_set_referer && data->ptr_ref)?data->ptr_ref:"" /* Referer: <data> <CRLF> */
-          );
+    /* initialize a dynamic send-buffer */
+    req_buffer = add_buffer_init();
+
+    /* add the main request stuff */
+    add_bufferf(req_buffer,
+                "%s " /* GET/HEAD/POST/PUT */
+                "%s HTTP/1.0\r\n" /* path */
+                "%s" /* proxyuserpwd */
+                "%s" /* userpwd */
+                "%s" /* range */
+                "%s" /* user agent */
+                "%s" /* cookie */
+                "%s" /* host */
+                "%s" /* pragma */
+                "%s" /* accept */
+                "%s", /* referer */
+
+                data->customrequest?data->customrequest:
+                (data->bits.no_body?"HEAD":
+                 (data->bits.http_post || data->bits.http_formpost)?"POST":
+                 (data->bits.http_put)?"PUT":"GET"),
+                ppath,
+                (data->bits.proxy_user_passwd && data->ptr_proxyuserpwd)?data->ptr_proxyuserpwd:"",
+                (data->bits.user_passwd && data->ptr_userpwd)?data->ptr_userpwd:"",
+                (data->bits.set_range && data->ptr_rangeline)?data->ptr_rangeline:"",
+                (data->useragent && *data->useragent && data->ptr_uagent)?data->ptr_uagent:"",
+                (data->ptr_cookie?data->ptr_cookie:""), /* Cookie: <data> */
+                (data->ptr_host?data->ptr_host:""), /* Host: host */
+                http->p_pragma?http->p_pragma:"",
+                http->p_accept?http->p_accept:"",
+                (data->bits.http_set_referer && data->ptr_ref)?data->ptr_ref:"" /* Referer: <data> <CRLF> */
+                );
 
     if(co) {
       int count=0;
@@ -376,19 +382,16 @@ CURLcode http(struct connectdata *conn)
       while(co) {
         if(co->value && strlen(co->value)) {
           if(0 == count) {
-            sendf(data->firstsocket, data,
-                  "Cookie:");
+            add_bufferf(req_buffer, "Cookie:");
           }
-          sendf(data->firstsocket, data,
-                "%s%s=%s", count?"; ":"", co->name,
-                co->value);
+          add_bufferf(req_buffer,
+                      "%s%s=%s", count?"; ":"", co->name, co->value);
           count++;
         }
         co = co->next; /* next cookie please */
       }
       if(count) {
-        sendf(data->firstsocket, data,
-              "\r\n");
+        add_buffer(req_buffer, "\r\n", 2);
       }
       cookie_freelist(co); /* free the cookie list */
       co=NULL;
@@ -419,16 +422,16 @@ CURLcode http(struct connectdata *conn)
       switch(data->timecondition) {
       case TIMECOND_IFMODSINCE:
       default:
-        sendf(data->firstsocket, data,
-              "If-Modified-Since: %s\r\n", buf);
+        add_bufferf(req_buffer,
+                    "If-Modified-Since: %s\r\n", buf);
         break;
       case TIMECOND_IFUNMODSINCE:
-        sendf(data->firstsocket, data,
-              "If-Unmodified-Since: %s\r\n", buf);
+        add_bufferf(req_buffer,
+                    "If-Unmodified-Since: %s\r\n", buf);
         break;
       case TIMECOND_LASTMOD:
-        sendf(data->firstsocket, data,
-              "Last-Modified: %s\r\n", buf);
+        add_bufferf(req_buffer,
+                    "Last-Modified: %s\r\n", buf);
         break;
       }
     }
@@ -445,9 +448,7 @@ CURLcode http(struct connectdata *conn)
         if(*ptr) {
           /* only send this if the contents was non-blank */
 
-          sendf(data->firstsocket, data,
-                "%s\015\012",
-                headers->data);
+          add_bufferf(req_buffer, "%s\r\n", headers->data);
         }
       }
       headers = headers->next;
@@ -468,12 +469,13 @@ CURLcode http(struct connectdata *conn)
                        generated form data */
       data->in = (FILE *)&http->form;
 
-      sendf(data->firstsocket, data,
-            "Content-Length: %d\r\n",
-            http->postsize-2);
+      add_bufferf(req_buffer,
+                  "Content-Length: %d\r\n", http->postsize-2);
 
+      /* set upload size to the progress meter */
       pgrsSetUploadSize(data, http->postsize);
 
+      add_buffer_send(data->firstsocket, conn, req_buffer);
       result = Transfer(conn, data->firstsocket, -1, TRUE,
                         &http->readbytecount,
                           data->firstsocket,
@@ -487,16 +489,20 @@ CURLcode http(struct connectdata *conn)
       /* Let's PUT the data to the server! */
 
       if(data->infilesize>0) {
-        sendf(data->firstsocket, data,
-              "Content-Length: %d\r\n\r\n", /* file size */
-              data->infilesize );
+        add_bufferf(req_buffer,
+                    "Content-Length: %d\r\n\r\n", /* file size */
+                    data->infilesize );
       }
       else
-        sendf(data->firstsocket, data,
-              "\015\012");
+        add_bufferf(req_buffer, "\015\012");
 
+      /* set the upload size to the progress meter */
       pgrsSetUploadSize(data, data->infilesize);
 
+      /* this sends the buffer and frees all the buffer resources */
+      add_buffer_send(data->firstsocket, conn, req_buffer);
+
+      /* prepare for transfer */
       result = Transfer(conn, data->firstsocket, -1, TRUE,
                         &http->readbytecount,
                         data->firstsocket,
@@ -512,30 +518,34 @@ CURLcode http(struct connectdata *conn)
         if(!checkheaders(data, "Content-Length:"))
           /* we allow replacing this header, although it isn't very wise to
              actually set your own */
-          sendf(data->firstsocket, data,
-                "Content-Length: %d\r\n",
-                (data->postfieldsize?data->postfieldsize:
-                 strlen(data->postfields)) );
+          add_bufferf(req_buffer,
+                      "Content-Length: %d\r\n",
+                      (data->postfieldsize?data->postfieldsize:
+                       strlen(data->postfields)) );
 
         if(!checkheaders(data, "Content-Type:"))
-          sendf(data->firstsocket, data,
-                "Content-Type: application/x-www-form-urlencoded\r\n");
+          add_bufferf(req_buffer,
+                      "Content-Type: application/x-www-form-urlencoded\r\n");
 
         /* and here comes the actual data */
         if(data->postfieldsize) {
-          ssend(data->firstsocket, conn, "\r\n", 2);
-          ssend(data->firstsocket, conn, data->postfields, data->postfieldsize);
-          ssend(data->firstsocket, conn, "\r\n", 2);
+          add_buffer(req_buffer, "\r\n", 2);
+          add_buffer(req_buffer, data->postfields,
+                     data->postfieldsize);
+          add_buffer(req_buffer, "\r\n", 2);
         }
-        sendf(data->firstsocket, data,
-              "\r\n"
-              "%s\r\n",
-              data->postfields );
+        else {
+          add_bufferf(req_buffer,
+                      "\r\n"
+                      "%s\r\n",
+                      data->postfields );
+        }
       }
       else
-        sendf(data->firstsocket, data, "\r\n");
+        add_buffer(req_buffer, "\r\n", 2);
 
       /* HTTP GET/HEAD download: */
+      add_buffer_send(data->firstsocket, conn, req_buffer);
       result = Transfer(conn, data->firstsocket, -1, TRUE, bytecount,
                         -1, NULL); /* nothing to upload */
     }
