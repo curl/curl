@@ -23,6 +23,6 @@
  *
  * $Id$
  *****************************************************************************/
-CURLcode file(struct connectdata *conn);
-
+CURLcode Curl_file(struct connectdata *conn);
+CURLcode Curl_file_connect(struct connectdata *conn);
 #endif

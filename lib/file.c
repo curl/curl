@@ -91,25 +91,19 @@
 #include "memdebug.h"
 #endif
 
-CURLcode file(struct connectdata *conn)
+/* Emulate a connect-then-transfer protocol. We connect to the file here */
+CURLcode Curl_file_connect(struct connectdata *conn)
 {
-  /* This implementation ignores the host name in conformance with 
-     RFC 1738. Only local files (reachable via the standard file system)
-     are supported. This means that files on remotely mounted directories
-     (via NFS, Samba, NT sharing) can be accessed through a file:// URL
-  */
-  CURLcode res = CURLE_OK;
-  char *path = conn->path;
-  struct stat statbuf;
-  size_t expected_size=-1;
-  size_t nread;
-  struct UrlData *data = conn->data;
-  char *buf = data->buffer;
-  int bytecount = 0;
-  struct timeval start = Curl_tvnow();
-  struct timeval now = start;
+  char *actual_path = curl_unescape(conn->path, 0);
+  struct FILE *file;
   int fd;
-  char *actual_path = curl_unescape(path, 0);
+
+  file = (struct FILE *)malloc(sizeof(struct FILE));
+  if(!file)
+    return CURLE_OUT_OF_MEMORY;
+
+  memset(file, 0, sizeof(struct FILE));
+  conn->proto.file = file;
 
 #if defined(WIN32) || defined(__EMX__)
   int i;
@@ -126,9 +120,37 @@ CURLcode file(struct connectdata *conn)
   free(actual_path);
 
   if(fd == -1) {
-    failf(data, "Couldn't open file %s", path);
+    failf(conn->data, "Couldn't open file %s", conn->path);
     return CURLE_FILE_COULDNT_READ_FILE;
   }
+  file->fd = fd;
+
+  return CURLE_OK;
+}
+
+/* This is the do-phase, separated from the connect-phase above */
+
+CURLcode Curl_file(struct connectdata *conn)
+{
+  /* This implementation ignores the host name in conformance with 
+     RFC 1738. Only local files (reachable via the standard file system)
+     are supported. This means that files on remotely mounted directories
+     (via NFS, Samba, NT sharing) can be accessed through a file:// URL
+  */
+  CURLcode res = CURLE_OK;
+  struct stat statbuf;
+  size_t expected_size=-1;
+  size_t nread;
+  struct UrlData *data = conn->data;
+  char *buf = data->buffer;
+  int bytecount = 0;
+  struct timeval start = Curl_tvnow();
+  struct timeval now = start;
+  int fd;
+
+  /* get the fd from the connection phase */
+  fd = conn->proto.file->fd;
+
   if( -1 != fstat(fd, &statbuf)) {
     /* we could stat it, then read out the size */
     expected_size = statbuf.st_size;

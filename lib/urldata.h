@@ -183,6 +183,13 @@ struct FTP {
   char *entrypath; /* the PWD reply when we logged on */
 };
 
+/****************************************************************************
+ * FILE unique setup
+ ***************************************************************************/
+struct FILE {
+  int fd; /* open file descriptor to read from! */
+};
+
 /*
  * Boolean values that concerns this connection.
  */
@@ -318,9 +325,9 @@ struct connectdata {
     struct HTTP *gopher; /* alias, just for the sake of being more readable */
     struct HTTP *https;  /* alias, just for the sake of being more readable */
     struct FTP *ftp;
+    struct FILE *file;
 #if 0 /* no need for special ones for these: */
     struct TELNET *telnet;
-    struct FILE *file;
     struct LDAP *ldap;
     struct DICT *dict;
 #endif

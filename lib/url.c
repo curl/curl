@@ -982,6 +982,11 @@ static CURLcode _connect(CURL *curl,
     *in_connect = NULL; /* clear the pointer */
     return CURLE_OUT_OF_MEMORY;
   }
+  /* We must set the return variable as soon as possible, so that our
+     parent can cleanup any possible allocs we may have done before
+     any failure */
+  *in_connect = conn;
+
   /* we have to init the struct */
   memset(conn, 0, sizeof(struct connectdata));
 
@@ -993,6 +998,12 @@ static CURLcode _connect(CURL *curl,
   conn->firstsocket = -1;     /* no file descriptor */
   conn->secondarysocket = -1; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
+
+  /* Default protocol-indepent behaveiour doesn't support persistant
+     connections, so we set this to force-close. Protocols that support
+     this need to set this to FALSE in their "curl_do" functions. */
+  conn->bits.close = TRUE;
+
 
   /***********************************************************
    * We need to allocate memory to store the path in. We get the size of the
@@ -1425,13 +1436,20 @@ static CURLcode _connect(CURL *curl,
   else if (strequal(conn->protostr, "FILE")) {
     conn->protocol |= PROT_FILE;
 
-    conn->curl_do = file;
+    conn->curl_do = Curl_file;
     /* no done() function */
 
-    result = Curl_Transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                      -1, NULL); /* no upload */
+    /* anyway, this is supposed to be the connect function so we better
+       at least check that the file is present here! */
+    result = Curl_file_connect(conn);
 
-    return CURLE_OK;
+    /* Setup a "faked" transfer that'll do nothing */
+    if(CURLE_OK == result) {
+      result = Curl_Transfer(conn, -1, -1, FALSE, NULL, /* no download */
+                             -1, NULL); /* no upload */
+    }
+
+    return result;
   }
   else {
     /* We fell through all checks and thus we don't support the specified
@@ -1582,7 +1600,6 @@ static CURLcode _connect(CURL *curl,
      */
     ConnectionStore(data, conn);
   }
-  *in_connect = conn;
 
   /*************************************************************
    * Resolve the name of the server or proxy
@@ -1779,30 +1796,15 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect,
   if(CURLE_OK != code) {
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
-    struct UrlData *data;
-    int index;
-
     conn = (struct connectdata *)*in_connect;
-    data = conn->data;
-#if 0
     if(conn) {
-      if(conn->path)
-        free(conn->path);
-#ifdef ENABLE_IPV6
-      if(conn->hp)
-        freeaddrinfo(conn->hp);
-#else
-      if(conn->hostent_buf)
-        free(conn->hostent_buf);
-#endif
-      free(conn);
-      *in_connect=NULL;
+      struct UrlData *data;
+      int index;
+      data = conn->data;
+      index = conn->connectindex; /* get the index */
+      curl_disconnect(conn);      /* close the connection */
+      data->connects[index]=NULL; /* clear the pointer */
     }
-#endif
-    index = conn->connectindex; /* get the index */
-    curl_disconnect(conn);      /* close the connection */
-    data->connects[index]=NULL; /* clear the pointer */
-
   }
   return code;
 }
