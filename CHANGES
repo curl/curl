@@ -8,9 +8,18 @@
 
 
 Daniel (12 March 2001)
+- Added 5 new libcurl options to curl/curl.h that can be used to control the
+  persistant connection support in libcurl. They're also documented (fairly
+  thoroughly) in the curl_easy_setopt.3 man page. Three of them are now
+  implemented, although not really tested at this point... Anyway, the new
+  implemented options are named CURLOPT_MAXCONNECTS, CURLOPT_FRESH_CONNECT,
+  CURLOPT_FORBID_REUSE. The ones still left to write code for are:
+  CURLOPT_CLOSEPOLICY and its related option CURLOPT_CLOSEFUNCTION.
+
 - Made curl (the actual command line tool) use the new libcurl 7.7 persistant
   connection support by re-using the same curl handle for every specified file
   transfer and after some more test case tweaking we have 100% test case OK.
+  I made some test cases return HTTP/1.0 now to make sure that works as well.
 
 - Had to add 'Connection: close' to the headers of a bunch of test cases so
   that curl behaves "old-style" since the test http server doesn't do multiple
