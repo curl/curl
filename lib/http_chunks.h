@@ -1,0 +1,73 @@
+#ifndef __HTTP_CHUNKS_H
+#define __HTTP_CHUNKS_H
+/*****************************************************************************
+ *                                  _   _ ____  _     
+ *  Project                     ___| | | |  _ \| |    
+ *                             / __| | | | |_) | |    
+ *                            | (__| |_| |  _ <| |___ 
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * In order to be useful for every potential user, curl and libcurl are
+ * dual-licensed under the MPL and the MIT/X-derivate licenses.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the MPL or the MIT/X-derivate
+ * licenses. You may pick one of these licenses.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * $Id$
+ *****************************************************************************/
+/*
+ * The longest possible hexadecimal number we support in a chunked transfer.
+ * Weird enoug, RFC2616 doesn't set a maximum size! Since we use strtoul()
+ * to convert it, we "only" support 2^32 bytes chunk data.
+ */
+#define MAXNUM_SIZE 16
+
+typedef enum {
+  CHUNK_LOST, /* never use */
+
+  /* In this we await and buffer all hexadecimal digits until we get one
+     that isn't a hexadecimal digit. When done, we go POSTHEX */
+  CHUNK_HEX,
+
+  /* We have received the hexadecimal digit and we eat all characters until
+     we get a CRLF pair. When we see a CR we go to the CR state. */
+  CHUNK_POSTHEX,
+
+  /* A single CR has been found and we should get a LF right away in this
+     state or we go back to POSTHEX. When LF is received, we go to DATA.
+     If the size given was zero, we set state to STOP and return. */
+  CHUNK_CR,
+
+  /* We eat the amount of data specified. When done, we move back to the
+     HEX state. */
+  CHUNK_DATA,
+
+  /* This is only used to really mark that we're out of the game */
+  CHUNK_STOP,
+
+  CHUNK_LAST /* never use */
+} ChunkyState;
+
+typedef enum {
+  CHUNKE_OK,
+  CHUNKE_TOO_LONG_HEX,
+  CHUNKE_WRITE_ERROR,
+  CHUNKE_STATE_ERROR,
+  CHUNKE_LAST
+} CHUNKcode;
+
+struct Curl_chunker {
+  char hexbuffer[ MAXNUM_SIZE + 1];
+  int hexindex;
+  ChunkyState state;
+  unsigned long datasize;
+};
+
+#endif
