@@ -261,7 +261,8 @@ typedef int curl_socket_t;
 #error "ares does not yet support IPv6. Disable IPv6 or ares and rebuild"
 #endif
 
-#if defined(WIN32) && !defined(__CYGWIN__) && !defined(USE_ARES)
+#if defined(WIN32) && !defined(__CYGWIN__) && !defined(USE_ARES) && \
+    !defined(__LCC__)  /* lcc-win32 doesn't have _beginthreadex() */
 #ifdef ENABLE_IPV6
 #define USE_THREADING_GETADDRINFO
 #else

@@ -52,11 +52,11 @@ extern "C" {
  * platforms. We also provide a CURL_FORMAT_OFF_T define to use in *printf
  * format strings when outputting a variable of type curl_off_t.
  */
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__LCC__)
 /* MSVC */
   typedef signed __int64 curl_off_t;
 #define CURL_FORMAT_OFF_T "%I64d"
-#else /* MSC_VER */
+#else /* _MSC_VER || __LCC__ */
 #if (defined(__GNUC__) && defined(WIN32)) || defined(__WATCOMC__)
 /* gcc on windows or Watcom */
   typedef long long curl_off_t;
@@ -88,7 +88,7 @@ extern "C" {
 #define CURL_FORMAT_OFF_T "%ld"
 #endif
 #endif /* GCC or Watcom on Windows */
-#endif /* MSC_VER */
+#endif /* _MSC_VER || __LCC__ */
 
 #ifdef UNDEF_FILE_OFFSET_BITS
 /* this was defined above for our checks, undefine it again */
@@ -327,7 +327,7 @@ typedef enum {
  * platforms.
  */
 #if defined(__STDC__) || defined(_MSC_VER) || defined(__cplusplus) || \
-  defined(__HP_aCC) || defined(__BORLANDC__)
+  defined(__HP_aCC) || defined(__BORLANDC__) || defined(__LCC__)
   /* This compiler is believed to have an ISO compatible preprocessor */
 #define CURL_ISOCPP
 #else

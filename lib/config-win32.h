@@ -1,6 +1,9 @@
 /* config.h.  Generated automatically by configure.  */
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
+#ifndef __CONFIG_WIN32_H
+#define __CONFIG_WIN32_H
+
 /* Define if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
@@ -223,9 +226,12 @@
 /*************************************************
  * This section is for compiler specific defines.*
  *************************************************/
-#if defined(MINGW32) || defined(__WATCOMC__) /* Borland and MS don't have this */
+/* Borland and MS don't have this */
+#if defined(MINGW32) || defined(__WATCOMC__) || defined(__LCC__)
 
 /* Define if you have the <unistd.h> header file.  */
 #define HAVE_UNISTD_H 1
+
+#endif
 
 #endif
