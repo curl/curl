@@ -136,7 +136,8 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
    * field, so there's not much to be done about that.
    */
   gettimeofday(&tv, NULL);
-  channel->next_id = (tv.tv_sec ^ tv.tv_usec ^ getpid()) & 0xffff;
+  channel->next_id = (unsigned short)
+    (tv.tv_sec ^ tv.tv_usec ^ getpid()) & 0xffff;
 
   channel->queries = NULL;
 
