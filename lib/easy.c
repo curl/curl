@@ -233,15 +233,17 @@ CURLcode curl_easy_perform(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
 
-  if (!data->hostcache) {
-    if (Curl_global_host_cache_use(data)) {
-      data->hostcache = Curl_global_host_cache_get();
+  if (Curl_global_host_cache_use(data) && data->hostcache != Curl_global_host_cache_get()) {
+    if (data->hostcache) {
+      Curl_hash_destroy(data->hostcache);
     }
-    else {
-      data->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
-    }
+    data->hostcache = Curl_global_host_cache_get();
   }
 
+  if (!data->hostcache) {
+    data->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
+  }
+  
   return Curl_perform(data);
 }
 
