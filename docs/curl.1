@@ -113,7 +113,7 @@ difference.
 .IP "--ciphers <list of ciphers>"
 (SSL) Specifies which ciphers to use in the connection. The list of ciphers
 must be using valid ciphers. Read up on SSL cipher list details on this URL:
-.I http://www.openssl.org/docs/apps/ciphers.html (Option added in curl 7.9)
+.I http://www.openssl.org/docs/apps/ciphers.html
 
 If this option is used several times, the last one will override the others.
 .IP "--compressed"
@@ -134,7 +134,7 @@ operation. Curl writes all cookies previously read from a specified file as
 well as all cookies received from remote server(s). If no cookies are known,
 no file will be written. The file will be written using the Netscape cookie
 file format. If you set the file name to a single dash, "-", the cookies will
-be written to stdout. (Option added in curl 7.9)
+be written to stdout.
 
 .B NOTE
 If the cookie jar can't be created or written to, the whole curl operation
@@ -295,7 +295,7 @@ If this option is used twice, the second will again disable silent failure.
 .IP "--ftp-create-dirs"
 (FTP) When an FTP URL/operation uses a path that doesn't currently exist on
 the server, the standard behaviour of curl is to fail. Using this option, curl
-will instead attempt to create missing directories.
+will instead attempt to create missing directories. (Added in 7.10.7)
 
 If this option is used twice, the second will again disable silent failure.
 .IP "-F/--form <name=content>"
@@ -334,7 +334,7 @@ contents but they should be encoded according to the URI standard.
 When used, this option will make all data specified with -d/--data or
 --data-binary to be used in a HTTP GET request instead of the POST request
 that otherwise would be used. The data will be appended to the URL with a '?'
-separator. (Option added in curl 7.9)
+separator.
 
 If used in combination with -I, the POST data will instead be appended to the
 URL with a HEAD request.
