@@ -29,8 +29,6 @@ missing
 mkinstalldirs
 reconf
 stamp-h.in
-perl/README
-perl/*.pl.in
 src/*.[ch]
 src/*in
 src/*am
