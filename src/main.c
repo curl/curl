@@ -2125,6 +2125,18 @@ operate(struct Configurable *config, int argc, char *argv[])
 
   urlnode = config->url_list;
 
+  if(config->headerfile) {
+    /* open file for output: */
+    if(strcmp(config->headerfile,"-")) {
+      heads.filename = config->headerfile;
+      headerfilep=NULL;
+    }
+    else
+      headerfilep=stdout;
+    heads.stream = headerfilep;
+    heads.config = config;
+  }
+
   /* loop through the list of given URLs */
   while(urlnode) {
 
@@ -2291,18 +2303,6 @@ operate(struct Configurable *config, int argc, char *argv[])
          config->resume_from_current) {
         config->resume_from = -1; /* -1 will then force get-it-yourself */
       }
-      if(config->headerfile) {
-        /* open file for output: */
-        if(strcmp(config->headerfile,"-")) {
-          heads.filename = config->headerfile;
-          headerfilep=NULL;
-        }
-        else
-          headerfilep=stdout;
-        heads.stream = headerfilep;
-        heads.config = config;
-      }
-    
       if(outs.stream && isatty(fileno(outs.stream)) &&
          !(config->conf&(CONF_UPLOAD|CONF_HTTPPOST)))
         /* we send the output to a tty and it isn't an upload operation,
@@ -2512,9 +2512,6 @@ operate(struct Configurable *config, int argc, char *argv[])
         fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
 #endif
 
-      if(config->headerfile && !headerfilep && heads.stream)
-        fclose(heads.stream);
-
       if (outfile && !strequal(outfile, "-") && outs.stream)
         fclose(outs.stream);
 
@@ -2567,6 +2564,9 @@ operate(struct Configurable *config, int argc, char *argv[])
     urlnode = nextnode;
 
   } /* while-loop through all URLs */
+
+  if(config->headerfile && !headerfilep && heads.stream)
+    fclose(heads.stream);
 
   if(allocuseragent)
     free(config->useragent);
