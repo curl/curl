@@ -1838,7 +1838,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       return result;
       
   }
-  else if(!data->set.no_body) {
+  else if(!conn->bits.no_body) {
     /* Retrieve file or directory */
     bool dirlist=FALSE;
     curl_off_t downloadsize=-1;
@@ -2209,7 +2209,7 @@ CURLcode ftp_perform(struct connectdata *conn,
   /* If we have selected NOBODY and HEADER, it means that we only want file
      information. Which in FTP can't be much more than the file size and
      date. */
-  if(data->set.no_body && data->set.include_header && ftp->file) {
+  if(conn->bits.no_body && data->set.include_header && ftp->file) {
     /* The SIZE command is _not_ RFC 959 specified, and therefor many servers
        may not support it! It is however the only way we have to get a file's
        size! */
@@ -2272,7 +2272,7 @@ CURLcode ftp_perform(struct connectdata *conn,
     return CURLE_OK;
   }
 
-  if(data->set.no_body)
+  if(conn->bits.no_body)
     /* doesn't really transfer any data */
     ftp->no_transfer = TRUE;
   /* Get us a second connection up and connected */

@@ -498,7 +498,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  * If we requested a "no body", this is a good time to get
                  * out and return home.
                  */
-                if(data->set.no_body)
+                if(conn->bits.no_body)
                   stop_reading = TRUE;
                 else {
                   /* If we know the expected size of this document, we set the
@@ -555,10 +555,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               /* This is the first header, it MUST be the error code line
                  or else we consiser this to be the body right away! */
               int httpversion_major;
-              int nc=sscanf (k->p, " HTTP/%d.%d %3d",
-                             &httpversion_major,
-                             &k->httpversion,
-                             &k->httpcode);
+              int nc=sscanf(k->p, " HTTP/%d.%d %3d",
+                            &httpversion_major,
+                            &k->httpversion,
+                            &k->httpcode);
               if (nc==3) {
                 k->httpversion += 10 * httpversion_major;
               }
@@ -566,7 +566,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 /* this is the real world, not a Nirvana
                    NCSA 1.5.x returns this crap when asked for HTTP/1.1
                 */
-                nc=sscanf (k->p, " HTTP %3d", &k->httpcode);
+                nc=sscanf(k->p, " HTTP %3d", &k->httpcode);
                 k->httpversion = 10;
                
                /* If user has set option HTTP200ALIASES,
@@ -1274,7 +1274,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
      * returning.
      */
 
-    if(!(data->set.no_body) && (conn->size != -1) &&
+    if(!(conn->bits.no_body) && (conn->size != -1) &&
        (k->bytecount != conn->size) &&
        !conn->newurl) {
       failf(data, "transfer closed with %" FORMAT_OFF_T
@@ -1331,7 +1331,7 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
       Curl_pgrsSetDownloadSize(data, conn->size);
   }
   /* we want header and/or body, if neither then don't do this! */
-  if(conn->bits.getheader || !data->set.no_body) {
+  if(conn->bits.getheader || !conn->bits.no_body) {
 
     FD_ZERO (&k->readfd);               /* clear it */
     if(conn->sockfd != CURL_SOCKET_BAD) {
@@ -1420,7 +1420,6 @@ void Curl_single_fdset(struct connectdata *conn,
 static CURLcode
 Transfer(struct connectdata *conn)
 {
-  struct SessionHandle *data = conn->data;
   CURLcode result;
   struct Curl_transfer_keeper *k = &conn->keep;
   bool done=FALSE;
@@ -1435,7 +1434,7 @@ Transfer(struct connectdata *conn)
     return CURLE_OK;
 
   /* we want header and/or body, if neither then don't do this! */
-  if(!conn->bits.getheader && data->set.no_body)
+  if(!conn->bits.getheader && conn->bits.no_body)
     return CURLE_OK;
 
   k->writefdp = &k->writefd; /* store the address of the set */
@@ -1859,7 +1858,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
     if(data->set.httpreq != HTTPREQ_GET) {
       data->set.httpreq = HTTPREQ_GET; /* enforce GET request */
       infof(data, "Disables POST, goes with %s\n",
-            data->set.no_body?"HEAD":"GET");
+            data->set.opt_no_body?"HEAD":"GET");
     }
     break;
   case 304: /* Not Modified */

@@ -7,6 +7,45 @@
                                   Changelog
 
 Daniel (6 April 2004)
+- Gisle Vanem's fixed bug #927979 reported by Nathan O'Sullivan. The problem
+  made libcurl on Windows leak a small amount of memory in each name resolve
+  when not used as a DLL.
+
+- New authentication code added, particularly noticable when doing POST or PUT
+  with Digest or NTLM. libcurl will now use HEAD to negotiate the
+  authentication and when done perform the requested POST. Previously libcurl
+  sent POST immediately and expected the server to reply a final status code
+  with an error and then libcurl would not send the request-body but instead
+  send then next request in the sequence.
+
+  The reason for this change is due to IIS6 barfing on libcurl when we attempt
+  to POST with NTLM authentication. The reason for the problems is found in
+  RFC2616 section 8.2.3 regarding how servers should deal with the 100
+  continue request-header:
+
+        If it responds with a final status code, it MAY close the transport
+        connection or it MAY continue to read and discard the rest of the
+        request.
+
+  Previous versions of IIS clearly did close the connection in this case,
+  while this newer version decided it should "read and discard". That would've
+  forced us to send the whole POST (or PUT) data only to have it discarded and
+  then be forced to send it again. To avoid that huge penality, we switch to
+  using HEAD until we are authenticated and then send the POST.
+
+  The only actual drawback I can think of (except for the odd sites that might
+  treat HEAD differently than they would treat POST/PUT when given the same
+  URL) is that if you do POST with CURLAUTH_ANY set and the site requires NO
+  authentication, libcurl will still use a HEAD in a first round and then do a
+  POST.
+
+  If you do a HEAD or a GET on a site using CURLAUTH_ANY, libcurl will send
+  an un-authenticated request at once, which then is the only request if the
+  site requires no auth.
+
+  Alan Pinstein helped me work out the protocol details by figuring out why
+  libcurl failed and what IIS6 expects.
+
 - The --limit-rate logic was corrected and now it works a lot better for
   higher speeds, such as '10m' or similar. Reported in bug report #930249.
 

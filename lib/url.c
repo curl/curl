@@ -463,7 +463,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Do not include the body part in the output data stream.
      */
-    data->set.no_body = va_arg(param, long)?TRUE:FALSE;
+    data->set.opt_no_body = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FAILONERROR:
     /*
@@ -2066,6 +2066,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   conn->bits.user_passwd = data->set.userpwd?1:0;
   conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
+  conn->bits.no_body = data->set.opt_no_body;
 
   /* This initing continues below, see the comment "Continue connectdata
    * initialization here" */
@@ -2923,6 +2924,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      * be new for this request even when we re-use an existing connection */
     conn->bits.user_passwd = old_conn->bits.user_passwd;
     conn->bits.proxy_user_passwd = old_conn->bits.proxy_user_passwd;
+
+    /* get the newly set value, not the old one */
+    conn->bits.no_body = old_conn->bits.no_body;
 
     /* If we speak over a proxy, we need to copy the host name too, as it
        might be another remote host even when re-using a connection */

@@ -186,6 +186,17 @@ void Curl_http_auth_act(struct connectdata *conn)
       conn->newurl = strdup(data->change.url); /* clone URL */
     data->state.authavail = CURLAUTH_NONE; /* clear it here */
   }
+  else if(!data->state.authdone && (data->info.httpcode < 400)) {
+    /* no (known) authentication available,
+       authentication is not "done" yet and
+       no authentication seems to be required and
+       we didn't try HEAD or GET */
+    if((data->set.httpreq != HTTPREQ_GET) &&
+       (data->set.httpreq != HTTPREQ_HEAD)) {
+      conn->newurl = strdup(data->change.url); /* clone URL */
+      data->state.authdone = TRUE;
+    }
+  }
 }
 
 /**
@@ -204,13 +215,16 @@ static CURLcode http_auth_headers(struct connectdata *conn,
   char *auth=NULL;
 
   curlassert(data);
-  data->state.authdone = FALSE; /* default is no */
 
   if(!data->state.authstage) {
-    if(conn->bits.httpproxy && conn->bits.proxy_user_passwd)
+    if(conn->bits.httpproxy && conn->bits.proxy_user_passwd) {
+      data->state.authdone = FALSE;
       Curl_http_auth_stage(data, 407);
-    else if(conn->bits.user_passwd)
+    }
+    else if(conn->bits.user_passwd) {
+      data->state.authdone = FALSE;
       Curl_http_auth_stage(data, 401);
+    }
     else {
       data->state.authdone = TRUE;
       return CURLE_OK; /* no authentication with no user or password */
@@ -1139,6 +1153,7 @@ CURLcode Curl_http(struct connectdata *conn)
   const char *te = ""; /* tranfer-encoding */
   char *ptr;
   char *request;
+  Curl_HttpReq httpreq = data->set.httpreq;
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -1157,19 +1172,40 @@ CURLcode Curl_http(struct connectdata *conn)
 
   if ( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
        data->set.upload) {
-    data->set.httpreq = HTTPREQ_PUT;
+    httpreq = HTTPREQ_PUT;
   }
 
-  request = data->set.customrequest?
-    data->set.customrequest:
-    (data->set.no_body?(char *)"HEAD":
-     ((HTTPREQ_POST == data->set.httpreq) ||
-      (HTTPREQ_POST_FORM == data->set.httpreq))?(char *)"POST":
-     (HTTPREQ_PUT == data->set.httpreq)?(char *)"PUT":(char *)"GET");
+  /* Now set the 'request' pointer to the proper request string */
+  if(data->set.customrequest)
+    request = data->set.customrequest;
+  else {
+    if(conn->bits.no_body)
+      request = (char *)"HEAD";
+    else {
+      curlassert((httpreq > HTTPREQ_NONE) && (httpreq < HTTPREQ_LAST));
+      switch(httpreq) {
+      case HTTPREQ_POST:
+      case HTTPREQ_POST_FORM:
+        request = (char *)"POST";
+        break;
+      case HTTPREQ_PUT:
+        request = (char *)"PUT";
+        break;
+      case HTTPREQ_GET:
+        request = (char *)"GET";
+        break;
+      case HTTPREQ_HEAD:
+        request = (char *)"HEAD";
+        break;
+      default: /* this should never happen */
+        break;
+      }
+    }
+  }
   
-  /* The User-Agent string has been built in url.c already, because it might
-     have been used in the proxy connect, but if we have got a header with
-     the user-agent string specified, we erase the previously made string
+  /* The User-Agent string might have been allocated in url.c already, because
+     it might have been used in the proxy connect, but if we have got a header
+     with the user-agent string specified, we erase the previously made string
      here. */
   if(checkheaders(data, "User-Agent:") && conn->allocptr.uagent) {
     free(conn->allocptr.uagent);
@@ -1180,6 +1216,16 @@ CURLcode Curl_http(struct connectdata *conn)
   result = http_auth_headers(conn, request, ppath);
   if(result)
     return result;
+
+  if(!data->state.authdone && (httpreq != HTTPREQ_GET)) {
+    /* Until we are authenticated, we switch over to HEAD. Unless its a GET
+       we want to do. The explanation for this is rather long and boring, but
+       the point is that it can't be done otherwise without risking having to
+       send the POST or PUT data multiple times. */
+    httpreq = HTTPREQ_HEAD;
+    request = (char *)"HEAD";
+    conn->bits.no_body = TRUE;
+  }
 
   Curl_safefree(conn->allocptr.ref);
   if(data->change.referer && !checkheaders(data, "Referer:"))
@@ -1193,7 +1239,7 @@ CURLcode Curl_http(struct connectdata *conn)
   else
     conn->allocptr.cookie = NULL;
 
-  if(!conn->bits.upload_chunky && (data->set.httpreq != HTTPREQ_GET)) {
+  if(!conn->bits.upload_chunky && (httpreq != HTTPREQ_GET)) {
     /* not a chunky transfer yet, but data is to be sent */
     ptr = checkheaders(data, "Transfer-Encoding:");
     if(ptr) {
@@ -1284,7 +1330,7 @@ CURLcode Curl_http(struct connectdata *conn)
     /* The path sent to the proxy is in fact the entire URL */
     ppath = data->change.url;
   }
-  if(HTTPREQ_POST_FORM == data->set.httpreq) {
+  if(HTTPREQ_POST_FORM == httpreq) {
     /* we must build the whole darned post sequence first, so that we have
        a size of the whole shebang before we start to send it */
      result = Curl_getFormData(&http->sendit, data->set.httppost,
@@ -1303,9 +1349,9 @@ CURLcode Curl_http(struct connectdata *conn)
   if(!checkheaders(data, "Accept:"))
     http->p_accept = "Accept: */*\r\n";
 
-  if(( (HTTPREQ_POST == data->set.httpreq) ||
-       (HTTPREQ_POST_FORM == data->set.httpreq) ||
-       (HTTPREQ_PUT == data->set.httpreq) ) &&
+  if(( (HTTPREQ_POST == httpreq) ||
+       (HTTPREQ_POST_FORM == httpreq) ||
+       (HTTPREQ_PUT == httpreq) ) &&
      conn->resume_from) {
     /**********************************************************************
      * Resuming upload in HTTP means that we PUT or POST and that we have
@@ -1368,14 +1414,14 @@ CURLcode Curl_http(struct connectdata *conn)
      * or uploading and we always let customized headers override our internal
      * ones if any such are specified.
      */
-    if((data->set.httpreq == HTTPREQ_GET) &&
+    if((httpreq == HTTPREQ_GET) &&
        !checkheaders(data, "Range:")) {
       /* if a line like this was already allocated, free the previous one */
       if(conn->allocptr.rangeline)
         free(conn->allocptr.rangeline);
       conn->allocptr.rangeline = aprintf("Range: bytes=%s\r\n", conn->range);
     }
-    else if((data->set.httpreq != HTTPREQ_GET) &&
+    else if((httpreq != HTTPREQ_GET) &&
             !checkheaders(data, "Content-Range:")) {
 
       if(conn->resume_from) {
@@ -1538,11 +1584,11 @@ CURLcode Curl_http(struct connectdata *conn)
     http->postdata = NULL;  /* nothing to post at this point */
     Curl_pgrsSetUploadSize(data, 0); /* upload size is 0 atm */
 
-    /* If 'authdone' is still FALSE, we must not set the write socket index to
-       the Curl_transfer() call below, as we're not ready to actually upload
-       any data yet. */
+    /* If 'authdone' is FALSE, we must not set the write socket index to the
+       Curl_transfer() call below, as we're not ready to actually upload any
+       data yet. */
 
-    switch(data->set.httpreq) {
+    switch(httpreq) {
 
     case HTTPREQ_POST_FORM:
       if(Curl_FormInit(&http->form, http->sendit)) {

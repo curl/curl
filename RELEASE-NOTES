@@ -13,6 +13,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o fixed minor memory leak in libcurl for Windows when staticly linked
+ o POST/PUT using Digest/NTLM/Negotiate (including anyauth) now work better
+ o --limit-rate with high speed rates is a lot more accurate now
  o curl_strnqual.3 "refer-to" man page fix
  o fixed a minor very old progress meter final update bug
  o added checks for a working NI_WITHSCOPEID before that is used
@@ -40,8 +43,8 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Thomas Schwinge, Marty Kuhrt, Günter Knauf, Kevin Roth, Glen Nakamura,
- Gisle Vanem, Greg Hewgill, Joe Halpin, Tor Arntsen, Dirk Manske, Roy Shan,
- Mitz Wark, Andrés García, Robin Kay
+ Thomas Schwinge, Marty Kuhrt, Günter Knauf, Kevin Roth, Glen Nakamura, Gisle
+ Vanem, Greg Hewgill, Joe Halpin, Tor Arntsen, Dirk Manske, Roy Shan, Mitz
+ Wark, Andrés García, Robin Kay, Alan Pinstein, David Byron, Nathan O'Sullivan
 
         Thanks! (and sorry if I forgot to mention someone)

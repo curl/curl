@@ -196,7 +196,7 @@ CURLcode Curl_file(struct connectdata *conn)
   /* If we have selected NOBODY and HEADER, it means that we only want file
      information. Which for FILE can't be much more than the file size and
      date. */
-  if(data->set.no_body && data->set.include_header && fstated) {
+  if(conn->bits.no_body && data->set.include_header && fstated) {
     CURLcode result;
     sprintf(buf, "Content-Length: %" FORMAT_OFF_T "\r\n", expected_size);
     result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
