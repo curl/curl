@@ -6,7 +6,20 @@
 
                                History of Changes
 
+Daniel (6 May 2002)
+- Added multi-post.c to the examples directory. I got the basic source for
+  this from Gustaf Hui.
+
 Daniel (3 May 2002)
+- CURL_MAX_WRITE_SIZE is now an exported #define in the curl/curl.h header and
+  can be used to figure out the maximum buffer size your write callback can
+  get.
+
+- CURLOPT_READDATA is now an alias for CURLOPT_INFILE and CURLOPT_WRITEDATE is
+  an alias for CURLOPT_FILE. These two were added for conformity. Most other
+  callback function's userdata are provided with options using a similar name-
+  scheme.
+
 - Added "--trace [file]" to the command line tool. It makes a very detailed
   trace dump get stored, with a full protocol dump that includes all received
   and transmitted data. This could be a very effective tool for debugging what
