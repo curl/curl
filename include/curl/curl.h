@@ -558,6 +558,9 @@ typedef enum {
   /* The CApath directory used to validate the peer certificate
      this option is used only if SSL_VERIFYPEER is true */
   CINIT(CAPATH, OBJECTPOINT, 97),
+
+  /* Instruct libcurl to use a smaller receive buffer */
+  CINIT(BUFFERSIZE, LONG, 98),
   
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
