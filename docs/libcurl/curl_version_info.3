@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_version_info 3 "19 Sep 2003" "libcurl 7.10.8" "libcurl Manual"
+.TH curl_version_info 3 "11 May 2004" "libcurl 7.12" "libcurl Manual"
 .SH NAME
 curl_version_info - returns run-time libcurl version info
 .SH SYNOPSIS
@@ -28,22 +28,32 @@ The curl_version_info_data struct looks like this
 
 .nf
 typedef struct {
-  CURLversion age;          /* 0 - this kind of struct */
+  CURLversion age;          /* see description below */
+
+  /* when 'age' is 0 or higher, the members below also exist: */
   const char *version;      /* human readable string */
   unsigned int version_num; /* numeric representation */
   const char *host;         /* human readable string */
   int features;             /* bitmask, see below */
   char *ssl_version;        /* human readable string */
   long ssl_version_num;     /* number */
-  char *libz_version;       /* human readable string */
-  const char *protocols[];  /* list of protocols */
+  const char *libz_version; /* human readable string */
+  const char **protocols;   /* list of protocols */
+
+  /* when 'age' is 1 or higher, the members below also exist: */
+  const char *ares;         /* human readable string */
+  int ares_num;             /* number */
+
+  /* when 'age' is 2 or higher, the member below also exists: */
+  const char *libidn;       /* human readable string */
+
 } curl_version_info_data;
 .fi
 
-\fIage\fP describes what kind of struct this is. It is always 0 now. In a
-future libcurl, if this struct changes, this age counter may be increased, and
-then the struct for number 1 will look different (except for this first struct
-field).
+\fIage\fP describes what age of this struct this is. The number depends on how
+new libcurl you're using. You are however guaranteed to get a struct that you
+have a matching struct for in the header, as you tell libcurl your "age" with
+the input argument.
 
 \fIversion\fP is just an ascii string for the libcurl version.
 
@@ -57,38 +67,35 @@ environment.
 
 \fIfeatures\fP can have none, one or more bits set, and the currently defined
 bits are:
-.TP 5.5
-.B CURL_VERSION_IPV6
+.RS
+.IP CURL_VERSION_IPV6
 supports IPv6
-.TP
-.B CURL_VERSION_KERBEROS4
+.IP CURL_VERSION_KERBEROS4
 supports kerberos4 (when using FTP)
-.TP
-.B CURL_VERSION_SSL
+.IP CURL_VERSION_SSL
 supports SSL (HTTPS/FTPS)
-.TP
-.B CURL_VERSION_LIBZ
+.IP CURL_VERSION_LIBZ
 supports HTTP deflate using libz
-.TP
-.B CURL_VERSION_NTLM
+.IP CURL_VERSION_NTLM
 supports HTTP NTLM (added in 7.10.6)
-.TP
-.B CURL_VERSION_GSSNEGOTIATE
+.IP CURL_VERSION_GSSNEGOTIATE
 supports HTTP GSS-Negotiate (added in 7.10.6)
-.TP
-.B CURL_VERSION_DEBUG
+.IP CURL_VERSION_DEBUG
 libcurl was built with extra debug capabilities built-in. This is mainly of
 interest for libcurl hackers. (added in 7.10.6)
-.TP
-.B CURL_VERSION_ASYNCHDNS
+.IP CURL_VERSION_ASYNCHDNS
 libcurl was built with support for asynchronous name lookups, which allows
 more exact timeouts (even on Windows) and less blocking when using the multi
 interface. (added in 7.10.7)
-.TP
-.B CURL_VERSION_SPNEGO
+.IP CURL_VERSION_SPNEGO
 libcurl was built with support for SPNEGO authentication (Simple and Protected
 GSS-API Negotiation Mechanism, defined in RFC 2478.) (added in 7.10.8)
-.PP
+.IP CURL_VERSION_LARGEFILE
+libcurl was built with support for large files.
+.IP CURL_VERSION_IDN
+libcurl was built with support for IDNA, domain names with international
+letters.
+.RE
 \fIssl_version\fP is an ascii string for the OpenSSL version used. If libcurl
 has no SSL support, this is NULL.
 
