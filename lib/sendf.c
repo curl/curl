@@ -308,6 +308,9 @@ CURLcode Curl_write(struct connectdata *conn,
         )
         /* this is just a case of EWOULDBLOCK */
         bytes_written=0;
+      else
+        failf(conn->data, "Send failure: %s",
+              Curl_strerror(conn, err));
     }
 #ifdef USE_SSLEAY
   }
