@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "8 May 2001" "Curl 7.7.3" "Curl Manual"
+.TH curl 1 "3 Aug 2001" "Curl 7.8" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -134,7 +134,8 @@ name=daniel -d skill=lousy' would generate a post chunk that looks like
 If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from stdin.  The
 contents of the file must already be url-encoded. Multiple files can also be
-specified.
+specified. Posting data from a file named 'foobar' would thus be done with
+"--data @foobar".
 
 To post data purely binary, you should instead use the --data-binary option.
 
