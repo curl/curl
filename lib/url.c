@@ -1116,11 +1116,7 @@ ConnectionStore(struct SessionHandle *data,
 static CURLcode ConnectPlease(struct SessionHandle *data,
                               struct connectdata *conn)
 {
-#if defined(WIN32)
-  unsigned long nonblock = 0;
-  fd_set connectfd;
-  struct timeval conntimeout;
-#endif
+  long max_time=300000; /* milliseconds, default to five minutes */
 
 #ifndef ENABLE_IPV6
   conn->firstsocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -1252,9 +1248,34 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 #endif /*ENABLE_IPV6*/
 
   /*************************************************************
+   * Figure out what maximum time we have left
+   *************************************************************/
+  if(data->set.timeout || data->set.connecttimeout) {
+    double has_passed;
+
+    /* Evaluate how much that that has passed */
+    has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
+
+#ifndef min
+#define min(a, b)   ((a) < (b) ? (a) : (b))
+#endif
+
+    /* get the most strict timeout of the ones converted to milliseconds */
+    max_time = min(data->set.timeout, data->set.connecttimeout)*1000;
+
+    /* subtract the passed time */
+    max_time -= (long)(has_passed * 1000);
+
+    if(max_time < 0)
+      /* a precaution, no need to continue if time already is up */
+      return CURLE_OPERATION_TIMEOUTED;
+  }
+
+  /*************************************************************
    * Connect to server/proxy
    *************************************************************/
   return Curl_connecthost(conn,
+                          max_time,
                           conn->firstsocket, /* might be bind()ed */
                           &conn->firstsocket);
 }
@@ -1640,21 +1661,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       conn->bits.rangestringalloc = TRUE; /* mark as allocated */
       conn->bits.use_range = 1; /* switch on range usage */
     }
-  }
-
-  /*************************************************************
-   * Set timeout if that is being used
-   *************************************************************/
-  if(data->set.timeout || data->set.connecttimeout) {
-    /* We set the timeout on the connection/resolving phase first, separately
-     * from the download/upload part to allow a maximum time on everything */
-
-    /* myalarm() makes a signal get sent when the timeout fires off, and that
-       will abort system calls */
-    if(data->set.connecttimeout)
-      myalarm(data->set.connecttimeout);
-    else
-      myalarm(data->set.timeout);
   }
 
   /*************************************************************
@@ -2055,6 +2061,23 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
 
   /*************************************************************
+   * Set timeout if that is being used
+   *************************************************************/
+  if(data->set.timeout || data->set.connecttimeout) {
+    /* We set the timeout on the name resolving phase first, separately from
+     * the download/upload part to allow a maximum time on everything. This is
+     * a signal-based timeout, why it won't work and shouldn't be used in
+     * multi-threaded environments. */
+
+    /* myalarm() makes a signal get sent when the timeout fires off, and that
+       will abort system calls */
+    if(data->set.connecttimeout)
+      myalarm(data->set.connecttimeout);
+    else
+      myalarm(data->set.timeout);
+  }
+
+  /*************************************************************
    * Resolve the name of the server or proxy
    *************************************************************/
   if(!data->change.proxy) {
@@ -2088,6 +2111,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
   }
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
+  if(data->set.timeout || data->set.connecttimeout)
+    /* switch off signal-based timeouts */
+    myalarm(0);
 
   /*************************************************************
    * Proxy authentication
