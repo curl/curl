@@ -240,6 +240,12 @@ struct Curl_dns_entry *
 Curl_cache_addr(struct SessionHandle *data, Curl_addrinfo *addr,
                 char *hostname, int port);
 
+/*
+ * Curl_destroy_thread_data() cleans up async resolver data.
+ * Complementary of ares_destroy.
+ */
+void Curl_destroy_thread_data(struct Curl_async *async);
+
 #ifndef INADDR_NONE
 #define CURL_INADDR_NONE (in_addr_t) ~0
 #else

@@ -301,10 +301,10 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
 #endif
 
 /*
- * destroy_thread_data() cleans up async resolver data.
+ * Curl_destroy_thread_data() cleans up async resolver data.
  * Complementary of ares_destroy.
  */
-static void destroy_thread_data (struct Curl_async *async)
+void Curl_destroy_thread_data (struct Curl_async *async)
 {
   if (async->hostname)
     free(async->hostname);
@@ -319,6 +319,7 @@ static void destroy_thread_data (struct Curl_async *async)
     /* destroy the synchronization objects */
     if (td->mutex_waiting)
       CloseHandle(td->mutex_waiting);
+    td->mutex_waiting = NULL;
     if (td->event_resolved)
       CloseHandle(td->event_resolved);
 
@@ -365,7 +366,7 @@ static bool init_resolve_thread (struct connectdata *conn,
    */
   td->mutex_waiting = CreateMutex(NULL, TRUE, NULL);
   if (td->mutex_waiting == NULL) {
-    destroy_thread_data(&conn->async);
+    Curl_destroy_thread_data(&conn->async);
     SetLastError(EAGAIN);
     return FALSE;
   }
@@ -375,7 +376,7 @@ static bool init_resolve_thread (struct connectdata *conn,
    */
   td->event_resolved = CreateEvent(NULL, TRUE, FALSE, NULL);
   if (td->event_resolved == NULL) {
-    destroy_thread_data(&conn->async);
+    Curl_destroy_thread_data(&conn->async);
     SetLastError(EAGAIN);
     return FALSE;
   }
@@ -401,7 +402,7 @@ static bool init_resolve_thread (struct connectdata *conn,
   if (!td->thread_hnd) {
      SetLastError(errno);
      TRACE(("_beginthreadex() failed; %s\n", Curl_strerror(conn,errno)));
-     destroy_thread_data(&conn->async);
+     Curl_destroy_thread_data(&conn->async);
      return FALSE;
   }
   /* This socket is only to keep Curl_resolv_fdset() and select() happy;
@@ -508,7 +509,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       rc = CURLE_OPERATION_TIMEDOUT;
   }
 
-  destroy_thread_data(&conn->async);
+  Curl_destroy_thread_data(&conn->async);
 
   if(!conn->async.dns)
     conn->bits.close = TRUE;
@@ -528,7 +529,7 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
   if (conn->async.done) {
     /* we're done */
-    destroy_thread_data(&conn->async);
+    Curl_destroy_thread_data(&conn->async);
     if (!conn->async.dns) {
       TRACE(("Curl_is_resolved(): CURLE_COULDNT_RESOLVE_HOST\n"));
       return CURLE_COULDNT_RESOLVE_HOST;

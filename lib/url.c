@@ -1503,11 +1503,12 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->allocptr.cookiehost);
   Curl_safefree(conn->ip_addr_str);
 
-#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
-    defined(USE_THREADING_GETADDRINFO)
-  /* possible left-overs from the async name resolve */
+  /* possible left-overs from the async name resolvers */
+#if defined(USE_ARES)
   Curl_safefree(conn->async.hostname);
   Curl_safefree(conn->async.os_specific);
+#elif defined(CURLRES_THREADED)
+  Curl_destroy_thread_data(&conn->async);
 #endif
 
   Curl_free_ssl_config(&conn->ssl_config);
