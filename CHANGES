@@ -8,6 +8,9 @@
 
 
 Daniel (3 December)
+- Marty Kuhrt made the build up-to-date on VMS, and moved most of the VMS-
+  specific stuff in the client code to a separate header file.
+
 - Steve Green fixed a return code bug in Curl_resolv(), that made the socks5
   code fail.
 
