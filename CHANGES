@@ -7,6 +7,16 @@
                                   Changelog
 
 
+Daniel (16 October)
+- Removed support for CURLOPT_PASSWDFUNCTION and CURLOPT_PASSWDDATA. libcurl
+  no longer prompt for passwords under any circumstances. Password prompting
+  was instead moved to curl, which now prompts for password if -u or -U lack
+  it. This solves the problem Kevin Roth reported when curl prompted for
+  password twice when doing NTLM authentication.
+
+- I rewrote the SSL subjectAltName check to avoid having to rely on OpenLDAP-
+  licensed derivate code.
+
 Daniel (15 October)
 - Avoid doing getsockopt() on Windows to verify connects. It seems that this
   hogs Windows machines when libcurl is being used multi-threaded (with > ~50
