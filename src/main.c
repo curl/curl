@@ -403,7 +403,8 @@ static void help(void)
   puts("    --connect-timeout <seconds> Maximum time allowed for connection\n"
        "    --create-dirs   Create the necessary local directory hierarchy\n"
        "    --crlf          Convert LF to CRLF in upload. Useful for MVS (OS/390)\n"
-       " -f/--fail          Fail silently (no output at all) on errors (H)\n"
+       " -f/--fail          Fail silently (no output at all) on errors (H)");
+  puts("    --ftp-create-dirs Create the remote dirs if not present (F)\n"
        " -F/--form <name=content> Specify HTTP POST data (H)\n"
        " -g/--globoff       Disable URL sequences and ranges using {} and []\n"
        " -G/--get           Send the -d data with a HTTP GET (H)");
@@ -540,6 +541,7 @@ struct Configurable {
   bool use_httpget;
   bool insecure_ok; /* set TRUE to allow insecure SSL connects */
   bool create_dirs;
+  bool ftp_create_dirs;
 
   char *writeout; /* %-styled format string to output */
   bool writeenv; /* write results to environment, if available */
@@ -1085,6 +1087,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 #ifdef __DJGPP__
     {"5p", "wdebug",     FALSE},
 #endif
+    {"5q", "ftp-create-dirs", FALSE},    
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1334,6 +1337,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         dbug_init();
         break;
 #endif
+      case 'q': /* --ftp-create_dirs */
+        config->ftp_create_dirs ^= TRUE;
+        break;
 
       default: /* the URL! */
         {
@@ -3096,6 +3102,10 @@ operate(struct Configurable *config, int argc, char *argv[])
       /* new in curl 7.10 */
       curl_easy_setopt(curl, CURLOPT_ENCODING, 
                        (config->encoding) ? "" : NULL);
+
+      /* new in curl 7.10.7 */
+      curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
+                       config->ftp_create_dirs);
 
       res = curl_easy_perform(curl);
         
