@@ -175,7 +175,9 @@ char *getpass(const char *prompt)
 #endif
   
   signal(SIGINT, sigint);
+#ifndef __EMX__
   signal(SIGTSTP, sigtstp);
+#endif
 
   return(buf);
 }
