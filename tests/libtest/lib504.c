@@ -22,6 +22,7 @@ CURLcode test(char *URL)
   CURLMcode res;
   int running;
   int max_fd;
+  int rc;
 
   curl_global_init(CURL_GLOBAL_ALL);
   c = curl_easy_init();
@@ -36,26 +37,29 @@ CURLcode test(char *URL)
 
   res = curl_multi_add_handle(m, c);
   if(res && (res != CURLM_CALL_MULTI_PERFORM))
-	 return 1; /* major failure */
+    return 1; /* major failure */
   do {
+    struct timeval interval={1,0};
+
+    fprintf(stderr, "curl_multi_perform()\n");
+    
     do {
       res = curl_multi_perform(m, &running);
-	} while (res == CURLM_CALL_MULTI_PERFORM);
+    } while (res == CURLM_CALL_MULTI_PERFORM);
     if(!running) {
       /* This is where this code is expected to reach */
       int numleft;
       CURLMsg *msg = curl_multi_info_read(m, &numleft);
-      fprintf(stderr, "Not running\n");
+      fprintf(stderr, "Expected: not running\n");
       if(msg && !numleft)
         ret = 100; /* this is where we should be */
       else
         ret = 99; /* not correct */
       break;
     }
-	fprintf(stderr, "running %d res %d\n", running, res);
+    fprintf(stderr, "running == %d, res == %d\n", running, res);
 
     if (res != CURLM_OK) {
-      fprintf(stderr, "not okay???\n");
       ret = 2;
       break;
     }
@@ -65,17 +69,16 @@ CURLcode test(char *URL)
     FD_ZERO(&exc);
     max_fd = 0;
 
-	fprintf(stderr, "_fdset()\n");
+    fprintf(stderr, "curl_multi_fdset()\n");
     if (curl_multi_fdset(m, &rd, &wr, &exc, &max_fd) != CURLM_OK) {
       fprintf(stderr, "unexpected failured of fdset.\n");
       ret = 3;
       break;
     }
-	fprintf(stderr, "select\n");
-    select(max_fd+1, &rd, &wr, &exc, NULL);
-
-    fprintf(stderr, "loop!\n");
-  } while(1);
+    rc = select(max_fd+1, &rd, &wr, &exc, &interval);
+    fprintf(stderr, "select returned %d\n", rc);
+    
+  } while(rc);
 
   curl_multi_remove_handle(m, c);
   curl_easy_cleanup(c);

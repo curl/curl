@@ -40,6 +40,7 @@ CURLcode test(char *URL)
     while(!done) {
       fd_set rd, wr, exc;
       int max_fd;
+      struct timeval interval={1,0};
 
       while (res == CURLM_CALL_MULTI_PERFORM) {
         res = curl_multi_perform(m, &running);
@@ -66,7 +67,7 @@ CURLcode test(char *URL)
         return 89;
       }
 
-      if (select(max_fd+1, &rd, &wr, &exc, NULL) == -1) {
+      if (select(max_fd+1, &rd, &wr, &exc, &interval) == -1) {
         fprintf(stderr, "bad select??\n");
         return 95;
       }
