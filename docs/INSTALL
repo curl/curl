@@ -558,35 +558,10 @@ PORTS
         - s390 Linux 
         - XScale/PXA250 Linux 2.4
 
-OpenSSL
-=======
+Useful URLs
+===========
 
-   You'll find OpenSSL information at:
-
-      http://www.openssl.org
-
-
-MingW32/Cygwin
-==============
-
-   You'll find MingW32 and Cygwin information at:
-
-      http://www.mingw.org
-
-OpenLDAP
-========
-
-   You'll find OpenLDAP information at:
-
-      http://www.openldap.org
-
-Zlib
-====
-
-   You'll find Zlib information at:
-
-      http://www.gzip.org/zlib/
-
-
-
- LocalWords:  MingW
+OpenSSL   http://www.openssl.org
+MingW     http://www.mingw.org
+OpenLDAP  http://www.openldap.org
+Zlib      http://www.gzip.org/zlib/
