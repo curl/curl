@@ -8,6 +8,11 @@
 
 
 Daniel (31 October)
+- Assume that MDTM on an FTP server returns the timestamp using the UTC time
+  zone. This changes the time CURLINFO_FILETIME returns for a given file over
+  FTP, and will change existing uses of CURLOPT_TIMECONDITION. It will make
+  the functionality more similar to how the HTTP one is already working.
+
 - Command line options that take numerical parameters (such as -y, -Y, -C etc)
   now reports error and exits if the parameter isn't truly a number greater
   than or equal to zero. This helps the user to notice bad usage
