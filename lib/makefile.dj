@@ -3,7 +3,7 @@
 #  Gisle Vanem <giva@bgnett.no>
 #
 
-DEPEND_PREREQ = config.h getdate.c
+DEPEND_PREREQ = config.h
 
 include ../packages/DOS/common.dj
 
@@ -22,207 +22,253 @@ $(CURL_LIB): $(OBJECTS)
 config.h: config.dj
 	cp $^ $@
 
-getdate.c: getdate.y
-	$(YACC) -o $@ $^
-
 clean:
 	- rm -f $(OBJECTS) Makefile.bak
 
 realclean vclean: clean
-	- rm -f config.h getdate.c $(CURL_LIB)
+	- rm -f config.h $(CURL_LIB)
 
 
 # DO NOT DELETE THIS LINE
-djgpp/base64.o: base64.c setup.h config.h ../include/curl/mprintf.h base64.h \
-  memory.h ../include/curl/curl.h ../include/curl/curlver.h \
-  ../include/curl/easy.h ../include/curl/multi.h memdebug.h
-djgpp/connect.o: connect.c setup.h config.h urldata.h cookie.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h if2ip.h strerror.h connect.h memory.h memdebug.h
-djgpp/content_encoding.o: content_encoding.c setup.h config.h
-djgpp/cookie.o: cookie.c setup.h config.h urldata.h cookie.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h getdate.h strequal.h strtok.h sendf.h memory.h \
-  memdebug.h
-djgpp/dict.o: dict.c setup.h config.h urldata.h cookie.h ../include/curl/curl.h \
+$(OBJ_DIR)/file.o: file.c setup.h config.h urldata.h cookie.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h transfer.h sendf.h progress.h strequal.h dict.h \
-  ../include/curl/mprintf.h
-djgpp/easy.o: easy.c setup.h config.h strequal.h urldata.h cookie.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h transfer.h ssluse.h url.h getinfo.h share.h memory.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h progress.h sendf.h escape.h \
+  file.h speedcheck.h getinfo.h transfer.h url.h memory.h \
   ../include/curl/mprintf.h memdebug.h
-djgpp/escape.o: escape.c setup.h config.h ../include/curl/curl.h \
+$(OBJ_DIR)/timeval.o: timeval.c timeval.h setup.h config.h
+$(OBJ_DIR)/base64.o: base64.c setup.h config.h ../include/curl/mprintf.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h base64.h memory.h memdebug.h
+$(OBJ_DIR)/hostip.o: hostip.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h \
+  inet_ntop.h ../include/curl/mprintf.h memory.h memdebug.h
+$(OBJ_DIR)/progress.o: progress.c setup.h config.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h memory.h ../include/curl/mprintf.h memdebug.h
-djgpp/file.o: file.c setup.h config.h urldata.h cookie.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h progress.h sendf.h escape.h file.h speedcheck.h \
-  getinfo.h transfer.h url.h memory.h ../include/curl/mprintf.h \
-  memdebug.h
-djgpp/formdata.o: formdata.c setup.h config.h ../include/curl/curl.h \
+  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h progress.h \
+  ../include/curl/mprintf.h
+$(OBJ_DIR)/formdata.o: formdata.c setup.h config.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
   ../include/curl/multi.h formdata.h strequal.h memory.h \
   ../include/curl/mprintf.h memdebug.h
-djgpp/ftp.o: ftp.c setup.h config.h ../include/curl/curl.h \
+$(OBJ_DIR)/cookie.o: cookie.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h strequal.h strtok.h sendf.h \
+  memory.h memdebug.h
+$(OBJ_DIR)/http.o: http.c setup.h config.h urldata.h cookie.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h transfer.h sendf.h progress.h \
+  base64.h strequal.h ssluse.h http_digest.h http_ntlm.h http_negotiate.h \
+  url.h share.h http.h memory.h select.h ../include/curl/mprintf.h \
+  memdebug.h
+$(OBJ_DIR)/sendf.o: sendf.c setup.h config.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
   ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h connect.h \
+  ../include/curl/mprintf.h memory.h strerror.h memdebug.h
+$(OBJ_DIR)/ftp.o: ftp.c setup.h config.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
   http_chunks.h hostip.h hash.h llist.h sendf.h if2ip.h progress.h \
   transfer.h escape.h http.h ftp.h strtoofft.h strequal.h ssluse.h \
-  connect.h strerror.h memory.h inet_ntop.h ../include/curl/mprintf.h \
-  memdebug.h
-djgpp/getdate.o: getdate.c setup.h config.h memory.h ../include/curl/curl.h \
+  connect.h strerror.h memory.h inet_ntop.h select.h \
+  ../include/curl/mprintf.h memdebug.h
+$(OBJ_DIR)/url.o: url.c setup.h config.h urldata.h cookie.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h memdebug.h getdate.h
-djgpp/getenv.o: getenv.c setup.h config.h ../include/curl/curl.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h netrc.h base64.h ssluse.h if2ip.h \
+  transfer.h sendf.h progress.h strequal.h strerror.h escape.h strtok.h \
+  share.h content_encoding.h http_digest.h http_negotiate.h select.h \
+  ftp.h dict.h telnet.h http.h file.h ldap.h url.h connect.h inet_ntop.h \
+  ca-bundle.h ../include/curl/mprintf.h memory.h memdebug.h
+$(OBJ_DIR)/dict.o: dict.c setup.h config.h urldata.h cookie.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h transfer.h sendf.h progress.h \
+  strequal.h dict.h ../include/curl/mprintf.h
+$(OBJ_DIR)/if2ip.o: if2ip.c setup.h config.h if2ip.h memory.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h memdebug.h
+$(OBJ_DIR)/speedcheck.o: speedcheck.c setup.h config.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h speedcheck.h
+$(OBJ_DIR)/ldap.o: ldap.c setup.h config.h urldata.h cookie.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h escape.h transfer.h \
+  strequal.h strtok.h ldap.h memory.h ../include/curl/mprintf.h \
+  memdebug.h
+$(OBJ_DIR)/ssluse.o: ssluse.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h url.h inet_pton.h \
+  ssluse.h connect.h strequal.h select.h ../include/curl/mprintf.h
+$(OBJ_DIR)/version.o: version.c setup.h config.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h ../include/curl/mprintf.h
+$(OBJ_DIR)/getenv.o: getenv.c setup.h config.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
   ../include/curl/multi.h memory.h memdebug.h
-djgpp/getinfo.o: getinfo.c setup.h config.h ../include/curl/curl.h \
+$(OBJ_DIR)/escape.o: escape.c setup.h config.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
-  http_chunks.h hostip.h hash.h llist.h getinfo.h memory.h memdebug.h
-djgpp/hash.o: hash.c setup.h config.h hash.h llist.h memory.h \
+  ../include/curl/multi.h memory.h ../include/curl/mprintf.h memdebug.h
+$(OBJ_DIR)/mprintf.o: mprintf.c setup.h config.h ../include/curl/mprintf.h \
   ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h memdebug.h
-djgpp/hostip.o: hostip.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/multi.h memory.h memdebug.h
+$(OBJ_DIR)/telnet.o: telnet.c setup.h config.h urldata.h cookie.h \
   ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h share.h strerror.h url.h inet_ntop.h \
-  ../include/curl/mprintf.h memory.h memdebug.h
-djgpp/hostip6.o: hostip6.c setup.h config.h urldata.h cookie.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h share.h strerror.h url.h \
-  ../include/curl/mprintf.h memory.h memdebug.h
-djgpp/hostip4.o: hostip4.c setup.h config.h urldata.h cookie.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h share.h strerror.h url.h \
-  ../include/curl/mprintf.h memory.h memdebug.h
-djgpp/hostares.o: hostares.c setup.h config.h urldata.h cookie.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h share.h strerror.h url.h \
-  ../include/curl/mprintf.h memory.h memdebug.h
-djgpp/hostasyn.o: hostasyn.c setup.h config.h urldata.h cookie.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h share.h strerror.h url.h \
-  ../include/curl/mprintf.h memory.h memdebug.h
-djgpp/hostsyn.o: hostsyn.c setup.h config.h urldata.h cookie.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h share.h strerror.h url.h \
-  ../include/curl/mprintf.h memory.h memdebug.h
-djgpp/if2ip.o: if2ip.c setup.h config.h if2ip.h memory.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h memdebug.h
-djgpp/krb4.o: krb4.c setup.h config.h
-djgpp/md5.o: md5.c setup.h config.h md5.h
-djgpp/ldap.o: ldap.c setup.h config.h urldata.h cookie.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h escape.h transfer.h strequal.h strtok.h ldap.h \
-  memory.h ../include/curl/mprintf.h memdebug.h
-djgpp/llist.o: llist.c setup.h config.h llist.h memory.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h memdebug.h
-djgpp/memdebug.o: memdebug.c setup.h config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h ../include/curl/mprintf.h urldata.h cookie.h \
-  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h memory.h \
-  memdebug.h
-djgpp/mprintf.o: mprintf.c setup.h config.h ../include/curl/mprintf.h memory.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h memdebug.h
-djgpp/multi.o: multi.c setup.h config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
-  http_chunks.h hostip.h hash.h llist.h transfer.h url.h connect.h \
-  progress.h memory.h memdebug.h
-djgpp/netrc.o: netrc.c setup.h config.h ../include/curl/curl.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h transfer.h sendf.h telnet.h \
+  ../include/curl/mprintf.h arpa_telnet.h memory.h select.h memdebug.h
+$(OBJ_DIR)/netrc.o: netrc.c setup.h config.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
   ../include/curl/multi.h netrc.h strequal.h strtok.h memory.h \
   ../include/curl/mprintf.h memdebug.h
-djgpp/progress.o: progress.c setup.h config.h ../include/curl/curl.h \
+$(OBJ_DIR)/getinfo.o: getinfo.c setup.h config.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
   ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
-  http_chunks.h hostip.h hash.h llist.h sendf.h progress.h \
-  ../include/curl/mprintf.h
-djgpp/security.o: security.c setup.h config.h
-djgpp/sendf.o: sendf.c setup.h config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
-  http_chunks.h hostip.h hash.h llist.h sendf.h connect.h \
-  ../include/curl/mprintf.h memory.h memdebug.h
-djgpp/share.o: share.c setup.h config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
-  http_chunks.h hostip.h hash.h llist.h share.h memory.h memdebug.h
-djgpp/speedcheck.o: speedcheck.c setup.h config.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
-  http_chunks.h hostip.h hash.h llist.h sendf.h speedcheck.h
-djgpp/ssluse.o: ssluse.c setup.h config.h urldata.h cookie.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h url.h inet_pton.h ssluse.h connect.h strequal.h \
-  ../include/curl/mprintf.h
-djgpp/strequal.o: strequal.c setup.h config.h strequal.h
-djgpp/strtok.o: strtok.c setup.h config.h strtok.h
-djgpp/telnet.o: telnet.c setup.h config.h urldata.h cookie.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h transfer.h sendf.h telnet.h ../include/curl/mprintf.h \
-  arpa_telnet.h memory.h memdebug.h
-djgpp/timeval.o: timeval.c timeval.h setup.h config.h
-djgpp/transfer.o: transfer.c setup.h config.h strtoofft.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h getinfo.h memory.h memdebug.h
+$(OBJ_DIR)/transfer.o: transfer.c setup.h config.h strtoofft.h \
   ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
   ../include/curl/multi.h strequal.h urldata.h cookie.h formdata.h \
-  timeval.h http_chunks.h hostip.h hash.h llist.h netrc.h \
-  content_encoding.h transfer.h sendf.h speedcheck.h progress.h getdate.h \
-  http.h url.h getinfo.h ssluse.h http_digest.h http_ntlm.h \
-  http_negotiate.h share.h memory.h ../include/curl/mprintf.h memdebug.h
-djgpp/strerror.o: strerror.c setup.h config.h ../include/curl/curl.h \
+  timeval.h e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h netrc.h content_encoding.h \
+  transfer.h sendf.h speedcheck.h progress.h http.h url.h getinfo.h \
+  ssluse.h http_digest.h http_ntlm.h http_negotiate.h share.h memory.h \
+  select.h ../include/curl/mprintf.h memdebug.h
+$(OBJ_DIR)/strequal.o: strequal.c setup.h config.h strequal.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h strerror.h urldata.h cookie.h formdata.h \
-  timeval.h http_chunks.h hostip.h hash.h llist.h \
-  ../include/curl/mprintf.h
-djgpp/strtoofft.o: strtoofft.c setup.h config.h strtoofft.h \
-  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
   ../include/curl/multi.h
-djgpp/url.o: url.c setup.h config.h urldata.h cookie.h ../include/curl/curl.h \
-  ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h netrc.h base64.h ssluse.h if2ip.h transfer.h sendf.h \
-  progress.h strequal.h escape.h strtok.h share.h content_encoding.h \
-  http_digest.h http_negotiate.h ftp.h dict.h telnet.h http.h file.h \
-  ldap.h url.h connect.h inet_ntop.h ca-bundle.h \
-  ../include/curl/mprintf.h memory.h memdebug.h
-djgpp/version.o: version.c setup.h config.h ../include/curl/curl.h \
+$(OBJ_DIR)/easy.o: easy.c setup.h config.h strequal.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
   ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
-  http_chunks.h hostip.h hash.h llist.h ../include/curl/mprintf.h
-djgpp/http.o: http.c setup.h config.h urldata.h cookie.h ../include/curl/curl.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h transfer.h ssluse.h url.h \
+  getinfo.h share.h memory.h progress.h ../include/curl/mprintf.h \
+  memdebug.h
+$(OBJ_DIR)/security.o: security.c setup.h config.h
+$(OBJ_DIR)/krb4.o: krb4.c setup.h config.h
+$(OBJ_DIR)/memdebug.o: memdebug.c setup.h config.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h transfer.h sendf.h progress.h base64.h strequal.h \
-  ssluse.h http_digest.h http_ntlm.h http_negotiate.h url.h share.h \
-  http.h memory.h ../include/curl/mprintf.h memdebug.h
-djgpp/http_chunks.o: http_chunks.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/multi.h ../include/curl/mprintf.h urldata.h cookie.h \
+  formdata.h timeval.h e:/djgpp/contrib/zlib/zlib.h \
+  e:/djgpp/contrib/zlib/zconf.h http_chunks.h hostip.h hash.h llist.h \
+  memory.h memdebug.h
+$(OBJ_DIR)/http_chunks.o: http_chunks.c setup.h config.h urldata.h cookie.h \
   ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h content_encoding.h http.h memory.h \
-  ../include/curl/mprintf.h memdebug.h
-djgpp/http_digest.o: http_digest.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h content_encoding.h http.h \
+  memory.h ../include/curl/mprintf.h memdebug.h
+$(OBJ_DIR)/strtok.o: strtok.c setup.h config.h strtok.h
+$(OBJ_DIR)/connect.o: connect.c setup.h config.h urldata.h cookie.h \
   ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
-  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
-  hash.h llist.h sendf.h strequal.h base64.h md5.h http_digest.h strtok.h \
-  url.h memory.h ../include/curl/mprintf.h memdebug.h
-djgpp/http_negotiate.o: http_negotiate.c setup.h config.h
-djgpp/http_ntlm.o: http_ntlm.c setup.h config.h
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h if2ip.h strerror.h \
+  connect.h memory.h select.h memdebug.h
+$(OBJ_DIR)/llist.o: llist.c setup.h config.h llist.h memory.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h memdebug.h
+$(OBJ_DIR)/hash.o: hash.c setup.h config.h hash.h llist.h memory.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h memdebug.h
+$(OBJ_DIR)/multi.o: multi.c setup.h config.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h transfer.h url.h connect.h \
+  progress.h memory.h memdebug.h
+$(OBJ_DIR)/content_encoding.o: content_encoding.c setup.h config.h urldata.h \
+  cookie.h ../include/curl/curl.h ../include/curl/curlver.h \
+  ../include/curl/easy.h ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h content_encoding.h \
+  memory.h memdebug.h
+$(OBJ_DIR)/share.o: share.c setup.h config.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h urldata.h cookie.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h share.h memory.h memdebug.h
+$(OBJ_DIR)/http_digest.o: http_digest.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h strequal.h base64.h md5.h \
+  http_digest.h strtok.h url.h memory.h ../include/curl/mprintf.h \
+  memdebug.h
+$(OBJ_DIR)/md5.o: md5.c setup.h config.h md5.h
+$(OBJ_DIR)/http_negotiate.o: http_negotiate.c setup.h config.h
+$(OBJ_DIR)/http_ntlm.o: http_ntlm.c setup.h config.h
+$(OBJ_DIR)/inet_pton.o: inet_pton.c setup.h config.h
+$(OBJ_DIR)/strtoofft.o: strtoofft.c setup.h config.h strtoofft.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h
+$(OBJ_DIR)/strerror.o: strerror.c setup.h config.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h strerror.h urldata.h cookie.h formdata.h \
+  timeval.h e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h ../include/curl/mprintf.h
+$(OBJ_DIR)/hostares.o: hostares.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h \
+  ../include/curl/mprintf.h memory.h memdebug.h
+$(OBJ_DIR)/hostasyn.o: hostasyn.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h \
+  ../include/curl/mprintf.h memory.h memdebug.h
+$(OBJ_DIR)/hostip4.o: hostip4.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h \
+  ../include/curl/mprintf.h memory.h memdebug.h
+$(OBJ_DIR)/hostip6.o: hostip6.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h \
+  ../include/curl/mprintf.h memory.h memdebug.h
+$(OBJ_DIR)/hostsyn.o: hostsyn.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h \
+  ../include/curl/mprintf.h memory.h memdebug.h
+$(OBJ_DIR)/hostthre.o: hostthre.c setup.h config.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h \
+  e:/djgpp/contrib/zlib/zlib.h e:/djgpp/contrib/zlib/zconf.h \
+  http_chunks.h hostip.h hash.h llist.h sendf.h share.h strerror.h url.h \
+  ../include/curl/mprintf.h inet_ntop.h memory.h memdebug.h
+$(OBJ_DIR)/inet_ntop.o: inet_ntop.c setup.h config.h
+$(OBJ_DIR)/parsedate.o: parsedate.c setup.h config.h ../include/curl/curl.h \
+  ../include/curl/curlver.h ../include/curl/easy.h \
+  ../include/curl/multi.h
+$(OBJ_DIR)/select.o: select.c setup.h config.h select.h
