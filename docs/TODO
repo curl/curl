@@ -93,11 +93,12 @@ TODO
 
  HTTP
 
- * Pass a list of host name to libcurl to which we allow the user name and
-   password to get sent to. Currently, it only get sent to the host name that
-   the first URL uses (to prevent others from being able to read it), but this
-   also prevents the authentication info from getting sent when following
-   locations to legitimate other host names.
+ * If the "body" of the POST is < MSS it really aught to be sent along with
+   the headers. More generally, if the last chunk of the POST body is < MSS,
+   it should be sent with the previous chunk (which may be the POST headers).
+   So long as any one send is larger than MSS (or there is only one send when
+   < MSS :), the Nagle Algorithm will not be a problem on any stack where
+   Nagle is implemented correctly. (pointed out by Rick Jones)
 
  * Authentication: NTLM. Support for that MS crap called NTLM
    authentication. MS proxies and servers sometime require that. Since that
