@@ -12,7 +12,7 @@ AR = ar
 RM = rm -f 
 RANLIB = ranlib
 STRIP = strip -g
-OPENSSL_PATH = ../../openssl-0.9.7c
+OPENSSL_PATH = ../../openssl-0.9.7d
 ZLIB_PATH = ../../zlib-1.2.1
 
 ########################################################

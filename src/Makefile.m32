@@ -12,7 +12,7 @@
 CC = gcc
 RM = rm -f
 STRIP = strip -s
-OPENSSL_PATH = ../../openssl-0.9.7c
+OPENSSL_PATH = ../../openssl-0.9.7d
 ZLIB_PATH = ../../zlib-1.2.1
 
 # We may need these someday
@@ -22,7 +22,7 @@ ZLIB_PATH = ../../zlib-1.2.1
 ########################################################
 ## Nothing more to do below this line!
 
-INCLUDES = -I. -I.. -I../include -I$(ZLIB_PATH)
+INCLUDES = -I. -I.. -I../include -I../lib -I$(ZLIB_PATH)
 CFLAGS = -g -O2 -DMINGW32
 ifdef SSL
   CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
