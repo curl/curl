@@ -380,6 +380,11 @@ or
 
 \fBcurl\fP -F "name=daniel;type=text/foo" url.com
 
+You can also explicitly change the name field of an file upload part by
+setting filename=, like this:
+
+\fBcurl\fP -F "file=@localfile;filename=nameinpost" url.com
+
 See further examples and details in the MANUAL.
 
 This option can be used multiple times.
