@@ -47,7 +47,7 @@ typedef struct _curl_hash_element {
 
 int Curl_hash_init(curl_hash *, int, curl_hash_dtor);
 curl_hash *Curl_hash_alloc(int, curl_hash_dtor);
-int Curl_hash_add(curl_hash *, char *, size_t, const void *);
+void *Curl_hash_add(curl_hash *, char *, size_t, void *);
 int Curl_hash_delete(curl_hash *h, char *key, size_t key_len);
 void *Curl_hash_pick(curl_hash *, char *, size_t);
 void Curl_hash_apply(curl_hash *h, void *user,

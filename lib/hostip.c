@@ -231,15 +231,22 @@ cache_resolv_response(struct SessionHandle *data,
     return NULL;
   }
 
-  dns->inuse = 0;
-  dns->addr = addr;
+  dns->inuse = 0;   /* init to not used */
+  dns->addr = addr; /* this is the address(es) */
 
-  /* Store it in our dns cache */
-  Curl_hash_add(data->hostcache, entry_id, entry_len+1,
-                (const void *) dns);
+  /* Store the resolved data in our DNS cache. This function may return a
+     pointer to an existing struct already present in the hash, and it may
+     return the same argument we pass in. Make no assumptions. */
+  dns = Curl_hash_add(data->hostcache, entry_id, entry_len+1, (void *) dns);
+  if(!dns) {
+    /* major badness, run away! */
+    Curl_freeaddrinfo(addr);
+    free(entry_id);
+    return NULL;
+  }
   time(&now);
 
-  dns->timestamp = now;
+  dns->timestamp = now; /* used now */
   dns->inuse++;         /* mark entry as in-use */
 
     

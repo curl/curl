@@ -138,34 +138,33 @@ mk_hash_element(char *key, size_t key_len, const void *p)
 
 #define FETCH_LIST(x,y,z) x->table[find_slot(x, y, z)]
 
-int 
-Curl_hash_add(curl_hash *h, char *key, size_t key_len, const void *p)
+/* Return the data in the hash. If there already was a match in the hash,
+   that data is returned. */
+void *
+Curl_hash_add(curl_hash *h, char *key, size_t key_len, void *p)
 {
   curl_hash_element  *he;
   curl_llist_element *le;
   curl_llist *l = FETCH_LIST(h, key, key_len);
 
-  for (le = l->head;
-       le;
-       le = le->next) {
+  for (le = l->head; le; le = le->next) {
     he = (curl_hash_element *) le->ptr;
     if (hash_key_compare(he->key, he->key_len, key, key_len)) {
-      h->dtor(he->ptr);
-      he->ptr = (void *) p;
-      return 1;
+      h->dtor(p);     /* remove the NEW entry */
+      return he->ptr; /* return the EXISTING entry */
     }
   }
 
   he = mk_hash_element(key, key_len, p);
   if (!he) 
-    return 0;
+    return NULL; /* failure */
 
   if (Curl_llist_insert_next(l, l->tail, he)) {
     ++h->size;
-    return 1;
+    return p; /* return the new entry */
   }
 
-  return 0;
+  return NULL; /* failure */
 }
 
 #if 0
