@@ -9,7 +9,6 @@
 	curl_easy_setopt,
 	curl_escape,
 	curl_unescape,
-	curl_formparse,
 	curl_formfree,
 	curl_getdate,
 	curl_getenv,
@@ -39,6 +38,8 @@
 	curl_version_info,
 	curl_share_init,
 	curl_share_setopt,
-	curl_share_cleanup
-
-
+ 	curl_share_cleanup,
+ 	curl_global_init_mem,
+ 	curl_easy_strerror,
+ 	curl_multi_strerror,
+ 	curl_share_strerror

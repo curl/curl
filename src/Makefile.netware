@@ -12,7 +12,7 @@ BASE	= c:/novell
 INSTDIR	= s:/libcurl
 
 # Edit the path below to point to the base of your Zlib sources.
-ZLIB_PATH = ../../../cw/zlib-src-1.1.4
+#ZLIB_PATH = ../../../cw/zlib-src-1.1.4
 
 # Edit the vars below to change NLM target settings.
 TARGET  = curl
@@ -104,7 +104,13 @@ CURL_INC = ../include
 CURL_LIB = ../lib
 
 INCLUDES = -I$(CURL_INC) -I$(CURL_LIB)
-INCLUDES += -I$(ZLIB_PATH)
+
+ifdef ZLIB_PATH
+	INCLUDES += -I$(ZLIB_PATH)
+	CFLAGS += -DHAVE_ZLIB_H -DHAVE_LIBZ
+	IMPORTS+ = @$(ZLIB_PATH)/nw/zlib.imp
+	MODULES+ = libz.nlm
+endif
 
 ifeq ($(LIBARCH),LIBC)
 	INCLUDES += -I$(SDK_LIBC)/include -I$(SDK_LIBC)/include/nks
@@ -123,7 +129,7 @@ endif
 
 ifeq ($(OSTYPE),linux)
 DL	= '
--include $(BASE)/nlmconv/ncpfs.inc
+#-include $(BASE)/nlmconv/ncpfs.inc
 endif
 
 OBJS	= \
@@ -141,9 +147,9 @@ $(OBJDIR)/%.o: %.c
 	@echo Compiling $<
 	@$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJDIR)/version.inc: $(CURL_INC)/curl/curl.h $(OBJDIR)
+$(OBJDIR)/version.inc: $(CURL_INC)/curl/curlver.h $(OBJDIR)
 	@echo Creating $@
-	@awk -f ../packages/netware/get_ver.awk $< > $@
+	@awk -f ../packages/NetWare/get_ver.awk $< > $@
 
 dist: all
 	-$(RM) $(OBJDIR)/*.o $(OBJDIR)/$(TARGET).map $(OBJDIR)/$(TARGET).ncv
@@ -202,9 +208,9 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)import @$(SDK_CLIB)/imports/threads.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_CLIB)/imports/nlmlib.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_CLIB)/imports/socklib.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapsdk.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapssl.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
+#	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapsdk.imp$(DL) >> $@
+#	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapssl.imp$(DL) >> $@
+#	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
 	@echo $(DL)module clib$(DL) >> $@
 else
 ifeq ($(LD),nlmconv)
@@ -218,9 +224,9 @@ endif
 	@echo $(DL)check _LibCCheckUnload$(DL) >> $@
 	@echo $(DL)import @$(SDK_LIBC)/imports/libc.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_LIBC)/imports/netware.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapsdk.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapssl.imp$(DL) >> $@
-	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapx.imp$(DL) >> $@
+#	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapsdk.imp$(DL) >> $@
+#	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapssl.imp$(DL) >> $@
+#	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapx.imp$(DL) >> $@
 	@echo $(DL)module libc$(DL) >> $@
 endif
 ifdef MODULES
