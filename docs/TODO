@@ -33,9 +33,6 @@ TODO
    return informational stuff as errors, consider a new info returned by
    curl_easy_getinfo() #845941
 
- * Option to set the SO_KEEPALIVE socket option to make libcurl notice and
-   disconnect very long time idle connections.
-
  LIBCURL - multi interface
 
  * Add curl_multi_timeout() to make libcurl's ares-functionality better.
