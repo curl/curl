@@ -125,7 +125,8 @@ CURLcode Curl_file_connect(struct connectdata *conn)
      with a drive letter.
   */
   actual_path = real_path;
-  if (*actual_path == '/' &&
+  if ((actual_path[0] == '/') &&
+      actual_path[1] &&
       (actual_path[2] == ':' || actual_path[2] == '|'))
   {
     actual_path[2] = ':';
