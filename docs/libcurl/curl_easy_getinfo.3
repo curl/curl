@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_getinfo 3 "25 Apr 2002" "libcurl 7.9.7" "libcurl Manual"
+.TH curl_easy_getinfo 3 "20 Aug 2003" "libcurl 7.10.8" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - Extract information from a curl session (added in 7.4)
 .SH SYNOPSIS
@@ -25,8 +25,9 @@ These are informations that can be extracted:
 .B CURLINFO_EFFECTIVE_URL
 Pass a pointer to a 'char *' to receive the last used effective URL.
 .TP
-.B CURLINFO_HTTP_CODE
-Pass a pointer to a long to receive the last received HTTP code.
+.B CURLINFO_RESPONSE_CODE
+Pass a pointer to a long to receive the last received HTTP or FTP code. This
+option was known as CURLINFO_HTTP_CODE in libcurl 7.10.7 and earlier.
 .TP
 .B CURLINFO_FILETIME
 Pass a pointer to a long to receive the remote time of the retrieved
