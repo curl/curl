@@ -33,11 +33,14 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <unistd.h>
 #include <signal.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/types.h>
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -61,14 +64,23 @@
 #define TRUE 1
 #endif
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#if defined(WIN32) && !defined(__CYGWIN__)
 #include <windows.h>
 #include <winsock2.h>
+#include <process.h>
+
+#define sleep(sec)   Sleep ((sec)*1000)
+#ifdef _MSC_VER
+#define strncasecmp  strnicmp
+#endif
+
 #define EINPROGRESS  WSAEINPROGRESS
 #define EWOULDBLOCK  WSAEWOULDBLOCK
 #define EISCONN      WSAEISCONN
 #define ENOTSOCK     WSAENOTSOCK
 #define ECONNREFUSED WSAECONNREFUSED
+
+static void win32_cleanup(void);
 #endif
 
 #define REQBUFSIZ 150000
@@ -118,6 +130,8 @@ void storerequest(char *reqbuf);
 
 #define CMD_AUTH_REQUIRED "auth_required"
 
+#define END_OF_HEADERS "\r\n\r\n"
+
 /* global variable, where to find the 'data' dir */
 const char *path=".";
 
@@ -134,25 +148,22 @@ enum {
 
 /* sent as reply to a QUIT */
 static const char *docquit =
-"HTTP/1.1 200 Goodbye\r\n"
-"\r\n";
+"HTTP/1.1 200 Goodbye" END_OF_HEADERS;
 
 /* sent as reply to a CONNECT */
 static const char *docconnect =
-"HTTP/1.1 200 Mighty fine indeed\r\n"
-"\r\n";
+"HTTP/1.1 200 Mighty fine indeed" END_OF_HEADERS;
 
 /* sent as reply to a "bad" CONNECT */
 static const char *docbadconnect =
-"HTTP/1.1 501 Forbidden you fool\r\n"
-"\r\n";
+"HTTP/1.1 501 Forbidden you fool" END_OF_HEADERS;
 
 /* send back this on 404 file not found */
-static const char *doc404 = "HTTP/1.1 404 Not Found\n"
-    "Server: " SWSVERSION "\n"
-    "Connection: close\n"
-    "Content-Type: text/html\n"
-    "\n"
+static const char *doc404 = "HTTP/1.1 404 Not Found\r\n"
+    "Server: " SWSVERSION "\r\n"
+    "Connection: close\r\n"
+    "Content-Type: text/html"
+    END_OF_HEADERS
     "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML 2.0//EN\">\n"
     "<HTML><HEAD>\n"
     "<TITLE>404 Not Found</TITLE>\n"
@@ -162,7 +173,7 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\n"
     "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
 
 #ifdef SIGPIPE
-static volatile int sigpipe;
+static volatile int sigpipe;  /* Why? It's not used */
 #endif
 
 static void logmsg(const char *msg, ...)
@@ -197,7 +208,23 @@ static void sigpipe_handler(int sig)
 }
 #endif
 
-#define END_OF_HEADERS "\r\n\r\n"
+#if defined(WIN32) && !defined(__CYGWIN__)
+#undef perror
+#define perror(m) win32_perror(m)
+
+static void win32_perror (const char *msg)
+{
+  char buf[256];
+  DWORD err = WSAGetLastError();
+
+  if (!FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+                     LANG_NEUTRAL, buf, sizeof(buf), NULL))
+     snprintf(buf, sizeof(buf), "Unknown error %lu (%#lx)", err, err);
+  if (msg)
+     fprintf(stderr, "%s: ", msg);
+  fprintf(stderr, "%s\n", buf);
+}
+#endif
 
 static char *test2file(int testno)
 {
@@ -267,7 +294,7 @@ int ProcessRequest(struct httprequest *req)
       else
         req->partno = 0;
 
-      sprintf(logbuf, "Reqested test number %ld part %ld",
+      sprintf(logbuf, "Requested test number %ld part %ld",
               req->testno, req->partno);
 
       logmsg(logbuf);
@@ -577,7 +604,7 @@ static int send_doc(int sock, struct httprequest *req)
      client... */
   if(strstr(buffer, "swsclose") || !count) {
     persistant = FALSE;
-    logmsg("connection close instruction swsclose found in response");
+    logmsg("connection close instruction \"swsclose\" found in response");
   }
   if(strstr(buffer, "swsbounce")) {
     prevbounce = TRUE;
@@ -635,7 +662,7 @@ static int send_doc(int sock, struct httprequest *req)
   return 0;
 }
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#if defined(WIN32) && !defined(__CYGWIN__)
 static void win32_init(void)
 {
   WORD wVersionRequested;  
@@ -647,7 +674,7 @@ static void win32_init(void)
     
   if (err != 0) {
     perror("Winsock init failed");
-    logmsg("Error initializing winsock -- aborting\n");
+    logmsg("Error initialising winsock -- aborting\n");
     exit(1);
   }
     
@@ -684,7 +711,8 @@ int main(int argc, char *argv[])
   
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
   win32_init();
-#endif
+  atexit(win32_cleanup);
+#else
 
 #ifdef SIGPIPE
 #ifdef HAVE_SIGNAL
@@ -692,6 +720,7 @@ int main(int argc, char *argv[])
 #endif
 #ifdef HAVE_SIGINTERRUPT
   siginterrupt(SIGPIPE, 1);
+#endif
 #endif
 #endif
 
@@ -776,10 +805,6 @@ int main(int argc, char *argv[])
   
   sclose(sock);
   
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-  win32_cleanup();
-#endif
-
   return 0;
 }
 
