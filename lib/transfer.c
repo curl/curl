@@ -609,7 +609,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             char *start;
 
             /* Find the first non-space letter */
-            for(start=k->p+18;
+            for(start=k->p+17;
                 *start && isspace((int)*start);
                 start++);
 
