@@ -92,6 +92,7 @@ my %commandok = (
                  'SYST' => 'loggedin',
                  'SIZE' => 'loggedin|twosock',
                  'PWD'  => 'loggedin|twosock',
+                 'MKD'  => 'loggedin|twosock',
                  'QUIT'  => 'loggedin|twosock',
                  'RNFR'  => 'loggedin|twosock',
                  'RNTO'  => 'loggedin|twosock',
@@ -118,6 +119,7 @@ my %displaytext = ('USER' => '331 We are happy you popped in!',
                    'SYST' => '215 UNIX Type: L8', # just fake something
                    'QUIT' => '221 bye bye baby', # just reply something
                    'PWD'  => '257 "/nowhere/anywhere" is current directory',
+                   'MKD'  => '257 Created your requested directory',
                    'REST' => '350 Yeah yeah we set it there for you',
                    'DELE' => '200 OK OK OK whatever you say',
                    'RNFR' => '350 Received your order. Please provide more',
@@ -428,6 +430,7 @@ sub PORT_command {
 $SIG{CHLD} = \&REAPER;
 
 my %customreply;
+my %customcount;
 my %delayreply;
 sub customize {
     undef %customreply;
@@ -439,6 +442,11 @@ sub customize {
     while(<CUSTOM>) {
         if($_ =~ /REPLY ([A-Z]+) (.*)/) {
             $customreply{$1}=$2;
+        }
+        if($_ =~ /COUNT ([A-Z]+) (.*)/) {
+            # we blank the customreply for this command when having
+            # been used this number of times
+            $customcount{$1}=$2;
         }
         elsif($_ =~ /DELAY ([A-Z]+) (\d*)/) {
             $delayreply{$1}=$2;
@@ -540,6 +548,10 @@ for ( $waitedpid = 0;
             $text = $displaytext{$FTPCMD};
         }
         else {
+            if($customcount{$FTPCMD} && (!--$customcount{$FTPCMD})) {
+                # used enough number of times, now blank the customreply
+                $customreply{$FTPCMD}="";
+            }
             logmsg "$FTPCMD made to send '$text'\n";
         }
         if($text) {
