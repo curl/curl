@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (23 April 2004)
+- I also added test case 163 just to make sure -F "var=<file" works fine and
+  can pass on characters such as newlines, carriage-return and tabs.
+
+- When we added test case 162 without adding the necessary requirement field
+  in the test meta data we could see that curl didn't complain if you used
+  --proxy-ntlm even if the underlying libcurl it uses has no NTLM support! I
+  now made it check this first, and it now exists with a "the installed
+  libcurl version doesn't support this" message if it happens again.
+
 Daniel (22 April 2004)
 - David Byron found and fixed a small bug with the --fail and authentication
   stuff added a few weeks ago.  Turns out that if you specify --proxy-ntlm and
