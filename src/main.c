@@ -1530,6 +1530,10 @@ int main(int argc, char *argv[])
 
     res = curl_easy_perform(curl);
 
+    if(config.writeout) {
+      ourWriteOut(curl, config.writeout);
+    }
+
     /* always cleanup */
     curl_easy_cleanup(curl);
 
