@@ -8,6 +8,33 @@
 
 
 Daniel (24 November)
+- Thanks to Mathias Axelsson, I've been able to work on FTPS for libcurl and it
+  seems to work somewhat fine now.
+
+  The FTPS stuff is based on RFC2228 and the murray-auth-ftp-ssl draft
+  (version 12). There seems to exist quite a few servers that have implemented
+  the server side of this.
+
+  We can now use ftps:// URLs to explicitly switch on SSL/TSL for the control
+  connection and the data connection (dealing with two SSL connections forced
+  me to change a lot of stuff in libcurl).
+
+  Alternatively, and what seems to be the recommended way, we can set the new
+  option CURLOPT_FTP_SSL to one of these values:
+
+     CURLFTPSSL_NOPE,   - do not attempt to use SSL
+     CURLFTPSSL_TRY     - try using SSL, proceed anyway otherwise
+     CURLFTPSSL_CONTROL - SSL for the control connection or fail
+     CURLFTPSSL_ALL     - SSL for all communication or fail
+
+  Any failure to set the desired level will make libcurl fail with the error
+  code CURLE_FTP_SSL_FAILED. This new option makes a "normal" ftp:// transfer
+  attempt to be made securely.
+
+  I've been able to login and get files (passively) from Mathias' server using
+  both ftps:// and CURLOPT_FTP_SSL. (I've made 'curl' understand the --ftp-ssl
+  option that sets CURLFTPSSL_TRY.)
+
 - Gaz Iqbal fixed a range string memory leak.
 
 - Gisle Vanem fixed the Windows builds.
@@ -15,7 +42,7 @@ Daniel (24 November)
 - Added the new FTPSSL defines in curl/curl.h
 
 Daniel (20 November)
-- Joshua Kapell filed bug report #845247 as he found an endless loop when
+- Josh Kapell filed bug report #845247 as he found an endless loop when
   getting a 407 back from a proxy when no user+password was given.
 
 Daniel (19 November)
