@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel (14 October)
+- Gisle Vanem made libcurl build and work with IPv6 on Windows.
+
 Daniel (13 October)
 - Giuseppe Attardi reported yet another segfault with ares and the multi
   interface. Me fixed.
