@@ -2963,12 +2963,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* get the newly set value, not the old one */
     conn->bits.no_body = old_conn->bits.no_body;
 
-    free(conn->host.rawalloc); /* free the newly allocated name buffer */
-    conn->host.rawalloc = old_conn->host.rawalloc; /* use the old one */
-    conn->host.name = old_conn->host.name;
-
-    conn->host.encalloc = old_conn->host.encalloc; /* use the old one */
-    conn->host.dispname = old_conn->host.dispname;
+    free(old_conn->host.rawalloc); /* free the newly allocated name buffer */
 
     free(conn->pathbuffer); /* free the newly allocated path pointer */
     conn->pathbuffer = old_conn->pathbuffer; /* use the old one */
@@ -3017,7 +3012,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     *in_connect = conn;      /* return this instead! */
 
-    infof(data, "Re-using existing connection! (#%d)\n", conn->connectindex);
+    infof(data, "Re-using existing connection! (#%d) with host %s\n",
+          conn->connectindex, conn->host.dispname);
   }
   else {
     /*
@@ -3381,7 +3377,8 @@ CURLcode Curl_done(struct connectdata *conn)
       result = res2;
   }
   else
-    infof(data, "Connection #%d left intact\n", conn->connectindex);
+    infof(data, "Connection #%d to host %s left intact\n",
+          conn->connectindex, conn->host.dispname);
 
   return result;
 }

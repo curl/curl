@@ -1398,7 +1398,40 @@ CURLcode Curl_http(struct connectdata *conn)
   if (conn->bits.httpproxy &&
       !data->set.tunnel_thru_httpproxy &&
       !(conn->protocol&PROT_HTTPS))  {
-    /* The path sent to the proxy is in fact the entire URL */
+    /* The path sent to the proxy is in fact the entire URL. But if the remote
+       host is a IDN-name, we must make sure that the request we produce only
+       uses the encoded host name! */
+    if(conn->host.dispname != conn->host.name) {
+      char *url = data->change.url;
+      char *ptr = strstr(url, conn->host.dispname);
+      if(ptr) {
+        /* This is where the display name starts in the URL, now replace this
+           part with the encoded name. TODO: This method of replacing the host
+           name is rather crude as I believe there's a slight risk that the
+           user has entered a user name or password that contain the host name
+           string. */
+        size_t currlen = strlen(conn->host.dispname);
+        size_t newlen = strlen(conn->host.name);
+        size_t urllen = strlen(url);
+        
+        char *newurl;
+        
+        newurl = malloc(urllen + newlen - currlen + 1);
+
+        /* copy the part before the host name */
+        memcpy(newurl, url, ptr - url);
+        /* append the new host name instead of the old */
+        memcpy(newurl + (ptr - url), conn->host.name, newlen);
+        /* append the piece after the host name */
+        memcpy(newurl + newlen + (ptr - url),
+               ptr + currlen, /* copy the trailing zero byte too */
+               urllen - (ptr-url) - currlen + 1);
+        if(data->change.url_alloc)
+          free(data->change.url);
+        data->change.url = newurl;
+        data->change.url_alloc = TRUE;
+      }
+    }
     ppath = data->change.url;
   }
   if(HTTPREQ_POST_FORM == httpreq) {
