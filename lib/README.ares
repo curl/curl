@@ -5,56 +5,53 @@ $Id$
                             | (__| |_| |  _ <| |___ 
                              \___|\___/|_| \_\_____|
 
-          How To Build libcurl to Use ares For Asynch Name Resolves
-          =========================================================
+          How To Build libcurl to Use c-ares For Asynch Name Resolves
+          ===========================================================
 
-ares:
-  ftp://athena-dist.mit.edu/pub/ATHENA/ares/ares-1.1.1.tar.gz
-  http://curl.haxx.se/dev/ares-1.1.1.tar.gz
-  http://curl.sourceforge.net/dev/ares-1.1.1.tar.gz
-  http://curl.planetmirror.com/dev/ares-1.1.1.tar.gz
-  http://curl.tsuren.net/dev/ares-1.1.1.tar.gz
-  
-c-ares: (a patched and improved version of ares)
-  http://curl.haxx.se/beta/arescurl-1.0-pre1.tar.gz
+c-ares: 
+  http://daniel.haxx.se/projects/c-ares/
 
 NOTE
-  libcurl works with ares 1.1.1, but several patches and improvements have
-  been put into the c-ares package which has made it more portable and better
-  working on several platforms.
+  libcurl 7.11.1 builds with c-ares 1.1.0, but 7.11.2 and later require c-ares
+  1.2.0 or alter.
 
-Build ares
-==========
+  Once upon the time libcurl built fine with the "original" ares. That is no
+  longer true. You need to use c-ares. c-ares is based on ares but improved.
 
-1. unpack the ares archive
-2. cd ares-dir
+Build c-ares
+============
+
+1. unpack the c-ares archive
+2. cd c-ares-dir
 3. ./configure
 4. make
 
-Build libcurl to use ares in the curl source tree
-=================================================
+Build libcurl to use c-ares in the curl source tree
+===================================================
 
-1. name the ares source directory 'ares' in the curl source directory
+1. name the c-ares source directory 'ares' in the curl source directory
+   (if you have checked out the curl sources from CVS, you will already have
+   c-ares in a directory named ares).
 2. ./configure --enable-ares
 3. make
 
-Build libcurl to use an installed ares
-======================================
+Build libcurl to use an installed c-ares
+========================================
 
 1. ./configure --enable-ares=/path/to/ares/install
 2. make
 
-Ares and ipv6
-=============
+c-ares and ipv6
+===============
 
 If the configure script enables IPv6 support you need to explicitly disable
-that (--disable-ipv6) since ares isn't IPv6 compatible (yet).
+that (--disable-ipv6) since c-ares isn't IPv6 compatible (yet).
 
-Ares on win32
-=============
+c-ares on win32
+===============
 (description brought by Dominick Meglio)
 
-First I compiled curl-ares. I changed the default C runtime library to be the
+First I compiled c-ares. I changed the default C runtime library to be the
 single-threaded rather than the multi-threaded (this seems to be required to
 prevent linking errors later on). Then I simply build the areslib project (the
 other projects adig/ahost seem to fail under MSVC).
