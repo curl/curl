@@ -19,4 +19,5 @@
 #endif
 
 extern char *arg2; /* set by first.c to the argv[2] or NULL */
-
+int test(char *URL); /* the actual test function provided by each individual
+                        libXXX.c file */
