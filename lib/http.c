@@ -352,6 +352,13 @@ CURLcode Curl_http_done(struct connectdata *conn)
     *bytecount = http->readbytecount + http->writebytecount;
   }
 
+  if(0 == (http->readbytecount + conn->headerbytecount)) {
+    /* nothing was read from the HTTP server, this can't be right
+       so we return an error here */
+    failf(data, "Empty reply from server\n");
+    return CURLE_GOT_NOTHING;
+  }
+
   return CURLE_OK;
 }
 

@@ -2034,6 +2034,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   conn->now = Curl_tvnow(); /* time this *after* the connect is done */
   conn->bytecount = 0;
+  conn->headerbytecount = 0;
   
   /* Figure out the ip-number and display the first host name it shows: */
 #ifdef ENABLE_IPV6

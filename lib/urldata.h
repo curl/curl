@@ -242,6 +242,7 @@ struct connectdata {
                                  not the proxy port! */
   char *ppath;
   long bytecount;
+  long headerbytecount;  /* only count received headers */
 
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
