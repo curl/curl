@@ -8,6 +8,23 @@
 
 Version XX
 
+Daniel (11 February 2000):
+- Paul Marquis <pmarquis@iname.com> fixed the config file parsing of curl to
+  deal with any-length lines, removing the previous limit of 4K.
+
+- Eetu Ojanen <esojanen@jyu.fi>'s suggestion of supporting the @-style for -b
+  is implemented. Now -b@<filename> works as well as the old style. -b@- also
+  similarily reads the cookies from stdin.
+
+- Reminder: -D should not write to the file until it needs to, in the same way
+  -o does. That would enable curl to use -b and -D on the same file...
+
+- Ellis Pritchard <ellis@citria.com> made getdate.y work for MacOS X.
+
+- Paul Harrington <paul@pizza.org> helped me out finding the crash in the
+  cookie parser. He also pointed out curl's habbit of sending empty cookies to
+  the server.
+
 Daniel (8 February 2000):
  - Ron Zapp <rzapper@yahoo.com> corrected a problem in src/urlglob.c that
    prevented curl from getting compiled on sunos 4. The problem had to do
