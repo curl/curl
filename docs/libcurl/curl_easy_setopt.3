@@ -456,6 +456,9 @@ redirections have been followed, the next redirect will cause an error
 .IP CURLOPT_PUT
 A non-zero parameter tells the library to use HTTP PUT to transfer data. The
 data should be set with \fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE\fP.
+
+This option is deprecated and starting with version 7.12.1 you should instead
+use \fICURLOPT_UPLOAD\fP.
 .IP CURLOPT_POST
 A non-zero parameter tells the library to do a regular HTTP post. This is a
 normal application/x-www-form-urlencoded kind, which is the most commonly used
@@ -734,7 +737,8 @@ as a curl_off_t. (Added in 7.11.0)
 .IP CURLOPT_UPLOAD
 A non-zero parameter tells the library to prepare for an upload. The
 \fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE_LARGE\fP are also interesting
-for uploads.
+for uploads. If the protocol is HTTP, uploading means using the PUT request
+unless you tell libcurl otherwise.
 .IP CURLOPT_MAXFILESIZE
 Pass a long as parameter. This allows you to specify the maximum size (in
 bytes) of a file to download. If the file requested is larger than this value,
