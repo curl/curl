@@ -5,14 +5,9 @@
                              \___|\___/|_| \_\_____|
 
 
-This document lists documents that specify standards used by curl, software
-that extends curl, web pages with similar utilities and information pages that
-describe some of the tools that we use to build/compile/develop curl.
+This document lists documents and standards used by curl.
 
-Standards
----------
-
-  RFC 959  - Defines how FTP works
+  RFC 959  - The FTP protocol
 
   RFC 1635 - How to Use Anonymous FTP
 
@@ -75,50 +70,3 @@ Standards
              
   RFC 2965 - HTTP State Management Mechanism. Cookies. Obsoletes RFC2109
 
-Compilers
----------
-  MingW32 - http://www.mingw.org/
-
-  gcc     - http://www.gnu.org/software/gcc/gcc.html
-
-Software
---------
-  OpenSSL -  http://www.openssl.org/
-
-  OpenLDAP - http://www.openldap.org/
-
-  zlib -     http://www.cdrom.com/pub/infozip/zlib/
-
-Similar Tools
--------------
-  wget    - http://sunsite.dk/wget/
-
-  snarf   - http://www.xach.com/snarf/
-
-  lynx    - http://lynx.browser.org/ (well at least when -dump is used)
-
-  swebget - http://www.uni-hildesheim.de/~smol0075/swebget/
-
-  Kermit  - http://www.columbia.edu/kermit/ftpclient
-
-  Pavuk   - http://www.idata.sk/~ondrej/pavuk/
-
-  httpr   - http://zwolak.dhs.org/httpr/
-
-  puf     - http://www.inf.tu-dresden.de/~ob6/sw/puf.html
-
-Related Software
-----------------
-  ftpparse - http://cr.yp.to/ftpparse.html parses FTP LIST responses
-
-  autoconf - http://www.gnu.org/software/autoconf/autoconf.html
-
-  automake - http://www.gnu.org/software/automake/automake.html
-
-  bison    - http://www.gnu.org/software/bison/bison.html
-
-  gzip     - http://www.gnu.org/software/gzip/gzip.html
-
-  tar      - http://www.gnu.org/software/tar/tar.html
-
-  libtool  - http://www.gnu.org/software/libtool/libtool.html
