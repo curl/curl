@@ -62,9 +62,10 @@ static int passwd_callback(char *buf, int num, int verify
  * from) source from the SSLeay package written by Eric Young
  * (eay@cryptsoft.com).  */
 
-int SSL_cert_stuff(struct UrlData *data, 
-		   char *cert_file,
-		   char *key_file)
+static
+int cert_stuff(struct UrlData *data, 
+               char *cert_file,
+               char *key_file)
 {
   if (cert_file != NULL) {
     SSL *ssl;
@@ -124,6 +125,7 @@ int SSL_cert_stuff(struct UrlData *data,
 #endif
 
 #ifdef USE_SSLEAY
+static
 int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
 {
   X509 *err_cert;
@@ -139,7 +141,7 @@ int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
 
 /* ====================================================== */
 int
-UrgSSLConnect (struct UrlData *data)
+Curl_SSLConnect (struct UrlData *data)
 {
 #ifdef USE_SSLEAY
     int err;
@@ -163,7 +165,7 @@ UrgSSLConnect (struct UrlData *data)
       RAND_screen();
 #else
       int len;
-      char *area = MakeFormBoundary();
+      char *area = Curl_FormBoundary();
       if(!area)
 	return 3; /* out of memory */
 	
@@ -198,7 +200,7 @@ UrgSSLConnect (struct UrlData *data)
     }
     
     if(data->cert) {
-      if (!SSL_cert_stuff(data, data->cert, data->cert)) {
+      if (!cert_stuff(data, data->cert, data->cert)) {
 	failf(data, "couldn't use certificate!\n");
 	return 2;
       }

@@ -62,7 +62,7 @@
 
 /* --- resolve name or IP-number --- */
 
-char *MakeIP(unsigned long num,char *addr, int addr_len)
+static char *MakeIP(unsigned long num,char *addr, int addr_len)
 {
 #if defined(HAVE_INET_NTOA) || defined(HAVE_INET_NTOA_R)
   struct in_addr in;
@@ -83,14 +83,17 @@ char *MakeIP(unsigned long num,char *addr, int addr_len)
   return (addr);
 }
 
-/* The original code to this function was stolen from the Dancer source code,
-   written by Bjorn Reese, it has since been patched and modified. */
+/* The original code to this function was once stolen from the Dancer source
+   code, written by Bjorn Reese, it has since been patched and modified
+   considerably. */
+
 #ifndef INADDR_NONE
 #define INADDR_NONE (unsigned long) ~0
 #endif
-struct hostent *GetHost(struct UrlData *data,
-                        char *hostname,
-                        char **bufp)
+
+struct hostent *Curl_gethost(struct UrlData *data,
+                             char *hostname,
+                             char **bufp)
 {
   struct hostent *h = NULL;
   unsigned long in;

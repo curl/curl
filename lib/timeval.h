@@ -42,8 +42,8 @@ struct timeval {
 #endif
 #endif
 
-struct timeval tvnow ();
-double tvdiff (struct timeval t1, struct timeval t2);
-long tvlong (struct timeval t1);
+struct timeval Curl_tvnow ();
+double Curl_tvdiff (struct timeval t1, struct timeval t2);
+long Curl_tvlong (struct timeval t1);
 
 #endif

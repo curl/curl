@@ -81,7 +81,6 @@
 
 #define  TELOPTS
 #define  TELCMDS
-#define  SLC_NAMES
 
 #include "arpa_telnet.h"
 
@@ -98,10 +97,12 @@
 #define  SB_EOF() (subpointer >= subend)
 #define  SB_LEN() (subend - subpointer)
 
+static
 void telwrite(struct UrlData *data,
 	      unsigned char *buffer,	/* Data to write */
 	      int count);		/* Number of bytes to write */
 
+static
 void telrcv(struct UrlData *data,
 	    unsigned char *inbuf,	/* Data received from socket */
 	    int count);			/* Number of bytes received */
@@ -155,6 +156,7 @@ static int him[256];
 static int himq[256]; 
 static int him_preferred[256]; 
 
+static
 void init_telnet(struct UrlData *data)
 {
    telrcv_state = TS_DATA;
@@ -246,6 +248,7 @@ static void send_negotiation(struct UrlData *data, int cmd, int option)
    printoption(data, "SENT", cmd, option);
 }
 
+static
 void set_remote_option(struct UrlData *data, int option, int newstate)
 {
    if(newstate == YES)
@@ -326,6 +329,7 @@ void set_remote_option(struct UrlData *data, int option, int newstate)
    }
 }
 
+static
 void rec_will(struct UrlData *data, int option)
 {
    switch(him[option])
@@ -377,6 +381,7 @@ void rec_will(struct UrlData *data, int option)
    }
 }
    
+static
 void rec_wont(struct UrlData *data, int option)
 {
    switch(him[option])
@@ -500,6 +505,7 @@ void set_local_option(struct UrlData *data, int option, int newstate)
    }
 }
 
+static
 void rec_do(struct UrlData *data, int option)
 {
    switch(us[option])
@@ -550,7 +556,8 @@ void rec_do(struct UrlData *data, int option)
       break;
    }
 }
-   
+
+static   
 void rec_dont(struct UrlData *data, int option)
 {
    switch(us[option])
@@ -669,6 +676,7 @@ static void suboption(struct UrlData *data)
    return;
 }
 
+static
 void telrcv(struct UrlData *data,
 	    unsigned char *inbuf,	/* Data received from socket */
 	    int count)			/* Number of bytes received */
@@ -689,7 +697,7 @@ void telrcv(struct UrlData *data,
 	    break;   /* Ignore \0 after CR */
 	 }
 
-	 client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
+	 Curl_client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
 	 continue;
 
       case TS_DATA:
@@ -703,7 +711,7 @@ void telrcv(struct UrlData *data,
 	    telrcv_state = TS_CR;
 	 }
 
-	 client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
+	 Curl_client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
 	 continue;
 
       case TS_IAC:
@@ -727,7 +735,7 @@ void telrcv(struct UrlData *data,
 	   telrcv_state = TS_SB;
 	   continue;
 	case IAC:
-          client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
+          Curl_client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
           break;
 	case DM:
 	case NOP:
@@ -818,6 +826,7 @@ void telrcv(struct UrlData *data,
    }
 }
 
+static
 void telwrite(struct UrlData *data,
 	      unsigned char *buffer,	/* Data to write */
 	      int count)		/* Number of bytes to write */
@@ -847,12 +856,12 @@ void telwrite(struct UrlData *data,
    }
 }
 
-CURLcode telnet_done(struct connectdata *conn)
+CURLcode Curl_telnet_done(struct connectdata *conn)
 {
   return CURLE_OK;
 }
 
-CURLcode telnet(struct connectdata *conn)
+CURLcode Curl_telnet(struct connectdata *conn)
 {
   struct UrlData *data = conn->data;
   int sockfd = data->firstsocket;

@@ -51,15 +51,15 @@ enum {
 #define LOGINSIZE 64
 #define PASSWORDSIZE 64
 
-int ParseNetrc(char *host,
-	       char *login,
-	       char *password)
+int Curl_parsenetrc(char *host,
+                    char *login,
+                    char *password)
 {
   FILE *file;
   char netrcbuffer[256];
   int retcode=1;
   
-  char *home = GetEnv("HOME"); /* portable environment reader */
+  char *home = curl_getenv("HOME"); /* portable environment reader */
   int state=NOTHING;
 
   char state_login=0;

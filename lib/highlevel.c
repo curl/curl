@@ -103,14 +103,14 @@
 #define min(a, b)   ((a) < (b) ? (a) : (b))
 #endif
 
-CURLcode 
+CURLcode static
 _Transfer(struct connectdata *c_conn)
 {
   size_t nread;                 /* number of bytes read */
   int bytecount = 0;            /* total number of bytes read */
   int writebytecount = 0;       /* number of bytes written */
   long contentlength=0;         /* size of incoming data */
-  struct timeval start = tvnow();
+  struct timeval start = Curl_tvnow();
   struct timeval now = start;   /* current time */
   bool header = TRUE;		/* incoming data has HTTP header */
   int headerline = 0;		/* counts header lines to better track the
@@ -151,19 +151,19 @@ _Transfer(struct connectdata *c_conn)
 
   myalarm (0);			/* switch off the alarm-style timeout */
 
-  now = tvnow();
+  now = Curl_tvnow();
   start = now;
 
 #define KEEP_READ  1
 #define KEEP_WRITE 2
 
-  pgrsTime(data, TIMER_PRETRANSFER);
-  speedinit(data);
+  Curl_pgrsTime(data, TIMER_PRETRANSFER);
+  Curl_speedinit(data);
 
   if (!conn->getheader) {
     header = FALSE;
     if(conn->size > 0)
-      pgrsSetDownloadSize(data, conn->size);
+      Curl_pgrsSetDownloadSize(data, conn->size);
   }
   /* we want header and/or body, if neither then don't do this! */
   if(conn->getheader ||
@@ -314,7 +314,7 @@ _Transfer(struct connectdata *c_conn)
                 if ('\n' == *p)
                   p++;		/* pass the \n byte */
 
-                pgrsSetDownloadSize(data, conn->size);
+                Curl_pgrsSetDownloadSize(data, conn->size);
 
                 header = FALSE;	/* no more header to parse! */
 
@@ -324,8 +324,8 @@ _Transfer(struct connectdata *c_conn)
                 if (data->bits.http_include_header)
                   writetype |= CLIENTWRITE_BODY;
 
-                urg = client_write(data, writetype, data->headerbuff,
-                                   p - data->headerbuff);
+                urg = Curl_client_write(data, writetype, data->headerbuff,
+                                        p - data->headerbuff);
                 if(urg)
                   return urg;
 
@@ -374,7 +374,7 @@ _Transfer(struct connectdata *c_conn)
               }
               else if(data->cookies &&
                       strnequal("Set-Cookie: ", p, 11)) {
-                cookie_add(data->cookies, TRUE, &p[12]);
+                Curl_cookie_add(data->cookies, TRUE, &p[12]);
               }
               else if(strnequal("Last-Modified:", p,
                                 strlen("Last-Modified:")) &&
@@ -398,7 +398,7 @@ _Transfer(struct connectdata *c_conn)
               if (data->bits.http_include_header)
                 writetype |= CLIENTWRITE_BODY;
 
-              urg = client_write(data, writetype, p, hbuflen);
+              urg = Curl_client_write(data, writetype, p, hbuflen);
               if(urg)
                 return urg;
 
@@ -484,9 +484,9 @@ _Transfer(struct connectdata *c_conn)
 
             bytecount += nread;
 
-            pgrsSetDownloadCounter(data, (double)bytecount);
+            Curl_pgrsSetDownloadCounter(data, (double)bytecount);
             
-            urg = client_write(data, CLIENTWRITE_BODY, str, nread);
+            urg = Curl_client_write(data, CLIENTWRITE_BODY, str, nread);
             if(urg)
               return urg;
 
@@ -513,7 +513,7 @@ _Transfer(struct connectdata *c_conn)
             break;
           }
           writebytecount += nread;
-          pgrsSetUploadCounter(data, (double)writebytecount);            
+          Curl_pgrsSetUploadCounter(data, (double)writebytecount);            
 
           /* convert LF to CRLF if so asked */
           if (data->crlf) {
@@ -543,11 +543,11 @@ _Transfer(struct connectdata *c_conn)
         break;
       }
 
-      now = tvnow();
-      if(pgrsUpdate(data))
+      now = Curl_tvnow();
+      if(Curl_pgrsUpdate(data))
         urg = CURLE_ABORTED_BY_CALLBACK;
       else
-        urg = speedcheck (data, now);
+        urg = Curl_speedcheck (data, now);
       if (urg)
 	return urg;
 
@@ -560,7 +560,7 @@ _Transfer(struct connectdata *c_conn)
         conn->upload_bufsize=(long)min(data->progress.ulspeed, BUFSIZE);
       }
 
-      if (data->timeout && (tvdiff (now, start) > data->timeout)) {
+      if (data->timeout && (Curl_tvdiff (now, start) > data->timeout)) {
 	failf (data, "Operation timed out with %d out of %d bytes received",
 	       bytecount, conn->size);
 	return CURLE_OPERATION_TIMEOUTED;
@@ -573,7 +573,7 @@ _Transfer(struct connectdata *c_conn)
           contentlength-bytecount);
     return CURLE_PARTIAL_FILE;
   }
-  if(pgrsUpdate(data))
+  if(Curl_pgrsUpdate(data))
     return CURLE_ABORTED_BY_CALLBACK;
 
   if(conn->bytecountp)
@@ -592,10 +592,10 @@ CURLcode curl_transfer(CURL *curl)
   struct UrlData *data = curl;
   struct connectdata *c_connect=NULL;
 
-  pgrsStartNow(data);
+  Curl_pgrsStartNow(data);
 
   do {
-    pgrsTime(data, TIMER_STARTSINGLE);
+    Curl_pgrsTime(data, TIMER_STARTSINGLE);
     res = curl_connect(curl, (CURLconnect **)&c_connect);
     if(res == CURLE_OK) {
       res = curl_do(c_connect);

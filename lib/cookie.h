@@ -63,10 +63,10 @@ struct CookieInfo {
 #define MAX_NAME 256
 #define MAX_NAME_TXT "255"
 
-struct Cookie *cookie_add(struct CookieInfo *, bool, char *);
-struct CookieInfo *cookie_init(char *);
-struct Cookie *cookie_getlist(struct CookieInfo *, char *, char *, bool);
-void cookie_freelist(struct Cookie *);
-void cookie_cleanup(struct CookieInfo *);
+struct Cookie *Curl_cookie_add(struct CookieInfo *, bool, char *);
+struct CookieInfo *Curl_cookie_init(char *);
+struct Cookie *Curl_cookie_getlist(struct CookieInfo *, char *, char *, bool);
+void Curl_cookie_freelist(struct Cookie *);
+void Curl_cookie_cleanup(struct CookieInfo *);
 
 #endif

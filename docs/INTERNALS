@@ -12,6 +12,13 @@ INTERNALS
 
  Thus, the largest amount of code and complexity is in the library part.
 
+SYMBOLS
+=======
+ All symbols used internally must use a 'Curl_' prefix if they're used in
+ more than a single file. Single file symbols must be made static. Public
+ symbols must use a 'curl_' prefix. (There are exceptions, but they are
+ destined to change to this pattern in the future.)
+
 CVS
 ===
 

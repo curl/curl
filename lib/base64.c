@@ -55,7 +55,7 @@ static int pos(char c)
 }
 
 #if 1
-int base64_encode(const void *data, int size, char **str)
+int Curl_base64_encode(const void *data, int size, char **str)
 {
   char *s, *p;
   int i;
@@ -93,7 +93,7 @@ int base64_encode(const void *data, int size, char **str)
 }
 #endif
 
-int base64_decode(const char *str, void *data)
+int Curl_base64_decode(const char *str, void *data)
 {
   const char *p;
   unsigned char *q;

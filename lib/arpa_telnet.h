@@ -63,6 +63,7 @@
 #define SYNCH	242		/* for telfunc calls */
 
 #ifdef TELCMDS
+static
 char *telcmds[] = {
 	"EOF", "SUSP", "ABORT", "EOR",
 	"SE", "NOP", "DMARK", "BRK", "IP", "AO", "AYT", "EC",
@@ -124,6 +125,7 @@ extern char *telcmds[];
 
 #define	NTELOPTS	(1+TELOPT_NEW_ENVIRON)
 #ifdef TELOPTS
+static
 char *telopts[NTELOPTS+1] = {
 	"BINARY", "ECHO", "RCP", "SUPPRESS GO AHEAD", "NAME",
 	"STATUS", "TIMING MARK", "RCTE", "NAOL", "NAOP",

@@ -22,7 +22,7 @@
  *
  * $Id$
  *****************************************************************************/
-int ParseNetrc(char *host,
-	       char *login,
-	       char *password);
+int Curl_parsenetrc(char *host,
+                    char *login,
+                    char *password);
 #endif

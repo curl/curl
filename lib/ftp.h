@@ -23,11 +23,18 @@
  *
  * $Id$
  *****************************************************************************/
-CURLcode ftp(struct connectdata *conn);
-CURLcode ftp_done(struct connectdata *conn);
-CURLcode ftp_connect(struct connectdata *conn);
+CURLcode Curl_ftp(struct connectdata *conn);
+CURLcode Curl_ftp_done(struct connectdata *conn);
+CURLcode Curl_ftp_connect(struct connectdata *conn);
+
+size_t Curl_ftpsendf(int fd, struct connectdata *, char *fmt, ...);
 
 struct curl_slist *curl_slist_append(struct curl_slist *list, char *data);
 void curl_slist_free_all(struct curl_slist *list);
+
+/* The kerberos stuff needs this: */
+int Curl_GetFTPResponse(int sockfd, char *buf,
+                        struct connectdata *conn,
+                        int *ftpcode);
 
 #endif

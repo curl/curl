@@ -87,7 +87,6 @@
 #include "if2ip.h"
 #include "download.h"
 #include "sendf.h"
-#include "speedcheck.h"
 #include "getpass.h"
 #include "progress.h"
 #include "cookie.h"
@@ -224,7 +223,7 @@ void static urlfree(struct UrlData *data, bool totally)
       /* the URL is allocated, free it! */
       free(data->url);
 
-    cookie_cleanup(data->cookies);
+    Curl_cookie_cleanup(data->cookies);
 
     free(data);
 
@@ -248,6 +247,7 @@ CURLcode curl_close(CURL *curl)
   return CURLE_OK;
 }
 
+static
 int my_getpass(void *clientp, char *prompt, char* buffer, int buflen )
 {
   char *retbuf;
@@ -381,7 +381,7 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
   case CURLOPT_COOKIEFILE:
     cookiefile = (char *)va_arg(param, void *);
     if(cookiefile) {
-      data->cookies = cookie_init(cookiefile);
+      data->cookies = Curl_cookie_init(cookiefile);
     }
     break;
   case CURLOPT_WRITEHEADER:
@@ -533,50 +533,11 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
   return CURLE_OK;
 }
 
-
-/*
- * Read everything until a newline.
- */
-
-int GetLine(int sockfd, char *buf, struct UrlData *data)
-{
-  int nread;
-  int read_rc=1;
-  char *ptr;
-  ptr=buf;
-
-  /* get us a full line, terminated with a newline */
-  for(nread=0;
-      (nread<BUFSIZE) && read_rc;
-      nread++, ptr++) {
-#ifdef USE_SSLEAY
-    if (data->ssl.use) {
-      read_rc = SSL_read(data->ssl.handle, ptr, 1);
-    }
-    else {
-#endif
-      read_rc = sread(sockfd, ptr, 1);
-#ifdef USE_SSLEAY
-    }
-#endif /* USE_SSLEAY */
-    if (*ptr == '\n')
-      break;
-  }
-  *ptr=0; /* zero terminate */
-
-  if(data->bits.verbose) {
-    fputs("< ", data->err);
-    fwrite(buf, 1, nread, data->err);
-    fputs("\n", data->err);
-  }
-  return nread;
-}
-
-
 #ifndef WIN32
 #ifndef RETSIGTYPE
 #define RETSIGTYPE void
 #endif
+static
 RETSIGTYPE alarmfunc(int signal)
 {
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
@@ -865,9 +826,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     char *proxy=NULL;
     char proxy_env[128];
 
-    no_proxy=GetEnv("no_proxy");
+    no_proxy=curl_getenv("no_proxy");
     if(!no_proxy)
-      no_proxy=GetEnv("NO_PROXY");
+      no_proxy=curl_getenv("NO_PROXY");
 
     if(!no_proxy || !strequal("*", no_proxy)) {
       /* NO_PROXY wasn't specified or it wasn't just an asterisk */
@@ -899,22 +860,22 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 	strcpy(envp, "_proxy");
 
 	/* read the protocol proxy: */
-	prox=GetEnv(proxy_env);
+	prox=curl_getenv(proxy_env);
 
 	if(!prox) {
           /* There was no lowercase variable, try the uppercase version: */
 	  for(envp = proxy_env; *envp; envp++)
 	    *envp = toupper(*envp);
-	  prox=GetEnv(proxy_env);
+	  prox=curl_getenv(proxy_env);
 	}
 
 	if(prox && *prox) { /* don't count "" strings */
 	  proxy = prox; /* use this */
 	}
 	else {
-	  proxy = GetEnv("all_proxy"); /* default proxy to use */
+	  proxy = curl_getenv("all_proxy"); /* default proxy to use */
 	  if(!proxy)
-            proxy=GetEnv("ALL_PROXY");
+            proxy=curl_getenv("ALL_PROXY");
 	}
 
         if(proxy && *proxy) {
@@ -935,7 +896,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
        */
     char *reurl;
 
-    reurl = maprintf("%s://%s", conn->proto, data->url);
+    reurl = aprintf("%s://%s", conn->proto, data->url);
 
     if(!reurl)
       return CURLE_OUT_OF_MEMORY;
@@ -984,9 +945,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       data->port = PORT_HTTP;
     data->remote_port = PORT_HTTP;
     conn->protocol |= PROT_HTTP;
-    conn->curl_do = http;
-    conn->curl_done = http_done;
-    conn->curl_close = http_close;
+    conn->curl_do = Curl_http;
+    conn->curl_done = Curl_http_done;
+    conn->curl_close = Curl_http_close;
   }
   else if (strequal(conn->proto, "HTTPS")) {
 #ifdef USE_SSLEAY
@@ -996,10 +957,10 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     conn->protocol |= PROT_HTTP;
     conn->protocol |= PROT_HTTPS;
 
-    conn->curl_do = http;
-    conn->curl_done = http_done;
-    conn->curl_connect = http_connect;
-    conn->curl_close = http_close;
+    conn->curl_do = Curl_http;
+    conn->curl_done = Curl_http_done;
+    conn->curl_connect = Curl_http_connect;
+    conn->curl_close = Curl_http_close;
 
 #else /* USE_SSLEAY */
     failf(data, "libcurl was built with SSL disabled, https: not supported!");
@@ -1017,9 +978,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 	conn->ppath = conn->path;
       }
     conn->protocol |= PROT_GOPHER;
-    conn->curl_do = http;
-    conn->curl_done = http_done;
-    conn->curl_close = http_close;
+    conn->curl_do = Curl_http;
+    conn->curl_done = Curl_http_done;
+    conn->curl_close = Curl_http_close;
   }
   else if(strequal(conn->proto, "FTP")) {
     char *type;
@@ -1032,14 +993,14 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
        !data->bits.tunnel_thru_httpproxy) {
       /* Unless we have asked to tunnel ftp operations through the proxy, we
          switch and use HTTP operations only */
-      conn->curl_do = http;
-      conn->curl_done = http_done;
-      conn->curl_close = http_close;
+      conn->curl_do = Curl_http;
+      conn->curl_done = Curl_http_done;
+      conn->curl_close = Curl_http_close;
     }
     else {
-      conn->curl_do = ftp;
-      conn->curl_done = ftp_done;
-      conn->curl_connect = ftp_connect;
+      conn->curl_do = Curl_ftp;
+      conn->curl_done = Curl_ftp_done;
+      conn->curl_connect = Curl_ftp_connect;
     }
 
     conn->ppath++; /* don't include the initial slash */
@@ -1076,8 +1037,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       data->port = PORT_TELNET;
     data->remote_port = PORT_TELNET;
 
-    conn->curl_do = telnet;
-    conn->curl_done = telnet_done;
+    conn->curl_do = Curl_telnet;
+    conn->curl_done = Curl_telnet_done;
 
   }
   else if (strequal(conn->proto, "DICT")) {
@@ -1085,16 +1046,16 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     if(!data->port)
       data->port = PORT_DICT;
     data->remote_port = PORT_DICT;
-    conn->curl_do = dict;
-    conn->curl_done = dict_done;
+    conn->curl_do = Curl_dict;
+    conn->curl_done = Curl_dict_done;
   }
   else if (strequal(conn->proto, "LDAP")) {
     conn->protocol |= PROT_LDAP;
     if(!data->port)
       data->port = PORT_LDAP;
     data->remote_port = PORT_LDAP;
-    conn->curl_do = ldap;
-    conn->curl_done = ldap_done;
+    conn->curl_do = Curl_ldap;
+    conn->curl_done = Curl_ldap_done;
   }
   else if (strequal(conn->proto, "FILE")) {
     conn->protocol |= PROT_FILE;
@@ -1114,7 +1075,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   }
 
   if(data->bits.use_netrc) {
-    if(ParseNetrc(data->hostname, data->user, data->passwd)) {
+    if(Curl_parsenetrc(data->hostname, data->user, data->passwd)) {
       infof(data, "Couldn't find host %s in the .netrc file, using defaults",
             data->hostname);
     }
@@ -1196,7 +1157,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     data->remote_port = data->port; /* it is the same port */
 
     /* Connect to target host right on */
-    conn->hp = GetHost(data, conn->name, &conn->hostent_buf);
+    conn->hp = Curl_gethost(data, conn->name, &conn->hostent_buf);
     if(!conn->hp) {
       failf(data, "Couldn't resolve host '%s'", conn->name);
       return CURLE_COULDNT_RESOLVE_HOST;
@@ -1252,7 +1213,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     }
 
     /* connect to proxy */
-    conn->hp = GetHost(data, proxyptr, &conn->hostent_buf);
+    conn->hp = Curl_gethost(data, proxyptr, &conn->hostent_buf);
     if(!conn->hp) {
       failf(data, "Couldn't resolve proxy '%s'", proxyptr);
       return CURLE_COULDNT_RESOLVE_PROXY;
@@ -1260,7 +1221,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 
     free(proxydup); /* free the duplicate pointer and not the modified */
   }
-  pgrsTime(data, TIMER_NAMELOOKUP);
+  Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
   data->firstsocket = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -1292,12 +1253,12 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     char myhost[256] = "";
     unsigned long in;
 
-    if(if2ip(data->device, myhost, sizeof(myhost))) {
-      h = GetHost(data, myhost, &hostdataptr);
+    if(Curl_if2ip(data->device, myhost, sizeof(myhost))) {
+      h = Curl_gethost(data, myhost, &hostdataptr);
     }
     else {
       if(strlen(data->device)>1) {
-        h = GetHost(data, data->device, &hostdataptr);
+        h = Curl_gethost(data, data->device, &hostdataptr);
       }
       if(h) {
         /* we know data->device is shorter than the myhost array */
@@ -1307,7 +1268,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 
     if(! *myhost) {
       /* need to fix this
-         h=GetHost(data,
+         h=Curl_gethost(data,
          getmyhost(*myhost,sizeof(myhost)),
          hostent_buf,
          sizeof(hostent_buf));
@@ -1384,7 +1345,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     }
 
     if(hostdataptr)
-      free(hostdataptr); /* allocated by GetHost() */
+      free(hostdataptr); /* allocated by Curl_gethost() */
 
   } /* end of device selection support */
 #endif  /* end of HAVE_INET_NTOA */
@@ -1443,32 +1404,35 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     char *authorization;
     snprintf(data->buffer, BUFSIZE, "%s:%s",
              data->proxyuser, data->proxypasswd);
-    if(base64_encode(data->buffer, strlen(data->buffer),
-                    &authorization) >= 0) {
+    if(Curl_base64_encode(data->buffer, strlen(data->buffer),
+                          &authorization) >= 0) {
       data->ptr_proxyuserpwd =
-        maprintf("Proxy-authorization: Basic %s\015\012", authorization);
+        aprintf("Proxy-authorization: Basic %s\015\012", authorization);
       free(authorization);
     }
   }
   if((conn->protocol&PROT_HTTP) || data->bits.httpproxy) {
     if(data->useragent) {
-      data->ptr_uagent = maprintf("User-Agent: %s\015\012", data->useragent);
+      data->ptr_uagent =
+        aprintf("User-Agent: %s\015\012", data->useragent);
     }
   }
 
   if(conn->curl_connect) {
     /* is there a connect() procedure? */
-    conn->now = tvnow(); /* set this here for timeout purposes in the
-                            connect procedure, it is later set again for the
-                            progress meter purpose */
+
+    /* set start time here for timeout purposes in the
+       connect procedure, it is later set again for the
+       progress meter purpose */
+    conn->now = Curl_tvnow();
     result = conn->curl_connect(conn);
     if(result != CURLE_OK)
       return result; /* pass back errors */
   }
 
-  pgrsTime(data, TIMER_CONNECT); /* we're connected */
+  Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected */
 
-  conn->now = tvnow(); /* time this *after* the connect is done */
+  conn->now = Curl_tvnow(); /* time this *after* the connect is done */
   conn->bytecount = 0;
   
   /* Figure out the ip-number and the first host name it shows: */
@@ -1560,7 +1524,7 @@ CURLcode curl_done(CURLconnect *c_connect)
   else
     result = CURLE_OK;
 
-  pgrsDone(data); /* done with the operation */
+  Curl_pgrsDone(data); /* done with the operation */
 
   conn->state = CONN_DONE;
 

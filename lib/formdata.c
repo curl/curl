@@ -91,16 +91,10 @@ static void GetStr(char **string,
  *
  ***************************************************************************/
 
-int curl_formparse(char *input,
-                   struct HttpPost **httppost,
-                   struct HttpPost **last_post)
-{
-  return FormParse(input, httppost, last_post);
-}
-
 #define FORM_FILE_SEPARATOR ','
 #define FORM_TYPE_SEPARATOR ';'
 
+static
 int FormParse(char *input,
 	      struct HttpPost **httppost,
 	      struct HttpPost **last_post)
@@ -298,6 +292,13 @@ int FormParse(char *input,
   return 0;
 }
 
+int curl_formparse(char *input,
+                   struct HttpPost **httppost,
+                   struct HttpPost **last_post)
+{
+  return FormParse(input, httppost, last_post);
+}
+
 static int AddFormData(struct FormData **formp,
 			void *line,
 			long length)
@@ -339,7 +340,7 @@ static int AddFormDataf(struct FormData **formp,
 }
 
 
-char *MakeFormBoundary(void)
+char *Curl_FormBoundary(void)
 {
   char *retstring;
   static int randomizer=0; /* this is just so that two boundaries within
@@ -367,7 +368,7 @@ char *MakeFormBoundary(void)
 }
 
 /* Used from http.c */ 
-void FormFree(struct FormData *form)
+void Curl_FormFree(struct FormData *form)
 {
   struct FormData *next;
   do {
@@ -400,8 +401,8 @@ void curl_formfree(struct HttpPost *form)
   } while((form=next)); /* continue */
 }
 
-struct FormData *getFormData(struct HttpPost *post,
-			     int *sizep)
+struct FormData *Curl_getFormData(struct HttpPost *post,
+                                  int *sizep)
 {
   struct FormData *form = NULL;
   struct FormData *firstform;
@@ -415,7 +416,7 @@ struct FormData *getFormData(struct HttpPost *post,
   if(!post)
     return NULL; /* no input => no output! */
 
-  boundary = MakeFormBoundary();
+  boundary = Curl_FormBoundary();
   
   /* Make the first line of the output */
   AddFormDataf(&form,
@@ -439,7 +440,7 @@ struct FormData *getFormData(struct HttpPost *post,
       /* If used, this is a link to more file names, we must then do
          the magic to include several files with the same field name */
 
-      fileboundary = MakeFormBoundary();
+      fileboundary = Curl_FormBoundary();
 
       size += AddFormDataf(&form,
 			   "\r\nContent-Type: multipart/mixed,"
@@ -535,24 +536,11 @@ struct FormData *getFormData(struct HttpPost *post,
   return firstform;
 }
 
-int FormInit(struct Form *form, struct FormData *formdata )
+int Curl_FormInit(struct Form *form, struct FormData *formdata )
 {
   if(!formdata)
     return 1; /* error */
 
-#if 0  
-  struct FormData *lastnode=formdata;
-
-  /* find the last node in the list */
-  while(lastnode->next) {
-    lastnode = lastnode->next;
-  }
-
-  /* Now, make sure that we'll send a nice terminating sequence at the end
-   * of the post. We *DONT* add this string to the size of the data since this
-   * is actually AFTER the data. */
-  AddFormDataf(&lastnode, "\r\n\r\n");
-#endif
   form->data = formdata;
   form->sent = 0;
 
@@ -560,10 +548,10 @@ int FormInit(struct Form *form, struct FormData *formdata )
 }
 
 /* fread() emulation */
-int FormReader(char *buffer,
-	       size_t size,
-	       size_t nitems,
-	       FILE *mydata)
+int Curl_FormReader(char *buffer,
+                    size_t size,
+                    size_t nitems,
+                    FILE *mydata)
 {
   struct Form *form;
   int wantedsize;
@@ -638,7 +626,7 @@ int main(int argc, char **argv)
     }
   }
 
-  form=getFormData(httppost, &size);
+  form=Curl_getFormData(httppost, &size);
 
   FormInit(&formread, form);
 

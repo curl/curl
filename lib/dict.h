@@ -23,7 +23,7 @@
  *
  * $Id$
  *****************************************************************************/
-CURLcode dict(struct connectdata *conn);
-CURLcode dict_done(struct connectdata *conn);
+CURLcode Curl_dict(struct connectdata *conn);
+CURLcode Curl_dict_done(struct connectdata *conn);
 
 #endif

@@ -80,12 +80,12 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-CURLcode dict_done(struct connectdata *conn)
+CURLcode Curl_dict_done(struct connectdata *conn)
 {
   return CURLE_OK;
 }
 
-CURLcode dict(struct connectdata *conn)
+CURLcode Curl_dict(struct connectdata *conn)
 {
   int nth;
   char *word;

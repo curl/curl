@@ -23,7 +23,7 @@
  *
  * $Id$
  *****************************************************************************/
-CURLcode telnet(struct connectdata *conn);
-CURLcode telnet_done(struct connectdata *conn);
+CURLcode Curl_telnet(struct connectdata *conn);
+CURLcode Curl_telnet_done(struct connectdata *conn);
 
 #endif

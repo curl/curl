@@ -117,18 +117,18 @@ static void * DynaGetFunction(char *name)
 static int WriteProc(void *param, char *text, int len)
 {
   struct UrlData *data = (struct UrlData *)param;
-  client_write(data, CLIENTWRITE_BODY, text, 0);
+  Curl_client_write(data, CLIENTWRITE_BODY, text, 0);
   return 0;
 }
 
-CURLcode ldap_done(struct connectdata *conn)
+CURLcode Curl_ldap_done(struct connectdata *conn)
 {
   return CURLE_OK;
 }
 
 /***********************************************************************
  */
-CURLcode ldap(struct connectdata *conn)
+CURLcode Curl_ldap(struct connectdata *conn)
 {
   CURLcode status = CURLE_OK;
   int rc;

@@ -52,7 +52,7 @@
 
 /* infof() is for info message along the way */
 
-void infof(struct UrlData *data, char *fmt, ...)
+void Curl_infof(struct UrlData *data, char *fmt, ...)
 {
   va_list ap;
   if(data->bits.verbose) {
@@ -66,7 +66,7 @@ void infof(struct UrlData *data, char *fmt, ...)
 /* failf() is for messages stating why we failed, the LAST one will be
    returned for the user (if requested) */
 
-void failf(struct UrlData *data, char *fmt, ...)
+void Curl_failf(struct UrlData *data, char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -78,13 +78,13 @@ void failf(struct UrlData *data, char *fmt, ...)
 }
 
 /* sendf() sends the formated data to the server */
-size_t sendf(int fd, struct UrlData *data, char *fmt, ...)
+size_t Curl_sendf(int fd, struct UrlData *data, char *fmt, ...)
 {
   size_t bytes_written;
   char *s;
   va_list ap;
   va_start(ap, fmt);
-  s = mvaprintf(fmt, ap);
+  s = vaprintf(fmt, ap);
   va_end(ap);
   if(!s)
     return 0; /* failure */
@@ -104,43 +104,8 @@ size_t sendf(int fd, struct UrlData *data, char *fmt, ...)
   return(bytes_written);
 }
 
-/*
- * ftpsendf() sends the formated string as a ftp command to a ftp server
- *
- * NOTE: we build the command in a fixed-length buffer, which sets length
- * restrictions on the command!
- *
- */
-size_t ftpsendf(int fd, struct connectdata *conn, char *fmt, ...)
-{
-  size_t bytes_written;
-  char s[256];
-
-  va_list ap;
-  va_start(ap, fmt);
-  vsnprintf(s, 250, fmt, ap);
-  va_end(ap);
-
-  if(conn->data->bits.verbose)
-    fprintf(conn->data->err, "> %s\n", s);
-
-  strcat(s, "\r\n"); /* append a trailing CRLF */
-
-#ifdef KRB4
-  if(conn->sec_complete && conn->data->cmdchannel) {
-    bytes_written = sec_fprintf(conn, conn->data->cmdchannel, s);
-    fflush(conn->data->cmdchannel);
-  }
-  else
-#endif /* KRB4 */
-    {
-      bytes_written = swrite(fd, s, strlen(s));
-    }
-  return(bytes_written);
-}
-
 /* ssend() sends plain (binary) data to the server */
-size_t ssend(int fd, struct connectdata *conn, void *mem, size_t len)
+size_t Curl_ssend(int fd, struct connectdata *conn, void *mem, size_t len)
 {
   size_t bytes_written;
   struct UrlData *data=conn->data; /* conn knows data, not vice versa */
@@ -170,10 +135,10 @@ size_t ssend(int fd, struct connectdata *conn, void *mem, size_t len)
    The bit pattern defines to what "streams" to write to. Body and/or header.
    The defines are in sendf.h of course.
  */
-CURLcode client_write(struct UrlData *data,
-                      int type,
-                      char *ptr,
-                      size_t len)
+CURLcode Curl_client_write(struct UrlData *data,
+                           int type,
+                           char *ptr,
+                           size_t len)
 {
   size_t wrote;
 
@@ -195,95 +160,6 @@ CURLcode client_write(struct UrlData *data,
     }
   }
   
-  return CURLE_OK;
-}
-
-
-/*
- * add_buffer_init() returns a fine buffer struct
- */
-send_buffer *add_buffer_init(void)
-{
-  send_buffer *blonk;
-  blonk=(send_buffer *)malloc(sizeof(send_buffer));
-  if(blonk) {
-    memset(blonk, 0, sizeof(send_buffer));
-    return blonk;
-  }
-  return NULL; /* failed, go home */
-}
-
-/*
- * add_buffer_send() sends a buffer and frees all associated memory.
- */
-size_t add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in)
-{
-  size_t amount;
-  if(conn->data->bits.verbose) {
-    fputs("> ", conn->data->err);
-    /* this data _may_ contain binary stuff */
-    fwrite(in->buffer, in->size_used, 1, conn->data->err);
-  }
-
-  amount = ssend(sockfd, conn, in->buffer, in->size_used);
-
-  if(in->buffer)
-    free(in->buffer);
-  free(in);
-
-  return amount;
-}
-
-
-/* 
- * add_bufferf() builds a buffer from the formatted input
- */
-CURLcode add_bufferf(send_buffer *in, char *fmt, ...)
-{
-  CURLcode result = CURLE_OUT_OF_MEMORY;
-  char *s;
-  va_list ap;
-  va_start(ap, fmt);
-  s = mvaprintf(fmt, ap); /* this allocs a new string to append */
-  va_end(ap);
-
-  if(s) {
-    result = add_buffer(in, s, strlen(s));
-    free(s);
-  }
-  return result;
-}
-
-/*
- * add_buffer() appends a memory chunk to the existing one
- */
-CURLcode add_buffer(send_buffer *in, void *inptr, size_t size)
-{
-  char *new_rb;
-  int new_size;
-
-  if(size > 0) {
-    if(!in->buffer ||
-       ((in->size_used + size) > (in->size_max - 1))) {
-      new_size = (in->size_used+size)*2;
-      if(in->buffer)
-        /* we have a buffer, enlarge the existing one */
-        new_rb = (char *)realloc(in->buffer, new_size);
-      else
-        /* create a new buffer */
-        new_rb = (char *)malloc(new_size);
-
-      if(!new_rb)
-        return CURLE_OUT_OF_MEMORY;
-
-      in->buffer = new_rb;
-      in->size_max = new_size;
-    }
-    memcpy(&in->buffer[in->size_used], inptr, size);
-      
-    in->size_used += size;
-  }
-
   return CURLE_OK;
 }
 

@@ -33,6 +33,7 @@
 #include "memdebug.h"
 #endif
 
+static
 char *GetEnv(char *variable)
 {
 #ifdef WIN32

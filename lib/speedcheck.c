@@ -33,24 +33,24 @@
 #include "sendf.h"
 #include "speedcheck.h"
 
-void speedinit(struct UrlData *data)
+void Curl_speedinit(struct UrlData *data)
 {
   memset(&data->keeps_speed, 0, sizeof(struct timeval));
 }
 
-CURLcode speedcheck(struct UrlData *data,
-                    struct timeval now)
+CURLcode Curl_speedcheck(struct UrlData *data,
+                         struct timeval now)
 {
   if((data->progress.current_speed >= 0) &&
      data->low_speed_time &&
-     (tvlong(data->keeps_speed) != 0) &&
+     (Curl_tvlong(data->keeps_speed) != 0) &&
      (data->progress.current_speed < data->low_speed_limit)) {
 
     /* We are now below the "low speed limit". If we are below it
        for "low speed time" seconds we consider that enough reason
        to abort the download. */
     
-    if( tvdiff(now, data->keeps_speed) > data->low_speed_time) {
+    if( Curl_tvdiff(now, data->keeps_speed) > data->low_speed_time) {
       /* we have been this slow for long enough, now die */
       failf(data,
 	    "Operation too slow. "

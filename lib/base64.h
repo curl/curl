@@ -34,6 +34,7 @@
 #ifndef __BASE64_H
 #define __BASE64_H
 
-int base64_encode(const void *data, int size, char **str);
+int Curl_base64_encode(const void *data, int size, char **str);
+int Curl_base64_decode(const char *str, void *data);
 
 #endif

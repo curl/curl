@@ -36,23 +36,19 @@ struct Form {
 	       been sent in a previous invoke */
 };
 
-int FormParse(char *string,
-	      struct HttpPost **httppost,
-	      struct HttpPost **last_post);
+int Curl_FormInit(struct Form *form, struct FormData *formdata );
 
-int FormInit(struct Form *form, struct FormData *formdata );
-
-struct FormData *getFormData(struct HttpPost *post,
-			     int *size);
+struct FormData *Curl_getFormData(struct HttpPost *post,
+                                  int *size);
 
 /* fread() emulation */
-int FormReader(char *buffer,
-	       size_t size,
-	       size_t nitems,
-	       FILE *mydata);
+int Curl_FormReader(char *buffer,
+                    size_t size,
+                    size_t nitems,
+                    FILE *mydata);
 
-char *MakeFormBoundary(void);
+char *Curl_FormBoundary(void);
 
-void FormFree(struct FormData *);
+void Curl_FormFree(struct FormData *);
 
 #endif

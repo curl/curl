@@ -53,7 +53,7 @@ gettimeofday (struct timeval *tp, void *nothing)
 #endif
 #endif
 
-struct timeval tvnow ()
+struct timeval Curl_tvnow ()
 {
  struct timeval now;
 #ifdef HAVE_GETTIMEOFDAY
@@ -65,12 +65,12 @@ struct timeval tvnow ()
  return now;
 }
 
-double tvdiff (struct timeval t1, struct timeval t2)
+double Curl_tvdiff (struct timeval t1, struct timeval t2)
 {
  return (double)(t1.tv_sec - t2.tv_sec) + ((t1.tv_usec-t2.tv_usec)/1000000.0);
 }
 
-long tvlong (struct timeval t1)
+long Curl_tvlong (struct timeval t1)
 {
  return t1.tv_sec;
 }

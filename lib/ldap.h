@@ -23,7 +23,7 @@
  *
  * $Id$
  *****************************************************************************/
-CURLcode ldap(struct connectdata *conn);
-CURLcode ldap_done(struct connectdata *conn);
+CURLcode Curl_ldap(struct connectdata *conn);
+CURLcode Curl_ldap_done(struct connectdata *conn);
 
 #endif /* __LDAP_H */

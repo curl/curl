@@ -72,7 +72,7 @@
 
 #define SYS_ERROR -1
 
-char *if2ip(char *interface, char *buf, int buf_size)
+char *Curl_if2ip(char *interface, char *buf, int buf_size)
 {
   int dummy;
   char *ip=NULL;

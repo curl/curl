@@ -40,13 +40,22 @@
 
 #ifdef KRB4
 
+#define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
 
 #include "security.h"
 #include <stdlib.h>
 #include <string.h>
 #include <netdb.h>
+
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
 #include "base64.h"
+#include "sendf.h"
+#include "ftp.h"
+
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
 #include "memdebug.h"
@@ -64,6 +73,7 @@ static struct {
     { prot_private, "private" }
 };
 
+#if 0
 static const char *
 level_to_name(enum protection_level level)
 {
@@ -73,6 +83,7 @@ level_to_name(enum protection_level level)
 	    return level_names[i].name;
     return "unknown";
 }
+#endif
 
 #ifndef FTP_SERVER /* not used in server */
 static enum protection_level 
@@ -319,7 +330,7 @@ sec_vfprintf2(struct connectdata *conn, FILE *f, const char *fmt, va_list ap)
   if(conn->data_prot == prot_clear)
     return vfprintf(f, fmt, ap);
   else {
-    buf = maprintf(fmt, ap);
+    buf = aprintf(fmt, ap);
     ret = buffer_write(&conn->out_buffer, buf, strlen(buf));
     free(buf);
     return ret;
@@ -360,7 +371,7 @@ sec_read_msg(struct connectdata *conn, char *s, int level)
     int code;
     
     buf = malloc(strlen(s));
-    len = base64_decode(s + 4, buf); /* XXX */
+    len = Curl_base64_decode(s + 4, buf); /* XXX */
     
     len = (*mech->decode)(conn->app_data, buf, len, level, conn);
     if(len < 0)
@@ -390,7 +401,7 @@ sec_vfprintf(struct connectdata *conn, FILE *f, const char *fmt, va_list ap)
     if(!conn->sec_complete)
 	return vfprintf(f, fmt, ap);
     
-    buf = maprintf(fmt, ap);
+    buf = aprintf(fmt, ap);
     len = (*mech->encode)(conn->app_data, buf, strlen(buf),
                           conn->command_prot, &enc,
 			  conn);
@@ -399,7 +410,7 @@ sec_vfprintf(struct connectdata *conn, FILE *f, const char *fmt, va_list ap)
 	failf(conn->data, "Failed to encode command.\n");
 	return -1;
     }
-    if(base64_encode(enc, len, &buf) < 0){
+    if(Curl_base64_encode(enc, len, &buf) < 0){
       failf(conn->data, "Out of memory base64-encoding.\n");
       return -1;
     }
@@ -461,7 +472,6 @@ sec_status(void)
 static int
 sec_prot_internal(struct connectdata *conn, int level)
 {
-    int ret;
     char *p;
     unsigned int s = 1048576;
     size_t nread;
@@ -472,11 +482,11 @@ sec_prot_internal(struct connectdata *conn, int level)
     }
 
     if(level){
-      ftpsendf(conn->data->firstsocket, conn,
-               "PBSZ %u", s);
+      Curl_ftpsendf(conn->data->firstsocket, conn,
+                    "PBSZ %u", s);
       /* wait for feedback */
-      nread = GetLastResponse(conn->data->firstsocket,
-                              conn->data->buffer, conn);
+      nread = Curl_GetFTPResponse(conn->data->firstsocket,
+                                  conn->data->buffer, conn, NULL);
       if(nread < 0)
         return /*CURLE_OPERATION_TIMEOUTED*/-1;
       if(/*ret != COMPLETE*/conn->data->buffer[0] != '2'){
@@ -491,11 +501,11 @@ sec_prot_internal(struct connectdata *conn, int level)
         conn->buffer_size = s;
     }
 
-    ftpsendf(conn->data->firstsocket, conn,
-             "PROT %c", level["CSEP"]);
+    Curl_ftpsendf(conn->data->firstsocket, conn,
+                  "PROT %c", level["CSEP"]);
     /* wait for feedback */
-    nread = GetLastResponse(conn->data->firstsocket,
-			    conn->data->buffer, conn);
+    nread = Curl_GetFTPResponse(conn->data->firstsocket,
+                                conn->data->buffer, conn, NULL);
     if(nread < 0)
       return /*CURLE_OPERATION_TIMEOUTED*/-1;
     if(/*ret != COMPLETE*/conn->data->buffer[0] != '2'){
@@ -600,11 +610,11 @@ sec_login(struct connectdata *conn)
 	}
 	infof(data, "Trying %s...\n", (*m)->name);
 	/*ret = command("AUTH %s", (*m)->name);***/
-	ftpsendf(conn->data->firstsocket, conn,
+	Curl_ftpsendf(conn->data->firstsocket, conn,
                  "AUTH %s", (*m)->name);
 	/* wait for feedback */
-	nread = GetLastResponse(conn->data->firstsocket,
-				conn->data->buffer, conn);
+	nread = Curl_GetFTPResponse(conn->data->firstsocket,
+                                    conn->data->buffer, conn, NULL);
 	if(nread < 0)
 	    return /*CURLE_OPERATION_TIMEOUTED*/-1;
 	if(/*ret != CONTINUE*/conn->data->buffer[0] != '3'){

@@ -47,6 +47,9 @@
 #include <string.h>
 #include <krb.h>
 
+#include "ftp.h"
+#include "sendf.h"
+
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
 #include "memdebug.h"
@@ -95,7 +98,8 @@ strlcpy (char *dst, const char *src, size_t dst_sz)
     else
 	return n + strlen (src);
 }
-
+#else
+size_t strlcpy (char *dst, const char *src, size_t dst_sz);
 #endif
 
 static int
@@ -284,7 +288,8 @@ krb4_auth(void *app_data, struct connectdata *conn)
     size_t nread;
     int l = sizeof(local_addr);
 
-    if(getsockname(conn->data->firstsocket, LOCAL_ADDR, &l) < 0)
+    if(getsockname(conn->data->firstsocket,
+                   (struct sockaddr *)LOCAL_ADDR, &l) < 0)
 	perror("getsockname()");
 
     checksum = getpid();
@@ -327,15 +332,15 @@ krb4_auth(void *app_data, struct connectdata *conn)
     /*printf("Local address is %s\n", inet_ntoa(localaddr->sin_addr));***/
     /*printf("Remote address is %s\n", inet_ntoa(remoteaddr->sin_addr));***/
 
-    if(base64_encode(adat.dat, adat.length, &p) < 0) {
+    if(Curl_base64_encode(adat.dat, adat.length, &p) < 0) {
 	printf("Out of memory base64-encoding.\n");
 	return AUTH_CONTINUE;
     }
     /*ret = command("ADAT %s", p)*/
-    ftpsendf(conn->data->firstsocket, conn, "ADAT %s", p);
+    Curl_ftpsendf(conn->data->firstsocket, conn, "ADAT %s", p);
     /* wait for feedback */
-    nread = GetLastResponse(conn->data->firstsocket,
-			    conn->data->buffer, conn);
+    nread = Curl_GetFTPResponse(conn->data->firstsocket,
+                                conn->data->buffer, conn, NULL);
     if(nread < 0)
 	return /*CURLE_OPERATION_TIMEOUTED*/-1;
     free(p);
@@ -351,7 +356,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
 	return AUTH_ERROR;
     }
     p += 5;
-    len = base64_decode(p, adat.dat);
+    len = Curl_base64_decode(p, adat.dat);
     if(len < 0){
 	printf("Failed to decode base64 from server.\n");
 	return AUTH_ERROR;
@@ -389,8 +394,6 @@ struct sec_client_mech krb4_client_mech = {
 
 void krb_kauth(struct connectdata *conn)
 {
-    int ret;
-    char buf[1024];
     des_cblock key;
     des_key_schedule schedule;
     KTEXT_ST tkt, tktcopy;
@@ -405,10 +408,11 @@ void krb_kauth(struct connectdata *conn)
 
     save = set_command_prot(conn, prot_private);
     /*ret = command("SITE KAUTH %s", name);***/
-    ftpsendf(conn->data->firstsocket, conn,
+    Curl_ftpsendf(conn->data->firstsocket, conn,
              "SITE KAUTH %s", conn->data->user);
     /* wait for feedback */
-    nread = GetLastResponse(conn->data->firstsocket, conn->data->buffer, conn);
+    nread = Curl_GetFTPResponse(conn->data->firstsocket, conn->data->buffer,
+                                conn, NULL);
     if(nread < 0)
 	return /*CURLE_OPERATION_TIMEOUTED*/;
 
@@ -427,7 +431,7 @@ void krb_kauth(struct connectdata *conn)
 	return;
     }
     p += 2;
-    tmp = base64_decode(p, &tkt.dat);
+    tmp = Curl_base64_decode(p, &tkt.dat);
     if(tmp < 0){
 	printf("Failed to decode base64 in reply.\n");
 	set_command_prot(conn, save);
@@ -476,7 +480,7 @@ void krb_kauth(struct connectdata *conn)
     memset(key, 0, sizeof(key));
     memset(schedule, 0, sizeof(schedule));
     memset(passwd, 0, sizeof(passwd));
-    if(base64_encode(tktcopy.dat, tktcopy.length, &p) < 0) {
+    if(Curl_base64_encode(tktcopy.dat, tktcopy.length, &p) < 0) {
       failf(conn->data, "Out of memory base64-encoding.\n");
       set_command_prot(conn, save);
       /*code = -1;***/
@@ -484,10 +488,11 @@ void krb_kauth(struct connectdata *conn)
     }
     memset (tktcopy.dat, 0, tktcopy.length);
     /*ret = command("SITE KAUTH %s %s", name, p);***/
-    ftpsendf(conn->data->firstsocket, conn,
+    Curl_ftpsendf(conn->data->firstsocket, conn,
              "SITE KAUTH %s %s", name, p);
     /* wait for feedback */
-    nread = GetLastResponse(conn->data->firstsocket, conn->data->buffer, conn);
+    nread = Curl_GetFTPResponse(conn->data->firstsocket, conn->data->buffer,
+                                conn, NULL);
     if(nread < 0)
 	return /*CURLE_OPERATION_TIMEOUTED*/;
     free(p);

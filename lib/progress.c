@@ -45,7 +45,7 @@
 
 #include "progress.h"
 
-void time2str(char *r, int t)
+static void time2str(char *r, int t)
 {
   int h = (t/3600);
   int m = (t-(h*3600))/60;
@@ -55,7 +55,7 @@ void time2str(char *r, int t)
 
 /* The point of this function would be to return a string of the input data,
    but never longer than 5 columns. Add suffix k, M, G when suitable... */
-char *max5data(double bytes, char *max5)
+static char *max5data(double bytes, char *max5)
 {
 #define ONE_KILOBYTE 1024
 #define ONE_MEGABYTE (1024*1024)
@@ -91,16 +91,16 @@ char *max5data(double bytes, char *max5)
 
 */
 
-void pgrsDone(struct UrlData *data)
+void Curl_pgrsDone(struct UrlData *data)
 {
   if(!(data->progress.flags & PGRS_HIDE)) {
     data->progress.lastshow=0;
-    pgrsUpdate(data); /* the final (forced) update */
+    Curl_pgrsUpdate(data); /* the final (forced) update */
     fprintf(data->err, "\n");
   }
 }
 
-void pgrsTime(struct UrlData *data, timerid timer)
+void Curl_pgrsTime(struct UrlData *data, timerid timer)
 {
   switch(timer) {
   default:
@@ -111,19 +111,19 @@ void pgrsTime(struct UrlData *data, timerid timer)
     /* This is set at the start of a single fetch, there may be several
        fetches within an operation, why we add all other times relative
        to this one */
-    data->progress.t_startsingle = tvnow();
+    data->progress.t_startsingle = Curl_tvnow();
     break;
 
   case TIMER_NAMELOOKUP:
-    data->progress.t_nslookup += tvdiff(tvnow(),
+    data->progress.t_nslookup += Curl_tvdiff(Curl_tvnow(),
                                         data->progress.t_startsingle);
     break;
   case TIMER_CONNECT:
-    data->progress.t_connect += tvdiff(tvnow(),
+    data->progress.t_connect += Curl_tvdiff(Curl_tvnow(),
                                        data->progress.t_startsingle);
     break;
   case TIMER_PRETRANSFER:
-    data->progress.t_pretransfer += tvdiff(tvnow(),
+    data->progress.t_pretransfer += Curl_tvdiff(Curl_tvnow(),
                                            data->progress.t_startsingle);
     break;
   case TIMER_POSTRANSFER:
@@ -132,22 +132,22 @@ void pgrsTime(struct UrlData *data, timerid timer)
   }
 }
 
-void pgrsStartNow(struct UrlData *data)
+void Curl_pgrsStartNow(struct UrlData *data)
 {
-  data->progress.start = tvnow();
+  data->progress.start = Curl_tvnow();
 }
 
-void pgrsSetDownloadCounter(struct UrlData *data, double size)
+void Curl_pgrsSetDownloadCounter(struct UrlData *data, double size)
 {
   data->progress.downloaded = size;
 }
 
-void pgrsSetUploadCounter(struct UrlData *data, double size)
+void Curl_pgrsSetUploadCounter(struct UrlData *data, double size)
 {
   data->progress.uploaded = size;
 }
 
-void pgrsSetDownloadSize(struct UrlData *data, double size)
+void Curl_pgrsSetDownloadSize(struct UrlData *data, double size)
 {
   if(size > 0) {
     data->progress.size_dl = size;
@@ -155,7 +155,7 @@ void pgrsSetDownloadSize(struct UrlData *data, double size)
   }
 }
 
-void pgrsSetUploadSize(struct UrlData *data, double size)
+void Curl_pgrsSetUploadSize(struct UrlData *data, double size)
 {
   if(size > 0) {
     data->progress.size_ul = size;
@@ -171,7 +171,7 @@ void pgrsSetUploadSize(struct UrlData *data, double size)
 
  */
 
-int pgrsUpdate(struct UrlData *data)
+int Curl_pgrsUpdate(struct UrlData *data)
 {
   struct timeval now;
   int result;
@@ -210,15 +210,15 @@ int pgrsUpdate(struct UrlData *data)
     data->progress.flags |= PGRS_HEADERS_OUT; /* headers are shown */
   }
 
-  now = tvnow(); /* what time is it */
+  now = Curl_tvnow(); /* what time is it */
 
-  if(data->progress.lastshow == tvlong(now))
+  if(data->progress.lastshow == Curl_tvlong(now))
     return 0; /* never update this more than once a second if the end isn't 
                  reached */
   data->progress.lastshow = now.tv_sec;
 
   /* The exact time spent so far */
-  data->progress.timespent = tvdiff (now, data->progress.start);
+  data->progress.timespent = Curl_tvdiff (now, data->progress.start);
 
   /* The average download speed this far */
   data->progress.dlspeed = data->progress.downloaded/(data->progress.timespent!=0.0?data->progress.timespent:1.0);

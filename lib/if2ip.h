@@ -25,9 +25,9 @@
 #include "setup.h"
 
 #if ! defined(WIN32) && ! defined(__BEOS__)
-extern char *if2ip(char *interface, char *buf, int buf_size);
+extern char *Curl_if2ip(char *interface, char *buf, int buf_size);
 #else
-#define if2ip(a,b,c) NULL
+#define Curl_if2ip(a,b,c) NULL
 #endif
 
 #endif

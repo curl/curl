@@ -23,11 +23,15 @@
  * $Id$
  *****************************************************************************/
 
-size_t ftpsendf(int fd, struct connectdata *, char *fmt, ...);
-size_t sendf(int fd, struct UrlData *, char *fmt, ...);
-size_t ssend(int fd, struct connectdata *, void *fmt, size_t len);
-void infof(struct UrlData *, char *fmt, ...);
-void failf(struct UrlData *, char *fmt, ...);
+size_t Curl_sendf(int fd, struct UrlData *, char *fmt, ...);
+size_t Curl_ssend(int fd, struct connectdata *, void *fmt, size_t len);
+void Curl_infof(struct UrlData *, char *fmt, ...);
+void Curl_failf(struct UrlData *, char *fmt, ...);
+
+#define sendf Curl_sendf
+#define ssend Curl_ssend
+#define infof Curl_infof
+#define failf Curl_failf
 
 struct send_buffer {
   char *buffer;
@@ -40,12 +44,7 @@ typedef struct send_buffer send_buffer;
 #define CLIENTWRITE_HEADER 2
 #define CLIENTWRITE_BOTH   (CLIENTWRITE_BODY|CLIENTWRITE_HEADER)
 
-CURLcode client_write(struct UrlData *data, int type, char *ptr,
-                      size_t len);
-send_buffer *add_buffer_init(void);
-CURLcode add_buffer(send_buffer *in, void *inptr, size_t size);
-CURLcode add_bufferf(send_buffer *in, char *fmt, ...);
-size_t add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in);
-
+CURLcode Curl_client_write(struct UrlData *data, int type, char *ptr,
+                           size_t len);
 
 #endif

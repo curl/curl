@@ -22,6 +22,7 @@
  *
  * $Id$
  *****************************************************************************/
-int GetLine(int sockfd, char *buf, struct UrlData *data);
+
+/* empty */
 
 #endif

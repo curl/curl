@@ -25,7 +25,7 @@
 
 #include <string.h>
 
-int strequal(const char *first, const char *second)
+int Curl_strequal(const char *first, const char *second)
 {
 #if defined(HAVE_STRCASECMP)
   return !strcasecmp(first, second);
@@ -45,7 +45,7 @@ int strequal(const char *first, const char *second)
 #endif
 }
 
-int strnequal(const char *first, const char *second, size_t max)
+int Curl_strnequal(const char *first, const char *second, size_t max)
 {
 #if defined(HAVE_STRCASECMP)
   return !strncasecmp(first, second, max);

@@ -690,7 +690,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           /* we already have a string, we append this one
              with a separating &-letter */
           char *oldpost=config->postfields;
-          config->postfields=maprintf("%s&%s", oldpost, postdata);
+          config->postfields=aprintf("%s&%s", oldpost, postdata);
           free(oldpost);
           free(postdata);
         }

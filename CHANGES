@@ -6,6 +6,11 @@
 
                                History of Changes
 
+Daniel (5 January 2001)
+- The krb4 support was broken in the release. Fixed now.
+
+- Huge internal symbol rename operation. 
+
 Version 7.5.2
 
 Daniel (4 January 2001)

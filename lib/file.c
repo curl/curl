@@ -106,7 +106,7 @@ CURLcode file(struct connectdata *conn)
   struct UrlData *data = conn->data;
   char *buf = data->buffer;
   int bytecount = 0;
-  struct timeval start = tvnow();
+  struct timeval start = Curl_tvnow();
   struct timeval now = start;
   int fd;
   char *actual_path = curl_unescape(path, 0);
@@ -139,7 +139,7 @@ CURLcode file(struct connectdata *conn)
      it avoids problems with select() and recv() on file descriptors
      in Winsock */
   if(expected_size != -1)
-    pgrsSetDownloadSize(data, expected_size);
+    Curl_pgrsSetDownloadSize(data, expected_size);
 
   while (res == CURLE_OK) {
     nread = read(fd, buf, BUFSIZE-1);
@@ -155,16 +155,16 @@ CURLcode file(struct connectdata *conn)
        to prevent CR/LF translation (this then goes to a binary mode
        file descriptor). */
 
-    res = client_write(data, CLIENTWRITE_BODY, buf, nread);
+    res = Curl_client_write(data, CLIENTWRITE_BODY, buf, nread);
     if(res)
       return res;
 
-    now = tvnow();
-    if(pgrsUpdate(data))
+    now = Curl_tvnow();
+    if(Curl_pgrsUpdate(data))
       res = CURLE_ABORTED_BY_CALLBACK;
   }
-  now = tvnow();
-  if(pgrsUpdate(data))
+  now = Curl_tvnow();
+  if(Curl_pgrsUpdate(data))
     res = CURLE_ABORTED_BY_CALLBACK;
 
   close(fd);

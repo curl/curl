@@ -23,7 +23,6 @@
  * $Id$
  *****************************************************************************/
 
-/* Unix and Win32 getenv function call */
-char *GetEnv(char *variable);
+#include <curl/curl.h>
 
 #endif

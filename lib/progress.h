@@ -36,14 +36,14 @@ typedef enum {
   TIMER_LAST /* must be last */
 } timerid;
   
-void pgrsDone(struct UrlData *data);
-void pgrsStartNow(struct UrlData *data);
-void pgrsSetDownloadSize(struct UrlData *data, double size);
-void pgrsSetUploadSize(struct UrlData *data, double size);
-void pgrsSetDownloadCounter(struct UrlData *data, double size);
-void pgrsSetUploadCounter(struct UrlData *data, double size);
-int pgrsUpdate(struct UrlData *data);
-void pgrsTime(struct UrlData *data, timerid timer);
+void Curl_pgrsDone(struct UrlData *data);
+void Curl_pgrsStartNow(struct UrlData *data);
+void Curl_pgrsSetDownloadSize(struct UrlData *data, double size);
+void Curl_pgrsSetUploadSize(struct UrlData *data, double size);
+void Curl_pgrsSetDownloadCounter(struct UrlData *data, double size);
+void Curl_pgrsSetUploadCounter(struct UrlData *data, double size);
+int Curl_pgrsUpdate(struct UrlData *data);
+void Curl_pgrsTime(struct UrlData *data, timerid timer);
 
 
 /* Don't show progress for sizes smaller than: */

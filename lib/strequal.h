@@ -22,7 +22,10 @@
  *
  * $Id$
  *****************************************************************************/
-int strequal(const char *first, const char *second);
-int strnequal(const char *first, const char *second, size_t max);
+int Curl_strequal(const char *first, const char *second);
+int Curl_strnequal(const char *first, const char *second, size_t max);
+
+#define strequal(a,b) Curl_strequal(a,b)
+#define strnequal(a,b,c) Curl_strnequal(a,b,c)
 
 #endif

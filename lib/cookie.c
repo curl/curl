@@ -100,9 +100,10 @@ Example set of cookies:
  *
  ***************************************************************************/
 
-struct Cookie *cookie_add(struct CookieInfo *c,
-                          bool httpheader, /* TRUE if HTTP header-style line */
-                          char *lineptr) /* first non-space of the line */
+struct Cookie *
+Curl_cookie_add(struct CookieInfo *c,
+                bool httpheader, /* TRUE if HTTP header-style line */
+                char *lineptr) /* first non-space of the line */
 {
   struct Cookie *clist;
   char what[MAX_COOKIE_LINE];
@@ -347,7 +348,7 @@ struct Cookie *cookie_add(struct CookieInfo *c,
  * called before any cookies are set. File may be NULL.
  *
  ****************************************************************************/
-struct CookieInfo *cookie_init(char *file)
+struct CookieInfo *Curl_cookie_init(char *file)
 {
   char line[MAX_COOKIE_LINE];
   struct CookieInfo *c;
@@ -375,7 +376,7 @@ struct CookieInfo *cookie_init(char *file)
         while(*lineptr && isspace((int)*lineptr))
           lineptr++;
 
-        cookie_add(c, TRUE, lineptr);
+        Curl_cookie_add(c, TRUE, lineptr);
       }
       else {
         /* This might be a netscape cookie-file line, get it! */
@@ -383,7 +384,7 @@ struct CookieInfo *cookie_init(char *file)
         while(*lineptr && isspace((int)*lineptr))
           lineptr++;
 
-        cookie_add(c, FALSE, lineptr);
+        Curl_cookie_add(c, FALSE, lineptr);
       }
     }
     if(fromfile)
@@ -405,8 +406,8 @@ struct CookieInfo *cookie_init(char *file)
  *
  ****************************************************************************/
 
-struct Cookie *cookie_getlist(struct CookieInfo *c,
-			      char *host, char *path, bool secure)
+struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
+                                   char *host, char *path, bool secure)
 {
    struct Cookie *newco;
    struct Cookie *co;
@@ -473,7 +474,7 @@ struct Cookie *cookie_getlist(struct CookieInfo *c,
  *
  ****************************************************************************/
 
-void cookie_freelist(struct Cookie *co)
+void Curl_cookie_freelist(struct Cookie *co)
 {
    struct Cookie *next;
    if(co) {
@@ -493,7 +494,7 @@ void cookie_freelist(struct Cookie *co)
  * Free a "cookie object" previous created with cookie_init().
  *
  ****************************************************************************/
-void cookie_cleanup(struct CookieInfo *c)
+void Curl_cookie_cleanup(struct CookieInfo *c)
 {
    struct Cookie *co;
    struct Cookie *next;

@@ -23,6 +23,8 @@
  * $Id$
  *****************************************************************************/
 
-struct hostent *GetHost(struct UrlData *data, char *hostname, char **bufp );
+struct hostent *Curl_gethost(struct UrlData *data,
+                             char *hostname,
+                             char **bufp);
 
 #endif

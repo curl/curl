@@ -22,8 +22,5 @@
  *
  * $Id$
  *****************************************************************************/
-int SSL_cert_stuff(struct UrlData *data, 
-		   char *cert_file,
-		   char *key_file);
-int UrgSSLConnect (struct UrlData *data);
+int Curl_SSLConnect (struct UrlData *data);
 #endif

@@ -58,7 +58,6 @@
 #endif
 
 #include "progress.h"
-#include "speedcheck.h"
 #include "sendf.h"
 
 #include <curl/types.h>
@@ -69,7 +68,7 @@
    <butlerm@xmission.com>. */
 
 CURLcode 
-Transfer(CURLconnect *c_conn,
+Curl_Transfer(CURLconnect *c_conn,
          /* READ stuff */
 	  int sockfd,		/* socket to read from or -1 */
 	  int size,		/* -1 if unknown at this point */
