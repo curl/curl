@@ -231,6 +231,8 @@ puts (
 "          Makes  curl  scan  the  .netrc  file in the user's home\n"
 "          directory for login name and password.  This  is  typi­\n"
 "          cally  used  for  ftp  on unix. If used with http, curl\n"
+);
+ puts(
 "          will  enable  user  authentication.  See  netrc(5)  for\n"
 "          details  on  the file format. Curl will not complain if\n"
 "          that file hasn't the right permissions (it  should  not\n"
@@ -468,6 +470,8 @@ puts (
 "\n"
 "     -z/--time-cond <date expression>\n"
 "          (HTTP) Request to get a file  that  has  been  modified\n"
+);
+ puts(
 "          later  than  the  given  time and date, or one that has\n"
 "          been modified before that time. The date expression can\n"
 "          be all sorts of date strings or if it doesn't match any\n"
@@ -688,6 +692,9 @@ puts (
 "      - Damien Adant <dams@usa.net>\n"
 "      - Chris <cbayliss@csc.come>\n"
 "      - Marco G. Salvagno <mgs@whiz.cjb.net>\n"
+"      - Paul Marquis <pmarquis@iname.com>\n"
+"      - David LeBlanc <dleblanc@qnx.com>\n"
+"      - Rich Gray at Plus Technologies\n"
 "\n"
 "WWW\n"
 "     http://curl.haxx.nu\n"
@@ -791,6 +798,8 @@ puts (
 "        curl -u user:passwd -x my-proxy:888 http://www.get.this/\n"
 "\n"
 " Some proxies require special authentication. Specify by using -U as above:\n"
+);
+ puts(
 "\n"
 "        curl -U user:passwd -x my-proxy:888 http://www.get.this/\n"
 "\n"
@@ -1060,6 +1069,8 @@ puts (
 "\n"
 "  From left-to-right:\n"
 "   %             - percentage completed of the whole transfer\n"
+);
+ puts(
 "   Total         - total size of the whole expected transfer\n"
 "   %             - percentage completed of the download\n"
 "   Received      - currently downloaded amount of bytes\n"
@@ -1340,6 +1351,8 @@ puts (
 "\n"
 "\n"
 "  The usage of the -x/--proxy flag overrides the environment variables.\n"
+);
+ puts(
 "\n"
 "NETRC\n"
 "\n"

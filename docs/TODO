@@ -26,10 +26,9 @@ seven. Let's do a serious attempt to include most of this.
   Move non-URL related functions that are used by both the lib and the curl
   application to a separate "portability lib".
 
-  Correct the lib's getenv() call as it is not threadsafe under win32.
-
   Add support for other languages than C (not important)
 
+  Improve the -K config file parser.
 
 For the future
 
@@ -100,7 +99,7 @@ For the future
  * Other proxies
    Ftp-kind proxy, Socks5, whatever kind of proxies are there?
 
- * IPv6 Awareness
+ * IPv6 Awareness and support
    Where ever it would fit. I am not that into v6 yet to fully grasp what we
    would need to do, but letting the autoconf search for v6-versions of a few
    functions and then use them instead is of course the first thing to do...

@@ -49,6 +49,12 @@
 /* Define if you have the gethostbyaddr function.  */
 #undef HAVE_GETHOSTBYADDR
 
+/* Define if you have the gethostbyaddr_r function.  */
+#undef HAVE_GETHOSTBYADDR_R
+
+/* Define if you have the gethostbyname_r function.  */
+#undef HAVE_GETHOSTBYNAME_R
+
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
@@ -66,6 +72,9 @@
 
 /* Define if you have the inet_ntoa function.  */
 #undef HAVE_INET_NTOA
+
+/* Define if you have the inet_ntoa_r function.  */
+#undef HAVE_INET_NTOA_R
 
 /* Define if you have the perror function.  */
 #undef HAVE_PERROR
@@ -189,6 +198,9 @@
 
 /* Define if you have the <sys/stat.h> header file.  */
 #undef HAVE_SYS_STAT_H
+
+/* Define if you have the <sys/time.h> header file.  */
+#undef HAVE_SYS_TIME_H
 
 /* Define if you have the <sys/types.h> header file.  */
 #undef HAVE_SYS_TYPES_H

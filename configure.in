@@ -178,11 +178,14 @@ AC_CHECK_FUNCS( socket \
                 stricmp \
                 strcmpi \
                 gethostname \
+                gethostbyname_r \
                 gethostbyaddr \
+                gethostbyaddr_r \
                 getservbyname \
                 gettimeofday \
                 inet_addr \
                 inet_ntoa \
+                inet_ntoa_r \
                 tcsetattr \
                 tcgetattr \
                 perror \

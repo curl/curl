@@ -6,6 +6,17 @@
 
                                History of Changes
 
+Daniel (29 May 2000)
+- Corrected the bits.* assignments when using CURLOPT options that only
+  toggles one of those bits.
+
+- Applied the huge patches from David LeBlanc <dleblanc at qnx.com> that add
+  usage of the gethostbyname_r() and similar functions in case they're around,
+  since that make libcurl much better threadsafe in many systems (such as
+  solaris). I added the checks for these functions to the configure script.
+
+  I can't explain why, but the inet_ntoa_r() function did not appear in my
+  Solaris include files, I had to add my own include file for this for now.
 
 Daniel (22 May 2000)
 - Jörn Hartroth brought me fixes to make the win32 version compile properly as
