@@ -96,6 +96,10 @@ must be using valid ciphers. Read up on SSL cipher list details on this URL:
 .I http://www.openssl.org/docs/apps/ciphers.html (Option added in curl 7.9)
 
 If this option is used several times, the last one will override the others.
+.IP "--compressed"
+(HTTP) Request a compressed response using the deflate or gzip
+algorithms and return the uncompressed document.  If this option is used
+and the server sends an unsupported encoding, Curl will report an error.
 .IP "--connect-timeout <seconds>"
 Maximum time in seconds that you allow the connection to the server to take.
 This only limits the connection phase, once curl has connected this option is
