@@ -13,7 +13,7 @@ To Think About When Contributing Source Code
 The License Issue
 
  When contributing with code, you agree to put your changes and new code under
- the same license curl and libcurl is already using.
+ the same license curl and libcurl is already using unless stated otherwise.
 
  If you add a larger piece of code, you can opt to make that file or set of
  files to use a different license as long as they don't enfore any changes to
@@ -26,19 +26,19 @@ Naming
  Try using a non-confusing naming scheme for your new functions and variable
  names. It doesn't necessarily have to mean that you should use the same as in
  other places of the code, just that the names should be logical,
- understandable and be named according to what they're used for.
+ understandable and be named according to what they're used for. File-local
+ functions should be made static.
 
 Indenting
 
  Please try using the same indenting levels and bracing method as all the
  other code already does. It makes the source code a lot easier to follow if
- all of it is written using the same style. I don't ask you to like it, I just
- ask you to follow the tradition! ;-)
+ all of it is written using the same style. We don't ask you to like it, we
+ just ask you to follow the tradition! ;-)
 
 Commenting
 
- Comment your source code extensively. I don't see myself as a very good
- source commenter, but I try to become one. Commented code is quality code and
+ Comment your source code extensively. Commented code is quality code and
  enables future modifications much more. Uncommented code much more risk being
  completely replaced when someone wants to extend things, since other persons'
  source code can get quite hard to read.
@@ -71,9 +71,9 @@ Separate Patches Doing Different Things
 Patch Against Recent Sources
 
  Please try to get the latest available sources to make your patches
- against. It makes my life so much easier. The very best is if you get the
- most up-to-date sources from the CVS repository, but the latest release
- archive is quite OK as well!
+ against. It makes the life of the developers so much easier. The very best is
+ if you get the most up-to-date sources from the CVS repository, but the
+ latest release archive is quite OK as well!
 
 Document
 
@@ -91,9 +91,9 @@ Write Access to CVS Repository
 
 Test Cases
 
- Since the introduction of the test suite, we will get the possibility to
- quickly verify that the main features are working as supposed to. To maintain
- this situation and improve it, all new features and functions that are added
- need tro be tested. Every feature that is added should get at least one valid
+ Since the introduction of the test suite, we can quickly verify that the main
+ features are working as they're supposed to. To maintain this situation and
+ improve it, all new features and functions that are added need to be tested
+ in the test suite. Every feature that is added should get at least one valid
  test case that verifies that it works as documented. If every submitter also
  post a few test cases, it won't end up as a heavy burden on a single person!
