@@ -151,9 +151,11 @@ static CURLcode AllowServerConnect(struct UrlData *data,
 
 /* --- parse FTP server responses --- */
 
-#define lastline(line) (isdigit((int)line[0]) && isdigit((int)line[1]) && \
-			isdigit((int)line[2]) && (' ' == line[3]))
-
+/*
+ * Curl_GetFTPResponse() is supposed to be invoked after each command sent to
+ * a remote FTP server. This function will wait and read all lines of the
+ * response and extract the relevant return code for the invoking function.
+ */
 
 int Curl_GetFTPResponse(int sockfd,
                         char *buf,
@@ -165,8 +167,7 @@ int Curl_GetFTPResponse(int sockfd,
    * as it seems that the OpenSSL read() stuff doesn't grok that properly.
    *
    * Alas, read as much as possible, split up into lines, use the ending
-   * line in a response or continue reading.
-   */
+   * line in a response or continue reading.  */
 
   int nread;   /* total size read */
   int perline; /* count bytes per line */
@@ -259,6 +260,9 @@ int Curl_GetFTPResponse(int sockfd,
               fwrite(line_start, perline, 1, data->err);
               /* no need to output LF here, it is part of the data */
             }
+
+#define lastline(line) (isdigit((int)line[0]) && isdigit((int)line[1]) && \
+			isdigit((int)line[2]) && (' ' == line[3]))
 
             if(perline>3 && lastline(line_start)) {
               /* This is the end of the last line, copy the last
@@ -599,7 +603,7 @@ CURLcode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
       ftpsendf(conn->firstsocket, conn, "%s", item->data);
 
       nread = Curl_GetFTPResponse(conn->firstsocket, 
-          conn->data->buffer, conn, &ftpcode);
+                                  conn->data->buffer, conn, &ftpcode);
       if (nread < 0)
         return CURLE_OPERATION_TIMEOUTED;
 
@@ -623,7 +627,7 @@ CURLcode _ftp_cwd(struct connectdata *conn, char *path)
   
   ftpsendf(conn->firstsocket, conn, "CWD %s", path);
   nread = Curl_GetFTPResponse(conn->firstsocket, 
-      conn->data->buffer, conn, &ftpcode);
+                              conn->data->buffer, conn, &ftpcode);
   if (nread < 0)
     return CURLE_OPERATION_TIMEOUTED;
 
@@ -634,6 +638,90 @@ CURLcode _ftp_cwd(struct connectdata *conn, char *path)
 
   return CURLE_OK;
 }
+
+static
+CURLcode _ftp_getfiletime(struct connectdata *conn, char *file)
+{
+  CURLcode result=CURLE_OK;
+  int ftpcode; /* for ftp status */
+  ssize_t nread;
+  char *buf = conn->data->buffer;
+
+  /* we have requested to get the modified-time of the file, this is yet
+     again a grey area as the MDTM is not kosher RFC959 */
+  ftpsendf(conn->firstsocket, conn, "MDTM %s", file);
+
+  nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
+  if(nread < 0)
+    return CURLE_OPERATION_TIMEOUTED;
+
+  if(ftpcode == 213) {
+    /* we got a time. Format should be: "YYYYMMDDHHMMSS[.sss]" where the
+       last .sss part is optional and means fractions of a second */
+    int year, month, day, hour, minute, second;
+    if(6 == sscanf(buf+4, "%04d%02d%02d%02d%02d%02d",
+                   &year, &month, &day, &hour, &minute, &second)) {
+      /* we have a time, reformat it */
+      time_t secs=time(NULL);
+      sprintf(buf, "%04d%02d%02d %02d:%02d:%02d",
+              year, month, day, hour, minute, second);
+      /* now, convert this into a time() value: */
+      conn->data->progress.filetime = curl_getdate(buf, &secs);
+    }
+    else {
+      infof(conn->data, "unsupported MDTM reply format\n");
+    }
+  }
+  return  result;
+}
+
+static CURLcode _ftp_transfertype(struct connectdata *conn,
+                                  bool ascii)
+{
+  struct UrlData *data = conn->data;
+  int ftpcode;
+  ssize_t nread;
+  char *buf=data->buffer;
+
+  ftpsendf(conn->firstsocket, conn, "TYPE %s", ascii?"A":"I");
+
+  nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
+  if(nread < 0)
+    return CURLE_OPERATION_TIMEOUTED;
+  
+  if(ftpcode != 200) {
+    failf(data, "Couldn't set %s mode",
+          ascii?"ASCII":"binary");
+    return ascii? CURLE_FTP_COULDNT_SET_ASCII:CURLE_FTP_COULDNT_SET_BINARY;
+  }
+
+  return CURLE_OK;
+}
+
+static
+CURLcode _ftp_getsize(struct connectdata *conn, char *file,
+                      ssize_t *size)
+{
+  struct UrlData *data = conn->data;
+  int ftpcode;
+  ssize_t nread;
+  char *buf=data->buffer;
+
+  ftpsendf(conn->firstsocket, conn, "SIZE %s", file);
+  nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
+  if(nread < 0)
+    return CURLE_OPERATION_TIMEOUTED;
+
+  if(ftpcode == 213) {
+    /* get the size from the ascii string: */
+    *size = atoi(buf+4);
+  }
+  else
+    return CURLE_FTP_COULDNT_GET_SIZE;
+
+  return CURLE_OK;
+}
+
 
 static
 CURLcode _ftp(struct connectdata *conn)
@@ -675,40 +763,17 @@ CURLcode _ftp(struct connectdata *conn)
       return result;
   }
 
-
   /* change directory first! */
   if(ftp->dir && ftp->dir[0]) {
     if ((result = _ftp_cwd(conn, ftp->dir)) != CURLE_OK)
         return result;
   }
 
+  /* Requested time of file? */
   if(data->bits.get_filetime && ftp->file) {
-    /* we have requested to get the modified-time of the file, this is yet
-       again a grey area as the MDTM is not kosher RFC959 */
-    ftpsendf(conn->firstsocket, conn, "MDTM %s", ftp->file);
-
-    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-    if(nread < 0)
-      return CURLE_OPERATION_TIMEOUTED;
-
-    if(ftpcode == 213) {
-      /* we got a time. Format should be: "YYYYMMDDHHMMSS[.sss]" where the
-         last .sss part is optional and means fractions of a second */
-      int year, month, day, hour, minute, second;
-      if(6 == sscanf(buf+4, "%04d%02d%02d%02d%02d%02d",
-                     &year, &month, &day, &hour, &minute, &second)) {
-        /* we have a time, reformat it */
-        time_t secs=time(NULL);
-        sprintf(buf, "%04d%02d%02d %02d:%02d:%02d",
-                year, month, day, hour, minute, second);
-        /* now, convert this into a time() value: */
-        data->progress.filetime = curl_getdate(buf, &secs);
-      }
-      else {
-        infof(data, "unsupported MDTM reply format\n");
-      }
-    }
-
+    result = _ftp_getfiletime(conn, ftp->file);
+    if(result)
+      return result;
   }
 
   /* If we have selected NOBODY, it means that we only want file information.
@@ -717,58 +782,44 @@ CURLcode _ftp(struct connectdata *conn)
     /* The SIZE command is _not_ RFC 959 specified, and therefor many servers
        may not support it! It is however the only way we have to get a file's
        size! */
-    int filesize;
+    ssize_t filesize;
 
     /* Some servers return different sizes for different modes, and thus we
        must set the proper type before we check the size */
-    ftpsendf(conn->firstsocket, conn, "TYPE %s",
-             (data->bits.ftp_ascii)?"A":"I");
+    result = _ftp_transfertype(conn, data->bits.ftp_ascii);
+    if(result)
+      return result;
 
-    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-    if(nread < 0)
-      return CURLE_OPERATION_TIMEOUTED;
+    /* failing to get size is not a serious error */
+    result = _ftp_getsize(conn, ftp->file, &filesize);
 
-    if(ftpcode != 200) {
-      failf(data, "Couldn't set %s mode",
-            (data->bits.ftp_ascii)?"ASCII":"binary");
-      return (data->bits.ftp_ascii)? CURLE_FTP_COULDNT_SET_ASCII:
-        CURLE_FTP_COULDNT_SET_BINARY;
-    }
-
-    ftpsendf(conn->firstsocket, conn, "SIZE %s", ftp->file);
-
-    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-    if(nread < 0)
-      return CURLE_OPERATION_TIMEOUTED;
-
-    if(ftpcode == 213) {
-
-      /* get the size from the ascii string: */
-      filesize = atoi(buf+4);
-
+    if(CURLE_OK == result) {
       sprintf(buf, "Content-Length: %d\r\n", filesize);
       result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
       if(result)
         return result;
+    }
+
+    /* If we asked for a time of the file and we actually got one as
+       well, we "emulate" a HTTP-style header in our output. */
 
 #ifdef HAVE_STRFTIME
-      if(data->bits.get_filetime && data->progress.filetime) {
-        struct tm *tm;
+    if(data->bits.get_filetime && data->progress.filetime) {
+      struct tm *tm;
 #ifdef HAVE_LOCALTIME_R
-        struct tm buffer;
-        tm = (struct tm *)localtime_r(&data->progress.filetime, &buffer);
+      struct tm buffer;
+      tm = (struct tm *)localtime_r(&data->progress.filetime, &buffer);
 #else
-        tm = localtime(&data->progress.filetime);
+      tm = localtime(&data->progress.filetime);
 #endif
-        /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-        strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S %Z\r\n",
-                 tm);
-        result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
-        if(result)
-          return result;
-      }
-#endif
+      /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
+      strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S %Z\r\n",
+               tm);
+      result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
+      if(result)
+        return result;
     }
+#endif
 
     return CURLE_OK;
   }
@@ -1312,19 +1363,9 @@ CURLcode _ftp(struct connectdata *conn)
   if(data->bits.upload) {
 
     /* Set type to binary (unless specified ASCII) */
-    ftpsendf(conn->firstsocket, conn, "TYPE %s",
-          (data->bits.ftp_ascii)?"A":"I");
-
-    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-    if(nread < 0)
-      return CURLE_OPERATION_TIMEOUTED;
-
-    if(ftpcode != 200) {
-      failf(data, "Couldn't set %s mode",
-            (data->bits.ftp_ascii)?"ASCII":"binary");
-      return (data->bits.ftp_ascii)? CURLE_FTP_COULDNT_SET_ASCII:
-        CURLE_FTP_COULDNT_SET_BINARY;
-    }
+    result = _ftp_transfertype(conn, data->bits.ftp_ascii);
+    if(result)
+      return result;
 
     if(conn->resume_from) {
       /* we're about to continue the uploading of a file */
@@ -1344,19 +1385,10 @@ CURLcode _ftp(struct connectdata *conn)
         /* we could've got a specified offset from the command line,
            but now we know we didn't */
 
-        ftpsendf(conn->firstsocket, conn, "SIZE %s", ftp->file);
-
-        nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-        if(nread < 0)
-          return CURLE_OPERATION_TIMEOUTED;
-
-        if(ftpcode != 213) {
-          failf(data, "Couldn't get file size: %s", buf+4);
+        if(CURLE_OK != _ftp_getsize(conn, ftp->file, &conn->resume_from)) {
+          failf(data, "Couldn't get remote file size");
           return CURLE_FTP_COULDNT_GET_SIZE;
         }
-
-        /* get the size from the ascii string: */
-        conn->resume_from = atoi(buf+4);
       }
 
       if(conn->resume_from) {
@@ -1380,8 +1412,7 @@ CURLcode _ftp(struct connectdata *conn)
 
           passed += actuallyread;
           if(actuallyread != readthisamountnow) {
-            failf(data, "Could only read %d bytes from the input\n",
-                  passed);
+            failf(data, "Could only read %d bytes from the input\n", passed);
             return CURLE_FTP_COULDNT_USE_REST;
           }
         }
@@ -1427,6 +1458,7 @@ CURLcode _ftp(struct connectdata *conn)
     }
 
     if(data->bits.ftp_use_port) {
+      /* PORT means we are now awaiting the server to connect to us. */
       result = AllowServerConnect(data, conn, portsock);
       if( result )
         return result;
@@ -1495,16 +1527,9 @@ CURLcode _ftp(struct connectdata *conn)
       dirlist = TRUE;
 
       /* Set type to ASCII */
-      ftpsendf(conn->firstsocket, conn, "TYPE A");
-	
-      nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-      if(nread < 0)
-        return CURLE_OPERATION_TIMEOUTED;
-	
-      if(ftpcode != 200) {
-        failf(data, "Couldn't set ascii mode");
-        return CURLE_FTP_COULDNT_SET_ASCII;
-      }
+      result = _ftp_transfertype(conn, TRUE /* ASCII enforced */);
+      if(result)
+        return result;
 
       /* if this output is to be machine-parsed, the NLST command will be
          better used since the LIST command output is not specified or
@@ -1516,19 +1541,9 @@ CURLcode _ftp(struct connectdata *conn)
     }
     else {
       /* Set type to binary (unless specified ASCII) */
-      ftpsendf(conn->firstsocket, conn, "TYPE %s",
-               (data->bits.ftp_ascii)?"A":"I");
-
-      nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-      if(nread < 0)
-        return CURLE_OPERATION_TIMEOUTED;
-
-      if(ftpcode != 200) {
-        failf(data, "Couldn't set %s mode",
-              (data->bits.ftp_ascii)?"ASCII":"binary");
-        return (data->bits.ftp_ascii)? CURLE_FTP_COULDNT_SET_ASCII:
-          CURLE_FTP_COULDNT_SET_BINARY;
-      }
+      result = _ftp_transfertype(conn, data->bits.ftp_ascii);
+      if(result)
+        return result;
 
       if(conn->resume_from) {
 
@@ -1537,22 +1552,18 @@ CURLcode _ftp(struct connectdata *conn)
          * We start with trying to use the SIZE command to figure out the size
          * of the file we're gonna get. If we can get the size, this is by far
          * the best way to know if we're trying to resume beyond the EOF.  */
+        int foundsize=-1;
+        
+        result = _ftp_getsize(conn, ftp->file, &foundsize);
 
-        ftpsendf(conn->firstsocket, conn, "SIZE %s", ftp->file);
-
-        nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-        if(nread < 0)
-          return CURLE_OPERATION_TIMEOUTED;
-
-        if(ftpcode != 213) {
-          infof(data, "server doesn't support SIZE: %s", buf+4);
+        if(CURLE_OK != result) {
+          infof(data, "ftp server doesn't support SIZE");
           /* We couldn't get the size and therefore we can't know if there
              really is a part of the file left to get, although the server
              will just close the connection when we start the connection so it
              won't cause us any harm, just not make us exit as nicely. */
         }
         else {
-          int foundsize=atoi(buf+4);
           /* We got a file size report, so we check that there actually is a
              part of the file left to get, or else we go home.  */
           if(conn->resume_from< 0) {
