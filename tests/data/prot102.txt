@@ -1,0 +1,5 @@
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PASV
+TYPE I
+RETR 102
