@@ -41,6 +41,10 @@ mingw32-ssl:
 	cd lib & make -f Makefile.m32 SSL=1 ZLIB=1
 	cd src & make -f Makefile.m32 SSL=1 ZLIB=1
 
+mingw32-clean:
+	cd lib & make -f Makefile.m32 clean
+	cd src & make -f Makefile.m32 clean
+
 vc:
 	cd lib
 	nmake /f Makefile.vc6 cfg=release
@@ -88,6 +92,10 @@ netware:
 netware-ssl:
 	$(MAKE) -C lib -f Makefile.netware SSL=1
 	$(MAKE) -C src -f Makefile.netware SSL=1
+
+netware-clean:
+	$(MAKE) -C lib -f Makefile.netware clean
+	$(MAKE) -C src -f Makefile.netware clean
 
 unix: all
 
