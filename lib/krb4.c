@@ -363,7 +363,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   for(; *p && *p != ' ' && *p != '\r' && *p != '\n'; p++);
   *p = 0;
 
-  des_string_to_key (conn->data->state.passwd, &key);
+  des_string_to_key (conn->passwd, &key);
   des_key_sched(&key, schedule);
     
   des_pcbc_encrypt((void *)tkt.dat, (void *)tktcopy.dat,
