@@ -901,7 +901,10 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
 
-AC_CHECK_SIZEOF(off_t)
+AC_CHECK_SIZEOF(curl_off_t, ,[
+#include <stdio.h>
+#include "$srcdir/include/curl/curl.h"
+])
 
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1, [if your compiler supports 'long long'])])
