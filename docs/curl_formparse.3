@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_formparse 3 "23 April 2001" "libcurl 7.7.2" "libcurl Manual"
+.TH curl_formparse 3 "3 May 2001" "libcurl 7.7.2" "libcurl Manual"
 .SH NAME
 curl_formparse - add a section to a multipart/formdata HTTP POST
 .SH SYNOPSIS
@@ -70,7 +70,7 @@ Returns non-zero if an error occurs.
  /* Add a normal text section */
  curl_formparse("name=FooBar", &post, &last);
  /* Set the form info */
- curl_easy_setopt(curl, CURLOPT_HTTPPOST, &post);
+ curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
 
 .SH "SEE ALSO"
 .BR curl_easy_setopt "(3) "
