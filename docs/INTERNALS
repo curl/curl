@@ -201,10 +201,10 @@ Library
  exists in lib/getpass.c. libcurl offers a custom callback that can be used
  instead of this, but it doesn't change much to us.
 
-Persistant Connections
+Persistent Connections
 ======================
 
- With curl 7.7, we added persistant connection support to libcurl which has
+ With curl 7.7, we added persistent connection support to libcurl which has
  introduced a somewhat different treatmeant of things inside of libcurl.
 
  o The 'UrlData' struct returned in the curl_easy_init() call must never
@@ -227,7 +227,7 @@ Persistant Connections
  o When curl_easy_cleanup() is called, we close all still opened connections.
 
  You do realize that the curl handle must be re-used in order for the
- persistant connections to work.
+ persistent connections to work.
 
 Library Symbols
 ===============
