@@ -53,11 +53,11 @@ RELEASE_OBJS= \
 	timevalr.obj \
 	urlr.obj \
 	filer.obj \
-        writeoutr.obj \
+    writeoutr.obj \
 	versionr.obj \
-        easyr.obj \
-        highlevelr.obj \
-        strequalr.obj
+    easyr.obj \
+    highlevelr.obj \
+    strequalr.obj
 
 DEBUG_OBJS= \
 	base64d.obj \
@@ -67,7 +67,7 @@ DEBUG_OBJS= \
 	formdatad.obj \
 	ftpd.obj \
 	httpd.obj \
-        ldapd.obj \
+    ldapd.obj \
 	dictd.obj \
 	telnetd.obj \
 	getdated.obj \
@@ -84,11 +84,11 @@ DEBUG_OBJS= \
 	timevald.obj \
 	urld.obj \
 	filed.obj \
-        writeoutd.obj \
-	versiond.obj  \
-        easyd.obj \
-        highleveld.obj \
-        strequald.obj
+    writeoutd.obj \
+    versiond.obj  \
+    easyd.obj \
+    highleveld.obj \
+    strequald.obj
 
 RELEASE_SSL_OBJS= \
 	base64rs.obj \
@@ -98,7 +98,7 @@ RELEASE_SSL_OBJS= \
 	formdatars.obj \
 	ftprs.obj \
 	httprs.obj \
-        ldaprs.obj \
+    ldaprs.obj \
 	dictrs.obj \
 	telnetrs.obj \
 	getdaters.obj \
@@ -115,11 +115,11 @@ RELEASE_SSL_OBJS= \
 	timevalrs.obj \
 	urlrs.obj \
 	filers.obj \
-        writeouts.obj \
+    writeouts.obj \
 	versionrs.obj \
-        easyrs.obj \
-        highlevelrs.obj \
-        strequalrs.obj
+    easyrs.obj \
+    highlevelrs.obj \
+    strequalrs.obj
 
 LINK_OBJS= \
 	base64.obj \
@@ -129,7 +129,7 @@ LINK_OBJS= \
 	formdata.obj \
 	ftp.obj \
 	http.obj \
-        ldap.obj \
+    ldap.obj \
 	dict.obj \
 	telnet.obj \
 	getdate.obj \
@@ -146,11 +146,11 @@ LINK_OBJS= \
 	timeval.obj \
 	url.obj \
 	file.obj \
-        writeout.obj \
+    writeout.obj \
 	version.obj \
-        easy.obj \
-        highlevel.obj \
-        strequal.obj
+    easy.obj \
+    highlevel.obj \
+    strequal.obj
 
 all : release
 
@@ -217,6 +217,12 @@ writeoutr.obj: writeout.c
         $(CCR) $(CFLAGS) writeout.c
 versionr.obj: version.c
 	$(CCR) $(CFLAGS) version.c
+easyr.obj: easy.c
+	$(CCR) $(CFLAGS) easy.c
+highlevelr.obj: highlevel.c
+	$(CCR) $(CFLAGS) highlevel.c
+strequalr.obj: strequal.c
+	$(CCR) $(CFLAGS) strequal.c
 
 ## Debug
 base64d.obj: base64.c
@@ -271,6 +277,12 @@ writeoutd.obj: writeout.c
         $(CCR) $(CFLAGS) writeout.c
 versiond.obj: version.c
 	$(CCD) $(CFLAGS) version.c
+easyd.obj: easy.c
+	$(CCR) $(CFLAGS) easy.c
+highleveld.obj: highlevel.c
+	$(CCR) $(CFLAGS) highlevel.c
+strequald.obj: strequal.c
+	$(CCR) $(CFLAGS) strequal.c
 
 
 ## Release SSL
@@ -326,6 +338,12 @@ writeoutrs.obj: writeout.c
         $(CCR) $(CFLAGS) writeout.c
 versionrs.obj: version.c
 	$(CCRS) $(CFLAGS) version.c
+easyrs.obj: easy.c
+	$(CCR) $(CFLAGS) easy.c
+highlevelrs.obj: highlevel.c
+	$(CCR) $(CFLAGS) highlevel.c
+strequalrs.obj: strequal.c
+	$(CCR) $(CFLAGS) strequal.c
 
 clean:
 	-@erase *.obj
