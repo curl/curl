@@ -24,7 +24,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 DSP = curllib.dsp
 
-EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	\
+EXTRA_DIST = getdate.y Makefile.b32 Makefile.m32	\
   Makefile.vc6 Makefile.riscos libcurl.def $(DSP) curllib.dsw		\
   config-vms.h config-win32.h config-riscos.h config-mac.h config.h.in	\
   ca-bundle.crt README.encoding README.memoryleak README.ares		\
