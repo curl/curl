@@ -151,7 +151,7 @@ CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
       break;
 
     if(amount != size) {
-      size += amount;
+      size -= amount;
       ptr += amount;
     }
     else
