@@ -8,6 +8,9 @@ moooooooo
 <server>
 ftp
 </server>
+<killserver>
+ftp
+</killserver>
  <name>
 FTP download with strict timeout and slow CWD
  </name>
