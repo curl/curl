@@ -44,6 +44,14 @@
 typedef char bool;
 #endif                     /* (rabe) */
 
+#ifdef NEED_REENTRANT
+/* Solaris machines needs _REENTRANT set for a few function prototypes and
+   things to appear in the #include files. We need to #define it before all
+   #include files */
+#define _REENTRANT
+#endif
+
+
 #include <stdio.h>
 #ifndef OS
 #ifdef WIN32
