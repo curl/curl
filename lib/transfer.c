@@ -567,22 +567,29 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   *start && isspace((int)*start);
                   start++);
 
-              /* count all non-space letters following */
-              for(end=start, len=0;
-                  *end && !isspace((int)*end);
-                  end++, len++);
+              end = strchr(start, '\r');
+              if(!end)
+                end = strchr(start, '\n');
 
-              /* allocate memory of a cloned copy */
-              if(data->info.contenttype)
-                free(data->info.contenttype);
+              if(end) {
+                /* skip all trailing space letters */
+                for(; isspace(*end) && (end > start); end--);
+
+                /* get length of the type */
+                len = end-start+1;
               
-              data->info.contenttype = malloc(len + 1);
-              if (NULL == data->info.contenttype)
-                return CURLE_OUT_OF_MEMORY;
+                /* allocate memory of a cloned copy */
+                if(data->info.contenttype)
+                  free(data->info.contenttype);
+              
+                data->info.contenttype = malloc(len + 1);
+                if (NULL == data->info.contenttype)
+                  return CURLE_OUT_OF_MEMORY;
 
-              /* copy the content-type string */
-              memcpy(data->info.contenttype, start, len);
-              data->info.contenttype[len] = 0; /* zero terminate */
+                /* copy the content-type string */
+                memcpy(data->info.contenttype, start, len);
+                data->info.contenttype[len] = 0; /* zero terminate */
+              }
             }
             else if((k->httpversion == 10) &&
                     conn->bits.httpproxy &&
