@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (4 October)
+- Siddhartha Prakash Jain provided a patch with a fix for libcurl with ares,
+  when working on IP-only names as we then could return "wait" status when the
+  name in fact already was resolved. I edited the patch slightly to not expose
+  async details to non-ares aware source code.
+
 Daniel (3 October)
 - Neil Spring posted the debian bug report #213180, and pointed out that using
   the name 'access' in a function prototype is not very wise as some compilers
