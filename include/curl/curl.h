@@ -58,6 +58,7 @@ extern "C" {
 struct HttpPost {
   struct HttpPost *next; /* next entry in the list */
   char *name;     /* pointer to allocated name */
+  long namelength; /* length of name length */
   char *contents; /* pointer to allocated data contents */
   long contentslength; /* length of contents field */
   char *contenttype; /* Content-Type */
@@ -66,8 +67,10 @@ struct HttpPost {
   long flags;     /* as defined below */
 #define HTTPPOST_FILENAME (1<<0) /* specified content is a file name */
 #define HTTPPOST_READFILE (1<<1) /* specified content is a file name */
-#define HTTPPOST_PTRCONTENTS (1<<2) /* contents is only stored pointer
-                                        do not free in formfree */
+#define HTTPPOST_PTRNAME (1<<2) /* name is only stored pointer
+                                   do not free in formfree */
+#define HTTPPOST_PTRCONTENTS (1<<3) /* contents is only stored pointer
+                                       do not free in formfree */
 };
 
 typedef int (*curl_progress_callback)(void *clientp,
@@ -497,6 +500,8 @@ typedef enum {
   
   /*  */
   CFINIT(COPYNAME),
+  CFINIT(PTRNAME),
+  CFINIT(NAMELENGTH),
   CFINIT(COPYCONTENTS),
   CFINIT(PTRCONTENTS),
   CFINIT(CONTENTSLENGTH),
