@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel (4 March 2004)
+- Improved PUT/POST with NTLM/Digest authentication, the so called issue 12.
+
 - Modified the test HTTP server a lot to work with the upcoming changes for
   PUT/POST with NTLM/Digest authentication (like test case 88). Added Andrés
   García's win32-changes. Improved the logging.

@@ -25,6 +25,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o Improved PUT/POST with NTLM/Digest authentication
  o following redirects and doing NTLM/Digest (where the first connection gets
    closed) with the multi interface work better now
  o file: progress meter and getinfo variables work now
