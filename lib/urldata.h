@@ -114,7 +114,7 @@
 #define MAX(x,y) ((x)>(y)?(x):(y))
 #endif
 
-#ifdef KRB4
+#ifdef HAVE_KRB4
 /* Types needed for krb4-ftp connections */
 struct krb4buffer {
   void *data;
@@ -510,7 +510,7 @@ struct connectdata {
   char *newurl; /* This can only be set if a Location: was in the
 		   document headers */
 
-#ifdef KRB4
+#ifdef HAVE_KRB4
   enum protection_level command_prot;
   enum protection_level data_prot;
   enum protection_level request_data_prot;

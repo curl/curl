@@ -102,7 +102,7 @@ char *curl_version(void)
   (void)num; /* no compiler warning please */
 #endif
 
-#ifdef KRB4
+#ifdef HAVE_KRB4
   sprintf(ptr, " krb4");
   ptr += strlen(ptr);
 #endif
@@ -167,7 +167,7 @@ static curl_version_info_data version_info = {
 #ifdef ENABLE_IPV6
   | CURL_VERSION_IPV6
 #endif
-#ifdef KRB4
+#ifdef HAVE_KRB4
   | CURL_VERSION_KERBEROS4
 #endif
 #ifdef USE_SSLEAY

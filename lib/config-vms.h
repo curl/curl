@@ -50,7 +50,7 @@
 #undef NEED_REENTRANT
 
 /* Define if you have the Kerberos4 libraries (including -ldes) */
-#undef KRB4
+#undef HAVE_KRB4
 
 /* Define this to 'int' if ssize_t is not an available typedefed type */
 #undef ssize_t

@@ -41,7 +41,7 @@
 #include "setup.h"
 
 #ifndef CURL_DISABLE_FTP
-#ifdef KRB4
+#ifdef HAVE_KRB4
 
 #include "security.h"
 #include "base64.h"
@@ -402,5 +402,5 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   return CURLE_OK;
 }
 
-#endif /* KRB4 */
+#endif /* HAVE_KRB4 */
 #endif /* CURL_DISABLE_FTP */

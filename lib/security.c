@@ -41,7 +41,7 @@
 #include "setup.h"
 
 #ifndef CURL_DISABLE_FTP
-#ifdef KRB4
+#ifdef HAVE_KRB4
 
 #define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
@@ -90,7 +90,7 @@ static struct Curl_sec_client_mech *mechs[] = {
 #ifdef KRB5
   /* not supported */
 #endif
-#ifdef KRB4
+#ifdef HAVE_KRB4
     &Curl_krb4_client_mech,
 #endif
     NULL
@@ -478,5 +478,5 @@ Curl_sec_end(struct connectdata *conn)
   conn->mech=NULL;
 }
 
-#endif /* KRB4 */
+#endif /* HAVE_KRB4 */
 #endif /* CURL_DISABLE_FTP */

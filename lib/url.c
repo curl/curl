@@ -127,7 +127,7 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#ifdef KRB4
+#ifdef HAVE_KRB4
 #include "security.h"
 #endif
 

@@ -36,7 +36,7 @@
 #undef NEED_REENTRANT
 
 /* Define if you have the Kerberos4 libraries (including -ldes) */
-#undef KRB4
+#undef HAVE_KRB4
 
 /* Define if you want to enable IPv6 support */
 #undef ENABLE_IPV6

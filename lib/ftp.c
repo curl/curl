@@ -77,7 +77,7 @@
 #include "http.h" /* for HTTP proxy tunnel stuff */
 #include "ftp.h"
 
-#ifdef KRB4
+#ifdef HAVE_KRB4
 #include "security.h"
 #include "krb4.h"
 #endif
@@ -377,7 +377,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   if(!result)
     code = atoi(buf);
 
-#ifdef KRB4
+#ifdef HAVE_KRB4
   /* handle the security-oriented responses 6xx ***/
   /* FIXME: some errorchecking perhaps... ***/
   switch(code) {
@@ -467,7 +467,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
-#ifdef KRB4
+#ifdef HAVE_KRB4
   /* if not anonymous login, try a secure login */
   if(data->set.krb4) {
 
@@ -559,7 +559,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
        (the user logged in without password) */
     infof(data, "We have successfully logged in\n");
     if (conn->ssl[FIRSTSOCKET].use) {
-#ifdef KRB4
+#ifdef HAVE_KRB4
 	/* we are logged in (with Kerberos)
 	 * now set the requested protection level
 	 */
@@ -739,7 +739,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
     }
   }
 
-#ifdef KRB4
+#ifdef HAVE_KRB4
   Curl_sec_fflush_fd(conn, conn->sock[SECONDARYSOCKET]);
 #endif
   /* shut down the socket to inform the server we're done */
