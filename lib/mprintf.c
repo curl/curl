@@ -122,8 +122,8 @@ enum {
 typedef struct {
   FormatType type;
   int flags;
-  int width;     /* width OR width parameter number */
-  int precision; /* precision OR precision parameter number */
+  long width;     /* width OR width parameter number */
+  long precision; /* precision OR precision parameter number */
   union {
     char *str;
     void *ptr;
@@ -281,7 +281,8 @@ int dprintf_Pass1Report(va_stack_t *vto, int max)
  *
  ******************************************************************/
 
-static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list arglist)
+static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
+                          va_list arglist)
 {
   char *fmt = format;
   int param_num = 0;
@@ -681,7 +682,7 @@ static int dprintf_formatf(
     else
       prec = -1;
 
-    alt = p->flags & FLAGS_ALT;
+    alt = (p->flags & FLAGS_ALT)?TRUE:FALSE;
     
     switch (p->type) {
     case FORMAT_INT:
@@ -1042,7 +1043,7 @@ static int alloc_addbyter(int output, FILE *data)
     infop->alloc *= 2;
   }
 
-  infop->buffer[ infop->len ] = output;
+  infop->buffer[ infop->len ] = (char)output;
 
   infop->len++;
 
