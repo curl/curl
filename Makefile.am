@@ -6,14 +6,9 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 
 EXTRA_DIST = \
 	CHANGES LEGAL maketgz MITX.txt MPL-1.1.txt \
-	config-win32.h reconf packages/README \
-	packages/Linux/RPM/README \
-	packages/Linux/RPM/curl-ssl.spec.in \
-	packages/Linux/RPM/curl.spec.in \
-	packages/Linux/RPM/make_curl_rpm \
-	packages/Win32/README
+	config-win32.h reconf packages/README
 
-SUBDIRS = docs lib src include tests
+SUBDIRS = docs lib src include tests packages
 
 test:
 	@(cd tests; make quiet-test)

@@ -615,6 +615,10 @@ AC_OUTPUT( Makefile \
 	   src/Makefile \
            lib/Makefile \
            tests/Makefile \
+	   packages/Makefile \
+	   packages/Win32/Makefile \
+	   packages/Linux/Makefile \
+	   packages/Linux/RPM/Makefile \
 	   packages/Linux/RPM/curl.spec \
 	   packages/Linux/RPM/curl-ssl.spec )
 
