@@ -8,6 +8,9 @@
 #
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP GET with nothing returned from server
  </name>

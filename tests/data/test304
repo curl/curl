@@ -12,6 +12,9 @@ blablabla
 
 # Client-side
 <client>
+<server>
+https
+</server>
  <name>
 HTTPS multipart formpost
  </name>

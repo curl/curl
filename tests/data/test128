@@ -4,6 +4,9 @@
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP upload with --crlf
  </name>

@@ -16,6 +16,9 @@
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP retrieve a byte-range
  </name>

@@ -13,6 +13,9 @@ Server: test-server/fake
 #
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 simple HTTP 1.0 GET
  </name>

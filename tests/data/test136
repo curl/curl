@@ -7,6 +7,9 @@
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP with user and no password
  </name>

@@ -12,6 +12,9 @@ todelooooo lalalala yada yada, we know nothing about ranges ;-)
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP resume request without server supporting it
  </name>

@@ -20,6 +20,9 @@ ink="#ffffff" vlink="#cccccc">
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP range support
  </name>

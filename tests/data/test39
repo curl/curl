@@ -12,6 +12,9 @@ blablabla
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP RFC1867-type formposting with filename= and type=
  </name>

@@ -18,6 +18,9 @@ boo
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with various cookies and custom Host:
  </name>

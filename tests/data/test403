@@ -8,6 +8,9 @@
 #
 # Client-side
 <client>
+<server>
+ftps
+</server>
  <name>
 insecure FTPS without permission
  </name>

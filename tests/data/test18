@@ -22,6 +22,9 @@ hoo
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 multiple requests using {} in URL
  </name>

@@ -11,6 +11,9 @@ Set-Cookie: path=/; thewinneris=nowayyouwin;
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 Get same cookie page several times
  </name>

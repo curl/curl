@@ -12,6 +12,9 @@ Funny-head: yesyes
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with simple cookie send
  </name>

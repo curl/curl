@@ -13,6 +13,9 @@ This server says moo
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP, junk session cookies
  </name>

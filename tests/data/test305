@@ -6,6 +6,9 @@
 
 # Client-side
 <client>
+<server>
+https
+</server>
  <name>
 insecure HTTPS without permission
  </name>

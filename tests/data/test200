@@ -11,6 +11,9 @@ moo
 
 # Client-side
 <client>
+<server>
+none
+</server>
  <name>
 basic file:// file
  </name>

@@ -10,6 +10,9 @@ Content-Type: text/html; charset=ISO-8859-4
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP content-type with spaces in
  </name>

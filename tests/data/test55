@@ -28,6 +28,9 @@ body
 </reply>
 
 <client>
+<server>
+http
+</server>
  <name>
 HTTP follow redirect with single slash in path
  </name>

@@ -10,6 +10,9 @@ This is the proof it works
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 get HTTP with URL > 10000 bytes
  </name>

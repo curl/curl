@@ -11,6 +11,9 @@ but we emulate that
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP download resume with set limit
  </name>

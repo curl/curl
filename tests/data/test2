@@ -14,6 +14,9 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP GET with user and password
  </name>

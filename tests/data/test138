@@ -10,6 +10,9 @@ this is file contents
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP download without size in RETR string and no SIZE command
  </name>

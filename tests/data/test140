@@ -9,6 +9,9 @@
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP download file with -z, expected to not transfer
  </name>

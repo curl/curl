@@ -4,6 +4,9 @@
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP download, failed PORT
  </name>

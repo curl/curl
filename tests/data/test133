@@ -19,6 +19,9 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 #
 # Client-side
 <client requires=netrc_debug>
+<server>
+ftp
+</server>
  <name>
 FTP (compulsory .netrc; ignored user/passwd) dir list PASV
  </name>

@@ -12,6 +12,9 @@ works
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP GET with type=A style ASCII URL using %20 codes
  </name>

@@ -51,6 +51,9 @@ Connection: close
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 looping HTTP Location: following with --max-redirs, no persistance
  </name>

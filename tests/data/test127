@@ -7,6 +7,9 @@ moooooooo
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP --disable-epsv
  </name>

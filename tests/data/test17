@@ -10,6 +10,9 @@ This is the proof it works
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with config file on stdin
  </name>

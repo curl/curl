@@ -15,6 +15,9 @@ Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with cookie parser and header recording
  </name>

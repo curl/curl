@@ -10,6 +10,9 @@ Connection: close
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP HEAD with Connection: close
  </name>

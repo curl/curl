@@ -7,6 +7,9 @@ we can still send data even if pwd fails!
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP download, failed PWD
  </name>

@@ -6,6 +6,9 @@
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 attempt connect to non-existing host name
  </name>

@@ -30,6 +30,9 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbb
 #
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP GET with chunked Transfer-Encoding
  </name>

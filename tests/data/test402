@@ -5,6 +5,9 @@ moooooooo
 
 # Client-side
 <client>
+<server>
+ftps
+</server>
 <killserver>
 ftp
 </killserver>

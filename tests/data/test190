@@ -5,6 +5,9 @@ moooooooo
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP download with strict timeout and slow CWD
  </name>

@@ -36,6 +36,9 @@ If this is received, the location following worked
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 simple HTTP Location: following
  </name>

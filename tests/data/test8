@@ -10,6 +10,9 @@ Server: test-server/fake
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with cookie parsing from header file
  </name>

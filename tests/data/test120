@@ -12,6 +12,9 @@ works
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 ftp download with post-quote delete operation
  </name>

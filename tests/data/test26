@@ -11,6 +11,9 @@ Connection: close
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 specify more -o than URLs
  </name>

@@ -13,6 +13,9 @@ the content goes here
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with proxy athorization
  </name>

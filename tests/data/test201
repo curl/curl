@@ -6,6 +6,9 @@
 
 # Client-side
 <client>
+<server>
+none
+</server>
  <name>
 missing file:// file
  </name>

@@ -6,6 +6,9 @@
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP URL with too deep (100+) dir hierarchy
  </name>

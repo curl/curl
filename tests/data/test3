@@ -14,6 +14,9 @@ this is data even though Content-Length is set to zero
 #
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP POST with user and password
  </name>

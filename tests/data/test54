@@ -11,6 +11,9 @@ This server reply is for testing
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with blank Location:
  </name>

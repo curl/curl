@@ -12,6 +12,9 @@ Repeated nonsense-headers
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 --write-out test
  </name>

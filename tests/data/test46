@@ -17,6 +17,9 @@ This server reply is for testing a simple Location: following
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP, get cookies and store in cookie jar
  </name>

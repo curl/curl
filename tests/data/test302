@@ -7,6 +7,9 @@ MOOOOO
 #
 # Client-side
 <client>
+<server>
+https
+</server>
  <name>
 HTTPS GET over HTTP proxy fails
  </name>

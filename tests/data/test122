@@ -7,6 +7,9 @@
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP download resume with whole file already downloaded
  </name>

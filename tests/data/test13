@@ -11,6 +11,9 @@ blabla custom request result
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP custom request 'DELETE'
  </name>

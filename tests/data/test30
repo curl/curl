@@ -6,6 +6,9 @@
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with no data in server reply
  </name>

@@ -7,6 +7,9 @@
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP PUT with resume
  </name>

@@ -6,6 +6,9 @@
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 unsupported protocol:// URL
  </name>

@@ -12,6 +12,9 @@ works
 
 # Client-side
 <client>
+<server>
+ftp
+</server>
  <name>
 FTP RETR PASV
  </name>

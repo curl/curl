@@ -23,6 +23,9 @@ boo
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with weirdly formatted cookies and cookiejar storage
  </name>

@@ -13,6 +13,9 @@ hej
 #
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP URL with slash but with "parameter"
  </name>

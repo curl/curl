@@ -14,6 +14,9 @@ wait 10
 
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with 2 secs timeout
  </name>

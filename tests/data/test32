@@ -20,6 +20,9 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+<server>
+http
+</server>
  <name>
 HTTP with -d and -G
  </name>

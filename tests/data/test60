@@ -12,6 +12,9 @@ blablabla
 
 # Client-side
 <client>
+<server>
+http
+</server>
 <name>
 HTTP PUT from stdin with wrong content-length
 </name>
