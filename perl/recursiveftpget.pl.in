@@ -1,0 +1,67 @@
+#!@PERL@
+#
+# Author:  Daniel Stenberg <Daniel.Stenberg@sth.frontec.se>
+# Date:    August 25 1998
+# Version: 0.1
+#
+# This is just meant as an example of why we wrote curl in the first place.
+# Quick n' easy scripting use.
+#
+
+$dir = $ARGV[0];
+
+$target = $ARGV[1];
+
+$maxdepth = $ARGV[2];
+
+if($dir eq "" || $target eq "") {
+    print "Usage: <URL> <dir> [max depth level] \n";
+    print " End the URL with a slash if a directory is specified, please\n";
+    exit;
+}
+
+if(($maxdepth ne "") && ($maxdepth == 0)) {
+    # reached maximum depth, die
+    print "Reached maximum recursive depth level ($maxdepth), exiting...\n";
+    exit;
+}
+
+# get dir
+@all = `curl -s $dir`;
+
+if($all[0] ne "") {
+    print "Got the main $dir dir\n";
+}
+
+line:
+for(@all) {
+    chop; # cut off newline
+    @linep= split(" ", $_);
+
+    $name = $linep[$#linep];
+
+    $firstletter=substr($linep[0], 0, 1);
+
+    if($firstletter eq "d") {
+        # this is a subdir, recurse
+        # if not . or .. of course
+
+        if(($name eq ".") || ($name eq "..")) {
+            next line;
+        }
+        print "Recursing for dir $dir$name in target $target/$name\n";
+
+	$nextdepth=$maxdepth-1;
+        print `$0 $dir$name/ $target/$name $nextdepth`;
+    }
+    elsif($firstletter eq "-") {
+        # this is a file, get it
+        # oh, make sure the target dir exists first
+
+        if(! -r $target ) {
+            mkdir($target,0777);
+        }
+        print "Getting file $dir$name in target $target/$name\n";
+        print `curl -s $dir$name >$target/$name`;
+    }
+}

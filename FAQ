@@ -1,0 +1,31 @@
+Date: 19 November 1999
+
+             Frequently Asked Questions about Curl
+
+1. Problems connecting to SSL servers.
+
+  It took a very long time before I could sort out why curl had problems
+  to connect to certain SSL servers when using SSLeay or OpenSSL v0.9+.
+  The error sometimes showed up similar to:
+
+  16570:error:1407D071:SSL routines:SSL2_READ:bad mac decode:s2_pkt.c:233:
+
+  It turned out to be because many older SSL servers don't deal with SSLv3
+  requests properly. To correct this problem, tell curl to select SSLv2 from
+  the command line (-2/--sslv2).
+
+  I have also seen examples where the remote server didn't like the SSLv2
+  request and instead you had to force curl to use SSLv3 with -3/--sslv3.
+
+2. Does curl support resume?
+
+  Yes. Both ways on FTP, download ways on HTTP.
+
+3. Is libcurl thread safe?
+
+  Yes, as far as curl's own code goes. It does use system calls that often
+  aren't thread safe in most environments, such as gethostbyname().
+
+  I am very interested in once and for all getting some kind of report or
+  README file from those who have used libcurl in a threaded environment,
+  since I haven't and I get this question more and more frequently!

@@ -1,0 +1,28 @@
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
+
+README
+
+  Curl is a command line tool for transfering data specified with URL
+  syntax. Find out how to use Curl by reading the curl.1 man page or the
+  README.curl document. Find out how to install Curl by reading the INSTALL
+  document.
+
+  libcurl is a link-library that Curl is using to to its job. It is readily
+  available to be used by your software. Read the README.libcurl document to
+  find out how!
+
+  You find answers to the most frequent questions we get in the FAQ document.
+
+  Always try the Curl web site for the latest news:
+
+        http://curl.haxx.nu
+
+  The official download mirror sites are:
+
+        Sweden --  ftp://ftp.sunet.se/pub/www/utilities/curl/
+        Germany -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
+        China --   http://www.pshowing.com/curl/

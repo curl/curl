@@ -1,0 +1,152 @@
+#! /bin/sh
+# Script to build release-archives with
+#
+
+echo "LIB version number?"
+read version
+
+libversion="$version"
+
+echo "CURL version number?"
+read curlversion
+
+HEADER=include/curl/curl.h
+CHEADER=src/version.h
+
+
+# Replace version number in header file:
+sed 's/#define LIBCURL_VERSION.*/#define LIBCURL_VERSION "'$libversion'"/g' $HEADER >$HEADER.new
+
+# Save old header file
+cp -p $HEADER $HEADER.old
+
+# Make new header:
+mv $HEADER.new $HEADER
+
+# Replace version number in header file:
+sed 's/#define CURL_VERSION.*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER >$CHEADER.new
+
+# Save old header file
+cp -p $CHEADER $CHEADER.old
+
+# Make new header:
+mv $CHEADER.new $CHEADER
+
+findprog()
+{
+  file="$1"
+  for part in `echo $PATH| tr ':' ' '`; do
+    path="$part/$file"
+    if [ -x "$path" ]; then
+      # there it is!
+      return 1
+    fi
+  done
+
+  # no such executable
+  return 0
+}
+
+############################################################################
+#
+# If we have autoconf we can just as well update configure.in to contain our
+# brand new version number:
+#
+ 
+if { findprog autoconf >/dev/null 2>/dev/null; } then
+  echo "- No autoconf found, we leave configure as it is"
+else
+  # Replace version number in configure.in file:
+
+  CONF="configure.in"
+
+  sed 's/^AM_INIT_AUTOMAKE.*/AM_INIT_AUTOMAKE(curl,"'$version'")/g' $CONF >$CONF.new
+
+  # Save old  file
+  cp -p $CONF $CONF.old
+
+  # Make new configure.in
+  mv $CONF.new $CONF
+ 
+  # Update the configure script
+  echo "Runs autoconf"
+  autoconf
+fi
+
+############################################################################
+#
+# automake is needed to run to make a non-GNU Makefile.in if Makefile.am has
+# been modified.
+#
+
+if { findprog automake >/dev/null 2>/dev/null; } then
+  echo "- Could not find or run automake, I hope you know what you're doing!"
+else
+  echo "Runs automake --include-deps"
+  automake --include-deps
+fi
+
+############################################################################
+#
+# Now run make first to make the file dates decent and make sure that it
+# compiles just before release!
+#
+
+make
+
+# get current dir
+dir=`pwd`
+
+# Get basename
+orig=`basename $dir`
+
+# Get the left part of the dash (-)
+new=`echo $orig | cut -d- -f1`
+
+# Build new directory name
+n=$new-$version;
+
+# Tell the world what we're doing
+echo "Copying files into distribution archive";
+
+if [ -r $n ]; then
+  echo "Directory already exists!"
+  exit
+fi
+
+# Create the new dir
+mkdir $n
+
+# Copy all relevant files, with path and permissions!
+tar -cf - `cat FILES` | (cd $n; tar -xBpf -)
+
+# Create the distribution root Makefile from Makefile.dist
+cp -p Makefile.dist $n/Makefile
+
+############################################################################
+#
+# Replace @SHELL@ with /bin/sh in the Makefile.in files!
+#
+echo "Replace @SHELL@ with /bin/sh in the Makefile.in files"
+temp=/tmp/curl$$
+for file in Makefile.in lib/Makefile.in src/Makefile.in; do
+  in="$n/$file"
+  sed "s:@SHELL@:/bin/sh:g" $in >$temp
+  cp $temp $in
+done
+rm -rf $temp
+
+# Tell the world what we're doing
+echo "creates $n.tar.gz";
+
+# Make a tar archive of it all
+tar -cvf $n.tar $n
+
+# gzip the archive
+gzip $n.tar
+
+# Make it world readable
+chmod a+r $n.tar.gz ;
+
+# Delete the temp dir
+rm -rf $n

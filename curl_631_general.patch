@@ -1,0 +1,1265 @@
+Only in curl-6.3.1: config-win32.h
+Only in curl-6.3.1: config-win32.h~
+Only in curl-6.3.1: config.cache
+Only in curl-6.3.1: config.h
+diff -cr curl-6.3.1-org/config.h.in curl-6.3.1/config.h.in
+*** curl-6.3.1-org/config.h.in	Sun Oct 17 13:18:34 1999
+--- curl-6.3.1/config.h.in	Thu Dec  9 14:23:01 1999
+***************
+*** 37,42 ****
+--- 37,45 ----
+  /* The number of bytes in a long long.  */
+  #undef SIZEOF_LONG_LONG
+  
++ /* Define if you have the closesocket function.  */
++ #undef HAVE_CLOSESOCKET
++ 
+  /* Define if you have the gethostbyaddr function.  */
+  #undef HAVE_GETHOSTBYADDR
+  
+***************
+*** 109,114 ****
+--- 112,120 ----
+  /* Define if you have the <getopt.h> header file.  */
+  #undef HAVE_GETOPT_H
+  
++ /* Define if you have the <io.h> header file.  */
++ #undef HAVE_IO_H
++ 
+  /* Define if you have the <netdb.h> header file.  */
+  #undef HAVE_NETDB_H
+  
+***************
+*** 169,177 ****
+--- 175,189 ----
+  /* Define if you have the <termios.h> header file.  */
+  #undef HAVE_TERMIOS_H
+  
++ /* Define if you have the <time.h> header file.  */
++ #undef HAVE_TIME_H
++ 
+  /* Define if you have the <unistd.h> header file.  */
+  #undef HAVE_UNISTD_H
+  
++ /* Define if you have the <winsock.h> header file.  */
++ #undef HAVE_WINSOCK_H
++ 
+  /* Define if you have the <x509.h> header file.  */
+  #undef HAVE_X509_H
+  
+Only in curl-6.3.1: config.log
+Only in curl-6.3.1: config.status
+Only in curl-6.3.1: configure
+diff -cr curl-6.3.1-org/configure.in curl-6.3.1/configure.in
+*** curl-6.3.1-org/configure.in	Wed Nov 24 14:48:38 1999
+--- curl-6.3.1/configure.in	Thu Dec  9 14:34:36 1999
+***************
+*** 1,7 ****
+  dnl $Id$
+  dnl Process this file with autoconf to produce a configure script.
+  AC_INIT(lib/urldata.h)
+! AM_CONFIG_HEADER(config.h)
+  AM_INIT_AUTOMAKE(curl,"6.3.1")
+  
+  dnl Checks for programs.
+--- 1,7 ----
+  dnl $Id$
+  dnl Process this file with autoconf to produce a configure script.
+  AC_INIT(lib/urldata.h)
+! AM_CONFIG_HEADER(config.h src/config.h)
+  AM_INIT_AUTOMAKE(curl,"6.3.1")
+  
+  dnl Checks for programs.
+***************
+*** 133,139 ****
+                    sgtty.h \
+                    fcntl.h \
+  		  dlfcn.h \
+!                   alloca.h )
+  
+  
+  dnl Check for libz header
+--- 133,143 ----
+                    sgtty.h \
+                    fcntl.h \
+  		  dlfcn.h \
+!                   alloca.h \
+!                   winsock.h \
+!                   time.h \
+!                   io.h
+!         )
+  
+  
+  dnl Check for libz header
+***************
+*** 175,181 ****
+                  tcsetattr \
+                  tcgetattr \
+                  perror \
+!                 getpass )
+  
+  
+  
+--- 179,187 ----
+                  tcsetattr \
+                  tcgetattr \
+                  perror \
+!                 getpass \
+!                 closesocket
+! )
+  
+  
+  
+Only in curl-6.3.1: configure.in~
+Common subdirectories: curl-6.3.1-org/include and curl-6.3.1/include
+Common subdirectories: curl-6.3.1-org/lib and curl-6.3.1/lib
+Common subdirectories: curl-6.3.1-org/perl and curl-6.3.1/perl
+Common subdirectories: curl-6.3.1-org/src and curl-6.3.1/src
+Only in curl-6.3.1: stamp-h1
+Common subdirectories: curl-6.3.1-org/include/curl and curl-6.3.1/include/curl
+diff -cr curl-6.3.1-org/include/curl/curl.h curl-6.3.1/include/curl/curl.h
+*** curl-6.3.1-org/include/curl/curl.h	Wed Nov 24 14:48:37 1999
+--- curl-6.3.1/include/curl/curl.h	Wed Dec  8 15:34:53 1999
+***************
+*** 352,360 ****
+--- 352,367 ----
+    /* HTTP request, for odd commands like DELETE, TRACE and others */
+    T(HTTPREQUEST, OBJECTPOINT, 35),
+  
++   /* Progress mode sets alternative progress mode displays, the only
++      one defined today is 1 which makes the #-style progress bar. */
++   T(PROGRESSMODE, LONG, 36),
++ 
+    URGTAG_LASTENTRY /* the last unusued */
+  } UrgTag;
+  
++ #define CURL_PROGRESS_STATS 0 /* default progress display */
++ #define CURL_PROGRESS_BAR   1
++ 
+  typedef enum {
+    TIMECOND_NONE,
+  
+Only in curl-6.3.1/include/curl: curl.h~
+Only in curl-6.3.1-org/include/curl: setup.h
+Only in curl-6.3.1/include/curl: setup.h~
+diff -cr curl-6.3.1-org/lib/Makefile curl-6.3.1/lib/Makefile
+*** curl-6.3.1-org/lib/Makefile	Wed Dec  8 13:38:22 1999
+--- curl-6.3.1/lib/Makefile	Thu Dec  9 15:42:21 1999
+***************
+*** 90,98 ****
+  
+  
+  DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I..
+! CPPFLAGS = 
+! LDFLAGS = 
+! LIBS = -ldl -lsocket -lnsl 
+  libcurl_a_LIBADD = 
+  libcurl_a_OBJECTS =  file.o timeval.o base64.o hostip.o progress.o \
+  formdata.o upload.o cookie.o http.o sendf.o ftp.o url.o dict.o if2ip.o \
+--- 90,98 ----
+  
+  
+  DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I..
+! CPPFLAGS = -I/homes/qradlsg/openssl-0.9.4/include
+! LDFLAGS = -L/homes/qradlsg/openssl-0.9.4
+! LIBS = -lssl -lcrypto -ldl -lsocket -lnsl 
+  libcurl_a_LIBADD = 
+  libcurl_a_OBJECTS =  file.o timeval.o base64.o hostip.o progress.o \
+  formdata.o upload.o cookie.o http.o sendf.o ftp.o url.o dict.o if2ip.o \
+***************
+*** 99,105 ****
+  speedcheck.o getdate.o download.o ldap.o ssluse.o version.o getenv.o \
+  escape.o mprintf.o telnet.o getpass.o netrc.o
+  AR = ar
+! CFLAGS = -g -O2
+  COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+  CCLD = $(CC)
+  LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+--- 99,105 ----
+  speedcheck.o getdate.o download.o ldap.o ssluse.o version.o getenv.o \
+  escape.o mprintf.o telnet.o getpass.o netrc.o
+  AR = ar
+! CFLAGS = -g -O2 -Wall -pedantic
+  COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+  CCLD = $(CC)
+  LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+Only in curl-6.3.1/lib: Makefile~
+diff -cr curl-6.3.1-org/lib/cookie.c curl-6.3.1/lib/cookie.c
+*** curl-6.3.1-org/lib/cookie.c	Fri Nov 12 15:54:59 1999
+--- curl-6.3.1/lib/cookie.c	Thu Dec  9 15:44:37 1999
+***************
+*** 60,66 ****
+  #include <ctype.h>
+  
+  #include "cookie.h"
+! #include <curl/setup.h>
+  #include "getdate.h"
+  
+  /****************************************************************************
+--- 60,66 ----
+  #include <ctype.h>
+  
+  #include "cookie.h"
+! #include "setup.h"
+  #include "getdate.h"
+  
+  /****************************************************************************
+***************
+*** 134,140 ****
+          }
+        }
+        ptr=strtok(NULL, ";");
+!       while(ptr && *ptr && isspace(*ptr))
+          ptr++;
+      }
+    }
+--- 134,140 ----
+          }
+        }
+        ptr=strtok(NULL, ";");
+!       while(ptr && *ptr && isspace((int)*ptr))
+          ptr++;
+      }
+    }
+***************
+*** 288,294 ****
+  {
+    char line[MAX_COOKIE_LINE];
+    struct CookieInfo *c;
+-   struct Cookie *co;
+    FILE *fp;
+  
+    c = (struct CookieInfo *)malloc(sizeof(struct CookieInfo));
+--- 288,293 ----
+***************
+*** 303,309 ****
+        if(strnequal("Set-Cookie:", line, 11)) {
+          /* This is a cookie line, get it! */
+          char *lineptr=&line[11];
+!         while(*lineptr && isspace(*lineptr))
+            lineptr++;
+  
+          cookie_add(c, TRUE, lineptr);
+--- 302,308 ----
+        if(strnequal("Set-Cookie:", line, 11)) {
+          /* This is a cookie line, get it! */
+          char *lineptr=&line[11];
+!         while(*lineptr && isspace((int)*lineptr))
+            lineptr++;
+  
+          cookie_add(c, TRUE, lineptr);
+***************
+*** 311,317 ****
+        else {
+          /* This might be a netscape cookie-file line, get it! */
+          char *lineptr=line;
+!         while(*lineptr && isspace(*lineptr))
+            lineptr++;
+  
+          cookie_add(c, FALSE, lineptr);
+--- 310,316 ----
+        else {
+          /* This might be a netscape cookie-file line, get it! */
+          char *lineptr=line;
+!         while(*lineptr && isspace((int)*lineptr))
+            lineptr++;
+  
+          cookie_add(c, FALSE, lineptr);
+Only in curl-6.3.1/lib: cookie.c~
+Binary files curl-6.3.1-org/lib/cookie.o and curl-6.3.1/lib/cookie.o differ
+diff -cr curl-6.3.1-org/lib/dict.c curl-6.3.1/lib/dict.c
+*** curl-6.3.1-org/lib/dict.c	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/dict.c	Thu Dec  9 14:27:23 1999
+***************
+*** 49,55 ****
+  
+  #include <errno.h>
+  
+! #include <curl/setup.h>
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+--- 49,55 ----
+  
+  #include <errno.h>
+  
+! #include "setup.h"
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+Binary files curl-6.3.1-org/lib/dict.o and curl-6.3.1/lib/dict.o differ
+diff -cr curl-6.3.1-org/lib/download.c curl-6.3.1/lib/download.c
+*** curl-6.3.1-org/lib/download.c	Tue Nov 23 09:24:26 1999
+--- curl-6.3.1/lib/download.c	Thu Dec  9 14:27:23 1999
+***************
+*** 42,48 ****
+  #include <stdio.h>
+  #include <string.h>
+  
+! #include <curl/setup.h>
+  
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+--- 42,48 ----
+  #include <stdio.h>
+  #include <string.h>
+  
+! #include "setup.h"
+  
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+Binary files curl-6.3.1-org/lib/download.o and curl-6.3.1/lib/download.o differ
+diff -cr curl-6.3.1-org/lib/file.c curl-6.3.1/lib/file.c
+*** curl-6.3.1-org/lib/file.c	Fri Nov 19 08:25:40 1999
+--- curl-6.3.1/lib/file.c	Thu Dec  9 14:27:24 1999
+***************
+*** 49,55 ****
+  
+  #include <errno.h>
+  
+! #include <curl/setup.h>
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+--- 49,55 ----
+  
+  #include <errno.h>
+  
+! #include "setup.h"
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+Binary files curl-6.3.1-org/lib/file.o and curl-6.3.1/lib/file.o differ
+diff -cr curl-6.3.1-org/lib/formdata.c curl-6.3.1/lib/formdata.c
+*** curl-6.3.1-org/lib/formdata.c	Tue Nov 23 17:54:36 1999
+--- curl-6.3.1/lib/formdata.c	Thu Dec  9 14:27:25 1999
+***************
+*** 56,62 ****
+  
+  #include <time.h>
+  
+! #include <curl/setup.h>
+  #include <curl/curl.h>
+  #include "formdata.h"
+  
+--- 56,62 ----
+  
+  #include <time.h>
+  
+! #include "setup.h"
+  #include <curl/curl.h>
+  #include "formdata.h"
+  
+Binary files curl-6.3.1-org/lib/formdata.o and curl-6.3.1/lib/formdata.o differ
+diff -cr curl-6.3.1-org/lib/ftp.c curl-6.3.1/lib/ftp.c
+*** curl-6.3.1-org/lib/ftp.c	Tue Nov 23 09:25:06 1999
+--- curl-6.3.1/lib/ftp.c	Thu Dec  9 15:43:10 1999
+***************
+*** 44,50 ****
+  #include <ctype.h>
+  #include <errno.h>
+  
+! #include <curl/setup.h>
+  
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+--- 44,50 ----
+  #include <ctype.h>
+  #include <errno.h>
+  
+! #include "setup.h"
+  
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+***************
+*** 728,734 ****
+        char *ptr2;
+  
+        from=strtol(data->range, &ptr, 0);
+!       while(ptr && *ptr && (isspace(*ptr) || (*ptr=='-')))
+          ptr++;
+        to=strtol(ptr, &ptr2, 0);
+        if(ptr == ptr2) {
+--- 728,734 ----
+        char *ptr2;
+  
+        from=strtol(data->range, &ptr, 0);
+!       while(ptr && *ptr && (isspace((int)*ptr) || (*ptr=='-')))
+          ptr++;
+        to=strtol(ptr, &ptr2, 0);
+        if(ptr == ptr2) {
+***************
+*** 886,892 ****
+              if('(' == *bytes)
+                break;
+              /* if only skip digits, or else we're in deep trouble */
+!             if(!isdigit(*bytes)) {
+                bytes=NULL;
+                break;
+              }
+--- 886,892 ----
+              if('(' == *bytes)
+                break;
+              /* if only skip digits, or else we're in deep trouble */
+!             if(!isdigit((int)*bytes)) {
+                bytes=NULL;
+                break;
+              }
+Only in curl-6.3.1/lib: ftp.c~
+Binary files curl-6.3.1-org/lib/ftp.o and curl-6.3.1/lib/ftp.o differ
+diff -cr curl-6.3.1-org/lib/hostip.c curl-6.3.1/lib/hostip.c
+*** curl-6.3.1-org/lib/hostip.c	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/hostip.c	Thu Dec  9 14:27:27 1999
+***************
+*** 40,46 ****
+  
+  #include <string.h>
+  
+! #include <curl/setup.h>
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+--- 40,46 ----
+  
+  #include <string.h>
+  
+! #include "setup.h"
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+Binary files curl-6.3.1-org/lib/hostip.o and curl-6.3.1/lib/hostip.o differ
+diff -cr curl-6.3.1-org/lib/http.c curl-6.3.1/lib/http.c
+*** curl-6.3.1-org/lib/http.c	Sat Oct 30 17:43:52 1999
+--- curl-6.3.1/lib/http.c	Thu Dec  9 14:27:27 1999
+***************
+*** 49,55 ****
+  
+  #include <errno.h>
+  
+! #include <curl/setup.h>
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+--- 49,55 ----
+  
+  #include <errno.h>
+  
+! #include "setup.h"
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+Binary files curl-6.3.1-org/lib/http.o and curl-6.3.1/lib/http.o differ
+diff -cr curl-6.3.1-org/lib/if2ip.c curl-6.3.1/lib/if2ip.c
+*** curl-6.3.1-org/lib/if2ip.c	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/if2ip.c	Thu Dec  9 14:27:28 1999
+***************
+*** 42,48 ****
+  #include <stdlib.h>
+  #include <string.h>
+  
+! #include <curl/setup.h>
+  
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+--- 42,48 ----
+  #include <stdlib.h>
+  #include <string.h>
+  
+! #include "setup.h"
+  
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+diff -cr curl-6.3.1-org/lib/if2ip.h curl-6.3.1/lib/if2ip.h
+*** curl-6.3.1-org/lib/if2ip.h	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/if2ip.h	Thu Dec  9 14:27:49 1999
+***************
+*** 39,45 ****
+   *
+   * ------------------------------------------------------------
+   ****************************************************************************/
+! #include <curl/setup.h>
+  
+  #ifndef WIN32
+  char *if2ip(char *interface);
+--- 39,45 ----
+   *
+   * ------------------------------------------------------------
+   ****************************************************************************/
+! #include "setup.h"
+  
+  #ifndef WIN32
+  char *if2ip(char *interface);
+Binary files curl-6.3.1-org/lib/if2ip.o and curl-6.3.1/lib/if2ip.o differ
+diff -cr curl-6.3.1-org/lib/ldap.c curl-6.3.1/lib/ldap.c
+*** curl-6.3.1-org/lib/ldap.c	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/ldap.c	Thu Dec  9 15:44:17 1999
+***************
+*** 48,54 ****
+  #include <sys/stat.h>
+  #include <errno.h>
+  
+! #include <curl/setup.h>
+  
+  #if defined(WIN32) && !defined(__GNUC__)
+  #else
+--- 48,54 ----
+  #include <sys/stat.h>
+  #include <errno.h>
+  
+! #include "setup.h"
+  
+  #if defined(WIN32) && !defined(__GNUC__)
+  #else
+***************
+*** 125,130 ****
+--- 125,131 ----
+    struct UrlData *data = (struct UrlData *)param;
+    
+    printf("%s\n", text);
++   return 0;
+  }
+  
+  /***********************************************************************
+***************
+*** 145,155 ****
+--- 146,158 ----
+    void *server;
+    void *result;
+    void *entryIterator;
++ #if 0
+    char *dn;
+    char **attrArray;
+    char *attrIterator;
+    char *attrString;
+    void *dummy;
++ #endif
+    int ldaptext;
+    
+    infof(data, "LDAP: %s %s\n", data->url);
+Only in curl-6.3.1/lib: ldap.c~
+Binary files curl-6.3.1-org/lib/ldap.o and curl-6.3.1/lib/ldap.o differ
+Binary files curl-6.3.1-org/lib/libcurl.a and curl-6.3.1/lib/libcurl.a differ
+diff -cr curl-6.3.1-org/lib/netrc.c curl-6.3.1/lib/netrc.c
+*** curl-6.3.1-org/lib/netrc.c	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/netrc.c	Thu Dec  9 14:27:29 1999
+***************
+*** 54,60 ****
+  #include <stdlib.h>
+  #include <string.h>
+  
+! #include <curl/setup.h>
+  #include "getenv.h"
+  
+  /* Debug this single source file with:
+--- 54,60 ----
+  #include <stdlib.h>
+  #include <string.h>
+  
+! #include "setup.h"
+  #include "getenv.h"
+  
+  /* Debug this single source file with:
+Binary files curl-6.3.1-org/lib/netrc.o and curl-6.3.1/lib/netrc.o differ
+diff -cr curl-6.3.1-org/lib/progress.c curl-6.3.1/lib/progress.c
+*** curl-6.3.1-org/lib/progress.c	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/progress.c	Thu Dec  9 14:27:29 1999
+***************
+*** 39,45 ****
+   ****************************************************************************/
+  
+  #include <string.h>
+! #include <curl/setup.h>
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #if defined(__MINGW32__)
+--- 39,45 ----
+   ****************************************************************************/
+  
+  #include <string.h>
+! #include "setup.h"
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #if defined(__MINGW32__)
+***************
+*** 56,77 ****
+  /* --- start of progress routines --- */
+  int progressmax=-1;
+  
+- static int progressmode=0;
+  static int prev = 0;
+  static int width = 0;
+  
+- void ProgressMode(int mode)
+- {
+-   progressmode=mode;
+- }
+- 
+  void ProgressInit(struct UrlData *data, int max)
+  {
+!   static char beenhere=0;
+!  
+!   if(beenhere || (data->conf&(CONF_NOPROGRESS|CONF_MUTE)))
+      return;
+!   /*beenhere=1;*/
+    prev = 0;
+  
+  /* TODO: get terminal width through ansi escapes or something similar.
+--- 56,69 ----
+  /* --- start of progress routines --- */
+  int progressmax=-1;
+  
+  static int prev = 0;
+  static int width = 0;
+  
+  void ProgressInit(struct UrlData *data, int max)
+  {
+!   if(data->conf&(CONF_NOPROGRESS|CONF_MUTE))
+      return;
+! 
+    prev = 0;
+  
+  /* TODO: get terminal width through ansi escapes or something similar.
+***************
+*** 89,95 ****
+      return;
+    }
+  
+!   if ( progressmode == URG_PROGRESS_MODE_STATS )
+      fprintf(stderr, "  %%   Received   Total  Speed   Time left  Total   Curr.Speed\n");
+  }
+  
+--- 81,87 ----
+      return;
+    }
+  
+!   if ( data->progressmode == CURL_PROGRESS_STATS )
+      fprintf(stderr, "  %%   Received   Total  Speed   Time left  Total   Curr.Speed\n");
+  }
+  
+***************
+*** 104,111 ****
+  void ProgressShow(struct UrlData *data,
+                    int point, struct timeval start, struct timeval now, bool force)
+  {
+!   switch ( progressmode ) {
+!   case URG_PROGRESS_MODE_STATS:
+      {
+        static long lastshow;
+        double percen;
+--- 96,103 ----
+  void ProgressShow(struct UrlData *data,
+                    int point, struct timeval start, struct timeval now, bool force)
+  {
+!   switch ( data->progressmode ) {
+!   case CURL_PROGRESS_STATS:
+      {
+        static long lastshow;
+        double percen;
+***************
+*** 172,178 ****
+        lastshow = now.tv_sec;
+        break;
+      }
+!   case URG_PROGRESS_MODE_BAR: /* 19990617 larsa */
+      {
+        if (point == prev) break;
+        if (progressmax == -1) {
+--- 164,170 ----
+        lastshow = now.tv_sec;
+        break;
+      }
+!   case CURL_PROGRESS_BAR: /* 19990617 larsa */
+      {
+        if (point == prev) break;
+        if (progressmax == -1) {
+Only in curl-6.3.1/lib: progress.c~
+diff -cr curl-6.3.1-org/lib/progress.h curl-6.3.1/lib/progress.h
+*** curl-6.3.1-org/lib/progress.h	Mon Sep  6 08:59:41 1999
+--- curl-6.3.1/lib/progress.h	Thu Dec  9 14:27:50 1999
+***************
+*** 51,58 ****
+  /* Don't show progress for sizes smaller than: */
+  #define LEAST_SIZE_PROGRESS BUFSIZE
+  
+- /* we want more progress info modes... */
+- #define URG_PROGRESS_MODE_STATS (0) /* default is the mode with value 0 */
+- #define URG_PROGRESS_MODE_BAR   (1)
+- 
+  #endif /* __PROGRESS_H */
+--- 51,54 ----
+Only in curl-6.3.1/lib: progress.h~
+Binary files curl-6.3.1-org/lib/progress.o and curl-6.3.1/lib/progress.o differ
+Only in curl-6.3.1/lib: replace.sh
+Only in curl-6.3.1/lib: replace.sh~
+diff -cr curl-6.3.1-org/lib/sendf.c curl-6.3.1/lib/sendf.c
+*** curl-6.3.1-org/lib/sendf.c	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/sendf.c	Thu Dec  9 14:27:30 1999
+***************
+*** 42,48 ****
+  #include <stdarg.h>
+  #include <stdlib.h>
+  
+! #include <curl/setup.h>
+  
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+--- 42,48 ----
+  #include <stdarg.h>
+  #include <stdlib.h>
+  
+! #include "setup.h"
+  
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+Binary files curl-6.3.1-org/lib/sendf.o and curl-6.3.1/lib/sendf.o differ
+Only in curl-6.3.1/lib: setup.h
+Only in curl-6.3.1/lib: setup.h~
+diff -cr curl-6.3.1-org/lib/speedcheck.h curl-6.3.1/lib/speedcheck.h
+*** curl-6.3.1-org/lib/speedcheck.h	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/speedcheck.h	Thu Dec  9 14:27:50 1999
+***************
+*** 40,46 ****
+   * ------------------------------------------------------------
+   ****************************************************************************/
+  
+! #include <curl/setup.h>
+  
+  #include "timeval.h"
+  
+--- 40,46 ----
+   * ------------------------------------------------------------
+   ****************************************************************************/
+  
+! #include "setup.h"
+  
+  #include "timeval.h"
+  
+Binary files curl-6.3.1-org/lib/speedcheck.o and curl-6.3.1/lib/speedcheck.o differ
+diff -cr curl-6.3.1-org/lib/ssluse.c curl-6.3.1/lib/ssluse.c
+*** curl-6.3.1-org/lib/ssluse.c	Mon Sep  6 08:59:41 1999
+--- curl-6.3.1/lib/ssluse.c	Thu Dec  9 14:27:30 1999
+***************
+*** 133,138 ****
+--- 133,152 ----
+  
+  #endif
+  
++ #if SSL_VERIFY_CERT
++ int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
++ {
++   X509 *err_cert;
++   char buf[256];
++ 
++   err_cert=X509_STORE_CTX_get_current_cert(ctx);
++   X509_NAME_oneline(X509_get_subject_name(err_cert),buf,256);
++ 
++   return 1;
++ }
++ 
++ #endif
++ 
+  /* ====================================================== */
+  int
+  UrgSSLConnect (struct UrlData *data)
+***************
+*** 176,182 ****
+  	return 2;
+        }
+      }
+!     /* Lets make a SSL structure */
+      data->ssl = SSL_new (data->ctx);
+      SSL_set_connect_state (data->ssl);
+  
+--- 190,204 ----
+  	return 2;
+        }
+      }
+! 
+! #if SSL_VERIFY_CERT
+!     SSL_CTX_set_verify(data->ctx,
+!                        SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
+!                        SSL_VERIFY_CLIENT_ONCE,
+!                        cert_verify_callback);
+! #endif
+! 
+!     /* Lets make an SSL structure */
+      data->ssl = SSL_new (data->ctx);
+      SSL_set_connect_state (data->ssl);
+  
+***************
+*** 227,232 ****
+--- 249,261 ----
+      /* We could do all sorts of certificate verification stuff here before
+         deallocating the certificate. */
+  
++ 
++ #if SSL_VERIFY_CERT
++     infof(data, "Verify result: %d\n", SSL_get_verify_result(data->ssl));
++ #endif
++ 
++ 
++ 
+      X509_free (data->server_cert);
+  #else /* USE_SSLEAY */
+      /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
+Only in curl-6.3.1/lib: ssluse.c~
+Binary files curl-6.3.1-org/lib/ssluse.o and curl-6.3.1/lib/ssluse.o differ
+diff -cr curl-6.3.1-org/lib/telnet.c curl-6.3.1/lib/telnet.c
+*** curl-6.3.1-org/lib/telnet.c	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/telnet.c	Thu Dec  9 14:27:31 1999
+***************
+*** 57,63 ****
+  
+  #include <errno.h>
+  
+! #include <curl/setup.h>
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+--- 57,63 ----
+  
+  #include <errno.h>
+  
+! #include "setup.h"
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+Binary files curl-6.3.1-org/lib/telnet.o and curl-6.3.1/lib/telnet.o differ
+diff -cr curl-6.3.1-org/lib/timeval.h curl-6.3.1/lib/timeval.h
+*** curl-6.3.1-org/lib/timeval.h	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/timeval.h	Thu Dec  9 14:27:51 1999
+***************
+*** 46,52 ****
+  #include <sys/time.h>
+  #endif
+  
+! #include <curl/setup.h>
+  
+  #ifndef HAVE_GETTIMEOFDAY
+  #if !defined(_WINSOCKAPI_) && !defined(__MINGW32__)
+--- 46,52 ----
+  #include <sys/time.h>
+  #endif
+  
+! #include "setup.h"
+  
+  #ifndef HAVE_GETTIMEOFDAY
+  #if !defined(_WINSOCKAPI_) && !defined(__MINGW32__)
+Binary files curl-6.3.1-org/lib/timeval.o and curl-6.3.1/lib/timeval.o differ
+diff -cr curl-6.3.1-org/lib/upload.c curl-6.3.1/lib/upload.c
+*** curl-6.3.1-org/lib/upload.c	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/upload.c	Thu Dec  9 14:27:32 1999
+***************
+*** 38,44 ****
+   * ------------------------------------------------------------
+   ****************************************************************************/
+  
+! #include <curl/setup.h>
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+  #endif
+--- 38,44 ----
+   * ------------------------------------------------------------
+   ****************************************************************************/
+  
+! #include "setup.h"
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+  #endif
+Binary files curl-6.3.1-org/lib/upload.o and curl-6.3.1/lib/upload.o differ
+diff -cr curl-6.3.1-org/lib/url.c curl-6.3.1/lib/url.c
+*** curl-6.3.1-org/lib/url.c	Fri Nov 19 08:07:10 1999
+--- curl-6.3.1/lib/url.c	Thu Dec  9 14:27:32 1999
+***************
+*** 54,60 ****
+  
+  #include <errno.h>
+  
+! #include <curl/setup.h>
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+--- 54,60 ----
+  
+  #include <errno.h>
+  
+! #include "setup.h"
+  
+  #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  #include <winsock.h>
+***************
+*** 387,392 ****
+--- 387,395 ----
+        case URGTAG_POSTFIELDS:
+          data->postfields = (char *)param_obj;
+          break;
++       case URGTAG_PROGRESSMODE:
++         data->progressmode = (long)param_long;
++         break;
+        case URGTAG_REFERER:
+          data->referer = (char *)param_obj;
+          break;
+Only in curl-6.3.1/lib: url.c~
+Binary files curl-6.3.1-org/lib/url.o and curl-6.3.1/lib/url.o differ
+diff -cr curl-6.3.1-org/lib/urldata.h curl-6.3.1/lib/urldata.h
+*** curl-6.3.1-org/lib/urldata.h	Sat Oct 30 17:44:42 1999
+--- curl-6.3.1/lib/urldata.h	Thu Dec  9 14:27:52 1999
+***************
+*** 42,48 ****
+  
+  /* This file is for lib internal stuff */
+  
+! #include <curl/setup.h>
+  
+  #ifndef MAXHOSTNAMELEN
+  #define MAXHOSTNAMELEN 256
+--- 42,48 ----
+  
+  /* This file is for lib internal stuff */
+  
+! #include "setup.h"
+  
+  #ifndef MAXHOSTNAMELEN
+  #define MAXHOSTNAMELEN 256
+***************
+*** 184,189 ****
+--- 184,190 ----
+  
+    char *headerbuff; /* allocated buffer to store headers in */
+    int headersize;   /* size of the allocation */
++   int progressmode; /* what kind of progress meter to display */
+  
+  #define MAX_CURL_USER_LENGTH 128
+  #define MAX_CURL_PASSWORD_LENGTH 128
+Only in curl-6.3.1/lib: urldata.h~
+diff -cr curl-6.3.1-org/lib/version.c curl-6.3.1/lib/version.c
+*** curl-6.3.1-org/lib/version.c	Thu Oct 14 00:27:12 1999
+--- curl-6.3.1/lib/version.c	Thu Dec  9 14:27:32 1999
+***************
+*** 41,47 ****
+  #include <string.h>
+  #include <stdio.h>
+  
+! #include <curl/setup.h>
+  #include <curl/curl.h>
+  #include "urldata.h"
+  
+--- 41,47 ----
+  #include <string.h>
+  #include <stdio.h>
+  
+! #include "setup.h"
+  #include <curl/curl.h>
+  #include "urldata.h"
+  
+Binary files curl-6.3.1-org/lib/version.o and curl-6.3.1/lib/version.o differ
+diff -cr curl-6.3.1-org/src/Makefile curl-6.3.1/src/Makefile
+*** curl-6.3.1-org/src/Makefile	Wed Dec  8 13:39:41 1999
+--- curl-6.3.1/src/Makefile	Thu Dec  9 14:47:51 1999
+***************
+*** 97,107 ****
+  
+  
+  DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I..
+! LDFLAGS = 
+! LIBS = -ldl -lsocket -lnsl 
+  curl_OBJECTS =  main.o hugehelp.o urlglob.o
+  curl_LDFLAGS = 
+! CFLAGS = -g -O2
+  COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+  CCLD = $(CC)
+  LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+--- 97,107 ----
+  
+  
+  DEFS = -DHAVE_CONFIG_H -I. -I$(srcdir) -I..
+! LDFLAGS = -L/homes/qradlsg/openssl-0.9.4
+! LIBS = -lssl -lcrypto -ldl -lsocket -lnsl 
+  curl_OBJECTS =  main.o hugehelp.o urlglob.o
+  curl_LDFLAGS = 
+! CFLAGS = -g -O2 -Wall
+  COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+  CCLD = $(CC)
+  LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+diff -cr curl-6.3.1-org/src/Makefile.in curl-6.3.1/src/Makefile.in
+*** curl-6.3.1-org/src/Makefile.in	Wed Dec  8 13:38:21 1999
+--- curl-6.3.1/src/Makefile.in	Thu Dec  9 14:40:07 1999
+***************
+*** 101,107 ****
+  LIBS = @LIBS@
+  curl_OBJECTS =  main.o hugehelp.o urlglob.o
+  curl_LDFLAGS = 
+! CFLAGS = @CFLAGS@
+  COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+  CCLD = $(CC)
+  LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+--- 101,107 ----
+  LIBS = @LIBS@
+  curl_OBJECTS =  main.o hugehelp.o urlglob.o
+  curl_LDFLAGS = 
+! CFLAGS = @CFLAGS@ -Wall
+  COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+  CCLD = $(CC)
+  LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+Only in curl-6.3.1/src: Makefile.in~
+Only in curl-6.3.1/src: config-win32.h
+Only in curl-6.3.1/src: config-win32.h~
+Only in curl-6.3.1/src: config.h
+Only in curl-6.3.1/src: config.h.in
+Only in curl-6.3.1/src: config.h.in~
+Only in curl-6.3.1/src: curl
+Only in curl-6.3.1/src: hugehelp.c
+Binary files curl-6.3.1-org/src/hugehelp.o and curl-6.3.1/src/hugehelp.o differ
+diff -cr curl-6.3.1-org/src/main.c curl-6.3.1/src/main.c
+*** curl-6.3.1-org/src/main.c	Sat Oct 30 17:45:12 1999
+--- curl-6.3.1/src/main.c	Thu Dec  9 14:50:12 1999
+***************
+*** 45,53 ****
+  #include <sys/stat.h>
+  #include <ctype.h>
+  
+! #include "curl/setup.h"
+! #include "curl/curl.h"
+! #include "curl/mprintf.h"
+  #include "../lib/getdate.h"
+  #ifdef GLOBURL
+  #include "urlglob.h"
+--- 45,52 ----
+  #include <sys/stat.h>
+  #include <ctype.h>
+  
+! #include <curl/curl.h>
+! #include <curl/mprintf.h>
+  #include "../lib/getdate.h"
+  #ifdef GLOBURL
+  #include "urlglob.h"
+***************
+*** 54,71 ****
+  #define CURLseparator	"--_curl_--"
+  #define MIMEseparator	"_curl_"
+  #endif
+  #include "version.h"
+  
+! #ifdef WIN32
+  #include <io.h>
+! #else
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+  #endif
+- #endif
+  
+  extern void hugehelp(void);
+- extern void ProgressMode(int);
+  
+  static void helpf(char *fmt, ...)
+  {
+--- 53,73 ----
+  #define CURLseparator	"--_curl_--"
+  #define MIMEseparator	"_curl_"
+  #endif
++ 
++ /* This is now designed to have its own local setup.h */
++ #include "setup.h"
++ 
+  #include "version.h"
+  
+! #ifdef HAVE_IO_H /* typical win32 habit */
+  #include <io.h>
+! #endif
+! 
+  #ifdef HAVE_UNISTD_H
+  #include <unistd.h>
+  #endif
+  
+  extern void hugehelp(void);
+  
+  static void helpf(char *fmt, ...)
+  {
+***************
+*** 173,178 ****
+--- 175,181 ----
+    bool crlf;
+    char *cookiefile;
+    char *httprequest;
++   bool progressmode;
+  
+    FILE *errors; /* if stderr redirect is requested */
+  
+***************
+*** 412,419 ****
+        else
+          config->errors = stdout;
+        break;
+!     case '#': /* 19990617 larsa */
+!       ProgressMode(1);
+        break;
+      case '2': 
+        /* SSL version 2 */
+--- 415,422 ----
+        else
+          config->errors = stdout;
+        break;
+!     case '#': /* added 19990617 larsa */
+!       config->progressmode ^= CURL_PROGRESS_BAR;
+        break;
+      case '2': 
+        /* SSL version 2 */
+***************
+*** 833,839 ****
+    int infilesize=-1; /* -1 means unknown */
+    bool stillflags=TRUE;
+  
+!   int res;
+    int i;
+    struct Configurable config;
+  
+--- 836,842 ----
+    int infilesize=-1; /* -1 means unknown */
+    bool stillflags=TRUE;
+  
+!   int res=URG_OK;
+    int i;
+    struct Configurable config;
+  
+***************
+*** 937,943 ****
+      printf("Content-Type: multipart/mixed; boundary=%s\n\n", MIMEseparator);
+  #endif
+    }
+!   for (i = 0; url = next_url(urls); ++i) {
+      if (outfiles)
+        config.outfile = strdup(outfiles);
+  #endif
+--- 940,946 ----
+      printf("Content-Type: multipart/mixed; boundary=%s\n\n", MIMEseparator);
+  #endif
+    }
+!   for (i = 0; (url = next_url(urls)); ++i) {
+      if (outfiles)
+        config.outfile = strdup(outfiles);
+  #endif
+***************
+*** 1105,1116 ****
+                      URGTAG_CRLF, config.crlf,
+                      URGTAG_QUOTE, config.quote,
+                      URGTAG_WRITEHEADER, headerfilep,
+- 
+                      URGTAG_COOKIEFILE, config.cookiefile,
+                      URGTAG_SSLVERSION, config.ssl_version,
+                      URGTAG_TIMECONDITION, config.timecond,
+                      URGTAG_TIMEVALUE, config.condtime,
+                      URGTAG_HTTPREQUEST, config.httprequest,
+                      URGTAG_DONE); /* always terminate the list of tags */
+    if(!config.errors)
+      config.errors = stderr;
+--- 1108,1119 ----
+                      URGTAG_CRLF, config.crlf,
+                      URGTAG_QUOTE, config.quote,
+                      URGTAG_WRITEHEADER, headerfilep,
+                      URGTAG_COOKIEFILE, config.cookiefile,
+                      URGTAG_SSLVERSION, config.ssl_version,
+                      URGTAG_TIMECONDITION, config.timecond,
+                      URGTAG_TIMEVALUE, config.condtime,
+                      URGTAG_HTTPREQUEST, config.httprequest,
++                     URGTAG_PROGRESSMODE, config.progressmode,
+                      URGTAG_DONE); /* always terminate the list of tags */
+    if(!config.errors)
+      config.errors = stderr;
+Only in curl-6.3.1/src: main.c~
+Binary files curl-6.3.1-org/src/main.o and curl-6.3.1/src/main.o differ
+Only in curl-6.3.1/src: setup.h
+Only in curl-6.3.1/src: setup.h~
+Only in curl-6.3.1/src: stamp-h2
+diff -cr curl-6.3.1-org/src/urlglob.c curl-6.3.1/src/urlglob.c
+*** curl-6.3.1-org/src/urlglob.c	Thu Oct 14 00:28:43 1999
+--- curl-6.3.1/src/urlglob.c	Wed Dec  8 16:55:55 1999
+***************
+*** 41,46 ****
+--- 41,47 ----
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <string.h>
++ #include <ctype.h>
+  #include <curl/curl.h>
+  #include "urlglob.h"
+  
+***************
+*** 117,123 ****
+       - num range with leading zeros: e.g. "001-999]"
+       expression is checked for well-formedness and collected until the next ']'
+    */
+-   char* buf = glob_buffer;
+    URLPattern *pat;
+    char *c;
+    
+--- 118,123 ----
+***************
+*** 125,131 ****
+    /* patterns 0,1,2,... correspond to size=1,3,5,... */
+    ++glob_expand->size;
+  
+!   if (isalpha(*pattern)) {		/* character range detected */
+      pat->type = UPTCharRange;
+      if (sscanf(pattern, "%c-%c]", &pat->content.CharRange.min_c, &pat->content.CharRange.max_c) != 2 ||
+  	pat->content.CharRange.min_c >= pat->content.CharRange.max_c ||
+--- 125,131 ----
+    /* patterns 0,1,2,... correspond to size=1,3,5,... */
+    ++glob_expand->size;
+  
+!   if (isalpha((int)*pattern)) {		/* character range detected */
+      pat->type = UPTCharRange;
+      if (sscanf(pattern, "%c-%c]", &pat->content.CharRange.min_c, &pat->content.CharRange.max_c) != 2 ||
+  	pat->content.CharRange.min_c >= pat->content.CharRange.max_c ||
+***************
+*** 139,145 ****
+      return (pat->content.CharRange.max_c - pat->content.CharRange.min_c + 1) *
+        glob_word(pattern + 4, pos + 4);
+    }
+!   if (isdigit(*pattern)) {		/* numeric range detected */
+      pat->type = UPTNumRange;
+      pat->content.NumRange.padlength = 0;
+      if (sscanf(pattern, "%d-%d]", &pat->content.NumRange.min_n, &pat->content.NumRange.max_n) != 2 ||
+--- 139,145 ----
+      return (pat->content.CharRange.max_c - pat->content.CharRange.min_c + 1) *
+        glob_word(pattern + 4, pos + 4);
+    }
+!   if (isdigit((int)*pattern)) {		/* numeric range detected */
+      pat->type = UPTNumRange;
+      pat->content.NumRange.padlength = 0;
+      if (sscanf(pattern, "%d-%d]", &pat->content.NumRange.min_n, &pat->content.NumRange.max_n) != 2 ||
+***************
+*** 150,156 ****
+      }
+      if (*pattern == '0') {		/* leading zero specified */
+        c = pattern;  
+!       while (isdigit(*c++))
+  	++pat->content.NumRange.padlength;	/* padding length is set for all instances
+  						   of this pattern */
+      }
+--- 150,156 ----
+      }
+      if (*pattern == '0') {		/* leading zero specified */
+        c = pattern;  
+!       while (isdigit((int)*c++))
+  	++pat->content.NumRange.padlength;	/* padding length is set for all instances
+  						   of this pattern */
+      }
+***************
+*** 296,302 ****
+  
+    while (*filename != '\0') {
+      if (*filename == '#') {
+!       if (!isdigit(*++filename) ||
+  	  *filename == '0') {		/* only '#1' ... '#9' allowed */
+  	printf("illegal matching expression\n");
+  	exit(URG_URL_MALFORMAT);
+--- 296,302 ----
+  
+    while (*filename != '\0') {
+      if (*filename == '#') {
+!       if (!isdigit((int)*++filename) ||
+  	  *filename == '0') {		/* only '#1' ... '#9' allowed */
+  	printf("illegal matching expression\n");
+  	exit(URG_URL_MALFORMAT);
+Only in curl-6.3.1/src: urlglob.c~
+Binary files curl-6.3.1-org/src/urlglob.o and curl-6.3.1/src/urlglob.o differ

@@ -1,0 +1,16 @@
+#!/bin/sh
+#
+# $Id$
+#
+# re autoconf/automake shell script
+#
+
+die(){
+	echo "$@" ; exit
+}
+
+aclocal    || die "ahhhhh"
+autoheader || die "ahhhhh"
+automake   || die "ahhhhh"
+autoconf   || die "ahhhhh"
+

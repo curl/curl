@@ -1,0 +1,46 @@
+Index: include/curl/curl.h
+===================================================================
+RCS file: /cvs/curl/curl/include/curl/curl.h,v
+retrieving revision 1.5
+diff -u -r1.5 curl.h
+--- curl.h	1999/11/23 08:22:42	1.5
++++ curl.h	1999/11/24 16:19:11
+@@ -365,9 +365,13 @@
+   TIMECOND_LAST
+ } TimeCond;
+ 
++#ifdef __BEOS__
++#include <support/SupportDefs.h>
++#else
+ #ifndef __cplusplus        /* (rabe) */
+ typedef char bool;
+ #endif                     /* (rabe) */
++#endif
+ 
+ /**********************************************************************
+  *
+Index: include/curl/setup.h
+===================================================================
+RCS file: /cvs/curl/curl/include/curl/setup.h,v
+retrieving revision 1.2
+diff -u -r1.2 setup.h
+--- setup.h	1999/10/17 11:18:34	1.2
++++ setup.h	1999/11/24 16:19:11
+@@ -139,10 +139,17 @@
+ #define DOT_CHAR      "_"
+ 
+ #else
++#ifdef __BEOS__
++#define sclose(x) closesocket(x)
++#define sread(x,y,z) recv(x,y,z,0)
++#define swrite(x,y,z) send(x,y,z,0)
++#define myalarm(x) alarm(x)
++#else
+ #define sclose(x) close(x)
+ #define sread(x,y,z) read(x,y,z)
+ #define swrite(x,y,z) write(x,y,z)
+ #define myalarm(x) alarm(x)
++#endif
+ 
+ #define PATH_CHAR     ":"
+ #define DIR_CHAR      "/"

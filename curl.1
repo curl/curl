@@ -1,0 +1,402 @@
+.\" You can view this file with:
+.\" nroff -man curl.1
+.\" Written by Daniel Stenberg
+.\"
+.TH curl 1 "8 November 1999" "Curl 6.3" "Curl Manual"
+.SH NAME
+curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
+HTTPS syntax.
+.SH SYNOPSIS
+.B curl [options]
+.I url
+.SH DESCRIPTION
+.B curl
+is a client to get documents/files from servers, using any of the
+supported protocols. The command is designed to work without user
+interaction or any kind of interactivity.
+
+curl offers a busload of useful tricks like proxy support, user
+authentication, ftp upload, HTTP post, SSL (https:) connections, cookies, file
+transfer resume and more.
+.SH URL
+The URL syntax is protocol dependent. You'll find a detailed description in
+RFC 2396.
+
+You can specify multiple URLs or parts of URLs by writing part sets within
+braces as in:
+
+ http://site.{one,two,three}.com
+
+or you can get sequences of alphanumeric series by using [] as in:
+
+ ftp://ftp.numericals.com/file[1-100].txt
+ ftp://ftp.numericals.com/file[001-100].txt    (with leading zeros)
+ ftp://ftp.letters.com/file[a-z].txt
+
+It is possible to specify up to 9 sets or series for a URL, but no nesting is
+supported at the moment:
+
+ http://www.any.org/archive[1996-1999]/volume[1-4]part{a,b,c,index}.html
+.SH OPTIONS
+.IP "-a/--append"
+(FTP)
+When used in a ftp upload, this will tell curl to append to the target
+file instead of overwriting it. If the file doesn't exist, it will
+be created.
+.IP "-A/--user-agent <agent string>"
+(HTTP)
+Specify the User-Agent string to send to the HTTP server. Some badly done CGIs
+fail if its not set to "Mozilla/4.0".  To encode blanks in the string,
+surround the string with single quote marks.  This can also be set with the
+-H/--header flag of course.
+.IP "-b/--cookie <name=data>"
+(HTTP)
+Pass the data to the HTTP server as a cookie. It is supposedly the
+data previously received from the server in a "Set-Cookie:" line.
+The data should be in the format "NAME1=VALUE1; NAME2=VALUE2".
+
+If no '=' letter is used in the line, it is treated as a filename to use to
+read previously stored cookie lines from, which should be used in this session
+if they match. Using this method also activates the "cookie parser" which
+will make curl record incoming cookies too, which may be handy if you're using
+this in combination with the -L/--location option. The file format of the file
+to read cookies from should be plain HTTP headers or the netscape cookie file
+format.
+.IP "-B/--ftp-ascii"
+(FTP/LDAP)
+Use ASCII transfer when getting an FTP file or LDAP info. For FTP, this can
+also be enforced by using an URL that ends with ";type=A".
+.IP "-c/--continue"
+Continue/Resume a previous file transfer. This instructs curl to
+continue appending data on the file where it was previously left,
+possibly because of a broken connection to the server. There must be
+a named physical file to append to for this to work.
+Note: Upload resume is depening on a command named SIZE not always
+present in all ftp servers! Upload resume is for FTP only.
+HTTP resume is only possible with HTTP/1.1 or later servers.
+.IP "-C/--continue-at <offset>"
+Continue/Resume a previous file transfer at the given offset. The
+given offset is the exact number of bytes that will be skipped
+counted from the beginning of the source file before it is transfered
+to the destination.
+If used with uploads, the ftp server command SIZE will not be used by
+curl. Upload resume is for FTP only.
+HTTP resume is only possible with HTTP/1.1 or later servers.
+.IP "-d/--data <data>"
+(HTTP)
+Sends the specified data in a POST request to the HTTP server. Note
+that the data is sent exactly as specified with no extra processing.
+The data is expected to be "url-encoded". This will cause curl to
+pass the data to the server using the content-type
+application/x-www-form-urlencoded. Compare to -F.
+
+If you start the data with the letter @, the rest should be a file name to
+read the data from, or - if you want curl to read the data from stdin.
+The contents of the file must already be url-encoded.
+.IP "-D/--dump-header <file>"
+(HTTP/FTP)
+Write the HTTP headers to this file. Write the FTP file info to this
+file if -I/--head is used.
+.IP "-e/--referer <URL>"
+(HTTP)
+Sends the "Referer Page" information to the HTTP server. Some badly
+done CGIs fail if it's not set. This can also be set with the -H/--header
+flag of course.
+.IP "-E/--cert <certificate[:password]>"
+(HTTPS)
+Tells curl to use the specified certificate file when getting a file
+with HTTPS. The certificate must be in PEM format.
+If the optional password isn't specified, it will be queried for on
+the terminal. Note that this certificate is the private key and the private
+certificate concatenated!
+.IP "-f/--fail"
+(HTTP)
+Fail silently (no output at all) on server errors. This is mostly done
+like this to better enable scripts etc to better deal with failed
+attempts. In normal cases when a HTTP server fails to deliver a
+document, it returns a HTML document stating so (which often also
+describes why and more). This flag will prevent curl from
+outputting that and fail silently instead.
+.IP "-F/--form <name=content>"
+(HTTP)
+This lets curl emulate a filled in form in which a user has pressed
+the submit button. This causes curl to POST data using the
+content-type multipart/form-data according to RFC1867. This enables
+uploading of binary files etc. To force the 'content' part to be
+read from a file, prefix the file name with an @ sign. Example, to
+send your password file to the server, where 'password' is the
+name of the form-field to which /etc/passwd will be the input:
+
+.B curl
+-F password=@/etc/passwd www.mypasswords.com
+
+To read the file's content from stdin insted of a file, use - where the file
+name should've been.
+.IP "-h/--help"
+Usage help.
+.IP "-H/--header <header>"
+(HTTP)
+Extra header to use when getting a web page. You may specify any number of
+extra headers. Note that if you should add a custom header that has the same
+name as one of the internal ones curl would use, your externally set header
+will be used instead of the internal one. This allows you to make even
+trickier stuff than curl would normally do. You should not replace internally
+set headers without knowing perfectly well what you're doing.
+.IP "-i/--include"
+(HTTP)
+Include the HTTP-header in the output. The HTTP-header includes things
+like server-name, date of the document, HTTP-version and more...
+.IP "-I/--head"
+(HTTP/FTP)
+Fetch the HTTP-header only! HTTP-servers feature the command HEAD
+which this uses to get nothing but the header of a document. When used
+on a FTP file, curl displays the file size only.
+.IP "-K/--config <config file>"
+Specify which config file to read curl arguments from. The config
+file is a text file in which command line arguments can be written
+which then will be used as if they were written on the actual command
+line. If the first column of a config line is a '#' character, the
+rest of the line will be treated as a comment.
+
+Specify the filename as '-' to make curl read the file from stdin.
+.IP "-l/--list-only"
+(FTP)
+When listing an FTP directory, this switch forces a name-only view.
+Especially useful if you want to machine-parse the contents of an FTP
+directory since the normal directory view doesn't use a standard look
+or format.
+.IP "-L/--location"
+(HTTP/HTTPS)
+If the server reports that the requested page has a different location
+(indicated with the header line Location:) this flag will let curl
+attempt to reattempt the get on the new place. If used together with
+-i or -I, headers from all requested pages will be shown.
+.IP "-m/--max-time <seconds>"
+Maximum time in seconds that you allow the whole operation to take.
+This is useful for preventing your batch jobs from hanging for hours
+due to slow networks or links going down.
+This doesn't work properly in win32 systems.
+.IP "-M/--manual"
+Manual. Display the huge help text.
+.IP "-n/--netrc"
+Makes curl scan the
+.I .netrc
+file in the user's home directory for login name and password. This is
+typically used for ftp on unix. If used with http, curl will enable user
+authentication. See
+.BR netrc(4)
+for details on the file format. Curl will not complain if that file
+hasn't the right permissions (it should not be world nor group
+readable). The environment variable "HOME" is used to find the home
+directory.
+
+A quick and very simple example of how to setup a
+.I .netrc
+to allow curl to ftp to the machine host.domain.com with user name
+'myself' and password 'secret' should look similar to:
+
+.B "machine host.domain.com user myself password secret"
+.IP "-o/--output <file>"
+Write output to <file> instead of stdout. If you are using {} or [] to fetch
+multiple documents, you can use #<num> in the <file> specifier. That variable
+will be replaced with the current string for the URL being fetched. Like in:
+
+  curl http://{one,two}.site.com -o "file_#1.txt"
+
+or use several variables like:
+
+  curl http://{site,host}.host[1-5].com -o "#1_#2"
+.IP "-O/--remote-name"
+Write output to a local file named like the remote file we get. (Only
+the file part of the remote file is used, the path is cut off.)
+.IP "-P/--ftpport <address>"
+(FTP)
+Reverses the initiator/listenor roles when connecting with ftp. This
+switch makes Curl use the PORT command instead of PASV. In
+practice, PORT tells the server to connect to the client's specified
+address and port, while PASV asks the server for an ip address and
+port to connect to. <address> should be one of:
+ interface - i.e "eth0" to specify which interface's IP address you want to use  (Unix only)
+ IP address - i.e "192.168.10.1" to specify exact IP number
+ host name - i.e "my.host.domain" to specify machine
+ "-"       - (any single-letter string) to make it pick the machine's default
+.IP "-q"
+If used as the first parameter on the command line, the
+.I $HOME/.curlrc
+file will not be read and used as a config file.
+.IP "-Q/--quote <comand>"
+(FTP) Send an arbitrary command to the remote FTP server, by using the QUOTE
+command of the server. Not all servers support this command, and the set of
+QUOTE commands are server specific!
+.IP "-r/--range <range>"
+(HTTP/FTP)
+Retrieve a byte range (i.e a partial document) from a HTTP/1.1 or FTP
+server. Ranges can be specified in a number of ways.
+ 0-499           - specifies the first 500 bytes
+ 500-999         - specifies the second 500 bytes
+ -500            - specifies the last 500 bytes
+ 9500-           - specifies the bytes from offset 9500 and forward
+ 0-0,-1          - specifies the first and last byte only(*)(H)
+ 500-700,600-799 - specifies 300 bytes from offset 500(H)
+ 100-199,500-599 - specifies two separate 100 bytes ranges(*)(H)
+
+(*) = NOTE that this will cause the server to reply with a multipart
+response!
+
+You should also be aware that many HTTP/1.1 servers do not have this feature
+enabled, so that when you attempt to get a range, you'll instead get the whole
+document.
+
+FTP range downloads only support the simple syntax 'start-stop' (optionally
+with one of the numbers omitted). It depends on the non-RFC command SIZE.
+.IP "-s/--silent"
+Silent mode. Don't show progress meter or error messages.  Makes
+Curl mute.
+.IP "-S/--show-error"
+When used with -s it makes curl show error message if it fails.
+.IP "-t/--upload"
+Transfer the stdin data to the specified file. Curl will read
+everything from stdin until EOF and store with the supplied name. If
+this is used on a http(s) server, the PUT command will be used.
+.IP "-T/--upload-file <file>"
+Like -t, but this transfers the specified local file. If there is no
+file part in the specified URL, Curl will append the local file
+name. NOTE that you must use a trailing / on the last directory to
+really prove to Curl that there is no file name or curl will
+think that your last directory name is the remote file name to
+use. That will most likely cause the upload operation to fail. If
+this is used on a http(s) server, the PUT command will be used.
+.IP "-u/--user <user:password>"
+Specify user and password to use when fetching. See README.curl for detailed
+examples of how to use this. If no password is specified, curl will
+ask for it interactively.
+.IP "-U/--proxy-user <user:password>"
+Specify user and password to use for Proxy authentication. If no
+password is specified, curl will ask for it interactively.
+.IP "-v/--verbose"
+Makes the fetching more verbose/talkative. Mostly usable for
+debugging. Lines starting with '>' means data sent by curl, '<'
+means data received by curl that is hidden in normal cases and lines
+starting with '*' means additional info provided by curl.
+.IP "-V/--version"
+Displays the full version of curl, libcurl and other 3rd party libraries
+linked with the executable.
+.IP "-x/--proxy <proxyhost[:port]>"
+Use specified proxy. If the port number is not specified, it is assumed at
+port 1080.
+.IP "-X/--request <command>"
+(HTTP)
+Specifies a custom request to use when communicating with the HTTP server.
+The specified request will be used instead of the standard GET. Read the
+HTTP 1.1 specification for details and explanations.
+
+(FTP)
+Specifies a custom FTP command to use instead of LIST when doing file lists
+with ftp.
+.IP "-y/--speed-time <speed>"
+Speed Limit. If a download is slower than this given speed, in bytes
+per second, for Speed Time seconds it gets aborted. Speed Time is set
+with -Y and is 30 if not set.
+.IP "-Y/--speed-limit <time>"
+Speed Time. If a download is slower than Speed Limit bytes per second
+during a Speed Time period, the download gets aborted. If Speed Time
+is used, the default Speed Limit will be 1 unless set with -y.
+.IP "-z/--time-cond <date expression>"
+(HTTP)
+Request to get a file that has been modified later than the given time and
+date, or one that has been modified before that time. The date expression can
+be all sorts of date strings or if it doesn't match any internal ones, it
+tries to get the time from a given file name instead! See the
+.BR "GNU date(1)"
+man page for date expression details.
+
+Start the date expression with a dash (-) to make it request for a document
+that is older than the given date/time, default is a document that is newer
+than the specified date/time.
+.IP "-3/--sslv3"
+(HTTPS)
+Forces curl to use SSL version 3 when negotiating with a remote SSL server.
+.IP "-2/--sslv2"
+(HTTPS)
+Forces curl to use SSL version 2 when negotiating with a remote SSL server.
+.IP "-#/--progress-bar"
+Make curl display progress information as a progress bar instead of the
+default statistics.
+.IP "--crlf"
+(FTP) Convert LF to CRLF in upload. Useful for MVS (OS/390).
+.IP "--stderr <file>"
+Redirect all writes to stderr to the specified file instead. If the file name
+is a plain '-', it is instead written to stdout. This option has no point when
+you're using a shell with decent redirecting capabilities.
+.SH FILES
+.I ~/.curlrc
+.RS
+Default config file.
+
+.SH ENVIRONMENT
+.IP "HTTP_PROXY [protocol://]<host>[:port]"
+Sets proxy server to use for HTTP.
+.IP "HTTPS_PROXY [protocol://]<host>[:port]"
+Sets proxy server to use for HTTPS.
+.IP "FTP_PROXY [protocol://]<host>[:port]"
+Sets proxy server to use for FTP.
+.IP "GOPHER_PROXY [protocol://]<host>[:port]"
+Sets proxy server to use for GOPHER.
+.IP "ALL_PROXY [protocol://]<host>[:port]"
+Sets proxy server to use if no protocol-specific proxy is set.
+.IP "NO_PROXY <comma-separated list of hosts>"
+list of host names that shouldn't go through any proxy. If set to a
+asterisk '*' only, it matches all hosts.
+.IP "COLUMNS <integer>"
+The width of the terminal.  This variable only affects curl when the
+--progress-bar option is used.
+.SH DIAGNOSTICS
+There exists a bunch of different error messages that may appear during
+bad conditions. They're all pretty verbose and descriptive and therefore
+you won't find any closer description of them here.
+.SH BUGS
+If you do find any (or have other suggestions), mail Daniel Stenberg
+<Daniel.Stenberg@haxx.nu>.
+.SH AUTHORS / CONTRIBUTORS
+ - Daniel Stenberg <Daniel.Stenberg@haxx.nu>
+ - Rafael Sagula <sagula@inf.ufrgs.br>
+ - Sampo Kellomaki <sampo@iki.fi>
+ - Linas Vepstas <linas@linas.org>
+ - Bjorn Reese <breese@mail1.stofanet.dk>
+ - Johan Anderson <johan@homemail.com>
+ - Kjell Ericson <Kjell.Ericson@sth.frontec.se>
+ - Troy Engel <tengel@sonic.net>
+ - Ryan Nelson <ryan@inch.com>
+ - Bjorn Stenberg <Bjorn.Stenberg@sth.frontec.se>
+ - Angus Mackay <amackay@gus.ml.org>
+ - Eric Young <eay@cryptsoft.com>
+ - Simon Dick <simond@totally.irrelevant.org>
+ - Oren Tirosh <oren@monty.hishome.net>
+ - Steven G. Johnson <stevenj@alum.mit.edu>
+ - Gilbert Ramirez Jr. <gram@verdict.uthscsa.edu>
+ - Andrés García <ornalux@redestb.es>
+ - Douglas E. Wegscheid <wegscd@whirlpool.com>
+ - Mark Butler <butlerm@xmission.com>
+ - Eric Thelin <eric@generation-i.com>
+ - Marc Boucher <marc@mbsi.ca>
+ - Greg Onufer <Greg.Onufer@Eng.Sun.COM>
+ - Doug Kaufman <dkaufman@rahul.net>
+ - David Eriksson <david@2good.com>
+ - Ralph Beckmann <rabe@uni-paderborn.de>
+ - T. Yamada <tai@imasy.or.jp>
+ - Lars J. Aas <larsa@sim.no>
+ - Jörn Hartroth <Joern.Hartroth@telekom.de>
+ - Matthew Clarke <clamat@van.maves.ca>
+ - Linus Nielsen <Linus.Nielsen@haxx.nu>
+ - Felix von Leitner <felix@convergence.de>
+ - Dan Zitter <dzitter@zitter.net>
+ - Jongki Suwandi <Jongki.Suwandi@eng.sun.com>
+ - Chris Maltby <chris@aurema.com>
+.SH WWW
+http://curl.haxx.nu
+.SH FTP
+ftp://ftp.sunet.se/pub/www/utilities/curl/
+.SH "SEE ALSO"
+.BR ftp (1),
+.BR wget (1),
+.BR snarf (1)

@@ -1,0 +1,67 @@
+#############################################################
+## Makefile for building libcurl.a with MingW32 (GCC-2.95) and
+## optionally OpenSSL (0.9.4)
+## Use: make -f Makefile.m32
+##
+## Comments to: Troy Engel <tengel@sonic.net> or
+##              Joern Hartroth <hartroth@acm.org>
+
+CC = gcc
+AR = ar
+RANLIB = ranlib
+OPENSSL_PATH = ../../openssl-0.9.4
+
+########################################################
+## Nothing more to do below this line!
+
+INCLUDES = -I. -I.. -I../include
+CFLAGS = -g -O2
+ifdef SSL
+  INCLUDES += -I"$(OPENSSL_PATH)/outinc" -I"$(OPENSSL_PATH)/outinc/openssl"
+  CFLAGS += -DUSE_SSLEAY
+endif
+COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
+
+libcurl_a_LIBRARIES = libcurl.a
+
+libcurl_a_SOURCES =  base64.c getenv.c if2ip.h progress.h upload.h \
+base64.h getenv.h mprintf.c setup.h url.c download.c getpass.c \
+mprintf.h ssluse.c url.h download.h hostip.c netrc.c ssluse.h \
+urldata.h formdata.c hostip.h netrc.h stdcheaders.h formdata.h \
+if2ip.c progress.c upload.c sendf.c sendf.h speedcheck.c speedcheck.h \
+ftp.c ftp.h getpass.c getpass.h version.c timeval.c  timeval.h cookie.c \
+cookie.h escape.c escape.h getdate.c getdate.h dict.h dict.c http.c \
+http.h telnet.c telnet.h file.c file.h ldap.c ldap.h
+
+libcurl_a_OBJECTS =  base64.o getenv.o mprintf.o url.o download.o \
+getpass.o ssluse.o hostip.o netrc.o formdata.o if2ip.o progress.o \
+upload.o sendf.o speedcheck.o ftp.o getpass.o version.o timeval.o \
+cookie.o escape.o getdate.o dict.o http.o telnet.o file.o ldap.o
+
+LIBRARIES =  $(libcurl_a_LIBRARIES)
+SOURCES = $(libcurl_a_SOURCES)
+OBJECTS = $(libcurl_a_OBJECTS)
+
+
+all: libcurl.a
+
+libcurl.a: $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
+	-@erase libcurl.a
+	$(AR) cru libcurl.a $(libcurl_a_OBJECTS)
+	$(RANLIB) libcurl.a
+
+.c.o:
+	$(COMPILE) -c $<
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+clean:
+	-@erase $(libcurl_a_OBJECTS)
+
+distrib: clean
+	-@erase $(libcurl_a_LIBRARIES)
+	

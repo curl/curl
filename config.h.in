@@ -1,0 +1,219 @@
+/* config.h.in.  Generated automatically from configure.in by autoheader.  */
+
+/* Define if on AIX 3.
+   System headers sometimes define this.
+   We just want to avoid a redefinition error message.  */
+#ifndef _ALL_SOURCE
+#undef _ALL_SOURCE
+#endif
+
+/* Define to empty if the keyword does not work.  */
+#undef const
+
+/* Define if you don't have vprintf but do have _doprnt.  */
+#undef HAVE_DOPRNT
+
+/* Define if you have the vprintf function.  */
+#undef HAVE_VPRINTF
+
+/* Define as the return type of signal handlers (int or void).  */
+#undef RETSIGTYPE
+
+/* Define to `unsigned' if <sys/types.h> doesn't define.  */
+#undef size_t
+
+/* Define if you have the ANSI C header files.  */
+#undef STDC_HEADERS
+
+/* Define if you can safely include both <sys/time.h> and <time.h>.  */
+#undef TIME_WITH_SYS_TIME
+
+/* Define cpu-machine-OS */
+#undef OS
+
+/* The number of bytes in a long double.  */
+#undef SIZEOF_LONG_DOUBLE
+
+/* The number of bytes in a long long.  */
+#undef SIZEOF_LONG_LONG
+
+/* Define if you have the closesocket function.  */
+#undef HAVE_CLOSESOCKET
+
+/* Define if you have the gethostbyaddr function.  */
+#undef HAVE_GETHOSTBYADDR
+
+/* Define if you have the gethostname function.  */
+#undef HAVE_GETHOSTNAME
+
+/* Define if you have the getpass function.  */
+#undef HAVE_GETPASS
+
+/* Define if you have the getservbyname function.  */
+#undef HAVE_GETSERVBYNAME
+
+/* Define if you have the gettimeofday function.  */
+#undef HAVE_GETTIMEOFDAY
+
+/* Define if you have the inet_addr function.  */
+#undef HAVE_INET_ADDR
+
+/* Define if you have the inet_ntoa function.  */
+#undef HAVE_INET_NTOA
+
+/* Define if you have the perror function.  */
+#undef HAVE_PERROR
+
+/* Define if you have the select function.  */
+#undef HAVE_SELECT
+
+/* Define if you have the socket function.  */
+#undef HAVE_SOCKET
+
+/* Define if you have the strcasecmp function.  */
+#undef HAVE_STRCASECMP
+
+/* Define if you have the strdup function.  */
+#undef HAVE_STRDUP
+
+/* Define if you have the strftime function.  */
+#undef HAVE_STRFTIME
+
+/* Define if you have the strstr function.  */
+#undef HAVE_STRSTR
+
+/* Define if you have the tcgetattr function.  */
+#undef HAVE_TCGETATTR
+
+/* Define if you have the tcsetattr function.  */
+#undef HAVE_TCSETATTR
+
+/* Define if you have the uname function.  */
+#undef HAVE_UNAME
+
+/* Define if you have the <alloca.h> header file.  */
+#undef HAVE_ALLOCA_H
+
+/* Define if you have the <arpa/inet.h> header file.  */
+#undef HAVE_ARPA_INET_H
+
+/* Define if you have the <crypto.h> header file.  */
+#undef HAVE_CRYPTO_H
+
+/* Define if you have the <dlfcn.h> header file.  */
+#undef HAVE_DLFCN_H
+
+/* Define if you have the <err.h> header file.  */
+#undef HAVE_ERR_H
+
+/* Define if you have the <fcntl.h> header file.  */
+#undef HAVE_FCNTL_H
+
+/* Define if you have the <getopt.h> header file.  */
+#undef HAVE_GETOPT_H
+
+/* Define if you have the <io.h> header file.  */
+#undef HAVE_IO_H
+
+/* Define if you have the <net/if.h> header file.  */
+#undef HAVE_NET_IF_H
+
+/* Define if you have the <netdb.h> header file.  */
+#undef HAVE_NETDB_H
+
+/* Define if you have the <netinet/in.h> header file.  */
+#undef HAVE_NETINET_IN_H
+
+/* Define if you have the <openssl/crypto.h> header file.  */
+#undef HAVE_OPENSSL_CRYPTO_H
+
+/* Define if you have the <openssl/err.h> header file.  */
+#undef HAVE_OPENSSL_ERR_H
+
+/* Define if you have the <openssl/pem.h> header file.  */
+#undef HAVE_OPENSSL_PEM_H
+
+/* Define if you have the <openssl/rsa.h> header file.  */
+#undef HAVE_OPENSSL_RSA_H
+
+/* Define if you have the <openssl/ssl.h> header file.  */
+#undef HAVE_OPENSSL_SSL_H
+
+/* Define if you have the <openssl/x509.h> header file.  */
+#undef HAVE_OPENSSL_X509_H
+
+/* Define if you have the <pem.h> header file.  */
+#undef HAVE_PEM_H
+
+/* Define if you have the <rsa.h> header file.  */
+#undef HAVE_RSA_H
+
+/* Define if you have the <sgtty.h> header file.  */
+#undef HAVE_SGTTY_H
+
+/* Define if you have the <ssl.h> header file.  */
+#undef HAVE_SSL_H
+
+/* Define if you have the <sys/param.h> header file.  */
+#undef HAVE_SYS_PARAM_H
+
+/* Define if you have the <sys/select.h> header file.  */
+#undef HAVE_SYS_SELECT_H
+
+/* Define if you have the <sys/socket.h> header file.  */
+#undef HAVE_SYS_SOCKET_H
+
+/* Define if you have the <sys/sockio.h> header file.  */
+#undef HAVE_SYS_SOCKIO_H
+
+/* Define if you have the <sys/stat.h> header file.  */
+#undef HAVE_SYS_STAT_H
+
+/* Define if you have the <sys/types.h> header file.  */
+#undef HAVE_SYS_TYPES_H
+
+/* Define if you have the <termio.h> header file.  */
+#undef HAVE_TERMIO_H
+
+/* Define if you have the <termios.h> header file.  */
+#undef HAVE_TERMIOS_H
+
+/* Define if you have the <time.h> header file.  */
+#undef HAVE_TIME_H
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Define if you have the <winsock.h> header file.  */
+#undef HAVE_WINSOCK_H
+
+/* Define if you have the <x509.h> header file.  */
+#undef HAVE_X509_H
+
+/* Define if you have the crypto library (-lcrypto).  */
+#undef HAVE_LIBCRYPTO
+
+/* Define if you have the dl library (-ldl).  */
+#undef HAVE_LIBDL
+
+/* Define if you have the nsl library (-lnsl).  */
+#undef HAVE_LIBNSL
+
+/* Define if you have the resolve library (-lresolve).  */
+#undef HAVE_LIBRESOLVE
+
+/* Define if you have the socket library (-lsocket).  */
+#undef HAVE_LIBSOCKET
+
+/* Define if you have the ssl library (-lssl).  */
+#undef HAVE_LIBSSL
+
+/* Define if you have the ucb library (-lucb).  */
+#undef HAVE_LIBUCB
+
+/* Name of package */
+#undef PACKAGE
+
+/* Version number of package */
+#undef VERSION
+

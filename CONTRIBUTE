@@ -1,0 +1,68 @@
+ Date: 1999-08-04
+
+To Think About When Contributing Source Code
+
+ This document is intended to offer some guidelines that can be useful to
+ keep in mind when you decide to write a contribution to the project. This
+ concerns new features as well as corrections to existing flaws or bugs.
+
+Naming
+
+ Try using a non-confusing naming scheme for your new functions and variable
+ names. It doesn't necessarily have to mean that you should use the same as
+ in other places of the code, just that the names should be logical,
+ understandable and be named according to what they're used for.
+
+Indenting
+
+ Please try using the same indenting levels and bracing method as all the
+ other code already does. It makes the source code a lot easier to follow if
+ all of it is written using the same style. I don't ask you to like it, I
+ just ask you to follow the tradition! ;-)
+
+Commenting
+
+ Comment your source code extensively. I don't see myself as a very good
+ source commenter, but I try to become one. Commented code is quality code
+ and enables future modifications much more. Uncommented code much more risk
+ being completely replaced when someone wants to extend things, since other
+ persons' source code can get quite hard to read.
+
+General Style
+
+ Keep your functions small. If they're small you avoid a lot of mistakes and
+ you don't accidentaly mix up variables.
+
+Non-clobbering All Over
+
+ When you write new functionality or fix bugs, it is important that you
+ don't fiddle all over the source files and functions. Remember that it is
+ likely that other people have done changes in the same source files as you
+ have and possibly even in the same functions. If you bring completely new
+ functionality, try writing it in a new source file. If you fix bugs, try to
+ fix one bug at a time and send them as separate patches.
+
+Separate Patches Doing Different Things
+
+ It is annoying when you get a huge patch from someone that is said to fix 511
+ odd problems, but discussions and opinions don't agree with 510 of them - or
+ 509 of them were already fixed in a different way. Then the patcher needs to
+ extract the single interesting patch from somewhere within the huge pile of
+ source, and that gives a lot of extra work. Preferably, all fixes that
+ correct different problems should be in their own patch with an attached
+ description exactly what they correct so that all patches can be selectively
+ applied by the maintainer or other interested parties.
+
+Document
+
+ Writing docs is dead boring and one of the big problems with many open
+ source projects. Someone's gotta do it. It makes it a lot easier if you
+ submit a small description of your fix or your new features with every
+ contribution so that it can be swiftly added to the package documentation.
+
+Write Access to CVS Repository
+
+ If you are a frequent contributor, or have another good reason, you can of
+ course get write access to the CVS repository and then you'll be able to
+ check-in all your changes straight into the CVS tree instead of sending all
+ changes by mail as patches. Just ask if this is what you'd want.

@@ -1,0 +1,65 @@
+#############################################################
+## Makefile for building curl.exe with MingW32 (GCC-2.95) and
+## optionally OpenSSL (0.9.4)
+##
+## Use: make -f Makefile.m32 [SSL=1]
+##
+## Comments to: Troy Engel <tengel@sonic.net> or
+##              Joern Hartroth <hartroth@acm.org>
+
+CC = gcc
+STRIP = strip -s
+OPENSSL_PATH = ../../openssl-0.9.4
+
+# We may need these someday
+# PERL = perl
+# NROFF = nroff
+
+########################################################
+## Nothing more to do below this line!
+
+INCLUDES = -I. -I.. -I../include
+CFLAGS = -g -O2 -DGLOBURL -DCURL_SEPARATORS
+LDFLAGS = 
+COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
+LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
+
+curl_PROGRAMS = curl.exe
+curl_OBJECTS =  main.o hugehelp.o urlglob.o
+curl_SOURCES = main.c hugehelp.c urlglob.c
+curl_DEPENDENCIES = ../lib/libcurl.a
+curl_LDADD = -L../lib -lcurl -lwsock32
+ifdef SSL
+  curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32 -lRSAglue
+endif
+
+PROGRAMS = $(curl_PROGRAMS)
+SOURCES = $(curl_SOURCES)
+OBJECTS = $(curl_OBJECTS)
+
+all: curl
+
+curl: $(curl_OBJECTS) $(curl_DEPENDENCIES)
+	-@erase curl.exe
+	$(LINK) $(curl_OBJECTS) $(curl_LDADD)
+	$(STRIP) $(curl_PROGRAMS)
+
+# We don't have nroff normally under win32
+# hugehelp.c: ../README.curl ../curl.1 mkhelp.pl
+# 	-@erase hugehelp.c
+# 	$(NROFF) -man ../curl.1 | $(PERL) mkhelp.pl ../README.curl > hugehelp.c
+
+.c.o:
+	$(COMPILE) -c $<
+
+.s.o:
+	$(COMPILE) -c $<
+
+.S.o:
+	$(COMPILE) -c $<
+
+clean:
+	-@erase $(curl_OBJECTS)
+
+distrib: clean
+	-@erase $(curl_PROGRAMS)

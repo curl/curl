@@ -1,0 +1,106 @@
+*** /homes/qradlsg/curl-org/lib/download.c	Thu Nov 11 08:57:12 1999
+--- lib/download.c	Mon Nov 22 08:33:13 1999
+***************
+*** 455,461 ****
+  #endif
+      }
+    }
+! 
+    ProgressShow (data, bytecount, start, now, TRUE);
+  
+    *bytecountp = bytecount;
+--- 455,464 ----
+  #endif
+      }
+    }
+!   if(contentlength && (bytecount != contentlength)) {
+!     failf(data, "transfer closed with %d bytes remaining", contentlength-bytecount);
+!     return URG_PARTIAL_FILE;
+!   }
+    ProgressShow (data, bytecount, start, now, TRUE);
+  
+    *bytecountp = bytecount;
+*** /homes/qradlsg/curl-org/include/curl/curl.h	Thu Nov 11 21:58:02 1999
+--- include/curl/curl.h	Mon Nov 22 08:33:59 1999
+***************
+*** 159,165 ****
+    URG_FTP_CANT_GET_HOST,
+    URG_FTP_CANT_RECONNECT,
+    URG_FTP_COULDNT_SET_BINARY,
+!   URG_FTP_PARTIAL_FILE,
+    URG_FTP_COULDNT_RETR_FILE,
+    URG_FTP_WRITE_ERROR,
+    URG_FTP_QUOTE_ERROR,
+--- 159,165 ----
+    URG_FTP_CANT_GET_HOST,
+    URG_FTP_CANT_RECONNECT,
+    URG_FTP_COULDNT_SET_BINARY,
+!   URG_PARTIAL_FILE,
+    URG_FTP_COULDNT_RETR_FILE,
+    URG_FTP_WRITE_ERROR,
+    URG_FTP_QUOTE_ERROR,
+***************
+*** 197,202 ****
+--- 197,205 ----
+    URL_LAST
+  } UrgError;
+  
++ /* This is just to make older programs not break: */
++ #define URG_FTP_PARTIAL_FILE URG_PARTIAL_FILE
++ 
+  #define URGTAG_DONE -1
+  #define URGTAG_LAST -1
+  #define URGTAG_END -1
+*** /homes/qradlsg/curl-org/lib/ftp.c	Sat Oct 30 17:43:25 1999
+--- lib/ftp.c	Mon Nov 22 08:34:27 1999
+***************
+*** 707,713 ****
+      if((-1 != data->infilesize) && (data->infilesize != *bytecountp)) {
+        failf(data, "Wrote only partial file (%d out of %d bytes)",
+              *bytecountp, data->infilesize);
+!       return URG_FTP_PARTIAL_FILE;
+      }
+    }
+    else {
+--- 707,713 ----
+      if((-1 != data->infilesize) && (data->infilesize != *bytecountp)) {
+        failf(data, "Wrote only partial file (%d out of %d bytes)",
+              *bytecountp, data->infilesize);
+!       return URG_PARTIAL_FILE;
+      }
+    }
+    else {
+***************
+*** 908,914 ****
+          if(size <= 0) {
+            failf(data, "Offset (%d) was beyond file size (%d)",
+                  data->resume_from, data->resume_from+size);
+!           return URG_FTP_PARTIAL_FILE;
+          }
+        }
+  #endif
+--- 908,914 ----
+          if(size <= 0) {
+            failf(data, "Offset (%d) was beyond file size (%d)",
+                  data->resume_from, data->resume_from+size);
+!           return URG_PARTIAL_FILE;
+          }
+        }
+  #endif
+***************
+*** 929,935 ****
+  
+        if((-1 != size) && (size != *bytecountp)) {
+          failf(data, "Received only partial file");
+!         return URG_FTP_PARTIAL_FILE;
+        }
+        else if(0 == *bytecountp) {
+          failf(data, "No data was received!");
+--- 929,935 ----
+  
+        if((-1 != size) && (size != *bytecountp)) {
+          failf(data, "Received only partial file");
+!         return URG_PARTIAL_FILE;
+        }
+        else if(0 == *bytecountp) {
+          failf(data, "No data was received!");

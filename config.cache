@@ -1,0 +1,86 @@
+# This file is a shell script that caches the results of configure
+# tests run on this system so they can be shared between configure
+# scripts and configure runs.  It is not useful on other systems.
+# If it contains results you don't want to keep, you may remove or edit it.
+#
+# By default, configure uses ./config.cache as the cache file,
+# creating it if it does not exist already.  You can give configure
+# the --cache-file=FILE option to use a different cache file; that is
+# what configure does when it calls configure scripts in
+# subdirectories, so they share the cache.
+# Giving --cache-file=/dev/null disables caching, for debugging configure.
+# config.status only pays attention to the cache file if you give it the
+# --recheck option to rerun configure.
+#
+ac_cv_c_const=${ac_cv_c_const='yes'}
+ac_cv_func_closesocket=${ac_cv_func_closesocket='no'}
+ac_cv_func_connect=${ac_cv_func_connect='no'}
+ac_cv_func_dlopen=${ac_cv_func_dlopen='no'}
+ac_cv_func_gethostbyaddr=${ac_cv_func_gethostbyaddr='yes'}
+ac_cv_func_gethostbyname=${ac_cv_func_gethostbyname='no'}
+ac_cv_func_gethostname=${ac_cv_func_gethostname='yes'}
+ac_cv_func_getpass=${ac_cv_func_getpass='yes'}
+ac_cv_func_getservbyname=${ac_cv_func_getservbyname='yes'}
+ac_cv_func_gettimeofday=${ac_cv_func_gettimeofday='yes'}
+ac_cv_func_inet_addr=${ac_cv_func_inet_addr='yes'}
+ac_cv_func_inet_ntoa=${ac_cv_func_inet_ntoa='yes'}
+ac_cv_func_perror=${ac_cv_func_perror='yes'}
+ac_cv_func_select=${ac_cv_func_select='yes'}
+ac_cv_func_socket=${ac_cv_func_socket='yes'}
+ac_cv_func_strcasecmp=${ac_cv_func_strcasecmp='yes'}
+ac_cv_func_strdup=${ac_cv_func_strdup='yes'}
+ac_cv_func_strftime=${ac_cv_func_strftime='yes'}
+ac_cv_func_strstr=${ac_cv_func_strstr='yes'}
+ac_cv_func_tcgetattr=${ac_cv_func_tcgetattr='yes'}
+ac_cv_func_tcsetattr=${ac_cv_func_tcsetattr='yes'}
+ac_cv_func_uname=${ac_cv_func_uname='yes'}
+ac_cv_func_vprintf=${ac_cv_func_vprintf='yes'}
+ac_cv_header_alloca_h=${ac_cv_header_alloca_h='yes'}
+ac_cv_header_arpa_inet_h=${ac_cv_header_arpa_inet_h='yes'}
+ac_cv_header_dlfcn_h=${ac_cv_header_dlfcn_h='yes'}
+ac_cv_header_fcntl_h=${ac_cv_header_fcntl_h='yes'}
+ac_cv_header_getopt_h=${ac_cv_header_getopt_h='no'}
+ac_cv_header_io_h=${ac_cv_header_io_h='no'}
+ac_cv_header_net_if_h=${ac_cv_header_net_if_h='yes'}
+ac_cv_header_netdb_h=${ac_cv_header_netdb_h='yes'}
+ac_cv_header_netinet_in_h=${ac_cv_header_netinet_in_h='yes'}
+ac_cv_header_openssl_crypto_h=${ac_cv_header_openssl_crypto_h='yes'}
+ac_cv_header_openssl_err_h=${ac_cv_header_openssl_err_h='yes'}
+ac_cv_header_openssl_pem_h=${ac_cv_header_openssl_pem_h='yes'}
+ac_cv_header_openssl_rsa_h=${ac_cv_header_openssl_rsa_h='yes'}
+ac_cv_header_openssl_ssl_h=${ac_cv_header_openssl_ssl_h='yes'}
+ac_cv_header_openssl_x509_h=${ac_cv_header_openssl_x509_h='yes'}
+ac_cv_header_sgtty_h=${ac_cv_header_sgtty_h='yes'}
+ac_cv_header_stdc=${ac_cv_header_stdc='yes'}
+ac_cv_header_sys_param_h=${ac_cv_header_sys_param_h='yes'}
+ac_cv_header_sys_select_h=${ac_cv_header_sys_select_h='yes'}
+ac_cv_header_sys_socket_h=${ac_cv_header_sys_socket_h='yes'}
+ac_cv_header_sys_sockio_h=${ac_cv_header_sys_sockio_h='yes'}
+ac_cv_header_sys_stat_h=${ac_cv_header_sys_stat_h='yes'}
+ac_cv_header_sys_types_h=${ac_cv_header_sys_types_h='yes'}
+ac_cv_header_termio_h=${ac_cv_header_termio_h='yes'}
+ac_cv_header_termios_h=${ac_cv_header_termios_h='yes'}
+ac_cv_header_time=${ac_cv_header_time='yes'}
+ac_cv_header_time_h=${ac_cv_header_time_h='yes'}
+ac_cv_header_unistd_h=${ac_cv_header_unistd_h='yes'}
+ac_cv_header_winsock_h=${ac_cv_header_winsock_h='no'}
+ac_cv_lib_crypto_CRYPTO_lock=${ac_cv_lib_crypto_CRYPTO_lock='yes'}
+ac_cv_lib_dl_dlopen=${ac_cv_lib_dl_dlopen='yes'}
+ac_cv_lib_nsl_gethostbyname=${ac_cv_lib_nsl_gethostbyname='yes'}
+ac_cv_lib_socket_connect=${ac_cv_lib_socket_connect='yes'}
+ac_cv_lib_ssl_SSL_connect=${ac_cv_lib_ssl_SSL_connect='yes'}
+ac_cv_path_NROFF=${ac_cv_path_NROFF='/bin/nroff'}
+ac_cv_path_PERL=${ac_cv_path_PERL='/usr/local/bin/perl'}
+ac_cv_prog_CC=${ac_cv_prog_CC='gcc'}
+ac_cv_prog_CPP=${ac_cv_prog_CPP='gcc -E'}
+ac_cv_prog_RANLIB=${ac_cv_prog_RANLIB='ranlib'}
+ac_cv_prog_YACC=${ac_cv_prog_YACC='bison -y'}
+ac_cv_prog_cc_cross=${ac_cv_prog_cc_cross='no'}
+ac_cv_prog_cc_g=${ac_cv_prog_cc_g='yes'}
+ac_cv_prog_cc_works=${ac_cv_prog_cc_works='yes'}
+ac_cv_prog_gcc=${ac_cv_prog_gcc='yes'}
+ac_cv_prog_make_make_set=${ac_cv_prog_make_make_set='yes'}
+ac_cv_sizeof_long_double=${ac_cv_sizeof_long_double='16'}
+ac_cv_sizeof_long_long=${ac_cv_sizeof_long_long='8'}
+ac_cv_type_signal=${ac_cv_type_signal='void'}
+ac_cv_type_size_t=${ac_cv_type_size_t='yes'}

@@ -1,0 +1,210 @@
+dnl $Id$
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(lib/urldata.h)
+AM_CONFIG_HEADER(config.h src/config.h)
+AM_INIT_AUTOMAKE(curl,"6.3.1")
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_INSTALL
+AC_PROG_MAKE_SET
+
+dnl Check for AIX weirdos
+AC_AIX
+
+dnl **********************************************************************
+dnl Checks for libraries.
+dnl **********************************************************************
+
+dnl nsl lib?
+AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, gethostbyname))
+
+dnl resolve lib?
+AC_CHECK_FUNC(strcasecmp, , AC_CHECK_LIB(resolve, strcasecmp))
+
+dnl socket lib?
+AC_CHECK_FUNC(connect, , AC_CHECK_LIB(socket, connect))
+
+dnl ucb lib?
+AC_CHECK_FUNC(gethostname, , AC_CHECK_LIB(ucb, gethostname))
+
+dnl dl lib?
+AC_CHECK_FUNC(dlopen, , AC_CHECK_LIB(dl, dlopen))
+
+dnl **********************************************************************
+dnl Check for the presence of SSL libraries and headers
+dnl **********************************************************************
+
+dnl Default to compiler & linker defaults for SSL files & libraries.
+OPT_SSL=off
+AC_ARG_WITH(ssl,dnl
+[  --with-ssl[=DIR]        where to look for SSL [compiler/linker default paths]
+                          DIR points to the SSL installation [/usr/local/ssl]],
+  OPT_SSL=$withval
+)
+
+if test X"$OPT_SSL" = Xno
+then
+  AC_MSG_WARN(SSL/https support disabled)  
+else
+
+  dnl Check for & handle argument to --with-ssl.
+
+  AC_MSG_CHECKING(where to look for SSL)
+  if test X"$OPT_SSL" = Xoff
+  then
+  	AC_MSG_RESULT([defaults (or given in environment)])
+  else
+	test X"$OPT_SSL" = Xyes && OPT_SSL=/usr/local/ssl
+	LIBS="$LIBS -L$OPT_SSL/lib"
+	CPPFLAGS="$CPPFLAGS -I$OPT_SSL/include/openssl -I$OPT_SSL/include"
+	AC_MSG_RESULT([$OPT_SSL])
+  fi
+
+  dnl check for crypto libs (part of SSLeay)
+  AC_CHECK_LIB(crypto, CRYPTO_lock)
+
+  if test $ac_cv_lib_crypto_CRYPTO_lock = yes; then
+    dnl This is only reasonable to do if crypto actually is there: check for
+    dnl SSL libs NOTE: it is important to do this AFTER the crypto lib
+    AC_CHECK_LIB(ssl, SSL_connect)
+
+    dnl Check for SSLeay headers
+    AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h openssl/pem.h openssl/ssl.h openssl/err.h)
+
+    if test $ac_cv_header_openssl_x509_h = no; then
+      AC_CHECK_HEADERS(x509.h rsa.h crypto.h pem.h ssl.h err.h)
+    fi
+
+  fi
+fi
+
+dnl **********************************************************************
+dnl Check for the presence of ZLIB libraries and headers
+dnl **********************************************************************
+
+dnl Default to compiler & linker defaults for files & libraries.
+dnl OPT_ZLIB=no
+dnl AC_ARG_WITH(zlib,dnl
+dnl [  --with-zlib[=DIR]  where to look for ZLIB [compiler/linker default paths]
+dnl                      DIR points to the ZLIB installation prefix [/usr/local]],
+dnl  OPT_ZLIB=$withval,
+dnl )
+
+dnl Check for & handle argument to --with-zlib.
+dnl
+dnl NOTE:  We *always* look for ZLIB headers & libraries, all this option
+dnl        does is change where we look (by adjusting LIBS and CPPFLAGS.)
+dnl
+
+dnl AC_MSG_CHECKING(where to look for ZLIB)
+dnl if test X"$OPT_ZLIB" = Xno
+dnl then
+dnl 	AC_MSG_RESULT([defaults (or given in environment)])
+dnl else
+dnl	test X"$OPT_ZLIB" = Xyes && OPT_ZLIB=/usr/local
+dnl	LIBS="$LIBS -L$OPT_ZLIB/lib"
+dnl	CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
+dnl	AC_MSG_RESULT([$OPT_ZLIB])
+dnl fi
+
+dnl z lib?
+dnl AC_CHECK_FUNC(gzread, , AC_CHECK_LIB(z, gzread))
+
+dnl **********************************************************************
+dnl Back to "normal" configuring
+dnl **********************************************************************
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS( \
+        unistd.h \
+        arpa/inet.h \
+        net/if.h \
+        netinet/in.h \
+        netdb.h \
+        sys/select.h \
+        sys/socket.h \
+        sys/sockio.h \
+        sys/stat.h \
+        sys/types.h \
+        getopt.h \
+        sys/param.h \
+        termios.h \
+        termio.h \
+        sgtty.h \
+        fcntl.h \
+        dlfcn.h \
+        alloca.h \
+        winsock.h \
+        time.h \
+        io.h \
+)
+
+dnl Check for libz header
+dnl AC_CHECK_HEADERS(zlib.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_TYPE_SIZE_T
+AC_HEADER_TIME
+
+# mprintf() checks:
+
+# check for 'long double'
+AC_CHECK_SIZEOF(long double, 8)
+# check for 'long long'
+AC_CHECK_SIZEOF(long long, 4)
+
+dnl Get system canonical name
+AC_CANONICAL_HOST
+AC_DEFINE_UNQUOTED(OS, "${host}")
+
+dnl Checks for library functions.
+dnl AC_PROG_GCC_TRADITIONAL
+AC_TYPE_SIGNAL
+AC_FUNC_VPRINTF
+AC_CHECK_FUNCS( socket \
+                select \
+                strdup \
+                strstr \
+                strftime \
+                uname \
+                strcasecmp \
+                gethostname \
+                gethostbyaddr \
+                getservbyname \
+                gettimeofday \
+                inet_addr \
+                inet_ntoa \
+                tcsetattr \
+                tcgetattr \
+                perror \
+                getpass \
+                closesocket
+)
+
+
+
+AC_PATH_PROG( PERL, perl, , 
+  $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
+AC_SUBST(PERL)
+
+AC_PATH_PROGS( NROFF, nroff gnroff, , 
+  $PATH:/usr/bin/:/usr/local/bin )
+AC_SUBST(NROFF)
+
+AC_PROG_RANLIB
+AC_PROG_YACC
+
+dnl AC_PATH_PROG( RANLIB, ranlib, /usr/bin/ranlib, 
+dnl   $PATH:/usr/bin/:/usr/local/bin )
+dnl AC_SUBST(RANLIB)
+
+AC_OUTPUT( Makefile \
+	   src/Makefile \
+           lib/Makefile \
+	   perl/checklinks.pl \
+	   perl/getlinks.pl \
+           perl/formfind.pl \
+	   perl/recursiveftpget.pl  )

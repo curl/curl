@@ -1,0 +1,315 @@
+#############################################################
+## Makefile for building libcurl.lib with MSVC6
+## Use: nmake -f makefile.vc6 [release | release-ssl | debug]
+##      (default is release)
+##
+## Comments to: Troy Engel <tengel@sonic.net>
+
+PROGRAM_NAME = libcurl.lib
+OPENSSL_PATH = ../../openssl-0.9.3a
+
+########################################################
+## Nothing more to do below this line!
+
+## Release
+CCR = cl.exe /ML /O2 /D "NDEBUG"
+LINKR = link.exe -lib
+
+## Debug
+CCD = cl.exe /MLd /Gm /ZI /Od /D "_DEBUG" /GZ
+LINKD = link.exe -lib
+
+## SSL Release
+CCRS = cl.exe /ML /O2 /D "NDEBUG" /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
+LINKRS = link.exe -lib /LIBPATH:$(OPENSSL_PATH)/out32dll
+
+CFLAGS = /nologo /W3 /GX /D "WIN32" /D "_MBCS" /D "_LIB" /YX /FD /c
+LFLAGS = /nologo /out:$(PROGRAM_NAME)
+LINKLIBS = kernel32.lib wsock32.lib
+LINKSLIBS = libeay32.lib ssleay32.lib RSAglue.lib
+
+RELEASE_OBJS= \
+	base64r.obj \
+	cookier.obj \
+	downloadr.obj \
+	escaper.obj \
+	formdatar.obj \
+	ftpr.obj \
+	httpr.obj \
+	dictr.obj \
+	telnetr.obj \
+	getdater.obj \
+	getenvr.obj \
+	getpassr.obj \
+	hostipr.obj \
+	if2ipr.obj \
+	mprintfr.obj \
+	netrcr.obj \
+	progressr.obj \
+	sendfr.obj \
+	speedcheckr.obj \
+	ssluser.obj \
+	timevalr.obj \
+	uploadr.obj \
+	urlr.obj \
+	filer.obj \
+	versionr.obj
+
+DEBUG_OBJS= \
+	base64d.obj \
+	cookied.obj \
+	downloadd.obj \
+	escaped.obj \
+	formdatad.obj \
+	ftpd.obj \
+	httpd.obj \
+	dictd.obj \
+	telnetd.obj \
+	getdated.obj \
+	getenvd.obj \
+	getpassd.obj \
+	hostipd.obj \
+	if2ipd.obj \
+	mprintfd.obj \
+	netrcd.obj \
+	progressd.obj \
+	sendfd.obj \
+	speedcheckd.obj \
+	sslused.obj \
+	timevald.obj \
+	uploadd.obj \
+	urld.obj \
+	filed.obj \
+	versiond.obj
+
+RELEASE_SSL_OBJS= \
+	base64rs.obj \
+	cookiers.obj \
+	downloadrs.obj \
+	escapers.obj \
+	formdatars.obj \
+	ftprs.obj \
+	httprs.obj \
+	dictrs.obj \
+	telnetrs.obj \
+	getdaters.obj \
+	getenvrs.obj \
+	getpassrs.obj \
+	hostiprs.obj \
+	if2iprs.obj \
+	mprintfrs.obj \
+	netrcrs.obj \
+	progressrs.obj \
+	sendfrs.obj \
+	speedcheckrs.obj \
+	sslusers.obj \
+	timevalrs.obj \
+	uploadrs.obj \
+	urlrs.obj \
+	filers.obj \
+	versionrs.obj
+
+LINK_OBJS= \
+	base64.obj \
+	cookie.obj \
+	download.obj \
+	escape.obj \
+	formdata.obj \
+	ftp.obj \
+	http.obj \
+	dict.obj \
+	telnet.obj \
+	getdate.obj \
+	getenv.obj \
+	getpass.obj \
+	hostip.obj \
+	if2ip.obj \
+	mprintf.obj \
+	netrc.obj \
+	progress.obj \
+	sendf.obj \
+	speedcheck.obj \
+	ssluse.obj \
+	timeval.obj \
+	upload.obj \
+	url.obj \
+	file.obj \
+	version.obj
+
+all : release
+
+release: $(RELEASE_OBJS)
+	$(LINKR) $(LFLAGS) $(LINKLIBS) $(LINK_OBJS)
+
+debug: $(DEBUG_OBJS)
+	$(LINKD) $(LFLAGS) $(LINKLIBS) $(LINK_OBJS)
+
+release-ssl: $(RELEASE_SSL_OBJS)
+	$(LINKRS) $(LFLAGS) $(LINKLIBS) $(LINKSLIBS) $(LINK_OBJS)
+
+
+## Release
+base64r.obj: base64.c
+	$(CCR) $(CFLAGS) base64.c
+cookier.obj: cookie.c
+	$(CCR) $(CFLAGS) cookie.c
+downloadr.obj: download.c
+	$(CCR) $(CFLAGS) download.c
+escaper.obj: escape.c
+	$(CCR) $(CFLAGS) escape.c
+formdatar.obj: formdata.c
+	$(CCR) $(CFLAGS) formdata.c
+ftpr.obj: ftp.c
+	$(CCR) $(CFLAGS) ftp.c
+httpr.obj: http.c
+	$(CCR) $(CFLAGS) http.c
+dictr.obj: dict.c
+	$(CCR) $(CFLAGS) dict.c
+telnetr.obj: telnet.c
+	$(CCR) $(CFLAGS) telnet.c
+getdater.obj: getdate.c
+	$(CCR) $(CFLAGS) getdate.c
+getenvr.obj: getenv.c
+	$(CCR) $(CFLAGS) getenv.c
+getpassr.obj: getpass.c
+	$(CCR) $(CFLAGS) getpass.c
+hostipr.obj: hostip.c
+	$(CCR) $(CFLAGS) hostip.c
+if2ipr.obj: if2ip.c
+	$(CCR) $(CFLAGS) if2ip.c
+mprintfr.obj: mprintf.c
+	$(CCR) $(CFLAGS) mprintf.c
+netrcr.obj: netrc.c
+	$(CCR) $(CFLAGS) netrc.c
+progressr.obj: progress.c
+	$(CCR) $(CFLAGS) progress.c
+sendfr.obj: sendf.c
+	$(CCR) $(CFLAGS) sendf.c
+speedcheckr.obj: speedcheck.c
+	$(CCR) $(CFLAGS) speedcheck.c
+ssluser.obj: ssluse.c
+	$(CCR) $(CFLAGS) ssluse.c
+timevalr.obj: timeval.c
+	$(CCR) $(CFLAGS) timeval.c
+uploadr.obj: upload.c
+	$(CCR) $(CFLAGS) upload.c
+urlr.obj: url.c
+	$(CCR) $(CFLAGS) url.c
+filer.obj: file.c
+	$(CCR) $(CFLAGS) file.c
+versionr.obj: version.c
+	$(CCR) $(CFLAGS) version.c
+
+## Debug
+base64d.obj: base64.c
+	$(CCD) $(CFLAGS) base64.c
+cookied.obj: cookie.c
+	$(CCD) $(CFLAGS) cookie.c
+downloadd.obj: download.c
+	$(CCD) $(CFLAGS) download.c
+escaped.obj: escape.c
+	$(CCD) $(CFLAGS) escape.c
+formdatad.obj: formdata.c
+	$(CCD) $(CFLAGS) formdata.c
+ftpd.obj: ftp.c
+	$(CCD) $(CFLAGS) ftp.c
+httpd.obj: http.c
+	$(CCD) $(CFLAGS) http.c
+dictd.obj: dict.c
+	$(CCD) $(CFLAGS) dict.c
+telnetd.obj: telnet.c
+	$(CCD) $(CFLAGS) telnet.c
+getdated.obj: getdate.c
+	$(CCD) $(CFLAGS) getdate.c
+getenvd.obj: getenv.c
+	$(CCD) $(CFLAGS) getenv.c
+getpassd.obj: getpass.c
+	$(CCD) $(CFLAGS) getpass.c
+hostipd.obj: hostip.c
+	$(CCD) $(CFLAGS) hostip.c
+if2ipd.obj: if2ip.c
+	$(CCD) $(CFLAGS) if2ip.c
+mprintfd.obj: mprintf.c
+	$(CCD) $(CFLAGS) mprintf.c
+netrcd.obj: netrc.c
+	$(CCD) $(CFLAGS) netrc.c
+progressd.obj: progress.c
+	$(CCD) $(CFLAGS) progress.c
+sendfd.obj: sendf.c
+	$(CCD) $(CFLAGS) sendf.c
+speedcheckd.obj: speedcheck.c
+	$(CCD) $(CFLAGS) speedcheck.c
+sslused.obj: ssluse.c
+	$(CCD) $(CFLAGS) ssluse.c
+timevald.obj: timeval.c
+	$(CCD) $(CFLAGS) timeval.c
+uploadd.obj: upload.c
+	$(CCD) $(CFLAGS) upload.c
+urld.obj: url.c
+	$(CCD) $(CFLAGS) url.c
+filed.obj: file.c
+	$(CCD) $(CFLAGS) file.c
+versiond.obj: version.c
+	$(CCD) $(CFLAGS) version.c
+
+
+## Release SSL
+base64rs.obj: base64.c
+	$(CCRS) $(CFLAGS) base64.c
+cookiers.obj: cookie.c
+	$(CCRS) $(CFLAGS) cookie.c
+downloadrs.obj: download.c
+	$(CCRS) $(CFLAGS) download.c
+escapers.obj: escape.c
+	$(CCRS) $(CFLAGS) escape.c
+formdatars.obj: formdata.c
+	$(CCRS) $(CFLAGS) formdata.c
+ftprs.obj: ftp.c
+	$(CCRS) $(CFLAGS) ftp.c
+httprs.obj: http.c
+	$(CCRS) $(CFLAGS) http.c
+dictrs.obj: dict.c
+	$(CCRS) $(CFLAGS) dict.c
+telnetrs.obj: telnet.c
+	$(CCRS) $(CFLAGS) telnet.c
+getdaters.obj: getdate.c
+	$(CCRS) $(CFLAGS) getdate.c
+getenvrs.obj: getenv.c
+	$(CCRS) $(CFLAGS) getenv.c
+getpassrs.obj: getpass.c
+	$(CCRS) $(CFLAGS) getpass.c
+hostiprs.obj: hostip.c
+	$(CCRS) $(CFLAGS) hostip.c
+if2iprs.obj: if2ip.c
+	$(CCRS) $(CFLAGS) if2ip.c
+mprintfrs.obj: mprintf.c
+	$(CCRS) $(CFLAGS) mprintf.c
+netrcrs.obj: netrc.c
+	$(CCRS) $(CFLAGS) netrc.c
+progressrs.obj: progress.c
+	$(CCRS) $(CFLAGS) progress.c
+sendfrs.obj: sendf.c
+	$(CCRS) $(CFLAGS) sendf.c
+speedcheckrs.obj: speedcheck.c
+	$(CCRS) $(CFLAGS) speedcheck.c
+sslusers.obj: ssluse.c
+	$(CCRS) $(CFLAGS) ssluse.c
+timevalrs.obj: timeval.c
+	$(CCRS) $(CFLAGS) timeval.c
+uploadrs.obj: upload.c
+	$(CCRS) $(CFLAGS) upload.c
+urlrs.obj: url.c
+	$(CCRS) $(CFLAGS) url.c
+filers.obj: file.c
+	$(CCRS) $(CFLAGS) file.c
+versionrs.obj: version.c
+	$(CCRS) $(CFLAGS) version.c
+
+clean:
+	-@erase *.obj
+	-@erase vc60.idb
+	-@erase vc60.pch
+
+distrib: clean
+	-@erase $(PROGRAM_NAME)
+

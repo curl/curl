@@ -1,0 +1,12 @@
+/* src/config.h.  Generated automatically by configure.  */
+/* Define if you have the strcasecmp function.  */
+#undef HAVE_STRCASECMP
+
+/* Define cpu-machine-OS */
+#undef OS
+
+/* Define if you have the <unistd.h> header file.  */
+#undef HAVE_UNISTD_H
+
+/* Define if you have the <io.h> header file.  */
+#undef HAVE_IO_H

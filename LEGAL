@@ -1,0 +1,21 @@
+Part of this software is distributed under the Mozilla Public License
+version 1.0, which is part of this distribution (MPL-1.0.txt) and
+available on-line at http://www.mozilla.org/MPL/
+
+The terminology used here is described in the Mozilla Public License.
+
+In accordance with section "4. Inability to Comply Due to Statute or
+Regulation" the following exemptions apply to this software:
+
+ * The Initial Developer has the right, regardless of the citizenship
+   of any involved party, to choose the location for settling disputes
+   as refered to under section "11. Miscellaneous" of the Mozilla Public
+   License.
+
+Initial Developers of this software are:
+
+  Daniel Stenberg <Daniel.Stenberg@sth.frontec.se>
+  Rafael Linden Sagula <sagula@inf.ufrgs.br>
+
+Curl is Copyright (C) 1996-1998 Daniel Stenberg and Rafael Linden Sagula
+ 
