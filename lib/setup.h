@@ -135,8 +135,11 @@ typedef unsigned char bool;
 
 /* To make large file support transparent even on Windows */
 #if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
+#include <sys/stat.h>   /* must come first before we redefine stat() */
+#include <io.h>
 #define lseek(x,y,z) _lseeki64(x, y, z)
 #define struct_stat struct _stati64
+#define stat(file,st) _stati64(file,st)
 #define fstat(fd,st) _fstati64(fd,st)
 #else
 #define struct_stat struct stat
