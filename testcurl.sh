@@ -24,6 +24,7 @@ die(){
 
 if [ -f setup ]; then
   . "./setup"
+  infixed="$fixed"
 fi
 
 if [ -z "$name" ]; then
@@ -44,11 +45,11 @@ if [ -z "$desc" ]; then
   fixed="3"
 fi
 
-if [ -z "$confopts" ]; then
+if [ -z "$confopts" -a "$infixed" -lt "4" ]; then
   echo "please enter your additional arguments to configure"
   echo "examples: --with-ssl --enable-debug --enable-ipv6 --with-krb4"
   read confopts
-  fixed="3"
+  fixed="4"
 fi
 
 
@@ -57,6 +58,7 @@ if [ "$fixed" -gt "0" ]; then
   echo "email='$email'" >> setup
   echo "desc='$desc'" >> setup
   echo "confopts='$confopts'" >> setup
+  echo "fixed='$fixed'" >> setup
 fi
 
 echo "testcurl: STARTING HERE"
@@ -135,7 +137,7 @@ fi
 cd "../$build"
 
 # run configure script
-../curl/configure $1 2>&1
+../curl/configure $confopts 2>&1
 
 if [ -f lib/Makefile ]; then
   echo "testcurl: configure seems to have finished fine"
