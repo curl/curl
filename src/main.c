@@ -214,7 +214,7 @@ char *strdup(char *str)
 #include "curlmsg_vms.h"
 #endif
 
-#if !defined(HAVE_FTRUNCATE) && defined(WIN32)
+#ifdef WIN32
 /*
  * Truncate a file handle at a 64-bit position 'where'.
  * Borland doesn't even support 64-bit types.
@@ -223,7 +223,7 @@ char *strdup(char *str)
 #define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
 #endif
 
-static int ftruncate (int fd, curl_off_t where)
+static int ftruncate64 (int fd, curl_off_t where)
 {
   curl_off_t curr;
   int rc = 0;
@@ -239,6 +239,7 @@ static int ftruncate (int fd, curl_off_t where)
   _lseeki64(fd, curr, SEEK_SET);
   return rc;
 }
+#define ftruncate(fd,where) ftruncate64(fd,where)
 #endif
 
 /*
