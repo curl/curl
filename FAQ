@@ -1,4 +1,4 @@
-Date: 19 November 1999
+Date: 15 March 2000
 
              Frequently Asked Questions about Curl
 
@@ -29,3 +29,12 @@ Date: 19 November 1999
   I am very interested in once and for all getting some kind of report or
   README file from those who have used libcurl in a threaded environment,
   since I haven't and I get this question more and more frequently!
+
+4. Why doesn't my posting using -F work?
+
+  You can't simply use -F or -d at your choice. The web server that will
+  receive your post assumes one of the formats. If the form you're trying to
+  "fake" sets the type to 'multipart/form-data', than and only then you must
+  use the -F type. In all the most common cases, you should use -d which then
+  causes a posting with the type 'application/x-www-form-urlencoded'.
+

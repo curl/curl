@@ -26,3 +26,19 @@ README
         Sweden --  ftp://ftp.sunet.se/pub/www/utilities/curl/
         Germany -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
         China --   http://www.pshowing.com/curl/
+
+  To download the very latest source off the CVS server do this:
+
+        cvs -d :pserver:cvs@curl.sourceforge.net/curl login
+
+        (just press enter when asked for password)
+
+        cvs -d :pserver:cvs@curl.sourceforge.net/curl co .
+
+        (now, you'll get all the latest sources downloaded into your current
+        directory. Note that this does not create a directory named curl or
+        anything)
+
+        cvs -d :pserver:cvs@curl.sourceforge.net/curl logout
+        
+        (you're off the hook!)

@@ -24,18 +24,17 @@ TODO
 
  * HTTP Pipelining/persistant connections
 
- - I'm gonna introduce HTTP "pipelining". Curl should be able
-   to request for several HTTP documents in one connect. It is the beginning
-   for supporing more advanced functions in the future, like web site
+ - We should introduce HTTP "pipelining". Curl could be able to request for
+   several HTTP documents in one connect. It would be the beginning for
+   supporing more advanced functions in the future, like web site
    mirroring. This will require that the urlget() function supports several
    documents from a single HTTP server, which it doesn't today.
 
- - When curl supports fetching several documents from the same
-   server using pipelining, I'd like to offer that function to the command
-   line. Anyone has a good idea how? The current way of specifying one URL
-   with the output sent to the stdout or a file gets in the way. Imagine a
-   syntax that supports "additional documents from the same server" in a way
-   similar to:
+ - When curl supports fetching several documents from the same server using
+   pipelining, I'd like to offer that function to the command line. Anyone has
+   a good idea how? The current way of specifying one URL with the output sent
+   to the stdout or a file gets in the way. Imagine a syntax that supports
+   "additional documents from the same server" in a way similar to:
 
      curl <main URL> --more-doc <path> --more-doc <path>
 
@@ -52,12 +51,11 @@ TODO
    And some friendly person's server source code is available at
     http://hopf.math.nwu.edu/digestauth/index.html
 
-   Then there's the Apache mod_digest source code too of course.
-   It seems as if Netscape doesn't support this, and not many servers
-   do. Although this is a lot better authentication method than the more
-   common "Basic". Basic sends the password in cleartext over the network,
-   this "Digest" method uses a challange-response protocol which increases
-   security quite a lot.
+   Then there's the Apache mod_digest source code too of course.  It seems as
+   if Netscape doesn't support this, and not many servers do. Although this is
+   a lot better authentication method than the more common "Basic". Basic
+   sends the password in cleartext over the network, this "Digest" method uses
+   a challange-response protocol which increases security quite a lot.
 
  * Different FTP Upload Through Web Proxy
    I don't know any web proxies that allow CONNECT through on port 21, but
@@ -88,3 +86,8 @@ TODO
    (http://search.ietf.org/internet-drafts/draft-murray-auth-ftp-ssl-05.txt)
 
  * HTTP POST resume using Range:
+
+ * Make curl capable of verifying the server's certificate when connecting
+   with HTTPS://.
+
+ * Make the timeout work as expected!

@@ -122,33 +122,37 @@ UPLOADING
 
  FTP
 
-   Upload all data on stdin to a specified ftp site:
+  Upload all data on stdin to a specified ftp site:
 
         curl -t ftp://ftp.upload.com/myfile
 
-   Upload data from a specified file, login with user and password:
+  Upload data from a specified file, login with user and password:
 
         curl -T uploadfile -u user:passwd ftp://ftp.upload.com/myfile
 
-   Upload a local file to the remote site, and use the local file name remote
-   too:
+  Upload a local file to the remote site, and use the local file name remote
+  too:
  
         curl -T uploadfile -u user:passwd ftp://ftp.upload.com/
 
-   NOTE: Curl is not currently supporing ftp upload through a proxy! The reason
-   for this is simply that proxies are seldomly configured to allow this and
-   that no author has supplied code that makes it possible!
+  Upload a local file to get appended to the remote file using ftp:
+
+        curl -T localfile -a ftp://ftp.upload.com/remotefile
+
+  NOTE: Curl does not support ftp upload through a proxy! The reason for this
+  is simply that proxies are seldomly configured to allow this and that no
+  author has supplied code that makes it possible!
 
  HTTP
 
-   Upload all data on stdin to a specified http site:
+  Upload all data on stdin to a specified http site:
 
         curl -t http://www.upload.com/myfile
 
-   Note that the http server must've been configured to accept PUT before this
-   can be done successfully.
+  Note that the http server must've been configured to accept PUT before this
+  can be done successfully.
 
-   For other ways to do http data upload, see the POST section below.
+  For other ways to do http data upload, see the POST section below.
 
 VERBOSE / DEBUG
 
@@ -457,9 +461,9 @@ FTP and firewalls
 
 HTTPS
 
-  Secure HTTP requires SSLeay to be installed and used when curl is built. If
-  that is done, curl is capable of retrieving and posting documents using the
-  HTTPS procotol.
+  Secure HTTP requires SSL libraries to be installed and used when curl is
+  built. If that is done, curl is capable of retrieving and posting documents
+  using the HTTPS procotol.
 
   Example:
 
@@ -472,9 +476,10 @@ HTTPS
   browsers (Netscape and MSEI both use the so called PKCS#12 format). If you
   want curl to use the certificates you use with your (favourite) browser, you
   may need to download/compile a converter that can convert your browser's
-  formatted certificates to PEM formatted ones. Dr Stephen N. Henson has
-  written a patch for SSLeay that adds this functionality. You can get his
-  patch (that requires an SSLeay installation) from his site at:
+  formatted certificates to PEM formatted ones. This kind of converter is
+  included in recent versions of OpenSSL, and for older versions Dr Stephen
+  N. Henson has written a patch for SSLeay that adds this functionality. You
+  can get his patch (that requires an SSLeay installation) from his site at:
   http://www.drh-consultancy.demon.co.uk/
 
   Example on how to automatically retrieve a document using a certificate with
@@ -600,6 +605,34 @@ ENVIRONMENT VARIABLES
 
 
   The usage of the -x/--proxy flag overrides the environment variables.
+
+NETRC
+
+  Unix introduced the .netrc concept a long time ago. It is a way for a user
+  to specify name and password for commonly visited ftp sites in a file so
+  that you don't have to type them in each time you visit those sites. You
+  realize this is a big security risk if someone else gets hold of your
+  passwords, so therefor most unix programs won't read this file unless it is
+  only readable by yourself (curl doesn't care though).
+
+  Curl supports .netrc files if told so (using the -n/--netrc option). This is
+  not restricted to only ftp, but curl can use it for all protocols where
+  authentication is used.
+
+  A very simple .netrc file could look something like:
+
+        machine curl.haxx.nu login iamdaniel password mysecret
+
+CUSTOM OUTPUT
+
+  To better allow script programmers to get to know about the progress of
+  curl, the -w/--write-out option was introduced. Using this, you can specify
+  what information from the previous transfer you want to extract.
+
+  To display the amount of bytes downloaded together with some text and an
+  ending newline:
+
+        curl -w 'We downloaded %{size_download} bytes\n' www.download.com
 
 MAILING LIST
 
