@@ -534,6 +534,7 @@ CURLcode Curl_SSL_set_engine(struct SessionHandle *data, const char *engine)
   data->state.engine = e;
   return (CURLE_OK);
 #else
+  (void)engine;
   failf(data, "SSL Engine not supported");
   return (CURLE_SSL_ENGINE_NOTFOUND);
 #endif
