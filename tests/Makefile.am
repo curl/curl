@@ -6,10 +6,10 @@ curl:
 	@(cd ..; make)
 
 test:
-	perl runtests.pl
+	$(PERL) runtests.pl
 
 quiet-test:
-	perl runtests.pl -s -a
+	$(PERL) runtests.pl -s -a
 
 clean:
 	rm -rf log
