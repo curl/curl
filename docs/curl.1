@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "23 May 2003" "Curl 7.10.6" "Curl Manual"
+.TH curl 1 "18 June 2003" "Curl 7.10.6" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -10,14 +10,18 @@ curl \- transfer a URL
 .I [URL...]
 .SH DESCRIPTION
 .B curl
-is a client to get documents/files from or send documents to a server, using
-any of the supported protocols (HTTP, HTTPS, FTP, GOPHER, DICT, TELNET, LDAP
-or FILE). The command is designed to work without user interaction or any kind
-of interactivity.
+is a tool to transfer data from or to a server, using one of the supported
+protocols (HTTP, HTTPS, FTP, FTPS, GOPHER, DICT, TELNET, LDAP or FILE). The
+command is designed to work without user interaction.
 
 curl offers a busload of useful tricks like proxy support, user
 authentication, ftp upload, HTTP post, SSL (https:) connections, cookies, file
-transfer resume and more.
+transfer resume and more. As you will see below, the amount of features will
+make your head spin!
+
+curl is powered by libcurl for all transfer-related features. See
+.BR libcurl (3)
+for details.
 .SH URL
 The URL syntax is protocol dependent. You'll find a detailed description in
 RFC 2396.
@@ -48,10 +52,8 @@ specified on a single command line and cannot be used between separate curl
 invokes.
 .SH OPTIONS
 .IP "-a/--append"
-(FTP)
-When used in a ftp upload, this will tell curl to append to the target
-file instead of overwriting it. If the file doesn't exist, it will
-be created.
+(FTP) When used in an FTP upload, this will tell curl to append to the target
+file instead of overwriting it. If the file doesn't exist, it will be created.
 
 If this option is used twice, the second one will disable append mode again.
 .IP "-A/--user-agent <agent string>"
@@ -63,6 +65,16 @@ surround the string with single quote marks.  This can also be set with the
 
 If this option is set more than once, the last one will be the one that's
 used.
+.IP "--anyauth"
+(HTTP) Tells curl to figure out authentication method by itself, and use the
+most secure one the remote site claims it supports. This is done by first
+doing a request and checking the response-headers, thus inducing an extra
+network round-trip. This is used instead of setting a specific authentication
+method, which you can do with \fI--digest\fP, \fI--ntlm\fP, and
+\fI--negotiate\fP. (Added in 7.10.6)
+
+If this option is used several times, the following occurrences make no
+difference.
 .IP "-b/--cookie <name=data>"
 (HTTP)
 Pass the data to the HTTP server as a cookie. It is supposedly the
@@ -90,6 +102,14 @@ also be enforced by using an URL that ends with ";type=A". This option causes
 data sent to stdout to be in text mode for win32 systems.
 
 If this option is used twice, the second one will disable ASCII usage.
+.IP "--basic"
+(HTTP) Tells curl to use HTTP Basic authentication. This is the default and
+this option is usually pointless, unless you use it to override a previously
+set option that sets a different authentication method (such as \fI--ntlm\fP,
+\fI--digest\fP and \fI--negotiate\fP). (Added in 7.10.6)
+
+If this option is used several times, the following occurrences make no
+difference.
 .IP "--ciphers <list of ciphers>"
 (SSL) Specifies which ciphers to use in the connection. The list of ciphers
 must be using valid ciphers. Read up on SSL cipher list details on this URL:
@@ -179,23 +199,26 @@ want to post a binary file without the strip-newlines feature of the
 If this option is used several times, the ones following the first will
 append data.
 .IP "--digest"
-(HTTP) Enables Digest authentication. This is a different authentication
-method than the default Basic method, and prevents the password from being
-sent over the wire in clear text. Use this in combination with the normal
--u/--user option to set user name and password.  (Option added in curl 7.10.6)
+(HTTP) Enables HTTP Digest authentication. This is a authentication that
+prevents the password from being sent over the wire in clear text. Use this in
+combination with the normal -u/--user option to set user name and
+password. See also \fI--ntlm\fP, \fP--negotiate\fI and \fI--anyauth\fP for
+related options. (Added in curl 7.10.6)
 
-If this option is used several times,  each occurrence will toggle this on/off.
-.IP "--negotiate"
-(HTTP) Enables Negotiate authentication. The Negotiate method was designed by
-Microsoft and is used in their web aplications. It is primarily meant as a
-support for Kerberos5 authentication but may be also used along with another
-authentication methods. For more information see IETF draft
-draft-brezak-spnego-http-04.txt.
+If this option is used several times, the following occurrences make no
+difference.
+.IP "--disable-eprt"
+(FTP) Tell curl to disable the use of the EPRT and LPRT commands when doing
+active FTP transfers. Curl will normally always first attempt to use EPRT,
+then LPRT before using PORT, but with this option, it will use PORT right
+away. EPRT and LPRT are extensions to the original FTP protocol, may not work
+on all servers but enable more functionality in a better way than the
+traditional PORT command. (Aded in 7.10.5)
 
-If this option is used several times,  each occurrence will toggle this on/off.
+If this option is used several times, each occurrence will toggle this on/off.
 .IP "--disable-epsv"
 (FTP) Tell curl to disable the use of the EPSV command when doing passive FTP
-downloads. Curl will normally always first attempt to use EPSV before PASV,
+transfers. Curl will normally always first attempt to use EPSV before PASV,
 but with this option, it will not try using EPSV.
 
 If this option is used several times, each occurrence will toggle this on/off.
@@ -414,9 +437,18 @@ If this option is used twice, the second will again disable list only.
 (HTTP/HTTPS) If the server reports that the requested page has a different
 location (indicated with the header line Location:) this flag will let curl
 attempt to reattempt the get on the new place. If used together with -i or -I,
-headers from all requested pages will be shown. If this flag is used when
-making a HTTP POST, curl will automatically switch to GET after the initial
-POST has been done.
+headers from all requested pages will be shown. If authentication is used,
+curl will only send its credentials to the initial host, so if a redirect
+takes curl to a different host, it won't intercept the user+password. See also
+\fI--location-trusted\fP on how to change this.
+
+If this option is used twice, the second will again disable location following.
+.IP "--location-trusted"
+(HTTP/HTTPS) Like \fI--location\fP, but will allow sending the name + password
+to all hosts that the site may redirect to. This may or may not introduce a
+security breach if the site redirects you do a site to which you'll send your
+authentication info (which is plaintext in the case of HTTP Basic
+authentication).
 
 If this option is used twice, the second will again disable location following.
 .IP "-m/--max-time <seconds>"
@@ -450,6 +482,19 @@ to allow curl to ftp to the machine host.domain.com with user name
 .B "machine host.domain.com login myself password secret"
 
 If this option is used twice, the second will again disable netrc usage.
+.IP "--negotiate"
+(HTTP) Enables GSS-Negotiate authentication. The GSS-Negotiate method was
+designed by Microsoft and is used in their web aplications. It is primarily
+meant as a support for Kerberos5 authentication but may be also used along
+with another authentication methods. For more information see IETF draft
+draft-brezak-spnego-http-04.txt. (Added in 7.10.6)
+
+\fBNOTE\fP that this option requiures that the library was built with GSSAPI
+support. This is not very common. Use \fIcurl --version\fP to see if your
+version supports GSS-Negotiate.
+
+If this option is used several times, the following occurrences make no
+difference.
 .IP "-N/--no-buffer"
 Disables the buffering of the output stream. In normal work situations, curl
 will use a standard buffered output stream that will have the effect that it
@@ -457,6 +502,19 @@ will output the data in chunks, not necessarily exactly when the data arrives.
 Using this option will disable that buffering.
 
 If this option is used twice, the second will again switch on buffering.
+.IP "--ntlm"
+(HTTP) Enables NTLM authentication. The NTLM authentication method was
+designed by Microsoft and is used by IIS web servers. It is a proprietary
+protocol, reversed engineered by clever people and implemented in curl based
+on their efforts. This kind of behavior should not be endorsed, you should
+encourage everyone who uses NTLM to switch to a public and documented
+authentication method instead. Such as Digest. (Added in 7.10.6)
+
+\fBNOTE\fP that this option requiures that the library was built with SSL
+support. Use \fIcurl --version\fP to see if your version supports NTLM.
+
+If this option is used several times, the following occurrences make no
+difference.
 .IP "-o/--output <file>"
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
 multiple documents, you can use '#' followed by a number in the <file>
@@ -613,7 +671,7 @@ descriptive information, to the given output file. Use "-" as filename to have
 the output sent to stdout.
 
 If this option is used several times, the last one will be used. (Added in
-curl 7.9.7)
+7.9.7)
 .IP "--trace-ascii <file>"
 Enables a full trace dump of all incoming and outgoing data, including
 descriptive information, to the given output file. Use "-" as filename to have
@@ -624,7 +682,7 @@ the ASCII part of the dump. It makes smaller output that might be easier to
 read for untrained humans.
 
 If this option is used several times, the last one will be used. (Added in
-curl 7.9.7)
+7.9.7)
 .IP "-u/--user <user:password>"
 Specify user and password to use when fetching. Read the MANUAL for detailed
 examples of how to use this. If no password is specified, curl will ask for it
@@ -662,8 +720,17 @@ If you think this option still doesn't give you enough details, consider using
 
 If this option is used twice, the second will again disable verbose.
 .IP "-V/--version"
-Displays the full version of curl, libcurl and other 3rd party libraries
-linked with the executable.
+Displays information about curl and the libcurl version it uses.
+
+The first line includes the full version of curl, libcurl and other 3rd party
+libraries linked with the executable.
+
+The second line (starts with "Protocols:") shows all protocols that libcurl
+reports to support.
+
+The third line (starts with "Features:") shows specific features libcurl
+reports to offer.
+
 .IP "-w/--write-out <format>"
 Defines what to display after a completed and successful operation. The format
 is a string that may contain plain text mixed with any number of variables. The
