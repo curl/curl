@@ -78,8 +78,9 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-CURLcode curl_global_init(void)
+CURLcode curl_global_init(long flags)
 {
+  flags = 0; /* not currently used */
   Curl_SSL_init();
   return CURLE_OK;
 }
