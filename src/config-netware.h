@@ -395,8 +395,11 @@
 /* Define to 1 if you have the <x509.h> header file. */
 #undef HAVE_X509_H
 
-/* if you have the zlib.h header file */
-#define HAVE_ZLIB_H 1
+/* if you have the zlib.h header file - set from Makefile */
+/* #undef HAVE_ZLIB_H */
+
+/* If zlib is available - set from Makefile */
+/* #undef HAVE_LIBZ */
 
 /* need REENTRANT defined */
 #undef NEED_REENTRANT
