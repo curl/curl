@@ -1486,13 +1486,14 @@ operate(struct Configurable *config, int argc, char *argv[])
       
       if(!config->outfile && config->remotefile) {
         /* Find and get the remote file name */
-        config->outfile=strstr(url, "://");
-        if(config->outfile)
-          config->outfile+=3;
+        char * pc =strstr(url, "://");
+        if(pc)
+          pc+=3;
         else
-          config->outfile=url;
-        config->outfile = strdup(strrchr(config->outfile, '/'));
-        if(!config->outfile || !strlen(++config->outfile)) {
+          pc=url;
+        pc = strrchr(pc, '/');
+        config->outfile = (char *) NULL == pc ? NULL : strdup(pc+1) ;
+        if(!config->outfile || !strlen(config->outfile)) {
           helpf("Remote file name has no length!\n");
           return CURLE_WRITE_ERROR;
         }
