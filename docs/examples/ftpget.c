@@ -58,7 +58,7 @@ int main(void)
     /* Define our callback to get called when there's data to be written */
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
     /* Set a pointer to our struct to pass to the callback */
-    curl_easy_setopt(curl, CURLOPT_FILE, &ftpfile);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ftpfile);
 
     /* Switch on full protocol/debug output */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, TRUE);

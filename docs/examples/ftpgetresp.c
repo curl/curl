@@ -45,7 +45,7 @@ int main(int argc, char **argv)
   if(curl) {
     /* Get a file listing from sunet */
     curl_easy_setopt(curl, CURLOPT_URL, "ftp://ftp.sunet.se/");
-    curl_easy_setopt(curl, CURLOPT_FILE, ftpfile);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, ftpfile);
     curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, write_response);
     curl_easy_setopt(curl, CURLOPT_WRITEHEADER, respfile);
     res = curl_easy_perform(curl);

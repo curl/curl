@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
 
   /* we pass our 'chunk' struct to the callback function */
-  curl_easy_setopt(curl_handle, CURLOPT_FILE, (void *)&chunk);
+  curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&chunk);
 
   /* get it! */
   curl_easy_perform(curl_handle);

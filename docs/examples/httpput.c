@@ -82,7 +82,7 @@ int main(int argc, char **argv)
     curl_easy_setopt(curl,CURLOPT_URL, url);
 
     /* now specify which file to upload */
-    curl_easy_setopt(curl, CURLOPT_INFILE, hd_src);
+    curl_easy_setopt(curl, CURLOPT_READDATA, hd_src);
 
     /* and give the size of the upload (optional) */
     curl_easy_setopt(curl, CURLOPT_INFILESIZE, file_info.st_size);

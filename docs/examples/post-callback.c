@@ -74,7 +74,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
     /* pointer to pass to our read function */
-    curl_easy_setopt(curl, CURLOPT_INFILE, &pooh);
+    curl_easy_setopt(curl, CURLOPT_READDATA, &pooh);
 
     /* get verbose debug output please */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
