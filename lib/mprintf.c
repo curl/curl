@@ -46,6 +46,15 @@
 #define SIZEOF_LONG_DOUBLE 0
 #endif
 
+#ifdef HAVE_LONGLONG
+#define LONG_LONG long long
+#define ENABLE_64BIT
+#else
+#ifdef _MSC_VER
+#define LONG_LONG __int64
+#define ENABLE_64BIT
+#endif
+#endif /* HAVE_LONGLONG */
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG
@@ -125,11 +134,11 @@ typedef struct {
     char *str;
     void *ptr;
     long num;
-#ifdef HAVE_LONGLONG
-    long long lnum;
+#ifdef ENABLE_64BIT
+    LONG_LONG lnum;
 #endif
     double dnum;
-#if SIZEOF_LONG_DOUBLE
+#if 0 /*SIZEOF_LONG_DOUBLE */
     long double ldnum;
 #endif
   } data;
@@ -526,9 +535,9 @@ static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list a
 	break;
 	
       case FORMAT_INT:
-#ifdef HAVE_LONGLONG
+#ifdef ENABLE_64BIT
 	if(vto[i].flags & FLAGS_LONGLONG)
-	  vto[i].data.lnum = va_arg(arglist, long long);
+	  vto[i].data.lnum = va_arg(arglist, LONG_LONG);
 	else
 #endif
 	  if(vto[i].flags & FLAGS_LONG)
@@ -538,7 +547,7 @@ static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list a
 	break;
 	
       case FORMAT_DOUBLE:
-#if SIZEOF_LONG_DOUBLE
+#if 0 /*SIZEOF_LONG_DOUBLE */
 	if(vto[i].flags & FLAGS_LONG)
 	  vto[i].data.ldnum = va_arg(arglist, long double);
 	else
@@ -613,8 +622,8 @@ static int dprintf_formatf(
     long base;
 
     /* Integral values to be written.  */
-#ifdef HAVE_LONGLONG
-    unsigned long long num;
+#ifdef ENABLE_64BIT
+    unsigned LONG_LONG num;
 #else
     unsigned long num;
 #endif
@@ -706,7 +715,7 @@ static int dprintf_formatf(
       /* Decimal integer.  */
       base = 10;
 
-#ifdef HAVE_LONGLONG
+#ifdef ENABLE_64BIT
       if(p->flags & FLAGS_LONGLONG) {
         /* long long */
 	is_neg = p->data.lnum < 0;
@@ -937,9 +946,9 @@ static int dprintf_formatf(
 
     case FORMAT_INTPTR:
       /* Answer the count of characters written.  */
-#ifdef HAVE_LONGLONG
+#ifdef ENABLE_64BIT
       if (p->flags & FLAGS_LONGLONG)
-	*(long long *) p->data.ptr = (long long)done;
+	*(LONG_LONG *) p->data.ptr = (LONG_LONG)done;
       else
 #endif
 	if (p->flags & FLAGS_LONG)
@@ -1153,8 +1162,8 @@ int main()
 {
   char buffer[129];
   char *ptr;
-#ifdef HAVE_LONGLONG
-  long long hullo;
+#ifdef ENABLE_64BIT
+  LONG_LONG hullo;
   dprintf("%3$12s %1$s %2$qd %4$d\n", "daniel", hullo, "stenberg", 65);
 #endif
 
