@@ -611,7 +611,8 @@ static int dprintf_formatf(
     char alt;
     
     /* Width of a field.  */
-    register long width;
+    long width;
+
     /* Precision of a field.  */
     long prec;
     
@@ -913,11 +914,11 @@ static int dprintf_formatf(
 
 	if(width >= 0) {
 	  /* RECURSIVE USAGE */
-	  fptr += curl_msprintf(fptr, "%d", width);
+	  fptr += curl_msprintf(fptr, "%ld", width);
 	}
 	if(prec >= 0) {
 	  /* RECURSIVE USAGE */
-	  fptr += curl_msprintf(fptr, ".%d", prec);
+	  fptr += curl_msprintf(fptr, ".%ld", prec);
 	}
 	if (p->flags & FLAGS_LONG)
 	  strcat(fptr, "l");
