@@ -218,6 +218,7 @@ typedef enum {
   CURLE_BAD_CONTENT_ENCODING,    /* 61 - Unrecognized transfer encoding */
   CURLE_LDAP_INVALID_URL,        /* 62 - Invalid LDAP URL */
   CURLE_FILESIZE_EXCEEDED,       /* 63 - Maximum file size exceeded */
+  CURLE_FTP_SSL_FAILED,          /* 64 - Requested FTP SSL level failed */ 
 
   CURL_LAST /* never use! */
 } CURLcode;
@@ -255,6 +256,14 @@ typedef enum {
 #define CURLE_FTP_BAD_DOWNLOAD_RESUME CURLE_BAD_DOWNLOAD_RESUME
 
 #define CURL_ERROR_SIZE 256
+
+typedef enum {
+  CURLFTPSSL_NONE,    /* do not attempt to use SSL */
+  CURLFTPSSL_TRY,     /* try using SSL, proceed anyway otherwise */
+  CURLFTPSSL_CONTROL, /* SSL for the control connection or fail */
+  CURLFTPSSL_ALL,     /* SSL for all communication or fail */
+  CURLFTPSSL_LAST     /* not an option, never use */
+} curl_ftpssl;
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
@@ -698,6 +707,13 @@ typedef enum {
      a poor attempt to find the user's home directory and check for a .netrc
      file in there. */
   CINIT(NETRC_FILE, OBJECTPOINT, 115),
+
+  /* Enable SSL/TLS for FTP, pick one of:
+     CURLFTPSSL_TRY     - try using SSL, proceed anyway otherwise
+     CURLFTPSSL_CONTROL - SSL for the control connection or fail
+     CURLFTPSSL_ALL     - SSL for all communication or fail
+  */
+  CINIT(FTP_SSL, LONG, 116),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
