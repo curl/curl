@@ -506,14 +506,15 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
        if test "$ICC" = "yes"; then
          dnl this is icc, not gcc.
 
-         dnl Warning 279 warns on static conditions in while expressions,
-         dnl ignore that.
+         dnl ICC warnings we ignore:
+         dnl * 279 warns on static conditions in while expressions
+         dnl * 269 warns on our "%Od" printf formatters for curl_off_t output:
+         dnl   "invalid format string conversion"
 
-         WARN="-wd279"
+         WARN="-wd279,269"
 
          if test "$gccnum" -gt "600"; then
-            dnl icc 6.0 and older doesn't have the -Wall flag, although it does
-            dnl have -wd<n>
+            dnl icc 6.0 and older doesn't have the -Wall flag
             WARN="-Wall $WARN"
          fi
        else dnl $ICC = yes
