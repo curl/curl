@@ -538,7 +538,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
     break;
   }
-  if(-1 == rc) {
+  if(0 != rc) {
     /* no good connect was made */
     sclose(sockfd);
     *sockconn = -1;
