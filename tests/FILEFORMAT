@@ -66,6 +66,14 @@ in the libtest/ directory.
 test case description
 </name>
 
+<setenv>
+variable1=contents1
+variable2=contents2
+
+Set the given environment variables to the specified value before the actual
+command is run, they are clear again after the command has been run.
+</setenv>
+
 <command [option=no-output]>
 command line to run, there's a bunch of %variables that get replaced
 accordingly. more about them elsewhere

@@ -611,6 +611,29 @@ sub singletest {
         writearray($FTPDCMD, \@ftpservercmd);
     }
 
+    my (@setenv)= getpart("client", "setenv");
+    my @envs;
+
+    my $s;
+    for $s (@setenv) {
+        chomp $s; # cut off the newline
+
+        subVariables \$s;
+
+        print "MOO: $s\n";
+        
+        if($s =~ /([^=]*)=(.*)/) {
+            my ($var, $content)=($1, $2);
+            
+            $ENV{$var}=$content;
+
+            print "setenv $var to $content\n";
+
+            # remember which, so that we can clear them afterwards!
+            push @envs, $var;
+        }
+    }
+
     # get the command line options to use
     my ($cmd, @blaha)= getpart("client", "command");
 
@@ -719,6 +742,11 @@ sub singletest {
 
     # remove the special FTP command file after each test!
     unlink($FTPDCMD);
+
+    my $e;
+    for $e (@envs) {
+        $ENV{$e}=""; # clean up
+    }
 
     my @err = getpart("verify", "errorcode");
     my $errorcode = $err[0];
