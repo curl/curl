@@ -3174,14 +3174,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
        the time we spent until now! */
     if(prev_alarm) {
       /* there was an alarm() set before us, now put it back */
-      long elapsed_ms = Curl_tvdiff(Curl_tvnow(), conn->created);
-      long alarm_set;
+      unsigned long elapsed_ms = Curl_tvdiff(Curl_tvnow(), conn->created);
+      unsigned long alarm_set;
 
       /* the alarm period is counted in even number of seconds */
       alarm_set = prev_alarm - elapsed_ms/1000;
-
-      if(alarm_set<=0) {
-        /* if it turned negative, we should fire off a SIGALRM here, but we
+      
+      if(!alarm_set ||
+         ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {
+        /* if the alarm time-left reached zero or turned "negative" (counted
+           with unsigned values), we should fire off a SIGALRM here, but we
            won't, and zero would be to switch it off so we never set it to
            less than 1! */
         alarm(1);
