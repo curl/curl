@@ -6,7 +6,38 @@
 
                                   Changelog
 
+Daniel (31 March 2004)
+- Roy Shan fixed a flaw that prevented ares name resolve timeouts to occur!
+
+- Dirk Manske found out that libcurl timed out waiting for resolves far too
+  easy when libcurl was built to use (c-)ares for name resolving.
+
+- Further Digest fixing and a successful test case 153 now makes me believe
+  Mitz Wark's problems are fixed.
+
+- Andres Garcia figured out that test case 63, while working, only proved a
+  flaw in libcurl's 'http_proxy' parser when a user name and password is
+  provided. The user name was not extracted properly (and 'http' was always
+  used as user name).
+
+- Andrés García fixed compiler warnings in our ioctlsocket() usage.
+
 Daniel (30 March 2004)
+- Joe Halpin faced problems with the getnameinfo() argument ai_flags and the
+  particular bit named 'NI_WITHSCOPEID' on Solaris 9 for Intel.  I've now
+  written a configure test that checks for a working NI_WITHSCOPEID
+  implemenation. No code uses the result from this test yet, it is still
+  experimental. James Carlson wrote in comp.unix.solaris: "It's a bug
+  (5006623) -- it's not supported and shouldn't be in the header file."
+
+- I provided Mitz Wark with a first patch in order to fix libcurl's problems
+  to re-negotiate Digest authentication (when 'stale=true' is included in the
+  response header).
+
+- Roy Shan discovered that the multi interface didn't properly timeout name
+  lookups which could make handles get stuck in that state and thus never get
+  completed. I've produced a first test patch that attempts to correct this.
+
 - David Byron's patch was appplied to make CURLOPT_FAILONERROR work nicely
   even with authentcations such as NTLM or Digest enabled. Test cases 150, 151
   and 152 were added to verify the functionality.
