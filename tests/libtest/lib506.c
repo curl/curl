@@ -87,7 +87,7 @@ void *fire(void *ptr)
   struct curl_slist *headers;
   struct Tdata *tdata = (struct Tdata*)ptr;
   CURL *curl = curl_easy_init();
-  int i;
+  int i=0;
 
   headers = sethost(NULL);
   curl_easy_setopt(curl, CURLOPT_VERBOSE,    1);
