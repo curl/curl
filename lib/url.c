@@ -1086,15 +1086,15 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       infof(data, "Couldn't find host %s in the .netrc file, using defaults",
             data->hostname);
     }
+    else
+      data->bits.user_passwd = 1; /* enable user+password */
+
     /* weather we failed or not, we don't know which fields that were filled
        in anyway */
     if(!data->user[0])
       strcpy(data->user, CURL_DEFAULT_USER);
     if(!data->passwd[0])
       strcpy(data->passwd, CURL_DEFAULT_PASSWORD);
-    if(conn->protocol&PROT_HTTP) {
-      data->bits.user_passwd = 1; /* enable user+password */
-    }
   }
   else if(!(data->bits.user_passwd) &&
 	  (conn->protocol & (PROT_FTP|PROT_HTTP)) ) {
