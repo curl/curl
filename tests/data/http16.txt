@@ -1,0 +1,7 @@
+GET http://we.want.that.site.com/2 HTTP/1.0
+Proxy-authorization: Basic ZmFrZTp1c2Vy
+User-Agent: curl/7.4.2 (sparc-sun-solaris2.7) libcurl 7.4.2
+Host: we.want.that.site.com
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
