@@ -524,7 +524,7 @@ Transfer(struct connectdata *c_conn)
                 conn->size = contentlength;
                 Curl_pgrsSetDownloadSize(data, contentlength);
               }
-			  else if((httpversion == 10) &&
+              else if((httpversion == 10) &&
                       conn->bits.httpproxy &&
                       compareheader(p, "Proxy-Connection:", "keep-alive")) {
                 /*
@@ -536,7 +536,7 @@ Transfer(struct connectdata *c_conn)
                 conn->bits.close = FALSE; /* don't close when done */
                 infof(data, "HTTP/1.0 proxy connection set to keep alive!\n");
               }
-			  else if((httpversion == 10) &&
+              else if((httpversion == 10) &&
                       compareheader(p, "Connection:", "keep-alive")) {
                 /*
                  * A HTTP/1.0 reply with the 'Connection: keep-alive' line
