@@ -1308,7 +1308,8 @@ static void verboseconnect(struct connectdata *conn,
   {
     struct in_addr in;
     (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
-    infof(data, "Connected to %s (%s) port %d\n", hostaddr->h_name,
+    infof(data, "Connected to %s (%s) port %d\n",
+          hostaddr?hostaddr->h_name:"[re-used]",
 #if defined(HAVE_INET_NTOA_R)
           inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)),
 #else
@@ -2176,7 +2177,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /*************************************************************
    * Resolve the name of the server or proxy
    *************************************************************/
-  if(!data->change.proxy) {
+  if(conn->bits.reuse) {
+    /* re-used connection, no resolving is necessary */
+    hostaddr = NULL;
+  }
+  else if(!data->change.proxy) {
     /* If not connecting via a proxy, extract the port from the URL, if it is
      * there, thus overriding any defaults that might have been set above. */
     conn->port =  conn->remote_port; /* it is the same port */
