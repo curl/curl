@@ -8,6 +8,11 @@
 
 
 Daniel (12 March 2001)
+- Made the chunked transfer-encoding engine detected bad formatted data length
+  and return error if so (we can't possibly extract sensible data if this is
+  the case). Added a test case that detects this. Number 36. Now there are 60
+  test cases.
+
 - Added 5 new libcurl options to curl/curl.h that can be used to control the
   persistant connection support in libcurl. They're also documented (fairly
   thoroughly) in the curl_easy_setopt.3 man page. Three of them are now
