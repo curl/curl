@@ -1,4 +1,4 @@
-Updated: August 10, 2004 (http://curl.haxx.se/docs/faq.html)
+Updated: August 12, 2004 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -41,6 +41,7 @@ FAQ
   3.13 Why does my single/double quotes fail?
   3.14 Does curl support javascript or pac (automated proxy config)?
   3.15 Can I do recursive fetches with curl?
+  3.16 What certificates do I need with I use SSL?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -461,6 +462,34 @@ FAQ
   There exist wrapper scripts with that functionality (for example the
   curlmirror perl script), and you can write programs based on libcurl to do
   it, but the command line tool curl itself cannot.
+
+  3.16 What certificates do I need with I use SSL?
+
+  There are three different kinds of "certificates" to keep track of when we
+  talk about using SSL-based protocols (HTTPS or FTPS) using curl or libcurl.
+
+  - Client certificate. The server you communicate may require that you can
+    provide this in order to prove that you actually are who you claim to be.
+    If the server doesn't require this, you don't need a client certificate.
+
+  - Server certificate. The server you communicate with has a server
+    certificate. You can and should verify this certficate to make sure that
+    you are truly talking to the real server and not a server impersonating
+    it. The server certificate verifaction process is made by using a
+    Certificate Authority certificate ("CA cert") that was used to sign the
+    server certificate. Server certificate verification is enabled by default
+    in curl and libcurl and is often the reason for problems as explained in
+    FAQ entry 4.12 and the SSLCERTS document
+    (http://curl.haxx.se/docs/sslcerts.html). Server certificates that are
+    "self-signed" or otherwise signed by a CA that you do not have a CA cert
+    for, cannot be verified. If the verification during a connect fails, you
+    are refused access. You then need to explicitly disable the verification
+    to connect to the server.
+
+  - Certificate Authority certificate ("CA cert"). You often have several CA
+    certs in a CA cert bundle that can be used to verify a server certificate
+    that was signed by one of the authorities in the bundle. curl comes with a
+    default CA cert bundle. You can override the default.
 
 
 4. Running Problems
