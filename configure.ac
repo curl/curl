@@ -1093,23 +1093,35 @@ AC_PATH_PROGS( NROFF, gnroff nroff, ,
   $PATH:/usr/bin/:/usr/local/bin )
 AC_SUBST(NROFF)
 
-AC_MSG_CHECKING([how to use *nroff to get plain text from man pages])
-MANOPT="-man"
-mancheck=`echo foo | $NROFF $MANOPT 2>/dev/null`
-if test -z "$mancheck"; then
-  MANOPT="-mandoc"
+if test -n "$NROFF"; then
+  dnl only check for nroff options if an nroff command was found
+
+  AC_MSG_CHECKING([how to use *nroff to get plain text from man pages])
+  MANOPT="-man"
   mancheck=`echo foo | $NROFF $MANOPT 2>/dev/null`
   if test -z "$mancheck"; then
-    MANOPT=""
-    AC_MSG_RESULT([failed])
-    AC_MSG_WARN([found no *nroff option to get plaintext from man pages])
+    MANOPT="-mandoc"
+   mancheck=`echo foo | $NROFF $MANOPT 2>/dev/null`
+    if test -z "$mancheck"; then
+      MANOPT=""
+      AC_MSG_RESULT([failed])
+      AC_MSG_WARN([found no *nroff option to get plaintext from man pages])
+    else
+      AC_MSG_RESULT([$MANOPT])
+    fi
   else
     AC_MSG_RESULT([$MANOPT])
   fi
-else
-  AC_MSG_RESULT([$MANOPT])
+  AC_SUBST(MANOPT)
 fi
-AC_SUBST(MANOPT)
+
+if test -z "$MANOPT"
+then
+  dnl if no nroff tool was found, or no option that could convert man pages
+  dnl was found, then disable the built-in manual stuff
+  AC_MSG_WARN([disabling built-in manual])
+  USE_MANUAL="no";
+fi
 
 AC_PROG_YACC
 
