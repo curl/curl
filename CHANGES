@@ -6,6 +6,20 @@
 
                                History of Changes
 
+Version 7.7-beta5
+
+Daniel (19 March 2001)
+- Georg Ottinger reported problems with using -C together with -L in the sense
+  that the -C info got lost when it was redirected. I could not repeat this
+  problem on the 7.7 branch why I leave this for the moment. Test case 39 was
+  added to do exactly this, and it seems to do right.
+
+- Christian Robottom Reis reported how his 7.7 beta didn't successfully do
+  form posts as elegantly as 7.6.1 did. Indeed, this was a flaw in the header
+  engine, as HTTP 1.1 has introduced a new 100 "transient" return code for PUT
+  and POST operations that I need to add support for. Section 8.2.3 in RFC2616
+  has all the details. Seems to work now!
+
 Daniel (16 March 2001)
 - After having experienced another machine break-down, we're back.
 
@@ -16,6 +30,10 @@ Daniel (16 March 2001)
 - Made a new php/ directory in the release archive and moved the PHP examples
   into a subdirectory in there. Not much PHP info yet, but I plan to. Please
   help me here as well!
+
+- Made libcurl return error if a transfer is aborted in the middle of a
+  "chunk". It actually enables libcurl to discover premature transfer aborts
+  even if the Content-Length: size is unknown.
 
 Daniel (15 March 2001)
 - Added --connect-timeout to curl, which sets the new CURLOPT_CONNECTTIMEOUT
