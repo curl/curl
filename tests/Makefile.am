@@ -6,7 +6,7 @@ test:
 	./runtests.pl
 
 quiet-test:
-	./runtests.pl -s -c
+	./runtests.pl -s -a
 
 clean:
 	rm -rf log
