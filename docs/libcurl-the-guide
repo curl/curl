@@ -1,0 +1,209 @@
+$Id$
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
+
+PROGRAMMING WITH LIBCURL
+
+About this Document
+
+ This document will attempt to describe the general principle and some basic
+ approach to consider when programming with libcurl. The text will focus
+ mainly on the C/C++ interface but might apply fairly well on other interfaces
+ as well as they usually follow the C one pretty closely.
+
+ This document will refer to 'the user' as the person writing the source code
+ that uses libcurl. That would probably be you or someone in your position.
+ What will be generally refered to as 'the program' will be the collected
+ source code that you write that is using libcurl for transfers. The program
+ is outside libcurl and libcurl is outside of the program.
+
+
+Building
+
+  Compiling the Program
+
+  Linking the Program with libcurl
+
+  SSL or Not
+
+
+Global Preparation
+
+ The program must initialize some of the libcurl functionality globally. That
+ means it should be done exactly once, no matter how many times you intend to
+ use the library. Once for your program's entire life time. This is done using
+
+    curl_global_init()
+
+ and it takes one parameter which is a bit pattern that tells libcurl what to
+ intialize. Using CURL_GLOBAL_ALL will make it initialize all known internal
+ sub modules, and might be a good default option. The current two bits that
+ are specified are:
+
+  CURL_GLOBAL_WIN32 which only does anything on Windows machines. When used on
+  a Windows machine, it'll make libcurl intialize the win32 socket
+  stuff. Without having that initialized properly, your program cannot use
+  sockets properly. You should only do this once for each application, so if
+  your program already does this or of another library in use does it, you
+  should not tell libcurl to do this as well.
+
+  CURL_GLOBAL_SSL which only does anything on libcurls compiled and built
+  SSL-enabled. On these systems, this will make libcurl init OpenSSL properly
+  for this application. This is only needed to do once for each application so
+  if your program or another library already does this, this bit should not be
+  needed.
+
+ libcurl has a default protection mechanism that detects if curl_global_init()
+ hasn't been called by the time curl_easy_perform() is called and if that is
+ the case, libcurl runs the function itself with a guessed bit pattern. Please
+ note that depending solely on this is not considered nice nor very good.
+
+ When the program no longer uses libcurl, it should call
+ curl_global_cleanup(), which is the opposite of the init call. It will then
+ do the reversed operations to cleanup the resources the curl_global_init()
+ call initialized.
+
+ Repeated calls to curl_global_init() and curl_global_cleanup() should be
+ avoided. They should be called once each.
+
+Handle the easy libcurl
+
+ libcurl version 7 is oriented around the so called easy interface. All
+ operations in the easy interface are prefixed with 'curl_easy'.
+
+ Future libcurls will also offer the multi interface. More about that
+ interface, what it is targeted for and how to use it is still only debated on
+ the libcurl mailing list and developer web pages. Join up to discuss and
+ figure out!
+
+ To use the easy interface, you must first create yourself an easy handle. You
+ need one handle for each easy session you want to perform. Basicly, you
+ should use one handle for every thread you plan to use for transferring. You
+ must never share the same handle in multiple threads.
+
+ Get an easy handle with
+
+    easyhandle = curl_easy_init();
+
+ It returns an easy handle. Using that you proceed to the next step: setting
+ up your preferred actions. A handle is just a logic entity for the upcoming
+ transfer or series of transfers. One of the most basic properties to set in
+ the handle is the URL. You set your preferred URL to transfer with
+ CURLOPT_URL in a manner similar to:
+
+    curl_easy_setopt(easyhandle, CURLOPT_URL, "http://curl.haxx.se/");
+
+ Let's assume for a while that you want to receive data as the URL indentifies
+ a remote resource you want to get here. Since you write a sort of application
+ that needs this transfer, I assume that you would like to get the data passed
+ to you directly instead of simply getting it passed to stdout. So, you write
+ your own function that matches this prototype:
+
+    size_t write_data(void *buffer, size_t size, size_t nmemb, void *userp);
+
+ You tell libcurl to pass all data to this function by issuing a function
+ similar to this:
+
+    curl_easy_setopt(easyhandle, CURLOPT_WRITEFUNCTION, write_data);
+
+ You can control what data your function get in the forth argument by setting
+ another property:
+
+    curl_easy_setopt(easyhandle, CURLOPT_FILE, &internal_struct);
+
+ Using that property, you can easily pass local data between your application
+ and the function that gets invoked by libcurl. libcurl itself won't touch the
+ data you pass with CURLOPT_FILE.
+
+ There are of course many more options you can set, and we'll get back to a
+ few of them later. Let's instead continue to the actual transfer:
+
+    success = curl_easy_perform(easyhandle);
+
+ The curl_easy_perform() will connect to the remote site, do the necessary
+ commands and receive the transfer. Whenever it receives data, it calls the
+ callback function we previously set. The function may get one byte at a time,
+ or it may get many kilobytes at once. libcurl delivers as much as possible as
+ often as possible. Your callback function should return the number of bytes
+ it "took care of". If that is not the exact same amount of bytes that was
+ passed to it, libcurl will abort the operation and return with an error code.
+
+ When the transfer is complete, the function returns a return code that
+ informs you if it succeeded in its mission or not. If a return code isn't
+ enough for you, you can use the CURLOPT_ERRORBUFFER to point libcurl to a
+ buffer of yours where it'll store a human readable error message as well.
+
+ If you then want to transfer another file, the handle is ready to be used
+ again. Mind you, it is even preferred that you re-use an existing handle if
+ you intend to make another transfer. libcurl will then attempt to re-use the
+ previous
+
+When It Doesn't Work
+
+ There will always be times when the transfer fails for some reason. You might
+ have set the wrong libcurl option or misunderstood what the libcurl option
+ actually does, or the remote server might return non-standard replies that
+ confuse the library which then confuses your program.
+
+ There's one golden rule when these things occur: set the CURLOPT_VERBOSE
+ option to TRUE. It'll cause the library to spew out the entire protocol
+ details it sends, some internal info and some received protcol data as well
+ (especially when using FTP). If you're using HTTP, adding the headers in the
+ received output to study is also a clever way to get a better understanding
+ wht the server behaves the way it does. Include headers in the normal body
+ output with CURLOPT_HEADER set TRUE.
+
+Upload Data to a Remote Site
+
+ libcurl tries to keep a protocol independent approach to most transfers, thus
+ uploading to a remote FTP site is very similar to uploading data to a HTTP
+ server with a PUT request.
+
+ Of course, first you either create an easy handle or you re-use one existing
+ one. Then you set the URL to operate on just like before. This is the remote
+ URL, that we now will upload.
+
+ Since we write an application, we most likely want libcurl to get the upload
+ data by asking us for it. To make it do that, we set the read callback and
+ the custom pointer libcurl will pass to our read callback. The read callback
+ should have a prototype similar to:
+
+   size_t function(char *buffer, size_t size, size_t nitems, void *userp);
+
+ Where buffer is the pointer to a buffer we fill in with data to upload and
+ size*nitems is the size of the buffer. The 'userp' pointer is the custom
+ pointer we set to point to a struct of ours to pass private data between the
+ application and the callback.
+
+    curl_easy_setopt(easyhandle, CURLOPT_READFUNCTION, read_function);
+
+    curl_easy_setopt(easyhandle, CURLOPT_INFILE, &filedata);
+
+ Tell libcurl that we want to upload:
+
+    curl_easy_setopt(easyhandle, CURLOPT_UPLOAD, TRUE);
+
+ A few protocols won't behave properly when uploads are done without any prior
+ knowledge of the expected file size. HTTP PUT is one example [1]. So, set the
+ upload file size using the CURLOPT_INFILESIZE like this:
+
+    curl_easy_setopt(easyhandle, CURLOPT_INFILESIZE, file_size);
+
+ So, then you call curl_easy_perform() this time, it'll perform all necessary
+ operations and when it has invoked the upload it'll call your supplied
+ callback to get the data to upload. The program should return as much data as
+ possible in every invoke, as that is likely to make the upload perform as
+ fast as possible. The callback should return the number of bytes it wrote in
+ the buffer. Returning 0 will signal the end of the upload.
+
+
+-----
+Footnotes:
+
+[1] = HTTP PUT without knowing the size prior to transfer is indeed possible,
+      but libcurl does not support the chunked transfers on uploading that is
+      necessary for this feature to work. We'd gratefully appreciate patches
+      that bring this functionality...
