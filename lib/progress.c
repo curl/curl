@@ -183,7 +183,7 @@ int pgrsUpdate(struct UrlData *data)
   struct timeval now;
   int result;
 
-  char max5[6][6];
+  char max5[6][10];
   double dlpercen=0;
   double ulpercen=0;
   double total_percen=0;
@@ -191,12 +191,7 @@ int pgrsUpdate(struct UrlData *data)
   double total_transfer;
   double total_expected_transfer;
 
-#define CURR_TIME 5
-
-  static double speeder[ CURR_TIME ];
-  static int speeder_c=0;
-
-  int nowindex = speeder_c% CURR_TIME;
+  int nowindex = data->progress.speeder_c% CURR_TIME;
   int checkindex;
   int count;
 
@@ -241,15 +236,19 @@ int pgrsUpdate(struct UrlData *data)
   /* Let's do the "current speed" thing, which should use the fastest
          of the dl/ul speeds */
 
-  speeder[ nowindex ] = data->progress.downloaded>data->progress.uploaded?
+  data->progress.speeder[ nowindex ] =
+    data->progress.downloaded>data->progress.uploaded?
     data->progress.downloaded:data->progress.uploaded;
-  speeder_c++; /* increase */
-  count = ((speeder_c>=CURR_TIME)?CURR_TIME:speeder_c) - 1;
-  checkindex = (speeder_c>=CURR_TIME)?speeder_c%CURR_TIME:0;
+  data->progress.speeder_c++; /* increase */
+  count = ((data->progress.speeder_c>=CURR_TIME)?
+           CURR_TIME:data->progress.speeder_c) - 1;
+  checkindex = (data->progress.speeder_c>=CURR_TIME)?
+    data->progress.speeder_c%CURR_TIME:0;
 
   /* find out the average speed the last CURR_TIME seconds */
   data->progress.current_speed =
-    (speeder[nowindex]-speeder[checkindex])/(count?count:1);
+    (data->progress.speeder[nowindex]-
+     data->progress.speeder[checkindex])/(count?count:1);
 
   if(data->progress.flags & PGRS_HIDE)
     return 0;
@@ -283,6 +282,7 @@ int pgrsUpdate(struct UrlData *data)
   /* Now figure out which of them that is slower and use for the for
          total estimate! */
   total_estimate = ulestimate>dlestimate?ulestimate:dlestimate;
+
 
   /* If we have a total estimate, we can display that and the expected
          time left */
@@ -329,5 +329,5 @@ int pgrsUpdate(struct UrlData *data)
           max5data(data->progress.current_speed, max5[5]) /* current speed */
           );
 
-    return 0;
+  return 0;
 }

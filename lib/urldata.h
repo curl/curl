@@ -242,6 +242,11 @@ struct Progress {
   struct timeval t_connect;
   struct timeval t_pretransfer;
   int httpcode;
+
+#define CURR_TIME 5
+
+  double speeder[ CURR_TIME ];
+  int speeder_c;
 };
 
 /****************************************************************************
