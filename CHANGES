@@ -6,7 +6,73 @@
 
                                History of Changes
 
+
+Daniel (27 October 2000)
+- Georg Horn brought us a splendid patch that solves the long-standing
+  annoying problem with timeouts that made curl exit with silly exit codes
+  (which as been commented out lately). This solution is sigaction() based and
+  of course then only works for unixes (and only those unixes that actually
+  have the sigaction() function).
+
+Daniel (26 October 2000)
+- Björn Stenberg supplied a patch that fixed the flaw mentioned by Kevin Roth
+  that made the password get echoed when prompted for interactively. The
+  getpass() function (now known as my_getpass()) was also fixed to not use any
+  static buffers. This also means we cannot use the "standard" getpass()
+  function even for those systems that have it, since it isn't thread-safe.
+  
+- Kevin Roth found out that if you'd write a config file with '-v url', the
+  url would not be used as "default URL" as documented, although if you wrote
+  it 'url -v' it worked! This has been corrected now.
+
+- Kevin Roth's idea of using multiple -d options on the same command line was
+  just brilliant, and I couldn't really think of any reason why we shouldn't
+  support it! The append function always append '&' and then the new -d
+  chunk. This enables constructs like the following:
+
+        curl -d name=daniel -d age=unknown foobarsite.com
+
+Daniel (24 October 2000)
+- I fixed the lib/memdebug.c source so that it compiles on Linux and other
+  systems. It will be useful one day when someone else but me wants to run the
+  memory debugging system.
+
+Daniel (23 October 2000)
+- I modified the maketgz and configure scripts, so that the configure script
+  will fetch the version number from the include/curl/curl.h header files, and
+  then the maketgz doesn't have to rebuild the configure script when I build
+  release-archives.
+
+- Björn Stenberg and Linus Nielsen correctly pointed out that curl was silly
+  enough to not allow @-letters in passwords when they were specified with the
+  -u or -U flags (CURLOPT_USERPWD and CURLOPT_PROXYUSERPWD). This also
+  suggests that curl probably should url-decode the password piece of an URL
+  so that you could pass an encoded @-letter there...
+  
+Daniel (20 October 2000)
+- Yet another http server barfed on curl's request that include the port
+  number in the Host: header always. I now only include the port number if it
+  isn't the default (80 for HTTP, 443 for HTTPS). www.perl.com turned out to
+  run one of those nasty servers.
+
+- The PHP4 module for curl had problems with referer that seems to have been
+  corrected just yesterday. (Sterling Hughes of the PHP team confirmed this)
+
+Daniel (17 October 2000)
+- Vladimir Oblomov reported that the -Y and -y options didn't work. They
+  didn't work for me either. This once again proves we should have that test
+  suite...
+  
+- I finally changed the error message libcurl returns if you try a https://
+  URL when the library wasn't build with SSL enabled. It will now return this
+  error:
+        "libcurl was built with SSL disabled, https: not supported!"
+
+  I really hope it will make it a bit clearer to users where the actual
+  problem lies.
+
 Version 7.4.1
+
 Daniel (16 October 2000)
 - I forgot to remove some of the malloc debug defines from the makefiles in
   the release archive (of course).
