@@ -555,6 +555,6 @@ Curl_addrinfo *Curl_addrinfo_copy(void *org, int port)
 {
   struct hostent *orig = org;
 
-  return Curl_he2ai(orig, port);
+  return Curl_he2ai(orig, (unsigned short)port);
 }
 #endif /* CURLRES_ADDRINFO_COPY */
