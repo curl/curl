@@ -9,6 +9,7 @@
 Daniel (3 December 2004)
 - Bug report #1078066: when a chunked transfer was pre-maturely closed exactly
   at a chunk boundary it was not considered an error and thus went unnoticed.
+  Fixed by Maurice Barnum.
 
   Added test case 207 to verify.
 

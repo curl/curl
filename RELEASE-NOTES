@@ -46,7 +46,7 @@ Other curl-related news since the previous public release:
 
  o pycurl 7.12.2: http://pycurl.sf.net/
  o TclCurl 0.12.2: http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o libcurl.NET 1.1: http://www.seasideresearch.com/downloads.html
+ o libcurl.NET 1.2: http://www.seasideresearch.com/downloads.html
  o RCurl 0.5.1: http://www.omegahat.org/RCurl/
  o libcurl.mono 1.0:
    http://forge.novell.com/modules/xfmod/project/?libcurl-mono
@@ -57,6 +57,6 @@ advice from friends like these:
  Peter Wullinger, Guillaume Arluison, Alexander Krasnostavsky, Mohun Biswas,
  Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia,
  Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips,
- Wojciech Zwiefka, David Phillips, Reinout van Schouwen
+ Wojciech Zwiefka, David Phillips, Reinout van Schouwen, Maurice Barnum
 
         Thanks! (and sorry if I forgot to mention someone)
