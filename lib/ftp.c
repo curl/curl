@@ -273,8 +273,8 @@ int GetLastResponse(int sockfd, char *buf,
         break;
       default:
 #ifdef USE_SSLEAY
-        if (data->use_ssl) {
-          keepon = SSL_read(data->ssl, ptr, 1);
+        if (data->ssl.use) {
+          keepon = SSL_read(data->ssl.handle, ptr, 1);
         }
         else {
 #endif

@@ -94,10 +94,10 @@ int SSL_cert_stuff(struct UrlData *data,
        */
       strcpy(global_passwd, data->cert_passwd);
       /* Set passwd callback: */
-      SSL_CTX_set_default_passwd_cb(data->ctx, passwd_callback);
+      SSL_CTX_set_default_passwd_cb(data->ssl.ctx, passwd_callback);
     }
 
-    if (SSL_CTX_use_certificate_file(data->ctx,
+    if (SSL_CTX_use_certificate_file(data->ssl.ctx,
 				     cert_file,
 				     SSL_FILETYPE_PEM) <= 0) {
       failf(data, "unable to set certificate file (wrong password?)\n");
@@ -106,14 +106,14 @@ int SSL_cert_stuff(struct UrlData *data,
     if (key_file == NULL)
       key_file=cert_file;
 
-    if (SSL_CTX_use_PrivateKey_file(data->ctx,
+    if (SSL_CTX_use_PrivateKey_file(data->ssl.ctx,
 				    key_file,
 				    SSL_FILETYPE_PEM) <= 0) {
       failf(data, "unable to set public key file\n");
       return(0);
     }
     
-    ssl=SSL_new(data->ctx);
+    ssl=SSL_new(data->ssl.ctx);
     x509=SSL_get_certificate(ssl);
     
     if (x509 != NULL)
@@ -127,7 +127,7 @@ int SSL_cert_stuff(struct UrlData *data,
     
     /* Now we know that a key and cert have been set against
      * the SSL context */
-    if (!SSL_CTX_check_private_key(data->ctx)) {
+    if (!SSL_CTX_check_private_key(data->ssl.ctx)) {
       failf(data, "Private key does not match the certificate public key\n");
       return(0);
     }
@@ -140,7 +140,7 @@ int SSL_cert_stuff(struct UrlData *data,
 
 #endif
 
-#if SSL_VERIFY_CERT
+#ifdef USE_SSLEAY
 int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
 {
   X509 *err_cert;
@@ -164,7 +164,7 @@ UrgSSLConnect (struct UrlData *data)
     SSL_METHOD *req_method;
 
     /* mark this is being ssl enabled from here on out. */
-    data->use_ssl = 1;
+    data->ssl.use = TRUE;
 
     /* Lets get nice error messages */
     SSL_load_error_strings();
@@ -195,7 +195,7 @@ UrgSSLConnect (struct UrlData *data)
     /* Setup all the global SSL stuff */
     SSLeay_add_ssl_algorithms();
 
-    switch(data->ssl_version) {
+    switch(data->ssl.version) {
     default:
       req_method = SSLv23_client_method();
       break;
@@ -207,9 +207,9 @@ UrgSSLConnect (struct UrlData *data)
       break;
     }
     
-    data->ctx = SSL_CTX_new(req_method);
+    data->ssl.ctx = SSL_CTX_new(req_method);
 
-    if(!data->ctx) {
+    if(!data->ssl.ctx) {
       failf(data, "SSL: couldn't create a context!");
       return 1;
     }
@@ -221,22 +221,31 @@ UrgSSLConnect (struct UrlData *data)
       }
     }
 
-#if SSL_VERIFY_CERT
-    SSL_CTX_set_verify(data->ctx,
-                       SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
-                       SSL_VERIFY_CLIENT_ONCE,
-                       cert_verify_callback);
-#endif
+    if(data->ssl.verifypeer){
+      SSL_CTX_set_verify(data->ssl.ctx,
+                         SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
+                         SSL_VERIFY_CLIENT_ONCE,
+                         cert_verify_callback);
+      if (!SSL_CTX_load_verify_locations(data->ssl.ctx,
+                                         data->ssl.CAfile,
+                                         data->ssl.CApath)) {
+        failf(data,"error setting cerficate verify locations\n");
+        return 2;
+      }
+    }
+    else
+      SSL_CTX_set_verify(data->ssl.ctx, SSL_VERIFY_NONE, cert_verify_callback);
+
 
     /* Lets make an SSL structure */
-    data->ssl = SSL_new (data->ctx);
-    SSL_set_connect_state (data->ssl);
+    data->ssl.handle = SSL_new (data->ssl.ctx);
+    SSL_set_connect_state (data->ssl.handle);
 
-    data->server_cert = 0x0;
+    data->ssl.server_cert = 0x0;
 
     /* pass the raw socket into the SSL layers */
-    SSL_set_fd (data->ssl, data->firstsocket);
-    err = SSL_connect (data->ssl);
+    SSL_set_fd (data->ssl.handle, data->firstsocket);
+    err = SSL_connect (data->ssl.handle);
 
     if (-1 == err) {
       err = ERR_get_error(); 
@@ -244,8 +253,9 @@ UrgSSLConnect (struct UrlData *data)
       return 10;
     }
 
-
-    infof (data, "SSL connection using %s\n", SSL_get_cipher (data->ssl));
+    /* Informational message */
+    infof (data, "SSL connection using %s\n",
+           SSL_get_cipher(data->ssl.handle));
   
     /* Get server's certificate (note: beware of dynamic allocation) - opt */
     /* major serious hack alert -- we should check certificates
@@ -253,14 +263,15 @@ UrgSSLConnect (struct UrlData *data)
      * attack
      */
 
-    data->server_cert = SSL_get_peer_certificate (data->ssl);
-    if(!data->server_cert) {
+    data->ssl.server_cert = SSL_get_peer_certificate (data->ssl.handle);
+    if(!data->ssl.server_cert) {
       failf(data, "SSL: couldn't get peer certificate!");
       return 3;
     }
     infof (data, "Server certificate:\n");
   
-    str = X509_NAME_oneline (X509_get_subject_name (data->server_cert), NULL, 0);
+    str = X509_NAME_oneline (X509_get_subject_name (data->ssl.server_cert),
+                             NULL, 0);
     if(!str) {
       failf(data, "SSL: couldn't get X509-subject!");
       return 4;
@@ -268,7 +279,8 @@ UrgSSLConnect (struct UrlData *data)
     infof(data, "\t subject: %s\n", str);
     CRYPTO_free(str);
 
-    str = X509_NAME_oneline (X509_get_issuer_name  (data->server_cert), NULL, 0);
+    str = X509_NAME_oneline (X509_get_issuer_name  (data->ssl.server_cert),
+                             NULL, 0);
     if(!str) {
       failf(data, "SSL: couldn't get X509-issuer name!");
       return 5;
@@ -279,11 +291,14 @@ UrgSSLConnect (struct UrlData *data)
     /* We could do all sorts of certificate verification stuff here before
        deallocating the certificate. */
 
-#if SSL_VERIFY_CERT
-    infof(data, "Verify result: %d\n", SSL_get_verify_result(data->ssl));
-#endif
+    if(data->ssl.verifypeer) {
+      data->ssl.certverifyresult=SSL_get_verify_result(data->ssl.handle);
+      infof(data, "Verify result: %d\n", data->ssl.certverifyresult);
+    }
+    else
+      data->ssl.certverifyresult=0;
 
-    X509_free(data->server_cert);
+    X509_free(data->ssl.server_cert);
 #else /* USE_SSLEAY */
     /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
     (void) data;

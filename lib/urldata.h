@@ -326,6 +326,21 @@ typedef enum {
   CURLI_LAST
 } CurlInterface;
 
+struct ssldata {
+  bool use;              /* use ssl encrypted communications TRUE/FALSE */
+  long version;          /* what version the client wants to use */
+  long certverifyresult; /* result from the certificate verification */
+  bool verifypeer;       /* set TRUE if this is desired */
+  char *CApath;          /* DOES NOT WORK ON WINDOWS */
+  char *CAfile;          /* cerficate to verify peer against */
+#ifdef USE_SSLEAY
+  /* these ones requires specific SSL-types */
+  SSL_CTX* ctx;
+  SSL*     handle;
+  X509*    server_cert;
+#endif /* USE_SSLEAY */
+};
+
 /*
  * As of April 11, 2000 we're now trying to split up the urldata struct in
  * three different parts:
@@ -438,8 +453,6 @@ struct UrlData {
 
   char *cookie;       /* HTTP cookie string to send */
 
-  short    use_ssl;   /* use ssl encrypted communications */
-
   char *newurl; /* This can only be set if a Location: was in the
 		   document headers */
 
@@ -451,12 +464,8 @@ struct UrlData {
 
   struct CookieInfo *cookies;
 
-  long ssl_version; /* what version the client wants to use */
-#ifdef USE_SSLEAY
-  SSL_CTX* ctx;
-  SSL*     ssl;
-  X509*    server_cert;
-#endif /* USE_SSLEAY */
+  struct ssldata ssl; /* this is for ssl-stuff */
+
   long crlf;
   struct curl_slist *quote;     /* before the transfer */
   struct curl_slist *postquote; /* after the transfer */

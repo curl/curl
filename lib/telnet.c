@@ -861,8 +861,9 @@ void telwrite(struct UrlData *data,
 #ifndef USE_SSLEAY
       bytes_written = swrite(data->firstsocket, outbuf, out_count);
 #else
-      if (data->use_ssl) {
-        bytes_written = SSL_write(data->ssl, (char *)outbuf, out_count);
+      if (data->ssl.use) {
+        bytes_written = SSL_write(data->ssl.handle, (char *)outbuf,
+                                  out_count);
       }
       else {
         bytes_written = swrite(data->firstsocket, outbuf, out_count);
@@ -918,8 +919,8 @@ CURLcode telnet(struct connectdata *conn)
 #ifndef USE_SSLEAY
 	    nread = sread (sockfd, buf, BUFSIZE - 1);
 #else
-	    if (data->use_ssl) {
-	       nread = SSL_read (data->ssl, buf, BUFSIZE - 1);
+	    if (data->ssl.use) {
+	       nread = SSL_read (data->ssl.handle, buf, BUFSIZE - 1);
 	    }
 	    else {
 	       nread = sread (sockfd, buf, BUFSIZE - 1);

@@ -117,6 +117,9 @@ CURLcode curl_getinfo(CURL *curl, CURLINFO info, ...)
   case CURLINFO_SPEED_UPLOAD:
     *param_doublep = data->progress.ulspeed;
     break;
+  case CURLINFO_SSL_VERIFYRESULT:
+    *param_longp = data->ssl.certverifyresult;
+    break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }

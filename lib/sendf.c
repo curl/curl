@@ -111,8 +111,8 @@ size_t sendf(int fd, struct UrlData *data, char *fmt, ...)
 #ifndef USE_SSLEAY
   bytes_written = swrite(fd, s, strlen(s));
 #else /* USE_SSLEAY */
-  if (data->use_ssl) {
-    bytes_written = SSL_write(data->ssl, s, strlen(s));
+  if (data->ssl.use) {
+    bytes_written = SSL_write(data->ssl.handle, s, strlen(s));
   } else {
     bytes_written = swrite(fd, s, strlen(s));
   }
@@ -161,8 +161,8 @@ size_t ssend(int fd, struct connectdata *conn, void *mem, size_t len)
   struct UrlData *data=conn->data; /* conn knows data, not vice versa */
 
 #ifdef USE_SSLEAY
-  if (data->use_ssl) {
-    bytes_written = SSL_write(data->ssl, mem, len);
+  if (data->ssl.use) {
+    bytes_written = SSL_write(data->ssl.handle, mem, len);
   }
   else {
 #endif

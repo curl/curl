@@ -150,19 +150,19 @@ void curl_free(void)
 void static urlfree(struct UrlData *data, bool totally)
 {
 #ifdef USE_SSLEAY
-  if (data->use_ssl) {
-    if(data->ssl) {
-      (void)SSL_shutdown(data->ssl);
-      SSL_set_connect_state(data->ssl);
+  if (data->ssl.use) {
+    if(data->ssl.handle) {
+      (void)SSL_shutdown(data->ssl.handle);
+      SSL_set_connect_state(data->ssl.handle);
 
-      SSL_free (data->ssl);
-      data->ssl = NULL;
+      SSL_free (data->ssl.handle);
+      data->ssl.handle = NULL;
     }
-    if(data->ctx) {
-      SSL_CTX_free (data->ctx);
-      data->ctx = NULL;
+    if(data->ssl.ctx) {
+      SSL_CTX_free (data->ssl.ctx);
+      data->ssl.ctx = NULL;
     }
-    data->use_ssl = FALSE; /* get back to ordinary socket usage */
+    data->ssl.use = FALSE; /* get back to ordinary socket usage */
   }
 #endif /* USE_SSLEAY */
 
@@ -380,7 +380,7 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     break;
 
   case CURLOPT_SSLVERSION:
-    data->ssl_version = va_arg(param, long);
+    data->ssl.version = va_arg(param, long);
     break;
 
   case CURLOPT_COOKIEFILE:
@@ -522,6 +522,13 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     data->krb4_level = va_arg(param, char *);
     data->bits.krb4=data->krb4_level?TRUE:FALSE;
     break;
+  case CURLOPT_SSL_VERIFYPEER:
+    data->ssl.verifypeer = va_arg(param, long);
+    break;
+  case CURLOPT_CAINFO:
+    data->ssl.CAfile = va_arg(param, char *);
+    data->ssl.CApath = NULL; /*This does not work on windows.*/
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_READ_ERROR; /* correct this */
@@ -546,8 +553,8 @@ int GetLine(int sockfd, char *buf, struct UrlData *data)
       (nread<BUFSIZE) && read_rc;
       nread++, ptr++) {
 #ifdef USE_SSLEAY
-    if (data->use_ssl) {
-      read_rc = SSL_read(data->ssl, ptr, 1);
+    if (data->ssl.use) {
+      read_rc = SSL_read(data->ssl.handle, ptr, 1);
     }
     else {
 #endif
@@ -593,8 +600,8 @@ CURLcode curl_write(CURLconnect *c_conn, char *buf, size_t amount,
   data = conn->data;
 
 #ifdef USE_SSLEAY
-  if (data->use_ssl) {
-    bytes_written = SSL_write(data->ssl, buf, amount);
+  if (data->ssl.use) {
+    bytes_written = SSL_write(data->ssl.handle, buf, amount);
   }
   else {
 #endif
@@ -624,8 +631,8 @@ CURLcode curl_read(CURLconnect *c_conn, char *buf, size_t buffersize,
   data = conn->data;
 
 #ifdef USE_SSLEAY
-  if (data->use_ssl) {
-    nread = SSL_read (data->ssl, buf, buffersize);
+  if (data->ssl.use) {
+    nread = SSL_read (data->ssl.handle, buf, buffersize);
   }
   else {
 #endif
