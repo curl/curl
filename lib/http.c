@@ -283,7 +283,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
              "%s"
              "\r\n",
              hostname, remote_port,
-             (data->bits.proxy_user_passwd)?conn->allocptr.proxyuserpwd:"",
+             (conn->bits.proxy_user_passwd)?conn->allocptr.proxyuserpwd:"",
              (data->useragent?conn->allocptr.uagent:"")
              );
 
@@ -340,7 +340,7 @@ CURLcode Curl_http_connect(struct connectdata *conn)
       return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(data->bits.user_passwd && !data->bits.this_is_a_follow) {
+  if(conn->bits.user_passwd && !data->bits.this_is_a_follow) {
     /* Authorization: is requested, this is not a followed location, get the
        original host name */
     data->auth_host = strdup(conn->hostname);
@@ -423,7 +423,7 @@ CURLcode Curl_http(struct connectdata *conn)
     conn->allocptr.uagent=NULL;
   }
 
-  if((data->bits.user_passwd) && !checkheaders(data, "Authorization:")) {
+  if((conn->bits.user_passwd) && !checkheaders(data, "Authorization:")) {
     char *authorization;
 
     /* To prevent the user+password to get sent to other than the original
@@ -606,10 +606,14 @@ CURLcode Curl_http(struct connectdata *conn)
                  (data->bits.http_post || data->bits.http_formpost)?"POST":
                  (data->bits.http_put)?"PUT":"GET"),
                 ppath,
-                (data->bits.proxy_user_passwd && conn->allocptr.proxyuserpwd)?conn->allocptr.proxyuserpwd:"",
-                (data->bits.user_passwd && conn->allocptr.userpwd)?conn->allocptr.userpwd:"",
-                (data->bits.set_range && conn->allocptr.rangeline)?conn->allocptr.rangeline:"",
-                (data->useragent && *data->useragent && conn->allocptr.uagent)?conn->allocptr.uagent:"",
+                (conn->bits.proxy_user_passwd &&
+                 conn->allocptr.proxyuserpwd)?conn->allocptr.proxyuserpwd:"",
+                (conn->bits.user_passwd && conn->allocptr.userpwd)?
+                conn->allocptr.userpwd:"",
+                (data->bits.set_range && conn->allocptr.rangeline)?
+                conn->allocptr.rangeline:"",
+                (data->useragent && *data->useragent && conn->allocptr.uagent)?
+                conn->allocptr.uagent:"",
                 (conn->allocptr.cookie?conn->allocptr.cookie:""), /* Cookie: <data> */
                 (conn->allocptr.host?conn->allocptr.host:""), /* Host: host */
                 http->p_pragma?http->p_pragma:"",

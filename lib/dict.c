@@ -100,7 +100,7 @@ CURLcode Curl_dict(struct connectdata *conn)
   char *path = conn->path;
   long *bytecount = &conn->bytecount;
 
-  if(data->bits.user_passwd) {
+  if(conn->bits.user_passwd) {
     /* AUTH is missing */
   }
 

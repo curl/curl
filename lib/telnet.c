@@ -745,7 +745,7 @@ static int check_telnet_options(struct connectdata *conn)
 
   /* Add the user name as an environment variable if it
      was given on the command line */
-  if(data->bits.user_passwd)
+  if(conn->bits.user_passwd)
   {
     char *buf = malloc(256);
     sprintf(buf, "USER,%s", data->user);

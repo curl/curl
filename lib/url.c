@@ -613,7 +613,6 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
      * user:password to use in the operation
      */
     data->userpwd = va_arg(param, char *);
-    data->bits.user_passwd = data->userpwd?1:0;
     break;
   case CURLOPT_POSTQUOTE:
     /*
@@ -657,7 +656,6 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
      * user:password needed to use the proxy
      */
     data->proxyuserpwd = va_arg(param, char *);
-    data->bits.proxy_user_passwd = data->proxyuserpwd?1:0;
     break;
   case CURLOPT_RANGE:
     /*
@@ -1288,9 +1286,14 @@ static CURLcode Connect(struct UrlData *data,
      connections, so we set this to force-close. Protocols that support
      this need to set this to FALSE in their "curl_do" functions. */
   conn->bits.close = TRUE;
+  
+  /* inherite initial knowledge from the data struct */
+  conn->bits.user_passwd = data->userpwd?1:0;
+  conn->bits.proxy_user_passwd = data->proxyuserpwd?1:0;
 
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
+
 
   /***********************************************************
    * We need to allocate memory to store the path in. We get the size of the
@@ -1406,7 +1409,7 @@ static CURLcode Connect(struct UrlData *data,
    * Take care of user and password authentication stuff
    *************************************************************/
 
-  if(data->bits.user_passwd && !data->bits.use_netrc) {
+  if(conn->bits.user_passwd && !data->bits.use_netrc) {
     data->user[0] =0;
     data->passwd[0]=0;
 
@@ -1431,7 +1434,7 @@ static CURLcode Connect(struct UrlData *data,
   /*************************************************************
    * Take care of proxy authentication stuff
    *************************************************************/
-  if(data->bits.proxy_user_passwd) {
+  if(conn->bits.proxy_user_passwd) {
     data->proxyuser[0] =0;
     data->proxypasswd[0]=0;
 
@@ -1754,7 +1757,7 @@ static CURLcode Connect(struct UrlData *data,
             conn->hostname);
     }
     else
-      data->bits.user_passwd = 1; /* enable user+password */
+      conn->bits.user_passwd = 1; /* enable user+password */
 
     /* weather we failed or not, we don't know which fields that were filled
        in anyway */
@@ -1763,7 +1766,7 @@ static CURLcode Connect(struct UrlData *data,
     if(!data->passwd[0])
       strcpy(data->passwd, CURL_DEFAULT_PASSWORD);
   }
-  else if(!(data->bits.user_passwd) &&
+  else if(!(conn->bits.user_passwd) &&
 	  (conn->protocol & (PROT_FTP|PROT_HTTP)) ) {
     /* This is a FTP or HTTP URL, and we haven't got the user+password in
      * the extra parameter, we will now try to extract the possible
@@ -1812,7 +1815,7 @@ static CURLcode Connect(struct UrlData *data,
       }
 
       conn->name = ++ptr;
-      data->bits.user_passwd=1; /* enable user+password */
+      conn->bits.user_passwd=TRUE; /* enable user+password */
     }
     else {
       strcpy(data->user, CURL_DEFAULT_USER);
@@ -1998,7 +2001,7 @@ static CURLcode Connect(struct UrlData *data,
   /*************************************************************
    * Proxy authentication
    *************************************************************/
-  if(data->bits.proxy_user_passwd) {
+  if(conn->bits.proxy_user_passwd) {
     char *authorization;
     snprintf(data->buffer, BUFSIZE, "%s:%s",
              data->proxyuser, data->proxypasswd);
