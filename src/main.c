@@ -2623,6 +2623,10 @@ static void free_config_fields(struct Configurable *config)
     free(config->random_file);
   if(config->egd_file)
     free(config->egd_file);
+  if(config->trace_dump)
+    free(config->trace_dump);
+  if(config->cipher_list)
+    free(config->cipher_list);
   if(config->userpwd)
     free(config->userpwd);
   if(config->postfields)
