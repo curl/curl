@@ -1,4 +1,3 @@
-.\" You can view this file with:
 .\" nroff -man [file]
 .\" $Id$
 .\"
@@ -166,7 +165,7 @@ code). (Added in 7.7.2)
 .B CURLOPT_WRITEHEADER
 Pass a pointer to be used to write the header part of the received data to. If
 you don't use your own callback to take care of the writing, this must be a
-valid FILE *. See also the \fICURLOPT_HEADERFUNCTION\fP option below on how to
+valid FILE *. See also the \fICURLOPT_HEADERFUNCTION\fP option above on how to
 set a custom get-all-headers callback.
 .TP
 .B CURLOPT_DEBUGFUNCTION
@@ -235,7 +234,7 @@ you tunnel through the HTTP proxy. Such tunneling is activated with
 Pass a long with this option to set the proxy port to connect to unless it is
 specified in the proxy string \fICURLOPT_PROXY\fP.
 .TP
-.B CURLOPT_PROXTYPE
+.B CURLOPT_PROXYTYPE
 Pass a long with this option to set type of the proxy. Available options for
 this are CURLPROXY_HTTP and CURLPROXY_SOCKS5, with the HTTP one being
 default. (Added in 7.10)
@@ -322,6 +321,12 @@ prompt function.
 .PP
 .SH HTTP OPTIONS
 .TP 0.4i
+.B CURLOPT_ENCODING
+Two encodings are supported \fIdentity\fP, which does nothing, and
+\fIdeflate\fP to request the server to compress its reponse using the
+zlib algorithm. This is not an order, the server may or may not do it.
+See the special file lib/README.encoding for details.
+.TP
 .B CURLOPT_FOLLOWLOCATION
 A non-zero parameter tells the library to follow any Location: header that the
 server sends as part of a HTTP header.
@@ -577,7 +582,7 @@ aborting perfectly normal operations. This option will cause curl to use the
 SIGALRM to enable time-outing system calls.
 
 \fBNOTE:\fP this is not recommended to use in unix multi-threaded programs, as
-it uses signals unless CURLOPT_NOSIGNAL (see below) is set.
+it uses signals unless CURLOPT_NOSIGNAL (see above) is set.
 .TP
 .B CURLOPT_LOW_SPEED_LIMIT
 Pass a long as parameter. It contains the transfer speed in bytes per second
@@ -640,7 +645,7 @@ connection timeout (it will then only timeout on the system's internal
 timeouts). See also the \fICURLOPT_TIMEOUT\fP option.
 
 \fBNOTE:\fP this is not recommended to use in unix multi-threaded programs, as
-it uses signals unless CURLOPT_NOSIGNAL (see below) is set.
+it uses signals unless CURLOPT_NOSIGNAL (see above) is set.
 .PP
 .SH SSL and SECURITY OPTIONS
 .TP 0.4i
