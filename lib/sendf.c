@@ -27,6 +27,10 @@
 #include <stdarg.h>
 #include <stdlib.h>
 
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>	/* required for send() & recv() prototypes */
+#endif
+
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif

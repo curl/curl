@@ -44,6 +44,10 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h> /* required for free() prototype, without it, this crashes
+                       on macos 68K */
+#endif
 
 #endif
 #include <stdio.h>

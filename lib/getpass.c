@@ -35,9 +35,7 @@
  *   Daniel Stenberg <daniel@haxx.se>
  */
 
-#ifdef HAVE_CONFIG_H
-#  include <config.h>
-#endif
+#include "setup.h" /* setup.h is required for read() prototype */
 
 #ifndef HAVE_GETPASS_R
 
