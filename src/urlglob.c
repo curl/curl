@@ -31,7 +31,7 @@
 #include <curl/curl.h>
 #include "urlglob.h"
 
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "../lib/memdebug.h"
 #endif
 
