@@ -1128,6 +1128,7 @@ sub singletest {
 
         for(@strip) {
             # strip all patterns from both arrays
+            chomp $_;
             @out = striparray( $_, \@out);
             @protstrip= striparray( $_, \@protstrip);
         }
