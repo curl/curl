@@ -191,7 +191,7 @@ CURLcode Curl_file(struct connectdata *conn)
      date. */
   if(data->set.no_body && data->set.include_header && fstated) {
     CURLcode result;
-    sprintf(buf, "Content-Length: " CURL_FORMAT_OFF_T "\r\n", expected_size);
+    sprintf(buf, "Content-Length: " FORMAT_OFF_T "\r\n", expected_size);
     result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
     if(result)
       return result;
