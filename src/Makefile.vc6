@@ -21,8 +21,8 @@ LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
 
 CFLAGS = /I "../include" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 LFLAGS = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
-LINKLIBS = wsock32.lib libcurl.lib
-LINKLIBS_DEBUG = wsock32.lib libcurld.lib
+LINKLIBS = ws2_32.lib libcurl.lib
+LINKLIBS_DEBUG = ws2_32.lib libcurld.lib
 
 RELEASE_OBJS= \
 	hugehelpr.obj \

@@ -29,7 +29,7 @@ LINKRS = link.exe -lib /out:$(PROGRAM_NAME) /LIBPATH:$(OPENSSL_PATH)/out32dll
 
 CFLAGS = /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS"
 LFLAGS = /nologo
-LINKLIBS = wsock32.lib
+LINKLIBS = ws2_32.lib
 LINKSLIBS = libeay32.lib ssleay32.lib RSAglue.lib
 
 RELEASE_OBJS= \
