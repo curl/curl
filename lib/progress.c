@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -119,7 +119,7 @@ static char *max5data(curl_off_t bytes, char *max5)
   return max5;
 }
 
-/* 
+/*
 
    New proposed interface, 9th of February 2000:
 
@@ -272,15 +272,17 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   timespent = (long)data->progress.timespent;
 
   /* The average download speed this far */
-  data->progress.dlspeed =
-    data->progress.downloaded/(timespent?timespent:1);
+  data->progress.dlspeed = (curl_off_t)
+    (data->progress.downloaded/(data->progress.timespent>0?
+                               data->progress.timespent:1));
 
   /* The average upload speed this far */
-  data->progress.ulspeed =
-    data->progress.uploaded/(timespent?timespent:1);
+  data->progress.ulspeed = (curl_off_t)
+    (data->progress.uploaded/(data->progress.timespent>0?
+                              data->progress.timespent:1));
 
   if(data->progress.lastshow == Curl_tvlong(now))
-    return 0; /* never update this more than once a second if the end isn't 
+    return 0; /* never update this more than once a second if the end isn't
                  reached */
   data->progress.lastshow = now.tv_sec;
 
@@ -373,7 +375,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     dlpercen = (long)(100*(data->progress.downloaded/100) /
                       (data->progress.size_dl/100));
   }
-    
+
   /* Now figure out which of them that is slower and use for the for
      total estimate! */
   total_estimate = ulestimate>dlestimate?ulestimate:dlestimate;
@@ -384,12 +386,12 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   time2str(time_spent, timespent);
 
   /* Get the total amount of data expected to get transfered */
-  total_expected_transfer = 
+  total_expected_transfer =
     (data->progress.flags & PGRS_UL_SIZE_KNOWN?
      data->progress.size_ul:data->progress.uploaded)+
     (data->progress.flags & PGRS_DL_SIZE_KNOWN?
      data->progress.size_dl:data->progress.downloaded);
-      
+
   /* We have transfered this much so far */
   total_transfer = data->progress.downloaded + data->progress.uploaded;
 
