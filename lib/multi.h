@@ -23,6 +23,10 @@
  * $Id$
  ***************************************************************************/
 
+ /* This file shadows for <curl/multi.h> in some compilers
+ */
+#include <curl/multi.h>
+
 /*
  * Prototypes for library-wide functions provided by multi.c
  */
