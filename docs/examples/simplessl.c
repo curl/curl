@@ -28,6 +28,9 @@
    4.2. if the format of the key file is DER, set pKeyType to "DER"
 
    !! verify of the server certificate is not implemented here !!
+
+   **** This example only works with libcurl 7.9.3 and later! ****
+
 */
 
 int main(int argc, char **argv)
