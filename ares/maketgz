@@ -21,7 +21,7 @@ print "adding $version in the configure.ac file\n";
 
 # now make a new configure script with this
 print "makes a new configure script\n";
-`autoconf configure.ac-rel`;
+`autoconf configure.ac-rel >configure`;
 
 # now run this new configure to get a fine makefile
 print "running configure\n";
