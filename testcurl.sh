@@ -11,7 +11,7 @@
 # curl site, at http://curl.haxx.se/auto/
 
 # USAGE:
-# testcurl.sh [configure options] > output
+# testcurl.sh > output
 
 # version of this script
 version=1
@@ -90,7 +90,7 @@ fi
 build="build-$$"
 
 # remove any previous left-overs
-rm -rf $build
+rm -rf build-*
 
 # create a dir to build in
 mkdir $build
