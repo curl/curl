@@ -22,8 +22,8 @@ curl_easy_setopt() calls in the setup phase.
 \fBNOTE:\fP strings passed to libcurl as 'char *' arguments, will not be
 copied by the library. Instead you should keep them available until libcurl no
 longer needs them. Failing to do so will cause very odd behavior or even
-crashes. libcurl will them until you call curl_easy_cleanup() or you set the
-same option again to use a different pointer.
+crashes. libcurl will need them until you call curl_easy_cleanup() or you set
+the same option again to use a different pointer.
 
 \fBNOTE2:\fP options set with this function call are valid for the forthcoming
 data transfers that are performed when you invoke \fIcurl_easy_perform\fP.
