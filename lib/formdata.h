@@ -2,10 +2,10 @@
 #define __FORMDATA_H
 
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -13,7 +13,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -23,17 +23,25 @@
  *
  * $Id$
  ***************************************************************************/
+
+enum formtype {
+  FORM_DATA, /* regular data */
+  FORM_FILE  /* 'line' points to a file name we should read from */
+};
+
 /* plain and simple linked list with lines to send */
 struct FormData {
   struct FormData *next;
+  enum formtype type;
   char *line;
   size_t length;
 };
 
 struct Form {
   struct FormData *data; /* current form line to send */
-  unsigned int sent; /* number of bytes of the current line that has already
-                        been sent in a previous invoke */
+  size_t sent;           /* number of bytes of the current line that has
+                            already been sent in a previous invoke */
+  FILE *fp;              /* file to read from */
 };
 
 /* used by FormAdd for temporary storage */

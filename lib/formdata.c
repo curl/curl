@@ -102,6 +102,9 @@ Content-Disposition: form-data; name="FILECONTENT"
 #include "setup.h"
 #include <curl/curl.h>
 
+/* Length of the random boundary string. */
+#define BOUNDARY_LENGTH 40
+
 #ifndef CURL_DISABLE_HTTP
 
 #include <stdio.h>
@@ -109,6 +112,7 @@ Content-Disposition: form-data; name="FILECONTENT"
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#include <sys/stat.h>
 #include "formdata.h"
 #include "strequal.h"
 #include "memory.h"
@@ -118,9 +122,6 @@ Content-Disposition: form-data; name="FILECONTENT"
 
 /* The last #include file should be: */
 #include "memdebug.h"
-
-/* Length of the random boundary string. */
-#define BOUNDARY_LENGTH 40
 
 /* What kind of Content-Type to use on un-specified files with unrecognized
    extensions. */
@@ -785,9 +786,10 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
  * size is incremented by the chunk length, unless it is NULL
  */
 static CURLcode AddFormData(struct FormData **formp,
+                            enum formtype type,
                             const void *line,
                             size_t length,
-                            size_t *size)
+                            curl_off_t *size)
 {
   struct FormData *newform = (struct FormData *)
     malloc(sizeof(struct FormData));
@@ -807,6 +809,7 @@ static CURLcode AddFormData(struct FormData **formp,
   memcpy(newform->line, line, length);
   newform->length = length;
   newform->line[length]=0; /* zero terminate for easier debugging */
+  newform->type = type;
 
   if(*formp) {
     (*formp)->next = newform;
@@ -815,8 +818,20 @@ static CURLcode AddFormData(struct FormData **formp,
   else
     *formp = newform;
 
-  if (size)
-    *size += length;
+  if (size) {
+    if(type == FORM_DATA)
+      *size += length;
+    else {
+      /* Since this is a file to be uploaded here, add the size of the actual
+         file */
+      if(!strequal("-", newform->line)) {
+        struct stat file;
+        if(!stat(newform->line, &file)) {
+          *size += file.st_size;
+        }
+      }
+    }
+  }
   return CURLE_OK;
 }
 
@@ -825,7 +840,7 @@ static CURLcode AddFormData(struct FormData **formp,
  */
 
 static CURLcode AddFormDataf(struct FormData **formp,
-                             size_t *size,
+                             curl_off_t *size,
                              const char *fmt, ...)
 {
   char s[4096];
@@ -834,39 +849,7 @@ static CURLcode AddFormDataf(struct FormData **formp,
   vsprintf(s, fmt, ap);
   va_end(ap);
 
-  return AddFormData(formp, s, 0, size);
-}
-
-/*
- * Curl_FormBoundary() creates a suitable boundary string and returns an
- * allocated one.
- */
-char *Curl_FormBoundary(void)
-{
-  char *retstring;
-  static int randomizer=0; /* this is just so that two boundaries within
-			      the same form won't be identical */
-  size_t i;
-
-  static char table16[]="abcdef0123456789";
-
-  retstring = (char *)malloc(BOUNDARY_LENGTH+1);
-
-  if(!retstring)
-    return NULL; /* failed */
-
-  srand(time(NULL)+randomizer++); /* seed */
-
-  strcpy(retstring, "----------------------------");
-
-  for(i=strlen(retstring); i<BOUNDARY_LENGTH; i++)
-    retstring[i] = table16[rand()%16];
-
-  /* 28 dashes and 12 hexadecimal digits makes 12^16 (184884258895036416)
-     combinations */
-  retstring[BOUNDARY_LENGTH]=0; /* zero terminate */
-
-  return retstring;
+  return AddFormData(formp, FORM_DATA, s, 0, size);
 }
 
 /*
@@ -936,7 +919,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
   struct curl_httppost *file;
   CURLcode result = CURLE_OK;
 
-  size_t size =0;
+  curl_off_t size=0; /* support potentially ENORMOUS formposts */
   char *boundary;
   char *fileboundary=NULL;
   struct curl_slist* curList;
@@ -977,16 +960,17 @@ CURLcode Curl_getFormData(struct FormData **finalform,
     if (result)
       break;
 
-    result = AddFormData(&form,
-                         "Content-Disposition: form-data; name=\"", 0, &size);
+    result = AddFormDataf(&form, &size,
+                          "Content-Disposition: form-data; name=\"");
     if (result)
       break;
 
-    result = AddFormData(&form, post->name, post->namelength, &size);
+    result = AddFormData(&form, FORM_DATA, post->name, post->namelength,
+                         &size);
     if (result)
       break;
 
-    result = AddFormData(&form, "\"", 0, &size);
+    result = AddFormDataf(&form, &size, "\"");
     if (result)
       break;
 
@@ -1071,7 +1055,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
       }
 #endif
 
-      result = AddFormData(&form, "\r\n\r\n", 0, &size);
+      result = AddFormDataf(&form, &size, "\r\n\r\n");
       if (result)
         break;
 
@@ -1079,11 +1063,10 @@ CURLcode Curl_getFormData(struct FormData **finalform,
          (post->flags & HTTPPOST_READFILE)) {
         /* we should include the contents from the specified file */
         FILE *fileread;
-        char buffer[1024];
-        size_t nread;
 
         fileread = strequal("-", file->contents)?
           stdin:fopen(file->contents, "rb"); /* binary read for win32  */
+
         /*
          * VMS: This only allows for stream files on VMS.  Stream files are
          * OK, as are FIXED & VAR files WITHOUT implied CC For implied CC,
@@ -1091,13 +1074,27 @@ CURLcode Curl_getFormData(struct FormData **finalform,
          */
 
         if(fileread) {
-          while((nread = fread(buffer, 1, 1024, fileread))) {
-            result = AddFormData(&form, buffer, nread, &size);
-            if (result)
-              break;
-          }
-          if(fileread != stdin)
+          if(fileread != stdin) {
+            /* close the file again */
             fclose(fileread);
+            /* add the file name only - for later reading from this */
+            result = AddFormData(&form, FORM_FILE, file->contents, 0, &size);
+          }
+          else {
+            /* When uploading from stdin, we can't know the size of the file,
+             * thus must read the full file as before. We *could* use chunked
+             * transfer-encoding, but that only works for HTTP 1.1 and we
+             * can't be sure we work with such a server.
+             */
+            size_t nread;
+            char buffer[512];
+            while((nread = fread(buffer, 1, sizeof(buffer), fileread))) {
+              result = AddFormData(&form, FORM_DATA, buffer, nread, &size);
+              if (result)
+                break;
+            }
+          }
+
           if (result) {
             Curl_formclean(firstform);
             free(boundary);
@@ -1115,16 +1112,16 @@ CURLcode Curl_getFormData(struct FormData **finalform,
       }
       else if (post->flags & HTTPPOST_BUFFER) {
         /* include contents of buffer */
-        result = AddFormData(&form, post->buffer, post->bufferlength,
-                             &size);
+        result = AddFormData(&form, FORM_DATA, post->buffer,
+                             post->bufferlength, &size);
           if (result)
             break;
       }
 
       else {
         /* include the contents we got */
-        result = AddFormData(&form, post->contents, post->contentslength,
-                             &size);
+        result = AddFormData(&form, FORM_DATA, post->contents,
+                             post->contentslength, &size);
         if (result)
           break;
       }
@@ -1183,8 +1180,30 @@ int Curl_FormInit(struct Form *form, struct FormData *formdata )
 
   form->data = formdata;
   form->sent = 0;
+  form->fp = NULL;
 
   return 0;
+}
+
+static size_t readfromfile(struct Form *form, char *buffer, size_t size)
+{
+  size_t nread;
+  if(!form->fp) {
+    /* this file hasn't yet been opened */
+    form->fp = fopen(form->data->line, "rb"); /* b is for binary */
+    if(!form->fp)
+      return -1; /* failure */
+  }
+  nread = fread(buffer, 1, size, form->fp);
+
+  if(nread != size) {
+    /* this is the last chunk form the file, move on */
+    fclose(form->fp);
+    form->fp = NULL;
+    form->data = form->data->next;
+  }
+
+  return nread;
 }
 
 /*
@@ -1207,6 +1226,9 @@ size_t Curl_FormReader(char *buffer,
   if(!form->data)
     return 0; /* nothing, error, empty */
 
+  if(form->data->type == FORM_FILE)
+    return readfromfile(form, buffer, wantedsize);
+
   do {
 
     if( (form->data->length - form->sent ) > wantedsize - gotsize) {
@@ -1228,7 +1250,7 @@ size_t Curl_FormReader(char *buffer,
 
     form->data = form->data->next; /* advance */
 
-  } while(form->data);
+  } while(form->data && (form->data->type == FORM_DATA));
   /* If we got an empty line and we have more data, we proceed to the next
      line immediately to avoid returning zero before we've reached the end.
      This is the bug reported November 22 1999 on curl 6.3. (Daniel) */
@@ -1475,3 +1497,36 @@ void curl_formfree(struct curl_httppost *form)
 }
 
 #endif  /* CURL_DISABLE_HTTP */
+
+/*
+ * Curl_FormBoundary() creates a suitable boundary string and returns an
+ * allocated one. This is also used by SSL-code so it must be present even
+ * if HTTP is disabled!
+ */
+char *Curl_FormBoundary(void)
+{
+  char *retstring;
+  static int randomizer=0; /* this is just so that two boundaries within
+			      the same form won't be identical */
+  size_t i;
+
+  static char table16[]="abcdef0123456789";
+
+  retstring = (char *)malloc(BOUNDARY_LENGTH+1);
+
+  if(!retstring)
+    return NULL; /* failed */
+
+  srand(time(NULL)+randomizer++); /* seed */
+
+  strcpy(retstring, "----------------------------");
+
+  for(i=strlen(retstring); i<BOUNDARY_LENGTH; i++)
+    retstring[i] = table16[rand()%16];
+
+  /* 28 dashes and 12 hexadecimal digits makes 12^16 (184884258895036416)
+     combinations */
+  retstring[BOUNDARY_LENGTH]=0; /* zero terminate */
+
+  return retstring;
+}
