@@ -109,6 +109,7 @@
 #include "progress.h"
 #include "cookie.h"
 #include "strequal.h"
+#include "escape.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -1129,16 +1130,34 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
       if(*conn->name != ':') {
         /* the name is given, get user+password */
-        sscanf(conn->name, "%127[^:]:%127[^@]",
+        sscanf(conn->name, "%127[^:@]:%127[^@]",
                data->user, data->passwd);
       }
       else
         /* no name given, get the password only */
         sscanf(conn->name+1, "%127[^@]", data->passwd);
 
+      if(data->user[0]) {
+        char *newname=curl_unescape(data->user, 0);
+        if(strlen(newname) < sizeof(data->user)) {
+          strcpy(data->user, newname);
+        }
+        /* if the new name is longer than accepted, then just use
+           the unconverted name, it'll be wrong but what the heck */
+        free(newname);
+      }
+
       /* check for password, if no ask for one */
       if( !data->passwd[0] ) {
         my_getpass("password:",data->passwd,sizeof(data->passwd));
+      }
+      else {
+        /* we have a password found in the URL, decode it! */
+        char *newpasswd=curl_unescape(data->passwd, 0);
+        if(strlen(newpasswd) < sizeof(data->passwd)) {
+          strcpy(data->passwd, newpasswd);
+        }
+        free(newpasswd);
       }
 
       conn->name = ++ptr;
