@@ -279,8 +279,9 @@ static CURLcode bindlocal(struct connectdata *conn,
             failf(data, "Insufficient kernel memory was available: %d", errno);
             break;
           default:
-            failf(data,"errno %d\n");
-          } /* end of switch */
+            failf(data, "errno %d\n", errno);
+            break;
+          } /* end of switch(errno) */
 	
           return CURLE_HTTP_PORT_FAILED;
         } /* end of else */
