@@ -419,7 +419,7 @@ Curl_addrinfo *Curl_he2ai(struct hostent *he, unsigned short port)
 
   for(i=0; (curr = (struct in_addr *)he->h_addr_list[i]); i++) {
 
-    ai = calloc(1, sizeof(struct addrinfo) + sizeof(struct sockaddr_in));
+    ai = calloc(1, sizeof(Curl_addrinfo) + sizeof(struct sockaddr_in));
 
     if(!ai)
       break;
@@ -437,7 +437,7 @@ Curl_addrinfo *Curl_he2ai(struct hostent *he, unsigned short port)
     ai->ai_addrlen = sizeof(struct sockaddr_in);
     /* make the ai_addr point to the address immediately following this struct
        and use that area to store the address */
-    ai->ai_addr = (struct sockaddr *) ((char*)ai + sizeof(struct addrinfo));
+    ai->ai_addr = (struct sockaddr *) ((char*)ai + sizeof(Curl_addrinfo));
 
     /* leave the rest of the struct filled with zero */
 
