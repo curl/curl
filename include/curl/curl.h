@@ -23,6 +23,30 @@
  * $Id$
  ***************************************************************************/
 
+/* If you have problems, all libcurl docs and details are found here:
+   http://curl.haxx.se/libcurl/
+*/
+
+/* This is the version number of the libcurl package from which this header
+   file origins: */
+#define LIBCURL_VERSION "7.10.6-pre3"
+
+/* This is the numeric version of the libcurl version number, meant for easier
+   parsing and comparions by programs. The LIBCURL_VERSION_NUM define will
+   always follow this syntax:
+
+         0xXXYYZZ
+
+   Where XX, YY and ZZ are the main version, release and patch numbers in
+   hexadecimal. All three numbers are always represented using two digits.  1.2
+   would appear as "0x010200" while version 9.11.7 appears as "0x090b07".
+
+   This 6-digit hexadecimal number does not show pre-release number, and it is
+   always a greater number in a more recent release. It makes comparisons with
+   greater than and less than work.
+*/
+#define LIBCURL_VERSION_NUM 0x070a06
+
 #include <stdio.h>
 /* The include stuff here is mainly for time_t! */
 #ifdef vms
@@ -51,39 +75,36 @@
 extern "C" {
 #endif
 
-/* stupid #define trick to preserve functionality with older code, but
-   making it use our name space for the future */
+/* silly trick to preserve functionality with older code, but making it use
+   our name space for the future */
 #define HttpPost curl_httppost
 
 struct curl_httppost {
-  struct curl_httppost *next; /* next entry in the list */
-  char *name;     /* pointer to allocated name */
-  long namelength; /* length of name length */
-  char *contents; /* pointer to allocated data contents */
-  long contentslength; /* length of contents field */
-
-  /* CMC: Added support for buffer uploads */
-  char *buffer; /* pointer to allocated buffer contents */
-  long bufferlength; /* length of buffer field */
-
-  char *contenttype; /* Content-Type */
+  struct curl_httppost *next;       /* next entry in the list */
+  char *name;                       /* pointer to allocated name */
+  long namelength;                  /* length of name length */
+  char *contents;                   /* pointer to allocated data contents */
+  long contentslength;              /* length of contents field */
+  char *buffer;                     /* pointer to allocated buffer contents */
+  long bufferlength;                /* length of buffer field */
+  char *contenttype;                /* Content-Type */
   struct curl_slist* contentheader; /* list of extra headers for this form */
-  struct curl_httppost *more; /* if one field name has more than one file, this
-                                 link should link to following files */
-  long flags;     /* as defined below */
-#define HTTPPOST_FILENAME (1<<0) /* specified content is a file name */
-#define HTTPPOST_READFILE (1<<1) /* specified content is a file name */
-#define HTTPPOST_PTRNAME (1<<2) /* name is only stored pointer
-                                   do not free in formfree */
+  struct curl_httppost *more;       /* if one field name has more than one
+                                       file, this link should link to following
+                                       files */
+  long flags;                       /* as defined below */
+#define HTTPPOST_FILENAME (1<<0)    /* specified content is a file name */
+#define HTTPPOST_READFILE (1<<1)    /* specified content is a file name */
+#define HTTPPOST_PTRNAME (1<<2)     /* name is only stored pointer
+                                       do not free in formfree */
 #define HTTPPOST_PTRCONTENTS (1<<3) /* contents is only stored pointer
                                        do not free in formfree */
+#define HTTPPOST_BUFFER (1<<4)      /* upload file from buffer */
+#define HTTPPOST_PTRBUFFER (1<<5)   /* upload file from pointer contents */
 
-/* CMC: Added support for buffer uploads */
-#define HTTPPOST_BUFFER (1<<4) /* upload file from buffer */
-#define HTTPPOST_PTRBUFFER (1<<5) /* upload file from pointer contents */
-
-  char *showfilename; /* The file name to show. If not set, the actual
-                         file name will be used (if this is a file part) */
+  char *showfilename;               /* The file name to show. If not set, the
+                                       actual file name will be used (if this
+                                       is a file part) */
 };
 
 typedef int (*curl_progress_callback)(void *clientp,
@@ -213,13 +234,13 @@ typedef enum {
   CURLPROXY_SOCKS5 = 5
 } curl_proxytype;
 
-typedef enum {
-  CURLAUTH_BASIC  =       0, /* default */
-  CURLAUTH_DIGEST =       1, /* Digest */
-  CURLAUTH_GSSNEGOTIATE = 2, /* GSS-Negotiate */
-  CURLAUTH_NTLM =         3, /* NTLM */
-  CURLAUTH_LASTKNOWN      /* never to be used */
-} curl_httpauth;
+#define CURLAUTH_NONE         0       /* nothing */
+#define CURLAUTH_BASIC        (1<<0)  /* Basic (default) */
+#define CURLAUTH_DIGEST       (1<<1)  /* Digest */
+#define CURLAUTH_GSSNEGOTIATE (1<<2)  /* GSS-Negotiate */
+#define CURLAUTH_NTLM         (1<<3)  /* NTLM */
+#define CURLAUTH_ANY ~0               /* all types set */
+#define CURLAUTH_ANYSAFE (~CURLAUTH_BASIC)
 
 /* this was the error code 50 in 7.7.3 and a few earlier versions, this
    is no longer used by libcurl but is instead #defined here only to not
@@ -270,6 +291,12 @@ typedef enum {
 #define CINIT(name,type,number) CURLOPT_/**/name = type + number
 #endif
 
+/*
+ * This macro-mania below setups the CURLOPT_[what] enum, to be used with
+ * curl_easy_setopt(). The first argument in the CINIT() macro is the [what]
+ * word.
+ */
+
 typedef enum {
   CINIT(NOTHING, LONG, 0), /********* the first one is unused ************/
   
@@ -279,24 +306,19 @@ typedef enum {
   /* The full URL to get/put */
   CINIT(URL,  OBJECTPOINT, 2),
 
-  /* Port number to connect to, if other than default. Specify the CONF_PORT
-     flag in the CURLOPT_FLAGS to activate this */
+  /* Port number to connect to, if other than default. */
   CINIT(PORT, LONG, 3),
 
-  /* Name of proxy to use. Specify the CONF_PROXY flag in the CURLOPT_FLAGS to
-     activate this */
+  /* Name of proxy to use. */
   CINIT(PROXY, OBJECTPOINT, 4),
   
-  /* Name and password to use when fetching. Specify the CONF_USERPWD flag in
-     the CURLOPT_FLAGS to activate this */
+  /* "name:password" to use when fetching. */
   CINIT(USERPWD, OBJECTPOINT, 5),
 
-  /* Name and password to use with Proxy. Specify the CONF_PROXYUSERPWD 
-     flag in the CURLOPT_FLAGS to activate this */
+  /* "name:password" to use with proxy. */
   CINIT(PROXYUSERPWD, OBJECTPOINT, 6),
 
-  /* Range to get, specified as an ASCII string. Specify the CONF_RANGE flag
-     in the CURLOPT_FLAGS to activate this */
+  /* Range to get, specified as an ASCII string. */
   CINIT(RANGE, OBJECTPOINT, 7),
 
   /* not used */
@@ -417,7 +439,6 @@ typedef enum {
      as described elsewhere. */
   CINIT(WRITEINFO, OBJECTPOINT, 40),
 
-  /* Previous FLAG bits */
   CINIT(VERBOSE, LONG, 41),      /* talk a lot */
   CINIT(HEADER, LONG, 42),       /* throw the header out too */
   CINIT(NOPROGRESS, LONG, 43),   /* shut off the progress meter */
@@ -633,8 +654,9 @@ typedef enum {
      attempted before the good old traditional PORT command. */     
   CINIT(FTP_USE_EPRT, LONG, 106),
 
-  /* Set this to a curl_httpauth value to enable that particular authentication
-     method. Use this in combination with CURLOPT_USERPWD. */
+  /* Set this to a bitmask value to enable the particular authentications
+     methods you like. Use this in combination with CURLOPT_USERPWD.
+     Note that setting multiple bits may cause extra network round-trips. */
   CINIT(HTTPAUTH, LONG, 107),
 
   CURLOPT_LASTENTRY /* the last unused */
@@ -705,9 +727,9 @@ typedef enum {
 #endif
 
 
-/* These functions are in the libcurl, they're here for portable reasons and
-   they are used by the 'curl' client. They really should be moved to some kind
-   of "portability library" since it has nothing to do with file transfers and
+/* These functions are in libcurl, they're here for portable reasons and they
+   are used by the 'curl' client. They really should be moved to some kind of
+   "portability library" since it has nothing to do with file transfers and
    might be usable to other programs...
 
    NOTE: they return TRUE if the strings match *case insensitively*.
@@ -715,9 +737,12 @@ typedef enum {
 extern int (curl_strequal)(const char *s1, const char *s2);
 extern int (curl_strnequal)(const char *s1, const char *s2, size_t n);
 
-/* DEPRECATED function to build formdata */
+#ifdef CURL_OLDSTYLE
+/* DEPRECATED function to build formdata. Stop using this, it will cease
+   to exist. */
 int curl_formparse(char *, struct curl_httppost **,
                    struct curl_httppost **_post);
+#endif
 
 /* name is uppercase CURLFORM_<name> */
 #ifdef CFINIT
@@ -796,47 +821,122 @@ typedef enum {
   CURL_FORMADD_LAST /* last */
 } CURLFORMcode;
 
+/*
+ * NAME curl_formadd()
+ *
+ * DESCRIPTION
+ *
+ * Pretty advanved function for building multi-part formposts. Each invoke
+ * adds one part that together construct a full post. Then use
+ * CURLOPT_HTTPPOST to send it off to libcurl.
+ */
 CURLFORMcode curl_formadd(struct curl_httppost **httppost,
-                 struct curl_httppost **last_post,
-                 ...);
+                          struct curl_httppost **last_post,
+                          ...);
 
-/* cleanup a form: */
+/*
+ * NAME curl_formfree()
+ *
+ * DESCRIPTION
+ *
+ * Free a multipart formpost previously built with curl_formadd().
+ */
 void curl_formfree(struct curl_httppost *form);
 
-/* Unix and Win32 getenv function call, this returns a malloc()'ed string that
-   MUST be free()ed after usage is complete. */
+/*
+ * NAME curl_getenv()
+ *
+ * DESCRIPTION
+ *
+ * Returns a malloc()'ed string that MUST be curl_free()ed after usage is
+ * complete.
+ */
 char *curl_getenv(const char *variable);
 
-/* Returns a static ascii string of the libcurl version. */
+/*
+ * NAME curl_version()
+ *
+ * DESCRIPTION
+ *
+ * Returns a static ascii string of the libcurl version.
+ */
 char *curl_version(void);
 
-/* Escape and unescape URL encoding in strings. The functions return a new
- * allocated string or NULL if an error occurred.  */
+/*
+ * NAME curl_escape()
+ *
+ * DESCRIPTION
+ *
+ * Escapes URL strings (converts all letters consider illegal in URLs to their
+ * %XX versions). This function returns a new allocated string or NULL if an
+ * error occurred.
+ */
 char *curl_escape(const char *string, int length);
+
+/*
+ * NAME curl_unescape()
+ *
+ * DESCRIPTION
+ *
+ * Unescapes URL encoding in strings (converts all %XX codes to their 8bit
+ * versions). This function returns a new allocated string or NULL if an error
+ * occurred.
+ */
 char *curl_unescape(const char *string, int length);
-/* 20020912 WJM. Provide for a de-allocation in the same translation unit
-   that did the allocation. Added in libcurl 7.10 */
+
+/*
+ * NAME curl_free()
+ *
+ * DESCRIPTION
+ *
+ * Provided for de-allocation in the same translation unit that did the
+ * allocation. Added in libcurl 7.10
+ */
 void curl_free(void *p);
 
-/* curl_global_init() should be invoked exactly once for each application that
-   uses libcurl */
+/*
+ * NAME curl_global_init()
+ *
+ * DESCRIPTION
+ *
+ * curl_global_init() should be invoked exactly once for each application that
+ * uses libcurl
+ */
 CURLcode curl_global_init(long flags);
 
-/* curl_global_cleanup() should be invoked exactly once for each application
-   that uses libcurl */
+/*
+ * NAME curl_global_cleanup()
+ *
+ * DESCRIPTION
+ *
+ * curl_global_cleanup() should be invoked exactly once for each application
+ * that uses libcurl
+ */
 void curl_global_cleanup(void);
-
-/* This is the version number */
-#define LIBCURL_VERSION "7.10.6-pre1"
-#define LIBCURL_VERSION_NUM 0x070a06
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
-	char			*data;
-	struct curl_slist	*next;
+  char *data;
+  struct curl_slist *next;
 };
 
+/*
+ * NAME curl_slist_append()
+ *
+ * DESCRIPTION
+ *
+ * Appends a string to a linked list. If no list exists, it will be created
+ * first. Returns the new list, after appending.
+ */
 struct curl_slist *curl_slist_append(struct curl_slist *, const char *);
+
+/*
+ * NAME curl_slist_free_all()
+ *
+ * DESCRIPTION
+ *
+ * free a previously built curl_slist.
+ */
 void curl_slist_free_all(struct curl_slist *);
 
 /*
@@ -1004,8 +1104,18 @@ typedef struct {
 #define CURL_VERSION_KERBEROS4 (1<<1)
 #define CURL_VERSION_SSL       (1<<2)
 #define CURL_VERSION_LIBZ      (1<<3)
+#define CURL_VERSION_NTLM      (1<<4)
+#define CURL_VERSION_GSSNEGOTIATE (1<<5)
+#define CURL_VERSION_DEBUG     (1<<6) /* built with debug capabilities */
 
-/* returns a pointer to a static copy of the version info struct */
+/*
+ * NAME curl_version_info()
+ *
+ * DESCRIPTION
+ *
+ * This function returns a pointer to a static copy of the version info
+ * struct. See above.
+ */
 curl_version_info_data *curl_version_info(CURLversion);
 
 #ifdef  __cplusplus
