@@ -5,7 +5,7 @@ Curl and libcurl 7.13.2
  Available command line options:           105
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        18
+ Amount of public web site mirrors:        20
  Number of known libcurl bindings:         31
 
 This release includes the following changes:
@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o inet_ntoa_r() when built with uClibc
  o the so name issue for the LDAP library dynamic load
  o crash when using SOCKS4 proxy
  o a debug printf() was removed
@@ -26,6 +27,8 @@ This release includes the following bugfixes:
 Other curl-related news since the previous public release:
 
  o pycurl 7.13.1 http://pycurl.sf.net
+ o http://curl.tolix.org is a new Californian mirror
+ o http://curl.seekmeup.com/ is a new mirror in US Texas
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:

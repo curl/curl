@@ -16,6 +16,9 @@ Daniel (16 March 2005)
   address that is then passed on and used.
 
 Daniel (15 March 2005)
+- Dan Fandrich made the code properly use the uClibc's version of
+  inet_ntoa_r() when built with it.
+
 - Added test 237 and 238: test EPSV and PASV response handling when they get
   well- formated data back but using illegal values. In 237 PASV gets an IP
   address that is way bad. In 238 EPSV gets a port that is way out of range.
