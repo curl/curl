@@ -597,240 +597,240 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             else if(checkprefix("Last-Modified:", k->p) &&
                     (data->set.timecondition || data->set.get_filetime) ) {
               time_t secs=time(NULL);
-k->timeofdoc = curl_getdate(k->p+strlen("Last-Modified:"),
-                                        &secs);
-            if(data->set.get_filetime)
-              data->info.filetime = k->timeofdoc;
-          }
-          else if ((k->httpcode >= 300 && k->httpcode < 400) &&
-                   (data->set.http_follow_location) &&
-                   checkprefix("Location:", k->p)) {
-            /* this is the URL that the server advices us to get instead */
-            char *ptr;
-            char *start=k->p;
-            char backup;
-
-            start += 9; /* pass "Location:" */
-
-            /* Skip spaces and tabs. We do this to support multiple
-               white spaces after the "Location:" keyword. */
-            while(*start && isspace((int)*start ))
-              start++;
-            ptr = start; /* start scanning here */
-
-            /* scan through the string to find the end */
-            while(*ptr && !isspace((int)*ptr))
-              ptr++;
-            backup = *ptr; /* store the ending letter */
-            if(ptr != start) {
-              *ptr = '\0';   /* zero terminate */
-              conn->newurl = strdup(start); /* clone string */
-              *ptr = backup; /* restore ending letter */
+              k->timeofdoc = curl_getdate(k->p+strlen("Last-Modified:"),
+                                          &secs);
+              if(data->set.get_filetime)
+                data->info.filetime = k->timeofdoc;
             }
-          }
+            else if ((k->httpcode >= 300 && k->httpcode < 400) &&
+                     (data->set.http_follow_location) &&
+                     checkprefix("Location:", k->p)) {
+              /* this is the URL that the server advices us to get instead */
+              char *ptr;
+              char *start=k->p;
+              char backup;
 
-          /*
-           * End of header-checks. Write them to the client.
-           */
+              start += 9; /* pass "Location:" */
 
-          k->writetype = CLIENTWRITE_HEADER;
-          if (data->set.http_include_header)
-            k->writetype |= CLIENTWRITE_BODY;
+              /* Skip spaces and tabs. We do this to support multiple
+                 white spaces after the "Location:" keyword. */
+              while(*start && isspace((int)*start ))
+                start++;
+              ptr = start; /* start scanning here */
 
-          if(data->set.verbose)
-            Curl_debug(data, CURLINFO_HEADER_IN,
-                       k->p, k->hbuflen);
+              /* scan through the string to find the end */
+              while(*ptr && !isspace((int)*ptr))
+                ptr++;
+              backup = *ptr; /* store the ending letter */
+              if(ptr != start) {
+                *ptr = '\0';   /* zero terminate */
+                conn->newurl = strdup(start); /* clone string */
+                *ptr = backup; /* restore ending letter */
+              }
+            }
 
-          result = Curl_client_write(data, k->writetype, k->p,
-                                     k->hbuflen);
-          if(result)
-            return result;
+            /*
+             * End of header-checks. Write them to the client.
+             */
 
-          data->info.header_size += k->hbuflen;
-          conn->headerbytecount += k->hbuflen;
+            k->writetype = CLIENTWRITE_HEADER;
+            if (data->set.http_include_header)
+              k->writetype |= CLIENTWRITE_BODY;
+
+            if(data->set.verbose)
+              Curl_debug(data, CURLINFO_HEADER_IN,
+                         k->p, k->hbuflen);
+
+            result = Curl_client_write(data, k->writetype, k->p,
+                                       k->hbuflen);
+            if(result)
+              return result;
+
+            data->info.header_size += k->hbuflen;
+            conn->headerbytecount += k->hbuflen;
               
-          /* reset hbufp pointer && hbuflen */
-          k->hbufp = data->state.headerbuff;
-          k->hbuflen = 0;
-        }
-        while (!stop_reading && *k->str); /* header line within buffer */
+            /* reset hbufp pointer && hbuflen */
+            k->hbufp = data->state.headerbuff;
+            k->hbuflen = 0;
+          }
+          while (!stop_reading && *k->str); /* header line within buffer */
 
-        if(stop_reading)
-          /* We've stopped dealing with input, get out of the do-while loop */
-          break;
+          if(stop_reading)
+            /* We've stopped dealing with input, get out of the do-while loop */
+            break;
 
-        /* We might have reached the end of the header part here, but
-           there might be a non-header part left in the end of the read
-           buffer. */
+          /* We might have reached the end of the header part here, but
+             there might be a non-header part left in the end of the read
+             buffer. */
 
-      }			/* end if header mode */
+        }			/* end if header mode */
 
-      /* This is not an 'else if' since it may be a rest from the header
-         parsing, where the beginning of the buffer is headers and the end
-         is non-headers. */
-      if (k->str && !k->header && (nread > 0)) {
+        /* This is not an 'else if' since it may be a rest from the header
+           parsing, where the beginning of the buffer is headers and the end
+           is non-headers. */
+        if (k->str && !k->header && (nread > 0)) {
             
-        if(0 == k->bodywrites) {
-          /* These checks are only made the first time we are about to
-             write a piece of the body */
-          if(conn->protocol&PROT_HTTP) {
-            /* HTTP-only checks */
-            if (conn->newurl) {
-              /* abort after the headers if "follow Location" is set */
-              infof (data, "Follow to new URL: %s\n", conn->newurl);
-              k->keepon &= ~KEEP_READ;
-              FD_ZERO(&k->rkeepfd);
-              *done = TRUE;
-              return CURLE_OK;
-            }
-            else if (conn->resume_from &&
-                     !k->content_range &&
-                     (data->set.httpreq==HTTPREQ_GET)) {
-              /* we wanted to resume a download, although the server
-                 doesn't seem to support this and we did this with a GET
-                 (if it wasn't a GET we did a POST or PUT resume) */
-              failf (data, "HTTP server doesn't seem to support "
-                     "byte ranges. Cannot resume.");
-              return CURLE_HTTP_RANGE_ERROR;
-            }
-            else if(data->set.timecondition && !conn->range) {
-              /* A time condition has been set AND no ranges have been
-                 requested. This seems to be what chapter 13.3.4 of
-                 RFC 2616 defines to be the correct action for a
-                 HTTP/1.1 client */
-              if((k->timeofdoc > 0) && (data->set.timevalue > 0)) {
-                switch(data->set.timecondition) {
-                case TIMECOND_IFMODSINCE:
-                default:
-                  if(k->timeofdoc < data->set.timevalue) {
-                    infof(data,
-                          "The requested document is not new enough\n");
-                    *done = TRUE;
-                    return CURLE_OK;
-                  }
-                  break;
-                case TIMECOND_IFUNMODSINCE:
-                  if(k->timeofdoc > data->set.timevalue) {
-                    infof(data,
-                          "The requested document is not old enough\n");
-                    *done = TRUE;
-                    return CURLE_OK;
-                  }
-                  break;
-                } /* switch */
-              } /* two valid time strings */
-            } /* we have a time condition */
+          if(0 == k->bodywrites) {
+            /* These checks are only made the first time we are about to
+               write a piece of the body */
+            if(conn->protocol&PROT_HTTP) {
+              /* HTTP-only checks */
+              if (conn->newurl) {
+                /* abort after the headers if "follow Location" is set */
+                infof (data, "Follow to new URL: %s\n", conn->newurl);
+                k->keepon &= ~KEEP_READ;
+                FD_ZERO(&k->rkeepfd);
+                *done = TRUE;
+                return CURLE_OK;
+              }
+              else if (conn->resume_from &&
+                       !k->content_range &&
+                       (data->set.httpreq==HTTPREQ_GET)) {
+                /* we wanted to resume a download, although the server
+                   doesn't seem to support this and we did this with a GET
+                   (if it wasn't a GET we did a POST or PUT resume) */
+                failf (data, "HTTP server doesn't seem to support "
+                       "byte ranges. Cannot resume.");
+                return CURLE_HTTP_RANGE_ERROR;
+              }
+              else if(data->set.timecondition && !conn->range) {
+                /* A time condition has been set AND no ranges have been
+                   requested. This seems to be what chapter 13.3.4 of
+                   RFC 2616 defines to be the correct action for a
+                   HTTP/1.1 client */
+                if((k->timeofdoc > 0) && (data->set.timevalue > 0)) {
+                  switch(data->set.timecondition) {
+                  case TIMECOND_IFMODSINCE:
+                  default:
+                    if(k->timeofdoc < data->set.timevalue) {
+                      infof(data,
+                            "The requested document is not new enough\n");
+                      *done = TRUE;
+                      return CURLE_OK;
+                    }
+                    break;
+                  case TIMECOND_IFUNMODSINCE:
+                    if(k->timeofdoc > data->set.timevalue) {
+                      infof(data,
+                            "The requested document is not old enough\n");
+                      *done = TRUE;
+                      return CURLE_OK;
+                    }
+                    break;
+                  } /* switch */
+                } /* two valid time strings */
+              } /* we have a time condition */
 
-          } /* this is HTTP */
-        } /* this is the first time we write a body part */
-        k->bodywrites++;
+            } /* this is HTTP */
+          } /* this is the first time we write a body part */
+          k->bodywrites++;
 
-        /* pass data to the debug function before it gets "dechunked" */
-        if(data->set.verbose) {
-          if(k->badheader) {
-            Curl_debug(data, CURLINFO_DATA_IN, data->state.headerbuff,
-                       k->hbuflen);
-            if(k->badheader == HEADER_PARTHEADER)
+          /* pass data to the debug function before it gets "dechunked" */
+          if(data->set.verbose) {
+            if(k->badheader) {
+              Curl_debug(data, CURLINFO_DATA_IN, data->state.headerbuff,
+                         k->hbuflen);
+              if(k->badheader == HEADER_PARTHEADER)
+                Curl_debug(data, CURLINFO_DATA_IN, k->str, nread);
+            }
+            else
               Curl_debug(data, CURLINFO_DATA_IN, k->str, nread);
           }
-          else
-            Curl_debug(data, CURLINFO_DATA_IN, k->str, nread);
-        }
 
-        if(conn->bits.chunk) {
-          /*
-           * Bless me father for I have sinned. Here comes a chunked
-           * transfer flying and we need to decode this properly.  While
-           * the name says read, this function both reads and writes away
-           * the data. The returned 'nread' holds the number of actual
-           * data it wrote to the client.  */
-          CHUNKcode res =
-            Curl_httpchunk_read(conn, k->str, nread, &nread);
+          if(conn->bits.chunk) {
+            /*
+             * Bless me father for I have sinned. Here comes a chunked
+             * transfer flying and we need to decode this properly.  While
+             * the name says read, this function both reads and writes away
+             * the data. The returned 'nread' holds the number of actual
+             * data it wrote to the client.  */
+            CHUNKcode res =
+              Curl_httpchunk_read(conn, k->str, nread, &nread);
 
-          if(CHUNKE_OK < res) {
-            if(CHUNKE_WRITE_ERROR == res) {
-              failf(data, "Failed writing data");
-              return CURLE_WRITE_ERROR;
+            if(CHUNKE_OK < res) {
+              if(CHUNKE_WRITE_ERROR == res) {
+                failf(data, "Failed writing data");
+                return CURLE_WRITE_ERROR;
+              }
+              failf(data, "Received problem in the chunky parser");
+              return CURLE_RECV_ERROR;
             }
-            failf(data, "Received problem in the chunky parser");
-            return CURLE_RECV_ERROR;
+            else if(CHUNKE_STOP == res) {
+              /* we're done reading chunks! */
+              k->keepon &= ~KEEP_READ; /* read no more */
+              FD_ZERO(&k->rkeepfd);
+
+              /* There are now possibly N number of bytes at the end of the
+                 str buffer that weren't written to the client, but we don't
+                 care about them right now. */
+            }
+            /* If it returned OK, we just keep going */
           }
-          else if(CHUNKE_STOP == res) {
-            /* we're done reading chunks! */
-            k->keepon &= ~KEEP_READ; /* read no more */
+
+          if((-1 != conn->maxdownload) &&
+             (k->bytecount + nread >= conn->maxdownload)) {
+            nread = conn->maxdownload - k->bytecount;
+            if(nread < 0 ) /* this should be unusual */
+              nread = 0;
+
+            k->keepon &= ~KEEP_READ; /* we're done reading */
             FD_ZERO(&k->rkeepfd);
-
-            /* There are now possibly N number of bytes at the end of the
-               str buffer that weren't written to the client, but we don't
-               care about them right now. */
           }
-          /* If it returned OK, we just keep going */
-        }
 
-        if((-1 != conn->maxdownload) &&
-           (k->bytecount + nread >= conn->maxdownload)) {
-          nread = conn->maxdownload - k->bytecount;
-          if(nread < 0 ) /* this should be unusual */
-            nread = 0;
+          k->bytecount += nread;
 
-          k->keepon &= ~KEEP_READ; /* we're done reading */
-          FD_ZERO(&k->rkeepfd);
-        }
-
-        k->bytecount += nread;
-
-        Curl_pgrsSetDownloadCounter(data, (double)k->bytecount);
+          Curl_pgrsSetDownloadCounter(data, (double)k->bytecount);
             
-        if(!conn->bits.chunk && (nread || k->badheader)) {
-          /* If this is chunky transfer, it was already written */
+          if(!conn->bits.chunk && (nread || k->badheader)) {
+            /* If this is chunky transfer, it was already written */
 
-          if(k->badheader) {
-            /* we parsed a piece of data wrongly assuming it was a header
-               and now we output it as body instead */
-            result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                       data->state.headerbuff,
-                                       k->hbuflen);
-          }
-          if(k->badheader < HEADER_ALLBAD) {
-            /* This switch handles various content encodings. If there's an
-               error here, be sure to check over the almost identical code in
-               http_chunk.c. 08/29/02 jhrg */
-#ifdef HAVE_LIBZ
-            switch (k->content_encoding) {
-            case IDENTITY:
-#endif
-              /* This is the default when the server sends no
-                 Content-Encoding header. See Curl_readwrite_init; the
-                 memset() call initializes k->content_encoding to zero.
-                 08/28/02 jhrg */
-              result = Curl_client_write(data, CLIENTWRITE_BODY, k->str, 
-                                         nread);
-#ifdef HAVE_LIBZ
-              break;
-
-            case DEFLATE: 
-              /* Assume CLIENTWRITE_BODY; headers are not encoded. */
-              result = Curl_unencode_deflate_write(data, k, nread);
-              break;
-
-            case GZIP:          /* FIXME 08/27/02 jhrg */
-            case COMPRESS:
-            default:
-              failf (data, "Unrecognized content encoding type. "
-                     "libcurl understands `identity' and `deflate' "
-                     "content encodings.");
-              result = CURLE_BAD_CONTENT_ENCODING;
-              break;
+            if(k->badheader) {
+              /* we parsed a piece of data wrongly assuming it was a header
+                 and now we output it as body instead */
+              result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                         data->state.headerbuff,
+                                         k->hbuflen);
             }
+            if(k->badheader < HEADER_ALLBAD) {
+              /* This switch handles various content encodings. If there's an
+                 error here, be sure to check over the almost identical code
+                 in http_chunk.c. 08/29/02 jhrg */
+#ifdef HAVE_LIBZ
+              switch (k->content_encoding) {
+              case IDENTITY:
 #endif
+                /* This is the default when the server sends no
+                   Content-Encoding header. See Curl_readwrite_init; the
+                   memset() call initializes k->content_encoding to zero.
+                   08/28/02 jhrg */
+                result = Curl_client_write(data, CLIENTWRITE_BODY, k->str, 
+                                           nread);
+#ifdef HAVE_LIBZ
+                break;
+
+              case DEFLATE: 
+                /* Assume CLIENTWRITE_BODY; headers are not encoded. */
+                result = Curl_unencode_deflate_write(data, k, nread);
+                break;
+
+              case GZIP:          /* FIXME 08/27/02 jhrg */
+              case COMPRESS:
+              default:
+                failf (data, "Unrecognized content encoding type. "
+                       "libcurl understands `identity' and `deflate' "
+                       "content encodings.");
+                result = CURLE_BAD_CONTENT_ENCODING;
+                break;
+              }
+#endif
+            }
+            k->badheader = HEADER_NORMAL; /* taken care of now */
+
+            if(result)
+              return result;
           }
-          k->badheader = HEADER_NORMAL; /* taken care of now */
 
-          if(result)
-            return result;
-        }
-
-      } /* if (! header and data to read ) */
+        } /* if (! header and data to read ) */
 
       } while(!readdone);
 
@@ -874,8 +874,8 @@ k->timeofdoc = curl_getdate(k->p+strlen("Last-Modified:"),
               conn->upload_fromhere += 10; /* 32bit hex + CRLF */
             }
 
-            nread = data->set.fread(conn->upload_fromhere, 1,
-                                    buffersize, data->set.in);
+            nread = conn->fread(conn->upload_fromhere, 1,
+                                buffersize, conn->fread_in);
           
             if(conn->bits.upload_chunky) {
               /* if chunked Transfer-Encoding */
@@ -944,12 +944,12 @@ k->timeofdoc = curl_getdate(k->p+strlen("Last-Modified:"),
              that instead of reading more data */
         }
 
-        /* write to socket */
+        /* write to socket (send away data) */
         result = Curl_write(conn,
-                            conn->writesockfd,
-                            conn->upload_fromhere,
-                            conn->upload_present,
-                            &bytes_written);
+                            conn->writesockfd,     /* socket to send to */
+                            conn->upload_fromhere, /* buffer pointer */
+                            conn->upload_present,  /* buffer size */
+                            &bytes_written);       /* actually send away */
         if(result)
           return result;
         else if(conn->upload_present != bytes_written) {

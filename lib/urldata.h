@@ -164,9 +164,6 @@ struct HTTP {
 
   /* For FORM posting */
   struct Form form;
-  curl_read_callback storefread;
-  FILE *in;
-
   struct Curl_chunker chunk;
 };
 
@@ -458,6 +455,9 @@ struct connectdata {
       and the 'upload_present' contains the number of bytes available at this
       position */
   char *upload_fromhere;
+
+  curl_read_callback fread; /* function that reads the input */
+  void *fread_in;           /* pointer to pass to the fread() above */
 };
 
 /* The end of connectdata. 08/27/02 jhrg */
@@ -633,7 +633,7 @@ struct UserDefined {
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
   char *useragent;   /* User-Agent string */
-  char *encoding;    /* Accept-Encoding string 08/28/02 jhrg */
+  char *encoding;    /* Accept-Encoding string */
   char *postfields;  /* if POST, set the fields' values here */
   size_t postfieldsize; /* if POST, this might have a size to use instead of
                            strlen(), and then the data *may* be binary (contain

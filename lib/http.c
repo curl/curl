@@ -126,8 +126,11 @@ send_buffer *add_buffer_init(void)
  * add_buffer_send() sends a buffer and frees all associated memory.
  */
 static
-CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
-                         long *bytes_written)
+CURLcode add_buffer_send(send_buffer *in,
+                         int sockfd,
+                         struct connectdata *conn,
+                         long *bytes_written) /* add the number of sent
+                                                 bytes to this counter */
 {
   ssize_t amount;
   CURLcode res;
@@ -149,6 +152,8 @@ CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
       /* this data _may_ contain binary stuff */
       Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, amount);
 
+    *bytes_written += amount;
+
     if(amount != size) {
       size -= amount;
       ptr += amount;
@@ -161,8 +166,6 @@ CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
   if(in->buffer)
     free(in->buffer);
   free(in);
-
-  *bytes_written += amount;
 
   return res;
 }
@@ -517,8 +520,9 @@ CURLcode Curl_http_done(struct connectdata *conn)
       
     Curl_formclean(http->sendit); /* Now free that whole lot */
 
-    data->set.fread = http->storefread; /* restore */
-    data->set.in = http->in; /* restore */
+    /* set the proper values */
+    conn->fread = data->set.fread; /* restore */
+    conn->fread_in = data->set.in; /* restore */
   }
   else if(HTTPREQ_PUT == data->set.httpreq)
     conn->bytecount = http->readbytecount + http->writebytecount;
@@ -923,13 +927,9 @@ CURLcode Curl_http(struct connectdata *conn)
         return CURLE_HTTP_POST_ERROR;
       }
 
-      http->storefread = data->set.fread; /* backup */
-      http->in = data->set.in; /* backup */
-          
-      data->set.fread = (curl_read_callback)
-        Curl_FormReader; /* set the read function to read from the
-                            generated form data */
-      data->set.in = (FILE *)&http->form;
+      /* set the read function to read from the generated form data */
+      conn->fread = (curl_read_callback)Curl_FormReader;
+      conn->fread_in = &http->form;
 
       if(!conn->bits.upload_chunky)
         /* only add Content-Length if not uploading chunked */
@@ -974,7 +974,7 @@ CURLcode Curl_http(struct connectdata *conn)
       Curl_pgrsSetUploadSize(data, http->postsize);
 
       /* fire away the whole request to the server */
-      result = add_buffer_send(conn->firstsocket, conn, req_buffer,
+      result = add_buffer_send(req_buffer, conn->firstsocket, conn, 
                                &data->info.request_size);
       if(result)
         failf(data, "Failed sending POST request");
@@ -1004,10 +1004,10 @@ CURLcode Curl_http(struct connectdata *conn)
       Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
       /* this sends the buffer and frees all the buffer resources */
-      result = add_buffer_send(conn->firstsocket, conn, req_buffer,
+      result = add_buffer_send(req_buffer, conn->firstsocket, conn,
                                &data->info.request_size);
       if(result)
-        failf(data, "Faied sending POST request");
+        failf(data, "Failed sending POST request");
       else
         /* prepare for transfer */
         result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
@@ -1053,7 +1053,7 @@ CURLcode Curl_http(struct connectdata *conn)
                     data->set.postfields );
 
       /* issue the request */
-      result = add_buffer_send(conn->firstsocket, conn, req_buffer,
+      result = add_buffer_send(req_buffer, conn->firstsocket, conn,
                                &data->info.request_size);
 
       if(result)
@@ -1070,7 +1070,7 @@ CURLcode Curl_http(struct connectdata *conn)
       add_buffer(req_buffer, "\r\n", 2);
       
       /* issue the request */
-      result = add_buffer_send(conn->firstsocket, conn, req_buffer,
+      result = add_buffer_send(req_buffer, conn->firstsocket, conn,
                                &data->info.request_size);
 
       if(result)

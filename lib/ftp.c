@@ -1591,8 +1591,8 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
             readthisamountnow = BUFSIZE;
 
           actuallyread =
-            data->set.fread(data->state.buffer, 1, readthisamountnow,
-                            data->set.in);
+            conn->fread(data->state.buffer, 1, readthisamountnow,
+                        conn->fread_in);
 
           passed += actuallyread;
           if(actuallyread != readthisamountnow) {
@@ -1623,7 +1623,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       }
     }
 
-    /* Send everything on data->set.in to the socket */
+    /* Send everything on data->state.in to the socket */
     if(data->set.ftp_append) {
       /* we append onto the file instead of rewriting it */
       FTPSENDF(conn, "APPE %s", ftp->file);

@@ -1789,6 +1789,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* else, no chunky upload */
   FALSE;
 
+  conn->fread = data->set.fread;
+  conn->fread_in = data->set.in;
+
   /***********************************************************
    * We need to allocate memory to store the path in. We get the size of the
    * full URL to be sure, and we need to make it at least 256 bytes since

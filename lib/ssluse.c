@@ -275,7 +275,8 @@ int cert_stuff(struct connectdata *conn,
       if (SSL_CTX_use_PrivateKey_file(conn->ssl.ctx,
                                       key_file,
                                       file_type) != 1) {
-        failf(data, "unable to set private key file\n");
+        failf(data, "unable to set private key file: '%s' type %s\n",
+              key_file, key_type?key_type:"PEM");
         return 0;
       }
       break;
