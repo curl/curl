@@ -53,6 +53,18 @@ borland-clean:
 	cd ..\src
 	make -f Makefile.b32 clean
 
+watcom:
+	cd lib
+	wmake -f Makefile.Watcom
+	cd ..\src
+	wmake -f Makefile.Watcom
+
+watcom-clean:
+	cd lib
+	wmake -f Makefile.Watcom clean
+	cd ..\src
+	wmake -f Makefile.Watcom clean
+
 mingw32:
 	$(MAKE) -C lib -f Makefile.m32 ZLIB=1
 	$(MAKE) -C src -f Makefile.m32 ZLIB=1
