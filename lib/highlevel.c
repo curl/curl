@@ -614,6 +614,9 @@ CURLcode curl_transfer(CURL *curl)
         char prot[16];
         char path[URL_MAX_LENGTH];
 
+        /* mark the next request as a followed location: */
+        data->bits.this_is_a_follow = TRUE;
+
         if(data->bits.http_auto_referer) {
           /* We are asked to automatically set the previous URL as the
              referer when we get the next URL. We pick the ->url field,
