@@ -287,9 +287,17 @@ CURLcode Curl_http_auth(struct connectdata *conn,
    */
   struct SessionHandle *data = conn->data;
 
-  char *start = (httpcode == 407) ? 
-    header+strlen("Proxy-authenticate:"): 
-    header+strlen("WWW-Authenticate:");
+  long *availp;
+  char *start;
+
+  if (httpcode == 407) {
+    start = header+strlen("Proxy-authenticate:");
+    availp = &data->info.proxyauthavail;
+  }
+  else {
+    start = header+strlen("WWW-Authenticate:");
+    availp = &data->info.httpauthavail;
+  }
   /*
    * Switch from proxy to web authentication and back if needed
    */
@@ -305,6 +313,7 @@ CURLcode Curl_http_auth(struct connectdata *conn,
 
 #ifdef GSSAPI
   if (checkprefix("GSS-Negotiate", start)) {
+    *availp |= CURLAUTH_GSSNEGOTIATE;
     if(data->state.authwant == CURLAUTH_GSSNEGOTIATE) {
       /* if exactly this is wanted, go */
       int neg = Curl_input_negotiate(conn, start);
@@ -320,6 +329,7 @@ CURLcode Curl_http_auth(struct connectdata *conn,
 #ifdef USE_SSLEAY
     /* NTLM support requires the SSL crypto libs */
     if(checkprefix("NTLM", start)) {
+      *availp |= CURLAUTH_NTLM;
       if(data->state.authwant == CURLAUTH_NTLM) {
         /* NTLM authentication is activated */
         CURLntlm ntlm =
@@ -337,6 +347,7 @@ CURLcode Curl_http_auth(struct connectdata *conn,
     else
 #endif
       if(checkprefix("Digest", start)) {
+        *availp |= CURLAUTH_DIGEST;
         if(data->state.authwant == CURLAUTH_DIGEST) {
           /* Digest authentication is activated */
           CURLdigest dig = CURLDIGEST_BAD;
@@ -363,6 +374,7 @@ CURLcode Curl_http_auth(struct connectdata *conn,
           }
       }
       else if(checkprefix("Basic", start)) {
+        *availp |= CURLAUTH_BASIC;
         if((data->state.authwant == CURLAUTH_BASIC) && (httpcode == 401)) {
           /* We asked for Basic authentication but got a 401 back
              anyway, which basicly means our name+password isn't

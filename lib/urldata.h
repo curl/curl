@@ -575,6 +575,9 @@ struct PureInfo {
   long header_size;  /* size of read header(s) in bytes */
   long request_size; /* the amount of bytes sent in the request(s) */
 
+  long proxyauthavail;
+  long httpauthavail;
+
   char *contenttype; /* the content type of the object */
 };
 

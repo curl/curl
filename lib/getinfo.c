@@ -166,6 +166,12 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_PRIVATE:
     *param_charp = data->set.private;
     break;
+  case CURLINFO_HTTPAUTH_AVAIL:
+    *param_longp = data->info.httpauthavail;
+    break;
+  case CURLINFO_PROXYAUTH_AVAIL:
+    *param_longp = data->info.proxyauthavail;
+    break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
