@@ -81,6 +81,8 @@ my %commandok = (
                  'SIZE' => 'loggedin|twosock',
                  'PWD'  => 'loggedin|twosock',
                  'QUIT'  => 'loggedin|twosock',
+                 'RNFR'  => 'loggedin|twosock',
+                 'RNTO'  => 'loggedin|twosock',
                  'DELE' => 'loggedin|twosock'
                  );
 
@@ -104,7 +106,9 @@ my %displaytext = ('USER' => '331 We are happy you popped in!',
                    'QUIT' => '221 bye bye baby', # just reply something
                    'PWD'  => '257 "/nowhere/anywhere" is current directory',
                    'REST' => '350 Yeah yeah we set it there for you',
-                   'DELE' => '200 OK OK OK whatever you say'
+                   'DELE' => '200 OK OK OK whatever you say',
+                   'RNFR' => '350 Received your order. Please provide more',
+                   'RNTO' => '250 Ok, thanks. File renaming completed.',
                    );
 
 # callback functions for certain commands
