@@ -9,14 +9,11 @@ TODO
  Things to do in project cURL. Please tell me what you think, contribute and
  send me patches that improve things!
 
-
 To do in a future release (random order):
 
  * Make SSL session ids get used if multiple HTTPS documents from the same
    host is requested. Note: is this really prioritized now with the persistent
    connections?
-
- * Make ftps:// work properly (test case 400+ in CVS)
 
  * Suggested on the mailing list: CURLOPT_FTP_MKDIR...!
 
@@ -48,9 +45,8 @@ To do in a future release (random order):
  * Move non-URL related functions that are used by both the lib and the curl
    application to a separate "portability lib".
 
- * Add support for other languages than C.  C++ (rumours have been heard about
-   something being worked on in this area) and perl (we have seen the first
-   versions of this!) comes to mind. Python anyone?
+ * Add libcurl support/interfaces for more languages.  C++ wrapper? Python
+   anyone?
 
  * "Content-Encoding: compress/gzip/zlib" HTTP 1.1 clearly defines how to get
    and decode compressed documents. There is the zlib that is pretty good at
@@ -82,8 +78,7 @@ To do in a future release (random order):
  * Other proxies
    Ftp-kind proxy, Socks5, whatever kind of proxies are there?
 
- * IPv6 Awareness and support. (This is partly done.)  RFC 2428 "FTP
+ * Full IPv6 Awareness and support. (This is partly done.)  RFC 2428 "FTP
    Extensions for IPv6 and NATs" is interesting. PORT should be replaced with
-   EPRT for IPv6 (done), and EPSV instead of PASV.  HTTP proxies are left to
-   add support for.
+   EPRT for IPv6 (done), and EPSV instead of PASV.
 
