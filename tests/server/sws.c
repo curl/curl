@@ -31,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
 #include <unistd.h>
 #include <signal.h>
 #include <time.h>
@@ -115,16 +116,22 @@ static volatile int sigpipe;
 static FILE *logfp;
 
 
-static void logmsg(const char *msg)
+static void logmsg(const char *msg, ...)
 {
-    time_t t = time(NULL);
-    struct tm *curr_time = localtime(&t);
-    char loctime[80];
+  time_t t = time(NULL);
+  va_list ap;
+  struct tm *curr_time = localtime(&t);
+  char loctime[80];
+  char buffer[256]; /* possible overflow if you pass in a huge string */
+   
+  va_start(ap, msg);
+  vsprintf(buffer, msg, ap);
+  va_end(ap);
 
-    strcpy(loctime, asctime(curr_time));
-    loctime[strlen(loctime) - 1] = '\0';
-    fprintf(logfp, "%s: %d: %s\n", loctime, (int)getpid(), msg);
-    fflush(logfp);
+  strcpy(loctime, asctime(curr_time));
+  loctime[strlen(loctime) - 1] = '\0';
+  fprintf(logfp, "%s: %d: %s\n", loctime, (int)getpid(), buffer);
+  fflush(logfp);
 }
 
 
@@ -221,7 +228,7 @@ void storerequest(char *reqbuf)
 #define MAXDOCNAMELEN_TXT "139999"
 
 #define REQUEST_KEYWORD_SIZE 256
-static int get_request(int sock, int *part)
+static int get_request(int sock, int *part, int *open)
 {
   static char reqbuf[REQBUFSIZ], doc[MAXDOCNAMELEN];
   static char request[REQUEST_KEYWORD_SIZE];
@@ -230,6 +237,8 @@ static int get_request(int sock, int *part)
   char logbuf[256];
 
   *part = 0; /* part zero equals none */
+
+  *open = TRUE; /* connection should remain open and wait for more commands */
 
   while (offset < REQBUFSIZ) {
     int got = recv(sock, reqbuf + offset, REQBUFSIZ - offset, 0);
@@ -307,16 +316,22 @@ static int get_request(int sock, int *part)
         /* If the client is passing this Digest-header, we set the part number
            to 1000. Not only to spice up the complexity of this, but to make
            Digest stuff to work in the test suite. */
+        logmsg("Received Digest request, sending back data 1000");
         *part = 1000;
       }
       else if(strstr(reqbuf, "Authorization: NTLM TlRMTVNTUAAD")) {
         /* If the client is passing this type-3 NTLM header */
+        logmsg("Received NTLM type-3, sending back data 1002");
         *part = 1002;
       }
       else if(strstr(reqbuf, "Authorization: NTLM TlRMTVNTUAAB")) {
         /* If the client is passing this type-1 NTLM header */
+        logmsg("Received NTLM type-1, sending back data 1001");
         *part = 1001;
       }
+
+      if(strstr(reqbuf, "Connection: close"))
+        *open = FALSE; /* close connection after this request */
     }
     else {
       if(sscanf(reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
@@ -325,6 +340,9 @@ static int get_request(int sock, int *part)
         sprintf(logbuf, "Receiced a CONNECT %s HTTP/%d.%d request", 
                 doc, prot_major, prot_minor);
         logmsg(logbuf);
+
+        if(prot_major*10+prot_minor == 10)
+          *open = FALSE; /* HTTP 1.0 closes connection by default */
 
         if(!strncmp(doc, "bad", 3))
           /* if the host name starts with bad, we fake an error here */
@@ -346,8 +364,11 @@ static int get_request(int sock, int *part)
   return DOCNUMBER_404;
 }
 
-
-static int send_doc(int sock, int doc, int part_no)
+/* returns -1 on failure */
+static int send_doc(int sock,
+                    int doc,
+                    int part_no,
+                    int *alive) /* keep the connection alive or not */
 {
   int written;
   int count;
@@ -357,11 +378,14 @@ static int send_doc(int sock, int doc, int part_no)
   char *cmd=NULL;
   int cmdsize=0;
   FILE *dump;
+  int persistant = TRUE;
 
   static char weare[256];
 
   char filename[256];
   char partbuf[80]="data";
+
+  *alive = FALSE;
 
   if(doc < 0) {
     switch(doc) {
@@ -399,7 +423,7 @@ static int send_doc(int sock, int doc, int part_no)
     count = strlen(buffer);
   }
   else {
-    logmsg("Fetch response data");
+    logmsg("Fetch response data, test %d part %d", doc, part_no);
 
     if(0 != part_no)
       sprintf(partbuf, "data%d", part_no);
@@ -434,6 +458,14 @@ static int send_doc(int sock, int doc, int part_no)
   if(!dump) {
     logmsg("couldn't create logfile: " RESPONSE_DUMP);
     return -1;
+  }
+
+  /* If the word 'swsclose' is present anywhere in the reply chunk, the
+     connection will be closed after the data has been sent to the requesting
+     client... */
+  if(strstr(buffer, "swsclose") || !count) {
+    persistant = FALSE;
+    logmsg("connection close instruction swsclose found in response");
   }
 
   do {
@@ -476,6 +508,8 @@ static int send_doc(int sock, int doc, int part_no)
   }
   if(cmd)
     free(cmd);
+
+  *alive = persistant;
 
   return 0;
 }
@@ -541,7 +575,9 @@ int main(int argc, char *argv[])
 
   while (1) {
     int doc;
-
+    int open;
+    int alive;
+    
     msgsock = accept(sock, NULL, NULL);
     
     if (msgsock == -1)
@@ -551,12 +587,24 @@ int main(int argc, char *argv[])
 
     do {
 
-      doc = get_request(msgsock, &part_no);
-      logmsg("Received request, now send response");
-      send_doc(msgsock, doc, part_no);
+      doc = get_request(msgsock, &part_no, &open);
+      logmsg("Received request, now send response number %d part %d",
+             doc, part_no);
+      send_doc(msgsock, doc, part_no, &alive);
 
+      if((doc < 0) && (doc != DOCNUMBER_CONNECT)) {
+        logmsg("special request received, no persistancy");
+        break;
+      }
+      if(!alive) {
+        logmsg("instructed to close connection after server-reply");
+        break;
+      }
+
+      if(open)
+        logmsg("persistant connection, awaits new request");
       /* if we got a CONNECT, loop and get another request as well! */
-    } while(doc == DOCNUMBER_CONNECT);
+    } while(open);
 
     logmsg("Closing client connection");
     close(msgsock);
