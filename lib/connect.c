@@ -68,7 +68,6 @@
 #endif
 
 #ifdef WIN32
-#define HAVE_IOCTLSOCKET
 #include <windows.h>
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK

@@ -39,15 +39,16 @@
 
 #ifdef HAVE_CONFIG_H
 #include "config.h" /* the configure script results */
+#else
+#ifdef WIN32
+/* hand-modified win32 config.h! */
+#include "config-win32.h"
+#endif
 #endif
 
 #ifdef VMS
 /* hand-modified VMS config.h! */
 #include "config-vms.h"
-#endif
-#ifdef WIN32
-/* hand-modified win32 config.h! */
-#include "config-win32.h"
 #endif
 #ifdef macintosh
 /* hand-modified MacOS config.h! */
