@@ -1,0 +1,27 @@
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP URL with too deep (100+) dir hierarchy
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/b
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+3
+</errorcode>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+</protocol>
+</verify>
