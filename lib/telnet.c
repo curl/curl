@@ -1043,13 +1043,14 @@ CURLcode Curl_telnet(struct connectdata *conn)
   HANDLE stdin_handle;
   HANDLE objs[2];
   DWORD waitret;
+  DWORD nread;
 #else
   fd_set readfd;
   fd_set keepfd;
+  ssize_t nread;  
 #endif
   bool keepon = TRUE;
   char *buf = data->state.buffer;
-  ssize_t nread;
   struct TELNET *tn;
 
   code = init_telnet(conn);
@@ -1086,60 +1087,57 @@ CURLcode Curl_telnet(struct connectdata *conn)
   /* Keep on listening and act on events */
   while(keepon) {
     waitret = WaitForMultipleObjects(2, objs, FALSE, INFINITE);
-    switch(waitret - WAIT_OBJECT_0)
+    switch(waitret - WAIT_OBJECT_0) {
+    case 0:
     {
-      case 0:
-      {
-        unsigned char outbuf[2];
-        int out_count = 0;
-        ssize_t bytes_written;
-        char *buffer = buf;
+      unsigned char outbuf[2];
+      int out_count = 0;
+      ssize_t bytes_written;
+      char *buffer = buf;
               
-        if(!ReadFile(stdin_handle, buf, 255, (LPDWORD)&nread, NULL)) {
-          keepon = FALSE;
-          break;
-        }
+      if(!ReadFile(stdin_handle, buf, sizeof(data->state.buffer),
+                   (LPDWORD)&nread, NULL)) {
+        keepon = FALSE;
+        break;
+      }
         
-        while(nread--) {
-          outbuf[0] = *buffer++;
-          out_count = 1;
-          if(outbuf[0] == CURL_IAC)
-            outbuf[out_count++] = CURL_IAC;
+      while(nread--) {
+        outbuf[0] = *buffer++;
+        out_count = 1;
+        if(outbuf[0] == CURL_IAC)
+          outbuf[out_count++] = CURL_IAC;
           
-          Curl_write(conn, conn->sock[FIRSTSOCKET], outbuf,
-                     out_count, &bytes_written);
+        Curl_write(conn, conn->sock[FIRSTSOCKET], outbuf,
+                   out_count, &bytes_written);
+      }
+    }
+    break;
+      
+    case 1:
+      if(WSAEnumNetworkEvents(sockfd, event_handle, &events)
+         != SOCKET_ERROR) {
+        if(events.lNetworkEvents & FD_READ) {
+          /* This reallu OUGHT to check its return code. */
+          Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+            
+          telrcv(conn, (unsigned char *)buf, nread);
+          
+          fflush(stdout);
+            
+          /* Negotiate if the peer has started negotiating,
+             otherwise don't. We don't want to speak telnet with
+             non-telnet servers, like POP or SMTP. */
+          if(tn->please_negotiate && !tn->already_negotiated) {
+            negotiate(conn);
+            tn->already_negotiated = 1;
+          }
+        }
+          
+        if(events.lNetworkEvents & FD_CLOSE) {
+          keepon = FALSE;
         }
       }
       break;
-      
-      case 1:
-        if(WSAEnumNetworkEvents(sockfd, event_handle, &events)
-           != SOCKET_ERROR)
-        {
-          if(events.lNetworkEvents & FD_READ)
-          {
-            /* This reallu OUGHT to check its return code. */
-            Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
-            
-            telrcv(conn, (unsigned char *)buf, nread);
-            
-            fflush(stdout);
-            
-            /* Negotiate if the peer has started negotiating,
-               otherwise don't. We don't want to speak telnet with
-               non-telnet servers, like POP or SMTP. */
-            if(tn->please_negotiate && !tn->already_negotiated) {
-              negotiate(conn);
-              tn->already_negotiated = 1;
-            }
-          }
-          
-          if(events.lNetworkEvents & FD_CLOSE)
-          {
-            keepon = FALSE;
-          }
-        }
-        break;
     }
   }
 #else
