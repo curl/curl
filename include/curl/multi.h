@@ -190,7 +190,7 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle,
                               int *msgs_in_queue);
 
 #ifdef __cplusplus
-} /* end of extern "C"
+} /* end of extern "C" */
 #endif
   
 #endif
