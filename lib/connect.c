@@ -309,9 +309,8 @@ static CURLcode bindlocal(struct connectdata *conn,
 
   return CURLE_HTTP_PORT_FAILED;
 }
-#else /* end of ipv4-specific section */
+#endif /* end of ipv4-specific section */
 
-/* we only use socketerror() on IPv6-enabled machines */
 static
 int socketerror(int sockfd)
 {
@@ -324,7 +323,6 @@ int socketerror(int sockfd)
   
   return err;
 }
-#endif
 
 /*
  * TCP connect to the given host with timeout, proxy or remote doesn't matter.
@@ -523,6 +521,16 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         failf(data, "Failed to connect to IP number %d", aliasindex+1);
         break;
       }
+    }
+
+    if(0 == rc) {
+      int err = socketerror(sockfd);
+      if ((0 == err) || (EISCONN == err)) {
+        /* we are connected, awesome! */
+        break;
+      }
+      /* nope, not connected for real */
+      rc = -1;
     }
 
     if(0 != rc) {
