@@ -2238,11 +2238,12 @@ CURLcode ftp_perform(struct connectdata *conn,
 #ifdef HAVE_STRFTIME
     if(data->set.get_filetime && (data->info.filetime>=0) ) {
       struct tm *tm;
+      time_t clock = (time_t)data->info.filetime;
 #ifdef HAVE_GMTIME_R
       struct tm buffer;
-      tm = (struct tm *)gmtime_r((time_t *)&data->info.filetime, &buffer);
+      tm = (struct tm *)gmtime_r(&clock, &buffer);
 #else
-      tm = gmtime((time_t *)&data->info.filetime);
+      tm = gmtime(&clock);
 #endif
       /* format: "Tue, 15 Nov 1994 12:45:26" */
       strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S GMT\r\n",
