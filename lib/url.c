@@ -110,7 +110,6 @@
 #include "ssluse.h"
 #include "hostip.h"
 #include "if2ip.h"
-#include "upload.h"
 #include "download.h"
 #include "sendf.h"
 #include "speedcheck.h"
