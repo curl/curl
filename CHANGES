@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (9 October)
+- Dominick Meglio made the inet_pton.c file build fine using MSVC.
+
+- The 'sws' test suite web server now #include setup.h from the lib directory.
+  This makes it more portable easier.
+
 Version 7.10.8-pre3 (8 October 2003)
 
 Daniel (8 October)
