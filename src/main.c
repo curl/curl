@@ -50,6 +50,10 @@
 #include <winsock.h>
 #endif
 
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
 #include "version.h"
 
 #ifdef HAVE_IO_H /* typical win32 habit */
