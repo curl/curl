@@ -34,11 +34,7 @@
 #  include <sys/time.h>
 #  include <time.h>
 # else
-#  ifdef HAVE_SYS_TIME_H
-#   include <sys/time.h>
-#  else
-#   include <time.h>
-#  endif
+   include <sys/time.h>
 # endif
 #endif /* defined (vms) */
 
