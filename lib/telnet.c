@@ -1208,7 +1208,7 @@ CURLcode Curl_telnet(struct connectdata *conn, bool *done)
       ssize_t bytes_written;
       char *buffer = buf;
 
-      for(;;) {
+      while(1) {
         if(!PeekNamedPipe(stdin_handle, NULL, 0, NULL, &readfile_read, NULL)) {
           keepon = FALSE;
           break;
