@@ -20,7 +20,7 @@ char *appendstring(char *string, /* original string */
 {
   int len = strlen(buffer);
 
-  if((len + *stringlen) > *stralloc) {
+  if((len + *stringlen) >= *stralloc) {
     char *newptr= realloc(string, *stralloc*2);
     if(newptr) {
       string = newptr;
