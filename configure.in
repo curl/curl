@@ -758,8 +758,9 @@ dnl if not found, $ac_func is the name we check for
   AC_TRY_LINK( [],
                [ $func ();],
                AC_MSG_RESULT(yes!)
+               eval "ac_cv_func_$func=yes"
                def=`echo "HAVE_$func" | tr 'a-z' 'A-Z'`
-               AC_DEFINE($def, 1, [If you have $func]),
+               AC_DEFINE_UNQUOTED($def, 1, [If you have $func]),
                AC_MSG_RESULT(but still no)
                )
 
