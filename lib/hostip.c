@@ -453,14 +453,30 @@ static char *MakeIP(unsigned long num,char *addr, int addr_len)
   return (addr);
 }
 
-/* The original code to this function was once stolen from the Dancer source
-   code, written by Bjorn Reese, it has since been patched and modified
-   considerably. */
-
 #ifndef INADDR_NONE
 #define INADDR_NONE (in_addr_t) ~0
 #endif
 
+static void hostcache_fixoffset(struct hostent *h, int offset)
+{
+  int i=0;
+  h->h_name=(char *)((int)h->h_name+offset);
+  h->h_aliases=(char **)((int)h->h_aliases+offset);
+  while(h->h_aliases[i]) {
+    h->h_aliases[i]=(char *)((int)h->h_aliases[i]+offset);
+    i++;
+  }
+  h->h_addr_list=(char **)((int)h->h_addr_list+offset);
+  i=0;
+  while(h->h_addr_list[i]) {
+    h->h_addr_list[i]=(char *)((int)h->h_addr_list[i]+offset);
+    i++;
+  }
+}
+
+/* The original code to this function was once stolen from the Dancer source
+   code, written by Bjorn Reese, it has since been patched and modified
+   considerably. */
 Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
                                 char *hostname,
                                 int port,
@@ -535,7 +551,11 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
 #endif
 
     if(h) {
-      buf=(int *)realloc(buf, step_size);
+      int offset;
+      h=(struct hostent *)realloc(buf, step_size);
+      offset=(int)h-(int)buf;
+      hostcache_fixoffset(h, offset);
+      buf=(int *)h;
       *bufp=(char *)buf;
     }
     else
@@ -555,7 +575,11 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
     infof(data, "gethostbyname_r() uses %d bytes\n", step_size);
 #endif
     if(!res) {
-      buf=(int *)realloc(buf, step_size);
+      int offset;
+      h=(struct hostent *)realloc(buf, step_size);
+      offset=(int)h-(int)buf;
+      hostcache_fixoffset(h, offset);
+      buf=(int *)h;
       *bufp=(char *)buf;
     }
     else
