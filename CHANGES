@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (13 January 2004)
+- Luke Call made the win32 version of the password prompting function support
+  backspace.
+
 - Dan Fandrich fixed the hugehelp source file to contain both a compressed and
   an uncompressed version in the distribution, so that more people easier can
   build curl with the compressed version.

@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o the win32 password prompting supports backspace
  o builds natively on AmigaOS (without unix emulation)
  o ftps:// now uses port 990 by default
  o the "configure --with-spnego" action was improved
@@ -79,6 +80,6 @@ advice from friends like these:
  W. Rozycki, Nicolas Croiset, Josh Kapell, Gaz Iqbal, Dave May, Markus
  Moeller, James Clancy, Giuseppe Attardi, swalkaus at yahoo.com, Steve Green,
  Marty Kuhrt, Dominick Meglio, Diego Casorran, David Byron, John McGowan,
- David J Meyer, Dan Fandrich, Pierre, Brian R Duffy
+ David J Meyer, Dan Fandrich, Pierre, Brian R Duffy, Luke Call
  
         Thanks! (and sorry if I forgot to mention someone)
