@@ -230,21 +230,27 @@ static CURLcode perhapsrewind(struct connectdata *conn)
 
   bytessent = http->writebytecount;
 
-  /* figure out how much data we are expected to send */
-  switch(data->set.httpreq) {
-  case HTTPREQ_POST:
-    if(data->set.postfieldsize != -1)
-      expectsend = data->set.postfieldsize;
-    break;
-  case HTTPREQ_PUT:
-    if(data->set.infilesize != -1)
-      expectsend = data->set.infilesize;
-    break;
-  case HTTPREQ_POST_FORM:
-    expectsend = http->postsize;
-    break;
-  default:
-    break;
+  if(conn->bits.authneg)
+    /* This is a state where we are known to be negotiating and we don't send
+       any data then. */
+    expectsend = 0;
+  else {
+    /* figure out how much data we are expected to send */
+    switch(data->set.httpreq) {
+    case HTTPREQ_POST:
+      if(data->set.postfieldsize != -1)
+        expectsend = data->set.postfieldsize;
+      break;
+    case HTTPREQ_PUT:
+      if(data->set.infilesize != -1)
+        expectsend = data->set.infilesize;
+      break;
+    case HTTPREQ_POST_FORM:
+      expectsend = http->postsize;
+      break;
+    default:
+      break;
+    }
   }
 
   conn->bits.rewindaftersend = FALSE; /* default */
