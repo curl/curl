@@ -253,7 +253,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       /* This is where we loop until we have read everything there is to
          read or we get a EWOULDBLOCK */
       do {
-        int buffersize = data->set.buffer_size?
+        size_t buffersize = data->set.buffer_size?
           data->set.buffer_size:BUFSIZE -1;
 
         /* receive data from the network! */
@@ -303,8 +303,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
           /* header line within buffer loop */
           do {
-            int hbufp_index;
-            int rest_length;
+            size_t hbufp_index;
+            size_t rest_length;
             size_t full_length;
             int writetype;
 
@@ -410,7 +410,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
 
             if (('\n' == *k->p) || ('\r' == *k->p)) {
-              int headerlen;
+              size_t headerlen;
               /* Zero-length header line means end of headers! */
 
               if ('\r' == *k->p)
@@ -1264,7 +1264,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
       */
 
-      int ms = Curl_tvdiff(k->now, k->start100);
+      long ms = Curl_tvdiff(k->now, k->start100);
       if(ms > CURL_TIMEOUT_EXPECT_100) {
         /* we've waited long enough, continue anyway */
         k->write_after_100_header = FALSE;

@@ -39,14 +39,15 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-char *curl_escape(const char *string, int length)
+char *curl_escape(const char *string, int inlength)
 {
-  size_t alloc = (length?(size_t)length:strlen(string))+1;
+  size_t alloc = (inlength?(size_t)inlength:strlen(string))+1;
   char *ns;
   char *testing_ptr = NULL;
   unsigned char in;
   size_t newlen = alloc;
   int strindex=0;
+  size_t length;
 
   ns = malloc(alloc);
   if(!ns)

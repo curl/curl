@@ -120,7 +120,8 @@ static void set_local_option(struct connectdata *, int cmd, int option);
 static void set_remote_option(struct connectdata *, int cmd, int option);
 
 static void printsub(struct SessionHandle *data,
-		     int direction, unsigned char *pointer, int length);
+		     int direction, unsigned char *pointer,
+                     size_t length);
 static void suboption(struct connectdata *);
 
 /* For negotiation compliant to RFC 1143 */
@@ -663,9 +664,9 @@ void rec_dont(struct connectdata *conn, int option)
 static void printsub(struct SessionHandle *data,
 		     int direction,		/* '<' or '>' */
 		     unsigned char *pointer,	/* where suboption data is */
-		     int length)		/* length of suboption data */
+		     size_t length)		/* length of suboption data */
 {
-  int i = 0;
+  unsigned int i = 0;
 
   if (data->set.verbose)
   {

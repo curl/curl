@@ -219,7 +219,7 @@ int waitconnect(curl_socket_t sockfd, /* socket */
   FD_ZERO(&errfd);
   FD_SET(sockfd, &errfd);
 
-  interval.tv_sec = timeout_msec/1000;
+  interval.tv_sec = (int)(timeout_msec/1000);
   timeout_msec -= interval.tv_sec*1000;
 
   interval.tv_usec = timeout_msec*1000;
@@ -674,7 +674,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   *connected = FALSE; /* default to not connected */
 
   if(data->set.timeout || data->set.connecttimeout) {
-    double has_passed;
+    long has_passed;
 
     /* Evaluate in milliseconds how much time that has passed */
     has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
@@ -696,7 +696,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       timeout_ms = data->set.connecttimeout*1000;
 
     /* subtract the passed time */
-    timeout_ms -= (long)has_passed;
+    timeout_ms -= has_passed;
 
     if(timeout_ms < 0) {
       /* a precaution, no need to continue if time already is up */
