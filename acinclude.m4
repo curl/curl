@@ -377,6 +377,7 @@ AC_DEFUN(CURL_CHECK_GETHOSTBYNAME_R,
 
 int
 gethostbyname_r(const char *, struct hostent *, struct hostent_data *);],[
+struct hostent_data data;
 gethostbyname_r(NULL, NULL, NULL);],[
       AC_MSG_RESULT(yes)
       AC_DEFINE(HAVE_GETHOSTBYNAME_R_3)
@@ -394,6 +395,7 @@ gethostbyname_r(NULL, NULL, NULL);],[
 
 int
 gethostbyname_r(const char *,struct hostent *, struct hostent_data *);],[
+struct hostent_data data;
 gethostbyname_r(NULL, NULL, NULL);],[
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(HAVE_GETHOSTBYNAME_R_3)
