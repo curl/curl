@@ -41,12 +41,13 @@ char *GetEnv(char *variable)
   char env[MAX_PATH]; /* MAX_PATH is from windef.h */
   char *temp = getenv(variable);
   env[0] = '\0';
-  ExpandEnvironmentStrings(temp, env, sizeof(env));
+  if (temp != NULL)
+    ExpandEnvironmentStrings(temp, env, sizeof(env));
 #else
   /* no length control */
   char *env = getenv(variable);
 #endif
-  return env?strdup(env):NULL;
+  return (env && env[0])?strdup(env):NULL;
 }
 
 char *curl_getenv(char *v)
