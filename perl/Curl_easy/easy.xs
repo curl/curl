@@ -8,7 +8,7 @@
 #include <curl/easy.h>
 
 #if (LIBCURL_VERSION_NUM<0x070702)
-#define CURLOPT_HEADERFUNCTION 79
+#define CURLOPT_HEADERFUNCTION 20079
 #define header_callback_func write_callback_func
 #else
 #define header_callback_func writeheader_callback_func
@@ -368,12 +368,16 @@ constant(char *name, int arg)
 	case 'A':
 	case 'B':
 	case 'C':
-	case 'D':
 	    if (strEQ(name, "CONNECT_TIME")) return CURLINFO_CONNECT_TIME;
+	    if (strEQ(name, "CONTENT_LENGTH_DOWNLOAD")) return CURLINFO_CONTENT_LENGTH_DOWNLOAD;
+	    if (strEQ(name, "CONTENT_LENGTH_UPLOAD")) return CURLINFO_CONTENT_LENGTH_UPLOAD;
 	    break;
+	case 'D':
 	case 'E':
-	case 'F':
 	    if (strEQ(name, "EFFECTIVE_URL")) return CURLINFO_EFFECTIVE_URL;
+	    break;
+	case 'F':
+	    if (strEQ(name, "FILETIME")) return CURLINFO_FILETIME;
 	    break;
 	case 'G':
 	case 'H':
@@ -397,6 +401,8 @@ constant(char *name, int arg)
 	    if (strEQ(name, "REQUEST_SIZE")) return CURLINFO_REQUEST_SIZE;
 	    break;
 	case 'S':
+	    if (strEQ(name, "SSL_VERIFYRESULT")) return CURLINFO_SSL_VERIFYRESULT;
+	    break;
 	case 'T':
 	    if (strEQ(name, "SIZE_DOWNLOAD")) return CURLINFO_SIZE_DOWNLOAD;
 	    if (strEQ(name, "SIZE_UPLOAD")) return CURLINFO_SIZE_UPLOAD;
@@ -421,27 +427,35 @@ constant(char *name, int arg)
 	    if (strEQ(name, "AUTOREFERER")) return CURLOPT_AUTOREFERER;
 	    break;
 	case 'C':
-	case 'D':
+	    if (strEQ(name, "CONNECTTIMEOUT")) return CURLOPT_CONNECTTIMEOUT;
 	    if (strEQ(name, "COOKIE")) return CURLOPT_COOKIE;
 	    if (strEQ(name, "COOKIEFILE")) return CURLOPT_COOKIEFILE;
+	    if (strEQ(name, "CLOSEFUNCTION")) return CURLOPT_CLOSEFUNCTION;
+	    if (strEQ(name, "CLOSEPOLICY")) return CURLOPT_CLOSEPOLICY;
 	    if (strEQ(name, "CRLF")) return CURLOPT_CRLF;
 	    if (strEQ(name, "CUSTOMREQUEST")) return CURLOPT_CUSTOMREQUEST;
 	    break;
+	case 'D':
 	case 'E':
-	case 'F':
+	    if (strEQ(name, "EGDSOCKET")) return CURLOPT_EGDSOCKET;
 	    if (strEQ(name, "ERRORBUFFER")) return CURLOPT_ERRORBUFFER;
+            break;
+	case 'F':
 	    if (strEQ(name, "FAILONERROR")) return CURLOPT_FAILONERROR;
 	    if (strEQ(name, "FILE")) return CURLOPT_FILE;
+	    if (strEQ(name, "FILETIME")) return CURLOPT_FILETIME;
 	    if (strEQ(name, "FOLLOWLOCATION")) return CURLOPT_FOLLOWLOCATION;
+	    if (strEQ(name, "FORBID_REUSE")) return CURLOPT_FORBID_REUSE;
 	    if (strEQ(name, "FTPAPPEND")) return CURLOPT_FTPAPPEND;
 	    if (strEQ(name, "FTPASCII")) return CURLOPT_FTPASCII;
 	    if (strEQ(name, "FTPLISTONLY")) return CURLOPT_FTPLISTONLY;
 	    if (strEQ(name, "FTPPORT")) return CURLOPT_FTPPORT;
+	    if (strEQ(name, "FRESH_CONNECT")) return CURLOPT_FRESH_CONNECT;
 	    break;
 	case 'G':
 	case 'H':
 	    if (strEQ(name, "HEADER")) return CURLOPT_HEADER;
-        if (strEQ(name, "HEADERFUNCTION")) return CURLOPT_HEADERFUNCTION;
+            if (strEQ(name, "HEADERFUNCTION")) return CURLOPT_HEADERFUNCTION;
 	    if (strEQ(name, "HTTPHEADER")) return CURLOPT_HTTPHEADER;
 	    if (strEQ(name, "HTTPPOST")) return CURLOPT_HTTPPOST;
 	    if (strEQ(name, "HTTPPROXYTUNNEL")) return CURLOPT_HTTPPROXYTUNNEL;
@@ -460,6 +474,9 @@ constant(char *name, int arg)
 	    if (strEQ(name, "LOW_SPEED_TIME")) return CURLOPT_LOW_SPEED_TIME;
 	    break;
 	case 'M':
+	    if (strEQ(name, "MAXCONNECTS")) return CURLOPT_MAXCONNECTS;
+	    if (strEQ(name, "MAXREDIRS")) return CURLOPT_MAXREDIRS;
+	    break;
 	case 'N':
 	    if (strEQ(name, "MUTE")) return CURLOPT_MUTE;
 	    if (strEQ(name, "NETRC")) return CURLOPT_NETRC;
@@ -484,19 +501,23 @@ constant(char *name, int arg)
 	    if (strEQ(name, "PUT")) return CURLOPT_PUT;
 	    break;
 	case 'Q':
-	case 'R':
 	    if (strEQ(name, "QUOTE")) return CURLOPT_QUOTE;
+            break;
+ 	case 'R':
+	    if (strEQ(name, "RANDOM_FILE")) return CURLOPT_RANDOM_FILE;
 	    if (strEQ(name, "RANGE")) return CURLOPT_RANGE;
 	    if (strEQ(name, "READFUNCTION")) return CURLOPT_READFUNCTION;
 	    if (strEQ(name, "REFERER")) return CURLOPT_REFERER;
 	    if (strEQ(name, "RESUME_FROM")) return CURLOPT_RESUME_FROM;
 	    break;
 	case 'S':
-	case 'T':
 	    if (strEQ(name, "SSLCERT")) return CURLOPT_SSLCERT;
 	    if (strEQ(name, "SSLCERTPASSWD")) return CURLOPT_SSLCERTPASSWD;
 	    if (strEQ(name, "SSLVERSION")) return CURLOPT_SSLVERSION;
 	    if (strEQ(name, "STDERR")) return CURLOPT_STDERR;
+            break;
+	case 'T':
+	    if (strEQ(name, "TELNETOPTIONS")) return CURLOPT_TELNETOPTIONS;
 	    if (strEQ(name, "TIMECONDITION")) return CURLOPT_TIMECONDITION;
 	    if (strEQ(name, "TIMEOUT")) return CURLOPT_TIMEOUT;
 	    if (strEQ(name, "TIMEVALUE")) return CURLOPT_TIMEVALUE;
