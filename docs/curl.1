@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "30 Oct 2001" "Curl 7.9.1" "Curl Manual"
+.TH curl 1 "8 Nov 2001" "Curl 7.9.1" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -790,6 +790,10 @@ Too many redirects. When following redirects, curl hit the maximum amount.
 Unknown TELNET option specified.
 .IP 49
 Malformed telnet option.
+.IP 51
+The remote peer's SSL certificate wasn't ok
+.IP 52
+The server didn't reply anything, which here is considered an error.
 .IP XX
 There will appear more error codes here in future releases. The existing ones
 are meant to never change.
