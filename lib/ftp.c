@@ -756,22 +756,30 @@ CURLcode ftp_getfiletime(struct connectdata *conn, char *file)
   if(result)
     return result;
 
-  if(ftpcode == 213) {
-    /* we got a time. Format should be: "YYYYMMDDHHMMSS[.sss]" where the
-       last .sss part is optional and means fractions of a second */
-    int year, month, day, hour, minute, second;
-    if(6 == sscanf(buf+4, "%04d%02d%02d%02d%02d%02d",
-                   &year, &month, &day, &hour, &minute, &second)) {
-      /* we have a time, reformat it */
-      time_t secs=time(NULL);
-      sprintf(buf, "%04d%02d%02d %02d:%02d:%02d",
-              year, month, day, hour, minute, second);
-      /* now, convert this into a time() value: */
-      conn->data->info.filetime = curl_getdate(buf, &secs);
+  switch(ftpcode) {
+  case 213:
+    {
+      /* we got a time. Format should be: "YYYYMMDDHHMMSS[.sss]" where the
+         last .sss part is optional and means fractions of a second */
+      int year, month, day, hour, minute, second;
+      if(6 == sscanf(buf+4, "%04d%02d%02d%02d%02d%02d",
+                     &year, &month, &day, &hour, &minute, &second)) {
+        /* we have a time, reformat it */
+        time_t secs=time(NULL);
+        sprintf(buf, "%04d%02d%02d %02d:%02d:%02d",
+                year, month, day, hour, minute, second);
+        /* now, convert this into a time() value: */
+        conn->data->info.filetime = curl_getdate(buf, &secs);
+      }
     }
-    else {
-      infof(conn->data, "unsupported MDTM reply format\n");
-    }
+    break;
+  default:
+    infof(conn->data, "unsupported MDTM reply format\n");
+    break;
+  case 550: /* "No such file or directory" */
+    failf(conn->data, "Given file does not exist");
+    result = CURLE_FTP_COULDNT_RETR_FILE;
+    break;
   }
   return  result;
 }
@@ -1989,7 +1997,7 @@ CURLcode ftp_perform(struct connectdata *conn,
        well, we "emulate" a HTTP-style header in our output. */
 
 #ifdef HAVE_STRFTIME
-    if(data->set.get_filetime && data->info.filetime) {
+    if(data->set.get_filetime && (data->info.filetime>=0) ) {
       struct tm *tm;
 #ifdef HAVE_LOCALTIME_R
       struct tm buffer;
