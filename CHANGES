@@ -8,6 +8,27 @@
 
 Version XX
 
+Daniel (2 March 2000):
+- Removed the perl-programs from the distribution, they never made many people
+  happy and I'll still keep them available on the web.
+
+- Added the -w and -N stuff to the man page. Documented the new progress meter
+  display in README.curl.
+
+- Jörn Hartroth <Joern.Hartroth@telekom.de>, Chris <cbayliss@csc.come> and Ulf
+  Möller from the openssl development team helped bringing me the details for
+  fixing an OpenSSL usage flaw. It became appearant when they released openssl
+  0.9.5 since that barfed on curl's bad behaviour (not seeding a random number
+  thing).
+
+- Yet another option: -N/--no-buffer disables buffering in the output stream.
+  Probably most useful for very slow transfers when you really want to get
+  every byte curl receives within some prefered time. Andrew <tmr@gci.net>
+  suggested this.
+
+- Damien Adant <dams@usa.net> mailed me his fixes for making curl compile
+  on Ultrix.
+
 Daniel (24 February 2000):
 - Applied Jörn Hartroth's fixes for config-win32.h and lib/Makefile.w32.
 
@@ -19,10 +40,10 @@ Daniel (24 February 2000):
 - Added more variables to -w:
 
   'http_code'
-  'namelookup_time'
-  'connect_time'
-  'pretransfer_time'
-  'effective_url'
+  'time_namelookup'
+  'time_connect'
+  'time_pretransfer'
+  'url_effective'
 
 - Made -w@filename read the syntax from a file and -w@- reads the syntax from
   stdin in the good old "standard" curl way.
