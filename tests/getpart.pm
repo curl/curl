@@ -3,6 +3,9 @@
 
 my @xml;
 
+my $warning=0;
+my $trace=0;
+
 sub getpartattr {
     my ($section, $part)=@_;
 
@@ -63,11 +66,20 @@ sub getpart {
             $inside--;
         }
         elsif((1==$inside) && ($_ =~ /^ *\<\/$section/)) {
+            if($trace) {
+                print STDERR "*** getpart.pm: $section/$part returned data!\n";
+            }
+            if(!@this && $warning) {
+                print STDERR "*** getpart.pm: $section/$part returned empty!\n";
+            }
             return @this;
         }
         elsif(2==$inside) {
             push @this, $_;
         }
+    }
+    if($warning) {
+        print STDERR "*** getpart.pm: $section/$part returned empty!\n";
     }
     return @this; #empty!
 }
