@@ -906,7 +906,8 @@ CURLcode ftp_use_port(struct connectdata *conn)
     2.1.X doesn't do*/
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
-  if (getaddrinfo(hbuf, "0", &hints, &res))
+
+  if (getaddrinfo(hbuf, (char *)"0", &hints, &res))
     return CURLE_FTP_PORT_FAILED;
   
   portsock = -1;
@@ -929,16 +930,15 @@ CURLcode ftp_use_port(struct connectdata *conn)
     
     break;
   }
+  freeaddrinfo(res);
   if (portsock < 0) {
     failf(data, strerror(errno));
-    freeaddrinfo(res);
     return CURLE_FTP_PORT_FAILED;
   }
 
   sslen = sizeof(ss);
   if (getsockname(portsock, sa, &sslen) < 0) {
     failf(data, strerror(errno));
-    freeaddrinfo(res);
     return CURLE_FTP_PORT_FAILED;
   }
 
@@ -1047,7 +1047,6 @@ CURLcode ftp_use_port(struct connectdata *conn)
   
   if (!*modep) {
     sclose(portsock);
-    freeaddrinfo(res);
     return CURLE_FTP_PORT_FAILED;
   }
   /* we set the secondary socket variable to this for now, it
@@ -1134,7 +1133,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
     }
     if(hostdataptr)
       /* free the memory used for name lookup */
-      free(hostdataptr);
+      Curl_freeaddrinfo(hostdataptr);
   }
   else {
     failf(data, "could't find my own IP address (%s)", myhost);
@@ -1285,7 +1284,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
       ftp_pasv_verbose(conn, conninfo, newhost, connectport);
 	
     if(hostdataptr)
-      free(hostdataptr);
+      Curl_freeaddrinfo(hostdataptr);
 
     if(CURLE_OK != result)
       return result;

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -69,6 +69,58 @@
 /* --- resolve name or IP-number --- */
 
 #ifdef ENABLE_IPV6
+
+#ifdef MALLOCDEBUG
+/* These two are strictly for memory tracing and are using the same
+ * style as the family otherwise present in memdebug.c. I put these ones
+ * here since they require a bunch of struct types I didn't wanna include
+ * in memdebug.c
+ */
+int curl_getaddrinfo(char *hostname, char *service,
+                     struct addrinfo *hints,
+                     struct addrinfo **result,
+                     int line, const char *source)
+{
+  int res=(getaddrinfo)(hostname, service, hints, result);
+  if(0 == res)
+    /* success */
+    fprintf(logfile?logfile:stderr, "ADDR %s:%d getaddrinfo() = %p\n",
+            source, line, *result);
+  else
+    fprintf(logfile?logfile:stderr, "ADDR %s:%d getaddrinfo() failed\n",
+            source, line);
+  return res;
+}
+void curl_freeaddrinfo(struct addrinfo *freethis,
+                       int line, const char *source)
+{
+  (freeaddrinfo)(freethis);
+  fprintf(logfile?logfile:stderr, "ADDR %s:%d freeaddrinfo(%p)\n",
+          source, line, freethis);
+}
+
+#endif
+
+/*
+ * This is a wrapper function for freeing name information in a protocol
+ * independent way. This takes care of using the appropriate underlaying
+ * proper function.
+ */
+void Curl_freeaddrinfo(void *freethis)
+{
+#ifdef ENABLE_IPV6
+  freeaddrinfo(freethis);
+#else
+  free(freethis);
+#endif
+}
+
+/*
+ * Return name information about the given hostname and port number. If
+ * successful, the 'addrinfo' is returned and the forth argument will point to
+ * memory we need to free after use. That meory *MUST* be freed with
+ * Curl_freeaddrinfo(), nothing else.
+ */
 Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
                                 char *hostname,
                                 int port,
@@ -78,8 +130,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
   int error;
   char sbuf[NI_MAXSERV];
 
-  *bufp=NULL; /* pointer unused with IPv6 */
-
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = PF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
@@ -87,9 +137,11 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
   snprintf(sbuf, sizeof(sbuf), "%d", port);
   error = getaddrinfo(hostname, sbuf, &hints, &res);
   if (error) {
-    infof(data, "getaddrinfo(3) failed for %s\n", hostname);
+    infof(data, "getaddrinfo(3) failed for %s\n", hostname);    
     return NULL;
   }
+  *bufp=(char *)res; /* make it point to the result struct */
+
   return res;
 }
 #else /* following code is IPv4-only */

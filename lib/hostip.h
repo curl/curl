@@ -27,9 +27,21 @@ struct addrinfo;
 struct hostent;
 struct SessionHandle;
 
+/* Get name info */
 Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
                                 char *hostname,
                                 int port,
                                 char **bufp);
+/* free name info */
+void Curl_freeaddrinfo(void *freethis);
+
+#ifdef MALLOCDEBUG
+void curl_freeaddrinfo(struct addrinfo *freethis,
+                       int line, const char *source);
+int curl_getaddrinfo(char *hostname, char *service,
+                     struct addrinfo *hints,
+                     struct addrinfo **result,
+                     int line, const char *source);
+#endif
 
 #endif

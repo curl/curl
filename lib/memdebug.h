@@ -6,6 +6,8 @@
 #include <memory.h>
 #endif
 
+extern FILE *logfile;
+
 /* memory functions */
 void *curl_domalloc(size_t size, int line, const char *source);
 void *curl_dorealloc(void *ptr, size_t size, int line, const char *source);
@@ -34,6 +36,11 @@ int curl_fclose(FILE *file, int line, const char *source);
  curl_socket(domain,type,protocol,__LINE__,__FILE__)
 #define accept(sock,addr,len)\
  curl_accept(sock,addr,len,__LINE__,__FILE__)
+
+#define getaddrinfo(host,serv,hint,res) \
+  curl_getaddrinfo(host,serv,hint,res,__LINE__,__FILE__)
+#define freeaddrinfo(data) \
+  curl_freeaddrinfo(data,__LINE__,__FILE__)
 
 /* sclose is probably already defined, redefine it! */
 #undef sclose
