@@ -505,8 +505,6 @@ int main(int argc, char *argv[])
   /* start accepting connections */
   listen(sock, 5);
 
-  fprintf(stderr, "*** %s listening on port %u ***\n", VERSION, port);
-
   while (1) {
     int doc;
 
