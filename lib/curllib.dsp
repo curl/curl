@@ -143,10 +143,6 @@ SOURCE=.\getinfo.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\getpass.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\hash.c
 # End Source File
 # Begin Source File
@@ -296,10 +292,6 @@ SOURCE=.\getdate.h
 # Begin Source File
 
 SOURCE=.\getenv.h
-# End Source File
-# Begin Source File
-
-SOURCE=.\getpass.h
 # End Source File
 # Begin Source File
 
