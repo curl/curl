@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -1769,7 +1769,8 @@ static CURLcode Connect(struct SessionHandle *data,
     conn->curl_close = Curl_http_close;
 
 #else /* USE_SSLEAY */
-    failf(data, "libcurl was built with SSL disabled, https: not supported!");
+    failf(data, LIBCURL_NAME
+          " was built with SSL disabled, https: not supported!");
     return CURLE_UNSUPPORTED_PROTOCOL;
 #endif /* !USE_SSLEAY */
   }
@@ -1795,7 +1796,8 @@ static CURLcode Connect(struct SessionHandle *data,
 #ifdef USE_SSLEAY
       conn->protocol |= PROT_FTPS;
 #else
-      failf(data, "libcurl was built with SSL disabled, ftps: not supported!");
+      failf(data, LIBCURL_NAME
+            " was built with SSL disabled, ftps: not supported!");
       return CURLE_UNSUPPORTED_PROTOCOL;
 #endif /* !USE_SSLEAY */
     }
