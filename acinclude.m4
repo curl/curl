@@ -152,10 +152,8 @@ AC_DEFUN([TYPE_IN_ADDR_T],
       AC_MSG_CHECKING([for in_addr_t equivalent])
       AC_CACHE_VAL([curl_cv_in_addr_t_equiv],
       [
-         # Systems have either "struct sockaddr *" or
-         # "void *" as the second argument to getpeername
          curl_cv_in_addr_t_equiv=
-         for t in int size_t unsigned long "unsigned long"; do
+         for t in "unsigned long" int size_t unsigned long; do
             AC_TRY_COMPILE([
                #include <sys/types.h>
                #include <sys/socket.h>
