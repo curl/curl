@@ -353,13 +353,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     h = gethostbyname(hostname);
     if (!h)
       infof(data, "gethostbyname(2) failed for %s\n", hostname);
-    else {
-      /*
-       * Translate the hostent to Curl_addrinfo and return the allocated
-       * data.
-       */
-      return Curl_addrinfo_copy(h, port);
-    }
 #endif /*HAVE_GETHOSTBYNAME_R */
   }
 
