@@ -863,7 +863,7 @@ Transfer(struct connectdata *c_conn)
       }
 
       if (data->set.timeout &&
-          ((Curl_tvdiff(now, start)/1000) > data->set.timeout)) {
+          ((Curl_tvdiff(now, start)/1000) >= data->set.timeout)) {
 	failf (data, "Operation timed out with %d out of %d bytes received",
 	       bytecount, conn->size);
 	return CURLE_OPERATION_TIMEOUTED;
@@ -914,6 +914,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
   data->set.followlocation=0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
+  data->state.errorbuf = FALSE; /* no error has occurred */
 
   Curl_initinfo(data); /* reset session-specific information "variables" */
 
