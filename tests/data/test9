@@ -1,0 +1,60 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+HTTP RFC1867-type formposting
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/we/want/9 -F name=daniel -F tool=curl -F file=@log/test9.txt
+</command>
+# We create this file before the command is invoked!
+<file name="log/test9.txt">
+foo-
+This is a moo-
+bar
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^(User-Agent:|Content-Type: multipart/form-data;|--curl).*
+</strip>
+<protocol>
+POST /we/want/9 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Content-Length: 375
+Content-Type: multipart/form-data; boundary=curluczemxkcWWsxptLlAImrFQHwQ3W
+
+--curluczemxkcWWsxptLlAImrFQHwQ3W
+Content-Disposition: form-data; name="name"
+
+daniel
+--curluczemxkcWWsxptLlAImrFQHwQ3W
+Content-Disposition: form-data; name="tool"
+
+curl
+--curluczemxkcWWsxptLlAImrFQHwQ3W
+Content-Disposition: form-data; name="file"; filename="log/test9.txt"
+Content-Type: text/plain
+
+foo-
+This is a moo-
+bar
+--curluczemxkcWWsxptLlAImrFQHwQ3W--
+
+</protocol>
+</verify>

@@ -1,0 +1,34 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Server: thebest/1.0
+Connection: close
+
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+HTTP HEAD with Connection: close
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/want/14 -i --head
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+HEAD /want/14 HTTP/1.1
+User-Agent: curl/7.4.2-pre4 (sparc-sun-solaris2.7) libcurl 7.4.2-pre4
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>

@@ -1,0 +1,34 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 Read you
+Deleted: suppose we got a header like this! ;-)
+
+blabla custom request result
+
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+HTTP custom request 'DELETE'
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/want/13 -X DELETE
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+DELETE /want/13 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
