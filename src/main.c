@@ -359,8 +359,8 @@ static void help(void)
        " -d/--data <data>   HTTP POST data (H)\n"
        "    --data-ascii <data>   HTTP POST ASCII data (H)\n"
        "    --data-binary <data>  HTTP POST binary data (H)\n"
-       "    --negotiate     Enable HTTP Negotiate Authentication (req GSS-lib)\n"
-       "    --digest        Enable HTTP Digest Authentication");
+       "    --negotiate     Enable HTTP Negotiate Authentication (H - req GSS-lib)\n"
+       "    --digest        Enable HTTP Digest Authentication (H)");
   puts("    --disable-eprt  Prevents curl from using EPRT or LPRT (F)\n"
        "    --disable-epsv  Prevents curl from using EPSV (F)\n"
        " -D/--dump-header <file> Write the headers to this file\n"
@@ -405,7 +405,8 @@ static void help(void)
        " -M/--manual        Display huge help text\n"
        " -n/--netrc         Must read .netrc for user name and password\n"
        "    --netrc-optional  Use either .netrc or URL; overrides -n\n"
-       " -N/--no-buffer     Disables the buffering of the output stream");
+       "    --ntlm          Enable HTTP NTLM authentication (H)");
+  puts(" -N/--no-buffer     Disables the buffering of the output stream");
   puts(" -o/--output <file> Write output to <file> instead of stdout\n"
        " -O/--remote-name   Write output to a file named as the remote file\n"
        " -p/--proxytunnel   Perform non-HTTP services through a HTTP proxy\n"
@@ -461,6 +462,7 @@ struct Configurable {
   char *cookiefile; /* read from this file */
   bool cookiesession; /* new session? */
   bool encoding;    /* Accept-Encoding please */
+  bool ntlm;        /* NTLM Authentication */
   bool digest;      /* Digest Authentication */
   bool negotiate;   /* Negotiate Authentication */
   bool use_resume;
@@ -1055,7 +1057,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5i", "limit-rate", TRUE},
     {"5j", "compressed",  FALSE}, /* might take an arg someday */
     {"5k", "digest",     FALSE},
-    {"5l",  "negotiate", FALSE},
+    {"5l", "negotiate",  FALSE},
+    {"5m", "ntlm",       FALSE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1286,6 +1289,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
       case 'l': /* --negotiate */
 	config->negotiate ^= TRUE;
+	break;
+
+      case 'm': /* --ntlm */
+	config->ntlm ^= TRUE;
 	break;
 
       default: /* the URL! */
@@ -2986,6 +2993,8 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLHTTP_DIGEST);
       else if(config->negotiate)
         curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLHTTP_NEGOTIATE);
+      else if(config->ntlm)
+        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLHTTP_NTLM);
       
       /* new in curl 7.9.7 */
       if(config->trace_dump) {
