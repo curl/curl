@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* Using configure --disable-[protocol] may cause 'make test' to fail for
+  tests using the disabled protocol(s).
+
 * To get HTTP Negotiate authentication to work fine, you need to provide a
   (fake) user name (this concerns both curl and the lib) because the code
   wrongly only considers authentication if there's a user name provided.
