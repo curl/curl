@@ -1,0 +1,110 @@
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
+
+                          How cURL Become Like This
+
+
+In the second half of 1997, Daniel Stenberg came up with the idea to make
+currency-exchange calculations available to Internet Relay Chat (IRC)
+users. All the necessary data are published on the Web; he just needed to
+automate their retrieval.
+
+Daniel simply adopted an existing command-line open-source tool, httpget, that
+Brazilian Rafael Sagula had written. After a few minor adjustments, it did
+just what he needed.
+
+Soon, he found currencies on a GOPHER site, so support for that had to go in,
+and not before long FTP download support was added as well. The name of the
+project was changed to urlget to better fit what it actually did now, since
+the http-only days were already passed.
+
+The project slowly grew bigger. When upload capabilities were added and the
+name once again was misleading, a second name change was made and on March 20,
+1998 curl 4 was released. (The version numbering from the previous names were
+kept.)
+
+(Unrelated to this project a company called Curl Corporation filed a US
+trademark on the name "CURL" on May 18 1998. That company had then already
+registered the curl.com domain back in November of the previous year. All this
+was much later brought into the lights.)
+
+SSL support was added, powered by the SSLeay library.
+
+August 1998, added project curl to freshmeat.net.
+
+October 1998, with the curl 4.9 release and the introduction of cookie
+support, curl was no longer released under the GPL license. Now we're at 4000
+lines of code, we switched over to the MPL license to restrict the effects of
+"copyleft".
+
+November 1998, configure script and reported successful compiles on several
+major operating systems. The never-quite-understood -F option was added and
+curl could now simulate quite a lot of a browser.
+
+Curl 5 was released in December 1998 and introduced the first ever curl man
+page. People started making Linux RPM packages out of it.
+
+January 1999, DICT support added.
+
+OpenSSL took over where SSLeay was abandoned.
+
+May 1999, first Debian package.
+
+August 1999, LDAP:// and FILE:// support added. The curl web site gets 1300
+visits daily.
+
+Released curl 6.0 in September. 15000 lines of code.
+
+December 28 1999, added project to Sourceforge and started using its services
+for managing the project.
+
+Spring 2000, major internal overhaul to provide a suitable library interface.
+The first non-beta release was named 7.1 and arrived in August. This offered
+the easy interface and turned out to be the beginning of actually getting
+other software and programs to get based on and powered by libcurl. Almost
+20000 lines of code.
+
+August 2000, the curl web site gets 4000 visits daily.
+
+The PHP guys adopted libcurl already the same month, when the first ever third
+party libcurl binding showed up. CURL has been a supported module in PHP since
+the release of PHP 4.0.2. This would soon get followers. More than 16
+different bindings exist at the time of this writing.
+
+September 2000, kerberos4 support was added.
+
+In November 2000 started the work on a test suite for curl. It was later
+re-written from scratch again.
+
+January 2001, Daniel released curl 7.5.2 under a new license again: MIT (or
+MPL). The MIT license is extremely liberal and can be used combined with GPL
+in other projects. This would finally put an end to the "complaints" from
+people involved in GPLed projects that previously were prohibited from using
+libcurl while it was released under MPL only. (Due to the fact that MPL is
+deemed "GPL incompatible".)
+
+curl supports HTTP 1.1 starting with the release of 7.7, March 22 2001. This
+also introduced libcurl's ability to do persistent connections. 24000 lines of
+code.
+
+August 2001. curl is bundled in Mac OS X, 10.1. It was already becoming more
+and more of a standard utility of Linux distributions and a regular in the BSD
+ports collections. The curl web site gets 8000 visits daily. Curl Corporation
+contacted Daniel to discuss "the name issue". After Daniel's reply, they have
+never since got in touch again.
+
+September 2001, libcurl 7.9 introduces cookie jar and curl_formadd(). During
+the forthcoming 7.9.x releases, we introduced the multi interface slowly and
+without much whistles.
+
+June 2002, the curl web site gets 13000 visits daily. curl and libcurl is
+35000 lines of code. Reported successful compiles on more than 40 combinations
+of CPUs and operating systems.
+
+To estimate number of users of the curl tool or libcurl library is next to
+impossible. Around 5000 downloaded packages each week from the main site gives
+a hint, but the packages are mirrored extensively, bundled with numerous OS
+distributions and otherwise retrieved as part of other software.
