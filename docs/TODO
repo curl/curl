@@ -106,9 +106,9 @@ TODO
    (http://www.mozilla.org/projects/security/pki/nss/) and GNUTLS
    (http://gnutls.hellug.gr/)
 
- LDAP
+ CLIENT
 
- * Multiple URL requests don't work. [http://sourceforge.net/tracker/index.php?func=detail&aid=475407&group_id=976&atid=100976]
+ * "curl ftp://site.com/*.txt"
 
  TEST SUITE
 
