@@ -46,7 +46,6 @@
 #define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
 
-#include "security.h"
 #include <stdlib.h>
 #include <string.h>
 #include <netdb.h>
@@ -55,6 +54,8 @@
 #include <unistd.h>
 #endif
 
+#include "urldata.h"
+#include "krb4.h"
 #include "base64.h"
 #include "sendf.h"
 #include "ftp.h"

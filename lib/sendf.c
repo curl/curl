@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -49,7 +49,7 @@
 #include <curl/mprintf.h>
 
 #ifdef HAVE_KRB4
-#include "security.h"
+#include "krb4.h"
 #endif
 #include <string.h>
 #include "memory.h"

@@ -82,7 +82,6 @@
 #include "ftp.h"
 
 #ifdef HAVE_KRB4
-#include "security.h"
 #include "krb4.h"
 #endif
 

@@ -141,7 +141,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include <curl/mprintf.h>
 
 #ifdef HAVE_KRB4
-#include "security.h"
+#include "krb4.h"
 #endif
 #include "memory.h"
 

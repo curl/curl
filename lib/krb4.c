@@ -43,8 +43,6 @@
 #ifndef CURL_DISABLE_FTP
 #ifdef HAVE_KRB4
 
-#include "security.h"
-#include "base64.h"
 #include <stdlib.h>
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -57,6 +55,8 @@
 #include <unistd.h> /* for getpid() */
 #endif
 
+#include "urldata.h"
+#include "base64.h"
 #include "ftp.h"
 #include "sendf.h"
 #include "krb4.h"
