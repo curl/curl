@@ -140,8 +140,10 @@ OBJS	= \
 	$(OBJDIR)/urlglob.o \
 	$(OBJDIR)/writeout.o \
 	$(OBJDIR)/getpass.o \
-	$(OBJDIR)/homedir.o
+	$(OBJDIR)/homedir.o \
+	$(OBJDIR)/timeval.o
 
+vpath %.c ../lib
 
 all: $(OBJDIR) $(OBJDIR)/version.inc $(OBJDIR)/$(TARGET).nlm 
 
