@@ -31,7 +31,7 @@ HTTP
  - custom HTTP request
  - cookie get/send
  - understands the netscape cookie file
- - custom headers (that can replace internally generated headers)
+ - custom headers (that can replace/remove internally generated headers)
  - custom user-agent string
  - custom referer string
  - range
@@ -57,7 +57,7 @@ FTP
  - upload via http-proxy as HTTP PUT
  - download resume
  - upload resume
- - QUOT commands (before and/or after the transfer)
+ - custom ftp commands (before and/or after the transfer)
  - simple "range" support
  - via http-proxy
 

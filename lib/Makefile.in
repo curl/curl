@@ -63,9 +63,14 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
+AS = @AS@
 CC = @CC@
+DLLTOOL = @DLLTOOL@
+LIBTOOL = @LIBTOOL@
+LN_S = @LN_S@
 MAKEINFO = @MAKEINFO@
 NROFF = @NROFF@
+OBJDUMP = @OBJDUMP@
 PACKAGE = @PACKAGE@
 PERL = @PERL@
 RANLIB = @RANLIB@
@@ -74,35 +79,37 @@ YACC = @YACC@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
-noinst_LIBRARIES = libcurl.a
+lib_LTLIBRARIES = libcurl.la
 
 # Some flags needed when trying to cause warnings ;-)
-CFLAGS = -g -Wall #-pedantic
+# CFLAGS = -g -Wall #-pedantic
 
 INCLUDES = -I$(top_srcdir)/include
 
-libcurl_a_SOURCES =  arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c base64.c       file.h         hostip.c       progress.c     timeval.h base64.h       formdata.c     hostip.h       progress.h     cookie.c       formdata.h     http.c         sendf.c        cookie.h       ftp.c          http.h         sendf.h        url.c dict.c         ftp.h          if2ip.c        speedcheck.c   url.h dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h download.c     getdate.h      ldap.c         ssluse.c       version.c download.h     getenv.c       ldap.h         ssluse.h       escape.c       getenv.h       mprintf.c      telnet.c       escape.h       getpass.c      netrc.c        telnet.h       writeout.c writeout.h highlevel.c strequal.c strequal.h easy.c
+libcurl_la_SOURCES =  arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c base64.c       file.h         hostip.c       progress.c     timeval.h base64.h       formdata.c     hostip.h       progress.h     cookie.c       formdata.h     http.c         sendf.c        cookie.h       ftp.c          http.h         sendf.h        url.c dict.c         ftp.h          if2ip.c        speedcheck.c   url.h dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h download.c     getdate.h      ldap.c         ssluse.c       version.c download.h     getenv.c       ldap.h         ssluse.h       escape.c       getenv.h       mprintf.c      telnet.c       escape.h       getpass.c      netrc.c        telnet.h       writeout.c writeout.h highlevel.c strequal.c strequal.h easy.c
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h ../src/config.h
 CONFIG_CLEAN_FILES = 
-LIBRARIES =  $(noinst_LIBRARIES)
+LTLIBRARIES =  $(lib_LTLIBRARIES)
 
 
 DEFS = @DEFS@ -I. -I$(srcdir) -I.. -I../src
 CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
-libcurl_a_LIBADD = 
-libcurl_a_OBJECTS =  file.o timeval.o base64.o hostip.o progress.o \
-formdata.o cookie.o http.o sendf.o ftp.o url.o dict.o if2ip.o \
-speedcheck.o getdate.o download.o ldap.o ssluse.o version.o getenv.o \
-escape.o mprintf.o telnet.o getpass.o netrc.o writeout.o highlevel.o \
-strequal.o easy.o
-AR = ar
+libcurl_la_LDFLAGS = 
+libcurl_la_LIBADD = 
+libcurl_la_OBJECTS =  file.lo timeval.lo base64.lo hostip.lo progress.lo \
+formdata.lo cookie.lo http.lo sendf.lo ftp.lo url.lo dict.lo if2ip.lo \
+speedcheck.lo getdate.lo download.lo ldap.lo ssluse.lo version.lo \
+getenv.lo escape.lo mprintf.lo telnet.lo getpass.lo netrc.lo \
+writeout.lo highlevel.lo strequal.lo easy.lo
+CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
-LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -110,28 +117,44 @@ DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
 TAR = gtar
 GZIP_ENV = --best
-SOURCES = $(libcurl_a_SOURCES)
-OBJECTS = $(libcurl_a_OBJECTS)
+SOURCES = $(libcurl_la_SOURCES)
+OBJECTS = $(libcurl_la_OBJECTS)
 
 all: all-redirect
 .SUFFIXES:
-.SUFFIXES: .S .c .o .s
+.SUFFIXES: .S .c .lo .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --foreign lib/Makefile
+	cd $(top_srcdir) && $(AUTOMAKE) --foreign --include-deps lib/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \
 	  && CONFIG_FILES=$(subdir)/$@ CONFIG_HEADERS= $(SHELL) ./config.status
 
 
-mostlyclean-noinstLIBRARIES:
+mostlyclean-libLTLIBRARIES:
 
-clean-noinstLIBRARIES:
-	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+clean-libLTLIBRARIES:
+	-test -z "$(lib_LTLIBRARIES)" || rm -f $(lib_LTLIBRARIES)
 
-distclean-noinstLIBRARIES:
+distclean-libLTLIBRARIES:
 
-maintainer-clean-noinstLIBRARIES:
+maintainer-clean-libLTLIBRARIES:
+
+install-libLTLIBRARIES: $(lib_LTLIBRARIES)
+	@$(NORMAL_INSTALL)
+	$(mkinstalldirs) $(DESTDIR)$(libdir)
+	@list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  if test -f $$p; then \
+	    echo "$(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p"; \
+	    $(LIBTOOL)  --mode=install $(INSTALL) $$p $(DESTDIR)$(libdir)/$$p; \
+	  else :; fi; \
+	done
+
+uninstall-libLTLIBRARIES:
+	@$(NORMAL_UNINSTALL)
+	list='$(lib_LTLIBRARIES)'; for p in $$list; do \
+	  $(LIBTOOL)  --mode=uninstall rm -f $(DESTDIR)$(libdir)/$$p; \
+	done
 
 .c.o:
 	$(COMPILE) -c $<
@@ -152,10 +175,27 @@ distclean-compile:
 
 maintainer-clean-compile:
 
-libcurl.a: $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
-	-rm -f libcurl.a
-	$(AR) cru libcurl.a $(libcurl_a_OBJECTS) $(libcurl_a_LIBADD)
-	$(RANLIB) libcurl.a
+.c.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.s.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+.S.lo:
+	$(LIBTOOL) --mode=compile $(COMPILE) -c $<
+
+mostlyclean-libtool:
+	-rm -f *.lo
+
+clean-libtool:
+	-rm -rf .libs _libs
+
+distclean-libtool:
+
+maintainer-clean-libtool:
+
+libcurl.la: $(libcurl_la_OBJECTS) $(libcurl_la_DEPENDENCIES)
+	$(LINK) -rpath $(libdir) $(libcurl_la_LDFLAGS) $(libcurl_la_OBJECTS) $(libcurl_la_LIBADD) $(LIBS)
 
 tags: TAGS
 
@@ -209,7 +249,7 @@ check-am: all-am
 check: check-am
 installcheck-am:
 installcheck: installcheck-am
-install-exec-am:
+install-exec-am: install-libLTLIBRARIES
 install-exec: install-exec-am
 
 install-data-am:
@@ -218,13 +258,14 @@ install-data: install-data-am
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 install: install-am
-uninstall-am:
+uninstall-am: uninstall-libLTLIBRARIES
 uninstall: uninstall-am
-all-am: Makefile $(LIBRARIES)
+all-am: Makefile $(LTLIBRARIES)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install
 installdirs:
+	$(mkinstalldirs)  $(DESTDIR)$(libdir)
 
 
 mostlyclean-generic:
@@ -236,33 +277,39 @@ distclean-generic:
 	-rm -f config.cache config.log stamp-h stamp-h[0-9]*
 
 maintainer-clean-generic:
-mostlyclean-am:  mostlyclean-noinstLIBRARIES mostlyclean-compile \
-		mostlyclean-tags mostlyclean-generic
+mostlyclean-am:  mostlyclean-libLTLIBRARIES mostlyclean-compile \
+		mostlyclean-libtool mostlyclean-tags \
+		mostlyclean-generic
 
 mostlyclean: mostlyclean-am
 
-clean-am:  clean-noinstLIBRARIES clean-compile clean-tags clean-generic \
-		mostlyclean-am
+clean-am:  clean-libLTLIBRARIES clean-compile clean-libtool clean-tags \
+		clean-generic mostlyclean-am
 
 clean: clean-am
 
-distclean-am:  distclean-noinstLIBRARIES distclean-compile \
-		distclean-tags distclean-generic clean-am
+distclean-am:  distclean-libLTLIBRARIES distclean-compile \
+		distclean-libtool distclean-tags distclean-generic \
+		clean-am
+	-rm -f libtool
 
 distclean: distclean-am
 
-maintainer-clean-am:  maintainer-clean-noinstLIBRARIES \
-		maintainer-clean-compile maintainer-clean-tags \
-		maintainer-clean-generic distclean-am
+maintainer-clean-am:  maintainer-clean-libLTLIBRARIES \
+		maintainer-clean-compile maintainer-clean-libtool \
+		maintainer-clean-tags maintainer-clean-generic \
+		distclean-am
 	@echo "This command is intended for maintainers to use;"
 	@echo "it deletes files that may require special tools to rebuild."
 
 maintainer-clean: maintainer-clean-am
 
-.PHONY: mostlyclean-noinstLIBRARIES distclean-noinstLIBRARIES \
-clean-noinstLIBRARIES maintainer-clean-noinstLIBRARIES \
-mostlyclean-compile distclean-compile clean-compile \
-maintainer-clean-compile tags mostlyclean-tags distclean-tags \
+.PHONY: mostlyclean-libLTLIBRARIES distclean-libLTLIBRARIES \
+clean-libLTLIBRARIES maintainer-clean-libLTLIBRARIES \
+uninstall-libLTLIBRARIES install-libLTLIBRARIES mostlyclean-compile \
+distclean-compile clean-compile maintainer-clean-compile \
+mostlyclean-libtool distclean-libtool clean-libtool \
+maintainer-clean-libtool tags mostlyclean-tags distclean-tags \
 clean-tags maintainer-clean-tags distdir info-am info dvi-am dvi check \
 check-am installcheck-am installcheck install-exec-am install-exec \
 install-data-am install-data install-am install uninstall-am uninstall \

@@ -51,5 +51,9 @@ lib/*am
 lib/Makefile.vc6
 lib/*m32
 include/README
+include/Makefile.in
+include/Makefile.am
 include/curl/*.h
+include/curl/Makefile.in
+include/curl/Makefile.am
 

@@ -82,6 +82,9 @@
 /* Define if you have the inet_ntoa_r function.  */
 #undef HAVE_INET_NTOA_R
 
+/* Define if you have the localtime_r function.  */
+#undef HAVE_LOCALTIME_R
+
 /* Define if you have the perror function.  */
 #undef HAVE_PERROR
 

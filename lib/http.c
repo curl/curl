@@ -38,6 +38,10 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+#define _REENTRANT /* Necessary to use in Solaris, since the silly guys at Sun
+                      made the localtime_r() prototype dependent on it (or
+                      _POSIX_C_SOURCE or _POSIX_PTHREAD_SEMANTICS). */
+
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
@@ -61,6 +65,12 @@
 #endif
 #include <netinet/in.h>
 #include <sys/time.h>
+
+#ifdef HAVE_TIME_H
+#ifdef TIME_WITH_SYS_TIME
+#include <time.h>
+#endif
+#endif
 
 #include <sys/resource.h>
 #ifdef HAVE_UNISTD_H
@@ -362,7 +372,6 @@ CURLcode http(struct connectdata *conn)
       struct tm *thistime;
 
 #ifdef HAVE_LOCALTIME_R
-      extern struct tm *localtime_r(time_t *, struct tm *);
       /* thread-safe version */
       struct tm keeptime;
       thistime = localtime_r(&data->timevalue, &keeptime);

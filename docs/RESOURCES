@@ -82,15 +82,13 @@ Software
 
 Similar Tools
 -------------
-  wget    - ftp://prep.ai.mit.edu/pub/gnu/
+  wget    - http://www.gnu.org/software/wget/wget.html
 
   snarf   - http://www.xach.com/snarf/
 
   lynx    - http://lynx.browser.org/ (well at least when -dump is used)
 
   swebget - http://www.uni-hildesheim.de/~smol0075/swebget/
-
-  fetch   - ?
 
 Related Software
 ----------------
@@ -105,3 +103,5 @@ Related Software
   gzip     - http://www.gnu.org/software/gzip/gzip.html
 
   tar      - http://www.gnu.org/software/tar/tar.html
+
+  libtool  - http://www.gnu.org/software/libtool/libtool.html

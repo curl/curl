@@ -8,6 +8,10 @@
 **  This code is in the public domain and has no copyright.
 */
 
+#define _REENTRANT /* Necessary to use in Solaris, since the silly guys at Sun
+                      made the localtime_r() prototype dependent on it (or
+                      _POSIX_C_SOURCE or _POSIX_PTHREAD_SEMANTICS). */
+
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 # ifdef HAVE_ALLOCA_H
@@ -471,7 +475,6 @@ o_merid	: /* NULL */
 
 extern struct tm	*gmtime ();
 extern struct tm	*localtime ();
-extern struct tm	*localtime_r (time_t *, struct tm *);
 extern time_t		mktime ();
 
 /* Month and day table. */

@@ -7,6 +7,27 @@
                                History of Changes
 
 
+Version 7.0.11beta
+
+Daniel (1 August 2000)
+- Albert Chin-A-Young pointed out that 'make install' did not properly create
+  the header include directory, why it failed to install the header files as
+  it should. Automake isn't really equipped to deal with subdirectories
+  without Makefiles in any nice way. I had to run ahead and add Makefiles in
+  both include and include/curl before I managed to create a top-level
+  makefile that succeeds in install everything properly!
+
+- Ok, no more "features" added now. Let's just verify that there's no major
+  flaws added now.
+
+Daniel (31 July 2000)
+- Both Jeff Schasny and Ketil Froyn asked me how to tell curl not to send one
+  of those internally generated headers. They didn't settle with the blank
+  ones you could tell curl to use. I rewrote the header-replace stuff a
+  little. Now, if you replace an internal header with your own and that new
+  one is a blank header you will only remove the internal one and not get any
+  blank. I couldn't figure out any case when you want that blank header.
+
 Daniel (29 July 2000)
 - It struck me that the lib used localtime() which is not thread-safe, so now
   I use localtime_r() in the systems that has it.
@@ -14,7 +35,8 @@ Daniel (29 July 2000)
 - I went through this entire document and removed all email addresses and left
   names only. I've really made an effort to always note who brought be bug
   reports or fixes, but more and more people ask me to remove the email
-  addresses since they become victims for spams this way.
+  addresses since they become victims for spams this way. Gordon Beaton got me
+  working on this.
 
 Daniel (27 July 2000)
 - Jörn Hartroth found out that when you specified a HTTP proxy in an
