@@ -6,6 +6,42 @@
 
                                History of Changes
 
+Daniel (12 November 2001)
+- Kai-Uwe Rommel made me aware that -p (http proxy tunnel) silly enough didn't
+  work for plain HTTP requests! So I made that work.
+
+Version 7.9.2-pre1
+
+Daniel (12 November 2001)
+- Rewrote the Curl_ConnectHTTPProxyTunnel(). It should now not only work a lot
+  faster, it should only support such ("broken") proxies that John Lask
+  previously have reported problems with. His proxy sends a trailing zero byte
+  after the end of the (proxy-) headers. I've tested this myself and it seems
+  to work on a proxy the previous version also worked with...! This rewrite is
+  due to the problems John Lask previously experienced.
+
+- Andrés García found out why the "current speed" meter sometimes showed 2048K
+  for very quick transfers. It turned out the "time diff"-function returned a
+  zero millisecond diff. We now always say it is at least one millisecond! In
+  reality, these timers very rarely have that good resolution so even though
+  the time diff was longer than 1 millisecond, it was reported as no diff.
+
+- I also modified the getinfo() again when returning times, as Paul Harrington
+  reports that 7.9.1 only returns times with 1 second accuracy, which indeed
+  is wrong.
+
+Daniel (8 November 2001)
+- Marcus Webster found out that curl_formadd() could read one byte outside a
+  buffer boundary, which then of course could lead to a crash. Marcus also
+  gracefully provided a patch for this this.
+
+- Glen Scott ran configure on his Cobalt Qube and it didn't figure out the
+  correct way of calling gethostbyname_r() and thus failed to resolve hosts.
+  This is two errors: it shouldn't continue the configure script if it finds
+  gethostbyname_r() but can't figure out how to use it, and it should really
+  figure out how to use it as it was running Linux and we know how that
+  works...
+ 
 Daniel (7 November 2001)
 - docs/VERSIONS is a new file in the archive that explains the version number
   system we use in the curl project.
