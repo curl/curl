@@ -82,7 +82,7 @@ extern "C" {
 /* gcc on windows or Watcom */
   typedef long long curl_off_t;
 #else
-/* "normal" approach, do not that this does not necessarily mean that
+/* "normal" approach, do note that this does not necessarily mean that
    the type is >32 bits, see the SIZEOF_CURL_OFF_T define for that! */
   typedef off_t curl_off_t;
 #endif
