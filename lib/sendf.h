@@ -51,6 +51,6 @@ int Curl_read(struct connectdata *conn, int sockfd,
 /* internal write-function, does plain socket, SSL and krb4 */
 CURLcode Curl_write(struct connectdata *conn, int sockfd,
                     void *mem, size_t len,
-                    size_t *written);
+                    ssize_t *written);
 
 #endif
