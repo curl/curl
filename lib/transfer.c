@@ -87,8 +87,7 @@
 #include <curl/types.h>
 #include "netrc.h"
 
-#include "content_encoding.h"   /* content encoding support. 08/27/02 jhrg */
-
+#include "content_encoding.h"
 #include "hostip.h"
 #include "transfer.h"
 #include "sendf.h"
@@ -718,7 +717,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   *start && isspace((int)*start);
                   start++);
 
-              /* Record the content-encoding for later use. 08/27/02 jhrg */
+              /* Record the content-encoding for later use */
               if (checkprefix("identity", start))
                 k->content_encoding = IDENTITY;
               else if (checkprefix("deflate", start))
@@ -1272,7 +1271,7 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   struct Curl_transfer_keeper *k = &conn->keep;
 
   /* NB: the content encoding software depends on this initialization of
-     Curl_transfer_keeper. 08/28/02 jhrg */
+     Curl_transfer_keeper. */
   memset(k, 0, sizeof(struct Curl_transfer_keeper));
 
   k->start = Curl_tvnow(); /* start time */
