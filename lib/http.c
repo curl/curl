@@ -238,7 +238,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
         Curl_http_auth_stage(data, 401);
       }
       infof(data, "Proxy auth using %s with user '%s'\n",
-            auth, conn->proxyuser);
+            auth, conn->proxyuser?conn->proxyuser:"");
     }
     /* Send web authentication header if needed */
     if (data->state.authstage == 401) {
@@ -287,7 +287,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
       }
       if(auth)
         infof(data, "Server auth using %s with user '%s'\n",
-              auth, conn->user);
+              auth, conn->user?conn->user:"");
     }
   }
   else
