@@ -1128,7 +1128,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     {
       const char *cpTemp = va_arg(param, char *);
       if (cpTemp && cpTemp[0]) {
-#ifdef HAVE_OPENSSL_ENGINE_H
+#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
         ENGINE *e = ENGINE_by_id(cpTemp);
         if (e) {
           if (data->engine) {
@@ -1152,7 +1152,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * flag to set engine as default.
      */
-#ifdef HAVE_OPENSSL_ENGINE_H
+#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
     if (data->engine) {
       if (ENGINE_set_default(data->engine, ENGINE_METHOD_ALL) > 0) {
 #ifdef DEBUG
