@@ -10,6 +10,7 @@ Curl and libcurl 7.12.3
 
 This release includes the following changes:
 
+ o no longer uses libcurl.def for building on Windows, OS/2 and Netware
  o builds on Windows CE
  o request retrying, --retry and family added
  o FTP 3rd party transfers with source and dest on the same host now works
@@ -17,6 +18,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o building with gssapi libs and hdeaders in the default dirs
+ o curl_getdate() parsing of dates later than year 2037 with 32 bit time_t
  o curl -v when stderr is closed wrote debug messages to the network socket
  o build failure with libidn 0.3.X or older
  o huge POSTs on VMS
@@ -37,6 +40,6 @@ advice from friends like these:
 
  Peter Wullinger, Guillaume Arluison, Alexander Krasnostavsky, Mohun Biswas,
  Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia,
- Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre
+ Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips
 
         Thanks! (and sorry if I forgot to mention someone)
