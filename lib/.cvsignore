@@ -7,3 +7,4 @@ Makefile
 config.h
 stamp-*
 ca-bundle.h
+getdate.c
