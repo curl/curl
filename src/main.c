@@ -243,6 +243,7 @@ static void help(void)
        " -H/--header <line> Custom header to pass to server. (H)\n"
        " -i/--include       Include the HTTP-header in the output (H)\n"
        " -I/--head          Fetch document info only (HTTP HEAD/FTP SIZE)\n"
+       "    --interface <interface> Specify the interface to be used\n"
        " -K/--config        Specify which config file to read\n"
        " -l/--list-only     List only names of an FTP directory (F)\n"
        " -L/--location      Follow Location: hints (H)\n"
@@ -299,6 +300,7 @@ struct Configurable {
   char *headerfile;
   char remotefile;
   char *ftpport;
+  char *interface;
   unsigned short porttouse;
   char *range;
   int low_speed_limit;
@@ -440,6 +442,7 @@ static int getparameter(char *flag, /* f or -long-flag */
   struct LongShort aliases[]= {
     {"9", "crlf",        FALSE},
     {"8", "stderr",      TRUE},
+    {"7", "interface",   TRUE},
 
     {"2", "sslv2",       FALSE},
     {"3", "sslv3",       FALSE},
@@ -609,6 +612,9 @@ static int getparameter(char *flag, /* f or -long-flag */
       else
         config->errors = stdout;
       break;
+    case '7': /* there is no short letter for this */
+      /* interface */
+      GetStr(&config->interface, nextarg);
     case '#': /* added 19990617 larsa */
       config->progressmode ^= CURL_PROGRESS_BAR;
       break;
@@ -1495,6 +1501,7 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_STDERR, config.errors);
     curl_easy_setopt(curl, CURLOPT_WRITEINFO, config.writeout);
     curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config.proxytunnel);
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, config.interface);
 
     if((config.progressmode == CURL_PROGRESS_BAR) &&
        !(config.conf&(CONF_NOPROGRESS|CONF_MUTE))) {
