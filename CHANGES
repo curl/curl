@@ -68,7 +68,7 @@ Daniel (2 September 2004)
 - Minor modification of an SSL-related error message.
 
 Daniel (31 August 2004)
-- David Tarendash fount out that curl_multi_add_handle() returned
+- David Tarendash found out that curl_multi_add_handle() returned
   CURLM_CALL_MULTI_PERFORM instead of CURLM_OK.
 
 Daniel (30 August 2004)
