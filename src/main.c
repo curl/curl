@@ -1308,10 +1308,12 @@ int main(int argc, char *argv[])
     if (outfiles)
       config.outfile = strdup(outfiles);
 
+#if 0
   if(config.outfile && config.infile) {
     helpf("you can't both upload and download!\n");
     return CURLE_FAILED_INIT;
   }
+#endif
  
   if (config.outfile || config.remotefile) {
     /* 
