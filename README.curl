@@ -316,18 +316,19 @@ PROGRESS METER
   actually is happening. The different fields in the output have the following
   meaning:
 
-   %   Received   Total  Speed   Time left  Total   Curr.Speed
-  13   524140   3841536   4296   0:12:52   0:14:54    292     
+  %   Received    Total    Speed  Estimated   Time      Left   Curr.Speed
+  0      97980  149081186  15211   2:43:21   0:00:06   2:43:15  14843  
 
   From left-to-right:
-  - The first column, is the percentage of the file currently transfered.
-  - Received means the total number of bytes that has been transfered.
-  - Total is the total number of bytes expected to transfer.
-  - Speed is average speed in bytes per second for the whole transfer so far.
-  - Time left is the estimated time left for this transfer to finnish if the
+   "%" - column, is the percentage of the file currently transfered.
+   "Received" - means the total number of bytes that has been transfered.
+   "Total" -  is the total number of bytes expected to transfer.
+   "Speed" - is average speed in bytes/second for the whole transfer so far.
+   "Estimated" - is the estimated total transfer time.
+   "Time" - is the time spent so far for this transfer
+   "Left" - is the estimated time left for this transfer to finnish if the
     current average speed will remain steady.
-  - Total is the estimated total transfer time.
-  - Curr.Speed is the average transfer speed the last 5 seconds (the first
+   "Curr.Speed" - is the average transfer speed the last 5 seconds (the first
     5 seconds of a transfer is based on less time of course.)
 
   NOTE: Much of the output is based on the fact that the size of the transfer
