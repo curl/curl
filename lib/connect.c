@@ -185,7 +185,6 @@ int waitconnect(int sockfd, /* socket */
   return 0;
 }
 
-#ifndef ENABLE_IPV6
 static CURLcode bindlocal(struct connectdata *conn,
                           int sockfd)
 {
@@ -207,22 +206,29 @@ static CURLcode bindlocal(struct connectdata *conn,
    *************************************************************/
   if (strlen(data->set.device)<255) {
     struct sockaddr_in sa;
-    struct hostent *h=NULL;
+    Curl_addrinfo *h=NULL;
     char *hostdataptr=NULL;
     size_t size;
     char myhost[256] = "";
     in_addr_t in;
 
     if(Curl_if2ip(data->set.device, myhost, sizeof(myhost))) {
+      /*
+       * We now have the numerical IPv4-style x.y.z.w in the 'myhost' buffer
+       */
       h = Curl_resolv(data, myhost, 0, &hostdataptr);
     }
     else {
       if(strlen(data->set.device)>1) {
+        /*
+         * This was not an interface, resolve the name as a host name
+         * or IP number
+         */
         h = Curl_resolv(data, data->set.device, 0, &hostdataptr);
-      }
-      if(h) {
-        /* we know data->set.device is shorter than the myhost array */
-        strcpy(myhost, data->set.device);
+        if(h) {
+          /* we know data->set.device is shorter than the myhost array */
+          strcpy(myhost, data->set.device);
+        }
       }
     }
 
@@ -243,10 +249,13 @@ static CURLcode bindlocal(struct connectdata *conn,
 
       if ( h ) {
         memset((char *)&sa, 0, sizeof(sa));
-        memcpy((char *)&sa.sin_addr,
-               h->h_addr,
-               h->h_length);
+#ifdef ENABLE_IPV6
+        memcpy((char *)&sa.sin_addr, h->ai_addr, h->ai_addrlen);        
+        sa.sin_family = h->ai_family;
+#else
+        memcpy((char *)&sa.sin_addr, h->h_addr, h->h_length);
         sa.sin_family = AF_INET;
+#endif
         sa.sin_addr.s_addr = in;
         sa.sin_port = 0; /* get any port */
 	
@@ -314,7 +323,7 @@ static CURLcode bindlocal(struct connectdata *conn,
 
   return CURLE_HTTP_PORT_FAILED;
 }
-#endif /* end of ipv4-specific section */
+
 
 static
 int socketerror(int sockfd)
@@ -400,6 +409,14 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
       if (sockfd < 0)
         continue;
+
+      if(conn->data->set.device) {
+        /* user selected to bind the outgoing socket to a specified "device"
+           before doing connect */
+        CURLcode res = bindlocal(conn, sockfd);
+        if(res)
+          return res;
+      }
 
       /* set socket non-blocking */
       Curl_nonblock(sockfd, TRUE);
