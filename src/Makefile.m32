@@ -11,7 +11,7 @@
 
 CC = gcc
 STRIP = strip -s
-OPENSSL_PATH = ../../openssl-0.9.6b
+OPENSSL_PATH = ../../openssl-0.9.6d
 
 # We may need these someday
 # PERL = perl
@@ -36,7 +36,7 @@ else
   curl_DEPENDENCIES = ../lib/libcurl.a
   curl_LDADD = -L../lib -lcurl
 endif
-curl_LDADD += -lwsock32 -lws2_32
+curl_LDADD += -lwsock32 -lws2_32 -lwinmm
 ifdef SSL
   curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32 -lRSAglue
 endif
