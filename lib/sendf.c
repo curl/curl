@@ -236,7 +236,14 @@ CURLcode Curl_client_write(struct UrlData *data,
     }
   }
   if((type & CLIENTWRITE_HEADER) && data->writeheader) {
-    wrote = data->fwrite(ptr, 1, len, data->writeheader);
+    /*
+     * Write headers to the same callback or to the especially setup
+     * header callback function (added after version 7.7.1).
+     */
+    curl_write_callback writeit=
+      data->fwrite_header?data->fwrite_header:data->fwrite;
+
+    wrote = writeit(ptr, 1, len, data->writeheader);
     if(wrote != len) {
       failf (data, "Failed writing header");
       return CURLE_WRITE_ERROR;

@@ -485,6 +485,9 @@ struct UrlData {
   /* function that stores the output:*/
   curl_write_callback fwrite;
 
+  /* optional function that stores the header output:*/
+  curl_write_callback fwrite_header;
+
   /* function that reads the input:*/
   curl_read_callback fread;
 

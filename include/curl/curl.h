@@ -430,6 +430,10 @@ typedef enum {
      phase. [Only works on unix-style/SIGALRM operating systems] */
   CINIT(CONNECTTIMEOUT, LONG, 78),
 
+  /* Function that will be called to store headers (instead of fwrite). The
+   * parameters will use fwrite() syntax, make sure to follow them. */
+  CINIT(HEADERFUNCTION, FUNCTIONPOINT, 79),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
