@@ -1,8 +1,8 @@
 /*****************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * $Id$
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
                CURLFORM_COPYNAME, "filename",
                CURLFORM_COPYCONTENTS, "postit2.c",
                CURLFORM_END);
-  
+
 
   /* Fill in the submit field too, even if this is rarely needed */
   curl_formadd(&formpost,

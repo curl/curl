@@ -1,8 +1,8 @@
 /*****************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * $Id$
@@ -49,10 +49,14 @@ int main(void)
   };
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  
+
   curl = curl_easy_init();
   if(curl) {
-    /* Get curl 7.9.2 from sunet.se's FTP site: */
+    /*
+     * Get curl 7.9.2 from sunet.se's FTP site. curl 7.9.2 is most likely not
+     * present there by the time you read this, so you'd better replace the
+     * URL with one that works!
+     */
     curl_easy_setopt(curl, CURLOPT_URL,
                      "ftp://ftp.sunet.se/pub/www/utilities/curl/curl-7.9.2.tar.gz");
     /* Define our callback to get called when there's data to be written */
