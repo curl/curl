@@ -7,6 +7,20 @@
                                History of Changes
 
 
+Daniel (4 February 2001)
+- curl_getinfo() was extended with two new options:
+  CURLINFO_CONTENT_LENGTH_DOWNLOAD and CURLINFO_CONTENT_LENGTH_UPLOAD. They
+  return the full assumed content length of the transfer in the given
+  direction. The CURLINFO_CONTENT_LENGTH_DOWNLOAD will be the Content-Length:
+  size of a HTTP download.
+
+Daniel (3 February 2001)
+- Ingo Ralf Blum provided another fix that makes curl build under the more
+  recent cygwin installations. It seems they've changed the preset defines to
+  not include WIN32 anymore.
+
+Version 7.6.1-pre2
+
 Daniel (31 January 2001)
 - Curl_read() and curl_read() now return a ssize_t for the size, as it had to
   be able to return -1. The telnet support crashed due to this and there was
