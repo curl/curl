@@ -1,4 +1,4 @@
-Updated: May 21, 2002 (http://curl.haxx.se/docs/faq.shtml)
+Updated: May 23, 2002 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -34,7 +34,7 @@ FAQ
   3.6 Does curl support ASP, XML, XHTML or HTML version Y?
   3.7 Can I use curl to delete/rename a file through FTP?
   3.8 How do I tell curl to follow HTTP redirects?
-  3.9 How do I use curl in my favourite programming language?
+  3.9 How do I use curl in my favorite programming language?
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
   3.11 How do I POST with a different Content-Type?
   3.12 Why do FTP specific features over HTTP proxy fail?
@@ -203,7 +203,7 @@ FAQ
   mailing lists are listed in the MANUAL document and online at
   http://curl.haxx.se/mail/
 
-  Keeping curl-related questions and dicussions on mailing lists allows others
+  Keeping curl-related questions and discussions on mailing lists allows others
   to join in and help, to share their ideas, contribute their suggestions and
   spread their wisdom. Keeping discussions on public mailing lists also allows
   for others to learn from this (both current and future users thanks to the
@@ -351,7 +351,7 @@ FAQ
 
      curl -L http://redirector.com
 
-  3.9 How do I use curl in my favourite programming language?
+  3.9 How do I use curl in my favorite programming language?
 
   There exist many language interfaces/bindings for curl that integrates it
   better with various languages. If you are fluid in a script language, you
@@ -388,7 +388,7 @@ FAQ
 
   Because when you use a HTTP proxy, the protocol spoken on the network will
   be HTTP, even if you specify a FTP URL. This effectively means that you
-  normally can't use FTP specific features such as ftp upload and ftp quote
+  normally can't use FTP specific features such as FTP upload and FTP quote
   etc.
 
   There is one exception to this rule, and that is if you can "tunnel through"
@@ -408,11 +408,11 @@ FAQ
    curl -d ' with spaces ' url.com
 
   Exactly what kind of quotes and how to do this is entirely up to the shell
-  or command line interepreter that you are using. For most unix shells, you
+  or command line interpreter that you are using. For most unix shells, you
   can more or less pick either single (') or double (") quotes. For
   Windows/DOS prompts I believe you're forced to use double (") quotes.
 
-  Please study the documentaion for your particular environment. Examples in
+  Please study the documentation for your particular environment. Examples in
   the curl docs will use a mix of both these ones as shown above. You must
   adjust them to work in your environment.
 
@@ -535,7 +535,7 @@ FAQ
 
     4.5.6 "301 Moved Permanently"
  
-    If you get this return code and an HTML outpt similar to this:
+    If you get this return code and an HTML output similar to this:
 
        <H1>Moved Permanently</H1> The document has moved <A
        HREF="http://same_url_now_with_a_trailing_slash/">here</A>.
