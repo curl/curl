@@ -135,12 +135,10 @@ Rotation is separate from addition to prevent recomputation.
 
 /* MD5 initialization. Begins an MD5 operation, writing a new context.
  */
-static void MD5_Init (context)
-struct md5_ctx *context;                                        /* context */
+static void MD5_Init(struct md5_ctx *context)
 {
   context->count[0] = context->count[1] = 0;
-  /* Load magic initialization constants.
-*/
+  /* Load magic initialization constants. */
   context->state[0] = 0x67452301;
   context->state[1] = 0xefcdab89;
   context->state[2] = 0x98badcfe;
@@ -151,10 +149,9 @@ struct md5_ctx *context;                                        /* context */
   operation, processing another message block, and updating the
   context.
  */
-static void MD5_Update (context, input, inputLen)
-struct md5_ctx *context;                                        /* context */
-unsigned char *input;                                /* input block */
-unsigned int inputLen;                     /* length of input block */
+static void MD5_Update (struct md5_ctx *context, /* context */
+                        unsigned char *input, /* input block */
+                        unsigned int inputLen)/* length of input block */
 {
   unsigned int i, bufindex, partLen;
 
@@ -187,11 +184,10 @@ unsigned int inputLen;                     /* length of input block */
 }
 
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
-  the message digest and zeroizing the context.
- */
-static void MD5_Final (digest, context)
-unsigned char digest[16];                         /* message digest */
-struct md5_ctx *context;                                       /* context */
+   the message digest and zeroizing the context.
+*/
+static void MD5_Final(unsigned char digest[16], /* message digest */
+                      struct md5_ctx *context) /* context */
 {
   unsigned char bits[8];
   unsigned int count, padLen;
@@ -215,9 +211,8 @@ struct md5_ctx *context;                                       /* context */
 }
 
 /* MD5 basic transformation. Transforms state based on block. */
-static void MD5Transform (state, block)
-UINT4 state[4];
-unsigned char block[64];
+static void MD5Transform(UINT4 state[4],
+                         unsigned char block[64])
 {
   UINT4 a = state[0], b = state[1], c = state[2], d = state[3], x[16];
 
