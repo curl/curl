@@ -6,7 +6,8 @@ AM_INIT_AUTOMAKE(curl,"6.5.2")
 
 dnl Checks for programs.
 AC_PROG_CC
-AC_PROG_INSTALL
+dnl The install stuff has already been taken care of by the automake stuff
+dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 dnl Check for AIX weirdos
