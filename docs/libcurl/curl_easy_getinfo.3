@@ -115,8 +115,12 @@ Pass a pointer to a 'char *' to receive the content-type of the downloaded
 object. This is the value read from the Content-Type: field. If you get NULL,
 it means that the server didn't send a valid Content-Type header or that the
 protocol used doesn't support this.  (Added in 7.9.4)
+.TP
+.B CURLINFO_PRIVATE
+Pass a pointer to a 'char *' to receive the pointer to the private data
+associated with the curl handle (set with the CURLOPT_PRIVATE option to curl_easy_setopt).
+(Added in 7.10.3)
 .PP
-
 .SH RETURN VALUE
 If the operation was successful, CURLE_OK is returned. Otherwise an
 appropriate error code will be returned.

@@ -158,6 +158,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_CONTENT_TYPE:
     *param_charp = data->info.contenttype;
     break;
+  case CURLINFO_PRIVATE:
+    *param_charp = data->set.private?data->set.private:(char *)"";
+    break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }

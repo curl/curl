@@ -610,6 +610,8 @@ typedef enum {
      the response to be compressed. */
   CINIT(ENCODING, OBJECTPOINT, 102),
  
+  /* Set pointer to private data */
+  CINIT(PRIVATE, OBJECTPOINT, 103),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
@@ -861,9 +863,11 @@ typedef enum {
   CURLINFO_REDIRECT_TIME   = CURLINFO_DOUBLE + 19,
   CURLINFO_REDIRECT_COUNT  = CURLINFO_LONG + 20,
 
+  CURLINFO_PRIVATE = CURLINFO_STRING + 21,
+
   /* Fill in new entries here! */
 
-  CURLINFO_LASTONE          = 21
+  CURLINFO_LASTONE          = 22
 } CURLINFO;
 
 /* unfortunately, the easy.h and multi.h include files need options and info

@@ -763,6 +763,13 @@ krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
 will be used. Set the string to NULL to disable kerberos4. The kerberos
 support only works for FTP. (Added in 7.3)
 .PP
+.SH OTHER OPTIONS
+.TP 0.4i
+.B CURLOPT_PRIVATE
+Pass a char * as parameter, pointing to data that should be
+associated with the curl handle.  The pointer can be subsequently retrieved using
+the CURLINFO_PRIVATE options to curl_easy_getinfo. (Added in 7.10.3)
+.PP
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, non-zero means an
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP

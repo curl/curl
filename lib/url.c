@@ -1088,6 +1088,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.proxytype = va_arg(param, long);
     break;
 
+  case CURLOPT_PRIVATE:
+    /*
+     * Set private data pointer.
+     */
+    data->set.private = va_arg(param, char *);
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_FAILED_INIT; /* correct this */
