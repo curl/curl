@@ -99,6 +99,10 @@ TODO
    This could possibly be implemented using the multi interface to queue
    requests and the response data.
 
+ * When doing CONNECT to a HTTP proxy, libcurl always uses HTTP/1.0. This has
+   never been reported as causing trouble to anyone, but should be considered
+   to use the HTTP version the user has chosen.
+
  TELNET
 
  * Reading input (to send to the remote server) on stdin is a crappy solution
@@ -150,6 +154,22 @@ TODO
  * Look over the implementation. The looping will have to "go away" from the
    lib/ldap.c source file and get moved to the main network code so that the
    multi interface and friends will work for LDAP as well.
+
+ NEW PROTOCOLS
+
+ * TFTP - RFC1350 (protocol) and RFC3617 (URI format)
+
+   Dan Fandrich: I wrote a tftp protocol module as part of the I-Boot
+   bootloader under a BSD-style license with attribution clause
+   http://download.intrinsyc.com/supported/tools/i-boot-lite/i-boot-lite-1.8/src/libs/net/tftp.c
+
+ * RTSP - RFC2326 (protocol - very HTTP-like, also contains URL description)
+
+ * SFTP/SCP/SSH (no RFCs for protocol nor URI/URL format). An implementation
+   should most probably use an existing ssh library, such as OpenSSH.
+
+ * RSYNC (no RFCs for protocol nor URI/URL format).  An implementation should
+   most probably use an existing ssh library, such as librsync.
 
  CLIENT
 
