@@ -719,6 +719,12 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
      */
     data->err = va_arg(param, FILE *);
     break;
+  case CURLOPT_HEADERFUNCTION:
+    /*
+     * Set header write callback
+     */
+    data->fwrite_header = va_arg(param, curl_write_callback);
+    break;
   case CURLOPT_WRITEFUNCTION:
     /*
      * Set data write callback
