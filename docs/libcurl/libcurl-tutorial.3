@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH libcurl-tutorial 3 "22 Jan 2005" "libcurl" "libcurl programming"
+.TH libcurl-tutorial 3 "25 Jan 2005" "libcurl" "libcurl programming"
 .SH NAME
 libcurl-tutorial \- libcurl programming tutorial
 .SH "Objective"
@@ -76,6 +76,11 @@ possibly together with a few other features that can be on and off on
 different libcurls.
 
 See also the "Features libcurl Provides" further down.
+.IP "autoconf macro"
+When you write your configure script to detect libcurl and setup variables
+accordingly, we offer a prewritten macro that probably does everything you
+need in this area. See docs/libcurl/libcurl.m4 file - it includes docs on how
+to use it.
 
 .SH "Portable Code in a Portable World"
 The people behind libcurl have put a considerable effort to make libcurl work

@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (25 January 2005)
+- David Shaw contributed a fairly complete and detailed autoconf test you can
+  use to detect libcurl and setup variables for the protocols the installed
+  libcurl supports: docs/libcurl/libcurl.m4
 
 Daniel (21 January 2005)
 - Major FTP third party transfer overhaul.
