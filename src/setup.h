@@ -62,6 +62,10 @@
 
 #include <stdio.h>
 
+#ifdef __TANDEM
+#include <floss.h>
+#endif
+
 #ifndef TRUE
 #define TRUE 1
 #endif

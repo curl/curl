@@ -100,6 +100,10 @@ typedef unsigned char bool;
 #endif
 #include <errno.h>
 
+#ifdef __TANDEM /* for nsr-tandem-nsk systems */
+#include <floss.h>
+#endif
+
 #ifndef OS
 #ifdef WIN32
 #define OS "win32"
