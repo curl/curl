@@ -33,45 +33,28 @@ The multi interface on the other hand is an asynchronous interface, that you
 call and that performs only a little piece of the transfer on each invoke. It
 is perfect if you want to do things while the transfer is in progress, or
 similar. The multi interface allows you to select() on libcurl action, and
-even to easily download multiple files simultaneously using a single thread.
+even to easily download multiple files simultaneously using a single thread. See further deails in the \fIlibcurl-multi(3)\fP man page.
 
 You can have multiple easy handles share certain data, even if they are used
 in different threads. This magic is setup using the share interface, as
 described in the \fIlibcurl-share(3)\fP man page.
 
-There is also a series of other helpful functions to use. They are:
-
+There is also a series of other helpful functions to use, including these:
 .RS
-.TP 10
-.B curl_version()
-displays the libcurl version
-.TP
-.B curl_getdate()
+.IP curl_version_info()
+gets detailed libcurl (and other used libraries) version info
+.IP curl_getdate()
 converts a date string to time_t
-.TP
-.B curl_getenv()
-portable environment variable reader
-.TP
-.B curl_easy_getinfo()
+.IP curl_easy_getinfo()
 get information about a performed transfer
-.TP
-.B curl_formadd()
+.IP curl_formadd()
 helps building an HTTP form POST
-.TP
-.B curl_formfree()
+.IP curl_formfree()
 free a list built with \fIcurl_formadd(3)\fP
-.TP
-.B curl_slist_append()
+.IP curl_slist_append()
 builds a linked list
-.TP
-.B curl_slist_free_all()
+.IP curl_slist_free_all()
 frees a whole curl_slist
-.TP
-.B curl_mprintf()
-portable printf() functions
-.TP
-.B curl_strequal()
-portable case insensitive string comparisons
 .RE
 
 .SH "LINKING WITH LIBCURL"
@@ -82,13 +65,17 @@ curl-config is added to make it easier for applications to link with libcurl
 and developers to learn about libcurl and how to use it.
 
 Run 'curl-config --libs' to get the (additional) linker options you need to
-link with the particular version of libcurl you've installed.
+link with the particular version of libcurl you've installed. See the
+\fIcurl-config(1)\fP man page for further details.
 
-For details, see the curl-config.1 man page.
+Unix-like operating system that ship libcurl as part of their distributions
+often don't provide the curl-config tool, but simply install the library and
+headers in the common path for this purpose.
+
 .SH "LIBCURL SYMBOL NAMES"
 All public functions in the libcurl interface are prefixed with 'curl_' (with
 a lowercase c). You can find other functions in the library source code, but
-other prefixes indicate the functions are private and may change without
+other prefixes indicate that the functions are private and may change without
 further notice in the next release.
 
 Only use documented functions and functionality!

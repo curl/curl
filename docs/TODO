@@ -81,6 +81,12 @@ TODO
  * Since USERPWD always override the user and password specified in URLs, we
    might need another way to specify user+password for anonymous ftp logins.
 
+ * The FTP code should get a way of returning errors that is known to still
+   have the control connection alive and sound. Currently, a returned error
+   from within ftp-functions does not tell if the control connection is still
+   OK to use or not. This causes libcurl to fail to re-use connections
+   slightly too often.
+
  HTTP
 
  * Digest and GSS-Negotiate support for HTTP proxies. They only work on
