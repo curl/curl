@@ -459,11 +459,10 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
     "SSL", "TLS", NULL
   };
 
-  ftp = (struct FTP *)malloc(sizeof(struct FTP));
+  ftp = (struct FTP *)calloc(sizeof(struct FTP), 1);
   if(!ftp)
     return CURLE_OUT_OF_MEMORY;
 
-  memset(ftp, 0, sizeof(struct FTP));
   conn->proto.ftp = ftp;
 
   /* We always support persistant connections on ftp */
@@ -763,26 +762,26 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   ssize_t nread;
   int ftpcode;
   CURLcode result=CURLE_OK;
-
   bool was_ctl_valid = ftp->ctl_valid;
+  size_t flen;
+  size_t dlen;
 
   /* now store a copy of the directory we are in */
   if(ftp->prevpath)
     free(ftp->prevpath);
-  {
-    size_t flen = ftp->file?strlen(ftp->file):0;
-    size_t dlen = conn->path?strlen(conn->path)-flen:0;
-    if(dlen) {
-      ftp->prevpath = malloc(dlen + 1);
-      if(!ftp->prevpath)
-        return CURLE_OUT_OF_MEMORY;
-      memcpy(ftp->prevpath, conn->path, dlen);
-      ftp->prevpath[dlen]=0; /* terminate */
-      infof(data, "Remembering we are in dir %s\n", ftp->prevpath);
-    }
-    else
-      ftp->prevpath = NULL; /* no path */
+
+  flen = ftp->file?strlen(ftp->file):0;
+  dlen = conn->path?strlen(conn->path)-flen:0;
+  if(dlen) {
+    ftp->prevpath = malloc(dlen + 1);
+    if(!ftp->prevpath)
+      return CURLE_OUT_OF_MEMORY;
+    memcpy(ftp->prevpath, conn->path, dlen);
+    ftp->prevpath[dlen]=0; /* terminate */
+    infof(data, "Remembering we are in dir %s\n", ftp->prevpath);
   }
+  else
+    ftp->prevpath = NULL; /* no path */
 
   /* free the dir tree and file parts */
   freedirs(ftp);
@@ -2420,8 +2419,10 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
       ftp->cache = NULL;
     }
     freedirs(ftp);
-    if(ftp->prevpath)
+    if(ftp->prevpath) {
       free(ftp->prevpath);
+      ftp->prevpath = NULL;
+    }
   }
   return CURLE_OK;
 }
@@ -2697,6 +2698,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
   CURLcode retcode = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct FTP *ftp;
+  size_t dlen;
 
   char *slash_pos;  /* position of the first '/' char in curpos */
   char *cur_pos = conn->path; /* current position in path. point at the begin
@@ -2768,15 +2770,14 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
                        pointer */
 
   ftp->cwddone = FALSE; /* default to not done */
-  {
-    size_t dlen = conn->path?strlen(conn->path):0;
-    if(dlen && ftp->prevpath) {
-      dlen -= ftp->file?strlen(ftp->file):0;
-      if((dlen == strlen(ftp->prevpath)) &&
-         curl_strnequal(conn->path, ftp->prevpath, dlen)) {
-        infof(data, "Request has same path as previous transfer\n");
-        ftp->cwddone = TRUE;
-      }
+
+  dlen = conn->path?strlen(conn->path):0;
+  if(dlen && ftp->prevpath) {
+    dlen -= ftp->file?strlen(ftp->file):0;
+    if((dlen == strlen(ftp->prevpath)) &&
+       curl_strnequal(conn->path, ftp->prevpath, dlen)) {
+      infof(data, "Request has same path as previous transfer\n");
+      ftp->cwddone = TRUE;
     }
   }
 
