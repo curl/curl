@@ -1062,6 +1062,7 @@ ConnectionExists(struct SessionHandle *data,
   struct connectdata *check;
 
   for(i=0; i< data->state.numconnects; i++) {
+    bool match = FALSE;
     /*
      * Note that if we use a HTTP proxy, we check connections to that
      * proxy and not to the actual remote server.
@@ -1082,7 +1083,6 @@ ConnectionExists(struct SessionHandle *data,
       if(strequal(needle->protostr, check->protostr) &&
          strequal(needle->name, check->name) &&
          (needle->remote_port == check->remote_port) ) {
-        bool dead;
         if(strequal(needle->protostr, "FTP")) {
           /* This is FTP, verify that we're using the same name and
              password as well */
@@ -1092,27 +1092,7 @@ ConnectionExists(struct SessionHandle *data,
             continue;
           }
         }
-        dead = SocketIsDead(check->firstsocket);
-        if(dead) {
-          /*
-           * Even though the connection seems to have passed away, we could
-           * still make an effort to get the name information, as we intend to
-           * connect to the same host again.
-           *
-           * This is now subject to discussion. What do you think?
-           */
-          infof(data, "Connection %d seems to be dead!\n", i);
-          Curl_disconnect(check); /* disconnect resources */
-          data->state.connects[i]=NULL; /* nothing here */
-
-          /* There's no need to continue search, because we only store
-             one connection for each unique set of identifiers */
-          return FALSE;
-        }
-
-        *usethis = check;
-        return TRUE; /* yes, we found one to use! */
-        
+        match = TRUE;
       }
     }
     else { /* The requested needle connection is using a proxy,
@@ -1121,9 +1101,26 @@ ConnectionExists(struct SessionHandle *data,
          strequal(needle->proxyhost, check->proxyhost) &&
          needle->port == check->port) {
         /* This is the same proxy connection, use it! */
-        *usethis = check;
-        return TRUE;
+        match = TRUE;
       }
+    }
+
+    if(match) {
+      bool dead = SocketIsDead(check->firstsocket);
+      if(dead) {
+        /*
+         */
+        infof(data, "Connection %d seems to be dead!\n", i);
+        Curl_disconnect(check); /* disconnect resources */
+        data->state.connects[i]=NULL; /* nothing here */
+
+        /* There's no need to continue searching, because we only store
+           one connection for each unique set of identifiers */
+        return FALSE;
+      }
+
+      *usethis = check;
+      return TRUE; /* yes, we found one to use! */
     }
   }
   return FALSE; /* no matching connecting exists */
