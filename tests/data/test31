@@ -10,7 +10,7 @@ Set-Cookie: foobar=name; domain=127.0.0.1; path=/ ; secure
 Set-Cookie:mismatch=this  ; domain=127.0.0.1; path=/silly/
 Set-Cookie: partmatch=present; domain=127.0.0.1 ; path=/;
 Set-Cookie: eat=this; domain=moo.foo.moo;
-Set-Cookie: eat=this-too; domain=foo.moo;
+Set-Cookie: eat=this-too; domain=.foo.moo;
 Set-Cookie: nodomainnovalue
 Set-Cookie: nodomain=value; expires=Tue Feb 1 11:56:27 MET 2014
 Set-Cookie: nodomainnovalue; domain=reallysilly
@@ -50,7 +50,7 @@ Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
 127.0.0.1	FALSE	/silly/	FALSE	0	ismatch	this
 127.0.0.1	FALSE	/	FALSE	0	partmatch	present
 moo.foo.moo	FALSE	/	FALSE	0	eat	this
-foo.moo	FALSE	/	FALSE	0	eat	this-too
+.foo.moo	TRUE	/	FALSE	0	eat	this-too
 127.0.0.1	FALSE	/	FALSE	1014678000	nodomain	value
 </file>
 </verify>
