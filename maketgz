@@ -62,25 +62,25 @@ findprog()
 # brand new version number:
 #
  
-if { findprog autoconf >/dev/null 2>/dev/null; } then
-  echo "- No autoconf found, we leave configure as it is"
-else
-  # Replace version number in configure.in file:
-
-  CONF="configure.in"
-
-  sed 's/^AM_INIT_AUTOMAKE.*/AM_INIT_AUTOMAKE(curl,"'$version'")/g' $CONF >$CONF.new
-
-  # Save old  file
-  cp -p $CONF $CONF.old
-
-  # Make new configure.in
-  mv $CONF.new $CONF
- 
-  # Update the configure script
-  echo "Runs autoconf"
-  autoconf
-fi
+#if { findprog autoconf >/dev/null 2>/dev/null; } then
+#  echo "- No autoconf found, we leave configure as it is"
+#else
+#  # Replace version number in configure.in file:
+#
+#  CONF="configure.in"
+#
+#  sed 's/^AM_INIT_AUTOMAKE.*/AM_INIT_AUTOMAKE(curl,"'$version'")/g' $CONF >$CONF.new
+#
+#  # Save old  file
+#  cp -p $CONF $CONF.old
+#
+#  # Make new configure.in
+#  mv $CONF.new $CONF
+# 
+#  # Update the configure script
+#  echo "Runs autoconf"
+#  autoconf
+#fi
 
 ############################################################################
 #
