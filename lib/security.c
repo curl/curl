@@ -413,7 +413,9 @@ sec_prot_internal(struct connectdata *conn, int level)
   }
 
   if(level){
-    Curl_ftpsendf(conn, "PBSZ %u", s);
+    if(Curl_ftpsendf(conn, "PBSZ %u", s))
+      return -1;
+
     nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
     if(nread < 0)
       return -1;
@@ -431,7 +433,9 @@ sec_prot_internal(struct connectdata *conn, int level)
       conn->buffer_size = s;
   }
 
-  Curl_ftpsendf(conn, "PROT %c", level["CSEP"]);
+  if(Curl_ftpsendf(conn, "PROT %c", level["CSEP"]))
+    return -1;
+
   nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
   if(nread < 0)
     return -1;
@@ -488,7 +492,8 @@ Curl_sec_login(struct connectdata *conn)
     }
     infof(data, "Trying %s...\n", (*m)->name);
 
-    Curl_ftpsendf(conn, "AUTH %s", (*m)->name);
+    if(Curl_ftpsendf(conn, "AUTH %s", (*m)->name))
+      return -1;
 
     nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, &ftpcode);
     if(nread < 0)
