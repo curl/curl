@@ -322,8 +322,8 @@ Transfer (struct UrlData *data,
                   /* obviously, the header is requested to be written to
                      this file: */
                   if((p - data->headerbuff) !=
-                     fwrite (data->headerbuff, 1, p - data->headerbuff,
-                             data->writeheader)) {
+                     data->fwrite (data->headerbuff, 1, p - data->headerbuff,
+                                   data->writeheader)) {
                     failf (data, "Failed writing output");
                     return URG_WRITE_ERROR;
                   }
@@ -392,7 +392,8 @@ Transfer (struct UrlData *data,
               }
               if(data->writeheader) {
                 /* the header is requested to be written to this file */
-                if(hbuflen != fwrite (p, 1, hbuflen, data->writeheader)) {
+                if(hbuflen != data->fwrite (p, 1, hbuflen,
+                                            data->writeheader)) {
                   failf (data, "Failed writing output");
                   return URG_WRITE_ERROR;
                 }
