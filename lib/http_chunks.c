@@ -248,12 +248,4 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
   }
   return CHUNKE_OK;
 }
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */
 #endif /* CURL_DISABLE_HTTP */

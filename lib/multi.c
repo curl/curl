@@ -557,11 +557,3 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
   else
     return NULL;
 }
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

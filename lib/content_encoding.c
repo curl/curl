@@ -112,11 +112,3 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
   }
 }
 #endif /* HAVE_LIBZ */
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

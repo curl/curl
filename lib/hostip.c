@@ -718,12 +718,3 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
 }
 
 #endif /* end of IPv4-specific code */
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */
- 

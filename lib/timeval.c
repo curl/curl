@@ -97,11 +97,3 @@ long Curl_tvlong (struct timeval t1)
 {
  return t1.tv_sec;
 }
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

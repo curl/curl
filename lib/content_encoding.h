@@ -24,11 +24,3 @@
 CURLcode Curl_unencode_deflate_write(struct SessionHandle *data, 
                                      struct Curl_transfer_keeper *k, 
                                      ssize_t nread);
-          
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

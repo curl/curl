@@ -42,11 +42,3 @@ CURLSHcode Curl_share_aquire_lock (struct SessionHandle *, curl_lock_data);
 CURLSHcode Curl_share_release_lock (struct SessionHandle *, curl_lock_data);
 
 #endif /* __CURL_SHARE_H */
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

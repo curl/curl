@@ -768,11 +768,3 @@ int main(int argc, char **argv)
 #endif
 
 #endif /* CURL_DISABLE_HTTP */
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */

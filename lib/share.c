@@ -139,12 +139,3 @@ Curl_share_release_lock(struct SessionHandle *data, curl_lock_data type)
 
   return CURLSHE_OK;
 }
-
-
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */
