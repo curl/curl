@@ -103,6 +103,61 @@
 #define min(a, b)   ((a) < (b) ? (a) : (b))
 #endif
 
+/*
+ * compareheader()
+ *
+ * Returns TRUE if 'headerline' contains the 'header' with given 'content'.
+ * Pass headers WITH the colon.
+ */
+static bool
+compareheader(char *headerline, /* line to check */
+              char *header,     /* header keyword _with_ colon */
+              char *content)    /* content string to find */
+{
+  /* RFC2616, section 4.2 says: "Each header field consists of a name followed
+   * by a colon (":") and the field value. Field names are case-insensitive.
+   * The field value MAY be preceded by any amount of LWS, though a single SP
+   * is preferred." */
+
+  size_t hlen = strlen(header);
+  size_t clen;
+  size_t len;
+  char *start;
+  char *end;
+
+  if(!strnequal(headerline, header, hlen))
+    return FALSE; /* doesn't start with header */
+
+  /* pass the header */
+  start = &headerline[hlen];
+
+  /* pass all white spaces */
+  while(*start && isspace((int)*start))
+    start++;
+
+  /* find the end of the header line */
+  end = strchr(start, '\r'); /* lines end with CRLF */
+  if(!end) {
+    /* in case there's a non-standard compliant line here */
+    end = strchr(start, '\n');
+
+    if(!end)
+      /* hm, there's no line ending here, return false and bail out! */
+      return FALSE;
+  }
+
+  len = end-start; /* length of the content part of the input line */
+  clen = strlen(content); /* length of the word to find */
+
+  /* find the content string in the rest of the line */
+  for(;len>=clen;len--, start++) {
+    if(strnequal(start, content, clen))
+      return TRUE; /* match! */
+  }
+
+  return FALSE; /* no match */
+}
+
 /* Parts of this function was written by the friendly Mark Butler
    <butlerm@xmission.com>. */
 
@@ -430,15 +485,14 @@ Transfer(struct connectdata *c_conn)
                 }
               }
               /* check for Content-Length: header lines to get size */
-              if (strnequal("Content-Length", p, 14) &&
-                  sscanf (p+14, ": %ld", &contentlength)) {
+              if (strnequal("Content-Length:", p, 15) &&
+                  sscanf (p+15, " %ld", &contentlength)) {
                 conn->size = contentlength;
                 Curl_pgrsSetDownloadSize(data, contentlength);
               }
               else if((httpversion == 0) &&
                       conn->bits.httpproxy &&
-                      strnequal("Proxy-Connection: keep-alive", p,
-                                strlen("Proxy-Connection: keep-alive"))) {
+                      compareheader(p, "Proxy-Connection:", "keep-alive")) {
                 /*
                  * When a HTTP/1.0 reply comes when using a proxy, the
                  * 'Proxy-Connection: keep-alive' line tells us the
@@ -449,8 +503,7 @@ Transfer(struct connectdata *c_conn)
                 infof(data, "HTTP/1.0 proxy connection set to keep alive!\n");
               }
               else if((httpversion == 0) &&
-                      strnequal("Connection: keep-alive", p,
-                                strlen("Connection: keep-alive"))) {
+                      compareheader(p, "Connection:", "keep-alive")) {
                 /*
                  * A HTTP/1.0 reply with the 'Connection: keep-alive' line
                  * tells us the connection will be kept alive for our
@@ -460,8 +513,7 @@ Transfer(struct connectdata *c_conn)
                 conn->bits.close = FALSE; /* don't close when done */
                 infof(data, "HTTP/1.0 connection set to keep alive!\n");
               }
-              else if (strnequal("Connection: close", p,
-                                 strlen("Connection: close"))) {
+              else if (compareheader(p, "Connection:", "close")) {
                 /*
                  * [RFC 2616, section 8.1.2.1]
                  * "Connection: close" is HTTP/1.1 language and means that
@@ -470,8 +522,7 @@ Transfer(struct connectdata *c_conn)
                  */
                 conn->bits.close = TRUE; /* close when done */
               }
-              else if (strnequal("Transfer-Encoding: chunked", p,
-                                 strlen("Transfer-Encoding: chunked"))) {
+              else if (compareheader(p, "Transfer-Encoding:", "chunked")) {
                 /*
                  * [RFC 2616, section 3.6.1] A 'chunked' transfer encoding
                  * means that the server will send a series of "chunks". Each
@@ -485,9 +536,9 @@ Transfer(struct connectdata *c_conn)
                 /* init our chunky engine */
                 Curl_httpchunk_init(conn);
               }
-              else if (strnequal("Content-Range", p, 13)) {
-                if (sscanf (p+13, ": bytes %d-", &offset) ||
-                    sscanf (p+13, ": bytes: %d-", &offset)) {
+              else if (strnequal("Content-Range:", p, 14)) {
+                if (sscanf (p+14, " bytes %d-", &offset) ||
+                    sscanf (p+14, " bytes: %d-", &offset)) {
                   /* This second format was added August 1st 2000 by Igor
                      Khristophorov since Sun's webserver JavaWebServer/1.1.1
                      obviously sends the header this way! :-( */
@@ -498,7 +549,7 @@ Transfer(struct connectdata *c_conn)
                 }
               }
               else if(data->cookies &&
-                      strnequal("Set-Cookie: ", p, 11)) {
+                      strnequal("Set-Cookie:", p, 11)) {
                 Curl_cookie_add(data->cookies, TRUE, &p[12]);
               }
               else if(strnequal("Last-Modified:", p,
@@ -511,7 +562,7 @@ Transfer(struct connectdata *c_conn)
               }
               else if ((httpcode >= 300 && httpcode < 400) &&
                        (data->bits.http_follow_location) &&
-                       strnequal("Location: ", p, 10)) {
+                       strnequal("Location:", p, 9)) {
                 /* this is the URL that the server advices us to get instead */
                 char *ptr;
                 char *start=p;
@@ -989,7 +1040,6 @@ CURLcode Curl_perform(CURL *curl)
 
   return res;
 }
-
 
 CURLcode 
 Curl_Transfer(struct connectdata *c_conn, /* connection data */
