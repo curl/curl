@@ -651,7 +651,7 @@ puts (
 "     13   FTP weird PASV reply, Curl couldn't parse the reply\n"
 "          sent to the PASV request.\n"
 "\n"
-"     14   FTP weird 227 formay. Curl couldn't parse the 227-line\n"
+"     14   FTP weird 227 format. Curl couldn't parse the 227-line\n"
 "          the server sent.\n"
 "\n"
 "     15   FTP can't get host. Couldn't resolve the host IP we got\n"
@@ -723,6 +723,22 @@ puts (
 "     41   Function not found. A required LDAP function was not\n"
 "          found.\n"
 "\n"
+"     42   Aborted by callback. An application told curl to abort\n"
+"          the operation.\n"
+"\n"
+"     43   Internal error. A function was called with a bad param­\n"
+"          eter.\n"
+"\n"
+"     44   Internal error. A function was called in a bad order.\n"
+"\n"
+"     45   Interface error. A specified outgoing interface could\n"
+"          not be used.\n"
+"\n"
+"     46   Bad password entered. An error was signalled when the\n"
+"          password was entered.\n"
+"     47   Too many redirects. When following redirects, curl hit\n"
+"          the maximum amount.\n"
+"\n"
 "     XX   There will appear more error codes here in future\n"
 "          releases. The existing ones are meant to never change.\n"
 "\n"
@@ -750,6 +766,8 @@ puts (
 "      - Douglas E. Wegscheid <wegscd@whirlpool.com>\n"
 "      - Mark Butler <butlerm@xmission.com>\n"
 "      - Eric Thelin <eric@generation-i.com>\n"
+);
+ puts(
 "      - Marc Boucher <marc@mbsi.ca>\n"
 "      - Greg Onufer <Greg.Onufer@Eng.Sun.COM>\n"
 "      - Doug Kaufman <dkaufman@rahul.net>\n"
@@ -762,8 +780,6 @@ puts (
 "      - Linus Nielsen <Linus.Nielsen@haxx.se>\n"
 "      - Felix von Leitner <felix@convergence.de>\n"
 "      - Dan Zitter <dzitter@zitter.net>\n"
-);
- puts(
 "      - Jongki Suwandi <Jongki.Suwandi@eng.sun.com>\n"
 "      - Chris Maltby <chris@aurema.com>\n"
 "      - Ron Zapp <rzapper@yahoo.com>\n"
@@ -786,9 +802,12 @@ puts (
 "      - Richard Prescott\n"
 "      - Jason S. Priebe <priebe@wral-tv.com>\n"
 "      - T. Bharath <TBharath@responsenetworks.com>\n"
+"      - Alexander Kourakos <awk@users.sourceforge.net>\n"
+"      - James Griffiths <griffiths_james@yahoo.com>\n"
 "\n"
 "WWW\n"
 "     http://curl.haxx.se\n"
+"\n"
 "FTP\n"
 "     ftp://ftp.sunet.se/pub/www/utilities/curl/\n"
 "\n"
@@ -1057,6 +1076,8 @@ puts (
 "\n"
 "        curl -F \"file=@cooltext.txt\" -F \"yourname=Daniel\" \\\n"
 "             -F \"filedescription=Cool text file with cool text inside\" \\\n"
+);
+ puts(
 "             http://www.post.com/postit.cgi\n"
 "\n"
 "  So, to send two files in one post you can do it in two ways:\n"
@@ -1075,11 +1096,11 @@ puts (
 "  that referred to actual page, and curl allows the user to specify that\n"
 "  referrer to get specified on the command line. It is especially useful to\n"
 "  fool or trick stupid servers or CGI scripts that rely on that information\n"
-);
- puts(
 "  being available or contain certain data.\n"
 "\n"
 "        curl -e www.coolsite.com http://www.showme.com/\n"
+"\n"
+"  NOTE: The referer field is defined in the HTTP spec to be a full URL.\n"
 "\n"
 "USER AGENT\n"
 "\n"
@@ -1326,6 +1347,8 @@ puts (
 "        curl https://www.secure-site.com\n"
 "\n"
 "  Curl is also capable of using your personal certificates to get/post files\n"
+);
+ puts(
 "  from sites that require valid certificates. The only drawback is that the\n"
 "  certificate needs to be in PEM-format. PEM is a standard and open format to\n"
 "  store certificates with, but it is not used by the most commonly used\n"
@@ -1336,8 +1359,6 @@ puts (
 "  included in recent versions of OpenSSL, and for older versions Dr Stephen\n"
 "  N. Henson has written a patch for SSLeay that adds this functionality. You\n"
 "  can get his patch (that requires an SSLeay installation) from his site at:\n"
-);
- puts(
 "  http://www.drh-consultancy.demon.co.uk/\n"
 "\n"
 "  Example on how to automatically retrieve a document using a certificate with\n"

@@ -6,6 +6,25 @@
 
                                History of Changes
 
+Version 7.5
+
+Daniel (1 December 2000)
+- Craig Davison gave us his updates on the VC++ makefiles, so now curl should
+  build fine with the Microsoft compiler on windows too.
+
+- Fixed the libcurl versioning so that we don't ruin old programs when
+  releasing new shared library interfaces.
+
+Daniel (30 November 2000)
+- Renamed docs/README.curl to docs/MANUAL to better reflect what the document
+  actually contains.
+
+Daniel (29 November 2000)
+- I removed a bunch of '#if 0' sections from the code. They only make things
+  harder to follow. After all, we do have all older versions in the CVS.
+
+Version 7.5-pre5
+
 Daniel (28 November 2000)
 - I filled in more error codes in the man page error code list that had been
   lagging.
