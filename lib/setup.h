@@ -136,11 +136,6 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #else
 #include <curl/stdcheaders.h>
 #endif
-
-#else
-#ifdef _AIX
-#include <curl/stdcheaders.h>
-#endif
 #endif
 
 #if defined(CURLDEBUG) && defined(HAVE_ASSERT_H)
