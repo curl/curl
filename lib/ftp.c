@@ -2136,7 +2136,7 @@ CURLcode ftp_perform(struct connectdata *conn,
         if(data->set.timecondition) {
           if((data->info.filetime > 0) && (data->set.timevalue > 0)) {
             switch(data->set.timecondition) {
-            case TIMECOND_IFMODSINCE:
+            case CURL_TIMECOND_IFMODSINCE:
             default:
               if(data->info.filetime < data->set.timevalue) {
                 infof(data, "The requested document is not new enough\n");
@@ -2144,7 +2144,7 @@ CURLcode ftp_perform(struct connectdata *conn,
                 return CURLE_OK;
               }
               break;
-            case TIMECOND_IFUNMODSINCE:
+            case CURL_TIMECOND_IFUNMODSINCE:
               if(data->info.filetime > data->set.timevalue) {
                 infof(data, "The requested document is not old enough\n");
                 ftp->no_transfer = TRUE; /* mark this to not transfer data */
@@ -2411,6 +2411,29 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 
 /***********************************************************************
  *
+ * Curl_ftp_quit()
+ *
+ * This should be called before calling sclose() on an ftp control connection
+ * (not data connections). We should then wait for the response from the 
+ * server before returning. The calling code should then try to close the
+ * connection.
+ *
+ */
+CURLcode Curl_ftp_quit(struct connectdata *conn)
+{
+  int nread;
+  int ftpcode;
+  CURLcode ret;
+
+  ret = Curl_ftpsendf(conn, "%s", "QUIT");
+  if(CURLE_OK == ret)
+    ret = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+
+  return ret;
+}
+
+/***********************************************************************
+ *
  * Curl_ftp_disconnect()
  *
  * Disconnect from an FTP server. Cleanup protocol-specific per-connection
@@ -2419,6 +2442,16 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 CURLcode Curl_ftp_disconnect(struct connectdata *conn)
 {
   struct FTP *ftp= conn->proto.ftp;
+
+#if 0
+  /* We cannot send quit unconditionally. If this connection is stale or
+     bad in any way, sending quit and waiting around here will make the
+     disconnect wait in vain and cause more problems than we need to.
+     
+     Until fixed, we keep this #if 0'ed. To be fixed in 7.11.1. Stay tuned.
+  */
+  (void)Curl_ftp_quit(conn); /* ignore errors on the QUIT */
+#endif
 
   /* The FTP session may or may not have been allocated/setup at this point! */
   if(ftp) {
