@@ -1,0 +1,33 @@
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP RETR PASV
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/102
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+PASV
+TYPE I
+RETR 102
+</protocol>
+</verify>

@@ -1,0 +1,33 @@
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP user+password in URL and ASCII transfer
+ </name>
+ <command>
+ftp://userdude:passfellow@%HOSTIP:%FTPPORT/103 --use-ascii
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER userdude
+PASS passfellow
+PWD
+PASV
+TYPE A
+RETR 103
+</protocol>
+</verify>

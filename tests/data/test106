@@ -1,0 +1,34 @@
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP GET with type=A style ASCII URL using %20 codes
+ </name>
+ <command>
+"ftp://%HOSTIP:%FTPPORT//path%20with%20%20spaces/and%20things2/106;type=A"
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD /path with  spaces/and things2
+PASV
+TYPE A
+RETR 106
+</protocol>
+</verify>

@@ -1,0 +1,29 @@
+# Server-side
+<reply>
+<size>
+51
+</size>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP --head to get file size only
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/a/path/103 --head
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD a/path
+MDTM 103
+TYPE I
+SIZE 103
+</protocol>
+</verify>
