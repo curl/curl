@@ -31,12 +31,12 @@ RSC=rc.exe
 
 !IF  "$(CFG)" == "curllib - Win32 Release"
 
-# PROP BASE Use_MFC 0
+# PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 0
 # PROP BASE Output_Dir "Release"
 # PROP BASE Intermediate_Dir "Release"
 # PROP BASE Target_Dir ""
-# PROP Use_MFC 0
+# PROP Use_MFC 6
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
