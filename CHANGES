@@ -6,6 +6,28 @@
 
                                History of Changes
 
+Daniel (8 April 2002)
+- Michael Curtis provided new functionality for curl on some platforms. Using
+  the --environment option, curl will *set* a bunch of environment variables
+  to values. The names are the same ones as for the -w/--writeout option.
+
+  For now, this only works on the RISC OS version, as this feature relies on
+  both OS support and that it matches OS paradigms.
+
+- Jacky Lam provided a fix for getting headers-only when the reply is HTTP/1.0
+  and 304, I edited it slightly.
+
+Daniel (5 April 2002)
+- As requested by Jay Graves, the '.curlrc' file (or _curlrc as it is called
+  when used in windows), is now loaded from the current directory if the HOME
+  environment variable isn't set (or if it is too long). I also enlarged the
+  array used to store the full file path in, to 512 bytes.
+
+- Kevin Roth pointed out to me why the "19 March" change regarding -G and -I
+  was stupid and the change was reverted. Added test case 48 to verify the
+  functionality.
+
+Version 7.9.6-pre3
 
 Daniel (4 April 2002)
 - Jonatan Lander brought a patch that makes curl/curl.h compile nicely on

@@ -637,7 +637,7 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.9.6-pre2"
+#define LIBCURL_VERSION "7.9.6-pre3"
 #define LIBCURL_VERSION_NUM 0x070906
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
