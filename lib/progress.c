@@ -71,7 +71,7 @@ void ProgressInit(struct UrlData *data, int max)
   if (curl_GetEnv("COLUMNS") != NULL)
     width = atoi(curl_GetEnv("COLUMNS"));
   else
-    width = 80;
+    width = 79;
 
   progressmax = max;
   if(-1 == max)
