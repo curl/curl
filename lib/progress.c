@@ -333,13 +333,15 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   }
 
   /* Figure out the estimated time of arrival for the upload */
-  if((data->progress.flags & PGRS_UL_SIZE_KNOWN) && data->progress.ulspeed){
+  if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
+     (data->progress.ulspeed > 0)) {
     ulestimate = data->progress.size_ul / data->progress.ulspeed;
     ulpercen = (data->progress.uploaded / data->progress.size_ul)*100;
   }
 
   /* ... and the download */
-  if((data->progress.flags & PGRS_DL_SIZE_KNOWN) && data->progress.dlspeed) {
+  if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
+     (data->progress.dlspeed > 0)) {
     dlestimate = data->progress.size_dl / data->progress.dlspeed;
     dlpercen = (data->progress.downloaded / data->progress.size_dl)*100;
   }
@@ -351,7 +353,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* If we have a total estimate, we can display that and the expected
      time left */
-  if(total_estimate) {
+  if(total_estimate > 0) {
     time2str(time_left, (int)(total_estimate - data->progress.timespent)); 
     time2str(time_total, (int)total_estimate);
   }
@@ -374,7 +376,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   total_transfer = data->progress.downloaded + data->progress.uploaded;
 
   /* Get the percentage of data transfered so far */
-  if(total_expected_transfer)
+  if(total_expected_transfer > 0)
     total_percen=(double)(total_transfer/total_expected_transfer)*100;
 
   fprintf(data->set.err,

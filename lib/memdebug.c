@@ -41,7 +41,8 @@
 #include <unistd.h>
 #endif
 
-/* DONT include memdebug.h here! */
+#define MEMDEBUG_NODEFINES /* don't redefine the standard functions */
+#include "memdebug.h"
 
 struct memdebug {
   int size;
@@ -194,7 +195,8 @@ void curl_dofree(void *ptr, int line, const char *source)
     fprintf(logfile, "MEM %s:%d free(%p)\n", source, line, ptr);
 }
 
-int curl_socket(int domain, int type, int protocol, int line, char *source)
+int curl_socket(int domain, int type, int protocol, int line,
+                const char *source)
 {
   int sockfd=(socket)(domain, type, protocol);
   if(logfile && (sockfd!=-1))
@@ -214,7 +216,7 @@ int curl_accept(int s, struct sockaddr *addr, socklen_t *addrlen,
 }
 
 /* this is our own defined way to close sockets on *ALL* platforms */
-int curl_sclose(int sockfd, int line, char *source)
+int curl_sclose(int sockfd, int line, const char *source)
 {
   int res=sclose(sockfd);
   if(logfile)

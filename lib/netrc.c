@@ -41,6 +41,7 @@
 #endif
 
 #include <curl/curl.h>
+#include "netrc.h"
 
 #include "strequal.h"
 #include "strtok.h"

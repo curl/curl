@@ -118,6 +118,9 @@ Content-Disposition: form-data; name="FILECONTENT"
 
 #include <time.h>
 
+#ifndef CURL_OLDSTYLE 
+#define CURL_OLDSTYLE 1 /* enable deprecated prototype for curl_formparse */
+#endif
 #include <curl/curl.h>
 #include "formdata.h"
 

@@ -26,6 +26,8 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "strequal.h"
+
 #ifdef HAVE_STRCASECMP
 /* this is for "-ansi -Wall -pedantic" to stop complaining! */
 extern int (strcasecmp)(const char *s1, const char *s2);

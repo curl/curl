@@ -35,6 +35,8 @@
 #include <unixlib.h>
 #endif
 
+#include <curl/curl.h>
+
 #ifdef CURLDEBUG
 #include "memdebug.h"
 #endif

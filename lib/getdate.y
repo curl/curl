@@ -152,9 +152,6 @@
 #define yytable  Curl_gd_yytable
 #define yycheck  Curl_gd_yycheck
 
-static int yylex ();
-static int yyerror ();
-
 #define EPOCH		1970
 #define HOUR(x)		((x) * 60)
 
@@ -223,6 +220,11 @@ typedef struct _CURL_CONTEXT {
     int			Number;
     enum _MERIDIAN	Meridian;
 }
+
+%{
+static int yylex (YYSTYPE *yylval, void *cookie);
+static int yyerror (const char *s);
+%}
 
 %token	tAGO tDAY tDAY_UNIT tDAYZONE tDST tHOUR_UNIT tID
 %token	tMERIDIAN tMINUTE_UNIT tMONTH tMONTH_UNIT
@@ -495,9 +497,9 @@ o_merid	: /* NULL */
 #include "getdate.h"
 
 #ifndef WIN32 /* the windows dudes don't need these, does anyone really? */
-extern struct tm	*gmtime ();
-extern struct tm	*localtime ();
-extern time_t		mktime ();
+extern struct tm	*gmtime (const time_t *);
+extern struct tm	*localtime (const time_t *);
+extern time_t		mktime (struct tm *);
 #endif
 
 /* Month and day table. */
@@ -689,16 +691,13 @@ static TABLE const MilitaryTable[] = {
 
 /* ARGSUSED */
 static int
-yyerror (s)
-     char *s ATTRIBUTE_UNUSED;
+yyerror (const char *s ATTRIBUTE_UNUSED)
 {
   return 0;
 }
 
 static int
-ToHour (Hours, Meridian)
-     int Hours;
-     MERIDIAN Meridian;
+ToHour (int Hours, MERIDIAN Meridian)
 {
   switch (Meridian)
     {
@@ -725,8 +724,7 @@ ToHour (Hours, Meridian)
 }
 
 static int
-ToYear (Year)
-     int Year;
+ToYear (int Year)
 {
   if (Year < 0)
     Year = -Year;
@@ -742,9 +740,7 @@ ToYear (Year)
 }
 
 static int
-LookupWord (yylval, buff)
-     YYSTYPE *yylval;
-     char *buff;
+LookupWord (YYSTYPE *yylval, char *buff)
 {
   register char *p;
   register char *q;
@@ -864,9 +860,7 @@ LookupWord (yylval, buff)
 }
 
 static int
-yylex (yylval, cookie)
-     YYSTYPE *yylval;
-     void *cookie;
+yylex (YYSTYPE *yylval, void *cookie)
 {
   register unsigned char c;
   register char *p;
@@ -1085,9 +1079,7 @@ curl_getdate (const char *p, const time_t *now)
 
 /* ARGSUSED */
 int
-main (ac, av)
-     int ac;
-     char *av[];
+main (int ac, char *av[])
 {
   char buff[MAX_BUFF_LEN + 1];
   time_t d;

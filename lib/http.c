@@ -193,11 +193,11 @@ void Curl_http_auth_act(struct connectdata *conn)
  * authentication method.
  */
 
-CURLcode http_auth_headers(struct connectdata *conn,
-                           char *request,
-                           char *path,
-                           bool *ready) /* set TRUE when the auth phase is
-                                           done and ready to do the *actual*
+static CURLcode http_auth_headers(struct connectdata *conn,
+                                  char *request,
+                                  char *path,
+                                  bool *ready) /* set TRUE when the auth phase
+                                           is done and ready to do the *actual*
                                            request */
 {
   CURLcode result = CURLE_OK;

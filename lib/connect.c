@@ -76,6 +76,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "if2ip.h"
+#include "connect.h"
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG

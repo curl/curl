@@ -43,6 +43,7 @@
 #include "formdata.h" /* for the boundary function */
 #include "url.h" /* for the ssl config check function */
 #include "inet_pton.h"
+#include "ssluse.h"
 
 #ifdef USE_SSLEAY
 #include <openssl/rand.h>
@@ -1057,7 +1058,7 @@ Curl_SSLConnect(struct connectdata *conn,
   /* pass the raw socket into the SSL layers */
   SSL_set_fd(connssl->handle, sockfd);
 
-  do {
+  while(1) {
     fd_set writefd;
     fd_set readfd;
     struct timeval interval;
@@ -1167,7 +1168,7 @@ Curl_SSLConnect(struct connectdata *conn,
     }
     else
       break; /* get out of loop */
-  } while(1);
+  } /* loop */
 
   /* Informational message */
   infof (data, "SSL connection using %s\n",

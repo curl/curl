@@ -74,6 +74,7 @@
 
 #include "progress.h"
 #include "strequal.h"
+#include "dict.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

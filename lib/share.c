@@ -178,7 +178,7 @@ curl_share_cleanup(CURLSH *sh)
 
 CURLSHcode
 Curl_share_lock(struct SessionHandle *data, curl_lock_data type,
-                curl_lock_access access)
+                curl_lock_access accesstype)
 {
   struct Curl_share *share = data->share;
 
@@ -186,7 +186,7 @@ Curl_share_lock(struct SessionHandle *data, curl_lock_data type,
     return CURLSHE_INVALID;
 
   if(share->specifier & (1<<type)) {
-    share->lockfunc(data, type, access, share->clientdata);
+    share->lockfunc(data, type, accesstype, share->clientdata);
   }
   /* else if we don't share this, pretend successful lock */
 

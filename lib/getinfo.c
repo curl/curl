@@ -26,6 +26,7 @@
 #include <curl/curl.h>
 
 #include "urldata.h"
+#include "getinfo.h"
 
 #include <stdio.h>
 #include <string.h>

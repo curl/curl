@@ -32,6 +32,7 @@
 #include <curl/curl.h>
 #include <curl/types.h>
 #include "sendf.h"
+#include "content_encoding.h"
 
 #define DSIZ 0x10000             /* buffer size for decompressed data */
 

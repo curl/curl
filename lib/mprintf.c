@@ -40,6 +40,8 @@
 
 #include <curl/curl.h> /* for the curl_off_t type */
 
+#include <curl/mprintf.h>
+
 #ifndef SIZEOF_LONG_DOUBLE
 #define SIZEOF_LONG_DOUBLE 0
 #endif

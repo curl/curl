@@ -159,10 +159,10 @@ struct md5_ctx *context;                                        /* context */
 unsigned char *input;                                /* input block */
 unsigned int inputLen;                     /* length of input block */
 {
-  unsigned int i, index, partLen;
+  unsigned int i, bufindex, partLen;
 
   /* Compute number of bytes mod 64 */
-  index = (unsigned int)((context->count[0] >> 3) & 0x3F);
+  bufindex = (unsigned int)((context->count[0] >> 3) & 0x3F);
 
   /* Update number of bits */
   if ((context->count[0] += ((UINT4)inputLen << 3))
@@ -170,23 +170,23 @@ unsigned int inputLen;                     /* length of input block */
     context->count[1]++;
   context->count[1] += ((UINT4)inputLen >> 29);
   
-  partLen = 64 - index;
+  partLen = 64 - bufindex;
 
   /* Transform as many times as possible. */
   if (inputLen >= partLen) {
-    MD5_memcpy((void *)&context->buffer[index], (void *)input, partLen);
+    MD5_memcpy((void *)&context->buffer[bufindex], (void *)input, partLen);
     MD5Transform(context->state, context->buffer);
     
     for (i = partLen; i + 63 < inputLen; i += 64)
       MD5Transform(context->state, &input[i]);
     
-    index = 0;
+    bufindex = 0;
   }
   else
     i = 0;
 
   /* Buffer remaining input */
-  MD5_memcpy((void *)&context->buffer[index], (void *)&input[i],
+  MD5_memcpy((void *)&context->buffer[bufindex], (void *)&input[i],
              inputLen-i);
 }
 
@@ -198,14 +198,14 @@ unsigned char digest[16];                         /* message digest */
 struct md5_ctx *context;                                       /* context */
 {
   unsigned char bits[8];
-  unsigned int index, padLen;
+  unsigned int count, padLen;
 
   /* Save number of bits */
   Encode (bits, context->count, 8);
 
   /* Pad out to 56 mod 64. */
-  index = (unsigned int)((context->count[0] >> 3) & 0x3f);
-  padLen = (index < 56) ? (56 - index) : (120 - index);
+  count = (unsigned int)((context->count[0] >> 3) & 0x3f);
+  padLen = (count < 56) ? (56 - count) : (120 - count);
   MD5_Update (context, PADDING, padLen);
 
   /* Append length (before padding) */
@@ -345,6 +345,7 @@ static void Decode (UINT4 *output,
 #include <string.h>
 #endif
 
+#include "md5.h"
 
 void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
                 unsigned char *input)

@@ -49,7 +49,7 @@ void curl_memdebug(const char *logname);
 void curl_memlimit(long limit);
 
 /* file descriptor manipulators */
-int curl_socket(int domain, int type, int protocol, int, const char *);
+int curl_socket(int domain, int type, int protocol, int line , const char *);
 int curl_sclose(int sockfd, int, const char *source);
 int curl_accept(int s, struct sockaddr *addr, socklen_t *addrlen,
                 int line, const char *source);
@@ -58,6 +58,8 @@ int curl_accept(int s, struct sockaddr *addr, socklen_t *addrlen,
 FILE *curl_fopen(const char *file, const char *mode, int line,
                  const char *source);
 int curl_fclose(FILE *file, int line, const char *source);
+
+#ifndef MEMDEBUG_NODEFINES
 
 /* Set this symbol on the command-line, recompile all lib-sources */
 #undef strdup
@@ -83,5 +85,7 @@ int curl_fclose(FILE *file, int line, const char *source);
 #undef fopen
 #define fopen(file,mode) curl_fopen(file,mode,__LINE__,__FILE__)
 #define fclose(file) curl_fclose(file,__LINE__,__FILE__)
+
+#endif /* MEMDEBUG_NODEFINES */
 
 #endif

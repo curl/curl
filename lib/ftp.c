@@ -2388,7 +2388,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   bytes_written=0;
   write_len = strlen(s);
 
-  do {
+  while(1) {
     res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
                      &bytes_written);
 
@@ -2404,7 +2404,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
     }
     else
       break;
-  } while(1);
+  }
 
   return res;
 }

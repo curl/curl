@@ -211,7 +211,7 @@ Curl_cookie_add(struct SessionHandle *data,
             /* note that this name may or may not have a preceeding dot, but
                we don't care about that, we treat the names the same anyway */
 
-            char *ptr=whatptr;
+            const char *domptr=whatptr;
             int dotcount=1;
             unsigned int i;
 
@@ -224,15 +224,15 @@ Curl_cookie_add(struct SessionHandle *data,
 
             if('.' == whatptr[0])
               /* don't count the initial dot, assume it */
-              ptr++;
+              domptr++;
 
             do {
-              ptr = strchr(ptr, '.');
-              if(ptr) {
-                ptr++;
+              domptr = strchr(domptr, '.');
+              if(domptr) {
+                domptr++;
                 dotcount++;
               }
-            } while(ptr);
+            } while(domptr);
 
             for(i=0;
                 i<sizeof(seventhree)/sizeof(seventhree[0]); i++) {
@@ -259,10 +259,10 @@ Curl_cookie_add(struct SessionHandle *data,
                  or the given domain is not valid and thus cannot be set. */
 
               if(!domain || tailmatch(whatptr, domain)) {
-                char *ptr=whatptr;
-                if(ptr[0] == '.')
-                  ptr++;
-                co->domain=strdup(ptr); /* dont prefix with dots internally */
+                const char *tailptr=whatptr;
+                if(tailptr[0] == '.')
+                  tailptr++;
+                co->domain=strdup(tailptr); /* don't prefix w/dots internally */
                 co->tailmatch=TRUE; /* we always do that if the domain name was
                                        given */
               }

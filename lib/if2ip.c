@@ -72,6 +72,8 @@
 #include <inet.h>
 #endif
 
+#include "if2ip.h"
+
 /* The last #include file should be: */
 #ifdef CURLDEBUG
 #include "memdebug.h"

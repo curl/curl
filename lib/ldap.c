@@ -49,6 +49,7 @@
 #include "sendf.h"
 #include "escape.h"
 #include "transfer.h"
+#include "ldap.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

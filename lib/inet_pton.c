@@ -38,6 +38,8 @@
 #include <string.h>
 #include <errno.h>
 
+#include "inet_pton.h"
+
 #define	IN6ADDRSZ	16
 #define	INADDRSZ	 4
 #define	INT16SZ		 2
@@ -68,10 +70,7 @@ static int	inet_pton6(const char *src, unsigned char *dst);
  *	Paul Vixie, 1996.
  */
 int
-Curl_inet_pton(af, src, dst)
-	int af;
-	const char *src;
-	void *dst;
+Curl_inet_pton(int af, const char *src, void *dst)
 {
 	switch (af) {
 	case AF_INET:
@@ -101,9 +100,7 @@ Curl_inet_pton(af, src, dst)
  *	Paul Vixie, 1996.
  */
 static int
-inet_pton4(src, dst)
-	const char *src;
-	unsigned char *dst;
+inet_pton4(const char *src, unsigned char *dst)
 {
 	static const char digits[] = "0123456789";
 	int saw_digit, octets, ch;
@@ -156,9 +153,7 @@ inet_pton4(src, dst)
  *	Paul Vixie, 1996.
  */
 static int
-inet_pton6(src, dst)
-	const char *src;
-	unsigned char *dst;
+inet_pton6(const char *src, unsigned char *dst)
 {
 	static const char xdigits_l[] = "0123456789abcdef",
 			  xdigits_u[] = "0123456789ABCDEF";

@@ -27,6 +27,8 @@
 #include <stddef.h>
 #include <string.h>
 
+#include "strtok.h"
+
 char *
 Curl_strtok_r(char *ptr, const char *sep, char **end)
 {

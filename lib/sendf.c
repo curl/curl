@@ -189,7 +189,7 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
   write_len = strlen(s);
   sptr = s;
 
-  do {
+  while (1) {
     /* Write the buffer to the socket */
     res = Curl_write(conn, sockfd, sptr, write_len, &bytes_written);
 
@@ -207,8 +207,7 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
     }
     else
       break;
-
-  } while(1);
+  }
 
   free(s); /* free the output string */
 
