@@ -166,12 +166,20 @@ UPLOADING
 
 VERBOSE / DEBUG
 
-  If curl fails where it isn't supposed to, if the servers don't let you
-  in, if you can't understand the responses: use the -v flag to get VERBOSE
-  fetching. Curl will output lots of info and all data it sends and
-  receives in order to let the user see all client-server interaction.
+  If curl fails where it isn't supposed to, if the servers don't let you in,
+  if you can't understand the responses: use the -v flag to get verbose
+  fetching. Curl will output lots of info and what it sends and receives in
+  order to let the user see all client-server interaction (but it won't show
+  you the actual data).
 
         curl -v ftp://ftp.upload.com/
+
+  To get even more details and information on what curl does, try using the
+  --trace or --trace-ascii options with a given file name to log to, like
+  this:
+
+        curl --trace trace.txt www.haxx.se
+ 
 
 DETAILED INFORMATION
 
@@ -350,6 +358,13 @@ COOKIES
 
         curl -b headers www.example.com
 
+  While saving headers to a file is a working way to store cookies, it is
+  however error-prone and not the prefered way to do this. Instead, make curl
+  save the incoming cookies using the well-known netscape cookie format like
+  this:
+
+        curl -c cookies.txt www.example.com
+
   Note that by specifying -b you enable the "cookie awareness" and with -L
   you can make curl follow a location: (which often is used in combination
   with cookies). So that if a site sends cookies and a location, you can
@@ -363,7 +378,11 @@ COOKIES
   the cookies received from www.example.com.  curl will send to the server the
   stored cookies which match the request as it follows the location.  The
   file "empty.txt" may be a non-existant file.
-  
+
+  Alas, to both read and write cookies from a netscape cookie file, you can
+  set both -b and -c to use the same file:
+
+        curl -b cookies.txt -c cookies.txt www.example.com
 
 PROGRESS METER
 
@@ -413,7 +432,8 @@ SPEED LIMIT
 
   Forcing curl not to transfer data faster than a given rate is also possible,
   which might be useful if you're using a limited bandwidth connection and you
-  don't want your transfer to use all of it.
+  don't want your transfer to use all of it (sometimes referred to as
+  "bandwith throttle").
 
   Make curl transfer data no faster than 10 kilobytes per second:
 
@@ -426,6 +446,11 @@ SPEED LIMIT
   Or prevent curl from uploading data faster than 1 megabyte per second:
 
         curl -T upload --limit-rate 1M ftp://uploadshereplease.com
+
+  When using the --limit-rate option, the transfer rate is regulated on a
+  per-second basis, which will cause the total transfer speed to become lower
+  than the given number. Sometimes of course substantially lower, if your
+  transfer stalls during periods.
 
 CONFIG FILE
 
