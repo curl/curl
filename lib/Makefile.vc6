@@ -71,9 +71,9 @@ CFGSET = TRUE
 
 ######################
 # release-ssl
-#todo
+
 !IF "$(CFG)" == "release-ssl" 
-TARGET   =$(LIB_NAME).dll
+TARGET   =$(LIB_NAME).lib
 DIROBJ   =.\$(CFG)
 LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
 LINKLIBS = $(LINKLIBS) $(SSLLIBS)
