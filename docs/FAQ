@@ -1,4 +1,4 @@
-Updated: May 29, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: August 7, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -14,6 +14,7 @@ FAQ
   1.4 When will you make curl do XXXX ?
   1.5 Who makes cURL?
   1.6 What do you get for making cURL?
+  1.7 What about CURL from curl.com?
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
@@ -169,6 +170,26 @@ FAQ
   the main mailing list, Haxx owns the curl web site's domain and
   sourceforge.net hosts several project tools we take advantage from like the
   bug tracker, mailing lists and more.
+
+  If you feel you want to show support our project with a donation, a very
+  nice way of doing that would be to buy "gift certificates" at useful online
+  shopping sites, such as amazon.com or thinkgeek.com.
+
+  1.7 What about CURL from curl.com?
+
+  During the summer 2001, curl.com has been busy advertising their client-side
+  programming language for the web, named CURL.
+
+  We are in no way associated with curl.com or their version of CURL. We have
+  never heard anything from them, nor are we scared of any trademark or naming
+  lawsuits.
+
+  Our project name curl has been in effective use since 1998. We weren't the
+  first computer related project to name itself curl either, so we don't claim
+  any first-hand rights to the name either.
+
+  We realize that we'll have to live in parallell with this behemoth, there's
+  nothing we can do about it.
 
 2. Install Related Problems
 
