@@ -583,13 +583,20 @@ then
 else
 
   dnl Check for and handle argument to --with-ssl.
-  EXTRA_SSL=
+
+  dnl save the pre-ssl check flags for a while
+  CLEANLDFLAGS="$LDFLAGS"
+  CLEANCPPFLAGS="$CPPFLAGS"
 
   case "$OPT_SSL" in
   yes)
     EXTRA_SSL=/usr/local/ssl ;;
   *)
-    EXTRA_SSL=$OPT_SSL ;;
+    dnl check the given spot right away!
+    EXTRA_SSL=$OPT_SSL
+    LDFLAGS="$LDFLAGS -L$EXTRA_SSL/lib"
+    CPPFLAGS="$CPPFLAGS -I$EXTRA_SSL/include/openssl -I$EXTRA_SSL/include"
+    ;;
   esac
 
   AC_CHECK_LIB(crypto, CRYPTO_lock,[
@@ -597,8 +604,8 @@ else
      ],[
      OLDLDFLAGS="$LDFLAGS"
      OLDCPPFLAGS="$CPPFLAGS"
-     LDFLAGS="$LDFLAGS -L$EXTRA_SSL/lib"
-     CPPFLAGS="$CPPFLAGS -I$EXTRA_SSL/include/openssl -I$EXTRA_SSL/include"
+     LDFLAGS="$CLEANLDFLAGS -L$EXTRA_SSL/lib"
+     CPPFLAGS="$CLEANCPPFLAGS -I$EXTRA_SSL/include/openssl -I$EXTRA_SSL/include"
      AC_CHECK_LIB(crypto, CRYPTO_add_lock,[
        HAVECRYPTO="yes" ], [
        LDFLAGS="$OLDLDFLAGS"
