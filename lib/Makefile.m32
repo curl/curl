@@ -24,18 +24,18 @@ COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 
 libcurl_a_LIBRARIES = libcurl.a
 
-libcurl_a_SOURCES =  base64.c getenv.c if2ip.h progress.h upload.h \
+libcurl_a_SOURCES =  base64.c getenv.c if2ip.h progress.h  \
 base64.h getenv.h mprintf.c setup.h url.c download.c getpass.c \
 mprintf.h ssluse.c url.h download.h hostip.c netrc.c ssluse.h \
 urldata.h formdata.c hostip.h netrc.h stdcheaders.h formdata.h \
-if2ip.c progress.c upload.c sendf.c sendf.h speedcheck.c speedcheck.h \
+if2ip.c progress.c sendf.c sendf.h speedcheck.c speedcheck.h \
 ftp.c ftp.h getpass.c getpass.h version.c timeval.c  timeval.h cookie.c \
 cookie.h escape.c escape.h getdate.c getdate.h dict.h dict.c http.c \
 http.h telnet.c telnet.h file.c file.h ldap.c ldap.h
 
 libcurl_a_OBJECTS =  base64.o getenv.o mprintf.o url.o download.o \
 getpass.o ssluse.o hostip.o netrc.o formdata.o if2ip.o progress.o \
-upload.o sendf.o speedcheck.o ftp.o getpass.o version.o timeval.o \
+sendf.o speedcheck.o ftp.o getpass.o version.o timeval.o \
 cookie.o escape.o getdate.o dict.o http.o telnet.o file.o ldap.o
 
 LIBRARIES =  $(libcurl_a_LIBRARIES)
