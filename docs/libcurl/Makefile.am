@@ -21,6 +21,7 @@ man_MANS = \
 	curl_version.3 \
 	curl_escape.3 \
 	curl_unescape.3 \
+	curl_free.3 \
 	curl_strequal.3 \
 	curl_strnequal.3 \
 	curl_mprintf.3 \
@@ -54,6 +55,7 @@ HTMLPAGES = \
 	curl_version.html \
 	curl_escape.html \
 	curl_unescape.html \
+	curl_free.html \
 	curl_strequal.html \
 	curl_strnequal.html \
 	curl_mprintf.html \
