@@ -152,6 +152,14 @@ TODO
 
  CLIENT
 
+ * "curl --sync http://example.com/feed[1-100].rss" or
+   "curl --sync http://example.net/{index,calendar,history}.html"
+
+   Downloads a range or set of URLs using the remote name, but only if the
+   remote file is newer than the local file. A Last-Modified HTTP date header
+   should also be used to set the mod date on the downloaded file.
+   (idea from "Brianiac")
+
  * Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
    Requested by Dane Jensen and others. This is easily scripted though.
 
