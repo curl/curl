@@ -458,7 +458,7 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
 
   /* Set the socket non-blocking. */
 
-#ifdef WIN32
+#if defined(WIN32) || defined(WATT32)
   flags = 1;
   ioctlsocket(s, FIONBIO, &flags);
 #else

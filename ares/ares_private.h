@@ -27,6 +27,15 @@
 #define closesocket(x) close(x)
 #endif
 
+#ifdef WATT32
+#include <tcp.h>
+#include <sys/ioctl.h>
+#undef  closesocket
+#define closesocket(s)    close_s(s)
+#define select(n,r,w,x,t) select_s(n,r,w,x,t)
+#define writev(s,v,c)     writev_s(s,v,c)
+#endif
+
 #define	DEFAULT_TIMEOUT		5
 #define DEFAULT_TRIES		4
 #ifndef INADDR_NONE

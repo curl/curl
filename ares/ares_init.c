@@ -506,6 +506,24 @@ DhcpNameServer
     free(resolvers);
   }
 
+#elif defined(WATT32)
+  int i;
+
+  sock_init();
+  for (i = 0; def_nameservers[i]; i++)
+      ;
+  if (i == 0)
+    return ARES_SUCCESS; /* use localhost DNS server */
+
+  nservers = i;
+  servers = calloc(sizeof(*servers), i);
+  if (!servers)
+     return ARES_ENOMEM;
+
+  for (i = 0; def_nameservers[i]; i++)
+      servers[i].addr.s_addr = htonl(def_nameservers[i]);
+  status = ARES_EOF;
+
 #else
   {
     char *p;
