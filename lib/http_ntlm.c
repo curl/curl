@@ -62,7 +62,7 @@
 #define DES_set_key des_set_key
 #define DES_ecb_encrypt des_ecb_encrypt
 
-/* This is how things were done in the old days */#define DESKEY(x) x
+/* This is how things were done in the old days */
 #define DESKEY(x) x
 #define DESKEYARG(x) x
 #else
