@@ -175,7 +175,7 @@ CURLcode Curl_file_done(struct connectdata *conn,
 {
   struct FILEPROTO *file = conn->proto.file;
   (void)status; /* not used */
-  Curl_safefree(file->path);
+  Curl_safefree(file->freepath);
 
   return CURLE_OK;
 }
