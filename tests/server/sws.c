@@ -135,13 +135,18 @@ void storerequest(char *reqbuf)
 }
 
 
-#define REQBUFSIZ 4096
-#define MAXDOCNAMELEN 1024
+#define REQBUFSIZ 50000
+#define REQBUFSIZ_TXT "49999"
+
+/* very-big-path support */
+#define MAXDOCNAMELEN 40000
+#define MAXDOCNAMELEN_TXT "39999"
+
 #define REQUEST_KEYWORD_SIZE 256
 static int get_request(int sock, int *part)
 {
-  char reqbuf[REQBUFSIZ], doc[MAXDOCNAMELEN];
-  char request[REQUEST_KEYWORD_SIZE];
+  static char reqbuf[REQBUFSIZ], doc[MAXDOCNAMELEN];
+  static char request[REQUEST_KEYWORD_SIZE];
   unsigned int offset = 0;
   int prot_major, prot_minor;
   char logbuf[256];
@@ -177,7 +182,7 @@ static int get_request(int sock, int *part)
   /* dump the request to an external file */
   storerequest(reqbuf);
 
-  if (sscanf(reqbuf, "%s %s HTTP/%d.%d",
+  if (sscanf(reqbuf, "%" REQBUFSIZ_TXT"s %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
              request,
              doc,
              &prot_major,
@@ -191,10 +196,14 @@ static int get_request(int sock, int *part)
     /* get the number after it */
     if(ptr) {
 
-      sprintf(logbuf, "Got request: %s %s HTTP/%d.%d",
-              request, doc, prot_major, prot_minor);
+      if((strlen(doc) + strlen(request)) < 200)
+        sprintf(logbuf, "Got request: %s %s HTTP/%d.%d",
+                request, doc, prot_major, prot_minor);
+      else
+        sprintf(logbuf, "Got a *HUGE* request HTTP/%d.%d",
+                prot_major, prot_minor);
       logmsg(logbuf);
-
+      
       if(!strncmp("/verifiedserver", ptr, 15)) {
         logmsg("Are-we-friendly question received");
         return -2;
