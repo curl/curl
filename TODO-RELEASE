@@ -1,17 +1,17 @@
 Issues not sorted in any particular order.
-  #[num] refers to bug report numbers.
   UNASSIGNED means that no person has publicly stated to work on the issue.
-  DELETE means the issue is subject for dismissal
 
 To get fixed in 7.12.1 (planned release: August 2004)
 ======================
 
 34 - Fix certificate wildcard checks:
      http://curl.haxx.se/mail/lib-2004-06/0219.html
+     Gisle works on this.
 
 35 - Fix multi interface when connecting to host with multiple IP addresses:
      http://curl.haxx.se/mail/lib-2004-06/0163.html and
      http://curl.haxx.se/mail/lib-2004-06/0167.html
+     UNASSIGNED
 
 * Bugfixes reported until late July
 

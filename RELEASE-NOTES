@@ -8,15 +8,20 @@ Curl and libcurl 7.12.1
 
 This release includes the following changes:
 
+ o libcurl-tutorial.3 is the new man page formerly known as libcurl-the-guide
+ o additional SSL trace data might be sent to the debug callback using two new
+   types: CURLINFO_SSL_DATA_IN and CURLINFO_SSL_DATA_OUT
  o multipart formposts can upload files larger than system memory
  o the curl tool continues with the next URL even if one transfer fails
  o FTP 3rd party transfer support - seven new setopt() options
 
 This release includes the following bugfixes:
 
+ o HTTP POST/PUT with NTLM/Digest/Negotiate to a URL returning 3XX
+ o HTTPS POST/PUT over a proxy requiring NTLM/Digest/Negotiate works now
  o less restrictive libidn requirements, 0.4.1 or later is fine
- o fixed HTTP POST or PUT with Digest/Negotiate/NTLM when the server didn't
-   require any authentication
+ o fixed HTTP POST or PUT with Digest/Negotiate/NTLM selected but the server
+   didn't require any authentication
  o win32 file:// transfer free memory bug
  o configure --disable-http builds a libcurl without HTTP support
  o CURLOPT_FILETIME had wrong type, it expects a long argument
@@ -24,7 +29,7 @@ This release includes the following bugfixes:
  o the msvc curllib.dsp now builds the libcurl.lib file again
  o builds fine on VMS again
  o builds fine on NetWare again
- o HTTP Digest authentication with proxies use correct user name + password
+ o HTTP Digest authentication with proxies uses correct user name + password
  o now builds fine with lcc-win32
 
 Other curl-related news since the previous public release:
@@ -39,6 +44,6 @@ advice from friends like these:
 
  Gisle Vanem, Vincent Bronner, Alexander Krasnostavsky, Chris Gaukroger,
  Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam,
- Luca Alteas, Jean-Louis Lemaire
+ Luca Alteas, Jean-Louis Lemaire, David Byron
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (19 June 2004)
+- Luca Alteas provided a test case with a failing curl operation: when we POST
+  to a site with --digest (or similar) set, and the server responded with a 302
+  Location: to the "authprobe" request, it was not treated correctly. We still
+  will behave badly if FOLLOWLOCATION is enabled for this case, but I'm not
+  in the mood to dive into this right now and will leave it as-is for now.
+  Verified my fix with test case 177.
+
 Daniel (18 June 2004)
 - Gisle Vanem's patch that provides more details from the SSL layers (if you
   use an OpenSSL version that supports it). It also introduces two new types
