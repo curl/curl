@@ -14,7 +14,7 @@ This configure script may be copied, distributed and modified under the
 terms of the curl license; see COPYING for more details])
 
 AC_CONFIG_SRCDIR([lib/urldata.h])
-AM_CONFIG_HEADER(lib/config.h src/config.h tests/server/config.h lib/ca-bundle.h)
+AM_CONFIG_HEADER(lib/config.h src/config.h tests/server/config.h )
 AM_MAINTAINER_MODE
 
 AC_PATH_PROG( SED, sed, , $PATH:/usr/bin:/usr/local/bin)
@@ -834,7 +834,6 @@ AC_CHECK_FUNCS( socket \
                 tcgetattr \
                 perror \
                 closesocket \
-                setvbuf \
                 sigaction \
                 signal \
                 getpass_r \
@@ -890,7 +889,7 @@ AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
    [ ca="$withval" ],
    [
   if test "x$prefix" != xNONE; then
-    ca="$prefix/share/curl/curl-ca-bundle.crt"
+    ca="\${prefix}/share/curl/curl-ca-bundle.crt"
   else
     ca="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
   fi
@@ -901,15 +900,10 @@ then
   ca="no"
 fi
 
-if test "x$ca" = "xno"; then
-  dnl let's not keep "no" as path name, blank it instead
-  ca=""
-else
-  AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE, "$ca", [CA bundle full path name])
+if test "x$ca" != "xno"; then
+  CURL_CA_BUNDLE='"'$ca'"'
+  AC_SUBST(CURL_CA_BUNDLE)  
 fi
-
-CURL_CA_BUNDLE="$ca"
-AC_SUBST(CURL_CA_BUNDLE)
 AC_MSG_RESULT([$ca])
 
 AC_PROG_YACC

@@ -69,15 +69,22 @@ memdebug.h inet_ntoa_r.h http_chunks.c http_chunks.h strtok.c strtok.h	\
 connect.c connect.h llist.c llist.h hash.c hash.h multi.c		\
 content_encoding.c content_encoding.h share.c share.h http_digest.c \
 md5.c md5.h http_digest.h http_negotiate.c http_negotiate.h \
-http_ntlm.c http_ntlm.h
+http_ntlm.c http_ntlm.h ca-bundle.h
 
 noinst_HEADERS = setup.h transfer.h
+
+BUILT_SOURCES = $(srcdir)/getdate.c $(srcdir)/ca-bundle.h
 
 # Say $(srcdir), so GNU make does not report an ambiguity with the .y.c rule.
 $(srcdir)/getdate.c: getdate.y
 	cd $(srcdir) && \
 	  $(YACC) $(YFLAGS) getdate.y; \
 	  mv -f y.tab.c getdate.c
+
+$(srcdir)/ca-bundle.h: Makefile.in Makefile
+	cd $(srcdir) && \
+	echo "/* The file is generated automaticly */" > $@
+	echo '#define CURL_CA_BUNDLE @CURL_CA_BUNDLE@' >> $@
 
 install-data-hook:
 	@if test -n "@CURL_CA_BUNDLE@"; then \
@@ -88,4 +95,4 @@ install-data-hook:
 # this hook is mainly for non-unix systems to build even if configure
 # isn't run
 dist-hook:
-	cp $(srcdir)/ca-bundle.h.in $(distdir)/ca-bundle.h
+	echo "/* ca bundle path set in here*/" > $(distdir)/ca-bundle.h
