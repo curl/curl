@@ -6,13 +6,41 @@
 
                                History of Changes
 
+Daniel (19 November 2001)
+- Lars M Gustafsson found a case with a bad free(). In fact, it was so bad I'm
+  amazed we never saw this before!
+
+- Kevin Roth patched the cygwin Makfile.
+
+Daniel (16 November 2001)
+- Klevtsov Vadim fixed a bug in how time-conditionals were sent when doing
+  HTTP.
+
+Version 7.9.2-pre3
+
+Daniel (14 November 2001)
+- Samuel Listopad patched away the problem with SSL we got when someone call
+  curl_global_init() => curl_global_cleanup() => curl_global_init(). The
+  second init would not "take" and SSL would be unusable with curl from that
+  point. This doesn't change the fact that calling the functions that way is
+  wrong. curl_global_init() should be called exactly once and not more.
+
+Daniel (13 November 2001)
+- Fixed some minor variable type mixups in ftp.c that caused compiler warnings
+  on HP-UX 11.00.
+
+- The FTP fix I did yesterday used an uninitialized variable that caused
+  spurious errors when doing FTP.
+
+Version 7.9.2-pre2
+
 Daniel (12 November 2001)
-- Ricardo Cadime fell over a multiple requests problem when first a FTP
+- Ricardo Cadime fell over a multiple-requests problem when first a FTP
   directory fetch failed and then a second request is made after that. The
   second request happened to get the FTP server response back from the
   previous request, when it did its initial CWD command.
 
-- Bjorn Reese pointed out that we could improved the time diff function to
+- Bjorn Reese pointed out that we could improve the time diff function to
   prevent truncation a bit.
 
 - Kai-Uwe Rommel made me aware that -p (http proxy tunnel) silly enough didn't
@@ -22,7 +50,7 @@ Version 7.9.2-pre1
 
 Daniel (12 November 2001)
 - Rewrote the Curl_ConnectHTTPProxyTunnel(). It should now not only work a lot
-  faster, it should only support such ("broken") proxies that John Lask
+  faster, it should also support such ("broken") proxies that John Lask
   previously have reported problems with. His proxy sends a trailing zero byte
   after the end of the (proxy-) headers. I've tested this myself and it seems
   to work on a proxy the previous version also worked with...! This rewrite is
