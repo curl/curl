@@ -59,6 +59,12 @@ Other curl-related news since the previous public release:
  o TclCurl 0.10.8 was released:
    http://personal1.iddeo.es/andresgarci/tclcurl/english/
  o the Ferite curl binding was released: http://www.ferite.org/
+ o stopped the curl.sourceforge.net mirror, it now redirects to curl.haxx.se
+ o fresh new curl web mirrors:
+   US Texas -      http://curl.cyberservers.net
+   US California - http://curl.mirror.redwire.net
+   Germany -       http://curl.mirror.at.stealer.net
+   Thailand -      http://curl.siamu.ac.th
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
