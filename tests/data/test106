@@ -29,7 +29,6 @@ FTP GET with type=A style ASCII URL using %20 codes
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-CWD 
 CWD path with  spaces
 CWD and things2
 EPSV
