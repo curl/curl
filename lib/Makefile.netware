@@ -117,11 +117,11 @@ endif
 ifeq ($(LIBARCH),LIBC)
 	INCLUDES += -I$(SDK_LIBC)/include -I$(SDK_LIBC)/include/nks
 	INCLUDES += -I$(SDK_LIBC)/include/winsock
-	INCLUDES += -I$(SDK_LDAP)/libc/inc
+	# INCLUDES += -I$(SDK_LDAP)/libc/inc
 else
 	INCLUDES += -I$(SDK_CLIB)/include/nlm -I$(SDK_CLIB)/include
 	# INCLUDES += -I$(SDK_CLIB)/include/nlm/obsolete
-	INCLUDES += -I$(SDK_LDAP)/clib/inc
+	# INCLUDES += -I$(SDK_LDAP)/clib/inc
 	CFLAGS += -DNETDB_USE_INTERNET
 endif
 CFLAGS	+= $(INCLUDES)
