@@ -83,7 +83,7 @@
 #include "http_chunks.h" /* for the structs and enum stuff */
 
 /* Download buffer size, keep it fairly big for speed reasons */
-#define BUFSIZE (1024*50)
+#define BUFSIZE (1024*20)
 
 /* Defaul upload buffer size, keep it smallish to get faster progress meter
    updates. This is just default, it is dynamic and adjusts to the upload
@@ -251,6 +251,7 @@ struct Curl_transfer_keeper {
   struct SessionHandle *data;
   struct connectdata *conn;
   char *buf;
+  char *uploadbuf;
   int maxfd;
 
   /* the file descriptors to play with */
@@ -409,6 +410,16 @@ struct connectdata {
 
   /* This struct is inited when needed */
   struct Curl_transfer_keeper keep;
+
+  /* 'upload_present' is used to keep a byte counter of how much data there is
+     still left in the buffer, aimed for upload. */
+  int upload_present;
+
+   /* 'upload_fromhere' is used as a read-pointer when we uploaded parts of a
+      buffer, so the next read should read from where this pointer points to,
+      and the 'upload_present' contains the number of bytes available at this
+      position */
+  char *upload_fromhere;                                   
 };
 
 /*
@@ -495,8 +506,8 @@ struct UrlState {
   char *headerbuff; /* allocated buffer to store headers in */
   int headersize;   /* size of the allocation */
 
-  char buffer[BUFSIZE+1]; /* buffer with size BUFSIZE */
-
+  char buffer[BUFSIZE+1]; /* download buffer */
+  char uploadbuffer[BUFSIZE+1]; /* upload buffer */
   double current_speed;  /* the ProgressShow() funcion sets this */
 
   bool this_is_a_follow; /* this is a followed Location: request */
