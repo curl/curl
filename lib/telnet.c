@@ -1094,7 +1094,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
         ssize_t bytes_written;
         char *buffer = buf;
               
-        if(!ReadFile(stdin_handle, buf, 255, &nread, NULL)) {
+        if(!ReadFile(stdin_handle, buf, 255, (LPDWORD)&nread, NULL)) {
           keepon = FALSE;
           break;
         }
