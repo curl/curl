@@ -62,6 +62,11 @@ while test $# -gt 0; do
 	exit 0
 	;;
 
+    --vernum)
+	echo @VERSIONNUM@
+	exit 0
+	;;
+
     --help)
 	usage 0
 	;;

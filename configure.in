@@ -8,6 +8,11 @@ VERSION=`sed -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/cu
 AM_INIT_AUTOMAKE(curl,$VERSION)
 
 dnl
+dnl we extract the numerical version for curl-config only
+VERSIONNUM=`sed -ne 's/^#define LIBCURL_VERSION_NUM 0x\(.*\)/\1/p' ${srcdir}/include/curl/curl.h`
+AC_SUBST(VERSIONNUM)
+
+dnl
 dnl Detect the canonical host and target build environment
 dnl
 

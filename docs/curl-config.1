@@ -2,7 +2,7 @@
 .\" nroff -man curl-config.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl-config 1 "18 March 2001" "Curl 7.7.2" "curl-config manual"
+.TH curl-config 1 "28 May 2001" "Curl 7.8" "curl-config manual"
 .SH NAME
 curl-config \- Get information about a libcurl installation
 .SH SYNOPSIS
@@ -30,6 +30,11 @@ in $prefix/lib and its header files are installed in $prefix/include and so
 on. The prefix is set with "configure --prefix".
 .IP "--version"
 Outputs version information about the installed libcurl.
+.IP "--vernum"
+Outputs version information about the installed libcurl, in numerical mode.
+This outputs the version number, in hexadecimal, with 8 bits for each part;
+major, minor, patch. So that libcurl 7.7.4 would appear as 070704 and libcurl
+12.13.14 would appear as 0c0d0e...
 .SH "EXAMPLES"
 What is the path to the curl header files?
 
