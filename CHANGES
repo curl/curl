@@ -7,6 +7,74 @@
                                History of Changes
 
 
+Daniel (15 August 2000)
+- Mathieu Legare compiled and build 7.1 without errors on both AIX 4.2 as well
+  as AIX 4.3. Now why did problems occur before?
+
+- Fred Noz reported a -w/--write-out bug that caused it to malfunction when
+  used combined with multiple URL retrievales. All but the first display got
+  screwed up!
+
+Daniel (11 August 2000)
+- Jason Priebe and an anynomous friend found some host names the Linux version
+  of curl could not resolve. It turned out the buffer used to retrieve that
+  information was too small. Fixed. One could argue about the usefulness of
+  not having the slightest trace of a man page for gethostbyname_r() on my
+  Linux Redhat installation...
+
+Daniel (10 August 2000)
+- Balaji S Rao missed the possibility of replacing the Content-Type: and
+  Content-Length: headers when doing -d posts. I added the possibility just now
+
+Daniel (8 August 2000)
+- Mike Dowell correctly discovered that curl did not approve URLs with no user
+  name but password. As in 'http://:foo@haxx.se'. I corrected this.
+
+Version 7.1
+
+Daniel (7 August 2000)
+- My AIX 4 fix does not work. I need help from a AIX 4 hacker.
+
+- I added my new document in the docs directory. It is aimed to become a sort
+  of tutorial on how to do HTTP scripting with curl.
+
+Daniel (4 August 2000)
+- Working with Rich Gray on compiling curl for lots of different platforms.
+  My fix for AIX 3.2 was not good enough and was slightly changed, I had to
+  move an include file before another, as is now described in the source.
+
+  AIX 4.2 (4.X?) has different gethostbyname_r() and gethostbyaddr_r()
+  functions that the configure script didn't check for and thus the compile
+  broke with an error. I have now changed the gethostbyname_r() check in the
+  configure file to support all three versions of both these functions. My
+  implementation that uses the AIX-style is though not yet verified and I may
+  get problems to fix it if it turns out to bug since I don't have access to
+  any system using that.
+
+  For problems like that, I made the configure script allow --disable-thread
+  to completely switch off the check for threadsafe versions of a few
+  functions and thus go with the "good old versions" that tend to work
+  although will break thread-safeness for libcurl. Most people won't use
+  libcurl for other things than curl though, and curl doesn't need a
+  thread-safe lib.
+
+- Working on my big tutorial about HTTP scripting with curl.
+
+Daniel (1 August 2000)
+- Rich Gray spotted a problem in src/setup.h caused by a #define strequal()
+  that was just a left-over from passed times. The strequal() is now a true
+  function supplied by libcurl for a portable case insensitive string
+  comparison. I added the prototypes in include/curl.h and removed the
+  now obsolete #define.
+
+- Igor Khristophorov made a fix to allow resumed download from Sun's
+  JavaWebServer/1.1.1. It seems that their server sends bad Content-Range
+  headers.
+
+- The makefiles forced a static library build, which is bad since we now use
+  libtool and thus have excellent shared library support! Albert Chin-A-Young
+  found out.
+
 Version 7.0.11beta
 
 Daniel (1 August 2000)
