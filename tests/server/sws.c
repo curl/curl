@@ -29,6 +29,7 @@
 
 #define TEST_DATA_PATH "data/test%d"
 
+static char *docfriends = "WE ROOLZ\r\n";
 static char *doc404 = "HTTP/1.1 404 Not Found\n"
     "Server: " VERSION "\n"
     "Connection: close\n"
@@ -184,12 +185,18 @@ static int get_request(int sock)
 
     /* get the number after it */
     if(ptr) {
+      if(!strcmp("/verifiedserver", ptr)) {
+        logmsg("Are-we-friendly question received");
+        return -2;
+      }
       test_no = strtol(ptr+1, &ptr, 10);
 
       logmsg("Found test number in PATH");
     }
-    else
+    else {
+
       logmsg("Did not find test number in PATH");
+    }
 
     return test_no;
   }
@@ -211,7 +218,11 @@ static int send_doc(int sock, int doc)
   char filename[256];
 
   if(doc < 0) {
-    buffer = doc404;
+    if(-2 == doc)
+      /* we got a "friends?" question, reply back that we sure are */
+      buffer = docfriends;
+    else
+      buffer = doc404;
     ptr = NULL;
     stream=NULL;
   }
@@ -256,6 +267,8 @@ int main(int argc, char *argv[])
       port = atoi(argv[1]);
 
     logfile = "logfile";
+
+    /* FIX: write our pid to a file name */
 
     logfp = fopen(logfile, "a");
     if (!logfp) {
@@ -317,10 +330,7 @@ int main(int argc, char *argv[])
       logmsg("New client connected");
 
       doc = get_request(msgsock);
-      if (doc > 0)
-        send_doc(msgsock, doc);
-      else
-        send_doc(msgsock, -1);
+      send_doc(msgsock, doc);
 
       close(msgsock);
     }

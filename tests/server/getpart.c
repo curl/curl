@@ -7,6 +7,27 @@
 #define EAT_SPACE(ptr) while( ptr && *ptr && isspace(*ptr) ) ptr++
 #define EAT_WORD(ptr) while( ptr && *ptr && !isspace(*ptr) && ('>' != *ptr)) ptr++
 
+char *appendstring(char *string, /* original string */
+                   char *buffer, /* to append */
+                   int *stringlen, int *stralloc)
+{
+  int len = strlen(buffer);
+
+  if((len + *stringlen) > *stralloc) {
+    char *newptr= realloc(string, *stralloc*2);
+    if(newptr) {
+      string = newptr;
+      *stralloc *= 2;
+    }
+    else
+      return NULL;
+  }
+  strcpy(&string[*stringlen], buffer);
+  *stringlen += len;
+
+  return string;
+}
+
 char *spitout(FILE *stream, char *main, char *sub, int *size)
 {
   char buffer[8192]; /* big enough for anything */
@@ -19,6 +40,7 @@ char *spitout(FILE *stream, char *main, char *sub, int *size)
   char *string;
   int stringlen=0;
   int stralloc=256;
+  int len;
 
   enum {
     STATE_OUTSIDE,
@@ -38,22 +60,9 @@ char *spitout(FILE *stream, char *main, char *sub, int *size)
 
     if('<' != *ptr) {
       if(display) {
-        int len;
         printf("=> %s", buffer);
-        
-        len = strlen(buffer);
-
-        if((len + stringlen) > stralloc) {
-          char *newptr= realloc(string, stralloc*2);
-          if(newptr) {
-            string = newptr;
-            stralloc *= 2;
-          }
-          else
-            return NULL;
-        }
-        strcpy(&string[stringlen], buffer);
-        stringlen += len;
+        string = appendstring(string, buffer, &stringlen, &stralloc);
+        printf("* %s\n", buffer);
       }
       continue;
     }
@@ -75,15 +84,17 @@ char *spitout(FILE *stream, char *main, char *sub, int *size)
         /* this is the end of the currently read sub section */
         state--;
         csub[0]=0; /* no sub anymore */
+        display=0;
       }
       else if((state == STATE_INMAIN) &&
               !strcmp(cmain, ptr)) {
         /* this is the end of the currently read main section */
         state--;
         cmain[0]=0; /* no main anymore */
+        display=0;
       }
     }
-    else {
+    else if(!display) {
       /* this is the beginning of a section */
       end = ptr;
       EAT_WORD(end);
@@ -100,11 +111,15 @@ char *spitout(FILE *stream, char *main, char *sub, int *size)
         break;
       }
     }
+    if(display) {
+      string = appendstring(string, buffer, &stringlen, &stralloc);
+      printf("* %s\n", buffer);
+    }
 
     if((STATE_INSUB == state) &&
        !strcmp(cmain, main) &&
        !strcmp(csub, sub)) {
-      printf("* %s\n", buffer);
+      printf("* (%d bytes) %s\n", stringlen, buffer);
       display = 1; /* start displaying */
     }
     else {
