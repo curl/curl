@@ -6,10 +6,10 @@
 # THEY DON'T FIT ME :-)
 
 # Get readme file as parameter:
-$README = $ARGV[0];
+my $README = $ARGV[0];
 
 if($README eq "") {
-    print "usage: mkreadme.pl <README>\n";
+    print "usage: mkreadme.pl [-c] <README> < manpage\n";
     exit;
 }
 
@@ -20,8 +20,8 @@ push @out, "                             / __| | | | |_) | |    \n";
 push @out, "                            | (__| |_| |  _ <| |___ \n";
 push @out, "                             \\___|\\___/|_| \\_\\_____|\n";
 
-$head=0;
-loop:
+my $head=0;
+
 while (<STDIN>) {
     $line = $_;
 
@@ -34,13 +34,13 @@ while (<STDIN>) {
     if($line =~ /^curl/i) {
 	# cut off the page headers
         $head=1;
-	next loop;
+	next;
     } 
 
     if($line =~ /^[ \t]*\n/) {
 	$wline++;
 	# we only make one empty line max
-	next loop;
+	next;
     }
     if($wline) {
 	$wline = 0;
@@ -54,20 +54,113 @@ while (<STDIN>) {
 push @out, "\n"; # just an extra newline
 
 open(READ, "<$README") ||
-    die "couldn't read the README infile";
+    die "couldn't read the README infile $README";
 
 while(<READ>) {
     push @out, $_;
 }
 close(READ);
 
+# if compressed
+if($c) {
+    my @test = `gzip --version 2>&1`;
+    if($test[0] =~ /gzip/) {
+        open(GZIP, "|gzip -9 >dumpit.gz");
+        binmode GZIP;
+        for(@out) {
+            print GZIP $_;
+            $gzip += length($_);
+        }
+        close(GZIP);
+        
+        open(GZIP, "<dumpit.gz");
+        binmode GZIP;
+        while(<GZIP>) {
+            push @gzip, $_;
+            $gzipped += length($_);
+        }
+        close(GZIP);
+    }
+    else {
+        # no gzip, no compression!
+        undef $c;
+        print STDERR "MEEEP: Couldn't find gzip, disable compression\n";
+    }
+}
 
-print "/* NEVER EVER edit this manually, fix the mkhelp script instead! */\n"
-;
-print "#include <stdio.h>\n";
-print "void hugehelp(void)\n";
-print "{\n";
-print " fputs (\n";
+$now = localtime;
+print <<HEAD
+/*
+ * NEVER EVER edit this manually, fix the mkhelp.pl script instead!
+ * Generation time: $now
+ */
+#include <stdio.h>
+HEAD
+    ;
+if($c) {
+    print "/* gzip shrunk this data from $gzip to $gzipped bytes */\n",
+    "#include <zlib.h>\nstatic const unsigned char hugehelpgz[] = {\n  ";
+    my $c=0;
+    for(@gzip) {
+        my @all=split(//, $_);
+        for(@all) {
+            my $num=ord($_);
+            printf("0x%02x, ", 0+$num);
+            if(++$c>11) {
+                print "\n  ";
+                $c=0;
+            }
+        }
+    }
+    print "\n};\n";
+
+    print <<EOF
+/* Decompress and send to stdout a gzip-compressed buffer */
+void hugehelp(void)
+{
+  unsigned char buf[0x10000];
+  int status,headerlen;
+  z_stream z;
+
+  /* Make sure no gzip options are set */
+  if (hugehelpgz[3] & 0xfe)
+    return;
+
+  headerlen = 10;
+  z.avail_in = sizeof(hugehelpgz) - headerlen;
+  z.next_in = (unsigned char *)hugehelpgz + headerlen;
+  z.zalloc = (alloc_func)Z_NULL;
+  z.zfree = (free_func)Z_NULL;
+  z.opaque = 0;
+
+  if (inflateInit2(&z, -MAX_WBITS) != Z_OK)
+    return;
+
+  for (;;) {
+    z.avail_out = (int)sizeof(buf);
+    z.next_out = buf;
+    status = inflate(&z, Z_SYNC_FLUSH);
+    if (status == Z_OK || status == Z_STREAM_END) {
+      fwrite(buf, sizeof(buf) - z.avail_out, 1, stdout);
+      if (status == Z_STREAM_END)
+         break;
+    } else
+      break;    /* Error */
+  }
+  inflateEnd(&z);
+}
+EOF
+    ;
+exit;
+}
+else {
+    print <<HEAD
+void hugehelp(void)
+{
+   fputs(
+HEAD
+         ;
+}
 
 $outsize=0;
 for(@out) {

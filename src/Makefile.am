@@ -11,6 +11,14 @@ INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/src -I$(top_srcdir)/src
 
 bin_PROGRAMS = curl #memtest
 
+if HAVE_LIBZ
+# libz available, attempt to compress the help data
+MKHELPOPT=-c
+else
+# no libz, don't try to compress
+MKHELPOPT=
+endif
+
 #memtest_SOURCES = memtest.c
 #memtest_LDADD = $(top_srcdir)/lib/libcurl.la
 
@@ -38,4 +46,4 @@ MKHELP=$(top_srcdir)/src/mkhelp.pl
 # This generates the hugehelp.c file
 hugehelp.c: $(README) $(MANPAGE)  mkhelp.pl
 	rm -f hugehelp.c
-	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP)  $(README) > hugehelp.c
+	$(NROFF) -man $(MANPAGE) | $(PERL) -s $(MKHELP) $(MKHELPOPT) $(README) > hugehelp.c
