@@ -11,7 +11,7 @@
                        (ARES_VERSION_PATCH))
 #define ARES_VERSION_STR "1.0.0"
 
-char *ares_version(int *version);
+const char *ares_version(int *version);
 
 #endif
 

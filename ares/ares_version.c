@@ -2,7 +2,7 @@
 
 #include "ares_version.h"
 
-char *ares_version(int *version)
+const char *ares_version(int *version)
 {
   if(version)
     *version = ARES_VERSION;
