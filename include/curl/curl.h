@@ -561,6 +561,9 @@ typedef enum {
 
   /* Instruct libcurl to use a smaller receive buffer */
   CINIT(BUFFERSIZE, LONG, 98),
+
+  /* Instruct libcurl to do not use any signal/alarm handlers, even with timeouts. */
+  CINIT(NOSIGNAL, LONG, 99),
   
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;

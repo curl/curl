@@ -668,6 +668,7 @@ struct UserDefined {
   bool reuse_fresh;      /* do not re-use an existing connection  */
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
+  bool no_signal;
 
   bool global_dns_cache;
 };

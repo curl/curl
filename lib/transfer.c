@@ -1130,7 +1130,8 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   /*************************************************************
    * Tell signal handler to ignore SIGPIPE
    *************************************************************/
-  data->state.prev_signal = signal(SIGPIPE, SIG_IGN);
+  if(!data->set.no_signal)
+    data->state.prev_signal = signal(SIGPIPE, SIG_IGN);
 #endif  
 
   Curl_initinfo(data); /* reset session-specific information "variables" */
@@ -1143,7 +1144,8 @@ CURLcode Curl_posttransfer(struct SessionHandle *data)
 {
 #if defined(HAVE_SIGNAL) && defined(SIGPIPE)
   /* restore the signal handler for SIGPIPE before we get back */
-  signal(SIGPIPE, data->state.prev_signal);
+  if(!data->set.no_signal)
+    signal(SIGPIPE, data->state.prev_signal);
 #endif  
 
   return CURLE_OK;
