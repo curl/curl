@@ -123,7 +123,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
             else if (strequal(token, "auth-int")) {
               foundAuthInt = TRUE;
             }
-            token = strtok (NULL, ",");
+            token = strtok_r(NULL, ",", &tok_buf);
           }
           free(tmp);
           /*select only auth o auth-int. Otherwise, ignore*/
