@@ -31,7 +31,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-CURLcode curl_getinfo(CURL *curl, CURLINFO info, ...)
+CURLcode Curl_getinfo(CURL *curl, CURLINFO info, ...)
 {
   va_list arg;
   long *param_longp;
