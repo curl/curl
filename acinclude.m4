@@ -423,10 +423,11 @@ main () {
     return 0;
 }
 ],
+    dnl if it worked fine
     AC_DEFINE(HAVE_GLIBC_STRERROR_R, 1, [we have a glibc-style strerror_r()])
     AC_MSG_RESULT([yes]),
+    dnl this didn't work!
     AC_MSG_RESULT([no])
-    )
 
     AC_MSG_CHECKING([for a POSIX strerror_r API])
     AC_TRY_RUN([
@@ -444,11 +445,17 @@ main () {
     return 0;
 }
 ],
+    dnl it worked, we have POSIX-style strerror()
     AC_DEFINE(HAVE_POSIX_STRERROR_R, 1, [we have a POSIX-style strerror_r()])
     AC_MSG_RESULT([yes]),
+    dnl it failed, we don't have POSIX-style
     AC_MSG_RESULT([no])
-    )
+    ) dnl end of AC_TRY_RUN() for POSIX strerror_r()
 
+    dnl cross-compiling!
+    ,
+    AC_MSG_NOTICE([cannot determine strerror_r() style: edit lib/config.h manually!])
+  ) dnl end of AC_TRY_RUN() for glibc strerror_r()
   fi
 
 ])
