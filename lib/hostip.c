@@ -605,6 +605,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
                                &h_errnop))==ERANGE) {
       step_size+=200;
     }
+    if(!h) /* failure */
+      res=1;
     
 #ifdef MALLOCDEBUG
     infof(data, "gethostbyname_r() uses %d bytes\n", step_size);
