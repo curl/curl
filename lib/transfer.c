@@ -1368,9 +1368,18 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             conn->size - k->bytecount);
       return CURLE_PARTIAL_FILE;
     }
-    else if(conn->bits.chunk && conn->proto.http->chunk.datasize) {
-      failf(data, "transfer closed with at least %d bytes remaining",
-            conn->proto.http->chunk.datasize);
+    else if(conn->bits.chunk &&
+            (conn->proto.http->chunk.state != CHUNK_STOP)) {
+      /*
+       * In chunked mode, return an error if the connection is closed prior to
+       * the empty (terminiating) chunk is read.
+       *
+       * The condition above used to check for
+       * conn->proto.http->chunk.datasize != 0 which is true after reading
+       * *any* chunk, not just the empty chunk.
+       *
+       */
+      failf(data, "transfer closed with outstanding read data remaining");
       return CURLE_PARTIAL_FILE;
     }
     if(Curl_pgrsUpdate(conn))

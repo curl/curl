@@ -23,7 +23,10 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o --disable-epsv when connecting to an IPv6 ftp server
+ o chunked-encoded transfers could get closed pre-maturely without error
+ o proxy CONNECT now default timeouts after 3600 seconds
+ o --disable-epsv and --disable-eprt are ignored when connecting to an IPv6 ftp
+   server
  o no more extra progress meter newline output after each Location: followed
  o HTTP PUT/POST with Digest, NTLM or Negotiate no longer uses HEAD
  o now gracefully bails out when exceeding FD_SETSIZE file descriptors

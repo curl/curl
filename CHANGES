@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Daniel (3 December 2004)
+- Bug report #1078066: when a chunked transfer was pre-maturely closed exactly
+  at a chunk boundary it was not considered an error and thus went unnoticed.
+
+  Added test case 207 to verify.
+
+Daniel (2 December 2004)
+- Fixed the CONNECT loop to default timeout to 3600 seconds.
+
+  Added test case 206 that makes CONNECT with Digest.
+
+  Fixed a flaw that prepended "(nil)" to the initial CONNECT rqeuest's user-
+  agent field.
+
 Daniel (30 November 2004)
 - Dan Fandrich's fix for libz 1.1 and "extra field" usage in a gzip stream
 
