@@ -110,7 +110,7 @@ static int ssl_app_verify_callback(X509_STORE_CTX *ctx, void *arg)
 
       if (strcmp((char *)p->accessinfoURL, (char *)accessinfoURL)) {	
         fprintf(stderr, "Setting URL <%s>, was <%s>\n",
-                accessinfoURL,p->accessinfoURL);
+                (char *)accessinfoURL, (char *)p->accessinfoURL);
         OPENSSL_free(p->accessinfoURL);
         p->accessinfoURL = accessinfoURL;
         curl_easy_setopt(p->curl, CURLOPT_URL,p->accessinfoURL);
@@ -179,7 +179,7 @@ int test(char *URL)
   curl_easy_setopt(p.curl, CURLOPT_SSL_VERIFYPEER, FALSE); 
   curl_easy_setopt(p.curl, CURLOPT_SSL_VERIFYHOST, 1);
 
-  fprintf(stderr,"Going to perform %s\n",p.accessinfoURL);
+  fprintf(stderr, "Going to perform %s\n", (char *)p.accessinfoURL);
 
   {
     CURLMcode res;
