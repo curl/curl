@@ -82,3 +82,6 @@
 
 /* The size of a `off_t', as computed by sizeof. */
 #undef SIZEOF_OFF_T
+
+/* If zlib is available */
+#undef HAVE_LIBZ
