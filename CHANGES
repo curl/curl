@@ -7,6 +7,35 @@
                                   Changelog
 
 
+Version 7.10.3-pre2 (4 Dec 2002)
+
+Daniel (4 Dec 2002)
+- Lots of work with Malcolm Dodds made me add a temporary code fix that now
+  shortens the timeout waiting for the 226 or 250 line after a completed
+  FTP transfer.
+
+  If no data is received within 60 seconds, this is taken as a sign of a dead
+  control connection and we bail out.
+
+Daniel (3 Dec 2002)
+- Ralph's bug report #644841 identified a problem in which curl returned a
+  timeout error code when in fact the problem was not a timeout. The proper
+  error should now be propagated better when they're detected in the FTP
+  response reading function.
+
+- Updated the Borland Makefiles.
+
+Daniel (2 Dec 2002)
+- Nicolas Berloquin provided a patch that introduced --create-dirs to the
+  command line tool. When used in combination with -o, it lets curl create
+  [non-existing] directories used in -o, suitably used with #-combinations
+  such as:
+
+     curl "www.images.com/{flowers,cities,parks,mountains}/pic_[1-100].jpg \
+       -o "dir_#1/pic#2.jpg" --create-dirs
+
+Version 7.10.3-pre1
+
 Daniel (28 Nov 2002)
 - I visited Lars Nordgren and had a go with his problem, which lead me to
   implement this fix. If libcurl detects the added custom header
