@@ -2245,7 +2245,7 @@ static void go_sleep(long ms)
 {
 #ifdef HAVE_POLL_FINE
   /* portable subsecond "sleep" */
-  poll((void *)0, 0, ms);
+  poll((void *)0, 0, (int)ms);
 #else
   /* systems without poll() need other solutions */
 
@@ -3494,8 +3494,8 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
           if(filetime >= 0) {
             struct utimbuf times;
-            times.actime = filetime;
-            times.modtime = filetime;
+            times.actime = (time_t)filetime;
+            times.modtime = (time_t)filetime;
             utime(outs.filename, &times); /* set the time we got */
           }
         }
