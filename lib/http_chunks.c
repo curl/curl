@@ -100,14 +100,17 @@ void Curl_httpchunk_init(struct connectdata *conn)
  */
 CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
                               char *datap,
-                              ssize_t length,
-                              ssize_t *wrote)
+                              ssize_t datalen,
+                              ssize_t *wrotep)
 {
   CURLcode result=CURLE_OK;
   struct Curl_chunker *ch = &conn->proto.http->chunk;
   struct Curl_transfer_keeper *k = &conn->keep;
-  int piece;
-  *wrote = 0; /* nothing yet */
+  size_t piece;
+  size_t length = (size_t)datalen;
+  size_t *wrote = (size_t *)wrotep;
+
+  *wrote = 0; /* nothing's written yet */
 
   while(length) {
     switch(ch->state) {
@@ -212,6 +215,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
       if(result)
         return CHUNKE_WRITE_ERROR;
+
       *wrote += piece;
 
       ch->datasize -= piece; /* decrease amount left to expect */

@@ -81,8 +81,8 @@ struct Curl_chunker {
   char hexbuffer[ MAXNUM_SIZE + 1];
   int hexindex;
   ChunkyState state;
-  ssize_t datasize;
-  ssize_t dataleft; /* untouched data amount at the end of the last buffer */
+  size_t datasize;
+  size_t dataleft; /* untouched data amount at the end of the last buffer */
 };
 
 #endif
