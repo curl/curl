@@ -120,7 +120,7 @@ void storerequest(char *reqbuf);
 #define REQUEST_DUMP  "log/server.input"
 #define RESPONSE_DUMP "log/server.response"
 
-#define TEST_DATA_PATH "%s/data/test%d"
+#define TEST_DATA_PATH "%s/data/test%ld"
 
 /* very-big-path support */
 #define MAXDOCNAMELEN 140000
