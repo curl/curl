@@ -82,8 +82,8 @@ amiga:
 	cd ./src && make -f makefile.amiga
 
 netware:
-        cd lib && make -f Makefile.netware
-        cd src && make -f Makefile.netware
+	cd lib && make -f Makefile.netware
+	cd src && make -f Makefile.netware
 
 unix: all
 
