@@ -9,10 +9,21 @@
 #  of the compiler, i.e. SET BCCDIR = c:\Borland\BCC55
 #  where c:\Borland\BCC55 is the compiler is installed
 #
-#  Requires 'Makefile.b32.resp'
-#
 #  Written by Jaepil Kim, pit@paradise.net.nz
 ############################################################
+
+# Edit the path below to point to the base of your Zlib sources.
+!ifndef ZLIB_PATH
+ZLIB_PATH = ../../zlib-1.2.1
+!endif
+
+# Edit the path below to point to the base of your OpenSSL package.
+!ifndef OPENSSL_PATH
+OPENSSL_PATH = ../../openssl-0.9.7d
+!endif
+
+# Set libcurl's name
+LIBCURLLIB = libcurl.lib
 
 # Setup environment
 CXX      = bcc32
@@ -24,14 +35,16 @@ CURNTDIR = .
 
 CXXFLAGS = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
 
-# If you build without SSL support, remove "-DUSE_SSLEAY" from the line below.
-DEFINES  = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS -DUSE_SSLEAY
-# DEFINES  = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS
+INCDIRS  = -I$(CURNTDIR);$(TOPDIR)/include
 
-INCDIRS  = -I$(CURNTDIR);$(TOPDIR)\include
-LINKLIB  = $(BCCDIR)\lib\psdk\ws2_32.lib
+#LINKLIB  = $(BCCDIR)\lib\psdk\ws2_32.lib
 
-LIBCURLLIB = libcurl.lib
+# If you build with SSL support, set WITH_SSL=1
+DEFINES  = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS
+!ifdef WITH_SSL
+DEFINES  = $(DEFINES) -DUSE_SSLEAY 
+INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)/inc32;$(OPENSSL_PATH)/inc32/openssl
+!endif
 
 .SUFFIXES: .c
 
@@ -48,15 +61,15 @@ all:	$(LIBCURLLIB)
 clean:
 	-$(RM) $(LIBCURLLIB)
 	-$(RM) *.obj
+	-$(RM) getdate.c
 
-$(LIBCURLLIB): $(LINKLIB) $(OBJECTS) Makefile.b32.resp
-	-$(RM) $(LIBCURLLIB)
-	$(LIB) $(LIBCURLLIB) @Makefile.b32.resp
+$(LIBCURLLIB): $(OBJECTS) $(LINKLIB)
+	@-$(RM) $@
+	$(LIB) $@ /a $**
 
-getdate.c:
+getdate.c: getdate.c.cvs
 	@echo Creating $@
 	@-$(RM) getdate.y
-	@$(CP) getdate.c.cvs $@
-
+	@$(CP) $** $@
 
 
