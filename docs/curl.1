@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "7 Nov 2003" "Curl 7.10.8" "Curl Manual"
+.TH curl 1 "2 Dec 2003" "Curl 7.11.0" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -293,8 +293,18 @@ prevent curl from outputting that and fail silently instead.
 If this option is used twice, the second will again disable silent failure.
 .IP "--ftp-create-dirs"
 (FTP) When an FTP URL/operation uses a path that doesn't currently exist on
-the server, the standard behaviour of curl is to fail. Using this option, curl
+the server, the standard behavior of curl is to fail. Using this option, curl
 will instead attempt to create missing directories. (Added in 7.10.7)
+
+If this option is used twice, the second will again disable silent failure.
+.IP "--ftp-pasv"
+(FTP) Use PASV when transfering. PASV is the internal default behavior, but
+using this option can be used to override a previos --ftp-port option. (Added
+in 7.11.0)
+
+If this option is used twice, the second will again disable silent failure.
+.IP "--ftp-ssl"
+(FTP) Make the FTP connection switch to use SSL/TLS. (Added in 7.11.0)
 
 If this option is used twice, the second will again disable silent failure.
 .IP "-F/--form <name=content>"
@@ -557,13 +567,12 @@ and requires that the proxy allows direct connect to the remote port number
 curl wants to tunnel through to.
 
 If this option is used twice, the second will again disable proxy tunnel.
-.IP "-P/--ftpport <address>"
-(FTP)
-Reverses the initiator/listener roles when connecting with ftp. This
-switch makes Curl use the PORT command instead of PASV. In
-practice, PORT tells the server to connect to the client's specified
-address and port, while PASV asks the server for an ip address and
-port to connect to. <address> should be one of:
+.IP "-P/--ftp-port <address>"
+(FTP) Reverses the initiator/listener roles when connecting with ftp. This
+switch makes Curl use the PORT command instead of PASV. In practice, PORT
+tells the server to connect to the client's specified address and port, while
+PASV asks the server for an ip address and port to connect to. <address>
+should be one of:
 .RS
 .IP interface
 i.e "eth0" to specify which interface's IP address you want to use  (Unix only)
@@ -575,7 +584,8 @@ i.e "my.host.domain" to specify machine
 (any single-letter string) to make it pick the machine's default
 .RE
 
-If this option is used several times, the last one will be used.
+If this option is used several times, the last one will be used. Disable the
+use of PORT with \fI--ftp-pasv\fP.
 .IP "-q"
 If used as the first parameter on the command line, the \fI$HOME/.curlrc\fP
 file will not be read and used as a config file.

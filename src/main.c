@@ -410,6 +410,7 @@ static void help(void)
     "    --crlf          Convert LF to CRLF in upload",
     " -f/--fail          Fail silently (no output at all) on errors (H)",
     "    --ftp-create-dirs Create the remote dirs if not present (F)",
+    "    --ftp-pasv      Use PASV instead of PORT (F)",
     "    --ftp-ssl       Enable SSL/TLS for the ftp transfer (F)",
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
     " -g/--globoff       Disable URL sequences and ranges using {} and []",
@@ -440,7 +441,7 @@ static void help(void)
     " -O/--remote-name   Write output to a file named as the remote file",
     " -p/--proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
     "    --proxy-ntlm    Enable NTLM authentication on the proxy (H)",
-    " -P/--ftpport <address> Use PORT with address instead of PASV (F)",
+    " -P/--ftp-port <address> Use PORT with address instead of PASV (F)",
     " -q                 If used as the first parameter disables .curlrc",
     " -Q/--quote <cmd>   Send command(s) to server before file transfer (F)",
     " -r/--range <range> Retrieve a byte range from a HTTP/1.1 or FTP server",
@@ -1190,6 +1191,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*y", "max-filesize", TRUE},
     {"*z", "disable-eprt", FALSE},
     {"$a", "ftp-ssl",    FALSE},
+    {"$b", "ftp-pasv",   FALSE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1237,7 +1239,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"o", "output",      TRUE},
     {"O", "remote-name", FALSE},
     {"p", "proxytunnel", FALSE},
-    {"P", "ftpport",     TRUE},
+    {"P", "ftpport",     TRUE}, /* older version */
+    {"P", "ftp-port",    TRUE},
     {"q", "disable",     FALSE},
     {"Q", "quote",       TRUE},
     {"r", "range",       TRUE},
@@ -1503,6 +1506,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       switch(subletter) {
       case 'a': /* --ftp-ssl */
         config->ftp_ssl ^= TRUE;
+        break;
+      case 'b': /* --ftp-pasv */
+        if(config->ftpport)
+          free(config->ftpport);
+        config->ftpport = NULL;
         break;
       }
       break;
