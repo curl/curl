@@ -350,15 +350,19 @@ sub runhttpserver {
     $pid = checkserver($pidfile);
 
     # verify if our/any server is running on this port
-    my $cmd = "$CURL -o log/verifiedserver -g \"http://$ip:$port/verifiedserver\" 2>/dev/null";
+    my $cmd = "$CURL -o log/verifiedserver -g \"http://$ip:$port/verifiedserver\" 2>log/verifystderr";
     print "CMD; $cmd\n" if ($verbose);
     my $res = system($cmd);
 
     $res >>= 8; # rotate the result
     my $data;
 
-    print "RUN: curl command returned $res\n" if ($verbose);
-
+    if($res && $verbose) {
+        print "RUN: curl command returned $res\nRUN: ";
+        open(ERR, "<log/verifystderr");
+        print <ERR>;
+        close(ERR);
+    }
     open(FILE, "<log/verifiedserver");
     my @file=<FILE>;
     close(FILE);
