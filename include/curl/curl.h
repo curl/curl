@@ -394,6 +394,13 @@ typedef enum {
    * set but doesn't match one of these, 'private' will be used.  */
   CINIT(KRB4LEVEL, OBJECTPOINT, 63),
 
+  /* Set if we should verify the peer in ssl handshake, set 1 to verify. */
+  CINIT(SSL_VERIFYPEER, LONG, 64),
+  
+  /* The CApath or CAfile used to validate the peer certificate
+     this option is used only if SSL_VERIFYPEER is true */
+  CINIT(CAINFO, OBJECTPOINT, 65),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
@@ -438,8 +445,8 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.4.1"
-#define LIBCURL_VERSION_NUM 0x070401
+#define LIBCURL_VERSION "7.4.2-pre2"
+#define LIBCURL_VERSION_NUM 0x070402
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
@@ -659,8 +666,9 @@ typedef enum {
   CURLINFO_SPEED_UPLOAD     = CURLINFO_DOUBLE + 10,
   CURLINFO_HEADER_SIZE      = CURLINFO_LONG   + 11,
   CURLINFO_REQUEST_SIZE     = CURLINFO_LONG   + 12,
+  CURLINFO_SSL_VERIFYRESULT = CURLINFO_LONG   + 13,
 
-  CURLINFO_LASTONE          = 13,
+  CURLINFO_LASTONE          = 14,
 } CURLINFO;
 
 /*
