@@ -72,8 +72,8 @@ dnl switch off particular protocols
 dnl
 AC_MSG_CHECKING([whether to support http])
 AC_ARG_ENABLE(http,
-[  --enable-http		Enable HTTP support
-  --disable-http	Disable HTTP support],
+AC_HELP_STRING([--enable-http],[Enable HTTP support])
+AC_HELP_STRING([--disable-http],[Disable HTTP support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -90,8 +90,8 @@ AC_ARG_ENABLE(http,
 )
 AC_MSG_CHECKING([whether to support ftp])
 AC_ARG_ENABLE(ftp,
-[  --enable-ftp		Enable FTP support
-  --disable-ftp	Disable FTP support],
+AC_HELP_STRING([--enable-ftp],[Enable FTP support])
+AC_HELP_STRING([--disable-ftp],[Disable FTP support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -105,8 +105,8 @@ AC_ARG_ENABLE(ftp,
 )
 AC_MSG_CHECKING([whether to support gopher])
 AC_ARG_ENABLE(gopher,
-[  --enable-gopher		Enable GOPHER support
-  --disable-gopher	Disable GOPHER support],
+AC_HELP_STRING([--enable-gopher],[Enable GOPHER support])
+AC_HELP_STRING([--disable-gopher],[Disable GOPHER support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -120,8 +120,8 @@ AC_ARG_ENABLE(gopher,
 )
 AC_MSG_CHECKING([whether to support file])
 AC_ARG_ENABLE(file,
-[  --enable-file		Enable FILE support
-  --disable-file	Disable FILE support],
+AC_HELP_STRING([--enable-file],[Enable FILE support])
+AC_HELP_STRING([--disable-file],[Disable FILE support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -135,8 +135,8 @@ AC_ARG_ENABLE(file,
 )
 AC_MSG_CHECKING([whether to support ldap])
 AC_ARG_ENABLE(ldap,
-[  --enable-ldap		Enable LDAP support
-  --disable-ldap	Disable LDAP support],
+AC_HELP_STRING([--enable-ldap],[Enable LDAP support])
+AC_HELP_STRING([--disable-ldap],[Disable LDAP support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -150,8 +150,8 @@ AC_ARG_ENABLE(ldap,
 )
 AC_MSG_CHECKING([whether to support dict])
 AC_ARG_ENABLE(dict,
-[  --enable-dict		Enable DICT support
-  --disable-dict	Disable DICT support],
+AC_HELP_STRING([--enable-dict],[Enable DICT support])
+AC_HELP_STRING([--disable-dict],[Disable DICT support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -165,8 +165,8 @@ AC_ARG_ENABLE(dict,
 )
 AC_MSG_CHECKING([whether to support telnet])
 AC_ARG_ENABLE(telnet,
-[  --enable-telnet		Enable TELNET support
-  --disable-telnet	Disable TELNET support],
+AC_HELP_STRING([--enable-telnet],[Enable TELNET support])
+AC_HELP_STRING([--disable-telnet],[Disable TELNET support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -186,8 +186,8 @@ dnl **********************************************************************
 
 AC_MSG_CHECKING([whether to enable ipv6])
 AC_ARG_ENABLE(ipv6,
-[  --enable-ipv6		Enable ipv6 (with ipv4) support
-  --disable-ipv6	Disable ipv6 support],
+AC_HELP_STRING([--enable-ipv6],[Enable ipv6 (with ipv4) support])
+AC_HELP_STRING([--disable-ipv6],[Disable ipv6 support]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -275,8 +275,8 @@ dnl **********************************************************************
 dnl Check how non-blocking sockets are set
 dnl **********************************************************************
 AC_ARG_ENABLE(nonblocking,
-[  --enable-nonblocking  Makes the script detect how to do it
-  --disable-nonblocking Makes the script disable non-blocking sockets],
+AC_HELP_STRING([--enable-nonblocking],[Enable detecting how to do it])
+AC_HELP_STRING([--disable-nonblocking],[Disable non-blocking socket detection]),
 [
   if test "$enableval" = "no" ; then
     AC_MSG_WARN([non-blocking sockets disabled])
@@ -295,7 +295,8 @@ dnl Check for the random seed preferences
 dnl **********************************************************************
 
 AC_ARG_WITH(egd-socket,
-    [  --with-egd-socket=FILE  Entropy Gathering Daemon socket pathname],
+AC_HELP_STRING([--with-egd-socket=FILE],
+               [Entropy Gathering Daemon socket pathname]),
     [ EGD_SOCKET="$withval" ]
 )
 if test -n "$EGD_SOCKET" ; then
@@ -305,7 +306,7 @@ fi
 
 dnl Check for user-specified random device
 AC_ARG_WITH(random,
-    [  --with-random=FILE      read randomness from FILE (default=/dev/urandom)],
+AC_HELP_STRING([--with-random=FILE],[read randomness from FILE (default=/dev/urandom)]),
     [ RANDOM_FILE="$withval" ],
     [
         dnl Check for random device
@@ -339,14 +340,15 @@ dnl Check for the presence of Kerberos4 libraries and headers
 dnl **********************************************************************
 
 AC_ARG_WITH(krb4-includes,
- [  --with-krb4-includes[=DIR]   Specify location of kerberos4 headers],[
+AC_HELP_STRING([--with-krb4-includes=DIR],
+               [Specify location of kerberos4 headers]),[
  CPPFLAGS="$CPPFLAGS -I$withval"
  KRB4INC="$withval"
  want_krb4=yes
  ])
 
 AC_ARG_WITH(krb4-libs,
- [  --with-krb4-libs[=DIR]   Specify location of kerberos4 libs],[
+AC_HELP_STRING([--with-krb4-libs=DIR],[Specify location of kerberos4 libs]),[
  LDFLAGS="$LDFLAGS -L$withval"
  KRB4LIB="$withval"
  want_krb4=yes
@@ -355,7 +357,7 @@ AC_ARG_WITH(krb4-libs,
 
 OPT_KRB4=off
 AC_ARG_WITH(krb4,dnl
-[  --with-krb4[=DIR]       where to look for Kerberos4],[
+AC_HELP_STRING([--with-krb4=DIR],[where to look for Kerberos4]),[
   OPT_KRB4="$withval"
   if test X"$OPT_KRB4" != Xyes
   then
@@ -433,7 +435,7 @@ dnl **********************************************************************
 dnl Default to compiler & linker defaults for SSL files & libraries.
 OPT_SSL=off
 AC_ARG_WITH(ssl,dnl
-AC_HELP_STRING([--with-ssl=PATH], [where to look for SSL, PATH points to the SSL installation (default: /usr/local/ssl)])
+AC_HELP_STRING([--with-ssl=PATH],[where to look for SSL, PATH points to the SSL installation (default: /usr/local/ssl)])
 AC_HELP_STRING([--without-ssl], [disable SSL]),
   OPT_SSL=$withval)
 
@@ -541,9 +543,9 @@ _cppflags=$CPPFLAGS
 _ldflags=$LDFLAGS
 OPT_ZLIB="/usr/local"
 AC_ARG_WITH(zlib,
-  AC_HELP_STRING([--with-zlib=PATH], [search for zlib in PATH])
-  AC_HELP_STRING([--without-zlib], [disable use of zlib]),
-                 [OPT_ZLIB="$withval"])
+AC_HELP_STRING([--with-zlib=PATH],[search for zlib in PATH])
+AC_HELP_STRING([--without-zlib],[disable use of zlib]),
+               [OPT_ZLIB="$withval"])
 
 case "$OPT_ZLIB" in
   no)
@@ -592,7 +594,7 @@ printf("just fine");
 )
 
 AC_ARG_ENABLE(thread,dnl
-[  --disable-thread       tell configure to not look for thread-safe functions],
+AC_HELP_STRING([--disable-thread],[don't look for thread-safe functions]),
   OPT_THREAD=off
   AC_MSG_WARN(libcurl will not get built using thread-safe functions)
 )
@@ -779,8 +781,8 @@ dnl lame option to switch on debug options
 dnl
 AC_MSG_CHECKING([whether to enable debug options])
 AC_ARG_ENABLE(debug,
-[  --enable-debug	Enable pedantic debug options
-  --disable-debug	Disable debug options],
+AC_HELP_STRING([--enable-debug],[Enable pedantic debug options])
+AC_HELP_STRING([--disable-debug],[Disable debug options]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
