@@ -9,7 +9,7 @@ INCLUDES = -I$(top_srcdir)/include/curl -I$(top_builddir)/lib
 LIBDIR = ../../lib
 
 # here are all tools used for running libcurl tests
-noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504
+noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505
 
 lib500_SOURCES = lib500.c first.c test.h
 lib500_LDADD = $(LIBDIR)/libcurl.la
@@ -30,4 +30,8 @@ lib503_DEPENDENCIES = $(LIBDIR)/libcurl.la
 lib504_SOURCES = lib504.c first.c test.h
 lib504_LDADD = $(LIBDIR)/libcurl.la
 lib504_DEPENDENCIES = $(LIBDIR)/libcurl.la
+
+lib505_SOURCES = lib505.c first.c test.h
+lib505_LDADD = $(LIBDIR)/libcurl.la
+lib505_DEPENDENCIES = $(LIBDIR)/libcurl.la
 
