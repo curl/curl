@@ -3,8 +3,6 @@ FILES
 LEGAL
 MPL-1.0.txt
 README
-*spec
-*spec.in
 docs/BUGS
 docs/CONTRIBUTE
 docs/FAQ
@@ -69,4 +67,9 @@ include/Makefile.am
 include/curl/*.h
 include/curl/Makefile.in
 include/curl/Makefile.am
-
+packages/Linux/RPM/curl-ssl.spec
+packages/Linux/RPM/curl.spec
+packages/Linux/RPM/make_curl_rpm
+packages/Linux/RPM/README
+packages/Win32/README
+packages/README
