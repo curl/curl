@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -47,6 +47,7 @@
 #include <curl/curl.h>
 #include "sendf.h"
 #include "escape.h"
+#include "transfer.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -210,6 +211,9 @@ CURLcode Curl_ldap(struct connectdata *conn)
     }
   }
   DynaClose();
+
+  /* no data to transfer */
+  Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
   
   return status;
 }
