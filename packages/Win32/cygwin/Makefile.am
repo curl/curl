@@ -20,7 +20,7 @@ cygwintmp = $(CURDIR)/tmp_binbuild
 cygwinbin:
 	rm -rf $(cygwintmp)
 	rm -rf $(cygwintmp)-dev
-	$(MAKE) -C $(top_builddir) install-strip prefix=$(cygwintmp)/usr
+	$(MAKE) -C $(top_builddir) DESTDIR=$(cygwintmp) install-strip
 	# $(STRIP) $(cygwintmp)/usr/bin/cygcurl-?.dll
 	$(mkinstalldirs) \
 	  $(cygwintmp)/usr/doc/Cygwin \
