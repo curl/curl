@@ -106,6 +106,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_HTTP_CODE:
     *param_longp = data->info.httpcode;
     break;
+  case CURLINFO_HTTP_CONNECTCODE:
+    *param_longp = data->info.httpproxycode;
+    break;
   case CURLINFO_FILETIME:
     *param_longp = data->info.filetime;
     break;

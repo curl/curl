@@ -566,6 +566,7 @@ struct connectdata {
  */
 struct PureInfo {
   int httpcode;
+  int httpproxycode;
   int httpversion;
   long filetime; /* If requested, this is might get set. Set to -1 if the time
                     was unretrievable. We cannot have this of type time_t,

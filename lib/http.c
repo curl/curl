@@ -556,6 +556,8 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   if(error)
     return CURLE_RECV_ERROR;
 
+  data->info.httpproxycode = httperror;
+
   if(200 != httperror) {
     if(407 == httperror)
       /* Added Nov 6 1998 */
