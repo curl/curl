@@ -163,9 +163,9 @@ getpassd.obj: getpass.c
 homedird.obj: homedir.c
 	$(CCD) $(CFLAGS) /Fo"$@" homedir.c
 timevald.obj: ../lib/timeval.c
-	$(CCR) $(CFLAGS) /Fo"$@" ../lib/timeval.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/timeval.c
 strtoofftd.obj: ../lib/strtoofft.c
-	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
+	$(CCD) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 maind.obj: main.c
 	$(CCD) $(CFLAGS) /Fo"$@" main.c
 curld.res : curl.rc
