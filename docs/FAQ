@@ -320,7 +320,7 @@ FAQ
 
   At the time of writing, there are bindings for the five language mentioned
   above, but chances are there are even more by the time you read this. Or you
-  may be able you write your own wrapper for a not-yet support language!
+  may be able you write your own wrapper for a not-yet supported language!
 
   Find out more about which languages that support curl directly, and how to
   install and use them, in the libcurl section of the curl web site:
