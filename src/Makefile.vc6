@@ -17,7 +17,7 @@ LINKR = link.exe /incremental:no /libpath:"../lib"
 
 ## Debug
 CCD = cl.exe /MDd /Gm /ZI /Od /D "_DEBUG" /GZ
-LINKD = link.exe /incremental:yes /debug
+LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
 
 CFLAGS = /I "../include" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 LFLAGS = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
