@@ -74,9 +74,9 @@ TODO
    might need another way to specify user+password for anonymous ftp logins.
 
  * Add FTPS support with SSL for the data connection too.  This should be made
-   according to the specs written in draft-murray-auth-ftp-ssl-11.txt,
-   "Securing FTP with TLS", valid until September 27th 2003.
-   http://curl.haxx.se/rfc/draft-murray-auth-ftp-ssl-11.txt
+   according to the specs written in draft-murray-auth-ftp-ssl-12.txt,
+   "Securing FTP with TLS", valid until 28th February, 2004.
+   http://curl.haxx.se/rfc/draft-murray-auth-ftp-ssl-12.txt
 
  HTTP
 
