@@ -34,29 +34,27 @@ LIB      = tlib
 TOPDIR   = ..
 CURNTDIR = .
 
-CXXFLAGS = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
+CXXFLAGS = -q -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
 # CXXFLAGS = -5 -O2 -WC -w-par -w-csu -w-aus
 LDFLAGS  = -lap
 
 INCDIRS  = -I$(CURNTDIR);$(TOPDIR)/include;$(TOPDIR)/lib
-LINKLIB  = $(BCCDIR)/lib/cw32mt.lib $(BCCDIR)/lib/psdk/winmm.lib $(BCCDIR)/lib/psdk/ws2_32.lib
+LINKLIB  = $(BCCDIR)/lib/cw32mt.lib
 
 LIBCURLLIB = $(TOPDIR)/lib/libcurl.lib
 
 # If you build with SSL support, set WITH_SSL=1
-DEFINES  = -DNDEBUG -DLIBCURL_BIGENDIAN=0 -DWIN32 -DCONSOLE -DMBCS
-!ifdef WITH_SSL
-DEFINES  = $(DEFINES) -DUSE_SSLEAY 
-INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)/inc32;$(OPENSSL_PATH)/inc32/openssl
-LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)/out32/ssleay32.lib $(OPENSSL_PATH)/out32/libeay32.lib
-!endif
+DEFINES  = -DNDEBUG -DLIBCURL_BIGENDIAN=0 -DWIN32 -D_CONSOLE -D_MBCS
 !ifdef WITH_ZLIB
 DEFINES  = $(DEFINES) -DHAVE_LIBZ
 INCDIRS  = $(INCDIRS);$(ZLIB_PATH)
 LINKLIB  = $(LINKLIB) $(ZLIB_PATH)/zlib.lib
 !endif
-
-.SUFFIXES: .c
+!ifdef WITH_SSL
+DEFINES  = $(DEFINES) -DUSE_SSLEAY 
+INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)/inc32;$(OPENSSL_PATH)/inc32/openssl
+LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)/out32/ssleay32.lib $(OPENSSL_PATH)/out32/libeay32.lib
+!endif
 
 .autodepend
 
