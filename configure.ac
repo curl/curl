@@ -957,7 +957,6 @@ case "$LIBIDN" in
                       CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
                       AC_CHECK_LIB(idn, idna_to_ascii_4i, ,
                                    nolibidn="true"
-                                   AC_MSG_WARN([no libidn found in $LIBIDN])
                                    LDFLAGS=$oldLDFLAGS
                                    CPPFLAGS=$oldCPPFLAGS)
                     fi
