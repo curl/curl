@@ -8,6 +8,7 @@ Curl and libcurl 7.12.1
 
 This release includes the following changes:
 
+ o read callbacks can stop the transfer by returning CURL_READFUNC_ABORT
  o libcurl-tutorial.3 is the new man page formerly known as libcurl-the-guide
  o additional SSL trace data might be sent to the debug callback using two new
    types: CURLINFO_SSL_DATA_IN and CURLINFO_SSL_DATA_OUT
@@ -37,7 +38,7 @@ Other curl-related news since the previous public release:
  o James Hu took over after Kevin Roth as maintainer of the curl package on
    cygwin. Many saludos to Kevin for a work well done during many years.
  o Gambas binding for libcurl: http://gambas.sf.net/
- o pycurl 7.12.0 was released http://pycyrl.sf.net/
+ o pycurl 7.12.0 was released http://pycurl.sf.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
