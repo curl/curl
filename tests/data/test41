@@ -1,0 +1,23 @@
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP formpost with missing file
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/want/41 -F moo=@boo
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+26
+</errorcode>
+</verify>
