@@ -63,6 +63,11 @@ USING PASSWORDS
 
         curl -u name:passwd ftp://machine.domain:port/full/path/to/file
 
+ FTPS
+
+   It is just like for FTP, but you may also want to specify and use
+   SSL-specific options for certificates etc.
+
  HTTP
 
    The HTTP URL doesn't support user and password in the URL string. Curl
@@ -74,6 +79,12 @@ USING PASSWORDS
    or specify user and password separately like in
 
         curl -u name:passwd http://machine.domain/full/path/to/file
+
+   HTTP offers many different methods of authentication and curl supports
+   several: Basic, Digest, NTLM and Negotiate. Without telling which method to
+   use, curl defaults to Basic. You can also ask curl to pick the most secure
+   ones out of the ones that the server accepts for the given URL, by using
+   --anyauth.
 
    NOTE! Since HTTP URLs don't support user and password, you can't use that
    style when using Curl via a proxy. You _must_ use the -u style fetch
