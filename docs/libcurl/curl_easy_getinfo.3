@@ -20,7 +20,7 @@ filled in accordingly and can be relied upon only if the function returns
 CURLE_OK.  This function is intended to get used *AFTER* a performed transfer,
 all results from this function are undefined until the transfer is completed.
 .SH AVAILABLE INFORMATION
-These are informations that can be extracted:
+The following information can be extracted:
 .IP CURLINFO_EFFECTIVE_URL
 Pass a pointer to a 'char *' to receive the last used effective URL.
 .IP CURLINFO_RESPONSE_CODE
@@ -51,7 +51,7 @@ pre-transfer commands and negotiations that are specific to the particular
 protocol(s) involved.
 .IP CURLINFO_STARTTRANSFER_TIME
 Pass a pointer to a double to receive the time, in seconds, it took from the
-start until the first byte is just about to be transfered. This includes
+start until the first byte is just about to be transferred. This includes
 CURLINFO_PRETRANSFER_TIME and also the time the server needs to calculate
 the result.
 .IP CURLINFO_REDIRECT_TIME
@@ -106,7 +106,7 @@ method(s) available. The meaning of the bits is explained in the
 CURLOPT_HTTPAUTH option for \fIcurl_easy_setopt(3)\fP.  (Added in 7.10.8)
 .IP CURLINFO_PROXYAUTH_AVAIL
 Pass a pointer to a long to receive a bitmask indicating the authentication
-method(s) available for your proxy athentication.  (Added in 7.10.8)
+method(s) available for your proxy authentication.  (Added in 7.10.8)
 .SH RETURN VALUE
 If the operation was successful, CURLE_OK is returned. Otherwise an
 appropriate error code will be returned.

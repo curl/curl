@@ -23,7 +23,7 @@ remaining messages after this function was called.
 The data the returned pointer points to will not survive calling
 \fIcurl_multi_cleanup(3)\fP.
 
-The 'CURLMsg' struct is very simple and only contain very basic informations.
+The 'CURLMsg' struct is very simple and only contain very basic information.
 If more involved information is wanted, the particular "easy handle" in
 present in that struct and can thus be used in subsequent regular
 \fIcurl_easy_getinfo(3)\fP calls (or similar):

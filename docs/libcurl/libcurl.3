@@ -21,8 +21,8 @@ libcurl is complete, it \fBmust\fP call \fIcurl_global_cleanup(3)\fP. In
 between those two calls, you can use libcurl as described below.
 
 To transfer files, you always set up an "easy handle" using
-\fIcurl_easy_init(3)\fP, but when you want the file(s) transfered you have the
-option of using the "easy" interface, or the "multi" interface.
+\fIcurl_easy_init(3)\fP, but when you want the file(s) transferred you have
+the option of using the "easy" interface, or the "multi" interface.
 
 The easy interface is a synchronous interface with which you call
 \fIcurl_easy_perform(3)\fP and let it perform the transfer. When it is
@@ -30,7 +30,7 @@ completed, the function return and you can continue. More details are found in
 the \fIlibcurl-easy(3)\fP man page.
 
 The multi interface on the other hand is an asynchronous interface, that you
-call and that performs only a little piece of the tranfer on each invoke. It
+call and that performs only a little piece of the transfer on each invoke. It
 is perfect if you want to do things while the transfer is in progress, or
 similar. The multi interface allows you to select() on libcurl action, and
 even to easily download multiple files simultaneously using a single thread.
@@ -56,7 +56,7 @@ portable environment variable reader
 get information about a performed transfer
 .TP
 .B curl_formadd()
-helps building a HTTP form POST
+helps building an HTTP form POST
 .TP
 .B curl_formfree()
 free a list built with \fIcurl_formadd(3)\fP

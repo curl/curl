@@ -85,7 +85,7 @@ lookups. It enables nice timeouts for name resolves without signals.
 .IP CURLOPT_WRITEFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
 function( void *ptr, size_t size, size_t nmemb, void *stream);\fP This
-function gets called by libcurl as soon as there is data reveiced that needs
+function gets called by libcurl as soon as there is data received that needs
 to be saved. The size of the data pointed to by \fIptr\fP is \fIsize\fP
 multiplied with \fInmemb\fP, it will not be zero terminated. Return the number
 of bytes actually taken care of. If that amount differs from the amount passed
@@ -165,7 +165,7 @@ Function pointer that should match the following prototype: \fIint
 curl_debug_callback (CURL *, curl_infotype, char *, size_t, void *);\fP
 \fICURLOPT_DEBUGFUNCTION\fP replaces the standard debug function used when
 \fICURLOPT_VERBOSE \fP is in effect. This callback receives debug information,
-as specified with the \fBcurl_infotype\fP argument. This funtion must return
+as specified with the \fBcurl_infotype\fP argument. This function must return
 0.  The data pointed to by the char * passed to this function WILL NOT be zero
 terminated, but will be exactly of the size as told by the size_t argument.
 
@@ -191,7 +191,7 @@ Function pointer that should match the following prototype: \fBCURLcode
 sslctxfun(CURL *curl, void *sslctx, void *parm);\fP This function gets called
 by libcurl just before the initialization of an SSL connection after having
 processed all other SSL related options to give a last chance to an
-application to modify the behaviour of openssl's ssl initilaization. The
+application to modify the behaviour of openssl's ssl initialization. The
 \fIsslctx\fP parameter is actually a pointer to an openssl \fISSL_CTX\fP. If
 an error is returned no attempt to establish a connection is made and the
 perform operation will return the error code from this callback function.  Set
@@ -249,8 +249,8 @@ be prefixed with [protocol]:// since any such prefix will be ignored. The
 proxy's port number may optionally be specified with the separate option
 \fICURLOPT_PROXYPORT\fP.
 
-\fBNOTE:\fP when you tell the library to use a HTTP proxy, libcurl will
-transparently convert operations to HTTP even if you specify a FTP URL
+\fBNOTE:\fP when you tell the library to use an HTTP proxy, libcurl will
+transparently convert operations to HTTP even if you specify an FTP URL
 etc. This may have an impact on what other features of the library you can
 use, such as \fICURLOPT_QUOTE\fP and similar FTP specifics that don't work
 unless you tunnel through the HTTP proxy. Such tunneling is activated with
@@ -282,13 +282,13 @@ libcurl caches this info for 60 seconds.
 .IP CURLOPT_DNS_USE_GLOBAL_CACHE
 Pass a long. If the value is non-zero, it tells curl to use a global DNS cache
 that will survive between easy handle creations and deletions. This is not
-thread-safe and this will use a global varible.
+thread-safe and this will use a global variable.
 
 \fBWARNING:\fP this option is considered obsolete. Stop using it. Switch over
 to using the share interface instead! See \fICURLOPT_SHARE\fP and
 \fIcurl_share_init(3)\fP.
 .IP CURLOPT_BUFFERSIZE
-Pass a long specifying your prefered size for the receive buffer in libcurl.
+Pass a long specifying your preferred size for the receive buffer in libcurl.
 The main point of this would be that the write callback gets called more often
 and with smaller chunks. This is just treated as a request, not an order. You
 cannot be guaranteed to actually get the given size. (Added in 7.10)
@@ -370,7 +370,7 @@ regular old-fashioned Basic method.
 .IP CURLAUTH_GSSNEGOTIATE
 HTTP GSS-Negotiate authentication. The GSS-Negotiate (also known as plain
 "Negotiate") method was designed by Microsoft and is used in their web
-aplications. It is primarily meant as a support for Kerberos5 authentication
+applications. It is primarily meant as a support for Kerberos5 authentication
 but may be also used along with another authentication methods. For more
 information see IETF draft draft-brezak-spnego-http-04.txt.
 
@@ -379,17 +379,17 @@ this to work.
 .IP CURLAUTH_NTLM
 HTTP NTLM authentication. A proprietary protocol invented and used by
 Microsoft. It uses a challenge-response and hash concept similar to Digest, to
-prevent the password from being evesdropped.
+prevent the password from being eavesdropped.
 
 \fBNOTE\fP that you need to build libcurl with SSL support for this option to
 work.
 .IP CURLAUTH_ANY
 This is a convenience macro that sets all bits and thus makes libcurl pick any
-it finds suitable. libcurl will automaticly select the one it finds most
+it finds suitable. libcurl will automatically select the one it finds most
 secure.
 .IP CURLAUTH_ANYSAFE
 This is a convenience macro that sets all bits except Basic and thus makes
-libcurl pick any it finds suitable. libcurl will automaticly select the one it
+libcurl pick any it finds suitable. libcurl will automatically select the one it
 finds most secure.
 .RE
 .IP CURLOPT_PROXYAUTH
@@ -405,7 +405,7 @@ this writing, only Basic and NTLM work. (Added in 7.10.7)
 .SH HTTP OPTIONS
 .IP CURLOPT_AUTOREFERER
 Pass a non-zero parameter to enable this. When enabled, libcurl will
-automaticly set the Referer: field in requests where it follows a Location:
+automatically set the Referer: field in requests where it follows a Location:
 redirect.
 .IP CURLOPT_ENCODING
 Sets the contents of the Accept-Encoding: header sent in an HTTP
@@ -422,7 +422,7 @@ encoding done by the server is ignored. See the special file
 lib/README.encoding for details.
 .IP CURLOPT_FOLLOWLOCATION
 A non-zero parameter tells the library to follow any Location: header that the
-server sends as part of a HTTP header.
+server sends as part of an HTTP header.
 
 \fBNOTE:\fP this means that the library will re-send the same request on the
 new location and follow new Location: headers all the way until no more such
@@ -447,7 +447,7 @@ one by HTML forms. See the \fICURLOPT_POSTFIELDS\fP option for how to specify
 the data to post and \fICURLOPT_POSTFIELDSIZE\fP in how to set the data
 size. Using the \fICURLOPT_POSTFIELDS\fP option implies this option.
 .IP CURLOPT_POSTFIELDS
-Pass a char * as parameter, which should be the full data to post in a HTTP
+Pass a char * as parameter, which should be the full data to post in an HTTP
 post operation. You need to make sure that the data is formatted the way you
 want the server to receive it. libcurl will not convert or encode it for
 you. Most web servers will assume this data to be url-encoded. Take note.
@@ -529,9 +529,10 @@ set a cookie in the http request. The format of the string should be
 NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie
 should contain.
 
-If you need to set mulitple cookies, you need to set them all using a single
-option and thus you need to concat them all in one single string. Set multiple
-cookies in one string like this: "name1=content1; name2=content2;" etc.
+If you need to set multiple cookies, you need to set them all using a single
+option and thus you need to concatenate them all in one single string. Set
+multiple cookies in one string like this: "name1=content1; name2=content2;"
+etc.
 
 Using this option multiple times will only make the latest string override the
 previously ones.
@@ -622,7 +623,7 @@ only files in their response to NLST; they might not include subdirectories
 and symbolic links.
 .IP CURLOPT_FTPAPPEND
 A non-zero parameter tells the library to append to the remote file instead of
-overwrite it. This is only useful when uploading to a ftp site.
+overwrite it. This is only useful when uploading to an ftp site.
 .IP CURLOPT_FTP_USE_EPRT
 Pass a long. If the value is non-zero, it tells curl to use the EPRT (and
 LPRT) command when doing active FTP downloads (which is enabled by
@@ -684,7 +685,7 @@ Pass an curl_off_t as parameter. It contains the offset in number of bytes
 that you want the transfer to start from. (Added in 7.11.0)
 .IP CURLOPT_CUSTOMREQUEST
 Pass a pointer to a zero terminated string as parameter. It will be user
-instead of GET or HEAD when doing a HTTP request, or instead of LIST or NLST
+instead of GET or HEAD when doing an HTTP request, or instead of LIST or NLST
 when doing an ftp directory listing. This is useful for doing DELETE or other
 more or less obscure HTTP requests. Don't do this at will, make sure your
 server supports the command first.
@@ -863,7 +864,7 @@ key.
 \fBNOTE:\fPIf the crypto device cannot be loaded,
 \fICURLE_SSL_ENGINE_NOTFOUND\fP is returned.
 .IP CURLOPT_SSLENGINE_DEFAULT
-Sets the actual crypto engine as the default for (asymetric) crypto
+Sets the actual crypto engine as the default for (asymmetric) crypto
 operations.
 
 \fBNOTE:\fPIf the crypto device cannot be set,
@@ -904,8 +905,8 @@ in the SSL handshake, set 1 to check existence, 2 to ensure that it matches
 the provided hostname. This is by default set to 2. (default changed in 7.10)
 .IP CURLOPT_SSL_CIPHER_LIST
 Pass a char *, pointing to a zero terminated string holding the list of
-ciphers to use for the SSL connection. The list must be syntactly correct, it
-consists of one or more cipher strings separated by colons. Commas or spaces
+ciphers to use for the SSL connection. The list must be syntactically correct,
+it consists of one or more cipher strings separated by colons. Commas or spaces
 are also acceptable separators but colons are normally used, \!, \- and \+ can
 be used as operators. Valid examples of cipher lists include 'RC4-SHA',
 \'SHA1+DES\', 'TLSv1' and 'DEFAULT'. The default list is normally set when you

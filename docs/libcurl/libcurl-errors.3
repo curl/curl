@@ -36,7 +36,7 @@ Couldn't resolve host. The given remote host was not resolved.
 .IP "CURLE_COULDNT_CONNECT (7)"
 Failed to connect() to host or proxy.
 .IP "CURLE_FTP_WEIRD_SERVER_REPLY (8)"
-After connecting to a FTP server, libcurl expects to get a certain reply back.
+After connecting to an FTP server, libcurl expects to get a certain reply back.
 This error code implies that it god a strange or bad reply. The given remote
 server is probably not an OK FTP server.
 .IP "CURLE_FTP_ACCESS_DENIED (9)"
@@ -93,7 +93,7 @@ There was a problem reading a local file or an error returned by the read
 callback.
 .IP "CURLE_OUT_OF_MEMORY (27)"
 Out of memory. A memory allocation request failed. This is serious badness and
-things are severly screwed up if this ever occur.
+things are severely screwed up if this ever occur.
 .IP "CURLE_OPERATION_TIMEOUTED (28)"
 Operation timeout. The specified time-out period was reached according to the
 conditions.
@@ -106,14 +106,14 @@ specified a good enough address for libcurl to use. See \fICURLOPT_FTPPORT\fP.
 The FTP REST command returned error. This should never happen if the server is
 sane.
 .IP "CURLE_FTP_COULDNT_GET_SIZE (32)"
-The FTP SIZE command returned errror. SIZE is not a kosher FTP command, it is
+The FTP SIZE command returned error. SIZE is not a kosher FTP command, it is
 an extension and not all servers support it. This is not a surprising error.
 .IP "CURLE_HTTP_RANGE_ERROR (33)"
 The HTTP server does not support or accept range requests.
 .IP "CURLE_HTTP_POST_ERROR (34)"
 This is an odd error that mainly occurs due to internal confusion.
 .IP "CURLE_SSL_CONNECT_ERROR (35)"
-A problem occured somewhere in the SSL/TLS handshake. You really want the
+A problem occurred somewhere in the SSL/TLS handshake. You really want the
 error buffer and read the message there as it pinpoints the problem slightly
 more. Could be certificates (file formats, paths, permissions), passwords, and
 others.

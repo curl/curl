@@ -19,14 +19,14 @@ integer-pointer.
 .SH "RETURN VALUE"
 CURLMcode type, general libcurl multi interface error code.
 
-If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this basicly means that you
+If you receive \fICURLM_CALL_MULTI_PERFORM\fP, this basically means that you
 should call \fIcurl_multi_perform\fP again, before you select() on more
 actions. You don't have to do it immediately, but the return code means that
 libcurl may have more data available to return or that there may be more data
 to send off before it is "satisfied".
 
 NOTE that this only returns errors etc regarding the whole multi stack. There
-might still have occurred problems on invidual transfers even when this
+might still have occurred problems on individual transfers even when this
 function returns OK.
 .SH "TYPICAL USAGE"
 Most application will use \fIcurl_multi_fdset(3)\fP to get the multi_handle's
