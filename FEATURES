@@ -47,7 +47,7 @@ FTP
  - upload via http-proxy as HTTP PUT
  - download resume
  - upload resume
- - QUOT commands
+ - QUOT commands (before and/or after the transfer)
  - simple "range" support
  - via http-proxy
 
