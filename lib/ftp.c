@@ -907,8 +907,10 @@ ftp_pasv_verbose(struct connectdata *conn,
   if(gethostbyaddr_r((char *) &address,
                      sizeof(address), AF_INET,
                      (struct hostent *)hostent_buf,
-                     hostent_buf + sizeof(*answer)))
+                     (struct hostent_data *)(hostent_buf + sizeof(*answer))))
     answer=NULL;
+  else
+    answer=(struct hostent *)hostent_buf;
                            
 #  endif
 #  ifdef HAVE_GETHOSTBYADDR_R_7
