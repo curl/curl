@@ -1018,6 +1018,11 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
     conn->curl_do = file;
     /* no done() function */
+
+    result = Transfer(conn, -1, -1, FALSE, NULL, /* no download */
+                      -1, NULL); /* no upload */
+
+    return CURLE_OK;
   }
 
   else {
