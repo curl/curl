@@ -233,7 +233,15 @@ typedef enum {
 #ifdef CINIT
 #undef CINIT
 #endif
-#if defined(__STDC__) || defined(_MSC_VER) || defined(__cplusplus)
+/*
+ * Figure out if we can use the ## operator, which is supported by ISO/ANSI C
+ * and C++. Some compilers support it without setting __STDC__ or __cplusplus
+ * so we need to carefully check for them too. We don't use configure-checks
+ * for these since we want these headers to remain generic and working for all
+ * platforms.
+ */
+#if defined(__STDC__) || defined(_MSC_VER) || defined(__cplusplus) || \
+  defined(__HP_aCC)
 #define CINIT(name,type,number) CURLOPT_ ## name = CURLOPTTYPE_ ## type + number
 #else
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
