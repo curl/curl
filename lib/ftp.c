@@ -764,6 +764,24 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
 
   bool was_ctl_valid = ftp->ctl_valid;
 
+  /* now store a copy of the directory we are in */
+  if(ftp->prevpath)
+    free(ftp->prevpath);
+  {
+    size_t flen = ftp->file?strlen(ftp->file):0;
+    size_t dlen = conn->path?strlen(conn->path)-flen:0;
+    if(dlen) {
+      ftp->prevpath = malloc(dlen + 1);
+      if(!ftp->prevpath)
+        return CURLE_OUT_OF_MEMORY;
+      memcpy(ftp->prevpath, conn->path, dlen);
+      ftp->prevpath[dlen]=0; /* terminate */
+      infof(data, "Remembering we are in dir %s\n", ftp->prevpath);
+    }
+    else
+      ftp->prevpath = NULL; /* no path */
+  }
+
   /* free the dir tree and file parts */
   freedirs(ftp);
 
@@ -1085,6 +1103,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
   unsigned char *pp;
   char portmsgbuf[1024], tmp[1024];
 
+  enum ftpcommand { EPRT, LPRT, PORT, DONE } fcmd;
   const char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
   char **modep;
   int rc;
@@ -1165,10 +1184,17 @@ CURLcode ftp_use_port(struct connectdata *conn)
     return CURLE_FTP_PORT_FAILED;
   }
 
-  for (modep = (char **)(data->set.ftp_use_eprt?&mode[0]:&mode[2]);
-       modep && *modep; modep++) {
+  for (fcmd = EPRT; fcmd != DONE; fcmd++) {
     int lprtaf, eprtaf;
     int alen=0, plen=0;
+
+    if(!conn->bits.ftp_use_eprt && (EPRT == fcmd))
+      /* if disabled, goto next */
+      continue;
+
+    if(!conn->bits.ftp_use_lprt && (LPRT == fcmd))
+      /* if disabled, goto next */
+      continue;
 
     switch (sa->sa_family) {
     case AF_INET:
@@ -1193,7 +1219,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
       break;
     }
 
-    if (strcmp(*modep, "EPRT") == 0) {
+    if (EPRT == fcmd) {
       if (eprtaf < 0)
         continue;
       if (getnameinfo((struct sockaddr *)&ss, sslen,
@@ -1208,22 +1234,21 @@ CURLcode ftp_use_port(struct connectdata *conn)
           *q = '\0';
       }
 
-      result = Curl_ftpsendf(conn, "%s |%d|%s|%s|", *modep, eprtaf,
+      result = Curl_ftpsendf(conn, "%s |%d|%s|%s|", mode[fcmd], eprtaf,
                              portmsgbuf, tmp);
       if(result)
         return result;
     }
-    else if (strcmp(*modep, "LPRT") == 0 ||
-             strcmp(*modep, "PORT") == 0) {
+    else if ((LPRT == fcmd) || (PORT == fcmd)) {
       int i;
 
-      if (strcmp(*modep, "LPRT") == 0 && lprtaf < 0)
+      if ((LPRT == fcmd) && lprtaf < 0)
         continue;
-      if (strcmp(*modep, "PORT") == 0 && sa->sa_family != AF_INET)
+      if ((PORT == fcmd) && sa->sa_family != AF_INET)
         continue;
 
       portmsgbuf[0] = '\0';
-      if (strcmp(*modep, "LPRT") == 0) {
+      if (LPRT == fcmd) {
         snprintf(tmp, sizeof(tmp), "%d,%d", lprtaf, alen);
         if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >=
             sizeof(portmsgbuf)) {
@@ -1243,7 +1268,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
         }
       }
 
-      if (strcmp(*modep, "LPRT") == 0) {
+      if (LPRT == fcmd) {
         snprintf(tmp, sizeof(tmp), ",%d", plen);
 
         if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf))
@@ -1259,7 +1284,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
         }
       }
 
-      result = Curl_ftpsendf(conn, "%s %s", *modep, portmsgbuf);
+      result = Curl_ftpsendf(conn, "%s %s", mode[fcmd], portmsgbuf);
       if(result)
         return result;
     }
@@ -1269,13 +1294,21 @@ CURLcode ftp_use_port(struct connectdata *conn)
       return result;
 
     if (ftpcode != 200) {
+      if (EPRT == fcmd) {
+        infof(data, "disabling EPRT usage\n");
+        conn->bits.ftp_use_eprt = FALSE;
+      }
+      else if (LPRT == fcmd) {
+        infof(data, "disabling LPRT usage\n");
+        conn->bits.ftp_use_lprt = FALSE;
+      }
       continue;
     }
     else
       break;
   }
 
-  if (!*modep) {
+  if (fcmd == DONE) {
     sclose(portsock);
     failf(data, "PORT command attempts failed");
     return CURLE_FTP_PORT_FAILED;
@@ -1479,7 +1512,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   char newhost[48];
   char *newhostp=NULL;
 
-  for (modeoff = (data->set.ftp_use_epsv?0:1);
+  for (modeoff = (conn->bits.ftp_use_epsv?0:1);
        mode[modeoff]; modeoff++) {
     result = Curl_ftpsendf(conn, "%s", mode[modeoff]);
     if(result)
@@ -1489,6 +1522,12 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
       return result;
     if (ftpcode == results[modeoff])
       break;
+
+    if(modeoff == 0) {
+      /* EPSV is not supported, disable it for next transfer */
+      conn->bits.ftp_use_epsv = FALSE;
+      infof(data, "disabling EPSV usage\n");
+    }
   }
 
   if (!mode[modeoff]) {
@@ -2362,6 +2401,8 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
       ftp->cache = NULL;
     }
     freedirs(ftp);
+    if(ftp->prevpath)
+      free(ftp->prevpath);
   }
   return CURLE_OK;
 }
@@ -2707,6 +2748,19 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
     ftp->file=NULL; /* instead of point to a zero byte, we make it a NULL
                        pointer */
 
+  ftp->cwddone = FALSE; /* default to not done */
+  {
+    size_t dlen = conn->path?strlen(conn->path):0;
+    if(dlen && ftp->prevpath) {
+      dlen -= ftp->file?strlen(ftp->file):0;
+      if((dlen == strlen(ftp->prevpath)) &&
+         curl_strnequal(conn->path, ftp->prevpath, dlen)) {
+        infof(data, "Request has same path as previous transfer\n");
+        ftp->cwddone = TRUE;
+      }
+    }
+  }
+
   return retcode;
 }
 
@@ -2726,6 +2780,10 @@ CURLcode ftp_cwd_and_create_path(struct connectdata *conn)
   /* the ftp struct is already inited in Curl_ftp_connect() */
   struct FTP *ftp = conn->proto.ftp;
   int i;
+
+  if(ftp->cwddone)
+    /* already done and fine */
+    return CURLE_OK;
 
   /* This is a re-used connection. Since we change directory to where the
      transfer is taking place, we must now get back to the original dir

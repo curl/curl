@@ -86,6 +86,7 @@ netrc_debug
 large_file
 idn
 getrlimit
+ipv6
 </features>
 
 <killserver>
@@ -165,6 +166,10 @@ One regex per line that is removed from the protocol dumps before the
 comparison is made. This is very useful to remove dependencies on dynamicly
 changing protocol data such as port numbers or user-agent strings.
 </strip>
+<strippart>
+One perl op per line that operates on the protocol dump. This is pretty
+advanced. Example: "s/^EPRT .*/EPRT stripped/"
+</strippart>
 <protocol [nonewline=yes]>
 the protocol dump curl should transmit, if 'nonewline' is set, we will cut
 off the trailing newline of this given data before comparing with the one

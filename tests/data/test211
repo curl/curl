@@ -1,0 +1,47 @@
+# Server-side
+<reply>
+<data>
+data blobb
+</data>
+<datacheck>
+data blobb
+data blobb
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+Get two FTP files with no remote EPSV support
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/a/path/211 ftp://%HOSTIP:%FTPPORT/a/path/211
+</command>
+<file name="log/ftpserver.cmd">
+REPLY EPSV 500 no such command
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD a
+CWD path
+EPSV
+PASV
+TYPE I
+SIZE 211
+RETR 211
+PASV
+TYPE I
+SIZE 211
+RETR 211
+QUIT
+</protocol>
+</verify>

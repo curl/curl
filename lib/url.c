@@ -321,6 +321,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
     data->set.httpreq = HTTPREQ_GET; /* Default HTTP request */
     data->set.ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
     data->set.ftp_use_eprt = TRUE;   /* FTP defaults to EPRT operations */
+    data->set.ftp_use_lprt = TRUE;   /* FTP defaults to EPRT operations */
 
     data->set.dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
 
@@ -911,6 +912,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
   case CURLOPT_FTP_USE_EPRT:
     data->set.ftp_use_eprt = va_arg(param, long)?TRUE:FALSE;
+    data->set.ftp_use_lprt = data->set.ftp_use_eprt;
     break;
 
   case CURLOPT_FTP_USE_EPSV:
@@ -1439,7 +1441,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     result = CURLE_FAILED_INIT; /* correct this */
     break;
   }
-  
+
   return result;
 }
 
@@ -2262,6 +2264,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
   conn->bits.no_body = data->set.opt_no_body;
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
+  conn->bits.ftp_use_epsv = data->set.ftp_use_epsv;
+  conn->bits.ftp_use_eprt = data->set.ftp_use_eprt;
+  conn->bits.ftp_use_lprt = data->set.ftp_use_lprt;
 
   /* This initing continues below, see the comment "Continue connectdata
    * initialization here" */

@@ -6,6 +6,22 @@
 
                                   Changelog
 
+Daniel (25 November 2004)
+- FTP improvements:
+
+  If EPSV, EPRT or LPRT is tried and doesn't work, it will not be retried on
+  the same server again even if a following request is made using a persistent
+  connection.
+
+  If a second request is made to a server, requesting a file from the same
+  directory as the previous request operated on, libcurl will no longer make
+  that long series of CWD commands just to end up on the same spot. Note that
+  this is only for *exactly* the same dir. There is still room for improvements
+  to optimize the CWD-sending when the dirs are only slightly different.
+
+  Added test 210, 211 and 212 to verify these changes. Had to improve the
+  test script too and added a new primitive to the test file format.
+
 Daniel (24 November 2004)
 - Andrés García fixed the configure script to detect select properly when run
   with Msys/Mingw on Windows.

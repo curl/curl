@@ -268,10 +268,12 @@ struct FTP {
   long response_time; /* When no timeout is given, this is the amount of
                          seconds we await for an FTP response. Initialized
                          in Curl_ftp_connect() */
-  bool ctl_valid;     /* Tells Curl_ftp_quit() whether or not to do
-                         anything. If the connection has timed out or
-                         been closed, this should be FALSE when it gets
-                         to Curl_ftp_quit() */
+  bool ctl_valid;   /* Tells Curl_ftp_quit() whether or not to do anything. If
+                       the connection has timed out or been closed, this
+                       should be FALSE when it gets to Curl_ftp_quit() */
+  bool cwddone;     /* if it has been determined that the proper CWD combo
+                       already has been done */
+  char *prevpath;   /* conn->path from the previous transfer */
 };
 
 /****************************************************************************
@@ -327,6 +329,16 @@ struct ConnectBits {
                           though it will be discarded. When the whole send
                           operation is done, we must call the data rewind
                           callback. */
+  bool ftp_use_epsv;  /* As set with CURLOPT_FTP_USE_EPSV, but if we find out
+                         EPSV doesn't work we disable it for the forthcoming
+                         requests */
+
+  bool ftp_use_eprt;  /* As set with CURLOPT_FTP_USE_EPRT, but if we find out
+                         EPRT doesn't work we disable it for the forthcoming
+                         requests */
+  bool ftp_use_lprt;  /* As set with CURLOPT_FTP_USE_EPRT, but if we find out
+                         LPRT doesn't work we disable it for the forthcoming
+                         requests */
 };
 
 struct hostname {
@@ -931,6 +943,7 @@ struct UserDefined {
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
   bool ftp_use_eprt;     /* if EPRT is to be attempted or not */
+  bool ftp_use_lprt;     /* if LPRT is to be attempted or not */
   curl_ftpssl ftp_ssl;   /* if AUTH TLS is to be attempted etc */
   curl_ftpauth ftpsslauth; /* what AUTH XXX to be attempted */
   bool no_signal;        /* do not use any signal/alarm handler */

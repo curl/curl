@@ -1,0 +1,57 @@
+# Server-side
+<reply>
+<data>
+data blobb
+</data>
+<datacheck>
+data blobb
+data blobb
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<features>
+ipv6
+</features>
+<server>
+ftp
+</server>
+ <name>
+Get two FTP files with no remote EPRT or LPRT support
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/a/path/212 ftp://%HOSTIP:%FTPPORT/a/path/212 -P -
+</command>
+<file name="log/ftpserver.cmd">
+REPLY EPRT 500 no such command
+REPLY LPRT 500 no such command
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strippart>
+s/^EPRT .*/EPRT stripped/
+s/^LPRT .*/LPRT stripped/
+s/^PORT .*/PORT stripped/
+</strippart>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD a
+CWD path
+EPRT stripped
+LPRT stripped
+PORT stripped
+TYPE I
+SIZE 212
+RETR 212
+PORT stripped
+TYPE I
+SIZE 212
+RETR 212
+QUIT
+</protocol>
+</verify>
