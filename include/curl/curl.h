@@ -366,6 +366,10 @@ typedef enum {
   /* We want the referer field set automatically when following locations */
   T(AUTOREFERER, LONG, 58),
 
+  /* Port of the proxy, can be set in the proxy string as well with:
+     "[host]:[port]" */
+  T(PROXYPORT, LONG, 59),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
@@ -409,8 +413,8 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.0.7beta"
-#define LIBCURL_VERSION_NUM 0x070007
+#define LIBCURL_VERSION "7.0.8beta"
+#define LIBCURL_VERSION_NUM 0x070008
 
 /* linked-list structure for the CURLOPT_QUOTE option */
 struct curl_slist {
