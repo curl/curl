@@ -207,7 +207,7 @@ if { grep "define USE_ARES" lib/config.h; } then
 
   echo "testcurl: build ares"
   cd ares
-  make
+  make 2>&1 | sed -e "s:$pwd::g"
   echo "testcurl: ares is now built"
 
   # cd back to the curl build dir
