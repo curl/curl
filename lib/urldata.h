@@ -27,6 +27,7 @@
 
 #include "setup.h"
 #include "hostip.h"
+#include "hash.h"
 
 #define PORT_FTP 21
 #define PORT_TELNET 23
@@ -644,6 +645,8 @@ struct UserDefined {
   bool reuse_fresh;      /* do not re-use an existing connection  */
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
+
+  bool global_dns_cache;
 };
 
 /*
@@ -658,6 +661,7 @@ struct UserDefined {
  * 'struct urlstate' instead.  */
 
 struct SessionHandle {
+  curl_hash          *hostcache;
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */
 

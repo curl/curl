@@ -71,6 +71,7 @@ int curl_hash_extended_delete(curl_hash *h, char *str_key, unsigned int str_key_
 int curl_hash_extended_find(curl_hash *h, char *str_key, unsigned int str_key_len, 
 			     unsigned long num_key, void **p);
 void curl_hash_apply(curl_hash *h, void *user, void (*cb)(void *, curl_hash_element *));
+size_t curl_hash_count(curl_hash *h);
 void curl_hash_clean(curl_hash *h);
 void curl_hash_destroy(curl_hash *h);
 

@@ -488,6 +488,9 @@ typedef enum {
    */
   CINIT(SSLENGINE_DEFAULT, LONG, 90),
 
+  /* Non-zero value means to use the global dns cache */
+  CINIT(DNS_USE_GLOBAL_CACHE, LONG, 91),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 

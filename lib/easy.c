@@ -141,8 +141,6 @@ CURLcode curl_global_init(long flags)
   if (initialized)
     return CURLE_OK;
 
-  Curl_host_cache_init();
-  
   if (flags & CURL_GLOBAL_SSL)
     Curl_SSL_init();
 
@@ -165,8 +163,8 @@ void curl_global_cleanup(void)
   if (!initialized)
     return;
 
-  Curl_host_cache_dtor();
-  
+  Curl_global_host_cache_dtor();
+
   if (init_flags & CURL_GLOBAL_SSL)
     Curl_SSL_cleanup();
 
@@ -235,12 +233,24 @@ CURLcode curl_easy_perform(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
 
+  if (!data->hostcache) {
+    if (Curl_global_host_cache_use(data)) {
+      data->hostcache = Curl_global_host_cache_get();
+    }
+    else {
+      data->hostcache = curl_hash_alloc(7, Curl_freeaddrinfo);
+    }
+  }
+
   return Curl_perform(data);
 }
 
 void curl_easy_cleanup(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
+  if (!Curl_global_host_cache_use(data)) {
+    curl_hash_destroy(data->hostcache);
+  }
   Curl_close(data);
 }
 

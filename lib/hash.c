@@ -255,11 +255,22 @@ curl_hash_clean(curl_hash *h)
   h->table = NULL;
 }
 
+size_t 
+curl_hash_count(curl_hash *h)
+{
+  return h->size;
+}
+
 void 
 curl_hash_destroy(curl_hash *h)
 {
+  if (!h) {
+    return;
+  }
+
   curl_hash_clean(h);
   free(h);
+  h = NULL;
 }
 
 /*

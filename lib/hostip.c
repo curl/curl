@@ -70,17 +70,27 @@
 #endif
 
 static curl_hash hostname_cache;
+static int host_cache_initialized;
 
-void Curl_host_cache_init(void)
+void Curl_global_host_cache_init(void)
 {
-  curl_hash_init(&hostname_cache, 7, Curl_freeaddrinfo);
+  if (!host_cache_initialized) {
+    curl_hash_init(&hostname_cache, 7, Curl_freeaddrinfo);
+    host_cache_initialized = 1;
+  }
 }
 
-void Curl_host_cache_dtor(void)
+curl_hash *Curl_global_host_cache_get(void)
 {
-  curl_hash_clean(&hostname_cache);
+  return &hostname_cache;
 }
 
+void Curl_global_host_cache_dtor(void)
+{
+  if (host_cache_initialized) {
+    curl_hash_clean(&hostname_cache);
+  }
+}
 
 Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
                            char *hostname,
@@ -90,14 +100,15 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
   Curl_addrinfo *addr = NULL;
   size_t hostname_len = strlen(hostname)+1;
 
-  if (curl_hash_find(&hostname_cache, hostname, hostname_len, (void **) &addr))
+  if (curl_hash_find(data->hostcache, hostname, hostname_len, (void **) &addr)) {
     return addr;
-
+  }
+  
   addr = Curl_getaddrinfo(data, hostname, port, bufp);
   if (!addr)
     return NULL;
 
-  curl_hash_add(&hostname_cache, hostname, hostname_len, (const void *) addr);
+  curl_hash_add(data->hostcache, hostname, hostname_len, (const void *) addr);
   return addr;
 }
 
@@ -405,3 +416,4 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
  * vim600: fdm=marker
  * vim: et sw=2 ts=2 sts=2 tw=78
  */
+ 

@@ -82,7 +82,8 @@ struct Curl_multi {
   struct Curl_message *msgs;
   /* amount of messages in the queue */
   int num_msgs;
-
+  /* Hostname cache */
+  curl_hash *hostcache;
 };
 
 
@@ -244,7 +245,6 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   easy=multi->easy.next;
   while(easy) {
-
     switch(easy->state) {
     case CURLM_STATE_INIT:
       /* init this transfer. */
@@ -256,6 +256,17 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       }
       break;
     case CURLM_STATE_CONNECT:
+      if (Curl_global_host_cache_use(easy->easy_handle)) {
+        easy->easy_handle->hostcache = Curl_global_host_cache_get();
+      }
+      else {
+        if (multi->hostcache == NULL) {
+          multi->hostcache = curl_hash_alloc(7, Curl_freeaddrinfo);
+        }
+
+        easy->easy_handle->hostcache = multi->hostcache;
+      }
+
       /* Connect. We get a connection identifier filled in. */
       easy->result = Curl_connect(easy->easy_handle, &easy->easy_conn);
 
@@ -328,7 +339,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
   if(GOOD_MULTI_HANDLE(multi)) {
     multi->type = 0; /* not good anymore */
-
+    curl_hash_destroy(multi->hostcache);
     /* remove all easy handles */
 
     free(multi);
@@ -341,3 +352,10 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 
 CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue);
 
+/*
+ * local variables:
+ * eval: (load-file "../curl-mode.el")
+ * end:
+ * vim600: fdm=marker
+ * vim: et sw=2 ts=2 sts=2 tw=78
+ */

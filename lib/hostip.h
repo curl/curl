@@ -23,12 +23,17 @@
  * $Id$
  *****************************************************************************/
 
+#include "hash.h"
+
 struct addrinfo;
 struct hostent;
 struct SessionHandle;
 
-void Curl_host_cache_init(void);
-void Curl_host_cache_dtor(void);
+void Curl_global_host_cache_init(void);
+void Curl_global_host_cache_dtor(void);
+curl_hash *Curl_global_host_cache_get(void);
+
+#define Curl_global_host_cache_use(__p) ((__p)->set.global_dns_cache)
 
 Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
 			   char *hostname,
