@@ -38,15 +38,15 @@
 
 #include "setup.h"
 
-#include <curl/mprintf.h>
-
 #ifdef KRB4
+
+#include <curl/mprintf.h>
 
 #include "security.h"
 #include <stdlib.h>
 #include <string.h>
 #include <netdb.h>
-#include "base64_krb.h"
+#include "base64.h"
 
 #define min(a, b)   ((a) < (b) ? (a) : (b))
 

@@ -40,7 +40,7 @@
 #ifdef KRB4
 
 #include "security.h"
-#include "base64_krb.h"
+#include "base64.h"
 #include <stdlib.h>
 #include <netdb.h>
 #include <syslog.h>
