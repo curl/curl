@@ -493,13 +493,13 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
        AC_MSG_RESULT($gccver)
 
        AC_MSG_CHECKING([if this is icc in disguise])
-       AC_EGREP_CPP([^__ICC], [__ICC],
+       AC_EGREP_CPP([^__INTEL_COMPILER], [__INTEL_COMPILER],
          dnl action if the text is found, this it has not been replaced by the
          dnl cpp
-         [ICC="no"]
+         ICC="no"
          AC_MSG_RESULT([no]),
          dnl the text was not found, it was replaced by the cpp
-         [ICC="yes"]
+         ICC="yes"
          AC_MSG_RESULT([yes])
        )
 
