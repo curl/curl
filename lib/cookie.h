@@ -36,7 +36,7 @@ struct Cookie {
   struct Cookie *next; /* next in the chain */
   char *name;        /* <this> = value */
   char *value;       /* name = <this> */
-  char *path;	      /* path = <this> */
+  char *path;         /* path = <this> */
   char *domain;      /* domain = <this> */
   long expires;    /* expires = <this> */
   char *expirestr;   /* the plain text version */

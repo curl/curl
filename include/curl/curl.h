@@ -246,7 +246,7 @@ typedef enum {
   CURLE_TOO_MANY_REDIRECTS ,     /* 47 - catch endless re-direct loops */
   CURLE_UNKNOWN_TELNET_OPTION,   /* 48 - User specified an unknown option */
   CURLE_TELNET_OPTION_SYNTAX ,   /* 49 - Malformed telnet option */
-  CURLE_OBSOLETE,	         /* 50 - NOT USED */
+  CURLE_OBSOLETE,                /* 50 - NOT USED */
   CURLE_SSL_PEER_CERTIFICATE,    /* 51 - peer's certificate wasn't ok */
   CURLE_GOT_NOTHING,             /* 52 - when this is a specific error */
   CURLE_SSL_ENGINE_NOTFOUND,     /* 53 - SSL crypto engine not found */
@@ -1178,7 +1178,7 @@ typedef enum {
   CURLINFO_HTTP_CONNECTCODE = CURLINFO_LONG   + 22,
   CURLINFO_HTTPAUTH_AVAIL   = CURLINFO_LONG   + 23,
   CURLINFO_PROXYAUTH_AVAIL  = CURLINFO_LONG   + 24,
-  CURLINFO_OS_ERRNO	    = CURLINFO_LONG   + 25,
+  CURLINFO_OS_ERRNO         = CURLINFO_LONG   + 25,
   /* Fill in new entries below here! */
 
   CURLINFO_LASTONE          = 26

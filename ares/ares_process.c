@@ -49,21 +49,21 @@
 #endif
 
 static void write_tcp_data(ares_channel channel, fd_set *write_fds,
-			   time_t now);
+                           time_t now);
 static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now);
 static void read_udp_packets(ares_channel channel, fd_set *read_fds,
-			     time_t now);
+                             time_t now);
 static void process_timeouts(ares_channel channel, time_t now);
 static void process_answer(ares_channel channel, unsigned char *abuf,
-			   int alen, int whichserver, int tcp, int now);
+                           int alen, int whichserver, int tcp, int now);
 static void handle_error(ares_channel channel, int whichserver, time_t now);
 static struct query *next_server(ares_channel channel, struct query *query, time_t now);
 static int open_tcp_socket(ares_channel channel, struct server_state *server);
 static int open_udp_socket(ares_channel channel, struct server_state *server);
 static int same_questions(const unsigned char *qbuf, int qlen,
-			  const unsigned char *abuf, int alen);
+                          const unsigned char *abuf, int alen);
 static struct query *end_query(ares_channel channel, struct query *query, int status,
-		      unsigned char *abuf, int alen);
+                      unsigned char *abuf, int alen);
 
 /* Something interesting happened on the wire, or there was a timeout.
  * See what's up and respond accordingly.
@@ -97,81 +97,81 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
       /* Make sure server has data to send and is selected in write_fds. */
       server = &channel->servers[i];
       if (!server->qhead || server->tcp_socket == ARES_SOCKET_BAD
-	  || !FD_ISSET(server->tcp_socket, write_fds))
-	continue;
+          || !FD_ISSET(server->tcp_socket, write_fds))
+        continue;
 
       /* Count the number of send queue items. */
       n = 0;
       for (sendreq = server->qhead; sendreq; sendreq = sendreq->next)
-	n++;
+        n++;
 
       /* Allocate iovecs so we can send all our data at once. */
       vec = malloc(n * sizeof(struct iovec));
       if (vec)
-	{
-	  /* Fill in the iovecs and send. */
-	  n = 0;
-	  for (sendreq = server->qhead; sendreq; sendreq = sendreq->next)
-	    {
-	      vec[n].iov_base = (char *) sendreq->data;
-	      vec[n].iov_len = sendreq->len;
-	      n++;
-	    }
-	  wcount = writev(server->tcp_socket, vec, n);
-	  free(vec);
-	  if (wcount < 0)
-	    {
-	      handle_error(channel, i, now);
-	      continue;
-	    }
+        {
+          /* Fill in the iovecs and send. */
+          n = 0;
+          for (sendreq = server->qhead; sendreq; sendreq = sendreq->next)
+            {
+              vec[n].iov_base = (char *) sendreq->data;
+              vec[n].iov_len = sendreq->len;
+              n++;
+            }
+          wcount = writev(server->tcp_socket, vec, n);
+          free(vec);
+          if (wcount < 0)
+            {
+              handle_error(channel, i, now);
+              continue;
+            }
 
-	  /* Advance the send queue by as many bytes as we sent. */
-	  while (wcount)
-	    {
-	      sendreq = server->qhead;
-	      if ((size_t)wcount >= sendreq->len)
-		{
-		  wcount -= sendreq->len;
-		  server->qhead = sendreq->next;
-		  if (server->qhead == NULL)
-		    server->qtail = NULL;
-		  free(sendreq);
-		}
-	      else
-		{
-		  sendreq->data += wcount;
-		  sendreq->len -= wcount;
-		  break;
-		}
-	    }
-	}
+          /* Advance the send queue by as many bytes as we sent. */
+          while (wcount)
+            {
+              sendreq = server->qhead;
+              if ((size_t)wcount >= sendreq->len)
+                {
+                  wcount -= sendreq->len;
+                  server->qhead = sendreq->next;
+                  if (server->qhead == NULL)
+                    server->qtail = NULL;
+                  free(sendreq);
+                }
+              else
+                {
+                  sendreq->data += wcount;
+                  sendreq->len -= wcount;
+                  break;
+                }
+            }
+        }
       else
-	{
-	  /* Can't allocate iovecs; just send the first request. */
-	  sendreq = server->qhead;
+        {
+          /* Can't allocate iovecs; just send the first request. */
+          sendreq = server->qhead;
 
           scount = send(server->tcp_socket, sendreq->data, sendreq->len, 0);
 
-	  if (scount < 0)
-	    {
-	      handle_error(channel, i, now);
-	      continue;
-	    }
+          if (scount < 0)
+            {
+              handle_error(channel, i, now);
+              continue;
+            }
 
-	  /* Advance the send queue by as many bytes as we sent. */
-	  if ((size_t)scount == sendreq->len)
-	    {
-	      server->qhead = sendreq->next;
-	      if (server->qhead == NULL)
-		server->qtail = NULL;
-	      free(sendreq);
-	    }
-	  else
-	    {
-	      sendreq->data += scount;
-	      sendreq->len -= scount;
-	    }
-	}
+          /* Advance the send queue by as many bytes as we sent. */
+          if ((size_t)scount == sendreq->len)
+            {
+              server->qhead = sendreq->next;
+              if (server->qhead == NULL)
+                server->qtail = NULL;
+              free(sendreq);
+            }
+          else
+            {
+              sendreq->data += scount;
+              sendreq->len -= scount;
+            }
+        }
     }
 }
 
@@ -190,68 +190,68 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
       server = &channel->servers[i];
       if (server->tcp_socket == ARES_SOCKET_BAD ||
           !FD_ISSET(server->tcp_socket, read_fds))
-	continue;
+        continue;
 
       if (server->tcp_lenbuf_pos != 2)
-	{
-	  /* We haven't yet read a length word, so read that (or
-	   * what's left to read of it).
-	   */
+        {
+          /* We haven't yet read a length word, so read that (or
+           * what's left to read of it).
+           */
           count = recv(server->tcp_socket,
                        server->tcp_lenbuf + server->tcp_buffer_pos,
                        2 - server->tcp_buffer_pos, 0);
-	  if (count <= 0)
-	    {
-	      handle_error(channel, i, now);
-	      continue;
-	    }
+          if (count <= 0)
+            {
+              handle_error(channel, i, now);
+              continue;
+            }
 
-	  server->tcp_lenbuf_pos += count;
-	  if (server->tcp_lenbuf_pos == 2)
-	    {
-	      /* We finished reading the length word.  Decode the
+          server->tcp_lenbuf_pos += count;
+          if (server->tcp_lenbuf_pos == 2)
+            {
+              /* We finished reading the length word.  Decode the
                * length and allocate a buffer for the data.
-	       */
-	      server->tcp_length = server->tcp_lenbuf[0] << 8
-		| server->tcp_lenbuf[1];
-	      server->tcp_buffer = malloc(server->tcp_length);
-	      if (!server->tcp_buffer)
-		handle_error(channel, i, now);
-	      server->tcp_buffer_pos = 0;
-	    }
-	}
+               */
+              server->tcp_length = server->tcp_lenbuf[0] << 8
+                | server->tcp_lenbuf[1];
+              server->tcp_buffer = malloc(server->tcp_length);
+              if (!server->tcp_buffer)
+                handle_error(channel, i, now);
+              server->tcp_buffer_pos = 0;
+            }
+        }
       else
-	{
-	  /* Read data into the allocated buffer. */
-       	  count = recv(server->tcp_socket,
-		       server->tcp_buffer + server->tcp_buffer_pos,
-		       server->tcp_length - server->tcp_buffer_pos, 0);
-	  if (count <= 0)
-	    {
-	      handle_error(channel, i, now);
-	      continue;
-	    }
+        {
+          /* Read data into the allocated buffer. */
+          count = recv(server->tcp_socket,
+                       server->tcp_buffer + server->tcp_buffer_pos,
+                       server->tcp_length - server->tcp_buffer_pos, 0);
+          if (count <= 0)
+            {
+              handle_error(channel, i, now);
+              continue;
+            }
 
-	  server->tcp_buffer_pos += count;
-	  if (server->tcp_buffer_pos == server->tcp_length)
-	    {
-	      /* We finished reading this answer; process it and
+          server->tcp_buffer_pos += count;
+          if (server->tcp_buffer_pos == server->tcp_length)
+            {
+              /* We finished reading this answer; process it and
                * prepare to read another length word.
-	       */
-	      process_answer(channel, server->tcp_buffer, server->tcp_length,
-			     i, 1, now);
+               */
+              process_answer(channel, server->tcp_buffer, server->tcp_length,
+                             i, 1, now);
           if (server->tcp_buffer)
-			free(server->tcp_buffer);
-	      server->tcp_buffer = NULL;
-	      server->tcp_lenbuf_pos = 0;
-	    }
-	}
+                        free(server->tcp_buffer);
+              server->tcp_buffer = NULL;
+              server->tcp_lenbuf_pos = 0;
+            }
+        }
     }
 }
 
 /* If any UDP sockets select true for reading, process them. */
 static void read_udp_packets(ares_channel channel, fd_set *read_fds,
-			     time_t now)
+                             time_t now)
 {
   struct server_state *server;
   int i, count;
@@ -264,11 +264,11 @@ static void read_udp_packets(ares_channel channel, fd_set *read_fds,
 
       if (server->udp_socket == ARES_SOCKET_BAD ||
           !FD_ISSET(server->udp_socket, read_fds))
-	continue;
+        continue;
 
       count = recv(server->udp_socket, buf, sizeof(buf), 0);
       if (count <= 0)
-	handle_error(channel, i, now);
+        handle_error(channel, i, now);
 
       process_answer(channel, buf, count, i, 0, now);
     }
@@ -283,16 +283,16 @@ static void process_timeouts(ares_channel channel, time_t now)
     {
       next = query->next;
       if (query->timeout != 0 && now >= query->timeout)
-	{
-	  query->error_status = ARES_ETIMEOUT;
-	  next = next_server(channel, query, now);
-	}
+        {
+          query->error_status = ARES_ETIMEOUT;
+          next = next_server(channel, query, now);
+        }
     }
 }
 
 /* Handle an answer from a server. */
 static void process_answer(ares_channel channel, unsigned char *abuf,
-			   int alen, int whichserver, int tcp, int now)
+                           int alen, int whichserver, int tcp, int now)
 {
   int id, tc, rcode;
   struct query *query;
@@ -311,7 +311,7 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
   for (query = channel->queries; query; query = query->next)
     {
       if (query->qid == id)
-	break;
+        break;
     }
   if (!query)
     return;
@@ -323,10 +323,10 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
   if ((tc || alen > PACKETSZ) && !tcp && !(channel->flags & ARES_FLAG_IGNTC))
     {
       if (!query->using_tcp)
-	{
-	  query->using_tcp = 1;
-	  ares__send_query(channel, query, now);
-	}
+        {
+          query->using_tcp = 1;
+          ares__send_query(channel, query, now);
+        }
       return;
     }
 
@@ -342,18 +342,18 @@ static void process_answer(ares_channel channel, unsigned char *abuf,
   if (!(channel->flags & ARES_FLAG_NOCHECKRESP))
     {
       if (rcode == SERVFAIL || rcode == NOTIMP || rcode == REFUSED)
-	{
-	  query->skip_server[whichserver] = 1;
-	  if (query->server == whichserver)
-	    next_server(channel, query, now);
-	  return;
-	}
+        {
+          query->skip_server[whichserver] = 1;
+          if (query->server == whichserver)
+            next_server(channel, query, now);
+          return;
+        }
       if (!same_questions(query->qbuf, query->qlen, abuf, alen))
-	{
-	  if (query->server == whichserver)
-	    next_server(channel, query, now);
-	  return;
-	}
+        {
+          if (query->server == whichserver)
+            next_server(channel, query, now);
+          return;
+        }
     }
 
   end_query(channel, query, ARES_SUCCESS, abuf, alen);
@@ -374,10 +374,10 @@ static void handle_error(ares_channel channel, int whichserver, time_t now)
     {
       next = query->next;
       if (query->server == whichserver)
-	{
-	  query->skip_server[whichserver] = 1;
-	  next = next_server(channel, query, now);
-	}
+        {
+          query->skip_server[whichserver] = 1;
+          next = next_server(channel, query, now);
+        }
     }
 }
 
@@ -388,18 +388,18 @@ static struct query *next_server(ares_channel channel, struct query *query, time
   for (; query->try < channel->tries; query->try++)
     {
       for (; query->server < channel->nservers; query->server++)
-	{
-	  if (!query->skip_server[query->server])
-	    {
-	      ares__send_query(channel, query, now);
-	      return (query->next);
-	    }
-	}
+        {
+          if (!query->skip_server[query->server])
+            {
+              ares__send_query(channel, query, now);
+              return (query->next);
+            }
+        }
       query->server = 0;
 
       /* Only one try if we're using TCP. */
       if (query->using_tcp)
-	break;
+        break;
     }
   return end_query(channel, query, query->error_status, NULL, 0);
 }
@@ -416,50 +416,50 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
        * a send request.
        */
       if (server->tcp_socket == ARES_SOCKET_BAD)
-	{
-	  if (open_tcp_socket(channel, server) == -1)
-	    {
-	      query->skip_server[query->server] = 1;
-	      next_server(channel, query, now);
-	      return;
-	    }
-	}
+        {
+          if (open_tcp_socket(channel, server) == -1)
+            {
+              query->skip_server[query->server] = 1;
+              next_server(channel, query, now);
+              return;
+            }
+        }
       sendreq = calloc(sizeof(struct send_request), 1);
       if (!sendreq)
         {
-	end_query(channel, query, ARES_ENOMEM, NULL, 0);
+        end_query(channel, query, ARES_ENOMEM, NULL, 0);
           return;
         }
       sendreq->data = query->tcpbuf;
       sendreq->len = query->tcplen;
       sendreq->next = NULL;
       if (server->qtail)
-	server->qtail->next = sendreq;
+        server->qtail->next = sendreq;
       else
-	server->qhead = sendreq;
+        server->qhead = sendreq;
       server->qtail = sendreq;
       query->timeout = 0;
     }
   else
     {
       if (server->udp_socket == ARES_SOCKET_BAD)
-	{
-	  if (open_udp_socket(channel, server) == -1)
-	    {
-	      query->skip_server[query->server] = 1;
-	      next_server(channel, query, now);
-	      return;
-	    }
-	}
+        {
+          if (open_udp_socket(channel, server) == -1)
+            {
+              query->skip_server[query->server] = 1;
+              next_server(channel, query, now);
+              return;
+            }
+        }
       if (send(server->udp_socket, query->qbuf, query->qlen, 0) == -1)
-	{
-	  query->skip_server[query->server] = 1;
-	  next_server(channel, query, now);
-	  return;
-	}
+        {
+          query->skip_server[query->server] = 1;
+          next_server(channel, query, now);
+          return;
+        }
       query->timeout = now
-	  + ((query->try == 0) ? channel->timeout
-	     : channel->timeout << query->try / channel->nservers);
+          + ((query->try == 0) ? channel->timeout
+             : channel->timeout << query->try / channel->nservers);
     }
 }
 
@@ -540,7 +540,7 @@ static int open_udp_socket(ares_channel channel, struct server_state *server)
 }
 
 static int same_questions(const unsigned char *qbuf, int qlen,
-			  const unsigned char *abuf, int alen)
+                          const unsigned char *abuf, int alen)
 {
   struct {
     const unsigned char *p;
@@ -567,14 +567,14 @@ static int same_questions(const unsigned char *qbuf, int qlen,
     {
       /* Decode the question in the query. */
       if (ares_expand_name(q.p, qbuf, qlen, &q.name, &q.namelen)
-	  != ARES_SUCCESS)
-	return 0;
+          != ARES_SUCCESS)
+        return 0;
       q.p += q.namelen;
       if (q.p + QFIXEDSZ > qbuf + qlen)
-	{
-	  free(q.name);
-	  return 0;
-	}
+        {
+          free(q.name);
+          return 0;
+        }
       q.type = DNS_QUESTION_TYPE(q.p);
       q.dnsclass = DNS_QUESTION_CLASS(q.p);
       q.p += QFIXEDSZ;
@@ -582,44 +582,44 @@ static int same_questions(const unsigned char *qbuf, int qlen,
       /* Search for this question in the answer. */
       a.p = abuf + HFIXEDSZ;
       for (j = 0; j < a.qdcount; j++)
-	{
-	  /* Decode the question in the answer. */
-	  if (ares_expand_name(a.p, abuf, alen, &a.name, &a.namelen)
-	      != ARES_SUCCESS)
-	    {
-	      free(q.name);
-	      return 0;
-	    }
-	  a.p += a.namelen;
-	  if (a.p + QFIXEDSZ > abuf + alen)
-	    {
-	      free(q.name);
-	      free(a.name);
-	      return 0;
-	    }
-	  a.type = DNS_QUESTION_TYPE(a.p);
-	  a.dnsclass = DNS_QUESTION_CLASS(a.p);
-	  a.p += QFIXEDSZ;
+        {
+          /* Decode the question in the answer. */
+          if (ares_expand_name(a.p, abuf, alen, &a.name, &a.namelen)
+              != ARES_SUCCESS)
+            {
+              free(q.name);
+              return 0;
+            }
+          a.p += a.namelen;
+          if (a.p + QFIXEDSZ > abuf + alen)
+            {
+              free(q.name);
+              free(a.name);
+              return 0;
+            }
+          a.type = DNS_QUESTION_TYPE(a.p);
+          a.dnsclass = DNS_QUESTION_CLASS(a.p);
+          a.p += QFIXEDSZ;
 
-	  /* Compare the decoded questions. */
-	  if (strcasecmp(q.name, a.name) == 0 && q.type == a.type
-	      && q.dnsclass == a.dnsclass)
-	    {
-	      free(a.name);
-	      break;
-	    }
-	  free(a.name);
-	}
+          /* Compare the decoded questions. */
+          if (strcasecmp(q.name, a.name) == 0 && q.type == a.type
+              && q.dnsclass == a.dnsclass)
+            {
+              free(a.name);
+              break;
+            }
+          free(a.name);
+        }
 
       free(q.name);
       if (j == a.qdcount)
-	return 0;
+        return 0;
     }
   return 1;
 }
 
 static struct query *end_query (ares_channel channel, struct query *query, int status,
-		      unsigned char *abuf, int alen)
+                      unsigned char *abuf, int alen)
 {
   struct query **q, *next;
   int i;
@@ -628,7 +628,7 @@ static struct query *end_query (ares_channel channel, struct query *query, int s
   for (q = &channel->queries; *q; q = &(*q)->next)
     {
       if (*q == query)
-	break;
+        break;
     }
   *q = query->next;
   if (*q)
@@ -645,7 +645,7 @@ static struct query *end_query (ares_channel channel, struct query *query, int s
   if (!channel->queries && !(channel->flags & ARES_FLAG_STAYOPEN))
     {
       for (i = 0; i < channel->nservers; i++)
-	ares__close_sockets(&channel->servers[i]);
+        ares__close_sockets(&channel->servers[i]);
     }
   return (next);
 }

@@ -74,10 +74,10 @@
 #define LDAP_SIZELIMIT_EXCEEDED 4
 #endif
 
-#define DLOPEN_MODE   RTLD_LAZY  /*! assume all dlopen() implementations have 
+#define DLOPEN_MODE   RTLD_LAZY  /*! assume all dlopen() implementations have
                                    this */
 
-#if defined(RTLD_LAZY_GLOBAL)	 /* It turns out some systems use this: */
+#if defined(RTLD_LAZY_GLOBAL)    /* It turns out some systems use this: */
 # undef  DLOPEN_MODE
 # define DLOPEN_MODE  RTLD_LAZY_GLOBAL
 #elif defined(RTLD_GLOBAL)
@@ -621,5 +621,5 @@ static void _ldap_free_urldesc (LDAPURLDesc *ludp)
   }
   free (ludp);
 }
-#endif	/* WIN32 */
-#endif	/* CURL_DISABLE_LDAP */
+#endif  /* WIN32 */
+#endif  /* CURL_DISABLE_LDAP */

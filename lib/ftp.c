@@ -55,7 +55,7 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef	VMS
+#ifdef  VMS
 #include <in.h>
 #include <inet.h>
 #endif
@@ -207,7 +207,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
       if (CURL_SOCKET_BAD == s) {
         /* DIE! */
         failf(data, "Error accept()ing server connect");
-      	return CURLE_FTP_PORT_FAILED;
+        return CURLE_FTP_PORT_FAILED;
       }
       infof(data, "Connection accepted from server\n");
 
@@ -260,7 +260,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   if (ftpcode)
     *ftpcode = 0; /* 0 for errors */
 
-  FD_ZERO (&readfd);		/* clear it */
+  FD_ZERO (&readfd);            /* clear it */
   FD_SET (sockfd, &readfd);     /* read socket */
 
   /* get this in a backup variable to be able to restore it on each lap in the
@@ -300,7 +300,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
     }
 
     if(!ftp->cache) {
-      readfd = rkeepfd;		   /* set every lap */
+      readfd = rkeepfd;            /* set every lap */
       interval.tv_sec = 1; /* use 1 second timeout intervals */
       interval.tv_usec = 0;
 
@@ -327,13 +327,13 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
       if(ftp->cache) {
         /* we had data in the "cache", copy that instead of doing an actual
          * read
-	 *
-	 * Dave Meyer, December 2003:
-	 * ftp->cache_size is cast to int here.  This should be safe,
-	 * because it would have been populated with something of size
-	 * int to begin with, even though its datatype may be larger
-	 * than an int.
-	 */
+         *
+         * Dave Meyer, December 2003:
+         * ftp->cache_size is cast to int here.  This should be safe,
+         * because it would have been populated with something of size
+         * int to begin with, even though its datatype may be larger
+         * than an int.
+         */
         memcpy(ptr, ftp->cache, (int)ftp->cache_size);
         gotbytes = (int)ftp->cache_size;
         free(ftp->cache);    /* free the cache */
@@ -387,7 +387,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
               return result;
 
 #define lastline(line) (isdigit((int)line[0]) && isdigit((int)line[1]) && \
-			isdigit((int)line[2]) && (' ' == line[3]))
+                        isdigit((int)line[2]) && (' ' == line[3]))
 
             if(perline>3 && lastline(line_start)) {
               /* This is the end of the last line, copy the last
@@ -790,7 +790,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
        !data->set.crlf) {
       failf(data, "Uploaded unaligned file size (%" FORMAT_OFF_T
             " out of %" FORMAT_OFF_T " bytes)",
-	    *ftp->bytecountp, data->set.infilesize);
+            *ftp->bytecountp, data->set.infilesize);
       conn->bits.close = TRUE; /* close this connection since we don't
                                   know what state this error leaves us in */
       return CURLE_PARTIAL_FILE;
@@ -800,7 +800,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
     if((-1 != conn->size) && (conn->size != *ftp->bytecountp) &&
        (conn->maxdownload != *ftp->bytecountp)) {
       failf(data, "Received only partial file: %" FORMAT_OFF_T " bytes",
-	    *ftp->bytecountp);
+            *ftp->bytecountp);
       conn->bits.close = TRUE; /* close this connection since we don't
                                   know what state this error leaves us in */
       return CURLE_PARTIAL_FILE;
@@ -1777,11 +1777,11 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 
     if(conn->ssl[SECONDARYSOCKET].use) {
       /* since we only have a plaintext TCP connection here, we must now
-	 do the TLS stuff */
+         do the TLS stuff */
       infof(data, "Doing the SSL/TLS handshake on the data stream\n");
       result = Curl_SSLConnect(conn, SECONDARYSOCKET);
       if(result)
-	return result;
+        return result;
     }
 
     *bytecountp=0;
@@ -1838,7 +1838,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       }
       infof(data, "range-download from %" FORMAT_OFF_T
             " to %" FORMAT_OFF_T ", totally %" FORMAT_OFF_T " bytes\n",
-	    from, to, conn->maxdownload);
+            from, to, conn->maxdownload);
       ftp->dont_check = TRUE; /* dont check for successful transfer */
     }
 
@@ -2045,12 +2045,12 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       }
 
       if(conn->ssl[SECONDARYSOCKET].use) {
-	/* since we only have a plaintext TCP connection here, we must now
-	   do the TLS stuff */
-	infof(data, "Doing the SSL/TLS handshake on the data stream\n");
-	result = Curl_SSLConnect(conn, SECONDARYSOCKET);
-	if(result)
-	  return result;
+        /* since we only have a plaintext TCP connection here, we must now
+           do the TLS stuff */
+        infof(data, "Doing the SSL/TLS handshake on the data stream\n");
+        result = Curl_SSLConnect(conn, SECONDARYSOCKET);
+        if(result)
+          return result;
       }
 
       if(size > conn->maxdownload && conn->maxdownload > 0)

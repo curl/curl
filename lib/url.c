@@ -2451,23 +2451,23 @@ static CURLcode CreateConnection(struct SessionHandle *data,
             break;
           }
         }
-	nope=strtok_r(NULL, ", ", &no_proxy_tok_buf);
+        nope=strtok_r(NULL, ", ", &no_proxy_tok_buf);
       }
       if(!nope) {
-	/* It was not listed as without proxy */
-	char *protop = conn->protostr;
-	char *envp = proxy_env;
-	char *prox;
+        /* It was not listed as without proxy */
+        char *protop = conn->protostr;
+        char *envp = proxy_env;
+        char *prox;
 
-	/* Now, build <protocol>_proxy and check for such a one to use */
-	while(*protop)
-	  *envp++ = tolower((int)*protop++);
+        /* Now, build <protocol>_proxy and check for such a one to use */
+        while(*protop)
+          *envp++ = tolower((int)*protop++);
 
-	/* append _proxy */
-	strcpy(envp, "_proxy");
+        /* append _proxy */
+        strcpy(envp, "_proxy");
 
-	/* read the protocol proxy: */
-	prox=curl_getenv(proxy_env);
+        /* read the protocol proxy: */
+        prox=curl_getenv(proxy_env);
 
         /*
          * We don't try the uppercase version of HTTP_PROXY because of
@@ -2481,21 +2481,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
          * This can cause 'internal' http/ftp requests to be
          * arbitrarily redirected by any external attacker.
          */
-	if(!prox && !strequal("http_proxy", proxy_env)) {
+        if(!prox && !strequal("http_proxy", proxy_env)) {
           /* There was no lowercase variable, try the uppercase version: */
-	  for(envp = proxy_env; *envp; envp++)
-	    *envp = toupper((int)*envp);
-	  prox=curl_getenv(proxy_env);
-	}
+          for(envp = proxy_env; *envp; envp++)
+            *envp = toupper((int)*envp);
+          prox=curl_getenv(proxy_env);
+        }
 
-	if(prox && *prox) { /* don't count "" strings */
-	  proxy = prox; /* use this */
-	}
-	else {
-	  proxy = curl_getenv("all_proxy"); /* default proxy to use */
-	  if(!proxy)
+        if(prox && *prox) { /* don't count "" strings */
+          proxy = prox; /* use this */
+        }
+        else {
+          proxy = curl_getenv("all_proxy"); /* default proxy to use */
+          if(!proxy)
             proxy=curl_getenv("ALL_PROXY");
-	}
+        }
 
         if(proxy && *proxy) {
           /* we have a proxy here to set */
@@ -2652,7 +2652,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if (isdigit((int)conn->path[1])) {
       conn->path = strchr(&conn->path[1], '/');
       if (conn->path == NULL)
-	conn->path = conn->pathbuffer;
+        conn->path = conn->pathbuffer;
     }
     conn->protocol |= PROT_GOPHER;
     conn->curl_do = Curl_http;
@@ -2728,16 +2728,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       command = toupper((int)type[6]);
       switch(command) {
       case 'A': /* ASCII mode */
-	data->set.ftp_ascii = 1;
-	break;
+        data->set.ftp_ascii = 1;
+        break;
       case 'D': /* directory mode */
-	data->set.ftp_list_only = 1;
-	break;
+        data->set.ftp_list_only = 1;
+        break;
       case 'I': /* binary mode */
       default:
-	/* switch off ASCII */
-	data->set.ftp_ascii = 0;
-	break;
+        /* switch off ASCII */
+        data->set.ftp_ascii = 0;
+        break;
       }
     }
 #else /* CURL_DISABLE_FTP */
@@ -3162,7 +3162,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     infof(data, "Re-using existing connection! (#%ld) with host %s\n",
           conn->connectindex,
-	  conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
+          conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
   }
   else {
     /*
@@ -3523,7 +3523,7 @@ CURLcode Curl_done(struct connectdata **connp,
   else
     infof(data, "Connection #%ld to host %s left intact\n",
           conn->connectindex,
-	  conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
+          conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
 
   return result;
 }

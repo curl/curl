@@ -31,7 +31,7 @@
 #include "ares_private.h"
 
 void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
-	       ares_callback callback, void *arg)
+               ares_callback callback, void *arg)
 {
   struct query *query;
   int i;

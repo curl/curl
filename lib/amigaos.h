@@ -36,10 +36,10 @@
 
 #include "config-amigaos.h"
 
-#define select(args...)	WaitSelect( args, NULL)
-#define inet_ntoa(x)	Inet_NtoA( x ## .s_addr)
-#define ioctl(a,b,c,d)	IoctlSocket( (LONG)a, (ULONG)b, (char*)c)
-#define _AMIGASF	1
+#define select(args...) WaitSelect( args, NULL)
+#define inet_ntoa(x)    Inet_NtoA( x ## .s_addr)
+#define ioctl(a,b,c,d)  IoctlSocket( (LONG)a, (ULONG)b, (char*)c)
+#define _AMIGASF        1
 
 extern void amiga_cleanup();
 extern BOOL amiga_init();

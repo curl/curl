@@ -242,7 +242,7 @@ static FormInfo * AddFormInfo(char *value,
  *
  ***************************************************************************/
 static const char * ContentTypeForFilename (const char *filename,
-					    const char *prevtype)
+                                            const char *prevtype)
 {
   const char *contenttype = NULL;
   unsigned int i;
@@ -273,10 +273,10 @@ static const char * ContentTypeForFilename (const char *filename,
   for(i=0; i<sizeof(ctts)/sizeof(ctts[0]); i++) {
     if(strlen(filename) >= strlen(ctts[i].extension)) {
       if(strequal(filename +
-		  strlen(filename) - strlen(ctts[i].extension),
-		  ctts[i].extension)) {
-	contenttype = ctts[i].type;
-	break;
+                  strlen(filename) - strlen(ctts[i].extension),
+                  ctts[i].extension)) {
+        contenttype = ctts[i].type;
+        break;
       }
     }
   }
@@ -606,23 +606,23 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
                                                current_form)))
                 return_value = CURL_FORMADD_MEMORY;
             }
-	    else
-	      return_value = CURL_FORMADD_NULL;
+            else
+              return_value = CURL_FORMADD_NULL;
           }
           else
             return_value = CURL_FORMADD_OPTION_TWICE;
         }
         else {
-	  if (contenttype) {
-	    current_form->contenttype = strdup(contenttype);
+          if (contenttype) {
+            current_form->contenttype = strdup(contenttype);
             if(!current_form->contenttype)
               return_value = CURL_FORMADD_MEMORY;
             else
               current_form->contenttype_alloc = TRUE;
           }
-	  else
-	    return_value = CURL_FORMADD_NULL;
-	}
+          else
+            return_value = CURL_FORMADD_NULL;
+        }
         break;
       }
     case CURLFORM_CONTENTHEADER:
@@ -1425,10 +1425,10 @@ int main()
   name3[1] = '\0';
   value3[1] = '\0';
   if (FormAddTest("PTRNAME + NAMELENGTH + COPYNAME + CONTENTSLENGTH test",
-		  &httppost, &last_post,
+                  &httppost, &last_post,
                   CURLFORM_PTRNAME, name3, CURLFORM_COPYCONTENTS, value3,
                   CURLFORM_CONTENTSLENGTH, value3length,
-		  CURLFORM_NAMELENGTH, name3length, CURLFORM_END))
+                  CURLFORM_NAMELENGTH, name3length, CURLFORM_END))
     ++errors;
   if (FormAddTest("simple PTRCONTENTS test", &httppost, &last_post,
                   CURLFORM_COPYNAME, name4, CURLFORM_PTRCONTENTS, value4,
@@ -1529,7 +1529,7 @@ char *Curl_FormBoundary(void)
 {
   char *retstring;
   static int randomizer=0; /* this is just so that two boundaries within
-			      the same form won't be identical */
+                              the same form won't be identical */
   size_t i;
 
   static char table16[]="abcdef0123456789";

@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -101,7 +101,7 @@ CURLcode Curl_dict(struct connectdata *conn)
   if (strnequal(path, DICT_MATCH, sizeof(DICT_MATCH)-1) ||
       strnequal(path, DICT_MATCH2, sizeof(DICT_MATCH2)-1) ||
       strnequal(path, DICT_MATCH3, sizeof(DICT_MATCH3)-1)) {
-      
+
     word = strchr(path, ':');
     if (word) {
       word++;
@@ -118,7 +118,7 @@ CURLcode Curl_dict(struct connectdata *conn)
         }
       }
     }
-      
+
     if ((word == NULL) || (*word == (char)0)) {
       failf(data, "lookup word is missing");
     }
@@ -128,7 +128,7 @@ CURLcode Curl_dict(struct connectdata *conn)
     if ((strategy == NULL) || (*strategy == (char)0)) {
       strategy = (char *)".";
     }
-      
+
     result = Curl_sendf(sockfd, conn,
                         "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                         "MATCH "
@@ -136,7 +136,7 @@ CURLcode Curl_dict(struct connectdata *conn)
                         "%s "    /* strategy */
                         "%s\n"   /* word */
                         "QUIT\n",
-                        
+
                         database,
                         strategy,
                         word
@@ -145,14 +145,14 @@ CURLcode Curl_dict(struct connectdata *conn)
       failf(data, "Failed sending DICT request");
     else
       result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
-                             -1, NULL); /* no upload */      
+                             -1, NULL); /* no upload */
     if(result)
       return result;
   }
   else if (strnequal(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
            strnequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
            strnequal(path, DICT_DEFINE3, sizeof(DICT_DEFINE3)-1)) {
-    
+
     word = strchr(path, ':');
     if (word) {
       word++;
@@ -165,14 +165,14 @@ CURLcode Curl_dict(struct connectdata *conn)
         }
       }
     }
-      
+
     if ((word == NULL) || (*word == (char)0)) {
       failf(data, "lookup word is missing");
     }
     if ((database == NULL) || (*database == (char)0)) {
       database = (char *)"!";
     }
-      
+
     result = Curl_sendf(sockfd, conn,
                         "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                         "DEFINE "
@@ -186,17 +186,17 @@ CURLcode Curl_dict(struct connectdata *conn)
     else
       result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                              -1, NULL); /* no upload */
-    
+
     if(result)
       return result;
-      
+
   }
   else {
-      
+
     ppath = strchr(path, '/');
     if (ppath) {
       int i;
-	
+
       ppath++;
       for (i = 0; ppath[i]; i++) {
         if (ppath[i] == ':')

@@ -967,7 +967,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
     if(result)
       return result;
 
-    FD_ZERO (&readfd);		/* clear it */
+    FD_ZERO (&readfd);          /* clear it */
     FD_SET (tunnelsocket, &readfd);     /* read socket */
 
     /* get this in a backup variable to be able to restore it on each lap in
@@ -1555,17 +1555,17 @@ CURLcode Curl_http(struct connectdata *conn)
         curl_off_t total_expected_size=
           conn->resume_from + data->set.infilesize;
         conn->allocptr.rangeline =
-	    aprintf("Content-Range: bytes %s%" FORMAT_OFF_T
+            aprintf("Content-Range: bytes %s%" FORMAT_OFF_T
                     "/%" FORMAT_OFF_T "\r\n",
-		    conn->range, total_expected_size-1,
-		    total_expected_size);
+                    conn->range, total_expected_size-1,
+                    total_expected_size);
       }
       else {
         /* Range was selected and then we just pass the incoming range and
            append total size */
         conn->allocptr.rangeline =
-	    aprintf("Content-Range: bytes %s/%" FORMAT_OFF_T "\r\n",
-		    conn->range, data->set.infilesize);
+            aprintf("Content-Range: bytes %s/%" FORMAT_OFF_T "\r\n",
+                    conn->range, data->set.infilesize);
       }
     }
   }

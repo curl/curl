@@ -1,8 +1,8 @@
 /*****************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * $Id$
@@ -24,9 +24,9 @@
  * Download a HTTP file and upload an FTP file simultaneously.
  */
 
-#define HANDLECOUNT 2	/* Number of simultaneous transfers */
-#define HTTP_HANDLE 0	/* Index for the HTTP transfer */
-#define FTP_HANDLE 1	/* Index for the FTP transfer */
+#define HANDLECOUNT 2   /* Number of simultaneous transfers */
+#define HTTP_HANDLE 0   /* Index for the HTTP transfer */
+#define FTP_HANDLE 1    /* Index for the FTP transfer */
 
 int main(int argc, char **argv)
 {
@@ -111,11 +111,11 @@ int main(int argc, char **argv)
 
        switch (idx) {
          case HTTP_HANDLE:
-	   printf("HTTP transfer completed with status %d\n", msg->data.result);
-	   break;
-	 case FTP_HANDLE:
-	   printf("FTP transfer completed with status %d\n", msg->data.result);
-	   break;
+           printf("HTTP transfer completed with status %d\n", msg->data.result);
+           break;
+         case FTP_HANDLE:
+           printf("FTP transfer completed with status %d\n", msg->data.result);
+           break;
        }
     }
   }

@@ -39,7 +39,7 @@
 #include "getpass.h"
 
 #ifndef WIN32
-#ifdef	VMS
+#ifdef  VMS
 #include <stdio.h>
 #include <string.h>
 #include descrip
@@ -80,7 +80,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 }
 #else /* VMS */
 #ifdef HAVE_TERMIOS_H
-#  if !defined(HAVE_TCGETATTR) && !defined(HAVE_TCSETATTR) 
+#  if !defined(HAVE_TCGETATTR) && !defined(HAVE_TCSETATTR)
 #    undef HAVE_TERMIOS_H
 #  endif
 #endif
@@ -126,7 +126,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #else
 #  ifdef HAVE_TERMIO_H
   struct termio orig;
-  struct termio noecho;  
+  struct termio noecho;
 #  else
 #  endif
 #endif
@@ -192,7 +192,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #  else
 #  endif
 #endif
-  
+
   signal(SIGINT, sigint);
 #ifdef SIGTSTP
   signal(SIGTSTP, sigtstp);
@@ -211,7 +211,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
   size_t i;
   printf("%s", prompt);
- 
+
   for(i=0; i<buflen; i++) {
     buffer[i] = getch();
     if ( buffer[i] == '\r' ) {

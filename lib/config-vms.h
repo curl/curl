@@ -1,5 +1,3 @@
-/* config.h.in.  Generated automatically from configure.in by autoheader.  */
-
 /* Define if on AIX 3.
    System headers sometimes define this.
    We just want to avoid a redefinition error message.  */
@@ -224,19 +222,19 @@
 #define HAVE_OPENSSL_CRYPTO_H 1
 
 /* Define if you have the <openssl/err.h> header file.  */
-#define HAVE_OPENSSL_ERR_H	1
+#define HAVE_OPENSSL_ERR_H      1
 
 /* Define if you have the <openssl/pem.h> header file.  */
-#define HAVE_OPENSSL_PEM_H	1
+#define HAVE_OPENSSL_PEM_H      1
 
 /* Define if you have the <openssl/rsa.h> header file.  */
 #define HAVE_OPENSSL_RSA_H 1
 
 /* Define if you have the <openssl/ssl.h> header file.  */
-#define HAVE_OPENSSL_SSL_H	1
+#define HAVE_OPENSSL_SSL_H      1
 
 /* Define if you have the <openssl/x509.h> header file.  */
-#define HAVE_OPENSSL_X509_H	1
+#define HAVE_OPENSSL_X509_H     1
 
 /* Define if you have the <pem.h> header file.  */
 #undef HAVE_PEM_H
@@ -314,7 +312,7 @@
 #define HAVE_LIBSOCKET 1
 
 /* Define if you have the ssl library (-lssl).  */
-#define HAVE_LIBSSL	1
+#define HAVE_LIBSSL     1
 
 /* Define if you have the ucb library (-lucb).  */
 #undef HAVE_LIBUCB
@@ -334,7 +332,7 @@
 /* Set to explicitly specify we don't want to use thread-safe functions */
 #undef DISABLED_THREADSAFE
 
-#define	HAVE_TIMEVAL_H	1
+#define HAVE_TIMEVAL_H  1
 
 /* Name of this package! */
 #define PACKAGE "not-used"
@@ -346,7 +344,7 @@
 #undef HAVE_GETPASS
 
 /* Define if you have a working OpenSSL installation */
-#define OPENSSL_ENABLED	1
+#define OPENSSL_ENABLED 1
 
 /* Define if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
@@ -368,7 +366,7 @@
 
 #define HAVE_MEMORY_H   1
 
-#define HAVE_FIONBIO	1
+#define HAVE_FIONBIO    1
 
 /* Define if you have the `sigsetjmp' function. */
 #define HAVE_SIGSETJMP 1

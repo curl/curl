@@ -37,7 +37,7 @@
 #include "ares_dns.h"
 
 #ifndef INADDR_NONE
-#define	INADDR_NONE 0xffffffff
+#define INADDR_NONE 0xffffffff
 #endif
 
 /* Mac OS X portability check */
@@ -54,58 +54,58 @@ struct nv {
 };
 
 static const struct nv flags[] = {
-  { "usevc",		ARES_FLAG_USEVC },
-  { "primary",		ARES_FLAG_PRIMARY },
-  { "igntc",		ARES_FLAG_IGNTC },
-  { "norecurse",	ARES_FLAG_NORECURSE },
-  { "stayopen",		ARES_FLAG_STAYOPEN },
-  { "noaliases",	ARES_FLAG_NOALIASES }
+  { "usevc",            ARES_FLAG_USEVC },
+  { "primary",          ARES_FLAG_PRIMARY },
+  { "igntc",            ARES_FLAG_IGNTC },
+  { "norecurse",        ARES_FLAG_NORECURSE },
+  { "stayopen",         ARES_FLAG_STAYOPEN },
+  { "noaliases",        ARES_FLAG_NOALIASES }
 };
 static const int nflags = sizeof(flags) / sizeof(flags[0]);
 
 static const struct nv classes[] = {
-  { "IN",	C_IN },
-  { "CHAOS",	C_CHAOS },
-  { "HS",	C_HS },
-  { "ANY",	C_ANY }
+  { "IN",       C_IN },
+  { "CHAOS",    C_CHAOS },
+  { "HS",       C_HS },
+  { "ANY",      C_ANY }
 };
 static const int nclasses = sizeof(classes) / sizeof(classes[0]);
 
 static const struct nv types[] = {
-  { "A",	T_A },
-  { "NS",	T_NS },
-  { "MD",	T_MD },
-  { "MF",	T_MF },
-  { "CNAME",	T_CNAME },
-  { "SOA",	T_SOA },
-  { "MB",	T_MB },
-  { "MG",	T_MG },
-  { "MR",	T_MR },
-  { "NULL",	T_NULL },
-  { "WKS",	T_WKS },
-  { "PTR",	T_PTR },
-  { "HINFO",	T_HINFO },
-  { "MINFO",	T_MINFO },
-  { "MX",	T_MX },
-  { "TXT",	T_TXT },
-  { "RP",	T_RP },
-  { "AFSDB",	T_AFSDB },
-  { "X25",	T_X25 },
-  { "ISDN",	T_ISDN },
-  { "RT",	T_RT },
-  { "NSAP",	T_NSAP },
-  { "NSAP_PTR",	T_NSAP_PTR },
-  { "SIG",	T_SIG },
-  { "KEY",	T_KEY },
-  { "PX",	T_PX },
-  { "GPOS",	T_GPOS },
-  { "AAAA",	T_AAAA },
-  { "LOC",	T_LOC },
-  { "SRV",	T_SRV },
-  { "AXFR",	T_AXFR },
-  { "MAILB",	T_MAILB },
-  { "MAILA",	T_MAILA },
-  { "ANY",	T_ANY }
+  { "A",        T_A },
+  { "NS",       T_NS },
+  { "MD",       T_MD },
+  { "MF",       T_MF },
+  { "CNAME",    T_CNAME },
+  { "SOA",      T_SOA },
+  { "MB",       T_MB },
+  { "MG",       T_MG },
+  { "MR",       T_MR },
+  { "NULL",     T_NULL },
+  { "WKS",      T_WKS },
+  { "PTR",      T_PTR },
+  { "HINFO",    T_HINFO },
+  { "MINFO",    T_MINFO },
+  { "MX",       T_MX },
+  { "TXT",      T_TXT },
+  { "RP",       T_RP },
+  { "AFSDB",    T_AFSDB },
+  { "X25",      T_X25 },
+  { "ISDN",     T_ISDN },
+  { "RT",       T_RT },
+  { "NSAP",     T_NSAP },
+  { "NSAP_PTR", T_NSAP_PTR },
+  { "SIG",      T_SIG },
+  { "KEY",      T_KEY },
+  { "PX",       T_PX },
+  { "GPOS",     T_GPOS },
+  { "AAAA",     T_AAAA },
+  { "LOC",      T_LOC },
+  { "SRV",      T_SRV },
+  { "AXFR",     T_AXFR },
+  { "MAILB",    T_MAILB },
+  { "MAILA",    T_MAILA },
+  { "ANY",      T_ANY }
 };
 static const int ntypes = sizeof(types) / sizeof(types[0]);
 
@@ -124,10 +124,10 @@ static const char *rcodes[] = {
 
 static void callback(void *arg, int status, unsigned char *abuf, int alen);
 static const unsigned char *display_question(const unsigned char *aptr,
-					     const unsigned char *abuf,
-					     int alen);
+                                             const unsigned char *abuf,
+                                             int alen);
 static const unsigned char *display_rr(const unsigned char *aptr,
-				       const unsigned char *abuf, int alen);
+                                       const unsigned char *abuf, int alen);
 static const char *type_name(int type);
 static const char *class_name(int dnsclass);
 static void usage(void);
@@ -146,7 +146,7 @@ int main(int argc, char **argv)
   WORD wVersionRequested = MAKEWORD(1,1);
   WSADATA wsaData;
   WSAStartup(wVersionRequested, &wsaData);
-#endif  
+#endif
 
   options.flags = ARES_FLAG_NOCHECKRESP;
   options.servers = NULL;
@@ -154,80 +154,80 @@ int main(int argc, char **argv)
   while ((c = getopt(argc, argv, "f:s:c:t:T:U:")) != -1)
     {
       switch (c)
-	{
-	case 'f':
-	  /* Add a flag. */
-	  for (i = 0; i < nflags; i++)
-	    {
-	      if (strcmp(flags[i].name, optarg) == 0)
-		break;
-	    }
-	  if (i == nflags)
-	    usage();
-	  options.flags |= flags[i].value;
-	  break;
+        {
+        case 'f':
+          /* Add a flag. */
+          for (i = 0; i < nflags; i++)
+            {
+              if (strcmp(flags[i].name, optarg) == 0)
+                break;
+            }
+          if (i == nflags)
+            usage();
+          options.flags |= flags[i].value;
+          break;
 
-	case 's':
-	  /* Add a server, and specify servers in the option mask. */
-	  hostent = gethostbyname(optarg);
-	  if (!hostent || hostent->h_addrtype != AF_INET)
-	    {
-	      fprintf(stderr, "adig: server %s not found.\n", optarg);
-	      return 1;
-	    }
-	  options.servers = realloc(options.servers, (options.nservers + 1)
-				    * sizeof(struct in_addr));
-	  if (!options.servers)
-	    {
-	      fprintf(stderr, "Out of memory!\n");
-	      return 1;
-	    }
-	  memcpy(&options.servers[options.nservers], hostent->h_addr,
-		 sizeof(struct in_addr));
-	  options.nservers++;
-	  optmask |= ARES_OPT_SERVERS;
-	  break;
+        case 's':
+          /* Add a server, and specify servers in the option mask. */
+          hostent = gethostbyname(optarg);
+          if (!hostent || hostent->h_addrtype != AF_INET)
+            {
+              fprintf(stderr, "adig: server %s not found.\n", optarg);
+              return 1;
+            }
+          options.servers = realloc(options.servers, (options.nservers + 1)
+                                    * sizeof(struct in_addr));
+          if (!options.servers)
+            {
+              fprintf(stderr, "Out of memory!\n");
+              return 1;
+            }
+          memcpy(&options.servers[options.nservers], hostent->h_addr,
+                 sizeof(struct in_addr));
+          options.nservers++;
+          optmask |= ARES_OPT_SERVERS;
+          break;
 
-	case 'c':
-	  /* Set the query class. */
-	  for (i = 0; i < nclasses; i++)
-	    {
-	      if (strcasecmp(classes[i].name, optarg) == 0)
-		break;
-	    }
-	  if (i == nclasses)
-	    usage();
-	  dnsclass = classes[i].value;
-	  break;
+        case 'c':
+          /* Set the query class. */
+          for (i = 0; i < nclasses; i++)
+            {
+              if (strcasecmp(classes[i].name, optarg) == 0)
+                break;
+            }
+          if (i == nclasses)
+            usage();
+          dnsclass = classes[i].value;
+          break;
 
-	case 't':
-	  /* Set the query type. */
-	  for (i = 0; i < ntypes; i++)
-	    {
-	      if (strcasecmp(types[i].name, optarg) == 0)
-		break;
-	    }
-	  if (i == ntypes)
-	    usage();
-	  type = types[i].value;
-	  break;
+        case 't':
+          /* Set the query type. */
+          for (i = 0; i < ntypes; i++)
+            {
+              if (strcasecmp(types[i].name, optarg) == 0)
+                break;
+            }
+          if (i == ntypes)
+            usage();
+          type = types[i].value;
+          break;
 
-	case 'T':
-	  /* Set the TCP port number. */
-	  if (!isdigit((unsigned char)*optarg))
-	    usage();
-	  options.tcp_port = strtol(optarg, NULL, 0);
-	  optmask |= ARES_OPT_TCP_PORT;
-	  break;
+        case 'T':
+          /* Set the TCP port number. */
+          if (!isdigit((unsigned char)*optarg))
+            usage();
+          options.tcp_port = strtol(optarg, NULL, 0);
+          optmask |= ARES_OPT_TCP_PORT;
+          break;
 
-	case 'U':
-	  /* Set the UDP port number. */
-	  if (!isdigit((unsigned char)*optarg))
-	    usage();
-	  options.udp_port = strtol(optarg, NULL, 0);
-	  optmask |= ARES_OPT_UDP_PORT;
-	  break;
-	}
+        case 'U':
+          /* Set the UDP port number. */
+          if (!isdigit((unsigned char)*optarg))
+            usage();
+          options.udp_port = strtol(optarg, NULL, 0);
+          optmask |= ARES_OPT_UDP_PORT;
+          break;
+        }
     }
   argc -= optind;
   argv += optind;
@@ -239,7 +239,7 @@ int main(int argc, char **argv)
   if (status != ARES_SUCCESS)
     {
       fprintf(stderr, "ares_init_options: %s\n",
-	      ares_strerror(status));
+              ares_strerror(status));
       return 1;
     }
 
@@ -253,7 +253,7 @@ int main(int argc, char **argv)
   else
     {
       for (; *argv; argv++)
-	ares_query(channel, *argv, dnsclass, type, callback, *argv);
+        ares_query(channel, *argv, dnsclass, type, callback, *argv);
     }
 
   /* Wait for all queries to complete. */
@@ -263,14 +263,14 @@ int main(int argc, char **argv)
       FD_ZERO(&write_fds);
       nfds = ares_fds(channel, &read_fds, &write_fds);
       if (nfds == 0)
-	break;
+        break;
       tvp = ares_timeout(channel, NULL, &tv);
       count = select(nfds, &read_fds, &write_fds, NULL, tvp);
       if (count < 0 && errno != EINVAL)
-	{
-	  perror("select");
-	  return 1;
-	}
+        {
+          perror("select");
+          return 1;
+        }
       ares_process(channel, &read_fds, &write_fds);
     }
 
@@ -296,7 +296,7 @@ static void callback(void *arg, int status, unsigned char *abuf, int alen)
     {
       printf("%s\n", ares_strerror(status));
       if (!abuf)
-	return;
+        return;
     }
 
   /* Won't happen, but check anyway, for safety. */
@@ -320,11 +320,11 @@ static void callback(void *arg, int status, unsigned char *abuf, int alen)
   /* Display the answer header. */
   printf("id: %d\n", id);
   printf("flags: %s%s%s%s%s\n",
-	 qr ? "qr " : "",
-	 aa ? "aa " : "",
-	 tc ? "tc " : "",
-	 rd ? "rd " : "",
-	 ra ? "ra " : "");
+         qr ? "qr " : "",
+         aa ? "aa " : "",
+         tc ? "tc " : "",
+         rd ? "rd " : "",
+         ra ? "ra " : "");
   printf("opcode: %s\n", opcodes[opcode]);
   printf("rcode: %s\n", rcodes[rcode]);
 
@@ -335,7 +335,7 @@ static void callback(void *arg, int status, unsigned char *abuf, int alen)
     {
       aptr = display_question(aptr, abuf, alen);
       if (aptr == NULL)
-	return;
+        return;
     }
 
   /* Display the answers. */
@@ -344,7 +344,7 @@ static void callback(void *arg, int status, unsigned char *abuf, int alen)
     {
       aptr = display_rr(aptr, abuf, alen);
       if (aptr == NULL)
-	return;
+        return;
     }
 
   /* Display the NS records. */
@@ -353,7 +353,7 @@ static void callback(void *arg, int status, unsigned char *abuf, int alen)
     {
       aptr = display_rr(aptr, abuf, alen);
       if (aptr == NULL)
-	return;
+        return;
     }
 
   /* Display the additional records. */
@@ -362,13 +362,13 @@ static void callback(void *arg, int status, unsigned char *abuf, int alen)
     {
       aptr = display_rr(aptr, abuf, alen);
       if (aptr == NULL)
-	return;
+        return;
     }
 }
 
 static const unsigned char *display_question(const unsigned char *aptr,
-					     const unsigned char *abuf,
-					     int alen)
+                                             const unsigned char *abuf,
+                                             int alen)
 {
   char *name;
   int type, dnsclass, status;
@@ -406,7 +406,7 @@ static const unsigned char *display_question(const unsigned char *aptr,
 }
 
 static const unsigned char *display_rr(const unsigned char *aptr,
-				       const unsigned char *abuf, int alen)
+                                       const unsigned char *abuf, int alen)
 {
   const unsigned char *p;
   char *name;
@@ -463,7 +463,7 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       /* For these types, the RR data is just a domain name. */
       status = ares_expand_name(aptr, abuf, alen, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+        return NULL;
       printf("\t%s.", name);
       free(name);
       break;
@@ -473,12 +473,12 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       p = aptr;
       len = *p;
       if (p + len + 1 > aptr + dlen)
-	return NULL;
+        return NULL;
       printf("\t%.*s", len, p + 1);
       p += len + 1;
       len = *p;
       if (p + len + 1 > aptr + dlen)
-	return NULL;
+        return NULL;
       printf("\t%.*s", len, p + 1);
       break;
 
@@ -487,13 +487,13 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       p = aptr;
       status = ares_expand_name(p, abuf, alen, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+        return NULL;
       printf("\t%s.", name);
       free(name);
       p += len;
       status = ares_expand_name(p, abuf, alen, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+        return NULL;
       printf("\t%s.", name);
       free(name);
       break;
@@ -503,11 +503,11 @@ static const unsigned char *display_rr(const unsigned char *aptr,
        * then a domain name.
        */
       if (dlen < 2)
-	return NULL;
+        return NULL;
       printf("\t%d", (aptr[0] << 8) | aptr[1]);
       status = ares_expand_name(aptr + 2, abuf, alen, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+        return NULL;
       printf("\t%s.", name);
       free(name);
       break;
@@ -519,24 +519,24 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       p = aptr;
       status = ares_expand_name(p, abuf, alen, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+        return NULL;
       printf("\t%s.\n", name);
       free(name);
       p += len;
       status = ares_expand_name(p, abuf, alen, &name, &len);
       if (status != ARES_SUCCESS)
-	return NULL;
+        return NULL;
       printf("\t\t\t\t\t\t%s.\n", name);
       free(name);
       p += len;
       if (p + 20 > aptr + dlen)
-	return NULL;
+        return NULL;
       printf("\t\t\t\t\t\t( %d %d %d %d %d )",
-	     (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3],
-	     (p[4] << 24) | (p[5] << 16) | (p[6] << 8) | p[7],
-	     (p[8] << 24) | (p[9] << 16) | (p[10] << 8) | p[11],
-	     (p[12] << 24) | (p[13] << 16) | (p[14] << 8) | p[15],
-	     (p[16] << 24) | (p[17] << 16) | (p[18] << 8) | p[19]);
+             (p[0] << 24) | (p[1] << 16) | (p[2] << 8) | p[3],
+             (p[4] << 24) | (p[5] << 16) | (p[6] << 8) | p[7],
+             (p[8] << 24) | (p[9] << 16) | (p[10] << 8) | p[11],
+             (p[12] << 24) | (p[13] << 16) | (p[14] << 8) | p[15],
+             (p[16] << 24) | (p[17] << 16) | (p[18] << 8) | p[19]);
       break;
 
     case T_TXT:
@@ -544,19 +544,19 @@ static const unsigned char *display_rr(const unsigned char *aptr,
        * strings. */
       p = aptr;
       while (p < aptr + dlen)
-	{
-	  len = *p;
-	  if (p + len + 1 > aptr + dlen)
-	    return NULL;
-	  printf("\t%.*s", len, p + 1);
-	  p += len + 1;
-	}
+        {
+          len = *p;
+          if (p + len + 1 > aptr + dlen)
+            return NULL;
+          printf("\t%.*s", len, p + 1);
+          p += len + 1;
+        }
       break;
 
     case T_A:
       /* The RR data is a four-byte Internet address. */
       if (dlen != 4)
-	return NULL;
+        return NULL;
       memcpy(&addr, aptr, sizeof(struct in_addr));
       printf("\t%s", inet_ntoa(addr));
       break;
@@ -569,18 +569,18 @@ static const unsigned char *display_rr(const unsigned char *aptr,
       /* The RR data is three two-byte numbers representing the
        * priority, weight, and port, followed by a domain name.
        */
-      
+
       printf("\t%d", DNS__16BIT(aptr));
       printf(" %d", DNS__16BIT(aptr + 2));
       printf(" %d", DNS__16BIT(aptr + 4));
-      
+
       status = ares_expand_name(aptr + 6, abuf, alen, &name, &len);
       if (status != ARES_SUCCESS)
         return NULL;
       printf("\t%s.", name);
       free(name);
       break;
-      
+
     default:
       printf("\t[Unknown RR; cannot parse]");
     }
@@ -596,7 +596,7 @@ static const char *type_name(int type)
   for (i = 0; i < ntypes; i++)
     {
       if (types[i].value == type)
-	return types[i].name;
+        return types[i].name;
     }
   return "(unknown)";
 }
@@ -608,7 +608,7 @@ static const char *class_name(int dnsclass)
   for (i = 0; i < nclasses; i++)
     {
       if (classes[i].value == dnsclass)
-	return classes[i].name;
+        return classes[i].name;
     }
   return "(unknown)";
 }
@@ -616,6 +616,6 @@ static const char *class_name(int dnsclass)
 static void usage(void)
 {
   fprintf(stderr, "usage: adig [-f flag] [-s server] [-c class] "
-	  "[-t type] [-p port] name ...\n");
+          "[-t type] [-p port] name ...\n");
   exit(1);
 }

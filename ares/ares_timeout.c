@@ -26,7 +26,7 @@
 #include "ares_private.h"
 
 struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv,
-			     struct timeval *tvbuf)
+                             struct timeval *tvbuf)
 {
   struct query *query;
   time_t now;
@@ -42,12 +42,12 @@ struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv,
   for (query = channel->queries; query; query = query->next)
     {
       if (query->timeout == 0)
-	continue;
+        continue;
       offset = query->timeout - now;
       if (offset < 0)
-	offset = 0;
+        offset = 0;
       if (min_offset == -1 || offset < min_offset)
-	min_offset = offset;
+        min_offset = offset;
     }
 
   /* If we found a minimum timeout and it's sooner than the one

@@ -35,9 +35,9 @@
 #include "inet_ntoa_r.h"
 #endif
 
-#define	IN6ADDRSZ	16
-#define	INADDRSZ	 4
-#define	INT16SZ		 2
+#define IN6ADDRSZ       16
+#define INADDRSZ         4
+#define INT16SZ          2
 
 #ifdef WIN32
 #define EAFNOSUPPORT    WSAEAFNOSUPPORT

@@ -148,7 +148,7 @@ CURLcode Curl_file_connect(struct connectdata *conn)
     if (actual_path[i] == '/')
       actual_path[i] = '\\';
 
-  fd = open(actual_path, O_RDONLY | O_BINARY);	/* no CR/LF translation! */
+  fd = open(actual_path, O_RDONLY | O_BINARY);  /* no CR/LF translation! */
   file->path = actual_path;
 #else
   fd = open(real_path, O_RDONLY);

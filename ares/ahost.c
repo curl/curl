@@ -33,7 +33,7 @@
 #include "ares_dns.h"
 
 #ifndef INADDR_NONE
-#define	INADDR_NONE 0xffffffff
+#define INADDR_NONE 0xffffffff
 #endif
 
 static void callback(void *arg, int status, struct hostent *host);
@@ -51,7 +51,7 @@ int main(int argc, char **argv)
   WORD wVersionRequested = MAKEWORD(1,1);
   WSADATA wsaData;
   WSAStartup(wVersionRequested, &wsaData);
-#endif  
+#endif
 
   if (argc <= 1)
     usage();
@@ -68,12 +68,12 @@ int main(int argc, char **argv)
     {
       addr.s_addr = inet_addr(*argv);
       if (addr.s_addr == INADDR_NONE)
-	ares_gethostbyname(channel, *argv, AF_INET, callback, *argv);
+        ares_gethostbyname(channel, *argv, AF_INET, callback, *argv);
       else
-	{
-	  ares_gethostbyaddr(channel, &addr, sizeof(addr), AF_INET, callback,
-			     *argv);
-	}
+        {
+          ares_gethostbyaddr(channel, &addr, sizeof(addr), AF_INET, callback,
+                             *argv);
+        }
     }
 
   /* Wait for all queries to complete. */
@@ -83,7 +83,7 @@ int main(int argc, char **argv)
       FD_ZERO(&write_fds);
       nfds = ares_fds(channel, &read_fds, &write_fds);
       if (nfds == 0)
-	break;
+        break;
       tvp = ares_timeout(channel, NULL, &tv);
       select(nfds, &read_fds, &write_fds, NULL, tvp);
       ares_process(channel, &read_fds, &write_fds);

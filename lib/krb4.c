@@ -115,7 +115,7 @@ krb4_check_prot(void *app_data, int level)
 
 static int
 krb4_decode(void *app_data, void *buf, int len, int level,
-	    struct connectdata *conn)
+            struct connectdata *conn)
 {
   MSG_DAT m;
   int e;
@@ -150,7 +150,7 @@ krb4_overhead(void *app_data, int level, int len)
 
 static int
 krb4_encode(void *app_data, void *from, int length, int level, void **to,
-	    struct connectdata *conn)
+            struct connectdata *conn)
 {
   struct krb4_data *d = app_data;
   *to = malloc(length + 31);
@@ -168,7 +168,7 @@ krb4_encode(void *app_data, void *from, int length, int level, void **to,
 
 static int
 mk_auth(struct krb4_data *d, KTEXT adat,
-	const char *service, char *host, int checksum)
+        const char *service, char *host, int checksum)
 {
   int ret;
   CREDENTIALS cred;

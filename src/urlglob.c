@@ -74,19 +74,19 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
 
   while (1) {
     switch (*pattern) {
-    case '\0':			/* URL ended while set was still open */
+    case '\0':                  /* URL ended while set was still open */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
                "unmatched brace at pos %d\n", (int)pos);
       return GLOB_ERROR;
 
     case '{':
-    case '[':			/* no nested expressions at this time */
+    case '[':                   /* no nested expressions at this time */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
                "nested braces not supported at pos %d\n", (int)pos);
       return GLOB_ERROR;
 
     case ',':
-    case '}':				/* set element completed */
+    case '}':                           /* set element completed */
       *buf = '\0';
       pat->content.Set.elements =
         realloc(pat->content.Set.elements,
@@ -103,10 +103,10 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
         /* entire set pattern completed */
         int wordamount;
 
-	/* always check for a literal (may be "") between patterns */
+        /* always check for a literal (may be "") between patterns */
         if(GLOB_ERROR == glob_word(glob, ++pattern, ++pos, &wordamount))
           wordamount=1;
-	*amount = pat->content.Set.size * wordamount;
+        *amount = pat->content.Set.size * wordamount;
 
         return GLOB_OK;
       }
@@ -116,22 +116,22 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
       ++pos;
       break;
 
-    case ']':				/* illegal closing bracket */
+    case ']':                           /* illegal closing bracket */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
                "illegal pattern at pos %d\n", (int)pos);
       return GLOB_ERROR;
 
-    case '\\':				/* escaped character, skip '\' */
-      if (*(buf+1) == '\0') {		/* but no escaping of '\0'! */
+    case '\\':                          /* escaped character, skip '\' */
+      if (*(buf+1) == '\0') {           /* but no escaping of '\0'! */
         snprintf(glob->errormsg, sizeof(glob->errormsg),
                  "illegal pattern at pos %d\n", (int)pos);
-	return GLOB_ERROR;
+        return GLOB_ERROR;
       }
       ++pattern;
-      ++pos;				/* intentional fallthrough */
+      ++pos;                            /* intentional fallthrough */
 
     default:
-      *buf++ = *pattern++;		/* copy character to set element */
+      *buf++ = *pattern++;              /* copy character to set element */
       ++pos;
     }
   }
@@ -155,12 +155,12 @@ static GlobCode glob_range(URLGlob *glob, char *pattern,
   /* patterns 0,1,2,... correspond to size=1,3,5,... */
   ++glob->size;
 
-  if (isalpha((int)*pattern)) {		/* character range detected */
+  if (isalpha((int)*pattern)) {         /* character range detected */
     pat->type = UPTCharRange;
     if (sscanf(pattern, "%c-%c]", &pat->content.CharRange.min_c,
                &pat->content.CharRange.max_c) != 2 ||
-	pat->content.CharRange.min_c >= pat->content.CharRange.max_c ||
-	pat->content.CharRange.max_c - pat->content.CharRange.min_c > 'z' - 'a') {
+        pat->content.CharRange.min_c >= pat->content.CharRange.max_c ||
+        pat->content.CharRange.max_c - pat->content.CharRange.min_c > 'z' - 'a') {
       /* the pattern is not well-formed */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
                "illegal pattern or range specification after pos %d\n", pos);
@@ -186,17 +186,17 @@ static GlobCode glob_range(URLGlob *glob, char *pattern,
     if (sscanf(pattern, "%d-%d]",
                &pat->content.NumRange.min_n,
                &pat->content.NumRange.max_n) != 2 ||
-	pat->content.NumRange.min_n >= pat->content.NumRange.max_n) {
+        pat->content.NumRange.min_n >= pat->content.NumRange.max_n) {
       /* the pattern is not well-formed */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
                "error: illegal pattern or range specification after pos %d\n",
                pos);
       return GLOB_ERROR;
     }
-    if (*pattern == '0') {		/* leading zero specified */
+    if (*pattern == '0') {              /* leading zero specified */
       c = pattern;
       while (isdigit((int)*c++))
-	++pat->content.NumRange.padlength; /* padding length is set for all
+        ++pat->content.NumRange.padlength; /* padding length is set for all
                                               instances of this pattern */
     }
     pat->content.NumRange.ptr_n = pat->content.NumRange.min_n;
@@ -248,10 +248,10 @@ static GlobCode glob_word(URLGlob *glob, char *pattern,
       /* escape character, skip '\' */
       ++pattern;
       ++pos;
-      if (*pattern == '\0')		/* but no escaping of '\0'! */
-	return GLOB_ERROR;
+      if (*pattern == '\0')             /* but no escaping of '\0'! */
+        return GLOB_ERROR;
     }
-    *buf++ = *pattern++;		/* copy character to literal */
+    *buf++ = *pattern++;                /* copy character to literal */
     ++pos;
   }
   *buf = '\0';
@@ -264,7 +264,7 @@ static GlobCode glob_word(URLGlob *glob, char *pattern,
 
   switch (*pattern) {
   case '\0':
-    break;			/* singular URL processed  */
+    break;                      /* singular URL processed  */
 
   case '{':
     /* process set pattern */
@@ -333,17 +333,17 @@ void glob_cleanup(URLGlob* glob)
   int elem;
 
   for (i = glob->size - 1; i < glob->size; --i) {
-    if (!(i & 1)) {	/* even indexes contain literals */
+    if (!(i & 1)) {     /* even indexes contain literals */
       free(glob->literal[i/2]);
     }
-    else {		/* odd indexes contain sets or ranges */
+    else {              /* odd indexes contain sets or ranges */
       if (glob->pattern[i/2].type == UPTSet) {
-	for (elem = glob->pattern[i/2].content.Set.size - 1;
+        for (elem = glob->pattern[i/2].content.Set.size - 1;
              elem >= 0;
              --elem) {
-	  free(glob->pattern[i/2].content.Set.elements[elem]);
-	}
-	free(glob->pattern[i/2].content.Set.elements);
+          free(glob->pattern[i/2].content.Set.elements[elem]);
+        }
+        free(glob->pattern[i/2].content.Set.elements);
       }
     }
   }
@@ -372,29 +372,29 @@ char *glob_next_url(URLGlob *glob)
       pat = &glob->pattern[i];
       switch (pat->type) {
       case UPTSet:
-	if (++pat->content.Set.ptr_s == pat->content.Set.size) {
-	  pat->content.Set.ptr_s = 0;
-	  carry = 1;
-	}
-	break;
+        if (++pat->content.Set.ptr_s == pat->content.Set.size) {
+          pat->content.Set.ptr_s = 0;
+          carry = 1;
+        }
+        break;
       case UPTCharRange:
-	if (++pat->content.CharRange.ptr_c > pat->content.CharRange.max_c) {
-	  pat->content.CharRange.ptr_c = pat->content.CharRange.min_c;
-	  carry = 1;
-	}
-	break;
+        if (++pat->content.CharRange.ptr_c > pat->content.CharRange.max_c) {
+          pat->content.CharRange.ptr_c = pat->content.CharRange.min_c;
+          carry = 1;
+        }
+        break;
       case UPTNumRange:
-	if (++pat->content.NumRange.ptr_n > pat->content.NumRange.max_n) {
-	  pat->content.NumRange.ptr_n = pat->content.NumRange.min_n;
-	  carry = 1;
-	}
-	break;
+        if (++pat->content.NumRange.ptr_n > pat->content.NumRange.max_n) {
+          pat->content.NumRange.ptr_n = pat->content.NumRange.min_n;
+          carry = 1;
+        }
+        break;
       default:
-	printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
-	exit (CURLE_FAILED_INIT);
+        printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
+        exit (CURLE_FAILED_INIT);
       }
     }
-    if (carry)		/* first pattern ptr has run into overflow, done! */
+    if (carry)          /* first pattern ptr has run into overflow, done! */
       return NULL;
   }
 
@@ -404,24 +404,24 @@ char *glob_next_url(URLGlob *glob)
       strcpy(buf, lit);
       buf += strlen(lit);
     }
-    else {				/* the rest (i odd) are patterns */
+    else {                              /* the rest (i odd) are patterns */
       pat = &glob->pattern[j/2];
       switch(pat->type) {
       case UPTSet:
-	strcpy(buf, pat->content.Set.elements[pat->content.Set.ptr_s]);
-	buf += strlen(pat->content.Set.elements[pat->content.Set.ptr_s]);
-	break;
+        strcpy(buf, pat->content.Set.elements[pat->content.Set.ptr_s]);
+        buf += strlen(pat->content.Set.elements[pat->content.Set.ptr_s]);
+        break;
       case UPTCharRange:
-	*buf++ = pat->content.CharRange.ptr_c;
-	break;
+        *buf++ = pat->content.CharRange.ptr_c;
+        break;
       case UPTNumRange:
-	sprintf(buf, "%0*d",
+        sprintf(buf, "%0*d",
                 pat->content.NumRange.padlength, pat->content.NumRange.ptr_n);
         buf += strlen(buf); /* make no sprint() return code assumptions */
-	break;
+        break;
       default:
-	printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
-	exit (CURLE_FAILED_INIT);
+        printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
+        exit (CURLE_FAILED_INIT);
       }
     }
   }

@@ -775,7 +775,7 @@ static int hostmatch(const char *hostname, const char *pattern)
         return HOST_MATCH;
 
       while (*hostname) {
-	/* The only recursive function in libcurl! */
+        /* The only recursive function in libcurl! */
         if (hostmatch(hostname++,pattern) == HOST_MATCH)
           return HOST_MATCH;
       }
@@ -1197,7 +1197,7 @@ Curl_SSLConnect(struct connectdata *conn,
     if (!SSL_CTX_load_verify_locations(connssl->ctx, data->set.ssl.CAfile,
                                        data->set.ssl.CApath)) {
       if (data->set.ssl.verifypeer) {
- 	/* Fail if we insist on successfully verifying the server. */
+        /* Fail if we insist on successfully verifying the server. */
         failf(data,"error setting certificate verify locations:\n"
               "  CAfile: %s\n  CApath: %s\n",
               data->set.ssl.CAfile ? data->set.ssl.CAfile : "none",
@@ -1351,7 +1351,7 @@ Curl_SSLConnect(struct connectdata *conn,
          * the SO_ERROR is also lost.
          */
         if (CURLE_SSL_CONNECT_ERROR == rc && errdetail == 0) {
-	  failf(data, "Unknown SSL protocol error in connection to %s:%d ",
+          failf(data, "Unknown SSL protocol error in connection to %s:%d ",
                 conn->host.name, conn->port);
           return rc;
         }

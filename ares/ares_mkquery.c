@@ -47,15 +47,15 @@
  *
  * AA, TC, RA, and RCODE are only set in responses.  Brief description
  * of the remaining fields:
- *	ID	Identifier to match responses with queries
- *	QR	Query (0) or response (1)
- *	Opcode	For our purposes, always QUERY
- * 	RD	Recursion desired
- *	Z	Reserved (zero)
- *	QDCOUNT	Number of queries
- *	ANCOUNT	Number of answers
- *	NSCOUNT	Number of name server records
- *	ARCOUNT	Number of additional records
+ *      ID      Identifier to match responses with queries
+ *      QR      Query (0) or response (1)
+ *      Opcode  For our purposes, always QUERY
+ *      RD      Recursion desired
+ *      Z       Reserved (zero)
+ *      QDCOUNT Number of queries
+ *      ANCOUNT Number of answers
+ *      NSCOUNT Number of name server records
+ *      ARCOUNT Number of additional records
  *
  * Question format, from RFC 1035:
  *                                  1  1  1  1  1  1
@@ -77,7 +77,7 @@
  */
 
 int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
-		 int rd, unsigned char **buf, int *buflen)
+                 int rd, unsigned char **buf, int *buflen)
 {
   int len;
   unsigned char *q;
@@ -89,7 +89,7 @@ int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
   for (p = name; *p; p++)
     {
       if (*p == '\\' && *(p + 1) != 0)
-	p++;
+        p++;
       len++;
     }
   /* If there are n periods in the name, there are n + 1 labels, and
@@ -121,31 +121,31 @@ int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
   while (*name)
     {
       if (*name == '.')
-	return ARES_EBADNAME;
+        return ARES_EBADNAME;
 
       /* Count the number of bytes in this label. */
       len = 0;
       for (p = name; *p && *p != '.'; p++)
-	{
-	  if (*p == '\\' && *(p + 1) != 0)
-	    p++;
-	  len++;
-	}
+        {
+          if (*p == '\\' && *(p + 1) != 0)
+            p++;
+          len++;
+        }
       if (len > MAXLABEL)
-	return ARES_EBADNAME;
+        return ARES_EBADNAME;
 
       /* Encode the length and copy the data. */
       *q++ = len;
       for (p = name; *p && *p != '.'; p++)
-	{
-	  if (*p == '\\' && *(p + 1) != 0)
-	    p++;
-	  *q++ = *p;
-	}
+        {
+          if (*p == '\\' && *(p + 1) != 0)
+            p++;
+          *q++ = *p;
+        }
 
       /* Go to the next label and repeat, unless we hit the end. */
       if (!*p)
-	break;
+        break;
       name = p + 1;
     }
 

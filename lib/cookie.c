@@ -29,20 +29,20 @@ RECEIVING COOKIE INFORMATION
 
 struct CookieInfo *cookie_init(char *file);
 
-	Inits a cookie struct to store data in a local file. This is always
-	called before any cookies are set.
+        Inits a cookie struct to store data in a local file. This is always
+        called before any cookies are set.
 
 int cookies_set(struct CookieInfo *cookie, char *cookie_line);
 
-	The 'cookie_line' parameter is a full "Set-cookie:" line as
-	received from a server.
+        The 'cookie_line' parameter is a full "Set-cookie:" line as
+        received from a server.
 
-	The function need to replace previously stored lines that this new
-	line superceeds.
+        The function need to replace previously stored lines that this new
+        line superceeds.
 
-	It may remove lines that are expired.
+        It may remove lines that are expired.
 
-	It should return an indication of success/error.
+        It should return an indication of success/error.
 
 
 SENDING COOKIE INFORMATION
@@ -51,12 +51,12 @@ SENDING COOKIE INFORMATION
 struct Cookies *cookie_getlist(struct CookieInfo *cookie,
                                char *host, char *path, bool secure);
 
-	For a given host and path, return a linked list of cookies that
-	the client should send to the server if used now. The secure
-	boolean informs the cookie if a secure connection is achieved or
-	not.
+        For a given host and path, return a linked list of cookies that
+        the client should send to the server if used now. The secure
+        boolean informs the cookie if a secure connection is achieved or
+        not.
 
-	It shall only return cookies that haven't expired.
+        It shall only return cookies that haven't expired.
 
 
 Example set of cookies:
@@ -775,10 +775,10 @@ void Curl_cookie_freelist(struct Cookie *co)
    struct Cookie *next;
    if(co) {
       while(co) {
-	 next = co->next;
-	 free(co); /* we only free the struct since the "members" are all
-		      just copied! */
-	 co = next;
+         next = co->next;
+         free(co); /* we only free the struct since the "members" are all
+                      just copied! */
+         co = next;
       }
    }
 }
@@ -796,13 +796,13 @@ void Curl_cookie_cleanup(struct CookieInfo *c)
    struct Cookie *next;
    if(c) {
       if(c->filename)
-	 free(c->filename);
+         free(c->filename);
       co = c->cookies;
 
       while(co) {
-	 next = co->next;
+         next = co->next;
          freecookie(co);
-	 co = next;
+         co = next;
       }
       free(c); /* free the base struct as well */
    }

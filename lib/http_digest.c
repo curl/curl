@@ -314,7 +314,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
       A2       = Method ":" digest-uri-value
 
-	  If the "qop" value is "auth-int", then A2 is:
+          If the "qop" value is "auth-int", then A2 is:
 
       A2       = Method ":" digest-uri-value ":" H(entity-body)
 

@@ -78,7 +78,7 @@
 #include "timeval.h"
 
 #ifdef HAVE_ZLIB_H
-#include <zlib.h> 		/* for content-encoding */
+#include <zlib.h>               /* for content-encoding */
 #endif
 
 #ifdef USE_ARES
@@ -151,8 +151,8 @@ struct ssl_config_data {
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
   long numsessions;      /* SSL session id cache size */
-  curl_ssl_ctx_callback fsslctx; 	/* function to initialize ssl ctx */
-  void *fsslctxp; 	/*parameter for call back */
+  curl_ssl_ctx_callback fsslctx;        /* function to initialize ssl ctx */
+  void *fsslctxp;       /*parameter for call back */
 };
 
 /* information stored about one single SSL session */
@@ -342,27 +342,27 @@ struct Curl_transfer_keeper {
   curl_off_t writebytecount;    /* number of bytes written */
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
-  bool header;	                /* incoming data has HTTP header */
+  bool header;                  /* incoming data has HTTP header */
   enum {
     HEADER_NORMAL,              /* no bad header at all */
     HEADER_PARTHEADER,          /* part of the chunk is a bad header, the rest
                                    is normal data */
     HEADER_ALLBAD               /* all was believed to be header */
-  } badheader;		        /* the header was deemed bad and will be
+  } badheader;                  /* the header was deemed bad and will be
                                    written as body */
-  int headerline;		/* counts header lines to better track the
+  int headerline;               /* counts header lines to better track the
                                    first one */
-  char *hbufp;			/* points at *end* of header line */
+  char *hbufp;                  /* points at *end* of header line */
   size_t hbuflen;
-  char *str;			/* within buf */
-  char *str_start;		/* within buf */
-  char *end_ptr;		/* within buf */
-  char *p;			/* within headerbuff */
-  bool content_range;      	/* set TRUE if Content-Range: was found */
-  curl_off_t offset;	        /* possible resume offset read from the
+  char *str;                    /* within buf */
+  char *str_start;              /* within buf */
+  char *end_ptr;                /* within buf */
+  char *p;                      /* within headerbuff */
+  bool content_range;           /* set TRUE if Content-Range: was found */
+  curl_off_t offset;            /* possible resume offset read from the
                                    Content-Range: header */
-  int httpcode;		        /* error code from the 'HTTP/1.? XXX' line */
-  int httpversion;		/* the HTTP version*10 */
+  int httpcode;                 /* error code from the 'HTTP/1.? XXX' line */
+  int httpversion;              /* the HTTP version*10 */
   struct timeval start100;      /* time stamp to wait for the 100 code from */
   bool write_after_100_header;  /* TRUE = we enable the write after we
                                    received a 100-continue/timeout or
@@ -370,17 +370,17 @@ struct Curl_transfer_keeper {
   bool wait100_after_headers;   /* TRUE = after the request-headers have been
                                    sent off properly, we go into the wait100
                                    state, FALSE = don't */
-  int content_encoding;  	/* What content encoding. sec 3.5, RFC2616. */
+  int content_encoding;         /* What content encoding. sec 3.5, RFC2616. */
 
-#define IDENTITY 0		/* No encoding */
-#define DEFLATE 1		/* zlib delfate [RFC 1950 & 1951] */
-#define GZIP 2			/* gzip algorithm [RFC 1952] */
-#define COMPRESS 3		/* Not handled, added for completeness */
+#define IDENTITY 0              /* No encoding */
+#define DEFLATE 1               /* zlib delfate [RFC 1950 & 1951] */
+#define GZIP 2                  /* gzip algorithm [RFC 1952] */
+#define COMPRESS 3              /* Not handled, added for completeness */
 
 #ifdef HAVE_LIBZ
-  bool zlib_init;		/* True if zlib already initialized;
-				   undefined if Content-Encoding header. */
-  z_stream z;			/* State structure for zlib. */
+  bool zlib_init;               /* True if zlib already initialized;
+                                   undefined if Content-Encoding header. */
+  z_stream z;                   /* State structure for zlib. */
 #endif
 
   time_t timeofdoc;
@@ -519,8 +519,8 @@ struct connectdata {
   /**** curl_get() phase fields */
 
   /* READ stuff */
-  curl_socket_t sockfd;	  /* socket to read from or CURL_SOCKET_BAD */
-  curl_off_t size;	  /* -1 if unknown at this point */
+  curl_socket_t sockfd;   /* socket to read from or CURL_SOCKET_BAD */
+  curl_off_t size;        /* -1 if unknown at this point */
   curl_off_t *bytecountp; /* return number of bytes read or NULL */
 
   /* WRITE stuff */
@@ -543,7 +543,7 @@ struct connectdata {
   } allocptr;
 
   char *newurl; /* This can only be set if a Location: was in the
-		   document headers */
+                   document headers */
 
 #ifdef HAVE_KRB4
   enum protection_level command_prot;

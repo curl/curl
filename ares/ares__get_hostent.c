@@ -42,96 +42,96 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
     {
       /* Skip comment lines; terminate line at comment character. */
       if (*line == '#' || !*line)
-	continue;
+        continue;
       p = strchr(line, '#');
       if (p)
-	*p = 0;
+        *p = 0;
 
       /* Get the address part. */
       p = line;
       while (*p && !isspace((unsigned char)*p))
-	p++;
+        p++;
       if (!*p)
-	continue;
+        continue;
       *p = 0;
       addr.s_addr = inet_addr(line);
       if (addr.s_addr == INADDR_NONE)
-	continue;
+        continue;
 
       /* Get the canonical hostname. */
       p++;
       while (isspace((unsigned char)*p))
-	p++;
+        p++;
       if (!*p)
-	continue;
+        continue;
       q = p;
       while (*q && !isspace((unsigned char)*q))
-	q++;
+        q++;
       end_at_hostname = (*q == 0);
       *q = 0;
       canonical = p;
 
       naliases = 0;
       if (!end_at_hostname)
-	{
-	  /* Count the aliases. */
-	  p = q + 1;
-	  while (isspace((unsigned char)*p))
-	    p++;
-	  while (*p)
-	    {
-	      while (*p && !isspace((unsigned char)*p))
-		p++;
-	      while (isspace((unsigned char)*p))
-		p++;
-	      naliases++;
-	    }
-	}
+        {
+          /* Count the aliases. */
+          p = q + 1;
+          while (isspace((unsigned char)*p))
+            p++;
+          while (*p)
+            {
+              while (*p && !isspace((unsigned char)*p))
+                p++;
+              while (isspace((unsigned char)*p))
+                p++;
+              naliases++;
+            }
+        }
 
       /* Allocate memory for the host structure. */
       hostent = malloc(sizeof(struct hostent));
       if (!hostent)
-	break;
+        break;
       hostent->h_aliases = NULL;
       hostent->h_addr_list = NULL;
       hostent->h_name = strdup(canonical);
       if (!hostent->h_name)
-	break;
+        break;
       hostent->h_addr_list = malloc(2 * sizeof(char *));
       if (!hostent->h_addr_list)
-	break;
+        break;
       hostent->h_addr_list[0] = malloc(sizeof(struct in_addr));
       if (!hostent->h_addr_list[0])
-	break;
+        break;
       hostent->h_aliases = malloc((naliases + 1) * sizeof(char *));
       if (!hostent->h_aliases)
-	break;
+        break;
 
       /* Copy in aliases. */
       naliases = 0;
       if (!end_at_hostname)
-	{
-	  p = canonical + strlen(canonical) + 1;
-	  while (isspace((unsigned char)*p))
-	    p++;
-	  while (*p)
-	    {
-	      q = p;
-	      while (*q && !isspace((unsigned char)*q))
-		q++;
-	      hostent->h_aliases[naliases] = malloc(q - p + 1);
-	      if (hostent->h_aliases[naliases] == NULL)
-		break;
-	      memcpy(hostent->h_aliases[naliases], p, q - p);
-	      hostent->h_aliases[naliases][q - p] = 0;
-	      p = q;
-	      while (isspace((unsigned char)*p))
-		p++;
-	      naliases++;
-	    }
-	  if (*p)
-	    break;
-	}
+        {
+          p = canonical + strlen(canonical) + 1;
+          while (isspace((unsigned char)*p))
+            p++;
+          while (*p)
+            {
+              q = p;
+              while (*q && !isspace((unsigned char)*q))
+                q++;
+              hostent->h_aliases[naliases] = malloc(q - p + 1);
+              if (hostent->h_aliases[naliases] == NULL)
+                break;
+              memcpy(hostent->h_aliases[naliases], p, q - p);
+              hostent->h_aliases[naliases][q - p] = 0;
+              p = q;
+              while (isspace((unsigned char)*p))
+                p++;
+              naliases++;
+            }
+          if (*p)
+            break;
+        }
       hostent->h_aliases[naliases] = NULL;
 
       hostent->h_addrtype = AF_INET;
@@ -149,22 +149,22 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
     {
       /* Memory allocation failure; clean up. */
       if (hostent)
-	{
+        {
           if(hostent->h_name)
             free((char *) hostent->h_name);
-	  if (hostent->h_aliases)
-	    {
-	      for (alias = hostent->h_aliases; *alias; alias++)
-		free(*alias);
-	    }
+          if (hostent->h_aliases)
+            {
+              for (alias = hostent->h_aliases; *alias; alias++)
+                free(*alias);
+            }
           if(hostent->h_aliases)
             free(hostent->h_aliases);
-	  if (hostent->h_addr_list && hostent->h_addr_list[0])
-	    free(hostent->h_addr_list[0]);
+          if (hostent->h_addr_list && hostent->h_addr_list[0])
+            free(hostent->h_addr_list[0]);
           if(hostent->h_addr_list)
             free(hostent->h_addr_list);
           free(hostent);
-	}
+        }
       return ARES_ENOMEM;
     }
 

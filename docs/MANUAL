@@ -580,11 +580,11 @@ NETWORK INTERFACE
 
   Get a web page from a server using a specified port for the interface:
 
-	curl --interface eth0:1 http://www.netscape.com/
+        curl --interface eth0:1 http://www.netscape.com/
 
   or
 
-	curl --interface 192.168.1.10 http://www.netscape.com/
+        curl --interface 192.168.1.10 http://www.netscape.com/
 
 HTTPS
 

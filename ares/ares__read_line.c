@@ -38,26 +38,26 @@ int ares__read_line(FILE *fp, char **buf, int *bufsize)
     {
       *buf = malloc(128);
       if (!*buf)
-	return ARES_ENOMEM;
+        return ARES_ENOMEM;
       *bufsize = 128;
     }
 
   while (1)
     {
       if (!fgets(*buf + offset, *bufsize - (int)offset, fp))
-	return (offset != 0) ? 0 : (ferror(fp)) ? ARES_EFILE : ARES_EOF;
+        return (offset != 0) ? 0 : (ferror(fp)) ? ARES_EFILE : ARES_EOF;
       len = offset + strlen(*buf + offset);
       if ((*buf)[len - 1] == '\n')
-	{
-	  (*buf)[len - 1] = 0;
-	  return ARES_SUCCESS;
-	}
+        {
+          (*buf)[len - 1] = 0;
+          return ARES_SUCCESS;
+        }
       offset = len;
 
       /* Allocate more space. */
       newbuf = realloc(*buf, *bufsize * 2);
       if (!newbuf)
-	return ARES_ENOMEM;
+        return ARES_ENOMEM;
       *buf = newbuf;
       *bufsize *= 2;
     }

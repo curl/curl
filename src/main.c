@@ -46,7 +46,7 @@
 #include "writeenv.h"
 #endif
 
-#define CURLseparator	"--_curl_--"
+#define CURLseparator   "--_curl_--"
 
 #if defined(WIN32)&&!defined(__CYGWIN32__)
 #include <winsock2.h>
@@ -146,7 +146,7 @@ typedef char bool;
  * standard MIN macro
  */
 #ifndef MIN
-#define MIN(X,Y)	(((X) < (Y)) ? (X) : (Y))
+#define MIN(X,Y)        (((X) < (Y)) ? (X) : (Y))
 #endif
 
 typedef enum {
@@ -207,7 +207,7 @@ char *strdup(char *str)
 #define mkdir(x,y) (mkdir)(x)
 #endif
 
-#ifdef	VMS
+#ifdef  VMS
 #include "curlmsg_vms.h"
 #endif
 
@@ -523,7 +523,7 @@ static char *my_get_line(FILE *fp);
 static int create_dir_hierarchy(char *outfile);
 
 static void GetStr(char **string,
-		   char *value)
+                   char *value)
 {
   if(*string)
     free(*string);
@@ -788,34 +788,34 @@ static int formparse(char *input,
       multi_start = multi_current=NULL;
 
       do {
-	/* since this was a file, it may have a content-type specifier
-	   at the end too, or a filename. Or both. */
+        /* since this was a file, it may have a content-type specifier
+           at the end too, or a filename. Or both. */
         char *ptr;
         char *filename=NULL;
 
-	sep=strchr(contp, FORM_TYPE_SEPARATOR);
-	sep2=strchr(contp, FORM_FILE_SEPARATOR);
+        sep=strchr(contp, FORM_TYPE_SEPARATOR);
+        sep2=strchr(contp, FORM_FILE_SEPARATOR);
 
-	/* pick the closest */
-	if(sep2 && (sep2 < sep)) {
-	  sep = sep2;
+        /* pick the closest */
+        if(sep2 && (sep2 < sep)) {
+          sep = sep2;
 
-	  /* no type was specified! */
-	}
+          /* no type was specified! */
+        }
 
         type = NULL;
 
-	if(sep) {
+        if(sep) {
 
-	  /* if we got here on a comma, don't do much */
-	  if(FORM_FILE_SEPARATOR == *sep)
-	    ptr = NULL;
-	  else
+          /* if we got here on a comma, don't do much */
+          if(FORM_FILE_SEPARATOR == *sep)
+            ptr = NULL;
+          else
             ptr = sep+1;
 
-	  *sep=0; /* terminate file name at separator */
+          *sep=0; /* terminate file name at separator */
 
-	  while(ptr && (FORM_FILE_SEPARATOR!= *ptr)) {
+          while(ptr && (FORM_FILE_SEPARATOR!= *ptr)) {
 
             /* pass all white spaces */
             while(isspace((int)*ptr))
@@ -855,21 +855,21 @@ static int formparse(char *input,
             else
               /* confusion, bail out of loop */
               break;
-	  }
+          }
           /* find the following comma */
           if(ptr)
             sep=strchr(ptr, FORM_FILE_SEPARATOR);
           else
             sep=NULL;
-	}
-	else {
-	  sep=strchr(contp, FORM_FILE_SEPARATOR);
-	}
-	if(sep) {
-	  /* the next file name starts here */
-	  *sep =0;
-	  sep++;
-	}
+        }
+        else {
+          sep=strchr(contp, FORM_FILE_SEPARATOR);
+        }
+        if(sep) {
+          /* the next file name starts here */
+          *sep =0;
+          sep++;
+        }
         /* if type == NULL curl_formadd takes care of the problem */
 
         if (!AddMultiFiles (contp, type, filename, &multi_start,
@@ -879,7 +879,7 @@ static int formparse(char *input,
           FreeMultiInfo (multi_start);
           return 3;
         }
-	contp = sep; /* move the contents pointer to after the separator */
+        contp = sep; /* move the contents pointer to after the separator */
 
       } while(sep && *sep); /* loop if there's another file name */
 
@@ -1280,8 +1280,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           numhits = 1; /* a single unique hit */
           break;
         }
-	parse = aliases[j].letter;
-	hit = j;
+        parse = aliases[j].letter;
+        hit = j;
       }
     }
     if(numhits>1) {
@@ -1314,13 +1314,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 #endif
     if(hit < 0) {
       for(j=0; j< sizeof(aliases)/sizeof(aliases[0]); j++) {
-	if(letter == aliases[j].letter[0]) {
-	  hit = j;
-	  break;
-	}
+        if(letter == aliases[j].letter[0]) {
+          hit = j;
+          break;
+        }
       }
       if(hit < 0) {
-	return PARAM_OPTION_UNKNOWN;
+        return PARAM_OPTION_UNKNOWN;
       }
     }
     if(hit < 0) {
@@ -1392,34 +1392,34 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
 
       case 'j': /* --compressed */
- 	config->encoding ^= TRUE;
- 	break;
+        config->encoding ^= TRUE;
+        break;
 
       case 'k': /* --digest */
- 	config->authtype = CURLAUTH_DIGEST;
- 	break;
+        config->authtype = CURLAUTH_DIGEST;
+        break;
 
       case 'l': /* --negotiate */
         if(curlinfo->features & CURL_VERSION_GSSNEGOTIATE)
           config->authtype = CURLAUTH_GSSNEGOTIATE;
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
-	break;
+        break;
 
       case 'm': /* --ntlm */
         if(curlinfo->features & CURL_VERSION_NTLM)
           config->authtype = CURLAUTH_NTLM;
         else
           return PARAM_LIBCURL_DOESNT_SUPPORT;
-	break;
+        break;
 
       case 'n': /* --basic for completeness */
-	config->authtype = CURLAUTH_BASIC;
-	break;
+        config->authtype = CURLAUTH_BASIC;
+        break;
 
       case 'o': /* --anyauth, let libcurl pick it */
-	config->authtype = CURLAUTH_ANY;
-	break;
+        config->authtype = CURLAUTH_ANY;
+        break;
 
 #ifdef __DJGPP__
       case 'p': /* --wdebug */
@@ -1520,8 +1520,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         GetStr(&config->socks5proxy, nextarg);
         break;
       case 'd': /* --tcp-nodelay option */
-	config->tcp_nodelay ^= TRUE;
-	break;
+        config->tcp_nodelay ^= TRUE;
+        break;
       case 'e': /* --proxy-digest */
         config->proxydigest ^= TRUE;
         break;
@@ -1723,11 +1723,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'F':
       /* "form data" simulation, this is a little advanced so lets do our best
-	 to sort this out slowly and carefully */
+         to sort this out slowly and carefully */
       if(formparse(nextarg,
                    &config->httppost,
                    &config->last_post))
-	return PARAM_BAD_USE;
+        return PARAM_BAD_USE;
       if(SetHTTPrequest(HTTPREQ_POST, &config->httpreq))
         return PARAM_BAD_USE;
       break;
@@ -1860,9 +1860,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case 'P':
       /* This makes the FTP sessions use PORT instead of PASV */
       /* use <eth0> or <192.168.10.10> style addresses. Anything except
-	 this will make us try to get the "default" address.
-	 NOTE: this is a changed behaviour since the released 4.1!
-	 */
+         this will make us try to get the "default" address.
+         NOTE: this is a changed behaviour since the released 4.1!
+         */
       GetStr(&config->ftpport, nextarg);
       break;
     case 'p':
@@ -1871,7 +1871,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
 
     case 'q': /* if used first, already taken care of, we do it like
-		 this so we don't cause an error! */
+                 this so we don't cause an error! */
       break;
     case 'Q':
       /* QUOTE command to send to FTP server */
@@ -2034,14 +2034,14 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       if(str2num(&config->low_speed_time, nextarg))
         return PARAM_BAD_NUMERIC;
       if(!config->low_speed_limit)
-	config->low_speed_limit = 1;
+        config->low_speed_limit = 1;
       break;
     case 'Y':
       /* low speed limit */
       if(str2num(&config->low_speed_limit, nextarg))
         return PARAM_BAD_NUMERIC;
       if(!config->low_speed_time)
-	config->low_speed_time=30;
+        config->low_speed_time=30;
       break;
     case 'z': /* time condition coming up */
       switch(*nextarg) {
@@ -2254,7 +2254,7 @@ static void parseconfig(const char *filename,
       if(alloced_param)
       {
         free(param);
-	param = NULL;
+        param = NULL;
       }
 
       free(aline);
@@ -2831,23 +2831,23 @@ operate(struct Configurable *config, int argc, char *argv[])
       char *flag = argv[i];
 
       if(curlx_strequal("--", argv[i]))
-	/* this indicates the end of the flags and thus enables the
-	   following (URL) argument to start with -. */
-	stillflags=FALSE;
+        /* this indicates the end of the flags and thus enables the
+           following (URL) argument to start with -. */
+        stillflags=FALSE;
       else {
-	nextarg= (i < argc - 1)? argv[i+1]: NULL;
+        nextarg= (i < argc - 1)? argv[i+1]: NULL;
 
-	res = getparameter(flag, nextarg, &passarg, config);
-	if(res) {
+        res = getparameter(flag, nextarg, &passarg, config);
+        if(res) {
           const char *reason = param2text(res);
           if(res != PARAM_HELP_REQUESTED)
             helpf("option %s: %s\n", origopt, reason);
           clean_getout(config);
-	  return CURLE_FAILED_INIT;
+          return CURLE_FAILED_INIT;
         }
 
-	if(passarg) /* we're supposed to skip this */
-	  i++;
+        if(passarg) /* we're supposed to skip this */
+          i++;
       }
     }
     else {
@@ -3093,7 +3093,7 @@ operate(struct Configurable *config, int argc, char *argv[])
               config->resume_from = 0;
           }
 
-	  outs.filename = outfile;
+          outs.filename = outfile;
 
           if(config->resume_from) {
             /* open file for output: */
@@ -3253,8 +3253,8 @@ operate(struct Configurable *config, int argc, char *argv[])
         }
 #endif
 
-	if(1 == config->tcp_nodelay)
-	  curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 1);
+        if(1 == config->tcp_nodelay)
+          curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 1);
 
         curl_easy_setopt(curl, CURLOPT_SSLENGINE, config->engine);
         curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1);
@@ -3479,7 +3479,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           ourWriteEnv(curl);
 #endif
 
-#ifdef	VMS
+#ifdef  VMS
         if (!config->showerror)  {
           vms_show = VMSSTS_HIDE;
         }
@@ -3617,8 +3617,8 @@ int main(int argc, char *argv[])
 #ifdef __NOVELL_LIBC__
   pressanykey();
 #endif
-#ifdef	VMS
-  if (res > CURL_LAST) res = CURL_LAST;	/* If CURL_LAST exceeded then */
+#ifdef  VMS
+  if (res > CURL_LAST) res = CURL_LAST; /* If CURL_LAST exceeded then */
   return (vms_cond[res]|vms_show);      /* curlmsg.h is out of sync.  */
 #else
   return res;

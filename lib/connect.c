@@ -67,7 +67,7 @@
 #undef in_addr_t
 #define in_addr_t unsigned long
 #endif
-#ifdef	VMS
+#ifdef VMS
 #include <in.h>
 #include <inet.h>
 #endif
@@ -362,8 +362,8 @@ static CURLcode bindlocal(struct connectdata *conn,
 
       } /* end of if  h */
       else {
-	failf(data,"could't find my own IP address (%s)", myhost);
-	return CURLE_HTTP_PORT_FAILED;
+        failf(data,"could't find my own IP address (%s)", myhost);
+        return CURLE_HTTP_PORT_FAILED;
       }
     } /* end of inet_addr */
 

@@ -40,11 +40,11 @@ CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp);
 /* This sets up a forthcoming transfer */
 CURLcode
 Curl_Transfer (struct connectdata *data,
-               int sockindex,    	/* socket index to read from or -1 */
-               curl_off_t size,		/* -1 if unknown at this point */
-               bool getheader,     	/* TRUE if header parsing is wanted */
-               curl_off_t *bytecountp,	/* return number of bytes read */
-               int writesockindex, 	/* socket index to write to, it may
+               int sockindex,           /* socket index to read from or -1 */
+               curl_off_t size,         /* -1 if unknown at this point */
+               bool getheader,          /* TRUE if header parsing is wanted */
+               curl_off_t *bytecountp,  /* return number of bytes read */
+               int writesockindex,      /* socket index to write to, it may
                                            very well be the same we read from.
                                            -1 disables */
                curl_off_t *writecountp /* return number of bytes written */

@@ -37,49 +37,49 @@
   #include <netinet/in.h>
 #endif
 
-#define ARES_SUCCESS		0
+#define ARES_SUCCESS            0
 
 /* Server error codes (ARES_ENODATA indicates no relevant answer) */
-#define ARES_ENODATA		1
-#define ARES_EFORMERR		2
-#define ARES_ESERVFAIL		3
-#define ARES_ENOTFOUND		4
-#define ARES_ENOTIMP		5
-#define ARES_EREFUSED		6
+#define ARES_ENODATA            1
+#define ARES_EFORMERR           2
+#define ARES_ESERVFAIL          3
+#define ARES_ENOTFOUND          4
+#define ARES_ENOTIMP            5
+#define ARES_EREFUSED           6
 
 /* Locally generated error codes */
-#define ARES_EBADQUERY		7
-#define ARES_EBADNAME		8
-#define ARES_EBADFAMILY		9
-#define ARES_EBADRESP		10
-#define ARES_ECONNREFUSED	11
-#define ARES_ETIMEOUT		12
-#define ARES_EOF		13
-#define ARES_EFILE		14
-#define ARES_ENOMEM		15
-#define ARES_EDESTRUCTION	16
-#define ARES_EBADSTR		17
+#define ARES_EBADQUERY          7
+#define ARES_EBADNAME           8
+#define ARES_EBADFAMILY         9
+#define ARES_EBADRESP           10
+#define ARES_ECONNREFUSED       11
+#define ARES_ETIMEOUT           12
+#define ARES_EOF                13
+#define ARES_EFILE              14
+#define ARES_ENOMEM             15
+#define ARES_EDESTRUCTION       16
+#define ARES_EBADSTR            17
 
 /* Flag values */
-#define ARES_FLAG_USEVC		(1 << 0)
-#define ARES_FLAG_PRIMARY	(1 << 1)
-#define ARES_FLAG_IGNTC		(1 << 2)
-#define ARES_FLAG_NORECURSE	(1 << 3)
-#define ARES_FLAG_STAYOPEN	(1 << 4)
-#define ARES_FLAG_NOSEARCH	(1 << 5)
-#define ARES_FLAG_NOALIASES	(1 << 6)
-#define ARES_FLAG_NOCHECKRESP	(1 << 7)
+#define ARES_FLAG_USEVC         (1 << 0)
+#define ARES_FLAG_PRIMARY       (1 << 1)
+#define ARES_FLAG_IGNTC         (1 << 2)
+#define ARES_FLAG_NORECURSE     (1 << 3)
+#define ARES_FLAG_STAYOPEN      (1 << 4)
+#define ARES_FLAG_NOSEARCH      (1 << 5)
+#define ARES_FLAG_NOALIASES     (1 << 6)
+#define ARES_FLAG_NOCHECKRESP   (1 << 7)
 
 /* Option mask values */
-#define ARES_OPT_FLAGS		(1 << 0)
-#define ARES_OPT_TIMEOUT	(1 << 1)
-#define ARES_OPT_TRIES		(1 << 2)
-#define ARES_OPT_NDOTS		(1 << 3)
-#define ARES_OPT_UDP_PORT	(1 << 4)
-#define ARES_OPT_TCP_PORT	(1 << 5)
-#define ARES_OPT_SERVERS	(1 << 6)
-#define ARES_OPT_DOMAINS	(1 << 7)
-#define ARES_OPT_LOOKUPS	(1 << 8)
+#define ARES_OPT_FLAGS          (1 << 0)
+#define ARES_OPT_TIMEOUT        (1 << 1)
+#define ARES_OPT_TRIES          (1 << 2)
+#define ARES_OPT_NDOTS          (1 << 3)
+#define ARES_OPT_UDP_PORT       (1 << 4)
+#define ARES_OPT_TCP_PORT       (1 << 5)
+#define ARES_OPT_SERVERS        (1 << 6)
+#define ARES_OPT_DOMAINS        (1 << 7)
+#define ARES_OPT_LOOKUPS        (1 << 8)
 
 struct ares_options {
   int flags;
@@ -100,41 +100,41 @@ struct timeval;
 struct ares_channeldata;
 typedef struct ares_channeldata *ares_channel;
 typedef void (*ares_callback)(void *arg, int status, unsigned char *abuf,
-			      int alen);
+                              int alen);
 typedef void (*ares_host_callback)(void *arg, int status,
-				   struct hostent *hostent);
+                                   struct hostent *hostent);
 
 int ares_init(ares_channel *channelptr);
 int ares_init_options(ares_channel *channelptr, struct ares_options *options,
-		      int optmask);
+                      int optmask);
 void ares_destroy(ares_channel channel);
 void ares_cancel(ares_channel channel);
 void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
-	       ares_callback callback, void *arg);
+               ares_callback callback, void *arg);
 void ares_query(ares_channel channel, const char *name, int dnsclass,
-		int type, ares_callback callback, void *arg);
+                int type, ares_callback callback, void *arg);
 void ares_search(ares_channel channel, const char *name, int dnsclass,
-		 int type, ares_callback callback, void *arg);
+                 int type, ares_callback callback, void *arg);
 void ares_gethostbyname(ares_channel channel, const char *name, int family,
-			ares_host_callback callback, void *arg);
+                        ares_host_callback callback, void *arg);
 void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
-			int family, ares_host_callback callback, void *arg);
+                        int family, ares_host_callback callback, void *arg);
 
 int ares_fds(ares_channel channel, fd_set *read_fds, fd_set *write_fds);
 struct timeval *ares_timeout(ares_channel channel, struct timeval *maxtv,
-			     struct timeval *tv);
+                             struct timeval *tv);
 void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds);
 
 int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
-		 int rd, unsigned char **buf, int *buflen);
+                 int rd, unsigned char **buf, int *buflen);
 int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
-		     int alen, char **s, long *enclen);
+                     int alen, char **s, long *enclen);
 int ares_expand_string(const unsigned char *encoded, const unsigned char *abuf,
-		     int alen, unsigned char **s, long *enclen);
+                     int alen, unsigned char **s, long *enclen);
 int ares_parse_a_reply(const unsigned char *abuf, int alen,
-		       struct hostent **host);
+                       struct hostent **host);
 int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
-			 int addrlen, int family, struct hostent **host);
+                         int addrlen, int family, struct hostent **host);
 void ares_free_string(void *str);
 void ares_free_hostent(struct hostent *host);
 const char *ares_strerror(int code);

@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -56,7 +56,7 @@ char *GetEnv(const char *variable, char do_expand)
 
   /* Don't use getenv(); it doesn't find variable added after program was
    * started. Don't accept truncated results (i.e. rc >= sizeof(buf1)).  */
-  
+
   rc = GetEnvironmentVariable(variable, buf1, sizeof(buf1));
   if (rc > 0 && rc < sizeof(buf1)) {
     env = buf1;
@@ -71,10 +71,10 @@ char *GetEnv(const char *variable, char do_expand)
   }
 #else
   (void)do_expand;
-#ifdef	VMS
+#ifdef  VMS
   env = getenv(variable);
   if (env && strcmp("HOME",variable) == 0) {
-	env = decc$translate_vms(env);
+        env = decc$translate_vms(env);
   }
 #else
   /* no length control */
@@ -90,11 +90,11 @@ char *homedir(void)
   char *home = GetEnv("HOME", FALSE);
   if(home)
     return home;
-  
+
 #if defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
  {
    struct passwd *pw = getpwuid(geteuid());
-  
+
    if (pw) {
 #ifdef VMS
      home = decc$translate_vms(pw->pw_dir);

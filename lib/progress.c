@@ -256,7 +256,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     if (!data->progress.callback) {
       if(conn->resume_from)
         fprintf(data->set.err,
-		"** Resuming transfer from byte position %" FORMAT_OFF_T
+                "** Resuming transfer from byte position %" FORMAT_OFF_T
                 "\n",
                 conn->resume_from);
       fprintf(data->set.err,
