@@ -1,0 +1,32 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 Mooo
+Server: test-server/fake
+Connection: close
+
+*flopp*
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+specify more -o than URLs
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/want/26 -o - -o -
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /want/26 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>

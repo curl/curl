@@ -1,0 +1,109 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 301 This is a weirdo text message
+Server: test-server/fake
+Location: data/reply/25
+Content-Length: 32
+Connection: close
+
+Redirect to the same URL again!
+</data>
+<datacheck>
+HTTP/1.1 301 This is a weirdo text message
+Server: test-server/fake
+Location: data/reply/25
+Content-Length: 32
+Connection: close
+
+HTTP/1.1 301 This is a weirdo text message
+Server: test-server/fake
+Location: data/reply/25
+Content-Length: 32
+Connection: close
+
+HTTP/1.1 301 This is a weirdo text message
+Server: test-server/fake
+Location: data/reply/25
+Content-Length: 32
+Connection: close
+
+HTTP/1.1 301 This is a weirdo text message
+Server: test-server/fake
+Location: data/reply/25
+Content-Length: 32
+Connection: close
+
+HTTP/1.1 301 This is a weirdo text message
+Server: test-server/fake
+Location: data/reply/25
+Content-Length: 32
+Connection: close
+
+HTTP/1.1 301 This is a weirdo text message
+Server: test-server/fake
+Location: data/reply/25
+Content-Length: 32
+Connection: close
+
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+ <name>
+looping HTTP Location: following with --max-redirs, no persistance
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/want/25 -L --max-redirs 5
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol>
+GET /want/25 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET /want/data/reply/25 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET /want/data/reply/data/reply/25 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET /want/data/reply/data/reply/data/reply/25 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET /want/data/reply/data/reply/data/reply/data/reply/25 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET /want/data/reply/data/reply/data/reply/data/reply/data/reply/25 HTTP/1.1
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+
+<errorcode>
+47
+</errorcode>
+</verify>

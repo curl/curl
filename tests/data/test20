@@ -1,0 +1,22 @@
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+attempt connect to non-existing host name
+ </name>
+ <command>
+non-existing-and-weeeeeeirdname
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+6
+</errorcode>
+</verify>
