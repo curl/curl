@@ -406,7 +406,7 @@ DhcpNameServer
   {
     status = config_nameserver(&servers, &nservers, buf);
     if (status == ARES_SUCCESS)
-       goto okay;
+      goto okay;
   }
 
   if (IsNT)
@@ -552,7 +552,9 @@ DhcpNameServer
     }
 
   /* If we got any name server entries, fill them in. */
+#ifdef WIN32
 okay:
+#endif
   if (servers)
     {
       channel->servers = servers;
