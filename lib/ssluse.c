@@ -739,40 +739,59 @@ static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
 
 /* ====================================================== */
 #ifdef USE_SSLEAY
-static int
-cert_hostcheck(const char *certname, const char *hostname)
-{
-  char *tmp;
-  const char *certdomain;
 
-  if(!certname ||
-     strlen(certname)<3 ||
-     !hostname ||
-     !strlen(hostname)) /* sanity check */
+/*
+ * Match a hostname against a wildcard pattern.
+ * E.g.
+ *  "foo.host.com" matches "*.host.com".
+ *
+ * We are a bit more liberal than RFC2818 describes in that we
+ * accept multiple "*" in pattern (similar to what some other browsers do).
+ * E.g.
+ *  "abc.def.domain.com" should strickly not match "*.domain.com", but we
+ *  don't consider "." to be important in CERT checking.
+ */
+#define HOST_NOMATCH 0
+#define HOST_MATCH   1
+
+static int hostmatch(const char *hostname, const char *pattern)
+{
+  while (1) {
+    int c = *pattern++;
+
+    if (c == '\0')
+      return (*hostname ? HOST_NOMATCH : HOST_MATCH);
+
+    if (c == '*') {
+      c = *pattern;
+      if (c == '\0')      /* "*\0" matches anything remaining */
+        return HOST_MATCH;
+
+      while (*hostname) {
+	/* The only recursive function in libcurl! */
+        if (hostmatch(hostname++,pattern) == HOST_MATCH)
+          return HOST_MATCH;
+      }
+      return HOST_NOMATCH;
+    }
+
+    if (toupper(c) != toupper(*hostname++))
+      return HOST_NOMATCH;
+  }
+}
+
+static int
+cert_hostcheck(const char *match_pattern, const char *hostname)
+{
+  if (!match_pattern || !*match_pattern ||
+      !hostname || !*hostname) /* sanity check */
     return 0;
 
-  if(curl_strequal(certname, hostname)) /* trivial case */
+  if(curl_strequal(hostname,match_pattern)) /* trivial case */
     return 1;
 
-  certdomain = certname + 1;
-
-  if((certname[0] != '*') || (certdomain[0] != '.'))
-    return 0; /* not a wildcard certificate, check failed */
-
-  if(!strchr(certdomain+1, '.'))
-    return 0; /* the certificate must have at least another dot in its name */
-
-  /* find 'certdomain' within 'hostname', case insensitive */
-  tmp = Curl_strcasestr(hostname, certdomain);
-  if(tmp) {
-    /* ok the certname's domain matches the hostname, let's check that it's a
-       tail-match */
-    if(curl_strequal(tmp, certdomain))
-      /* looks like a match. Just check we havent swallowed a '.' */
-      return tmp == strchr(hostname, '.');
-    else
-      return 0;
-  }
+  if (hostmatch(hostname,match_pattern) == HOST_MATCH)
+    return 1;
   return 0;
 }
 
@@ -828,18 +847,8 @@ static CURLcode verifyhost(struct connectdata *conn,
   altnames = X509_get_ext_d2i(server_cert, NID_subject_alt_name, NULL, NULL);
 
   if(altnames) {
-    int hostlen = 0;
-    int domainlen = 0;
-    char *domain = NULL;
     int numalts;
     int i;
-
-    if(GEN_DNS == target) {
-      hostlen = (int)strlen(conn->host.name);
-      domain = strchr(conn->host.name, '.');
-      if(domain)
-        domainlen = (int)strlen(domain);
-    }
 
     /* get amount of alternatives, RFC2459 claims there MUST be at least
        one, but we don't depend on it... */
@@ -854,26 +863,28 @@ static CURLcode verifyhost(struct connectdata *conn,
       if(check->type == target) {
         /* get data and length */
         const char *altptr = (char *)ASN1_STRING_data(check->d.ia5);
-        const int altlen = ASN1_STRING_length(check->d.ia5);
+        int altlen;
 
         switch(target) {
-        case GEN_DNS: /* name comparison */
-          /* Is this an exact match? */
-          if((hostlen == altlen) &&
-             curl_strnequal(conn->host.name, altptr, hostlen))
-            matched = TRUE;
+        case GEN_DNS: /* name/pattern comparison */
+          /* The OpenSSL man page explicitly says: "In general it cannot be
+             assumed that the data returned by ASN1_STRING_data() is null
+             terminated or does not contain embedded nulls." But also that
+             "The actual format of the data will depend on the actual string
+             type itself: for example for and IA5String the data will be ASCII"
 
-          /* Is this a wildcard match? */
-          else if((altptr[0] == '*') &&
-                  (domainlen == altlen-1) &&
-                  domain &&
-                  curl_strnequal(domain, altptr+1, domainlen))
+             Gisle researched the OpenSSL sources:
+             "I checked the 0.9.6 and 0.9.8 sources before my patch and
+             it always 0-terminates an IA5String."
+          */
+          if (cert_hostcheck(altptr, conn->host.name))
             matched = TRUE;
           break;
 
         case GEN_IPADD: /* IP address comparison */
           /* compare alternative IP address if the data chunk is the same size
              our server IP address is */
+          altlen = ASN1_STRING_length(check->d.ia5);
           if((altlen == addrlen) && !memcmp(altptr, &addr, altlen))
             matched = TRUE;
           break;
@@ -1034,7 +1045,7 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
          ssl_ver == SSL3_VERSION_MAJOR ? '3' : '?');
 
   /* SSLv2 doesn't seem to have TLS record-type headers, so OpenSSL
-   * always pass-up content-type as 0. But the interesting message-tupe
+   * always pass-up content-type as 0. But the interesting message-type
    * is at 'buf[0]'.
    */
   if (ssl_ver == SSL3_VERSION_MAJOR && content_type != 0)
