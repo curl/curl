@@ -372,11 +372,19 @@ sub displaydata {
     unlink($memdump); # remove this if there was one left
 
     my $version=`$CURL -V`;
+    chomp $version;
+
+    my $curl = $version;
+
+    $curl =~ s/^(.*)(libcurl.*)/$1/g;
+    my $libcurl = $2;
+
     my $hostname=`hostname`;
     my $hosttype=`uname -a`;
 
     print "********* System characteristics ******** \n",
-    "* $version",
+    "* $curl\n",
+    "* $libcurl\n",
     "* Host: $hostname",
     "* System: $hosttype";
 
