@@ -116,10 +116,11 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #endif
 #endif
 
-#ifdef HAVE_MSG_NOSIGNAL
+#ifdef MSG_NOSIGNAL
 /* If we have the MSG_NOSIGNAL define, we make sure to use that in the forth
    argument to send() and recv() */
 #define SEND_4TH_ARG MSG_NOSIGNAL
+#define HAVE_MSG_NOSIGNAL 1 /* we have MSG_NOSIGNAL */
 #else
 #define SEND_4TH_ARG 0
 #endif
