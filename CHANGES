@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel (6 July 2004)
+- Andrés García found out why the windows tests failed on file:// "uploads".
+
 Daniel (2 July 2004)
 - Andrés García reported a curl_share_cleanup() crash that occurs when no
   lock/unlock callbacks have been set and the share is cleaned up.
