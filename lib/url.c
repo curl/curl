@@ -321,6 +321,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
     malloc(sizeof(struct connectdata *) * data->state.numconnects);
 
   if(!data->state.connects) {
+    free(data->state.headerbuff);
     free(data);
     return CURLE_OUT_OF_MEMORY;
   }
