@@ -1193,6 +1193,7 @@ typedef enum {
   CURLSHE_BAD_OPTION, /* 1 */
   CURLSHE_IN_USE,     /* 2 */
   CURLSHE_INVALID,    /* 3 */
+  CURLSHE_NOMEM,      /* out of memory */
   CURLSHE_LAST /* never use */
 } CURLSHcode;
 
