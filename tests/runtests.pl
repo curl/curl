@@ -8,10 +8,14 @@
 
 use strict;
 
+use stunnel;
+
 my $srcdir = $ENV{'srcdir'} || '.';
 my $HOSTIP="127.0.0.1";
 my $HOSTPORT=8999; # bad name, but this is the HTTP server port
+my $HTTPSPORT=8433; # this is the HTTPS server port
 my $FTPPORT=8921;  # this is the FTP server port
+my $FTPSPORT=8821;  # this is the FTPS server port
 my $CURL="../src/curl"; # what curl executable to run on the tests
 my $LOGDIR="log";
 my $TESTDIR="data";
@@ -31,8 +35,10 @@ my $TESTCASES="all";
 # No variables below this point should need to be modified
 #
 
-my $PIDFILE=".server.pid";
-my $FTPPIDFILE=".ftpserver.pid";
+my $HTTPPIDFILE=".server.pid";
+my $HTTPSPIDFILE=".https.pid";
+my $FTPPIDFILE=".ftps.pid";
+my $FTPSPIDFILE=".ftpsserver.pid";
 
 # this gets set if curl is compiled with memory debugging:
 my $memory_debug=0;
@@ -42,6 +48,8 @@ my $memdump="memdump";
 
 # the path to the script that analyzes the memory debug output file:
 my $memanalyze="../memanalyze.pl";
+
+my $checkstunnel = &checkstunnel;
 
 #######################################################################
 # variables the command line options may set
@@ -86,37 +94,51 @@ sub stopserver {
 }
 
 #######################################################################
+# check the given test server if it is still alive
+#
+sub checkserver {
+    my ($pidfile)=@_;
+    my $RUNNING=0;
+    my $PID=0;
+
+    # check for pidfile
+    if ( -f $pidfile ) {
+        my $PID=serverpid($pidfile);
+        if ($PID ne "" && kill(0, $PID)) {
+            $RUNNING=1;
+        }
+        else {
+            $RUNNING=0;
+            $PID = -$PID; # negative means dead process
+        }
+    }
+    else {
+        $RUNNING=0;
+    }
+    return $PID
+}
+
+#######################################################################
 # start the http server, or if it already runs, verify that it is our
 # test server on the test-port!
 #
 sub runhttpserver {
     my $verbose = $_[0];
-    my $STATUS;
     my $RUNNING;
-    # check for pidfile
-    if ( -f $PIDFILE ) {
-        my $PID=serverpid($PIDFILE);
-        if ($PID ne "" && kill(0, $PID)) {
-            $STATUS="httpd (pid $PID) running";
-            $RUNNING=1;
-        }
-        else {
-            $STATUS="httpd (pid $PID?) not running";
-            $RUNNING=0;
-        }
-    }
-    else {
-        $STATUS="httpd (no pid file) not running";
-        $RUNNING=0;
-    }
 
-    if ($RUNNING != 1) {
+    my $pid = checkserver($HTTPPIDFILE );
+
+    if ($pid <= 0) {
         my $flag=$debugprotocol?"-v ":"";
         system("perl $srcdir/httpserver.pl $flag $HOSTPORT &");
-        sleep 1; # give it a little time to start
+        if($verbose) {
+            print "httpd started\n";
+        }
     }
     else {
-        print "$STATUS\n";
+        if($pid > 0) {
+            print "httpd ($pid) runs\n";
+        }
 
         # verify that our server is one one running on this port:
         my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver`;
@@ -127,42 +149,61 @@ sub runhttpserver {
             exit;
         }
 
-        print "The running HTTP server has been verified to be our server\n";
+        if($verbose) {
+            print "The running HTTP server has been verified to be our server\n";
+        }
     }
 }
 
+#######################################################################
+# start the https server (or rather, tunnel) if needed
+#
+sub runhttpsserver {
+    my $verbose = $_[0];
+    my $STATUS;
+    my $RUNNING;
+    my $PID=checkserver($HTTPSPIDFILE );
+
+    if($PID > 0) {
+        # kill previous stunnel!
+        if($verbose) {
+            print "kills off running stunnel at $PID\n";
+        }
+        stopserver($HTTPSPIDFILE);
+    }
+
+    my $flag=$debugprotocol?"-v ":"";
+    system("perl $srcdir/httpsserver.pl $flag -r $HOSTPORT $HTTPSPORT &");
+    if($verbose) {
+        print "httpd stunnel started\n";
+    }
+}
+
+#######################################################################
+# start the ftp server if needed
+#
 sub runftpserver {
     my $verbose = $_[0];
     my $STATUS;
     my $RUNNING;
     # check for pidfile
-    if ( -f $FTPPIDFILE ) {
-        my $PID=serverpid($FTPPIDFILE);
-        if ($PID ne "" && kill(0, $PID)) {
-            $STATUS="ftpd (pid $PID) running";
-            $RUNNING=1;
-        }
-        else {
-            $STATUS="ftpd (pid $PID?) not running";
-            $RUNNING=0;
-        }
-    }
-    else {
-        $STATUS="ftpd (no pid file) not running";
-        $RUNNING=0;
-    }
+    my $pid = checkserver ($FTPPIDFILE );
 
-    if ($RUNNING != 1) {
+    if ($pid <= 0) {
         my $flag=$debugprotocol?"-v ":"";
         if($debugprotocol) {
             print "* Starts ftp server verbose:\n";
             print "perl $srcdir/ftpserver.pl $flag $FTPPORT &\n";
         }
         system("perl $srcdir/ftpserver.pl $flag $FTPPORT &");
-        sleep 1; # give it a little time to start
+        if($verbose) {
+            print "ftpd started\n";
+        }
     }
     else {
-        print "$STATUS\n";
+        if($verbose) {
+            print "ftpd ($pid) is already running\n";
+        }
 
         # verify that our server is one one running on this port:
         my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver`;
@@ -174,7 +215,35 @@ sub runftpserver {
             exit;
         }
 
-        print "The running FTP server has been verified to be our server\n";
+        if($verbose) {
+            print "The running FTP server has been verified to be our server\n";
+        }
+    }
+}
+
+#######################################################################
+# start the ftps server (or rather, tunnel) if needed
+#
+sub runftpsserver {
+    my $verbose = $_[0];
+    my $STATUS;
+    my $RUNNING;
+    my $PID=checkserver($FTPSPIDFILE );
+
+    if($PID > 0) {
+        # kill previous stunnel!
+        if($verbose) {
+            print "kills off running stunnel at $PID\n";
+        }
+        stopserver($FTPSPIDFILE);
+    }
+
+    my $flag=$debugprotocol?"-v ":"";
+    my $cmd="perl $srcdir/ftpsserver.pl $flag -r $FTPPORT $FTPSPORT &";
+    print "CMD: $cmd\n";
+    system($cmd);
+    if($verbose) {
+        print "ftpd stunnel started\n";
     }
 }
 
@@ -204,9 +273,7 @@ sub comparefiles {
         $dnum = read(D, $d, $m);
         if(($snum != $dnum) ||
            ($s ne $d)) {
-            print "$source and $dest differ\n";
-            $res=1;
-            $snum=0;
+            return 1;
         }
     } while($snum);
     close(S);
@@ -285,7 +352,9 @@ sub compare {
 
     $res = comparefiles($first, $sec);
     if ($res != 0) {
-        print " $text FAILED";
+        print " $text FAILED\n";
+        print "=> diff $first $sec' looks like (\">\" added by runtime):\n";
+        print `diff $sec $first`;
         return 1;
     }
 
@@ -306,7 +375,7 @@ sub displaydata {
     my $hostname=`hostname`;
     my $hosttype=`uname -a`;
 
-    print "Running tests on:\n",
+    print "********* System characteristics ******** \n",
     "* $version",
     "* Host: $hostname",
     "* System: $hosttype";
@@ -318,7 +387,9 @@ sub displaydata {
         $memory_debug=1;
     }
     printf("* Memory debugging: %s\n", $memory_debug?"ON":"OFF");
-
+    printf("* HTTPS server:     %s\n", $checkstunnel?"ON":"OFF");
+    printf("* FTPS server:      %s\n", $checkstunnel?"ON":"OFF");
+    print "***************************************** \n";
 }
 
 #######################################################################
@@ -354,9 +425,11 @@ sub singletest {
     my $ftpservercmd="$TESTDIR/ftpd$NUMBER.txt";
 
     if(! -r $CURLCMD) {
-        # this is not a test
-        print "$NUMBER doesn't look like a test case!\n";
-        return -1;
+        if($verbose) {
+            # this is not a test
+            print "$NUMBER doesn't look like a test case!\n";
+            return -1;
+        }
     }
 
     # remove previous server output logfile
@@ -389,7 +462,9 @@ sub singletest {
     # make some nice replace operations
     $cmd =~ s/%HOSTIP/$HOSTIP/g;
     $cmd =~ s/%HOSTPORT/$HOSTPORT/g;
+    $cmd =~ s/%HTTPSPORT/$HTTPSPORT/g;
     $cmd =~ s/%FTPPORT/$FTPPORT/g;
+    $cmd =~ s/%FTPSPORT/$FTPSPORT/g;
     #$cmd =~ s/%HOSTNAME/$HOSTNAME/g;
 
     if($memory_debug) {
@@ -562,6 +637,69 @@ sub singletest {
     return 0;
 }
 
+my %run;
+
+sub serverfortest {
+    my ($testnum)=@_;
+
+    if($testnum< 100) {
+        # 0 - 99 is for HTTP
+        if(!$run{'http'}) {
+            runhttpserver($verbose);
+            $run{'http'}=$HTTPPIDFILE;
+        }
+    }
+    elsif($testnum< 200) {
+        # 100 - 199 is for FTP
+        if(!$run{'ftp'}) {
+            runftpserver($verbose);
+            $run{'ftp'}=$FTPPIDFILE;
+        }
+    }
+    elsif($testnum< 300) {
+        # 200 - 299 is for FILE, no server!
+        $run{'file'}="moo";
+    }
+    elsif($testnum< 400) {
+        # 300 - 399 is for HTTPS, two servers!
+
+        if(!$checkstunnel) {
+            # we can't run https tests without stunnel
+            return 1;
+        }
+
+        if(!$run{'http'}) {
+            runhttpserver($verbose);
+            $run{'http'}=$HTTPPIDFILE;
+        }
+        if(!$run{'https'}) {
+            runhttpsserver($verbose);
+            $run{'https'}=$HTTPSPIDFILE;
+        }
+    }
+    elsif($testnum< 500) {
+        # 400 - 499 is for FTPS, also two servers
+
+        if(!$checkstunnel) {
+            # we can't run https tests without stunnel
+            return 1;
+        }
+        if(!$run{'ftp'}) {
+            runftpserver($verbose);
+            $run{'ftp'}=$FTPPIDFILE;
+        }
+        if(!$run{'ftps'}) {
+            runftpsserver($verbose);
+            $run{'ftps'}=$FTPSPIDFILE;
+        }
+    }
+    else {
+        print "Bad test number, no server available\n";
+        return 100;
+    }
+    sleep 1; # give a second for the server(s) to startup
+    return 0; # ok
+}
 
 #######################################################################
 # Check options to this test program
@@ -594,14 +732,14 @@ do {
     elsif($ARGV[0] eq "-h") {
         # show help text
         print <<EOHELP
-Usage: runtests.pl [-h][-s][-v][numbers]
+Usage: runtests.pl [options]
   -a       continue even if a test fails
   -d       display server debug info
   -g       run the test case with gdb
   -h       this help text
   -s       short output
   -v       verbose output
-  [num]    as string like "5 6 9" to run those tests only
+  [num]    like "5 6 9" or " 5 to 22 " to run those tests only
 EOHELP
     ;
         exit;
@@ -644,8 +782,11 @@ mkdir($LOGDIR, 0777);
 # First, start our test servers
 #
 
-runhttpserver($verbose);
-runftpserver($verbose);
+#runhttpserver($verbose);
+#runftpserver($verbose);
+#runhttpsserver($verbose);
+
+#sleep 1; # start-up time
 
 #######################################################################
 # If 'all' tests are requested, find out all test numbers
@@ -683,7 +824,18 @@ my $failed;
 my $testnum;
 my $ok=0;
 my $total=0;
+my $skipped=0;
+
 foreach $testnum (split(" ", $TESTCASES)) {
+
+    my $serverproblem = serverfortest($testnum);
+
+    if($serverproblem) {
+        # there's a problem with the server, don't run
+        # this particular server, but count it as "skipped"
+        $skipped++;
+        next;
+    }
 
     my $error = singletest($testnum);
     if(-1 != $error) {
@@ -714,8 +866,12 @@ close(CMDLOG);
 # Tests done, stop the servers
 #
 
-stopserver($FTPPIDFILE);
-stopserver($PIDFILE);
+for(keys %run) {
+    stopserver($run{$_}); # the pid file is in the hash table
+}
+#stopserver($FTPPIDFILE);
+#stopserver($PIDFILE);
+#stopserver($HTTPSPIDFILE);
 
 if($total) {
     print "$ok tests out of $total reported OK\n";
@@ -726,4 +882,7 @@ if($total) {
 }
 else {
     print "No tests were performed!\n";
+}
+if($skipped) {
+    print "$skipped tests were skipped due to server problems\n";
 }

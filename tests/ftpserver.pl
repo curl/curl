@@ -289,7 +289,15 @@ sub PORT_command {
         return 0;
     }
     my $iaddr = inet_aton("$1.$2.$3.$4");
-    my $paddr = sockaddr_in(($5<<8)+$6, $iaddr);
+
+    my $port = ($5<<8)+$6;
+
+    if(!$port || $port > 65535) {
+        print STDERR "very illegal PORT number: $port\n";
+        return 1;
+    }
+
+    my $paddr = sockaddr_in($port, $iaddr);
     my $proto   = getprotobyname('tcp') || 6;
 
     socket(SOCK, PF_INET, SOCK_STREAM, $proto) || die "major failure";
