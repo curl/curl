@@ -75,7 +75,7 @@ of bytes actually taken care of. If that amount differs from the amount passed
 to your function, it'll signal an error to the library and it will abort the
 transfer and return \fICURLE_WRITE_ERROR\fP.
 
-Set the \fIstream\fP argument with the \fBCURLOPT_FILE\fP option.
+Set the \fIstream\fP argument with the \fBCURLOPT_WRITEDATA\fP option.
 
 \fBNOTE:\fP you will be passed as much data as possible in all invokes, but
 you cannot possibly make any assumptions. It may be one byte, it may be
