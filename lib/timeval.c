@@ -78,7 +78,8 @@ static int gettimeofday(struct timeval *tp, void *nothing)
 #endif /* WIN32 */
 #endif /* HAVE_GETTIMEOFDAY */
 
-struct timeval Curl_tvnow (void)
+/* Return the current time in a timeval struct */
+struct timeval Curl_tvnow(void)
 {
   struct timeval now;
   (void)gettimeofday(&now, NULL);
@@ -88,14 +89,17 @@ struct timeval Curl_tvnow (void)
 /*
  * Make sure that the first argument is the more recent time, as otherwise
  * we'll get a weird negative time-diff back...
+ *
+ * Returns: the time difference in number of milliseconds.
  */
-long Curl_tvdiff (struct timeval newer, struct timeval older)
+long Curl_tvdiff(struct timeval newer, struct timeval older)
 {
   return (newer.tv_sec-older.tv_sec)*1000+
     (499+newer.tv_usec-older.tv_usec)/1000;
 }
 
-long Curl_tvlong (struct timeval t1)
+/* return the number of seconds in the given input timeval struct */
+long Curl_tvlong(struct timeval t1)
 {
   return t1.tv_sec;
 }
