@@ -305,6 +305,7 @@ int ProcessRequest(struct httprequest *req)
       stream=fopen(filename, "rb");
       if(!stream) {
         logmsg("Couldn't open test file %d", req->testno);
+        req->open = FALSE; /* closes connection */
         return 0;
       }
       else {
