@@ -699,9 +699,8 @@ static int dprintf_formatf(
 #if SIZEOF_LONG_LONG
       if(p->flags & FLAGS_LONGLONG) {
 	 /* long long */
-	num = p->data.lnum;
-	is_neg = num < 0;
-	num = is_neg ? (- num) : num;
+	is_neg = p->data.lnum < 0;
+	num = is_neg ? (- p->data.lnum) : p->data.lnum;
       }
       else
 #endif
