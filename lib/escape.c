@@ -25,6 +25,7 @@
  * allocated string or NULL if an error occurred.  */
 
 #include "setup.h"
+#include <ctype.h>
 #include <curl/curl.h>
 
 #include <stdio.h>
@@ -52,14 +53,28 @@ char *curl_escape(char *string, int length)
             !(in >= 'A' && in <= 'Z') &&
             !(in >= '0' && in <= '9')) {
       /* encode it */
-      newlen += 2; /* the size grows with two, since this'll become a %XX */
-      if(newlen > alloc) {
-        alloc *= 2;
-        ns = realloc(ns, alloc);
-        if(!ns)
-          return NULL;
+      if(('%' == in) &&
+         (length>=2) &&
+         isxdigit((int)string[1]) &&
+         isxdigit((int)string[2]) ) {
+        /*
+         * This is an already encoded letter, leave it!
+         */
+        memcpy(&ns[index], string, 3);
+        string+=2;
       }
-      sprintf(&ns[index], "%%%02X", in);
+      else {
+        /* encode this now */
+
+        newlen += 2; /* the size grows with two, since this'll become a %XX */
+        if(newlen > alloc) {
+          alloc *= 2;
+          ns = realloc(ns, alloc);
+          if(!ns)
+            return NULL;
+        }
+        sprintf(&ns[index], "%%%02X", in);
+      }
       index+=3;
     }
     else {
