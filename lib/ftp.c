@@ -815,7 +815,7 @@ ftp_pasv_verbose(struct connectdata *conn,
   char hostent_buf[8192];
 
 #if defined(HAVE_INET_ADDR)
-  unsigned long address;
+  in_addr_t address;
 # if defined(HAVE_GETHOSTBYADDR_R)
   int h_errnop;
 # endif
