@@ -155,116 +155,94 @@ sub serverpid {
 # Memory allocation test and failure torture testing.
 #
 sub torture {
-    # start all test servers (http, https, ftp, ftps)
-    &startservers(("http", "https", "ftp", "ftps"));
-    my $c;
+    my $testcmd = shift;
+    my $gdbline = shift;
 
-    my @test=('http://%HOSTIP:%HOSTPORT/1',
-              'ftp://%HOSTIP:%FTPPORT/1',
-              'http://%HOSTIP:%HOSTPORT/3 -d "poo"');
-    
-    # loop over the different tests commands
-    for(@test) {
-        my $cmdargs = "$_";
+    # remove memdump first to be sure we get a new nice and clean one
+    unlink($memdump);
 
-        $c++;
+    # First get URL from test server, ignore the output/result
+    system($testcmd);
 
-        if($tortnum && ($tortnum != $c)) {
-            next;
-        }
-        print "We want test $c\n";
-
-        my $redir=">log/torture.stdout 2>log/torture.stderr";
-
-        subVariables(\$cmdargs);
-
-        my $testcmd = "$CURL $cmdargs $redir";
-
-        # First get URL from test server, ignore the output/result
-        system($testcmd);
-
-        # Set up gdb-stuff if desired
-        if($gdbthis) {
-            open(GDBCMD, ">log/gdbcmd");
-            print GDBCMD "set args $cmdargs\n";
-            print GDBCMD "show args\n";
-            close(GDBCMD);
-            $testcmd = "gdb $CURL -x log/gdbcmd";
-        }
-
-        print "Torture test $c:\n";
-        print " CMD: $testcmd\n" if($verbose);
+    print " CMD: $testcmd\n" if($verbose);
         
-        # memanalyze -v is our friend, get the number of allocations made
-        my $count;
-        my @out = `$memanalyze -v $memdump`;
-        for(@out) {
-            if(/^Allocations: (\d+)/) {
-                $count = $1;
-                last;
-            }
+    # memanalyze -v is our friend, get the number of allocations made
+    my $count;
+    my @out = `$memanalyze -v $memdump`;
+    for(@out) {
+        if(/^Allocations: (\d+)/) {
+            $count = $1;
+            last;
         }
-        if(!$count) {
-            # hm, no allocations in this fetch, ignore and get next
-            print "BEEEP, no allocs found for test $c!!!\n";
+    }
+
+    print " $count allocations to make fail\n";
+
+    for ( 1 .. $count ) {
+        my $limit = $_;
+        my $fail;
+        my $dumped_core;
+        
+        if($tortalloc && ($tortalloc != $limit)) {
             next;
         }
-        print " $count allocations to excersize\n";
 
-        for ( 1 .. $count ) {
-            my $limit = $_;
-            my $fail;
-
-            if($tortalloc && ($tortalloc != $limit)) {
-                next;
-            }
-
-            print "Alloc no: $limit\r" if(!$gdbthis);
+        print "Fail alloc no: $limit\r" if(!$gdbthis);
             
-            # make the memory allocation function number $limit return failure
-            $ENV{'CURL_MEMLIMIT'} = $limit;
+        # make the memory allocation function number $limit return failure
+        $ENV{'CURL_MEMLIMIT'} = $limit;
 
-            # remove memdump first to be sure we get a new nice and clean one
-            unlink($memdump);
-            
-            print "**> Alloc number $limit is now set to fail <**\n" if($gdbthis);
+        # remove memdump first to be sure we get a new nice and clean one
+        unlink($memdump);
+        
+        print "**> Alloc number $limit is now set to fail <**\n" if($gdbthis);
 
-            my $ret = system($testcmd);
+        my $ret;
+        if($gdbthis) {
+            system($gdbline)
+        }        
+        else {
+            $ret = system($testcmd);
+        }
 
-            # verify that it returns a proper error code, doesn't leak memory
-            # and doesn't core dump
-            if($ret & 255) {
-                print " system() returned $ret\n";
-                $fail=1;
-            }
-            else {
-                my @memdata=`$memanalyze $memdump`;
-                my $leak=0;
-                for(@memdata) {
-                    if($_ ne "") {
-                        # well it could be other memory problems as well, but
-                        # we call it leak for short here
-                        $leak=1;
-                    }
-                }
-                if($leak) {
-                    print "** MEMORY FAILURE\n";
-                    print @memdata;
-                    print `$memanalyze -l $memdump`;
-                    $fail = 1;
+        if(-r "core") {
+            # there's core file present now!
+            print " core dumped!\n";
+            $dumped_core = 1;
+            $fail = 2;
+        }
+
+        # verify that it returns a proper error code, doesn't leak memory
+        # and doesn't core dump
+        if($ret & 255) {
+            print " system() returned $ret\n";
+            $fail=1;
+        }
+        else {
+            my @memdata=`$memanalyze $memdump`;
+            my $leak=0;
+            for(@memdata) {
+                if($_ ne "") {
+                    # well it could be other memory problems as well, but
+                    # we call it leak for short here
+                    $leak=1;
                 }
             }
-            if($fail) {
-                print " Failed on alloc number $limit in test $c.\n",
-                " invoke with -t$c,$limit to repeat this single case.\n";
-                stopservers();
-                exit 1;
+            if($leak) {
+                print "** MEMORY FAILURE\n";
+                print @memdata;
+                print `$memanalyze -l $memdump`;
+                $fail = 1;
             }
         }
-        print "\n torture test $c did GOOD\n";
-
-        # all is well, now test a different kind of URL
+        if($fail) {
+            print " Failed on alloc number $limit in test.\n",
+            " invoke with -t$limit to repeat this single case.\n";
+            stopservers();
+            exit 1;
+        }
     }
+
     stopservers();
     exit; # for now, we stop after these tests
 }
@@ -1051,12 +1029,20 @@ sub singletest {
 
     my $dumped_core;
     my $cmdres;
-    # run the command line we built
+
+
     if($gdbthis) {
         open(GDBCMD, ">log/gdbcmd");
         print GDBCMD "set args $cmdargs\n";
         print GDBCMD "show args\n";
         close(GDBCMD);
+    }
+    # run the command line we built
+    if ($torture) {
+        torture($CMDLINE,
+                "gdb --directory libtest $DBGCURL -x log/gdbcmd");
+    }
+    elsif($gdbthis) {
         system("gdb --directory libtest $DBGCURL -x log/gdbcmd");
         $cmdres=0; # makes it always continue after a debugged run
     }
@@ -1466,9 +1452,7 @@ do {
         # torture
         $torture=1;
         my $xtra = $1;
-        if($xtra =~ s/^(\d+)//) {
-            $tortnum = $1;
-        }
+
         if($xtra =~ s/(\d+)$//) {
             $tortalloc = $1;
         }
@@ -1584,11 +1568,6 @@ open(CMDLOG, ">$CURLLOG") ||
     print "can't log command lines to $CURLLOG\n";
 
 #######################################################################
-# Torture the memory allocation system and checks
-#
-if($torture) {
-    &torture();
-}
 
 sub displaylogcontent {
     my ($file)=@_;
