@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel(30 January 2004)
+- Added code that attempts to fix the test 91 failure. As has been figured out
+  by Patrick Smith, the error happens because we re-use a connection that the
+  server is just about to close and we even manage to send away the request
+  without seeing an error. On the first read attempt we get a ECONNRESET.
+  Starting now, we attempt to detect this and if so, we retry the request on a
+  fresh connection.
+
 - I added test case 510 which is a custom program that does a POST using a
   read callback, with chunked transfer-encoding.
 
