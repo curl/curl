@@ -84,14 +84,14 @@ Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
 
 GET /69 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAABAAAAA7IAAAQABAAkAAAABAAEACAAAABIQVhYQ1VSTA==
+Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
 
 GET /69 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAGAAAAAYABgAeAAAAAgACABAAAAAEAAQAEgAAAAIAAgAWAAAAAAAAACQAAAAAYIAAEMAVQBSAEwAdABlAHMAdAB1AHMAZQByAEgAQQBYAFgAWmRDApEJkUyGOPS3DjvASModEeW/N/FBqYVyF4y6/y/7F6qmEQ7lXjXFF3tH1145
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAFAAAAAAAAAAaAAAAAAAAABAAAAAEAAQAEAAAAAAAAAAUAAAAAAAAABoAAAAAYIAAHRlc3R1c2VyAAAAAAAAAABaZEMCkQmRTIY49LcOO8BIyh0R5b838UE=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache

@@ -1,13 +1,7 @@
 # Server-side
 <reply>
-<data>
-HTTP/1.1 401 Authorization Required
-Server: Apache/1.3.27 (Darwin) PHP/4.1.2
-WWW-Authenticate: NTLM
-Content-Type: text/html; charset=iso-8859-1
 
-This is not the real page
-</data>
+# no <data> in this test since we have NTLM from the start
 
 # This is supposed to be returned when the server gets a first
 # Authorization: NTLM line passed-in from the client
@@ -31,11 +25,6 @@ Finally, this is the real page!
 </data1002>
 
 <datacheck>
-HTTP/1.1 401 Authorization Required
-Server: Apache/1.3.27 (Darwin) PHP/4.1.2
-WWW-Authenticate: NTLM
-Content-Type: text/html; charset=iso-8859-1
-
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
@@ -74,20 +63,14 @@ http://%HOSTIP:%HOSTPORT/67 -u testuser:testpass --ntlm
 </strip>
 <protocol>
 GET /67 HTTP/1.1
+Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
 
 GET /67 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAABAAAAA7IAAAQABAAkAAAABAAEACAAAABIQVhYQ1VSTA==
-User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: 127.0.0.1:8999
-Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
-
-GET /67 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAGAAAAAYABgAeAAAAAgACABAAAAAEAAQAEgAAAAIAAgAWAAAAAAAAACQAAAAAYIAAEMAVQBSAEwAdABlAHMAdAB1AHMAZQByAEgAQQBYAFgAWmRDApEJkUyGOPS3DjvASModEeW/N/FBqYVyF4y6/y/7F6qmEQ7lXjXFF3tH1145
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAFAAAAAAAAAAaAAAAAAAAABAAAAAEAAQAEAAAAAAAAAAUAAAAAAAAABoAAAAAYIAAHRlc3R1c2VyAAAAAAAAAABaZEMCkQmRTIY49LcOO8BIyh0R5b838UE=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache
