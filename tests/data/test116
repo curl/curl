@@ -1,0 +1,31 @@
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP download, failed PORT
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/116 -P 127.0.0.1
+</command>
+<file name="log/ftpserver.cmd">
+REPLY PORT 314 bluah you f00l!
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+30
+</errorcode>
+<strip>
+^PORT 127,0,0,1,.*
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+</protocol>
+</verify>

@@ -1,0 +1,33 @@
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP download, failed RETR with PORT
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/119 -P -
+</command>
+<file name="log/ftpserver.cmd">
+REPLY RETR 314 bluah you f00l!
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+19
+</errorcode>
+<strip>
+^PORT.*
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+TYPE I
+RETR 119
+</protocol>
+</verify>

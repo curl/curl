@@ -1,0 +1,28 @@
+# Server-side
+<reply>
+<size>
+5
+</size>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP download resume with whole file already downloaded
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/122 -C 5
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+PASV
+TYPE I
+SIZE 122
+</protocol>
+</verify>

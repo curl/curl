@@ -1,0 +1,27 @@
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP upload resume with whole file already downloaded
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/123 -T log/upload123 -C 51
+</command>
+<file name="log/upload123">
+--------------------------------------------------
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+PASV
+TYPE I
+</protocol>
+</verify>

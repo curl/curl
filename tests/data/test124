@@ -1,0 +1,31 @@
+# Server-side
+<reply>
+<data>
+we can still send data even if pwd fails!
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP download, failed PWD
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/124
+</command>
+<file name="log/ftpserver.cmd">
+REPLY PWD 314 bluah you f00l!
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+PASV
+TYPE I
+RETR 124
+</protocol>
+</verify>

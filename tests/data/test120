@@ -1,0 +1,34 @@
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+ftp download with post-quote delete operation
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/120 -Q "-DELE file"
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+PASV
+TYPE I
+RETR 120
+DELE file
+</protocol>
+</verify>

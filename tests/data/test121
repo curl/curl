@@ -1,0 +1,35 @@
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+ftp download with post- and pre-transfer delete operations
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/121 -Q "-DELE after_transfer" -Q "DELE before_transfer"
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+DELE before_transfer
+PASV
+TYPE I
+RETR 121
+DELE after_transfer
+</protocol>
+</verify>
