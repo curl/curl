@@ -128,7 +128,7 @@ static struct timeval notimeout={0,0};
 CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 {
   struct SessionHandle *data = conn->data;
-  int buffersize = bytes;
+  size_t buffersize = (size_t)bytes;
   int nread;
 
   if(conn->bits.upload_chunky) {
