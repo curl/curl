@@ -14,7 +14,6 @@ EXPORTS
 	curl_easy_setopt @ 5 ;
 	curl_escape @ 6 ;
 	curl_unescape @ 7;
-	curl_formparse @ 8 ;
 	curl_formfree @ 9 ;
 	curl_getdate @ 10 ;
 	curl_getenv @ 11 ;
