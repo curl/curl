@@ -219,8 +219,15 @@ static CURLcode perhapsrewind(struct connectdata *conn)
 {
   struct HTTP *http = conn->proto.http;
   struct SessionHandle *data = conn->data;
-  curl_off_t bytessent = http->writebytecount;
+  curl_off_t bytessent;
   curl_off_t expectsend = -1; /* default is unknown */
+
+  if(!http)
+    /* If this is still NULL, we have not reach very far and we can
+       safely skip this rewinding stuff */
+    return CURLE_OK;
+
+  bytessent = http->writebytecount;
 
   /* figure out how much data we are expected to send */
   switch(data->set.httpreq) {
