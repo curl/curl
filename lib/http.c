@@ -748,8 +748,8 @@ CURLcode Curl_http(struct connectdata *conn)
       start++;
     ptr = start; /* start host-scanning here */
 
-    /* scan through the string to find the end */
-    while(*ptr && !isspace((int)*ptr))
+    /* scan through the string to find the end (space or colon) */
+    while(*ptr && !isspace((int)*ptr) && !(':'==*ptr))
       ptr++;
     
     if(ptr != start) {
