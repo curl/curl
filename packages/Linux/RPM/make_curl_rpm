@@ -1,0 +1,62 @@
+#! /bin/sh
+# script to build curl RPM from src RPM (SSL and non-SSL versions)
+
+# initialize
+top_dir=/usr/src/redhat
+sources_dir=$top_dir/SOURCES
+specs_dir=$top_dir/SPECS
+rpms_dir=$top_dir/RPMS
+arch=`rpm --showrc | awk 'NF == 3 && $2 == "_arch" { print $3 }'`
+
+# fill in your own name and email here
+packager_name="Mr Joe Packager Person"
+packager_email='<Joe@packager.person>'
+
+# make sure we're running as root
+if test `id -u` -ne `id -u root`
+then
+   echo "you must build the RPM as root"
+   exit 1
+fi
+
+# get version and release number
+if test $# -lt 1
+then
+   echo "version number?"
+   read version
+else
+   version=$1
+fi
+
+if test $# -lt 2
+then
+   echo "release number?"
+   read release
+else
+   release=$2
+fi
+
+# build all the files
+targets="curl curl-ssl"
+for target in $targets
+do
+   # make sure src RPM exist
+   src_rpm="$target-$version-$release.src.rpm"
+   if test -f $src_rpm
+   then
+      rpm -ivh $src_rpm
+
+      # replace packager in spec file
+      sed -e 's/^Packager: .*/Packager: $packager_name $packager_email/' $specs_dir/$target.spec > $specs_dir/$target-$version-$arch.spec
+
+      # build it
+      if ! rpm -ba $specs_dir/$target-$version-$arch.spec
+      then
+         echo "error building $target for $arch -- check output above"
+      fi
+
+      echo "$target rpm is now in $rpms_dir/$arch"
+   else
+      echo $src_rpm does not exist
+   fi
+done
