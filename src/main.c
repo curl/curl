@@ -383,6 +383,7 @@ static void help(void)
     " -o/--output <file> Write output to <file> instead of stdout",
     " -O/--remote-name   Write output to a file named as the remote file",
     " -p/--proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
+    "    --proxy-anyauth  Let curl pick proxy authentication method (H)",
     "    --proxy-basic   Enable Basic authentication on the proxy (H)",
     "    --proxy-digest  Enable Digest authentication on the proxy (H)",
     "    --proxy-ntlm    Enable NTLM authentication on the proxy (H)",
@@ -512,6 +513,7 @@ struct Configurable {
   bool proxyntlm;
   bool proxydigest;
   bool proxybasic;
+  bool proxyanyauth;
   char *writeout; /* %-styled format string to output */
   bool writeenv; /* write results to environment, if available */
   FILE *errors; /* if stderr redirect is requested */
@@ -1257,6 +1259,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$k", "3p-user", TRUE},
     {"$l", "3p-quote", TRUE},
     {"$m", "ftp-account", TRUE},
+    {"$n", "proxy-anyauth", FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1641,9 +1644,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'm': /* --ftp-account */
         GetStr(&config->ftp_account, nextarg);
         break;
+      case 'n': /* --proxy-anyauth */
+        config->proxyanyauth ^= TRUE;
+        break;
       }
       break;
-    case '#': /* added 19990617 larsa */
+    case '#': /* --progress-bar */
       config->progressmode ^= CURL_PROGRESS_BAR;
       break;
     case '0':
@@ -3650,7 +3656,9 @@ operate(struct Configurable *config, int argc, char *argv[])
         /* new in curl 7.10.7 */
         curl_easy_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
                          config->ftp_create_dirs);
-        if(config->proxyntlm)
+        if(config->proxyanyauth)
+          curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_ANY);
+        else if(config->proxyntlm)
           curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
         else if(config->proxydigest)
           curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_DIGEST);

@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "25 Jan 2005" "Curl 7.13.0" "Curl Manual"
+.TH curl 1 "29 Mar 2005" "Curl 7.13.2" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -647,6 +647,13 @@ You may use this option as many times as you have number of URLs.
 (SSL) Pass phrase for the private key
 
 If this option is used several times, the last one will be used.
+.IP "--proxy-anyauth"
+Tells curl to pick a suitable authentication method when communicating with
+the given proxy. This will cause an extra request/response round-trip. Added
+in curl 7.13.2.
+
+If this option is used twice, the second will again disable the proxy use-any
+authentication.
 .IP "--proxy-basic"
 Tells curl to use HTTP Basic authentication when communicating with the given
 proxy. Use \fI--basic\fP for enabling HTTP Basic with a remote host. Basic is
