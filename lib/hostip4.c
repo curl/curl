@@ -79,6 +79,7 @@
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
+#include "inet_pton.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -202,11 +203,9 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   *waitp = 0; /* don't wait, we act synchronously */
 
-  in=inet_addr(hostname);
-  if (in != CURL_INADDR_NONE) {
+  if(1 == inet_pton(AF_INET, hostname, &in))
     /* This is a dotted IP address 123.123.123.123-style */
     return Curl_ip2addr(in, hostname, port);
-  }
 
 #if defined(HAVE_GETHOSTBYNAME_R)
   /*

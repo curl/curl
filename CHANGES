@@ -7,6 +7,19 @@
                                   Changelog
 
 
+Daniel (16 March 2005)
+- Tru64 and some IRIX boxes seem to not like test 237 as it is. Their
+  inet_addr() functions seems to use &255 on all numericals in a ipv4 dotted
+  address which makes a different failure... Now I've modified the ipv4
+  resolve code to use inet_pton() instead in an attempt to make these systems
+  better detect this as a bad IP address rather than creating a toally bogus
+  address that is then passed on and used.
+
+Daniel (15 March 2005)
+- Added test 237 and 238: test EPSV and PASV response handling when they get
+  well- formated data back but using illegal values. In 237 PASV gets an IP
+  address that is way bad. In 238 EPSV gets a port that is way out of range.
+
 Daniel (14 March 2005)
 - Added a few missing features to the curl-config --features list
 
