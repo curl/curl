@@ -55,9 +55,11 @@ Curl_strtoll(const char *nptr, char **endptr, int base)
   if (end[0] == '-') {
     is_negative = 1;
     end++;
-  } else if (end[0] == '+') {
+  }
+  else if (end[0] == '+') {
     end++;
-  } else if (end[0] == '\0') {
+  }
+  else if (end[0] == '\0') {
     /* We had nothing but perhaps some whitespace -- there was no number. */
     if (endptr) {
       *endptr = end;
@@ -71,7 +73,8 @@ Curl_strtoll(const char *nptr, char **endptr, int base)
       end += 2;
       base = 16;
     }
-  } else if (end[0] == '0') {
+  }
+  else if (end[0] == '0') {
     if (base == 8 || base == 0) {
       end++;
       base = 8;
@@ -90,16 +93,15 @@ Curl_strtoll(const char *nptr, char **endptr, int base)
   overflow = 0;
   for (i = get_char(end[0], base);
        i != -1;
-       end++, i = get_char(end[0], base))
-  {
+       end++, i = get_char(end[0], base)) {
     newval = base * value + i;
     if (newval < value) {
       /* We've overflowed. */
       overflow = 1;
       break;
-    } else {
-      value = newval;
     }
+    else
+      value = newval;
   }
 
   if (!overflow) {
@@ -107,19 +109,18 @@ Curl_strtoll(const char *nptr, char **endptr, int base)
       /* Fix the sign. */
       value *= -1;
     }
-  } else {
-    if (is_negative) {
+  }
+  else {
+    if (is_negative)
       value = 0x8000000000000000L;
-    } else {
+    else
       value = 0x7FFFFFFFFFFFFFFFL;
-    }
 
     errno = ERANGE;
   }
 
-  if (endptr) {
+  if (endptr)
     *endptr = end;
-  }
 
   return value;
 }
@@ -134,20 +135,23 @@ Curl_strtoll(const char *nptr, char **endptr, int base)
  *
  * @return  the value of c in base, or -1 if c isn't in range
  */
-static int get_char(char c, int base) {
-    int value = -1;
-    if (c <= '9' && c >= '0') {
-	value = c - '0';
-    } else if (c <= 'Z' && c >= 'A') {
-	value = c - 'A' + 10;
-    } else if (c <= 'z' && c >= 'a') {
-	value = c - 'a' + 10;
-    }
+static int get_char(char c, int base)
+{
+  int value = -1;
+  if (c <= '9' && c >= '0') {
+    value = c - '0';
+  }
+  else if (c <= 'Z' && c >= 'A') {
+    value = c - 'A' + 10;
+  }
+  else if (c <= 'z' && c >= 'a') {
+    value = c - 'a' + 10;
+  }
 
-    if (value >= base) {
-	value = -1;
-    }
+  if (value >= base) {
+    value = -1;
+  }
 
-    return value;
+  return value;
 }
 #endif  /* Only present if we need strtoll, but don't have it. */
