@@ -1,7 +1,7 @@
-Curl and libcurl 7.13.0
+Curl and libcurl 7.13.1
 
- Public curl release number:               85
- Releases counted from the very beginning: 112
+ Public curl release number:               86
+ Releases counted from the very beginning: 113
  Available command line options:           104
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
@@ -10,51 +10,18 @@ Curl and libcurl 7.13.0
 
 This release includes the following changes:
 
- o added --ftp-account and CURLOPT_FTP_ACCOUNT
- o added CURLOPT_SOURCE_URL and CURLOPT_SOURCE_QUOTE
- o obsoleted CURLOPT_SOURCE_HOST, CURLOPT_SOURCE_PATH, CURLOPT_SOURCE_PORT
-   and CURLOPT_PASV_HOST
- o added --3p-url, --3p-user and --3p-quote
- o -Q "+[command]" was added
- o src/getpass.c license issue sorted (code was rewritten)
- o curl -w now supports 'http_connect' for the proxy's response to CONNECT
- o introducing "curl-config --protocols"
+ o
 
 This release includes the following bugfixes:
 
- o re-sending a request when retrying on a fresh connection with multi
-   interface
- o improved valgrind report parser in the test suite
- o several valgrind reports
- o CURLOPT_FTPPORT and -P work when built ipv6-enabled
- o FTP third party transfers was much improved
- o proxy environment variables are now ignored when built HTTP-disabled
- o CURLOPT_PROXY can now disable HTTP proxy even when built HTTP-disabled
- o "curl dictionary.com" no longer assumes DICT protocol
- o re-invoke some system calls on EINTR
- o duplicate Host: when failed connection re-use
- o SOCKS5 version check
- o memory problem with cleaning up multi interface
- o SSL certificate name memory leak
- o -d with -G to multiple URLs crashed
- o double va_list access crash fixed
- o minor memory leak when "version" is set in a cookie header
- o builds fine on BeOS and NetBSD
- o builds and runs fine on FreeBSD
+ o 
 
 Other curl-related news since the previous public release:
 
- o cURLpp 0.3.2 - https://rrette.com/curlpp.html
- o pycURL 7.12.3 - http://pycurl.sourceforge.net/
- o new web mirror: http://curl.mirrormonster.com/ (US, California)
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Dan Fandrich, Peter Pentchev, Marcin Konicki, Rune Kleveland, David Shaw,
- Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt,
- Hzhijun, Pavel Orehov, Bruce Mitchener, Cyrill Osterwalder, Dan Torop,
- Martijn Koster, Alex aka WindEagle, Cody Jones, Samuel Díaz García,
- Stephan Bergmann, Philippe Hameau, Ian Ford, Stephen More, Lars Nilsson
 
         Thanks! (and sorry if I forgot to mention someone)
