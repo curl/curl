@@ -669,7 +669,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
 	      str = q + 1;
 	      while (*q && *q != ';' && !isspace((unsigned char)*q))
 		q++;
-	      if (ip_addr(str, q - str, &pat.mask) != 0)
+	      if (ip_addr(str, (int)(q - str), &pat.mask) != 0)
 		natural_mask(&pat);
 	    }
 	  else
@@ -783,9 +783,7 @@ static char *try_config(char *s, const char *opt)
 
 static const char *try_option(const char *p, const char *q, const char *opt)
 {
-  int len;
-
-  len = strlen(opt);
+  size_t len = strlen(opt);
   return (q - p > len && strncmp(p, opt, len) == 0) ? p + len : NULL;
 }
 
