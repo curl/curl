@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel(28 January 2004)
+- Richard Bramante fixed chunked transfer-encoded "uploads" to send a final
+  CRLF combo properly.
+
 Daniel(27 January 2004)
 - Made the response-headers during a CONNECT request to a proxy get passed on
   as regular headers, so they appear with -i/-I options and similar.
