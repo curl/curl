@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel (3 September)
+- Peter Pentchev found and fixed two problems in the test suite's web server
+  code, that made it segfault at times.
+
+- Joerg Mueller-Tolk improved the proxy user+password handling, especially
+  when providing a blank password.
+
+Daniel (2 September)
+- Fix for making CONNECT to proxies do the correct magic to allow NTLM, Digest
+  and similar to work.
+
 Daniel (1 September)
 - Henrik Storner made libcurl work fine with OpenLDAP 2.1.22 (current).
 
