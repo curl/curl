@@ -1,94 +1,23 @@
-Curl and libcurl 7.10.8. A bugfix release.
+Curl and libcurl 7.10.9. A bugfix release.
 
-The 77th public curl release. Release number 104 counted from the very
+The 78th public curl release. Release number 105 counted from the very
 beginning.
 
 This release includes the following changes:
 
- o --head now works on file:// URLs too
- o file: URLs with only one initial slash now works too
- o RELEASE-NOTES document added to the release archive to summarize the big
-   and visible changes and bugfixes
- o CURLOPT_MAXFILESIZE was added, and --max-filesize
- o CURLOPT_PASSWDFUNCTION and CURLOPT_PASSWDDATA are no longer supported
- o IPv6 is now supported on Windows builds too
- o CURLOPT_IPRESOLVE lets you select pure IPv6 or IPv4 resolved addresses
-   (curl offers the command line options -4/--ipv4 and -6/--ipv6)
- o GSS-Negotiate works fine with the MIT kerberos library
- o SPNEGO support added, if libcurl is built with the FBopenssl libraries,
-   curl_version_info() can return a feature bit for it and curl -V displays
-   SPNEGO as a feature if libcurl is built with it enabled
- o easy handles added to a multi handle now share DNS cache automaticly
- o CURLINFO_HTTPAUTH_AVAIL and CURLINFO_PROXYAUTH_AVAIL were added
- o CURLOPT_FTP_RESPONSE_TIMEOUT was added
- o NTLM, Digest and GSS-Negotiate authentications also work for HTTPS over
-   proxies
- o curl supports multiple -T flags to allow serveral uploaded files using
-   a single command line
- o CURLINFO_RESPONSE_CODE can return the last FTP response code
+ o 
 
 This release includes the following bugfixes:
 
- o added work-around for a name resolve problem on some glibc versions
- o a rare ERRORBUFFER single-byte overflow was fixed
- o HTTP-resuming an already downloaded file works better
- o builds better on Solaris 8+ with gcc
- o --disable-eprt works now
- o improved CA cert verification
- o --anyauth could bug when the first response had no body contents
- o double password prompting when doing NTLM fixed
- o improved performance when used multi-threaded on windows
- o share-locking during DNS lookups was modified
- o resume was not possible to switch off properly once enabled
- o fixed the ipv4 connect code when a DNS entry has multiple IPs
- o now checks subjectAltNames when matching certs
- o HTTP POST using read callback works again
- o builds fine on BeOS now
- o CURLOPT_COOKIE set to NULL no longer sends the previously set cookie
- o if an FTP transfer used a bad path, the next transfer could fail too
- o ares-built libcurl resolves IP-only names properly
- o changed the curl_lock_function proto to prevent warnings on some compilers
- o builds fine on QNX 6.2.x now
- o PUT with --digest works now 
- o --anyauth that picks NTLM and then follows a redirect (and does NTLM again)
-   works now
- o asynch resolves now work on NT4 too
- o a DNS cache trash (possible segfault) was fixed
- o runtests.pl clears all proxy environment variables before the test is run
- o Microsoft's "Negotiate" authentication is now supported by the existing
-   GSSNEGOTIATE option
- o A set zero-length proxy name confused libcurl
- o Digest authentication works again without OpenSSL on 64bit architectures
- o configure --enable-thread works now
- o buffer problems in the test suite's web server were fixed
- o improved proxy password handling
- o LDAP is again working nicely with the current OpenLDAP
- o asynch name lookup for non-resolving hosts now return a proper error message
- o CURLOPT_SSL_VERIFYHOST set to 1 no longer aborts if no CN field is
-   obtainable, it will merely warn about it
- o name resolve segfault with uClibc fixed
- o multi interface and multi-part/formpost could end in segfault
- o curl_multi_info_read() sets the msgs_in_queue to 0 when returning NULL
- o multi interface, ares and non-resolving host caused a segfault
- o minor single SSL memory leak fixed
- o Setting CURLOPT_WRITEFUNCTION or CURLOPT_READFUNCTION to NULL resets them
-   to default
+ o 
 
 Other curl-related news since the previous public release:
 
- o TclCurl 0.10.7 was released.
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Loren Kirkby, Jeff Pohlmeyer, Antoine Calando, Gerd v. Egidy, Vincent
- Sanders, John McGowan, Henrik Storner, Jörg Mueller-Tolk, Peter Pentchev,
- Early Ehlinger, Kevin Fisk, Jurij Smakov, Bjorn Reese, Tim Bartley, David
- Kimdon, Dominick Meglio, Markus Moeller, Giuseppe Attardi, James MacMillan,
- Neil Spring, Siddhartha Prakash Jain, Jon Turner, Vincent Bronner, Shard,
- Jeremy Friesner, Florian Schoppmann, Neil Dunbar, Frank Ticheler, Lachlan
- O'Dea, Dirk Manske, Domenico Andreoli, Gisle Vanem, Kimmo Kinnunen, Andrew
- Fuller, Georg Horn, Andrés García, Dylan Ellicott, Kevin Roth, David Hull,
- James Bursa, Dan C
+
  
         Thanks! (and sorry if I forgot to mention someone)
