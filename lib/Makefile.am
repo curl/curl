@@ -96,7 +96,7 @@ $(srcdir)/ca-bundle.h: Makefile.in Makefile
 	@if test -f $@; then \
 	  chmod 0644 $@; \
 	fi
-	echo "/* The file is generated automaticly */" > $@
+	echo "/* This file is generated automatically */" > $@
 if CABUNDLE
 	echo '#define CURL_CA_BUNDLE @CURL_CA_BUNDLE@' >> $@
 else
