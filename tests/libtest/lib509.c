@@ -121,7 +121,7 @@ static int ssl_app_verify_callback(X509_STORE_CTX *ctx, void *arg)
            URL in the cert uses a static one. We thus need to create a new
            URL that uses the currently requested port number which may not
            be the one this URL uses! */
-        sprintf(newurl, "https://localhost:%d/509", portnum);
+        sprintf(newurl, "https://127.0.0.1:%d/509", portnum);
         fprintf(stderr, "But *really* Setting URL <%s>\n", newurl);
 
         curl_easy_setopt(p->curl, CURLOPT_URL, newurl);

@@ -34,7 +34,7 @@ lib503
 simple multi http:// through proxytunnel with authentication info
  </name>
  <command>
-http://%HOSTIP:%HTTPSPORT/503 localhost:%HTTPPORT
+http://%HOSTIP:%HTTPSPORT/503 127.0.0.1:%HTTPPORT
 </command>
 <file name="log/test503.txt">
 foo
