@@ -154,18 +154,18 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   if(data->state.digest.algo == CURLDIGESTALGO_MD5SESS) {
     md5this = (unsigned char *)
       aprintf("%s:%s:%s:%s:%s",
-              data->state.user,
+              conn->user,
               data->state.digest.realm,
-              data->state.passwd,
+              conn->passwd,
               data->state.digest.nonce,
               data->state.digest.cnonce);
   }
   else {
     md5this = (unsigned char *)
       aprintf("%s:%s:%s",
-              data->state.user,
+              conn->user,
               data->state.digest.realm,
-              data->state.passwd);
+              conn->passwd);
   }
   Curl_md5it(md5buf, md5this);
   free(md5this); /* free this again */
@@ -202,7 +202,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
              "nonce=\"%s\", "
              "uri=\"%s\", "
              "response=\"%s\"\r\n",
-             data->state.user,
+             conn->user,
              data->state.digest.realm,
              data->state.digest.nonce,
              uripath, /* this is the PATH part of the URL */ 

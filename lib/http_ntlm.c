@@ -271,7 +271,6 @@ static void mkhash(char *password,
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn)
 {
-  struct SessionHandle *data=conn->data;
   const char *domain=""; /* empty */
   const char *host=""; /* empty */
   int domlen=strlen(domain);
@@ -339,6 +338,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     size = Curl_base64_encode(ntlm, size, &base64);
 
     if(size >0 ) {
+      if(conn->allocptr.userpwd)
+        free(conn->allocptr.userpwd);
       conn->allocptr.userpwd = aprintf("Authorization: NTLM %s\r\n",
                                        base64);
       free(base64);
@@ -377,20 +378,20 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     const char *user;
     int userlen;
 
-    user = strchr(data->state.user, '\\');
+    user = strchr(conn->user, '\\');
     if(!user)
-      user = strchr(data->state.user, '/');
+      user = strchr(conn->user, '/');
 
     if (user) {
-      domain = data->state.user;
+      domain = conn->user;
       domlen = user - domain;
       user++;
     }
     else
-      user = data->state.user;
+      user = conn->user;
     userlen = strlen(user);
 
-    mkhash(data->state.passwd, &conn->ntlm.nonce[0], lmresp
+    mkhash(conn->passwd, &conn->ntlm.nonce[0], lmresp
 #ifdef USE_NTRESPONSES
            , ntresp
 #endif
@@ -510,6 +511,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     size = Curl_base64_encode(ntlm, size, &base64);
 
     if(size >0 ) {
+      if(conn->allocptr.userpwd)
+        free(conn->allocptr.userpwd);
       conn->allocptr.userpwd = aprintf("Authorization: NTLM %s\r\n",
                                        base64);
       free(base64);

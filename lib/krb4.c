@@ -322,7 +322,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
 
   save = Curl_set_command_prot(conn, prot_private);
 
-  result = Curl_ftpsendf(conn, "SITE KAUTH %s", conn->data->state.user);
+  result = Curl_ftpsendf(conn, "SITE KAUTH %s", conn->user);
 
   if(result)
     return result;

@@ -1252,6 +1252,11 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   if(-1 != conn->firstsocket)
     sclose(conn->firstsocket);
 
+  if(conn->user)
+    free(conn->user);
+  if(conn->passwd)
+    free(conn->passwd);
+
   if(conn->allocptr.proxyuserpwd)
     free(conn->allocptr.proxyuserpwd);
   if(conn->allocptr.uagent)
@@ -1358,8 +1363,8 @@ ConnectionExists(struct SessionHandle *data,
         if(needle->protocol & PROT_FTP) {
           /* This is FTP, verify that we're using the same name and
              password as well */
-          if(!strequal(needle->data->state.user, check->proto.ftp->user) ||
-             !strequal(needle->data->state.passwd, check->proto.ftp->passwd)) {
+          if(!strequal(needle->user, check->user) ||
+             !strequal(needle->passwd, check->passwd)) {
             /* one of them was different */
             continue;
           }
@@ -1840,6 +1845,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   unsigned int prev_alarm=0;
 #endif
   char endbracket;
+  char user[MAX_CURL_USER_LENGTH];
+  char passwd[MAX_CURL_PASSWORD_LENGTH];
+  bool passwdgiven=FALSE; /* set TRUE if an application-provided password has
+                             been set */
+
 
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
@@ -2590,8 +2600,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    *
    * Outputs: (almost :- all currently undefined)
    *          conn->bits.user_passwd  - non-zero if non-default passwords exist
-   *          conn->state.user        - non-zero length if defined
-   *          conn->state.passwd      -   ditto
+   *          conn->user              - non-zero length if defined
+   *          conn->passwd            -   ditto
    *          conn->hostname          - remove user name and password
    */
 
@@ -2602,8 +2612,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * We need somewhere to put the embedded details, so do that first.
    */
 
-  data->state.user[0] =0;   /* to make everything well-defined */
-  data->state.passwd[0]=0;
+  user[0] =0;   /* to make everything well-defined */
+  passwd[0]=0;
 
   if (conn->protocol & (PROT_FTP|PROT_HTTP)) {
     /* This is a FTP or HTTP URL, we will now try to extract the possible
@@ -2630,31 +2640,31 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         if(*userpass != ':') {
           /* the name is given, get user+password */
           sscanf(userpass, "%127[^:@]:%127[^@]",
-                 data->state.user, data->state.passwd);
+                 user, passwd);
         }
         else
           /* no name given, get the password only */
-          sscanf(userpass, ":%127[^@]", data->state.passwd);
+          sscanf(userpass, ":%127[^@]", passwd);
 
-        if(data->state.user[0]) {
-          char *newname=curl_unescape(data->state.user, 0);
-          if(strlen(newname) < sizeof(data->state.user)) {
-            strcpy(data->state.user, newname);
+        if(user[0]) {
+          char *newname=curl_unescape(user, 0);
+          if(strlen(newname) < sizeof(user)) {
+            strcpy(user, newname);
           }
           /* if the new name is longer than accepted, then just use
              the unconverted name, it'll be wrong but what the heck */
           free(newname);
         }
-        if (data->state.passwd[0]) {
+        if (passwd[0]) {
           /* we have a password found in the URL, decode it! */
-          char *newpasswd=curl_unescape(data->state.passwd, 0);
-          if(strlen(newpasswd) < sizeof(data->state.passwd)) {
-            strcpy(data->state.passwd, newpasswd);
+          char *newpasswd=curl_unescape(passwd, 0);
+          if(strlen(newpasswd) < sizeof(passwd)) {
+            strcpy(passwd, newpasswd);
           }
           free(newpasswd);
 
           /* we have set the password */
-          data->state.passwdgiven = TRUE;
+          passwdgiven = TRUE;
         }
       }
     }
@@ -2673,35 +2683,35 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(*data->set.userpwd != ':') {
       /* the name is given, get user+password */
       sscanf(data->set.userpwd, "%127[^:]:%127[^\n]",
-             data->state.user, data->state.passwd);
+             user, passwd);
       if(strchr(data->set.userpwd, ':'))
         /* a colon means the password was given, even if blank */
-        data->state.passwdgiven = TRUE;
+        passwdgiven = TRUE;
     }
     else
       /* no name given, starts with a colon, get the password only */
-      sscanf(data->set.userpwd+1, "%127[^\n]", data->state.passwd);
+      sscanf(data->set.userpwd+1, "%127[^\n]", passwd);
   }
 
   if ((data->set.use_netrc != CURL_NETRC_IGNORED) &&
-      !data->state.passwdgiven) {  /* need passwd */
+      !passwdgiven) {  /* need passwd */
     if(Curl_parsenetrc(conn->hostname,
-                       data->state.user,
-                       data->state.passwd)) {
+                       user,
+                       passwd)) {
       infof(data, "Couldn't find host %s in the .netrc file, using defaults",
             conn->hostname);
     }
     else {
       conn->bits.user_passwd = 1; /* enable user+password */
-      data->state.passwdgiven = TRUE;
+      passwdgiven = TRUE;
     }
   }
 
   /* if we have a user but no password, ask for one */
-  if(conn->bits.user_passwd && !data->state.passwdgiven ) {
+  if(conn->bits.user_passwd && !passwdgiven ) {
     if(data->set.fpasswd(data->set.passwd_client,
-                         "password:", data->state.passwd,
-                         sizeof(data->state.passwd)))
+                         "password:", passwd,
+                         sizeof(passwd)))
       return CURLE_BAD_PASSWORD_ENTERED;
   }
 
@@ -2710,13 +2720,17 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* If our protocol needs a password and we have none, use the defaults */
   if ( (conn->protocol & (PROT_FTP|PROT_HTTP)) &&
        !conn->bits.user_passwd &&
-       !data->state.passwdgiven) {
+       !passwdgiven) {
 
-    strcpy(data->state.user, CURL_DEFAULT_USER);
-    strcpy(data->state.passwd, CURL_DEFAULT_PASSWORD);
+    strcpy(user, CURL_DEFAULT_USER);
+    strcpy(passwd, CURL_DEFAULT_PASSWORD);
 
     /* This is the default password, so DON'T set conn->bits.user_passwd */
   }
+
+  /* store user + password */
+  conn->user = strdup(user);
+  conn->passwd = strdup(passwd);
 
   /*************************************************************
    * Check the current list of connections to see if we can
@@ -2776,6 +2790,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->bits.chunk = FALSE; /* always assume not chunked unless told
                                  otherwise */
     conn->maxdownload = -1;  /* might have been used previously! */
+
+    free(old_conn->user);
+    free(old_conn->passwd);
 
     free(old_conn);          /* we don't need this anymore */
 

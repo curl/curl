@@ -650,8 +650,7 @@ static CURLcode Curl_output_basic(struct connectdata *conn)
   char *authorization;
   struct SessionHandle *data=conn->data;
 
-  sprintf(data->state.buffer, "%s:%s",
-          data->state.user, data->state.passwd);
+  sprintf(data->state.buffer, "%s:%s", conn->user, conn->passwd);
   if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
                         &authorization) >= 0) {
     if(conn->allocptr.userpwd)
