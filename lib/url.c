@@ -1881,10 +1881,10 @@ static int handleSock5Proxy(const char *proxy_name,
 
       if(4 == sscanf( buf, "%hu.%hu.%hu.%hu",
                       &ip[0], &ip[1], &ip[2], &ip[3])) {
-        socksreq[4] = ip[0];
-        socksreq[5] = ip[1];
-        socksreq[6] = ip[2];
-        socksreq[7] = ip[3];
+        socksreq[4] = (unsigned char)ip[0];
+        socksreq[5] = (unsigned char)ip[1];
+        socksreq[6] = (unsigned char)ip[2];
+        socksreq[7] = (unsigned char)ip[3];
       }
       else
         hp = NULL; /* fail! */
