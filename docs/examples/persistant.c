@@ -10,26 +10,14 @@
 
 #include <stdio.h>
 #include <unistd.h>
-
 #include <curl/curl.h>
-
-/* to make this work under windows, use the win32-functions from the
-   docs/examples/win32socket.c file as well */
-
-/* This example REQUIRES libcurl 7.7 or later */
-#if (LIBCURL_VERSION_NUM < 0x070700)
-#error Too old libcurl version, upgrade or stay away.
-#endif
 
 int main(int argc, char **argv)
 {
   CURL *curl;
   CURLcode res;
 
-#ifdef MALLOCDEBUG
-  /* this sends all memory debug messages to a specified logfile */
-  curl_memdebug("memdump");
-#endif
+  curl_global_init(CURL_GLOBAL_ALL);
 
   curl = curl_easy_init();
   if(curl) {
