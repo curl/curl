@@ -232,7 +232,14 @@ The actual URL to deal with. The parameter should be a char * to a zero
 terminated string. The string must remain present until curl no longer needs
 it, as it doesn't copy the string.
 
-\fBNOTE:\fP this option is (the only one) required to be set before
+If the given URL lacks the protocol part ("http://" or "ftp://" etc), it will
+attempt to guess which protocol to use based on the given host name. If the
+given protocol of the set URL is not supported, libcurl will return on error
+(\fICURLE_UNSUPPORTED_PROTOCOL\fP) when you call \fIcurl_easy_perform(3)\fP or
+\fIcurl_multi_perform(3)\fP. Use \fIcurl_version_info(3)\fP for detailed info
+on which protocols that are supported.
+
+\fBNOTE:\fP \fICURLOPT_URL\fP is the only option that must be set before
 \fIcurl_easy_perform(3)\fP is called.
 .IP CURLOPT_PROXY
 Set HTTP proxy to use. The parameter should be a char * to a zero terminated
