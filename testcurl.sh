@@ -184,7 +184,15 @@ if [ $CVS -eq 1 ]; then
   rm -rf autom4te.cache
 
   # generate the build files
-  ./buildconf 2>&1
+  ./buildconf 2>&1 | tee build.log
+
+  if { grep "^buildconf: OK" build.log; } then
+     echo "testcurl: buildconf was successful"
+  else
+     echo "testcurl: buildconf was NOT successful"
+     die
+  fi
+
 fi
 
 if [ -f configure ]; then
