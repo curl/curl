@@ -7,6 +7,9 @@
                                History of Changes
 
 Daniel (17 September 2001)
+- Linus Nielsen Feltzing fixed telnet for win32. It makes libcurl require
+  winsock 2.0.
+
 - libtool 1.4.2 is now in use!
 
 Version 7.9-pre5
