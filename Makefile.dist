@@ -54,16 +54,16 @@ borland-clean:
 	make -f Makefile.b32 clean
 
 mingw32:
-	cd lib & make -f Makefile.m32 ZLIB=1
-	cd src & make -f Makefile.m32 ZLIB=1
+	$(MAKE) -C lib -f Makefile.m32 ZLIB=1
+	$(MAKE) -C src -f Makefile.m32 ZLIB=1
 
 mingw32-ssl:
-	cd lib & make -f Makefile.m32 SSL=1 ZLIB=1
-	cd src & make -f Makefile.m32 SSL=1 ZLIB=1
+	$(MAKE) -C lib -f Makefile.m32 SSL=1 ZLIB=1
+	$(MAKE) -C src -f Makefile.m32 SSL=1 ZLIB=1
 
 mingw32-clean:
-	cd lib & make -f Makefile.m32 clean
-	cd src & make -f Makefile.m32 clean
+	$(MAKE) -C lib -f Makefile.m32 clean
+	$(MAKE) -C src -f Makefile.m32 clean
 
 vc:
 	cd lib
@@ -102,8 +102,8 @@ vc-libcurl-ssl-dll:
 	nmake /f Makefile.vc6
 
 djgpp:
-	make -C lib -f Makefile.dj
-	make -C src -f Makefile.dj
+	$(MAKE) -C lib -f Makefile.dj
+	$(MAKE) -C src -f Makefile.dj
 
 cygwin:
 	./configure
