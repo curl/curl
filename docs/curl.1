@@ -136,6 +136,9 @@ with HTTPS. The certificate must be in PEM format.
 If the optional password isn't specified, it will be queried for on
 the terminal. Note that this certificate is the private key and the private
 certificate concatenated!
+.IP "--cacert <CA certificate>"
+(HTTPS) Tells curl to use the specified certificate file to verify the
+peer. The certificate must be in PEM format.
 .IP "-f/--fail"
 (HTTP)
 Fail silently (no output at all) on server errors. This is mostly done
