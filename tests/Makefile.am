@@ -3,10 +3,10 @@ all:
 install:
 
 test:
-	./runtests.pl
+	perl runtests.pl
 
 quiet-test:
-	./runtests.pl -s -a
+	perl runtests.pl -s -a
 
 clean:
 	rm -rf log
