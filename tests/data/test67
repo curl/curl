@@ -1,0 +1,99 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 401 Authorization Required
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: NTLM
+Content-Type: text/html; charset=iso-8859-1
+
+This is not the real page
+</data>
+
+# This is supposed to be returned when the server gets a first
+# Authorization: NTLM line passed-in from the client
+<data1001>
+HTTP/1.1 401 Now gimme that second request of crap
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+
+This is not the real page either!
+</data1001>
+
+# This is supposed to be returned when the server gets the second
+# Authorization: NTLM line passed-in from the client
+<data1002>
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+
+Finally, this is the real page!
+</data1002>
+
+<datacheck>
+HTTP/1.1 401 Authorization Required
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: NTLM
+Content-Type: text/html; charset=iso-8859-1
+
+This is not the real page
+HTTP/1.1 401 Now gimme that second request of crap
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+
+This is not the real page either!
+HTTP/1.1 200 Things are fine in server land
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+
+Finally, this is the real page!
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+# NTLM only works if SSL-support is present
+<features>
+SSL
+</features>
+<server>
+http
+</server>
+ <name>
+HTTP with NTLM authorization
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/67 -u testuser:testpass --ntlm
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /67 HTTP/1.1
+User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET /67 HTTP/1.1
+Authorization: NTLM TlRMTVNTUAABAAAAA7IAAAUABQArAAAACwALACAAAABMSUxMQVNZU1RFUkhFTU1B
+User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET /67 HTTP/1.1
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAHAAAAAYABgAiAAAAAoACgBAAAAAEAAQAEoAAAAWABYAWgAAAAAAAACgAAAAAYIAAEgARQBNAE0AQQB0AGUAcwB0AHUAcwBlAHIATABJAEwATABBAFMAWQBTAFQARQBSAFpkQwKRCZFMYkMKatVwZ5YQjH0KEq0sF6mFcheMuv8v+xeqphEO5V41xRd7R9deOQ==
+User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
