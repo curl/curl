@@ -411,7 +411,7 @@ static struct HttpPost * AddHttpPost (char * name,
   if(post) {
     memset(post, 0, sizeof(struct HttpPost));
     post->name = name;
-    post->namelength = namelength?namelength:(long)strlen(name);
+    post->namelength = name?(namelength?namelength:(long)strlen(name)):0;
     post->contents = value;
     post->contentslength = contentslength;
     post->contenttype = contenttype;
@@ -832,10 +832,12 @@ FORMcode FormAdd(struct HttpPost **httppost,
   if(FORMADD_OK == return_value) {
     /* go through the list, check for copleteness and if everything is
      * alright add the HttpPost item otherwise set return_value accordingly */
-    form = first_form;
-    while (form != NULL) {
-      if ( (!form->name) ||
-           (!form->value) ||
+    
+    post = NULL;
+    for(form = first_form;
+        form != NULL;
+        form = form->more) {
+      if ( ((!form->name || !form->value) && !post) ||
            ( (form->contentslength) &&
              (form->flags & HTTPPOST_FILENAME) ) ||
            ( (form->flags & HTTPPOST_FILENAME) &&
@@ -880,7 +882,6 @@ FORMcode FormAdd(struct HttpPost **httppost,
         if (form->contenttype)
           prevtype = form->contenttype;
       }
-      form = form->more;
     }
   }
 
@@ -1391,12 +1392,12 @@ int main()
 
     if(-1 == nread)
       break;
-    fwrite(buffer, nread, 1, stderr);
+    fwrite(buffer, nread, 1, stdout);
   } while(1);
 
-  fprintf(stderr, "size: %d\n", size);
+  fprintf(stdout, "size: %d\n", size);
   if (errors)
-    fprintf(stderr, "\n==> %d Test(s) failed!\n", errors);
+    fprintf(stdout, "\n==> %d Test(s) failed!\n", errors);
   else
     fprintf(stdout, "\nAll Tests seem to have worked (please check output)\n");
 
