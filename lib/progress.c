@@ -119,15 +119,15 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
 
   case TIMER_NAMELOOKUP:
     data->progress.t_nslookup +=
-      Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
+      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
     break;
   case TIMER_CONNECT:
     data->progress.t_connect +=
-      Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
+      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
     break;
   case TIMER_PRETRANSFER:
     data->progress.t_pretransfer +=
-      Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
+      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
     break;
   case TIMER_POSTRANSFER:
     /* this is the normal end-of-transfer thing */
