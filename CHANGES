@@ -8,6 +8,41 @@
 
 Version XX
 
+Daniel (19 March 2000):
+- Marco G. Salvagno <mgs@whiz.cjb.net> supplied me with a series of patches
+  that now allows curl to get compiled on OS/2. It even includes a section in
+  the INSTALL file. Very nice job!
+
+Daniel (17 March 2000):
+- Wham Bang <wham_bang@yahoo.com> (is that Pascal Gaudette?) supplied a patch
+  for the lib/Makefile.vc6 file. We still need some fixes for the
+  config-win32.h since it appears that VC++ and mingw32 have different
+  opinions about (at least) unistd.h's existance.
+
+Daniel (15 March 2000):
+- I modified the -D/--dump-header workings so that it doesn't write anything
+  to the file until it needs to. This way, you can actually use -b and -D
+  on the same file if you want repeated invokes to store and read the cookies
+  in that one single file.
+
+- Poked around in lots of texts. Added the BUGS file for bug reporting stuff.
+  Added the classic HTTP POST question to the FAQ, removed some #ifdef WIN32
+  stuff from the sources (they're covered by the config-win32.h now).
+
+- Pascal Gaudette <pascal@gaudette.org> fixed a missing ldap.c problem in the
+  Makefile.vc6 file. He also addressed a problem in src/config-win32.h.
+
+Daniel (14 March 2000):
+- Paul Harrington pointed out that the 'http_code' variable in the -w output
+  was never written. I fixed it now.
+
+- Janne Johansson <jj@dynarc.se> reported the complaints that OpenBSD does
+  when getdate.c #includes malloc.h. It claims stdlib.h should be included
+  instead. I added #ifdef HAVE_MALLOC_H code in getdate.y and two checks in
+  the configure.in for malloc.h and stdlib.h.
+
+Version 6.5
+
 Daniel (13 March 2000):
 - <curl@spam.wolvesbane.net> pointed out that the way curl sent cookies in a
   single line wasn't enjoyed by IIS4.0 servers. In my view, that is not what
