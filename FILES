@@ -53,6 +53,7 @@ src/*.in
 src/*.am
 src/mkhelp.pl
 src/Makefile.vc6
+src/Makefile.b32
 src/*m32
 lib/getdate.y
 lib/*.[ch]
@@ -60,6 +61,8 @@ lib/*in
 lib/*am
 lib/Makefile.vc6
 lib/*m32
+lib/Makefile.b32
+lib/Makefile.b32.resp
 lib/libcurl.def
 include/README
 include/Makefile.in

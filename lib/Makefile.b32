@@ -1,0 +1,75 @@
+############################################################
+#  Makefile.b32 - Borland's C++ Compiler 5.X
+#
+#  'lib' directory
+#
+#  Requires 'Makefile.b32.resp'
+#
+#  Written by Jaepil Kim, pit@paradise.net.nz
+############################################################
+
+# Setup environment
+CXX	   = bcc32
+RM	   = del
+LIB	   = tlib
+TOPDIR	   = ..
+CURNTDIR   = .
+CXXFLAGS   = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro
+DEFINES    = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS
+INCDIRS    = -I$(CURNTDIR);$(TOPDIR)/include/
+
+# 'BCCDIR' has to be set up in your c:\autoexec.bat
+# i.e. SET BCCDIR = c:\Borland\BCC55
+# where c:\Borland\BCC55 is the compiler is installed
+LINKLIB	   = $(BCCDIR)/lib/psdk/wsock32.lib
+LIBCURLLIB = libcurl.lib
+
+.SUFFIXES: .c
+
+SOURCES	   = \
+	base64.c \
+	cookie.c \
+	download.c \
+	escape.c \
+	formdata.c \
+	ftp.c \
+	http.c \
+	ldap.c \
+	dict.c \
+	telnet.c \
+	getdate.c \
+	getenv.c \
+	getpass.c \
+	hostip.c \
+	if2ip.c \
+	mprintf.c \
+	netrc.c \
+	progress.c \
+	sendf.c \
+	speedcheck.c \
+	ssluse.c \
+	timeval.c \
+	url.c \
+	file.c \
+	getinfo.c \
+	version.c \
+	easy.c \
+	highlevel.c \
+	strequal.c
+
+OBJECTS = $(SOURCES:.c=.obj)
+
+.c.obj:
+	$(CXX) -c $(INCDIRS) $(CXXFLAGS) $(DEFINES) $<
+
+all:	$(LIBCURLLIB)
+
+clean:
+	$(RM) $(LIBCURLLIB)
+        $(RM) *.obj
+
+$(LIBCURLLIB):  $(LINKLIB) $(OBJECTS) Makefile.b32.resp
+	$(RM) $(LIBCURLLIB)
+	$(LIB) $(LIBCURLLIB) @Makefile.b32.resp
+
+

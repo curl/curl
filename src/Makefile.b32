@@ -1,0 +1,43 @@
+############################################################
+#  Makefile.b32 - Borland's C++ Compiler 5.X
+#
+#  'src' directory
+#
+#  Written by Jaepil Kim, pit@paradise.net.nz
+############################################################
+
+# Set program's name
+PROGNAME  = curl.exe
+
+# Setup environment
+CXX       = bcc32
+CXXFLAGS  = -5 -O2 -WC -w-par -w-csu -w-aus
+RM        = del
+TOPDIR    = ..
+DEFINES   = -DNDEBUG -DLIBCURL_BIGENDIAN=0 -DWIN32 -D_CONSOLE -D_MBCS
+LD	  = bcc32
+LDFLAGS	  = -lap -e$(PROGNAME)
+INCDIRS   = -I$(TOPDIR)/include
+LIBCURLLIB= $(TOPDIR)/lib/libcurl.lib
+
+# 'BCCDIR' has to be set up in your c:\autoexec.bat
+# i.e. SET BCCDIR = c:\Borland\BCC55
+# where c:\Borland\BCC55 is the compiler is installed
+LINKLIB   = $(BCCDIR)/lib/psdk/wsock32.lib
+
+
+PROGRAMS  = \
+	curl.exe 
+
+.c.obj:
+	$(CXX) -c $(INCDIRS) $(CXXFLAGS) $(DEFINES) $*.c
+
+all: $(PROGRAMS)
+
+curl.exe: $(LIBCURLLIB) $(LINKLIB) hugehelp.obj writeout.obj urlglob.obj main.obj
+	$(LD) $(LDFLAGS) hugehelp.obj writeout.obj urlglob.obj main.obj $(LIBCURLLIB) $(LINKLIB)
+
+clean:
+	$(RM) *.obj
+        $(RM) *.exe
+        $(RM) *.tds
