@@ -1,0 +1,70 @@
+#
+#  Watcom / OpenWatcom / Win32 makefile for cURL.
+#  G. Vanem <giva@bgnett.no>
+#
+# $Id$
+
+#
+# Set to 1 to use static lib.
+# Set to 0 to use DLL and import lib.
+#
+STATIC = 1
+
+CC = wcc386
+
+CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm     &
+         -bt=nt -d+ -dWIN32 -dHAVE_LONGLONG -dHAVE_STRTOLL -dWITHOUT_MM_LIB &
+         -dSIZEOF_CURL_OFF_T=8 -dCURLDEBUG -dCURLTOOLDEBUG -dENABLE_IPV6    &
+         -dHAVE_WINSOCK2_H -I..\include -I..\lib
+
+!if "STATIC" == "0"
+LIBCURL = ..\lib\libcurl_wc_imp.lib
+
+!else
+CFLAGS += -dCURL_STATICLIB
+LIBCURL = ..\lib\libcurl_wc.lib
+!endif
+
+OBJ_DIR = Watcom_obj
+
+OBJS = $(OBJ_DIR)\getpass.obj  $(OBJ_DIR)\homedir.obj $(OBJ_DIR)\hugehelp.obj &
+       $(OBJ_DIR)\main.obj     $(OBJ_DIR)\urlglob.obj $(OBJ_DIR)\writeenv.obj &
+       $(OBJ_DIR)\writeout.obj $(OBJ_DIR)\timeval.obj
+
+RESOURCE = $(OBJ_DIR)\curl.res
+
+all: hugehelp.c $(OBJ_DIR) curl.exe .SYMBOLIC
+	@echo Welcome to cURL
+
+hugehelp.c: hugehelp.c.cvs
+	copy hugehelp.c.cvs hugehelp.c
+
+$(OBJ_DIR):
+	mkdir $(OBJ_DIR)
+
+curl.exe: $(OBJS) $(RESOURCE)
+	wlink name $@ system nt file { $(OBJS) }                   &
+	  option quiet, map, caseexact, eliminate, res=$(RESOURCE) &
+	  libpath $(%watcom)\lib386;$(%watcom)\lib386\nt           &
+	  library $(LIBCURL), clib3r.lib, ws2_32.lib
+
+clean: .SYMBOLIC
+	- rm -f $(OBJS) $(RESOURCE)
+
+vclean realclean: clean .SYMBOLIC
+ 	- rm -f curl.exe curl.map
+	- rmdir $(OBJ_DIR)
+
+$(RESOURCE): curl.rc
+	wrc -dCURLDEBUG=1 -q -r -zm -I..\include -fo=$@ curl.rc
+
+.ERASE
+$(OBJ_DIR)\timeval.obj: ..\lib\timeval.c
+	$(CC) $[@ $(CFLAGS) -fo=$@
+	@echo .
+
+.ERASE
+.c{$(OBJ_DIR)}.obj:
+	$(CC) $[@ $(CFLAGS) -fo=$@
+	@echo .
+

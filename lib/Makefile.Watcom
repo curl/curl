@@ -1,0 +1,88 @@
+#
+#  Watcom / OpenWatcom / Win32 makefile for libcurl.
+#  G. Vanem <giva@bgnett.no>
+#
+# $Id$
+
+TARGETS = libcurl_wc.lib libcurl_wc.dll libcurl_wc_imp.lib
+
+CC = wcc386
+
+CFLAGS = -3r -mf -d3 -hc -zff -zgf -zq -zm -s -fr=con -w2 -fpi -oilrtfm -bt=nt &
+         -d+ -dWIN32 -dHAVE_LONGLONG -dCURL_CA_BUNDLE=getenv("CURL_CA_BUNDLE") &
+         -dBUILDING_LIBCURL -dWITHOUT_MM_LIB -dHAVE_SPNEGO=1 -dENABLE_IPV6     &
+         -dDEBUG_THREADING_GETADDRINFO -dDEBUG=1 -dCURLDEBUG -I. -I..\include
+
+OBJ_DIR  = Watcom_obj
+LIB_ARG  = $(OBJ_DIR)\wlib.arg
+LINK_ARG = $(OBJ_DIR)\wlink.arg
+
+OBJS = $(OBJ_DIR)\transfer.obj         $(OBJ_DIR)\file.obj       &
+       $(OBJ_DIR)\strequal.obj         $(OBJ_DIR)\timeval.obj    &
+       $(OBJ_DIR)\easy.obj             $(OBJ_DIR)\base64.obj     &
+       $(OBJ_DIR)\security.obj         $(OBJ_DIR)\hostip.obj     &
+       $(OBJ_DIR)\krb4.obj             $(OBJ_DIR)\progress.obj   &
+       $(OBJ_DIR)\memdebug.obj         $(OBJ_DIR)\formdata.obj   &
+       $(OBJ_DIR)\http_chunks.obj      $(OBJ_DIR)\cookie.obj     &
+       $(OBJ_DIR)\strtok.obj           $(OBJ_DIR)\http.obj       &
+       $(OBJ_DIR)\connect.obj          $(OBJ_DIR)\sendf.obj      &
+       $(OBJ_DIR)\llist.obj            $(OBJ_DIR)\ftp.obj        &
+       $(OBJ_DIR)\hash.obj             $(OBJ_DIR)\url.obj        &
+       $(OBJ_DIR)\multi.obj            $(OBJ_DIR)\dict.obj       &
+       $(OBJ_DIR)\content_encoding.obj $(OBJ_DIR)\if2ip.obj      &
+       $(OBJ_DIR)\share.obj            $(OBJ_DIR)\speedcheck.obj &
+       $(OBJ_DIR)\http_digest.obj      $(OBJ_DIR)\ldap.obj       &
+       $(OBJ_DIR)\md5.obj              $(OBJ_DIR)\ssluse.obj     &
+       $(OBJ_DIR)\http_negotiate.obj   $(OBJ_DIR)\version.obj    &
+       $(OBJ_DIR)\http_ntlm.obj        $(OBJ_DIR)\getenv.obj     &
+       $(OBJ_DIR)\inet_pton.obj        $(OBJ_DIR)\escape.obj     &
+       $(OBJ_DIR)\strtoofft.obj        $(OBJ_DIR)\mprintf.obj    &
+       $(OBJ_DIR)\strerror.obj         $(OBJ_DIR)\telnet.obj     &
+       $(OBJ_DIR)\hostares.obj         $(OBJ_DIR)\netrc.obj      &
+       $(OBJ_DIR)\hostasyn.obj         $(OBJ_DIR)\getinfo.obj    &
+       $(OBJ_DIR)\hostip4.obj          $(OBJ_DIR)\hostthre.obj   &
+       $(OBJ_DIR)\hostip6.obj          $(OBJ_DIR)\inet_ntop.obj  &
+       $(OBJ_DIR)\hostsyn.obj          $(OBJ_DIR)\parsedate.obj  &
+       $(OBJ_DIR)\select.obj
+
+RESOURCE = $(OBJ_DIR)\libcurl.res
+
+all: $(OBJ_DIR) $(TARGETS) .SYMBOLIC
+	@echo Welcome to libcurl
+
+$(OBJ_DIR):
+	mkdir $(OBJ_DIR)
+
+libcurl_wc.lib: $(OBJS) $(LIB_ARG)
+	wlib -q -b -c $@ @$(LIB_ARG)
+
+libcurl_wc.dll: $(OBJS) $(RESOURCE) $(LINK_ARG)
+	wlink name libcurl_wc.dll @$(LINK_ARG)
+
+clean: .SYMBOLIC
+	- rm -f $(OBJS) $(RESOURCE)
+
+vclean realclean: clean .SYMBOLIC
+	- rm -f $(TARGETS) $(LIB_ARG) $(LINK_ARG) libcurl_wc.map
+	- rmdir $(OBJ_DIR)
+
+.ERASE
+$(RESOURCE): libcurl.rc
+        wrc -dCURLDEBUG=1 -q -r -zm -I..\include -fo=$@ libcurl.rc
+
+.ERASE
+.c{$(OBJ_DIR)}.obj:
+	$(CC) $[@ $(CFLAGS) -fo=$@
+	@echo .
+
+$(LIB_ARG):
+	%create $^@
+	for %f in ($(OBJS)) do %append $^@ +- %f
+
+$(LINK_ARG):
+	%create $^@
+	@%append $^@ system nt dll
+	@%append $^@ file { $(OBJS) }
+	@%append $^@ option quiet, map, caseexact, eliminate, implib=libcurl_wc_imp.lib,
+	@%append $^@ res=$(RESOURCE) libpath $(%watcom)\lib386;$(%watcom)\lib386\nt
+	@%append $^@ library clib3r.lib, ws2_32.lib
