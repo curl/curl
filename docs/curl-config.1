@@ -2,7 +2,7 @@
 .\" nroff -man curl-config.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl-config 1 "28 May 2001" "Curl 7.8" "curl-config manual"
+.TH curl-config 1 "16 August 2001" "Curl 7.8.1" "curl-config manual"
 .SH NAME
 curl-config \- Get information about a libcurl installation
 .SH SYNOPSIS
@@ -12,8 +12,8 @@ curl-config \- Get information about a libcurl installation
 displays information about a previous curl and libcurl installation.
 .SH OPTIONS
 .IP "--cflags"
-What set of CFLAGS that was used when libcurl was built. This is mostly a
-debug option that serves no particular use to most people.
+Set of compiler options (CFLAGS) to use when compiling files that use
+libcurl. Currently that is only thw include path to the curl include files.
 .IP "--feature"
 Lists what particular main features the installed libcurl was built with. At
 the time of writing, this list may include SSL, KRB4 or IPv6. Do not assume
@@ -36,17 +36,13 @@ This outputs the version number, in hexadecimal, with 8 bits for each part;
 major, minor, patch. So that libcurl 7.7.4 would appear as 070704 and libcurl
 12.13.14 would appear as 0c0d0e...
 .SH "EXAMPLES"
-What is the path to the curl header files?
-
-  echo `curl-config --prefix`/include
-
-What is the path to libcurl?
-
-  echo `curl-config --prefix`/lib
-
-What other linker options do I need when I link with libcurl?
+What linker options do I need when I link with libcurl?
 
   curl-config --libs
+
+What compiler options do I need when I compile using libcurl functions?
+
+  curl-config --cflags
 
 How do I know if libcurl was built with SSL support?
 
