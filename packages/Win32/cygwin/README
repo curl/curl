@@ -8,12 +8,9 @@ Curl is a tool for transferring files with URL syntax, supporting
 See /usr/doc/curl-<version>/FEATURES for more info.
 
 
-Runtime Dependencies:
+Dependencies:
   - Cygwin
-
-Compile-time Dependencies:
-  - OpenSSL 0.9.6b (*)
-
+  - OpenSSL 0.9.6b-2+ (*)
   (*) cURL can be built without SSL support:  ./configure --without-ssl
 
 
@@ -79,10 +76,10 @@ Packaging Instructions:
   cookies, user+password authentication, file transfer resume,
   http proxy tunneling and a busload of other useful tricks."
   category: Web Libs
-  requires: cygwin
+  requires: cygwin openssl
 
 
 Cygwin port maintained by:
   Kevin Roth <kproth at bigfoot dot com>
-  Questions regarding cURL use should be directed to curl@contactor.se.
-  Questions regarding its packaging should be directed to cygwin@cygwin.com.
+  Questions about cURL should be directed to curl@contactor.se.
+  Questions about its cygwin package should be directed to cygwin@cygwin.com.
