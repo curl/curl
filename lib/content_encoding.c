@@ -73,7 +73,7 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
                             ssize_t nread)
 {
   int status;                   /* zlib status */
-  int result;                   /* Curl_client_write status */
+  int result = CURLE_OK; /*?*/  /* Curl_client_write status */
   char decomp[DSIZ];            /* Put the decompressed data here. */
   z_stream *z = &k->z;          /* zlib state structure */
 
@@ -217,7 +217,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
                          ssize_t nread)
 {
   int status;                   /* zlib status */
-  int result;                   /* Curl_client_write status */
+  int result = CURLE_OK; /*?*/  /* Curl_client_write status */
   char decomp[DSIZ];            /* Put the decompressed data here. */
   z_stream *z = &k->z;          /* zlib state structure */
 

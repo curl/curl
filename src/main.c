@@ -2567,7 +2567,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
   int separator = 0;
   
-  FILE *infd;
+  FILE *infd = stdin;
   bool infdfopen;
   FILE *headerfilep = NULL;
   char *urlbuffer=NULL;

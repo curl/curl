@@ -783,7 +783,7 @@ static CURLcode verifyhost(struct connectdata *conn,
   char peer_CN[257];
   bool matched = FALSE; /* no alternative match yet */
   int target = GEN_DNS; /* target type, GEN_DNS or GEN_IPADD */
-  int addrlen;
+  int addrlen = 0;
   struct SessionHandle *data = conn->data;
   STACK_OF(GENERAL_NAME) *altnames;
 #ifdef ENABLE_IPV6
@@ -809,9 +809,9 @@ static CURLcode verifyhost(struct connectdata *conn,
   altnames = X509_get_ext_d2i(server_cert, NID_subject_alt_name, NULL, NULL);
   
   if(altnames) {
-    int hostlen;
-    int domainlen;
-    char *domain;
+    int hostlen = 0;
+    int domainlen = 0;
+    char *domain = NULL;
     int numalts;
     int i;
         
