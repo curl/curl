@@ -394,7 +394,7 @@ CURLcode http(struct connectdata *conn)
       while(co) {
         if(co->value && strlen(co->value)) {
           if(0 == count) {
-            add_bufferf(req_buffer, "Cookie:");
+            add_bufferf(req_buffer, "Cookie: ");
           }
           add_bufferf(req_buffer,
                       "%s%s=%s", count?"; ":"", co->name, co->value);
