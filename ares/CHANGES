@@ -1,3 +1,12 @@
+  Changelog for the c-ares project
+
+* April 1, 2004
+- Dirk Manske provided a new function that is now named ares_cancel(). It is
+  used to cancel/cleanup a resolve/request made using ares functions on the
+  given ares channel. It does not destroy/kill the ares channel itself.
+
+- Dominick Meglio cleaned up the formatting in several man pages.
+
 * March 30, 2004
 - Dominick Meglio's new ares_expand_string. A helper function when decoding
   incoming DNS packages.
@@ -81,3 +90,5 @@ Version 1.0-pre1 (8 October 2003)
 - Daniel Stenberg adjusted the windows port
 
 - liren at vivisimo.com made the initial windows port
+
+* Imported the sources from ares 1.1.1

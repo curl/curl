@@ -105,7 +105,7 @@ int ares_init(ares_channel *channelptr);
 int ares_init_options(ares_channel *channelptr, struct ares_options *options,
 		      int optmask);
 void ares_destroy(ares_channel channel);
-
+void ares_cancel(ares_channel channel);
 void ares_send(ares_channel channel, const unsigned char *qbuf, int qlen,
 	       ares_callback callback, void *arg);
 void ares_query(ares_channel channel, const char *name, int dnsclass,
