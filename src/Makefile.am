@@ -22,10 +22,12 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
+# we use srcdir/src for "private" includes
 # we use srcdir/include for the static global include files
-# we use builddir/src for the generated src/config.h file to get found
-# we use srcdir/lib for the client-private header files
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/src -I$(top_srcdir)/src
+# we use builddir/src for the generated include files to get found
+# we use srcdir/lib for the header files we "borrow" from the lib
+INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/include -I$(top_builddir)/src \
+	-I$(top_srcdir)/lib
 
 bin_PROGRAMS = curl
 
