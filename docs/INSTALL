@@ -8,9 +8,12 @@
 
 Curl has been compiled and built on numerous different operating systems.
 
-If you're using Windows (95/98/NT/ME/2000 or whatever), VMS, RISC OS or OS/2,
-you should continue reading from one the paragraphs further down. All other
-systems should be capable of being installed as described below.
+Most systems build curl the same way (unix-style). Continue reading below for
+more details if you're one of them.
+
+If you're using Windows (95/98/NT/ME/2000/XP or similar), VMS, RISC OS or OS/2
+or cross-compile, you should continue reading from one the paragraphs further
+down.
 
 UNIX
 ====
@@ -324,6 +327,45 @@ VMS
    So far for porting notes as of:
    13-jul-2001
    N. Baggus
+
+CROSS COMPILE
+=============
+
+   (This section was graciously brought to us by Jim Duey, 23-oct-2001)
+
+   Download and unpack the cURL package.  Version should be 7.9.1 or later.
+
+   'cd' to the new directory. (ie. curl-7.9.1-pre4)
+
+   Set environment variables to point to the cross-compile toolchain and call
+   configure with any options you need.  Be sure and specify the '--host' and
+   '--build' parameters at configuration time.  The following script is an
+   example of cross-compiling for the IBM 405GP PowerPC processor using the
+   toolchain from MonteVista for Hardhat Linux.
+
+   (begin script)
+
+   #! /bin/sh
+
+   export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
+   export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
+   export AR=ppc_405-ar
+   export AS=ppc_405-as
+   export LD=ppc_405-ld
+   export RANLIB=ppc_405-ranlib
+   export CC=ppc_405-gcc
+   export NM=ppc_405-nm
+
+   configure --target=powerpc-hardhat-linux \
+	--host=powerpc-hardhat-linux \
+	--build=i586-pc-linux-gnu \
+	--prefix=/opt/hardhat/devkit/ppc/405/target/usr/local \
+	--exec-prefix=/usr/local
+
+   (end script)
+
+   The '--prefix' parameter specifies where cURL will be installed.  If
+   'configure' completes successfully, do 'make' and 'make install' as usual.
 
 PORTS
 =====
