@@ -1,0 +1,75 @@
+#############################################################
+# $Id$
+#
+## Makefile for building libcares.a with MingW32 (GCC-3.2)
+## Use: make -f Makefile.m32 [demos]
+##
+## Quick hack by Guenter; comments to: /dev/nul
+
+CC = gcc
+AR = ar
+RANLIB = ranlib
+STRIP = strip -g
+#RM = rm -f 
+
+########################################################
+## Nothing more to do below this line!
+
+LIB=libcares.a
+CC=gcc
+#CPPFLAGS=@CPPFLAGS@
+WARN_FLAGS=-Wall
+CFLAGS=-O2 -DMINGW32
+CFLAGS+=${WARN_CFLAGS} ${ERROR_CFLAGS}
+#DEFS=-DWIN32
+LDFLAGS=-s
+LIBS=-lwsock32
+ALL_CFLAGS=${CPPFLAGS} ${CFLAGS} ${DEFS}
+
+MANPAGES := $(patsubst %.c,%.o,$(wildcard ares_*.3))
+
+OBJS	:= $(patsubst %.c,%.o,$(wildcard ares_*.c))
+OBJS	+= windows_port.o
+
+$(LIB): ${OBJS}
+	ar cru $@ ${OBJS}
+	${RANLIB} $@
+
+all: $(LIB) demos
+
+demos: adig.exe ahost.exe
+
+tags:
+	etags *.[ch]
+
+adig.exe: adig.o $(LIB)
+	${CC} ${LDFLAGS} -o $@ adig.o $(LIB) ${LIBS}
+
+ahost.exe: ahost.o $(LIB)
+	${CC} ${LDFLAGS} -o $@ ahost.o $(LIB) ${LIBS}
+
+${OBJS}: ares.h ares_dns.h ares_private.h
+
+.c.o:
+	${CC} -c ${ALL_CFLAGS} $<
+
+check:
+
+install:
+	${top_srcdir}/mkinstalldirs ${DESTDIR}${libdir}
+	${top_srcdir}/mkinstalldirs ${DESTDIR}${includedir}
+	${top_srcdir}/mkinstalldirs ${DESTDIR}${mandir}/man3
+	${INSTALL} -m 644 $(LIB) ${DESTDIR}${libdir}
+	${RANLIB} ${DESTDIR}${libdir}/$(LIB)
+	chmod u-w ${DESTDIR}${libdir}/$(LIB)
+	${INSTALL} -m 444 ${srcdir}/ares.h ${DESTDIR}${includedir}
+	${INSTALL} -m 444 ${srcdir}/ares_version.h ${DESTDIR}${includedir}
+	(for man in $(MANPAGES); do \
+	   ${INSTALL} -m 444 ${srcdir}/$${man} ${DESTDIR}${mandir}/man3; \
+	done)
+
+clean:
+	rm -f ${OBJS} $(LIB) adig.o adig.exe ahost.o ahost.exe
+
+distclean: clean
+	rm -f config.cache config.log config.status Makefile
