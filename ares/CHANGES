@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* April 7
+- Tupone Alfredo fixed includes of arpa/nameser_compat.h to build fine on Mac
+  OS X.
+
 * April 5
 
 - Dominick Meglio: Provided implementations of inet_net_pton and inet_pton
