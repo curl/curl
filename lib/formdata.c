@@ -835,7 +835,7 @@ static CURLcode AddFormData(struct FormData **formp,
       /* Since this is a file to be uploaded here, add the size of the actual
          file */
       if(!strequal("-", newform->line)) {
-        struct stat file;
+        struct_stat file;
         if(!stat(newform->line, &file)) {
           *size += file.st_size;
         }

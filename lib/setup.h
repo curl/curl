@@ -133,6 +133,14 @@ typedef unsigned char bool;
 #define SEND_4TH_ARG 0
 #endif
 
+/* To make large file support transparent even on Windows */
+#if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
+#define lseek(x,y,z) _lseeki64(x, y, z)
+#define struct_stat struct _stati64
+#define fstat(fd,st) _fstati64(fd,st)
+#else
+#define struct_stat struct stat
+#endif
 
 /* Below we define four functions. They should
    1. close a socket

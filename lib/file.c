@@ -167,14 +167,6 @@ CURLcode Curl_file_connect(struct connectdata *conn)
   return CURLE_OK;
 }
 
-#if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
-#define lseek(x,y,z) _lseeki64(x, y, z)
-#define struct_stat struct _stati64
-#define fstat(fd,st) _fstati64(fd,st)
-#else
-#define struct_stat struct stat
-#endif
-
 CURLcode Curl_file_done(struct connectdata *conn,
                         CURLcode status)
 {
