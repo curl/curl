@@ -1,0 +1,54 @@
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 funky chunky!
+Server: fakeit/0.9 fakeitbad/1.0
+Transfer-Encoding: chunked
+Connection: mooo
+
+2
+a
+
+ILLEGAL
+bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
+</data>
+<datacheck>
+HTTP/1.1 200 funky chunky!
+Server: fakeit/0.9 fakeitbad/1.0
+Transfer-Encoding: chunked
+Connection: mooo
+
+a
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+ <name>
+HTTP GET with bad chunked Transfer-Encoding
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/36
+</command>
+</test>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+26
+</errocode>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /36 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
+
