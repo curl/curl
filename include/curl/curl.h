@@ -457,6 +457,9 @@ typedef enum {
   /* Specify which file name to write all known cookies in after completed
      operation. Set file name to "-" (dash) to make it go to stdout. */
   CINIT(COOKIEJAR, OBJECTPOINT, 82),
+
+  /* Specify which SSL ciphers to use */
+  CINIT(SSL_CIPHER_LIST, OBJECTPOINT, 83),
   
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
