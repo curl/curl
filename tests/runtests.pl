@@ -398,10 +398,14 @@ if ( $TESTCASES eq "all") {
     my @cmds = grep { /^command/ && -f "$TESTDIR/$_" } readdir(DIR);
     closedir DIR;
 
-    $TESTCASES="";
+    $TESTCASES=""; # start with no test cases
+
+    # cut off everything but the digits 
     for(@cmds) {
-        # cut off everything but the digits 
         $_ =~ s/[a-z\/\.]*//g;
+    }
+    # the the numbers from low to high
+    for(sort { $a <=> $b } @cmds) {
         $TESTCASES .= " $_";
     }
 }
