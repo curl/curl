@@ -18,10 +18,6 @@ use strict;
 
 require "getpart.pm";
 
-if($] >= 5.8) {
-    require 'open'; import( 'open', OUT => ':raw' );
-}
-
 open(FTPLOG, ">log/ftpd.log") ||
     print STDERR "failed to open log file, runs without logging\n";
 
