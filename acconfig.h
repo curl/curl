@@ -43,3 +43,8 @@
 /* Define this to 'int' if ssize_t is not an available typedefed type */
 #undef ssize_t
 
+/* Define this as a suitable file to read random data from */
+#undef RANDOM_FILE
+
+/* Define this to your Entropy Gathering Daemon socket pathname */
+#undef EGD_SOCKET

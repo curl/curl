@@ -392,6 +392,36 @@ dnl dl lib?
 AC_CHECK_FUNC(dlopen, , AC_CHECK_LIB(dl, dlopen))
 
 dnl **********************************************************************
+dnl Check for the random seed preferences 
+dnl **********************************************************************
+
+AC_ARG_WITH(egd-socket,
+    [  --with-egd-socket=FILE  Entropy Gathering Daemon socket pathname],
+    [ EGD_SOCKET="$withval" ]
+)
+if test -n "$EGD_SOCKET" ; then
+	AC_DEFINE_UNQUOTED(EGD_SOCKET, "$EGD_SOCKET")
+fi
+
+dnl Check for user-specified random device
+AC_ARG_WITH(random,
+    [  --with-random=FILE      read randomness from FILE (default=/dev/urandom)],
+    [ RANDOM_FILE="$withval" ],
+    [
+        dnl Check for random device
+        AC_CHECK_FILE("/dev/urandom",
+            [
+                RANDOM_FILE="/dev/urandom";
+            ]
+        )
+    ]
+)
+if test -n "$RANDOM_FILE" ; then
+	AC_SUBST(RANDOM_FILE)
+	AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE")
+fi
+
+dnl **********************************************************************
 dnl Check for the presence of Kerberos4 libraries and headers
 dnl **********************************************************************
 
@@ -545,7 +575,8 @@ else
   dnl these can only exist if openssl exists
 
   AC_CHECK_FUNCS( RAND_status \
-                  RAND_screen )
+                  RAND_screen \
+                  RAND_egd )
 
 fi
 

@@ -58,16 +58,92 @@ static int passwd_callback(char *buf, int num, int verify
   return 0;
 }
 
-/* This function is *highly* inspired by (and parts are directly stolen
- * from) source from the SSLeay package written by Eric Young
- * (eay@cryptsoft.com).  */
+static
+bool seed_enough(struct connectdata *conn, /* unused for now */
+                 int nread)
+{
+#ifdef HAVE_RAND_STATUS
+  /* only available in OpenSSL 0.9.5a and later */
+  if(RAND_status())
+    return TRUE;
+#else
+  if(nread > 500)
+    /* this is a very silly decision to make */
+    return TRUE;
+#endif
+  return FALSE; /* not enough */
+}
 
 static
-int cert_stuff(struct UrlData *data, 
-               struct connectdata *conn,
+int random_the_seed(struct connectdata *conn)
+{
+  char *buf = conn->data->buffer; /* point to the big buffer */
+  int ret;
+  int nread=0;
+
+  /* Q: should we add support for a random file name as a libcurl option?
+     A: Yes */
+#if 0
+  /* something like this */
+  nread += RAND_load_file(filename, number_of_bytes);
+#endif
+  /* generates a default path for the random seed file */
+  buf[0]=0; /* blank it first */
+  RAND_file_name(buf, BUFSIZE);
+  if ( buf[0] ) {
+    /* we got a file name to try */
+    nread += RAND_load_file(buf, 16384);
+    if(seed_enough(conn, nread))
+      return nread;
+  }
+
+#ifdef RANDOM_FILE
+  nread += RAND_load_file(RANDOM_FILE, 16384);
+  if(seed_enough(conn, nread))
+    return nread;
+#endif
+
+#if defined(HAVE_RAND_EGD) && defined(EGD_SOCKET)
+  /* only available in OpenSSL 0.9.5 and later */
+  /* EGD_SOCKET is set at configure time */
+  ret = RAND_egd(EGD_SOCKET);
+  if(-1 != ret) {
+    nread += ret;
+    if(seed_enough(conn, nread))
+      return nread;
+  }
+#endif
+
+  /* If we get here, it means we need to seed the PRNG using a "silly"
+     approach! */
+#ifdef HAVE_RAND_SCREEN
+  /* This one gets a random value by reading the currently shown screen */
+  RAND_screen();
+  nread = 100; /* just a value */
+#else
+  {
+    int len;
+    char *area = Curl_FormBoundary();
+    if(!area)
+      return 3; /* out of memory */
+	
+    len = strlen(area);
+    RAND_seed(area, len);
+
+    free(area); /* now remove the random junk */
+#endif
+  }
+
+  infof(conn->data, "Your connection is using a weak random seed!\n");
+  return nread;
+}
+
+static
+int cert_stuff(struct connectdata *conn,
                char *cert_file,
                char *key_file)
 {
+  struct UrlData *data = conn->data;
   if (cert_file != NULL) {
     SSL *ssl;
     X509 *x509;
@@ -123,9 +199,6 @@ int cert_stuff(struct UrlData *data,
   return(1);
 }
 
-#endif
-
-#ifdef USE_SSLEAY
 static
 int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
 {
@@ -156,28 +229,8 @@ Curl_SSLConnect(struct connectdata *conn)
   /* Lets get nice error messages */
   SSL_load_error_strings();
 
-#ifdef HAVE_RAND_STATUS
-  /* RAND_status() was introduced in OpenSSL 0.9.5 */
-  if(0 == RAND_status())
-#endif
-    {
-      /* We need to seed the PRNG properly! */
-#ifdef HAVE_RAND_SCREEN
-      /* This one gets a random value by reading the currently shown screen */
-      RAND_screen();
-#else
-      int len;
-      char *area = Curl_FormBoundary();
-      if(!area)
-	return 3; /* out of memory */
-	
-      len = strlen(area);
-
-      RAND_seed(area, len);
-
-      free(area); /* now remove the random junk */
-#endif
-    }
+  /* Make funny stuff to get random input */
+  random_the_seed(conn);
     
   /* Setup all the global SSL stuff */
   SSLeay_add_ssl_algorithms();
@@ -202,7 +255,7 @@ Curl_SSLConnect(struct connectdata *conn)
   }
     
   if(data->cert) {
-    if (!cert_stuff(data, conn, data->cert, data->cert)) {
+    if (!cert_stuff(conn, data->cert, data->cert)) {
       failf(data, "couldn't use certificate!\n");
       return 2;
     }
