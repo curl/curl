@@ -62,7 +62,7 @@ CURLcode Curl_getinfo(CURL *curl, CURLINFO info, ...)
   
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
-    *param_charp = data->url?data->url:"";
+    *param_charp = data->url?data->url:(char *)"";
     break;
   case CURLINFO_HTTP_CODE:
     *param_longp = data->progress.httpcode;
