@@ -1,118 +1,147 @@
-/*****************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
- *                             \___|\___/|_| \_\_____|
- *
- *  The contents of this file are subject to the Mozilla Public License
- *  Version 1.0 (the "License"); you may not use this file except in
- *  compliance with the License. You may obtain a copy of the License at
- *  http://www.mozilla.org/MPL/
- *
- *  Software distributed under the License is distributed on an "AS IS"
- *  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
- *  License for the specific language governing rights and limitations
- *  under the License.
- *
- *  The Original Code is Curl.
- *
- *  The Initial Developer of the Original Code is Daniel Stenberg.
- *
- *  Portions created by the Initial Developer are Copyright (C) 1998.
- *  All Rights Reserved.
- *
- * ------------------------------------------------------------
- * Main author:
- * - Daniel Stenberg <daniel@haxx.se>
- *
- * 	http://curl.haxx.se
- *
- * $Source$
- * $Revision$
- * $Date$
- * $Author$
- * $State$
- * $Locker$
- *
- * ------------------------------------------------------------
- ****************************************************************************/
-
-#include <stdio.h>
-
-/* ---- Base64 Encoding --- */
-static char table64[]=
-  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-  
 /*
- * base64Encode()
- *
- * Returns the length of the newly created base64 string. The third argument
- * is a pointer to an allocated area holding the base64 data. If something
- * went wrong, -1 is returned.
- *
- * Modifed my version to resemble the krb4 one. The krb4 sources then won't
- * need its own.
- *
+ * Copyright (c) 1995 - 1999 Kungliga Tekniska Högskolan
+ * (Royal Institute of Technology, Stockholm, Sweden).
+ * All rights reserved.
+ * 
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ * 
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ * 
+ * 3. Neither the name of the Institute nor the names of its contributors
+ *    may be used to endorse or promote products derived from this software
+ *    without specific prior written permission.
+ * 
+ * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
+ * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+ * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
+ * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+ * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+ * SUCH DAMAGE.
  */
-int base64Encode(char *indata, int insize, char **outptr)
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+#include <stdlib.h>
+#include <string.h>
+#include "base64.h"
+
+static char base64[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+static int pos(char c)
 {
-  unsigned char ibuf[3];
-  unsigned char obuf[4];
-  int i;
-  int inputparts;
-  char *output;
-  char *base64data;
-
-  if(0 == insize)
-    insize = strlen(indata);
-
-  base64data = output = (char*)malloc(insize*4/3+4);
-  if(NULL == output)
-    return -1;
-
-  while(insize > 0) {
-    for (i = inputparts = 0; i < 3; i++) { 
-      if(*indata) {
-        inputparts++;
-        ibuf[i] = *indata;
-        indata++;
-        insize--;
-      }
-      else
-        ibuf[i] = 0;
-    }
-                       
-    obuf [0] = (ibuf [0] & 0xFC) >> 2;
-    obuf [1] = ((ibuf [0] & 0x03) << 4) | ((ibuf [1] & 0xF0) >> 4);
-    obuf [2] = ((ibuf [1] & 0x0F) << 2) | ((ibuf [2] & 0xC0) >> 6);
-    obuf [3] = ibuf [2] & 0x3F;
-
-    switch(inputparts) {
-    case 1: /* only one byte read */
-      sprintf(output, "%c%c==", 
-              table64[obuf[0]],
-              table64[obuf[1]]);
-      break;
-    case 2: /* two bytes read */
-      sprintf(output, "%c%c%c=", 
-              table64[obuf[0]],
-              table64[obuf[1]],
-              table64[obuf[2]]);
-      break;
-    default:
-      sprintf(output, "%c%c%c%c", 
-              table64[obuf[0]],
-              table64[obuf[1]],
-              table64[obuf[2]],
-              table64[obuf[3]] );
-      break;
-    }
-    output += 4;
-  }
-  *output=0;
-  *outptr = base64data; /* make it return the actual data memory */
-
-  return strlen(base64data); /* return the length of the new data */
+  char *p;
+  for(p = base64; *p; p++)
+    if(*p == c)
+      return p - base64;
+  return -1;
 }
-/* ---- End of Base64 Encoding ---- */
+
+#if 1
+int base64_encode(const void *data, int size, char **str)
+{
+  char *s, *p;
+  int i;
+  int c;
+  const unsigned char *q;
+
+  p = s = (char*)malloc(size*4/3+4);
+  if (p == NULL)
+      return -1;
+  q = (const unsigned char*)data;
+  i=0;
+  for(i = 0; i < size;){
+    c=q[i++];
+    c*=256;
+    if(i < size)
+      c+=q[i];
+    i++;
+    c*=256;
+    if(i < size)
+      c+=q[i];
+    i++;
+    p[0]=base64[(c&0x00fc0000) >> 18];
+    p[1]=base64[(c&0x0003f000) >> 12];
+    p[2]=base64[(c&0x00000fc0) >> 6];
+    p[3]=base64[(c&0x0000003f) >> 0];
+    if(i > size)
+      p[3]='=';
+    if(i > size+1)
+      p[2]='=';
+    p+=4;
+  }
+  *p=0;
+  *str = s;
+  return strlen(s);
+}
+#endif
+
+int base64_decode(const char *str, void *data)
+{
+  const char *p;
+  unsigned char *q;
+  int c;
+  int x;
+  int done = 0;
+  q=(unsigned char*)data;
+  for(p=str; *p && !done; p+=4){
+    x = pos(p[0]);
+    if(x >= 0)
+      c = x;
+    else{
+      done = 3;
+      break;
+    }
+    c*=64;
+    
+    x = pos(p[1]);
+    if(x >= 0)
+      c += x;
+    else
+      return -1;
+    c*=64;
+    
+    if(p[2] == '=')
+      done++;
+    else{
+      x = pos(p[2]);
+      if(x >= 0)
+	c += x;
+      else
+	return -1;
+    }
+    c*=64;
+    
+    if(p[3] == '=')
+      done++;
+    else{
+      if(done)
+	return -1;
+      x = pos(p[3]);
+      if(x >= 0)
+	c += x;
+      else
+	return -1;
+    }
+    if(done < 3)
+      *q++=(c&0x00ff0000)>>16;
+      
+    if(done < 2)
+      *q++=(c&0x0000ff00)>>8;
+    if(done < 1)
+      *q++=(c&0x000000ff)>>0;
+  }
+  return q - (unsigned char*)data;
+}
