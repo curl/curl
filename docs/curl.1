@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "5 Oct 2001" "Curl 7.9.1" "Curl Manual"
+.TH curl 1 "30 Oct 2001" "Curl 7.9.1" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -485,13 +485,14 @@ XDISPLOC=<X display> Sets the X display location.
 
 NEW_ENV=<var,val> Sets an environment variable.
 .IP "-T/--upload-file <file>"
-Like -t, but this transfers the specified local file. If there is no
-file part in the specified URL, Curl will append the local file
-name. NOTE that you must use a trailing / on the last directory to
-really prove to Curl that there is no file name or curl will
-think that your last directory name is the remote file name to
-use. That will most likely cause the upload operation to fail. If
+This transfers the specified local file to the remote URL. If there is no file
+part in the specified URL, Curl will append the local file name. NOTE that you
+must use a trailing / on the last directory to really prove to Curl that there
+is no file name or curl will think that your last directory name is the remote
+file name to use. That will most likely cause the upload operation to fail. If
 this is used on a http(s) server, the PUT command will be used.
+
+Use the file name "-" (a single dash) to use stdin instead of a given file.
 
 If this option is used several times, the last one will be used.
 .IP "-u/--user <user:password>"
