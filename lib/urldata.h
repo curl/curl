@@ -110,6 +110,9 @@ struct Progress {
   int width; /* screen width at download start */
   int flags; /* see progress.h */
   struct timeval start;
+  double timespent;
+  double dlspeed;
+  double ulspeed;
 };
 
 struct UrlData {
@@ -175,9 +178,6 @@ struct UrlData {
   char *newurl; /* This can only be set if a Location: was in the
 		   document headers */
 
-#ifdef MULTIDOC
-  struct MoreDoc *moredoc;  /* linked list of more docs to get */
-#endif
   struct HttpHeader *headers; /* linked list of extra headers */
   struct HttpPost *httppost;  /* linked list of POST data */
 
@@ -203,6 +203,9 @@ struct UrlData {
 
   char *headerbuff; /* allocated buffer to store headers in */
   int headersize;   /* size of the allocation */
+
+  char *writeinfo;  /* if non-NULL describes what to output on a successful
+                       completion */
 
   struct Progress progress;
 
