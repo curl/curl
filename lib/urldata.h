@@ -450,9 +450,21 @@ struct connectdata {
 #define PROT_FTPS    (1<<9)
 #define PROT_SSL     (1<<10) /* protocol requires SSL */
 
-  /* the particular host we use, in two different ways */
+  /* 'dns_entry' is the particular host we use. This points to an entry in the
+     DNS cache and it will not get pruned while locked. It gets unlocked in
+     Curl_done() */
   struct Curl_dns_entry *dns_entry;
-  Curl_addrinfo *ip_addr; /* the particular IP we connected to */
+
+  /* 'ip_addr' is the particular IP we connected to. It points to a struct
+     within the DNS cache, so this pointer is only valid as long as the DNS
+     cache entry remains locked. It gets unlocked in Curl_done() */
+  Curl_addrinfo *ip_addr;
+
+  /* 'ip_addr_str' is the ip_addr data as a human readable malloc()ed string.
+     It remains available as long as the connection does, which is longer than
+     the ip_addr itself. Currently, this is only set (and used) in
+     url.c:verboseconnect(). */
+  char *ip_addr_str;
 
   char protostr[16];  /* store the protocol string in this buffer */
 

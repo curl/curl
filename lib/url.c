@@ -1417,12 +1417,6 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 
   data = conn->data;
 
-  if(conn->dns_entry && data->hostcache)
-    /* if the DNS entry is still around, and the host cache is not blanked
-       (which it is for example when a shared one is killed by
-       curl_multi_cleanup() and similar stuff) */
-    Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
-
 #if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
   /* scan for DNS cache entries still marked as in use */
   Curl_hash_apply(data->hostcache,
@@ -1503,6 +1497,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->allocptr.ref);
   Curl_safefree(conn->allocptr.host);
   Curl_safefree(conn->allocptr.cookiehost);
+  Curl_safefree(conn->ip_addr_str);
 
 #if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
     defined(USE_THREADING_GETADDRINFO)
@@ -1991,10 +1986,22 @@ static void verboseconnect(struct connectdata *conn)
   char addrbuf[256];
 
   /* Get a printable version of the network address. */
-  Curl_printable_address(conn->ip_addr, addrbuf, sizeof(addrbuf));
+  if(!conn->bits.reuse) {
+    Curl_printable_address(conn->ip_addr, addrbuf, sizeof(addrbuf));
+
+    /* save the string */
+    if(conn->ip_addr_str)
+      free(conn->ip_addr_str);
+    conn->ip_addr_str = strdup(addrbuf);
+    if(!conn->ip_addr_str)
+      return; /* FAIL */
+  }
+  /* else,
+     Re-used, ip_addr is not safe to access. */
+
   infof(data, "Connected to %s (%s) port %d\n",
         conn->bits.httpproxy ? conn->proxy.dispname : conn->host.dispname,
-        addrbuf[0] ? addrbuf : "??", conn->port);
+        conn->ip_addr_str, conn->port);
 }
 
 /*
@@ -3533,10 +3540,14 @@ CURLcode Curl_done(struct connectdata **connp,
   struct SessionHandle *data=conn->data;
 
   /* cleanups done even if the connection is re-used */
-
   if(conn->bits.rangestringalloc) {
     free(conn->range);
     conn->bits.rangestringalloc = FALSE;
+  }
+
+  if(conn->dns_entry) {
+    Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
+    conn->dns_entry = NULL;
   }
 
   /* Cleanup possible redirect junk */

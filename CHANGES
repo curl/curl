@@ -7,6 +7,26 @@
                                   Changelog
 
 Daniel (28 January 2005)
+- KNOWN_BUGS #17 fixed. A DNS cache entry may not remain locked between two
+  curl_easy_perform() invokes. It was previously unlocked at disconnect, which
+  could mean that it remained locked between multiple transfers. The DNS cache
+  may not live as long as the connection cache does, as they are separate.
+
+  To deal with the lack of DNS (host address) data availability in re-used
+  connections, libcurl now keeps a copy of the IP adress as a string, to be
+  able to show it even on subsequent requests on the same connection.
+
+  The problem could be made to appear with this stunt:
+
+  1. create a multi handle
+  2. add an easy handle
+  3. fetch a URL that is persistent (leaves the connection alive)
+  4. remove the easy handle from the multi
+  5. kill the multi handle
+  6. create a multi handle
+  7. add the same easy handle to the new multi handle
+  8. fetch a URL from the same server as before (re-using the connection)
+
 - Stephen More pointed out that CURLOPT_FTPPORT and the -P option didn't work
   when built ipv6-enabled. I've now made a fix for it. Writing test cases for
   custom port hosts turned too tricky so unfortunately there's none.
