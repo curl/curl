@@ -77,58 +77,86 @@ void Curl_failf(struct UrlData *data, char *fmt, ...)
   va_end(ap);
 }
 
-/* sendf() sends the formated data to the server */
-size_t Curl_sendf(int fd, struct UrlData *data, char *fmt, ...)
+/* Curl_sendf() sends formated data to the server */
+size_t Curl_sendf(int sockfd, struct connectdata *conn,
+                  char *fmt, ...)
 {
+  struct UrlData *data = conn->data;
   size_t bytes_written;
   char *s;
   va_list ap;
   va_start(ap, fmt);
-  s = vaprintf(fmt, ap);
+  s = vaprintf(fmt, ap); /* returns an allocated string */
   va_end(ap);
   if(!s)
     return 0; /* failure */
   if(data->bits.verbose)
     fprintf(data->err, "> %s", s);
 
-#ifndef USE_SSLEAY
-  bytes_written = swrite(fd, s, strlen(s));
-#else /* USE_SSLEAY */
-  if (data->ssl.use) {
-    bytes_written = SSL_write(data->ssl.handle, s, strlen(s));
-  } else {
-    bytes_written = swrite(fd, s, strlen(s));
-  }
-#endif /* USE_SSLEAY */
+  /* Write the buffer to the socket */
+  Curl_write(conn, sockfd, s, strlen(s), &bytes_written);
+
   free(s); /* free the output string */
-  return(bytes_written);
+
+  return bytes_written;
 }
 
-/* ssend() sends plain (binary) data to the server */
-size_t Curl_ssend(int fd, struct connectdata *conn, void *mem, size_t len)
+/*
+ * Curl_write() is an internal write function that sends plain (binary) data
+ * to the server. Works with plain sockets, SSL or kerberos.
+ *
+ */
+CURLcode Curl_write(struct connectdata *conn, int sockfd,
+                    void *mem, size_t len,
+                    size_t *written)
 {
   size_t bytes_written;
   struct UrlData *data=conn->data; /* conn knows data, not vice versa */
 
 #ifdef USE_SSLEAY
   if (data->ssl.use) {
-    bytes_written = SSL_write(data->ssl.handle, mem, len);
+    int loop=100; /* just a precaution to never loop endlessly */
+    while(loop--) {
+      bytes_written = SSL_write(data->ssl.handle, mem, len);
+      if((-1 != bytes_written) ||
+         (SSL_ERROR_WANT_WRITE != SSL_get_error(data->ssl.handle,
+                                                bytes_written) ))
+        break;
+    }
   }
   else {
 #endif
 #ifdef KRB4
     if(conn->sec_complete) {
-      bytes_written = sec_write(conn, fd, mem, len);
+      bytes_written = sec_write(conn, sockfd, mem, len);
     }
     else
 #endif /* KRB4 */
-      bytes_written = swrite(fd, mem, len);
+      bytes_written = swrite(sockfd, mem, len);
 #ifdef USE_SSLEAY
   }
 #endif
 
-  return bytes_written;
+  *written = bytes_written;
+  return CURLE_OK;
 }
+
+/*
+ * External write-function, writes to the data-socket.
+ * Takes care of plain sockets, SSL or kerberos transparently.
+ */
+CURLcode curl_write(CURLconnect *c_conn, char *buf, size_t amount,
+                   size_t *n)
+{
+  struct connectdata *conn = (struct connectdata *)c_conn;
+
+  if(!n || !conn || (conn->handle != STRUCT_CONNECT))
+    return CURLE_FAILED_INIT;
+
+  return Curl_write(conn, conn->sockfd, buf, amount, n);
+}
+
+
 
 /* client_write() sends data to the write callback(s)
 
@@ -161,5 +189,58 @@ CURLcode Curl_client_write(struct UrlData *data,
   }
   
   return CURLE_OK;
+}
+
+
+/*
+ * Internal read-from-socket function. This is meant to deal with plain
+ * sockets, SSL sockets and kerberos sockets.
+ */
+CURLcode Curl_read(struct connectdata *conn, int sockfd,
+                   char *buf, size_t buffersize,
+                   size_t *n)
+{
+  struct UrlData *data = conn->data;
+  size_t nread;
+
+#ifdef USE_SSLEAY
+  if (data->ssl.use) {
+    int loop=100; /* just a precaution to never loop endlessly */
+    while(loop--) {
+      nread = SSL_read(data->ssl.handle, buf, buffersize);
+      if((-1 != nread) ||
+         (SSL_ERROR_WANT_READ != SSL_get_error(data->ssl.handle, nread) ))
+        break;
+    }
+  }
+  else {
+#endif
+#ifdef KRB4
+    if(conn->sec_complete)
+      nread = sec_read(conn, sockfd, buf, buffersize);
+    else
+#endif
+      nread = sread (sockfd, buf, buffersize);
+#ifdef USE_SSLEAY
+  }
+#endif /* USE_SSLEAY */
+  *n = nread;
+  return CURLE_OK;
+}
+
+/*
+ * The public read function reads from the 'sockfd' file descriptor only.
+ * Use the Curl_read() internally when you want to specify fd.
+ */
+
+CURLcode curl_read(CURLconnect *c_conn, char *buf, size_t buffersize,
+                   size_t *n)
+{
+  struct connectdata *conn = (struct connectdata *)c_conn;
+
+  if(!n || !conn || (conn->handle != STRUCT_CONNECT))
+    return CURLE_FAILED_INIT;
+
+  return Curl_read(conn, conn->sockfd, buf, buffersize, n);
 }
 

@@ -23,13 +23,10 @@
  * $Id$
  *****************************************************************************/
 
-size_t Curl_sendf(int fd, struct UrlData *, char *fmt, ...);
-size_t Curl_ssend(int fd, struct connectdata *, void *fmt, size_t len);
+size_t Curl_sendf(int fd, struct connectdata *, char *fmt, ...);
 void Curl_infof(struct UrlData *, char *fmt, ...);
 void Curl_failf(struct UrlData *, char *fmt, ...);
 
-#define sendf Curl_sendf
-#define ssend Curl_ssend
 #define infof Curl_infof
 #define failf Curl_failf
 
@@ -46,5 +43,14 @@ typedef struct send_buffer send_buffer;
 
 CURLcode Curl_client_write(struct UrlData *data, int type, char *ptr,
                            size_t len);
+
+/* internal read-function, does plain socket, SSL and krb4 */
+CURLcode Curl_read(struct connectdata *conn, int sockfd,
+                   char *buf, size_t buffersize,
+                   size_t *n);
+/* internal write-function, does plain socket, SSL and krb4 */
+CURLcode Curl_write(struct connectdata *conn, int sockfd,
+                    void *mem, size_t len,
+                    size_t *written);
 
 #endif
