@@ -140,7 +140,8 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
       memcpy(hostent->h_addr_list[0], &addr, sizeof(struct in_addr));
       hostent->h_addr_list[1] = NULL;
       *host = hostent;
-      free(line);
+      if(line)
+        free(line);
       return ARES_SUCCESS;
     }
   free(line);
@@ -150,18 +151,21 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
       /* Memory allocation failure; clean up. */
       if (hostent)
 	{
-	  free((char *) hostent->h_name);
+          if(hostent->h_name)
+            free((char *) hostent->h_name);
 	  if (hostent->h_aliases)
 	    {
 	      for (alias = hostent->h_aliases; *alias; alias++)
 		free(*alias);
 	    }
-	  free(hostent->h_aliases);
+          if(hostent->h_aliases)
+            free(hostent->h_aliases);
 	  if (hostent->h_addr_list)
 	    free(hostent->h_addr_list[0]);
-	  free(hostent->h_addr_list);
+          if(hostent->h_addr_list)
+            free(hostent->h_addr_list);
+          free(hostent);
 	}
-      free(hostent);
       return ARES_ENOMEM;
     }
 
