@@ -528,13 +528,15 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     /* nope, not connected  */
     if (WAITCONN_FDSET_ERROR == rc) {
       verifyconnect(sockfd, &error);
+      data->state.os_errno = error;
       infof(data, "%s\n",Curl_strerror(conn,error));
     }
     else
-    infof(data, "Connection failed\n");
+      infof(data, "Connection failed\n");
 
     if(trynextip(conn, sockindex, connected)) {
       error = Curl_ourerrno();
+      data->state.os_errno = error;
       failf(data, "Failed connect to %s:%d; %s",
             conn->host.name, conn->port, Curl_strerror(conn,error));
       code = CURLE_COULDNT_CONNECT;
@@ -644,6 +646,7 @@ singleipconnect(struct connectdata *conn,
       /* unknown error, fallthrough and try another address! */
       failf(data, "Failed to connect to %s: %s",
             addr_buf, Curl_strerror(conn,error));
+      data->state.os_errno = error;
       break;
     }
   }
