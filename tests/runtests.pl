@@ -885,7 +885,6 @@ sub singletest {
 
     my @what;
     my $why;
-    my $serverproblem;
 
     # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
@@ -893,13 +892,11 @@ sub singletest {
             # this is not a test
             print "RUN: $testnum doesn't look like a test case!\n";
         }
-        $serverproblem = 100;
+        $why = "no test";
     }
     else {
         @what = getpart("client", "features");
     }
-
-    printf("test %03d...", $testnum);
 
     for(@what) {
         my $f = $_;
@@ -942,64 +939,40 @@ sub singletest {
         }
 
         $why = "curl lacks $f support";
-        $serverproblem = 15; # set it here
         last;
     }
 
-    if(!$serverproblem) {
-        $serverproblem = serverfortest($testnum);
+    if(!$why) {
+        $why = serverfortest($testnum);
     }
 
-    if(!$serverproblem) {
+    if(!$why) {
         my @precheck = getpart("client", "precheck");
         my $cmd = $precheck[0];
         chomp $cmd;
         if($cmd) {
             my @o = `$cmd 2>/dev/null`;
             if($o[0]) {
-                $serverproblem = 15;
                 $why = $o[0];
                 chomp $why;
             }
         }
     }
 
-
-    if($serverproblem) {
-        # there's a problem with the server, don't run
-        # this particular server, but count it as "skipped"
-        if($serverproblem == 2) {
-            $why = "server problems";
-        }
-        elsif($serverproblem == 100) {
-            $why = "no test";
-        }
-        elsif($serverproblem == 99) {
-            $why = "bad test";
-        }
-        elsif($serverproblem == 15) {
-            # set above, a lacking prereq
-        }
-        elsif($serverproblem == 1) {
-            $why = "no HTTPS server";
-        }
-        elsif($serverproblem == 3) {
-            $why = "no FTPS server";
-        }
-        else {
-            $why = "unfulfilled requirements";
-        }
+    if($why) {
+        # there's a problem, count it as "skipped"
         $skipped++;
         $skipped{$why}++;
         $teststat[$testnum]=$why; # store reason for this test case
 
-        print "SKIPPED\n";
         if(!$short) {
-            print "* Test $testnum: $why\n";
+            printf "test %03d SKIPPED: $why\n", $testnum;
         }
 
         return -1;
     }
+    printf("test %03d...", $testnum);
+
 
     # extract the reply data
     my @reply = getpart("reply", "data");
@@ -1476,6 +1449,8 @@ sub stopservers {
 #######################################################################
 # startservers() starts all the named servers
 #
+# Returns: string with error reason or blank for success
+
 sub startservers {
     my @what = @_;
     my $pid;
@@ -1486,7 +1461,7 @@ sub startservers {
             if(!$run{'ftp'}) {
                 $pid = runftpserver($verbose);
                 if($pid <= 0) {
-                    return 2; # error starting it
+                    return "failed starting FTP server";
                 }
                 printf ("* pid ftp => %-5d\n", $pid) if($verbose);
                 $run{'ftp'}=$pid;
@@ -1496,7 +1471,7 @@ sub startservers {
             if(!$run{'http'}) {
                 $pid = runhttpserver($verbose);
                 if($pid <= 0) {
-                    return 2; # error starting
+                    return "failed starting HTTP server";
                 }
                 printf ("* pid http => %-5d\n", $pid) if($verbose);
                 $run{'http'}=$pid;
@@ -1506,22 +1481,25 @@ sub startservers {
             if(!$run{'http-ipv6'}) {
                 $pid = runhttpserver($verbose, "IPv6");
                 if($pid <= 0) {
-                    return 2; # error starting
+                    return "failed starting IPv6 HTTP server";
                 }
                 printf ("* pid http-ipv6 => %-5d\n", $pid) if($verbose);
                 $run{'http-ipv6'}=$pid;
             }
         }
         elsif($what eq "ftps") {
-            if(!$stunnel || !$ssl_version) {
+            if(!$stunnel) {
                 # we can't run ftps tests without stunnel
-                # or if libcurl is SSL-less
-                return 3;
+                return "no stunnel";
+            }
+            if(!!$ssl_version) {
+                # we can't run ftps tests if libcurl is SSL-less
+                return "curl lacks SSL support";
             }
             if(!$run{'ftp'}) {
                 $pid = runftpserver($verbose);
                 if($pid <= 0) {
-                    return 2; # error starting it
+                    return "failed starting FTP server";
                 }
                 printf ("* pid ftp => %-5d\n", $pid) if($verbose);
                 $run{'ftp'}=$pid;
@@ -1531,7 +1509,7 @@ sub startservers {
 
                 $pid = runftpsserver($verbose);
                 if($pid <= 0) {
-                    return 2;
+                    return "failed starting FTPS server (stunnel)";
                 }
                 printf ("* pid ftps => %-5d\n", $pid) if($verbose);
                 $run{'ftps'}=$pid;
@@ -1549,7 +1527,7 @@ sub startservers {
             if(!$run{'http'}) {
                 $pid = runhttpserver($verbose);
                 if($pid <= 0) {
-                    return 2; # problems starting server
+                    return "failed starting HTTP server";
                 }
                 printf ("* pid http => %-5d\n", $pid) if($verbose);
                 $run{'http'}=$pid;
@@ -1557,7 +1535,7 @@ sub startservers {
             if(!$run{'https'}) {
                 $pid = runhttpsserver($verbose);
                 if($pid <= 0) {
-                    return 2;
+                    return "failed starting HTTPS server (stunnel)";
                 }
                 printf ("* pid https => %-5d\n", $pid) if($verbose);
                 $run{'https'}=$pid;
@@ -1578,12 +1556,8 @@ sub startservers {
 # specified test case. This is a useful design when we run single tests as not
 # all servers need to run then!
 #
-# Returns:
-# 100 if this is not a test case
-# 99  if this test case has no servers specified
-# 3   if this test is skipped due to no FTPS server
-# 2   if one of the required servers couldn't be started
-# 1   if this test is skipped due to no HTTPS server
+# Returns: a string, blank if everything is fine or a reason why it failed
+#
 
 sub serverfortest {
     my ($testnum)=@_;
@@ -1594,14 +1568,14 @@ sub serverfortest {
             # this is not a test
             print "$testnum doesn't look like a test case!\n";
         }
-        return 100;
+        return "no test";
     }
 
     my @what = getpart("client", "server");
 
     if(!$what[0]) {
         warn "Test case $testnum has no server(s) specified!";
-        return 99;
+        return "no server specified";
     }
 
     return &startservers(@what);
