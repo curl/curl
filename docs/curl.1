@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "25 Feb 2002" "Curl 7.9.5" "Curl Manual"
+.TH curl 1 "10 Apr 2002" "Curl 7.9.5" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -297,6 +297,12 @@ first column of a config line is a '#' character, the rest of the line will be
 treated as a comment.
 
 Specify the filename as '-' to make curl read the file from stdin.
+
+Note that to be able to specify a URL in the config file, you need to specify
+it using the --url option, and not by simply writing the URL on its own
+line. So, it could look similar to this:
+
+url = "http://curl.haxx.se/docs/"
 
 This option can be used multiple times.
 .IP "-l/--list-only"
