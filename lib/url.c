@@ -2765,9 +2765,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* This is the default password, so DON'T set conn->bits.user_passwd */
   }
   else {
-    /* store user + password */
-    conn->user = user[0]?strdup(user):NULL;
-    conn->passwd = passwd[0]?strdup(passwd):NULL;
+    /* store user + password, zero-length if not set */
+    conn->user = strdup(user);
+    conn->passwd = strdup(passwd);
   }
 
   /*************************************************************
