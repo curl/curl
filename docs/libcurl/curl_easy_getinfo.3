@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_getinfo 3 "20 Aug 2003" "libcurl 7.10.8" "libcurl Manual"
+.TH curl_easy_getinfo 3 "14 Dec 2004" "libcurl 7.12.3" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - extract information from a curl handle
 .SH SYNOPSIS
@@ -12,13 +12,12 @@ curl_easy_getinfo - extract information from a curl handle
 
 .SH DESCRIPTION
 Request internal information from the curl session with this function.  The
-third argument
-.B MUST
-be a pointer to a long, a pointer to a char * or a pointer to a double (as
-this documentation describes further down).  The data pointed-to will be
-filled in accordingly and can be relied upon only if the function returns
-CURLE_OK.  This function is intended to get used *AFTER* a performed transfer,
-all results from this function are undefined until the transfer is completed.
+third argument \fBMUST\fP be a pointer to a long, a pointer to a char *, a
+pointer to a struct curl_slist * or a pointer to a double (as this
+documentation describes further down).  The data pointed-to will be filled in
+accordingly and can be relied upon only if the function returns CURLE_OK.
+This function is intended to get used AFTER a performed transfer, all results
+from this function are undefined until the transfer is completed.
 
 You should not free the memory returned by this function unless it is
 explictly mentioned below.
@@ -93,7 +92,9 @@ verification that was requested (using the CURLOPT_SSL_VERIFYPEER option to
 Pass the address of a 'struct curl_slist *' to receive a linked-list of
 OpenSSL crypto-engines supported. Note that engines are normally implemented
 in separate dynamic libraries. Hence not all the returned engines may be
-available at run-time.
+available at run-time. \fBNOTE:\fP you must call \fIcurl_slist_free_all(3)\fP
+on the list pointer once you're done with it, as libcurl will not free the
+data for you. (Added in 7.12.3)
 .IP CURLINFO_CONTENT_LENGTH_DOWNLOAD
 Pass a pointer to a double to receive the content-length of the download. This
 is the value read from the Content-Length: field.
