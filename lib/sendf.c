@@ -274,7 +274,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
          may be EWOULDBLOCK or on some systems EAGAIN when it returned
          due to its inability to send off data without blocking. We
          therefor treat both error codes the same here */
-      if((EWOULDBLOCK == errno) || ((EAGAIN == errno))
+      if((EWOULDBLOCK == errno) || (EAGAIN == errno))
 #endif
       {
         /* this is just a case of EWOULDBLOCK */
