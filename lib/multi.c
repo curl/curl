@@ -342,7 +342,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
           gotourl = strdup(easy->easy_handle->change.url);
           if(gotourl) {
             easy->easy_handle->change.url_changed = FALSE;
-            easy->result = Curl_follow(easy->easy_handle, gotourl);
+            easy->result = Curl_follow(easy->easy_handle, gotourl, FALSE);
             if(CURLE_OK == easy->result)
               easy->state = CURLM_STATE_CONNECT;
             else
@@ -518,7 +518,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
             easy->easy_conn->newurl = NULL;
             easy->result = Curl_done(&easy->easy_conn, CURLE_OK);
             if(easy->result == CURLE_OK)
-              easy->result = Curl_follow(easy->easy_handle, newurl);
+              easy->result = Curl_follow(easy->easy_handle, newurl, FALSE);
             if(CURLE_OK == easy->result) {
               easy->state = CURLM_STATE_CONNECT;
               result = CURLM_CALL_MULTI_PERFORM;

@@ -1742,9 +1742,11 @@ static void strcpy_url(char *output, char *url)
  * as given by the remote server and set up the new URL to request.
  */
 CURLcode Curl_follow(struct SessionHandle *data,
-                     char *newurl) /* this 'newurl' is the Location: string,
+                     char *newurl, /* this 'newurl' is the Location: string,
                                       and it must be malloc()ed before passed
                                       here */
+                     bool retry) /* set TRUE if this is a request retry as
+                                    opposed to a real redirect following */
 {
   /* Location: redirect */
   char prot[16]; /* URL protocol string storage */
@@ -1758,8 +1760,9 @@ CURLcode Curl_follow(struct SessionHandle *data,
     return CURLE_TOO_MANY_REDIRECTS;
   }
 
-  /* mark the next request as a followed location: */
-  data->state.this_is_a_follow = TRUE;
+  if(!retry)
+    /* mark the next request as a followed location: */
+    data->state.this_is_a_follow = TRUE;
 
   data->set.followlocation++; /* count location-followers */
 
@@ -2063,7 +2066,7 @@ Curl_connect_host(struct SessionHandle *data,
       res = Curl_done(conn, res);
       if(CURLE_OK == res) {
         char *gotourl = strdup(data->change.url);
-        res = Curl_follow(data, gotourl);
+        res = Curl_follow(data, gotourl, FALSE);
         if(res)
           free(gotourl);
       }
@@ -2086,6 +2089,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
   CURLcode res2;
   struct connectdata *conn=NULL;
   char *newurl = NULL; /* possibly a new URL to follow to! */
+  bool retry = FALSE;
 
   data->state.used_interface = Curl_if_easy;
 
@@ -2119,6 +2123,8 @@ CURLcode Curl_perform(struct SessionHandle *data)
         res = Transfer(conn); /* now fetch that URL please */
         if(res == CURLE_OK) {
 
+          retry = FALSE;
+
           if((conn->keep.bytecount+conn->headerbytecount == 0) &&
              conn->bits.reuse) {
             /* We got no data and we attempted to re-use a connection. This
@@ -2135,6 +2141,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
                                         prevent i.e HTTP transfers to return
                                         error just because nothing has been
                                         transfered! */
+            retry = TRUE;
           }
           else
             /*
@@ -2174,7 +2181,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
        */
 
       if((res == CURLE_OK) && newurl) {
-        res = Curl_follow(data, newurl);
+        res = Curl_follow(data, newurl, retry);
         if(CURLE_OK == res) {
           newurl = NULL;
           continue;

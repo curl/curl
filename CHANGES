@@ -8,6 +8,12 @@
 
 
 Daniel (11 January 2005)
+- Cyrill Osterwalder posted a detailed analysis about a bug that occurs when
+  using a custom Host: header and curl fails to send a request on a re-used
+  persistent connection and thus creates a new connection and resends it. It
+  then sent two Host: headers. Cyrill's analysis was posted here:
+  http://curl.haxx.se/mail/archive-2005-01/0022.html
+
 - Bruce Mitchener identified (bug report #1099640) the never-ending SOCKS5
   problem with the version byte and the check for bad versions. Bruce has lots
   of clues on this, and based on his suggestion I've now removed the check of
