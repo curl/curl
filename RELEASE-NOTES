@@ -47,12 +47,16 @@ Other curl-related news since the previous public release:
  o AdacURL 7.11.2 was released: http://www.almroth.com/adacurl/
  o PycURL 7.11.3 was released: http://pycurl.sourceforge.net
  o A new German download mirror: http://www.mirrorspace.org/curl/
+ o Two new mailing lists are available:
+   curl-and-python - for python programmers using pycurl or curl
+   curl-perl-commmits - receives commits done to the curl-perl CVS module
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, Tommy Tam, Luca Altea, James Bursa, Mihai Ionescu, Michael
  Benedict, Andrés García, Joe Halpin, Seshubabu Pasam, Peter Sylvester, Robert
- D. Young, Jesse Noller, David Byron, Massimiliano Ziccardi, Mohun Biswas
+ D. Young, Jesse Noller, David Byron, Massimiliano Ziccardi, Mohun Biswas,
+ Renaud Duhaut
 
         Thanks! (and sorry if I forgot to mention someone)

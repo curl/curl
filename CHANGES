@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (1 June 2004)
+- I clarified the --create-dirs option somewhat in the curl man page.
+
+- Renaud Duhaut corrected the curl_unescape man page.
+
+- David Byron modified one of Massimiliano Ziccardi's recent MSVC makefile
+  changes to now again use the mm lib by default.
+
 Daniel (26 May 2004)
 - Mohun Biswas added release-zlib and debug-zlib targets to the MSVC libcurl
   Makefile
