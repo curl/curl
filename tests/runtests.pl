@@ -375,6 +375,11 @@ sub runhttpserver {
     if ( $data =~ /WE ROOLZ: (\d+)/ ) {
         $pid = 0+$1;
     }
+    elsif($res == 6) {
+        # curl: (6) Couldn't resolve host '::1'
+        print "RUN: failed to resolve host\n";
+        return -3;
+    }
     elsif($data || ($res != 7)) {
         print "RUN: Unknown server is running on port $port\n";
         return -2;
