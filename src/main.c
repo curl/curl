@@ -2064,7 +2064,7 @@ static int parseconfig(const char *filename,
 
         filename = filebuffer;
       }
-      curl_free(home); /* we've used it, now free it */
+      free(home); /* we've used it, now free it */
     }
   }
 
