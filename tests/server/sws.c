@@ -71,12 +71,19 @@ spitout(FILE *stream,
 #define TEST_DATA_PATH "data/test%d"
 
 enum {
+  DOCNUMBER_QUIT    = -6,
   DOCNUMBER_BADCONNECT = -5,
   DOCNUMBER_INTERNAL= -4,
   DOCNUMBER_CONNECT = -3,
   DOCNUMBER_WERULEZ = -2,
   DOCNUMBER_404     = -1
 };
+
+
+/* sent as reply to a QUIT */
+static const char *docquit =
+"HTTP/1.1 200 Goodbye\r\n"
+"\r\n";
 
 /* sent as reply to a CONNECT */
 static const char *docconnect =
@@ -279,6 +286,11 @@ static int get_request(int sock, int *part)
         return DOCNUMBER_WERULEZ;
       }
 
+      if(!strncmp("/quit", ptr, 15)) {
+        logmsg("Request-to-quit received");
+        return DOCNUMBER_QUIT;
+      }
+
       ptr++; /* skip the slash */
 
       test_no = strtol(ptr, &ptr, 10);
@@ -353,6 +365,10 @@ static int send_doc(int sock, int doc, int part_no)
 
   if(doc < 0) {
     switch(doc) {
+    case DOCNUMBER_QUIT:
+      logmsg("Replying to QUIT");
+      buffer = docquit;
+      break;
     case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
       logmsg("Identifying ourselves as friends");
@@ -544,6 +560,9 @@ int main(int argc, char *argv[])
 
     logmsg("Closing client connection");
     close(msgsock);
+
+    if (doc == DOCNUMBER_QUIT)
+      break;
   }
   
   close(sock);
