@@ -91,6 +91,11 @@
 /* Define if you have the strstr function.  */
 #define HAVE_STRSTR 1
 
+/* Define if you have the strtoll function.  */
+#ifdef MINGW32
+#define HAVE_STRTOLL 1
+#endif
+
 /* Define if you have the tcgetattr function.  */
 /*#define HAVE_TCGETATTR 1*/
 
