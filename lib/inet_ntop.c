@@ -26,6 +26,12 @@
 
 #include "inet_ntop.h"
 
+#if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
+/* this platform has a inet_ntoa_r() function, but no proto declared anywhere
+   so we include our own proto to make compilers happy */
+#include "inet_ntoa_r.h"
+#endif
+
 #define	IN6ADDRSZ	16
 #define	INADDRSZ	 4
 #define	INT16SZ		 2
