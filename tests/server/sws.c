@@ -390,7 +390,7 @@ int ProcessRequest(struct httprequest *req)
          have been received */
       req->cl = strtol(line+15, &line, 10);
 
-      logmsg("Found Content-Legth: %d in the request", req->cl);
+      logmsg("Found Content-Length: %d in the request", req->cl);
       break;
     }
     else if(curlx_strnequal("Transfer-Encoding: chunked", line,
@@ -431,7 +431,10 @@ int ProcessRequest(struct httprequest *req)
     /* If the client is passing this type-3 NTLM header */
     req->partno += 1002;
     req->ntlm = TRUE; /* NTLM found */
-    logmsg("Received NTLM type-3, sending back data %d", req->partno);
+    logmsg("Received NTLM type-3, xxxxxxxxxxxxx sending back data %d", req->partno);
+    if(req->cl) {
+      logmsg("  Expecting %d POSTed bytes", req->cl);
+    }
   }
   else if(!req->ntlm &&
           strstr(req->reqbuf, "Authorization: NTLM TlRMTVNTUAAB")) {
@@ -443,7 +446,14 @@ int ProcessRequest(struct httprequest *req)
   if(strstr(req->reqbuf, "Connection: close"))
     req->open = FALSE; /* close connection after this request */
 
-  if(req->cl && (req->auth || !req->auth_req)) {
+  /* If authentication is required and no auth was provided, end now. This
+     makes the server NOT wait for PUT/POST data and you can then make the
+     test case send a rejection before any such data has been sent. Test case
+     154 uses this.*/
+  if(req->auth_req && !req->auth)
+    return 1;
+
+  if(req->cl) {
     if(req->cl <= strlen(end+strlen(END_OF_HEADERS)))
       return 1; /* done */
     else
@@ -878,7 +888,7 @@ int main(int argc, char *argv[])
       }
 
       if(req.open)
-        logmsg("persistant connection, awaits new request");
+        logmsg("=> persistant connection request ended, awaits new request");
       /* if we got a CONNECT, loop and get another request as well! */
     } while(req.open || (req.testno == DOCNUMBER_CONNECT));
 
