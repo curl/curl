@@ -12,6 +12,16 @@ TODO
 
 To do in a future release (random order):
 
+ * It would be nice to be able to use "-d" (or something similar) to attach
+   parameters of EITHER the GET or POST type... It would either require
+   another curl argument to specify "GET" (obviously the default should remain
+   POST), or it would require a new curl argument (perhaps -G/--get-data).
+ 
+   I know we're running out of letters, but it somehow feels a little
+   "cleaner" to just tag on each of your HTTP "parameters" (data-items) one by
+   one and let curl put them together, rather than having to put them together
+   myself and include them in the URL.
+
  * Add an interface that enables a user to select prefered SSL ciphers to use.
 
  * Make curl deal with cookies better. libcurl should be able to maintain a
