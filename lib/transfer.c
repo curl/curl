@@ -178,8 +178,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   int didwhat=0;
 
   do {
+    /* If we still have reading to do, we check if we have a readable
+       socket. Sometimes the reafdp is NULL, it no fd_set was done using
+       the multi interface and then we can do nothing but to attempt a
+       read to be sure. */
     if((k->keepon & KEEP_READ) &&
-       FD_ISSET(conn->sockfd, k->readfdp)) {
+       (!k->readfdp || FD_ISSET(conn->sockfd, k->readfdp))) {
 
       /* read! */
       result = Curl_read(conn, conn->sockfd, k->buf,
@@ -746,8 +750,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       } /* if (! header and data to read ) */
     } /* if( read from socket ) */
 
+    /* If we still have writing to do, we check if we have a writable
+       socket. Sometimes the writefdp is NULL, it no fd_set was done using
+       the multi interface and then we can do nothing but to attempt a
+       write to be sure. */
     if((k->keepon & KEEP_WRITE) &&
-       FD_ISSET(conn->writesockfd, k->writefdp)) {
+       (!k->writefdp || FD_ISSET(conn->writesockfd, k->writefdp)) ) {
       /* write */
 
       int i, si;
