@@ -525,7 +525,7 @@ static void GetStr(char **string,
 {
   if(*string)
     free(*string);
-  if(value && *value)
+  if(value)
     *string = strdup(value);
   else
     *string = NULL;
@@ -1131,7 +1131,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       nextarg=(char *)&parse[1]; /* this is the actual extra parameter */
       singleopt=TRUE;   /* don't loop anymore after this */
     }
-    else if((!nextarg || !*nextarg) && aliases[hit].extraparam) {
+    else if(!nextarg && aliases[hit].extraparam) {
       return PARAM_REQUIRES_PARAMETER;
     }
     else if(nextarg && aliases[hit].extraparam)
@@ -1324,7 +1324,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           GetStr(&postdata, nextarg);
         }
 
-        if(config->postfields && *config->postfields) {
+        if(config->postfields) {
           /* we already have a string, we append this one
              with a separating &-letter */
           char *oldpost=config->postfields;
