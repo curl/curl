@@ -65,6 +65,7 @@ my %commandok = (
                  'USER' => 'fresh',
                  'PASS' => 'passwd',
                  'PASV' => 'loggedin|twosock',
+                 'EPSV' => 'loggedin|twosock',
                  'PORT' => 'loggedin|twosock',
                  'TYPE' => 'loggedin|twosock',
                  'LIST' => 'twosock',
@@ -86,6 +87,7 @@ my %statechange = ( 'USER' => 'passwd',    # USER goes to passwd state
                     'PASS' => 'loggedin',  # PASS goes to loggedin state
                     'PORT' => 'twosock',   # PORT goes to twosock
                     'PASV' => 'twosock',   # PASV goes to twosock
+                    'EPSV' => 'twosock',   # EPSV goes to twosock
                     );
 
 # this text is shown before the function specified below is run
@@ -108,6 +110,7 @@ my %commandfunc = ( 'PORT' => \&PORT_command,
                     'LIST' => \&LIST_command,
                     'NLST' => \&NLST_command,
                     'PASV' => \&PASV_command,
+                    'EPSV' => \&PASV_command,
                     'RETR' => \&RETR_command,   
                     'SIZE' => \&SIZE_command,
                     'REST' => \&REST_command,
@@ -174,8 +177,19 @@ sub SIZE_command {
         logmsg "SIZE $testno returned $size\n";
     }
     else {
-        print "550 $testno: No such file or directory.\r\n";
-        logmsg "SIZE $testno: no such file\n";
+        $size=0;
+        @data = getpart("reply", "data");
+        for(@data) {
+            $size += length($_);
+        }
+        if($size) {
+            print "213 $size\r\n";
+            logmsg "SIZE $testno returned $size\n";
+        }
+        else {
+            print "550 $testno: No such file or directory.\r\n";
+            logmsg "SIZE $testno: no such file\n";
+        }
     }
     return 0;
 }
@@ -259,6 +273,8 @@ sub STOR_command {
 
 my $pasvport=9000;
 sub PASV_command {
+    my ($arg, $cmd)=@_;
+
     socket(Server2, PF_INET, SOCK_STREAM, $proto) || die "socket: $!";
     setsockopt(Server2, SOL_SOCKET, SO_REUSEADDR,
                pack("l", 1)) || die "setsockopt: $!";
@@ -283,8 +299,17 @@ sub PASV_command {
     }
     listen(Server2,SOMAXCONN) || die "listen: $!";
 
-    printf("227 Entering Passive Mode (127,0,0,1,%d,%d)\n",
-           ($pasvport/256), ($pasvport%256));
+    if($cmd ne "EPSV") {
+        # PASV reply
+        logmsg "replying to a $cmd command\n";
+        printf("227 Entering Passive Mode (127,0,0,1,%d,%d)\n",
+               ($pasvport/256), ($pasvport%256));
+    }
+    else {
+        # EPSV reply
+        logmsg "replying to a $cmd command\n";
+        printf("229 Entering Passive Mode (|||%d|)\n", $pasvport);
+    }
 
     my $paddr = accept(SOCK, Server2);
     my($iport,$iaddr) = sockaddr_in($paddr);
@@ -296,6 +321,7 @@ sub PASV_command {
 
     return;
 }
+
 
 sub PORT_command {
     my $arg = $_[0];
@@ -432,6 +458,9 @@ for ( $waitedpid = 0;
         if($text eq "") {
             $text = $displaytext{$FTPCMD};
         }
+        else {
+            logmsg "$FTPCMD made to send '$text'\n";
+        }
         if($text) {
             print "$text\r\n";
         }
@@ -442,7 +471,7 @@ for ( $waitedpid = 0;
             my $func = $commandfunc{$FTPCMD};
             if($func) {
                 # it is!
-                \&$func($FTPARG);
+                \&$func($FTPARG, $FTPCMD);
             }
         }
 

@@ -19,6 +19,10 @@ FTP RETR PASV
 ftp://%HOSTIP:%FTPPORT/102
 </command>
 </test>
+<file name="log/ftpserver.cmd">
+REPLY EPSV 500 no such command
+</file>
+
 
 # Verify data after the test has been "shot"
 <verify>
@@ -26,8 +30,10 @@ ftp://%HOSTIP:%FTPPORT/102
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
+EPSV
 PASV
 TYPE I
+SIZE 102
 RETR 102
 </protocol>
 </verify>
