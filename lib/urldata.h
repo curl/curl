@@ -678,8 +678,8 @@ struct UrlState {
 
   char buffer[BUFSIZE+1]; /* download buffer */
   char uploadbuffer[BUFSIZE+1]; /* upload buffer */
-  double current_speed;  /* the ProgressShow() funcion sets this */
-
+  curl_off_t current_speed;  /* the ProgressShow() funcion sets this,
+                                bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */
 
   char *auth_host; /* if set, this should be the host name that we will
