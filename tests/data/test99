@@ -41,6 +41,7 @@ http://%HOSTIP:%HTTPPORT/99 -C 9999999999
 #
 # Verify data after the test has been "shot"
 <verify>
+# 33 is CURLE_HTTP_RANGE_ERROR
 <errorcode>
 33
 </errorcode>
