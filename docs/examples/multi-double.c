@@ -80,7 +80,8 @@ int main(int argc, char **argv)
     case 0:
     default:
       /* timeout or readable/writable sockets */
-      curl_multi_perform(multi_handle, &still_running);
+      while(CURLM_CALL_MULTI_PERFORM ==
+            curl_multi_perform(multi_handle, &still_running));
       break;
     }
   }
