@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2003, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -218,7 +218,7 @@ CURLcode Curl_close(struct SessionHandle *data)
   if(data->set.cookiejar)
     /* we have a "destination" for all the cookies to get dumped to */
     Curl_cookie_output(data->cookies, data->set.cookiejar);
-    
+
   Curl_cookie_cleanup(data->cookies);
 #endif
 
@@ -255,7 +255,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
   if(!data)
     /* this is a very serious error */
     return CURLE_OUT_OF_MEMORY;
-  
+
   memset(data, 0, sizeof(struct SessionHandle));
 
   /* We do some initial setup here, all those fields that can't be just 0 */
@@ -271,13 +271,13 @@ CURLcode Curl_open(struct SessionHandle **curl)
   data->set.out = stdout; /* default output to stdout */
   data->set.in  = stdin;  /* default input from stdin */
   data->set.err  = stderr;  /* default stderr to stderr */
-  
+
   /* use fwrite as default function to store output */
   data->set.fwrite = (curl_write_callback)fwrite;
 
   /* use fread as default function to read input */
   data->set.fread = (curl_read_callback)fread;
-  
+
   /* set the default passwd function */
   data->set.fpasswd = my_getpass;
 
@@ -289,7 +289,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
   data->set.ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
 
   data->set.dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
-  
+
   /* make libcurl quiet by default: */
   data->set.hide_progress = TRUE;  /* CURLOPT_NOPROGRESS changes these */
   data->progress.flags |= PGRS_HIDE;
@@ -298,14 +298,14 @@ CURLcode Curl_open(struct SessionHandle **curl)
   data->set.ssl.numsessions = 5;
 
   data->set.proxyport = 1080;
-  
+
   data->set.proxytype = CURLPROXY_HTTP; /* defaults to HTTP proxy */
 
   /* create an array with connection data struct pointers */
   data->state.numconnects = 5; /* hard-coded right now */
   data->state.connects = (struct connectdata **)
     malloc(sizeof(struct connectdata *) * data->state.numconnects);
-  
+
   if(!data->state.connects) {
     free(data);
     return CURLE_OUT_OF_MEMORY;
@@ -341,7 +341,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
   case CURLOPT_DNS_CACHE_TIMEOUT:
     data->set.dns_cache_timeout = va_arg(param, int);
     break;
-  case CURLOPT_DNS_USE_GLOBAL_CACHE: 
+  case CURLOPT_DNS_USE_GLOBAL_CACHE:
     {
       int use_cache = va_arg(param, int);
       if (use_cache) {
@@ -827,7 +827,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     break;
   case CURLOPT_POSTQUOTE:
     /*
-     * List of RAW FTP commands to use after a transfer 
+     * List of RAW FTP commands to use after a transfer
      */
     data->set.postquote = va_arg(param, struct curl_slist *);
     break;
@@ -839,7 +839,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     break;
   case CURLOPT_QUOTE:
     /*
-     * List of RAW FTP commands to use before a transfer 
+     * List of RAW FTP commands to use before a transfer
      */
     data->set.quote = va_arg(param, struct curl_slist *);
     break;
@@ -1096,22 +1096,22 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
       if(data->share)
       {
         Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
-        
+
         /* checking the dns cache stuff */
         if(data->share->hostcache == data->hostcache)
         {
           data->hostcache = NULL;
         }
-    
+
         data->share->dirty--;
-        
+
         Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
       }
-      
+
       data->share = set;
 
       Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
-      
+
       data->share->dirty++;
 
       if( data->hostcache )
@@ -1119,7 +1119,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
         Curl_hash_destroy(data->hostcache);
         data->hostcache = data->share->hostcache;
       }
-      
+
       Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
     }
     break;
@@ -1144,7 +1144,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.http200aliases = va_arg(param, struct curl_slist *);
     break;
-      
+
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_FAILED_INIT; /* correct this */
@@ -1228,24 +1228,24 @@ CURLcode Curl_disconnect(struct connectdata *conn)
  * be dead. Most commonly this happens when the server has closed the
  * connection due to inactivity.
  */
-static bool SocketIsDead(int sock) 
-{ 
-  int sval; 
-  bool ret_val = TRUE; 
-  fd_set check_set; 
-  struct timeval to; 
+static bool SocketIsDead(int sock)
+{
+  int sval;
+  bool ret_val = TRUE;
+  fd_set check_set;
+  struct timeval to;
 
-  FD_ZERO(&check_set); 
-  FD_SET(sock,&check_set); 
+  FD_ZERO(&check_set);
+  FD_SET(sock,&check_set);
 
-  to.tv_sec = 0; 
-  to.tv_usec = 0; 
+  to.tv_sec = 0;
+  to.tv_usec = 0;
 
   sval = select(sock + 1, &check_set, 0, 0, &to);
   if(sval == 0)
     /* timeout */
     ret_val = FALSE;
-  
+
   return ret_val;
 }
 
@@ -1354,7 +1354,7 @@ ConnectionKillOne(struct SessionHandle *data)
 
   for(i=0; i< data->state.numconnects; i++) {
     conn = data->state.connects[i];
-    
+
     if(!conn)
       continue;
 
@@ -1531,7 +1531,7 @@ static int handleSock5Proxy(
               " that the SOCKS5 server wanted a username/password, since none"
               " was supplied to the server on this connection.)");
       }
-      else {            
+      else {
         failf(conn->data, "No authentication method was acceptable.");
       }
       return 1;
@@ -1548,7 +1548,7 @@ static int handleSock5Proxy(
   socksreq[1] = 1; /* connect */
   socksreq[2] = 0; /* must be zero */
   socksreq[3] = 1; /* IPv4 = 1 */
-    
+
   {
 #ifndef ENABLE_IPV6
     struct Curl_dns_entry *dns;
@@ -1662,7 +1662,7 @@ static CURLcode ConnectPlease(struct connectdata *conn,
     }
     else {
       failf(conn->data, "unknown proxytype option given");
-      return CURLE_COULDNT_CONNECT; 
+      return CURLE_COULDNT_CONNECT;
     }
   }
 
@@ -1735,7 +1735,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   CURLcode result=CURLE_OK;
-  
+
   if(conn->bits.tcpconnect)
     /* We already are connected, get back. This may happen when the connect
        worked fine in the first call, like when we connect to a local server
@@ -1839,7 +1839,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* Set the start time temporary to this creation time to allow easier
      timeout checks before the transfer has started for real. The start time
      is later set "for real" using Curl_pgrsStartNow(). */
-  conn->data->progress.start = conn->created; 
+  conn->data->progress.start = conn->created;
 
   conn->bits.user_passwd = data->set.userpwd?1:0;
   conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
@@ -1856,7 +1856,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   urllen=strlen(data->change.url);
   if(urllen < LEAST_PATH_ALLOC)
     urllen=LEAST_PATH_ALLOC;
-  
+
   conn->path=(char *)malloc(urllen);
   if(NULL == conn->path)
     return CURLE_OUT_OF_MEMORY; /* really bad error */
@@ -1883,14 +1883,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       char *ptr=strchr(conn->path, '/');
       if(ptr) {
         /* there was a slash present
-           
+
            RFC1738 (section 3.1, page 5) says:
- 
+
            The rest of the locator consists of data specific to the scheme,
            and is known as the "url-path". It supplies the details of how the
            specified resource can be accessed. Note that the "/" between the
            host (or port) and the url-path is NOT part of the url-path.
- 
+
            As most agents use file://localhost/foo to get '/foo' although the
            slash preceeding foo is a separator and not a slash for the path,
            a URL as file://localhost//foo must be valid as well, to refer to
@@ -1900,8 +1900,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         if(ptr[1] && ('/' == ptr[1]))
           /* if there was two slashes, we skip the first one as that is then
              used truly as a separator */
-          ptr++; 
-        
+          ptr++;
+
         strcpy(conn->path, ptr);
       }
     }
@@ -1916,7 +1916,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if (2 > sscanf(data->change.url,
                    "%64[^\n:]://%512[^\n/]%[^\n]",
                    conn->protostr, conn->gname, conn->path)) {
-      
+
       /*
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
@@ -2002,7 +2002,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
 
   /*************************************************************
-   * Set a few convenience pointers 
+   * Set a few convenience pointers
    *************************************************************/
   conn->name = conn->gname;
   conn->ppath = conn->path;
@@ -2087,7 +2087,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
          * environment (cgi or php), this environment variable can
          * be controlled by the web server user by setting the
          * http header 'Proxy:' to some value.
-         * 
+         *
          * This can cause 'internal' http/ftp requests to be
          * arbitrarily redirected by any external attacker.
          */
@@ -2389,7 +2389,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* this is a RFC2732-style specified IP-address */
     conn->bits.ipv6_ip = TRUE;
 
-    conn->name++; /* pass the starting bracket */ 
+    conn->name++; /* pass the starting bracket */
     conn->hostname++;
     tmp = strchr(conn->name, ']');
     *tmp = 0; /* zero terminate */
@@ -2500,7 +2500,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   data->state.user[0] =0;   /* to make everything well-defined */
   data->state.passwd[0]=0;
-  
+
   if (conn->protocol & (PROT_FTP|PROT_HTTP)) {
     /* This is a FTP or HTTP URL, we will now try to extract the possible
      * user+password pair in a string like:
@@ -2655,7 +2655,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     /* 'path' points to the allocated data, 'ppath' may have been advanced
        to point somewhere within the 'path' area. */
-    conn->path = path; 
+    conn->path = path;
     conn->ppath = ppath;
 
     /* re-use init */
@@ -2673,9 +2673,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->resume_from = data->set.set_resume_from;
     if (conn->resume_from) {
         snprintf(resumerange, sizeof(resumerange), "%d-", conn->resume_from);
-        if (conn->bits.rangestringalloc == TRUE) 
+        if (conn->bits.rangestringalloc == TRUE)
             free(conn->range);
-        
+
         /* tell ourselves to fetch this range */
         conn->range = strdup(resumerange);
         conn->bits.use_range = TRUE;        /* enable range download */
@@ -2687,7 +2687,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       conn->bits.rangestringalloc = TRUE; /* mark range string allocated */
       conn->bits.use_range = TRUE;        /* enable range download */
     }
-    
+
     *in_connect = conn;      /* return this instead! */
 
     infof(data, "Re-using existing connection! (#%d)\n", conn->connectindex);
@@ -2704,7 +2704,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* Continue connectdata initialization here.
-   * 
+   *
    * Inherit the proper values from the urldata struct AFTER we have arranged
    * the persistant conncetion stuff */
   conn->fread = data->set.fread;
@@ -2881,7 +2881,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   conn->bytecount = 0;
   conn->headerbytecount = 0;
-  
+
   if(-1 == conn->firstsocket) {
     bool connected;
 
@@ -2983,7 +2983,7 @@ CURLcode Curl_done(struct connectdata *conn)
 
   /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
      forced us to close this no matter what we think.
-    
+
      if conn->bits.close is TRUE, it means that the connection should be
      closed in spite of all our efforts to be nice, due to protocol
      restrictions in our or the server's end */
@@ -3009,7 +3009,7 @@ CURLcode Curl_do(struct connectdata **connp)
     result = conn->curl_do(conn);
 
     /* This was formerly done in transfer.c, but we better do it here */
-    
+
     if((CURLE_SEND_ERROR == result) && conn->bits.reuse) {
       /* This was a re-use of a connection and we got a write error in the
        * DO-phase. Then we DISCONNECT this connection and have another attempt
@@ -3057,8 +3057,6 @@ static bool
 ssl_config_matches(struct ssl_config_data* data,
                    struct ssl_config_data* needle)
 {
-  bool result = FALSE;
-
   if((data->version == needle->version) &&
      (data->verifypeer == needle->verifypeer) &&
      (data->verifyhost == needle->verifyhost) &&
@@ -3067,15 +3065,13 @@ ssl_config_matches(struct ssl_config_data* data,
      safe_strequal(data->random_file, needle->random_file) &&
      safe_strequal(data->egdsocket, needle->egdsocket) &&
      safe_strequal(data->cipher_list, needle->cipher_list))
-  {
-    result = TRUE;
-  }
+    return TRUE;
 
-  return result;
+  return FALSE;
 }
 
 static bool
-init_ssl_config(struct SessionHandle* data, struct connectdata* conn) 
+init_ssl_config(struct SessionHandle* data, struct connectdata* conn)
 {
   conn->ssl_config.verifyhost = data->set.ssl.verifyhost;
   conn->ssl_config.verifypeer = data->set.ssl.verifypeer;
@@ -3083,33 +3079,38 @@ init_ssl_config(struct SessionHandle* data, struct connectdata* conn)
 
   if(data->set.ssl.CAfile) {
     conn->ssl_config.CAfile = strdup(data->set.ssl.CAfile);
-    if(!conn->ssl_config.CAfile) return FALSE;
+    if(!conn->ssl_config.CAfile)
+      return FALSE;
   }
 
   if(data->set.ssl.CApath) {
     conn->ssl_config.CApath = strdup(data->set.ssl.CApath);
-	if(!conn->ssl_config.CApath) return FALSE;
+    if(!conn->ssl_config.CApath)
+      return FALSE;
   }
 
   if(data->set.ssl.cipher_list) {
     conn->ssl_config.cipher_list = strdup(data->set.ssl.cipher_list);
-	if(!conn->ssl_config.cipher_list) return FALSE;
+    if(!conn->ssl_config.cipher_list)
+      return FALSE;
   }
 
   if(data->set.ssl.egdsocket) {
     conn->ssl_config.egdsocket = strdup(data->set.ssl.egdsocket);
-	if(!conn->ssl_config.egdsocket) return FALSE;
+    if(!conn->ssl_config.egdsocket)
+      return FALSE;
   }
 
   if(data->set.ssl.random_file) {
     conn->ssl_config.random_file = strdup(data->set.ssl.random_file);
-	if(!conn->ssl_config.random_file) return FALSE;
+    if(!conn->ssl_config.random_file)
+      return FALSE;
   }
 
   return TRUE;
 }
 
-static void free_ssl_config(struct ssl_config_data* sslc) 
+static void free_ssl_config(struct ssl_config_data* sslc)
 {
   if(sslc->CAfile)
     free(sslc->CAfile);
