@@ -1,0 +1,1 @@
+getting three URLs in one command line (to stdout)

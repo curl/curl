@@ -51,5 +51,6 @@ command6.txt      name12.txt        prot3.txt         upload109.txt \
 command7.txt      name13.txt        prot4.txt         upload112.txt \
 command8.txt      name14.txt        prot5.txt \
 command9.txt      name15.txt        prot6.txt \
-error111.txt      name16.txt        prot7.txt
-
+error111.txt      name16.txt        prot7.txt \
+command26.txt  prot26.txt     command27.txt  prot27.txt \
+name26.txt     reply26.txt    name27.txt     stdout27.txt 
