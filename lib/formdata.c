@@ -102,7 +102,7 @@ static void GetStr(char **string,
  *
  ***************************************************************************/
 
-int curl_FormParse(char *input,
+int curl_formparse(char *input,
                    struct HttpPost **httppost,
                    struct HttpPost **last_post)
 {
