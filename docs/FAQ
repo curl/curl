@@ -1,4 +1,4 @@
-Updated: November 12, 2002 (http://curl.haxx.se/docs/faq.html)
+Updated: November 20, 2002 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -59,6 +59,7 @@ FAQ
   4.9 Curl can't authenticate to the server that requires NTLM?
   4.10 My HTTP request using HEAD, PUT or DELETE doesn't work!
   4.11 Why does my HTTP range requests return the full document?
+  4.12 Why do I get "certificate verify failed" ?
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -606,6 +607,30 @@ FAQ
 
   Because the range may not be supported by the server, or the server may
   choose to ignore it and return the full document anyway.
+
+  4.12 Why do I get "certificate verify failed" ?
+
+  You invoke curl 7.10 or later to communicate on a https:// URL and get an
+  error back looking something similar to this:
+
+      curl: (35) SSL: error:14090086:SSL routines: 
+      SSL3_GET_SERVER_CERTIFICATE:certificate verify failed
+
+  Then it means that curl couldn't verify that the server's certificate was
+  good. Curl verifies the certificate using the CA cert bundle that comes with
+  the curl installation.
+
+  To disable the verification (which makes it act like curl did before 7.10),
+  use -k. This does however enable man-in-the-middle attacks.
+
+  If you get this failure but are having a CA cert bundle installed and used,
+  the server's certificate is not signed by one of the CA's in the bundle. It
+  might for example be self-signed. You then correct this problem by obtaining
+  a valid CA cert for the server. Or again, decrease the security by disabling
+  this check.
+
+  Details are also in the SSLCERTS file in the release archives, found online
+  here: http://curl.haxx.se/lxr/source/SSLCERTS
 
 5. libcurl Issues
 
