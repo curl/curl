@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -58,13 +58,13 @@ curl_easy_strerror(CURLcode error)
     return "URL using bad/illegal format or missing URL";
 
   case CURLE_COULDNT_RESOLVE_PROXY:
-    return "couldnt resolve proxy";
+    return "couldnt resolve proxy name";
 
   case CURLE_COULDNT_RESOLVE_HOST:
-    return "couldnt resolve host";
+    return "couldnt resolve host name";
 
   case CURLE_COULDNT_CONNECT:
-    return "couldn't connect";
+    return "couldn't connect to server";
 
   case CURLE_FTP_WEIRD_SERVER_REPLY:
     return "FTP: weird server reply";
@@ -256,10 +256,10 @@ curl_multi_strerror(CURLMcode error)
   switch (error) {
   case CURLM_CALL_MULTI_PERFORM:
     return "please call curl_multi_perform() soon";
-    
+
   case CURLM_OK:
     return "no error";
-    
+
   case CURLM_BAD_HANDLE:
     return "invalid multi handle";
 
@@ -521,13 +521,13 @@ const char *Curl_strerror(struct connectdata *conn, int err)
       snprintf(buf, max, "Unknown error %d (%#x)", err, err);
   }
 #else /* not native Windows coming up */
-    
+
   /* These should be atomic and hopefully thread-safe */
 #ifdef HAVE_STRERROR_R
   /* There are two different APIs for strerror_r(). The POSIX and the GLIBC
      versions. */
 #ifdef HAVE_POSIX_STRERROR_R
-  strerror_r(err, buf, max); 
+  strerror_r(err, buf, max);
   /* this may set errno to ERANGE if insufficient storage was supplied via
      'strerrbuf' and 'buflen' to contain the generated message string, or
      EINVAL if the value of 'errnum' is not a valid error number.*/
