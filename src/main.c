@@ -3029,10 +3029,11 @@ operate(struct Configurable *config, int argc, char *argv[])
 
 
   if (config->list_engines) {
-    const struct curl_slist *engines = NULL;
+    struct curl_slist *engines = NULL;
 
     curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
     list_engines(engines);
+    curl_slist_free_all(engines);
     res = CURLE_OK;
     goto quit_curl;
   }
