@@ -6,6 +6,54 @@
 
                                History of Changes
 
+Verson 7.3pre2
+
+Daniel (15 September 2000)
+- Kai-Uwe Rommel pointed out a problem in the httpproxytunnel stuff for ftp.
+  Adjusted it. Added better info message when setting up the tunnel and the
+  pasv message when doing the second connect.
+  
+Verson 7.3pre1
+
+Daniel (15 September 2000)
+- libcurl now allows "httpproxytunnel" to an arbitrary host and port name. The
+  second connection on ftp needed that.
+
+- TheArtOfHTTPScripting was corrected all over. I both type and spell really
+  bad at times!
+  
+Daniel (14 September 2000)
+- -p/--proxytunnel was added to 'curl'. It uses the new
+  CURLOPT_HTTPPROXYTUNNEL libcurl option that allows "any" protocol to tunnel
+  through the specified http proxy. At the moment, this should work with ftp.
+
+Daniel (13 September 2000)
+- Jochen Schaeuble found that file:// didn't work as expected. Corrected this
+  and mailed the patch to the mailing list.
+
+Daniel (7 September 2000)
+- I changed the #define T() in curl.h since it turned out it wasn't really
+  a good symbol to use (when you compiled PHP with curl as a module, that
+  define collided with some IMAP define or something). This was posted to the
+  PHP bug tracker.
+
+- I added extern "C" stuff in two header files to better allow libcurl usage
+  in C++ sorces. Discussions on the libcurl list with Danny Horswell lead to
+  this.
+
+Version 7.2.1
+
+Daniel (31 August 2000)
+- Albert Chin-A-Young fixed the configure script *again* and now it seems to
+  detect Linux name resolving properly! (heard that before?)
+
+- Troels Walsted Hansen pointed out that downloading a file containing the
+  letter '+' from an ftp server didn't work. It did work from HTTP though and
+  the reason was my lame URL decoder.
+
+- I happened to notice that -I didn't at all work on ftp anymore. I corrected
+  that.
+
 Version 7.2
 
 Daniel (30 August 2000)

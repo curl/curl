@@ -60,6 +60,7 @@ FTP
  - custom ftp commands (before and/or after the transfer)
  - simple "range" support
  - via http-proxy
+ - all operations can be tunneled through a http-proxy
 
 TELNET
  - connection negotiation
