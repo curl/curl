@@ -1,5 +1,5 @@
-#ifndef __SETUP_H
-#define __SETUP_H
+#ifndef __CLIENT_SETUP_H
+#define __CLIENT_SETUP_H
 /*****************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    

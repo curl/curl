@@ -790,11 +790,75 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.cert = va_arg(param, char *);
     break;
-  case CURLOPT_SSLCERTPASSWD:
+  case CURLOPT_SSLCERTTYPE:
     /*
-     * String that holds the SSL certificate password.
+     * String that holds file type of the SSL certificate to use
      */
-    data->set.cert_passwd = va_arg(param, char *);
+    data->set.cert_type = va_arg(param, char *);
+    break;
+  case CURLOPT_SSLKEY:
+    /*
+     * String that holds file name of the SSL certificate to use
+     */
+    data->set.key = va_arg(param, char *);
+    break;
+  case CURLOPT_SSLKEYTYPE:
+    /*
+     * String that holds file type of the SSL certificate to use
+     */
+    data->set.key_type = va_arg(param, char *);
+    break;
+  case CURLOPT_SSLKEYPASSWD:
+    /*
+     * String that holds the SSL private key password.
+     */
+    data->set.key_passwd = va_arg(param, char *);
+    break;
+  case CURLOPT_SSLENGINE:
+    /*
+     * String that holds the SSL crypto engine.
+     */
+#ifdef HAVE_OPENSSL_ENGINE_H
+    {
+      const char *cpTemp = va_arg(param, char *);
+      ENGINE     *e;
+      if (cpTemp && cpTemp[0]) {
+        e = ENGINE_by_id(cpTemp);
+        if (e) {
+          if (data->engine) {
+            ENGINE_free(data->engine);
+          }
+          data->engine = e;
+        }
+        else {
+          failf(data, "SSL Engine '%s' not found", cpTemp);
+          return CURLE_SSL_ENGINE_NOTFOUND;
+        }
+      }
+    }
+#else
+    return CURLE_SSL_ENGINE_NOTFOUND;
+#endif
+    break;
+  case CURLOPT_SSLENGINE_DEFAULT:
+    /*
+     * flag to set engine as default.
+     */
+#ifdef HAVE_OPENSSL_ENGINE_H
+    if (data->engine) {
+      if (ENGINE_set_default(data->engine, ENGINE_METHOD_ALL) > 0) {
+#ifdef DEBUG
+        fprintf(stderr,"set default crypto engine\n");
+#endif
+      }
+      else {
+#ifdef DEBUG
+        failf(data, "set default crypto engine failed");
+#endif
+        return CURLE_SSL_ENGINE_SETFAILED;
+      }
+    }
+#endif
     break;
   case CURLOPT_CRLF:
     /*

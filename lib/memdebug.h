@@ -1,6 +1,14 @@
 #ifdef MALLOCDEBUG
 
+#include "setup.h"
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #include <stdio.h>
 #ifdef HAVE_MEMORY_H
 #include <memory.h>

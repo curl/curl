@@ -34,9 +34,9 @@
 #ifdef HAVE_CONFIG_H
 
 #ifdef VMS
-#include "config-vms.h"
+#include "../config-vms.h"
 #else
-#include "config.h" /* the configure script results */
+#include "../config.h" /* the configure script results */
 #endif
 
 #else
@@ -46,13 +46,14 @@
 #endif
 #ifdef macintosh
 /* hand-modified MacOS config.h! */
-#include "config-mac.h"
+#include "../config-mac.h"
 #endif
 
 #endif
 
 #ifndef __cplusplus        /* (rabe) */
 typedef char bool;
+#define typedef_bool
 #endif                     /* (rabe) */
 
 #ifdef NEED_REENTRANT

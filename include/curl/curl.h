@@ -156,7 +156,9 @@ typedef enum {
   CURLE_OBSOLETE,	         /* 50 - removed after 7.7.3 */
   CURLE_SSL_PEER_CERTIFICATE,    /* 51 - peer's certificate wasn't ok */
   CURLE_GOT_NOTHING,             /* 52 - when this is a specific error */
-  
+  CURLE_SSL_ENGINE_NOTFOUND,     /* 53 - SSL crypto engine not found */
+  CURLE_SSL_ENGINE_SETFAILED,    /* 54 - can not set SSL crypto engine as default */
+
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -279,8 +281,10 @@ typedef enum {
   /* name of the file keeping your private SSL-certificate */
   CINIT(SSLCERT, OBJECTPOINT, 25),
 
-  /* password for the SSL-certificate */
+  /* password for the SSL-private key, keep this for compatibility */
   CINIT(SSLCERTPASSWD, OBJECTPOINT, 26),
+  /* password for the SSL private key */
+  CINIT(SSLKEYPASSWD, OBJECTPOINT, 26),
   
   /* send TYPE parameter? */
   CINIT(CRLF, LONG, 27),
@@ -466,7 +470,24 @@ typedef enum {
      default, that one will always be attempted before the more traditional
      PASV command. */     
   CINIT(FTP_USE_EPSV, LONG, 85),
-  
+
+  /* type of the file keeping your SSL-certificate ("DER", "PEM", "ENG") */
+  CINIT(SSLCERTTYPE, OBJECTPOINT, 86),
+
+  /* name of the file keeping your private SSL-key */
+  CINIT(SSLKEY, OBJECTPOINT, 87),
+
+  /* type of the file keeping your private SSL-key ("DER", "PEM", "ENG") */
+  CINIT(SSLKEYTYPE, OBJECTPOINT, 88),
+
+  /* crypto engine for the SSL-sub system */
+  CINIT(SSLENGINE, OBJECTPOINT, 89),
+
+  /* set the crypto engine for the SSL-sub system as default
+     the param has no meaning...
+   */
+  CINIT(SSLENGINE_DEFAULT, LONG, 90),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 

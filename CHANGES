@@ -6,10 +6,46 @@
 
                                History of Changes
 
+Daniel (17 December 2001)
+- Götz Babin-Ebell dove into the dark dungeons of the OpenSSL ENGINE stuff and
+  made libcurl support it! This allows libcurl to do SSL connections with the
+  private key stored in external hardware.
+
+  To make this good, he had to add a bunch of new library options that'll be
+  useful to others as well:
+
+   CURLOPT_SSLCERTTYPE  set SSL cert type (PEM/DER)
+   CURLOPT_SSLKEY       set SSL private key (file)
+   CURLOPT_SSLKEYTYPE:  set SSL key type (PEM/DER/ENG)
+   CURLOPT_SSLKEYPASSWD: set the passphrase for your private key
+                          (CURLOPT_SSLCERTPASSWD is an alias)
+   CURLOPT_SSLENGINE:   set the name of the crypto engine
+                        (returns CURLE_SSL_ENGINE_NOTFOUND on error)
+   CURLOPT_SSLENGINE_DEFAULT: set the default engine
+
+  There are two new failure codes:
+
+   CURLE_SSL_ENGINE_NOTFOUND
+   CURLE_SSL_ENGINE_SETFAILED
+
 Daniel (14 December 2001)
+- We have "branched" the source-tree at a few places. Checkout the CVS sources
+  with the 'multi-dev' label to get the latest multi interface development
+  tree. The idea is to only branch affected files and to restrict the branch
+  to the v8 multi interface development only.
+
+  *NOTE* that if we get bug reports and patches etc, we might need to apply
+  them in both branches!
+
+  The multi-dev branch is what we are gonna use as main branch in the future
+  if it turns out successful. Thus, we must maintain both now in case we need
+  them. The current main branch will be used if we want to release a 7.9.3 or
+  perhaps a 7.10 release before version 8. Which is very likely.
+
 - Marcus Webster provided code for the new CURLFORM_CONTENTHEADER option for
   curl_formadd(), that lets an application add a set of headers for that
-  particular part in a multipart/form-post. We need to add 
+  particular part in a multipart/form-post. He also provided a section to the
+  man page that describes the new option.
 
 Daniel (11 December 2001)
 - Ben Greear made me aware of the fact that the Curl_failf() usage internally

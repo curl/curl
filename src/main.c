@@ -77,7 +77,9 @@
 #define DEFAULT_MAXREDIRS  50L
 
 #ifndef __cplusplus        /* (rabe) */
+#ifndef typedef_bool
 typedef char bool;
+#endif
 #endif                     /* (rabe) */
 
 #define CURL_PROGRESS_STATS 0 /* default progress display */
@@ -318,6 +320,11 @@ static void help(void)
        "    --egd-file <file> EGD socket path for random data (SSL)\n"
        " -e/--referer       Referer page (H)");
   puts(" -E/--cert <cert[:passwd]> Specifies your certificate file and password (HTTPS)\n"
+       "    --cert-type <type> Specifies your certificate file type (DER/PEM/ENG) (HTTPS)\n"
+       "    --key <key>     Specifies your private key file (HTTPS)\n"
+       "    --key-type <type> Specifies your private key  file type (DER/PEM/ENG) (HTTPS)\n"
+       "    --pass  <pass>  Specifies your passphrase for the private key (HTTPS)");
+  puts("    --engine <eng>  Specifies the crypto engine to use (HTTPS)\n"
        "    --cacert <file> CA certifciate to verify peer against (SSL)\n"
        "    --ciphers <list> What SSL ciphers to use (SSL)\n"
        "    --connect-timeout <seconds> Maximum time allowed for connection\n"
@@ -420,8 +427,12 @@ struct Configurable {
 
   char *cipher_list;
   char *cert;
+  char *cert_type;
   char *cacert;
-  char *cert_passwd;
+  char *key;
+  char *key_type;
+  char *key_passwd;
+  char *engine;
   bool crlf;
   char *customrequest;
   char *krb4level;
@@ -884,6 +895,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"e", "referer",     TRUE},
     {"E", "cert",        TRUE},
     {"Ea", "cacert",     TRUE},
+    {"Eb","cert-type",   TRUE},
+    {"Ec","key",         TRUE},
+    {"Ed","key-type",    TRUE},
+    {"Ee","pass",        TRUE},
+    {"Ef","engine",      TRUE},
     {"f", "fail",        FALSE},
     {"F", "form",        TRUE},
     {"g", "globoff",     FALSE},
@@ -1180,35 +1196,53 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       }
       break;
     case 'E':
-      if(subletter == 'a') {
+      switch(subletter) {
+      case 'a': /* CA info PEM file */
         /* CA info PEM file */
         GetStr(&config->cacert, nextarg);
-      }
-      else {
-	char *ptr = strchr(nextarg, ':');
-        /* Since we live in a world of weirdness and confusion, the win32
-           dudes can use : when using drive letters and thus
-           c:\file:password needs to work. In order not to break
-           compatibility, we still use : as separator, but we try to detect
-           when it is used for a file name! On windows. */
+        break;
+      case 'b': /* cert file type */
+        GetStr(&config->cert_type, nextarg);
+        break;
+      case 'c': /* private key file */
+        GetStr(&config->key, nextarg);
+        break;
+      case 'd': /* private key file type */
+        GetStr(&config->key_type, nextarg);
+        break;
+      case 'e': /* private key passphrase */
+        GetStr(&config->key_passwd, nextarg);
+        break;
+      case 'f': /* crypto engine */
+        GetStr(&config->engine, nextarg);
+        break;
+      default: /* certificate file */
+        {
+          char *ptr = strchr(nextarg, ':');
+          /* Since we live in a world of weirdness and confusion, the win32
+             dudes can use : when using drive letters and thus
+             c:\file:password needs to work. In order not to break
+             compatibility, we still use : as separator, but we try to detect
+             when it is used for a file name! On windows. */
 #ifdef WIN32
-        if(ptr &&
-           (ptr == &nextarg[1]) &&
-           (nextarg[2] == '\\') &&
-           (isalpha((int)nextarg[0])) )
-          /* colon in the second column, followed by a backslash, and the
-             first character is an alphabetic letter:
+          if(ptr &&
+             (ptr == &nextarg[1]) &&
+             (nextarg[2] == '\\') &&
+             (isalpha((int)nextarg[0])) )
+             /* colon in the second column, followed by a backslash, and the
+                first character is an alphabetic letter:
 
-             this is a drive letter colon */
-          ptr = strchr(&nextarg[3], ':'); /* find the next one instead */
+                this is a drive letter colon */
+            ptr = strchr(&nextarg[3], ':'); /* find the next one instead */
 #endif
-        if(ptr) {
-	  /* we have a password too */
-	  *ptr=0;
-	  ptr++;
-	  GetStr(&config->cert_passwd, ptr);
-	}
-	GetStr(&config->cert, nextarg);
+          if(ptr) {
+            /* we have a password too */
+            *ptr=0;
+            ptr++;
+            GetStr(&config->key_passwd, ptr);
+          }
+          GetStr(&config->cert, nextarg);
+        }
       }
       break;
     case 'f':
@@ -2214,6 +2248,8 @@ operate(struct Configurable *config, int argc, char *argv[])
       }
 #endif
 
+      curl_easy_setopt(curl, CURLOPT_SSLENGINE, config->engine);
+      curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1);
 
       curl_easy_setopt(curl, CURLOPT_FILE, (FILE *)&outs); /* where to store */
       /* what call to write: */
@@ -2261,7 +2297,10 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, config->headers);
       curl_easy_setopt(curl, CURLOPT_HTTPPOST, config->httppost);
       curl_easy_setopt(curl, CURLOPT_SSLCERT, config->cert);
-      curl_easy_setopt(curl, CURLOPT_SSLCERTPASSWD, config->cert_passwd);
+      curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
+      curl_easy_setopt(curl, CURLOPT_SSLKEY, config->key);
+      curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, config->key_type);
+      curl_easy_setopt(curl, CURLOPT_SSLKEYPASSWD, config->key_passwd);
 
       if(config->cacert) {
         curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);

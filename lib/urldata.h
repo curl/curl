@@ -58,6 +58,9 @@
 #include "openssl/pem.h"
 #include "openssl/ssl.h"
 #include "openssl/err.h"
+#ifdef HAVE_OPENSSL_ENGINE_H
+#include <openssl/engine.h>
+#endif
 #else
 #include "rsa.h"
 #include "crypto.h"
@@ -111,6 +114,9 @@ enum protection_level {
 };
 #endif
 
+#ifndef HAVE_OPENSSL_ENGINE_H
+typedef void ENGINE;
+#endif
 /* struct for data related to SSL and SSL connections */
 struct ssl_connect_data {
   bool use;              /* use ssl encrypted communications TRUE/FALSE */
@@ -525,8 +531,12 @@ struct UserDefined {
   char *cookie;         /* HTTP cookie string to send */
   struct curl_slist *headers; /* linked list of extra headers */
   struct HttpPost *httppost;  /* linked list of POST data */
-  char *cert;           /* PEM-formatted certificate */
-  char *cert_passwd;    /* plain text certificate password */
+  char *cert;           /* certificate */
+  char *cert_type;      /* format for certificate (default: PEM) */
+  char *key;            /* private key */
+  char *key_type;       /* format for private key (default: PEM) */
+  char *key_passwd;     /* plain text private key password */
+  char *crypto_engine;  /* name of the crypto engine to use */
   char *cookiejar;      /* dump all cookies to this file */
   bool crlf;            /* convert crlf on ftp upload(?) */
   struct curl_slist *quote;     /* before the transfer */
@@ -594,6 +604,9 @@ struct SessionHandle {
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */
   struct PureInfo info;        /* stats, reports and info data */
+#ifdef USE_SSLEAY
+  ENGINE*  engine;
+#endif /* USE_SSLEAY */
 };
 
 #define LIBCURL_NAME "libcurl"

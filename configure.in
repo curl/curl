@@ -392,6 +392,10 @@ else
         OPENSSL_ENABLED=1)
     fi
 
+    dnl Check for the OpenSSL engine header, it is kind of "separated"
+    dnl from the main SSL check
+    AC_CHECK_HEADERS(openssl/engine.h)
+
     AC_SUBST(OPENSSL_ENABLED)
 
   fi

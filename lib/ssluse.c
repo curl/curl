@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -22,11 +22,12 @@
  *****************************************************************************/
 
 /*
- * The original SSL code was written by
+ * The original SSL code for curl was written by
  * Linas Vepstas <linas@linas.org> and Sampo Kellomaki <sampo@iki.fi>
  */
 
 #include "setup.h"
+
 #include <string.h>
 #include <stdlib.h>
 
@@ -171,33 +172,55 @@ int random_the_seed(struct connectdata *conn)
   return nread;
 }
 
+#ifndef SSL_FILETYPE_ENGINE
+#define SSL_FILETYPE_ENGINE 42
+#endif
+static int do_file_type(const char *type)
+{
+  if (!type || !type[0])
+    return SSL_FILETYPE_PEM;
+  if (curl_strequal(type, "PEM"))
+    return SSL_FILETYPE_PEM;
+  if (curl_strequal(type, "DER"))
+    return SSL_FILETYPE_ASN1;
+  if (curl_strequal(type, "ENG"))
+    return SSL_FILETYPE_ENGINE;
+  return -1;
+}
+
 static
 int cert_stuff(struct connectdata *conn,
                char *cert_file,
-               char *key_file)
+               const char *cert_type,
+               char *key_file,
+               const char *key_type)
 {
   struct SessionHandle *data = conn->data;
+  int file_type;
+
   if (cert_file != NULL) {
     SSL *ssl;
     X509 *x509;
 
-    if(data->set.cert_passwd) {
+    if(data->set.key_passwd) {
 #ifndef HAVE_USERDATA_IN_PWD_CALLBACK
       /*
        * If password has been given, we store that in the global
        * area (*shudder*) for a while:
        */
-      strcpy(global_passwd, data->set.cert_passwd);
+      strcpy(global_passwd, data->set.key_passwd);
 #else
       /*
        * We set the password in the callback userdata
        */
-      SSL_CTX_set_default_passwd_cb_userdata(conn->ssl.ctx, data->set.cert_passwd);
+      SSL_CTX_set_default_passwd_cb_userdata(conn->ssl.ctx,
+                                             data->set.key_passwd);
 #endif
       /* Set passwd callback: */
       SSL_CTX_set_default_passwd_cb(conn->ssl.ctx, passwd_callback);
     }
 
+#if 0
     if (SSL_CTX_use_certificate_file(conn->ssl.ctx,
 				     cert_file,
 				     SSL_FILETYPE_PEM) != 1) {
@@ -213,6 +236,83 @@ int cert_stuff(struct connectdata *conn,
       failf(data, "unable to set public key file");
       return(0);
     }
+#else
+    /* The '#ifdef 0' section above was removed on 17-dec-2001 */
+
+    file_type = do_file_type(cert_type);
+
+    switch(file_type) {
+    case SSL_FILETYPE_PEM:
+    case SSL_FILETYPE_ASN1:
+      if (SSL_CTX_use_certificate_file(conn->ssl.ctx,
+                                       cert_file,
+                                       file_type) != 1) {
+        failf(data, "unable to set certificate file (wrong password?)");
+        return 0;
+      }
+      break;
+    case SSL_FILETYPE_ENGINE:
+      failf(data, "file type ENG for certificate not implemented");
+      return 0;
+
+    default:
+      failf(data, "not supported file type '%s' for certificate", cert_type);
+      return 0;
+    }
+
+    file_type = do_file_type(key_type);
+
+    switch(file_type) {
+    case SSL_FILETYPE_PEM:
+      if (key_file == NULL)
+        /* cert & key can only be in PEM case in the same file */
+        key_file=cert_file;
+    case SSL_FILETYPE_ASN1:
+      if (SSL_CTX_use_PrivateKey_file(conn->ssl.ctx,
+                                      key_file,
+                                      file_type) != 1) {
+        failf(data, "unable to set private key file\n");
+        return 0;
+      }
+      break;
+    case SSL_FILETYPE_ENGINE:
+#ifdef HAVE_OPENSSL_ENGINE_H
+      {                         /* XXXX still needs some work */
+        EVP_PKEY *priv_key = NULL;
+        if (conn && conn->data && conn->data->engine) {
+          if (!key_file || !key_file[0]) {
+            failf(data, "no key set to load from crypto engine\n");
+            return 0;
+          }
+          priv_key = ENGINE_load_private_key(conn->data->engine,key_file,
+                                             data->set.key_passwd);
+          if (!priv_key) {
+            failf(data, "failed to load private key from crypto engine\n");
+            return 0;
+          }
+          if (SSL_CTX_use_PrivateKey(conn->ssl.ctx, priv_key) != 1) {
+            failf(data, "unable to set private key\n");
+            EVP_PKEY_free(priv_key);
+            return 0;
+          }
+          EVP_PKEY_free(priv_key);  /* we don't need the handle any more... */
+        }
+        else {
+          failf(data, "crypto engine not set, can't load private key\n");
+          return 0;
+        }
+      }
+#else
+      failf(data, "file type ENG for private key not supported\n");
+      return 0;
+#endif
+      break;
+    default:
+      failf(data, "not supported file type for private key\n");
+      return 0;
+    }
+
+#endif
     
     ssl=SSL_new(conn->ssl.ctx);
     x509=SSL_get_certificate(ssl);
@@ -269,6 +369,10 @@ void Curl_SSL_init(void)
 
   init_ssl++; /* never again */
 
+#ifdef HAVE_ENGINE_LOAD_BUILTIN_ENGINES
+  ENGINE_load_builtin_engines();
+#endif
+
   /* Lets get nice error messages */
   SSL_load_error_strings();
 
@@ -292,6 +396,10 @@ void Curl_SSL_cleanup(void)
     /* EVP_cleanup() removes all ciphers and digests from the
        table. */
     EVP_cleanup();
+
+#ifdef HAVE_ENGINE_cleanup
+    ENGINE_cleanup();
+#endif
 
     init_ssl=0; /* not inited any more */
   }
@@ -428,6 +536,13 @@ int Curl_SSL_Close_All(struct SessionHandle *data)
     /* free the cache data */
     free(data->state.session);
   }
+#ifdef HAVE_OPENSSL_ENGINE_H
+  if (data->engine)
+  {
+    ENGINE_free(data->engine);
+    data->engine = NULL;
+  }
+#endif
   return 0;
 }
 
@@ -569,7 +684,11 @@ Curl_SSLConnect(struct connectdata *conn)
   }
     
   if(data->set.cert) {
-    if (!cert_stuff(conn, data->set.cert, data->set.cert)) {
+    if (!cert_stuff(conn,
+                    data->set.cert,
+                    data->set.cert_type,
+                    data->set.key,
+                    data->set.key_type)) {
       /* failf() is already done in cert_stuff() */
       return CURLE_SSL_CONNECT_ERROR;
     }
