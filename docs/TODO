@@ -24,6 +24,10 @@ For the future
    URLs mentioned in the list. I figure -O or something would have to be
    implied by such an action.
 
+ * Make curl with multiple URLs, even outside of {}-letters. I could also
+   imagine an optional fork()ed system that downloads each URL in its own
+   thread. It should of course have a maximum amount of simultaneous fork()s.
+
  * Improve the regular progress meter with --continue is used. It should be
    noticable when there's a resume going on.
 
