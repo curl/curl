@@ -777,6 +777,12 @@ struct UrlState {
 #ifdef USE_ARES
   ares_channel areschannel; /* for name resolves */
 #endif
+
+#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
+  ENGINE *engine;
+#endif /* USE_SSLEAY */
+  struct curl_slist *engine_list; /* list of names from ENGINE_get_id() */
+
 };
 
 
@@ -973,10 +979,6 @@ struct SessionHandle {
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */
   struct PureInfo info;        /* stats, reports and info data */
-#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
-  ENGINE *engine;
-  struct curl_slist *engine_list; /* list of names from ENGINE_get_id() */
-#endif /* USE_SSLEAY */
 };
 
 #define LIBCURL_NAME "libcurl"

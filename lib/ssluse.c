@@ -329,7 +329,7 @@ int cert_stuff(struct connectdata *conn,
 #ifdef HAVE_OPENSSL_ENGINE_H
       {                         /* XXXX still needs some work */
         EVP_PKEY *priv_key = NULL;
-        if(conn && conn->data && conn->data->engine) {
+        if(conn && conn->data && conn->data->state.engine) {
 #ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
           UI_METHOD *ui_method = UI_OpenSSL();
 #endif
@@ -339,7 +339,7 @@ int cert_stuff(struct connectdata *conn,
           }
           /* the typecast below was added to please mingw32 */
           priv_key = (EVP_PKEY *)
-            ENGINE_load_private_key(conn->data->engine,key_file,
+            ENGINE_load_private_key(conn->data->state.engine,key_file,
 #ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
                                     ui_method,
 #endif
@@ -495,17 +495,17 @@ CURLcode Curl_SSL_set_engine(struct SessionHandle *data, const char *engine)
     return (CURLE_SSL_ENGINE_NOTFOUND);
   }
 
-  if (data->engine) {
-    ENGINE_finish(data->engine);
-    ENGINE_free(data->engine);
+  if (data->state.engine) {
+    ENGINE_finish(data->state.engine);
+    ENGINE_free(data->state.engine);
   }
-  data->engine = NULL;
+  data->state.engine = NULL;
   if (!ENGINE_init(e)) {
     ENGINE_free(e);
     failf(data, "Failed to initialise SSL Engine '%s'", engine);
     return (CURLE_SSL_ENGINE_INITFAILED);
   }
-  data->engine = e;
+  data->state.engine = e;
   return (CURLE_OK);
 #else
   failf(data, "SSL Engine not supported");
@@ -518,12 +518,12 @@ CURLcode Curl_SSL_set_engine(struct SessionHandle *data, const char *engine)
 CURLcode Curl_SSL_set_engine_default(struct SessionHandle *data)
 {
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
-  if (data->engine) {
-    if (ENGINE_set_default(data->engine, ENGINE_METHOD_ALL) > 0) {
-      infof(data,"set default crypto engine %s\n", data->engine);
+  if (data->state.engine) {
+    if (ENGINE_set_default(data->state.engine, ENGINE_METHOD_ALL) > 0) {
+      infof(data,"set default crypto engine %s\n", data->state.engine);
     }
     else {
-      failf(data, "set default crypto engine %s failed", data->engine);
+      failf(data, "set default crypto engine %s failed", data->state.engine);
       return CURLE_SSL_ENGINE_SETFAILED;
     }
   }
@@ -534,7 +534,7 @@ CURLcode Curl_SSL_set_engine_default(struct SessionHandle *data)
 }
 
 /* Build the list of OpenSSL crypto engine names. Add to
- * linked list at data->engine_list.
+ * linked list at data->state.engine_list.
  */
 CURLcode Curl_SSL_engines_list(struct SessionHandle *data)
 {
@@ -542,12 +542,12 @@ CURLcode Curl_SSL_engines_list(struct SessionHandle *data)
   ENGINE *e;
 
   /* Free previous list */
-  if (data->engine_list)
-    curl_slist_free_all(data->engine_list);
+  if (data->state.engine_list)
+    curl_slist_free_all(data->state.engine_list);
 
-  data->engine_list = NULL;
+  data->state.engine_list = NULL;
   for (e = ENGINE_get_first(); e; e = ENGINE_get_next(e))
-    data->engine_list = curl_slist_append(data->engine_list, ENGINE_get_id(e));
+    data->state.engine_list = curl_slist_append(data->state.engine_list, ENGINE_get_id(e));
 #endif
   return (CURLE_OK);
 }
@@ -691,14 +691,14 @@ int Curl_SSL_Close_All(struct SessionHandle *data)
     free(data->state.session);
   }
 #ifdef HAVE_OPENSSL_ENGINE_H
-  if(data->engine) {
-    ENGINE_finish(data->engine);
-    ENGINE_free(data->engine);
-    data->engine = NULL;
+  if(data->state.engine) {
+    ENGINE_finish(data->state.engine);
+    ENGINE_free(data->state.engine);
+    data->state.engine = NULL;
   }
-  if (data->engine_list)
-    curl_slist_free_all(data->engine_list);
-  data->engine_list = NULL;
+  if (data->state.engine_list)
+    curl_slist_free_all(data->state.engine_list);
+  data->state.engine_list = NULL;
 
 #endif
   return 0;
@@ -1558,4 +1558,3 @@ Curl_SSLConnect(struct connectdata *conn,
 #endif
   return retcode;
 }
-
