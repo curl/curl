@@ -251,21 +251,31 @@ static CURLcode perhapsrewind(struct connectdata *conn)
 
   if((expectsend == -1) || (expectsend > bytessent)) {
     /* There is still data left to send */
-    if((data->state.authproxy.picked == CURLAUTH_NTLM) ||/* using NTLM */
-       (data->state.authhost.picked == CURLAUTH_NTLM) ) {
-      conn->bits.close = FALSE; /* don't close, keep on sending */
+    if((data->state.authproxy.picked == CURLAUTH_NTLM) ||
+       (data->state.authhost.picked == CURLAUTH_NTLM)) {
+      if(((expectsend - bytessent) < 2000) ||
+         (conn->ntlm.state != NTLMSTATE_NONE)) {
+        /* The NTLM-negotiation has started *OR* there is just a little (<2K)
+           data left to send, keep on sending. */
 
-      /* rewind data when completely done sending! */
-      conn->bits.rewindaftersend = TRUE;
-      return CURLE_OK;
+        /* rewind data when completely done sending! */
+        if(!conn->bits.authneg)
+          conn->bits.rewindaftersend = TRUE;
+
+        return CURLE_OK;
+      }
+      if(conn->bits.close)
+        /* this is already marked to get closed */
+        return CURLE_OK;
+
+      infof(data, "NTLM send, close instead of sending %ld bytes\n",
+            expectsend - bytessent);
     }
-    else {
-      /* If there is more than just a little data left to send, close the
-       * current connection by force.
-       */
-      conn->bits.close = TRUE;
-      conn->size = 0; /* don't download any more than 0 bytes */
-    }
+
+    /* This is not NTLM or NTLM with many bytes left to send: close
+     */
+    conn->bits.close = TRUE;
+    conn->size = 0; /* don't download any more than 0 bytes */
   }
 
   if(bytessent)
@@ -310,7 +320,8 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
     conn->newurl = strdup(data->change.url); /* clone URL */
 
     if((data->set.httpreq != HTTPREQ_GET) &&
-       (data->set.httpreq != HTTPREQ_HEAD)) {
+       (data->set.httpreq != HTTPREQ_HEAD) &&
+       !conn->bits.rewindaftersend) {
       code = perhapsrewind(conn);
       if(code)
         return code;

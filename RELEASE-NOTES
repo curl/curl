@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o HTTP POST with --anyauth picking NTLM
  o SSL problems when downloading exactly 16KB data
  o out of memory conditions preserve error codes better
  o a few crashes at out of memory
@@ -31,6 +32,7 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Gisle Vanem, David Byron, Marty Kuhrt, Maruko, Eric Vergnaud
+ Gisle Vanem, David Byron, Marty Kuhrt, Maruko, Eric Vergnaud, Christopher
+ R. Palmer
 
         Thanks! (and sorry if I forgot to mention someone)

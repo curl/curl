@@ -541,6 +541,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
                 if(result)
                   return result;
+
+                if(conn->bits.rewindaftersend) {
+                  /* We rewind after a complete send, so thus we continue
+                     sending now */
+                  infof(data, "Keep sending data to get tossed away!\n");
+                  k->keepon |= KEEP_WRITE;
+                }
               }
 #endif   /* CURL_DISABLE_HTTP */
 

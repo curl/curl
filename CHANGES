@@ -6,6 +6,24 @@
 
                                   Changelog
 
+Daniel (16 February 2005)
+- Christopher R. Palmer reported a problem with HTTP-POSTing using "anyauth"
+  that picks NTLM. Thanks to David Byron letting me test NTLM against his
+  servers, I could quickly repeat and fix the problem. It turned out to be:
+
+  When libcurl POSTs without knowing/using an authentication and it gets back
+  a list of types from which it picks NTLM, it needs to either continue
+  sending its data if it keeps the connection alive, or not send the data but
+  close the connection. Then do the first step in the NTLM auth. libcurl
+  didn't send the data nor close the connection but simply read the
+  response-body and then sent the first negotiation step. Which then failed
+  miserably of course. The fixed version forces a connection if there is more
+  than 2000 bytes left to send.
+
+Daniel (14 February 2005)
+- The configure script didn't check for ENGINE_load_builtin_engines() so it
+  was never used.
+
 Daniel (11 February 2005)
 - Removed all uses of strftime() since it uses the localised version of the
   week day names and month names and servers don't like that.
