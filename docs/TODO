@@ -21,9 +21,9 @@ TODO
    less copy of data and thus a faster operation.
    [http://curl.haxx.se/dev/no_copy_callbacks.txt]
 
- * Add asynchronous name resolving. http://curl.haxx.se/dev/async-resolver.txt
-   This should be made to work on most of the supported platforms, or
-   otherwise it isn't really interesting.
+ * Add asynchronous name resolving (http://daniel.haxx.se/resolver/). This
+   should be made to work on most of the supported platforms, or otherwise it
+   isn't really interesting.
 
  * Data sharing. Tell which easy handles within a multi handle that should
    share cookies, connection cache, dns cache, ssl session cache.  Full
