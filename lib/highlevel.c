@@ -149,6 +149,7 @@ _Transfer(struct connectdata *c_conn)
   long bodywrites=0;
 
   char newurl[URL_MAX_LENGTH];		/* buffer for Location: URL */
+  int writetype;
 
   /* the highest fd we use + 1 */
   struct UrlData *data;
@@ -336,24 +337,15 @@ _Transfer(struct connectdata *c_conn)
 
                 /* now, only output this if the header AND body are requested:
                  */
-                if (data->bits.http_include_header) {
-                  if((p - data->headerbuff) !=
-                     data->fwrite (data->headerbuff, 1,
-                                   p - data->headerbuff, data->out)) {
-                    failf (data, "Failed writing output");
-                    return CURLE_WRITE_ERROR;
-                  }
-                }
-                if(data->writeheader) {
-                  /* obviously, the header is requested to be written to
-                     this file: */
-                  if((p - data->headerbuff) !=
-                     data->fwrite (data->headerbuff, 1, p - data->headerbuff,
-                                   data->writeheader)) {
-                    failf (data, "Failed writing output");
-                    return CURLE_WRITE_ERROR;
-                  }
-                }
+                writetype = CLIENTWRITE_HEADER;
+                if (data->bits.http_include_header)
+                  writetype |= CLIENTWRITE_BODY;
+
+                urg = client_write(data, writetype, data->headerbuff,
+                                   p - data->headerbuff);
+                if(urg)
+                  return urg;
+
                 data->header_size += p - data->headerbuff;
                 break;		/* exit header line loop */
               }
@@ -406,6 +398,8 @@ _Transfer(struct connectdata *c_conn)
                       data->timecondition) {
                 time_t secs=time(NULL);
                 timeofdoc = curl_getdate(p+strlen("Last-Modified:"), &secs);
+                if(data->bits.get_filetime)
+                  data->progress.filetime = timeofdoc;
               }
               else if ((code >= 300 && code < 400) &&
                        (data->bits.http_follow_location) &&
@@ -416,21 +410,15 @@ _Transfer(struct connectdata *c_conn)
                    instead */
                 data->newurl = strdup (newurl);
               }
-              
-              if (data->bits.http_include_header) {
-                if(hbuflen != data->fwrite (p, 1, hbuflen, data->out)) {
-                  failf (data, "Failed writing output");
-                  return CURLE_WRITE_ERROR;
-                }
-              }
-              if(data->writeheader) {
-                /* the header is requested to be written to this file */
-                if(hbuflen != data->fwrite (p, 1, hbuflen,
-                                            data->writeheader)) {
-                  failf (data, "Failed writing output");
-                  return CURLE_WRITE_ERROR;
-                }
-              }
+
+              writetype = CLIENTWRITE_HEADER;
+              if (data->bits.http_include_header)
+                writetype |= CLIENTWRITE_BODY;
+
+              urg = client_write(data, writetype, p, hbuflen);
+              if(urg)
+                return urg;
+
               data->header_size += hbuflen;
               
               /* reset hbufp pointer && hbuflen */
@@ -515,10 +503,9 @@ _Transfer(struct connectdata *c_conn)
 
             pgrsSetDownloadCounter(data, (double)bytecount);
             
-            if (nread != data->fwrite (str, 1, nread, data->out)) {
-              failf (data, "Failed writing output");
-              return CURLE_WRITE_ERROR;
-            }
+            urg = client_write(data, CLIENTWRITE_BODY, str, nread);
+            if(urg)
+              return urg;
 
           } /* if (! header and data to read ) */
         } /* if( read from socket ) */
