@@ -20,8 +20,8 @@ right of a ? letter will be converted).
 If the 'length' argument is set to 0, curl_unescape() will use strlen() on the
 input 'url' string to find out the size.
 
-You must free() the returned string when you're done with it.
+You must curl_free() the returned string when you're done with it.
 .SH RETURN VALUE
 A pointer to a zero terminated string or NULL if it failed.
 .SH "SEE ALSO"
-.I curl_escape(), RFC 2396
+.I curl_escape(), curl_free(), RFC 2396
