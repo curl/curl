@@ -2366,6 +2366,7 @@ int myprogress (void *clientp,
     sprintf( outline, format, line, percent );
     fprintf( bar->out, "\r%s", outline );
   }
+  fflush(bar->out);
   bar->prev = point;
 
   return 0;
