@@ -7,19 +7,11 @@ DEPEND_PREREQ = config.h getdate.c
 
 include ../packages/DOS/common.dj
 
-SOURCES = base64.c      connect.c     content_encoding.c cookie.c dict.c \
-          easy.c        escape.c      file.c     formdata.c ftp.c        \
-          getdate.c     getenv.c      getinfo.c  hash.c     hostip.c     \
-          hostip6.c     hostip4.c     hostares.c hostasyn.c hostsyn.c    \
-          if2ip.c       krb4.c        md5.c      ldap.c     llist.c      \
-          memdebug.c    mprintf.c     multi.c    netrc.c    progress.c   \
-          security.c    sendf.c       share.c    speedcheck.c ssluse.c   \
-          strequal.c    strtok.c      telnet.c   timeval.c  transfer.c   \
-          strerror.c    strtoofft.c   url.c      version.c  http.c       \
-          http_chunks.c http_digest.c http_negotiate.c      http_ntlm.c
+# Makefile.inc provides the CSOURCES and HHEADERS defines
+include Makefile.inc
 
-SOURCES := $(strip $(SOURCES))
-OBJECTS  = $(addprefix $(OBJ_DIR)/, $(SOURCES:.c=.o))
+OBJECTS := $(patsubst %.c,$(OBJ_DIR)/%.o,$(strip $(CSOURCES)))
+
 CURL_LIB = libcurl.a
 
 all: $(OBJ_DIR) config.h $(CURL_LIB)
