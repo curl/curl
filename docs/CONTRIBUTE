@@ -18,7 +18,7 @@ The License Issue
  If you add a larger piece of code, you can opt to make that file or set of
  files to use a different license as long as they don't enfore any changes to
  the rest of the package and they make sense. Such "separate parts" can not be
- GPL (as we don't want the FPL virus to attack users of libcurl) but they must
+ GPL (as we don't want the GPL virus to attack users of libcurl) but they must
  use "GPL compatible" licenses.
 
 Naming
