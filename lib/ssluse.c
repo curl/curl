@@ -235,17 +235,21 @@ int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
 
 #endif
 
+#ifdef USE_SSLEAY
+/* "global" init done? */
+static int init_ssl=0;
+#endif
+
 /* Global init */
 void Curl_SSL_init(void)
 {
 #ifdef USE_SSLEAY
-  static int only_once=0;
 
   /* make sure this is only done once */
-  if(0 != only_once)
+  if(0 != init_ssl)
     return;
 
-  only_once++; /* never again */
+  init_ssl++; /* never again */
 
   /* Lets get nice error messages */
   SSL_load_error_strings();
@@ -259,12 +263,16 @@ void Curl_SSL_init(void)
 void Curl_SSL_cleanup(void)
 {
 #ifdef USE_SSLEAY
-  /* Free the SSL error strings */
-  ERR_free_strings();
+  if(init_ssl) {
+    /* only cleanup if we did a previous init */
+
+    /* Free the SSL error strings */
+    ERR_free_strings();
   
-  /* EVP_cleanup() removes all ciphers and digests from the
-     table. */
-  EVP_cleanup();
+    /* EVP_cleanup() removes all ciphers and digests from the
+       table. */
+    EVP_cleanup();
+  }
 #endif  
 }
 
