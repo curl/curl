@@ -138,6 +138,20 @@ fi
 
 echo "buildconf: libtool version $lt_version (ok)"
 
+#--------------------------------------------------------------------------
+# m4 check
+#
+m4=`${M4:-m4} --version 2>/dev/null|head -1`;
+m4_version=`echo $m4 | sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//'`
+
+if { echo $m4 | grep "GNU" >/dev/null 2>&1; } then
+  echo "buildconf: GNU m4 version $m4_version (ok)"
+else
+  echo "buildconf: m4 version $m4 found. You need a GNU m4 installed!"
+  exit 1
+fi
+
+
 # ------------------------------------------------------------
 
 # run the correct scripts now
