@@ -37,14 +37,11 @@ The parameter
 .I name
 gives the hostname as a NUL-terminated C string, and
 .I family
-gives the desired type of address for the resulting host entry.  When
-the query is complete or has failed, the ares library will invoke
-.IR callback .
-Completion or failure of the query may happen immediately, or may
-happen during a later call to
-.BR ares_process (3)
-or
-.BR ares_destroy (3).
+gives the desired type of address for the resulting host entry.  When the
+query is complete or has failed, the ares library will invoke \fIcallback\fP.
+Completion or failure of the query may happen immediately, or may happen
+during a later call to \fIares_process(3)\fP, \fIares_destroy(3)\fP or
+\fIares_cancel(3)\fP.
 .PP
 The callback argument
 .I arg
@@ -96,7 +93,8 @@ did not complete successfully,
 will be
 .BR NULL .
 .SH SEE ALSO
-.BR ares_process (3)
+.BR ares_process (3),
+.BR ares_gethostbyaddr (3)
 .SH AUTHOR
 Greg Hudson, MIT Information Systems
 .br
