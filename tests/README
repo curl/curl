@@ -8,6 +8,8 @@ The cURL Test Suite
 
 Requires:
   perl (and a unix-style shell)
+  diff (when a test fail, a diff is shown)
+  stunnel (for HTTPS and FTPS tests)
 
 Run:
   'make test'. This invokes the 'runtests.pl' perl script. Edit the top
