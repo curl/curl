@@ -558,6 +558,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   ssize_t nread;
   char *buf = data->state.buffer; /* this is our buffer */
   int ftpcode;
+  CURLcode result;
 
   if(data->set.upload) {
     if((-1 != data->set.infilesize) && (data->set.infilesize != *ftp->bytecountp)) {
@@ -575,8 +576,12 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
     else if(!conn->bits.resume_done &&
             !data->set.no_body &&
             (0 == *ftp->bytecountp)) {
+      /* We consider this an error, but there's no true FTP error received
+         why we need to continue to "read out" the server response too.
+         We don't want to leave a "waiting" server reply if we'll get told
+         to make a second request on this same connection! */
       failf(data, "No data was received!");
-      return CURLE_FTP_COULDNT_RETR_FILE;
+      result = CURLE_FTP_COULDNT_RETR_FILE;
     }
   }
 
@@ -604,12 +609,10 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   conn->bits.resume_done = FALSE; /* clean this for next connection */
 
   /* Send any post-transfer QUOTE strings? */
-  if(data->set.postquote) {
-    CURLcode result = ftp_sendquote(conn, data->set.postquote);
-    return result;
-  }
+  if(!result && data->set.postquote)
+    result = ftp_sendquote(conn, data->set.postquote);
 
-  return CURLE_OK;
+  return result;
 }
 
 /***********************************************************************
