@@ -399,6 +399,8 @@ CURLcode Curl_http(struct connectdata *conn)
     memset(http, 0, sizeof(struct HTTP));
     conn->proto.http = http;
   }
+  else
+    http = conn->proto.http;
 
   if ( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
        data->bits.upload) {
