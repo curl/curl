@@ -859,6 +859,7 @@ int main(int argc, char *argv[])
   char errorbuffer[URLGET_ERROR_SIZE];
 
   struct OutStruct outs;
+  struct OutStruct heads;
 
   char *url = NULL;
 #ifdef GLOBURL
@@ -1086,14 +1087,12 @@ int main(int argc, char *argv[])
     /* open file for output: */
     if(strcmp(config.headerfile,"-"))
     {
-      headerfilep=(FILE *) fopen(config.headerfile, "wb");
-      if (!headerfilep) {
-	helpf("Can't open '%s'!\n", config.headerfile);
-	return URG_WRITE_ERROR;
-      }
+      heads.filename = config.headerfile;
+      headerfilep=NULL;
     }
     else
       headerfilep=stdout;
+    heads.stream = headerfilep;
   }
 
   if(outs.stream && isatty(fileno(outs.stream)) &&
@@ -1147,7 +1146,7 @@ int main(int argc, char *argv[])
                     URGTAG_CRLF, config.crlf,
                     URGTAG_QUOTE, config.quote,
                     URGTAG_POSTQUOTE, config.postquote,
-                    URGTAG_WRITEHEADER, headerfilep,
+                    URGTAG_WRITEHEADER, &heads,
                     URGTAG_COOKIEFILE, config.cookiefile,
                     URGTAG_SSLVERSION, config.ssl_version,
                     URGTAG_TIMECONDITION, config.timecond,
@@ -1164,6 +1163,9 @@ int main(int argc, char *argv[])
      (config.errors != stdout))
     /* it wasn't directed to stdout or stderr so close the file! */
     fclose(config.errors);
+
+  if(!headerfilep && heads.stream)
+    fclose(heads.stream);
 
   if(urlbuffer)
     free(urlbuffer);
