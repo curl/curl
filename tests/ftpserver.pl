@@ -56,6 +56,7 @@ my %commandok = ( "USER" => "fresh",
                   "PORT" => "loggedin",
                   "TYPE" => "loggedin|twosock",
                   "LIST" => "twosock",
+                  "RETR" => "twosock",
                   );
 
 # initially, we're in 'fresh' state
@@ -65,17 +66,19 @@ my %statechange = ( 'USER' => 'passwd',    # USER goes to passwd state
                     'PASV' => 'twosock',   # PASV goes to twosock
                     );
 
+# this text is shown before the function specified below is run
 my %displaytext = ('USER' => '331 We are happy you popped in!', # output FTP line
                    'PASS' => '230 Welcome you silly person',
                    'PORT' => '200 You said PORT - I say FINE',
                    'TYPE' => '200 I modify TYPE as you wanted',
-                   'LIST' => '150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)', #150 Here comes a directory your way',
+                   'LIST' => '150 here comes a directory',
                    );
 
 # callback functions for certain commands
 my %commandfunc = ( 'PORT', \&PORT_command,
                     'LIST', \&LIST_command,
-                    'PASV', \&PASV_command);
+                    'PASV', \&PASV_command,
+                    'RETR', \&RETR_command);
 
 my $pid;
 
@@ -104,6 +107,37 @@ sub LIST_command {
     print "226 ASCII transfer complete\r\n";
     return 0;
 }
+
+sub RETR_command {
+    my $testno = $_[0];
+
+    logmsg "RETR test number $testno\n";
+
+    my $filename = "data/reply$testno.txt";
+
+    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+        $atime,$mtime,$ctime,$blksize,$blocks)
+        = stat($filename);
+
+    if($size) {
+    
+        print "150 Binary data connection for $testno () ($size bytes).\r\n";
+
+        open(FILE, "<$filename");
+        while(<FILE>) {
+            print KID_TO_WRITE $_;
+            # print STDERR "PASS: $_";
+        }
+        close(KID_TO_WRITE);
+
+        print "226 File transfer complete\r\n";
+    }
+    else {
+        print "550 $testno: No such file or directory.\r\n";
+    }
+    return 0;
+}
+
 
 # < 220 pm1 FTP server (SunOS 5.7) ready.
 # > USER anonymous
