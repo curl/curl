@@ -1,7 +1,7 @@
 Online:  http://curl.haxx.se/docs/httpscripting.shtml
 Author:  Daniel Stenberg <daniel@haxx.se>
-Date:    August 20, 2001
-Version: 0.4
+Date:    October 31, 2001
+Version: 0.5
 
                 The Art Of Scripting HTTP Requests Using Curl
                 =============================================
@@ -48,7 +48,7 @@ Version: 0.4
 2. URL
 
  The Uniform Resource Locator format is how you specify the address of a
- particular resource on the internet. You know these, you've seen URLs like
+ particular resource on the Internet. You know these, you've seen URLs like
  http://curl.haxx.se or https://yourbank.com a million times.
 
 3. GET a page
@@ -56,7 +56,7 @@ Version: 0.4
  The simplest and most common request/operation made using HTTP is to get a
  URL. The URL could itself refer to a web page, an image or a file. The client
  issues a GET request to the server and receives the document it asked for.
- If you isse the command line
+ If you issue the command line
 
         curl http://curl.haxx.se
 
@@ -89,7 +89,7 @@ Version: 0.4
           <input type=submit name=press value="OK">
         </form>
 
-  In your favourite browser, this form will appear with a text box to fill in
+  In your favorite browser, this form will appear with a text box to fill in
   and a press-button labeled "OK". If you fill in '1905' and press the OK
   button, your browser will then create a new URL to get for you. The URL will
   get "junk.cgi?birthyear=1905&press=OK" appended to the path part of the
@@ -136,8 +136,8 @@ Version: 0.4
  4.3 FILE UPLOAD POST
 
   Back in late 1995 they defined a new way to post data over HTTP. It was
-  documented in the RFC 1867, why this method sometimes is refered to as
-  a rfc1867-posting.
+  documented in the RFC 1867, why this method sometimes is referred to as
+  a RFC1867-posting.
 
   This method is mainly designed to better support file uploads. A form that
   allows a user to upload a file could be written like this in HTML:
@@ -182,7 +182,7 @@ Version: 0.4
   way your browser does.
 
   An easy way to get to see this, is to save the HTML page with the form on
-  your local disk, mofidy the 'method' to a GET, and press the submit button
+  your local disk, modify the 'method' to a GET, and press the submit button
   (you could also change the action URL if you want to).
 
   You will then clearly see the data get appended to the URL, separated with a
@@ -214,7 +214,7 @@ Version: 0.4
  Sometimes your HTTP access is only available through the use of a HTTP
  proxy. This seems to be especially common at various companies. A HTTP proxy
  may require its own user and password to allow the client to get through to
- the internet. To specify those with curl, run something like:
+ the Internet. To specify those with curl, run something like:
 
         curl -U proxyuser:proxypassword curl.haxx.se
 
@@ -294,7 +294,7 @@ Version: 0.4
  contents to the server, unless of course they are expired.
 
  Many applications and servers use this method to connect a series of requests
- into a single logical session. To be able to use curl in such occations, we
+ into a single logical session. To be able to use curl in such occasions, we
  must be able to record and send back cookies the way the web application
  expects them. The same way browsers deal with them.
 
@@ -325,6 +325,15 @@ Version: 0.4
 
         curl -b nada -L www.cookiesite.com
 
+ Curl has the ability to read and write cookie files that use the same file
+ format that Netscape and Mozilla do. It is a convenient way to share cookies
+ between browsers and automatic scripts. The -b switch automatically detects
+ if a given file is such a cookie file and parses it, and by using the
+ -c/--cookie-jar option you'll make curl write a new cookie file at the end of
+ an operation:
+
+        curl -b cookies.txt -c newcookies.txt www.cookiesite.com
+
 11. HTTPS
 
  There are a few ways to do secure HTTP transfers. The by far most common
@@ -349,7 +358,7 @@ Version: 0.4
   you need to enter the unlock-code before the certificate can be used by
   curl. The PIN-code can be specified on the command line or if not, entered
   interactively when curl queries for it. Use a certificate with curl on a
-  https server like:
+  HTTPS server like:
 
         curl -E mycert.pem https://that.secure.server.com
 
@@ -358,9 +367,11 @@ Version: 0.4
  RFC 2616 is a must to read if you want in-depth understanding of the HTTP
  protocol.
 
- RFC 2396 explains the URL syntax
+ RFC 2396 explains the URL syntax.
 
  RFC 2109 defines how cookies are supposed to work.
+
+ RFC 1867 defines the HTTP post upload format.
 
  http://www.openssl.org is the home of the OpenSSL project
 
