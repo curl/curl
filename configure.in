@@ -589,6 +589,7 @@ AC_CONFIG_FILES([Makefile \
            tests/data/Makefile \
 	   packages/Makefile \
 	   packages/Win32/Makefile \
+	   packages/Cygwin/Makefile \
 	   packages/Linux/Makefile \
 	   packages/Linux/RPM/Makefile \
 	   packages/Linux/RPM/curl.spec \
