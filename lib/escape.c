@@ -41,6 +41,9 @@
 /* Escape and unescape URL encoding in strings. The functions return a new
  * allocated string or NULL if an error occurred.  */
 
+#include "setup.h"
+#include <curl/curl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -88,17 +91,24 @@ char *curl_unescape(char *string, int length)
    unsigned char in;
    int index=0;
    int hex;
+   char querypart=FALSE; /* everything to the right of a '?' letter is
+                            the "query part" where '+' should become ' '.
+                            RFC 2316, section 3.10 */
   
    while(--alloc) {
       in = *string;
-      if('+' == in)
-	 in = ' ';
+      if(querypart && ('+' == in))
+         in = ' ';
+      else if(!querypart && ('?' == in)) {
+        /* we have "walked in" to the query part */
+        querypart=TRUE;
+      }
       else if('%' == in) {
-	 /* encoded part */
-	 if(sscanf(string+1, "%02X", &hex)) {
-	    in = hex;
-	    string+=2;
-	 }
+        /* encoded part */
+        if(sscanf(string+1, "%02X", &hex)) {
+          in = hex;
+          string+=2;
+        }
       }
 
       ns[index++] = in;
