@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -131,7 +131,7 @@
  */
 
 /* These two symbols are for the global DNS cache */
-static curl_hash hostname_cache;
+static struct curl_hash hostname_cache;
 static int host_cache_initialized;
 
 static void freednsentry(void *freethis);
@@ -152,7 +152,7 @@ void Curl_global_host_cache_init(void)
 /*
  * Return a pointer to the global cache
  */
-curl_hash *Curl_global_host_cache_get(void)
+struct curl_hash *Curl_global_host_cache_get(void)
 {
   return &hostname_cache;
 }
@@ -244,7 +244,7 @@ hostcache_timestamp_remove(void *datap, void *hc)
  * Prune the DNS cache. This assumes that a lock has already been taken.
  */
 static void
-hostcache_prune(curl_hash *hostcache, int cache_timeout, time_t now)
+hostcache_prune(struct curl_hash *hostcache, int cache_timeout, time_t now)
 {
   struct hostcache_prune_data user;
 
@@ -507,7 +507,7 @@ static void freednsentry(void *freethis)
 /*
  * Curl_mk_dnscache() creates a new DNS cache and returns the handle for it.
  */
-curl_hash *Curl_mk_dnscache(void)
+struct curl_hash *Curl_mk_dnscache(void)
 {
   return Curl_hash_alloc(7, freednsentry);
 }

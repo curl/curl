@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -112,7 +112,7 @@ struct connectdata;
 
 void Curl_global_host_cache_init(void);
 void Curl_global_host_cache_dtor(void);
-curl_hash *Curl_global_host_cache_get(void);
+struct curl_hash *Curl_global_host_cache_get(void);
 
 #define Curl_global_host_cache_use(__p) ((__p)->set.global_dns_cache)
 
@@ -176,7 +176,7 @@ void Curl_scan_cache_used(void *user, void *ptr);
 void Curl_freeaddrinfo(Curl_addrinfo *freeaddr);
 
 /* make a new dns cache and return the handle */
-curl_hash *Curl_mk_dnscache(void);
+struct curl_hash *Curl_mk_dnscache(void);
 
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct SessionHandle *data);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -33,7 +33,7 @@
 #include "memdebug.h"
 
 void
-Curl_llist_init(curl_llist *l, curl_llist_dtor dtor)
+Curl_llist_init(struct curl_llist *l, curl_llist_dtor dtor)
 {
   l->size = 0;
   l->dtor = dtor;
@@ -41,12 +41,12 @@ Curl_llist_init(curl_llist *l, curl_llist_dtor dtor)
   l->tail = NULL;
 }
 
-curl_llist *
+struct curl_llist *
 Curl_llist_alloc(curl_llist_dtor dtor)
 {
-  curl_llist *list;
+  struct curl_llist *list;
 
-  list = (curl_llist *)malloc(sizeof(curl_llist));
+  list = (struct curl_llist *)malloc(sizeof(struct curl_llist));
   if(NULL == list)
     return NULL;
 
@@ -59,10 +59,11 @@ Curl_llist_alloc(curl_llist_dtor dtor)
  * Curl_llist_insert_next() returns 1 on success and 0 on failure.
  */
 int
-Curl_llist_insert_next(curl_llist *list, curl_llist_element *e, const void *p)
+Curl_llist_insert_next(struct curl_llist *list, struct curl_llist_element *e,
+                       const void *p)
 {
-  curl_llist_element *ne =
-    (curl_llist_element *) malloc(sizeof(curl_llist_element));
+  struct curl_llist_element *ne =
+    (struct curl_llist_element *) malloc(sizeof(struct curl_llist_element));
   if(!ne)
     return 0;
 
@@ -91,7 +92,8 @@ Curl_llist_insert_next(curl_llist *list, curl_llist_element *e, const void *p)
 }
 
 int
-Curl_llist_remove(curl_llist *list, curl_llist_element *e, void *user)
+Curl_llist_remove(struct curl_llist *list, struct curl_llist_element *e,
+                  void *user)
 {
   if (e == NULL || list->size == 0)
     return 1;
@@ -119,7 +121,7 @@ Curl_llist_remove(curl_llist *list, curl_llist_element *e, void *user)
 }
 
 void
-Curl_llist_destroy(curl_llist *list, void *user)
+Curl_llist_destroy(struct curl_llist *list, void *user)
 {
   if(list) {
     while (list->size > 0)
