@@ -6,6 +6,25 @@
 
                                   Changelog
 
+Daniel (21 Mar)
+- Life is a mystery. Within a time period of 17 hours, Tim Pope and Michael
+  Churchill filed one bug report each, both identifying problems with a second
+  transfer when doing persistant transfers re-using a connection. Tim's one is
+  #706624, labeled "Multiple uploads per handle fail" and Michael's #707003
+  "Does not send Authorization: header when reusing connection". I could track
+  both down to the same piece of logic and it turned out libcurl was not using
+  new settings properly when re-using an existing connection. This concerned
+  both uploading and downloading and involved exactly those pieces these two
+  reports identified. This code has been this faulty since the day I
+  introduced persistant connection support in libcurl, more than 2 years ago.
+
+Daniel (20 Mar 2003)
+- Five year anniversary. Today five years ago, the first ever curl release saw
+  the light of day.
+
+Daniel (17 Mar)
+- Andy Cedilnik corrected flaws in some libcurl example-usage sources.
+
 Daniel (16 Mar)
 - Juan F. Codagnone reported that the fix from March 2nd was incomplete.
 
