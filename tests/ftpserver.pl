@@ -211,9 +211,12 @@ sub RETR_command {
         # this is the secret command that verifies that this actually is
         # the curl test server
         print "150 Binary junk (10 bytes).\r\n";
-        print SOCK "WE ROOLZ\r\n";
+        print SOCK "WE ROOLZ: $$\r\n";
         close(SOCK);
         print "226 File transfer complete\r\n";
+        if($verbose) {
+            print STDERR "FTPD: We returned proof we are the test server\n";
+        }
         return 0;
     }
 
@@ -439,8 +442,9 @@ for ( $waitedpid = 0;
 
     print @welcome;
     if($verbose) {
-        print STDERR "OUT:\n";
-        print STDERR @welcome;
+        for(@welcome) {
+            print STDERR "OUT: $_";
+        }
     }
     my $state="fresh";
 
