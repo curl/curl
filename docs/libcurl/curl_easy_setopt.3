@@ -650,6 +650,15 @@ pass FALSE (zero) to this option, it will not try using EPSV, only plain PASV.
 Pass a long. If the value is non-zero, curl will attempt to create any remote
 directory that it fails to CWD into. CWD is the command that changes working
 directory. (Added in 7.10.7)
+.TP
+.B CURLOPT_FTP_RESPONSE_TIMEOUT
+Pass a long.  Causes curl to set a timeout period (in seconds) on the amount
+of time that the server is allowed to take in order to generate a response
+message for a command before the session is considered hung.  Note that while 
+curl is waiting for a response, this value overrides CURLOPT_TIMEOUT. It is 
+recommended that if used in conjunction with CURLOPT_TIMEOUT, you set 
+CURLOPT_FTP_RESPONSE_TIMEOUT to a value smaller than CURLOPT_TIMEOUT.
+(Added in 7.10.8)
 .PP
 .SH PROTOCOL OPTIONS
 .TP 0.4i
