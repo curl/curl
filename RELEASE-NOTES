@@ -3,10 +3,11 @@ Curl and libcurl 7.11.1. A bugfix release.
  Public curl release number:               79
  Releases counted from the very beginning: 106
  Available command line options:           94
- Available curl_easy_setopt() options:     111
+ Available curl_easy_setopt() options:     112
 
 This release includes the following changes:
 
+ o CURLOPT_POSTFIELDSIZE_LARGE added to offer POSTs larger than 2GB
  o CURL_VERSION_LARGEFILE is a feature bit returned by libcurls that feature
    large file support
  o libcurl only requires winsock 1.1 on windows now

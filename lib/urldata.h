@@ -780,9 +780,9 @@ struct UserDefined {
   char *useragent;   /* User-Agent string */
   char *encoding;    /* Accept-Encoding string */
   char *postfields;  /* if POST, set the fields' values here */
-  size_t postfieldsize; /* if POST, this might have a size to use instead of
-                           strlen(), and then the data *may* be binary (contain
-                           zero bytes) */
+  curl_off_t postfieldsize; /* if POST, this might have a size to use instead
+                               of strlen(), and then the data *may* be binary
+                               (contain zero bytes) */
   char *ftpport;     /* port to send with the FTP PORT command */
   char *device;      /* network interface to use */
   curl_write_callback fwrite;        /* function that stores the output */

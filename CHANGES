@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (12 March 2004)
+- Added CURLOPT_POSTFIELDSIZE_LARGE, the large file version of
+  CURLOPT_POSTFIELDSIZE to allow POSTs larger than 2GB.
+
+- David Byron fixed an uninitialized variable case/crash.
+
 Daniel (10 March 2004)
 - Jeff Lawson fixed the SSL connection to deal with received signals during the
   connect.

@@ -782,10 +782,17 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     break;
   case CURLOPT_POSTFIELDSIZE:
     /*
-     * The size of the POSTFIELD data, if curl should now do a strlen
-     * to find out. Enables binary posts.
+     * The size of the POSTFIELD data to prevent libcurl to do strlen() to
+     * figure it out. Enables binary posts.
      */
     data->set.postfieldsize = va_arg(param, long);
+    break;
+  case CURLOPT_POSTFIELDSIZE_LARGE:
+    /*
+     * The size of the POSTFIELD data to prevent libcurl to do strlen() to
+     * figure it out. Enables binary posts.
+     */
+    data->set.postfieldsize = va_arg(param, curl_off_t);
     break;
   case CURLOPT_REFERER:
     /*

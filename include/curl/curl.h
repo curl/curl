@@ -783,6 +783,9 @@ typedef enum {
   */
   CINIT(FTP_SSL, LONG, 119),
 
+  /* The _LARGE version of the standard POSTFIELDSIZE option */
+  CINIT(POSTFIELDSIZE_LARGE, OFF_T, 120),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "27 Feb 2004" "libcurl 7.11.1" "libcurl Manual"
+.TH curl_easy_setopt 3 "12 Mar 2004" "libcurl 7.11.1" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -464,6 +464,11 @@ If you want to post data to the server without letting libcurl do a strlen()
 to measure the data size, this option must be used. When this option is used
 you can post fully binary data, which otherwise is likely to fail. If this
 size is set to zero, the library will use strlen() to get the size.
+.IP CURLOPT_POSTFIELDSIZE_LARGE
+Pass a curl_off_t as parameter. Use this to set the size of the
+\fICURLOPT_POSTFIELDS\fP data to prevent libcurl from doing strlen() on the
+data to figure out the size. This is the large file version of the
+\fICURLOPT_POSTFIELDSIZE\fP option.
 .IP CURLOPT_HTTPPOST
 Tells libcurl you want a multipart/formdata HTTP POST to be made and you
 instruct what data to pass on to the server.  Pass a pointer to a linked list
