@@ -6,6 +6,32 @@
 
                                   Changelog
 
+Daniel (2 June)
+- Feedback from Serge Semashko made me change the error message returned when
+  CURLE_HTTP_RETURNED_ERROR is returned.
+
+- Anonymous in bug report #745122 pointed out that we should really be using
+  SSL_CTX_set_options(... SSL_OP_ALL) to work around flaws in existing SSL
+  implementations.
+
+Daniel (27 May)
+- Andreas Ley and Rich Gray helped me point out that no version of HP-UX has
+  the sys/select.h header file so including it unconditionally in curl/multi.h
+  is not a good thing. Now we check for HPUX and avoid using that header on
+  such systems.
+
+- Rudy Koento experienced problems with curl's recent habit of POSTing data in
+  two separate send() calls, first the headers and then the data. I've now
+  made a fix that for static and known content that is less than 100K in size,
+  everything is now sent in one single system call again. This is also better
+  for network performance reasons.
+
+- I modified the main makefile to not build the test suite and a few other
+  unnecessary things by default. Now, the test suite is built when 'make test'
+  is run.  This reduces build time for those who don't care for the test
+  suite, and it also reduces confusion for people using platforms where the
+  test suite build fails!
+
 Daniel (26 May)
 - Chris Lewis pointed out a flaw in the #ifdefs in curl/multi.h for Windows,
   which is now corrected.
