@@ -115,7 +115,7 @@ int FormParse(char *input,
   struct HttpPost *subpost; /* a sub-node */
   unsigned int i;
 
-  if(1 <= sscanf(input, "%255[^ =] = %4095[^\n]", name, contents)) {
+  if(1 <= sscanf(input, "%255[^=]=%4095[^\n]", name, contents)) {
     /* the input was using the correct format */
     contp = contents;
 
