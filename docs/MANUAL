@@ -11,7 +11,7 @@ SIMPLE USAGE
 
         curl http://www.netscape.com/
 
-  Get the root README file from funet's ftp-server:
+  Get the README file the user's home directory at funet's ftp-server:
 
         curl ftp://ftp.funet.fi/README
 
@@ -19,7 +19,7 @@ SIMPLE USAGE
 
         curl http://www.weirdserver.com:8000/
 
-  Get a list of the root directory of an FTP site:
+  Get a list of a directory of an FTP site:
 
         curl ftp://cool.haxx.se/
 
