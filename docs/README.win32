@@ -1,0 +1,19 @@
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
+
+README.win32
+
+  Read the README file first.
+
+  Curl has been compiled, built and run on all sorts of Windows and win32
+  systems. While not being the main develop target, a fair share of curl users
+  are win32-based.
+
+  Some documentation in this archive will be tricky to read for Windows
+  people, as they come in unix-style man pages. You can either download a
+  freely available nroff binary for win32 (*pointers appriciated*), convert
+  the files into plain-text on your neighbor's unix machine or run over to the
+  curl web site and view them as plain HTML.
