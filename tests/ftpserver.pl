@@ -210,6 +210,7 @@ sub RETR_command {
             # move read pointer forward
             $size -= $rest;
             logmsg "REST $rest was removed from size, makes $size left\n";
+            $rest = 0; # reset REST offset again
         }
         print "150 Binary data connection for $testno () ($size bytes).\r\n";
         logmsg "150 Binary data connection for $testno ($size bytes).\n";
