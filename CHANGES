@@ -8,10 +8,14 @@
 
 
 Daniel (14 March 2001)
+- Björn Stenberg provided similar fixes as Jörn did and some additional patches
+  for non-SSL compiles.
+
 - I increased the interface number for libcurl as I've removed the low level
   functions from the interface. I also took this opportunity to rename the
-  Curl_strequal function to curl_strequal and Curl_strnequal to curl_strnequal,
-  as they're public libcurl functions (even if they're still undocumented).
+  Curl_strequal function to curl_strequal and Curl_strnequal to
+  curl_strnequal, as they're public libcurl functions (even if they're still
+  undocumented).
 
   This will make older programs not capable of using the new libcurl with
   just a drop-in replacement.
@@ -21,6 +25,7 @@ Daniel (14 March 2001)
   o lib/ssluse.c had a bad #endif placement
   o lib/file.c was made to compile on win32 again
   o lib/Makefile.m32 was updated with the new files
+  o lib/libcurl.def matches the current interface state
 
 Daniel (13 March 2001)
 - It only took an hour or so before Jörn Hartroth found a problem in the
