@@ -2598,7 +2598,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         config->conf |= CONF_NOPROGRESS;
     
 
-      if (urlnum > 1) {
+      if (urlnum > 1 && !(config->conf&CONF_MUTE)) {
         fprintf(stderr, "\n[%d/%d]: %s --> %s\n",
                 i+1, urlnum, url, outfile ? outfile : "<stdout>");
         if (separator)
