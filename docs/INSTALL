@@ -6,14 +6,13 @@
 
                                 How To Compile
 
-Curl has been compiled and built on numerous different operating systems.
+Installing Binary Packages
+==========================
 
-Most systems build curl the same way (unix-style). Continue reading below for
-more details if you're one of them.
-
-If you're using Windows (95/98/NT/ME/2000/XP or similar), VMS, RISC OS or OS/2
-or cross-compile, you should continue reading from one the paragraphs further
-down.
+   Lots of people download binary distributions of curl and libcurl. This
+   document does not describe how to install curl or libcurl using such a
+   binary package. This document describes how to compile, build and install
+   curl and libcurl from source code.
 
 UNIX
 ====
@@ -290,8 +289,6 @@ VMS
 ===
    (The VMS section is in whole contributed by the friendly Nico Baggus)
 
-   This is the first attempt at porting cURL to VMS.
-
    Curl seems to work with FTP & HTTP other protocols are not tested.  (the
    perl http/ftp testing server supplied as testing too cannot work on VMS
    because vms has no concept of fork(). [ I tried to give it a whack, but
@@ -300,7 +297,7 @@ VMS
    SSL stuff has not been ported.
 
    Telnet has about the same issues as for Win32. When the changes for Win32
-   are clear maybe they'l work for VMS too. The basic problem is that select
+   are clear maybe they'll work for VMS too. The basic problem is that select
    ONLY works for sockets.
 
    Marked instances of fopen/[f]stat that might become a problem, especially
@@ -520,7 +517,3 @@ OpenLDAP
 
       http://www.openldap.org
 
-   You need to install it with shared libraries, which is enabled when running
-   the ldap configure script with "--enable-shared". With my linux 2.0.36
-   kernel I also had to disable using threads (with --without-threads),
-   because the configure script couldn't figure out my system.
