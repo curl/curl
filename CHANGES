@@ -7,6 +7,15 @@
                                   Changelog
 
 Daniel (24 June 2004)
+- The standard curl_version() string now only includes version info about
+  involved libraries and not about particular features. Thus it will no longer
+  include info about ipv6 nor GSS. That info is of course still available in
+  the feature bitmask curl_version_info() offers.
+
+- Replaced all occurances of sprintf() with snprintf(). This is mostly because
+  it is "A Good Thing" rather than actually fixing any known problem. This
+  will help preventing future possible mistakes to cause buffer overflows.
+
 - Major reorganization in the host resolve code (again). This time, I've
   modified the code to now always use a linked list of Curl_addrinfo structs
   to return resolved info in, no matter what resolver method or support that
