@@ -1543,6 +1543,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->protocol |= PROT_HTTP;
     conn->curl_do = Curl_http;
     conn->curl_done = Curl_http_done;
+    conn->curl_connect = Curl_http_connect;
   }
   else if (strequal(conn->protostr, "HTTPS")) {
 #ifdef USE_SSLEAY

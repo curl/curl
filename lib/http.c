@@ -398,19 +398,22 @@ CURLcode Curl_http_connect(struct connectdata *conn)
    * us to the host we want to talk to.  Only after the connect
    * has occured, can we start talking SSL
    */
-  if (conn->protocol & PROT_HTTPS) {
-    if (data->change.proxy) {
-      /* HTTPS through a proxy can only be done with a tunnel */
-      result = Curl_ConnectHTTPProxyTunnel(conn, conn->firstsocket,
-                                           conn->hostname, conn->remote_port);
-      if(CURLE_OK != result)
+
+  if(data->change.proxy &&
+     ((conn->protocol & PROT_HTTPS) || data->set.tunnel_thru_httpproxy)) {
+
+    /* either HTTPS over proxy, OR explicitly asked for a tunnel */
+    result = Curl_ConnectHTTPProxyTunnel(conn, conn->firstsocket,
+                                         conn->hostname, conn->remote_port);
+    if(CURLE_OK != result)
+      return result;
+    
+    if(conn->protocol & PROT_HTTPS) {
+      /* now, perform the SSL initialization for this socket */
+      result = Curl_SSLConnect(conn);
+      if(result)
         return result;
     }
-
-    /* now, perform the SSL initialization for this socket */
-    result = Curl_SSLConnect(conn);
-    if(result)
-      return result;
   }
 
   if(conn->bits.user_passwd && !data->state.this_is_a_follow) {
@@ -530,7 +533,9 @@ CURLcode Curl_http(struct connectdata *conn)
                              host, ppath,
                              conn->protocol&PROT_HTTPS?TRUE:FALSE);
   }
-  if ((data->change.proxy) && !(conn->protocol&PROT_HTTPS))  {
+  if (data->change.proxy &&
+      !data->set.tunnel_thru_httpproxy &&
+      !(conn->protocol&PROT_HTTPS))  {
     /* The path sent to the proxy is in fact the entire URL */
     ppath = data->change.url;
   }
