@@ -7,6 +7,12 @@ const char *HOSTHEADER = "Host: www.host.foo.com";
 const char *JAR = "log/jar506";
 #define THREADS 2
 
+void lock(CURL *handle, curl_lock_data data, curl_lock_access access,
+          void *useptr );
+void unlock(CURL *handle, curl_lock_data data, void *useptr );
+struct curl_slist *sethost(struct curl_slist *headers);
+void *fire(void *ptr);
+char *suburl(char *base, int i);
 
 /* struct containing data of a thread */
 struct Tdata {
