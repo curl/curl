@@ -619,7 +619,7 @@ EOHELP
         }
     }
     elsif($ARGV[0] =~ /^to$/i) {
-        $fromnum = $number;
+        $fromnum = $number+1;
     }
 } while(shift @ARGV);
 
