@@ -25,7 +25,9 @@ if test "x$SED" = "xsed-was-not-found-by-configure"; then
 fi
 
 dnl AR is used by libtool, and try the odd Solaris path too
-AC_PATH_PROG( AR, ar,
+dnl we use AC_CHECK_TOOL since this should make a library for the target
+dnl platform
+AC_CHECK_TOOL(AR, ar,
               ar-was-not-found-by-configure,
               $PATH:/usr/bin:/usr/local/bin:/usr/ccs/bin)
 AC_SUBST(AR)
