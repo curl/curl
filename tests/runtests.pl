@@ -1492,7 +1492,7 @@ sub startservers {
                 # we can't run ftps tests without stunnel
                 return "no stunnel";
             }
-            if(!!$ssl_version) {
+            if(!$ssl_version) {
                 # we can't run ftps tests if libcurl is SSL-less
                 return "curl lacks SSL support";
             }
@@ -1523,7 +1523,7 @@ sub startservers {
                 # we can't run ftps tests without stunnel
                 return "no stunnel";
             }
-            if(!!$ssl_version) {
+            if(!$ssl_version) {
                 # we can't run ftps tests if libcurl is SSL-less
                 return "curl lacks SSL support";
             }
