@@ -6,11 +6,25 @@
 
                                History of Changes
 
+
 Daniel (7 January 2002)
-- I worked with Georg Horn and comments from Götz Babin-Ebell and switch
-  curl's socket operation completely over to non-blocking for the entire
-  operation. We had to do this to make the SSL connection phase timeout
-  properly without signals. A little extra code to deal with this was added.
+- I made the 'bool' typedef use an "unsigned char". It makes it the same on
+  all platforms, no matter what the platform thinks the default format for
+  char is. This was noticed since we made a silly comparison involving such a
+  bool variable, and only one compiler/platform combination (on Debian Linux)
+  complained about it (that happened to have its char unsigned by default).
+
+- Bug report #495290 identified a cookie parsing problem that was corrected.
+  When a Set-Cookie: line is received without a trailing semicolon, libcurl
+  didn't read the last "name=value" pair of the line, leading to confusions...
+
+- Sterling committed his updated DNS cache code.
+
+- I worked with Georg Horn and comments from Götz Babin-Ebell and switched
+  curl's socket operations completely over to non-blocking for the entire
+  operation (previously we used non-blocking only for the connection phase).
+  We had to do this to make the SSL connection phase timeout properly without
+  the use of signals. A little extra code to deal with this was added.
 
 - T. Bharath pointed out a slightly obscure cookie engine flaw.
 
