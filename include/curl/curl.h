@@ -292,17 +292,18 @@ typedef enum {
   CURLE_SSL_ENGINE_NOTFOUND,     /* 53 - SSL crypto engine not found */
   CURLE_SSL_ENGINE_SETFAILED,    /* 54 - can not set SSL crypto engine as
                                     default */
-  CURLE_SEND_ERROR,              /* 55 - failed sending network data */
-  CURLE_RECV_ERROR,              /* 56 - failure in receiving network data */
-  CURLE_SHARE_IN_USE,            /* 57 - share is in use */
-  CURLE_SSL_CERTPROBLEM,         /* 58 - problem with the local certificate */
-  CURLE_SSL_CIPHER,              /* 59 - couldn't use specified cipher */
-  CURLE_SSL_CACERT,              /* 60 - problem with the CA cert (path?) */
-  CURLE_BAD_CONTENT_ENCODING,    /* 61 - Unrecognized transfer encoding */
-  CURLE_LDAP_INVALID_URL,        /* 62 - Invalid LDAP URL */
-  CURLE_FILESIZE_EXCEEDED,       /* 63 - Maximum file size exceeded */
-  CURLE_FTP_SSL_FAILED,          /* 64 - Requested FTP SSL level failed */
-  CURLE_SEND_FAIL_REWIND,        /* 65 - Sending the data requires a rewind
+  CURLE_SSL_ENGINE_INITFAILED,   /* 55 - failed to initialise ENGINE */
+  CURLE_SEND_ERROR,              /* 56 - failed sending network data */
+  CURLE_RECV_ERROR,              /* 57 - failure in receiving network data */
+  CURLE_SHARE_IN_USE,            /* 58 - share is in use */
+  CURLE_SSL_CERTPROBLEM,         /* 59 - problem with the local certificate */
+  CURLE_SSL_CIPHER,              /* 60 - couldn't use specified cipher */
+  CURLE_SSL_CACERT,              /* 61 - problem with the CA cert (path?) */
+  CURLE_BAD_CONTENT_ENCODING,    /* 62 - Unrecognized transfer encoding */
+  CURLE_LDAP_INVALID_URL,        /* 63 - Invalid LDAP URL */
+  CURLE_FILESIZE_EXCEEDED,       /* 64 - Maximum file size exceeded */
+  CURLE_FTP_SSL_FAILED,          /* 65 - Requested FTP SSL level failed */
+  CURLE_SEND_FAIL_REWIND,        /* 66 - Sending the data requires a rewind
                                     that failed */
   CURL_LAST /* never use! */
 } CURLcode;
@@ -1200,6 +1201,7 @@ CURL_EXTERN time_t curl_getdate(const char *p, const time_t *now);
 #define CURLINFO_STRING   0x100000
 #define CURLINFO_LONG     0x200000
 #define CURLINFO_DOUBLE   0x300000
+#define CURLINFO_SLIST    0x400000
 #define CURLINFO_MASK     0x0fffff
 #define CURLINFO_TYPEMASK 0xf00000
 
@@ -1231,9 +1233,10 @@ typedef enum {
   CURLINFO_PROXYAUTH_AVAIL  = CURLINFO_LONG   + 24,
   CURLINFO_OS_ERRNO         = CURLINFO_LONG   + 25,
   CURLINFO_NUM_CONNECTS     = CURLINFO_LONG   + 26,
+  CURLINFO_SSL_ENGINES      = CURLINFO_SLIST  + 27,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 27
+  CURLINFO_LASTONE          = 28
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
