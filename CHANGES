@@ -6,6 +6,16 @@
 
                                History of Changes
 
+Daniel (20 June 2001)
+- Mike Bytnar provided a fine report that proved that the --with-ssl option
+  for configure needed tweaking. It no longer searches the default directories
+  for OpenSSL libs or directories when a specified path is given.
+
+Daniel (19 June 2001)
+- When an FTP transfer is cut off during transfer, curl could present a truly
+  garbaged error message and in worst case dump core. Thanks to detailed
+  reports from Shawn Poulson we nailed this.
+
 Daniel (12 June 2001)
 - Salvador Dávila provided a fix for FTP range downloads.
 
