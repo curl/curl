@@ -6,9 +6,9 @@
 
 BUGS
 
-  Curl has grown substantially from that day, several years ago, when I
-  started fiddling with it. When I write this, there are 16500 lines of source
-  code, and by the time you read this it has probably grown even more.
+  Curl and libcurl have grown substantially since the beginning. At the time
+  of writing (mid March 2001), there are 23000 lines of source code, and by
+  the time you read this it has probably grown even more.
 
   Of course there are lots of bugs left. And lots of misfeatures.
 
@@ -21,10 +21,11 @@ BUGS
         http://sourceforge.net/bugs/?group_id=976
 
   When reporting a bug, you should include information that will help us
-  understand what's wrong, what's expected and how to repeat it. You therefore
-  need to supply your operating system's name and version number (uname -a
-  under a unix is fine), what version of curl you're using (curl -v is fine),
-  what URL you were working with and anything else you think matters.
+  understand what's wrong, what you expected to happen and how to repeat the
+  bad behaviour. You therefore need to supply your operating system's name and
+  version number (uname -a under a unix is fine), what version of curl you're
+  using (curl -V is fine), what URL you were working with and anything else
+  you think matters.
 
   If curl crashed, causing a core dump (in unix), there is hardly any use to
   send that huge file to anyone of us. Unless we have an exact same system
@@ -32,7 +33,7 @@ BUGS
   a stack trace and send that (much smaller) output to us instead!
 
   The address and how to subscribe to the mailing list is detailed in the
-  README.curl file.
+  MANUAL file.
 
   HOW TO GET A STACK TRACE with a common unix debugger
   ====================================================
