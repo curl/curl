@@ -3356,6 +3356,13 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_MAXFILESIZE_LARGE,
                            config->max_filesize);
 
+        if(4 == config->ip_version)
+          curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+        else if(6 == config->ip_version)
+          curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V6);
+        else
+          curl_easy_setopt(curl, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_WHATEVER);
+
         /* new in curl 7.11.0 */
         if(config->ftp_ssl)
           curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
