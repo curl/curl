@@ -166,7 +166,7 @@ If this option is used twice, the second will again disable crlf converting.
 that can emulate as if a user has filled in a HTML form and pressed the submit
 button. Note that the data is sent exactly as specified with no extra
 processing (with all newlines cut off).  The data is expected to be
-"url-encoded". This will cause curl to pass the data to the server using the
+\&"url-encoded". This will cause curl to pass the data to the server using the
 content-type application/x-www-form-urlencoded. Compare to -F. If more than
 one -d/--data option is used on the same command line, the data pieces
 specified will be merged together with a separating &-letter. Thus, using '-d
@@ -177,7 +177,7 @@ If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from stdin.  The
 contents of the file must already be url-encoded. Multiple files can also be
 specified. Posting data from a file named 'foobar' would thus be done with
-"--data @foobar".
+\&"--data @foobar".
 
 To post data purely binary, you should instead use the --data-binary option.
 
@@ -815,7 +815,7 @@ at port 1080.
 
 This option overrides existing environment variables that sets proxy to
 use. If there's an environment variable setting a proxy, you can set proxy to
-"" to override it.
+\&"" to override it.
 
 \fBNote\fP that all operations that are performed over a HTTP proxy will
 transparantly be converted to HTTP. It means that certain protocol specific
