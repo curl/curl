@@ -199,6 +199,7 @@ Curl_cookie_add(struct CookieInfo *c,
     /* This line is NOT a HTTP header style line, we do offer support for
        reading the odd netscape cookies-file format here */
     char *firstptr;
+    char *tok_buf;
     int fields;
 
     if(lineptr[0]=='#') {
@@ -214,7 +215,7 @@ Curl_cookie_add(struct CookieInfo *c,
     if(ptr)
       *ptr=0; /* clear it */
 
-    firstptr=strtok(lineptr, "\t"); /* first tokenize it on the TAB */
+    firstptr=strtok_r(lineptr, "\t", &tok_buf); /* first tokenize it on the TAB */
 
     /* Here's a quick check to eliminate normal HTTP-headers from this */
     if(!firstptr || strchr(firstptr, ':')) {
@@ -224,7 +225,7 @@ Curl_cookie_add(struct CookieInfo *c,
 
     /* Now loop through the fields and init the struct we already have
        allocated */
-    for(ptr=firstptr, fields=0; ptr; ptr=strtok(NULL, "\t"), fields++) {
+    for(ptr=firstptr, fields=0; ptr; ptr=strtok_r(NULL, "\t", &tok_buf), fields++) {
       switch(fields) {
       case 0:
         co->domain = strdup(ptr);
