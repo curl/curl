@@ -57,6 +57,7 @@
 
 #include <curl/curl.h>
 #include "urldata.h"
+#include "sendf.h"
 
 #include "progress.h"
 
@@ -97,7 +98,6 @@ char *max5data(double bytes, char *max5)
    New proposed interface, 9th of February 2000:
 
    pgrsStartNow() - sets start time
-   pgrsMode(type) - kind of display
    pgrsSetDownloadSize(x) - known expected download size
    pgrsSetUploadSize(x) - known expected upload size
    pgrsSetDownloadCounter() - amount of data currently downloaded
@@ -106,7 +106,7 @@ char *max5data(double bytes, char *max5)
    pgrsDone() - transfer complete
 
 */
-#if 1
+
 void pgrsDone(struct UrlData *data)
 {
   if(!(data->progress.flags & PGRS_HIDE)) {
@@ -114,16 +114,6 @@ void pgrsDone(struct UrlData *data)
     pgrsUpdate(data); /* the final (forced) update */
     fprintf(stderr, "\n");
   }
-}
-void pgrsMode(struct UrlData *data, int mode)
-{
-  /* mode should include a hidden mode as well */
-  if(data->bits.hide_progress || data->bits.mute)
-    data->progress.flags |= PGRS_HIDE; /* don't show anything */
-  else {
-    data->progress.mode = mode; /* store type */
-  }
-
 }
 
 void pgrsTime(struct UrlData *data, timerid timer)
@@ -190,6 +180,7 @@ void pgrsSetUploadSize(struct UrlData *data, double size)
 int pgrsUpdate(struct UrlData *data)
 {
   struct timeval now;
+  int result;
 
   char max5[6][6];
   double dlpercen=0;
@@ -222,7 +213,7 @@ int pgrsUpdate(struct UrlData *data)
          this is were lots of the calculations are being made that will be used
          even when not displayed! */
   else if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
-    if ( data->progress.mode == CURL_PROGRESS_STATS ) {
+    if (!data->progress.callback) {
       fprintf(data->err,
               "  %% Total    %% Received %% Xferd  Average Speed          Time             Curr.\n"
               "                                 Dload  Upload Total    Current  Left    Speed\n");
@@ -262,11 +253,14 @@ int pgrsUpdate(struct UrlData *data)
   if(data->progress.flags & PGRS_HIDE)
     return 0;
   else if(data->fprogress) {
-    return data->fprogress(data->progress_client,
-                           data->progress.size_dl,
-                           data->progress.downloaded,
-                           data->progress.size_ul,
-                           data->progress.uploaded);
+    result= data->fprogress(data->progress_client,
+                            data->progress.size_dl,
+                            data->progress.downloaded,
+                            data->progress.size_ul,
+                            data->progress.uploaded);
+    if(result)
+      failf(data, "Callback aborted");
+    return result;
   }
 
       /* Figure out the estimated time of arrival for the upload */
@@ -334,231 +328,5 @@ int pgrsUpdate(struct UrlData *data)
           max5data(data->progress.current_speed, max5[5]) /* current speed */
           );
 
-
-#if 0
-  case CURL_PROGRESS_BAR:
-    /* original progress bar code by Lars Aas */
-    if (progressmax == -1) {
-      int prevblock = prev / 1024;
-      int thisblock = point / 1024;
-      while ( thisblock > prevblock ) {
-        fprintf( data->err, "#" );
-        prevblock++;
-      }
-        prev = point;
-    }
-    else {
-      char line[256];
-      char outline[256];
-      char format[40];
-      float frac = (float) point / (float) progressmax;
-      float percent = frac * 100.0f;
-      int barwidth = width - 7;
-      int num = (int) (((float)barwidth) * frac);
-        int i = 0;
-        for ( i = 0; i < num; i++ ) {
-          line[i] = '#';
-        }
-        line[i] = '\0';
-        sprintf( format, "%%-%ds %%5.1f%%%%", barwidth );
-        sprintf( outline, format, line, percent );
-        fprintf( data->err, "\r%s", outline );
-    }
-    prev = point;
-    break;
-#endif
-
     return 0;
 }
-
-
-#endif
-
-#if 0
-/* --- start of (the former) progress routines --- */
-int progressmax=-1;
-
-static int prev = 0;
-static int width = 0;
-
-void ProgressInit(struct UrlData *data, int max/*, int options, int moremax*/)
-{
-#ifdef __EMX__
-  /* 20000318 mgs */
-  int scr_size [2];
-#endif
-  char *colp;
-
-  if(data->conf&(CONF_NOPROGRESS|CONF_MUTE))
-    return;
-
-  prev = 0;
-
-/* TODO: get terminal width through ansi escapes or something similar.
-         try to update width when xterm is resized... - 19990617 larsa */
-#ifndef __EMX__
-  /* 20000318 mgs
-   * OS/2 users most likely won't have this env var set, and besides that
-   * we're using our own way to determine screen width */
-  colp = curl_GetEnv("COLUMNS");
-  if (colp != NULL) {
-    width = atoi(colp);
-    free(colp);
-  }
-  else
-    width = 79;
-#else
-  /* 20000318 mgs
-   * We use this emx library call to get the screen width, and subtract
-   * one from what we got in order to avoid a problem with the cursor
-   * advancing to the next line if we print a string that is as long as
-   * the screen is wide. */
- 
-  _scrsize(scr_size);
-  width = scr_size[0] - 1;
-#endif
-
-
-  progressmax = max;
-  if(-1 == max)
-    return;
-  if(progressmax <= LEAST_SIZE_PROGRESS) {
-    progressmax = -1; /* disable */
-    return;
-  }
-
-  if ( data->progressmode == CURL_PROGRESS_STATS )
-    fprintf(data->err,
-            "  %%   Received    Total    Speed  Estimated   Time      Left   Curr.Speed\n");
-
-}
-
-void ProgressShow(struct UrlData *data,
-                  int point, struct timeval start, struct timeval now, bool force)
-{
-  switch ( data->progressmode ) {
-  case CURL_PROGRESS_STATS:
-    {
-      static long lastshow;
-      double percen;
-
-      double spent;
-      double speed;
-
-#define CURR_TIME 5
-
-      static int speeder[ CURR_TIME ];
-      static int speeder_c=0;
-
-      int nowindex = speeder_c% CURR_TIME;
-      int checkindex;
-      int count;
-
-      if(!force && (point != progressmax) && (lastshow == tvlong(now)))
-        return; /* never update this more than once a second if the end isn't 
-                   reached */
-
-      spent = tvdiff (now, start);
-      speed = point/(spent!=0.0?spent:1.0);
-      if(!speed)
-        speed=1;
-
-      /* point is where we are right now */
-      speeder[ nowindex ] = point;
-      speeder_c++; /* increase */
-      count = ((speeder_c>=CURR_TIME)?CURR_TIME:speeder_c) - 1;
-      checkindex = (speeder_c>=CURR_TIME)?speeder_c%CURR_TIME:0;
-
-      /* find out the average speed the last CURR_TIME seconds */
-      data->current_speed = (speeder[nowindex]-speeder[checkindex])/(count?count:1);
-
-#if 0
-      printf("NOW %d(%d) THEN %d(%d) DIFF %lf COUNT %d\n",
-	     speeder[nowindex], nowindex,
-	     speeder[checkindex], checkindex,
-	     data->current_speed, count);
-#endif
-
-      if(data->conf&(CONF_NOPROGRESS|CONF_MUTE))
-        return;
-
-      if(-1 != progressmax) {
-        char left[20];
-        char estim[20];
-        char timespent[20];
-        int estimate = progressmax/(int) speed;
-    
-        time2str(left,estimate-(int) spent); 
-        time2str(estim,estimate);
-        time2str(timespent,spent);
-
-        percen=(double)point/progressmax;
-        percen=percen*100;
-
-        fprintf(stderr, "\r%3d %10d %10d %6.0lf %s %s %s %6.0lf   ",
-                (int)percen, point, progressmax,
-                speed, estim, timespent, left, data->current_speed);
-      }
-      else
-        fprintf(data->err,
-                "\r%d bytes received in %.3lf seconds (%.0lf bytes/sec)",
-                point, spent, speed);
-
-      lastshow = now.tv_sec;
-      break;
-    }
-  case CURL_PROGRESS_BAR: /* 19990617 larsa */
-    {
-      if (point == prev) break;
-      if (progressmax == -1) {
-        int prevblock = prev / 1024;
-        int thisblock = point / 1024;
-        while ( thisblock > prevblock ) {
-            fprintf( data->err, "#" );
-            prevblock++;
-        }
-        prev = point;
-      } else {
-        char line[256];
-        char outline[256];
-        char format[40];
-        float frac = (float) point / (float) progressmax;
-        float percent = frac * 100.0f;
-        int barwidth = width - 7;
-        int num = (int) (((float)barwidth) * frac);
-        int i = 0;
-        for ( i = 0; i < num; i++ ) {
-            line[i] = '#';
-        }
-        line[i] = '\0';
-        sprintf( format, "%%-%ds %%5.1f%%%%", barwidth );
-        sprintf( outline, format, line, percent );
-        fprintf( data->err, "\r%s", outline );
-      }
-      prev = point;
-      break;
-    }
-  default: /* 19990617 larsa */
-    {
-      int prevblock = prev / 1024;
-      int thisblock = point / 1024;
-      if (prev == point) break;
-      while ( thisblock > prevblock ) {
-        fprintf( data->err, "#" );
-        prevblock++;
-      }
-      prev = point;
-      break;
-    }
-  }
-}
-
-void ProgressEnd(struct UrlData *data)
-{
-  if(data->conf&(CONF_NOPROGRESS|CONF_MUTE))
-    return;
-  fputs("\n", data->err);
-}
-
-/* --- end of progress routines --- */
-#endif
