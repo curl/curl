@@ -240,10 +240,10 @@ main () {
 struct hostent h;
 struct hostent *hp;
 char *name = "localhost";
-char buf[10];
+char buf[8192];
 int rc;
 int h_errno;
-rc = gethostbyname_r(name, &h, buf, 10, &hp, &h_errno);
+rc = gethostbyname_r(name, &h, buf, 8192, &hp, &h_errno);
 exit (rc != 0 ? 1 : 0); }],[
 	    AC_MSG_RESULT(yes)
 	    AC_DEFINE(HAVE_GETHOSTBYNAME_R_6)
