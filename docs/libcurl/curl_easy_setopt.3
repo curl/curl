@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "20 Jan 2005" "libcurl 7.12.4" "libcurl Manual"
+.TH curl_easy_setopt 3 "25 Jan 2005" "libcurl 7.13.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -763,6 +763,10 @@ Exactly like \fICURLOPT_QUOTE\fP, but for the source host.
 Exactly like \fICURLOPT_PREQUOTE\fP, but for the source host.
 .IP CURLOPT_SOURCE_POSTQUOTE
 Exactly like \fICURLOPT_POSTQUOTE\fP, but for the source host.
+.IP CURLOPT_FTP_ACCOUNT
+Pass a pointer to a zero-terminated string (or NULL to disable). When an FTP
+server asks for "account data" after user name and password has been provided,
+this data is sent off using the ACCT command. (Added in 7.13.0)
 .SH PROTOCOL OPTIONS
 .IP CURLOPT_TRANSFERTEXT
 A non-zero parameter tells the library to use ASCII mode for ftp transfers,

@@ -1396,6 +1396,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.source_postquote = va_arg(param, struct curl_slist *);
     break;
 
+  case CURLOPT_FTP_ACCOUNT:
+    data->set.ftp_account = va_arg(param, char *);
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_FAILED_INIT; /* correct this */

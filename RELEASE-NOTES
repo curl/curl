@@ -2,14 +2,15 @@ Curl and libcurl 7.13.0
 
  Public curl release number:               85
  Releases counted from the very beginning: 112
- Available command line options:           103
- Available curl_easy_setopt() options:     121
+ Available command line options:           104
+ Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        15
  Number of known libcurl bindings:         29
 
 This release includes the following changes:
 
+ o added --ftp-account and CURLOPT_FTP_ACCOUNT
  o added CURLOPT_SOURCE_URL and CURLOPT_SOURCE_QUOTE
  o obsoleted CURLOPT_SOURCE_HOST, CURLOPT_SOURCE_PATH, CURLOPT_SOURCE_PORT
    and CURLOPT_PASV_HOST
@@ -49,6 +50,6 @@ advice from friends like these:
  Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt,
  Hzhijun, Pavel Orehov, Bruce Mitchener, Cyrill Osterwalder, Dan Torop,
  Martijn Koster, Alex aka WindEagle, Cody Jones, Samuel Díaz García,
- Stephan Bergmann, Philippe Hameau
+ Stephan Bergmann, Philippe Hameau, Ian Ford
 
         Thanks! (and sorry if I forgot to mention someone)

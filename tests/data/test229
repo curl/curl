@@ -1,0 +1,32 @@
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP RETR with bad ACCT
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/229 --ftp-account "one count"
+</command>
+<file name="log/ftpserver.cmd">
+REPLY PASS 332 please provide account name
+REPLY ACCT 532 bluah!
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+ACCT one count
+</protocol>
+<errorcode>
+11
+</errorcode>
+</verify>

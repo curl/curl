@@ -621,6 +621,23 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
       infof(data, "We have successfully logged in\n");
     }
+    else if(ftpcode == 332) {
+      /* 332 Please provide account info */
+      if(data->set.ftp_account) {
+        FTPSENDF(conn, "ACCT %s", data->set.ftp_account);
+        result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+        if(!result && (ftpcode != 230)) {
+          failf(data, "ACCT rejected by server: %03d", ftpcode);
+          result = CURLE_FTP_WEIRD_PASS_REPLY; /* FIX */
+        }
+      }
+      else {
+        failf(data, "ACCT requested by none available");
+        result = CURLE_FTP_WEIRD_PASS_REPLY;
+      }
+      if(result)
+        return result;
+    }
     else {
       failf(data, "Odd return code after PASS");
       return CURLE_FTP_WEIRD_PASS_REPLY;

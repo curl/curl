@@ -882,6 +882,10 @@ typedef enum {
      commands with this */
   CINIT(SOURCE_QUOTE, OBJECTPOINT, 133),
 
+  /* zero terminated string for pass on to the FTP server when asked for
+     "account" info */
+  CINIT(FTP_ACCOUNT, OBJECTPOINT, 134),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

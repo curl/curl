@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel (25 January 2005)
+- Ian Ford asked about support for the FTP command ACCT, and I discovered it
+  is present in RFC959... so now (lib)curl supports it as well. --ftp-account
+  and CURLOPT_FTP_ACCOUNT set the account string. (The server may ask for an
+  account string after PASS have been sent away. The client responds
+  with "ACCT [account string]".) Added test case 228 and 229 to verify the
+  functionality. Updated the test FTP server to support ACCT somewhat.
+
 - David Shaw contributed a fairly complete and detailed autoconf test you can
   use to detect libcurl and setup variables for the protocols the installed
   libcurl supports: docs/libcurl/libcurl.m4

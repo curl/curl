@@ -1,0 +1,44 @@
+# Server-side
+<reply>
+<data>
+data
+    to
+      see
+that FTP
+works
+  so does it?
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP RETR with ACCT
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/228 --ftp-account "one count"
+</command>
+<file name="log/ftpserver.cmd">
+REPLY PASS 332 please provide account name
+REPLY ACCT 230 thank you
+</file>
+</client>
+
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+ACCT one count
+PWD
+EPSV
+TYPE I
+SIZE 228
+RETR 228
+QUIT
+</protocol>
+</verify>

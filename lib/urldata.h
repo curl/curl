@@ -862,6 +862,7 @@ struct UserDefined {
   char *cookiejar;      /* dump all cookies to this file */
   bool cookiesession;   /* new cookie session? */
   bool crlf;            /* convert crlf on ftp upload(?) */
+  char *ftp_account;    /* ftp account data */
   struct curl_slist *quote;     /* after connection is established */
   struct curl_slist *postquote; /* after the transfer */
   struct curl_slist *prequote; /* before the transfer, after type */

@@ -548,7 +548,7 @@ struct Configurable {
   struct curl_slist *tp_quote;
   struct curl_slist *tp_postquote;
   struct curl_slist *tp_prequote;
-
+  char *ftp_account; /* for ACCT */
 };
 
 /* global variable to hold info about libcurl */
@@ -1249,10 +1249,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$g", "retry",      TRUE},
     {"$h", "retry-delay", TRUE},
     {"$i", "retry-max-time", TRUE},
-
     {"$j", "3p-url", TRUE},
     {"$k", "3p-user", TRUE},
     {"$l", "3p-quote", TRUE},
+    {"$m", "ftp-account", TRUE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1631,6 +1631,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
         break;
         /* break */
+      case 'm': /* --ftp-account */
+        GetStr(&config->ftp_account, nextarg);
+        break;
       }
       break;
     case '#': /* added 19990617 larsa */
@@ -2830,6 +2833,8 @@ static void free_config_fields(struct Configurable *config)
     free(config->tp_url);
   if(config->tp_user)
     free(config->tp_user);
+  if(config->ftp_account)
+    free(config->ftp_account);
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
   curl_slist_free_all(config->prequote);
@@ -3655,12 +3660,13 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
         }
 
-        /* curl 7.12.4 */
+        /* curl 7.13.0 */
         curl_easy_setopt(curl, CURLOPT_SOURCE_URL, config->tp_url);
         curl_easy_setopt(curl, CURLOPT_SOURCE_USERPWD, config->tp_user);
         curl_easy_setopt(curl, CURLOPT_SOURCE_PREQUOTE, config->tp_prequote);
         curl_easy_setopt(curl, CURLOPT_SOURCE_POSTQUOTE, config->tp_postquote);
         curl_easy_setopt(curl, CURLOPT_SOURCE_QUOTE, config->tp_quote);
+        curl_easy_setopt(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
 
         retry_numretries = config->req_retry;
 
