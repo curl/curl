@@ -15,3 +15,8 @@ config.sub
 libtool
 ltmain.sh
 stamp-h1
+*.lo
+.libs
+depcomp
+libcares.la
+missing
