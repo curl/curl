@@ -45,7 +45,15 @@ while(<FILE>) {
     chomp $_;
     $line = $_;
 
-    if($line =~ /^MEM ([^ ]*):(\d*) (.*)/) {
+    if($line =~ /^LIMIT ([^ ]*):(\d*) (.*)/) {
+        # new memory limit test prefix
+        my $i = $3;
+        my ($source, $linenum) = ($1, $2);
+        if($trace && ($i =~ /([^ ]*) reached memlimit/)) {
+            print "LIMIT: $1 returned error at $source:$linenum\n";
+        }
+    }
+    elsif($line =~ /^MEM ([^ ]*):(\d*) (.*)/) {
         # generic match for the filename+linenumber
         $source = $1;
         $linenum = $2;
