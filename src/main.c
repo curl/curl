@@ -252,9 +252,7 @@ static void help(void)
        " -N/--no-buffer     Disables the buffering of the output stream\n"
        " -o/--output <file> Write output to <file> instead of stdout\n"
        " -O/--remote-name   Write output to a file named as the remote file\n"
-#if 0
-       " -p/--port <port>   Use port other than default for current protocol.\n"
-#endif
+       " -p/--proxytunnel   Perform non-HTTP services through a HTTP proxy\n"
        " -P/--ftpport <address> Use PORT with address instead of PASV when ftping (F)\n"
        " -q                 When used as the first parameter disables .curlrc\n"
        " -Q/--quote <cmd>   Send QUOTE command to FTP before file transfer (F)\n"
@@ -311,6 +309,7 @@ struct Configurable {
   char *proxyuserpwd;
   char *proxy;
   bool configread;
+  bool proxytunnel;
   long conf;
   char *url;
   char *cert;
@@ -473,9 +472,7 @@ static int getparameter(char *flag, /* f or -long-flag */
     {"N", "no-buffer",   FALSE},
     {"o", "output",      TRUE},
     {"O", "remote-name", FALSE},
-#if 0
-    {"p", "port",        TRUE},
-#endif
+    {"p", "proxytunnel", FALSE},
     {"P", "ftpport",     TRUE},
     {"q", "disable",     FALSE},
     {"Q", "quote",       TRUE},
@@ -789,15 +786,11 @@ static int getparameter(char *flag, /* f or -long-flag */
 	 */
       GetStr(&config->ftpport, nextarg);
       break;
-#if 0
     case 'p':
-      /* specified port */
-      fputs("You've used the -p option, it will be removed in a future version\n",
-	    stderr);
-      config->porttouse = atoi(nextarg);
-      config->conf |= CONF_PORT; /* changed port */
+      /* proxy tunnel for non-http protocols */
+      config->proxytunnel ^= TRUE;
       break;
-#endif
+
     case 'q': /* if used first, already taken care of, we do it like
 		 this so we don't cause an error! */
       break;
@@ -1501,6 +1494,7 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, config.customrequest);
     curl_easy_setopt(curl, CURLOPT_STDERR, config.errors);
     curl_easy_setopt(curl, CURLOPT_WRITEINFO, config.writeout);
+    curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config.proxytunnel);
 
     if((config.progressmode == CURL_PROGRESS_BAR) &&
        !(config.conf&(CONF_NOPROGRESS|CONF_MUTE))) {
