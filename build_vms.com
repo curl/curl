@@ -6,7 +6,7 @@ $	loc  = f$environment("PROCEDURE")
 $	def = f$parse("X.X;1",loc) - "X.X;1"
 $
 $	set def 'def'
-$	cc_qual = "/define=HAVE_CONFIG_H=1/include=(""../include/"",""../"",""../../openssl-0_9_6c/include/"")"
+$	cc_qual = "/define=HAVE_CONFIG_H=1/include=(""../include/"",""../"",""../../openssl-0_9_7/include/"")"
 $	if p1 .eqs. "LISTING" then cc_qual = cc_qual + "/LIST/MACHINE"
 $	if p1 .eqs. "DEBUG" then cc_qual = cc_qual + "/LIST/MACHINE/DEBUG"
 $	msg_qual = ""
@@ -14,8 +14,8 @@ $	call build "[.lib]" "*.c"
 $	call build "[.src]" "*.c"
 $	call build "[.src]" "*.msg"
 $	link /exe=curl.exe [.src]curl/lib/include=main,[.lib]curl/lib, -
-		[-.openssl-0_9_6c.axp.exe.ssl]libssl/lib, -
-		[-.openssl-0_9_6c.axp.exe.crypto]libcrypto/lib
+		[-.openssl-0_9_7.axp.exe.ssl]libssl/lib, -
+		[-.openssl-0_9_7.axp.exe.crypto]libcrypto/lib
 $
 $
 $	goto Common_Exit
