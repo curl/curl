@@ -493,7 +493,6 @@ static void Curl_setNoDelay(struct connectdata *conn,
 #else
   (void)conn;
   (void)sockfd;
-  (void)ip;
 #endif
 }
 
