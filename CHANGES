@@ -6,6 +6,13 @@
 
                                History of Changes
 
+Daniel (22 January 2001)
+- Björn Stenberg supplied a progress meter patch that makes it look better even
+  during slow starts. Previously it made some silly assumptions...
+
+- Added two FTP tests for -Q and -Q - stuff since it was being discussed on
+  the mailing list. Had to correct the ftpserver.pl too as it bugged slightly.
+
 Daniel (19 January 2001)
 - Made the Location: parsers deal with any-length URLs. Thus I removed the last
   code that restricts the length of URLs that curl supports.
