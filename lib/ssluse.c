@@ -863,7 +863,6 @@ static CURLcode verifyhost(struct connectdata *conn)
       if(data->set.ssl.verifyhost > 1) {
         failf(data,
               "SSL: unable to obtain common name from peer certificate");
-        X509_free(conn->ssl.server_cert);
         return CURLE_SSL_PEER_CERTIFICATE;
       }
       else {
@@ -880,7 +879,6 @@ static CURLcode verifyhost(struct connectdata *conn)
         if(data->set.ssl.verifyhost > 1) {
           failf(data, "SSL: certificate subject name '%s' does not match "
                 "target host name '%s'", peer_CN, conn->hostname);
-          X509_free(conn->ssl.server_cert);
           return CURLE_SSL_PEER_CERTIFICATE;
         }
         else
