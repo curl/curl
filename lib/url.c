@@ -2144,18 +2144,24 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(conn->bits.proxy_user_passwd) {
     char proxyuser[MAX_CURL_USER_LENGTH]="";
     char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";
+    passwdgiven = FALSE;
 
     if(*data->set.proxyuserpwd != ':') {
       /* the name is given, get user+password */
       sscanf(data->set.proxyuserpwd, "%127[^:]:%127[^\n]",
              proxyuser, proxypasswd);
-      }
-    else
+      if(strchr(data->set.proxyuserpwd, ':'))
+        /* a colon means the password was given, even if blank */
+        passwdgiven = TRUE;  
+    }
+    else {
       /* no name given, get the password only */
       sscanf(data->set.proxyuserpwd+1, "%127[^\n]", proxypasswd);
+      passwdgiven = TRUE;
+    }
 
     /* check for password, if no ask for one */
-    if( !proxypasswd[0] ) {
+    if( !proxypasswd[0] && !passwdgiven) {
       if(data->set.fpasswd( data->set.passwd_client,
                             "proxy password:",
                             proxypasswd,
@@ -2709,6 +2715,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   user[0] =0;   /* to make everything well-defined */
   passwd[0]=0;
+  passwdgiven = FALSE; /* none given so far */
 
   if (conn->protocol & (PROT_FTP|PROT_HTTP)) {
     /* This is a FTP or HTTP URL, we will now try to extract the possible
