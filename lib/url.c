@@ -2882,6 +2882,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     free(old_conn->user);
     free(old_conn->passwd);
+    free(old_conn->proxyuser);
+    free(old_conn->proxypasswd);
 
     free(old_conn);          /* we don't need this anymore */
 
