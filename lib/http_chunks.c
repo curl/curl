@@ -44,7 +44,7 @@
  * Chunk format (simplified):
  *
  * <HEX SIZE>[ chunk extension ] CRLF
- * <DATA>
+ * <DATA> CRLF
  *
  * Highlights from RFC2616 section 3.6 say:
 
