@@ -168,29 +168,25 @@ static CURLcode Curl_output_basic(struct connectdata *conn, bool proxy)
 static bool pickoneauth(struct auth *pick)
 {
   bool picked;
-  if(pick->avail) {
-    /* only deal with authentication we want */
-    long avail = pick->avail & pick->want;
-    picked = TRUE;
+  /* only deal with authentication we want */
+  long avail = pick->avail & pick->want;
+  picked = TRUE;
 
-    /* The order of these checks is highly relevant, as this will be the order
-       of preference in case of the existance of multiple accepted types. */
-    if(avail & CURLAUTH_GSSNEGOTIATE)
-      pick->picked = CURLAUTH_GSSNEGOTIATE;
-    else if(avail & CURLAUTH_DIGEST)
-      pick->picked = CURLAUTH_DIGEST;
-    else if(avail & CURLAUTH_NTLM)
-      pick->picked = CURLAUTH_NTLM;
-    else if(avail & CURLAUTH_BASIC)
-      pick->picked = CURLAUTH_BASIC;
-    else {
-      pick->picked = CURLAUTH_NONE; /* none was picked clear it */
-      picked = FALSE;
-    }
-    pick->avail = CURLAUTH_NONE; /* clear it here */
+  /* The order of these checks is highly relevant, as this will be the order
+     of preference in case of the existance of multiple accepted types. */
+  if(avail & CURLAUTH_GSSNEGOTIATE)
+    pick->picked = CURLAUTH_GSSNEGOTIATE;
+  else if(avail & CURLAUTH_DIGEST)
+    pick->picked = CURLAUTH_DIGEST;
+  else if(avail & CURLAUTH_NTLM)
+    pick->picked = CURLAUTH_NTLM;
+  else if(avail & CURLAUTH_BASIC)
+    pick->picked = CURLAUTH_BASIC;
+  else {
+    pick->picked = CURLAUTH_PICKNONE; /* we select to use nothing */
+    picked = FALSE;
   }
-  else
-    return FALSE;
+  pick->avail = CURLAUTH_NONE; /* clear it here */
 
   return picked;
 }
@@ -212,14 +208,16 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   if(data->state.authproblem)
     return data->set.http_fail_on_error?CURLE_HTTP_RETURNED_ERROR:CURLE_OK;
 
-  if(conn->bits.user_passwd) {
+  if(conn->bits.user_passwd &&
+     ((conn->keep.httpcode == 401) || conn->bits.authprobe)) {
     pickhost = pickoneauth(&data->state.authhost);
-    if(!pickhost && (conn->keep.httpcode == 401))
+    if(!pickhost)
       data->state.authproblem = TRUE;
   }
-  if(conn->bits.proxy_user_passwd) {
+  if(conn->bits.proxy_user_passwd &&
+     ((conn->keep.httpcode == 407) || conn->bits.authprobe) ) {
     pickproxy = pickoneauth(&data->state.authproxy);
-    if(!pickproxy && (conn->keep.httpcode == 407))
+    if(!pickproxy)
       data->state.authproblem = TRUE;
   }
 
@@ -283,21 +281,17 @@ Curl_http_output_auth(struct connectdata *conn,
     return CURLE_OK; /* no authentication with no user or password */
   }
 
-  if(data->state.authhost.want &&
-     !data->state.authhost.picked) {
+  if(data->state.authhost.want && !data->state.authhost.picked)
     /* The app has selected one or more methods, but none has been picked
        so far by a server round-trip. Then we set the picked one to the
        want one, and if this is one single bit it'll be used instantly. */
     data->state.authhost.picked = data->state.authhost.want;
-  }
 
-  if(data->state.authproxy.want &&
-     !data->state.authproxy.picked) {
-    /* The app has selected one or more methods, but none has been picked
-       so far by a server round-trip. Then we set the picked one to the
-       want one, and if this is one single bit it'll be used instantly. */
+  if(data->state.authproxy.want && !data->state.authproxy.picked)
+    /* The app has selected one or more methods, but none has been picked so
+       far by a proxy round-trip. Then we set the picked one to the want one,
+       and if this is one single bit it'll be used instantly. */
     data->state.authproxy.picked = data->state.authproxy.want;
-  }
 
   /* To prevent the user+password to get sent to other than the original
      host due to a location-follow, we do some weirdo checks here */
@@ -1313,7 +1307,11 @@ CURLcode Curl_http(struct connectdata *conn)
     httpreq = HTTPREQ_HEAD;
     request = (char *)"HEAD";
     conn->bits.no_body = TRUE;
+    conn->bits.authprobe = TRUE; /* this is a request done to probe for
+                                    authentication methods */
   }
+  else
+    conn->bits.authprobe = FALSE;
 
   Curl_safefree(conn->allocptr.ref);
   if(data->change.referer && !checkheaders(data, "Referer:"))

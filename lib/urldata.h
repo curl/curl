@@ -319,6 +319,9 @@ struct ConnectBits {
                          This is implicit when SSL-protocols are used through
                          proxies, but can also be enabled explicitly by
                          apps */
+  bool authprobe;     /* set TRUE when this transfer is done to probe for auth
+                         types, as when asking for "any" type when speaking
+                         HTTP */
 };
 
 struct hostname {
