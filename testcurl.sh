@@ -233,11 +233,6 @@ else
   echo "testcurl: the tests were successful!"  
 fi
 
-if [ $CVS -eq 1 ]; then
-  # store the cvs status for the next time
-  mv $newstat $oldstat
-fi
-
 # get out of dir
 cd ..
 
