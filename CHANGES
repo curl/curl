@@ -6,6 +6,21 @@
 
                                History of Changes
 
+Daniel (7 January 2002)
+- I worked with Georg Horn and comments from Götz Babin-Ebell and switch
+  curl's socket operation completely over to non-blocking for the entire
+  operation. We had to do this to make the SSL connection phase timeout
+  properly without signals. A little extra code to deal with this was added.
+
+- T. Bharath pointed out a slightly obscure cookie engine flaw.
+
+- Pete Su pointed out that libcurl didn't treat HTTP code 204 as it should.
+  204-replies never provides a response-body. This resulted in bad persistant
+  behavior when 204 was received.
+
+Daniel (5 January 2002)
+- SM updated the VC++ library Makefiles for the new source files.
+
 Daniel (4 January 2002)
 - I discovered that we wrongly used inet_ntoa() (instead of inet_ntoa_r() in
   two places in the source code). One happened with VERBOSE set on connects,
