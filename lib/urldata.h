@@ -165,6 +165,8 @@ struct HTTP {
   /* For FORM posting */
   struct Form form;
   struct Curl_chunker chunk;
+
+  char *postdata; /* for regular POSTs */
 };
 
 /****************************************************************************

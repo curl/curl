@@ -515,14 +515,14 @@ CURLcode Curl_http_done(struct connectdata *conn)
   data=conn->data;
   http=conn->proto.http;
 
+  /* set the proper values (possibly modified on POST) */
+  conn->fread = data->set.fread; /* restore */
+  conn->fread_in = data->set.in; /* restore */
+
   if(HTTPREQ_POST_FORM == data->set.httpreq) {
     conn->bytecount = http->readbytecount + http->writebytecount;
       
     Curl_formclean(http->sendit); /* Now free that whole lot */
-
-    /* set the proper values */
-    conn->fread = data->set.fread; /* restore */
-    conn->fread_in = data->set.in; /* restore */
   }
   else if(HTTPREQ_PUT == data->set.httpreq)
     conn->bytecount = http->readbytecount + http->writebytecount;
@@ -537,6 +537,32 @@ CURLcode Curl_http_done(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/* fread() emulation to provide POST data */
+static int POSTReader(char *buffer,
+                      size_t size,
+                      size_t nitems,
+                      void *userp)
+{
+  struct HTTP *http = (struct HTTP *)userp;
+  int fullsize = size * nitems;
+
+  if(0 == http->postsize)
+    /* nothing to return */
+    return 0;
+  
+  if(http->postsize <= fullsize) {
+    memcpy(buffer, http->postdata, http->postsize);
+    fullsize = http->postsize;
+    http->postsize = 0;
+    return fullsize;
+  }
+
+  memcpy(buffer, http->postdata, fullsize);
+  http->postdata += fullsize;
+  http->postsize -= fullsize;
+
+  return fullsize;
+}
 
 CURLcode Curl_http(struct connectdata *conn)
 {
@@ -1042,17 +1068,19 @@ CURLcode Curl_http(struct connectdata *conn)
 
       add_buffer(req_buffer, "\r\n", 2);
 
-      /* and here comes the actual data */
-      if(data->set.postfieldsize && data->set.postfields) {
-        add_buffer(req_buffer, data->set.postfields,
-                   data->set.postfieldsize);
-      }
-      else if(data->set.postfields)
-        add_bufferf(req_buffer,
-                    "%s",
-                    data->set.postfields );
+      /* and here we setup the pointers to the actual data */
+      if(data->set.postfields) {
+        if(data->set.postfieldsize)
+          http->postsize = data->set.postfieldsize;
+        else
+          http->postsize = strlen(data->set.postfields);
+        http->postdata = data->set.postfields;
 
-      /* issue the request */
+        conn->fread = (curl_read_callback)POSTReader;
+        conn->fread_in = (void *)http;
+      }
+
+      /* issue the request, headers-only */
       result = add_buffer_send(req_buffer, conn->firstsocket, conn,
                                &data->info.request_size);
 
@@ -1062,8 +1090,8 @@ CURLcode Curl_http(struct connectdata *conn)
         result =
           Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
                         &http->readbytecount,
-                        data->set.postfields?-1:conn->firstsocket,
-                        data->set.postfields?NULL:&http->writebytecount);
+                        conn->firstsocket,
+                        &http->writebytecount);
       break;
 
     default:
