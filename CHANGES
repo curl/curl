@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (26 Jun 2002)
+- Glen Nakamura solved a crash in the name resolving function for IP-only
+  addresses on Alpha Linux (at least).
+
 - T. Bharath corrected the high resolution timer introduced in 7.9.8.
 
 Daniel (22 Jun 2002)
