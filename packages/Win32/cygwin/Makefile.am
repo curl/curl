@@ -12,21 +12,18 @@ EXTRA_DIST = README
 #
 
 # Cygwin build number (default to "1")
-# NOTE: I tried using this to default CYGBUILD to 1, but couldn't make it work)
-#ifndef CYGBUILD
-#  CYGBUILD = 1
-#endif
+CYGBUILD ?= 1
 
-# temp dir for use while building the tarball (fully-qualified)
+# Cygwin tarball build dir (fully-qualified name, gets deleted when done)
 cygwintmp := $(CURDIR)/cygwinbin-builddir
 
 cygwinbin:
 	rm -rf $(cygwintmp)
-	@(echo Installing to the temporary build dir...)
 	$(MAKE) -C $(top_builddir) install prefix=$(cygwintmp)/usr
 	$(mkinstalldirs) $(cygwintmp)/usr/doc/Cygwin \
 	                 $(cygwintmp)/usr/doc/$(PACKAGE)-$(VERSION)
-	cp $(top_srcdir)/packages/Win32/cygwin/README \
+	cd $(top_srcdir); \
+	  cp packages/Win32/cygwin/README \
 	  $(cygwintmp)/usr/doc/Cygwin/$(PACKAGE)-$(VERSION)-$(CYGBUILD).README
 	cd $(top_srcdir) ; \
 	  cp CHANGES LEGAL MPL-1.1.txt README docs/FAQ docs/FEATURES docs/TODO \

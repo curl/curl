@@ -1,19 +1,20 @@
-Curl is a tool for transferring files with URL syntax, supporting
- FTP, FTPS, HTTP, HTTPS, GOPHER, TELNET, DICT, FILE and LDAP. 
- Curl supports HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading, kerberos,
- HTTP form based upload, proxies, cookies, user+password authentication, 
- file transfer resume, http proxy tunneling and a busload of other useful tricks.
+Curl is a tool for transferring files with URL syntax, supporting FTP, FTPS,
+ HTTP, HTTPS, GOPHER, TELNET, DICT, FILE and LDAP. Curl supports HTTPS 
+ certificates, HTTP POST, HTTP PUT, FTP uploading, kerberos, HTTP form based
+ upload, proxies, cookies, user+password authentication, file transfer resume,
+ http proxy tunneling and a busload of other useful tricks.
  See /usr/doc/curl-<version>/FEATURES for more info.
 
 cURL (as of 7.9.1) builds 100% cleanly OOTB.
 
 The Cygwin specific source files (README and a Makefile for
  building binary tarballs) are not in a CYGWIN-PATCHES directory.
- They are at: <srctop>/packages/Win32/cygwin/
+They are at: <srctop>/packages/Win32/cygwin/
 
 
 Direct Dependencies:
-  OpenSSL 0.9.6b (cURL can be built without SSL support: configure --without-ssl)
+  OpenSSL 0.9.6b 
+  (*) cURL can be built without SSL support:  ./configure --without-ssl
 
 
 Canonical Homepage:
@@ -41,16 +42,16 @@ Build Instructions:
 
 
 Packaging Instructions:
-  To create a new binary tarball for cygwin's setup.exe, you must first do a clean
-  build (see above). The 'make install' step is optional of course. Then do:
+  To create a new binary tarball for cygwin's setup.exe, the first step is to
+  do a clean build (./configure and make). The 'make install' step is optional.
+  Then do:
 
   $ cd curl-<ver>-X
-  $ CYGBUILD=X make cygwinbin
+  $ make cygwinbin CYGBUILD=X 
 
   where "X" is the cygwin release number (e.g. the "-1" in curl-7.9.3-1).
-  I had some difficulty figuring out how to default CYGBUILD to "1", this may
-  get fixed in a future release.
-
+  If you leave off "CYGBUILD=X", X defaults to 1.
+  
   Assuming everything worked properly, you'll find your cygwin
   binary tarball in the curl-<ver>-X/packages/Win32/cygwin/ directory.
 
