@@ -121,7 +121,7 @@ free_cookiemess(struct Cookie *co)
 struct Cookie *
 Curl_cookie_add(struct CookieInfo *c,
                 bool httpheader, /* TRUE if HTTP header-style line */
-                char *lineptr,   /* first non-space of the line */
+                char *lineptr,   /* first character of the line */
                 char *domain)    /* default domain */
 {
   struct Cookie *clist;
@@ -146,6 +146,10 @@ Curl_cookie_add(struct CookieInfo *c,
     /* This line was read off a HTTP-header */
     char *sep;
     semiptr=strchr(lineptr, ';'); /* first, find a semicolon */
+
+    while(*lineptr && isspace((int)*lineptr))
+      lineptr++;
+
     ptr = lineptr;
     do {
       /* we have a <what>=<this> pair or a 'secure' word here */
