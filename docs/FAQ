@@ -1,4 +1,4 @@
-Updated: March 13, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: March 22, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -79,7 +79,8 @@ FAQ
   Curl supports a range of common internet protocols, currently including
   HTTP, HTTPS, FTP, GOPHER, LDAP, DICT, TELNET and FILE.
 
-  We spell it cURL or just curl.
+  We spell it cURL or just curl. We pronounce it with an initial k sound:
+  [kurl].
 
   1.2 What is libcurl?
 
