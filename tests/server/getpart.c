@@ -19,12 +19,16 @@ char *appendstring(char *string, /* original string */
                    int *stringlen, int *stralloc)
 {
   int len = strlen(buffer);
+  int needed_len = len + *stringlen;
 
-  if((len + *stringlen) >= *stralloc) {
-    char *newptr= realloc(string, *stralloc*2);
+  if(needed_len >= *stralloc) {
+    char *newptr;
+    long newsize = needed_len*2; /* get twice the needed size */
+
+    newptr = realloc(string, newsize);
     if(newptr) {
       string = newptr;
-      *stralloc *= 2;
+      *stralloc = newsize;
     }
     else
       return NULL;
@@ -56,6 +60,10 @@ char *spitout(FILE *stream, char *main, char *sub, int *size)
   } state = STATE_OUTSIDE;
 
   string = (char *)malloc(stralloc);
+  if(!string)
+    return NULL;
+
+  string[0] = 0; /* zero first byte in case of no data */
   
   while(fgets(buffer, sizeof(buffer), stream)) {
 
