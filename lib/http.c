@@ -1053,16 +1053,17 @@ CURLcode Curl_http(struct connectdata *conn)
   if(result)
     return result;
 
-  if((data->change.referer) && !checkheaders(data, "Referer:")) {
-    if(conn->allocptr.ref)
-      free(conn->allocptr.ref);
+  Curl_safefree(conn->allocptr.ref);
+  if(data->change.referer && !checkheaders(data, "Referer:"))
     conn->allocptr.ref = aprintf("Referer: %s\015\012", data->change.referer);
-  }
-  if(data->set.cookie && !checkheaders(data, "Cookie:")) {
-    if(conn->allocptr.cookie)
-      free(conn->allocptr.cookie);
+  else
+    conn->allocptr.ref = NULL;
+
+  Curl_safefree(conn->allocptr.cookie);
+  if(data->set.cookie && !checkheaders(data, "Cookie:"))
     conn->allocptr.cookie = aprintf("Cookie: %s\015\012", data->set.cookie);
-  }
+  else
+    conn->allocptr.cookie = NULL;
 
   if(!conn->bits.upload_chunky && (data->set.httpreq != HTTPREQ_GET)) {
     /* not a chunky transfer but data is to be sent */
