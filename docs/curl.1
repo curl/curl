@@ -165,9 +165,9 @@ that can emulate as if a user has filled in a HTML form and pressed the submit
 button. Note that the data is sent exactly as specified with no extra
 processing (with all newlines cut off).  The data is expected to be
 \&"url-encoded". This will cause curl to pass the data to the server using the
-content-type application/x-www-form-urlencoded. Compare to -F. If more than
-one \fI-d/--data\fP option is used on the same command line, the data pieces
-specified will be merged together with a separating &-letter. Thus, using '-d
+content-type application/x-www-form-urlencoded. Compare to -F. If this option
+is used more than once on the same command line, the data pieces specified
+will be merged together with a separating &-letter. Thus, using '-d
 name=daniel -d skill=lousy' would generate a post chunk that looks like
 \&'name=daniel&skill=lousy'.
 
