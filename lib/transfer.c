@@ -805,10 +805,17 @@ CURLcode Curl_perform(CURL *curl)
           char *pathsep;
           char *newest;
 
+          /* we must make our own copy of the URL to play with, as it may
+             point to read-only data */
+          char *url_clone=strdup(data->url);
+
+          if(!url_clone)
+            return CURLE_OUT_OF_MEMORY;
+
           /* protsep points to the start of the host name */
-          protsep=strstr(data->url, "//");
+          protsep=strstr(url_clone, "//");
           if(!protsep)
-            protsep=data->url;
+            protsep=url_clone;
           else {
             port=FALSE; /* we got a full URL and thus we should not obey the
                            port number that might have been set by the user
@@ -838,15 +845,16 @@ CURLcode Curl_perform(CURL *curl)
               *pathsep=0;
           }
 
-          newest=(char *)malloc( strlen(data->url) +
+          newest=(char *)malloc( strlen(url_clone) +
                                  1 + /* possible slash */
                                  strlen(conn->newurl) + 1/* zero byte */);
 
           if(!newest)
             return CURLE_OUT_OF_MEMORY;
-          sprintf(newest, "%s%s%s", data->url, ('/' == conn->newurl[0])?"":"/",
+          sprintf(newest, "%s%s%s", url_clone, ('/' == conn->newurl[0])?"":"/",
                   conn->newurl);
           free(conn->newurl);
+          free(url_clone);
           conn->newurl = newest;
         }
         else {
