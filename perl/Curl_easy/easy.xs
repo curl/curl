@@ -29,8 +29,8 @@ static char *errbufvarname = NULL;
 
 static SV *read_callback = NULL, *write_callback = NULL,
           *progress_callback = NULL, *passwd_callback = NULL,
-	      *header_callback = NULL; 
-		  /* *closepolicy_callback = NULL; */
+	  *header_callback = NULL; 
+	  /* *closepolicy_callback = NULL; */
 
 
 /* For storing the content */
@@ -87,58 +87,58 @@ fwrite_wrapper (const void *ptr,
 		void *stream,
 		void *call_function)
 {
-    dSP ;
-    int count,status;
+    dSP;
+    int count, status;
     SV *sv;
 
     if (call_function) {
-        /* then we are doing a callback to perl */
+	/* then we are doing a callback to perl */
 
-        ENTER ;
-        SAVETMPS ;
-	 
-        PUSHMARK(SP) ;
+	ENTER;
+	SAVETMPS;
 
-        if (stream == stdout) {
-            sv = newSViv(0); /* FIXME: should cast stdout to GLOB somehow? */
-        } else { /* its already an SV */
-            sv = stream;
-        }
-	
-        if (ptr != NULL) {
-            XPUSHs(sv_2mortal(newSVpvn(ptr, size * nmemb))); 
+	PUSHMARK(SP);
+
+	if (stream == stdout) {
+	    sv = newSViv(0);	/* FIXME: should cast stdout to GLOB somehow? */
+	} else {		/* its already an SV */
+	    sv = stream;
+	}
+
+	if (ptr != NULL) {
+	    XPUSHs(sv_2mortal(newSVpvn(ptr, size * nmemb)));
 	} else {
-            XPUSHs(sv_2mortal(newSVpv("",0)));
-        }
-        XPUSHs(sv_2mortal(newSVsv(sv)));  /* CURLOPT_FILE SV* */
-        PUTBACK ;
+	    XPUSHs(sv_2mortal(newSVpv("", 0)));
+	}
+	XPUSHs(sv_2mortal(newSVsv(sv)));	/* CURLOPT_FILE SV* */
+	PUTBACK;
 
-        count = call_sv((SV *)call_function, G_SCALAR);
-	 
-        SPAGAIN;
-        if (count != 1)
-            croak("Big trouble, perl_call_sv(write_callback) didn't return status\n");
+	count = perl_call_sv((SV *) call_function, G_SCALAR);
 
-		status = POPi;
+	SPAGAIN;
+	if (count != 1)
+	    croak("Big trouble, perl_call_sv(write_callback) didn't return status\n");
 
-        PUTBACK ;
-	 
-        FREETMPS ;
-        LEAVE ;
-        return status;
+	status = POPi;
 
-     } else {
-            /* default to a normal 'fwrite' */
-            /* stream could be a FILE * or an SV * */
-            FILE *f;
-	
-            if (stream == stdout) { /* the only possible FILE ? Think so*/
-                f = stream;
-            } else { /* its a GLOB */
-                f = IoIFP(sv_2io(stream)); /* may barf if not a GLOB */
-            }
+	PUTBACK;
 
-            return fwrite(ptr,size,nmemb,f);
+	FREETMPS;
+	LEAVE;
+	return status;
+
+    } else {
+	/* default to a normal 'fwrite' */
+	/* stream could be a FILE * or an SV * */
+	FILE *f;
+
+	if (stream == stdout) {	/* the only possible FILE ? Think so */
+	    f = stream;
+	} else {		/* its a GLOB */
+	    f = IoIFP(sv_2io(stream));	/* may barf if not a GLOB */
+	}
+
+	return fwrite(ptr, size, nmemb, f);
     }
 }
 
@@ -192,7 +192,7 @@ read_callback_func( void *ptr, size_t size,
         XPUSHs(sv_2mortal(newSVsv(sv))); /* CURLOPT_INFILE SV*  */
         PUTBACK ;
 
-        count = call_sv(read_callback, G_SCALAR);
+        count = perl_call_sv(read_callback, G_SCALAR);
 	 
         SPAGAIN;
         if (count != 1)
@@ -209,7 +209,6 @@ read_callback_func( void *ptr, size_t size,
         FREETMPS ;
         LEAVE ;
         return (size_t) (mylen/size);
-
     } else {
        /* default to a normal 'fread' */
        /* stream could be a FILE * or an SV * */
@@ -284,7 +283,7 @@ static int passwd_callback_func(void *clientp, char *prompt, char *buffer,
     count = perl_call_sv(passwd_callback, G_ARRAY);
     SPAGAIN;
     if (count != 2)
-	    croak("Big trouble, perl_call_sv(passwd_callback) didn't return status + data\n");
+	croak("Big trouble, perl_call_sv(passwd_callback) didn't return status + data\n");
 
     sv = POPs;
     count = POPi;
@@ -294,7 +293,7 @@ static int passwd_callback_func(void *clientp, char *prompt, char *buffer,
     /* only allowed to return the number of bytes asked for */
     mylen = len<(buflen-1) ? len : (buflen-1);
     memcpy(buffer,p,mylen);
-	buffer[buflen]=0; /* ensure C string terminates */
+    buffer[buflen]=0; /* ensure C string terminates */
 
     PUTBACK;
     FREETMPS;
@@ -318,12 +317,11 @@ closepolicy_callback_func(void *clientp)
    PUSHMARK(SP);
    PUTBACK;
 
-   argc = call_sv(closepolicy_callback, G_SCALAR);
+   argc = perl_call_sv(closepolicy_callback, G_SCALAR);
    SPAGAIN;
 
    if (argc != 1) {
-      croak
-         ("Unexpected number of arguments returned from closefunction callback\n");
+      croak("Unexpected number of arguments returned from closefunction callback\n");
    }
    pl_status = POPs;
    status = SvTRUE(pl_status) ? 0 : 1;
@@ -560,22 +558,18 @@ int option
 SV * value
 CODE:
     if (option < CURLOPTTYPE_OBJECTPOINT) {
-
 	/* This is an option specifying an integer value: */
 	RETVAL = curl_easy_setopt(curl, option, (long)SvIV(value));
-
     } else if (option == CURLOPT_FILE || option == CURLOPT_INFILE ||
 	    option == CURLOPT_WRITEHEADER || option == CURLOPT_PROGRESSDATA ||
-        option == CURLOPT_PASSWDDATA) {
+	    option == CURLOPT_PASSWDDATA) {
 	/* This is an option specifying an SV * value: */
 	RETVAL = curl_easy_setopt(curl, option, newSVsv(ST(2)));
-
     } else if (option == CURLOPT_ERRORBUFFER) {
 	/* Pass in variable name for storing error messages... */
 	RETVAL = curl_easy_setopt(curl, option, errbuf);
 	if (errbufvarname) free(errbufvarname);
 	errbufvarname = strdup((char *)SvPV(value, PL_na));
-
     } else if (option == CURLOPT_WRITEFUNCTION || option ==
 	    CURLOPT_READFUNCTION || option == CURLOPT_PROGRESSFUNCTION ||
 	    option == CURLOPT_PASSWDFUNCTION || option == CURLOPT_HEADERFUNCTION) {
@@ -608,7 +602,6 @@ CODE:
         */
 	}
 	RETVAL = -1;
-
     } else if (option == CURLOPT_HTTPHEADER || option == CURLOPT_QUOTE ||
 	    option == CURLOPT_POSTQUOTE) {
 	/* This is an option specifying a list of curl_slist structs: */

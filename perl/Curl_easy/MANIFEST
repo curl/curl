@@ -1,6 +1,7 @@
 Changes
 MANIFEST
 Makefile.PL
+README
 easy.pm
 easy.xs
 test.pl

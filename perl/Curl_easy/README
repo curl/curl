@@ -12,16 +12,16 @@ installed. You then may install this module via the usual way:
     make install
 
 The module provides the same functionality as libcurl provides to C programs,
-please refer to the documentation of libcurl.
+please refer to the documentation of libcurl. Some examples may be found in
+test.pl.
 
-A short example how to use the module may be found in test.pl.
+This software is distributed AS IS, WITHOUT WARRANTY OF ANY KIND, either
+express or implied. Send praise, patches, money, beer and pizza to the author.
+Send complaints to /dev/null. ;-)
 
-This Software is distributed AS IS, WITHOUT WARRANTY OF ANY KIND,
-either express or implied. Send praise, patches, money, beer and
-pizza to the author. Send complaints to /dev/null. ;-)
+The author of this software is Georg Horn <horn@koblenz-net.de>
+Parts of the callback support have been added by Cris Bailiff
+<c.bailiff@awayweb.com> and Forrest Cahoon <forrest.cahoon@merrillcorp.com>
 
-The author of this module is Georg Horn <horn@koblenz-net.de>
-
-The latest version of this module can be dowloaded from
-http://koblenz-net.de/~horn/export/
+The latest version can be downloaded from http://koblenz-net.de/~horn/export/
 
