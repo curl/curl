@@ -743,7 +743,6 @@ cert_hostcheck(const char *certname, const char *hostname)
   }
   return 0;
 }
-#endif
 
 static CURLcode verifyhost(struct connectdata *conn)
 {
@@ -886,6 +885,7 @@ static CURLcode verifyhost(struct connectdata *conn)
 
   return CURLE_OK;
 }
+#endif
 
 /* ====================================================== */
 CURLcode
