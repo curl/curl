@@ -1,4 +1,9 @@
 
+* February 2, 2004:
+
+- ares_strerror() has one argument less. This is the first official
+  modification of the existing provided ares API.
+
 * January 29, 2004:
 
 - Dirk Manske fixed how the socket is set non-blocking.
