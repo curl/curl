@@ -133,13 +133,25 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
   struct timeval dt;
   struct SessionHandle *data = conn->data;
   int sock = conn->sock[SECONDARYSOCKET];
+  struct timeval now = Curl_tvnow();
+  int timespent = Curl_tvdiff(Curl_tvnow(), now)/1000;
+  int timeout = data->set.connecttimeout?data->set.connecttimeout:
+    (data->set.timeout?data->set.timeout: 0);
   
   FD_ZERO(&rdset);
 
   FD_SET(sock, &rdset);
+  
+  if(timeout) {
+    timeout -= timespent;
+    if(timeout<=0) {
+      failf(data, "Timed out before server could connect to us");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+  }
 
-  /* we give the server 10 seconds to connect to us */
-  dt.tv_sec = 10;
+  /* we give the server 60 seconds to connect to us, or a custom timeout */
+  dt.tv_sec = timeout?timeout:60;
   dt.tv_usec = 0;
 
   switch (select(sock+1, &rdset, NULL, NULL, &dt)) {
@@ -1119,18 +1131,25 @@ CURLcode ftp_use_port(struct connectdata *conn)
 
   const char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
   char **modep;
+  int rc;
 
   /*
    * we should use Curl_if2ip?  given pickiness of recent ftpd,
    * I believe we should use the same address as the control connection.
    */
   sslen = sizeof(ss);
-  if (getsockname(conn->sock[FIRSTSOCKET], (struct sockaddr *)&ss, &sslen) < 0)
+  rc = getsockname(conn->sock[FIRSTSOCKET], (struct sockaddr *)&ss, &sslen);
+  if(rc < 0) {
+    failf(data, "getsockname() returned %d\n", rc);
     return CURLE_FTP_PORT_FAILED;
+  }
   
-  if (getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL, 0,
-                  niflags))
+  rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL, 0,
+                   niflags);
+  if(rc) {
+    failf(data, "getnameinfo() returned %d\n", rc);
     return CURLE_FTP_PORT_FAILED;
+  }
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = sa->sa_family;
@@ -1140,8 +1159,11 @@ CURLcode ftp_use_port(struct connectdata *conn)
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
 
-  if (getaddrinfo(hbuf, (char *)"0", &hints, &res))
+  rc = getaddrinfo(hbuf, NULL, &hints, &res);
+  if(rc) {
+    failf(data, "getaddrinfo() returned %d\n", rc);
     return CURLE_FTP_PORT_FAILED;
+  }
   
   portsock = -1;
   for (ai = res; ai; ai = ai->ai_next) {
