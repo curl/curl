@@ -50,12 +50,19 @@
 
 #if ! defined(WIN32) && ! defined(__BEOS__)
 
+#ifdef NEED_REENTRANT
+#define _REENTRANT
+#endif
+
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#include <netinet/in.h>
 
 #ifdef HAVE_SYS_TIME_H
 /* This must be before net/if.h for AIX 3.2 to enjoy life */
@@ -75,7 +82,7 @@
 #include <sys/sockio.h>
 #endif
 
-#ifdef HAVE_INET_NTOA_R
+#ifndef HAVE_INET_NTOA_R_DECL
 #include "inet_ntoa_r.h"
 #endif
 

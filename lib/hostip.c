@@ -40,8 +40,11 @@
 
 #include <string.h>
 #include <malloc.h>
+#include <errno.h>
 
 #include "setup.h"
+
+#define _REENTRANT
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>
@@ -52,8 +55,12 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -62,9 +69,7 @@
 #include "urldata.h"
 #include "sendf.h"
 
-#define _REENTRANT
-
-#ifdef HAVE_INET_NTOA_R
+#ifndef HAVE_INET_NTOA_R_DECL
 #include "inet_ntoa_r.h"
 #endif
 
@@ -103,6 +108,7 @@ struct hostent *GetHost(struct UrlData *data,
 {
   struct hostent *h = NULL;
   unsigned long in;
+  int ret;
 
   if ( (in=inet_addr(hostname)) != INADDR_NONE ) {
     struct in_addr *addrentry;
@@ -145,13 +151,17 @@ struct hostent *GetHost(struct UrlData *data,
 
     /* August 4th, 2000. I don't have any such system around so I write this
        blindly in hope it might work or that someone else will help me fix
-       this. */
+       this. August 22nd, 2000: Albert Chin-A-Young brought an updated version
+       that should work! */
 
-    h = gethostbyname_r(hostname,
+    ret = gethostbyname_r(hostname,
                         (struct hostent *)buf,
                         (struct hostent_data *)(buf + sizeof(struct hostent)));
+
+    /* result expected in h */
+    h = (struct hostent*)buf;
     h_errnop= errno; /* we don't deal with this, but set it anyway */
-    if(NULL == h)
+    if(ret)
 #endif
       {
       infof(data, "gethostbyname_r(2) failed for %s\n", hostname);

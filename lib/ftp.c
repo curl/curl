@@ -60,20 +60,20 @@
 #include <sys/socket.h>
 #endif
 #include <sys/types.h>
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #include <sys/utsname.h>
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
 #endif
 
 #if defined(WIN32) && defined(__GNUC__) || defined(__MINGW32__)
 #include <errno.h>
-#endif
-
-#ifdef HAVE_INET_NTOA_R
-#include "inet_ntoa_r.h"
 #endif
 
 #include <curl/curl.h>
