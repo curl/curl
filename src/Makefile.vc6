@@ -72,8 +72,6 @@ CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
 LFLAGS = $(LFLAGS) $(WINDOWS_SDK_PATH)\lib\secur32.lib
 !ENDIF
 
-CFLAGS = $(CFLAGS) /DCURLDEBUG
-
 RELEASE_OBJS= \
 	hugehelpr.obj \
 	writeoutr.obj \

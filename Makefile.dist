@@ -174,6 +174,12 @@ vc-zlib-dll:
 	cd ..\src
 	nmake /f Makefile.vc6 cfg=release-zlib-dll
 
+vc-sspi:
+	cd lib
+	nmake /f Makefile.vc6 cfg=release WINDOWS_SSPI=1
+	cd ..\src
+	nmake /f Makefile.vc6 cfg=release WINDOWS_SSPI=1
+
 djgpp:
 	$(MAKE) -C lib -f Makefile.dj
 	$(MAKE) -C src -f Makefile.dj
