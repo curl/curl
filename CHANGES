@@ -6,6 +6,29 @@
 
                                History of Changes
 
+Daniel (9 February 2001)
+- Frank Reid and Cain Hopwood provided information and research around a
+  HTTPS PUT problem we seem to have.
+
+Daniel (8 February 2001)
+- An interesting discussion is how to specify an empty password without having
+  curl ask for it interactively? The current implmentation takes an empty
+  password as a request for a password prompt. However, I still want to
+  support a blank user field. Thus, today if you enter "-u :" (without user
+  and password) curl will prompt for the password. Tricky. How would you
+  specify you want the prompt otherwise?
+
+- Made the netrc parse result possible to use for other protocols than FTP and
+  HTTP (such as the upcoming TELNET fixes).
+
+- The previously mentioned "MSVC++ problems" turned out to be a non-issue.
+
+- Added a HTTP file upload code example in the docs/examples/ section on
+  request.
+
+- Adjusted the FTP response fix slightly.
+
+Version 7.6.1-pre3
 
 Daniel (7 February 2001)
 - SM found a flaw in the response reading function for FTP that could make
