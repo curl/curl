@@ -1,0 +1,76 @@
+#! /bin/sh
+#
+# The idea to this kind of setup info script was stolen from numerous
+# other packages, such as neon, libxml and gnome.
+#
+# $Id$
+#
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+includedir=@includedir@
+
+usage()
+{
+    cat <<EOF
+Usage: curl-config [OPTION]
+
+Available values for OPTION are:
+
+  --prefix		curl install prefix
+  --libs		library linking information
+  --cflags		pre-processor and compiler flags
+  --help		display this help and exit
+  --version		output version information
+EOF
+
+    exit $1
+}
+
+if test $# -eq 0; then
+    usage 1
+fi
+
+cflags=false
+libs=false
+
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+    --prefix=*)
+	prefix=$optarg
+	;;
+
+    --prefix)
+	echo $prefix
+	;;
+
+    --version)
+	echo curl @VERSION@
+	exit 0
+	;;
+
+    --help)
+	usage 0
+	;;
+
+    --cflags)
+       	echo @CPPFLAGS@ @CFLAGS@
+       	;;
+
+    --libs)
+       	echo @LDFLAGS@ @LIBS@
+       	;;
+
+    *)
+	usage
+	exit 1
+	;;
+    esac
+    shift
+done
+
+exit 0
