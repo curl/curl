@@ -204,6 +204,7 @@ static curl_version_info_data version_info = {
   NULL, /* zlib_version */
   protocols,
   NULL, /* c-ares version */
+  0,    /* c-ares version numerical */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
