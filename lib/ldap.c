@@ -93,7 +93,11 @@ static void DynaOpen(void)
 #ifdef RTLD_LAZY_GLOBAL /* It turns out some systems use this: */
            RTLD_LAZY_GLOBAL
 #else
+#ifdef RTLD_GLOBAL
            RTLD_LAZY | RTLD_GLOBAL
+#else
+           /* and some systems don't have the RTLD_GLOBAL symbol */
+           RTLD_LAZY
 #endif
            );
     libldap = dlopen("libldap.so", RTLD_LAZY);
