@@ -140,9 +140,17 @@ Transfer (struct UrlData *data,
   now = tvnow();
   start = now;
 
+#define KEEP_READ  1
+#define KEEP_WRITE 2
+
+  pgrsStartNow(data);
   if (!getheader) {
     header = FALSE;
+#if 0
     ProgressInit (data, size);
+#endif
+    if(size > 0)
+      pgrsSetDownloadSize(data, size);
   }
   {
     fd_set readfd;
@@ -150,7 +158,7 @@ Transfer (struct UrlData *data,
     fd_set rkeepfd;
     fd_set wkeepfd;
     struct timeval interval;
-    bool keepon = TRUE;
+    int keepon=0;
 
     /* timeout every X second
        - makes a better progressmeter (i.e even when no data is read, the
@@ -162,11 +170,13 @@ Transfer (struct UrlData *data,
     FD_ZERO (&readfd);		/* clear it */
     if(sockfd != -1) {
       FD_SET (sockfd, &readfd); /* read socket */
+      keepon |= KEEP_READ;
     }
 
     FD_ZERO (&writefd);		/* clear it */
     if(writesockfd != -1) {
       FD_SET (writesockfd, &writefd); /* write socket */
+      keepon |= KEEP_WRITE;
     }
 
     /* get these in backup variables to be able to restore them on each lap in
@@ -182,12 +192,12 @@ Transfer (struct UrlData *data,
 
       switch (select (maxfd, &readfd, &writefd, NULL, &interval)) {
       case -1:			/* select() error, stop reading */
-	keepon = FALSE;
+	keepon = 0; /* no more read or write */
 	continue;
       case 0:			/* timeout */
 	break;
       default:
-        if((sockfd>-1) && FD_ISSET(sockfd, &readfd)) {
+        if((keepon & KEEP_READ) && FD_ISSET(sockfd, &readfd)) {
           /* read! */
 #ifdef USE_SSLEAY
           if (data->use_ssl) {
@@ -207,7 +217,7 @@ Transfer (struct UrlData *data,
           /* if we receive 0 or less here, the server closed the connection and
              we bail out from this! */
           else if (0 >= (signed int) nread) {
-            keepon = FALSE;
+            keepon &= ~KEEP_READ;
             break;
           }
 
@@ -290,8 +300,12 @@ Transfer (struct UrlData *data,
                   p++;		/* pass the \r byte */
                 if ('\n' == *p)
                   p++;		/* pass the \n byte */
-                
+
+#if 0                
                 ProgressInit (data, size);	/* init progress meter */
+#endif
+                pgrsSetDownloadSize(data, size);
+
                 header = FALSE;	/* no more header to parse! */
 
                 /* now, only output this if the header AND body are requested:
@@ -459,10 +473,12 @@ Transfer (struct UrlData *data,
               nread = data->maxdownload - bytecount;
               if(nread < 0 ) /* this should be unusual */
                 nread = 0;
-              keepon = FALSE; /* we're done now! */
+              keepon &= ~KEEP_READ; /* we're done reading */
             }
 
             bytecount += nread;
+
+            pgrsSetDownloadCounter(data, (double)bytecount);
             
             if (nread != data->fwrite (str, 1, nread, data->out)) {
               failf (data, "Failed writing output");
@@ -472,7 +488,7 @@ Transfer (struct UrlData *data,
           } /* if (! header and data to read ) */
         } /* if( read from socket ) */
 
-        if((writesockfd>-1) && FD_ISSET(writesockfd, &writefd)) {
+        if((keepon & KEEP_WRITE) && FD_ISSET(writesockfd, &writefd)) {
           /* write */
 
           char scratch[BUFSIZE * 2];
@@ -485,9 +501,11 @@ Transfer (struct UrlData *data,
           nread = data->fread(buf, 1, BUFSIZE, data->in);
           writebytecount += nread;
 
+          pgrsSetUploadCounter(data, (double)writebytecount);
+            
           if (nread<=0) {
             /* done */
-            keepon = FALSE; 
+            keepon &= ~KEEP_WRITE; /* we're done writing */
             break;
           }
 
@@ -528,9 +546,13 @@ Transfer (struct UrlData *data,
       }
 
       now = tvnow();
+#if 0
       if (!header) {
 	ProgressShow (data, bytecount, start, now, FALSE);
       }
+#endif
+      pgrsUpdate(data);
+
       urg = speedcheck (data, now);
       if (urg)
 	return urg;
@@ -554,7 +576,10 @@ Transfer (struct UrlData *data,
           contentlength-bytecount);
     return URG_PARTIAL_FILE;
   }
+#if 0
   ProgressShow (data, bytecount, start, now, TRUE);
+#endif
+  pgrsUpdate(data);
 
   if(bytecountp)
     *bytecountp = bytecount; /* read count */
