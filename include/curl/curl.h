@@ -491,6 +491,9 @@ typedef enum {
   /* Non-zero value means to use the global dns cache */
   CINIT(DNS_USE_GLOBAL_CACHE, LONG, 91),
 
+  /* DNS cache timeout */
+  CINIT(DNS_CACHE_TIMEOUT, LONG, 92),
+  
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 

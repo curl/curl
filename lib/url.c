@@ -251,13 +251,15 @@ CURLcode Curl_open(struct SessionHandle **curl)
   data->set.httpreq = HTTPREQ_GET; /* Default HTTP request */
   data->set.ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
 
+  data->set.dns_cache_timeout = 60; /* Timeout every 60 seconds by default */
+  
   /* make libcurl quiet by default: */
   data->set.hide_progress = TRUE;  /* CURLOPT_NOPROGRESS changes these */
   data->progress.flags |= PGRS_HIDE;
 
   /* Set the default size of the SSL session ID cache */
   data->set.ssl.numsessions = 5;
-
+  
   /* create an array with connection data struct pointers */
   data->state.numconnects = 5; /* hard-coded right now */
   data->state.connects = (struct connectdata **)
@@ -284,7 +286,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
   va_start(param, option);
 
   switch(option) {
-    case CURLOPT_DNS_USE_GLOBAL_CACHE: {
+  case CURLOPT_DNS_CACHE_TIMEOUT:
+    data->set.dns_cache_timeout = va_arg(param, int);
+    break;
+  case CURLOPT_DNS_USE_GLOBAL_CACHE: 
+    {
       int use_cache = va_arg(param, int);
       if (use_cache) {
         Curl_global_host_cache_init();

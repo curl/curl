@@ -93,24 +93,59 @@ void Curl_global_host_cache_dtor(void)
   }
 }
 
+struct curl_dns_cache_entry {
+  Curl_addrinfo *addr;
+  int            timestamp;
+};
+
 Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
                            char *hostname,
                            int port,
                            char **bufp)
 {
-  Curl_addrinfo *addr = NULL;
-  size_t hostname_len = strlen(hostname)+1;
+  struct curl_dns_cache_entry *p = NULL;
+  size_t hostname_len;
+  time_t now;
 
-  if (curl_hash_find(data->hostcache, hostname, hostname_len, (void **) &addr)) {
-    return addr;
+  /* If the host cache timeout is 0, we don't do DNS cach'ing
+     so fall through */
+  if (data->set.dns_cache_timeout == 0) {
+    return Curl_getaddrinfo(data, hostname, port, bufp);
   }
-  
-  addr = Curl_getaddrinfo(data, hostname, port, bufp);
-  if (!addr)
-    return NULL;
 
-  curl_hash_add(data->hostcache, hostname, hostname_len, (const void *) addr);
-  return addr;
+  hostname_len = strlen(hostname)+1;
+
+  time(&now);
+  /* See if its already in our dns cache */
+  if (curl_hash_find(data->hostcache, hostname, hostname_len, (void **) &p)) {
+    /* Do we need to check for a cache timeout? */
+    if (data->set.dns_cache_timeout != -1) {
+      /* Return if the entry has not timed out */
+      if ((now - p->timestamp) < data->set.dns_cache_timeout) {
+        return p->addr;
+      }
+    }
+    else {
+      return p->addr;
+    }
+  }
+
+  /* Create a new cache entry */
+  p = (struct curl_dns_cache_entry *) malloc(sizeof(struct curl_dns_cache_entry));
+  if (!p) {
+    return NULL;
+  }
+
+  p->addr = Curl_getaddrinfo(data, hostname, port, bufp);
+  if (!p->addr) {
+    return NULL;
+  }
+  p->timestamp = now;
+
+  /* Save it in our host cache */
+  curl_hash_update(data->hostcache, hostname, hostname_len, (const void *) p);
+
+  return p->addr;
 }
 
 /*
@@ -120,11 +155,15 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
  */
 void Curl_freeaddrinfo(void *freethis)
 {
+  struct curl_dns_cache_entry *p = (struct curl_dns_cache_entry *) freethis;
+
 #ifdef ENABLE_IPV6
-  freeaddrinfo(freethis);
+  freeaddrinfo(p->addr);
 #else
-  free(freethis);
+  free(p->addr);
 #endif
+
+  free(p);
 }
 
 /* --- resolve name or IP-number --- */

@@ -647,6 +647,7 @@ struct UserDefined {
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
 
   bool global_dns_cache;
+  bool dns_cache_timeout;
 };
 
 /*
