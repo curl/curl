@@ -72,9 +72,9 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
 CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
 {
   va_list arg;
-  long *param_longp;
-  double *param_doublep;
-  char **param_charp;
+  long *param_longp=NULL;
+  double *param_doublep=NULL;
+  char **param_charp=NULL;
   va_start(arg, info);
 
   switch(info&CURLINFO_TYPEMASK) {

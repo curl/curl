@@ -999,7 +999,6 @@ CURLcode ftp_use_port(struct connectdata *conn)
 #endif
   unsigned char *ap;
   unsigned char *pp;
-  int alen, plen;
   char portmsgbuf[4096], tmp[4096];
 
   const char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
@@ -1062,6 +1061,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
 
   for (modep = (char **)mode; modep && *modep; modep++) {
     int lprtaf, eprtaf;
+    int alen=0, plen=0;
     
     switch (sa->sa_family) {
     case AF_INET:
@@ -1363,7 +1363,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
 #endif
   int modeoff;
   unsigned short connectport; /* the local port connect() should use! */
-  unsigned short newport; /* remote port, not necessary the local one */
+  unsigned short newport=0; /* remote port, not necessary the local one */
   
   /* newhost must be able to hold a full IP-style address in ASCII, which
      in the IPv6 case means 5*8-1 = 39 letters */

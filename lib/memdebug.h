@@ -57,6 +57,7 @@ FILE *curl_fopen(const char *file, const char *mode, int line,
 int curl_fclose(FILE *file, int line, const char *source);
 
 /* Set this symbol on the command-line, recompile all lib-sources */
+#undef strdup
 #define strdup(ptr) curl_dostrdup(ptr, __LINE__, __FILE__)
 #define malloc(size) curl_domalloc(size, __LINE__, __FILE__)
 #define realloc(ptr,size) curl_dorealloc(ptr, size, __LINE__, __FILE__)
