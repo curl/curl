@@ -1611,9 +1611,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
       nope=no_proxy?strtok_r(no_proxy, ", ", &no_proxy_tok_buf):NULL;
       while(nope) {
-        if(strlen(nope) <= strlen(conn->name)) {
+        int namelen;
+        char *endptr = strchr(conn->name, ':');
+        if(endptr)
+          namelen=endptr-conn->name;
+        else
+          namelen=strlen(conn->name);
+
+        if(strlen(nope) <= namelen) {
           char *checkn=
-            conn->name + strlen(conn->name) - strlen(nope);
+            conn->name + namelen - strlen(nope);
           if(strnequal(nope, checkn, strlen(nope))) {
             /* no proxy for this host! */
             break;
