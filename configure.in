@@ -543,8 +543,7 @@ case "$OPT_ZLIB" in
 
     AC_CHECK_HEADER(zlib.h,[
       AC_CHECK_LIB(z, gzread,
-                   [AM_CONDITIONAL(CONTENT_ENCODING, true)
-                   HAVE_LIBZ="1"
+                   [HAVE_LIBZ="1"
                    AC_SUBST(HAVE_LIBZ)
                    LIBS="$LIBS -lz"
                    AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
