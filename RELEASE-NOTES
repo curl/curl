@@ -1,89 +1,24 @@
-Curl and libcurl 7.11.1. A bugfix release.
+Curl and libcurl 7.11.2. A bugfix release.
 
- Public curl release number:               79
- Releases counted from the very beginning: 106
+ Public curl release number:               80
+ Releases counted from the very beginning: 107
  Available command line options:           94
  Available curl_easy_setopt() options:     112
 
 This release includes the following changes:
 
- o CURLOPT_POSTFIELDSIZE_LARGE added to offer POSTs larger than 2GB
- o CURL_VERSION_LARGEFILE is a feature bit returned by libcurls that feature
-   large file support
- o libcurl only requires winsock 1.1 on windows now
- o when doing FTP, curl now sends QUIT before disconnecting
- o name resolves can now timeout on windows too
- o $HOME is now recognized better when looking for .netrc files
- o now re-uses the ares handle when re-using curl handles
- o SO_BINDTODEVICE is used for network interface binding
- o configure --disable-manual disables the built-in huge manual from the
-   command line tool
- o the default Accept: header used in HTTP requests changed
- o asynch dns lookups now require the c-ares library
- o curl --socks can be used to set a SOCKS5 proxy to use
- o response-headers received after a (proxy) CONNECT request are now passed
-   to the header callback just like other headers
+ o 
 
 This release includes the following bugfixes:
 
- o builds and runs on Novell NetWare
- o Windows builds now report OS as "i386-pc-win32"
- o received signals during SSL connect is handled better
- o improved PUT/POST with NTLM/Digest authentication
- o following redirects and doing NTLM/Digest (where the first connection gets
-   closed) with the multi interface work better now
- o file: progress meter and getinfo variables work now
- o CURLOPT_FRESH_CONNECT and CURLAUTH_NTLM now work when set together
- o share interface usage without (un)lock functions segfaulted
- o --limit-rate no longer cripples the --speed-limit feature
- o fixed verbose output problem with ipv6-enabled re-used connections
- o fixed the socks5 code to check version in the socks response properly
- o dns cache bug - fixed the 'inuse' counter
- o large file fix for Content-Length
- o better docs for the share interface
- o several configure fixes for mingw/msys
- o setting a Host: header is no longer affecting the Host: header used when
-   libcurl follows a Location:
- o fixed numerous compiler warnings on several operating systems and compilers
- o PUTing from stdin couldn't disable chunked transfer-encoding
- o corrected the mingw makefiles
- o improved the configure libz detection
- o fixed EPRT/PORT use when doing FTP on ipv6-enabled AIX hosts
- o *nroff commands that only support -mandoc and not -man are now supported
-   (for the built-in manual text in the command line tool)
- o fixed the unconditional #include of config.h in hugehelp.c
- o builds fine on MPE/iX
- o upload using chunked transfer-encoding now sends the last chunk properly
-   teriminated with an extra CRLF
- o Fixed the progress meter display for files >2GB
- o persistant connections over a proxy messed up the proxy name/password
- o the socks5 code segfaulted if no username/password was set
- o the *_LARGE options now take curl_off_t types as parameters and this will
-   make it possible to handle large files on windows too
- o builds with large file support even on systems without strtoll()
+ o 
 
 Other curl-related news since the previous public release:
 
- o Many platforms are being used to autobuild and autotest curl on a daily
-   basis. Please join in and test curl on your systems:
-   http://curl.haxx.se/auto/
- o the curl mailing lists moved, (re-)subscribe to the new ones from here:
-   http://curl.haxx.se/mail/
- o c-ares 1.1.0 was relased: http://daniel.haxx.se/projects/c-ares/
- o TclCurl 0.11.0 was released:
-   http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o PycURL 7.11.0 was released: http://pycurl.sourceforge.net/
- o the libcurl D binding was released:
-   http://www.atari-soldiers.com/libcurl.html
- o new Estonian web site mirror: http://curl.dope-brothers.com/
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Gisle Vanem, Vincent Bronner, Richard Bramante, Dirk Manske, Dan Fandrich,
- Ken Hirsch, Stadler Stephan, Domenico Andreoli, Patrick Smith, Tor Arntsen,
- Andrés García, Tim Baker, Len Krause, Gilad, Ken Rastatter, P R Schaffner,
- Greg Hewgill, Ben Greear, Jeff Lawson, Grigory Entin, Doug Porter, David
- Byron, Andy Serpa, Joe Halpin, Christopher R. Palmer, Günter Knauf
 
         Thanks! (and sorry if I forgot to mention someone)
