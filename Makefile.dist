@@ -51,6 +51,12 @@ vc-ssl:
 	cd lib
 	nmake -f Makefile.vc6 cfg=release-ssl
 	cd ..\src
+	nmake -f Makefile.vc6 cfg=release-ssl
+
+vc-ssl-dll:
+	cd lib
+	nmake -f Makefile.vc6 cfg=release-ssl-dll
+	cd ..\src
 	nmake -f Makefile.vc6
 
 cygwin:
