@@ -104,6 +104,10 @@
 
 static bool verifyconnect(curl_socket_t sockfd);
 
+/*
+ * Curl_ourerrno() returns the errno (or equivalent) on this platform to
+ * hide platform specific for the function that calls this.
+ */
 int Curl_ourerrno(void)
 {
 #ifdef WIN32
@@ -113,13 +117,11 @@ int Curl_ourerrno(void)
 #endif
 }
 
-/*************************************************************************
- * Curl_nonblock
- *
- * Description:
- *  Set the socket to either blocking or non-blocking mode.
+/*
+ * Curl_nonblock() set the given socket to either blocking or non-blocking
+ * mode based on the 'nonblock' boolean argument. This function is highly
+ * portable.
  */
-
 int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
                   int nonblock   /* TRUE or FALSE */)
 {
@@ -177,12 +179,19 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
 }
 
 /*
- * waitconnect() returns:
+ * waitconnect() waits for a TCP connect on the given socket for the specified
+ * number if milliseconds. It returns:
  * 0    fine connect
  * -1   select() error
  * 1    select() timeout
- * 2    select() returned with an error condition
+ * 2    select() returned with an error condition fd_set
  */
+
+#define WAITCONN_CONNECTED     0
+#define WAITCONN_SELECT_ERROR -1
+#define WAITCONN_TIMEOUT       1
+#define WAITCONN_FDSET_ERROR   2
+
 static
 int waitconnect(curl_socket_t sockfd, /* socket */
                 long timeout_msec)
@@ -213,18 +222,18 @@ int waitconnect(curl_socket_t sockfd, /* socket */
   rc = select(sockfd+1, NULL, &fd, &errfd, &interval);
   if(-1 == rc)
     /* error, no connect here, try next */
-    return -1;
+    return WAITCONN_SELECT_ERROR;
   
   else if(0 == rc)
     /* timeout, no connect today */
-    return 1;
+    return WAITCONN_TIMEOUT;
 
   if(FD_ISSET(sockfd, &errfd))
     /* error condition caught */
-    return 2;
+    return WAITCONN_FDSET_ERROR;
 
   /* we have a connect! */
-  return 0;
+  return WAITCONN_CONNECTED;
 }
 
 static CURLcode bindlocal(struct connectdata *conn,

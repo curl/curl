@@ -85,14 +85,16 @@
 #include "memdebug.h"
 #endif
 
-/* Silly win32 socket initialization functions */
-
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+/* win32_cleanup() is for win32 socket cleanup functionality, the opposite
+   of win32_init() */
 static void win32_cleanup(void)
 {
   WSACleanup();
 }
 
+/* win32_init() performs win32 socket initialization to properly setup the
+   stack to allow networking */
 static CURLcode win32_init(void)
 {
   WORD wVersionRequested;  
@@ -126,23 +128,23 @@ static CURLcode win32_init(void)
     WSACleanup(); 
     return CURLE_FAILED_INIT; 
   }
+  /* The Windows Sockets DLL is acceptable. Proceed. */
   return CURLE_OK;
 }
-/* The Windows Sockets DLL is acceptable. Proceed. */ 
+
 #else
 /* These functions exist merely to prevent compiler warnings */
 static CURLcode win32_init(void) { return CURLE_OK; }
 static void win32_cleanup(void) { }
 #endif
 
-
 /* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized = 0;
 static long          init_flags  = 0;
 
 /**
- * Globally initializes cURL given a bitwise set of 
- * the different features to initialize.
+ * curl_global_init() globally initializes cURL given a bitwise set of the
+ * different features of what to initialize.
  */
 CURLcode curl_global_init(long flags)
 {
@@ -168,8 +170,8 @@ CURLcode curl_global_init(long flags)
 }
 
 /**
- * Globally cleanup cURL, uses the value of "init_flags" to determine
- * what needs to be cleaned up and what doesn't
+ * curl_global_cleanup() globally cleanups cURL, uses the value of
+ * "init_flags" to determine what needs to be cleaned up and what doesn't.
  */
 void curl_global_cleanup(void)
 {
@@ -192,6 +194,10 @@ void curl_global_cleanup(void)
   init_flags  = 0;
 }
 
+/*
+ * curl_easy_init() is the external interface to alloc, setup and init an
+ * easy handle that is returned. If anything goes wrong, NULL is returned.
+ */
 CURL *curl_easy_init(void)
 {
   CURLcode res;
@@ -213,6 +219,10 @@ CURL *curl_easy_init(void)
   return data;
 }
 
+/* 
+ * curl_easy_setopt() is the external interface for setting options on an
+ * easy handle.
+ */
 typedef int (*func_T)(void);
 CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
 {
@@ -257,6 +267,10 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
   return ret;
 }
 
+/*
+ * curl_easy_perform() is the external interface that performs a transfer
+ * previously setup.
+ */
 CURLcode curl_easy_perform(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
@@ -285,6 +299,10 @@ CURLcode curl_easy_perform(CURL *curl)
   return Curl_perform(data);
 }
 
+/*
+ * curl_easy_cleanup() is the external interface to cleaning/freeing the given
+ * easy handle.
+ */
 void curl_easy_cleanup(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
@@ -296,6 +314,10 @@ void curl_easy_cleanup(CURL *curl)
   Curl_close(data);
 }
 
+/*
+ * curl_easy_getinfo() is an external interface that allows an app to retrieve
+ * information from a performed transfer and similar.
+ */
 CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...)
 {
   va_list arg;
@@ -308,6 +330,11 @@ CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...)
   return Curl_getinfo(data, info, paramp);
 }
 
+/*
+ * curl_easy_duphandle() is an external interface to allow duplication of a
+ * given input easy handle. The returned handle will be a new working handle
+ * with all options set exactly as the input source handle.
+ */
 CURL *curl_easy_duphandle(CURL *incurl)
 {
   struct SessionHandle *data=(struct SessionHandle *)incurl;
