@@ -409,7 +409,7 @@ struct Cookie *cookie_getlist(struct CookieInfo *c,
 	 /* now check if the domain is correct */
 	 domlen=co->domain?strlen(co->domain):0;
 	 if(!co->domain ||
-	    ((domlen<hostlen) &&
+	    ((domlen<=hostlen) &&
 	     strequal(host+(hostlen-domlen), co->domain)) ) {
 	    /* the right part of the host matches the domain stuff in the
 	       cookie data */
