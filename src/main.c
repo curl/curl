@@ -3558,14 +3558,14 @@ operate(struct Configurable *config, int argc, char *argv[])
   if(config->headerfile && !headerfilep && heads.stream)
     fclose(heads.stream);
 
-  if(config->trace_fopened && config->trace_stream)
-    fclose(config->trace_stream);
-
   if(allocuseragent)
     free(config->useragent);
 
   /* cleanup the curl handle! */
   curl_easy_cleanup(curl);
+
+  if(config->trace_fopened && config->trace_stream)
+    fclose(config->trace_stream);
 
   if(config->errors_fopened)
     fclose(config->errors);
