@@ -7,6 +7,24 @@
                                   Changelog
 
 
+Daniel (19 Dec)
+- Matthew B patched the Curl_base64_decode() function.
+
+- Evan Jordan reported in bug report #653022 that the SSL_read() usage was
+  wrong, and it certainly was. It could lead to curl using too much CPU due to
+  a stupid loop.
+
+Daniel (18 Dec)
+- As suggested by Margus Freudenthal, CURLE_HTTP_NOT_FOUND was renamed to
+  CURLE_HTTP_RETURNED_ERROR since it is returned on any >= 400 code when
+  CURLOPT_FAILONERROR is set.
+
+Daniel (17 Dec)
+- Bug reported #651464, reported by Christopher Palmer, provided an example
+  source code using the multi interface that hang when trying to connect to a
+  proxy on a localhost port where no proxy was listening. This bug was not
+  repeatable on libcurls that were IPv6-enabled.
+
 Daniel (16 Dec)
 - Christopher Palmer also noticed what Vojtech Janota already was
   experiencing: The attempted name resolve fix for glibc 2.2.93 caused libcurl
@@ -44,7 +62,8 @@ Daniel (12 Dec)
 
 Daniel (11 Dec)
 - CURL_MAX_WRITE_SIZE is now decreased to 16KB since it makes the Windows
-  version perform uploads much faster!!!
+  version perform uploads much faster!!! RBramante did lots of research on
+  this topic.
 
 - Fixed the #include in curl/curl.h to include the other files outside the
   extern "C" scope.
