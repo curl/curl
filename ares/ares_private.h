@@ -164,5 +164,9 @@ int ares__read_line(FILE *fp, char **buf, int *bufsize);
    libcurl lowlevel code from within library is ugly and only works when
    c-ares is built and linked with a similarly debug-build libcurl, but we do
    this anyway for convenience. */
+#ifndef CURL_EXTERN
+/* ugly hack to make this compile */
+#define CURL_EXTERN
+#endif
 #include "../lib/memdebug.h"
 #endif
