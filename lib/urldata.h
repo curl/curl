@@ -779,8 +779,6 @@ struct UserDefined {
   curl_progress_callback fprogress;  /* function for progress information */
   curl_debug_callback fdebug;      /* function that write informational data */
   void *progress_client; /* pointer to pass to the progress callback */
-  curl_passwd_callback fpasswd;      /* call for password */
-  void *passwd_client;               /* pass to the passwd callback */
   long timeout;         /* in seconds, 0 means no timeout */
   long connecttimeout;  /* in seconds, 0 means no timeout */
   long ftp_response_timeout; /* in seconds, 0 means no timeout */
