@@ -26,8 +26,6 @@
 #include <string.h>
 #include <curl/curl.h>
 
-#include "multi.h" /* will become <curl/multi.h> soon */
-
 #include "urldata.h"
 #include "transfer.h"
 #include "url.h"
