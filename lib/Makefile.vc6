@@ -23,7 +23,7 @@ LINKD = link.exe -lib
 CCRS = cl.exe /ML /O2 /D "NDEBUG" /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
 LINKRS = link.exe -lib /LIBPATH:$(OPENSSL_PATH)/out32dll
 
-CFLAGS = /nologo /W3 /GX /D "WIN32" /D "_MBCS" /D "_LIB" /YX /FD /c
+CFLAGS = /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS"
 LFLAGS = /nologo /out:$(PROGRAM_NAME)
 LINKLIBS = kernel32.lib wsock32.lib
 LINKSLIBS = libeay32.lib ssleay32.lib RSAglue.lib
