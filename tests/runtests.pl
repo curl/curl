@@ -1246,7 +1246,7 @@ sub singletest {
     }
 
     my @err = getpart("verify", "errorcode");
-    my $errorcode = $err[0];
+    my $errorcode = $err[0] || "0";
 
     my $res;
     if (@validstdout) {
@@ -1376,10 +1376,21 @@ sub singletest {
         }
     }
 
-    if($errorcode == $cmdres) {
-        $errorcode =~ s/\n//;
+    # accept multiple comma-separated error codes
+    my @splerr = split(/ *, */, $errorcode);
+    my $errok;
+    my $e;
+    foreach $e (@splerr) {
+        if($e == $cmdres) {
+            # a fine error code
+            $errok = 1;
+            last;
+        }
+    }
+
+    if($errok) {
         if($verbose) {
-            print " received exitcode $errorcode OK";
+            print " received exitcode $cmdres OK";
         }
         elsif(!$short) {
             print " exit OK";
@@ -1387,7 +1398,7 @@ sub singletest {
     }
     else {
         if(!$short) {
-            print "\ncurl returned $cmdres, ".(0+$errorcode)." was expected\n";
+            printf "\ncurl returned $cmdres, %s was expected\n", $errorcode;
         }
         print " exit FAILED\n";
         return 1;

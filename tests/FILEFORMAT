@@ -165,7 +165,9 @@ Pass this given data on stdin to the tool.
 
 <verify>
 <errorcode>
-numerical error code curl is supposed to return
+numerical error code curl is supposed to return. Specify a list of accepted
+error codes by separating multiple numbers with comma. See test 237 for an
+example.
 </errorcode>
 <strip>
 One regex per line that is removed from the protocol dumps before the
