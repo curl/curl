@@ -293,10 +293,7 @@ CURLcode http(struct connectdata *conn)
   }
 
   if(!checkheaders(data, "Host:")) {
-    if(data->port != PORT_HTTP)
-      data->ptr_host = maprintf("Host: %s:%d\r\n", host, data->port);
-    else
-      data->ptr_host = maprintf("Host: %s\r\n", host);
+    data->ptr_host = maprintf("Host: %s:%d\r\n", host, data->remote_port);
   }
 
   if(!checkheaders(data, "Pragma:"))
