@@ -303,6 +303,7 @@ typedef enum {
 
 #define CURL_ERROR_SIZE 256
 
+/* parameter for the CURLOPT_FTP_SSL option */
 typedef enum {
   CURLFTPSSL_NONE,    /* do not attempt to use SSL */
   CURLFTPSSL_TRY,     /* try using SSL, proceed anyway otherwise */
@@ -310,6 +311,14 @@ typedef enum {
   CURLFTPSSL_ALL,     /* SSL for all communication or fail */
   CURLFTPSSL_LAST     /* not an option, never use */
 } curl_ftpssl;
+
+/* parameter for the CURLOPT_FTPSSLAUTH option */
+typedef enum {
+  CURLFTPAUTH_DEFAULT, /* let libcurl decide */
+  CURLFTPAUTH_SSL,     /* use "AUTH SSL" */
+  CURLFTPAUTH_TLS,     /* use "AUTH TLS" */
+  CURLFTPAUTH_LAST /* not an option, never use */
+} curl_ftpauth;
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
@@ -812,6 +821,18 @@ typedef enum {
   /* When doing 3rd party transfer, set the source post-quote linked list
      of commands with this */
   CINIT(SOURCE_POSTQUOTE, OBJECTPOINT, 128),
+
+  /* When FTP over SSL/TLS is selected (with CURLOPT_FTP_SSL), this option
+     can be used to change libcurl's default action which is to first try
+     "AUTH SSL" and then "AUTH TLS" in this order, and proceed when a OK
+     response has been received.
+
+     Available parameters are:
+     CURLFTPAUTH_DEFAULT - let libcurl decide
+     CURLFTPAUTH_SSL     - try "AUTH SSL" first, then TLS
+     CURLFTPAUTH_TLS     - try "AUTH TLS" first, then SSL
+  */
+  CINIT(FTPSSLAUTH, LONG, 129),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

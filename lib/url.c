@@ -1338,6 +1338,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.ftp_ssl = (curl_ftpssl)va_arg(param, long);
     break;
 
+  case CURLOPT_FTPSSLAUTH:
+    /*
+     * Set a specific auth for FTP-SSL transfers.
+     */
+    data->set.ftpsslauth = (curl_ftpauth)va_arg(param, long);
+    break;
+
   case CURLOPT_IPRESOLVE:
     data->set.ip_version = va_arg(param, long);
     break;

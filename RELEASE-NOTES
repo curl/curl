@@ -10,6 +10,7 @@ Curl and libcurl 7.12.2
 
 This release includes the following changes:
 
+ o added CURLOPT_FTPSSLAUTH
  o curl_getdate() completely rewritten, which may affect curl -z use cases.
 
 This release includes the following bugfixes:
@@ -37,6 +38,6 @@ advice from friends like these:
 
  Casey O'Donnell, Roland Krikava, Alex, Alexander Krasnostavsky, Kjetil
  Jacobsen, Ling Thio, Roman Koifman, Harshal Pradhan, Jonas Forsman, David
- Tarendash
+ Tarendash, Daniel at touchtunes
 
         Thanks! (and sorry if I forgot to mention someone)

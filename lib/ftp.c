@@ -540,8 +540,27 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
   if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
     /* we don't have a SSL/TLS connection, try a FTPS connection now */
+    int start;
+    int trynext;
+    int count=0;
 
-    for (try = 0; ftpauth[try]; try++) {
+    switch(data->set.ftpsslauth) {
+    case CURLFTPAUTH_DEFAULT:
+    case CURLFTPAUTH_SSL:
+      start = 0;
+      trynext = 1;
+      break;
+    case CURLFTPAUTH_TLS:
+      start = 1;
+      trynext = 0;
+      break;
+    default:
+      failf(data, "unsupported parameter to CURLOPT_FTPSSLAUTH: %d\n",
+            data->set.ftpsslauth);
+      return CURLE_FAILED_INIT; /* we don't know what to do */
+    }
+
+    for (try = start; ftpauth[count]; try=trynext, count++) {
 
       FTPSENDF(conn, "AUTH %s", ftpauth[try]);
 

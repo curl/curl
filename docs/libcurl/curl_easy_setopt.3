@@ -720,6 +720,18 @@ Require SSL for the control connection or fail with \fICURLE_FTP_SSL_FAILED\fP.
 .IP CURLFTPSSL_ALL
 Require SSL for all communication or fail with \fICURLE_FTP_SSL_FAILED\fP.
 .RE
+.IP CURLOPT_FTPSSLAUTH
+Pass a long using one of the values from below, to alter how libcurl issues
+\&"AUTH TLS" or "AUTH SSL" when FTP over SSL is activated (see
+\fICURLOPT_FTP_SSL\fP).
+.RS
+.IP CURLFTPAUTH_DEFAULT
+Allow libcurl to decide
+.IP CURLFTPAUTH_SSL
+Try "AUTH SSL" first, and only if that fails try "AUTH TLS"
+.IP CURLFTPAUTH_TLS
+Try "AUTH TLS" first, and only if that fails try "AUTH SSL"
+.RE
 .SH PROTOCOL OPTIONS
 .IP CURLOPT_TRANSFERTEXT
 A non-zero parameter tells the library to use ASCII mode for ftp transfers,

@@ -7,6 +7,15 @@
                                   Changelog
 
 Daniel (16 September 2004)
+- Daniel at touchtunes uses the FTP+SSL server "BSDFTPD-SSL from
+  http://bsdftpd-ssl.sc.ru/" which accordingly doesn't properly work with curl
+  when "AUTH SSL" is issued (although the server responds fine and everything)
+  but requires that curl issues "AUTH TLS" instead. See
+  http://curl.haxx.se/feedback/display.cgi?id=10951944937603&support=yes
+
+  Introducing CURLOPT_FTPSSLAUTH that allows the application to select which
+  of the AUTH strings to attempt first.
+
 - Anonymous filed bug report #1029478 which identified a bug when you 1) used
   a URL without properly seperating the host name and the parameters with a
   slash. 2) the URL had parameters to the right of a ? that contains a slash
@@ -17,7 +26,7 @@ Daniel (16 September 2004)
   Test case 187 was added to verify that this was fixed properly.
 
 Daniel (11 September 2004)
-- Added parsedate.[ch] that contains a rewrite of the date parser currently
+- Added parsedate.c that contains a rewrite of the date parser currently
   provided by getdate.y. The new one is MUCH smaller and will allow us to run
   away from the yacc/bison jungle. It is also slightly lacking in features
   compared to the old one, but it supports parsing of all date formats HTTP
