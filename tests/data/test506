@@ -79,9 +79,9 @@ unlock: cookie <Pigs in space>: 11
 lock:   cookie <Pigs in space>: 12
 unlock: cookie <Pigs in space>: 13
 run 1: set cookie 1, 2 and 3
-CLEANUP
 lock:   dns    <Pigs in space>: 14
 unlock: dns    <Pigs in space>: 15
+CLEANUP
 lock:   dns    <Pigs in space>: 16
 unlock: dns    <Pigs in space>: 17
 lock:   cookie <Pigs in space>: 18
@@ -102,9 +102,9 @@ unlock: cookie <Pigs in space>: 29
 lock:   cookie <Pigs in space>: 30
 unlock: cookie <Pigs in space>: 31
 run 2: set cookie 4 and 5
-CLEANUP
 lock:   dns    <Pigs in space>: 32
 unlock: dns    <Pigs in space>: 33
+CLEANUP
 lock:   dns    <Pigs in space>: 34
 unlock: dns    <Pigs in space>: 35
 lock:   cookie <Pigs in space>: 36
@@ -126,13 +126,13 @@ unlock: cookie <Pigs in space>: 47
 lock:   cookie <Pigs in space>: 48
 unlock: cookie <Pigs in space>: 49
 run 3: overwrite cookie 1 and 4
+lock:   dns    <Pigs in space>: 50
+unlock: dns    <Pigs in space>: 51
 try SHARE_CLEANUP...
-lock:   share  <Pigs in space>: 50
-unlock: share  <Pigs in space>: 51
+lock:   share  <Pigs in space>: 52
+unlock: share  <Pigs in space>: 53
 SHARE_CLEANUP failed, correct
 CLEANUP
-lock:   dns    <Pigs in space>: 52
-unlock: dns    <Pigs in space>: 53
 lock:   dns    <Pigs in space>: 54
 unlock: dns    <Pigs in space>: 55
 lock:   cookie <Pigs in space>: 56
