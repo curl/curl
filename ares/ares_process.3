@@ -35,13 +35,10 @@ The file descriptor sets pointed to by
 and
 .I write_fds
 should have file descriptors set in them according to whether the file
-descriptors specified by
-.BR ares_fds (3)
-are ready for reading and writing.  (The easiest way to determine this
-information is to invoke
+descriptors specified by \fIares_fds(3)\fP are ready for reading and writing.
+(The easiest way to determine this information is to invoke
 .B select
-with a timeout no greater than the timeout given by
-.BR ares_timeout (3)).
+with a timeout no greater than the timeout given by \fIares_timeout(3)\fP ).
 .PP
 The
 .B ares_process
