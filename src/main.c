@@ -2952,7 +2952,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
       /* new in curl 7.10 */
       curl_easy_setopt(curl, CURLOPT_ENCODING, 
-                       (config->encoding) ? "deflate, gzip" : NULL);
+                       (config->encoding) ? "" : NULL);
 
       res = curl_easy_perform(curl);
         
