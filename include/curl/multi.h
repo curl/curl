@@ -203,6 +203,17 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle);
 CURLMsg *curl_multi_info_read(CURLM *multi_handle,
                               int *msgs_in_queue);
 
+/*
+ * NAME curl_multi_strerror()
+ *
+ * DESCRIPTION
+ *
+ * The curl_multi_strerror function may be used to turn a CURLMcode value
+ * into the equivalent human readable error string.  This is useful
+ * for printing meaningful error messages.
+ */
+const char *curl_multi_strerror(CURLMcode);
+
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif

@@ -1066,7 +1066,6 @@ void curl_slist_free_all(struct curl_slist *);
  */
 time_t curl_getdate(const char *p, const time_t *now);
 
-
 #define CURLINFO_STRING   0x100000
 #define CURLINFO_LONG     0x200000
 #define CURLINFO_DOUBLE   0x300000
@@ -1241,6 +1240,28 @@ typedef struct {
  * struct. See above.
  */
 curl_version_info_data *curl_version_info(CURLversion);
+
+/*
+ * NAME curl_easy_strerror()
+ *
+ * DESCRIPTION
+ *
+ * The curl_easy_strerror function may be used to turn a CURLcode value
+ * into the equivalent human readable error string.  This is useful
+ * for printing meaningful error messages.
+ */
+const char *curl_easy_strerror(CURLcode);
+
+/*
+ * NAME curl_share_strerror()
+ *
+ * DESCRIPTION
+ *
+ * The curl_share_strerror function may be used to turn a CURLSHcode value
+ * into the equivalent human readable error string.  This is useful
+ * for printing meaningful error messages.
+ */
+const char *curl_share_strerror(CURLSHcode);
 
 #ifdef  __cplusplus
 }
