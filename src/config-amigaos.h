@@ -18,6 +18,7 @@
 #define HAVE_TIME_H             1
 #define TIME_WITH_SYS_TIME      1
 #define HAVE_TERMIOS_H          1
+#define HAVE_FTRUNCATE          1
 
 #define HAVE_PWD_H              1
 

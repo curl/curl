@@ -280,6 +280,7 @@ config.h: Makefile.netware
 	@echo $(DL)#define HAVE_ERR_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_FCNTL_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_FIONBIO 1$(DL) >> $@
+	@echo $(DL)#define HAVE_FTRUNCATE 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETHOSTBYADDR 1$(DL) >> $@
 	@echo $(DL)#define HAVE_GETTIMEOFDAY 1$(DL) >> $@
 	@echo $(DL)#define HAVE_INET_ADDR 1$(DL) >> $@

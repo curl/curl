@@ -96,6 +96,9 @@
 /* Define if you have the strstr function.  */
 #define  HAVE_STRSTR 1
 
+/* Define if you have the ftruncate function. */
+#define HAVE_FTRUNCATE 1
+
 /* Define if you have the uname function.  */
 #define HAVE_UNAME 1
 

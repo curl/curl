@@ -11,6 +11,9 @@
 /* Define if you have the <io.h> header file.  */
 #undef HAVE_IO_H
 
+/* Define if you have ftruncate()  */
+#define HAVE_FTRUNCATE 1
+
 /* Define if you have strdup() */
 #define HAVE_STRDUP 1
 

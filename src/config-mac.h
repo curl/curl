@@ -8,6 +8,7 @@
 
 #define HAVE_SETVBUF            1
 #define HAVE_UTIME              1
+#define HAVE_FTRUNCATE          1
 
 #define main(x,y) curl_main(x,y)
 

@@ -89,6 +89,9 @@
 /* Define if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H
 
+/* Define if you have the `ftruncate' function. */
+#define HAVE_FTRUNCATE
+
 /* Define if getaddrinfo exists and works */
 #define HAVE_GETADDRINFO
 
