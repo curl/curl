@@ -148,6 +148,11 @@ TODO
    which should overwrite the program reasonable defaults (plain/text,
    8bit...) (Idea brough to us by kromJx)
 
+ * ability to specify the classic computing suffixes on the range
+   specifications. For example, to download the first 500 Kilobytes of a file,
+   be able to specify the following for the -r option: "-r 0-500K" or for the
+   first 2 Megabytes of a file: "-r 0-2M". (Mark Smith suggested)
+
  * --data-encode that URL encodes the data before posting
    http://curl.haxx.se/mail/archive-2003-11/0091.html (Kevin Roth suggested)
 
