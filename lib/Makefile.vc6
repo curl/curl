@@ -196,7 +196,7 @@ X_OBJS= \
 	$(DIROBJ)\telnet.obj \
 	$(DIROBJ)\getdate.obj \
 	$(DIROBJ)\getenv.obj \
-	$(DIROBJ)\getpass.obj \
+	$(DIROBJ)\inet_pton.obj \
 	$(DIROBJ)\hostip.obj \
 	$(DIROBJ)\if2ip.obj \
 	$(DIROBJ)\mprintf.obj \

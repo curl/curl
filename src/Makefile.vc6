@@ -37,18 +37,21 @@ RELEASE_OBJS= \
 	hugehelpr.obj \
 	writeoutr.obj \
 	urlglobr.obj \
+	getpassr.obj \
 	mainr.obj
 
 DEBUG_OBJS= \
 	hugehelpd.obj \
 	writeoutd.obj \
 	urlglobd.obj \
+	getpassd.obj \
 	maind.obj
 	
 LINK_OBJS= \
 	hugehelp.obj \
 	writeout.obj \
 	urlglob.obj \
+	getpass.obj \
 	main.obj
  
 ######################
@@ -79,6 +82,8 @@ writeoutr.obj: writeout.c
 	$(CCR) $(CFLAGS) writeout.c
 urlglobr.obj: urlglob.c
 	$(CCR) $(CFLAGS) urlglob.c
+getpassr.obj: getpass.c
+	$(CCR) $(CFLAGS) getpass.c
 mainr.obj: main.c
 	$(CCR) $(CFLAGS) main.c
 
@@ -89,6 +94,8 @@ writeoutd.obj: writeout.c
 	$(CCD) $(CFLAGS) writeout.c
 urlglobd.obj: urlglob.c
 	$(CCD) $(CFLAGS) urlglob.c
+getpassd.obj: getpass.c
+	$(CCD) $(CFLAGS) getpass.c
 maind.obj: main.c
 	$(CCD) $(CFLAGS) main.c
 
