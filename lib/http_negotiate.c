@@ -50,24 +50,35 @@
 static int
 get_gss_name(struct connectdata *conn, gss_name_t *server)
 {
+  struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
   OM_uint32 major_status, minor_status;
   gss_buffer_desc token = GSS_C_EMPTY_BUFFER;
   char name[2048];
+  const char* service;
 
   /* GSSAPI implementation by Globus (known as GSI) requires the name to be
      of form "<service>/<fqdn>" instead of <service>@<fqdn> (ie. slash instead
      of at-sign). Also GSI servers are often identified as 'host' not 'khttp'.
      Change following lines if you want to use GSI */
-  token.length = strlen("khttp@") + strlen(conn->hostname) + 1;
+
+  /* IIS uses the <service>@<fqdn> form but uses 'http' as the service name */
+  
+  if (neg_ctx->gss) 
+    service = "khttp";
+  else
+    service = "http";
+
+  token.length = strlen(service) + 1 + strlen(conn->hostname) + 1;
   if (token.length + 1 > sizeof(name))
     return EMSGSIZE;
-  sprintf(name, "khttp@%s", conn->hostname);
+  sprintf(name, "%s@%s", service, conn->hostname);
 
   token.value = (void *) name;
   major_status = gss_import_name(&minor_status,
                                  &token,
                                  GSS_C_NT_HOSTBASED_SERVICE,
                                  server);
+
   return GSS_ERROR(major_status) ? -1 : 0;
 }
 
@@ -107,12 +118,32 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
   int ret;
   size_t len;
+  bool gss;
+  const char* protocol;
 
   while(*header && isspace((int)*header))
     header++;
-  if(!checkprefix("GSS-Negotiate", header))
+  if(checkprefix("GSS-Negotiate", header)) {
+    protocol = "GSS-Negotiate";
+    gss = TRUE;
+  }
+  else if (checkprefix("Negotiate", header)) {
+    protocol = "Negotiate";
+    gss = FALSE;
+  }
+  else
     return -1;
 
+  if (neg_ctx->context) {
+    if (neg_ctx->gss != gss) {
+      return -1;
+    }
+  }
+  else {
+    neg_ctx->protocol = protocol;
+    neg_ctx->gss = gss;
+  }
+    
   if (neg_ctx->context && neg_ctx->status == GSS_S_COMPLETE) {
     /* We finished succesfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
@@ -125,7 +156,7 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
       (ret = get_gss_name(conn, &neg_ctx->server_name)))
     return ret;
 
-  header += strlen("GSS-Negotiate");
+  header += strlen(neg_ctx->protocol);
   while(*header && isspace((int)*header))
     header++;
 
@@ -188,7 +219,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
 
   conn->allocptr.userpwd =
-    aprintf("Authorization: GSS-Negotiate %s\r\n", encoded);
+    aprintf("Authorization: %s %s\r\n", neg_ctx->protocol, encoded);
   free(encoded);
   gss_release_buffer(&minor_status, &neg_ctx->output_token);
   return (conn->allocptr.userpwd == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;

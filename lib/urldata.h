@@ -186,6 +186,8 @@ struct ntlmdata {
 
 #ifdef GSSAPI
 struct negotiatedata {
+  bool gss; /* Whether we're processing GSS-Negotiate or Negotiate */
+  const char* protocol; /* "GSS-Negotiate" or "Negotiate" */
   OM_uint32 status;
   gss_ctx_id_t context;
   gss_name_t server_name;

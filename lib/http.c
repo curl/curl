@@ -312,7 +312,8 @@ CURLcode Curl_http_auth(struct connectdata *conn,
     start++;
 
 #ifdef GSSAPI
-  if (checkprefix("GSS-Negotiate", start)) {
+  if (checkprefix("GSS-Negotiate", start) ||
+      checkprefix("Negotiate", start)) {
     *availp |= CURLAUTH_GSSNEGOTIATE;
     if(data->state.authwant == CURLAUTH_GSSNEGOTIATE) {
       /* if exactly this is wanted, go */
