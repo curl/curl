@@ -38,14 +38,13 @@
 #endif
 
 #ifdef HAVE_CONFIG_H
-
-#ifdef VMS
-#include "config-vms.h"
-#else
 #include "config.h" /* the configure script results */
 #endif
 
-#else
+#ifdef VMS
+/* hand-modified VMS config.h! */
+#include "config-vms.h"
+#endif
 #ifdef WIN32
 /* hand-modified win32 config.h! */
 #include "config-win32.h"
@@ -55,9 +54,8 @@
 #include "config-mac.h"
 #endif
 #ifdef AMIGA
+/* hand-modified AmigaOS config.h! */
 #include "amigaos.h"
-#endif
-
 #endif
 
 #ifndef TRUE
