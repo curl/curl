@@ -152,6 +152,38 @@ _create_hostcache_id(char *server, int port, ssize_t *entry_len)
   return id;
 }
 
+struct _curl_hostcache_prune_data {
+  int cache_timeout;
+  int now;
+};
+
+static int
+_curl_hostcache_timestamp_remove(void *datap, void *hc)
+{
+  struct _curl_hostcache_prune_data *data = 
+    (struct _curl_hostcache_prune_data *) datap;
+  struct curl_dns_cache_entry *c = (struct curl_dns_cache_entry *) hc;
+  
+  if (data->now - c->timestamp < data->cache_timeout) {
+    return 0;
+  }
+  
+  return 1;
+}
+
+static void
+_curl_hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
+{
+  struct _curl_hostcache_prune_data user;
+
+  user.cache_timeout = cache_timeout;
+  user.now = now;
+  
+  curl_hash_clean_with_criterium(hostcache, 
+                                 (void *) &user, 
+                                 _curl_hostcache_timestamp_remove);
+}
+
 /* Macro to save redundant free'ing of entry_id */
 #define _hostcache_return(__v) \
 { \
@@ -175,6 +207,13 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
     return Curl_getaddrinfo(data, hostname, port, bufp);
   }
 
+  time(&now);
+
+  /* Remove outdated entries from the hostcache */
+  _curl_hostcache_prune(data->hostcache, 
+                        data->set.dns_cache_timeout, 
+                        now);
+
   /* Create an entry id, based upon the hostname and port */
   entry_len = strlen(hostname);
   entry_id = _create_hostcache_id(hostname, port, &entry_len);
@@ -184,19 +223,9 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
     return Curl_getaddrinfo(data, hostname, port, bufp);
   }
   
-  time(&now);
   /* See if its already in our dns cache */
   if (entry_id && curl_hash_find(data->hostcache, entry_id, entry_len+1, (void **) &p)) {
-    /* Do we need to check for a cache timeout? */
-    if (data->set.dns_cache_timeout != -1) {
-      /* Return if the entry has not timed out */
-      if ((now - p->timestamp) < data->set.dns_cache_timeout) {
-        _hostcache_return(p->addr);
-      }
-    }
-    else {
-      _hostcache_return(p->addr);
-    }
+    _hostcache_return(p->addr);
   }
 
   /* Create a new cache entry */
