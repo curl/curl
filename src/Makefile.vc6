@@ -30,8 +30,8 @@ ZLIB_PATH  = ../../zlib-1.1.4
 
 CFLAGS = /I "../lib" /I "../include" /I "$(ZLIB_PATH)" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 LFLAGS = /nologo /libpath:"$(ZLIB_PATH)" /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
-LINKLIBS = ws2_32.lib libcurl.lib winmm.lib zlib.lib
-LINKLIBS_DEBUG = ws2_32.lib libcurld.lib winmm.lib zlib.lib
+LINKLIBS = wsock32.lib libcurl.lib winmm.lib zlib.lib
+LINKLIBS_DEBUG = wsock32.lib libcurld.lib winmm.lib zlib.lib
 
 RELEASE_OBJS= \
 	hugehelpr.obj \
@@ -58,6 +58,7 @@ OPENSSL_PATH   = ../../openssl-0.9.7a
 !ENDIF
 LFLAGSSSL = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSLLIBS   = libeay32.lib ssleay32.lib gdi32.lib 
+CFLAGS = $(CFLAGS) -DUSE_SSLEAY
 LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
 LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS)
 LFLAGS = $(LFLAGS) $(LFLAGSSSL)
@@ -100,12 +101,13 @@ maind.obj: main.c
 	$(CCD) $(CFLAGS) /Fo"$@" main.c
 
 clean:
-	-@erase homedir.obj
-	-@erase hugehelp.obj
-	-@erase main.obj
+	-@erase $(RELEASE_OBJS)
+	-@erase $(DEBUG_OBJS)
 	-@erase vc60.idb
 	-@erase vc60.pdb
 	-@erase vc60.pch
+	-@erase vc70.idb
+	-@erase vc70.pch
 	-@erase curl.ilk
 	-@erase curl.pdb
 

@@ -48,7 +48,6 @@ CFLAGS = /I "." /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /
 LNKDLL    = link.exe /DLL  /def:libcurl.def
 LNKLIB    = link.exe /lib
 LFLAGS    = /nologo
-LINKLIBS  = ws2_32.lib winmm.lib
 SSLLIBS   = libeay32.lib ssleay32.lib
 #  RSAglue.lib was formerly needed in the SSLLIBS
 CFGSET    = FALSE
@@ -84,7 +83,6 @@ TARGET   =$(LIB_NAME).lib
 DIROBJ   =.\$(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32"
 LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
-LINKLIBS = $(LINKLIBS)
 CC       = $(CCNODBG) $(CFLAGSSSL)
 CFGSET   = TRUE
 !ENDIF
@@ -97,7 +95,6 @@ TARGET   =$(LIB_NAME).dll
 DIROBJ   =.\$(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32dll"
 LNK      = $(LNKDLL) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
-LINKLIBS = $(LINKLIBS) $(SSLLIBS)
 CC       = $(CCNODBG)  $(CFLAGSSSL)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
@@ -110,7 +107,6 @@ TARGET   =$(LIB_NAME).lib
 DIROBJ   =.\$(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32dll"
 LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
-LINKLIBS = $(LINKLIBS) $(SSLLIBS)
 CC       = $(CCNODBG)  $(CFLAGSSSL)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
@@ -147,7 +143,6 @@ RESOURCE = $(DIROBJ)\libcurl.res
 TARGET   = $(LIB_NAME_DEBUG).lib
 DIROBJ   =.\$(CFG)
 LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
-LINKLIBS = $(LINKLIBS)
 CC       = $(CCDEBUG) $(CFLAGSSSL)
 CFGSET   = TRUE
 !ENDIF
@@ -160,7 +155,6 @@ TARGET   =$(LIB_NAME_DEBUG).dll
 DIROBJ   =.\$(CFG)
 LFLAGSSSL = /LIBPATH:$(OPENSSL_PATH)/out32dll
 LNK      = $(LNKDLL) $(LFLAGSSSL) /DEBUG /out:$(TARGET) /IMPLIB:"$(LIB_NAME_DEBUG).lib" /PDB:"$(LIB_NAME_DEBUG).pdb"
-LINKLIBS = $(LINKLIBS) $(SSLLIBS)
 CC       = $(CCDEBUG) $(CFLAGSSSL)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
@@ -234,7 +228,7 @@ all : $(TARGET)
 
 
 $(TARGET): $(X_OBJS)
-	$(LNK) $(LFLAGS) $(LINKLIBS) $(X_OBJS)
+	$(LNK) $(LFLAGS) $(X_OBJS)
 
 $(X_OBJS): $(DIROBJ)
 

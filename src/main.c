@@ -2647,8 +2647,11 @@ operate(struct Configurable *config, int argc, char *argv[])
 
   errorbuffer[0]=0; /* prevent junk from being output */
 
-  main_init(); /* inits */
-
+  /* inits */
+  if (main_init() != CURLE_OK) {
+    helpf("error initializing curl library\n");
+    return CURLE_FAILED_INIT;
+  }
   config->showerror=TRUE;
   config->conf=CONF_DEFAULT;
   config->use_httpget=FALSE;

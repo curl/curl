@@ -45,7 +45,7 @@
 
 /* For MSVC7 we can use _strtoi64() which seems to be a strtoll() clone */
 #if defined(_MSC_VER) && (_MSC_VER >= 1300)
-#define strtoll _strtoi64
+#define strtoofft _strtoi64
 #else /* MSVC7 or later */
 curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
 #define strtoofft curlx_strtoll
