@@ -97,71 +97,57 @@ typedef int (*curl_passwd_callback)(void *clientp,
 
 typedef enum {
   CURLE_OK = 0,
-  CURLE_UNSUPPORTED_PROTOCOL,
-  CURLE_FAILED_INIT,
-  CURLE_URL_MALFORMAT,
-  CURLE_URL_MALFORMAT_USER,
-  CURLE_COULDNT_RESOLVE_PROXY,
-  CURLE_COULDNT_RESOLVE_HOST,
-  CURLE_COULDNT_CONNECT,
-  CURLE_FTP_WEIRD_SERVER_REPLY,
-  CURLE_FTP_ACCESS_DENIED,
-  CURLE_FTP_USER_PASSWORD_INCORRECT,
-  CURLE_FTP_WEIRD_PASS_REPLY,
-  CURLE_FTP_WEIRD_USER_REPLY,
-  CURLE_FTP_WEIRD_PASV_REPLY,
-  CURLE_FTP_WEIRD_227_FORMAT,
-  CURLE_FTP_CANT_GET_HOST,
-  CURLE_FTP_CANT_RECONNECT,
-  CURLE_FTP_COULDNT_SET_BINARY,
-  CURLE_PARTIAL_FILE,
-  CURLE_FTP_COULDNT_RETR_FILE,
-  CURLE_FTP_WRITE_ERROR,
-  CURLE_FTP_QUOTE_ERROR,
-  CURLE_HTTP_NOT_FOUND,
-  CURLE_WRITE_ERROR,
+  CURLE_UNSUPPORTED_PROTOCOL,    /* 1 */
+  CURLE_FAILED_INIT,             /* 2 */
+  CURLE_URL_MALFORMAT,           /* 3 */
+  CURLE_URL_MALFORMAT_USER,      /* 4 */
+  CURLE_COULDNT_RESOLVE_PROXY,   /* 5 */
+  CURLE_COULDNT_RESOLVE_HOST,    /* 6 */
+  CURLE_COULDNT_CONNECT,         /* 7 */
+  CURLE_FTP_WEIRD_SERVER_REPLY,  /* 8 */
+  CURLE_FTP_ACCESS_DENIED,       /* 9 */
+  CURLE_FTP_USER_PASSWORD_INCORRECT, /* 10 */
+  CURLE_FTP_WEIRD_PASS_REPLY,    /* 11 */
+  CURLE_FTP_WEIRD_USER_REPLY,    /* 12 */
+  CURLE_FTP_WEIRD_PASV_REPLY,    /* 13 */
+  CURLE_FTP_WEIRD_227_FORMAT,    /* 14 */
+  CURLE_FTP_CANT_GET_HOST,       /* 15 */
+  CURLE_FTP_CANT_RECONNECT,      /* 16 */
+  CURLE_FTP_COULDNT_SET_BINARY,  /* 17 */
+  CURLE_PARTIAL_FILE,            /* 18 */
+  CURLE_FTP_COULDNT_RETR_FILE,   /* 19 */
+  CURLE_FTP_WRITE_ERROR,         /* 20 */
+  CURLE_FTP_QUOTE_ERROR,         /* 21 */
+  CURLE_HTTP_NOT_FOUND,          /* 22 */
+  CURLE_WRITE_ERROR,             /* 23 */
+  CURLE_MALFORMAT_USER,          /* 24 - user name is illegally specified */
+  CURLE_FTP_COULDNT_STOR_FILE,   /* 25 - failed FTP upload */
+  CURLE_READ_ERROR,              /* 26 - could open/read from file */
+  CURLE_OUT_OF_MEMORY,           /* 27 */
+  CURLE_OPERATION_TIMEOUTED,     /* 28 - the timeout time was reached */
+  CURLE_FTP_COULDNT_SET_ASCII,   /* 29 - TYPE A failed */
+  CURLE_FTP_PORT_FAILED,         /* 30 - FTP PORT operation failed */
+  CURLE_FTP_COULDNT_USE_REST,    /* 31 - the REST command failed */
+  CURLE_FTP_COULDNT_GET_SIZE,    /* 32 - the SIZE command failed */
+  CURLE_HTTP_RANGE_ERROR,        /* 33 - RANGE "command" didn't work */
+  CURLE_HTTP_POST_ERROR,         /* 34 */
+  CURLE_SSL_CONNECT_ERROR,       /* 35 - wrong when connecting with SSL */
+  CURLE_FTP_BAD_DOWNLOAD_RESUME, /* 36 - couldn't resume download */
+  CURLE_FILE_COULDNT_READ_FILE,  /* 37 */
+  CURLE_LDAP_CANNOT_BIND,        /* 38 */
+  CURLE_LDAP_SEARCH_FAILED,      /* 39 */
+  CURLE_LIBRARY_NOT_FOUND,       /* 40 */
+  CURLE_FUNCTION_NOT_FOUND,      /* 41 */
+  CURLE_ABORTED_BY_CALLBACK,     /* 42 */
+  CURLE_BAD_FUNCTION_ARGUMENT,   /* 43 */
+  CURLE_BAD_CALLING_ORDER,       /* 44 */
+  CURLE_HTTP_PORT_FAILED,        /* 45 - HTTP Interface operation failed */
+  CURLE_BAD_PASSWORD_ENTERED,    /* 46 - my_getpass() returns fail */
+  CURLE_TOO_MANY_REDIRECTS ,     /* 47 - catch endless re-direct loops */
+  CURLE_UNKNOWN_TELNET_OPTION,   /* 48 - User specified an unknown option */
+  CURLE_TELNET_OPTION_SYNTAX ,   /* 49 - Malformed telnet option */
 
-  CURLE_MALFORMAT_USER, /* the user name is illegally specified */
-  CURLE_FTP_COULDNT_STOR_FILE, /* failed FTP upload */
-  CURLE_READ_ERROR, /* could open/read from file */
-
-  CURLE_OUT_OF_MEMORY,
-  CURLE_OPERATION_TIMEOUTED, /* the timeout time was reached */
-  CURLE_FTP_COULDNT_SET_ASCII, /* TYPE A failed */
-
-  CURLE_FTP_PORT_FAILED, /* FTP PORT operation failed */
-
-  CURLE_FTP_COULDNT_USE_REST, /* the REST command failed */
-  CURLE_FTP_COULDNT_GET_SIZE, /* the SIZE command failed */
-
-  CURLE_HTTP_RANGE_ERROR, /* The RANGE "command" didn't seem to work */
-
-  CURLE_HTTP_POST_ERROR,
-
-  CURLE_SSL_CONNECT_ERROR, /* something was wrong when connecting with SSL */
-
-  CURLE_FTP_BAD_DOWNLOAD_RESUME, /* couldn't resume download */
-
-  CURLE_FILE_COULDNT_READ_FILE,
-
-  CURLE_LDAP_CANNOT_BIND,
-  CURLE_LDAP_SEARCH_FAILED,
-  CURLE_LIBRARY_NOT_FOUND,
-  CURLE_FUNCTION_NOT_FOUND,
-  
-  CURLE_ABORTED_BY_CALLBACK,
-  CURLE_BAD_FUNCTION_ARGUMENT,
-  CURLE_BAD_CALLING_ORDER,
-
-  CURLE_HTTP_PORT_FAILED, /* HTTP Interface operation failed */
-
-  CURLE_BAD_PASSWORD_ENTERED, /* when the my_getpass() returns fail */
-  CURLE_TOO_MANY_REDIRECTS , /* catch endless re-direct loops */
-
-  CURLE_UNKNOWN_TELNET_OPTION , /* User specified an unknown option */
-  CURLE_TELNET_OPTION_SYNTAX , /* Malformed telnet option */
-
-  CURL_LAST
+  CURL_LAST /* never use! */
 } CURLcode;
 
 /* This is just to make older programs not break: */
