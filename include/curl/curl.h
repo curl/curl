@@ -94,6 +94,15 @@ extern "C" {
 /* Check a range of defines to detect large file support. On Linux it seems
    none of these are set by default, so if you don't explicitly switches on
    large file support, this define will be made for "small file" support. */
+#ifndef _FILE_OFFSET_BITS
+#define _FILE_OFFSET_BITS 0 /* to prevent warnings in the check below */
+#define UNDEF_FILE_OFFSET_BITS
+#endif
+#ifndef FILESIZEBITS
+#define FILESIZEBITS 0 /* to prevent warnings in the check below */
+#define UNDEF_FILESIZEBITS
+#endif
+
 #if defined(_LARGE_FILES) || (_FILE_OFFSET_BITS > 32) || (FILESIZEBITS > 32) \
    || defined(_LARGEFILE_SOURCE) || defined(_LARGEFILE64_SOURCE)
   /* For now, we assume at least one of these to be set for large files to
@@ -104,6 +113,16 @@ extern "C" {
 #endif
 #endif /* GCC or Watcom on Windows */
 #endif /* MSC_VER */
+
+#ifdef UNDEF_FILE_OFFSET_BITS
+/* this was defined above for our checks, undefine it again */
+#undef _FILE_OFFSET_BITS
+#endif
+
+#ifdef UNDEF_FILESIZEBITS
+/* this was defined above for our checks, undefine it again */
+#undef FILESIZEBITS
+#endif
 
 struct curl_httppost {
   struct curl_httppost *next;       /* next entry in the list */
