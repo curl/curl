@@ -1,0 +1,14 @@
+These are problems known to exist at the time of this release. Feel free to
+join in and help us correct one or more of these! Also be sure to check the
+changelog of the current development status, as one or more of these problems
+may have been fixed since this was written!
+
+* curl_formadd() fails on OSF1. Why? Fix! Need help from OSF1 dudes.
+  https://sourceforge.net/tracker/index.php?func=detail&aid=524433&group_id=976&atid=100976
+
+* Running 'make test' on Mac OS X gives 4 errors. This seems to be related
+  to some kind of libtool problem:
+  http://curl.haxx.se/mail/archive-2002-03/0029.html and
+  http://curl.haxx.se/mail/archive-2002-03/0033.html
+
+* libcurl does not deal nicely with files larger than 2GB
