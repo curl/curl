@@ -183,6 +183,24 @@ fi
 echo "testcurl: display lib/config.h"
 grep "^ *#" lib/config.h
 
+if { grep USE_ARES lib/config.h; } then
+  echo "testcurl: setup to build ares"
+
+  # make an ares dir
+  mkdir ares
+
+  # run the ares configure
+  cd ares
+  ../../curl/ares/configure 2>&1
+
+  echo "testcurl: build ares"
+  make
+  echo "testcurl: ares is now built"
+
+  # cd back to the curl build dir
+  cd ..
+fi
+
 echo "testcurl: now run make"
 make -i 2>&1 | sed -e "s:$pwd::g"
 
