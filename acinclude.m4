@@ -140,8 +140,12 @@ AC_DEFUN([TYPE_SOCKLEN_T],
          for arg2 in "struct sockaddr" void; do
             for t in int size_t unsigned long "unsigned long"; do
                AC_TRY_COMPILE([
+                  #ifdef HAVE_SYS_TYPES_H
                   #include <sys/types.h>
+                  #endif
+                  #ifdef HAVE_SYS_SOCKET_H
                   #include <sys/socket.h>
+                  #endif
 
                   int getpeername (int, $arg2 *, $t *);
                ],[
@@ -177,9 +181,15 @@ AC_DEFUN([TYPE_IN_ADDR_T],
          curl_cv_in_addr_t_equiv=
          for t in "unsigned long" int size_t unsigned long; do
             AC_TRY_COMPILE([
+               #ifdef HAVE_SYS_TYPES_H
                #include <sys/types.h>
+               #endif
+               #ifdef HAVE_SYS_SOCKET_H
                #include <sys/socket.h>
+               #endif
+               #ifdef HAVE_ARPA_INET_H
                #include <arpa/inet.h>
+               #endif
             ],[
                $t data = inet_addr ("1.2.3.4");
             ],[
