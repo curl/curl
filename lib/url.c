@@ -67,7 +67,7 @@
 #include <sys/select.h>
 #endif
 
-#ifdef	VMS
+#ifdef VMS
 #include <in.h>
 #include <inet.h>
 #endif
