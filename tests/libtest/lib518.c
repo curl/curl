@@ -43,6 +43,10 @@
 static int rlimit(void)
 {
   struct rlimit rl;
+
+  fprintf(stderr, "NUM_OPEN: %d\n", NUM_OPEN);
+  fprintf(stderr, "NUM_NEEDED: %d\n", NUM_NEEDED);
+
   /* get open file limits */
   if (getrlimit(RLIMIT_NOFILE, &rl) == -1) {
     fprintf(stderr, "warning: getrlimit: failed to get RLIMIT_NOFILE\n");
@@ -51,7 +55,8 @@ static int rlimit(void)
 
   /* check that hard limit is high enough */
   if (rl.rlim_max < NUM_NEEDED) {
-    fprintf(stderr, "warning: RLIMIT_NOFILE hard limit is too low\n");
+    fprintf(stderr, "warning: RLIMIT_NOFILE hard limit %d < %d\n",
+            (int)rl.rlim_max, NUM_NEEDED);
     return -1;
   }
 
