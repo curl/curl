@@ -900,8 +900,8 @@ CURLcode _ftp(struct connectdata *conn)
 #else
     const int niflags = NI_NUMERICHOST | NI_NUMERICSERV;
 #endif
-    char *ap;
-    char *pp;
+    unsigned char *ap;
+    unsigned char *pp;
     int alen, plen;
     char portmsgbuf[4096], tmp[4096];
 
@@ -968,17 +968,17 @@ CURLcode _ftp(struct connectdata *conn)
 
       switch (sa->sa_family) {
       case AF_INET:
-	ap = (char *)&((struct sockaddr_in *)&ss)->sin_addr;
+	ap = (unsigned char *)&((struct sockaddr_in *)&ss)->sin_addr;
 	alen = sizeof(((struct sockaddr_in *)&ss)->sin_addr);
-	pp = (char *)&((struct sockaddr_in *)&ss)->sin_port;
+	pp = (unsigned char *)&((struct sockaddr_in *)&ss)->sin_port;
 	plen = sizeof(((struct sockaddr_in *)&ss)->sin_port);
 	lprtaf = 4;
 	eprtaf = 1;
 	break;
       case AF_INET6:
-	ap = (char *)&((struct sockaddr_in6 *)&ss)->sin6_addr;
+	ap = (unsigned char *)&((struct sockaddr_in6 *)&ss)->sin6_addr;
 	alen = sizeof(((struct sockaddr_in6 *)&ss)->sin6_addr);
-	pp = (char *)&((struct sockaddr_in6 *)&ss)->sin6_port;
+	pp = (unsigned char *)&((struct sockaddr_in6 *)&ss)->sin6_port;
 	plen = sizeof(((struct sockaddr_in6 *)&ss)->sin6_port);
 	lprtaf = 6;
 	eprtaf = 2;
@@ -1172,6 +1172,7 @@ again:;
   }
   else { /* we use the PASV command */
 #if 0
+    /* no support for IPv6 passive mode yet */
     char *mode[] = { "EPSV", "LPSV", "PASV", NULL };
     int results[] = { 229, 228, 227, 0 };
 #else
