@@ -209,14 +209,8 @@ grep "^ *#" lib/config.h
 if { grep USE_ARES lib/config.h; } then
   echo "testcurl: setup to build ares"
 
-  # make an ares dir
-  mkdir ares
-
-  # run the ares configure
-  cd ares
-  ../../$CURLDIR/ares/configure 2>&1
-
   echo "testcurl: build ares"
+  cd ares
   make
   echo "testcurl: ares is now built"
 
