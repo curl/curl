@@ -483,6 +483,15 @@ options.
 You can override the default POST Content-Type: header by setting your own
 with \fICURLOPT_HTTPHEADER\fP.
 
+Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
+You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
+
+If you use POST to a HTTP 1.1 server, you can send data without knowing the
+size before starting the POST if you use chunked encoding. You enable this by
+adding a header like "Transfer-Encoding: chunked" with
+\fICURLOPT_HTTPHEADER\fP. With HTTP 1.0 or without chunked transfer, you must
+specify the size in the request.
+
 NOTE: if you have issued a POST request and want to make a HEAD or GET
 instead, you must explictly pick the new request type using
 \fICURLOPT_NOBODY\fP or \fICURLOPT_HTTPGET\fP or similar.
@@ -496,6 +505,9 @@ This POST is a normal application/x-www-form-urlencoded kind (and libcurl will
 set that Content-Type by default when this option is used), which is the most
 commonly used one by HTML forms. See also the \fICURLOPT_POST\fP. Using
 \fICURLOPT_POSTFIELDS\fP implies \fICURLOPT_POST\fP.
+
+Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
+You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
 
 \fBNote:\fP to make multipart/formdata posts (aka rfc1867-posts), check out
 the \fICURLOPT_HTTPPOST\fP option.
@@ -517,6 +529,9 @@ list of 'struct HttpPost' structs properly filled in. The best and most
 elegant way to do this, is to use \fIcurl_formadd(3)\fP as documented. The
 data in this list must remain intact until you close this curl handle again
 with \fIcurl_easy_cleanup(3)\fP.
+
+Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
+You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
 .IP CURLOPT_REFERER
 Pass a pointer to a zero terminated string as parameter. It will be used to
 set the Referer: header in the http request sent to the remote server. This
@@ -762,9 +777,19 @@ libcurl what the expected size of the infile is.  This value should be passed
 as a curl_off_t. (Added in 7.11.0)
 .IP CURLOPT_UPLOAD
 A non-zero parameter tells the library to prepare for an upload. The
-\fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE_LARGE\fP are also interesting
-for uploads. If the protocol is HTTP, uploading means using the PUT request
-unless you tell libcurl otherwise.
+\fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZEE\fP or
+\fICURLOPT_INFILESIZE_LARGE\fP are also interesting for uploads. If the
+protocol is HTTP, uploading means using the PUT request unless you tell
+libcurl otherwise.
+
+Using PUT with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
+You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
+
+If you use PUT to a HTTP 1.1 server, you can upload data without knowing the
+size before starting the transfer if you use chunked encoding. You enable this
+by adding a header like "Transfer-Encoding: chunked" with
+\fICURLOPT_HTTPHEADER\fP. With HTTP 1.0 or without chunked transfer, you must
+specify the size.
 .IP CURLOPT_MAXFILESIZE
 Pass a long as parameter. This allows you to specify the maximum size (in
 bytes) of a file to download. If the file requested is larger than this value,
