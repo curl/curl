@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel(30 January 2004)
+- I added test case 510 which is a custom program that does a POST using a
+  read callback, with chunked transfer-encoding.
+
+- Adjusted one of the MPE/iX changes as it made test case 504 fail all over.
+
 - Added --socks as a recognized option. It works just like --proxy but sets a
   SOCKS5 proxy to use. SOCKS5 support has been available in libcurl for a
   while, just not provided by the curl tool. This does not currently work for
