@@ -787,7 +787,6 @@ cert_hostcheck(const char *certname, const char *hostname)
 static CURLcode verifyhost(struct connectdata *conn,
                            X509 *server_cert)
 {
-  char peer_CN[257];
   bool matched = FALSE; /* no alternative match yet */
   int target = GEN_DNS; /* target type, GEN_DNS or GEN_IPADD */
   int addrlen = 0;
@@ -872,13 +871,36 @@ static CURLcode verifyhost(struct connectdata *conn,
  
   if(matched)
     /* an alternative name matched the server hostname */
-    infof(data, "\t subjectAltName: %s matched\n", conn->host.name);
+    infof(data, "\t subjectAltName: %s matched\n", conn->host.dispname);
   else {
-    bool obtain=FALSE;
-    if(X509_NAME_get_text_by_NID(X509_get_subject_name(server_cert),
-                                 NID_commonName,
-                                 peer_CN,
-                                 sizeof(peer_CN)) < 0) {
+    /* we have to look to the last occurence of a commonName in the
+       distinguished one to get the most significant one. */
+    int j,i=-1 ;
+
+/* The following is done because of a bug in 0.9.6b */
+  
+    unsigned char *nulstr = (unsigned char *)"";
+    unsigned char *peer_CN = nulstr;
+
+    X509_NAME *name = X509_get_subject_name(server_cert) ;   
+    if (name) 
+      while ((j=X509_NAME_get_index_by_NID(name,NID_commonName,i))>=0) 
+        i=j; 
+
+    /* we have the name entry and we will now convert this to a string
+       that we can use for comparison. Doing this we support BMPstring,
+       UTF8 etc. */
+
+    if (i>=0) {
+      j = ASN1_STRING_to_UTF8(&peer_CN,
+                              X509_NAME_ENTRY_get_data(
+                                X509_NAME_get_entry(name,i)));
+    }
+   
+    if (peer_CN == nulstr)
+       peer_CN = NULL;
+
+    if (!peer_CN) {
       if(data->set.ssl.verifyhost > 1) {
         failf(data,
               "SSL: unable to obtain common name from peer certificate");
@@ -890,25 +912,22 @@ static CURLcode verifyhost(struct connectdata *conn,
         infof(data, "\t common name: WARNING couldn't obtain\n");
       }
     }
-    else
-      obtain = TRUE;
-         
-    if(obtain) {
-      if(!cert_hostcheck(peer_CN, conn->host.name)) {
-        if(data->set.ssl.verifyhost > 1) {
-          failf(data, "SSL: certificate subject name '%s' does not match "
-                "target host name '%s'", peer_CN, conn->host.name);
-          return CURLE_SSL_PEER_CERTIFICATE;
-        }
-        else
-          infof(data, "\t common name: %s (does not match '%s')\n",
-                peer_CN, conn->host.name);
+    else if(!cert_hostcheck((const char *)peer_CN, conn->host.name)) {
+      if(data->set.ssl.verifyhost > 1) {
+        failf(data, "SSL: certificate subject name '%s' does not match "
+              "target host name '%s'", peer_CN, conn->host.dispname);
+        OPENSSL_free(peer_CN);
+        return CURLE_SSL_PEER_CERTIFICATE ;
       }
       else
-        infof(data, "\t common name: %s (matched)\n", peer_CN);
+        infof(data, "\t common name: %s (does not match '%s')\n",
+              peer_CN, conn->host.dispname);
     }
-  }
-
+    else {
+      infof(data, "\t common name: %s (matched)\n", peer_CN);
+      OPENSSL_free(peer_CN);
+    }
+  } 
   return CURLE_OK;
 }
 #endif
