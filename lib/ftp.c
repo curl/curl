@@ -289,13 +289,13 @@ int Curl_GetFTPResponse(int sockfd,
   /* FIXME: some errorchecking perhaps... ***/
   switch(code) {
   case 631:
-    sec_read_msg(conn, buf, prot_safe);
+    Curl_sec_read_msg(conn, buf, prot_safe);
     break;
   case 632:
-    sec_read_msg(conn, buf, prot_private);
+    Curl_sec_read_msg(conn, buf, prot_private);
     break;
   case 633:
-    sec_read_msg(conn, buf, prot_confidential);
+    Curl_sec_read_msg(conn, buf, prot_confidential);
     break;
   default:
     /* normal ftp stuff we pass through! */
@@ -392,13 +392,13 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   if(data->bits.krb4) {
 
     /* request data protection level (default is 'clear') */
-    sec_request_prot(conn, "private");
+    Curl_sec_request_prot(conn, "private");
 
     /* We set private first as default, in case the line below fails to
        set a valid level */
-    sec_request_prot(conn, data->krb4_level);
+    Curl_sec_request_prot(conn, data->krb4_level);
 
-    if(sec_login(conn) != 0)
+    if(Curl_sec_login(conn) != 0)
       infof(data, "Logging in with password in cleartext!\n");
     else
       infof(data, "Authentication successful\n");
@@ -453,13 +453,13 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 	 * now set the requested protection level
 	 */
     if(conn->sec_complete)
-      sec_set_protection_level(conn);
+      Curl_sec_set_protection_level(conn);
 
     /* we may need to issue a KAUTH here to have access to the files
      * do it if user supplied a password
      */
     if(conn->data->passwd && *conn->data->passwd)
-      krb_kauth(conn);
+      Curl_krb_kauth(conn);
 #endif
   }
   else {
@@ -554,7 +554,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   }
 
 #ifdef KRB4
-  sec_fflush_fd(conn, conn->secondarysocket);
+  Curl_sec_fflush_fd(conn, conn->secondarysocket);
 #endif
   /* shut down the socket to inform the server we're done */
   sclose(conn->secondarysocket);

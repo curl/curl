@@ -770,7 +770,7 @@ CURLcode Curl_http(struct connectdata *conn)
            * actually send. Let's make a NULL pointer equal "" here. Good/bad
            * ?
            */
-          data->postfields = "";
+          data->postfields = (char *)"";
           data->postfieldsize = 0; /* it might been set to something illegal,
                                       anything > 0 would be! */
         }

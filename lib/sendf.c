@@ -201,7 +201,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
 #endif
 #ifdef KRB4
     if(conn->sec_complete) {
-      bytes_written = sec_write(conn, sockfd, mem, len);
+      bytes_written = Curl_sec_write(conn, sockfd, mem, len);
     }
     else
 #endif /* KRB4 */
@@ -280,7 +280,7 @@ CURLcode Curl_read(struct connectdata *conn, int sockfd,
 #endif
 #ifdef KRB4
     if(conn->sec_complete)
-      nread = sec_read(conn, sockfd, buf, buffersize);
+      nread = Curl_sec_read(conn, sockfd, buf, buffersize);
     else
 #endif
       nread = sread (sockfd, buf, buffersize);
