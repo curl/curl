@@ -327,6 +327,25 @@ AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
 )
 
 dnl **********************************************************************
+dnl Check for the presence of the winmm library.
+dnl **********************************************************************
+
+AC_MSG_CHECKING([for timeGetTime in winmm])
+my_ac_save_LIBS=$LIBS
+LIBS="-lwinmm $LIBS"
+AC_TRY_LINK([#include <windef.h>
+             #include <mmsystem.h>
+             ],
+             [timeGetTime();],
+             [ dnl worked!
+             AC_MSG_RESULT([yes])
+             ],
+             [ dnl failed, restore LIBS
+             LIBS=$my_ac_save_LIBS
+             AC_MSG_RESULT(no)]
+           )
+
+dnl **********************************************************************
 dnl Checks for IPv6
 dnl **********************************************************************
 
