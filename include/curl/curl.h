@@ -48,18 +48,14 @@
 #define LIBCURL_VERSION_NUM 0x070a06
 
 #include <stdio.h>
-/* The include stuff here is mainly for time_t! */
+
+/* The include stuff here below is mainly for time_t! */
 #ifdef vms
 # include <types.h>
 # include <time.h>
 #else
 # include <sys/types.h>
-# ifdef TIME_WITH_SYS_TIME
-#  include <sys/time.h>
-#  include <time.h>
-# else
-#  include <sys/time.h>
-# endif
+# include <time.h>
 #endif /* defined (vms) */
 
 #ifndef TRUE
