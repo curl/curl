@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (15 March 2004)
+- Lots of libcurl man pages were updated to contain references to other man
+  pages the recognized way so that they appear as nice hyperlinks in the HTML
+  versions.
+
 - buildconf now checks the m4 version too, since autoconf requires a GNU m4
   version to build proper configure scripts.
 
