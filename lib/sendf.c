@@ -347,6 +347,9 @@ int Curl_read(struct connectdata *conn,
       case SSL_ERROR_WANT_WRITE:
         /* if there's data pending, then we re-invoke SSL_read() */
         break;
+      default:
+        failf(conn->data, "SSL read error: %d", err);
+        return CURLE_READ_ERROR;
       }
     } while(loop);
     if(loop && SSL_pending(conn->ssl.handle))
