@@ -164,16 +164,18 @@ else
 
 dnl check for a few thread-safe functions
 
-AC_CHECK_FUNCS( gethostbyname_r \
-                gethostbyaddr_r \
-                localtime_r \
-                inet_ntoa_r
-)
+  AC_CHECK_FUNCS( gethostbyname_r \
+                  gethostbyaddr_r \
+                  localtime_r \
+                  inet_ntoa_r
+  )
 
-dnl **********************************************************************
-dnl Time to make a check for gethostbyname_r
-dnl If it exists, it may use one of three different interfaces
-dnl **********************************************************************
+  if test "$ac_cv_func_gethostbyname_r" = "yes"; then
+
+  dnl **********************************************************************
+  dnl Time to make a check for gethostbyname_r
+  dnl If it exists, it may use one of three different interfaces
+  dnl **********************************************************************
 
     AC_MSG_CHECKING(for gethostbyname_r)
     if test -z "$ac_cv_gethostbyname_args"; then
@@ -312,7 +314,10 @@ dnl **********************************************************************
         AC_MSG_RESULT([yes, and it takes $ac_cv_gethostbyaddr_args arguments])
     fi
 
+  fi
+
 fi
+
 
 dnl **********************************************************************
 dnl Back to "normal" configuring
@@ -369,7 +374,7 @@ AC_DEFINE_UNQUOTED(OS, "${host}")
 dnl Checks for library functions.
 dnl AC_PROG_GCC_TRADITIONAL
 AC_TYPE_SIGNAL
-AC_FUNC_VPRINTF
+dnl AC_FUNC_VPRINTF
 AC_CHECK_FUNCS( socket \
                 select \
                 strdup \
@@ -394,6 +399,10 @@ AC_CHECK_FUNCS( socket \
                 RAND_status \
                 RAND_screen
 )
+
+if test "$ac_cv_func_select" != "yes"; then
+  AC_MSG_ERROR(Can't work without an existing socket() function)
+fi
 
 AC_PATH_PROG( PERL, perl, , 
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
