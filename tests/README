@@ -13,6 +13,9 @@ Run:
   'make test'. This invokes the 'runtests.sh' shell script. Edit the top
   variables of that script in case you have some specific needs.
 
+  The script breaks on the first test that doesn't do OK. Run the script
+  with -v for more verbose output.
+
 Logs:
   All logs are generated in the logs/ subdirctory (it is emtpied first
   in the runtests.sh script)
@@ -29,4 +32,12 @@ Data:
     httpN.txt: the full dump of the HTTP protocol communication that curl is
                expected to use when performing this test
 
-    replyN.txt: the full dump the server should reply to curl for this test
+    replyN.txt: the full dump the server should reply to curl for this test.
+               If the final result that curl should've got is not in this
+               file, you can instead name the file replyN0001.txt. This enables
+               you to fiddle more. ;-)
+
+FIX:
+
+  * Make httpserver.pl work when we PUT without Content-Length:
+

@@ -1,14 +1,23 @@
 #!/usr/bin/perl
 use Socket;
 use Carp;
+use FileHandle;
 
 sub spawn;  # forward declaration
 sub logmsg { #print "$0 $$: @_ at ", scalar localtime, "\n"
  }
 
-my $port = shift || $ARGV[0];
+my $port = $ARGV[0];
 my $proto = getprotobyname('tcp');
 $port = $1 if $port =~ /(\d+)/; # untaint port number
+
+if($ARGV[1] =~ /^ftp$/i) {
+    $protocol="FTP";
+}
+else {
+    $protocol="HTTP";
+}
+
 
 socket(Server, PF_INET, SOCK_STREAM, $proto)|| die "socket: $!";
     setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
@@ -16,7 +25,7 @@ socket(Server, PF_INET, SOCK_STREAM, $proto)|| die "socket: $!";
 bind(Server, sockaddr_in($port, INADDR_ANY))|| die "bind: $!";
 listen(Server,SOMAXCONN) || die "listen: $!";
 
-logmsg "server started on port $port";
+print "$protocol server started on port $port\n";
 
 open(PID, ">.server.pid");
 print PID $$;
@@ -46,8 +55,53 @@ for ( $waitedpid = 0;
     # this code is forked and run
     spawn sub {
         my ($request, $path, $ver, $left, $cl);
+
+        if($protocol eq "FTP") {
+
+            # < 220 pm1 FTP server (SunOS 5.7) ready.
+            # > USER anonymous
+            # < 331 Guest login ok, send ident as password.
+            # > PASS curl_by_daniel@haxx.se
+            # < 230 Guest login ok, access restrictions apply.
+            # * We have successfully logged in
+            # * Connected to pm1 (193.15.23.1)
+            # > PASV
+            # < 227 Entering Passive Mode (193,15,23,1,231,59)
+            # * Connecting to pm1 (193.15.23.1) port 59195
+            # > TYPE A
+            # < 200 Type set to A.
+            # > LIST
+            # < 150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes).
+            # * Getting file with size: -1
+
+            print "220-running the curl suite test server\r\n",
+            "220-running the curl suite test server\r\n",
+            "220 running the curl suite test server\r\n";
+
+            STDOUT->autoflush(1);
+
+            while(1) {
+
+                last unless defined ($_ = <STDIN>);
+
+                # Remove trailing CRLF.
+                s/[\n\r]+$//;
+
+                unless (m/^([A-Z]{3,4})\s?(.*)/i)
+                {
+                    print STDERR
+                        "badly formed command received: ".$_;
+                    exit 0;
+                }
+                 
+                print STDERR "GOT: $_\n";
+            }
+            exit;
+        }
+        # otherwise, we're doing HTTP
+
         while(<STDIN>) {
-            if($_ =~ /(GET|POST|HEAD) (.*) HTTP\/1.(\d)/) {
+            if($_ =~ /([A-Z]*) (.*) HTTP\/1.(\d)/) {
                 $request=$1;
                 $path=$2;
                 $ver=$3;
@@ -68,7 +122,7 @@ for ( $waitedpid = 0;
 
             if(!$left &&
                ($_ eq "\r\n") or ($_ eq "")) {
-                if($request eq "POST") {
+                if($request =~ /^(POST|PUT)$/) {
                     $left=$cl;
                 }
                 else {
