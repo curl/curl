@@ -8,6 +8,9 @@
 
 
 Daniel (10 December)
+- Diego Casorran made curl and libcurl possible to build natively (no more
+  need for the ixemul library) on AmigaOS.
+
 - Dominick Meglio made configure --enable-ares support a given path to the
   installed ares lib, instead of always using it in the curl source tree.
   This also fixed the curl-config --libs output.
