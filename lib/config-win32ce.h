@@ -248,10 +248,9 @@
 #include <winsock.h>
 #include <process.h>
 
-extern int errno;
-
 #define ENOSPC 1
 #define ENOMEM 2
+#define EAGAIN 3
 
 extern int stat(const char *path,struct stat *buffer );
 
