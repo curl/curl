@@ -3461,7 +3461,8 @@ operate(struct Configurable *config, int argc, char *argv[])
                     CURL_CA_CERT_ERRORMSG2 );
           }
           else
-            fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
+            fprintf(config->errors, "curl: (%d) %s\n", res,
+                    errorbuffer[0]? errorbuffer: curl_easy_strerror(res));
         }
 #endif
 
