@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "8 Nov 2001" "Curl 7.9.1" "Curl Manual"
+.TH curl 1 "26 Nov 2001" "Curl 7.9.1" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -117,13 +117,13 @@ be written to stdout. (Option added in curl 7.9)
 If this option is used several times, the last specfied file name will be
 used.
 .IP "-C/--continue-at <offset>"
-Continue/Resume a previous file transfer at the given offset. The
-given offset is the exact number of bytes that will be skipped
-counted from the beginning of the source file before it is transfered
-to the destination.
-If used with uploads, the ftp server command SIZE will not be used by
-curl. Upload resume is for FTP only.
-HTTP resume is only possible with HTTP/1.1 or later servers.
+Continue/Resume a previous file transfer at the given offset. The given offset
+is the exact number of bytes that will be skipped counted from the beginning
+of the source file before it is transfered to the destination.  If used with
+uploads, the ftp server command SIZE will not be used by curl.
+
+Use "-C -" to tell curl to automatically find out where/how to resume the
+transfer. It then uses the given output/input files to figure that out.
 
 If this option is used several times, the last one will be used.
 .IP "-d/--data <data>"
