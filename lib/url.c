@@ -2935,6 +2935,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       conn->bits.rangestringalloc = TRUE; /* mark range string allocated */
       conn->bits.use_range = TRUE;        /* enable range download */
     }
+    else
+      conn->bits.use_range = FALSE; /* disable range download */
 
     *in_connect = conn;      /* return this instead! */
 
