@@ -455,18 +455,22 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
   copy->h_aliases = (char**)bufptr;
 
   /* Figure out how many aliases there are */
-  for (i = 0; orig->h_aliases[i] != NULL; ++i);
+  for (i = 0; orig->h_aliases && orig->h_aliases[i]; ++i);
 
   /* Reserve room for the array */
   bufptr += (i + 1) * sizeof(char*);
 
   /* Clone all known aliases */
-  for(i = 0; (str = orig->h_aliases[i]); i++) {
-    len = strlen(str) + 1;
-    strncpy(bufptr, str, len);
-    copy->h_aliases[i] = bufptr;
-    bufptr += len;
+  if(orig->h_aliases) {
+    for(i = 0; (str = orig->h_aliases[i]); i++) {
+      len = strlen(str) + 1;
+      strncpy(bufptr, str, len);
+      copy->h_aliases[i] = bufptr;
+      bufptr += len;
+    }
   }
+  /* if(!orig->h_aliases) i was already set to 0 */
+
   /* Terminate the alias list with a NULL */
   copy->h_aliases[i] = NULL;
 
