@@ -2351,6 +2351,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           char proxyuser[MAX_CURL_USER_LENGTH];
           char proxypasswd[MAX_CURL_PASSWORD_LENGTH];
 
+          char *fineptr;
+
           /* skip the possible protocol piece */
           ptr=strstr(proxy, "://");
           if(ptr)
@@ -2358,9 +2360,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           else
             ptr = proxy;
 
+          fineptr = ptr;
+
           /* check for an @-letter */
           ptr = strchr(ptr, '@');
-          if(ptr && (2 == sscanf(proxy, "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
+          if(ptr && (2 == sscanf(fineptr,
+                                 "%" MAX_CURL_USER_LENGTH_TXT"[^:]:"
                                  "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
                                  proxyuser, proxypasswd))) {
             /* found user and password, rip them out */
@@ -2378,7 +2383,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
             
             conn->bits.proxy_user_passwd = TRUE; /* enable it */
 
-            ptr = strdup(ptr+1);
+            ptr = strdup(ptr+1); /* the right side of the @-letter */
             free(proxy); /* free the former data */
             proxy = ptr; /* now use this instead */
           }
