@@ -21,16 +21,6 @@
 #
 # $Id: Makefile.vc6,v 1.17 2004/01/13 08:57:01 bagder Exp $
 ##############################################################
-# CHANGE LOG
-# ------------------------------------------------------------
-# 05.11.2001   John Lask   Initial Release
-# 02.05.2002   Miklos Nemeth OPENSSL_PATH environment; no need
-#              for OpenSSL libraries when creating a 
-#              static libcurl.lib
-# 10.14.2003   Added a target release-libcurl-ssl-dll which
-#              is intended to allow static linking of libcurl with dynamic
-#              linking of openssl
-##############################################################
 
 LIB_NAME       = libcurl
 LIB_NAME_DEBUG = libcurld
