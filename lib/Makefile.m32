@@ -47,7 +47,8 @@ libcurl_a_SOURCES = arpa_telnet.h file.c netrc.h timeval.c base64.c \
 	strtok.c connect.c hash.c llist.c multi.c share.c share.h	      \
 	content_encoding.h content_encoding.c http_digest.h http_digest.c     \
 	http_negotiate.c http_negotiate.h http_ntlm.c http_ntlm.h md5.h	      \
-	md5.c strtoofft.c inet_pton.c
+	md5.c strtoofft.c inet_pton.c strerror.c hostares.c hostasyn.c	      \
+	hostip4.c hostip6.c hostsyn.c hostthre.c inet_ntop.c
 
 libcurl_a_OBJECTS =  file.o timeval.o base64.o hostip.o progress.o \
 	formdata.o cookie.o http.o sendf.o ftp.o url.o dict.o if2ip.o \
@@ -56,7 +57,8 @@ libcurl_a_OBJECTS =  file.o timeval.o base64.o hostip.o progress.o \
 	strequal.o easy.o security.o krb4.o memdebug.o http_chunks.o \
 	strtok.o connect.o hash.o llist.o multi.o share.o \
 	content_encoding.o http_digest.o http_negotiate.o http_ntlm.o md5.o \
-	strtoofft.o inet_pton.o
+	strtoofft.o inet_pton.o strerror.o hostares.o hostasyn.o hostip4.o \
+	hostip6.o hostsyn.o hostthre.o inet_ntop.o
 
 LIBRARIES =  $(libcurl_a_LIBRARIES)
 SOURCES = $(libcurl_a_SOURCES)
