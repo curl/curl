@@ -36,6 +36,17 @@ struct Form {
 	       been sent in a previous invoke */
 };
 
+/* used by FormAdd for temporary storage */
+typedef struct FormInfo {
+  char *name;
+  long namelength;
+  char *value;
+  long contentslength;
+  char *contenttype;
+  long flags;
+  struct FormInfo *more;
+} FormInfo;
+
 int Curl_FormInit(struct Form *form, struct FormData *formdata );
 
 struct FormData *Curl_getFormData(struct HttpPost *post,
