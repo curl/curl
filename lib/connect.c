@@ -507,11 +507,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     return CURLE_COULDNT_CONNECT;
   }
   /*
-   * If the connection phase is "done" here, we should attempt to connect
-   * to the "next address" in the Curl_hostaddr structure that we resolved
-   * before. But we don't have that struct around anymore and we can't just
-   * keep a pointer since the cache might in fact have gotten pruned by the
-   * time we want to read this... Alas, we don't do this yet.
+   * If the connection failed here, we should attempt to connect to the "next
+   * address" for the given host.
    */
 
   return CURLE_OK;
@@ -603,11 +600,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /* Max time for each address */
   num_addr = Curl_num_addresses(remotehost->addr);
   timeout_per_addr = timeout_ms / num_addr;
-
-  hostname = data->change.proxy?conn->proxy.name:conn->host.name;
-
-  infof(data, "About to connect() to %s port %d\n",
-        hostname, port);
 
   /* Below is the loop that attempts to connect to all IP-addresses we
    * know for the given host. One by one until one IP succeedes.

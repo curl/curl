@@ -1940,6 +1940,11 @@ static CURLcode ConnectPlease(struct connectdata *conn,
 {
   CURLcode result;
   Curl_ipconnect *addr;
+  struct SessionHandle *data = conn->data;
+  char *hostname = data->change.proxy?conn->proxy.name:conn->host.name;
+
+  infof(data, "About to connect() to %s port %d\n",
+        hostname, conn->port);
 
   /*************************************************************
    * Connect to server/proxy
