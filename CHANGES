@@ -6,6 +6,12 @@
 
                                History of Changes
 
+Daniel (26 March 2001)
+- Mohamed Lrhazi reported problems with 7.6.1 and persistant HTTP/1.0
+  connections (when the server replied a Connection: Keep-Alive) and this
+  problem was not properly dealt with in 7.7 either. A patch was posted to the
+  curl-and-php mailing list.
+
 Daniel (24 March 2001)
 - Colin Watson reported about a problem and brought a patch that corrected it,
   which was about the man page and lines starting with a single quote (') in a
