@@ -27,7 +27,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "getenv.h"
+#include <curl/curl.h>
+
 #include "strequal.h"
 
 /* Debug this single source file with:

@@ -80,7 +80,6 @@
 #include "netrc.h"
 
 #include "formdata.h"
-#include "getenv.h"
 #include "base64.h"
 #include "ssluse.h"
 #include "hostip.h"

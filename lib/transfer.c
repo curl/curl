@@ -82,7 +82,6 @@
 #include <curl/types.h>
 #include "netrc.h"
 
-#include "getenv.h"
 #include "hostip.h"
 #include "transfer.h"
 #include "sendf.h"
