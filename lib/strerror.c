@@ -485,12 +485,16 @@ get_winsock_error (int err, char *buf, size_t len)
 }
 #endif   /* WIN32 && !__CYGWIN__ */
 
-#ifndef WIN32
-extern int sys_nerr;
-#endif
-
 /*
  * Our thread-safe and smart strerror() replacement.
+ *
+ * The 'err' argument passed in to this function MUST be a true errno number
+ * as reported on this system. We do no range checking on the number before
+ * we pass it to the "number-to-message" convertion function and there might
+ * be systems that don't do proper range checking in there themselves.
+ *
+ * We don't do range checking (on systems other than Windows) since there is
+ * no good reliable and portable way to do it.
  */
 const char *Curl_strerror(struct connectdata *conn, int err)
 {
@@ -498,37 +502,45 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   size_t max;
 
   curlassert(conn);
+  curlassert(err >= 0);
 
   buf = conn->syserr_buf;
   max = sizeof(conn->syserr_buf)-1;
   *buf = '\0';
+
+#if defined(WIN32) && !defined(__CYGWIN__)
+  /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if (err >= 0 && err < sys_nerr) {
-    /* These should be atomic and hopefully thread-safe */
+    if (!get_winsock_error (err, buf, max) &&
+        !FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+                        LANG_NEUTRAL, buf, max, NULL))
+      snprintf(buf, max, "Unknown error %d (%#x)", err, err);
+  }
+#else /* not native Windows coming up */
+    
+  /* These should be atomic and hopefully thread-safe */
 #ifdef HAVE_STRERROR_R
+  /* There are two different APIs for strerror_r(). The POSIX and the GLIBC
+     versions. */
 #ifdef HAVE_POSIX_STRERROR_R
-    strerror_r(err, buf, max); 
-    /* this may set errno to ERANGE if insufficient storage was supplied via
-       strerrbuf and buflen to contain the generated message string, or EINVAL
-       if the value of errnum is not a valid error number.*/
+  strerror_r(err, buf, max); 
+  /* this may set errno to ERANGE if insufficient storage was supplied via
+     'strerrbuf' and 'buflen' to contain the generated message string, or
+     EINVAL if the value of 'errnum' is not a valid error number.*/
 #else
+  {
     /* HAVE_GLIBC_STRERROR_R */
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
     strncpy(buf, msg, max);
-#endif
-#else
-    strncpy(buf, strerror(err), max);
-#endif
-    *(buf+max) = '\0';
   }
-  else {
-#if defined(WIN32) && !defined(__CYGWIN__)
-    if (!get_winsock_error (err, buf, max) &&
-        !FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
-                        LANG_NEUTRAL, buf, max, NULL))
-#endif
-     snprintf(buf, max, "Unknown error %d (%#x)", err, err);
-  }
+#endif /* end of HAVE_GLIBC_STRERROR_R */
+#else /* HAVE_STRERROR_R */
+  strncpy(buf, strerror(err), max);
+#endif /* end of HAVE_STRERROR_R */
+#endif /* end of ! Windows */
+
+  buf[max] = '\0'; /* make sure the string is zero terminated */
 
   /* strip trailing '\r\n' or '\n'. */
   if ((p = strrchr(buf,'\n')) != NULL && (p - buf) >= 2)
