@@ -63,7 +63,7 @@ EXTRA_DIST = $(man_MANS) \
 
 MAN2HTML= gnroff -man $< | man2html >$@
 
-SUFFIXES += .1 .3 .html
+SUFFIXES = .1 .3 .html
 
 html: $(HTMLPAGES)
 
