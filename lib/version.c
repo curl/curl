@@ -46,7 +46,7 @@ static void getssl_version(char *ptr, long *num)
     }
     else {
       if(ssleay_value&0xff0) {
-        sub[0]=((ssleay_value>>4)&0xff) + 'a' -1;
+        sub[0]=(char)((ssleay_value>>4)&0xff) + 'a' -1;
       }
       else
         sub[0]='\0';
