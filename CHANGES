@@ -6,16 +6,106 @@
 
                                   Changelog
 
+Daniel (25 June)
+- More NTLM-improvements. Less code. Smaller packets back and forth.
+
+Daniel (23 June)
+- Eric Glass provided us with a better doc on NTLM details, and I added more
+  comments and clarified the current code more. Using the new knowledge, we
+  should be able to make the NTLM stuff work even better.
+  Eric's original URL: http://davenport.sourceforge.net/ntlm.html
+  Version stored and provided at curl site: http://curl.haxx.se/rfc/ntlm.html
+
+- Fixed the minor compile problems pre3 had if built without GSSAPI and/or
+  SSL.
+
+Version 7.10.6-pre3 (19 June 2003)
+
+Daniel (19 June)
+- Made curl use curl_free() on memory returned by curl_getenv(), as this
+  should theoreticly make it possibly to build and run curl and libcurl with
+  different memory allocation schemes with no problems.
+
+Daniel (18 June)
+- Improved the mkhelp.pl a bit further to make a nicer hugehelp text and to
+  include a better comment in the top for the gzip compressed version.
+
+Daniel (17 June)
+- CURLOPT_HTTPAUTH is now a bitmask, in which you set which authentication
+  type(s) you want to use. If more than one is set, libcurl will use one of
+  the selected one and the one it considers is more secure. Test case 67 and
+  68 (for NTLM) were fixed and we've reduced a round-trip for specific --ntlm
+  featches, and test case 69 and 70 were added for testing authentication
+  "picking". --anyauth is the new command line tool option, and I also added
+  --basic for completeness (that's the default type).
+
+- Fixed the runtests.pl script to use the info provided by the new curl -V
+  output.
+
+- --enable-debug now sets the CURLDEBUG define instead of MALLOCDEBUG, as it
+  is meant to be a generic debug conditional.
+
+- curl_version_info() can now return CURL_VERSION_DEBUG as a feature bit, to
+  indicate that the library was built with CURLDEBUG set.
+
+- Ralph Mitchell found out that some web applications very badly uses white
+  spaces in Location: redirects, and apparently IE is a browser (the only
+  one?) that supports this abomination. Based on Ralph's patch, I added code
+  that now attempts to replace white spaces with the proper "%20" or "+".
+  Test case 40 and 42 were added to verify my changes.
+
+- curl -V now also outputs a list of features the available library offers (if
+  any).
+
+- The curl_version() string now includes "GSS" if libcurl is built with GSSAPI
+  support.
+
+- David Orrell reported that libcurl still crashed when sending HUGE requests
+  over HTTPS... I fixed.
+
+Version 7.10.6-pre2 (16 June 2003)
+
+Daniel (16 June)
+- curl_version_info() now returns bitmasked information weather NTLM and
+  GSSNEGOTIATE are supported, since it is doomed to vary on different
+  installatiions.
+
+- I remade the HTTP Digest code to use the MD5-code provided by OpenSSL if
+  that is present, and only use our own MD5-code if it isn't.
+  
+Daniel (13 June)
+- More NTLM help, fixes and patches from Cris Bailiff.
+
+- Marty Kuhrt brought include fixes for making VMS builds warning-free.
+
+Daniel (12 June)
+- NTLM authentication works somewhat against the test servers provided by
+  Mathias Axelsson and Cris Bailiff. Use by setting CURLOPT_HTTPAUTH to
+  CURLAUTH_NTLM to libcurl, or --ntlm for the curl tool. Test case 67 and 68
+  were added for this. NTLM-support requires OpenSSL.
+
+- Dan Fandrich provided a patch, that granted that gzip and libz are available
+  at build-time, compresses the hugehelp text in the curl command line and
+  uncompresses it at request. Saves some ~60K in the final output executable.
+
+Daniel (11 June)
+- Long day of fighting the NTLM demons.
+
 Daniel (10 June)
 - Modified how to set auth type to libcurl. Now use CURLOPT_HTTPAUTH instead,
   and pick method. Supported ones currently are:
-  CURLHTTP_BASIC     - default selection
-  CURLHTTP_DIGEST    - formerly CURLOPT_HTTPDIGEST
-  CURLHTTP_NEGOTIATE
+  CURLAUTH_BASIC     - default selection
+  CURLAUTH_DIGEST    - formerly CURLOPT_HTTPDIGEST
+  CURLAUTH_GSSNEGOTIATE
 
-- Daniel Kouril added HTTP Negotiate authentication support, as defined in the
-  IETF draft draft-brezak-spnego-http-04.txt. In use already by various
-  Microsoft web applications. --negotiate is the new family member.
+- Daniel Kouril added HTTP GSS-Negotiate authentication support, as defined in
+  the IETF draft draft-brezak-spnego-http-04.txt. In use already by various
+  Microsoft web applications. --negotiate is the new family member. To take
+  advantage of this, you need one of these packages:
+
+  o Heimdal Kerberos5               http://www.pdc.kth.se/heimdal/heimdal.html
+  o GSSAPI from Globus                   http://www.globus.org/
+  o GSSAPI libraries from MIT Kerberos5  http://web.mit.edu/kerberos/www/
 
 - A missing ending bracket (']') while doing URL globbing could lead to a
   segfault. While fixing this, I also introduced better error reporting in the
