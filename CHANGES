@@ -4,7 +4,38 @@
                             | (__| |_| |  _ <| |___ 
                              \___|\___/|_| \_\_____|
 
-                               History of Changes
+                                  Changelog
+
+Daniel (26 Jun 2002)
+- T. Bharath corrected the high resolution timer introduced in 7.9.8.
+
+Daniel (22 Jun 2002)
+- Andrés García pointed out man page errors in curl_formadd.3. I fixed.
+
+Daniel (19 Jun 2002)
+- Chris Combes pointed out a flaw in curl_escape(). I fixed. We no longer
+  tries to generate nor parse '+' in URLs. Spaces become %20, and only %-codes
+  are translated by curl_unescape().
+
+Daniel (15 Jun 2002)
+- Added --limit-rate to the curl tool. Allows the user to set a maxmimum
+  upper limit to how much bandwidth to use for transfers.
+
+- CURLOPT_BUFFERSIZE was added to libcurl. This sets a prefered size for the
+  receive buffer in libcurl. The main point of this would be that the write
+  callback gets called more often and with smaller chunks.
+
+Daniel (14 Jun 2002)
+- Yarram Sunil found out that the SocketIsDead() function performed a lot
+  faster on Windows when removing the 1 microsecond timeout.
+
+- Hanno L. Kranzhoff fixed the VC++ project files.
+
+- Tom Mattison found out that ftp transfers closed the connection a little
+  too often.
+
+- Miklos Nemeth posted a VC++ makefile fix and some INSTALL comments on how
+  to disable specific protocols when building for Windows.
 
 Version 7.9.8
 
