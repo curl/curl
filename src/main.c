@@ -46,6 +46,8 @@
 #include <ctype.h>
 
 #include <curl/curl.h>
+#include <curl/types.h> /* new for v7 */
+#include <curl/easy.h> /* new for v7 */
 #include <curl/mprintf.h>
 #include "../lib/getdate.h"
 
@@ -70,6 +72,25 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
+
+/* Just a set of bits */
+#define CONF_DEFAULT  0
+#define CONF_VERBOSE  (1<<5) /* talk a lot */
+#define CONF_HEADER   (1<<8) /* throw the header out too */
+#define CONF_NOPROGRESS (1<<10) /* shut off the progress meter */
+#define CONF_NOBODY   (1<<11) /* use HEAD to get http document */
+#define CONF_FAILONERROR (1<<12) /* no output on http error codes >= 300 */
+#define CONF_UPLOAD   (1<<14) /* this is an upload */
+#define CONF_POST     (1<<15) /* HTTP POST method */
+#define CONF_FTPLISTONLY (1<<16) /* Use NLST when listing ftp dir */
+#define CONF_FTPAPPEND (1<<20) /* Append instead of overwrite on upload! */
+#define CONF_NETRC    (1<<22)  /* read user+password from .netrc */
+#define CONF_FOLLOWLOCATION (1<<23) /* use Location: Luke! */
+#define CONF_FTPASCII (1<<24) /* use TYPE A for transfer */
+#define CONF_HTTPPOST (1<<25) /* multipart/form-data HTTP POST */
+#define CONF_PUT      (1<<27) /* PUT the input file */
+#define CONF_MUTE     (1<<28) /* force NOPROGRESS */
+
 
 #ifndef HAVE_STRDUP
 /* Ultrix doesn't have strdup(), so make a quick clone: */
@@ -113,7 +134,7 @@ static UrgError win32_init(void)
   if (err != 0) 
     /* Tell the user that we couldn't find a useable */ 
     /* winsock.dll.     */ 
-    return URG_FAILED_INIT; 
+    return CURLE_FAILED_INIT; 
     
   /* Confirm that the Windows Sockets DLL supports 1.1.*/ 
   /* Note that if the DLL supports versions greater */ 
@@ -127,13 +148,13 @@ static UrgError win32_init(void)
 
     /* winsock.dll. */ 
     WSACleanup(); 
-    return URG_FAILED_INIT; 
+    return CURLE_FAILED_INIT; 
   }
-  return URG_OK;
+  return CURLE_OK;
 }
 /* The Windows Sockets DLL is acceptable. Proceed. */ 
 #else
-static UrgError win32_init(void) { return URG_OK; }
+static CURLcode win32_init(void) { return CURLE_OK; }
 #define win32_cleanup()
 #endif
 
@@ -143,7 +164,7 @@ static UrgError win32_init(void) { return URG_OK; }
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
  * used, or havoc may be the result.
  */
-UrgError main_init(void)
+CURLcode main_init(void)
 {
   return win32_init();
 }
@@ -297,7 +318,10 @@ static void GetStr(char **string,
 {
   if(*string)
     free(*string);
-  *string = strdup(value);
+  if(value && *value)
+    *string = strdup(value);
+  else
+    *string = NULL;
 }
 
 static char *file2string(FILE *file)
@@ -420,7 +444,7 @@ static int getparameter(char *flag, /* f or -long-flag */
 	if(parse) {
 	  /* this is the second match, we can't continue! */
 	  helpf("option --%s is ambiguous\n", &flag[1]);
-	  return URG_FAILED_INIT;
+	  return CURLE_FAILED_INIT;
 	}
 	parse = aliases[j].letter;
 	hit = j;
@@ -428,7 +452,7 @@ static int getparameter(char *flag, /* f or -long-flag */
     }
     if(hit < 0) {
       helpf("unknown option -%s.\n", flag);
-      return URG_FAILED_INIT;
+      return CURLE_FAILED_INIT;
     }    
   }
   else {
@@ -454,18 +478,18 @@ static int getparameter(char *flag, /* f or -long-flag */
       }
       if(hit < 0) {
 	helpf("unknown option -%c.\n", letter);
-	return URG_FAILED_INIT;      
+	return CURLE_FAILED_INIT;      
       }
     }
     if(hit < 0) {
       helpf("unknown option -%c.\n", letter);
-      return URG_FAILED_INIT;
+      return CURLE_FAILED_INIT;
     }    
     if(!nextarg && aliases[hit].extraparam) {
       helpf("option -%s/--%s requires an extra argument!\n",
 	    aliases[hit].letter,
 	    aliases[hit].lname);
-      return URG_FAILED_INIT;
+      return CURLE_FAILED_INIT;
     }
     else if(nextarg && aliases[hit].extraparam)
       *usedarg = TRUE; /* mark it as used */
@@ -491,7 +515,7 @@ static int getparameter(char *flag, /* f or -long-flag */
         break;
       }
       now=time(NULL);
-      config->condtime=get_date(nextarg, &now);
+      config->condtime=curl_getdate(nextarg, &now);
       if(-1 == config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
         struct stat statbuf;
@@ -586,7 +610,6 @@ static int getparameter(char *flag, /* f or -long-flag */
       break;
     case 'e':
       GetStr(&config->referer, nextarg);
-      config->conf |= CONF_REFERER;
       break;
     case 'E':
       {
@@ -610,13 +633,12 @@ static int getparameter(char *flag, /* f or -long-flag */
       if(curl_FormParse(nextarg,
                         &config->httppost,
                         &config->last_post))
-	return URG_FAILED_INIT;    
-      config->conf |= CONF_HTTPPOST; /* no toggle, OR! */
+	return CURLE_FAILED_INIT;    
       break;
 
     case 'h': /* h for help */
       help();
-      return URG_FAILED_INIT;
+      return CURLE_FAILED_INIT;
     case 'H':
       head = (struct HttpHeader *)malloc(sizeof(struct HttpHeader));
       if(head) {
@@ -659,7 +681,7 @@ static int getparameter(char *flag, /* f or -long-flag */
       break;
     case 'M': /* M for manual, huge help */
       hugehelp();
-      return URG_FAILED_INIT;
+      return CURLE_FAILED_INIT;
     case 'n':
       /* pick info from .netrc, if this is used for http, curl will
 	 automatically enfore user+password with the request */
@@ -683,7 +705,6 @@ static int getparameter(char *flag, /* f or -long-flag */
 	 this will make us try to get the "default" address.
 	 NOTE: this is a changed behaviour since the released 4.1!
 	 */
-      config->conf |= CONF_FTPPORT;
       GetStr(&config->ftpport, nextarg);
       break;
 #if 0
@@ -712,7 +733,6 @@ static int getparameter(char *flag, /* f or -long-flag */
     case 'r':
       /* byte range requested */
       GetStr(&config->range, nextarg);
-      config->conf |= CONF_RANGE;
       break;
     case 's':
       /* don't show progress meter, don't show errors : */
@@ -735,19 +755,17 @@ static int getparameter(char *flag, /* f or -long-flag */
     case 'u':
       /* user:password  */
       GetStr(&config->userpwd, nextarg);
-      config->conf |= CONF_USERPWD;
       break;
     case 'U':
       /* Proxy user:password  */
       GetStr(&config->proxyuserpwd, nextarg);
-      config->conf |= CONF_PROXYUSERPWD;
       break;
     case 'v':
       config->conf ^= CONF_VERBOSE; /* talk a lot */
       break;
     case 'V':
       printf(CURL_ID "%s\n", curl_version());
-      return URG_FAILED_INIT;
+      return CURLE_FAILED_INIT;
     case 'w':
       /* get the output string */
       if('@' == *nextarg) {
@@ -768,14 +786,7 @@ static int getparameter(char *flag, /* f or -long-flag */
       break;
     case 'x':
       /* proxy */
-      if(!*nextarg) {
-	/* disable proxy when no proxy is given */
-	config->conf &= ~CONF_PROXY;
-      }
-      else { 
-	config->conf |= CONF_PROXY;
-	GetStr(&config->proxy, nextarg);
-      }
+      GetStr(&config->proxy, nextarg);
       break;
     case 'X':
       /* HTTP request */
@@ -799,13 +810,13 @@ static int getparameter(char *flag, /* f or -long-flag */
 	helpf("Unknown option '%c'\n", letter);
       else
 	helpf("Unknown option\n"); /* short help blurb */
-      return URG_FAILED_INIT;
+      return CURLE_FAILED_INIT;
     }
     hit = -1;
 
   } while(*++parse && !*usedarg);
 
-  return URG_OK;
+  return CURLE_OK;
 }
 
 
@@ -826,7 +837,7 @@ static int parseconfig(char *filename,
     char *home = curl_GetEnv("HOME"); /* portable environment reader */
 
     if(!home || (strlen(home)>(sizeof(filebuffer)-strlen(CURLRC))))
-      return URG_OK;
+      return CURLE_OK;
 
     sprintf(filebuffer, "%s%s%s", home, DIR_CHAR, CURLRC);
 
@@ -894,7 +905,7 @@ static int parseconfig(char *filename,
     if(file != stdin)
       fclose(file);
   }
-  return URG_OK;
+  return CURLE_OK;
 }
 
 struct OutStruct {
@@ -944,7 +955,8 @@ int main(int argc, char *argv[])
   int infilesize=-1; /* -1 means unknown */
   bool stillflags=TRUE;
 
-  int res=URG_OK;
+  CURL *curl;
+  int res=CURLE_OK;
   int i;
 
   outs.stream = stdout;
@@ -981,7 +993,7 @@ int main(int argc, char *argv[])
 
   if ((argc < 2)  && !config.url) {
     helpf(NULL);
-    return URG_FAILED_INIT;
+    return CURLE_FAILED_INIT;
   }
 
   /* Parse options */
@@ -1014,7 +1026,7 @@ int main(int argc, char *argv[])
     else {
       if(url) {
 	helpf("only one URL is supported!\n");
-	return URG_FAILED_INIT;
+	return CURLE_FAILED_INIT;
       }
       url = argv[i];
     }
@@ -1027,7 +1039,7 @@ int main(int argc, char *argv[])
   
   if(!url) {
     helpf("no URL specified!\n");
-    return URG_FAILED_INIT;
+    return CURLE_FAILED_INIT;
   }
 #if 0
   fprintf(stderr, "URL: %s PROXY: %s\n", url, config.proxy?config.proxy:"none");
@@ -1036,7 +1048,7 @@ int main(int argc, char *argv[])
   /* expand '{...}' and '[...]' expressions and return total number of URLs
      in pattern set */
   res = glob_url(&urls, url, &urlnum);
-  if(res != URG_OK)
+  if(res != CURLE_OK)
     return res;
 
   outfiles = config.outfile;		/* save outfile pattern befor expansion */
@@ -1058,7 +1070,7 @@ int main(int argc, char *argv[])
 
   if(config.outfile && config.infile) {
     helpf("you can't both upload and download!\n");
-    return URG_FAILED_INIT;
+    return CURLE_FAILED_INIT;
   }
  
   if (config.outfile || config.remotefile) {
@@ -1077,7 +1089,7 @@ int main(int argc, char *argv[])
       config.outfile = strrchr(config.outfile, '/');
       if(!config.outfile || !strlen(++config.outfile)) {
         helpf("Remote file name has no length!\n");
-        return URG_WRITE_ERROR;
+        return CURLE_WRITE_ERROR;
       }
     }
     else	/* fill '#1' ... '#9' terms from URL pattern */
@@ -1100,7 +1112,7 @@ int main(int argc, char *argv[])
       outs.stream=(FILE *) fopen(config.outfile, config.resume_from?"ab":"wb");
       if (!outs.stream) {
         helpf("Can't open '%s'!\n", config.outfile);
-        return URG_WRITE_ERROR;
+        return CURLE_WRITE_ERROR;
       }
     }
     else {
@@ -1127,7 +1139,7 @@ int main(int argc, char *argv[])
       urlbuffer=(char *)malloc(strlen(url) + strlen(config.infile) + 3);
       if(!urlbuffer) {
         helpf("out of memory\n");
-        return URG_OUT_OF_MEMORY;
+        return CURLE_OUT_OF_MEMORY;
       }
       if(ptr)
         /* there is a trailing slash on the URL */
@@ -1142,7 +1154,7 @@ int main(int argc, char *argv[])
     infd=(FILE *) fopen(config.infile, "rb");
     if (!infd || stat(config.infile, &fileinfo)) {
       helpf("Can't open '%s'!\n", config.infile);
-      return URG_READ_ERROR;
+      return CURLE_READ_ERROR;
     }
     infilesize=fileinfo.st_size;
 
@@ -1189,48 +1201,121 @@ int main(int argc, char *argv[])
 
   main_init();
 
-  res = curl_urlget(URGTAG_FILE, (FILE *)&outs,  /* where to store */
-                    URGTAG_WRITEFUNCTION, my_fwrite, /* what call to write */
-                    URGTAG_INFILE, infd, /* for uploads */
-                    URGTAG_INFILESIZE, infilesize, /* size of uploaded file */
-                    URGTAG_URL, url,     /* what to fetch */
-                    URGTAG_PROXY, config.proxy, /* proxy to use */
-                    URGTAG_FLAGS, config.conf, /* flags */
-                    URGTAG_USERPWD, config.userpwd, /* user + passwd */
-                    URGTAG_PROXYUSERPWD, config.proxyuserpwd, /* Proxy user + passwd */
-                    URGTAG_RANGE, config.range, /* range of document */
-                    URGTAG_ERRORBUFFER, errorbuffer,
-                    URGTAG_TIMEOUT, config.timeout,
-                    URGTAG_POSTFIELDS, config.postfields,
-                    URGTAG_REFERER, config.referer,
-                    URGTAG_USERAGENT, config.useragent,
-                    URGTAG_FTPPORT, config.ftpport,
-                    URGTAG_LOW_SPEED_LIMIT, config.low_speed_limit,
-                    URGTAG_LOW_SPEED_TIME, config.low_speed_time,
-                    URGTAG_RESUME_FROM, config.use_resume?config.resume_from:0,
-                    URGTAG_COOKIE, config.cookie,
-                    URGTAG_HTTPHEADER, config.headers,
-                    URGTAG_HTTPPOST, config.httppost,
-                    URGTAG_SSLCERT, config.cert,
-                    URGTAG_SSLCERTPASSWD, config.cert_passwd,
-                    URGTAG_CRLF, config.crlf,
-                    URGTAG_QUOTE, config.quote,
-                    URGTAG_POSTQUOTE, config.postquote,
-                    URGTAG_WRITEHEADER, config.headerfile?&heads:NULL,
-                    URGTAG_COOKIEFILE, config.cookiefile,
-                    URGTAG_SSLVERSION, config.ssl_version,
-                    URGTAG_TIMECONDITION, config.timecond,
-                    URGTAG_TIMEVALUE, config.condtime,
-                    URGTAG_CUSTOMREQUEST, config.customrequest,
-                    URGTAG_STDERR, config.errors,
-                    URGTAG_PROGRESSMODE, config.progressmode,
-                    URGTAG_WRITEINFO, config.writeout,
-                    URGTAG_DONE); /* always terminate the list of tags */
+#if 0
+  /* This is code left from the pre-v7 time, left here mainly as a reminder
+     and possibly as a warning! ;-) */
+
+  res = curl_urlget(CURLOPT_FILE, (FILE *)&outs,  /* where to store */
+                    CURLOPT_WRITEFUNCTION, my_fwrite, /* what call to write */
+                    CURLOPT_INFILE, infd, /* for uploads */
+                    CURLOPT_INFILESIZE, infilesize, /* size of uploaded file */
+                    CURLOPT_URL, url,     /* what to fetch */
+                    CURLOPT_PROXY, config.proxy, /* proxy to use */
+                    CURLOPT_FLAGS, config.conf, /* flags */
+                    CURLOPT_USERPWD, config.userpwd, /* user + passwd */
+                    CURLOPT_PROXYUSERPWD, config.proxyuserpwd, /* Proxy user + passwd */
+                    CURLOPT_RANGE, config.range, /* range of document */
+                    CURLOPT_ERRORBUFFER, errorbuffer,
+                    CURLOPT_TIMEOUT, config.timeout,
+                    CURLOPT_POSTFIELDS, config.postfields,
+                    CURLOPT_REFERER, config.referer,
+                    CURLOPT_USERAGENT, config.useragent,
+                    CURLOPT_FTPPORT, config.ftpport,
+                    CURLOPT_LOW_SPEED_LIMIT, config.low_speed_limit,
+                    CURLOPT_LOW_SPEED_TIME, config.low_speed_time,
+                    CURLOPT_RESUME_FROM, config.use_resume?config.resume_from:0,
+                    CURLOPT_COOKIE, config.cookie,
+                    CURLOPT_HTTPHEADER, config.headers,
+                    CURLOPT_HTTPPOST, config.httppost,
+                    CURLOPT_SSLCERT, config.cert,
+                    CURLOPT_SSLCERTPASSWD, config.cert_passwd,
+                    CURLOPT_CRLF, config.crlf,
+                    CURLOPT_QUOTE, config.quote,
+                    CURLOPT_POSTQUOTE, config.postquote,
+                    CURLOPT_WRITEHEADER, config.headerfile?&heads:NULL,
+                    CURLOPT_COOKIEFILE, config.cookiefile,
+                    CURLOPT_SSLVERSION, config.ssl_version,
+                    CURLOPT_TIMECONDITION, config.timecond,
+                    CURLOPT_TIMEVALUE, config.condtime,
+                    CURLOPT_CUSTOMREQUEST, config.customrequest,
+                    CURLOPT_STDERR, config.errors,
+                    CURLOPT_PROGRESSMODE, config.progressmode,
+                    CURLOPT_WRITEINFO, config.writeout,
+                    CURLOPT_DONE); /* always terminate the list of tags */
+
+#endif
+  /* The new, v7-style easy-interface! */
+  curl = curl_easy_init();
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_FILE, (FILE *)&outs);  /* where to store */
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite); /* what call to write */
+    curl_easy_setopt(curl, CURLOPT_INFILE, infd); /* for uploads */
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize); /* size of uploaded file */
+    curl_easy_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
+    curl_easy_setopt(curl, CURLOPT_PROXY, config.proxy); /* proxy to use */
+#if 0
+    curl_easy_setopt(curl, CURLOPT_FLAGS, config.conf); /* flags */
+#else
+    curl_easy_setopt(curl, CURLOPT_VERBOSE, config.conf&CONF_VERBOSE);
+    curl_easy_setopt(curl, CURLOPT_HEADER, config.conf&CONF_HEADER);
+    curl_easy_setopt(curl, CURLOPT_NOPROGRESS, config.conf&CONF_NOPROGRESS);
+    curl_easy_setopt(curl, CURLOPT_NOBODY, config.conf&CONF_NOBODY);
+    curl_easy_setopt(curl, CURLOPT_FAILONERROR, config.conf&CONF_FAILONERROR);
+    curl_easy_setopt(curl, CURLOPT_UPLOAD, config.conf&CONF_UPLOAD);
+    curl_easy_setopt(curl, CURLOPT_POST, config.conf&CONF_POST);
+    curl_easy_setopt(curl, CURLOPT_FTPLISTONLY, config.conf&CONF_FTPLISTONLY);
+    curl_easy_setopt(curl, CURLOPT_FTPAPPEND, config.conf&CONF_FTPAPPEND);
+    curl_easy_setopt(curl, CURLOPT_NETRC, config.conf&CONF_NETRC);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, config.conf&CONF_FOLLOWLOCATION);
+    curl_easy_setopt(curl, CURLOPT_FTPASCII, config.conf&CONF_FTPASCII);
+
+    curl_easy_setopt(curl, CURLOPT_PUT, config.conf&CONF_PUT);
+    curl_easy_setopt(curl, CURLOPT_MUTE, config.conf&CONF_MUTE);
+#endif
+
+
+    curl_easy_setopt(curl, CURLOPT_USERPWD, config.userpwd); /* user + passwd */
+    curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, config.proxyuserpwd); /* Proxy user + passwd */
+    curl_easy_setopt(curl, CURLOPT_RANGE, config.range); /* range of document */
+    curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
+    curl_easy_setopt(curl, CURLOPT_TIMEOUT, config.timeout);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDS, config.postfields);
+    curl_easy_setopt(curl, CURLOPT_REFERER, config.referer);
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, config.useragent);
+    curl_easy_setopt(curl, CURLOPT_FTPPORT, config.ftpport);
+    curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, config.low_speed_limit);
+    curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, config.low_speed_time);
+    curl_easy_setopt(curl, CURLOPT_RESUME_FROM, config.use_resume?config.resume_from:0);
+    curl_easy_setopt(curl, CURLOPT_COOKIE, config.cookie);
+    curl_easy_setopt(curl, CURLOPT_HTTPHEADER, config.headers);
+    curl_easy_setopt(curl, CURLOPT_HTTPPOST, config.httppost);
+    curl_easy_setopt(curl, CURLOPT_SSLCERT, config.cert);
+    curl_easy_setopt(curl, CURLOPT_SSLCERTPASSWD, config.cert_passwd);
+    curl_easy_setopt(curl, CURLOPT_CRLF, config.crlf);
+    curl_easy_setopt(curl, CURLOPT_QUOTE, config.quote);
+    curl_easy_setopt(curl, CURLOPT_POSTQUOTE, config.postquote);
+    curl_easy_setopt(curl, CURLOPT_WRITEHEADER, config.headerfile?&heads:NULL);
+    curl_easy_setopt(curl, CURLOPT_COOKIEFILE, config.cookiefile);
+    curl_easy_setopt(curl, CURLOPT_SSLVERSION, config.ssl_version);
+    curl_easy_setopt(curl, CURLOPT_TIMECONDITION, config.timecond);
+    curl_easy_setopt(curl, CURLOPT_TIMEVALUE, config.condtime);
+    curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, config.customrequest);
+    curl_easy_setopt(curl, CURLOPT_STDERR, config.errors);
+    curl_easy_setopt(curl, CURLOPT_PROGRESSMODE, config.progressmode);
+    curl_easy_setopt(curl, CURLOPT_WRITEINFO, config.writeout);
+
+    res = curl_easy_perform(curl);
+
+    /* always cleanup */
+    curl_easy_cleanup(curl);
+
+    if((res!=CURLE_OK) && config.showerror)
+      fprintf(config.errors, "curl: (%d) %s\n", res, errorbuffer);
+  }
+  else
+    fprintf(config.errors, "curl: failed to init libcurl!\n");
 
   main_free();
-
-  if((res!=URG_OK) && config.showerror)
-    fprintf(config.errors, "curl: (%d) %s\n", res, errorbuffer);
 
   if((config.errors != stderr) &&
      (config.errors != stdout))

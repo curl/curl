@@ -1,6 +1,5 @@
-#ifndef __LDAP_H
-#define __LDAP_H
-
+#ifndef __CURL_EASY_H
+#define __CURL_EASY_H
 /*****************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -29,7 +28,7 @@
  * Main author:
  * - Daniel Stenberg <Daniel.Stenberg@haxx.nu>
  *
- * 	http://www.fts.frontec.se/~dast/curl/
+ * 	http://curl.haxx.nu
  *
  * $Source$
  * $Revision$
@@ -40,7 +39,8 @@
  *
  * ------------------------------------------------------------
  ****************************************************************************/
-CURLcode ldap(struct connectdata *conn);
-CURLcode ldap_done(struct connectdata *conn);
-
-#endif /* __LDAP_H */
+CURL *curl_easy_init(void);
+CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
+CURLcode curl_easy_perform(CURL *curl);
+void curl_easy_cleanup(CURL *curl);
+#endif

@@ -39,8 +39,8 @@
  *
  * ------------------------------------------------------------
  ****************************************************************************/
-UrgError 
-Transfer (struct UrlData *data,
+CURLcode 
+Transfer (struct connectdata *data,
 	  int sockfd,		/* socket to read from or -1 */
 	  int size,		/* -1 if unknown at this point */
 	  bool getheader,	/* TRUE if header parsing is wanted */

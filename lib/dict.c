@@ -92,12 +92,17 @@
 #include "sendf.h"
 
 #include "progress.h"
+#include "strequal.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+CURLcode dict_done(struct connectdata *conn)
+{
+  return CURLE_OK;
+}
 
-UrgError dict(struct UrlData *data, char *path, long *bytecount)
+CURLcode dict(struct connectdata *conn)
 {
   int nth;
   char *word;
@@ -106,9 +111,13 @@ UrgError dict(struct UrlData *data, char *path, long *bytecount)
   char *strategy = NULL;
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
-  UrgError result=URG_OK;
-    
-  if(data->conf & CONF_USERPWD) {
+  CURLcode result=CURLE_OK;
+  struct UrlData *data=conn->data;
+
+  char *path = conn->path;
+  long *bytecount = &conn->bytecount;
+
+  if(data->bits.user_passwd) {
     /* AUTH is missing */
   }
 
@@ -162,7 +171,7 @@ UrgError dict(struct UrlData *data, char *path, long *bytecount)
           word
           );
     
-    result = Transfer(data, data->firstsocket, -1, FALSE, bytecount,
+    result = Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
                       -1, NULL); /* no upload */
       
     if(result)
@@ -210,7 +219,7 @@ UrgError dict(struct UrlData *data, char *path, long *bytecount)
           word
           );
     
-    result = Transfer(data, data->firstsocket, -1, FALSE, bytecount,
+    result = Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
                       -1, NULL); /* no upload */
       
     if(result)
@@ -234,7 +243,7 @@ UrgError dict(struct UrlData *data, char *path, long *bytecount)
             "QUIT\n",
             ppath);
       
-      result = Transfer(data, data->firstsocket, -1, FALSE, bytecount,
+      result = Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
                         -1, NULL);
       
       if(result)
@@ -243,10 +252,5 @@ UrgError dict(struct UrlData *data, char *path, long *bytecount)
     }
   }
 
-#if 0
-  ProgressEnd(data);
-#endif
-  pgrsDone(data);
-
-  return URG_OK;
+  return CURLE_OK;
 }

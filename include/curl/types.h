@@ -1,6 +1,5 @@
-#ifndef __LDAP_H
-#define __LDAP_H
-
+#ifndef __CURL_TYPES_H
+#define __CURL_TYPES_H
 /*****************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -29,7 +28,7 @@
  * Main author:
  * - Daniel Stenberg <Daniel.Stenberg@haxx.nu>
  *
- * 	http://www.fts.frontec.se/~dast/curl/
+ * 	http://curl.haxx.nu
  *
  * $Source$
  * $Revision$
@@ -40,7 +39,7 @@
  *
  * ------------------------------------------------------------
  ****************************************************************************/
-CURLcode ldap(struct connectdata *conn);
-CURLcode ldap_done(struct connectdata *conn);
+typedef void CURL;
+typedef void CURLconnect;
 
-#endif /* __LDAP_H */
+#endif /* __CURL_TYPES_H */

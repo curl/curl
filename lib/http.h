@@ -40,6 +40,9 @@
  *
  * ------------------------------------------------------------
  ****************************************************************************/
-UrgError http(struct UrlData *data, char *path, char *host, long *bytecountp);
+
+CURLcode http(struct connectdata *conn);
+CURLcode http_done(struct connectdata *conn);
+CURLcode http_connect(struct connectdata *conn);
 
 #endif

@@ -8,6 +8,39 @@
 
 Version XX
 
+Daniel (21 May 2000)
+- Updated lots of #defines, enums and variable type names in the library. No
+  more weird URG or URLTAG prefixes. All types and names should be curl-
+  prefixed to avoid name space clashes. The FLAGS-parameter to the former
+  curl_urlget() has been converted into a bunch of flags to use in separate
+  setopt calls. I'm still focusing on the easy-interface, as the curl tool is
+  now using that.
+
+- Bjorn Reese has provided me with an asynchronous name resolver that I plan
+  to use in upcoming versions of curl to be able to gracefully timeout name
+  lookups.
+
+Version 7.0beta released
+
+Daniel (18 May 2000)
+- Introduced LIBCURL_VERSION_NUM to the curl.h include file to better allow
+  source codes to be dependent on the lib version. This define is now set to
+  a dexadecimal number, with 8 bits each for major number, minor number and
+  patch number. In other words, version 1.2.3 would make it 0x010203. It also
+  makes a larger number a newer version.
+
+Daniel (17 May 2000)
+- Martin Kammerhofer correctly pointed out several flaws in the FTP range
+  option. I corrected them.
+- Removed the win32 winsock init crap from the lib to the src/main.c file
+  in the application instead. They can't be in the lib, especially not for
+  multithreaded purposes.
+
+Daniel (16 May 2000)
+- Rewrote the src/main.c source to use the new easy-interface to libcurl 7.
+  There is still more work to do, but the first step is now taken.
+  <curl/easy.h> is the include file to use.
+
 Daniel (14 May 2000)
 - FTP URLs are now treated slightly different, more according to RFC 1738.
 - FTP sessions are now performed differently, with CWD commands to change

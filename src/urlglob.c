@@ -69,18 +69,18 @@ int glob_set(char *pattern, int pos) {
     switch (*pattern) {
     case '\0':				/* URL ended while set was still open */
       printf("error: unmatched brace at pos %d\n", pos);
-      exit (URG_URL_MALFORMAT);
+      exit (CURLE_URL_MALFORMAT);
     case '{':
     case '[':				/* no nested expressions at this time */
       printf("error: nested braces not supported %d\n", pos);
-      exit (URG_URL_MALFORMAT);
+      exit (CURLE_URL_MALFORMAT);
     case ',':
     case '}':				/* set element completed */
       *buf = '\0';
       pat->content.Set.elements = realloc(pat->content.Set.elements, (pat->content.Set.size + 1) * sizeof(char*));
       if (!pat->content.Set.elements) {
 	printf("out of memory in set pattern\n");
-	exit(URG_OUT_OF_MEMORY);
+	exit(CURLE_OUT_OF_MEMORY);
       }
       pat->content.Set.elements[pat->content.Set.size] = strdup(glob_buffer);
       ++pat->content.Set.size;
@@ -95,11 +95,11 @@ int glob_set(char *pattern, int pos) {
       break;
     case ']':				/* illegal closing bracket */
       printf("error: illegal pattern at pos %d\n", pos);
-      exit (URG_URL_MALFORMAT);
+      exit (CURLE_URL_MALFORMAT);
     case '\\':				/* escaped character, skip '\' */
       if (*(buf+1) == '\0') {		/* but no escaping of '\0'! */
 	printf("error: illegal pattern at pos %d\n", pos);
-	exit (URG_URL_MALFORMAT);
+	exit (CURLE_URL_MALFORMAT);
       }
       ++pattern;
       ++pos;				/* intentional fallthrough */
@@ -108,7 +108,7 @@ int glob_set(char *pattern, int pos) {
       ++pos;
     }
   }
-  exit (URG_FAILED_INIT);
+  exit (CURLE_FAILED_INIT);
 }
 
 int glob_range(char *pattern, int pos) {
@@ -132,7 +132,7 @@ int glob_range(char *pattern, int pos) {
 	pat->content.CharRange.max_c - pat->content.CharRange.min_c > 'z' - 'a') {
       /* the pattern is not well-formed */ 
       printf("error: illegal pattern or range specification after pos %d\n", pos);
-      exit (URG_URL_MALFORMAT);
+      exit (CURLE_URL_MALFORMAT);
     }
     pat->content.CharRange.ptr_c = pat->content.CharRange.min_c;
     /* always check for a literal (may be "") between patterns */
@@ -146,7 +146,7 @@ int glob_range(char *pattern, int pos) {
 	pat->content.NumRange.min_n >= pat->content.NumRange.max_n) {
       /* the pattern is not well-formed */ 
       printf("error: illegal pattern or range specification after pos %d\n", pos);
-      exit (URG_URL_MALFORMAT);
+      exit (CURLE_URL_MALFORMAT);
     }
     if (*pattern == '0') {		/* leading zero specified */
       c = pattern;  
@@ -161,7 +161,7 @@ int glob_range(char *pattern, int pos) {
       glob_word(c, pos + (c - pattern));
   }
   printf("error: illegal character in range specification at pos %d\n", pos);
-  exit (URG_URL_MALFORMAT);
+  exit (CURLE_URL_MALFORMAT);
 }
 
 int glob_word(char *pattern, int pos) {
@@ -174,14 +174,14 @@ int glob_word(char *pattern, int pos) {
   while (*pattern != '\0' && *pattern != '{' && *pattern != '[') {
     if (*pattern == '}' || *pattern == ']') {
       printf("illegal character at position %d\n", pos);
-      exit (URG_URL_MALFORMAT);
+      exit (CURLE_URL_MALFORMAT);
     }
     if (*pattern == '\\') {		/* escape character, skip '\' */
       ++pattern;
       ++pos;
       if (*pattern == '\0') {		/* but no escaping of '\0'! */
 	printf("illegal character at position %d\n", pos);
-	exit (URG_URL_MALFORMAT);
+	exit (CURLE_URL_MALFORMAT);
       }
     }
     *buf++ = *pattern++;		/* copy character to literal */
@@ -201,21 +201,21 @@ int glob_word(char *pattern, int pos) {
     return glob_range(++pattern, ++pos);/* process range pattern */
   }
   printf("internal error\n");
-  exit (URG_FAILED_INIT);
+  exit (CURLE_FAILED_INIT);
 }
 
 int glob_url(URLGlob** glob, char* url, int *urlnum)
 {
   if (strlen(url)>URL_MAX_LENGTH) {
     printf("Illegally sized URL\n");
-    return URG_URL_MALFORMAT;
+    return CURLE_URL_MALFORMAT;
   }
 
   glob_expand = (URLGlob*)malloc(sizeof(URLGlob));
   glob_expand->size = 0;
   *urlnum = glob_word(url, 1);
   *glob = glob_expand;
-  return URG_OK;
+  return CURLE_OK;
 }
 
 char *next_url(URLGlob *glob)
@@ -258,7 +258,7 @@ char *next_url(URLGlob *glob)
 	break;
       default:
 	printf("internal error: invalid pattern type (%d)\n", pat->type);
-	exit (URG_FAILED_INIT);
+	exit (CURLE_FAILED_INIT);
       }
     }
     if (carry)		/* first pattern ptr has run into overflow, done! */
@@ -287,7 +287,7 @@ char *next_url(URLGlob *glob)
 	break;
       default:
 	printf("internal error: invalid pattern type (%d)\n", pat->type);
-	exit (URG_FAILED_INIT);
+	exit (CURLE_FAILED_INIT);
       }
     }
   }
@@ -305,12 +305,12 @@ char *match_url(char *filename, URLGlob glob) {
       if (!isdigit((int)*++filename) ||
 	  *filename == '0') {		/* only '#1' ... '#9' allowed */
 	printf("illegal matching expression\n");
-	exit(URG_URL_MALFORMAT);
+	exit(CURLE_URL_MALFORMAT);
       }
       i = *filename - '1';
       if (i + 1 > glob.size / 2) {
 	printf("match against nonexisting pattern\n");
-	exit(URG_URL_MALFORMAT);
+	exit(CURLE_URL_MALFORMAT);
       }
       pat = glob.pattern[i];
       switch (pat.type) {
@@ -327,7 +327,7 @@ char *match_url(char *filename, URLGlob glob) {
 	break;
       default:
 	printf("internal error: invalid pattern type (%d)\n", pat.type);
-	exit (URG_FAILED_INIT);
+	exit (CURLE_FAILED_INIT);
       }
       ++filename;
     }

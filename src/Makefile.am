@@ -4,7 +4,7 @@
 
 # Some flags needed when trying to cause warnings ;-)
 # CFLAGS = -Wall -pedantic
-CPPFLAGS = -DGLOBURL -DCURL_SEPARATORS
+#CPPFLAGS = -DGLOBURL -DCURL_SEPARATORS
 
 INCLUDES = -I$(top_srcdir)/include
 

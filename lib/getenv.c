@@ -22,18 +22,6 @@
  *  Portions created by the Initial Developer are Copyright (C) 1998.
  *  All Rights Reserved.
  *
- *  Contributor(s):
- *   Rafael Sagula <sagula@inf.ufrgs.br>
- *   Sampo Kellomaki <sampo@iki.fi>
- *   Linas Vepstas <linas@linas.org>
- *   Bjorn Reese <breese@imada.ou.dk>
- *   Johan Anderson <johan@homemail.com>
- *   Kjell Ericson <Kjell.Ericson@haxx.nu>
- *   Troy Engel <tengel@palladium.net>
- *   Ryan Nelson <ryan@inch.com>
- *   Bjorn Stenberg <Bjorn.Stenberg@haxx.nu>
- *   Angus Mackay <amackay@gus.ml.org>
- *
  * ------------------------------------------------------------
  * Main author:
  * - Daniel Stenberg <Daniel.Stenberg@haxx.nu>
@@ -46,24 +34,6 @@
  * $Author$
  * $State$
  * $Locker$
- *
- * ------------------------------------------------------------
- * $Log$
- * Revision 1.2  2000-01-10 23:36:14  bagder
- * syncing with local edit
- *
- * Revision 1.4  1999/09/06 06:59:40  dast
- * Changed email info
- *
- * Revision 1.3  1999/08/13 07:34:48  dast
- * Changed the URL in the header
- *
- * Revision 1.2  1999/03/13 00:56:09  dast
- * Big changes done due to url.c being split up in X smaller files and that
- * the lib is now more stand-alone.
- *
- * Revision 1.1.1.1  1999/03/11 22:23:34  dast
- * Imported sources
  *
  ****************************************************************************/
 

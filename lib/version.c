@@ -58,7 +58,7 @@ char *curl_version(void)
 #ifdef USE_SSLEAY
 
 #if (SSLEAY_VERSION_NUMBER >= 0x900000)
-  sprintf(ptr, " (SSL %x.%x.%x)",
+  sprintf(ptr, " (SSL %lx.%lx.%lx)",
           (SSLEAY_VERSION_NUMBER>>28)&0xff,
           (SSLEAY_VERSION_NUMBER>>20)&0xff,
           (SSLEAY_VERSION_NUMBER>>12)&0xf);

@@ -1,5 +1,5 @@
-#ifndef __CURL_H
-#define __CURL_H
+#ifndef __CURL_CURL_H
+#define __CURL_CURL_H
 /*****************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -39,6 +39,25 @@
  *
  * ------------------------------------------------------------
  ****************************************************************************/
+
+/* The include stuff here is mainly for time_t! */
+#ifdef vms
+# include <types.h>
+# include <time.h>
+#else
+# include <sys/types.h>
+# if TIME_WITH_SYS_TIME
+#  include <sys/time.h>
+#  include <time.h>
+# else
+#  if HAVE_SYS_TIME_H
+#   include <sys/time.h>
+#  else
+#   include <time.h>
+#  endif
+# endif
+#endif /* defined (vms) */
+
 #ifndef TRUE
 #define TRUE 1
 #endif
@@ -46,71 +65,8 @@
 #define FALSE 0
 #endif
 
+#include <curl/types.h>
 
-#define CONF_DEFAULT 0
-#define CONF_PROXY   (1<<0) /* set if proxy is in use */
-#define CONF_PORT    (1<<1) /* set if different port than protcol-defines is
-                               used */
-#define CONF_HTTP    (1<<2) /* http get */
-#define CONF_GOPHER  (1<<3) /* gopher get */
-#define CONF_FTP     (1<<4) /* ftp get (binary mode) */
-#define CONF_VERBOSE (1<<5) /* talk a lot */
-
-#define CONF_TELNET  (1<<6)
-
-#define CONF_HEADER  (1<<8) /* throw the header out too */
-#define CONF_USERPWD (1<<9) /* user+passwd has been specified */
-#define CONF_NOPROGRESS (1<<10) /* shut off the progress meter (auto)
-                                   see also _MUTE */
-#define CONF_NOBODY  (1<<11) /* use HEAD to get http document */
-#define CONF_FAILONERROR (1<<12) /* Makes urlget() fail with a return code
-                                    WITHOUT writing anything to the output if
-                                    a return code >=300 is returned from the
-                                    server. */
-#define CONF_RANGE (1<<13) /* Byte-range request, specified parameter is set */
-#define CONF_UPLOAD (1<<14) /* this is an upload, only supported for ftp
-                               currently */
-
-#define CONF_POST (1<<15) /* HTTP POST method */
-
-/* When getting an FTP directory, this switch makes the listing only show file
-   names and nothing else. Makes machine parsing of the output possible. This
-   enforces the NLST command to the ftp server, compared to the otherwise
-   used: LIST. */
-#define CONF_FTPLISTONLY (1<<16)
-
-/* Set the referer string */
-#define CONF_REFERER (1<<17)
-#define CONF_PROXYUSERPWD (1<<18) /* Proxy user+passwd has been specified */
-
-/* For FTP, use PORT instead of PASV! */
-#define CONF_FTPPORT (1<<19)
-
-/* FTP: Append instead of overwrite on upload! */
-#define CONF_FTPAPPEND (1<<20)
-
-#define CONF_HTTPS (1<<21)  /* Use SSLeay for encrypted communication */
-
-#define CONF_NETRC (1<<22)  /* read user+password from .netrc */
-
-#define CONF_FOLLOWLOCATION (1<<23) /* get the page that the Location: tells
-				       us to get */
-
-#define CONF_FTPASCII (1<<24) /* use TYPE A for transfer */
-
-#define CONF_HTTPPOST (1<<25) /* this causes a multipart/form-data
-				 HTTP POST */
-#define CONF_NOPROT   (1<<26) /* host name specified without protocol */
-
-#define CONF_PUT      (1<<27) /* PUT the input file */
-
-#define CONF_MUTE     (1<<28) /* force NOPROGRESS */
-
-#define CONF_DICT     (1<<29) /* DICT:// protocol */
-
-#define CONF_FILE     (1<<30) /* FILE:// protocol */
-
-#define CONF_LDAP     (1<<31) /* LDAP:// protocol */
 
 struct HttpHeader {
   struct HttpHeader *next; /* next entry in the list */
@@ -132,68 +88,69 @@ struct HttpPost {
    may return other values, stay prepared. */
 
 typedef enum {
-  URG_OK = 0,
-  URG_UNSUPPORTED_PROTOCOL,
-  URG_FAILED_INIT,
-  URG_URL_MALFORMAT,
-  URG_URL_MALFORMAT_USER,
-  URG_COULDNT_RESOLVE_PROXY,
-  URG_COULDNT_RESOLVE_HOST,
-  URG_COULDNT_CONNECT,
-  URG_FTP_WEIRD_SERVER_REPLY,
-  URG_FTP_ACCESS_DENIED,
-  URG_FTP_USER_PASSWORD_INCORRECT,
-  URG_FTP_WEIRD_PASS_REPLY,
-  URG_FTP_WEIRD_USER_REPLY,
-  URG_FTP_WEIRD_PASV_REPLY,
-  URG_FTP_WEIRD_227_FORMAT,
-  URG_FTP_CANT_GET_HOST,
-  URG_FTP_CANT_RECONNECT,
-  URG_FTP_COULDNT_SET_BINARY,
-  URG_PARTIAL_FILE,
-  URG_FTP_COULDNT_RETR_FILE,
-  URG_FTP_WRITE_ERROR,
-  URG_FTP_QUOTE_ERROR,
-  URG_HTTP_NOT_FOUND,
-  URG_WRITE_ERROR,
+  CURLE_OK = 0,
+  CURLE_UNSUPPORTED_PROTOCOL,
+  CURLE_FAILED_INIT,
+  CURLE_URL_MALFORMAT,
+  CURLE_URL_MALFORMAT_USER,
+  CURLE_COULDNT_RESOLVE_PROXY,
+  CURLE_COULDNT_RESOLVE_HOST,
+  CURLE_COULDNT_CONNECT,
+  CURLE_FTP_WEIRD_SERVER_REPLY,
+  CURLE_FTP_ACCESS_DENIED,
+  CURLE_FTP_USER_PASSWORD_INCORRECT,
+  CURLE_FTP_WEIRD_PASS_REPLY,
+  CURLE_FTP_WEIRD_USER_REPLY,
+  CURLE_FTP_WEIRD_PASV_REPLY,
+  CURLE_FTP_WEIRD_227_FORMAT,
+  CURLE_FTP_CANT_GET_HOST,
+  CURLE_FTP_CANT_RECONNECT,
+  CURLE_FTP_COULDNT_SET_BINARY,
+  CURLE_PARTIAL_FILE,
+  CURLE_FTP_COULDNT_RETR_FILE,
+  CURLE_FTP_WRITE_ERROR,
+  CURLE_FTP_QUOTE_ERROR,
+  CURLE_HTTP_NOT_FOUND,
+  CURLE_WRITE_ERROR,
 
-  URG_MALFORMAT_USER, /* the user name is illegally specified */
-  URG_FTP_COULDNT_STOR_FILE, /* failed FTP upload */
-  URG_READ_ERROR, /* could open/read from file */
+  CURLE_MALFORMAT_USER, /* the user name is illegally specified */
+  CURLE_FTP_COULDNT_STOR_FILE, /* failed FTP upload */
+  CURLE_READ_ERROR, /* could open/read from file */
 
-  URG_OUT_OF_MEMORY,
-  URG_OPERATION_TIMEOUTED, /* the timeout time was reached */
-  URG_FTP_COULDNT_SET_ASCII, /* TYPE A failed */
+  CURLE_OUT_OF_MEMORY,
+  CURLE_OPERATION_TIMEOUTED, /* the timeout time was reached */
+  CURLE_FTP_COULDNT_SET_ASCII, /* TYPE A failed */
 
-  URG_FTP_PORT_FAILED, /* FTP PORT operation failed */
+  CURLE_FTP_PORT_FAILED, /* FTP PORT operation failed */
 
-  URG_FTP_COULDNT_USE_REST, /* the REST command failed */
-  URG_FTP_COULDNT_GET_SIZE, /* the SIZE command failed */
+  CURLE_FTP_COULDNT_USE_REST, /* the REST command failed */
+  CURLE_FTP_COULDNT_GET_SIZE, /* the SIZE command failed */
 
-  URG_HTTP_RANGE_ERROR, /* The RANGE "command" didn't seem to work */
+  CURLE_HTTP_RANGE_ERROR, /* The RANGE "command" didn't seem to work */
 
-  URG_HTTP_POST_ERROR,
+  CURLE_HTTP_POST_ERROR,
 
-  URG_SSL_CONNECT_ERROR, /* something was wrong when connecting with SSL */
+  CURLE_SSL_CONNECT_ERROR, /* something was wrong when connecting with SSL */
 
-  URG_FTP_BAD_DOWNLOAD_RESUME, /* couldn't resume download */
+  CURLE_FTP_BAD_DOWNLOAD_RESUME, /* couldn't resume download */
 
-  URG_FILE_COULDNT_READ_FILE,
+  CURLE_FILE_COULDNT_READ_FILE,
 
-  URG_LDAP_CANNOT_BIND,
-  URG_LDAP_SEARCH_FAILED,
-  URG_LIBRARY_NOT_FOUND,
-  URG_FUNCTION_NOT_FOUND,
+  CURLE_LDAP_CANNOT_BIND,
+  CURLE_LDAP_SEARCH_FAILED,
+  CURLE_LIBRARY_NOT_FOUND,
+  CURLE_FUNCTION_NOT_FOUND,
+  
+  CURLE_ABORTED_BY_CALLBACK,
 
-  URL_LAST
-} UrgError;
+  CURLE_BAD_FUNCTION_ARGUMENT,
+  CURLE_BAD_CALLING_ORDER,
+
+  CURL_LAST
+} CURLcode;
 
 /* This is just to make older programs not break: */
-#define URG_FTP_PARTIAL_FILE URG_PARTIAL_FILE
-
-#define URGTAG_DONE -1
-#define URGTAG_LAST -1
-#define URGTAG_END -1
+#define CURLE_FTP_PARTIAL_FILE CURLE_PARTIAL_FILE
 
 #define URLGET_ERROR_SIZE 256
 
@@ -201,19 +158,19 @@ typedef enum {
 #define URL_MAX_LENGTH 4096 
 #define URL_MAX_LENGTH_TXT "4095"
 
-/* name is uppercase URGTAG_<name>,
-   type is one of the defined URGTYPE_<type>
+/* name is uppercase CURLOPT_<name>,
+   type is one of the defined CURLOPTTYPE_<type>
    number is unique identifier */
-#define T(name,type,number) URGTAG_ ## name = URGTYPE_ ## type + number
+#define T(name,type,number) CURLOPT_ ## name = CURLOPTTYPE_ ## type + number
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
-#define URGTYPE_LONG          0
-#define URGTYPE_OBJECTPOINT   10000
-#define URGTYPE_FUNCTIONPOINT 20000
+#define CURLOPTTYPE_LONG          0
+#define CURLOPTTYPE_OBJECTPOINT   10000
+#define CURLOPTTYPE_FUNCTIONPOINT 20000
 
 typedef enum {
-  URGTAG_NOTHING, /* the first unused */
+  T(NOTHING, LONG, 0), /********* the first one is unused ************/
   
   /* This is the FILE * the regular output should be written to. */
   T(FILE, OBJECTPOINT, 1),
@@ -222,28 +179,29 @@ typedef enum {
   T(URL,  OBJECTPOINT, 2),
 
   /* Port number to connect to, if other than default. Specify the CONF_PORT
-     flag in the URGTAG_FLAGS to activate this */
+     flag in the CURLOPT_FLAGS to activate this */
   T(PORT, LONG, 3),
 
-  /* Name of proxy to use. Specify the CONF_PROXY flag in the URGTAG_FLAGS to
+  /* Name of proxy to use. Specify the CONF_PROXY flag in the CURLOPT_FLAGS to
      activate this */
   T(PROXY, OBJECTPOINT, 4),
   
   /* Name and password to use when fetching. Specify the CONF_USERPWD flag in
-     the URGTAG_FLAGS to activate this */
+     the CURLOPT_FLAGS to activate this */
   T(USERPWD, OBJECTPOINT, 5),
 
   /* Name and password to use with Proxy. Specify the CONF_PROXYUSERPWD 
-     flag in the URGTAG_FLAGS to activate this */
+     flag in the CURLOPT_FLAGS to activate this */
   T(PROXYUSERPWD, OBJECTPOINT, 6),
 
   /* Range to get, specified as an ASCII string. Specify the CONF_RANGE flag
-     in the URGTAG_FLAGS to activate this */
+     in the CURLOPT_FLAGS to activate this */
   T(RANGE, OBJECTPOINT, 7),
 
+#if 0
   /* Configuration flags */
   T(FLAGS, LONG, 8),
-
+#endif
   /* Specified file stream to upload from (use as input): */
   T(INFILE, OBJECTPOINT, 9),
 
@@ -262,7 +220,7 @@ typedef enum {
   /* Time-out the read operation after this amount of seconds */
   T(TIMEOUT, LONG, 13),
 
-  /* If the URGTAG_INFILE is used, this can be used to inform urlget about how
+  /* If the CURLOPT_INFILE is used, this can be used to inform urlget about how
      large the file being sent really is. That allows better error checking
      and better verifies that the upload was succcessful. -1 means unknown
      size. */
@@ -364,8 +322,25 @@ typedef enum {
      as described elsewhere. */
   T(WRITEINFO, OBJECTPOINT, 40),
 
-  URGTAG_LASTENTRY /* the last unusued */
-} UrgTag;
+  /* Previous FLAG bits */
+  T(VERBOSE, LONG, 41),      /* talk a lot */
+  T(HEADER, LONG, 42),       /* throw the header out too */
+  T(NOPROGRESS, LONG, 43),   /* shut off the progress meter */
+  T(NOBODY, LONG, 44),       /* use HEAD to get http document */
+  T(FAILONERROR, LONG, 45),  /* no output on http error codes >= 300 */
+  T(UPLOAD, LONG, 46),       /* this is an upload */
+  T(POST, LONG, 47),         /* HTTP POST method */
+  T(FTPLISTONLY, LONG, 48),  /* Use NLST when listing ftp dir */
+
+  T(FTPAPPEND, LONG, 50),    /* Append instead of overwrite on upload! */
+  T(NETRC, LONG, 51),        /* read user+password from .netrc */
+  T(FOLLOWLOCATION, LONG, 52),  /* use Location: Luke! */
+  T(FTPASCII, LONG, 53),     /* use TYPE A for transfer */
+  T(PUT, LONG, 54),          /* PUT the input file */
+  T(MUTE, LONG, 55),         /* force NOPROGRESS */
+
+  CURLOPT_LASTENTRY /* the last unusued */
+} CURLoption;
 
 #define CURL_PROGRESS_STATS 0 /* default progress display */
 #define CURL_PROGRESS_BAR   1
@@ -388,23 +363,11 @@ typedef char bool;
 #endif                     /* (rabe) */
 #endif
 
-/**********************************************************************
- *
- * >>> urlget() interface #defines changed in v5! <<<
- *
- * You enter parameters as tags. Tags are specified as a pair of parameters.
- * The first parameter in a pair is the tag identifier, telling urlget what
- * kind of tag it is, and the second is the data. The tags may come in any
- * order but MUST ALWAYS BE TERMINATED with an ending URGTAG_DONE (which
- * needs no data).
- *
- * _Very_ simple example:
- *
- * curl_urlget(URGTAG_URL, "http://www.fts.frontec.se/~dast/", URGTAG_DONE);
- *
- ***********************************************************************/
-
+#if 0
+/* At last, I stand here in front of you today and can officially proclaim
+   this function prototype as history... 17th of May, 2000 */
 UrgError curl_urlget(UrgTag, ...);
+#endif
 
 /* external form function */
 int curl_FormParse(char *string,
@@ -418,9 +381,10 @@ char *curl_GetEnv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "6.5.2"
+#define LIBCURL_VERSION "7.0beta"
+#define LIBCURL_VERSION_NUM 0x070000
 
-/* linked-list structure for QUOTE */
+/* linked-list structure for the CURLOPT_QUOTE option */
 struct curl_slist {
 	char			*data;
 	struct curl_slist	*next;
@@ -429,4 +393,192 @@ struct curl_slist {
 struct curl_slist *curl_slist_append(struct curl_slist *list, char *data);
 void curl_slist_free_all(struct curl_slist *list);
 
-#endif /* __URLGET_H */
+/*
+ * NAME	curl_init()
+ *
+ * DESCRIPTION
+ *
+ * Inits libcurl globally. This must be used before any libcurl calls can
+ * be used. This may install global plug-ins or whatever. (This does not
+ * do winsock inits in Windows.)
+ *
+ * EXAMPLE
+ *
+ * curl_init();
+ *
+ */
+CURLcode curl_init(void);
+
+/*
+ * NAME	curl_init()
+ *
+ * DESCRIPTION
+ *
+ * Frees libcurl globally. This must be used after all libcurl calls have
+ * been used. This may remove global plug-ins or whatever. (This does not
+ * do winsock cleanups in Windows.)
+ *
+ * EXAMPLE
+ *
+ * curl_free(curl);
+ *
+ */
+void curl_free(void);
+
+/*
+ * NAME curl_open()
+ *
+ * DESCRIPTION
+ *
+ * Opens a general curl session. It does not try to connect or do anything
+ * on the network because of this call. The specified URL is only required
+ * to enable curl to figure out what protocol to "activate".
+ *
+ * A session should be looked upon as a series of requests to a single host.  A
+ * session interacts with one host only, using one single protocol.
+ *
+ * The URL is not required. If set to "" or NULL, it can still be set later
+ * using the curl_setopt() function. If the curl_connect() function is called
+ * without the URL being known, it will return error.
+ *
+ * EXAMPLE
+ *
+ * CURLcode result;
+ * CURL *curl;
+ * result = curl_open(&curl, "http://curl.haxx.nu/libcurl/");
+ * if(result != CURL_OK) {
+ *   return result;
+ * }
+ * */
+CURLcode curl_open(CURL **curl, char *url);
+
+/*
+ * NAME curl_setopt()
+ *
+ * DESCRIPTION
+ *
+ * Sets a particular option to the specified value.
+ *
+ * EXAMPLE
+ *
+ * CURL curl;
+ * curl_setopt(curl, CURL_HTTP_FOLLOW_LOCATION, TRUE);
+ */
+CURLcode curl_setopt(CURL *handle, CURLoption option, ...);
+
+/*
+ * NAME curl_close()
+ *
+ * DESCRIPTION
+ *
+ * Closes a session previously opened with curl_open()
+ *
+ * EXAMPLE
+ *
+ * CURL *curl;
+ * CURLcode result;
+ *
+ * result = curl_close(curl);
+ */
+CURLcode curl_close(CURL *curl); /* the opposite of curl_open() */
+
+CURLcode curl_read(CURLconnect *c_conn, char *buf, size_t buffersize,
+                   size_t *n);
+CURLcode curl_write(CURLconnect *c_conn, char *buf, size_t amount,
+                    size_t *n);
+
+/*
+ * NAME curl_connect()
+ *
+ * DESCRIPTION
+ *
+ * Connects to the peer server and performs the initial setup. This function
+ * writes a connect handle to its second argument that is a unique handle for
+ * this connect. This allows multiple connects from the same handle returned
+ * by curl_open().
+ *
+ * EXAMPLE
+ *
+ * CURLCode result;
+ * CURL curl;
+ * CURLconnect connect;
+ * result = curl_connect(curl, &connect);
+ */
+
+CURLcode curl_connect(CURL *curl, CURLconnect **in_connect);
+
+/*
+ * NAME curl_do()
+ *
+ * DESCRIPTION
+ *
+ * (Note: May 3rd 2000: this function does not currently allow you to
+ * specify a document, it will use the one set previously)
+ *
+ * This function asks for the particular document, file or resource that
+ * resides on the server we have connected to. You may specify a full URL,
+ * just an absolute path or even a relative path. That means, if you're just
+ * getting one file from the remote site, you can use the same URL as input
+ * for both curl_open() as well as for this function.
+ *
+ * In the even there is a host name, port number, user name or password parts
+ * in the URL, you can use the 'flags' argument to ignore them completely, or
+ * at your choice, make the function fail if you're trying to get a URL from
+ * different host than you connected to with curl_connect().
+ *
+ * You can only get one document at a time using the same connection. When one
+ * document has been received you can although request again.
+ *
+ * When the transfer is done, curl_done() MUST be called.
+ *
+ * EXAMPLE
+ *
+ * CURLCode result;
+ * char *url;
+ * CURLconnect *connect;
+ * result = curl_do(connect, url, CURL_DO_NONE); */
+CURLcode curl_do(CURLconnect *in_conn);
+
+/*
+ * NAME curl_done()
+ *
+ * DESCRIPTION
+ *
+ * When the transfer following a curl_do() call is done, this function should
+ * get called.
+ *
+ * EXAMPLE
+ *
+ * CURLCode result;
+ * char *url;
+ * CURLconnect *connect;
+ * result = curl_done(connect); */
+CURLcode curl_done(CURLconnect *connect);
+
+/*
+ * NAME curl_disconnect()
+ *
+ * DESCRIPTION
+ *
+ * Disconnects from the peer server and performs connection cleanup.
+ *
+ * EXAMPLE
+ *
+ * CURLcode result;
+ * CURLconnect *connect;
+ * result = curl_disconnect(connect); */
+CURLcode curl_disconnect(CURLconnect *connect);
+
+/*
+ * NAME curl_getdate()
+ *
+ * DESCRIPTION
+ *
+ * Returns the time, in seconds since 1 Jan 1970 of the time string given in
+ * the first argument. The time argument in the second parameter is for cases
+ * where the specified time is relative now, like 'two weeks' or 'tomorrow'
+ * etc.
+ */
+time_t curl_getdate(const char *p, const time_t *now);
+
+#endif /* __CURL_CURL_H */

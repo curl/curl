@@ -61,7 +61,7 @@
 void infof(struct UrlData *data, char *fmt, ...)
 {
   va_list ap;
-  if(data->conf & CONF_VERBOSE) {
+  if(data->bits.verbose) {
     va_start(ap, fmt);
     fputs("* ", data->err);
     vfprintf(data->err, fmt, ap);
@@ -95,7 +95,7 @@ int sendf(int fd, struct UrlData *data, char *fmt, ...)
   va_end(ap);
   if(!s)
     return 0; /* failure */
-  if(data->conf & CONF_VERBOSE)
+  if(data->bits.verbose)
     fprintf(data->err, "> %s", s);
 #ifndef USE_SSLEAY
    bytes_written = swrite(fd, s, strlen(s));

@@ -1,18 +1,11 @@
-/*  Copyright (C) 1995, 1997, 1998 Free Software Foundation, Inc.
-
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software Foundation,
-   Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.  */
+/*
+**  Originally written by Steven M. Bellovin <smb@research.att.com> while
+**  at the University of North Carolina at Chapel Hill.  Later tweaked by
+**  a couple of people on Usenet.  Completely overhauled by Rich $alz
+**  <rsalz@bbn.com> and Jim Berets <jberets@bbn.com> in August, 1990.
+**
+**  This code is in the public domain and has no copyright.
+*/
 
 #if HAVE_CONFIG_H
 # include <config.h>
@@ -43,4 +36,4 @@
 # endif
 #endif /* defined (vms) */
 
-time_t get_date PARAMS ((const char *p, const time_t *now));
+time_t curl_getdate PARAMS ((const char *p, const time_t *now));

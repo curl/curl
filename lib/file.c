@@ -100,23 +100,25 @@
 #include <curl/mprintf.h>
 
 
-UrgError file(struct UrlData *data, char *path, long *bytecountp)
+CURLcode file(struct connectdata *conn)
 {
   /* This implementation ignores the host name in conformance with 
      RFC 1738. Only local files (reachable via the standard file system)
      are supported. This means that files on remotely mounted directories
      (via NFS, Samba, NT sharing) can be accessed through a file:// URL
   */
-
+  CURLcode res = CURLE_OK;
+  char *path = conn->path;
   struct stat statbuf;
   size_t expected_size=-1;
   size_t nread;
+  struct UrlData *data = conn->data;
   char *buf = data->buffer;
   int bytecount = 0;
   struct timeval start = tvnow();
   struct timeval now = start;
   int fd;
-  char *actual_path = curl_unescape(path);
+  char *actual_path = curl_unescape(path, 0);
 
 #if defined(WIN32) || defined(__EMX__)
   int i;
@@ -134,7 +136,7 @@ UrgError file(struct UrlData *data, char *path, long *bytecountp)
 
   if(fd == -1) {
     failf(data, "Couldn't open file %s", path);
-    return URG_FILE_COULDNT_READ_FILE;
+    return CURLE_FILE_COULDNT_READ_FILE;
   }
   if( -1 != fstat(fd, &statbuf)) {
     /* we could stat it, then read out the size */
@@ -151,7 +153,7 @@ UrgError file(struct UrlData *data, char *path, long *bytecountp)
   if(expected_size != -1)
     pgrsSetDownloadSize(data, expected_size);
 
-  while (1) {
+  while (res == CURLE_OK) {
     nread = read(fd, buf, BUFSIZE-1);
 
     if (0 <= nread)
@@ -166,21 +168,19 @@ UrgError file(struct UrlData *data, char *path, long *bytecountp)
        file descriptor). */
     if(nread != data->fwrite (buf, 1, nread, data->out)) {
       failf (data, "Failed writing output");
-      return URG_WRITE_ERROR;
+      return CURLE_WRITE_ERROR;
     }
     now = tvnow();
-    pgrsUpdate(data);
-#if 0
-    ProgressShow (data, bytecount, start, now, FALSE);
-#endif
+    if(pgrsUpdate(data))
+      res = CURLE_ABORTED_BY_CALLBACK;
   }
   now = tvnow();
-#if 0
-  ProgressShow (data, bytecount, start, now, TRUE);
-#endif
-  pgrsUpdate(data);
+  if(pgrsUpdate(data))
+    res = CURLE_ABORTED_BY_CALLBACK;
 
   close(fd);
 
-  return URG_OK;
+  free(actual_path);
+
+  return res;
 }

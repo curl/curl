@@ -149,7 +149,7 @@ void curl_slist_free_all(struct curl_slist *list)
 }
 
 
-static UrgError AllowServerConnect(struct UrlData *data,
+static CURLcode AllowServerConnect(struct UrlData *data,
                                    int sock)
 {
   fd_set rdset;
@@ -167,11 +167,11 @@ static UrgError AllowServerConnect(struct UrlData *data,
   case -1: /* error */
     /* let's die here */
     failf(data, "Error while waiting for server connect");
-    return URG_FTP_PORT_FAILED;
+    return CURLE_FTP_PORT_FAILED;
   case 0:  /* timeout */
     /* let's die here */
     failf(data, "Timeout while waiting for server connect");
-    return URG_FTP_PORT_FAILED;
+    return CURLE_FTP_PORT_FAILED;
   default:
     /* we have received data here */
     {
@@ -185,7 +185,7 @@ static UrgError AllowServerConnect(struct UrlData *data,
       if( -1 == s) {
 	/* DIE! */
 	failf(data, "Error accept()ing server connect");
-	return URG_FTP_PORT_FAILED;
+	return CURLE_FTP_PORT_FAILED;
       }
       infof(data, "Connection accepted from server\n");
 
@@ -193,7 +193,7 @@ static UrgError AllowServerConnect(struct UrlData *data,
     }
     break;
   }
-  return URG_OK;
+  return CURLE_OK;
 }
 
 
@@ -202,7 +202,7 @@ static UrgError AllowServerConnect(struct UrlData *data,
 #define lastline(line) (isdigit((int)line[0]) && isdigit((int)line[1]) && \
 			isdigit((int)line[2]) && (' ' == line[3]))
 
-static int GetLastResponse(int sockfd, char *buf,
+int GetLastResponse(int sockfd, char *buf,
 			   struct UrlData *data)
 {
   int nread;
@@ -230,7 +230,7 @@ static int GetLastResponse(int sockfd, char *buf,
     }
     *ptr=0; /* zero terminate */
 
-    if(data->conf & CONF_VERBOSE) {
+    if(data->bits.verbose) {
       fputs("< ", data->err);
       fwrite(buf, 1, nread, data->err);
       fputs("\n", data->err);
@@ -310,32 +310,37 @@ static char *URLfix(char *string)
 }
 #endif
 
-static
-UrgError _ftp(struct UrlData *data,
-              long *bytecountp,
-              char *ftpuser,
-              char *ftppasswd,
-              char *ppath)
+/* ftp_connect() should do everything that is to be considered a part
+   of the connection phase. */
+CURLcode ftp_connect(struct connectdata *conn)
 {
   /* this is FTP and no proxy */
   size_t nread;
-  UrgError result;
+  struct UrlData *data=conn->data;
   char *buf = data->buffer; /* this is our buffer */
-  /* for the ftp PORT mode */
-  int portsock=-1;
-  struct sockaddr_in serv_addr;
+  struct FTP *ftp;
 
-  struct curl_slist *qitem; /* QUOTE item */
+  ftp = (struct FTP *)malloc(sizeof(struct FTP));
+  if(!ftp)
+    return CURLE_OUT_OF_MEMORY;
+
+  memset(ftp, 0, sizeof(struct FTP));
+  data->proto.ftp = ftp;
+
+  /* get some initial data into the ftp struct */
+  ftp->bytecountp = &conn->bytecount;
+  ftp->user = data->user;
+  ftp->passwd = data->passwd;
 
   /* The first thing we do is wait for the "220*" line: */
   nread = GetLastResponse(data->firstsocket, buf, data);
   if(strncmp(buf, "220", 3)) {
     failf(data, "This doesn't seem like a nice ftp-server response");
-    return URG_FTP_WEIRD_SERVER_REPLY;
+    return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
   /* send USER */
-  sendf(data->firstsocket, data, "USER %s\r\n", ftpuser);
+  sendf(data->firstsocket, data, "USER %s\r\n", ftp->user);
 
   /* wait for feedback */
   nread = GetLastResponse(data->firstsocket, buf, data);
@@ -344,19 +349,19 @@ UrgError _ftp(struct UrlData *data,
     /* 530 User ... access denied
        (the server denies to log the specified user) */
     failf(data, "Access denied: %s", &buf[4]);
-    return URG_FTP_ACCESS_DENIED;
+    return CURLE_FTP_ACCESS_DENIED;
   }
   else if(!strncmp(buf, "331", 3)) {
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
-    sendf(data->firstsocket, data, "PASS %s\r\n", ftppasswd);
+    sendf(data->firstsocket, data, "PASS %s\r\n", ftp->passwd);
     nread = GetLastResponse(data->firstsocket, buf, data);
 
     if(!strncmp(buf, "530", 3)) {
       /* 530 Login incorrect.
          (the username and/or the password are incorrect) */
       failf(data, "the username and/or the password are incorrect");
-      return URG_FTP_USER_PASSWORD_INCORRECT;
+      return CURLE_FTP_USER_PASSWORD_INCORRECT;
     }
     else if(!strncmp(buf, "230", 3)) {
       /* 230 User ... logged in.
@@ -366,7 +371,7 @@ UrgError _ftp(struct UrlData *data,
     }
     else {
       failf(data, "Odd return code after PASS");
-      return URG_FTP_WEIRD_PASS_REPLY;
+      return CURLE_FTP_WEIRD_PASS_REPLY;
     }
   }
   else if(! strncmp(buf, "230", 3)) {
@@ -376,8 +381,104 @@ UrgError _ftp(struct UrlData *data,
   }
   else {
     failf(data, "Odd return code after USER");
-    return URG_FTP_WEIRD_USER_REPLY;
+    return CURLE_FTP_WEIRD_USER_REPLY;
   }
+
+  return CURLE_OK;
+}
+
+
+/* argument is already checked for validity */
+CURLcode ftp_done(struct connectdata *conn)
+{
+  struct UrlData *data = conn->data;
+  struct FTP *ftp = data->proto.ftp;
+  size_t nread;
+  char *buf = data->buffer; /* this is our buffer */
+  struct curl_slist *qitem; /* QUOTE item */
+
+  if(data->bits.upload) {
+    if((-1 != data->infilesize) && (data->infilesize != *ftp->bytecountp)) {
+      failf(data, "Wrote only partial file (%d out of %d bytes)",
+            *ftp->bytecountp, data->infilesize);
+      return CURLE_PARTIAL_FILE;
+    }
+  }
+  else {
+    if((-1 != conn->size) && (conn->size != *ftp->bytecountp) &&
+       (data->maxdownload != *ftp->bytecountp)) {
+      failf(data, "Received only partial file");
+      return CURLE_PARTIAL_FILE;
+    }
+    else if(0 == *ftp->bytecountp) {
+      failf(data, "No data was received!");
+      return CURLE_FTP_COULDNT_RETR_FILE;
+    }
+  }
+  /* shut down the socket to inform the server we're done */
+  sclose(data->secondarysocket);
+  data->secondarysocket = -1;
+    
+  /* now let's see what the server says about the transfer we
+     just performed: */
+  nread = GetLastResponse(data->firstsocket, buf, data);
+
+  /* 226 Transfer complete */
+  if(strncmp(buf, "226", 3)) {
+    failf(data, "%s", buf+4);
+    return CURLE_FTP_WRITE_ERROR;
+  }
+
+  /* Send any post-transfer QUOTE strings? */
+  if(data->postquote) {
+    qitem = data->postquote;
+    /* Send all QUOTE strings in same order as on command-line */
+    while (qitem) {
+      /* Send string */
+      if (qitem->data) {
+        sendf(data->firstsocket, data, "%s\r\n", qitem->data);
+
+        nread = GetLastResponse(data->firstsocket, buf, data);
+
+        if (buf[0] != '2') {
+          failf(data, "QUOT string not accepted: %s",
+                qitem->data);
+          return CURLE_FTP_QUOTE_ERROR;
+        }
+      }
+      qitem = qitem->next;
+    }
+  }
+
+  if(ftp->file)
+    free(ftp->file);
+  if(ftp->dir)
+    free(ftp->dir);
+
+  /* TBD: the ftp struct is still allocated here */
+
+  return CURLE_OK;
+}
+
+
+
+static
+CURLcode _ftp(struct connectdata *conn)
+{
+  /* this is FTP and no proxy */
+  size_t nread;
+  CURLcode result;
+  struct UrlData *data=conn->data;
+  char *buf = data->buffer; /* this is our buffer */
+  /* for the ftp PORT mode */
+  int portsock=-1;
+  struct sockaddr_in serv_addr;
+
+  struct curl_slist *qitem; /* QUOTE item */
+  /* the ftp struct is already inited in ftp_connect() */
+  struct FTP *ftp = data->proto.ftp;
+
+  long *bytecountp = ftp->bytecountp;
 
   /* Send any QUOTE strings? */
   if(data->quote) {
@@ -393,7 +494,7 @@ UrgError _ftp(struct UrlData *data,
         if (buf[0] != '2') {
           failf(data, "QUOT string not accepted: %s",
                 qitem->data);
-          return URG_FTP_QUOTE_ERROR;
+          return CURLE_FTP_QUOTE_ERROR;
         }
       }
       qitem = qitem->next;
@@ -402,18 +503,18 @@ UrgError _ftp(struct UrlData *data,
 
   /* If we have selected NOBODY, it means that we only want file information.
      Which in FTP can't be much more than the file size! */
-  if(data->conf & CONF_NOBODY) {
+  if(data->bits.no_body) {
     /* The SIZE command is _not_ RFC 959 specified, and therefor many servers
        may not support it! It is however the only way we have to get a file's
        size! */
     int filesize;
-    sendf(data->firstsocket, data, "SIZE %s\r\n", ppath);
+    sendf(data->firstsocket, data, "SIZE %s\r\n", ftp->file);
 
     nread = GetLastResponse(data->firstsocket, buf, data);
 
     if(strncmp(buf, "213", 3)) {
       failf(data, "Couldn't get file size: %s", buf+4);
-      return URG_FTP_COULDNT_GET_SIZE;
+      return CURLE_FTP_COULDNT_GET_SIZE;
     }
     /* get the size from the ascii string: */
     filesize = atoi(buf+4);
@@ -422,21 +523,21 @@ UrgError _ftp(struct UrlData *data,
 
     if(strlen(buf) != data->fwrite(buf, 1, strlen(buf), data->out)) {
       failf (data, "Failed writing output");
-      return URG_WRITE_ERROR;
+      return CURLE_WRITE_ERROR;
     }
     if(data->writeheader) {
       /* the header is requested to be written to this file */
       if(strlen(buf) != data->fwrite (buf, 1, strlen(buf),
                                       data->writeheader)) {
         failf (data, "Failed writing output");
-        return URG_WRITE_ERROR;
+        return CURLE_WRITE_ERROR;
       }
     }
-    return URG_OK;
+    return CURLE_OK;
   }
 
   /* We have chosen to use the PORT command */
-  if(data->conf & CONF_FTPPORT) {
+  if(data->bits.ftp_use_port) {
     struct sockaddr_in sa;
     struct hostent *h=NULL;
     size_t size;
@@ -481,28 +582,28 @@ UrgError _ftp(struct UrlData *data,
           if(getsockname(portsock, (struct sockaddr *) &add,
                          (int *)&size)<0) {
             failf(data, "getsockname() failed");
-            return URG_FTP_PORT_FAILED;
+            return CURLE_FTP_PORT_FAILED;
           }
           porttouse = ntohs(add.sin_port);
 
           if ( listen(portsock, 1) < 0 ) {
             failf(data, "listen(2) failed on socket");
-            return URG_FTP_PORT_FAILED;
+            return CURLE_FTP_PORT_FAILED;
           }
         }
         else {
           failf(data, "bind(2) failed on socket");
-          return URG_FTP_PORT_FAILED;
+          return CURLE_FTP_PORT_FAILED;
         }
       }
       else {
         failf(data, "socket(2) failed (%s)");
-        return URG_FTP_PORT_FAILED;
+        return CURLE_FTP_PORT_FAILED;
       }
     }
     else {
       failf(data, "could't find my own IP address (%s)", myhost);
-      return URG_FTP_PORT_FAILED;
+      return CURLE_FTP_PORT_FAILED;
     }
     {
       struct in_addr in;
@@ -520,7 +621,7 @@ UrgError _ftp(struct UrlData *data,
 
     if(strncmp(buf, "200", 3)) {
       failf(data, "Server does not grok PORT, try without it!");
-      return URG_FTP_PORT_FAILED;
+      return CURLE_FTP_PORT_FAILED;
     }     
   }
   else { /* we use the PASV command */
@@ -531,7 +632,7 @@ UrgError _ftp(struct UrlData *data,
 
     if(strncmp(buf, "227", 3)) {
       failf(data, "Odd return code after PASV");
-      return URG_FTP_WEIRD_PASV_REPLY;
+      return CURLE_FTP_WEIRD_PASV_REPLY;
     }
     else {
       int ip[4];
@@ -561,13 +662,13 @@ UrgError _ftp(struct UrlData *data,
       }
       if(!*str) {
 	 failf(data, "Couldn't interpret this 227-reply: %s", buf);
-	 return URG_FTP_WEIRD_227_FORMAT;
+	 return CURLE_FTP_WEIRD_227_FORMAT;
       }
       sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
       he = GetHost(data, newhost);
       if(!he) {
         failf(data, "Can't resolve new host %s", newhost);
-        return URG_FTP_CANT_GET_HOST;
+        return CURLE_FTP_CANT_GET_HOST;
       }
 
 	
@@ -579,7 +680,7 @@ UrgError _ftp(struct UrlData *data,
       serv_addr.sin_family = he->h_addrtype;
       serv_addr.sin_port = htons(newport);
 
-      if(data->conf & CONF_VERBOSE) {
+      if(data->bits.verbose) {
         struct in_addr in;
 #if 1
         struct hostent * answer;
@@ -620,26 +721,38 @@ UrgError _ftp(struct UrlData *data,
           failf(data, "Can't connect to ftp server");
           break;
         }
-        return URG_FTP_CANT_RECONNECT;
+        return CURLE_FTP_CANT_RECONNECT;
       }
     }
 
   }
   /* we have the (new) data connection ready */
 
-  if(data->conf & CONF_UPLOAD) {
+  /* change directory first */
+
+  if(ftp->dir && ftp->dir[0]) {
+    sendf(data->firstsocket, data, "CWD %s\r\n", ftp->dir);
+    nread = GetLastResponse(data->firstsocket, buf, data);
+
+    if(strncmp(buf, "250", 3)) {
+      failf(data, "Couldn't change to directory %s", ftp->dir);
+      return CURLE_FTP_ACCESS_DENIED;
+    }
+  }
+
+  if(data->bits.upload) {
 
     /* Set type to binary (unless specified ASCII) */
     sendf(data->firstsocket, data, "TYPE %s\r\n",
-          (data->conf&CONF_FTPASCII)?"A":"I");
+          (data->bits.ftp_ascii)?"A":"I");
 
     nread = GetLastResponse(data->firstsocket, buf, data);
 
     if(strncmp(buf, "200", 3)) {
       failf(data, "Couldn't set %s mode",
-            (data->conf&CONF_FTPASCII)?"ASCII":"binary");
-      return (data->conf&CONF_FTPASCII)? URG_FTP_COULDNT_SET_ASCII:
-        URG_FTP_COULDNT_SET_BINARY;
+            (data->bits.ftp_ascii)?"ASCII":"binary");
+      return (data->bits.ftp_ascii)? CURLE_FTP_COULDNT_SET_ASCII:
+        CURLE_FTP_COULDNT_SET_BINARY;
     }
 
     if(data->resume_from) {
@@ -660,13 +773,13 @@ UrgError _ftp(struct UrlData *data,
         /* we could've got a specified offset from the command line,
            but now we know we didn't */
 
-        sendf(data->firstsocket, data, "SIZE %s\r\n", ppath);
+        sendf(data->firstsocket, data, "SIZE %s\r\n", ftp->file);
 
         nread = GetLastResponse(data->firstsocket, buf, data);
 
         if(strncmp(buf, "213", 3)) {
           failf(data, "Couldn't get file size: %s", buf+4);
-          return URG_FTP_COULDNT_GET_SIZE;
+          return CURLE_FTP_COULDNT_GET_SIZE;
         }
 
         /* get the size from the ascii string: */
@@ -687,11 +800,11 @@ UrgError _ftp(struct UrlData *data,
 
         if(strncmp(buf, "350", 3)) {
           failf(data, "Couldn't use REST: %s", buf+4);
-          return URG_FTP_COULDNT_USE_REST;
+          return CURLE_FTP_COULDNT_USE_REST;
         }
 #else
         /* enable append instead */
-        data->conf |= CONF_FTPAPPEND;
+        data->bits.ftp_append = 1;
 #endif
         /* Now, let's read off the proper amount of bytes from the
            input. If we knew it was a proper file we could've just
@@ -710,7 +823,7 @@ UrgError _ftp(struct UrlData *data,
           if(actuallyread != readthisamountnow) {
             failf(data, "Could only read %d bytes from the input\n",
                   passed);
-            return URG_FTP_COULDNT_USE_REST;
+            return CURLE_FTP_COULDNT_USE_REST;
           }
         }
         while(passed != data->resume_from);
@@ -721,7 +834,7 @@ UrgError _ftp(struct UrlData *data,
 
           if(data->infilesize <= 0) {
             infof(data, "File already completely uploaded\n");
-            return URG_OK;
+            return CURLE_OK;
           }
         }
         /* we've passed, proceed as normal */
@@ -729,21 +842,21 @@ UrgError _ftp(struct UrlData *data,
     }
 
     /* Send everything on data->in to the socket */
-    if(data->conf & CONF_FTPAPPEND)
+    if(data->bits.ftp_append)
       /* we append onto the file instead of rewriting it */
-      sendf(data->firstsocket, data, "APPE %s\r\n", ppath);
+      sendf(data->firstsocket, data, "APPE %s\r\n", ftp->file);
     else
-      sendf(data->firstsocket, data, "STOR %s\r\n", ppath);
+      sendf(data->firstsocket, data, "STOR %s\r\n", ftp->file);
 
     nread = GetLastResponse(data->firstsocket, buf, data);
 
     if(atoi(buf)>=400) {
       failf(data, "Failed FTP upload:%s", buf+3);
       /* oops, we never close the sockets! */
-      return URG_FTP_COULDNT_STOR_FILE;
+      return CURLE_FTP_COULDNT_STOR_FILE;
     }
 
-    if(data->conf & CONF_FTPPORT) {
+    if(data->bits.ftp_use_port) {
       result = AllowServerConnect(data, portsock);
       if( result )
         return result;
@@ -758,24 +871,19 @@ UrgError _ftp(struct UrlData *data,
 #if 0
     ProgressInit(data, data->infilesize);
 #endif
-    result = Transfer(data, -1, -1, FALSE, NULL, /* no download */
+    result = Transfer(conn, -1, -1, FALSE, NULL, /* no download */
                       data->secondarysocket, bytecountp);
     if(result)
       return result;
       
-    if((-1 != data->infilesize) && (data->infilesize != *bytecountp)) {
-      failf(data, "Wrote only partial file (%d out of %d bytes)",
-            *bytecountp, data->infilesize);
-      return URG_PARTIAL_FILE;
-    }
   }
   else {
     /* Retrieve file or directory */
     bool dirlist=FALSE;
     long downloadsize=-1;
 
-    if(data->conf&CONF_RANGE && data->range) {
-      int from, to;
+    if(data->bits.set_range && data->range) {
+      long from, to;
       int totalsize=-1;
       char *ptr;
       char *ptr2;
@@ -788,32 +896,34 @@ UrgError _ftp(struct UrlData *data,
         /* we didn't get any digit */
         to=-1;
       }
-      if(-1 == to) {
+      if((-1 == to) && (from>=0)) {
         /* X - */
         data->resume_from = from;
+        infof(data, "FTP RANGE %d to end of file\n", from);
       }
       else if(from < 0) {
         /* -Y */
-        from = 0;
-        to = -from;
-        totalsize = to-from;
-        data->maxdownload = totalsize;
+        totalsize = -from;
+        data->maxdownload = -from;
+        data->resume_from = from;
+        infof(data, "FTP RANGE the last %d bytes\n", totalsize);
       }
       else {
-        /* X- */
+        /* X-Y */
         totalsize = to-from;
-        data->maxdownload = totalsize;
+        data->maxdownload = totalsize+1; /* include the last mentioned byte */
+        data->resume_from = from;
+        infof(data, "FTP RANGE from %d getting %d bytes\n", from, data->maxdownload);
       }
       infof(data, "range-download from %d to %d, totally %d bytes\n",
             from, to, totalsize);
     }
-
+#if 0
     if(!ppath[0])
       /* make sure this becomes a valid name */
       ppath="./";
-
-    if((data->conf & CONF_FTPLISTONLY) ||
-       ('/' == ppath[strlen(ppath)-1] )) {
+#endif
+    if((data->bits.ftp_list_only) || !ftp->file) {
       /* The specified path ends with a slash, and therefore we think this
          is a directory that is requested, use LIST. But before that we
          need to set ASCII transfer mode. */
@@ -826,30 +936,29 @@ UrgError _ftp(struct UrlData *data,
 	
       if(strncmp(buf, "200", 3)) {
         failf(data, "Couldn't set ascii mode");
-        return URG_FTP_COULDNT_SET_ASCII;
+        return CURLE_FTP_COULDNT_SET_ASCII;
       }
 
       /* if this output is to be machine-parsed, the NLST command will be
          better used since the LIST command output is not specified or
          standard in any way */
 
-      sendf(data->firstsocket, data, "%s %s\r\n",
+      sendf(data->firstsocket, data, "%s\r\n",
             data->customrequest?data->customrequest:
-            (data->conf&CONF_FTPLISTONLY?"NLST":"LIST"),
-            ppath);
+            (data->bits.ftp_list_only?"NLST":"LIST"));
     }
     else {
       /* Set type to binary (unless specified ASCII) */
       sendf(data->firstsocket, data, "TYPE %s\r\n",
-            (data->conf&CONF_FTPASCII)?"A":"I");
+            (data->bits.ftp_list_only)?"A":"I");
 
       nread = GetLastResponse(data->firstsocket, buf, data);
 
       if(strncmp(buf, "200", 3)) {
         failf(data, "Couldn't set %s mode",
-              (data->conf&CONF_FTPASCII)?"ASCII":"binary");
-        return (data->conf&CONF_FTPASCII)? URG_FTP_COULDNT_SET_ASCII:
-          URG_FTP_COULDNT_SET_BINARY;
+              (data->bits.ftp_ascii)?"ASCII":"binary");
+        return (data->bits.ftp_ascii)? CURLE_FTP_COULDNT_SET_ASCII:
+          CURLE_FTP_COULDNT_SET_BINARY;
       }
 
       if(data->resume_from) {
@@ -860,7 +969,7 @@ UrgError _ftp(struct UrlData *data,
          * of the file we're gonna get. If we can get the size, this is by far
          * the best way to know if we're trying to resume beyond the EOF.  */
 
-        sendf(data->firstsocket, data, "SIZE %s\r\n", ppath);
+        sendf(data->firstsocket, data, "SIZE %s\r\n", ftp->file);
 
         nread = GetLastResponse(data->firstsocket, buf, data);
 
@@ -875,13 +984,27 @@ UrgError _ftp(struct UrlData *data,
           int foundsize=atoi(buf+4);
           /* We got a file size report, so we check that there actually is a
              part of the file left to get, or else we go home.  */
-          if(foundsize <= data->resume_from) {
-            failf(data, "Offset (%d) was beyond file size (%d)",
-                  data->resume_from, foundsize);
-            return URG_FTP_BAD_DOWNLOAD_RESUME;
+          if(data->resume_from< 0) {
+            /* We're supposed to download the last abs(from) bytes */
+            if(foundsize < -data->resume_from) {
+              failf(data, "Offset (%d) was beyond file size (%d)",
+                    data->resume_from, foundsize);
+              return CURLE_FTP_BAD_DOWNLOAD_RESUME;
+            }
+            /* convert to size to download */
+            downloadsize = -data->resume_from;
+            /* download from where? */
+            data->resume_from = foundsize - downloadsize;
           }
-          /* Now store the number of bytes we are expected to download */
-          downloadsize = foundsize-data->resume_from;
+          else {
+            if(foundsize <= data->resume_from) {
+              failf(data, "Offset (%d) was beyond file size (%d)",
+                    data->resume_from, foundsize);
+              return CURLE_FTP_BAD_DOWNLOAD_RESUME;
+            }
+            /* Now store the number of bytes we are expected to download */
+            downloadsize = foundsize-data->resume_from;
+          }
         }
 
         /* Set resume file transfer offset */
@@ -894,11 +1017,11 @@ UrgError _ftp(struct UrlData *data,
 
         if(strncmp(buf, "350", 3)) {
           failf(data, "Couldn't use REST: %s", buf+4);
-          return URG_FTP_COULDNT_USE_REST;
+          return CURLE_FTP_COULDNT_USE_REST;
         }
       }
 
-      sendf(data->firstsocket, data, "RETR %s\r\n", ppath);
+      sendf(data->firstsocket, data, "RETR %s\r\n", ftp->file);
     }
 
     nread = GetLastResponse(data->firstsocket, buf, data);
@@ -968,12 +1091,12 @@ UrgError _ftp(struct UrlData *data,
         if(size <= 0) {
           failf(data, "Offset (%d) was beyond file size (%d)",
                 data->resume_from, data->resume_from+size);
-          return URG_PARTIAL_FILE;
+          return CURLE_PARTIAL_FILE;
         }
       }
 #endif
 
-      if(data->conf & CONF_FTPPORT) {
+      if(data->bits.ftp_use_port) {
         result = AllowServerConnect(data, portsock);
         if( result )
           return result;
@@ -982,95 +1105,74 @@ UrgError _ftp(struct UrlData *data,
       infof(data, "Getting file with size: %d\n", size);
 
       /* FTP download: */
-      result=Transfer(data, data->secondarysocket, size, FALSE,
+      result=Transfer(conn, data->secondarysocket, size, FALSE,
                       bytecountp,
                       -1, NULL); /* no upload here */
       if(result)
         return result;
-
-      if((-1 != size) && (size != *bytecountp)) {
-        failf(data, "Received only partial file");
-        return URG_PARTIAL_FILE;
-      }
-      else if(0 == *bytecountp) {
-        failf(data, "No data was received!");
-        return URG_FTP_COULDNT_RETR_FILE;
-      }
     }
     else {
       failf(data, "%s", buf+4);
-      return URG_FTP_COULDNT_RETR_FILE;
+      return CURLE_FTP_COULDNT_RETR_FILE;
     }
 	
   }
   /* end of transfer */
-#if 0
-  ProgressEnd(data);
-#endif
-  pgrsDone(data);
 
-  /* shut down the socket to inform the server we're done */
-  sclose(data->secondarysocket);
-  data->secondarysocket = -1;
-    
-  /* now let's see what the server says about the transfer we
-     just performed: */
-  nread = GetLastResponse(data->firstsocket, buf, data);
-
-  /* 226 Transfer complete */
-  if(strncmp(buf, "226", 3)) {
-    failf(data, "%s", buf+4);
-    return URG_FTP_WRITE_ERROR;
-  }
-
-  /* Send any post-transfer QUOTE strings? */
-  if(data->postquote) {
-    qitem = data->postquote;
-    /* Send all QUOTE strings in same order as on command-line */
-    while (qitem) {
-      /* Send string */
-      if (qitem->data) {
-        sendf(data->firstsocket, data, "%s\r\n", qitem->data);
-
-        nread = GetLastResponse(data->firstsocket, buf, data);
-
-        if (buf[0] != '2') {
-          failf(data, "QUOT string not accepted: %s",
-                qitem->data);
-          return URG_FTP_QUOTE_ERROR;
-        }
-      }
-      qitem = qitem->next;
-    }
-  }
-
-
-  return URG_OK;
+  return CURLE_OK;
 }
 
 /* -- deal with the ftp server!  -- */
 
-UrgError ftp(struct UrlData *data,
-             long *bytecountp,
-             char *ftpuser,
-             char *ftppasswd,
-             char *urlpath)
+/* argument is already checked for validity */
+CURLcode ftp(struct connectdata *conn)
 {
-  char *realpath;
-  UrgError retcode;
+  CURLcode retcode;
 
-#if 0
-  realpath = URLfix(urlpath);
-#else
-  realpath = curl_unescape(urlpath);
-#endif
-  if(realpath) {
-    retcode = _ftp(data, bytecountp, ftpuser, ftppasswd, realpath);
-    free(realpath);
+  struct UrlData *data = conn->data;
+  struct FTP *ftp;
+  int dirlength=0; /* 0 forces strlen() */
+
+  /* the ftp struct is already inited in ftp_connect() */
+  ftp = data->proto.ftp;
+
+  /* We split the path into dir and file parts *before* we URLdecode
+     it */
+  ftp->file = strrchr(conn->ppath, '/');
+  if(ftp->file) {
+    ftp->file++; /* point to the first letter in the file name part or
+                    remain NULL */
+  }
+  else {
+    ftp->file = conn->ppath; /* there's only a file part */
+  }
+  dirlength=ftp->file-conn->ppath;
+
+  if(*ftp->file) {
+    ftp->file = curl_unescape(ftp->file, 0);
+    if(NULL == ftp->file) {
+      failf(data, "no memory");
+      return CURLE_OUT_OF_MEMORY;
+    }
   }
   else
-    /* then we try the original path */
-    retcode = _ftp(data, bytecountp, ftpuser, ftppasswd, urlpath);
+    ftp->file=NULL; /* instead of point to a zero byte, we make it a NULL
+                       pointer */
+
+  ftp->urlpath = conn->ppath;
+  if(dirlength) {
+    ftp->dir = curl_unescape(ftp->urlpath, dirlength);
+    if(NULL == ftp->dir) {
+      if(ftp->file)
+        free(ftp->file);
+      failf(data, "no memory");
+      return CURLE_OUT_OF_MEMORY; /* failure */
+    }
+  }
+  else
+    ftp->dir = NULL;
+
+  retcode = _ftp(conn);
 
   return retcode;
 }

@@ -225,7 +225,7 @@ static void printoption(struct UrlData *data,
    char *fmt;
    char *opt;
    
-   if (data->conf & CONF_VERBOSE)
+   if (data->bits.verbose)
    {
       if (cmd == IAC)
       {
@@ -628,7 +628,7 @@ static void printsub(struct UrlData *data,
 {
    int i = 0;
 
-   if (data->conf & CONF_VERBOSE)
+   if (data->bits.verbose)
    {
       if (direction)
       {
@@ -871,23 +871,29 @@ void telwrite(struct UrlData *data,
    }
 }
 
-UrgError telnet(struct UrlData *data)
+CURLcode telnet_done(struct connectdata *conn)
 {
-   int sockfd = data->firstsocket;
-   fd_set readfd;
-   fd_set keepfd;
+  return CURLE_OK;
+}
 
-   bool keepon = TRUE;
-   char *buf = data->buffer;
-   int nread;
+CURLcode telnet(struct connectdata *conn)
+{
+  struct UrlData *data = conn->data;
+  int sockfd = data->firstsocket;
+  fd_set readfd;
+  fd_set keepfd;
 
-   init_telnet(data);
+  bool keepon = TRUE;
+  char *buf = data->buffer;
+  int nread;
+
+  init_telnet(data);
    
-   FD_ZERO (&readfd);		/* clear it */
-   FD_SET (sockfd, &readfd);
-   FD_SET (1, &readfd);
+  FD_ZERO (&readfd);		/* clear it */
+  FD_SET (sockfd, &readfd);
+  FD_SET (1, &readfd);
 
-   keepfd = readfd;
+  keepfd = readfd;
 
    while (keepon)
    {
@@ -931,7 +937,7 @@ UrgError telnet(struct UrlData *data)
 	 telrcv(data, (unsigned char *)buf, nread);
       }
    }
-   return URG_OK;
+   return CURLE_OK;
 }
 
 

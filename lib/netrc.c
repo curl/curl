@@ -56,6 +56,7 @@
 
 #include "setup.h"
 #include "getenv.h"
+#include "strequal.h"
 
 /* Debug this single source file with:
    'make netrc' then run './netrc'!

@@ -2,13 +2,7 @@ dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(lib/urldata.h)
 AM_CONFIG_HEADER(config.h src/config.h)
-AM_INIT_AUTOMAKE(curl,"3-test")
-
-dnl
-dnl Detect the canonical host and target build environment
-dnl
-AC_CANONICAL_HOST
-AC_CANONICAL_TARGET
+AM_INIT_AUTOMAKE(curl,"7.0beta")
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -25,27 +19,6 @@ dnl **********************************************************************
 
 dnl nsl lib?
 AC_CHECK_FUNC(gethostbyname, , AC_CHECK_LIB(nsl, gethostbyname))
-
-dnl At least one system has been identified to require BOTH nsl and
-dnl socket libs to link properly.
-if test "$ac_cv_lib_nsl_gethostbyname" = "$ac_cv_func_gethostbyname"; then
-  AC_MSG_CHECKING([trying both nsl and socket libs])
-  my_ac_save_LIBS=$LIBS
-  LIBS="-lnsl -lsocket $LIBS"
-  AC_TRY_LINK( ,
-             [gethostbyname();],
-             my_ac_link_result=success,
-             my_ac_link_result=failure )
-
-  if test "$my_ac_link_result" = "failure"; then
-    AC_MSG_RESULT([no])
-    AC_MSG_ERROR([couldn't find libraries for gethostbyname()])
-    dnl restore LIBS
-    LIBS=$my_ac_save_LIBS
-  else
-    AC_MSG_RESULT([yes])
-  fi
-fi
 
 dnl resolve lib?
 AC_CHECK_FUNC(strcasecmp, , AC_CHECK_LIB(resolve, strcasecmp))
@@ -219,14 +192,13 @@ AC_CHECK_FUNCS( socket \
                 RAND_screen
 )
 
-
-
 AC_PATH_PROG( PERL, perl, , 
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
 AC_SUBST(PERL)
 
 AC_PATH_PROGS( NROFF, gnroff nroff, , 
   $PATH:/usr/bin/:/usr/local/bin )
+AC_SUBST(NROFF)
 
 AC_PROG_RANLIB
 AC_PROG_YACC
@@ -236,8 +208,6 @@ dnl   $PATH:/usr/bin/:/usr/local/bin )
 dnl AC_SUBST(RANLIB)
 
 AC_OUTPUT( Makefile \
-	   curl.spec \
-	   curl-ssl.spec \
 	   src/Makefile \
            lib/Makefile )
 dnl	   perl/checklinks.pl \

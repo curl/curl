@@ -44,7 +44,7 @@
 
 #include "timeval.h"
 
-UrgError speedcheck(struct UrlData *data,
+CURLcode speedcheck(struct UrlData *data,
                     struct timeval now);
 
 #endif

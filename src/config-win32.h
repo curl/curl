@@ -2,6 +2,9 @@
 /* Define if you have the strcasecmp function.  */
 /*#define HAVE_STRCASECMP 1*/
 
+/* Define if you have the stricmp function.  */
+#define HAVE_STRICMP 1
+
 /* Define cpu-machine-OS */
 #define OS "win32"
 

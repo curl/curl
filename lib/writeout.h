@@ -1,3 +1,5 @@
+#ifndef __WRITEOUT_H
+#define __WRITEOUT_H
 /*****************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -41,3 +43,5 @@
 #include "urldata.h"
 
 void WriteOut(struct UrlData *data);
+
+#endif

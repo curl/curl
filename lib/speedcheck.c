@@ -48,7 +48,7 @@
 #include "sendf.h"
 #include "speedcheck.h"
 
-UrgError speedcheck(struct UrlData *data,
+CURLcode speedcheck(struct UrlData *data,
                     struct timeval now)
 {
   static struct timeval keeps_speed;
@@ -69,13 +69,13 @@ UrgError speedcheck(struct UrlData *data,
 	    "Less than %d bytes/sec transfered the last %d seconds",
 	    data->low_speed_limit,
 	    data->low_speed_time);
-      return URG_OPERATION_TIMEOUTED;
+      return CURLE_OPERATION_TIMEOUTED;
     }
   }
   else {
     /* we keep up the required speed all right */
     keeps_speed = now;
   }
-  return URG_OK;
+  return CURLE_OK;
 }
 

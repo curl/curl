@@ -72,7 +72,7 @@
 #define DYNA_GET_FUNCTION(type, fnc) \
   (fnc) = (type)DynaGetFunction(#fnc); \
   if ((fnc) == NULL) { \
-    return URG_FUNCTION_NOT_FOUND; \
+    return CURLE_FUNCTION_NOT_FOUND; \
   } \
 
 /***********************************************************************
@@ -129,16 +129,21 @@ static void * DynaGetFunction(char *name)
 static int WriteProc(void *param, char *text, int len)
 {
   struct UrlData *data = (struct UrlData *)param;
-  
-  printf("%s\n", text);
+
+  data->fwrite(text, 1, strlen(text), data->out);
   return 0;
+}
+
+CURLcode ldap_done(struct connectdata *conn)
+{
+  return CURLE_OK;
 }
 
 /***********************************************************************
  */
-UrgError ldap(struct UrlData *data, char *path, long *bytecount)
+CURLcode ldap(struct connectdata *conn)
 {
-  UrgError status = URG_OK;
+  CURLcode status = CURLE_OK;
   int rc;
   void *(*ldap_open)(char *, int);
   int (*ldap_simple_bind_s)(void *, char *, char *);
@@ -152,24 +157,19 @@ UrgError ldap(struct UrlData *data, char *path, long *bytecount)
   void *server;
   void *result;
   void *entryIterator;
-#if 0
-  char *dn;
-  char **attrArray;
-  char *attrIterator;
-  char *attrString;
-  void *dummy;
-#endif
+
   int ldaptext;
+  struct UrlData *data=conn->data;
   
   infof(data, "LDAP: %s %s\n", data->url);
 
   DynaOpen();
   if (libldap == NULL) {
     failf(data, "The needed LDAP library/libraries couldn't be opened");
-    return URG_LIBRARY_NOT_FOUND;
+    return CURLE_LIBRARY_NOT_FOUND;
   }
 
-  ldaptext = data->conf & CONF_FTPASCII; /* This is a dirty hack */
+  ldaptext = data->bits.ftp_ascii; /* This is a dirty hack */
   
   /* The types are needed because ANSI C distinguishes between
    * pointer-to-object (data) and pointer-to-function.
@@ -188,17 +188,17 @@ UrgError ldap(struct UrlData *data, char *path, long *bytecount)
   if (server == NULL) {
     failf(data, "LDAP: Cannot connect to %s:%d",
 	  data->hostname, data->port);
-    status = URG_COULDNT_CONNECT;
+    status = CURLE_COULDNT_CONNECT;
   } else {
     rc = ldap_simple_bind_s(server, data->user, data->passwd);
     if (rc != 0) {
       failf(data, "LDAP: %s", ldap_err2string(rc));
-      status = URG_LDAP_CANNOT_BIND;
+      status = CURLE_LDAP_CANNOT_BIND;
     } else {
       rc = ldap_url_search_s(server, data->url, 0, &result);
       if (rc != 0) {
 	failf(data, "LDAP: %s", ldap_err2string(rc));
-	status = URG_LDAP_SEARCH_FAILED;
+	status = CURLE_LDAP_SEARCH_FAILED;
       } else {
 	for (entryIterator = ldap_first_entry(server, result);
 	     entryIterator;
@@ -210,7 +210,7 @@ UrgError ldap(struct UrlData *data, char *path, long *bytecount)
 				   "", 0, 0);
 	      if (rc != 0) {
 		failf(data, "LDAP: %s", ldap_err2string(rc));
-		status = URG_LDAP_SEARCH_FAILED;
+		status = CURLE_LDAP_SEARCH_FAILED;
 	      }
 	    } else {
 	      rc = ldap_entry2html(server, NULL, entryIterator, NULL,
@@ -218,7 +218,7 @@ UrgError ldap(struct UrlData *data, char *path, long *bytecount)
 				   "", 0, 0, NULL, NULL);
 	      if (rc != 0) {
 		failf(data, "LDAP: %s", ldap_err2string(rc));
-		status = URG_LDAP_SEARCH_FAILED;
+		status = CURLE_LDAP_SEARCH_FAILED;
 	      }
 	    }
 	  }

@@ -57,8 +57,6 @@
 #endif
 #endif
 
-
-
 #ifndef OS
 #ifdef WIN32
 #define OS "win32"
@@ -99,6 +97,7 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #endif
 #endif
 
+#if 0
 #ifdef HAVE_STRCASECMP
 #define strnequal(x,y,z) !(strncasecmp)(x,y,z)
 #define strequal(x,y) !(strcasecmp)(x,y)
@@ -106,6 +105,7 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #else
 #define strnequal(x,y,z) !strnicmp(x,y,z)
 #define strequal(x,y) !stricmp(x,y)
+#endif
 #endif
 
 /* Below we define four functions. They should

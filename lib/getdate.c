@@ -1864,7 +1864,7 @@ difftm (struct tm *a, struct tm *b)
 }
 
 time_t
-get_date (const char *p, const time_t *now)
+curl_getdate (const char *p, const time_t *now)
 {
   struct tm tm, tm0, *tmp;
   time_t Start;
@@ -1998,7 +1998,7 @@ main (ac, av)
   buff[MAX_BUFF_LEN] = 0;
   while (fgets (buff, MAX_BUFF_LEN, stdin) && buff[0])
     {
-      d = get_date (buff, (time_t *) NULL);
+      d = curl_getdate (buff, (time_t *) NULL);
       if (d == -1)
 	(void) printf ("Bad format - couldn't convert.\n");
       else

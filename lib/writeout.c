@@ -41,6 +41,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "strequal.h"
 #include "writeout.h"
 
 typedef enum {

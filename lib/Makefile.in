@@ -77,11 +77,11 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 noinst_LIBRARIES = libcurl.a
 
 # Some flags needed when trying to cause warnings ;-)
-#CFLAGS = -g -Wall -pedantic
+CFLAGS = -g -Wall #-pedantic
 
 INCLUDES = -I$(top_srcdir)/include
 
-libcurl_a_SOURCES =  arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c base64.c       file.h         hostip.c       progress.c     timeval.h base64.h       formdata.c     hostip.h       progress.h     cookie.c       formdata.h     http.c         sendf.c        cookie.h       ftp.c          http.h         sendf.h        url.c dict.c         ftp.h          if2ip.c        speedcheck.c   url.h dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h download.c     getdate.h      ldap.c         ssluse.c       version.c download.h     getenv.c       ldap.h         ssluse.h       escape.c       getenv.h       mprintf.c      telnet.c       escape.h       getpass.c      netrc.c        telnet.h       writeout.c writeout.h
+libcurl_a_SOURCES =  arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c base64.c       file.h         hostip.c       progress.c     timeval.h base64.h       formdata.c     hostip.h       progress.h     cookie.c       formdata.h     http.c         sendf.c        cookie.h       ftp.c          http.h         sendf.h        url.c dict.c         ftp.h          if2ip.c        speedcheck.c   url.h dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h download.c     getdate.h      ldap.c         ssluse.c       version.c download.h     getenv.c       ldap.h         ssluse.h       escape.c       getenv.h       mprintf.c      telnet.c       escape.h       getpass.c      netrc.c        telnet.h       writeout.c writeout.h highlevel.c strequal.c strequal.h easy.c
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h ../src/config.h
@@ -97,9 +97,9 @@ libcurl_a_LIBADD =
 libcurl_a_OBJECTS =  file.o timeval.o base64.o hostip.o progress.o \
 formdata.o cookie.o http.o sendf.o ftp.o url.o dict.o if2ip.o \
 speedcheck.o getdate.o download.o ldap.o ssluse.o version.o getenv.o \
-escape.o mprintf.o telnet.o getpass.o netrc.o writeout.o
+escape.o mprintf.o telnet.o getpass.o netrc.o writeout.o highlevel.o \
+strequal.o easy.o
 AR = ar
-CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@

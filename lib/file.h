@@ -40,6 +40,6 @@
  *
  * ------------------------------------------------------------
  ****************************************************************************/
-UrgError file(struct UrlData *data, char *path, long *bytecountp);
+CURLcode file(struct connectdata *conn);
 
 #endif

@@ -38,11 +38,6 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
-/*
- * SSL code intially written by
- * Linas Vepstas <linas@linas.org> and Sampo Kellomaki <sampo@iki.fi>
- */
-
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
@@ -116,6 +111,8 @@
 #include "getpass.h"
 #include "progress.h"
 #include "cookie.h"
+#include "strequal.h"
+#include "writeout.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -124,80 +121,27 @@
 #include "http.h"
 #include "file.h"
 #include "ldap.h"
-#include "writeout.h"
+
+#include <curl/types.h>
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* -- -- */
 
-/***********************************************************************
- * Start with some silly functions to make win32-systems survive
- ***********************************************************************/
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-static void win32_cleanup(void)
+
+CURLcode _urlget(struct UrlData *data);
+
+/* does nothing, returns OK */
+CURLcode curl_init(void)
 {
-  WSACleanup();
+  return CURLE_OK;
 }
 
-static UrgError win32_init(void)
-{
-  WORD wVersionRequested;  
-  WSADATA wsaData; 
-  int err; 
-  wVersionRequested = MAKEWORD(1, 1); 
-    
-  err = WSAStartup(wVersionRequested, &wsaData); 
-    
-  if (err != 0) 
-    /* Tell the user that we couldn't find a useable */ 
-    /* winsock.dll.     */ 
-    return URG_FAILED_INIT; 
-    
-  /* Confirm that the Windows Sockets DLL supports 1.1.*/ 
-  /* Note that if the DLL supports versions greater */ 
-  /* than 1.1 in addition to 1.1, it will still return */ 
-  /* 1.1 in wVersion since that is the version we */ 
-  /* requested. */ 
-    
-  if ( LOBYTE( wsaData.wVersion ) != 1 || 
-       HIBYTE( wsaData.wVersion ) != 1 ) { 
-    /* Tell the user that we couldn't find a useable */ 
-
-    /* winsock.dll. */ 
-    WSACleanup(); 
-    return URG_FAILED_INIT; 
-  }
-  return URG_OK;
-}
-/* The Windows Sockets DLL is acceptable. Proceed. */ 
-#else
-static UrgError win32_init(void) { return URG_OK; }
-#define win32_cleanup()
-#endif
-
-
-/*
- * This is the main global constructor for the lib. Call this before
- * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
- * used, or havoc may be the result.
- */
-UrgError curl_init(void)
-{
-  return win32_init();
-}
-
-/*
- * This is the main global destructor for the lib. Call this after
- * _all_ libcurl usage is done.
- */
+/* does nothing */
 void curl_free(void)
 {
-  win32_cleanup();
 }
-
-static UrgError _urlget(struct UrlData *data);
-
 
 void urlfree(struct UrlData *data, bool totally)
 {
@@ -278,190 +222,55 @@ void urlfree(struct UrlData *data, bool totally)
   }
 }
 
-typedef struct UrlData CURL;
+CURLcode curl_close(CURL *curl)
+{
+  struct UrlData *data=(struct UrlData *)curl;
+  
+  void *protocol = data->proto.generic;
 
-UrgError curl_open(CURL **curl, char *url)
+  /* total session cleanup */
+  urlfree(data, TRUE);
+
+  if(protocol)
+    free(protocol);
+
+  free(data);
+
+  return CURLE_OK;
+}
+
+CURLcode curl_open(CURL **curl, char *url)
 {
   /* We don't yet support specifying the URL at this point */
-
-  /* Very simple start-up: alloc the struct, init it with zeroes and return */
-  CURL *data = (CURL *)malloc(sizeof(CURL));
-  if(data) {
-    memset(data, 0, sizeof(CURL));
-    *curl = data;
-    return URG_OK;
-  }
-
-  /* this is a very serious error */
-  return URG_OUT_OF_MEMORY;
-}
-
-typedef unsigned int CURLoption;
-
-UrgError curl_setopt(CURL *curl, CURLoption option, ...)
-{
-  struct UrlData *data = curl;
-  va_list param;
-  char *cookiefile;
-
-  va_start(param, option);
-
-  switch(option) {
-  case URGTAG_TIMECONDITION:
-    data->timecondition = va_arg(param, long);
-    break;
-
-  case URGTAG_TIMEVALUE:
-    data->timevalue = va_arg(param, long);
-    break;
-
-  case URGTAG_SSLVERSION:
-    data->ssl_version = va_arg(param, long);
-    break;
-
-  case URGTAG_COOKIEFILE:
-    cookiefile = (char *)va_arg(param, void *);
-    if(cookiefile) {
-      data->cookies = cookie_init(cookiefile);
-    }
-    break;
-  case URGTAG_WRITEHEADER:
-    data->writeheader = (FILE *)va_arg(param, FILE *);
-    break;
-  case URGTAG_COOKIE:
-    data->cookie = va_arg(param, char *);
-    break;
-  case URGTAG_ERRORBUFFER:
-    data->errorbuffer = va_arg(param, char *);
-    break;
-  case URGTAG_FILE:
-    data->out = va_arg(param, FILE *);
-    break;
-  case URGTAG_FTPPORT:
-    data->ftpport = va_arg(param, char *);
-    break;
-  case URGTAG_HTTPHEADER:
-    data->headers = va_arg(param, struct HttpHeader *);
-    break;
-  case URGTAG_CUSTOMREQUEST:
-    data->customrequest = va_arg(param, char *);
-    break;
-  case URGTAG_HTTPPOST:
-    data->httppost = va_arg(param, struct HttpPost *);
-    break;
-  case URGTAG_INFILE:
-    data->in = va_arg(param, FILE *);
-    break;
-  case URGTAG_INFILESIZE:
-    data->infilesize = va_arg(param, long);
-    break;
-  case URGTAG_LOW_SPEED_LIMIT:
-    data->low_speed_limit=va_arg(param, long);
-    break;
-  case URGTAG_LOW_SPEED_TIME:
-    data->low_speed_time=va_arg(param, long);
-    break;
-  case URGTAG_URL:
-    data->url = va_arg(param, char *);
-    break;
-  case URGTAG_PORT:
-    /* this typecast is used to fool the compiler to NOT warn for a
-       "cast from pointer to integer of different size" */
-    data->port = (unsigned short)(va_arg(param, long));
-    break;
-  case URGTAG_POSTFIELDS:
-    data->postfields = va_arg(param, char *);
-    break;
-  case URGTAG_PROGRESSMODE:
-    data->progress.mode = va_arg(param, long);
-    break;
-  case URGTAG_REFERER:
-    data->referer = va_arg(param, char *);
-    break;
-  case URGTAG_PROXY:
-    data->proxy = va_arg(param, char *);
-    break;
-  case URGTAG_FLAGS:
-    data->conf = va_arg(param, long);
-    break;
-  case URGTAG_TIMEOUT:
-    data->timeout = va_arg(param, long);
-    break;
-  case URGTAG_USERAGENT:
-    data->useragent = va_arg(param, char *);
-    break;
-  case URGTAG_USERPWD:
-    data->userpwd = va_arg(param, char *);
-    break;
-  case URGTAG_POSTQUOTE:
-    data->postquote = va_arg(param, struct curl_slist *);
-    break;
-  case URGTAG_PROXYUSERPWD:
-    data->proxyuserpwd = va_arg(param, char *);
-    break;
-  case URGTAG_RANGE:
-    data->range = va_arg(param, char *);
-    break;
-  case URGTAG_RESUME_FROM:
-    data->resume_from = va_arg(param, long);
-    break;
-  case URGTAG_STDERR:
-    data->err = va_arg(param, FILE *);
-    break;
-  case URGTAG_WRITEFUNCTION:
-    data->fwrite = va_arg(param, void *);
-    break;
-  case URGTAG_WRITEINFO:
-    data->writeinfo = va_arg(param, char *);
-    break;
-  case URGTAG_READFUNCTION:
-    data->fread = va_arg(param, void *);
-    break;
-  case URGTAG_SSLCERT:
-    data->cert = va_arg(param, char *);
-    break;
-  case URGTAG_SSLCERTPASSWD:
-    data->cert_passwd = va_arg(param, char *);
-    break;
-  case URGTAG_CRLF:
-    data->crlf = va_arg(param, long);
-    break;
-  case URGTAG_QUOTE:
-    data->quote = va_arg(param, struct curl_slist *);
-    break;
-  default:
-    /* unknown tag and its companion, just ignore: */
-    return URG_READ_ERROR; /* correct this */
-  }
-  return URG_OK;
-}
-
-
-typedef int (*func_T)(void);
-
-UrgError curl_urlget(UrgTag tag, ...)
-{
-  va_list arg;
-  func_T param_func = (func_T)0;
-  long param_long = 0;
-  void *param_obj = NULL;
-  UrgError res;
-
   struct UrlData *data;
 
-  /* this is for the lame win32 socket crap */
-  if(curl_init())
-    return URG_FAILED_INIT;
+  /* Very simple start-up: alloc the struct, init it with zeroes and return */
+  data = (struct UrlData *)malloc(sizeof(struct UrlData));
+  if(data) {
+    memset(data, 0, sizeof(struct UrlData));
+    data->handle = STRUCT_OPEN;
+    data->interface = CURLI_NORMAL; /* normal interface by default */
 
-  /* We use curl_open() with undefined URL so far */
-  res = curl_open(&data, NULL);
-  if(res == URG_OK) {
-    /* data is now filled with good-looking zeroes */
+    /* We do some initial setup here, all those fields that can't be just 0 */
 
+    data-> headerbuff=(char*)malloc(HEADERSIZE);
+    if(!data->headerbuff) {
+      free(data); /* free the memory again */
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    data-> headersize=HEADERSIZE;
+
+#if 0
     /* Let's set some default values: */
-    curl_setopt(data, URGTAG_FILE, stdout); /* default output to stdout */
-    curl_setopt(data, URGTAG_INFILE, stdin);  /* default input from stdin */
-    curl_setopt(data, URGTAG_STDERR, stderr);  /* default stderr to stderr! */
+    curl_setopt(data, CURLOPT_FILE, stdout); /* default output to stdout */
+    curl_setopt(data, CURLOPT_INFILE, stdin);  /* default input from stdin */
+    curl_setopt(data, CURLOPT_STDERR, stderr);  /* default stderr to stderr! */
+#endif
+
+    data->out = stdout; /* default output to stdout */
+    data->in  = stdin;  /* default input from stdin */
+    data->err  = stderr;  /* default stderr to stderr */
 
     data->firstsocket = -1; /* no file descriptor */
     data->secondarysocket = -1; /* no file descriptor */
@@ -476,141 +285,204 @@ UrgError curl_urlget(UrgTag tag, ...)
 
     data->current_speed = -1; /* init to negative == impossible */
 
-    va_start(arg, tag);
-
-    while(tag != URGTAG_DONE) {
-      /* PORTING NOTE:
-	 Ojbect pointers can't necessarily be casted to function pointers and
-	 therefore we need to know what type it is and read the correct type
-	 at once. This should also correct problems with different sizes of
-	 the types.
-         */
-
-      if(tag < URGTYPE_OBJECTPOINT) {
-	/* This is a LONG type */
-	param_long = va_arg(arg, long);
-        curl_setopt(data, tag, param_long);
-      }
-      else if(tag < URGTYPE_FUNCTIONPOINT) {
-	/* This is a object pointer type */
-	param_obj = va_arg(arg, void *);
-        curl_setopt(data, tag, param_obj);
-      }
-      else {
-	param_func = va_arg(arg, func_T );
-        curl_setopt(data, tag, param_func);
-      }
-
-      /* printf("tag: %d\n", tag); */
-      tag = va_arg(arg, UrgTag);
-    }
-
-    va_end(arg);
-
-    pgrsMode(data, data->progress.mode);
-    pgrsStartNow(data);
-
-    data-> headerbuff=(char*)malloc(HEADERSIZE);
-    if(!data->headerbuff)
-      return URG_FAILED_INIT;
-
-    data-> headersize=HEADERSIZE;
-
-    res = _urlget(data); /* fetch the URL please */
-
-    while((res == URG_OK) && data->newurl) {
-      /* Location: redirect */
-      char prot[16];
-      char path[URL_MAX_LENGTH];
-
-      if(2 != sscanf(data->newurl, "%15[^:]://%" URL_MAX_LENGTH_TXT
-                     "s", prot, path)) {
-	/***
-	 *DANG* this is an RFC 2068 violation. The URL is supposed
-	 to be absolute and this doesn't seem to be that!
-	 ***
-	 Instead, we have to TRY to append this new path to the old URL
-	 to the right of the host part. Oh crap, this is doomed to cause
-	 problems in the future...
-	 */
-	char *protsep;
-	char *pathsep;
-	char *newest;
-
-	/* protsep points to the start of the host name */
-	protsep=strstr(data->url, "//");
-	if(!protsep)
-	  protsep=data->url;
-	else {
-          data->port=0; /* we got a full URL and then we should reset the
-                           port number here to re-initiate it later */
-	  protsep+=2; /* pass the // */
-        }
-
-        if('/' != data->newurl[0]) {
-          /* First we need to find out if there's a ?-letter in the URL, and
-             cut it and the right-side of that off */
-          pathsep = strrchr(protsep, '?');
-          if(pathsep)
-            *pathsep=0;
-
-          /* we have a relative path to append to the last slash if
-             there's one available */
-          pathsep = strrchr(protsep, '/');
-          if(pathsep)
-            *pathsep=0;
-        }
-        else {
-          /* We got a new absolute path for this server, cut off from the
-             first slash */
-          pathsep = strchr(protsep, '/');
-          if(pathsep)
-            *pathsep=0;
-        }
-
-        newest=(char *)malloc( strlen(data->url) +
-                               1 + /* possible slash */
-                               strlen(data->newurl) + 1/* zero byte */);
-
-	if(!newest)
-	  return URG_OUT_OF_MEMORY;
-        sprintf(newest, "%s%s%s", data->url, ('/' == data->newurl[0])?"":"/",
-                data->newurl);
-	free(data->newurl);
-	data->newurl = newest;
-      }
-      else {
-        /* This was an absolute URL, clear the port number! */
-        data->port = 0;
-      }
-      
-      data->url = data->newurl;
-      data->newurl = NULL; /* don't show! */
-
-      infof(data, "Follows Location: to new URL: '%s'\n", data->url);
-
-      /* clean up the sockets and SSL stuff from the previous "round" */
-      urlfree(data, FALSE);
-
-      res = _urlget(data);
-    }
-    if(data->newurl)
-      free(data->newurl);
-
-  }
-  else
-    res = URG_FAILED_INIT; /* failed */
-
-  if((URG_OK == res) && data->writeinfo) {
-    /* Time to output some info to stdout */
-    WriteOut(data);
+    *curl = data;
+    return CURLE_OK;
   }
 
+  /* this is a very serious error */
+  return CURLE_OUT_OF_MEMORY;
+}
 
-  /* total cleanup */
-  urlfree(data, TRUE);
+CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
+{
+  struct UrlData *data = curl;
+  va_list param;
+  char *cookiefile;
 
-  return res;
+  va_start(param, option);
+
+  switch(option) {
+  case CURLOPT_VERBOSE:
+    data->bits.verbose = va_arg(param, long);
+    break;
+  case CURLOPT_HEADER:
+    data->bits.http_include_header = va_arg(param, long);
+    break;
+  case CURLOPT_NOPROGRESS:
+    data->bits.hide_progress = va_arg(param, long);
+    if(data->bits.hide_progress)
+      data->progress.flags |= PGRS_HIDE;
+    break;
+  case CURLOPT_NOBODY:
+    data->bits.no_body = va_arg(param, long);
+    break;
+  case CURLOPT_FAILONERROR:
+    data->bits.http_fail_on_error = va_arg(param, long);
+    break;
+  case CURLOPT_UPLOAD:
+    data->bits.upload = va_arg(param, long);
+    break;
+  case CURLOPT_POST:
+    data->bits.http_post = va_arg(param, long);
+    break;
+  case CURLOPT_FTPLISTONLY:
+    data->bits.ftp_list_only = va_arg(param, long);
+    break;
+  case CURLOPT_FTPAPPEND:
+    data->bits.ftp_append = va_arg(param, long);
+    break;
+  case CURLOPT_NETRC:
+    data->bits.use_netrc = va_arg(param, long);
+    break;
+  case CURLOPT_FOLLOWLOCATION:
+    data->bits.http_follow_location = va_arg(param, long);
+    break;
+  case CURLOPT_FTPASCII:
+    data->bits.ftp_ascii = va_arg(param, long);
+    break;
+  case CURLOPT_PUT:
+    data->bits.http_put = va_arg(param, long);
+    break;
+  case CURLOPT_MUTE:
+    data->bits.mute = va_arg(param, long);
+    break;
+
+  case CURLOPT_TIMECONDITION:
+    data->timecondition = va_arg(param, long);
+    break;
+
+  case CURLOPT_TIMEVALUE:
+    data->timevalue = va_arg(param, long);
+    break;
+
+  case CURLOPT_SSLVERSION:
+    data->ssl_version = va_arg(param, long);
+    break;
+
+  case CURLOPT_COOKIEFILE:
+    cookiefile = (char *)va_arg(param, void *);
+    if(cookiefile) {
+      data->cookies = cookie_init(cookiefile);
+    }
+    break;
+  case CURLOPT_WRITEHEADER:
+    data->writeheader = (FILE *)va_arg(param, FILE *);
+    break;
+  case CURLOPT_COOKIE:
+    data->cookie = va_arg(param, char *);
+    break;
+  case CURLOPT_ERRORBUFFER:
+    data->errorbuffer = va_arg(param, char *);
+    break;
+  case CURLOPT_FILE:
+    data->out = va_arg(param, FILE *);
+    break;
+  case CURLOPT_FTPPORT:
+    data->ftpport = va_arg(param, char *);
+    data->bits.ftp_use_port = data->ftpport?1:0;
+    break;
+  case CURLOPT_HTTPHEADER:
+    data->headers = va_arg(param, struct HttpHeader *);
+    break;
+  case CURLOPT_CUSTOMREQUEST:
+    data->customrequest = va_arg(param, char *);
+    break;
+  case CURLOPT_HTTPPOST:
+    data->httppost = va_arg(param, struct HttpPost *);
+    data->bits.http_formpost = data->httppost?1:0;
+    break;
+  case CURLOPT_INFILE:
+    data->in = va_arg(param, FILE *);
+    break;
+  case CURLOPT_INFILESIZE:
+    data->infilesize = va_arg(param, long);
+    break;
+  case CURLOPT_LOW_SPEED_LIMIT:
+    data->low_speed_limit=va_arg(param, long);
+    break;
+  case CURLOPT_LOW_SPEED_TIME:
+    data->low_speed_time=va_arg(param, long);
+    break;
+  case CURLOPT_URL:
+    data->url = va_arg(param, char *);
+    break;
+  case CURLOPT_PORT:
+    /* this typecast is used to fool the compiler to NOT warn for a
+       "cast from pointer to integer of different size" */
+    data->port = (unsigned short)(va_arg(param, long));
+    break;
+  case CURLOPT_POSTFIELDS:
+    data->postfields = va_arg(param, char *);
+    break;
+  case CURLOPT_PROGRESSMODE:
+    data->progress.mode = va_arg(param, long);
+    break;
+  case CURLOPT_REFERER:
+    data->referer = va_arg(param, char *);
+    data->bits.http_set_referer = (data->referer && *data->referer)?1:0;
+    break;
+  case CURLOPT_PROXY:
+    data->proxy = va_arg(param, char *);
+    data->bits.httpproxy = data->proxy?1:0;
+    break;
+#if 0
+  case CURLOPT_FLAGS:
+    conf_to_internal(data, va_arg(param, long));
+    break;
+#endif
+  case CURLOPT_TIMEOUT:
+    data->timeout = va_arg(param, long);
+    break;
+  case CURLOPT_USERAGENT:
+    data->useragent = va_arg(param, char *);
+    break;
+  case CURLOPT_USERPWD:
+    data->userpwd = va_arg(param, char *);
+    data->bits.user_passwd = data->userpwd?1:0;
+    break;
+  case CURLOPT_POSTQUOTE:
+    data->postquote = va_arg(param, struct curl_slist *);
+    break;
+  case CURLOPT_PROXYUSERPWD:
+    data->proxyuserpwd = va_arg(param, char *);
+    data->bits.proxy_user_passwd = data->proxyuserpwd?1:0;
+    break;
+  case CURLOPT_RANGE:
+    data->range = va_arg(param, char *);
+    data->bits.set_range = data->range?1:0;
+    break;
+  case CURLOPT_RESUME_FROM:
+    data->resume_from = va_arg(param, long);
+    break;
+  case CURLOPT_STDERR:
+    data->err = va_arg(param, FILE *);
+    break;
+  case CURLOPT_WRITEFUNCTION:
+    data->fwrite = va_arg(param, write_callback);
+    break;
+  case CURLOPT_WRITEINFO:
+    data->writeinfo = va_arg(param, char *);
+    break;
+  case CURLOPT_READFUNCTION:
+    data->fread = va_arg(param, read_callback);
+    break;
+  case CURLOPT_SSLCERT:
+    data->cert = va_arg(param, char *);
+    break;
+  case CURLOPT_SSLCERTPASSWD:
+    data->cert_passwd = va_arg(param, char *);
+    break;
+  case CURLOPT_CRLF:
+    data->crlf = va_arg(param, long);
+    break;
+  case CURLOPT_QUOTE:
+    data->quote = va_arg(param, struct curl_slist *);
+    break;
+  default:
+    /* unknown tag and its companion, just ignore: */
+    return CURLE_READ_ERROR; /* correct this */
+  }
+  return CURLE_OK;
 }
 
 
@@ -618,8 +490,7 @@ UrgError curl_urlget(UrgTag tag, ...)
  * Read everything until a newline.
  */
 
-static int GetLine(int sockfd, char *buf,
-		   struct UrlData *data)
+int GetLine(int sockfd, char *buf, struct UrlData *data)
 {
   int nread;
   int read_rc=1;
@@ -645,14 +516,13 @@ static int GetLine(int sockfd, char *buf,
   }
   *ptr=0; /* zero terminate */
 
-  if(data->conf & CONF_VERBOSE) {
+  if(data->bits.verbose) {
     fputs("< ", data->err);
     fwrite(buf, 1, nread, data->err);
     fputs("\n", data->err);
   }
   return nread;
 }
-
 
 
 #ifndef WIN32
@@ -667,35 +537,114 @@ RETSIGTYPE alarmfunc(int signal)
 }
 #endif
 
-/* ====================================================== */
+CURLcode curl_write(CURLconnect *c_conn, char *buf, size_t amount,
+                   size_t *n)
+{
+  struct connectdata *conn = (struct connectdata *)c_conn;
+  struct UrlData *data;
+  size_t bytes_written;
+
+  if(!n || !conn || (conn->handle != STRUCT_CONNECT))
+    return CURLE_FAILED_INIT;
+  data = conn->data;
+
+#ifdef USE_SSLEAY
+  if (data->use_ssl) {
+    bytes_written = SSL_write(data->ssl, buf, amount);
+  }
+  else {
+#endif
+    bytes_written = swrite(conn->writesockfd, buf, amount);
+#ifdef USE_SSLEAY
+  }
+#endif /* USE_SSLEAY */
+
+  *n = bytes_written;
+  return CURLE_OK;
+}
+
+CURLcode curl_read(CURLconnect *c_conn, char *buf, size_t buffersize,
+                   size_t *n)
+{
+  struct connectdata *conn = (struct connectdata *)c_conn;
+  struct UrlData *data;
+  size_t nread;
+
+  if(!n || !conn || (conn->handle != STRUCT_CONNECT))
+    return CURLE_FAILED_INIT;
+  data = conn->data;
+
+#ifdef USE_SSLEAY
+  if (data->use_ssl) {
+    nread = SSL_read (data->ssl, buf, buffersize);
+  }
+  else {
+#endif
+    nread = sread (conn->sockfd, buf, buffersize);
+#ifdef USE_SSLEAY
+  }
+#endif /* USE_SSLEAY */
+  *n = nread;
+  return CURLE_OK;
+}
+
+CURLcode curl_disconnect(CURLconnect *c_connect)
+{
+  struct connectdata *conn = c_connect;
+
+  struct UrlData *data = conn->data;
+
+  /* clean up the sockets and SSL stuff from the previous "round" */
+  urlfree(data, FALSE);
+
+  return CURLE_OK;
+}
+
 /*
- * urlget <url>
- * (result put on stdout)
+ * NAME curl_connect()
  *
- * <url> ::= <proto> "://" <host> [ ":" <port> ] "/" <path>
+ * DESCRIPTION
  *
- * <proto> = "HTTP" | "HTTPS" | "GOPHER" | "FTP"
+ * Connects to the peer server and performs the initial setup. This function
+ * writes a connect handle to its second argument that is a unique handle for
+ * this connect. This allows multiple connects from the same handle returned
+ * by curl_open().
  *
- * When FTP:
+ * EXAMPLE
  *
- * <host> ::= [ <user> ":" <password> "@" ] <host>
+ * CURLCode result;
+ * CURL curl;
+ * CURLconnect connect;
+ * result = curl_connect(curl, &connect);
  */
 
-static UrgError _urlget(struct UrlData *data)
+CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 {
-  struct hostent *hp=NULL;
-  struct sockaddr_in serv_addr;
+  char *tmp;
   char *buf;
-  char proto[64];
-  char gname[256]="default.com";
-  char *name;
-  char path[URL_MAX_LENGTH]="/";
-  char *ppath, *tmp;
-  long bytecount;
-  struct timeval now;
-
-  UrgError result;
+  CURLcode result;
   char resumerange[12]="";
+  struct UrlData *data = curl;
+  struct connectdata *conn;
+
+  if(!data || (data->handle != STRUCT_OPEN))
+    return CURLE_BAD_FUNCTION_ARGUMENT; /* TBD: make error codes */
+
+  if(!data->url)
+    return CURLE_URL_MALFORMAT;
+
+  conn = (struct connectdata *)malloc(sizeof(struct connectdata));
+  if(!conn) {
+    *in_connect = NULL; /* clear the pointer */
+    return CURLE_OUT_OF_MEMORY;
+  }
+  *in_connect = conn;
+
+  memset(conn, 0, sizeof(struct connectdata));
+  conn->handle = STRUCT_CONNECT;
+
+  conn->data = data; /* remember our daddy */
+  conn->state = CONN_INIT;
 
   buf = data->buffer; /* this is our buffer */
 
@@ -709,59 +658,60 @@ static UrgError _urlget(struct UrlData *data)
    * to SSL connect through the proxy -- and we don't know if we
    * will need to use SSL until we parse the url ...
    */
-  if((1 == sscanf(data->url, "file://%" URL_MAX_LENGTH_TXT "[^\n]",
-                  path))) {
+  if((2 == sscanf(data->url, "%64[^:]://%" URL_MAX_LENGTH_TXT "[^\n]",
+                  conn->proto,
+                  conn->path)) && strequal(conn->proto, "file")) {
     /* we deal with file://<host>/<path> differently since it
        supports no hostname other than "localhost" and "127.0.0.1",
-       which ist unique among the protocols specified in RFC 1738 */
-    if (strstr(path, "localhost/") || strstr(path, "127.0.0.1/"))
-      strcpy(path, &path[10]);		/* ... since coincidentally
-					   both host strings are of
-					   equal length */
-    /* otherwise, <host>/ is quietly ommitted */
+       which is unique among the protocols specified in RFC 1738 */
+    if (strnequal(conn->path, "localhost/", 10) ||
+        strnequal(conn->path, "127.0.0.1/", 10))
+      /* ... since coincidentally both host strings are of equal length
+         otherwise, <host>/ is quietly ommitted */
+      strcpy(conn->path, &conn->path[10]);
 
-
-    /* that's it, no more fiddling with proxies, redirections,
-       or SSL for files, go directly to the file reading function */
-    result = file(data, path, &bytecount);
-    if(result)
-      return result;
-  
-    return URG_OK;
+    strcpy(conn->proto, "file");
   }
-  else if (2 > sscanf(data->url, "%64[^\n:]://%256[^\n/]%" URL_MAX_LENGTH_TXT "[^\n]",
-                 proto, gname, path)) {
-    
+  else {
+    /* Set default host and default path */
+    strcpy(conn->gname, "curl.haxx.nu");
+    strcpy(conn->path, "/");
+
+    if (2 > sscanf(data->url,
+                   "%64[^\n:]://%256[^\n/]%" URL_MAX_LENGTH_TXT "[^\n]",
+                   conn->proto, conn->gname, conn->path)) {
       
-    /* badly formatted, let's try the browser-style _without_ 'http://' */
-    if((1 > sscanf(data->url, "%256[^\n/]%" URL_MAX_LENGTH_TXT "[^\n]", gname,
-                   path)) ) {
-      failf(data, "<url> malformed");
-      return URG_URL_MALFORMAT;
-    }
-    if(strnequal(gname, "FTP", 3)) {
-      strcpy(proto, "ftp");
-    }
-    else if(strnequal(gname, "GOPHER", 6))
-      strcpy(proto, "gopher");
+      /* badly formatted, let's try the browser-style _without_ 'http://' */
+      if((1 > sscanf(data->url, "%256[^\n/]%" URL_MAX_LENGTH_TXT "[^\n]",
+                     conn->gname, conn->path)) ) {
+        failf(data, "<url> malformed");
+        return CURLE_URL_MALFORMAT;
+      }
+      if(strnequal(conn->gname, "FTP", 3)) {
+        strcpy(conn->proto, "ftp");
+      }
+      else if(strnequal(conn->gname, "GOPHER", 6))
+        strcpy(conn->proto, "gopher");
 #ifdef USE_SSLEAY
-    else if(strnequal(gname, "HTTPS", 5))
-      strcpy(proto, "https");
+      else if(strnequal(conn->gname, "HTTPS", 5))
+        strcpy(conn->proto, "https");
 #endif /* USE_SSLEAY */
-    else if(strnequal(gname, "TELNET", 6))
-      strcpy(proto, "telnet");
-    else if (strnequal(gname, "DICT", sizeof("DICT")-1))
-      strcpy(proto, "DICT");
-    else if (strnequal(gname, "LDAP", sizeof("LDAP")-1))
-      strcpy(proto, "LDAP");
-    else
-      strcpy(proto, "http");
+      else if(strnequal(conn->gname, "TELNET", 6))
+        strcpy(conn->proto, "telnet");
+      else if (strnequal(conn->gname, "DICT", sizeof("DICT")-1))
+        strcpy(conn->proto, "DICT");
+      else if (strnequal(conn->gname, "LDAP", sizeof("LDAP")-1))
+        strcpy(conn->proto, "LDAP");
+      else {
+        strcpy(conn->proto, "http");
+      }
 
-    data->conf |= CONF_NOPROT;
+      conn->protocol |= PROT_MISSING; /* not given in URL */
+    }
   }
 
 
-  if((data->conf & CONF_USERPWD) && ! (data->conf & CONF_NETRC)) {
+  if(data->bits.user_passwd && !data->bits.use_netrc) {
     if(':' != *data->userpwd) {
       if((1 <= sscanf(data->userpwd, "%127[^:]:%127s",
                       data->user, data->passwd))) {
@@ -774,11 +724,11 @@ static UrgError _urlget(struct UrlData *data)
     }
     if(!data->user[0]) {
       failf(data, "USER malformat: user name can't be zero length");
-      return URG_MALFORMAT_USER;
+      return CURLE_MALFORMAT_USER;
     }
   }
 
-  if(data->conf & CONF_PROXYUSERPWD) {
+  if(data->bits.proxy_user_passwd) {
     if(':' != *data->proxyuserpwd) {
       if((1 <= sscanf(data->proxyuserpwd, "%127[^:]:%127s",
                       data->proxyuser, data->proxypasswd))) {
@@ -791,16 +741,16 @@ static UrgError _urlget(struct UrlData *data)
     }
     if(!data->proxyuser[0]) {
       failf(data, " Proxy USER malformat: user name can't be zero length");
-      return URG_MALFORMAT_USER;
+      return CURLE_MALFORMAT_USER;
     }
   }
 
-  name = gname;
-  ppath = path;
-  data->hostname = name;
+  conn->name = conn->gname;
+  conn->ppath = conn->path;
+  data->hostname = conn->name;
 
 
-  if(!(data->conf & CONF_PROXY)) {
+  if(!data->bits.httpproxy) {
     /* If proxy was not specified, we check for default proxy environment
        variables, to enable i.e Lynx compliance:
 
@@ -824,9 +774,9 @@ static UrgError _urlget(struct UrlData *data)
 
       nope=no_proxy?strtok(no_proxy, ", "):NULL;
       while(nope) {
-        if(strlen(nope) <= strlen(name)) {
+        if(strlen(nope) <= strlen(conn->name)) {
           char *checkn=
-            name + strlen(name) - strlen(nope);
+            conn->name + strlen(conn->name) - strlen(nope);
           if(strnequal(nope, checkn, strlen(nope))) {
             /* no proxy for this host! */
             break;
@@ -836,7 +786,7 @@ static UrgError _urlget(struct UrlData *data)
       }
       if(!nope) {
 	/* It was not listed as without proxy */
-	char *protop = proto;
+	char *protop = conn->proto;
 	char *envp = proxy_env;
 	char *prox;
 
@@ -861,29 +811,29 @@ static UrgError _urlget(struct UrlData *data)
         if(proxy && *proxy) {
           /* we have a proxy here to set */
           data->proxy = proxy;
-          data->conf |= CONF_PROXY;
+          data->bits.httpproxy=1;
         }
       } /* if (!nope) - it wasn't specfied non-proxy */
     } /* NO_PROXY wasn't specified or '*' */
   } /* if not using proxy */
 
-  if((data->conf & (CONF_PROXY|CONF_NOPROT)) == (CONF_PROXY|CONF_NOPROT) ) {
+  if((conn->protocol&PROT_MISSING) && data->bits.httpproxy ) {
     /* We're guessing prefixes here and since we're told to use a proxy, we
        need to add the protocol prefix to the URL string before we continue!
        */
     char *reurl;
 
-    reurl = maprintf("%s://%s", proto, data->url);
+    reurl = maprintf("%s://%s", conn->proto, data->url);
 
     if(!reurl)
-      return URG_OUT_OF_MEMORY;
+      return CURLE_OUT_OF_MEMORY;
 
     data->url = reurl;
     if(data->freethis)
       free(data->freethis);
     data->freethis = reurl;
 
-    data->conf &= ~CONF_NOPROT; /* switch that one off again */
+    conn->protocol &= ~PROT_MISSING; /* switch that one off again */
   }
 
   /* RESUME on a HTTP page is a tricky business. First, let's just check that
@@ -894,11 +844,11 @@ static UrgError _urlget(struct UrlData *data)
      server, we just fail since we can't rewind the file writing from within
      this function. */
   if(data->resume_from) {
-    if(!(data->conf & CONF_RANGE)) {
+    if(!data->bits.set_range) {
       /* if it already was in use, we just skip this */
       sprintf(resumerange, "%d-", data->resume_from);
       data->range=resumerange; /* tell ourselves to fetch this range */
-      data->conf |= CONF_RANGE; /* switch on range usage */
+      data->bits.set_range = 1; /* switch on range usage */
     }
   }
 
@@ -916,50 +866,69 @@ static UrgError _urlget(struct UrlData *data)
    * works differently, depending on whether its SSL or not).
    */
 
-  if (strequal(proto, "HTTP")) {
+  if (strequal(conn->proto, "HTTP")) {
     if(!data->port)
       data->port = PORT_HTTP;
     data->remote_port = PORT_HTTP;
-    data->conf |= CONF_HTTP;
+    conn->protocol |= PROT_HTTP;
+    conn->curl_do = http;
+    conn->curl_done = http_done;
   }
-  else if (strequal(proto, "HTTPS")) {
+  else if (strequal(conn->proto, "HTTPS")) {
 #ifdef USE_SSLEAY
     if(!data->port)
       data->port = PORT_HTTPS;
     data->remote_port = PORT_HTTPS;
-    data->conf |= CONF_HTTP;
-    data->conf |= CONF_HTTPS;
+    conn->protocol |= PROT_HTTP;
+    conn->protocol |= PROT_HTTPS;
+
+    conn->curl_do = http;
+    conn->curl_done = http_done;
+    conn->curl_connect = http_connect;
+
 #else /* USE_SSLEAY */
     failf(data, "SSL is disabled, https: not supported!");
-    return URG_UNSUPPORTED_PROTOCOL;
+    return CURLE_UNSUPPORTED_PROTOCOL;
 #endif /* !USE_SSLEAY */
   }
-  else if (strequal(proto, "GOPHER")) {
+  else if (strequal(conn->proto, "GOPHER")) {
     if(!data->port)
       data->port = PORT_GOPHER;
     data->remote_port = PORT_GOPHER;
     /* Skip /<item-type>/ in path if present */
-    if (isdigit((int)path[1])) {
-      ppath = strchr(&path[1], '/');
-      if (ppath == NULL)
-	ppath = path;
+    if (isdigit((int)conn->path[1])) {
+      conn->ppath = strchr(&conn->path[1], '/');
+      if (conn->ppath == NULL)
+	conn->ppath = conn->path;
       }
-    data->conf |= CONF_GOPHER;
+    conn->protocol |= PROT_GOPHER;
+    conn->curl_do = http;
+    conn->curl_done = http_done;
   }
-  else if(strequal(proto, "FTP")) {
+  else if(strequal(conn->proto, "FTP")) {
     char *type;
     if(!data->port)
       data->port = PORT_FTP;
     data->remote_port = PORT_FTP;
-    data->conf |= CONF_FTP;
+    conn->protocol |= PROT_FTP;
 
-    ppath++; /* don't include the initial slash */
+    if(data->bits.httpproxy) {
+      conn->curl_do = http;
+      conn->curl_done = http_done;
+    }
+    else {
+      conn->curl_do = ftp;
+      conn->curl_done = ftp_done;
+      conn->curl_connect = ftp_connect;
+    }
+
+    conn->ppath++; /* don't include the initial slash */
 
     /* FTP URLs support an extension like ";type=<typecode>" that
        we'll try to get now! */
-    type=strstr(ppath, ";type=");
+    type=strstr(conn->ppath, ";type=");
     if(!type) {
-      type=strstr(gname, ";type=");
+      type=strstr(conn->gname, ";type=");
     }
     if(type) {
       char command;
@@ -967,54 +936,59 @@ static UrgError _urlget(struct UrlData *data)
       command = toupper(type[6]);
       switch(command) {
       case 'A': /* ASCII mode */
-	data->conf |= CONF_FTPASCII;
+	data->bits.ftp_ascii = 1;
 	break;
       case 'D': /* directory mode */
-	data->conf |= CONF_FTPLISTONLY;
+	data->bits.ftp_list_only = 1;
 	break;
       case 'I': /* binary mode */
       default:
 	/* switch off ASCII */
-	data->conf &= ~CONF_FTPASCII; 
+	data->bits.ftp_ascii = 0;
 	break;
       }
     }
   }
-  else if(strequal(proto, "TELNET")) {
+  else if(strequal(conn->proto, "TELNET")) {
     /* telnet testing factory */
-    data->conf |= CONF_TELNET;
+    conn->protocol |= PROT_TELNET;
     if(!data->port)
       data->port = PORT_TELNET;
     data->remote_port = PORT_TELNET;
+
+    conn->curl_do = telnet;
+    conn->curl_done = telnet_done;
+
   }
-  else if (strequal(proto, "DICT")) {
-    data->conf |= CONF_DICT;
+  else if (strequal(conn->proto, "DICT")) {
+    conn->protocol |= PROT_DICT;
     if(!data->port)
       data->port = PORT_DICT;
     data->remote_port = PORT_DICT;
+    conn->curl_do = dict;
+    conn->curl_done = dict_done;
   }
-  else if (strequal(proto, "LDAP")) {
-    data->conf |= CONF_LDAP;
+  else if (strequal(conn->proto, "LDAP")) {
+    conn->protocol |= PROT_LDAP;
     if(!data->port)
       data->port = PORT_LDAP;
     data->remote_port = PORT_LDAP;
+    conn->curl_do = ldap;
+    conn->curl_done = ldap_done;
   }
-  /* file:// is handled above */
-  /*  else if (strequal(proto, "FILE")) {
-    data->conf |= CONF_FILE;
+  else if (strequal(conn->proto, "FILE")) {
+    conn->protocol |= PROT_FILE;
 
-    result = file(data, path, &bytecount);
-    if(result)
-      return result;
+    conn->curl_do = file;
+    /* no done() function */
+  }
 
-    return URG_OK;
-    }*/
   else {
-    failf(data, "Unsupported protocol: %s", proto);
-    return URG_UNSUPPORTED_PROTOCOL;
+    failf(data, "Unsupported protocol: %s", conn->proto);
+    return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
-  if(data->conf & CONF_NETRC) {
+  if(data->bits.use_netrc) {
     if(ParseNetrc(data->hostname, data->user, data->passwd)) {
       infof(data, "Couldn't find host %s in the .netrc file, using defaults",
             data->hostname);
@@ -1025,25 +999,26 @@ static UrgError _urlget(struct UrlData *data)
       strcpy(data->user, CURL_DEFAULT_USER);
     if(!data->passwd[0])
       strcpy(data->passwd, CURL_DEFAULT_PASSWORD);
-    if(data->conf & CONF_HTTP) {
-      data->conf |= CONF_USERPWD;
+    if(conn->protocol&PROT_HTTP) {
+      data->bits.user_passwd = 1; /* enable user+password */
     }
   }
-  else if(!(data->conf & CONF_USERPWD) &&
-	  (data->conf & (CONF_FTP|CONF_HTTP)) ) {
+  else if(!(data->bits.user_passwd) &&
+	  (conn->protocol & (PROT_FTP|PROT_HTTP)) ) {
     /* This is a FTP or HTTP URL, and we haven't got the user+password in
        the extra parameter, we will now try to extract the possible
        user+password pair in a string like:
        ftp://user:password@ftp.my.site:8021/README */
     char *ptr=NULL; /* assign to remove possible warnings */
-    if(':' == *name) {
+    if(':' == *conn->name) {
       failf(data, "URL malformat: user can't be zero length");
-      return URG_URL_MALFORMAT_USER;
+      return CURLE_URL_MALFORMAT_USER;
     }
-    if((1 <= sscanf(name, "%127[^:]:%127[^@]",
-		    data->user, data->passwd)) && (ptr=strchr(name, '@'))) {
-      name = ++ptr;
-      data->conf |= CONF_USERPWD;
+    if((1 <= sscanf(conn->name, "%127[^:]:%127[^@]",
+		    data->user, data->passwd)) &&
+       (ptr=strchr(conn->name, '@'))) {
+      conn->name = ++ptr;
+      data->bits.user_passwd=1; /* enable user+password */
     }
     else {
       strcpy(data->user, CURL_DEFAULT_USER);
@@ -1051,19 +1026,19 @@ static UrgError _urlget(struct UrlData *data)
     }
   }
 
-  if(!(data->conf & CONF_PROXY)) {
+  if(!data->bits.httpproxy) {
     /* If not connecting via a proxy, extract the port from the URL, if it is
      * there, thus overriding any defaults that might have been set above. */
-    tmp = strchr(name, ':');
+    tmp = strchr(conn->name, ':');
     if (tmp) {
       *tmp++ = '\0';
       data->port = atoi(tmp);
     }
     
     /* Connect to target host right on */
-    if(!(hp = GetHost(data, name))) {
-      failf(data, "Couldn't resolv host '%s'", name);
-      return URG_COULDNT_RESOLVE_HOST;
+    if(!(conn->hp = GetHost(data, conn->name))) {
+      failf(data, "Couldn't resolv host '%s'", conn->name);
+      return CURLE_COULDNT_RESOLVE_HOST;
     }
   }
   else {
@@ -1079,12 +1054,12 @@ static UrgError _urlget(struct UrlData *data)
 
     if(NULL == proxydup) {
       failf(data, "memory shortage");
-      return URG_OUT_OF_MEMORY;
+      return CURLE_OUT_OF_MEMORY;
     }
 
     /* we use proxy all right, but we wanna know the remote port for SSL
        reasons */
-    tmp = strchr(name, ':');
+    tmp = strchr(conn->name, ':');
     if (tmp) {
       *tmp++ = '\0'; /* cut off the name there */
       data->remote_port = atoi(tmp);
@@ -1111,9 +1086,9 @@ static UrgError _urlget(struct UrlData *data)
     }
 
     /* connect to proxy */
-    if(!(hp = GetHost(data, proxyptr))) {
+    if(!(conn->hp = GetHost(data, proxyptr))) {
       failf(data, "Couldn't resolv proxy '%s'", proxyptr);
-      return URG_COULDNT_RESOLVE_PROXY;
+      return CURLE_COULDNT_RESOLVE_PROXY;
     }
 
     free(proxydup); /* free the duplicate pointer and not the modified */
@@ -1122,14 +1097,16 @@ static UrgError _urlget(struct UrlData *data)
 
   data->firstsocket = socket(AF_INET, SOCK_STREAM, 0);
 
-  memset((char *) &serv_addr, '\0', sizeof(serv_addr));
-  memcpy((char *)&(serv_addr.sin_addr), hp->h_addr, hp->h_length);
-  serv_addr.sin_family = hp->h_addrtype;
+  memset((char *) &conn->serv_addr, '\0', sizeof(conn->serv_addr));
+  memcpy((char *)&(conn->serv_addr.sin_addr),
+         conn->hp->h_addr, conn->hp->h_length);
+  conn->serv_addr.sin_family = conn->hp->h_addrtype;
+  conn->serv_addr.sin_port = htons(data->port);
 
-  serv_addr.sin_port = htons(data->port);
-
-  if (connect(data->firstsocket, (struct sockaddr *) &serv_addr,
-	      sizeof(serv_addr)) < 0) {
+  if (connect(data->firstsocket,
+              (struct sockaddr *) &(conn->serv_addr),
+              sizeof(conn->serv_addr)
+              ) < 0) {
     switch(errno) {
 #ifdef ECONNREFUSED
       /* this should be made nicer */
@@ -1146,10 +1123,10 @@ static UrgError _urlget(struct UrlData *data)
       failf(data, "Can't connect to server: %d", errno);
       break;
     }
-    return URG_COULDNT_CONNECT;
+    return CURLE_COULDNT_CONNECT;
   }
 
-  if(data->conf & CONF_PROXYUSERPWD) {
+  if(data->bits.proxy_user_passwd) {
     char authorization[512];
     sprintf(data->buffer, "%s:%s", data->proxyuser, data->proxypasswd);
     base64Encode(data->buffer, authorization);
@@ -1157,74 +1134,27 @@ static UrgError _urlget(struct UrlData *data)
     data->ptr_proxyuserpwd = maprintf("Proxy-authorization: Basic %s\015\012",
 				      authorization);
   }
-  if(data->conf & (CONF_HTTPS|CONF_HTTP|CONF_PROXY)) {
+  if((conn->protocol&PROT_HTTP) || data->bits.httpproxy) {
     if(data->useragent) {
       data->ptr_uagent = maprintf("User-Agent: %s\015\012", data->useragent);
     }
   }
 
-
-  /* If we are not using a proxy and we want a secure connection,
-   * perform SSL initialization & connection now.
-   * If using a proxy with https, then we must tell the proxy to CONNECT
-   * us to the host we want to talk to.  Only after the connect
-   * has occured, can we start talking SSL
-   */
-   if (data->conf & CONF_HTTPS) {
-     if (data->conf & CONF_PROXY) {
-
-        /* OK, now send the connect statment */
-        sendf(data->firstsocket, data,
-              "CONNECT %s:%d HTTP/1.0\015\012"
-              "%s"
-	      "%s"
-              "\r\n",
-              data->hostname, data->remote_port,
-              (data->conf&CONF_PROXYUSERPWD)?data->ptr_proxyuserpwd:"",
-	      (data->useragent?data->ptr_uagent:"")
-              );
-
-        /* wait for the proxy to send us a HTTP/1.0 200 OK header */
-	/* Daniel rewrote this part Nov 5 1998 to make it more obvious */
-	{
-	  int httperror=0;
-	  int subversion=0;
-	  while(GetLine(data->firstsocket, data->buffer, data)) {
-	    if('\r' == data->buffer[0])
-	      break; /* end of headers */
-	    if(2 == sscanf(data->buffer, "HTTP/1.%d %d",
-			   &subversion,
-			   &httperror)) {
-	      ;
-	    }
-	  }
-	  if(200 != httperror) {
-	    if(407 == httperror)
-	      /* Added Nov 6 1998 */
-	      failf(data, "Proxy requires authorization!");
-	    else 
-	      failf(data, "Received error code %d from proxy", httperror);
-	    return URG_READ_ERROR;
-	  }
-	}
-        infof (data, "Proxy has replied to CONNECT request\n");
-     }
-
-      /* now, perform the SSL initialization for this socket */
-     if(UrgSSLConnect (data)) {
-       return URG_SSL_CONNECT_ERROR;
-     }
+  if(conn->curl_connect) {
+    /* is there a post-connect() procedure? */
+    result = conn->curl_connect(conn);
   }
+
   pgrsTime(data, TIMER_CONNECT);
 
-  now = tvnow(); /* time this *after* the connect is done */
-  bytecount = 0;
+  conn->now = tvnow(); /* time this *after* the connect is done */
+  conn->bytecount = 0;
   
   /* Figure out the ip-number and the first host name it shows: */
   {
     struct in_addr in;
-    (void) memcpy(&in.s_addr, *hp->h_addr_list, sizeof (in.s_addr));
-    infof(data, "Connected to %s (%s)\n", hp->h_name, inet_ntoa(in));
+    (void) memcpy(&in.s_addr, *conn->hp->h_addr_list, sizeof (in.s_addr));
+    infof(data, "Connected to %s (%s)\n", conn->hp->h_name, inet_ntoa(in));
   }
 
 #if 0 /* Kerberos experiements! Beware! Take cover! */
@@ -1243,36 +1173,67 @@ static UrgError _urlget(struct UrlData *data)
   }
 #endif
 
-  if((data->conf&(CONF_FTP|CONF_PROXY)) == CONF_FTP) {
-    result = ftp(data, &bytecount, data->user, data->passwd, ppath);
-    if(result)
-      return result;
+  return CURLE_OK;
+}
+
+CURLcode curl_done(CURLconnect *c_connect)
+{
+  struct connectdata *conn = c_connect;
+  struct UrlData *data;
+  CURLcode result;
+
+  if(!conn || (conn->handle!= STRUCT_CONNECT)) {
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  else if(data->conf & CONF_TELNET) {
-    result=telnet(data);
-    if(result)
-      return result;
+  if(conn->state != CONN_DO) {
+    /* This can only be called after a curl_do() */
+    return CURLE_BAD_CALLING_ORDER;
   }
-  else if (data->conf & CONF_LDAP) {
-    result = ldap(data, path, &bytecount);
-    if (result)
-      return result;
+  data = conn->data;
+
+  /* this calls the protocol-specific function pointer previously set */
+  if(conn->curl_done)
+    result = conn->curl_done(conn);
+  else
+    result = CURLE_OK;
+
+  pgrsDone(data); /* done with the operation */
+
+  conn->state = CONN_DONE;
+
+  return result;
+}
+
+CURLcode curl_do(CURLconnect *in_conn)
+{
+  struct connectdata *conn = in_conn;
+  CURLcode result;
+
+  if(!conn || (conn->handle!= STRUCT_CONNECT)) {
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  else if (data->conf & CONF_DICT) {
-    result = dict(data, path, &bytecount);
-    if(result)
-      return result;
+  if(conn->state != CONN_INIT) {
+    return CURLE_BAD_CALLING_ORDER;
   }
-  else {
-    result = http(data, ppath, name, &bytecount);
-    if(result)
+
+  if(conn->curl_do) {
+    /* generic protocol-specific function pointer set in curl_connect() */
+    result = conn->curl_do(conn);
+    if(result) {
+      conn->state = CONN_ERROR;
       return result;
+    }
   }
-  if(bytecount) {
-    double ittook = tvdiff (tvnow(), now);
+
+  conn->state = CONN_DO; /* we have entered this state */
+
+#if 0
+  if(conn->bytecount) {
+    double ittook = tvdiff (tvnow(), conn->now);
     infof(data, "%i bytes transfered in %.3lf seconds (%.0lf bytes/sec).\n",
-          bytecount, ittook, (double)bytecount/(ittook!=0.0?ittook:1));
+          conn->bytecount, ittook, (double)conn->bytecount/(ittook!=0.0?ittook:1));
   }
-  return URG_OK;
+#endif
+  return CURLE_OK;
 }
 

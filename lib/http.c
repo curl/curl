@@ -94,6 +94,9 @@
 #include "progress.h"
 #include "base64.h"
 #include "cookie.h"
+#include "strequal.h"
+#include "url.h"
+#include "ssluse.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -115,33 +118,114 @@ bool static checkheaders(struct UrlData *data, char *thisheader)
   return FALSE;
 }
 
-UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
+CURLcode http_connect(struct connectdata *conn)
 {
-  /* Send the GET line to the HTTP server */
+  struct UrlData *data;
 
-  struct FormData *sendit=NULL;
-  int postsize=0;
-  UrgError result;
-  char *buf;
-  struct Cookie *co = NULL;
-  char *p_pragma = NULL;
-  char *p_accept = NULL;
-  long readbytecount;
-  long writebytecount;
+  data=conn->data;
 
-  buf = data->buffer; /* this is our buffer */
+  /* If we are not using a proxy and we want a secure connection,
+   * perform SSL initialization & connection now.
+   * If using a proxy with https, then we must tell the proxy to CONNECT
+   * us to the host we want to talk to.  Only after the connect
+   * has occured, can we start talking SSL
+   */
+   if (conn->protocol & PROT_HTTPS) {
+     if (data->bits.httpproxy) {
 
-  if ( (data->conf&(CONF_HTTP|CONF_FTP)) &&
-       (data->conf&CONF_UPLOAD)) {
-    data->conf |= CONF_PUT;
+        /* OK, now send the connect statment */
+        sendf(data->firstsocket, data,
+              "CONNECT %s:%d HTTP/1.0\015\012"
+              "%s"
+	      "%s"
+              "\r\n",
+              data->hostname, data->remote_port,
+              (data->bits.proxy_user_passwd)?data->ptr_proxyuserpwd:"",
+	      (data->useragent?data->ptr_uagent:"")
+              );
+
+        /* wait for the proxy to send us a HTTP/1.0 200 OK header */
+	/* Daniel rewrote this part Nov 5 1998 to make it more obvious */
+	{
+	  int httperror=0;
+	  int subversion=0;
+	  while(GetLine(data->firstsocket, data->buffer, data)) {
+	    if('\r' == data->buffer[0])
+	      break; /* end of headers */
+	    if(2 == sscanf(data->buffer, "HTTP/1.%d %d",
+			   &subversion,
+			   &httperror)) {
+	      ;
+	    }
+	  }
+	  if(200 != httperror) {
+	    if(407 == httperror)
+	      /* Added Nov 6 1998 */
+	      failf(data, "Proxy requires authorization!");
+	    else 
+	      failf(data, "Received error code %d from proxy", httperror);
+	    return CURLE_READ_ERROR;
+	  }
+	}
+        infof (data, "Proxy has replied to CONNECT request\n");
+     }
+
+      /* now, perform the SSL initialization for this socket */
+     if(UrgSSLConnect (data)) {
+       return CURLE_SSL_CONNECT_ERROR;
+     }
   }
-#if 0 /* old version */
-  if((data->conf&(CONF_HTTP|CONF_UPLOAD)) ==
-     (CONF_HTTP|CONF_UPLOAD)) {
-    /* enable PUT! */
-    data->conf |= CONF_PUT;
+
+   return CURLE_OK;
+}
+CURLcode http_done(struct connectdata *conn)
+{
+  struct UrlData *data;
+  long *bytecount = &conn->bytecount;
+  struct HTTP *http;
+
+  data=conn->data;
+  http=data->proto.http;
+
+  if(data->bits.http_formpost) {
+    *bytecount = http->readbytecount + http->writebytecount;
+      
+    FormFree(http->sendit); /* Now free that whole lot */
+
+    data->fread = http->storefread; /* restore */
+    data->in = http->in; /* restore */
   }
-#endif
+  else if(data->bits.http_put) {
+    *bytecount = http->readbytecount + http->writebytecount;
+  }
+
+  /* TBD: the HTTP struct remains allocated here */
+
+  return CURLE_OK;
+}
+
+
+CURLcode http(struct connectdata *conn)
+{
+  struct UrlData *data=conn->data;
+  char *buf = data->buffer; /* this is a short cut to the buffer */
+  CURLcode result;
+  struct HTTP *http;
+  struct Cookie *co=NULL; /* no cookies from start */
+  char *ppath = conn->ppath; /* three previous function arguments */
+  char *host = conn->name;
+  long *bytecount = &conn->bytecount;
+
+  http = (struct HTTP *)malloc(sizeof(struct HTTP));
+  if(!http)
+    return CURLE_OUT_OF_MEMORY;
+  memset(http, 0, sizeof(struct HTTP));
+  data->proto.http = http;
+
+  if ( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
+       data->bits.upload) {
+    data->bits.http_put=1;
+  }
   
   /* The User-Agent string has been built in url.c already, because it might
      have been used in the proxy connect, but if we have got a header with
@@ -152,17 +236,17 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
     data->ptr_uagent=NULL;
   }
 
-  if((data->conf & CONF_USERPWD) && !checkheaders(data, "Authorization:")) {
+  if((data->bits.user_passwd) && !checkheaders(data, "Authorization:")) {
     char authorization[512];
     sprintf(data->buffer, "%s:%s", data->user, data->passwd);
     base64Encode(data->buffer, authorization);
     data->ptr_userpwd = maprintf( "Authorization: Basic %s\015\012",
                                   authorization);
   }
-  if((data->conf & CONF_RANGE) && !checkheaders(data, "Range:")) {
+  if((data->bits.set_range) && !checkheaders(data, "Range:")) {
     data->ptr_rangeline = maprintf("Range: bytes=%s\015\012", data->range);
   }
-  if((data->conf & CONF_REFERER) && !checkheaders(data, "Referer:")) {
+  if((data->bits.http_set_referer) && !checkheaders(data, "Referer:")) {
     data->ptr_ref = maprintf("Referer: %s\015\012", data->referer);
   }
   if(data->cookie && !checkheaders(data, "Cookie:")) {
@@ -173,16 +257,16 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
     co = cookie_getlist(data->cookies,
                         host,
                         ppath,
-                        data->conf&CONF_HTTPS?TRUE:FALSE);
+                        conn->protocol&PROT_HTTPS?TRUE:FALSE);
   }
-  if ((data->conf & CONF_PROXY) && (!(data->conf & CONF_HTTPS)))  {
+  if ((data->bits.httpproxy) && !(conn->protocol&PROT_HTTPS))  {
     /* The path sent to the proxy is in fact the entire URL */
     strncpy(ppath, data->url, URL_MAX_LENGTH-1);
   }
-  if(data->conf & CONF_HTTPPOST) {
+  if(data->bits.http_formpost) {
     /* we must build the whole darned post sequence first, so that we have
        a size of the whole shebang before we start to send it */
-    sendit = getFormData(data->httppost, &postsize);
+    http->sendit = getFormData(data->httppost, &http->postsize);
   }
 
   if(!checkheaders(data, "Host:"))
@@ -190,10 +274,10 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
 
 
   if(!checkheaders(data, "Pragma:"))
-    p_pragma = "Pragma: no-cache\r\n";
+    http->p_pragma = "Pragma: no-cache\r\n";
 
   if(!checkheaders(data, "Accept:"))
-    p_accept = "Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*\r\n";
+    http->p_accept = "Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*\r\n";
 
   do {
     sendf(data->firstsocket, data,
@@ -210,19 +294,19 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
           "%s", /* referer */
 
           data->customrequest?data->customrequest:
-          (data->conf&CONF_NOBODY?"HEAD":
-           (data->conf&(CONF_POST|CONF_HTTPPOST))?"POST":
-           (data->conf&CONF_PUT)?"PUT":"GET"),
+          (data->bits.no_body?"HEAD":
+           (data->bits.http_post || data->bits.http_formpost)?"POST":
+           (data->bits.http_put)?"PUT":"GET"),
           ppath,
-          (data->conf&CONF_PROXYUSERPWD && data->ptr_proxyuserpwd)?data->ptr_proxyuserpwd:"",
-          (data->conf&CONF_USERPWD && data->ptr_userpwd)?data->ptr_userpwd:"",
-          (data->conf&CONF_RANGE && data->ptr_rangeline)?data->ptr_rangeline:"",
+          (data->bits.proxy_user_passwd && data->ptr_proxyuserpwd)?data->ptr_proxyuserpwd:"",
+          (data->bits.user_passwd && data->ptr_userpwd)?data->ptr_userpwd:"",
+          (data->bits.set_range && data->ptr_rangeline)?data->ptr_rangeline:"",
           (data->useragent && *data->useragent && data->ptr_uagent)?data->ptr_uagent:"",
           (data->ptr_cookie?data->ptr_cookie:""), /* Cookie: <data> */
           (data->ptr_host?data->ptr_host:""), /* Host: host */
-          p_pragma?p_pragma:"",
-          p_accept?p_accept:"",
-          (data->conf&CONF_REFERER && data->ptr_ref)?data->ptr_ref:"" /* Referer: <data> <CRLF> */
+          http->p_pragma?http->p_pragma:"",
+          http->p_accept?http->p_accept:"",
+          (data->bits.http_set_referer && data->ptr_ref)?data->ptr_ref:"" /* Referer: <data> <CRLF> */
           );
 
     if(co) {
@@ -234,9 +318,10 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
             sendf(data->firstsocket, data,
                   "Cookie:");
           }
-          count++;
           sendf(data->firstsocket, data,
-                " %s=%s;", co->name, co->value);
+                "%s%s=%s", count?"; ":"", co->name,
+                co->value);
+          count++;
         }
         co = co->next; /* next cookie please */
       }
@@ -284,8 +369,8 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
       data->headers = data->headers->next;
     }
 
-    if(data->conf&(CONF_POST|CONF_HTTPPOST)) {
-      if(data->conf & CONF_POST) {
+    if(data->bits.http_post || data->bits.http_formpost) {
+      if(data->bits.http_post) {
         /* this is the simple x-www-form-urlencoded style */
         sendf(data->firstsocket, data,
               "Content-Length: %d\015\012"
@@ -295,53 +380,39 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
               data->postfields );
       }
       else {
-        struct Form form;
-        size_t (*storefread)(char *, size_t , size_t , FILE *);
-        FILE *in;
-        long conf;
 
-        if(FormInit(&form, sendit)) {
+        if(FormInit(&http->form, http->sendit)) {
           failf(data, "Internal HTTP POST error!\n");
-          return URG_HTTP_POST_ERROR;
+          return CURLE_HTTP_POST_ERROR;
         }
 
-        storefread = data->fread; /* backup */
-        in = data->in; /* backup */
+        http->storefread = data->fread; /* backup */
+        http->in = data->in; /* backup */
           
         data->fread =
           (size_t (*)(char *, size_t, size_t, FILE *))
           FormReader; /* set the read function to read from the
                          generated form data */
-        data->in = (FILE *)&form;
+        data->in = (FILE *)&http->form;
 
         sendf(data->firstsocket, data,
               "Content-Length: %d\r\n",
-              postsize-2);
+              http->postsize-2);
 
-	pgrsSetUploadSize(data, postsize);
-#if 0
-        ProgressInit(data, postsize);
-#endif
+	pgrsSetUploadSize(data, http->postsize);
 
-        result = Transfer(data, data->firstsocket, -1, TRUE, &readbytecount,
-                          data->firstsocket, &writebytecount);
-        *bytecount = readbytecount + writebytecount;
-
-        FormFree(sendit); /* Now free that whole lot */
-
-        if(result)
+        result = Transfer(conn, data->firstsocket, -1, TRUE,
+                          &http->readbytecount,
+                          data->firstsocket,
+                          &http->writebytecount);
+        if(result) {
+          FormFree(http->sendit); /* free that whole lot */
           return result;
-	
-        data->fread = storefread; /* restore */
-        data->in = in; /* restore */
-
-	sendf(data->firstsocket, data,
-	      "\r\n\r\n");
+        }
       }
     }
-    else if(data->conf&CONF_PUT) {
+    else if(data->bits.http_put) {
       /* Let's PUT the data to the server! */
-      long conf;
 
       if(data->infilesize>0) {
         sendf(data->firstsocket, data,
@@ -352,39 +423,28 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
         sendf(data->firstsocket, data,
               "\015\012");
 
-#if 0        
-      ProgressInit(data, data->infilesize);
-#endif
       pgrsSetUploadSize(data, data->infilesize);
 
-      result = Transfer(data, data->firstsocket, -1, TRUE, &readbytecount,
-                        data->firstsocket, &writebytecount);
-      
-      *bytecount = readbytecount + writebytecount;
-
+      result = Transfer(conn, data->firstsocket, -1, TRUE,
+                        &http->readbytecount,
+                        data->firstsocket,
+                        &http->writebytecount);
       if(result)
         return result;
 
     }
     else {
       sendf(data->firstsocket, data, "\r\n");
-    }
-    if(0 == *bytecount) {
+
       /* HTTP GET/HEAD download: */
-      result = Transfer(data, data->firstsocket, -1, TRUE, bytecount,
+      result = Transfer(conn, data->firstsocket, -1, TRUE, bytecount,
                         -1, NULL); /* nothing to upload */
     }
     if(result)
       return result;
-
-#if 0      
-    ProgressEnd(data);
-#endif
-    pgrsDone(data);
-
   } while (0); /* this is just a left-over from the multiple document download
                   attempts */
 
-  return URG_OK;
+  return CURLE_OK;
 }
 

@@ -44,6 +44,6 @@
  * allocated string or NULL if an error occurred.  */
 
 char *curl_escape(char *string);
-char *curl_unescape(char *string);
+char *curl_unescape(char *string, int length);
 
 #endif

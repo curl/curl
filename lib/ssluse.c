@@ -38,6 +38,12 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+/*
+ * The original SSL code was written by
+ * Linas Vepstas <linas@linas.org> and Sampo Kellomaki <sampo@iki.fi>
+ */
+
+
 #include <string.h>
 #include <stdlib.h>
 

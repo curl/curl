@@ -40,6 +40,7 @@
  *
  * ------------------------------------------------------------
  ****************************************************************************/
-UrgError dict(struct UrlData *data, char *path, long *bytecountp);
+CURLcode dict(struct connectdata *conn);
+CURLcode dict_done(struct connectdata *conn);
 
 #endif
