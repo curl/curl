@@ -457,6 +457,7 @@ UrgError curl_urlget(UrgTag tag, ...)
     va_end(arg);
 
     pgrsMode(data, data->progress.mode);
+    pgrsStartNow(data);
 
     data-> headerbuff=(char*)malloc(HEADERSIZE);
     if(!data->headerbuff)
