@@ -195,7 +195,7 @@ struct Progress {
 
   double current_speed; /* uses the currently fastest transfer */
 
-  int mode;  /* what kind of progress meter to display */
+  bool callback;  /* set when progress callback is used */
   int width; /* screen width at download start */
   int flags; /* see progress.h */
   double timespent;
