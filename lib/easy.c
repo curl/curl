@@ -238,7 +238,7 @@ CURLcode curl_easy_perform(CURL *curl)
       data->hostcache = Curl_global_host_cache_get();
     }
     else {
-      data->hostcache = curl_hash_alloc(7, Curl_freeaddrinfo);
+      data->hostcache = Curl_hash_alloc(7, Curl_freeaddrinfo);
     }
   }
 
@@ -249,7 +249,7 @@ void curl_easy_cleanup(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
   if (!Curl_global_host_cache_use(data)) {
-    curl_hash_destroy(data->hostcache);
+    Curl_hash_destroy(data->hostcache);
   }
   Curl_close(data);
 }

@@ -33,7 +33,7 @@
 #include "memdebug.h"
 #endif
 void 
-curl_llist_init(curl_llist *l, curl_llist_dtor dtor)
+Curl_llist_init(curl_llist *l, curl_llist_dtor dtor)
 {
   l->size = 0;
   l->dtor = dtor;
@@ -42,7 +42,7 @@ curl_llist_init(curl_llist *l, curl_llist_dtor dtor)
 }
 
 curl_llist *
-curl_llist_alloc(curl_llist_dtor dtor)
+Curl_llist_alloc(curl_llist_dtor dtor)
 {
   curl_llist *list;
 
@@ -50,13 +50,13 @@ curl_llist_alloc(curl_llist_dtor dtor)
   if(NULL == list)
     return NULL;
 
-  curl_llist_init(list, dtor);
+  Curl_llist_init(list, dtor);
 
   return list;
 }
 
 int
-curl_llist_insert_next(curl_llist *list, curl_llist_element *e, const void *p)
+Curl_llist_insert_next(curl_llist *list, curl_llist_element *e, const void *p)
 {
   curl_llist_element  *ne;
 
@@ -84,7 +84,7 @@ curl_llist_insert_next(curl_llist *list, curl_llist_element *e, const void *p)
 }
 
 int 
-curl_llist_insert_prev(curl_llist *list, curl_llist_element *e, const void *p)
+Curl_llist_insert_prev(curl_llist *list, curl_llist_element *e, const void *p)
 {
   curl_llist_element *ne;
 
@@ -111,7 +111,7 @@ curl_llist_insert_prev(curl_llist *list, curl_llist_element *e, const void *p)
 }
 
 int 
-curl_llist_remove(curl_llist *list, curl_llist_element *e, void *user)
+Curl_llist_remove(curl_llist *list, curl_llist_element *e, void *user)
 {
   if (e == NULL || list->size == 0)
     return 1;
@@ -139,28 +139,28 @@ curl_llist_remove(curl_llist *list, curl_llist_element *e, void *user)
 }
 
 int 
-curl_llist_remove_next(curl_llist *list, curl_llist_element *e, void *user)
+Curl_llist_remove_next(curl_llist *list, curl_llist_element *e, void *user)
 {
-  return curl_llist_remove(list, e->next, user);
+  return Curl_llist_remove(list, e->next, user);
 }
 
 int 
-curl_llist_remove_prev(curl_llist *list, curl_llist_element *e, void *user)
+Curl_llist_remove_prev(curl_llist *list, curl_llist_element *e, void *user)
 {
-  return curl_llist_remove(list, e->prev, user);
+  return Curl_llist_remove(list, e->prev, user);
 }
 
 size_t 
-curl_llist_count(curl_llist *list)
+Curl_llist_count(curl_llist *list)
 {
   return list->size;
 }
 
 void 
-curl_llist_destroy(curl_llist *list, void *user)
+Curl_llist_destroy(curl_llist *list, void *user)
 {
   while (list->size > 0) {
-    curl_llist_remove(list, CURL_LLIST_TAIL(list), user);
+    Curl_llist_remove(list, CURL_LLIST_TAIL(list), user);
   }
 
   free(list);

@@ -79,7 +79,7 @@ static int host_cache_initialized;
 void Curl_global_host_cache_init(void)
 {
   if (!host_cache_initialized) {
-    curl_hash_init(&hostname_cache, 7, Curl_freeaddrinfo);
+    Curl_hash_init(&hostname_cache, 7, Curl_freeaddrinfo);
     host_cache_initialized = 1;
   }
 }
@@ -92,7 +92,7 @@ curl_hash *Curl_global_host_cache_get(void)
 void Curl_global_host_cache_dtor(void)
 {
   if (host_cache_initialized) {
-    curl_hash_clean(&hostname_cache);
+    Curl_hash_clean(&hostname_cache);
     host_cache_initialized = 0;
   }
 }
@@ -152,7 +152,7 @@ _create_hostcache_id(char *server, int port, ssize_t *entry_len)
   return id;
 }
 
-struct _curl_hostcache_prune_data {
+struct hostcache_prune_data {
   int cache_timeout;
   int now;
 };
@@ -160,8 +160,8 @@ struct _curl_hostcache_prune_data {
 static int
 _curl_hostcache_timestamp_remove(void *datap, void *hc)
 {
-  struct _curl_hostcache_prune_data *data = 
-    (struct _curl_hostcache_prune_data *) datap;
+  struct hostcache_prune_data *data = 
+    (struct hostcache_prune_data *) datap;
   struct curl_dns_cache_entry *c = (struct curl_dns_cache_entry *) hc;
   
   if (data->now - c->timestamp < data->cache_timeout) {
@@ -172,14 +172,14 @@ _curl_hostcache_timestamp_remove(void *datap, void *hc)
 }
 
 static void
-_curl_hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
+hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
 {
-  struct _curl_hostcache_prune_data user;
+  struct hostcache_prune_data user;
 
   user.cache_timeout = cache_timeout;
   user.now = now;
   
-  curl_hash_clean_with_criterium(hostcache, 
+  Curl_hash_clean_with_criterium(hostcache, 
                                  (void *) &user, 
                                  _curl_hostcache_timestamp_remove);
 }
@@ -210,9 +210,9 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
   time(&now);
 
   /* Remove outdated entries from the hostcache */
-  _curl_hostcache_prune(data->hostcache, 
-                        data->set.dns_cache_timeout, 
-                        now);
+  hostcache_prune(data->hostcache, 
+                  data->set.dns_cache_timeout, 
+                  now);
 
   /* Create an entry id, based upon the hostname and port */
   entry_len = strlen(hostname);
@@ -225,7 +225,7 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
   
   /* See if its already in our dns cache */
   if (entry_id &&
-      curl_hash_find(data->hostcache, entry_id, entry_len+1, (void **) &p)) {
+      Curl_hash_find(data->hostcache, entry_id, entry_len+1, (void **) &p)) {
     _hostcache_return(p->addr);
   }
 
@@ -244,7 +244,7 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
   p->timestamp = now;
 
   /* Save it in our host cache */
-  curl_hash_update(data->hostcache, entry_id, entry_len+1, (const void *) p);
+  Curl_hash_update(data->hostcache, entry_id, entry_len+1, (const void *) p);
 
   _hostcache_return(p->addr);
 }

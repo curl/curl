@@ -44,14 +44,14 @@ typedef struct _curl_llist {
   size_t size;
 } curl_llist;
 
-void curl_llist_init(curl_llist *, curl_llist_dtor);
-curl_llist *curl_llist_alloc(curl_llist_dtor);
-int curl_llist_insert_next(curl_llist *, curl_llist_element *, const void *);
-int curl_llist_insert_prev(curl_llist *, curl_llist_element *, const void *);
-int curl_llist_remove(curl_llist *, curl_llist_element *, void *);
-int curl_llist_remove_next(curl_llist *, curl_llist_element *, void *);
-size_t curl_llist_count(curl_llist *);
-void curl_llist_destroy(curl_llist *, void *);
+void Curl_llist_init(curl_llist *, curl_llist_dtor);
+curl_llist *Curl_llist_alloc(curl_llist_dtor);
+int Curl_llist_insert_next(curl_llist *, curl_llist_element *, const void *);
+int Curl_llist_insert_prev(curl_llist *, curl_llist_element *, const void *);
+int Curl_llist_remove(curl_llist *, curl_llist_element *, void *);
+int Curl_llist_remove_next(curl_llist *, curl_llist_element *, void *);
+size_t Curl_llist_count(curl_llist *);
+void Curl_llist_destroy(curl_llist *, void *);
 
 #define CURL_LLIST_HEAD(__l) ((__l)->head)
 #define CURL_LLIST_TAIL(__l) ((__l)->tail)
