@@ -19,7 +19,7 @@ ftp
 FTP GET with type=A style ASCII URL using %20 codes
  </name>
  <command>
-"ftp://%HOSTIP:%FTPPORT//path%20with%20%20spaces/and%20things2/106;type=A"
+"ftp://%HOSTIP:%FTPPORT//path%20with%20%20spaces//and%20things2/106;type=A"
 </command>
 </test>
 
@@ -29,7 +29,7 @@ FTP GET with type=A style ASCII URL using %20 codes
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-CWD path with  spaces
+CWD /path with  spaces
 CWD and things2
 EPSV
 TYPE A
