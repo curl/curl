@@ -244,6 +244,7 @@ Curl_cache_addr(struct SessionHandle *data, Curl_addrinfo *addr,
  * Curl_destroy_thread_data() cleans up async resolver data.
  * Complementary of ares_destroy.
  */
+struct Curl_async; /* forward-declaration */
 void Curl_destroy_thread_data(struct Curl_async *async);
 
 #ifndef INADDR_NONE
