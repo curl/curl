@@ -298,6 +298,7 @@ config.h: Makefile.netware
 	@echo $(DL)#define STDC_HEADERS 1$(DL) >> $@
 	@echo $(DL)#define TIME_WITH_SYS_TIME 1$(DL) >> $@
 	@echo $(DL)#define HAVE_STRUCT_IN6_ADDR 1$(DL) >> $@
+	@echo $(DL)#define HAVE_AF_INET6 1$(DL) >> $@
 ifdef NW_WINSOCK
 	@echo $(DL)#define HAVE_CLOSESOCKET 1$(DL) >> $@
 else
