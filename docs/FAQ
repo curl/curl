@@ -1,4 +1,4 @@
-Updated: November 27, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: December 20, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -49,6 +49,7 @@ FAQ
    4.5.3 "403 Forbidden"
    4.5.4 "404 Not Found"
    4.5.5 "405 Method Not Allowed"
+   4.5.6 "301 Moved Permanently"
   4.6 Can you tell me what error code 142 means?
   4.7 How do I keep user names and passwords secret in Curl command lines?
   4.8 I found a bug!
@@ -477,6 +478,17 @@ FAQ
     The method specified in the Request-Line is not allowed for the resource
     identified by the Request-URI. The response MUST include an Allow header
     containing a list of valid methods for the requested resource.
+
+    4.5.6 "301 Moved Permanently"
+ 
+    If you get this return code and an HTML outpt similar to this:
+
+       <H1>Moved Permanently</H1> The document has moved <A
+       HREF="http://same_url_now_with_a_trailing_slash/">here</A>.
+
+    it might be because you request a directory URL but without the trailing
+    slash. Try the same operation again _with_ the trailing URL, or use the
+    -L/--location option to follow the redirection.
 
   4.6. Can you tell me what error code 142 means?
 
