@@ -400,7 +400,11 @@ CURLcode Curl_is_resolved(struct connectdata *conn, bool *done)
   static const struct timeval tv={0,0};
   int count;
   struct SessionHandle *data = conn->data;
-  int nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
+  int nfds;
+
+  FD_ZERO(&read_fds);
+  FD_ZERO(&write_fds);
+  nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
 
   count = select(nfds, &read_fds, &write_fds, NULL,
                  (struct timeval *)&tv);
