@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (16 December)
+- Updated test 506 since it started to fail after the cache prune change
+  yesterday. I also changed it slightly to feature a counter in each debug
+  output for easier tracing.
+
 Daniel (15 December)
 - Old DNS cache entries are now only pruned after curl is done with a request,
   and not in the actual name resolve call.
