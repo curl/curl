@@ -8,6 +8,12 @@
 
 Version XX
 
+Daniel (22 May 2000)
+- Rich Gray struck back with yet some portability reports. Data General DG/UX
+  needed a little fix in lib/ldap.c since it doesn't have RTLD_GLOBAL defined.
+  More fixes are expected as a result of Richies very helpful work.
+
+
 Daniel (21 May 2000)
 - Updated lots of #defines, enums and variable type names in the library. No
   more weird URG or URLTAG prefixes. All types and names should be curl-
