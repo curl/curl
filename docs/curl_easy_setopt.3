@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "22 August 2001" "libcurl 7.8.1" "libcurl Manual"
+.TH curl_easy_setopt 3 "29 August 2001" "libcurl 7.9" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -515,6 +515,12 @@ previously using the same curl handle. (Added in 7.8.1)
 Pass a long. Set if we should verify the Common name from the peer certificate
 in the SSL handshake, set 1 to check existence, 2 to ensure that it matches
 the provided hostname. (Added in 7.8.1)
+.TP
+.B CURLOPT_COOKIEJAR
+Pass a file name as char *, zero terminated. This will make libcurl dump all
+internally known cookies to the specified file when curl_easy_cleanup() is
+called. If no cookies are known, no file will be created. Specify "-" to
+instead have the cookies written to stdout.
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as
