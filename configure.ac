@@ -318,6 +318,7 @@ then
   AC_TRY_LINK([#include <winsock2.h>],
                [gethostbyname("www.dummysite.com");],
                [ dnl worked!
+               ws2="yes"
                AC_MSG_RESULT([yes])
                HAVE_GETHOSTBYNAME="1"],
                [ dnl failed, restore LIBS
@@ -1664,6 +1665,17 @@ AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
   esac ],
        AC_MSG_RESULT(yes)
 )
+
+if test "x$ws2" = "xyes"; then
+
+  dnl If ws2_32 is wanted, make sure it is the _last_ lib in LIBS (makes
+  dnl things work when built with c-ares). But we can't just move it last
+  dnl since then other stuff (SSL) won't build. So we simply append it to the
+  dnl end.
+
+  LIBS="$LIBS -lws2_32"
+
+fi
 
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 
