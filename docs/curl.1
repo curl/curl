@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "14 Feb 2003" "Curl 7.10.3" "Curl Manual"
+.TH curl 1 "23 May 2003" "Curl 7.10.6" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -97,9 +97,11 @@ must be using valid ciphers. Read up on SSL cipher list details on this URL:
 
 If this option is used several times, the last one will override the others.
 .IP "--compressed"
-(HTTP) Request a compressed response using the deflate or gzip
-algorithms and return the uncompressed document.  If this option is used
-and the server sends an unsupported encoding, Curl will report an error.
+(HTTP) Request a compressed response using one of the algorithms libcurl
+supports, and return the uncompressed document.  If this option is used and
+the server sends an unsupported encoding, Curl will report an error.
+
+If this option is used several times, each occurrence will toggle it on/off.
 .IP "--connect-timeout <seconds>"
 Maximum time in seconds that you allow the connection to the server to take.
 This only limits the connection phase, once curl has connected this option is
@@ -176,6 +178,13 @@ want to post a binary file without the strip-newlines feature of the
 
 If this option is used several times, the ones following the first will
 append data.
+.IP "--digest"
+(HTTP) Enables Digest authentication. This is a different authentication
+method than the default Basic method, and prevents the password from being
+sent over the wire in clear text. Use this in combination with the normal
+-u/--user option to set user name and password.  (Option added in curl 7.10.6)
+
+If this option is used several times,  each occurrence will toggle this on/off.
 .IP "--disable-epsv"
 (FTP) Tell curl to disable the use of the EPSV command when doing passive FTP
 downloads. Curl will normally always first attempt to use EPSV before PASV,
@@ -456,8 +465,8 @@ You may use this option as many times as you have number of URLs.
 
 See also the --create-dirs option to create the local directories dynamically.
 .IP "-O/--remote-name"
-Write output to a local file named like the remote file we get. (Only
-the file part of the remote file is used, the path is cut off.)
+Write output to a local file named like the remote file we get. (Only the file
+part of the remote file is used, the path is cut off.)
 
 You may use this option as many times as you have number of URLs.
 .IP "-p/--proxytunnel"
@@ -612,6 +621,9 @@ curl 7.9.7)
 Specify user and password to use when fetching. Read the MANUAL for detailed
 examples of how to use this. If no password is specified, curl will ask for it
 interactively.
+
+You can also use the --digest option to enable Digest authentication when
+communicating with HTTP 1.1 servers.
 
 If this option is used several times, the last one will be used.
 .IP "-U/--proxy-user <user:password>"
