@@ -758,7 +758,18 @@ AC_ARG_ENABLE(debug,
        CFLAGS="$CFLAGS -W -Wall -Wwrite-strings -pedantic -Wundef -Wpointer-arith -Wcast-align -Wnested-externs"
     fi
     dnl strip off optimizer flags
-    CFLAGS=`echo $CFLAGS | sed -e 's/-O[0-9 ]//g'`
+    NEWFLAGS=""
+    for flag in $CFLAGS; do
+      case "$flag" in
+      -O*)
+        dnl echo "cut off $flag"
+        ;;
+      *)
+        NEWFLAGS="$NEWFLAGS $flag"
+        ;;
+      esac
+    done
+    CFLAGS=$NEWFLAGS
        ;;
   esac ],
        AC_MSG_RESULT(no)
@@ -775,6 +786,7 @@ AC_CONFIG_FILES([Makefile \
            tests/Makefile \
            tests/data/Makefile \
            tests/server/Makefile \
+           tests/libtest/Makefile \
 	   packages/Makefile \
 	   packages/Win32/Makefile \
 	   packages/Win32/cygwin/Makefile \
