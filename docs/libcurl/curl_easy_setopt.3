@@ -1,7 +1,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "18 Sep 2002" "libcurl 7.10" "libcurl Manual"
+.TH curl_easy_setopt 3 "13 Nov 2002" "libcurl 7.10" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -22,7 +22,8 @@ curl_easy_setopt() calls in the setup phase.
 \fBNOTE:\fP strings passed to libcurl as 'char *' arguments, will not be
 copied by the library. Instead you should keep them available until libcurl no
 longer needs them. Failing to do so will cause very odd behavior or even
-crashes.
+crashes. libcurl will them until you call curl_easy_cleanup() or you set the
+same option again to use a different pointer.
 
 \fBNOTE2:\fP options set with this function call are valid for the forthcoming
 data transfers that are performed when you invoke \fIcurl_easy_perform\fP.

@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_cleanup 3 "4 March 2002" "libcurl 7.7" "libcurl Manual"
+.TH curl_easy_cleanup 3 "13 Nov 2002" "libcurl 7.7" "libcurl Manual"
 .SH NAME
 curl_easy_cleanup - End a libcurl easy session
 .SH SYNOPSIS
@@ -18,6 +18,9 @@ opposite of the \fIcurl_easy_init\fP function and must be called with the same
 This will effectively close all connections this handle has used and possibly
 has kept open until now. Don't call this function if you intend to transfer
 more files.
+
+When you've called this, you can safely remove all the strings you've
+previously told libcurl to use, as it won't use them anymore now.
 .SH RETURN VALUE
 None
 .SH "SEE ALSO"
