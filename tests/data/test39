@@ -41,7 +41,7 @@ User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 z
 Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
-Content-Length: 598
+Content-Length: 594
 Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
 
@@ -63,7 +63,7 @@ bar
 foo
 
 ------------------------------24e78000bd32
-Content-Disposition: form-data; name="file2"; filename="log/test39.txt"
+Content-Disposition: form-data; name="file2"; filename="test39.txt"
 Content-Type: text/plain
 
 foo bar

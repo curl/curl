@@ -37,12 +37,12 @@ User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6
 Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
-Content-Length: 227
+Content-Length: 223
 Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------b0b3d6d23991
 
 ------------------------------b0b3d6d23991
-Content-Disposition: form-data; name="name"; filename="log/fie ld 166"
+Content-Disposition: form-data; name="name"; filename="fie ld 166"
 Content-Type: application/octet-stream
 
 data inside the file

@@ -5,7 +5,7 @@ To get fixed in 7.12.2 (planned release: mid October 2004)
 
 40 - fixed
 
-41 - Fedor Karpelevitch's formpost path basename patch
+41 - fixed
 
 42 - Bertrand Demiddelaer's CURLOPT_VERBOSE may read free()ed data patch
 

@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel (1 October 2004)
+- Based on Fedor Karpelevitch's formpost path basename patch, file parts in
+  formposts no longer include the path part. If you _really_ want them, you
+  must provide your preferred full file name with CURLFORM_FILENAME.
+
+  Added detection for libgen.h and basename() to configure. My custom
+  basename() replacement function for systems without it, might be a bit too
+  naive...
+
+  Updated 6 test cases to make them work with the stripped paths.
+
 Daniel (30 September 2004)
 - Larry Campbell added CURLINFO_OS_ERRNO to curl_easy_getinfo() that allows an
   app to retrieve the errno variable after a (connect) failure. It will make
