@@ -535,6 +535,9 @@ CURLcode ftp_done(struct connectdata *conn)
       return CURLE_FTP_COULDNT_RETR_FILE;
     }
   }
+#ifdef KRB4
+  sec_fflush_fd(conn, data->secondarysocket);
+#endif
   /* shut down the socket to inform the server we're done */
   sclose(data->secondarysocket);
   data->secondarysocket = -1;
