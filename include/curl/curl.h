@@ -418,7 +418,7 @@ char *curl_GetEnv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "6.5"
+#define LIBCURL_VERSION "6.5.2"
 
 /* linked-list structure for QUOTE */
 struct curl_slist {

@@ -6,6 +6,14 @@
 
                                History of Changes
 
+Version 6.5.2
+
+Daniel (21 March 2000):
+- Paul Harrington <paul@pizza.org> quickly pointed out to me that 6.5.1
+  crashes hard. I upload 6.5.2 now as quickly as possible! The problem was
+  the -D adjustments in src/main.c, see also a separate 6.5.1-patch on the
+  web site.
+
 Version 6.5.1
 
 Daniel (20 March 2000):
