@@ -936,9 +936,11 @@ ConnectionExists(struct UrlData *data,
           data->connects[i]=NULL; /* nothing here */
           continue; /* try another one now */
         }
+
+        *usethis = check;
+        return TRUE; /* yes, we found one to use! */
+        
       }
-      *usethis = check;
-      return TRUE; /* yes, we found one to use! */
     }
     else { /* The requested needle connection is using a proxy,
               is the checked one using the same? */
