@@ -45,6 +45,11 @@
     file descriptors simultaneous easily.
   
 */
+#if defined(_WIN32) && !defined(WIN32)
+/* Chris Lewis mentioned that he doesn't get WIN32 defined, only _WIN32
+   so we make this like adjustment to catch this. */
+#define WIN32 1
+#endif
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>
