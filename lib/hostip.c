@@ -348,8 +348,7 @@ int Curl_resolv(struct connectdata *conn,
           rc = 1; /* no info yet */
       }
     }
-    else
-    {
+    else {
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
@@ -359,15 +358,15 @@ int Curl_resolv(struct connectdata *conn,
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
-      if(!dns) {
+      if(!dns)
         /* returned failure, bail out nicely */
         Curl_freeaddrinfo(addr);
-      }
       else
         rc = 0;
     }
   }
-
+  else
+    rc = 0;
 
   *entry = dns;
 
