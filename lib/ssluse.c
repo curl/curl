@@ -437,7 +437,11 @@ void Curl_SSL_cleanup(void)
     ENGINE_cleanup();
 #endif
 
+#ifdef HAVE_CRYPTO_CLEANUP_ALL_EX_DATA
+    /* this function was not present in 0.9.6b, but was added sometimes
+       later */
     CRYPTO_cleanup_all_ex_data();
+#endif
 
     init_ssl=0; /* not inited any more */
   }
