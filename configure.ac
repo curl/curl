@@ -281,7 +281,7 @@ dnl At least one system has been identified to require BOTH nsl and socket
 dnl libs at the same time to link properly.
 if test "$HAVE_GETHOSTBYNAME" != "1"
 then
-  AC_MSG_CHECKING([trying gethostbyname with both nsl and socket libs])
+  AC_MSG_CHECKING([for gethostbyname with both nsl and socket libs])
   my_ac_save_LIBS=$LIBS
   LIBS="-lnsl -lsocket $LIBS"
   AC_TRY_LINK( ,
