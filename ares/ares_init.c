@@ -437,11 +437,11 @@ DhcpNameServer
       return (errno == ENOENT) ? ARES_SUCCESS : ARES_EFILE;
     while ((status = ares__read_line(fp, &line, &linesize)) == ARES_SUCCESS)
     {
-      if ((p = try_config(line, "domain")) && channel->ndomains == -1)
+      if ((p = try_config(line, "domain")))
         status = config_domain(channel, p);
       else if ((p = try_config(line, "lookup")) && !channel->lookups)
         status = config_lookup(channel, p);
-      else if ((p = try_config(line, "search")) && channel->ndomains == -1)
+      else if ((p = try_config(line, "search")))
         status = set_search(channel, p);
       else if ((p = try_config(line, "nameserver")) && channel->nservers == -1)
         status = config_nameserver(&servers, &nservers, p);
@@ -701,6 +701,14 @@ static int set_search(ares_channel channel, const char *str)
 {
   int n;
   const char *p, *q;
+
+  if(channel->ndomains != -1) {
+    /* if we already have some domains present, free them first */
+    for(n=0; n < channel->ndomains; n++)
+      free(channel->domains[n]);
+    free(channel->domains);
+    channel->ndomains = -1;
+  }
 
   /* Count the domains given. */
   n = 0;

@@ -1,5 +1,13 @@
   Changelog for the c-ares project
 
+* May 11
+- Nico Stappenbelt reported that when processing domain and search lines in
+  the resolv.conf file, the first entry encountered is processed and used as
+  the search list. According to the manual pages for both Linux, Solaris and
+  Tru64, the last entry of either a domain or a search field is used.
+
+  This is now adjusted in the code
+
 Version 1.2.0 (April 13, 2004)
 
 * April 2, 2004
