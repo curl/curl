@@ -13,22 +13,17 @@ To get fixed in 7.11.1 (planned release in March 2004)
 
 10. Anton Fedorov's "dumpcert" patch (only mailed to me privately) UNASSIGNED
 
-12. PUT and POST with multiple auth bits do wrong. #862835 Patch posted to
-   list. (Awaiting feedback)
+12. PUT and POST with multiple auth bits or simply with NTLM or Digest do
+    wrong. #862835 Patch posted to list. (Awaiting feedback)
 
 14. Evaluate/apply Gertjan van Wingerde's SSL patches, UNASSIGNED
 
-19. Resolve Giuseppe Attardi's "elusive cache bug" (work required).
-    UNASSIGNED
+19. Resolve Giuseppe Attardi's "elusive cache bug" FIXED?
 
 21. Send QUIT before closing an FTP connection. Joe Halpin works on this.
 
 23. Peter Sylvester's "Most Significant Common Name" patch. Feedback welcome.
     At least the UTF8 conversion and comparison should be done. Patch?
-    UNASSIGNED
-
-24. When using ares, create the ares channel in the curl_easy_init function
-    and re-use the same channel during the life time of the curl handle.
     UNASSIGNED
 
 25. Curl_strtoll() is not part of the libcurl API, yet 'curl' needs a function
