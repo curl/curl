@@ -291,7 +291,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             k->hbuflen += nread;
             if (!k->headerline && (k->hbuflen>5)) {
               /* make a first check that this looks like a HTTP header */
-              if(!checkprefix(data->state.headerbuff, "HTTP/")) {
+              if(!checkprefix("HTTP/", data->state.headerbuff)) {
                 /* this is not the beginning of a HTTP first header line */
                 k->header = FALSE;
                 k->badheader = HEADER_ALLBAD;
@@ -345,7 +345,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           if(!k->headerline) {
             /* the first read header */
             if((k->hbuflen>5) &&
-               !checkprefix(data->state.headerbuff, "HTTP/")) {
+               !checkprefix("HTTP/", data->state.headerbuff)) {
               /* this is not the beginning of a HTTP first header line */
               k->header = FALSE;
               k->badheader = HEADER_PARTHEADER;
