@@ -1634,7 +1634,7 @@ CURLcode ftp_perform(struct connectdata *conn)
 
           passed += actuallyread;
           if(actuallyread != readthisamountnow) {
-            failf(data, "Could only read %d bytes from the input\n", passed);
+            failf(data, "Could only read %d bytes from the input", passed);
             return CURLE_FTP_COULDNT_USE_REST;
           }
         }

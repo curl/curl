@@ -201,7 +201,7 @@ int cert_stuff(struct connectdata *conn,
     if (SSL_CTX_use_certificate_file(conn->ssl.ctx,
 				     cert_file,
 				     SSL_FILETYPE_PEM) != 1) {
-      failf(data, "unable to set certificate file (wrong password?)\n");
+      failf(data, "unable to set certificate file (wrong password?)");
       return(0);
     }
     if (key_file == NULL)
@@ -210,7 +210,7 @@ int cert_stuff(struct connectdata *conn,
     if (SSL_CTX_use_PrivateKey_file(conn->ssl.ctx,
 				    key_file,
 				    SSL_FILETYPE_PEM) != 1) {
-      failf(data, "unable to set public key file\n");
+      failf(data, "unable to set public key file");
       return(0);
     }
     
@@ -229,7 +229,7 @@ int cert_stuff(struct connectdata *conn,
     /* Now we know that a key and cert have been set against
      * the SSL context */
     if (!SSL_CTX_check_private_key(conn->ssl.ctx)) {
-      failf(data, "Private key does not match the certificate public key\n");
+      failf(data, "Private key does not match the certificate public key");
       return(0);
     }
 #ifndef HAVE_USERDATA_IN_PWD_CALLBACK    
@@ -578,7 +578,7 @@ Curl_SSLConnect(struct connectdata *conn)
   if(data->set.ssl.cipher_list) {
     if (!SSL_CTX_set_cipher_list(conn->ssl.ctx,
                                  data->set.ssl.cipher_list)) {
-      failf(data, "failed setting cipher list\n");
+      failf(data, "failed setting cipher list");
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -591,7 +591,7 @@ Curl_SSLConnect(struct connectdata *conn)
     if (!SSL_CTX_load_verify_locations(conn->ssl.ctx,
                                        data->set.ssl.CAfile,
                                        data->set.ssl.CApath)) {
-      failf(data,"error setting cerficate verify locations\n");
+      failf(data,"error setting cerficate verify locations");
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
@@ -713,7 +713,7 @@ Curl_SSLConnect(struct connectdata *conn)
   if(data->set.ssl.verifypeer) {
     data->set.ssl.certverifyresult=SSL_get_verify_result(conn->ssl.handle);
     if (data->set.ssl.certverifyresult != X509_V_OK) {
-      failf(data, "SSL certificate verify result: %d\n",
+      failf(data, "SSL certificate verify result: %d",
             data->set.ssl.certverifyresult);
       retcode = CURLE_SSL_PEER_CERTIFICATE;
     }

@@ -121,7 +121,7 @@ CURLcode Curl_dict(struct connectdata *conn)
     }
       
     if ((word == NULL) || (*word == (char)0)) {
-      failf(data, "lookup word is missing\n");
+      failf(data, "lookup word is missing");
     }
     if ((database == NULL) || (*database == (char)0)) {
       database = (char *)"!";
@@ -174,7 +174,7 @@ CURLcode Curl_dict(struct connectdata *conn)
     }
       
     if ((word == NULL) || (*word == (char)0)) {
-      failf(data, "lookup word is missing\n");
+      failf(data, "lookup word is missing");
     }
     if ((database == NULL) || (*database == (char)0)) {
       database = (char *)"!";

@@ -374,7 +374,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   memset(schedule, 0, sizeof(schedule));
   memset(passwd, 0, sizeof(passwd));
   if(Curl_base64_encode(tktcopy.dat, tktcopy.length, &p) < 0) {
-    failf(conn->data, "Out of memory base64-encoding.\n");
+    failf(conn->data, "Out of memory base64-encoding.");
     Curl_set_command_prot(conn, save);
     return;
   }

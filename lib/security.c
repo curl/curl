@@ -362,11 +362,11 @@ Curl_sec_vfprintf(struct connectdata *conn, FILE *f, const char *fmt, va_list ap
                                conn);
     free(buf);
     if(len < 0) {
-	failf(conn->data, "Failed to encode command.\n");
+	failf(conn->data, "Failed to encode command.");
 	return -1;
     }
     if(Curl_base64_encode(enc, len, &buf) < 0){
-      failf(conn->data, "Out of memory base64-encoding.\n");
+      failf(conn->data, "Out of memory base64-encoding.");
       return -1;
     }
     if(conn->command_prot == prot_safe)
@@ -421,7 +421,7 @@ sec_prot_internal(struct connectdata *conn, int level)
       return -1;
 
     if(conn->data->state.buffer[0] != '2'){
-      failf(conn->data, "Failed to set protection buffer size.\n");
+      failf(conn->data, "Failed to set protection buffer size.");
       return -1;
     }
     conn->buffer_size = s;
@@ -441,7 +441,7 @@ sec_prot_internal(struct connectdata *conn, int level)
     return -1;
 
   if(conn->data->state.buffer[0] != '2'){
-    failf(conn->data, "Failed to set protection level.\n");
+    failf(conn->data, "Failed to set protection level.");
     return -1;
   }
     

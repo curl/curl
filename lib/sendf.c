@@ -137,8 +137,9 @@ void Curl_infof(struct SessionHandle *data, const char *fmt, ...)
   }
 }
 
-/* Curl_failf() is for messages stating why we failed, the LAST one will be
-   returned for the user (if requested) */
+/* Curl_failf() is for messages stating why we failed.
+ * The message SHALL NOT include any LF or CR.
+ */
 
 void Curl_failf(struct SessionHandle *data, const char *fmt, ...)
 {
