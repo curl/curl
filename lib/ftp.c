@@ -2820,7 +2820,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   if(data->set.upload) {
     if((-1 != data->set.infilesize) &&
        (data->set.infilesize != *ftp->bytecountp) &&
-       !data->set.crlf) {
+       !data->set.crlf &&
+       !ftp->no_transfer)) {
       failf(data, "Uploaded unaligned file size (%" FORMAT_OFF_T
             " out of %" FORMAT_OFF_T " bytes)",
             *ftp->bytecountp, data->set.infilesize);
