@@ -166,3 +166,6 @@
 
 /* Define if you have the closesocket function.  */
 #define HAVE_CLOSESOCKET 1
+
+/* Define if you have the setvbuf function.  */
+#define HAVE_SETVBUF 1
