@@ -290,6 +290,13 @@ static int get_request(int sock, int *part)
 
       sprintf(logbuf, "Found test number %d in path", test_no);
       logmsg(logbuf);
+
+      if(strstr(reqbuf, "Authorization: Digest")) {
+        /* If the client is passing this Digest-header, we set the part number
+           to 1000. Not only to spice up the complexity of this, but to make
+           Digest stuff to work in the test suite. */
+        *part = 1000;
+      }
     }
     else {
       if(sscanf(reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
