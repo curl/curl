@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (7 May 2004)
+- Made the lib/curllib.dsp file get generated automaticly when a distribution
+  package is made, with the msvcproj.* files as templates and all
+  win32-sources added. I think this can be made to work better than the always
+  lagging-behind previous approach. I'm not sure this builds a working project
+  file right now though!
+
 Daniel (6 May 2004)
 - Michael Benedict brought a fix that fills in the errorbuffer properly when
   ares fails to resolve a name for a case not previously dealt with like this.
