@@ -6,6 +6,33 @@
 
                                   Changelog
 
+Daniel (16 Mar)
+- Juan F. Codagnone reported that the fix from March 2nd was incomplete.
+
+- Added code to the configure.in to check for select() argument types. I've
+  not made any code use the results just yet though.
+
+Daniel (15 Mar)
+- Gisle Vanem provided two patches to build better on Windows.
+
+- Adjusted the test suite code to better make sure that the server(s) required
+  for a specific test is properly started before the test case is attempted.
+  Many tests now run a lot faster than before.
+
+Daniel (14 Mar)
+- Another configure.in adjustment made the configure detect functions properly
+  on HPUX now.
+
+Daniel (13 Mar)
+- Philippe Raoult fixed pre4-compile quirks for FreeBSD.
+
+Version 7.10.4-pre4 (13 Mar 2003)
+
+Daniel (13 Mar)
+- Added a backup-check for functions that aren't found by AC_CHECK_FUNCS()
+  as I believe some checks on HPUX need this. At least some of the info given
+  to us by Rick Jones seemed to indicate this.
+
 Daniel (12 Mar)
 - Thomas Tonino found out that if you used the curl tool to do PUT operations
   as in 'curl www.foo.com/dir/ -T file' and the file name included for example
