@@ -6,6 +6,12 @@
 
                                History of Changes
 
+Daniel (10 May 2002)
+- Kevin Roth adjusted the --trace-ascii output slightly.
+
+- Paul Harrington found out that src/writeout.c needed an additional header
+  file included for AIX builds
+
 Version 7.9.7-pre2
 
 Daniel (7 May 2002)
