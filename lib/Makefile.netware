@@ -150,7 +150,7 @@ ifdef XDCOPT
 	XDCDATA = $(OBJDIR)/$(TARGET).xdc
 endif
 
-ifeq ($(OSTYPE),linux)
+ifeq ($(findstring linux,$(OSTYPE)),linux)
 DL	= '
 #-include $(NDKBASE)/nlmconv/ncpfs.inc
 endif
