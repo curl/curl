@@ -129,8 +129,8 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
 
   if(logfile && source)
     fprintf(logfile, "MEM %s:%d malloc(%zd) = %p\n",
-            source, line, wantedsize, mem->mem);
-  return mem->mem;
+            source, line, wantedsize, mem ? mem->mem : 0);
+  return (mem ? mem->mem : NULL);
 }
 
 void *curl_docalloc(size_t wanted_elements, size_t wanted_size,
@@ -155,8 +155,8 @@ void *curl_docalloc(size_t wanted_elements, size_t wanted_size,
 
   if(logfile && source)
     fprintf(logfile, "MEM %s:%d calloc(%u,%u) = %p\n",
-            source, line, wanted_elements, wanted_size, mem->mem);
-  return mem->mem;
+            source, line, wanted_elements, wanted_size, mem ? mem->mem : 0);
+  return (mem ? mem->mem : NULL);
 }
 
 char *curl_dostrdup(const char *str, int line, const char *source)
@@ -172,6 +172,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   len=strlen(str)+1;
 
   mem=curl_domalloc(len, 0, NULL); /* NULL prevents logging */
+  if (mem)
   memcpy(mem, str, len);
 
   if(logfile)
