@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel (10 March 2004)
+- Jeff Lawson fixed the SSL connection to deal with received signals during the
+  connect.
+
+- Changed the OS string for win32 to become "i386-pc-win32".
+
+Daniel (9 March 2004)
+- Changed the internals to use curl_socket_t for socket variable type. This
+  should enable us to build with less warnings on Windows, where SOCKET is
+  used which is an unsigned int, while most other platforms use a mere int.
+
+- Modified lib/config-win32.h to build fine on MSVC again.
+
 Version 7.11.1-pre1 (8 March 2004)
 
 Daniel (8 March 2004)
