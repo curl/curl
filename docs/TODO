@@ -53,6 +53,10 @@ TODO
  * Make the built-in progress meter use its own dedicated output stream, and
    make it possible to set it. Use stderr by default.
 
+ * CURLOPT_MAXFILESIZE. Prevent downloads that are larger than the specified
+   size. CURLE_FILESIZE_EXCEEDED would then be returned. Gautam Mani
+   requested.
+
  DOCUMENTATION
 
 
