@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "26 September 2000" "Curl 7.3" "libcurl Manual"
+.TH curl_easy_setopt 3 "30 October 2000" "Curl 7.4.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -352,6 +352,39 @@ Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the progress callback set with
 .I CURLOPT_PROGRESSFUNCTION
  .
+.TP
+.B CURLOPT_SSL_VERIFYPEER
+Pass a long that is set to a non-zero value to make curl verify the peer's
+certificate. The certificate to verify against must be specified with the
+CURLOPT_CAINFO option. (Added in 7.4.2)
+.TP
+.B CURLOPT_CAINFO
+Pass a char * to a zero terminated file naming holding the certificate to
+verify the peer with. This only makes sense when used in combination with the
+CURLOPT_SSL_VERIFYPEER option. (Added in 7.4.2)
+.TP
+.B CURLOPT_PASSWDFUNCTION
+Pass a pointer to a curl_passwd_callback function that will then be called
+instead of the internal one if libcurl requests a password. The function must
+match this prototype:
+.BI "int my_getpass(void *client, char *prompt, char* buffer, int buflen );"
+If set to NULL, it equals to making the function always fail. If the function
+returns a non-zero value, it will abort the operation and an error
+(CURLE_BAD_PASSWORD_ENTERED) will be returned.
+.I client
+is a generic pointer, see CURLOPT_PASSWDDATA.
+.I prompt
+is a zero-terminated string that is text that prefixes the input request.
+.I buffer
+is a pointer to data where the entered password should be stored and
+.I buflen
+is the maximum number of bytes that may be written in the buffer.
+(Added in 7.4.2)
+.TP
+.B CURLOPT_PASSWDDATA
+Pass a void * to whatever data you want. The passed pointer will be the first
+argument sent to the specifed CURLOPT_PASSWDFUNCTION function. (Added in
+7.4.2)
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as
