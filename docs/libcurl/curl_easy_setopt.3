@@ -478,6 +478,13 @@ is called. If no cookies are known, no file will be created. Specify "-" to
 instead have the cookies written to stdout. Using this option also enables
 cookies for this session, so if you for example follow a location it will make
 matching cookies get sent accordingly. (Added in 7.9)
+
+.B NOTE
+If the cookie jar file can't be created or written to (when the
+curl_easy_cleanup() is called), libcurl will not and cannot report an error
+for this. Using CURLOPT_VERBOSE or CURLOPT_DEBUGFUNCTION will get a warning to
+display, but that is the only visible feedback you get about this possibly
+lethal situation.
 .TP
 .B CURLOPT_TIMECONDITION
 Pass a long as parameter. This defines how the CURLOPT_TIMEVALUE time value is

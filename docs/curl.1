@@ -110,6 +110,12 @@ no file will be written. The file will be written using the Netscape cookie
 file format. If you set the file name to a single dash, "-", the cookies will
 be written to stdout. (Option added in curl 7.9)
 
+.B NOTE
+If the cookie jar can't be created or written to, the whole curl operation
+won't fail or even report an error clearly. Using -v will get a warning
+displayed, but that is the only visible feedback you get about this possibly
+lethal situation.
+
 If this option is used several times, the last specfied file name will be
 used.
 .IP "-C/--continue-at <offset>"
