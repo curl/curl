@@ -349,15 +349,17 @@ dnl Check if the operating system allows programs to write to their own argv[]
 dnl **********************************************************************
 
 AC_MSG_CHECKING([if argv can be written to])
-AC_TRY_RUN([
+AC_RUN_IFELSE([[
 int main(int argc, char ** argv) {
 	argv[0][0] = ' ';
 	return (argv[0][0] == ' ')?0:1;
 }
-	],
+	]],
 	AC_DEFINE(HAVE_WRITABLE_ARGV, 1, [Define this symbol if your OS supports changing the contents of argv])
 	AC_MSG_RESULT(yes),
-	AC_MSG_RESULT(no)
+	AC_MSG_RESULT(no),
+        AC_MSG_RESULT(no)
+        AC_MSG_WARN([the previous check could not be made default was used])
 )
 
 dnl **********************************************************************
