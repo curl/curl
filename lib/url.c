@@ -106,6 +106,7 @@
 #include "http.h"
 #include "file.h"
 #include "ldap.h"
+#include "url.h"
 
 #include <curl/types.h>
 
@@ -142,10 +143,8 @@ RETSIGTYPE alarmfunc(int signal)
 }
 #endif
 
-CURLcode Curl_close(CURL *curl)
+CURLcode Curl_close(struct UrlData *data)
 {
-  struct UrlData *data=(struct UrlData *)curl;
-  
   /* Loop through all open connections and kill them one by one */
   while(-1 != ConnectionKillOne(data));
 
@@ -197,7 +196,7 @@ int my_getpass(void *clientp, const char *prompt, char* buffer, int buflen )
 }
 
 
-CURLcode Curl_open(CURL **curl)
+CURLcode Curl_open(struct UrlData **curl)
 {
   /* We don't yet support specifying the URL at this point */
   struct UrlData *data;
@@ -283,9 +282,8 @@ CURLcode Curl_open(CURL **curl)
   return CURLE_OUT_OF_MEMORY;
 }
 
-CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
+CURLcode Curl_setopt(struct UrlData *data, CURLoption option, ...)
 {
-  struct UrlData *data = curl;
   va_list param;
   char *cookiefile;
 
