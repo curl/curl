@@ -6,6 +6,32 @@
 
                                History of Changes
 
+Daniel (17 January 2002)
+- docs/libcurl-the-guide is a new tutorial for our libcurl programming
+  friends.
+
+- Richard Archer brought back the ability to compile and build with OpenSSL
+  versions before 0.9.5.
+  [http://sourceforge.net/tracker/?func=detail&atid=100976&aid=504163&group_id=976]
+
+- The DNS cache code didn't take the port number into account, which made it
+  work rather bad on IPv6-enabled hosts (especially when doing passive
+  FTP). Sterling fixed it.
+
+Daniel (16 January 2002)
+- Georg Horn pointed out a timed out transfer without error text. I found it
+  and corrected it.
+
+- SSL writes didn't work, they return an uninitialized value that caused
+  havoc all over. Georg Horn experienced this.
+
+- Kevin Roth patched the curl_version() function to use the proper OpenSSL
+  function for version information. This way, curl will report the version of
+  the SSL library actually running right now, not the one that had its headers
+  installed when libcurl was built. Mainly intersting when running with shared
+  OpenSSL libraries.  
+
+Version 7.9.3-pre2
 
 Daniel (16 January 2002)
 - Mofied the main transfer loop and related stuff to deal with non-blocking
