@@ -569,8 +569,7 @@ else
     dnl This is only reasonable to do if crypto actually is there: check for
     dnl SSL libs NOTE: it is important to do this AFTER the crypto lib
 
-    LIBS="$LIBS -lcrypto"
-
+    AC_CHECK_LIB(crypto, CRYPTO_add_lock)
     AC_CHECK_LIB(ssl, SSL_connect)
 
     if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
