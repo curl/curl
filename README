@@ -17,7 +17,9 @@ README
 
   You find answers to the most frequent questions we get in the FAQ document.
 
-  Study the COPYING file for distribution terms and similar.
+  Study the COPYING file for distribution terms and similar. If you distribute
+  curl binaries or other binaries that involve libcurl, you might enjoy the
+  LICENSE-MIXING document.
 
 CONTACT
 
