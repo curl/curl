@@ -1,4 +1,6 @@
 #
+# $Id$
+#
 #  Adapted for djgpp2 / Watt-32 / DOS by
 #  Gisle Vanem <giva@bgnett.no>
 #
@@ -6,22 +8,28 @@
 DEPEND_PREREQ = config.h hugehelp.c
 
 include ../packages/DOS/common.dj
+include Makefile.inc
 
 ifeq ($(USE_SSL),1)
   EX_LIBS += $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
 endif
 
+ifeq ($(USE_ARES),1)
+  EX_LIBS += $(ARES_ROOT)/libcares.a
+endif
+
 ifeq ($(USE_ZLIB),1)
   EX_LIBS += $(ZLIB_ROOT)/libz.a
+  CFLAGS  += -DUSE_MANUAL
 endif
 
 EX_LIBS += $(WATT32_ROOT)/lib/libwatt.a
 
-CFLAGS += -DUSE_MANUAL -DUSE_ENVIRONMENT
+CFLAGS += -DUSE_ENVIRONMENT
 
-PROGRAM = ../curl.exe
-SOURCES = getpass.c homedir.c hugehelp.c main.c urlglob.c writeenv.c writeout.c
-OBJECTS = $(addprefix $(OBJ_DIR)/, $(SOURCES:.c=.o))
+PROGRAM  = curl.exe
+CSOURCES = $(CURL_SOURCES)
+OBJECTS  = $(addprefix $(OBJ_DIR)/, $(CURL_SOURCES:.c=.o))
 
 all: $(OBJ_DIR) config.h $(PROGRAM)
 
