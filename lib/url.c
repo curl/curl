@@ -586,7 +586,7 @@ CURLcode curl_write(CURLconnect *c_conn, char *buf, size_t amount,
 #endif
 #ifdef KRB4
     if(conn->sec_complete)
-      bytes_written = sec_write(conn, conn->sockfd, buf, amount);
+      bytes_written = sec_write(conn, conn->writesockfd, buf, amount);
     else
 #endif
       bytes_written = swrite(conn->writesockfd, buf, amount);
