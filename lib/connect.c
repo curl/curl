@@ -251,14 +251,23 @@ static CURLcode bindlocal(struct connectdata *conn,
         Curl_resolv_unlock(h);
         /* we don't need it anymore after this function has returned */
 
-        memset((char *)&sa, 0, sizeof(sa));
 #ifdef ENABLE_IPV6
-        memcpy((char *)&sa.sin_addr, addr->ai_addr, addr->ai_addrlen);        
-        sa.sin_family = addr->ai_family;
+        (void)sa; /* prevent compiler warning */
+        if( bind(sockfd, addr->ai_addr, addr->ai_addrlen) >= 0) {
+          /* we succeeded to bind */
+          struct sockaddr_in6 add;
+	
+          size = sizeof(add);
+          if(getsockname(sockfd, (struct sockaddr *) &add,
+                         (socklen_t *)&size)<0) {
+            failf(data, "getsockname() failed");
+            return CURLE_HTTP_PORT_FAILED;
+          }
+        }
 #else
+        memset((char *)&sa, 0, sizeof(sa));
         memcpy((char *)&sa.sin_addr, addr->h_addr, addr->h_length);
         sa.sin_family = AF_INET;
-#endif
         sa.sin_addr.s_addr = in;
         sa.sin_port = 0; /* get any port */
 	
@@ -273,6 +282,7 @@ static CURLcode bindlocal(struct connectdata *conn,
             return CURLE_HTTP_PORT_FAILED;
           }
         }
+#endif
         else {
           switch(errno) {
           case EBADF:
