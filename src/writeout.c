@@ -80,7 +80,7 @@ static struct variable replacements[]={
   {"speed_download", VAR_SPEED_DOWNLOAD},
   {"speed_upload", VAR_SPEED_UPLOAD},
   {"content_type", VAR_CONTENT_TYPE},
-  {NULL, 0}
+  {NULL, VAR_NONE}
 };
 
 void ourWriteOut(CURL *curl, char *writeinfo)
