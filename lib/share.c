@@ -186,7 +186,8 @@ Curl_share_lock(struct SessionHandle *data, curl_lock_data type,
     return CURLSHE_INVALID;
 
   if(share->specifier & (1<<type)) {
-    share->lockfunc(data, type, accesstype, share->clientdata);
+    if(share->lockfunc) /* only call this if set! */
+      share->lockfunc(data, type, accesstype, share->clientdata);
   }
   /* else if we don't share this, pretend successful lock */
 
@@ -202,7 +203,8 @@ Curl_share_unlock(struct SessionHandle *data, curl_lock_data type)
     return CURLSHE_INVALID;
 
   if(share->specifier & (1<<type)) {
-    share->unlockfunc (data, type, share->clientdata);
+    if(share->unlockfunc) /* only call this if set! */
+      share->unlockfunc (data, type, share->clientdata);
   }
 
   return CURLSHE_OK;
