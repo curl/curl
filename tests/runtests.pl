@@ -748,6 +748,10 @@ sub checkcurl {
         die "couldn't run '$CURL'"
     }
 
+    if(!$curl_debug && $torture) {
+        die "can't run torture tests since curl was not build with debug";
+    }
+
     my $hostname=`hostname`;
     my $hosttype=`uname -a`;
 
