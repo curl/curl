@@ -97,7 +97,9 @@ void Curl_pgrsDone(struct connectdata *conn)
   if(!(data->progress.flags & PGRS_HIDE)) {
     data->progress.lastshow=0;
     Curl_pgrsUpdate(conn); /* the final (forced) update */
-    fprintf(data->err, "\n");
+    if(!data->progress.callback)
+      /* only output if we don't use progress callback */
+      fprintf(data->err, "\n");
   }
 }
 
