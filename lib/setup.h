@@ -35,9 +35,8 @@
 #define CURL_DISABLE_GOPHER
 #endif
 
-#if !defined(WIN32) && defined(_WIN32)
-/* This _might_ be a good Borland fix. Please report whether this works or
-   not! */
+#if !defined(WIN32) && defined(__WIN32__)
+/* This should be a good Borland fix. Alexander J. Oss told us! */
 #define WIN32
 #endif
 
