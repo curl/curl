@@ -87,6 +87,8 @@
 #include "memdebug.h"
 #endif
 
+static bool verifyconnect(int sockfd);
+
 int Curl_ourerrno(void)
 {
 #ifdef WIN32
@@ -178,7 +180,7 @@ int waitconnect(int sockfd, /* socket */
   /* Call this function once now, and ignore the results. We do this to
      "clear" the error state on the socket so that we can later read it
      reliably. This is reported necessary on the MPE/iX operating system. */
-  verifyconnect();
+  verifyconnect(sockfd);
 
   /* now select() until we get connect or timeout */
   FD_ZERO(&fd);
