@@ -77,7 +77,7 @@ while test $# -gt 0; do
        	;;
 
     --libs)
-       	echo -L@libdir@ @LDFLAGS@ @LIBS@
+       	echo -L@libdir@ -lcurl @LDFLAGS@ @LIBS@
        	;;
 
     *)
