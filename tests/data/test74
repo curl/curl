@@ -9,7 +9,6 @@ Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 Accept-Ranges: bytes
 Content-Length: 6
-Connection: close
 Content-Type: text/html
 Funny-head: yesyes
 
@@ -19,6 +18,7 @@ Funny-head: yesyes
 HTTP/1.0 200 OK
 Content-Type: text/html
 Funny-head: swsclose
+Connection: close
 
 crap data
 </data1>
@@ -31,10 +31,10 @@ crap data
 http
 </server>
  <name>
-HTTP, urlglob retrieval and -o #[num] usage
+HTTP, urlglob {}-retrieval and -o #[num] usage
  </name>
  <command option=no-output>
-http://%HOSTIP:%HOSTPORT/{74,740001} -o "log/dumpit#1.dump" -o "log/dumpit#2.dump"
+"http://%HOSTIP:%HOSTPORT/{74,740001}" -o "log/dumpit#1.dump"
 </command>
 </client>
 
@@ -56,10 +56,11 @@ Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
 
 </protocol>
-<file name="log/dumpit2.dump">
+<file name="log/dumpit740001.dump">
 HTTP/1.0 200 OK
 Content-Type: text/html
 Funny-head: swsclose
+Connection: close
 
 crap data
 </file>
