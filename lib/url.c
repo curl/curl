@@ -733,37 +733,42 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
 
   if(data->bits.user_passwd && !data->bits.use_netrc) {
-    if(':' != *data->userpwd) {
-      if((1 <= sscanf(data->userpwd, "%127[^:]:%127s",
-                      data->user, data->passwd))) {
-        /* check for password, if no ask for one */
-        if( !data->passwd[0] )
-        {
-          strncpy(data->passwd, getpass("password: "), sizeof(data->passwd));
-        }
+    data->user[0] =0;
+    data->passwd[0]=0;
+
+    if(*data->userpwd != ':') {
+      /* the name is given, get user+password */
+      sscanf(data->userpwd, "%127[^:]:%127[^@]",
+             data->user, data->passwd);
       }
-    }
-    if(!data->user[0]) {
-      failf(data, "USER malformat: user name can't be zero length");
-      return CURLE_MALFORMAT_USER;
+    else
+      /* no name given, get the password only */
+      sscanf(data->userpwd+1, "%127[^@]", data->passwd);
+
+    /* check for password, if no ask for one */
+    if( !data->passwd[0] ) {
+      strncpy(data->passwd, getpass("password: "), sizeof(data->passwd));
     }
   }
 
   if(data->bits.proxy_user_passwd) {
-    if(':' != *data->proxyuserpwd) {
-      if((1 <= sscanf(data->proxyuserpwd, "%127[^:]:%127s",
-                      data->proxyuser, data->proxypasswd))) {
-        /* check for password, if no ask for one */
-        if( !data->proxypasswd[0] )
-        {
-          strncpy(data->proxypasswd, getpass("proxy password: "), sizeof(data->proxypasswd));
-        }
+    data->proxyuser[0] =0;
+    data->proxypasswd[0]=0;
+
+    if(*data->proxyuserpwd != ':') {
+      /* the name is given, get user+password */
+      sscanf(data->proxyuserpwd, "%127[^:]:%127[^@]",
+             data->proxyuser, data->proxypasswd);
       }
+    else
+      /* no name given, get the password only */
+      sscanf(data->proxyuserpwd+1, "%127[^@]", data->proxypasswd);
+
+    /* check for password, if no ask for one */
+    if( !data->proxypasswd[0] ) {
+      strncpy(data->proxypasswd, getpass("proxy password: "), sizeof(data->proxypasswd));
     }
-    if(!data->proxyuser[0]) {
-      failf(data, " Proxy USER malformat: user name can't be zero length");
-      return CURLE_MALFORMAT_USER;
-    }
+
   }
 
   conn->name = conn->gname;
@@ -1038,13 +1043,32 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
        user+password pair in a string like:
        ftp://user:password@ftp.my.site:8021/README */
     char *ptr=NULL; /* assign to remove possible warnings */
+#if 0
     if(':' == *conn->name) {
       failf(data, "URL malformat: user can't be zero length");
       return CURLE_URL_MALFORMAT_USER;
     }
-    if((1 <= sscanf(conn->name, "%127[^:]:%127[^@]",
-		    data->user, data->passwd)) &&
-       (ptr=strchr(conn->name, '@'))) {
+#endif
+    if(ptr=strchr(conn->name, '@')) {
+      /* there's a user+password given here, to the left of the @ */
+
+      data->user[0] =0;
+      data->passwd[0]=0;
+
+      if(*conn->name != ':') {
+        /* the name is given, get user+password */
+        sscanf(conn->name, "%127[^:]:%127[^@]",
+               data->user, data->passwd);
+      }
+      else
+        /* no name given, get the password only */
+        sscanf(conn->name+1, "%127[^@]", data->passwd);
+
+      /* check for password, if no ask for one */
+      if( !data->passwd[0] ) {
+        strncpy(data->passwd, getpass("password: "), sizeof(data->passwd));
+      }
+
       conn->name = ++ptr;
       data->bits.user_passwd=1; /* enable user+password */
     }
