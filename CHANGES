@@ -7,6 +7,20 @@
                                   Changelog
 
 
+Daniel (25 Sep 2002)
+- libcurl could leak memory when downloading multiple files using http ranges.
+
+- Walter J. Mack provided code and docs for the new curl_free() function that
+  shall be used to free memory that is allocated by libcurl and returned back
+  to the application, as curl_escape() and curl_unescape() do.
+
+- Andrés García fixed a flaw that made (among other things) dict-fetches
+  return a random value.
+
+Daniel (24 Sep 2002)
+- Wez Furlong brought his initial patch that introduced curl_version_info().
+  We might need to tweak it somewhat before release.
+
 Daniel (20 Sep 2002)
 - Craig Markwardt fixed another Tru64 IP resolve problem.
 
