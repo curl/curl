@@ -1005,6 +1005,10 @@ CURLcode _ftp(struct connectdata *conn)
       freeaddrinfo(res);
       return CURLE_FTP_PORT_FAILED;
     }
+    /* we set the secondary socket variable to this for now, it
+       is only so that the cleanup function will close it in case
+       we fail before the true secondary stuff is made */
+    conn->secondarysocket = portsock;
 
 #else
     struct sockaddr_in sa;
