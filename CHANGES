@@ -6,6 +6,32 @@
 
                                   Changelog
 
+Daniel (29 Jan)
+- Jamie Wilkinson provided a patch that now makes curl attempt to clear out
+  "sensitive" command line arguments so that they don't appear in ps outputs
+  (only on platforms that allow writing to argv[]).
+
+- John McGowan found out that the DEBUGFUNCTION could be called with bad
+  arguments and thus cause the --trace outputs to go wrong.
+
+- Removed all the emacs local variables from all files.
+
+- Dave Halbakken found a problem with FTP downloads that could accidently
+  return CURLE_PARTIAL_FILE when curl_easy_perform() was called with NOBODY
+  set TRUE.
+
+Daniel (27 Jan)
+- The fopen.c example was flawed as Nick Humfrey noticed, and I fixed it to
+  work again.
+
+Daniel (24 Jan)
+- Bertrand Demiddelaer found and fixed a memory leak (the content-type string)
+  when following locations.
+
+Daniel (22 Jan 2003)
+- Ian Wilkes and Legoff Vincent both independently provided fixes for making
+  curl/multi.h work properly when compiled with a C++ compiler.
+
 Daniel (20 Jan 2003)
 - Fixed 'buildconf' to check version number of the required tools before
   they're actually used.
