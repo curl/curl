@@ -159,7 +159,7 @@ fi
 echo "buildconf: running libtoolize"
 ${LIBTOOLIZE:-libtoolize} --copy --automake --force || die "The command '${LIBTOOLIZE:-libtoolize}  --copy --automake --force' failed"
 echo "buildconf: running aclocal"
-${ACLOCAL:-aclocal}       || die "The command '${AUTOHEADER:-aclocal}' failed"
+${ACLOCAL:-aclocal} $ACLOCAL_FLAGS || die "The command '${ACLOCAL:-aclocal}${ACLOCAL_FLAGS:+" $ACLOCAL_FLAGS"}' failed"
 echo "buildconf: running aclocal hack to convert all mv to mv -f"
 perl -i.bak -pe 's/\bmv +([^-\s])/mv -f $1/g' aclocal.m4
 echo "buildconf: running autoheader"
@@ -170,7 +170,7 @@ ${AUTOCONF:-autoconf}     || die "The command '${AUTOCONF:-autoconf}' failed"
 if test -d ares; then
   cd ares
   echo "buildconf: running aclocal in the ares directory"
-  ${ACLOCAL:-aclocal}     || die "The command '${ACLOCAL:-aclocal}' failed"
+  ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS || die "The command '${ACLOCAL:-aclocal}${ACLOCAL_FLAGS:+" $ACLOCAL_FLAGS"}' failed"
   echo "buildconf: running autoconf in the ares directory"
   ${AUTOCONF:-autoconf}     || die "The command '${AUTOCONF:-autoconf}' failed"
   cd ..
