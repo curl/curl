@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Version 7.10.7-pre4 (12 August 2003)
+
+Daniel (12 August)
+- curl_version_info() now returns a flag if libcurl was built with asynch DNS
+  support, and this is now also displayed with 'curl -V'.
+
+- Added a few new man pages to the docs/libcurl dir: curl_share_init,
+  curl_share_setopt, curl_share_cleanup, libcurl-easy and libcurl-share.
+
 Daniel (11 August)
 - Mike Cherepov made the local binding code work for Windows, which makes
   the option CURLOPT_INTERFACE work on Windows as well.
