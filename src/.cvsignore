@@ -3,4 +3,6 @@ Makefile.in
 .deps
 .libs
 curl
+config.h
+hugehelp.c
 stamp-h2*

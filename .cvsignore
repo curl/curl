@@ -7,3 +7,5 @@ configure
 config.h
 config.status
 curl-config
+autom4te.cache
+depcomp
