@@ -7,6 +7,37 @@
                                History of Changes
 
 
+Daniel (25 February 2002)
+- Fiddled with the automake files to make all source files in the lib
+  directory not have ../src in the include path, and the src sources shouldn't
+  have ../lib!
+
+- All 79 test cases ran OK under Linux and Solaris using the new HTTP server
+  in the test suite. The new HTTP server was first donated by Georg Horn and
+  subsequently modified to work with the test suite. It is currently still not
+  portable enough to run on "all over" but this is a start and I can run all
+  curl tests on my machines. This is an important requirement for the upcoming
+  public release.
+
+- Using -d and -I on the same command line now reports an error, as it implies
+  two different HTTP requests that can't be mixed.
+
+- Jeffrey Pohlmeyer provided a patch that made the -w/--write-out option
+  support %{content_type} to get the content type of the recent download.
+
+- Kevin Roth reported that pre2 and pre3 didn't compile properly on cygwin,
+  and this was because I used #ifdef HAVE_WINSOCK_H in lib/multi.h to figure
+  out if we could include winsock.h which turns out not to be a wise choice to
+  do on cygwin since it has the file but can't include it!
+
+Daniel (22 February 2002)
+- Added src/config-vms.h to the release archive.
+
+- Fixed the connection timeout value again, the change from February 18 wasn't
+  complete.
+
+Version 7.9.5-pre3
+
 Daniel (21 February 2002)
 - Kevin Roth and Andrés García both found out that lib/config.h.in was missing
   in the pre-release archive and thus the configure script failed.
