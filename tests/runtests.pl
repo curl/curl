@@ -159,7 +159,7 @@ sub runhttpserver {
 
     # verify if our/any server is running on this port
     my $cmd = "$CURL -o log/verifiedserver --silent -i $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null";
-    print "CMD; $cmd" if ($verbose);
+    print "CMD; $cmd\n" if ($verbose);
     my $res = system($cmd);
 
     $res >>= 8; # rotate the result
