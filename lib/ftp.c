@@ -97,7 +97,7 @@ static CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote
 static CURLcode ftp_cwd(struct connectdata *conn, char *path);
 
 /* easy-to-use macro: */
-#define ftpsendf Curl_ftpsendf
+#define FTPSENDF(x,y,z) if((result = Curl_ftpsendf(x,y,z))) return result
 
 static CURLcode AllowServerConnect(struct SessionHandle *data,
                                    struct connectdata *conn,
@@ -417,7 +417,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 #endif
   
   /* send USER */
-  ftpsendf(conn, "USER %s", ftp->user);
+  FTPSENDF(conn, "USER %s", ftp->user);
 
   /* wait for feedback */
   nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
@@ -433,7 +433,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   else if(ftpcode == 331) {
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
-    ftpsendf(conn, "PASS %s", ftp->passwd);
+    FTPSENDF(conn, "PASS %s", ftp->passwd);
     nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
@@ -479,7 +479,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   }
 
   /* send PWD to discover our entry point */
-  ftpsendf(conn, "PWD");
+  FTPSENDF(conn, "PWD", NULL);
 
   /* wait for feedback */
   nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
@@ -601,13 +601,14 @@ static
 CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 {
   struct curl_slist *item;
-  ssize_t            nread;
-  int                ftpcode;
+  ssize_t nread;
+  int ftpcode;
+  CURLcode result;
 
   item = quote;
   while (item) {
     if (item->data) {
-      ftpsendf(conn, "%s", item->data);
+      FTPSENDF(conn, "%s", item->data);
 
       nread = Curl_GetFTPResponse(
                                   conn->data->state.buffer, conn, &ftpcode);
@@ -631,8 +632,9 @@ CURLcode ftp_cwd(struct connectdata *conn, char *path)
 {
   ssize_t nread;
   int     ftpcode;
+  CURLcode result;
   
-  ftpsendf(conn, "CWD %s", path);
+  FTPSENDF(conn, "CWD %s", path);
   nread = Curl_GetFTPResponse(
                               conn->data->state.buffer, conn, &ftpcode);
   if (nread < 0)
@@ -656,7 +658,7 @@ CURLcode ftp_getfiletime(struct connectdata *conn, char *file)
 
   /* we have requested to get the modified-time of the file, this is yet
      again a grey area as the MDTM is not kosher RFC959 */
-  ftpsendf(conn, "MDTM %s", file);
+  FTPSENDF(conn, "MDTM %s", file);
 
   nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
   if(nread < 0)
@@ -689,8 +691,9 @@ static CURLcode ftp_transfertype(struct connectdata *conn,
   int ftpcode;
   ssize_t nread;
   char *buf=data->state.buffer;
+  CURLcode result;
 
-  ftpsendf(conn, "TYPE %s", ascii?"A":"I");
+  FTPSENDF(conn, "TYPE %s", ascii?"A":"I");
 
   nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
   if(nread < 0)
@@ -713,8 +716,9 @@ CURLcode ftp_getsize(struct connectdata *conn, char *file,
   int ftpcode;
   ssize_t nread;
   char *buf=data->state.buffer;
+  CURLcode result;
 
-  ftpsendf(conn, "SIZE %s", file);
+  FTPSENDF(conn, "SIZE %s", file);
   nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
   if(nread < 0)
     return CURLE_OPERATION_TIMEOUTED;
@@ -860,6 +864,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
   ssize_t nread;
   char *buf = data->state.buffer; /* this is our buffer */
   int ftpcode; /* receive FTP response codes in this */
+  CURLcode result;
 
 #ifdef ENABLE_IPV6
   /******************************************************************
@@ -982,7 +987,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
             *q = '\0';
       }
 
-      ftpsendf(conn, "%s |%d|%s|%s|", *modep, eprtaf,
+      FTPSENDF(conn, "%s |%d|%s|%s|", *modep, eprtaf,
                portmsgbuf, tmp);
     } else if (strcmp(*modep, "LPRT") == 0 ||
                strcmp(*modep, "PORT") == 0) {
@@ -1030,7 +1035,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
         }
       }
       
-      ftpsendf(conn, "%s %s", *modep, portmsgbuf);
+      FTPSENDF(conn, "%s %s", *modep, portmsgbuf);
     }
     
     nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
@@ -1156,10 +1161,12 @@ CURLcode ftp_use_port(struct connectdata *conn)
     sscanf( inet_ntoa(in), "%hu.%hu.%hu.%hu",
             &ip[0], &ip[1], &ip[2], &ip[3]);
 #endif
-    ftpsendf(conn, "PORT %d,%d,%d,%d,%d,%d",
-             ip[0], ip[1], ip[2], ip[3],
-             porttouse >> 8,
-             porttouse & 255);
+    result=Curl_ftpsendf(conn, "PORT %d,%d,%d,%d,%d,%d",
+                         ip[0], ip[1], ip[2], ip[3],
+                         porttouse >> 8,
+                         porttouse & 255);
+    if(result)
+      return result;
   }
 
   nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
@@ -1201,7 +1208,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   int modeoff;
   
   for (modeoff = 0; mode[modeoff]; modeoff++) {
-    ftpsendf(conn, mode[modeoff]);
+    FTPSENDF(conn, mode[modeoff], "");
     nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
@@ -1490,11 +1497,13 @@ CURLcode ftp_perform(struct connectdata *conn)
     }
 
     /* Send everything on data->set.in to the socket */
-    if(data->set.ftp_append)
+    if(data->set.ftp_append) {
       /* we append onto the file instead of rewriting it */
-      ftpsendf(conn, "APPE %s", ftp->file);
-    else
-      ftpsendf(conn, "STOR %s", ftp->file);
+      FTPSENDF(conn, "APPE %s", ftp->file);
+    }
+    else {
+      FTPSENDF(conn, "STOR %s", ftp->file);
+    }
 
     nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
     if(nread < 0)
@@ -1584,7 +1593,7 @@ CURLcode ftp_perform(struct connectdata *conn)
          better used since the LIST command output is not specified or
          standard in any way */
 
-      ftpsendf(conn, "%s",
+      FTPSENDF(conn, "%s",
             data->set.customrequest?data->set.customrequest:
             (data->set.ftp_list_only?"NLST":"LIST"));
     }
@@ -1655,7 +1664,7 @@ CURLcode ftp_perform(struct connectdata *conn)
         infof(data, "Instructs server to resume from offset %d\n",
               conn->resume_from);
 
-        ftpsendf(conn, "REST %d", conn->resume_from);
+        FTPSENDF(conn, "REST %d", conn->resume_from);
 
         nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
         if(nread < 0)
@@ -1667,7 +1676,7 @@ CURLcode ftp_perform(struct connectdata *conn)
         }
       }
 
-      ftpsendf(conn, "RETR %s", ftp->file);
+      FTPSENDF(conn, "RETR %s", ftp->file);
     }
 
     nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
@@ -1825,17 +1834,18 @@ CURLcode Curl_ftp(struct connectdata *conn)
 }
 
 /*
- * ftpsendf() sends the formated string as a ftp command to a ftp server
+ * Curl_ftpsendf() sends the formated string as a ftp command to a ftp server
  *
  * NOTE: we build the command in a fixed-length buffer, which sets length
  * restrictions on the command!
  *
  */
-size_t Curl_ftpsendf(struct connectdata *conn,
-                     const char *fmt, ...)
+CURLcode Curl_ftpsendf(struct connectdata *conn,
+                       const char *fmt, ...)
 {
   size_t bytes_written;
   char s[256];
+  size_t write_len;
 
   va_list ap;
   va_start(ap, fmt);
@@ -1848,9 +1858,10 @@ size_t Curl_ftpsendf(struct connectdata *conn,
   strcat(s, "\r\n"); /* append a trailing CRLF */
 
   bytes_written=0;
-  Curl_write(conn, conn->firstsocket, s, strlen(s), &bytes_written);
+  write_len = strlen(s);
+  Curl_write(conn, conn->firstsocket, s, write_len, &bytes_written);
 
-  return(bytes_written);
+  return (bytes_written==write_len)?CURLE_OK:CURLE_WRITE_ERROR;
 }
 
 
