@@ -6,6 +6,9 @@
 
 PHP program examples
 
+getbinarypageinvar.php
+ - Fetch a single URL containing binary data and return it into a variable
+
 getpageinvar.php
  - Fetch a single URL and return in a variable
 
