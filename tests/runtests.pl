@@ -48,11 +48,8 @@ my $FTPSPIDFILE=".ftps.pid";
 # invoke perl like this:
 my $perl="perl -I$srcdir";
 
-# this gets set if curl is compiled with memory debugging:
-my $memory_debug=0;
-
-# this gets set if curl is compiled with netrc debugging:
-my $netrc_debug = 0;
+# this gets set if curl is compiled with debugging:
+my $curl_debug=0;
 
 # name of the file that the memory debugging creates:
 my $memdump="memdump";
@@ -65,7 +62,8 @@ my $checkstunnel = &checkstunnel;
 my $ssl_version; # set if libcurl is built with SSL support
 
 my $skipped=0;  # number of tests skipped; reported in main loop
-my $problems=0; # number of tests that didn't run due to run-time problems
+my %skipped;    # skipped{reason}=counter, reasons for skip
+my @teststat;   # teststat[testnum]=reason, reasons for skip
 
 #######################################################################
 # variables the command line options may set
@@ -190,7 +188,7 @@ sub runhttpserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/httpserver.pl $flag $HOSTPORT &";
+    $cmd="$perl $srcdir/httpserver.pl $flag $HOSTPORT &";
     system($cmd);
     if($verbose) {
         print "CMD: $cmd\n";
@@ -439,18 +437,40 @@ sub compare {
 #######################################################################
 # display information about curl and the host the test suite runs on
 #
-sub displaydata {
+sub checkcurl {
 
     unlink($memdump); # remove this if there was one left
 
+    my $curl;
+    my $libcurl;
     my @version=`$CURL -V`;
-    my $version=$version[0];
-    chomp $version;
+    for(@version) {
+        chomp;
 
-    my $curl = $version;
+        if($_ =~ /^curl/) {
+            $curl = $_;
 
-    $curl =~ s/^(.*)(libcurl.*)/$1/g;
-    my $libcurl = $2;
+            $curl =~ s/^(.*)(libcurl.*)/$1/g;
+            $libcurl = $2;
+        }
+        elsif($_ =~ /^Protocols: (.*)/i) {
+            # these are the supported protocols, we don't use this knowledge
+            # at this point
+        }
+        elsif($_ =~ /^Features: (.*)/i) {
+            my $feat = $1;
+            if($feat =~ /debug/i) {
+                # debug is a listed "feature", use that knowledge
+                $curl_debug = 1;
+                # set the NETRC debug env
+                $ENV{'CURL_DEBUG_NETRC'} = 'log/netrc';
+            }
+            if($feat =~ /SSL/i) {
+                # ssl enabled
+                $ssl_version=1;
+            }
+        }
+    }
 
     my $hostname=`hostname`;
     my $hosttype=`uname -a`;
@@ -461,26 +481,9 @@ sub displaydata {
     "* Host: $hostname",
     "* System: $hosttype";
 
-    if($libcurl =~ /SSL/i) {
-        $ssl_version=1;
-    }
-
-    if( -r $memdump) {
-        # if this exists, curl was compiled with memory debugging
-        # enabled and we shall verify that no memory leaks exist
-        # after each and every test!
-        $memory_debug=1;
-
-        # there's only one debug control in the configure script
-        # so hope netrc debugging is enabled and set it up
-        $netrc_debug = 1;
-        $ENV{'CURL_DEBUG_NETRC'} = 'log/netrc';
-    }
-    printf("* Memory debugging: %s\n", $memory_debug?"ON":"OFF");
-    printf("* Netrc debugging:  %s\n", $netrc_debug?"ON":"OFF");
-    printf("* HTTPS server:     %s\n", $checkstunnel?"ON":"OFF");
-    printf("* FTPS server:      %s\n", $checkstunnel?"ON":"OFF");
+    printf("* Server SSL:       %s\n", $checkstunnel?"ON":"OFF");
     printf("* libcurl SSL:      %s\n", $ssl_version?"ON":"OFF");
+    printf("* libcurl debug:    %s\n", $curl_debug?"ON":"OFF");
     print "***************************************** \n";
 }
 
@@ -506,16 +509,24 @@ sub subVariables {
 sub singletest {
     my $testnum=$_[0];
 
+    my @what;
+    my $why;
+    my $serverproblem;
+
     # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
         if($verbose) {
             # this is not a test
             print "RUN: $testnum doesn't look like a test case!\n";
         }
-        return -1;
+        $serverproblem = 100;
+    }
+    else {
+        @what = getpart("client", "features");
     }
 
-    my @what = getpart("client", "features");
+    printf("test %03d...", $testnum);
+    
     for(@what) {
         my $f = $_;
         $f =~ s/\s//g;
@@ -526,27 +537,45 @@ sub singletest {
             }
         }
         elsif($f eq "netrc_debug") {
-            if($netrc_debug) {
+            if($curl_debug) {
                 next;
             }
         }
 
-        warn "Test case $testnum requires the missing feature: $_";
-        return -1;
+        $why = "lacks $f";
+        $serverproblem = 5; # set it here
+        last;
     }
 
-    my $serverproblem = serverfortest($testnum);
+    if(!$serverproblem) {
+        $serverproblem = serverfortest($testnum);
+    }
 
     if($serverproblem) {
         # there's a problem with the server, don't run
         # this particular server, but count it as "skipped"
-        if($serverproblem> 1) {
-            print "RUN: test case $testnum couldn't run!\n";
-            $problems++;
+        my $why;
+        if($serverproblem == 2) {
+            $why = "server problems";
+        }
+        elsif($serverproblem == 100) {
+            $why = "no test";
+        }
+        elsif($serverproblem == 99) {
+            $why = "bad test";
         }
         else {
-            $skipped++;
+            $why = "unfulfilled requirements";
         }
+        $skipped++;
+        $skipped{$why}++;
+        $teststat[$testnum]=$why; # store reason for this test case
+        
+        print "SKIPPED\n";
+        if(!$short) {
+            print "* Test $testnum: $why\n";
+        }
+
         return -1;
     }
 
@@ -591,7 +620,6 @@ sub singletest {
     # name of the test
     my @testname= getpart("client", "name");
 
-    printf("test %03d...", $testnum);
     if(!$short) {
         my $name = $testname[0];
         $name =~ s/\n//g;
@@ -653,7 +681,7 @@ sub singletest {
 
     #$cmd =~ s/%HOSTNAME/$HOSTNAME/g;
 
-    if($memory_debug) {
+    if($curl_debug) {
         unlink($memdump);
     }
 
@@ -874,7 +902,7 @@ sub singletest {
 
     unlink($FTPDCMD); # remove the instructions for this test
 
-    my @what = getpart("client", "killserver");
+    @what = getpart("client", "killserver");
     for(@what) {
         my $serv = $_;
         chomp $serv;
@@ -887,7 +915,7 @@ sub singletest {
         }
     }
 
-    if($memory_debug) {
+    if($curl_debug) {
         if(! -f $memdump) {
             print "\n** ALERT! memory debuggin without any output file?\n";
         }
@@ -925,6 +953,12 @@ sub singletest {
 # This function makes sure the right set of server is running for the
 # specified test case. This is a useful design when we run single tests as not
 # all servers need to run then!
+#
+# Returns:
+# 100 if this is not a test case
+# 99  if this test case has no servers specified
+# 2   if one of the required servers couldn't be started
+# 1   if this test is skipped due to unfulfilled requirements
 
 sub serverfortest {
     my ($testnum)=@_;
@@ -943,7 +977,7 @@ sub serverfortest {
 
     if(!$what[0]) {
         warn "Test case $testnum has no server(s) specified!";
-        return 100;
+        return 99;
     }
 
     for(@what) {
@@ -1018,7 +1052,6 @@ sub serverfortest {
             warn "we don't support a server for $what";
         }
     }
-    return 0; # ok
 }
 
 #######################################################################
@@ -1105,7 +1138,7 @@ if($testthis[0] ne "") {
 #
 
 if(!$listonly) {
-    displaydata();
+    checkcurl();
 }
 
 #######################################################################
@@ -1150,11 +1183,14 @@ my $failed;
 my $testnum;
 my $ok=0;
 my $total=0;
+my $lasttest;
 
 foreach $testnum (split(" ", $TESTCASES)) {
 
+    $lasttest = $testnum if($testnum > $lasttest);
+
     my $error = singletest($testnum);
-    if(-1 == $error) {
+    if($error < 0) {
         # not a test we can run
         next;
     }
@@ -1203,10 +1239,28 @@ else {
     print "TESTFAIL: No tests were performed!\n";
 }
 if($skipped) {
-    print "TESTINFO: $skipped tests were skipped due to restraints\n";
-}
-if($problems) {
-    print "TESTINFO: $problems tests didn't run due to run-time problems\n";
+    my $s=0;
+    print "TESTINFO: $skipped tests were skipped due to these restraints:\n";
+
+    for(keys %skipped) {
+        print ", " if($s);
+        my $r = $_;
+        printf "TESTINFO: \"%s\" happened %d times (", $r, $skipped{$_};
+
+        # now show all test case numbers that had this reason for being
+        # skipped
+        my $c=0;
+        for(0 .. $lasttest) {
+            my $t = $_;
+            if($teststat[$_] eq $r) {
+                print ", " if($c);
+                print $_;
+                $c++;
+            }
+        }
+        print ")\n";
+        $s++;
+    }
 }
 if($total && ($ok != $total)) {
     exit 1;
