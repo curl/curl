@@ -430,8 +430,10 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         if(easy->easy_conn->newurl) {
           easy->result = Curl_follow(easy->easy_handle,
                                      strdup(easy->easy_conn->newurl));
-          if(CURLE_OK == easy->result)
+          if(CURLE_OK == easy->result) {
             easy->state = CURLM_STATE_CONNECT;
+            result = CURLM_CALL_MULTI_PERFORM;
+          }
         }
         else {
           easy->state = CURLM_STATE_DONE;
