@@ -60,6 +60,10 @@
 #include <setjmp.h>
 #endif
 
+#ifdef WIN32
+#include <process.h>
+#endif
+
 #if (defined(NETWARE) && defined(__NOVELL_LIBC__))
 #undef in_addr_t
 #define in_addr_t unsigned long
@@ -70,6 +74,7 @@
 #include "hostip.h"
 #include "hash.h"
 #include "share.h"
+#include "strerror.h"
 #include "url.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -108,12 +113,8 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
                                      char *hostname,
                                      int port,
                                      int *waitp);
-#ifndef ENABLE_IPV6
-#if !defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES) || \
-    defined(USE_THREADING_GETHOSTBYNAME)
+
 static struct hostent* pack_hostent(char** buf, struct hostent* orig);
-#endif
-#endif
 
 #ifdef USE_THREADING_GETHOSTBYNAME
 #ifdef DEBUG_THREADING_GETHOSTBYNAME
@@ -126,12 +127,11 @@ static void trace_it (const char *fmt, ...);
 #define TRACE(x)
 #endif
 
-static struct hostent* pack_hostent (char** buf, struct hostent* orig);
 static bool init_gethostbyname_thread (struct connectdata *conn,
                                        const char *hostname, int port);
 struct thread_data {
   HANDLE thread_hnd;
-  DWORD  thread_id;
+  unsigned thread_id;
   DWORD  thread_status;
 };
 #endif
@@ -1319,8 +1319,10 @@ static void trace_it (const char *fmt, ...)
   static int do_trace = -1;
   va_list args;
 
-  if (do_trace == -1)
-    do_trace = getenv("CURL_TRACE") ? 1 : 0;
+  if (do_trace == -1) {
+    const char *env = getenv("CURL_TRACE");
+    do_trace = (env && atoi(env) > 0);
+  }
   if (!do_trace)
     return;
   va_start (args, fmt);
@@ -1336,7 +1338,7 @@ static void trace_it (const char *fmt, ...)
  *
  * For builds without ARES/USE_IPV6, create a resolver thread and wait on it.
  */
-static DWORD WINAPI gethostbyname_thread (void *arg)
+static unsigned __stdcall gethostbyname_thread (void *arg)
 {
   struct connectdata *conn = (struct connectdata*) arg;
   struct hostent *he;
@@ -1355,19 +1357,21 @@ static DWORD WINAPI gethostbyname_thread (void *arg)
   TRACE(("Winsock-error %d, addr %s\n", conn->async.status,
          he ? inet_ntoa(*(struct in_addr*)he->h_addr) : "unknown"));
   return (rc);
-  /* An implicit ExitThread() here */
+  /* An implicit _endthreadex() here */
 }
 
-/* complementary of ares_destroy
+/*
+ * destroy_thread_data() cleans up async resolver data.
+ * Complementary of ares_destroy.
  */
-static void destroy_thread_data (struct connectdata *conn)
+static void destroy_thread_data (struct Curl_async *async)
 {
-  if (conn->async.hostname)
-    free(conn->async.hostname);
-  if (conn->async.os_specific)
-    free(conn->async.os_specific);
-  conn->async.hostname = NULL;
-  conn->async.os_specific = NULL;
+  if (async->hostname)
+    free(async->hostname);
+  if (async->os_specific)
+    free(async->os_specific);
+  async->hostname = NULL;
+  async->os_specific = NULL;
 }
 
 /*
@@ -1377,14 +1381,13 @@ static void destroy_thread_data (struct connectdata *conn)
 static bool init_gethostbyname_thread (struct connectdata *conn,
                                        const char *hostname, int port)
 {
-  struct thread_data *td = malloc(sizeof(*td));
+  struct thread_data *td = calloc(sizeof(*td), 1);
 
   if (!td) {
     SetLastError(ENOMEM);
     return (0);
   }
 
-  memset (td, 0, sizeof(*td));
   Curl_safefree(conn->async.hostname);
   conn->async.hostname = strdup(hostname);
   if (!conn->async.hostname) {
@@ -1399,11 +1402,12 @@ static bool init_gethostbyname_thread (struct connectdata *conn,
   conn->async.dns = NULL;
   conn->async.os_specific = (void*) td;
 
-  td->thread_hnd = CreateThread(NULL, 0, gethostbyname_thread,
+  td->thread_hnd = (HANDLE) _beginthreadex(NULL, 0, gethostbyname_thread,
                                 conn, 0, &td->thread_id);
   if (!td->thread_hnd) {
-     TRACE(("CreateThread() failed; %lu\n", GetLastError()));
-     destroy_thread_data(conn);
+     SetLastError(errno);
+     TRACE(("_beginthreadex() failed; %s\n", Curl_strerror(conn,errno)));
+     destroy_thread_data(&conn->async);
      return (0);
   }
   return (1);
@@ -1438,19 +1442,23 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
   status = WaitForSingleObject(td->thread_hnd, 1000UL*timeout);
   if (status == WAIT_OBJECT_0 || status == WAIT_ABANDONED) {
-     /* Thread finished before timeout; propagate Winsock error to this thread */
+     /* Thread finished before timeout; propagate Winsock error to this thread.
+      * 'conn->async.done = TRUE' is set in host_callback().
+      */
      WSASetLastError(conn->async.status);
      GetExitCodeThread(td->thread_hnd, &td->thread_status);
-     TRACE(("status %lu, thread-status %08lX\n", status, td->thread_status));
+     TRACE(("gethostbyname_thread() status %lu, thread retval %lu, ",
+            status, td->thread_status));
   }
   else {
      conn->async.done = TRUE;
-     TerminateThread(td->thread_hnd, (DWORD)-1);
      td->thread_status = (DWORD)-1;
+     TRACE(("gethostbyname_thread() timeout, "));
   }
 
-  TRACE(("gethostbyname_thread() retval %08lX, elapsed %lu ms\n",
-         td->thread_status, GetTickCount()-ticks));
+  TRACE(("elapsed %lu ms\n", GetTickCount()-ticks));
+
+  CloseHandle(td->thread_hnd);
 
   if(entry)
     *entry = conn->async.dns;
@@ -1464,13 +1472,14 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       rc = CURLE_OPERATION_TIMEDOUT;
     }
     else if(conn->async.done) {
-      failf(data, "Could not resolve host: %s (code %lu)", conn->name, conn->async.status);
+      failf(data, "Could not resolve host: %s; %s",
+            conn->name, Curl_strerror(conn,conn->async.status));
       rc = CURLE_COULDNT_RESOLVE_HOST;
     }
     else
       rc = CURLE_OPERATION_TIMEDOUT;
 
-    destroy_thread_data(conn);
+    destroy_thread_data(&conn->async);
     /* close the connection, since we can't return failure here without
        cleaning up this connection properly */
     Curl_disconnect(conn);
@@ -1490,7 +1499,7 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
   if (conn->async.done) {
     /* we're done */
-    destroy_thread_data(conn);
+    destroy_thread_data(&conn->async);
     if (!conn->async.dns) {
       TRACE(("Curl_is_resolved(): CURLE_COULDNT_RESOLVE_HOST\n"));
       return CURLE_COULDNT_RESOLVE_HOST;
