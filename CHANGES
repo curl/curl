@@ -7,6 +7,20 @@
                                   Changelog
 
 
+Daniel (9 March 2005)
+- Dan F improved the SSL lib setup in configure.
+
+- Nodak Sodak reported a crash when using a SOCKS4 proxy.
+
+- Jean-Marc Ranger pointed out an embarassing debug printf() leftover in the
+  multi interface code.
+
+- Adjusted the man page for the curl_getdate() return value for dates after
+  year 2038. For 32 bit time_t it returns 0x7fffffff but for 64bit time_t it
+  returns either the correct value or even -1 on some systems that still seem
+  to not deal with this properly. Tor Arntsen found a 64bit AIX system for us
+  that did the latter.
+
 Daniel (8 March 2005)
 - Dominick Meglio reported that using CURLOPT_FILETIME when transferring a FTP
   file got a Last-Modified: header written to the data stream, corrupting the
