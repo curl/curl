@@ -7,6 +7,11 @@
                                History of Changes
 
 Daniel (3 September 2001)
+- Added the -R/--remote-time option, that uses the remote file's datestamp to
+  set the local file's datestamp. Thus, when you get a remote file your local
+  file will get the same time and date. Note that this only works when you use
+  -o or -O.
+
 - Installed libtool 1.4.1, libtoolized and everything.
 
 Daniel (1 September 2001)
