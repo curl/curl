@@ -526,23 +526,27 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
 
   if ( (in=inet_addr(hostname)) != INADDR_NONE ) {
     struct in_addr *addrentry;
-    long *buf = (long *)malloc(sizeof(struct hostent)+128);
+    struct namebuf {
+        struct hostent hostentry;
+        char *h_addr_list[2];
+        struct in_addr addrentry;
+        char h_name[1];
+    } *buf = (struct namebuf *)malloc(sizeof(struct namebuf)+128);
     if(!buf)
       return NULL; /* major failure */
     *bufp = (char *)buf;
 
-    h = (struct hostent*)buf;
-    h->h_addr_list = (char**)(buf + sizeof(*h));
-    addrentry = (struct in_addr*)(h->h_addr_list + 2);
+    h = &buf->hostentry;
+    h->h_addr_list = &buf->h_addr_list[0];
+    addrentry = &buf->addrentry;
     addrentry->s_addr = in;
     h->h_addr_list[0] = (char*)addrentry;
     h->h_addr_list[1] = NULL;
     h->h_addrtype = AF_INET;
     h->h_length = sizeof(*addrentry);
-    h->h_name = *(h->h_addr_list) + h->h_length;
-    /* bad one h->h_name = (char*)(h->h_addr_list + h->h_length); */
-    MakeIP(ntohl(in),h->h_name, sizeof(struct hostent)+128 -
-           (long)(h->h_name) + (long)buf);
+    h->h_name = &buf->h_name[0];
+    MakeIP(ntohl(in), h->h_name,
+           sizeof(struct namebuf)+128 - (long)(h->h_name) + (long)buf);
   }
 #if defined(HAVE_GETHOSTBYNAME_R)
   else {
