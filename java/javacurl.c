@@ -11,6 +11,7 @@ struct javacurl {
   struct writecallback {
     jmethodID mid;
     JNIEnv *java;
+    jclass cls; /* global reference */
     jobject object;
   } write;
 };
@@ -43,11 +44,18 @@ JNIEXPORT void JNICALL Java_CurlGlue_jni_1cleanup(JNIEnv *java,
                                                   jobject myself,
                                                   jint jcurl)
 {
-  void *handle=(void *)((struct javacurl*)jcurl)->libcurl;
 
-  curl_easy_cleanup(handle); /* cleanup libcurl stuff */
+  struct javacurl *curl = (struct javacurl*)jcurl;
 
-  free((void *)jcurl); /* free the struct too */
+  if(curl->write.cls) {
+    /* a global reference we must delete */
+    (*java)->DeleteGlobalRef(java, curl->write.cls);
+    (*java)->DeleteGlobalRef(java, curl->write.object);
+  }
+
+  curl_easy_cleanup(curl->libcurl); /* cleanup libcurl stuff */
+
+  free((void *)curl); /* free the struct too */
 }
 
 /*
@@ -91,8 +99,9 @@ static int javacurl_write_callback(void *ptr,
   jbyteArray jb=NULL;
   int ret=0;
 
-  fprintf(stderr, "%d bytes data received in callback, ptr %p, java =%p\n",
-          realsize, curl, java);
+  fprintf(stderr, "%d bytes data received in callback:\n"
+          "ptr=%p, java=%p cls=%p\n",
+          realsize, curl, java, curl->write.cls);
 
   jb=(*java)->NewByteArray(java, realsize);
   (*java)->SetByteArrayRegion(java, jb, 0, 
@@ -117,25 +126,38 @@ static int javacurl_write_callback(void *ptr,
 JNIEXPORT jint JNICALL Java_CurlGlue_jni_1setopt__IILCurlWrite_2
   (JNIEnv *java, jobject myself, jint jcurl, jint option, jobject object)
 {
-  jclass cls = (*java)->GetObjectClass(java, object);
+  jclass cls_local = (*java)->GetObjectClass(java, object);
   jmethodID mid;
   struct javacurl *curl = (struct javacurl *)jcurl;
-
-  printf("setopt int + object, option = %d cls= %p\n", option, cls);
+  jclass cls;
+  jobject obj_global;
 
   switch(option) {
   case CURLOPT_WRITEFUNCTION:
+    /* this makes a reference that'll be alive until we kill it! */
+    cls = (*java)->NewGlobalRef(java, cls_local);
+
+    printf("setopt int + object, option = %d cls= %p\n",
+           option, cls);
+
+    if(!cls) {
+      puts("couldn't make local reference global");
+      return 0;
+    }
+
     /* this is the write callback */
-    mid = (*java)->GetMethodID(java, cls, "handleString",
-                               "([B)I");
+    mid = (*java)->GetMethodID(java, cls, "handleString", "([B)I");
     if(!mid) {
-      /* no callback method found */
       puts("no callback method found");
       return 0;
     }
+
+    obj_global = (*java)->NewGlobalRef(java, object);
+
     curl->write.mid = mid;
-    curl->write.java = java;
-    curl->write.object = object;
+    curl->write.cls = cls;
+    curl->write.object = obj_global;
+    /*curl->write.java = java; stored on perform */
 
     fprintf(stderr, "setopt write callback and write file pointer %p, java = %p\n",
             curl, java);
@@ -144,6 +166,7 @@ JNIEXPORT jint JNICALL Java_CurlGlue_jni_1setopt__IILCurlWrite_2
                      javacurl_write_callback);
     curl_easy_setopt(curl->libcurl, CURLOPT_FILE,
                      curl);
+
     break;
   }
   return 0;
@@ -158,6 +181,7 @@ JNIEXPORT jint JNICALL Java_CurlGlue_getinfo
 JNIEXPORT jint JNICALL Java_CurlGlue_jni_1perform
   (JNIEnv *java, jobject myself, jint jcurl)
 {
-  void *handle=(void *)((struct javacurl*)jcurl)->libcurl;
-  return (jint)curl_easy_perform(handle);
+  struct javacurl *curl=(struct javacurl*)jcurl;
+  curl->write.java = java;
+  return (jint)curl_easy_perform(curl->libcurl);
 }
