@@ -129,7 +129,7 @@ char *suburl(char *base, int i)
 /* test function */
 int test(char *URL)
 {
-  CURLcode res;
+  int res;
   CURLSHcode scode;
   char *url;
   struct Tdata tdata;
