@@ -1,11 +1,10 @@
 #############################################################
-# $Id: Makefile.am,v 1.20 2001/08/08 07:46:44 bagder Exp $
 #
 ## Makefile for building libcurl.lib with MSVC6
 ## Use: nmake -f makefile.vc6 [release | release-ssl | debug]
 ##      (default is release)
 ##
-## Comments to: Troy Engel <tengel@sonic.net>
+## Originally written by: Troy Engel <tengel@sonic.net>
 ## Updated by: Craig Davison <cd@securityfocus.com>
 ## Updated by: SM <sm@technologist.com>
 
@@ -127,7 +126,7 @@ RELEASE_SSL_OBJS= \
 	versionrs.obj \
 	easyrs.obj \
 	strequalrs.obj \
-	strtokd.obj
+	strtokrs.obj
 
 LINK_OBJS= \
 	base64.obj \
@@ -310,7 +309,7 @@ formdatars.obj: formdata.c
 ftprs.obj: ftp.c
 	$(CCRS) $(CFLAGS) ftp.c
 httprs.obj: http.c
-	$(CCR) $(CFLAGS) http.c
+	$(CCRS) $(CFLAGS) http.c
 http_chunksrs.obj: http_chunks.c
 	$(CCRS) $(CFLAGS) http_chunks.c
 ldaprs.obj: ldap.c
