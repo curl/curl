@@ -16,8 +16,8 @@
 
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
-#define EMSGSIZE ERANGE /* FIX: is there a better replacement? */
-#define EAFNOSUPPORT ERANGE /* FIX: is there a better replacement? */
+#define EMSGSIZE WSAEMSGSIZE
+#define EAFNOSUPPORT WSAEAFNOSUPPORT
 
 /* Structure for scatter/gather I/O.  */
 struct iovec
