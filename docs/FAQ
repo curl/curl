@@ -325,6 +325,9 @@ FAQ
   In win32, the standard DOS shell treats the %-letter specially and you may
   need to quote the string properly when % is used in it.
 
+  Also note that if you want the literal %-letter to be part of the data you
+  pass in a POST using -d/--data you must encode it as '%25'.
+
   4.3. How can I use {, }, [ or ] to specify multiple URLs?
 
   Because those letters have a special meaning to the shell, and to be used in
