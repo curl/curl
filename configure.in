@@ -2,7 +2,7 @@ dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(lib/urldata.h)
 AM_CONFIG_HEADER(config.h src/config.h)
-AM_INIT_AUTOMAKE(curl,"7.0.11test")
+AM_INIT_AUTOMAKE(curl,"7.1")
 AM_PROG_LIBTOOL
 
 dnl
@@ -16,84 +16,6 @@ AC_PROG_CC
 dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-
-dnl The following checks for the amount of arguments that gethostbyname_r()
-dnl and gethostbyaddr_r() want is shamelessly stolen from a posting I found
-dnl in the OpenLDAP mailing list archive, posted by 
-dnl Juan Carlos Gomez <gomez@cthulhu.engr.sgi.com> 
-dnl ====================================================================
-dnl check no of arguments for gethostbyname_r
-AC_DEFUN(OL_FUNC_GETHOSTBYNAME_R_NARGS,
- [AC_CACHE_CHECK(number of arguments of gethostbyname_r, ol_cv_func_gethostbyname_r_nargs,
-   [AC_TRY_COMPILE([#include <sys/types.h>
-                  #include <sys/socket.h>
-                  #include <netinet/in.h>
-                  #include <netdb.h>
-                  #define BUFSIZE (sizeof(struct hostent)+10)],
-                 [struct hostent hent; char buffer[BUFSIZE];
-                  int bufsize=BUFSIZE;int h_errno;
-                    (void)gethostbyname_r( "segovia.cs.purdue.edu", &hent, buffer, bufsize, &h_errno);
-                  return 0;],
-              ol_cv_func_gethostbyname_r_nargs=5, ol_cv_func_gethostbyname_r_nargs=0)
-              if test $ol_cv_func_gethostbyname_r_nargs = 0 ; then
-                      AC_TRY_COMPILE([#include <sys/types.h>
-                  #include <sys/socket.h>
-                  #include <netinet/in.h>
-                  #include <netdb.h>
-                  #define BUFSIZE (sizeof(struct hostent)+10)],
-                 [struct hostent hent;struct hostent *rhent;
-                  char buffer[BUFSIZE];
-                  int bufsize=BUFSIZE;int h_errno;
-                    (void)gethostbyname_r( "segovia.cs.purdue.edu",
-&hent, buffer, bufsize, &rhent, &h_errno);
-                  return 0;],
-                 ol_cv_func_gethostbyname_r_nargs=6, ol_cv_func_gethostbyname_r_nargs=0)
-              fi
-      ])
-  if test $ol_cv_func_gethostbyname_r_nargs -gt 1 ; then
-    AC_DEFINE_UNQUOTED(GETHOSTBYNAME_R_NARGS, $ol_cv_func_gethostbyname_r_nargs)
-  fi
-])dnl
-dnl check no of arguments for gethostbyaddr_r
-AC_DEFUN(OL_FUNC_GETHOSTBYADDR_R_NARGS,
- [AC_CACHE_CHECK(number of arguments of gethostbyaddr_r, ol_cv_func_gethostbyaddr_r_nargs,
-   [AC_TRY_COMPILE([#include <sys/types.h>
-                  #include <sys/socket.h>
-                  #include <netinet/in.h>
-                  #include <netdb.h>
-                  #define BUFSIZE (sizeof(struct hostent)+10)],
-                 [struct hostent hent; char buffer[BUFSIZE]; 
-                  struct in_addr add={0x70707070};
-                  size_t alen=sizeof(struct in_addr);
-                  int bufsize=BUFSIZE;int h_errno;
-                    (void)gethostbyaddr_r( (void *)&(add.s_addr),
-                              alen, AF_INET, &hent, buffer, bufsize, &h_errno);
-                  return 0;],
-                  ol_cv_func_gethostbyaddr_r_nargs=7,
-                  ol_cv_func_gethostbyaddr_r_nargs=0)
-              if test $ol_cv_func_gethostbyaddr_r_nargs = 0 ; then
-                      AC_TRY_COMPILE([#include <sys/types.h>
-                  #include <sys/socket.h>
-                  #include <netinet/in.h>
-                  #include <netdb.h>
-                  #define BUFSIZE (sizeof(struct hostent)+10)],
-                 [struct hostent hent; struct hostent *rhent; char buffer[BUFSIZE]; 
-                  struct in_addr add={0x70707070};
-                  size_t alen=sizeof(struct in_addr);
-                  int bufsize=BUFSIZE;int h_errno;
-                    (void)gethostbyaddr_r( (void *)&(add.s_addr),
-                              alen, AF_INET, &hent, buffer, bufsize, 
-                              &rhent, &h_errno);
-                  return 0;],
-                  ol_cv_func_gethostbyaddr_r_nargs=8,
-                  ol_cv_func_gethostbyaddr_r_nargs=0)
-              fi
-      ])
-  if test $ol_cv_func_gethostbyaddr_r_nargs -gt 1 ; then
-    AC_DEFINE_UNQUOTED(GETHOSTBYADDR_R_NARGS, $ol_cv_func_gethostbyaddr_r_nargs)
-  fi
-])dnl
-
 
 dnl Check for AIX weirdos
 AC_AIX
@@ -128,6 +50,13 @@ fi
 
 dnl resolve lib?
 AC_CHECK_FUNC(strcasecmp, , AC_CHECK_LIB(resolve, strcasecmp))
+
+if test "$ac_cv_lib_resolve_strcasecmp" = "$ac_cv_func_strcasecmp"; then
+  AC_CHECK_LIB(resolve, strcasecmp,
+              [LIBS="-lresolve $LIBS"],
+               ,
+               -lnsl)
+fi
 
 dnl socket lib?
 AC_CHECK_FUNC(connect, , AC_CHECK_LIB(socket, connect))
@@ -218,6 +147,173 @@ dnl fi
 dnl z lib?
 dnl AC_CHECK_FUNC(gzread, , AC_CHECK_LIB(z, gzread))
 
+
+dnl Default is to try the thread-safe versions of a few functions
+OPT_THREAD=on
+AC_ARG_ENABLE(thread,dnl
+[  --disable-thread       tell configure to not look for thread-safe functions],
+  OPT_THREAD=off
+)
+
+if test X"$OPT_THREAD" = Xoff
+then
+  AC_MSG_WARN(libcurl will not get built using thread-safe functions)
+  AC_DEFINE(DISABLED_THREADSAFE, 1, \
+Set to explicitly specify we don't want to use thread-safe functions)
+else
+
+dnl check for a few thread-safe functions
+
+AC_CHECK_FUNCS( gethostbyname_r \
+                gethostbyaddr_r \
+                localtime_r \
+                inet_ntoa_r
+)
+
+dnl **********************************************************************
+dnl Time to make a check for gethostbyname_r
+dnl If it exists, it may use one of three different interfaces
+dnl **********************************************************************
+
+    AC_MSG_CHECKING(for gethostbyname_r)
+    if test -z "$ac_cv_gethostbyname_args"; then
+        AC_TRY_COMPILE(
+            [
+#include <sys/types.h>
+#include <netdb.h>],
+            [
+struct hostent *hp;
+struct hostent h;
+char *name;
+char buffer[10];
+int  h_errno;
+hp = gethostbyname_r(name, &h, buffer, 10, &h_errno);],
+            ac_cv_gethostbyname_args=5)
+    fi
+    if test -z "$ac_cv_gethostbyname_args"; then
+        AC_TRY_COMPILE(
+            [
+#include <sys/types.h>
+#include <netdb.h>],
+            [
+struct hostent h;
+struct hostent_data hdata;
+char *name;
+int  rc;
+rc = gethostbyname_r(name, &h, &hdata);],
+            ac_cv_gethostbyname_args=3)
+    fi
+    if test -z "$ac_cv_gethostbyname_args"; then
+        AC_TRY_COMPILE(
+            [
+#include <sys/types.h>
+#include <netdb.h>],
+            [
+struct hostent h;
+struct hostent *hp;
+char *name;
+char buf[10];
+int rc;
+int h_errno;
+
+rc = gethostbyname_r(name, &h, buf, 10, &hp, &h_errno);
+            ],
+            ac_cv_gethostbyname_args=6)
+    fi
+    if test -z "$ac_cv_gethostbyname_args"; then
+        AC_MSG_RESULT(no)
+        have_missing_r_funcs="$have_missing_r_funcs gethostbyname_r"
+    else
+        if test "$ac_cv_gethostbyname_args" = 3; then
+            AC_DEFINE(HAVE_GETHOSTBYNAME_R_3)
+        elif test "$ac_cv_gethostbyname_args" = 5; then
+            AC_DEFINE(HAVE_GETHOSTBYNAME_R_5)
+        elif test "$ac_cv_gethostbyname_args" = 6; then
+            AC_DEFINE(HAVE_GETHOSTBYNAME_R_6)
+        fi
+        AC_MSG_RESULT([yes, and it takes $ac_cv_gethostbyname_args arguments])
+    fi
+
+dnl **********************************************************************
+dnl Time to make a check for gethostbyaddr_r
+dnl If it exists, it may use one of three different interfaces
+dnl **********************************************************************
+    AC_MSG_CHECKING(for gethostbyaddr_r)
+    if test -z "$ac_cv_gethostbyaddr_args"; then
+        AC_TRY_COMPILE(
+            [
+#include <sys/types.h>
+#include <netdb.h>],
+            [
+                char * address;
+                int length;
+                int type;
+                struct hostent h;
+                struct hostent_data hdata;
+                int rc;
+                rc = gethostbyaddr_r(address, length, type, &h, &hdata);
+            ],
+            ac_cv_gethostbyaddr_args=5)
+        
+    fi
+    if test -z "$ac_cv_gethostbyaddr_args"; then
+        AC_TRY_COMPILE(
+            [
+#include <sys/types.h>
+#include <netdb.h>],
+            [
+                char * address;
+                int length;
+                int type;
+                struct hostent h;
+                char buffer[10];
+                int buflen;
+                int h_errnop;
+                struct hostent * hp;
+
+                hp = gethostbyaddr_r(address, length, type, &h,
+                                     buffer, buflen, &h_errnop);
+            ],
+            ac_cv_gethostbyaddr_args=7)
+    fi
+
+    if test -z "$ac_cv_gethostbyaddr_args"; then
+        AC_TRY_COMPILE(
+            [
+#include <sys/types.h>
+#include <netdb.h>],
+            [
+                char * address;
+                int length;
+                int type;
+                struct hostent h;
+                char buffer[10];
+                int buflen;
+                int h_errnop;
+                struct hostent * hp;
+                int rc;
+
+                rc = gethostbyaddr_r(address, length, type, &h,
+                                     buffer, buflen, &hp, &h_errnop);
+            ],
+            ac_cv_gethostbyaddr_args=8)
+    fi
+    if test -z "$ac_cv_gethostbyaddr_args"; then
+        AC_MSG_RESULT(no)
+        have_missing_r_funcs="$have_missing_r_funcs gethostbyaddr_r"
+    else
+        if test "$ac_cv_gethostbyaddr_args" = 5; then
+            AC_DEFINE(HAVE_GETHOSTBYADDR_R_5)
+        elif test "$ac_cv_gethostbyaddr_args" = 7; then
+            AC_DEFINE(HAVE_GETHOSTBYADDR_R_7)
+        elif test "$ac_cv_gethostbyaddr_args" = 8; then
+            AC_DEFINE(HAVE_GETHOSTBYADDR_R_8)
+        fi
+        AC_MSG_RESULT([yes, and it takes $ac_cv_gethostbyaddr_args arguments])
+    fi
+
+fi
+
 dnl **********************************************************************
 dnl Back to "normal" configuring
 dnl **********************************************************************
@@ -284,15 +380,11 @@ AC_CHECK_FUNCS( socket \
                 stricmp \
                 strcmpi \
                 gethostname \
-                gethostbyname_r \
                 gethostbyaddr \
-                gethostbyaddr_r \
-                localtime_r \
                 getservbyname \
                 gettimeofday \
                 inet_addr \
                 inet_ntoa \
-                inet_ntoa_r \
                 tcsetattr \
                 tcgetattr \
                 perror \
@@ -302,24 +394,6 @@ AC_CHECK_FUNCS( socket \
                 RAND_status \
                 RAND_screen
 )
-
-#
-# The *_r functions below can have a different amount of parameters depending
-# on various systems. Let's check how many this system wants!
-#
-if test "$ac_cv_func_gethostbyname_r" = yes ; then
-      OL_FUNC_GETHOSTBYNAME_R_NARGS
-else
-      ol_cv_func_gethostbyname_r=0
-fi
-
-if test "$ac_cv_func_gethostbyaddr_r" = yes ; then
-      OL_FUNC_GETHOSTBYADDR_R_NARGS
-else
-      ol_cv_func_gethostbyaddr_r=0
-fi
-
-
 
 AC_PATH_PROG( PERL, perl, , 
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
