@@ -1,0 +1,8 @@
+EXAMPLES
+
+This directory is for tiny libcurl programming examples. They are meant to
+show some simple steps on how you can build your own application to take full
+advantage of libcurl.
+
+If you end up with other small but still useful example sources, please mail
+them for submission in future packages and on the web site.
