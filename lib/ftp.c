@@ -462,7 +462,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
     /* we may need to issue a KAUTH here to have access to the files
      * do it if user supplied a password
      */
-    if(conn->data->set.passwd && *conn->data->set.passwd)
+    if(data->state.passwd && *data->state.passwd)
       Curl_krb_kauth(conn);
 #endif
   }
