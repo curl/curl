@@ -60,6 +60,7 @@ while test $# -gt 0; do
     --feature|--features)
 	if test "@USE_SSLEAY@" = "1"; then
           echo "SSL"
+          NTLM=1
         fi
 	if test "@KRB4_ENABLED@" = "1"; then
           echo "KRB4"
@@ -72,6 +73,16 @@ while test $# -gt 0; do
         fi
 	if test "@HAVE_ARES@" = "1"; then
           echo "AsynchDNS"
+        fi
+	if test "@IDN_ENABLED@" = "1"; then
+          echo "IDN"
+        fi
+	if test "@USE_WINDOWS_SSPI@" = "1"; then
+          echo "SSPI"
+          NTLM=1
+        fi
+	if test "$NTLM" = "1"; then
+          echo "NTLM"
         fi
 	;;
 
