@@ -23,16 +23,8 @@ To do in a future release (random order):
 
  * Add an interface that enables a user to select prefered SSL ciphers to use.
 
- * Make curl deal with cookies better. libcurl should be able to maintain a
-   "cookie jar". Updating it with cookies that is received, and using it to
-   pass cookies to the servers that have matching cookies in the jar.
-   http://curl.haxx.se/dev/cookie-jar.txt
-
  * Consider an interface to libcurl that allows applications to easier get to
    know what cookies that are sent back in the response headers.
-
- * Make SSL session ids get used if multiple HTTPS documents from the same
-   host is requested. http://curl.haxx.se/dev/SSL_session_id.txt
 
  * HTTP PUT for files passed on stdin. Requires libcurl to send the file
    with chunked content encoding. http://curl.haxx.se/dev/HTTP-PUT-stdin.txt
