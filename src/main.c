@@ -39,6 +39,9 @@
 
 #include "urlglob.h"
 #include "writeout.h"
+#ifdef USE_ENVIRONMENT
+#include "writeenv.h"
+#endif
 
 #define CURLseparator	"--_curl_--"
 
@@ -328,6 +331,9 @@ static void help(void)
        "    --disable-epsv  Prevents curl from using EPSV (F)\n"
        " -D/--dump-header <file> Write the headers to this file\n"
        "    --egd-file <file> EGD socket path for random data (SSL)\n"
+#ifdef USE_ENVIRONMENT
+       "    --environment   Write result codes to environment variables (RISC OS)\n"
+#endif
        " -e/--referer       Referer page (H)");
   puts(" -E/--cert <cert[:passwd]> Specifies your certificate file and password (HTTPS)\n"
        "    --cert-type <type> Specifies your certificate file type (DER/PEM/ENG) (HTTPS)\n"
@@ -453,6 +459,7 @@ struct Configurable {
   bool use_httpget;
 
   char *writeout; /* %-styled format string to output */
+  bool writeenv; /* write results to environment, if available */
 
   FILE *errors; /* if stderr redirect is requested */
   bool errors_fopened;
@@ -475,7 +482,7 @@ struct Configurable {
   HttpReq httpreq;
 };
 
-static int parseconfig(char *filename,
+static int parseconfig(const char *filename,
 		       struct Configurable *config);
 static char *my_get_line(FILE *fp);
 
@@ -942,13 +949,17 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"8", "stderr",      TRUE},
     {"7", "interface",   TRUE},
     {"6", "krb4",        TRUE},
+    /* all these ones, starting with 5 as a short-option have *no* short
+       option to mention. */
     {"5", "url",         TRUE},
     {"5a", "random-file", TRUE},
     {"5b", "egd-file",   TRUE},
     {"5c", "connect-timeout", TRUE},
     {"5d", "ciphers",    TRUE},
     {"5e", "disable-epsv", FALSE},
-
+#ifdef USE_ENVIRONMENT
+    {"5f", "environment", FALSE},
+#endif
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1124,6 +1135,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'e': /* --disable-epsv */
         config->disable_epsv ^= TRUE;
         break;
+#ifdef USE_ENVIRONMENT
+      case 'f':
+        config->writeenv ^= TRUE;
+        break;
+#endif
       default: /* the URL! */
         {
           struct getout *url;
@@ -1599,7 +1615,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 }
 
 
-static int parseconfig(char *filename,
+static int parseconfig(const char *filename,
 		       struct Configurable *config)
 {
   int res;
@@ -2482,6 +2498,10 @@ operate(struct Configurable *config, int argc, char *argv[])
       if(config->writeout) {
         ourWriteOut(curl, config->writeout);
       }
+#ifdef USE_ENVIRONMENT
+      if (config->writeenv)
+        ourWriteEnv(curl);
+#endif
 
 #ifdef	VMS
       if (!config->showerror)  {
