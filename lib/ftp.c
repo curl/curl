@@ -172,7 +172,7 @@ int Curl_GetFTPResponse(int sockfd,
   fd_set readfd;
   struct UrlData *data = conn->data;
   char *line_start;
-  int code;
+  int code=0; /* default "error code" to return */
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1
@@ -680,7 +680,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
 
     /* 226 Transfer complete, 250 Requested file action okay, completed. */
     if((ftpcode != 226) && (ftpcode != 250)) {
-      failf(data, "%s", buf+4);
+      failf(data, "server did not report OK, got %d", ftpcode);
       return CURLE_FTP_WRITE_ERROR;
     }
   }
