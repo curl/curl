@@ -332,7 +332,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
         /* the 'amount' value is bigger than would fit in 32 bits if
            multiplied with 1000, so we use the double math for this */
         data->progress.current_speed = (curl_off_t)
-          ((double)amount/(span_ms/1000.0));
+          ((double)amount/((double)span_ms/1000.0));
       else
         /* the 'amount' value is small enough to fit within 32 bits even
            when multiplied with 1000 */

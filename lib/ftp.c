@@ -1690,7 +1690,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
           if(readthisamountnow > BUFSIZE)
             readthisamountnow = BUFSIZE;
 
-          actuallyread =
+          actuallyread = (curl_off_t)
             conn->fread(data->state.buffer, 1, (size_t)readthisamountnow,
                         conn->fread_in);
 

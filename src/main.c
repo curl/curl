@@ -2279,7 +2279,9 @@ static int my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
   int rc;
   struct OutStruct *out=(struct OutStruct *)stream;
   struct Configurable *config = out->config;
-  curl_off_t size = sz * nmemb;
+  curl_off_t size = (curl_off_t)(sz * nmemb); /* typecast to prevent
+                                                 warnings when converting from
+                                                 unsigned to signed */
   if(out && !out->stream) {
     /* open file for writing */
     out->stream=fopen(out->filename, "wb");
@@ -2354,7 +2356,9 @@ static int my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
 {
   struct InStruct *in=(struct InStruct *)userp;
   struct Configurable *config = in->config;
-  curl_off_t size = sz * nmemb;
+  curl_off_t size = (curl_off_t)(sz * nmemb);  /* typecast to prevent warnings
+                                                  when converting from
+                                                  unsigned to signed */
 
   if(config->sendpersecond) {
     /*
