@@ -237,10 +237,10 @@ cache_resolv_response(struct SessionHandle *data,
   /* Store the resolved data in our DNS cache. This function may return a
      pointer to an existing struct already present in the hash, and it may
      return the same argument we pass in. Make no assumptions. */
-  dns = Curl_hash_add(data->hostcache, entry_id, entry_len+1, (void *) dns);
+  dns = Curl_hash_add(data->hostcache, entry_id, entry_len+1, (void *)dns);
   if(!dns) {
-    /* major badness, run away! */
-    Curl_freeaddrinfo(addr);
+    /* Major badness, run away. When this happens, the 'dns' data has
+       already been cleared up by Curl_hash_add(). */
     free(entry_id);
     return NULL;
   }
