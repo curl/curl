@@ -90,7 +90,7 @@ $(srcdir)/getdate.c: getdate.y
 	  $(YACC) $(YFLAGS) getdate.y; \
 	  mv -f y.tab.c getdate.c
 
-$(top_builddir)/ca-bundle.h: Makefile.in Makefile
+$(srcdir)/ca-bundle.h: Makefile.in Makefile
 	echo "/* The file is generated automaticly */" > $@
 if CABUNDLE
 	echo '#define CURL_CA_BUNDLE @CURL_CA_BUNDLE@' >> $@
