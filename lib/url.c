@@ -1906,7 +1906,8 @@ static void verboseconnect(struct connectdata *conn)
   host = Curl_inet_ntop(AF_INET, &in, addrbuf, sizeof(addrbuf));
 #endif
   infof(data, "Connected to %s (%s) port %d\n",
-        conn->hostname, host?host:"", conn->port);
+        conn->bits.httpproxy?conn->proxyhost:conn->hostname,
+        host?host:"", conn->port);
 }
 
 /*
