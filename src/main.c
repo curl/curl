@@ -3439,8 +3439,9 @@ operate(struct Configurable *config, int argc, char *argv[])
         }
 #else
         if((res!=CURLE_OK) && config->showerror) {
+          fprintf(config->errors, "curl: (%d) %s\n", (int)res,
+                  errorbuffer[0]? errorbuffer: curl_easy_strerror(res));
           if(CURLE_SSL_CACERT == res) {
-            fprintf(config->errors, "curl: (%d) %s\n\n", res, errorbuffer);
 #define CURL_CA_CERT_ERRORMSG1 \
 "More details here: http://curl.haxx.se/docs/sslcerts.html\n\n" \
 "curl performs SSL certificate verification by default, using a \"bundle\"\n" \
@@ -3460,9 +3461,6 @@ operate(struct Configurable *config, int argc, char *argv[])
                     CURL_CA_CERT_ERRORMSG1,
                     CURL_CA_CERT_ERRORMSG2 );
           }
-          else
-            fprintf(config->errors, "curl: (%d) %s\n", res,
-                    errorbuffer[0]? errorbuffer: curl_easy_strerror(res));
         }
 #endif
 
