@@ -1079,7 +1079,7 @@ CURLcode Curl_http(struct connectdata *conn)
 
   if(!conn->bits.upload_chunky && (data->set.httpreq != HTTPREQ_GET)) {
     /* not a chunky transfer but data is to be sent */
-    char *ptr = checkheaders(data, "Transfer-Encoding:");
+    ptr = checkheaders(data, "Transfer-Encoding:");
     if(ptr) {
       /* Some kind of TE is requested, check if 'chunked' is chosen */
       if(Curl_compareheader(ptr, "Transfer-Encoding:", "chunked"))
@@ -1108,7 +1108,6 @@ CURLcode Curl_http(struct connectdata *conn)
     /* If we have a given custom Host: header, we extract the host name
        in order to possibly use it for cookie reasons later on. */
     char *start = ptr+strlen("Host:");
-    char *ptr;
     while(*start && isspace((int)*start ))
       start++;
     ptr = start; /* start host-scanning here */
@@ -1395,7 +1394,7 @@ CURLcode Curl_http(struct connectdata *conn)
     }
 
     while(headers) {
-      char *ptr = strchr(headers->data, ':');
+      ptr = strchr(headers->data, ':');
       if(ptr) {
         /* we require a colon for this to be a true header */
 
