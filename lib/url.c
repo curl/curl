@@ -855,17 +855,32 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
       /* default */
       data->set.httpdigest = FALSE;
       data->set.httpnegotiate = FALSE;
+      data->set.httpntlm = FALSE;      
       break;
     case CURLHTTP_DIGEST:
       /* Enable HTTP Digest authentication */
       data->set.httpdigest = TRUE;
       data->set.httpnegotiate = FALSE;
+      data->set.httpntlm = FALSE;      
       break;
+    case CURLHTTP_NTLM:
+      /* Enable HTTP NTLM authentication */
+#ifdef USE_SSLEAY
+      /* We can only support NTLM if OpenSSL is present, as we need their
+         crypto package for it */
+      data->set.httpdigest = FALSE;
+      data->set.httpnegotiate = FALSE;
+      data->set.httpntlm = TRUE;      
+      break;
+#else
+      /* fall-through */
+#endif
     case CURLHTTP_NEGOTIATE:
 #ifdef GSSAPI
       /* Enable HTTP Negotaiate authentication */
       data->set.httpdigest = FALSE;
       data->set.httpnegotiate = TRUE;
+      data->set.httpntlm = FALSE;      
       break;
 #else
       /* fall-through */

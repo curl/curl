@@ -96,6 +96,7 @@
 #include "getinfo.h"
 #include "ssluse.h"
 #include "http_digest.h"
+#include "http_ntlm.h"
 #ifdef GSSAPI
 #include "http_negotiate.h"
 #endif
@@ -736,6 +737,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 conn->newurl = strdup(data->change.url);
 	    }
 #endif
+            else if(Curl_compareheader(k->p,
+                                       "WWW-Authenticate:", "NTLM") &&
+                    (401 == k->httpcode) &&
+                    data->set.httpntlm /* NTLM authentication is 
+                                          activated */) {
+              CURLntlm ntlm;
+              ntlm = Curl_input_ntlm(conn,
+                                     k->p+strlen("WWW-Authenticate:"));
+
+              conn->newurl = strdup(data->change.url); /* clone string */
+            }
             else if(checkprefix("WWW-Authenticate:", k->p) &&
                     (401 == k->httpcode) &&
                     data->set.httpdigest /* Digest authentication is 

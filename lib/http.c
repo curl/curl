@@ -90,6 +90,7 @@
 #include "strequal.h"
 #include "ssluse.h"
 #include "http_digest.h"
+#include "http_ntlm.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -696,7 +697,12 @@ CURLcode Curl_http(struct connectdata *conn)
 	return result;
   } else
 #endif
-  if(data->state.digest.nonce) {
+  if(data->state.ntlm.state) {
+    result = Curl_output_ntlm(conn);
+    if(result)
+      return result;
+  }
+  else if(data->state.digest.nonce) {
     result = Curl_output_digest(conn,
                                 (unsigned char *)request,
                                 (unsigned char *)ppath);
