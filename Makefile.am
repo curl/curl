@@ -67,3 +67,36 @@ pkgadd:
 	make install DESTDIR=`/bin/pwd`/packages/Solaris/root ; \
 	cat LEGAL MITX.txt MPL-1.1.txt > $(srcdir)/packages/Solaris/copyright ; \
 	cd $(srcdir)/packages/Solaris && $(MAKE) package
+
+
+
+
+#
+# Build a Cygwin binary tarball
+# run 'make cygwinbin' once you've done './configure' and 'make'
+# deposits curl-${VERSION}.tar.gz into the packages/Cygwin directory
+# installation of this tarball is via cygwin-setup.exe
+#
+
+# tmp dir to build binary-tarball in
+CygwinTmp = /tmp/curl-binary-build
+
+# Cygwin build number (for a new curl rev, start at 1)
+CygwinBld = 1
+
+cygwinbin:
+	rm -rf $(CygwinTmp) ; \
+	  $(MAKE) install prefix="$(CygwinTmp)/usr"
+	$(mkinstalldirs) $(CygwinTmp)/usr/doc/Cygwin \
+	                 $(CygwinTmp)/usr/doc/$(PACKAGE)-$(VERSION)
+	cp $(top_srcdir)/packages/Cygwin/README \
+	  $(CygwinTmp)/usr/doc/Cygwin/$(PACKAGE)-$(VERSION)-$(CygwinBld).README
+	cd $(top_srcdir) ; \
+	cp CHANGES LEGAL MPL-1.1.txt README docs/FAQ docs/FEATURES \
+	  docs/TODO $(CygwinTmp)/usr/doc/$(PACKAGE)-$(VERSION)
+	cd $(CygwinTmp) && \
+	  tar cjf $(PACKAGE)-$(VERSION)-$(CygwinBld).tar.bz2 usr
+	mv $(CygwinTmp)/*.tar.bz2 . && rm -rf $(CygwinTmp)
+
+	
+
