@@ -63,6 +63,8 @@ for ( $waitedpid = 0;
         my ($request, $path, $ver, $left, $cl);
 
         my @headers;
+
+      stdin:
         while(<STDIN>) {
             if($_ =~ /([A-Z]*) (.*) HTTP\/1.(\d)/) {
                 $request=$1;
@@ -135,13 +137,16 @@ for ( $waitedpid = 0;
                 print "HTTP/1.1 200 OK\r\n",
                 "header: yes\r\n",
                 "\r\n",
-                "You must select a test number to get good data back\r\n";
+                "You must enter a test number to get good data back\r\n";
             }
             else {
                 # send a custom reply to the client
                 open(DATA, "<data/reply$testnum.txt");
                 while(<DATA>) {
                     print $_;
+                    if($verbose) {
+                        print STDERR "OUT: $_";
+                    }
                 }
                 close(DATA);
             }
