@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (15 April 2004)
+- Removed the fixed maximum amount of dir levels the FTP code supported.
+  Previously we had a fixed array for 100 levels, now we save space in each
+  handle by allocating only for a few level by default and then enlarging that
+  in case of need (with no maximum depth). Adjusted test case 142 to verify
+  that 150 dir levels work fine.
+
 Daniel (14 April 2004)
 - Asking for CURL_IPRESOLVE_V6 when ipv6 addresses can't be resolved will
   now cause the resolve function to return NULL immediately. This flaw was

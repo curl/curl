@@ -124,9 +124,19 @@ static CURLcode ftp_cwd_and_mkd(struct connectdata *conn, char *path);
 static void freedirs(struct FTP *ftp)
 {
   int i;
-  for (i=0; ftp->dirs[i]; i++){
-    free(ftp->dirs[i]);
-    ftp->dirs[i]=NULL;
+  if(ftp->dirs) {
+    for (i=0; i < ftp->dirdepth; i++){
+      if(ftp->dirs[i]) {
+        free(ftp->dirs[i]);
+        ftp->dirs[i]=NULL;
+      }
+    }
+    free(ftp->dirs);
+    ftp->dirs = NULL;
+  }
+  if(ftp->file) {
+    free(ftp->file);
+    ftp->file = NULL;
   }
 }
 
@@ -732,13 +742,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   int ftpcode;
   CURLcode result=CURLE_OK;
 
-  /* free the dir tree parts */
+  /* free the dir tree and file parts */
   freedirs(ftp);
-
-  if(ftp->file) {
-    free(ftp->file);
-    ftp->file = NULL;
-  }
 
   if(data->set.upload) {
     if((-1 != data->set.infilesize) &&
@@ -2317,7 +2322,6 @@ CURLcode Curl_ftp(struct connectdata *conn)
   char *slash_pos;  /* position of the first '/' char in curpos */
   char *cur_pos=conn->ppath; /* current position in ppath. point at the begin
                                 of next path component */
-  int path_part=0;/* current path component */
 
   /* the ftp struct is already inited in ftp_connect() */
   ftp = conn->proto.ftp;
@@ -2329,23 +2333,28 @@ CURLcode Curl_ftp(struct connectdata *conn)
   Curl_pgrsSetUploadSize(data, 0);
   Curl_pgrsSetDownloadSize(data, 0);
 
-  /*  fixed : initialize ftp->dirs[xxx] to NULL !
-      is done in Curl_ftp_connect() */
-
+  ftp->dirdepth = 0;
+  ftp->diralloc = 5; /* default dir depth to allocate */
+  ftp->dirs = (char **)malloc(ftp->diralloc * sizeof(ftp->dirs[0]));
+  if(!ftp->dirs)
+    return CURLE_OUT_OF_MEMORY;
+  ftp->dirs[0] = NULL; /* to start with */
+  
   /* parse the URL path into separate path components */
   while((slash_pos=strchr(cur_pos, '/'))) {
     /* 1 or 0 to indicate absolute directory */
-    bool absolute_dir = (cur_pos - conn->ppath > 0) && (path_part == 0);
+    bool absolute_dir = (cur_pos - conn->ppath > 0) && (ftp->dirdepth == 0);
 
     /* seek out the next path component */
     if (slash_pos-cur_pos) {
       /* we skip empty path components, like "x//y" since the FTP command CWD
          requires a parameter and a non-existant parameter a) doesn't work on
          many servers and b) has no effect on the others. */
-      ftp->dirs[path_part] = curl_unescape(cur_pos - absolute_dir,
-                                           slash_pos - cur_pos + absolute_dir);
+      ftp->dirs[ftp->dirdepth] = curl_unescape(cur_pos - absolute_dir,
+                                               slash_pos - cur_pos +
+                                               absolute_dir);
     
-      if (!ftp->dirs[path_part]) { /* run out of memory ... */
+      if (!ftp->dirs[ftp->dirdepth]) { /* run out of memory ... */
         failf(data, "no memory");
         freedirs(ftp);
         return CURLE_OUT_OF_MEMORY;
@@ -2358,12 +2367,16 @@ CURLcode Curl_ftp(struct connectdata *conn)
 
     if(!retcode) {
       cur_pos = slash_pos + 1; /* jump to the rest of the string */
-      if(++path_part >= (CURL_MAX_FTP_DIRDEPTH-1)) {
-        /* too deep, we need the last entry to be kept NULL at all
-           times to signal end of list */
-        failf(data, "too deep dir hierarchy");
-        freedirs(ftp);
-        return CURLE_URL_MALFORMAT;
+      if(++ftp->dirdepth >= ftp->diralloc) {
+        /* enlarge array */
+        char *bigger;
+        ftp->diralloc *= 2; /* double the size each time */
+        bigger = realloc(ftp->dirs, ftp->diralloc * sizeof(ftp->dirs[0]));
+        if(!bigger) {
+          freedirs(ftp);
+          return CURLE_OUT_OF_MEMORY;
+        }
+        ftp->dirs = (char **)bigger;
       }
     }
   }
@@ -2510,10 +2523,6 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
     if(ftp->cache) {
       free(ftp->cache);
       ftp->cache = NULL;
-    }
-    if(ftp->file) {
-      free(ftp->file);
-      ftp->file = NULL; /* zero */
     }
     freedirs(ftp);
   }

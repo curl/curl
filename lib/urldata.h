@@ -107,9 +107,6 @@
    of need. */
 #define HEADERSIZE 256
 
-/* Maximum number of dirs supported by libcurl in a FTP dir hierarchy */
-#define CURL_MAX_FTP_DIRDEPTH 100
-
 /* Just a convenience macro to get the larger value out of two given.
    We prefix with CURL to prevent name collisions. */
 #define CURLMAX(x,y) ((x)>(y)?(x):(y))
@@ -244,7 +241,9 @@ struct FTP {
   char *user;    /* user name string */
   char *passwd;  /* password string */
   char *urlpath; /* the originally given path part of the URL */
-  char *dirs[CURL_MAX_FTP_DIRDEPTH]; /* path components */
+  char **dirs;   /* realloc()ed array for path components */
+  int dirdepth;  /* number of entries used in the 'dirs' array */
+  int diralloc;  /* number of entries allocated for the 'dirs' array */
   char *file;    /* decoded file */
 
   char *entrypath; /* the PWD reply when we logged on */
