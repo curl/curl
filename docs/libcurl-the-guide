@@ -232,6 +232,7 @@ Multi-threading issues
  For SIGPIPE info see the UNIX Socket FAQ at
  http://www.unixguide.net/network/socketfaq/2.22.shtml
 
+ Also, note that CURLOPT_DNS_USE_GLOBAL_CACHE is not thread-safe.
 
 When It Doesn't Work
 
