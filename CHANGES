@@ -6,7 +6,54 @@
 
                                History of Changes
 
+Version 7.2
+
+Daniel (30 August 2000)
+- Understanding AIX is a hard task. I believe I'll never figure out why they
+  solve things so differently from the other unixes. Now, I'm left with the
+  AIX 4.3 run-time warnings about duplicate symbols that according to this
+  article (http://www.geocrawler.com/archives/3/405/1999/9/0/2593428/) is a
+  libtool flaw. I tried the mentioned patch, although that stops the linking
+  completely.
+
+  So, if I select to ignore the ld warnings there are compiler warnings that
+  fill the screen pretty bad when curl compiles. It turns out that if I want
+  to '#include <arpa/inet.h>', I can get tid of the warnings by include the
+  following three include files before that one:
+
+        #include <net/if_dl.h>
+        #include <sys/mbuf.h>
+        #include <netinet/if_ether.h>
+
+  Now, is it really sane to add those include files before arpa/inet.h in all
+  the source files that include it?
+
+  Thanks to Albert Chin-A-Young at thewrittenword.com who gave me the AIX
+  login to try everything on.
+
+Daniel (24 August 2000)
+- Jan Schmidt supplied us a new VC6 makefile for Windows as the previous one
+  was not up to date but lacked several object files.
+
+- More work on the naming.
+
+- Albert Chin-A-Young provided a configure-check for large file support, as
+  some systems seem to need that for them to work. Had to change the position
+  for the config.h include file in every .c file in the libcurl dir...
+
+- As suggested on the mailing list (by Troy Engel), I did use a --data-binary
+  option instead of the messy way I've left described below. It seems to
+  work. The libcurl fix remained the same as yesterday.
+
 Daniel (23 August 2000)
+- Back on the -d stripping newlines thing. The 'plain post' thing was added
+  when I had no thought of that one could actually post binary data with
+  it. Now, I have to add this functionality in a graceful manner and I think
+  I've managed to come up with a way: '-d @file;binary' will thus post the
+  file binary, exactly as its contents are. It is implemented with a new
+  *setopt() option (CURLOPT_POSTFIELDSIZE) to set the postfield size, since
+  libcurl can't strlen() the data in these cases.
+
 - Albert Chin-A-Young made some very serious efforts and all the name
   resolving problems seem to have been sorted out now on all the platforms
   that previously showed them. I'll make another release now anyday because of

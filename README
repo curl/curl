@@ -30,14 +30,14 @@ README
 
         cvs -d :pserver:anonymous@cvs.curl.sourceforge.net:/cvsroot/curl login
 
-        (just press enter when asked for password)
+     (just press enter when asked for password)
 
         cvs -d :pserver:anonymous@cvs.curl.sourceforge.net:/cvsroot/curl co .
 
-        (now, you'll get all the latest sources downloaded into your current
-        directory. Note that this does not create a directory named curl or
-        anything)
+     (now, you'll get all the latest sources downloaded into your current
+     directory. Note that this does NOT create a directory named curl or
+     anything)
 
         cvs -d :pserver:anonymous@cvs.curl.sourceforge.net:/cvsroot/curl logout
         
-        (you're off the hook!)
+     (you're off the hook!)
