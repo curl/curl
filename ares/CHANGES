@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* April 2, 2004
+- Updated various man pages to look nicer when converted to HTML on the web
+  site.
+
 * April 1, 2004
 - Dirk Manske provided a new function that is now named ares_cancel(). It is
   used to cancel/cleanup a resolve/request made using ares functions on the
