@@ -413,11 +413,10 @@ sec_prot_internal(struct connectdata *conn, int level)
   }
 
   if(level){
-    Curl_ftpsendf(conn->firstsocket, conn,
+    Curl_ftpsendf(conn,
                   "PBSZ %u", s);
     /* wait for feedback */
-    nread = Curl_GetFTPResponse(conn->firstsocket,
-                                conn->data->state.buffer, conn, NULL);
+    nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
     if(nread < 0)
       return /*CURLE_OPERATION_TIMEOUTED*/-1;
     if(/*ret != COMPLETE*/conn->data->state.buffer[0] != '2'){
@@ -432,12 +431,11 @@ sec_prot_internal(struct connectdata *conn, int level)
       conn->buffer_size = s;
   }
 
-  Curl_ftpsendf(conn->firstsocket, conn,
-                "PROT %c", level["CSEP"]);
+  Curl_ftpsendf(conn, "PROT %c", level["CSEP"]);
   /* wait for feedback */
-  nread = Curl_GetFTPResponse(conn->firstsocket,
-                              conn->data->state.buffer, conn, NULL);
+  nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
   if(nread < 0)
+
     return /*CURLE_OPERATION_TIMEOUTED*/-1;
   if(/*ret != COMPLETE*/conn->data->state.buffer[0] != '2'){
     failf(conn->data, "Failed to set protection level.\n");
@@ -490,7 +488,7 @@ Curl_sec_login(struct connectdata *conn)
     }
     infof(data, "Trying %s...\n", (*m)->name);
     /*ret = command("AUTH %s", (*m)->name);***/
-    Curl_ftpsendf(conn->firstsocket, conn,
+    Curl_ftpsendf(conn,
                   "AUTH %s", (*m)->name);
     /* wait for feedback */
     nread = Curl_GetFTPResponse(conn->firstsocket,

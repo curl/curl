@@ -245,7 +245,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
     return AUTH_CONTINUE;
   }
 
-  Curl_ftpsendf(conn->firstsocket, conn, "ADAT %s", p);
+  Curl_ftpsendf(conn, "ADAT %s", p);
 
   nread = Curl_GetFTPResponse(conn->firstsocket,
                               conn->data->state.buffer, conn, NULL);
@@ -313,10 +313,10 @@ void Curl_krb_kauth(struct connectdata *conn)
 
   save = Curl_set_command_prot(conn, prot_private);
 
-  Curl_ftpsendf(conn->firstsocket, conn,
+  Curl_ftpsendf(conn,
                 "SITE KAUTH %s", conn->data->state.user);
 
-  nread = Curl_GetFTPResponse(conn->firstsocket, conn->data->state.buffer,
+  nread = Curl_GetFTPResponse(conn->data->state.buffer,
                               conn, NULL);
   if(nread < 0)
     return /*CURLE_OPERATION_TIMEOUTED*/;
@@ -380,10 +380,10 @@ void Curl_krb_kauth(struct connectdata *conn)
   }
   memset (tktcopy.dat, 0, tktcopy.length);
 
-  Curl_ftpsendf(conn->firstsocket, conn,
+  Curl_ftpsendf(conn,
                 "SITE KAUTH %s %s", name, p);
 
-  nread = Curl_GetFTPResponse(conn->firstsocket, conn->data->state.buffer,
+  nread = Curl_GetFTPResponse(conn->data->state.buffer,
                               conn, NULL);
   if(nread < 0)
     return /*CURLE_OPERATION_TIMEOUTED*/;
