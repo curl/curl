@@ -492,8 +492,10 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
           current_form->value = strdup(filename);
           if(!current_form->value)
             return_value = CURL_FORMADD_MEMORY;
-          else
+          else {
             current_form->flags |= HTTPPOST_READFILE;
+            current_form->value_alloc = TRUE;
+          }
         }
         else
           return_value = CURL_FORMADD_NULL;
