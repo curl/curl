@@ -22,6 +22,7 @@ Available values for OPTION include:
   --libs      library linking information
   --prefix    curl install prefix
   --version   output version information
+  --vernum    output the version information as a number (hexadecimal)
 EOF
 
     exit $1
