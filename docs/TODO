@@ -175,14 +175,14 @@ TODO
    http://curl.haxx.se/mail/archive-2003-11/0091.html (Kevin Roth suggested)
 
  * Provide a way to make options bound to a specific URL among several on the
-   command line. Possibly by adding a new option that separates options
-   between URLs, similar to this:
+   command line. Possibly by letting ':' separate options between URLs,
+   similar to this:
 
-      curl --data foo --url url.com --optionseparator
-           --url url2.com --optionseparator \
+      curl --data foo --url url.com :
+          --url url2.com : \
           --url url3.com --data foo3
 
-   (--optionseparator used to show my point, it would need a better name)
+   (More details: http://curl.haxx.se/mail/archive-2004-07/0133.html)
 
    The example would do a POST-GET-POST combination on a single command line.
 
