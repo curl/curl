@@ -8,7 +8,41 @@
 
 Version *upcoming* 7.4
 
+Daniel (12 October 2000)
+- Colin Robert Phipps elegantly corrected a buffer overflow. It could be used
+  by an evil ftp to crash curl. I took the opportunity of replacing a few
+  other sprintf()s into snprintf()s as well.
+
+Daniel (11 October 2000)
+- Found some more memory leaks. This new simple memory debugger has turned out
+  really useful!
+
+Version 7.4 pre6
+
 Daniel (9 October 2000)
+- Florian Koenig pointed out that the bool typedef in the curl/curl.h include
+  file was breaking PHP 4.0.3 compiling. The bool typedef is not used in the
+  public interface and was wrongly inserted in that header file.
+
+- Jörg Hartroth corrected a minor memory leak in the src/urlglob.c stuff. It
+  didn't harm anyone since the memory is free()ed on exit anyway.
+
+- Corrected the src/main.c. We use the _MPRINTF_REPLACE #define to use our
+  libcurl-printf() functions. This gives us snprintf() et al on all
+  platforms. I converted the allocated useragent string to one that uses a
+  local buffer.
+
+- I've set an #if 0 section around the Content-Transfer-Encoding header
+  generated in lib/formdata.c. This will hopefully make curl do more
+  PHP-friendly multi-part posts.
+
+Version 7.4 pre5
+
+Daniel (9 October 2000)
+- Nico Baggus found out that curl's ability to force a ASCII download when
+  using FTP was no longer working! I corrected this. This problem was probably
+  introduced when I redesigned libcurl for version 7.
+
 - Georg Horn provided a source example that proved a memory leak in libcurl.
   I added simple memory debugging facilities and now we can make libcurl log
   all memory fiddling functions. An additional perl script is used to analyze
@@ -24,9 +58,9 @@ Daniel (8 October 2000)
 Version 7.4 pre4
 
 Daniel (6 October 2000)
-- Is the -F post following the RFCX 1867 spec? We had this dicussion on the
+- Is the -F post following the RFC 1867 spec? We had this dicussion on the
   mailing list since it appears curl can't post -F form posts to a PHP
-  receiver...
+  receiver... I've been in touch with the PHP developers about this.
 
 - Domenico Andreoli found out that the long option '--proxy' wasn't working
   anymore! The option parser got confused when I added the --proxytunnel for
