@@ -1,0 +1,27 @@
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+insecure HTTPS without permission
+ </name>
+ <command>
+https://%HOSTIP:%HOSTPORT/want/305 --cacert moooo
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+</protocol>
+<errorcode>
+60
+</errorcode>
+</verify>
