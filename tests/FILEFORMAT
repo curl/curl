@@ -58,6 +58,15 @@ accordingly. more about them elsewhere
 Set 'option=no-output' to prevent the test script to slap on the --output
 argument that directs the output to a file. The --output is also not added if
 the client/stdout section is used.
+
+Available substitute variables include:
+%HOSTIP    - IP address of the host running this test
+%HOSTPORT  - Port number of the HTTP server
+%HTTPSPORT - Port number of the HTTPS server
+%FTPPORT   - Port number of the FTP server
+%FTPSPORT  - Port number of the FTPS server
+%SRCDIR    - Full path to the source dir
+%PWD       - Current directory
 </command>
 <file name="log/filename">
 this creates the named file with this content before the test case is run
