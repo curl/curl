@@ -94,16 +94,13 @@ CURLcode curl_getinfo(CURL *curl, CURLINFO info, ...)
     *param_doublep = data->progress.timespent;
     break;
   case CURLINFO_NAMELOOKUP_TIME:
-    *param_doublep = tvdiff(data->progress.t_nslookup,
-                            data->progress.start);
+    *param_doublep = data->progress.t_nslookup;
     break;
   case CURLINFO_CONNECT_TIME:
-    *param_doublep =  tvdiff(data->progress.t_connect,
-                             data->progress.start);
+    *param_doublep = data->progress.t_connect;
     break;
   case CURLINFO_PRETRANSFER_TIME:
-    *param_doublep =  tvdiff(data->progress.t_pretransfer,
-                             data->progress.start);
+    *param_doublep =  data->progress.t_pretransfer;
     break;
   case CURLINFO_SIZE_UPLOAD:
     *param_doublep =  data->progress.uploaded;

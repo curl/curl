@@ -244,10 +244,11 @@ struct Progress {
   double ulspeed;
 
   struct timeval start;
+  struct timeval t_startsingle;
   /* various data stored for possible later report */
-  struct timeval t_nslookup;
-  struct timeval t_connect;
-  struct timeval t_pretransfer;
+  double t_nslookup;
+  double t_connect;
+  double t_pretransfer;
   int httpcode;
 
 #define CURR_TIME 5
@@ -271,6 +272,8 @@ struct HTTP {
   struct Form form;
   size_t (*storefread)(char *, size_t , size_t , FILE *);
   FILE *in;
+
+  long followlocation;
 };
 
 /****************************************************************************
