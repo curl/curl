@@ -58,7 +58,7 @@ void time2str(char *r, int t)
   int h = (t/3600);
   int m = (t-(h*3600))/60;
   int s = (t-(h*3600)-(m*60));
-  sprintf(r,"%d:%02d:%02d",h,m,s);
+  sprintf(r,"%2d:%02d:%02d",h,m,s);
 }
 
 /* The point of this function would be to return a string of the input data,
@@ -94,8 +94,11 @@ char *max5data(double bytes, char *max5)
 #if 1
 void pgrsDone(struct UrlData *data)
 {
-  if(!(data->progress.flags & PGRS_HIDE))
+  if(!(data->progress.flags & PGRS_HIDE)) {
+    data->progress.lastshow=0;
+    pgrsUpdate(data); /* the final (forced) update */
     fprintf(stderr, "\n");
+  }
 }
 void pgrsMode(struct UrlData *data, int mode)
 {
@@ -125,21 +128,25 @@ void pgrsSetUploadCounter(struct UrlData *data, double size)
 
 void pgrsSetDownloadSize(struct UrlData *data, double size)
 {
-  data->progress.size_dl = size;
-  data->progress.flags |= PGRS_DL_SIZE_KNOWN;
+  if(size > 0) {
+    data->progress.size_dl = size;
+    data->progress.flags |= PGRS_DL_SIZE_KNOWN;
+  }
 }
 
 void pgrsSetUploadSize(struct UrlData *data, double size)
 {
-  data->progress.size_ul = size;
-  data->progress.flags |= PGRS_UL_SIZE_KNOWN;
+  if(size > 0) {
+    data->progress.size_ul = size;
+    data->progress.flags |= PGRS_UL_SIZE_KNOWN;
+  }
 }
 
 /* EXAMPLE OUTPUT to follow:
 
-  % Total    % Received % Xferd  Average Speed          Time            Curr.
-                                Download Upload Total   Current  Left   Speed
-100 12345  100 12345  100 12345  12345   12345  2:47:33 2:00:02 2:00:02 12345
+  % Total    % Received % Xferd  Average Speed          Time             Curr.
+                                 Dload  Upload Total    Current  Left    Speed
+100 12345  100 12345  100 12345  12345  12345 12:12:12 12:12:12 12:12:12 12345
 
  */
 
@@ -154,8 +161,8 @@ void pgrsUpdate(struct UrlData *data)
   else if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
     if ( data->progress.mode == CURL_PROGRESS_STATS ) {
       fprintf(data->err,
-              "  %% Total    %% Received %% Xferd  Average Speed          Time            Curr.\n"
-              "                                Download Upload Total   Current  Left   Speed\n");
+              "  %% Total    %% Received %% Xferd  Average Speed          Time             Curr.\n"
+              "                                 Dload  Upload Total    Current  Left    Speed\n");
     }
     data->progress.flags |= PGRS_HEADERS_OUT; /* headers are shown */
   }
@@ -165,7 +172,6 @@ void pgrsUpdate(struct UrlData *data)
   switch(data->progress.mode) {
   case CURL_PROGRESS_STATS:
     {
-      static long lastshow;
       char max5[6][6];
       double dlpercen=0;
       double ulpercen=0;
@@ -196,10 +202,10 @@ void pgrsUpdate(struct UrlData *data)
           
       double total_estimate;
 
-      if(lastshow == tvlong(now))
+      if(data->progress.lastshow == tvlong(now))
         return; /* never update this more than once a second if the end isn't 
                    reached */
-      lastshow = now.tv_sec;
+      data->progress.lastshow = now.tv_sec;
 
       /* The exact time spent so far */
       timespent = tvdiff (now, data->progress.start);
@@ -276,7 +282,7 @@ void pgrsUpdate(struct UrlData *data)
 
 
       fprintf(stderr,
-              "\r%3d %s  %3d %s  %3d %s  %s   %s  %s %s %s %s",
+              "\r%3d %s  %3d %s  %3d %s  %s  %s %s %s %s %s",
               (int)total_percen,                    /* total % */
               max5data(total_expected_transfer, max5[2]),    /* total size */
               (int)dlpercen,                        /* rcvd % */
