@@ -647,12 +647,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             else if (checkprefix("Content-Encoding:", k->p) &&
                      data->set.encoding) {
               /*
-               * Process Content-Encoding. Look for the values: identity, gzip,
-               * deflate, compress, x-gzip and x-compress. x-gzip and
+               * Process Content-Encoding. Look for the values: identity,
+               * gzip, deflate, compress, x-gzip and x-compress. x-gzip and
                * x-compress are the same as gzip and compress. (Sec 3.5 RFC
-               * 2616). zlib cannot handle compress, and gzip is not currently
-               * implemented. However, errors are handled further down when the
-               * response body is processed 08/27/02 jhrg */
+               * 2616). zlib cannot handle compress.  However, errors are
+               * handled further down when the response body is processed
+               */
               char *start;
 
               /* Find the first non-space letter */
