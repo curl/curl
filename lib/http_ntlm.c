@@ -77,7 +77,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
     header++;
 
   if(checkprefix("NTLM", header)) {
-    char buffer[256];
+    unsigned char buffer[256];
     header += strlen("NTLM");
 
     while(*header && isspace((int)*header))
@@ -187,7 +187,7 @@ static void mkhash(char *password,
   unsigned char lmbuffer[21];
   unsigned char ntbuffer[21];
   
-  unsigned char lm_pw[14];
+  unsigned char pw[256]; /* for maximum 128-letter passwords! */
   int len = strlen(password);
   unsigned char magic[] = { 0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 };
   int i;
@@ -196,47 +196,46 @@ static void mkhash(char *password,
     len = 14;
   
   for (i=0; i<len; i++)
-    lm_pw[i] = toupper(password[i]);
+    pw[i] = toupper(password[i]);
 
   for (; i<14; i++)
-    lm_pw[i] = 0;
+    pw[i] = 0;
 
-  /* create LanManager hashed password */
   {
+  /* create LanManager hashed password */
+
     DES_key_schedule ks;
 
-    setup_des_key(lm_pw, &ks);
+    setup_des_key(pw, &ks);
     DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer, &ks,
                     DES_ENCRYPT);
   
-    setup_des_key(lm_pw+7, &ks);
+    setup_des_key(pw+7, &ks);
     DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer+8, &ks,
                     DES_ENCRYPT);
 
     memset(lmbuffer+16, 0, 5);
-
   }
 
   {
     /* create NT hashed password */
-    int len = strlen(password);
-    unsigned char nt_pw[256];
     MD4_CTX MD4;
 
+    len = strlen(password);
+
     for (i=0; i<len; i++) {
-      nt_pw[2*i]   = password[i];
-      nt_pw[2*i+1] = 0;
+      pw[2*i]   = password[i];
+      pw[2*i+1] = 0;
     }
 
     MD4_Init(&MD4);
-    MD4_Update(&MD4, nt_pw, 2*len);
-    MD4_Final(nt_pw, &MD4);
+    MD4_Update(&MD4, pw, 2*len);
+    MD4_Final(ntbuffer, &MD4);
 
     memset(ntbuffer+16, 0, 5);
-
   }
-  /* create responses */
 
+  /* create responses */
   calc_resp(lmbuffer, nonce, lmresp);
   calc_resp(ntbuffer, nonce, ntresp);
 }
@@ -290,6 +289,12 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     and sends a longer chunk of data than we do! Interestingly, there's no
     host or domain either.
 
+    We want to send something like this:
+
+0x00: 4e 54 4c 4d 53 53 50 00 01 00 00 00 03 b2 00 00  | NTLMSSP.........
+0x10: 05 00 05 00 2b 00 00 00 0b 00 0b 00 20 00 00 00  | ....+...........
+0x20: 4c 49 4c 4c 41 53 59 53 54 45 52 48 45 4d 4d 41  | LILLASYSTERHEMMA
+
     */
 
     snprintf((char *)ntlm, sizeof(ntlm), "NTLMSSP%c"
@@ -300,16 +305,18 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
              "%c%c"  /* domain length */
              "%c%c"  /* domain length */
              "%c%c"  /* domain name offset */
+             "%c%c"  /* 2 zeroes */
              "%c%c"  /* host length */
              "%c%c"  /* host length */
              "%c%c"  /* host name offset */
-             "%c%c"
+             "%c%c"  /* 2 zeroes */
              "%s" /* host name */
              "%s", /* domain string */
              0,0,0,0,0,0,
              SHORTPAIR(domlen),
              SHORTPAIR(domlen),
              SHORTPAIR(domoff),
+             0,0,
              SHORTPAIR(hostlen),
              SHORTPAIR(hostlen),
              SHORTPAIR(hostoff),
@@ -317,7 +324,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
              host, domain);
 
     /* initial packet length */
-    size = 8 + 1 + 3 + 18 + hostlen + domlen;
+    size = 32 + hostlen + domlen;
 #if 0
     #define CHUNK "\x4e\x54\x4c\x4d\x53\x53\x50\x00\x01\x00\x00\x00\x06\x82\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x30\x00\x00\x00\x00\x00\x00\x00\x30\x00\x00\x00"
     memcpy(ntlm, CHUNK, sizeof(CHUNK)-1);
@@ -356,6 +363,19 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
 
       Note how the domain + username + hostname ARE NOT unicoded in any way.
       Domain and hostname are uppercase, while username are case sensitive.
+
+      We send something like this:
+
+0x00: 4e 54 4c 4d 53 53 50 00 03 00 00 00 18 00 18 00  | NTLMSSP.........
+0x10: 6c 00 00 00 18 00 18 00 84 00 00 00 0a 00 0a 00  | l...............
+0x20: 40 00 00 00 0c 00 0c 00 4a 00 00 00 16 00 16 00  | @.......J.......
+0x30: 56 00 00 00 00 00 00 00 9c 00 00 00 01 82 00 00  | V...............
+0x40: 48 00 45 00 4d 00 4d 00 41 00 64 00 61 00 6e 00  | H.E.M.M.A.d.a.n.
+0x50: 69 00 65 00 6c 00 4c 00 49 00 4c 00 4c 00 41 00  | i.e.l.L.I.L.L.A.
+0x60: 53 00 59 00 53 00 54 00 45 00 52 00 bc ed 28 c9  | S.Y.S.T.E.R...(.
+0x70: 16 c4 1b 16 d7 c9 b4 0e ef ef 02 6d 26 8d c0 ba  | ...........m&...
+0x80: ac b6 5a c1 26 8d c0 ba ac b6 5a c1 26 8d c0 ba  | ..Z.&.....Z.&...
+0x90: ac b6 5a c1 26 8d c0 ba ac b6 5a c1              | ..Z.&.....Z.
 
     */
 
