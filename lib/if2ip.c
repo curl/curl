@@ -34,10 +34,6 @@
 
 #if ! defined(WIN32) && ! defined(__BEOS__) && !defined(__CYGWIN32__)
 
-#ifdef NEED_REENTRANT
-#define _REENTRANT
-#endif
-
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif

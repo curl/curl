@@ -34,13 +34,6 @@
 
 #include <errno.h>
 
-
-#ifdef NEED_REENTRANT
-#define _REENTRANT /* Necessary to use in Solaris, since the silly guys at Sun
-                      made the localtime_r() prototype dependent on it (or
-                      _POSIX_C_SOURCE or _POSIX_PTHREAD_SEMANTICS). */
-#endif
-
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>
 #include <time.h>
