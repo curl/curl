@@ -488,6 +488,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Do not include the body part in the output data stream.
      */
     data->set.opt_no_body = va_arg(param, long)?TRUE:FALSE;
+    if(data->set.opt_no_body)
+      /* in HTTP lingo, this means using the HEAD request */
+      data->set.httpreq = HTTPREQ_HEAD;
     break;
   case CURLOPT_FAILONERROR:
     /*

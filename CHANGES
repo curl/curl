@@ -6,7 +6,19 @@
 
                                   Changelog
 
+Daniel (30 June 2004)
+- Niels van Tongeren found that setting CURLOPT_NOBODY to TRUE doesn't disable
+  a previously set POST request, making a very odd request get sent (unless
+  you disabled the POST) a HEAD request with a POST request-body. I've now
+  made CURLOPT_NOBODY enforce a proper HEAD. Added test case 514 for this.
+
 Daniel (29 June 2004)
+- Günter Knauf made the testcurl.pl script capable of using a custom setup
+  file to easier run multiple autobuilds on the same source tree.
+
+- Gisle fixed the djgpp build and fixed a memory problem in some of the
+  reorged name resolved code.
+
 - Fixed code to allow connects done using the multi interface to attempt the
   next IP when connecting to a host that resolves to multiple IPs and a
   connect attempt fails.
