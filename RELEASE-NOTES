@@ -1,7 +1,7 @@
-Curl and libcurl 7.12.1
+Curl and libcurl 7.12.2
 
- Public curl release number:               82
- Releases counted from the very beginning: 109
+ Public curl release number:               83
+ Releases counted from the very beginning: 110
  Available command line options:           96
  Available curl_easy_setopt() options:     120
  Number of public functions in libcurl:    36
@@ -10,74 +10,18 @@ Curl and libcurl 7.12.1
 
 This release includes the following changes:
 
- o the version string now only contains info about (sub) package versions,
-   while for example krb4 and ipv6 now only are available as 'features'
- o added curl_easy_reset()
- o socks proxy support even when libcurl is built ipv6-enabled
- o read callbacks can stop the transfer by returning CURL_READFUNC_ABORT
- o libcurl-tutorial.3 is the new man page formerly known as libcurl-the-guide
- o additional SSL trace data might be sent to the debug callback using two new
-   types: CURLINFO_SSL_DATA_IN and CURLINFO_SSL_DATA_OUT
- o multipart formposts can upload files larger than system memory
- o the curl tool continues with the next URL even if one transfer fails
- o FTP 3rd party transfer support - seven new setopt() options
+ o 
 
 This release includes the following bugfixes:
 
- o UTF-8 encoded certificate names can now be verified properly
- o krb4 link problem
- o HTTP Negotiate service name now provided in uppercase
- o no longer accepts any cookies with domain set to just a TLD
- o HTTP Digest properties without quotes in the header
- o bad Host: header case on re-used connections over proxy
- o duplicate Host: header case on re-used connections
- o curl -o name#[num] now works when no globbing for [num] exists
- o test suite runs fine with valgrind 2.1.x
- o negative Content-Length is ignored
- o test 505 runs fine on windows
- o curl_share_cleanup() crash
- o --trace files now get the final info lines too
- o multi interface connects fine to multi-IP resolving hosts
- o --limit-rate works on Mac OS X (and other systems with bad poll()s)
- o cookies can now hold 4999 bytes of content
- o HTTP POST/PUT with NTLM/Digest/Negotiate to a URL returning 3XX
- o HTTPS POST/PUT over a proxy requiring NTLM/Digest/Negotiate
- o less restrictive libidn requirements, 0.4.1 or later is fine
- o HTTP POST or PUT with Digest/Negotiate/NTLM selected but the server
-   didn't require any authentication
- o win32 file:// transfer free memory bug
- o configure --disable-http builds a libcurl without HTTP support
- o CURLOPT_FILETIME had wrong type in curl.h, it expects a long argument
- o builds fine with Borland on Windows
- o the msvc curllib.dsp now builds the libcurl.lib file
- o builds fine on VMS
- o builds fine on NetWare
- o HTTP Digest authentication with proxies uses correct user name + password
- o builds fine with lcc-win32
+ o 
 
 Other curl-related news since the previous public release:
 
- o James Hu took over after Kevin Roth as maintainer of the curl package on
-   cygwin. Many saludos to Kevin for a work well done during many years.
- o Gambas binding: http://gambas.sf.net
- o pycurl 7.12.0 was released http://pycurl.sf.net
- o wxWidgets binding: http://homepage.mac.com/codonnell/wxcurldav/
- o New Austrian curl web mirror: http://curl.gds.tuwien.ac.at
- o TclCurl 0.12.0 was released:
-   http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o Ch binding: http://chcurl.sourceforge.net
- o New US curl web mirror: http://curl.109k.com
- o glib/GTK+ binding: http://atterer.net/glibcurl/
- o New French curl web mirror: http://curl.mirror.internet.tp
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Gisle Vanem, Vincent Bronner, Alexander Krasnostavsky, Chris Gaukroger,
- Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam,
- Luca Alteas, Jean-Louis Lemaire, David Byron, David Cohen, Rob Stanzel,
- Niels van Tongeren, Andrés García, Toby Peterson, Casey O'Donnell, Brian
- Akins, Bertrand Demiddelaer, Joel Chen, Dylan Salisbury, Enrico Scholz,
- Alexis Carvalho
 
         Thanks! (and sorry if I forgot to mention someone)
