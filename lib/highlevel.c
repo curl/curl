@@ -456,14 +456,14 @@ _Transfer(struct connectdata *c_conn)
                     default:
                       if(timeofdoc < data->timevalue) {
                         infof(data,
-                              "The requested document is not new enough");
+                              "The requested document is not new enough\n");
                         return CURLE_OK;
                       }
                       break;
                     case TIMECOND_IFUNMODSINCE:
                       if(timeofdoc > data->timevalue) {
                         infof(data,
-                              "The requested document is not old enough");
+                              "The requested document is not old enough\n");
                         return CURLE_OK;
                       }
                       break;
