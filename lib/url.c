@@ -67,6 +67,12 @@
 #include <sys/select.h>
 #endif
 
+#ifdef	VMS
+#include <in.h>
+#include <inet.h>
+#endif
+
+
 #ifndef HAVE_SELECT
 #error "We can't compile without select() support!"
 #endif
@@ -1429,12 +1435,34 @@ static CURLcode Connect(struct UrlData *data,
      * hostname other than "localhost" and "127.0.0.1", which is unique among
      * the URL protocols specified in RFC 1738
      */
+    if(conn->path[0] != '/') {
+      /* the URL included a host name, we ignore host names in file:// URLs
+         as the standards don't define what to do with them */
+      char *ptr=strchr(conn->path, '/');
+      if(ptr) {
+        /* there was a slash present
+           
+           RFC1738 (section 3.1, page 5) says:
+ 
+           The rest of the locator consists of data specific to the scheme,
+           and is known as the "url-path". It supplies the details of how the
+           specified resource can be accessed. Note that the "/" between the
+           host (or port) and the url-path is NOT part of the url-path.
+ 
+           As most agents use file://localhost/foo to get '/foo' although the
+           slash preceeding foo is a separator and not a slash for the path,
+           a URL as file://localhost//foo must be valid as well, to refer to
+           the same file with an absolute path.
+        */
 
-    if (strnequal(conn->path, "localhost/", 10) ||
-        strnequal(conn->path, "127.0.0.1/", 10))
-      /* If there's another host name than the one we support, <host>/ is
-       * quietly ommitted */
-      strcpy(conn->path, &conn->path[10]);
+        if(ptr[1] && ('/' == ptr[1]))
+          /* if there was two slashes, we skip the first one as that is then
+             used truly as a separator */
+          ptr++; 
+        
+        strcpy(conn->path, ptr);
+      }
+    }
 
     strcpy(conn->protostr, "file"); /* store protocol string lowercase */
   }
