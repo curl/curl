@@ -172,6 +172,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,
   struct timeval before = Curl_tvnow();
 
 #ifdef ENABLE_IPV6
+  struct addrinfo *ai;
   /*
    * Connecting with IPv6 support is so much easier and cleanly done
    */
