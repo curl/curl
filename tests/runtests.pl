@@ -613,6 +613,7 @@ sub singletest {
     }
     else {
         $CMDLINE="$LIBDIR/$tool";
+        $DBGCURL=$CMDLINE;
     }
 
     $CMDLINE .= "$cmdargs >$STDOUT 2>$STDERR";
@@ -829,13 +830,11 @@ sub serverfortest {
         push @what, "file";
     }
     elsif($testnum< 400) {
-        # 300 - 399 is for HTTPS, two servers!
-        push @what, "http";
+        # 300 - 399 is for HTTPS
         push @what, "https";
     }
     elsif($testnum< 500) {
-        # 400 - 499 is for FTPS, also two servers
-        push @what, "ftp";
+        # 400 - 499 is for FTPS
         push @what, "ftps";
     }
 
@@ -876,6 +875,10 @@ sub serverfortest {
                 # or if libcurl is SSL-less
                 return 1;
             }
+            if(!$run{'ftp'}) {
+                runftpserver($verbose);
+                $run{'ftp'}=$FTPPIDFILE;
+            }
             if(!$run{'ftps'}) {
                 runftpsserver($verbose);
                 $run{'ftps'}=$FTPSPIDFILE;
@@ -889,6 +892,10 @@ sub serverfortest {
                 # we can't run https tests without stunnel
                 # or if libcurl is SSL-less
                 return 1;
+            }
+            if(!$run{'http'}) {
+                runhttpserver($verbose);
+                $run{'http'}=$HTTPPIDFILE;
             }
             if(!$run{'https'}) {
                 runhttpsserver($verbose);
