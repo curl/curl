@@ -5,6 +5,12 @@ doesn't want these improvements.
 The package is called 'c-ares' for now since I (Daniel Stenberg) want this for
 use within the curl project (hence the letter C) and it makes a nice pun.
 
+* January 4, 2004:
+
+- Dominick Meglio made the private gettimeofday() become ares_gettimeofday()
+  instead in order to not pollute the name space and risk colliding with
+  other libraries' versions of this function.
+
 * October 24, 2003. Daniel Stenberg:
 
   Added ares_version().
