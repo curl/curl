@@ -1,1 +1,3 @@
 SUBDIRS = Win32 Linux
+
+EXTRA_DIST = README
