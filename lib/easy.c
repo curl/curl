@@ -391,11 +391,6 @@ void curl_easy_cleanup(CURL *curl)
   if(!data)
     return;
 
-  if ( ! (data->share && data->share->hostcache) ) {
-    if ( !Curl_global_host_cache_use(data)) {
-      Curl_hash_destroy(data->hostcache);
-    }
-  }
   Curl_close(data);
 }
 

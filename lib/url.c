@@ -204,6 +204,12 @@ CURLcode Curl_close(struct SessionHandle *data)
   /* Loop through all open connections and kill them one by one */
   while(-1 != ConnectionKillOne(data));
 
+  if ( ! (data->share && data->share->hostcache) ) {
+    if ( !Curl_global_host_cache_use(data)) {
+      Curl_hash_destroy(data->hostcache);
+    }
+  }
+
 #ifdef USE_SSLEAY
   /* Close down all open SSL info and sessions */
   Curl_SSL_Close_All(data);
@@ -1431,6 +1437,17 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     return CURLE_OK; /* this is closed and fine already */
 
   data = conn->data;
+
+  if(conn->dns_entry)
+    Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
+
+#if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
+  /* scan for DNS cache entries still marked as in use */
+  Curl_hash_apply(data->hostcache,
+                  NULL, Curl_scan_cache_used);
+#endif
+
+  Curl_hostcache_prune(data); /* kill old DNS cache entries */
 
   /*
    * The range string is usually freed in curl_done(), but we might
@@ -3230,8 +3247,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(conn->bits.reuse) {
     /* re-used connection, no resolving is necessary */
     hostaddr = NULL;
-    conn->dns_entry = NULL; /* we don't connect now so we don't have any fresh
-                               dns entry struct to point to */
+    /* we'll need to clear conn->dns_entry later in Curl_disconnect() */
 
     if (conn->bits.httpproxy)
       fix_hostname(conn, &conn->host);
@@ -3479,17 +3495,6 @@ CURLcode Curl_done(struct connectdata **connp,
     free(conn->newurl);
     conn->newurl = NULL;
   }
-
-  if(conn->dns_entry)
-    Curl_resolv_unlock(conn->data, conn->dns_entry); /* done with this */
-
-#if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
-  /* scan for DNS cache entries still marked as in use */
-  Curl_hash_apply(data->hostcache,
-                  NULL, Curl_scan_cache_used);
-#endif
-
-  Curl_hostcache_prune(data); /* kill old DNS cache entries */
 
   /* this calls the protocol-specific function pointer previously set */
   if(conn->curl_done)
