@@ -196,7 +196,7 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   /* scan through the list and remove the 'curl_handle' */
   easy = multi->easy.next;
   while(easy) {
-    if(easy->easy_handle == curl_handle)
+    if(easy->easy_handle == (struct SessionHandle *)curl_handle)
       break;
     easy=easy->next;
   }
