@@ -5,9 +5,7 @@ die(){
 	exit
 }
 
-MAKEFILES=`find . -name Makefile.am | sed 's/\.am$//'`
-
-automake $MAKEFILES || die "The command 'automake $MAKEFILES' failed"
+automake          || die "The command 'automake $MAKEFILES' failed"
 aclocal           || die "The command 'aclocal' failed"
 autoheader        || die "The command 'autoheader' failed"
 autoconf          || die "The command 'autoconf' failed"
