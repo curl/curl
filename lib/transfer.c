@@ -859,7 +859,8 @@ Transfer(struct connectdata *c_conn)
         conn->upload_bufsize=(long)min(data->progress.ulspeed, BUFSIZE);
       }
 
-      if (data->set.timeout && (Curl_tvdiff (now, start) > data->set.timeout)) {
+      if (data->set.timeout &&
+          ((Curl_tvdiff(now, start)/1000) > data->set.timeout)) {
 	failf (data, "Operation timed out with %d out of %d bytes received",
 	       bytecount, conn->size);
 	return CURLE_OPERATION_TIMEOUTED;
@@ -984,7 +985,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
           data->change.referer_alloc = TRUE; /* yes, free this later */
         }
 
-        if(2 != sscanf(newurl, "%15[^:]://%c", prot, &letter)) {
+        if(2 != sscanf(newurl, "%15[^?&/:]://%c", prot, &letter)) {
           /***
            *DANG* this is an RFC 2068 violation. The URL is supposed
            to be absolute and this doesn't seem to be that!
