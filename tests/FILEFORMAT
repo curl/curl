@@ -43,6 +43,11 @@ which is useful if the test case needs a file to act on.
 <errorcode>
 numerical error code curl is supposed to return
 </errorcode>
+<strip>
+One regex per line that is removed from the protocol dumps before the
+comparison is made. This is very useful to remove dependencies on dynamicly
+changing protocol data such as port numbers or user-agent strings.
+</strip>
 <protocol>
 the protocol dump curl should transmit
 </protocol>
