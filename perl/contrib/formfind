@@ -28,7 +28,17 @@ sub namevalue {
     my ($tag)=@_;
     my $name=$tag;
     if($name =~ /name *=/i) {
-        $name=~ s/.*name *= *(\"|)([^ \">]*).*/$2/gi;
+        if($name =~ /name *= *([^\"]([^ \">]*))/) {
+            $name = $1;
+        }
+        elsif($name =~ /name *= *\"([^\"]*)\"/) {
+            $name=$1;
+        }
+        else {
+            # there is a tag but we didn't find the contents
+            $name="[weird]";
+        }
+
     }
     else {
         # no name given
@@ -37,7 +47,16 @@ sub namevalue {
     # get value tag
     my $value= $tag;
     if($value =~ /value *=/i) {
-        $value=~ s/.*value *= *(\"|)([^ \">]*).*/$2/gi;
+        if($value =~ /value *= *([^\"]([^ \">]*))/) {
+            $value = $1;
+        }
+        elsif($value =~ /value *= *\"([^\"]*)\"/) {
+            $value=$1;
+        }
+        else {
+            # there is a tag but we didn't find the contents
+            $value="[weird]";
+        }
     }
     else {
         $value="";
@@ -142,11 +161,11 @@ while($in =~ /[^<]*(<[^>]+>)/g ) {
                     push @alts, "$value";
                 }
                 else {
-                    $info="";
+                    print "Input: NAME=\"$name\"";
                     if($value ne "") {
-                        $info="=$value";
+                        print " VALUE=\"$value\"";
                     }
-                    print "Input: $name$info ($type)\n";
+                    print " ($type)\n";
                     push @vars, "$name";
                     # store default value:
                     $value{$name}=$value;
