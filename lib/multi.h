@@ -44,7 +44,7 @@
   o Enable the application to select() on its own file descriptors and curl's
     file descriptors simultaneous easily.
   
-  Example source using this interface: http://curl.haxx.se/dev/multi-app.c
+  Example sources using this interface is here: ../multi/
 
 */
 #ifdef HAVE_SYS_SOCKET_H
