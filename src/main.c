@@ -661,10 +661,12 @@ static int getparameter(char *flag, /* f or -long-flag */
     case 'c':
       /* This makes us continue an ftp transfer */
       config->use_resume^=TRUE;
+      fprintf(stderr, "-c is a deprecated switch, use '-C -' instead!\n");
       break;
     case 'C':
       /* This makes us continue an ftp transfer at given position */
-      config->resume_from= atoi(nextarg);
+      if(!strequal(nextarg, "-"))
+        config->resume_from= atoi(nextarg);
       config->use_resume=TRUE;
       break;
     case 'd':
@@ -835,11 +837,14 @@ static int getparameter(char *flag, /* f or -long-flag */
     case 't':
       /* we are uploading */
       config->conf ^= CONF_UPLOAD;
+      fprintf(stderr, "-t is a deprecated switch, use '-T -' instead!\n");
       break;
     case 'T':
       /* we are uploading */
       config->conf |= CONF_UPLOAD;
-      GetStr(&config->infile, nextarg);
+      if(!strequal("-", nextarg))
+        /* make - equal stdin */
+        GetStr(&config->infile, nextarg);
       break;
     case 'u':
       /* user:password  */
