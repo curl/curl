@@ -8,7 +8,13 @@
 
 
 Daniel (29 January 2001)
-- Yet another Content-Range change. Ok now? Bob Schader checks from his end.
+- I added a test case for the HTTP PUT resume thing (test case 33).
+
+Version 7.6.1-pre1
+
+Daniel (29 January 2001)
+- Yet another Content-Range change. Ok now? Bob Schader checks from his end 
+  and it works for him.
 
 Daniel (27 January 2001)
 - So the HTTP PUT resume fix wasn't good. There should appearantly be a
