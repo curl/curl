@@ -2080,10 +2080,9 @@ static bool is_ASCII_name (const char *hostname)
 /*
  * Check if characters in hostname is allowed in Top Level Domain.
  */
-static bool tld_check_name (struct connectdata *conn,
+static bool tld_check_name (struct SessionHandle *data,
                             const char *ace_hostname)
 {
-  struct SessionHandle *data = conn->data;
   size_t err_pos;
   char *uc_name = NULL;
   int rc;
@@ -2091,8 +2090,7 @@ static bool tld_check_name (struct connectdata *conn,
   /* Convert (and downcase) ACE-name back into locale's character set */
   rc = idna_to_unicode_lzlz(ace_hostname, &uc_name, 0);
   if (rc != IDNA_SUCCESS)
-     infof(data, "Failed to convert %s from ACE; %s\n",
-           ace_hostname, Curl_idn_strerror(conn,rc));
+    return (FALSE);
 
   rc = tld_check_lz(uc_name, &err_pos, NULL);
   if (rc == TLD_INVALID)
@@ -2128,7 +2126,7 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
       infof(data, "Failed to convert %s to ACE; %s\n",
             host->name, Curl_idn_strerror(conn,rc));
     else {
-      tld_check_name(conn, ace_hostname);
+      tld_check_name(data, ace_hostname);
 
       host->encalloc = ace_hostname;
       /* change the name pointer to point to the encoded hostname */
