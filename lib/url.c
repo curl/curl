@@ -1101,7 +1101,7 @@ static bool SocketIsDead(int sock)
   FD_SET(sock,&check_set); 
 
   to.tv_sec = 0; 
-  to.tv_usec = 1; 
+  to.tv_usec = 0; 
 
   sval = select(sock + 1, &check_set, 0, 0, &to);
   if(sval == 0)
