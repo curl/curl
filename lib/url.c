@@ -2276,10 +2276,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(-1 == conn->firstsocket) {
     /* Connect only if not already connected! */
     result = ConnectPlease(conn);
+    Curl_pgrsTime(data, TIMER_CONNECT); /* connect done, good or bad */
+
     if(CURLE_OK != result)
       return result;
 
-    Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected */
     if(data->set.verbose)
       verboseconnect(conn);
 
