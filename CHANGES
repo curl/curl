@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (12 March 2005)
+- David Houlder added --form-string that adds that string to a multipart
+  formpost part, without special characters having special meanings etc like
+  --form features.
+
 Daniel (11 March 2005)
 - curl_version_info() returns the feature bit CURL_VERSION_SSPI if it was
   built with SSPI support.
