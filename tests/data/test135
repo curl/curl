@@ -1,0 +1,39 @@
+# Server-side
+<reply>
+<data>
+0123456789abcdef
+0123456789abcdef
+0123456789abcdef
+0123456789abcdef
+</data>
+<datacheck nonewline=yes>
+0123456789abc
+</datacheck>
+<size>
+64
+</size>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP retrieve a byte-range
+ </name>
+ <command>
+-r 4-16 ftp://%HOSTIP:%FTPPORT/135
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+EPSV
+TYPE I
+SIZE 135
+REST 4
+RETR 135
+</protocol>
+</verify>
