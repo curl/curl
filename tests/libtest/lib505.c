@@ -47,13 +47,16 @@ CURLcode test(char *URL)
   const char *buf_2 = "RNTO 505-forreal";
 
   /* get the file size of the local file */
-  hd = open(arg2, O_RDONLY) ;
+  hd = stat(arg2, &file_info);
   if(hd == -1) {
     /* can't open file, bail out */
     return -1;
   }
-  fstat(hd, &file_info);
-  close(hd);
+
+  if(! file_info.st_size) {
+    fprintf(stderr, "WARNING: file %s has no size!\n", arg2);
+    return -4;
+  }
 
   /* get a FILE * of the same file, could also be made with
      fdopen() from the previous descriptor, but hey this is just 
@@ -89,7 +92,8 @@ CURLcode test(char *URL)
     curl_easy_setopt(curl, CURLOPT_INFILE, hd_src);
 
     /* and give the size of the upload (optional) */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE, file_info.st_size);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE,
+                     (long)file_info.st_size);
 
     /* Now run off and do what you've been told! */
     res = curl_easy_perform(curl);
