@@ -11,7 +11,7 @@ README
   README.curl document. Find out how to install Curl by reading the INSTALL
   document.
 
-  libcurl is a link-library that Curl is using to to its job. It is readily
+  libcurl is a link-library that Curl is using to do its job. It is readily
   available to be used by your software. Read the README.libcurl document to
   find out how!
 
