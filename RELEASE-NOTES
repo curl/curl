@@ -26,6 +26,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o Windows builds now report OS as "i386-pc-win32"
  o received signals during SSL connect is handled better
  o improved PUT/POST with NTLM/Digest authentication
  o following redirects and doing NTLM/Digest (where the first connection gets
