@@ -48,11 +48,15 @@
 #include <curl/curl.h>
 #include <curl/mprintf.h>
 #include "../lib/getdate.h"
-#ifdef GLOBURL
+
 #include "urlglob.h"
 #define CURLseparator	"--_curl_--"
 #define MIMEseparator	"_curl_"
-#endif
+
+/* This define make use of the "Curlseparator" as opposed to the
+   MIMEseparator. We might add support for the latter one in the
+   future, and that's why this is left in the source. */
+#define CURL_SEPARATORS
 
 /* This is now designed to have its own local setup.h */
 #include "setup.h"
@@ -862,12 +866,11 @@ int main(int argc, char *argv[])
   struct OutStruct heads;
 
   char *url = NULL;
-#ifdef GLOBURL
+
   URLGlob *urls;
   int urlnum;
   char *outfiles = NULL;
   int separator = 0;
-#endif
   
   FILE *infd = stdin;
   FILE *headerfilep = NULL;
@@ -964,7 +967,6 @@ int main(int argc, char *argv[])
   fprintf(stderr, "URL: %s PROXY: %s\n", url, config.proxy?config.proxy:"none");
 #endif
 
-#ifdef GLOBURL
   /* expand '{...}' and '[...]' expressions and return total number of URLs
      in pattern set */
   res = glob_url(&urls, url, &urlnum);
@@ -987,7 +989,6 @@ int main(int argc, char *argv[])
   for (i = 0; (url = next_url(urls)); ++i) {
     if (outfiles)
       config.outfile = strdup(outfiles);
-#endif
 
   if(config.outfile && config.infile) {
     helpf("you can't both upload and download!\n");
@@ -1013,10 +1014,8 @@ int main(int argc, char *argv[])
         return URG_WRITE_ERROR;
       }
     }
-#ifdef GLOBURL
     else	/* fill '#1' ... '#9' terms from URL pattern */
       config.outfile = match_url(config.outfile, *urls);
-#endif
 
     if((0 == config.resume_from) && config.use_resume) {
       /* we're told to continue where we are now, then we get the size of the
@@ -1105,7 +1104,7 @@ int main(int argc, char *argv[])
        we switch off the progress meter */
     config.conf |= CONF_NOPROGRESS;
 
-#ifdef GLOBURL
+
   if (urlnum > 1) {
     fprintf(stderr, "\n[%d/%d]: %s --> %s\n", i+1, urlnum, url, config.outfile ? config.outfile : "<stdout>");
     if (separator) {
@@ -1118,7 +1117,6 @@ int main(int argc, char *argv[])
 #endif
     }
   }
-#endif
 
   if(!config.errors)
     config.errors = stderr;
@@ -1183,7 +1181,6 @@ int main(int argc, char *argv[])
   if(config.url)
     free(config.url);
 
-#ifdef GLOBURL
   if(url)
     free(url);
   if(config.outfile && !config.remotefile)
@@ -1192,7 +1189,6 @@ int main(int argc, char *argv[])
 #ifdef MIME_SEPARATORS
   if (separator)
     printf("--%s--\n", MIMEseparator);
-#endif
 #endif
 
   curl_slist_free_all(config.quote); /* the checks for config.quote == NULL */
