@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Daniel (10 February 2005)
+- Now the test script disables valgrind-testing when the test suite runs if
+  libcurl is built shared. Otherwise valgrind only tests the shell that runs
+  the wrapper-script named 'curl' that is a front-end to curl in this case.
+  This should also fix the huge amount of reports of false positives when
+  valgrind has identified leaks in (ba)sh and not in curl and people report
+  that as curl bugs. Bug report #1116672 is one example.
+
+  Also, the valgrind report parser has been adapted to check that at least one
+  of the sources in a stack strace is one of (lib)curl's source files or
+  otherwise it will not consider the problem to concern (lib)curl.
+
+- Marty Kuhrt streamlined the VMS build.
+
 Daniel (9 February 2005)
 - David Byron fixed his SSL problems, initially mentioned here:
   http://curl.haxx.se/mail/lib-2005-01/0240.html. It turned out we didn't use
