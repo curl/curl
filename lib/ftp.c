@@ -1258,6 +1258,23 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   char *buf = data->state.buffer; /* this is our buffer */
   int ftpcode; /* receive FTP response codes in this */
   CURLcode result;
+  Curl_addrinfo *addr=NULL;
+  Curl_ipconnect *conninfo;
+
+  /*
+    Here's the excecutive summary on what to do:
+
+    PASV is RFC959, expect:
+    227 Entering Passive Mode (a1,a2,a3,a4,p1,p2)
+
+    LPSV is RFC1639, expect:
+    228 Entering Long Passive Mode (4,4,a1,a2,a3,a4,2,p1,p2)
+    (Is this actually supported *anywhere*?)
+
+    EPSV is RFC2428, expect:
+    229 Entering Extended Passive Mode (|||port|)
+
+  */
 
 #if 0
   /* no support for IPv6 passive mode yet */
@@ -1268,6 +1285,13 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   int results[] = { 227, 0 };
 #endif
   int modeoff;
+  unsigned short connectport; /* the local port connect() should use! */
+  unsigned short newport; /* remote port, not necessary the local one */
+  char *hostdataptr=NULL;
+  
+  /* newhost must be able to hold a full IP-style address in ASCII, which
+     in the IPv6 case means 5*8-1 = 39 letters */
+  char newhost[48];
   
   for (modeoff = 0; mode[modeoff]; modeoff++) {
     FTPSENDF(conn, mode[modeoff], "");
@@ -1283,16 +1307,9 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
     failf(data, "Odd return code after PASV");
     return CURLE_FTP_WEIRD_PASV_REPLY;
   }
-  else if (strcmp(mode[modeoff], "PASV") == 0) {
+  else if (227 == results[modeoff]) {
     int ip[4];
     int port[2];
-    unsigned short newport; /* remote port, not necessary the local one */
-    unsigned short connectport; /* the local port connect() should use! */
-    char newhost[32];
-    
-    Curl_addrinfo *addr;
-    char *hostdataptr=NULL;
-    Curl_ipconnect *conninfo;
     char *str=buf;
 
     /*
@@ -1321,53 +1338,86 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
 
     sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
     newport = (port[0]<<8) + port[1];
-    if(data->change.proxy) {
-      /*
-       * This is a tunnel through a http proxy and we need to connect to the
-       * proxy again here. We already have the name info for it since the
-       * previous lookup.
-       */
-      addr = conn->hostaddr;
-      connectport =
-        (unsigned short)conn->port; /* we connect to the proxy's port */
-    }
-    else {
-      /* normal, direct, ftp connection */
-      addr = Curl_getaddrinfo(data, newhost, newport, &hostdataptr);
-      if(!addr) {
-        failf(data, "Can't resolve new host %s", newhost);
-        return CURLE_FTP_CANT_GET_HOST;
-      }
-      connectport = newport; /* we connect to the remote port */
-    }
-    
-    result = Curl_connecthost(conn,
-                              addr,
-                              connectport,
-                              &conn->secondarysocket,
-                              &conninfo);
-    
-    if((CURLE_OK == result) &&       
-       data->set.verbose)
-      /* this just dumps information about this second connection */
-      ftp_pasv_verbose(conn, conninfo, newhost, connectport);
-	
-    if(hostdataptr)
-      Curl_freeaddrinfo(hostdataptr);
 
-    if(CURLE_OK != result)
-      return result;
+    /* we should compare to see if this is the same IP like the one
+       we're already connected to, as then we can skip the name function
+       call below, in similar style that we do for the EPSV reply */
+  }
+#if 1
+  else if (strcmp(mode[modeoff], "EPSV") == 0) {
+    char *ptr = strchr(buf, '(');
+    if(ptr) {
+      unsigned int num;
+      char separator[4];
+      ptr++;
+      if(5  == sscanf(ptr, "%c%c%c%u%c",
+                      &separator[0],
+                      &separator[1],
+                      &separator[2],
+                      &num,
+                      &separator[3])) {
+        /* the four separators should be identical */
+        newport = num;
 
-    if (data->set.tunnel_thru_httpproxy) {
-      /* We want "seamless" FTP operations through HTTP proxy tunnel */
-      result = Curl_ConnectHTTPProxyTunnel(conn, conn->secondarysocket,
-                                           newhost, newport);
-      if(CURLE_OK != result)
-        return result;
+        /* we should use the same host we already are connected to */
+        addr = conn->hostaddr;
+      }                      
+      else
+        ptr=NULL;
+    }
+    if(!ptr) {
+      failf(data, "Weirdly formatted EPSV reply");
+      return CURLE_FTP_WEIRD_PASV_REPLY;
     }
   }
+#endif
   else
     return CURLE_FTP_CANT_RECONNECT;
+
+  if(data->change.proxy) {
+    /*
+     * This is a tunnel through a http proxy and we need to connect to the
+     * proxy again here. We already have the name info for it since the
+     * previous lookup.
+     */
+    addr = conn->hostaddr;
+    connectport =
+      (unsigned short)conn->port; /* we connect to the proxy's port */
+  }
+  else if(!addr) {
+    /* normal, direct, ftp connection */
+    addr = Curl_getaddrinfo(data, newhost, newport, &hostdataptr);
+    if(!addr) {
+      failf(data, "Can't resolve new host %s", newhost);
+      return CURLE_FTP_CANT_GET_HOST;
+    }
+    connectport = newport; /* we connect to the remote port */
+  }
+    
+  result = Curl_connecthost(conn,
+                            addr,
+                            connectport,
+                            &conn->secondarysocket,
+                            &conninfo);
+  
+  if((CURLE_OK == result) &&       
+     data->set.verbose)
+    /* this just dumps information about this second connection */
+    ftp_pasv_verbose(conn, conninfo, newhost, connectport);
+  
+  if(hostdataptr)
+    Curl_freeaddrinfo(hostdataptr);
+  
+  if(CURLE_OK != result)
+    return result;
+
+  if (data->set.tunnel_thru_httpproxy) {
+    /* We want "seamless" FTP operations through HTTP proxy tunnel */
+    result = Curl_ConnectHTTPProxyTunnel(conn, conn->secondarysocket,
+                                         newhost, newport);
+    if(CURLE_OK != result)
+      return result;
+  }
 
   return CURLE_OK;
 }
