@@ -26,6 +26,12 @@
 #include <string.h>
 #include <ctype.h>
 
+#ifdef HAVE_STRCASECMP
+/* this is for "-ansi -Wall -pedantic" to stop complaining! */
+extern int (strcasecmp)(const char *s1, const char *s2);
+extern int (strncasecmp)(const char *s1, const char *s2, size_t n);
+#endif
+
 int curl_strequal(const char *first, const char *second)
 {
 #if defined(HAVE_STRCASECMP)
