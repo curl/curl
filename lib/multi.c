@@ -43,6 +43,7 @@
 #include "connect.h"
 #include "progress.h"
 #include "memory.h"
+#include "easy.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -173,6 +174,8 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
      the new node */
   if(easy->next)
     easy->next->prev = easy;
+
+  Curl_easy_addmulti(easy_handle, multi_handle);
 
   /* increase the node-counter */
   multi->num_easy++;
@@ -584,6 +587,13 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   return result;
 }
 
+/* This is called when an easy handle is cleanup'ed that is part of a multi
+   handle */
+void Curl_multi_rmeasy(void *multi_handle, CURL *easy_handle)
+{
+  curl_multi_remove_handle(multi_handle, easy_handle);
+}
+
 CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
@@ -600,6 +610,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       nexteasy=easy->next;
       /* clear out the usage of the shared DNS cache */
       easy->easy_handle->hostcache = NULL;
+      easy->easy_handle->multi = NULL;
 
       if (easy->msg)
         free(easy->msg);

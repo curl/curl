@@ -82,6 +82,7 @@
 #include "share.h"
 #include "memory.h"
 #include "progress.h"
+#include "easy.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -401,6 +402,15 @@ void curl_easy_cleanup(CURL *curl)
     return;
 
   Curl_close(data);
+}
+
+/*
+ * Store a pointed to the multi handle within the easy handle's data struct.
+ */
+void Curl_easy_addmulti(struct SessionHandle *data,
+                        void *multi)
+{
+  data->multi = multi;
 }
 
 /*

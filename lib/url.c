@@ -118,6 +118,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "http_digest.h"
 #include "http_negotiate.h"
 #include "select.h"
+#include "multi.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -196,6 +197,10 @@ void Curl_safefree(void *ptr)
 
 CURLcode Curl_close(struct SessionHandle *data)
 {
+  if(data->multi) {
+    /* this handle is still part of a multi handle, take care of this first */
+    Curl_multi_rmeasy(data->multi, data);
+  }
   /* Loop through all open connections and kill them one by one */
   while(-1 != ConnectionKillOne(data))
     ; /* empty loop */
@@ -1422,7 +1427,10 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 
   data = conn->data;
 
-  if(conn->dns_entry)
+  if(conn->dns_entry && data->hostcache)
+    /* if the DNS entry is still around, and the host cache is not blanked
+       (which it is for example when a shared one is killed by
+       curl_multi_cleanup() and similar stuff) */
     Curl_resolv_unlock(data, conn->dns_entry); /* done with this */
 
 #if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)

@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o memory problem with cleaning up multi interface
  o SSL certificate name memory leak
  o -d with -G to multiple URLs crashed
  o double va_list access crash fixed
@@ -33,6 +34,6 @@ advice from friends like these:
 
  Dan Fandrich, Peter Pentchev, Marcin Konicki, Rune Kleveland, David Shaw,
  Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt,
- Hzhijun
+ Hzhijun, Pavel Orehov
 
         Thanks! (and sorry if I forgot to mention someone)

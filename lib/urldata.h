@@ -971,6 +971,8 @@ struct UserDefined {
 
 struct SessionHandle {
   curl_hash *hostcache;
+  void *multi;                 /* if non-NULL, points to the multi handle
+                                  struct of which this "belongs" */
   struct Curl_share *share;    /* Share, handles global variable mutexing */
   struct UserDefined set;      /* values set by the libcurl user */
   struct DynamicStatic change; /* possibly modified userdefined data */

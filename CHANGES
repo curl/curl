@@ -8,6 +8,11 @@
 
 
 Daniel (10 January 2005)
+- Pavel Orehov reported memory problems with the multi interface in bug report
+  #1098843. In short, a shared DNS cache was setup for a multi handle and when
+  the shared cache was deleted before the individual easy handles, the latter
+  cleanups caused read/writes to already freed memory.
+
 - Hzhijun reported a memory leak in the SSL certificate code, that leaked the
   remote certificate name when it didn't match the used host name.
 
