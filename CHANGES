@@ -7,6 +7,11 @@
                                History of Changes
 
 Daniel (11 January 2001)
+- Added -g/--globoff that switches OFF the URL globbing and thus enables {}[]
+  letters to be part of the URL. Do note that RFC2396 section 2.4.3 explicitly
+  mention these letters to be escaped. This was posted as a feature request by
+  Jorge Gutierrez and as a bug by Terry.
+
 - Short options to curl that requires parameters can now be specified without
   having the option and its parameter space separated. -ofile works as good as
   -o file. -m20 is equal to -m 20. Do note that this goes for single-letter
