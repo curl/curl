@@ -1764,6 +1764,7 @@ ToHour (Hours, Meridian)
       abort ();
     }
   /* NOTREACHED - but make gcc happy! */
+  return -1;
 }
 
 static int
