@@ -5,7 +5,7 @@
 # Usage: see usage message below
 #        Should be invoked from \lib directory
 #        Edit the paths and desired library name
-#        SSL path is only required if you intend compiling 
+#        SSL path is only required if you intend compiling
 #        with SSL.
 #
 # This make file leaves the result either a .lib or .dll file
@@ -17,13 +17,13 @@
 #
 # Another option would have been to leave the .lib and .dll
 # files in the "cfg" directory, but then the make file
-# in \src would need to be changed.      
-#      
+# in \src would need to be changed.
+#
 ##############################################################
-# CHANGE LOG 
+# CHANGE LOG
 # ------------------------------------------------------------
 # 05.11.2001   John Lask   Initial Release
-# 
+#
 #
 ##############################################################
 
@@ -50,7 +50,7 @@ CFGSET    = FALSE
 ######################
 # release
 
-!IF "$(CFG)" == "release" 
+!IF "$(CFG)" == "release"
 TARGET =$(LIB_NAME).lib
 DIROBJ =.\$(CFG)
 LNK    = $(LNKLIB) /out:$(TARGET)
@@ -61,7 +61,7 @@ CFGSET = TRUE
 ######################
 # release-dll
 
-!IF "$(CFG)" == "release-dll" 
+!IF "$(CFG)" == "release-dll"
 TARGET =$(LIB_NAME).dll
 DIROBJ =.\$(CFG)
 LNK    = $(LNKDLL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
@@ -72,25 +72,25 @@ CFGSET = TRUE
 ######################
 # release-ssl
 
-!IF "$(CFG)" == "release-ssl" 
+!IF "$(CFG)" == "release-ssl"
 TARGET   =$(LIB_NAME).lib
 DIROBJ   =.\$(CFG)
 LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
 LINKLIBS = $(LINKLIBS) $(SSLLIBS)
 CC       = $(CCNODBG) $(CFLAGSSSL)
-CFGSET   = TRUE 
+CFGSET   = TRUE
 !ENDIF
 
 ######################
 # release-ssl-dll
 
-!IF "$(CFG)" == "release-ssl-dll" 
+!IF "$(CFG)" == "release-ssl-dll"
 TARGET   =$(LIB_NAME).dll
 DIROBJ   =.\$(CFG)
-LNK      = $(LNKDLL) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib" 
+LNK      = $(LNKDLL) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
 LINKLIBS = $(LINKLIBS) $(SSLLIBS)
 CC       = $(CCNODBG)  $(CFLAGSSSL)
-CFGSET   = TRUE 
+CFGSET   = TRUE
 !ENDIF
 
 
@@ -99,7 +99,7 @@ CFGSET   = TRUE
 ######################
 # debug
 
-!IF "$(CFG)" == "debug" 
+!IF "$(CFG)" == "debug"
 TARGET =$(LIB_NAME_DEBUG).lib
 DIROBJ =.\$(CFG)
 LNK    = $(LNKLIB) /out:$(TARGET)
@@ -110,7 +110,7 @@ CFGSET = TRUE
 ######################
 # debug-dll
 
-!IF "$(CFG)" == "debug-dll" 
+!IF "$(CFG)" == "debug-dll"
 TARGET =$(LIB_NAME_DEBUG).dll
 DIROBJ =.\$(CFG)
 LNK    = $(LNKDLL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME_DEBUG).lib"
@@ -121,7 +121,7 @@ CFGSET = TRUE
 ######################
 # debug-ssl
 #todo
-!IF "$(CFG)" == "debug-ssl" 
+!IF "$(CFG)" == "debug-ssl"
 TARGET   = $(LIB_NAME_DEBUG).lib
 DIROBJ   =.\$(CFG)
 LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
@@ -133,10 +133,10 @@ CFGSET   = TRUE
 ######################
 # debug-ssl-dll
 
-!IF "$(CFG)" == "debug-ssl-dll" 
+!IF "$(CFG)" == "debug-ssl-dll"
 TARGET   =$(LIB_NAME_DEBUG).dll
 DIROBJ   =.\$(CFG)
-LNK      = $(LNKDLL) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME_DEBUG).lib" 
+LNK      = $(LNKDLL) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME_DEBUG).lib"
 LINKLIBS = $(LINKLIBS) $(SSLLIBS)
 CC       = $(CCDEBUG) $(CFLAGSSSL)
 CFGSET   = TRUE
@@ -193,8 +193,9 @@ X_OBJS= \
 	$(DIROBJ)\easy.obj \
 	$(DIROBJ)\strequal.obj \
 	$(DIROBJ)\strtok.obj \
-	$(DIROBJ)\connect.obj
-
+	$(DIROBJ)\connect.obj \
+	$(DIROBJ)\hash.obj \
+	$(DIROBJ)\llist.obj
 
 all : $(TARGET)
 
