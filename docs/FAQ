@@ -1,4 +1,4 @@
-Updated: January 2, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: January 4, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -467,74 +467,55 @@ FAQ
 
 6. License Issues
 
-  Curl and libcurl are released under the MPL, the Mozilla Public License. To
-  get a really good answer to your license conflict questions, you should
-  study the MPL license and the license you are about to use and check for
-  clashes yourself. This section is just a brief summary for the cases we get
-  the most questions. (Parts of this section was much enhanced by Bjorn
-  Reese.)
+  NOTE: This section is now updated to concern curl 7.5.2 or later!
+
+  Curl and libcurl are released under a MIT/X derivate license *or* the MPL,
+  the Mozilla Public License. To get a really good answer to your license
+  conflict questions, you should study the MPL and MIT/X licenses and the
+  license you are about to use and check for clashes yourself. This section is
+  just a brief summary for the cases we get the most questions. (Parts of this
+  section was much enhanced by Bjorn Reese.)
 
   6.1. I have a GPL program, can I use the libcurl library?
 
-  No, unfortunately you cannot distribute the (lib)curl code with your code.
-  According to both the Free Software Foundation and the Mozilla
-  Organization, MPL and GPL are not compatible, because GPL requires of
-  other licenses that they do "not impose any further restrictions on the
-  recipients' exercise of the rights granted herein" [GPL paragraph 6] (One
-  could argue about which license that actually imposes restrictions, but
-  that'll be left for you to ponder about.)
+  Yes!
 
-  However, you have two alternative options:
-
-    1) Nothing prevents you from distributing your program separately from
-       curl and libcurl, and request that the user receives it separately.
-       The incompability issues between MPL and GPL only applies to the
-       distribution.
-
-    2) Add the following exception to your distribution (you must have the
-       consent of all the copyright holders of the source code in your
-       project in order to do this) 
-
-         As a special exception, you have permission to link this program
-         with the curl library and distribute executables, as long as you
-         follow the requirements of the GNU GPL in regard to all of the
-         software in the executable aside from curl.
-
-       This exception must be added to your GPL covered source code files
-       immediately after the notification mentioned in the appendix of GPL.
-       The wording was originally suggested by the Free Software Foundation
-       in relationship with the Qt library. We have changed the wording to
-       apply to curl.
+  Since libcurl may be distributed under the MIT/X derivate license, it can be
+  used together with GPL in any software.
 
   6.2. I have a closed-source program, can I use the libcurl library?
 
-  Yes, libcurl does not put any restrictions on the program that uses the
-  library. If you end up doing changes to the library, only those changes must
-  be made available, not the ones to your program.
+  Yes.
+
+  libcurl does not put any restrictions on the program that uses the
+  library.
 
   6.3. I have a BSD licensed program, can I use the libcurl library?
 
-  Yes, libcurl does not put any restrictions on the program that uses the
-  library. If you end up doing changes to the library, only those changes must
-  be made available, not the ones to your program.
+  Yes.
+
+  libcurl does not put any restrictions on the program that uses the
+  library.
 
   6.4. I have a program that uses LGPL libraries, can I use libcurl?
 
-  Yes you can. LGPL libraries don't spread to other libraries the same way GPL
-  ones do.
+  Yes.
 
-  However, when you read paragraph (3) of the LGPL license, you'll see that
-  anyone - at will - may at any time convert that LGPL program into GPL. And
-  GPL programs can't be distributed together with MPL programs, neither with
-  (lib)curl source code and not as a binary.
+  The LGPL license don't clash with other licenses.
 
   6.5. Can I modify curl/libcurl for my program and keep the changes secret?
 
-  No, you're not allowed to do that.
+  Yes.
+
+  The MIT/X derivate license practically allows you to do almost anything with
+  the sources, on the condition that the copyright texts in the sources are
+  left intact.
 
   6.6. Can you please change the curl/libcurl license to XXXX?
 
   No. We carefully picked this license years ago and a large amount of people
   have contributed with source code knowing that this is the license we
   use. This license puts the restrictions we want on curl/libcurl and it does
-  not spread to other programs or libraries that use it.
+  not spread to other programs or libraries that use it. The recent dual
+  license modification should make it possible for everyone to use libcurl or
+  curl in their projects, no matter what license they already have in use.
