@@ -627,7 +627,7 @@ Transfer(struct connectdata *c_conn)
                       (data->set.timecondition || data->set.get_filetime) ) {
                 time_t secs=time(NULL);
                 timeofdoc = curl_getdate(p+strlen("Last-Modified:"), &secs);
-                if(data->set.get_filetime)
+                if(data->set.get_filetime>=0)
                   data->info.filetime = timeofdoc;
               }
               else if ((httpcode >= 300 && httpcode < 400) &&

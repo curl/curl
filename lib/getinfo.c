@@ -46,7 +46,7 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
 
   info->httpcode = 0;
   info->httpversion=0;
-  info->filetime=0;
+  info->filetime=-1; /* -1 is an illegal time and thus means unknown */
 
   return CURLE_OK;
 }

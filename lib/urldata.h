@@ -352,8 +352,8 @@ struct connectdata {
 struct PureInfo {
   int httpcode;
   int httpversion;
-  time_t filetime; /* If requested, this is might get set. It may be 0 if
-                      the time was unretrievable */
+  long filetime; /* If requested, this is might get set. Set to -1 if
+                    the time was unretrievable */
   long header_size;  /* size of read header(s) in bytes */
   long request_size; /* the amount of bytes sent in the request(s) */
 };
