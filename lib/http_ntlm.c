@@ -90,9 +90,15 @@
 
 
 CURLntlm Curl_input_ntlm(struct connectdata *conn,
+                         bool proxy,   /* if proxy or not */
                          char *header) /* rest of the www-authenticate:
                                           header */
 {
+  /* point to the correct struct with this */
+  struct ntlmdata *ntlm;
+
+  ntlm = proxy?&conn->proxyntlm:&conn->ntlm;
+
   /* skip initial whitespaces */
   while(*header && isspace((int)*header))
     header++;
@@ -121,21 +127,20 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
 
       int size = Curl_base64_decode(header, buffer);
 
-      conn->ntlm.state = NTLMSTATE_TYPE2; /* we got a type-2 */
+      ntlm->state = NTLMSTATE_TYPE2; /* we got a type-2 */
 
       if(size >= 48)
         /* the nonce of interest is index [24 .. 31], 8 bytes */
-        memcpy(conn->ntlm.nonce, &buffer[24], 8);
+        memcpy(ntlm->nonce, &buffer[24], 8);
 
       /* at index decimal 20, there's a 32bit NTLM flag field */
-
+      
     }
     else {
-      if(conn->ntlm.state >= NTLMSTATE_TYPE1)
+      if(ntlm->state >= NTLMSTATE_TYPE1)
         return CURLNTLM_BAD;
 
-      conn->ntlm.state = NTLMSTATE_TYPE1; /* we should sent away a
-                                                  type-1 */
+      ntlm->state = NTLMSTATE_TYPE1; /* we should sent away a type-1 */
     }
   }
   return CURLNTLM_FINE;
@@ -281,7 +286,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   int domoff;  /* domain name offset */
   int size;
   char *base64=NULL;
-  unsigned char ntlm[256]; /* enough, unless the host/domain is very long */
+  unsigned char ntlmbuf[256]; /* enough, unless the host/domain is very long */
 
   /* point to the address of the pointer that holds the string to sent to the
      server, which is for a plain host or for a HTTP proxy */
@@ -290,19 +295,23 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   /* point to the name and password for this */
   char *userp;
   char *passwdp;
+  /* point to the correct struct with this */
+  struct ntlmdata *ntlm;
 
   if(proxy) {
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->proxyuser;
     passwdp = conn->proxypasswd;
+    ntlm = &conn->proxyntlm;
   }
   else {
     allocuserpwd = &conn->allocptr.userpwd;
     userp = conn->user;
     passwdp = conn->passwd;
+    ntlm = &conn->ntlm;
   }
   
-  switch(conn->ntlm.state) {
+  switch(ntlm->state) {
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     hostoff = 32;
@@ -321,7 +330,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     */
 
-    snprintf((char *)ntlm, sizeof(ntlm), "NTLMSSP%c"
+    snprintf((char *)ntlmbuf, sizeof(ntlmbuf), "NTLMSSP%c"
              "\x01%c%c%c" /* 32-bit type = 1 */
              "%c%c%c%c"   /* 32-bit NTLM flag field */
              "%c%c"  /* domain length */
@@ -356,7 +365,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     size = 32 + hostlen + domlen;
 
     /* now keeper of the base64 encoded package size */
-    size = Curl_base64_encode(ntlm, size, &base64);
+    size = Curl_base64_encode(ntlmbuf, size, &base64);
 
     if(size >0 ) {
       Curl_safefree(*allocuserpwd);
@@ -412,7 +421,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       user = userp;
     userlen = strlen(user);
 
-    mkhash(passwdp, &conn->ntlm.nonce[0], lmresp
+    mkhash(passwdp, &ntlm->nonce[0], lmresp
 #ifdef USE_NTRESPONSES
            , ntresp
 #endif
@@ -425,7 +434,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     ntrespoff = lmrespoff + 0x18;
 
     /* Create the big type-3 message binary blob */
-    size = snprintf((char *)ntlm, sizeof(ntlm),
+    size = snprintf((char *)ntlmbuf, sizeof(ntlmbuf),
                     "NTLMSSP%c"
                     "\x03%c%c%c" /* type-3, 32 bits */
 
@@ -504,32 +513,32 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     /* size is now 64 */
     size=64;
-    ntlm[62]=ntlm[63]=0;
+    ntlmbuf[62]=ntlmbuf[63]=0;
 
-    memcpy(&ntlm[size], domain, domlen);
+    memcpy(&ntlmbuf[size], domain, domlen);
     size += domlen;
 
-    memcpy(&ntlm[size], user, userlen);
+    memcpy(&ntlmbuf[size], user, userlen);
     size += userlen;
 
     /* we append the binary hashes to the end of the blob */
-    if(size < ((int)sizeof(ntlm) - 0x18)) {
-      memcpy(&ntlm[size], lmresp, 0x18);
+    if(size < ((int)sizeof(ntlmbuf) - 0x18)) {
+      memcpy(&ntlmbuf[size], lmresp, 0x18);
       size += 0x18;
     }
 
 #ifdef USE_NTRESPONSES
-    if(size < ((int)sizeof(ntlm) - 0x18)) {      
-      memcpy(&ntlm[size], ntresp, 0x18);
+    if(size < ((int)sizeof(ntlmbuf) - 0x18)) {      
+      memcpy(&ntlmbuf[size], ntresp, 0x18);
       size += 0x18;
     }
 #endif
 
-    ntlm[56] = size & 0xff;
-    ntlm[57] = size >> 8;
+    ntlmbuf[56] = size & 0xff;
+    ntlmbuf[57] = size >> 8;
 
     /* convert the binary blob into base64 */
-    size = Curl_base64_encode(ntlm, size, &base64);
+    size = Curl_base64_encode(ntlmbuf, size, &base64);
 
     if(size >0 ) {
       Curl_safefree(*allocuserpwd);
@@ -541,7 +550,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     else
       return CURLE_OUT_OF_MEMORY; /* FIX TODO */
 
-    conn->ntlm.state = NTLMSTATE_TYPE3; /* we sent a type-3 */
+    ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     
   }
   break;
