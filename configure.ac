@@ -1001,6 +1001,7 @@ AC_CHECK_HEADERS(
         arpa/inet.h \
         net/if.h \
         netinet/in.h \
+        netinet/tcp.h \
         netdb.h \
         sys/sockio.h \
         sys/stat.h \
