@@ -7,6 +7,15 @@
                                   Changelog
 
 
+Daniel (22 October)
+- Gisle Vanem found out --disable-eprt didn't work and patched it.
+
+- Test case 91 was modified and could now repeat the problem Kevin Roth has
+  reported, and the bug was fixed.
+
+- Dylan Ellicott added vc-libcurl-ssl-dll as a target to the root makefile
+  to build a static libcurl that links with a shared OpenSSL using MSVC.
+
 Daniel (21 October)
 - Andrés García updated the mingw32 makefiles.
 

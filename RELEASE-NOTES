@@ -22,6 +22,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o --anyauth could bug when the first response had no body contents
  o double password prompting when doing NTLM fixed
  o improved performance when used multi-threaded on windows
  o share-locking during DNS lookups was modified
@@ -74,6 +75,6 @@ advice from friends like these:
  Neil Spring, Siddhartha Prakash Jain, Jon Turner, Vincent Bronner, Shard,
  Jeremy Friesner, Florian Schoppmann, Neil Dunbar, Frank Ticheler, Lachlan
  O'Dea, Dirk Manske, Domenico Andreoli, Gisle Vanem, Kimmo Kinnunen, Andrew
- Fuller, Georg Horn, Andrés García
+ Fuller, Georg Horn, Andrés García, Dylan Ellicott, Kevin Roth
  
         Thanks! (and sorry if I forgot to mention someone)
