@@ -380,6 +380,11 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       return CURLE_OPERATION_TIMEOUTED;
     }
   }
+  if(conn->protocol & PROT_FILE) {
+    /* we are connected, awesome! */
+    *connected = TRUE;
+    return CURLE_OK;
+  }
 
   /* check for connect without timeout as we want to return immediately */
   rc = waitconnect(sockfd, 0);
