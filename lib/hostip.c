@@ -426,10 +426,10 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
    * everything. OSF1 is known to require at least 8872 bytes. The buffer
    * required for storing all possible aliases and IP numbers is according to
    * Stevens' Unix Network Programming 2nd editor, p. 304: 8192 bytes! */
-  char *buf = (char *)malloc(CURL_NAMELOOKUP_SIZE);
+  int *buf = (int *)malloc(CURL_NAMELOOKUP_SIZE);
   if(!buf)
     return NULL; /* major failure */
-  *bufp = buf;
+  *bufp = (char *)buf;
 
   port=0; /* unused in IPv4 code */
   ret = 0; /* to prevent the compiler warning */
@@ -459,7 +459,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
     /* Solaris, IRIX and more */
     if ((h = gethostbyname_r(hostname,
                              (struct hostent *)buf,
-                             buf + sizeof(struct hostent),
+                             (char *)buf + sizeof(struct hostent),
                              CURL_NAMELOOKUP_SIZE - sizeof(struct hostent),
                              &h_errnop)) == NULL )
 #endif
