@@ -27,7 +27,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "curl_strerror.h"
+#include "strerror.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>

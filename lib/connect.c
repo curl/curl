@@ -87,7 +87,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "if2ip.h"
-#include "curl_strerror.h"
+#include "strerror.h"
 #include "connect.h"
 
 /* The last #include file should be: */

@@ -91,7 +91,7 @@
 #include "strequal.h"
 #include "ssluse.h"
 #include "connect.h"
-#include "curl_strerror.h"
+#include "strerror.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
