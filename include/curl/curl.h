@@ -55,16 +55,20 @@
 extern "C" {
 #endif
 
-struct HttpPost {
-  struct HttpPost *next; /* next entry in the list */
+/* stupid #define trick to preserve functionality with older code, but
+   making it use our name space for the future */
+#define HttpPost curl_httppost
+
+struct curl_httppost {
+  struct curl_httppost *next; /* next entry in the list */
   char *name;     /* pointer to allocated name */
   long namelength; /* length of name length */
   char *contents; /* pointer to allocated data contents */
   long contentslength; /* length of contents field */
   char *contenttype; /* Content-Type */
   struct curl_slist* contentheader; /* list of extra headers for this form */
-  struct HttpPost *more; /* if one field name has more than one file, this
-			    link should link to following files */
+  struct curl_httppost *more; /* if one field name has more than one file, this
+                                 link should link to following files */
   long flags;     /* as defined below */
 #define HTTPPOST_FILENAME (1<<0) /* specified content is a file name */
 #define HTTPPOST_READFILE (1<<1) /* specified content is a file name */
@@ -72,6 +76,8 @@ struct HttpPost {
                                    do not free in formfree */
 #define HTTPPOST_PTRCONTENTS (1<<3) /* contents is only stored pointer
                                        do not free in formfree */
+  char *showfilename; /* The file name to show. If not set, the actual
+                         file name will be used (if this is a file part) */
 };
 
 typedef int (*curl_progress_callback)(void *clientp,
@@ -548,10 +554,9 @@ extern int (curl_strnequal)(const char *s1, const char *s2, size_t n);
 #define strequal(a,b) curl_strequal(a,b)
 #define strnequal(a,b,c) curl_strnequal(a,b,c)
 
-/* external form function */
-int curl_formparse(char *string,
-                   struct HttpPost **httppost,
-                   struct HttpPost **last_post);
+/* DEPRECATED function to build formdata */
+int curl_formparse(char *, struct curl_httppost **,
+                   struct curl_httppost **_post);
 
 /* name is uppercase CURLFORM_<name> */
 #ifdef CFINIT
@@ -575,11 +580,14 @@ typedef enum {
   CFINIT(FILE),
   CFINIT(CONTENTTYPE),
   CFINIT(CONTENTHEADER),
+  CFINIT(FILENAME),
   CFINIT(END),
   CFINIT(ARRAY_END),   /* up are the options allowed within a array */
 
   CURLFORM_LASTENTRY /* the last unusued */
 } CURLformoption;
+
+#undef CFINIT /* done */
 
 /* structure to be used as parameter for CURLFORM_ARRAY */
 struct curl_forms {
@@ -587,13 +595,13 @@ struct curl_forms {
 	const char		*value;
 };
 
-/* new external form function */
-int curl_formadd(struct HttpPost **httppost,
-                 struct HttpPost **last_post,
+/* use this for multipart formpost building */
+int curl_formadd(struct curl_httppost **httppost,
+                 struct curl_httppost **last_post,
                  ...);
 
 /* cleanup a form: */
-void curl_formfree(struct HttpPost *form);
+void curl_formfree(struct curl_httppost *form);
 
 /* Unix and Win32 getenv function call, this returns a malloc()'ed string that
    MUST be free()ed after usage is complete. */
