@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (13 October)
+- Domenico Andreoli removed the extra LDFLAGS assignment in lib/Makefile.am
+  that was reported about in the debian bug report #212086.
+
+  Domenico also fixed two makefiles where we used 'gnroff' instead of the more
+  portable $(NROFF).
+
 Daniel (12 October)
 - Dirk Manske made the share locking around DNS lookups slightly different to
   allow the share system's DNS lookups to run somewhat more
