@@ -223,6 +223,7 @@ static int do_file_type(const char *type)
 
 static
 int cert_stuff(struct connectdata *conn,
+               SSL_CTX* ctx,
                char *cert_file,
                const char *cert_type,
                char *key_file,
@@ -246,11 +247,11 @@ int cert_stuff(struct connectdata *conn,
       /*
        * We set the password in the callback userdata
        */
-      SSL_CTX_set_default_passwd_cb_userdata(conn->ssl.ctx,
+      SSL_CTX_set_default_passwd_cb_userdata(ctx,
                                              data->set.key_passwd);
 #endif
       /* Set passwd callback: */
-      SSL_CTX_set_default_passwd_cb(conn->ssl.ctx, passwd_callback);
+      SSL_CTX_set_default_passwd_cb(ctx, passwd_callback);
     }
 
     file_type = do_file_type(cert_type);
@@ -258,8 +259,8 @@ int cert_stuff(struct connectdata *conn,
     switch(file_type) {
     case SSL_FILETYPE_PEM:
       /* SSL_CTX_use_certificate_chain_file() only works on PEM files */
-      if(SSL_CTX_use_certificate_chain_file(conn->ssl.ctx,
-                                             cert_file) != 1) {
+      if(SSL_CTX_use_certificate_chain_file(ctx,
+                                            cert_file) != 1) {
         failf(data, "unable to set certificate file (wrong password?)");
         return 0;
       }
@@ -269,9 +270,9 @@ int cert_stuff(struct connectdata *conn,
       /* SSL_CTX_use_certificate_file() works with either PEM or ASN1, but
          we use the case above for PEM so this can only be performed with
          ASN1 files. */
-      if(SSL_CTX_use_certificate_file(conn->ssl.ctx,
-                                       cert_file,
-                                       file_type) != 1) {
+      if(SSL_CTX_use_certificate_file(ctx,
+                                      cert_file,
+                                      file_type) != 1) {
         failf(data, "unable to set certificate file (wrong password?)");
         return 0;
       }
@@ -293,9 +294,7 @@ int cert_stuff(struct connectdata *conn,
         /* cert & key can only be in PEM case in the same file */
         key_file=cert_file;
     case SSL_FILETYPE_ASN1:
-      if(SSL_CTX_use_PrivateKey_file(conn->ssl.ctx,
-                                      key_file,
-                                      file_type) != 1) {
+      if(SSL_CTX_use_PrivateKey_file(ctx, key_file, file_type) != 1) {
         failf(data, "unable to set private key file: '%s' type %s\n",
               key_file, key_type?key_type:"PEM");
         return 0;
@@ -322,7 +321,7 @@ int cert_stuff(struct connectdata *conn,
             failf(data, "failed to load private key from crypto engine\n");
             return 0;
           }
-          if(SSL_CTX_use_PrivateKey(conn->ssl.ctx, priv_key) != 1) {
+          if(SSL_CTX_use_PrivateKey(ctx, priv_key) != 1) {
             failf(data, "unable to set private key\n");
             EVP_PKEY_free(priv_key);
             return 0;
@@ -344,7 +343,7 @@ int cert_stuff(struct connectdata *conn,
       return 0;
     }
 
-    ssl=SSL_new(conn->ssl.ctx);
+    ssl=SSL_new(ctx);
     x509=SSL_get_certificate(ssl);
 
     /* This version was provided by Evan Jordan and is supposed to not
@@ -363,7 +362,7 @@ int cert_stuff(struct connectdata *conn,
     
     /* Now we know that a key and cert have been set against
      * the SSL context */
-    if(!SSL_CTX_check_private_key(conn->ssl.ctx)) {
+    if(!SSL_CTX_check_private_key(ctx)) {
       failf(data, "Private key does not match the certificate public key");
       return(0);
     }
@@ -453,6 +452,13 @@ void Curl_SSL_cleanup(void)
 #endif
 }
 
+#ifndef USE_SSLEAY
+void Curl_SSL_Close(struct connectdata *conn)
+{
+  (void)conn;
+}
+#endif
+
 #ifdef USE_SSLEAY
 
 /*
@@ -460,7 +466,8 @@ void Curl_SSL_cleanup(void)
  */
 void Curl_SSL_Close(struct connectdata *conn)
 {
-  if(conn->ssl.use) {
+  if(conn->ssl[FIRSTSOCKET].use) {
+    int i;
     /*
       ERR_remove_state() frees the error queue associated with
       thread pid.  If pid == 0, the current thread will have its
@@ -472,18 +479,22 @@ void Curl_SSL_Close(struct connectdata *conn)
     */
     ERR_remove_state(0);
 
-    if(conn->ssl.handle) {
-      (void)SSL_shutdown(conn->ssl.handle);
-      SSL_set_connect_state(conn->ssl.handle);
-
-      SSL_free (conn->ssl.handle);
-      conn->ssl.handle = NULL;
+    for(i=0; i<2; i++) {
+      struct ssl_connect_data *connssl = &conn->ssl[i];
+      
+      if(connssl->handle) {
+        (void)SSL_shutdown(connssl->handle);
+        SSL_set_connect_state(connssl->handle);
+        
+        SSL_free (connssl->handle);
+        connssl->handle = NULL;
+      }
+      if(connssl->ctx) {
+        SSL_CTX_free (connssl->ctx);
+        connssl->ctx = NULL;
+      }
+      connssl->use = FALSE; /* get back to ordinary socket usage */
     }
-    if(conn->ssl.ctx) {
-      SSL_CTX_free (conn->ssl.ctx);
-      conn->ssl.ctx = NULL;
-    }
-    conn->ssl.use = FALSE; /* get back to ordinary socket usage */
   }
 }
 
@@ -598,7 +609,8 @@ int Curl_SSL_Close_All(struct SessionHandle *data)
 /*
  * Extract the session id and store it in the session cache.
  */
-static int Store_SSL_Session(struct connectdata *conn)
+static int Store_SSL_Session(struct connectdata *conn,
+                             struct ssl_connect_data *ssl)
 {
   SSL_SESSION *ssl_sessionid;
   int i;
@@ -609,14 +621,14 @@ static int Store_SSL_Session(struct connectdata *conn)
   /* ask OpenSSL, say please */
 
 #ifdef HAVE_SSL_GET1_SESSION
-  ssl_sessionid = SSL_get1_session(conn->ssl.handle);
+  ssl_sessionid = SSL_get1_session(ssl->handle);
 
   /* SSL_get1_session() will increment the reference
      count and the session will stay in memory until explicitly freed with
      SSL_SESSION_free(3), regardless of its state. 
      This function was introduced in openssl 0.9.5a. */
 #else
-  ssl_sessionid = SSL_get_session(conn->ssl.handle);
+  ssl_sessionid = SSL_get_session(ssl->handle);
 
   /* if SSL_get1_session() is unavailable, use SSL_get_session().
      This is an inferior option because the session can be flushed
@@ -647,7 +659,7 @@ static int Store_SSL_Session(struct connectdata *conn)
   
   /* now init the session struct wisely */
   store->sessionid = ssl_sessionid;
-  store->age = data->state.sessionage;      /* set current age */
+  store->age = data->state.sessionage;    /* set current age */
   store->name = strdup(conn->name);       /* clone host name */
   store->remote_port = conn->remote_port; /* port number */
 
@@ -765,7 +777,8 @@ cert_hostcheck(const char *certname, const char *hostname)
    in the certificate and must exactly match the IP in the URI.
 
 */
-static CURLcode verifyhost(struct connectdata *conn)
+static CURLcode verifyhost(struct connectdata *conn,
+                           X509 *server_cert)
 {
   char peer_CN[257];
   bool matched = FALSE; /* no alternative match yet */
@@ -793,8 +806,7 @@ static CURLcode verifyhost(struct connectdata *conn)
     }
   
   /* get a "list" of alternative names */
-  altnames = X509_get_ext_d2i(conn->ssl.server_cert, NID_subject_alt_name,
-                              NULL, NULL);
+  altnames = X509_get_ext_d2i(server_cert, NID_subject_alt_name, NULL, NULL);
   
   if(altnames) {
     int hostlen;
@@ -856,7 +868,7 @@ static CURLcode verifyhost(struct connectdata *conn)
     infof(data, "\t subjectAltName: %s matched\n", conn->hostname);
   else {
     bool obtain=FALSE;
-    if(X509_NAME_get_text_by_NID(X509_get_subject_name(conn->ssl.server_cert),
+    if(X509_NAME_get_text_by_NID(X509_get_subject_name(server_cert),
                                  NID_commonName,
                                  peer_CN,
                                  sizeof(peer_CN)) < 0) {
@@ -896,7 +908,8 @@ static CURLcode verifyhost(struct connectdata *conn)
 
 /* ====================================================== */
 CURLcode
-Curl_SSLConnect(struct connectdata *conn)
+Curl_SSLConnect(struct connectdata *conn,
+                int sockindex)
 {
   CURLcode retcode = CURLE_OK;
 
@@ -908,9 +921,11 @@ Curl_SSLConnect(struct connectdata *conn)
   SSL_METHOD *req_method;
   SSL_SESSION *ssl_sessionid=NULL;
   ASN1_TIME *certdate;
+  int sockfd = conn->sock[sockindex];
+  struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   /* mark this is being ssl enabled from here on out. */
-  conn->ssl.use = TRUE;
+  connssl->use = TRUE;
 
   if(!ssl_seeded || data->set.ssl.random_file || data->set.ssl.egdsocket) {
     /* Make funny stuff to get random input */
@@ -937,9 +952,9 @@ Curl_SSLConnect(struct connectdata *conn)
     break;
   }
     
-  conn->ssl.ctx = SSL_CTX_new(req_method);
+  connssl->ctx = SSL_CTX_new(req_method);
 
-  if(!conn->ssl.ctx) {
+  if(!connssl->ctx) {
     failf(data, "SSL: couldn't create a context!");
     return CURLE_OUT_OF_MEMORY;
   }
@@ -952,10 +967,11 @@ Curl_SSLConnect(struct connectdata *conn)
      implementations is desired."
 
   */
-  SSL_CTX_set_options(conn->ssl.ctx, SSL_OP_ALL);
+  SSL_CTX_set_options(connssl->ctx, SSL_OP_ALL);
     
   if(data->set.cert) {
     if(!cert_stuff(conn,
+                   connssl->ctx,
                    data->set.cert,
                    data->set.cert_type,
                    data->set.key,
@@ -966,7 +982,7 @@ Curl_SSLConnect(struct connectdata *conn)
   }
 
   if(data->set.ssl.cipher_list) {
-    if(!SSL_CTX_set_cipher_list(conn->ssl.ctx,
+    if(!SSL_CTX_set_cipher_list(connssl->ctx,
                                 data->set.ssl.cipher_list)) {
       failf(data, "failed setting cipher list");
       return CURLE_SSL_CIPHER;
@@ -976,7 +992,7 @@ Curl_SSLConnect(struct connectdata *conn)
   if (data->set.ssl.CAfile || data->set.ssl.CApath) {
     /* tell SSL where to find CA certificates that are used to verify
        the servers certificate. */
-    if (!SSL_CTX_load_verify_locations(conn->ssl.ctx, data->set.ssl.CAfile,
+    if (!SSL_CTX_load_verify_locations(connssl->ctx, data->set.ssl.CAfile,
                                        data->set.ssl.CApath)) {
       if (data->set.ssl.verifypeer) {
  	/* Fail if we insist on successfully verifying the server. */
@@ -989,34 +1005,31 @@ Curl_SSLConnect(struct connectdata *conn)
       else {
         /* Just continue with a warning if no strict  certificate verification
            is required. */
-        infof(data,"error setting certificate verify locations,"
+        infof(data, "error setting certificate verify locations,"
               " continuing anyway:\n");
-        infof(data, "  CAfile: %s\n",
-              data->set.ssl.CAfile ? data->set.ssl.CAfile : "none");
-        infof(data, "  CApath: %s\n",
-              data->set.ssl.CApath ? data->set.ssl.CApath : "none");
       }
     }
     else {
       /* Everything is fine. */
-      infof(data,"successfully set certificate verify locations:\n");
-      infof(data, "  CAfile: %s\n",
-            data->set.ssl.CAfile ? data->set.ssl.CAfile : "none");
-      infof(data, "  CApath: %s\n",
-            data->set.ssl.CApath ? data->set.ssl.CApath : "none");
+      infof(data, "successfully set certificate verify locations:\n");
     }
+    infof(data,
+          "  CAfile: %s\n"
+          "  CApath: %s\n",
+          data->set.ssl.CAfile ? data->set.ssl.CAfile : "none",
+          data->set.ssl.CApath ? data->set.ssl.CApath : "none");
   }
   /* SSL always tries to verify the peer, this only says whether it should
    * fail to connect if the verification fails, or if it should continue
    * anyway. In the latter case the result of the verification is checked with
    * SSL_get_verify_result() below. */
-  SSL_CTX_set_verify(conn->ssl.ctx,
+  SSL_CTX_set_verify(connssl->ctx,
                      data->set.ssl.verifypeer?SSL_VERIFY_PEER:SSL_VERIFY_NONE,
                      cert_verify_callback);
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
-    retcode = (*data->set.ssl.fsslctx)(data, conn->ssl.ctx,
+    retcode = (*data->set.ssl.fsslctx)(data, connssl->ctx,
                                        data->set.ssl.fsslctxp);
     if(retcode) {
       failf(data,"error signaled by ssl ctx callback");
@@ -1025,24 +1038,24 @@ Curl_SSLConnect(struct connectdata *conn)
   }
 
   /* Lets make an SSL structure */
-  conn->ssl.handle = SSL_new (conn->ssl.ctx);
-  SSL_set_connect_state (conn->ssl.handle);
+  connssl->handle = SSL_new(connssl->ctx);
+  SSL_set_connect_state(connssl->handle);
 
-  conn->ssl.server_cert = 0x0;
+  connssl->server_cert = 0x0;
 
   if(!conn->bits.reuse) {
     /* We're not re-using a connection, check if there's a cached ID we
        can/should use here! */
     if(!Get_SSL_Session(conn, &ssl_sessionid)) {
       /* we got a session id, use it! */
-      SSL_set_session(conn->ssl.handle, ssl_sessionid);
+      SSL_set_session(connssl->handle, ssl_sessionid);
       /* Informational message */
       infof (data, "SSL re-using session ID\n");
     }
   }
 
   /* pass the raw socket into the SSL layers */
-  SSL_set_fd(conn->ssl.handle, conn->firstsocket);
+  SSL_set_fd(connssl->handle, sockfd);
 
   do {
     fd_set writefd;
@@ -1088,18 +1101,18 @@ Curl_SSLConnect(struct connectdata *conn)
     FD_ZERO(&writefd);
     FD_ZERO(&readfd);
 
-    err = SSL_connect(conn->ssl.handle);
+    err = SSL_connect(connssl->handle);
 
     /* 1  is fine
        0  is "not successful but was shut down controlled"
        <0 is "handshake was not successful, because a fatal error occurred" */
     if(1 != err) {
-      int detail = SSL_get_error(conn->ssl.handle, err);
+      int detail = SSL_get_error(connssl->handle, err);
 
       if(SSL_ERROR_WANT_READ == detail)
-        FD_SET(conn->firstsocket, &readfd);
+        FD_SET(sockfd, &readfd);
       else if(SSL_ERROR_WANT_WRITE == detail)
-        FD_SET(conn->firstsocket, &writefd);
+        FD_SET(sockfd, &writefd);
       else {
         /* untreated error */
         char error_buffer[120]; /* OpenSSL documents that this must be at least
@@ -1143,7 +1156,7 @@ Curl_SSLConnect(struct connectdata *conn)
 
     interval.tv_usec = timeout_ms*1000;
 
-    what = select(conn->firstsocket+1, &readfd, &writefd, NULL, &interval);
+    what = select(sockfd+1, &readfd, &writefd, NULL, &interval);
     if(what > 0)
       /* reabable or writable, go loop yourself */
       continue;
@@ -1158,12 +1171,12 @@ Curl_SSLConnect(struct connectdata *conn)
 
   /* Informational message */
   infof (data, "SSL connection using %s\n",
-         SSL_get_cipher(conn->ssl.handle));
+         SSL_get_cipher(connssl->handle));
 
   if(!ssl_sessionid) {
     /* Since this is not a cached session ID, then we want to stach this one
        in the cache! */
-    Store_SSL_Session(conn);
+    Store_SSL_Session(conn, connssl);
   }
 
   
@@ -1173,38 +1186,38 @@ Curl_SSLConnect(struct connectdata *conn)
    * attack
    */
 
-  conn->ssl.server_cert = SSL_get_peer_certificate(conn->ssl.handle);
-  if(!conn->ssl.server_cert) {
+  connssl->server_cert = SSL_get_peer_certificate(connssl->handle);
+  if(!connssl->server_cert) {
     failf(data, "SSL: couldn't get peer certificate!");
     return CURLE_SSL_PEER_CERTIFICATE;
   }
   infof (data, "Server certificate:\n");
   
-  str = X509_NAME_oneline(X509_get_subject_name(conn->ssl.server_cert),
+  str = X509_NAME_oneline(X509_get_subject_name(connssl->server_cert),
                           NULL, 0);
   if(!str) {
     failf(data, "SSL: couldn't get X509-subject!");
-    X509_free(conn->ssl.server_cert);
+    X509_free(connssl->server_cert);
     return CURLE_SSL_CONNECT_ERROR;
   }
   infof(data, "\t subject: %s\n", str);
   CRYPTO_free(str);
 
-  certdate = X509_get_notBefore(conn->ssl.server_cert);
+  certdate = X509_get_notBefore(connssl->server_cert);
   Curl_ASN1_UTCTIME_output(conn, "\t start date: ", certdate);
 
-  certdate = X509_get_notAfter(conn->ssl.server_cert);
+  certdate = X509_get_notAfter(connssl->server_cert);
   Curl_ASN1_UTCTIME_output(conn, "\t expire date: ", certdate);
 
   if(data->set.ssl.verifyhost) {
-    retcode = verifyhost(conn);
+    retcode = verifyhost(conn, connssl->server_cert);
     if(retcode) {
-      X509_free(conn->ssl.server_cert);
+      X509_free(connssl->server_cert);
       return retcode;
     }
   }
 
-  str = X509_NAME_oneline(X509_get_issuer_name(conn->ssl.server_cert),
+  str = X509_NAME_oneline(X509_get_issuer_name(connssl->server_cert),
                           NULL, 0);
   if(!str) {
     failf(data, "SSL: couldn't get X509-issuer name!");
@@ -1217,7 +1230,7 @@ Curl_SSLConnect(struct connectdata *conn)
     /* We could do all sorts of certificate verification stuff here before
        deallocating the certificate. */
     
-    data->set.ssl.certverifyresult=SSL_get_verify_result(conn->ssl.handle);
+    data->set.ssl.certverifyresult=SSL_get_verify_result(connssl->handle);
     if(data->set.ssl.certverifyresult != X509_V_OK) {
       if(data->set.ssl.verifypeer) {
         /* We probably never reach this, because SSL_connect() will fail
@@ -1234,7 +1247,7 @@ Curl_SSLConnect(struct connectdata *conn)
       infof(data, "SSL certificate verify ok.\n");
   }
 
-  X509_free(conn->ssl.server_cert);
+  X509_free(connssl->server_cert);
 #else /* USE_SSLEAY */
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void) conn;

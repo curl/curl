@@ -130,9 +130,9 @@ enum protection_level {
 };
 #endif
 
-/* struct for data related to SSL and SSL connections */
+/* struct for data related to each SSL connection */
 struct ssl_connect_data {
-  bool use;              /* use ssl encrypted communications TRUE/FALSE */
+  bool use;        /* use ssl encrypted communications TRUE/FALSE */
 #ifdef USE_SSLEAY
   /* these ones requires specific SSL-types */
   SSL_CTX* ctx;
@@ -385,6 +385,9 @@ struct Curl_async {
 };
 #endif
 
+#define FIRSTSOCKET     0
+#define SECONDARYSOCKET 1
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -442,12 +445,12 @@ struct connectdata {
   
   struct timeval now;     /* "current" time */
   struct timeval created; /* creation time */
-  int firstsocket;     /* the main socket to use */
-  int secondarysocket; /* for i.e ftp transfers */
+  int sock[2];       /* two sockets, the second is used for the data transfer
+                        when doing FTP */
   long maxdownload; /* in bytes, the maximum amount of data to fetch, 0
                        means unlimited */
   
-  struct ssl_connect_data ssl; /* this is for ssl-stuff */
+  struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
   struct ssl_config_data ssl_config;
 
   struct ConnectBits bits;    /* various state-flags for this connection */
@@ -486,8 +489,8 @@ struct connectdata {
   long *bytecountp;	 /* return number of bytes read or NULL */
           
   /* WRITE stuff */
-  int writesockfd;       /* socket to write to, it may very well be
-                            the same we read from. -1 disables */
+  int writesockfd;       /* socket to write to, it may very
+                            well be the same we read from. -1 disables */
   long *writebytecountp; /* return number of bytes written or NULL */
 
   /** Dynamicly allocated strings, may need to be freed before this **/
@@ -863,6 +866,7 @@ struct UserDefined {
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
   bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
   bool ftp_use_eprt;     /* if EPRT is to be attempted or not */
+  curl_ftpssl ftp_ssl;   /* if AUTH TLS is to be attempted etc */
   bool no_signal;        /* do not use any signal/alarm handler */
 
   bool global_dns_cache;

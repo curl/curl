@@ -262,7 +262,7 @@ static void send_negotiation(struct connectdata *conn, int cmd, int option)
    buf[1] = cmd;
    buf[2] = option;
    
-   (void)swrite(conn->firstsocket, buf, 3);
+   (void)swrite(conn->sock[FIRSTSOCKET], buf, 3);
    
    printoption(conn->data, "SENT", cmd, option);
 }
@@ -826,7 +826,7 @@ static void suboption(struct connectdata *conn)
       snprintf((char *)temp, sizeof(temp),
                "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_TTYPE,
                CURL_TELQUAL_IS, tn->subopt_ttype, CURL_IAC, CURL_SE);
-      (void)swrite(conn->firstsocket, temp, len);
+      (void)swrite(conn->sock[FIRSTSOCKET], temp, len);
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_XDISPLOC:
@@ -834,7 +834,7 @@ static void suboption(struct connectdata *conn)
       snprintf((char *)temp, sizeof(temp),
                "%c%c%c%c%s%c%c", CURL_IAC, CURL_SB, CURL_TELOPT_XDISPLOC,
                CURL_TELQUAL_IS, tn->subopt_xdisploc, CURL_IAC, CURL_SE);
-      (void)swrite(conn->firstsocket, temp, len);
+      (void)swrite(conn->sock[FIRSTSOCKET], temp, len);
       printsub(data, '>', &temp[2], len-2);
       break;
     case CURL_TELOPT_NEW_ENVIRON:
@@ -857,7 +857,7 @@ static void suboption(struct connectdata *conn)
       snprintf((char *)&temp[len], sizeof(temp) - len,
                "%c%c", CURL_IAC, CURL_SE);
       len += 2;
-      (void)swrite(conn->firstsocket, temp, len);
+      (void)swrite(conn->sock[FIRSTSOCKET], temp, len);
       printsub(data, '>', &temp[2], len-2);
       break;
   }
@@ -1035,7 +1035,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
 {
   CURLcode code;
   struct SessionHandle *data = conn->data;
-  int sockfd = conn->firstsocket;
+  int sockfd = conn->sock[FIRSTSOCKET];
 #ifdef WIN32
   WSAEVENT event_handle;
   WSANETWORKEVENTS events;
@@ -1105,7 +1105,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
           if(outbuf[0] == CURL_IAC)
             outbuf[out_count++] = CURL_IAC;
           
-          Curl_write(conn, conn->firstsocket, outbuf,
+          Curl_write(conn, conn->sock[FIRSTSOCKET], outbuf,
                      out_count, &bytes_written);
         }
       }
@@ -1176,7 +1176,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
           if(outbuf[0] == CURL_IAC)
             outbuf[out_count++] = CURL_IAC;
       
-          Curl_write(conn, conn->firstsocket, outbuf,
+          Curl_write(conn, conn->sock[FIRSTSOCKET], outbuf,
                      out_count, &bytes_written);
         }
       }

@@ -126,12 +126,12 @@ static void freedirs(struct FTP *ftp)
  * connected.
  *
  */
-static CURLcode AllowServerConnect(struct SessionHandle *data,
-                                   struct connectdata *conn,
-                                   int sock)
+static CURLcode AllowServerConnect(struct connectdata *conn)
 {
   fd_set rdset;
   struct timeval dt;
+  struct SessionHandle *data = conn->data;
+  int sock = conn->sock[SECONDARYSOCKET];
   
   FD_ZERO(&rdset);
 
@@ -169,7 +169,7 @@ static CURLcode AllowServerConnect(struct SessionHandle *data,
       }
       infof(data, "Connection accepted from server\n");
 
-      conn->secondarysocket = s;
+      conn->sock[SECONDARYSOCKET] = s;
       Curl_nonblock(s, TRUE); /* enable non-blocking */
     }
     break;
@@ -197,7 +197,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
    * Alas, read as much as possible, split up into lines, use the ending
    * line in a response or continue reading.  */
 
-  int sockfd = conn->firstsocket;
+  int sockfd = conn->sock[FIRSTSOCKET];
   int perline; /* count bytes per line */
   bool keepon=TRUE;
   ssize_t gotbytes;
@@ -438,7 +438,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
   if (data->set.tunnel_thru_httpproxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
-    result = Curl_ConnectHTTPProxyTunnel(conn, conn->firstsocket,
+    result = Curl_ConnectHTTPProxyTunnel(conn, FIRSTSOCKET,
                                          conn->hostname, conn->remote_port);
     if(CURLE_OK != result)
       return result;
@@ -447,7 +447,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   if(conn->protocol & PROT_FTPS) {
     /* FTPS is simply ftp with SSL for the control channel */
     /* now, perform the SSL initialization for this socket */
-    result = Curl_SSLConnect(conn);
+    result = Curl_SSLConnect(conn, FIRSTSOCKET);
     if(result)
       return result;
   }
@@ -480,6 +480,71 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
       infof(data, "Authentication successful\n");
   }
 #endif
+
+  if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
+    /* we don't have a ssl connection, try a FTPS connection now */
+    FTPSENDF(conn, "AUTH TLS", NULL);
+
+    result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+    if(result)
+      return result;
+
+    /* RFC2228 (page 5) says:
+     *
+     * If the server is willing to accept the named security mechanism, and
+     * does not require any security data, it must respond with reply code
+     * 234.
+     */
+
+    if(234 == ftpcode) {
+      result = Curl_SSLConnect(conn, FIRSTSOCKET);
+      if(result)
+        return result;
+      conn->protocol |= PROT_FTPS;
+      conn->ssl[SECONDARYSOCKET].use = FALSE; /* clear-text data */
+    }
+  }
+  if(conn->ssl[FIRSTSOCKET].use) {
+    /* PBSZ = PROTECTION BUFFER SIZE.
+
+       The 'draft-murray-auth-ftp-ssl' (draft 12, page 7) says:
+
+       Specifically, the PROT command MUST be preceded by a PBSZ command
+       and a PBSZ command MUST be preceded by a successful security data
+       exchange (the TLS negotiation in this case)
+
+       ... (and on page 8):
+         
+       Thus the PBSZ command must still be issued, but must have a parameter
+       of '0' to indicate that no buffering is taking place and the data
+       connection should not be encapsulated.
+    */
+    FTPSENDF(conn, "PBSZ %d", 0);
+    result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+    if(result)
+      return result;
+
+    /* For TLS, the data connection can have one of two security levels.
+
+       1)Clear (requested by 'PROT C')
+
+       2)Private (requested by 'PROT P')
+    */
+    if(!conn->ssl[SECONDARYSOCKET].use) {
+      FTPSENDF(conn, "PROT %c", 'P');
+      result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+      if(result)
+        return result;
+    
+      if(ftpcode == 200)
+        /* We have enabled SSL for the data connection! */
+        conn->ssl[SECONDARYSOCKET].use = TRUE;
+
+      /* FTP servers typically responds with 500 if they decide to reject
+         our 'P' request */
+    }
+  }
+
   
   /* send USER */
   FTPSENDF(conn, "USER %s", ftp->user?ftp->user:"");
@@ -666,8 +731,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   Curl_sec_fflush_fd(conn, conn->secondarysocket);
 #endif
   /* shut down the socket to inform the server we're done */
-  sclose(conn->secondarysocket);
-  conn->secondarysocket = -1;
+  sclose(conn->sock[SECONDARYSOCKET]);
+  conn->sock[SECONDARYSOCKET] = -1;
 
   if(!ftp->no_transfer) {
     /* Let's see what the server says about the transfer we just performed,
@@ -1039,7 +1104,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
    * I believe we should use the same address as the control connection.
    */
   sslen = sizeof(ss);
-  if (getsockname(conn->firstsocket, (struct sockaddr *)&ss, &sslen) < 0)
+  if (getsockname(conn->sock[FIRSTSOCKET], (struct sockaddr *)&ss, &sslen) < 0)
     return CURLE_FTP_PORT_FAILED;
   
   if (getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL, 0,
@@ -1205,7 +1270,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
   /* we set the secondary socket variable to this for now, it
      is only so that the cleanup function will close it in case
      we fail before the true secondary stuff is made */
-  conn->secondarysocket = portsock;
+  conn->sock[SECONDARYSOCKET] = portsock;
   
 #else
   /******************************************************************
@@ -1249,7 +1314,8 @@ CURLcode ftp_use_port(struct connectdata *conn)
     socklen_t sslen;
     
     sslen = sizeof(sa);
-    if (getsockname(conn->firstsocket, (struct sockaddr *)&sa, &sslen) < 0) {
+    if (getsockname(conn->sock[FIRSTSOCKET],
+                    (struct sockaddr *)&sa, &sslen) < 0) {
       failf(data, "getsockname() failed");
       return CURLE_FTP_PORT_FAILED;
     }
@@ -1526,7 +1592,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   result = Curl_connecthost(conn,
                             addr,
                             connectport,
-                            &conn->secondarysocket,
+                            &conn->sock[SECONDARYSOCKET],
                             &conninfo,
                             connected);
 
@@ -1547,7 +1613,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   
   if (data->set.tunnel_thru_httpproxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
-    result = Curl_ConnectHTTPProxyTunnel(conn, conn->secondarysocket,
+    result = Curl_ConnectHTTPProxyTunnel(conn, SECONDARYSOCKET,
                                          newhostp, newport);
     if(CURLE_OK != result)
       return result;
@@ -1684,7 +1750,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 
     if(data->set.ftp_use_port) {
       /* PORT means we are now awaiting the server to connect to us. */
-      result = AllowServerConnect(data, conn, conn->secondarysocket);
+      result = AllowServerConnect(conn);
       if( result )
         return result;
     }
@@ -1697,7 +1763,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
     Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
     result = Curl_Transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                      conn->secondarysocket, bytecountp);
+                           SECONDARYSOCKET, bytecountp);
     if(result)
       return result;
       
@@ -1940,15 +2006,24 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         size = downloadsize;
 
       if(data->set.ftp_use_port) {
-        result = AllowServerConnect(data, conn, conn->secondarysocket);
+        result = AllowServerConnect(conn);
         if( result )
           return result;
       }
 
+#if 1
+      if(conn->ssl[SECONDARYSOCKET].use) {
+        /* since we only have a TCP connection, we must now do the TLS stuff */
+        infof(data, "Doing the SSL/TSL handshake on the data stream\n");
+        result = Curl_SSLConnect(conn, SECONDARYSOCKET);
+        if(result)
+          return result;
+      }
+#endif
       infof(data, "Getting file with size: %d\n", size);
 
       /* FTP download: */
-      result=Curl_Transfer(conn, conn->secondarysocket, size, FALSE,
+      result=Curl_Transfer(conn, SECONDARYSOCKET, size, FALSE,
                            bytecountp,
                            -1, NULL); /* no upload here */
       if(result)
@@ -2232,10 +2307,10 @@ CURLcode Curl_ftp(struct connectdata *conn)
     if(connected)
       retcode = Curl_ftp_nextconnect(conn);
 
-    if(retcode && (conn->secondarysocket >= 0)) {
+    if(retcode && (conn->sock[SECONDARYSOCKET] >= 0)) {
       /* Failure detected, close the second socket if it was created already */
-      sclose(conn->secondarysocket);
-      conn->secondarysocket = -1;
+      sclose(conn->sock[SECONDARYSOCKET]);
+      conn->sock[SECONDARYSOCKET] = -1;
     }
 
     if(ftp->no_transfer)
@@ -2280,7 +2355,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   write_len = strlen(s);
 
   do {
-    res = Curl_write(conn, conn->firstsocket, sptr, write_len,
+    res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
                      &bytes_written);
 
     if(CURLE_OK != res)

@@ -1865,14 +1865,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
       res = Curl_do(&conn);
 
       if(res == CURLE_OK) {
-        if(conn->protocol&PROT_FTPS)
-          /* FTPS, disable ssl while transfering data */
-          conn->ssl.use = FALSE;
         res = Transfer(conn); /* now fetch that URL please */
-        if(conn->protocol&PROT_FTPS)
-          /* FTPS, enable ssl again after havving transferred data */
-          conn->ssl.use = TRUE;
-
         if(res == CURLE_OK)
           /*
            * We must duplicate the new URL here as the connection data
@@ -1885,11 +1878,11 @@ CURLcode Curl_perform(struct SessionHandle *data)
            * possibly know if the connection is in a good shape or not now. */
           conn->bits.close = TRUE;
 
-          if(-1 !=conn->secondarysocket) {
+          if(-1 != conn->sock[SECONDARYSOCKET]) {
             /* if we failed anywhere, we must clean up the secondary socket if
                it was used */
-            sclose(conn->secondarysocket);
-            conn->secondarysocket=-1;
+            sclose(conn->sock[SECONDARYSOCKET]);
+            conn->sock[SECONDARYSOCKET]=-1;
           }
         }
 
@@ -1932,12 +1925,13 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
 CURLcode 
 Curl_Transfer(struct connectdata *c_conn, /* connection data */
-              int sockfd,       /* socket to read from or -1 */
+              int sockindex,    /* socket index to read from or -1 */
               int size,         /* -1 if unknown at this point */
               bool getheader,   /* TRUE if header parsing is wanted */
               long *bytecountp, /* return number of bytes read or NULL */
-              int writesockfd,  /* socket to write to, it may very well be
-                                   the same we read from. -1 disables */
+              int writesockindex,  /* socket index to write to, it may very
+                                      well be the same we read from. -1
+                                      disables */
               long *writebytecountp /* return number of bytes written or
                                        NULL */
               )
@@ -1947,11 +1941,11 @@ Curl_Transfer(struct connectdata *c_conn, /* connection data */
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
   /* now copy all input parameters */
-  conn->sockfd = sockfd;
+  conn->sockfd = sockindex==-1?-1:conn->sock[sockindex];
   conn->size = size;
   conn->bits.getheader = getheader;
   conn->bytecountp = bytecountp;
-  conn->writesockfd = writesockfd;
+  conn->writesockfd = writesockindex==-1?-1:conn->sock[writesockindex];
   conn->writebytecountp = writebytecountp;
 
   return CURLE_OK;

@@ -89,6 +89,7 @@ CURLcode Curl_dict(struct connectdata *conn)
                           by RFC 2229 */
   CURLcode result=CURLE_OK;
   struct SessionHandle *data=conn->data;
+  int sockfd = conn->sock[FIRSTSOCKET];
 
   char *path = conn->path;
   long *bytecount = &conn->bytecount;
@@ -134,7 +135,7 @@ CURLcode Curl_dict(struct connectdata *conn)
       nth = atoi(nthdef);
     }
       
-    result = Curl_sendf(conn->firstsocket, conn,
+    result = Curl_sendf(sockfd, conn,
                         "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                         "MATCH "
                         "%s "    /* database */
@@ -149,7 +150,7 @@ CURLcode Curl_dict(struct connectdata *conn)
     if(result)
       failf(data, "Failed sending DICT request");
     else
-      result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
+      result = Curl_Transfer(conn, sockfd, -1, FALSE, bytecount,
                              -1, NULL); /* no upload */      
     if(result)
       return result;
@@ -184,7 +185,7 @@ CURLcode Curl_dict(struct connectdata *conn)
       nth = atoi(nthdef);
     }
       
-    result = Curl_sendf(conn->firstsocket, conn,
+    result = Curl_sendf(sockfd, conn,
                         "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                         "DEFINE "
                         "%s "     /* database */
@@ -195,7 +196,7 @@ CURLcode Curl_dict(struct connectdata *conn)
     if(result)
       failf(data, "Failed sending DICT request");
     else
-      result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
+      result = Curl_Transfer(conn, sockfd, -1, FALSE, bytecount,
                              -1, NULL); /* no upload */
     
     if(result)
@@ -213,14 +214,14 @@ CURLcode Curl_dict(struct connectdata *conn)
         if (ppath[i] == ':')
           ppath[i] = ' ';
       }
-      result = Curl_sendf(conn->firstsocket, conn,
+      result = Curl_sendf(sockfd, conn,
                           "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                           "%s\n"
                           "QUIT\n", ppath);
       if(result)
         failf(data, "Failed sending DICT request");
       else
-        result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
+        result = Curl_Transfer(conn, sockfd, -1, FALSE, bytecount,
                                -1, NULL);
       if(result)
         return result;

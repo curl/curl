@@ -266,7 +266,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
         int sockfd;
 
         if(CURLM_STATE_WAITCONNECT == easy->state) {
-          sockfd = conn->firstsocket;
+          sockfd = conn->sock[FIRSTSOCKET];
           FD_SET(sockfd, write_fd_set);
         }
         else {
@@ -275,7 +275,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
              to connect to us. It makes a difference in the way: if we
              connect to the site we wait for the socket to become writable, if 
              the site connects to us we wait for it to become readable */
-          sockfd = conn->secondarysocket;
+          sockfd = conn->sock[SECONDARYSOCKET];
           FD_SET(sockfd, write_fd_set);
         }
 
@@ -390,7 +390,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     case CURLM_STATE_WAITCONNECT:
       /* awaiting a completion of an asynch connect */
       easy->result = Curl_is_connected(easy->easy_conn,
-                                       easy->easy_conn->firstsocket,
+                                       easy->easy_conn->sock[FIRSTSOCKET],
                                        &connected);
       if(connected)
         easy->result = Curl_protocol_connect(easy->easy_conn, NULL);
@@ -437,7 +437,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
        * First, check if we really are ready to do more.
        */
       easy->result = Curl_is_connected(easy->easy_conn,
-                                       easy->easy_conn->secondarysocket,
+                                       easy->easy_conn->sock[SECONDARYSOCKET],
                                        &connected);
       if(connected) {
         /*
@@ -465,11 +465,11 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
          * possibly know if the connection is in a good shape or not now. */
         easy->easy_conn->bits.close = TRUE;
 
-        if(-1 !=easy->easy_conn->secondarysocket) {
+        if(-1 !=easy->easy_conn->sock[SECONDARYSOCKET]) {
           /* if we failed anywhere, we must clean up the secondary socket if
              it was used */
-          sclose(easy->easy_conn->secondarysocket);
-          easy->easy_conn->secondarysocket=-1;
+          sclose(easy->easy_conn->sock[SECONDARYSOCKET]);
+          easy->easy_conn->sock[SECONDARYSOCKET]=-1;
         }
         Curl_posttransfer(easy->easy_handle);
         Curl_done(easy->easy_conn);

@@ -220,23 +220,27 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
  * to the server. Works with plain sockets, SSL or kerberos.
  *
  */
-CURLcode Curl_write(struct connectdata *conn, int sockfd,
+CURLcode Curl_write(struct connectdata *conn,
+                    int sockfd,
                     void *mem, size_t len,
                     ssize_t *written)
 {
   ssize_t bytes_written;
   CURLcode retcode;
-  (void)conn;
 
 #ifdef USE_SSLEAY
+  /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
+     If it is the second socket, we set num to 1. Otherwise to 0. This lets
+     us use the correct ssl handle. */
+  int num = (sockfd == conn->sock[SECONDARYSOCKET]);
   /* SSL_write() is said to return 'int' while write() and send() returns
      'size_t' */
-  if (conn->ssl.use) {
+  if (conn->ssl[num].use) {
     int err;
-    int rc = SSL_write(conn->ssl.handle, mem, len);
+    int rc = SSL_write(conn->ssl[num].handle, mem, len);
 
     if(rc < 0) {
-      err = SSL_get_error(conn->ssl.handle, rc);
+      err = SSL_get_error(conn->ssl[num].handle, rc);
     
       switch(err) {
       case SSL_ERROR_WANT_READ:
@@ -271,6 +275,8 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
     bytes_written = rc;
   }
   else {
+#else
+  (void)conn;
 #endif
 #ifdef KRB4
     if(conn->sec_complete) {
@@ -364,16 +370,20 @@ int Curl_read(struct connectdata *conn,
               ssize_t *n)
 {
   ssize_t nread;
-  (void)conn;
+#ifdef USE_SSLEAY
+  /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
+     If it is the second socket, we set num to 1. Otherwise to 0. This lets
+     us use the correct ssl handle. */
+  int num = (sockfd == conn->sock[SECONDARYSOCKET]);
+
   *n=0; /* reset amount to zero */
 
-#ifdef USE_SSLEAY
-  if (conn->ssl.use) {
-    nread = SSL_read(conn->ssl.handle, buf, buffersize);
+  if (conn->ssl[num].use) {
+    nread = SSL_read(conn->ssl[num].handle, buf, buffersize);
 
     if(nread < 0) {
       /* failed SSL_read */
-      int err = SSL_get_error(conn->ssl.handle, nread);
+      int err = SSL_get_error(conn->ssl[num].handle, nread);
 
       switch(err) {
       case SSL_ERROR_NONE: /* this is not an error */
@@ -398,13 +408,16 @@ int Curl_read(struct connectdata *conn,
     }
   }
   else {
+#else
+    (void)conn;
 #endif
+    *n=0; /* reset amount to zero */
 #ifdef KRB4
     if(conn->sec_complete)
       nread = Curl_sec_read(conn, sockfd, buf, buffersize);
     else
 #endif
-      nread = sread (sockfd, buf, buffersize);
+      nread = sread(sockfd, buf, buffersize);
 
     if(-1 == nread) {
       int err = Curl_ourerrno();

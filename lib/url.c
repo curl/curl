@@ -1251,6 +1251,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.max_filesize = va_arg(param, long);
     break;
 
+  case CURLOPT_FTP_SSL:
+    /*
+     * Make FTP transfers attempt to use SSL/TLS.
+     */
+    data->set.ftp_ssl = va_arg(param, long);
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_FAILED_INIT; /* correct this */
@@ -1293,16 +1300,13 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->proto.generic);
   Curl_safefree(conn->newurl);
   Curl_safefree(conn->path);  /* the URL path part */
-
-#ifdef USE_SSLEAY
   Curl_SSL_Close(conn);
-#endif /* USE_SSLEAY */
 
   /* close possibly still open sockets */
-  if(-1 != conn->secondarysocket)
-    sclose(conn->secondarysocket);
-  if(-1 != conn->firstsocket)
-    sclose(conn->firstsocket);
+  if(-1 != conn->sock[SECONDARYSOCKET])
+    sclose(conn->sock[SECONDARYSOCKET]);
+  if(-1 != conn->sock[FIRSTSOCKET])
+    sclose(conn->sock[FIRSTSOCKET]);
 
   Curl_safefree(conn->user);
   Curl_safefree(conn->passwd);
@@ -1429,7 +1433,7 @@ ConnectionExists(struct SessionHandle *data,
     }
 
     if(match) {
-      bool dead = SocketIsDead(check->firstsocket);
+      bool dead = SocketIsDead(check->sock[FIRSTSOCKET]);
       if(dead) {
         /*
          */
@@ -1549,16 +1553,15 @@ ConnectionStore(struct SessionHandle *data,
  * This function logs in to a SOCKS5 proxy and sends the specifies the final
  * desitination server.
  */
-static int handleSock5Proxy(
-    const char *proxy_name,
-    const char *proxy_password,
-    struct connectdata *conn,
-    int sock)
+static int handleSock5Proxy(const char *proxy_name,
+                            const char *proxy_password,
+                            struct connectdata *conn)
 {
   unsigned char socksreq[600]; /* room for large user/pw (255 max each) */
   ssize_t actualread;
   ssize_t written;
   CURLcode result;
+  int sock = conn->sock[FIRSTSOCKET];
 
   Curl_nonblock(sock, FALSE);
 
@@ -1754,7 +1757,7 @@ static CURLcode ConnectPlease(struct connectdata *conn,
   result= Curl_connecthost(conn,
                            hostaddr,
                            conn->port,
-                           &conn->firstsocket,
+                           &conn->sock[FIRSTSOCKET],
                            &addr,
                            connected);
   if(CURLE_OK == result) {
@@ -1776,8 +1779,7 @@ static CURLcode ConnectPlease(struct connectdata *conn,
     if (conn->data->set.proxytype == CURLPROXY_SOCKS5) {
       return handleSock5Proxy(conn->proxyuser,
                               conn->proxypasswd,
-                              conn,
-                              conn->firstsocket) ?
+                              conn) ?
         CURLE_COULDNT_CONNECT : CURLE_OK;
     }
     else if (conn->data->set.proxytype == CURLPROXY_HTTP) {
@@ -1953,8 +1955,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   /* and we setup a few fields in case we end up actually using this struct */
   conn->data = data;           /* remember our daddy */
-  conn->firstsocket = -1;     /* no file descriptor */
-  conn->secondarysocket = -1; /* no file descriptor */
+  conn->sock[FIRSTSOCKET] = -1;     /* no file descriptor */
+  conn->sock[SECONDARYSOCKET] = -1; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
   conn->bits.httpproxy = (data->change.proxy && *data->change.proxy &&
                           (data->set.proxytype == CURLPROXY_HTTP))?
@@ -2419,6 +2421,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(strequal(conn->protostr, "FTPS")) {
 #ifdef USE_SSLEAY
       conn->protocol |= PROT_FTPS|PROT_SSL;
+      conn->ssl[SECONDARYSOCKET].use = TRUE; /* send data securely */
 #else
       failf(data, LIBCURL_NAME
             " was built with SSL disabled, ftps: not supported!");
@@ -3100,7 +3103,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
   conn->bytecount = 0;
   conn->headerbytecount = 0;
 
-  if(-1 == conn->firstsocket) {
+  if(-1 == conn->sock[FIRSTSOCKET]) {
     bool connected;
 
     /* Connect only if not already connected! */
