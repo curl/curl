@@ -105,6 +105,15 @@ static CURLcode ftp_cwd(struct connectdata *conn, char *path);
 /* easy-to-use macro: */
 #define FTPSENDF(x,y,z) if((result = Curl_ftpsendf(x,y,z))) return result
 
+static void freedirs(struct FTP *ftp)
+{
+  int i;
+  for (i=0; ftp->dirs[i]; i++){
+    free(ftp->dirs[i]);
+    ftp->dirs[i]=NULL;
+  }
+}
+
 /***********************************************************************
  *
  * AllowServerConnect()
@@ -597,6 +606,14 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   ssize_t nread;
   int ftpcode;
   CURLcode result=CURLE_OK;
+
+  /* free the dir tree parts */
+  freedirs(ftp);
+
+  if(ftp->file) {
+    free(ftp->file);
+    ftp->file = NULL;
+  }
 
   if(data->set.upload) {
     if((-1 != data->set.infilesize) &&
@@ -2161,7 +2178,8 @@ CURLcode Curl_ftp(struct connectdata *conn)
     
       if (!ftp->dirs[path_part]) { /* run out of memory ... */
         failf(data, "no memory");
-        retcode = CURLE_OUT_OF_MEMORY;
+        freedirs(ftp);
+        return CURLE_OUT_OF_MEMORY;
       }
     }
     else {
@@ -2175,16 +2193,9 @@ CURLcode Curl_ftp(struct connectdata *conn)
         /* too deep, we need the last entry to be kept NULL at all
            times to signal end of list */
         failf(data, "too deep dir hierarchy");
-        retcode = CURLE_URL_MALFORMAT;
+        freedirs(ftp);
+        return CURLE_URL_MALFORMAT;
       }
-    }
-    if (retcode) {
-      int i;
-      for (i=0;i<path_part;i++) { /* free previous parts */
-        free(ftp->dirs[i]);
-        ftp->dirs[i]=NULL;
-      }
-      return retcode; /* failure */
     }
   }
 
@@ -2193,11 +2204,7 @@ CURLcode Curl_ftp(struct connectdata *conn)
   if(*ftp->file) {
     ftp->file = curl_unescape(ftp->file, 0);
     if(NULL == ftp->file) {
-      int i;
-      for (i=0;i<path_part;i++){
-        free(ftp->dirs[i]);
-        ftp->dirs[i]=NULL;
-      }
+      freedirs(ftp);
       failf(data, "no memory");
       return CURLE_OUT_OF_MEMORY;
     }
@@ -2288,22 +2295,20 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 CURLcode Curl_ftp_disconnect(struct connectdata *conn)
 {
   struct FTP *ftp= conn->proto.ftp;
-  int i;
 
   /* The FTP session may or may not have been allocated/setup at this point! */
   if(ftp) {
     if(ftp->entrypath)
       free(ftp->entrypath);
-    if(ftp->cache)
+    if(ftp->cache) {
       free(ftp->cache);
-    if(ftp->file)
-      free(ftp->file);
-    for (i=0;ftp->dirs[i];i++){
-      free(ftp->dirs[i]);
-      ftp->dirs[i]=NULL;
+      ftp->cache = NULL;
     }
-
-    ftp->file = NULL; /* zero */
+    if(ftp->file) {
+      free(ftp->file);
+      ftp->file = NULL; /* zero */
+    }
+    freedirs(ftp);
   }
   return CURLE_OK;
 }
