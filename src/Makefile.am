@@ -38,7 +38,8 @@ EXTRA_DIST = mkhelp.pl curlmsg.msg makefile.dj \
 	macos/curl.mcp.xml.sit.hqx \
 	macos/MACINSTALL.TXT \
 	macos/src/curl_GUSIConfig.cpp \
-	macos/src/macos_main.cpp curlmsg.h curlmsg.sdl curlmsg_vms.h
+	macos/src/macos_main.cpp curlmsg.h curlmsg.sdl curlmsg_vms.h \
+	config-amiga.h makefile.amiga
 
 MANPAGE=$(top_srcdir)/docs/curl.1
 README=$(top_srcdir)/docs/MANUAL
