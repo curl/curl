@@ -40,6 +40,15 @@ sub REAPER {
     logmsg "reaped $waitedpid" . ($? ? " with exit $?" : '');
 }
 
+$commandok{ USER => 'fresh'}; # USER is ok in fresh state
+
+print "TEST: ".$commandok{"USER"}."\n";
+
+
+$statechange{ 'USER' => 'passwd'}; # USER goes to passwd state
+
+$displaytext{'USER' => '331 We are happy you arrived!'}; # output FTP line
+
 $SIG{CHLD} = \&REAPER;
 
 for ( $waitedpid = 0;
@@ -74,11 +83,14 @@ for ( $waitedpid = 0;
             # < 150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes).
             # * Getting file with size: -1
 
+            # flush data:
+            $| = 1;
+
             print "220-running the curl suite test server\r\n",
             "220-running the curl suite test server\r\n",
             "220 running the curl suite test server\r\n";
 
-            STDOUT->autoflush(1);
+            $state="fresh";
 
             while(1) {
 
@@ -93,8 +105,24 @@ for ( $waitedpid = 0;
                         "badly formed command received: ".$_;
                     exit 0;
                 }
+                $FTPCMD=$1;
+                $full=$_;
                  
-                print STDERR "GOT: $_\n";
+                print STDERR "GOT: ($1) $_\n";
+
+                $ok = $commandok{$FTPCMD};
+                if($ok !~ /$state/) {
+                    print "314 $FTPCMD not OK ($ok) in state: $state!\r\n";
+                    exit;
+                }
+
+                $state=$statechange{$FTPCMD};
+                if($command{$1} eq "") {
+                    print "314 Wwwwweeeeird internal error\r\n";
+                    exit
+                }
+                $text = $displaytext{$FTPCMD};
+                print "$text\r\n";
             }
             exit;
         }
