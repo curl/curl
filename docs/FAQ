@@ -81,7 +81,7 @@ FAQ
   fact it can also be pronounced 'see URL' also helped.
 
   Curl supports a range of common Internet protocols, currently including
-  HTTP, HTTPS, FTP, GOPHER, LDAP, DICT, TELNET and FILE.
+  HTTP, HTTPS, FTP, FTPS, GOPHER, LDAP, DICT, TELNET and FILE.
 
   We spell it cURL or just curl. We pronounce it with an initial k sound:
   [kurl].
