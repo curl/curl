@@ -24,6 +24,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o added work-around for a name resolve problem on some glibc versions
  o a rare ERRORBUFFER single-byte overflow was fixed
  o HTTP-resuming an already downloaded file works better
  o builds better on Solaris 8+ with gcc
@@ -83,6 +84,6 @@ advice from friends like these:
  Jeremy Friesner, Florian Schoppmann, Neil Dunbar, Frank Ticheler, Lachlan
  O'Dea, Dirk Manske, Domenico Andreoli, Gisle Vanem, Kimmo Kinnunen, Andrew
  Fuller, Georg Horn, Andrés García, Dylan Ellicott, Kevin Roth, David Hull,
- James Bursa
+ James Bursa, Dan C
  
         Thanks! (and sorry if I forgot to mention someone)

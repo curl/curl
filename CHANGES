@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (28 October)
+- Dan C tracked down yet another weird behavior in the glibc gethostbyname_r()
+  function for some specific versions (reported on 2.2.5 and 2.1.1), and
+  provided a fix. On Linux machines with these glibc versioins, non-ipv6
+  builds of libcurl would often fail to resolve perfectly resolvable host
+  names.
+
 Daniel (26 October)
 - James Bursa found out that curl_msnprintf() could write the trailing
   zero-byte outside its given buffer size. This could happen if you generated

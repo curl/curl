@@ -983,13 +983,28 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
          of buffer size (step_size grows beyond CURL_NAMELOOKUP_SIZE).
 
          If anyone has a better fix, please tell us!
+
+         -------------------------------------------------------------------
+
+         On October 23rd 2003, Dan C dug up more details on the mysteries of
+         gethostbyname_r() in glibc:
+
+         In glibc 2.2.5 the interface is different (this has also been
+         discovered in glibc 2.1.1-6 as shipped by Redhat 6). What I can't
+         explain, is that tests performed on glibc 2.2.4-34 and 2.2.4-32
+         (shipped/upgraded by Redhat 7.2) don't show this behavior!
+
+         In this "buggy" version, the return code is -1 on error and 'errno'
+         is set to the ERANGE or EAGAIN code. Note that 'errno' is not a
+         thread-safe variable.
+
       */
 
-      if((ERANGE == res) || (EAGAIN == res)) {
+      if(((ERANGE == res) || (EAGAIN == res)) ||
+         ((res<0) && ((ERANGE == errno) || (EAGAIN == errno))))
 	step_size+=200;
-	continue;
-      }
-      break;
+      else
+        break;
     } while(step_size <= CURL_NAMELOOKUP_SIZE);
 
     if(!h) /* failure */
