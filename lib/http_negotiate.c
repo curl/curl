@@ -31,6 +31,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <errno.h>
 
 #include "urldata.h"
 #include "sendf.h"
@@ -53,18 +54,15 @@ get_gss_name(struct connectdata *conn, gss_name_t *server)
   gss_buffer_desc token = GSS_C_EMPTY_BUFFER;
   char name[2048];
 
-#ifdef KRB5
+  /* GSSAPI implementation by Globus (known as GSI) requires the name to be
+     of form "<service>/<fqdn>" instead of <service>@<fqdn> (ie. slash instead
+     of at-sign). Also GSI servers are often identified as 'host' not 'khttp'.
+     Change following lines if you want to use GSI */
   token.length = strlen("khttp@") + strlen(conn->hostname) + 1;
-#els
-  token.length = strlen("host/") + strlen(conn->hostname) + 1;
-#endif
   if (token.length + 1 > sizeof(name))
     return EMSGSIZE;
-#ifdef KRB5
   sprintf(name, "khttp@%s", conn->hostname);
-#else
-  sprintf(name, "host/%s", conn->hostname);
-#endif
+
   token.value = (void *) name;
   major_status = gss_import_name(&minor_status,
                                  &token,
