@@ -1,4 +1,4 @@
-Updated: January 27, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: January 29, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -30,6 +30,7 @@ FAQ
   3.6 Does curl support javascript, ASP, XML, XHTML or HTML version Y?
   3.7 Can I use curl to delete/rename a file through FTP?
   3.8 How do I tell curl to follow HTTP redirects?
+  3.9 How to I use curl in PHP?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -279,6 +280,19 @@ FAQ
   -L/--location option. As in:
 
      curl -L http://redirector.com
+
+  3.9 How to I use curl in PHP?
+
+  PHP4 has the ability to use libcurl as an internal module if built with that
+  option enabled. You then get a set of extra functions that can be used
+  within your PHP programs. You find all details about those functions in the
+  curl section in the PHP manual, see the online version at:
+
+        http://www.php.net/manual/ref.curl.php
+
+  PHP also offers the option to run a command line, and then you can of course
+  invoke the curl tool using a command line. This is the way to use curl if
+  you're using PHP3 or PHP4 built without curl module support.
 
 4. Running Problems
 
