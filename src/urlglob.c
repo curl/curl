@@ -314,7 +314,7 @@ int glob_url(URLGlob** glob, char* url, int *urlnum, FILE *error)
   if(NULL == glob_buffer)
     return CURLE_OUT_OF_MEMORY;
 
-  glob_expand = (URLGlob*)malloc(sizeof(URLGlob));
+  glob_expand = (URLGlob*)calloc(sizeof(URLGlob), 1);
   if(NULL == glob_expand) {
     free(glob_buffer);
     return CURLE_OUT_OF_MEMORY;
