@@ -45,7 +45,7 @@
 #include "memdebug.h"
 
 struct memdebug {
-  int size;
+  size_t size;
   double mem[1];
   /* I'm hoping this is the thing with the strictest alignment
    * requirements.  That also means we waste some space :-( */
@@ -125,7 +125,7 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
   }
 
   if(logfile && source)
-    fprintf(logfile, "MEM %s:%d malloc(%d) = %p\n",
+    fprintf(logfile, "MEM %s:%d malloc(%zd) = %p\n",
             source, line, wantedsize, mem->mem);
   return mem->mem;
 }
@@ -172,7 +172,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   memcpy(mem, str, len);
 
   if(logfile)
-    fprintf(logfile, "MEM %s:%d strdup(%p) (%d) = %p\n",
+    fprintf(logfile, "MEM %s:%d strdup(%p) (%zd) = %p\n",
             source, line, str, len, mem);
 
   return mem;
@@ -195,7 +195,7 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
 
   mem=(struct memdebug *)(realloc)(mem, size);
   if(logfile)
-    fprintf(logfile, "MEM %s:%d realloc(0x%x, %d) = %p\n",
+    fprintf(logfile, "MEM %s:%d realloc(0x%x, %zd) = %p\n",
             source, line, ptr, wantedsize, mem?mem->mem:NULL);
 
   if(mem) {
