@@ -72,6 +72,28 @@ while(<STDIN>) {
             print "Not recognized input line: $function\n";
         }        
     }
+    # FD url.c:1282 socket() = 5
+    elsif($_ =~ /^FD ([^:]*):(\d*) (.*)/) {
+        # generic match for the filename+linenumber
+        $source = $1;
+        $linenum = $2;
+        $function = $3;
+
+        if($function =~ /socket\(\) = (\d*)/) {
+            $filedes{$1}=1;
+            $getfile{$1}="$source:$linenum";
+            $openfile++;
+        }
+        elsif($function =~ /sclose\((\d*)\)/) {
+            if($filedes{$1} != 1) {
+                print "Close without open: $line\n";
+            }
+            else {
+                $filedes{$1}=0; # closed now
+                $openfile--;
+            }
+        }
+    }
     else {
         print "Not recognized prefix line: $line\n";
     }
@@ -93,3 +115,10 @@ if($totalmem) {
     }
 }
 
+if($openfile) {
+    for(keys %filedes) {
+        if($filedes{$_} == 1) {
+            print "Open file descriptor created at ".$getfile{$_}."\n";
+        }
+    }
+}

@@ -43,12 +43,22 @@
 
 #include <curl/curl.h>
 
+#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#include <winsock.h>
+#else /* some kind of unix */
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#endif
+
 #define _MPRINTF_REPLACE
 #include <curl/mprintf.h>
 #include "urldata.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+
+/* DONT include memdebug.h here! */
 
 /*
  * Note that these debug functions are very simple and they are meant to
@@ -113,6 +123,23 @@ void curl_dofree(void *ptr, int line, char *source)
 
   fprintf(logfile?logfile:stderr, "MEM %s:%d free(%p)\n",
           source, line, ptr);
+}
+
+int curl_socket(int domain, int type, int protocol, int line, char *source)
+{
+  int sockfd=(socket)(domain, type, protocol);
+  fprintf(logfile?logfile:stderr, "FD %s:%d socket() = %d\n",
+          source, line, sockfd);
+  return sockfd;
+}
+
+/* this is our own defined way to close sockets on *ALL* platforms */
+int curl_sclose(int sockfd, int line, char *source)
+{
+  int res=sclose(sockfd);
+  fprintf(logfile?logfile:stderr, "FD %s:%d sclose(%d)\n",
+          source, line, sockfd);
+  return sockfd;
 }
 
 #endif /* MALLOCDEBUG */
