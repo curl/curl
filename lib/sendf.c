@@ -279,13 +279,28 @@ CURLcode Curl_read(struct connectdata *conn, int sockfd,
 
 #ifdef USE_SSLEAY
   if (conn->ssl.use) {
-    int loop=100; /* just a precaution to never loop endlessly */
-    while(loop--) {
+    bool loop=TRUE;
+    int err;
+    do {
       nread = SSL_read(conn->ssl.handle, buf, buffersize);
-      if((-1 != nread) ||
-         (SSL_ERROR_WANT_READ != SSL_get_error(conn->ssl.handle, nread) ))
+
+      if(nread > 0)
+        /* successful read */
         break;
-    }
+
+      err = SSL_get_error(conn->ssl.handle, nread);
+
+      switch(err) {
+      case SSL_ERROR_NONE: /* this is not an error */
+      case SSL_ERROR_ZERO_RETURN: /* no more data */
+        loop=0; /* get out of loop */
+        break;
+      case SSL_ERROR_WANT_READ:
+      case SSL_ERROR_WANT_WRITE:
+        /* if there's data pending, then we re-invoke SSL_read() */
+        break;
+      }
+    } while(loop && SSL_pending(conn->ssl.handle));
   }
   else {
 #endif
