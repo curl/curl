@@ -1,4 +1,4 @@
-                                       Updated for curl 7.7.2 on April 26, 2001
+                                       Updated for curl 7.8 on May 29, 2001
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -69,20 +69,29 @@ Library
  rather small and easy-to-follow. All the ones prefixed with 'curl_easy' are
  put in the lib/easy.c file.
 
+ Starting with libcurl 7.8, curl_global_init_() and curl_global_cleanup() were
+ introduced. They should be called by the application to initialize and clean
+ up global stuff in the library. As of today, they just do the global SSL
+ initing if SSL is enabled. libcurl itself has no "global" scope.
+
  All printf()-style functions use the supplied clones in lib/mprintf.c. This
  makes sure we stay absolutely platform independent.
 
  curl_easy_init() allocates an internal struct and makes some initializations.
- The returned handle does not reveal internals.
+ The returned handle does not reveal internals. This is the 'UrlData' struct
+ which works as a global "anchor" struct. All connections performed will get
+ connect-specific data allocated that should be used for things related to
+ particular connections/requests.
 
- curl_easy_setopt() takes a three arguments, where the option stuff must be
- passed in pairs, the parameter-ID and the parameter-value. The list of
- options is documented in the man page.
+ curl_easy_setopt() takes three arguments, where the option stuff must be
+ passed in pairs: the parameter-ID and the parameter-value. The list of
+ options is documented in the man page. This function mainly sets things in
+ the 'UrlData' struct.
 
  curl_easy_perform() does a whole lot of things:
 
  It starts off in the lib/easy.c file by calling Curl_perform() and the main
- work then continues lib/url.c. The flow continues with a call to
+ work then continues in lib/url.c. The flow continues with a call to
  Curl_connect() to connect to the remote site.
 
  o Curl_connect()
@@ -94,12 +103,18 @@ Library
    When Curl_connect is done, we are connected to the remote site. Then it is
    time to tell the server to get a document/file. Curl_do() arranges this.
 
+   This function makes sure there's an allocated and initiated 'connectdata'
+   struct that is used for this particular connection only (although there may
+   be several requests performed on the same connect). A bunch of things are
+   inited/inherited from the UrlData struct.
+
  o Curl_do()
 
    Curl_do() makes sure the proper protocol-specific function is called. The
    functions are named after the protocols they handle. Curl_ftp(),
    Curl_http(), Curl_dict(), etc. They all reside in their respective files
-   (ftp.c, http.c and dict.c).
+   (ftp.c, http.c and dict.c). HTTPS is handled by Curl_http() and FTPS by
+   Curl_ftp().
 
    The protocol-specific functions of course deal with protocol-specific
    negotiations and setup. They have access to the Curl_sendf() (from
@@ -123,17 +138,18 @@ Library
    Called after a transfer is done. This function takes care of everything
    that has to be done after a transfer. This function attempts to leave
    matters in a state so that Curl_do() should be possible to call again on
-   the same connection (in a persistent connection case). It may also soon be
-   closed with Curl_disconnect().
+   the same connection (in a persistent connection case). It might also soon
+   be closed with Curl_disconnect().
 
  o Curl_disconnect()
 
-   During normal connection and transfers, no one ever tries to close any
+   When doing normal connections and transfers, no one ever tries to close any
    connection so this is not normally called when curl_easy_perform() is
    used. This function is only used when we are certain that no more transfers
-   is going to be made on the connection (it can be also closed by
-   force). This function can also be called at times to make sure that libcurl
-   doesn't keep too many connections alive at the same time.
+   is going to be made on the connection. It can be also closed by force, or
+   it can be called to make sure that libcurl doesn't keep too many
+   connections alive at the same time (there's a default amount of 5 but that
+   can be changed with the CURLOPT_MAXCONNECTS option).
 
    This function cleans up all resources that are associated with a single
    connection.
@@ -239,26 +255,26 @@ Library
 Persistent Connections
 ======================
 
- With curl 7.7, we added persistent connection support to libcurl which has
- introduced a somewhat different treatmeant of things inside of libcurl.
+ The persistent connection support in libcurl requires some considerations on
+ how to do things inside of the library.
 
  o The 'UrlData' struct returned in the curl_easy_init() call must never
    hold connection-oriented data. It is meant to hold the root data as well
    as all the options etc that the library-user may choose.
- o The 'UrlData' struct holds the cache array of pointers to 'connectdata'
-   structs. There's one connectdata struct for each connection that libcurl
-   knows about.
+ o The 'UrlData' struct holds the "connection cache" (an array of pointers to
+   'connectdata' structs). There's one connectdata struct allocated for each
+   connection that libcurl knows about.
  o This also enables the 'curl handle' to be reused on subsequent transfers,
-   something that was illegal in pre-7.7 versions.
+   something that was illegal before libcurl 7.7.
  o When we are about to perform a transfer with curl_easy_perform(), we first
    check for an already existing connection in the cache that we can use,
    otherwise we create a new one and add to the cache. If the cache is full
    already when we add a new connection, we close one of the present ones. We
    select which one to close dependent on the close policy that may have been
    previously set.
- o When the tranfer operation is complete, we try to leave the connection open.
-   Particular options may tell us not to, and protocols may signal closure on
-   connections and then we don't keep it open of course.
+ o When the transfer operation is complete, we try to leave the connection
+   open. Particular options may tell us not to, and protocols may signal
+   closure on connections and then we don't keep it open of course.
  o When curl_easy_cleanup() is called, we close all still opened connections.
 
  You do realize that the curl handle must be re-used in order for the
@@ -268,10 +284,9 @@ Library Symbols
 ===============
  
  All symbols used internally in libcurl must use a 'Curl_' prefix if they're
- used in more than a single file. Single-file symbols must be made
- static. Public (exported) symbols must use a 'curl_' prefix. (There are
- exceptions, but they are destined to be changed to follow this pattern in the
- future.)
+ used in more than a single file. Single-file symbols must be made static.
+ Public ("exported") symbols must use a 'curl_' prefix. (There are exceptions,
+ but they are to be changed to follow this pattern in future versions.)
 
 Return Codes and Informationals
 ===============================
