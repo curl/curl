@@ -204,6 +204,8 @@ X_OBJS= \
 	$(DIROBJ)\share.obj \
 	$(DIROBJ)\multi.obj \
 	$(DIROBJ)\http_digest.obj \
+        $(DIROBJ)\http_negotiate.obj \
+        $(DIROBJ)\http_ntlm.obj \
 	$(DIROBJ)\md5.obj
 
 all : $(TARGET)
@@ -226,6 +228,3 @@ clean:
 	-@erase $(DIROBJ)\*.obj
 	-@erase vc60.idb
 	-@erase vc60.pch
-
-getdate.c: getdate.c.cvs
-	copy getdate.c.cvs getdate.c
