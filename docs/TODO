@@ -18,7 +18,12 @@ To do for the 7.8 release:
  * Make SSL session ids get used if multiple HTTPS documents from the same
    host is requested.
 
-To do in a future release:
+To do in a future release (random order):
+
+ * Document the undocumented libcurl functions: the printf clones (like
+   curl_msprintf, curl_mfprintf, curl_msnprintf, curl_maprintf and
+   curl_mvfprintf) and the string compare functions (curl_strequal
+   and curl_strnequal).
 
  * Add configure options that disables certain protocols in libcurl to
    decrease footprint.  '--disable-[protocol]' where protocol is http, ftp,
