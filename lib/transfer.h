@@ -35,7 +35,7 @@ void Curl_single_fdset(struct connectdata *conn,
                        int *max_fd);
 CURLcode Curl_readwrite_init(struct connectdata *conn);
 
-int Curl_fillreadbuffer(struct connectdata *conn, int bytes);
+CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp);
 
 /* This sets up a forthcoming transfer */
 CURLcode

@@ -218,7 +218,12 @@ static CURLcode file_upload(struct connectdata *conn)
     Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
   while (res == CURLE_OK) {
-    nread = Curl_fillreadbuffer(conn, BUFSIZE);
+    int readcount;
+    res = Curl_fillreadbuffer(conn, BUFSIZE, &readcount);
+    if(res)
+      return res;
+
+    nread = (size_t)readcount;
 
     if (nread <= 0)
       break;

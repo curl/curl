@@ -125,8 +125,9 @@ static struct timeval notimeout={0,0};
  * This function will call the read callback to fill our buffer with data
  * to upload.
  */
-int Curl_fillreadbuffer(struct connectdata *conn, int bytes)
+CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp)
 {
+  struct SessionHandle *data = conn->data;
   int buffersize = bytes;
   int nread;
 
@@ -138,6 +139,11 @@ int Curl_fillreadbuffer(struct connectdata *conn, int bytes)
 
   nread = conn->fread(conn->upload_fromhere, 1,
                       buffersize, conn->fread_in);
+
+  if(nread == CURL_READFUNC_ABORT) {
+    failf(data, "operation aborted by callback\n");
+    return CURLE_ABORTED_BY_CALLBACK;
+  }
 
   if(!conn->bits.forbidchunk && conn->bits.upload_chunky) {
     /* if chunked Transfer-Encoding */
@@ -161,7 +167,10 @@ int Curl_fillreadbuffer(struct connectdata *conn, int bytes)
 
     nread+=2; /* for the added CRLF */
   }
-  return nread;
+
+  *nreadp = nread;
+
+  return CURLE_OK;
 }
 
 /*
@@ -1131,7 +1140,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               break;
             }
 
-            nread = Curl_fillreadbuffer(conn, BUFSIZE);
+            result = Curl_fillreadbuffer(conn, BUFSIZE, &nread);
+            if(result)
+              return result;
           }
           else
             nread = 0; /* we're done uploading/reading */
