@@ -564,9 +564,9 @@ typedef enum {
   /* Maximum number of http redirects to follow */
   CINIT(MAXREDIRS, LONG, 68),
 
-  /* Pass a pointer to a time_t to get a possible date of the requested
-     document! Pass a NULL to shut it off. */
-  CINIT(FILETIME, OBJECTPOINT, 69),
+  /* Pass a long set to 1 to get the date of the requested document (if
+     possible)! Pass a zero to shut it off. */
+  CINIT(FILETIME, LONG, 69),
 
   /* This points to a linked list of telnet options */
   CINIT(TELNETOPTIONS, OBJECTPOINT, 70),
