@@ -20,6 +20,12 @@ Run:
   Use -s fort shorter output, or pass a string with test numbers to run
   specific tests only (like ./runtests.pl "3 4" to test 3 and 4 only)
 
+Memory:
+  The test script will check that all allocated memory is freed properly IF
+  curl has been built with the MALLOCDEBUG define set. The script will
+  automatically detect if that is the case, and it will use the ../memanalyze
+  script to analyze the memory debugging output.
+
 Logs:
   All logs are generated in the logs/ subdirctory (it is emtpied first
   in the runtests.sh script)
@@ -45,6 +51,9 @@ Data:
                this file to see that they're identical. If this is present,
                curl will not be run with -o but instead all output is compared
                against this file!
+
+    errorN.txt: if this file is present, it should contain the error number
+               curl is supposed to return when this test is run.
 
 FIX:
 
