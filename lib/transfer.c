@@ -268,18 +268,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           k->end_ptr = strchr (k->str_start, '\n');
               
           if (!k->end_ptr) {
-            /* no more complete header lines within buffer */
-            /* copy what is remaining into headerbuff */
-            int str_length = (int)strlen(k->str);
+            /* Not a complete header line within buffer, append the data to
+               the end of the headerbuff. */
 
-            /*
-             * We enlarge the header buffer if it seems to be too
-             * smallish
-             */
-            if (k->hbuflen + (int)str_length >=
-                data->state.headersize) {
+            if (k->hbuflen + nread >= data->state.headersize) {
+              /* We enlarge the header buffer as it is too small */
               char *newbuff;
-              long newsize=MAX((k->hbuflen+str_length)*3/2,
+              long newsize=MAX((k->hbuflen+nread)*3/2,
                                data->state.headersize*2);
               hbufp_index = k->hbufp - data->state.headerbuff;
               newbuff = (char *)realloc(data->state.headerbuff, newsize);
@@ -291,9 +286,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               data->state.headerbuff = newbuff;
               k->hbufp = data->state.headerbuff + hbufp_index;
             }
-            strcpy (k->hbufp, k->str);
-            k->hbufp += str_length;
-            k->hbuflen += str_length;
+            memcpy(k->hbufp, k->str, nread);
+            k->hbufp += nread;
+            k->hbuflen += nread;
             if (!k->headerline && (k->hbuflen>5)) {
               /* make a first check that this looks like a HTTP header */
               if(!strnequal(data->state.headerbuff, "HTTP/", 5)) {
