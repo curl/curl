@@ -1,0 +1,26 @@
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+two file:// URLs to stdout
+ </name>
+ <command>
+file://localhost/%PWD/log/test202.txt file://localhost/%PWD/log/test202.txt
+</command>
+<file name="log/test202.txt">
+contents in a single file
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+contents in a single file
+contents in a single file
+</stdout>
+</verify>
