@@ -215,6 +215,28 @@ char *strdup(char *str)
 #include "curlmsg_vms.h"
 #endif
 
+#if !defined(HAVE_FTRUNCATE) && defined(WIN32)
+/*
+ * Truncate a file handle at a 64-bit position 'where'
+ */
+static int ftruncate (int fd, curl_off_t where)
+{
+  curl_off_t curr;
+  int rc = 0;
+
+  if ((curr = _lseeki64(fd, 0, SEEK_CUR)) < 0)
+     return -1;
+
+  if (_lseeki64(fd, where, SEEK_SET) < 0)
+     return -1;
+
+  if (_write(fd, curr, SEEK_SET) < 0)
+     rc = -1;
+  _lseeki64(fd, curr, SEEK_SET);
+  return rc;
+}
+#endif
+
 /*
  * This is the main global constructor for the app. Call this before
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
