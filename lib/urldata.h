@@ -81,6 +81,10 @@
 #include <zlib.h> 		/* for content-encoding */
 #endif
 
+#ifdef USE_ARES
+#include <ares.h>
+#endif
+
 #include <curl/curl.h>
 
 #include "http_chunks.h" /* for the structs and enum stuff */
@@ -94,10 +98,6 @@
 #else
 #include <gssapi.h>
 #endif
-#endif
-
-#ifdef USE_ARES
-#include <ares.h>
 #endif
 
 /* Download buffer size, keep it fairly big for speed reasons */
@@ -381,7 +381,8 @@ struct Curl_transfer_keeper {
   bool ignorebody;  /* we read a response-body but we ignore it! */
 };
 
-#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
+#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
+    defined(USE_THREADING_GETADDRINFO)
 struct Curl_async {
   char *hostname;
   int port;
@@ -430,6 +431,9 @@ struct connectdata {
   char *namebuffer; /* allocated buffer to store the hostname in */
   char *hostname;  /* hostname to use, as parsed from url. points to
                       somewhere within the namebuffer[] area */
+#ifdef USE_LIBIDN
+  char *ace_hostname; /* hostname possibly converted to ACE form */
+#endif
   char *pathbuffer;/* allocated buffer to store the URL's path part in */
   char *path;      /* path to use, points to somewhere within the pathbuffer
                       area */
@@ -579,7 +583,8 @@ struct connectdata {
 
   char syserr_buf [256]; /* buffer for Curl_strerror() */
 
-#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
+#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
+    defined(USE_THREADING_GETADDRINFO)
   /* data used for the asynch name resolve callback */
   struct Curl_async async;
 #endif

@@ -92,57 +92,49 @@
 #include "memdebug.h"
 #endif
 
-#ifndef ARES_SUCCESS
-#define ARES_SUCCESS CURLE_OK
-#endif
-
-#define CURL_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
-                                    many seconds for a name resolve */
+/*
+ * hostip.c explained
+ * ==================
+ *
+ * The main COMPILE-TIME DEFINES to keep in mind when reading the host*.c
+ * source file are these:
+ *
+ * CURLRES_IPV6 - this host has getaddrinfo() and family, and thus we use
+ * that. The host may not be able to resolve IPv6, but we don't really have to
+ * take that into account. Hosts that aren't IPv6-enabled have CURLRES_IPV4
+ * defined.
+ *
+ * CURLRES_ARES - is defined if libcurl is built to use c-ares for
+ * asynchronous name resolves. It cannot have ENABLE_IPV6 defined at the same
+ * time, as c-ares has no ipv6 support. This can be Windows or *nix.
+ *
+ * CURLRES_THREADED - is defined if libcurl is built to run under (native)
+ * Windows, and then the name resolve will be done in a new thread, and the
+ * supported API will be the same as for ares-builds.
+ *
+ * If any of the two previous are defined, CURLRES_ASYNCH is defined too. If
+ * libcurl is not built to use an asynchronous resolver, CURLRES_SYNCH is
+ * defined.
+ *
+ * The host*.c sources files are split up like this:
+ *
+ * hostip.c   - method-independent resolver functions and utility functions
+ * hostasyn.c - functions for asynchronous name resolves
+ * hostsyn.c  - functions for synchronous name resolves
+ * hostares.c - functions for ares-using name resolves
+ * hostthre.c - functions for threaded name resolves
+ * hostip4.c  - ipv4-specific functions
+ * hostip6.c  - ipv6-specific functions
+ *
+ * The hostip.h is the united header file for all this. It defines the
+ * CURLRES_* defines based on the config*.h and setup.h defines.
+ */
 
 /* These two symbols are for the global DNS cache */
 static curl_hash hostname_cache;
 static int host_cache_initialized;
 
-
 static void freednsentry(void *freethis);
-
-/*
- * my_getaddrinfo() is the generic low-level name resolve API within this
- * source file. There exist three versions of this function - for different
- * name resolve layers (selected at build-time). They all take this same set
- * of arguments
- */
-static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
-                                     char *hostname,
-                                     int port,
-                                     int *waitp);
-
-#if (!defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES) || \
-     defined(USE_THREADING_GETHOSTBYNAME)) && \
-     !defined(ENABLE_IPV6)
-static struct hostent* pack_hostent(char** buf, struct hostent* orig);
-#endif
-
-#ifdef USE_THREADING_GETHOSTBYNAME
-#ifdef DEBUG_THREADING_GETHOSTBYNAME
-/* If this is defined, provide tracing */
-#define TRACE(args)  \
- do { trace_it("%u: ", __LINE__); trace_it args; } while (0)
-
-static void trace_it (const char *fmt, ...);
-#else
-#define TRACE(x)
-#endif
-
-static bool init_gethostbyname_thread (struct connectdata *conn,
-                                       const char *hostname, int port);
-struct thread_data {
-  HANDLE thread_hnd;
-  unsigned thread_id;
-  DWORD  thread_status;
-  curl_socket_t dummy_sock;   /* dummy for Curl_multi_ares_fdset() */
-};
-#endif
 
 /*
  * Curl_global_host_cache_init() initializes and sets up a global DNS cache.
@@ -177,8 +169,8 @@ void Curl_global_host_cache_dtor(void)
 }
 
 /*
- * Minor utility-function:
- * Count the number of characters that an integer takes up.
+ * Count the number of characters that an integer would use in a string
+ * (base 10).
  */
 static int _num_chars(int i)
 {
@@ -201,8 +193,8 @@ static int _num_chars(int i)
 }
 
 /*
- * Minor utility-function:
- * Create a hostcache id string for the DNS caching.
+ * Return a hostcache id string for the providing host + port, to be used by
+ * the DNS caching.
  */
 static char *
 create_hostcache_id(char *server, int port, size_t *entry_len)
@@ -305,7 +297,7 @@ sigjmp_buf curl_jmpenv;
 
 
 /*
- * cache_resolv_response() stores a 'Curl_addrinfo' struct in the DNS cache.
+ * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
  *
  * When calling Curl_resolv() has resulted in a response with a returned
  * address, we call this function to store the information in the dns
@@ -313,11 +305,11 @@ sigjmp_buf curl_jmpenv;
  *
  * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
  */
-static struct Curl_dns_entry *
-cache_resolv_response(struct SessionHandle *data,
-                      Curl_addrinfo *addr,
-                      char *hostname,
-                      int port)
+struct Curl_dns_entry *
+Curl_cache_addr(struct SessionHandle *data,
+                Curl_addrinfo *addr,
+                char *hostname,
+                int port)
 {
   char *entry_id;
   size_t entry_len;
@@ -424,11 +416,18 @@ int Curl_resolv(struct connectdata *conn,
 
   if (!dns) {
     /* The entry was not in the cache. Resolve it to IP address */
-      
-    /* If my_getaddrinfo() returns NULL, 'wait' might be set to a non-zero
+
+    Curl_addrinfo *addr;
+
+    /* Check what IP specifics the app has requested and if we can provide it.
+     * If not, bail out. */
+    if(!Curl_ipvalid(data))
+      return -1;
+
+    /* If Curl_getaddrinfo() returns NULL, 'wait' might be set to a non-zero
        value indicating that we need to wait for the response to the resolve
        call */
-    Curl_addrinfo *addr = my_getaddrinfo(conn, hostname, port, &wait);
+    addr = Curl_getaddrinfo(conn, hostname, port, &wait);
     
     if (!addr) {
       if(wait) {
@@ -449,7 +448,7 @@ int Curl_resolv(struct connectdata *conn,
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
       /* we got a response, store it in the cache */
-      dns = cache_resolv_response(data, addr, hostname, port);
+      dns = Curl_cache_addr(data, addr, hostname, port);
       
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
@@ -478,34 +477,15 @@ int Curl_resolv(struct connectdata *conn,
  */
 void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
 {
+  curlassert(dns && (dns->inuse>0));
+
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
   dns->inuse--;
 
-#ifdef CURLDEBUG
-  if(dns->inuse < 0) {
-    infof(data, "Interal host cache screw-up!");
-    *(char **)0=NULL;
-  }
-#endif
-
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-}
-
-/*
- * This is a wrapper function for freeing name information in a protocol
- * independent way. This takes care of using the appropriate underlaying
- * function.
- */
-void Curl_freeaddrinfo(Curl_addrinfo *p)
-{
-#ifdef ENABLE_IPV6
-  freeaddrinfo(p);
-#else
-  free(p); /* works fine for the ARES case too */
-#endif
 }
 
 /*
@@ -528,469 +508,65 @@ curl_hash *Curl_mk_dnscache(void)
   return Curl_hash_alloc(7, freednsentry);
 }
 
-/* --- resolve name or IP-number --- */
-
-/* Allocate enough memory to hold the full name information structs and
- * everything. OSF1 is known to require at least 8872 bytes. The buffer
- * required for storing all possible aliases and IP numbers is according to
- * Stevens' Unix Network Programming 2nd edition, p. 304: 8192 bytes!
- */
-#define CURL_NAMELOOKUP_SIZE 9000
-
-#ifdef USE_ARES
-
+#ifdef CURLRES_HOSTENT_RELOCATE
 /*
- * Curl_multi_ares_fdset() is called when someone from the outside world
- * (using curl_multi_fdset()) wants to get our fd_set setup and we're talking
- * with ares. The caller must make sure that this function is only called when
- * we have a working ares channel.
- *
- * Returns: CURLE_OK always!
+ * Curl_hostent_relocate() ajusts all pointers in the given hostent struct
+ * according to the offset. This is typically used when a hostent has been
+ * reallocated and needs to be setup properly on the new address.
  */
-
-CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
-                               fd_set *read_fd_set,
-                               fd_set *write_fd_set,
-                               int *max_fdp)
-
+void Curl_hostent_relocate(struct hostent *h, long offset)
 {
-  int max = ares_fds(conn->data->state.areschannel,
-                     read_fd_set, write_fd_set);
-  *max_fdp = max;
+  int i=0;
 
-  return CURLE_OK;
-}
-
-/*
- * Curl_is_resolved() is called repeatedly to check if a previous name resolve
- * request has completed. It should also make sure to time-out if the
- * operation seems to take too long.
- *
- * Returns normal CURLcode errors.
- */
-CURLcode Curl_is_resolved(struct connectdata *conn,
-                          struct Curl_dns_entry **dns)
-{
-  fd_set read_fds, write_fds;
-  struct timeval tv={0,0};
-  int count;
-  struct SessionHandle *data = conn->data;
-  int nfds;
-
-  FD_ZERO(&read_fds);
-  FD_ZERO(&write_fds);
-
-  nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
-
-  count = select(nfds, &read_fds, &write_fds, NULL,
-                 (struct timeval *)&tv);
-
-  /* Call ares_process() unconditonally here, even if we simply timed out
-     above, as otherwise the ares name resolve won't timeout! */
-  ares_process(data->state.areschannel, &read_fds, &write_fds);
-
-  *dns = NULL;
-
-  if(conn->async.done) {
-    /* we're done, kill the ares handle */
-    if(!conn->async.dns)
-      return CURLE_COULDNT_RESOLVE_HOST;
-    *dns = conn->async.dns;
-  }
-
-  return CURLE_OK;
-}
-
-/*
- * Curl_wait_for_resolv() waits for a resolve to finish. This function should
- * be avoided since using this risk getting the multi interface to "hang".
- *
- * If 'entry' is non-NULL, make it point to the resolved dns entry
- *
- * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved, and
- * CURLE_OPERATION_TIMEDOUT if a time-out occurred.
- */
-CURLcode Curl_wait_for_resolv(struct connectdata *conn,
-                              struct Curl_dns_entry **entry)
-{
-  CURLcode rc=CURLE_OK;
-  struct SessionHandle *data = conn->data;
-  long timeout = CURL_TIMEOUT_RESOLVE; /* default name resolve timeout */
-
-  /* now, see if there's a connect timeout or a regular timeout to
-     use instead of the default one */
-  if(conn->data->set.connecttimeout)
-    timeout = conn->data->set.connecttimeout;
-  else if(conn->data->set.timeout)
-    timeout = conn->data->set.timeout;
-
-  /* We convert the number of seconds into number of milliseconds here: */
-  if(timeout < 2147483)
-    /* maximum amount of seconds that can be multiplied with 1000 and
-       still fit within 31 bits */
-    timeout *= 1000;
-  else
-    timeout = 0x7fffffff; /* ridiculous amount of time anyway */
-
-  /* Wait for the name resolve query to complete. */
-  while (1) {
-    int nfds=0;
-    fd_set read_fds, write_fds;
-    struct timeval *tvp, tv, store;
-    int count;
-    struct timeval now = Curl_tvnow();
-    long timediff;
-
-    store.tv_sec = (int)timeout/1000;
-    store.tv_usec = (timeout%1000)*1000;
-    
-    FD_ZERO(&read_fds);
-    FD_ZERO(&write_fds);
-    nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
-    if (nfds == 0)
-      /* no file descriptors means we're done waiting */
-      break;
-    tvp = ares_timeout(data->state.areschannel, &store, &tv);
-    count = select(nfds, &read_fds, &write_fds, NULL, tvp);
-    if (count < 0 && errno != EINVAL)
-      break;
-
-    ares_process(data->state.areschannel, &read_fds, &write_fds);
-
-    timediff = Curl_tvdiff(Curl_tvnow(), now); /* spent time */
-    timeout -= timediff?timediff:1; /* always deduct at least 1 */
-    if (timeout < 0) {
-      /* our timeout, so we cancel the ares operation */
-      ares_cancel(data->state.areschannel);
-      break;
+  h->h_name=(char *)((long)h->h_name+offset);
+  if(h->h_aliases) {
+    /* only relocate aliases if there are any! */
+    h->h_aliases=(char **)((long)h->h_aliases+offset);
+    while(h->h_aliases[i]) {
+      h->h_aliases[i]=(char *)((long)h->h_aliases[i]+offset);
+      i++;
     }
   }
 
-  /* Operation complete, if the lookup was successful we now have the entry
-     in the cache. */
-    
-  if(entry)
-    *entry = conn->async.dns;
-
-  if(!conn->async.dns) {
-    /* a name was not resolved */
-    if((timeout < 0) || (conn->async.status == ARES_ETIMEOUT)) {
-      failf(data, "Resolving host timed out: %s", conn->hostname);
-      rc = CURLE_OPERATION_TIMEDOUT;
-    }
-    else if(conn->async.done) {
-      failf(data, "Could not resolve host: %s (%s)", conn->hostname,
-            ares_strerror(conn->async.status));
-      rc = CURLE_COULDNT_RESOLVE_HOST;
-    }
-    else
-      rc = CURLE_OPERATION_TIMEDOUT;
-
-    /* close the connection, since we can't return failure here without
-       cleaning up this connection properly */
-    Curl_disconnect(conn);
+  h->h_addr_list=(char **)((long)h->h_addr_list+offset);
+  i=0;
+  while(h->h_addr_list[i]) {
+    h->h_addr_list[i]=(char *)((long)h->h_addr_list[i]+offset);
+    i++;
   }
-  
-  return rc;
 }
-#endif
+#endif /* CURLRES_HOSTENT_RELOCATE */
 
-#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
+#ifdef CURLRES_ADDRINFO_COPY
+
+/* align on even 64bit boundaries */
+#define MEMALIGN(x) ((x)+(8-(((unsigned long)(x))&0x7)))
 
 /*
- * host_callback() gets called by ares/gethostbyname_thread() when we got the
- * name resolved (or not!).
- *
- * If the status argument is ARES_SUCCESS, we must copy the hostent field
- * since ares will free it when this function returns. This operation stores
- * the resolved data in the DNS cache.
- *
- * The storage operation locks and unlocks the DNS cache.
+ * Curl_addrinfo_copy() performs a "deep" copy of a hostent into a buffer and
+ * returns a pointer to the malloc()ed copy. You need to call free() on the
+ * returned buffer when you're done with it.
  */
-static void host_callback(void *arg, /* "struct connectdata *" */
-                          int status,
-                          struct hostent *hostent)
+Curl_addrinfo *Curl_addrinfo_copy(Curl_addrinfo *orig)
 {
-  struct connectdata *conn = (struct connectdata *)arg;
-  struct Curl_dns_entry *dns = NULL;
-
-  conn->async.done = TRUE;
-  conn->async.status = status;
-
-  if(ARES_SUCCESS == status) {
-    /* we got a resolved name in 'hostent' */
-    char *bufp = (char *)malloc(CURL_NAMELOOKUP_SIZE);
-    if(bufp) {
-
-      /* pack_hostent() copies to and shrinks the target buffer */
-      struct hostent *he = pack_hostent(&bufp, hostent);
-
-      struct SessionHandle *data = conn->data;
-
-      if(data->share)
-        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
-
-      dns = cache_resolv_response(data, he,
-                                  conn->async.hostname, conn->async.port);
-
-      if(data->share)
-        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
-    }
-  }
-
-  conn->async.dns = dns;
-
-  /* The input hostent struct will be freed by ares when we return from this
-     function */
-}
-#endif
-
-#ifdef USE_ARES
-/*
- * my_getaddrinfo() when using ares for name resolves.
- *
- * Returns name information about the given hostname and port number. If
- * successful, the 'hostent' is returned and the forth argument will point to
- * memory we need to free after use. That memory *MUST* be freed with
- * Curl_freeaddrinfo(), nothing else.
- */
-static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
-                                     char *hostname,
-                                     int port,
-                                     int *waitp)
-{
-  char *bufp;
-  struct SessionHandle *data = conn->data;
-
-  *waitp = FALSE;
-  
-  if(data->set.ip_version == CURL_IPRESOLVE_V6)
-    /* an ipv6 address was requested and we can't get/use one */
-    return NULL;
-
-  bufp = strdup(hostname);
-
-  if(bufp) {
-    Curl_safefree(conn->async.hostname);
-    conn->async.hostname = bufp;
-    conn->async.port = port;
-    conn->async.done = FALSE; /* not done */
-    conn->async.status = 0;   /* clear */
-    conn->async.dns = NULL;   /* clear */
-
-    /* areschannel is already setup in the Curl_open() function */
-    ares_gethostbyname(data->state.areschannel, hostname, PF_INET,
-                       host_callback, conn);
-      
-    *waitp = TRUE; /* please wait for the response */
-  }
-  return NULL; /* no struct yet */
-}
-#endif
-
-#if !defined(USE_ARES) && !defined(USE_THREADING_GETHOSTBYNAME)
-
-/*
- * Curl_wait_for_resolv() for builds without ARES and threaded gethostbyname,
- * Curl_resolv() can never return wait==TRUE, so this function will never be
- * called. If it still gets called, we return failure at once.
- *
- * We provide this function only to allow multi.c to remain unaware if we are
- * doing asynch resolves or not.
- */
-CURLcode Curl_wait_for_resolv(struct connectdata *conn,
-                              struct Curl_dns_entry **entry)
-{
-  (void)conn;
-  *entry=NULL;
-  return CURLE_COULDNT_RESOLVE_HOST;
-}
-
-/*
- * This function will never be called when built with ares or threaded
- * resolves. If it still gets called, we return failure at once.
- *
- * We provide this function only to allow multi.c to remain unaware if we are
- * doing asynch resolves or not.
- */
-CURLcode Curl_is_resolved(struct connectdata *conn,
-                          struct Curl_dns_entry **dns)
-{
-  (void)conn;
-  *dns = NULL;
-
-  return CURLE_COULDNT_RESOLVE_HOST;
-}
-#endif
-
-#if !defined(USE_ARES)
-/*
- * Non-ares build. If we are using threading gethostbyname, then this must
- * set the fd_set for the threaded resolve socket. If not, we just return OK.
- */
-CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
-                               fd_set *read_fd_set,
-                               fd_set *write_fd_set,
-                               int *max_fdp)
-{
-#ifdef USE_THREADING_GETHOSTBYNAME
-  const struct thread_data *td =
-    (const struct thread_data *) conn->async.os_specific;
-
-  if (td && td->dummy_sock != CURL_SOCKET_BAD) {
-    FD_SET(td->dummy_sock,write_fd_set);
-    *max_fdp = td->dummy_sock;
-  }
-#else /* if not USE_THREADING_GETHOSTBYNAME */
-  (void)conn;
-  (void)read_fd_set;
-  (void)write_fd_set;
-  (void)max_fdp;
-#endif
-  return CURLE_OK;
-}
-#endif /* !USE_ARES */
-
-#if defined(ENABLE_IPV6) && !defined(USE_ARES)
-
-#ifdef CURLDEBUG
-/* These two are strictly for memory tracing and are using the same
- * style as the family otherwise present in memdebug.c. I put these ones
- * here since they require a bunch of struct types I didn't wanna include
- * in memdebug.c
- */
-int curl_getaddrinfo(char *hostname, char *service,
-                     struct addrinfo *hints,
-                     struct addrinfo **result,
-                     int line, const char *source)
-{
-  int res=(getaddrinfo)(hostname, service, hints, result);
-  if(0 == res) {
-    /* success */
-    if(logfile)
-      fprintf(logfile, "ADDR %s:%d getaddrinfo() = %p\n",
-              source, line, (void *)*result);
-  }
-  else {
-    if(logfile)
-      fprintf(logfile, "ADDR %s:%d getaddrinfo() failed\n",
-              source, line);
-  }
-  return res;
-}
-
-void curl_freeaddrinfo(struct addrinfo *freethis,
-                       int line, const char *source)
-{
-  (freeaddrinfo)(freethis);
-  if(logfile)
-    fprintf(logfile, "ADDR %s:%d freeaddrinfo(%p)\n",
-            source, line, (void *)freethis);
-}
-
-#endif
-
-/*
- * my_getaddrinfo() when built ipv6-enabled.
- *
- * Returns name information about the given hostname and port number. If
- * successful, the 'addrinfo' is returned and the forth argument will point to
- * memory we need to free after use. That memory *MUST* be freed with
- * Curl_freeaddrinfo(), nothing else.
- */
-static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
-                                     char *hostname,
-                                     int port,
-                                     int *waitp)
-{
-  struct addrinfo hints, *res;
-  int error;
-  char sbuf[NI_MAXSERV];
-  int s, pf;
-  struct SessionHandle *data = conn->data;
-
-  *waitp=0; /* don't wait, we have the response now */
-
-  /* see if we have an IPv6 stack */
-  s = socket(PF_INET6, SOCK_DGRAM, 0);
-  if (s < 0) {
-    /* Some non-IPv6 stacks have been found to make very slow name resolves
-     * when PF_UNSPEC is used, so thus we switch to a mere PF_INET lookup if
-     * the stack seems to be a non-ipv6 one. */
-
-    if(data->set.ip_version == CURL_IPRESOLVE_V6)
-      /* an ipv6 address was requested and we can't get/use one */
-      return NULL;
-
-    pf = PF_INET;
-  }
-  else {
-    /* This seems to be an IPv6-capable stack, use PF_UNSPEC for the widest
-     * possible checks. And close the socket again.
-     */
-    sclose(s);
-
-    /*
-     * Check if a more limited name resolve has been requested.
-     */
-    switch(data->set.ip_version) {
-    case CURL_IPRESOLVE_V4:
-      pf = PF_INET;
-      break;
-    case CURL_IPRESOLVE_V6:
-      pf = PF_INET6;
-      break;
-    default:
-      pf = PF_UNSPEC;
-      break;
-    }
-  }
- 
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = pf;
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags = AI_CANONNAME;
-  snprintf(sbuf, sizeof(sbuf), "%d", port);
-  error = getaddrinfo(hostname, sbuf, &hints, &res);
-  if (error) {
-    infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);    
-    return NULL;
-  }
-
-  return res;
-}
-#else /* following code is IPv4-only */
-
-#if !defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES) || \
-    defined(USE_THREADING_GETHOSTBYNAME)
-static void hostcache_fixoffset(struct hostent *h, long offset);
-
-/*
- * pack_hostent() is a file-local function that performs a "deep" copy of a
- * hostent into a buffer (returns a pointer to the copy). Make absolutely sure
- * the destination buffer is big enough!
- */
-static struct hostent* pack_hostent(char** buf, struct hostent* orig)
-{
-  char *bufptr;
   char *newbuf;
-  struct hostent* copy;
-
+  Curl_addrinfo *copy;
   int i;
   char *str;
   size_t len;
+  char *aptr = (char *)malloc(CURL_HOSTENT_SIZE);
+  char *bufptr = aptr;
 
-  bufptr = *buf;
-  copy = (struct hostent*)bufptr;
+  if(!bufptr)
+    return NULL; /* major bad */
 
-  bufptr += sizeof(struct hostent);
+  copy = (Curl_addrinfo *)bufptr;
+
+  bufptr += sizeof(Curl_addrinfo);
   copy->h_name = bufptr;
   len = strlen(orig->h_name) + 1;
   strncpy(bufptr, orig->h_name, len);
   bufptr += len;
-
-  /* we align on even 64bit boundaries for safety */
-#define MEMALIGN(x) ((x)+(8-(((unsigned long)(x))&0x7)))
 
   /* This must be aligned properly to work on many CPU architectures! */
   bufptr = MEMALIGN(bufptr);
@@ -1044,528 +620,15 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 
   /* now, shrink the allocated buffer to the size we actually need, which
      most often is only a fraction of the original alloc */
-  newbuf=(char *)realloc(*buf, (long)(bufptr-*buf));
+  newbuf=(char *)realloc(aptr, (long)(bufptr-aptr));
 
-  /* if the alloc moved, we need to adjust things again */
-  if(newbuf != *buf)
-    hostcache_fixoffset((struct hostent*)newbuf, (long)(newbuf-*buf));
+  /* if the alloc moved, we need to adjust the hostent struct */
+  if(newbuf != aptr)
+    Curl_hostent_relocate((struct hostent*)newbuf, (long)(newbuf-aptr));
 
   /* setup the return */
-  *buf = newbuf;
-  copy = (struct hostent*)newbuf;
+  copy = (Curl_addrinfo *)newbuf;
 
   return copy;
 }
-#endif
-
-/*
- * hostcache_fixoffset() is a utility-function that corrects all pointers in
- * the given hostent struct according to the offset. This is typically used
- * when a hostent has been reallocated and needs to be setup properly on the
- * new address.
- */
-static void hostcache_fixoffset(struct hostent *h, long offset)
-{
-  int i=0;
-
-  h->h_name=(char *)((long)h->h_name+offset);
-  if(h->h_aliases) {
-    /* only relocate aliases if there are any! */
-    h->h_aliases=(char **)((long)h->h_aliases+offset);
-    while(h->h_aliases[i]) {
-      h->h_aliases[i]=(char *)((long)h->h_aliases[i]+offset);
-      i++;
-    }
-  }
-
-  h->h_addr_list=(char **)((long)h->h_addr_list+offset);
-  i=0;
-  while(h->h_addr_list[i]) {
-    h->h_addr_list[i]=(char *)((long)h->h_addr_list[i]+offset);
-    i++;
-  }
-}
-
-#ifndef USE_ARES
-
-/*
- * MakeIP() converts the input binary ipv4-address to an ascii string in the
- * dotted numerical format. 'addr' is a pointer to a buffer that is 'addr_len'
- * bytes big. 'num' is the 32 bit IP number.
- */
-static char *MakeIP(unsigned long num, char *addr, int addr_len)
-{
-#if defined(HAVE_INET_NTOA) || defined(HAVE_INET_NTOA_R)
-  struct in_addr in;
-  in.s_addr = htonl(num);
-
-#if defined(HAVE_INET_NTOA_R)
-  inet_ntoa_r(in,addr,addr_len);
-#else
-  strncpy(addr,inet_ntoa(in),addr_len);
-#endif
-#else
-  unsigned char *paddr;
-
-  num = htonl(num);  /* htonl() added to avoid endian probs */
-  paddr = (unsigned char *)&num;
-  sprintf(addr, "%u.%u.%u.%u", paddr[0], paddr[1], paddr[2], paddr[3]);
-#endif
-  return (addr);
-}
-
-/*
- * my_getaddrinfo() - the ipv4 "traditional" version.
- *
- * The original code to this function was once stolen from the Dancer source
- * code, written by Bjorn Reese, it has since been patched and modified
- * considerably.
- */
-static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
-                                     char *hostname,
-                                     int port,
-                                     int *waitp)
-{
-  struct hostent *h = NULL;
-  in_addr_t in;
-  struct SessionHandle *data = conn->data;
-  (void)port; /* unused in IPv4 code */
-
-  *waitp = 0; /* don't wait, we act synchronously */
-
-  if(data->set.ip_version == CURL_IPRESOLVE_V6)
-    /* an ipv6 address was requested and we can't get/use one */
-    return NULL;
-
-  in=inet_addr(hostname);
-  if (in != CURL_INADDR_NONE) {
-    struct in_addr *addrentry;
-    struct namebuf {
-        struct hostent hostentry;
-        char *h_addr_list[2];
-        struct in_addr addrentry;
-        char h_name[128];
-    } *buf = (struct namebuf *)malloc(sizeof(struct namebuf));
-    if(!buf)
-      return NULL; /* major failure */
-
-    h = &buf->hostentry;
-    h->h_addr_list = &buf->h_addr_list[0];
-    addrentry = &buf->addrentry;
-    addrentry->s_addr = in;
-    h->h_addr_list[0] = (char*)addrentry;
-    h->h_addr_list[1] = NULL;
-    h->h_addrtype = AF_INET;
-    h->h_length = sizeof(*addrentry);
-    h->h_name = &buf->h_name[0];
-    MakeIP(ntohl(in), (char *)h->h_name, sizeof(buf->h_name));
-  }
-#if defined(HAVE_GETHOSTBYNAME_R)
-  else {
-    int h_errnop;
-    int res=ERANGE;
-    int step_size=200;
-    int *buf = (int *)malloc(CURL_NAMELOOKUP_SIZE);
-    if(!buf)
-      return NULL; /* major failure */
-
-     /* Workaround for gethostbyname_r bug in qnx nto. It is also _required_
-        for some of these functions. */
-    memset(buf, 0, CURL_NAMELOOKUP_SIZE);
-#ifdef HAVE_GETHOSTBYNAME_R_5
-    /* Solaris, IRIX and more */
-    (void)res; /* prevent compiler warning */
-    while(!h) {
-      h = gethostbyname_r(hostname,
-                          (struct hostent *)buf,
-                          (char *)buf + sizeof(struct hostent),
-                          step_size - sizeof(struct hostent),
-                          &h_errnop);
-
-      /* If the buffer is too small, it returns NULL and sets errno to
-         ERANGE. The errno is thread safe if this is compiled with
-         -D_REENTRANT as then the 'errno' variable is a macro defined to
-         get used properly for threads. */
-
-      if(h || (errno != ERANGE))
-        break;
-      
-      step_size+=200;
-    }
-
-#ifdef CURLDEBUG
-    infof(data, "gethostbyname_r() uses %d bytes\n", step_size);
-#endif
-
-    if(h) {
-      int offset;
-      h=(struct hostent *)realloc(buf, step_size);
-      offset=(long)h-(long)buf;
-      hostcache_fixoffset(h, offset);
-      buf=(int *)h;
-    }
-    else
-#endif /* HAVE_GETHOSTBYNAME_R_5 */
-#ifdef HAVE_GETHOSTBYNAME_R_6
-    /* Linux */
-    do {
-      res=gethostbyname_r(hostname,
-			  (struct hostent *)buf,
-			  (char *)buf + sizeof(struct hostent),
-			  step_size - sizeof(struct hostent),
-			  &h, /* DIFFERENCE */
-			  &h_errnop);
-      /* Redhat 8, using glibc 2.2.93 changed the behavior. Now all of a
-         sudden this function returns EAGAIN if the given buffer size is too
-         small. Previous versions are known to return ERANGE for the same
-         problem.
-
-         This wouldn't be such a big problem if older versions wouldn't
-         sometimes return EAGAIN on a common failure case. Alas, we can't
-         assume that EAGAIN *or* ERANGE means ERANGE for any given version of
-         glibc.
-
-         For now, we do that and thus we may call the function repeatedly and
-         fail for older glibc versions that return EAGAIN, until we run out
-         of buffer size (step_size grows beyond CURL_NAMELOOKUP_SIZE).
-
-         If anyone has a better fix, please tell us!
-
-         -------------------------------------------------------------------
-
-         On October 23rd 2003, Dan C dug up more details on the mysteries of
-         gethostbyname_r() in glibc:
-
-         In glibc 2.2.5 the interface is different (this has also been
-         discovered in glibc 2.1.1-6 as shipped by Redhat 6). What I can't
-         explain, is that tests performed on glibc 2.2.4-34 and 2.2.4-32
-         (shipped/upgraded by Redhat 7.2) don't show this behavior!
-
-         In this "buggy" version, the return code is -1 on error and 'errno'
-         is set to the ERANGE or EAGAIN code. Note that 'errno' is not a
-         thread-safe variable.
-
-      */
-
-      if(((ERANGE == res) || (EAGAIN == res)) ||
-         ((res<0) && ((ERANGE == errno) || (EAGAIN == errno))))
-	step_size+=200;
-      else
-        break;
-    } while(step_size <= CURL_NAMELOOKUP_SIZE);
-
-    if(!h) /* failure */
-      res=1;
-    
-#ifdef CURLDEBUG
-    infof(data, "gethostbyname_r() uses %d bytes\n", step_size);
-#endif
-    if(!res) {
-      int offset;
-      h=(struct hostent *)realloc(buf, step_size);
-      offset=(long)h-(long)buf;
-      hostcache_fixoffset(h, offset);
-      buf=(int *)h;
-    }
-    else
-#endif/* HAVE_GETHOSTBYNAME_R_6 */
-#ifdef HAVE_GETHOSTBYNAME_R_3
-    /* AIX, Digital Unix/Tru64, HPUX 10, more? */
-
-    /* For AIX 4.3 or later, we don't use gethostbyname_r() at all, because of
-       the plain fact that it does not return unique full buffers on each
-       call, but instead several of the pointers in the hostent structs will
-       point to the same actual data! This have the unfortunate down-side that
-       our caching system breaks down horribly. Luckily for us though, AIX 4.3
-       and more recent versions have a completely thread-safe libc where all
-       the data is stored in thread-specific memory areas making calls to the
-       plain old gethostbyname() work fine even for multi-threaded programs.
-       
-       This AIX 4.3 or later detection is all made in the configure script.
-
-       Troels Walsted Hansen helped us work this out on March 3rd, 2003. */
-
-    if(CURL_NAMELOOKUP_SIZE >=
-       (sizeof(struct hostent)+sizeof(struct hostent_data))) {
-
-      /* August 22nd, 2000: Albert Chin-A-Young brought an updated version
-       * that should work! September 20: Richard Prescott worked on the buffer
-       * size dilemma. */
-
-      res = gethostbyname_r(hostname,
-                            (struct hostent *)buf,
-                            (struct hostent_data *)((char *)buf +
-                                                    sizeof(struct hostent)));
-      h_errnop= errno; /* we don't deal with this, but set it anyway */
-    }
-    else
-      res = -1; /* failure, too smallish buffer size */
-
-    if(!res) { /* success */
-
-      h = (struct hostent*)buf; /* result expected in h */
-
-      /* This is the worst kind of the different gethostbyname_r() interfaces.
-         Since we don't know how big buffer this particular lookup required,
-         we can't realloc down the huge alloc without doing closer analysis of
-         the returned data. Thus, we always use CURL_NAMELOOKUP_SIZE for every
-         name lookup. Fixing this would require an extra malloc() and then
-         calling pack_hostent() that subsequent realloc()s down the new memory
-         area to the actually used amount. */
-    }    
-    else
-#endif /* HAVE_GETHOSTBYNAME_R_3 */
-      {
-      infof(data, "gethostbyname_r(2) failed for %s\n", hostname);
-      h = NULL; /* set return code to NULL */
-      free(buf);
-    }
-#else /* HAVE_GETHOSTBYNAME_R */
-  else {
-
-#ifdef USE_THREADING_GETHOSTBYNAME
-    /* fire up a new resolver thread! */
-    if (init_gethostbyname_thread(conn,hostname,port)) {
-      *waitp = TRUE;  /* please wait for the response */
-      return NULL;
-    }
-    infof(data, "init_gethostbyname_thread() failed for %s; code %lu\n",
-          hostname, GetLastError());
-#endif
-    h = gethostbyname(hostname);
-    if (!h)
-      infof(data, "gethostbyname(2) failed for %s\n", hostname);
-    else {
-      char *buf=(char *)malloc(CURL_NAMELOOKUP_SIZE);
-      /* we make a copy of the hostent right now, right here, as the static
-         one we got a pointer to might get removed when we don't want/expect
-         that */
-      h = pack_hostent(&buf, h);
-    }
-#endif /*HAVE_GETHOSTBYNAME_R */
-  }
-
-  return h;
-}
-
-#endif /* end of IPv4-specific code */
-
-#endif /* end of !USE_ARES */
-
-
-#if defined(USE_THREADING_GETHOSTBYNAME)
-#ifdef DEBUG_THREADING_GETHOSTBYNAME
-static void trace_it (const char *fmt, ...)
-{
-  static int do_trace = -1;
-  va_list args;
-
-  if (do_trace == -1) {
-    const char *env = getenv("CURL_TRACE");
-    do_trace = (env && atoi(env) > 0);
-  }
-  if (!do_trace)
-    return;
-  va_start (args, fmt);
-  vfprintf (stderr, fmt, args);
-/*fflush (stderr); */  /* seems a bad idea in a multi-threaded app */
-  va_end (args);
-}
-#endif
-
-/*
- * gethostbyname_thread() resolves a name, calls the host_callback and then
- * exits.
- *
- * For builds without ARES/USE_IPV6, create a resolver thread and wait on it.
- */
-static unsigned __stdcall gethostbyname_thread (void *arg)
-{
-  struct connectdata *conn = (struct connectdata*) arg;
-  struct hostent *he;
-  int    rc;
-
-  WSASetLastError (conn->async.status = NO_DATA); /* pending status */
-  he = gethostbyname (conn->async.hostname);
-  if (he) {
-    host_callback(conn, ARES_SUCCESS, he);
-    rc = 1;
-  }
-  else {
-    host_callback(conn, (int)WSAGetLastError(), NULL);
-    rc = 0;
-  }
-  TRACE(("Winsock-error %d, addr %s\n", conn->async.status,
-         he ? inet_ntoa(*(struct in_addr*)he->h_addr) : "unknown"));
-  return (rc);
-  /* An implicit _endthreadex() here */
-}
-
-/*
- * destroy_thread_data() cleans up async resolver data.
- * Complementary of ares_destroy.
- */
-static void destroy_thread_data (struct Curl_async *async)
-{
-  if (async->hostname)
-    free(async->hostname);
-
-  if (async->os_specific) {
-    curl_socket_t sock = ((const struct thread_data*)async->os_specific)->dummy_sock;
-
-    if (sock != CURL_SOCKET_BAD)
-       sclose(sock);
-    free(async->os_specific);
-  }
-  async->hostname = NULL;
-  async->os_specific = NULL;
-}
-
-/*
- * init_gethostbyname_thread() starts a new thread that performs
- * the actual resolve. This function returns before the resolve is done.
- */
-static bool init_gethostbyname_thread (struct connectdata *conn,
-                                       const char *hostname, int port)
-{
-  struct thread_data *td = calloc(sizeof(*td), 1);
-
-  if (!td) {
-    SetLastError(ENOMEM);
-    return (0);
-  }
-
-  Curl_safefree(conn->async.hostname);
-  conn->async.hostname = strdup(hostname);
-  if (!conn->async.hostname) {
-    free(td);
-    SetLastError(ENOMEM);
-    return (0);
-  }
-
-  conn->async.port = port;
-  conn->async.done = FALSE;
-  conn->async.status = 0;
-  conn->async.dns = NULL;
-  conn->async.os_specific = (void*) td;
-
-  td->dummy_sock = CURL_SOCKET_BAD;
-  td->thread_hnd = (HANDLE) _beginthreadex(NULL, 0, gethostbyname_thread,
-                                conn, 0, &td->thread_id);
-  if (!td->thread_hnd) {
-     SetLastError(errno);
-     TRACE(("_beginthreadex() failed; %s\n", Curl_strerror(conn,errno)));
-     destroy_thread_data(&conn->async);
-     return (0);
-  }
-  /* This socket is only to keep Curl_multi_ares_fdset() and select() happy;
-   * should never become signalled for read/write since it's unbound but
-   * Windows needs atleast 1 socket in select().
-   */
-  td->dummy_sock = socket(AF_INET, SOCK_DGRAM, 0);
-  return (1);
-}
-
-/*
- * Curl_wait_for_resolv() waits for a resolve to finish. This function should
- * be avoided since using this risk getting the multi interface to "hang".
- *
- * If 'entry' is non-NULL, make it point to the resolved dns entry
- *
- * This is the version for resolves-in-a-thread.
- */
-CURLcode Curl_wait_for_resolv(struct connectdata *conn,
-                              struct Curl_dns_entry **entry)
-{
-  struct thread_data   *td = (struct thread_data*) conn->async.os_specific;
-  struct SessionHandle *data = conn->data;
-  long   timeout;
-  DWORD  status, ticks;
-  CURLcode rc;
-
-  curlassert (conn && td);
-
-  /* now, see if there's a connect timeout or a regular timeout to
-     use instead of the default one */
-  timeout =
-    conn->data->set.connecttimeout ? conn->data->set.connecttimeout :
-    conn->data->set.timeout ? conn->data->set.timeout :
-    CURL_TIMEOUT_RESOLVE; /* default name resolve timeout */
-  ticks = GetTickCount();
-
-  status = WaitForSingleObject(td->thread_hnd, 1000UL*timeout);
-  if (status == WAIT_OBJECT_0 || status == WAIT_ABANDONED) {
-     /* Thread finished before timeout; propagate Winsock error to this thread.
-      * 'conn->async.done = TRUE' is set in host_callback().
-      */
-     WSASetLastError(conn->async.status);
-     GetExitCodeThread(td->thread_hnd, &td->thread_status);
-     TRACE(("gethostbyname_thread() status %lu, thread retval %lu, ",
-            status, td->thread_status));
-  }
-  else {
-     conn->async.done = TRUE;
-     td->thread_status = (DWORD)-1;
-     TRACE(("gethostbyname_thread() timeout, "));
-  }
-
-  TRACE(("elapsed %lu ms\n", GetTickCount()-ticks));
-
-  CloseHandle(td->thread_hnd);
-
-  if(entry)
-    *entry = conn->async.dns;
-
-  rc = CURLE_OK;
-
-  if (!conn->async.dns) {
-    /* a name was not resolved */
-    if (td->thread_status == (DWORD)-1 || conn->async.status == NO_DATA) {
-      failf(data, "Resolving host timed out: %s", conn->hostname);
-      rc = CURLE_OPERATION_TIMEDOUT;
-    }
-    else if(conn->async.done) {
-      failf(data, "Could not resolve host: %s; %s",
-            conn->hostname, Curl_strerror(conn,conn->async.status));
-      rc = CURLE_COULDNT_RESOLVE_HOST;
-    }
-    else
-      rc = CURLE_OPERATION_TIMEDOUT;
-  }
-
-  destroy_thread_data(&conn->async);
-
-  if (CURLE_OK != rc)
-    /* close the connection, since we can't return failure here without
-       cleaning up this connection properly */
-    Curl_disconnect(conn);
-
-  return (rc);
-}
-
-/*
- * Curl_is_resolved() is called repeatedly to check if a previous name resolve
- * request has completed. It should also make sure to time-out if the
- * operation seems to take too long.
- */
-CURLcode Curl_is_resolved(struct connectdata *conn,
-                          struct Curl_dns_entry **entry)
-{
-  *entry = NULL;
-
-  if (conn->async.done) {
-    /* we're done */
-    destroy_thread_data(&conn->async);
-    if (!conn->async.dns) {
-      TRACE(("Curl_is_resolved(): CURLE_COULDNT_RESOLVE_HOST\n"));
-      return CURLE_COULDNT_RESOLVE_HOST;
-    }
-    *entry = conn->async.dns;
-    TRACE(("resolved okay, dns %p\n", *entry));
-  }
-  else
-    TRACE(("not yet\n"));
-  return CURLE_OK;
-}
-
-#endif
+#endif /* CURLRES_ADDRINFO_COPY */

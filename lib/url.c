@@ -84,6 +84,11 @@
 
 #endif
 
+#ifdef USE_LIBIDN
+#include <idna.h>
+#include <stringprep.h>
+#endif
+
 #ifdef HAVE_OPENSSL_ENGINE_H
 #include <openssl/engine.h>
 #endif
@@ -116,6 +121,7 @@
 #include "ldap.h"
 #include "url.h"
 #include "connect.h"
+#include "inet_ntop.h"
 #include <ca-bundle.h>
 
 #include <curl/types.h>
@@ -144,6 +150,11 @@ static bool ConnectionExists(struct SessionHandle *data,
 static unsigned int ConnectionStore(struct SessionHandle *data,
                                     struct connectdata *conn);
 static bool safe_strequal(char* str1, char* str2);
+
+#ifdef USE_LIBIDN
+static bool is_ASCII_name (const char *hostname);
+static bool is_ACE_name (const char *hostname);
+#endif
 
 #ifndef USE_ARES
 /* not for Win32, unless it is cygwin
@@ -1384,7 +1395,8 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->allocptr.host);
   Curl_safefree(conn->allocptr.cookiehost);
   Curl_safefree(conn->proxyhost);
-#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
+#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
+    defined(USE_THREADING_GETADDRINFO)
   /* possible left-overs from the async name resolve */
   Curl_safefree(conn->async.hostname);
   Curl_safefree(conn->async.os_specific);
@@ -1875,64 +1887,26 @@ static CURLcode ConnectPlease(struct connectdata *conn,
 }
 
 /*
- * ALERT! The 'dns' pointer being passed in here might be NULL at times.
+ * verboseconnect() displays verbose information after a connect
  */
-static void verboseconnect(struct connectdata *conn,
-                           struct Curl_dns_entry *dns)
+static void verboseconnect(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
+  const char *host=NULL;
+  char addrbuf[NI_MAXHOST];
 
-  /* Figure out the ip-number and display the first host name it shows: */
+  /* Get a printable version of the network address. */
 #ifdef ENABLE_IPV6
-  {
-    char hbuf[NI_MAXHOST];
-#ifdef HAVE_NI_WITHSCOPEID
-#define NIFLAGS NI_NUMERICHOST | NI_WITHSCOPEID
+  struct addrinfo *ai = conn->serv_addr;
+  host = Curl_printable_address(ai->ai_family, ai->ai_addr,
+                                addrbuf, sizeof(addrbuf));
 #else
-#define NIFLAGS NI_NUMERICHOST
+  struct in_addr in;
+  (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
+  host = Curl_inet_ntop(AF_INET, &in, addrbuf, sizeof(addrbuf));
 #endif
-    if(dns) {
-      struct addrinfo *ai = dns->addr;
-
-      /* Lookup the name of the given address. This should probably be remade
-         to use the DNS cache instead, as the host name is most likely cached
-         already. */
-      if (getnameinfo(ai->ai_addr, ai->ai_addrlen, hbuf, sizeof(hbuf), NULL, 0,
-                      NIFLAGS)) {
-        snprintf(hbuf, sizeof(hbuf), "unknown");
-      }
-      else {
-        if (ai->ai_canonname) {
-          infof(data, "Connected to %s (%s) port %d\n", ai->ai_canonname, hbuf,
-                conn->port);
-          return;
-        }
-      }
-    }
-    else {
-      snprintf(hbuf, sizeof(hbuf), "same host");
-    }
-
-    infof(data, "Connected to %s port %d\n", hbuf, conn->port);
-  }
-#else
-  {
-#ifdef HAVE_INET_NTOA_R
-    char ntoa_buf[64];
-#endif
-    Curl_addrinfo *hostaddr=dns?dns->addr:NULL;
-    struct in_addr in;
-    (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
-    infof(data, "Connected to %s (%s) port %d\n",
-          hostaddr?hostaddr->h_name:"",
-#if defined(HAVE_INET_NTOA_R)
-          inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)),
-#else
-          inet_ntoa(in),
-#endif
-          conn->port);
-  }
-#endif
+  infof(data, "Connected to %s (%s) port %d\n",
+        conn->hostname, host?host:"", conn->port);
 }
 
 /*
@@ -1942,11 +1916,9 @@ static void verboseconnect(struct connectdata *conn,
  * If we're using the multi interface, this host address pointer is most
  * likely NULL at this point as we can't keep the resolved info around. This
  * may call for some reworking, like a reference counter in the struct or
- * something. The hostaddr is not used for very much though, we have the
- * 'serv_addr' field in the connectdata struct for most of it.
+ * something.
  */
-CURLcode Curl_protocol_connect(struct connectdata *conn,
-                               struct Curl_dns_entry *hostaddr)
+CURLcode Curl_protocol_connect(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   CURLcode result=CURLE_OK;
@@ -1960,7 +1932,7 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
   Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
 
   if(data->set.verbose)
-    verboseconnect(conn, hostaddr);
+    verboseconnect(conn);
 
   if(conn->curl_connect) {
     /* is there a protocol-specific connect() procedure? */
@@ -3173,6 +3145,26 @@ static CURLcode SetupConnection(struct connectdata *conn,
        a file:// transfer */
     return result;
 
+#ifdef USE_LIBIDN
+  /*************************************************************
+   * Check name for non-ASCII and convert hostname to ACE form.
+   *************************************************************/
+
+  if(!conn->bits.reuse && conn->remote_port) {
+    const char *host = conn->hostname;
+    char *ace_hostname;
+
+    if (!is_ASCII_name(host) && !is_ACE_name(host)) {
+       int rc = idna_to_ascii_lz (host, &ace_hostname, 0);
+
+       if (rc == IDNA_SUCCESS)
+          conn->ace_hostname = ace_hostname;
+       else
+          infof(data, "Failed to convert %s to ACE; IDNA error %d\n", host, rc);
+    }
+  }
+#endif
+
   /*************************************************************
    * Send user-agent to HTTP proxies even if the target protocol
    * isn't HTTP.
@@ -3202,7 +3194,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
     result = ConnectPlease(conn, hostaddr, &connected);
 
     if(connected) {
-      result = Curl_protocol_connect(conn, hostaddr);
+      result = Curl_protocol_connect(conn);
       if(CURLE_OK == result)
         conn->bits.tcpconnect = TRUE;
     }
@@ -3217,7 +3209,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
     Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
     conn->bits.tcpconnect = TRUE;
     if(data->set.verbose)
-      verboseconnect(conn, hostaddr);
+      verboseconnect(conn);
   }
 
   conn->now = Curl_tvnow(); /* time this *after* the connect is done, we
@@ -3277,7 +3269,8 @@ CURLcode Curl_connect(struct SessionHandle *data,
    then a successful name resolve has been received */
 CURLcode Curl_async_resolved(struct connectdata *conn)
 {
-#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
+#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
+    defined(USE_THREADING_GETADDRINFO)
   CURLcode code = SetupConnection(conn, conn->async.dns);
 
   if(code)
@@ -3504,3 +3497,20 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc)
   if(sslc->random_file)
     free(sslc->random_file);
 }
+
+/*
+ * Helpers for IDNA convertions. To do.
+ */
+#ifdef USE_LIBIDN
+static bool is_ASCII_name (const char *hostname)
+{
+  (void) hostname;
+  return (TRUE);
+}
+
+static bool is_ACE_name (const char *hostname)
+{
+  (void) hostname;
+  return (FALSE);
+}
+#endif

@@ -51,20 +51,40 @@ struct Curl_dns_entry {
  * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
  * use, or we'll leak memory!
  */
-
 int Curl_resolv(struct connectdata *conn,
                 char *hostname,
                 int port,
                 struct Curl_dns_entry **dnsentry);
 
+/*
+ * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
+ * been set and returns TRUE if they are OK.
+ */
+bool Curl_ipvalid(struct SessionHandle *data);
+
+/*
+ * Curl_getaddrinfo() is the generic low-level name resolve API within this
+ * source file. There are several versions of this function - for different
+ * name resolve layers (selected at build-time). They all take this same set
+ * of arguments
+ */
+Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
+                                char *hostname,
+                                int port,
+                                int *waitp);
+
 CURLcode Curl_is_resolved(struct connectdata *conn,
                           struct Curl_dns_entry **dns);
 CURLcode Curl_wait_for_resolv(struct connectdata *conn,
                               struct Curl_dns_entry **dnsentry);
-CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
-                               fd_set *read_fd_set,
-                               fd_set *write_fd_set,
-                               int *max_fdp);
+
+/* Curl_fdset() is a generic function that exists in multiple versions
+   depending on what name resolve technology we've built to use. The function
+   is called from the curl_multi_fdset() function */
+CURLcode Curl_fdset(struct connectdata *conn,
+                    fd_set *read_fd_set,
+                    fd_set *write_fd_set,
+                    int *max_fdp);
 /* unlock a previously resolved dns entry */
 void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns);
 
@@ -81,13 +101,52 @@ curl_hash *Curl_mk_dnscache(void);
 void Curl_hostcache_prune(struct SessionHandle *data);
 
 #ifdef CURLDEBUG
-void curl_freeaddrinfo(struct addrinfo *freethis,
+void curl_dofreeaddrinfo(struct addrinfo *freethis,
+                         int line, const char *source);
+int curl_dogetaddrinfo(char *hostname, char *service,
+                       struct addrinfo *hints,
+                       struct addrinfo **result,
                        int line, const char *source);
-int curl_getaddrinfo(char *hostname, char *service,
-                     struct addrinfo *hints,
-                     struct addrinfo **result,
-                     int line, const char *source);
+int curl_dogetnameinfo(const struct sockaddr *sa, socklen_t salen,
+                       char *host, size_t hostlen,
+                       char *serv, size_t servlen, int flags,
+                       int line, const char *source);
 #endif
+
+/* This is the callback function that is used when we build with asynch
+   resolve */
+void Curl_addrinfo_callback(void *arg,
+                            int status,
+                            Curl_addrinfo *hostent);
+
+/* This is a utility-function for ipv4-builds to create a hostent struct
+   from a numerical-only IP address */
+Curl_addrinfo *Curl_ip2addr(unsigned long num, char *hostname);
+
+/* relocate a hostent struct */
+void Curl_hostent_relocate(struct hostent *h, long offset);
+
+/* copy a Curl_addrinfo struct, currently this only supports copying
+   a hostent (ipv4-style) struct */
+Curl_addrinfo *Curl_addrinfo_copy(Curl_addrinfo *orig);
+
+/*
+ * (IPv6) Curl_printable_address() returns a printable version of the
+ * ai->ai_addr address given in the 2nd argument. The first should be the
+ * ai->ai_family and the result will be stored in the buf that is bufsize
+ * bytes big.
+ */
+const char *Curl_printable_address(int af, void *addr,
+                                   char *buf, size_t bufsize);
+
+/*
+ * Curl_cache_addr() stores a 'Curl_addrinfo' struct in the DNS cache.
+ *
+ * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
+ */
+struct Curl_dns_entry *
+Curl_cache_addr(struct SessionHandle *data, Curl_addrinfo *addr,
+                char *hostname, int port);
 
 #ifndef INADDR_NONE
 #define CURL_INADDR_NONE (in_addr_t) ~0
@@ -95,5 +154,67 @@ int curl_getaddrinfo(char *hostname, char *service,
 #define CURL_INADDR_NONE INADDR_NONE
 #endif
 
+/*
+ * Setup comfortable CURLRES_* defines to use in the host*.c sources.
+ */
+
+#ifdef USE_ARES
+#define CURLRES_ASYNCH
+#define CURLRES_ARES
+#endif
+
+#ifdef USE_THREADING_GETHOSTBYNAME
+#define CURLRES_ASYNCH
+#define CURLRES_THREADED
+#endif
+
+#ifdef USE_THREADING_GETADDRINFO
+#define CURLRES_ASYNCH
+#define CURLRES_THREADED
+#endif
+
+#ifdef ENABLE_IPV6
+#define CURLRES_IPV6
+#else
+#define CURLRES_IPV4
+#endif
+
+#ifdef CURLRES_IPV4
+#if !defined(HAVE_GETHOSTBYNAME_R) || defined(CURLRES_ASYNCH)
+/* If built for ipv4 and missing gethostbyname_r(), or if using async name
+   resolve, we need the Curl_addrinfo_copy() function (which itself needs the
+   Curl_hostent_relocate() function)) */
+#define CURLRES_ADDRINFO_COPY
+#define CURLRES_HOSTENT_RELOCATE
+#endif
+#endif /* IPv4-only */
+
+#ifdef HAVE_GETHOSTBYNAME_R_6
+#define CURLRES_HOSTENT_RELOCATE
+#endif
+
+#ifdef HAVE_GETHOSTBYNAME_R_5
+#define CURLRES_HOSTENT_RELOCATE
+#endif
+
+#ifndef CURLRES_ASYNCH
+#define CURLRES_SYNCH
+#endif
+
+/* Allocate enough memory to hold the full name information structs and
+ * everything. OSF1 is known to require at least 8872 bytes. The buffer
+ * required for storing all possible aliases and IP numbers is according to
+ * Stevens' Unix Network Programming 2nd edition, p. 304: 8192 bytes!
+ */
+#define CURL_HOSTENT_SIZE 9000
+
+#define CURL_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
+                                    many seconds for a name resolve */
+
+#ifdef CURLRES_ARES
+#define CURL_ASYNC_SUCCESS ARES_SUCCESS
+#else
+#define CURL_ASYNC_SUCCESS CURLE_OK
+#endif
 
 #endif

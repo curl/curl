@@ -251,8 +251,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
       break;
     case CURLM_STATE_WAITRESOLVE:
       /* waiting for a resolve to complete */
-      Curl_multi_ares_fdset(easy->easy_conn, read_fd_set, write_fd_set,
-                            &this_max_fd);
+      Curl_fdset(easy->easy_conn, read_fd_set, write_fd_set, &this_max_fd);
       if(this_max_fd > *max_fd)
         *max_fd = this_max_fd;
       break;
@@ -413,7 +412,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
                                          easy->easy_conn->sock[FIRSTSOCKET],
                                          &connected);
         if(connected)
-          easy->result = Curl_protocol_connect(easy->easy_conn, NULL);
+          easy->result = Curl_protocol_connect(easy->easy_conn);
 
         if(CURLE_OK != easy->result) {
           /* failure detected */
