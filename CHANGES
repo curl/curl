@@ -6,14 +6,37 @@
 
                                History of Changes
 
+Daniel (29 August 2001)
+- The new cookie code have enabled the brand new '-c/--cookie-jar' option. Use
+  that to specify the file name in which you want to have all cookies curl
+  knows of, dumped to. It'll be written using the netscape cookie format.
+
+  This is internally done with the new CURLOPT_COOKIEJAR option to libcurl,
+  which in turn dumps this information when curl_easy_cleanup() is invoked.
+  There might be reasons to re-consider my choice of putting it there. Perhaps
+  it is better placed to get done just before *_perform() is done. It is all
+  of course depending on how you guys want to use this feature...
+
+- Added ftpupload.c in the source examples section, based on source code posted
+  by Erick Nuwendam.
+
 Daniel (28 August 2001)
+- Now running libtool CVS branch-1-4 to generate stuff. Should fix problems
+  on OpenBSD and hopefully on FreeBSD as well!
+
 - Georg Huettenegger modified the curl_formadd() functionality slightly, and
   added support for error code 417 when doing form post and using the Expect:
   header. Great work!
 
 - Made some tests with cached SSL session IDs, and they seem to work. There
   should be a significant speed improvement in the SSL connection phase, but
-  in my tiny tests it just isn't possible to notice any difference.
+  in my tiny tests it just isn't possible to notice any difference. Like other
+  caching in libcurl, you must reuse the same handle for the caching to take
+  effect. SSL session ID caching is done on a per host-name and destination
+  port number basis.
+
+  Set verbose, and you'll get informational tests when libcurl detects and
+  uses a previous SSL session ID.
 
 - Upgraded to automake 1.5 on my development/release machine.
 
