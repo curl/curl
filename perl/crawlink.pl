@@ -9,9 +9,13 @@
 # Written to use 'curl' for URL checking.
 #
 # Author: Daniel Stenberg <daniel@haxx.se>
-# Version: 0.2 Dec 19, 2000
+# Version: 0.3 Jan 3, 2001
 #
 # HISTORY
+#
+# 0.3 - The -i now adds regexes that if a full URL link matches one of those,
+#       it is not followed. This can then be used to prevent this script from
+#       following '.*\.cgi', specific pages or whatever.
 #
 # 0.2 - Made it only HEAD non html files (i.e skip the GET). Makes it a lot
 #       faster to skip large non HTML files such as pdfs or big RFCs! ;-)
@@ -32,6 +36,8 @@ my $help;
 my $external;
 my $curlopts;
 
+my @ignorelist;
+
  argv:
 if($ARGV[0] eq "-v" ) {
     $verbose++;
@@ -40,6 +46,12 @@ if($ARGV[0] eq "-v" ) {
 }
 elsif($ARGV[0] eq "-c" ) {
     $curlopts=$ARGV[1];
+    shift @ARGV;
+    shift @ARGV;
+    goto argv;
+}
+elsif($ARGV[0] eq "-i" ) {
+    push @ignorelist, $ARGV[1];
     shift @ARGV;
     shift @ARGV;
     goto argv;
@@ -72,10 +84,12 @@ $rooturls{$ARGV[0]}=1;
 if(($geturl eq "") || $help) {
     print  "Usage: $0 [-hilvx] <full URL>\n",
     " Use a traling slash for directory URLs!\n",
-    " -h  This help text\n",
-    " -l  Line number report for BAD links\n",
-    " -v  Verbose mode\n",
-    " -x  Check non-local (external?) links only\n";
+    " -c [data]  Pass [data] as argument to every curl invoke\n",
+    " -h         This help text\n",
+    " -i [regex] Ignore root links that match this pattern\n",
+    " -l         Line number report for BAD links\n",
+    " -v         Verbose mode\n",
+    " -x         Check non-local (external?) links only\n";
     exit;
 }
 
@@ -303,9 +317,6 @@ while(1) {
     if($geturl == -1) {
         last;
     }
-    if($verbose) {
-        print "ROOT: $geturl\n";
-    }
 
     #
     # Splits the URL in its different parts
@@ -331,6 +342,8 @@ while(1) {
         print "ROOT page $geturl returned $error\n";
         next;
     }
+
+    print "    ==== $geturl ====\n";
 
     if($verbose == 2) {
         printf("Error code $error, Content-Type: $ctype, got %d bytes\n",
@@ -405,8 +418,17 @@ while(1) {
             }
         }
         else {
-            # the link works, add it!
-            $rooturls{$link}++; # check this if not checked already
+            # the link works, add it if it isn't in the ingore list
+            my $ignore=0;
+            for(@ignorelist) {
+                if($link =~ /$_/) {
+                    $ignore=1;
+                }
+            }
+            if(!$ignore) {
+                # not ignored, add
+                $rooturls{$link}++; # check this if not checked already
+            }
         }
         
     }
