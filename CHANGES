@@ -6,7 +6,48 @@
 
                                History of Changes
 
-Version 7.7.3-pre1
+Daniel (12 May 2001)
+- Jukka Pihl suggested that if (lib)curl is told to verify the peer's
+  certificate and the peer can't be verified, it should fail and return a
+  proper error code. I added a brand new error code named
+  CURLE_SSL_PEER_CERTIFICATE for this purpose.
+
+Daniel (11 May 2001)
+- As was discussed with Frederic Lepied a while ago, I now made libcurl not
+  return error even though no data was transfered on upload/download resume
+  when the no transfer is needed. The CURLE_ALREADY_COMPLETE error was removed
+  from the header file to make any implemenator that uses that to be aware of
+  the fact that it can't be returned anymore!
+
+- Improved general header-parsing to better allow white spaces and more.
+
+- Rodney Simmons proved the fix I did yesterday was bad and I had to post
+  another one.
+
+- Ingo Wilken patched away two redirect problems more!
+  
+Daniel (10 May 2001)
+- Cris Bailiff correctly noted that the space-after-header problem with
+  Location: is present on several other places in the libcurl sources.
+
+- Ingo Wilken patched away a problem libcurl had when following Location:
+  headers with an extra space after the colon.
+
+- Rodney Simmons found out that multiple FTP transfers did not treat relative
+  directories correctly.
+
+Daniel (9 May 2001)
+- Getting an FTP file with CURLOPT_NOBODY set (or -I from the command line),
+  makes curl use the non-standard ftp command "SIZE". If it failed, libcurl
+  returned error. Starting now, it just don't output the file size instead.
+  Anonymous bug report.
+  
+Daniel (7 May 2001)
+- Corrected two minor compiler warnings due to the FILE * to void * conversion
+  that I missed at two places. Jörn Hartroth brought me patches. Sander Gates
+  filed a bug report on this.
+
+Version 7.7.3
 
 Daniel (4 May 2001)
 - All callback functions now take 'void *' instead of 'FILE *'. This is made
