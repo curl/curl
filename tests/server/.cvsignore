@@ -5,3 +5,4 @@ sws
 stamp-h*
 config.h
 Makefile
+getpart
