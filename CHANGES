@@ -6,6 +6,15 @@
 
                                History of Changes
 
+Daniel (2 August 2001)
+- Frank Keeney pointed out a manual mistake for certificate convertions.
+
+- Tomasz Lacki pointed out a problem in the transfer loop that could make the
+  select() loop use far too much CPU.
+
+- Pawel A. Gajda pointed out an output mistake done when using libcurl's
+  progress callback.
+
 Daniel (29 June 2001)
 - Naveen Noel noticed that the Borland library makefile wasn't updated.
 
