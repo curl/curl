@@ -61,7 +61,7 @@ findprog()
 # Enforce a rerun of configure (updates the VERSION)
 #
 
-#./config.status --recheck
+./config.status --recheck
 
 ############################################################################
 #
