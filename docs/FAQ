@@ -1,4 +1,4 @@
-Updated: December 30, 2000 (http://curl.haxx.se/docs/faq.shtml)
+Updated: January 2, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -74,6 +74,8 @@ FAQ
 
   Curl supports a range of common internet protocols, currently including
   HTTP, HTTPS, FTP, GOPHER, LDAP, DICT and FILE.
+
+  Please spell it cURL or just curl.
 
   1.2 What is libcurl?
 
@@ -222,7 +224,7 @@ FAQ
 
   Curl supports resume both ways on FTP, download ways on HTTP.
 
-  Try the -c and -C options.
+  Try the -C option.
 
   3.3. Why doesn't my posting using -F work?
 
@@ -359,9 +361,9 @@ FAQ
   4.6. Can you tell me what error code 142 means?
 
   All error codes that are larger than the highest documented error code means
-  that curl has existed due to a timeout. There is currently no nice way for
-  curl to abort from such a condition and that's why it gets this undocumented
-  error. This should be changed in releases after 7.4.1.
+  that curl has existed due to a timeout. There was no nice way for curl to
+  abort from such a condition and that's why it got this undocumented
+  error. This should not occur in releases after 7.4.1.
 
   4.7. How do I keep usernames and passwords secret in Curl command lines?
 
@@ -376,6 +378,10 @@ FAQ
   not a task that curl addresses. You could of course encrypt them somehow to
   at least hide them from being read by human eyes, but that is not what
   anyone would call security.
+
+  Also note that regular HTTP and FTP passwords are sent in clear across the
+  network. All it takes for anyone to fetch them is to listen on the network.
+  Evesdropping is very easy.
 
   4.8 I found a bug!
 
