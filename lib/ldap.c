@@ -134,8 +134,7 @@ static void * DynaGetFunction(char *name)
 static int WriteProc(void *param, char *text, int len)
 {
   struct UrlData *data = (struct UrlData *)param;
-
-  data->fwrite(text, 1, strlen(text), data->out);
+  client_write(data, CLIENTWRITE_BODY, text, 0);
   return 0;
 }
 

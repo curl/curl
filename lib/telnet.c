@@ -713,8 +713,8 @@ void telrcv(struct UrlData *data,
 	 {
 	    break;   /* Ignore \0 after CR */
 	 }
-	 
-	 data->fwrite((char *)&c, 1, 1, data->out);
+
+	 client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
 	 continue;
 
       case TS_DATA:
@@ -728,7 +728,7 @@ void telrcv(struct UrlData *data,
 	    telrcv_state = TS_CR;
 	 }
 
-	 data->fwrite((char *)&c, 1, 1, data->out);
+	 client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
 	 continue;
 
       case TS_IAC:
@@ -752,8 +752,8 @@ void telrcv(struct UrlData *data,
 	   telrcv_state = TS_SB;
 	   continue;
 	case IAC:
-	   data->fwrite((char *)&c, 1, 1, data->out);
-	   break;
+          client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
+          break;
 	case DM:
 	case NOP:
 	case GA:
