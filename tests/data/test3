@@ -28,7 +28,7 @@ HTTP POST with user and password
 <strip>
 ^User-Agent:.*
 </strip>
-<protocol>
+<protocol nonewline=yes>
 POST /3 HTTP/1.1
 Authorization: Basic ZmFrZTotdXNlcg==
 Host: 127.0.0.1:8999
