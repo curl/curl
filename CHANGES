@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.12.2 (18 October 2004)
+
 Daniel (16 October 2004)
 - Alexander Krasnostavsky made the CURLOPT_FTP_CREATE_MISSING_DIRS option work
   fine even for third party transfers.
