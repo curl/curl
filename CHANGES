@@ -61,8 +61,17 @@ Daniel (12 March 2001)
   to fix the test servers to get all the test cases do OK.
 
 Daniel (8 March 2001)
+- Guenole Bescon reported that libcurl did output errors to stderr even if
+  MUTE and NOPROGRESS was set. It turned out to be a bug and happens if
+  there's an error and no ERRORBUFFER is set. This is now corrected.
+
+Version 7.7-beta1
+
+Daniel (8 March 2001)
 - "Transfer-Encoding: chunked" is no longer any trouble for libcurl. I've
   added two source files and I've run some test downloads that look fine.
+
+- HTTP HEAD works too, even on 1.1 servers.
 
 Daniel (5 March 2001)
 - The current 57 test cases now pass OK. It would suggest that libcurl works
