@@ -1,4 +1,4 @@
-GET /want/25 HTTP/1.0
+GET /want/25 HTTP/1.1
 User-Agent: curl/7.6-pre1 (sparc-sun-solaris2.7) libcurl 7.5.2 (SSL 0.9.6) (krb4 enabled)
 Host: 127.0.0.1:8999
 Pragma: no-cache

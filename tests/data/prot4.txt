@@ -1,4 +1,4 @@
-GET /4 HTTP/1.0
+GET /4 HTTP/1.1
 Host: 127.0.0.1:8999
 Pragma: no-cache
 extra-header: here

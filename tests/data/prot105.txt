@@ -1,5 +1,6 @@
 USER userdude
 PASS passfellow
+PWD
 PASV
 TYPE A
 RETR 103

@@ -1,4 +1,4 @@
-GET http://we.want.that.site.com/2 HTTP/1.0
+GET http://we.want.that.site.com/2 HTTP/1.1
 Proxy-authorization: Basic ZmFrZUB1c2VyOqenp2xvb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb29vb28=
 Host: we.want.that.site.com
 Pragma: no-cache
