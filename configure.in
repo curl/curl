@@ -533,7 +533,6 @@ AC_CHECK_FUNCS( socket \
                 strcmpi \
                 gethostname \
                 gethostbyaddr \
-                getservbyname \
                 gettimeofday \
                 inet_addr \
                 inet_ntoa \
