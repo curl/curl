@@ -309,7 +309,11 @@ cookies when they're closed down. (Added in 7.9.7)
 
 If this option is used several times, each occurrence will toggle this on/off.
 .IP "-k/--insecure"
-(SSL)
+(SSL) This option explicitly allows curl to perform "insecure" SSL connections
+and transfers. Starting with curl 7.10, all SSL connections will be attempted
+to be made secure by using the CA certificate bundle installed by
+default. This makes all connections considered "insecure" to fail unless
+-k/--insecure is used.
 
 If this option is used twice, the second time will again disable it.
 .IP "--krb4 <level>"
