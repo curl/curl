@@ -720,10 +720,10 @@ struct UrlState {
                                 bytes / second */
   bool this_is_a_follow; /* this is a followed Location: request */
 
-  char *auth_host; /* if set, this should be the host name that we will
-                      sent authorization to, no else. Used to make Location:
-                      following not keep sending user+password... This is
-                      strdup() data.
+  char *first_host; /* if set, this should be the host name that we will
+                       sent authorization to, no else. Used to make Location:
+                       following not keep sending user+password... This is
+                       strdup() data.
                     */
 
   struct curl_ssl_session *session; /* array of 'numsessions' size */

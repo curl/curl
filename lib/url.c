@@ -211,7 +211,7 @@ CURLcode Curl_close(struct SessionHandle *data)
   if(data->change.cookielist) /* clean up list if any */
     curl_slist_free_all(data->change.cookielist);
 
-  Curl_safefree(data->state.auth_host);
+  Curl_safefree(data->state.first_host);
   Curl_safefree(data->state.scratch);
 
   if(data->change.proxy_alloc)

@@ -299,8 +299,8 @@ Curl_http_output_auth(struct connectdata *conn,
   /* To prevent the user+password to get sent to other than the original
      host due to a location-follow, we do some weirdo checks here */
   if(!data->state.this_is_a_follow ||
-     !data->state.auth_host ||
-     curl_strequal(data->state.auth_host, conn->host.name) ||
+     !data->state.first_host ||
+     curl_strequal(data->state.first_host, conn->host.name) ||
      data->set.http_disable_hostname_check_before_authentication) {
 
     /* Send proxy authentication header if needed */
@@ -1156,14 +1156,13 @@ CURLcode Curl_http_connect(struct connectdata *conn)
       return result;
   }
 
-  if(conn->bits.user_passwd && !data->state.this_is_a_follow) {
-    /* Authorization: is requested, this is not a followed location, get the
-       original host name */
-    if (data->state.auth_host)
+  if(!data->state.this_is_a_follow) {
+    /* this is not a followed location, get the original host name */
+    if (data->state.first_host)
       /* Free to avoid leaking memory on multiple requests*/
-      free(data->state.auth_host);
+      free(data->state.first_host);
 
-    data->state.auth_host = strdup(conn->host.name);
+    data->state.first_host = strdup(conn->host.name);
   }
 
   return CURLE_OK;
@@ -1363,11 +1362,13 @@ CURLcode Curl_http(struct connectdata *conn)
   Curl_safefree(conn->allocptr.host);
 
   ptr = checkheaders(data, "Host:");
-  if(ptr && !data->state.this_is_a_follow) {
+  if(ptr && (!data->state.this_is_a_follow ||
+             curl_strequal(data->state.first_host, conn->host.name))) {
     /* If we have a given custom Host: header, we extract the host name in
        order to possibly use it for cookie reasons later on. We only allow the
        custom Host: header if this is NOT a redirect, as setting Host: in the
-       redirected request is being out on thin ice. */
+       redirected request is being out on thin ice. Except if the host name
+       is the same as the first one! */
     char *start = ptr+strlen("Host:");
     while(*start && isspace((int)*start ))
       start++;
@@ -1379,6 +1380,7 @@ CURLcode Curl_http(struct connectdata *conn)
 
     if(ptr != start) {
       size_t len=ptr-start;
+      Curl_safefree(conn->allocptr.cookiehost);
       conn->allocptr.cookiehost = malloc(len+1);
       if(!conn->allocptr.cookiehost)
         return CURLE_OUT_OF_MEMORY;
@@ -1727,9 +1729,17 @@ CURLcode Curl_http(struct connectdata *conn)
         if(*ptr) {
           /* only send this if the contents was non-blank */
 
-          result = add_bufferf(req_buffer, "%s\r\n", headers->data);
-          if(result)
-            return result;
+          if(conn->allocptr.host &&
+            /* a Host: header was sent already, don't pass on any custom Host:
+               header as that will produce *two* in the same request! */
+             curl_strnequal("Host:", headers->data, 5))
+            ;
+          else {
+
+            result = add_bufferf(req_buffer, "%s\r\n", headers->data);
+            if(result)
+              return result;
+          }
         }
       }
       headers = headers->next;
