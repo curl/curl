@@ -1430,19 +1430,22 @@ CURLcode Curl_http(struct connectdata *conn)
         char *newurl;
         
         newurl = malloc(urllen + newlen - currlen + 1);
-
-        /* copy the part before the host name */
-        memcpy(newurl, url, ptr - url);
-        /* append the new host name instead of the old */
-        memcpy(newurl + (ptr - url), conn->host.name, newlen);
-        /* append the piece after the host name */
-        memcpy(newurl + newlen + (ptr - url),
-               ptr + currlen, /* copy the trailing zero byte too */
-               urllen - (ptr-url) - currlen + 1);
-        if(data->change.url_alloc)
-          free(data->change.url);
-        data->change.url = newurl;
-        data->change.url_alloc = TRUE;
+        if(newurl) {
+          /* copy the part before the host name */
+          memcpy(newurl, url, ptr - url);
+          /* append the new host name instead of the old */
+          memcpy(newurl + (ptr - url), conn->host.name, newlen);
+          /* append the piece after the host name */
+          memcpy(newurl + newlen + (ptr - url),
+                 ptr + currlen, /* copy the trailing zero byte too */
+                 urllen - (ptr-url) - currlen + 1);
+          if(data->change.url_alloc)
+            free(data->change.url);
+          data->change.url = newurl;
+          data->change.url_alloc = TRUE;
+        }
+        else
+          return CURLE_OUT_OF_MEMORY;
       }
     }
     ppath = data->change.url;
