@@ -54,7 +54,7 @@ else
 	CC = gcc
 endif
 # RM	= rm -f
-# CP	= cp -fv
+CP	= cp -fv
 # if you want to mark the target as MTSAFE you will need a tool for
 # generating the xdc data for the linker; here's a minimal tool:
 # http://www.gknw.de/development/prgtools/mkxdc.zip
