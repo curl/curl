@@ -1,0 +1,53 @@
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+https
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib503
+</tool>
+
+ <name>
+simple multi https:// with authentication info
+ </name>
+ <command>
+http://%HOSTIP:%HTTPSPORT/503 localhost:%HOSTPORT
+</command>
+<file name="log/test502.txt">
+foo
+   bar
+bar
+   foo
+moo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+CONNECT 127.0.0.1:8433 HTTP/1.0
+Proxy-authorization: Basic dGVzdDppbmc=
+
+GET /503 HTTP/1.1
+Proxy-authorization: Basic dGVzdDppbmc=
+Authorization: Basic dGVzdDppbmc=
+Host: 127.0.0.1:8433
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>

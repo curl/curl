@@ -1,6 +1,7 @@
 #
 # Server-side
 <reply>
+MOOOOO
 </reply>
 
 #
@@ -10,7 +11,7 @@
 HTTPS GET over HTTP proxy fails
  </name>
  <command>
--k -U fake:user -x %HOSTIP:%HOSTPORT https://ssl.fakeurl-to.test/slash/302
+-k -U fake:user -x %HOSTIP:%HOSTPORT https://bad.fakeurl-to.test/slash/302
 </command>
 </test>
 
