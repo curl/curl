@@ -12,25 +12,14 @@ TODO
 
 To do in a future release (random order):
 
+ * FTP ASCII upload does not follow RFC959 section 3.1.1.1: 
+    "The sender converts the data from an internal character representation to
+    the standard 8-bit NVT-ASCII representation (see the Telnet
+    specification).  The receiver will convert the data from the standard form
+    to his own internal form."
+
  * Make the connect non-blocking so that timeouts work for connect in 
    multi-threaded programs 
-
- * Using FILE * in the libcurl API introduces a serious limitation since (at
-   least in the *nix falvours I know) you can fopen only the first 256
-   files. This means, that an application that first opens or fopens 256 files
-   has no chance to use libcurl. Using open and file descriptors instead of
-   FILE * would solve the problem. This implies a minor API
-   change/enhancement. ck1 <ck1@swissonline.ch>
-
- * It would be nice to be able to use "-d" (or something similar) to attach
-   parameters of EITHER the GET or POST type... It would either require
-   another curl argument to specify "GET" (obviously the default should remain
-   POST), or it would require a new curl argument (perhaps -G/--get-data).
- 
-   I know we're running out of letters, but it somehow feels a little
-   "cleaner" to just tag on each of your HTTP "parameters" (data-items) one by
-   one and let curl put them together, rather than having to put them together
-   myself and include them in the URL.
 
  * Add an interface that enables a user to select prefered SSL ciphers to use.
 
@@ -51,6 +40,11 @@ To do in a future release (random order):
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
    http://curl.haxx.se/dev/no_copy_callbacks.txt
+
+ * An option to only download remote FTP files if they're newer than the local
+   one is a good idea, and it would fit right into the same syntax as the
+   already working http dito works. It of course requires that 'MDTM' works,
+   and it isn't a standard FTP command.
 
  * Suggested on the mailing list: CURLOPT_FTP_MKDIR...!
 
