@@ -1272,6 +1272,11 @@ ConnectionExists(struct SessionHandle *data,
     if(!check)
       /* NULL pointer means not filled-in entry */
       continue;
+
+    if((needle->protocol&PROT_SSL) != (check->protocol&PROT_SSL))
+      /* don't do mixed SSL and non-SSL connections */
+      continue;
+
     if(!needle->bits.httpproxy || needle->protocol&PROT_SSL) {
       /* The requested connection does not use a HTTP proxy or it
          uses SSL. */
