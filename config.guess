@@ -1,9 +1,9 @@
 #! /bin/sh
 # Attempt to guess a canonical system name.
 #   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-#   2000, 2001, 2002 Free Software Foundation, Inc.
+#   2000, 2001, 2002, 2003 Free Software Foundation, Inc.
 
-timestamp='2002-10-21'
+timestamp='2003-02-22'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -98,14 +98,17 @@ trap 'exit 1' 1 2 15
 # Historically, `CC_FOR_BUILD' used to be named `HOST_CC'. We still
 # use `HOST_CC' if defined, but it is deprecated.
 
-# This shell variable is my proudest work .. or something. --bje
+# Portable tmp directory creation inspired by the Autoconf team.
 
-set_cc_for_build='tmpdir=${TMPDIR-/tmp}/config-guess-$$ ;
-(old=`umask` && umask 077 && mkdir $tmpdir && umask $old && unset old)
-   || (echo "$me: cannot create $tmpdir" >&2 && exit 1) ;
-dummy=$tmpdir/dummy ;
-files="$dummy.c $dummy.o $dummy.rel $dummy" ;
-trap '"'"'rm -f $files; rmdir $tmpdir; exit 1'"'"' 1 2 15 ;
+set_cc_for_build='
+trap "exitcode=\$?; (rm -f \$tmpfiles 2>/dev/null; rmdir \$tmp 2>/dev/null) && exit \$exitcode" 0 ;
+trap "rm -f \$tmpfiles 2>/dev/null; rmdir \$tmp 2>/dev/null; exit 1" 1 2 13 15 ;
+: ${TMPDIR=/tmp} ;
+ { tmp=`(umask 077 && mktemp -d -q "$TMPDIR/cgXXXXXX") 2>/dev/null` && test -n "$tmp" && test -d "$tmp" ; } ||
+ { test -n "$RANDOM" && tmp=$TMPDIR/cg$$-$RANDOM && (umask 077 && mkdir $tmp) ; } ||
+ { echo "$me: cannot create a temporary directory in $TMPDIR" >&2 ; exit 1 ; } ;
+dummy=$tmp/dummy ;
+tmpfiles="$dummy.c $dummy.o $dummy.rel $dummy" ;
 case $CC_FOR_BUILD,$HOST_CC,$CC in
  ,,)    echo "int x;" > $dummy.c ;
 	for c in cc gcc c89 c99 ; do
@@ -113,15 +116,13 @@ case $CC_FOR_BUILD,$HOST_CC,$CC in
 	     CC_FOR_BUILD="$c"; break ;
 	  fi ;
 	done ;
-	rm -f $files ;
 	if test x"$CC_FOR_BUILD" = x ; then
 	  CC_FOR_BUILD=no_compiler_found ;
 	fi
 	;;
  ,,*)   CC_FOR_BUILD=$CC ;;
  ,*,*)  CC_FOR_BUILD=$HOST_CC ;;
-esac ;
-unset files'
+esac ;'
 
 # This is needed to find uname on a Pyramid OSx when run in the BSD universe.
 # (ghazi@noc.rutgers.edu 1994-08-24)
@@ -178,7 +179,18 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 		;;
 	esac
 	# The OS release
-	release=`echo ${UNAME_RELEASE}|sed -e 's/[-_].*/\./'`
+	# Debian GNU/NetBSD machines have a different userland, and
+	# thus, need a distinct triplet. However, they do not need
+	# kernel version information, so it can be replaced with a
+	# suitable tag, in the style of linux-gnu.
+	case "${UNAME_VERSION}" in
+	    Debian*)
+		release='-gnu'
+		;;
+	    *)
+		release=`echo ${UNAME_RELEASE}|sed -e 's/[-_].*/\./'`
+		;;
+	esac
 	# Since CPU_TYPE-MANUFACTURER-KERNEL-OPERATING_SYSTEM:
 	# contains redundant information, the shorter form:
 	# CPU_TYPE-MANUFACTURER-OPERATING_SYSTEM is used.
@@ -227,66 +239,47 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	if test $UNAME_RELEASE = "V4.0"; then
 		UNAME_RELEASE=`/usr/sbin/sizer -v | awk '{print $3}'`
 	fi
+	# According to Compaq, /usr/sbin/psrinfo has been available on
+	# OSF/1 and Tru64 systems produced since 1995.  I hope that
+	# covers most systems running today.  This code pipes the CPU
+	# types through head -n 1, so we only detect the type of CPU 0.
+	ALPHA_CPU_TYPE=`/usr/sbin/psrinfo -v | sed -n -e 's/^  The alpha \(.*\) processor.*$/\1/p' | head -n 1`
+	case "$ALPHA_CPU_TYPE" in
+	    "EV4 (21064)")
+		UNAME_MACHINE="alpha" ;;
+	    "EV4.5 (21064)")
+		UNAME_MACHINE="alpha" ;;
+	    "LCA4 (21066/21068)")
+		UNAME_MACHINE="alpha" ;;
+	    "EV5 (21164)")
+		UNAME_MACHINE="alphaev5" ;;
+	    "EV5.6 (21164A)")
+		UNAME_MACHINE="alphaev56" ;;
+	    "EV5.6 (21164PC)")
+		UNAME_MACHINE="alphapca56" ;;
+	    "EV5.7 (21164PC)")
+		UNAME_MACHINE="alphapca57" ;;
+	    "EV6 (21264)")
+		UNAME_MACHINE="alphaev6" ;;
+	    "EV6.7 (21264A)")
+		UNAME_MACHINE="alphaev67" ;;
+	    "EV6.8CB (21264C)")
+		UNAME_MACHINE="alphaev68" ;;
+	    "EV6.8AL (21264B)")
+		UNAME_MACHINE="alphaev68" ;;
+	    "EV6.8CX (21264D)")
+		UNAME_MACHINE="alphaev68" ;;
+	    "EV6.9A (21264/EV69A)")
+		UNAME_MACHINE="alphaev69" ;;
+	    "EV7 (21364)")
+		UNAME_MACHINE="alphaev7" ;;
+	    "EV7.9 (21364A)")
+		UNAME_MACHINE="alphaev79" ;;
+	esac
 	# A Vn.n version is a released version.
 	# A Tn.n version is a released field test version.
 	# A Xn.n version is an unreleased experimental baselevel.
 	# 1.2 uses "1.2" for uname -r.
-	eval $set_cc_for_build
-	cat <<EOF >$dummy.s
-	.data
-\$Lformat:
-	.byte 37,100,45,37,120,10,0	# "%d-%x\n"
-
-	.text
-	.globl main
-	.align 4
-	.ent main
-main:
-	.frame \$30,16,\$26,0
-	ldgp \$29,0(\$27)
-	.prologue 1
-	.long 0x47e03d80 # implver \$0
-	lda \$2,-1
-	.long 0x47e20c21 # amask \$2,\$1
-	lda \$16,\$Lformat
-	mov \$0,\$17
-	not \$1,\$18
-	jsr \$26,printf
-	ldgp \$29,0(\$26)
-	mov 0,\$16
-	jsr \$26,exit
-	.end main
-EOF
-	$CC_FOR_BUILD -o $dummy $dummy.s 2>/dev/null
-	if test "$?" = 0 ; then
-		case `$dummy` in
-			0-0)
-				UNAME_MACHINE="alpha"
-				;;
-			1-0)
-				UNAME_MACHINE="alphaev5"
-				;;
-			1-1)
-				UNAME_MACHINE="alphaev56"
-				;;
-			1-101)
-				UNAME_MACHINE="alphapca56"
-				;;
-			2-303)
-				UNAME_MACHINE="alphaev6"
-				;;
-			2-307)
-				UNAME_MACHINE="alphaev67"
-				;;
-			2-1307)
-				UNAME_MACHINE="alphaev68"
-				;;
-			3-1307)
-				UNAME_MACHINE="alphaev7"
-				;;
-		esac
-	fi
-	rm -f $dummy.s $dummy && rmdir $tmpdir
 	echo ${UNAME_MACHINE}-dec-osf`echo ${UNAME_RELEASE} | sed -e 's/^[VTX]//' | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
 	exit 0 ;;
     Alpha\ *:Windows_NT*:*)
@@ -439,8 +432,7 @@ EOF
 EOF
 	$CC_FOR_BUILD -o $dummy $dummy.c \
 	  && $dummy `echo "${UNAME_RELEASE}" | sed -n 's/\([0-9]*\).*/\1/p'` \
-	  && rm -f $dummy.c $dummy && rmdir $tmpdir && exit 0
-	rm -f $dummy.c $dummy && rmdir $tmpdir
+	  && exit 0
 	echo mips-mips-riscos${UNAME_RELEASE}
 	exit 0 ;;
     Motorola:PowerMAX_OS:*:*)
@@ -449,7 +441,7 @@ EOF
     Motorola:*:4.3:PL8-*)
 	echo powerpc-harris-powermax
 	exit 0 ;;
-    Night_Hawk:*:*:PowerMAX_OS)
+    Night_Hawk:*:*:PowerMAX_OS | Synergy:PowerMAX_OS:*:*)
 	echo powerpc-harris-powermax
 	exit 0 ;;
     Night_Hawk:Power_UNIX:*:*)
@@ -524,8 +516,7 @@ EOF
 			exit(0);
 			}
 EOF
-		$CC_FOR_BUILD -o $dummy $dummy.c && $dummy && rm -f $dummy.c $dummy && rmdir $tmpdir && exit 0
-		rm -f $dummy.c $dummy && rmdir $tmpdir
+		$CC_FOR_BUILD -o $dummy $dummy.c && $dummy && exit 0
 		echo rs6000-ibm-aix3.2.5
 	elif grep bos324 /usr/include/stdio.h >/dev/null 2>&1; then
 		echo rs6000-ibm-aix3.2.4
@@ -624,10 +615,20 @@ EOF
               }
 EOF
 		    (CCOPTS= $CC_FOR_BUILD -o $dummy $dummy.c 2>/dev/null) && HP_ARCH=`$dummy`
-		    if test -z "$HP_ARCH"; then HP_ARCH=hppa; fi
-		    rm -f $dummy.c $dummy && rmdir $tmpdir
+		    test -z "$HP_ARCH" && HP_ARCH=hppa
 		fi ;;
 	esac
+	if [ ${HP_ARCH} = "hppa2.0w" ]
+	then
+	    # avoid double evaluation of $set_cc_for_build
+	    test -n "$CC_FOR_BUILD" || eval $set_cc_for_build
+	    if echo __LP64__ | (CCOPTS= $CC_FOR_BUILD -E -) | grep __LP64__ >/dev/null
+	    then
+		HP_ARCH="hppa2.0w"
+	    else
+		HP_ARCH="hppa64"
+	    fi
+	fi
 	echo ${HP_ARCH}-hp-hpux${HPUX_REV}
 	exit 0 ;;
     ia64:HP-UX:*:*)
@@ -661,8 +662,7 @@ EOF
 	  exit (0);
 	}
 EOF
-	$CC_FOR_BUILD -o $dummy $dummy.c && $dummy && rm -f $dummy.c $dummy && rmdir $tmpdir && exit 0
-	rm -f $dummy.c $dummy && rmdir $tmpdir
+	$CC_FOR_BUILD -o $dummy $dummy.c && $dummy && exit 0
 	echo unknown-hitachi-hiuxwe2
 	exit 0 ;;
     9000/7??:4.3bsd:*:* | 9000/8?[79]:4.3bsd:*:* )
@@ -720,14 +720,14 @@ EOF
     CRAY*TS:*:*:*)
 	echo t90-cray-unicos${UNAME_RELEASE} | sed -e 's/\.[^.]*$/.X/'
 	exit 0 ;;
-    CRAY*T3D:*:*:*)
-	echo alpha-cray-unicosmk${UNAME_RELEASE} | sed -e 's/\.[^.]*$/.X/'
-	exit 0 ;;
     CRAY*T3E:*:*:*)
 	echo alphaev5-cray-unicosmk${UNAME_RELEASE} | sed -e 's/\.[^.]*$/.X/'
 	exit 0 ;;
     CRAY*SV1:*:*:*)
 	echo sv1-cray-unicos${UNAME_RELEASE} | sed -e 's/\.[^.]*$/.X/'
+	exit 0 ;;
+    *:UNICOS/mp:*:*)
+	echo nv1-cray-unicosmp${UNAME_RELEASE} | sed -e 's/\.[^.]*$/.X/' 
 	exit 0 ;;
     F30[01]:UNIX_System_V:*:* | F700:UNIX_System_V:*:*)
 	FUJITSU_PROC=`uname -m | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
@@ -756,7 +756,6 @@ EOF
 	#endif
 EOF
 	eval `$CC_FOR_BUILD -E $dummy.c 2>/dev/null | grep ^LIBC=`
-	rm -f $dummy.c && rmdir $tmpdir
 	echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'`${LIBC:+-$LIBC}
 	exit 0 ;;
     i*:CYGWIN*:*)
@@ -769,13 +768,16 @@ EOF
 	echo ${UNAME_MACHINE}-pc-pw32
 	exit 0 ;;
     x86:Interix*:3*)
-	echo i386-pc-interix3
+	echo i586-pc-interix3
+	exit 0 ;;
+    [345]86:Windows_95:* | [345]86:Windows_98:* | [345]86:Windows_NT:*)
+	echo i${UNAME_MACHINE}-pc-mks
 	exit 0 ;;
     i*:Windows_NT*:* | Pentium*:Windows_NT*:*)
 	# How do we know it's Interix rather than the generic POSIX subsystem?
 	# It also conflicts with pre-2.0 versions of AT&T UWIN. Should we
 	# UNAME_MACHINE based on the output of uname instead of i386?
-	echo i386-pc-interix
+	echo i586-pc-interix
 	exit 0 ;;
     i*:UWIN*:*)
 	echo ${UNAME_MACHINE}-pc-uwin
@@ -818,8 +820,26 @@ EOF
 	#endif
 EOF
 	eval `$CC_FOR_BUILD -E $dummy.c 2>/dev/null | grep ^CPU=`
-	rm -f $dummy.c && rmdir $tmpdir
-	test x"${CPU}" != x && echo "${CPU}-pc-linux-gnu" && exit 0
+	test x"${CPU}" != x && echo "${CPU}-unknown-linux-gnu" && exit 0
+	;;
+    mips64:Linux:*:*)
+	eval $set_cc_for_build
+	sed 's/^	//' << EOF >$dummy.c
+	#undef CPU
+	#undef mips64
+	#undef mips64el
+	#if defined(__MIPSEL__) || defined(__MIPSEL) || defined(_MIPSEL) || defined(MIPSEL)
+	CPU=mips64el
+	#else
+	#if defined(__MIPSEB__) || defined(__MIPSEB) || defined(_MIPSEB) || defined(MIPSEB)
+	CPU=mips64
+	#else
+	CPU=
+	#endif
+	#endif
+EOF
+	eval `$CC_FOR_BUILD -E $dummy.c 2>/dev/null | grep ^CPU=`
+	test x"${CPU}" != x && echo "${CPU}-unknown-linux-gnu" && exit 0
 	;;
     ppc:Linux:*:*)
 	echo powerpc-unknown-linux-gnu
@@ -914,7 +934,6 @@ EOF
 	#endif
 EOF
 	eval `$CC_FOR_BUILD -E $dummy.c 2>/dev/null | grep ^LIBC=`
-	rm -f $dummy.c && rmdir $tmpdir
 	test x"${LIBC}" != x && echo "${UNAME_MACHINE}-pc-linux-${LIBC}" && exit 0
 	test x"${TENTATIVE}" != x && echo "${TENTATIVE}" && exit 0
 	;;
@@ -931,6 +950,23 @@ EOF
 	# I just have to hope.  -- rms.
         # Use sysv4.2uw... so that sysv4* matches it.
 	echo ${UNAME_MACHINE}-pc-sysv4.2uw${UNAME_VERSION}
+	exit 0 ;;
+    i*86:OS/2:*:*)
+	# If we were able to find `uname', then EMX Unix compatibility
+	# is probably installed.
+	echo ${UNAME_MACHINE}-pc-os2-emx
+	exit 0 ;;
+    i*86:XTS-300:*:STOP)
+	echo ${UNAME_MACHINE}-unknown-stop
+	exit 0 ;;
+    i*86:atheos:*:*)
+	echo ${UNAME_MACHINE}-unknown-atheos
+	exit 0 ;;
+    i*86:LynxOS:2.*:* | i*86:LynxOS:3.[01]*:* | i*86:LynxOS:4.0*:*)
+	echo i386-unknown-lynxos${UNAME_RELEASE}
+	exit 0 ;;
+    i*86:*DOS:*:*)
+	echo ${UNAME_MACHINE}-pc-msdosdjgpp
 	exit 0 ;;
     i*86:*:4.*:* | i*86:SYSTEM_V:4.*:*)
 	UNAME_REL=`echo ${UNAME_RELEASE} | sed 's/\/MP$//'`
@@ -966,9 +1002,6 @@ EOF
 		echo ${UNAME_MACHINE}-pc-sysv32
 	fi
 	exit 0 ;;
-    i*86:*DOS:*:*)
-	echo ${UNAME_MACHINE}-pc-msdosdjgpp
-	exit 0 ;;
     pc:*:*:*)
 	# Left here for compatibility:
         # uname -m prints for DJGPP always 'pc', but it prints nothing about
@@ -995,9 +1028,12 @@ EOF
     mc68k:UNIX:SYSTEM5:3.51m)
 	echo m68k-convergent-sysv
 	exit 0 ;;
+    M680?0:D-NIX:5.3:*)
+	echo m68k-diab-dnix
+	exit 0 ;;
     M68*:*:R3V[567]*:*)
 	test -r /sysV68 && echo 'm68k-motorola-sysv' && exit 0 ;;
-    3[34]??:*:4.0:3.0 | 3[34]??A:*:4.0:3.0 | 3[34]??,*:*:4.0:3.0 | 3[34]??/*:*:4.0:3.0 | 4400:*:4.0:3.0 | 4850:*:4.0:3.0 | SKA40:*:4.0:3.0)
+    3[34]??:*:4.0:3.0 | 3[34]??A:*:4.0:3.0 | 3[34]??,*:*:4.0:3.0 | 3[34]??/*:*:4.0:3.0 | 4400:*:4.0:3.0 | 4850:*:4.0:3.0 | SKA40:*:4.0:3.0 | SDS2:*:4.0:3.0)
 	OS_REL=''
 	test -r /etc/.relid \
 	&& OS_REL=.`sed -n 's/[^ ]* [^ ]* \([0-9][0-9]\).*/\1/p' < /etc/.relid`
@@ -1013,9 +1049,6 @@ EOF
 	exit 0 ;;
     mc68030:UNIX_System_V:4.*:*)
 	echo m68k-atari-sysv4
-	exit 0 ;;
-    i*86:LynxOS:2.*:* | i*86:LynxOS:3.[01]*:* | i*86:LynxOS:4.0*:*)
-	echo i386-unknown-lynxos${UNAME_RELEASE}
 	exit 0 ;;
     TSUNAMI:LynxOS:2.*:*)
 	echo sparc-unknown-lynxos${UNAME_RELEASE}
@@ -1098,7 +1131,11 @@ EOF
 	echo ${UNAME_MACHINE}-apple-rhapsody${UNAME_RELEASE}
 	exit 0 ;;
     *:Darwin:*:*)
-	echo `uname -p`-apple-darwin${UNAME_RELEASE}
+	case `uname -p` in
+	    *86) UNAME_PROCESSOR=i686 ;;
+	    powerpc) UNAME_PROCESSOR=powerpc ;;
+	esac
+	echo ${UNAME_PROCESSOR}-apple-darwin${UNAME_RELEASE}
 	exit 0 ;;
     *:procnto*:*:* | *:QNX:[0123456789]*:*)
 	UNAME_PROCESSOR=`uname -p`
@@ -1134,11 +1171,6 @@ EOF
 	fi
 	echo ${UNAME_MACHINE}-unknown-plan9
 	exit 0 ;;
-    i*86:OS/2:*:*)
-	# If we were able to find `uname', then EMX Unix compatibility
-	# is probably installed.
-	echo ${UNAME_MACHINE}-pc-os2-emx
-	exit 0 ;;
     *:TOPS-10:*:*)
 	echo pdp10-unknown-tops10
 	exit 0 ;;
@@ -1156,12 +1188,6 @@ EOF
 	exit 0 ;;
     *:ITS:*:*)
 	echo pdp10-unknown-its
-	exit 0 ;;
-    i*86:XTS-300:*:STOP)
-	echo ${UNAME_MACHINE}-unknown-stop
-	exit 0 ;;
-    i*86:atheos:*:*)
-	echo ${UNAME_MACHINE}-unknown-atheos
 	exit 0 ;;
 esac
 
@@ -1283,8 +1309,7 @@ main ()
 }
 EOF
 
-$CC_FOR_BUILD -o $dummy $dummy.c 2>/dev/null && $dummy && rm -f $dummy.c $dummy && rmdir $tmpdir && exit 0
-rm -f $dummy.c $dummy && rmdir $tmpdir
+$CC_FOR_BUILD -o $dummy $dummy.c 2>/dev/null && $dummy && exit 0
 
 # Apollos put the system type in the environment.
 
