@@ -530,7 +530,7 @@ int Curl_SSL_init(void)
 {
 #ifdef USE_SSLEAY
   /* make sure this is only done once */
-  if(0 != init_ssl)
+  if(init_ssl)
     return 1;
 
 #ifdef HAVE_ENGINE_LOAD_BUILTIN_ENGINES
@@ -543,11 +543,12 @@ int Curl_SSL_init(void)
   /* Setup all the global SSL stuff */
   if (!SSLeay_add_ssl_algorithms())
     return 0;
+
+  init_ssl++; /* never again */
+
 #else
   /* SSL disabled, do nothing */
 #endif
-
-  init_ssl++; /* never again */
 
   return 1;
 }
