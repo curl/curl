@@ -1,4 +1,4 @@
-Updated: May 23, 2002 (http://curl.haxx.se/docs/faq.html)
+Updated: August 8, 2002 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -84,7 +84,9 @@ FAQ
   cURL (or simply just 'curl') is a command line tool for getting or sending
   files using URL syntax. The name is a play on 'Client for URLs', originally
   with URL spelled in uppercase to make it obvious it deals with URLs. The
-  fact it can also be pronounced 'see URL' also helped.
+  fact it can also be pronounced 'see URL' also helped, it works as an
+  abbrivation for "Client URL Request Library" or why not the recursive
+  version: "Curl is a URL Request Library".
 
   Curl supports a range of common Internet protocols, currently including
   HTTP, HTTPS, FTP, FTPS, GOPHER, LDAP, DICT, TELNET and FILE.
@@ -154,10 +156,10 @@ FAQ
   1.5 Who makes cURL?
 
   cURL and libcurl are not made by any single individual. Sure, Daniel
-  Stenberg writes the major parts, but various people's submissions are
-  important and crucial. Anyone can post their changes and improvements and
-  have them inserted in the main sources (of course on the condition that
-  developers agree on that the fixes are good).
+  Stenberg writes the major parts, but other persons' submissions are
+  important and crucial. Anyone can contribute and post their changes and
+  improvements and have them inserted in the main sources (of course on the
+  condition that developers agree on that the fixes are good).
 
   The list of contributors in the docs/THANKS file is only a small part of all
   the people that every day provide us with bug reports, suggestions, ideas
@@ -167,8 +169,8 @@ FAQ
 
   1.6 What do you get for making cURL?
 
-  Project cURL is entirely free and open. No person gets paid in any way for
-  developing curl. We all do this voluntarily on our spare time.
+  Project cURL is entirely free and open. No person gets paid for developing
+  curl. We do this voluntarily on our spare time.
 
   We get some help from companies. Contactor Data hosts the curl web site and
   the main mailing list, Haxx owns the curl web site's domain and
@@ -178,8 +180,8 @@ FAQ
   If you want to support our project with a donation or similar, one way of
   doing that would be to buy "gift certificates" at useful online shopping
   sites, such as amazon.com or thinkgeek.com. Another way would be to sponsor
-  us through a banner-program or by simply helping us coding, documenting,
-  testing etc.
+  us through a banner-program or even better: by helping us coding,
+  documenting, testing etc.
 
   1.7 What about CURL from curl.com?
 
