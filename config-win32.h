@@ -87,7 +87,7 @@
 /*#define HAVE_TCSETATTR 1*/
 
 /* Define if you have the uname function.  */
-#define HAVE_UNAME 1
+/*#define HAVE_UNAME 1*/
 
 /* Define if you have the <alloca.h> header file.  */
 /*#define HAVE_ALLOCA_H 1*/
@@ -146,14 +146,8 @@
 /* Define if you have the <termios.h> header file.  */
 #define HAVE_TERMIOS_H 1
 
-/* Define if you have the <unistd.h> header file.  */
-#define HAVE_UNISTD_H 1
-
 /* Name of package */
 #define PACKAGE "curl"
-
-/* Version number of package */
-#define VERSION "6.3.1"
 
 /* Define if you have the <io.h> header file.  */
 #define HAVE_IO_H 1
@@ -172,3 +166,13 @@
 
 /* Define if you have the RAND_screen function when using SSL  */
 #define HAVE_RAND_SCREEN 1
+
+/*************************************************
+ * This section is for compiler specific defines.*
+ *************************************************/
+#ifndef VC6 /* VC6 => Microsoft Visual C++ 6 */
+
+/* Define if you have the <unistd.h> header file.  */
+#define HAVE_UNISTD_H 1
+
+#endif
