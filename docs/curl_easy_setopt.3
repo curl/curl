@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "29 August 2001" "libcurl 7.9" "libcurl Manual"
+.TH curl_easy_setopt 3 "12 Sep 2001" "libcurl 7.9" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -521,6 +521,18 @@ Pass a file name as char *, zero terminated. This will make libcurl dump all
 internally known cookies to the specified file when curl_easy_cleanup() is
 called. If no cookies are known, no file will be created. Specify "-" to
 instead have the cookies written to stdout.
+.TP
+.B CURLOPT_SSL_CIPHER_LIST
+Pass a char *, pointing to a zero terminated string holding the list of
+ciphers to use for the SSL connection. The list must be syntactly correct, it
+consists of one or more cipher strings separated by colons. Commas or spaces
+are also acceptable separators but colons are normally used, \!, \- and \+ can
+be used as operators. Valid examples of cipher lists include 'RC4-SHA',
+\'SHA1+DES\', 'TLSv1' and 'DEFAULT'. The default list is normally set when you
+compile OpenSSL.
+
+You'll find all details about cipher lists on this URL:
+.I http://www.openssl.org/docs/apps/ciphers.html
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as
