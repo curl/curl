@@ -1475,7 +1475,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   for (i = 0; (url = next_url(urls)); ++i) {
     if (config->outfile) {
       free(config->outfile);
-      config->outfile = strdup(outfiles);
+      config->outfile = outfiles?strdup(outfiles):NULL;
     }
  
     if (config->outfile || config->remotefile) {
