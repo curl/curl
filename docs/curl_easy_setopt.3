@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "27 March 2001" "libcurl 7.7" "libcurl Manual"
+.TH curl_easy_setopt 3 "30 March 2001" "libcurl 7.7" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -274,7 +274,11 @@ curl_slist' structs properly filled in. Use
 .I curl_slist_append(3)
 to create the list and
 .I curl_slist_free_all(3)
-to clean up an entire list.
+to clean up an entire list. If you add a header that is otherwise generated
+and used by libcurl internally, your added one will be used instead. If you
+add a header with no contents as in 'Accept:', the internally used header will
+just get disabled. Thus, using this option you can add new headers, replace
+internal headers and remove internal headers.
 .TP
 .B CURLOPT_HTTPPOST
 Tells libcurl you want a multipart/formdata HTTP POST to be made and you
