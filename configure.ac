@@ -931,7 +931,7 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        ;;
   *)   AC_MSG_RESULT(yes)
 
-    CPPFLAGS="$CPPFLAGS -DMALLOCDEBUG"
+    CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
     CFLAGS="$CFLAGS -g" 
     if test "$GCC" = "yes"; then
        CFLAGS="$CFLAGS -W -Wall -Wwrite-strings -pedantic -Wundef -Wpointer-arith -Wnested-externs"
