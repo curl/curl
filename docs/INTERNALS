@@ -36,22 +36,25 @@ Windows vs Unix
  the Windows way. The four perhaps most notable details are:
 
  1. Different function names for close(), read(), write()
+
+   In curl, this is solved with defines and macros, so that the source looks
+   the same at all places except for the header file that defines them.
+
  2. Windows requires a couple of init calls for the socket stuff
+
+   Those must be made by the application that uses libcurl, in curl that means
+   src/main.c has some code #ifdef'ed to do just that.
+
  3. The file descriptors for network communication and file operations are
     not easily interchangable as in unix
+
+   We avoid this by not trying any funny tricks on file descriptors.
+
  4. When writing data to stdout, Windows makes end-of-lines the DOS way, thus
     destroying binary data, although you do want that conversion if it is
     text coming through... (sigh)
 
- In curl, (1) is made with defines and macros, so that the source looks the
- same at all places except for the header file that defines them.
-
- (2) must be made by the application that uses libcurl, in curl that means
- src/main.c has some code #ifdef'ed to do just that.
-
- (3) is simply avoided by not trying any funny tricks on file descriptors.
-
- (4) we set stdout to binary under windows
+   We set stdout to binary under windows
 
  Inside the source code, I do make an effort to avoid '#ifdef WIN32'. All
  conditionals that deal with features *should* instead be in the format
