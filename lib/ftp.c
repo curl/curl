@@ -221,7 +221,7 @@ int Curl_GetFTPResponse(int sockfd, char *buf,
                         int *ftpcode)
 {
   int nread;
-  int keepon=TRUE;
+  size_t keepon=TRUE;
   char *ptr;
   int timeout = 3600; /* in seconds */
   struct timeval interval;
@@ -272,22 +272,17 @@ int Curl_GetFTPResponse(int sockfd, char *buf,
         break;
       case 0: /* timeout */
         error = SELECT_TIMEOUT;
-        infof(data, "Transfer aborted due to timeout\n");
         failf(data, "Transfer aborted due to timeout");
         break;
       default:
-#ifdef USE_SSLEAY
-        if (data->ssl.use) {
-          keepon = SSL_read(data->ssl.handle, ptr, 1);
-        }
-        else {
-#endif
-          keepon = sread(sockfd, ptr, 1);
-#ifdef USE_SSLEAY
-        }
-#endif /* USE_SSLEAY */
-
-        if ((*ptr == '\n') || (*ptr == '\r'))
+        /*
+         * This code previously didn't use the kerberos sec_read() code
+         * to read, but when we use Curl_read() it may do so. Do confirm
+         * that this is still ok and then remove this comment!
+         */
+        if(CURLE_OK != Curl_read(conn, sockfd, ptr, 1, &keepon))
+          keepon = FALSE;
+        else if ((*ptr == '\n') || (*ptr == '\r'))
           keepon = FALSE;
       }
       if(keepon) {
@@ -372,7 +367,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
   if (data->bits.tunnel_thru_httpproxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
-    result = Curl_ConnectHTTPProxyTunnel(data, data->firstsocket,
+    result = Curl_ConnectHTTPProxyTunnel(conn, data->firstsocket,
                                          data->hostname, data->remote_port);
     if(CURLE_OK != result)
       return result;
@@ -979,7 +974,7 @@ CURLcode _ftp(struct connectdata *conn)
 
       if (data->bits.tunnel_thru_httpproxy) {
         /* We want "seamless" FTP operations through HTTP proxy tunnel */
-        result = Curl_ConnectHTTPProxyTunnel(data, data->secondarysocket,
+        result = Curl_ConnectHTTPProxyTunnel(conn, data->secondarysocket,
                                              newhost, newport);
         if(CURLE_OK != result)
           return result;
