@@ -174,6 +174,7 @@ _Transfer(struct connectdata *c_conn)
 #define KEEP_WRITE 2
 
   pgrsTime(data, TIMER_PRETRANSFER);
+  speedinit(data);
 
   if (!conn->getheader) {
     header = FALSE;

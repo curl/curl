@@ -503,6 +503,8 @@ struct UrlData {
 #ifdef KRB4
   FILE *cmdchannel;
 #endif
+
+  struct timeval keeps_speed; /* this should be request-specific */
 };
 
 #define LIBCURL_NAME "libcurl"

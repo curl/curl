@@ -44,6 +44,7 @@
 
 #include "timeval.h"
 
+void speedinit(struct UrlData *data);
 CURLcode speedcheck(struct UrlData *data,
                     struct timeval now);
 
