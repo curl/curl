@@ -69,15 +69,24 @@ print "void hugehelp(void)\n";
 print "{\n";
 print "puts (\n";
 
+$outsize=0;
 for(@out) {
     chop;
 
     $new = $_;
 
+    $outsize += length($new);
+
     $new =~ s/\\/\\\\/g;
     $new =~ s/\"/\\\"/g;
 
     printf("\"%s\\n\"\n", $new);
+
+    if($outsize > 10000) {
+        # terminate and make another puts() call here
+        print ");\n puts(\n";
+        $outsize=0;
+    }
 
 }
 
