@@ -2491,6 +2491,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           /* no name given, get the password only */
           sscanf(userpass, ":%127[^@]", data->state.passwd);
 
+        /* we have set the password */
+        data->state.passwdgiven = TRUE;
+
         if(data->state.user[0]) {
           char *newname=curl_unescape(data->state.user, 0);
           if(strlen(newname) < sizeof(data->state.user)) {
