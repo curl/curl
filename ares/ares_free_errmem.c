@@ -21,4 +21,5 @@
  */
 void ares_free_errmem(char *mem)
 {
+  (void)mem;
 }
