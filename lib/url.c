@@ -2036,7 +2036,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 {
   char *tmp;
   CURLcode result=CURLE_OK;
-  char resumerange[40]="";
   struct connectdata *conn;
   struct connectdata *conn_temp;
   int urllen;
@@ -2484,9 +2483,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(conn->resume_from) {
     if(!conn->bits.use_range) {
       /* if it already was in use, we just skip this */
-      snprintf(resumerange, sizeof(resumerange), "%" FORMAT_OFF_T "-",
-	       conn->resume_from);
-      conn->range=strdup(resumerange); /* tell ourselves to fetch this range */
+      conn->range = aprintf("%" FORMAT_OFF_T "-", conn->resume_from);
+      if(!conn->range)
+        return CURLE_OUT_OF_MEMORY;
       conn->bits.rangestringalloc = TRUE; /* mark as allocated */
       conn->bits.use_range = 1; /* switch on range usage */
     }
@@ -3004,19 +3003,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      */
     conn->resume_from = data->set.set_resume_from;
     if (conn->resume_from) {
-      snprintf(resumerange, sizeof(resumerange), "%" FORMAT_OFF_T "-",
-	       conn->resume_from);
       if (conn->bits.rangestringalloc == TRUE)
         free(conn->range);
+      conn->range = aprintf("%" FORMAT_OFF_T "-", conn->resume_from);
+      if(!conn->range)
+        return CURLE_OUT_OF_MEMORY;
 
       /* tell ourselves to fetch this range */
-      conn->range = strdup(resumerange);
       conn->bits.use_range = TRUE;        /* enable range download */
       conn->bits.rangestringalloc = TRUE; /* mark range string allocated */
     }
     else if (data->set.set_range) {
       /* There is a range, but is not a resume, useful for random ftp access */
       conn->range = strdup(data->set.set_range);
+      if(!conn->range)
+        return CURLE_OUT_OF_MEMORY;
       conn->bits.rangestringalloc = TRUE; /* mark range string allocated */
       conn->bits.use_range = TRUE;        /* enable range download */
     }
