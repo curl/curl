@@ -6,6 +6,34 @@
 
                                History of Changes
 
+Daniel (11 September 2001)
+- Added verbose output for SSL connections that output the server
+  certificate's start and expire dates. As suggested by Paul Harrington.
+
+- Heikki Korpela found problems in the perl ftp server used for the test
+  suite, when he runs on on OpenBSD with perl 5.6. Some changes have been
+  made, but nothing really certain.
+
+- T. Bharath has experienced problems with libcurl's stack usage on windows
+  and works on reducing it.
+
+Daniel (10 September 2001)
+- Cris Bailiff fixed the perl interface. It stopped working since the changed
+  behavior with WRITEHEADER and NULL pointers.
+
+- The "output cookies" function could dump core if no cookies were enabled.
+
+Daniel (7 September 2001)
+- SM pointed out that the SSL code didn't compile any longer if SSL was
+  disabled... Also, we needed to correct the #include for the utime stuff on
+  windows.
+
+Daniel (6 September 2001)
+- T. Bharath pointed out a flaw in the SSL session cache code that made it
+  sometimes read from a NULL pointer.
+
+Version 7.9-pre3
+
 Daniel (3 September 2001)
 - Added the -R/--remote-time option, that uses the remote file's datestamp to
   set the local file's datestamp. Thus, when you get a remote file your local
@@ -1116,7 +1144,7 @@ Version 7.6.1-pre2
 Daniel (31 January 2001)
 - Curl_read() and curl_read() now return a ssize_t for the size, as it had to
   be able to return -1. The telnet support crashed due to this and there was a
-  possibility to weird behaviour all over. Linus Nielsen Feltzing helped me
+  possibility to weird behavior all over. Linus Nielsen Feltzing helped me
   find this.
 
 - Added a configure.in check for a working getaddrinfo() if IPv6 is requested.
