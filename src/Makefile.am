@@ -12,6 +12,7 @@ bin_PROGRAMS = curl #memtest
 
 noinst_HEADERS = setup.h \
 	config-win32.h \
+	config-mac.h \
 	urlglob.h \
 	version.h \
 	writeout.h
@@ -26,7 +27,7 @@ BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c
 NROFF=@NROFF@
 
-EXTRA_DIST = mkhelp.pl config-win32.h curlmsg.msg\
+EXTRA_DIST = mkhelp.pl curlmsg.msg \
 	Makefile.vc6 Makefile.b32 Makefile.m32 config.h.in
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
