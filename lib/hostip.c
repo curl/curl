@@ -333,7 +333,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
     /* This seems to be an IPv6-capable stack, use PF_UNSPEC for the widest
      * possible checks. And close the socket again.
      */
-    close(s);
+    sclose(s);
  
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
