@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (30 March 2004)
+- David Byron's patch was appplied to make CURLOPT_FAILONERROR work nicely
+  even with authentcations such as NTLM or Digest enabled. Test cases 150, 151
+  and 152 were added to verify the functionality.
+
 Daniel (29 March 2004)
 - Gisle Vanem updated files for the djgpp/MS-DOS build.
 
