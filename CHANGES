@@ -7,6 +7,22 @@
                                History of Changes
 
 Daniel (21 August 2001)
+- Georg Huettenegger's big patch was applied. Now we have:
+  o "Expect: 100-continue" support. We will from now on send that header in
+    all rfc1867-posts, as that makes us abort much faster when the server
+    rejects our POST. Posting without the Expect: header is still possible in
+    the standard replace-internal-header style.
+  o curl_formadd() is a new formpost building function that is introduced to
+    replace the now deprecated curl_formparse() function. The latter function
+    will still hang around for a while, but the curl_formadd() is the new way
+    and correct way to build form posts.
+  o Documentation has been updated to reflect these changes
+
+  These changes are reason enough to name the next curl release 7.9...
+
+- We now convert man pages to HTML pages and include them in the release
+  archive. For the pleasure of everyone without nroff within reach.
+
 - Andrés García's suggested flushing of the progress meter output stream was
   added. It should make the progress meter look better on Windows.
 
