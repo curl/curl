@@ -1,4 +1,4 @@
-Updated: March 11, 2002 (http://curl.haxx.se/docs/faq.shtml)
+Updated: April 27, 2002 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -15,6 +15,7 @@ FAQ
   1.5 Who makes cURL?
   1.6 What do you get for making cURL?
   1.7 What about CURL from curl.com?
+  1.8 I have a problem who do I mail?
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
@@ -192,6 +193,21 @@ FAQ
 
   We recognize that we will be living in parallel with curl.com and wish them
   every success.
+
+  1.8 I have a problem who do I mail?
+
+  Please do not attempt to mail any single individual unless you really need
+  to. Keep curl-related questions on a suitable mailing list. All available
+  mailing lists are listed in the MANUAL document and online at
+  http://curl.haxx.se/mail/
+
+  Keeping curl-related questions and dicussions on mailing lists allows others
+  to join in and help, to share their ideas, contribute their suggestions and
+  spread their wisdom. Keeping discussions on public mailing lists also allows
+  for others to learn from this (both current and future users thanks to the
+  web based archives of the mailing lists), thus saving us from having to
+  repeat ourselves even more. Thanks for respecting this.
+
 
 2. Install Related Problems
 
@@ -537,12 +553,8 @@ FAQ
   particular platform, try contacting the person who built the package/archive
   you have.
 
-  If there is a bug, post a bug report in the Curl Bug Track System over at
-  http://sourceforge.net/bugs/?group_id=976
-
-  Always include as many details you can think of, including curl version,
-  operating system name and version and complete instructions how to repeat
-  the bug.
+  If there is a bug, read the BUGS document first. Then report it as described
+  in there.
 
   4.9. Curl can't authenticate to the server that requires NTLM?
 
