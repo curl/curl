@@ -752,7 +752,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Progress callback function
      */
     data->set.fprogress = va_arg(param, curl_progress_callback);
-    data->progress.callback = TRUE; /* no longer internal */
+    if(data->set.fprogress)
+      data->progress.callback = TRUE; /* no longer internal */
+    else
+      data->progress.callback = FALSE; /* NULL enforces internal */
+
     break;
   case CURLOPT_PROGRESSDATA:
     /*
