@@ -31,14 +31,7 @@ INCLUDES = -I$(top_srcdir)/src -I$(top_srcdir)/include -I$(top_builddir)/src \
 
 bin_PROGRAMS = curl
 
-# libcurl has sources that provide functions named curlx_* that aren't part of
-# the official API, but we re-use the code here to avoid duplication.
-curlx_ones =  $(top_srcdir)/lib/strtoofft.c $(top_srcdir)/lib/timeval.c
-
-curl_SOURCES = main.c hugehelp.c hugehelp.h urlglob.c writeout.c setup.h   \
-	config-win32.h config-mac.h config-vms.h config-riscos.h urlglob.h \
-	version.h writeout.h writeenv.c writeenv.h getpass.c getpass.h	   \
-	homedir.c homedir.h $(curlx_ones)
+include Makefile.inc
 
 curl_LDADD = ../lib/libcurl.la
 curl_DEPENDENCIES = ../lib/libcurl.la
@@ -50,7 +43,7 @@ EXTRA_DIST = mkhelp.pl makefile.dj Makefile.vc6 Makefile.b32 Makefile.m32 \
 	Makefile.riscos config.h.in macos/curl.mcp.xml.sit.hqx		  \
 	macos/MACINSTALL.TXT macos/src/curl_GUSIConfig.cpp		  \
 	macos/src/macos_main.cpp config-amigaos.h makefile.amiga curl.rc  \
-	Makefile.netware
+	Makefile.netware Makefile.inc
 
 MANPAGE=$(top_srcdir)/docs/curl.1
 README=$(top_srcdir)/docs/MANUAL
