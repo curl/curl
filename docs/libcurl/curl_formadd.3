@@ -2,13 +2,13 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_formadd 3 "1 Match 2002" "libcurl 7.9.1" "libcurl Manual"
+.TH curl_formadd 3 "21 May 2002" "libcurl 7.9.8" "libcurl Manual"
 .SH NAME
 curl_formadd - add a section to a multipart/formdata HTTP POST
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "int curl_formadd(struct HttpPost ** " firstitem,
+.BI "CURLFORMcode curl_formadd(struct HttpPost ** " firstitem,
 .BI "struct HttpPost ** " lastitem, " ...);"
 .ad
 .SH DESCRIPTION
@@ -83,7 +83,9 @@ you call \fIcurl_form_free\fP and \fIcurl_easy_cleanup\fP.
 
 See example below.
 .SH RETURN VALUE
-Returns non-zero if an error occurs.
+0 means everything was ok, non-zero means an error occurred as
+.I <curl/curl.h>
+defines.
 .SH EXAMPLE
 .nf
 
