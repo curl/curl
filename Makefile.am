@@ -8,7 +8,7 @@ EXTRA_DIST = \
 	CHANGES LEGAL maketgz MITX.txt MPL-1.1.txt \
 	config-win32.h reconf packages/README Makefile.dist
 
-SUBDIRS = docs lib src include tests packages
+SUBDIRS = docs lib src include tests packages perl php
 
 # create a root makefile in the distribution:
 dist-hook:

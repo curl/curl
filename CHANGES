@@ -6,15 +6,27 @@
 
                                History of Changes
 
+Daniel (16 March 2001)
+- After having experienced another machine break-down, we're back.
+
+- Georg Horn's perl interface Curl::easy is now included in the curl release
+  archive. The perl/ directory is now present. Please help me with docs,
+  examples and updates you think fit.
+
+- Made a new php/ directory in the release archive and moved the PHP examples
+  into a subdirectory in there. Not much PHP info yet, but I plan to. Please
+  help me here as well!
 
 Daniel (15 March 2001)
 - Added --connect-timeout to curl, which sets the new CURLOPT_CONNECTTIMEOUT
   option in libcurl. It limits the time curl is allowed to spend in the
   connection phase. This differs from -m/--max-time that limits the entire
-  file transfer operation. Requested by Larry Fahnoe and more.
+  file transfer operation. Requested by Larry Fahnoe and others.
 
   I also updated the curl.1 and curl_easy_setopt.3 man pages and removed the
   item from the TODO.
+
+Version 7.7-beta4
 
 Daniel (14 March 2001)
 - Made curl grok IPv6 with HTTP proxies and got everything to compile nicely
