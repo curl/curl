@@ -972,7 +972,7 @@ case "$LIBIDN" in
        if test "x$nolibidn" != "xtrue"; then
          curl_idn_msg="enabled"
          dnl different versions of libidn have different setups of these:
-         AC_CHECK_FUNCS( idn_free )
+         AC_CHECK_FUNCS( idn_free idna_strerror )
          AC_CHECK_HEADERS( idn-free.h )
        fi
                     
