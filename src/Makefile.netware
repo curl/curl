@@ -8,11 +8,13 @@
 #################################################################
 
 # Edit the path below to point to the base of your Novell NDK.
-BASE	= c:/novell
+ifndef NDKBASE
+NDKBASE	= /novell
+endif
 INSTDIR	= s:/libcurl
 
 # Edit the path below to point to the base of your Zlib sources.
-#ZLIB_PATH = ../../../cw/zlib-src-1.1.4
+#ZLIB_PATH = ../../zlib-1.2.1
 
 # Edit the vars below to change NLM target settings.
 TARGET  = curl
@@ -90,13 +92,13 @@ ifeq ($(LIBARCH),LIBC)
 #	CFLAGS += -D__ANSIC__
 else
 	PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
-	CFLAGS += -include $(BASE)/nlmconv/genlm.h
+	CFLAGS += -include $(NDKBASE)/nlmconv/genlm.h
 endif
 endif
 
 LDLIBS	=
 
-NDK_ROOT = $(BASE)/ndk
+NDK_ROOT = $(NDKBASE)/ndk
 SDK_CLIB = $(NDK_ROOT)/nwsdk
 SDK_LIBC = $(NDK_ROOT)/libc
 SDK_LDAP = $(NDK_ROOT)/cldapsdk/netware
@@ -129,7 +131,7 @@ endif
 
 ifeq ($(OSTYPE),linux)
 DL	= '
-#-include $(BASE)/nlmconv/ncpfs.inc
+#-include $(NDKBASE)/nlmconv/ncpfs.inc
 endif
 
 OBJS	= \
