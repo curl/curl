@@ -100,7 +100,6 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
    1. close a socket
    2. read from a socket
    3. write to a socket
-   (Hopefully, only win32-crap do this weird name changing)
 
    4. set the SIGALRM signal timeout
    5. set dir/file naming defines
@@ -115,8 +114,8 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #else
      /* gcc-for-win is still good :) */
 #define sclose(x) close(x)
-#define sread(x,y,z) read(x,y,z)
-#define swrite(x,y,z) write(x,y,z)
+#define sread(x,y,z) recv(x,y,z,0)
+#define swrite(x,y,z) send(x,y,z,0)
 #define myalarm(x) alarm(x)
 #endif
 
