@@ -36,7 +36,7 @@
 
 struct pollfd
 {
-    int     fd;
+    curl_socket_t fd;
     short   events;
     short   revents;
 };

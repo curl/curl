@@ -98,7 +98,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
-  int maxfd;
+  curl_socket_t maxfd;
   int r;
   int ret;
 
@@ -176,7 +176,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   fd_set fds_read;
   fd_set fds_write;
   fd_set fds_err;
-  int maxfd;
+  curl_socket_t maxfd;
   int r;
   unsigned int i;
 
@@ -186,12 +186,14 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   maxfd = -1;
 
   for (i = 0; i < nfds; i++) {
-    if (ufds[i].fd < 0)
+    if (ufds[i].fd == CURL_SOCKET_BAD)
       continue;
+#ifndef WIN32  /* This is harmless and wrong on Win32 */
     if (ufds[i].fd >= FD_SETSIZE) {
       errno = EINVAL;
       return -1;
     }
+#endif
     if (ufds[i].fd > maxfd)
       maxfd = ufds[i].fd;
     if (ufds[i].events & POLLIN)
@@ -220,7 +222,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   r = 0;
   for (i = 0; i < nfds; i++) {
     ufds[i].revents = 0;
-    if (ufds[i].fd < 0)
+    if (ufds[i].fd == CURL_SOCKET_BAD)
       continue;
     if (FD_ISSET(ufds[i].fd, &fds_read))
       ufds[i].revents |= POLLIN;
