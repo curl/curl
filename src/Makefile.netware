@@ -145,6 +145,7 @@ DL	= '
 #-include $(NDKBASE)/nlmconv/ncpfs.inc
 endif
 
+# Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
 OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CURL_SOURCES)))
