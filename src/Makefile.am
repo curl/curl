@@ -10,7 +10,7 @@ INCLUDES = -I$(top_srcdir)/include
 
 bin_PROGRAMS = curl
 
-curl_SOURCES = main.c hugehelp.c urlglob.c
+curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c
 curl_LDADD = $(top_srcdir)/lib/libcurl.la
 curl_DEPENDENCIES = $(top_srcdir)/lib/libcurl.la
 BUILT_SOURCES = hugehelp.c
