@@ -686,28 +686,43 @@ static int getparameter(char *flag, /* f or -long-flag */
       break;
     case 'd':
       /* postfield data */
-      if('@' == *nextarg) {
-        /* the data begins with a '@' letter, it means that a file name
-           or - (stdin) follows */
-        FILE *file;
-        char *ptr;
+      {
+        char *postdata=NULL;
 
-        nextarg++; /* pass the @ */
+        if('@' == *nextarg) {
+          /* the data begins with a '@' letter, it means that a file name
+             or - (stdin) follows */
+          FILE *file;
+          char *ptr;
 
-        if(strequal("-", nextarg))
-          file = stdin;
-        else 
-          file = fopen(nextarg, "r");
+          nextarg++; /* pass the @ */
 
-        if(subletter == 'b') /* forced binary */
-          config->postfields = file2memory(file, &config->postfieldsize);
+          if(strequal("-", nextarg))
+            file = stdin;
+          else 
+            file = fopen(nextarg, "r");
+
+          if(subletter == 'b') /* forced binary */
+            postdata = file2memory(file, &config->postfieldsize);
+          else
+            postdata = file2string(file);
+          if(file && (file != stdin))
+            fclose(stdin);
+        }
+        else {
+          GetStr(&postdata, nextarg);
+        }
+
+        if(config->postfields && *config->postfields) {
+          /* we already have a string, we append this one
+             with a separating &-letter */
+          char *oldpost=config->postfields;
+          config->postfields=maprintf("%s&%s", oldpost, postdata);
+          free(oldpost);
+          free(postdata);
+        }
         else
-          config->postfields = file2string(file);
-        if(file && (file != stdin))
-          fclose(stdin);
-      }
-      else {
-        GetStr(&config->postfields, nextarg);
+          config->postfields=postdata;
       }
       if(config->postfields)
         config->conf |= CONF_POST;
