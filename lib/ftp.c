@@ -636,8 +636,7 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
     if (item->data) {
       FTPSENDF(conn, "%s", item->data);
 
-      nread = Curl_GetFTPResponse(
-                                  conn->data->state.buffer, conn, &ftpcode);
+      nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, &ftpcode);
       if (nread < 0)
         return CURLE_OPERATION_TIMEOUTED;
 
