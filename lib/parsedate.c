@@ -86,11 +86,14 @@
 
 static time_t Curl_parsedate(const char *date);
 
-static const char *wkday[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-static const char *weekday[] = { "Monday", "Tuesday", "Wednesday", "Thursday",
+static const char * const wkday[] =
+  {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+static const char * const weekday[] =
+  { "Monday", "Tuesday", "Wednesday", "Thursday",
                                  "Friday", "Saturday", "Sunday" };
-static const char *month[]= { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
-                              "Aug", "Sep", "Oct", "Nov", "Dec" };
+static const char * const month[]=
+  { "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
 struct tzinfo {
   const char *name;
@@ -153,7 +156,7 @@ static const struct tzinfo tz[]= {
 static int checkday(char *check, size_t len)
 {
   int i;
-  const char **what;
+  const char * const *what;
   bool found= FALSE;
   if(len > 3)
     what = &weekday[0];
@@ -172,7 +175,7 @@ static int checkday(char *check, size_t len)
 static int checkmonth(char *check)
 {
   int i;
-  const char **what;
+  const char * const *what;
   bool found= FALSE;
 
   what = &month[0];
