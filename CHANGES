@@ -7,6 +7,70 @@
                                History of Changes
 
 
+Daniel (4 April 2002)
+- Jonatan Lander brought a patch that makes curl/curl.h compile nicely on
+  pre-ISO compilers, like when using gcc -traditional.
+
+Daniel (3 April 2002)
+- Jacky Lam identified a glitch when getting headers-only, where libcurl would
+  "hang" 1 second in vain in the select() loop before returning back.
+
+- Tor Arntsen brought a patch for multipart formposts. It turned out that the
+  "CGI_Lite Perl package" makes some bad assumptions on what letters that may
+  be used in boundary strings and thus curl could confuse it by including '+'
+  and '/'. While this is standards-compliant, we change the behavior to work
+  smoothly with existing software based on that package.
+
+Daniel (2 April 2002)
+- Gerhard Herre filed bug report #536238 where he pointed out a crash in
+  verbose FTP passive transfers for AIX.
+
+- Clarence Gardner pointed out a minor flaw in how libcurl didn't properly
+  take care of all errors that SSL_read() could return.
+
+- Jacky Lam fixed a MALLOCDEBUG problem in lib/getinfo.c
+
+Daniel (27 March 2002)
+- T. Bharath pointed out a flaw in the connection re-use function that didn't
+  check proxy connections properly for "deadness" before they were re-used.
+
+- Pedro Neves found out that HTTP POSTing with --data-binary did not properly
+  work under Windows as the file specified wasn't read fully binary!
+
+Daniel (25 March 2002)
+- Jacky Lam brought a fix that improves treatment of cookies using identical
+  domains but with leading dots properly.
+
+Daniel (22 March 2002)
+- Miklos Nemeth updated the windows section of the docs/INSTALL file and the
+  windows makefiles.
+
+- Jon Dillon provided us with several good-looking curl images for
+  promotion. View them here http://curl.haxx.se/icons.html
+
+Daniel (20 March 2002)
+- Peter Verhas found out that CRLF replacement in uploads was not working. I
+  fixed it, and added test case 128 that verifies the functionality.
+
+- The list formerly known as curl-main is now named curl-users and is hosted
+  by sourceforge. Susbcribe to the new list, get off the old one.
+
+Version 7.9.6-pre2
+
+Daniel (19 March 2002)
+- Made -G and -I on the same command line cause an error.
+
+- Moved the multi.h file to the "public" include directory and made it get
+  included by curl.h so that no extra include files will be necessary to use
+  it.
+
+  Added docs and man pages for the multi interface to the release archive.
+  Added the three example source codes too.
+
+  Necessary steps in my campaign to sneak in the multi interface... ;-)
+
+- Updated the year in all copyright notices in all C and H files.
+
 Daniel (18 March 2002)
 - Tomas Szepe found out that -d and -G didn't mix as they should. I broke this
   in 7.9.5... Added test case 32 for this.
@@ -14,8 +78,8 @@ Daniel (18 March 2002)
 Version 7.9.6-pre1
 
 Daniel (16 March 2002)
-- Peter at verhas.com pointed out that the curl_escape and curl_unscape man
-  pages contained factual errors.
+- Peter Verhas pointed out that the curl_escape and curl_unscape man pages
+  contained factual errors.
 
 - Albert Choy found and corrected a problem with the verbose output when doing
   PASV ftp transfers. It could make libcurl crash.
