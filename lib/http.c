@@ -140,7 +140,8 @@ bool static checkheaders(struct UrlData *data, char *thisheader)
  * this proxy. After that, the socket can be used just as a normal socket.
  */
 
-CURLcode GetHTTPProxyTunnel(struct UrlData *data, int tunnelsocket)
+CURLcode GetHTTPProxyTunnel(struct UrlData *data, int tunnelsocket,
+                            char *hostname, int remote_port)
 {
   int httperror=0;
   int subversion=0;
@@ -153,7 +154,7 @@ CURLcode GetHTTPProxyTunnel(struct UrlData *data, int tunnelsocket)
         "%s"
         "%s"
         "\r\n",
-        data->hostname, data->remote_port,
+        hostname, remote_port,
         (data->bits.proxy_user_passwd)?data->ptr_proxyuserpwd:"",
         (data->useragent?data->ptr_uagent:"")
         );
@@ -197,7 +198,8 @@ CURLcode http_connect(struct connectdata *conn)
   if (conn->protocol & PROT_HTTPS) {
     if (data->bits.httpproxy) {
       /* HTTPS through a proxy can only be done with a tunnel */
-      result = GetHTTPProxyTunnel(data, data->firstsocket);
+      result = GetHTTPProxyTunnel(data, data->firstsocket,
+                                  data->hostname, data->remote_port);
       if(CURLE_OK != result)
         return result;
     }

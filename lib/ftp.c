@@ -390,7 +390,8 @@ CURLcode ftp_connect(struct connectdata *conn)
 
   if (data->bits.tunnel_thru_httpproxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
-    result = GetHTTPProxyTunnel(data, data->firstsocket);
+    result = GetHTTPProxyTunnel(data, data->firstsocket,
+                                data->hostname, data->remote_port);
     if(CURLE_OK != result)
       return result;
   }
@@ -769,13 +770,24 @@ CURLcode _ftp(struct connectdata *conn)
 	 failf(data, "Couldn't interpret this 227-reply: %s", buf);
 	 return CURLE_FTP_WEIRD_227_FORMAT;
       }
-      sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-      he = GetHost(data, newhost, hostent_buf, sizeof(hostent_buf));
-      if(!he) {
-        failf(data, "Can't resolve new host %s", newhost);
-        return CURLE_FTP_CANT_GET_HOST;
-      }
 
+      if(data->bits.httpproxy) {
+        /*
+         * This is a tunnel through a http proxy and we need to connect to the
+         * proxy again here. We already have the name info for it since the
+         * previous lookup.
+         */
+        he = conn->hp;
+      }
+      else {
+        /* normal, direct, ftp connection */
+        sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+        he = GetHost(data, newhost, hostent_buf, sizeof(hostent_buf));
+        if(!he) {
+          failf(data, "Can't resolve new host %s", newhost);
+          return CURLE_FTP_CANT_GET_HOST;
+        }
+      }
 	
       newport = (port[0]<<8) + port[1];
       data->secondarysocket = socket(AF_INET, SOCK_STREAM, 0);
@@ -783,7 +795,13 @@ CURLcode _ftp(struct connectdata *conn)
       memset((char *) &serv_addr, '\0', sizeof(serv_addr));
       memcpy((char *)&(serv_addr.sin_addr), he->h_addr, he->h_length);
       serv_addr.sin_family = he->h_addrtype;
-      serv_addr.sin_port = htons(newport);
+
+      if(data->bits.httpproxy)
+        /* connect to the http proxy's port number */
+        serv_addr.sin_port = htons(data->port);
+      else
+        /* direct connection to remote host's PASV port */
+        serv_addr.sin_port = htons(newport);
 
       if(data->bits.verbose) {
         struct in_addr in;
@@ -871,7 +889,8 @@ CURLcode _ftp(struct connectdata *conn)
 
       if (data->bits.tunnel_thru_httpproxy) {
         /* We want "seamless" FTP operations through HTTP proxy tunnel */
-        result = GetHTTPProxyTunnel(data, data->secondarysocket);
+        result = GetHTTPProxyTunnel(data, data->secondarysocket,
+                                    newhost, newport);
         if(CURLE_OK != result)
           return result;
       }
