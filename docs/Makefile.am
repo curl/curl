@@ -17,7 +17,9 @@ man_MANS = \
 	curl_getenv.3 \
 	curl_slist_append.3 \
 	curl_slist_free_all.3 \
-	curl_version.3
+	curl_version.3 \
+	curl_escape.3 \
+	curl_unescape.3
 
 EXTRA_DIST = $(man_MANS) \
 	MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS \
