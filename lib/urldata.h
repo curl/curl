@@ -205,7 +205,7 @@ struct negotiatedata {
  ***************************************************************************/
 struct HTTP {
   struct FormData *sendit;
-  size_t postsize;
+  curl_off_t postsize; /* off_t to handle large file sizes */
   char *postdata;
 
   const char *p_pragma;      /* Pragma: string */
@@ -221,7 +221,7 @@ struct HTTP {
     curl_read_callback fread; /* backup storage for fread pointer */
     void *fread_in;           /* backup storage for fread_in pointer */
     char *postdata;
-    size_t postsize;
+    curl_off_t postsize;
   } backup;
 
   enum {

@@ -1620,11 +1620,11 @@ CURLcode Curl_http(struct connectdata *conn)
           if(!conn->bits.upload_chunky)
             /* We're not sending it 'chunked', append it to the request
                already now to reduce the number if send() calls */
-            add_buffer(req_buffer, data->set.postfields, postsize);
+            add_buffer(req_buffer, data->set.postfields, (size_t)postsize);
           else {
             /* Append the POST data chunky-style */
             add_bufferf(req_buffer, "%x\r\n", postsize);
-            add_buffer(req_buffer, data->set.postfields, postsize);
+            add_buffer(req_buffer, data->set.postfields, (size_t)postsize);
             add_buffer(req_buffer, "\r\n0\r\n\r\n", 7); /* end of a chunked
                                                            transfer stream */
           }
