@@ -1263,7 +1263,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
        * proxy again here. We already have the name info for it since the
        * previous lookup.
        */
-      addr = conn->hp;
+      addr = conn->hostaddr;
       connectport =
         (unsigned short)conn->port; /* we connect to the proxy's port */
     }

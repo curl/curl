@@ -194,7 +194,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   u_int32_t cs;
   struct krb4_data *d = app_data;
   struct sockaddr_in *localaddr  = (struct sockaddr_in *)LOCAL_ADDR;
-  char *host = conn->hp->h_name;
+  char *host = conn->hostaddr->h_name;
   ssize_t nread;
   int l = sizeof(conn->local_addr);
 
@@ -249,7 +249,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
 
   nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
   if(nread < 0)
-    return /*CURLE_OPERATION_TIMEOUTED*/-1;
+    return -1;
   free(p);
 
   if(/*ret != COMPLETE*/conn->data->state.buffer[0] != '2'){
@@ -361,7 +361,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   if (strcmp ((char*)tktcopy.dat + 8,
               KRB_TICKET_GRANTING_TICKET) != 0) {
     afs_string_to_key (passwd,
-                       krb_realmofhost(/*hostname*/conn->hp->h_name),
+                       krb_realmofhost(conn->hostaddr->h_name),
                        &key);
     des_key_sched (&key, schedule);
     des_pcbc_encrypt((des_cblock*)tkt.dat, (des_cblock*)tktcopy.dat,
