@@ -213,6 +213,14 @@ typedef enum {
   CURLPROXY_SOCKS5 = 5
 } curl_proxytype;
 
+typedef enum {
+  CURLHTTP_BASIC  =    0, /* default */
+  CURLHTTP_DIGEST =    1, /* Digest */
+  CURLHTTP_NEGOTIATE = 2, /* Negotiate */
+  CURLHTTP_NTLM =      3, /* NTLM */
+  CURLHTTP_LAST           /* never to be used */
+} curl_httpauth;
+
 /* this was the error code 50 in 7.7.3 and a few earlier versions, this
    is no longer used by libcurl but is instead #defined here only to not
    make programs break */
@@ -625,13 +633,9 @@ typedef enum {
      attempted before the good old traditional PORT command. */     
   CINIT(FTP_USE_EPRT, LONG, 106),
 
-  /* Set this to a non-zero value to enable HTTP Digest Authentication.
-     You should use this in combination with CURLOPT_USERPWD. */
-  CINIT(HTTPDIGEST, LONG, 107),
-
-  /* Set this to a non-zero value to enable HTTP Negotiate Authentication.
-     You should use this in combination with CURLOPT_USERPWD. */
-  CINIT(HTTPNEGOTIATE, LONG, 108),
+  /* Set this to a curl_httpauth value to enable that particular authentication
+     method. Use this in combination with CURLOPT_USERPWD. */
+  CINIT(HTTPAUTH, LONG, 107),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

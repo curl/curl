@@ -7,10 +7,15 @@
                                   Changelog
 
 Daniel (10 June)
+- Modified how to set auth type to libcurl. Now use CURLOPT_HTTPAUTH instead,
+  and pick method. Supported ones currently are:
+  CURLHTTP_BASIC     - default selection
+  CURLHTTP_DIGEST    - formerly CURLOPT_HTTPDIGEST
+  CURLHTTP_NEGOTIATE
+
 - Daniel Kouril added HTTP Negotiate authentication support, as defined in the
   IETF draft draft-brezak-spnego-http-04.txt. In use already by various
-  Microsoft web applications. CURLOPT_HTTPNEGOTIATE and --negotiate are the
-  new family members.
+  Microsoft web applications. --negotiate is the new family member.
 
 - A missing ending bracket (']') while doing URL globbing could lead to a
   segfault. While fixing this, I also introduced better error reporting in the

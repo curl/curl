@@ -844,18 +844,38 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
       data->set.encoding = (char*)ALL_CONTENT_ENCODINGS;
     break;
 
-  case CURLOPT_HTTPDIGEST:
+  case CURLOPT_HTTPAUTH:
     /*
-     * Enable HTTP Digest Authentication
+     * Set HTTP Authentication type.
      */
-    data->set.httpdigest = va_arg(param, long);
-    break;
+  {
+    curl_httpauth auth = va_arg(param, long);
+    switch(auth) {
+    case CURLHTTP_BASIC:
+      /* default */
+      data->set.httpdigest = FALSE;
+      data->set.httpnegotiate = FALSE;
+      break;
+    case CURLHTTP_DIGEST:
+      /* Enable HTTP Digest authentication */
+      data->set.httpdigest = TRUE;
+      data->set.httpnegotiate = FALSE;
+      break;
+    case CURLHTTP_NEGOTIATE:
 #ifdef GSSAPI
-  case CURLOPT_HTTPNEGOTIATE:
-    /* Enable HTTP Negotaiate authentication */
-    data->set.httpnegotiate = va_arg(param, long);
-    break;
+      /* Enable HTTP Negotaiate authentication */
+      data->set.httpdigest = FALSE;
+      data->set.httpnegotiate = TRUE;
+      break;
+#else
+      /* fall-through */
 #endif
+    default:
+      return CURLE_FAILED_INIT; /* unsupported type */
+    }
+  }
+  break;
+  
   case CURLOPT_USERPWD:
     /*
      * user:password to use in the operation
