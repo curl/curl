@@ -1,5 +1,4 @@
 HTTP/1.1 200 OK
 Server: thebest/1.0
-Connection: close
+Silly-but-last-header: funny
 
-no?
