@@ -212,9 +212,10 @@ logit "NAME = $name";
 logit "EMAIL = $email";
 logit "DESC = $desc";
 logit "CONFOPTS = $confopts";
-logit "CFLAGS = ".($ENV{CFLAGS} ? $ENV{CFLAGS} : "");
-logit "CC = ".($ENV{CC} ? $ENV{CC} : "");
-logit "target = ".($targetos ? $targetos : "");
+logit "CFLAGS = ".$ENV{CFLAGS};
+logit "LDFLAGS = ".$ENV{LDFLAGS};
+logit "CC = ".$ENV{CC};
+logit "target = ".$targetos;
 logit "version = $version";
 logit "date = ".(scalar gmtime)." UTC";
 
