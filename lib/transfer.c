@@ -462,10 +462,28 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               data->info.header_size += headerlen;
               conn->headerbytecount += headerlen;
 
-              /* *auth_act() checks what authentication methods that are
-                 available and decides which one (if any) to use. It will
-                 set 'newurl' if an auth metod was picked. */
-              Curl_http_auth_act(conn);
+              if (conn->resume_from &&
+                  !k->content_range &&
+                  (data->set.httpreq==HTTPREQ_GET)) {
+                if(k->httpcode == 416) {
+                  /* "Requested Range Not Satisfiable" */
+                  stop_reading = TRUE;
+                }
+                else {
+                  /* we wanted to resume a download, although the server
+                     doesn't seem to support this and we did this with a GET
+                     (if it wasn't a GET we did a POST or PUT resume) */
+                  failf (data, "HTTP server doesn't seem to support "
+                         "byte ranges. Cannot resume.");
+                  return CURLE_HTTP_RANGE_ERROR;
+                }
+              }
+
+              if(!stop_reading)
+                /* *auth_act() checks what authentication methods that are
+                   available and decides which one (if any) to use. It will
+                   set 'newurl' if an auth metod was picked. */
+                Curl_http_auth_act(conn);
               
               if(!k->header) {
                 /*
@@ -881,17 +899,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 k->ignorebody = TRUE;
                 infof(data, "Ignoring the response-body\n");
               }
-              if (conn->resume_from &&
-                       !k->content_range &&
-                       (data->set.httpreq==HTTPREQ_GET)) {
-                /* we wanted to resume a download, although the server
-                   doesn't seem to support this and we did this with a GET
-                   (if it wasn't a GET we did a POST or PUT resume) */
-                failf (data, "HTTP server doesn't seem to support "
-                       "byte ranges. Cannot resume.");
-                return CURLE_HTTP_RANGE_ERROR;
-              }
-              else if(data->set.timecondition && !conn->range) {
+              if(data->set.timecondition && !conn->range) {
                 /* A time condition has been set AND no ranges have been
                    requested. This seems to be what chapter 13.3.4 of
                    RFC 2616 defines to be the correct action for a
@@ -1232,7 +1240,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     
   if (data->set.timeout &&
       ((Curl_tvdiff(k->now, k->start)/1000) >= data->set.timeout)) {
-    failf (data, "Operation timed out with %Od out of %Od bytes received",
+    failf (data, "Operation timed out with " CURL_FORMAT_OFF_T " out of "
+           CURL_FORMAT_OFF_T " bytes received",
            k->bytecount, conn->size);
     return CURLE_OPERATION_TIMEOUTED;
   }
@@ -1246,7 +1255,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if(!(data->set.no_body) && (conn->size != -1) &&
        (k->bytecount != conn->size) &&
        !conn->newurl) {
-      failf(data, "transfer closed with %Od bytes remaining to read",
+      failf(data, "transfer closed with " CURL_FORMAT_OFF_T
+            " bytes remaining to read",
             conn->size - k->bytecount);
       return CURLE_PARTIAL_FILE;
     }
