@@ -1085,18 +1085,18 @@ for(keys %run) {
 }
 
 if($total) {
-    printf("$ok tests out of $total reported OK: %d%%\n",
+    printf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
            $ok/$total*100);
 
     if($ok != $total) {
-        print "These test cases failed: $failed\n";
+        print "TESTFAIL: These test cases failed: $failed\n";
     }
 }
 else {
-    print "No tests were performed!\n";
+    print "TESTFAIL: No tests were performed!\n";
 }
 if($skipped) {
-    print "$skipped tests were skipped due to restraints\n";
+    print "TESTINFO: $skipped tests were skipped due to restraints\n";
 }
 if($total && ($ok != $total)) {
     exit 1;
