@@ -553,7 +553,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
 
 #if defined(WIN32) && !defined(__CYGWIN__)
 
-#if _WIN32_WCE
+#ifdef _WIN32_WCE
   buf[0]=0;
   {
     wchar_t wbuf[256];
