@@ -216,7 +216,8 @@ CURLcode Curl_close(struct SessionHandle *data)
   if(data->set.cookiejar) {
     /* we have a "destination" for all the cookies to get dumped to */
     if(Curl_cookie_output(data->cookies, data->set.cookiejar))
-      infof(data, "WARNING: failed to save cookies in given jar\n");
+      infof(data, "WARNING: failed to save cookies in %s\n",
+            data->set.cookiejar);
   }
 
   if( !data->share || (data->cookies != data->share->cookies) ) {
