@@ -44,8 +44,6 @@
   o Enable the application to select() on its own file descriptors and curl's
     file descriptors simultaneous easily.
   
-  Example sources using this interface is here: ../multi/
-
 */
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
@@ -56,6 +54,10 @@
 #endif
 
 #include "curl.h"
+
+#ifdef  __cplusplus
+extern "C" {
+#endif
 
 typedef void CURLM;
 
@@ -187,4 +189,8 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle);
 CURLMsg *curl_multi_info_read(CURLM *multi_handle,
                               int *msgs_in_queue);
 
+#ifdef __cplusplus
+} /* end of extern "C"
+#endif
+  
 #endif
