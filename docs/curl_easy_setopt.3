@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "30 October 2000" "Curl 7.4.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "22 November 2000" "Curl 7.5" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -385,6 +385,13 @@ is the maximum number of bytes that may be written in the buffer.
 Pass a void * to whatever data you want. The passed pointer will be the first
 argument sent to the specifed CURLOPT_PASSWDFUNCTION function. (Added in
 7.4.2)
+.TP
+.B CURLOPT_FILETIME
+Pass a long. If it is a non-zero value, libcurl will attempt to get the
+modification date of the remote document in this operation. This requires that
+the remote server sends the time or replies to a time querying command. The
+curl_easy_getinfo() function with the CURLINFO_FILETIME argument can be used
+after a transfer to extract the received time (if any). (Added in 7.5)
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as

@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_init 3 "30 October 2000" "Curl 7.4.2" "libcurl Manual"
+.TH curl_easy_init 3 "22 November 2000" "Curl 7.5" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - Extract information from a curl session (added in 7.4)
 .SH SYNOPSIS
@@ -27,6 +27,12 @@ Pass a pointer to a 'char *' to receive the last used effective URL.
 .TP
 .B CURLINFO_HTTP_CODE
 Pass a pointer to a long to receive the last received HTTP code.
+.TP
+.B CURLINFO_FILETIME
+Pass a pointer to a long to receive the remote time of the retrieved
+document. If you get 0, it can be because of many reasons (unknown, the server
+hides it or the server doesn't support the command that tells document time
+etc) and the time of the document is unknown. (Added in 7.5)
 .TP
 .B CURLINFO_TOTAL_TIME
 Pass a pointer to a double to receive the total transaction time in seconds
