@@ -13,6 +13,14 @@
 
 PROGRAM_NAME = curl.exe
 
+!IFNDEF ZLIB_PATH
+ZLIB_PATH = ../../zlib-1.1.4
+!ENDIF
+
+!IFNDEF OPENSSL_PATH
+OPENSSL_PATH = ../../openssl-0.9.9d
+!ENDIF
+
 ########################################################
 ## Nothing more to do below this line!
 
@@ -25,10 +33,6 @@ RCR = rc.exe /dCURLDEBUG=0
 CCD = cl.exe /MDd /Gm /ZI /Od /D "_DEBUG" /GZ
 LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
 RCD = rc.exe /dCURLDEBUG=1
-
-!IFNDEF ZLIB_PATH
-ZLIB_PATH  = ../../zlib-1.1.4
-!ENDIF
 
 CFLAGS = /I "../lib" /I "../include" /I "$(ZLIB_PATH)" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 LFLAGS = /nologo /libpath:"$(ZLIB_PATH)" /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
@@ -62,9 +66,6 @@ DEBUG_OBJS= \
 # release-ssl
  
 !IF "$(CFG)" == "release-ssl"
-!IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.7a
-!ENDIF
 LFLAGSSSL = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSLLIBS   = libeay32.lib ssleay32.lib gdi32.lib 
 CFLAGS = $(CFLAGS) -DUSE_SSLEAY
@@ -77,9 +78,6 @@ LFLAGS = $(LFLAGS) $(LFLAGSSSL)
 # release-libcurl-ssl-dll
 
 !IF "$(CFG)" == "release-libcurl-ssl-dll"
-!IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.7a
-!ENDIF
 LFLAGSSSL = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSLLIBS   = libeay32.lib ssleay32.lib gdi32.lib 
 CFLAGS = $(CFLAGS) -DUSE_SSLEAY
