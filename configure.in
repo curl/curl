@@ -397,7 +397,8 @@ else
   	AC_MSG_RESULT([defaults (or given in environment)])
   else
 	test X"$OPT_SSL" = Xyes && OPT_SSL=/usr/local/ssl
-	LIBS="$LIBS -L$OPT_SSL/lib"
+        dnl	LIBS="$LIBS -L$OPT_SSL/lib"
+        LDFLAGS="$LDFLAGS -L$OPT_SSL/lib"
 	CPPFLAGS="$CPPFLAGS -I$OPT_SSL/include/openssl -I$OPT_SSL/include"
 	AC_MSG_RESULT([$OPT_SSL])
   fi
