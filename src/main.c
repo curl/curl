@@ -255,7 +255,7 @@ static void help(void)
        "    --cacert <file> CA certifciate to verify peer against (HTTPS)\n"
        " -f/--fail          Fail silently (no output at all) on errors (H)\n"
        " -F/--form <name=content> Specify HTTP POST data (H)\n"
-
+       " -g/--globoff       Disable URL sequences and ranges using {} and []\n"
        " -h/--help          This help text\n"
        " -H/--header <line> Custom header to pass to server. (H)\n"
        " -i/--include       Include the HTTP-header in the output (H)\n"
@@ -280,6 +280,7 @@ static void help(void)
        " -S/--show-error    Show error. With -s, make curl show errors when they occur\n"
        " -t/--upload        Transfer/upload stdin to remote site\n"
        " -T/--upload-file <file> Transfer/upload <file> to remote site\n"
+       "    --url <URL>     Another way to specify URL to work with\n"
        " -u/--user <user[:password]> Specify user and password to use\n"
        " -U/--proxy-user <user[:password]> Specify Proxy authentication\n"
        " -v/--verbose       Makes the operation more talkative\n"
@@ -347,6 +348,7 @@ struct Configurable {
   char *krb4level;
   bool progressmode;
   bool nobuffer;
+  bool globoff;
 
   char *writeout; /* %-styled format string to output */
 
@@ -542,7 +544,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"Ea", "cacert",     TRUE},
     {"f", "fail",        FALSE},
     {"F", "form",        TRUE},
-
+    {"g", "globoff",     FALSE},
     {"h", "help",        FALSE},
     {"H", "header",      TRUE},
     {"i", "include",     FALSE},
@@ -642,8 +644,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     if(hit < 0) {
       return PARAM_OPTION_UNKNOWN;
     }    
-    if(!longopt && flag[1]) {
-      nextarg=&flag[1]; /* this is the actual extra parameter */
+    if(!longopt && aliases[hit].extraparam && parse[1]) {
+      nextarg=&parse[1]; /* this is the actual extra parameter */
       singleopt=TRUE;   /* don't loop anymore after this */
     }
     else if((!nextarg || !*nextarg) && aliases[hit].extraparam) {
@@ -833,6 +835,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 	return PARAM_BAD_USE;
       if(SetHTTPrequest(HTTPREQ_POST, &config->httpreq))
         return PARAM_BAD_USE;
+      break;
+
+    case 'g': /* g disables URLglobbing */
+      config->globoff ^= TRUE;
       break;
 
     case 'h': /* h for help */
@@ -1415,7 +1421,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
   char *url = NULL;
 
-  URLGlob *urls;
+  URLGlob *urls=NULL;
   int urlnum;
   char *outfiles;
   int separator = 0;
@@ -1556,12 +1562,15 @@ operate(struct Configurable *config, int argc, char *argv[])
     /* default output stream is stdout */
     outs.stream = stdout;
     outs.config = config;
-    
-    /* expand '{...}' and '[...]' expressions and return total number of URLs
-       in pattern set */
-    res = glob_url(&urls, url, &urlnum);
-    if(res != CURLE_OK)
-      return res;
+
+    if(!config->globoff) {
+      /* Unless explicitly shut off, we expand '{...}' and '[...]' expressions
+         and return total number of URLs in pattern set */
+      res = glob_url(&urls, url, &urlnum);
+      if(res != CURLE_OK)
+        return res;
+    }
+
 
     /* save outfile pattern before expansion */
     outfiles = urlnode->outfile?strdup(urlnode->outfile):NULL;
@@ -1570,10 +1579,9 @@ operate(struct Configurable *config, int argc, char *argv[])
       /* multiple files extracted to stdout, insert separators! */
       separator = 1;
     }
-    for (i = 0; (url = next_url(urls)); ++i) {
+    for (i = 0; (url = urls?next_url(urls):(i?NULL:url)); ++i) {
       char *outfile;
       outfile = outfiles?strdup(outfiles):NULL;
-
  
       if((urlnode->flags&GETOUT_USEREMOTE) ||
          (outfile && !strequal("-", outfile)) ) {
@@ -1597,7 +1605,7 @@ operate(struct Configurable *config, int argc, char *argv[])
             return CURLE_WRITE_ERROR;
           }
         }
-        else {
+        else if(urls) {
           /* fill '#1' ... '#9' terms from URL pattern */
           char *storefile = outfile;
           outfile = match_url(storefile, urls);
@@ -1855,8 +1863,9 @@ operate(struct Configurable *config, int argc, char *argv[])
     if(outfiles)
       free(outfiles);
 
-    /* cleanup memory used for URL globbing patterns */
-    glob_cleanup(urls);
+    if(urls)
+      /* cleanup memory used for URL globbing patterns */
+      glob_cleanup(urls);
 
     /* empty this urlnode struct */
     if(urlnode->url)
