@@ -136,6 +136,7 @@ log "CFLAGS = $CFLAGS"
 log "CC = $CC"
 log "version = $version"
 log "date = `date -u`"
+log "testscript = obsolete shell version, use tests/testcurl.pl instead!"
 
 # Make $pwd to become the path without newline. We'll use that in order to cut
 # off that path from all possible logs and error messages etc.
