@@ -736,6 +736,7 @@ struct UserDefined {
   bool hide_progress;
   bool http_fail_on_error;
   bool http_follow_location;
+  bool http_disable_hostname_check_before_authentication;
   bool include_header;
 #define http_include_header include_header /* former name */
 

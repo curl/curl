@@ -349,6 +349,11 @@ new location and follow new Location: headers all the way until no more such
 headers are returned. \fICURLOPT_MAXREDIRS\fP can be used to limit the number
 of redirects libcurl will follow.
 .TP
+.B CURLOPT_UNRESTRICTED_AUTH
+A non-zero parameter tells the library it can continue to send authentication
+(user+password) when following locations, even when hostname changed. Note
+that this is meaningful only when setting \fICURLOPT_FOLLOWLOCATION\fP.
+.TP
 .B CURLOPT_MAXREDIRS
 Pass a long. The set number will be the redirection limit. If that many
 redirections have been followed, the next redirect will cause an error

@@ -503,6 +503,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.http_follow_location = va_arg(param, long)?TRUE:FALSE;
     break;
+  case CURLOPT_UNRESTRICTED_AUTH:
+    /*
+     * Send authentication (user+password) when following locations, even when
+     * hostname changed.
+     */
+    data->set.http_disable_hostname_check_before_authentication =
+      va_arg(param, long)?TRUE:FALSE;
+    break;
   case CURLOPT_HTTP_VERSION:
     /*
      * This sets a requested HTTP version to be used. The value is one of
