@@ -6,6 +6,10 @@
 
                                History of Changes
 
+Daniel (2 November 2001)
+- Replaced read() and write() with recv() and send() for socket operations
+  even under normal unixes.
+
 Daniel (1 November 2001)
 - When an FTP transfer was aborted due to a timeout, it wasn't really aware of
   how many bytes that had been transferred and the error text always said 0
