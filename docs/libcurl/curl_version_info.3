@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_version_info 3 "17 Jun 2003" "libcurl 7.10.6" "libcurl Manual"
+.TH curl_version_info 3 "12 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
 .SH NAME
 curl_version_info - returns run-time libcurl version info
 .SH SYNOPSIS
@@ -79,6 +79,11 @@ supports HTTP GSS-Negotiate (added in 7.10.6)
 .B CURL_VERSION_DEBUG
 libcurl was built with extra debug capabilities built-in. This is mainly of
 interest for libcurl hackers. (added in 7.10.6)
+.TP
+.B CURL_VERSION_ASYNCHDNS
+libcurl was built with support for asynchronous name lookups, which allows
+more exact timeouts (even on Windows) and less blocking when using the multi
+interface. (added in 7.10.7)
 .PP
 \fIssl_version\fP is an ascii string for the OpenSSL version used. If libcurl
 has no SSL support, this is NULL.
@@ -97,5 +102,4 @@ entry.
 A pointer to a curl_version_info_data struct.
 .SH "SEE ALSO"
 \fIcurl_version(3)\fP
-.SH BUGS
-No known bugs.
+
