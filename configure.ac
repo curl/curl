@@ -384,6 +384,8 @@ main()
 
 if test "$ipv6" = "yes"; then
   CURL_CHECK_WORKING_GETADDRINFO
+
+  CURL_CHECK_NI_WITHSCOPEID
 fi
 
 dnl **********************************************************************

@@ -245,7 +245,8 @@ AC_DEFUN([CURL_CHECK_WORKING_GETADDRINFO],[
 #include <sys/types.h>
 #include <sys/socket.h>
 
-void main(void) {
+int main(void)
+{
     struct addrinfo hints, *ai;
     int error;
 
@@ -254,11 +255,9 @@ void main(void) {
     hints.ai_socktype = SOCK_STREAM;
     error = getaddrinfo("127.0.0.1", "8080", &hints, &ai);
     if (error) {
-        exit(1);
+        return 1;
     }
-    else {
-        exit(0);
-    }
+    return 0;
 }
 ],[
   ac_cv_working_getaddrinfo="yes"
@@ -275,6 +274,65 @@ if test "$ac_cv_working_getaddrinfo" = "yes"; then
   AC_SUBST(IPV6_ENABLED)
 fi
 ])
+
+dnl ************************************************************
+dnl check for working NI_WITHSCOPEID in getnameinfo()
+dnl
+AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID],[
+  AC_CACHE_CHECK(for working NI_WITHSCOPEID, ac_cv_working_ni_withscopeid,[
+
+ AC_RUN_IFELSE([[
+#include <sys/socket.h>
+#include <netdb.h>
+int main()
+{
+#ifdef NI_WITHSCOPEID
+   struct sockaddr_storage ss;
+   int sslen;
+   int rc;
+   char hbuf[NI_MAXHOST];
+   int fd = socket(AF_INET, SOCK_STREAM, 0);
+   if(fd < 0) {
+     fd = socket(AF_INET6, SOCK_STREAM, 0);
+     if(fd < 0)
+       return 4; /* couldn't create socket of either kind */
+   }
+
+   rc = getsockname(fd, (struct sockaddr *)&ss, &sslen);
+   if(rc)
+     return 1; /* getsockname() failed unexpectedly */
+
+   rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf),
+                     NULL, 0,
+                     NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID);
+   printf("rc = %s\n", gai_strerror(rc));
+
+   if(rc)
+     return 2; /* getnameinfo() failed, we take this as an indication to
+                  avoid NI_WITHSCOPEID */
+
+   return 0; /* everything works fine, use NI_WITHSCOPEID! */
+#else
+   return 3; /* we don't seem to have the definition, don't use it */
+#endif
+}
+]],
+dnl program worked:
+[ ac_cv_working_ni_withscopeid="yes" ],
+dnl program failed:
+[ ac_cv_working_ni_withscopeid="no" ],
+dnl we cross-compile:
+[ ac_cv_working_ni_withscopeid="yes" ]
+) dnl end of AC_RUN_IFELSE
+
+]) dnl end of AC_CACHE_CHECK
+
+if test "$ac_cv_working_ni_withscopeid" = "yes"; then
+  AC_DEFINE(HAVE_NI_SCOPEWITHID, 1,
+            [Define if NI_SCOPEWITHID exists and works])
+fi
+
+]) dnl end of AC_DEFUN
 
 
 AC_DEFUN([CURL_CHECK_LOCALTIME_R],
