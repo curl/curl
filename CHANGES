@@ -6,7 +6,22 @@
 
                                History of Changes
 
-** curl 7.7 DOES NOT currently WORK. **
+
+Daniel (5 March 2001)
+- The current 57 test cases now pass OK. It would suggest that libcurl works
+  using the old-style with one connection per handle. The test suite doesn't
+  handle multiple connections yet so there are no test cases for this.
+
+- I patched the telnet.c heavily to not use any global variables anymore. It
+  should make it a lot nicer library-wise.
+
+- The file:// support was modified slightly to use the internal connect-first-
+  then-do approach.
+
+Daniel (4 March 2001)
+- More bugs erased.
+
+Version 7.7-alpha2
 
 Daniel (4 March 2001)
 - Now, there's even a basic check that a re-used connection is still alive
