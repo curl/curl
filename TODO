@@ -85,3 +85,6 @@ TODO
    Please, write me a script that makes it. It'd make my day.
 
  * SSL for more protocols, like SSL-FTP...
+   (http://search.ietf.org/internet-drafts/draft-murray-auth-ftp-ssl-05.txt)
+
+ * HTTP POST resume using Range:
