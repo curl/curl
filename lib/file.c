@@ -94,7 +94,11 @@
 #include "memdebug.h"
 #endif
 
-/* Emulate a connect-then-transfer protocol. We connect to the file here */
+/*
+ * Curl_file_connect() gets called from Curl_protocol_connect() to allow us to
+ * do protocol-specific actions at connect-time.  We emulate a
+ * connect-then-transfer protocol and "connect" to the file here
+ */
 CURLcode Curl_file_connect(struct connectdata *conn)
 {
   char *real_path = curl_unescape(conn->path, 0);
@@ -159,8 +163,14 @@ CURLcode Curl_file_connect(struct connectdata *conn)
 #define lseek(x,y,z) _lseeki64(x, y, z)
 #endif
 
-/* This is the do-phase, separated from the connect-phase above */
-
+/*
+ * Curl_file() is the protocol-specific function for the do-phase, separated
+ * from the connect-phase above. Other protocols merely setup the transfer in
+ * the do-phase, to have it done in the main transfer loop but since some
+ * platforms we support don't allow select()ing etc on file handles (as
+ * opposed to sockets) we instead perform the whole do-operation in this
+ * function.
+ */
 CURLcode Curl_file(struct connectdata *conn)
 {
   /* This implementation ignores the host name in conformance with 
