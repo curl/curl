@@ -82,7 +82,7 @@ struct krb4_data {
 
 #ifndef HAVE_STRLCPY
 /* if it ever goes non-static, make it Curl_ prefixed! */
-size_t static 
+static size_t
 strlcpy (char *dst, const char *src, size_t dst_sz)
 {
     size_t n;
