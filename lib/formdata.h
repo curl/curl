@@ -45,11 +45,13 @@ typedef struct FormInfo {
   bool value_alloc;
   size_t contentslength;
   char *contenttype;
+  bool contenttype_alloc;
   long flags;
   char *buffer;      /* pointer to existing buffer used for file upload */
   size_t bufferlength;
   char *showfilename; /* The file name to show. If not set, the actual
                          file name will be used */
+  bool showfilename_alloc;
   struct curl_slist* contentheader;
   struct FormInfo *more;
 } FormInfo;
