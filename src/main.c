@@ -1733,18 +1733,19 @@ int my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
 }
 
 struct ProgressData {
-  size_t total;
-  size_t prev;
-  size_t point;
+  int calls;
+  double total;
+  double prev;
+  double point;
   int width;
   FILE *out; /* where to write everything to */
 };
 
 int myprogress (void *clientp,
-                size_t dltotal,
-                size_t dlnow,
-                size_t ultotal,
-                size_t ulnow)
+                double dltotal,
+                double dlnow,
+                double ultotal,
+                double ulnow)
 {
   /* The original progress-bar source code was written for curl by Lars Aas,
      and this new edition inherites some of his concepts. */
@@ -1762,6 +1763,8 @@ int myprogress (void *clientp,
   size_t total = dltotal + ultotal;
 
   bar->point = dlnow + ulnow; /* we've come this far */
+
+  bar->calls++; /* simply count invokes */
 
   if(0 == total) {
     int prevblock = bar->prev / 1024;
@@ -2403,6 +2406,12 @@ operate(struct Configurable *config, int argc, char *argv[])
       
       res = curl_easy_perform(curl);
         
+      if(progressbar.calls) {
+        /* if the custom progress bar has been displayed, we output a
+           newline here */
+        fputs("\n", progressbar.out);
+      }
+
       if(config->writeout) {
         ourWriteOut(curl, config->writeout);
       }
