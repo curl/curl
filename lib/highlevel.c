@@ -107,7 +107,6 @@
 #include "getpass.h"
 #include "progress.h"
 #include "getdate.h"
-#include "writeout.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
