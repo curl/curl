@@ -25,6 +25,7 @@ Misc
  - socks5 support
  - supports user name + password in proxy environment variables
  - operations through proxy "tunnel" (using CONNECT)
+ - supports transfers of large files (>2GB and >4GB)
 
 HTTP
  - HTTP/1.1 compliant (optionally uses 1.0)
@@ -79,6 +80,11 @@ FTP
  - via http-proxy
  - all operations can be tunneled through a http-proxy
  - customizable to retrieve file modification date
+
+FTPS (*1)
+ - explicit ftps:// support that use SSL on both connections
+ - implicit "AUTH TSL" and "AUTH SSL" usage to "upgrade" plain ftp://
+   connection to use SSL for both or one of the connections
 
 TELNET
  - connection negotiation
