@@ -58,7 +58,7 @@
 FILE *logfile;
 
 /* this sets the log file name */
-void curl_memdebug(char *logname)
+void curl_memdebug(const char *logname)
 {
   logfile = fopen(logname, "w");
 }
