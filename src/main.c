@@ -191,6 +191,11 @@ globalvalue int  CURL_BADPARAM;
 globalvalue int  CURL_BADORDER;
 globalvalue int  CURL_BADPWD;
 globalvalue int  CURL_MNYREDIR;
+globalvalue int  CURL_UNKTELNET;
+globalvalue int  CURL_UNKMSG;
+globalvalue int  CURL_BADSSLCERT;
+globalvalue int  CURL_SRVNOERR;
+globalvalue int  CURL_MAXMSG;
 long	vms_cond[] = {
 	VMS_STS(1,FAC_SYSTEM,MSG_NORMAL,SEV_SUCCESS),
 	CURL_UNSUPPROTO,		/* these are from curlmsg.msg file..... */
@@ -238,7 +243,12 @@ long	vms_cond[] = {
 	CURL_BADPARAM,
 	CURL_BADORDER,
 	CURL_BADPWD,
-	CURL_MNYREDIR
+	CURL_MNYREDIR,
+	CURL_UNKTELNET,
+	CURL_UNKMSG,
+	CURL_BADSSLCERT,
+	CURL_SRVNOERR,
+	CURL_MAXMSG
 };
 #endif
 
@@ -2489,6 +2499,7 @@ int main(int argc, char *argv[])
   free_config_fields(&config);
 
 #ifdef	VMS
+  if (res > 52) res = 53;		/* MAXMSG, porting helper */
   return (vms_cond[res]|vms_show);
 #else
   return res;
