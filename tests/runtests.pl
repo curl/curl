@@ -224,9 +224,7 @@ sub compare {
 
     $res = comparefiles($first, $sec);
     if ($res != 0) {
-        if(!$short) {
-            print " $text FAILED";
-        }
+        print " $text FAILED";
         return 1;
     }
 
