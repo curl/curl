@@ -558,6 +558,9 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
     char *dir = (char *)malloc(nread+1);
     char *store=dir;
     char *ptr=&buf[4]; /* start on the first letter */
+
+    if(!dir)
+      return CURLE_OUT_OF_MEMORY;
     
     /* Reply format is like
        257<space>"<directory-name>"<space><commentary> and the RFC959 says
@@ -565,7 +568,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
        The directory name can contain any character; embedded double-quotes
        should be escaped by double-quotes (the "quote-doubling" convention).
     */
-    if(dir && ('\"' == *ptr)) {
+    if('\"' == *ptr) {
       /* it started good */
       ptr++;
       while(ptr && *ptr) {
