@@ -610,6 +610,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if (conn->newurl) {
               /* abort after the headers if "follow Location" is set */
               infof (data, "Follow to new URL: %s\n", conn->newurl);
+                k->keepon &= ~KEEP_READ;
+                FD_ZERO(&k->rkeepfd);
               return CURLE_OK;
             }
             else if (conn->resume_from &&
