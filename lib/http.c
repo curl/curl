@@ -1067,7 +1067,6 @@ CURLcode Curl_http(struct connectdata *conn)
   char *ptr;
   char *request;
   bool authdone=TRUE; /* if the authentication phase is done */
-  Curl_HttpReq httpreq;  /* type of HTTP request */
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -1467,13 +1466,11 @@ CURLcode Curl_http(struct connectdata *conn)
     http->postdata = NULL;  /* nothing to post at this point */
     Curl_pgrsSetUploadSize(data, 0); /* upload size is 0 atm */
 
-    if(!authdone)
-      /* until the auth is done, pretend we only do GET */
-      httpreq = HTTPREQ_GET;
-    else
-      httpreq = data->set.httpreq;
+    /* If 'authdone' is still FALSE, we must not set the write socket index to
+       the Curl_transfer() call below, as we're not ready to actually upload
+       any data yet. */
 
-    switch(httpreq) {
+    switch(data->set.httpreq) {
 
     case HTTPREQ_POST_FORM:
       if(Curl_FormInit(&http->form, http->sendit)) {
@@ -1538,8 +1535,8 @@ CURLcode Curl_http(struct connectdata *conn)
         /* setup variables for the upcoming transfer */
         result = Curl_Transfer(conn, FIRSTSOCKET, -1, TRUE,
                                &http->readbytecount,
-                               FIRSTSOCKET,
-                               &http->writebytecount);
+                               authdone?FIRSTSOCKET:-1,
+                               authdone?&http->writebytecount:NULL);
       if(result) {
         Curl_formclean(http->sendit); /* free that whole lot */
         return result;
@@ -1554,7 +1551,16 @@ CURLcode Curl_http(struct connectdata *conn)
                     "Content-Length: %" FORMAT_OFF_T "\r\n", /* size */
                     data->set.infilesize );
 
-      add_bufferf(req_buffer, "\r\n");
+      if(!checkheaders(data, "Expect:")) {
+        /* if not disabled explicitly we add a Expect: 100-continue
+           to the headers which actually speeds up post operations (as
+           there is one packet coming back from the web server) */
+        add_bufferf(req_buffer,
+                    "Expect: 100-continue\r\n");
+        data->set.expect100header = TRUE;
+      }
+
+      add_buffer(req_buffer, "\r\n", 2); /* end of headers */
 
       /* set the upload size to the progress meter */
       Curl_pgrsSetUploadSize(data, (double)data->set.infilesize);
@@ -1568,8 +1574,8 @@ CURLcode Curl_http(struct connectdata *conn)
         /* prepare for transfer */
         result = Curl_Transfer(conn, FIRSTSOCKET, -1, TRUE,
                                &http->readbytecount,
-                               FIRSTSOCKET,
-                               &http->writebytecount);
+                               authdone?FIRSTSOCKET:-1,
+                               authdone?&http->writebytecount:NULL);
       if(result)
         return result;
       break;
@@ -1597,14 +1603,18 @@ CURLcode Curl_http(struct connectdata *conn)
         add_bufferf(req_buffer,
                     "Content-Type: application/x-www-form-urlencoded\r\n");
 
-      add_buffer(req_buffer, "\r\n", 2);
-
       if(data->set.postfields) {
 
-        if(postsize < (100*1024)) {
+        if(authdone && (postsize < (100*1024))) {
+          /* If we're not done with the authentication phase, we don't expect
+             to actually send off any data yet. Hence, we delay the sending of
+             the body until we receive that friendly 100-continue response */
+             
           /* The post data is less than 100K, then append it to the header.
              This limit is no magic limit but only set to prevent really huge
              POSTs to get the data duplicated with malloc() and family. */
+
+          add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
 
           if(!conn->bits.upload_chunky)
             /* We're not sending it 'chunked', append it to the request
@@ -1630,9 +1640,22 @@ CURLcode Curl_http(struct connectdata *conn)
 
           /* set the upload size to the progress meter */
           Curl_pgrsSetUploadSize(data, http->postsize);
+
+          if(!authdone && !checkheaders(data, "Expect:")) {
+            /* if not disabled explicitly we add a Expect: 100-continue to the
+               headers which actually speeds up post operations (as there is
+               one packet coming back from the web server) */
+            add_bufferf(req_buffer,
+                        "Expect: 100-continue\r\n");
+            data->set.expect100header = TRUE;
+          }
+
+          add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
         }
       }
       else {
+        add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+
         /* set the upload size to the progress meter */
         Curl_pgrsSetUploadSize(data, (double)data->set.infilesize);
 

@@ -40,6 +40,7 @@ Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: */*
 Content-Length: 14
+Expect: 100-continue
 
 data on stdin
 </protocol>

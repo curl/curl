@@ -38,6 +38,7 @@ Pragma: no-cache
 Accept: */*
 Transfer-Encoding: chunked
 Content-Length: 1
+Expect: 100-continue
 
 13
 more than one byte

@@ -45,6 +45,7 @@ Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: */*
 Content-Length: 78
+Expect: 100-continue
 
 Weird
      file

@@ -44,6 +44,7 @@ Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: */*
 Content-Length: 50
+Expect: 100-continue
 
 012345678
 012345678
