@@ -6,6 +6,32 @@
 
                                   Changelog
 
+Daniel (4 July)
+- Rick Richardson pointed out that using setvbuf() to achive non-buffering
+  on output is no-good for SCO Xenix and other unixes. We switched over to
+  using plain fflush() instead.
+
+- Dan Grayson pointed out that we set the CURL_CA_BUNDLE variable wrongly in
+  the configure script, and I had to change some build stuff to make the new
+  way work.
+
+- Peter Sylvester's patch was applied that introduces the following:
+
+   CURLOPT_SSL_CTX_FUNCTION to set a callback that gets called with the
+   OpenSSL's ssl_ctx pointer passed in and allow a callback to act on it. If
+   anything but CURLE_OK is returned, that will also be returned by libcurl
+   all the way back. If this function changes the CURLOPT_URL, libcurl will
+   detect this and instead go use the new URL.
+
+   CURLOPT_SSL_CTX_DATA is a pointer you set to get passed to the callback set
+   with CURLOPT_SSL_CTX_FUNCTION.
+
+Daniel (1 July)
+- David Byron provided a patch that allows a client to quit the test suite's
+  HTTP server.
+
+- Gisle Vanem found and patched a lib handle leak in the ldap code.
+
 Daniel (25 June)
 - More NTLM-improvements. Less code. Smaller packets back and forth.
 
