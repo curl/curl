@@ -3,6 +3,46 @@ use strict;
 
 my @xml;
 
+sub getpartattr {
+    my ($section, $part)=@_;
+
+    my %hash;
+    my $inside=0;
+
+ #   print "Section: $section, part: $part\n";
+
+    for(@xml) {
+ #       print "$inside: $_";
+        if(!$inside && ($_ =~ /^ *\<$section/)) {
+            $inside++;
+        }
+        elsif((1 ==$inside) && ($_ =~ /^ *\<$part([^>]*)/)) {
+            $inside++;
+            my $attr=$1;
+            my @p=split("[ \t]", $attr);
+            my $assign;
+
+            foreach $assign (@p) {
+                # $assign is a 'name="contents"' pair
+
+                if($assign =~ / *([^=]*)=\"([^\"]*)\"/) {
+                    # *with* quotes
+                    $hash{$1}=$2;
+                }
+                elsif($assign =~ / *([^=]*)=([^\"]*)/) {
+                    # *without* quotes
+                    $hash{$1}=$2;
+                }
+            }
+            last;
+        }
+        elsif((2 ==$inside) && ($_ =~ /^ *\<\/$part/)) {
+            $inside--;
+        }
+    }
+    return %hash;
+}
+
 sub getpart {
     my ($section, $part)=@_;
 
@@ -16,7 +56,7 @@ sub getpart {
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
-        elsif((1 ==$inside) && ($_ =~ /^ *\<$part/)) {
+        elsif((1 ==$inside) && ($_ =~ /^ *\<$part[ \>]/)) {
             $inside++;
         }
         elsif((2 ==$inside) && ($_ =~ /^ *\<\/$part/)) {

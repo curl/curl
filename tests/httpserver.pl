@@ -121,10 +121,6 @@ for ( $waitedpid = 0;
             my $testnum;
             if($path =~ /.*\/(\d*)/) {
                 $testnum=$1;
-
-                if($verbose) {
-                    print STDERR "OUT: sending reply $testnum\n";
-                }
             }
             else {
                 $testnum=0;
@@ -142,9 +138,18 @@ for ( $waitedpid = 0;
                 "You must enter a test number to get good data back\r\n";
             }
             else {
+                my $part="";
+                if($testnum > 10000) {
+                    $part = $testnum % 10000;
+                    $testnum = sprintf("%d", $testnum/10000);
+                }
+                if($verbose) {
+                    print STDERR "OUT: sending reply $testnum (part $part)\n";
+                }
+
                 loadtest("data/test$testnum");
                 # send a custom reply to the client
-                my @data = getpart("reply", "data");
+                my @data = getpart("reply", "data$part");
                 for(@data) {
                     print $_;
                     if($verbose) {

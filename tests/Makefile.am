@@ -3,6 +3,8 @@ EXTRA_DIST = ftpserver.pl httpserver.pl runtests.pl ftpsserver.pl stunnel.pm \
 
 SUBDIRS = data
 
+PERLFLAGS = -I$(srcdir)
+
 all:
 install:
 
@@ -11,11 +13,11 @@ curl:
 
 test:
 	$(MAKE) -C data test
-	srcdir=$(srcdir) $(PERL) $(srcdir)/runtests.pl
+	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
 
 quiet-test:
 	$(MAKE) -C data test
-	srcdir=$(srcdir) $(PERL) $(srcdir)/runtests.pl -s -a
+	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -s -a
 
 clean:
 	rm -rf log
