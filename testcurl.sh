@@ -8,7 +8,7 @@
 # at a regular interval. The output will be suitable to be mailed automaticly
 # to "curl-autocompile@haxx.se" to be dealt with automaticly.  The most
 # current build status (with a resonable backlog) will be published on the
-# curl site, at http://curl.haxx.se/
+# curl site, at http://curl.haxx.se/auto/
 
 # USAGE:
 # testcurl.sh [configure options] > output
@@ -49,11 +49,13 @@ if [ -z "$desc" ]; then
   fixed="3"
 fi
 
-if [ -z "$confopts" -a "$infixed" -lt "4" ]; then
-  echo "please enter your additional arguments to configure"
-  echo "examples: --with-ssl --enable-debug --enable-ipv6 --with-krb4"
-  read confopts
-  fixed="4"
+if [ -z "$confopts" ]; then
+  if [ $infixed -lt 4 ]; then
+    echo "please enter your additional arguments to configure"
+    echo "examples: --with-ssl --enable-debug --enable-ipv6 --with-krb4"
+    read confopts
+    fixed="4"
+  fi
 fi
 
 
