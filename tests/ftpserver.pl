@@ -652,5 +652,6 @@ for ( $waitedpid = 0;
         }
             
     } # while(1)
+    logmsg "client disconnected\n";
     close(Client);
 }
