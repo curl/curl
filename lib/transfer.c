@@ -366,15 +366,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                    reading! */
                 if(-1 != conn->size)
                   conn->maxdownload = conn->size;
-
-                /* If max download size is *zero* (nothing) we already
-                   have nothing and can safely return ok now! */
-                if(0 == conn->maxdownload)
-                  stop_reading = TRUE;
-                    
-                /* What to do if the size is *not* known? */
               }
-
+              /* If max download size is *zero* (nothing) we already
+                 have nothing and can safely return ok now! */
+              if(0 == conn->maxdownload)
+                stop_reading = TRUE;
+                    
               if(stop_reading) {
                 /* we make sure that this socket isn't read more now */
                 k->keepon &= ~KEEP_READ;
@@ -447,6 +444,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  * NOT contain a message-body, and thus is always terminated
                  * by the first empty line after the header fields.  */
                 conn->size=0;
+                conn->maxdownload=0;
                 break;
               default:
                 /* nothing */
