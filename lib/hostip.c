@@ -156,30 +156,24 @@ static int _num_chars(int i)
 
 /* Create a hostcache id */
 static char *
-create_hostcache_id(char *server, int port, ssize_t *entry_len)
+create_hostcache_id(char *server, int port, size_t *entry_len)
 {
   char *id = NULL;
 
   /* Get the length of the new entry id */
-  *entry_len = *entry_len + /* Hostname length */
-    1 +                     /* ':' seperator */
-    _num_chars(port);       /* number of characters the port will take up */
+  *entry_len = strlen(server) + /* Hostname length */
+    1 +                         /* ':' seperator */
+    _num_chars(port);     /* number of characters the port will take up */
   
   /* Allocate the new entry id */
-  id = malloc(*entry_len + 1);
+  id = malloc(*entry_len + 1); /* 1 extra for the zero terminator */
   if (!id)
     return NULL;
 
   /* Create the new entry */
-  /* If sprintf() doesn't return the entry length, that signals failure */
-  if (sprintf(id, "%s:%d", server, port) != *entry_len) {
-    /* Free the allocated id, set length to zero and return NULL */
-    *entry_len = 0;
-    free(id);
-    return NULL;
-  }
+  sprintf(id, "%s:%d", server, port);
 
-  return id;
+  return id; /* return pointer to the string */
 }
 
 struct hostcache_prune_data {
@@ -256,12 +250,11 @@ cache_resolv_response(struct SessionHandle *data,
                       int port)
 {
   char *entry_id;
-  ssize_t entry_len;
+  size_t entry_len;
   struct Curl_dns_entry *dns;
   time_t now;
 
   /* Create an entry id, based upon the hostname and port */
-  entry_len = strlen(hostname);
   entry_id = create_hostcache_id(hostname, port, &entry_len);
   /* If we can't create the entry id, fail */
   if (!entry_id)
@@ -315,7 +308,7 @@ int Curl_resolv(struct connectdata *conn,
 {
   char *entry_id = NULL;
   struct Curl_dns_entry *dns = NULL;
-  ssize_t entry_len;
+  size_t entry_len;
   int wait;
   struct SessionHandle *data = conn->data;
   CURLcode result;
@@ -335,7 +328,6 @@ int Curl_resolv(struct connectdata *conn,
 #endif
 
   /* Create an entry id, based upon the hostname and port */
-  entry_len = strlen(hostname);
   entry_id = create_hostcache_id(hostname, port, &entry_len);
   /* If we can't create the entry id, fail */
   if (!entry_id)
