@@ -84,9 +84,10 @@ UNIX
 
    KNOWN PROBLEMS
 
-     If you happen to have autoconf installed, but a version older than
-     2.12 you will get into trouble. Then you can still build curl by
-     issuing these commands: (from Ralph Beckmann)
+     If you happen to have autoconf installed, but a version older than 2.12
+     you will get into trouble. Then you can still build curl by issuing these
+     commands (note that this requires curl to be built staticly): (from Ralph
+     Beckmann)
 
        ./configure [...]
        cd lib; make; cd ..
@@ -138,6 +139,14 @@ UNIX
      In most cases, /usr/athena is the install prefix and then it works with
 
        ./configure --with-krb4=/usr/athena
+
+     If your system support shared libraries, but you want to built a static
+     version only, you can disable building the shared version by using:
+
+       ./configure --disable-shared
+
+     If you're a curl developer and use gcc, you might want to enable more
+     debug options with the --enable-debug option.
 
 Win32
 =====
