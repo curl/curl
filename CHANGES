@@ -6,6 +6,36 @@
 
                                History of Changes
 
+Daniel (3 May 2002)
+- Added "--trace [file]" to the command line tool. It makes a very detailed
+  trace dump get stored, with a full protocol dump that includes all received
+  and transmitted data. This could be a very effective tool for debugging what
+  goes wrong. This dump includes every byte the way it is sent to/received
+  from the server. The dump is the plain-text version, so SSL transfers will
+  still be readable.
+
+- I found out that the DEBUGFUNCTION was not called properly everywhere as we
+  wanted it to. I fixed it.
+
+- -D now stores all headers to the same file if multiple URLs are given on the
+  command line! Kevin Roth made me aware of that it didn't already do this!
+
+- Gustaf Hui wrote an excellent formpost example that used the multi
+  interface.  Unfortunately, it didn't work due to several bugs in how
+  transfers were made when the multi interface was used.
+
+Daniel (2 May 2002)
+- Hanno Kranzhoff found out that when doing multiple transfers on the same
+  easy handle, the progress meter would show a bad "currently downloaded
+  value" when the transfer starts.
+
+Daniel (1 May 2002)
+- Applied another patch by Jacky Lam to make the name resolve info realloc()
+  stuff work properly.
+
+Daniel (28 April 2002)
+- curl_multi_info_read() is now implemented!
+
 Daniel (27 April 2002)
 - Updated BUGS, TODO, FAQ, INSTALL and added BINDINGS.
 
