@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (29 January 2005)
+- Connect failures with the multi interface was often returned as "connect()
+  timed out" even though the reason was different.
+
 Daniel (28 January 2005)
 - KNOWN_BUGS #17 fixed. A DNS cache entry may not remain locked between two
   curl_easy_perform() invokes. It was previously unlocked at disconnect, which

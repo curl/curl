@@ -754,7 +754,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   if(data->state.used_interface == Curl_if_multi)
     /* don't hang when doing multi */
-    timeout_per_addr = timeout_ms = 0;
+    timeout_per_addr = 0;
 
   /*
    * Connecting with a Curl_addrinfo chain
