@@ -421,6 +421,8 @@ CURLcode Curl_http(struct connectdata *conn)
       sprintf(data->buffer, "%s:%s", data->user, data->passwd);
       if(Curl_base64_encode(data->buffer, strlen(data->buffer),
                             &authorization) >= 0) {
+        if(data->ptr_userpwd)
+          free(data->ptr_userpwd);
         data->ptr_userpwd = aprintf( "Authorization: Basic %s\015\012",
                                      authorization);
         free(authorization);
@@ -428,9 +430,13 @@ CURLcode Curl_http(struct connectdata *conn)
     }
   }
   if((data->bits.http_set_referer) && !checkheaders(data, "Referer:")) {
+    if(data->ptr_ref)
+      free(data->ptr_ref);
     data->ptr_ref = aprintf("Referer: %s\015\012", data->referer);
   }
   if(data->cookie && !checkheaders(data, "Cookie:")) {
+    if(data->ptr_cookie)
+      free(data->ptr_cookie);
     data->ptr_cookie = aprintf("Cookie: %s\015\012", data->cookie);
   }
 
@@ -450,7 +456,11 @@ CURLcode Curl_http(struct connectdata *conn)
     http->sendit = Curl_getFormData(data->httppost, &http->postsize);
   }
 
-  if(!checkheaders(data, "Host:")) {
+  if(!checkheaders(data, "Host:") &&
+     !data->ptr_host) {
+    /* if ptr_host is already set, it is OK since we only re-use connections
+       to the very same host and port */
+
     if(((conn->protocol&PROT_HTTPS) && (data->remote_port == PORT_HTTPS)) ||
        (!(conn->protocol&PROT_HTTPS) && (data->remote_port == PORT_HTTP)) )
       /* If (HTTPS on port 443) OR (non-HTTPS on port 80) then don't include

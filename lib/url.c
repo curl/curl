@@ -1653,6 +1653,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
              data->proxyuser, data->proxypasswd);
     if(Curl_base64_encode(data->buffer, strlen(data->buffer),
                           &authorization) >= 0) {
+      if(data->ptr_proxyuserpwd)
+        free(data->ptr_proxyuserpwd);
       data->ptr_proxyuserpwd =
         aprintf("Proxy-authorization: Basic %s\015\012", authorization);
       free(authorization);
@@ -1665,6 +1667,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
    *************************************************************/
   if((conn->protocol&PROT_HTTP) || data->bits.httpproxy) {
     if(data->useragent) {
+      if(data->ptr_uagent)
+        free(data->ptr_uagent);
       data->ptr_uagent =
         aprintf("User-Agent: %s\015\012", data->useragent);
     }
