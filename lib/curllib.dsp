@@ -195,6 +195,10 @@ SOURCE=.\mprintf.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\multi.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\netrc.c
 # End Source File
 # Begin Source File
