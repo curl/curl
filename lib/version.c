@@ -47,7 +47,7 @@ static void getssl_version(char *ptr, long *num)
     unsigned long ssleay_value;
     sub[1]='\0';
     ssleay_value=SSLeay();
-    *num = ssleay_value;
+    *num = (long)ssleay_value;
     if(ssleay_value < 0x906000) {
       ssleay_value=SSLEAY_VERSION_NUMBER;
       sub[0]='\0';
