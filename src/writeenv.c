@@ -22,6 +22,9 @@
  *****************************************************************************/
 
 #include "setup.h"
+
+#ifdef USE_ENVIRONMENT
+
 #include <curl/curl.h>
 
 #ifdef __riscos__
@@ -33,6 +36,7 @@ struct
   const char * name;
   CURLINFO id;
   enum {
+    writeenv_NONE,
     writeenv_DOUBLE,
     writeenv_LONG,
     writeenv_STRING
@@ -52,7 +56,7 @@ struct
   {"curl_size_upload", CURLINFO_SIZE_UPLOAD, writeenv_DOUBLE},
   {"curl_speed_download", CURLINFO_SPEED_DOWNLOAD, writeenv_DOUBLE},
   {"curl_speed_upload", CURLINFO_SPEED_UPLOAD, writeenv_DOUBLE},
-  {NULL, 0}
+  {NULL, 0, writeenv_NONE}
  };
 
 static void internalSetEnv(const char * name, char * value)
@@ -82,7 +86,7 @@ void ourWriteEnv(CURL *curl)
 
     case writeenv_LONG:
       if (curl_easy_getinfo(curl, variables[i].id, &longinfo) == CURLE_OK) {
-        sprintf(numtext, "%5i", longinfo);
+        sprintf(numtext, "%5ld", longinfo);
         internalSetEnv(variables[i].name, numtext);
       }
       else
@@ -101,3 +105,5 @@ void ourWriteEnv(CURL *curl)
 
   return;
 }
+
+#endif
