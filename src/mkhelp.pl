@@ -6,6 +6,12 @@
 # THEY DON'T FIT ME :-)
 
 # Get readme file as parameter:
+
+if($ARGV[0] eq "-c") {
+    $c=1;
+    shift @ARGV;
+}
+
 my $README = $ARGV[0];
 
 if($README eq "") {
@@ -20,6 +26,7 @@ push @out, "                             / __| | | | |_) | |    \n";
 push @out, "                            | (__| |_| |  _ <| |___ \n";
 push @out, "                             \\___|\\___/|_| \\_\\_____|\n";
 
+my $olen=0;
 while (<STDIN>) {
     my $line = $_;
 
@@ -70,16 +77,19 @@ close(READ);
 if($c) {
     my @test = `gzip --version 2>&1`;
     if($test[0] =~ /gzip/) {
-        open(GZIP, "|gzip -9 >dumpit.gz") ||
-            die "can't run gzip, try without -c";
+        open(GZIP, ">dumpit") ||
+            die "can't create the dumpit file, try without -c";
         binmode GZIP;
         for(@out) {
             print GZIP $_;
             $gzip += length($_);
         }
         close(GZIP);
+
+        system("gzip --best --no-name dumpit");
         
-        open(GZIP, "<dumpit.gz");
+        open(GZIP, "<dumpit.gz") ||
+             die "can't read the dumpit.gz file, try without -c";
         binmode GZIP;
         while(<GZIP>) {
             push @gzip, $_;
