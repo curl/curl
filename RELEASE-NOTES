@@ -25,6 +25,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o configure works better with SSL libs in a "non-standard ld.so dir"
+ o curl-config --vernum zero prefixed
  o bad memory access in the NTLM code
  o EPSV on multi-homed servers now works correctly
  o chunked-encoded transfers could get closed pre-maturely without error
@@ -62,6 +64,6 @@ advice from friends like these:
  Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia,
  Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips,
  Wojciech Zwiefka, David Phillips, Reinout van Schouwen, Maurice Barnum,
- Richard Atterer, Rene Bernhardt
+ Richard Atterer, Rene Bernhardt, Matt Veenstra, Bryan Henderson, Ton Voon
 
         Thanks! (and sorry if I forgot to mention someone)
