@@ -13,6 +13,9 @@ For the future
  product! (Yes, you may add things not mentioned here, these are just a
  few teasers...)
 
+ * Make SSL session ids get used if multiple HTTPS documents from the same
+   host is requested.
+
  * Improve the command line option parser to accept '-m300' as well as the '-m
    300' convention. It should be able to work if '-m300' is considered to be
    space separated to the next option.
@@ -41,6 +44,9 @@ For the future
 
  * Make sure the low-level interface works. highlevel.c should basically be
    possible to write using that interface. Document the low-level interface
+
+ * Make the easy-interface support multiple file transfers. If they're done
+   to the same host, they should use persistant connections or similar.
 
  * Add asynchronous name resolving, as this enables full timeout support for
    fork() systems.
