@@ -7,6 +7,21 @@
                                History of Changes
 
 Daniel (6 August 2001)
+- Heikki Korpela posted a patch that makes 'curl-config --libs' include the
+  directory in which libcurl itself is installed in. While this wasn't my
+  initial intention with this option, it makes sense and makes linking with
+  libcurl easier.
+
+- Stefan Ulrich pointed out to us that other tools and libraries treat file://
+  URLs with only one slash after the host name slighly different than libcurl
+  does. Since all the others seem to agree, we better follow them.
+
+- Nico Baggus provided us with a huge set of fixes to make curl compile and
+  build under OpenVMS.
+
+Version 7.8.1-pre3
+
+Daniel (6 August 2001)
 - Jonathan Hseu noticed that you couldn't get a header callback unless you
   set CURLOPT_WRITEHEADER to non-NULL, even if you didn't care about that
   data. This is now fixed.
