@@ -58,6 +58,12 @@ future all test cases should use this. Makes us independent of the test
 case number.
 </server>
 
+<features>
+A list of features that must be present in the client/library for this test
+to be able to run. Features testable here are:
+SSL
+</features>
+
 <killserver>
 Using the same syntax as in <server> but when mentioned here these servers
 are explicitly KILLED when this test case is completed. Only use this if there

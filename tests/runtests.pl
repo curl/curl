@@ -930,6 +930,27 @@ sub serverfortest {
         }
         return 100;
     }
+
+    my @what = getpart("client", "features");
+
+    for(@what) {
+        my $f = $_;
+
+        $f =~ s/\s//g;
+
+        print STDERR "CHECK FOR $f\n";
+
+        if($f eq "SSL") {
+            if($ssl_version) {
+                last;
+            }
+        }
+
+        warn "Test case $testnum requires the missing feature: $_";
+        return 100;
+    }
+
+
     my @what = getpart("client", "server");
 
     if(!$what[0]) {
