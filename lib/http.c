@@ -718,8 +718,7 @@ CURLcode Curl_http(struct connectdata *conn)
       http->storefread = data->fread; /* backup */
       http->in = data->in; /* backup */
           
-      data->fread =
-        (size_t (*)(char *, size_t, size_t, FILE *))
+      data->fread = (curl_read_callback)
         Curl_FormReader; /* set the read function to read from the
                             generated form data */
       data->in = (FILE *)&http->form;
