@@ -1910,7 +1910,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           {"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
           {"Debug", CURL_VERSION_DEBUG},
           {"AsynchDNS", CURL_VERSION_ASYNCHDNS},
-          {"SPNEGO", CURL_VERSION_SPNEGO}
+          {"SPNEGO", CURL_VERSION_SPNEGO},
+          {"Largefile", CURL_VERSION_LARGEFILE}
         };
         printf("Features: ");
         for(i=0; i<sizeof(feats)/sizeof(feats[0]); i++) {
