@@ -9,7 +9,13 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o upload using chunked transfer-encoding now sends the last chunk properly
+   teriminated with an extra CRLF
+ o Fixed the progress meter display for files >2GB
+ o persistant connections over a proxy messed up the proxy name/password
+ o the socks5 code segfaulted if no username/password was set
+ o the *_LARGE options now take curl_off_t types as parameters and this will
+   make it possible to handle large files on windows too
 
 Other curl-related news since the previous public release:
 
@@ -18,6 +24,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- 
+ Gisle Vanem, Vincent Bronner, Richard Bramante
 
         Thanks! (and sorry if I forgot to mention someone)

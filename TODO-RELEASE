@@ -8,8 +8,8 @@ To get fixed in 7.11.1
 1. Introduce a new error code indicating authentication problems (for proxy
    CONNECT error 407 for example). #845941 UNASSIGNED
 
-4. Multi-threaded OpenSSL usage needs to be addressed (Dirk Manske has stepped
-   forward on this)
+4. Multi-threaded OpenSSL usage. Dirk Manske stepped forward. This will be
+   addressed by a note in the docs!
 
 6. REST fix for servers not behaving well on >2GB requests (some outstanding
    issues, Dave Meyer works on this)
