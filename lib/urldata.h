@@ -227,7 +227,8 @@ struct connectdata {
 
   char *proxyhost; /* name of the http proxy host */
 
-  struct timeval now; /* current time */
+  struct timeval now;     /* "current" time */
+  struct timeval created; /* creation time */
   int firstsocket;     /* the main socket to use */
   int secondarysocket; /* for i.e ftp transfers */
 
