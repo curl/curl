@@ -6,6 +6,30 @@
 
                                History of Changes
 
+Daniel (5 August 2001)
+- Sergio Ballestrero provided a patch for reading responses from NCSA httpd
+  1.5.x servers, as they return really screwed up response headers when asked
+  for with HTTP 1.1.
+
+- curl_escape() no longer treats already encoded characters in the input
+  string especially.
+
+Daniel (3 August 2001)
+- I replaced the former lib/arpa_telnet.h file with one I wrote myself, to
+  avoid the BSD annoucement clause of the license in the former file.
+
+- Andrew Francis provided a new version of base64.c to work around the license
+  boiler plate that came with the previous one. I patched it, but the glory
+  should go to Andrew for his heads up.
+
+- Tomasz Lacki noticed that when you do repeated transfers with libcurl you
+  couldn't always reliably change HTTP request. This has now been fixed and a
+  new libcurl option was added: CURLOPT_HTTPGET, that can force the HTTP
+  requestr (back) to GET.
+
+- Linus Nielsen Feltzing pointed out that httpsserver.pl wasn't included in
+  release archives. It should be now.
+
 Daniel (2 August 2001)
 - Frank Keeney pointed out a manual mistake for certificate convertions.
 
