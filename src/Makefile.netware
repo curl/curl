@@ -91,7 +91,7 @@ else
 LD	= nlmconv
 LDFLAGS	= -T
 CFLAGS	+= -fno-builtin -fpack-struct -fpcc-struct-return
-CFLAGS	+= -Wall # -pedantic
+CFLAGS	+= -Wall -Wno-strict-aliasing # -pedantic
 ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
 else
