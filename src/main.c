@@ -111,8 +111,6 @@ void *xmalloc(size_t);
 char *msdosify(char *);
 char *rename_if_dos_device_name(char *);
 void xfree(void *);
-#include <limits.h>
-#include <fcntl.h>
 struct pollfd {
        int fd;
        int events;     /* in param: what to poll for */
