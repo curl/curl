@@ -482,6 +482,10 @@ static int get_request(int sock, struct httprequest *req)
         return DOCNUMBER_INTERNAL;
       }
       logmsg("Connection closed by client");
+      reqbuf[req->offset]=0;
+
+      /* dump the request receivied so far to the external file */
+      storerequest(reqbuf);
       return DOCNUMBER_INTERNAL;
     }
     req->offset += got;
