@@ -227,7 +227,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
     }
     if(-1 == bytes_written) {
 #ifdef WIN32
-      if(EWOULDBLOCK == GetLastError())
+      if(WSAEWOULDBLOCK == GetLastError())
 #else
       if(EWOULDBLOCK == errno)
 #endif
@@ -339,7 +339,7 @@ int Curl_read(struct connectdata *conn,
 
     if(-1 == nread) {
 #ifdef WIN32
-      if(EWOULDBLOCK == GetLastError())
+      if(WSAEWOULDBLOCK == GetLastError())
 #else
       if(EWOULDBLOCK == errno)
 #endif
