@@ -57,6 +57,7 @@ my %commandok = ( "USER" => "fresh",
                   "TYPE" => "loggedin|twosock",
                   "LIST" => "twosock",
                   "RETR" => "twosock",
+                  "CWD"  => "loggedin",
                   );
 
 # initially, we're in 'fresh' state
@@ -72,6 +73,8 @@ my %displaytext = ('USER' => '331 We are happy you popped in!', # output FTP lin
                    'PORT' => '200 You said PORT - I say FINE',
                    'TYPE' => '200 I modify TYPE as you wanted',
                    'LIST' => '150 here comes a directory',
+                   'CWD'  => '250 CWD command successful.',
+
                    );
 
 # callback functions for certain commands
@@ -271,6 +274,10 @@ for ( $waitedpid = 0;
 
     # this code is forked and run
     spawn sub {
+
+        open(INPUT, ">log/server.input") ||
+            logmsg "failed to open log/server.input\n";
+
         # < 220 pm1 FTP server (SunOS 5.7) ready.
         # > USER anonymous
         # < 331 Guest login ok, send ident as password.
@@ -300,6 +307,7 @@ for ( $waitedpid = 0;
 
             last unless defined ($_ = <STDIN>);
 
+
             # Remove trailing CRLF.
             s/[\n\r]+$//;
 
@@ -313,6 +321,7 @@ for ( $waitedpid = 0;
             my $full=$_;
                  
             logmsg "GOT: ($1) $_\n";
+            print INPUT "$$: $full\n";
 
             my $ok = $commandok{$FTPCMD};
             if($ok !~ /$state/) {
