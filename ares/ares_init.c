@@ -324,7 +324,7 @@ DhcpNameServer
 
   status = ARES_EFILE;
 
-  if (IsNT) 
+  if (IsNT)
   {
     if (RegOpenKeyEx(
           HKEY_LOCAL_MACHINE, WIN_NS_NT_KEY, 0,
@@ -368,7 +368,7 @@ DhcpNameServer
       if ((result = RegQueryValueEx(
              mykey, NAMESERVER, NULL, &data_type,
              NULL, &bytes
-             ) 
+             )
             ) == ERROR_SUCCESS ||
           result == ERROR_MORE_DATA)
       {
@@ -384,10 +384,10 @@ DhcpNameServer
           free(line);
         }
       }
-    } 
+    }
     RegCloseKey(mykey);
   }
-  
+
   if (status != ARES_EFILE)
   {
     /*
@@ -404,7 +404,7 @@ DhcpNameServer
      system variable Inet$Resolvers, space separated. */
 
   line = getenv("Inet$Resolvers");
-  status = ARES_EFILE;
+  status = ARES_EOF;
   if (line) {
     char *resolvers = strdup(line), *pos, *space;
 
@@ -424,7 +424,7 @@ DhcpNameServer
 
     if (status == ARES_SUCCESS)
       status = ARES_EOF;
-    
+
     free(resolvers);
   }
 
@@ -433,7 +433,7 @@ DhcpNameServer
     char *p;
     FILE *fp;
     int linesize;
-   
+
     fp = fopen(PATH_RESOLV_CONF, "r");
     if (!fp)
       return (errno == ENOENT) ? ARES_SUCCESS : ARES_EFILE;
