@@ -26,15 +26,15 @@
 /*
  * Telnet option defines. Add more here if in need.
  */
-#define TELOPT_BINARY   0  /* binary 8bit data */
-#define TELOPT_SGA      3  /* Supress Go Ahead */
-#define TELOPT_EXOPL  255  /* EXtended OPtions List */
-#define TELOPT_TTYPE   24  /* Terminal TYPE */
-#define TELOPT_XDISPLOC 35 /* X DISPlay LOCation */
+#define CURL_TELOPT_BINARY   0  /* binary 8bit data */
+#define CURL_TELOPT_SGA      3  /* Supress Go Ahead */
+#define CURL_TELOPT_EXOPL  255  /* EXtended OPtions List */
+#define CURL_TELOPT_TTYPE   24  /* Terminal TYPE */
+#define CURL_TELOPT_XDISPLOC 35 /* X DISPlay LOCation */
 
-#define TELOPT_NEW_ENVIRON 39  /* NEW ENVIRONment variables */
-#define NEW_ENV_VAR   0
-#define NEW_ENV_VALUE 1
+#define CURL_TELOPT_NEW_ENVIRON 39  /* NEW ENVIRONment variables */
+#define CURL_NEW_ENV_VAR   0
+#define CURL_NEW_ENV_VALUE 1
 
 /*
  * The telnet options represented as strings
@@ -53,27 +53,27 @@ static const char *telnetoptions[]=
   "OLD-ENVIRON", "AUTHENTICATION", "ENCRYPT",       "NEW-ENVIRON"
 };
 
-#define TELOPT_MAXIMUM TELOPT_NEW_ENVIRON
+#define CURL_TELOPT_MAXIMUM CURL_TELOPT_NEW_ENVIRON
 
-#define TELOPT_OK(x) ((x) <= TELOPT_MAXIMUM)
-#define TELOPT(x)    telnetoptions[x]
+#define CURL_TELOPT_OK(x) ((x) <= CURL_TELOPT_MAXIMUM)
+#define CURL_TELOPT(x)    telnetoptions[x]
 
-#define NTELOPTS 40 
+#define CURL_NTELOPTS 40 
 
 /*
  * First some defines
  */
-#define xEOF 236 /* End Of File */ 
-#define SE   240 /* Sub negotiation End */
-#define NOP  241 /* No OPeration */
-#define DM   242 /* Data Mark */
-#define GA   249 /* Go Ahead, reverse the line */
-#define SB   250 /* SuBnegotiation */
-#define WILL 251 /* Our side WILL use this option */
-#define WONT 252 /* Our side WON'T use this option */
-#define DO   253 /* DO use this option! */
-#define DONT 254 /* DON'T use this option! */
-#define IAC  255 /* Interpret As Command */
+#define CURL_xEOF 236 /* End Of File */ 
+#define CURL_SE   240 /* Sub negotiation End */
+#define CURL_NOP  241 /* No OPeration */
+#define CURL_DM   242 /* Data Mark */
+#define CURL_GA   249 /* Go Ahead, reverse the line */
+#define CURL_SB   250 /* SuBnegotiation */
+#define CURL_WILL 251 /* Our side WILL use this option */
+#define CURL_WONT 252 /* Our side WON'T use this option */
+#define CURL_DO   253 /* DO use this option! */
+#define CURL_DONT 254 /* DON'T use this option! */
+#define CURL_IAC  255 /* Interpret As Command */
 
 /*
  * Then those numbers represented as strings:
@@ -86,16 +86,16 @@ static const char *telnetcmds[]=
   "WILL", "WONT",  "DO",    "DONT", "IAC"
 };
 
-#define TELCMD_MINIMUM xEOF /* the first one */
-#define TELCMD_MAXIMUM  IAC  /* surprise, 255 is the last one! ;-) */
+#define CURL_TELCMD_MINIMUM CURL_xEOF /* the first one */
+#define CURL_TELCMD_MAXIMUM CURL_IAC  /* surprise, 255 is the last one! ;-) */
 
-#define TELQUAL_IS   0
-#define TELQUAL_SEND 1
-#define TELQUAL_INFO 2
-#define TELQUAL_NAME 3
+#define CURL_TELQUAL_IS   0
+#define CURL_TELQUAL_SEND 1
+#define CURL_TELQUAL_INFO 2
+#define CURL_TELQUAL_NAME 3
 
-#define TELCMD_OK(x) ( ((unsigned int)(x) >= TELCMD_MINIMUM) && \
-                       ((unsigned int)(x) <= TELCMD_MAXIMUM) )
-#define TELCMD(x)    telnetcmds[(x)-TELCMD_MINIMUM]
+#define CURL_TELCMD_OK(x) ( ((unsigned int)(x) >= CURL_TELCMD_MINIMUM) && \
+                       ((unsigned int)(x) <= CURL_TELCMD_MAXIMUM) )
+#define CURL_TELCMD(x)    telnetcmds[(x)-CURL_TELCMD_MINIMUM]
 #endif
 #endif
