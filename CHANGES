@@ -6,8 +6,11 @@
 
                                   Changelog
 
-Gisle (16 October 2004)
+Daniel (16 October 2004)
+- runekl at opoint.com found out (and provided a fix) that libcurl leaked
+  memory for cookies with the "max-age" field set.
 
+Gisle (16 October 2004)
 - Issue 50 in TODO-RELEASE; Added Traian Nicolescu's patches for threaded
   resolver on Windows. Plugged some potential handle and memory leaks.
 

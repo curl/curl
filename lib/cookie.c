@@ -111,6 +111,8 @@ static void freecookie(struct Cookie *co)
     free(co->name);
   if(co->value)
     free(co->value);
+  if(co->maxage)
+    free(co->maxage);
 
   free(co);
 }
