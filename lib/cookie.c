@@ -374,6 +374,9 @@ Curl_cookie_add(struct CookieInfo *c,
           free(clist->maxage);
 
         *clist = *co;  /* then store all the new data */
+
+        free(co);   /* free the newly alloced memory */
+        co = clist; /* point to the previous struct instead */
       }
 
     }
