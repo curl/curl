@@ -2022,7 +2022,6 @@ static CURLcode Connect(struct UrlData *data,
     free(conn->path);        /* free the previous path pointer */
 
     /* we need these pointers if we speak over a proxy */
-    strcpy(conn->gname, old_conn->gname); /* copy the name */
     conn->name = conn->gname;
     conn->hostname = old_conn->gname;
 
