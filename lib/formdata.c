@@ -634,11 +634,16 @@ int main(int argc, char **argv)
 
   form=Curl_getFormData(httppost, &size);
 
-  FormInit(&formread, form);
+  Curl_FormInit(&formread, form);
 
-  while(nread = FormReader(buffer, 1, sizeof(buffer), (FILE *)&formread)) {
+  do {
+    nread = Curl_FormReader(buffer, 1, sizeof(buffer),
+                            (FILE *)&formread);
+
+    if(-1 == nread)
+      break;
     fwrite(buffer, nread, 1, stderr);
-  }
+  } while(1);
 
   fprintf(stderr, "size: %d\n", size);
 
