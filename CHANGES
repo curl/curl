@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (19 January 2004)
+- David Byron cleaned up how --trace with no option was treated, and also
+  arguments in a config file without a required parameter!
+
 Daniel (16 January 2004)
 - Gisle Vanem fixed a few issues where compilers warned about variables
   possibly being used unassigned.
