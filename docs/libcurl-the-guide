@@ -255,6 +255,9 @@ When It Doesn't Work
  possible of your code that uses libcurl, operating system name and version,
  compiler name and version etc.
 
+ If CURLOPT_VERBOSE is not enough, you increase the level of debug data your
+ application receive by using the CURLOPT_DEBUGFUNCTION.
+
  Getting some in-depth knowledge about the protocols involved is never wrong,
  and if you're trying to do funny things, you might very well understand
  libcurl and how to use it better if you study the appropriate RFC documents
@@ -293,8 +296,8 @@ Upload Data to a Remote Site
     curl_easy_setopt(easyhandle, CURLOPT_UPLOAD, TRUE);
 
  A few protocols won't behave properly when uploads are done without any prior
- knowledge of the expected file size. HTTP PUT is one example [1]. So, set the
- upload file size using the CURLOPT_INFILESIZE like this:
+ knowledge of the expected file size. So, set the upload file size using the
+ CURLOPT_INFILESIZE for all known file sizes like this[1]:
 
     curl_easy_setopt(easyhandle, CURLOPT_INFILESIZE, file_size);
 
@@ -404,7 +407,7 @@ HTTP POSTing
     headers = curl_slist_append(headers, "Content-Type: text/xml");
 
     /* post binary data */
-    curl_easy_setopt(easyhandle, CURLOPT_POSTFIELD, binaryptr);
+    curl_easy_setopt(easyhandle, CURLOPT_POSTFIELDS, binaryptr);
 
     /* set the size of the postfields data */
     curl_easy_setopt(easyhandle, CURLOPT_POSTFIELDSIZE, 23);
@@ -726,6 +729,35 @@ Persistancy Is The Way to Happiness
  CURLOPT_FORBID_REUSE to TRUE.
 
 
+HTTP Headers Used by libcurl
+
+ When you use libcurl to do HTTP requeests, it'll pass along a series of
+ headers automaticly. It might be good for you to know and understand these
+ ones.
+
+  Host
+
+    This header is required by HTTP 1.1 and even many 1.0 servers and should
+    be the name of the server we want to talk to. This includes the port
+    number if anything but default.
+
+  Pragma
+
+    "no-cache". Tells a possible proxy to not grap a copy from the cache but
+    to fetch a fresh one.
+
+  Accept:
+
+    "image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*". Cloned from a
+    browser once a hundred years ago.
+
+  Expect:
+
+    When doing multi-part formposts, libcurl will set this header to
+    "100-continue" to ask the server for an "OK" message before it proceeds
+    with sending the data part of the post.
+
+
 Customizing Operations
 
  There is an ongoing development today where more and more protocols are built
@@ -738,101 +770,129 @@ Customizing Operations
 
  libcurl is your friend here too.
 
- If just changing the actual HTTP request keyword is what you want, like when
- GET, HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST is there
- for you. It is very simple to use:
+  CUSTOMREQUEST
 
-    curl_easy_setopt(easyhandle, CURLOPT_CUSTOMREQUEST, "MYOWNRUQUEST");
+    If just changing the actual HTTP request keyword is what you want, like
+    when GET, HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST
+    is there for you. It is very simple to use:
 
- When using the custom request, you change the request keyword of the actual
- request you are performing. Thus, by default you make GET request but you can
- also make a POST operation (as described before) and then replace the POST
- keyword if you want to. You're the boss.
+       curl_easy_setopt(easyhandle, CURLOPT_CUSTOMREQUEST, "MYOWNRUQUEST");
 
- HTTP-like protocols pass a series of headers to the server when doing the
- request, and you're free to pass any amount of extra headers that you think
- fit. Adding headers are this easy:
+    When using the custom request, you change the request keyword of the
+    actual request you are performing. Thus, by default you make GET request
+    but you can also make a POST operation (as described before) and then
+    replace the POST keyword if you want to. You're the boss.
 
-    struct curl_slist *headers=NULL; /* init to NULL is important */
+  Modify Headers
 
-    headers = curl_slist_append(headers, "Hey-server-hey: how are you?");
-    headers = curl_slist_append(headers, "X-silly-content: yes");
+    HTTP-like protocols pass a series of headers to the server when doing the
+    request, and you're free to pass any amount of extra headers that you
+    think fit. Adding headers are this easy:
 
-    /* pass our list of custom made headers */
-    curl_easy_setopt(easyhandle, CURLOPT_HTTPHEADER, headers);
+       struct curl_slist *headers=NULL; /* init to NULL is important */
 
-    curl_easy_perform(easyhandle); /* transfer http */
+       headers = curl_slist_append(headers, "Hey-server-hey: how are you?");
+       headers = curl_slist_append(headers, "X-silly-content: yes");
 
-    curl_slist_free_all(headers); /* free the header list */
+       /* pass our list of custom made headers */
+       curl_easy_setopt(easyhandle, CURLOPT_HTTPHEADER, headers);
 
- ... and if you think some of the internally generated headers, such as
- User-Agent:, Accept: or Host: don't contain the data you want them to
- contain, you can replace them by simply setting them too:
+       curl_easy_perform(easyhandle); /* transfer http */
 
-    headers = curl_slist_append(headers, "User-Agent: 007");
-    headers = curl_slist_append(headers, "Host: munged.host.line");
+       curl_slist_free_all(headers); /* free the header list */
 
- If you replace an existing header with one with no contents, you will prevent
- the header from being sent. Like if you want to completely prevent the
- "Accept:" header to be sent, you can disable it with code similar to this:
+   ... and if you think some of the internally generated headers, such as
+   Accept: or Host: don't contain the data you want them to contain, you can
+   replace them by simply setting them too:
 
-    headers = curl_slist_append(headers, "Accept:");
+       headers = curl_slist_append(headers, "Accept: Agent-007");
+       headers = curl_slist_append(headers, "Host: munged.host.line");
 
- Both replacing and cancelling internal headers should be done with careful
- consideration and you should be aware that you may violate the HTTP protocol
- when doing so.
+  Delete Headers
 
- There's only one aspect left in the HTTP requests that we haven't yet
- mentioned how to modify: the version field. All HTTP requests includes the
- version number to tell the server which version we support. libcurl speak
- HTTP 1.1 by default. Some very old servers don't like getting 1.1-requests
- and when dealing with stubborn old things like that, you can tell libcurl to
- use 1.0 instead by doing something like this:
+    If you replace an existing header with one with no contents, you will
+    prevent the header from being sent. Like if you want to completely prevent
+    the "Accept:" header to be sent, you can disable it with code similar to
+    this:
 
-    curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, CURLHTTP_VERSION_1_0);
+       headers = curl_slist_append(headers, "Accept:");
 
- Not all protocols are HTTP-like, and thus the above may not help you when you
- want to make for example your FTP transfers to behave differently.
+    Both replacing and cancelling internal headers should be done with careful
+    consideration and you should be aware that you may violate the HTTP
+    protocol when doing so.
 
- Sending custom commands to a FTP server means that you need to send the
- comands exactly as the FTP server expects them (RFC959 is a good guide here),
- and you can only use commands that work on the control-connection alone. All
- kinds of commands that requires data interchange and thus needs a
- data-connection must be left to libcurl's own judgement. Also be aware that
- libcurl will do its very best to change directory to the target directory
- before doing any transfer, so if you change directory (with CWD or similar)
- you might confuse libcurl and then it might not attempt to transfer the file
- in the correct remote directory.
+  Enforcing chunked transfer-encoding
 
- A little example that deletes a given file before an operation:
+    By making sure a request uses the custom header "Transfer-Encoding:
+    chunked" when doing a non-GET HTTP operation, libcurl will switch over to
+    "chunked" upload, even though the size of the data to upload might be
+    known. By default, libcurl usually switches over to chunked upload
+    automaticly if the upload data size is unknown.
 
-    headers = curl_slist_append(headers, "DELE file-to-remove");
+  HTTP Version
 
-    /* pass the list of custom commands to the handle */
-    curl_easy_setopt(easyhandle, CURLOPT_QUOTE, headers);
+    There's only one aspect left in the HTTP requests that we haven't yet
+    mentioned how to modify: the version field. All HTTP requests includes the
+    version number to tell the server which version we support. libcurl speak
+    HTTP 1.1 by default. Some very old servers don't like getting 1.1-requests
+    and when dealing with stubborn old things like that, you can tell libcurl
+    to use 1.0 instead by doing something like this:
 
-    curl_easy_perform(easyhandle); /* transfer ftp data! */
+       curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION,
+                                    CURLHTTP_VERSION_1_0);
 
-    curl_slist_free_all(headers); /* free the header list */
+  FTP Custom Commands
 
- If you would instead want this operation (or chain of operations) to happen
- _after_ the data transfer took place the option to curl_easy_setopt() would
- instead be called CURLOPT_POSTQUOTE and used the exact same way.
+    Not all protocols are HTTP-like, and thus the above may not help you when
+    you want to make for example your FTP transfers to behave differently.
 
- The custom FTP command will be issued to the server in the same order they
- are added to the list, and if a command gets an error code returned back from
- the server, no more commands will be issued and libcurl will bail out with an
- error code (CURLE_FTP_QUOTE_ERROR). Note that if you use CURLOPT_QUOTE to
- send commands before a transfer, no transfer will actually take place when a
- quote command has failed.
+    Sending custom commands to a FTP server means that you need to send the
+    comands exactly as the FTP server expects them (RFC959 is a good guide
+    here), and you can only use commands that work on the control-connection
+    alone. All kinds of commands that requires data interchange and thus needs
+    a data-connection must be left to libcurl's own judgement. Also be aware
+    that libcurl will do its very best to change directory to the target
+    directory before doing any transfer, so if you change directory (with CWD
+    or similar) you might confuse libcurl and then it might not attempt to
+    transfer the file in the correct remote directory.
 
- If you set the CURLOPT_HEADER to true, you will tell libcurl to get
- information about the target file and output "headers" about it. The headers
- will be in "HTTP-style", looking like they do in HTTP.
+    A little example that deletes a given file before an operation:
 
- The option to enable headers or to run custom FTP commands may be useful to
- combine with CURLOPT_NOBODY. If this option is set, no actual file content
- transfer will be performed.
+      headers = curl_slist_append(headers, "DELE file-to-remove");
+
+      /* pass the list of custom commands to the handle */
+      curl_easy_setopt(easyhandle, CURLOPT_QUOTE, headers);
+
+      curl_easy_perform(easyhandle); /* transfer ftp data! */
+
+      curl_slist_free_all(headers); /* free the header list */
+
+    If you would instead want this operation (or chain of operations) to
+    happen _after_ the data transfer took place the option to
+    curl_easy_setopt() would instead be called CURLOPT_POSTQUOTE and used the
+    exact same way.
+
+    The custom FTP command will be issued to the server in the same order they
+    are added to the list, and if a command gets an error code returned back
+    from the server, no more commands will be issued and libcurl will bail out
+    with an error code (CURLE_FTP_QUOTE_ERROR). Note that if you use
+    CURLOPT_QUOTE to send commands before a transfer, no transfer will
+    actually take place when a quote command has failed.
+
+    If you set the CURLOPT_HEADER to true, you will tell libcurl to get
+    information about the target file and output "headers" about it. The
+    headers will be in "HTTP-style", looking like they do in HTTP.
+
+    The option to enable headers or to run custom FTP commands may be useful
+    to combine with CURLOPT_NOBODY. If this option is set, no actual file
+    content transfer will be performed.
+
+  FTP Custom CUSTOMREQUEST
+
+    If you do what list the contents of a FTP directory using your own defined
+    FTP command, CURLOPT_CUSTOMREQUEST will do just that. "NLST" is the
+    default one for listing directories but you're free to pass in your idea
+    of a good alternative.
 
 
 Cookies Without Chocolate Chips
@@ -1007,19 +1067,30 @@ SSL, Certificates and Other Tricks
 
  [ seeding, passwords, keys, certificates, ENGINE, ca certs ]
 
+Multiple Transfers Using the multi Interface
+
+ The easy interface as described in detail in this document is a synchronous
+ interface that transfers one file at a time and doesn't return until its
+ done.
+
+ The multi interface on the other hand, allows your program to transfer
+ multiple files in both directions at the same time, without forcing you to
+ use multiple threads.
+
+ [fill in lots of more multi stuff here]
 
 Future
 
- [ multi interface, sharing between handles, mutexes, pipelining ]
+ [ sharing between handles, mutexes, pipelining ]
 
 
 -----
 Footnotes:
 
-[1] = HTTP PUT without knowing the size prior to transfer is indeed possible,
-      but libcurl does not support the chunked transfers on uploading that is
-      necessary for this feature to work. We'd gratefully appreciate patches
-      that bring this functionality...
+[1] = libcurl 7.10.3 and later have the ability to switch over to chunked
+      Tranfer-Encoding in cases were HTTP uploads are done with data of an
+      unknown size.
+
 
 [2] = This happens on Windows machines when libcurl is built and used as a
       DLL. However, you can still do this on Windows if you link with a static
