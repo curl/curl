@@ -66,11 +66,13 @@ libcurl.a: $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	$(RANLIB) libcurl.a
 	$(STRIP) $@
 
+DLLINITOBJ =
+
 # remove the last line above to keep debug info
 
-libcurl.dll libcurldll.a: libcurl.a libcurl.def dllinit.o
+libcurl.dll libcurldll.a: libcurl.a libcurl.def $(DLLINITOBJ)
 	$(RM) $@
-	dllwrap --dllname $@ --output-lib libcurldll.a --export-all --def libcurl.def $(libcurl_a_LIBRARIES) dllinit.o $(DLL_LIBS) -lwsock32 -lws2_32 -lwinmm
+	dllwrap --dllname $@ --output-lib libcurldll.a --export-all --def libcurl.def $(libcurl_a_LIBRARIES) $(DLLINITOBJ) $(DLL_LIBS) -lwsock32 -lws2_32 -lwinmm
 	$(STRIP) $@
 
 # remove the last line above to keep debug info
