@@ -468,6 +468,8 @@ static void help(void)
     " -1/--tlsv1         Force usage of TLSv1 (H)",
     " -2/--sslv2         Force usage of SSLv2 (H)",
     " -3/--sslv3         Force usage of SSLv3 (H)",
+    " -4/--ipv4          Resolve name to IPv4 address",
+    " -6/--ipv6          Resolve name to IPv6 address",
     " -#/--progress-bar  Display transfer progress as a progress bar",
     NULL
   };
@@ -562,6 +564,7 @@ struct Configurable {
   struct curl_slist *prequote;
 
   long ssl_version;
+  long ip_version;
   curl_TimeCond timecond;
   time_t condtime;
 
@@ -1070,41 +1073,43 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
      boolean whether it takes an additional argument
      */
   struct LongShort aliases[]= {
-    {"9", "crlf",        FALSE},
-    {"8", "stderr",      TRUE},
-    {"7", "interface",   TRUE},
-    {"6", "krb4",        TRUE},
-    /* all these ones, starting with 5 as a short-option have *no* short
+    /* all these ones, starting with "*" as a short-option have *no* short
        option to mention. */
-    {"5", "url",         TRUE},
-    {"5a", "random-file", TRUE},
-    {"5b", "egd-file",   TRUE},
-    {"5c", "connect-timeout", TRUE},
-    {"5d", "ciphers",    TRUE},
-    {"5e", "disable-epsv", FALSE},
+    {"*", "url",         TRUE},
+    {"*a", "random-file", TRUE},
+    {"*b", "egd-file",   TRUE},
+    {"*c", "connect-timeout", TRUE},
+    {"*d", "ciphers",    TRUE},
+    {"*e", "disable-epsv", FALSE},
 #ifdef USE_ENVIRONMENT
-    {"5f", "environment", FALSE},
+    {"*f", "environment", FALSE},
 #endif
-    {"5g", "trace",      TRUE},
-    {"5h", "trace-ascii", TRUE},
-    {"5i", "limit-rate", TRUE},
-    {"5j", "compressed",  FALSE}, /* might take an arg someday */
-    {"5k", "digest",     FALSE},
-    {"5l", "negotiate",  FALSE},
-    {"5m", "ntlm",       FALSE},
-    {"5n", "basic",      FALSE},
-    {"5o", "anyauth",    FALSE},
+    {"*g", "trace",      TRUE},
+    {"*h", "trace-ascii", TRUE},
+    {"*i", "limit-rate", TRUE},
+    {"*j", "compressed",  FALSE}, /* might take an arg someday */
+    {"*k", "digest",     FALSE},
+    {"*l", "negotiate",  FALSE},
+    {"*m", "ntlm",       FALSE},
+    {"*n", "basic",      FALSE},
+    {"*o", "anyauth",    FALSE},
 #ifdef __DJGPP__
-    {"5p", "wdebug",     FALSE},
+    {"*p", "wdebug",     FALSE},
 #endif
-    {"5q", "ftp-create-dirs", FALSE},    
-    {"5r", "create-dirs", FALSE},
-    {"5s", "max-redirs",   TRUE},
-    {"5t", "proxy-ntlm",   FALSE},
+    {"*q", "ftp-create-dirs", FALSE},    
+    {"*r", "create-dirs", FALSE},
+    {"*s", "max-redirs",   TRUE},
+    {"*t", "proxy-ntlm",   FALSE},
+    {"*u", "crlf",        FALSE},
+    {"*v", "stderr",      TRUE},
+    {"*w", "interface",   TRUE},
+    {"*x", "krb4",        TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
     {"3", "sslv3",       FALSE},
+    {"4", "ipv4",       FALSE},
+    {"6", "ipv6",       FALSE},
     {"a", "append",      FALSE},
     {"A", "user-agent",  TRUE},
     {"b", "cookie",      TRUE},
@@ -1242,27 +1247,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       *usedarg = TRUE; /* mark it as used */
 
     switch(letter) {
-    case '9': /* there is no short letter for this */
-      /* LF -> CRLF conversinon? */
-      config->crlf = TRUE;
-      break;
-    case '8': /* there is no short letter for this */
-      if(strcmp(nextarg, "-")) {
-        config->errors = fopen(nextarg, "wt");
-        config->errors_fopened = TRUE;
-      }
-      else
-        config->errors = stdout;
-      break;
-    case '7': /* there is no short letter for this */
-      /* interface */
-      GetStr(&config->iface, nextarg);
-      break;
-    case '6': /* there is no short letter for this */
-      /* krb4 level string */
-      GetStr(&config->krb4level, nextarg);
-      break;
-    case '5':
+    case '*': /* options without a short option */
       switch(subletter) {
       case 'a': /* random-file */
         GetStr(&config->random_file, nextarg);
@@ -1364,6 +1349,28 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->proxyntlm ^= TRUE;
         break;
 
+      case 'u': /* --crlf */
+        /* LF -> CRLF conversinon? */
+        config->crlf = TRUE;
+        break;
+
+      case 'v': /* --stderr */
+        if(strcmp(nextarg, "-")) {
+          config->errors = fopen(nextarg, "wt");
+          config->errors_fopened = TRUE;
+        }
+        else
+          config->errors = stdout;
+      break;
+      case 'w': /* --interface */
+        /* interface */
+        GetStr(&config->iface, nextarg);
+        break;
+      case 'x': /* --krb4 */
+        /* krb4 level string */
+        GetStr(&config->krb4level, nextarg);
+        break;
+
       default: /* the URL! */
         {
           struct getout *url;
@@ -1409,6 +1416,14 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case '3': 
       /* SSL version 3 */
       config->ssl_version = CURL_SSLVERSION_SSLv3;
+      break;
+    case '4': 
+      /* IPv4 */
+      config->ip_version = 4;
+      break;
+    case '6': 
+      /* IPv6 */
+      config->ip_version = 6;
       break;
     case 'a':
       /* This makes the FTP sessions use APPE instead of STOR */
@@ -1828,7 +1843,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           {"NTLM", CURL_VERSION_NTLM},
           {"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
           {"Debug", CURL_VERSION_DEBUG},
-          {"AsynchDNS", CURL_VERSION_ASYNCHDNS}
+          {"AsynchDNS", CURL_VERSION_ASYNCHDNS},
+          {"SPNEGO", CURL_VERSION_SPNEGO}
         };
         printf("Features: ");
         for(i=0; i<sizeof(feats)/sizeof(feats[0]); i++) {
