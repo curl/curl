@@ -739,7 +739,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   CURLcode result;
   int res;
 
-  int nread;   /* total size read */
+  size_t nread;   /* total size read */
   int perline; /* count bytes per line */
   bool keepon=TRUE;
   ssize_t gotbytes;
