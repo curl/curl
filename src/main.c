@@ -347,8 +347,8 @@ static void help(void)
        "    --cacert <file> CA certifciate to verify peer against (SSL)\n"
        "    --capath <directory> CA directory (made using c_rehash) to verify\n"
        "                    peer against (SSL, NOT Windows)\n"
-       "    --ciphers <list> What SSL ciphers to use (SSL)\n"
-       "    --connect-timeout <seconds> Maximum time allowed for connection\n"
+       "    --ciphers <list> What SSL ciphers to use (SSL)");
+  puts("    --connect-timeout <seconds> Maximum time allowed for connection\n"
        " -f/--fail          Fail silently (no output at all) on errors (H)\n"
        " -F/--form <name=content> Specify HTTP POST data (H)\n"
        " -g/--globoff       Disable URL sequences and ranges using {} and []\n"
