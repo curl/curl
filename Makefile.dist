@@ -35,6 +35,24 @@ borland:
 	cd ..\src
 	make -f Makefile.b32
 
+borland-ssl:
+	cd lib
+	make -f Makefile.b32 WITH_SSL=1
+	cd ..\src
+	make -f Makefile.b32 WITH_SSL=1
+
+borland-ssl-zlib:
+	cd lib
+	make -f Makefile.b32 WITH_SSL=1 WITH_ZLIB=1
+	cd ..\src
+	make -f Makefile.b32 WITH_SSL=1 WITH_ZLIB=1
+
+borland-clean:
+	cd lib
+	make -f Makefile.b32 clean
+	cd ..\src
+	make -f Makefile.b32 clean
+
 mingw32:
 	cd lib & make -f Makefile.m32 ZLIB=1
 	cd src & make -f Makefile.m32 ZLIB=1
