@@ -6,7 +6,51 @@
 
                                History of Changes
 
+Daniel (9 October 2001)
+- Added a new option to the command line client: -0/--http1.0. It uses the new
+  libcurl option CURLOPT_HTTP_VERSION to request that libcurl uses HTTP 1.0
+  requests instead of the default version (1.1). It should only be used if you
+  really MUST do that because of a silly remote server.
+
+- Renamed the 'TimeCond' typedef in curl/curl.h to use a 'curl_' prefix as
+  all public curl-symbols should.
+
+- libcurl now explicitly ignores the SIGPIPE signal.
+
+Daniel (8 October 2001)
+- Kevin Roth's change to the cookie-jar comment (in the stored file) was
+  applied.
+
+- Lucas Adamski's minor bug in the bind error code failf() was fixed.
+
+Daniel (5 October 2001)
+- Moonesamy fixed the Curl_connecthost() function to not give compiler errors
+  on a bunch of compilers, due to the argument named 'socket'.
+
+- Moonesamy also provided updated VC++ makefiles and project files.
+
+Version 7.9.1-pre2
+
+Daniel (4 October 2001)
+- Albert Chin provided a configure patch that makes the script detect proper
+  gethostbyname_r() method without actually running any code, only compiling
+  is necessary. This also removes the need of having a resolving 'localhost'
+  name.
+
+- Found and removed memory leakage (name resolve data) in libcurl on
+  IPv6-enabled hosts. These could sneak through because we didn't have any
+  resource tracing on the IPv6-related functions. We do now.
+
 Daniel (3 October 2001)
+- Keith McGuigan patched away a (mainly Windows-) problem with the name
+  resolver data being kept in the static memory area, which is removed when a
+  thread is killed. The curl handle itself though perfectly handles being
+  passed between threads.
+
+- Dirk Eddelbuettel reported an odd bug that turned out to be his proxy that
+  required an Authorization: header. Now, proxies are not supposed to require
+  that header, that is for true servers...
+
 - I accidentally ruined Georg's curl_formadd(). Uh, bad me. Corrected now.
 
 Version 7.9.1-pre1
