@@ -19,10 +19,7 @@ TODO
 
  * The new 'multi' interface is being designed. Work out the details, start
    implementing and write test applications!
-   [http://curl.haxx.se/dev/multi.h]
-
- * Add a name resolve cache to libcurl to make repeated fetches to the same
-   host name (when persitancy isn't available) faster.
+   [http://curl.haxx.se/lxr/source/lib/multi.h]
 
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
@@ -33,13 +30,28 @@ TODO
    telnet, ldap, dict or file.
 
  * Add asynchronous name resolving. http://curl.haxx.se/dev/async-resolver.txt
+   This should be made to work on most of the supported platforms, or
+   otherwise it isn't really interesting.
 
- * Strip any trailing CR from the error message when Curl_failf() is used.
+ * Data sharing. Tell which easy handles within a multi handle that should
+   share cookies, connection cache, dns cache, ssl session cache.
+
+ * Mutexes. By adding mutex callback support, the 'data sharing' mentioned
+   above can be made between several easy handles running in different threads
+   too. The actual mutex implementations will be left for the application to
+   implement, libcurl will merely call 'getmutex' and 'leavemutex' callbacks.
+
+ * No-faster-then-this transfers. Many people have limited bandwidth and they
+   want the ability to make sure their transfers never use more bandwith than
+   they think is good.
+
+ * Set the SO_KEEPALIVE socket option to make libcurl notice and disconnect
+   very long time idle connections.
 
  DOCUMENTATION
 
  * Document all CURLcode error codes, why they happen and what most likely
-   will make them not happen again.
+   will make them not happen again. In a libcurl point of view.
 
  FTP
 
@@ -54,11 +66,7 @@ TODO
    already working http dito works. It of course requires that 'MDTM' works,
    and it isn't a standard FTP command.
 
- * Suggested on the mailing list: CURLOPT_FTP_MKDIR...!
-
- * Always use the FTP SIZE command before downloading, as that makes it more
-   likely that we know the size when downloading. Some sites support SIZE but
-   don't show the size in the RETR response!
+ * Add FTPS support with SSL for the data connection too.
 
  HTTP
 
@@ -83,20 +91,31 @@ TODO
    http://www.innovation.ch/java/ntlm.html that contains detailed reverse-
    engineered info.
 
- * RFC2617 compliance, "Digest Access Authentication"
-   A valid test page seem to exist at:
-   http://hopf.math.nwu.edu/testpage/digest/
-   And some friendly person's server source code is available at
-   http://hopf.math.nwu.edu/digestauth/index.html
-   Then there's the Apache mod_digest source code too of course.  It seems as
-   if Netscape doesn't support this, and not many servers do. Although this is
-   a lot better authentication method than the more common "Basic". Basic
-   sends the password in cleartext over the network, this "Digest" method uses
-   a challange-response protocol which increases security quite a lot.
+ * RFC2617 compliance, "Digest Access Authentication" A valid test page seem
+   to exist at: http://hopf.math.nwu.edu/testpage/digest/ And some friendly
+   person's server source code is available at
+   http://hopf.math.nwu.edu/digestauth/index.html Then there's the Apache
+   mod_digest source code too of course.  It seems as if Netscape doesn't
+   support this, and not many servers do. Although this is a lot better
+   authentication method than the more common "Basic". Basic sends the
+   password in cleartext over the network, this "Digest" method uses a
+   challange-response protocol which increases security quite a lot.
+
+ * Pipelining. Sending multiple requests before the previous one(s) are done.
+   This could possibly be implemented using the multi interface to queue
+   requests and the response data.
 
  TELNET
 
  * Make TELNET work on windows98!
+
+ * Reading input (to send to the remote server) on stdin is a crappy solution
+   for library purposes. We need to invent a good way for the application to
+   be able to provide the data to send.
+
+ * Move the telnet support's network select() loop go away and merge the code
+   into the main transfer loop. Until this is done, the multi interface won't
+   work for telnet.
 
  SSL
 
@@ -104,12 +123,20 @@ TODO
    exported/imported. Cris Bailiff said: "OpenSSL has functions which can
    serialise the current SSL state to a buffer of your choice, and
    recover/reset the state from such a buffer at a later date - this is used
-   by mod_ssl for apache to implement and SSL session ID cache"
+   by mod_ssl for apache to implement and SSL session ID cache". This whole
+   idea might become moot if we enable the 'data sharing' as mentioned in the
+   LIBCURL label above.
 
  * Make curl's SSL layer option capable of using other free SSL libraries.
    Such as the Mozilla Security Services
    (http://www.mozilla.org/projects/security/pki/nss/) and GNUTLS
    (http://gnutls.hellug.gr/)
+
+ LDAP
+
+ * Look over the implementation. The looping will have to "go away" from the
+   lib/ldap.c source file and get moved to the main network code so that the
+   multi interface and friends will work for LDAP as well.
 
  CLIENT
 
@@ -119,11 +146,10 @@ TODO
    the same syntax to specify several files to get uploaded (using the same
    persistant connection), using -T.
 
- * Say you have a list of FTP addresses to download in a file named
-   ftp-list.txt: "cat ftp-list.txt | xargs curl -O -O -O [...]". curl _needs_
-   an "-Oalways" flag -- all addresses on the command line use the base
-   filename to store locally.  Else a script must precount the # of URLs,
-   construct the proper number of "-O"s...
+ * When the multi interface has been implemented and proved to work, the
+   client could be told to use maximum N simultaneous transfers and then just
+   make sure that happens. It should of course not make more than one
+   connection to the same remote host.
 
  TEST SUITE
 
