@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (2 December)
+- Giuseppe Attardi pointed out that we should use MSG_NOSIGNAL when we use
+  send() and recv(). I added checks for the define in the configure script and
+  adjusted the code accordingly. If the symbol is present, we won't attempt
+  to ignore the SIGPIPE signal.
+
 Daniel (1 December)
 - Mathias Axelsson set up a bsdftpd-ssl server for me and I could make curl
   run fine against its FTPS implementation. Now these FTPS-related things
