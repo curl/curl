@@ -6,7 +6,7 @@ curl_share_cleanup - Clean up a shared object
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "CURLSHcode curl_share_cleanup( );"
+.BI "CURLSHcode curl_share_cleanup(CURLSH *" share_handle ");"
 .ad
 .SH DESCRIPTION
 This function deletes a shared object. The share handle cannot be used anymore
