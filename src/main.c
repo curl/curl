@@ -970,6 +970,21 @@ typedef enum {
   PARAM_LAST
 } ParameterError;
 
+static void cleanarg(char *str)
+{
+#ifdef HAVE_WRITABLE_ARGV
+  /* now that GetStr has copied the contents of nextarg, wipe the next
+   * argument out so that the username:password isn't displayed in the
+   * system process list */
+  if (str) {
+    size_t len = strlen(str);
+    memset(str, ' ', len);
+  }
+#else
+  (void)str;
+#endif
+}
+
 static ParameterError getparameter(char *flag, /* f or -long-flag */
                                    char *nextarg, /* NULL if unset */
                                    bool *usedarg, /* set to TRUE if the arg
@@ -1398,6 +1413,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'e': /* private key passphrase */
         GetStr(&config->key_passwd, nextarg);
+        cleanarg(nextarg);
         break;
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
@@ -1432,6 +1448,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
             GetStr(&config->key_passwd, ptr);
           }
           GetStr(&config->cert, nextarg);
+          cleanarg(nextarg);
         }
       }
       break;
@@ -1627,10 +1644,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case 'u':
       /* user:password  */
       GetStr(&config->userpwd, nextarg);
+      cleanarg(nextarg);
       break;
     case 'U':
       /* Proxy user:password  */
       GetStr(&config->proxyuserpwd, nextarg);
+      cleanarg(nextarg);
       break;
     case 'v':
       config->conf ^= CONF_VERBOSE; /* talk a lot */
