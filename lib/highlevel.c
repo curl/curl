@@ -349,6 +349,7 @@ _Transfer(struct connectdata *c_conn)
                     return CURLE_WRITE_ERROR;
                   }
                 }
+                data->header_size += p - data->headerbuff;
                 break;		/* exit header line loop */
               }
               
@@ -425,6 +426,7 @@ _Transfer(struct connectdata *c_conn)
                   return CURLE_WRITE_ERROR;
                 }
               }
+              data->header_size += hbuflen;
               
               /* reset hbufp pointer && hbuflen */
               hbufp = data->headerbuff;

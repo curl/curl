@@ -84,6 +84,12 @@ CURLcode curl_getinfo(CURL *curl, CURLINFO info, ...)
   case CURLINFO_HTTP_CODE:
     *param_longp = data->progress.httpcode;
     break;
+  case CURLINFO_HEADER_SIZE:
+    *param_longp = data->header_size;
+    break;
+  case CURLINFO_REQUEST_SIZE:
+    *param_longp = data->request_size;
+    break;
   case CURLINFO_TOTAL_TIME:
     *param_doublep = data->progress.timespent;
     break;
