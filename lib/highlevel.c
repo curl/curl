@@ -718,6 +718,9 @@ CURLcode curl_transfer(CURL *curl)
           /* TBD: set the port with curl_setopt() */
           data->port = 0;
         }
+
+        if(data->bits.urlstringalloc)
+          free(data->url);
       
         /* TBD: set the URL with curl_setopt() */
         data->url = data->newurl;
@@ -744,12 +747,6 @@ CURLcode curl_transfer(CURL *curl)
   if(data->newurl)
     free(data->newurl);
 
-#if 0
-  if((CURLE_OK == res) && data->writeinfo) {
-    /* Time to output some info to stdout */
-    WriteOut(data);
-  }
-#endif
   return res;
 }
 
