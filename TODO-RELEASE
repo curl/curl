@@ -36,6 +36,8 @@ To get fixed in 7.11.1
 16. Tony Blakie's bug report about getting a 302 and Location: back from a
     proxy after a CONNECT request. (correct behavior on this is not certain)
 
+18. Remove the Accept: line from the default HTTP request
+
 Fixed in 7.11
 =============
 
