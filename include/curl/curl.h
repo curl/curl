@@ -398,6 +398,26 @@ typedef enum {
   /* This points to a linked list of telnet options */
   CINIT(TELNETOPTIONS, OBJECTPOINT, 70),
 
+  /* Max amount of cached alive connections */
+  CINIT(MAXCONNECTS, LONG, 71),
+
+  /* What policy to use when closing connections when the cache is filled
+     up */
+  CINIT(CLOSEPOLICY, LONG, 72),
+
+  /* Callback to use when CURLCLOSEPOLICY_CALLBACK is set */
+  CINIT(CLOSEFUNCTION, FUNCTIONPOINT, 73),
+
+  /* Set to explicitly use a new connection for the upcoming transfer.
+     Do not use this unless you're absolutely sure of this, as it makes the
+     operation slower and is less friendly for the network. */
+  CINIT(FRESH_CONNECT, LONG, 74),
+
+  /* Set to explicitly forbid the upcoming transfer's connection to be re-used
+     when done. Do not use this unless you're absolutely sure of this, as it
+     makes the operation slower and is less friendly for the network. */
+  CINIT(FORBID_REUSE, LONG, 75),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
