@@ -261,7 +261,7 @@ Curl_cookie_add(struct SessionHandle *data,
               /* Received and skipped a cookie with a domain using too few
                  dots. */
               badcookie=TRUE; /* mark this as a bad cookie */
-              infof(data, "skipped cookie with illegal dotcount domain: %s",
+              infof(data, "skipped cookie with illegal dotcount domain: %s\n",
                     whatptr);
             }
             else {
@@ -289,7 +289,7 @@ Curl_cookie_add(struct SessionHandle *data,
                    is not a domain to which the current host belongs. Mark as
                    bad. */
                 badcookie=TRUE;
-                infof(data, "skipped cookie with bad tailmatch domain: %s",
+                infof(data, "skipped cookie with bad tailmatch domain: %s\n",
                       whatptr);
               }
             }
