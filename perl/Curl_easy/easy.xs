@@ -616,6 +616,11 @@ CODE:
 	case CURLOPT_POSTQUOTE:
 	    slist = &postquote; break;
 	}
+        /* free any previous list */
+        if (*slist) {
+            curl_slist_free_all(*slist);
+            *slist=NULL;
+        }                                                                       
 	/* ...store the values into it... */
 	for (;;) {
 	    SV *sv = av_shift(array);

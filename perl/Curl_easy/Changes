@@ -1,6 +1,10 @@
 Revision history for Perl extension Curl::easy.
 Check out the file README for more info.
 
+1.1.4  Fri Apr 20 2001: - Cris Bailiff <c.bailiff@devsecure.com>
+    - Fix case where curl_slists such as 'HTTPHEADERS' need to
+      be re-set over persistant requests
+
 1.1.3  Wed Apr 18 2001: - Cris Bailiff <c.bailiff@devsecure.com>
     - Change/shorten module function names: Curl::easy::curl_easy_setopt
       becomes Curl::easy::setopt etc. This requires minor changes to existing
