@@ -7,11 +7,10 @@
                                History of Changes
 
 Daniel (6 November 2001)
-- We got bug report #478780 posted, which very correctly pointed out two bad
-  timeouet things in libcurl: we didn't restore the sigaction struct (alarm
-  handler for the SIGALRM) nor did we restore the previous alarm() timeout
-  that could've been set by a "parent" process or similar. We do that now
-  though! The reporter was anonymous.
+- Enrik Berkhan posted bug report #478780, in which he very correctly pointed
+  out two bad timeout matters in libcurl: we didn't restore the sigaction
+  struct (the alarm handler for SIGALRM) nor did we restore the previous
+  alarm() timeout that could've been set by a "parent" process or similar.
 
 - Kevin Roth made the cygwin binary get stripped before install.
 
@@ -21,8 +20,8 @@ Daniel (5 November 2001)
   Unfortunately, I can't enable the -Wstrict-prototypes in my debug builds
   though, as gcc then complains like crazy on OpenSSL include files... :-(
 
-- John Lask provided SSL over HTTP proxy fixes (that I didn't quite agree on,
-  we need to work on this).
+- John Lask provided SSL over HTTP proxy fixes. They'll need some tweaking
+  to work on all platforms.
 
 - John Lask added the -1/--TLSv1 options that forces SSL into using TLS
   version 1 when speaking HTTPS.
@@ -30,8 +29,8 @@ Daniel (5 November 2001)
 - John Lask brought a brand new VC++ makefile for the lib directory, that
   works a lot better than the previous!
 
-- Ramana Mokkapati brought some clever insights on the LDAP failures, and his
-  suggested changes are now applied.
+- Ramana Mokkapati brought some clever insights on the LDAP failures (bug
+  report #475407), and his suggested changes are now applied.
 
 Version 7.9.1
 
