@@ -3227,6 +3227,8 @@ CURLcode Curl_done(struct connectdata *conn)
                   NULL, Curl_scan_cache_used);
 #endif
 
+  Curl_hostcache_prune(data); /* kill old DNS cache entries */
+
   /* this calls the protocol-specific function pointer previously set */
   if(conn->curl_done)
     result = conn->curl_done(conn);

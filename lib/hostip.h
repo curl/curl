@@ -77,6 +77,9 @@ void Curl_freeaddrinfo(Curl_addrinfo *freeaddr);
 /* free cached name info */
 void Curl_freednsinfo(void *freethis);
 
+/* prune old entries from the DNS cache */
+void Curl_hostcache_prune(struct SessionHandle *data);
+
 #ifdef CURLDEBUG
 void curl_freeaddrinfo(struct addrinfo *freethis,
                        int line, const char *source);

@@ -195,6 +195,23 @@ hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
                                  hostcache_timestamp_remove);
 }
 
+void Curl_hostcache_prune(struct SessionHandle *data)
+{
+  time_t now;
+  if(data->share)
+    Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
+  time(&now);
+
+  /* Remove outdated and unused entries from the hostcache */
+  hostcache_prune(data->hostcache,
+                  data->set.dns_cache_timeout,
+                  now);
+
+  if(data->share)
+    Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+}
+
 #ifdef HAVE_SIGSETJMP
 /* Beware this is a global and unique instance */
 sigjmp_buf curl_jmpenv;
@@ -248,12 +265,6 @@ cache_resolv_response(struct SessionHandle *data,
 
   dns->timestamp = now; /* used now */
   dns->inuse++;         /* mark entry as in-use */
-
-    
-  /* Remove outdated and unused entries from the hostcache */
-  hostcache_prune(data->hostcache, 
-                  data->set.dns_cache_timeout, 
-                  now);
 
   /* free the allocated entry_id again */
   free(entry_id);
