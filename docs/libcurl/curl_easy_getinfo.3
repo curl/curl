@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_init 3 "17 Apr 2002" "libcurl 7.9.7" "libcurl Manual"
+.TH curl_easy_init 3 "25 Apr 2002" "libcurl 7.9.7" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - Extract information from a curl session (added in 7.4)
 .SH SYNOPSIS
@@ -38,7 +38,9 @@ CURLOPT_FILETIME option to \fIcurl_easy_setopt(3)\fP. (Added in 7.5)
 .TP
 .B CURLINFO_TOTAL_TIME
 Pass a pointer to a double to receive the total transaction time in seconds
-for the previous transfer.
+for the previous transfer. This time does not include the connect time, so if
+you want the complete operation time, you should add the
+CURLINFO_CONNECT_TIME.
 .TP
 .B CURLINFO_NAMELOOKUP_TIME
 Pass a pointer to a double to receive the time, in seconds, it took from the
