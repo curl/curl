@@ -13,6 +13,7 @@ README.curl
 README.libcurl
 curl.1
 *spec
+*spec.in
 RESOURCES
 TODO
 maketgz
