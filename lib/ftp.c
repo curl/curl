@@ -405,6 +405,10 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   return result;
 }
 
+static char *ftpauth[]= {
+  "SSL", "TLS", NULL
+};
+
 /*
  * Curl_ftp_connect() should do everything that is to be considered a part of
  * the connection phase.
@@ -417,7 +421,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   char *buf = data->state.buffer; /* this is our buffer */
   struct FTP *ftp;
   CURLcode result;
-  int ftpcode;
+  int ftpcode, try;
 
   ftp = (struct FTP *)malloc(sizeof(struct FTP));
   if(!ftp)
@@ -453,7 +457,6 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
       return result;
   }
 
-
   /* The first thing we do is wait for the "220*" line: */
   result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
   if(result)
@@ -483,26 +486,32 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 #endif
 
   if(data->set.ftp_ssl && !conn->ssl[FIRSTSOCKET].use) {
-    /* we don't have a ssl connection, try a FTPS connection now */
-    FTPSENDF(conn, "AUTH TLS", NULL);
+    /* we don't have a SSL/TLS connection, try a FTPS connection now */
 
-    result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
-    if(result)
-      return result;
+    for (try = 0; ftpauth[try]; try++) {
 
-    /* RFC2228 (page 5) says:
-     *
-     * If the server is willing to accept the named security mechanism, and
-     * does not require any security data, it must respond with reply code
-     * 234.
-     */
+      FTPSENDF(conn, "AUTH %s", ftpauth[try]);
 
-    if(234 == ftpcode) {
-      result = Curl_SSLConnect(conn, FIRSTSOCKET);
+      result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+
       if(result)
         return result;
-      conn->protocol |= PROT_FTPS;
-      conn->ssl[SECONDARYSOCKET].use = FALSE; /* clear-text data */
+
+      /* RFC2228 (page 5) says:
+       *
+       * If the server is willing to accept the named security mechanism, and
+       * does not require any security data, it must respond with reply code
+       * 234/334.
+       */
+
+      if((ftpcode == 234) || (ftpcode == 334)) {
+        result = Curl_SSLConnect(conn, FIRSTSOCKET);
+        if(result)
+          return result;
+        conn->protocol |= PROT_FTPS;
+        conn->ssl[SECONDARYSOCKET].use = FALSE; /* clear-text data */
+        break;
+      }
     }
   }
   
@@ -549,6 +558,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
     /* 230 User ... logged in.
        (the user logged in without password) */
     infof(data, "We have successfully logged in\n");
+    if (conn->ssl[FIRSTSOCKET].use) {
 #ifdef KRB4
 	/* we are logged in (with Kerberos)
 	 * now set the requested protection level
@@ -565,6 +575,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
         return result;
     }
 #endif
+  }
   }
   else {
     failf(data, "Odd return code after USER");
@@ -1759,7 +1770,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
     if(conn->ssl[SECONDARYSOCKET].use) {
       /* since we only have a plaintext TCP connection here, we must now
 	 do the TLS stuff */
-      infof(data, "Doing the SSL/TSL handshake on the data stream\n");
+      infof(data, "Doing the SSL/TLS handshake on the data stream\n");
       result = Curl_SSLConnect(conn, SECONDARYSOCKET);
       if(result)
 	return result;
@@ -2024,7 +2035,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       if(conn->ssl[SECONDARYSOCKET].use) {
 	/* since we only have a plaintext TCP connection here, we must now
 	   do the TLS stuff */
-	infof(data, "Doing the SSL/TSL handshake on the data stream\n");
+	infof(data, "Doing the SSL/TLS handshake on the data stream\n");
 	result = Curl_SSLConnect(conn, SECONDARYSOCKET);
 	if(result)
 	  return result;
@@ -2220,7 +2231,7 @@ CURLcode ftp_perform(struct connectdata *conn,
   else {
     /* We have chosen (this is default) to use the PASV command */
     result = ftp_use_pasv(conn, connected);
-    if(!result && *connected)
+    if(CURLE_OK == result && *connected)
       infof(data, "Connected the data stream with PASV!\n");
   }
   
