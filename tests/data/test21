@@ -10,7 +10,7 @@
 use curl with multiple request methods
  </name>
  <command>
--I -d FOOO localhost
+-I -d FOOO -G localhost
 </command>
 </test>
 
