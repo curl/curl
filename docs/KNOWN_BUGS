@@ -12,3 +12,5 @@ may have been fixed since this was written!
   http://curl.haxx.se/mail/archive-2002-03/0033.html
 
 * libcurl does not deal nicely with files larger than 2GB
+
+* GOPHER transfers seem broken
