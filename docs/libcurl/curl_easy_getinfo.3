@@ -78,7 +78,8 @@ uploaded.
 .TP
 .B CURLINFO_SIZE_DOWNLOAD
 Pass a pointer to a double to receive the total amount of bytes that were
-downloaded.
+downloaded. The amount is only for the latest transfer and will be reset again
+for each new transfer.
 .TP
 .B CURLINFO_SPEED_DOWNLOAD
 Pass a pointer to a double to receive the average download speed that curl
