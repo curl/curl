@@ -229,7 +229,12 @@ struct Curl_transfer_keeper {
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
   bool header;	                /* incoming data has HTTP header */
-  bool badheader;		/* the header was deemed bad and will be
+  enum {
+    HEADER_NORMAL,      /* no bad header at all */
+    HEADER_PARTHEADER,  /* part of the chunk is a bad header, the rest is
+                           normal data */
+    HEADER_ALLBAD       /* all was believed to be header */
+  } badheader;		        /* the header was deemed bad and will be
                                    written as body */
   int headerline;		/* counts header lines to better track the
                                    first one */

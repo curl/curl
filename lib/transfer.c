@@ -294,7 +294,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               if(!strnequal(data->state.headerbuff, "HTTP/", 5)) {
                 /* this is not the beginning of a HTTP first header line */
                 k->header = FALSE;
-                k->badheader = TRUE;
+                k->badheader = HEADER_ALLBAD;
                 break;
               }
             }
@@ -341,6 +341,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           /****
            * We now have a FULL header line that p points to
            *****/
+
+          if(!k->headerline) {
+            /* the first read header */
+            if((k->hbuflen>5) &&
+               !strnequal(data->state.headerbuff, "HTTP/", 5)) {
+              /* this is not the beginning of a HTTP first header line */
+              k->header = FALSE;
+              k->badheader = HEADER_PARTHEADER;
+              break;
+            }
+          }
 
           if (('\n' == *k->p) || ('\r' == *k->p)) {
             int headerlen;
@@ -505,7 +516,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
             else {
               k->header = FALSE;   /* this is not a header line */
-              k->badheader = TRUE; /* this was a bad header */
               break;
             }
           }
@@ -764,8 +774,16 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         k->bodywrites++;
 
         /* pass data to the debug function before it gets "dechunked" */
-        if(data->set.verbose)
-          Curl_debug(data, CURLINFO_DATA_IN, k->str, nread);
+        if(data->set.verbose) {
+          if(k->badheader) {
+            Curl_debug(data, CURLINFO_DATA_IN, data->state.headerbuff,
+                       k->hbuflen);
+            if(k->badheader == HEADER_PARTHEADER)
+              Curl_debug(data, CURLINFO_DATA_IN, k->str, nread);
+          }
+          else
+            Curl_debug(data, CURLINFO_DATA_IN, k->str, nread);
+        }
 
         if(conn->bits.chunk) {
           /*
@@ -820,9 +838,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             result = Curl_client_write(data, CLIENTWRITE_BODY,
                                        data->state.headerbuff,
                                        k->hbuflen);
-            k->badheader = FALSE; /* taken care of now */
           }
-          else {
+          if(k->badheader < HEADER_ALLBAD) {
             /* This switch handles various content encodings. If there's an
                error here, be sure to check over the almost identical code in
                http_chunk.c. 08/29/02 jhrg */
@@ -855,6 +872,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
 #endif
           }
+          k->badheader = HEADER_NORMAL; /* taken care of now */
 
           if(result)
             return result;
