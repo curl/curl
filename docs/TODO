@@ -33,8 +33,8 @@ TODO
    return informational stuff as errors, consider a new info returned by
    curl_easy_getinfo() #845941
 
- * Set the SO_KEEPALIVE socket option to make libcurl notice and disconnect
-   very long time idle connections.
+ * Option to set the SO_KEEPALIVE socket option to make libcurl notice and
+   disconnect very long time idle connections.
 
  LIBCURL - multi interface
 
@@ -158,7 +158,18 @@ TODO
  * --data-encode that URL encodes the data before posting
    http://curl.haxx.se/mail/archive-2003-11/0091.html (Kevin Roth suggested)
 
+ BUILD
+
+ * Consider extending 'roffit' to produce decent ASCII output, and use that
+   instead of (g)nroff when building src/hugehelp.c
+  
  TEST SUITE
+
+ * Make the test servers able to serve multiple running test suites. Like if
+   two users run 'make test' at once.
+
+ * Make runtests.pl capable of changing port numbers for the servers. This was
+   the intention from the start, but in practise it is now hard.
 
  * If perl wasn't found by the configure script, don't attempt to run the
    tests but explain something nice why it doesn't.
@@ -169,11 +180,20 @@ TODO
  * Make the test suite work on more platforms. OpenBSD and Mac OS. Remove
    fork()s and it should become even more portable.
 
- * Introduce a test suite that tests libcurl better and more explicitly.
-
-NEXT MAJOR RELEASE
+ NEXT MAJOR RELEASE
 
  * curl_easy_cleanup() returns void, but curl_multi_cleanup() returns a
    CURLMcode. These should be changed to be the same.
 
  * curl_formparse() should be removed
+
+ * remove obsolete defines from curl/curl.h
+
+ * remove the following functions from the public API:
+   curl_getenv
+   curl_mprintf (and variations)
+   curl_strequal
+   curl_strnequal
+
+   They will instead become curlx_ - alternatives. That makes the curl app
+   still capable of building with them from source.
