@@ -379,7 +379,11 @@ typedef enum {
   CINIT(FTPLISTONLY, LONG, 48),  /* Use NLST when listing ftp dir */
 
   CINIT(FTPAPPEND, LONG, 50),    /* Append instead of overwrite on upload! */
-  CINIT(NETRC, LONG, 51),        /* read user+password from .netrc */
+
+  /* Specify whether to read the user+password from the .netrc or the URL.
+   * This must be one of the CURL_NETRC_* enums below. */
+  CINIT(NETRC, LONG, 51),
+
   CINIT(FOLLOWLOCATION, LONG, 52),  /* use Location: Luke! */
 
   /* This FTPASCII name is now obsolete, to be removed, use the TRANSFERTEXT
@@ -558,6 +562,18 @@ enum {
   CURL_HTTP_VERSION_1_1,  /* please use HTTP 1.1 in the request */
   
   CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
+};
+
+  /* These enums are for use with the CURLOPT_NETRC option. */
+enum CURL_NETRC_OPTION {
+  CURL_NETRC_IGNORED,     /* The .netrc will never be read.
+                           * This is the default. */
+  CURL_NETRC_OPTIONAL,    /* A user:password in the URL will be preferred
+                           * to one in the .netrc. */
+  CURL_NETRC_REQUIRED,    /* A user:password in the URL will be ignored.
+                           * Unless one is set programmatically, the .netrc
+                           * will be queried. */
+  CURL_NETRC_LAST
 };
 
 enum {
