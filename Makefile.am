@@ -6,8 +6,7 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 
 EXTRA_DIST =						\
 	CHANGES LEGAL maketgz MITX.txt MPL-1.1.txt	\
-	reconf Makefile.dist curl-config.in build_vms.com curl-mode.el \
-	config-vms.h config-win32.h config-riscos.h config-mac.h
+	reconf Makefile.dist curl-config.in build_vms.com curl-mode.el
 
 bin_SCRIPTS = curl-config
 
