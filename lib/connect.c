@@ -223,7 +223,6 @@ static CURLcode bindlocal(struct connectdata *conn,
    * Select device to bind socket to
    *************************************************************/
   if (strlen(data->set.device)<255) {
-    struct sockaddr_in sa;
     struct Curl_dns_entry *h=NULL;
     size_t size;
     char myhost[256] = "";
@@ -282,7 +281,6 @@ static CURLcode bindlocal(struct connectdata *conn,
         /* we don't need it anymore after this function has returned */
 
 #ifdef ENABLE_IPV6
-        (void)sa; /* prevent compiler warning */
         if( bind(sockfd, addr->ai_addr, addr->ai_addrlen) >= 0) {
           /* we succeeded to bind */
           struct sockaddr_in6 add;
@@ -295,21 +293,25 @@ static CURLcode bindlocal(struct connectdata *conn,
           }
         }
 #else
-        memset((char *)&sa, 0, sizeof(sa));
-        memcpy((char *)&sa.sin_addr, addr->h_addr, addr->h_length);
-        sa.sin_family = AF_INET;
-        sa.sin_addr.s_addr = in;
-        sa.sin_port = 0; /* get any port */
+        {
+          struct sockaddr_in sa;
+
+          memset((char *)&sa, 0, sizeof(sa));
+          memcpy((char *)&sa.sin_addr, addr->h_addr, addr->h_length);
+          sa.sin_family = AF_INET;
+          sa.sin_addr.s_addr = in;
+          sa.sin_port = 0; /* get any port */
 	
-        if( bind(sockfd, (struct sockaddr *)&sa, sizeof(sa)) >= 0) {
-          /* we succeeded to bind */
-          struct sockaddr_in add;
+          if( bind(sockfd, (struct sockaddr *)&sa, sizeof(sa)) >= 0) {
+            /* we succeeded to bind */
+            struct sockaddr_in add;
 	
-          size = sizeof(add);
-          if(getsockname(sockfd, (struct sockaddr *) &add,
-                         (socklen_t *)&size)<0) {
-            failf(data, "getsockname() failed");
-            return CURLE_HTTP_PORT_FAILED;
+            size = sizeof(add);
+            if(getsockname(sockfd, (struct sockaddr *) &add,
+                           (socklen_t *)&size)<0) {
+              failf(data, "getsockname() failed");
+              return CURLE_HTTP_PORT_FAILED;
+            }
           }
         }
 #endif
