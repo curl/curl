@@ -380,8 +380,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       return CURLE_OPERATION_TIMEOUTED;
     }
   }
-  if(conn->protocol & PROT_FILE) {
-    /* we are connected, awesome! */
+  if(conn->bits.tcpconnect) {
+    /* we are connected already! */
     *connected = TRUE;
     return CURLE_OK;
   }

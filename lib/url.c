@@ -1677,6 +1677,12 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   CURLcode result=CURLE_OK;
   
+  if(conn->bits.tcpconnect)
+    /* We already are connected, get back. This may happen when the connect
+       worked fine in the first call, like when we connect to a local server
+       or proxy. */
+    return CURLE_OK;
+
   Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
 
   if(data->set.verbose)
@@ -2299,6 +2305,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     /* Setup a "faked" transfer that'll do nothing */
     if(CURLE_OK == result) {
+      conn->bits.tcpconnect = TRUE; /* we are "connected */
       result = Curl_Transfer(conn, -1, -1, FALSE, NULL, /* no download */
                              -1, NULL); /* no upload */
     }
@@ -2795,14 +2802,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* Connect only if not already connected! */
     result = ConnectPlease(conn, hostaddr, &connected);
 
-    if(connected)
+    if(connected) {
       result = Curl_protocol_connect(conn, hostaddr);
+      if(CURLE_OK == result)
+        conn->bits.tcpconnect = TRUE;
+    }
+    else
+      conn->bits.tcpconnect = FALSE;
+
 
     if(CURLE_OK != result)
       return result;
   }
   else {
     Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
+    conn->bits.tcpconnect = TRUE;
     if(data->set.verbose)
       verboseconnect(conn, hostaddr);
   }

@@ -243,6 +243,9 @@ struct ConnectBits {
   bool forbidchunk;   /* used only to explicitly forbid chunk-upload for
                          specific upload buffers. See readmoredata() in
                          http.c for details. */
+  bool tcpconnect;    /* the tcp stream (or simimlar) is connected, this
+                         is set the first time on the first connect function
+                         call */
 };
 
 /*
