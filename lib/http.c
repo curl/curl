@@ -176,8 +176,24 @@ CURLcode http_connect(struct connectdata *conn)
      }
   }
 
+   if(data->bits.user_passwd && !data->bits.this_is_a_follow) {
+     /* Authorization: is requested, this is not a followed location, get the
+        original host name */
+     data->auth_host = strdup(data->hostname);
+   }
+
    return CURLE_OK;
 }
+
+/* called from curl_close() when this struct is about to get wasted, free
+   protocol-specific resources */
+CURLcode http_close(struct connectdata *conn)
+{
+  if(conn->data->auth_host)
+    free(conn->data->auth_host);
+  return CURLE_OK;
+}
+
 CURLcode http_done(struct connectdata *conn)
 {
   struct UrlData *data;
@@ -238,10 +254,17 @@ CURLcode http(struct connectdata *conn)
 
   if((data->bits.user_passwd) && !checkheaders(data, "Authorization:")) {
     char authorization[512];
-    sprintf(data->buffer, "%s:%s", data->user, data->passwd);
-    base64Encode(data->buffer, authorization);
-    data->ptr_userpwd = maprintf( "Authorization: Basic %s\015\012",
-                                  authorization);
+
+    /* To prevent the user+password to get sent to other than the original
+       host due to a location-follow, we do some weirdo checks here */
+    if(!data->bits.this_is_a_follow ||
+       !data->auth_host ||
+       strequal(data->auth_host, data->hostname)) {
+      sprintf(data->buffer, "%s:%s", data->user, data->passwd);
+      base64Encode(data->buffer, authorization);
+      data->ptr_userpwd = maprintf( "Authorization: Basic %s\015\012",
+                                    authorization);
+    }
   }
   if((data->bits.set_range) && !checkheaders(data, "Range:")) {
     data->ptr_rangeline = maprintf("Range: bytes=%s\015\012", data->range);
