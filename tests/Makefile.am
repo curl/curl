@@ -12,11 +12,11 @@ curl:
 	@(cd ..; make)
 
 test:
-	$(MAKE) -C data test
+	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
 
 quiet-test:
-	$(MAKE) -C data test
+	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -s -a
 
 clean:
