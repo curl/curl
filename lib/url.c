@@ -235,6 +235,10 @@ void static urlfree(struct UrlData *data, bool totally)
     if(data->free_referer)
       free(data->referer);
 
+    if(data->bits.urlstringalloc)
+      /* the URL is allocated, free it! */
+      free(data->url);
+
     cookie_cleanup(data->cookies);
 
     free(data);
