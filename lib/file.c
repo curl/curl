@@ -84,6 +84,7 @@
 #include "file.h"
 #include "speedcheck.h"
 #include "getinfo.h"
+#include "transfer.h" /* for Curl_readwrite_init() */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
