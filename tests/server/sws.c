@@ -48,7 +48,9 @@
 /* This define is "almost" required to build on HPUX 11 */
 #include <arpa/inet.h> 
 #endif
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
+#endif
 
 #include "getpart.h"
 
