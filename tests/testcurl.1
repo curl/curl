@@ -61,6 +61,9 @@ Set name to report as. Displayed in the build summary on the site.
 .IP "--nocvsup"
 Don't update from CVS even though it is a CVS tree. Useful to still be able to
 test even though your network is down, or similar.
+.IP "--runtestsopts=[options]"
+Options that is passed to the runtests.pl script. Useful for disabling valgrind
+by force, and similar.
 .IP "--setup=[file name]"
 File name to read setup from (deprecated). The old style of providing info.
 If info is missing when testcurl.pl is started, it will prompt you and then
