@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (4 June 2004)
+- Made the configure checks for strerror_r() not exit the configure script
+  when built for cross-compiling.
+
 Daniel (3 June 2004)
 - Chris Gaukroger pointed out that 'make test' attempts to run the tests even
   if curl is built cross-compiled. I've now made it output a short message
