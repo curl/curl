@@ -29,6 +29,7 @@
 struct addrinfo;
 struct hostent;
 struct SessionHandle;
+struct connectdata;
 
 void Curl_global_host_cache_init(void);
 void Curl_global_host_cache_dtor(void);
@@ -41,9 +42,6 @@ struct Curl_dns_entry {
   time_t timestamp;
   long inuse;      /* use-counter, make very sure you decrease this
                       when you're done using the address you received */
-#ifdef CURLDEBUG
-  char *entry_id;
-#endif
 };
 
 /*
@@ -54,10 +52,18 @@ struct Curl_dns_entry {
  * use, or we'll leak memory!
  */
 
-struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
-                                   char *hostname,
-                                   int port);
+int Curl_resolv(struct connectdata *conn,
+                char *hostname,
+                int port,
+                struct Curl_dns_entry **dnsentry);
 
+CURLcode Curl_is_resolved(struct connectdata *conn, bool *done);
+CURLcode Curl_wait_for_resolv(struct connectdata *conn,
+                              struct Curl_dns_entry **dnsentry);
+CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
+                               fd_set *read_fd_set,
+                               fd_set *write_fd_set,
+                               int *max_fdp);
 /* unlock a previously resolved dns entry */
 void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns);
 

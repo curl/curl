@@ -185,7 +185,7 @@ int fileno( FILE *stream);
  * Information regarding a single IP witin a Curl_addrinfo MUST be stored in
  * a Curl_ipconnect struct.
  */
-#ifdef ENABLE_IPV6
+#if defined(ENABLE_IPV6) && !defined(USE_ARES)
 typedef struct addrinfo Curl_addrinfo;
 typedef struct addrinfo Curl_ipconnect;
 #else

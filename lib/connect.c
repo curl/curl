@@ -208,6 +208,7 @@ static CURLcode bindlocal(struct connectdata *conn,
     size_t size;
     char myhost[256] = "";
     in_addr_t in;
+    int rc;
 
     /* First check if the given name is an IP address */
     in=inet_addr(data->set.device);
@@ -217,7 +218,10 @@ static CURLcode bindlocal(struct connectdata *conn,
       /*
        * We now have the numerical IPv4-style x.y.z.w in the 'myhost' buffer
        */
-      h = Curl_resolv(data, myhost, 0);
+      rc = Curl_resolv(conn, myhost, 0, &h);
+      if(rc == 1)
+        rc = Curl_wait_for_resolv(conn, &h);
+
     }
     else {
       if(strlen(data->set.device)>1) {
@@ -225,11 +229,14 @@ static CURLcode bindlocal(struct connectdata *conn,
          * This was not an interface, resolve the name as a host name
          * or IP number
          */
-        h = Curl_resolv(data, data->set.device, 0);
-        if(h) {
+        rc = Curl_resolv(conn, data->set.device, 0, &h);
+        if(rc == 1)
+          rc = Curl_wait_for_resolv(conn, &h);
+
+        if(h)
           /* we know data->set.device is shorter than the myhost array */
           strcpy(myhost, data->set.device);
-        }
+
       }
     }
 

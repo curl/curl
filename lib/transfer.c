@@ -605,8 +605,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 len = end-start+1;
               
                 /* allocate memory of a cloned copy */
-                if(data->info.contenttype)
-                  free(data->info.contenttype);
+                Curl_safefree(data->info.contenttype);
               
                 data->info.contenttype = malloc(len + 1);
                 if (NULL == data->info.contenttype)
@@ -1903,10 +1902,22 @@ CURLcode Curl_perform(struct SessionHandle *data)
   do {  
     int urlchanged = FALSE;
     do {
+      bool async;
       Curl_pgrsTime(data, TIMER_STARTSINGLE);
       data->change.url_changed = FALSE;
-      res = Curl_connect(data, &conn);
+      res = Curl_connect(data, &conn, &async);
 
+      if((CURLE_OK == res) && async) {
+        /* Now, if async is TRUE here, we need to wait for the name
+           to resolve */
+        res = Curl_wait_for_resolv(conn, NULL);
+        if(CURLE_OK == res)
+          /* Resolved, continue with the connection */
+          res = Curl_async_resolved(conn);              
+      }
+      if(res)
+        break;
+      
       /* If a callback (or something) has altered the URL we should use within
          the Curl_connect(), we detect it here and act as if we are redirected
          to the new URL */

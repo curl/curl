@@ -90,6 +90,10 @@
 #include <gssapi.h>
 #endif
 
+#ifdef USE_ARES
+#include <ares.h>
+#endif
+
 /* Download buffer size, keep it fairly big for speed reasons */
 #define BUFSIZE CURL_MAX_WRITE_SIZE
 
@@ -364,6 +368,16 @@ struct Curl_transfer_keeper {
   bool ignorebody;  /* we read a response-body but we ignore it! */
 };
 
+#ifdef USE_ARES
+struct Curl_async {
+  char *hostname;
+  int port;
+  struct Curl_dns_entry *dns;
+  bool done;  /* set TRUE when the lookup is complete */
+  int status; /* if done is TRUE, this is the status from the callback */
+};
+#endif
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -538,6 +552,11 @@ struct connectdata {
                                because it authenticates connections, not
                                single requests! */
   struct ntlmdata proxyntlm; /* NTLM data for proxy */
+
+#ifdef USE_ARES
+  /* data used for the asynch name resolve callback */
+  struct Curl_async async;
+#endif
 };
 
 /* The end of connectdata. */
@@ -669,6 +688,10 @@ struct UrlState {
 
   long authwant;  /* inherited from what the user set with CURLOPT_HTTPAUTH */
   long authavail; /* what the server reports */
+
+#ifdef USE_ARES
+  ares_channel areschannel; /* for name resolves */
+#endif
 };
 
 

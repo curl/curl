@@ -12,10 +12,16 @@ EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	    \
 
 lib_LTLIBRARIES = libcurl.la
 
+if ARES
+ARESINC = -I$(top_srcdir)/ares
+endif
+
 # we use srcdir/include for the static global include files
 # we use builddir/lib for the generated lib/config.h file to get found
 # we use srcdir/lib for the lib-private header files
-INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/lib -I$(top_srcdir)/lib
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/lib -I$(top_srcdir)/lib $(ARESINC)
+
+LDFLAGS = -L$(top_srcdir)/lib
 
 VERSION=-version-info 2:2:0
 
@@ -48,14 +54,17 @@ VERSION=-version-info 2:2:0
 #
 
 if NO_UNDEFINED
-# The -no-undefined flag is CRUCIAL for this to build fine on Cygwin. If we
-# find a case in which we need to remove this flag, we should most likely
-# write a configure check that detects when this flag is needed and when its
-# not.
-libcurl_la_LDFLAGS = -no-undefined $(VERSION)
+# The -no-undefined flag is CRUCIAL for this to build fine on Cygwin.
+UNDEF = -no-undefined
 else
-libcurl_la_LDFLAGS = $(VERSION)
+UNDEF =
 endif
+
+if ARES
+ARESLIB = -lares -L$(top_builddir)/ares
+endif
+
+libcurl_la_LDFLAGS = $(UNDEF) $(VERSION) $(ARESLIB)
 
 libcurl_la_SOURCES = arpa_telnet.h file.c getpass.h netrc.h timeval.c	\
 base64.c file.h hostip.c progress.c timeval.h base64.h formdata.c	\

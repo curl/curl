@@ -1231,18 +1231,24 @@ CURLcode ftp_use_port(struct connectdata *conn)
 
   if(data->set.ftpport) {
     in_addr_t in;
+    int rc;
 
     /* First check if the given name is an IP address */
     in=inet_addr(data->set.ftpport);
 
     if((in == CURL_INADDR_NONE) &&
        Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
-      h = Curl_resolv(data, myhost, 0);
+      rc = Curl_resolv(conn, myhost, 0, &h);
+      if(rc == 1)
+        rc = Curl_wait_for_resolv(conn, &h);
     }
     else {
       int len = strlen(data->set.ftpport);
-      if(len>1)
-        h = Curl_resolv(data, data->set.ftpport, 0);
+      if(len>1) {
+        rc = Curl_resolv(conn, data->set.ftpport, 0, &h);
+        if(rc == 1)
+          rc = Curl_wait_for_resolv(conn, &h);
+      }
       if(h)
         strcpy(myhost, data->set.ftpport); /* buffer overflow risk */
     }
@@ -1381,6 +1387,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   CURLcode result;
   struct Curl_dns_entry *addr=NULL;
   Curl_ipconnect *conninfo;
+  int rc;
 
   /*
     Here's the excecutive summary on what to do:
@@ -1505,14 +1512,20 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
      * We don't want to rely on a former host lookup that might've expired
      * now, instead we remake the lookup here and now!
      */
-    addr = Curl_resolv(data, conn->proxyhost, conn->port);
+    rc = Curl_resolv(conn, conn->proxyhost, conn->port, &addr);
+    if(rc == 1)
+      rc = Curl_wait_for_resolv(conn, &addr);
+
     connectport =
       (unsigned short)conn->port; /* we connect to the proxy's port */    
 
   }
   else {
     /* normal, direct, ftp connection */
-    addr = Curl_resolv(data, newhostp, newport);
+    rc = Curl_resolv(conn, newhostp, newport, &addr);
+    if(rc == 1)
+      rc = Curl_wait_for_resolv(conn, &addr);
+
     if(!addr) {
       failf(data, "Can't resolve new host %s:%d", newhostp, newport);
       return CURLE_FTP_CANT_GET_HOST;

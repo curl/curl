@@ -65,6 +65,7 @@
 #include "hostip.h"
 #include "hash.h"
 #include "share.h"
+#include "url.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -81,10 +82,13 @@
 static curl_hash hostname_cache;
 static int host_cache_initialized;
 
-static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
-                                       char *hostname,
-                                       int port,
-                                       char **bufp);
+static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
+                                     char *hostname,
+                                     int port,
+                                     int *waitp);
+#if !defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES)
+static struct hostent* pack_hostent(char** buf, struct hostent* orig);
+#endif
 
 void Curl_global_host_cache_init(void)
 {
@@ -135,15 +139,14 @@ create_hostcache_id(char *server, int port, ssize_t *entry_len)
   char *id = NULL;
 
   /* Get the length of the new entry id */
-  *entry_len = *entry_len +      /* Hostname length */
-               1 +               /* The ':' seperator */
-               _num_chars(port); /* The number of characters the port will take up */
+  *entry_len = *entry_len + /* Hostname length */
+    1 +                     /* ':' seperator */
+    _num_chars(port);       /* number of characters the port will take up */
   
   /* Allocate the new entry id */
   id = malloc(*entry_len + 1);
-  if (!id) {
+  if (!id)
     return NULL;
-  }
 
   /* Create the new entry */
   /* If sprintf() doesn't return the entry length, that signals failure */
@@ -192,57 +195,26 @@ hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
                                  hostcache_timestamp_remove);
 }
 
-#if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
-/* Called from Curl_done() to check that there's no DNS cache entry with
-   a non-zero counter left. */
-void Curl_scan_cache_used(void *user, void *ptr)
-{
-  struct Curl_dns_entry *e = ptr;
-  (void)user; /* prevent compiler warning */
-  if(e->inuse) {
-    fprintf(stderr, "*** WARNING: locked DNS cache entry detected: %s\n",
-            e->entry_id);
-    /* perform a segmentation fault to draw attention */
-    *(void **)0 = 0;
-  }
-}
-#endif
-
-/* Macro to save redundant free'ing of entry_id */
-#define HOSTCACHE_RETURN(dns) \
-{ \
-  free(entry_id); \
-  if(data->share) \
-  {               \
-    Curl_share_unlock(data, CURL_LOCK_DATA_DNS); \
-  }               \
-  return dns; \
-}
-
 #ifdef HAVE_SIGSETJMP
 /* Beware this is a global and unique instance */
 sigjmp_buf curl_jmpenv;
 #endif
 
-struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
-                                   char *hostname,
-                                   int port)
-{
-  char *entry_id = NULL;
-  struct Curl_dns_entry *dns = NULL;
-  ssize_t entry_len;
-  time_t now;
-  char *bufp;
 
-#ifdef HAVE_SIGSETJMP
-  /* this allows us to time-out from the name resolver, as the timeout
-     will generate a signal and we will siglongjmp() from that here */
-  if(!data->set.no_signal && sigsetjmp(curl_jmpenv, 1)) {
-    /* this is coming from a siglongjmp() */
-    failf(data, "name lookup timed out");
-    return NULL;
-  }
-#endif
+/* When calling Curl_resolv() has resulted in a response with a returned
+   address, we call this function to store the information in the dns
+   cache etc */
+
+static struct Curl_dns_entry *
+cache_resolv_response(struct SessionHandle *data,
+                      Curl_addrinfo *addr,
+                      char *hostname,
+                      int port)
+{
+  char *entry_id;
+  int entry_len;
+  struct Curl_dns_entry *dns;
+  time_t now;
 
   /* Create an entry id, based upon the hostname and port */
   entry_len = strlen(hostname);
@@ -251,45 +223,112 @@ struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
   if (!entry_id)
     return NULL;
 
+  /* Create a new cache entry */
+  dns = (struct Curl_dns_entry *) malloc(sizeof(struct Curl_dns_entry));
+  if (!dns) {
+    Curl_freeaddrinfo(addr);
+    free(entry_id);
+    return NULL;
+  }
+
+  dns->inuse = 0;
+  dns->addr = addr;
+
+  /* Store it in our dns cache */
+  Curl_hash_add(data->hostcache, entry_id, entry_len+1,
+                (const void *) dns);
+  time(&now);
+
+  dns->timestamp = now;
+  dns->inuse++;         /* mark entry as in-use */
+
+    
+  /* Remove outdated and unused entries from the hostcache */
+  hostcache_prune(data->hostcache, 
+                  data->set.dns_cache_timeout, 
+                  now);
+
+  /* free the allocated entry_id again */
+  free(entry_id);
+
+  return dns;
+}
+
+/* Resolve a name and return a pointer in the 'entry' argument if one
+   is available.
+
+   Return codes:
+
+   -1 = error, no pointer
+   0 = OK, pointer provided
+   1 = waiting for response, no pointer
+*/
+int Curl_resolv(struct connectdata *conn,
+                char *hostname,
+                int port,
+                struct Curl_dns_entry **entry)
+{
+  char *entry_id = NULL;
+  struct Curl_dns_entry *dns = NULL;
+  ssize_t entry_len;
+  int wait;
+  struct SessionHandle *data = conn->data;
+
+  /* default to failure */
+  int rc = -1;
+  *entry = NULL;
+
+#ifdef HAVE_SIGSETJMP
+  /* this allows us to time-out from the name resolver, as the timeout
+     will generate a signal and we will siglongjmp() from that here */
+  if(!data->set.no_signal && sigsetjmp(curl_jmpenv, 1)) {
+    /* this is coming from a siglongjmp() */
+    failf(data, "name lookup timed out");
+    return -1;
+  }
+#endif
+
+  /* Create an entry id, based upon the hostname and port */
+  entry_len = strlen(hostname);
+  entry_id = create_hostcache_id(hostname, port, &entry_len);
+  /* If we can't create the entry id, fail */
+  if (!entry_id)
+    return -1;
+
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->hostcache, entry_id, entry_len+1);
 
+  /* free the allocated entry_id again */
+  free(entry_id);
+
   if (!dns) {
-    Curl_addrinfo *addr = my_getaddrinfo(data, hostname, port, &bufp);
+    /* The entry was not in the cache. Resolve it to IP address */
+      
+    /* If my_getaddrinfo() returns NULL, 'wait' might be set to a non-zero
+       value indicating that we need to wait for the response to the resolve
+       call */
+    Curl_addrinfo *addr = my_getaddrinfo(conn, hostname, port, &wait);
     
     if (!addr) {
-      HOSTCACHE_RETURN(NULL);
+      if(wait)
+        /* the response to our resolve call will come asynchronously at 
+           a later time, good or bad */
+        rc = 1;
     }
-
-    /* Create a new cache entry */
-    dns = (struct Curl_dns_entry *) malloc(sizeof(struct Curl_dns_entry));
-    if (!dns) {
-      Curl_freeaddrinfo(addr);
-      HOSTCACHE_RETURN(NULL);
-    }
-
-    dns->inuse = 0;
-    dns->addr = addr;
-    /* Save it in our host cache */
-    Curl_hash_add(data->hostcache, entry_id, entry_len+1, (const void *) dns);
+    else
+      /* we got a response, store it in the cache */
+      dns = cache_resolv_response(data, addr, hostname, port);
   }
-  time(&now);
 
-  dns->timestamp = now;
-  dns->inuse++;         /* mark entry as in-use */
-#ifdef CURLDEBUG
-  dns->entry_id = entry_id;
-#endif
+  if(data->share)
+    Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
-  /* Remove outdated and unused entries from the hostcache */
-  hostcache_prune(data->hostcache, 
-                  data->set.dns_cache_timeout, 
-                  now);
+  *entry = dns;
 
-  HOSTCACHE_RETURN(dns);
+  return rc;
 }
 
 void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
@@ -314,7 +353,7 @@ void Curl_freeaddrinfo(Curl_addrinfo *p)
 #ifdef ENABLE_IPV6
   freeaddrinfo(p);
 #else
-  free(p);
+  free(p); /* works fine for the ARES case too */
 #endif
 }
 
@@ -332,7 +371,203 @@ void Curl_freednsinfo(void *freethis)
 
 /* --- resolve name or IP-number --- */
 
-#ifdef ENABLE_IPV6
+/* Allocate enough memory to hold the full name information structs and
+ * everything. OSF1 is known to require at least 8872 bytes. The buffer
+ * required for storing all possible aliases and IP numbers is according to
+ * Stevens' Unix Network Programming 2nd edition, p. 304: 8192 bytes!
+ */
+#define CURL_NAMELOOKUP_SIZE 9000
+
+#ifdef USE_ARES
+
+CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
+                               fd_set *read_fd_set,
+                               fd_set *write_fd_set,
+                               int *max_fdp)
+
+{
+  int max = ares_fds(conn->data->state.areschannel,
+                     read_fd_set, write_fd_set);
+  *max_fdp = max;
+
+  return CURLE_OK;
+}
+
+/* called to check if the name is resolved now */
+CURLcode Curl_is_resolved(struct connectdata *conn, bool *done)
+{
+  fd_set read_fds, write_fds;
+  static const struct timeval tv={0,0};
+  int count;
+  struct SessionHandle *data = conn->data;
+  int nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
+
+  count = select(nfds, &read_fds, &write_fds, NULL,
+                 (struct timeval *)&tv);
+
+  if(count)
+    ares_process(data->state.areschannel, &read_fds, &write_fds);
+
+  if(conn->async.done) {
+    *done = TRUE;
+
+    if(!conn->async.dns)
+      return CURLE_COULDNT_RESOLVE_HOST;
+  }
+  else
+    *done = FALSE;
+
+  return CURLE_OK;
+}
+
+/* This is a function that locks and waits until the name resolve operation
+   has completed.
+
+   If 'entry' is non-NULL, make it point to the resolved dns entry
+
+   Return CURLE_COULDNT_RESOLVE_HOST if the host was not resolved, and
+   CURLE_OPERATION_TIMEDOUT if a time-out occurred.
+*/
+CURLcode Curl_wait_for_resolv(struct connectdata *conn,
+                              struct Curl_dns_entry **entry)
+{
+  CURLcode rc=CURLE_OK;
+  struct SessionHandle *data = conn->data;
+    
+  /* Wait for the name resolve query to complete. */
+  while (1) {
+    int nfds=0;
+    fd_set read_fds, write_fds;
+    struct timeval *tvp, tv;
+    int count;
+    
+    FD_ZERO(&read_fds);
+    FD_ZERO(&write_fds);
+    nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
+    if (nfds == 0)
+      break;
+    tvp = ares_timeout(data->state.areschannel,
+                       NULL, /* pass in our maximum time here */
+                       &tv);
+    count = select(nfds, &read_fds, &write_fds, NULL, tvp);
+    if (count < 0 && errno != EINVAL)
+      break;
+
+    ares_process(data->state.areschannel, &read_fds, &write_fds);
+  }
+
+  /* Operation complete, if the lookup was successful we now have the entry
+     in the cache. */
+    
+  /* this destroys the channel and we cannot use it anymore after this */
+  ares_destroy(data->state.areschannel);
+
+  if(entry)
+    *entry = conn->async.dns;
+
+  if(!conn->async.dns) {
+    /* a name was not resolved */
+    if(conn->async.done)
+      rc = CURLE_COULDNT_RESOLVE_HOST;
+    else
+      rc = CURLE_OPERATION_TIMEDOUT;
+
+    /* close the connection, since we can't return failure here without
+       cleaning up this connection properly */
+    Curl_disconnect(conn);
+  }
+  
+  return rc;
+}
+
+/* this function gets called by ares when we got the name resolved */
+static void host_callback(void *arg, /* "struct connectdata *" */
+                          int status,
+                          struct hostent *hostent)
+{
+  struct connectdata *conn = (struct connectdata *)arg;
+  struct Curl_dns_entry *dns = NULL;
+
+  conn->async.done = TRUE;
+  conn->async.status = status;
+
+  if(ARES_SUCCESS == status) {
+    /* we got a resolved name in 'hostent' */
+    char *bufp = (char *)malloc(CURL_NAMELOOKUP_SIZE);
+    if(bufp) {
+
+      /* pack_hostent() copies to and shrinks the target buffer */
+      struct hostent *he = pack_hostent(&bufp, hostent);
+
+      dns = cache_resolv_response(conn->data, he,
+                                  conn->async.hostname, conn->async.port);
+    }
+  }
+
+  conn->async.dns = dns;
+
+  /* The input hostent struct will be freed by ares when we return from this
+     function */
+}
+
+/*
+ * Return name information about the given hostname and port number. If
+ * successful, the 'hostent' is returned and the forth argument will point to
+ * memory we need to free after use. That meory *MUST* be freed with
+ * Curl_freeaddrinfo(), nothing else.
+ */
+static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
+                                     char *hostname,
+                                     int port,
+                                     int *waitp)
+{
+  int rc;
+  char *bufp;
+  struct SessionHandle *data = conn->data;
+
+  rc = ares_init(&data->state.areschannel);
+
+  *waitp = FALSE;
+  
+  if(!rc) {
+    /* only if success */
+
+    bufp = strdup(hostname);
+
+    if(bufp) {
+      Curl_safefree(conn->async.hostname);
+      conn->async.hostname = bufp;
+      conn->async.port = port;
+      conn->async.done = FALSE; /* not done */
+      conn->async.status = 0;   /* clear */
+      conn->async.dns = NULL;   /* clear */
+      
+      ares_gethostbyname(data->state.areschannel, hostname, PF_INET,
+                         host_callback, conn);
+
+      *waitp = TRUE; /* please wait for the response */      
+    }
+    else
+      ares_destroy(data->state.areschannel);
+  }
+
+  return NULL; /* no struct yet */
+  
+}
+#else
+/* For builds without ARES, Curl_resolv() can never return wait==TRUE,
+   so this function will never be called. If it still gets called, we
+   return failure at once. */
+CURLcode Curl_wait_for_resolv(struct connectdata *conn,
+                              struct Curl_dns_entry **entry)
+{
+  (void)conn;
+  *entry=NULL;
+  return CURLE_COULDNT_RESOLVE_HOST;
+}
+#endif
+
+#if defined(ENABLE_IPV6) && !defined(USE_ARES)
 
 #ifdef CURLDEBUG
 /* These two are strictly for memory tracing and are using the same
@@ -377,15 +612,16 @@ void curl_freeaddrinfo(struct addrinfo *freethis,
  * memory we need to free after use. That meory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
-static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
+static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
                                      char *hostname,
                                      int port,
-                                     char **bufp)
+                                     int *waitp)
 {
   struct addrinfo hints, *res;
   int error;
   char sbuf[NI_MAXSERV];
   int s, pf = PF_UNSPEC;
+  struct SessionHandle *data = conn->data;
 
   /* see if we have an IPv6 stack */
   s = socket(PF_INET6, SOCK_DGRAM, 0);
@@ -410,20 +646,18 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
     infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);    
     return NULL;
   }
-  *bufp=(char *)res; /* make it point to the result struct */
+  *waitp=0; /* don't wait, we have the response now */
 
   return res;
 }
 #else /* following code is IPv4-only */
 
-#ifndef HAVE_GETHOSTBYNAME_R
+#if !defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES)
 static void hostcache_fixoffset(struct hostent *h, int offset);
-/**
+/*
  * Performs a "deep" copy of a hostent into a buffer (returns a pointer to the
  * copy). Make absolutely sure the destination buffer is big enough!
- *
- * Keith McGuigan 
- * 10/3/2001 */
+ */
 static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 {
   char *bufptr;
@@ -512,6 +746,25 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 }
 #endif
 
+static void hostcache_fixoffset(struct hostent *h, int offset)
+{
+  int i=0;
+  h->h_name=(char *)((long)h->h_name+offset);
+  h->h_aliases=(char **)((long)h->h_aliases+offset);
+  while(h->h_aliases[i]) {
+    h->h_aliases[i]=(char *)((long)h->h_aliases[i]+offset);
+    i++;
+  }
+  h->h_addr_list=(char **)((long)h->h_addr_list+offset);
+  i=0;
+  while(h->h_addr_list[i]) {
+    h->h_addr_list[i]=(char *)((long)h->h_addr_list[i]+offset);
+    i++;
+  }
+}
+
+#ifndef USE_ARES
+
 static char *MakeIP(unsigned long num, char *addr, int addr_len)
 {
 #if defined(HAVE_INET_NTOA) || defined(HAVE_INET_NTOA_R)
@@ -533,42 +786,23 @@ static char *MakeIP(unsigned long num, char *addr, int addr_len)
   return (addr);
 }
 
-static void hostcache_fixoffset(struct hostent *h, int offset)
-{
-  int i=0;
-  h->h_name=(char *)((long)h->h_name+offset);
-  h->h_aliases=(char **)((long)h->h_aliases+offset);
-  while(h->h_aliases[i]) {
-    h->h_aliases[i]=(char *)((long)h->h_aliases[i]+offset);
-    i++;
-  }
-  h->h_addr_list=(char **)((long)h->h_addr_list+offset);
-  i=0;
-  while(h->h_addr_list[i]) {
-    h->h_addr_list[i]=(char *)((long)h->h_addr_list[i]+offset);
-    i++;
-  }
-}
-
 /* The original code to this function was once stolen from the Dancer source
    code, written by Bjorn Reese, it has since been patched and modified
    considerably. */
-static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
+static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
                                      char *hostname,
                                      int port,
-                                     char **bufp)
+                                     int *waitp)
 {
   struct hostent *h = NULL;
   in_addr_t in;
   int ret; /* this variable is unused on several platforms but used on some */
+  struct SessionHandle *data = conn->data;
 
-#define CURL_NAMELOOKUP_SIZE 9000
-  /* Allocate enough memory to hold the full name information structs and
-   * everything. OSF1 is known to require at least 8872 bytes. The buffer
-   * required for storing all possible aliases and IP numbers is according to
-   * Stevens' Unix Network Programming 2nd editor, p. 304: 8192 bytes! */
-  port=0; /* unused in IPv4 code */
+  (void)port; /* unused in IPv4 code */
   ret = 0; /* to prevent the compiler warning */
+
+  *waitp = 0; /* don't wait, we act synchronously */
 
   in=inet_addr(hostname);
   if (in != CURL_INADDR_NONE) {
@@ -581,7 +815,6 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
     } *buf = (struct namebuf *)malloc(sizeof(struct namebuf));
     if(!buf)
       return NULL; /* major failure */
-    *bufp = (char *)buf;
 
     h = &buf->hostentry;
     h->h_addr_list = &buf->h_addr_list[0];
@@ -602,7 +835,6 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
     int *buf = (int *)malloc(CURL_NAMELOOKUP_SIZE);
     if(!buf)
       return NULL; /* major failure */
-    *bufp=(char *)buf;
 
      /* Workaround for gethostbyname_r bug in qnx nto. It is also _required_
         for some of these functions. */
@@ -638,7 +870,6 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
       offset=(long)h-(long)buf;
       hostcache_fixoffset(h, offset);
       buf=(int *)h;
-      *bufp=(char *)buf;
     }
     else
 #endif
@@ -687,7 +918,6 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
       offset=(long)h-(long)buf;
       hostcache_fixoffset(h, offset);
       buf=(int *)h;
-      *bufp=(char *)buf;
     }
     else
 #endif
@@ -730,13 +960,11 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
       infof(data, "gethostbyname_r(2) failed for %s\n", hostname);
       h = NULL; /* set return code to NULL */
       free(buf);
-      *bufp=NULL;
     }
 #else
   else {
     if ((h = gethostbyname(hostname)) == NULL ) {
       infof(data, "gethostbyname(2) failed for %s\n", hostname);
-      *bufp=NULL;
     }
     else 
     {
@@ -745,7 +973,6 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
          static one we got a pointer to might get removed when we don't
          want/expect that */
       h = pack_hostent(&buf, h);
-      *bufp=(char *)buf;
     }
 #endif
   }
@@ -753,3 +980,5 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
 }
 
 #endif /* end of IPv4-specific code */
+
+#endif /* end of !USE_ARES */

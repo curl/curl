@@ -30,7 +30,9 @@
 CURLcode Curl_open(struct SessionHandle **curl);
 CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...);
 CURLcode Curl_close(struct SessionHandle *data); /* opposite of curl_open() */
-CURLcode Curl_connect(struct SessionHandle *, struct connectdata **);
+CURLcode Curl_connect(struct SessionHandle *, struct connectdata **,
+                      bool *async);
+CURLcode Curl_async_resolved(struct connectdata *conn);
 CURLcode Curl_do(struct connectdata **);
 CURLcode Curl_do_more(struct connectdata *);
 CURLcode Curl_done(struct connectdata *);

@@ -147,7 +147,11 @@ static unsigned int ConnectionStore(struct SessionHandle *data,
                                     struct connectdata *conn);
 static bool safe_strequal(char* str1, char* str2);
 
-#if !defined(WIN32)||defined(__CYGWIN32__)
+#ifndef USE_ARES
+/* not for Win32, unless it is cygwin
+   not for ares builds */
+#if !defined(WIN32) || defined(__CYGWIN32__)
+
 #ifndef RETSIGTYPE
 #define RETSIGTYPE void
 #endif
@@ -165,6 +169,7 @@ RETSIGTYPE alarmfunc(int signal)
   return;
 }
 #endif
+#endif /* USE_ARES */
 
 void Curl_safefree(void *ptr)
 {
@@ -1286,7 +1291,11 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->allocptr.host);
   Curl_safefree(conn->allocptr.cookiehost);
   Curl_safefree(conn->proxyhost);
-
+#ifdef USE_ARES
+  /* possible left-overs from the async name resolve */
+  Curl_safefree(conn->async.hostname);
+#endif
+  
   Curl_free_ssl_config(&conn->ssl_config);
 
   free(conn); /* free all the connection oriented data */
@@ -1632,7 +1641,15 @@ static int handleSock5Proxy(
 #ifndef ENABLE_IPV6
     struct Curl_dns_entry *dns;
     Curl_addrinfo *hp=NULL;
-    dns = Curl_resolv(conn->data, conn->hostname, conn->remote_port);
+    int rc = Curl_resolv(conn, conn->hostname, conn->remote_port, &dns);
+    
+    if(rc == -1)
+      return CURLE_COULDNT_RESOLVE_HOST;
+
+    if(rc == 1)
+      /* this requires that we're in "wait for resolve" state */
+      rc = Curl_wait_for_resolv(conn, &dns);
+    
     /*
      * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
      * returns a Curl_addrinfo pointer that may not always look the same.
@@ -1841,8 +1858,19 @@ CURLcode Curl_protocol_connect(struct connectdata *conn,
   return result; /* pass back status */
 }
 
+/*
+ * CreateConnection() sets up a new connectdata struct, or re-uses an already
+ * existing one, and resolves host name.
+ *
+ * if this function returns CURLE_OK and *async is set to TRUE, the resolve
+ * response will be coming asynchronously. If *async is FALSE, the name is
+ * already resolved.
+ */
+
 static CURLcode CreateConnection(struct SessionHandle *data,
-                                 struct connectdata **in_connect)
+                                 struct connectdata **in_connect,
+                                 struct Curl_dns_entry **addr,
+                                 bool *async)
 {
   char *tmp;
   CURLcode result=CURLE_OK;
@@ -1859,7 +1887,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   char passwd[MAX_CURL_PASSWORD_LENGTH];
   bool passwdgiven=FALSE; /* set TRUE if an application-provided password has
                              been set */
-
+  int rc;
 
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
@@ -1870,6 +1898,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #endif
 #endif
 
+  *addr = NULL; /* nothing yet */
+  *async = FALSE;
+  
   /*************************************************************
    * Check input data
    *************************************************************/
@@ -2875,8 +2906,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* else, no chunky upload */
   FALSE;
 
+#ifndef USE_ARES
   /*************************************************************
-   * Set timeout if that is being used
+   * Set timeout if that is being used, and we're not using an asynchronous
+   * name resolve.
    *************************************************************/
   if((data->set.timeout || data->set.connecttimeout) && !data->set.no_signal) {
     /*************************************************************
@@ -2919,7 +2952,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
        has been done since then until now. */
 #endif
   }
-
+#endif
+  
   /*************************************************************
    * Resolve the name of the server or proxy
    *************************************************************/
@@ -2935,9 +2969,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->port =  conn->remote_port; /* it is the same port */
 
     /* Resolve target host right on */
-    hostaddr = Curl_resolv(data, conn->name, conn->port);
+    rc = Curl_resolv(conn, conn->name, conn->port, &hostaddr);
+    if(rc == 1)
+      *async = TRUE;
 
-    if(!hostaddr) {
+    else if(!hostaddr) {
       failf(data, "Couldn't resolve host '%s'", conn->name);
       result =  CURLE_COULDNT_RESOLVE_HOST;
       /* don't return yet, we need to clean up the timeout first */
@@ -2947,15 +2983,19 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* This is a proxy that hasn't been resolved yet. */
 
     /* resolve proxy */
-    hostaddr = Curl_resolv(data, conn->proxyhost, conn->port);
+    rc = Curl_resolv(conn, conn->proxyhost, conn->port, &hostaddr);
 
-    if(!hostaddr) {
+    if(rc == 1)
+      *async = TRUE;
+
+    else if(!hostaddr) {
       failf(data, "Couldn't resolve proxy '%s'", conn->proxyhost);
       result = CURLE_COULDNT_RESOLVE_PROXY;
       /* don't return yet, we need to clean up the timeout first */
     }
   }
-  Curl_pgrsTime(data, TIMER_NAMELOOKUP);
+  *addr = hostaddr;
+
 #ifdef HAVE_ALARM
   if((data->set.timeout || data->set.connecttimeout) && !data->set.no_signal) {
 #ifdef HAVE_SIGACTION
@@ -2995,7 +3035,25 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       alarm(0); /* just shut it off */
   }
 #endif
-  if(result)
+
+  return result;
+}
+
+/* SetupConnection() should be called after the name resolve initiated in
+ * CreateConnection() is all done.
+ */
+ 
+static CURLcode SetupConnection(struct connectdata *conn,
+                                struct Curl_dns_entry *hostaddr)
+{
+  struct SessionHandle *data = conn->data;
+  CURLcode result=CURLE_OK;
+
+  Curl_pgrsTime(data, TIMER_NAMELOOKUP);
+
+  if(conn->protocol & PROT_FILE)
+    /* There's nothing in this function to setup if we're only doing
+       a file:// transfer */
     return result;
 
   /*************************************************************
@@ -3007,8 +3065,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
              conn->proxyuser, conn->proxypasswd);
     if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
                           &authorization) >= 0) {
-      if(conn->allocptr.proxyuserpwd)
-        free(conn->allocptr.proxyuserpwd);
+      Curl_safefree(conn->allocptr.proxyuserpwd);
       conn->allocptr.proxyuserpwd =
         aprintf("Proxy-authorization: Basic %s\015\012", authorization);
       free(authorization);
@@ -3022,16 +3079,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if((conn->protocol&PROT_HTTP) ||
      (data->change.proxy && *data->change.proxy)) {
     if(data->set.useragent) {
-      if(conn->allocptr.uagent)
-        free(conn->allocptr.uagent);
+      Curl_safefree(conn->allocptr.uagent);
       conn->allocptr.uagent =
         aprintf("User-Agent: %s\015\012", data->set.useragent);
     }
   }
 
   if(data->set.encoding) {
-    if(conn->allocptr.accept_encoding)
-      free(conn->allocptr.accept_encoding);
+    Curl_safefree(conn->allocptr.accept_encoding);
     conn->allocptr.accept_encoding =
       aprintf("Accept-Encoding: %s\015\012", data->set.encoding);
   }
@@ -3083,25 +3138,59 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 }
 
 CURLcode Curl_connect(struct SessionHandle *data,
-                      struct connectdata **in_connect)
+                      struct connectdata **in_connect,
+                      bool *asyncp)
 {
   CURLcode code;
-  struct connectdata *conn;
+  struct Curl_dns_entry *dns;
 
+  *asyncp = FALSE; /* assume synchronous resolves by default */
+  
   /* call the stuff that needs to be called */
-  code = CreateConnection(data, in_connect);
+  code = CreateConnection(data, in_connect, &dns, asyncp);
 
+  if(CURLE_OK == code) {
+    /* no error */
+    if(dns || !*asyncp)
+      /* If an address is available it means that we already have the name
+         resolved, OR it isn't async.
+         If so => continue connecting from here */
+      code = SetupConnection(*in_connect, dns);
+    /* else
+         response will be received and treated async wise */
+  }
+  
   if(CURLE_OK != code) {
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
-    conn = (struct connectdata *)*in_connect;
-    if(conn) {
-      Curl_disconnect(conn);      /* close the connection */
-      *in_connect = NULL;         /* return a NULL */
+    if(*in_connect) {
+      Curl_disconnect(*in_connect); /* close the connection */
+      *in_connect = NULL;           /* return a NULL */
     }
   }
+
   return code;
 }
+
+/* Call this function after Curl_connect() has returned async=TRUE and
+   then a successful name resolve has been received */
+CURLcode Curl_async_resolved(struct connectdata *conn)
+{
+#ifdef USE_ARES
+  CURLcode code = SetupConnection(conn, conn->async.dns);
+
+  if(code)
+    /* We're not allowed to return failure with memory left allocated
+       in the connectdata struct, free those here */
+    Curl_disconnect(conn); /* close the connection */
+
+  return code;
+#else
+  (void)conn;
+  return CURLE_OK;
+#endif
+}
+
 
 CURLcode Curl_done(struct connectdata *conn)
 {
@@ -3179,11 +3268,28 @@ CURLcode Curl_do(struct connectdata **connp)
       conn->bits.close = TRUE; /* enforce close of this connetion */
       result = Curl_done(conn);   /* we are so done with this */
       if(CURLE_OK == result) {
+        bool async;
         /* Now, redo the connect and get a new connection */
-        result = Curl_connect(data, connp);
-        if(CURLE_OK == result)
+        result = Curl_connect(data, connp, &async);
+        if(CURLE_OK == result) {
+          /* We have connected or sent away a name resolve query fine */
+
+          if(async) {
+            /* Now, if async is TRUE here, we need to wait for the name
+               to resolve */
+            result = Curl_wait_for_resolv(conn, NULL);
+            if(result)
+              return result;
+            
+            /* Resolved, continue with the connection */
+            result = Curl_async_resolved(conn);              
+            if(result)
+              return result;
+          }
+          
           /* ... finally back to actually retry the DO phase */
-          result = conn->curl_do(*connp);
+          result = conn->curl_do(conn);
+        }
       }
     }
   }

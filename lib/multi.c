@@ -56,7 +56,8 @@ struct Curl_message {
 
 typedef enum {
   CURLM_STATE_INIT,
-  CURLM_STATE_CONNECT,     /* connect has been sent off */
+  CURLM_STATE_CONNECT,     /* resolve/connect has been sent off */
+  CURLM_STATE_WAITRESOLVE, /* we're awaiting the resolve to finalize */
   CURLM_STATE_WAITCONNECT, /* we're awaiting the connect to finalize */
   CURLM_STATE_DO,          /* send off the request (part 1) */
   CURLM_STATE_DO_MORE,     /* send off the request (part 2) */
@@ -239,6 +240,14 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
     switch(easy->state) {
     default:
       break;
+    case CURLM_STATE_WAITRESOLVE:
+      /* waiting for a resolve to complete */
+      Curl_multi_ares_fdset(easy->easy_conn, read_fd_set, write_fd_set,
+                            &this_max_fd);
+      if(this_max_fd > *max_fd)
+        *max_fd = this_max_fd;
+      break;
+
     case CURLM_STATE_WAITCONNECT:
     case CURLM_STATE_DO_MORE:
       {
@@ -293,6 +302,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   CURLMcode result=CURLM_OK;
   struct Curl_message *msg = NULL;
   bool connected;
+  bool async;
 
   *running_handles = 0; /* bump this once for every living handle */
 
@@ -320,6 +330,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         easy->easy_handle->state.used_interface = Curl_if_multi;
       }
       break;
+
     case CURLM_STATE_CONNECT:
       if (Curl_global_host_cache_use(easy->easy_handle)) {
         easy->easy_handle->hostcache = Curl_global_host_cache_get();
@@ -333,16 +344,46 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
       /* Connect. We get a connection identifier filled in. */
       Curl_pgrsTime(easy->easy_handle, TIMER_STARTSINGLE);
-      easy->result = Curl_connect(easy->easy_handle, &easy->easy_conn);
+      easy->result = Curl_connect(easy->easy_handle, &easy->easy_conn, &async);
 
-      /* after the connect has been sent off, go WAITCONNECT */
       if(CURLE_OK == easy->result) {
-        easy->state = CURLM_STATE_WAITCONNECT;
-        result = CURLM_CALL_MULTI_PERFORM; 
+        if(async)
+          /* We're now waiting for an asynchronous name lookup */
+          easy->state = CURLM_STATE_WAITRESOLVE;
+        else {
+          /* after the connect has been sent off, go WAITCONNECT */
+          easy->state = CURLM_STATE_WAITCONNECT;
+          result = CURLM_CALL_MULTI_PERFORM;
+        }
+      }
+      break;
+
+    case CURLM_STATE_WAITRESOLVE:
+      /* awaiting an asynch name resolve to complete */
+      {
+        bool done;
+
+        /* check if we have the name resolved by now */
+        easy->result = Curl_is_resolved(easy->easy_conn, &done);
+
+        if(done) {
+          /* Perform the next step in the connection phase, and then move on
+             to the WAITCONNECT state */
+          easy->result = Curl_async_resolved(easy->easy_conn);
+
+          easy->state = CURLM_STATE_WAITCONNECT;
+        }
+        
+        if(CURLE_OK != easy->result) {
+          /* failure detected */
+          easy->easy_conn = NULL;           /* no more connection */
+          break;
+        }
       }
       break;
 
     case CURLM_STATE_WAITCONNECT:
+      /* awaiting a completion of an asynch connect */
       {
         bool connected;
         easy->result = Curl_is_connected(easy->easy_conn,
