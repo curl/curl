@@ -1,4 +1,6 @@
 ########################################################
+# $Id: Makefile.vc6,v 1.19 2004/11/14 13:48:15 giva Exp $
+#
 ## Makefile for building curl.exe with MSVC6
 ## Use: nmake -f makefile.vc6 [release | debug] [CFG=release-ssl]
 ##      (default is release)
