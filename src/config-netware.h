@@ -405,7 +405,7 @@
 #undef NEED_REENTRANT
 
 /* cpu-machine-OS */
-#define OS "i386-pc-NetWare"
+#define OS "i586-pc-NetWare"
 
 /* Name of package */
 #undef PACKAGE
