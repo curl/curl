@@ -374,19 +374,20 @@ static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list a
 	case 'q':
 	  flags |= FLAGS_LONGLONG;
 	  break;
+#if 0
 	case 'Z':
 	  if (sizeof(size_t) > sizeof(unsigned long int))
 	    flags |= FLAGS_LONGLONG;
 	  if (sizeof(size_t) > sizeof(unsigned int))
 	    flags |= FLAGS_LONG;
 	  break;
+#endif
 	case 'O':
-	  if (sizeof(curl_off_t) > sizeof(unsigned long int)) {
-	    flags |= FLAGS_LONGLONG;
-	  }
-          else if (sizeof(curl_off_t) > sizeof(unsigned int)) {
-	    flags |= FLAGS_LONG;
-	  }
+#if SIZEOF_CURL_OFF_T > 4
+          flags |= FLAGS_LONGLONG;
+#else
+          flags |= FLAGS_LONG;
+#endif
 	  break;
 	case '0':
 	  if (!(flags & FLAGS_LEFT))
