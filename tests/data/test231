@@ -1,0 +1,51 @@
+#
+# Server-side
+<reply>
+<data nocheck=1>
+contents of source file 231
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+ftp
+ftp2
+</server>
+ <name>
+FTP 3rd party transfer, make target use PORT
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/dest/destpath/231 -u daniel:stenberg --3p-url ftp://%HOSTIP:%FTP2PORT/source/sourcepath/231 --3p-user daniel2:stenberg2 -P -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# target-side protocol check
+<strippart>>
+s/^(PORT 127,0,0,1).*/$1/
+</strippart>
+<protocol>
+USER daniel
+PASS stenberg
+PWD
+TYPE I
+CWD dest
+CWD destpath
+PORT 127,0,0,1
+STOR 231
+QUIT
+</protocol>
+<file name="log/server2.input">
+USER daniel2
+PASS stenberg2
+PWD
+TYPE I
+PASV
+RETR source/sourcepath/231
+QUIT
+</file>
+</verify>

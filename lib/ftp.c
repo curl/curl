@@ -368,7 +368,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
             /* output debug output if that is requested */
             if(data->set.verbose)
-              Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline, conn->host.dispname);
+              Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline, conn);
 
             /*
              * We pass all response-lines to the callback function registered
@@ -593,7 +593,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   if(ftpcode == 530) {
     /* 530 User ... access denied
        (the server denies to log the specified user) */
-    failf(data, "Access denied: %s", &buf[4]);
+    failf(data, "Access denied: %03d", ftpcode);
     return CURLE_FTP_ACCESS_DENIED;
   }
   else if(ftpcode == 331) {
@@ -610,7 +610,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
       or
          530 Sorry, the maximum number of allowed users are already connected
       */
-      failf(data, "not logged in: %s", &buf[4]);
+      failf(data, "not logged in: %03d", ftpcode);
       return CURLE_FTP_USER_PASSWORD_INCORRECT;
     }
     else if(ftpcode/100 == 2) {
@@ -1594,7 +1594,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
     }
 
     if(!*str) {
-      failf(data, "Couldn't interpret this 227-reply: %s", buf);
+      failf(data, "Couldn't interpret the 227-reply");
       return CURLE_FTP_WEIRD_227_FORMAT;
     }
 
@@ -1828,7 +1828,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       return result;
 
     if(ftpcode>=400) {
-      failf(data, "Failed FTP upload:%s", buf+3);
+      failf(data, "Failed FTP upload: %03d", ftpcode);
       /* oops, we never close the sockets! */
       return CURLE_FTP_COULDNT_STOR_FILE;
     }
@@ -2022,7 +2022,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
           return result;
 
         if(ftpcode != 350) {
-          failf(data, "Couldn't use REST: %s", buf+4);
+          failf(data, "Couldn't use REST: %03d", ftpcode);
           return CURLE_FTP_COULDNT_USE_REST;
         }
       }
@@ -2136,7 +2136,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         ftp->no_transfer = TRUE; /* don't think we should download anything */
       }
       else {
-        failf(data, "%s", buf+4);
+        failf(data, "RETR failed: %03d", ftpcode);
         return CURLE_FTP_COULDNT_RETR_FILE;
       }
     }
@@ -2367,7 +2367,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
       break;
 
     if(conn->data->set.verbose)
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, bytes_written, conn->host.dispname);
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, bytes_written, conn);
 
     if(bytes_written != (ssize_t)write_len) {
       write_len -= bytes_written;
@@ -2553,6 +2553,9 @@ static CURLcode ftp_3rdparty_pretransfer(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct connectdata *sec_conn = conn->sec_conn;
 
+  conn->xfertype = TARGET3RD;
+  sec_conn->xfertype = SOURCE3RD;
+
   /* sets transfer type */
   result = ftp_transfertype(conn, data->set.ftp_ascii);
   if (result)
@@ -2596,7 +2599,7 @@ static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
   struct connectdata *pasv_conn;
   struct connectdata *port_conn;
 
-  if (data->set.pasvHost == CURL_TARGET_PASV) {
+  if (data->set.ftpport == NULL) {
     pasv_conn = conn;
     port_conn = sec_conn;
   }
@@ -2612,9 +2615,11 @@ static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
   /* sets the passive mode */
   FTPSENDF(pasv_conn, "%s", "PASV");
   result = Curl_GetFTPResponse(&nread, pasv_conn, &ftpcode);
-  if (result) return result;
+  if (result)
+    return result;
+
   if (ftpcode != 227) {
-    failf(data, "Odd return code after PASV:%s", buf + 3);
+    failf(data, "Odd return code after PASV: %03d", ftpcode);
     return CURLE_FTP_WEIRD_PASV_REPLY;
   }
 
@@ -2626,7 +2631,7 @@ static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
   }
 
   if (!*str) {
-    failf(pasv_conn->data, "Couldn't interpret this 227-reply: %s", buf);
+    failf(pasv_conn->data, "Couldn't interpret the 227-reply");
     return CURLE_FTP_WEIRD_227_FORMAT;
   }
 
@@ -2640,7 +2645,7 @@ static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
     return result;
 
   if (ftpcode != 200) {
-    failf(data, "PORT command attempts failed:%s", buf + 3);
+    failf(data, "PORT command attempts failed: %03d", ftpcode);
     return CURLE_FTP_PORT_FAILED;
   }
 
@@ -2648,41 +2653,44 @@ static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
   stor_cmd = data->set.ftp_append?"APPE":"STOR";
 
   /* transfers file between remote hosts */
-  FTPSENDF(sec_conn, "RETR %s", data->set.source_path);
+  /* FIX: this should send a series of CWD commands and then RETR only the
+     ftp->file file. The conn->path "full path" is not unescaped. Test case
+     230 tests this. */
+  FTPSENDF(sec_conn, "RETR %s", sec_conn->path);
 
-  if(data->set.pasvHost == CURL_TARGET_PASV) {
+  if(!data->set.ftpport) {
 
     result = Curl_GetFTPResponse(&nread, sec_conn, &ftpcode);
     if (result)
       return result;
 
-    if (ftpcode != 150) {
-      failf(data, "Failed RETR: %s", buf + 4);
+    if((ftpcode != 150) && (ftpcode != 125)) {
+      failf(data, "Failed RETR: %03d", ftpcode);
       return CURLE_FTP_COULDNT_RETR_FILE;
     }
 
-    result = Curl_ftpsendf(conn, "%s %s", stor_cmd, conn->path);
+    result = Curl_ftpsendf(conn, "%s %s", stor_cmd, conn->proto.ftp->file);
     if(CURLE_OK == result)
       result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
     if (result)
       return result;
 
-    if (ftpcode != 150) {
-      failf(data, "Failed FTP upload: %s", buf + 4);
+    if (ftpcode >= 400) {
+      failf(data, "Failed FTP upload: %03d", ftpcode);
       return CURLE_FTP_COULDNT_STOR_FILE;
     }
 
   }
   else {
 
-    result = Curl_ftpsendf(conn, "%s %s", stor_cmd, conn->path);
+    result = Curl_ftpsendf(conn, "%s %s", stor_cmd, conn->proto.ftp->file);
     if(CURLE_OK == result)
       result = Curl_GetFTPResponse(&nread, sec_conn, &ftpcode);
     if (result)
       return result;
 
-    if (ftpcode != 150) {
-      failf(data, "Failed FTP upload: %s", buf + 4);
+    if (ftpcode >= 400) {
+      failf(data, "Failed FTP upload: %03d", ftpcode);
       return CURLE_FTP_COULDNT_STOR_FILE;
     }
 
@@ -2690,8 +2698,8 @@ static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
     if (result)
       return result;
 
-    if (ftpcode != 150) {
-      failf(data, "Failed FTP upload: %s", buf + 4);
+    if((ftpcode != 150) && (ftpcode != 125)) {
+      failf(data, "Failed FTP upload: %03d", ftpcode);
       return CURLE_FTP_COULDNT_STOR_FILE;
     }
   }

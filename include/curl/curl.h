@@ -712,7 +712,7 @@ typedef enum {
   CINIT(SSLENGINE_DEFAULT, LONG, 90),
 
   /* Non-zero value means to use the global dns cache */
-  CINIT(DNS_USE_GLOBAL_CACHE, LONG, 91), /* To become OBSOLETE soon */
+  CINIT(DNS_USE_GLOBAL_CACHE, LONG, 91), /* To becomeO BSOLETE soon */
 
   /* DNS cache timeout */
   CINIT(DNS_CACHE_TIMEOUT, LONG, 92),
@@ -842,25 +842,15 @@ typedef enum {
   /* Enable/disable the TCP Nagle algorithm */
   CINIT(TCP_NODELAY, LONG, 121),
 
-  /* When doing 3rd party transfer, set the source host name with this */
-  CINIT(SOURCE_HOST, OBJECTPOINT, 122),
+  /* 122 OBSOLETE, used in 7.12.3. Gone in 7.13.0 */
 
   /* When doing 3rd party transfer, set the source user and password with
      this */
   CINIT(SOURCE_USERPWD, OBJECTPOINT, 123),
 
-  /* When doing 3rd party transfer, set the source file path with this */
-  CINIT(SOURCE_PATH, OBJECTPOINT, 124),
-
-  /* When doing 3rd party transfer, set the source server's port number
-     with this */
-  CINIT(SOURCE_PORT, LONG, 125),
-
-  /* When doing 3rd party transfer, decide which server that should get the
-     PASV command (and the other gets the PORT).
-     0 (default) - The target host issues PASV.
-     1           - The source host issues PASV */
-  CINIT(PASV_HOST, LONG, 126),
+  /* 124 OBSOLETE, used in 7.12.3. Gone in 7.13.0 */
+  /* 125 OBSOLETE, used in 7.12.3. Gone in 7.13.0 */
+  /* 126 OBSOLETE, used in 7.12.3. Gone in 7.13.0 */
 
   /* When doing 3rd party transfer, set the source pre-quote linked list
      of commands with this */
@@ -884,6 +874,13 @@ typedef enum {
 
   CINIT(IOCTLFUNCTION, FUNCTIONPOINT, 130),
   CINIT(IOCTLDATA, OBJECTPOINT, 131),
+
+  /* To make a 3rd party transfer, set the source URL with this */
+  CINIT(SOURCE_URL, OBJECTPOINT, 132),
+
+  /* When doing 3rd party transfer, set the source quote linked list of
+     commands with this */
+  CINIT(SOURCE_QUOTE, OBJECTPOINT, 133),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
@@ -909,6 +906,11 @@ typedef enum {
 #define CURLOPT_PASSWDFUNCTION -3
 #define CURLOPT_PASSWDDATA     -4
 #define CURLOPT_CLOSEFUNCTION  -5
+
+#define CURLOPT_SOURCE_HOST    -6
+#define CURLOPT_SOURCE_PATH    -7
+#define CURLOPT_SOURCE_PORT    -8
+#define CURLOPT_PASV_HOST      -9
 
 #else
 /* This is set if CURL_NO_OLDIES is defined at compile-time */

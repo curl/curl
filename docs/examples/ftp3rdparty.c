@@ -1,8 +1,8 @@
 /*****************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * $Id$
@@ -16,22 +16,20 @@
 
 /*
  * This is an example showing how to transfer a file between two remote hosts.
+ * 7.13.0 or later required.
  */
-
-
 
 int main(void)
 {
   CURL *curl;
   CURLcode res;
-  char sourceFileName[] = "/tmp/file";
-  char targetFileName[] = "/tmp/curlTargetTest.dat";
-  char sourceHost[] = "source";
-  char targetHost[] = "target";
+  char source_url[] = "ftp://remotehost.com/path/to/source";
+  char target_url[] = "ftp://aotherserver.com/path/to/dest";
+
   char sourceUserPass[] = "user:pass";
   char targetUserPass[] = "user:pass";
   char url[100];
-  
+
   struct curl_slist *source_pre_cmd = NULL;
   struct curl_slist *target_pre_cmd = NULL;
   struct curl_slist *source_post_cmd = NULL;
@@ -39,24 +37,25 @@ int main(void)
   char cmd[] = "PWD";   /* just to test */
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
-  
+
   curl = curl_easy_init();
   if (curl) {
-    sprintf(url, "ftp://%s@%s/%s", targetUserPass, targetHost, targetFileName);
-    printf("%s\n", url);
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+    /* The ordinary URL is the target when speaking 3rd party transfers */
+    curl_easy_setopt(curl, CURLOPT_URL, target_url);
 
-    /* Set a proxy host */
-    curl_easy_setopt(curl, CURLOPT_SOURCE_HOST, sourceHost);
+    /* Set a source URL */
+    curl_easy_setopt(curl, CURLOPT_SOURCE_URL, source_url);
 
-    /* Set a proxy user and password */
+    /* Set target user and password */
+    curl_easy_setopt(curl, CURLOPT_USERPWD, targetUserPass);
+
+    /* Set source user and password */
     curl_easy_setopt(curl, CURLOPT_SOURCE_USERPWD, sourceUserPass);
 
-    /* Set a proxy full file name */
-    curl_easy_setopt(curl, CURLOPT_SOURCE_PATH, sourceFileName);
-
-    /* Set a proxy passive host */
-    curl_easy_setopt(curl, CURLOPT_PASV_HOST, 0);   /* optional */
+#if 0
+    /* FTPPORT enables PORT on the target side, instead of PASV. */
+    curl_easy_setopt(curl, CURLOPT_FTPPORT, "");   /* optional */
+#endif
 
     /* build a list of commands to pass to libcurl */
     source_pre_cmd = curl_slist_append(source_pre_cmd, cmd);
@@ -77,7 +76,7 @@ int main(void)
     target_post_cmd = curl_slist_append(target_post_cmd, cmd);
     /* Set a post-quote command */
     curl_easy_setopt(curl, CURLOPT_POSTQUOTE, target_post_cmd);
-    
+
     /* Switch on full protocol/debug output */
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
 

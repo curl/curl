@@ -1,8 +1,8 @@
-Curl and libcurl 7.12.4
+Curl and libcurl 7.13.0
 
  Public curl release number:               85
  Releases counted from the very beginning: 112
- Available command line options:           100
+ Available command line options:           103
  Available curl_easy_setopt() options:     123
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        14
@@ -10,6 +10,10 @@ Curl and libcurl 7.12.4
 
 This release includes the following changes:
 
+ o added CURLOPT_SOURCE_URL and CURLOPT_SOURCE_QUOTE
+ o obsoleted CURLOPT_SOURCE_HOST, CURLOPT_SOURCE_PATH, CURLOPT_SOURCE_PORT
+   and CURLOPT_PASV_HOST
+ o added --3p-url, --3p-user and --3p-quote
  o -Q "+[command]" was added
  o src/getpass.c license issue sorted (code was rewritten)
  o curl -w now supports 'http_connect' for the proxy's response to CONNECT
@@ -17,6 +21,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o FTP third party transfers was much improved
  o proxy environment variables are now ignored when built HTTP-disabled
  o CURLOPT_PROXY can now disable HTTP proxy even when built HTTP-disabled
  o "curl dictionary.com" no longer assumes DICT protocol

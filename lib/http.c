@@ -858,8 +858,7 @@ CURLcode add_buffer_send(send_buffer *in,
 
     if(conn->data->set.verbose)
       /* this data _may_ contain binary stuff */
-      Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, amount,
-                 conn->host.dispname);
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, amount, conn);
 
     *bytes_written += amount;
 
@@ -1140,7 +1139,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
               /* output debug if that is requested */
               if(data->set.verbose)
                 Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline,
-                           conn->host.dispname);
+                           conn);
 
               /* send the header to the callback */
               writetype = CLIENTWRITE_HEADER;

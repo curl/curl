@@ -1,0 +1,51 @@
+#
+# Server-side
+<reply>
+<data nocheck=1>
+contents of source file 232
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+ftp
+ftp2
+</server>
+ <name>
+FTP 3rd party transfer, anonymous user
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/dest/destpath/232 --3p-url ftp://%HOSTIP:%FTP2PORT/source/sourcepath/232
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# target-side protocol check
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+TYPE I
+CWD dest
+CWD destpath
+PASV
+STOR 232
+QUIT
+</protocol>
+<stripfile>
+s/^(PORT 127,0,0,1).*/$1/
+</stripfile>
+<file name="log/server2.input">
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+TYPE I
+PORT 127,0,0,1
+RETR source/sourcepath/232
+QUIT
+</file>
+</verify>

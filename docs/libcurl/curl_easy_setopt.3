@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "29 Nov 2004" "libcurl 7.12.3" "libcurl Manual"
+.TH curl_easy_setopt 3 "20 Jan 2005" "libcurl 7.12.4" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -751,6 +751,18 @@ Try "AUTH SSL" first, and only if that fails try "AUTH TLS"
 .IP CURLFTPAUTH_TLS
 Try "AUTH TLS" first, and only if that fails try "AUTH SSL"
 .RE
+.IP CURLOPT_SOURCE_URL
+When set, it enables a FTP third party transfer, using the set URL as source,
+while \fICURLOPT_URL\fP is the target.
+.IP CURLOPT_SOURCE_USERPWD
+Set "username:password" to use for the source connection when doing FTP third
+party transfers.
+.IP CURLOPT_SOURCE_QUOTE
+Exactly like \fICURLOPT_QUOTE\fP, but for the source host.
+.IP CURLOPT_SOURCE_PREQUOTE
+Exactly like \fICURLOPT_PREQUOTE\fP, but for the source host.
+.IP CURLOPT_SOURCE_POSTQUOTE
+Exactly like \fICURLOPT_POSTQUOTE\fP, but for the source host.
 .SH PROTOCOL OPTIONS
 .IP CURLOPT_TRANSFERTEXT
 A non-zero parameter tells the library to use ASCII mode for ftp transfers,

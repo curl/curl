@@ -400,13 +400,12 @@ static void help(void)
     "    --socks <host[:port]> Use SOCKS5 proxy on given host + port",
     "    --stderr <file> Where to redirect stderr. - means stdout",
     " -t/--telnet-option <OPT=val> Set telnet option",
-    "    --trace <file>  Dump a network/debug trace to the given file",
+    "    --trace <file>  Write a debug trace to the given file",
     "    --trace-ascii <file> Like --trace but without the hex output",
-    " -T/--upload-file <file> Transfer/upload <file> to remote site",
-    "    --url <URL>     Another way to specify URL to work with",
-    " -u/--user <user[:password]> Specify user and password to use",
-    "                    Overrides -n and --netrc-optional",
-    " -U/--proxy-user <user[:password]> Specify Proxy authentication",
+    " -T/--upload-file <file> Transfer <file> to remote site",
+    "    --url <URL>     Spet URL to work with",
+    " -u/--user <user[:password]> Set server user and password",
+    " -U/--proxy-user <user[:password]> Set proxy user and password",
     " -v/--verbose       Make the operation more talkative",
     " -V/--version       Show version number and quit",
 #ifdef __DJGPP__
@@ -422,6 +421,9 @@ static void help(void)
     " -1/--tlsv1         Use TLSv1 (SSL)",
     " -2/--sslv2         Use SSLv2 (SSL)",
     " -3/--sslv3         Use SSLv3 (SSL)",
+    "    --3p-quote      like -Q for the source URL for 3rd party transfer (F)",
+    "    --3p-url        source URL to activate 3rd party transfer (F)",
+    "    --3p-user       user and password for source 3rd party transfer (F)",
     " -4/--ipv4          Resolve name to IPv4 address",
     " -6/--ipv6          Resolve name to IPv6 address",
     " -#/--progress-bar  Display transfer progress as a progress bar",
@@ -540,6 +542,13 @@ struct Configurable {
   long req_retry;   /* number of retries */
   long retry_delay; /* delay between retries (in seconds) */
   long retry_maxtime; /* maximum time to keep retrying */
+
+  char *tp_url; /* third party URL */
+  char *tp_user; /* third party userpwd */
+  struct curl_slist *tp_quote;
+  struct curl_slist *tp_postquote;
+  struct curl_slist *tp_prequote;
+
 };
 
 /* global variable to hold info about libcurl */
@@ -1240,6 +1249,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$g", "retry",      TRUE},
     {"$h", "retry-delay", TRUE},
     {"$i", "retry-max-time", TRUE},
+
+    {"$j", "3p-url", TRUE},
+    {"$k", "3p-user", TRUE},
+    {"$l", "3p-quote", TRUE},
+
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1586,6 +1600,36 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'i': /* --retry-max-time */
         if(str2num(&config->retry_maxtime, nextarg))
           return PARAM_BAD_NUMERIC;
+        break;
+
+      case 'j': /* --3p-url */
+        GetStr(&config->tp_url, nextarg);
+        break;
+      case 'k': /* --3p-user */
+        GetStr(&config->tp_user, nextarg);
+        break;
+      case 'l': /* --3p-quote */
+        /* QUOTE commands to send to source FTP server */
+        err = PARAM_OK;
+        switch(nextarg[0]) {
+        case '-':
+          /* prefixed with a dash makes it a POST TRANSFER one */
+          nextarg++;
+          err = add2list(&config->tp_postquote, nextarg);
+          break;
+        case '+':
+          /* prefixed with a plus makes it a just-before-transfer one */
+          nextarg++;
+          err = add2list(&config->tp_prequote, nextarg);
+          break;
+        default:
+          err = add2list(&config->tp_quote, nextarg);
+          break;
+        }
+        if(err)
+          return err;
+
+        break;
         /* break */
       }
       break;
@@ -2782,10 +2826,17 @@ static void free_config_fields(struct Configurable *config)
     free(config->capath);
   if(config->cookiejar)
     free(config->cookiejar);
+  if(config->tp_url)
+    free(config->tp_url);
+  if(config->tp_user)
+    free(config->tp_user);
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
   curl_slist_free_all(config->prequote);
   curl_slist_free_all(config->postquote);
+  curl_slist_free_all(config->tp_quote);
+  curl_slist_free_all(config->tp_prequote);
+  curl_slist_free_all(config->tp_postquote);
   curl_slist_free_all(config->headers);
 }
 
@@ -3603,6 +3654,13 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_PROXY, config->socks5proxy);
           curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
         }
+
+        /* curl 7.12.4 */
+        curl_easy_setopt(curl, CURLOPT_SOURCE_URL, config->tp_url);
+        curl_easy_setopt(curl, CURLOPT_SOURCE_USERPWD, config->tp_user);
+        curl_easy_setopt(curl, CURLOPT_SOURCE_PREQUOTE, config->tp_prequote);
+        curl_easy_setopt(curl, CURLOPT_SOURCE_POSTQUOTE, config->tp_postquote);
+        curl_easy_setopt(curl, CURLOPT_SOURCE_QUOTE, config->tp_quote);
 
         retry_numretries = config->req_retry;
 

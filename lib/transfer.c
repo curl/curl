@@ -935,7 +935,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
             if(data->set.verbose)
               Curl_debug(data, CURLINFO_HEADER_IN,
-                         k->p, k->hbuflen, conn->host.dispname);
+                         k->p, k->hbuflen, conn);
 
             result = Curl_client_write(data, writetype, k->p, k->hbuflen);
             if(result)
@@ -1032,14 +1032,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           if(data->set.verbose) {
             if(k->badheader) {
               Curl_debug(data, CURLINFO_DATA_IN, data->state.headerbuff,
-                         k->hbuflen, conn->host.dispname);
+                         k->hbuflen, conn);
               if(k->badheader == HEADER_PARTHEADER)
-                Curl_debug(data, CURLINFO_DATA_IN, k->str, nread,
-                           conn->host.dispname);
+                Curl_debug(data, CURLINFO_DATA_IN, k->str, nread, conn);
             }
             else
-              Curl_debug(data, CURLINFO_DATA_IN, k->str, nread,
-                         conn->host.dispname);
+              Curl_debug(data, CURLINFO_DATA_IN, k->str, nread, conn);
           }
 
 #ifndef CURL_DISABLE_HTTP
@@ -1270,7 +1268,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         if(data->set.verbose)
           /* show the data before we change the pointer upload_fromhere */
           Curl_debug(data, CURLINFO_DATA_OUT, conn->upload_fromhere,
-                     bytes_written, conn->host.dispname);
+                     bytes_written, conn);
 
         if(conn->upload_present != bytes_written) {
           /* we only wrote a part of the buffer (if anything), deal with it! */
@@ -2094,7 +2092,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
     res = Curl_connect_host(data, &conn);   /* primary connection */
 
     if(res == CURLE_OK) {
-      if (data->set.source_host) /* 3rd party transfer */
+      if (data->set.source_url) /* 3rd party transfer */
         res = Curl_pretransfersec(conn);
       else
         conn->sec_conn = NULL;
@@ -2105,7 +2103,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
       res = Curl_do(&conn);
 
       /* for non 3rd party transfer only */
-      if(res == CURLE_OK && !data->set.source_host) {
+      if(res == CURLE_OK && !data->set.source_url) {
         res = Transfer(conn); /* now fetch that URL please */
         if(res == CURLE_OK) {
 
@@ -2236,27 +2234,25 @@ CURLcode Curl_pretransfersec(struct connectdata *conn)
   CURLcode status = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct connectdata *sec_conn = NULL;   /* secondary connection */
-  bool reuse_fresh_tmp = data->set.reuse_fresh;
-
-  /* update data with source host options */
-  char *url = aprintf( "%s://%s/", conn->protostr, data->set.source_host);
-
-  if(!url)
-    return CURLE_OUT_OF_MEMORY;
+  bool backup_reuse_fresh = data->set.reuse_fresh;
+  char *backup_userpwd = data->set.userpwd;
 
   if(data->change.url_alloc)
     free(data->change.url);
 
-  data->change.url_alloc = TRUE;
-  data->change.url = url;
-  data->set.ftpport = data->set.source_port;
-  data->set.userpwd = data->set.source_userpwd;
+  data->change.url_alloc = FALSE;
+  data->change.url = data->set.source_url;
 
+  /* We must never actually alter 'data->set' properties, so we restore the
+     backed up values afterwards! */
+
+#if 0
   /* if both remote hosts are the same host - create new connection */
   if (strequal(conn->host.dispname, data->set.source_host))
-    /* NOTE: this is restored back to the original value after the connect is
-       done */
+#endif
     data->set.reuse_fresh = TRUE;
+
+  data->set.userpwd = data->set.source_userpwd;
 
   /* secondary connection */
   status = Curl_connect_host(data, &sec_conn);
@@ -2267,7 +2263,8 @@ CURLcode Curl_pretransfersec(struct connectdata *conn)
     conn->sec_conn = sec_conn;
   }
 
-  data->set.reuse_fresh = reuse_fresh_tmp;
+  data->set.reuse_fresh = backup_reuse_fresh;
+  data->set.userpwd = backup_userpwd;
 
   return status;
 }

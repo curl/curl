@@ -204,8 +204,7 @@ CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
       break;
 
     if(data->set.verbose)
-      Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written,
-                 conn->host.dispname);
+      Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written, conn);
 
     if((size_t)bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease
@@ -468,18 +467,22 @@ static int showit(struct SessionHandle *data, curl_infotype type,
 }
 
 int Curl_debug(struct SessionHandle *data, curl_infotype type,
-               char *ptr, size_t size, char *host)
+               char *ptr, size_t size,
+               struct connectdata *conn)
 {
   int rc;
-  if(data->set.printhost && host) {
+  if(data->set.printhost && conn && conn->host.dispname) {
     char buffer[160];
     const char *t=NULL;
+    const char *w="Data";
     switch (type) {
     case CURLINFO_HEADER_IN:
+      w = "Header";
     case CURLINFO_DATA_IN:
       t = "from";
       break;
     case CURLINFO_HEADER_OUT:
+      w = "Header";
     case CURLINFO_DATA_OUT:
       t = "to";
       break;
@@ -488,7 +491,10 @@ int Curl_debug(struct SessionHandle *data, curl_infotype type,
     }
 
     if(t) {
-      snprintf(buffer, sizeof(buffer), "[Data %s %s]", t, host);
+      snprintf(buffer, sizeof(buffer), "[%s %s %s%s]", w, t,
+               conn->xfertype==NORMAL?"":
+               (conn->xfertype==SOURCE3RD?"source ":"target "),
+               conn->host.dispname);
       rc = showit(data, CURLINFO_TEXT, buffer, strlen(buffer));
       if(rc)
         return rc;

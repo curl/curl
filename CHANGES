@@ -7,6 +7,50 @@
                                   Changelog
 
 
+Daniel (21 January 2005)
+- Major FTP third party transfer overhaul.
+
+  These four options are now obsolete: CURLOPT_SOURCE_HOST,
+  CURLOPT_SOURCE_PATH, CURLOPT_SOURCE_PORT (this option didn't work before)
+  and CURLOPT_PASV_HOST.
+
+  These two options are added: CURLOPT_SOURCE_URL and CURLOPT_SOURCE_QUOTE.
+
+  The target-side didn't use the proper path with RETR, and thus this only
+  worked correctly in the login path (i.e without doing any CWD). The source-
+  side still uses a wrong path, but the fix for this will need to wait. Verify
+  the flaw by using a source URL with included %XX-codes.
+
+  Made CURLOPT_FTPPORT control weather the target operation should use PORT
+  (or not). The other side thus uses passive (PASV) mode.
+
+  Updated the ftp3rdparty.c example source to use the updated options.
+
+  Added support for a second FTP server in the test suite. Named... ftp2.
+  Added test cases 230, 231 and 232 as a few first basic tests of very simple
+  3rd party transfers.
+
+  Changed the debug output to include 'target' and 'source' when a 3rd party
+  is being made, to make it clearer what commands/responses came on what
+  connection.
+
+  Added three new command line options: --3p-url, --3p-user and --3p-quote.
+
+  Documented the command line options and the curl_easy_setopt options related
+  to third party transfers.
+
+  (Temporarily) disabled the ability to re-use an existing connection for the
+  source connection. This is because it needs to force a new in case the
+  source and target is the same host, and the host name check is trickier now
+  when the source is identified with a full URL instead of a plain host name
+  like before.
+
+  TODO (short-term) for 3rd party transfers: quote support. The options are
+  there, we need to add test cases to verify their functionality.
+
+  TODO (long-term) for 3rd party transfers: IPv6 support (EPRT and EPSV etc)
+  and SSL/TSL support.
+
 Daniel (20 January 2005)
 - Philippe Hameau found out that -Q "+[command]" didn't work, although some
   code was written for it. I fixed and added test case 227 to verify it.
