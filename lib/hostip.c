@@ -539,9 +539,8 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       rc = CURLE_OPERATION_TIMEDOUT;
     }
     else if(conn->async.done) {
-      char **dummy=NULL; /* stupid never-used ares-thing */
       failf(data, "Could not resolve host: %s (%s)", conn->name,
-            ares_strerror(conn->async.status, dummy));
+            ares_strerror(conn->async.status));
       rc = CURLE_COULDNT_RESOLVE_HOST;
     }
     else
