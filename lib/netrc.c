@@ -27,6 +27,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
+
+
 #include <curl/curl.h>
 
 #include "strequal.h"
@@ -60,7 +71,7 @@ int Curl_parsenetrc(char *host,
   char netrcbuffer[256];
   int retcode=1;
   
-  char *home = curl_getenv("HOME"); /* portable environment reader */
+  char *home = NULL; 
   int state=NOTHING;
 
   char state_login=0;
@@ -68,15 +79,28 @@ int Curl_parsenetrc(char *host,
 
 #define NETRC DOT_CHAR "netrc"
 
-  if(!home)
-    return -1;
+#if defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
+  struct passwd *pw;
+  pw= getpwuid(geteuid());
+  if (pw)
+    strncat(netrcbuffer, pw->pw_dir, 255);
+#else
+  void *pw=NULL;
+#endif
+  
+  if(NULL == pw) {
+    home = curl_getenv("HOME"); /* portable environment reader */
+    if(!home) {
+      return -1;
+    }
 
-  if(strlen(home)>(sizeof(netrcbuffer)-strlen(NETRC))) {
-    free(home);
-    return -1;
+    if(strlen(home)>(sizeof(netrcbuffer)-strlen(NETRC))) {
+      free(home);
+      return -1;
+    }
+
+    sprintf(netrcbuffer, "%s%s%s", home, DIR_CHAR, NETRC);
   }
-
-  sprintf(netrcbuffer, "%s%s%s", home, DIR_CHAR, NETRC);
 
   file = fopen(netrcbuffer, "r");
   if(file) {
