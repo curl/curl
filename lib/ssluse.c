@@ -815,7 +815,7 @@ Curl_SSLConnect(struct connectdata *conn)
     }
   }
 
-  if(data->set.ssl.verifypeer){
+  if(data->set.ssl.verifypeer) {
     SSL_CTX_set_verify(conn->ssl.ctx,
                        SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
                        SSL_VERIFY_CLIENT_ONCE,
@@ -833,11 +833,11 @@ Curl_SSLConnect(struct connectdata *conn)
 
   /* give application a chance to interfere with SSL set up. */
   if (data->set.ssl.fsslctx) {
-    CURLcode callbackresult = (*data->set.ssl.fsslctx)(data, conn->ssl.ctx,
-                                                       data->set.ssl.fsslctxp);
-    if (callbackresult != CURLE_OK) {
+    retcode = (*data->set.ssl.fsslctx)(data, conn->ssl.ctx,
+                                       data->set.ssl.fsslctxp);
+    if (retcode) {
       failf(data,"error signaled by ssl ctx callback");
-      return callbackresult;
+      return retcode;
     }
   }
 
