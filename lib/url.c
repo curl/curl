@@ -143,7 +143,12 @@ static bool ConnectionExists(struct SessionHandle *data,
                              struct connectdata **usethis);
 static unsigned int ConnectionStore(struct SessionHandle *data,
                                     struct connectdata *conn);
-
+static bool ssl_config_matches(struct ssl_config_data* data,
+                               struct ssl_config_data* needle);
+static bool init_ssl_config(struct SessionHandle* data,
+                            struct connectdata* conn);
+static bool safe_strequal(char* str1, char* str2);
+static void free_ssl_config(struct ssl_config_data* sslc);
 
 #if !defined(WIN32)||defined(__CYGWIN32__)
 #ifndef RETSIGTYPE
@@ -1211,6 +1216,8 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   if(conn->proxyhost)
     free(conn->proxyhost);
 
+  free_ssl_config(&conn->ssl_config);
+
   free(conn); /* free all the connection oriented data */
 
   return CURLE_OK;
@@ -1277,7 +1284,14 @@ ConnectionExists(struct SessionHandle *data,
       if(strequal(needle->protostr, check->protostr) &&
          strequal(needle->name, check->name) &&
          (needle->remote_port == check->remote_port) ) {
-        if(strequal(needle->protostr, "FTP")) {
+        if(needle->protocol & PROT_SSL) {
+          /* This is SSL, verify that we're using the same
+             ssl options as well */
+          if(!ssl_config_matches(&needle->ssl_config, &check->ssl_config)) {
+            continue;
+          }
+        }
+        if(needle->protocol & PROT_FTP) {
           /* This is FTP, verify that we're using the same name and
              password as well */
           if(!strequal(needle->data->state.user, check->proto.ftp->user) ||
@@ -2686,6 +2700,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     ConnectionStore(data, conn);
   }
 
+  if(!init_ssl_config(data, conn))
+    return CURLE_OUT_OF_MEMORY;
+
   /* Continue connectdata initialization here.
    * 
    * Inherit the proper values from the urldata struct AFTER we have arranged
@@ -3024,4 +3041,88 @@ CURLcode Curl_do_more(struct connectdata *conn)
     result = conn->curl_do_more(conn);
 
   return result;
+}
+
+static bool safe_strequal(char* str1, char* str2)
+{
+  if(str1 && str2)
+    /* both pointers point to something then compare them */
+    return strequal(str1, str2);
+  else
+    /* if both pointers are NULL then treat them as equal */
+    return (!str1 && !str2);
+}
+
+static bool
+ssl_config_matches(struct ssl_config_data* data,
+                   struct ssl_config_data* needle)
+{
+  bool result = FALSE;
+
+  if((data->version == needle->version) &&
+     (data->verifypeer == needle->verifypeer) &&
+     (data->verifyhost == needle->verifyhost) &&
+     safe_strequal(data->CApath, needle->CApath) &&
+     safe_strequal(data->CAfile, needle->CAfile) &&
+     safe_strequal(data->random_file, needle->random_file) &&
+     safe_strequal(data->egdsocket, needle->egdsocket) &&
+     safe_strequal(data->cipher_list, needle->cipher_list))
+  {
+    result = TRUE;
+  }
+
+  return result;
+}
+
+static bool
+init_ssl_config(struct SessionHandle* data, struct connectdata* conn) 
+{
+  conn->ssl_config.verifyhost = data->set.ssl.verifyhost;
+  conn->ssl_config.verifypeer = data->set.ssl.verifypeer;
+  conn->ssl_config.version = data->set.ssl.version;
+
+  if(data->set.ssl.CAfile) {
+    conn->ssl_config.CAfile = strdup(data->set.ssl.CAfile);
+    if(!conn->ssl_config.CAfile) return FALSE;
+  }
+
+  if(data->set.ssl.CApath) {
+    conn->ssl_config.CApath = strdup(data->set.ssl.CApath);
+	if(!conn->ssl_config.CApath) return FALSE;
+  }
+
+  if(data->set.ssl.cipher_list) {
+    conn->ssl_config.cipher_list = strdup(data->set.ssl.cipher_list);
+	if(!conn->ssl_config.cipher_list) return FALSE;
+  }
+
+  if(data->set.ssl.egdsocket) {
+    conn->ssl_config.egdsocket = strdup(data->set.ssl.egdsocket);
+	if(!conn->ssl_config.egdsocket) return FALSE;
+  }
+
+  if(data->set.ssl.random_file) {
+    conn->ssl_config.random_file = strdup(data->set.ssl.random_file);
+	if(!conn->ssl_config.random_file) return FALSE;
+  }
+
+  return TRUE;
+}
+
+static void free_ssl_config(struct ssl_config_data* sslc) 
+{
+  if(sslc->CAfile)
+    free(sslc->CAfile);
+
+  if(sslc->CApath)
+    free(sslc->CApath);
+
+  if(sslc->cipher_list)
+    free(sslc->cipher_list);
+
+  if(sslc->egdsocket)
+    free(sslc->egdsocket);
+
+  if(sslc->random_file)
+    free(sslc->random_file);
 }

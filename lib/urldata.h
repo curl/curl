@@ -380,6 +380,7 @@ struct connectdata {
                        means unlimited */
   
   struct ssl_connect_data ssl; /* this is for ssl-stuff */
+  struct ssl_config_data ssl_config;
 
   struct ConnectBits bits;    /* various state-flags for this connection */
 
