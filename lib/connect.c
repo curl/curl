@@ -432,7 +432,6 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
    more address exists */
 static bool trynextip(struct connectdata *conn,
                       int sockindex,
-                      long timeout,
                       bool *connected)
 {
   curl_socket_t sockfd;
@@ -441,13 +440,15 @@ static bool trynextip(struct connectdata *conn,
   if(sockindex != FIRSTSOCKET)
     return TRUE; /* no next */
 
+  /* try the next address */
   ai = conn->ip_addr->ai_next;
 
   while (ai) {
-    sockfd = singleipconnect(conn, ai, timeout, connected);
+    sockfd = singleipconnect(conn, ai, 0L, connected);
     if(sockfd != CURL_SOCKET_BAD) {
       /* store the new socket descriptor */
       conn->sock[sockindex] = sockfd;
+      conn->ip_addr = ai;
       return FALSE;
     }
     ai = ai->ai_next;
@@ -514,14 +515,14 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     }
     /* nope, not connected for real */
     infof(data, "Connection failed\n");
-    if(trynextip(conn, sockindex, allow-has_passed, connected)) {
+    if(trynextip(conn, sockindex, connected)) {
       code = CURLE_COULDNT_CONNECT;
     }
   }
   else if(WAITCONN_TIMEOUT != rc) {
     /* nope, not connected  */
     infof(data, "Connection failed\n");
-    if(trynextip(conn, sockindex, allow-has_passed, connected)) {
+    if(trynextip(conn, sockindex, connected)) {
       int error = Curl_ourerrno();
       failf(data, "Failed connect to %s:%d; %s",
             conn->host.name, conn->port, Curl_strerror(conn,error));
