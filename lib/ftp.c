@@ -669,13 +669,14 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
       return CURLE_FTP_WRITE_ERROR;
     }
   }
-  if(ftp->dont_check) {
+  if(ftp->dont_check)
     /* if we don't check, we can't re-use this connection as it leaves the
        control connection in a weird status */
     conn->bits.close = TRUE;
-  }
 
-  conn->bits.resume_done = FALSE; /* clean this for next connection */
+  /* reset these for next connection */
+  conn->bits.resume_done = FALSE;
+  ftp->dont_check = FALSE; 
 
   /* Send any post-transfer QUOTE strings? */
   if(!result && data->set.postquote)
@@ -1604,7 +1605,7 @@ CURLcode ftp_perform(struct connectdata *conn)
 
   if(data->set.no_body)
     /* don't transfer the data */
-    ftp->dont_check = TRUE;
+    ;
   /* Get us a second connection up and connected */
   else if(data->set.ftp_use_port) {
     /* We have chosen to use the PORT command */
