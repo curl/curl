@@ -1,0 +1,18 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" $Id$
+.\"
+.TH curl_easy_strerror 3 "26 Apr 2004" "libcurl 7.12" "libcurl Manual"
+.SH NAME
+curl_easy_strerror - return string describing error code
+.SH SYNOPSIS
+.nf
+.B #include <curl/curl.h>
+.BI "const char *curl_easy_strerror(CURLcode " errornum ");"
+.SH DESCRIPTION
+The curl_easy_strerror() function returns a string describing the CURLcode
+error code passed in the argument \fIerrornum\fP.
+.SH RETURN VALUE
+A pointer to a zero terminated string.
+.SH "SEE ALSO"
+.BR libcurl-errors "(3), " curl_multi_strerror "(3), " curl_share_strerror "(3)"
