@@ -250,7 +250,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if((k->keepon & KEEP_READ) &&
        (!readfdp || FD_ISSET(conn->sockfd, readfdp))) {
 
-      bool readdone = TRUE;
+      bool is_empty_data = FALSE;
 
       /* This is where we loop until we have read everything there is to
          read or we get a EWOULDBLOCK */
@@ -279,9 +279,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         }
 
         didwhat |= KEEP_READ;
+        /* indicates data of zero size, i.e. empty file */
+        is_empty_data = (nread == 0 && k->bodywrites == 0);
 
         /* NULL terminate, allowing string ops to be used */
-        if (0 < nread)
+        if (0 < nread || is_empty_data)
           k->buf[nread] = 0;
 
         /* if we receive 0 or less here, the server closed the connection and
@@ -289,7 +291,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         else if (0 >= nread) {
           k->keepon &= ~KEEP_READ;
           FD_ZERO(&k->rkeepfd);
-          readdone = TRUE;
           break;
         }
 
@@ -922,9 +923,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         /* This is not an 'else if' since it may be a rest from the header
            parsing, where the beginning of the buffer is headers and the end
            is non-headers. */
-        if (k->str && !k->header && (nread > 0)) {
+        if (k->str && !k->header && (nread > 0 || is_empty_data)) {
 
-          if(0 == k->bodywrites) {
+          if(0 == k->bodywrites && !is_empty_data) {
             /* These checks are only made the first time we are about to
                write a piece of the body */
             if(conn->protocol&PROT_HTTP) {
@@ -1037,7 +1038,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
           Curl_pgrsSetDownloadCounter(data, k->bytecount);
 
-          if(!conn->bits.chunk && (nread || k->badheader)) {
+          if(!conn->bits.chunk && (nread || k->badheader || is_empty_data)) {
             /* If this is chunky transfer, it was already written */
 
             if(k->badheader && !k->ignorebody) {
@@ -1094,7 +1095,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
         } /* if (! header and data to read ) */
 
-      } while(!readdone);
+        if (is_empty_data) {
+          /* if we received nothing, the server closed the connection and we
+             are done */
+          k->keepon &= ~KEEP_READ;
+          FD_ZERO(&k->rkeepfd);
+        }
+
+      } while(0);
 
     } /* if( read from socket ) */
 

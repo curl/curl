@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (20 August 2004)
+- Alexander Krasnostavsky made the write callback get called even when a zero
+  byte file is downloaded.
+
 Daniel (18 August 2004)
 - Ling Thio pointed out that when libcurl is built ipv6-enabled, it still did
   reverse DNS lookups when fed with a numerical IP-address (like

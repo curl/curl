@@ -14,6 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o downloading empty files now calls the write callback properly
  o no more reverse DNS lookups when getting ip-only address with ipv6-enabled
    libcurl
  o libcurl works better multi-threaded on AIX (when built with xlc)

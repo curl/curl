@@ -44,10 +44,6 @@ may have been fixed since this was written!
   libcurl thinks of it as the *compressed* lenght. Some explanations are here:
   http://curl.haxx.se/mail/lib-2003-06/0146.html
 
-* Downloading 0 (zero) bytes files over FTP will not create a zero byte file
-  locally, which is because libcurl doesn't call the write callback with zero
-  bytes. Explained here: http://curl.haxx.se/mail/archive-2003-04/0143.html
-
 * IPv6 support on AIX 4.3.3 doesn't work due to a missing sockaddr_storage
   struct. It has been reported to work on AIX 5.1 though.
 
