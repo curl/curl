@@ -2,6 +2,9 @@
 
 #include <sys/socket.h>
 #include <stdio.h>
+#ifdef HAVE_MEMORY_H
+#include <memory.h>
+#endif
 
 /* memory functions */
 void *curl_domalloc(size_t size, int line, char *source);
