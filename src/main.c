@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -199,7 +199,7 @@ char *strdup(char *str)
   return newstr;
 
 }
-#endif 
+#endif
 
 #ifdef WIN32
 #include <direct.h>
@@ -414,7 +414,7 @@ struct Configurable {
   char *cookiefile; /* read from this file */
   bool cookiesession; /* new session? */
   bool encoding;    /* Accept-Encoding please */
-  long authtype;    /* auth bitmask */  
+  long authtype;    /* auth bitmask */
   bool use_resume;
   bool resume_from_current;
   bool disable_epsv;
@@ -496,7 +496,7 @@ struct Configurable {
   struct curl_httppost *last_post;
 
   struct curl_slist *telnet_options;
-        
+
   HttpReq httpreq;
 
   /* for bandwidth limiting features: */
@@ -618,13 +618,13 @@ static struct getout *new_getout(struct Configurable *config)
   if(node) {
     /* clear the struct */
     memset(node, 0, sizeof(struct getout));
-        
+
     /* append this new node last in the list */
     if(last)
       last->next = node;
     else
       config->url_list = node; /* first node */
-            
+
     /* move the last pointer */
     config->url_last = node;
   }
@@ -717,7 +717,7 @@ static void FreeMultiInfo (struct multi_files *multi_start)
 /***************************************************************************
  *
  * formparse()
- *	
+ *
  * Reads a 'name=value' paramter and builds the appropriate linked list.
  *
  * Specify files to upload with 'name=@filename'. Supports specified
@@ -769,7 +769,7 @@ static int formparse(char *input,
   if((1 == sscanf(input, "%255[^=]=", name)) &&
      (contp = strchr(input, '='))) {
     /* the input was using the correct format */
-    
+
     /* Allocate the contents */
     contents = strdup(contp+1);
     if(!contents) {
@@ -823,7 +823,7 @@ static int formparse(char *input,
 
               /* set type pointer */
               type = &ptr[5];
-	    
+
               /* verify that this is a fine type specifier */
               if(2 != sscanf(type, "%127[^/]/%127[^;,\n]",
                              major, minor)) {
@@ -952,7 +952,7 @@ typedef enum {
   PARAM_OK,
   PARAM_OPTION_AMBIGUOUS,
   PARAM_OPTION_UNKNOWN,
-  PARAM_REQUIRES_PARAMETER,  
+  PARAM_REQUIRES_PARAMETER,
   PARAM_BAD_USE,
   PARAM_HELP_REQUESTED,
   PARAM_GOT_EXTRA_PARAMETER,
@@ -1016,7 +1016,7 @@ static int str2num(long *val, char *str)
     *val = atoi(str);
   else
     retcode = 1; /* badness */
-  return retcode;  
+  return retcode;
 }
 
 /**
@@ -1264,7 +1264,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     }
     if(hit < 0) {
       return PARAM_OPTION_UNKNOWN;
-    }    
+    }
   }
   else {
     flag++; /* prefixed with one dash, pass it */
@@ -1299,7 +1299,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     }
     if(hit < 0) {
       return PARAM_OPTION_UNKNOWN;
-    }    
+    }
     if(!longopt && aliases[hit].extraparam && parse[1]) {
       nextarg=(char *)&parse[1]; /* this is the actual extra parameter */
       singleopt=TRUE;   /* don't loop anymore after this */
@@ -1418,7 +1418,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         if(curlinfo->features & CURL_VERSION_NTLM)
           config->proxyntlm ^= TRUE;
         else
-          return PARAM_LIBCURL_DOESNT_SUPPORT;        
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
 
       case 'u': /* --crlf */
@@ -1471,7 +1471,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           else
             /* there was no free node, create one! */
             url=new_getout(config);
-          
+
           if(url) {
             /* fill in the URL */
             GetStr(&url->url, nextarg);
@@ -1504,7 +1504,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case '#': /* added 19990617 larsa */
       config->progressmode ^= CURL_PROGRESS_BAR;
       break;
-    case '0': 
+    case '0':
       /* HTTP version 1.0 */
       config->httpversion = CURL_HTTP_VERSION_1_0;
       break;
@@ -1512,19 +1512,19 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       /* TLS version 1 */
       config->ssl_version = CURL_SSLVERSION_TLSv1;
       break;
-    case '2': 
+    case '2':
       /* SSL version 2 */
       config->ssl_version = CURL_SSLVERSION_SSLv2;
       break;
-    case '3': 
+    case '3':
       /* SSL version 3 */
       config->ssl_version = CURL_SSLVERSION_SSLv3;
       break;
-    case '4': 
+    case '4':
       /* IPv4 */
       config->ip_version = 4;
       break;
-    case '6': 
+    case '6':
       /* IPv6 */
       config->ip_version = 6;
       break;
@@ -1583,7 +1583,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
           if(curlx_strequal("-", nextarg))
             file = stdin;
-          else 
+          else
             file = fopen(nextarg, "rb");
 
           if(subletter == 'b') /* forced binary */
@@ -1983,13 +1983,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         nextarg++; /* pass the @ */
         if(curlx_strequal("-", nextarg))
           file = stdin;
-        else 
+        else
           file = fopen(nextarg, "r");
         config->writeout = file2string(file);
         if(file && (file != stdin))
           fclose(file);
       }
-      else 
+      else
         GetStr(&config->writeout, nextarg);
       break;
     case 'x':
@@ -2067,7 +2067,7 @@ static void parseconfig(const char *filename,
   char filebuffer[512];
   bool usedarg;
   char *home;
-  
+
   if(!filename || !*filename) {
     /* NULL or no file name attempts to load .curlrc from the homedir! */
 
@@ -2085,7 +2085,7 @@ static void parseconfig(const char *filename,
       }
       free(home); /* we've used it, now free it */
     }
-    
+
 # else /* AmigaOS */
   /* On AmigaOS all the config files are into env:
    */
@@ -2098,7 +2098,7 @@ static void parseconfig(const char *filename,
     file = fopen(filename, "r");
   else
     file = stdin;
-  
+
   if(file) {
     char *line;
     char *aline;
@@ -2145,7 +2145,7 @@ static void parseconfig(const char *filename,
       /* pass spaces and separator(s) */
       while(*line && (isspace((int)*line) || isseparator(*line)))
         line++;
-      
+
       /* the parameter starts here (unless quoted) */
       if(*line == '\"') {
         char *ptr;
@@ -2320,7 +2320,7 @@ static int my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
          */
         if (config->low_speed_time > 0)
           sleep_time = MIN(sleep_time,(config->low_speed_time * 1000) / 2);
-        
+
         if(sleep_time > 0) {
           go_sleep(sleep_time);
           now = curlx_tvnow();
@@ -2331,11 +2331,11 @@ static int my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
   }
 
   rc = fwrite(buffer, sz, nmemb, out->stream);
-  
+
   if(config->nobuffer)
     /* disable output buffering */
     fflush(out->stream);
-  
+
   return rc;
 }
 
@@ -2391,7 +2391,7 @@ static int my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
         }
       }
       config->lastsendtime = now;
-      
+
       if(size > config->sendpersecond) {
         /* lower the size to actually read */
         nmemb = (size_t)config->sendpersecond;
@@ -2421,7 +2421,7 @@ static int myprogress (void *clientp,
 {
   /* The original progress-bar source code was written for curl by Lars Aas,
      and this new edition inherits some of his concepts. */
-  
+
   char line[256];
   char outline[256];
   char format[40];
@@ -2502,7 +2502,7 @@ void progressbarinit(struct ProgressData *bar,
    * one from what we got in order to avoid a problem with the cursor
    * advancing to the next line if we print a string that is as long as
    * the screen is wide. */
- 
+
   _scrsize(scr_size);
   bar->width = scr_size[0] - 1;
 #endif
@@ -2662,7 +2662,7 @@ static void free_config_fields(struct Configurable *config)
  *  4. Windows Directory (e.g. C:\windows)
  *  5. all directories along %PATH%
  */
-static void FindWin32CACert(struct Configurable *config, 
+static void FindWin32CACert(struct Configurable *config,
                             const char *bundle_file)
 {
   /* only check for cert file if "we" support SSL */
@@ -2683,7 +2683,7 @@ static void FindWin32CACert(struct Configurable *config,
 
 #endif
 
-static int 
+static int
 operate(struct Configurable *config, int argc, char *argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
@@ -2707,7 +2707,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   char *uploadfile=NULL; /* a single file, never a glob */
 
   int separator = 0;
-  
+
   FILE *infd = stdin;
   bool infdfopen;
   FILE *headerfilep = NULL;
@@ -2783,7 +2783,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       char *nextarg;
       bool passarg;
       char *origopt=argv[i];
-      
+
       char *flag = argv[i];
 
       if(curlx_strequal("--", argv[i]))
@@ -2910,7 +2910,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       /* This node had no URL, skip it and continue to the next */
       if(urlnode->outfile)
         free(urlnode->outfile);
-    
+
       /* move on to the next URL */
       nextnode=urlnode->next;
       free(urlnode); /* free the node */
@@ -2972,15 +2972,15 @@ operate(struct Configurable *config, int argc, char *argv[])
           i++) {
         char *outfile;
         outfile = outfiles?strdup(outfiles):NULL;
-        
+
         if((urlnode->flags&GETOUT_USEREMOTE) ||
            (outfile && !curlx_strequal("-", outfile)) ) {
-          
-          /* 
+
+          /*
            * We have specified a file name to store the result in, or we have
            * decided we want to use the remote file name.
            */
-      
+
           if(!outfile) {
             /* Find and get the remote file name */
             char * pc =strstr(url, "://");
@@ -3003,7 +3003,7 @@ operate(struct Configurable *config, int argc, char *argv[])
             }
 #if defined(__DJGPP__)
             {
-              /* This is for DOS, and then we do some major replacing of 
+              /* This is for DOS, and then we do some major replacing of
                  bad characters in the file name before using it */
               char file1 [PATH_MAX];
 
@@ -3026,18 +3026,18 @@ operate(struct Configurable *config, int argc, char *argv[])
               break;
             }
           }
-          
+
           /* Create the directory hierarchy, if not pre-existant to a multiple
              file output call */
-        
+
           if(config->create_dirs &&
              (-1 == create_dir_hierarchy(outfile)))
             return CURLE_WRITE_ERROR;
-          
+
           if(config->resume_from_current) {
             /* We're told to continue from where we are now. Get the
                size of the file as it is now and open it for append instead */
-            
+
             struct stat fileinfo;
 
             /* VMS -- Danger, the filesize is only valid for stream files */
@@ -3048,7 +3048,7 @@ operate(struct Configurable *config, int argc, char *argv[])
               /* let offset be 0 */
               config->resume_from = 0;
           }
-        
+
 	  outs.filename = outfile;
 
           if(config->resume_from) {
@@ -3110,7 +3110,7 @@ operate(struct Configurable *config, int argc, char *argv[])
               else
                 /* thers is no trailing slash on the URL */
                 sprintf(urlbuffer, "%s/%s", url, filep);
-            
+
               curl_free(filep);
 
               free(url);
@@ -3118,7 +3118,7 @@ operate(struct Configurable *config, int argc, char *argv[])
             }
           }
           /* VMS Note:
-           * 
+           *
            * Reading binary from files can be a problem...  Only FIXED, VAR
            * etc WITHOUT implied CC will work Others need a \n appended to a
            * line
@@ -3139,7 +3139,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           }
           infdfopen=TRUE;
           uploadfilesize=fileinfo.st_size;
-      
+
         }
         else if(uploadfile && curlx_strequal(uploadfile, "-")) {
           infd = stdin;
@@ -3193,7 +3193,7 @@ operate(struct Configurable *config, int argc, char *argv[])
                if the url contains a hostname only
             */
             sprintf(urlbuffer, "%s/?%s", url, httpgetfields);
- 
+
           free(url); /* free previous URL */
           url = urlbuffer; /* use our new URL instead! */
         }
@@ -3268,7 +3268,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
         /* new in libcurl 7.2: */
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, config->postfieldsize);
-        
+
         curl_easy_setopt(curl, CURLOPT_REFERER, config->referer);
         curl_easy_setopt(curl, CURLOPT_AUTOREFERER,
                          config->conf&CONF_AUTO_REFERER);
@@ -3302,18 +3302,18 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
           curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
         }
-      
+
         if((config->conf&CONF_NOBODY) ||
            config->remote_time) {
           /* no body or use remote time */
           curl_easy_setopt(curl, CURLOPT_FILETIME, TRUE);
         }
-      
-        if (config->maxredirs) 
-          curl_easy_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs); 
-        else 
-          curl_easy_setopt(curl, CURLOPT_MAXREDIRS, DEFAULT_MAXREDIRS); 
- 
+
+        if (config->maxredirs)
+          curl_easy_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs);
+        else
+          curl_easy_setopt(curl, CURLOPT_MAXREDIRS, DEFAULT_MAXREDIRS);
+
         curl_easy_setopt(curl, CURLOPT_CRLF, config->crlf);
         curl_easy_setopt(curl, CURLOPT_QUOTE, config->quote);
         curl_easy_setopt(curl, CURLOPT_POSTQUOTE, config->postquote);
@@ -3331,12 +3331,12 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_TIMEVALUE, config->condtime);
         curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
         curl_easy_setopt(curl, CURLOPT_STDERR, config->errors);
-      
+
         /* three new ones in libcurl 7.3: */
         curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel);
         curl_easy_setopt(curl, CURLOPT_INTERFACE, config->iface);
         curl_easy_setopt(curl, CURLOPT_KRB4LEVEL, config->krb4level);
-      
+
         progressbarinit(&progressbar, config);
         if((config->progressmode == CURL_PROGRESS_BAR) &&
            !(config->conf&(CONF_NOPROGRESS|CONF_MUTE))) {
@@ -3345,7 +3345,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, myprogress);
           curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
         }
-        
+
         /* new in libcurl 7.6.2: */
         curl_easy_setopt(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
 
@@ -3373,7 +3373,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         /* new in libcurl 7.10.6 (default is Basic) */
         if(config->authtype)
           curl_easy_setopt(curl, CURLOPT_HTTPAUTH, config->authtype);
-      
+
         /* new in curl 7.9.7 */
         if(config->trace_dump) {
           curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
@@ -3383,7 +3383,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
 
         /* new in curl 7.10 */
-        curl_easy_setopt(curl, CURLOPT_ENCODING, 
+        curl_easy_setopt(curl, CURLOPT_ENCODING,
                          (config->encoding) ? "" : NULL);
 
         /* new in curl 7.10.7 */
@@ -3417,7 +3417,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         }
 
         res = curl_easy_perform(curl);
-        
+
         if((config->progressmode == CURL_PROGRESS_BAR) &&
            progressbar.calls) {
           /* if the custom progress bar has been displayed, we output a
@@ -3470,7 +3470,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           fclose(outs.stream);
 
 #ifdef HAVE_UTIME
-        /* Important that we set the time _after_ the file has been 
+        /* Important that we set the time _after_ the file has been
            closed, as is done above here */
         if(config->remote_time && outs.filename) {
           /* as libcurl if we got a time. Pretty please */
@@ -3489,13 +3489,13 @@ operate(struct Configurable *config, int argc, char *argv[])
          */
         if( strlen(url) > 78 )
           url[79] = '\0';
-        
+
         SetComment( outs.filename, url);
 #endif
 
         if(headerfilep)
           fclose(headerfilep);
-      
+
         if (httpgetfields)
           free(httpgetfields);
 
@@ -3513,10 +3513,10 @@ operate(struct Configurable *config, int argc, char *argv[])
       if(urls)
         /* cleanup memory used for URL globbing patterns */
         glob_cleanup(urls);
-     
+
       if(uploadfile)
         free(uploadfile);
- 
+
     } /* loop to the next globbed upload file */
 
     if(inglob)
@@ -3532,7 +3532,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       free(urlnode->outfile);
     if(urlnode->infile)
       free(urlnode->infile);
-    
+
     /* move on to the next URL */
     nextnode=urlnode->next;
     free(urlnode); /* free the node */
@@ -3619,7 +3619,7 @@ static int create_dir_hierarchy(char *outfile)
   char *outdup;
   char *dirbuildup;
   int result=0;
-  
+
   outdup = strdup(outfile);
   dirbuildup = malloc(sizeof(char) * strlen(outfile));
   if(!dirbuildup)
@@ -3714,7 +3714,7 @@ msdosify (char *file_name)
     illegal_aliens = illegal_chars_w95;
     len -= (illegal_chars_w95 - illegal_chars_dos);
   }
-  
+
   /* Get past the drive letter, if any. */
   if (s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
     *d++ = *s++;
