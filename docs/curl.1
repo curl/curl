@@ -594,6 +594,18 @@ LDAP search failed.
 Library not found. The LDAP library was not found.
 .IP 41
 Function not found. A required LDAP function was not found.
+.IP 42
+Aborted by callback. An application told curl to abort the operation.
+.IP 43
+Internal error. A function was called with a bad parameter.
+.IP 44
+Internal error. A function was called in a bad order.
+.IP 45
+Interface error. A specified outgoing interface could not be used.
+.IP 46
+Bad password entered. An error was signalled when the password was entered.
+.IP 47
+Too many redirects. When following redirects, curl hit the maximum amount.
 .IP XX
 There will appear more error codes here in future releases. The existing ones
 are meant to never change.
@@ -654,6 +666,8 @@ If you do find bugs, mail them to curl-bug@haxx.se.
  - Richard Prescott
  - Jason S. Priebe <priebe@wral-tv.com>
  - T. Bharath <TBharath@responsenetworks.com>
+ - Alexander Kourakos <awk@users.sourceforge.net>
+ - James Griffiths <griffiths_james@yahoo.com>
 
 .SH WWW
 http://curl.haxx.se

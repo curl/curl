@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "22 November 2000" "Curl 7.5" "libcurl Manual"
+.TH curl_easy_setopt 3 "28 November 2000" "Curl 7.5" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -392,6 +392,12 @@ modification date of the remote document in this operation. This requires that
 the remote server sends the time or replies to a time querying command. The
 curl_easy_getinfo() function with the CURLINFO_FILETIME argument can be used
 after a transfer to extract the received time (if any). (Added in 7.5)
+.TP
+.B CURLOPT_MAXREDIRS
+Pass a long. The set number will be the redirection limit. If that many
+redirections have been followed, the next redirect will cause an error. This
+option only makes sense if the CURLOPT_FOLLOWLOCATION is used at the same
+time. (Added in 7.5)
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as
