@@ -9,7 +9,8 @@ EXTRA_DIST = CHANGES COPYING maketgz SSLCERTS reconf Makefile.dist	\
 
 bin_SCRIPTS = curl-config
 
-SUBDIRS = docs lib src include tests packages
+SUBDIRS = lib src
+DIST_SUBDIRS = $(SUBDIRS) tests include packages docs
 
 # create a root makefile in the distribution:
 dist-hook:
@@ -25,10 +26,10 @@ pdf:
 check: test
 
 test:
-	@(cd tests; $(MAKE) quiet-test)
+	@(cd tests; $(MAKE) all quiet-test)
 
 test-full:
-	@(cd tests; $(MAKE) full-test)
+	@(cd tests; $(MAKE) all full-test)
 
 #
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
