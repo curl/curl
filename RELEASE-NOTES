@@ -1,7 +1,7 @@
 Curl and libcurl 7.12.3
 
- Public curl release number:               84
- Releases counted from the very beginning: 111
+ Public curl release number:               85
+ Releases counted from the very beginning: 112
  Available command line options:           100
  Available curl_easy_setopt() options:     123
  Number of public functions in libcurl:    46
@@ -10,72 +10,18 @@ Curl and libcurl 7.12.3
 
 This release includes the following changes:
 
- o PKCS12 certificate support added
- o added CURLINFO_SSL_ENGINES (and "--engine list")
- o new configure options: --disable-cookies, --disable-crypto-auth and
-   --disable-verbose
- o persistent ftp request improvements
- o CURLOPT_IOCTLFUNCTION and CURLOPT_IOCTLDATA added. If your app uses HTTP
-   Digest, NTLM or Negotiate authentication, you will most likely want to use
-   these
- o -w time_redirect and num_redirects
- o no longer uses libcurl.def for building on Windows, OS/2 and Netware
- o builds on Windows CE
- o request retrying, --retry and family added
- o FTP 3rd party transfers with source and dest on the same host now works
- o added CURLINFO_NUM_CONNECTS
+ o 
 
 This release includes the following bugfixes:
 
- o curl -E on windows accepts "c:/path" with forward-slash
- o several improvements for large file support on windows
- o file handle leak in aborted multipart formpost file upload
- o -T upload multiple files with backslashes in file names
- o modified credentials between two requests on a persistent http connection
- o large file file:// resumes on Windows
- o URLs with username and IPv6 numerical addresses
- o configure works better with SSL libs in a "non-standard ld.so dir"
- o curl-config --vernum zero prefixed
- o bad memory access in the NTLM code
- o EPSV on multi-homed servers now works correctly
- o chunked-encoded transfers could get closed pre-maturely without error
- o proxy CONNECT now default timeouts after 3600 seconds
- o disabling EPSV or EPRT is ignored when connecting to an IPv6 FTP server
- o no extra progress meter newline output after each Location: followed
- o HTTP PUT/POST with Digest, NTLM or Negotiate no longer uses HEAD
- o works with or gracefully bails out when exceeding FD_SETSIZE file
-   descriptors
- o CURLINFO_REDIRECT_TIME works
- o building with gssapi libs and hdeaders in the default dirs
- o curl_getdate() parsing of dates later than year 2037 with 32 bit time_t
- o curl -v when stderr is closed wrote debug messages to the network socket
- o build failure with libidn 0.3.X or older
- o huge POSTs on VMS
- o configure no longer uses pkg-config on cross-compiles
- o potential gzip decompress memory leak
- o "-C - --fail" on a HTTP page already downloaded
- o formposting a zero byte file
- o use setlocale() for better IDN functionality by default
+ o 
 
 Other curl-related news since the previous public release:
 
- o pycurl 7.12.2: http://pycurl.sf.net/
- o TclCurl 0.12.2: http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o libcurl.NET 1.2: http://www.seasideresearch.com/downloads.html
- o RCurl 0.5.1: http://www.omegahat.org/RCurl/
- o libcurl.mono 1.0:
-   http://forge.novell.com/modules/xfmod/project/?libcurl-mono
- o new German curl mirror: http://curl.kgt.org/
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Peter Wullinger, Guillaume Arluison, Alexander Krasnostavsky, Mohun Biswas,
- Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia, Tim
- Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips,
- Wojciech Zwiefka, David Phillips, Reinout van Schouwen, Maurice Barnum,
- Richard Atterer, Rene Bernhardt, Matt Veenstra, Bryan Henderson, Ton Voon,
- Kai Sommerfeld, David Byron, Harshal Pradhan, Tom Lee, Dinar, Jean-Marc
- Ranger, Samuel Listopad
 
         Thanks! (and sorry if I forgot to mention someone)
