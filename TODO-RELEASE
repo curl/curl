@@ -37,6 +37,14 @@ To get fixed in 7.11.2 (planned release May/June 2004)
     passwords against IIS servers. Requires test cases to be updated
     accordingly. #915609
 
+30. Digest re-negotiation is not supported, we wrongly assume a new 401
+    response to signify an authenticaion error. We need to detect the
+    difference between a 401 due to a bad Digest authorization header and a
+    401 because the server wants to re-negotiate.
+
+    Mitz Wark provided details and traces here:
+    http://curl.haxx.se/mail/lib-2004-03/0299.html
+
 To get fixed in 7.12.0
 ======================
 
