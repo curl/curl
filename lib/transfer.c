@@ -507,10 +507,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   if(conn->bits.chunk)
                     conn->size=-1;
 
-                  if(-1 != conn->size) {
-                    Curl_pgrsSetDownloadSize(data, conn->size);
-                    conn->maxdownload = conn->size;
-                  }
+                }
+                if(-1 != conn->size) {
+                  /* We do this operation even if no_body is true, since this
+                     data might be retrieved later with curl_easy_getinfo()
+                     and its CURLINFO_CONTENT_LENGTH_DOWNLOAD option. */
+
+                  Curl_pgrsSetDownloadSize(data, conn->size);
+                  conn->maxdownload = conn->size;
                 }
                 /* If max download size is *zero* (nothing) we already
                    have nothing and can safely return ok now! */
