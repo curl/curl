@@ -284,6 +284,7 @@ X_OBJS= \
 	$(DIROBJ)\md5.obj \
 	$(DIROBJ)\memdebug.obj \
 	$(DIROBJ)\strerror.obj \
+	$(DIROBJ)\select.obj \
 	$(DIROBJ)\content_encoding.obj \
 	$(RESOURCE)
 
