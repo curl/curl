@@ -316,7 +316,7 @@ Curl_SSLConnect(struct connectdata *conn)
     
   if(data->cert) {
     if (!cert_stuff(conn, data->cert, data->cert)) {
-      failf(data, "couldn't use certificate!\n");
+      /* failf() is already done in cert_stuff() */
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
