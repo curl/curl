@@ -25,8 +25,6 @@
 
 #include "setup.h"
 
-#include "setup.h"
-
 #include <stddef.h>
 
 #include "llist.h"
