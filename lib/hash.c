@@ -127,9 +127,17 @@ mk_hash_element(char *key, size_t key_len, const void *p)
     (curl_hash_element *) malloc(sizeof(curl_hash_element));
 
   if(he) {
-    he->key = strdup(key);
-    he->key_len = key_len;
-    he->ptr = (void *) p;
+    char *dup = strdup(key);
+    if(dup) {
+      he->key = dup;
+      he->key_len = key_len;
+      he->ptr = (void *) p;
+    }
+    else {
+      /* failed to duplicate the key, free memory and fail */
+      free(he);
+      he = NULL;
+    }
   }
   return he;
 }
