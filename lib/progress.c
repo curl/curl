@@ -362,14 +362,16 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
      (data->progress.ulspeed > 0)) {
     ulestimate = (long)(data->progress.size_ul / data->progress.ulspeed);
-    ulpercen = (long)(data->progress.uploaded / data->progress.size_ul)*100;
+    ulpercen = (long)(100*(data->progress.uploaded/100) /
+                      (data->progress.size_ul/100) );
   }
 
   /* ... and the download */
   if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
      (data->progress.dlspeed > 0)) {
     dlestimate = (long)(data->progress.size_dl / data->progress.dlspeed);
-    dlpercen = (long)(data->progress.downloaded / data->progress.size_dl)*100;
+    dlpercen = (long)(100*(data->progress.downloaded/100) /
+                      (data->progress.size_dl/100));
   }
     
   /* Now figure out which of them that is slower and use for the for
@@ -393,7 +395,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* Get the percentage of data transfered so far */
   if(total_expected_transfer > 0)
-    total_percen=(int)(total_transfer/total_expected_transfer)*100;
+    total_percen=(int)(100*(total_transfer/100) /
+                       (total_expected_transfer/100) );
 
   fprintf(data->set.err,
           "\r%3d %s  %3d %s  %3d %s  %s  %s %s %s %s %s",
