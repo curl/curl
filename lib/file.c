@@ -140,8 +140,8 @@ CURLcode Curl_file(struct connectdata *conn)
   */
   CURLcode res = CURLE_OK;
   struct stat statbuf;
-  size_t expected_size=-1;
-  size_t nread;
+  ssize_t expected_size=-1;
+  ssize_t nread;
   struct UrlData *data = conn->data;
   char *buf = data->buffer;
   int bytecount = 0;
@@ -162,11 +162,7 @@ CURLcode Curl_file(struct connectdata *conn)
      this is both more efficient than the former call to download() and
      it avoids problems with select() and recv() on file descriptors
      in Winsock */
-#ifdef	VMS
-  if((signed int)expected_size != -1)
-#else
   if(expected_size != -1)
-#endif
     Curl_pgrsSetDownloadSize(data, expected_size);
 
   while (res == CURLE_OK) {
@@ -175,12 +171,9 @@ CURLcode Curl_file(struct connectdata *conn)
     if ( nread > 0)
       buf[nread] = 0;
 
-#ifdef	VMS
-    if ((signed int)nread <= 0)
-#else
     if (nread <= 0)
-#endif
       break;
+
     bytecount += nread;
     /* NOTE: The following call to fwrite does CR/LF translation on
        Windows systems if the target is stdout. Use -O or -o parameters
