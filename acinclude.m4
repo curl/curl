@@ -64,7 +64,7 @@ dnl the code was bad, try a different program now, test 3
 ],[
 /* ioctlsocket source code */
  int socket;
- int flags = ioctlsocket(socket, FIONBIO, &flags);
+ unsigned long flags = ioctlsocket(socket, FIONBIO, &flags);
 ],[
 dnl ioctlsocket test was good
 nonblock="ioctlsocket"

@@ -147,7 +147,7 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
 
 #ifdef HAVE_IOCTLSOCKET
   /* Windows? */
-  int flags;
+  unsigned long flags;
   flags = nonblock;
   return ioctlsocket(sockfd, FIONBIO, &flags);
 #define SETBLOCK 3
