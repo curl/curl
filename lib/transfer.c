@@ -568,7 +568,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               int len;
               
               /* Find the first non-space letter */
-              for(start=k->p+14;
+              for(start=k->p+13;
                   *start && isspace((int)*start);
                   start++);
 
