@@ -1184,7 +1184,6 @@ CURLcode ftp_use_port(struct connectdata *conn)
       return result;
     
     if (ftpcode != 200) {
-      failf(data, "Server does not grok %s", *modep);
       continue;
     }
     else
@@ -1193,6 +1192,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
   
   if (!*modep) {
     sclose(portsock);
+    failf(data, "PORT command attempts failed");
     return CURLE_FTP_PORT_FAILED;
   }
   /* we set the secondary socket variable to this for now, it
@@ -1931,8 +1931,14 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         return result;
     }
     else {
-      failf(data, "%s", buf+4);
-      return CURLE_FTP_COULDNT_RETR_FILE;
+      if(dirlist && (ftpcode == 450)) {
+        /* simply no matching files */
+        ftp->no_transfer = TRUE; /* don't think we should download anything */
+      }
+      else {
+        failf(data, "%s", buf+4);
+        return CURLE_FTP_COULDNT_RETR_FILE;
+      }
     }
 	
   }
@@ -2180,16 +2186,19 @@ CURLcode Curl_ftp(struct connectdata *conn)
   if(CURLE_OK == retcode) {
     if(connected)
       retcode = Curl_ftp_nextconnect(conn);
-    else {
-      if(ftp->no_transfer) {
-        /* no data to transfer */
-        retcode=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);        
-      }
-      else {
-        /* since we didn't connect now, we want do_more to get called */
-        conn->bits.do_more = TRUE;
-      }
+
+    if(retcode && (conn->secondarysocket >= 0)) {
+      /* Failure detected, close the second socket if it was created already */
+      sclose(conn->secondarysocket);
+      conn->secondarysocket = -1;
     }
+
+    if(ftp->no_transfer)
+      /* no data to transfer */
+      retcode=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);        
+    else if(!connected)
+      /* since we didn't connect now, we want do_more to get called */
+      conn->bits.do_more = TRUE;
   }
 
   return retcode;
