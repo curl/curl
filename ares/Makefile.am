@@ -55,3 +55,12 @@ libcares_la_SOURCES = $(CSOURCES) $(HHEADERS)
 libcares_ladir = $(includedir)
 # what headers to install on 'make install':
 libcares_la_HEADERS = ares.h ares_version.h
+
+# Make files named *.dist replace the file without .dist extension
+dist-hook:
+	find $(distdir) -name "*.dist" -exec rm {} \;
+	(distit=`find $(srcdir) -name "*.dist"`; \
+	for file in $$distit; do \
+	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \
+	  cp $$file $(distdir)$$strip; \
+	done)
