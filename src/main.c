@@ -92,6 +92,72 @@ char *strdup(char *str)
 
 extern void hugehelp(void);
 
+/***********************************************************************
+ * Start with some silly functions to make win32-systems survive
+ ***********************************************************************/
+#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+static void win32_cleanup(void)
+{
+  WSACleanup();
+}
+
+static UrgError win32_init(void)
+{
+  WORD wVersionRequested;  
+  WSADATA wsaData; 
+  int err; 
+  wVersionRequested = MAKEWORD(1, 1); 
+    
+  err = WSAStartup(wVersionRequested, &wsaData); 
+    
+  if (err != 0) 
+    /* Tell the user that we couldn't find a useable */ 
+    /* winsock.dll.     */ 
+    return URG_FAILED_INIT; 
+    
+  /* Confirm that the Windows Sockets DLL supports 1.1.*/ 
+  /* Note that if the DLL supports versions greater */ 
+  /* than 1.1 in addition to 1.1, it will still return */ 
+  /* 1.1 in wVersion since that is the version we */ 
+  /* requested. */ 
+    
+  if ( LOBYTE( wsaData.wVersion ) != 1 || 
+       HIBYTE( wsaData.wVersion ) != 1 ) { 
+    /* Tell the user that we couldn't find a useable */ 
+
+    /* winsock.dll. */ 
+    WSACleanup(); 
+    return URG_FAILED_INIT; 
+  }
+  return URG_OK;
+}
+/* The Windows Sockets DLL is acceptable. Proceed. */ 
+#else
+static UrgError win32_init(void) { return URG_OK; }
+#define win32_cleanup()
+#endif
+
+
+/*
+ * This is the main global constructor for the app. Call this before
+ * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
+ * used, or havoc may be the result.
+ */
+UrgError main_init(void)
+{
+  return win32_init();
+}
+
+/*
+ * This is the main global destructor for the app. Call this after
+ * _all_ libcurl usage is done.
+ */
+void main_free(void)
+{
+  win32_cleanup();
+}
+
+
 static void helpf(char *fmt, ...)
 {
   va_list ap;
@@ -1121,6 +1187,8 @@ int main(int argc, char *argv[])
   if(!config.errors)
     config.errors = stderr;
 
+  main_init();
+
   res = curl_urlget(URGTAG_FILE, (FILE *)&outs,  /* where to store */
                     URGTAG_WRITEFUNCTION, my_fwrite, /* what call to write */
                     URGTAG_INFILE, infd, /* for uploads */
@@ -1158,6 +1226,9 @@ int main(int argc, char *argv[])
                     URGTAG_PROGRESSMODE, config.progressmode,
                     URGTAG_WRITEINFO, config.writeout,
                     URGTAG_DONE); /* always terminate the list of tags */
+
+  main_free();
+
   if((res!=URG_OK) && config.showerror)
     fprintf(config.errors, "curl: (%d) %s\n", res, errorbuffer);
 
