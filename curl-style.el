@@ -34,7 +34,7 @@
   ;; c-mode-base-map because of inheritance ...
   (define-key c-mode-base-map "\M-q" 'c-fill-paragraph)
   (setq c-recognize-knr-p nil)
-  (add-hook 'write-file-hooks 'delete-trailing-whitespace)
+  ;;; (add-hook 'write-file-hooks 'delete-trailing-whitespace t)
   (setq show-trailing-whitespace t)
   )
 
