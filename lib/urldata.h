@@ -331,7 +331,7 @@ struct ssldata {
   bool use;              /* use ssl encrypted communications TRUE/FALSE */
   long version;          /* what version the client wants to use */
   long certverifyresult; /* result from the certificate verification */
-  bool verifypeer;       /* set TRUE if this is desired */
+  long verifypeer;       /* set TRUE if this is desired */
   char *CApath;          /* DOES NOT WORK ON WINDOWS */
   char *CAfile;          /* cerficate to verify peer against */
 #ifdef USE_SSLEAY
@@ -401,8 +401,8 @@ struct UrlData {
   char *url;   /* what to get */
   char *freethis; /* if non-NULL, an allocated string for the URL */
   char *hostname; /* hostname to connect, as parsed from url */
-  unsigned short port; /* which port to use (if non-protocol bind) set
-                          CONF_PORT to use this */
+  long port; /* which port to use (if non-protocol bind) set
+                CONF_PORT to use this */
   unsigned short remote_port; /* what remote port to connect to, not the proxy
 				 port! */
   struct Configbits bits; /* new-style (v7) flag data */

@@ -446,9 +446,7 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     data->url = va_arg(param, char *);
     break;
   case CURLOPT_PORT:
-    /* this typecast is used to fool the compiler to NOT warn for a
-       "cast from pointer to integer of different size" */
-    data->port = (unsigned short)(va_arg(param, long));
+    data->port = va_arg(param, long);
     break;
   case CURLOPT_POSTFIELDS:
     data->postfields = va_arg(param, char *);
