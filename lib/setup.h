@@ -169,13 +169,8 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #define DOT_CHAR      "_"
 #endif
 
-#ifdef HAVE_STRCASECMP
-/* this is for "-ansi -Wall -pedantic" to stop complaining! */
-extern int (strcasecmp)(const char *s1, const char *s2);
-extern int (strncasecmp)(const char *s1, const char *s2, size_t n);
 #ifndef fileno /* sunos 4 have this as a macro! */
 int fileno( FILE *stream);
-#endif
 #endif
 
 #endif
