@@ -85,6 +85,8 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
   channel->nsort = -1;
   channel->lookups = NULL;
   channel->queries = NULL;
+  channel->domains = NULL;
+  channel->sortlist = NULL;
 
   /* Initialize configuration by each of the four sources, from highest
    * precedence to lowest.
@@ -464,8 +466,10 @@ DhcpNameServer
   /* Handle errors. */
   if (status != ARES_EOF)
     {
-      if (servers != NULL) free(servers);
-      if (sortlist != NULL) free(sortlist);
+      if (servers != NULL)
+        free(servers);
+      if (sortlist != NULL)
+        free(sortlist);
       return status;
     }
 
