@@ -62,6 +62,9 @@ TODO
 
  FTP
 
+ * Code overhaul to make it more state-machine like and to _never_ block on
+   waiting for server responses when used with the multi interface.
+
  * Support GSS/Kerberos 5 for ftp file transfer. This will allow user
    authentication and file encryption.  Possible libraries and example clients
    are available from MIT or Heimdal. Requsted by Markus Moeller.
@@ -210,7 +213,7 @@ TODO
 
  * Consider extending 'roffit' to produce decent ASCII output, and use that
    instead of (g)nroff when building src/hugehelp.c
-  
+
  TEST SUITE
 
  * Make the test servers able to serve multiple running test suites. Like if
