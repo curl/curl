@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* When connecting to a SOCKS proxy, the (connect) timeout is not properly
+  acknowledged after the actual TCP connect (during the SOCKS "negotiate"
+  phase). Pointed out by Lucas
+
 * Using configure --disable-[protocol] may cause 'make test' to fail for
   tests using the disabled protocol(s).
 
