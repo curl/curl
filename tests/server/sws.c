@@ -5,14 +5,14 @@
 #include <string.h>
 #include <unistd.h>
 #include <signal.h>
-#include <getopt.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netdb.h>
-#include <assert.h>
+
+char *spitout(FILE *stream, char *main, char *sub, int *size);
 
 #define DEFAULT_PORT 8999
 
@@ -80,7 +80,7 @@ static void sigterm_handler(int sig)
 int ProcessRequest(char *request)
 {
   char *line=request;
-  long contentlength=-1;
+  unsigned long contentlength=0;
 
 #define END_OF_HEADERS "\r\n\r\n"
 
@@ -111,7 +111,7 @@ int ProcessRequest(char *request)
       line++;
   } while(line);
 
-  if(contentlength > -1 ) {
+  if(contentlength > 0 ) {
     if(contentlength <= strlen(end+strlen(END_OF_HEADERS)))
       return 1; /* done */
     else
@@ -138,12 +138,14 @@ void storerequest(char *reqbuf)
 #define REQBUFSIZ 4096
 #define MAXDOCNAMELEN 1024
 #define REQUEST_KEYWORD_SIZE 256
-static int get_request(int sock)
+static int get_request(int sock, int *part)
 {
   char reqbuf[REQBUFSIZ], doc[MAXDOCNAMELEN];
   char request[REQUEST_KEYWORD_SIZE];
   unsigned int offset = 0;
   int prot_major, prot_minor;
+
+  *part = 0; /* part zero equals none */
 
   while (offset < REQBUFSIZ) {
     int got = recv(sock, reqbuf + offset, REQBUFSIZ - offset, 0);
@@ -191,7 +193,15 @@ static int get_request(int sock)
         logmsg("Are-we-friendly question received");
         return -2;
       }
-      test_no = strtol(ptr+1, &ptr, 10);
+
+      ptr++; /* skip the slash */
+
+      test_no = strtol(ptr, &ptr, 10);
+
+      if(test_no > 10000) {
+        *part = test_no % 10000;
+        test_no /= 10000;
+      }
 
       logmsg("Found test number in PATH");
     }
@@ -209,7 +219,7 @@ static int get_request(int sock)
 }
 
 
-static int send_doc(int sock, int doc)
+static int send_doc(int sock, int doc, int part_no)
 {
   int written;
   int count;
@@ -218,6 +228,7 @@ static int send_doc(int sock, int doc)
   FILE *stream;
 
   char filename[256];
+  char partbuf[80]="data";
 
   if(doc < 0) {
     if(-2 == doc)
@@ -237,7 +248,11 @@ static int send_doc(int sock, int doc)
       return 0;
     }
 
-    ptr = buffer = spitout(stream, "reply", "data", &count);
+    if(0 != part_no) {
+      sprintf(partbuf, "data%d", part_no);
+    }
+
+    ptr = buffer = spitout(stream, "reply", partbuf, &count);
   }
 
   do {
@@ -260,84 +275,86 @@ static int send_doc(int sock, int doc)
 
 int main(int argc, char *argv[])
 {
-    struct sockaddr_in me;
-    int sock, msgsock, flag;
-    unsigned short port = DEFAULT_PORT;
-    char *logfile = DEFAULT_LOGFILE;
-    
-    if(argc>1)
-      port = atoi(argv[1]);
+  struct sockaddr_in me;
+  int sock, msgsock, flag;
+  unsigned short port = DEFAULT_PORT;
+  char *logfile = DEFAULT_LOGFILE;
+  int part_no;
+  
+  if(argc>1)
+    port = atoi(argv[1]);
 
-    /* FIX: write our pid to a file name */
+  /* FIX: write our pid to a file name */
 
-    logfp = fopen(logfile, "a");
-    if (!logfp) {
-	perror(logfile);
-	exit(1);
-    }
+  logfp = fopen(logfile, "a");
+  if (!logfp) {
+    perror(logfile);
+    exit(1);
+  }
 
-    signal(SIGPIPE, sigpipe_handler);
-    signal(SIGINT, sigterm_handler);
-    signal(SIGTERM, sigterm_handler);
+  /* FIX: make a more portable signal handler */
+  signal(SIGPIPE, sigpipe_handler);
+  signal(SIGINT, sigterm_handler);
+  signal(SIGTERM, sigterm_handler);
 
-    siginterrupt(SIGPIPE, 1);
-    siginterrupt(SIGINT, 1);
-    siginterrupt(SIGTERM, 1);
+  siginterrupt(SIGPIPE, 1);
+  siginterrupt(SIGINT, 1);
+  siginterrupt(SIGTERM, 1);
 
-    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock < 0) {
-	perror("opening stream socket");
-	fprintf(logfp, "Error opening socket -- aborting\n");
-	fclose(logfp);
-	exit(1);
-    }
-
-    flag = 1;
-    if (setsockopt
-	(sock, SOL_SOCKET, SO_REUSEADDR, (const void *) &flag,
-	 sizeof(int)) < 0) {
-	perror("setsockopt(SO_REUSEADDR)");
-    }
-
-    me.sin_family = AF_INET;
-    me.sin_addr.s_addr = INADDR_ANY;
-    me.sin_port = htons(port);
-    if (bind(sock, (struct sockaddr *) &me, sizeof me) < 0) {
-	perror("binding stream socket");
-	fprintf(logfp, "Error binding socket -- aborting\n");
-	fclose(logfp);
-	exit(1);
-    }
-
-    /* start accepting connections */
-    listen(sock, 5);
-
-    printf("*** %s listening on port %u ***\n", VERSION, port);
-
-    while (!sigterm) {
-      int doc;
-
-      msgsock = accept(sock, NULL, NULL);
-      
-      if (msgsock == -1) {
-        if (sigterm) {
-          break;
-        }
-        /* perror("accept"); */
-        continue;
-      }
-      
-      logmsg("New client connected");
-
-      doc = get_request(msgsock);
-      send_doc(msgsock, doc);
-
-      close(msgsock);
-    }
-
-    close(sock);
+  sock = socket(AF_INET, SOCK_STREAM, 0);
+  if (sock < 0) {
+    perror("opening stream socket");
+    fprintf(logfp, "Error opening socket -- aborting\n");
     fclose(logfp);
+    exit(1);
+  }
 
-    return 0;
+  flag = 1;
+  if (setsockopt
+      (sock, SOL_SOCKET, SO_REUSEADDR, (const void *) &flag,
+       sizeof(int)) < 0) {
+    perror("setsockopt(SO_REUSEADDR)");
+  }
+
+  me.sin_family = AF_INET;
+  me.sin_addr.s_addr = INADDR_ANY;
+  me.sin_port = htons(port);
+  if (bind(sock, (struct sockaddr *) &me, sizeof me) < 0) {
+    perror("binding stream socket");
+    fprintf(logfp, "Error binding socket -- aborting\n");
+    fclose(logfp);
+    exit(1);
+  }
+
+  /* start accepting connections */
+  listen(sock, 5);
+
+  printf("*** %s listening on port %u ***\n", VERSION, port);
+
+  while (!sigterm) {
+    int doc;
+
+    msgsock = accept(sock, NULL, NULL);
+    
+    if (msgsock == -1) {
+      if (sigterm) {
+        break;
+      }
+      /* perror("accept"); */
+      continue;
+    }
+    
+    logmsg("New client connected");
+
+    doc = get_request(msgsock, &part_no);
+    send_doc(msgsock, doc, part_no);
+
+    close(msgsock);
+  }
+  
+  close(sock);
+  fclose(logfp);
+  
+  return 0;
 }
 

@@ -13,6 +13,7 @@
 #define show(x)
 #endif
 
+static
 char *appendstring(char *string, /* original string */
                    char *buffer, /* to append */
                    int *stringlen, int *stralloc)
@@ -46,7 +47,6 @@ char *spitout(FILE *stream, char *main, char *sub, int *size)
   char *string;
   int stringlen=0;
   int stralloc=256;
-  int len;
 
   enum {
     STATE_OUTSIDE,
