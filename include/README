@@ -27,7 +27,7 @@ versions). Therefore, all header files in here must obey these rules:
 
 * We cannot assume anything else but very basic compiler features being
   present. While libcurl requires an ANSI C compiler to build, some of the
-  earler ANSI compilers clearly can't deal with some operators.
+  earlier ANSI compilers clearly can't deal with some preprocessor operators.
 
 * Newlines must remain unix-style for older compilers' sake.
 
