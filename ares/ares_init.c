@@ -784,7 +784,7 @@ static char *try_config(char *s, const char *opt)
 static const char *try_option(const char *p, const char *q, const char *opt)
 {
   size_t len = strlen(opt);
-  return (q - p > len && strncmp(p, opt, len) == 0) ? p + len : NULL;
+  return ((size_t)(q - p) > len && !strncmp(p, opt, len)) ? &p[len] : NULL;
 }
 
 static int ip_addr(const char *s, int len, struct in_addr *addr)
