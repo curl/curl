@@ -1,10 +1,10 @@
 #ifndef _CURL_STRTOOFFT_H
 #define _CURL_STRTOOFFT_H
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -12,7 +12,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -56,6 +56,14 @@ curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
 #else /* SIZEOF_CURL_OFF_T > 4 */
 /* simply use strtol() to get 32bit numbers */
 #define curlx_strtoofft strtol
+#endif
+
+#ifdef HAVE_LL
+#define CURL_LLONG_MIN 0x8000000000000000LL
+#define CURL_LLONG_MAX 0x7FFFFFFFFFFFFFFFLL
+#else
+#define CURL_LLONG_MIN 0x8000000000000000L
+#define CURL_LLONG_MAX 0x7FFFFFFFFFFFFFFFL
 #endif
 
 #endif
