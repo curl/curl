@@ -432,10 +432,10 @@ static void help(void)
        "                    Overrides -n and --netrc-optional\n"
        " -U/--proxy-user <user[:password]> Specify Proxy authentication\n"
        " -v/--verbose       Makes the operation more talkative\n"
-#ifdef DJGPP
-       "                    Also enables Watt-32 debugging\n"
-#endif
        " -V/--version       Outputs version number then quits");
+#ifdef __DJGPP__
+  puts("    --wdebug        Turns on WATT-32 debugging under DJGPP");
+#endif
   puts(" -w/--write-out [format] What to output after completion\n"
        " -x/--proxy <host[:port]>  Use proxy. (Default port is 1080)\n"
        "    --random-file <file> File to use for reading random data from (SSL)\n"
@@ -1067,6 +1067,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5m", "ntlm",       FALSE},
     {"5n", "basic",      FALSE},
     {"5o", "anyauth",    FALSE},
+#ifdef __DJGPP__
+    {"5p", "wdebug",     FALSE},
+#endif
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1310,6 +1313,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'o': /* --anyauth, let libcurl pick it */
 	config->authtype = CURLAUTH_ANY;
 	break;
+
+#ifdef __DJGPP__
+      case 'p': /* --wdebug */
+        dbug_init();
+        break;
+#endif
 
       default: /* the URL! */
         {
@@ -1723,9 +1732,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       cleanarg(nextarg);
       break;
     case 'v':
-#ifdef DJGPP
-      dbug_init();
-#endif
       config->conf ^= CONF_VERBOSE; /* talk a lot */
       break;
     case 'V':

@@ -78,6 +78,10 @@ int fileno( FILE *stream);
 #else
 
 #ifdef DJGPP
+#include <tcp.h>
+#ifdef word
+#undef word
+#endif
 #define DIR_CHAR      "/"
 #define DOT_CHAR      "_"
 #else
