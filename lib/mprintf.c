@@ -40,12 +40,6 @@
 
 #include <curl/mprintf.h>
 
-#ifdef _WIN32_WCE
-#define CURL_CDECL __cdecl
-#else
-#define CURL_CDECL
-#endif
-
 #ifndef SIZEOF_LONG_DOUBLE
 #define SIZEOF_LONG_DOUBLE 0
 #endif
@@ -589,12 +583,7 @@ static int dprintf_formatf(
   void *data, /* untouched by format(), just sent to the stream() function in
                  the second argument */
   /* function pointer called for each output character */
-
-#ifdef _WIN32_WCE
-  int (__cdecl *stream) (int, FILE *),
-#else
   int (*stream)(int, FILE *),
-#endif
   const char *format,    /* %-formatted string */
   va_list ap_save) /* list of parameters */
 {
@@ -990,7 +979,7 @@ static int dprintf_formatf(
 }
 
 /* fputc() look-alike */
-static int CURL_CDECL addbyter(int output, FILE *data)
+static int addbyter(int output, FILE *data)
 {
   struct nsprintf *infop=(struct nsprintf *)data;
   unsigned char outc = (unsigned char)output;
@@ -1038,7 +1027,7 @@ int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 }
 
 /* fputc() look-alike */
-static int CURL_CDECL alloc_addbyter(int output, FILE *data)
+static int alloc_addbyter(int output, FILE *data)
 {
   struct asprintf *infop=(struct asprintf *)data;
   unsigned char outc = (unsigned char)output;
@@ -1124,7 +1113,7 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
     return strdup("");
 }
 
-static int CURL_CDECL storebuffer(int output, FILE *data)
+static int storebuffer(int output, FILE *data)
 {
   char **buffer = (char **)data;
   unsigned char outc = (unsigned char)output;
