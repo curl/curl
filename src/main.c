@@ -504,22 +504,25 @@ static int getparameter(char *flag, /* f or -long-flag */
   if('-' == flag[0]) {
     /* try a long name */
     int fnam=strlen(&flag[1]);
+    int numhits=0;
     for(j=0; j< sizeof(aliases)/sizeof(aliases[0]); j++) {
       if(strnequal(aliases[j].lname, &flag[1], fnam)) {
         longopt = TRUE;
+        numhits++;
         if(strequal(aliases[j].lname, &flag[1])) {
           parse = aliases[j].letter;
           hit = j;
+          numhits = 1; /* a single unique hit */
           break;
         }
-	if(parse) {
-	  /* this is the second match, we can't continue! */
-	  helpf("option --%s is ambiguous\n", &flag[1]);
-	  return CURLE_FAILED_INIT;
-	}
 	parse = aliases[j].letter;
 	hit = j;
       }
+    }
+    if(numhits>1) {
+      /* this is at least the second match! */
+      helpf("option --%s is ambiguous\n", &flag[1]);
+      return CURLE_FAILED_INIT;
     }
     if(hit < 0) {
       helpf("unknown option -%s.\n", flag);
