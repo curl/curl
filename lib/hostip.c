@@ -630,7 +630,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
 
       ret = gethostbyname_r(hostname,
                             (struct hostent *)buf,
-                            (struct hostent_data *)(buf + sizeof(struct hostent)));
+                            (struct hostent_data *)((char *)buf + sizeof(struct hostent)));
     else
       ret = -1; /* failure, too smallish buffer size */
     
