@@ -31,6 +31,10 @@ UNIX
    If you have checked out the sources from the CVS repository, read the
    CVS-INFO on how to proceed.
 
+   Get a full listing of all available configure options by invoking it like:
+
+        ./configure --help
+
    If you want to install curl in a different file hierarchy than /usr/local,
    you need to specify that already when running configure:
 
