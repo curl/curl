@@ -127,6 +127,7 @@ _Transfer(struct connectdata *c_conn)
   int offset = 0;		/* possible resume offset read from the
                                    Content-Range: header */
   int code = 0;			/* error code from the 'HTTP/1.? XXX' line */
+  int httpversion = -1;         /* the last digit in the HTTP/1.1 string */
 
   /* for the low speed checks: */
   CURLcode urg;
@@ -319,9 +320,9 @@ _Transfer(struct connectdata *c_conn)
                   p++;		/* pass the \r byte */
                 if ('\n' == *p)
                   p++;		/* pass the \n byte */
-
+#if 0 /* headers are not included in the size */
                 Curl_pgrsSetDownloadSize(data, conn->size);
-
+#endif
                 header = FALSE;	/* no more header to parse! */
 
                 /* now, only output this if the header AND body are requested:
@@ -342,7 +343,7 @@ _Transfer(struct connectdata *c_conn)
               if (!headerline++) {
                 /* This is the first header, it MUST be the error code line
                    or else we consiser this to be the body right away! */
-                if (sscanf (p, " HTTP/1.%*c %3d", &code)) {
+                if (2 == sscanf (p, " HTTP/1.%d %3d", &httpversion, &code)) {
                   /* 404 -> URL not found! */
                   if (
                       ( ((data->bits.http_follow_location) && (code >= 400))
@@ -499,13 +500,23 @@ _Transfer(struct connectdata *c_conn)
                     } /* switch */
                   } /* two valid time strings */
                 } /* we have a time condition */
+                if(!conn->bits.close && (httpversion == 1)) {
+                  /* If this is not the last request before a close, we must
+                     set the maximum download size to the size of the expected
+                     document or else, we won't know when to stop reading! */
+                  if(-1 != conn->size)
+                    conn->maxdownload = conn->size;
+
+                  /* What to do if the size is *not* known? */
+                }
+
               } /* this is HTTP */
             } /* this is the first time we write a body part */
             bodywrites++;
 
-            if(data->maxdownload &&
-               (bytecount + nread > data->maxdownload)) {
-              nread = data->maxdownload - bytecount;
+            if(conn->maxdownload &&
+               (bytecount + nread >= conn->maxdownload)) {
+              nread = conn->maxdownload - bytecount;
               if((signed int)nread < 0 ) /* this should be unusual */
                 nread = 0;
               keepon &= ~KEEP_READ; /* we're done reading */
