@@ -199,7 +199,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #include <conio.h>
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
-  int i;
+  size_t i;
   printf("%s", prompt);
  
   for(i=0; i<buflen; i++) {
