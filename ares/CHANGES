@@ -1,3 +1,6 @@
+* February 25, 2004
+- Dan Fandrich found a flaw in the Feb 22 fix.
+
 * February 23, 2004
 - Removed ares_free_errmem(), the function, the file and the man page. It was
   not used and it did nothing.
