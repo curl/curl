@@ -761,6 +761,10 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
 
   *waitp = FALSE;
   
+  if(data->set.ip_version == CURL_IPRESOLVE_V6)
+    /* an ipv6 address was requested and we can't get/use one */
+    return NULL;
+
   bufp = strdup(hostname);
 
   if(bufp) {
@@ -906,11 +910,17 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
 
   /* see if we have an IPv6 stack */
   s = socket(PF_INET6, SOCK_DGRAM, 0);
-  if (s < 0)
+  if (s < 0) {
     /* Some non-IPv6 stacks have been found to make very slow name resolves
      * when PF_UNSPEC is used, so thus we switch to a mere PF_INET lookup if
      * the stack seems to be a non-ipv6 one. */
+
+    if(data->set.ip_version == CURL_IPRESOLVE_V6)
+      /* an ipv6 address was requested and we can't get/use one */
+      return NULL;
+
     pf = PF_INET;
+  }
   else {
     /* This seems to be an IPv6-capable stack, use PF_UNSPEC for the widest
      * possible checks. And close the socket again.
@@ -1119,6 +1129,10 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
   (void)port; /* unused in IPv4 code */
 
   *waitp = 0; /* don't wait, we act synchronously */
+
+  if(data->set.ip_version == CURL_IPRESOLVE_V6)
+    /* an ipv6 address was requested and we can't get/use one */
+    return NULL;
 
   in=inet_addr(hostname);
   if (in != CURL_INADDR_NONE) {
