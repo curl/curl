@@ -1,0 +1,6 @@
+HTTP/1.1 301 Moved Permanently
+Server: fake
+Location: /moo/moo/moo/310002
+
+No contents
+

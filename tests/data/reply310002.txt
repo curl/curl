@@ -1,0 +1,5 @@
+HTTP/1.1 200 Followed here fine
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+If this is received, the location following worked

@@ -58,4 +58,7 @@ command28.txt  name28.txt     prot28.txt     reply28.txt \
 command120.txt  name120.txt     prot120.txt     reply120.txt \
 command121.txt  name121.txt     prot121.txt     reply121.txt \
 command29.txt  error30.txt  name30.txt  prot30.txt   reply30.txt \
-command30.txt  name29.txt   prot29.txt  reply29.txt
+command30.txt  name29.txt   prot29.txt  reply29.txt \
+command31.txt  name32.txt  reply31.txt      reply32.txt \
+command32.txt  prot31.txt  reply310001.txt  reply320001.txt \
+name31.txt     prot32.txt  reply310002.txt  reply320002.txt
