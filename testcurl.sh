@@ -186,7 +186,7 @@ if [ $CVS -eq 1 ]; then
   # generate the build files
   ./buildconf 2>&1 | tee build.log
 
-  if { grep "^buildconf: OK" build.log; } then
+  if { grep "^buildconf: OK" build.log >/dev/null 2>&1; } then
      echo "testcurl: buildconf was successful"
   else
      echo "testcurl: buildconf was NOT successful"
