@@ -1,0 +1,39 @@
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP PORT upload with CWD
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/CWD/STOR/RETR/108 -T log/upload108 -P -
+</command>
+<file name="log/upload108">
+Moooooooooooo
+ upload this
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^PORT .*
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD CWD/STOR/RETR
+PORT 127,0,0,1,5,109
+TYPE I
+STOR 108
+</protocol>
+<upload>
+Moooooooooooo
+ upload this
+</upload>
+</verify>

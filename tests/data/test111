@@ -1,0 +1,33 @@
+# Server-side
+<reply>
+<size>
+85
+</size>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP download resume beyond file size
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/111 -C 2000
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+36
+</errorcode>
+<strip>
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+PASV
+TYPE I
+SIZE 111
+</protocol>
+</verify>

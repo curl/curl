@@ -1,0 +1,36 @@
+# Server-side
+<reply>
+<data>
+expected to be a file without the first part
+but we emulate that
+</data>
+<size>
+85
+</size>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP download resume with set limit
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/110 -C 20
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+PASV
+TYPE I
+SIZE 110
+REST 20
+RETR 110
+</protocol>
+</verify>

@@ -1,0 +1,37 @@
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP PASV upload append
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/109 -T log/upload109 --append
+</command>
+<file name="log/upload109">
+Moooooooooooo
+ upload this
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+PASV
+TYPE I
+APPE 109
+</protocol>
+<upload>
+Moooooooooooo
+ upload this
+</upload>
+</verify>
