@@ -463,7 +463,11 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   }
 
   hostname = data->change.proxy?conn->proxyhost:conn->hostname;
-  infof(data, "About to connect() to %s:%d\n", hostname, port);
+  infof(data, "About to connect() to %s%s%s:%d\n",
+        conn->bits.ipv6_ip?"[":"",
+        hostname,
+        conn->bits.ipv6_ip?"]":"",
+        port);
 
 #ifdef ENABLE_IPV6
   /*

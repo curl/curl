@@ -2279,8 +2279,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if((1 == sscanf(conn->name, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
      (']' == endbracket)) {
     /* this is a RFC2732-style specified IP-address */
+    conn->bits.ipv6_ip = TRUE;
 
     conn->name++; /* pass the starting bracket */ 
+    conn->hostname++;
     tmp = strchr(conn->name, ']');
     *tmp = 0; /* zero terminate */
     tmp++; /* pass the ending bracket */

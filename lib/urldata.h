@@ -210,7 +210,8 @@ struct ConnectBits {
   bool httpproxy;    /* if set, this transfer is done through a http proxy */
   bool user_passwd;    /* do we use user+password for this connection? */
   bool proxy_user_passwd; /* user+password for the proxy? */
-
+  bool ipv6_ip; /* we communicate with a remove site specified with pure IPv6
+                   IP address */
   bool use_range;
   bool rangestringalloc; /* the range string is malloc()'ed */
 };
