@@ -1774,7 +1774,7 @@ static int parseconfig(const char *filename,
       case '\n':
       case '*':
       case '\0':
-        free(line);
+        free(aline);
         continue;
       }
 
