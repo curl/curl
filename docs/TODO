@@ -11,6 +11,10 @@ TODO
 
 To do for the next release:
 
+ * Make sure SSL works even when IPv6 is enabled. We just can't connect to
+   IPv6 sites and use SSL, but we should detect that particular condition
+   and warn about it.
+
  * Make SSL session ids get used if multiple HTTPS documents from the same
    host is requested.
 
