@@ -22,6 +22,8 @@ REPLY RETR 314 bluah you f00l!
 </errorcode>
 <strip>
 ^PORT.*
+^EPRT .*
+^LPRT .*
 </strip>
 <protocol>
 USER anonymous

@@ -22,6 +22,8 @@ Moooooooooooo
 <verify>
 <strip>
 ^PORT .*
+^EPRT .*
+^LPRT .*
 </strip>
 <protocol>
 USER anonymous

@@ -22,6 +22,8 @@ REPLY PORT 314 bluah you f00l!
 </errorcode>
 <strip>
 ^PORT 127,0,0,1,.*
+^EPRT .*
+^LPRT .*
 </strip>
 <protocol>
 USER anonymous
