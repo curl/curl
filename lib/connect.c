@@ -206,6 +206,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,
       /* get a new timeout for next attempt */
       after = Curl_tvnow();
       timeout_ms -= (long)(Curl_tvdiff(after, before)*1000);
+      if(timeout_ms < 0)
+        break;
       before = after;
       continue;
     }
@@ -285,6 +287,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,
       /* get a new timeout for next attempt */
       after = Curl_tvnow();
       timeout_ms -= (long)(Curl_tvdiff(after, before)*1000);
+      if(timeout_ms < 0)
+        break;
       before = after;
       continue; /* try next address */
     }
