@@ -51,7 +51,7 @@
 #define HAVE_GETSERVBYNAME 1
 
 /* Define if you have the gettimeofday function.  */
-#define HAVE_GETTIMEOFDAY 1
+/*  #define HAVE_GETTIMEOFDAY 1 */
 
 /* Define if you have the inet_addr function.  */
 #define HAVE_INET_ADDR 1
@@ -126,7 +126,7 @@
 /*#define HAVE_SYS_PARAM_H 1*/
 
 /* Define if you have the <sys/select.h> header file.  */
-#define HAVE_SYS_SELECT_H 1
+/*  #define HAVE_SYS_SELECT_H 1 */
 
 /* Define if you have the <sys/socket.h> header file.  */
 /*#define HAVE_SYS_SOCKET_H 1*/
