@@ -7,6 +7,9 @@ my $warning=0;
 my $trace=0;
 
 sub getpartattr {
+    # if $part is undefined (ie only one argument) then
+    # return the attributes of the section
+
     my ($section, $part)=@_;
 
     my %hash;
@@ -19,7 +22,9 @@ sub getpartattr {
         if(!$inside && ($_ =~ /^ *\<$section/)) {
             $inside++;
         }
-        elsif((1 ==$inside) && ($_ =~ /^ *\<$part([^>]*)/)) {
+        if((1 ==$inside) && ( ($_ =~ /^ *\<$part([^>]*)/) ||
+                              !(defined($part)) )
+             ) {
             $inside++;
             my $attr=$1;
             my @p=split("[ \t]", $attr);

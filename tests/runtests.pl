@@ -6,7 +6,8 @@
 #######################################################################
 # These should be the only variables that might be needed to get edited:
 
-use strict;
+#use strict;
+#use warnings;
 
 @INC=(@INC, $ENV{'srcdir'}, ".");
 
@@ -20,6 +21,7 @@ my $HTTPSPORT=8433; # this is the HTTPS server port
 my $FTPPORT=8921;  # this is the FTP server port
 my $FTPSPORT=8821;  # this is the FTPS server port
 my $CURL="../src/curl"; # what curl executable to run on the tests
+my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
 my $LOGDIR="log";
 my $TESTDIR="data";
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
@@ -48,6 +50,11 @@ my $perl="perl -I$srcdir";
 # this gets set if curl is compiled with memory debugging:
 my $memory_debug=0;
 
+# this gets set if curl is compiled with netrc debugging:
+# It has to be in the global symbol table because of the way 'requires' works
+$main::netrc_debug=0;
+my $netrc_debug = \$main::netrc_debug;
+
 # name of the file that the memory debugging creates:
 my $memdump="memdump";
 
@@ -57,6 +64,8 @@ my $memanalyze="./memanalyze.pl";
 my $checkstunnel = &checkstunnel;
 
 my $ssl_version; # set if libcurl is built with SSL support
+
+my $skipped=0; # number of tests skipped; reported in main loop
 
 #######################################################################
 # variables the command line options may set
@@ -390,12 +399,33 @@ sub displaydata {
         # enabled and we shall verify that no memory leaks exist
         # after each and every test!
         $memory_debug=1;
+
+        # there's only one debug control in the configure script
+        # so hope netrc debugging is enabled and set it up
+        $$netrc_debug = 1;
+        $ENV{'CURL_DEBUG_NETRC'} = 'log/netrc';
     }
     printf("* Memory debugging: %s\n", $memory_debug?"ON":"OFF");
+    printf("* Netrc debugging:  %s\n", $$netrc_debug?"ON":"OFF");
     printf("* HTTPS server:     %s\n", $checkstunnel?"ON":"OFF");
     printf("* FTPS server:      %s\n", $checkstunnel?"ON":"OFF");
     printf("* libcurl SSL:      %s\n", $ssl_version?"ON":"OFF");
     print "***************************************** \n";
+}
+
+#######################################################################
+# substitute the variable stuff into either a joined up file or 
+# a command, in either case passed by reference
+#
+sub subVariables {
+  my ($thing) = @_;
+  $$thing =~ s/%HOSTIP/$HOSTIP/g;
+  $$thing =~ s/%HOSTPORT/$HOSTPORT/g;
+  $$thing =~ s/%HTTPSPORT/$HTTPSPORT/g;
+  $$thing =~ s/%FTPPORT/$FTPPORT/g;
+  $$thing =~ s/%FTPSPORT/$FTPSPORT/g;
+  $$thing =~ s/%SRCDIR/$srcdir/g;
+  $$thing =~ s/%PWD/$pwd/g;
 }
 
 #######################################################################
@@ -413,6 +443,26 @@ sub singletest {
         }
         return -1;
     }
+
+    {
+        my %hash = getpartattr("client");
+        my $requires = $hash{'requires'};
+
+        if (defined($requires)) {
+            my $value=${$requires};
+#            print "This test requires '$requires' with value '$value' \n";
+
+            if (${$requires}) {
+                # this test is OK
+                ;
+            }else {
+                print "$testnum requires $requires, which is not set; skipping\n";
+                $skipped++;
+                return 0;  # look successful
+            }
+        }
+    }
+
 
     # extract the reply data
     my @reply = getpart("reply", "data");
@@ -471,13 +521,16 @@ sub singletest {
 
     # make some nice replace operations
     $cmd =~ s/\n//g; # no newlines please
-    $cmd =~ s/%HOSTIP/$HOSTIP/g;
-    $cmd =~ s/%HOSTPORT/$HOSTPORT/g;
-    $cmd =~ s/%HTTPSPORT/$HTTPSPORT/g;
-    $cmd =~ s/%FTPPORT/$FTPPORT/g;
-    $cmd =~ s/%FTPSPORT/$FTPSPORT/g;
-    $cmd =~ s/%SRCDIR/$srcdir/g;
-    $cmd =~ s/%PWD/$pwd/g;
+
+    subVariables \$cmd;
+
+#    $cmd =~ s/%HOSTIP/$HOSTIP/g;
+#    $cmd =~ s/%HOSTPORT/$HOSTPORT/g;
+#    $cmd =~ s/%HTTPSPORT/$HTTPSPORT/g;
+#    $cmd =~ s/%FTPPORT/$FTPPORT/g;
+#    $cmd =~ s/%FTPSPORT/$FTPSPORT/g;
+#    $cmd =~ s/%SRCDIR/$srcdir/g;
+#    $cmd =~ s/%PWD/$pwd/g;
 
     #$cmd =~ s/%HOSTNAME/$HOSTNAME/g;
 
@@ -491,11 +544,17 @@ sub singletest {
         my %hash = getpartattr("client", "file");
 
         my $filename=$hash{'name'};
+
         if(!$filename) {
             print "ERROR: section client=>file has no name attribute!\n";
             exit;
         }
-        writearray($filename, \@inputfile);
+        my $fileContent = join('', @inputfile);
+        subVariables \$fileContent;
+#        print "DEBUG: writing file " . $filename . "\n";
+        open OUTFILE, ">$filename";
+        print OUTFILE   $fileContent;
+        close OUTFILE;
     }
 
     my %cmdhash = getpartattr("client", "command");
@@ -537,7 +596,7 @@ sub singletest {
         print GDBCMD "set args $cmdargs\n";
         print GDBCMD "show args\n";
         close(GDBCMD);
-        system("gdb $CURL -x log/gdbcmd");
+        system("gdb $DBGCURL -x log/gdbcmd");
         $res =0; # makes it always continue after a debugged run
     }
     else {
@@ -909,7 +968,6 @@ my $failed;
 my $testnum;
 my $ok=0;
 my $total=0;
-my $skipped=0;
 
 foreach $testnum (split(" ", $TESTCASES)) {
 
