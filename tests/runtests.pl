@@ -57,7 +57,8 @@ my $memdump="memdump";
 # the path to the script that analyzes the memory debug output file:
 my $memanalyze="./memanalyze.pl";
 
-my $checkstunnel = &checkstunnel;
+my $checkstunnel = checkcmd("stunnel");
+my $checkvalgrind = checkcmd("valgrind");
 
 my $ssl_version; # set if libcurl is built with SSL support
 
@@ -65,6 +66,12 @@ my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 
+if($checkvalgrind) {
+    # we have found valgrind on the host, use it
+
+    # perhaps we should verify that valgrind works before we actually use it?
+    $CURL="valgrind --leak-check=yes --logfile-fd=3 -q $CURL";
+}
 #######################################################################
 # variables the command line options may set
 #
@@ -103,6 +110,20 @@ foreach $protocol (('ftp', 'http', 'ftps', 'https', 'gopher', 'no')) {
     $ENV{$proxy}=undef;
     # clear uppercase version
     $ENV{uc($proxy)}=undef;
+}
+
+#######################################################################
+# Check for a command in the PATH.
+#
+sub checkcmd {
+    my ($cmd)=@_;
+    my @paths=("/usr/sbin", "/usr/local/sbin", "/sbin", "/usr/bin",
+               "/usr/local/bin", split(":", $ENV{'PATH'}));
+    for(@paths) {
+        if( -x "$_/$cmd") {
+            return "$_/$cmd";
+        }
+    }
 }
 
 #######################################################################
@@ -578,7 +599,7 @@ sub checkcurl {
 
     my $curl;
     my $libcurl;
-    my @version=`$CURL -V`;
+    my @version=`$CURL -V 2>/dev/null`;
     for(@version) {
         chomp;
 
@@ -635,6 +656,7 @@ sub checkcurl {
     printf("* Server SSL:       %s\n", $checkstunnel?"ON":"OFF");
     printf("* libcurl SSL:      %s\n", $ssl_version?"ON":"OFF");
     printf("* libcurl debug:    %s\n", $curl_debug?"ON":"OFF");
+    printf("* valgrind:         %s\n", $checkvalgrind?"ON":"OFF");
     print "***************************************** \n";
 }
 
@@ -880,6 +902,9 @@ sub singletest {
         writearray($stdinfile, \@stdintest);
 
         $cmdargs .= " <$stdinfile";
+    }
+    if($checkvalgrind) {
+        $cmdargs .= " 3>log/valgrind$testnum";
     }
     my $CMDLINE;
 
