@@ -42,6 +42,9 @@
 #include "setup.h"
 
 #include <curl/curl.h>
+
+#define _MPRINTF_REPLACE
+#include <curl/mprintf.h>
 #include "urldata.h"
 #include <stdio.h>
 #include <string.h>
