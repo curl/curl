@@ -7,6 +7,16 @@
                                   Changelog
 
 
+Daniel (19 December 2004)
+- I investigated our PKCS12 build problem on Solaris 2.7 with OpenSSL 0.9.7e,
+  and it turned out to be the fault of the zlib 1.1.4 headers doing a typedef
+  named 'free_func' and the OpenSSL headers have a prototype that uses
+  'free_func' in one of its arguments. This is why the compile errors out.
+
+  In other words, we need to include the openssl/pkcs12.h header before the
+  zlib.h header and it builds fine. The configure script now checks for this
+  file and it then gets included early in lib/urldata.h.
+
 Daniel (18 December 2004)
 - Samuel Listopad added support for PKCS12 formatted certificates.
 
@@ -45,7 +55,7 @@ Daniel (13 December 2004)
 Daniel (11 December 2004)
 - Made the test suite HTTP server (sws) capable of using IPv6, and then
   extended the test environment to support that and also added three test
-  cases (240, 241, 242) that run tests using IPv6. One of them uses a URL that
+  cases (240, 241, 242) that run tests using IPv6. Test 242 uses a URL that
   didn't work before the 10 dec fix by Kai Sommerfeld.
 
 - Made a failed file:// resume output an error message
