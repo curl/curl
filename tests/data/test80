@@ -1,0 +1,48 @@
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake swsclose
+Content-Type: text/html
+Funny-head: yesyes
+
+contents
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP over proxy with both proxy and site authentication
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/we/want/that/page/80 -p -x %HOSTIP:%HOSTPORT --user iam:myself --proxy-user youare:yourself
+</command>
+</test>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+CONNECT 127.0.0.1:8999 HTTP/1.0
+Proxy-authorization: Basic eW91YXJlOnlvdXJzZWxm
+User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
+
+GET /we/want/that/page/80 HTTP/1.1
+Authorization: Basic aWFtOm15c2VsZg==
+User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
