@@ -2885,54 +2885,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
-  /*************************************************************
-   * Figure out the remote port number
-   *
-   * No matter if we use a proxy or not, we have to figure out the remote
-   * port number of various reasons.
-   *
-   * To be able to detect port number flawlessly, we must not confuse them
-   * IPv6-specified addresses in the [0::1] style. (RFC2732)
-   *
-   * The conn->host.name is currently [user:passwd@]host[:port] where host
-   * could be a hostname, IPv4 address or IPv6 address.
-   *************************************************************/
-  if((1 == sscanf(conn->host.name, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
-     (']' == endbracket)) {
-    /* this is a RFC2732-style specified IP-address */
-    conn->bits.ipv6_ip = TRUE;
-
-    conn->host.name++; /* pass the starting bracket */
-    tmp = strchr(conn->host.name, ']');
-    *tmp = 0; /* zero terminate */
-    tmp++; /* pass the ending bracket */
-    if(':' != *tmp)
-      tmp = NULL; /* no port number available */
-  }
-  else
-    tmp = strrchr(conn->host.name, ':');
-
-  if (tmp) {
-    char *rest;
-    unsigned long port;
-
-    port=strtoul(tmp+1, &rest, 10);  /* Port number must be decimal */
-
-    if (rest != (tmp+1) && *rest == '\0') {
-      /* The colon really did have only digits after it,
-       * so it is either a port number or a mistake */
-
-      if (port > 0xffff) {   /* Single unix standard says port numbers are
-                              * 16 bits long */
-        failf(data, "Port number too large: %lu", port);
-        return CURLE_URL_MALFORMAT;
-      }
-
-      *tmp = '\0'; /* cut off the name there */
-      conn->remote_port = (unsigned short)port;
-    }
-  }
-
   if(data->change.proxy && *data->change.proxy) {
     /* If this is supposed to use a proxy, we need to figure out the proxy
        host name name, so that we can re-use an existing connection
@@ -3076,6 +3028,54 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           free(newpasswd);
         }
       }
+    }
+  }
+
+  /*************************************************************
+   * Figure out the remote port number
+   *
+   * No matter if we use a proxy or not, we have to figure out the remote
+   * port number of various reasons.
+   *
+   * To be able to detect port number flawlessly, we must not confuse them
+   * IPv6-specified addresses in the [0::1] style. (RFC2732)
+   *
+   * The conn->host.name is currently [user:passwd@]host[:port] where host
+   * could be a hostname, IPv4 address or IPv6 address.
+   *************************************************************/
+  if((1 == sscanf(conn->host.name, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
+     (']' == endbracket)) {
+    /* this is a RFC2732-style specified IP-address */
+    conn->bits.ipv6_ip = TRUE;
+
+    conn->host.name++; /* pass the starting bracket */
+    tmp = strchr(conn->host.name, ']');
+    *tmp = 0; /* zero terminate */
+    tmp++; /* pass the ending bracket */
+    if(':' != *tmp)
+      tmp = NULL; /* no port number available */
+  }
+  else
+    tmp = strrchr(conn->host.name, ':');
+
+  if (tmp) {
+    char *rest;
+    unsigned long port;
+
+    port=strtoul(tmp+1, &rest, 10);  /* Port number must be decimal */
+
+    if (rest != (tmp+1) && *rest == '\0') {
+      /* The colon really did have only digits after it,
+       * so it is either a port number or a mistake */
+
+      if (port > 0xffff) {   /* Single unix standard says port numbers are
+                              * 16 bits long */
+        failf(data, "Port number too large: %lu", port);
+        return CURLE_URL_MALFORMAT;
+      }
+
+      *tmp = '\0'; /* cut off the name there */
+      conn->remote_port = (unsigned short)port;
     }
   }
 
