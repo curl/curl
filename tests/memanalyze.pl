@@ -115,7 +115,7 @@ while(<FILE>) {
 
             if($sizeataddr{$addr}>0) {
                 # this means weeeeeirdo
-                print "Fucked up debug compile, rebuild curl now\n";
+                print "Mixed debug compile, rebuild curl now\n";
             }
 
             $sizeataddr{$addr}=$size;
@@ -128,6 +128,31 @@ while(<FILE>) {
 
             newtotal($totalmem);
             $mallocs++;
+
+            $getmem{$addr}="$source:$linenum";
+        }
+        elsif($function =~ /calloc\((\d*),(\d*)\) = 0x([0-9a-f]*)/) {
+            $size = $1*$2;
+            $addr = $3;
+
+            $arg1 = $1;
+            $arg2 = $2;
+
+            if($sizeataddr{$addr}>0) {
+                # this means weeeeeirdo
+                print "Mixed debug compile, rebuild curl now\n";
+            }
+
+            $sizeataddr{$addr}=$size;
+            $totalmem += $size;
+
+            if($trace) {
+                print "CALLOC: calloc($arg1,$arg2) at $source:$linenum",
+                " makes totally $totalmem bytes\n";
+            }
+
+            newtotal($totalmem);
+            $callocs++;
 
             $getmem{$addr}="$source:$linenum";
         }
@@ -212,13 +237,13 @@ while(<FILE>) {
         $linenum = $2;
         $function = $3;
 
-        if($function =~ /fopen\(\"([^\"]*)\"\) = (\(nil\)|0x([0-9a-f]*))/) {
-            if($2 eq "(nil)") {
+        if($function =~ /fopen\(\"([^\"]*)\",\"([^\"]*)\"\) = (\(nil\)|0x([0-9a-f]*))/) {
+            if($3 eq "(nil)") {
                 ;
             }
             else {
-                $fopen{$3}=1;
-                $fopenfile{$3}="$source:$linenum";
+                $fopen{$4}=1;
+                $fopenfile{$4}="$source:$linenum";
                 $fopens++;
             }
         }
@@ -312,6 +337,7 @@ if($addrinfos) {
 if($verbose) {
     print "Mallocs: $mallocs\n",
     "Reallocs: $reallocs\n",
+    "Callocs: $callcs\n",
     "Strdups:  $strdups\n",
     "Frees: $frees\n",
     "Allocations: ".($mallocs + $reallocs + $strdups)."\n";
