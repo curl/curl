@@ -126,7 +126,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
          32 (48) start of data block
       */
 
-      int size = Curl_base64_decode(header, buffer);
+      size_t size = Curl_base64_decode(header, (char *)buffer);
 
       ntlm->state = NTLMSTATE_TYPE2; /* we got a type-2 */
 
@@ -376,7 +376,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     size = 32 + hostlen + domlen;
 
     /* now keeper of the base64 encoded package size */
-    size = Curl_base64_encode(ntlmbuf, size, &base64);
+    size = Curl_base64_encode((char *)ntlmbuf, size, &base64);
 
     if(size >0 ) {
       Curl_safefree(*allocuserpwd);
@@ -549,7 +549,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     ntlmbuf[57] = size >> 8;
 
     /* convert the binary blob into base64 */
-    size = Curl_base64_encode(ntlmbuf, size, &base64);
+    size = Curl_base64_encode((char *)ntlmbuf, size, &base64);
 
     if(size >0 ) {
       Curl_safefree(*allocuserpwd);
