@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_global_init 3 "14 August 2001" "libcurl 7.8.1" "libcurl Manual"
+.TH curl_global_init 3 "13 Nov 2001" "libcurl 7.9.1" "libcurl Manual"
 .SH NAME
 curl_global_init - Global libcurl initialisation
 .SH SYNOPSIS
@@ -11,8 +11,8 @@ curl_global_init - Global libcurl initialisation
 .BI "CURLcode curl_global_init(long " flags ");"
 .ad
 .SH DESCRIPTION
-This function should be called once (no matter how many threads or libcurl
-sessions that'll be used) by every application that uses libcurl.
+This function should only be called once (no matter how many threads or
+libcurl sessions that'll be used) by every application that uses libcurl.
 
 If this function hasn't been invoked when \fIcurl_easy_init\fP is called, it
 will be done automatically by libcurl.
@@ -22,6 +22,8 @@ init, as described below. Set the desired bits by ORing the values together.
 
 You must however \fBalways\fP use the \fIcurl_global_cleanup\fP function, as
 that cannot be called automatically for you by libcurl.
+
+Calling this function more than once will cause unpredictable results.
 
 This function was added in libcurl 7.8.
 .SH FLAGS
