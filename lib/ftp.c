@@ -85,6 +85,7 @@
 #include "progress.h"
 #include "download.h"
 #include "escape.h"
+#include "http.h" /* for HTTP proxy tunnel stuff */
 
 #ifdef KRB4
 #include "security.h"
