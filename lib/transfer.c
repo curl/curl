@@ -457,11 +457,16 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  */
                 if(data->set.no_body)
                   stop_reading = TRUE;
-                else if(!conn->bits.close) {
-                  /* If this is not the last request before a close, we must
-                     set the maximum download size to the size of the
-                     expected document or else, we won't know when to stop
-                     reading! */
+                else {
+                  /* If we know the expected size of this document, we set the
+                     maximum download size to the size of the expected
+                     document or else, we won't know when to stop reading!
+
+                     Note that we set the download maximum even if we read a
+                     "Connection: close" header, to make sure that
+                     "Content-Length: 0" still prevents us from attempting to
+                     read the (missing) response-body.
+                  */
                   if(-1 != conn->size)
                     conn->maxdownload = conn->size;
                 }
