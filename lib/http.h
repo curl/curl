@@ -35,7 +35,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http(struct connectdata *conn);
-CURLcode Curl_http_done(struct connectdata *conn);
+CURLcode Curl_http_done(struct connectdata *, CURLcode);
 CURLcode Curl_http_connect(struct connectdata *conn);
 
 /* The following functions are defined in http_chunks.c */

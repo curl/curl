@@ -738,13 +738,14 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
  *
  * Input argument is already checked for validity.
  */
-CURLcode Curl_ftp_done(struct connectdata *conn)
+CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
 {
   struct SessionHandle *data = conn->data;
   struct FTP *ftp = conn->proto.ftp;
   ssize_t nread;
   int ftpcode;
   CURLcode result=CURLE_OK;
+
   bool was_ctl_valid = ftp->ctl_valid;
 
   /* free the dir tree and file parts */
@@ -784,8 +785,24 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
       result = CURLE_FTP_COULDNT_RETR_FILE;
     }
   }
-  
-  ftp->ctl_valid = was_ctl_valid;
+
+  switch(status) {
+  case CURLE_BAD_DOWNLOAD_RESUME:
+  case CURLE_FTP_WEIRD_PASV_REPLY:
+  case CURLE_FTP_PORT_FAILED:
+  case CURLE_FTP_COULDNT_SET_BINARY:
+  case CURLE_FTP_COULDNT_RETR_FILE:
+  case CURLE_FTP_ACCESS_DENIED:
+    /* the connection stays alive fine even though this happened */
+    /* fall-through */
+  case CURLE_OK: /* doesn't affect the control connection's status */
+    ftp->ctl_valid = was_ctl_valid;
+    break;
+  default:       /* by default, an error means the control connection is
+                    wedged and should not be used anymore */
+    ftp->ctl_valid = FALSE;
+    break;
+  }
 
 #ifdef HAVE_KRB4
   Curl_sec_fflush_fd(conn, conn->sock[SECONDARYSOCKET]);
@@ -794,12 +811,12 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   sclose(conn->sock[SECONDARYSOCKET]);
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
 
-  if(!ftp->no_transfer) {
+  if(!ftp->no_transfer && !status) {
     /* Let's see what the server says about the transfer we just performed,
-       but lower the timeout as sometimes this connection has died while 
-       the data has been transfered. This happens when doing through NATs
-       etc that abandon old silent connections.
-    */
+     * but lower the timeout as sometimes this connection has died while the
+     * data has been transfered. This happens when doing through NATs etc that
+     * abandon old silent connections.
+     */
     ftp->response_time = 60; /* give it only a minute for now */
 
     result = Curl_GetFTPResponse(&nread, conn, &ftpcode);

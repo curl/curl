@@ -25,7 +25,7 @@
 
 #ifndef CURL_DISABLE_FTP
 CURLcode Curl_ftp(struct connectdata *conn);
-CURLcode Curl_ftp_done(struct connectdata *conn);
+CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode);
 CURLcode Curl_ftp_connect(struct connectdata *conn);
 CURLcode Curl_ftp_disconnect(struct connectdata *conn);
 CURLcode Curl_ftpsendf(struct connectdata *, const char *fmt, ...);

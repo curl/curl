@@ -1172,10 +1172,12 @@ CURLcode Curl_http_connect(struct connectdata *conn)
  * has been performed.
  */
 
-CURLcode Curl_http_done(struct connectdata *conn)
+CURLcode Curl_http_done(struct connectdata *conn,
+                        CURLcode status)
 {
   struct SessionHandle *data;
   struct HTTP *http;
+  (void)status; /* no use for us */
 
   data=conn->data;
   http=conn->proto.http;

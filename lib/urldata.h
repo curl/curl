@@ -482,7 +482,7 @@ struct connectdata {
   /* These two functions MUST be set by the curl_connect() function to be
      be protocol dependent */
   CURLcode (*curl_do)(struct connectdata *);
-  CURLcode (*curl_done)(struct connectdata *);
+  CURLcode (*curl_done)(struct connectdata *, CURLcode);
 
   /* If the curl_do() function is better made in two halves, this
    * curl_do_more() function will be called afterwards, if set. For example

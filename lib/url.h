@@ -35,7 +35,7 @@ CURLcode Curl_connect(struct SessionHandle *, struct connectdata **,
 CURLcode Curl_async_resolved(struct connectdata *conn);
 CURLcode Curl_do(struct connectdata **);
 CURLcode Curl_do_more(struct connectdata *);
-CURLcode Curl_done(struct connectdata *);
+CURLcode Curl_done(struct connectdata *, CURLcode);
 CURLcode Curl_disconnect(struct connectdata *);
 CURLcode Curl_protocol_connect(struct connectdata *conn);
 bool Curl_ssl_config_matches(struct ssl_config_data* data,

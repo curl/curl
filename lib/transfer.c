@@ -853,6 +853,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   *ptr = '\0';   /* zero terminate */
                   conn->newurl = strdup(start); /* clone string */
                   *ptr = backup; /* restore ending letter */
+                  if(!conn->newurl)
+                    return CURLE_OUT_OF_MEMORY;
                 }
               }
 #if 0 /* for consideration */
@@ -1967,7 +1969,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
          to the new URL */
       urlchanged = data->change.url_changed;
       if ((CURLE_OK == res) && urlchanged) {
-        res = Curl_done(conn);
+        res = Curl_done(conn, res);
         if(CURLE_OK == res) {
           char *gotourl = strdup(data->change.url);
           res = Curl_follow(data, gotourl);
@@ -2024,14 +2026,14 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
         /* Always run Curl_done(), even if some of the previous calls
            failed, but return the previous (original) error code */
-        res2 = Curl_done(conn);
+        res2 = Curl_done(conn, res);
 
         if(CURLE_OK == res)
           res = res2;
       }
       else
         /* Curl_do() failed, clean up left-overs in the done-call */
-        res2 = Curl_done(conn);
+        res2 = Curl_done(conn, res);
 
       /*
        * Important: 'conn' cannot be used here, since it may have been closed

@@ -329,7 +329,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         char *gotourl;
         Curl_posttransfer(easy->easy_handle);
 
-        easy->result = Curl_done(easy->easy_conn);
+        easy->result = Curl_done(easy->easy_conn, CURLE_OK);
         if(CURLE_OK == easy->result) {
           gotourl = strdup(easy->easy_handle->change.url);
           easy->easy_handle->change.url_changed = FALSE;
@@ -491,7 +491,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
             easy->easy_conn->sock[SECONDARYSOCKET]=-1;
           }
           Curl_posttransfer(easy->easy_handle);
-          Curl_done(easy->easy_conn);
+          Curl_done(easy->easy_conn, easy->result);
         }
 
         /* after the transfer is done, go DONE */
@@ -504,7 +504,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
           if(easy->easy_conn->newurl) {
             char *newurl = easy->easy_conn->newurl;
             easy->easy_conn->newurl = NULL;
-            easy->result = Curl_done(easy->easy_conn);
+            easy->result = Curl_done(easy->easy_conn, CURLE_OK);
             if(easy->result == CURLE_OK)
               easy->result = Curl_follow(easy->easy_handle, newurl);
             if(CURLE_OK == easy->result) {
@@ -520,7 +520,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         break;
       case CURLM_STATE_DONE:
         /* post-transfer command */
-        easy->result = Curl_done(easy->easy_conn);
+        easy->result = Curl_done(easy->easy_conn, CURLE_OK);
 
         /* after we have DONE what we're supposed to do, go COMPLETED, and
            it doesn't matter what the Curl_done() returned! */
