@@ -234,9 +234,6 @@
 
 #else
 
-/* MSVC needs an underscore */
-#define snprintf _snprintf
-
 #endif
 
 #endif
