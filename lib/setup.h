@@ -85,10 +85,10 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #endif
 
 #ifndef STDC_HEADERS /* no standard C headers! */
-#include "stdcheaders.h"
+#include "curl/stdcheaders.h"
 #else
 #ifdef _AIX
-#include "stdcheaders.h"
+#include "curl/stdcheaders.h"
 #endif
 #endif
 
