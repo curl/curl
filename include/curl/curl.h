@@ -563,14 +563,15 @@ typedef enum {
   /* Instruct libcurl to use a smaller receive buffer */
   CINIT(BUFFERSIZE, LONG, 98),
 
-  /* Instruct libcurl to never use any signal/alarm handlers, even with
-     timeouts. */
+  /* Instruct libcurl to not use any signal/alarm handlers, even when using
+     timeouts. This option is useful for multi-threaded applications.
+     See libcurl-the-guide for more background information. */
   CINIT(NOSIGNAL, LONG, 99),
   
   /* Provide a CURLShare for mutexing non-ts data */
   CINIT(SHARE, OBJECTPOINT, 100),
 
-  CURLOPT_LASTENTRY /* the last unusued */
+  CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
   /* two convenient "aliases" that follow the name scheme better */
