@@ -56,11 +56,10 @@ file instead of overwriting it. If the file doesn't exist, it will be created.
 
 If this option is used twice, the second one will disable append mode again.
 .IP "-A/--user-agent <agent string>"
-(HTTP)
-Specify the User-Agent string to send to the HTTP server. Some badly done CGIs
-fail if its not set to "Mozilla/4.0".  To encode blanks in the string,
-surround the string with single quote marks.  This can also be set with the
--H/--header flag of course.
+(HTTP) Specify the User-Agent string to send to the HTTP server. Some badly
+done CGIs fail if its not set to "Mozilla/4.0".  To encode blanks in the
+string, surround the string with single quote marks.  This can also be set
+with the \fI-H/--header\fP option of course.
 
 If this option is set more than once, the last one will be the one that's
 used.
@@ -84,14 +83,14 @@ If no '=' letter is used in the line, it is treated as a filename to use to
 read previously stored cookie lines from, which should be used in this session
 if they match. Using this method also activates the "cookie parser" which will
 make curl record incoming cookies too, which may be handy if you're using this
-in combination with the -L/--location option. The file format of the file to
-read cookies from should be plain HTTP headers or the Netscape/Mozilla cookie
-file format.
+in combination with the \fI-L/--location\fP option. The file format of the
+file to read cookies from should be plain HTTP headers or the Netscape/Mozilla
+cookie file format.
 
-.B NOTE
-that the file specified with -b/--cookie is only used as input. No cookies
-will be stored in the file. To store cookies, use the -c/--cookie-jar option
-or you could even save the HTTP headers to a file using -D/--dump-header!
+\fBNOTE\fP that the file specified with \fI-b/--cookie\fP is only used as
+input. No cookies will be stored in the file. To store cookies, use the
+\fI-c/--cookie-jar\fP option or you could even save the HTTP headers to a file
+using \fI-D/--dump-header\fP!
 
 If this option is set more than once, the last one will be the one that's
 used.
@@ -167,7 +166,7 @@ button. Note that the data is sent exactly as specified with no extra
 processing (with all newlines cut off).  The data is expected to be
 \&"url-encoded". This will cause curl to pass the data to the server using the
 content-type application/x-www-form-urlencoded. Compare to -F. If more than
-one -d/--data option is used on the same command line, the data pieces
+one \fI-d/--data\fP option is used on the same command line, the data pieces
 specified will be merged together with a separating &-letter. Thus, using '-d
 name=daniel -d skill=lousy' would generate a post chunk that looks like
 \&'name=daniel&skill=lousy'.
@@ -176,7 +175,7 @@ If you start the data with the letter @, the rest should be a file name to
 read the data from, or - if you want curl to read the data from stdin.  The
 contents of the file must already be url-encoded. Multiple files can also be
 specified. Posting data from a file named 'foobar' would thus be done with
-\&"--data @foobar".
+\fI--data\fP @foobar".
 
 To post data purely binary, you should instead use the \fI--data-binary\fP
 option.
@@ -227,8 +226,8 @@ Write the protocol headers to the specified file.
 
 This option is handy to use when you want to store the headers that a HTTP
 site sends to you. Cookies from the headers could then be read in a second
-curl invoke by using the -b/--cookie option! The -c/--cookie-jar option is
-however a better way to store cookies.
+curl invoke by using the \fI-b/--cookie\fP option! The \fI-c/--cookie-jar\fP
+option is however a better way to store cookies.
 
 When used on FTP, the ftp server response lines are considered being "headers"
 and thus are saved there.
@@ -236,7 +235,7 @@ and thus are saved there.
 If this option is used several times, the last one will be used.
 .IP "-e/--referer <URL>"
 (HTTP) Sends the "Referer Page" information to the HTTP server. This can also
-be set with the -H/--header flag of course.  When used with
+be set with the \fI-H/--header\fP flag of course.  When used with
 \fI-L/--location\fP you can append ";auto" to the referer URL to make curl
 automatically set the previous URL when it follows a Location: header. The
 ";auto" string can be used alone, even if you don't set an initial referer.
@@ -278,9 +277,10 @@ If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
 (HTTPS) Tells curl to use the specified certificate directory to verify the
 peer. The certificates must be in PEM format, and the directory must have been
-processed using the c_rehash utility supplied with openssl. Using --capath can
-allow curl to make https connections much more efficiently than using --cacert
-if the --cacert file contains many CA certificates.
+processed using the c_rehash utility supplied with openssl. Using
+\fI--capath\fP can allow curl to make https connections much more efficiently
+than using \fI--cacert\fP if the \fI--cacert\fP file contains many CA
+certificates.
 
 If this option is used several times, the last one will be used.
 .IP "-f/--fail"
@@ -330,10 +330,10 @@ you can specify URLs that contain the letters {}[] without having them being
 interpreted by curl itself. Note that these letters are not normal legal URL
 contents but they should be encoded according to the URI standard.
 .IP "-G/--get"
-When used, this option will make all data specified with -d/--data or
---data-binary to be used in a HTTP GET request instead of the POST request
-that otherwise would be used. The data will be appended to the URL with a '?'
-separator.
+When used, this option will make all data specified with \fI-d/--data\fP or
+\fI--data-binary\fP to be used in a HTTP GET request instead of the POST
+request that otherwise would be used. The data will be appended to the URL
+with a '?'  separator.
 
 If used in combination with -I, the POST data will instead be appended to the
 URL with a HEAD request.
@@ -351,6 +351,8 @@ set headers without knowing perfectly well what you're doing. Replacing an
 internal header with one without content on the right side of the colon will
 prevent that header from appearing.
 
+See also the \fI-A/--user-agent\fP and \fI-e/--referer\fP options.
+
 This option can be used multiple times to add/replace/remove multiple headers.
 .IP "-i/--include"
 (HTTP)
@@ -362,7 +364,7 @@ If this option is used twice, the second will again disable header include.
 Perform an operation using a specified interface. You can enter interface
 name, IP address or host name. An example could look like:
 
-.B "curl --interface eth0:1 http://www.netscape.com/"
+ curl --interface eth0:1 http://www.netscape.com/
 
 If this option is used several times, the last one will be used.
 .IP "-I/--head"
@@ -385,9 +387,7 @@ If this option is used several times, each occurrence will toggle this on/off.
 and transfers. Starting with curl 7.10, all SSL connections will be attempted
 to be made secure by using the CA certificate bundle installed by
 default. This makes all connections considered "insecure" to fail unless
--k/--insecure is used.
-
-This option is ignored if --cacert or --capath is used!
+\fI-k/--insecure\fP is used.
 
 If this option is used twice, the second time will again disable it.
 .IP "--krb4 <level>"
@@ -408,7 +408,7 @@ treated as a comment.
 Specify the filename as '-' to make curl read the file from stdin.
 
 Note that to be able to specify a URL in the config file, you need to specify
-it using the --url option, and not by simply writing the URL on its own
+it using the \fI--url\fP option, and not by simply writing the URL on its own
 line. So, it could look similar to this:
 
 url = "http://curl.haxx.se/docs/"
