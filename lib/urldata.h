@@ -240,26 +240,27 @@ struct FTP {
 struct Configbits {
   bool ftp_append;
   bool ftp_ascii;
-  bool http_post;
-  bool http_set_referer;
+  bool ftp_list_only;
+  bool ftp_use_port;
+  bool hide_progress;
   bool http_fail_on_error;
+  bool http_follow_location;
   bool http_formpost;
   bool http_include_header;
-  bool http_follow_location;
+  bool http_post;
   bool http_put;
+  bool http_set_referer;
+  bool httpproxy;
+  bool mute;
   bool no_body;
-  bool ftp_list_only;
-  bool use_netrc;
-  bool ftp_use_port;
+  bool proxy_user_passwd;
+  bool proxystringalloc; /* the http proxy string is malloc()'ed */
   bool set_port;
   bool set_range;
-  bool mute;
-  bool hide_progress;
   bool upload;
+  bool use_netrc;
   bool user_passwd;
-  bool proxy_user_passwd;
   bool verbose;
-  bool httpproxy;
 };
 
 typedef size_t (*progress_callback)(void *clientp,

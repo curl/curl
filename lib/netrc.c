@@ -95,8 +95,13 @@ int ParseNetrc(char *host,
 
 #define NETRC DOT_CHAR "netrc"
 
-  if(!home || (strlen(home)>(sizeof(netrcbuffer)-strlen(NETRC))))
+  if(!home)
     return -1;
+
+  if(strlen(home)>(sizeof(netrcbuffer)-strlen(NETRC))) {
+    free(home);
+    return -1;
+  }
 
   sprintf(netrcbuffer, "%s%s%s", home, DIR_CHAR, NETRC);
 
@@ -161,6 +166,8 @@ int ParseNetrc(char *host,
 
     fclose(file);
   }
+
+  free(home);
 
   return retcode;
 }

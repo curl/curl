@@ -39,6 +39,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef WIN32
 #include <windows.h>
@@ -48,7 +49,7 @@ char *GetEnv(char *variable)
 {
 #ifdef WIN32
   /* This shit requires windows.h (HUGE) to be included */
-  static char env[MAX_PATH]; /* MAX_PATH is from windef.h */
+  char env[MAX_PATH]; /* MAX_PATH is from windef.h */
   char *temp = getenv(variable);
   env[0] = '\0';
   ExpandEnvironmentStrings(temp, env, sizeof(env));
@@ -56,7 +57,7 @@ char *GetEnv(char *variable)
   /* no length control */
   char *env = getenv(variable);
 #endif
-  return env;
+  return env?strdup(env):NULL;
 }
 
 char *curl_GetEnv(char *v)

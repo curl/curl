@@ -172,6 +172,12 @@ void urlfree(struct UrlData *data, bool totally)
     data->firstsocket=-1;
   }
 
+  if(data->bits.proxystringalloc) {
+    data->bits.proxystringalloc=0;
+    free(data->proxy);
+    data->proxy=NULL;
+  }
+  
 
   if(data->ptr_proxyuserpwd) {
     free(data->ptr_proxyuserpwd);
@@ -815,10 +821,13 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
         if(proxy && *proxy) {
           /* we have a proxy here to set */
           data->proxy = proxy;
+          data->bits.proxystringalloc=1; /* this needs to be freed later */
           data->bits.httpproxy=1;
         }
       } /* if (!nope) - it wasn't specfied non-proxy */
     } /* NO_PROXY wasn't specified or '*' */
+    if(no_proxy)
+      free(no_proxy);
   } /* if not using proxy */
 
   if((conn->protocol&PROT_MISSING) && data->bits.httpproxy ) {
