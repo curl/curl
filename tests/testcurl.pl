@@ -34,9 +34,7 @@
 # curl site, at http://curl.haxx.se/auto/
 
 # USAGE:
-# testcurl.pl [curl-daily-name] > output
-# or:
-# testcurl.pl --target=your_os > output
+# testcurl.pl [--target=your_os] [curl-daily-name] > output
 
 # Updated:
 # v1.7 22-Jun-04 - added --target option for other platform targets.
@@ -54,21 +52,25 @@ BEGIN { $^W = 1; }
 
 use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog
             $buildlogname $gnulikebuild $targetos $confsuffix $binext);
-use vars qw($name $email $desc $confopts);
+use vars qw($name $email $desc $confopts $setupfile);
 
 # version of this script
 $version='$Revision$';
 $fixed=0;
 
 # Determine if we're running from CVS or a canned copy of curl,
-# or if we got a specific target option
+# or if we got a specific target option or setup file option.
 $CURLDIR="curl";
 $CVS=1;
-if (@ARGV && $ARGV[0]) {
+$targetos = '';
+$setupfile = 'setup';
+while ($ARGV[0]) {
   if ($ARGV[0] =~ /--target=/) {
-    $targetos = (split(/=/, $ARGV[0]))[1];
+    $targetos = (split(/=/, shift @ARGV))[1];
+  } elsif ($ARGV[0] =~ /--setup=/) {
+    $setupfile = (split(/=/, shift @ARGV))[1];
   } else {
-    $CURLDIR=$ARGV[0];
+    $CURLDIR=shift @ARGV;
     $CVS=0;
   }
 }
@@ -77,9 +79,9 @@ if (@ARGV && $ARGV[0]) {
 $gnulikebuild = 1;
 $confsuffix = '';
 $binext = '';
-if ($^O eq 'MSWin32' || defined($targetos)) {
+if ($^O eq 'MSWin32' || $targetos ne '') {
   $gnulikebuild = 0;
-  if (!defined($targetos)) {
+  if ($targetos eq '') {
     # If no target defined on Win32 lets assume vc
     $targetos = 'vc';
   }
@@ -145,7 +147,7 @@ sub mydie($){
     exit 1;
 }
 
-if (open(F, "setup")) {
+if (open(F, "$setupfile")) {
   while (<F>) {
     if (/(\w+)=(.*)/) {
       eval "\$$1=$2;";
@@ -190,12 +192,13 @@ if (!$confopts) {
 
 
 if ($fixed > 0) {
-  open(F, ">setup") or die;
+  open(F, ">$setupfile") or die;
   print F "name='$name'\n";
   print F "email='$email'\n";
   print F "desc='$desc'\n";
   print F "confopts='$confopts'\n";
   print F "fixed='$fixed'\n";
+  close(F);
 }
 
 logit "STARTING HERE"; # first line logged
@@ -215,15 +218,15 @@ $pwd = cwd();
 
 if (-d $CURLDIR) {
   if ($CVS && -d "$CURLDIR/CVS") {
-    logit "curl is verified to be a fine source dir";
+    logit "$CURLDIR is verified to be a fine source dir";
     # remove the generated sources to force them to be re-generated each
     # time we run this test
     unlink "$CURLDIR/lib/getdate.c";
     unlink "$CURLDIR/src/hugehelp.c";
   } elsif (!$CVS && -f "$CURLDIR/tests/testcurl.pl") {
-    logit "curl is verified to be a fine daily source dir"
+    logit "$CURLDIR is verified to be a fine daily source dir"
   } else {
-    mydie "curl is not a daily source dir or checked out from CVS!"
+    mydie "$CURLDIR is not a daily source dir or checked out from CVS!"
   }
 }
 $build="build-$$";
@@ -412,7 +415,7 @@ if (-f "src/curl$binext") {
   mydie "src/curl was not created (curl$binext)";
 }
 
-if (defined($targetos) && $targetos =~ /netware/) {
+if ($targetos ne '' && $targetos =~ /netware/) {
   #system('../../curlver.sh');
 } else {
 logit "display curl$binext --version output";
