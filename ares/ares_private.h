@@ -55,6 +55,11 @@
 
 #define PATH_RESOLV_CONF "/dev/ENV/etc/resolv.conf"
 
+#elif defined(NETWARE)
+
+#define PATH_RESOLV_CONF "sys:/etc/resolv.cfg"
+#define PATH_HOSTS		"sys:/etc/hosts"
+
 #else
 
 #define PATH_RESOLV_CONF	"/etc/resolv.conf"
