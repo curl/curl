@@ -695,15 +695,15 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
          dnl -Wcast-align is a bit too annoying on all gcc versions ;-)
 
          if test "$gccnum" -ge "207"; then
-           dnl gcc 2.7 or later (well, they don't work on 2.2.2)
-           WARN="$WARN -Wno-long-long -Wmissing-declarations -Wsign-compare"
+           dnl gcc 2.7 or later
+           WARN="$WARN -Wmissing-declarations"
          fi
 
          if test "$gccnum" -gt "295"; then
            dnl only if the compiler is newer than 2.95 since we got lots of
            dnl "`_POSIX_C_SOURCE' is not defined" in system headers with
            dnl gcc 2.95.4 on FreeBSD 4.9!
-           WARN="$WARN -Wundef"
+           WARN="$WARN -Wundef -Wno-long-long -Wsign-compare"
          fi
 
          if test "$gccnum" -ge "296"; then
