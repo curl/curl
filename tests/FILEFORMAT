@@ -78,6 +78,7 @@ to be able to run. Features testable here are:
 SSL
 netrc_debug
 large_file
+idn
 </features>
 
 <killserver>
@@ -101,7 +102,7 @@ variable1=contents1
 variable2=contents2
 
 Set the given environment variables to the specified value before the actual
-command is run, they are clear again after the command has been run.
+command is run, they are cleared again after the command has been run.
 </setenv>
 
 <command [option=no-output]>
