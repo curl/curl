@@ -7,6 +7,16 @@
                                   Changelog
 
 
+Daniel (13 January 2005)
+- Inspired by Martijn Koster's patch and example source at
+  http://www.greenhills.co.uk/mak/gentoo/curl-eintr-bug.c, I now made the
+  select() and poll() calls properly loop if they return -1 and errno is
+  EINTR. glibc docs for this is found here:
+  http://www.gnu.org/software/libc/manual/html_node/Interrupted-Primitives.html
+
+  This last link says BSD doesn't have this "effect". Will there be a problem
+  if we do this unconditionally?
+
 Daniel (11 January 2005)
 - Dan Torop cleaned up a few no longer used variables from David Phillips'
   select() overhaul fix.

@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o re-invoke some system calls on EINTR
  o duplicate Host: when failed connection re-use
  o SOCKS5 version check
  o memory problem with cleaning up multi interface
@@ -36,6 +37,7 @@ advice from friends like these:
 
  Dan Fandrich, Peter Pentchev, Marcin Konicki, Rune Kleveland, David Shaw,
  Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt,
- Hzhijun, Pavel Orehov, Bruce Mitchener, Cyrill Osterwalder, Dan Torop
+ Hzhijun, Pavel Orehov, Bruce Mitchener, Cyrill Osterwalder, Dan Torop,
+ Martijn Koster
 
         Thanks! (and sorry if I forgot to mention someone)

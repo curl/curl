@@ -23,6 +23,8 @@
 
 #include "setup.h"
 
+#include <errno.h>
+
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -80,7 +82,9 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
     num++;
   }
 
-  r = poll(pfd, num, timeout_ms);
+  do {
+    r = poll(pfd, num, timeout_ms);
+  } while((r == -1) && (errno == EINTR));
 
   if (r < 0)
     return -1;
@@ -142,7 +146,9 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
       maxfd = writefd;
   }
 
-  r = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
+  do {
+    r = select(maxfd + 1, &fds_read, &fds_write, &fds_err, &timeout);
+  } while((r == -1) && (errno == EINTR));
 
   if (r < 0)
     return -1;
@@ -179,8 +185,11 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
  */
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
 {
+  int r;
 #ifdef HAVE_POLL_FINE
-    return poll(ufds, nfds, timeout_ms);
+  do {
+    r = poll(ufds, nfds, timeout_ms);
+  } while((r == -1) && (errno == EINTR));
 #else
   struct timeval timeout;
   struct timeval *ptimeout;
@@ -188,7 +197,6 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
   fd_set fds_write;
   fd_set fds_err;
   curl_socket_t maxfd;
-  int r;
   unsigned int i;
 
   FD_ZERO(&fds_read);
@@ -223,7 +231,9 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     ptimeout = &timeout;
   }
 
-  r = select(maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
+  do {
+    r = select(maxfd + 1, &fds_read, &fds_write, &fds_err, ptimeout);
+  } while((r == -1) && (errno == EINTR));
 
   if (r < 0)
     return -1;
@@ -244,7 +254,6 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, int timeout_ms)
     if (ufds[i].revents != 0)
       r++;
   }
-
-  return r;
 #endif
+  return r;
 }
