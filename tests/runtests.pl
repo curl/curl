@@ -1599,7 +1599,7 @@ do {
     }
     elsif ($ARGV[0] eq "-c") {
         # use this path to curl instead of default
-        $CURL=$ARGV[1];
+        $DBGCURL=$CURL=$ARGV[1];
         shift @ARGV;
     }
     elsif ($ARGV[0] eq "-d") {
