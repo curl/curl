@@ -723,6 +723,7 @@ sub subVariables {
   my ($thing) = @_;
   $$thing =~ s/%HOSTIP/$HOSTIP/g;
   $$thing =~ s/%HOSTPORT/$HOSTPORT/g;
+  $$thing =~ s/%HTTPPORT/$HOSTPORT/g;
   $$thing =~ s/%HTTPSPORT/$HTTPSPORT/g;
   $$thing =~ s/%FTPPORT/$FTPPORT/g;
   $$thing =~ s/%FTPSPORT/$FTPSPORT/g;
