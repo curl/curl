@@ -21,7 +21,7 @@ endif
 # we use srcdir/lib for the lib-private header files
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/lib -I$(top_srcdir)/lib $(ARESINC)
 
-LDFLAGS = -L$(top_srcdir)/lib
+LDFLAGS += -L$(top_srcdir)/lib
 
 VERSION=-version-info 2:2:0
 
