@@ -35,6 +35,13 @@ To get fixed in 7.11.1 (planned release in March 2004)
 24. When using ares, create the ares channel in the curl_easy_init function
     and re-use the same channel during the life time of the curl handle.
 
+25. Curl_strtoll() is not part of the libcurl API, yet 'curl' needs a function
+    like this. We need to sort out how to deal with it. I really don't like
+    adding non-transfer related functions to the API. Is there a downside with
+    putting such files in a common dir for functions/code that can be used by
+    both the lib and the client code? Other functions that could be treated
+    the same way include the *printf and the string comparison functions etc.
+
 To get fixed in 7.11.2 (planned release May/June 2004)
 ======================
 
