@@ -1654,7 +1654,8 @@ operate(struct Configurable *config, int argc, char *argv[])
       httpgetfields = strdup(config->postfields);
       free(config->postfields);
       config->postfields = NULL;
-      if(SetHTTPrequest(HTTPREQ_GET, &config->httpreq)) {
+      if(SetHTTPrequest((config->conf&CONF_NOBODY?HTTPREQ_HEAD:HTTPREQ_GET),
+                        &config->httpreq)) {
         free(httpgetfields);
         return PARAM_BAD_USE;
       }
@@ -1858,12 +1859,22 @@ operate(struct Configurable *config, int argc, char *argv[])
       if (httpgetfields) {
         /* Find out whether the url contains a file name */
         char *pc =strstr(url, "://");
+        char separator='?';
         if(pc)
           pc+=3;
         else
           pc=url;
-        pc = strrchr(pc, '/');
 
+        pc = strrchr(pc, '/'); /* check for a slash */
+
+        if(pc) {
+          /* there is a slash present in the URL */
+
+          if(strchr(pc, '?'))
+          /* Ouch, there's already a question mark in the URL string, we
+             then appead the data with an amperand separator instead! */
+            separator='&';
+        }
         /*
          * Then append ? followed by the get fields to the url.
          */
@@ -1872,12 +1883,12 @@ operate(struct Configurable *config, int argc, char *argv[])
           helpf("out of memory\n");
           return CURLE_OUT_OF_MEMORY;
         }
-        /* Append  / before the ? to create a well-formed url
-           if the url contains a hostname only
-        */
         if (pc)
-          sprintf(urlbuffer, "%s?%s", url, httpgetfields);
+          sprintf(urlbuffer, "%s%c%s", url, separator, httpgetfields);
         else
+          /* Append  / before the ? to create a well-formed url
+             if the url contains a hostname only
+          */
           sprintf(urlbuffer, "%s/?%s", url, httpgetfields);
  
         free(url); /* free previous URL */
