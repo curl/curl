@@ -179,7 +179,7 @@ static BOOL dprintf_IsQualifierNoDollar(char c)
   case '-': case '+': case ' ': case '#': case '.':
   case '0': case '1': case '2': case '3': case '4':
   case '5': case '6': case '7': case '8': case '9':
-  case 'h': case 'l': case 'L': case 'Z': case 'q':
+  case 'h': case 'l': case 'L': case 'z': case 'q':
   case '*': case 'O':
     return TRUE;
   default:
@@ -383,14 +383,15 @@ static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list a
 	case 'q':
 	  flags |= FLAGS_LONGLONG;
 	  break;
-#if 0
-	case 'Z':
-	  if (sizeof(size_t) > sizeof(unsigned long int))
+	case 'z':
+          /* the code below generates a warning if -Wunreachable-code is
+             used */
+	  if (sizeof(size_t) > sizeof(unsigned long))
 	    flags |= FLAGS_LONGLONG;
 	  if (sizeof(size_t) > sizeof(unsigned int))
 	    flags |= FLAGS_LONG;
 	  break;
-#endif
+
 	case 'O':
 #if SIZEOF_CURL_OFF_T > 4
           flags |= FLAGS_LONGLONG;
