@@ -3,6 +3,15 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+21. FTP ASCII transfers do not follow RFC959. They don't convert the data
+   accordingly (not for sending nor for receiving). RFC 959 section 3.1.1.1
+   clearly describes how this should be done:
+
+     The sender converts the data from an internal character representation to
+     the standard 8-bit NVT-ASCII representation (see the Telnet
+     specification).  The receiver will convert the data from the standard
+     form to his own internal form.
+
 20. valgrind errors occur too often when 'make test' is used. It is because
   too many third-party libs and tools have problems. When curl is built
   without --disable-shared, the testing is done with a front-end script which
