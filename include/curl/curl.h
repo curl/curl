@@ -795,7 +795,6 @@ typedef enum {
 
 #else
 /* This is set if CURL_NO_OLDIES is defined at compile-time */
-#define curl_formparse "curl_formparse is obsolete"
 #undef CURLOPT_DNS_USE_GLOBAL_CACHE /* soon obsolete */
 #endif
 
@@ -852,13 +851,6 @@ typedef enum {
    libcurl, see lib/README.curlx for details */
 extern int (curl_strequal)(const char *s1, const char *s2);
 extern int (curl_strnequal)(const char *s1, const char *s2, size_t n);
-
-#ifdef CURL_OLDSTYLE
-/* DEPRECATED function to build formdata. Stop using this, it will cease
-   to exist. */
-int curl_formparse(char *, struct curl_httppost **,
-                   struct curl_httppost **_post);
-#endif
 
 /* name is uppercase CURLFORM_<name> */
 #ifdef CFINIT

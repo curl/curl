@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o general HTTP authentication improvements
  o HTTP Digest authentication with the proxy works
  o mulipart formposting with -F and file names with spaces work again
  o curl_easy_duphandle() now works when ares-enabled

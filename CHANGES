@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (4 May 2004)
+- curl_formparse() has been removed from the library. It has been marked and
+  mentioned as deprecated for several years.
+
 Daniel (3 May 2004)
 - Rewritten HTTP authentication code. The previous code could not properly
   deal with the added test cases 167, 168 and 169. I've now rewritten the code

@@ -201,8 +201,6 @@ TODO
  * curl_easy_cleanup() returns void, but curl_multi_cleanup() returns a
    CURLMcode. These should be changed to be the same.
 
- * curl_formparse() should be removed
-
  * remove obsolete defines from curl/curl.h
 
  * remove the following functions from the public API:
