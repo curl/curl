@@ -21,7 +21,7 @@ http
 idn
 </features>
 <setenv>
-CHARSET=ISO-8859-1
+CHARSET=ISO8859-1
 </setenv>
  <name>
 HTTP over proxy with IDN host name
