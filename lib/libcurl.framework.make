@@ -1,17 +1,8 @@
-#
-# libcurl.framework.make is the make file.  There are comments about unique
-# Mac OS X things if you want to read.  It can be built by calling:
-# "make build -e -f libcurl.framework.make"
-#
-# The libcurl.plist is a basically the resource bit of the framework on Mac OS
-# X.  It is a simple XML file so you can open this to see what it is.
-# Version, name, etc.
-#
-
 TMP_DIR = ../lib/.lib
 LIB_DIR = ../lib
 
-# for debug symbols add the -g option
+# for debug symbols add the -g option.  Remove the -O2 option for best debuggin.
+# Can be compiled with -O3 optimizations.
 C_OPTIONS = \
 	-fno-common \
 	-O2 \
@@ -22,13 +13,26 @@ C_OPTIONS = \
 	-Wall
 
 # The 2 -framework tags are the needed Mac OS X sytem libs
-LIBRARIES = -framework CoreFoundation -framework CoreServices -lssl -lcrypto -lz 
+# must link to version 0.9 of libssl to run on Mac OS X 10.2.  10.1 is not tested but should work.
+LIBRARIES = -framework CoreFoundation \
+	-framework CoreServices \
+	/usr/lib/libssl.dylib \
+	/usr/lib/libcrypto.dylib \
+	-lz 
 
 # These libtool options are needed for a framework.
 # @executable_path tells the application that links to this library where to find it.
-# On Mac OS X we usually put frameworks iniside the application bundle in a frameworks folder.
-LINK_OPTIONS = -prebind -dynamiclib -install_name @executable_path/../frameworks/libcurl.framework/libcurl
+# On Mac OS X frameworks are usually iniside the application bundle in a frameworks folder.
+# Define a seg1addr so prebinding does not overlap with other frameworks or bundles.
+# For prebinding 0x10400000 was chosen a bit at random.  
+# If this overlaps one of you current libs just change in the makefile. 
+# This address is safe for all built in frameworks.  
+LINK_OPTIONS = -prebind \
+	-seg1addr 0x10400000 \
+	-dynamiclib \
+	-install_name @executable_path/../frameworks/libcurl.framework/libcurl
 
+# This is the file list.  It is not dynamically generated so this must be updated if new files are added to the build.
 OBJECTS = $(TMP_DIR)/base64.o \
 	$(TMP_DIR)/connect.o \
 	$(TMP_DIR)/content_encoding.o \
