@@ -6,6 +6,49 @@
 
                                History of Changes
 
+Daniel (28 August 2001)
+- Georg Huettenegger modified the curl_formadd() functionality slightly, and
+  added support for error code 417 when doing form post and using the Expect:
+  header. Great work!
+
+- Made some tests with cached SSL session IDs, and they seem to work. There
+  should be a significant speed improvement in the SSL connection phase, but
+  in my tiny tests it just isn't possible to notice any difference.
+
+- Upgraded to automake 1.5 on my development/release machine.
+
+Daniel (27 August 2001)
+- Slowly started writing SSL session ID caching code
+
+Daniel (24 August 2001)
+- T. Bharath removed compiler warnings on windows and updated the MS project
+  files.
+
+- Kevin Roth reported two kinds of command line constructs with the new -G that
+  curl didn't really deal with the way one would like.
+
+- Tim Costello patched away a use of strcasecmp() in the SSL code. We have our
+  own portable version named strequal() that should be used!
+
+- Tim also pointed out a problem in the lib/Makefile.vc6 file that made it mix
+  debug object modules causing confusions.
+
+Daniel (23 August 2001)
+- T. Bharath accurately found a libcurl bug that would happen when doing a
+  second invoke of curl_easy_perform() with a new URL when the previous invoke
+  followed a Location: header.
+
+- Started the improvement work on the cookie engine:
+  - Now keeps cookies in the same order as the cookie file
+  - A write to the possibly static string was removed
+  - Added a function that can output all cookies
+  - Now supports reading multiple cookie files
+
+- Steve Lhomme corrected a DLL naming issue in the MSVC++ project file.
+
+- Split up the monster function in lib/ftp.c to use more smallish functions to
+  increase readability and maintainability.
+
 Daniel (21 August 2001)
 - Georg Huettenegger's big patch was applied. Now we have:
   o "Expect: 100-continue" support. We will from now on send that header in
