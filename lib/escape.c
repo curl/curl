@@ -48,6 +48,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 char *curl_escape(char *string)
 {
    int alloc=strlen(string)+1;

@@ -61,6 +61,10 @@
 #include "security.h"
 #include <string.h>
 #endif
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
 
 /* infof() is for info message along the way */
 

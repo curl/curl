@@ -126,6 +126,10 @@
 #ifdef KRB4
 #include "security.h"
 #endif
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
 
 /* -- -- */
 

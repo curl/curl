@@ -47,6 +47,11 @@
 #include <string.h>
 #include <krb.h>
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 #ifdef FTP_SERVER
 #define LOCAL_ADDR ctrl_addr
 #define REMOTE_ADDR his_addr

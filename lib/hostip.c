@@ -72,6 +72,11 @@
 #include "inet_ntoa_r.h"
 #endif
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 /* --- resolve name or IP-number --- */
 
 char *MakeIP(unsigned long num,char *addr, int addr_len)

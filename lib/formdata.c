@@ -63,6 +63,11 @@
 
 #include "strequal.h"
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 /* Length of the random boundary string. The risk of this being used
    in binary data is very close to zero, 64^32 makes
    6277101735386680763835789423207666416102355444464034512896

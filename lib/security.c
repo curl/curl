@@ -47,6 +47,10 @@
 #include <string.h>
 #include <netdb.h>
 #include "base64.h"
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
 
 #define min(a, b)   ((a) < (b) ? (a) : (b))
 

@@ -89,6 +89,10 @@
 #ifdef KRB4
 #include "security.h"
 #endif
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
 
 /* returns last node in linked list */
 static struct curl_slist *slist_get_last(struct curl_slist *list)
@@ -1178,7 +1182,7 @@ CURLcode _ftp(struct connectdata *conn)
     else {
       /* Set type to binary (unless specified ASCII) */
       ftpsendf(data->firstsocket, conn, "TYPE %s",
-            (data->bits.ftp_list_only)?"A":"I");
+               (data->bits.ftp_ascii)?"A":"I");
 
       nread = GetLastResponse(data->firstsocket, buf, conn);
       if(nread < 0)

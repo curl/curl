@@ -65,6 +65,11 @@ Example set of cookies:
 #include "getdate.h"
 #include "strequal.h"
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 /****************************************************************************
  *
  * cookie_add()
@@ -496,6 +501,7 @@ void cookie_cleanup(struct CookieInfo *c)
 	 free(co);
 	 co = next;
       }
+      free(c); /* free the base struct as well */
    }
 }
 

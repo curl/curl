@@ -45,6 +45,10 @@
 #include <windows.h>
 #endif
 
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 char *GetEnv(char *variable)
 {
 #ifdef WIN32
