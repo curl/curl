@@ -785,6 +785,16 @@ Curl_SSLConnect(struct connectdata *conn)
     failf(data, "SSL: couldn't create a context!");
     return CURLE_OUT_OF_MEMORY;
   }
+
+  /* OpenSSL contains code to work-around lots of bugs and flaws in various
+     SSL-implementations. SSL_CTX_set_options() is used to enabled those
+     work-arounds. The man page for this option states that SSL_OP_ALL enables
+     ll the work-arounds and that "It is usually safe to use SSL_OP_ALL to
+     enable the bug workaround options if compatibility with somewhat broken
+     implementations is desired."
+
+  */
+  SSL_CTX_set_options(conn->ssl.ctx, SSL_OP_ALL);
     
   if(data->set.cert) {
     if (!cert_stuff(conn,
