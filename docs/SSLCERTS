@@ -20,19 +20,32 @@ server, do one of the following:
  1. Tell libcurl to *not* verify the peer. With libcurl you disable with with
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
 
-    With the curl command tool, you disable this with -k/--insecure.
+    With the curl command line tool, you disable this with -k/--insecure.
 
  2. Get a CA certificate that can verify the remote server and use the proper
     option to point out this CA cert for verification when connecting. For
     libcurl hackers: curl_easy_setopt(curl, CURLOPT_CAPATH, capath);
 
-    With the curl command tool: --cacert [file]
+    With the curl command line tool: --cacert [file]
 
  3. Add the CA cert for your server to the existing default CA cert bundle.
     The default path of the CA bundle installed with the curl package is:
     /usr/local/share/curl/curl-ca-bundle.crt, which can be changed by running
     configure with the --with-ca-bundle option pointing out the path of your
     choice.
+
+    If you're using the curl command line tool, you can specify your own CA
+    cert path by setting the environment variable CURL_CA_BUNDLE to the path
+    of your choice.
+
+    If you're using the curl command line toll on Windows, curl will search
+    for a CA cert file named "curl-ca-bundle.crt" in these directories and in
+    this order:
+      1. application's directory
+      2. current working directory
+      3. Windows System directory (e.g. C:\windows\system32)
+      4. Windows Directory (e.g. C:\windows)
+      5. all directories along %PATH%
 
 Neglecting to use one of the above menthods when dealing with a server using a
 certficate that isn't signed by one of the certficates in the installed CA
@@ -45,4 +58,3 @@ trouble for some users, since it adds security to a majority of the SSL
 connections that previously weren't really secure. It turned out many people
 were using previous versions of curl/libcurl without realizing the need for
 the CA cert options to get truly secure SSL connections.
-
