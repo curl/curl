@@ -168,6 +168,8 @@ echo "buildconf: running aclocal hack to convert all mv to mv -f"
 perl -i.bak -pe 's/\bmv +([^-\s])/mv -f $1/g' aclocal.m4
 echo "buildconf: running autoheader"
 ${AUTOHEADER:-autoheader} || die "The autoheader command failed"
+echo "buildconf: cp lib/config.h.in src/config.h.in"
+cp lib/config.h.in src/config.h.in
 echo "buildconf: running autoconf"
 ${AUTOCONF:-autoconf}     || die "The autoconf command failed"
 
