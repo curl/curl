@@ -46,9 +46,20 @@ struct Curl_dns_entry {
 #endif
 };
 
+/*
+ * Curl_resolv() returns an entry with the info for the specified host
+ * and port.
+ *
+ * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
+ * use, or we'll leak memory!
+ */
+
 struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
                                    char *hostname,
                                    int port);
+
+/* unlock a previously resolved dns entry */
+#define Curl_resolv_unlock(dns) dns->inuse--
 
 /* for debugging purposes only: */
 void Curl_scan_cache_used(void *user, void *ptr);

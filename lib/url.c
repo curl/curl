@@ -1500,7 +1500,7 @@ static int handleSock5Proxy(
       socksreq[6] = ((char*)hp->h_addr_list[0])[2];
       socksreq[7] = ((char*)hp->h_addr_list[0])[3];
 
-      dns->inuse--; /* not used anymore from now on */
+      Curl_resolv_unlock(dns); /* not used anymore from now on */
     }
     else {
       failf(conn->data, "Failed to resolve \"%s\" for SOCKS5 connect.",
@@ -2852,7 +2852,7 @@ CURLcode Curl_done(struct connectdata *conn)
   }
 
   if(conn->connect_addr)
-    conn->connect_addr->inuse--; /* done with this */
+    Curl_resolv_unlock(conn->connect_addr); /* done with this */
 
 #ifdef MALLOCDEBUG
   /* scan for DNS cache entries still marked as in use */

@@ -249,8 +249,8 @@ static CURLcode bindlocal(struct connectdata *conn,
       if ( h ) {
         Curl_addrinfo *addr = h->addr;
 
-        h->inuse--; /* decrease the use-counter, we don't need it anymore
-                       after this function has returned */
+        Curl_resolv_unlock(h);
+        /* we don't need it anymore after this function has returned */
 
         memset((char *)&sa, 0, sizeof(sa));
 #ifdef ENABLE_IPV6
