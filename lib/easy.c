@@ -250,3 +250,30 @@ CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...)
 
   return Curl_getinfo(data, info, paramp);
 }
+
+CURL *curl_easy_duphandle(CURL *incurl)
+{
+  struct SessionHandle *data=(struct SessionHandle *)incurl;
+
+  struct SessionHandle *outcurl = malloc(sizeof(struct SessionHandle));
+
+  if(NULL == outcurl)
+    return NULL; /* failure */
+
+  /* start with clearing the entire new struct */
+  memset(outcurl, 0, sizeof(struct SessionHandle));
+
+  /* copy all userdefined values */
+  outcurl->set = data->set;
+
+  /* duplicate all values in 'change' */
+  outcurl->change.url = strdup(data->change.url);
+  outcurl->change.proxy = strdup(data->change.proxy);
+  outcurl->change.referer = strdup(data->change.referer);
+  /* set all the alloc-bits */
+  outcurl->change.url_alloc =
+    outcurl->change.proxy_alloc =
+    outcurl->change.referer_alloc = TRUE;
+
+  return outcurl;
+}
