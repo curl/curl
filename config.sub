@@ -3,7 +3,7 @@
 #   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
 #   Free Software Foundation, Inc.
 
-timestamp='2001-08-23'
+timestamp='2001-09-07'
 
 # This file is (in principle) common to ALL GNU software.
 # The presence of a machine in this file suggests that SOME GNU software
@@ -236,7 +236,8 @@ case $basic_machine in
 	| mips16 | mips64 | mips64el | mips64orion | mips64orionel \
 	| mips64vr4100 | mips64vr4100el | mips64vr4300 \
 	| mips64vr4300el | mips64vr5000 | mips64vr5000el \
-	| mipsbe | mipsel | mipsle | mipstx39 | mipstx39el \
+	| mipsbe | mipseb | mipsel | mipsle | mipstx39 | mipstx39el \
+	| mipsisa32 \
 	| mn10200 | mn10300 \
 	| ns16k | ns32k \
 	| openrisc \
@@ -293,8 +294,8 @@ case $basic_machine in
 	| m88110-* | m88k-* | mcore-* \
 	| mips-* | mips16-* | mips64-* | mips64el-* | mips64orion-* \
 	| mips64orionel-* | mips64vr4100-* | mips64vr4100el-* \
-	| mips64vr4300-* | mips64vr4300el-* | mipsbe-* | mipsel-* \
-	| mipsle-* | mipstx39-* | mipstx39el-* \
+	| mips64vr4300-* | mips64vr4300el-* | mipsbe-* | mipseb-* \
+	| mipsle-* | mipsel-* | mipstx39-* | mipstx39el-* \
 	| none-* | np1-* | ns16k-* | ns32k-* \
 	| orion-* \
 	| pdp10-* | pdp11-* | pj-* | pjl-* | pn-* | power-* \

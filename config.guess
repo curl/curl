@@ -3,7 +3,7 @@
 #   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
 #   Free Software Foundation, Inc.
 
-timestamp='2001-08-23'
+timestamp='2001-09-04'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -393,6 +393,7 @@ EOF
 	echo clipper-intergraph-clix${UNAME_RELEASE}
 	exit 0 ;;
     mips:*:*:UMIPS | mips:*:*:RISCos)
+	eval $set_cc_for_build
 	sed 's/^	//' << EOF >$dummy.c
 #ifdef __cplusplus
 #include <stdio.h>  /* for printf() prototype */
@@ -414,7 +415,6 @@ EOF
 	  exit (-1);
 	}
 EOF
-	eval $set_cc_for_build
 	$CC_FOR_BUILD $dummy.c -o $dummy \
 	  && ./$dummy `echo "${UNAME_RELEASE}" | sed -n 's/\([0-9]*\).*/\1/p'` \
 	  && rm -f $dummy.c $dummy && exit 0
@@ -484,6 +484,7 @@ EOF
 	exit 0 ;;
     *:AIX:2:3)
 	if grep bos325 /usr/include/stdio.h >/dev/null 2>&1; then
+		eval $set_cc_for_build
 		sed 's/^		//' << EOF >$dummy.c
 		#include <sys/systemcfg.h>
 
@@ -495,7 +496,6 @@ EOF
 			exit(0);
 			}
 EOF
-		eval $set_cc_for_build
 		$CC_FOR_BUILD $dummy.c -o $dummy && ./$dummy && rm -f $dummy.c $dummy && exit 0
 		rm -f $dummy.c $dummy
 		echo rs6000-ibm-aix3.2.5
@@ -563,6 +563,7 @@ EOF
                   fi ;;
               esac
               if [ "${HP_ARCH}" = "" ]; then
+	      eval $set_cc_for_build
               sed 's/^              //' << EOF >$dummy.c
 
               #define _HPUX_SOURCE
@@ -596,10 +597,9 @@ EOF
                   exit (0);
               }
 EOF
-	eval $set_cc_for_build
-	(CCOPTS= $CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null ) && HP_ARCH=`./$dummy`
-	if test -z "$HP_ARCH"; then HP_ARCH=hppa; fi
-	rm -f $dummy.c $dummy
+	    (CCOPTS= $CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null ) && HP_ARCH=`./$dummy`
+	    if test -z "$HP_ARCH"; then HP_ARCH=hppa; fi
+	    rm -f $dummy.c $dummy
 	fi ;;
 	esac
 	echo ${HP_ARCH}-hp-hpux${HPUX_REV}
@@ -609,6 +609,7 @@ EOF
 	echo ia64-hp-hpux${HPUX_REV}
 	exit 0 ;;
     3050*:HI-UX:*:*)
+	eval $set_cc_for_build
 	sed 's/^	//' << EOF >$dummy.c
 	#include <unistd.h>
 	int
@@ -634,7 +635,6 @@ EOF
 	  exit (0);
 	}
 EOF
-	eval $set_cc_for_build
 	$CC_FOR_BUILD $dummy.c -o $dummy && ./$dummy && rm -f $dummy.c $dummy && exit 0
 	rm -f $dummy.c $dummy
 	echo unknown-hitachi-hiuxwe2
@@ -851,6 +851,7 @@ EOF
 		exit 0 ;;
 	esac
 	# Determine whether the default compiler is a.out or elf
+	eval $set_cc_for_build
 	cat >$dummy.c <<EOF
 #include <features.h>
 #ifdef __cplusplus
@@ -875,7 +876,6 @@ EOF
   return 0;
 }
 EOF
-	eval $set_cc_for_build
 	$CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null && ./$dummy "${UNAME_MACHINE}" && rm -f $dummy.c $dummy && exit 0
 	rm -f $dummy.c $dummy
 	test x"${TENTATIVE}" != x && echo "${TENTATIVE}" && exit 0
@@ -1122,6 +1122,7 @@ esac
 #echo '(No uname command or uname output not recognized.)' 1>&2
 #echo "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" 1>&2
 
+eval $set_cc_for_build
 cat >$dummy.c <<EOF
 #ifdef _SEQUENT_
 # include <sys/types.h>
@@ -1236,7 +1237,6 @@ main ()
 }
 EOF
 
-eval $set_cc_for_build
 $CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null && ./$dummy && rm -f $dummy.c $dummy && exit 0
 rm -f $dummy.c $dummy
 
