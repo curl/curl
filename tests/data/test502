@@ -24,7 +24,7 @@ lib502
 simple multi file:// get
  </name>
  <command>
-file:///%PWD/log/test502.txt
+file://%PWD/log/test502.txt
 </command>
 <file name="log/test502.txt">
 foo
