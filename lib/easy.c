@@ -80,7 +80,7 @@
 
 CURLcode curl_global_init(long flags)
 {
-  if(!(flags & CURL_GLOBAL_NOT_SSL))
+  if(flags & CURL_GLOBAL_SSL)
     Curl_SSL_init();
 
   return CURLE_OK;
