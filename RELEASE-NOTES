@@ -21,9 +21,8 @@ This release includes the following bugfixes:
  o ftps:// now uses port 990 by default
  o the "configure --with-spnego" action was improved
  o fixed a rare follow-redirect problem
- o curl-configure --feature now outputs AsynchDNS if enabled
+ o curl-config --feature now outputs AsynchDNS if enabled
  o occational re-use of freed-memory problem fixed
- o builds natively (without unix emulation) on AmigaOS
  o curl-config --libs now include the ares link directory
  o configure --enable-ares now accepts a given path
  o -lz no longer appear twice on the link line
