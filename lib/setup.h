@@ -162,13 +162,4 @@ int fileno( FILE *stream);
 
 #endif
 
-/*
- * FIXME: code for getting a passwd in windows/non termcap/signal systems?
- */
-#ifndef WIN32
-#define get_password(x) getpass(x)
-#else
-#define get_password(x) 
-#endif
-
 #endif /* __CONFIG_H */
