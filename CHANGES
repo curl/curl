@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (12 Aug 2002)
+- Applied my initial take on making the multi stuff more asynchronous. Connects
+  should now return back without "hanging" until it has connected for real.
+  This should also be the case for FTP-PASV connects.
+
 Daniel (9 Aug 2002)
 - Applied Markus F.X.J. Oberhumer's patch that introduces CURLOPT_NOSIGNAL,
   which effectively prevents libcurl from doing anything that may cause
