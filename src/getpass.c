@@ -38,18 +38,6 @@
 
 #include "getpass.h"
 
-#ifdef HAVE_GETPASS
-char *getpass_r(const char *prompt, char *password, size_t passlen)
-{
-  char *ptr = getpass(prompt);
-  strncpy(password, ptr, passlen);
-  password[passlen-1]=0;
-  return password;
-}
-#define DONE
-#else
-/* the rest of this file is only for systems without getpass() */
-
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -223,8 +211,6 @@ char *getpass_r(const char *prompt, /* prompt to display */
 
   return password; /* return pointer to buffer */
 }
-
-#endif /* DONE */
 
 #endif /* HAVE_GETPASS */
 #endif /* HAVE_GETPASS_R */

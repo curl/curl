@@ -1268,7 +1268,6 @@ AC_CHECK_FUNCS( strtoll \
                 siginterrupt \
                 sigaction \
                 signal \
-                getpass \
                 getpass_r \
                 strlcat \
                 getpwuid \
