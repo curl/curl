@@ -63,6 +63,9 @@ int curl_strnequal(const char *first, const char *second, size_t max)
     first++;
     second++;
   }
+  if(0 == max)
+    return 1; /* they are equal this far */
+
   return toupper(*first) == toupper(*second);
 #endif
 }
