@@ -8,6 +8,28 @@
 
 
 Daniel (14 March 2001)
+- I fell onto a bug report on php.net that obiously was better directed to our
+  project. Anyway, it said the .netrc parsing didn't work as supposed, and as
+  I agreed I made the netrc parser use getpwuid() to figure out the home
+  directory of the effective user and try that netrc. It still uses the
+  environment variable HOME for those that don't have that function or if the
+  user doesn't return valid pwd info.
+
+- Edin Kadribaic posted a bug report where he got a crash when a fetch with
+  user+password in the URL followed a Location: to a second URL (absolute,
+  without name+password). This bug has been around for a long while and
+  crashes due to a read at address zero. Fixed now. Wrote test case 38, that
+  tests this.
+
+- Modified the test suite's httpserver slightly to append all client request
+  data to its log file so that the test script now better can verify a range
+  of requests and not only the last one, as it did previously.
+
+- Updated the curl man page with --random-file and --egd-file details.
+
+Version 7.7-beta3
+
+Daniel (14 March 2001)
 - Björn Stenberg provided similar fixes as Jörn did and some additional patches
   for non-SSL compiles.
 
