@@ -14,12 +14,12 @@ Daniel (14 March 2001)
   I need to remake things in the test suite. I can't test the FTP parts with
   curl built for IPv6 as it uses a different set of FTP commands then!
 
-- I fell onto a bug report on php.net that obiously was better directed to our
-  project. Anyway, it said the .netrc parsing didn't work as supposed, and as
-  I agreed I made the netrc parser use getpwuid() to figure out the home
-  directory of the effective user and try that netrc. It still uses the
-  environment variable HOME for those that don't have that function or if the
-  user doesn't return valid pwd info.
+- I fell onto a bug report on php.net (posted by Lars Torben Wilson) that was
+  a report meant for our project. Anyway, it said the .netrc parsing didn't
+  work as supposed, and as I agreed with Lars, I made the netrc parser use
+  getpwuid() to figure out the home directory of the effective user and try
+  that netrc. It still uses the environment variable HOME for those that don't
+  have that function or if the user doesn't return valid pwd info.
 
 - Edin Kadribaic posted a bug report where he got a crash when a fetch with
   user+password in the URL followed a Location: to a second URL (absolute,
