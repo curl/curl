@@ -413,12 +413,18 @@ sub filteroff {
 
 sub compare {
     # filter off patterns _before_ this comparison!
-    my ($firstref, $secondref)=@_;
+    my ($subject, $firstref, $secondref)=@_;
 
     my $result = compareparts($firstref, $secondref);
 
-    if(!$short && $result) {
-        print showdiff($firstref, $secondref);
+    if($result) {
+        if(!$short) {
+            print "\n $subject FAILED:\n";
+            print showdiff($firstref, $secondref);
+        }
+        else {
+            print "FAILED\n";
+        }
     }
     return $result;
 }
@@ -740,9 +746,8 @@ sub singletest {
         # verify redirected stdout
         my @actual = loadarray($STDOUT);
 
-        $res = compare(\@actual, \@validstdout);
+        $res = compare("stdout", \@actual, \@validstdout);
         if($res) {
-            print " stdout FAILED\n";
             return 1;
         }
         if(!$short) {
@@ -754,9 +759,8 @@ sub singletest {
     if(!$replyattr{'nocheck'} && @reply) {
         # verify the received data
         my @out = loadarray($CURLOUT);
-        $res = compare(\@out, \@reply);
+        $res = compare("data", \@out, \@reply);
         if ($res) {
-            print " data FAILED\n";
             return 1;
         }
         if(!$short) {
@@ -767,9 +771,8 @@ sub singletest {
     if(@upload) {
         # verify uploaded data
         my @out = loadarray("$LOGDIR/upload.$testnum");
-        $res = compare(\@out, \@upload);
+        $res = compare("upload", \@out, \@upload);
         if ($res) {
-            print " upload FAILED\n";
             return 1;
         }
         if(!$short) {
@@ -801,9 +804,8 @@ sub singletest {
             @protstrip= striparray( $_, \@protstrip);
         }
 
-        $res = compare(\@out, \@protstrip);
+        $res = compare("protocol", \@out, \@protstrip);
         if($res) {
-            print " protocol FAILED\n";
             return 1;
         }
         if(!$short) {
@@ -823,9 +825,8 @@ sub singletest {
         }
         my @generated=loadarray($filename);
 
-        $res = compare(\@generated, \@outfile);
+        $res = compare("output", \@generated, \@outfile);
         if($res) {
-            print " output FAILED\n";
             return 1;
         }
         if(!$short) {
