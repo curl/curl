@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (14 April 2004)
+- Asking for CURL_IPRESOLVE_V6 when ipv6 addresses can't be resolved will
+  now cause the resolve function to return NULL immediately. This flaw was
+  pointed out by Gisle Vanem.
+
+- Gisle Vanem made curl -4/-6 actually set the desired option to libcurl.
+
 - runtests.pl now has a new option (-p) that will display "interesting" log
   files to stdout in case of a test failure. This is primarily intended to be
   used in the 'full-test' make target that is used by the autobuild tests, as

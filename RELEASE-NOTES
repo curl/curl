@@ -13,6 +13,10 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURLOPT_IPRESOLVE set to CURL_IPRESOLVE_V6 will now cause a returned error
+   if the host only can resolve ipv4 addresses
+ o curl -4/-6 now actually sets the requested option in libcurl
+ o multi interface on Windows without ares works again
  o improved resolution for the CURLINFO_*_TIME info variables
  o getting only a 100 Continue response and nothing else, when talking HTTP,
    is now treated as an error by libcurl
