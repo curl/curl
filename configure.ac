@@ -87,7 +87,7 @@ dnl check for cygwin stuff
 AC_LIBTOOL_WIN32_DLL
 
 dnl libtool setup
-AM_PROG_LIBTOOL
+AC_PROG_LIBTOOL
 
 AC_MSG_CHECKING([if we need -no-undefined])
 case $host in
