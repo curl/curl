@@ -518,7 +518,7 @@ typedef enum {
   CINIT(FOLLOWLOCATION, LONG, 52),  /* use Location: Luke! */
 
   CINIT(TRANSFERTEXT, LONG, 53), /* transfer data in text/ASCII format */
-  CINIT(PUT, LONG, 54),          /* PUT the input file */
+  CINIT(PUT, LONG, 54),          /* HTTP PUT */
 
   /* 55 = OBSOLETE */
 
@@ -779,6 +779,34 @@ typedef enum {
 
   /* Enable/disable the TCP Nagle algorithm */
   CINIT(TCP_NODELAY, LONG, 121),
+
+  /* When doing 3rd party transfer, set the source host name with this */
+  CINIT(SOURCE_HOST, OBJECTPOINT, 122),
+
+  /* When doing 3rd party transfer, set the source user and password with
+     this */
+  CINIT(SOURCE_USERPWD, OBJECTPOINT, 123),
+
+  /* When doing 3rd party transfer, set the source file path with this */
+  CINIT(SOURCE_PATH, OBJECTPOINT, 124),
+
+  /* When doing 3rd party transfer, set the source server's port number
+     with this */
+  CINIT(SOURCE_PORT, LONG, 125),
+
+  /* When doing 3rd party transfer, decide which server that should get the
+     PASV command (and the other gets the PORT).
+     0 (default) - The target host issues PASV.
+     1           - The source host issues PASV */
+  CINIT(PASV_HOST, LONG, 126),
+
+  /* When doing 3rd party transfer, set the source pre-quote linked list
+     of commands with this */
+  CINIT(SOURCE_PREQUOTE, OBJECTPOINT, 127),
+
+  /* When doing 3rd party transfer, set the source post-quote linked list
+     of commands with this */
+  CINIT(SOURCE_POSTQUOTE, OBJECTPOINT, 128),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
