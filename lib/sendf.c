@@ -46,6 +46,7 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
+#include "connect.h" /* for the Curl_ourerrno() proto */
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -228,6 +229,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
                     ssize_t *written)
 {
   ssize_t bytes_written;
+  (void)conn;
 
 #ifdef USE_SSLEAY
   /* SSL_write() is said to return 'int' while write() and send() returns
@@ -246,7 +248,8 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
         *written = 0;
         return CURLE_OK;
       case SSL_ERROR_SYSCALL:
-        failf(conn->data, "SSL_write() returned SYSCALL, errno = %d\n", errno);
+        failf(conn->data, "SSL_write() returned SYSCALL, errno = %d\n",
+              Curl_ourerrno());
         return CURLE_SEND_ERROR;
       }
       /* a true error */
@@ -267,14 +270,15 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
       bytes_written = swrite(sockfd, mem, len);
     }
     if(-1 == bytes_written) {
+      int err = Curl_ourerrno();
 #ifdef WIN32
-      if(WSAEWOULDBLOCK == GetLastError())
+      if(WSAEWOULDBLOCK == err)
 #else
       /* As pointed out by Christophe Demory on March 11 2003, errno
          may be EWOULDBLOCK or on some systems EAGAIN when it returned
          due to its inability to send off data without blocking. We
          therefor treat both error codes the same here */
-      if((EWOULDBLOCK == errno) || (EAGAIN == errno))
+      if((EWOULDBLOCK == err) || (EAGAIN == err))
 #endif
       {
         /* this is just a case of EWOULDBLOCK */
@@ -345,6 +349,7 @@ int Curl_read(struct connectdata *conn,
               ssize_t *n)
 {
   ssize_t nread;
+  (void)conn;
   *n=0; /* reset amount to zero */
 
 #ifdef USE_SSLEAY
@@ -363,6 +368,17 @@ int Curl_read(struct connectdata *conn,
       case SSL_ERROR_WANT_WRITE:
         /* there's data pending, re-invoke SSL_read() */
         return -1; /* basicly EWOULDBLOCK */
+      case SSL_ERROR_SYSCALL:
+        /* openssl/ssl.h says "look at error stack/return value/errno" */
+      {
+        char error_buffer[120]; /* OpenSSL documents that this must be at least
+                                   120 bytes long. */
+        int sslerror = ERR_get_error();
+        failf(conn->data, "SSL read: %s, errno %d",
+              ERR_error_string(sslerror, error_buffer),
+              Curl_ourerrno() );
+      }
+      return CURLE_RECV_ERROR;
       default:
         failf(conn->data, "SSL read error: %d", err);
         return CURLE_RECV_ERROR;
@@ -379,10 +395,11 @@ int Curl_read(struct connectdata *conn,
       nread = sread (sockfd, buf, buffersize);
 
     if(-1 == nread) {
+      int err = Curl_ourerrno();
 #ifdef WIN32
-      if(WSAEWOULDBLOCK == GetLastError())
+      if(WSAEWOULDBLOCK == err)
 #else
-      if(EWOULDBLOCK == errno)
+      if(EWOULDBLOCK == err)
 #endif
         return -1;
     }
