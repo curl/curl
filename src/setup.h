@@ -112,4 +112,8 @@ int fileno( FILE *stream);
 #define typedef_bool
 #endif
 
+#ifndef SIZEOF_CURL_OFF_T
+#define SIZEOF_CURL_OFF_T sizeof(curl_off_t)
+#endif
+
 #endif /* __SETUP_H */

@@ -244,4 +244,8 @@ typedef struct hostent Curl_addrinfo;
 typedef struct in_addr Curl_ipconnect;
 #endif
 
+#ifndef SIZEOF_CURL_OFF_T
+#define SIZEOF_CURL_OFF_T sizeof(curl_off_t)
+#endif
+
 #endif /* __CONFIG_H */
