@@ -248,4 +248,12 @@ typedef struct in_addr Curl_ipconnect;
 #define SIZEOF_CURL_OFF_T sizeof(curl_off_t)
 #endif
 
+#ifdef VMS
+#define IOCTL_3_ARGS
+#endif
+
+#ifdef mpeix
+#define IOCTL_3_ARGS
+#endif
+
 #endif /* __CONFIG_H */

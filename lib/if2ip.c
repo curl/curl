@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
@@ -68,7 +67,6 @@
 #endif
 
 #ifdef	VMS
-#define	IOCTL_3_ARGS
 #include <inet.h>
 #endif
 
@@ -77,10 +75,6 @@
 /* The last #include file should be: */
 #ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
-
-#ifdef DJGPP
-#define IOCTL_3_ARGS
 #endif
 
 #define SYS_ERROR -1
