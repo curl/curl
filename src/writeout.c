@@ -52,6 +52,7 @@ typedef enum {
   VAR_SPEED_DOWNLOAD,
   VAR_SPEED_UPLOAD,
   VAR_HTTP_CODE,
+  VAR_HTTP_CODE_PROXY,
   VAR_HEADER_SIZE,
   VAR_REQUEST_SIZE,
   VAR_EFFECTIVE_URL,
@@ -71,6 +72,7 @@ struct variable {
 static const struct variable replacements[]={
   {"url_effective", VAR_EFFECTIVE_URL},
   {"http_code", VAR_HTTP_CODE},
+  {"http_connect", VAR_HTTP_CODE_PROXY},
   {"time_total", VAR_TOTAL_TIME},
   {"time_namelookup", VAR_NAMELOOKUP_TIME},
   {"time_connect", VAR_CONNECT_TIME},
@@ -125,6 +127,12 @@ void ourWriteOut(CURL *curl, char *writeinfo)
               case VAR_HTTP_CODE:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &longinfo))
+                  fprintf(stream, "%03ld", longinfo);
+                break;
+              case VAR_HTTP_CODE_PROXY:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_HTTP_CONNECTCODE,
+                                     &longinfo))
                   fprintf(stream, "%03ld", longinfo);
                 break;
               case VAR_HEADER_SIZE:

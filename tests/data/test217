@@ -1,0 +1,44 @@
+# Server-side
+<reply>
+
+# this is returned first since we get no proxy-auth
+<data nocheck=1>
+HTTP/1.1 405 Method Not Allowed swsclose
+
+And you should ignore this data.
+</data>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP proxy CONNECT to proxy returning 405
+ </name>
+ <command>
+http://test.remote.server.com:217/path/2170002 --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -w '%{http_code} %{http_connect}\n'
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol>
+CONNECT test.remote.server.com:217 HTTP/1.0
+
+</protocol>
+# CURLE_RECV_ERROR
+<errorcode>
+56
+</errorcode>
+<stdout>
+HTTP/1.1 405 Method Not Allowed swsclose
+
+000 405
+</stdout>
+</verify>
