@@ -32,4 +32,11 @@ REPLY SIZE 550 bluah you f00l!
 <errorcode>
 19
 </errorcode>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+MDTM 511
+QUIT
+</protocol>
 </verify>
