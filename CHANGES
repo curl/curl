@@ -6,6 +6,28 @@
 
                                   Changelog
 
+Daniel (3 Mar)
+- Added share.obj to the VC6 and Borland libcurl makefiles.
+
+- Troels Walsted Hansen found and investigated a problem with libcurl on AIX,
+  presumably only on 4.3 or later. gethostbyname_r() is not returning data
+  that is possible to "keep" and cache the way libcurl does. But instead these
+  versions of AIX uses a gethostbyname() that works thread-safely we can
+  instead use the ordinary gethostbyname() and our pack_hostent() approach to
+  achieve what we want. The configure script now attempts to detect AIX 4.3 or
+  later to adjust for this.
+
+Daniel (2 Mar)
+- Juan F. Codagnone found a problem introduced in 7.10.3 when you first did a
+  POST and then back to a GET using the same easy handle.
+
+Daniel (28 Feb)
+- Removed the strequal and strnequal defines from curl/curl.h header. They
+  were never meant for the public header anyway. Philippe Raoult brought it
+  up.
+
+- James Bursa fixed the RISC OS build.
+
 Daniel (27 Feb)
 - Avery Fay pointed out the very misleading curl_multi_info_read man page, and
   I updated it to become more accurate.
