@@ -1,7 +1,7 @@
-                                  _   _ ____  _     
-                              ___| | | |  _ \| |    
-                             / __| | | | |_) | |    
-                            | (__| |_| |  _ <| |___ 
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
                                 How To Compile
@@ -75,7 +75,7 @@ UNIX
            ./configure
 
      (with csh, tcsh and their clones):
-     
+
        env CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" \
        ./configure
 
@@ -131,7 +131,7 @@ UNIX
 
 Win32
 =====
- 
+
    Without SSL:
 
       MingW32 (GCC-2.95) style
@@ -199,8 +199,8 @@ Win32
         Then run 'nmake vc' in curl's root directory.
 
         If you want to compile with zlib support, you will need to build
-        zlib (http://www.gzip.org/zlib/) as well. Please read the zlib 
-        documentation on how to compile zlib. Define the ZLIB_PATH environment 
+        zlib (http://www.gzip.org/zlib/) as well. Please read the zlib
+        documentation on how to compile zlib. Define the ZLIB_PATH environment
         variable to the location of zlib.h and zlib.lib, for example:
 
           set ZLIB_PATH=c:\zlib-1.2.1
@@ -229,7 +229,7 @@ Win32
         'nmake vc-ssl-dll' creates the libcurl dynamic library and
         links curl.exe against libcurl and OpenSSL dynamically.
         This executable requires libcurl.dll and the OpenSSL DLLs
-        at runtime. 
+        at runtime.
         Run 'nmake vc-ssl-zlib' to build with both ssl and zlib support.
 
       Microsoft / Borland style
@@ -241,27 +241,27 @@ Win32
       Using Borland C++ compiler version 5.5.1 (available as free download
       from Borland's site)
       ---------------------------------------------------------------------
-      
+
         compile openssl
-      
+
         Make sure you include the paths to curl/include and openssl/inc32 in
         your bcc32.cnf file
-      
+
 
         eg : -I"c:\Bcc55\include;c:\path_curl\include;c:\path_openssl\inc32"
-        
+
         Check to make sure that all of the sources listed in lib/Makefile.b32
         are present in the /path_to_curl/lib directory. (Check the src
         directory for missing ones.)
-        
+
         Make sure the environment variable "BCCDIR" is set to the install
         location for the compiler eg : c:\Borland\BCC55
-        
+
         command line:
         make -f /path_to_curl/lib/Makefile-ssl.b32
-        
+
         compile simplessl.c with appropriate links
-        
+
         c:\curl\docs\examples\> bcc32 -L c:\path_to_curl\lib\libcurl.lib
                                       -L c:\borland\bcc55\lib\psdk\ws2_32.lib
                                       -L c:\openssl\out32\libeay32.lib
@@ -292,6 +292,13 @@ Win32
       - Modify lib/Makefile.vc6
       - Add defines to Project/Settings/C/C++/General/Preprocessor Definitions
         in the curllib.dsw/curllib.dsp Visual C++ 6 IDE project.
+
+
+   Important (with SSL or not):
+      When building an application that uses the static libcurl library, you
+      must add '-DCURL_STATICLIB' to your CFLAGS.  Otherwise the linker will
+      look for dynamic import symbols.
+
 
 IBM OS/2
 ========
@@ -373,7 +380,7 @@ VMS
       1 = Success
       2 = Error
       3 = Information
-      4 = Fatal 
+      4 = Fatal
       <5-7> reserved.
 
    This all presents itself with:
@@ -449,10 +456,10 @@ NetWare
    - either any gcc / nlmconv, or CodeWarrior 7 PDK 4 or later.
    - gnu make and awk running on the platform you compile on;
      native Win32 versions can be downloaded from:
-     http://www.gknw.com/development/prgtools/ 
+     http://www.gknw.com/development/prgtools/
    - recent Novell LibC SDK available from:
      http://developer.novell.com/ndk/libc.htm
-   - optional zlib sources (at the moment only dynamic linking with zlib.imp); 
+   - optional zlib sources (at the moment only dynamic linking with zlib.imp);
      sources with NetWare Makefile can be obtained from:
      http://www.gknw.com/mirror/zlib/
 
@@ -464,7 +471,7 @@ NetWare
    a 'set | grep OSTYPE' shows the var present and set; I simply overwrote it
    with 'OSTYPE=linux-rh9-gnu' and the detection in the Makefile worked...;
    other options are currently not supported, although partly prepared.
-   The Ares lib builds arlready fine, and both test tools work fine at least 
+   The Ares lib builds arlready fine, and both test tools work fine at least
    when build with CodeWarrior...; don't know yet why they fail when build with
    gcc though; if you want to compile with Ares support then set an env var
    WITH_ARES=1; I've not tested yet including libares into curl.
@@ -604,7 +611,7 @@ PORTS
         - m68k Linux
         - m68k OpenBSD
         - m88k dg-dgux5.4R3.00
-        - s390 Linux 
+        - s390 Linux
         - XScale/PXA250 Linux 2.4
 
 Useful URLs
