@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_init 3 "31 Jan 2001" "libcurl 7.9.4" "libcurl Manual"
+.TH curl_easy_init 3 "17 Apr 2002" "libcurl 7.9.7" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - Extract information from a curl session (added in 7.4)
 .SH SYNOPSIS
@@ -59,6 +59,16 @@ Pass a pointer to a double to receive the time, in seconds, it took from the
 start until the first byte is just about to be transfered. This includes
 CURLINFO_PRETRANSFER_TIME and also the time the server needs to calculate
 the result.
+.TP
+.B CURLINFO_REDIRECT_TIME
+Pass a pointer to a double to receive the total time, in seconds, it took for
+all redirection steps include name lookup, connect, pretransfer and transfer
+before final transaction was started. CURLINFO_REDIRECT_TIME contains the
+complete execution time for multiple redirections.  (Added in 7.9.7)
+.TP
+.B CURLINFO_REDIRECT_COUNT
+Pass a pointer to a long to receive the total number of redirections that were
+actually followed.  (Added in 7.9.7)
 .TP
 .B CURLINFO_SIZE_UPLOAD
 Pass a pointer to a double to receive the total amount of bytes that were
