@@ -1,0 +1,30 @@
+# Server-side
+<reply>
+<data>
+moooooooo
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP --disable-epsv
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/path/to/file/127 --disable-epsv
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD path/to/file
+PASV
+TYPE I
+SIZE 127
+RETR 127
+</protocol>
+</verify>
