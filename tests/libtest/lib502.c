@@ -28,6 +28,6 @@ int test(char *URL)
   curl_easy_cleanup(c);
   curl_multi_cleanup(m);
 
-  return 0;
+  return res;
 }
 
