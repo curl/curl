@@ -10,11 +10,13 @@ Curl and libcurl 7.12.2
 
 This release includes the following changes:
 
- o added CURLOPT_FTPSSLAUTH
- o curl_getdate() completely rewritten, which may affect curl -z use cases.
+ o added CURLOPT_FTPSSLAUTH to allow ftp connects to attempt "AUTH TLS" instead
+   before "AUTH SSL"
+ o curl_getdate() completely rewritten, which may affect curl -z use cases
 
 This release includes the following bugfixes:
 
+ o CURLOPT_SSLENGINE can be set to NULL even if no engine support is available
  o LDAP crash when more than one record was received
  o connect failures properly stores an error message in the errorbuffer
  o Rare Location:-following problem with bad original URL
@@ -24,8 +26,7 @@ This release includes the following bugfixes:
  o "Proxy-Connection: close" is now understood and properly dealt with
  o curl_getdate() crash fixed
  o downloading empty files now calls the write callback properly
- o no more reverse DNS lookups when getting ip-only address with ipv6-enabled
-   libcurl
+ o no reverse DNS lookups for ip-only addresses with ipv6-enabled libcurl
  o libcurl works better multi-threaded on AIX (when built with xlc)
  o cookies over proxy didn't match the path properly
  o MSVC makefile fixes to build better
@@ -42,6 +43,6 @@ advice from friends like these:
  Casey O'Donnell, Roland Krikava, Alex, Alexander Krasnostavsky, Kjetil
  Jacobsen, Ling Thio, Roman Koifman, Harshal Pradhan, Jonas Forsman, David
  Tarendash, Daniel at touchtunes, Bertrand Demiddelaer, Andreas Rieke,
- Jean-Claude Chauve, Dan Fandrich
+ Jean-Claude Chauve, Dan Fandrich, Peter Sylvester
 
         Thanks! (and sorry if I forgot to mention someone)

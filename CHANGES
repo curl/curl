@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel (28 September 2004)
+- "Mekonikum" found out that if you built curl without SSL support, although
+  your current SSL installation supports Engine, the compile fails.
+
+Daniel (27 September 2004)
+- When --with-ssl=PATH is used to the configure script, it no longer uses
+  pkg-config to figure out extra details. That is now only done if no PATH is
+  included or if SSL is checked for by default without the --with-ssl option.
+
+Daniel (25 September 2004)
+- Peter Sylvester pointed out that CURLOPT_SSLENGINE couldn't even be set to
+  NULL when no engine was supported. It can now.
+
 Daniel (22 September 2004)
 - Dan Fandrich fixed three test cases to no longer use "localhost" but instead
   use "127.0.0.1" to avoid requiring that localhost resolves nicely.
