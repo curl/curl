@@ -13,9 +13,6 @@ To get fixed in 7.13.1 (planned release: April 2005)
      Awaits OpenSSL support for this, no need to support this in libcurl before
      there's an OpenSSL release that does it.
 
-54 - Turn the FTP code into a state machine to support the multi interface
-     100% non-blocking.
-
 To get fixed in 7.14.0
 ======================
 
