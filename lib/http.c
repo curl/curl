@@ -716,7 +716,7 @@ CURLcode Curl_http(struct connectdata *conn)
   if(data->cookies) {
     co = Curl_cookie_getlist(data->cookies,
                              host, ppath,
-                             (conn->protocol&PROT_HTTPS?TRUE:FALSE));
+                             (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
   }
   if (data->change.proxy && *data->change.proxy &&
       !data->set.tunnel_thru_httpproxy &&
