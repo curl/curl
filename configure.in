@@ -13,12 +13,15 @@ AC_CANONICAL_TARGET
 
 dnl Checks for programs.
 AC_PROG_CC
+
+dnl Check for AIX weirdos
+AC_AIX
+
+AC_SYS_LARGEFILE
 dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
-dnl Check for AIX weirdos
-AC_AIX
 
 dnl **********************************************************************
 dnl Checks for libraries.

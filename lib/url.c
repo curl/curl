@@ -421,6 +421,9 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
   case CURLOPT_POSTFIELDS:
     data->postfields = va_arg(param, char *);
     break;
+  case CURLOPT_POSTFIELDSIZE:
+    data->postfieldsize = va_arg(param, long);
+    break;
   case CURLOPT_REFERER:
     data->referer = va_arg(param, char *);
     data->bits.http_set_referer = (data->referer && *data->referer)?1:0;

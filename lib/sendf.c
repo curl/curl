@@ -84,7 +84,6 @@ void failf(struct UrlData *data, char *fmt, ...)
 }
 
 /* sendf() sends the formated data to the server */
-
 int sendf(int fd, struct UrlData *data, char *fmt, ...)
 {
   size_t bytes_written;
@@ -108,6 +107,25 @@ int sendf(int fd, struct UrlData *data, char *fmt, ...)
 #endif /* USE_SSLEAY */
   free(s); /* free the output string */
   return(bytes_written);
+}
+
+/* ssend() sends plain (binary) data to the server */
+size_t ssend(int fd, struct UrlData *data, void *mem, size_t len)
+{
+  size_t bytes_written;
+
+  if(data->bits.verbose)
+    fprintf(data->err, "> [binary output]\n");
+#ifndef USE_SSLEAY
+   bytes_written = swrite(fd, mem, len);
+#else
+  if (data->use_ssl) {
+    bytes_written = SSL_write(data->ssl, mem, len);
+  } else {
+    bytes_written = swrite(fd, mem, len);
+  }
+#endif /* USE_SSLEAY */
+  return bytes_written;
 }
 
 

@@ -345,6 +345,9 @@ struct UrlData {
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
   char *postfields; /* if POST, set the fields' values here */
+  long postfieldsize; /* if POST, this might have a size to use instead of
+                         strlen(), and then the data *may* be binary (contain
+                         zero bytes) */
 
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */

@@ -82,7 +82,7 @@
 #include <sys/sockio.h>
 #endif
 
-#ifndef HAVE_INET_NTOA_R_DECL
+#if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL) 
 #include "inet_ntoa_r.h"
 #endif
 

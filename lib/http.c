@@ -38,12 +38,6 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
-#ifdef NEED_REENTRANT
-#define _REENTRANT /* Necessary to use in Solaris, since the silly guys at Sun
-                      made the localtime_r() prototype dependent on it (or
-                      _POSIX_C_SOURCE or _POSIX_PTHREAD_SEMANTICS). */
-#endif
-
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
@@ -56,6 +50,12 @@
 #include <errno.h>
 
 #include "setup.h"
+
+#ifdef NEED_REENTRANT
+#define _REENTRANT /* Necessary to use in Solaris, since the silly guys at Sun
+                      made the localtime_r() prototype dependent on it (or
+                      _POSIX_C_SOURCE or _POSIX_PTHREAD_SEMANTICS). */
+#endif
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>
@@ -378,7 +378,7 @@ CURLcode http(struct connectdata *conn)
 #ifdef HAVE_LOCALTIME_R
       /* thread-safe version */
       struct tm keeptime;
-      thistime = localtime_r(&data->timevalue, &keeptime);
+      thistime = (struct tm *)localtime_r(&data->timevalue, &keeptime);
 #else
       thistime = localtime(&data->timevalue);
 #endif
@@ -492,13 +492,19 @@ CURLcode http(struct connectdata *conn)
              actually set your own */
           sendf(data->firstsocket, data,
                 "Content-Length: %d\r\n",
-                strlen(data->postfields));
+                (data->postfieldsize?data->postfieldsize:
+                 strlen(data->postfields)) );
 
         if(!checkheaders(data, "Content-Type:"))
           sendf(data->firstsocket, data,
                 "Content-Type: application/x-www-form-urlencoded\r\n");
 
         /* and here comes the actual data */
+        if(data->postfieldsize) {
+          ssend(data->firstsocket, data, "\r\n", 2);
+          ssend(data->firstsocket, data, data->postfields, data->postfieldsize);
+          ssend(data->firstsocket, data, "\r\n", 2);
+        }
         sendf(data->firstsocket, data,
               "\r\n"
               "%s\r\n",
