@@ -31,6 +31,7 @@ stopserver() {
   if [ -f $PIDFILE ] ; then
       PID=`cat $PIDFILE`
       kill -9 $PID
+      rm -f $PIDFILE # server is killed
   fi
 }
 
@@ -55,6 +56,18 @@ runserver () {
     sleep 1 # give it a little time to start
   else
     echo $STATUS
+
+    # verify that our server is one one running on this port:
+    data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver`;
+
+    if { echo $data | grep -v "WE ROOLZ" >/dev/null 2>&1; } then
+        echo "Another HTTP server is running on port $HOSTPORT"
+        echo "Edit runtests.sh to use another port and rerun the test script"
+        exit
+    fi
+
+    echo "The running HTTP server has been verified to be our test server"
+
   fi
 }
 

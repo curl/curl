@@ -80,31 +80,39 @@ for ( $waitedpid = 0;
             }
         }
 
-        #
-        # we always start the path with a number, this is the
-        # test number that this server will use to know what
-        # contents to pass back to the client
-        #
-        if($path =~ /.*\/(\d*)/) {
-            $testnum=$1;
-        }
-        else {
-            print STDERR "UKNOWN TEST CASE\n";
+        if($path =~ /verifiedserver/) {
+            # this is a hard-coded query-string for the test script
+            # to verify that this is the server actually running!
+            print "HTTP/1.1 999 WE ROOLZ\r\n";
             exit;
         }
-        open(INPUT, ">log/server.input");
-        for(@headers) {
-            print INPUT $_;
-        }
-        close(INPUT);
+        else {
 
-        # send a reply to the client
-        open(DATA, "<data/reply$testnum.txt");
-        while(<DATA>) {
-            print $_;
+            #
+            # we always start the path with a number, this is the
+            # test number that this server will use to know what
+            # contents to pass back to the client
+            #
+            if($path =~ /.*\/(\d*)/) {
+                $testnum=$1;
+            }
+            else {
+                print STDERR "UKNOWN TEST CASE\n";
+                exit;
+            }
+            open(INPUT, ">log/server.input");
+            for(@headers) {
+                print INPUT $_;
+            }
+            close(INPUT);
+            
+            # send a reply to the client
+            open(DATA, "<data/reply$testnum.txt");
+            while(<DATA>) {
+                print $_;
+            }
+            close(DATA);
         }
-        close(DATA);
-
      #   print "Hello there, $name, it's now ", scalar localtime, "\r\n";
     };
 }
