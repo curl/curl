@@ -6,6 +6,25 @@
 
                                   Changelog
 
+Daniel (30 January 2005)
+- Fixed a memory leak when using the multi interface and the DO operation
+  failed (as in test case 205).
+
+- Fixed a valgrind warning for file:// operations.
+
+- Fixed a valgrind report in the url globbing code for the curl command line
+  tool.
+
+- Bugfixed the parser that scans the valgrind report outputs (in runtests.pl).
+  I noticed that it previously didn't detect and report the "Conditional jump
+  or move depends on uninitialised value(s)" error. When I fixed this, I
+  caught a few curl bugs with it. And then I had to spend time to make the
+  test suite IGNORE these errors when OpenSSL is used since it produce massive
+  amounts of valgrind warnings (but only of the "Conditional..." kind it
+  seems). So, if a test that requires SSL is run, it ignores the
+  "Conditional..." errors, and you'll get a "valgrind PARTIAL" output instead
+  of "valgrind OK".
+
 Daniel (29 January 2005)
 - Using the multi interface, and doing a requsted a re-used connection that
   gets closed just after the request has been sent failed and did not re-issue
