@@ -149,6 +149,14 @@ static void freedirs(struct FTP *ftp)
   }
 }
 
+/* Returns non-zero iff the given string contains CR (0x0D) or LF (0x0A), which
+   are not allowed within RFC 959 <string>.
+ */
+static bool isBadFtpString(const char *string)
+{
+  return strchr(string, 0x0D) != NULL || strchr(string, 0x0A) != NULL;
+}
+
 /***********************************************************************
  *
  * AllowServerConnect()
@@ -474,6 +482,9 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   /* no need to duplicate them, this connectdata struct won't change */
   ftp->user = conn->user;
   ftp->passwd = conn->passwd;
+  if (isBadFtpString(ftp->user) || isBadFtpString(ftp->passwd)) {
+    return CURLE_URL_MALFORMAT;
+  }
   ftp->response_time = 3600; /* set default response time-out */
 
 #ifndef CURL_DISABLE_HTTP
@@ -2738,6 +2749,10 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         freedirs(ftp);
         return CURLE_OUT_OF_MEMORY;
       }
+      if (isBadFtpString(ftp->dirs[ftp->dirdepth])) {
+        freedirs(ftp);
+        return CURLE_URL_MALFORMAT;
+      }
     }
     else {
       cur_pos = slash_pos + 1; /* jump to the rest of the string */
@@ -2768,6 +2783,10 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
       freedirs(ftp);
       failf(data, "no memory");
       return CURLE_OUT_OF_MEMORY;
+    }
+    if (isBadFtpString(ftp->file)) {
+      freedirs(ftp);
+      return CURLE_URL_MALFORMAT;
     }
   }
   else

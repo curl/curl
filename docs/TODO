@@ -65,6 +65,9 @@ TODO
 
  FTP
 
+ * Make the detection of (bad) %0d and %0a codes in FTP url parts earlier in
+   the process to avoid doing a resolve and connect in vain.
+
  * Code overhaul to make it more state-machine like and to _never_ block on
    waiting for server responses when used with the multi interface.
 

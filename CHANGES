@@ -8,12 +8,18 @@
 
 
 Daniel (19 January 2005)
+- Stephan Bergmann made libcurl return CURLE_URL_MALFORMAT if an FTP URL
+  contains %0a or %0d in the user, password or CWD parts. (A future fix would
+  include doing it for %00 as well - see KNOWN_BUGS for details.) Test case
+  225 and 226 were added to verify this
+
 - Stephan Bergmann pointed out two flaws in libcurl built with HTTP disabled:
 
   1) the proxy environment variables are still read and used to set HTTP proxy
 
   2) you couldn't disable http proxy with CURLOPT_PROXY (since the option was
-     disabled)
+     disabled). This is important since apps may want to disable HTTP proxy
+     without actually knowing if libcurl was built to disable HTTP or not.
 
   Based on Stephan's patch, both these issues should now be fixed.
 

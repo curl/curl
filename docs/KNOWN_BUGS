@@ -3,6 +3,16 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* FTP URLs passed to curl may contain NUL (0x00) in the RFC 1738 <user>,
+  <password>, and <fpath> components, encoded as "%00".  The problem is that
+  curl_unescape does not detect this, but instead returns a shortened C
+  string.  From a strict FTP protocol standpoint, NUL is a valid character
+  within RFC 959 <string>, so the way to handle this correctly in curl would
+  be to use a data structure other than a plain C string, one that can handle
+  embedded NUL characters.  From a practical standpoint, most FTP servers
+  would not meaningfully support NUL characters within RFC 959 <string>,
+  anyway (e.g., UNIX pathnames may not contain NUL).
+
 * Test case 241 fails on all systems that support IPv6 but that don't have the
   host name 'ip6-localhost' in /etc/hosts (or similar) since the test case
   uses that host name to test the IPv6 name to address resolver.
