@@ -169,6 +169,10 @@ CURLcode Curl_file_connect(struct connectdata *conn)
 
 #if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
 #define lseek(x,y,z) _lseeki64(x, y, z)
+#define struct_stat struct _stati64
+#define fstat(fd,st) _fstati64(fd,st)
+#else
+#define struct_stat struct stat
 #endif
 
 CURLcode Curl_file_done(struct connectdata *conn,
@@ -278,7 +282,9 @@ CURLcode Curl_file(struct connectdata *conn)
      (via NFS, Samba, NT sharing) can be accessed through a file:// URL
   */
   CURLcode res = CURLE_OK;
-  struct stat statbuf;
+  struct_stat statbuf; /* struct_stat instead of struct stat just to allow the
+                          Windows version to have a different struct without
+                          having to redefine the simple word 'stat' */
   curl_off_t expected_size=0;
   bool fstated=FALSE;
   ssize_t nread;
