@@ -9,10 +9,6 @@ TODO
  Things to do in project cURL. Please tell me what you think, contribute and
  send me patches that improve things!
 
-To do for the 7.7 release:
-
- * Add a special connection-timeout that only goes for the connection phase.
-
 To do for the 7.8 release:
 
  * Make SSL session ids get used if multiple HTTPS documents from the same

@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "14 March 2001" "Curl 7.7" "Curl Manual"
+.TH curl 1 "15 March 2001" "Curl 7.7" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -91,6 +91,14 @@ also be enforced by using an URL that ends with ";type=A". This option causes
 data sent to stdout to be in text mode for win32 systems.
 
 If this option is used twice, the second one will disable ASCII usage.
+.IP "--connect-timeout <seconds>"
+Maximum time in seconds that you allow the connection to the server to take.
+This only limits the connection phase, once curl has connected this option is
+of no more use. This option doesn't work in win32 systems.  See also the
+.I "--max-time"
+option.
+
+If this option is used serveral times, the last one will be used.
 .IP "-c/--continue"
 .B Deprecated. Use '-C -' instead.
 Continue/Resume a previous file transfer. This instructs curl to
@@ -295,6 +303,9 @@ If this option is used twice, the second will again disable location following.
 Maximum time in seconds that you allow the whole operation to take.  This is
 useful for preventing your batch jobs from hanging for hours due to slow
 networks or links going down.  This doesn't work fully in win32 systems.
+See also the
+.I "--connect-timeout"
+option.
 
 If this option is used serveral times, the last one will be used.
 .IP "-M/--manual"

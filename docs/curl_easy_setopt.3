@@ -470,6 +470,15 @@ the more secure will the SSL connection become.
 .B CURLOPT_FORBID_REUSE
 Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
 socket. It will be used to seed the random engine for SSL.
+.TP
+.B CURLOPT_CONNECTTIMEOUT
+Pass a long. It should contain the maximum time in seconds that you allow the
+connection to the server to take.  This only limits the connection phase, once
+it has connected, this option is of no more use. Set to zero to disable
+connection timeout (it will then only timeout on the system's internal
+timeouts). This option doesn't work in win32 systems.  See also the
+.I CURLOPT_TIMEOUT
+option.
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as
