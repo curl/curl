@@ -905,8 +905,13 @@ Curl_SSLConnect(struct connectdata *conn)
                                      thread's error queue and removes the
                                      entry. */
 
-        
-        if(0x14090086 == detail) {
+        switch(detail) {
+        case 0x1407E086:
+          /* 1407E086:
+             SSL routines:
+             SSL2_SET_CERTIFICATE:
+             certificate verify failed */
+        case 0x14090086:
           /* 14090086:
              SSL routines:
              SSL3_GET_SERVER_CERTIFICATE:
@@ -914,8 +919,7 @@ Curl_SSLConnect(struct connectdata *conn)
           failf(data,
                 "SSL certificate problem, verify that the CA cert is OK");
           return CURLE_SSL_CACERT;
-        }
-        else {
+        default:
           /* detail is already set to the SSL error above */
           failf(data, "SSL: %s", ERR_error_string(detail, error_buffer));
           /* OpenSSL 0.9.6 and later has a function named
