@@ -28,7 +28,7 @@ EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	   \
   ca-bundle.crt README.encoding README.memoryleak README.ares README.curlx \
   makefile.dj config.dj libcurl.framework.make libcurl.plist libcurl.rc	   \
   config-amigaos.h amigaos.c amigaos.h makefile.amiga config-netware.h	   \
-  Makefile.netware nwlib.c libcurl.imp
+  Makefile.netware nwlib.c libcurl.imp msvcproj.head msvcproj.foot
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -97,6 +97,8 @@ libcurl_la_SOURCES = arpa_telnet.h file.c netrc.h timeval.c base64.c	\
   hostip4.c hostip6.c hostsyn.c hostthre.c inet_ntop.c inet_ntop.h	\
   curlx.h
 
+WIN32_SOURCES = $(libcurl_la_SOURCES) config-win32.h
+
 noinst_HEADERS = setup.h transfer.h
 
 BUILT_SOURCES = $(srcdir)/getdate.c $(top_builddir)/lib/ca-bundle.h
@@ -129,3 +131,13 @@ install-data-hook:
 dist-hook:
 	chmod 0644 $(distdir)/ca-bundle.h
 	echo "/* ca bundle path set in here*/" > $(distdir)/ca-bundle.h
+
+curllib.dsp: msvcproj.head msvcproj.foot Makefile.am
+	cp msvcproj.head curllib.dsp
+	(for file in $(WIN32_SOURCES); do \
+	echo "# Begin Source File" >> curllib.dsp; \
+	echo "" >> curllib.dsp; \
+	echo "SOURCE=.\\"$$file >> curllib.dsp; \
+	echo "# End Source File" >> curllib.dsp; \
+	done; \
+	cat msvcproj.foot >> curllib.dsp )
