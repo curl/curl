@@ -65,7 +65,8 @@ close(READ);
 if($c) {
     my @test = `gzip --version 2>&1`;
     if($test[0] =~ /gzip/) {
-        open(GZIP, "|gzip -9 >dumpit.gz");
+        open(GZIP, "|gzip -9 >dumpit.gz") ||
+            die "can't run gzip, try without -c";
         binmode GZIP;
         for(@out) {
             print GZIP $_;
@@ -80,6 +81,8 @@ if($c) {
             $gzipped += length($_);
         }
         close(GZIP);
+
+        unlink("dumpit.gz");
     }
     else {
         # no gzip, no compression!
