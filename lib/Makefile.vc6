@@ -11,7 +11,7 @@
 
 PROGRAM_NAME = libcurl.lib
 PROGRAM_NAME_DEBUG = libcurld.lib
-#OPENSSL_PATH = ../../openssl-0.9.6a
+#OPENSSL_PATH = ../../openssl-0.9.6b
 
 ########################################################
 ## Nothing more to do below this line!
@@ -294,7 +294,7 @@ easyd.obj: easy.c
 strequald.obj: strequal.c
 	$(CCD) $(CFLAGS) strequal.c
 strtokd.obj:strtok.c
-	$(CCR) $(CFLAGS) strtok.c
+	$(CCD) $(CFLAGS) strtok.c
 
 ## Release SSL
 base64rs.obj: base64.c
@@ -356,7 +356,7 @@ easyrs.obj: easy.c
 strequalrs.obj: strequal.c
 	$(CCRS) $(CFLAGS) strequal.c
 strtokrs.obj:strtok.c
-	$(CCR) $(CFLAGS) strtok.c
+	$(CCRS) $(CFLAGS) strtok.c
 
 
 clean:
