@@ -68,14 +68,18 @@ struct CookieInfo {
 #define MAX_NAME 256
 #define MAX_NAME_TXT "255"
 
+struct SessionHandle;
 /*
  * Add a cookie to the internal list of cookies. The domain and path arguments
  * are only used if the header boolean is TRUE.
  */
-struct Cookie *Curl_cookie_add(struct CookieInfo *, bool header, char *line,
+
+struct Cookie *Curl_cookie_add(struct SessionHandle *data,
+                               struct CookieInfo *, bool header, char *line,
                                char *domain, char *path);
 
-struct CookieInfo *Curl_cookie_init(char *, struct CookieInfo *, bool);
+struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
+                                    char *, struct CookieInfo *, bool);
 struct Cookie *Curl_cookie_getlist(struct CookieInfo *, char *, char *, bool);
 void Curl_cookie_freelist(struct Cookie *);
 void Curl_cookie_cleanup(struct CookieInfo *);

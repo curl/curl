@@ -617,7 +617,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Activate the cookie parser. This may or may not already
      * have been made.
      */
-    data->cookies = Curl_cookie_init(NULL, data->cookies,
+    data->cookies = Curl_cookie_init(data, NULL, data->cookies,
                                      data->set.cookiesession);
     break;
 #endif
@@ -1210,7 +1210,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
       /* check cookie list is set */
       if(!data->cookies)
-        data->cookies = Curl_cookie_init( NULL, NULL, TRUE );
+        data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE );
       
       /* check for host cache not needed,
        * it will be done by curl_easy_perform */ 

@@ -79,7 +79,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 
       case CURL_LOCK_DATA_COOKIE:
         if (!share->cookies) {
-          share->cookies = Curl_cookie_init( NULL, NULL, TRUE );
+          share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE );
         }
         break;
 

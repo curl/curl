@@ -132,8 +132,8 @@ void curl_slist_free_all(struct curl_slist *list)
 
 void Curl_infof(struct SessionHandle *data, const char *fmt, ...)
 {
-  va_list ap;
-  if(data->set.verbose) {
+  if(data && data->set.verbose) {
+    va_list ap;
     char print_buffer[1024 + 1];
     va_start(ap, fmt);
     vsnprintf(print_buffer, 1024, fmt, ap);
