@@ -6,6 +6,92 @@
 
                                History of Changes
 
+Version *upcoming* 7.4
+
+Daniel (9 October 2000)
+- Georg Horn provided a source example that proved a memory leak in libcurl.
+  I added simple memory debugging facilities and now we can make libcurl log
+  all memory fiddling functions. An additional perl script is used to analyze
+  the output logfile and to match malloc()s with free()s etc. The memory leak
+  Georg found turned out to be the main cookie struct that cookie_cleanup()
+  didn't free!
+
+Daniel (8 October 2000)
+- Georg Horn found a GetHost() problem. It turned out it never assigned the
+  pointer in the third argument properly! This could make a crash, or at best
+  a memory leak!
+
+Version 7.4 pre4
+
+Daniel (6 October 2000)
+- Is the -F post following the RFCX 1867 spec? We had this dicussion on the
+  mailing list since it appears curl can't post -F form posts to a PHP
+  receiver...
+
+- Domenico Andreoli found out that the long option '--proxy' wasn't working
+  anymore! The option parser got confused when I added the --proxytunnel for
+  7.3. This was indeed a very old flaw that hasn't turned up until now...
+
+- Jörn Hartroth provided patches, updated makefiles and two new files for DLL
+  stuff on win32. He also pointed out that lib source files were compiled with
+  -I../src which isn't only wrong but plain stupid!
+
+- Troels Walsted Hansen fixed a problem with HTTP resume. Curl previously used
+  a local variable badly, that could lead to crashes.
+
+Version 7.4 pre3
+
+Daniel (4 October 2000)
+- More docs written. The curl_easy_getinfo.3 man page is now pretty accurate,
+  as is the -w section in curl.1. I added two options to enable the user to
+  get information about the received headers' size and the size of the HTTP
+  request. T. Bharath requested them.
+  
+Daniel (3 October 2000)
+- Corrected a sever free() before use in the new add_buffer_send()! ;-)
+
+Version 7.4 pre2
+
+Daniel (3 October 2000)
+- Jason S. Priebe sent me patches that changed the way curl issues HTTP
+  requests. The entire request is now issued in one single shot. It didn't do
+  this previously, and it has turned out that since the common browsers do it
+  this way, some sites have turned out to work with browsers but not with
+  curl! Although this is not a client-side problem, we want to be able to
+  fully emulate browsers, and thus we have now adjusted the networking layer
+  to slightly more appear as a browser. I adjusted Jason's patch, the faults
+  are probably mine.
+
+Daniel (2 October 2000)
+- Anyone who ever uploaded data with curl on a slow link has noticed that the
+  progess meter is updated very infrequently. That is due to the large buffer
+  size curl is using. It reads 50Kb and sends it, updates the progress meter
+  and loops. 50Kb is very much on a slow link, although it is pretty neat to
+  use on a fast one.
+
+  I've now made an adjustment that makes curl use a 2Kb buffer for uploads to
+  start with. If curl's average upload speed is faster than buffer size bytes
+  per second, curl will increase the used buffer size up to max 50Kb. It
+  should make the progress meter work better.
+  
+Version 7.4 pre1
+
+Daniel (29 September 2000)
+- Ripped out the -w stuff from the library and put in the curl tool. It gets
+  all the relevant info from the library using the new curl_easy_getinfo()
+  function.
+
+- brad at openbsd.org mailed me a patch that corrected my kerberos mistake and
+  removed a compiler warning from hostip.c that OpenBSD people get.
+
+Daniel (28 September 2000)
+- Of course (I should probably get punished somehow) I didn't properly correct
+  the #include lines for the base64 stuff in the kerberos sources in the just
+  released 7.3 package. They still include the *_krb.h files! Now, the error
+  is sooo very easy to spot and fix so I won't bother with a quick bug fix
+  release. I'll post a patch whenever one is needed instead. It'll be
+  available in the CVS in a few minutes anyway.
+
 Version 7.3
 
 Daniel (28 September 2000)
