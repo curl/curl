@@ -791,7 +791,7 @@ Curl_SSLConnect(struct connectdata *conn)
         !SSL_CTX_load_verify_locations(conn->ssl.ctx,
                                        data->set.ssl.CAfile,
                                        data->set.ssl.CApath)) {
-      failf(data,"error setting cerficate verify locations");
+      failf(data,"error setting certificate verify locations");
       return CURLE_SSL_CACERT;
     }
   }
