@@ -73,7 +73,7 @@ $(srcdir)/getdate.c: getdate.y
 install-data-hook:
 	@if test -n "@CURL_CA_BUNDLE@"; then \
 	  $(mkinstalldirs) `dirname $(DESTDIR)@CURL_CA_BUNDLE@`; \
-	  @INSTALL_DATA@ ca-bundle.crt $(DESTDIR)@CURL_CA_BUNDLE@; \
+	  @INSTALL_DATA@ $(srcdir)/ca-bundle.crt $(DESTDIR)@CURL_CA_BUNDLE@; \
         fi
 
 # this hook is mainly for non-unix systems to build even if configure
