@@ -29,5 +29,4 @@ EXPORTS
  	curl_mvfprintf @ 20 ;
 	curl_strequal @ 21 ; 
 	curl_strnequal @ 22 ; 
-	curl_escape @ 23 ; 
-	curl_unescape @ 24 ; 
+
