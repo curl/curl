@@ -31,3 +31,7 @@
 
 /* Define if you have the `setvbuf' function. */
 #undef HAVE_SETVBUF
+
+/* Define if you have the `poll' function. */
+#undef HAVE_POLL
+
