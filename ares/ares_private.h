@@ -143,3 +143,11 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now);
 void ares__close_sockets(struct server_state *server);
 int ares__get_hostent(FILE *fp, struct hostent **host);
 int ares__read_line(FILE *fp, char **buf, int *bufsize);
+
+#ifdef CURLDEBUG
+/* This is low-level hard-hacking memory leak tracking and similar. Using the
+   libcurl lowlevel code from within library is ugly and only works when
+   c-ares is built and linked with a similarly debug-build libcurl, but we do
+   this anyway for convenience. */
+#include "../lib/memdebug.h"
+#endif
