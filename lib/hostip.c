@@ -212,7 +212,7 @@ cache_resolv_response(struct SessionHandle *data,
                       int port)
 {
   char *entry_id;
-  int entry_len;
+  ssize_t entry_len;
   struct Curl_dns_entry *dns;
   time_t now;
 
