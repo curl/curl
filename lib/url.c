@@ -124,6 +124,7 @@
 #include "http.h"
 #include "file.h"
 #include "ldap.h"
+#include "writeout.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -134,12 +135,12 @@
  * Start with some silly functions to make win32-systems survive
  ***********************************************************************/
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-static void cleanup(void)
+static void win32_cleanup(void)
 {
   WSACleanup();
 }
 
-static int init(void)
+static UrgError win32_init(void)
 {
   WORD wVersionRequested;  
   WSADATA wsaData; 
@@ -151,7 +152,7 @@ static int init(void)
   if (err != 0) 
     /* Tell the user that we couldn't find a useable */ 
     /* winsock.dll.     */ 
-    return 1; 
+    return URG_FAILED_INIT; 
     
   /* Confirm that the Windows Sockets DLL supports 1.1.*/ 
   /* Note that if the DLL supports versions greater */ 
@@ -165,15 +166,35 @@ static int init(void)
 
     /* winsock.dll. */ 
     WSACleanup(); 
-    return 1; 
+    return URG_FAILED_INIT; 
   }
-  return 0;
+  return URG_OK;
 }
 /* The Windows Sockets DLL is acceptable. Proceed. */ 
 #else
-static int init(void) { return 0; }
-static void cleanup(void) {}
+static UrgError win32_init(void) { return URG_OK; }
+#define win32_cleanup()
 #endif
+
+
+/*
+ * This is the main global constructor for the lib. Call this before
+ * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
+ * used, or havoc may be the result.
+ */
+UrgError curl_init(void)
+{
+  return win32_init();
+}
+
+/*
+ * This is the main global destructor for the lib. Call this after
+ * _all_ libcurl usage is done.
+ */
+void curl_free(void)
+{
+  win32_cleanup();
+}
 
 static UrgError _urlget(struct UrlData *data);
 
@@ -252,10 +273,169 @@ void urlfree(struct UrlData *data, bool totally)
 
     free(data);
 
-    /* winsock crap cleanup */
-    cleanup();
+    /* global cleanup */
+    curl_free();
   }
 }
+
+typedef struct UrlData CURL;
+
+UrgError curl_open(CURL **curl, char *url)
+{
+  /* We don't yet support specifying the URL at this point */
+
+  /* Very simple start-up: alloc the struct, init it with zeroes and return */
+  CURL *data = (CURL *)malloc(sizeof(CURL));
+  if(data) {
+    memset(data, 0, sizeof(CURL));
+    *curl = data;
+    return URG_OK;
+  }
+
+  /* this is a very serious error */
+  return URG_OUT_OF_MEMORY;
+}
+
+typedef unsigned int CURLoption;
+
+UrgError curl_setopt(CURL *curl, CURLoption option, ...)
+{
+  struct UrlData *data = curl;
+  va_list param;
+  char *cookiefile;
+
+  va_start(param, option);
+
+  switch(option) {
+  case URGTAG_TIMECONDITION:
+    data->timecondition = va_arg(param, long);
+    break;
+
+  case URGTAG_TIMEVALUE:
+    data->timevalue = va_arg(param, long);
+    break;
+
+  case URGTAG_SSLVERSION:
+    data->ssl_version = va_arg(param, long);
+    break;
+
+  case URGTAG_COOKIEFILE:
+    cookiefile = (char *)va_arg(param, void *);
+    if(cookiefile) {
+      data->cookies = cookie_init(cookiefile);
+    }
+    break;
+  case URGTAG_WRITEHEADER:
+    data->writeheader = (FILE *)va_arg(param, FILE *);
+    break;
+  case URGTAG_COOKIE:
+    data->cookie = va_arg(param, char *);
+    break;
+  case URGTAG_ERRORBUFFER:
+    data->errorbuffer = va_arg(param, char *);
+    break;
+  case URGTAG_FILE:
+    data->out = va_arg(param, FILE *);
+    break;
+  case URGTAG_FTPPORT:
+    data->ftpport = va_arg(param, char *);
+    break;
+  case URGTAG_HTTPHEADER:
+    data->headers = va_arg(param, struct HttpHeader *);
+    break;
+  case URGTAG_CUSTOMREQUEST:
+    data->customrequest = va_arg(param, char *);
+    break;
+  case URGTAG_HTTPPOST:
+    data->httppost = va_arg(param, struct HttpPost *);
+    break;
+  case URGTAG_INFILE:
+    data->in = va_arg(param, FILE *);
+    break;
+  case URGTAG_INFILESIZE:
+    data->infilesize = va_arg(param, long);
+    break;
+  case URGTAG_LOW_SPEED_LIMIT:
+    data->low_speed_limit=va_arg(param, long);
+    break;
+  case URGTAG_LOW_SPEED_TIME:
+    data->low_speed_time=va_arg(param, long);
+    break;
+  case URGTAG_URL:
+    data->url = va_arg(param, char *);
+    break;
+  case URGTAG_PORT:
+    /* this typecast is used to fool the compiler to NOT warn for a
+       "cast from pointer to integer of different size" */
+    data->port = (unsigned short)(va_arg(param, long));
+    break;
+  case URGTAG_POSTFIELDS:
+    data->postfields = va_arg(param, char *);
+    break;
+  case URGTAG_PROGRESSMODE:
+    data->progress.mode = va_arg(param, long);
+    break;
+  case URGTAG_REFERER:
+    data->referer = va_arg(param, char *);
+    break;
+  case URGTAG_PROXY:
+    data->proxy = va_arg(param, char *);
+    break;
+  case URGTAG_FLAGS:
+    data->conf = va_arg(param, long);
+    break;
+  case URGTAG_TIMEOUT:
+    data->timeout = va_arg(param, long);
+    break;
+  case URGTAG_USERAGENT:
+    data->useragent = va_arg(param, char *);
+    break;
+  case URGTAG_USERPWD:
+    data->userpwd = va_arg(param, char *);
+    break;
+  case URGTAG_POSTQUOTE:
+    data->postquote = va_arg(param, struct curl_slist *);
+    break;
+  case URGTAG_PROXYUSERPWD:
+    data->proxyuserpwd = va_arg(param, char *);
+    break;
+  case URGTAG_RANGE:
+    data->range = va_arg(param, char *);
+    break;
+  case URGTAG_RESUME_FROM:
+    data->resume_from = va_arg(param, long);
+    break;
+  case URGTAG_STDERR:
+    data->err = va_arg(param, FILE *);
+    break;
+  case URGTAG_WRITEFUNCTION:
+    data->fwrite = va_arg(param, void *);
+    break;
+  case URGTAG_WRITEINFO:
+    data->writeinfo = va_arg(param, char *);
+    break;
+  case URGTAG_READFUNCTION:
+    data->fread = va_arg(param, void *);
+    break;
+  case URGTAG_SSLCERT:
+    data->cert = va_arg(param, char *);
+    break;
+  case URGTAG_SSLCERTPASSWD:
+    data->cert_passwd = va_arg(param, char *);
+    break;
+  case URGTAG_CRLF:
+    data->crlf = va_arg(param, long);
+    break;
+  case URGTAG_QUOTE:
+    data->quote = va_arg(param, struct curl_slist *);
+    break;
+  default:
+    /* unknown tag and its companion, just ignore: */
+    return URG_READ_ERROR; /* correct this */
+  }
+  return URG_OK;
+}
+
 
 typedef int (*func_T)(void);
 
@@ -266,23 +446,23 @@ UrgError curl_urlget(UrgTag tag, ...)
   long param_long = 0;
   void *param_obj = NULL;
   UrgError res;
-  char *cookiefile;
 
   struct UrlData *data;
 
   /* this is for the lame win32 socket crap */
-  if(init())
+  if(curl_init())
     return URG_FAILED_INIT;
 
-  data = (struct UrlData *)malloc(sizeof(struct UrlData));
-  if(data) {
-
-    memset(data, 0, sizeof(struct UrlData));
+  /* We use curl_open() with undefined URL so far */
+  res = curl_open(&data, NULL);
+  if(res == URG_OK) {
+    /* data is now filled with good-looking zeroes */
 
     /* Let's set some default values: */
-    data->out = stdout; /* default output to stdout */
-    data->in  = stdin;  /* default input from stdin */
-    data->err  = stderr;  /* default stderr to stderr */
+    curl_setopt(data, URGTAG_FILE, stdout); /* default output to stdout */
+    curl_setopt(data, URGTAG_INFILE, stdin);  /* default input from stdin */
+    curl_setopt(data, URGTAG_STDERR, stderr);  /* default stderr to stderr! */
+
     data->firstsocket = -1; /* no file descriptor */
     data->secondarysocket = -1; /* no file descriptor */
 
@@ -309,151 +489,19 @@ UrgError curl_urlget(UrgTag tag, ...)
       if(tag < URGTYPE_OBJECTPOINT) {
 	/* This is a LONG type */
 	param_long = va_arg(arg, long);
+        curl_setopt(data, tag, param_long);
       }
       else if(tag < URGTYPE_FUNCTIONPOINT) {
 	/* This is a object pointer type */
 	param_obj = va_arg(arg, void *);
+        curl_setopt(data, tag, param_obj);
       }
-      else
+      else {
 	param_func = va_arg(arg, func_T );
+        curl_setopt(data, tag, param_func);
+      }
 
       /* printf("tag: %d\n", tag); */
-     
-
-      switch(tag) {
-#ifdef MULTIDOC
-      case URGTAG_MOREDOCS:
-        data->moredoc = (struct MoreDoc *)param_obj;
-        break;
-#endif
-      case URGTAG_TIMECONDITION:
-        data->timecondition = (long)param_long;
-        break;
-
-      case URGTAG_TIMEVALUE:
-        data->timevalue = (long)param_long;
-        break;
-
-      case URGTAG_SSLVERSION:
-        data->ssl_version = (int)param_long;
-        break;
-
-      case URGTAG_COOKIEFILE:
-        cookiefile = (char *)param_obj;
-        if(cookiefile) {
-          data->cookies = cookie_init(cookiefile);
-        }
-        break;
-      case URGTAG_WRITEHEADER:
-	data->writeheader = (FILE *)param_obj;
-	break;
-      case URGTAG_COOKIE:
-	data->cookie = (char *)param_obj;
-	break;
-      case URGTAG_ERRORBUFFER:
-        data->errorbuffer = (char *)param_obj;
-        break;
-      case URGTAG_FILE:
-        data->out = (FILE *)param_obj;
-        break;
-      case URGTAG_FTPPORT:
-        data->ftpport = (char *)param_obj;
-        break;
-      case URGTAG_HTTPHEADER:
-	data->headers = (struct HttpHeader *)param_obj;
-	break;
-      case URGTAG_CUSTOMREQUEST:
-	data->customrequest = (char *)param_obj;
-	break;
-      case URGTAG_HTTPPOST:
-	data->httppost = (struct HttpPost *)param_obj;
-	break;
-      case URGTAG_INFILE:
-        data->in = (FILE *)param_obj;
-        break;
-      case URGTAG_INFILESIZE:
-        data->infilesize = (long)param_long;
-        break;
-      case URGTAG_LOW_SPEED_LIMIT:
-	data->low_speed_limit=(long)param_long;
-	break;
-      case URGTAG_LOW_SPEED_TIME:
-	data->low_speed_time=(long)param_long;
-	break;
-      case URGTAG_URL:
-        data->url = (char *)param_obj;
-        break;
-      case URGTAG_PORT:
-        /* this typecast is used to fool the compiler to NOT warn for a
-           "cast from pointer to integer of different size" */
-        data->port = (unsigned short)((long)param_long);
-        break;
-      case URGTAG_POSTFIELDS:
-        data->postfields = (char *)param_obj;
-        break;
-      case URGTAG_PROGRESSMODE:
-        data->progress.mode = (long)param_long;
-        break;
-      case URGTAG_REFERER:
-        data->referer = (char *)param_obj;
-        break;
-      case URGTAG_PROXY:
-        data->proxy = (char *)param_obj;
-        break;
-      case URGTAG_FLAGS:
-        data->conf = (long)param_long;
-        break;
-      case URGTAG_TIMEOUT:
-        data->timeout = (long)param_long;
-        break;
-      case URGTAG_USERAGENT:
-        data->useragent = (char *)param_obj;
-        break;
-      case URGTAG_USERPWD:
-        data->userpwd = (char *)param_obj;
-        break;
-      case URGTAG_POSTQUOTE:
-        data->postquote = (struct curl_slist *)param_obj;
-        break;
-      case URGTAG_PROXYUSERPWD:
-        data->proxyuserpwd = (char *)param_obj;
-        break;
-      case URGTAG_RANGE:
-        data->range = (char *)param_obj;
-        break;
-      case URGTAG_RESUME_FROM:
-	data->resume_from = (long)param_long;
-	break;
-      case URGTAG_STDERR:
-	data->err = (FILE *)param_obj;
-	break;
-      case URGTAG_WRITEFUNCTION:
-        data->fwrite = (size_t (*)(char *, size_t, size_t, FILE *))param_func;
-        break;
-      case URGTAG_WRITEINFO:
-        data->writeinfo = (char *)param_obj;
-        break;
-      case URGTAG_READFUNCTION:
-        data->fread = (size_t (*)(char *, size_t, size_t, FILE *))param_func;
-        break;
-      case URGTAG_SSLCERT:
-	data->cert = (char *)param_obj;
-	break;
-      case URGTAG_SSLCERTPASSWD:
-	data->cert_passwd = (char *)param_obj;
-	break;
-      case URGTAG_CRLF:
-	data->crlf = (long)param_long;
-	break;
-      case URGTAG_QUOTE:
-        data->quote = (struct curl_slist *)param_obj;
-        break;
-      case URGTAG_DONE: /* done with the parsing, fall through */
-        continue;
-      default:
-        /* unknown tag and its companion, just ignore: */
-        break;
-      }
       tag = va_arg(arg, UrgTag);
     }
 
