@@ -17,6 +17,39 @@ NC=nc
 # simply run a particular one:
 TESTCASES=" 1 2 3 4"
 
+stopserver() {
+  PIDFILE="$LOGDIR/server.pid"
+
+  # check for pidfile
+  if [ -f $PIDFILE ] ; then
+      PID=`cat $PIDFILE`
+      kill -9 $PID
+  fi
+}
+
+runserver () {
+  PIDFILE="$LOGDIR/server.pid"
+
+  # check for pidfile
+  if [ -f $PIDFILE ] ; then
+      PID=`cat $PIDFILE`
+      if [ "x$PID" != "x" ] && kill -0 $PID 2>/dev/null ; then
+          STATUS="httpd (pid $PID) running"
+          RUNNING=1
+      else
+          STATUS="httpd (pid $PID?) not running"
+          RUNNING=0
+      fi
+  else
+      STATUS="httpd (no pid file) not running"
+      RUNNING=0
+  fi
+
+  if [ $RUNNING != "1" ]; then
+    ./httpserver.pl $HOSTPORT &
+    sleep 1 # give it a little time to start
+  fi
+}
 
 compare () {
   # filter off the $4 pattern before compare!
@@ -54,10 +87,6 @@ singletest ()
   DESC=`cat data/name$NUMBER.txt | tr -d '\012'`
 
   echo "test $NUMBER... [$DESC]"
-
-  ./runserv.pl $HOSTIP $HOSTPORT &
-
-  sleep 1
 
   # get the command line options to use
   cmd=`sed -e "s/%HOSTIP/$HOSTIP/g" -e "s/%HOSTPORT/$HOSTPORT/g" <$CURLCMD `
@@ -135,14 +164,8 @@ mkdir $LOGDIR
 #######################################################################
 # First, start the TCP server
 #
-#./runserv.pl $HOSTIP $HOSTPORT &
 
-#if [ $? != "0" ]; then
-#  echo "failed starting the TCP server"
-#  exit
-#fi
-
-#sleep 1 # give it a second to start
+runserver
 
 #######################################################################
 # The main test-loop
@@ -154,3 +177,9 @@ for NUMBER in $TESTCASES; do
 
   # loop for next test
 done
+
+#######################################################################
+# Tests done, stop server
+#
+
+stopserver
