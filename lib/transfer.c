@@ -127,7 +127,7 @@ Transfer(struct connectdata *c_conn)
   bool content_range = FALSE;	/* set TRUE if Content-Range: was found */
   int offset = 0;		/* possible resume offset read from the
                                    Content-Range: header */
-  int code = 0;			/* error code from the 'HTTP/1.? XXX' line */
+  int httpcode = 0;		/* error code from the 'HTTP/1.? XXX' line */
   int httpversion = -1;         /* the last digit in the HTTP/1.1 string */
 
   /* for the low speed checks: */
@@ -181,7 +181,7 @@ Transfer(struct connectdata *c_conn)
     int keepon=0;
 
     /* timeout every X second
-       - makes a better progressmeter (i.e even when no data is read, the
+       - makes a better progress meter (i.e even when no data is read, the
        meter can be updated and reflect reality)
        - allows removal of the alarm() crap
        - variable timeout is easier
@@ -310,8 +310,11 @@ Transfer(struct connectdata *c_conn)
               /* we now have a full line that p points to */
               if (('\n' == *p) || ('\r' == *p)) {
                 /* Zero-length line means end of header! */
+#if 0
                 if (-1 != conn->size)	/* if known */
-                  conn->size += bytecount; /* we append the already read size */
+                  conn->size += bytecount; /* we append the already read
+                                              size */
+#endif
 
 
                 if ('\r' == *p)
@@ -321,7 +324,20 @@ Transfer(struct connectdata *c_conn)
 #if 0 /* headers are not included in the size */
                 Curl_pgrsSetDownloadSize(data, conn->size);
 #endif
-                header = FALSE;	/* no more header to parse! */
+
+                if(100 == httpcode) {
+                  /*
+                   * we have made a HTTP PUT or POST and this is 1.1-lingo
+                   * that tells us that the server is OK with this and ready
+                   * to receive our stuff.
+                   * However, we'll get more headers now so we must get
+                   * back into the header-parsing state!
+                   */
+                  header = TRUE;
+                  headerline = 0; /* we restart the header line counter */
+                }
+                else
+                  header = FALSE;	/* no more header to parse! */
 
                 /* now, only output this if the header AND body are requested:
                  */
@@ -336,29 +352,38 @@ Transfer(struct connectdata *c_conn)
 
                 data->header_size += p - data->headerbuff;
 
+                if(!header) {
+                  /*
+                   * end-of-headers.
+                   *
+                   * If we requested a "no body" and this isn't a "close"
+                   * connection, this is a good time to get out and return
+                   * home.
+                   */
+                  if(!conn->bits.close && data->bits.no_body)
+                    return CURLE_OK;
+                  break;		/* exit header line loop */
+                }
 
-                /*
-                 * end-of-headers.
-                 *
-                 * If we requested a "no body" and this isn't a "close"
-                 * connection, this is a good time to get out and return
-                 * home.
-                 */
-                if(!conn->bits.close && data->bits.no_body)
-                  return CURLE_OK;
-
-                break;		/* exit header line loop */
+                /* We continue reading headers, so reset the line-based
+                   header parsing variables hbufp && hbuflen */
+                hbufp = data->headerbuff;
+                hbuflen = 0;
+                continue;
               }
               
               if (!headerline++) {
                 /* This is the first header, it MUST be the error code line
                    or else we consiser this to be the body right away! */
-                if (2 == sscanf (p, " HTTP/1.%d %3d", &httpversion, &code)) {
+                if (2 == sscanf (p, " HTTP/1.%d %3d", &httpversion,
+                                 &httpcode)) {
                   /* 404 -> URL not found! */
                   if (
-                      ( ((data->bits.http_follow_location) && (code >= 400))
+                      ( ((data->bits.http_follow_location) &&
+                         (httpcode >= 400))
                         ||
-                        (!data->bits.http_follow_location && (code >= 300)))
+                        (!data->bits.http_follow_location &&
+                         (httpcode >= 300)))
                       && (data->bits.http_fail_on_error)) {
                     /* If we have been told to fail hard on HTTP-errors,
                        here is the check for that: */
@@ -366,7 +391,7 @@ Transfer(struct connectdata *c_conn)
                     failf (data, "The requested file was not found");
                     return CURLE_HTTP_NOT_FOUND;
                   }
-                  data->progress.httpcode = code;
+                  data->progress.httpcode = httpcode;
                   data->progress.httpversion = httpversion;
                   if(httpversion == 0)
                     /* Default action for HTTP/1.0 must be to close, unless
@@ -447,7 +472,7 @@ Transfer(struct connectdata *c_conn)
                 if(data->bits.get_filetime)
                   data->progress.filetime = timeofdoc;
               }
-              else if ((code >= 300 && code < 400) &&
+              else if ((httpcode >= 300 && httpcode < 400) &&
                        (data->bits.http_follow_location) &&
                        strnequal("Location: ", p, 10)) {
                 /* this is the URL that the server advices us to get instead */
