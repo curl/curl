@@ -1,1 +1,1 @@
-Replaced HTTP headers
+Replaced internal and added custom HTTP headers

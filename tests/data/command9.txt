@@ -1,0 +1,2 @@
+http://%HOSTIP:%HOSTPORT/we/want/9 -F name=daniel -F tool=curl -F file=@data/command9.txt
+
