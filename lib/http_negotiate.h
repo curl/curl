@@ -27,7 +27,7 @@
 #ifdef GSSAPI
 
 /* this is for Negotiate header input */
-CURLcode Curl_input_negotiate(struct connectdata *conn, char *header);
+int Curl_input_negotiate(struct connectdata *conn, char *header);
 
 /* this is for creating Negotiate header output */
 CURLcode Curl_output_negotiate(struct connectdata *conn);
