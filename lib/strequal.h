@@ -33,7 +33,8 @@ int curl_strnequal(const char *first, const char *second, size_t max);
 #define strnequal(a,b,c) curl_strnequal(a,b,c)
 
 #ifndef HAVE_STRLCAT
-size_t strlcat(char *dst, const char *src, size_t siz);
+#define strlcat(x,y,z) Curl_strlcat(x,y,z)
+size_t Curl_strlcat(char *dst, const char *src, size_t siz);
 #endif
 
 #endif
