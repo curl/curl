@@ -62,6 +62,7 @@ lib/*in
 lib/*am
 lib/Makefile.vc6
 lib/*m32
+lib/libcurl.def
 include/README
 include/Makefile.in
 include/Makefile.am
