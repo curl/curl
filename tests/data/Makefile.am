@@ -2,7 +2,7 @@ all:
 install:
 
 test:
-	[ -f command1.txt ] || ln -s $(srcdir)/*.txt .
+	[ -f test1 ] || ln -s $(srcdir)/test* .
 
 EXTRA_DIST = \
 test1    test11   test14   test3    test400  test7    \
