@@ -1146,7 +1146,7 @@ sub singletest {
     }
 
     if($valgrind) {
-        $CMDLINE = "valgrind ".$valgrind_tool."--leak-check=yes --logfile=log/valgrind$testnum $CMDLINE";
+        $CMDLINE = "valgrind ".$valgrind_tool."--leak-check=yes --num-callers=16 --logfile=log/valgrind$testnum $CMDLINE";
     }
 
     $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
