@@ -30,7 +30,7 @@
 int ares__read_line(FILE *fp, char **buf, int *bufsize)
 {
   char *newbuf;
-  int offset = 0;
+  size_t offset = 0;
   size_t len;
 
   if (*buf == NULL)
