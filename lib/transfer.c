@@ -450,6 +450,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               data->info.header_size += headerlen;
               conn->headerbytecount += headerlen;
 
+              /* *auth_act() checks what authentication methods that are
+                 available and decides which one (if any) to use. It will
+                 set 'newurl' if an auth metod was picked. */
+              Curl_http_auth_act(conn);
+              
               if(!k->header) {
                 /*
                  * really end-of-headers.
@@ -824,11 +829,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if(conn->protocol&PROT_HTTP) {
               /* HTTP-only checks */
 
-              /* *auth_act() checks what authentication methods that are
-                 available and decides which one (if any) to use. It will
-                 set 'newurl' if an auth metod was picked. */
-              Curl_http_auth_act(conn);
-              
               if (conn->newurl) {
                 if(conn->bits.close) {
                   /* Abort after the headers if "follow Location" is set
