@@ -69,7 +69,7 @@ print CONF "
 	connect = $target_port
 ";
 close CONF; 
-system("chmod go-rwx $conffile $certfile");	# secure permissions
+#system("chmod go-rwx $conffile $certfile");	# secure permissions
 
 		# works only with stunnel versions < 4.00
 my $cmd="$stunnel -p $certfile -P $pidfile -d $port -r $target_port 2>/dev/null";
