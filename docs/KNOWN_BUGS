@@ -3,6 +3,11 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* CURLOPT_USERPWD and CURLOPT_PROXYUSERPWD have no way of providing user names
+  that contain a colon. This can't be fixed easily in a backwards compatible
+  way without adding new options (and then, they should most probably allow
+  setting user name and password separately).
+
 * libcurl ignores empty path parts in FTP URLs, whereas RFC1738 states that
   such parts should be sent to the server as 'CWD ' (without an argument).
   The only exception to this rule, is that we knowingly break this if the
