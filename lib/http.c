@@ -997,6 +997,8 @@ CURLcode Curl_http(struct connectdata *conn)
       headers = headers->next;
     }
 
+    http->postdata = NULL; /* nothing to post at this point */
+
     switch(data->set.httpreq) {
 
     case HTTPREQ_POST_FORM:
