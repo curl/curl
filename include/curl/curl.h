@@ -624,6 +624,11 @@ typedef enum {
      and password to whatever host the server decides. */
   CINIT(UNRESTRICTED_AUTH, LONG, 105),
 
+  /* Specificly switch on or off the FTP engine's use of the EPRT command ( it
+     also disables the LPRT attempt). By default, those ones will always be
+     attempted before the good old traditional PORT command. */     
+  CINIT(FTP_USE_EPRT, LONG, 106),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -814,8 +819,8 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.10.4"
-#define LIBCURL_VERSION_NUM 0x070a04
+#define LIBCURL_VERSION "7.10.5-pre2"
+#define LIBCURL_VERSION_NUM 0x070a05
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
