@@ -918,7 +918,8 @@ dnl Checks for library functions.
 dnl AC_PROG_GCC_TRADITIONAL
 AC_TYPE_SIGNAL
 dnl AC_FUNC_VPRINTF
-AC_CHECK_FUNCS( socket \
+AC_CHECK_FUNCS( strtoll \
+                socket \
                 select \
                 strdup \
                 strstr \
