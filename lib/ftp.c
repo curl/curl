@@ -1205,19 +1205,19 @@ CURLcode ftp_use_port(struct connectdata *conn)
 
   if(data->set.ftpport) {
     if(Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
-      h = Curl_resolv(data, myhost, 0, &hostdataptr);
+      h = Curl_resolv(data, myhost, 0);
     }
     else {
       int len = strlen(data->set.ftpport);
       if(len>1)
-        h = Curl_resolv(data, data->set.ftpport, 0, &hostdataptr);
+        h = Curl_resolv(data, data->set.ftpport, 0);
       if(h)
         strcpy(myhost, data->set.ftpport); /* buffer overflow risk */
     }
   }
   if(! *myhost) {
     char *tmp_host = getmyhost(myhost, sizeof(myhost));
-    h=Curl_resolv(data, tmp_host, 0, &hostdataptr);
+    h=Curl_resolv(data, tmp_host, 0);
   }
   infof(data, "We connect from %s\n", myhost);
   
