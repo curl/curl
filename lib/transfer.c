@@ -573,6 +573,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   end++, len++);
 
               /* allocate memory of a cloned copy */
+              if(data->info.contenttype)
+                free(data->info.contenttype);
+              
               data->info.contenttype = malloc(len + 1);
               if (NULL == data->info.contenttype)
                 return CURLE_OUT_OF_MEMORY;
