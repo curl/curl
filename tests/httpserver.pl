@@ -18,7 +18,7 @@ listen(Server,SOMAXCONN) || die "listen: $!";
 
 logmsg "server started on port $port";
 
-open(PID, ">log/server.pid");
+open(PID, ">.server.pid");
 print PID $$;
 close(PID);
 
@@ -45,6 +45,7 @@ for ( $waitedpid = 0;
 
     # this code is forked and run
     spawn sub {
+        my ($request, $path, $ver, $left, $cl);
         while(<STDIN>) {
             if($_ =~ /(GET|POST|HEAD) (.*) HTTP\/1.(\d)/) {
                 $request=$1;
@@ -54,15 +55,19 @@ for ( $waitedpid = 0;
             elsif($_ =~ /^Content-Length: (\d*)/) {
                 $cl=$1;
             }
-            # print "RCV: $_";
 
             push @headers, $_;
 
             if($left > 0) {
                 $left -= length($_);
+                if($left == 0) {
+                    $left = -1; # just to force a loop break here
+                }
             }
+            # print STDERR "RCV ($left): $_";
 
-            if(($_ eq "\r\n") or ($_ eq "")) {
+            if(!$left &&
+               ($_ eq "\r\n") or ($_ eq "")) {
                 if($request eq "POST") {
                     $left=$cl;
                 }
@@ -80,7 +85,7 @@ for ( $waitedpid = 0;
         # test number that this server will use to know what
         # contents to pass back to the client
         #
-        if($path =~ /^\/(\d*)/) {
+        if($path =~ /.*\/(\d*)/) {
             $testnum=$1;
         }
         else {
