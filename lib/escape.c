@@ -39,11 +39,11 @@
 
 char *curl_escape(const char *string, int length)
 {
-  int alloc = (length?length:(int)strlen(string))+1;  
+  size_t alloc = (length?(size_t)length:strlen(string))+1;  
   char *ns = malloc(alloc);
   char *testing_ptr = NULL;
   unsigned char in;
-  int newlen = alloc;
+  size_t newlen = alloc;
   int strindex=0;
 
   length = alloc-1;
@@ -89,7 +89,7 @@ char *curl_unescape(const char *string, int length)
   char *ns = malloc(alloc);
   unsigned char in;
   int strindex=0;
-  unsigned int hex;
+  long hex;
  
   if( !ns ) {
     return NULL;
@@ -107,7 +107,7 @@ char *curl_unescape(const char *string, int length)
 
       hex = strtol(hexstr, &ptr, 16);
 
-      in = hex;
+      in = (unsigned char)hex; /* this long is never bigger than 255 anyway */
       string+=2;
       alloc-=2;
     }
