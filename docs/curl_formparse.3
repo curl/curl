@@ -18,8 +18,8 @@ a time until you've added all the sections you want included and then you pass
 the \fI firstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST\fP.
 \fIlastitem\fP is set after each call and on repeated invokes it should be
 left as set to allow repeated invokes to find the end of the list in a faster
-way.  \fIstring\fP must be a zero terminated string following the following
-syntax.
+way.  \fIstring\fP must be a zero terminated string abiding to the syntax
+described in a section below
 
 The pointers \fIfirstitem\fP and \fIlastitem\fP point to, should both be
 pointers to NULL in the first call to this function. All list-data will be
