@@ -5,7 +5,114 @@ die(){
 	exit
 }
 
+#--------------------------------------------------------------------------
+# autoconf 2.50 or newer
+#
+ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|head -1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+if test -z "$ac_version"; then
+  echo "buildconf: autoconf not found."
+  echo "            You need autoconf version 2.50 or newer installed."
+  exit 1
+fi
+IFS=.; set $ac_version; IFS=' '
+if test "$1" = "2" -a "$2" -lt "50" || test "$1" -lt "2"; then
+  echo "buildconf: autoconf version $ac_version found."
+  echo "            You need autoconf version 2.50 or newer installed."
+  echo "            If you have a sufficient autoconf installed, but it"
+  echo "            is not named 'autoconf', then try setting the"
+  echo "            AUTOCONF environment variable."
+  exit 1
+fi
+
+echo "buildconf: autoconf version $ac_version (ok)"
+
+#--------------------------------------------------------------------------
+# autoheader 2.50 or newer
+#
+ah_version=`${AUTOHEADER:-autoheader} --version 2>/dev/null|head -1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+if test -z "$ah_version"; then
+  echo "buildconf: autoheader not found."
+  echo "            You need autoheader version 2.50 or newer installed."
+  exit 1
+fi
+IFS=.; set $ah_version; IFS=' '
+if test "$1" = "2" -a "$2" -lt "50" || test "$1" -lt "2"; then
+  echo "buildconf: autoheader version $ah_version found."
+  echo "            You need autoheader version 2.50 or newer installed."
+  echo "            If you have a sufficient autoheader installed, but it"
+  echo "            is not named 'autoheader', then try setting the"
+  echo "            AUTOHEADER environment variable."
+  exit 1
+fi
+
+echo "buildconf: autoheader version $ah_version (ok)"
+
+#--------------------------------------------------------------------------
+# automake 1.6 or newer
+#
+am_version=`${AUTOMAKE:-automake} --version 2>/dev/null|head -1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+if test -z "$am_version"; then
+  echo "buildconf: automake not found."
+  echo "            You need automake version 1.6 or newer installed."
+  exit 1
+fi
+IFS=.; set $am_version; IFS=' '
+if test "$1" = "1" -a "$2" -lt "6" || test "$1" -lt "1"; then
+  echo "buildconf: automake version $am_version found."
+  echo "            You need automake version 1.6 or newer installed."
+  echo "            If you have a sufficient automake installed, but it"
+  echo "            is not named 'autommake', then try setting the"
+  echo "            AUTOMAKE environment variable."
+  exit 1
+fi
+
+echo "buildconf: automake version $am_version (ok)"
+
+#--------------------------------------------------------------------------
+# libtool 1.4 or newer
+#
+LIBTOOL_WANTED_MAJOR=1
+LIBTOOL_WANTED_MINOR=4
+LIBTOOL_WANTED_PATCH=
+LIBTOOL_WANTED_VERSION=1.4
+
+libtool=`which glibtool 2>/dev/null`
+if test ! -x "$libtool"; then
+  libtool=`which libtool`
+fi
+lt_pversion=`$libtool --version 2>/dev/null|sed -e 's/^[^0-9]*//' -e 's/[- ].*//'`
+if test -z "$lt_pversion"; then
+  echo "buildconf: libtool not found."
+  echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
+  exit 1
+fi
+lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$/.\1/'`
+IFS=.; set $lt_version; IFS=' '
+lt_status="good"
+if test "$1" = "$LIBTOOL_WANTED_MAJOR"; then
+   if test "$2" -lt "$LIBTOOL_WANTED_MINOR"; then
+      lt_status="bad"
+   elif test ! -z "$LIBTOOL_WANTED_PATCH"; then
+       if test "$3" -lt "$LIBTOOL_WANTED_PATCH"; then
+           lt_status="bad"
+       fi
+   fi
+fi
+if test $lt_status != "good"; then
+  echo "buildconf: libtool version $lt_pversion found."
+  echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
+  exit 1
+fi
+
+echo "buildconf: libtool version $lt_pversion (ok)"
+
+echo "buildconf: running aclocal"
 aclocal           || die "The command 'aclocal' failed"
+echo "buildconf: running autoheader"
 autoheader        || die "The command 'autoheader' failed"
+echo "buildconf: running autoconf"
 autoconf          || die "The command 'autoconf' failed"
-automake -a       || die "The command 'automake $MAKEFILES' failed"
+echo "buildconf: running automake"
+automake -a       || die "The command 'automake -a' failed"
+
+exit 0
