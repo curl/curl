@@ -186,7 +186,7 @@ int curl_getaddrinfo(char *hostname, char *service,
     /* success */
     if(logfile)
       fprintf(logfile, "ADDR %s:%d getaddrinfo() = %p\n",
-              source, line, *result);
+              source, line, (void *)*result);
   }
   else {
     if(logfile)
@@ -202,7 +202,7 @@ void curl_freeaddrinfo(struct addrinfo *freethis,
   (freeaddrinfo)(freethis);
   if(logfile)
     fprintf(logfile, "ADDR %s:%d freeaddrinfo(%p)\n",
-            source, line, freethis);
+            source, line, (void *)freethis);
 }
 
 #endif
