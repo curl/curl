@@ -41,6 +41,10 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
     dnl Checks for standard header files, to make memdebug.h inclusions bettter
     AC_HEADER_STDC
 
+    dnl the entire --enable-debug is a hack that lives and runs on top of
+    dnl libcurl stuff so this BUILDING_LIBCURL is not THAT much uglier
+    AC_DEFINE(BUILDING_LIBCURL, 1, [when building as static part of libcurl])
+
     CPPFLAGS="$CPPFLAGS -DCURLDEBUG -I$srcdir/../include"
     CFLAGS="$CFLAGS -g" 
 
