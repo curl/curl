@@ -7,7 +7,28 @@
                                   Changelog
 
 
+Daniel (8 Jan 2003)
+- Updated share stuff in curl/curl.h, including data types, structs and
+  function prototypes. The corresponding files in lib/ were also modified
+  of course to remain compilable. Based on input from Jean-Philippe and also
+  to make it more in line with the design document.
+
+- Jean-Philippe Barrette-LaPierre patched a very trivial memory leak in
+  curl_escape() that would happen when realloc() returns NULL...
+
+- Matthew Blain provided feedback to make the --create-dirs stuff build
+  properly on Windows.
+
+- Fixed the #include in tests/libtest/first.c as Legoff Vincent pointed out.
+
 Daniel (7 Jan 2003)
+- Philippe Raoult provided a patch that now makes libcurl properly support
+  wildcard checks for certificate names.
+
+- Simon Liu added CURLOPT_HTTP200ALIASES, to let an application set other
+  strings recognized as "HTTP 200" to allow http-like protocols to get
+  downloaded fine by curl.
+
 - Now using autoconf 2.57 and automake 1.7.2
 
 - Doing "curl -I ftp://domain/non-existing-file" still outputed a date!
@@ -18,7 +39,7 @@ Daniel (7 Jan 2003)
 Daniel (6 Jan 2003)
 - Sterling Hughes fixed a possible bug: previously, if you called
   curl_easy_perform and then set the global dns cache, the global cache
-  wouldn't be used.
+  wouldn't be used. Pointed out by Jean-Philippe Barrette-LaPierre.
 
 - Matthew Blain's fixed the VC6 libcurl makefile to include better debug data
   on debug builds.
