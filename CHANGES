@@ -6,6 +6,10 @@
 
                                History of Changes
 
+Daniel (14 June 2000)
+- Tim Tassonis discovered that curl 7 didn't handle normal http POST as it
+  should. I corrected this.
+
 Version 7.0.6beta
 
 Daniel (14 June 2000)
