@@ -1230,7 +1230,6 @@ CURLcode Curl_http(struct connectdata *conn)
   char *buf = data->state.buffer; /* this is a short cut to the buffer */
   CURLcode result=CURLE_OK;
   struct HTTP *http;
-  struct Cookie *co=NULL; /* no cookies from start */
   char *ppath = conn->path;
   char *host = conn->host.name;
   const char *te = ""; /* tranfer-encoding */
@@ -1397,15 +1396,6 @@ CURLcode Curl_http(struct connectdata *conn)
     if(!conn->allocptr.host)
       /* without Host: we can't make a nice request */
       return CURLE_OUT_OF_MEMORY;
-  }
-
-  if(data->cookies) {
-    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-    co = Curl_cookie_getlist(data->cookies,
-                             conn->allocptr.cookiehost?
-                             conn->allocptr.cookiehost:host, ppath,
-                             (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
-    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
   }
 
   if (conn->bits.httpproxy &&
@@ -1611,40 +1601,51 @@ CURLcode Curl_http(struct connectdata *conn)
                 http->p_pragma?http->p_pragma:"",
                 http->p_accept?http->p_accept:"",
                 (data->set.encoding && *data->set.encoding && conn->allocptr.accept_encoding)?
-                conn->allocptr.accept_encoding:"", /* 08/28/02 jhrg */
-                (data->change.referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> <CRLF> */,
+                conn->allocptr.accept_encoding:"",
+                (data->change.referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> */,
                 te
                 );
 
     if(result)
       return result;
 
-    if(co) {
-      int count=0;
-      struct Cookie *store=co;
-      /* now loop through all cookies that matched */
-      while(co) {
-        if(co->value) {
-          if(0 == count) {
-            result = add_bufferf(req_buffer, "Cookie: ");
+    if(data->cookies) {
+      struct Cookie *co; /* no cookies from start */
+
+      Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
+      co = Curl_cookie_getlist(data->cookies,
+                               conn->allocptr.cookiehost?
+                               conn->allocptr.cookiehost:host, ppath,
+                               (bool)(conn->protocol&PROT_HTTPS?TRUE:FALSE));
+      Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+
+      if(co) {
+        int count=0;
+        struct Cookie *store=co;
+        /* now loop through all cookies that matched */
+        while(co) {
+          if(co->value) {
+            if(0 == count) {
+              result = add_bufferf(req_buffer, "Cookie: ");
+              if(result)
+                break;
+            }
+            result = add_bufferf(req_buffer,
+                                 "%s%s=%s", count?"; ":"",
+                                 co->name, co->value);
             if(result)
-              return result;
+              break;
+            count++;
           }
-          result = add_bufferf(req_buffer,
-                               "%s%s=%s", count?"; ":"", co->name, co->value);
-          if(result)
-            return result;
-          count++;
+          co = co->next; /* next cookie please */
         }
-        co = co->next; /* next cookie please */
+        if(count && (CURLE_OK == result))
+          result = add_buffer(req_buffer, "\r\n", 2);
+        
+        Curl_cookie_freelist(store); /* free the cookie list */
       }
-      if(count) {
-        result = add_buffer(req_buffer, "\r\n", 2);
-        if(result)
-          return result;
-      }
-      Curl_cookie_freelist(store); /* free the cookie list */
-      co=NULL;
+      if(result)
+        return result;
     }
 
     if(data->set.timecondition) {
