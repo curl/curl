@@ -350,6 +350,13 @@ static int get_request(int sock, int *part, int *open)
         if(!strncmp(doc, "bad", 3))
           /* if the host name starts with bad, we fake an error here */
           test_no = DOCNUMBER_BADCONNECT;
+        else if(!strncmp(doc, "test", 4)) {
+          char *ptr = strchr(doc, ':');
+          if(ptr)
+            test_no = atoi(ptr+1);
+          else
+            test_no = DOCNUMBER_CONNECT;
+        }
         else
           test_no = DOCNUMBER_CONNECT;
       }

@@ -102,6 +102,10 @@ that is returned. The last slash in the URL must be followed by a number. That
 number (N) will be used by the test-server to load test case N and return the
 data that is defined within the <reply><data></data></reply> section.
 
+If a CONNECT is used to the server (to emulate HTTPS etc over proxy), the port
+number given in the CONNECT request will be used to identify which test that
+is being run, if the proxy host name is said to start with 'test'.
+
 Set 'option=no-output' to prevent the test script to slap on the --output
 argument that directs the output to a file. The --output is also not added if
 the client/stdout section is used.
