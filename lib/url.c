@@ -1704,12 +1704,12 @@ static CURLcode Connect(struct SessionHandle *data,
   } /* if not using proxy */
 
   /*************************************************************
-   * No protocol but proxy usage needs attention
+   * No protocol part in URL was used, add it!
    *************************************************************/
-  if((conn->protocol&PROT_MISSING) && data->change.proxy ) {
-    /* We're guessing prefixes here and since we're told to use a proxy, we
-       need to add the protocol prefix to the URL string before we continue!
-       */
+  if(conn->protocol&PROT_MISSING) {
+    /* We're guessing prefixes here and if we're told to use a proxy or if
+       we're gonna follow a Location: later or... then we need the protocol
+       part added so that we have a valid URL. */
     char *reurl;
 
     reurl = aprintf("%s://%s", conn->protostr, data->change.url);
