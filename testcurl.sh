@@ -7,7 +7,7 @@
 # testcurl.sh is the master script to use for automatic testing of CVS-curl.
 # This is written for the purpose of being run from a crontab job or similar
 # at a regular interval. The output will be suitable to be mailed automaticly
-# to "curl-autocompile@haxx.se" to be dealt with automaticly.  The most
+# to "curl-autocompile@haxx.se" to be dealt with automatically.  The most
 # current build status (with a resonable backlog) will be published on the
 # curl site, at http://curl.haxx.se/auto/
 
