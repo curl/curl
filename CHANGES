@@ -7,6 +7,20 @@
                                History of Changes
 
 
+Daniel (6 February 2002)
+- Miklos Nemeth provided updated windows makefiles and INSTALL docs.
+
+- Mr Larry Fahnoe found a problem with formposts and I managed to track down
+  and patch this bug. This was actually two bugs, as the posted size was also
+  said to be two bytes too large.
+
+- Brent Beardsley found out and brought a correction for the
+  CURLINFO_CONTENT_TYPE parser that was off one byte. This was my fault, I
+  accidentaly broke Giaslas Georgios' patch.
+
+Daniel (5 February 2002)
+- Kevin Roth found yet another SSL download problem.
+
 Version 7.9.4
 
 - no changes since pre-release
