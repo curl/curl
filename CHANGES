@@ -7,15 +7,22 @@
                                   Changelog
 
 Daniel (26 May 2004)
+- Mohun Biswas added release-zlib and debug-zlib targets to the MSVC libcurl
+  Makefile
+
 - David Byron reported a problem with proxy authentication when doing CONNECT,
   like when accessing HTTPS sites wiht a proxy. This probably broke when I
   rewrote the auth stuff recently.
+
+- I added fileupload.c in the examples directory, showing how an upload to a
+  file:// URL is made.
 
 Daniel (25 May 2004)
 - Massimiliano Ziccardi updated the MSVC makefiles.
 
 Daniel (24 May 2004)
-- libcurl now supports "uploading" to file:// URLs.
+- libcurl now supports "uploading" to file:// URLs. Test 204 and 205 were
+  added to verify.
 
 - Simon Josefsson added a idn_free() function in libidn 0.4.5 as a reaction to
   Gisle's previous mail. We now use this function, and thus we require libidn

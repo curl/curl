@@ -6,7 +6,7 @@ Curl and libcurl 7.12.0.
  Available curl_easy_setopt() options:     113
  Number of public functions in libcurl:    36
 
-A special thanks to the recent project sponsors:
+A special thanks to:
 
  archivas.com and Alan Pinstein, for paying me to focus on their requests
 
@@ -52,7 +52,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, Tommy Tam, Luca Altea, James Bursa, Mihai Ionescu, Michael
- Benedict, Andrés García, Joe Halpin, Seshubabu Pasam, Peter Sylvester,
- Robert D. Young, Jesse Noller, David Byron, Massimiliano Ziccardi
+ Benedict, Andrés García, Joe Halpin, Seshubabu Pasam, Peter Sylvester, Robert
+ D. Young, Jesse Noller, David Byron, Massimiliano Ziccardi, Mohun Biswas
 
         Thanks! (and sorry if I forgot to mention someone)
