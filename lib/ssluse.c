@@ -103,6 +103,13 @@
 #define HAVE_ERR_ERROR_STRING_N 1
 #endif
 
+/*
+ * Number of bytes to read from the random number seed file. This must be
+ * a finite value (because some entropy "files" like /dev/urandom have
+ * an infinite length), but must be large enough to provide enough
+ * entopy to properly seed OpenSSL's PRNG.
+ */
+#define RAND_LOAD_LENGTH 1024
 
 #ifndef HAVE_USERDATA_IN_PWD_CALLBACK
 static char global_passwd[64];
@@ -169,7 +176,7 @@ int random_the_seed(struct SessionHandle *data)
     /* let the option override the define */
     nread += RAND_load_file((data->set.ssl.random_file?
                              data->set.ssl.random_file:RANDOM_FILE),
-                            16384); /* bounded size in case it's /dev/urandom */
+                            RAND_LOAD_LENGTH);
     if(seed_enough(nread))
       return nread;
   }
@@ -231,7 +238,7 @@ int random_the_seed(struct SessionHandle *data)
   RAND_file_name(buf, BUFSIZE);
   if(buf[0]) {
     /* we got a file name to try */
-    nread += RAND_load_file(buf, 16384);
+    nread += RAND_load_file(buf, RAND_LOAD_LENGTH);
     if(seed_enough(nread))
       return nread;
   }
