@@ -1052,6 +1052,17 @@ sub singletest {
     my $dumped_core;
     my $cmdres;
 
+    my @precommand= getpart("client", "precommand");
+    if($precommand[0]) {
+        # this is pure perl to eval!
+        my $code = join("", @precommand);
+        eval $code;
+        if($@) {
+            print "perl: $code\n";
+            print "precommand: $@";
+            exit;
+        }
+    }
 
     if($gdbthis) {
         open(GDBCMD, ">log/gdbcmd");

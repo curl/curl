@@ -66,6 +66,7 @@ my $verbose=0; # set to 1 for debugging
 my $retrweirdo=0;
 my $retrnosize=0;
 my $srcdir=".";
+my $nosave=0;
 
 my $port = 8921; # just a default
 do {
@@ -381,7 +382,10 @@ sub STOR_command {
     my $ulsize=0;
     while (defined($line = <SOCK>)) {
         $ulsize += length($line);
-        print FILE $line;
+        print FILE $line if(!$nosave);
+    }
+    if($nosave) {
+        print FILE "$ulsize bytes would've been stored here\n";
     }
     close(FILE);
     close_dataconn();
@@ -496,6 +500,9 @@ my %customcount;
 my %delayreply;
 sub customize {
     undef %customreply;
+
+    $nosave = 0; # default is to save as normal
+
     open(CUSTOM, "<log/ftpserver.cmd") ||
         return 1;
 
@@ -504,22 +511,31 @@ sub customize {
     while(<CUSTOM>) {
         if($_ =~ /REPLY ([A-Z]+) (.*)/) {
             $customreply{$1}=$2;
+            logmsg "FTPD: set custom reply for $1\n";
         }
         if($_ =~ /COUNT ([A-Z]+) (.*)/) {
             # we blank the customreply for this command when having
             # been used this number of times
             $customcount{$1}=$2;
+            logmsg "FTPD: blank custom reply for $1 after $2 uses\n";
         }
         elsif($_ =~ /DELAY ([A-Z]+) (\d*)/) {
             $delayreply{$1}=$2;
+            logmsg "FTPD: delay reply for $1 with $2 seconds\n";
         }
         elsif($_ =~ /RETRWEIRDO/) {
-            print "instructed to use RETRWEIRDO\n";
+            logmsg "FTPD: instructed to use RETRWEIRDO\n";
             $retrweirdo=1;
         }
         elsif($_ =~ /RETRNOSIZE/) {
-            print "instructed to use RETRNOSIZE\n";
+            logmsg "FTPD: instructed to use RETRNOSIZE\n";
             $retrnosize=1;
+        }
+        elsif($_ =~ /NOSAVE/) {
+            # don't actually store the file we upload - to be used when
+            # uploading insanely huge amounts
+            $nosave = 1;
+            logmsg "FTPD: NOSAVE prevents saving of uploaded data\n";
         }
     }
     close(CUSTOM);
