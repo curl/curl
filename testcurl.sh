@@ -123,8 +123,8 @@ att="0"
 while cvsup; do
   att=`expr $att + 1`
   echo "testcurl: failed CVS update attempt number $att."
-  if [ $att -gt 50 ]; then
-    cvsstat="BADNESS"
+  if [ $att -gt 10 ]; then
+    cvsstat="111"
     break # get out of the loop
   fi
   sleep 5
