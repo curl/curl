@@ -465,8 +465,12 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
 
 static int open_tcp_socket(ares_channel channel, struct server_state *server)
 {
-  ares_socket_t s;
+#if defined(WIN32)
+  u_long flags;
+#else
   int flags;
+#endif
+  ares_socket_t s;
   struct sockaddr_in sockin;
 
   /* Acquire a socket. */
