@@ -632,7 +632,6 @@ AC_CHECK_HEADERS( \
         arpa/inet.h \
         net/if.h \
         netinet/in.h \
-	netinet/if_ether.h \
         netdb.h \
         sys/select.h \
         sys/socket.h \
