@@ -889,9 +889,9 @@ FAQ
 
   7.3 Can I perform multiple requests using the same handle?
 
-  With libcurl you can. With PHP/CURL you cannot. This is a limitation in the
-  PHP/CURL code. Therefore, you need to close each handle after each request
-  and create a new one for the following one.
+  Yes - at least in PHP version 4.3.8 and later (this has been known to not
+  work in earlier versions, but the exact version when it started to work is
+  unknown to me).
 
-  I've heard rumours that this situation has been fixed in PHP5, but that is
-  unconfirmed.
+  After a transfer, you just set new options in the handle and make another
+  transfer. This will make libcurl to re-use the same connection if it can.
