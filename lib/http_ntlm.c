@@ -277,8 +277,7 @@ static void mkhash(char *password,
 
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn,
-                          bool proxy,
-                          bool *ready)
+                          bool proxy)
 {
   const char *domain=""; /* empty */
   const char *host=""; /* empty */
@@ -300,7 +299,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;
 
-  *ready = FALSE;
+  curlassert(conn);
+  curlassert(conn->data);
+  conn->data->state.authdone = FALSE;
 
   if(proxy) {
     allocuserpwd = &conn->allocptr.proxyuserpwd;
@@ -562,7 +563,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY; /* FIX TODO */
 
     ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
-    *ready = TRUE;
+    conn->data->state.authdone = TRUE;
 
     /* Switch to web authentication after proxy authentication is done */
     if (proxy)
@@ -577,7 +578,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       free(*allocuserpwd);
       *allocuserpwd=NULL;
     }
-    *ready = TRUE;
+    conn->data->state.authdone = TRUE;
     break;
   }
 
