@@ -169,7 +169,7 @@ TODO
    should most probably use an existing ssh library, such as OpenSSH.
 
  * RSYNC (no RFCs for protocol nor URI/URL format).  An implementation should
-   most probably use an existing ssh library, such as librsync.
+   most probably use an existing rsync library, such as librsync.
 
  CLIENT
 
