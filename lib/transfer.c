@@ -380,6 +380,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 /* we make sure that this socket isn't read more now */
                 k->keepon &= ~KEEP_READ;
                 FD_ZERO(&k->rkeepfd);
+                /* for a progress meter/info update before going away */
+                Curl_pgrsUpdate(conn);
                 return CURLE_OK;
               }
 
