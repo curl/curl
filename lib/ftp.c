@@ -2216,7 +2216,7 @@ static CURLcode ftp_state_user_resp(struct connectdata *conn,
       state(conn, FTP_ACCT);
     }
     else {
-      failf(data, "ACCT requested by none available");
+      failf(data, "ACCT requested but none available");
       result = CURLE_LOGIN_DENIED;
     }
   }

@@ -236,6 +236,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_SEND_FAIL_REWIND:
     return "Send failed since rewinding of the data stream failed";
 
+  case CURLE_LOGIN_DENIED:
+    return "FTP: login denied";;
+
   case CURLE_URL_MALFORMAT_USER: /* not used by current libcurl */
   case CURLE_MALFORMAT_USER:     /* not used by current libcurl */
   case CURLE_BAD_CALLING_ORDER:  /* not used by current libcurl */
