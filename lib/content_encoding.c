@@ -33,7 +33,7 @@
 #include <curl/types.h>
 #include "sendf.h"
 
-#define DSIZ 4096               /* buffer size for decompressed data */
+#define DSIZ 0x10000             /* buffer size for decompressed data */
 
 #define GZIP_MAGIC_0 0x1f
 #define GZIP_MAGIC_1 0x8b
@@ -248,7 +248,12 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
       break;
 
     case GZIP_UNDERFLOW:
-      /* We need more data so we can find the end of the gzip header */
+      /* We need more data so we can find the end of the gzip header.
+      It's possible that the memory block we malloc here will never be
+      freed if the transfer abruptly aborts after this point.  Since it's
+      unlikely that circumstances will be right for this code path to be
+      followed in the first place, and it's even more unlikely for a transfer
+      to fail immediately afterwards, it should seldom be a problem. */
       z->avail_in = nread;
       z->next_in = malloc(z->avail_in);
       if (z->next_in == NULL) {
