@@ -6,6 +6,18 @@
 
                                History of Changes
 
+Daniel (29 October 2001)
+- Kevin Roth brought another patch that moved the cygwin package files to the
+  packages/Win32/cygwin directory.
+
+- A bug in the connection re-use logic made repeated requests to the same FTP
+  server (when using name+pasword in the URL) sometimes use more than one
+  connection.
+
+- Moonesamy tracked down and fixed a problem with the new 7.9.1 connect
+  code. This might be the error Kevin Roth reported on the 7.9.1-pre5
+  release...
+
 Daniel (26 October 2001)
 - Added test28 which verifies that "Location:"-following works even if the
   contents is separated with more than one space.
