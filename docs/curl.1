@@ -687,6 +687,10 @@ If this option is used several times, the last one will be used.
 Use specified HTTP proxy. If the port number is not specified, it is assumed
 at port 1080.
 
+This option overrides existing environment variables that sets proxy to
+use. If there's an environment variable setting a proxy, you can set proxy to
+"" to override it.
+
 \fBNote\fP that all operations that are performed over a HTTP proxy will
 transparantly be converted to HTTP. It means that certain protocol specific
 operations might not be available. This is not the case if you can tunnel
