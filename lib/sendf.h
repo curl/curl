@@ -30,13 +30,6 @@ void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 #define infof Curl_infof
 #define failf Curl_failf
 
-struct send_buffer {
-  char *buffer;
-  size_t size_max;
-  size_t size_used;
-};
-typedef struct send_buffer send_buffer;
-
 #define CLIENTWRITE_BODY   1
 #define CLIENTWRITE_HEADER 2
 #define CLIENTWRITE_BOTH   (CLIENTWRITE_BODY|CLIENTWRITE_HEADER)
