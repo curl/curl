@@ -137,6 +137,7 @@ struct thread_data {
   HANDLE thread_hnd;
   unsigned thread_id;
   DWORD  thread_status;
+  curl_socket_t dummy_sock;   /* dummy for Curl_multi_ares_fdset() */
 };
 #endif
 
@@ -807,23 +808,31 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 
 #if !defined(USE_ARES)
 /*
- * Non-ares build.
- *
- * We provide this function only to allow multi.c to remain unaware if we are
- * doing asynch resolves or not.
+ * Non-ares build. If we are using threading gethostbyname, then this must
+ * set the fd_set for the threaded resolve socket. If not, we just return OK.
  */
 CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
                                fd_set *read_fd_set,
                                fd_set *write_fd_set,
                                int *max_fdp)
 {
+#ifdef USE_THREADING_GETHOSTBYNAME
+  const struct thread_data *td =
+    (const struct thread_data *) conn->async.os_specific;
+
+  if (td && td->dummy_sock != CURL_SOCKET_BAD) {
+    FD_SET(td->dummy_sock,write_fd_set);
+    *max_fdp = td->dummy_sock;
+  }
+#else /* if not USE_THREADING_GETHOSTBYNAME */
   (void)conn;
   (void)read_fd_set;
   (void)write_fd_set;
   (void)max_fdp;
+#endif
   return CURLE_OK;
 }
-#endif
+#endif /* !USE_ARES */
 
 #if defined(ENABLE_IPV6) && !defined(USE_ARES)
 
@@ -1332,7 +1341,7 @@ static void trace_it (const char *fmt, ...)
     return;
   va_start (args, fmt);
   vfprintf (stderr, fmt, args);
-  fflush (stderr);
+/*fflush (stderr); */  /* seems a bad idea in a multi-threaded app */
   va_end (args);
 }
 #endif
@@ -1373,8 +1382,14 @@ static void destroy_thread_data (struct Curl_async *async)
 {
   if (async->hostname)
     free(async->hostname);
-  if (async->os_specific)
+
+  if (async->os_specific) {
+    curl_socket_t sock = ((const struct thread_data*)async->os_specific)->dummy_sock;
+
+    if (sock != CURL_SOCKET_BAD)
+       sclose(sock);
     free(async->os_specific);
+  }
   async->hostname = NULL;
   async->os_specific = NULL;
 }
@@ -1407,6 +1422,7 @@ static bool init_gethostbyname_thread (struct connectdata *conn,
   conn->async.dns = NULL;
   conn->async.os_specific = (void*) td;
 
+  td->dummy_sock = CURL_SOCKET_BAD;
   td->thread_hnd = (HANDLE) _beginthreadex(NULL, 0, gethostbyname_thread,
                                 conn, 0, &td->thread_id);
   if (!td->thread_hnd) {
@@ -1415,6 +1431,11 @@ static bool init_gethostbyname_thread (struct connectdata *conn,
      destroy_thread_data(&conn->async);
      return (0);
   }
+  /* This socket is only to keep Curl_multi_ares_fdset() and select() happy;
+   * should never become signalled for read/write since it's unbound but
+   * Windows needs atleast 1 socket in select().
+   */
+  td->dummy_sock = socket(AF_INET, SOCK_DGRAM, 0);
   return (1);
 }
 
