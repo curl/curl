@@ -478,7 +478,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 start++);
 
             /* count all non-space letters following */
-            for(end=start+1, len=0;
+            for(end=start, len=0;
                 *end && !isspace((int)*end);
                 end++, len++);
 
