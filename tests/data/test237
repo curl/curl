@@ -1,0 +1,34 @@
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP getting bad host in 227-response to PASV
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/237 --disable-epsv
+</command>
+<file name="log/ftpserver.cmd">
+REPLY PASV 227 Entering Passiv Mode (1218,91,256,127,127,127)
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# curl: (15) Can't resolve new host 1218.91.256.127:32639
+# 15 => CURLE_FTP_CANT_GET_HOST
+<errorcode>
+15
+</errorcode>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+PASV
+</protocol>
+</verify>
