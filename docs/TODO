@@ -73,6 +73,9 @@ TODO
 
  FTP
 
+ * Make CURLOPT_FTPPORT support an additional port number on the IP/if/name,
+   like "blabla:[port]" or possibly even "blabla:[portfirst]-[portsecond]".
+
  * FTP ASCII upload does not follow RFC959 section 3.1.1.1: "The sender
    converts the data from an internal character representation to the standard
    8-bit NVT-ASCII representation (see the Telnet specification).  The
