@@ -7,5 +7,4 @@ advantage of libcurl.
 If you end up with other small but still useful example sources, please mail
 them for submission in future packages and on the web site.
 
-There are examples for different languages and environments. Browse around to
-find those that fit you.
+Try the php/examples/ directory for PHP programming snippets!
