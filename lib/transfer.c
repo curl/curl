@@ -817,12 +817,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                                        k->hbuflen);
             k->badheader = FALSE; /* taken care of now */
           }
-
-          /* This switch handles various content encodings. If there's an
-             error here, be sure to check over the almost identical code in
-             http_chunk.c. 08/29/02 jhrg */
+          else {
+            /* This switch handles various content encodings. If there's an
+               error here, be sure to check over the almost identical code in
+               http_chunk.c. 08/29/02 jhrg */
 #ifdef HAVE_LIBZ
-          switch (k->content_encoding) {
+            switch (k->content_encoding) {
             case IDENTITY:
 #endif
               /* This is the default when the server sends no
@@ -847,8 +847,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                      "content encodings.");
               result = CURLE_BAD_CONTENT_ENCODING;
               break;
-          }
+            }
 #endif
+          }
 
           if(result)
             return result;
