@@ -2491,9 +2491,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           /* no name given, get the password only */
           sscanf(userpass, ":%127[^@]", data->state.passwd);
 
-        /* we have set the password */
-        data->state.passwdgiven = TRUE;
-
         if(data->state.user[0]) {
           char *newname=curl_unescape(data->state.user, 0);
           if(strlen(newname) < sizeof(data->state.user)) {
@@ -2510,6 +2507,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
             strcpy(data->state.passwd, newpasswd);
           }
           free(newpasswd);
+
+          /* we have set the password */
+          data->state.passwdgiven = TRUE;
         }
       }
     }
@@ -2538,15 +2538,18 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       sscanf(data->set.userpwd+1, "%127[^\n]", data->state.passwd);
   }
 
-  if (data->set.use_netrc != CURL_NETRC_IGNORED &&
+  if ((data->set.use_netrc != CURL_NETRC_IGNORED) &&
       !data->state.passwdgiven) {  /* need passwd */
     if(Curl_parsenetrc(conn->hostname,
                        data->state.user,
                        data->state.passwd)) {
       infof(data, "Couldn't find host %s in the .netrc file, using defaults",
             conn->hostname);
-    } else
+    }
+    else {
       conn->bits.user_passwd = 1; /* enable user+password */
+      data->state.passwdgiven = TRUE;
+    }
   }
 
   /* if we have a user but no password, ask for one */
