@@ -405,7 +405,11 @@ list. If you add a header that is otherwise generated and used by libcurl
 internally, your added one will be used instead. If you add a header with no
 contents as in 'Accept:' (no data on the right side of the colon), the
 internally used header will get disabled. Thus, using this option you can add
-new headers, replace internal headers and remove internal headers.
+new headers, replace internal headers and remove internal headers. The
+headers included in the linked list must not be CRLF-terminated, because
+curl adds CRLF after each header item. Failure to comply with this will
+result in strange bugs because the server will most likely ignore part
+of the headers you specified.
 
 \fBNOTE:\fPThe most commonly replaced headers have "shortcuts" in the options
 CURLOPT_COOKIE, CURLOPT_USERAGENT and CURLOPT_REFERER.
