@@ -404,7 +404,7 @@ struct hostent {
 
 */
 
-Curl_addrinfo *Curl_he2ai(struct hostent *he, unsigned short port)
+Curl_addrinfo *Curl_he2ai(struct hostent *he, int port)
 {
   Curl_addrinfo *ai;
   Curl_addrinfo *prevai = NULL;
