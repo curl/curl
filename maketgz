@@ -58,29 +58,10 @@ findprog()
 
 ############################################################################
 #
-# If we have autoconf we can just as well update configure.in to contain our
-# brand new version number:
+# Enforce a rerun of configure (updates the VERSION)
 #
- 
-#if { findprog autoconf >/dev/null 2>/dev/null; } then
-#  echo "- No autoconf found, we leave configure as it is"
-#else
-#  # Replace version number in configure.in file:
-#
-#  CONF="configure.in"
-#
-#  sed 's/^AM_INIT_AUTOMAKE.*/AM_INIT_AUTOMAKE(curl,"'$version'")/g' $CONF >$CONF.new
-#
-#  # Save old  file
-#  cp -p $CONF $CONF.old
-#
-#  # Make new configure.in
-#  mv $CONF.new $CONF
-# 
-#  # Update the configure script
-#  echo "Runs autoconf"
-#  autoconf
-#fi
+
+./config.status --recheck
 
 ############################################################################
 #
@@ -97,65 +78,7 @@ fi
 
 ############################################################################
 #
-# Now run make first to make the file dates decent and make sure that it
-# compiles just before release!
+# Now run make dist
 #
 
-make
-
-# get current dir
-dir=`pwd`
-
-# Get basename
-orig=`basename $dir`
-
-# Get the left part of the dash (-)
-new=`echo $orig | cut -d- -f1`
-
-# Build new directory name
-n=$new-$version;
-
-# Tell the world what we're doing
-echo "Copying files into distribution archive";
-
-if [ -r $n ]; then
-  echo "Directory already exists!"
-  exit
-fi
-
-# Create the new dir
-mkdir $n
-
-# Copy all relevant files, with path and permissions!
-tar -cf - `cat FILES` | (cd $n; tar -xBpf -)
-
-# Create the distribution root Makefile from Makefile.dist
-cp -p Makefile.dist $n/Makefile
-
-############################################################################
-#
-# Replace @SHELL@ with /bin/sh in the Makefile.in files!
-#
-echo "Replace @SHELL@ with /bin/sh in the Makefile.in files"
-temp=/tmp/curl$$
-for file in Makefile.in lib/Makefile.in src/Makefile.in; do
-  in="$n/$file"
-  sed "s:@SHELL@:/bin/sh:g" $in >$temp
-  cp $temp $in
-done
-rm -rf $temp
-
-# Tell the world what we're doing
-echo "creates $n.tar.gz";
-
-# Make a tar archive of it all
-tar -cvf $n.tar $n
-
-# gzip the archive
-gzip $n.tar
-
-# Make it world readable
-chmod a+r $n.tar.gz ;
-
-# Delete the temp dir
-rm -rf $n
+make dist
