@@ -2,7 +2,7 @@ Curl and libcurl 7.12.3
 
  Public curl release number:               84
  Releases counted from the very beginning: 111
- Available command line options:           96
+ Available command line options:           100
  Available curl_easy_setopt() options:     121
  Number of public functions in libcurl:    36
  Amount of public web site mirrors:        13
@@ -17,11 +17,10 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o configure no longer use pkg-config on cross-compiles
- o gzip decompress memory leak
+ o configure no longer uses pkg-config on cross-compiles
+ o potential gzip decompress memory leak
  o "-C - --fail" on a HTTP page already downloaded
  o formposting a zero byte file
- o test 165 works with older iconv versions as well
  o use setlocale() for better IDN functionality by default
 
 Other curl-related news since the previous public release:
