@@ -1030,7 +1030,7 @@ CURLcode Curl_http(struct connectdata *conn)
       struct Cookie *store=co;
       /* now loop through all cookies that matched */
       while(co) {
-        if(co->value && strlen(co->value)) {
+        if(co->value) {
           if(0 == count) {
             add_bufferf(req_buffer, "Cookie: ");
           }
