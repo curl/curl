@@ -25,4 +25,9 @@
 int Curl_parsenetrc(char *host,
                     char *login,
                     char *password);
+  /* Assume: password[0]=0, host[0] != 0.
+   * If login[0] = 0, search for login and password within a machine section
+   * in the netrc.
+   * If login[0] != 0, search for password within machine and login.
+   */
 #endif

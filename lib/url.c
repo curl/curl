@@ -441,7 +441,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Parse the $HOME/.netrc file
      */
-    data->set.use_netrc = va_arg(param, long)?TRUE:FALSE;
+    data->set.use_netrc = va_arg(param, long);
     break;
   case CURLOPT_FOLLOWLOCATION:
     /*
@@ -1351,7 +1351,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   char resumerange[40]="";
   struct connectdata *conn;
   struct connectdata *conn_temp;
-  char endbracket;
   int urllen;
   Curl_addrinfo *hostaddr;
 #ifdef HAVE_ALARM
@@ -1406,7 +1405,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      connections, so we set this to force-close. Protocols that support
      this need to set this to FALSE in their "curl_do" functions. */
   conn->bits.close = TRUE;
-  
+
   /* inherite initial knowledge from the data struct */
   conn->bits.user_passwd = data->set.userpwd?1:0;
   conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
@@ -1533,35 +1532,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   buf = data->state.buffer; /* this is our buffer */
 
-  /*************************************************************
-   * Take care of user and password authentication stuff
-   *************************************************************/
-
-  if(conn->bits.user_passwd && !data->set.use_netrc) {
-    data->state.user[0] =0;
-    data->state.passwd[0]=0;
-
-    if(*data->set.userpwd != ':') {
-      /* the name is given, get user+password */
-      sscanf(data->set.userpwd, "%127[^:]:%127[^\n]",
-             data->state.user, data->state.passwd);
-    }
-    else
-      /* no name given, get the password only */
-      sscanf(data->set.userpwd+1, "%127[^\n]", data->state.passwd);
-
-    /* check for password, if no ask for one */
-    if( !data->state.passwd[0] ) {
-      if(!data->set.fpasswd || 
-         data->set.fpasswd(data->set.passwd_client,
-                           "password:", data->state.passwd,
-                           sizeof(data->state.passwd)))
-      {
-        failf(data, "Bad password from password callback");
-        return CURLE_BAD_PASSWORD_ENTERED;
-      }
-    }
-  }
+  /*
+   * So if the URL was A://B/C,
+   *   conn->protostr is A
+   *   conn->gname is B
+   *   conn->path is /C
+   */
 
   /*************************************************************
    * Take care of proxy authentication stuff
@@ -1843,7 +1819,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
     if(type) {
       char command;
-      *type=0;
+      *type=0;                     /* it was in the middle of the hostname */
       command = toupper(type[6]);
       switch(command) {
       case 'A': /* ASCII mode */
@@ -1912,86 +1888,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
 
   /*************************************************************
-   * .netrc scanning coming up
-   *************************************************************/
-  if(data->set.use_netrc) {
-    if(Curl_parsenetrc(conn->hostname,
-                       data->state.user,
-                       data->state.passwd)) {
-      infof(data, "Couldn't find host %s in the .netrc file, using defaults",
-            conn->hostname);
-    }
-    else
-      conn->bits.user_passwd = 1; /* enable user+password */
-
-    /* weather we failed or not, we don't know which fields that were filled
-       in anyway */
-    if(!data->state.user[0])
-      strcpy(data->state.user, CURL_DEFAULT_USER);
-    if(!data->state.passwd[0])
-      strcpy(data->state.passwd, CURL_DEFAULT_PASSWORD);
-  }
-  else if(!(conn->bits.user_passwd) &&
-	  (conn->protocol & (PROT_FTP|PROT_HTTP)) ) {
-    /* This is a FTP or HTTP URL, and we haven't got the user+password in
-     * the extra parameter, we will now try to extract the possible
-     * user+password pair in a string like:
-     * ftp://user:password@ftp.my.site:8021/README */
-    char *ptr=NULL; /* assign to remove possible warnings */
-    if((ptr=strchr(conn->name, '@'))) {
-      /* there's a user+password given here, to the left of the @ */
-
-      data->state.user[0] =0;
-      data->state.passwd[0]=0;
-
-      if(*conn->name != ':') {
-        /* the name is given, get user+password */
-        sscanf(conn->name, "%127[^:@]:%127[^@]",
-               data->state.user, data->state.passwd);
-      }
-      else
-        /* no name given, get the password only */
-        sscanf(conn->name+1, "%127[^@]", data->state.passwd);
-
-      if(data->state.user[0]) {
-        char *newname=curl_unescape(data->state.user, 0);
-        if(strlen(newname) < sizeof(data->state.user)) {
-          strcpy(data->state.user, newname);
-        }
-        /* if the new name is longer than accepted, then just use
-           the unconverted name, it'll be wrong but what the heck */
-        free(newname);
-      }
-
-      /* check for password, if no ask for one */
-      if( !data->state.passwd[0] ) {
-        if(!data->set.fpasswd ||
-           data->set.fpasswd(data->set.passwd_client,
-                             "password:", data->state.passwd,
-                             sizeof(data->state.passwd))) {
-          failf(data, "Bad password from password callback");
-          return CURLE_BAD_PASSWORD_ENTERED;
-        }
-      }
-      else {
-        /* we have a password found in the URL, decode it! */
-        char *newpasswd=curl_unescape(data->state.passwd, 0);
-        if(strlen(newpasswd) < sizeof(data->state.passwd)) {
-          strcpy(data->state.passwd, newpasswd);
-        }
-        free(newpasswd);
-      }
-
-      conn->name = ++ptr;
-      conn->bits.user_passwd=TRUE; /* enable user+password */
-    }
-    else {
-      strcpy(data->state.user, CURL_DEFAULT_USER);
-      strcpy(data->state.passwd, CURL_DEFAULT_PASSWORD);
-    }
-  }
-
-  /*************************************************************
    * Figure out the remote port number
    *
    * No matter if we use a proxy or not, we have to figure out the remote
@@ -1999,29 +1895,32 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    *
    * To be able to detect port number flawlessly, we must not confuse them
    * IPv6-specified addresses in the [0::1] style. (RFC2732)
+   *
+   * The conn->name is currently [user:passwd@]host[:port] where host could
+   * be a hostname, IPv4 address or IPv6 address.
    *************************************************************/
 
-  if((1 == sscanf(conn->name, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
-     (']' == endbracket)) {
-    /* This is a (IPv6-style) specified IP-address. We support _any_
-       IP within brackets to be really generic. */
-    conn->name++; /* pass the starting bracket */
-
-    tmp = strchr(conn->name, ']');
-    *tmp = 0; /* zero terminate */
-
-    tmp++; /* pass the ending bracket */
-    if(':' != *tmp)
-      tmp = NULL; /* no port number available */
-  }
-  else {
-    /* traditional IPv4-style port-extracting */
-    tmp = strchr(conn->name, ':');
-  }
+  tmp = strrchr(conn->name, ':');
 
   if (tmp) {
-    *tmp++ = '\0'; /* cut off the name there */
-    conn->remote_port = atoi(tmp);
+    char *rest;
+    unsigned long port;
+
+    port=strtoul(tmp+1, &rest, 10);  /* Port number must be decimal */
+
+    if (rest != (tmp+1) && *rest == '\0') {
+      /* The colon really did have only digits after it,
+       * so it is either a port number or a mistake */
+
+      if (port > 0xffff) {   /* Single unix standard says port numbers are
+                              * 16 bits long */
+        failf(data, "Port number too large: %lu", port);
+        return CURLE_URL_MALFORMAT;
+      }
+
+      *tmp = '\0'; /* cut off the name there */
+      conn->remote_port = port;
+    }
   }
 
   if(data->change.proxy) {
@@ -2073,6 +1972,138 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->proxyhost = strdup(proxyptr);
 
     free(proxydup); /* free the duplicate pointer and not the modified */
+  }
+
+  /*************************************************************
+   * Take care of user and password authentication stuff
+   *************************************************************/
+
+  /*
+   * Inputs: data->set.userpwd   (CURLOPT_USERPWD)
+   *         data->set.fpasswd   (CURLOPT_PASSWDFUNCTION)
+   *         data->set.use_netrc (CURLOPT_NETRC)
+   *         conn->hostname
+   *         netrc file
+   *         hard-coded defaults
+   *
+   * Outputs: (almost :- all currently undefined)
+   *          conn->bits.user_passwd  - non-zero if non-default passwords exist
+   *          conn->state.user        - non-zero length if defined
+   *          conn->state.passwd      -   ditto
+   *          conn->hostname          - remove user name and password
+   */
+
+  /* At this point, we're hoping all the other special cases have
+   * been taken care of, so conn->hostname is at most
+   *    [user[:password]]@]hostname
+   *
+   * We need somewhere to put the embedded details, so do that first.
+   */
+
+  data->state.user[0] =0;   /* to make everything well-defined */
+  data->state.passwd[0]=0;
+  
+  if (conn->protocol & (PROT_FTP|PROT_HTTP)) {
+    /* This is a FTP or HTTP URL, we will now try to extract the possible
+     * user+password pair in a string like:
+     * ftp://user:password@ftp.my.site:8021/README */
+    char *ptr=strchr(conn->name, '@');
+    char *userpass = conn->name;
+    if(ptr != NULL) {
+      /* there's a user+password given here, to the left of the @ */
+
+      conn->name = conn->hostname = ++ptr;
+
+      /* So the hostname is sane.  Only bother interpreting the
+       * results if we could care.  It could still be wasted
+       * work because it might be overtaken by the programmatically
+       * set user/passwd, but doing that first adds more cases here :-(
+       */
+
+      if (data->set.use_netrc != CURL_NETRC_REQUIRED) {
+        /* We could use the one in the URL */
+
+        conn->bits.user_passwd = 1; /* enable user+password */
+
+        if(*userpass != ':') {
+          /* the name is given, get user+password */
+          sscanf(userpass, "%127[^:@]:%127[^@]",
+                 data->state.user, data->state.passwd);
+        }
+        else
+          /* no name given, get the password only */
+          sscanf(userpass, ":%127[^@]", data->state.passwd);
+
+        if(data->state.user[0]) {
+          char *newname=curl_unescape(data->state.user, 0);
+          if(strlen(newname) < sizeof(data->state.user)) {
+            strcpy(data->state.user, newname);
+          }
+          /* if the new name is longer than accepted, then just use
+             the unconverted name, it'll be wrong but what the heck */
+          free(newname);
+        }
+        if (data->state.passwd[0]) {
+          /* we have a password found in the URL, decode it! */
+          char *newpasswd=curl_unescape(data->state.passwd, 0);
+          if(strlen(newpasswd) < sizeof(data->state.passwd)) {
+            strcpy(data->state.passwd, newpasswd);
+          }
+          free(newpasswd);
+        }
+      }
+    }
+  }
+
+  /* Programmatically set password:
+   *   - always applies, if available
+   *   - takes precedence over the values we just set above
+   * so scribble it over the top.
+   * User-supplied passwords are assumed not to need unescaping.
+   *
+   * user_password is set in "inherite initial knowledge' above,
+   * so it doesn't have to be set in this block
+   */
+  if (data->set.userpwd != NULL) {
+    if(*data->set.userpwd != ':') {
+      /* the name is given, get user+password */
+      sscanf(data->set.userpwd, "%127[^:]:%127[^\n]",
+             data->state.user, data->state.passwd);
+    }
+    else
+      /* no name given, get the password only */
+      sscanf(data->set.userpwd+1, "%127[^\n]", data->state.passwd);
+  }
+
+  if (data->set.use_netrc != CURL_NETRC_IGNORED &&
+      data->state.passwd[0] == '\0' ) {  /* need passwd */
+    if(Curl_parsenetrc(conn->hostname,
+                       data->state.user,
+                       data->state.passwd)) {
+      infof(data, "Couldn't find host %s in the .netrc file, using defaults",
+            conn->hostname);
+    } else
+      conn->bits.user_passwd = 1; /* enable user+password */
+  }
+
+  /* if we have a user but no password, ask for one */
+  if(conn->bits.user_passwd &&
+     !data->state.passwd[0] ) {
+    if(!data->set.fpasswd ||
+      data->set.fpasswd(data->set.passwd_client,
+                       "password:", data->state.passwd,
+                           sizeof(data->state.passwd)))
+      return CURLE_BAD_PASSWORD_ENTERED;
+  }
+
+  /* So we could have a password but no user; that's just too bad. */
+
+  /* If our protocol needs a password and we have none, use the defaults */
+  if ( (conn->protocol & (PROT_FTP|PROT_HTTP)) &&
+       !conn->bits.user_passwd) {
+    strcpy(data->state.user, CURL_DEFAULT_USER);
+    strcpy(data->state.passwd, CURL_DEFAULT_PASSWORD);
+    /* This is the default password, so DON'T set conn->bits.user_passwd */
   }
 
   /*************************************************************

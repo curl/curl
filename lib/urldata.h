@@ -650,7 +650,8 @@ struct UserDefined {
   bool no_body;
   bool set_port;
   bool upload;
-  bool use_netrc;
+  enum CURL_NETRC_OPTION
+       use_netrc;        /* defined in include/curl.h */
   bool verbose;
   bool krb4;             /* kerberos4 connection requested */
   bool reuse_forbid;     /* forbidden to be reused, close after use */
