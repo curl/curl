@@ -6,6 +6,23 @@
 
                                History of Changes
 
+Daniel (23 January 2001)
+- Added simple IPv6 detection in the configure script and made the version
+  string add 'ipv6' to the enable section in that case. ENABLE_IPV6 will be
+  set if curl is compiled with IPv6 support enabled.
+
+- Added a parser for IPv6-style specified IP-addresses in a URL. Thus, when
+  IPv6 gets enabled soon, we can use URLs like '[0::1]:80'...
+
+- Made the URL globbing in the client possible to fail silently if there's an
+  error in the globbing. It makes it almost intuitive, so when you don't
+  follow the syntax rules, globbing is simply switched off the the raw string
+  is used instead.
+
+  I still think we'll get problems with IPv6-style IP-addresses when we *want*
+  globbing on parts of the URL as the initial part of the URL will for sure
+  seriously confuse the globber.
+
 Daniel (22 January 2001)
 - Björn Stenberg supplied a progress meter patch that makes it look better even
   during slow starts. Previously it made some silly assumptions...
