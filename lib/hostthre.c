@@ -83,9 +83,7 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
-#include "inet_ntoa_r.h"
-#endif
+#include "inet_ntop.h"
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG
@@ -137,17 +135,14 @@ static void trace_it (const char *fmt, ...)
 #endif
 
 #ifdef DEBUG_THREADING_GETADDRINFO
-
-/* inet_ntop.c */
-extern const char *Curl_inet_ntop (int af, const void *addr, char *buf, size_t size);
-
 static void dump_addrinfo (struct connectdata *conn, const struct addrinfo *ai)
 {
   TRACE(("dump_addrinfo:\n"));
   for ( ; ai; ai = ai->ai_next) {
     char  buf [INET6_ADDRSTRLEN];
+
     trace_it("    fam %2d, CNAME %s, ",
-             af, ai->ai_canonname ? ai->ai_canonname : "<none>");
+             ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
     if (Curl_printable_address(ai->ai_family, ai->ai_addr, buf, sizeof(buf)))
       trace_it("%s\n", buf);
     else
@@ -283,6 +278,10 @@ static bool init_resolve_thread (struct connectdata *conn,
 
   Curl_safefree(conn->async.hostname);
   conn->async.hostname = strdup(hostname);
+#ifdef USE_LIBIDN
+  if (conn->ace_hostname)
+    TRACE(("ACE name '%s'\n", conn->ace_hostname));
+#endif
   if (!conn->async.hostname) {
     free(td);
     SetLastError(ENOMEM);
@@ -499,7 +498,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
   /* see if we have an IPv6 stack */
   s = socket(PF_INET6, SOCK_DGRAM, 0);
-  if (s < 0) {
+  if (s != CURL_SOCKET_BAD) {
     /* Some non-IPv6 stacks have been found to make very slow name resolves
      * when PF_UNSPEC is used, so thus we switch to a mere PF_INET lookup if
      * the stack seems to be a non-ipv6 one. */

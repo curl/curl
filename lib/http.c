@@ -92,6 +92,7 @@
 #include "http_negotiate.h"
 #include "url.h"
 #include "share.h"
+#include "hostip.h"
 #include "http.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -252,7 +253,7 @@ static CURLcode http_auth_headers(struct connectdata *conn,
      host due to a location-follow, we do some weirdo checks here */
   if(!data->state.this_is_a_follow ||
      !data->state.auth_host ||
-     curl_strequal(data->state.auth_host, conn->hostname) ||
+     curl_strequal(data->state.auth_host, TRUE_HOSTNAME(conn)) ||
      data->set.http_disable_hostname_check_before_authentication) {
 
   /* Send proxy authentication header if needed */
@@ -1112,7 +1113,7 @@ CURLcode Curl_http_connect(struct connectdata *conn)
 
     /* either HTTPS over proxy, OR explicitly asked for a tunnel */
     result = Curl_ConnectHTTPProxyTunnel(conn, FIRSTSOCKET,
-                                         conn->hostname, conn->remote_port);
+                                         TRUE_HOSTNAME(conn), conn->remote_port);
     if(CURLE_OK != result)
       return result;
   }    
@@ -1131,7 +1132,7 @@ CURLcode Curl_http_connect(struct connectdata *conn)
       /* Free to avoid leaking memory on multiple requests*/
       free(data->state.auth_host);
 
-    data->state.auth_host = strdup(conn->hostname);
+    data->state.auth_host = strdup(TRUE_HOSTNAME(conn));
   }
 
   return CURLE_OK;
@@ -1218,7 +1219,7 @@ CURLcode Curl_http(struct connectdata *conn)
   struct HTTP *http;
   struct Cookie *co=NULL; /* no cookies from start */
   char *ppath = conn->path;
-  char *host = conn->hostname;
+  char *host = TRUE_HOSTNAME(conn);
   const char *te = ""; /* tranfer-encoding */
   char *ptr;
   char *request;

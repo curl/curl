@@ -124,8 +124,6 @@
 #include "inet_ntop.h"
 #include <ca-bundle.h>
 
-#include <curl/types.h>
-
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
 #endif
@@ -152,8 +150,7 @@ static unsigned int ConnectionStore(struct SessionHandle *data,
 static bool safe_strequal(char* str1, char* str2);
 
 #ifdef USE_LIBIDN
-static bool is_ASCII_name (const char *hostname);
-static bool is_ACE_name (const char *hostname);
+static bool is_ASCII_name(const char *hostname);
 #endif
 
 #ifndef USE_ARES
@@ -1373,6 +1370,9 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->newurl);
   Curl_safefree(conn->pathbuffer); /* the URL path buffer */
   Curl_safefree(conn->namebuffer); /* the URL host name buffer */
+#ifdef USE_LIBIDN
+  Curl_safefree(conn->ace_hostname);
+#endif
   Curl_SSL_Close(conn);
 
   /* close possibly still open sockets */
@@ -1473,7 +1473,7 @@ ConnectionExists(struct SessionHandle *data,
         continue;
 
       if(strequal(needle->protostr, check->protostr) &&
-         strequal(needle->hostname, check->hostname) &&
+         strequal(TRUE_HOSTNAME(needle), TRUE_HOSTNAME(check)) &&
          (needle->remote_port == check->remote_port) ) {
         if(needle->protocol & PROT_SSL) {
           /* This is SSL, verify that we're using the same
@@ -1763,7 +1763,7 @@ static int handleSock5Proxy(const char *proxy_name,
 #ifndef ENABLE_IPV6
     struct Curl_dns_entry *dns;
     Curl_addrinfo *hp=NULL;
-    int rc = Curl_resolv(conn, conn->hostname, conn->remote_port, &dns);
+    int rc = Curl_resolv(conn, TRUE_HOSTNAME(conn), conn->remote_port, &dns);
     
     if(rc == -1)
       return 1;
@@ -2917,6 +2917,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     free(conn->namebuffer); /* free the newly allocated name buffer */
     conn->namebuffer = old_conn->namebuffer; /* use the old one */
     conn->hostname = old_conn->hostname;
+#ifdef USE_LIBIDN
+    Curl_safefree(conn->ace_hostname);
+    conn->ace_hostname = old_conn->ace_hostname;
+#endif
 
     free(conn->pathbuffer); /* free the newly allocated path pointer */
     conn->pathbuffer = old_conn->pathbuffer; /* use the old one */
@@ -3057,7 +3061,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->port =  conn->remote_port; /* it is the same port */
 
     /* Resolve target host right on */
-    rc = Curl_resolv(conn, conn->hostname, conn->port, &hostaddr);
+    rc = Curl_resolv(conn, TRUE_HOSTNAME(conn), conn->port, &hostaddr);
     if(rc == 1)
       *async = TRUE;
 
@@ -3154,13 +3158,12 @@ static CURLcode SetupConnection(struct connectdata *conn,
     const char *host = conn->hostname;
     char *ace_hostname;
 
-    if (!is_ASCII_name(host) && !is_ACE_name(host)) {
-       int rc = idna_to_ascii_lz (host, &ace_hostname, 0);
-
-       if (rc == IDNA_SUCCESS)
-          conn->ace_hostname = ace_hostname;
-       else
-          infof(data, "Failed to convert %s to ACE; IDNA error %d\n", host, rc);
+    if (!is_ASCII_name(host)) {
+      int rc = idna_to_ascii_lz (host, &ace_hostname, 0);
+      if (rc == IDNA_SUCCESS)
+        conn->ace_hostname = ace_hostname;
+      else
+        infof(data, "Failed to convert %s to ACE; IDNA error %d\n", host, rc);
     }
   }
 #endif
@@ -3499,18 +3502,17 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc)
 }
 
 /*
- * Helpers for IDNA convertions. To do.
+ * Helpers for IDNA convertions.
  */
 #ifdef USE_LIBIDN
 static bool is_ASCII_name (const char *hostname)
 {
-  (void) hostname;
-  return (TRUE);
-}
+  const unsigned char *ch = (const unsigned char*)hostname;
 
-static bool is_ACE_name (const char *hostname)
-{
-  (void) hostname;
-  return (FALSE);
+  while (*ch) {
+    if (*ch++ > 0x80)
+      return FALSE;
+  }
+  return TRUE;
 }
 #endif

@@ -433,6 +433,10 @@ struct connectdata {
                       somewhere within the namebuffer[] area */
 #ifdef USE_LIBIDN
   char *ace_hostname; /* hostname possibly converted to ACE form */
+#define TRUE_HOSTNAME(conn) \
+ (conn->ace_hostname ? conn->ace_hostname : conn->hostname)
+#else
+#define TRUE_HOSTNAME(conn) conn->hostname
 #endif
   char *pathbuffer;/* allocated buffer to store the URL's path part in */
   char *path;      /* path to use, points to somewhere within the pathbuffer
