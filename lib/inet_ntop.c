@@ -155,7 +155,7 @@ static const char *inet_ntop6 (const u_char *src, char *dst, size_t size)
       tp += strlen(tp);
       break;
     }
-    tp += snprintf(tp, 4, "%lx", words[i]);
+    tp += snprintf(tp, 5, "%lx", words[i]);
   }
 
   /* Was it a trailing run of 0x00's?
