@@ -285,6 +285,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           /* header line within buffer loop */
           do {
             int hbufp_index;
+            int rest_length;
+            int full_length;
               
             /* str_start is start of line within buf */
             k->str_start = k->str;
@@ -326,10 +328,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               break; /* read more and try again */
             }
 
-            /* decrease the size of the remaining buffer */
-            nread -= (k->end_ptr - k->str)+1; 
+            /* decrease the size of the remaining (supposed) header line */
+            rest_length = (k->end_ptr - k->str)+1;
+            nread -= rest_length; 
 
             k->str = k->end_ptr + 1; /* move past new line */
+
+            full_length = k->str - k->str_start;
 
             /*
              * We're about to copy a chunk of data to the end of the
@@ -337,11 +342,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
              * fit in the allocated header buffer, or else we enlarge 
              * it.
              */
-            if (k->hbuflen + (k->str - k->str_start) >=
+            if (k->hbuflen + full_length >=
                 data->state.headersize) {
               char *newbuff;
-              long newsize=MAX((k->hbuflen+
-                                (k->str-k->str_start))*3/2,
+              long newsize=MAX((k->hbuflen+full_length)*3/2,
                                data->state.headersize*2);
               hbufp_index = k->hbufp - data->state.headerbuff;
               newbuff = (char *)realloc(data->state.headerbuff, newsize);
@@ -355,9 +359,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
 
             /* copy to end of line */
-            strncpy (k->hbufp, k->str_start, k->str - k->str_start);
-            k->hbufp += k->str - k->str_start;
-            k->hbuflen += k->str - k->str_start;
+            strncpy (k->hbufp, k->str_start, full_length);
+            k->hbufp += full_length;
+            k->hbuflen += full_length;
             *k->hbufp = 0;
               
             k->p = data->state.headerbuff;
@@ -372,7 +376,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  !checkhttpprefix(data, data->state.headerbuff)) {
                 /* this is not the beginning of a HTTP first header line */
                 k->header = FALSE;
-                k->badheader = HEADER_PARTHEADER;
+                if(nread)
+                  /* since there's more, this is a partial bad header */
+                  k->badheader = HEADER_PARTHEADER;
+                else {
+                  /* this was all we read so its all a bad header */
+                  k->badheader = HEADER_ALLBAD;
+                  nread = rest_length;
+                }
                 break;
               }
             }
