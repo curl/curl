@@ -6,6 +6,18 @@
 
                                History of Changes
 
+Daniel (6 November 2000)
+- Added possibility to set a password callback to use instead of the built-in.
+  They're controled with curl_easy_setopt() of course, the tags are
+  CURLOPT_PASSWDFUNCTION and CURLOPT_PASSWDDATA.
+
+- Used T. Bharath's thinking and fixed the timers that showed terribly wrong
+  times when location: headers were followed.
+
+- Emmanuel Tychon discovered that curl didn't really like user names only in
+  the URL. I corrected this and I also fixed the since long living problem
+  with URL encoded user names and passwords in the URLs. They should work now.
+  
 Daniel (2 November 2000)
 - When I added --interface, the new error code that was added with it was
   inserted in the wrong place and thus all error codes from 35 and upwards got
