@@ -27,7 +27,7 @@ test:
 	@(cd tests; $(MAKE) quiet-test)
 
 test-full:
-	@(cd tests; $(MAKE) test)
+	@(cd tests; $(MAKE) full-test)
 
 #
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros

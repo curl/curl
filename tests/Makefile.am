@@ -17,5 +17,9 @@ quiet-test: server/sws
 	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -s -a
 
+full-test: server/sws
+	@cd data && exec $(MAKE) test
+	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -a
+
 server/sws:
 	cd server; make sws
