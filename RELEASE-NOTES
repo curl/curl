@@ -1,62 +1,25 @@
-Curl and libcurl 7.12.0.
+Curl and libcurl 7.12.1
 
- Public curl release number:               81
- Releases counted from the very beginning: 108
+ Public curl release number:               82
+ Releases counted from the very beginning: 109
  Available command line options:           96
  Available curl_easy_setopt() options:     113
  Number of public functions in libcurl:    36
 
-A special thanks to:
-
- archivas.com and Alan Pinstein, for paying me to focus on their requests
-
 This release includes the following changes:
 
- o added ability to "upload" to file:// URLs
- o added curl_global_init_mem()
- o removed curl_formparse()
- o the MSVC project file in the release archive is automatically built
- o curl --proxy-digest is a new command line option
- o the Windows version of libcurl can use wldap32.dll for LDAP
- o added curl_easy_strerror(), curl_multi_strerror() and curl_share_strerror()
- o IPv6-enabled Windows hosts now resolves names threaded/asynch as well
- o configure --with-libidn can be used to point out the root dir of a libidn
-   installation (version 0.4.5 or later) for curl to use, then libcurl can
-   resolve and use IDNA names (domain names with "international" letters)
+ o 
 
 This release includes the following bugfixes:
 
- o incoming cookies with domains set with a prefixed dot now works better
- o CURLOPT_COOKIEFILE and CURLOPT_COOKIE can be used in the same request
- o improved peer certificate name verification
- o allocation failures cause no leaks nor crashes
- o the progress meter display now handles file sizes up to full 8 exabytes
-   (which is as high a signed 64 bit number can reach)
- o general HTTP authentication improvements
- o HTTP Digest authentication with the proxy works
- o mulipart formposting with -F and file names with spaces work again
- o curl_easy_duphandle() now works when ares-enabled
- o HTTP Digest authentication works a lot more like the RFC says
- o curl works with telnet and stdin properly on Windows
- o configure --without-ssl works even when pkg-config has OpenSSL details
- o src/hugehelp.c builds correct again in non-configure build environments
+ o 
 
 Other curl-related news since the previous public release:
 
- o The CVS repository was moved to cool.haxx.se
- o AdacURL 7.11.2 was released: http://www.almroth.com/adacurl/
- o PycURL 7.11.3 was released: http://pycurl.sourceforge.net
- o A new German download mirror: http://www.mirrorspace.org/curl/
- o Two new mailing lists are available:
-   curl-and-python - for python programmers using pycurl or curl
-   curl-perl-commmits - receives commits done to the curl-perl CVS module
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Gisle Vanem, Tommy Tam, Luca Altea, James Bursa, Mihai Ionescu, Michael
- Benedict, Andrés García, Joe Halpin, Seshubabu Pasam, Peter Sylvester, Robert
- D. Young, Jesse Noller, David Byron, Massimiliano Ziccardi, Mohun Biswas,
- Renaud Duhaut
 
         Thanks! (and sorry if I forgot to mention someone)
