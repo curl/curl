@@ -135,7 +135,7 @@ int Curl_base64_encode(const void *inp, int insize, char **outptr)
 
   while(insize > 0) {
     for (i = inputparts = 0; i < 3; i++) { 
-      if(*indata) {
+      if(insize > 0) {
         inputparts++;
         ibuf[i] = *indata;
         indata++;
