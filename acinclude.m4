@@ -291,25 +291,27 @@ int main()
    int sslen;
    int rc;
    char hbuf[NI_MAXHOST];
-   int fd = socket(AF_INET, SOCK_STREAM, 0);
+   int fd = socket(AF_INET6, SOCK_STREAM, 0);
    if(fd < 0) {
-     fd = socket(AF_INET6, SOCK_STREAM, 0);
-     if(fd < 0)
-       return 4; /* couldn't create socket of either kind */
+     printf("couldn't create AF_INET6 socket\n");
+     return 4; /* couldn't create socket of either kind */
    }
 
    rc = getsockname(fd, (struct sockaddr *)&ss, &sslen);
-   if(rc)
+   if(rc) {
+     printf("getsockname() failed\n");
      return 1; /* getsockname() failed unexpectedly */
+   }
 
    rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf),
                      NULL, 0,
                      NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID);
-   printf("rc = %s\n", gai_strerror(rc));
 
-   if(rc)
+   if(rc) {
+     printf("rc = %s\n", gai_strerror(rc));
      return 2; /* getnameinfo() failed, we take this as an indication to
                   avoid NI_WITHSCOPEID */
+   }
 
    return 0; /* everything works fine, use NI_WITHSCOPEID! */
 #else
