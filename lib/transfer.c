@@ -767,7 +767,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
            * the name says read, this function both reads and writes away
            * the data. The returned 'nread' holds the number of actual
            * data it wrote to the client.  */
-          /* Handle chunking here? 08/27/02 jhrg */
           CHUNKcode res =
             Curl_httpchunk_read(conn, k->str, nread, &nread);
 
