@@ -114,7 +114,11 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
                                      int port,
                                      int *waitp);
 
+#if (!defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES) || \
+     defined(USE_THREADING_GETHOSTBYNAME)) && \
+     !defined(ENABLE_IPV6)
 static struct hostent* pack_hostent(char** buf, struct hostent* orig);
+#endif
 
 #ifdef USE_THREADING_GETHOSTBYNAME
 #ifdef DEBUG_THREADING_GETHOSTBYNAME
@@ -925,7 +929,8 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
 }
 #else /* following code is IPv4-only */
 
-#if !defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
+#if !defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES) || \
+    defined(USE_THREADING_GETHOSTBYNAME)
 static void hostcache_fixoffset(struct hostent *h, long offset);
 
 /*
