@@ -13,8 +13,8 @@ README.win32
   are win32-based.
 
   The unix-style man pages are tricky to read on windows, so therefore are all
-  those pages also converted to HTML and those are also included in the
-  release archives.
+  those pages converted to HTML as well as pdf, and included in the release
+  archives.
 
   The main curl.1 man page is also "built-in" in the command line tool. Use a
   command line similar to this in order to extract a separate text file:
