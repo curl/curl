@@ -5,4 +5,4 @@ Makefile.in
 curl
 config.h
 hugehelp.c
-stamp-h2*
+stamp-h*
