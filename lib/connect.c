@@ -61,6 +61,7 @@
 #include <winsock.h>
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
+#define EISCONN     WSAEISCONN
 #endif
 
 #include "urldata.h"
