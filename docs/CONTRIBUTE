@@ -145,5 +145,15 @@ How To Make a Patch
 
      diff -ur curl-original-dir curl-modfied-sources-dir > my-fixes.diff
 
- GNU diff exists for virtually all platforms, including all kinds of unixes
- and Windows.
+ The GNU diff and GNU patch tools exist for virtually all platforms, including
+ all kinds of unixes and Windows:
+
+ For unix-like operating systems:
+
+        http://www.fsf.org/software/patch/patch.html
+        http://www.gnu.org/directory/diffutils.html
+
+ For Windows:
+
+        http://gnuwin32.sourceforge.net/packages/patch.htm
+        http://gnuwin32.sourceforge.net/packages/diffutils.htm
