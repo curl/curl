@@ -14,6 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o less restrictive libidn requirements, 0.4.1 or later is fine
  o fixed HTTP POST or PUT with Digest/Negotiate/NTLM when the server didn't
    require any authentication
  o win32 file:// transfer free memory bug
@@ -38,6 +39,6 @@ advice from friends like these:
 
  Gisle Vanem, Vincent Bronner, Alexander Krasnostavsky, Chris Gaukroger,
  Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam,
- Luca Alteas
+ Luca Alteas, Jean-Louis Lemaire
 
         Thanks! (and sorry if I forgot to mention someone)

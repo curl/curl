@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (16 June 2004)
+- Modified to keep the upload byte counter in an curl_off_t, not an int as
+  before. 32bits is not enough. This is most likely the bug Jean-Louis Lemaire
+  reported that makes 2GB FTP uploads to report error ("unaligned file sizes")
+  when completed.
+
 Daniel (15 June 2004)
 - Luca Alteas reported a problem that I fixed: if you did a POST with
   CURLAUTH_DIGEST set but the server didn't require any authentication,
