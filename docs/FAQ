@@ -19,7 +19,7 @@ FAQ
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
-   2.1.1. native linker doesn't find openssl
+   2.1.1. native linker doesn't find OpenSSL
    2.1.2. only the libssl lib is missing
   2.2 Does curl work/build with other SSL libraries?
   2.3 Where can I find a copy of LIBEAY32.DLL?
@@ -450,7 +450,7 @@ FAQ
 
     - Read the javascript code and rewrite the same logic in another language.
 
-    - Implement a javascript interpreted, people have successfully used the
+    - Implement a javascript interpreter, people have successfully used the
       Mozilla javascript engine in the past.
 
     - Ask your admins to stop this, for a static proxy setup or similar.
