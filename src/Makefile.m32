@@ -12,7 +12,7 @@
 CC = gcc
 RM = rm -f
 STRIP = strip -s
-OPENSSL_PATH = ../../openssl-0.9.6g
+OPENSSL_PATH = ../../openssl-0.9.7a
 ZLIB_PATH = ../../zlib-1.1.4
 
 # We may need these someday
@@ -25,7 +25,7 @@ ZLIB_PATH = ../../zlib-1.1.4
 INCLUDES = -I. -I.. -I../include
 CFLAGS = -g -O2 -DMINGW32
 ifdef SSL
-  CFLAGS += -DUSE_SSLEAY
+  CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
 endif
 LDFLAGS = 
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
@@ -43,7 +43,7 @@ else
 endif
 curl_LDADD += -lwsock32 -lws2_32 -lwinmm
 ifdef SSL
-  curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32 -lRSAglue
+  curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32
 endif
 ifdef ZLIB
   curl_LDADD += -L$(ZLIB_PATH) -lz
@@ -75,7 +75,7 @@ curl.exe: $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(COMPILE) -c $<
 
 clean:
-	$(RM) $(curl_OBJECTS)
+	$(RM) $(curl_OBJECTS) curl.exe
 
 distrib: clean
 	$(RM) $(curl_PROGRAMS)
