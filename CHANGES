@@ -7,6 +7,34 @@
                                   Changelog
 
 
+Daniel (10 Jan 2003)
+- Steve Oliphant pointed out that test case 105 did not work anymore and this
+  was due to a missing fix for the password prompting.
+
+Version 7.10.3-pre6 (10 Jan 2003)
+
+Daniel (9 Jan 2003)
+- Bryan Kemp pointed out that curl -u could not provide a blank password
+  without prompting the user. It can now. -u username: makes the password
+  empty, while -u username makes curl prompt the user for a password.
+
+- Kjetil Jacobsen found a remaining connect problem in the multi interface on
+  ipv4 systems (Linux only?), that I fixed and Kjetil verified that it fixed
+  his problems.
+
+- memanalyze.pl now reads a file name from the command line, and no longer
+  takes the data on stdin as before.
+
+Version 7.10.3-pre5 (9 Jan 2003)
+
+Daniel (9 Jan 2003)
+- Fixed tests/memanalyze.pl to work with file names that contain colons (as on
+  Windows).
+  
+- Kjetil Jacobsen quickly pointed out that lib/share.h was missing...
+
+Version 7.10.3-pre4 (9 Jan 2003)
+
 Daniel (9 Jan 2003)
 - Updated lib/share.c quite a bit to match the design document at
   http://curl.haxx.se/dev/sharing.txt a lot more.
@@ -40,6 +68,7 @@ Daniel (7 Jan 2003)
 - Now using autoconf 2.57 and automake 1.7.2
 
 - Doing "curl -I ftp://domain/non-existing-file" still outputed a date!
+  Wayne Haigh reported.
 
 - The error message is now written properly with a newline in the --trace
   file.
