@@ -224,12 +224,14 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
   }
   
   /* See if its already in our dns cache */
-  if (entry_id && curl_hash_find(data->hostcache, entry_id, entry_len+1, (void **) &p)) {
+  if (entry_id &&
+      curl_hash_find(data->hostcache, entry_id, entry_len+1, (void **) &p)) {
     _hostcache_return(p->addr);
   }
 
   /* Create a new cache entry */
-  p = (struct curl_dns_cache_entry *) malloc(sizeof(struct curl_dns_cache_entry));
+  p = (struct curl_dns_cache_entry *)
+    malloc(sizeof(struct curl_dns_cache_entry));
   if (!p) {
    _hostcache_return(NULL);
   }
