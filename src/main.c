@@ -2610,6 +2610,10 @@ static int myprogress (void *clientp,
   curl_off_t point = (curl_off_t)dlnow + (curl_off_t)ulnow +
     bar->initial_size; /* we've come this far */
 
+  if(point > total)
+    /* we have got more than the expected total! */
+    total = point;
+
   bar->calls++; /* simply count invokes */
 
   if(total < 1) {

@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel (4 March 2005)
+- Rene Rebe fixed a -# crash when more data than expected was retrieved.
+
 Daniel (22 February 2005)
 - NTLM and ftp-krb4 buffer overflow fixed, as reported here:
   http://www.securityfocus.com/archive/1/391042 and the CAN report here:

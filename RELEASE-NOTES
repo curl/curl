@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o -# crash when more data than expected was retrieved
  o NTLM/krb4 buffer overflow fixed (CAN-2005-0490)
  o proxy auth bug when following redirects to another host
  o socket leak when local bind failed
@@ -37,6 +38,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, David Byron, Marty Kuhrt, Maruko, Eric Vergnaud, Christopher
- R. Palmer, Mike Dobbs, David in bug report #1124588, Ralph Mitchell
+ R. Palmer, Mike Dobbs, David in bug report #1124588, Ralph Mitchell,
+ Rene Rebe
 
         Thanks! (and sorry if I forgot to mention someone)
