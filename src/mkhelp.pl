@@ -163,7 +163,7 @@ void hugehelp(void)
   if (inflateInit2(&z, -MAX_WBITS) != Z_OK)
     return;
 
-  for (;;) {
+  while(1) {
     z.avail_out = (int)sizeof(buf);
     z.next_out = buf;
     status = inflate(&z, Z_SYNC_FLUSH);
@@ -171,7 +171,8 @@ void hugehelp(void)
       fwrite(buf, sizeof(buf) - z.avail_out, 1, stdout);
       if (status == Z_STREAM_END)
          break;
-    } else
+    }
+     else
       break;    /* Error */
   }
   inflateEnd(&z);
