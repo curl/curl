@@ -581,7 +581,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
           *connected = TRUE; /* this is truly a connect */
           break;
 	}
-        failf(data, "socket error: %d", err);
+        failf(data, "socket error");
         /* we are _not_ connected, it was a false alert, continue please */
       }
       else if(2 == rc)
