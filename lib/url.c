@@ -478,6 +478,9 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
   case CURLOPT_TIMEOUT:
     data->timeout = va_arg(param, long);
     break;
+  case CURLOPT_MAXREDIRS:
+    data->maxredirs = va_arg(param, long);
+    break;
   case CURLOPT_USERAGENT:
     data->useragent = va_arg(param, char *);
     break;

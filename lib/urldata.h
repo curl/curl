@@ -417,6 +417,7 @@ struct UrlData {
   /* stuff related to HTTP */
 
   long followlocation;
+  long maxredirs; /* maximum no. of http(s) redirects to follow */
   char *referer;
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
