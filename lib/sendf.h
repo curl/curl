@@ -40,8 +40,9 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+size_t ftpsendf(int fd, struct connectdata *, char *fmt, ...);
 size_t sendf(int fd, struct UrlData *, char *fmt, ...);
-size_t ssend(int fd, struct UrlData *, void *fmt, size_t len);
+size_t ssend(int fd, struct connectdata *, void *fmt, size_t len);
 void infof(struct UrlData *, char *fmt, ...);
 void failf(struct UrlData *, char *fmt, ...);
 

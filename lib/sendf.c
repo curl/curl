@@ -56,6 +56,11 @@
 
 #include <curl/mprintf.h>
 
+#ifdef KRB4
+#include "security.h"
+#include <string.h>
+#endif
+
 /* infof() is for info message along the way */
 
 void infof(struct UrlData *data, char *fmt, ...)
@@ -96,9 +101,10 @@ int sendf(int fd, struct UrlData *data, char *fmt, ...)
     return 0; /* failure */
   if(data->bits.verbose)
     fprintf(data->err, "> %s", s);
+
 #ifndef USE_SSLEAY
-   bytes_written = swrite(fd, s, strlen(s));
-#else
+  bytes_written = swrite(fd, s, strlen(s));
+#else /* USE_SSLEAY */
   if (data->use_ssl) {
     bytes_written = SSL_write(data->ssl, s, strlen(s));
   } else {
@@ -109,22 +115,65 @@ int sendf(int fd, struct UrlData *data, char *fmt, ...)
   return(bytes_written);
 }
 
-/* ssend() sends plain (binary) data to the server */
-size_t ssend(int fd, struct UrlData *data, void *mem, size_t len)
+/*
+ * ftpsendf() sends the formated string as a ftp command to a ftp server
+ */
+int ftpsendf(int fd, struct connectdata *conn, char *fmt, ...)
 {
   size_t bytes_written;
+  char *s;
+  va_list ap;
+  va_start(ap, fmt);
+  s = mvaprintf(fmt, ap);
+  va_end(ap);
+  if(!s)
+    return 0; /* failure */
+  if(conn->data->bits.verbose)
+    fprintf(conn->data->err, "> %s\n", s);
+
+#ifdef KRB4
+  if(conn->sec_complete && conn->data->cmdchannel) {
+    bytes_written = sec_fprintf(conn, conn->data->cmdchannel, s);
+    bytes_written += fprintf(conn->data->cmdchannel, "\r\n");
+    fflush(conn->data->cmdchannel);
+  }
+  else
+#endif /* KRB4 */
+    {
+      bytes_written = swrite(fd, s, strlen(s));
+      bytes_written += swrite(fd, "\r\n", 2);
+    }
+  free(s); /* free the output string */
+  return(bytes_written);
+}
+
+
+/* ssend() sends plain (binary) data to the server */
+size_t ssend(int fd, struct connectdata *conn, void *mem, size_t len)
+{
+  size_t bytes_written;
+  struct UrlData *data=conn->data; /* conn knows data, not vice versa */
 
   if(data->bits.verbose)
     fprintf(data->err, "> [binary output]\n");
-#ifndef USE_SSLEAY
-   bytes_written = swrite(fd, mem, len);
-#else
+
+#ifdef USE_SSLEAY
   if (data->use_ssl) {
     bytes_written = SSL_write(data->ssl, mem, len);
-  } else {
-    bytes_written = swrite(fd, mem, len);
   }
-#endif /* USE_SSLEAY */
+  else {
+#endif
+#ifdef KRB4
+    if(conn->sec_complete) {
+      bytes_written = sec_write(conn, fd, mem, len);
+    }
+    else
+#endif /* KRB4 */
+      bytes_written = swrite(fd, mem, len);
+#ifdef USE_SSLEAY
+  }
+#endif
+
   return bytes_written;
 }
 
