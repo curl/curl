@@ -1,0 +1,22 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by Daniel.Stenberg@haxx.nu
+.\"
+.TH curl_slist_free_all 3 "2 June 2000" "Curl 7.0" "libcurl Manual"
+.SH NAME
+curl_slist_free_all - free an entire curl_slist list
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "void curl_slist_free_all(struct curl_slit *" list);
+.ad
+.SH DESCRIPTION
+curl_slist_free_all() removes all traces of a previously built curl_slist
+linked list.
+.SH RETURN VALUE
+Nothing.
+.SH "SEE ALSO"
+.BR curl_slist_append "(3), "
+.SH BUGS
+Surely there are some, you tell me!
+

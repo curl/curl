@@ -1,0 +1,27 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by Daniel.Stenberg@haxx.nu
+.\"
+.TH curl_version 3 "2 June 2000" "Curl 7.0" "libcurl Manual"
+.SH NAME
+curl_version - returns the libcurl version string
+.SH SYNOPSIS
+.B #include <curl/easy.h>
+.sp
+.BI "char *curl_version( );"
+.ad
+.SH DESCRIPTION
+Returns a human readable string with the version number of libcurl and some of
+its important components (like OpenSSL version).
+
+Do note that this returns the actual running lib's version, you might have
+installed a newer lib's include files in your system which may turn your
+LIBCURL_VERSION #define value to differ from this result.
+.SH RETURN VALUE
+A pointer to a zero terminated string.
+.SH "SEE ALSO"
+The
+.I LIBCURL_VERSION
+#define in <curl/curl.h>
+.SH BUGS
+Surely there are some, you tell me!
