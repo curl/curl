@@ -495,6 +495,10 @@ RETSIGTYPE alarmfunc(int signal)
 
 CURLcode Curl_disconnect(struct connectdata *conn)
 {
+  if(-1 != conn->connectindex)
+    /* unlink ourselves! */
+    conn->data->connects[conn->connectindex] = NULL;
+
   if(conn->curl_disconnect)
     /* This is set if protocol-specific cleanups should be made */
     conn->curl_disconnect(conn);
@@ -1810,13 +1814,8 @@ CURLcode Curl_connect(struct UrlData *data,
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
     conn = (struct connectdata *)*in_connect;
-    if(conn) {
-      int index;
-      index = conn->connectindex; /* get the index */
+    if(conn)
       Curl_disconnect(conn);      /* close the connection */
-      if(-1 != index)
-        data->connects[index]=NULL; /* clear the pointer */
-    }
   }
   return code;
 }
@@ -1824,11 +1823,8 @@ CURLcode Curl_connect(struct UrlData *data,
 
 CURLcode Curl_done(struct connectdata *conn)
 {
-  struct UrlData *data;
+  struct UrlData *data=conn->data;
   CURLcode result;
-  int index;
-
-  data = conn->data;
 
   /* this calls the protocol-specific function pointer previously set */
   if(conn->curl_done)
@@ -1840,11 +1836,8 @@ CURLcode Curl_done(struct connectdata *conn)
 
   /* if bits.close is TRUE, it means that the connection should be closed
      in spite of all our efforts to be nice */
-  if((CURLE_OK == result) && conn->bits.close) {
-    index = conn->connectindex;     /* get the index */
+  if((CURLE_OK == result) && conn->bits.close)
     result = Curl_disconnect(conn); /* close the connection */
-    data->connects[index]=NULL;     /* clear the pointer */
-  }
 
   return result;
 }
