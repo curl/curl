@@ -939,7 +939,9 @@ case "$LIBIDN" in
        AC_CHECK_LIB(idn, idna_to_ascii_lz, ,
                     [
                     dnl if there was a given path, try it
+                    nolibidn="true"
                     if test "x$LIBIDN" != "x"; then
+                      nolibidn="" dnl reset to test again
                       oldLDFLAGS=$LDFLAGS
                       oldCPPFLAGS=$CPPFLAGS
                       LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
