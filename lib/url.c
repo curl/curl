@@ -2768,7 +2768,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(Curl_parsenetrc(conn->hostname,
                        user, passwd,
                        data->set.netrc_file)) {
-      infof(data, "Couldn't find host %s in the .netrc file, using defaults",
+      infof(data, "Couldn't find host %s in the .netrc file, using defaults\n",
             conn->hostname);
     }
     else
@@ -3281,7 +3281,7 @@ CURLcode Curl_do(struct connectdata **connp)
 
       infof(data, "Re-used connection seems dead, get a new one\n");
 
-      conn->bits.close = TRUE; /* enforce close of this connetion */
+      conn->bits.close = TRUE; /* enforce close of this connection */
       result = Curl_done(conn);   /* we are so done with this */
 
       /* conn is no longer a good pointer */
