@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (19 May)
+- As requested by Martin Michlmayr in Debian bug report #193630, libcurl now
+  supports user name and password in the proxy environment variables. Added
+  test case 63 to verify this.
+
 Version 7.10.5 (19 May 2003)
 
 Daniel (15 May)
