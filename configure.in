@@ -492,7 +492,6 @@ AC_CHECK_HEADERS( \
         sys/stat.h \
         sys/types.h \
         sys/time.h \
-        getopt.h \
         sys/param.h \
         termios.h \
         termio.h \
@@ -527,6 +526,7 @@ AC_CHECK_SIZEOF(long long, 4)
 AC_CHECK_TYPE(ssize_t, int)
 
 TYPE_SOCKLEN_T
+TYPE_IN_ADDR_T
 
 dnl Checks for library functions.
 dnl AC_PROG_GCC_TRADITIONAL

@@ -143,6 +143,45 @@ AC_DEFUN([TYPE_SOCKLEN_T],
 #include <sys/socket.h>])
 ])
 
+dnl Check for in_addr_t: it is used to receive the return code of inet_addr()
+dnl and a few other things. If not found, we set it to unsigned int, as even
+dnl 64-bit implementations use to set it to a 32-bit type.
+AC_DEFUN([TYPE_IN_ADDR_T],
+[
+   AC_CHECK_TYPE([in_addr_t], ,[
+      AC_MSG_CHECKING([for in_addr_t equivalent])
+      AC_CACHE_VAL([curl_cv_in_addr_t_equiv],
+      [
+         # Systems have either "struct sockaddr *" or
+         # "void *" as the second argument to getpeername
+         curl_cv_in_addr_t_equiv=
+         for arg2 in "struct sockaddr" void; do
+            for t in int size_t unsigned long "unsigned long"; do
+               AC_TRY_COMPILE([
+                  #include <sys/types.h>
+                  #include <sys/socket.h>
+                  #include <arpa/inet.h>
+               ],[
+                  $arg data = inet_addr ("1.2.3.4");
+               ],[
+                  curl_cv_in_addr_t_equiv="$t"
+                  break
+               ])
+            done
+         done
+
+         if test "x$curl_cv_in_addr_t_equiv" = x; then
+            AC_MSG_ERROR([Cannot find a type to use in place of in_addr_t])
+         fi
+      ])
+      AC_MSG_RESULT($curl_cv_in_addr_t_equiv)
+      AC_DEFINE_UNQUOTED(in_addr_t, $curl_cv_in_addr_t_equiv,
+			[type to use in place of in_addr_t if not defined])],
+      [#include <sys/types.h>
+#include <sys/socket.h>,
+#include <arpa/inet.h>])
+])
+
 dnl ************************************************************
 dnl check for "localhost", if it doesn't exist, we can't do the
 dnl gethostbyname_r tests!
