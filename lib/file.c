@@ -104,7 +104,7 @@ CURLcode Curl_file_connect(struct connectdata *conn)
   char *real_path = curl_unescape(conn->path, 0);
   struct FILEPROTO *file;
   int fd;
-#if defined(WIN32) || defined(__EMX__)
+#if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
   int i;
   char *actual_path;
 #endif
@@ -120,7 +120,7 @@ CURLcode Curl_file_connect(struct connectdata *conn)
 
   conn->proto.file = file;
 
-#if defined(WIN32) || defined(__EMX__)
+#if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
   /* If the first character is a slash, and there's
      something that looks like a drive at the beginning of
      the path, skip the slash.  If we remove the initial
@@ -144,7 +144,7 @@ CURLcode Curl_file_connect(struct connectdata *conn)
     actual_path++;
   }
 
-  /* change path separators from '/' to '\\' for Windows and OS/2 */
+  /* change path separators from '/' to '\\' for DOS, Windows and OS/2 */
   for (i=0; actual_path[i] != '\0'; ++i)
     if (actual_path[i] == '/')
       actual_path[i] = '\\';
@@ -184,7 +184,7 @@ CURLcode Curl_file_done(struct connectdata *conn,
   return CURLE_OK;
 }
 
-#if defined(WIN32) || defined(__EMX__)
+#if defined(WIN32) || defined(MSDOS) || defined(__EMX__)
 #define DIRSEP '\\'
 #else
 #define DIRSEP '/'
