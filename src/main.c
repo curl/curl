@@ -3054,6 +3054,9 @@ static int create_dir_hierarchy(char *outfile)
   
   outdup = strdup(outfile);
   dirbuildup = malloc(sizeof(char) * strlen(outfile));
+  if(!dirbuildup)
+    return -1;
+  dirbuildup[0] = '\0';
 
   tempdir = strtok(outdup, DIR_CHAR);
 
