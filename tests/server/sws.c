@@ -77,7 +77,7 @@
 struct httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
   int offset;     /* size of the incoming request */
-  int testno;     /* test number found in the request */
+  long testno;     /* test number found in the request */
   int partno;     /* part number found in the request */
   int open;       /* keep connection open info, as found in the request */
   bool auth_req;  /* authentication required, don't wait for body unless
@@ -227,7 +227,7 @@ int ProcessRequest(struct httprequest *req)
       FILE *stream;
       char *filename;
       char *cmd = NULL;
-      int cmdsize = 0;
+      size_t cmdsize = 0;
 
       if((strlen(doc) + strlen(request)) < 200)
         sprintf(logbuf, "Got request: %s %s HTTP/%d.%d",
@@ -260,7 +260,7 @@ int ProcessRequest(struct httprequest *req)
       else
         req->partno = 0;
 
-      sprintf(logbuf, "Reqested test number %d part %d",
+      sprintf(logbuf, "Reqested test number %ld part %d",
               req->testno, req->partno);
 
       logmsg(logbuf);
@@ -474,12 +474,12 @@ static int get_request(int sock, struct httprequest *req)
 static int send_doc(int sock, struct httprequest *req)
 {
   int written;
-  int count;
+  size_t count;
   const char *buffer;
   char *ptr;
   FILE *stream;
   char *cmd=NULL;
-  int cmdsize=0;
+  size_t cmdsize=0;
   FILE *dump;
   int persistant = TRUE;
 
@@ -659,7 +659,7 @@ int main(int argc, char *argv[])
   struct httprequest req;
   
   if(argc>1) {
-    port = atoi(argv[1]);
+    port = (unsigned short)atoi(argv[1]);
 
     if(argc>2) {
       path = argv[2];

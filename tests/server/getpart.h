@@ -23,4 +23,5 @@
 const char *
 spitout(FILE *stream,
         const char *main,
-        const char *sub, int *size);
+        const char *sub,
+        size_t *size);

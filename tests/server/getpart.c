@@ -65,7 +65,7 @@ char *appendstring(char *string, /* original string */
 
 const char *spitout(FILE *stream,
                     const char *main,
-                    const char *sub, int *size)
+                    const char *sub, size_t *size)
 {
   char buffer[8192]; /* big enough for anything */
   char cmain[128]=""; /* current main section */
