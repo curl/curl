@@ -212,6 +212,57 @@ struct ConnectBits {
 };
 
 /*
+ * This struct is all the previously local variables from Curl_perform() moved
+ * to struct to allow the function to return and get re-invoked better without
+ * losing state.
+ */
+
+struct Curl_transfer_keeper {
+  int bytecount;                /* total number of bytes read */
+  int writebytecount;           /* number of bytes written */
+  long contentlength;           /* size of incoming data */
+  struct timeval start;         /* transfer started at this time */
+  struct timeval now;           /* current time */
+  bool header;	                /* incoming data has HTTP header */
+  int headerline;		/* counts header lines to better track the
+                                   first one */
+  char *hbufp;			/* points at *end* of header line */
+  int hbuflen;
+  char *str;			/* within buf */
+  char *str_start;		/* within buf */
+  char *end_ptr;		/* within buf */
+  char *p;			/* within headerbuff */
+  bool content_range;      	/* set TRUE if Content-Range: was found */
+  int offset;	                /* possible resume offset read from the
+                                   Content-Range: header */
+  int httpcode;		        /* error code from the 'HTTP/1.? XXX' line */
+  int httpversion;		/* the HTTP version*10 */
+  bool write_after_100_header;  /* should we enable the write after
+                                   we received a 100-continue/timeout
+                                   or directly */
+
+  /* for the low speed checks: */
+  time_t timeofdoc;
+  long bodywrites;
+  int writetype;
+
+  /* the highest fd we use + 1 */
+  struct SessionHandle *data;
+  struct connectdata *conn;
+  char *buf;
+  int maxfd;
+
+  /* the file descriptors to play with */
+  fd_set readfd;
+  fd_set writefd;
+  fd_set rkeepfd;
+  fd_set wkeepfd;
+  int keepon;
+
+};
+
+
+/*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
  */
@@ -355,6 +406,8 @@ struct connectdata {
     void *generic;
   } proto;
 
+  /* This struct is inited when needed */
+  struct Curl_transfer_keeper keep;
 };
 
 /*
@@ -460,6 +513,13 @@ struct UrlState {
   bool errorbuf; /* Set to TRUE if the error buffer is already filled in.
                     This must be set to FALSE every time _easy_perform() is
                     called. */
+
+#ifdef HAVE_SIGNAL
+  /* storage for the previous bag^H^H^HSIGPIPE signal handler :-) */
+  void (*prev_signal)(int sig);
+#endif
+  bool allow_port; /* Is set.use_port allowed to take effect or not. This
+                      is always set TRUE when curl_easy_perform() is called. */
 };
 
 
@@ -569,7 +629,6 @@ struct UserDefined {
   bool hide_progress;
   bool http_fail_on_error;
   bool http_follow_location;
-
   bool include_header;
 #define http_include_header include_header /* former name */
 

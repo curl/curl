@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -29,11 +29,9 @@
 
 CURLcode Curl_open(struct SessionHandle **curl);
 CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...);
-CURLcode Curl_close(struct SessionHandle *data); /* the opposite of curl_open() */
-CURLcode Curl_connect(struct SessionHandle *,
-                      struct connectdata **,
-                      bool allow_port);
-CURLcode Curl_do(struct connectdata *);
+CURLcode Curl_close(struct SessionHandle *data); /* opposite of curl_open() */
+CURLcode Curl_connect(struct SessionHandle *, struct connectdata **);
+CURLcode Curl_do(struct connectdata **);
 CURLcode Curl_done(struct connectdata *);
 CURLcode Curl_disconnect(struct connectdata *);
 

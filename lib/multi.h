@@ -50,7 +50,7 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#include <curl/types.h>
+#include <curl/curl.h>
 
 typedef void CURLM;
 
@@ -60,6 +60,7 @@ typedef enum {
   CURLM_BAD_HANDLE,      /* the passed-in handle is not a valid CURLM handle */
   CURLM_BAD_EASY_HANDLE, /* an easy handle was not good/valid */
   CURLM_OUT_OF_MEMORY,   /* if you ever get this, you're in deep sh*t */
+  CURLM_INTERNAL_ERROR,  /* this is a libcurl bug */
   CURLM_LAST
 } CURLMcode;
 

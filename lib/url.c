@@ -1214,8 +1214,7 @@ static CURLcode ConnectPlease(struct connectdata *conn)
 }
 
 static CURLcode CreateConnection(struct SessionHandle *data,
-                                 struct connectdata **in_connect,
-                                 bool allow_port) /* allow set.use_port? */
+                                 struct connectdata **in_connect)
 {
   char *tmp;
   char *buf;
@@ -1614,7 +1613,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    *************************************************************/
 
   if (strequal(conn->protostr, "HTTP")) {
-    conn->port = (data->set.use_port && allow_port)?data->set.use_port:PORT_HTTP;
+    conn->port = (data->set.use_port && data->state.allow_port)?
+      data->set.use_port:PORT_HTTP;
     conn->remote_port = PORT_HTTP;
     conn->protocol |= PROT_HTTP;
     conn->curl_do = Curl_http;
@@ -1624,7 +1624,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   else if (strequal(conn->protostr, "HTTPS")) {
 #ifdef USE_SSLEAY
 
-    conn->port = (data->set.use_port && allow_port)?data->set.use_port:PORT_HTTPS;
+    conn->port = (data->set.use_port && data->state.allow_port)?
+      data->set.use_port:PORT_HTTPS;
     conn->remote_port = PORT_HTTPS;
     conn->protocol |= PROT_HTTP|PROT_HTTPS|PROT_SSL;
 
@@ -1639,7 +1640,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #endif /* !USE_SSLEAY */
   }
   else if (strequal(conn->protostr, "GOPHER")) {
-    conn->port = (data->set.use_port && allow_port)?data->set.use_port:PORT_GOPHER;
+    conn->port = (data->set.use_port && data->state.allow_port)?
+      data->set.use_port:PORT_GOPHER;
     conn->remote_port = PORT_GOPHER;
     /* Skip /<item-type>/ in path if present */
     if (isdigit((int)conn->path[1])) {
@@ -1665,7 +1667,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #endif /* !USE_SSLEAY */
     }
 
-    conn->port = (data->set.use_port && allow_port)?data->set.use_port:PORT_FTP;
+    conn->port = (data->set.use_port && data->state.allow_port)?
+      data->set.use_port:PORT_FTP;
     conn->remote_port = PORT_FTP;
     conn->protocol |= PROT_FTP;
 
@@ -1720,21 +1723,24 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* telnet testing factory */
     conn->protocol |= PROT_TELNET;
 
-    conn->port = (data->set.use_port && allow_port)?data->set.use_port: PORT_TELNET;
+    conn->port = (data->set.use_port && data->state.allow_port)?
+      data->set.use_port: PORT_TELNET;
     conn->remote_port = PORT_TELNET;
     conn->curl_do = Curl_telnet;
     conn->curl_done = Curl_telnet_done;
   }
   else if (strequal(conn->protostr, "DICT")) {
     conn->protocol |= PROT_DICT;
-    conn->port = (data->set.use_port && allow_port)?data->set.use_port:PORT_DICT;
+    conn->port = (data->set.use_port && data->state.allow_port)?
+      data->set.use_port:PORT_DICT;
     conn->remote_port = PORT_DICT;
     conn->curl_do = Curl_dict;
     conn->curl_done = NULL; /* no DICT-specific done */
   }
   else if (strequal(conn->protostr, "LDAP")) {
     conn->protocol |= PROT_LDAP;
-    conn->port = (data->set.use_port && allow_port)?data->set.use_port:PORT_LDAP;
+    conn->port = (data->set.use_port && data->state.allow_port)?
+      data->set.use_port:PORT_LDAP;
     conn->remote_port = PORT_LDAP;
     conn->curl_do = Curl_ldap;
     conn->curl_done = NULL; /* no LDAP-specific done */
@@ -2228,14 +2234,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 }
 
 CURLcode Curl_connect(struct SessionHandle *data,
-                      struct connectdata **in_connect,
-                      bool allow_port)
+                      struct connectdata **in_connect)
 {
   CURLcode code;
   struct connectdata *conn;
 
   /* call the stuff that needs to be called */
-  code = CreateConnection(data, in_connect, allow_port);
+  code = CreateConnection(data, in_connect);
 
   if(CURLE_OK != code) {
     /* We're not allowed to return failure with memory left allocated
@@ -2291,14 +2296,38 @@ CURLcode Curl_done(struct connectdata *conn)
   return result;
 }
 
-CURLcode Curl_do(struct connectdata *conn)
+CURLcode Curl_do(struct connectdata **connp)
 {
   CURLcode result=CURLE_OK;
+  struct connectdata *conn = *connp;
+  struct SessionHandle *data=conn->data;
 
-  if(conn->curl_do)
+  if(conn->curl_do) {
     /* generic protocol-specific function pointer set in curl_connect() */
     result = conn->curl_do(conn);
 
+    /* This was formerly done in transfer.c, but we better do it here */
+    
+    if((CURLE_WRITE_ERROR == result) && conn->bits.reuse) {
+      /* This was a re-use of a connection and we got a write error in the
+       * DO-phase. Then we DISCONNECT this connection and have another attempt
+       * to CONNECT and then DO again! The retry cannot possibly find another
+       * connection to re-use, since we only keep one possible connection for
+       * each.  */
+
+      infof(data, "Re-used connection seems dead, get a new one\n");
+
+      conn->bits.close = TRUE; /* enforce close of this connetion */
+      result = Curl_done(conn);   /* we are so done with this */
+      if(CURLE_OK == result) {
+        /* Now, redo the connect and get a new connection */
+        result = Curl_connect(data, connp);
+        if(CURLE_OK == result)
+          /* ... finally back to actually retry the DO phase */
+          result = conn->curl_do(*connp);
+      }
+    }
+  }
   return result;
 }
 
