@@ -46,10 +46,7 @@ curl_easy_strerror(CURLcode error)
     return "failed init";
 
   case CURLE_URL_MALFORMAT:
-    return "url malformat";
-
-  case CURLE_URL_MALFORMAT_USER:
-    return "url malformat user";
+    return "URL using bad/illegal format or missing URL";
 
   case CURLE_COULDNT_RESOLVE_PROXY:
     return "couldnt resolve proxy";
@@ -61,124 +58,115 @@ curl_easy_strerror(CURLcode error)
     return "couldn't connect";
 
   case CURLE_FTP_WEIRD_SERVER_REPLY:
-    return "ftp weird server reply";
+    return "FTP: weird server reply";
 
   case CURLE_FTP_ACCESS_DENIED:
-    return "ftp access denied";
+    return "FTP: access denied";
 
   case CURLE_FTP_USER_PASSWORD_INCORRECT:
-    return "ftp user password incorrect";
+    return "FTP: user and/or password incorrect";
 
   case CURLE_FTP_WEIRD_PASS_REPLY:
-    return "ftp weird pass reply";
+    return "FTP: unknown PASS reply";
 
   case CURLE_FTP_WEIRD_USER_REPLY:
-    return "ftp weird user reply";
+    return "FTP: unknown USER reply";
 
   case CURLE_FTP_WEIRD_PASV_REPLY:
-    return "ftp weird pasv reply";
+    return "FTP: unknown PASV reply";
 
   case CURLE_FTP_WEIRD_227_FORMAT:
-    return "ftp weird 227 format";
+    return "FTP: unknown 227 response format";
 
   case CURLE_FTP_CANT_GET_HOST:
-    return "ftp cant get host";
+    return "FTP: can't figure out the host in the PASV response";
 
   case CURLE_FTP_CANT_RECONNECT:
-    return "ftp can't reconnect";
+    return "FTP: can't connect to server the response code is unknown";
 
   case CURLE_FTP_COULDNT_SET_BINARY:
-    return "ftp couldn't set binary";
+    return "FTP: couldn't set binary mode";
 
   case CURLE_PARTIAL_FILE:
-    return "partial file";
+    return "Transferred a partial file";
 
   case CURLE_FTP_COULDNT_RETR_FILE:
-    return "ftp couldn't retr file";
+    return "FTP: couldn't retrieve (RETR failed) the specified file";
 
   case CURLE_FTP_WRITE_ERROR:
-    return "ftp write error";
+    return "FTP: the post-transfer acknowledge response was not OK";
 
   case CURLE_FTP_QUOTE_ERROR:
-    return "ftp quote error";
+    return "FTP: a quote command returned error";
 
-  case CURLE_HTTP_NOT_FOUND:
-    return "http not found";
+  case CURLE_HTTP_RETURNED_ERROR:
+    return "HTTP response code said error";
 
   case CURLE_WRITE_ERROR:
-    return "write error";
-
-  case CURLE_MALFORMAT_USER:
-    return "user name is illegally specified";
+    return "failed writing received data to disk/application";
 
   case CURLE_FTP_COULDNT_STOR_FILE:
-    return "failed FTP upload";
+    return "failed FTP upload (the STOR command)";
 
   case CURLE_READ_ERROR:
-    return "could open/read from file";
+    return "failed to open/read local data from file/application";
 
   case CURLE_OUT_OF_MEMORY:
     return "out of memory";
 
   case CURLE_OPERATION_TIMEOUTED:
-    return "the timeout time was reached";
+    return "a timeout was reached";
 
   case CURLE_FTP_COULDNT_SET_ASCII:
-    return "TYPE A failed";
+    return "FTP could not set ASCII mode (TYPE A)";
 
   case CURLE_FTP_PORT_FAILED:
-    return "FTP PORT operation failed";
+    return "FTP command PORT failed";
 
   case CURLE_FTP_COULDNT_USE_REST:
-    return "the REST command failed";
+    return "FTP command REST failed";
 
   case CURLE_FTP_COULDNT_GET_SIZE:
-    return "the SIZE command failed";
+    return "FTP command SIZE failed";
 
   case CURLE_HTTP_RANGE_ERROR:
-    return "RANGE \"command\" didn't work";
+    return "a range was requested but the server did not deliver it";
 
   case CURLE_HTTP_POST_ERROR:
-    return "http post error";
+    return "internal problem setting up the POST";
 
   case CURLE_SSL_CONNECT_ERROR:
-    return "wrong when connecting with SSL";
+    return "SSL connect error";
 
   case CURLE_FTP_BAD_DOWNLOAD_RESUME:
-    return "couldn't resume download";
+    return "couldn't resume FTP download";
 
   case CURLE_FILE_COULDNT_READ_FILE:
-    return "file couldn't read file";
+    return "couldn't read a file:// file";
 
   case CURLE_LDAP_CANNOT_BIND:
-    return "ldap cannot bind";
+    return "LDAP: cannot bind";
 
   case CURLE_LDAP_SEARCH_FAILED:
-    return "ldap search failed";
+    return "LDAP: search failed";
 
   case CURLE_LIBRARY_NOT_FOUND:
-    return "library not found";
+    return "a required shared library was not found";
 
   case CURLE_FUNCTION_NOT_FOUND:
-    return "function not found";
+    return "a required function in the shared library was not found";
 
   case CURLE_ABORTED_BY_CALLBACK:
-    return "aborted by callback";
+    return "the operation was aborted by an application callback";
 
   case CURLE_BAD_FUNCTION_ARGUMENT:
-    return "bad function argument";
+    return "a libcurl function was given a bad argument";
 
-  case CURLE_BAD_CALLING_ORDER:
-    return "bad calling order";
-
-  case CURLE_HTTP_PORT_FAILED:
-    return "HTTP Interface operation failed";
-
-  case CURLE_BAD_PASSWORD_ENTERED:
-    return "my getpass() returns fail";
+  case CURLE_INTERFACE_FAILED:
+    return "failed binding local connection end";
 
   case CURLE_TOO_MANY_REDIRECTS :
-    return "catch endless re-direct loops";
+    return "number of redirects hit maximum amount";
 
   case CURLE_UNKNOWN_TELNET_OPTION:
     return "User specified an unknown option";
@@ -186,14 +174,11 @@ curl_easy_strerror(CURLcode error)
   case CURLE_TELNET_OPTION_SYNTAX :
     return "Malformed telnet option";
 
-  case CURLE_OBSOLETE:
-    return "obsolete";
-
   case CURLE_SSL_PEER_CERTIFICATE:
-    return "peer's certificate wasn't ok";
+    return "SSL peer certificate was not ok";
 
   case CURLE_GOT_NOTHING:
-    return "when this is a specific error";
+    return "server returned nothing (no headers, no data)";
 
   case CURLE_SSL_ENGINE_NOTFOUND:
     return "SSL crypto engine not found";
@@ -202,25 +187,25 @@ curl_easy_strerror(CURLcode error)
     return "can not set SSL crypto engine as default";
 
   case CURLE_SEND_ERROR:
-    return "failed sending network data";
+    return "failed sending data to the peer";
 
   case CURLE_RECV_ERROR:
-    return "failure in receiving network data";
+    return "failure when receiving data from the peer";
 
   case CURLE_SHARE_IN_USE:
-    return "CURLE_SHARE_IN_USER";
+    return "share is already in use";
 
   case CURLE_SSL_CERTPROBLEM:
-    return "problem with the local certificate";
+    return "problem with the local SSL certificate";
 
   case CURLE_SSL_CIPHER:
-    return "couldn't use specified cipher";
+    return "couldn't use specified SSL cipher";
 
   case CURLE_SSL_CACERT:
-    return "problem with the CA cert (path? access rights?)";
+    return "problem with the SSL CA cert (path? access rights?)";
 
   case CURLE_BAD_CONTENT_ENCODING:
-    return "Unrecognized transfer encoding";
+    return "Unrecognized HTTP Content-Encoding";
 
   case CURLE_LDAP_INVALID_URL:
     return "Invalid LDAP URL";
@@ -231,6 +216,11 @@ curl_easy_strerror(CURLcode error)
   case CURLE_FTP_SSL_FAILED:
     return "Requested FTP SSL level failed";
 
+  case CURLE_URL_MALFORMAT_USER: /* not used by current libcurl */
+  case CURLE_MALFORMAT_USER:     /* not used by current libcurl */
+  case CURLE_BAD_CALLING_ORDER:  /* not used by current libcurl */
+  case CURLE_BAD_PASSWORD_ENTERED:/* not used by current libcurl */
+  case CURLE_OBSOLETE:           /* not used by current libcurl */
   case CURL_LAST:
     break;
   }
@@ -248,7 +238,7 @@ curl_easy_strerror(CURLcode error)
    * The line number for the error will be near this comment, which
    * is why it is here, and not at the start of the switch.
    */
-  return "CURLcode unknown";
+  return "unknown error";
 }
 
 const char *
@@ -262,22 +252,22 @@ curl_multi_strerror(CURLMcode error)
     return "no error";
     
   case CURLM_BAD_HANDLE:
-    return "CURLM not valid multi handle";
+    return "invalid multi handle";
 
   case CURLM_BAD_EASY_HANDLE:
-    return "CURLM not valid easy handle";
+    return "invalid easy handle";
 
   case CURLM_OUT_OF_MEMORY:
-    return "CURLM libcurl out of memory";
+    return "out of memory";
 
   case CURLM_INTERNAL_ERROR:
-    return "CURLM libcurl internal bug";
+    return "internal error";
 
   case CURLM_LAST:
     break;
   }
 
-  return "CURLMcode unknown";
+  return "unknown error";
 }
 
 const char *
@@ -288,13 +278,13 @@ curl_share_strerror(CURLSHcode error)
     return "no error";
 
   case CURLSHE_BAD_OPTION:
-    return "CURLSH bad option";
+    return "unknown share option";
 
   case CURLSHE_IN_USE:
-    return "CURLSH in use";
+    return "share currently in use";
 
   case CURLSHE_INVALID:
-    return "CURLSH invalid";
+    return "invalid share handle";
 
   case CURLSHE_LAST:
     break;
@@ -534,6 +524,9 @@ const char *Curl_strerror(struct connectdata *conn, int err)
     /* HAVE_GLIBC_STRERROR_R */
     char buffer[256];
     char *msg = strerror_r(err, buffer, sizeof(buffer));
+    /* this version of strerror_r() only *might* use the buffer we pass to
+       the function, but it always returns the error message as a pointer,
+       so we must copy that string unconditionally */
     strncpy(buf, msg, max);
   }
 #endif /* end of HAVE_GLIBC_STRERROR_R */
