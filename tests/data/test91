@@ -66,10 +66,10 @@ SSL
 http
 </server>
  <name>
-HTTP with NTLM/Negotiate/Basic, anyauth and no user or password
+HTTP with NTLM/Negotiate/Basic, anyauth and user with domain
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/91 --anyauth
+http://%HOSTIP:%HOSTPORT/91 --anyauth -u mydomain\\myself:secret
 </command>
 </test>
 
@@ -93,7 +93,7 @@ Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
 
 GET /91 HTTP/1.1
-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAAAAAAWAAAAAAAAABAAAAAAAAAAEAAAAAAAAAAQAAAAAAAAABYAAAAAYIAAGCT+8nLdjAKIyAekoPAy7B9436GAxPu0A==
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAE4AAAAAAAAAZgAAAAgACABAAAAABgAGAEgAAAAAAAAATgAAAAAAAABmAAAAAYIAAG15ZG9tYWlubXlzZWxmwjImlHmYemDYVmFrmRFoVn3jfoYDE+7Q
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache
