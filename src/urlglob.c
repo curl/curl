@@ -49,7 +49,7 @@
 #include "../lib/memdebug.h"
 #endif
 
-char glob_buffer[URL_MAX_LENGTH];
+char *glob_buffer;
 URLGlob *glob_expand;
 
 int glob_word(char*, int);
@@ -210,10 +210,13 @@ int glob_word(char *pattern, int pos) {
 
 int glob_url(URLGlob** glob, char* url, int *urlnum)
 {
-  if (strlen(url)>URL_MAX_LENGTH) {
-    printf("Illegally sized URL\n");
-    return CURLE_URL_MALFORMAT;
-  }
+  /*
+   * We can deal with any-size, just make a buffer with the same length
+   * as the specified URL!
+   */
+  glob_buffer=(char *)malloc(strlen(url)+1);
+  if(NULL == glob_buffer)
+    return CURLE_OUT_OF_MEMORY;
 
   glob_expand = (URLGlob*)malloc(sizeof(URLGlob));
   glob_expand->size = 0;
@@ -238,6 +241,7 @@ void glob_cleanup(URLGlob* glob) {
     }
   }
   free(glob);
+  free(glob_buffer);
 }
 
 char *next_url(URLGlob *glob)
