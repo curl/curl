@@ -32,7 +32,6 @@
 #include <sys/ioctl.h>
 #undef  closesocket
 #define closesocket(s)    close_s(s)
-#define select(n,r,w,x,t) select_s(n,r,w,x,t)
 #define writev(s,v,c)     writev_s(s,v,c)
 #endif
 
@@ -51,7 +50,11 @@
 #define DHCPNAMESERVER "DhcpNameServer"
 #define PATH_HOSTS_NT  "\\drivers\\etc\\hosts"
 #define PATH_HOSTS_9X  "\\hosts"
-          
+
+#elif defined(WATT32)
+
+#define PATH_RESOLV_CONF "/dev/ENV/etc/resolv.conf"
+
 #else
 
 #define PATH_RESOLV_CONF	"/etc/resolv.conf"

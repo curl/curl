@@ -224,6 +224,12 @@ static int file_lookup(const char *name, struct hostent **host)
     strcat(PATH_HOSTS, PATH_HOSTS_9X);
   }
 
+#elif defined(WATT32)
+  extern const char *_w32_GetHostsFile (void);
+  const char *PATH_HOSTS = _w32_GetHostsFile();
+
+  if (!PATH_HOSTS)
+    return ARES_ENOTFOUND;
 #endif
 
   fp = fopen(PATH_HOSTS, "r");
