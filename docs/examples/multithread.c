@@ -1,8 +1,8 @@
 /*****************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * $Id$
@@ -15,7 +15,15 @@
 #include <pthread.h>
 #include <curl/curl.h>
 
-/* silly list of test-URLs */
+/*
+  List of URLs to fetch.
+
+  If you intend to use a SSL-based protocol here you MUST setup the OpenSSL
+  callback functions as described here:
+
+  http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+
+*/
 char *urls[]= {
   "http://curl.haxx.se/",
   "ftp://cool.haxx.se/",
@@ -28,17 +36,15 @@ void *pull_one_url(void *url)
   CURL *curl;
 
   curl = curl_easy_init();
-
   curl_easy_setopt(curl, CURLOPT_URL, url);
-  curl_easy_perform(curl);
-
+  curl_easy_perform(curl); /* ignores error */
   curl_easy_cleanup(curl);
 
   return NULL;
 }
 
 
-/* 
+/*
    int pthread_create(pthread_t *new_thread_ID,
    const pthread_attr_t *attr,
    void * (*start_func)(void *), void *arg);
@@ -56,7 +62,7 @@ int main(int argc, char **argv)
                            urls[i]);
     if(0 != error)
       fprintf(stderr, "Couldn't run thread number %d, errno %d\n", i, error);
-    else 
+    else
       fprintf(stderr, "Thread %d, gets %s\n", i, urls[i]);
   }
 
