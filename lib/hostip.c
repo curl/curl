@@ -98,11 +98,49 @@ struct curl_dns_cache_entry {
   time_t timestamp;
 };
 
+static int _num_chars(int i)
+{
+  int chars = 0;
+
+  do {
+    chars++;
+
+    i = (int) i / 10;
+  } while (i > 1);
+
+  return chars;
+}
+
+static char *
+_create_hostcache_id(char *server, int server_len, int port)
+{
+  char *id = NULL;
+  int   id_len;
+
+  id_len = server_len + _num_chars(port);
+
+  id = malloc(id_len + 1);
+  if (!id) {
+    return NULL;
+  }
+
+  id_len = sprintf(id, "%s:%d", server, port);
+  if (id_len <= 0) {
+    free(id);
+    return NULL;
+  }
+
+  return id;
+}
+
+  
+
 Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
                            char *hostname,
                            int port,
                            char **bufp)
 {
+  char *cache_id = NULL;
   struct curl_dns_cache_entry *p = NULL;
   size_t hostname_len;
   time_t now;
@@ -113,11 +151,13 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
     return Curl_getaddrinfo(data, hostname, port, bufp);
   }
 
-  hostname_len = strlen(hostname)+1;
+  hostname_len = strlen(hostname);
 
+  cache_id = _create_hostcache_id(hostname, hostname_len, port);
+  
   time(&now);
   /* See if its already in our dns cache */
-  if (curl_hash_find(data->hostcache, hostname, hostname_len, (void **) &p)) {
+  if (cache_id && curl_hash_find(data->hostcache, hostname, hostname_len+1, (void **) &p)) {
     /* Do we need to check for a cache timeout? */
     if (data->set.dns_cache_timeout != -1) {
       /* Return if the entry has not timed out */
@@ -144,7 +184,7 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
   p->timestamp = now;
 
   /* Save it in our host cache */
-  curl_hash_update(data->hostcache, hostname, hostname_len, (const void *) p);
+  curl_hash_update(data->hostcache, hostname, hostname_len+1, (const void *) p);
 
   return p->addr;
 }
