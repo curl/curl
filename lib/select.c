@@ -39,6 +39,11 @@
 
 #include "select.h"
 
+#ifdef __BEOS__
+/* BeOS has FD_SET defined in socket.h */
+#include <socket.h>
+#endif
+
 #ifdef WIN32
 #define VALID_SOCK(s) (1)  /* Win-sockets are not in range [0..FD_SETSIZE> */
 #else

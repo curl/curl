@@ -314,6 +314,16 @@ then
              )
 fi
 
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+  dnl gethostbyname in the net lib - for BeOS
+  AC_CHECK_LIB(net, gethostbyname,
+               [HAVE_GETHOSTBYNAME="1"
+               LIBS="$LIBS -lnet"
+               ])
+fi
+
+
 if test "$HAVE_GETHOSTBYNAME" = "1"; then
   AC_DEFINE(HAVE_GETHOSTBYNAME, 1, [If you have gethostbyname])
 else

@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (22 December 2004)
+- Marcin Konicki provided two configure fixes and a source fix to make curl
+  build out-of-the-box on BeOS.
+
 Daniel (21 December 2004)
 - Added test case 217 that verified CURLINFO_HTTP_CONNECTCODE, and I made the
   -w option support 'http_connect' to make it easier to verify!

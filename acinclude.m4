@@ -87,9 +87,7 @@ AC_DEFINE(HAVE_IOCTLSOCKET_CASE, 1, [use Ioctlsocket() for non-blocking sockets]
 dnl Ioctlsocket didnt compile, do test 5!
   AC_TRY_COMPILE([
 /* headers for SO_NONBLOCK test (BeOS) */
-#include <sys/types.h>
-#include <unistd.h>
-#include <fcntl.h>
+#include <socket.h>
 ],[
 /* SO_NONBLOCK source code */
  long b = 1;
