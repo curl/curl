@@ -726,6 +726,26 @@ KERBEROS4 FTP TRANSFER
   There's no use for a password on the -u switch, but a blank one will make
   curl ask for one and you already entered the real password to kauth.
 
+TELNET
+
+  The curl telnet support is basic and very easy to use. Curl passes all data
+  passed to it on stdin to the remote server. Connect to a remote telnet
+  server using a command line similar to:
+
+        curl telnet://remote.server.com
+
+  And enter the data to pass to the server on stdin. The result will be sent
+  stdout or to the file you specify with -o.
+
+  You might want the -N/--no-buffer option to switch off the buffered output
+  for slow connections or if the output from the remote site is slow and/or
+  without newlines.
+
+  NOTE: the telnet protocol does not specify any way to login with a specified
+  user and password and thus curl can't do that automatically. To do that, you
+  need to track when the login prompt is received and send the username and
+  password accordingly.
+
 MAILING LIST
 
   We have an open mailing list to discuss curl, its development and things
