@@ -103,7 +103,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
   case CURLINFO_EFFECTIVE_URL:
     *param_charp = data->change.url?data->change.url:(char *)"";
     break;
-  case CURLINFO_HTTP_CODE:
+  case CURLINFO_RESPONSE_CODE:
     *param_longp = data->info.httpcode;
     break;
   case CURLINFO_HTTP_CONNECTCODE:

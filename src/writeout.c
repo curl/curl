@@ -118,7 +118,7 @@ void ourWriteOut(CURL *curl, char *writeinfo)
                 break;
               case VAR_HTTP_CODE:
                 if(CURLE_OK ==
-                   curl_easy_getinfo(curl, CURLINFO_HTTP_CODE, &longinfo))
+                   curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &longinfo))
                   fprintf(stream, "%03d", longinfo);
                 break;
               case VAR_HEADER_SIZE:

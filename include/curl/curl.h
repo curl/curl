@@ -979,7 +979,7 @@ time_t curl_getdate(const char *p, const time_t *now);
 typedef enum {
   CURLINFO_NONE, /* first, never use this */
   CURLINFO_EFFECTIVE_URL    = CURLINFO_STRING + 1,
-  CURLINFO_HTTP_CODE        = CURLINFO_LONG   + 2,
+  CURLINFO_RESPONSE_CODE    = CURLINFO_LONG   + 2,
   CURLINFO_TOTAL_TIME       = CURLINFO_DOUBLE + 3,
   CURLINFO_NAMELOOKUP_TIME  = CURLINFO_DOUBLE + 4,
   CURLINFO_CONNECT_TIME     = CURLINFO_DOUBLE + 5,
@@ -1004,6 +1004,10 @@ typedef enum {
 
   CURLINFO_LASTONE          = 23
 } CURLINFO;
+
+/* CURLINFO_RESPONSE_CODE is the new name for the option previously known as
+   CURLINFO_HTTP_CODE */
+#define CURLINFO_HTTP_CODE CURLINFO_RESPONSE_CODE
 
 typedef enum {
   CURLCLOSEPOLICY_NONE, /* first, never use this */
