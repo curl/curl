@@ -1272,7 +1272,8 @@ CURLcode Curl_http(struct connectdata *conn)
 
         passed += actuallyread;
         if(actuallyread != readthisamountnow) {
-          failf(data, "Could only read %Od bytes from the input",
+          failf(data, "Could only read " CURL_FORMAT_OFF_T
+                " bytes from the input",
                 passed);
           return CURLE_READ_ERROR;
         }
@@ -1311,7 +1312,8 @@ CURLcode Curl_http(struct connectdata *conn)
         curl_off_t total_expected_size=
           conn->resume_from + data->set.infilesize;
         conn->allocptr.rangeline =
-	    aprintf("Content-Range: bytes %s%Od/%Od\r\n",
+	    aprintf("Content-Range: bytes %s" CURL_FORMAT_OFF_T "/"
+                    CURL_FORMAT_OFF_T "\r\n",
 		    conn->range, total_expected_size-1,
 		    total_expected_size);
       }
@@ -1319,7 +1321,7 @@ CURLcode Curl_http(struct connectdata *conn)
         /* Range was selected and then we just pass the incoming range and 
            append total size */
         conn->allocptr.rangeline =
-	    aprintf("Content-Range: bytes %s/%Od\r\n",
+	    aprintf("Content-Range: bytes %s/" CURL_FORMAT_OFF_T "\r\n",
 		    conn->range, data->set.infilesize);
       }
     }
@@ -1549,7 +1551,7 @@ CURLcode Curl_http(struct connectdata *conn)
       if((data->set.infilesize>0) && !conn->bits.upload_chunky)
         /* only add Content-Length if not uploading chunked */
         add_bufferf(req_buffer,
-                    "Content-Length: %Od\r\n", /* file size */
+                    "Content-Length: " CURL_FORMAT_OFF_T "\r\n", /* size */
                     data->set.infilesize );
 
       add_bufferf(req_buffer, "\r\n");
