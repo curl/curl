@@ -94,8 +94,11 @@ char *Curl_if2ip(const char *interface, char *buf, int buf_size)
   }
   else {
     struct ifreq req;
+    size_t len = strlen(interface);
     memset(&req, 0, sizeof(req));
-    strcpy(req.ifr_name, interface);
+    if(len >= sizeof(req.ifr_name))
+      return NULL; /* this can't be a fine interface name */
+    memcpy(req.ifr_name, interface, len+1);
     req.ifr_addr.sa_family = AF_INET;
 #ifdef	IOCTL_3_ARGS
     if (SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req)) {
