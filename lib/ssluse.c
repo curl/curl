@@ -30,6 +30,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
@@ -41,9 +42,11 @@
 #include "sendf.h"
 #include "formdata.h" /* for the boundary function */
 #include "url.h" /* for the ssl config check function */
+#include "inet_pton.h"
 
 #ifdef USE_SSLEAY
 #include <openssl/rand.h>
+#include <openssl/x509v3.h>
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG
@@ -191,7 +194,7 @@ int random_the_seed(struct SessionHandle *data)
   /* generates a default path for the random seed file */
   buf[0]=0; /* blank it first */
   RAND_file_name(buf, BUFSIZE);
-  if ( buf[0] ) {
+  if(buf[0]) {
     /* we got a file name to try */
     nread += RAND_load_file(buf, 16384);
     if(seed_enough(nread))
@@ -207,13 +210,13 @@ int random_the_seed(struct SessionHandle *data)
 #endif
 static int do_file_type(const char *type)
 {
-  if (!type || !type[0])
+  if(!type || !type[0])
     return SSL_FILETYPE_PEM;
-  if (curl_strequal(type, "PEM"))
+  if(curl_strequal(type, "PEM"))
     return SSL_FILETYPE_PEM;
-  if (curl_strequal(type, "DER"))
+  if(curl_strequal(type, "DER"))
     return SSL_FILETYPE_ASN1;
-  if (curl_strequal(type, "ENG"))
+  if(curl_strequal(type, "ENG"))
     return SSL_FILETYPE_ENGINE;
   return -1;
 }
@@ -228,7 +231,7 @@ int cert_stuff(struct connectdata *conn,
   struct SessionHandle *data = conn->data;
   int file_type;
 
-  if (cert_file != NULL) {
+  if(cert_file != NULL) {
     SSL *ssl;
     X509 *x509;
 
@@ -255,7 +258,7 @@ int cert_stuff(struct connectdata *conn,
     switch(file_type) {
     case SSL_FILETYPE_PEM:
       /* SSL_CTX_use_certificate_chain_file() only works on PEM files */
-      if (SSL_CTX_use_certificate_chain_file(conn->ssl.ctx,
+      if(SSL_CTX_use_certificate_chain_file(conn->ssl.ctx,
                                              cert_file) != 1) {
         failf(data, "unable to set certificate file (wrong password?)");
         return 0;
@@ -266,7 +269,7 @@ int cert_stuff(struct connectdata *conn,
       /* SSL_CTX_use_certificate_file() works with either PEM or ASN1, but
          we use the case above for PEM so this can only be performed with
          ASN1 files. */
-      if (SSL_CTX_use_certificate_file(conn->ssl.ctx,
+      if(SSL_CTX_use_certificate_file(conn->ssl.ctx,
                                        cert_file,
                                        file_type) != 1) {
         failf(data, "unable to set certificate file (wrong password?)");
@@ -286,11 +289,11 @@ int cert_stuff(struct connectdata *conn,
 
     switch(file_type) {
     case SSL_FILETYPE_PEM:
-      if (key_file == NULL)
+      if(key_file == NULL)
         /* cert & key can only be in PEM case in the same file */
         key_file=cert_file;
     case SSL_FILETYPE_ASN1:
-      if (SSL_CTX_use_PrivateKey_file(conn->ssl.ctx,
+      if(SSL_CTX_use_PrivateKey_file(conn->ssl.ctx,
                                       key_file,
                                       file_type) != 1) {
         failf(data, "unable to set private key file: '%s' type %s\n",
@@ -302,11 +305,11 @@ int cert_stuff(struct connectdata *conn,
 #ifdef HAVE_OPENSSL_ENGINE_H
       {                         /* XXXX still needs some work */
         EVP_PKEY *priv_key = NULL;
-        if (conn && conn->data && conn->data->engine) {
+        if(conn && conn->data && conn->data->engine) {
 #ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
           UI_METHOD *ui_method = UI_OpenSSL();
 #endif
-          if (!key_file || !key_file[0]) {
+          if(!key_file || !key_file[0]) {
             failf(data, "no key set to load from crypto engine\n");
             return 0;
           }
@@ -315,11 +318,11 @@ int cert_stuff(struct connectdata *conn,
                                              ui_method,
 #endif
                                              data->set.key_passwd);
-          if (!priv_key) {
+          if(!priv_key) {
             failf(data, "failed to load private key from crypto engine\n");
             return 0;
           }
-          if (SSL_CTX_use_PrivateKey(conn->ssl.ctx, priv_key) != 1) {
+          if(SSL_CTX_use_PrivateKey(conn->ssl.ctx, priv_key) != 1) {
             failf(data, "unable to set private key\n");
             EVP_PKEY_free(priv_key);
             return 0;
@@ -346,7 +349,7 @@ int cert_stuff(struct connectdata *conn,
 
     /* This version was provided by Evan Jordan and is supposed to not
        leak memory as the previous version: */
-    if (x509 != NULL) {
+    if(x509 != NULL) {
       EVP_PKEY *pktmp = X509_get_pubkey(x509);
       EVP_PKEY_copy_parameters(pktmp,SSL_get_privatekey(ssl));
       EVP_PKEY_free(pktmp);
@@ -360,7 +363,7 @@ int cert_stuff(struct connectdata *conn,
     
     /* Now we know that a key and cert have been set against
      * the SSL context */
-    if (!SSL_CTX_check_private_key(conn->ssl.ctx)) {
+    if(!SSL_CTX_check_private_key(conn->ssl.ctx)) {
       failf(data, "Private key does not match the certificate public key");
       return(0);
     }
@@ -457,7 +460,7 @@ void Curl_SSL_cleanup(void)
  */
 void Curl_SSL_Close(struct connectdata *conn)
 {
-  if (conn->ssl.use) {
+  if(conn->ssl.use) {
     /*
       ERR_remove_state() frees the error queue associated with
       thread pid.  If pid == 0, the current thread will have its
@@ -583,7 +586,7 @@ int Curl_SSL_Close_All(struct SessionHandle *data)
     free(data->state.session);
   }
 #ifdef HAVE_OPENSSL_ENGINE_H
-  if (data->engine)
+  if(data->engine)
   {
     ENGINE_free(data->engine);
     data->engine = NULL;
@@ -669,28 +672,28 @@ static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
   i=tm->length;
   asn1_string=(char *)tm->data;
 
-  if (i < 10)
+  if(i < 10)
     return 1;
-  if (asn1_string[i-1] == 'Z')
+  if(asn1_string[i-1] == 'Z')
     gmt=TRUE;
   for (i=0; i<10; i++)
-    if ((asn1_string[i] > '9') || (asn1_string[i] < '0'))
+    if((asn1_string[i] > '9') || (asn1_string[i] < '0'))
       return 2;
 
   year= (asn1_string[0]-'0')*10+(asn1_string[1]-'0');
-  if (year < 50)
+  if(year < 50)
     year+=100;
 
   month= (asn1_string[2]-'0')*10+(asn1_string[3]-'0');
-  if ((month > 12) || (month < 1))
+  if((month > 12) || (month < 1))
     return 3;
 
   day= (asn1_string[4]-'0')*10+(asn1_string[5]-'0');
   hour= (asn1_string[6]-'0')*10+(asn1_string[7]-'0');
   minute=  (asn1_string[8]-'0')*10+(asn1_string[9]-'0');
 
-  if ( (asn1_string[10] >= '0') && (asn1_string[10] <= '9') &&
-       (asn1_string[11] >= '0') && (asn1_string[11] <= '9'))
+  if((asn1_string[10] >= '0') && (asn1_string[10] <= '9') &&
+     (asn1_string[11] >= '0') && (asn1_string[11] <= '9'))
     second= (asn1_string[10]-'0')*10+(asn1_string[11]-'0');
   
   infof(data,
@@ -741,6 +744,148 @@ cert_hostcheck(const char *certname, const char *hostname)
   return 0;
 }
 #endif
+
+static CURLcode verifyhost(struct connectdata *conn)
+{
+  char peer_CN[257];
+  int ntype = 3; /* 1 = IPv6, 2 = IPv4, 3=DNS */
+  int i;
+  int altmatch = 0;
+#ifdef ENABLE_IPV6
+  struct in6_addr addr;
+#else
+  struct in_addr addr;
+#endif
+  char *ptr;
+  struct SessionHandle *data = conn->data;
+     
+#ifdef ENABLE_IPV6
+  if(conn->hostname[0] == '[' && strchr(conn->hostname, ']')) {
+    char *n2 = strdup(conn->hostname+1);
+    *strchr(n2, ']') = '\0';
+    if(Curl_inet_pton(AF_INET6, n2, &addr))
+      ntype = 1;
+    free(n2);
+  }
+  else
+#endif
+  {
+    if((ptr = strrchr(conn->hostname, '.')) &&
+       isdigit((unsigned char)ptr[1])) {
+      if(Curl_inet_pton(AF_INET, conn->hostname, &addr))
+        ntype = 2;
+    }
+  }
+ 	
+  i = X509_get_ext_by_NID(conn->ssl.server_cert, NID_subject_alt_name, -1);
+  if(i >= 0) {
+    X509_EXTENSION *ex;
+    STACK_OF(GENERAL_NAME) *alt;
+ 
+    ex = X509_get_ext(conn->ssl.server_cert, i);
+    alt = X509V3_EXT_d2i(ex);
+    if(alt) {
+      int n, len1 = 0, len2 = 0;
+      char *domain = NULL;
+      GENERAL_NAME *gn;
+        
+      if(ntype == 3) {
+        len1 = strlen(conn->hostname);
+        domain = strchr(conn->hostname, '.');
+        if(domain) {
+          len2 = len1 - (domain-conn->hostname);
+        }
+      }
+      n = sk_GENERAL_NAME_num(alt);
+      for (i=0; i<n; i++) {
+        char *sn;
+        int sl;
+        gn = sk_GENERAL_NAME_value(alt, i);
+        if(gn->type == GEN_DNS) {
+          if(ntype != 3)
+            continue;
+          
+          sn = (char *) ASN1_STRING_data(gn->d.ia5);
+          sl = ASN1_STRING_length(gn->d.ia5);
+            
+          /* Is this an exact match? */
+          if((len1 == sl) && curl_strnequal(conn->hostname, sn, len1))
+            break;
+                     
+          /* Is this a wildcard match? */
+          if((*sn == '*') && domain && (len2 == sl-1) &&
+             curl_strnequal(domain, sn+1, len2))
+            break;
+ 
+        }
+        else if(gn->type == GEN_IPADD) {
+          if(ntype == 3)
+            continue;
+                     
+          sn = (char *) ASN1_STRING_data(gn->d.ia5);
+          sl = ASN1_STRING_length(gn->d.ia5);
+ 
+#ifdef ENABLE_IPv6
+          if(ntype == 1 && sl != sizeof(struct in6_addr))
+            continue;
+          else
+#endif
+            if(ntype == 2 && sl != sizeof(struct in_addr))
+              continue;
+          
+          if(!memcmp(sn, &addr, sl))
+            break;
+        }
+      }
+             
+      GENERAL_NAMES_free(alt);
+      if(i < n) {	/* got a match in altnames */
+        altmatch = 1;
+        infof(data, "\t subjectAltName: %s matched\n", conn->hostname);
+      }
+    }
+  }
+ 
+  if(!altmatch) {
+    bool obtain=FALSE;
+    if(X509_NAME_get_text_by_NID(X509_get_subject_name(conn->ssl.server_cert),
+                                 NID_commonName,
+                                 peer_CN,
+                                 sizeof(peer_CN)) < 0) {
+      if(data->set.ssl.verifyhost > 1) {
+        failf(data,
+              "SSL: unable to obtain common name from peer certificate");
+        X509_free(conn->ssl.server_cert);
+        return CURLE_SSL_PEER_CERTIFICATE;
+      }
+      else {
+        /* Consider verifyhost == 1 as an "OK" for a missing CN field, but we
+           output a note about the situation */
+        infof(data, "\t common name: WARNING couldn't obtain\n");
+      }
+    }
+    else
+      obtain = TRUE;
+         
+    if(obtain) {
+      if(!cert_hostcheck(peer_CN, conn->hostname)) {
+        if(data->set.ssl.verifyhost > 1) {
+          failf(data, "SSL: certificate subject name '%s' does not match "
+                "target host name '%s'", peer_CN, conn->hostname);
+          X509_free(conn->ssl.server_cert);
+          return CURLE_SSL_PEER_CERTIFICATE;
+        }
+        else
+          infof(data, "\t common name: %s (does not match '%s')\n",
+                peer_CN, conn->hostname);
+      }
+      else
+        infof(data, "\t common name: %s (matched)\n", peer_CN);
+    }
+  }
+
+  return CURLE_OK;
+}
 
 /* ====================================================== */
 CURLcode
@@ -803,19 +948,19 @@ Curl_SSLConnect(struct connectdata *conn)
   SSL_CTX_set_options(conn->ssl.ctx, SSL_OP_ALL);
     
   if(data->set.cert) {
-    if (!cert_stuff(conn,
-                    data->set.cert,
-                    data->set.cert_type,
-                    data->set.key,
-                    data->set.key_type)) {
+    if(!cert_stuff(conn,
+                   data->set.cert,
+                   data->set.cert_type,
+                   data->set.key,
+                   data->set.key_type)) {
       /* failf() is already done in cert_stuff() */
       return CURLE_SSL_CERTPROBLEM;
     }
   }
 
   if(data->set.ssl.cipher_list) {
-    if (!SSL_CTX_set_cipher_list(conn->ssl.ctx,
-                                 data->set.ssl.cipher_list)) {
+    if(!SSL_CTX_set_cipher_list(conn->ssl.ctx,
+                                data->set.ssl.cipher_list)) {
       failf(data, "failed setting cipher list");
       return CURLE_SSL_CIPHER;
     }
@@ -826,10 +971,10 @@ Curl_SSLConnect(struct connectdata *conn)
                        SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
                        SSL_VERIFY_CLIENT_ONCE,
                        cert_verify_callback);
-    if ((data->set.ssl.CAfile || data->set.ssl.CApath) &&
-        !SSL_CTX_load_verify_locations(conn->ssl.ctx,
-                                       data->set.ssl.CAfile,
-                                       data->set.ssl.CApath)) {
+    if((data->set.ssl.CAfile || data->set.ssl.CApath) &&
+       !SSL_CTX_load_verify_locations(conn->ssl.ctx,
+                                      data->set.ssl.CAfile,
+                                      data->set.ssl.CApath)) {
       failf(data,"error setting certificate verify locations");
       return CURLE_SSL_CACERT;
     }
@@ -838,10 +983,10 @@ Curl_SSLConnect(struct connectdata *conn)
     SSL_CTX_set_verify(conn->ssl.ctx, SSL_VERIFY_NONE, cert_verify_callback);
 
   /* give application a chance to interfere with SSL set up. */
-  if (data->set.ssl.fsslctx) {
+  if(data->set.ssl.fsslctx) {
     retcode = (*data->set.ssl.fsslctx)(data, conn->ssl.ctx,
                                        data->set.ssl.fsslctxp);
-    if (retcode) {
+    if(retcode) {
       failf(data,"error signaled by ssl ctx callback");
       return retcode;
     }
@@ -996,15 +1141,15 @@ Curl_SSLConnect(struct connectdata *conn)
    * attack
    */
 
-  conn->ssl.server_cert = SSL_get_peer_certificate (conn->ssl.handle);
+  conn->ssl.server_cert = SSL_get_peer_certificate(conn->ssl.handle);
   if(!conn->ssl.server_cert) {
     failf(data, "SSL: couldn't get peer certificate!");
     return CURLE_SSL_PEER_CERTIFICATE;
   }
   infof (data, "Server certificate:\n");
   
-  str = X509_NAME_oneline (X509_get_subject_name (conn->ssl.server_cert),
-                           NULL, 0);
+  str = X509_NAME_oneline(X509_get_subject_name(conn->ssl.server_cert),
+                          NULL, 0);
   if(!str) {
     failf(data, "SSL: couldn't get X509-subject!");
     X509_free(conn->ssl.server_cert);
@@ -1019,45 +1164,14 @@ Curl_SSLConnect(struct connectdata *conn)
   certdate = X509_get_notAfter(conn->ssl.server_cert);
   Curl_ASN1_UTCTIME_output(conn, "\t expire date: ", certdate);
 
-  if (data->set.ssl.verifyhost) {
-    char peer_CN[257];
-    if (X509_NAME_get_text_by_NID(X509_get_subject_name(conn->ssl.server_cert),
-                                  NID_commonName,
-                                  peer_CN,
-                                  sizeof(peer_CN)) < 0) {
-      /* Failed to get the CN field from the server's certificate */
-      if (data->set.ssl.verifyhost > 1) {
-        failf(data, "SSL: unable to obtain common name from peer certificate");
-        X509_free(conn->ssl.server_cert);
-        return CURLE_SSL_PEER_CERTIFICATE;
-      }
-      else
-        /* Consider verifyhost == 1 as an "OK" for a missing CN field, but we
-           output a note about the situation */
-        infof(data, "\t common name: WARNING couldn't obtain\n");
-    }
-    else {
-      /* Compare the CN field with the remote host name */
-      if (!cert_hostcheck(peer_CN, conn->hostname)) {
-        if (data->set.ssl.verifyhost > 1) {
-          failf(data, "SSL: certificate subject name '%s' does not match "
-                "target host name '%s'",
-                peer_CN, conn->hostname);
-          X509_free(conn->ssl.server_cert);
-          return CURLE_SSL_PEER_CERTIFICATE;
-        }
-        else
-          infof(data,
-                "\t common name: %s (does not match '%s')\n",
-                peer_CN, conn->hostname);
-      }
-      else
-        infof(data, "\t common name: %s (matched)\n", peer_CN);
-    }
+  if(data->set.ssl.verifyhost) {
+    retcode = verifyhost(conn);
+    if(retcode)
+      return retcode;
   }
 
-  str = X509_NAME_oneline (X509_get_issuer_name  (conn->ssl.server_cert),
-                           NULL, 0);
+  str = X509_NAME_oneline(X509_get_issuer_name(conn->ssl.server_cert),
+                          NULL, 0);
   if(!str) {
     failf(data, "SSL: couldn't get X509-issuer name!");
     X509_free(conn->ssl.server_cert);
@@ -1071,7 +1185,7 @@ Curl_SSLConnect(struct connectdata *conn)
 
   if(data->set.ssl.verifypeer) {
     data->set.ssl.certverifyresult=SSL_get_verify_result(conn->ssl.handle);
-    if (data->set.ssl.certverifyresult != X509_V_OK) {
+    if(data->set.ssl.certverifyresult != X509_V_OK) {
       failf(data, "SSL certificate verify result: %d",
             data->set.ssl.certverifyresult);
       retcode = CURLE_SSL_PEER_CERTIFICATE;
