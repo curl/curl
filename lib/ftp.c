@@ -1213,7 +1213,7 @@ again:;
 #endif
 #ifdef EINTR
         case EINTR:
-          failf(data, "Connection timeouted to ftp server");
+          failf(data, "Connection timed out to ftp server");
           break;
 #endif
         default:

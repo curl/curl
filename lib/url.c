@@ -1464,7 +1464,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       break;
 #endif
     case EINTR:
-      failf(data, "Connection timeouted");
+      failf(data, "Connection timed out");
       break;
     default:
       failf(data, "Can't connect to server: %d", errno);
