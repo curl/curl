@@ -163,7 +163,8 @@ CURLcode Curl_file(struct connectdata *conn)
   */
   CURLcode res = CURLE_OK;
   struct stat statbuf;
-  double expected_size=-1;
+  unsigned long expected_size=0;
+  bool fstated=FALSE;
   ssize_t nread;
   struct SessionHandle *data = conn->data;
   char *buf = data->state.buffer;
@@ -178,25 +179,59 @@ CURLcode Curl_file(struct connectdata *conn)
 /*VMS?? -- This only works reliable for STREAMLF files */
   if( -1 != fstat(fd, &statbuf)) {
     /* we could stat it, then read out the size */
-    expected_size = (double)statbuf.st_size;
+    expected_size = statbuf.st_size;
+    fstated = TRUE;
+  }
+
+  /* If we have selected NOBODY and HEADER, it means that we only want file
+     information. Which for FILE can't be much more than the file size and
+     date. */
+  if(data->set.no_body && data->set.include_header && fstated) {
+    CURLcode result;
+    sprintf(buf, "Content-Length: %lu\r\n", expected_size);
+    result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
+    if(result)
+      return result;
+
+    sprintf(buf, "Accept-ranges: bytes\r\n");
+    result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
+    if(result)
+      return result;
+
+#ifdef HAVE_STRFTIME
+    if(fstated) {
+      struct tm *tm;
+#ifdef HAVE_LOCALTIME_R
+      struct tm buffer;
+      tm = (struct tm *)localtime_r((time_t *)&statbuf.st_mtime, &buffer);
+#else
+      tm = localtime((time_t *)&statbuf.st_mtime);
+#endif
+      /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
+      strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S GMT\r\n",
+               tm);
+      result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
+    }
+#endif
+    return result;
   }
 
   /* Added by Dolbneff A.V & Spiridonoff A.V */
-  if (conn->resume_from <= expected_size)
+  if (conn->resume_from <= (long)expected_size)
     expected_size -= conn->resume_from;
   else
     /* Is this error code suitable in such situation? */
     return CURLE_FTP_BAD_DOWNLOAD_RESUME;
 
-  if (expected_size == 0)
+  if (fstated && (expected_size == 0))
     return CURLE_OK;
 
   /* The following is a shortcut implementation of file reading
      this is both more efficient than the former call to download() and
      it avoids problems with select() and recv() on file descriptors
      in Winsock */
-  if(expected_size != -1)
-    Curl_pgrsSetDownloadSize(data, expected_size);
+  if(fstated)
+    Curl_pgrsSetDownloadSize(data, (double)expected_size);
 
   if(conn->resume_from)
     /* Added by Dolbneff A.V & Spiridonoff A.V */

@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (30 October)
+- David Hull made libcurl deal with NOBODY and HEADER for file:// the same way
+  it already does for FTP: it provides HTTP-looking headers that provide info
+  only about the file, without doing the actual transfer. The curl tool then
+  lets --head do this.
+
 Daniel (29 October)
 - runtests.pl now checks for and use valgrind if present. It will redirect the
   valgrind results in log/valgrind[num] but it currently doesn't scan that
