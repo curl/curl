@@ -3,10 +3,11 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
-* test case 57 has </test> that should be </client> but when corrected, the
+18. test case 57 has </test> that should be </client> but when corrected, the
   test case fails!
 
-* 1. create a multi handle
+17. Memory badness:
+  1. create a multi handle
   2. add an easy handle
   3. fetch a URL that is persistent (leaves the connection alive)
   4. remove the easy handle from the multi
@@ -18,7 +19,7 @@ may have been fixed since this was written!
   Use valgrind to see the memory problems when libcurl assumes that the DNS
   data lives as long as the connection
 
-* FTP URLs passed to curl may contain NUL (0x00) in the RFC 1738 <user>,
+16. FTP URLs passed to curl may contain NUL (0x00) in the RFC 1738 <user>,
   <password>, and <fpath> components, encoded as "%00".  The problem is that
   curl_unescape does not detect this, but instead returns a shortened C
   string.  From a strict FTP protocol standpoint, NUL is a valid character
@@ -28,62 +29,62 @@ may have been fixed since this was written!
   would not meaningfully support NUL characters within RFC 959 <string>,
   anyway (e.g., UNIX pathnames may not contain NUL).
 
-* Test case 241 fails on all systems that support IPv6 but that don't have the
-  host name 'ip6-localhost' in /etc/hosts (or similar) since the test case
+15. Test case 241 fails on all systems that support IPv6 but that don't have
+  the host name 'ip6-localhost' in /etc/hosts (or similar) since the test case
   uses that host name to test the IPv6 name to address resolver.
 
-* Test case 165 might fail on system which has libidn present, but with an
+14. Test case 165 might fail on system which has libidn present, but with an
   old iconv version (2.1.3 is a known bad version), since it doesn't recognize
   the charset when named ISO8859-1. Changing the name to ISO-8859-1 makes the
   test pass, but instead makes it fail on Solaris hosts that use its native
   iconv.
 
-* curl version 7.12.2 fails on AIX if compiled with --enable-ares.
+13. curl version 7.12.2 fails on AIX if compiled with --enable-ares.
   The workaround is to combine --enable-ares with --disable-shared
 
-* When connecting to a SOCKS proxy, the (connect) timeout is not properly
+12. When connecting to a SOCKS proxy, the (connect) timeout is not properly
   acknowledged after the actual TCP connect (during the SOCKS "negotiate"
   phase). Pointed out by Lucas. Fix: need to select() and timeout properly.
 
-* Using configure --disable-[protocol] may cause 'make test' to fail for
+11. Using configure --disable-[protocol] may cause 'make test' to fail for
   tests using the disabled protocol(s).
 
-* To get HTTP Negotiate authentication to work fine, you need to provide a
+10. To get HTTP Negotiate authentication to work fine, you need to provide a
   (fake) user name (this concerns both curl and the lib) because the code
   wrongly only considers authentication if there's a user name provided.
   Bug report #1004841. How? http://curl.haxx.se/mail/lib-2004-08/0182.html
 
-* --limit-rate using -d or -F does not work. This is because the limit logic
+9. --limit-rate using -d or -F does not work. This is because the limit logic
   is provided by the curl app in its read/write callbacks, and when doing
   -d/-F the callbacks aren't used! Bug report #921395.
 
-* Doing resumed upload over HTTP does not work with '-C -', because curl
+8. Doing resumed upload over HTTP does not work with '-C -', because curl
   doesn't do a HEAD first to get the initial size. This needs to be done
   manually for HTTP PUT resume to work, and then '-C [index]'.
 
-* CURLOPT_USERPWD and CURLOPT_PROXYUSERPWD have no way of providing user names
+7. CURLOPT_USERPWD and CURLOPT_PROXYUSERPWD have no way of providing user names
   that contain a colon. This can't be fixed easily in a backwards compatible
   way without adding new options (and then, they should most probably allow
   setting user name and password separately).
 
-* libcurl ignores empty path parts in FTP URLs, whereas RFC1738 states that
+6. libcurl ignores empty path parts in FTP URLs, whereas RFC1738 states that
   such parts should be sent to the server as 'CWD ' (without an argument).
   The only exception to this rule, is that we knowingly break this if the
   empty part is first in the path, as then we use the double slashes to
   indicate that the user wants to reach the root dir (this exception SHALL
   remain even when this bug is fixed).
 
-* libcurl doesn't treat the content-length of compressed data properly, as
+5. libcurl doesn't treat the content-length of compressed data properly, as
   it seems HTTP servers send the *uncompressed* length in that header and
   libcurl thinks of it as the *compressed* length. Some explanations are here:
   http://curl.haxx.se/mail/lib-2003-06/0146.html
 
-* IPv6 support on AIX 4.3.3 doesn't work due to a missing sockaddr_storage
+4. IPv6 support on AIX 4.3.3 doesn't work due to a missing sockaddr_storage
   struct. It has been reported to work on AIX 5.1 though.
 
-* GOPHER transfers seem broken
+3. GOPHER transfers seem broken
 
-* If a HTTP server responds to a HEAD request and includes a body (thus
+2. If a HTTP server responds to a HEAD request and includes a body (thus
   violating the RFC2616), curl won't wait to read the response but just stop
   reading and return back. If a second request (let's assume a GET) is then
   immediately made to the same server again, the connection will be re-used
@@ -93,6 +94,6 @@ may have been fixed since this was written!
   More details on this is found in this libcurl mailing list thread:
   http://curl.haxx.se/mail/lib-2002-08/0000.html
 
-* LDAP support requires that not only the OpenLDAP shared libraries be
-  present at run time, but the development libraries (liblber.so and
-  libldap.so) as well (not applicable to Windows).
+1. LDAP support requires that not only the OpenLDAP shared libraries be
+   present at run time, but the development libraries (liblber.so and
+   libldap.so) as well (not applicable to Windows).
