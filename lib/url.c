@@ -893,6 +893,7 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     conn->protocol |= PROT_HTTP;
     conn->curl_do = http;
     conn->curl_done = http_done;
+    conn->curl_close = http_close;
   }
   else if (strequal(conn->proto, "HTTPS")) {
 #ifdef USE_SSLEAY
@@ -905,6 +906,7 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     conn->curl_do = http;
     conn->curl_done = http_done;
     conn->curl_connect = http_connect;
+    conn->curl_close = http_close;
 
 #else /* USE_SSLEAY */
     failf(data, "SSL is disabled, https: not supported!");
@@ -924,6 +926,7 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     conn->protocol |= PROT_GOPHER;
     conn->curl_do = http;
     conn->curl_done = http_done;
+    conn->curl_close = http_close;
   }
   else if(strequal(conn->proto, "FTP")) {
     char *type;
@@ -935,6 +938,7 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     if(data->bits.httpproxy) {
       conn->curl_do = http;
       conn->curl_done = http_done;
+      conn->curl_close = http_close;
     }
     else {
       conn->curl_do = ftp;
