@@ -25,6 +25,10 @@ ifeq ($(USE_ZLIB),1)
   CFLAGS  += -DUSE_MANUAL
 endif
 
+ifeq ($(USE_IDNA),1)
+  EX_LIBS += $(LIBIDN_ROOT)/lib/dj_obj/libidn.a -liconv
+endif
+
 EX_LIBS += $(WATT32_ROOT)/lib/libwatt.a
 
 CFLAGS += -DUSE_ENVIRONMENT
@@ -34,6 +38,7 @@ CSOURCES = $(CURL_SOURCES)
 OBJECTS  = $(addprefix $(OBJ_DIR)/, $(CURL_SOURCES:.c=.o))
 
 all: $(OBJ_DIR) config.h $(PROGRAM)
+	@echo Welcome to cURL
 
 $(PROGRAM): $(OBJECTS) ../lib/libcurl.a
 	$(CC) -o $@ $^ $(EX_LIBS)
