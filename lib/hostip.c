@@ -377,10 +377,12 @@ static struct hostent* pack_hostent(char* buf, struct hostent* orig)
   bufptr += len;
 
   /* we align on even 64bit boundaries for safety */
-#define MEMALIGN(x) (((unsigned long)(x)&0xfffffff8)+8)
+#define MEMALIGN(x) ((x)+(8-(((unsigned long)(x))&0x7)))
 
   /* This must be aligned properly to work on many CPU architectures! */
-  copy->h_aliases = (char**)MEMALIGN(bufptr);
+  bufptr = MEMALIGN(bufptr);
+  
+  copy->h_aliases = (char**)bufptr;
 
   /* Figure out how many aliases there are */
   for (i = 0; orig->h_aliases[i] != NULL; ++i);
@@ -402,7 +404,7 @@ static struct hostent* pack_hostent(char* buf, struct hostent* orig)
   copy->h_length = orig->h_length;
     
   /* align it for (at least) 32bit accesses */
-  bufptr = (char *)MEMALIGN(bufptr);
+  bufptr = MEMALIGN(bufptr);
 
   copy->h_addr_list = (char**)bufptr;
 
