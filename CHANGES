@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (9 Aug 2002)
+- Applied Markus F.X.J. Oberhumer's patch that introduces CURLOPT_NOSIGNAL,
+  which effectively prevents libcurl from doing anything that may cause
+  signals to get sent. This is basicly for multi-threaded applications that
+  now can use timeouts properly, without risking any signals to burst in and
+  ruin the party.
+  
 Daniel (5 Aug 2002)
 - Lukasz Czekierda reported that RFC2732-style literal IPv6 addresses didn't
   work. When did that code vanish? Anyway, it's back again now and seems to
