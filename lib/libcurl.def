@@ -42,3 +42,6 @@ EXPORTS
 	curl_multi_info_read @ 33;
 	curl_free @ 34;
 	curl_version_info @ 35;
+	curl_share_init @ 36;
+	curl_share_setopt @ 37;
+	curl_share_cleanup @ 38;
