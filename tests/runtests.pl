@@ -154,6 +154,10 @@ sub runftpserver {
 
     if ($RUNNING != 1) {
         my $flag=$debugprotocol?"-v ":"";
+        if($debugprotocol) {
+            print "* Starts ftp server verbose:\n";
+            print "perl $srcdir/ftpserver.pl $flag $FTPPORT &\n";
+        }
         system("perl $srcdir/ftpserver.pl $flag $FTPPORT &");
         sleep 1; # give it a little time to start
     }
