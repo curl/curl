@@ -21,7 +21,8 @@ struct iovec
 
 #define getpid() _getpid()
 
-int strcasecmp(const char *a, const char *b);
+struct timezone { int dummy; };
+
 int ares_gettimeofday(struct timeval *tv, struct timezone *tz);
 #define gettimeofday(tv,tz) ares_gettimeofday(tv,tz)
 
