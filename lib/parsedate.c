@@ -78,7 +78,58 @@ static const char *weekday[] = { "Monday", "Tuesday", "Wednesday", "Thursday",
 const char *Curl_month[]= { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul",
                             "Aug", "Sep", "Oct", "Nov", "Dec" };
 
-static const char *tz[]= { "GMT", "UTC", "MET" };
+struct tzinfo {
+  const char *name;
+  int offset; /* +/- in minutes */
+};
+
+/* Here's a bunch of frequently used time zone names. These were supported
+   by the old getdate parser. */
+static const struct tzinfo tz[]= {
+  {"GMT", 0},     /* Greenwich Mean */
+  {"UTC", 0},     /* Universal (Coordinated) */
+  {"WET", 0},     /* Western European */
+  {"BST", 0},     /* British Summer */
+  {"WAT", 60},    /* West Africa */
+  {"AST", 240},   /* Atlantic Standard */
+  {"ADT", 240},   /* Atlantic Daylight */
+  {"EST", 300},   /* Eastern Standard */
+  {"EDT", 300},   /* Eastern Daylight */
+  {"CST", 360},   /* Central Standard */
+  {"CDT", 360},   /* Central Daylight */
+  {"MST", 420},   /* Mountain Standard */
+  {"MDT", 420},   /* Mountain Daylight */
+  {"PST", 480},   /* Pacific Standard */
+  {"PDT", 480},   /* Pacific Daylight */
+  {"YST", 540},   /* Yukon Standard */
+  {"YDT", 540},   /* Yukon Daylight */
+  {"HST", 600},   /* Hawaii Standard */
+  {"HDT", 600},   /* Hawaii Daylight */
+  {"CAT", 600},   /* Central Alaska */
+  {"AHST", 600},  /* Alaska-Hawaii Standard */
+  {"NT",  660},   /* Nome */
+  {"IDLW", 720},  /* International Date Line West */
+  {"CET", -60},   /* Central European */
+  {"MET", -60},   /* Middle European */
+  {"MEWT", -60},  /* Middle European Winter */
+  {"MEST", -120}, /* Middle European Summer */
+  {"CEST", -120}, /* Central European Summer */
+  {"MESZ", -60},  /* Middle European Summer */
+  {"FWT", -60},   /* French Winter */
+  {"FST", -60},   /* French Summer */
+  {"EET", -120},  /* Eastern Europe, USSR Zone 1 */
+  {"WAST", -420}, /* West Australian Standard */
+  {"WADT", -420}, /* West Australian Daylight */
+  {"CCT", -480},  /* China Coast, USSR Zone 7 */
+  {"JST", -540},  /* Japan Standard, USSR Zone 8 */
+  {"EAST", -600}, /* Eastern Australian Standard */
+  {"EADT", -600}, /* Eastern Australian Daylight */
+  {"GST", -600},  /* Guam Standard, USSR Zone 9 */
+  {"NZT", -720},  /* New Zealand */
+  {"NZST", -720}, /* New Zealand Standard */
+  {"NZDT", -720}, /* New Zealand Daylight */
+  {"IDLE", -720}, /* International Date Line East */
+};
 
 /* returns:
    -1 no day
@@ -118,24 +169,27 @@ static int checkmonth(char *check)
     }
     what++;
   }
-  return found?i:-1;
+  return found?i:-1; /* return the offset or -1, no real offset is -1 */
 }
+
+/* return the time zone offset between GMT and the input one, in number
+   of seconds or -1 if the timezone wasn't found/legal */
 
 static int checktz(char *check)
 {
-  int i;
-  const char **what;
+  unsigned int i;
+  const struct tzinfo *what;
   bool found= FALSE;
 
-  what = &tz[0];
-  for(i=0; i<2; i++) {
-    if(curl_strequal(check, what[0])) {
+  what = tz;
+  for(i=0; i< sizeof(tz)/sizeof(tz[0]); i++) {
+    if(curl_strequal(check, what->name)) {
       found=TRUE;
       break;
     }
     what++;
   }
-  return found?i:-1;
+  return found?what->offset*60:-1;
 }
 
 static void skip(const char **date)
@@ -156,17 +210,17 @@ difftm (struct tm *a, struct tm *b)
   int by = b->tm_year + (TM_YEAR_ORIGIN - 1);
   long days = (
   /* difference in day of year */
-		a->tm_yday - b->tm_yday
+                a->tm_yday - b->tm_yday
   /* + intervening leap days */
-		+ ((ay >> 2) - (by >> 2))
-		- (ay / 100 - by / 100)
-		+ ((ay / 100 >> 2) - (by / 100 >> 2))
+                + ((ay >> 2) - (by >> 2))
+                - (ay / 100 - by / 100)
+                + ((ay / 100 >> 2) - (by / 100 >> 2))
   /* + difference in years * 365 */
-		+ (long) (ay - by) * 365
+                + (long) (ay - by) * 365
   );
   return (60 * (60 * (24 * days + (a->tm_hour - b->tm_hour))
-		+ (a->tm_min - b->tm_min))
-	  + (a->tm_sec - b->tm_sec));
+                + (a->tm_min - b->tm_min))
+          + (a->tm_sec - b->tm_sec));
 }
 #endif
 
@@ -186,9 +240,10 @@ time_t Curl_parsedate(const char *date)
   int minnum=-1;
   int secnum=-1;
   long yearnum=-1;
-  int tznum=-1;
+  int tzoff=-1;
   struct tm tm;
   enum assume dignext = DATE_MDAY;
+  const char *indate = date; /* save the original pointer */
 
   int part = 0; /* max 6 parts */
 
@@ -215,10 +270,10 @@ time_t Curl_parsedate(const char *date)
           found = TRUE;
       }
 
-      if(!found && (tznum == -1)) {
+      if(!found && (tzoff == -1)) {
         /* this just must be a time zone string */
-        tznum = checktz(buf);
-        if(tznum != -1)
+        tzoff = checktz(buf);
+        if(tzoff != -1)
           found = TRUE;
       }
 
@@ -239,6 +294,20 @@ time_t Curl_parsedate(const char *date)
       }
       else {
         val = strtol(date, &end, 10);
+
+        if( ((end - date) == 4) &&
+            (val < 1300) &&
+            (indate< date) &&
+            ((date[-1] == '+' || date[-1] == '-'))) {
+          /* four digits and a value less than 1300 and it is preceeded with
+             a plus or minus. This is a time zone indication. */
+          found = TRUE;
+          tzoff = (val/100 * 60 + val%100)*60;
+
+          /* the + and - prefix indicates the local time compared to GMT,
+             this we need ther reversed math to get what we want */
+          tzoff = date[-1]=='+'?-tzoff:tzoff;
+        }
 
         if((dignext == DATE_MDAY) && (mdaynum == -1)) {
           if((val > 0) && (val<32)) {
@@ -311,12 +380,12 @@ time_t Curl_parsedate(const char *date)
 #endif
 
     t2 = mktime(gmt);
-    delta = t - t2;
 
-    /* if we would like to adjust to a different input time zone than GMT,
-       we would add that to the delta value right here */
+    /* Add the time zone diff (between the given timezone and GMT) and the
+       diff between the local time zone and GMT. */
+    delta = (tzoff!=-1?tzoff:0) + (t - t2);
 
-    if(t + delta < t)
+    if((delta>0) && (t + delta < t))
       return -1; /* time_t overflow */
 
     t += delta;
