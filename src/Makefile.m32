@@ -22,7 +22,7 @@ ZLIB_PATH = ../../zlib-1.1.4
 ########################################################
 ## Nothing more to do below this line!
 
-INCLUDES = -I. -I.. -I../include
+INCLUDES = -I. -I.. -I../include -I$(ZLIB_PATH)
 CFLAGS = -g -O2 -DMINGW32
 ifdef SSL
   CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
@@ -41,12 +41,9 @@ else
   curl_DEPENDENCIES = ../lib/libcurl.a
   curl_LDADD = -L../lib -lcurl
 endif
-curl_LDADD += -lwsock32 -lws2_32 -lwinmm
+curl_LDADD += -lwsock32 -lws2_32 -lwinmm -L$(ZLIB_PATH) -lz
 ifdef SSL
   curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32
-endif
-ifdef ZLIB
-  curl_LDADD += -L$(ZLIB_PATH) -lz
 endif
 
 PROGRAMS = $(curl_PROGRAMS)
