@@ -345,11 +345,11 @@ if ($gnulikebuild) {
     mydie "configure didn't work";
   }
 } else {
-  if ($^O eq 'MSWin32') {
+  if (($^O eq 'MSWin32') && ($targetos !~ /netware/)) {
     system("xcopy /s /q ..\\$CURLDIR .");
     system("buildconf.bat");
-  } elsif ($^O eq 'linux') {
-    system("cp -ar ../$CURLDIR/* ."); 
+  } elsif (($^O eq 'linux') || ($targetos =~ /netware/)) {
+    system("cp -afr ../$CURLDIR/* ."); 
     system("cp -af ../$CURLDIR/Makefile.dist Makefile"); 
     system("make -i -C lib -f Makefile.$targetos prebuild");
     system("make -i -C src -f Makefile.$targetos prebuild");
@@ -387,9 +387,9 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   close(F);
 
   if (-f "libcares$libext") {
-    logit "ares is now built successfully (libcares.$libext)";
+    logit "ares is now built successfully (libcares$libext)";
   } else {
-    logit "ares build failed (libares.$libext)";
+    logit "ares build failed (libares$libext)";
   }
 
   # cd back to the curl build dir
@@ -419,6 +419,12 @@ if ($gnulikebuild) {
     print;
   }
   close(F);
+}
+
+if (-f "lib/libcurl$libext") {
+  logit "lib/libcurl was created fine (libcurl$libext)";
+} else {
+  logit "lib/libcurl was not created (libcurl$libext)";
 }
 
 if (-f "src/curl$binext") {
