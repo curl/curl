@@ -1562,6 +1562,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         if(str2num(&config->retry_maxtime, nextarg))
           return PARAM_BAD_NUMERIC;
         break;
+      default:
+        break;
       }
       break;
     case '#': /* added 19990617 larsa */
