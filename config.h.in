@@ -37,6 +37,9 @@
 /* The number of bytes in a long long.  */
 #undef SIZEOF_LONG_LONG
 
+/* Define if you have the RAND_screen function.  */
+#undef HAVE_RAND_SCREEN
+
 /* Define if you have the RAND_status function.  */
 #undef HAVE_RAND_STATUS
 
@@ -121,6 +124,9 @@
 /* Define if you have the <io.h> header file.  */
 #undef HAVE_IO_H
 
+/* Define if you have the <malloc.h> header file.  */
+#undef HAVE_MALLOC_H
+
 /* Define if you have the <net/if.h> header file.  */
 #undef HAVE_NET_IF_H
 
@@ -159,6 +165,9 @@
 
 /* Define if you have the <ssl.h> header file.  */
 #undef HAVE_SSL_H
+
+/* Define if you have the <stdlib.h> header file.  */
+#undef HAVE_STDLIB_H
 
 /* Define if you have the <sys/param.h> header file.  */
 #undef HAVE_SYS_PARAM_H
