@@ -176,7 +176,7 @@ AC_DEFUN([TYPE_IN_ADDR_T],
       AC_DEFINE_UNQUOTED(in_addr_t, $curl_cv_in_addr_t_equiv,
 			[type to use in place of in_addr_t if not defined])],
       [#include <sys/types.h>
-#include <sys/socket.h>,
+#include <sys/socket.h>
 #include <arpa/inet.h>])
 ])
 
