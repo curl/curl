@@ -15,9 +15,11 @@ Misc
  - guesses protocol from host name unless specified
  - uses .netrc
  - progress bar/time specs while downloading
- - PROXY environment variables support
+ - "standard" proxy environment variables support
  - config file support
  - compiles on win32
+ - redirectable stderr
+ - use selected network interface for outgoing traffic
 
 HTTP
  - GET
@@ -28,8 +30,9 @@ HTTP
  - authentication
  - resume
  - follow redirects
+ - maximum amount of redirects to follow
  - custom HTTP request
- - cookie get/send
+ - cookie get/send fully parsed
  - understands the netscape cookie file format
  - custom headers (that can replace/remove internally generated headers)
  - custom user-agent string
@@ -38,11 +41,12 @@ HTTP
  - proxy authentication
  - time conditions
  - via http-proxy
- - specify interface device/port
+ - retrieve file modification date
 
 HTTPS (*1)
  - (all the HTTP features)
  - using certificates
+ - verify server certificate
  - via http-proxy
 
 FTP
@@ -63,6 +67,7 @@ FTP
  - simple "range" support
  - via http-proxy
  - all operations can be tunneled through a http-proxy
+ - customizable to retrieve file modification date
 
 TELNET
  - connection negotiation
