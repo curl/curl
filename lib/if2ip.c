@@ -56,6 +56,11 @@
 #include <arpa/inet.h>
 #endif
 #include <netinet/in.h>
+
+#ifdef HAVE_SYS_TIME_H
+/* This must be before net/if.h for AIX 3.2 to enjoy life */
+#include <sys/time.h>
+#endif
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
 #endif
@@ -64,10 +69,6 @@
 /* -- if2ip() -- */
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
-#endif
-
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
 #endif
 
 #ifdef HAVE_SYS_SOCKIO_H
