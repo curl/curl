@@ -114,62 +114,6 @@ enum {
   KEEP_WRITE
 };
 
-
-/*
- * compareheader()
- *
- * Returns TRUE if 'headerline' contains the 'header' with given 'content'.
- * Pass headers WITH the colon.
- */
-static bool
-compareheader(char *headerline, /* line to check */
-              const char *header,     /* header keyword _with_ colon */
-              const char *content)    /* content string to find */
-{
-  /* RFC2616, section 4.2 says: "Each header field consists of a name followed
-   * by a colon (":") and the field value. Field names are case-insensitive.
-   * The field value MAY be preceded by any amount of LWS, though a single SP
-   * is preferred." */
-
-  size_t hlen = strlen(header);
-  size_t clen;
-  size_t len;
-  char *start;
-  char *end;
-
-  if(!strnequal(headerline, header, hlen))
-    return FALSE; /* doesn't start with header */
-
-  /* pass the header */
-  start = &headerline[hlen];
-
-  /* pass all white spaces */
-  while(*start && isspace((int)*start))
-    start++;
-
-  /* find the end of the header line */
-  end = strchr(start, '\r'); /* lines end with CRLF */
-  if(!end) {
-    /* in case there's a non-standard compliant line here */
-    end = strchr(start, '\n');
-
-    if(!end)
-      /* hm, there's no line ending here, return false and bail out! */
-      return FALSE;
-  }
-
-  len = end-start; /* length of the content part of the input line */
-  clen = strlen(content); /* length of the word to find */
-
-  /* find the content string in the rest of the line */
-  for(;len>=clen;len--, start++) {
-    if(strnequal(start, content, clen))
-      return TRUE; /* match! */
-  }
-
-  return FALSE; /* no match */
-}
-
 /* We keep this static and global since this is read-only and NEVER
    changed. It should just remain a blanked-out timeout value. */
 static struct timeval notimeout={0,0};
@@ -553,7 +497,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           }
           else if((k->httpversion == 10) &&
                   conn->bits.httpproxy &&
-                  compareheader(k->p, "Proxy-Connection:", "keep-alive")) {
+                  Curl_compareheader(k->p,
+                                     "Proxy-Connection:", "keep-alive")) {
             /*
              * When a HTTP/1.0 reply comes when using a proxy, the
              * 'Proxy-Connection: keep-alive' line tells us the
@@ -564,7 +509,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             infof(data, "HTTP/1.0 proxy connection set to keep alive!\n");
           }
           else if((k->httpversion == 10) &&
-                  compareheader(k->p, "Connection:", "keep-alive")) {
+                  Curl_compareheader(k->p, "Connection:", "keep-alive")) {
             /*
              * A HTTP/1.0 reply with the 'Connection: keep-alive' line
              * tells us the connection will be kept alive for our
@@ -574,7 +519,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             conn->bits.close = FALSE; /* don't close when done */
             infof(data, "HTTP/1.0 connection set to keep alive!\n");
           }
-          else if (compareheader(k->p, "Connection:", "close")) {
+          else if (Curl_compareheader(k->p, "Connection:", "close")) {
             /*
              * [RFC 2616, section 8.1.2.1]
              * "Connection: close" is HTTP/1.1 language and means that
@@ -583,7 +528,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
              */
             conn->bits.close = TRUE; /* close when done */
           }
-          else if (compareheader(k->p, "Transfer-Encoding:", "chunked")) {
+          else if (Curl_compareheader(k->p,
+                                      "Transfer-Encoding:", "chunked")) {
             /*
              * [RFC 2616, section 3.6.1] A 'chunked' transfer encoding
              * means that the server will send a series of "chunks". Each
@@ -925,7 +871,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
             /* copy the prefix to the buffer */
             memcpy(conn->upload_fromhere, hexbuffer, hexlen);
-            if(nread>0) {
+            if(nread>hexlen) {
               /* append CRLF to the data */
               memcpy(conn->upload_fromhere +
                      nread, "\r\n", 2);
