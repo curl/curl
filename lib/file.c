@@ -152,6 +152,10 @@ CURLcode Curl_file_connect(struct connectdata *conn)
   return CURLE_OK;
 }
 
+#if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
+#define lseek(x,y,z) _lseeki64(x, y, z)
+#endif
+
 /* This is the do-phase, separated from the connect-phase above */
 
 CURLcode Curl_file(struct connectdata *conn)
@@ -234,7 +238,6 @@ CURLcode Curl_file(struct connectdata *conn)
     Curl_pgrsSetDownloadSize(data, (double)expected_size);
 
   if(conn->resume_from)
-    /* Added by Dolbneff A.V & Spiridonoff A.V */
     lseek(fd, conn->resume_from, SEEK_SET);
 
   while (res == CURLE_OK) {
