@@ -1580,7 +1580,7 @@ static CURLcode ConnectPlease(struct connectdata *conn,
     memset((char *) &conn->serv_addr, '\0', sizeof(conn->serv_addr));
     memcpy((char *)&(conn->serv_addr.sin_addr),
            (struct in_addr *)addr, sizeof(struct in_addr));
-    conn->serv_addr.sin_family = hostaddr->h_addrtype;
+    conn->serv_addr.sin_family = hostaddr->addr->h_addrtype;
     conn->serv_addr.sin_port = htons((unsigned short)conn->port);
 #endif
 

@@ -576,7 +576,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /*
    * Connecting with IPv4-only support
    */
-  if(!remotehost->h_addr_list[0]) {
+  if(!remotehost->addr->h_addr_list[0]) {
     /* If there is no addresses in the address list, then we return
        error right away */
     failf(data, "no address available");
@@ -603,16 +603,16 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /* This is the loop that attempts to connect to all IP-addresses we
      know for the given host. One by one. */
   for(rc=-1, aliasindex=0;
-      rc && (struct in_addr *)remotehost->h_addr_list[aliasindex];
+      rc && (struct in_addr *)remotehost->addr->h_addr_list[aliasindex];
       aliasindex++) {
     struct sockaddr_in serv_addr;
 
     /* do this nasty work to do the connect */
     memset((char *) &serv_addr, '\0', sizeof(serv_addr));
     memcpy((char *)&(serv_addr.sin_addr),
-           (struct in_addr *)remotehost->h_addr_list[aliasindex],
+           (struct in_addr *)remotehost->addr->h_addr_list[aliasindex],
            sizeof(struct in_addr));
-    serv_addr.sin_family = remotehost->h_addrtype;
+    serv_addr.sin_family = remotehost->addr->h_addrtype;
     serv_addr.sin_port = htons((unsigned short)port);
   
     rc = connect(sockfd, (struct sockaddr *)&serv_addr,
@@ -688,7 +688,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
   if(addr)
     /* this is the address we've connected to */
-    *addr = (struct in_addr *)remotehost->h_addr_list[aliasindex];
+    *addr = (struct in_addr *)remotehost->addr->h_addr_list[aliasindex];
 #endif
 
   /* allow NULL-pointers to get passed in */

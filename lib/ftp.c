@@ -1183,7 +1183,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
    *
    */
   struct sockaddr_in sa;
-  struct hostent *h=NULL;
+  struct Curl_dns_entry *h=NULL;
   unsigned short porttouse;
   char myhost[256] = "";
   bool sa_filled_in = FALSE;
@@ -1229,8 +1229,8 @@ CURLcode ftp_use_port(struct connectdata *conn)
       if(!sa_filled_in) {
         memset((char *)&sa, 0, sizeof(sa));
         memcpy((char *)&sa.sin_addr,
-               h->h_addr,
-               h->h_length);
+               h->addr->h_addr,
+               h->addr->h_length);
         sa.sin_family = AF_INET;
         sa.sin_addr.s_addr = INADDR_ANY;
       }
@@ -1276,7 +1276,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
     struct in_addr in;
     unsigned short ip[5];
     (void) memcpy(&in.s_addr,
-                  h?*h->h_addr_list:(char *)&sa.sin_addr.s_addr,
+                  h?*h->addr->h_addr_list:(char *)&sa.sin_addr.s_addr,
                   sizeof (in.s_addr));
 
 #ifdef HAVE_INET_NTOA_R
