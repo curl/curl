@@ -2564,7 +2564,7 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
  *
  * Calls failf()
  */
-CURLcode ftp_mkd(struct connectdata *conn, char *path)
+static CURLcode ftp_mkd(struct connectdata *conn, char *path)
 {
   CURLcode result=CURLE_OK;
   int ftpcode; /* for ftp status */
