@@ -19,16 +19,19 @@ README
 
   Study the LEGAL file for distribution terms and similar.
 
-  Visit the curl web site or mirror for the latest news:
+  Visit the curl web site or mirrors for the latest news:
 
         http://curl.haxx.se/
         http://curl.sf.net/
+        http://curl.planetmirror.com/
 
   The official download mirror sites are:
 
         Sweden    -- ftp://ftp.sunet.se/pub/www/utilities/curl/
         Sweden    -- http://cool.haxx.se/curl/
         Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
+        Australia -- http://curl.planetmirror.com/pub/curl/
+        US        -- http://curl.sourceforge.net/download.html
 
   To download the very latest source off the CVS server do this:
 
