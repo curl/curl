@@ -1,0 +1,66 @@
+# Server-side
+<reply>
+<data nocheck=true>
+HTTP/1.1 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 9
+
+surprise
+</data>
+<data1>
+HTTP/1.1 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Connection: close
+
+surprise2
+</data1>
+
+<postcmd>
+wait 1
+</postcmd>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP with delayed close, conn reuse, connection reset and retry
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/want/160 http://%HOSTIP:%HOSTPORT/wantmore/1600001
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+HTTP/1.1 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 9
+
+surprise
+HTTP/1.1 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Connection: close
+
+surprise2
+</stdout>
+
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /want/160 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: */*
+
+GET /wantmore/1600001 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: */*
+
+</protocol>
+</verify>
