@@ -1,33 +1,13 @@
-This is just a small collection of perl scripts that use curl to do
-their jobs.
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
 
-If you need a proxy configuration in order to get HTTP or FTP
-documents, do edit your .curlrc file in your HOME dir to contain:
--x <proxy host>:<proxy port>
+Perl
 
-These scripts are all written by Daniel Stenberg.
+ Georg Horn's Perl interface to curl is available in the Curl_easy/
+subdirectory.
 
-checklinks.pl
-=============
-  This script fetches an HTML page, extracts all links and references to
-  other documents and then goes through them to check that they work.
-  Reports progress in a format intended for machine-parsing.
-
-getlinks.pl
-===========
-  You ever wanted to download a bunch of programs a certain HTML page has
-  links to? This program extracts all links and references from a web page
-  and then compares them to the regex you supply. All matches will be
-  downloaded in the target directory of your choice.
-
-recursiveftpget.pl
-==================
-  This script recursively downloads all files from a directory on an ftp site
-  and all subdirectories it has. Optional depth-level.
-
-formfind.pl
-===========
-  Downloads an HTML page (or reads stdin) and reports a human readable report
-  about the FORM(s) present. What method, what URL, which input or select
-  field, what default values they have and what submit buttons there are. It
-  is useful if you intend to use curl to properly fake a form submission.
+ Unfortunately, we don't have any examples nor any documentation for it at
+this point.
