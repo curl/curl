@@ -195,9 +195,6 @@ sub compare {
         $sec="$LOGDIR/stored.tmp";
     }
 
-#    $res = system("cmp $first $sec");
-#    $res /= 256;
-
     comparefiles($first, $sec);
     if ($res != 0) {
         print " $text FAILED";
@@ -291,8 +288,6 @@ sub singletest {
     else {
         # verify the received data
         $res = compare($CURLOUT, $REPLY, "data");
-        $res /= 256;
-
         if ($res) {
             exit;
         }
@@ -300,7 +295,6 @@ sub singletest {
         # verify the sent request
         $res = compare($SERVERIN, $HTTP, "http",
                        "^(User-Agent:|--curl|Content-Type: multipart/form-data; boundary=).*\r\n");
-        $res /= 256;
 
         # The strip pattern above is for stripping off User-Agent: since
         # that'll be different in all versions, and the lines in a
@@ -314,7 +308,6 @@ sub singletest {
         if ( -r "$VALIDOUT" ) {
 
             $res = compare($STDOUT, $VALIDOUT, "stdout");
-            $res /= 256;
             if($res) {
                 exit;
             }
