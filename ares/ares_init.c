@@ -109,7 +109,8 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
 	}
       if (channel->nsort != -1)
 	free(channel->sortlist);
-      free(channel->lookups);
+      if(channel->lookups)
+        free(channel->lookups);
       free(channel);
       return status;
     }
