@@ -9,15 +9,15 @@ TODO
  Things to do in project cURL. Please tell me what you think, contribute and
  send me patches that improve things!
 
-To do for the 7.8 release:
+To do for the next release:
 
  * Make SSL session ids get used if multiple HTTPS documents from the same
    host is requested.
 
  * Document the undocumented libcurl functions: the printf clones (like
    curl_msprintf, curl_mfprintf, curl_msnprintf, curl_maprintf and
-   curl_mvfprintf), the string compare functions (curl_strequal
-   and curl_strnequal) and the URL escape/unescape functions.
+   curl_mvfprintf) and the string compare functions (curl_strequal
+   and curl_strnequal).
 
 To do in a future release (random order):
 
