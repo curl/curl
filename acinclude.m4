@@ -295,6 +295,26 @@ AC_DEFUN([CURL_CHECK_LOCALTIME_R],
 	AC_MSG_RESULT(no))])])
 ])
 
+dnl
+dnl This function checks for strerror_r(). If it isn't found at first, it
+dnl retries with _THREAD_SAFE defined, as that is what AIX seems to require
+dnl in order to find this function.
+dnl
+dnl If the function is found, it will then proceed to check how the function
+dnl actually works: glibc-style or POSIX-style.
+dnl
+dnl glibc:
+dnl      char *strerror_r(int errnum, char *buf, size_t n);
+dnl  
+dnl  What this one does is to return the error string (no surprises there),
+dnl  but it doesn't usually copy anything into buf!  The 'buf' and 'n'
+dnl  parameters are only meant as an optional working area, in case strerror_r
+dnl  needs it.  A quick test on a few systems shows that it's generally not
+dnl  touched at all.
+dnl
+dnl POSIX:
+dnl      int strerror_r(int errnum, char *buf, size_t n);
+dnl
 AC_DEFUN([CURL_CHECK_STRERROR_R],
 [
   dnl determine of strerror_r is present
@@ -302,15 +322,63 @@ AC_DEFUN([CURL_CHECK_STRERROR_R],
     AC_MSG_CHECKING(whether strerror_r is declared)
     AC_EGREP_CPP(strerror_r,[
 #include <string.h>],[
+      strerror_r="yes"
       AC_MSG_RESULT(yes)],[
       AC_MSG_RESULT(no)
-      AC_MSG_CHECKING(whether strerror_r with -D_REENTRANT is declared)
+      AC_MSG_CHECKING(whether strerror_r with -D_THREAD_SAFE is declared)
       AC_EGREP_CPP(strerror_r,[
-#define _REENTRANT
+#define _THREAD_SAFE
 #include <string.h>],[
-	AC_DEFINE(NEED_REENTRANT)
+        strerror_r="yes"
+	CPPFLAGS="-D_THREAD_SAFE $CPPFLAGS"
 	AC_MSG_RESULT(yes)],
 	AC_MSG_RESULT(no))])])
+
+  if test "x$strerror_r" = "xyes"; then
+    dnl determine if this strerror_r() is glibc or POSIX
+    AC_MSG_CHECKING([for a glibc strerror_r API])
+    AC_TRY_RUN([
+#include <string.h>
+#include <errno.h>
+int
+main () {
+  char buffer[1024]; /* big enough to play with */
+  char *string =
+    strerror_r(EACCES, buffer, sizeof(buffer));
+    /* this should've returned a string */
+    if(!string || !string[0])
+      return 99;
+    return 0;
+}
+],
+    AC_DEFINE(HAVE_GLIBC_STRERROR_R, 1, [we have a glibc-style strerror_r()])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no])
+    )
+
+    AC_MSG_CHECKING([for a POSIX strerror_r API])
+    AC_TRY_RUN([
+#include <string.h>
+#include <errno.h>
+int
+main () {
+  char buffer[1024]; /* big enough to play with */
+  int error =
+    strerror_r(EACCES, buffer, sizeof(buffer));
+    /* This should've returned zero, and written an error string in the
+       buffer.*/
+    if(!buffer[0] || error)
+      return 99;
+    return 0;
+}
+],
+    AC_DEFINE(HAVE_POSIX_STRERROR_R, 1, [we have a POSIX-style strerror_r()])
+    AC_MSG_RESULT([yes]),
+    AC_MSG_RESULT([no])
+    )
+
+  fi
+
 ])
 
 AC_DEFUN([CURL_CHECK_INET_NTOA_R],
