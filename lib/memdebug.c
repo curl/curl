@@ -54,7 +54,7 @@
  * Don't use these with multithreaded test programs!
  */
 
-FILE *logfile=stderr;
+FILE *logfile;
 
 /* this sets the log file name */
 void curl_memdebug(char *logname)
@@ -66,7 +66,7 @@ void curl_memdebug(char *logname)
 void *curl_domalloc(size_t size, int line, char *source)
 {
   void *mem=(malloc)(size);
-  fprintf(logfile, "MEM %s:%d malloc(%d) = %p\n",
+  fprintf(logfile?logfile:stderr, "MEM %s:%d malloc(%d) = %p\n",
           source, line, size, mem);
   return mem;
 }
@@ -75,7 +75,7 @@ char *curl_dostrdup(char *str, int line, char *source)
 {
   char *mem=(strdup)(str);
   size_t len=strlen(str)+1;
-  fprintf(logfile, "MEM %s:%d strdup(%p) (%d) = %p\n",
+  fprintf(logfile?logfile:stderr, "MEM %s:%d strdup(%p) (%d) = %p\n",
           source, line, str, len, mem);
   return mem;
 }
@@ -83,7 +83,7 @@ char *curl_dostrdup(char *str, int line, char *source)
 void *curl_dorealloc(void *ptr, size_t size, int line, char *source)
 {
   void *mem=(realloc)(ptr, size);
-  fprintf(logfile, "MEM %s:%d realloc(%p, %d) = %p\n",
+  fprintf(logfile?logfile:stderr, "MEM %s:%d realloc(%p, %d) = %p\n",
           source, line, ptr, size, mem);
   return mem;
 }
@@ -91,7 +91,7 @@ void *curl_dorealloc(void *ptr, size_t size, int line, char *source)
 void curl_dofree(void *ptr, int line, char *source)
 {
   (free)(ptr);
-  fprintf(logfile, "MEM %s:%d free(%p)\n",
+  fprintf(logfile?logfile:stderr, "MEM %s:%d free(%p)\n",
           source, line, ptr);
 }
 
