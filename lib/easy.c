@@ -80,6 +80,10 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+/* The last #include file should be: */
+#ifdef CURLDEBUG
+#include "memdebug.h"
+#endif
 
 /* Silly win32 socket initialization functions */
 
