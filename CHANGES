@@ -10,8 +10,8 @@ Daniel (16 September)
 - Doing PUT with --digest failed, as reported in bug report #805853.
 
 - Using --anyauth that picked NTLM, and then a redirect closed the connection
-  and took curl to a second NTLM page made curl fail. Test case #806328
-  identified the problem.
+  and took curl to a second NTLM page made curl fail. Bug report #806328
+  identified the problem, test case 90 was added to verify the fix.
 
 Daniel (14 September)
 - codemastr brought a patch for ares to make the Windows portions of it work
