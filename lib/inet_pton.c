@@ -108,7 +108,8 @@ inet_pton4(const char *src, unsigned char *dst)
 
   saw_digit = 0;
   octets = 0;
-  *(tp = tmp) = 0;
+  tp = tmp;
+  *tp = 0;
   while ((ch = *src++) != '\0') {
     const char *pch;
 
