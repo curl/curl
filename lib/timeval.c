@@ -1,16 +1,16 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2003, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -28,8 +28,7 @@
 #ifdef WIN32
 #include <mmsystem.h>
 
-int
-gettimeofday (struct timeval *tp, void *nothing)
+static int gettimeofday(struct timeval *tp, void *nothing)
 {
 #ifdef WITHOUT_MM_LIB
   SYSTEMTIME st;
@@ -63,23 +62,26 @@ gettimeofday (struct timeval *tp, void *nothing)
   Usec = (Ticks - (Sec*1000))*1000;
   tp->tv_sec = Sec;
   tp->tv_usec = Usec;
-#endif
-  return 1;
+#endif /* WITHOUT_MM_LIB */
+  return 0;
 }
-#define HAVE_GETTIMEOFDAY
-#endif
-#endif
+#else /* WIN32 */
+/* non-win32 version of Curl_gettimeofday() */
+static int gettimeofday(struct timeval *tp, void *nothing)
+{
+  (void)nothing; /* we don't support specific time-zones */
+  tp->tv_sec = (long)time(NULL);
+  tp->tv_usec = 0;
+  return 0;
+}
+#endif /* WIN32 */
+#endif /* HAVE_GETTIMEOFDAY */
 
 struct timeval Curl_tvnow (void)
 {
- struct timeval now;
-#ifdef HAVE_GETTIMEOFDAY
- gettimeofday (&now, NULL);
-#else
- now.tv_sec = (long) time(NULL);
- now.tv_usec = 0;
-#endif
- return now;
+  struct timeval now;
+  (void)gettimeofday(&now, NULL);
+  return now;
 }
 
 /*
@@ -94,5 +96,5 @@ long Curl_tvdiff (struct timeval newer, struct timeval older)
 
 long Curl_tvlong (struct timeval t1)
 {
- return t1.tv_sec;
+  return t1.tv_sec;
 }
