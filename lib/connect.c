@@ -489,7 +489,7 @@ static void Curl_setNoDelay(struct connectdata *conn,
 {
 #ifdef TCP_NODELAY
   struct SessionHandle *data= conn->data;
-  socklen_t onoff = (socklen_t) data->tcp_nodelay;
+  socklen_t onoff = (socklen_t) data->set.tcp_nodelay;
   if(setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, (void *)&onoff,
                 sizeof(onoff)) < 0)
     infof(data, "Could not set TCP_NODELAY: %s\n",
@@ -580,7 +580,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     if (sockfd == CURL_SOCKET_BAD)
       continue;
 
-    else if(data->tcp_nodelay)
+    else if(data->set.tcp_nodelay)
       Curl_setNoDelay(conn, sockfd);
 #else
   /*
@@ -601,7 +601,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       return CURLE_COULDNT_CONNECT; /* big time error */
     }
 
-    else if(data->tcp_nodelay)
+    else if(data->set.tcp_nodelay)
       Curl_setNoDelay(conn, sockfd);
 
     /* nasty address work before connect can be made */
