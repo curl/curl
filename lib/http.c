@@ -94,7 +94,6 @@
 #include "base64.h"
 #include "cookie.h"
 #include "strequal.h"
-#include "url.h"
 #include "ssluse.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
@@ -141,7 +140,7 @@ size_t add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in)
     fwrite(in->buffer, in->size_used, 1, conn->data->err);
   }
 
-  amount = ssend(sockfd, conn, in->buffer, in->size_used);
+  Curl_write(conn, sockfd, in->buffer, in->size_used, &amount);
 
   if(in->buffer)
     free(in->buffer);
@@ -213,28 +212,21 @@ CURLcode add_buffer(send_buffer *in, void *inptr, size_t size)
  */
 
 static
-int GetLine(int sockfd, char *buf, struct UrlData *data)
+int GetLine(int sockfd, char *buf, struct connectdata *conn)
 {
-  int nread;
+  size_t nread;
   int read_rc=1;
   char *ptr;
+  struct UrlData *data=conn->data;
+
   ptr=buf;
 
   /* get us a full line, terminated with a newline */
   for(nread=0;
       (nread<BUFSIZE) && read_rc;
       nread++, ptr++) {
-#ifdef USE_SSLEAY
-    if (data->ssl.use) {
-      read_rc = SSL_read(data->ssl.handle, ptr, 1);
-    }
-    else {
-#endif
-      read_rc = sread(sockfd, ptr, 1);
-#ifdef USE_SSLEAY
-    }
-#endif /* USE_SSLEAY */
-    if (*ptr == '\n')
+    if((CURLE_OK != Curl_read(conn, sockfd, ptr, 1, &nread)) ||
+       (*ptr == '\n'))
       break;
   }
   *ptr=0; /* zero terminate */
@@ -272,27 +264,29 @@ bool static checkheaders(struct UrlData *data, char *thisheader)
  * this proxy. After that, the socket can be used just as a normal socket.
  */
 
-CURLcode Curl_ConnectHTTPProxyTunnel(struct UrlData *data, int tunnelsocket,
+CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
+                                     int tunnelsocket,
                                      char *hostname, int remote_port)
 {
   int httperror=0;
   int subversion=0;
+  struct UrlData *data=conn->data;
 
   infof(data, "Establish HTTP proxy tunnel to %s:%d\n", hostname, remote_port);
 
-  /* OK, now send the connect statment */
-  sendf(tunnelsocket, data,
-        "CONNECT %s:%d HTTP/1.0\015\012"
-        "%s"
-        "%s"
-        "\r\n",
-        hostname, remote_port,
-        (data->bits.proxy_user_passwd)?data->ptr_proxyuserpwd:"",
-        (data->useragent?data->ptr_uagent:"")
-        );
+  /* OK, now send the connect request to the proxy */
+  Curl_sendf(tunnelsocket, conn,
+             "CONNECT %s:%d HTTP/1.0\015\012"
+             "%s"
+             "%s"
+             "\r\n",
+             hostname, remote_port,
+             (data->bits.proxy_user_passwd)?data->ptr_proxyuserpwd:"",
+             (data->useragent?data->ptr_uagent:"")
+             );
 
   /* wait for the proxy to send us a HTTP/1.0 200 OK header */
-  while(GetLine(tunnelsocket, data->buffer, data)) {
+  while(GetLine(tunnelsocket, data->buffer, conn)) {
     if('\r' == data->buffer[0])
       break; /* end of headers */
     if(2 == sscanf(data->buffer, "HTTP/1.%d %d",
@@ -330,7 +324,7 @@ CURLcode Curl_http_connect(struct connectdata *conn)
   if (conn->protocol & PROT_HTTPS) {
     if (data->bits.httpproxy) {
       /* HTTPS through a proxy can only be done with a tunnel */
-      result = Curl_ConnectHTTPProxyTunnel(data, data->firstsocket,
+      result = Curl_ConnectHTTPProxyTunnel(conn, data->firstsocket,
                                            data->hostname, data->remote_port);
       if(CURLE_OK != result)
         return result;
