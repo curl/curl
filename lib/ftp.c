@@ -2154,21 +2154,23 @@ static CURLcode ftp_state_loggedin(struct connectdata *conn)
   infof(data, "We have successfully logged in\n");
 
 #ifdef HAVE_KRB4
-  /* We are logged in with Kerberos, now set the requested
-   * protection level
-   */
-  if(conn->sec_complete)
-    /* BLOCKING */
-    Curl_sec_set_protection_level(conn);
-
-  /* We may need to issue a KAUTH here to have access to the files
-   * do it if user supplied a password
-   */
-  if(conn->passwd && *conn->passwd) {
-    /* BLOCKING */
-    result = Curl_krb_kauth(conn);
-    if(result)
-      return result;
+  if(data->set.krb4) {
+    /* We are logged in, asked to use Kerberos. Set the requested
+     * protection level
+     */
+    if(conn->sec_complete)
+      /* BLOCKING */
+      Curl_sec_set_protection_level(conn);
+    
+    /* We may need to issue a KAUTH here to have access to the files
+     * do it if user supplied a password
+     */
+    if(conn->passwd && *conn->passwd) {
+      /* BLOCKING */
+      result = Curl_krb_kauth(conn);
+      if(result)
+        return result;
+    }
   }
 #endif
   if(conn->ssl[FIRSTSOCKET].use) {
