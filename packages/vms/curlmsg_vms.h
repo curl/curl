@@ -1,8 +1,11 @@
+/* $Id$                                                                     */
 /* CURLMSG_VMS.H                                                            */
 /* This defines the necessary bits to change CURLE_* error codes to VMS     */
 /* style error codes.  CURLMSG.H is built from CURLMSG.SDL which is built   */
 /* from CURLMSG.MSG.  The vms_cond array is used to return VMS errors by    */
 /* putting the VMS error codes into the array offset based on CURLE_* code. */
+/*                                                                          */
+/* If you update CURLMSG.MSG make sure to update this file to match.        */
 /*                                                                          */
 #include "curlmsg.h"
 int       vms_show = 0;
@@ -67,7 +70,7 @@ long vms_cond[] =
         CURL_ABORTED_BY_CALLBACK,
         CURL_BAD_FUNCTION_ARGUMENT,
         CURL_BAD_CALLING_ORDER,
-        CURL_HTTP_PORT_FAILED,
+        CURL_INTERFACE_FAILED,
         CURL_BAD_PASSWORD_ENTERED,
         CURL_TOO_MANY_REDIRECTS,
         CURL_UNKNOWN_TELNET_OPTION,
@@ -87,5 +90,8 @@ long vms_cond[] =
         CURL_LDAP_INVALID_URL,
         CURL_FILESIZE_EXCEEDED,
         CURL_FTP_SSL_FAILED,
+        CURL_SEND_FAIL_REWIND,
+        CURL_SSL_ENGINE_INITFAILED,
+        CURL_LOGIN_DENIED,
         CURL_CURL_LAST
         };
