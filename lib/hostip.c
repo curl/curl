@@ -696,6 +696,19 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
 #ifdef HAVE_GETHOSTBYNAME_R_3
     /* AIX, Digital Unix, HPUX 10, more? */
 
+    /* For AIX 4.3 or later, we don't use gethostbyname_r() at all, because of
+       the plain fact that it does not return unique full buffers on each
+       call, but instead several of the pointers in the hostent structs will
+       point to the same actual data! This have the unfortunate down-side that
+       our caching system breaks down horribly. Luckily for us though, AIX 4.3
+       and more recent versions have a completely thread-safe libc where all
+       the data is stored in thread-specific memory areas making calls to the
+       plain old gethostbyname() work fine even for multi-threaded programs.
+       
+       This AIX 4.3 or later detection is all made in the configure script.
+
+       Troels Walsted Hansen helped us work this out on March 3rd, 2003. */
+
     if(CURL_NAMELOOKUP_SIZE >=
        (sizeof(struct hostent)+sizeof(struct hostent_data)))
 
@@ -705,7 +718,8 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
 
       ret = gethostbyname_r(hostname,
                             (struct hostent *)buf,
-                            (struct hostent_data *)((char *)buf + sizeof(struct hostent)));
+                            (struct hostent_data *)((char *)buf +
+                                                    sizeof(struct hostent)));
     else
       ret = -1; /* failure, too smallish buffer size */
     
