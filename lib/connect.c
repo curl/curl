@@ -364,8 +364,13 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 #endif
 
     /* get the most strict timeout of the ones converted to milliseconds */
-    if(data->set.timeout &&
-       (data->set.timeout < data->set.connecttimeout))
+    if(data->set.timeout && data->set.connecttimeout) {
+      if (data->set.timeout < data->set.connecttimeout)
+        timeout_ms = data->set.timeout*1000;
+      else 
+        timeout_ms = data->set.connecttimeout*1000;
+    }
+    else if(data->set.timeout)
       timeout_ms = data->set.timeout*1000;
     else
       timeout_ms = data->set.connecttimeout*1000;
