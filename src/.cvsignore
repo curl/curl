@@ -6,3 +6,4 @@ curl
 config.h
 hugehelp.c
 stamp-h*
+*.dist
