@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2003, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -31,7 +31,6 @@
 #include <sys/time.h>
 #endif
 
-
 #ifndef HAVE_GETTIMEOFDAY
 #if !defined(_WINSOCKAPI_) && !defined(__MINGW32__)
 struct timeval {
@@ -41,11 +40,10 @@ struct timeval {
 #endif
 #endif
 
-struct timeval Curl_tvnow (void);
+struct timeval Curl_tvnow(void);
 
 /* the diff is from now on returned in number of milliseconds! */
-long Curl_tvdiff (struct timeval t1, struct timeval t2);
-
-long Curl_tvlong (struct timeval t1);
+long Curl_tvdiff(struct timeval t1, struct timeval t2);
+long Curl_tvlong(struct timeval t1);
 
 #endif
