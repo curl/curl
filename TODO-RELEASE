@@ -4,9 +4,6 @@ Fix before releasing 7.11.0
 
 3. Apply Peter Sylvester's multi patches (work in progress)
 
-6. REST fix for servers not behaving well on >2GB requests (some outstanding
-   issues, Dave Meyer works on this)
-
 8. Resolve the occational test case 91 failure. This still has no
    resolution. (David Byron has done lots of research, no resolution yet)
 
@@ -27,6 +24,9 @@ To get fixed in 7.11.1
    headers are (no progress yet) #845941
 
 4. Multi-threaded OpenSSL usage needs to be addressed (patch anyone?)
+
+6. REST fix for servers not behaving well on >2GB requests (some outstanding
+   issues, Dave Meyer works on this)
 
 9. Modify ares to do 'files bind' order instead of 'bind files' by default
    (not actually part of libcurl) See details by Frank Ticheler posted here:
