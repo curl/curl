@@ -40,7 +40,6 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
-extern struct hostent *GetHost(struct UrlData *data, char *hostname, char *buf, int buf_size );
-extern char *MakeIP(unsigned long num,char *addr, int addr_len);
+struct hostent *GetHost(struct UrlData *data, char *hostname, char **bufp );
 
 #endif
