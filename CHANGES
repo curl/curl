@@ -7,6 +7,8 @@
                                History of Changes
 
 Daniel (29 June 2001)
+- Naveen Noel noticed that the Borland library makefile wasn't updated.
+
 - Nic Roets brought a fix for the certificate verification when using SSL.
 
 Daniel (27 June 2001)
