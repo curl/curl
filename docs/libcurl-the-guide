@@ -20,13 +20,15 @@ About this Document
  source code that you write that is using libcurl for transfers. The program
  is outside libcurl and libcurl is outside of the program.
 
+ To get the more details on all options and functions described herein, please
+ refer to their respective man pages.
 
 Building
 
-  There are many different ways to build C programs. This chapter will assume
-  a unix-style build process. If you use a different build system, you can
-  still read this to get general information that may apply to your
-  environment as well.
+ There are many different ways to build C programs. This chapter will assume a
+ unix-style build process. If you use a different build system, you can still
+ read this to get general information that may apply to your environment as
+ well.
 
   Compiling the Program
 
@@ -222,6 +224,11 @@ When It Doesn't Work
  possible of your code that uses libcurl, operating system name and version,
  compiler name and version etc.
 
+ Getting some in-depth knowledge about the protocols involved is never wrong,
+ and if you're trying to funny things, you might very well understand libcurl
+ and how to use it better if you study the appropriate RFC documents at least
+ briefly.
+
 
 Upload Data to a Remote Site
 
@@ -297,7 +304,42 @@ Passwords
 
         curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
  
-  [ more options, setting passsword callback ]
+ There's a long time unix "standard" way of storing ftp user names and
+ passwords, namely in the $HOME/.netrc file. The file should be made private
+ so that only the user may read it (see also the "Security Considerations"
+ chapter), as it might contain the password in plain text. libcurl has the
+ ability to use this file to figure out what set of user name and password to
+ use for a particular host. As an extension to the normal functionality,
+ libcurl also supports this file for non-FTP protocols such as HTTP. To make
+ curl use this file, use the CURLOPT_NETRC option:
+
+    curl_easy_setopt(easyhandle, CURLOPT_NETRC, TRUE);
+
+ And a very basic example of how such a .netrc file may look like:
+
+    machine myhost.mydomain.com
+    login userlogin
+    password secretword
+
+ All these examples have been cases where the password has been optional, or
+ at least you could leave it out and have libcurl attempt to do its job
+ without it. There are times when the password isn't optional, like when
+ you're using an SSL private key for secure transfers.
+
+ You can in this situation either pass a password to libcurl to use to unlock
+ the private key, or you can let libcurl prompt the user for it. If you prefer
+ to ask the user, then you can provide your own callback function that will be
+ called when libcurl wants the password. That way, you can control how the
+ question will appear to the user.
+
+ To pass the known private key password to libcurl:
+
+    curl_easy_setopt(easyhandle, CURLOPT_SSLKEYPASSWD, "keypassword");
+
+ To make a password callback:
+
+    int enter_passwd(void *ourp, const char *prompt, char *buffer, int len);
+    curl_easy_setopt(easyhandle, CURLOPT_PASSWDFUNCTION, enter_passwd);
 
 
 HTTP POSTing
@@ -425,7 +467,37 @@ libcurl with C++
 
 Proxies
 
- [ regular http, authorization, ftp => http, SSL, tunneling ]
+ What "proxy" means according to Merriam-Webster: "a person authorized to act
+ for another" but also "the agency, function, or office of a deputy who acts
+ as a substitute for another".
+
+ Proxies are exceedingly common these days. Companies often only offer
+ internet access to employees through their HTTP proxies. Network clients or
+ user-agents ask the proxy for docuements, the proxy does the actual request
+ and then it returns them.
+
+ libcurl has full support for HTTP proxies, so when a given URL is wanted,
+ libcurl will ask the proxy for it instead of trying to connect to the actual
+ host identified in the URL.
+
+ The fact that the proxy is a HTTP proxy puts certain restrictions on what can
+ actually happen. A requested URL that might not be a HTTP URL will be still
+ be passed to the HTTP proxy to deliver back to libcurl. This happens
+ transparantly, and an application may not need to know. I say "may", because
+ at times it is very important to understand that all operations over a HTTP
+ proxy is using the HTTP protocol. For example, you can't invoke your own
+ custom FTP commands or even proper FTP directory listings.
+
+ To tell libcurl to use a proxy at a given port number:
+
+    curl_easy_setopt(easyhandle, CURLOPT_PROXY, "proxy-host.com:8080");
+
+ Some proxies require user authentication before allowing a request, and you
+ pass that information similar to this:
+
+    curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "user:password");
+
+ [ environment variables, SSL, tunneling, automatic proxy config (.pac) ]
 
 
 Security Considerations
