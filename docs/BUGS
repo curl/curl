@@ -23,10 +23,15 @@ BUGS
 
   When reporting a bug, you should include information that will help us
   understand what's wrong, what you expected to happen and how to repeat the
-  bad behaviour. You therefore need to supply your operating system's name and
+  bad behavior. You therefore need to supply your operating system's name and
   version number (uname -a under a unix is fine), what version of curl you're
   using (curl -V is fine), what URL you were working with and anything else
   you think matters.
+
+  Since curl deals with networks, it often helps us a lot if you include a
+  protocol debug dump with your bug report. The output you get by using the -v
+  flag. Usually, you also get more info by using -i so that is likely to be
+  useful when reporting bugs as well.
 
   If curl crashed, causing a core dump (in unix), there is hardly any use to
   send that huge file to anyone of us. Unless we have an exact same system
@@ -36,8 +41,7 @@ BUGS
   The address and how to subscribe to the mailing list is detailed in the
   MANUAL file.
 
-  How To Get A Stack Trace
-  ========================
+HOW TO GET A STACK TRACE
 
   First, you must make sure that you compile all sources with -g and that you
   don't 'strip' the final executable. Try to avoid optimizing the code as
