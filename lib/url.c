@@ -306,6 +306,9 @@ CURLcode curl_open(CURL **curl, char *url)
     /* use fread as default function to read input */
     data->fread = (size_t (*)(char *, size_t, size_t, FILE *))fread;
 
+    /* set the default passwd function */
+    data->fpasswd = my_getpass;
+
     data->infilesize = -1; /* we don't know any size */
 
     data->current_speed = -1; /* init to negative == impossible */
@@ -478,6 +481,12 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     break;
   case CURLOPT_PROGRESSDATA:
     data->progress_client = va_arg(param, void *);
+    break;
+  case CURLOPT_PASSWDFUNCTION:
+    data->fpasswd = va_arg(param, curl_passwd_callback);
+    break;
+  case CURLOPT_PASSWDDATA:
+    data->passwd_client = va_arg(param, void *);
     break;
   case CURLOPT_PROXYUSERPWD:
     data->proxyuserpwd = va_arg(param, char *);
@@ -809,7 +818,10 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
     /* check for password, if no ask for one */
     if( !data->passwd[0] ) {
-      my_getpass("password:", data->passwd, sizeof(data->passwd));
+      if(!data->fpasswd ||
+         data->fpasswd(data->passwd_client,
+                       "password:", data->passwd, sizeof(data->passwd)))
+        return CURLE_BAD_PASSWORD_ENTERED;
     }
   }
 
@@ -828,9 +840,12 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
     /* check for password, if no ask for one */
     if( !data->proxypasswd[0] ) {
-      my_getpass("proxy password:",
-                 data->proxypasswd,
-                 sizeof(data->proxypasswd));
+      if(!data->fpasswd ||
+         data->fpasswd( data->passwd_client,
+                        "proxy password:",
+                        data->proxypasswd,
+                        sizeof(data->proxypasswd)))
+        return CURLE_BAD_PASSWORD_ENTERED;
     }
 
   }
@@ -1149,7 +1164,10 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
       /* check for password, if no ask for one */
       if( !data->passwd[0] ) {
-        my_getpass("password:",data->passwd,sizeof(data->passwd));
+        if(!data->fpasswd ||
+           data->fpasswd(data->passwd_client,
+                         "password:",data->passwd,sizeof(data->passwd)))
+          return CURLE_BAD_PASSWORD_ENTERED;
       }
       else {
         /* we have a password found in the URL, decode it! */

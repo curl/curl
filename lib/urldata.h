@@ -435,6 +435,10 @@ struct UrlData {
   curl_progress_callback fprogress;
   void *progress_client; /* pointer to pass to the progress callback */
 
+  /* function to call instead of the internal for password */
+  curl_passwd_callback fpasswd;
+  void *passwd_client; /* pointer to pass to the passwd callback */
+
   long timeout; /* in seconds, 0 means no timeout */
   long infilesize; /* size of file to upload, -1 means unknown */
 

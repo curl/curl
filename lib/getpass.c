@@ -68,7 +68,7 @@
 #  define perror(x) fprintf(stderr, "Error in: %s\n", x)
 #endif
 
-void my_getpass(const char *prompt, char *buffer, int buflen)
+int my_getpass(void *client, const char *prompt, char *buffer, int buflen)
 {
   FILE *infp;
   FILE *outfp;
@@ -176,11 +176,12 @@ void my_getpass(const char *prompt, char *buffer, int buflen)
   signal(SIGTSTP, sigtstp);
 #endif
 
+  return 0; /* we always return success */
 }
 #else /* WIN32 */
 #include <stdio.h>
 #include <conio.h>
-void my_getpass(const char *prompt, char *buffer, int buflen)
+int my_getpass(void *client, const char *prompt, char *buffer, int buflen)
 {
   int i;
   printf("%s", prompt);
@@ -195,6 +196,8 @@ void my_getpass(const char *prompt, char *buffer, int buflen)
   /* if user didn't hit ENTER, terminate buffer */
   if (i==buflen)
     buffer[buflen-1]=0;
+
+  return 0; /* we always return success */
 }
 #endif
 

@@ -99,7 +99,12 @@ typedef size_t (*curl_read_callback)(char *buffer,
                                      size_t nitems,
                                      FILE *instream);
 
-/* All possible error codes from this version of urlget(). Future versions
+typedef int (*curl_passwd_callback)(void *clientp,
+                                    char *prompt,
+                                    char *buffer,
+                                    int buflen);
+
+/* All possible error codes from all sorts of curl functions. Future versions
    may return other values, stay prepared.
 
    Always add new return codes last. Never *EVER* remove any. The return
@@ -165,6 +170,8 @@ typedef enum {
   CURLE_BAD_CALLING_ORDER,
 
   CURLE_HTTP_PORT_FAILED, /* HTTP Interface operation failed */
+
+  CURLE_BAD_PASSWORD_ENTERED, /* when the my_getpass() returns fail */
 
   CURL_LAST
 } CURLcode;
@@ -403,6 +410,13 @@ typedef enum {
   /* The CApath or CAfile used to validate the peer certificate
      this option is used only if SSL_VERIFYPEER is true */
   CINIT(CAINFO, OBJECTPOINT, 65),
+
+  /* Function pointer to replace the internal password prompt */
+  CINIT(PASSWDFUNCTION, FUNCTIONPOINT, 66),
+
+  /* Custom pointer that gets passed as first argument to the password
+     function */
+  CINIT(PASSWDDATA, OBJECTPOINT, 67),
 
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
