@@ -93,6 +93,7 @@ if ($^O eq 'MSWin32' || $targetos ne '') {
     $confsuffix = '-win32';
     $binext = '.exe';
     $libext = '.lib' if ($targetos =~ /vc/ || $targetos =~ /borland/);
+    $libext = '.a' if ($targetos =~ /mingw32/);
   } elsif ($targetos =~ /netware/) {
     $binext = '.nlm';
     $libext = '.lib';
