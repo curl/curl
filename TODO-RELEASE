@@ -1,6 +1,6 @@
 Issues not sorted in any particular order.
 
-To get fixed in 7.13.1 (planned release: April 2005)
+To get fixed in 7.13.2 (planned release: April 2005)
 ======================
 
 58 - Fix KNOWN_BUGS #19: "FTP 3rd party transfers with the multi interface
@@ -9,6 +9,10 @@ To get fixed in 7.13.1 (planned release: April 2005)
 47 - Peter Sylvester's patch for SRP on the TLS layer
      Awaits OpenSSL support for this, no need to support this in libcurl before
      there's an OpenSSL release that does it.
+
+58 - SSPI for libcurl on Windows
+
+59 - --form-string and --form-file as discussed on curl-users list
 
 To get fixed in 7.14.0
 ======================

@@ -7,6 +7,8 @@
                                   Changelog
 
 
+Version 7.13.1 (4 March 2005)
+
 Daniel (4 March 2005)
 - Dave Dribin made it possible to set CURLOPT_COOKIEFILE to "" to activate
   the cookie "engine" without having to provide an empty or non-existing file.
