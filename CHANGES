@@ -8,6 +8,18 @@
 
 Version XX
 
+Daniel (8 April 2000):
+- Made the progress bar look better for file sizes between 9999 kilobytes
+  and 100 megabytes. They're now displayed XX.XM.
+- I also noticed that ftp fetches through HTTP proxies didn't add the user
+  agent string. It does now.
+- Habibie <habibie@MailandNews.com> supplied a pretty good way to build RPMs
+  on a Linux machine. It still a) requires me to be root to do it, b) leaves
+  the rpm packages laying at some odd place on my disk c) doesn't work to
+  build the ssl version of curl since I didn't install openssl from an rpm
+  package so now the rpm crap thinks I don't have openssl and refuses to build
+  a package that depends on ssl... Did I mention I don't get along with RPM?
+
 Daniel (4 April 2000):
 - Marco G. Salvagno <mgs@whiz.cjb.net> supplied me with two fixes that
   appearantly makes the OS/2 port work better with multiple URLs.
