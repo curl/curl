@@ -47,6 +47,8 @@
 #endif
 #include <netdb.h>
 
+#include "getpart.h"
+
 #ifndef FALSE
 #define FALSE 0
 #endif
@@ -54,10 +56,8 @@
 #define TRUE 1
 #endif
 
-const char *
-spitout(FILE *stream,
-        const char *main,
-        const char *sub, int *size);
+int ProcessRequest(char *request);
+void storerequest(char *reqbuf);
 
 #define DEFAULT_PORT 8999
 

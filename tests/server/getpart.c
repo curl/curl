@@ -1,8 +1,31 @@
+/***************************************************************************
+ *                                  _   _ ____  _     
+ *  Project                     ___| | | |  _ \| |    
+ *                             / __| | | | |_) | |    
+ *                            | (__| |_| |  _ <| |___ 
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * $Id$
+ ***************************************************************************/
 
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
+#include "getpart.h"
 
 #define EAT_SPACE(ptr) while( ptr && *ptr && isspace((int)*ptr) ) ptr++
 #define EAT_WORD(ptr) while( ptr && *ptr && !isspace((int)*ptr) && ('>' != *ptr)) ptr++
@@ -39,7 +62,9 @@ char *appendstring(char *string, /* original string */
   return string;
 }
 
-char *spitout(FILE *stream, char *main, char *sub, int *size)
+const char *spitout(FILE *stream,
+                    const char *main,
+                    const char *sub, int *size)
 {
   char buffer[8192]; /* big enough for anything */
   char cmain[128]=""; /* current main section */
