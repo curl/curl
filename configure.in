@@ -82,6 +82,9 @@ void main(void) {
 if test "$ac_cv_working_getaddrinfo" = "yes"; then
   AC_DEFINE(HAVE_GETADDRINFO, 1, [Define if getaddrinfo exists and works])
   AC_DEFINE(ENABLE_IPV6, 1, [Define if you want to enable IPv6 support])
+
+  IPV6_ENABLED=1
+  AC_SUBST(IPV6_ENABLED)
 fi
 ])
 
@@ -506,6 +509,10 @@ then
       dnl add define KRB4
       AC_DEFINE(KRB4)
 
+      dnl substitute it too!
+      KRB4_ENABLED=1
+      AC_SUBST(KRB4_ENABLED)
+
       dnl the krb4 stuff needs a strlcpy()
       AC_CHECK_FUNCS(strlcpy)
 
@@ -572,13 +579,44 @@ else
 
 
     dnl Check for SSLeay headers
-    AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h openssl/pem.h openssl/ssl.h openssl/err.h)
+    AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
+                     openssl/pem.h openssl/ssl.h openssl/err.h)
 
     if test $ac_cv_header_openssl_x509_h = no; then
       AC_CHECK_HEADERS(x509.h rsa.h crypto.h pem.h ssl.h err.h)
     fi
 
+    dnl
+    dnl If all heades are present, we have enabled SSL!
+    if test "$ac_cv_header_openssl_x509_h" = "yes" &&
+       test "$ac_cv_header_openssl_rsa_h" = "yes" &&
+       test "$ac_cv_header_openssl_crypto_h" = "yes" &&
+       test "$ac_cv_header_openssl_pem_h" = "yes" &&
+       test "$ac_cv_header_openssl_ssl_h" = "yes" &&
+       test "$ac_cv_header_openssl_err_h" = "yes"; then
+      OPENSSL_ENABLED="1";
+    fi
+
+    dnl
+    dnl Check the alternative headers too
+    if test "$ac_cv_header_x509_h" = "yes" &&
+       test "$ac_cv_header_rsa_h" = "yes" &&
+       test "$ac_cv_header_crypto_h" = "yes" &&
+       test "$ac_cv_header_pem_h" = "yes" &&
+       test "$ac_cv_header_ssl_h" = "yes" &&
+       test "$ac_cv_header_err_h" = "yes"; then
+      OPENSSL_ENABLED="1";
+    fi
+
+    AC_SUBST(OPENSSL_ENABLED)
+
   fi
+
+  if test X"$OPT_SSL" != Xoff &&
+     test "$OPENSSL_ENABLED" != "1"; then
+    AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
+  fi
+
 
   dnl these can only exist if openssl exists
 

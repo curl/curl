@@ -14,13 +14,14 @@ usage()
     cat <<EOF
 Usage: curl-config [OPTION]
 
-Available values for OPTION are:
+Available values for OPTION include:
 
-  --prefix		curl install prefix
-  --libs		library linking information
-  --cflags		pre-processor and compiler flags
-  --help		display this help and exit
-  --version		output version information
+  --cflags    pre-processor and compiler flags
+  --feature   newline separated list of enabled features
+  --help      display this help and exit
+  --libs      library linking information
+  --prefix    curl install prefix
+  --version   output version information
 EOF
 
     exit $1
@@ -44,6 +45,18 @@ while test $# -gt 0; do
 	echo $prefix
 	;;
 
+    --feature)
+	if test "@OPENSSL_ENABLED@" = "1"; then
+          echo "SSL"
+        fi
+	if test "@KRB4_ENABLED@" = "1"; then
+          echo "KRB4"
+        fi
+	if test "@IPV6_ENABLED@" = "1"; then
+          echo "IPv6"
+        fi
+	;;
+
     --version)
 	echo libcurl @VERSION@
 	exit 0
@@ -54,7 +67,7 @@ while test $# -gt 0; do
 	;;
 
     --cflags)
-       	echo @CPPFLAGS@ @CFLAGS@
+       	echo @CPPFLAGS@
        	;;
 
     --libs)
