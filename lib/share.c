@@ -24,141 +24,122 @@
 #include "setup.h"
 #include <stdlib.h>
 #include <curl/curl.h>
-#include "share.h"
 #include "urldata.h"
+#include "share.h"
 
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
 #include "memdebug.h"
 #endif
 
-#define CURL_SHARE_SET_LOCKED(__share, __type) ((__share)->locked += (__type))
-#define CURL_SHARE_SET_UNLOCKED(__share, __type) ((__share)->locked -= (__type))
-
-#define CURL_SHARE_SET_USED(__share, __type) ((__share)->specifier += (__type))
-#define CURL_SHARE_SET_UNUSED(__share, __type) ((__share)->specifier -= (__type))
-#define CURL_SHARE_IS_USED(__share, __type) ((__share)->specifier & (__type))
-#define CURL_SHARE_IS_LOCKED(__share, __type) ((__share)->locked & (__type))
-
-#define CURL_SHARE_IS_DIRTY(__share) ((__share)->dirty)
-
-#define CURL_SHARE_GET(__handle) (((struct SessionHandle *) (__handle))->share)
-
 CURLSH *
-curl_share_init (void)
+curl_share_init(void)
 {
-  curl_share *share = (curl_share *) malloc (sizeof (curl_share));
-  if (share) {
-    memset (share, 0, sizeof (curl_share));
-  }
+  struct Curl_share *share =
+    (struct Curl_share *)malloc(sizeof(struct Curl_share));
+  if (share)
+    memset (share, 0, sizeof(struct Curl_share));
 
   return share;
 }
 
-CURLcode 
-curl_share_setopt (curl_share *share, curl_lock_type option, int enable)
+CURLSHcode
+curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 {
-  if (CURL_SHARE_IS_DIRTY(share)) {
-    return CURLE_SHARE_IN_USE;
+  struct Curl_share *share = (struct Curl_share *)sh;
+  va_list param;
+  int type;
+  curl_lock_function lockfunc;
+  curl_unlock_function unlockfunc;
+  void *ptr;
+
+  if (share->dirty)
+    /* don't allow setting options while one or more handles are already
+       using this share */
+    return CURLSHE_IN_USE;
+
+  va_start(param, option);
+
+  switch(option) {
+  case CURLSHOPT_SHARE:
+    /* this is a type this share will share */
+    type = va_arg(param, int);
+    share->specifier |= (1<<type);
+    break;
+
+  case CURLSHOPT_UNSHARE:
+    /* this is a type this share will no longer share */
+    type = va_arg(param, int);
+    share->specifier &= ~(1<<type);
+    break;
+
+  case CURLSHOPT_LOCKFUNC:
+    lockfunc = va_arg(param, curl_lock_function);
+    share->lockfunc = lockfunc;
+    break;
+
+  case CURLSHOPT_UNLOCKFUNC:
+    unlockfunc = va_arg(param, curl_unlock_function);
+    share->unlockfunc = unlockfunc;    
+    break;
+
+  case CURLSHOPT_USERDATA:
+    ptr = va_arg(param, void *);
+    share->clientdata = ptr;
+    break;
+
+  default:
+    return CURLSHE_BAD_OPTION;
   }
 
-  if (enable) {
-    CURL_SHARE_SET_USED (share, option);
-  }
-  else {
-    CURL_SHARE_SET_UNUSED (share, option);
-  }
-
-  return CURLE_OK;
+  return CURLSHE_OK;
 }
 
-CURLcode
-curl_share_set_lock_function (curl_share *share, curl_lock_function lock)
+CURLSHcode curl_share_cleanup(CURLSH *sh)
 {
-  if (CURL_SHARE_IS_DIRTY(share)) {
-    return CURLE_SHARE_IN_USE;
-  }
-
-  share->lockfunc = lock;
-  return CURLE_OK;
-}
-
-CURLcode
-curl_share_set_unlock_function (curl_share *share, curl_unlock_function unlock)
-{
-  if (CURL_SHARE_IS_DIRTY(share)) {
-    return CURLE_SHARE_IN_USE;
-  }
-
-  share->unlockfunc = unlock;
-  return CURLE_OK;
-}
-
-CURLcode
-curl_share_set_lock_data (curl_share *share, void *data) 
-{
-  if (CURL_SHARE_IS_DIRTY(share)) {
-    return CURLE_SHARE_IN_USE;
-  }
-
-  share->clientdata = data;
-  return CURLE_OK;
-}
-
-Curl_share_error 
-Curl_share_acquire_lock (CURL *handle, curl_lock_type type)
-{
-  curl_share *share = CURL_SHARE_GET (handle);
-  if (share == NULL) {
-    return SHARE_ERROR_INVALID;
-  }
-
-  if (! (share->specifier & type)) {
-    return SHARE_ERROR_NOT_REGISTERED;
-  }
-
-  if (CURL_SHARE_IS_LOCKED (share, type)) {
-    return SHARE_ERROR_OK;
-  }
-
-  share->lockfunc (handle, type, share->clientdata);
-  CURL_SHARE_SET_LOCKED (share, type);
-
-  return SHARE_ERROR_OK;
-}
-
-Curl_share_error 
-Curl_share_release_lock (CURL *handle, curl_lock_type type)
-{
-  curl_share *share = CURL_SHARE_GET(handle);
-  if (share == NULL) {
-    return SHARE_ERROR_INVALID;
-  }
-
-  if (! (share->specifier & type)) {
-    return SHARE_ERROR_NOT_REGISTERED;
-  }
-
-  if (!CURL_SHARE_IS_LOCKED (share, type)) {
-    return SHARE_ERROR_OK;
-  }
-
-  share->unlockfunc (handle, type, share->clientdata);
-  CURL_SHARE_SET_UNLOCKED (share, type);
-
-  return SHARE_ERROR_OK;
-}
-
-CURLcode curl_share_destroy (curl_share *share)
-{
-  if (CURL_SHARE_IS_DIRTY(share)) {
-    return CURLE_SHARE_IN_USE;
-  }
+  struct Curl_share *share = (struct Curl_share *)sh;
+  if (share->dirty)
+    return CURLSHE_IN_USE;
 
   free (share);
   
-  return CURLE_OK;
+  return CURLSHE_OK;
 }
+
+
+CURLSHcode
+Curl_share_acquire_lock(struct SessionHandle *data, curl_lock_data type)
+{
+  struct Curl_share *share = data->share;
+
+  if (share == NULL)
+    return CURLSHE_INVALID;
+
+  if(share->specifier & (1<<type)) {
+    share->lockfunc (data, type, CURL_LOCK_ACCESS_SINGLE, share->clientdata);
+    share->locked |= (1<<type);
+  }
+  /* else if we don't share this, pretend successful lock */
+
+  return CURLSHE_OK;
+}
+
+CURLSHcode
+Curl_share_release_lock(struct SessionHandle *data, curl_lock_data type)
+{
+  struct Curl_share *share = data->share;
+
+  if (share == NULL)
+    return CURLSHE_INVALID;
+
+  if(share->specifier & (1<<type)) {
+    share->unlockfunc (data, type, share->clientdata);
+    share->locked &= ~(1<<type);
+  }
+
+  return CURLSHE_OK;
+}
+
 
 /*
  * local variables:
