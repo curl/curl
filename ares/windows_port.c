@@ -25,7 +25,7 @@ strcasecmp(const char *a, const char *b)
 }
 
 int 
-gettimeofday(struct timeval *tv, struct timezone *tz) 
+ares_gettimeofday(struct timeval *tv, struct timezone *tz) 
 {
     FILETIME        ft;
     LARGE_INTEGER   li;

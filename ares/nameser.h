@@ -18,7 +18,8 @@ struct iovec
 #define getpid() _getpid()
 
 int strcasecmp(const char *a, const char *b);
-int gettimeofday(struct timeval *tv, struct timezone *tz);
+int ares_gettimeofday(struct timeval *tv, struct timezone *tz);
+#define gettimeofday(tv,tz) ares_gettimeofday(tv,tz)
 
 #define NS_CMPRSFLGS  0xc0  
 
@@ -35,7 +36,7 @@ typedef enum __ns_class {
     /* Query class values which do not appear in resource records */
     ns_c_none = 254,        /* for prereq. sections in update requests */
     ns_c_any = 255,         /* Wildcard match. */
-        ns_c_max = 65536
+    ns_c_max = 65536
 } ns_class;
 
 #define C_IN           ns_c_in
@@ -113,7 +114,7 @@ typedef enum __ns_opcode {
                                 /* Opcode 3 is undefined/reserved. */
     ns_o_notify = 4,        /* Zone change notification. */
     ns_o_update = 5,        /* Zone update message. */
-        ns_o_max = 6
+    ns_o_max = 6
 } ns_opcode;
 
 #define QUERY          ns_o_query
@@ -147,17 +148,17 @@ typedef enum __ns_rcode {
     /* The following are TSIG extended errors */
     ns_r_badsig = 16,
     ns_r_badkey = 17,
-        ns_r_badtime = 18
+    ns_r_badtime = 18
 } ns_rcode;
 
-#define SERVFAIL       ns_r_servfail
-#define NOTIMP         ns_r_notimpl
-#define REFUSED        ns_r_refused
-#define NOERROR                ns_r_noerror
-#define FORMERR                ns_r_formerr
-#define NXDOMAIN       ns_r_nxdomain
+#define SERVFAIL        ns_r_servfail
+#define NOTIMP          ns_r_notimpl
+#define REFUSED         ns_r_refused
+#define NOERROR         ns_r_noerror
+#define FORMERR         ns_r_formerr
+#define NXDOMAIN        ns_r_nxdomain
 
-#define C_CHAOS                ns_c_chaos
+#define C_CHAOS         ns_c_chaos
 #define C_HS            ns_c_hs
 #define C_NONE          ns_c_none
 #define C_ANY           ns_c_any
