@@ -86,6 +86,10 @@
 #include "download.h"
 #include "escape.h"
 
+#ifdef KRB4
+#include "security.h"
+#endif
+
 /* returns last node in linked list */
 static struct curl_slist *slist_get_last(struct curl_slist *list)
 {
@@ -285,6 +289,19 @@ int GetLastResponse(int sockfd, char *buf,
     }
     *ptr=0; /* zero terminate */
 
+#if KRB4
+    { /* handle the security-oriented responses 6xx ***/
+      /* FIXME: some errorchecking perhaps... ***/
+      if(strncmp(buf, "631", 3) == 0)
+        sec_read_msg(conn, buf, prot_safe);
+      else if(strncmp(buf, "632", 3) == 0)
+        sec_read_msg(conn, buf, prot_private);
+      else if(strncmp(buf, "633", 3) == 0)
+        sec_read_msg(conn, buf, prot_confidential);
+      nread = strlen(buf);
+    }
+#endif
+
     if(data->bits.verbose && buf[0]) {
       fputs("< ", data->err);
       fwrite(buf, 1, nread, data->err);
@@ -405,8 +422,28 @@ CURLcode ftp_connect(struct connectdata *conn)
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
+#ifdef KRB4
+  /* if not anonymous login, try a secure login */
+  if(data->bits.krb4) {
+
+    /* request data protection level (default is 'clear') */
+    sec_request_prot(conn, "private");
+
+    /* We set private first as default, in case the line below fails to
+       set a valid level */
+    sec_request_prot(conn, data->krb4_level);
+
+    data->cmdchannel = fdopen(data->firstsocket, "w");
+
+    if(sec_login(conn) != 0)
+      infof(data, "Logging in with password in cleartext!\n");
+    else
+      infof(data, "Authentication successful\n");
+  }
+#endif
+  
   /* send USER */
-  sendf(data->firstsocket, data, "USER %s\r\n", ftp->user);
+  ftpsendf(data->firstsocket, conn, "USER %s", ftp->user);
 
   /* wait for feedback */
   nread = GetLastResponse(data->firstsocket, buf, conn);
@@ -422,7 +459,7 @@ CURLcode ftp_connect(struct connectdata *conn)
   else if(!strncmp(buf, "331", 3)) {
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
-    sendf(data->firstsocket, data, "PASS %s\r\n", ftp->passwd);
+    ftpsendf(data->firstsocket, conn, "PASS %s", ftp->passwd);
     nread = GetLastResponse(data->firstsocket, buf, conn);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
@@ -444,10 +481,23 @@ CURLcode ftp_connect(struct connectdata *conn)
       return CURLE_FTP_WEIRD_PASS_REPLY;
     }
   }
-  else if(! strncmp(buf, "230", 3)) {
+  else if(/*! strncmp(buf, "230", 3)***/ buf[0] == '2') {
     /* 230 User ... logged in.
        (the user logged in without password) */
     infof(data, "We have successfully logged in\n");
+#ifdef KRB4
+	/* we are logged in (with Kerberos)
+	 * now set the requested protection level
+	 */
+    if(conn->sec_complete)
+      sec_set_protection_level(conn);
+
+    /* we may need to issue a KAUTH here to have access to the files
+     * do it if user supplied a password
+     */
+    if(conn->data->passwd && *conn->data->passwd)
+      krb_kauth(conn);
+#endif
   }
   else {
     failf(data, "Odd return code after USER");
@@ -510,7 +560,7 @@ CURLcode ftp_done(struct connectdata *conn)
     while (qitem) {
       /* Send string */
       if (qitem->data) {
-        sendf(data->firstsocket, data, "%s\r\n", qitem->data);
+        ftpsendf(data->firstsocket, conn, "%s", qitem->data);
 
         nread = GetLastResponse(data->firstsocket, buf, conn);
         if(nread < 0)
@@ -567,7 +617,7 @@ CURLcode _ftp(struct connectdata *conn)
     while (qitem) {
       /* Send string */
       if (qitem->data) {
-        sendf(data->firstsocket, data, "%s\r\n", qitem->data);
+        ftpsendf(data->firstsocket, conn, "%s", qitem->data);
 
         nread = GetLastResponse(data->firstsocket, buf, conn);
         if(nread < 0)
@@ -585,7 +635,7 @@ CURLcode _ftp(struct connectdata *conn)
 
   /* change directory first! */
   if(ftp->dir && ftp->dir[0]) {
-    sendf(data->firstsocket, data, "CWD %s\r\n", ftp->dir);
+    ftpsendf(data->firstsocket, conn, "CWD %s", ftp->dir);
     nread = GetLastResponse(data->firstsocket, buf, conn);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
@@ -603,7 +653,7 @@ CURLcode _ftp(struct connectdata *conn)
        may not support it! It is however the only way we have to get a file's
        size! */
     int filesize;
-    sendf(data->firstsocket, data, "SIZE %s\r\n", ftp->file);
+    ftpsendf(data->firstsocket, conn, "SIZE %s", ftp->file);
 
     nread = GetLastResponse(data->firstsocket, buf, conn);
     if(nread < 0)
@@ -637,23 +687,24 @@ CURLcode _ftp(struct connectdata *conn)
   if(data->bits.ftp_use_port) {
     struct sockaddr_in sa;
     struct hostent *h=NULL;
+    char *hostdataptr=NULL;
     size_t size;
     unsigned short porttouse;
     char myhost[256] = "";
 
     if(data->ftpport) {
       if(if2ip(data->ftpport, myhost, sizeof(myhost))) {
-        h = GetHost(data, myhost, hostent_buf, sizeof(hostent_buf));
+        h = GetHost(data, myhost, &hostdataptr);
       }
       else {
         if(strlen(data->ftpport)>1)
-          h = GetHost(data, data->ftpport, hostent_buf, sizeof(hostent_buf));
+          h = GetHost(data, data->ftpport, &hostdataptr);
         if(h)
-          strcpy(myhost,data->ftpport);
+          strcpy(myhost, data->ftpport); /* buffer overflow risk */
       }
     }
     if(! *myhost) {
-      h=GetHost(data, getmyhost(myhost,sizeof(myhost)), hostent_buf, sizeof(hostent_buf));
+      h=GetHost(data, getmyhost(myhost, sizeof(myhost)), &hostdataptr);
     }
     infof(data, "We connect from %s\n", myhost);
 
@@ -682,16 +733,19 @@ CURLcode _ftp(struct connectdata *conn)
 
           if ( listen(portsock, 1) < 0 ) {
             failf(data, "listen(2) failed on socket");
+            free(hostdataptr);
             return CURLE_FTP_PORT_FAILED;
           }
         }
         else {
           failf(data, "bind(2) failed on socket");
+          free(hostdataptr);
           return CURLE_FTP_PORT_FAILED;
         }
       }
       else {
         failf(data, "socket(2) failed (%s)");
+        free(hostdataptr);
         return CURLE_FTP_PORT_FAILED;
       }
     }
@@ -713,7 +767,7 @@ CURLcode _ftp(struct connectdata *conn)
       sscanf( inet_ntoa(in), "%hu.%hu.%hu.%hu",
               &ip[0], &ip[1], &ip[2], &ip[3]);
 #endif
-      sendf(data->firstsocket, data, "PORT %d,%d,%d,%d,%d,%d\r\n",
+      ftpsendf(data->firstsocket, conn, "PORT %d,%d,%d,%d,%d,%d",
             ip[0], ip[1], ip[2], ip[3],
             porttouse >> 8,
             porttouse & 255);
@@ -730,7 +784,7 @@ CURLcode _ftp(struct connectdata *conn)
   }
   else { /* we use the PASV command */
 
-    sendf(data->firstsocket, data, "PASV\r\n");
+    ftpsendf(data->firstsocket, conn, "PASV");
 
     nread = GetLastResponse(data->firstsocket, buf, conn);
     if(nread < 0)
@@ -748,6 +802,7 @@ CURLcode _ftp(struct connectdata *conn)
       char newhost[32];
       struct hostent *he;
       char *str=buf,*ip_addr;
+      char *hostdataptr=NULL;
 
       /*
        * New 227-parser June 3rd 1999.
@@ -785,7 +840,7 @@ CURLcode _ftp(struct connectdata *conn)
       }
       else {
         /* normal, direct, ftp connection */
-        he = GetHost(data, newhost, hostent_buf, sizeof(hostent_buf));
+        he = GetHost(data, newhost, &hostdataptr);
         if(!he) {
           failf(data, "Can't resolve new host %s", newhost);
           return CURLE_FTP_CANT_GET_HOST;
@@ -864,6 +919,9 @@ CURLcode _ftp(struct connectdata *conn)
               connectport);
       }
 	
+      if(hostdataptr)
+        free(hostdataptr);
+
       if (connect(data->secondarysocket, (struct sockaddr *) &serv_addr,
                   sizeof(serv_addr)) < 0) {
         switch(errno) {
@@ -900,7 +958,7 @@ CURLcode _ftp(struct connectdata *conn)
   if(data->bits.upload) {
 
     /* Set type to binary (unless specified ASCII) */
-    sendf(data->firstsocket, data, "TYPE %s\r\n",
+    ftpsendf(data->firstsocket, conn, "TYPE %s",
           (data->bits.ftp_ascii)?"A":"I");
 
     nread = GetLastResponse(data->firstsocket, buf, conn);
@@ -932,7 +990,7 @@ CURLcode _ftp(struct connectdata *conn)
         /* we could've got a specified offset from the command line,
            but now we know we didn't */
 
-        sendf(data->firstsocket, data, "SIZE %s\r\n", ftp->file);
+        ftpsendf(data->firstsocket, conn, "SIZE %s", ftp->file);
 
         nread = GetLastResponse(data->firstsocket, buf, conn);
         if(nread < 0)
@@ -955,7 +1013,7 @@ CURLcode _ftp(struct connectdata *conn)
         infof(data, "Instructs server to resume from offset %d\n",
               data->resume_from);
 
-        sendf(data->firstsocket, data, "REST %d\r\n", data->resume_from);
+        ftpsendf(data->firstsocket, conn, "REST %d", data->resume_from);
 
         nread = GetLastResponse(data->firstsocket, buf, conn);
         if(nread < 0)
@@ -1007,9 +1065,9 @@ CURLcode _ftp(struct connectdata *conn)
     /* Send everything on data->in to the socket */
     if(data->bits.ftp_append)
       /* we append onto the file instead of rewriting it */
-      sendf(data->firstsocket, data, "APPE %s\r\n", ftp->file);
+      ftpsendf(data->firstsocket, conn, "APPE %s", ftp->file);
     else
-      sendf(data->firstsocket, data, "STOR %s\r\n", ftp->file);
+      ftpsendf(data->firstsocket, conn, "STOR %s", ftp->file);
 
     nread = GetLastResponse(data->firstsocket, buf, conn);
     if(nread < 0)
@@ -1095,7 +1153,7 @@ CURLcode _ftp(struct connectdata *conn)
       dirlist = TRUE;
 
       /* Set type to ASCII */
-      sendf(data->firstsocket, data, "TYPE A\r\n");
+      ftpsendf(data->firstsocket, conn, "TYPE A");
 	
       nread = GetLastResponse(data->firstsocket, buf, conn);
       if(nread < 0)
@@ -1110,13 +1168,13 @@ CURLcode _ftp(struct connectdata *conn)
          better used since the LIST command output is not specified or
          standard in any way */
 
-      sendf(data->firstsocket, data, "%s\r\n",
+      ftpsendf(data->firstsocket, conn, "%s",
             data->customrequest?data->customrequest:
             (data->bits.ftp_list_only?"NLST":"LIST"));
     }
     else {
       /* Set type to binary (unless specified ASCII) */
-      sendf(data->firstsocket, data, "TYPE %s\r\n",
+      ftpsendf(data->firstsocket, conn, "TYPE %s",
             (data->bits.ftp_list_only)?"A":"I");
 
       nread = GetLastResponse(data->firstsocket, buf, conn);
@@ -1138,7 +1196,7 @@ CURLcode _ftp(struct connectdata *conn)
          * of the file we're gonna get. If we can get the size, this is by far
          * the best way to know if we're trying to resume beyond the EOF.  */
 
-        sendf(data->firstsocket, data, "SIZE %s\r\n", ftp->file);
+        ftpsendf(data->firstsocket, conn, "SIZE %s", ftp->file);
 
         nread = GetLastResponse(data->firstsocket, buf, conn);
         if(nread < 0)
@@ -1182,7 +1240,7 @@ CURLcode _ftp(struct connectdata *conn)
         infof(data, "Instructs server to resume from offset %d\n",
               data->resume_from);
 
-        sendf(data->firstsocket, data, "REST %d\r\n", data->resume_from);
+        ftpsendf(data->firstsocket, conn, "REST %d", data->resume_from);
 
         nread = GetLastResponse(data->firstsocket, buf, conn);
         if(nread < 0)
@@ -1194,7 +1252,7 @@ CURLcode _ftp(struct connectdata *conn)
         }
       }
 
-      sendf(data->firstsocket, data, "RETR %s\r\n", ftp->file);
+      ftpsendf(data->firstsocket, conn, "RETR %s", ftp->file);
     }
 
     nread = GetLastResponse(data->firstsocket, buf, conn);
