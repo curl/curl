@@ -320,7 +320,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   easy=multi->easy.next;
   while(easy) {
-#ifdef CURLDEBUG
+#if 0
     fprintf(stderr, "HANDLE %p: State: %x\n",
             (char *)easy, easy->state);
 #endif
@@ -416,8 +416,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
       case CURLM_STATE_WAITCONNECT:
         /* awaiting a completion of an asynch connect */
-        easy->result = Curl_is_connected(easy->easy_conn,
-                                         easy->easy_conn->sock[FIRSTSOCKET],
+        easy->result = Curl_is_connected(easy->easy_conn, FIRSTSOCKET,
                                          &connected);
         if(connected)
           easy->result = Curl_protocol_connect(easy->easy_conn);
@@ -463,10 +462,8 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         /*
          * First, check if we really are ready to do more.
          */
-        easy->result =
-          Curl_is_connected(easy->easy_conn,
-                            easy->easy_conn->sock[SECONDARYSOCKET],
-                            &connected);
+        easy->result = Curl_is_connected(easy->easy_conn, SECONDARYSOCKET,
+                                         &connected);
         if(connected) {
           /*
            * When we are connected, DO MORE and then go PERFORM

@@ -101,7 +101,15 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
+
 static bool verifyconnect(curl_socket_t sockfd, int *error);
+
+static curl_socket_t
+singleipconnect(struct connectdata *conn,
+                Curl_addrinfo *ai, /* start connecting to this */
+                long timeout_ms,
+                bool *connected);
 
 /*
  * Curl_ourerrno() returns the errno (or equivalent) on this platform to
@@ -422,43 +430,74 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   return rc;
 }
 
+/* Used within the multi interface. Try next IP address, return TRUE if no
+   more address exists */
+static bool trynextip(struct connectdata *conn,
+                      int sockindex,
+                      long timeout,
+                      bool *connected)
+{
+  curl_socket_t sockfd;
+  Curl_addrinfo *ai;
+
+  if(sockindex != FIRSTSOCKET)
+    return TRUE; /* no next */
+
+  ai = conn->ip_addr->ai_next;
+
+  while (ai) {
+    sockfd = singleipconnect(conn, ai, timeout, connected);
+    if(sockfd != CURL_SOCKET_BAD) {
+      /* store the new socket descriptor */
+      conn->sock[sockindex] = sockfd;
+      return FALSE;
+    }
+    ai = ai->ai_next;
+  }
+  return TRUE;
+}
+
 /*
  * Curl_is_connected() is used from the multi interface to check if the
  * firstsocket has connected.
  */
 
 CURLcode Curl_is_connected(struct connectdata *conn,
-                           curl_socket_t sockfd,
+                           int sockindex,
                            bool *connected)
 {
   int rc;
   struct SessionHandle *data = conn->data;
+  CURLcode code = CURLE_OK;
+  curl_socket_t sockfd = conn->sock[sockindex];
+  long allow = DEFAULT_CONNECT_TIMEOUT;
+  long has_passed;
+
+  curlassert(sockindex >= FIRSTSOCKET && sockindex <= SECONDARYSOCKET);
 
   *connected = FALSE; /* a very negative world view is best */
 
-  if(data->set.timeout || data->set.connecttimeout) {
-    /* there is a timeout set */
+  /* Evaluate in milliseconds how much time that has passed */
+  has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
 
-    /* Evaluate in milliseconds how much time that has passed */
-    long has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
-
-    /* subtract the most strict timeout of the ones */
-    if(data->set.timeout && data->set.connecttimeout) {
-      if (data->set.timeout < data->set.connecttimeout)
-        has_passed -= data->set.timeout*1000;
-      else
-        has_passed -= data->set.connecttimeout*1000;
-    }
-    else if(data->set.timeout)
-      has_passed -= data->set.timeout*1000;
+  /* subtract the most strict timeout of the ones */
+  if(data->set.timeout && data->set.connecttimeout) {
+    if (data->set.timeout < data->set.connecttimeout)
+      allow = data->set.timeout*1000;
     else
-      has_passed -= data->set.connecttimeout*1000;
+      allow = data->set.connecttimeout*1000;
+  }
+  else if(data->set.timeout) {
+    allow = data->set.timeout*1000;
+  }
+  else if(data->set.connecttimeout) {
+    allow = data->set.connecttimeout*1000;
+  }
 
-    if(has_passed > 0 ) {
-      /* time-out, bail out, go home */
-      failf(data, "Connection time-out");
-      return CURLE_OPERATION_TIMEOUTED;
-    }
+  if(has_passed > allow ) {
+    /* time-out, bail out, go home */
+    failf(data, "Connection time-out after %ld ms", has_passed);
+    return CURLE_OPERATION_TIMEOUTED;
   }
   if(conn->bits.tcpconnect) {
     /* we are connected already! */
@@ -476,21 +515,27 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       return CURLE_OK;
     }
     /* nope, not connected for real */
-    failf(data, "Connection failed");
-    return CURLE_COULDNT_CONNECT;
+    infof(data, "Connection failed\n");
+    if(trynextip(conn, sockindex, allow-has_passed, connected)) {
+      code = CURLE_COULDNT_CONNECT;
+    }
   }
   else if(WAITCONN_TIMEOUT != rc) {
-    int error = Curl_ourerrno();
-    failf(data, "Failed connect to %s:%d; %s",
-          conn->host.name, conn->port, Curl_strerror(conn,error));
-    return CURLE_COULDNT_CONNECT;
+    /* nope, not connected  */
+    infof(data, "Connection failed\n");
+    if(trynextip(conn, sockindex, allow-has_passed, connected)) {
+      int error = Curl_ourerrno();
+      failf(data, "Failed connect to %s:%d; %s",
+            conn->host.name, conn->port, Curl_strerror(conn,error));
+      code = CURLE_COULDNT_CONNECT;
+    }
   }
   /*
    * If the connection failed here, we should attempt to connect to the "next
    * address" for the given host.
    */
 
-  return CURLE_OK;
+  return code;
 }
 
 static void tcpnodelay(struct connectdata *conn,
@@ -511,6 +556,95 @@ static void tcpnodelay(struct connectdata *conn,
 #endif
 }
 
+/* singleipconnect() connects to the given IP only, and it may return without
+   having connected if used from the multi interface. */
+static curl_socket_t
+singleipconnect(struct connectdata *conn,
+                Curl_addrinfo *ai,
+                long timeout_ms,
+                bool *connected)
+{
+  char addr_buf[128];
+  int rc;
+  int error;
+  bool conected;
+  struct SessionHandle *data = conn->data;
+  curl_socket_t sockfd = socket(ai->ai_family, ai->ai_socktype,
+                                ai->ai_protocol);
+  if (sockfd == CURL_SOCKET_BAD)
+    return CURL_SOCKET_BAD;
+
+  *connected = FALSE; /* default is not connected */
+
+  Curl_printable_address(ai, addr_buf, sizeof(addr_buf));
+  infof(data, "  Trying %s... ", addr_buf);
+
+  if(data->set.tcp_nodelay)
+    tcpnodelay(conn, sockfd);
+
+  if(conn->data->set.device) {
+    /* user selected to bind the outgoing socket to a specified "device"
+       before doing connect */
+    CURLcode res = bindlocal(conn, sockfd);
+    if(res)
+      return res;
+  }
+
+  /* set socket non-blocking */
+  Curl_nonblock(sockfd, TRUE);
+
+  rc = connect(sockfd, ai->ai_addr, ai->ai_addrlen);
+
+  if(-1 == rc) {
+    error = Curl_ourerrno();
+
+    switch (error) {
+    case EINPROGRESS:
+    case EWOULDBLOCK:
+#if defined(EAGAIN) && EAGAIN != EWOULDBLOCK
+      /* On some platforms EAGAIN and EWOULDBLOCK are the
+       * same value, and on others they are different, hence
+       * the odd #if
+       */
+    case EAGAIN:
+#endif
+      rc = waitconnect(sockfd, timeout_ms);
+      break;
+    default:
+      /* unknown error, fallthrough and try another address! */
+      failf(data, "Failed to connect to %s: %s",
+            addr_buf, Curl_strerror(conn,error));
+      break;
+    }
+  }
+
+  /* The 'WAITCONN_TIMEOUT == rc' comes from the waitconnect(), and not from
+     connect(). We can be sure of this since connect() cannot return 1. */
+  if((WAITCONN_TIMEOUT == rc) &&
+     (data->state.used_interface == Curl_if_multi)) {
+    /* Timeout when running the multi interface */
+    return sockfd;
+  }
+
+  conected = verifyconnect(sockfd, &error);
+
+  if(!rc && conected) {
+    /* we are connected, awesome! */
+    *connected = TRUE; /* this is a true connect */
+    infof(data, "connected\n");
+    return sockfd;
+  }
+  else if(WAITCONN_TIMEOUT == rc)
+    infof(data, "Timeout\n");
+  else
+    infof(data, "%s\n", Curl_strerror(conn, error));
+
+  /* connect failed or timed out */
+  sclose(sockfd);
+
+  return CURL_SOCKET_BAD;
+}
+
 /*
  * TCP connect to the given host with timeout, proxy or remote doesn't matter.
  * There might be more than one IP address to try out. Fill in the passed
@@ -525,11 +659,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 {
   struct SessionHandle *data = conn->data;
   curl_socket_t sockfd = CURL_SOCKET_BAD;
-  int rc, error;
   int aliasindex;
   int num_addr;
-  bool conected;
-  char addr_buf[256];
   Curl_addrinfo *ai;
   Curl_addrinfo *curr_addr;
 
@@ -539,7 +670,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /*************************************************************
    * Figure out what maximum time we have left
    *************************************************************/
-  long timeout_ms=300000; /* milliseconds, default to five minutes total */
+  long timeout_ms= DEFAULT_CONNECT_TIMEOUT;
   long timeout_per_addr;
 
   *connected = FALSE; /* default to not connected */
@@ -583,98 +714,24 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   ai = remotehost->addr;
 
   /* Below is the loop that attempts to connect to all IP-addresses we
-   * know for the given host. One by one until one IP succeedes.
+   * know for the given host. One by one until one IP succeeds.
    */
 
+  if(data->state.used_interface == Curl_if_multi)
+    /* don't hang when doing multi */
+    timeout_per_addr = timeout_ms = 0;
+
   /*
-   * Connecting with a getaddrinfo chain
+   * Connecting with a Curl_addrinfo chain
    */
   for (curr_addr = ai, aliasindex=0; curr_addr;
        curr_addr = curr_addr->ai_next, aliasindex++) {
 
-    sockfd = socket(curr_addr->ai_family, curr_addr->ai_socktype,
-                    curr_addr->ai_protocol);
-    if (sockfd == CURL_SOCKET_BAD) {
-      timeout_per_addr += timeout_per_addr / (num_addr - aliasindex);
-      continue;
-    }
+    /* start connecting to the IP curr_addr points to */
+    sockfd = singleipconnect(conn, curr_addr, timeout_per_addr, connected);
 
-    Curl_printable_address(curr_addr, addr_buf, sizeof(addr_buf));
-    infof(data, "  Trying %s... ", addr_buf);
-
-    if(data->set.tcp_nodelay)
-      tcpnodelay(conn, sockfd);
-
-    if(conn->data->set.device) {
-      /* user selected to bind the outgoing socket to a specified "device"
-         before doing connect */
-      CURLcode res = bindlocal(conn, sockfd);
-      if(res)
-        return res;
-    }
-
-    /* set socket non-blocking */
-    Curl_nonblock(sockfd, TRUE);
-
-    /* do not use #ifdef within the function arguments below, as connect() is
-       a defined macro on some platforms and some compilers don't like to mix
-       #ifdefs with macro usage! (AmigaOS is one such platform) */
-
-    rc = connect(sockfd, curr_addr->ai_addr, curr_addr->ai_addrlen);
-
-    if(-1 == rc) {
-      error = Curl_ourerrno();
-
-      switch (error) {
-      case EINPROGRESS:
-      case EWOULDBLOCK:
-#if defined(EAGAIN) && EAGAIN != EWOULDBLOCK
-        /* On some platforms EAGAIN and EWOULDBLOCK are the
-         * same value, and on others they are different, hence
-         * the odd #if
-         */
-      case EAGAIN:
-#endif
-        /* asynchronous connect, wait for connect or timeout */
-        if(data->state.used_interface == Curl_if_multi)
-          /* don't hang when doing multi */
-          timeout_per_addr = timeout_ms = 0;
-
-        rc = waitconnect(sockfd, timeout_per_addr);
-        break;
-      default:
-        /* unknown error, fallthrough and try another address! */
-        failf(data, "Failed to connect to %s (IP number %d): %s",
-              addr_buf, aliasindex+1, Curl_strerror(conn,error));
-        break;
-      }
-    }
-
-    /* The 'WAITCONN_TIMEOUT == rc' comes from the waitconnect(), and not from
-       connect(). We can be sure of this since connect() cannot return 1. */
-    if((WAITCONN_TIMEOUT == rc) &&
-       (data->state.used_interface == Curl_if_multi)) {
-      /* Timeout when running the multi interface, we return here with a
-         CURLE_OK return code. */
-      rc = 0;
+    if(sockfd != CURL_SOCKET_BAD)
       break;
-    }
-
-    conected = verifyconnect(sockfd, &error);
-
-    if(!rc && conected) {
-      /* we are connected, awesome! */
-      *connected = TRUE; /* this is a true connect */
-      break;
-    }
-    if(WAITCONN_TIMEOUT == rc)
-      infof(data, "Timeout\n");
-    else
-      infof(data, "%s\n", Curl_strerror(conn, error));
-
-    /* connect failed or timed out */
-    sclose(sockfd);
-    sockfd = CURL_SOCKET_BAD;
 
     /* get a new timeout for next attempt */
     after = Curl_tvnow();
