@@ -944,9 +944,10 @@ char *basename(char *path)
   if(s1 && s2) {
     path = (s1 > s2? s1 : s2)+1;
   }
-  else {
-    path = (s1 ? s1 : s2)+1;
-  }
+  else if(s1)
+    path = s1 + 1;
+  else if(s2)
+    path = s1 + 1;
 
   return path;
 }
