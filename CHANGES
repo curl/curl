@@ -6,6 +6,41 @@
 
                                History of Changes
 
+Daniel (22 May 2002)
+- James Cone brought an excellent patch, including several tests and docs!
+  CURLOPT_NETRC now takes an enum as argument instead of the previous boolean.
+  --netrc-optional was introduced as an addition to --netrc to allow the
+  command line client to take use of all that new netrc stuff.
+
+- Bug report #558888 showed a case where libcurl re-used the previous host
+  name when a connection over a proxy was re-used but to a different target
+  host.
+
+Daniel (21 May 2002)
+- Edin Kadribasic helped me sort out a problem to made libcurl crash when
+  trying to HTTP POST an empty string.
+
+- Clarified that Juergen Wilke donated the original tests/server/sws.c code.
+
+- Jean-Philippe Barrette-LaPierre made curl_formadd() return a typedef named
+  CURLFORMcode instead of the previous 'int', and the various return codes are
+  now globally exported. It allows applications to better figure out what goes
+  wrong when curl_formadd() returns errors.
+
+Daniel (20 May 2002)
+- Roland Zimmermann pointed out that SSL_CTX_use_certificate_chain_file()
+  is prefered to SSL_CTX_use_certificate_file().
+
+Daniel (17 May 2002)
+- Bug report #556869 pointed out that src/writeout.c didn't compile on freebsd
+  after my AIX fixes the other week.
+
+- Bug report #556930 pointed out a FreeBSD core dump introduced in 7.9.7 in
+  the DNS struct realloc stuff. Actually, this crash could happen on all
+  systems that made the pack_hostent() function get invoked.
+
+- I removed several compiler warnings in the test suite's HTTP server.
+
 Version 7.9.7
 
 Daniel (10 May 2002)
