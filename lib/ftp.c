@@ -792,7 +792,7 @@ CURLcode _ftp(struct connectdata *conn)
     int alen, plen;
     char portmsgbuf[4096], tmp[4096];
 
-    char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
+    const char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
     char **modep;
 
     /*
@@ -850,7 +850,7 @@ CURLcode _ftp(struct connectdata *conn)
       return CURLE_FTP_PORT_FAILED;
     }
 
-    for (modep = mode; modep && *modep; modep++) {
+    for (modep = (char *)mode; modep && *modep; modep++) {
       int lprtaf, eprtaf;
 
       switch (sa->sa_family) {
@@ -937,8 +937,7 @@ CURLcode _ftp(struct connectdata *conn)
 	failf(data, "Server does not grok %s", *modep);
 	continue;
       } else
-	      break;
-again:;
+        break;
     }
 
     if (!*modep) {
