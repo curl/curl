@@ -143,13 +143,13 @@ static unsigned int ConnectionStore(struct SessionHandle *data,
 #ifndef RETSIGTYPE
 #define RETSIGTYPE void
 #endif
+extern sigjmp_buf curl_jmpenv;
 static
 RETSIGTYPE alarmfunc(int signal)
 {
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void)signal;
 #ifdef HAVE_SIGSETJMP
-  extern sigjmp_buf curl_jmpenv;
   siglongjmp(curl_jmpenv, 1);
 #endif
   return;
