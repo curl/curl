@@ -7,6 +7,35 @@
                                   Changelog
 
 
+Daniel (13 February 2004)
+- Ben Greear's SO_BINDTODEVICE patch for the binding of the local end to a
+  specific network interface.
+
+- Greg Hewgill found out that the variable holding 'contentlength' wasn't big
+  enough to hold a large file!
+
+- Tor Arntsen fixed a 64bit-related problem in date-related code in the ftp
+  department, and there was another potential problem in the name resolve code
+  too.
+
+Daniel (11 February 2004)
+- Removed a few variables that were only set but never used, as some compilers
+  warn about that and we do not like compiler warnings!
+
+- Removed the need for symlinks in the tests/data directory if curl is built
+  outside of the source directory and the 'make test' is used. This was done
+  by providing a "source dir path" to the scripts/servers.
+
+- Now, if the configure script can't find an nroff tool or an option to nroff
+  to use to convert man pages with, it will completely switch off the built-in
+  manual.
+
+- 'configure --disable-manual' completely disables the built-in manual from
+  the curl command tool.
+
+- Andrés García fixed the configure script and a minor source edit, and now
+  he has managed to get msys/mingw to run configure and then build!
+
 Daniel (9 February 2004)
 - The default HTTP Accept: header was modified to the much simpler
   "Accept: */*".
