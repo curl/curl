@@ -5,6 +5,27 @@
                              \___|\___/|_| \_\_____|
 
                                History of Changes
+Daniel (25 January 2001)
+- I took hold of Rick Jones' question why we don't use recv() and send() for
+  reading/writing to the sockets and I've now modified the sread() and
+  swrite() macros to use them instead. If nothing else, they could be tested
+  in the next beta-round coming right up.
+
+- Jeff Morrow found a problem with libcurl's usage of SSL_read() and supplied
+  his research results in how to fix this. It turns out we have to invoke the
+  function several times in some cases. The same goes for the SSL_write().
+
+  I made some rather drastic changes all over libcurl to make all writes and
+  reads get done on one single place so that this repeated-attempts thing
+  would only have to be implemented at one point.
+
+- Rick Jones spotted that the 'total time' counter really didn't measure the
+  total time very accurate on subsecond levels.
+
+- Johan Nilsson pointed out the need to more clearly specify that the timeout
+  value you set for a download is for the *entire* download. There's currently
+  no option available that sets a timeout for the connection phase only.
+
 Daniel (24 January 2001)
 - Ingo Ralf Blum submitted a series of patches required to get curl to compile
   properly with cygwin.
@@ -25,7 +46,7 @@ Daniel (23 January 2001)
 
 - Made the URL globbing in the client possible to fail silently if there's an
   error in the globbing. It makes it almost intuitive, so when you don't
-  follow the syntax rules, globbing is simply switched off the the raw string
+  follow the syntax rules, globbing is simply switched off and the raw string
   is used instead.
 
   I still think we'll get problems with IPv6-style IP-addresses when we *want*
