@@ -178,29 +178,30 @@ contents of the file must already be url-encoded. Multiple files can also be
 specified. Posting data from a file named 'foobar' would thus be done with
 \&"--data @foobar".
 
-To post data purely binary, you should instead use the --data-binary option.
+To post data purely binary, you should instead use the \fI--data-binary\fP
+option.
 
--d/--data is the same as --data-ascii.
+\fI-d/--data\fP is the same as \fI--data-ascii\fP.
 
 If this option is used several times, the ones following the first will
 append data.
 .IP "--data-ascii <data>"
-(HTTP) This is an alias for the -d/--data option.
+(HTTP) This is an alias for the \fI-d/--data\fP option.
 
 If this option is used several times, the ones following the first will
 append data.
 .IP "--data-binary <data>"
-(HTTP) This posts data in a similar manner as --data-ascii does, although when
-using this option the entire context of the posted data is kept as-is. If you
-want to post a binary file without the strip-newlines feature of the
---data-ascii option, this is for you.
+(HTTP) This posts data in a similar manner as \fI--data-ascii\fP does,
+although when using this option the entire context of the posted data is kept
+as-is. If you want to post a binary file without the strip-newlines feature of
+the \fI--data-ascii\fP option, this is for you.
 
 If this option is used several times, the ones following the first will
 append data.
 .IP "--digest"
 (HTTP) Enables HTTP Digest authentication. This is a authentication that
 prevents the password from being sent over the wire in clear text. Use this in
-combination with the normal -u/--user option to set user name and
+combination with the normal \fI-u/--user\fP option to set user name and
 password. See also \fI--ntlm\fP, \fI--negotiate\fP and \fI--anyauth\fP for
 related options. (Added in curl 7.10.6)
 
