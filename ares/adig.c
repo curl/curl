@@ -282,8 +282,8 @@ int main(int argc, char **argv)
 static void callback(void *arg, int status, unsigned char *abuf, int alen)
 {
   char *name = (char *) arg, *errmem;
-  int id, qr, opcode, aa, tc, rd, ra, rcode, i;
-  unsigned int qdcount, ancount, nscount, arcount;
+  int id, qr, opcode, aa, tc, rd, ra, rcode;
+  unsigned int qdcount, ancount, nscount, arcount, i;
   const unsigned char *aptr;
 
   /* Display the query name if given. */
