@@ -1,0 +1,1 @@
+ftp://%HOSTIP:%FTPPORT/109 -T data/reply106.txt --append

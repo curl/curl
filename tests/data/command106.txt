@@ -1,0 +1,2 @@
+"ftp://%HOSTIP:%FTPPORT//path%20with%20%20spaces/and%20things2/106;type=A"
+

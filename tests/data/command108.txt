@@ -1,0 +1,1 @@
+ftp://%HOSTIP:%FTPPORT/CWD/STOR/RETR/108 -T data/reply106.txt -P -

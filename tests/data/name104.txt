@@ -1,0 +1,1 @@
+FTP --head to get file size only

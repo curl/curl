@@ -1,0 +1,2 @@
+ftp://userdude:passfellow@%HOSTIP:%FTPPORT/103 --use-ascii
+

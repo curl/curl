@@ -1,0 +1,1 @@
+FTP user+password in URL and ASCII transfer

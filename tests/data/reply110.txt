@@ -1,0 +1,2 @@
+expected to be a file without the first part
+but we emulate that

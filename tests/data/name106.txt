@@ -1,0 +1,1 @@
+FTP GET with type=A style ASCII URL using %20 codes

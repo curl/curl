@@ -1,0 +1,1 @@
+ftp://%HOSTIP:%FTPPORT/110 -C 20
