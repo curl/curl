@@ -54,17 +54,13 @@
  *  - uses no statics
  *  - takes a u_char* not an in_addr as input
  */
-static const char *inet_ntop4 (const u_char *src, char *dst, size_t size)
+static char *inet_ntop4 (const u_char *src, char *dst, size_t size)
 {
 #if defined(HAVE_INET_NTOA_R_2_ARGS)
   const char *ptr;
-  size_t len;
   curlassert(size >= 16);
   ptr = inet_ntoa_r(*(struct in_addr*)src, dst);
-  len = strlen(ptr);
-  memmove(dst, ptr, len);
-  dst[len] = 0;
-  return dst;
+  return (char *)memmove(dst, ptr, strlen(ptr)+1);
 
 #elif defined(HAVE_INET_NTOA_R)
   return inet_ntoa_r(*(struct in_addr*)src, dst, size);
@@ -85,7 +81,7 @@ static const char *inet_ntop4 (const u_char *src, char *dst, size_t size)
 /*
  * Convert IPv6 binary address into presentation (printable) format.
  */
-static const char *inet_ntop6 (const u_char *src, char *dst, size_t size)
+static char *inet_ntop6 (const u_char *src, char *dst, size_t size)
 {
   /*
    * Note that int32_t and int16_t need only be "at least" large enough
@@ -189,10 +185,10 @@ static const char *inet_ntop6 (const u_char *src, char *dst, size_t size)
 /*
  * Convert a network format address to presentation format.
  *
- * Returns pointer to presentation format address (`dst'),
+ * Returns pointer to presentation format address (`buf'),
  * Returns NULL on error (see errno).
  */
-const char *Curl_inet_ntop(int af, const void *src, char *buf, size_t size)
+char *Curl_inet_ntop(int af, const void *src, char *buf, size_t size)
 {
   switch (af) {
   case AF_INET:

@@ -69,6 +69,7 @@
 #include <inet.h>
 #endif
 
+#include "inet_ntop.h"
 #include "memory.h"
 
 /* The last #include file should be: */
