@@ -95,7 +95,12 @@ command is run, they are clear again after the command has been run.
 
 <command [option=no-output]>
 command line to run, there's a bunch of %variables that get replaced
-accordingly. more about them elsewhere
+accordingly.
+
+Note that the URL that gets passed to the server actually controls what data
+that is returned. The last slash in the URL must be followed by a number. That
+number (N) will be used by the test-server to load test case N and return the
+data that is defined within the <reply><data></data></reply> section.
 
 Set 'option=no-output' to prevent the test script to slap on the --output
 argument that directs the output to a file. The --output is also not added if
