@@ -46,10 +46,15 @@
 typedef enum {
   VAR_NONE,       /* must be the first */
   VAR_TOTAL_TIME,
+  VAR_NAMELOOKUP_TIME,
+  VAR_CONNECT_TIME,
+  VAR_PRETRANSFER_TIME,
   VAR_SIZE_DOWNLOAD,
   VAR_SIZE_UPLOAD,
   VAR_SPEED_DOWNLOAD,
   VAR_SPEED_UPLOAD,
+  VAR_HTTP_CODE,
+  VAR_EFFECTIVE_URL,
   VAR_NUM_OF_VARS /* must be the last */
 } replaceid;
 
@@ -60,7 +65,12 @@ struct variable {
 
 
 static struct variable replacements[]={
+  {"effective_url", VAR_EFFECTIVE_URL},
+  {"http_code", VAR_HTTP_CODE},
   {"total_time", VAR_TOTAL_TIME},
+  {"namelookup_time", VAR_NAMELOOKUP_TIME},
+  {"connect_time", VAR_CONNECT_TIME},
+  {"pretransfer_time", VAR_PRETRANSFER_TIME},
   {"size_download", VAR_SIZE_DOWNLOAD},
   {"size_upload", VAR_SIZE_UPLOAD},
   {"speed_download", VAR_SPEED_DOWNLOAD},
@@ -89,8 +99,23 @@ void WriteOut(struct UrlData *data)
           for(i=0; replacements[i].name; i++) {
             if(strequal(ptr, replacements[i].name)) {
               switch(replacements[i].id) {
+              case VAR_EFFECTIVE_URL:
+                fprintf(stream, "%s", data->url?data->url:"");
+                break;
               case VAR_TOTAL_TIME:
                 fprintf(stream, "%.3f", data->progress.timespent);
+                break;
+              case VAR_NAMELOOKUP_TIME:
+                fprintf(stream, "%.3f", tvdiff(data->progress.t_nslookup,
+                                               data->progress.start));
+                break;
+              case VAR_CONNECT_TIME:
+                fprintf(stream, "%.3f", tvdiff(data->progress.t_connect,
+                                               data->progress.start));
+                break;
+              case VAR_PRETRANSFER_TIME:
+                fprintf(stream, "%.3f", tvdiff(data->progress.t_pretransfer,
+                                               data->progress.start));
                 break;
               case VAR_SIZE_UPLOAD:
                 fprintf(stream, "%.0f", data->progress.uploaded);
