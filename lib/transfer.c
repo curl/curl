@@ -222,7 +222,7 @@ _Transfer(struct connectdata *c_conn)
       default:
         if((keepon & KEEP_READ) && FD_ISSET(conn->sockfd, &readfd)) {
           /* read! */
-          urg = curl_read(conn, buf, BUFSIZE -1, &nread);
+          urg = Curl_read(conn, conn->sockfd, buf, BUFSIZE -1, &nread);
 
           /* NULL terminate, allowing string ops to be used */
           if (0 < (signed int) nread)
@@ -541,7 +541,8 @@ _Transfer(struct connectdata *c_conn)
           }
 
           /* write to socket */
-          urg = curl_write(conn, buf, nread, &bytes_written);
+          urg = Curl_write(conn, conn->writesockfd, buf, nread,
+                           &bytes_written);
 
           if(nread != bytes_written) {
             failf(data, "Failed uploading data");
