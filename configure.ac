@@ -212,33 +212,65 @@ dnl **********************************************************************
 dnl Checks for libraries.
 dnl **********************************************************************
 
-dnl gethostbyname in the nsl lib?
-AC_CHECK_FUNC(gethostbyname, , [ AC_CHECK_LIB(nsl, gethostbyname) ])
+dnl gethostbyname without lib or in the nsl lib?
+AC_CHECK_FUNC(gethostbyname,
+              [HAVE_GETHOSTBYNAME="1"
+              ],
+              [ AC_CHECK_LIB(nsl, gethostbyname,
+                             [HAVE_GETHOSTBYNAME="1"
+                             LIBS="$LIBS -lnsl"
+                             ])
+              ])
 
-if test "$ac_cv_lib_nsl_gethostbyname" != "yes" -a "$ac_cv_func_gethostbyname" != "yes"; then
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
   dnl gethostbyname in the socket lib?
-  AC_CHECK_FUNC(gethostbyname, , [ AC_CHECK_LIB(socket, gethostbyname) ])
+  AC_CHECK_LIB(socket, gethostbyname,
+               [HAVE_GETHOSTBYNAME="1"
+               LIBS="$LIBS -lsocket"
+               ])
 fi
 
-dnl At least one system has been identified to require BOTH nsl and
-dnl socket libs to link properly.
-if test "$ac_cv_lib_nsl_gethostbyname" != "yes" -a "$ac_cv_lib_socket_gethostbyname" != "yes" -a "$ac_cv_func_gethostbyname" != "yes"; then
-  AC_MSG_CHECKING([trying both nsl and socket libs])
+dnl At least one system has been identified to require BOTH nsl and socket
+dnl libs at the same time to link properly.
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+  AC_MSG_CHECKING([trying gethostbyname with both nsl and socket libs])
   my_ac_save_LIBS=$LIBS
   LIBS="-lnsl -lsocket $LIBS"
   AC_TRY_LINK( ,
              [gethostbyname();],
-             my_ac_link_result=success,
-             my_ac_link_result=failure )
+             [ dnl found it!
+             HAVE_GETHOSTBYNAME="1",
+             AC_MSG_RESULT([yes])],
+             [ dnl failed!
+             AC_MSG_RESULT([no])
+             dnl restore LIBS
+             LIBS=$my_ac_save_LIBS]
+             )
+fi
 
-  if test "$my_ac_link_result" = "failure"; then
-    AC_MSG_RESULT([no])
-    AC_MSG_ERROR([couldn't find libraries for gethostbyname()])
-    dnl restore LIBS
-    LIBS=$my_ac_save_LIBS
-  else
-    AC_MSG_RESULT([yes])
-  fi
+if test "$HAVE_GETHOSTBYNAME" != "1"
+then
+  dnl This is for Msys/Mingw
+  AC_MSG_CHECKING([for gethostbyname in ws2_32])
+  my_ac_save_LIBS=$LIBS
+  LIBS="-lws2_32 $LIBS"
+  AC_TRY_LINK([#include <winsock2.h>],
+               [gethostbyname("www.dummysite.com");],
+               [ dnl worked!
+               AC_MSG_CHECKING([yes])
+               HAVE_GETHOSTBYNAME="1"],
+               [ dnl failed, restore LIBS
+               LIBS=$my_ac_save_LIBS
+               AC_MSG_RESULT(no)]
+             )
+fi
+
+if test "$HAVE_GETHOSTBYNAME" = "1"; then
+  AC_DEFINE(HAVE_GETHOSTBYNAME, 1, [If you have gethostbyname])
+else
+  AC_MSG_ERROR([couldn't find libraries for gethostbyname()])
 fi
 
 dnl resolve lib?
@@ -850,12 +882,13 @@ then
   AC_DEFINE(DISABLED_THREADSAFE, 1, \
 Set to explicitly specify we don't want to use thread-safe functions)
 else
+  if test "$ipv6" != "yes"; then
+    dnl dig around for gethostbyname_r()
+    CURL_CHECK_GETHOSTBYNAME_R()
 
-  dnl dig around for gethostbyname_r()
-  CURL_CHECK_GETHOSTBYNAME_R()
-
-  dnl dig around for gethostbyaddr_r()
-  CURL_CHECK_GETHOSTBYADDR_R()
+    dnl dig around for gethostbyaddr_r()
+    CURL_CHECK_GETHOSTBYADDR_R()
+  fi
 
   dnl poke around for inet_ntoa_r()
   CURL_CHECK_INET_NTOA_R()
