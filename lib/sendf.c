@@ -60,8 +60,8 @@
 
 #ifdef KRB4
 #include "security.h"
-#include <string.h>
 #endif
+#include <string.h>
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
 #include "memdebug.h"
@@ -123,36 +123,38 @@ size_t sendf(int fd, struct UrlData *data, char *fmt, ...)
 
 /*
  * ftpsendf() sends the formated string as a ftp command to a ftp server
+ *
+ * NOTE: we build the command in a fixed-length buffer, which sets length
+ * restrictions on the command!
+ *
  */
 size_t ftpsendf(int fd, struct connectdata *conn, char *fmt, ...)
 {
   size_t bytes_written;
-  char *s;
+  char s[256];
+
   va_list ap;
   va_start(ap, fmt);
-  s = mvaprintf(fmt, ap);
+  vsnprintf(s, 250, fmt, ap);
   va_end(ap);
-  if(!s)
-    return 0; /* failure */
+
   if(conn->data->bits.verbose)
     fprintf(conn->data->err, "> %s\n", s);
+
+  strcat(s, "\r\n"); /* append a trailing CRLF */
 
 #ifdef KRB4
   if(conn->sec_complete && conn->data->cmdchannel) {
     bytes_written = sec_fprintf(conn, conn->data->cmdchannel, s);
-    bytes_written += fprintf(conn->data->cmdchannel, "\r\n");
     fflush(conn->data->cmdchannel);
   }
   else
 #endif /* KRB4 */
     {
       bytes_written = swrite(fd, s, strlen(s));
-      bytes_written += swrite(fd, "\r\n", 2);
     }
-  free(s); /* free the output string */
   return(bytes_written);
 }
-
 
 /* ssend() sends plain (binary) data to the server */
 size_t ssend(int fd, struct connectdata *conn, void *mem, size_t len)
