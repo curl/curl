@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "26 October 2000" "Curl 7.4.2" "Curl Manual"
+.TH curl 1 "22 November 2000" "Curl 7.5" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -357,6 +357,9 @@ ask for it interactively.
 .IP "-U/--proxy-user <user:password>"
 Specify user and password to use for Proxy authentication. If no
 password is specified, curl will ask for it interactively.
+.IP "--url <URL>"
+Set the URL to fetch. This option is mostly handy when you wanna specify URL
+in a config file.
 .IP "-v/--verbose"
 Makes the fetching more verbose/talkative. Mostly usable for
 debugging. Lines starting with '>' means data sent by curl, '<'
