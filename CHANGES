@@ -6,6 +6,14 @@
 
                                History of Changes
 
+Daniel (30 October 2000)
+- T. Bharath brought a set of patches that bring new functionality to
+  curl_easy_getinfo() and curl_easy_setopt(). Now you can request peer
+  certificate verification with the *setopt() CURLOPT_SSL_VERIFYPEER option
+  and then use the CURLOPT_CAINFO to set the certificate to verify the remote
+  peer against. After an such an operation with a verification request, the
+  *_getinfo() option CURLINFO_SSL_VERIFYRESULT will return information about
+  whether the verification succeeded or not.  
 
 Daniel (27 October 2000)
 - Georg Horn brought us a splendid patch that solves the long-standing
