@@ -6,7 +6,7 @@ Curl and libcurl 7.13.1
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        15
- Number of known libcurl bindings:         29
+ Number of known libcurl bindings:         30
 
 This release includes the following changes:
 
@@ -30,6 +30,7 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
+ o libcurl-vb 1.0 http://sf.net/projects/libcurl-vb/
  o pycurl 7.13.0: http://pycurl.sf.net/
 
 This release would not have looked like this without help, code, reports and
