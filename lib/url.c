@@ -184,9 +184,11 @@ CURLcode Curl_close(CURL *curl)
 }
 
 static
-int my_getpass(void *clientp, char *prompt, char* buffer, int buflen )
+int my_getpass(void *clientp, const char *prompt, char* buffer, int buflen )
 {
   char *retbuf;
+  clientp=NULL; /* prevent compiler warning */
+
   retbuf = getpass_r(prompt, buffer, buflen);
   if(NULL == retbuf)
     return 1;
@@ -195,7 +197,7 @@ int my_getpass(void *clientp, char *prompt, char* buffer, int buflen )
 }
 
 
-CURLcode Curl_open(CURL **curl, char *url)
+CURLcode Curl_open(CURL **curl)
 {
   /* We don't yet support specifying the URL at this point */
   struct UrlData *data;
@@ -953,7 +955,7 @@ ConnectionExists(struct UrlData *data,
                  struct connectdata *needle,
                  struct connectdata **usethis)
 {
-  size_t i;
+  long i;
   struct connectdata *check;
 
   for(i=0; i< data->numconnects; i++) {
@@ -1016,7 +1018,7 @@ ConnectionExists(struct UrlData *data,
 static int
 ConnectionKillOne(struct UrlData *data)
 {
-  size_t i;
+  long i;
   struct connectdata *conn;
   int highscore=-1;
   int connindex=-1;
@@ -1082,7 +1084,7 @@ static unsigned int
 ConnectionStore(struct UrlData *data,
                 struct connectdata *conn)
 {
-  size_t i;
+  long i;
   for(i=0; i< data->numconnects; i++) {
     if(!data->connects[i])
       break;
@@ -1870,14 +1872,14 @@ static CURLcode Connect(struct UrlData *data,
     conn->port = (data->use_port && allow_port)?data->use_port:PORT_DICT;
     conn->remote_port = PORT_DICT;
     conn->curl_do = Curl_dict;
-    conn->curl_done = Curl_dict_done;
+    conn->curl_done = NULL; /* no DICT-specific done */
   }
   else if (strequal(conn->protostr, "LDAP")) {
     conn->protocol |= PROT_LDAP;
     conn->port = (data->use_port && allow_port)?data->use_port:PORT_LDAP;
     conn->remote_port = PORT_LDAP;
     conn->curl_do = Curl_ldap;
-    conn->curl_done = Curl_ldap_done;
+    conn->curl_done = NULL; /* no LDAP-specific done */
   }
   else if (strequal(conn->protostr, "FILE")) {
     conn->protocol |= PROT_FILE;
