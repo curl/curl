@@ -1,7 +1,7 @@
                       Peer SSL Certificate Verification
                       =================================
 
-Starting in 7.10, libcurl performs peer SSL certificate verification by
+Since version 7.10, libcurl performs peer SSL certificate verification by
 default. This is done by installing a default CA cert bundle on 'make install'
 (or similar), that CA bundle package is used by default on operations against
 SSL servers.
@@ -11,9 +11,11 @@ by CAs present in the bundle, you will not notice any changed behavior and you
 will seamlessly get a higher security level on your SSL connections since you
 can be sure that the remote server really is the one it claims to be.
 
-If the remote server uses a self-signed certificate, or if you don't install
-curl's CA cert bundle or if it uses a certificate signed by a CA that isn't
-included in the bundle, then you need to do one of the following:
+If the remote server uses a self-signed certificate, if you don't install
+curl's CA cert bundle, if the server uses a certificate signed by a CA that
+isn't included in the bundle or if the remoste host is an imposter
+impersonating your favourite site, and you want to transfer files from this
+server, do one of the following:
 
  1. Tell libcurl to *not* verify the peer. With libcurl you disable with with
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
@@ -37,3 +39,8 @@ trouble for some users, since it adds security to a majority of the SSL
 connections that previously weren't really secure. It turned out many people
 were using previous versions of curl/libcurl without realizing the need for
 the CA cert options to get truly secure SSL connections.
+
+The default path of the CA bundle installed with the curl package is:
+/usr/local/share/curl/curl-ca-bundle.crt, which can be changed by running
+configure with the --with-ca-bundle option pointing out the path of your
+choice.
