@@ -1532,6 +1532,8 @@ void free_config_fields(struct Configurable *config)
     curl_formfree(config->httppost);
   if(config->cacert)
     free(config->cacert);
+  if(config->cookiejar)
+    free(config->cookiejar);
 
   curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
   curl_slist_free_all(config->postquote); /*  */
