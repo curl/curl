@@ -1175,6 +1175,7 @@ CURLSHcode curl_share_cleanup(CURLSH *);
 
 typedef enum {
   CURLVERSION_FIRST,
+  CURLVERSION_SECOND,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -1183,7 +1184,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redfine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_FIRST
+#define CURLVERSION_NOW CURLVERSION_SECOND
 
 typedef struct {
   CURLversion age;          /* age of the returned struct */
@@ -1196,6 +1197,10 @@ typedef struct {
   const char *libz_version;       /* human readable string */
   /* protocols is terminated by an entry with a NULL protoname */
   const char **protocols;
+
+  /* The fields below this were added in CURLVERSION_SECOND */
+  const char *ares;
+  int ares_num;
 } curl_version_info_data;
 
 #define CURL_VERSION_IPV6      (1<<0)
