@@ -62,7 +62,7 @@ fail if its not set to "Mozilla/4.0".  To encode blanks in the string,
 surround the string with single quote marks.  This can also be set with the
 -H/--header flag of course.
 
-If this option is used more than once, the last one will be the one to be
+If this option is set more than once, the last one will be the one that's
 used.
 .IP "-b/--cookie <name=data>"
 (HTTP)
@@ -83,7 +83,7 @@ that the file specified with -b/--cookie is only used as input. No cookies
 will be stored in the file. To store cookies, save the HTTP headers to a file
 using -D/--dump-header!
 
-If this option is used more than once, the last one will be the one to be
+If this option is set more than once, the last one will be the one that's
 used.
 .IP "-B/--use-ascii"
 Use ASCII transfer when getting an FTP file or LDAP info. For FTP, this can
@@ -756,13 +756,17 @@ Interface error. A specified outgoing interface could not be used.
 Bad password entered. An error was signalled when the password was entered.
 .IP 47
 Too many redirects. When following redirects, curl hit the maximum amount.
+.IP 48
+Unknown TELNET option specified.
+.IP 49
+Malformed telnet option.
 .IP XX
 There will appear more error codes here in future releases. The existing ones
 are meant to never change.
 .SH BUGS
 If you do find bugs, mail them to curl-bug@haxx.se.
 .SH AUTHORS / CONTRIBUTORS
- - Daniel Stenberg <Daniel.Stenberg@haxx.se>
+ - Daniel Stenberg <daniel@haxx.se>
  - Rafael Sagula <sagula@inf.ufrgs.br>
  - Sampo Kellomaki <sampo@iki.fi>
  - Linas Vepstas <linas@linas.org>
@@ -827,6 +831,8 @@ If you do find bugs, mail them to curl-bug@haxx.se.
  - Cris Bailiff <c.bailiff@awayweb.com>
  - Sterling Hughes <sterling@designmultimedia.com>
  - S. Moonesamy
+ - Ingo Wilken <iw@WWW.Ecce-Terram.DE>
+ - Pawel A. Gajda <mis@k2.net.pl>
 
 .SH WWW
 http://curl.haxx.se
