@@ -32,7 +32,7 @@ cygwinbin:
 # copy some files into the binary install dir
 	cp $(srcdir)/README \
 	  $(cygwintmp)/usr/doc/Cygwin/$(PACKAGE)-$(VERSION)-$(CYGBUILD).README
-	cd $(top_srcdir) ; cp CHANGES COPYING README UPGRADE docs/* \
+	cd $(top_srcdir) ; cp CHANGES COPYING README RELEASE-NOTES docs/* \
 	  $(cygwintmp)/usr/doc/$(PACKAGE)-$(VERSION) ; pwd
 	cd $(cygwintmp)/usr/doc/$(PACKAGE)-$(VERSION) ; rm *.1 Makefile*
 #
