@@ -7,6 +7,20 @@
                                   Changelog
 
 
+Daniel (12 Oct 2002)
+- Trying to connect to a host on a bad port number caused the multi interface
+  to never return failure and it appeared to keep on trying forever (it just
+  didn't do anything).
+
+Daniel (11 Oct 2002)
+- Downloading HTTP without headers didn't work 100%, some of the initial data
+  got written twice. Kevin Roth reported.
+
+- Kevin Roth found out the "config file" parser in the client code could
+  segfault, like if DOS newlines were used.
+
+Version 7.10.1 (11 Oct 2002)
+
 Daniel (10 Oct 2002)
 - Jeff Lawson fixed a few problems with connection re-use that remained when
   you set CURLOPT_PROXY to "".
