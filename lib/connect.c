@@ -228,6 +228,7 @@ static CURLcode bindlocal(struct connectdata *conn,
     char myhost[256] = "";
     in_addr_t in;
     int rc;
+    bool was_iface = FALSE;
 
     /* First check if the given name is an IP address */
     in=inet_addr(data->set.device);
@@ -239,7 +240,10 @@ static CURLcode bindlocal(struct connectdata *conn,
        */
       rc = Curl_resolv(conn, myhost, 0, &h);
       if(rc == 1)
-        rc = Curl_wait_for_resolv(conn, &h);
+        (void)Curl_wait_for_resolv(conn, &h);
+
+      if(h)
+        was_iface = TRUE;
 
     }
     else {
@@ -250,7 +254,7 @@ static CURLcode bindlocal(struct connectdata *conn,
          */
         rc = Curl_resolv(conn, data->set.device, 0, &h);
         if(rc == 1)
-          rc = Curl_wait_for_resolv(conn, &h);
+          (void)Curl_wait_for_resolv(conn, &h);
 
         if(h)
           /* we know data->set.device is shorter than the myhost array */
@@ -266,10 +270,36 @@ static CURLcode bindlocal(struct connectdata *conn,
          hostent_buf,
          sizeof(hostent_buf));
       */
+      failf(data, "Couldn't bind to '%s'", data->set.device);
       return CURLE_HTTP_PORT_FAILED;
     }
 
     infof(data, "We bind local end to %s\n", myhost);
+
+#ifdef SO_BINDTODEVICE
+    /* I am not sure any other OSs than Linux that provide this feature, and
+     * at the least I cannot test. --Ben
+     *
+     * This feature allows one to tightly bind the local socket to a
+     * particular interface.  This will force even requests to other local
+     * interfaces to go out the external interface.
+     *
+     */
+    if (was_iface) {
+      /* Only bind to the interface when specified as interface, not just as a
+       * hostname or ip address.
+       */
+      if (setsockopt(sockfd, SOL_SOCKET, SO_BINDTODEVICE,
+                     data->set.device, strlen(data->set.device)+1) != 0) {
+        /* printf("Failed to BINDTODEVICE, socket: %d  device: %s error: %s\n",
+           sockfd, data->set.device, strerror(errno)); */
+        infof(data, "SO_BINDTODEVICE %s failed\n",
+              data->set.device);
+        /* This is typiclally "errno 1, error: Operation not permitted" if
+           you're not running as root or another suitable privileged user */
+      }
+    }
+#endif
 
     in=inet_addr(myhost);
     if (CURL_INADDR_NONE != in) {
