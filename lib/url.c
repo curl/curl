@@ -190,6 +190,9 @@ CURLcode Curl_close(struct SessionHandle *data)
   if(data->state.auth_host)
     free(data->state.auth_host);
 
+  if(data->state.scratch)
+    free(data->state.scratch);
+
   if(data->change.proxy_alloc)
     free(data->change.proxy);
 

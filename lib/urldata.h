@@ -598,7 +598,7 @@ struct UrlState {
   struct curl_ssl_session *session; /* array of 'numsessions' size */
   long sessionage;                  /* number of the most recent session */
 
-  char scratch[BUFSIZE*2]; /* huge buffer when doing upload CRLF replacing */
+  char *scratch; /* huge buffer[BUFSIZE*2] when doing upload CRLF replacing */
   bool errorbuf; /* Set to TRUE if the error buffer is already filled in.
                     This must be set to FALSE every time _easy_perform() is
                     called. */

@@ -964,6 +964,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
           /* convert LF to CRLF if so asked */
           if (data->set.crlf) {
+              if(data->state.scratch == NULL)
+                data->state.scratch = malloc(2*BUFSIZE);
+              if(data->state.scratch == NULL) {
+                failf (data, "Failed to alloc scratch buffer!");
+                return CURLE_OUT_OF_MEMORY;
+              }
             for(i = 0, si = 0; i < nread; i++, si++) {
               if (conn->upload_fromhere[i] == 0x0a) {
                 data->state.scratch[si++] = 0x0d;
