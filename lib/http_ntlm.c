@@ -95,13 +95,19 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
 
       which translates to this:
 
-      4e 54 4c 4d 53 53 50 00 02 00 00 00 02 00 02 00 30 00 00 00 06 82 81 00
-      73 9d 40 61 50 e0 c8 d7 00 00 00 00 00 00 00 00 6e 00 6e 00 32 00 00 00
-      43 43 02 00 04 00 43 00 43 00 01 00 12 00 45 00 4c 00 49 00 53 00 41 00
-      42 00 45 00 54 00 48 00 04 00 18 00 63 00 63 00 2e 00 69 00 63 00 65 00
-      64 00 65 00 76 00 2e 00 6e 00 75 00 03 00 2c 00 65 00 6c 00 69 00 73 00
-      61 00 62 00 65 00 74 00 68 00 2e 00 63 00 63 00 2e 00 69 00 63 00 65 00
-      64 00 65 00 76 00 2e 00 6e 00 75 00 00 00 00 00
+0x00: 4e 54 4c 4d 53 53 50 00 02 00 00 00 02 00 02 00  | NTLMSSP.........
+0x10: 30 00 00 00 06 82 81 00 73 9d 40 61 50 e0 c8 d7  | 0.......s.@aP...
+0x20: 00 00 00 00 00 00 00 00 6e 00 6e 00 32 00 00 00  | ........n.n.2...
+0x30: 43 43 02 00 04 00 43 00 43 00 01 00 12 00 45 00  | CC....C.C.....E.
+0x40: 4c 00 49 00 53 00 41 00 42 00 45 00 54 00 48 00  | L.I.S.A.B.E.T.H.
+0x50: 04 00 18 00 63 00 63 00 2e 00 69 00 63 00 65 00  | ....c.c...i.c.e.
+0x60: 64 00 65 00 76 00 2e 00 6e 00 75 00 03 00 2c 00  | d.e.v...n.u...,.
+0x70: 65 00 6c 00 69 00 73 00 61 00 62 00 65 00 74 00  | e.l.i.s.a.b.e.t.
+0x80: 68 00 2e 00 63 00 63 00 2e 00 69 00 63 00 65 00  | h...c.c...i.c.e.
+0x90: 64 00 65 00 76 00 2e 00 6e 00 75 00 00 00 00 00  | d.e.v...n.u.....
+
+This is not the same format as described on the web page, but doing repeated
+requests show that 0x18-0x1f seems to be the nonce anyway.
 
       */
 
@@ -109,7 +115,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
 
       data->state.ntlm.state = NTLMSTATE_TYPE2; /* we got a type-2 */
 
-      if(size == 48)
+      if(size >= 48)
         /* the nonce of interest is index [24 .. 31], 8 bytes */
         memcpy(data->state.ntlm.nonce, &buffer[24], 8);
     }
@@ -170,14 +176,16 @@ static void calc_resp(unsigned char *keys,
                   DES_ENCRYPT);
 }
 
+/*
+ * Set up lanmanager and nt hashed passwords
+ */
 static void mkhash(char *password,
                    unsigned char *nonce,  /* 8 bytes */
                    unsigned char *lmresp, /* must fit 0x18 bytes */
                    unsigned char *ntresp) /* must fit 0x18 bytes */
 {
-  /* setup LanManager password */
-  unsigned char lmbuffer[0x18];
-  unsigned char ntbuffer[0x18];
+  unsigned char lmbuffer[21];
+  unsigned char ntbuffer[21];
   
   unsigned char lm_pw[14];
   int len = strlen(password);
@@ -274,8 +282,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
 
     This translates into:
 
-    4e 54 4c 4d 53 53 50 00 01 00 00 00 06 82 00 00 00 00 00 00 00 00 00 00 00
-    00 00 00 00 00 00 00 00 00 00 00 30 00 00 00 00 00 00 00 30 00 00 00
+0x00: 4e 54 4c 4d 53 53 50 00 01 00 00 00 06 82 00 00  | NTLMSSP.........
+0x10: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  | ................
+0x20: 00 00 00 00 30 00 00 00 00 00 00 00 30 00 00 00  | ....0.......0...
 
     Which isn't following the web spec. This uses 0x8206 instead of 0xb203
     and sends a longer chunk of data than we do! Interestingly, there's no
@@ -309,7 +318,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
 
     /* initial packet length */
     size = 8 + 1 + 3 + 18 + hostlen + domlen;
-#if 1
+#if 0
     #define CHUNK "\x4e\x54\x4c\x4d\x53\x53\x50\x00\x01\x00\x00\x00\x06\x82\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x30\x00\x00\x00\x00\x00\x00\x00\x30\x00\x00\x00"
     memcpy(ntlm, CHUNK, sizeof(CHUNK)-1);
     size = sizeof(CHUNK)-1;
@@ -337,11 +346,13 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
 
       Which translates to:
 
-      4e 54 4c 4d 53 53 50 00 03 00 00 00 18 00 18 00 4a 00 00 00 00 00 00 00
-      62 00 00 00 05 00 05 00 34 00 00 00 06 00 06 00 39 00 00 00 0b 00 0b 00
-      3f 00 00 00 48 45 4d 4d 41 64 61 6e 69 65 6c 4c 49 4c 4c 41 53 59 53 54
-      45 52 4f 54 f2 44 2e 87 9b 52 0e 12 bd 6d 1e 77 64 26 2a ed 12 8d 7e 2a
-      36 b2
+0x00: 4e 54 4c 4d 53 53 50 00 03 00 00 00 18 00 18 00  | NTLMSSP.........
+0x10: 4a 00 00 00 00 00 00 00 62 00 00 00 05 00 05 00  | J.......b.......
+0x20: 34 00 00 00 06 00 06 00 39 00 00 00 0b 00 0b 00  | 4.......9.......
+0x30: 3f 00 00 00 48 45 4d 4d 41 64 61 6e 69 65 6c 4c  | ?...HEMMAdanielL
+0x40: 49 4c 4c 41 53 59 53 54 45 52 4f 54 f2 44 2e 87  | ILLASYSTEROT.D..
+0x50: 9b 52 0e 12 bd 6d 1e 77 64 26 2a ed 12 8d 7e 2a  | .R...m.wd&*...~*
+0x60: 36 b2                                            | 6.
 
       Note how the domain + username + hostname ARE NOT unicoded in any way.
       Domain and hostname are uppercase, while username are case sensitive.
@@ -443,6 +454,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
                     0x0, 0x0);
 
     /* size is now 64 */
+    size=64;
+    ntlm[62]=ntlm[63]=0;
+
 #if 1
     ascii_to_unicode(&ntlm[size], (unsigned char *)domain, TRUE);
     size += domlen;
@@ -470,13 +484,22 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     }
 
     if(size < ((int)sizeof(ntlm) - 0x18)) {      
-      memcpy(&ntlm[size+0x18], ntresp, 0x18);
-      size += 0x18*2;
+      memcpy(&ntlm[size], ntresp, 0x18);
+      size += 0x18;
     }
 
 
     ntlm[56] = size & 0xff;
     ntlm[57] = size >> 8;
+
+#if 0
+#undef CHUNK
+
+#define CHUNK "\x4e\x54\x4c\x4d\x53\x53\x50\x00\x03\x00\x00\x00\x18\x00\x18\x00\x4a\x00\x00\x00\x00\x00\x00\x00\x62\x00\x00\x00\x05\x00\x05\x00\x34\x00\x00\x00\x06\x00\x06\x00\x39\x00\x00\x00\x0b\x00\x0b\x00\x3f\x00\x00\x00\x48\x45\x4d\x4d\x41\x64\x61\x6e\x69\x65\x6c\x4c\x49\x4c\x4c\x41\x53\x59\x53\x54\x45\x52\x4f\x54\xf2\x44\x2e\x87\x9b\x52\x0e\x12\xbd\x6d\x1e\x77\x64\x26\x2a\xed\x12\x8d\x7e\x2a\x36\xb2"
+    memcpy(ntlm, CHUNK, sizeof(CHUNK)-1);
+    size = sizeof(CHUNK)-1;
+#endif
+
     
     /* convert the binary blob into base64 */
     size = Curl_base64_encode(ntlm, size, &base64);
