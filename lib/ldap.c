@@ -165,7 +165,6 @@ CURLcode Curl_ldap(struct connectdata *conn)
   void *ber;
   void *attribute;
 
-  int ldaptext;
   struct SessionHandle *data=conn->data;
   
   infof(data, "LDAP: %s\n", data->change.url);
@@ -176,8 +175,6 @@ CURLcode Curl_ldap(struct connectdata *conn)
     return CURLE_LIBRARY_NOT_FOUND;
   }
 
-  ldaptext = data->set.ftp_ascii; /* This is a dirty hack */
-  
   /* The types are needed because ANSI C distinguishes between
    * pointer-to-object (data) and pointer-to-function.
    */
