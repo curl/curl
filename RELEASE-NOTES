@@ -7,18 +7,23 @@ Curl and libcurl 7.12.0.
 
 This release includes the following changes:
 
- o 
+ o IPv6-enabled Windows hosts now resolves names threaded/asynch as well
+ o configure --with-libidn can be used to point out the root dir of a libidn
+   installation for curl to use, then libcurl can resolve IDNA names
 
 This release includes the following bugfixes:
 
- o 
+ o curl works with telnet and stdin properly on Windows
+ o configure --without-ssl works even when pkg-config has OpenSSL details
+ o src/hugehelp.c builds correct again in non-configure build environments
 
 Other curl-related news since the previous public release:
 
- o 
+ o PycURL 7.11.2 was released: http://pycurl.sourceforge.net
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+ Gisle Vanem, Tommy Tam
 
         Thanks! (and sorry if I forgot to mention someone)
