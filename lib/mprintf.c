@@ -38,10 +38,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#ifndef SIZEOF_LONG_LONG
-/* prevents warnings on picky compilers */
-#define SIZEOF_LONG_LONG 0
-#endif
 #ifndef SIZEOF_LONG_DOUBLE
 #define SIZEOF_LONG_DOUBLE 0
 #endif
@@ -125,7 +121,7 @@ typedef struct {
     char *str;
     void *ptr;
     long num;
-#if SIZEOF_LONG_LONG /* if this is non-zero */
+#ifdef HAVE_LONGLONG
     long long lnum;
 #endif
     double dnum;
@@ -517,7 +513,7 @@ static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list a
 	break;
 	
       case FORMAT_INT:
-#if SIZEOF_LONG_LONG
+#ifdef HAVE_LONGLONG
 	if(vto[i].flags & FLAGS_LONGLONG)
 	  vto[i].data.lnum = va_arg(arglist, long long);
 	else
@@ -604,7 +600,7 @@ static int dprintf_formatf(
     long base;
 
     /* Integral values to be written.  */
-#if SIZEOF_LONG_LONG
+#ifdef HAVE_LONGLONG
     unsigned long long num;
 #else
     unsigned long num;
@@ -697,9 +693,9 @@ static int dprintf_formatf(
       /* Decimal integer.  */
       base = 10;
 
-#if SIZEOF_LONG_LONG
+#ifdef HAVE_LONGLONG
       if(p->flags & FLAGS_LONGLONG) {
-	 /* long long */
+        /* long long */
 	is_neg = p->data.lnum < 0;
 	num = is_neg ? (- p->data.lnum) : p->data.lnum;
       }
@@ -928,7 +924,7 @@ static int dprintf_formatf(
 
     case FORMAT_INTPTR:
       /* Answer the count of characters written.  */
-#if SIZEOF_LONG_LONG
+#ifdef HAVE_LONGLONG
       if (p->flags & FLAGS_LONGLONG)
 	*(long long int *) p->data.ptr = done;
       else
@@ -1147,7 +1143,7 @@ int main()
 {
   char buffer[129];
   char *ptr;
-#if SIZEOF_LONG_LONG>0
+#ifdef HAVE_LONGLONG
   long long hullo;
   dprintf("%3$12s %1$s %2$qd %4$d\n", "daniel", hullo, "stenberg", 65);
 #endif
