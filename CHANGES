@@ -7,6 +7,22 @@
                                   Changelog
 
 
+Daniel (9 February 2004)
+- The default HTTP Accept: header was modified to the much simpler
+  "Accept: */*".
+
+- P R Schaffner updated the curl-ssl spec file for RPMs.
+
+- Dominick Meglio brought lots of documentation for the share interface's man
+  pages that were previously missing.
+
+- Tor Arntsen provided a patch that makes libcurl work-around a bug in the
+  AIX5 implementation of getaddrinfo(). This makes the FTP PORT stuff work on
+  ipv6-enabled AIX builds.
+
+- Ken Rastatter provided portability fixes for the curlgtk.c example, and now
+  it runs on windows with GTK as well!
+
 Daniel (6 February 2004)
 - Andrés García made the configure script find gethostbyname() fine when run
   with mingw on windows.
