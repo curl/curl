@@ -19,8 +19,10 @@ data to sent to the client on its request and later verified that it arrived
 safely. Set the nocheck=1 to prevent the test script to verify the arrival
 of this data.
 </data>
-<datacheck>
-if the data is sent but this is what should be checked afterwards
+<datacheck [nonewline=yes]>
+if the data is sent but this is what should be checked afterwards. If
+'nonewline' is set, we will cut off the trailing newline of this given data
+before comparing with the one actually received by the client
 </datacheck>
 <size>
 number to return on a ftp SIZE command

@@ -471,6 +471,14 @@ sub singletest {
 
     if (@replycheck) {
         # we use this file instead to check the final output against
+
+        my %hash = getpartattr("reply", "datacheck");
+        if($hash{'nonewline'}) {
+            # Yes, we must cut off the final newline from the final line
+            # of the datacheck
+            chomp($replycheck[$#replycheck]);
+        }
+    
         @reply=@replycheck;
     }
 
