@@ -194,7 +194,7 @@ Transfer(struct connectdata *c_conn)
   int offset = 0;		/* possible resume offset read from the
                                    Content-Range: header */
   int httpcode = 0;		/* error code from the 'HTTP/1.? XXX' line */
-  int httpversion = -1;         /* the last digit in the HTTP/1.1 string */
+  int httpversion = -1;			/* the HTTP version*10 */
 
   /* for the low speed checks: */
   CURLcode urg;
@@ -465,8 +465,21 @@ Transfer(struct connectdata *c_conn)
               if (!headerline++) {
                 /* This is the first header, it MUST be the error code line
                    or else we consiser this to be the body right away! */
-                if (2 == sscanf (p, " HTTP/1.%d %3d", &httpversion,
-                                 &httpcode)) {
+                int httpversion_major;
+                int nc=sscanf (p, " HTTP/%d.%d %3d",
+                               &httpversion_major ,&httpversion, &httpcode);
+                if (nc==3) {
+                  httpversion+=10*httpversion_major;
+                }
+                else {
+                  /* this is the real world, not a Nirvana
+                     NCSA 1.5.x returns this crap when asked for HTTP/1.1
+                  */
+                  nc=sscanf (p, " HTTP %3d", &httpcode);
+                  httpversion = 10;
+                }
+
+                if (nc) {
                   data->progress.httpcode = httpcode;
                   data->progress.httpversion = httpversion;
 
@@ -485,7 +498,7 @@ Transfer(struct connectdata *c_conn)
                     return CURLE_HTTP_NOT_FOUND;
                   }
 
-                  if(httpversion == 0)
+                  if(httpversion == 10)
                     /* Default action for HTTP/1.0 must be to close, unless
                        we get one of those fancy headers that tell us the
                        server keeps it open for us! */
@@ -511,7 +524,7 @@ Transfer(struct connectdata *c_conn)
                 conn->size = contentlength;
                 Curl_pgrsSetDownloadSize(data, contentlength);
               }
-              else if((httpversion == 0) &&
+			  else if((httpversion == 10) &&
                       conn->bits.httpproxy &&
                       compareheader(p, "Proxy-Connection:", "keep-alive")) {
                 /*
@@ -523,7 +536,7 @@ Transfer(struct connectdata *c_conn)
                 conn->bits.close = FALSE; /* don't close when done */
                 infof(data, "HTTP/1.0 proxy connection set to keep alive!\n");
               }
-              else if((httpversion == 0) &&
+			  else if((httpversion == 10) &&
                       compareheader(p, "Connection:", "keep-alive")) {
                 /*
                  * A HTTP/1.0 reply with the 'Connection: keep-alive' line
