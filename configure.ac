@@ -958,79 +958,6 @@ case "$LIBIDN" in
        ;; 
 esac
 
-AC_MSG_CHECKING([whether to enable ares])
-AC_ARG_ENABLE(ares,
-AC_HELP_STRING([--enable-ares=PATH],[Enable ares for name lookups])
-AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
-[ case "$enableval" in
-  no)
-       AC_MSG_RESULT(no)
-       ;;
-  *)   AC_MSG_RESULT(yes)
-
-       if test "x$IPV6_ENABLED" = "x1"; then
-         AC_MSG_ERROR([ares doesn't work with ipv6, disable ipv6 to use ares])
-       fi
-
-       AC_DEFINE(USE_ARES, 1, [Define if you want to enable ares support])
-       dnl substitute HAVE_ARES for curl-config and similar
-       HAVE_ARES="1"
-       AC_SUBST(HAVE_ARES)
-       curl_ares_msg="enabled"
-
-       LIBS="$LIBS -lcares"
-
-       dnl For backwards compatibility default to includes/lib in srcdir/ares
-       dnl If a value is specified it is assumed that the libs are in $val/lib
-       dnl and the includes are in $val/include. This is the default setup for
-       dnl ares so it should not be a problem.
-       if test "x$enableval" = "xyes" ; then
-         if test -d "$srcdir/ares"; then
-            aresembedded="yes"
-            AC_CONFIG_SUBDIRS(ares)
-            aresinc=`cd $srcdir/ares && pwd`
-            CPPFLAGS="$CPPFLAGS -I$aresinc"
-
-            dnl the pwd= below cannot 'cd' into the ares dir to get the full
-            dnl path to it, since it may not exist yet if we build outside of
-            dnl the source tree
-            pwd=`pwd`
-            LDFLAGS="$LDFLAGS -L$pwd/ares"
-         fi
-       else
-         CPPFLAGS="$CPPFLAGS -I$enableval/include"
-         LDFLAGS="$LDFLAGS -L$enableval/lib"
-       fi
-
-       if test -z "$aresembedded"; then
-         dnl verify that a sufficient c-ares is here if we have pointed one
-         dnl out and don't use the "embedded" ares dir (in which case we don't
-         dnl check it because it might not have been built yet)
-         AC_MSG_CHECKING([that c-ares is good and recent enough])
-         AC_LINK_IFELSE( [
-#include <ares.h>
-/* provide a set of dummy functions in case c-ares was built with debug */
-void curl_dofree() { }
-void curl_sclose() { }
-void curl_domalloc() { }
-
-int main(void)
-{
-  ares_channel channel;
-  ares_cancel(channel);
-  return 0;
-}
-],
-          AC_MSG_RESULT(yes),
-          AC_MSG_RESULT(no)
-          AC_MSG_ERROR([c-ares library defective or too old])
-          )
-       fi
-       ;;
-  esac ],
-       AC_MSG_RESULT(no)
-)
-
 dnl Default is to try the thread-safe versions of a few functions
 OPT_THREAD=on
 
@@ -1326,10 +1253,78 @@ fi
 dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 
+AC_MSG_CHECKING([whether to enable ares])
+AC_ARG_ENABLE(ares,
+AC_HELP_STRING([--enable-ares=PATH],[Enable ares for name lookups])
+AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       ;;
+  *)   AC_MSG_RESULT(yes)
 
-dnl AC_PATH_PROG( RANLIB, ranlib, /usr/bin/ranlib, 
-dnl   $PATH:/usr/bin/:/usr/local/bin )
-dnl AC_SUBST(RANLIB)
+       if test "x$IPV6_ENABLED" = "x1"; then
+         AC_MSG_ERROR([ares doesn't work with ipv6, disable ipv6 to use ares])
+       fi
+
+       AC_DEFINE(USE_ARES, 1, [Define if you want to enable ares support])
+       dnl substitute HAVE_ARES for curl-config and similar
+       HAVE_ARES="1"
+       AC_SUBST(HAVE_ARES)
+       curl_ares_msg="enabled"
+
+       LIBS="$LIBS -lcares"
+
+       dnl For backwards compatibility default to includes/lib in srcdir/ares
+       dnl If a value is specified it is assumed that the libs are in $val/lib
+       dnl and the includes are in $val/include. This is the default setup for
+       dnl ares so it should not be a problem.
+       if test "x$enableval" = "xyes" ; then
+         if test -d "$srcdir/ares"; then
+            aresembedded="yes"
+            AC_CONFIG_SUBDIRS(ares)
+            aresinc=`cd $srcdir/ares && pwd`
+            CPPFLAGS="$CPPFLAGS -I$aresinc"
+
+            dnl the pwd= below cannot 'cd' into the ares dir to get the full
+            dnl path to it, since it may not exist yet if we build outside of
+            dnl the source tree
+            pwd=`pwd`
+            LDFLAGS="$LDFLAGS -L$pwd/ares"
+         fi
+       else
+         CPPFLAGS="$CPPFLAGS -I$enableval/include"
+         LDFLAGS="$LDFLAGS -L$enableval/lib"
+       fi
+
+       if test -z "$aresembedded"; then
+         dnl verify that a sufficient c-ares is here if we have pointed one
+         dnl out and don't use the "embedded" ares dir (in which case we don't
+         dnl check it because it might not have been built yet)
+         AC_MSG_CHECKING([that c-ares is good and recent enough])
+         AC_LINK_IFELSE( [
+#include <ares.h>
+/* provide a set of dummy functions in case c-ares was built with debug */
+void curl_dofree() { }
+void curl_sclose() { }
+void curl_domalloc() { }
+
+int main(void)
+{
+  ares_channel channel;
+  ares_cancel(channel);
+  return 0;
+}
+],
+          AC_MSG_RESULT(yes),
+          AC_MSG_RESULT(no)
+          AC_MSG_ERROR([c-ares library defective or too old])
+          )
+       fi
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
 
 dnl ************************************************************
 dnl lame option to switch on debug options
