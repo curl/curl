@@ -8,6 +8,14 @@
 
 
 Daniel (12 March 2001)
+- Made curl (the actual command line tool) use the new libcurl 7.7 persistant
+  connection support by re-using the same curl handle for every specified file
+  transfer and after some more test case tweaking we have 100% test case OK.
+
+- Had to add 'Connection: close' to the headers of a bunch of test cases so
+  that curl behaves "old-style" since the test http server doesn't do multiple
+  connections... Now I get 100% test case OK.
+
 - The curl.haxx.se site, the main curl mailing list and my personal email are
   all dead today due to power blackout in the area where the main servers are
   located. Horrible.
