@@ -723,7 +723,10 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 #ifdef HAVE_SIGACTION
   sigaction(SIGALRM, NULL, &sigact);
   sigact.sa_handler = alarmfunc;
+#ifdef SA_RESTART
+  /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
   sigact.sa_flags &= ~SA_RESTART;
+#endif
   sigaction(SIGALRM, &sigact, NULL);
 #else
   /* no sigaction(), revert to the much lamer signal() */
