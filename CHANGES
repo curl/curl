@@ -6,6 +6,22 @@
 
                                   Changelog
 
+Daniel (11 Sep 2002)
+- Lukasz Czekierda found out that curl didn't send a correct HTTP Host: header
+  when you specified the URL with an IPv6 IP-address.
+
+Daniel (4 Sep 2002)
+- Sven Neuhaus made --silent being acknowledged even when multiple URLs
+  were used. It used to output "[1/2]: http://host/a.html.de --> a.html.d" etc
+  even when told to shut up.
+
+Daniel (3 Sep 2002)
+- Updated all source code headers to use MIT-license references only, and
+  point to the COPYING file and the http://curl.haxx.se/docs/copyright.html
+  URL. I've cut out all references to MPL that I could find.
+
+- Corected the makefiles to not always use -lz when linking
+
 Version 7.10-pre2
 
 Daniel (2 Sep 2002)
@@ -21,6 +37,8 @@ Daniel (2 Sep 2002)
 Daniel (30 Aug 2002)
 - Applied an anonymous SOCKS5-proxy patch. Not properly working in all
   situations though, as all getaddrinfo()-using libcurls will fail on this.
+  This is because of the somewhat naive way the current code tries to extract
+  the IP address of the proxy.
 
 - Fixed up the SSL cert fixes from the other day even more after more inputs
   from Cris. Added three new SSL error codes to make the
