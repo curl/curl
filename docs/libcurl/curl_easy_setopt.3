@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "5 Aug 2002" "libcurl 7.9.8" "libcurl Manual"
+.TH curl_easy_setopt 3 "20 Aug 2002" "libcurl 7.9.9" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -513,6 +513,9 @@ Unknown/unused argument values will be set to zero (like if you only download
 data, the upload size will remain 0). Returning a non-zero value from this
 callback will cause libcurl to abort the transfer and return
 \fICURLE_ABORTED_BY_CALLBACK\fP.
+
+Also note that \fICURLOPT_NOPROGRESS\fP must be set to FALSE to make this
+function actually get called.
 .TP
 .B CURLOPT_PROGRESSDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
@@ -702,6 +705,19 @@ is. This funtion must return 0.
 Pass a pointer to whatever you want passed in to your CURLOPT_DEBUGFUNCTION in
 the last void * argument. This pointer is not used by libcurl, it is only
 passed to the callback.
+.TP
+.B CURLOPT_BUFFERSIZE
+Pass a long specifying your prefered size for the receive buffer in libcurl.
+The main point of this would be that the write callback gets called more often
+and with smaller chunks. This is just treated as a request, not an order. You
+cannot be guaranteed to actually get the given size. (Added in 7.9.9)
+.TP
+.B CURLOPT_NOSIGNAL
+Pass a long. If it is non-zero, libcurl will not use any functions that
+install signal handlers or any functions that cause signals to be sent to the
+process. This option is mainly here to allow multi-threaded unix applications
+to still set/use all timeout options etc, without risking getting signals.
+(Added in 7.9.9)
 .PP
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, non-zero means an
