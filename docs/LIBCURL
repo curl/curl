@@ -4,7 +4,10 @@
                         | | | |_) | (__| |_| | |  | |
                         |_|_|_.__/ \___|\__,_|_|  |_|
 
-                     How To Use Libcurl In Your Program
+                   How To Use Libcurl In Your C/C++ Program
+
+ [ libcurl can be used directly from within your PHP or Perl programs as well,
+   look elsewhere for documentation on this ]
 
  The interface is meant to be very simple for applictions/programmers, hence
  the name "easy". We have therefore minimized the number of entries.
@@ -45,6 +48,18 @@ The Easy Interface
    curl_slist_free_all() - frees a whole curl_slist
 
  For details on these, read the separate man pages.
+
+Portability
+
+ libcurl works *exactly* the same, on any of the platforms it compiles and
+ builds on.
+
+ There's only one caution, and that is the win32 platform that may(*) require
+ you to init the winsock stuff before you use the libcurl functions. Details
+ on this are noted on the curl_easy_init() man page.
+
+ (*) = it appears users of the cygwin environment gets this done
+       automatically.
 
 Persistant Connections
 

@@ -31,7 +31,7 @@ FAQ
   3.7 Can I use curl to delete/rename a file through FTP?
   3.8 How do I tell curl to follow HTTP redirects?
   3.9 How do I use curl in PHP?
-  3.10 What about SOAP, WEBDAV, XML-RPC or similar protocols over HTTP?
+  3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -292,7 +292,7 @@ FAQ
   invoke the curl tool using a command line. This is the way to use curl if
   you're using PHP3 or PHP4 built without curl module support.
 
-  3.10 What about SOAP, WEBDAV, XML-RPC or similar protocols over HTTP?
+  3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
   Curl adheres to the HTTP spec, which basically means you can play with *any*
   protocol that is built ontop of HTTP. Protocols such as SOAP, WEBDAV and
