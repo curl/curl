@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH libcurl 5 "19 March 2002" "libcurl 7.8.1" "libcurl overview"
+.TH libcurl 3 "19 March 2002" "libcurl 7.9.6" "libcurl overview"
 .SH NAME
 libcurl \- client-side URL transfers
 .SH DESCRIPTION
@@ -21,7 +21,8 @@ calls, you can use libcurl as described below.
 
 When using libcurl's "easy" interface you init your session and get a handle,
 which you use as input to the easy interface functions you use. Use
-\fIcurl_easy_init()\fP to get the handle.
+\fIcurl_easy_init()\fP to get the handle. There is also the so called "multi"
+interface, try the \fIlibcurl-multi(3)\fP man page for an overview of that.
 
 You continue by setting all the options you want in the upcoming transfer,
 most important among them is the URL itself (you can't transfer anything
@@ -75,9 +76,8 @@ portable case insensitive string comparisons
 .RE
 
 .SH "LINKING WITH LIBCURL"
-Starting with 7.7.2 (on unix-like machines), there's a tool named curl-config
-that gets installed with the rest of the curl stuff when 'make install' is
-performed.
+On unix-like machines, there's a tool named curl-config that gets installed
+with the rest of the curl stuff when 'make install' is performed.
 
 curl-config is added to make it easier for applications to link with libcurl
 and developers to learn about libcurl and how to use it.
@@ -103,19 +103,18 @@ several threads. libcurl is thread-safe and can be used in any number of
 threads, but you must use separate curl handles if you want to use libcurl in
 more than one thread simultaneously.
 .SH "PERSISTANT CONNECTIONS"
-With libcurl 7.7, persistant connections were added. Persistant connections
-means that libcurl can re-use the same connection for several transfers, if
-the conditions are right.
+Persistent connections means that libcurl can re-use the same connection for
+several transfers, if the conditions are right.
 
-libcurl will *always* attempt to use persistant connections. Whenever you use
+libcurl will *always* attempt to use persistent connections. Whenever you use
 curl_easy_perform(), libcurl will attempt to use an existing connection to do
-the transfer, and if none exists it'll open a new one that will be subject
-for re-use on a possible following call to curl_easy_perform().
+the transfer, and if none exists it'll open a new one that will be subject for
+re-use on a possible following call to curl_easy_perform().
 
-To allow libcurl to take full advantage of persistant connections, you should
-do as many of your file transfers as possible using the same curl
-handle. When you call curl_easy_cleanup(), all the possibly open connections
-held by libcurl will be closed and forgotten.
+To allow libcurl to take full advantage of persistent connections, you should
+do as many of your file transfers as possible using the same curl handle. When
+you call curl_easy_cleanup(), all the possibly open connections held by
+libcurl will be closed and forgotten.
 
 Note that the options set with curl_easy_setopt() will be used in on every
 repeat curl_easy_perform() call
