@@ -177,6 +177,9 @@ CURLcode Curl_file_done(struct connectdata *conn,
   (void)status; /* not used */
   Curl_safefree(file->freepath);
 
+  if(file->fd != -1)
+    close(file->fd);
+
   return CURLE_OK;
 }
 
@@ -227,7 +230,7 @@ static CURLcode file_upload(struct connectdata *conn)
     int readcount;
     res = Curl_fillreadbuffer(conn, BUFSIZE, &readcount);
     if(res)
-      return res;
+      break;
 
     nread = (size_t)readcount;
 
@@ -383,8 +386,7 @@ CURLcode Curl_file(struct connectdata *conn)
   if(Curl_pgrsUpdate(conn))
     res = CURLE_ABORTED_BY_CALLBACK;
 
-  close(fd);
-
   return res;
 }
+
 #endif

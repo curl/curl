@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (17 August 2004)
+- Kjetil Jacobsen noticed that when transferring a file:// URL pointing to an
+  empty file, libcurl would return with the file still open.
+
+- Alexander Krasnostavsky pointed out that the configure script needs to define
+  _THREAD_SAFE for AIX systems to make libcurl built really thread-safe.
+
+  Also added a check for the xlc compiler on AIX, and if that is detect we use
+  the -qthreaded compiler option
+
 Daniel (16 August 2004)
 - libcurl now allows a custom "Accept-Encoding:" header override the
   internally set one that gets set with CURLOPT_ENCODING. Pointed out by Alex.
