@@ -248,6 +248,6 @@ endif
 
 hugehelp.c: hugehelp.c.cvs
 	@echo Creating $@
-	$(CP) $< $@
+	@$(CP) $< $@
 
  

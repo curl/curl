@@ -299,7 +299,7 @@ ca-bundle.h: Makefile.netware
 getdate.c: getdate.c.cvs
 	@echo Creating $@
 	@-$(RM) getdate.y
-	$(CP) $< $@
+	@$(CP) $< $@
 
 url.c: ca-bundle.h
 
