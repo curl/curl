@@ -3229,11 +3229,11 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_INTERFACE, config->iface);
         curl_easy_setopt(curl, CURLOPT_KRB4LEVEL, config->krb4level);
       
+        progressbarinit(&progressbar, config);
         if((config->progressmode == CURL_PROGRESS_BAR) &&
            !(config->conf&(CONF_NOPROGRESS|CONF_MUTE))) {
           /* we want the alternative style, then we have to implement it
              ourselves! */
-          progressbarinit(&progressbar, config);
           curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, myprogress);
           curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
         }
