@@ -185,7 +185,6 @@ CURLcode Curl_GetFTPResponse(int *nreadp, /* return number of bytes read */
    * line in a response or continue reading.  */
 
   int sockfd = conn->firstsocket;
-  int nread;   /* total size read */
   int perline; /* count bytes per line */
   bool keepon=TRUE;
   ssize_t gotbytes;
@@ -215,11 +214,11 @@ CURLcode Curl_GetFTPResponse(int *nreadp, /* return number of bytes read */
   ptr=buf;
   line_start = buf;
 
-  nread=0;
+  *nreadp=0;
   perline=0;
   keepon=TRUE;
 
-  while((nread<BUFSIZE) && (keepon && !result)) {
+  while((*nreadp<BUFSIZE) && (keepon && !result)) {
     /* check and reset timeout value every lap */
     if(data->set.timeout)
       /* if timeout is requested, find out how much remaining time we have */
@@ -270,7 +269,7 @@ CURLcode Curl_GetFTPResponse(int *nreadp, /* return number of bytes read */
         ftp->cache_size = 0; /* zero the size just in case */
       }
       else {
-        int res = Curl_read(conn, sockfd, ptr, BUFSIZE-nread, &gotbytes);
+        int res = Curl_read(conn, sockfd, ptr, BUFSIZE-*nreadp, &gotbytes);
         if(res < 0)
           /* EWOULDBLOCK */
           continue; /* go looping again */
@@ -292,7 +291,7 @@ CURLcode Curl_GetFTPResponse(int *nreadp, /* return number of bytes read */
          * line */
         int i;
 
-        nread += gotbytes;
+        *nreadp += gotbytes;
         for(i = 0; i < gotbytes; ptr++, i++) {
           perline++;
           if(*ptr=='\n') {
@@ -378,7 +377,6 @@ CURLcode Curl_GetFTPResponse(int *nreadp, /* return number of bytes read */
   if(ftpcode)
     *ftpcode=code; /* return the initial number like this */
 
-  *nreadp = nread; /* total amount of bytes read */
   return result;
 }
 
@@ -412,8 +410,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   /* no need to duplicate them, the data struct won't change */
   ftp->user = data->state.user;
   ftp->passwd = data->state.passwd;
-
-  ftp->response_time = 3600; /* default response time-out */
+  ftp->response_time = 3600; /* set default response time-out */
 
   if (data->set.tunnel_thru_httpproxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
@@ -634,9 +631,22 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   conn->secondarysocket = -1;
 
   if(!ftp->no_transfer) {
-    /* now let's see what the server says about the transfer we just
-       performed: */
+    /* Let's see what the server says about the transfer we just performed,
+       but lower the timeout as sometimes this connection has died while 
+       the data has been transfered. This happens when doing through NATs
+       etc that abandon old silent connections.
+    */
+    ftp->response_time = 60; /* give it only a minute for now */
+
     result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+
+    ftp->response_time = 3600; /* set this back to one hour waits */
+  
+    if(!nread && (CURLE_OPERATION_TIMEDOUT == result)) {
+      failf(data, "control connection looks dead");
+      return result;
+    }
+
     if(result)
       return result;
 
