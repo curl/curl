@@ -33,14 +33,26 @@ CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid
 curl:
 	@cd $(top_builddir) && $(MAKE)
 
+if CROSSCOMPILING
+TEST = @echo "NOTICE: we can't run the tests when cross-compiling!"
+TEST_Q = $(TEST)
+TEST_F = $(TEST)
+TEST_T = $(TEST)
+else # if not cross-compiling:
+TEST = srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
+TEST_Q = $(TEST) -s -a
+TEST_F = $(TEST) -a -p
+TEST_T = $(TEST) -t
+endif
+
 test: all
-	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
+	$(TEST)
 
 quiet-test: all
-	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -s -a
+	$(TEST_Q)
 
 full-test: all
-	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -a -p
+	$(TEST_F)
 
 torture-test: all
-	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -t
+	$(TEST_T)
