@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "30 Apr 2002" "libcurl 7.9.6" "libcurl Manual"
+.TH curl_easy_setopt 3 "3 May 2002" "libcurl 7.9.6" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -60,7 +60,8 @@ Set the \fIstream\fP argument with the \fBCURLOPT_FILE\fP option.
 
 \fBNOTE:\fP you will be passed as much data as possible in all invokes, but
 you cannot possibly make any assumptions. It may be one byte, it may be
-thousands.
+thousands. The maximum amount of data that can be passed to the write callback
+is defined in the curl.h header file: CURL_MAX_WRITE_SIZE.
 .TP
 .B CURLOPT_INFILE
 Data pointer to pass to the file read function. Note that if you specify the

@@ -83,7 +83,7 @@
 #include "http_chunks.h" /* for the structs and enum stuff */
 
 /* Download buffer size, keep it fairly big for speed reasons */
-#define BUFSIZE (1024*20)
+#define BUFSIZE CURL_MAX_WRITE_SIZE
 
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
    of need. */

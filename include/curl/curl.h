@@ -86,6 +86,8 @@ typedef int (*curl_progress_callback)(void *clientp,
                                       double ultotal,
                                       double ulnow);
 
+#define CURL_MAX_WRITE_SIZE 20480
+
 typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t size,
                                       size_t nitems,
