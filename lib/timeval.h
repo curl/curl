@@ -27,7 +27,6 @@
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <time.h>
-#include <winsock.h>
 #else
 #include <sys/time.h>
 #endif

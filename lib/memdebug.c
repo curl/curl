@@ -26,12 +26,8 @@
 
 #include <curl/curl.h>
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-#include <winsock.h>
-#else /* some kind of unix */
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
-#endif
 #endif
 
 #define _MPRINTF_REPLACE

@@ -20,11 +20,6 @@
 
 #ifndef HAVE_INET_PTON
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-#define EAFNOSUPPORT WSAEAFNOSUPPORT
-#include <winsock.h>
-#else
-
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -40,7 +35,6 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#endif
 #include <string.h>
 #include <errno.h>
 
@@ -50,6 +44,10 @@
 
 #ifndef	AF_INET6
 #define	AF_INET6	AF_MAX+1	/* just to let this compile */
+#endif
+
+#ifdef WIN32
+#define EAFNOSUPPORT    WSAEAFNOSUPPORT
 #endif
 
 /*

@@ -119,6 +119,17 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
    */
 
 #ifdef WIN32
+
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN  /* Prevent including <winsock*.h> in <windows.h> */
+#endif
+
+#include <winsock2.h>        /* required by telnet.c */
+
+#if defined(ENABLE_IPV6) || defined(USE_SSLEAY)
+#include <ws2tcpip.h>
+#endif
+
 #if !defined(__GNUC__) || defined(__MINGW32__)
 #define sclose(x) closesocket(x)
 #define sread(x,y,z) recv(x,y,z,0)

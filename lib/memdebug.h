@@ -28,9 +28,6 @@
 #include <sys/types.h>
 #endif
 
-#ifdef WIN32
-#include <winsock.h>
-#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif

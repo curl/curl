@@ -27,7 +27,9 @@
 #define ssize_t int
 
 /* Define this to 'int' if socklen_t is not an available typedefed type */
+#if !defined(ENABLE_IPV6) && !defined(USE_SSLEAY)
 #define socklen_t int
+#endif
 
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
@@ -98,6 +100,9 @@
 /* Define if you have the uname function.  */
 /*#define HAVE_UNAME 1*/
 
+/* Define if you have utime() */
+#define HAVE_UTIME 1
+
 /* Define if you have the <alloca.h> header file.  */
 /*#define HAVE_ALLOCA_H 1*/
 
@@ -105,7 +110,7 @@
 #define HAVE_MALLOC_H 1
 
 /* Define if you have the <arpa/inet.h> header file.  */
-#define HAVE_ARPA_INET_H 1
+/* #define HAVE_ARPA_INET_H 1 */
 
 /* Define if you have the <crypto.h> header file.  */
 /* #undef HAVE_CRYPTO_H */
@@ -123,7 +128,7 @@
 /* #undef HAVE_GETOPT_H */
 
 /* Define if you have the <netdb.h> header file.  */
-#define HAVE_NETDB_H 1
+/* #define HAVE_NETDB_H 1 */
 
 /* Define if you have the <netinet/in.h> header file.  */
 /*#define HAVE_NETINET_IN_H 1*/
@@ -144,19 +149,22 @@
 /*#define HAVE_SYS_SOCKET_H 1*/
 
 /* Define if you have the <sys/sockio.h> header file.  */
-#define HAVE_SYS_SOCKIO_H 1
+/* #define HAVE_SYS_SOCKIO_H 1 */
 
 /* Define if you have the <sys/stat.h> header file.  */
 #define HAVE_SYS_STAT_H 1
+
+/* Define if you have the <sys/utime.h> header file */
+#define HAVE_SYS_UTIME_H 1
 
 /* Define if you have the <sys/types.h> header file.  */
 #define HAVE_SYS_TYPES_H 1
 
 /* Define if you have the <termio.h> header file.  */
-#define HAVE_TERMIO_H 1
+/* #define HAVE_TERMIO_H 1 */
 
 /* Define if you have the <termios.h> header file.  */
-#define HAVE_TERMIOS_H 1
+/* #define HAVE_TERMIOS_H 1 */
 
 /* Name of package */
 #define PACKAGE "curl"
@@ -169,6 +177,12 @@
 
 /* Define if you have the <winsock.h> header file.  */
 #define HAVE_WINSOCK_H 1
+
+/* Define if you have the <winsock2.h> header file.  */
+#define HAVE_WINSOCK2_H 1
+
+/* Define if you have the <ws2tcpip.h> header file.  */
+#define HAVE_WS2TCPIP_H 1
 
 /* Define if you have the <stdlib.h> header file.  */
 #define HAVE_STDLIB_H 1
@@ -191,7 +205,7 @@
 /*************************************************
  * This section is for compiler specific defines.*
  *************************************************/
-#ifdef MINGW32 /* Borland and MS don't have this */
+#if defined(MINGW32) || defined(__WATCOMC__) /* Borland and MS don't have this */
 
 /* Define if you have the <unistd.h> header file.  */
 #define HAVE_UNISTD_H 1

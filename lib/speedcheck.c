@@ -25,9 +25,6 @@
 
 #include <stdio.h>
 #include <string.h>
-#if defined(__MINGW32__)
-#include <winsock.h>
-#endif
 
 #include <curl/curl.h>
 #include "urldata.h"

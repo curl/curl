@@ -24,13 +24,7 @@
 #include "setup.h"
 
 #include <string.h>
-
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-#if defined(__MINGW32__)
-#include <winsock.h>
-#endif
 #include <time.h>
-#endif
 
 /* 20000318 mgs
  * later we use _scrsize to determine the screen width, this emx library

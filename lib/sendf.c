@@ -39,9 +39,6 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-#include <winsock.h>
-#endif
 
 #include <curl/curl.h>
 #include "urldata.h"

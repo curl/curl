@@ -21,14 +21,13 @@
  * $Id$
  ***************************************************************************/
 
-#ifdef WIN32
-#include <windows.h>
-#endif
 #include "timeval.h"
 
 #ifndef HAVE_GETTIMEOFDAY
 
 #ifdef WIN32
+#include <mmsystem.h>
+
 int
 gettimeofday (struct timeval *tp, void *nothing)
 {

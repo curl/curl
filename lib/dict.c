@@ -35,7 +35,6 @@
 #include <errno.h>
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-#include <winsock.h>
 #include <time.h>
 #include <io.h>
 #else

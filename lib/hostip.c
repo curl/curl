@@ -29,7 +29,7 @@
 #define _REENTRANT
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-#include <winsock.h>
+#include <malloc.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

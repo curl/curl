@@ -66,11 +66,11 @@
 #ifdef WIN32
 #define HAVE_IOCTLSOCKET
 #include <windows.h>
-#include <winsock.h>
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #define EISCONN     WSAEISCONN
 #define ENOTSOCK    WSAENOTSOCK
+#define ECONNREFUSED WSAECONNREFUSED
 #endif
 
 #include "urldata.h"
