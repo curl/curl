@@ -72,65 +72,56 @@
 #include <stddef.h>
 
 char *
-curl_strtok_r(char *s, const char *delim, char **last)
+Curl_strtok_r(char *s, const char *delim, char **last)
 {
-    char *spanp;
-    int c, sc;
-    char *tok;
+  char *spanp;
+  int c, sc;
+  char *tok;
 
-    if (s == NULL && (s = *last) == NULL)
-    {
-	return NULL;
+  if (s == NULL && (s = *last) == NULL) {
+    return NULL;
+  }
+
+  /*
+   * Skip (span) leading delimiters (s += strspn(s, delim), sort of).
+   */
+ cont:
+  c = *s++;
+  for (spanp = (char *)delim; (sc = *spanp++) != 0; ) {
+    if (c == sc) {
+      goto cont;
     }
+  }
 
-    /*
-     * Skip (span) leading delimiters (s += strspn(s, delim), sort of).
-     */
-cont:
+  if (c == 0) {		/* no non-delimiter characters */
+    *last = NULL;
+    return NULL;
+  }
+  tok = s - 1;
+  
+  /*
+   * Scan token (scan for delimiters: s += strcspn(s, delim), sort of).
+   * Note that delim must have one NUL; we stop if we see that, too.
+   */
+  for (;;) {
     c = *s++;
-    for (spanp = (char *)delim; (sc = *spanp++) != 0; )
-    {
-	if (c == sc)
-	{
-	    goto cont;
-	}
+    spanp = (char *)delim;
+    do {
+      if ((sc = *spanp++) == c) {
+        if (c == 0) {
+          s = NULL;
+        }
+        else {
+          char *w = s - 1;
+          *w = '\0';
+        }
+        *last = s;
+        return tok;
+      }
     }
-
-    if (c == 0)		/* no non-delimiter characters */
-    {
-	*last = NULL;
-	return NULL;
-    }
-    tok = s - 1;
-
-    /*
-     * Scan token (scan for delimiters: s += strcspn(s, delim), sort of).
-     * Note that delim must have one NUL; we stop if we see that, too.
-     */
-    for (;;)
-    {
-	c = *s++;
-	spanp = (char *)delim;
-	do
-	{
-	    if ((sc = *spanp++) == c)
-	    {
-		if (c == 0)
-		{
-		    s = NULL;
-		}
-		else
-		{
-		    char *w = s - 1;
-		    *w = '\0';
-		}
-		*last = s;
-		return tok;
-	    }
-	}
-	while (sc != 0);
-    }
-    /* NOTREACHED */
+    while (sc != 0);
+  }
+  /* NOTREACHED */
 }
 
 #endif
