@@ -230,6 +230,10 @@ int fileno( FILE *stream);
 #error "ares does not yet support IPv6. Disable IPv6 or ares and rebuild"
 #endif
 
+#if defined(WIN32) && !defined(__CYGWIN32__) && !defined(USE_ARES) && !defined(ENABLE_IPV6)
+#define USE_THREADING_GETHOSTBYNAME  /* Cygwin uses alarm() function */
+#endif
+
 /*
  * Curl_addrinfo MUST be used for name resolving information.
  * Information regarding a single IP witin a Curl_addrinfo MUST be stored in
