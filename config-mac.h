@@ -36,4 +36,6 @@
 #define HAVE_RAND_STATUS	1
 #define HAVE_RAND_EGD		1
 
-#include <GUSIExtra.h>
+#define HAVE_FIONBIO        1
+
+#include "GUSIExtra.h"
