@@ -16,6 +16,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl_easy_reset() no longer enables the progress meter
+ o build fix for SSL disabled curl with SSL Engine support present
+ o configure --with-ssl=PATH now ignores pkg-config path info
  o CURLOPT_SSLENGINE can be set to NULL even if no engine support is available
  o LDAP crash when more than one record was received
  o connect failures properly stores an error message in the errorbuffer
@@ -43,6 +46,6 @@ advice from friends like these:
  Casey O'Donnell, Roland Krikava, Alex, Alexander Krasnostavsky, Kjetil
  Jacobsen, Ling Thio, Roman Koifman, Harshal Pradhan, Jonas Forsman, David
  Tarendash, Daniel at touchtunes, Bertrand Demiddelaer, Andreas Rieke,
- Jean-Claude Chauve, Dan Fandrich, Peter Sylvester
+ Jean-Claude Chauve, Dan Fandrich, Peter Sylvester, "Mekonikum"
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (29 September 2004)
+- Bertrand Demiddelaer fixed curl_easy_reset() so that it doesn't mistakingly
+  enable the progress meter.
+
 Daniel (28 September 2004)
 - "Mekonikum" found out that if you built curl without SSL support, although
   your current SSL installation supports Engine, the compile fails.
