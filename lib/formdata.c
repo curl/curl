@@ -1244,11 +1244,14 @@ CURLcode Curl_getFormData(struct FormData **finalform,
         char buffer[1024];
         size_t nread;
 
-        fileread = strequal("-", file->contents)?stdin:
-          /* binary read for win32 crap */
-          /*VMS??*/ fopen(file->contents, "rb");  /* ONLY ALLOWS FOR STREAM FILES ON VMS */
-        /*VMS?? Stream files are OK, as are FIXED & VAR files WITHOUT implied CC */
-        /*VMS?? For implied CC, every record needs to have a \n appended & 1 added to SIZE */
+        fileread = strequal("-", file->contents)?
+          stdin:fopen(file->contents, "rb"); /* binary read for win32  */
+        /*
+         * VMS: This only allows for stream files on VMS.  Stream files are
+         * OK, as are FIXED & VAR files WITHOUT implied CC For implied CC,
+         * every record needs to have a \n appended & 1 added to SIZE
+         */
+
         if(fileread) {
           while((nread = fread(buffer, 1, 1024, fileread)))
             size += AddFormData(&form, buffer, nread);
@@ -1257,10 +1260,6 @@ CURLcode Curl_getFormData(struct FormData **finalform,
             fclose(fileread);
         }
         else {
-#if 0
-          /* File wasn't found, add a nothing field! */
-          size += AddFormData(&form, "", 0);
-#endif
           Curl_formclean(firstform);
           free(boundary);
           *finalform = NULL;
