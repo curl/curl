@@ -6,6 +6,10 @@
 
 Perl
 
+ Perl's a great script language, not the least for quick prototyping. Curl is
+elegantly used from within it. You can either invoke external curl command
+line or use the curl interface.
+
  Georg Horn's Perl interface to curl is available in the Curl_easy/
 subdirectory.
 
