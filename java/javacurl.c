@@ -82,8 +82,17 @@ JNIEXPORT jint JNICALL Java_CurlGlue_jni_1setopt__III
   (JNIEnv *java, jobject myself, jint jcurl, jint option, jint value)
 {
   void *handle = (void *)((struct javacurl*)jcurl)->libcurl;
+  CURLoption opt = (CURLoption)option;
 
   puts("setopt int + int");
+
+  switch(opt) {
+  case CURLOPT_FILE:
+    /* silently ignored, we don't need user-specified callback data when
+       we have an object, and besides the CURLOPT_FILE is not exported
+       to the java interface */
+    return 0;
+  }
 
   return (jint)curl_easy_setopt(handle, (CURLoption)option, value);
 }
