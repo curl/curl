@@ -165,7 +165,7 @@ sub torture {
     system($testcmd);
 
     print " CMD: $testcmd\n" if($verbose);
-        
+
     # memanalyze -v is our friend, get the number of allocations made
     my $count=0;
     my @out = `$memanalyze -v $memdump`;
@@ -186,25 +186,25 @@ sub torture {
         my $limit = $_;
         my $fail;
         my $dumped_core;
-        
+
         if($tortalloc && ($tortalloc != $limit)) {
             next;
         }
 
         print "Fail alloc no: $limit\r" if($verbose);
-            
+
         # make the memory allocation function number $limit return failure
         $ENV{'CURL_MEMLIMIT'} = $limit;
 
         # remove memdump first to be sure we get a new nice and clean one
         unlink($memdump);
-        
+
         print "**> Alloc number $limit is now set to fail <**\n" if($gdbthis);
 
         my $ret;
         if($gdbthis) {
             system($gdbline)
-        }        
+        }
         else {
             $ret = system($testcmd);
         }
@@ -479,7 +479,7 @@ sub runftpserver {
         }
         sleep(1);
     }
-    
+
     # now (re-)start our server:
     my $flag=$debugprotocol?"-v ":"";
     $flag .= "-s \"$srcdir\"";
@@ -498,7 +498,6 @@ sub runftpserver {
         print "$cmd\n" if($verbose);
         my @data = `$cmd`;
         foreach $line (@data) {
-            print STDERR "We read: $_";
             if ( $line =~ /WE ROOLZ: (\d+)/ ) {
                 $pid = 0+$1;
                 $verified = 1;
@@ -618,7 +617,7 @@ sub filteroff {
         print OUT $_;
     }
     close(IN);
-    close(OUT);    
+    close(OUT);
     return 0;
 }
 
@@ -766,7 +765,7 @@ sub checkcurl {
 }
 
 #######################################################################
-# substitute the variable stuff into either a joined up file or 
+# substitute the variable stuff into either a joined up file or
 # a command, in either case passed by reference
 #
 sub subVariables {
@@ -805,7 +804,7 @@ sub singletest {
     }
 
     printf("test %03d...", $testnum);
-    
+
     for(@what) {
         my $f = $_;
         $f =~ s/\s//g;
@@ -867,7 +866,7 @@ sub singletest {
         $skipped++;
         $skipped{$why}++;
         $teststat[$testnum]=$why; # store reason for this test case
-        
+
         print "SKIPPED\n";
         if(!$short) {
             print "* Test $testnum: $why\n";
@@ -889,7 +888,7 @@ sub singletest {
             # of the datacheck
             chomp($replycheck[$#replycheck]);
         }
-    
+
         @reply=@replycheck;
     }
 
@@ -988,7 +987,7 @@ sub singletest {
         subVariables \$fileContent;
 #        print "DEBUG: writing file " . $filename . "\n";
         open OUTFILE, ">$filename";
-        binmode OUTFILE; # for crapage systems, use binary       
+        binmode OUTFILE; # for crapage systems, use binary
         print OUTFILE $fileContent;
         close OUTFILE;
     }
@@ -1039,7 +1038,7 @@ sub singletest {
     $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
 
     if($verbose) {
-        print "$CMDLINE\n"; 
+        print "$CMDLINE\n";
     }
 
     print CMDLOG "$CMDLINE\n";
@@ -1198,7 +1197,7 @@ sub singletest {
         }
         if(!$short) {
             print " output OK";
-        }        
+        }
     }
 
     if($errorcode == $cmdres) {
@@ -1220,7 +1219,7 @@ sub singletest {
 
     # the test succeeded, remove all log files
     if(!$keepoutfiles) {
-        cleardir($LOGDIR);        
+        cleardir($LOGDIR);
     }
 
     unlink($FTPDCMD); # remove the instructions for this test
@@ -1293,7 +1292,7 @@ sub singletest {
             print " valgrind OK";
         }
 
-        
+
     }
     if($short) {
         print "OK";
@@ -1337,7 +1336,7 @@ sub startservers {
                 $pid = runhttpserver($verbose);
                 if($pid <= 0) {
                     return 2; # error starting
-                } 
+                }
                 printf ("* pid http => %-5d\n", $pid) if($verbose);
                 $run{'http'}=$pid;
             }
@@ -1450,12 +1449,12 @@ do {
         $verbose=1;
     }
     elsif ($ARGV[0] eq "-c") {
-        # use this path to curl instead of default        
+        # use this path to curl instead of default
         $CURL=$ARGV[1];
         shift @ARGV;
     }
     elsif ($ARGV[0] eq "-d") {
-        # have the servers display protocol output 
+        # have the servers display protocol output
         $debugprotocol=1;
     }
     elsif ($ARGV[0] eq "-g") {
@@ -1575,7 +1574,7 @@ if ( $TESTCASES eq "all") {
 
     $TESTCASES=""; # start with no test cases
 
-    # cut off everything but the digits 
+    # cut off everything but the digits
     for(@cmds) {
         $_ =~ s/[a-z\/\.]*//g;
     }
