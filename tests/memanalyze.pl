@@ -6,6 +6,10 @@
 # MEM mprintf.c:1103 realloc(e5718, 64) = e6118
 # MEM sendf.c:232 free(f6520)
 
+my $mallocs=0;
+my $reallocs=0;
+my $strdups=0;
+
 while(1) {
     if($ARGV[0] eq "-v") {
         $verbose=1;
@@ -287,7 +291,8 @@ if($verbose) {
     print "Mallocs: $mallocs\n",
     "Reallocs: $reallocs\n",
     "Strdups:  $strdups\n",
-    "Frees: $frees\n";
+    "Frees: $frees\n",
+    "Allocations: ".($mallocs + $reallocs + $strdups)."\n";
 
     print "Maximum allocated: $maxmem\n";
 }
