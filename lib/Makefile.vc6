@@ -223,7 +223,7 @@ X_OBJS= \
 	$(DIROBJ)\hostthre.obj \
 	$(DIROBJ)\hostip4.obj \
 	$(DIROBJ)\hostip6.obj \
-	$(DIROBJ)\inet_ntop.c \
+	$(DIROBJ)\inet_ntop.obj \
 	$(DIROBJ)\if2ip.obj \
 	$(DIROBJ)\mprintf.obj \
 	$(DIROBJ)\netrc.obj \
