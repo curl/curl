@@ -115,6 +115,8 @@ char *spitout(FILE *stream, char *main, char *sub, int *size)
         strcpy(csub, ptr);
         state = STATE_INSUB;
         break;
+      default:
+        break;
       }
     }
     if(display) {
