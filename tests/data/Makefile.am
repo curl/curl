@@ -67,5 +67,5 @@ command34.txt prot34.txt reply340001.txt name34.txt reply34.txt \
 command35.txt  name35.txt     prot35.txt     reply35.txt \
 command36.txt  error36.txt  name36.txt  reply36.txt \
 command37.txt  name37.txt  prot37.txt  reply37.txt \
-command38.txt prot38.txt reply380001.txt \
-name38.txt reply38.txt
+command38.txt prot38.txt reply380001.txt name38.txt reply38.txt \
+command39.txt prot39.txt reply390001.txt name39.txt reply39.txt reply390002.txt

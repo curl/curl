@@ -1,0 +1,6 @@
+HTTP/1.1 200 Followed here fine
+Server: test-server/fake
+Content-Range: bytes 20-71/91
+Content-Length: 51
+
+If this is received, the location following worked
