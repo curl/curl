@@ -23,7 +23,7 @@
  * $Id$
  ***************************************************************************/
 
-#include <curl/curl.h>
+#include <curl/curlver.h>
 
 #define CURL_NAME "curl"
 #define CURL_VERSION LIBCURL_VERSION
