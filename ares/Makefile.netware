@@ -88,7 +88,7 @@ LD	= nlmconv
 LDFLAGS	= -T
 AR	= ar
 ARFLAGS	= -cq
-CFLAGS	+= -fno-builtin -fpack-struct -fpcc-struct-return
+CFLAGS	+= -fno-builtin -fpack-struct -fpcc-struct-return -fno-strict-aliasing
 CFLAGS	+= -Wall -Wno-format # -pedantic
 ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
