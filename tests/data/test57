@@ -1,0 +1,36 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+Content-Type: text/html; charset=ISO-8859-4   
+
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+HTTP content-type with spaces in
+ </name>
+ <command>
+-w '%{content_type}\n' %HOSTIP:%HOSTPORT/57 -o log/out57
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<file name="log/out57">
+text/html; charset=ISO-8859-4
+</file>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /57 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
