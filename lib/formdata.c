@@ -517,7 +517,7 @@ static const char * ContentTypeForFilename (const char *filename,
     {".jpg",  "image/jpeg"},
     {".jpeg", "image/jpeg"},
     {".txt",  "text/plain"},
-    {".html", "text/plain"}
+    {".html", "text/html"}
   };
   
   if(prevtype)
