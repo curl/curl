@@ -1344,8 +1344,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
     case 'G': /* HTTP GET */
       config->use_httpget = TRUE;
-      if(SetHTTPrequest(HTTPREQ_GET, &config->httpreq))
-        return PARAM_BAD_USE;
       break;
 
     case 'h': /* h for help */
