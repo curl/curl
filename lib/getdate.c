@@ -197,38 +197,40 @@ typedef enum _MERIDIAN {
     MERam, MERpm, MER24
 } MERIDIAN;
 
+/* parse results and input string */
+typedef struct _CONTEXT {
+    const char	*yyInput;
+    int		yyDayOrdinal;
+    int		yyDayNumber;
+    int		yyHaveDate;
+    int		yyHaveDay;
+    int		yyHaveRel;
+    int		yyHaveTime;
+    int		yyHaveZone;
+    int		yyTimezone;
+    int		yyDay;
+    int		yyHour;
+    int		yyMinutes;
+    int		yyMonth;
+    int		yySeconds;
+    int		yyYear;
+    MERIDIAN	yyMeridian;
+    int		yyRelDay;
+    int		yyRelHour;
+    int		yyRelMinutes;
+    int		yyRelMonth;
+    int		yyRelSeconds;
+    int		yyRelYear;
+} CONTEXT;
 
-/*
-**  Global variables.  We could get rid of most of these by using a good
-**  union as the yacc stack.  (This routine was originally written before
-**  yacc had the %union construct.)  Maybe someday; right now we only use
-**  the %union very rarely.
+/* enable use of extra argument to yyparse and yylex which can be used to pass
+**  in a user defined value (CONTEXT struct in our case)
 */
-static const char	*yyInput;
-static int	yyDayOrdinal;
-static int	yyDayNumber;
-static int	yyHaveDate;
-static int	yyHaveDay;
-static int	yyHaveRel;
-static int	yyHaveTime;
-static int	yyHaveZone;
-static int	yyTimezone;
-static int	yyDay;
-static int	yyHour;
-static int	yyMinutes;
-static int	yyMonth;
-static int	yySeconds;
-static int	yyYear;
-static MERIDIAN	yyMeridian;
-static int	yyRelDay;
-static int	yyRelHour;
-static int	yyRelMinutes;
-static int	yyRelMonth;
-static int	yyRelSeconds;
-static int	yyRelYear;
+#define YYPARSE_PARAM cookie
+#define YYLEX_PARAM cookie
+#define context ((CONTEXT *) cookie)
 
-
-#line 211 "getdate.y"
+#line 218 "getdate.y"
 typedef union {
     int			Number;
     enum _MERIDIAN	Meridian;
@@ -311,11 +313,11 @@ static const short yyrhs[] = {    -1,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-   227,   228,   231,   234,   237,   240,   243,   246,   249,   255,
-   261,   270,   276,   288,   291,   294,   300,   304,   308,   314,
-   318,   336,   342,   348,   352,   357,   361,   368,   376,   379,
-   382,   385,   388,   391,   394,   397,   400,   403,   406,   409,
-   412,   415,   418,   421,   424,   427,   430,   435,   468,   472
+   234,   235,   238,   241,   244,   247,   250,   253,   256,   262,
+   268,   277,   283,   295,   298,   301,   307,   311,   315,   321,
+   325,   343,   349,   355,   359,   364,   368,   375,   383,   386,
+   389,   392,   395,   398,   401,   404,   407,   410,   413,   416,
+   419,   422,   425,   428,   431,   434,   437,   442,   476,   480
 };
 #endif
 
@@ -395,6 +397,8 @@ static const short yycheck[] = {     0,
     11,    15,    13,    14,    16,    19,    17,    16,    21,     0,
     56
 };
+#define YYPURE 1
+
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
 #line 3 "/usr/local/share/bison.simple"
 /* This file comes from bison-1.28.  */
@@ -939,135 +943,135 @@ yyreduce:
   switch (yyn) {
 
 case 3:
-#line 231 "getdate.y"
+#line 238 "getdate.y"
 {
-	    yyHaveTime++;
+	    context->yyHaveTime++;
 	;
     break;}
 case 4:
-#line 234 "getdate.y"
+#line 241 "getdate.y"
 {
-	    yyHaveZone++;
+	    context->yyHaveZone++;
 	;
     break;}
 case 5:
-#line 237 "getdate.y"
+#line 244 "getdate.y"
 {
-	    yyHaveDate++;
+	    context->yyHaveDate++;
 	;
     break;}
 case 6:
-#line 240 "getdate.y"
+#line 247 "getdate.y"
 {
-	    yyHaveDay++;
+	    context->yyHaveDay++;
 	;
     break;}
 case 7:
-#line 243 "getdate.y"
+#line 250 "getdate.y"
 {
-	    yyHaveRel++;
+	    context->yyHaveRel++;
 	;
     break;}
 case 9:
-#line 249 "getdate.y"
+#line 256 "getdate.y"
 {
-	    yyHour = yyvsp[-1].Number;
-	    yyMinutes = 0;
-	    yySeconds = 0;
-	    yyMeridian = yyvsp[0].Meridian;
+	    context->yyHour = yyvsp[-1].Number;
+	    context->yyMinutes = 0;
+	    context->yySeconds = 0;
+	    context->yyMeridian = yyvsp[0].Meridian;
 	;
     break;}
 case 10:
-#line 255 "getdate.y"
+#line 262 "getdate.y"
 {
-	    yyHour = yyvsp[-3].Number;
-	    yyMinutes = yyvsp[-1].Number;
-	    yySeconds = 0;
-	    yyMeridian = yyvsp[0].Meridian;
+	    context->yyHour = yyvsp[-3].Number;
+	    context->yyMinutes = yyvsp[-1].Number;
+	    context->yySeconds = 0;
+	    context->yyMeridian = yyvsp[0].Meridian;
 	;
     break;}
 case 11:
-#line 261 "getdate.y"
+#line 268 "getdate.y"
 {
-	    yyHour = yyvsp[-3].Number;
-	    yyMinutes = yyvsp[-1].Number;
-	    yyMeridian = MER24;
-	    yyHaveZone++;
-	    yyTimezone = (yyvsp[0].Number < 0
-			  ? -yyvsp[0].Number % 100 + (-yyvsp[0].Number / 100) * 60
-			  : - (yyvsp[0].Number % 100 + (yyvsp[0].Number / 100) * 60));
+	    context->yyHour = yyvsp[-3].Number;
+	    context->yyMinutes = yyvsp[-1].Number;
+	    context->yyMeridian = MER24;
+	    context->yyHaveZone++;
+	    context->yyTimezone = (yyvsp[0].Number < 0
+				   ? -yyvsp[0].Number % 100 + (-yyvsp[0].Number / 100) * 60
+				   : - (yyvsp[0].Number % 100 + (yyvsp[0].Number / 100) * 60));
 	;
     break;}
 case 12:
-#line 270 "getdate.y"
+#line 277 "getdate.y"
 {
-	    yyHour = yyvsp[-5].Number;
-	    yyMinutes = yyvsp[-3].Number;
-	    yySeconds = yyvsp[-1].Number;
-	    yyMeridian = yyvsp[0].Meridian;
+	    context->yyHour = yyvsp[-5].Number;
+	    context->yyMinutes = yyvsp[-3].Number;
+	    context->yySeconds = yyvsp[-1].Number;
+	    context->yyMeridian = yyvsp[0].Meridian;
 	;
     break;}
 case 13:
-#line 276 "getdate.y"
+#line 283 "getdate.y"
 {
-	    yyHour = yyvsp[-5].Number;
-	    yyMinutes = yyvsp[-3].Number;
-	    yySeconds = yyvsp[-1].Number;
-	    yyMeridian = MER24;
-	    yyHaveZone++;
-	    yyTimezone = (yyvsp[0].Number < 0
-			  ? -yyvsp[0].Number % 100 + (-yyvsp[0].Number / 100) * 60
-			  : - (yyvsp[0].Number % 100 + (yyvsp[0].Number / 100) * 60));
+	    context->yyHour = yyvsp[-5].Number;
+	    context->yyMinutes = yyvsp[-3].Number;
+	    context->yySeconds = yyvsp[-1].Number;
+	    context->yyMeridian = MER24;
+	    context->yyHaveZone++;
+	    context->yyTimezone = (yyvsp[0].Number < 0
+				   ? -yyvsp[0].Number % 100 + (-yyvsp[0].Number / 100) * 60
+				   : - (yyvsp[0].Number % 100 + (yyvsp[0].Number / 100) * 60));
 	;
     break;}
 case 14:
-#line 288 "getdate.y"
+#line 295 "getdate.y"
 {
-	    yyTimezone = yyvsp[0].Number;
+	    context->yyTimezone = yyvsp[0].Number;
 	;
     break;}
 case 15:
-#line 291 "getdate.y"
+#line 298 "getdate.y"
 {
-	    yyTimezone = yyvsp[0].Number - 60;
+	    context->yyTimezone = yyvsp[0].Number - 60;
 	;
     break;}
 case 16:
-#line 295 "getdate.y"
+#line 302 "getdate.y"
 {
-	    yyTimezone = yyvsp[-1].Number - 60;
+	    context->yyTimezone = yyvsp[-1].Number - 60;
 	;
     break;}
 case 17:
-#line 300 "getdate.y"
+#line 307 "getdate.y"
 {
-	    yyDayOrdinal = 1;
-	    yyDayNumber = yyvsp[0].Number;
+	    context->yyDayOrdinal = 1;
+	    context->yyDayNumber = yyvsp[0].Number;
 	;
     break;}
 case 18:
-#line 304 "getdate.y"
+#line 311 "getdate.y"
 {
-	    yyDayOrdinal = 1;
-	    yyDayNumber = yyvsp[-1].Number;
+	    context->yyDayOrdinal = 1;
+	    context->yyDayNumber = yyvsp[-1].Number;
 	;
     break;}
 case 19:
-#line 308 "getdate.y"
+#line 315 "getdate.y"
 {
-	    yyDayOrdinal = yyvsp[-1].Number;
-	    yyDayNumber = yyvsp[0].Number;
+	    context->yyDayOrdinal = yyvsp[-1].Number;
+	    context->yyDayNumber = yyvsp[0].Number;
 	;
     break;}
 case 20:
-#line 314 "getdate.y"
+#line 321 "getdate.y"
 {
-	    yyMonth = yyvsp[-2].Number;
-	    yyDay = yyvsp[0].Number;
+	    context->yyMonth = yyvsp[-2].Number;
+	    context->yyDay = yyvsp[0].Number;
 	;
     break;}
 case 21:
-#line 318 "getdate.y"
+#line 325 "getdate.y"
 {
 	  /* Interpret as YYYY/MM/DD if $1 >= 1000, otherwise as MM/DD/YY.
 	     The goal in recognizing YYYY/MM/DD is solely to support legacy
@@ -1075,226 +1079,227 @@ case 21:
 	     you want portability, use the ISO 8601 format.  */
 	  if (yyvsp[-4].Number >= 1000)
 	    {
-	      yyYear = yyvsp[-4].Number;
-	      yyMonth = yyvsp[-2].Number;
-	      yyDay = yyvsp[0].Number;
+	      context->yyYear = yyvsp[-4].Number;
+	      context->yyMonth = yyvsp[-2].Number;
+	      context->yyDay = yyvsp[0].Number;
 	    }
 	  else
 	    {
-	      yyMonth = yyvsp[-4].Number;
-	      yyDay = yyvsp[-2].Number;
-	      yyYear = yyvsp[0].Number;
+	      context->yyMonth = yyvsp[-4].Number;
+	      context->yyDay = yyvsp[-2].Number;
+	      context->yyYear = yyvsp[0].Number;
 	    }
 	;
     break;}
 case 22:
-#line 336 "getdate.y"
+#line 343 "getdate.y"
 {
 	    /* ISO 8601 format.  yyyy-mm-dd.  */
-	    yyYear = yyvsp[-2].Number;
-	    yyMonth = -yyvsp[-1].Number;
-	    yyDay = -yyvsp[0].Number;
+	    context->yyYear = yyvsp[-2].Number;
+	    context->yyMonth = -yyvsp[-1].Number;
+	    context->yyDay = -yyvsp[0].Number;
 	;
     break;}
 case 23:
-#line 342 "getdate.y"
+#line 349 "getdate.y"
 {
 	    /* e.g. 17-JUN-1992.  */
-	    yyDay = yyvsp[-2].Number;
-	    yyMonth = yyvsp[-1].Number;
-	    yyYear = -yyvsp[0].Number;
+	    context->yyDay = yyvsp[-2].Number;
+	    context->yyMonth = yyvsp[-1].Number;
+	    context->yyYear = -yyvsp[0].Number;
 	;
     break;}
 case 24:
-#line 348 "getdate.y"
+#line 355 "getdate.y"
 {
-	    yyMonth = yyvsp[-1].Number;
-	    yyDay = yyvsp[0].Number;
+	    context->yyMonth = yyvsp[-1].Number;
+	    context->yyDay = yyvsp[0].Number;
 	;
     break;}
 case 25:
-#line 352 "getdate.y"
+#line 359 "getdate.y"
 {
-	    yyMonth = yyvsp[-3].Number;
-	    yyDay = yyvsp[-2].Number;
-	    yyYear = yyvsp[0].Number;
+	    context->yyMonth = yyvsp[-3].Number;
+	    context->yyDay = yyvsp[-2].Number;
+	    context->yyYear = yyvsp[0].Number;
 	;
     break;}
 case 26:
-#line 357 "getdate.y"
+#line 364 "getdate.y"
 {
-	    yyMonth = yyvsp[0].Number;
-	    yyDay = yyvsp[-1].Number;
+	    context->yyMonth = yyvsp[0].Number;
+	    context->yyDay = yyvsp[-1].Number;
 	;
     break;}
 case 27:
-#line 361 "getdate.y"
+#line 368 "getdate.y"
 {
-	    yyMonth = yyvsp[-1].Number;
-	    yyDay = yyvsp[-2].Number;
-	    yyYear = yyvsp[0].Number;
+	    context->yyMonth = yyvsp[-1].Number;
+	    context->yyDay = yyvsp[-2].Number;
+	    context->yyYear = yyvsp[0].Number;
 	;
     break;}
 case 28:
-#line 368 "getdate.y"
+#line 375 "getdate.y"
 {
-	    yyRelSeconds = -yyRelSeconds;
-	    yyRelMinutes = -yyRelMinutes;
-	    yyRelHour = -yyRelHour;
-	    yyRelDay = -yyRelDay;
-	    yyRelMonth = -yyRelMonth;
-	    yyRelYear = -yyRelYear;
+	    context->yyRelSeconds = -context->yyRelSeconds;
+	    context->yyRelMinutes = -context->yyRelMinutes;
+	    context->yyRelHour = -context->yyRelHour;
+	    context->yyRelDay = -context->yyRelDay;
+	    context->yyRelMonth = -context->yyRelMonth;
+	    context->yyRelYear = -context->yyRelYear;
 	;
     break;}
 case 30:
-#line 379 "getdate.y"
+#line 386 "getdate.y"
 {
-	    yyRelYear += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelYear += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 31:
-#line 382 "getdate.y"
+#line 389 "getdate.y"
 {
-	    yyRelYear += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelYear += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 32:
-#line 385 "getdate.y"
+#line 392 "getdate.y"
 {
-	    yyRelYear += yyvsp[0].Number;
+	    context->yyRelYear += yyvsp[0].Number;
 	;
     break;}
 case 33:
-#line 388 "getdate.y"
+#line 395 "getdate.y"
 {
-	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 34:
-#line 391 "getdate.y"
+#line 398 "getdate.y"
 {
-	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 35:
-#line 394 "getdate.y"
+#line 401 "getdate.y"
 {
-	    yyRelMonth += yyvsp[0].Number;
+	    context->yyRelMonth += yyvsp[0].Number;
 	;
     break;}
 case 36:
-#line 397 "getdate.y"
+#line 404 "getdate.y"
 {
-	    yyRelDay += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelDay += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 37:
-#line 400 "getdate.y"
+#line 407 "getdate.y"
 {
-	    yyRelDay += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelDay += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 38:
-#line 403 "getdate.y"
+#line 410 "getdate.y"
 {
-	    yyRelDay += yyvsp[0].Number;
+	    context->yyRelDay += yyvsp[0].Number;
 	;
     break;}
 case 39:
-#line 406 "getdate.y"
+#line 413 "getdate.y"
 {
-	    yyRelHour += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelHour += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 40:
-#line 409 "getdate.y"
+#line 416 "getdate.y"
 {
-	    yyRelHour += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelHour += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 41:
-#line 412 "getdate.y"
+#line 419 "getdate.y"
 {
-	    yyRelHour += yyvsp[0].Number;
+	    context->yyRelHour += yyvsp[0].Number;
 	;
     break;}
 case 42:
-#line 415 "getdate.y"
+#line 422 "getdate.y"
 {
-	    yyRelMinutes += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelMinutes += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 43:
-#line 418 "getdate.y"
+#line 425 "getdate.y"
 {
-	    yyRelMinutes += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelMinutes += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 44:
-#line 421 "getdate.y"
+#line 428 "getdate.y"
 {
-	    yyRelMinutes += yyvsp[0].Number;
+	    context->yyRelMinutes += yyvsp[0].Number;
 	;
     break;}
 case 45:
-#line 424 "getdate.y"
+#line 431 "getdate.y"
 {
-	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 46:
-#line 427 "getdate.y"
+#line 434 "getdate.y"
 {
-	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
+	    context->yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 47:
-#line 430 "getdate.y"
+#line 437 "getdate.y"
 {
-	    yyRelSeconds += yyvsp[0].Number;
+	    context->yyRelSeconds += yyvsp[0].Number;
 	;
     break;}
 case 48:
-#line 436 "getdate.y"
+#line 443 "getdate.y"
 {
-	    if (yyHaveTime && yyHaveDate && !yyHaveRel)
-	      yyYear = yyvsp[0].Number;
+	    if (context->yyHaveTime && context->yyHaveDate &&
+		!context->yyHaveRel)
+	      context->yyYear = yyvsp[0].Number;
 	    else
 	      {
 		if (yyvsp[0].Number>10000)
 		  {
-		    yyHaveDate++;
-		    yyDay= (yyvsp[0].Number)%100;
-		    yyMonth= (yyvsp[0].Number/100)%100;
-		    yyYear = yyvsp[0].Number/10000;
+		    context->yyHaveDate++;
+		    context->yyDay= (yyvsp[0].Number)%100;
+		    context->yyMonth= (yyvsp[0].Number/100)%100;
+		    context->yyYear = yyvsp[0].Number/10000;
 		  }
 		else
 		  {
-		    yyHaveTime++;
+		    context->yyHaveTime++;
 		    if (yyvsp[0].Number < 100)
 		      {
-			yyHour = yyvsp[0].Number;
-			yyMinutes = 0;
+			context->yyHour = yyvsp[0].Number;
+			context->yyMinutes = 0;
 		      }
 		    else
 		      {
-		    	yyHour = yyvsp[0].Number / 100;
-		    	yyMinutes = yyvsp[0].Number % 100;
+		    	context->yyHour = yyvsp[0].Number / 100;
+		    	context->yyMinutes = yyvsp[0].Number % 100;
 		      }
-		    yySeconds = 0;
-		    yyMeridian = MER24;
+		    context->yySeconds = 0;
+		    context->yyMeridian = MER24;
 		  }
 	      }
 	  ;
     break;}
 case 49:
-#line 469 "getdate.y"
+#line 477 "getdate.y"
 {
 	    yyval.Meridian = MER24;
 	  ;
     break;}
 case 50:
-#line 473 "getdate.y"
+#line 481 "getdate.y"
 {
 	    yyval.Meridian = yyvsp[0].Meridian;
 	  ;
@@ -1521,7 +1526,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 478 "getdate.y"
+#line 486 "getdate.y"
 
 
 /* Include this file down here because bison inserts code above which
@@ -1777,7 +1782,8 @@ ToYear (Year)
 }
 
 static int
-LookupWord (buff)
+LookupWord (yylval, buff)
+     YYSTYPE *yylval;
      char *buff;
 {
   register char *p;
@@ -1793,12 +1799,12 @@ LookupWord (buff)
 
   if (strcmp (buff, "am") == 0 || strcmp (buff, "a.m.") == 0)
     {
-      yylval.Meridian = MERam;
+      yylval->Meridian = MERam;
       return tMERIDIAN;
     }
   if (strcmp (buff, "pm") == 0 || strcmp (buff, "p.m.") == 0)
     {
-      yylval.Meridian = MERpm;
+      yylval->Meridian = MERpm;
       return tMERIDIAN;
     }
 
@@ -1819,13 +1825,13 @@ LookupWord (buff)
 	{
 	  if (strncmp (buff, tp->name, 3) == 0)
 	    {
-	      yylval.Number = tp->value;
+	      yylval->Number = tp->value;
 	      return tp->type;
 	    }
 	}
       else if (strcmp (buff, tp->name) == 0)
 	{
-	  yylval.Number = tp->value;
+	  yylval->Number = tp->value;
 	  return tp->type;
 	}
     }
@@ -1833,7 +1839,7 @@ LookupWord (buff)
   for (tp = TimezoneTable; tp->name; tp++)
     if (strcmp (buff, tp->name) == 0)
       {
-	yylval.Number = tp->value;
+	yylval->Number = tp->value;
 	return tp->type;
       }
 
@@ -1843,7 +1849,7 @@ LookupWord (buff)
   for (tp = UnitsTable; tp->name; tp++)
     if (strcmp (buff, tp->name) == 0)
       {
-	yylval.Number = tp->value;
+	yylval->Number = tp->value;
 	return tp->type;
       }
 
@@ -1855,7 +1861,7 @@ LookupWord (buff)
       for (tp = UnitsTable; tp->name; tp++)
 	if (strcmp (buff, tp->name) == 0)
 	  {
-	    yylval.Number = tp->value;
+	    yylval->Number = tp->value;
 	    return tp->type;
 	  }
       buff[i] = 's';		/* Put back for "this" in OtherTable. */
@@ -1864,7 +1870,7 @@ LookupWord (buff)
   for (tp = OtherTable; tp->name; tp++)
     if (strcmp (buff, tp->name) == 0)
       {
-	yylval.Number = tp->value;
+	yylval->Number = tp->value;
 	return tp->type;
       }
 
@@ -1874,7 +1880,7 @@ LookupWord (buff)
       for (tp = MilitaryTable; tp->name; tp++)
 	if (strcmp (buff, tp->name) == 0)
 	  {
-	    yylval.Number = tp->value;
+	    yylval->Number = tp->value;
 	    return tp->type;
 	  }
     }
@@ -1890,7 +1896,7 @@ LookupWord (buff)
     for (tp = TimezoneTable; tp->name; tp++)
       if (strcmp (buff, tp->name) == 0)
 	{
-	  yylval.Number = tp->value;
+	  yylval->Number = tp->value;
 	  return tp->type;
 	}
 
@@ -1898,7 +1904,9 @@ LookupWord (buff)
 }
 
 static int
-yylex ()
+yylex (yylval, cookie)
+     YYSTYPE *yylval;
+     void *cookie;
 {
   register unsigned char c;
   register char *p;
@@ -1908,42 +1916,42 @@ yylex ()
 
   for (;;)
     {
-      while (ISSPACE ((unsigned char) *yyInput))
-	yyInput++;
+      while (ISSPACE ((unsigned char) *context->yyInput))
+	context->yyInput++;
 
-      if (ISDIGIT (c = *yyInput) || c == '-' || c == '+')
+      if (ISDIGIT (c = *context->yyInput) || c == '-' || c == '+')
 	{
 	  if (c == '-' || c == '+')
 	    {
 	      sign = c == '-' ? -1 : 1;
-	      if (!ISDIGIT (*++yyInput))
+	      if (!ISDIGIT (*++context->yyInput))
 		/* skip the '-' sign */
 		continue;
 	    }
 	  else
 	    sign = 0;
-	  for (yylval.Number = 0; ISDIGIT (c = *yyInput++);)
-	    yylval.Number = 10 * yylval.Number + c - '0';
-	  yyInput--;
+	  for (yylval->Number = 0; ISDIGIT (c = *context->yyInput++);)
+	    yylval->Number = 10 * yylval->Number + c - '0';
+	  context->yyInput--;
 	  if (sign < 0)
-	    yylval.Number = -yylval.Number;
+	    yylval->Number = -yylval->Number;
 	  return sign ? tSNUMBER : tUNUMBER;
 	}
       if (ISALPHA (c))
 	{
-	  for (p = buff; (c = *yyInput++, ISALPHA (c)) || c == '.';)
+	  for (p = buff; (c = *context->yyInput++, ISALPHA (c)) || c == '.';)
 	    if (p < &buff[sizeof buff - 1])
 	      *p++ = c;
 	  *p = '\0';
-	  yyInput--;
-	  return LookupWord (buff);
+	  context->yyInput--;
+	  return LookupWord (yylval, buff);
 	}
       if (c != '(')
-	return *yyInput++;
+	return *context->yyInput++;
       Count = 0;
       do
 	{
-	  c = *yyInput++;
+	  c = *context->yyInput++;
 	  if (c == '\0')
 	    return c;
 	  if (c == '(')
@@ -1983,10 +1991,11 @@ curl_getdate (const char *p, const time_t *now)
 {
   struct tm tm, tm0, *tmp;
   time_t Start;
+  CONTEXT cookie;
 #ifdef HAVE_LOCALTIME_R
   struct tm keeptime;
 #endif
-  yyInput = p;
+  cookie.yyInput = p;
   Start = now ? *now : time ((time_t *) NULL);
 #ifdef HAVE_LOCALTIME_R
   tmp = (struct tm *)localtime_r(&Start, &keeptime);
@@ -1995,52 +2004,55 @@ curl_getdate (const char *p, const time_t *now)
 #endif
   if (!tmp)
     return -1;
-  yyYear = tmp->tm_year + TM_YEAR_ORIGIN;
-  yyMonth = tmp->tm_mon + 1;
-  yyDay = tmp->tm_mday;
-  yyHour = tmp->tm_hour;
-  yyMinutes = tmp->tm_min;
-  yySeconds = tmp->tm_sec;
+  cookie.yyYear = tmp->tm_year + TM_YEAR_ORIGIN;
+  cookie.yyMonth = tmp->tm_mon + 1;
+  cookie.yyDay = tmp->tm_mday;
+  cookie.yyHour = tmp->tm_hour;
+  cookie.yyMinutes = tmp->tm_min;
+  cookie.yySeconds = tmp->tm_sec;
   tm.tm_isdst = tmp->tm_isdst;
-  yyMeridian = MER24;
-  yyRelSeconds = 0;
-  yyRelMinutes = 0;
-  yyRelHour = 0;
-  yyRelDay = 0;
-  yyRelMonth = 0;
-  yyRelYear = 0;
-  yyHaveDate = 0;
-  yyHaveDay = 0;
-  yyHaveRel = 0;
-  yyHaveTime = 0;
-  yyHaveZone = 0;
+  cookie.yyMeridian = MER24;
+  cookie.yyRelSeconds = 0;
+  cookie.yyRelMinutes = 0;
+  cookie.yyRelHour = 0;
+  cookie.yyRelDay = 0;
+  cookie.yyRelMonth = 0;
+  cookie.yyRelYear = 0;
+  cookie.yyHaveDate = 0;
+  cookie.yyHaveDay = 0;
+  cookie.yyHaveRel = 0;
+  cookie.yyHaveTime = 0;
+  cookie.yyHaveZone = 0;
 
-  if (yyparse ()
-      || yyHaveTime > 1 || yyHaveZone > 1 || yyHaveDate > 1 || yyHaveDay > 1)
+  if (yyparse (&cookie)
+      || cookie.yyHaveTime > 1 || cookie.yyHaveZone > 1 ||
+      cookie.yyHaveDate > 1 || cookie.yyHaveDay > 1)
     return -1;
 
-  tm.tm_year = ToYear (yyYear) - TM_YEAR_ORIGIN + yyRelYear;
-  tm.tm_mon = yyMonth - 1 + yyRelMonth;
-  tm.tm_mday = yyDay + yyRelDay;
-  if (yyHaveTime || (yyHaveRel && !yyHaveDate && !yyHaveDay))
+  tm.tm_year = ToYear (cookie.yyYear) - TM_YEAR_ORIGIN + cookie.yyRelYear;
+  tm.tm_mon = cookie.yyMonth - 1 + cookie.yyRelMonth;
+  tm.tm_mday = cookie.yyDay + cookie.yyRelDay;
+  if (cookie.yyHaveTime ||
+      (cookie.yyHaveRel && !cookie.yyHaveDate && !cookie.yyHaveDay))
     {
-      tm.tm_hour = ToHour (yyHour, yyMeridian);
+      tm.tm_hour = ToHour (cookie.yyHour, cookie.yyMeridian);
       if (tm.tm_hour < 0)
 	return -1;
-      tm.tm_min = yyMinutes;
-      tm.tm_sec = yySeconds;
+      tm.tm_min = cookie.yyMinutes;
+      tm.tm_sec = cookie.yySeconds;
     }
   else
     {
       tm.tm_hour = tm.tm_min = tm.tm_sec = 0;
     }
-  tm.tm_hour += yyRelHour;
-  tm.tm_min += yyRelMinutes;
-  tm.tm_sec += yyRelSeconds;
+  tm.tm_hour += cookie.yyRelHour;
+  tm.tm_min += cookie.yyRelMinutes;
+  tm.tm_sec += cookie.yyRelSeconds;
 
   /* Let mktime deduce tm_isdst if we have an absolute timestamp,
      or if the relative timestamp mentions days, months, or years.  */
-  if (yyHaveDate | yyHaveDay | yyHaveTime | yyRelDay | yyRelMonth | yyRelYear)
+  if (cookie.yyHaveDate | cookie.yyHaveDay | cookie.yyHaveTime |
+      cookie.yyRelDay | cookie.yyRelMonth | cookie.yyRelYear)
     tm.tm_isdst = -1;
 
   tm0 = tm;
@@ -2058,18 +2070,18 @@ curl_getdate (const char *p, const time_t *now)
          we apply mktime to 1970-01-02 08:00:00 instead and adjust the time
          zone by 24 hours to compensate.  This algorithm assumes that
          there is no DST transition within a day of the time_t boundaries.  */
-      if (yyHaveZone)
+      if (cookie.yyHaveZone)
 	{
 	  tm = tm0;
 	  if (tm.tm_year <= EPOCH - TM_YEAR_ORIGIN)
 	    {
 	      tm.tm_mday++;
-	      yyTimezone -= 24 * 60;
+	      cookie.yyTimezone -= 24 * 60;
 	    }
 	  else
 	    {
 	      tm.tm_mday--;
-	      yyTimezone += 24 * 60;
+	      cookie.yyTimezone += 24 * 60;
 	    }
 	  Start = mktime (&tm);
 	}
@@ -2078,22 +2090,22 @@ curl_getdate (const char *p, const time_t *now)
 	return Start;
     }
 
-  if (yyHaveDay && !yyHaveDate)
+  if (cookie.yyHaveDay && !cookie.yyHaveDate)
     {
-      tm.tm_mday += ((yyDayNumber - tm.tm_wday + 7) % 7
-		     + 7 * (yyDayOrdinal - (0 < yyDayOrdinal)));
+      tm.tm_mday += ((cookie.yyDayNumber - tm.tm_wday + 7) % 7
+		     + 7 * (cookie.yyDayOrdinal - (0 < cookie.yyDayOrdinal)));
       Start = mktime (&tm);
       if (Start == (time_t) -1)
 	return Start;
     }
 
-  if (yyHaveZone)
+  if (cookie.yyHaveZone)
     {
       long delta;
       struct tm *gmt = gmtime (&Start);
       if (!gmt)
 	return -1;
-      delta = yyTimezone * 60L + difftm (&tm, gmt);
+      delta = cookie.yyTimezone * 60L + difftm (&tm, gmt);
       if ((Start + delta < Start) != (delta < 0))
 	return -1;		/* time_t overflow */
       Start += delta;
