@@ -202,7 +202,7 @@
  *This is to eliminate the warnings when compiled *
  * using MS VC++ compiler	  			  *
  **************************************************/
-#ifdef _MSC_VER
+#if 0
 
 #pragma warning (disable: 4244)	/* truncation from 'const int' to 'char' */
 #pragma warning (disable: 4127)	/* conditional expression is constant */

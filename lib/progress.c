@@ -344,8 +344,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   /* If we have a total estimate, we can display that and the expected
      time left */
   if(total_estimate) {
-    time2str(time_left, total_estimate-(int) data->progress.timespent); 
-    time2str(time_total, total_estimate);
+    time2str(time_left, (int)(total_estimate - data->progress.timespent)); 
+    time2str(time_total, (int)total_estimate);
   }
   else {
     /* otherwise we blank those times */
@@ -353,7 +353,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     strcpy(time_total, "--:--:--");
   }
   /* The time spent so far is always known */
-  time2str(time_current, data->progress.timespent);
+  time2str(time_current, (int)data->progress.timespent);
 
   /* Get the total amount of data expected to get transfered */
   total_expected_transfer = 

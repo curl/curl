@@ -602,7 +602,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
            (struct in_addr *)remotehost->h_addr_list[aliasindex],
            sizeof(struct in_addr));
     serv_addr.sin_family = remotehost->h_addrtype;
-    serv_addr.sin_port = htons(port);
+    serv_addr.sin_port = htons((unsigned short)port);
   
     rc = connect(sockfd, (struct sockaddr *)&serv_addr,
                  sizeof(serv_addr));

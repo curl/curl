@@ -2011,32 +2011,32 @@ int myprogress (void *clientp,
   char line[256];
   char outline[256];
   char format[40];
-  float frac;
-  float percent;
+  double frac;
+  double percent;
   int barwidth;
   int num;
   int i;
 
   struct ProgressData *bar = (struct ProgressData *)clientp;
-  size_t total = dltotal + ultotal;
+  double total = dltotal + ultotal;
 
   bar->point = dlnow + ulnow; /* we've come this far */
 
   bar->calls++; /* simply count invokes */
 
   if(0 == total) {
-    int prevblock = bar->prev / 1024;
-    int thisblock = bar->point / 1024;
+    int prevblock = (int)bar->prev / 1024;
+    int thisblock = (int)bar->point / 1024;
     while ( thisblock > prevblock ) {
       fprintf( bar->out, "#" );
       prevblock++;
     }
   }
   else {
-    frac = (float) bar->point / (float) total;
+    frac = bar->point / total;
     percent = frac * 100.0f;
     barwidth = bar->width - 7;
-    num = (int) (((float)barwidth) * frac);
+    num = (int) (((double)barwidth) * frac);
     i = 0;
     for ( i = 0; i < num; i++ ) {
       line[i] = '#';
