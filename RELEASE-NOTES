@@ -5,12 +5,12 @@ Curl and libcurl 7.12.3
  Available command line options:           100
  Available curl_easy_setopt() options:     123
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        13
+ Amount of public web site mirrors:        14
  Number of known libcurl bindings:         29
 
 This release includes the following changes:
 
- o added CURLINFO_SSL_ENGINES
+ o added CURLINFO_SSL_ENGINES (and "--engine list")
  o new configure options: --disable-cookies, --disable-crypto-auth and
    --disable-verbose
  o persistent ftp request improvements
@@ -61,6 +61,7 @@ Other curl-related news since the previous public release:
  o RCurl 0.5.1: http://www.omegahat.org/RCurl/
  o libcurl.mono 1.0:
    http://forge.novell.com/modules/xfmod/project/?libcurl-mono
+ o new German curl mirror: http://curl.kgt.org/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
