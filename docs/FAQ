@@ -79,10 +79,7 @@ FAQ
 
   1.2 What is libcurl?
 
-  libcurl is the engine inside curl that does all the work. curl is more or
-  less the command line interface that converts the given options into libcurl
-  function invokes. libcurl is a reliable, higly portable multiprotocol file
-  transfer library.
+  libcurl is a reliable, higly portable multiprotocol file transfer library.
 
   Any application is free to use libcurl, even commercial or closed-source
   ones.
