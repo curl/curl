@@ -38,6 +38,23 @@ char *curl_version(void)
 
 #ifdef USE_SSLEAY
 
+#if (SSLEAY_VERSION_NUMBER >= 0x906000)
+  {
+    char sub[2];
+    if(SSLEAY_VERSION_NUMBER&0xff0) {
+      sub[0]=((SSLEAY_VERSION_NUMBER>>4)&0xff) + 'a' -1;
+    }
+    else
+      sub[0]=0;
+
+    sprintf(ptr, " (OpenSSL %lx.%lx.%lx%s)",
+            (SSLEAY_VERSION_NUMBER>>28)&0xf,
+            (SSLEAY_VERSION_NUMBER>>20)&0xff,
+            (SSLEAY_VERSION_NUMBER>>12)&0xff,
+            sub);
+  }
+
+#else
 #if (SSLEAY_VERSION_NUMBER >= 0x900000)
   sprintf(ptr, " (SSL %lx.%lx.%lx)",
           (SSLEAY_VERSION_NUMBER>>28)&0xff,
@@ -57,6 +74,7 @@ char *curl_version(void)
             (SSLEAY_VERSION_NUMBER>>8)&0xf,
             (SSLEAY_VERSION_NUMBER>>4)&0xf, sub);
   }
+#endif
 #endif
   ptr=strchr(ptr, '\0');
 #endif
