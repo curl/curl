@@ -3,7 +3,7 @@
 #define HAVE_STRICMP 1
 
 /* Define cpu-machine-OS */
-#define OS "win32"
+#define OS "i386-pc-win32"
 
 /* Define if you have the <io.h> header file.  */
 #define HAVE_IO_H 1
