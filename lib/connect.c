@@ -663,12 +663,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
 
     if(0 != rc) {
-      if(data->state.used_interface == Curl_if_multi) {
-        /* When running the multi interface, we bail out here */
-        rc = 0;
-        break;
-      }
-
       /* get a new timeout for next attempt */
       after = Curl_tvnow();
       timeout_ms -= Curl_tvdiff(after, before);
