@@ -449,7 +449,8 @@ void rec_wont(struct connectdata *conn, int option)
   }
 }
    
-void set_local_option(struct connectdata *conn, int option, int newstate)
+static void
+set_local_option(struct connectdata *conn, int option, int newstate)
 {
   struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
   if(newstate == CURL_YES)
