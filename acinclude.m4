@@ -669,10 +669,11 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
          dnl   "invalid format string conversion"
          dnl * 279 warns on static conditions in while expressions
          dnl * 981 warns on "operands are evaluated in unspecified order"
+         dnl * 1418 "external definition with no prior declaration"
          dnl * 1419 warns on "external declaration in primary source file"
          dnl   which we know and do on purpose.
 
-         WARN="-wd279,269,1419,981"
+         WARN="-wd279,269,981,1418,1419
 
          if test "$gccnum" -gt "600"; then
             dnl icc 6.0 and older doesn't have the -Wall flag
