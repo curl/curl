@@ -218,11 +218,13 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
   }
 #endif
 
+#if 0
   /* If the host cache timeout is 0, we don't do DNS cach'ing
      so fall through */
   if (data->set.dns_cache_timeout == 0) {
     return Curl_getaddrinfo(data, hostname, port, &bufp);
   }
+#endif
 
   time(&now);
 
