@@ -38,7 +38,7 @@ AC_DEFUN(CURL_CHECK_NONBLOCKING_SOCKET,
 ],[
 dnl the O_NONBLOCK test was fine
 nonblock="O_NONBLOCK"
-AC_DEFINE(HAVE_O_NONBLOCK)
+AC_DEFINE(HAVE_O_NONBLOCK, 1, [use O_NONBLOCK for non-blocking sockets])
 ],[
 dnl the code was bad, try a different program now, test 2
 
@@ -52,7 +52,7 @@ dnl the code was bad, try a different program now, test 2
 ],[
 dnl FIONBIO test was good
 nonblock="FIONBIO"
-AC_DEFINE(HAVE_FIONBIO)
+AC_DEFINE(HAVE_FIONBIO, 1, [use FIONBIO for non-blocking sockets])
 ],[
 dnl FIONBIO test was also bad
 dnl the code was bad, try a different program now, test 3
@@ -66,7 +66,7 @@ dnl the code was bad, try a different program now, test 3
 ],[
 dnl ioctlsocket test was good
 nonblock="ioctlsocket"
-AC_DEFINE(HAVE_IOCTLSOCKET)
+AC_DEFINE(HAVE_IOCTLSOCKET, 1, [use ioctlsocket() for non-blocking sockets])
 ],[
 dnl ioctlsocket didnt compile!
 
@@ -79,11 +79,11 @@ dnl ioctlsocket didnt compile!
 ],[
 dnl ioctlsocket test was good
 nonblock="IoctlSocket"
-AC_DEFINE(HAVE_IOCTLSOCKET_CASE)
+AC_DEFINE(HAVE_IOCTLSOCKET_CASE, 1, [use Ioctlsocket() for non-blocking sockets])
 ],[
 dnl ioctlsocket didnt compile!
 nonblock="nada"
-AC_DEFINE(HAVE_DISABLED_NONBLOCKING)
+AC_DEFINE(HAVE_DISABLED_NONBLOCKING, 1, [disabled non-blocking sockets])
 ])
 dnl end of forth test
 
@@ -272,15 +272,15 @@ AC_DEFUN(CURL_CHECK_INET_NTOA_R,
     AC_MSG_CHECKING(whether inet_ntoa_r is declared)
     AC_EGREP_CPP(inet_ntoa_r,[
 #include <arpa/inet.h>],[
-      AC_DEFINE(HAVE_INET_NTOA_R_DECL)
+      AC_DEFINE(HAVE_INET_NTOA_R_DECL, 1, [inet_ntoa_r() is declared])
       AC_MSG_RESULT(yes)],[
       AC_MSG_RESULT(no)
       AC_MSG_CHECKING(whether inet_ntoa_r with -D_REENTRANT is declared)
       AC_EGREP_CPP(inet_ntoa_r,[
 #define _REENTRANT
 #include <arpa/inet.h>],[
-	AC_DEFINE(HAVE_INET_NTOA_R_DECL)
-	AC_DEFINE(NEED_REENTRANT)
+	AC_DEFINE(HAVE_INET_NTOA_R_DECL, 1, [inet_ntoa_r() is declared])
+	AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT defined])
 	AC_MSG_RESULT(yes)],
 	AC_MSG_RESULT(no))])])
 ])
@@ -302,7 +302,7 @@ struct hostent_data hdata;
 int rc;
 rc = gethostbyaddr_r(address, length, type, &h, &hdata);],[
       AC_MSG_RESULT(yes)
-      AC_DEFINE(HAVE_GETHOSTBYADDR_R_5)
+      AC_DEFINE(HAVE_GETHOSTBYADDR_R_5, 1, [gethostbyaddr_r() takes 5 args])
       ac_cv_gethostbyaddr_args=5],[
       AC_MSG_RESULT(no)
       AC_MSG_CHECKING(if gethostbyaddr_r with -D_REENTRANT takes 5 arguments)
@@ -318,8 +318,8 @@ struct hostent_data hdata;
 int rc;
 rc = gethostbyaddr_r(address, length, type, &h, &hdata);],[
 	AC_MSG_RESULT(yes)
-	AC_DEFINE(HAVE_GETHOSTBYADDR_R_5)
-	AC_DEFINE(NEED_REENTRANT)
+	AC_DEFINE(HAVE_GETHOSTBYADDR_R_5, 1, [gethostbyaddr_r() takes 5 args])
+	AC_DEFINE(NEED_REENTRANT, 1, [need REENTRANT])
 	ac_cv_gethostbyaddr_args=5],[
 	AC_MSG_RESULT(no)
 	AC_MSG_CHECKING(if gethostbyaddr_r takes 7 arguments)
@@ -337,7 +337,7 @@ struct hostent * hp;
 hp = gethostbyaddr_r(address, length, type, &h,
                      buffer, 8192, &h_errnop);],[
 	  AC_MSG_RESULT(yes)
-	  AC_DEFINE(HAVE_GETHOSTBYADDR_R_7)
+	  AC_DEFINE(HAVE_GETHOSTBYADDR_R_7, 1, [gethostbyaddr_r() takes 7 args] )
 	  ac_cv_gethostbyaddr_args=7],[
 	  AC_MSG_RESULT(no)
 	  AC_MSG_CHECKING(if gethostbyaddr_r takes 8 arguments)
@@ -356,7 +356,7 @@ int rc;
 rc = gethostbyaddr_r(address, length, type, &h,
                      buffer, 8192, &hp, &h_errnop);],[
 	    AC_MSG_RESULT(yes)
-	    AC_DEFINE(HAVE_GETHOSTBYADDR_R_8)
+	    AC_DEFINE(HAVE_GETHOSTBYADDR_R_8, 1, [gethostbyaddr_r() takes 8 args])
 	    ac_cv_gethostbyaddr_args=8],[
 	    AC_MSG_RESULT(no)
 	    have_missing_r_funcs="$have_missing_r_funcs gethostbyaddr_r"])])])])])
@@ -380,7 +380,7 @@ gethostbyname_r(const char *, struct hostent *, struct hostent_data *);],[
 struct hostent_data data;
 gethostbyname_r(NULL, NULL, NULL);],[
       AC_MSG_RESULT(yes)
-      AC_DEFINE(HAVE_GETHOSTBYNAME_R_3)
+      AC_DEFINE(HAVE_GETHOSTBYNAME_R_3, 1, [gethostbyname_r() takes 3 args])
       ac_cv_gethostbyname_args=3],[
       AC_MSG_RESULT(no)
       AC_MSG_CHECKING([if gethostbyname_r with -D_REENTRANT takes 3 arguments])
@@ -398,8 +398,8 @@ gethostbyname_r(const char *,struct hostent *, struct hostent_data *);],[
 struct hostent_data data;
 gethostbyname_r(NULL, NULL, NULL);],[
 	AC_MSG_RESULT(yes)
-	AC_DEFINE(HAVE_GETHOSTBYNAME_R_3)
-	AC_DEFINE(NEED_REENTRANT)
+	AC_DEFINE(HAVE_GETHOSTBYNAME_R_3, 1, [gethostbyname_r() takes 3 args])
+	AC_DEFINE(NEED_REENTRANT, 1, [needs REENTRANT])
 	ac_cv_gethostbyname_args=3],[
 	AC_MSG_RESULT(no)
 	AC_MSG_CHECKING([if gethostbyname_r takes 5 arguments])
@@ -413,7 +413,7 @@ struct hostent *
 gethostbyname_r(const char *, struct hostent *, char *, int, int *);],[
 gethostbyname_r(NULL, NULL, NULL, 0, NULL);],[
 	  AC_MSG_RESULT(yes)
-	  AC_DEFINE(HAVE_GETHOSTBYNAME_R_5)
+	  AC_DEFINE(HAVE_GETHOSTBYNAME_R_5, 1, [gethostbyname_r() takes 5 args])
           ac_cv_gethostbyname_args=5],[
 	  AC_MSG_RESULT(no)
 	  AC_MSG_CHECKING([if gethostbyname_r takes 6 arguments])
@@ -428,7 +428,7 @@ gethostbyname_r(const char *, struct hostent *, char *, size_t,
 struct hostent **, int *);],[
 gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);],[
 	    AC_MSG_RESULT(yes)
-	    AC_DEFINE(HAVE_GETHOSTBYNAME_R_6)
+	    AC_DEFINE(HAVE_GETHOSTBYNAME_R_6, 1, [gethostbyname_r() takes 6 args])
             ac_cv_gethostbyname_args=6],[
 	    AC_MSG_RESULT(no)
 	    have_missing_r_funcs="$have_missing_r_funcs gethostbyname_r"],

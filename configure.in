@@ -155,7 +155,7 @@ AC_ARG_ENABLE(dict,
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
-       AC_DEFINE(CURL_DISABLE_DICT, 1 [to disable DICT])
+       AC_DEFINE(CURL_DISABLE_DICT, 1, [to disable DICT])
        AC_SUBST(CURL_DISABLE_DICT)
        ;;
   *)   AC_MSG_RESULT(yes)
