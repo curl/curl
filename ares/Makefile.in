@@ -33,6 +33,9 @@ $(LIB): ${OBJS}
 	ar cru $@ ${OBJS}
 	${RANLIB} $@
 
+tags:
+	etags *.[ch]
+
 adig: adig.o $(LIB)
 	${CC} ${LDFLAGS} -o $@ adig.o $(LIB) ${LIBS}
 
