@@ -64,6 +64,9 @@ DllMain (
 	 DWORD reason /* Reason this function is being called. */ ,
 	 LPVOID reserved /* Not used. */ )
 {
+  /* prevent compiler warnings */
+  (void) hInst;
+  (void) reserved;
 
   switch (reason)
     {
