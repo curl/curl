@@ -6,7 +6,18 @@
 
                                   Changelog
 
+Daniel (16 September)
+- Doing PUT with --digest failed, as reported in bug report #805853.
+
+- Using --anyauth that picked NTLM, and then a redirect closed the connection
+  and took curl to a second NTLM page made curl fail. Test case #806328
+  identified the problem.
+
 Daniel (14 September)
+- codemastr brought a patch for ares to make the Windows portions of it work
+  properly on NT4. I uploaded a new diff and updated the docs on where to get
+  it etc.
+
 - Jeff Pohlmeyer tracked down a very hard-to-find bug where we removed a
   cached DNS entry even though it may be in use, which caused "random" memory
   to get overwritten and thus "random" crashes.
