@@ -94,7 +94,8 @@ libcurl_la_SOURCES = arpa_telnet.h file.c netrc.h timeval.c base64.c	\
   md5.c md5.h http_digest.h http_negotiate.c http_negotiate.h		\
   http_ntlm.c http_ntlm.h ca-bundle.h inet_pton.c inet_pton.h		\
   strtoofft.c strtoofft.h strerror.c strerror.h hostares.c hostasyn.c	\
-  hostip4.c hostip6.c hostsyn.c hostthre.c inet_ntop.c inet_ntop.h
+  hostip4.c hostip6.c hostsyn.c hostthre.c inet_ntop.c inet_ntop.h	\
+  curlx.h
 
 noinst_HEADERS = setup.h transfer.h
 
