@@ -119,8 +119,8 @@ static CURLcode AllowServerConnect(struct UrlData *data,
       size_t size = sizeof(struct sockaddr_in);
       struct sockaddr_in add;
 
-      getsockname(sock, (struct sockaddr *) &add, (int *)&size);
-      s=accept(sock, (struct sockaddr *) &add, (int *)&size);
+      getsockname(sock, (struct sockaddr *) &add, (socklen_t *)&size);
+      s=accept(sock, (struct sockaddr *) &add, (socklen_t *)&size);
 
       sclose(sock); /* close the first socket */
 
@@ -932,7 +932,7 @@ again:;
           size = sizeof(add);
 
           if(getsockname(portsock, (struct sockaddr *) &add,
-                         (int *)&size)<0) {
+                         (socklen_t *)&size)<0) {
             failf(data, "getsockname() failed");
             return CURLE_FTP_PORT_FAILED;
           }
