@@ -1,1 +1,0 @@
-FTP upload resume with whole file already uploaded

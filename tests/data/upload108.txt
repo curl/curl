@@ -1,6 +1,0 @@
-data
-    to
-      see
-that FTP
-works
-  so does it?

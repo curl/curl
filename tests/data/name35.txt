@@ -1,1 +1,0 @@
-HTTP HEAD without Connection: close

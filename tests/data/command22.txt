@@ -1,2 +1,0 @@
-%HOSTIP:%HOSTPORT/`perl -e 'print "a" x 10000;'`/17
-

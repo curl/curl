@@ -1,2 +1,0 @@
-ftp://%HOSTIP:%FTPPORT/115
-

@@ -1,1 +1,0 @@
- -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HOSTPORT/3

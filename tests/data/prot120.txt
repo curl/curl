@@ -1,7 +1,0 @@
-USER anonymous
-PASS curl_by_daniel@haxx.se
-PWD
-PASV
-TYPE I
-RETR 106
-DELE file

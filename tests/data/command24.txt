@@ -1,2 +1,0 @@
-http://%HOSTIP:%HOSTPORT/24 --fail
-

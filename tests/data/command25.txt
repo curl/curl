@@ -1,4 +1,0 @@
-http://%HOSTIP:%HOSTPORT/want/25 -L --max-redirs 5
-
-
-

@@ -1,1 +1,0 @@
---globoff http://%HOSTIP:%HOSTPORT/wantit/{}[]/28

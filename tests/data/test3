@@ -1,0 +1,42 @@
+#
+# Server-side
+<reply name="1">
+<data>
+HTTP/1.0 200 OK
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+this is data even though Content-Length is set to zero
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+ <name>
+HTTP POST with user and password
+ </name>
+ <command>
+ -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HOSTPORT/3
+</command>
+</test>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+POST /3 HTTP/1.1
+Authorization: Basic ZmFrZTotdXNlcg==
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Content-Length: 37
+Content-Type: application/x-www-form-urlencoded
+
+fooo=mooo&pooo=clue&doo=%20%20%20++++
+</protocol>
+</verify>

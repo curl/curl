@@ -1,9 +1,0 @@
-PUT /we/want/10 HTTP/1.1
-Host: 127.0.0.1:8999
-Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
-Content-Length: 60
-
-http://%HOSTIP:%HOSTPORT/we/want/10 -T data/command10.txt
-
-

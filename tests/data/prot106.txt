@@ -1,7 +1,0 @@
-USER anonymous
-PASS curl_by_daniel@haxx.se
-PWD
-CWD /path with  spaces/and things2
-PASV
-TYPE A
-RETR 106

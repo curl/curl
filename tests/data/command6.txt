@@ -1,2 +1,0 @@
-http://%HOSTIP:%HOSTPORT/we/want/that/page/6 -b "name=contents;name2=content2"
-

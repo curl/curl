@@ -1,0 +1,39 @@
+#
+# Server-side
+<reply name="1">
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes
+
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+ <name>
+Replaced internal and added custom HTTP headers
+ </name>
+ <command>
+ -H "extra-header: here" -H "Accept: replaced" http://%HOSTIP:%HOSTPORT/4
+</command>
+</test>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /4 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+extra-header: here
+Accept: replaced
+
+</protocol>
+</verify>

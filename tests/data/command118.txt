@@ -1,3 +1,0 @@
-ftp://%HOSTIP:%FTPPORT/118
-
-

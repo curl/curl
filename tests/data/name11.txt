@@ -1,1 +1,0 @@
-simple HTTP Location: following

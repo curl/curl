@@ -1,8 +1,0 @@
-GET http://weeird.site.com/YES/boo/2 HTTP/1.1
-Proxy-authorization: Basic cHJveHk6cHBwcA==
-Authorization: Basic c2l0ZTptb29vbw==
-User-Agent: curl/7.7.2 (sparc-sun-solaris2.7) libcurl 7.7.2 (OpenSSL 0.9.6a) (krb4 enabled)
-Host: weeird.site.com
-Pragma: no-cache
-Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
-

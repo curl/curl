@@ -1,2 +1,0 @@
-http://%HOSTIP:%HOSTPORT/32 -d mooo=fooo -L
-

@@ -1,1 +1,0 @@
-http://user:pwd@%HOSTIP:%HOSTPORT/38 -L

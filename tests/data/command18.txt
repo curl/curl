@@ -1,1 +1,0 @@
-'%HOSTIP:%HOSTPORT/{3,10,11}'

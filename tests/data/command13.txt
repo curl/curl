@@ -1,3 +1,0 @@
-http://%HOSTIP:%HOSTPORT/want/13 -X DELETE
-
-

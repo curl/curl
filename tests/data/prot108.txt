@@ -1,7 +1,0 @@
-USER anonymous
-PASS curl_by_daniel@haxx.se
-PWD
-CWD CWD/STOR/RETR
-PORT 127,0,0,1,5,109
-TYPE I
-STOR 108
