@@ -62,18 +62,18 @@
 /* returns last node in linked list */
 static struct curl_slist *slist_get_last(struct curl_slist *list)
 {
-	struct curl_slist	*item;
+  struct curl_slist	*item;
 
-	/* if caller passed us a NULL, return now */
-	if (!list)
-		return NULL;
+  /* if caller passed us a NULL, return now */
+  if (!list)
+    return NULL;
 
-	/* loop through to find the last item */
-	item = list;
-	while (item->next) {
-		item = item->next;
-	}
-	return item;
+  /* loop through to find the last item */
+  item = list;
+  while (item->next) {
+    item = item->next;
+  }
+  return item;
 }
 
 /* append a struct to the linked list. It always retunrs the address of the
@@ -84,50 +84,49 @@ static struct curl_slist *slist_get_last(struct curl_slist *list)
 struct curl_slist *curl_slist_append(struct curl_slist *list,
                                      const char *data)
 {
-	struct curl_slist	*last;
-	struct curl_slist	*new_item;
+  struct curl_slist	*last;
+  struct curl_slist	*new_item;
 
-	new_item = (struct curl_slist *) malloc(sizeof(struct curl_slist));
-	if (new_item) {
-		new_item->next = NULL;
-		new_item->data = strdup(data);
-	}
-	else {
-		fprintf(stderr, "Cannot allocate memory for QUOTE list.\n");
-		return NULL;
-	}
+  new_item = (struct curl_slist *) malloc(sizeof(struct curl_slist));
+  if (new_item) {
+    new_item->next = NULL;
+    new_item->data = strdup(data);
+  }
+  if (new_item == NULL || new_item->data == NULL) {
+    fprintf(stderr, "Cannot allocate memory for QUOTE list.\n");
+    return NULL;
+  }
 
-	if (list) {
-		last = slist_get_last(list);
-		last->next = new_item;
-		return list;
-	}
+  if (list) {
+    last = slist_get_last(list);
+    last->next = new_item;
+    return list;
+  }
 
-	/* if this is the first item, then new_item *is* the list */
-	return new_item;
+  /* if this is the first item, then new_item *is* the list */
+  return new_item;
 }
 
 /* be nice and clean up resources */
 void curl_slist_free_all(struct curl_slist *list)
 {
-	struct curl_slist	*next;
-	struct curl_slist	*item;
+  struct curl_slist	*next;
+  struct curl_slist	*item;
 
-	if (!list)
-		return;
+  if (!list)
+    return;
 
-	item = list;
-	do {
-		next = item->next;
+  item = list;
+  do {
+    next = item->next;
 		
-		if (item->data) {
-			free(item->data);
-		}
-		free(item);
-		item = next;
-	} while (next);
+    if (item->data) {
+      free(item->data);
+    }
+    free(item);
+    item = next;
+  } while (next);
 }
-
 
 /* Curl_infof() is for info message along the way */
 
