@@ -783,12 +783,12 @@ typedef enum {
 
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
-#define CURLOPT_HTTPREQUEST    0
+#define CURLOPT_HTTPREQUEST    -1
 #define CURLOPT_FTPASCII       CURLOPT_TRANSFERTEXT
-#define CURLOPT_MUTE           0
-#define CURLOPT_PASSWDFUNCTION 0
-#define CURLOPT_PASSWDDATA     0
-#define CURLOPT_CLOSEFUNCTION  0
+#define CURLOPT_MUTE           -2
+#define CURLOPT_PASSWDFUNCTION -3
+#define CURLOPT_PASSWDDATA     -4
+#define CURLOPT_CLOSEFUNCTION  -5
 
 #else
 /* This is set if CURL_NO_OLDIES is defined at compile-time */
