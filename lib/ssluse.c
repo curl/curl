@@ -138,8 +138,8 @@ int random_the_seed(struct connectdata *conn)
     RAND_seed(area, len);
 
     free(area); /* now remove the random junk */
-#endif
   }
+#endif
 
   /* generates a default path for the random seed file */
   buf[0]=0; /* blank it first */
