@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Version 7.10.4 (2 Apr 2003)
+
+Daniel (1 Apr)
+- Added test case 505 to exercise FTP upload with rename done with libcurl,
+  and for that I had to extend the test suite's FTP server to deal with the
+  RNFR and RNTO commands.
+
+Daniel (31 Mar)
+- Even more SSL config check modifications after Richard's testing.
+
+Version 7.10.4-pre6 (31 Mar 2003)
+
 Daniel (31 Mar)
 - More fixes for the SSL session ID cache checks when SSL configs are changed
   between connections. Based on tests and talks with Richard Bramante.
