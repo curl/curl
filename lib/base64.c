@@ -61,8 +61,8 @@ static void decodeQuantum(unsigned char *dest, char *src)
       x = (x << 6) + 62;
     else if(src[i] == '/')
       x = (x << 6) + 63;
-       else if(src[i] == '=')
-         x = (x << 6);
+    else if(src[i] == '=')
+      x = (x << 6);
   }
 
   dest[2] = (unsigned char)(x & 255); x >>= 8;
