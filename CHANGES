@@ -10,11 +10,18 @@ Version XX
 
 Daniel (31 January 2000):
  - Paul Harrington <paul@pizza.org> found another core dump in the cookie
-   parser.
+   parser. Curl doesn't properly recognize the 'version' keyword and I think
+   that is what caused this. I need to refresh some specs on cookies and see
+   what else curl lacks to improve this a bit more once and for all.
 
  - Mark W. Eichin <eichin@thok.org> found that while curl is uploading a form
    to a web site, it doesn't read incoming data why it'll hang after a while
    since the socket "pipe" becomes full.
+
+   It took me two hours to rewrite Download() and Upload() into the new
+   single function Transfer(). It even seems to work! More testing is required
+   of course... I should get the header-sending together in a kind of queue
+   and let them get "uploaded" in Transfer() as well.
 
  - Zhibiao Wu <wuzb@erols.com> pointed out a curl bug in the location: area,
    although I did not get a reproducable way to do this why I have to wait
