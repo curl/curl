@@ -171,7 +171,7 @@ typedef enum _MERIDIAN {
 } MERIDIAN;
 
 /* parse results and input string */
-typedef struct _CONTEXT {
+typedef struct _CURL_CONTEXT {
     const char	*yyInput;
     int		yyDayOrdinal;
     int		yyDayNumber;
@@ -194,14 +194,14 @@ typedef struct _CONTEXT {
     int		yyRelMonth;
     int		yyRelSeconds;
     int		yyRelYear;
-} CONTEXT;
+} CURL_CONTEXT;
 
 /* enable use of extra argument to yyparse and yylex which can be used to pass
-**  in a user defined value (CONTEXT struct in our case)
+**  in a user defined value (CURL_CONTEXT struct in our case)
 */
 #define YYPARSE_PARAM cookie
 #define YYLEX_PARAM cookie
-#define context ((CONTEXT *) cookie)
+#define context ((CURL_CONTEXT *) cookie)
 %}
 
 /* This grammar has 13 shift/reduce conflicts. */
@@ -944,7 +944,7 @@ curl_getdate (const char *p, const time_t *now)
 {
   struct tm tm, tm0, *tmp;
   time_t Start;
-  CONTEXT cookie;
+  CURL_CONTEXT cookie;
 #ifdef HAVE_LOCALTIME_R
   struct tm keeptime;
 #endif
