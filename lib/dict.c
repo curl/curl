@@ -141,21 +141,21 @@ CURLcode Curl_dict(struct connectdata *conn)
       nth = atoi(nthdef);
     }
       
-    sendf(data->firstsocket, data,
-          "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
-          "MATCH "
-          "%s "    /* database */
-          "%s "    /* strategy */
-          "%s\n"   /* word */
-          "QUIT\n",
+    Curl_sendf(data->firstsocket, conn,
+               "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
+               "MATCH "
+               "%s "    /* database */
+               "%s "    /* strategy */
+               "%s\n"   /* word */
+               "QUIT\n",
 	    
-          database,
-          strategy,
-          word
-          );
+               database,
+               strategy,
+               word
+               );
     
     result = Curl_Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
-                      -1, NULL); /* no upload */
+                           -1, NULL); /* no upload */
       
     if(result)
       return result;
@@ -191,20 +191,20 @@ CURLcode Curl_dict(struct connectdata *conn)
       nth = atoi(nthdef);
     }
       
-    sendf(data->firstsocket, data,
-          "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
-          "DEFINE "
-          "%s "     /* database */
-          "%s\n"    /* word */
-          "QUIT\n",
-          
-          database,
-          word
-          );
+    Curl_sendf(data->firstsocket, conn,
+               "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
+               "DEFINE "
+               "%s "     /* database */
+               "%s\n"    /* word */
+               "QUIT\n",
+               
+               database,
+               word
+               );
     
     result = Curl_Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
-                      -1, NULL); /* no upload */
-      
+                           -1, NULL); /* no upload */
+    
     if(result)
       return result;
       
@@ -220,14 +220,14 @@ CURLcode Curl_dict(struct connectdata *conn)
         if (ppath[i] == ':')
           ppath[i] = ' ';
       }
-      sendf(data->firstsocket, data,
-            "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
-            "%s\n"
-            "QUIT\n",
-            ppath);
+      Curl_sendf(data->firstsocket, conn,
+                 "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
+                 "%s\n"
+                 "QUIT\n",
+                 ppath);
       
       result = Curl_Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
-                        -1, NULL);
+                             -1, NULL);
       
       if(result)
         return result;
