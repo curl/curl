@@ -262,9 +262,9 @@ sub RETR_command {
 sub STOR_command {
     my $testno=$_[0];
 
-    logmsg "STOR test number $testno\n";
-
     my $filename = "log/upload.$testno";
+
+    logmsg "STOR test number $testno in $filename\n";
 
     print "125 Gimme gimme gimme!\r\n";
 
