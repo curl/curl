@@ -349,6 +349,7 @@ static void help(void)
     " -o/--output <file> Write output to <file> instead of stdout",
     " -O/--remote-name   Write output to a file named as the remote file",
     " -p/--proxytunnel   Operate through a HTTP proxy tunnel (using CONNECT)",
+    "    --proxy-basic   Enable Basic authentication on the proxy (H)",
     "    --proxy-digest  Enable Digest authentication on the proxy (H)",
     "    --proxy-ntlm    Enable NTLM authentication on the proxy (H)",
     " -P/--ftp-port <address> Use PORT with address instead of PASV (F)",
@@ -474,6 +475,7 @@ struct Configurable {
   bool ftp_create_dirs;
   bool proxyntlm;
   bool proxydigest;
+  bool proxybasic;
 
   char *writeout; /* %-styled format string to output */
   bool writeenv; /* write results to environment, if available */
@@ -1166,7 +1168,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$b", "ftp-pasv",   FALSE},
     {"$c", "socks5",     TRUE},
     {"$d", "tcp-nodelay",FALSE},
-    {"$e", "proxy-digest",   FALSE},
+    {"$e", "proxy-digest", FALSE},
+    {"$f", "proxy-basic", FALSE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1498,6 +1501,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 	break;
       case 'e': /* --proxy-digest */
         config->proxydigest ^= TRUE;
+        break;
+      case 'f': /* --proxy-basic */
+        config->proxybasic ^= TRUE;
         break;
       }
       break;
@@ -3393,6 +3399,8 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
         else if(config->proxydigest)
           curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_DIGEST);
+        else if(config->proxybasic)
+          curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_BASIC);
 
         /* new in curl 7.10.8 */
         if(config->max_filesize)

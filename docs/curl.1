@@ -609,6 +609,13 @@ You may use this option as many times as you have number of URLs.
 (SSL) Pass phrase for the private key
 
 If this option is used several times, the last one will be used.
+.IP "--proxy-basic"
+Tells curl to use HTTP Basic authentication when communicating with the given
+proxy. Use \fI--basic\fP for enabling HTTP Basic with a remote host. Basic is
+the default authentication method curl uses with proxies.
+
+If this option is used twice, the second will again disable proxy HTTP Basic
+authentication.
 .IP "--proxy-digest"
 Tells curl to use HTTP Digest authentication when communicating with the given
 proxy. Use \fI--digest\fP for enabling HTTP Digest with a remote host.
