@@ -514,6 +514,10 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
 {
   struct connectdata *conn = c_connect;
 
+  if(conn->curl_disconnect)
+    /* This is set if protocol-specific cleanups should be made */
+    conn->curl_disconnect(conn);
+
   if(conn->proto.generic)
     free(conn->proto.generic);
 
@@ -596,6 +600,15 @@ ConnectionExists(struct UrlData *data,
     if(strequal(needle->protostr, check->protostr) &&
        strequal(needle->name, check->name) &&
        (needle->port == check->port) ) {
+      if(strequal(needle->protostr, "FTP")) {
+        /* This is FTP, verify that we're using the same name and
+           password as well */
+        if(!strequal(needle->data->user, check->proto.ftp->user) ||
+           !strequal(needle->data->passwd, check->proto.ftp->passwd)) {
+          /* one of them was different */
+          continue;
+        }
+      }
       *usethis = check;
       return TRUE; /* yes, we found one to use! */
     }
@@ -1322,6 +1335,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       conn->curl_do = Curl_ftp;
       conn->curl_done = Curl_ftp_done;
       conn->curl_connect = Curl_ftp_connect;
+      conn->curl_disconnect = Curl_ftp_disconnect;
     }
 
     conn->ppath++; /* don't include the initial slash */
@@ -1530,7 +1544,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     conn->ppath = path;      /* set this too */
 
     /* re-use init */
-    conn->maxdownload = 0; /* might have been used previously! */
+    conn->maxdownload = 0;   /* might have been used previously! */
+    conn->bits.reuse = TRUE; /* yes, we're re-using here */
 
     infof(data, "Re-using existing connection! (#%d)\n", conn->connectindex);
   }
@@ -1626,13 +1641,6 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   }
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
-  if(-1 == conn->firstsocket) {
-    /* Connect only if not already connected! */
-    result = ConnectPlease(data, conn);
-    if(CURLE_OK != result)
-      return result;
-  }
-
   /*************************************************************
    * Proxy authentication
    *************************************************************/
@@ -1663,18 +1671,25 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     }
   }
 
-  if(conn->curl_connect) {
-    /* is there a connect() procedure? */
+  if(-1 == conn->firstsocket) {
+    /* Connect only if not already connected! */
+    result = ConnectPlease(data, conn);
+    if(CURLE_OK != result)
+      return result;
 
-    /* set start time here for timeout purposes in the
-     * connect procedure, it is later set again for the
-     * progress meter purpose */
-    conn->now = Curl_tvnow();
+    if(conn->curl_connect) {
+      /* is there a connect() procedure? */
 
-    /* Call the protocol-specific connect function */
-    result = conn->curl_connect(conn);
-    if(result != CURLE_OK)
-      return result; /* pass back errors */
+      /* set start time here for timeout purposes in the
+       * connect procedure, it is later set again for the
+       * progress meter purpose */
+      conn->now = Curl_tvnow();
+
+      /* Call the protocol-specific connect function */
+      result = conn->curl_connect(conn);
+      if(result != CURLE_OK)
+        return result; /* pass back errors */
+    }
   }
 
   Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected */
