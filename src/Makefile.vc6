@@ -4,6 +4,7 @@
 ##      (default is release)
 ##
 ## Comments to: Troy Engel <tengel@sonic.net>
+## Updated by: Craig Davison <cd@securityfocus.com>
 
 PROGRAM_NAME = curl.exe
 
@@ -11,27 +12,34 @@ PROGRAM_NAME = curl.exe
 ## Nothing more to do below this line!
 
 ## Release
-CCR = cl.exe /ML /O2 /D "NDEBUG"
+CCR = cl.exe /MD /O2 /D "NDEBUG"
 LINKR = link.exe /incremental:no /libpath:"../lib"
 
 ## Debug
-CCD = cl.exe /MLd /Gm /ZI /Od /D "_DEBUG" /GZ
+CCD = cl.exe /MDd /Gm /ZI /Od /D "_DEBUG" /GZ
 LINKD = link.exe /incremental:yes /debug
 
-CFLAGS = /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+CFLAGS = /I "../include" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 LFLAGS = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
-LINKLIBS = kernel32.lib wsock32.lib libcurl.lib
+LINKLIBS = wsock32.lib libcurl.lib
+LINKLIBS_DEBUG = wsock32.lib libcurld.lib
 
 RELEASE_OBJS= \
 	hugehelpr.obj \
+	writeoutr.obj \
+	urlglobr.obj \
 	mainr.obj
 
 DEBUG_OBJS= \
 	hugehelpd.obj \
+	writeoutd.obj \
+	urlglobd.obj \
 	maind.obj
 	
 LINK_OBJS= \
 	hugehelp.obj \
+	writeout.obj \
+	urlglob.obj \
 	main.obj
 
 all : release
@@ -40,17 +48,25 @@ release: $(RELEASE_OBJS)
 	$(LINKR) $(LFLAGS) $(LINKLIBS) $(LINK_OBJS)
 
 debug: $(DEBUG_OBJS)
-	$(LINKD) $(LFLAGS) $(LINKLIBS) $(LINK_OBJS)
+	$(LINKD) $(LFLAGS) $(LINKLIBS_DEBUG) $(LINK_OBJS)
 
 ## Release
 hugehelpr.obj: hugehelp.c
 	$(CCR) $(CFLAGS) /Zm200 hugehelp.c
+writeoutr.obj: writeout.c
+	$(CCR) $(CFLAGS) writeout.c
+urlglobr.obj: urlglob.c
+	$(CCR) $(CFLAGS) urlglob.c
 mainr.obj: main.c
 	$(CCR) $(CFLAGS) main.c
 
 ## Debug
 hugehelpd.obj: hugehelp.c
 	$(CCD) $(CFLAGS) /Zm200 hugehelp.c
+writeoutd.obj: writeout.c
+	$(CCD) $(CFLAGS) writeout.c
+urlglobd.obj: urlglob.c
+	$(CCD) $(CFLAGS) urlglob.c
 maind.obj: main.c
 	$(CCD) $(CFLAGS) main.c
 
