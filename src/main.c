@@ -145,6 +145,12 @@ char *strdup(char *str)
 }
 #endif 
 
+#ifdef WIN32
+#include <direct.h>
+#define F_OK 0
+#define mkdir(x,y) (mkdir)(x)
+#endif
+
 #ifdef	VMS
 int	vms_show = 0;
 #define	FAC_CURL	0xC01
@@ -3073,7 +3079,7 @@ static int create_dir_hierarchy(char *outfile)
         else
           sprintf(dirbuildup,"%s%s", DIR_CHAR, tempdir);
       }
-      if (access(dirbuildup,F_OK) == -1) {
+      if (access(dirbuildup, F_OK) == -1) {
         result = mkdir(dirbuildup,(mode_t)0000750);
         if (-1 == result) {
           switch (errno) {
