@@ -4,8 +4,9 @@
  * Redistribution and use are freely permitted provided that:
  *
  *   1) This header remain in tact.
- *   2) The prototype for getpass is not changed from:
- *      int getpass_r(const char *prompt, char *buffer, int buflen)
+ *   2) The prototypes for getpass and getpass_r are not changed from:
+ *         char *getpass(const char *prompt)
+ *         char *getpass_r(const char *prompt, char* buffer, int buflen)
  *   3) This source code is not used outside of this(getpass.c) file.
  *   4) Any changes to this(getpass.c) source code are made publicly available.
  *
@@ -34,11 +35,13 @@
  *   Daniel Stenberg <daniel@haxx.se>
  */
 
-#ifndef WIN32
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif
 
+#ifndef HAVE_GETPASS_R
+
+#ifndef WIN32
 #ifdef HAVE_TERMIOS_H
 #  if !defined(HAVE_TCGETATTR) && !defined(HAVE_TCSETATTR) 
 #    undef HAVE_TERMIOS_H
@@ -68,7 +71,7 @@
 #  define perror(x) fprintf(stderr, "Error in: %s\n", x)
 #endif
 
-int getpass_r(const char *prompt, char *buffer, int buflen)
+char *getpass_r(const char *prompt, char *buffer, int buflen)
 {
   FILE *infp;
   FILE *outfp;
@@ -176,12 +179,12 @@ int getpass_r(const char *prompt, char *buffer, int buflen)
   signal(SIGTSTP, sigtstp);
 #endif
 
-  return 0; /* we always return success */
+  return buffer; /* we always return success */
 }
 #else /* WIN32 */
 #include <stdio.h>
 #include <conio.h>
-int getpass_r(const char *prompt, char *buffer, int buflen)
+char *getpass_r(const char *prompt, char *buffer, int buflen)
 {
   int i;
   printf("%s", prompt);
@@ -197,7 +200,17 @@ int getpass_r(const char *prompt, char *buffer, int buflen)
   if (i==buflen)
     buffer[buflen-1]=0;
 
-  return 0; /* we always return success */
+  return buffer; /* we always return success */
 }
 #endif
 
+#endif /* ifndef HAVE_GETPASS_R */
+
+#if 0
+/* for consistensy, here's the old-style function: */
+char *getpass(const char *prompt)
+{
+  static char buf[256];
+  return getpass_r(prompt, buf, sizeof(buf));
+}
+#endif
