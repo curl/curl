@@ -78,7 +78,8 @@ int main(int argc, char **argv)
     /* HTTP PUT please */
     curl_easy_setopt(curl, CURLOPT_PUT, TRUE);
 
-    /* specify target */
+    /* specify target URL, and note that this URL should include a file
+       name, not only a directory */
     curl_easy_setopt(curl,CURLOPT_URL, url);
 
     /* now specify which file to upload */
