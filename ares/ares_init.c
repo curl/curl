@@ -49,7 +49,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
 			   const char *str);
 static int set_search(ares_channel channel, const char *str);
 static int set_options(ares_channel channel, const char *str);
-static char *try_config(char *s, char *opt);
+static char *try_config(char *s, const char *opt);
 static const char *try_option(const char *p, const char *q, const char *opt);
 static int ip_addr(const char *s, int len, struct in_addr *addr);
 static void natural_mask(struct apattern *pat);
@@ -716,7 +716,7 @@ static int set_options(ares_channel channel, const char *str)
   return ARES_SUCCESS;
 }
 
-static char *try_config(char *s, char *opt)
+static char *try_config(char *s, const char *opt)
 {
   int len;
 
