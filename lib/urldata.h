@@ -221,7 +221,7 @@ struct HTTP {
     curl_read_callback fread; /* backup storage for fread pointer */
     void *fread_in;           /* backup storage for fread_in pointer */
     char *postdata;
-    int postsize;
+    size_t postsize;
   } backup;
 
   enum {
