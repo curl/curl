@@ -230,6 +230,36 @@ Win32
         project properties to use the SSL include path, link with the SSL libs
         and define the USE_SSLEAY symbol.
 
+      Using Borland C++ compiler version 5.5.1 (available as free download
+      from Borland's site)
+      ---------------------------------------------------------------------
+      
+        compile openssl
+      
+        Make sure you include the paths to curl/include and openssl/inc32 in
+        your bcc32.cnf file
+      
+
+        eg : -I"c:\Bcc55\include;c:\path_curl\include;c:\path_openssl\inc32"
+        
+        Check to make sure that all of the sources listed in lib/Makefile.b32
+        are present in the /path_to_curl/lib directory. (Check the src
+        directory for missing ones.)
+        
+        Make sure the environment variable "BCCDIR" is set to the install
+        location for the compiler eg : c:\Borland\BCC55
+        
+        command line:
+        make -f /path_to_curl/lib/Makefile-ssl.b32
+        
+        compile simplessl.c with appropriate links
+        
+        c:\curl\docs\examples\> bcc32 -L c:\path_to_curl\lib\libcurl.lib
+                                      -L c:\borland\bcc55\lib\psdk\ws2_32.lib
+                                      -L c:\openssl\out32\libeay32.lib
+                                      -L c:\openssl\out32\ssleay32.lib
+                                      simplessl.c
+
    Disabling Specific Protocols:
 
       The configure utility, unfortunately, is not available for the Windows
