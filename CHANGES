@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (14 May)
+- George Comninos provided a fix that calls the progress meter when waiting
+  for FTP command responses take >1 second. It'll make applications more
+  "responsive" even when dealing with very slow ftp servers.
+
 Daniel (12 May)
 - George Comninos pointed out that libcurl uploads had two quirks:
    o when using FTP PORT command, it used blocking sockets!
@@ -19,7 +24,7 @@ Daniel (9 May)
 
 - Dan Fandrich pointed out we had three unnecessary files in CVS that is
   generated with libtoolize, so they're now removed and libtoolize is invoked
-  accordinly in the buildconf script.
+  accordingly in the buildconf script.
 
 - Avery Fay found out that the CURLOPT_INTERFACE way of first checking if the
   given name is a network interface gave a real performance penalty on Linux,
@@ -29,6 +34,8 @@ Daniel (9 May)
 - CURLOPT_FTP_USE_EPRT added. Set this to FALSE to disable libcurl's attempts
   to use EPRT and LPRT before the traditional PORT command. The command line
   tool sets this option with '--disable-eprt'.
+
+Version 7.10.5-pre2 (6 May 2003)
 
 Daniel (6 May)
 - Kevin Delafield reported another case where we didn't correctly check for
@@ -82,6 +89,8 @@ Daniel (30 Apr)
 Daniel (29 Apr)
 - Peter Kovacs provided a patch that makes the CURLINFO_CONNECT_TIME work fine
   when using the multi interface (too).
+
+Version 7.10.5-pre1 (23 Apr 2003)
 
 Daniel (23 Apr)
 - Upgraded to libtool 1.5.
