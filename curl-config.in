@@ -19,7 +19,8 @@ Available values for OPTION include:
   --ca        ca bundle install path
   --cc        compiler
   --cflags    pre-processor and compiler flags
-  --feature   newline separated list of enabled features
+  --features  newline separated list of enabled features
+  --protocols newline separated list of enabled protocols
   --help      display this help and exit
   --libs      library linking information
   --prefix    curl install prefix
@@ -56,7 +57,7 @@ while test $# -gt 0; do
 	echo "$prefix"
 	;;
 
-    --feature)
+    --feature|--features)
 	if test "@USE_SSLEAY@" = "1"; then
           echo "SSL"
         fi
@@ -69,32 +70,40 @@ while test $# -gt 0; do
 	if test "@HAVE_LIBZ@" = "1"; then
           echo "libz"
         fi
-	if test "@CURL_DISABLE_HTTP@" = "1"; then
-          echo "HTTP-disabled"
-        fi
-	if test "@CURL_DISABLE_FTP@" = "1"; then
-          echo "FTP-disabled"
-        fi
-	if test "@CURL_DISABLE_GOPHER@" = "1"; then
-          echo "GOPHER-disabled"
-        fi
-	if test "@CURL_DISABLE_FILE@" = "1"; then
-          echo "FILE-disabled"
-        fi
-	if test "@CURL_DISABLE_TELNET@" = "1"; then
-          echo "TELNET-disabled"
-        fi
-	if test "@CURL_DISABLE_LDAP@" = "1"; then
-          echo "LDAP-disabled"
-        fi
-	if test "@CURL_DISABLE_DICT@" = "1"; then
-          echo "DICT-disabled"
-        fi
 	if test "@HAVE_ARES@" = "1"; then
           echo "AsynchDNS"
         fi
 	;;
 
+    --protocols)
+	if test "@CURL_DISABLE_HTTP@" != "1"; then
+          echo "HTTP"
+	  if test "@USE_SSLEAY@" = "1"; then
+            echo "HTTPS"
+          fi
+        fi
+	if test "@CURL_DISABLE_FTP@" != "1"; then
+          echo "FTP"
+	  if test "@USE_SSLEAY@" = "1"; then
+            echo "FTPS"
+          fi
+        fi
+	if test "@CURL_DISABLE_GOPHER@" != "1"; then
+          echo "GOPHER"
+        fi
+	if test "@CURL_DISABLE_FILE@" != "1"; then
+          echo "FILE"
+        fi
+	if test "@CURL_DISABLE_TELNET@" != "1"; then
+          echo "TELNET"
+        fi
+	if test "@CURL_DISABLE_LDAP@" != "1"; then
+          echo "LDAP"
+        fi
+	if test "@CURL_DISABLE_DICT@" != "1"; then
+          echo "DICT"
+        fi
+	;;
     --version)
 	echo libcurl @VERSION@
 	exit 0
@@ -123,8 +132,7 @@ while test $# -gt 0; do
 
     *)
         echo "unknown option: $1"
-	usage
-	exit 1
+	usage 1
 	;;
     esac
     shift
