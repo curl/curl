@@ -506,7 +506,7 @@ sub singletest {
     # name of the test
     my @testname= getpart("client", "name");
 
-    print "test $testnum...";
+    printf("test %03d...", $testnum);
     if(!$short) {
         my $name = $testname[0];
         $name =~ s/\n//g;
