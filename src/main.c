@@ -1530,7 +1530,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     /* save outfile pattern before expansion */
     outfiles = urlnode->outfile?strdup(urlnode->outfile):NULL;
 
-    if (outfiles && strequal(outfiles, "-") && urlnum > 1) {
+    if (!outfiles || strequal(outfiles, "-") && urlnum > 1) {
       /* multiple files extracted to stdout, insert separators! */
       separator = 1;
     }
