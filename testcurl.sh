@@ -116,7 +116,7 @@ cvsup() {
 
   # return (1 - RETURNVALUE) so that errors return 0 while goodness
   # returns 1
-  return `expr 1 - $?`
+  return `expr 1 - $cvsstat`
 }
 
 att="0"
