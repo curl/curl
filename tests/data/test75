@@ -1,0 +1,33 @@
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+HTTP, urlglob retrieval with bad range
+ </name>
+ <command option=no-output>
+"http://%HOSTIP:%HOSTPORT/[1-1]" -o "log/weee#1.dump" --stderr -
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<errorcode>
+3
+</errorcode>
+<stdout>
+curl: (3) [globbing] error: illegal pattern or range specification after pos 24
+
+</stdout>
+</verify>
