@@ -13,7 +13,11 @@ Daniel (22 May 2001)
     automake 1.4-p1
 
   I wouldn't recommend any developer to try to generate things with older
-  versions than these.
+  versions than these. Building from CVS will probably more or less require
+  at least these versions.
+
+  As a result of this, the configure script grew to more than double its
+  previous size!
 
 Daniel (21 May 2001)
 - I made ftps:// work. Added test case 400 to the release archive, as the

@@ -61,7 +61,7 @@ findprog()
 # Enforce a rerun of configure (updates the VERSION)
 #
 
-./config.status --recheck
+#./config.status --recheck
 
 ############################################################################
 #
@@ -73,7 +73,7 @@ if { findprog automake >/dev/null 2>/dev/null; } then
   echo "- Could not find or run automake, I hope you know what you're doing!"
 else
   echo "Runs automake --include-deps"
-  automake --include-deps
+  automake --include-deps Makefile
 fi
 
 ############################################################################

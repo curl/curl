@@ -11,6 +11,7 @@ dnl
 dnl Detect the canonical host and target build environment
 dnl
 
+AC_CANONICAL_HOST
 dnl Get system canonical name
 AC_DEFINE_UNQUOTED(OS, "${host}")
 
