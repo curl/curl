@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -127,15 +127,21 @@ Curl_cookie_add(struct CookieInfo *c,
 	    
   if(httpheader) {
     /* This line was read off a HTTP-header */
-
+    char *sep;
     semiptr=strchr(lineptr, ';'); /* first, find a semicolon */
     ptr = lineptr;
     do {
       /* we have a <what>=<this> pair or a 'secure' word here */
-      if(strchr(ptr, '=')) {
+      sep = strchr(ptr, '=');
+      if(sep && (!semiptr || (semiptr>sep)) ) {
+        /*
+         * There is a = sign and if there was a semicolon too, which make sure
+         * that the semicolon comes _after_ the equal sign.
+         */
+
         name[0]=what[0]=0; /* init the buffers */
-        if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^=]=%"
-                       MAX_COOKIE_LINE_TXT "[^;\r\n]",
+        if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^;=]=%"
+                       MAX_COOKIE_LINE_TXT "[^;\r\n ]",
                        name, what)) {
           /* this is a legal <what>=<this> pair */
           if(strequal("path", name)) {
@@ -187,8 +193,11 @@ Curl_cookie_add(struct CookieInfo *c,
 
         }
       }
-      if(!semiptr)
-        continue; /* we already know there are no more cookies */
+      if(!semiptr || !*semiptr) {
+        /* we already know there are no more cookies */
+        semiptr = NULL;
+        continue;
+      }
 
       ptr=semiptr+1;
       while(ptr && *ptr && isspace((int)*ptr))
@@ -198,8 +207,22 @@ Curl_cookie_add(struct CookieInfo *c,
       if(!semiptr && *ptr)
         /* There are no more semicolons, but there's a final name=value pair
            coming up */
-        semiptr=ptr;
+        semiptr=strchr(ptr, '\0');
     } while(semiptr);
+
+    if(NULL == co->name) {
+      /* we didn't get a cookie name, this is an illegal line, bail out */
+      if(co->domain)
+        free(co->domain);
+      if(co->path)
+        free(co->path);
+      if(co->name)
+        free(co->name);
+      if(co->value)
+        free(co->value);
+      free(co);
+      return NULL;
+    }
 
     if(NULL == co->domain)
       /* no domain given in the header line, set the default now */
