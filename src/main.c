@@ -1473,9 +1473,9 @@ operate(struct Configurable *config, int argc, char *argv[])
 #endif
   }
   for (i = 0; (url = next_url(urls)); ++i) {
-    if (outfiles) {
+    if (config->outfile) {
       free(config->outfile);
-      config->outfile = outfiles;
+      config->outfile = strdup(outfiles);
     }
  
     if (config->outfile || config->remotefile) {
@@ -1757,6 +1757,9 @@ operate(struct Configurable *config, int argc, char *argv[])
       free(url);
 
   }
+  if(outfiles)
+    free(outfiles);
+
 #ifdef MIME_SEPARATORS
   if (separator)
     printf("--%s--\n", MIMEseparator);
