@@ -1211,10 +1211,10 @@ CURLcode ftp_use_port(struct connectdata *conn)
       if(bind(portsock, (struct sockaddr *)&sa, size) >= 0) {
         /* we succeeded to bind */
         struct sockaddr_in add;
-        size = sizeof(add);
+        socklen_t socksize = sizeof(add);
 
         if(getsockname(portsock, (struct sockaddr *) &add,
-                       (socklen_t *)&size)<0) {
+                       &socksize)<0) {
           failf(data, "getsockname() failed");
           return CURLE_FTP_PORT_FAILED;
         }
