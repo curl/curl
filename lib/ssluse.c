@@ -374,15 +374,39 @@ Curl_SSLConnect(struct connectdata *conn)
                            NULL, 0);
   if(!str) {
     failf(data, "SSL: couldn't get X509-subject!");
+    X509_free(conn->ssl.server_cert);
     return CURLE_SSL_CONNECT_ERROR;
   }
   infof(data, "\t subject: %s\n", str);
   CRYPTO_free(str);
 
+  if (data->ssl.verifyhost) {
+    char peer_CN[257];
+    if (X509_NAME_get_text_by_NID(X509_get_subject_name(conn->ssl.server_cert), NID_commonName, peer_CN, sizeof(peer_CN)) < 0) {
+      failf(data, "SSL: unable to obtain common name from peer certificate");
+      X509_free(conn->ssl.server_cert);
+      return CURLE_SSL_PEER_CERTIFICATE;
+    }
+
+    if (strcasecmp(peer_CN, conn->hostname) != 0) {
+      if (data->ssl.verifyhost > 1) {
+        failf(data, "SSL: certificate subject name '%s' does not match target host name '%s'",
+            peer_CN, conn->hostname);
+        X509_free(conn->ssl.server_cert);
+        return CURLE_SSL_PEER_CERTIFICATE;
+      }
+      else
+        infof(data, "\t common name: %s (does not match '%s')\n", peer_CN, conn->hostname);
+    }
+    else
+      infof(data, "\t common name: %s (matched)\n", peer_CN);
+  }
+
   str = X509_NAME_oneline (X509_get_issuer_name  (conn->ssl.server_cert),
                            NULL, 0);
   if(!str) {
     failf(data, "SSL: couldn't get X509-issuer name!");
+    X509_free(conn->ssl.server_cert);
     return CURLE_SSL_CONNECT_ERROR;
   }
   infof(data, "\t issuer: %s\n", str);
@@ -393,9 +417,11 @@ Curl_SSLConnect(struct connectdata *conn)
 
   if(data->ssl.verifypeer) {
     data->ssl.certverifyresult=SSL_get_verify_result(conn->ssl.handle);
-    failf(data, "SSL certificate verify result: %d\n",
-          data->ssl.certverifyresult);
-    retcode = CURLE_SSL_PEER_CERTIFICATE;
+    if (data->ssl.certverifyresult != X509_V_OK) {
+      failf(data, "SSL certificate verify result: %d\n",
+            data->ssl.certverifyresult);
+      retcode = CURLE_SSL_PEER_CERTIFICATE;
+    }
   }
   else
     data->ssl.certverifyresult=0;

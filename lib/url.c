@@ -792,6 +792,12 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
      */
     data->ssl.verifypeer = va_arg(param, long);
     break;
+  case CURLOPT_SSL_VERIFYHOST:
+    /*
+     * Enable verification of the CN contained in the peer certificate
+     */
+    data->ssl.verifyhost = va_arg(param, long);
+    break;
   case CURLOPT_CAINFO:
     /*
      * Set CA info for SSL connection. Specify file name of the CA certificate

@@ -129,6 +129,7 @@ struct ssl_config_data {
   long version;          /* what version the client wants to use */
   long certverifyresult; /* result from the certificate verification */
   long verifypeer;       /* set TRUE if this is desired */
+  long verifyhost;       /* 0: no verif, 1: check that CN exists, 2: CN must match hostname */
   char *CApath;          /* DOES NOT WORK ON WINDOWS */
   char *CAfile;          /* cerficate to verify peer against */
   char *random_file;     /* path to file containing "random" data */
