@@ -953,23 +953,28 @@ case "$LIBIDN" in
        AC_MSG_RESULT(no)
        ;;
   *)   AC_MSG_RESULT(yes)
-       AC_CHECK_LIB(idn, idna_to_ascii_lz, ,
-                    [
-                    dnl if there was a given path, try it
-                    nolibidn="true"
-                    if test "x$LIBIDN" != "xyes"; then
-                      nolibidn="" dnl reset to test again
-                      oldLDFLAGS=$LDFLAGS
-                      oldCPPFLAGS=$CPPFLAGS
-                      LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
-                      CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
-                      AC_CHECK_LIB(idn, idna_to_ascii_4i, ,
-                                   nolibidn="true"
-                                   LDFLAGS=$oldLDFLAGS
-                                   CPPFLAGS=$oldCPPFLAGS)
-                    fi
-                    ])
-       if test "x$nolibidn" != "xtrue"; then
+
+       idn=""
+       dnl if there is a given path, check that FIRST
+       if test "x$LIBIDN" != "xyes"; then
+          oldLDFLAGS=$LDFLAGS
+          oldCPPFLAGS=$CPPFLAGS
+          LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
+          CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
+          idn="yes"
+          AC_CHECK_LIB(idn, idna_to_ascii_4i, ,
+                       idn=""
+                       LDFLAGS=$oldLDFLAGS
+                       CPPFLAGS=$oldCPPFLAGS)
+       fi
+
+       if test "x$idn" != "xyes"; then
+          dnl check with default paths
+          AC_CHECK_LIB(idn, idna_to_ascii_lz, ,
+                       idn="")
+       fi
+
+       if test "x$idn" = "xyes"; then
          curl_idn_msg="enabled"
          dnl different versions of libidn have different setups of these:
          AC_CHECK_FUNCS( idn_free idna_strerror )
