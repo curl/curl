@@ -478,7 +478,7 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
                           struct Curl_dns_entry **dns)
 {
   fd_set read_fds, write_fds;
-  static const struct timeval tv={0,0};
+  struct timeval tv={0,0};
   int count;
   struct SessionHandle *data = conn->data;
   int nfds;
