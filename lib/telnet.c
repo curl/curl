@@ -798,7 +798,6 @@ static int check_telnet_options(struct connectdata *conn)
  *
  * Look at the sub-option buffer, and try to be helpful to the other
  * side.
- * No suboptions are supported yet.
  */
 
 static void suboption(struct connectdata *conn)
