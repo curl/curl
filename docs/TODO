@@ -49,8 +49,8 @@ TODO
    very long time idle connections.
 
  * Make sure we don't ever loop because of non-blocking sockets return
-   EWOULDBLOCK or similar. This concerns the HTTP request sending, the FTP
-   command sending etc.
+   EWOULDBLOCK or similar. This concerns the HTTP request sending (and
+   especially regular HTTP POST), the FTP command sending etc.
 
  * Go through the code and verify that libcurl deals with big files >2GB and
    >4GB all over. Bug reports indicate that it doesn't currently work
@@ -143,6 +143,11 @@ TODO
    idea might become moot if we enable the 'data sharing' as mentioned in the
    LIBCURL label above.
 
+ * OpenSSL supports a callback for customised verification of the peer
+   certificate, but this doesn't seem to be exposed in the libcurl APIs. Could
+   it be? There's so much that could be done if it were! (brought by Chris
+   Clark)
+
  * Make curl's SSL layer option capable of using other free SSL libraries.
    Such as the Mozilla Security Services
    (http://www.mozilla.org/projects/security/pki/nss/) and GNUTLS
@@ -166,6 +171,18 @@ TODO
    client could be told to use maximum N simultaneous transfers and then just
    make sure that happens. It should of course not make more than one
    connection to the same remote host.
+
+ * Extending the capabilities of the multipart formposting. How about leaving
+   the ';type=foo' syntax as it is and adding an extra tag (headers) which
+   works like this: curl -F "coolfiles=@fil1.txt;headers=@fil1.hdr" where
+   fil1.hdr contains extra headers like
+
+     Content-Type: text/plain; charset=KOI8-R"
+     Content-Transfer-Encoding: base64
+     X-User-Comment: Please don't use browser specific HTML code
+
+   which should overwrite the program reasonable defaults (plain/text,
+   8bit...) (Idea brough to us by kromJx)
 
  TEST SUITE
 
