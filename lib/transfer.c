@@ -749,6 +749,10 @@ CURLcode Curl_perform(CURL *curl)
   bool port=TRUE; /* allow data->use_port to set port to use */
   char *newurl = NULL; /* possibly a new URL to follow to! */
 
+  if(!data->url)
+    /* we can't do anything wihout URL */
+    return CURLE_URL_MALFORMAT;
+
   data->followlocation=0; /* reset the location-follow counter */
   data->bits.this_is_a_follow = FALSE; /* reset this */
 
