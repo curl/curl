@@ -27,6 +27,7 @@ typedef enum {
   CURLDIGEST_NONE, /* not a digest */
   CURLDIGEST_BAD,  /* a digest, but one we don't like */
   CURLDIGEST_BADALGO, /* unsupported algorithm requested */
+  CURLDIGEST_NOMEM,
   CURLDIGEST_FINE, /* a digest we act on */
 
   CURLDIGEST_LAST  /* last entry in this enum, don't use */

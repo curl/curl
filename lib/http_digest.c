@@ -105,6 +105,8 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
                        value, content)) ) {
         if(strequal(value, "nonce")) {
           d->nonce = strdup(content);
+          if(!d->nonce)
+            return CURLDIGEST_NOMEM;
         }
         else if(strequal(value, "stale")) {
           if(strequal(content, "true")) {
@@ -114,15 +116,21 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
         }
         else if(strequal(value, "realm")) {
           d->realm = strdup(content);
+          if(!d->realm)
+            return CURLDIGEST_NOMEM;
         }
         else if(strequal(value, "opaque")) {
           d->opaque = strdup(content);
+          if(!d->opaque)
+            return CURLDIGEST_NOMEM;
         }
         else if(strequal(value, "qop")) {
           char *tok_buf;
           /* tokenize the list and choose auth if possible, use a temporary
              clone of the buffer since strtok_r() ruins it */
           tmp = strdup(content);
+          if(!tmp)
+            return CURLDIGEST_NOMEM;
           token = strtok_r(tmp, ",", &tok_buf);
           while (token != NULL) {
             if (strequal(token, "auth")) {
@@ -137,13 +145,19 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
           /*select only auth o auth-int. Otherwise, ignore*/
           if (foundAuth) {
             d->qop = strdup("auth");
+            if(!d->qop)
+              return CURLDIGEST_NOMEM;
           }
           else if (foundAuthInt) {
             d->qop = strdup("auth-int");
+            if(!d->qop)
+              return CURLDIGEST_NOMEM;
           }
         }
         else if(strequal(value, "algorithm")) {
           d->algorithm = strdup(content);
+          if(!d->algorithm)
+            return CURLDIGEST_NOMEM;
           if(strequal(content, "MD5-sess"))
             d->algo = CURLDIGESTALGO_MD5SESS;
           else if(strequal(content, "MD5"))
