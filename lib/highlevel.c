@@ -84,9 +84,6 @@
 #include <sys/select.h>
 #endif
 
-#ifndef HAVE_VPRINTF
-#error "We can't compile without vprintf() support!"
-#endif
 #ifndef HAVE_SELECT
 #error "We can't compile without select() support!"
 #endif
@@ -517,7 +514,7 @@ _Transfer(struct connectdata *c_conn)
 
           char scratch[BUFSIZE * 2];
           int i, si;
-          int bytes_written;
+          size_t bytes_written;
 
           if(data->crlf)
             buf = data->buffer; /* put it back on the buffer */
