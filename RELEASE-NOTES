@@ -3,8 +3,11 @@ Curl and libcurl 7.10.8 is out! A bugfix release.
 This release includes the following changes:
 
  o CURLOPT_IPRESOLVE lets you select pure IPv6 or IPv4 resolved addresses
+   (curl offers the command line options -4/--ipv4 and -6/--ipv6)
  o GSS-Negotiate works fine with the MIT kerberos library
- o SPNEGO support added, if libcurl is built with the FBopenssl libraries
+ o SPNEGO support added, if libcurl is built with the FBopenssl libraries,
+   curl_version_info() can return a feature bit for it and curl -V displays
+   SPNEGO as a feature if libcurl is built with it enabled.
  o easy handles added to a multi handle now share DNS cache automaticly
  o CURLINFO_HTTPAUTH_AVAIL and CURLINFO_PROXYAUTH_AVAIL were added
  o CURLOPT_FTP_RESPONSE_TIMEOUT was added
