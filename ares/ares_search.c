@@ -124,7 +124,12 @@ void ares_search(ares_channel channel, const char *name, int dnsclass,
 	  free(s);
 	}
       else
+      {
+        /* failed, free the malloc()ed memory */
+        free(squery->name);
+        free(squery);
 	callback(arg, status, NULL, 0);
+      }
     }
 }
 
