@@ -1,0 +1,9 @@
+- James Bursa made it run on RISC OS
+
+- Dominick Meglio made it run fine on NT4
+
+- Duncan Wilcox made it fine on Mac OS X
+
+- Daniel Stenberg adjusted the windows port
+
+- liren at vivisimo.com made the initial windows port

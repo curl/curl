@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
+
+#include "nameser.h"
+
+int
+strncasecmp(const char *a, const char *b, size_t n)
+{
+    size_t i;
+
+    for (i = 0; i < n; i++) {
+        int c1 = isupper(a[i]) ? tolower(a[i]) : a[i];
+        int c2 = isupper(b[i]) ? tolower(b[i]) : b[i];
+        if (c1 != c2) return c1-c2;
+    }
+    return 0;
+}
+
+int
+strcasecmp(const char *a, const char *b)
+{
+    return strncasecmp(a, b, strlen(a)+1);
+}
+
+int 
+gettimeofday(struct timeval *tv, struct timezone *tz) 
+{
+    FILETIME        ft;
+    LARGE_INTEGER   li;
+    __int64         t;
+    static int      tzflag;
+
+    if (tv)
+    {
+        GetSystemTimeAsFileTime(&ft);
+        li.LowPart  = ft.dwLowDateTime;
+        li.HighPart = ft.dwHighDateTime;
+        t  = li.QuadPart;       /* In 100-nanosecond intervals */
+        //t -= EPOCHFILETIME;     /* Offset to the Epoch time */
+        t /= 10;                /* In microseconds */
+        tv->tv_sec  = (long)(t / 1000000);
+        tv->tv_usec = (long)(t % 1000000);
+    }
+
+#if 0
+    if (tz)
+    {
+        if (!tzflag)
+        {
+            _tzset();
+            tzflag++;
+        }
+        tz->tz_minuteswest = _timezone / 60;
+        tz->tz_dsttime = _daylight;
+    }
+#endif
+
+    return 0;
+}

@@ -1,0 +1,41 @@
+This is ares, an asynchronous resolver library.  It is intended for
+applications which need to perform DNS queries without blocking, or
+need to perform multiple DNS queries in parallel.  The primary
+examples of such applications are servers which communicate with
+multiple clients and programs with graphical user interfaces.
+
+This library implementation is not especially portable to crufty old
+systems like SunOS 4.  It assumes a compiler which can handle ANSI C
+syntax, a system malloc which properly handles realloc(NULL, foo) and
+free(NULL), and a reasonably up-to-date <arpa/nameser.h>.
+
+I have attempted to preserve the externally visible behavior of the
+BIND resolver in nearly all respects.  The API of the library is, of
+course, very different from the synchronous BIND API; instead of
+invoking a function like res_send() and getting a return value back
+indicating the number of bytes in the response, you invoke a function
+like ares_send() and give it a callback function to invoke when the
+response arrives.  You then have to select() on the file descriptors
+indicated by ares_fds(), with a timeout given by ares_timeout().  You
+call ares_process() when select() returns.
+
+Some features are missing from the current version of ares, relative
+to the BIND resolver:
+
+	* There is no IPV6 support.
+	* There is no hostname verification.
+	* There is no logging of unexpected events.
+	* There is no debugging-oriented logging.
+	* There is no YP support.
+
+libares requires an ANSI compiler to compile and use.  To build the
+library, just run "./configure" and "make".  To install it, run "make
+install".  Run "./configure --help" to see a list of options you can
+provide to configure to change how the library builds.  libares has no
+data files, so you can move the include file and library around freely
+without leaving behind any dependencies on old paths.  Building the
+library will also build the "adig" program, a little toy for trying
+out the library.  It doesn't get installed.
+
+libares is distributed at athena-dist.mit.edu:pub/ATHENA/ares.  Please
+send bug reports and comments to ghudson@mit.edu.
