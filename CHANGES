@@ -6,6 +6,16 @@
 
                                History of Changes
 
+Daniel (31 August 2001)
+- I just made a huge internal struct rehaul, and all the big internally used
+  structs have been renamed, redesigned and stuff have been moved around a bit
+  to make the source easier to follow, more logically grouped and to hopefully
+  decrease future bugs. I also hope that this will make new functions to get
+  easier to add, and make it less likely that we have bugs left like the URL-
+  free bug from August 23.
+
+Version 7.9-pre1
+
 Daniel (29 August 2001)
 - The new cookie code have enabled the brand new '-c/--cookie-jar' option. Use
   that to specify the file name in which you want to have all cookies curl
