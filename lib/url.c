@@ -86,6 +86,7 @@
 
 #ifdef USE_LIBIDN
 #include <idna.h>
+#include <tld.h>
 #include <stringprep.h>
 #ifdef HAVE_IDN_FREE_H
 #include <idn-free.h>
@@ -2075,6 +2076,36 @@ static bool is_ASCII_name (const char *hostname)
   }
   return TRUE;
 }
+
+/*
+ * Check if characters in hostname is allowed in Top Level Domain.
+ */
+static bool tld_check_name (struct connectdata *conn,
+                            const char *ace_hostname)
+{
+  struct SessionHandle *data = conn->data;
+  size_t err_pos;
+  char *uc_name = NULL;
+  int rc;
+
+  /* Convert (and downcase) ACE-name back into locale's character set */
+  rc = idna_to_unicode_lzlz(ace_hostname, &uc_name, 0);
+  if (rc != IDNA_SUCCESS)
+     infof(data, "Failed to convert %s from ACE; %s\n",
+           ace_hostname, Curl_idn_strerror(conn,rc));
+
+  rc = tld_check_lz(uc_name, &err_pos, NULL);
+  if (rc == TLD_INVALID)
+     infof(data, "WARNING: %s; pos %u = `%c'/0x%02X\n",
+           tld_strerror(rc), err_pos, uc_name[err_pos],
+           uc_name[err_pos] & 255);
+  else if (rc != TLD_SUCCESS)
+       infof(data, "WARNING: TLD check for %s failed; %s\n",
+             uc_name, tld_strerror(rc));
+  if (uc_name)
+     idn_free(uc_name);
+  return (rc == TLD_SUCCESS);
+}
 #endif
 
 static void fix_hostname(struct connectdata *conn, struct hostname *host)
@@ -2097,6 +2128,8 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
       infof(data, "Failed to convert %s to ACE; %s\n",
             host->name, Curl_idn_strerror(conn,rc));
     else {
+      tld_check_name(conn, ace_hostname);
+
       host->encalloc = ace_hostname;
       /* change the name pointer to point to the encoded hostname */
       host->name = host->encalloc;
