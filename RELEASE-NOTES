@@ -1,0 +1,66 @@
+Curl and libcurl 7.10.8 is out! A bugfix release.
+
+Download from http://curl.haxx.se/download.html. As usual, allow some time
+before the popular binary archives are up-to-date with this release.
+
+Get curl from your favorite mirror by using this service:
+http://curl.haxx.se/latest.cgi
+
+Make sure the files haven't been tampered with by the time they land in your
+filesystem by using these MD5 sums:
+
+
+This release includes the following changes:
+
+ o CURLOPT_IPRESOLVE lets you select pure IPv6 or IPv4 resolved addresses
+ o GSS-Negotiate works fine with the MIT kerberos library
+ o SPNEGO support added, if libcurl is built with the FBopenssl libraries
+ o easy handles added to a multi handle now share DNS cache automaticly
+ o CURLINFO_HTTPAUTH_AVAIL and CURLINFO_PROXYAUTH_AVAIL were added
+ o CURLOPT_FTP_RESPONSE_TIMEOUT was added
+ o NTLM, Digest and GSS-Negotiate authentications should work even for HTTPS
+   over proxies
+ o curl supports multiple -T flags to allow serveral uploaded files using
+   a single command line
+ o CURLINFO_RESPONSE_CODE can return the last FTP response code
+
+This release includes the following bugfixes:
+
+ o PUT with --digest works now 
+ o --anyauth that picks NTLM and then follows a redirect (and does NTLM again)
+   works now
+ o asynch resolves now work on NT4 too
+ o a DNS cache trash (possible segfault) was fixed
+ o runtests.pl clears all proxy environment variables before the test is run
+ o Microsoft's "Negotiate" authentication is now supported by the existing
+   GSSNEGOTIATE option.
+ o A set zero-length proxy name confused libcurl
+ o Digest authentication works again without OpenSSL on 64bit architectures
+ o configure --enable-thread works now
+ o buffer problems in the test suite's web server were fixed
+ o improved proxy password handling
+ o LDAP is again working nicely with the current OpenLDAP
+ o asynch name lookup for non-resolving hosts now return a proper error message
+ o CURLOPT_SSL_VERIFYHOST set to 1 no longer aborts if no CN field is
+   obtainable, it will merely warn about it.
+ o name resolve segfault with uClibc fixed
+ o multi interface and multi-part/formpost could end in segfault
+ o curl_multi_info_read() sets the msgs_in_queue to 0 when returning NULL
+ o multi interface, ares and non-resolving host caused a segfault
+ o minor single SSL memory leak fixed
+ o Setting CURLOPT_WRITEFUNCTION or CURLOPT_READFUNCTION to NULL resets them
+   to default.
+
+Other curl-related news since the previous public release:
+
+ o TclCurl 0.10.7 was released.
+
+This release would not have looked like this without help, code, reports and
+advice from friends like these:
+
+ Loren Kirkby, Jeff Pohlmeyer, Antoine Calando, Gerd v. Egidy, Vincent
+ Sanders, John McGowan, Henrik Storner, Jörg Mueller-Tolk, Peter Pentchev,
+ Early Ehlinger, Kevin Fisk, Jurij Smakov, Bjorn Reese, Tim Bartley,
+ David Kimdon, codemastr, Markus Moeller, Giuseppe Attardi
+ 
+        Thanks! (and sorry if I forgot to mention someone)
