@@ -601,15 +601,15 @@ RESUMING FILE TRANSFERS
 
  Continue downloading a document:
 
-        curl -c -o file ftp://ftp.server.com/path/file
+        curl -C - -o file ftp://ftp.server.com/path/file
 
  Continue uploading a document(*1):
 
-        curl -c -T file ftp://ftp.server.com/path/file
+        curl -C - -T file ftp://ftp.server.com/path/file
 
  Continue downloading a document from a web server(*2):
 
-        curl -c -o file http://www.server.com/
+        curl -C - -o file http://www.server.com/
 
  (*1) = This requires that the ftp server supports the non-standard command
         SIZE. If it doesn't, curl will say so.
