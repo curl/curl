@@ -400,17 +400,26 @@ SPEED LIMIT
 CONFIG FILE
 
   Curl automatically tries to read the .curlrc file (or _curlrc file on win32
-  systems) from the user's home dir on startup. The config file should be
-  made up with normal command line switches. Comments can be used within the
-  file. If the first letter on a line is a '#'-letter the rest of the line
-  is treated as a comment.
+  systems) from the user's home dir on startup.
+
+  The config file could be made up with normal command line switches, but you
+  can also specify the long options without the dashes to make it more
+  readable. You can separate the options and the parameter with spaces, or
+  with = or :. Comments can be used within the file. If the first letter on a
+  line is a '#'-letter the rest of the line is treated as a comment.
+
+  If you want the parameter to contain spaces, you must inclose the entire
+  parameter within double quotes ("). Within those quotes, you specify a
+  quote as \".
+
+  NOTE: You must specify options and their arguments on the same line.
 
   Example, set default time out and proxy in a config file:
 
         # We want a 30 minute timeout:
         -m 1800
         # ... and we use a proxy for all accesses:
-        -x proxy.our.domain.com:8080
+        proxy = proxy.our.domain.com:8080
 
   White spaces ARE significant at the end of lines, but all white spaces
   leading up to the first characters of each line are ignored.
@@ -424,14 +433,14 @@ CONFIG FILE
   without URL by making a config file similar to:
 
         # default url to get
-        http://help.with.curl.com/curlhelp.html
+        url = "http://help.with.curl.com/curlhelp.html"
 
   You can specify another config file to be read by using the -K/--config
   flag. If you set config file name to "-" it'll read the config from stdin,
   which can be handy if you want to hide options from being visible in process
   tables etc:
 
-        echo "-u user:passwd" | curl -K - http://that.secret.site.com
+        echo "user = user:passwd" | curl -K - http://that.secret.site.com
 
 EXTRA HEADERS
 
