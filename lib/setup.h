@@ -304,6 +304,7 @@ typedef struct in_addr Curl_ipconnect;
 /* This could benefit from additional checks that some of the used/important
    header files are present as well before we define the USE_* define. */
 #define USE_LIBIDN
+#define LIBIDN_REQUIRED_VERSION "0.4.5"
 #endif
 
 #endif /* __CONFIG_H */

@@ -87,6 +87,8 @@
 #ifdef USE_LIBIDN
 #include <idna.h>
 #include <stringprep.h>
+void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
+                              libidn 0.4.5's make install! */
 #endif
 
 #ifdef HAVE_OPENSSL_ENGINE_H
@@ -1390,13 +1392,13 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->proxy.rawalloc); /* proxy name buffer */
   if(conn->host.encalloc)
-    (free)(conn->host.encalloc); /* encoded host name buffer, must be freed
-                                    with free() since this was allocated by
-                                    libidn */
+    idn_free(conn->host.encalloc); /* encoded host name buffer, must be freed
+                                      with idn_free() since this was allocated
+                                      by libidn */
   if(conn->proxy.encalloc)
-    (free)(conn->proxy.encalloc); /* encoded proxy name buffer, must be freed
-                                     with free() since this was allocated by
-                                     libidn */
+    idn_free(conn->proxy.encalloc); /* encoded proxy name buffer, must be
+                                       freed with idn_free() since this was
+                                       allocated by libidn */
   Curl_SSL_Close(conn);
 
   /* close possibly still open sockets */
@@ -1997,7 +1999,8 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
   /*************************************************************
    * Check name for non-ASCII and convert hostname to ACE form.
    *************************************************************/
-  if (!is_ASCII_name(host->name)) {
+  if (!is_ASCII_name(host->name) &&
+      stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
     char *ace_hostname = NULL;
     struct SessionHandle *data = conn->data;
     int rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);

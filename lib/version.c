@@ -132,8 +132,10 @@ char *curl_version(void)
   ptr += strlen(ptr);
 #endif
 #ifdef USE_LIBIDN
-  sprintf(ptr, " libidn/%s", stringprep_check_version(NULL));
-  ptr += strlen(ptr);
+  if(stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
+    sprintf(ptr, " libidn/%s", stringprep_check_version(NULL));
+    ptr += strlen(ptr);
+  }
 #endif
 
   return version;
@@ -209,9 +211,6 @@ static curl_version_info_data version_info = {
 #if defined(ENABLE_64BIT) && (SIZEOF_CURL_OFF_T > 4)
   | CURL_VERSION_LARGEFILE
 #endif
-#ifdef USE_LIBIDN
-  | CURL_VERSION_IDN
-#endif
   ,
   NULL, /* ssl_version */
   0,    /* ssl_version_num */
@@ -244,6 +243,13 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
     version_info.ares = ares_version(&aresnum);
     version_info.ares_num = aresnum;
   }
+#endif
+#ifdef USE_LIBIDN
+  /* This returns a version string if we use the given version or later,
+     otherwise it returns NULL */
+  version_info.libidn = stringprep_check_version(LIBIDN_REQUIRED_VERSION);
+  if(version_info.libidn)
+    version_info.features |= CURL_VERSION_IDN;
 #endif
   (void)stamp; /* avoid compiler warnings, we don't use this */
 

@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (24 May 2004)
+- Simon Josefsson added a idn_free() function in libidn 0.4.5 as a reaction to
+  Gisle's previous mail. We now use this function, and thus we require libidn
+  0.4.5 or later. No earler version will do.
+
 - Robert D. Young reported that CURLOPT_COOKIEFILE and CURLOPT_COOKIE could
   not be used both in one request. Fixed it and added test case 172 to verify.
 
