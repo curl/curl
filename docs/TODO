@@ -17,9 +17,7 @@ TODO
 
  * Make content encoding/decoding internally be made using a filter system.
 
- * The new 'multi' interface is being designed. Work out the details, start
-   implementing and write test applications!
-   [http://curl.haxx.se/lxr/source/lib/multi.h]
+ * Test the 'multi' interface more.
 
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
@@ -56,6 +54,9 @@ TODO
    >4GB all over. Bug reports indicate that it doesn't currently work
    properly.
 
+ * Make the built-in progress meter use its own dedicated output stream, and
+   make it possible to set it. Use stderr by default.
+
  DOCUMENTATION
 
  * Document all CURLcode error codes, why they happen and what most likely
@@ -77,9 +78,6 @@ TODO
  * Add FTPS support with SSL for the data connection too.
 
  HTTP
-
- * Make it possible to supply normal POST data through the ordinary read data
-   callback.
 
  * HTTP PUT for files passed on stdin *OR* when the --crlf option is
    used. Requires libcurl to send the file with chunked content
