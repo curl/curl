@@ -18,6 +18,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o the MSVC libcurl Makefile was fixed
+ o libcurl on Windows crash if resolver was active when easy handle was killed
  o HTTP POST with auth and an initial 100 response before the 401/407
  o configure's SSL-detection for msys/mingw
  o better connection keep-alive when POSTing with HTTP Digest
@@ -50,6 +52,6 @@ advice from friends like these:
  Dan Fandrich, Ignacio Vazquez-Abrams, Randy McMurchy, Dominick Meglio,
  Jean-Marc Ranger, Tor Arntsen, Nodak Sodak, David Houlder, Gisle Vanem,
  Christopher R. Palmer, Gwenole Beauchesne, Augustus Saunders, Jesper Jensen,
- Tom Moers, Andres Garcia, Hardeep Singh
+ Tom Moers, Andres Garcia, Hardeep Singh, Marcelo Juchem
 
         Thanks! (and sorry if I forgot to mention someone)

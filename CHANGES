@@ -8,6 +8,12 @@
 
 
 Daniel (4 April 2005)
+- Marcelo Juchem fixed the MSVC makefile for libcurl
+
+- Gisle Vanem fixed a crash in libcurl, that could happen if the easy handle
+  was killed before the threading resolver (windows only) still hadn't
+  completed.
+
 - Hardeep Singh reported a problem doing HTTP POST with Digest. (It was
   actually also affecting NTLM and Negotiate.) It turned out that if the
   server responded with 100 Continue before the initial 401 response, libcurl
