@@ -1156,9 +1156,22 @@ AC_CHECK_SIZEOF(curl_off_t, ,[
 #include "$srcdir/include/curl/curl.h"
 ])
 AC_CHECK_SIZEOF(size_t)
+AC_CHECK_SIZEOF(long)
 
 AC_CHECK_TYPE(long long,
-   [AC_DEFINE(HAVE_LONGLONG, 1, [if your compiler supports 'long long'])])
+   [AC_DEFINE(HAVE_LONGLONG, 1, [if your compiler supports long long])]
+   longlong="yes"  
+)
+
+if test "xyes" = "x$longlong"; then
+  AC_MSG_CHECKING([if numberLL works])
+  AC_COMPILE_IFELSE([long long val = 1000LL;],
+   [AC_DEFINE(HAVE_LL, 1, [if your compiler supports LL])]
+   AC_MSG_RESULT(yes),
+   AC_MSG_RESULT(no)
+  )
+fi
+
 
 # check for ssize_t
 AC_CHECK_TYPE(ssize_t, ,
