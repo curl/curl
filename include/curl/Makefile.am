@@ -3,5 +3,6 @@ pkginclude_HEADERS = \
 	easy.h \
 	mprintf.h \
 	stdcheaders.h \
-	types.h
+	types.h \
+	multi.h
 pkgincludedir= $(includedir)/curl
