@@ -78,5 +78,7 @@ endif
 else # USE_MANUAL
 # built-in manual has been disabled, make a blank file
 $(HUGE):
-	echo "/* explicitly disabled */" >$(HUGE)
+	echo "/* built-in manual is disabled, blank function */" > $(HUGE)
+	echo '#include "hugehelp.h"' >> $(HUGE)
+	echo "void hugehelp(void) {}" >>$(HUGE)
 endif
