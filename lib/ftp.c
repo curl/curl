@@ -1343,8 +1343,8 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
        we're already connected to, as then we can skip the name function
        call below, in similar style that we do for the EPSV reply */
   }
-#if 1
-  else if (strcmp(mode[modeoff], "EPSV") == 0) {
+#if 0
+  else if (229 == results[modeoff]) {
     char *ptr = strchr(buf, '(');
     if(ptr) {
       unsigned int num;
