@@ -6,7 +6,44 @@
 
                                History of Changes
 
+Daniel (24 July 2000)
+- Added CURLOPT_PROXYPORT to the curl_easy_setopt() call to allow the proxy
+  port number to be set separately from the proxy host name.
+
+- Andrew <andrew at ugh.net.au> pointed out a netrc manual bug.
+
+- The FTP transfer code now accepts a 250-code as well as the previously
+  accepted 226, after a successful file transfer. Mohan <mnair at
+  evergreen-funds.com> pointed this out.
+
+- The check for *both* nsl and socket was never added in the v7 configure.in
+  when I moved the main branch. I re-added that check to configure.in. This was
+  discovered by Rich Gray.
+
+- Howard, Blaise <Blaise.Howard at factiva.com> pointed out a missing free() in
+  curl_disconnect() which of course meant libcurl ate memory.
+
+- Brian E. Gallew noted that the HTTP 'Host:' header curl sent did not
+  properly include the port number if non-default ports were used. This should
+  now have been fixed.
+
+- HTTP connect errors now return errors earlier. This was most notably causing
+  problems when the HTTPS certificate had problems and later caused a crash.
+  Many thanks to Gregory Nicholls <gnicholls at level8.com> for discovering
+  and suggesting a fix...
+
+Daniel (21 June 2000)
+- After a "bug report" I received where the user was using both -F and -I in a
+  HTTP request (it severly confused the library I should add), I added some
+  checks to src/main.c that prevents setting more than one HTTP request
+  command, no matter what the user wants! ;-)
+
+Version 7.0.8beta
+
 Daniel (20 June 2000)
+- I did a major replace in many files to use the new curl domain haxx.se
+  instead of the previous one.
+
 - As Eetu Ojanen suggested, I finally took the step and now libcurl no longer
   makes a POST after it has followed a location. When the initial POST has
   been done, it'll turned into a GET for the further requests. This is only
