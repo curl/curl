@@ -169,6 +169,8 @@ Win32
         set, then run 'nmake -f Makefile.vc6' in the lib/ dir and then
         'nmake -f Makefile.vc6' in the src/ dir.
 
+        The vcvars32.bat file is part of the Microsoft development environment.
+
       IDE-style
       -------------------------
         If you use VC++, Borland or similar compilers. Include all lib source
@@ -213,6 +215,8 @@ Win32
         Run the 'vcvars32.bat' file to get the proper environment variables
         set, then run 'nmake -f Makefile.vc6 release-ssl' in the lib/ dir and
         then 'nmake -f Makefile.vc6' in the src/ dir.
+
+        The vcvars32.bat file is part of the Microsoft development environment.
 
       Microsoft / Borland style
       -------------------------
