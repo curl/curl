@@ -107,7 +107,8 @@ while test $# -gt 0; do
 	;;
 
     --cflags)
-       	echo -I@includedir@
+       	#echo -I@includedir@
+        echo ""
        	;;
 
     --libs)
