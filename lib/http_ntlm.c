@@ -330,10 +330,12 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 {
   const char *domain=""; /* empty */
   const char *host=""; /* empty */
+#ifndef USE_WINDOWS_SSPI
   int domlen=(int)strlen(domain);
   int hostlen = (int)strlen(host);
   int hostoff; /* host name offset */
   int domoff;  /* domain name offset */
+#endif
   size_t size;
   char *base64=NULL;
   unsigned char ntlmbuf[256]; /* enough, unless the host/domain is very long */
