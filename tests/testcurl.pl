@@ -459,5 +459,10 @@ if ($gnulikebuild) {
   print "TESTDONE: 1 tests out of 0 (dummy message)\n"; # dummy message to feign success
 }
 
+# simple way to create a tarball just before the build is deleted.
+if (-f '../mktarball') {
+  system('../mktarball');
+}
+
 # mydie to cleanup
 mydie "ending nicely";
