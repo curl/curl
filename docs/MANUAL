@@ -689,7 +689,7 @@ ENVIRONMENT VARIABLES
 
   Curl reads and understands the following environment variables:
 
-        HTTP_PROXY, HTTPS_PROXY, FTP_PROXY, GOPHER_PROXY
+        http_proxy, HTTPS_PROXY, FTP_PROXY, GOPHER_PROXY
 
   They should be set for protocol-specific proxies. General proxy should be
   set with
