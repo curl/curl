@@ -1,0 +1,48 @@
+# Server-side
+<reply>
+<data>
+foo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP with --ftp-create-dirs (failing CWD)
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/first/dir/here/147 --ftp-create-dirs
+</command>
+</test>
+<file name="log/ftpserver.cmd">
+REPLY CWD 550 I won't allow this on my server
+COUNT CWD 1
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# strip all kinds of PORT, EPRT and LPRT curl can do
+<strip>
+^PORT 127,0,0,1,.*
+^EPRT.*
+^LPRT.*
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD first
+MKD first
+CWD first
+CWD dir
+CWD here
+EPSV
+TYPE I
+SIZE 147
+RETR 147
+</protocol>
+</verify>
