@@ -1,5 +1,4 @@
 #############################################################
-# $Id$
 #
 ## Makefile for building libcurl.a with MingW32 (GCC-2.95) and
 ## optionally OpenSSL (0.9.6)
@@ -12,7 +11,7 @@ CC = gcc
 AR = ar
 RANLIB = ranlib
 STRIP = strip -g
-OPENSSL_PATH = ../../openssl-0.9.6
+OPENSSL_PATH = ../../openssl-0.9.6b
 
 ########################################################
 ## Nothing more to do below this line!
@@ -62,7 +61,7 @@ libcurl.a: $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 
 libcurl.dll libcurldll.a: libcurl.a libcurl.def dllinit.o
 	-@erase $@
-	dllwrap --dllname $@ --output-lib libcurldll.a --export-all --def libcurl.def $(libcurl_a_LIBRARIES) dllinit.o -L$(OPENSSL_PATH)/out $(DLL_LIBS) -lwsock32
+	dllwrap --dllname $@ --output-lib libcurldll.a --export-all --def libcurl.def $(libcurl_a_LIBRARIES) dllinit.o -L$(OPENSSL_PATH)/out $(DLL_LIBS) -lwsock32 -lws2_32
 	$(STRIP) $@
 
 # remove the last line above to keep debug info
