@@ -6,8 +6,9 @@
 
 
 This document has been introduced in order to let you find documents that
-specify standards used by curl, software that extends curl and web pages with
-"competing" utilities.
+specify standards used by curl, software that extends curl, web pages with
+"competing" utilities and information pages that describe some of the tools
+that we use to build/compile/develop curl.
 
 Standards
 
@@ -43,17 +44,17 @@ Standards
   RFC 2229 - "A Dictionary Server Protocol"
 
   RFC 2231 - "MIME Parameter Value and Encoded Word Extensions:
-              Character Sets, Languages, and Continuations"
+             Character Sets, Languages, and Continuations"
 
   RFC 2388 - "Returning Values from Forms: multipart/form-data"
-   Use this as an addition to the 1867 
+             Use this as an addition to the 1867 
 
-  RFC 2396 - "Uniform Resource Identifiers: Generic Syntax and Semantics" 
-   This one obsoletes 1738, but since 1738 is often mentioned I've left it
-   in this list.
+  RFC 2396 - "Uniform Resource Identifiers: Generic Syntax and Semantics" This
+             one obsoletes 1738, but since 1738 is often mentioned I've left
+             it in this list.
 
   RFC 2428 - "FTP Extensions for IPv6 and NATs"
-   This should be considered when introducing IPv6 awareness.
+             This should be considered when introducing IPv6 awareness.
 
   RFC 2616 - HTTP 1.1
 
@@ -62,12 +63,13 @@ Standards
 Compilers
 
   MingW32 - http://www.xraylith.wisc.edu/~khan/software/gnu-win32/index.html
+  gcc     - http://www.gnu.org/software/gcc/gcc.html
 
 Software
 
-  OpenSSL - http://www.openssl.org
+  OpenSSL -  http://www.openssl.org
   OpenLDAP - http://www.openldap.org
-  zlib - http://www.cdrom.com/pub/infozip/zlib/
+  zlib -     http://www.cdrom.com/pub/infozip/zlib/
 
 Competitors
 
@@ -77,3 +79,11 @@ Competitors
   swebget - http://www.uni-hildesheim.de/~smol0075/swebget/
   fetch   - ?
 
+Related Software
+
+  ftpparse - http://cr.yp.to/ftpparse.html parses FTP LIST responses
+  autoconf - http://www.gnu.org/software/autoconf/autoconf.html
+  automake - http://www.gnu.org/software/automake/automake.html
+  bison    - http://www.gnu.org/software/bison/bison.html
+  gzip     - http://www.gnu.org/software/gzip/gzip.html
+  tar      - http://www.gnu.org/software/tar/tar.html
