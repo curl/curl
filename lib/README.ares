@@ -31,12 +31,21 @@ Build ares
 3. ./configure
 4. make
 
-Build libcurl to use ares
-=========================
+Build libcurl to use ares in the curl source tree
+=================================================
 
 1. name the ares source directory 'ares' in the curl source directory
 2. ./configure --enable-ares
 3. make
+
+Build libcurl to use an installed ares
+======================================
+
+1. ./configure --enable-ares=/path/to/ares/install
+2. make
+
+Ares and ipv6
+=============
 
 If the configure script enables IPv6 support you need to explicitly disable
 that (--disable-ipv6) since ares isn't IPv6 compatible (yet).
