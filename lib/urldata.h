@@ -781,8 +781,6 @@ struct UrlState {
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *engine;
 #endif /* USE_SSLEAY */
-  struct curl_slist *engine_list; /* list of names from ENGINE_get_id() */
-
 };
 
 

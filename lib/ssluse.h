@@ -43,6 +43,6 @@ CURLcode Curl_SSL_set_engine(struct SessionHandle *data, const char *engine);
 CURLcode Curl_SSL_set_engine_default(struct SessionHandle *data);
 
 /* Build list of OpenSSL engines */
-CURLcode Curl_SSL_engines_list(struct SessionHandle *data);
+struct curl_slist *Curl_SSL_engines_list(struct SessionHandle *data);
 
 #endif

@@ -412,6 +412,22 @@ int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
   return ok;
 }
 
+/* Return error string for last OpenSSL error
+ */
+static char *SSL_strerror(unsigned long error, char *buf, size_t size)
+{
+#ifdef HAVE_ERR_ERROR_STRING_N
+  /* OpenSSL 0.9.6 and later has a function named
+     ERRO_error_string_n() that takes the size of the buffer as a
+     third argument */
+  ERR_error_string_n(error, buf, size);
+#else
+  (void) size;
+  ERR_error_string(error, buf);
+#endif
+  return (buf);
+}
+
 /* "global" init done? */
 static int init_ssl=0;
 
@@ -480,6 +496,7 @@ void Curl_SSL_Close(struct connectdata *conn)
 {
   (void)conn;
 }
+
 #endif
 
 
@@ -501,8 +518,11 @@ CURLcode Curl_SSL_set_engine(struct SessionHandle *data, const char *engine)
   }
   data->state.engine = NULL;
   if (!ENGINE_init(e)) {
+    char buf[256];
+
     ENGINE_free(e);
-    failf(data, "Failed to initialise SSL Engine '%s'", engine);
+    failf(data, "Failed to initialise SSL Engine '%s':\n%s",
+          engine, SSL_strerror(ERR_get_error(), buf, sizeof(buf)));
     return (CURLE_SSL_ENGINE_INITFAILED);
   }
   data->state.engine = e;
@@ -533,23 +553,19 @@ CURLcode Curl_SSL_set_engine_default(struct SessionHandle *data)
   return (CURLE_OK);
 }
 
-/* Build the list of OpenSSL crypto engine names. Add to
- * linked list at data->state.engine_list.
+/* Return list of OpenSSL crypto engine names.
  */
-CURLcode Curl_SSL_engines_list(struct SessionHandle *data)
+struct curl_slist *Curl_SSL_engines_list(struct SessionHandle *data)
 {
+  struct curl_slist *list = NULL;
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *e;
 
-  /* Free previous list */
-  if (data->state.engine_list)
-    curl_slist_free_all(data->state.engine_list);
-
-  data->state.engine_list = NULL;
   for (e = ENGINE_get_first(); e; e = ENGINE_get_next(e))
-    data->state.engine_list = curl_slist_append(data->state.engine_list, ENGINE_get_id(e));
+    list = curl_slist_append(list, ENGINE_get_id(e));
 #endif
-  return (CURLE_OK);
+  (void) data;
+  return (list);
 }
 
 
@@ -696,10 +712,6 @@ int Curl_SSL_Close_All(struct SessionHandle *data)
     ENGINE_free(data->state.engine);
     data->state.engine = NULL;
   }
-  if (data->state.engine_list)
-    curl_slist_free_all(data->state.engine_list);
-  data->state.engine_list = NULL;
-
 #endif
   return 0;
 }
@@ -1432,14 +1444,7 @@ Curl_SSLConnect(struct connectdata *conn,
         }
         /* Could be a CERT problem */
 
-#ifdef HAVE_ERR_ERROR_STRING_N
-          /* OpenSSL 0.9.6 and later has a function named
-             ERRO_error_string_n() that takes the size of the buffer as a
-             third argument */
-          ERR_error_string_n(errdetail, error_buffer, sizeof(error_buffer));
-#else
-          ERR_error_string(errdetail, error_buffer);
-#endif
+        SSL_strerror(errdetail, error_buffer, sizeof(error_buffer));
         failf(data, "%s%s", cert_problem ? cert_problem : "", error_buffer);
         return rc;
       }

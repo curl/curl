@@ -182,8 +182,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_longp = data->info.numconnects;
     break;
   case CURLINFO_SSL_ENGINES:
-    Curl_SSL_engines_list(data);
-    *param_slistp = data->state.engine_list;
+    *param_slistp = Curl_SSL_engines_list(data);
     break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;
