@@ -12,10 +12,10 @@ moo
 # Client-side
 <client>
  <name>
-file:// with relative path
+basic file:// file
  </name>
  <command>
-file://log/test200.txt
+file://localhost/%PWD/log/test200.txt
 </command>
 <file name="log/test200.txt">
 foo

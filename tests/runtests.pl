@@ -68,6 +68,9 @@ my $debugprotocol;
 my $anyway;
 my $gdbthis;      # run test case with gdb debugger
 my $keepoutfiles; # keep stdout and stderr files after tests
+my $pwd;          # current working directory
+
+chomp($pwd = `pwd`);
 
 #######################################################################
 # Return the pid of the server as found in the given pid file
@@ -443,6 +446,8 @@ sub singletest {
     $cmd =~ s/%FTPPORT/$FTPPORT/g;
     $cmd =~ s/%FTPSPORT/$FTPSPORT/g;
     $cmd =~ s/%SRCDIR/$srcdir/g;
+    $cmd =~ s/%PWD/$pwd/g;
+
     #$cmd =~ s/%HOSTNAME/$HOSTNAME/g;
 
     if($memory_debug) {
