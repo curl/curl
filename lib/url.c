@@ -1125,12 +1125,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * String that holds the SSL crypto engine.
      */
-#ifdef HAVE_OPENSSL_ENGINE_H
     {
       const char *cpTemp = va_arg(param, char *);
-      ENGINE     *e;
       if (cpTemp && cpTemp[0]) {
-        e = ENGINE_by_id(cpTemp);
+#ifdef HAVE_OPENSSL_ENGINE_H
+        ENGINE *e = ENGINE_by_id(cpTemp);
         if (e) {
           if (data->engine) {
             ENGINE_free(data->engine);
@@ -1141,12 +1140,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
           failf(data, "SSL Engine '%s' not found", cpTemp);
           return CURLE_SSL_ENGINE_NOTFOUND;
         }
+#else
+        failf(data, "SSL Engine not supported");
+        return CURLE_SSL_ENGINE_NOTFOUND;
+#endif
       }
     }
     break;
-#else
-    return CURLE_SSL_ENGINE_NOTFOUND;
-#endif
+
   case CURLOPT_SSLENGINE_DEFAULT:
     /*
      * flag to set engine as default.
