@@ -45,6 +45,7 @@
 #include "strequal.h"
 #include "base64.h"
 #include "http_ntlm.h"
+#include "url.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -269,7 +270,8 @@ static void mkhash(char *password,
   (((x) >>16)&0xff), ((x)>>24)
 
 /* this is for creating ntlm header output */
-CURLcode Curl_output_ntlm(struct connectdata *conn)
+CURLcode Curl_output_ntlm(struct connectdata *conn,
+                          bool proxy)
 {
   const char *domain=""; /* empty */
   const char *host=""; /* empty */
@@ -279,8 +281,27 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
   int domoff;  /* domain name offset */
   int size;
   char *base64=NULL;
-
   unsigned char ntlm[256]; /* enough, unless the host/domain is very long */
+
+  /* point to the address of the pointer that holds the string to sent to the
+     server, which is for a plain host or for a HTTP proxy */
+  char **allocuserpwd;
+
+  /* point to the name and password for this */
+  char *userp;
+  char *passwdp;
+
+  if(proxy) {
+    allocuserpwd = &conn->allocptr.proxyuserpwd;
+    userp = conn->proxyuser;
+    passwdp = conn->proxypasswd;
+  }
+  else {
+    allocuserpwd = &conn->allocptr.userpwd;
+    userp = conn->user;
+    passwdp = conn->passwd;
+  }
+  
   switch(conn->ntlm.state) {
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
@@ -338,10 +359,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     size = Curl_base64_encode(ntlm, size, &base64);
 
     if(size >0 ) {
-      if(conn->allocptr.userpwd)
-        free(conn->allocptr.userpwd);
-      conn->allocptr.userpwd = aprintf("Authorization: NTLM %s\r\n",
-                                       base64);
+      Curl_safefree(*allocuserpwd);
+      *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
+                              proxy?"Proxy-":"",
+                              base64);
       free(base64);
     }
     else
@@ -378,20 +399,20 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     const char *user;
     int userlen;
 
-    user = strchr(conn->user, '\\');
+    user = strchr(userp, '\\');
     if(!user)
-      user = strchr(conn->user, '/');
+      user = strchr(userp, '/');
 
     if (user) {
-      domain = conn->user;
+      domain = userp;
       domlen = user - domain;
       user++;
     }
     else
-      user = conn->user;
+      user = userp;
     userlen = strlen(user);
 
-    mkhash(conn->passwd, &conn->ntlm.nonce[0], lmresp
+    mkhash(passwdp, &conn->ntlm.nonce[0], lmresp
 #ifdef USE_NTRESPONSES
            , ntresp
 #endif
@@ -511,10 +532,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     size = Curl_base64_encode(ntlm, size, &base64);
 
     if(size >0 ) {
-      if(conn->allocptr.userpwd)
-        free(conn->allocptr.userpwd);
-      conn->allocptr.userpwd = aprintf("Authorization: NTLM %s\r\n",
-                                       base64);
+      Curl_safefree(*allocuserpwd);
+      *allocuserpwd = aprintf("%sAuthorization: NTLM %s\r\n",
+                              proxy?"Proxy-":"",
+                              base64);
       free(base64);
     }
     else
@@ -528,9 +549,9 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
   case NTLMSTATE_TYPE3:
     /* connection is already authenticated,
      * don't send a header in future requests */
-    if(conn->allocptr.userpwd) {
-      free(conn->allocptr.userpwd);
-      conn->allocptr.userpwd=NULL;
+    if(*allocuserpwd) {
+      free(*allocuserpwd);
+      *allocuserpwd=NULL;
     }
     break;
   }
