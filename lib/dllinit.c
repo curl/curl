@@ -1,3 +1,4 @@
+#ifdef WIN32
 /* dllinit.c -- Portable DLL initialization. 
    Copyright (C) 1998, 1999 Free Software Foundation, Inc.
    Contributed by Mumit Khan (khan@xraylith.wisc.edu).
@@ -80,3 +81,4 @@ DllMain (
     }
   return TRUE;
 }
+#endif
