@@ -1839,6 +1839,8 @@ operate(struct Configurable *config, int argc, char *argv[])
   int res = 0;
   int i;
 
+  errorbuffer[0]=0; /* prevent junk from being output */
+
 #ifdef MALLOCDEBUG
   /* this sends all memory debug messages to a logfile named memdump */
   curl_memdebug("memdump");
