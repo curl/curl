@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "12 March 2001" "Curl 7.7" "Curl Manual"
+.TH curl 1 "14 March 2001" "Curl 7.7" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -166,6 +166,11 @@ previous URL when it follows a Location: header. The ";auto" string can be
 used alone, even if you don't set an initial referer.
 
 If this option is used serveral times, the last one will be used.
+.IP "--egd-file <file>"
+(HTTPS) Specify the path name to the Entropy Gathering Daemon socket. The
+socket is used to seed the random engine for SSL connections. See also the
+.I "--random-file"
+option.
 .IP "-E/--cert <certificate[:password]>"
 (HTTPS)
 Tells curl to use the specified certificate file when getting a file
@@ -383,6 +388,12 @@ to be run before and after the transfer. If the server returns failure for one
 of the commands, the entire operation will be aborted.
 
 This option can be used multiple times.
+.IP "--random-file <file>"
+(HTTPS) Specify the path name to file containing what will be considered as
+random data. The data is used to seed the random engine for SSL connections.
+See also the
+.I "--edg-file"
+option.
 .IP "-r/--range <range>"
 (HTTP/FTP)
 Retrieve a byte range (i.e a partial document) from a HTTP/1.1 or FTP
