@@ -1886,7 +1886,7 @@ CURLcode Curl_http(struct connectdata *conn)
              This limit is no magic limit but only set to prevent really huge
              POSTs to get the data duplicated with malloc() and family. */
 
-          result == add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
+          result = add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
           if(result)
             return result;
 
