@@ -113,7 +113,7 @@ Content-Disposition: form-data; name="FILECONTENT"
 #include <stdarg.h>
 #include <time.h>
 #include <sys/stat.h>
-#ifdef HAVE_LIBGEN_H
+#if defined(HAVE_LIBGEN_H) && defined(HAVE_BASENAME)
 #include <libgen.h>
 #endif
 #include "formdata.h"
