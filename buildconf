@@ -133,6 +133,14 @@ echo "buildconf: running autoheader"
 ${AUTOHEADER:-autoheader} || die "The command '${AUTOHEADER:-autoheader}' failed"
 echo "buildconf: running autoconf"
 ${AUTOCONF:-autoconf}     || die "The command '${AUTOCONF:-autoconf}' failed"
+
+if test -d ares; then
+  echo "buildconf: running autoconf in the ares directory"
+  cd ares
+  ${AUTOCONF:-autoconf}     || die "The command '${AUTOCONF:-autoconf}' failed"
+  cd ..
+fi
+
 echo "buildconf: running automake"
 ${AUTOMAKE:-automake} -a  || die "The command '${AUTOMAKE:-automake} -a' failed"
 exit 0
