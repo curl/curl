@@ -56,7 +56,7 @@
 
 struct send_request {
   /* Remaining data to send */
-  const char *data;
+  const unsigned char *data;
   int len;
 
   /* Next request in queue */
@@ -88,11 +88,11 @@ struct query {
   time_t timeout;
 
   /* Query buf with length at beginning, for TCP transmission */
-  char *tcpbuf;
+  unsigned char *tcpbuf;
   int tcplen;
 
   /* Arguments passed to ares_send() (qbuf points into tcpbuf) */
-  const char *qbuf;
+  const unsigned char *qbuf;
   int qlen;
   ares_callback callback;
   void *arg;
