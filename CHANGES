@@ -6,7 +6,34 @@
 
                                   Changelog
 
+Daniel (5 Aug 2002)
+- Lukasz Czekierda reported that RFC2732-style literal IPv6 addresses didn't
+  work. When did that code vanish? Anyway, it's back again now and seems to
+  work!
+
+- Jonatan Lander found out that POSTing an empty string didn't work with the
+  command line tool.
+
+Daniel (3 Aug 2002)
+- Jörn Hartroth fixed the libcurl.def file to build the windows DLL with
+  the multi interface enabled.
+
+Daniel (1 Aug 2002)
+- The ftp PORT command now uses a better default IP address, as it will
+  extract and use the local IP address used by the control connection.
+
+- Modified the #include lines in curl/multi.h to work better on more
+  platforms.
+
+Daniel (31 Jul 2002)
+- Attempted a fix for Ray DeGennaro's reported HP-UX host name resolve
+  problems.
+
 Daniel (30 Jul 2002)
+- Priya Ramakrishnan and Ryan Jones compiles curl/curl.h with a C++ compiler
+  and don't get __STDC__ defined, which required us to extend the preprocessor
+  check for the ## operator usage.
+
 - Correct the description for CURLOPT_PASSWDFUNCTION, if set to NULL the
   internal default function will be put back.
 
