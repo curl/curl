@@ -7,10 +7,20 @@
                                History of Changes
 
 Daniel (12 April 2002)
+- Fixed the TIMER_CONNECT to be more accurate for FTP transfers. Previously
+  FTP transfers got the "connect done" time set after the initial FTP commands
+  and not directly after the TCP/IP connect as it should.
+
+  I also made the time stamp get set even if the connect itself fails, which
+  it didn't do previously.
+
 - Jean-Philippe Barrette-LaPierre provided his patch that introduces
   CURLOPT_DEBUGFUNCTION and CURLOPT_DEBUGDATA. They allow a program to a set a
   callback to receive debug/information data. That includes headers and data
-  that is received and sent.
+  that is received and sent. CURLOPT_VERBOSE still controls it.
+
+  By default, there is an internal debugfunction that will make things look
+  and work as before if not changed.
 
 Daniel (10 April 2002)
 - Sebastien Willemijns found out that -x didn't use the default port number as

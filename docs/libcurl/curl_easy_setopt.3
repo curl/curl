@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "2 Apr 2002" "libcurl 7.9.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "12 Apr 2002" "libcurl 7.9.6" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -35,7 +35,7 @@ The \fIhandle\fP is the return code from a \fIcurl_easy_init(3)\fP or
 \fIcurl_easy_duphandle(3)\fP call.
 .SH OPTIONS
 The options are listed in a sort of random order, but you'll figure it out!
-.TP 0.8i
+.TP 0.4i
 .B CURLOPT_FILE
 Data pointer to pass to the file write function. Note that if you specify the
 \fICURLOPT_WRITEFUNCTION\fP, this is the pointer you'll get as input. If you
@@ -626,10 +626,23 @@ libcurl caches info for 60 seconds. (Added in libcurl 7.9.3)
 Pass a long. If the value is non-zero, it tells curl to use a global DNS cache
 that will survive between easy handles creations and deletions. This is not
 thread-safe and this will use a global varible. (Added in libcurl 7.9.3)
+.TP
+.B CURLOPT_DEBUGFUNCTION
+Function pointer that should match the following prototype: \fIint
+curl_debug_callback (CURL *, curl_infotype, char *, size_t, void *);\fP
+This function will receive debug information if CURLOPT_VERBOSE is
+enabled. The curl_infotype argument specifies what kind of information it
+is. This funtion must return 0.
+.TP
+.B CURLOPT_DEBUGDATA
+Pass a pointer to whatever you want passed in to your CURLOPT_DEBUGFUNCTION in
+the last void * argument. This pointer is not used by libcurl, it is only
+passed to the callback.
 .PP
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as \fI<curl/curl.h>\fP defines.
+error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP
+man page for the full list with descriptions.
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_cleanup "(3), "
 .SH BUGS
