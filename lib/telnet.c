@@ -226,9 +226,9 @@ static void printoption(struct SessionHandle *data,
     if (cmd == IAC)
     {
       if (TELCMD_OK(option))
-        printf("%s IAC %s\n", direction, TELCMD(option));
+        Curl_infof(data, "%s IAC %s\n", direction, TELCMD(option));
       else
-        printf("%s IAC %d\n", direction, option);
+        Curl_infof(data, "%s IAC %d\n", direction, option);
     }
     else
     {
@@ -244,12 +244,12 @@ static void printoption(struct SessionHandle *data,
           opt = NULL;
 
         if(opt)
-          printf("%s %s %s\n", direction, fmt, opt);
+          Curl_infof(data, "%s %s %s\n", direction, fmt, opt);
         else
-          printf("%s %s %d\n", direction, fmt, option);
+          Curl_infof(data, "%s %s %d\n", direction, fmt, option);
       }
       else
-        printf("%s %d %d\n", direction, cmd, option);
+        Curl_infof(data, "%s %d %d\n", direction, cmd, option);
     }
   }
 }
@@ -638,7 +638,7 @@ static void printsub(struct SessionHandle *data,
   {
     if (direction)
     {
-      printf("%s IAC SB ", (direction == '<')? "RCVD":"SENT");
+      Curl_infof(data, "%s IAC SB ", (direction == '<')? "RCVD":"SENT");
       if (length >= 3)
       {
         int j;
@@ -648,27 +648,27 @@ static void printsub(struct SessionHandle *data,
 
         if (i != IAC || j != SE)
         {
-          printf("(terminated by ");
+          Curl_infof(data, "(terminated by ");
           if (TELOPT_OK(i))
-            printf("%s ", TELOPT(i));
+            Curl_infof(data, "%s ", TELOPT(i));
           else if (TELCMD_OK(i))
-            printf("%s ", TELCMD(i));
+            Curl_infof(data, "%s ", TELCMD(i));
           else
-            printf("%d ", i);
+            Curl_infof(data, "%d ", i);
           if (TELOPT_OK(j))
-            printf("%s", TELOPT(j));
+            Curl_infof(data, "%s", TELOPT(j));
           else if (TELCMD_OK(j))
-            printf("%s", TELCMD(j));
+            Curl_infof(data, "%s", TELCMD(j));
           else
-            printf("%d", j);
-          printf(", not IAC SE!) ");
+            Curl_infof(data, "%d", j);
+          Curl_infof(data, ", not IAC SE!) ");
         }
       }
       length -= 2;
     }
     if (length < 1)
     {
-      printf("(Empty suboption?)");
+      Curl_infof(data, "(Empty suboption?)");
       return;
     }
 
@@ -677,28 +677,28 @@ static void printsub(struct SessionHandle *data,
         case TELOPT_TTYPE:
         case TELOPT_XDISPLOC:
         case TELOPT_NEW_ENVIRON:
-          printf("%s", TELOPT(pointer[0]));
+          Curl_infof(data, "%s", TELOPT(pointer[0]));
           break;
         default:
-          printf("%s (unsupported)", TELOPT(pointer[0]));
+          Curl_infof(data, "%s (unsupported)", TELOPT(pointer[0]));
           break;
       }
     }
     else
-      printf("%d (unknown)", pointer[i]);
+      Curl_infof(data, "%d (unknown)", pointer[i]);
 
     switch(pointer[1]) {
       case TELQUAL_IS:
-        printf(" IS");
+        Curl_infof(data, " IS");
         break;
       case TELQUAL_SEND:
-        printf(" SEND");
+        Curl_infof(data, " SEND");
         break;
       case TELQUAL_INFO:
-        printf(" INFO/REPLY");
+        Curl_infof(data, " INFO/REPLY");
         break;
       case TELQUAL_NAME:
-        printf(" NAME");
+        Curl_infof(data, " NAME");
         break;
     }
       
@@ -706,21 +706,21 @@ static void printsub(struct SessionHandle *data,
       case TELOPT_TTYPE:
       case TELOPT_XDISPLOC:
         pointer[length] = 0;
-        printf(" \"%s\"", &pointer[2]);
+        Curl_infof(data, " \"%s\"", &pointer[2]);
         break;
       case TELOPT_NEW_ENVIRON:
         if(pointer[1] == TELQUAL_IS) {
-          printf(" ");
+          Curl_infof(data, " ");
           for(i = 3;i < length;i++) {
             switch(pointer[i]) {
               case NEW_ENV_VAR:
-                printf(", ");
+                Curl_infof(data, ", ");
                 break;
               case NEW_ENV_VALUE:
-                printf(" = ");
+                Curl_infof(data, " = ");
                 break;
               default:
-                printf("%c", pointer[i]);
+                Curl_infof(data, "%c", pointer[i]);
                 break;
             }
           }
@@ -728,13 +728,13 @@ static void printsub(struct SessionHandle *data,
         break;
       default:
         for (i = 2; i < length; i++)
-          printf(" %.2x", pointer[i]);
+          Curl_infof(data, " %.2x", pointer[i]);
         break;
     }
       
     if (direction)
     {
-      printf("\n");
+      Curl_infof(data, "\n");
     }
   }
 }
