@@ -109,7 +109,6 @@
 #include "progress.h"
 #include "cookie.h"
 #include "strequal.h"
-#include "writeout.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -1206,9 +1205,14 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   conn->serv_addr.sin_family = conn->hp->h_addrtype;
   conn->serv_addr.sin_port = htons(data->port);
 
-/* sck 8/31/2000 add support for specifing device to bind socket to */
-/* #ifdef LINUX */
-/* I am using this, but it may not work everywhere, only tested on RedHat 6.2 */
+#ifndef WIN32 
+  /* We don't generally like checking for OS-versions, we should make this
+     HAVE_XXXX based, although at the moment I don't have a decent test for
+     this! */
+
+  /* sck 8/31/2000 add support for specifing device to bind socket to */
+  /* I am using this, but it may not work everywhere, only tested on
+     RedHat 6.2 */
 #ifdef HAVE_INET_NTOA
 
 #ifndef INADDR_NONE
@@ -1337,6 +1341,7 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
   } /* end of device selection support */
 #endif  /* end of HAVE_INET_NTOA */
+#endif /* end of not WIN32 */
 
   if (connect(data->firstsocket,
               (struct sockaddr *) &(conn->serv_addr),
