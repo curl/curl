@@ -756,7 +756,7 @@ AC_ARG_ENABLE(debug,
     CPPFLAGS="$CPPFLAGS -DMALLOCDEBUG"
     CFLAGS="$CFLAGS -g" 
     if test "$GCC" = "yes"; then
-       CFLAGS="$CFLAGS -W -Wall -Wwrite-strings -pedantic -Wundef -Wpointer-arith -Wcast-align -Wnested-externs"
+       CFLAGS="$CFLAGS -W -Wall -Wwrite-strings -pedantic -Wundef -Wpointer-arith -Wnested-externs"
     fi
     dnl strip off optimizer flags
     NEWFLAGS=""
