@@ -193,8 +193,8 @@ typedef enum {
  * or SECURITY_KERNEL, indicating who is compiling the code.
  */
 #define SECURITY_WIN32 1
-#include <sspi.h>
 #include <Security.h>
+#include <sspi.h>
 #include <rpc.h>
 #endif
 
