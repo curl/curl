@@ -1279,13 +1279,12 @@ CURLcode Curl_http(struct connectdata *conn)
       case HTTPREQ_PUT:
         request = (char *)"PUT";
         break;
+      default: /* this should never happen */
       case HTTPREQ_GET:
         request = (char *)"GET";
         break;
       case HTTPREQ_HEAD:
         request = (char *)"HEAD";
-        break;
-      default: /* this should never happen */
         break;
       }
     }
