@@ -5,7 +5,7 @@
 #                            | (__| |_| |  _ <| |___ 
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # In order to be useful for every potential user, curl and libcurl are
 # dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -43,13 +43,13 @@ mingw32-ssl:
 
 vc:
 	cd lib
-	nmake -f Makefile.vc6
+	nmake -f Makefile.vc6 cfg=release
 	cd ..\src
 	nmake -f Makefile.vc6
 
 vc-ssl:
 	cd lib
-	nmake -f Makefile.vc6 release-ssl
+	nmake -f Makefile.vc6 cfg=release-ssl
 	cd ..\src
 	nmake -f Makefile.vc6
 
