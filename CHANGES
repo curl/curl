@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (8 January 2004)
+- Fixed the SPNEGO configure check to not use -R or other non-portable options
+  in the LDFLAGS. Reported by Pierre in bug report #872930.
+
 Daniel (5 January 2004)
 - Dan Fandrich provided a fix on our zlib usage.
 
