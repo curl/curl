@@ -7,6 +7,10 @@
                                History of Changes
 
 Daniel (8 January 2001)
+- Francis Dagenais reported that the SCO compiler still fails when compiling
+  curl due to that getpass_r() prototype. I've now put it around #ifndef
+  HAVE_GETPASS_R in an attempt to please the SCO systems.
+
 - Made some minor corrections to get the client to cleanup properly and I made
   the separator work again when getting multiple globbed URLs to stdout.
 
