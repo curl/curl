@@ -1967,10 +1967,13 @@ CURLcode ftp_perform(struct connectdata *conn,
       return result;
   }
 
-  /* change directory first! */
-  if(ftp->dir && ftp->dir[0]) {
-    if ((result = ftp_cwd(conn, ftp->dir)) != CURLE_OK)
+  {
+    int i; /* counter for loop */
+    for (i=0; ftp->dirs[i]; i++) {
+      /* RFC 1738 says empty components should be respected too */
+      if ((result = ftp_cwd(conn, ftp->dirs[i])) != CURLE_OK)
         return result;
+    }
   }
 
   /* Requested time of file or time-depended transfer? */
@@ -2091,34 +2094,64 @@ CURLcode ftp_perform(struct connectdata *conn,
  */
 CURLcode Curl_ftp(struct connectdata *conn)
 {
-  CURLcode retcode;
+  CURLcode retcode=CURLE_OK;
   bool connected=0;
 
   struct SessionHandle *data = conn->data;
   struct FTP *ftp;
-  int dirlength=0; /* 0 forces strlen() */
+
+  char *slash_pos;  /* position of the first '/' char in curpos */
+  char *cur_pos=conn->ppath; /* current position in ppath. point at the begin
+                                of next path component */
+  int path_part=0;/* current path component */
 
   /* the ftp struct is already inited in ftp_connect() */
   ftp = conn->proto.ftp;
   conn->size = -1; /* make sure this is unknown at this point */
 
-  /* We split the path into dir and file parts *before* we URLdecode
-     it */
-  ftp->file = strrchr(conn->ppath, '/');
-  if(ftp->file) {
-    if(ftp->file != conn->ppath)
-      dirlength=ftp->file-conn->ppath; /* don't count the traling slash */
+  /*  fixed : initialize ftp->dirs[xxx] to NULL !
+      is done in Curl_ftp_connect() */
 
-    ftp->file++; /* point to the first letter in the file name part or
-                    remain NULL */
+  /* parse the URL path into separate path components */
+  while((slash_pos=strchr(cur_pos, '/'))) {
+    /* seek out the next path component */
+    if (0 == slash_pos-cur_pos)  /* empty path component, like "x//y" */
+      ftp->dirs[path_part] = strdup(""); /* empty string */
+    else
+      ftp->dirs[path_part] = curl_unescape(cur_pos,slash_pos-cur_pos);
+    
+    if (!ftp->dirs[path_part]) { /* run out of memory ... */
+      failf(data, "no memory");
+      retcode = CURLE_OUT_OF_MEMORY;
+    }
+    else {
+      cur_pos = slash_pos + 1; /* jump to the rest of the string */
+      if(++path_part >= CURL_MAX_FTP_DIRDEPTH) {
+        /* too deep */
+        failf(data, "too deep dir hierarchy");
+        retcode = CURLE_URL_MALFORMAT;
+      }
+    }
+    if (retcode) {
+      int i;
+      for (i=0;i<path_part;i++) { /* free previous parts */
+        free(ftp->dirs[i]);
+        ftp->dirs[i]=NULL;
+      }
+      return retcode; /* failure */
+    }
   }
-  else {
-    ftp->file = conn->ppath; /* there's only a file part */
-  }
+
+  ftp->file = cur_pos;  /* the rest is the file name */
 
   if(*ftp->file) {
     ftp->file = curl_unescape(ftp->file, 0);
     if(NULL == ftp->file) {
+      int i;
+      for (i=0;i<path_part;i++){
+        free(ftp->dirs[i]);
+        ftp->dirs[i]=NULL;
+      }
       failf(data, "no memory");
       return CURLE_OUT_OF_MEMORY;
     }
@@ -2126,20 +2159,7 @@ CURLcode Curl_ftp(struct connectdata *conn)
   else
     ftp->file=NULL; /* instead of point to a zero byte, we make it a NULL
                        pointer */
-
-  ftp->urlpath = conn->ppath;
-  if(dirlength) {
-    ftp->dir = curl_unescape(ftp->urlpath, dirlength);
-    if(NULL == ftp->dir) {
-      if(ftp->file)
-        free(ftp->file);
-      failf(data, "no memory");
-      return CURLE_OUT_OF_MEMORY; /* failure */
-    }
-  }
-  else
-    ftp->dir = NULL;
-
+  
   retcode = ftp_perform(conn, &connected);
 
   if(CURLE_OK == retcode) {
@@ -2219,6 +2239,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 CURLcode Curl_ftp_disconnect(struct connectdata *conn)
 {
   struct FTP *ftp= conn->proto.ftp;
+  int i;
 
   /* The FTP session may or may not have been allocated/setup at this point! */
   if(ftp) {
@@ -2228,10 +2249,12 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
       free(ftp->cache);
     if(ftp->file)
       free(ftp->file);
-    if(ftp->dir)
-      free(ftp->dir);
+    for (i=0;ftp->dirs[i];i++){
+      free(ftp->dirs[i]);
+      ftp->dirs[i]=NULL;
+    }
 
-    ftp->file = ftp->dir = NULL; /* zero */
+    ftp->file = NULL; /* zero */
   }
   return CURLE_OK;
 }
