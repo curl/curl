@@ -172,6 +172,7 @@ typedef enum {
   CURLE_HTTP_PORT_FAILED, /* HTTP Interface operation failed */
 
   CURLE_BAD_PASSWORD_ENTERED, /* when the my_getpass() returns fail */
+  CURLE_TOO_MANY_REDIRECTS , /* catch endless re-direct loops */
 
   CURL_LAST
 } CURLcode;
@@ -417,16 +418,16 @@ typedef enum {
   /* Custom pointer that gets passed as first argument to the password
      function */
   CINIT(PASSWDDATA, OBJECTPOINT, 67),
+  
+  /* Maximum number of http redirects to follow */
+  CINIT(MAXREDIRS, LONG, 68),
 
   /* Pass a pointer to a time_t to get a possible date of the requested
      document! Pass a NULL to shut it off. */
-  CINIT(FILETIME, OBJECTPOINT, 68),
+  CINIT(FILETIME, OBJECTPOINT, 69),
 
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
-
-#define CURL_PROGRESS_STATS 0 /* default progress display */
-#define CURL_PROGRESS_BAR   1
 
 typedef enum {
   TIMECOND_NONE,
@@ -469,7 +470,7 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.5-pre3"
+#define LIBCURL_VERSION "7.5-pre4"
 #define LIBCURL_VERSION_NUM 0x070500
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
