@@ -268,7 +268,7 @@ static int send_doc(int sock, int doc, int part_no)
   char *ptr;
   FILE *stream;
   char *cmd=NULL;
-  int cmdsize;
+  int cmdsize=0;
 
   char filename[256];
   char partbuf[80]="data";
@@ -285,10 +285,8 @@ static int send_doc(int sock, int doc, int part_no)
     count = strlen(buffer);
   }
   else {
-    if(0 != part_no) {
+    if(0 != part_no)
       sprintf(partbuf, "data%d", part_no);
-    }
-
 
     sprintf(filename, TEST_DATA_PATH, doc);
 
