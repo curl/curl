@@ -6,6 +6,29 @@
 
                                   Changelog
 
+Daniel (14 April 2004)
+- runtests.pl now has a new option (-p) that will display "interesting" log
+  files to stdout in case of a test failure. This is primarily intended to be
+  used in the 'full-test' make target that is used by the autobuild tests, as
+  we then get a much better chance to understand (remote) test failures based
+  on autobuild logs alone.
+
+Daniel (13 April 2004)
+- Gisle Vanem made the multi interface work again on Windows even when built
+  without ares. Before this, select() would return -1 during the name resolve
+  phase since curl_multi_fdset() didn't return any fd_set at all which wasn't
+  appreciated!
+
+- curl_easy_duphandle() now duplicates the tcp_nodelay info as well.
+
+Daniel (11 April 2004)
+- Applied David Byron's patch for the MSVC libcurl makefile for builds with
+  zlib.
+
+Daniel (9 April 2004)
+- Dirk Manske improved the timer resolution for CURLINFO_*_TIME, it can now
+  be down to usec if the system sypports it.
+
 Daniel (7 April 2004)
 - A request that sends "Expect: 100-continue" and gets nothing but a single
   100 response back will now return a CURLE_GOT_NOTHING. Test 158 verifies.
