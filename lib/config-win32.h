@@ -41,7 +41,7 @@
 
 /* Borland lacks _lseeki64(), so we don't support >2GB files */
 #ifdef __BORLANDC__
-#define SIZEOF_CURL_OFF_T 4 
+#define SIZEOF_CURL_OFF_T 4
 #else
 #define SIZEOF_CURL_OFF_T 8
 #endif
@@ -121,7 +121,9 @@
 /*#define HAVE_UNAME 1*/
 
 /* Define if you have utime() */
+#ifndef __BORLANDC__
 #define HAVE_UTIME 1
+#endif
 
 /* Define if you have the <alloca.h> header file.  */
 /*#define HAVE_ALLOCA_H 1*/
@@ -178,7 +180,9 @@
 #define HAVE_SYS_STAT_H 1
 
 /* Define if you have the <sys/utime.h> header file */
+#ifndef __BORLANDC__
 #define HAVE_SYS_UTIME_H 1
+#endif
 
 /* Define if you have the <sys/types.h> header file.  */
 #define HAVE_SYS_TYPES_H 1
