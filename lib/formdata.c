@@ -944,7 +944,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
     if (result)
       break;
 
-    size += AddFormData(&form, "\"", 0, &size);
+    result = AddFormData(&form, "\"", 0, &size);
     if (result)
       break;
 
