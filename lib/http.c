@@ -162,6 +162,8 @@ void Curl_http_auth_act(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
 
+  data->state.authwant = CURLAUTH_NONE; /* clear it first */
+
   if(data->state.authavail) {
     if(data->state.authavail & CURLAUTH_GSSNEGOTIATE)
       data->state.authwant = CURLAUTH_GSSNEGOTIATE;
@@ -171,13 +173,11 @@ void Curl_http_auth_act(struct connectdata *conn)
       data->state.authwant = CURLAUTH_NTLM;
     else if(data->state.authavail & CURLAUTH_BASIC)
       data->state.authwant = CURLAUTH_BASIC;
-    else
-      data->state.authwant = CURLAUTH_NONE; /* none */
 
     if(data->state.authwant)
       conn->newurl = strdup(data->change.url); /* clone URL */
+    data->state.authavail = CURLAUTH_NONE; /* clear it here */
   }
-  data->state.authavail = CURLAUTH_NONE; /* clear it here */
 }
 
 /*
