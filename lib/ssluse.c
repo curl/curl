@@ -1025,26 +1025,35 @@ Curl_SSLConnect(struct connectdata *conn)
                                   NID_commonName,
                                   peer_CN,
                                   sizeof(peer_CN)) < 0) {
-      failf(data, "SSL: unable to obtain common name from peer certificate");
-      X509_free(conn->ssl.server_cert);
-      return CURLE_SSL_PEER_CERTIFICATE;
-    }
-
-    if (!cert_hostcheck(peer_CN, conn->hostname)) {
+      /* Failed to get the CN field from the server's certificate */
       if (data->set.ssl.verifyhost > 1) {
-        failf(data, "SSL: certificate subject name '%s' does not match "
-              "target host name '%s'",
-              peer_CN, conn->hostname);
+        failf(data, "SSL: unable to obtain common name from peer certificate");
         X509_free(conn->ssl.server_cert);
         return CURLE_SSL_PEER_CERTIFICATE;
       }
       else
-        infof(data,
-              "\t common name: %s (does not match '%s')\n",
-              peer_CN, conn->hostname);
+        /* Consider verifyhost == 1 as an "OK" for a missing CN field, but we
+           output a note about the situation */
+        infof(data, "\t common name: WARNING couldn't obtain\n");
     }
-    else
-      infof(data, "\t common name: %s (matched)\n", peer_CN);
+    else {
+      /* Compare the CN field with the remote host name */
+      if (!cert_hostcheck(peer_CN, conn->hostname)) {
+        if (data->set.ssl.verifyhost > 1) {
+          failf(data, "SSL: certificate subject name '%s' does not match "
+                "target host name '%s'",
+                peer_CN, conn->hostname);
+          X509_free(conn->ssl.server_cert);
+          return CURLE_SSL_PEER_CERTIFICATE;
+        }
+        else
+          infof(data,
+                "\t common name: %s (does not match '%s')\n",
+                peer_CN, conn->hostname);
+      }
+      else
+        infof(data, "\t common name: %s (matched)\n", peer_CN);
+    }
   }
 
   str = X509_NAME_oneline (X509_get_issuer_name  (conn->ssl.server_cert),
