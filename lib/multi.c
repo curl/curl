@@ -220,6 +220,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
   struct Curl_one_easy *easy;
   bool done;
+  CURLMcode result=CURLM_OK;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -229,28 +230,30 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
     switch(easy->state) {
     case CURLM_STATE_INIT:
-      /* init this transfer. Hm, uh, I can't think of anything to init
-         right now, let's skip over to CONNECT at once!
-
-         easy->result = Curl_init(easy->easy_handle);     
-         if(CURLE_OK == easy->result)
-      */
-      /* after init, go CONNECT */
-      easy->state = CURLM_STATE_CONNECT;
+      /* init this transfer. */
+      easy->result=Curl_pretransfer(easy->easy_handle);
+      if(CURLE_OK == easy->result) {
+        /* after init, go CONNECT */
+        easy->state = CURLM_STATE_CONNECT;
+        result = CURLM_CALL_MULTI_PERFORM; 
+      }
       break;
     case CURLM_STATE_CONNECT:
       /* connect */
       easy->result = Curl_connect(easy->easy_handle);     
       /* after connect, go DO */
-      if(CURLE_OK == easy->result)
+      if(CURLE_OK == easy->result) {
         easy->state = CURLM_STATE_DO;
+        result = CURLM_CALL_MULTI_PERFORM; 
+      }
       break;
     case CURLM_STATE_DO:
       /* Do the fetch or put request */
       easy->result = Curl_do(easy->easy_handle);
       /* after do, go PERFORM */
-      if(CURLE_OK == easy->result)
+      if(CURLE_OK == easy->result) {
         easy->state = CURLM_STATE_PERFORM;
+      }
       break;
     case CURLM_STATE_PERFORM:
       /* read/write data if it is ready to do so */
@@ -258,8 +261,11 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       /* hm, when we follow redirects, we may need to go back to the CONNECT
          state */
       /* after the transfer is done, go DONE */
-      if(TRUE == done)
+      if(TRUE == done) {
+        /* call this even if the readwrite function returned error */
+        easy->result = Curl_posttransfer(easy->easy_handle);
         easy->state = CURLM_STATE_DONE;
+      }
       break;
     case CURLM_STATE_DONE:
       /* post-transfer command */
