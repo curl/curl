@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -132,7 +132,7 @@ Content-Disposition: form-data; name="FILECONTENT"
 /***************************************************************************
  *
  * AddHttpPost()
- *	
+ *
  * Adds a HttpPost structure to the list, if parent_post is given becomes
  * a subpost of parent_post instead of a direct list element.
  *
@@ -167,13 +167,13 @@ AddHttpPost(char * name, size_t namelength,
   }
   else
     return NULL;
-  
+
   if (parent_post) {
     /* now, point our 'more' to the original 'more' */
     post->more = parent_post->more;
-    
+
     /* then move the original 'more' to point to ourselves */
-    parent_post->more = post;	         
+    parent_post->more = post;
   }
   else {
     /* make the previous point to this */
@@ -181,8 +181,8 @@ AddHttpPost(char * name, size_t namelength,
       (*last_post)->next = post;
     else
       (*httppost) = post;
-    
-    (*last_post) = post;  
+
+    (*last_post) = post;
   }
   return post;
 }
@@ -190,7 +190,7 @@ AddHttpPost(char * name, size_t namelength,
 /***************************************************************************
  *
  * AddFormInfo()
- *	
+ *
  * Adds a FormInfo structure to the list presented by parent_form_info.
  *
  * Returns newly allocated FormInfo on success and NULL if malloc failed/
@@ -213,11 +213,11 @@ static FormInfo * AddFormInfo(char *value,
   }
   else
     return NULL;
-  
+
   if (parent_form_info) {
     /* now, point our 'more' to the original 'more' */
     form_info->more = parent_form_info->more;
-    
+
     /* then move the original 'more' to point to ourselves */
     parent_form_info->more = form_info;
   }
@@ -230,7 +230,7 @@ static FormInfo * AddFormInfo(char *value,
 /***************************************************************************
  *
  * ContentTypeForFilename()
- *	
+ *
  * Provides content type for filename if one of the known types (else
  * (either the prevtype or the default is returned).
  *
@@ -257,7 +257,7 @@ static const char * ContentTypeForFilename (const char *filename,
     {".txt",  "text/plain"},
     {".html", "text/html"}
   };
-  
+
   if(prevtype)
     /* default to the previously set/used! */
     contenttype = prevtype;
@@ -265,7 +265,7 @@ static const char * ContentTypeForFilename (const char *filename,
     /* It seems RFC1867 defines no Content-Type to default to
        text/plain so we don't actually need to set this: */
     contenttype = HTTPPOST_CONTENTTYPE_DEFAULT;
-  
+
   for(i=0; i<sizeof(ctts)/sizeof(ctts[0]); i++) {
     if(strlen(filename) >= strlen(ctts[i].extension)) {
       if(strequal(filename +
@@ -273,7 +273,7 @@ static const char * ContentTypeForFilename (const char *filename,
 		  ctts[i].extension)) {
 	contenttype = ctts[i].type;
 	break;
-      }	      
+      }
     }
   }
   /* we have a contenttype by now */
@@ -283,7 +283,7 @@ static const char * ContentTypeForFilename (const char *filename,
 /***************************************************************************
  *
  * memdup()
- *	
+ *
  * Copies the 'source' data to a newly allocated buffer buffer (that is
  * returned). Uses buffer_length if not null, else uses strlen to determine
  * the length of the buffer to be copied
@@ -296,7 +296,7 @@ static char *memdup(const char *src, size_t buffer_length)
   size_t length;
   bool add = FALSE;
   char *buffer;
-  
+
   if (buffer_length)
     length = buffer_length;
   else {
@@ -306,7 +306,7 @@ static char *memdup(const char *src, size_t buffer_length)
   buffer = (char*)malloc(length+add);
   if (!buffer)
     return NULL; /* fail */
-  
+
   memcpy(buffer, src, length);
 
   /* if length unknown do null termination */
@@ -319,7 +319,7 @@ static char *memdup(const char *src, size_t buffer_length)
 /***************************************************************************
  *
  * FormAdd()
- *	
+ *
  * Stores a formpost parameter and builds the appropriate linked list.
  *
  * Has two principal functionalities: using files and byte arrays as
@@ -567,7 +567,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         }
         break;
       }
-      
+
     case CURLFORM_BUFFERPTR:
         current_form->flags |= HTTPPOST_PTRBUFFER;
       if (current_form->buffer)
@@ -628,12 +628,12 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         struct curl_slist* list = array_state?
           (struct curl_slist*)array_value:
           va_arg(params, struct curl_slist*);
-        
+
         if( current_form->contentheader )
           return_value = CURL_FORMADD_OPTION_TWICE;
         else
           current_form->contentheader = list;
-        
+
         break;
       }
     case CURLFORM_FILENAME:
@@ -659,7 +659,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   if(CURL_FORMADD_OK == return_value) {
     /* go through the list, check for copleteness and if everything is
      * alright add the HttpPost item otherwise set return_value accordingly */
-    
+
     post = NULL;
     for(form = first_form;
         form != NULL;
@@ -704,7 +704,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
           form->name_alloc = TRUE;
         }
         if ( !(form->flags & HTTPPOST_FILENAME) &&
-             !(form->flags & HTTPPOST_READFILE) && 
+             !(form->flags & HTTPPOST_READFILE) &&
              !(form->flags & HTTPPOST_PTRCONTENTS) &&
              !(form->flags & HTTPPOST_PTRBUFFER) ) {
           /* copy value (without strdup; possibly contains null characters) */
@@ -722,7 +722,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
                            form->contentheader, form->showfilename,
                            post, httppost,
                            last_post);
-        
+
         if(!post) {
           return_value = CURL_FORMADD_MEMORY;
           break;
@@ -754,7 +754,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   form = first_form;
   while (form != NULL) {
     FormInfo *delete_form;
-    
+
     delete_form = form;
     form = form->more;
     free (delete_form);
@@ -807,7 +807,7 @@ static CURLcode AddFormData(struct FormData **formp,
   memcpy(newform->line, line, length);
   newform->length = length;
   newform->line[length]=0; /* zero terminate for easier debugging */
-  
+
   if(*formp) {
     (*formp)->next = newform;
     *formp = newform;
@@ -872,7 +872,7 @@ char *Curl_FormBoundary(void)
 /*
  * Curl_formclean() is used from http.c, this cleans a built FormData linked
  * list
- */ 
+ */
 void Curl_formclean(struct FormData *form)
 {
   struct FormData *next;
@@ -884,7 +884,7 @@ void Curl_formclean(struct FormData *form)
     next=form->next;  /* the following form line */
     free(form->line); /* free the line */
     free(form);       /* free the struct */
-  
+
   } while((form=next)); /* continue */
 }
 
@@ -949,7 +949,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
   boundary = Curl_FormBoundary();
   if(!boundary)
     return CURLE_OUT_OF_MEMORY;
-  
+
   /* Make the first line of the output */
   result = AddFormDataf(&form, NULL,
                         "Content-Type: multipart/form-data;"
@@ -963,7 +963,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
      part of the header! */
 
   firstform = form;
-  
+
   do {
 
     if(size) {
@@ -1033,7 +1033,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
         if (result)
           break;
       }
-      
+
       if(file->contenttype) {
         /* we have a specified type */
         result = AddFormDataf(&form, &size,
@@ -1063,7 +1063,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
        * should, I can just as well skip this to the benefit of the users who
        * are using such confused receivers.
        */
-      
+
       if(file->contenttype &&
          !checkprefix("text/", file->contenttype)) {
         /* this is not a text content, mention our binary encoding */
@@ -1112,7 +1112,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
           return CURLE_READ_ERROR;
         }
 
-      } 
+      }
       else if (post->flags & HTTPPOST_BUFFER) {
         /* include contents of buffer */
         result = AddFormData(&form, post->buffer, post->bufferlength,
@@ -1140,7 +1140,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
          boundary: */
       result = AddFormDataf(&form, &size,
                            "\r\n--%s--",
-                           fileboundary);     
+                           fileboundary);
       free(fileboundary);
       if (result)
         break;
@@ -1208,7 +1208,7 @@ size_t Curl_FormReader(char *buffer,
     return 0; /* nothing, error, empty */
 
   do {
-  
+
     if( (form->data->length - form->sent ) > wantedsize - gotsize) {
 
       memcpy(buffer + gotsize , form->data->line + form->sent,
@@ -1223,7 +1223,7 @@ size_t Curl_FormReader(char *buffer,
            form->data->line + form->sent,
            (form->data->length - form->sent) );
     gotsize += form->data->length - form->sent;
-    
+
     form->sent = 0;
 
     form->data = form->data->next; /* advance */
