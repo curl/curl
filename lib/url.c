@@ -1611,7 +1611,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
       nope=no_proxy?strtok_r(no_proxy, ", ", &no_proxy_tok_buf):NULL;
       while(nope) {
-        int namelen;
+        unsigned int namelen;
         char *endptr = strchr(conn->name, ':');
         if(endptr)
           namelen=endptr-conn->name;
