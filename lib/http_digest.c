@@ -221,22 +221,36 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   char *cnonce;
   char *tmp = NULL;
   struct timeval now;
+
+  char **allocuserpwd;
+  char *userp;
+  char *passwdp;
   struct auth *authp;
-  char **userp;
 
   struct SessionHandle *data = conn->data;
   struct digestdata *d;
 
   if(proxy) {
     d = &data->state.proxydigest;
+    allocuserpwd = &conn->allocptr.proxyuserpwd;
+    userp = conn->proxyuser;
+    passwdp = conn->proxypasswd;
     authp = &data->state.authproxy;
-    userp = &conn->allocptr.proxyuserpwd;
   }
   else {
     d = &data->state.digest;
+    allocuserpwd = &conn->allocptr.userpwd;
+    userp = conn->user;
+    passwdp = conn->passwd;
     authp = &data->state.authhost;
-    userp = &conn->allocptr.userpwd;
   }
+
+  /* not set means empty */
+  if(!userp)
+    userp=(char *)"";
+
+  if(!passwdp)
+    passwdp=(char *)"";
 
   if(!d->nonce) {
     authp->done = FALSE;
@@ -269,7 +283,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   */
 
   md5this = (unsigned char *)
-    aprintf("%s:%s:%s", conn->user, d->realm, conn->passwd);
+    aprintf("%s:%s:%s", userp, d->realm, passwdp);
   if(!md5this)
     return CURLE_OUT_OF_MEMORY;
   Curl_md5it(md5buf, md5this);
@@ -347,10 +361,10 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     nonce="1053604145", uri="/64", response="c55f7f30d83d774a3d2dcacf725abaca"
   */
 
-  Curl_safefree(conn->allocptr.userpwd);
+  Curl_safefree(*allocuserpwd);
 
   if (d->qop) {
-    *userp =
+    *allocuserpwd =
       aprintf( "%sAuthorization: Digest "
                "username=\"%s\", "
                "realm=\"%s\", "
@@ -361,7 +375,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                "qop=\"%s\", "
                "response=\"%s\"",
                proxy?"Proxy-":"",
-               conn->user,
+               userp,
                d->realm,
                d->nonce,
                uripath, /* this is the PATH part of the URL */
@@ -376,7 +390,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                   same nonce in the qop=auth mode. */
   }
   else {
-    *userp =
+    *allocuserpwd =
       aprintf( "%sAuthorization: Digest "
                "username=\"%s\", "
                "realm=\"%s\", "
@@ -384,40 +398,40 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                "uri=\"%s\", "
                "response=\"%s\"",
                proxy?"Proxy-":"",
-               conn->user,
+               userp,
                d->realm,
                d->nonce,
                uripath, /* this is the PATH part of the URL */
                request_digest);
   }
-  if(!*userp)
+  if(!*allocuserpwd)
     return CURLE_OUT_OF_MEMORY;
 
   /* Add optional fields */
   if(d->opaque) {
     /* append opaque */
-    tmp = aprintf("%s, opaque=\"%s\"", *userp, d->opaque);
+    tmp = aprintf("%s, opaque=\"%s\"", *allocuserpwd, d->opaque);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
-    free(*userp);
-    *userp = tmp;
+    free(*allocuserpwd);
+    *allocuserpwd = tmp;
   }
 
   if(d->algorithm) {
     /* append algorithm */
-    tmp = aprintf("%s, algorithm=\"%s\"", *userp, d->algorithm);
+    tmp = aprintf("%s, algorithm=\"%s\"", *allocuserpwd, d->algorithm);
     if(!tmp)
       return CURLE_OUT_OF_MEMORY;
-    free(*userp);
-    *userp = tmp;
+    free(*allocuserpwd);
+    *allocuserpwd = tmp;
   }
 
   /* append CRLF to the userpwd header */
-  tmp = (char*) realloc(*userp, strlen(*userp) + 3 + 1);
+  tmp = (char*) realloc(*allocuserpwd, strlen(*allocuserpwd) + 3 + 1);
   if(!tmp)
     return CURLE_OUT_OF_MEMORY;
   strcat(tmp, "\r\n");
-  *userp = tmp;
+  *allocuserpwd = tmp;
 
   return CURLE_OK;
 }
