@@ -37,6 +37,10 @@
   #include <netinet/in.h>
 #endif
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 #define ARES_SUCCESS            0
 
 /* Server error codes (ARES_ENODATA indicates no relevant answer) */
@@ -139,5 +143,9 @@ void ares_free_string(void *str);
 void ares_free_hostent(struct hostent *host);
 const char *ares_strerror(int code);
 void ares_free_errmem(char *mem);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* ARES__H */
