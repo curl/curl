@@ -53,10 +53,11 @@ typedef enum {
  */
 static GlobCode glob_word(URLGlob *, /* object anchor */
                           char *,    /* globbed string */
-                          int,       /* position */
+                          size_t,       /* position */
                           int *);    /* returned number of strings */
 
-static GlobCode glob_set(URLGlob *glob, char *pattern, int pos, int *amount)
+static GlobCode glob_set(URLGlob *glob, char *pattern,
+                         size_t pos, int *amount)
 {
   /* processes a set expression with the point behind the opening '{'
      ','-separated elements are collected until the next closing '}'
@@ -223,13 +224,14 @@ static GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
   return GLOB_ERROR;
 }
 
-static GlobCode glob_word(URLGlob *glob, char *pattern, int pos, int *amount)
+static GlobCode glob_word(URLGlob *glob, char *pattern,
+                          size_t pos, int *amount)
 {
   /* processes a literal string component of a URL
      special characters '{' and '[' branch to set/range processing functions
    */ 
   char* buf = glob->glob_buffer;
-  int litindex;
+  size_t litindex;
   GlobCode res = GLOB_OK;
 
   *amount = 1; /* default is one single string */
@@ -353,7 +355,8 @@ char *glob_next_url(URLGlob *glob)
   char *buf = glob->glob_buffer;
   URLPattern *pat;
   char *lit;
-  signed int i;
+  int i;
+  size_t j;
   int carry;
 
   if (!glob->beenhere)
@@ -386,7 +389,7 @@ char *glob_next_url(URLGlob *glob)
 	}
 	break;
       default:
-	printf("internal error: invalid pattern type (%d)\n", pat->type);
+	printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
 	exit (CURLE_FAILED_INIT);
       }
     }
@@ -394,14 +397,14 @@ char *glob_next_url(URLGlob *glob)
       return NULL;
   }
 
-  for (i = 0; i < glob->size; ++i) {
-    if (!(i % 2)) {            /* every other term (i even) is a literal */
-      lit = glob->literal[i/2];
+  for (j = 0; j < glob->size; ++j) {
+    if (!(j&1)) {              /* every other term (j even) is a literal */
+      lit = glob->literal[j/2];
       strcpy(buf, lit);
       buf += strlen(lit);
     }
     else {				/* the rest (i odd) are patterns */
-      pat = &glob->pattern[i/2];
+      pat = &glob->pattern[j/2];
       switch(pat->type) {
       case UPTSet:
 	strcpy(buf, pat->content.Set.elements[pat->content.Set.ptr_s]);
@@ -416,7 +419,7 @@ char *glob_next_url(URLGlob *glob)
         buf += strlen(buf); /* make no sprint() return code assumptions */
 	break;
       default:
-	printf("internal error: invalid pattern type (%d)\n", pat->type);
+	printf("internal error: invalid pattern type (%d)\n", (int)pat->type);
 	exit (CURLE_FAILED_INIT);
       }
     }
@@ -428,11 +431,11 @@ char *glob_next_url(URLGlob *glob)
 char *glob_match_url(char *filename, URLGlob *glob)
 {
   char *target;
-  int allocsize;
-  int stringlen=0;
+  size_t allocsize;
+  size_t stringlen=0;
   char numbuf[18];
   char *appendthis = NULL;
-  int appendlen = 0;
+  size_t appendlen = 0;
 
   /* We cannot use the glob_buffer for storage here since the filename may
    * be longer than the URL we use. We allocate a good start size, then
@@ -446,7 +449,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
   while (*filename) {
     if (*filename == '#' && isdigit((int)filename[1])) {
       /* only '#1' ... '#9' allowed */
-      int i;
+      unsigned long i;
       unsigned long num = strtoul(&filename[1], &filename, 10);
 
       i = num-1;
@@ -456,8 +459,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
         switch (pat.type) {
         case UPTSet:
           appendthis = pat.content.Set.elements[pat.content.Set.ptr_s];
-          appendlen =
-            (int)strlen(pat.content.Set.elements[pat.content.Set.ptr_s]);
+          appendlen = strlen(pat.content.Set.elements[pat.content.Set.ptr_s]);
           break;
         case UPTCharRange:
           numbuf[0]=pat.content.CharRange.ptr_c;
@@ -470,7 +472,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
                   pat.content.NumRange.padlength,
                   pat.content.NumRange.ptr_n);
           appendthis = numbuf;
-          appendlen = (int)strlen(numbuf);
+          appendlen = strlen(numbuf);
           break;
         default:
           printf("internal error: invalid pattern type (%d)\n",

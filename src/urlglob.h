@@ -51,8 +51,8 @@ typedef struct {
 typedef struct {
   char* literal[10];
   URLPattern pattern[9];
-  int size;
-  int urllen;
+  size_t size;
+  size_t urllen;
   char *glob_buffer;
   char beenhere;
   char errormsg[80]; /* error message buffer */
