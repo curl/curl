@@ -119,15 +119,15 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
 
   case TIMER_NAMELOOKUP:
     data->progress.t_nslookup +=
-      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
+      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000.0;
     break;
   case TIMER_CONNECT:
     data->progress.t_connect +=
-      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
+      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000.0;
     break;
   case TIMER_PRETRANSFER:
     data->progress.t_pretransfer +=
-      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
+      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000.0;
     break;
   case TIMER_POSTRANSFER:
     /* this is the normal end-of-transfer thing */
@@ -275,6 +275,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     /* Figure out the exact time for the time span */
     span_ms = Curl_tvdiff(now,
                           data->progress.speeder_time[checkindex]);
+    if(0 == span_ms)
+      span_ms=1; /* at least one millisecond MUST have passed */
 
     /* Calculate the average speed the last 'countindex' seconds */
     data->progress.current_speed =
