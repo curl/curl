@@ -3,7 +3,6 @@
  * require. If you don't use windows, you can safely ignore this crap.
  */
 
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 static void win32_cleanup(void)
 {
   WSACleanup();
