@@ -57,6 +57,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
 {
   bool more = TRUE;
   struct SessionHandle *data=conn->data;
+  bool before = FALSE; /* got a nonce before */
 
   /* skip initial whitespaces */
   while(*header && isspace((int)*header))
@@ -64,6 +65,10 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
 
   if(checkprefix("Digest", header)) {
     header += strlen("Digest");
+
+    /* If we already have received a nonce, keep that in mind */
+    if(data->state.digest.nonce)
+      before = TRUE;
 
     /* clear off any former leftovers and init to defaults */
     Curl_digest_cleanup(data);
@@ -81,6 +86,10 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
                      value, content)) {
         if(strequal(value, "nonce")) {
           data->state.digest.nonce = strdup(content);
+        }
+        else if(strequal(value, "stale")) {
+          if(strequal(content, "true"))
+            data->state.digest.stale = TRUE;
         }
         else if(strequal(value, "cnonce")) {
           data->state.digest.cnonce = strdup(content);
@@ -106,7 +115,14 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
         /* allow the list to be comma-separated */
         header++; 
     }
+    /* We had a nonce since before, and we got another one now without
+    'stale=true'. This means we provided bad credentials in the previous
+    request */
 
+    if(before && !data->state.digest.stale)
+      return CURLDIGEST_BAD;
+
+    /* We got this header without a nonce, that's a bad Digest line! */
     if(!data->state.digest.nonce)
       return CURLDIGEST_BAD;
   }
@@ -213,19 +229,23 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
 void Curl_digest_cleanup(struct SessionHandle *data)
 {
-  if(data->state.digest.nonce)
-    free(data->state.digest.nonce);
-  data->state.digest.nonce = NULL;
+  struct digestdata *d = &data->state.digest;
 
-  if(data->state.digest.cnonce)
-    free(data->state.digest.cnonce);
-  data->state.digest.cnonce = NULL;
+  if(d->nonce)
+    free(d->nonce);
+  d->nonce = NULL;
 
-  if(data->state.digest.realm)
-    free(data->state.digest.realm);
-  data->state.digest.realm = NULL;
+  if(d->cnonce)
+    free(d->cnonce);
+  d->cnonce = NULL;
 
-  data->state.digest.algo = CURLDIGESTALGO_MD5; /* default algorithm */
+  if(d->realm)
+    free(d->realm);
+  d->realm = NULL;
+
+  d->algo = CURLDIGESTALGO_MD5; /* default algorithm */
+
+  d->stale = FALSE; /* default means normal, not stale */
 }
 
 #endif
