@@ -130,9 +130,9 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                             unsigned char *request,
                             unsigned char *uripath)
 {
-  /* We have a Digest setup for this, use it!
-     Now, to get all the details for this sorted out, I must urge you dear friend
-     to read up on the RFC2617 section 3.2.2, */
+  /* We have a Digest setup for this, use it!  Now, to get all the details for
+     this sorted out, I must urge you dear friend to read up on the RFC2617
+     section 3.2.2, */
   unsigned char md5buf[16]; /* 16 bytes/128 bits */
   unsigned char ha1[33]; /* 32 digits and 1 zero byte */
   unsigned char ha2[33];
