@@ -197,12 +197,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       didwhat |= KEEP_READ;
 
       /* NULL terminate, allowing string ops to be used */
-      if (0 < (signed int) nread)
+      if (0 < nread)
         k->buf[nread] = 0;
 
       /* if we receive 0 or less here, the server closed the connection and
          we bail out from this! */
-      else if (0 >= (signed int) nread) {
+      else if (0 >= nread) {
         k->keepon &= ~KEEP_READ;
         FD_ZERO(&k->rkeepfd);
         break;
@@ -591,7 +591,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       /* This is not an 'else if' since it may be a rest from the header
          parsing, where the beginning of the buffer is headers and the end
          is non-headers. */
-      if (k->str && !k->header && ((signed int)nread > 0)) {
+      if (k->str && !k->header && (nread > 0)) {
             
         if(0 == k->bodywrites) {
           /* These checks are only made the first time we are about to
@@ -672,7 +672,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         if((-1 != conn->maxdownload) &&
            (k->bytecount + nread >= conn->maxdownload)) {
           nread = conn->maxdownload - k->bytecount;
-          if((signed int)nread < 0 ) /* this should be unusual */
+          if(nread < 0 ) /* this should be unusual */
             nread = 0;
 
           k->keepon &= ~KEEP_READ; /* we're done reading */
@@ -699,53 +699,84 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       /* write */
 
       int i, si;
-      size_t bytes_written;
+      ssize_t bytes_written;
 
       if ((k->bytecount == 0) && (k->writebytecount == 0))
         Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
       didwhat |= KEEP_WRITE;
 
-      nread = data->set.fread(k->buf, 1, conn->upload_bufsize,
-                              data->set.in);
+      /* only read more data if there's no upload data already
+         present in the upload buffer */
+      if(0 == conn->upload_present) {
+        /* init the "upload from here" pointer */
+        conn->upload_fromhere = k->uploadbuf;
 
-      /* the signed int typecase of nread of for systems that has
-         unsigned size_t */
-      if ((signed int)nread<=0) {
-        /* done */
-        k->keepon &= ~KEEP_WRITE; /* we're done writing */
-        FD_ZERO(&k->wkeepfd);
-        break;
-      }
-      k->writebytecount += nread;
-      Curl_pgrsSetUploadCounter(data, (double)k->writebytecount);
+        nread = data->set.fread(conn->upload_fromhere, 1,
+                                conn->upload_bufsize,
+                                data->set.in);
 
-      /* convert LF to CRLF if so asked */
-      if (data->set.crlf) {
-        for(i = 0, si = 0; i < (int)nread; i++, si++) {
-          if (k->buf[i] == 0x0a) {
-            data->state.scratch[si++] = 0x0d;
-            data->state.scratch[si] = 0x0a;
-          }
-          else {
-            data->state.scratch[si] = k->buf[i];
-          }
+        /* the signed int typecase of nread of for systems that has
+           unsigned size_t */
+        if (nread<=0) {
+          /* done */
+          k->keepon &= ~KEEP_WRITE; /* we're done writing */
+          FD_ZERO(&k->wkeepfd);
+          break;
         }
-        nread = si;
-        k->buf = data->state.scratch; /* point to the new buffer */
+
+        /* store number of bytes available for upload */
+        conn->upload_present = nread;
+
+        /* convert LF to CRLF if so asked */
+        if (data->set.crlf) {
+          for(i = 0, si = 0; i < nread; i++, si++) {
+            if (k->buf[i] == 0x0a) {
+              data->state.scratch[si++] = 0x0d;
+              data->state.scratch[si] = 0x0a;
+            }
+            else {
+              data->state.scratch[si] = k->uploadbuf[i];
+            }
+          }
+          nread = si;
+          k->buf = data->state.scratch; /* point to the new buffer */
+        }
+      }
+      else {
+        /* We have a partial buffer left from a previous "round". Use
+           that instead of reading more data */
+
       }
 
       /* write to socket */
-      result = Curl_write(conn, conn->writesockfd, k->buf, nread,
+      result = Curl_write(conn,
+                          conn->writesockfd,
+                          conn->upload_fromhere,
+                          conn->upload_present,
                           &bytes_written);
       if(result)
         return result;
-      else if(nread != (int)bytes_written) {
-        failf(data, "Failed uploading data");
-        return CURLE_WRITE_ERROR;
+      else if(conn->upload_present != bytes_written) {
+        /* we only wrote a part of the buffer (if anything), deal with it! */
+
+        /* store the amount of bytes left in the buffer to write */
+        conn->upload_present -= bytes_written;
+
+        /* advance the pointer where to find the buffer when the next send
+           is to happen */
+        conn->upload_fromhere += bytes_written;
       }
       else if(data->set.crlf)
         k->buf = data->state.buffer; /* put it back on the buffer */
+      else {
+        /* we've uploaded that buffer now */
+        conn->upload_fromhere = k->uploadbuf;
+        conn->upload_present = 0; /* no more bytes left */
+      }
+
+      k->writebytecount += nread;
+      Curl_pgrsSetUploadCounter(data, (double)k->writebytecount);
 
     }
 
@@ -838,6 +869,7 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
 
   data = conn->data; /* there's the root struct */
   k->buf = data->state.buffer;
+  k->uploadbuf = data->state.uploadbuffer;
   k->maxfd = (conn->sockfd>conn->writesockfd?
               conn->sockfd:conn->writesockfd)+1;
   k->hbufp = data->state.headerbuff;
