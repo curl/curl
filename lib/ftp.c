@@ -91,8 +91,9 @@
 #include "memdebug.h"
 #endif
 
-/* Used in more than one place in the file */
+/* Local API functions */
 static CURLcode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quote);
+static CURLcode _ftp_cwd(struct connectdata *conn, char *path);
 
 /* easy-to-use macro: */
 #define ftpsendf Curl_ftpsendf
@@ -586,7 +587,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
 }
 
 
-static CURLcode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
+static 
+CURLcode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 {
   struct curl_slist *item;
   ssize_t            nread;
@@ -595,7 +597,7 @@ static CURLcode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quot
   item = quote;
   while (item) {
     if (item->data) {
-      ftpsendf(conn->firstsocket, conn, "%", item->data);
+      ftpsendf(conn->firstsocket, conn, "%s", item->data);
 
       nread = Curl_GetFTPResponse(conn->firstsocket, 
           conn->data->buffer, conn, &ftpcode);
@@ -612,6 +614,24 @@ static CURLcode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quot
   }
 
   return CURLE_OK;
+}
+
+static 
+CURLcode _ftp_cwd(struct connectdata *conn, char *path)
+{
+  ssize_t nread;
+  int     ftpcode;
+  
+  ftpsendf(conn->firstsocket, conn, "CWD %s", path);
+  nread = Curl_GetFTPResponse(conn->firstsocket, 
+      conn->data->buffer, conn, &ftpcode);
+  if (nread < 0)
+    return CURLE_OPERATION_TIMEOUTED;
+
+  if (ftpcode != 250) {
+    failf(conn->data, "Couldn't change back to directory %s", path);
+    return CURLE_FTP_ACCESS_DENIED;
+  }
 }
 
 static
@@ -647,21 +667,13 @@ CURLcode _ftp(struct connectdata *conn)
       return result;
   }
     
-  if(conn->bits.reuse) {
     /* This is a re-used connection. Since we change directory to where the
        transfer is taking place, we must now get back to the original dir
        where we ended up after login: */
-    ftpsendf(conn->firstsocket, conn, "CWD %s", ftp->entrypath);
-    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-    if(nread < 0)
-      return CURLE_OPERATION_TIMEOUTED;
-    
-    if(ftpcode != 250) {
-      failf(data, "Couldn't change back to directory %s", ftp->entrypath);
-      return CURLE_FTP_ACCESS_DENIED;
-    }
+  if (conn->bits.reuse) {
+    if ((result = _ftp_cwd(conn, ftp->entrypath)) != CURLE_OK)
+      return result;
   }
-
 
 
   /* change directory first! */
