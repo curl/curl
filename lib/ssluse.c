@@ -236,9 +236,11 @@ int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
 #endif
 
 /* ====================================================== */
-int
+CURLcode
 Curl_SSLConnect(struct connectdata *conn)
 {
+  CURLcode retcode = CURLE_OK;
+
 #ifdef USE_SSLEAY
   struct UrlData *data = conn->data;
   int err;
@@ -273,13 +275,13 @@ Curl_SSLConnect(struct connectdata *conn)
 
   if(!conn->ssl.ctx) {
     failf(data, "SSL: couldn't create a context!");
-    return 1;
+    return CURLE_OUT_OF_MEMORY;
   }
     
   if(data->cert) {
     if (!cert_stuff(conn, data->cert, data->cert)) {
       failf(data, "couldn't use certificate!\n");
-      return 2;
+      return CURLE_SSL_CONNECT_ERROR;
     }
   }
 
@@ -292,7 +294,7 @@ Curl_SSLConnect(struct connectdata *conn)
                                        data->ssl.CAfile,
                                        data->ssl.CApath)) {
       failf(data,"error setting cerficate verify locations\n");
-      return 2;
+      return CURLE_SSL_CONNECT_ERROR;
     }
   }
   else
@@ -312,7 +314,7 @@ Curl_SSLConnect(struct connectdata *conn)
   if (-1 == err) {
     err = ERR_get_error(); 
     failf(data, "SSL: %s", ERR_error_string(err, NULL));
-    return 10;
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
   /* Informational message */
@@ -328,7 +330,7 @@ Curl_SSLConnect(struct connectdata *conn)
   conn->ssl.server_cert = SSL_get_peer_certificate (conn->ssl.handle);
   if(!conn->ssl.server_cert) {
     failf(data, "SSL: couldn't get peer certificate!");
-    return 3;
+    return CURLE_SSL_PEER_CERTIFICATE;
   }
   infof (data, "Server certificate:\n");
   
@@ -336,7 +338,7 @@ Curl_SSLConnect(struct connectdata *conn)
                            NULL, 0);
   if(!str) {
     failf(data, "SSL: couldn't get X509-subject!");
-    return 4;
+    return CURLE_SSL_CONNECT_ERROR;
   }
   infof(data, "\t subject: %s\n", str);
   CRYPTO_free(str);
@@ -345,7 +347,7 @@ Curl_SSLConnect(struct connectdata *conn)
                            NULL, 0);
   if(!str) {
     failf(data, "SSL: couldn't get X509-issuer name!");
-    return 5;
+    return CURLE_SSL_CONNECT_ERROR;
   }
   infof(data, "\t issuer: %s\n", str);
   CRYPTO_free(str);
@@ -355,7 +357,9 @@ Curl_SSLConnect(struct connectdata *conn)
 
   if(data->ssl.verifypeer) {
     data->ssl.certverifyresult=SSL_get_verify_result(conn->ssl.handle);
-    infof(data, "Verify result: %d\n", data->ssl.certverifyresult);
+    failf(data, "SSL certificate verify result: %d\n",
+          data->ssl.certverifyresult);
+    retcode = CURLE_SSL_PEER_CERTIFICATE;
   }
   else
     data->ssl.certverifyresult=0;
@@ -365,5 +369,5 @@ Curl_SSLConnect(struct connectdata *conn)
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void) conn;
 #endif
-  return 0;
+  return retcode;
 }

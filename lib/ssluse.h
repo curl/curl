@@ -23,5 +23,5 @@
  * $Id$
  *****************************************************************************/
 #include "urldata.h"
-int Curl_SSLConnect(struct connectdata *conn);
+CURLcode Curl_SSLConnect(struct connectdata *conn);
 #endif
