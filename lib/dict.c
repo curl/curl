@@ -90,7 +90,7 @@ CURLcode Curl_dict(struct connectdata *conn)
   char *nthdef = NULL; /* This is not part of the protocol, but required
                           by RFC 2229 */
   CURLcode result=CURLE_OK;
-  struct UrlData *data=conn->data;
+  struct SessionHandle *data=conn->data;
 
   char *path = conn->path;
   long *bytecount = &conn->bytecount;

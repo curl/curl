@@ -248,17 +248,17 @@ krb4_auth(void *app_data, struct connectdata *conn)
   Curl_ftpsendf(conn->firstsocket, conn, "ADAT %s", p);
 
   nread = Curl_GetFTPResponse(conn->firstsocket,
-                              conn->data->buffer, conn, NULL);
+                              conn->data.set->buffer, conn, NULL);
   if(nread < 0)
     return /*CURLE_OPERATION_TIMEOUTED*/-1;
   free(p);
 
-  if(/*ret != COMPLETE*/conn->data->buffer[0] != '2'){
+  if(/*ret != COMPLETE*/conn->data.set->buffer[0] != '2'){
     printf("Server didn't accept auth data.\n");
     return AUTH_ERROR;
   }
 
-  p = strstr(conn->data->buffer, "ADAT=");
+  p = strstr(conn->data.set->buffer, "ADAT=");
   if(!p){
     printf("Remote host didn't send adat reply.\n");
     return AUTH_ERROR;
@@ -314,20 +314,20 @@ void Curl_krb_kauth(struct connectdata *conn)
   save = Curl_set_command_prot(conn, prot_private);
 
   Curl_ftpsendf(conn->firstsocket, conn,
-                "SITE KAUTH %s", conn->data->user);
+                "SITE KAUTH %s", conn->data.set->user);
 
-  nread = Curl_GetFTPResponse(conn->firstsocket, conn->data->buffer,
+  nread = Curl_GetFTPResponse(conn->firstsocket, conn->data.set->buffer,
                               conn, NULL);
   if(nread < 0)
     return /*CURLE_OPERATION_TIMEOUTED*/;
 
-  if(/*ret != CONTINUE*/conn->data->buffer[0] != '3'){
+  if(/*ret != CONTINUE*/conn->data.set->buffer[0] != '3'){
     Curl_set_command_prot(conn, save);
     /*code = -1;***/
     return;
   }
 
-  p = strstr(conn->data->buffer, "T=");
+  p = strstr(conn->data.set->buffer, "T=");
   if(!p) {
     printf("Bad reply from server.\n");
     Curl_set_command_prot(conn, save);
@@ -344,7 +344,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   tkt.length = tmp;
   tktcopy.length = tkt.length;
     
-  p = strstr(conn->data->buffer, "P=");
+  p = strstr(conn->data.set->buffer, "P=");
   if(!p) {
     printf("Bad reply from server.\n");
     Curl_set_command_prot(conn, save);
@@ -354,7 +354,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   for(; *p && *p != ' ' && *p != '\r' && *p != '\n'; p++);
   *p = 0;
 
-  des_string_to_key (conn->data->passwd, &key);
+  des_string_to_key (conn->data.set->passwd, &key);
   des_key_sched(&key, schedule);
     
   des_pcbc_encrypt((des_cblock*)tkt.dat, (des_cblock*)tktcopy.dat,
@@ -383,7 +383,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   Curl_ftpsendf(conn->firstsocket, conn,
                 "SITE KAUTH %s %s", name, p);
 
-  nread = Curl_GetFTPResponse(conn->firstsocket, conn->data->buffer,
+  nread = Curl_GetFTPResponse(conn->firstsocket, conn->data.set->buffer,
                               conn, NULL);
   if(nread < 0)
     return /*CURLE_OPERATION_TIMEOUTED*/;

@@ -128,10 +128,10 @@ static
 size_t add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in)
 {
   size_t amount;
-  if(conn->data->bits.verbose) {
-    fputs("> ", conn->data->err);
+  if(conn->data->set.verbose) {
+    fputs("> ", conn->data->set.err);
     /* this data _may_ contain binary stuff */
-    fwrite(in->buffer, in->size_used, 1, conn->data->err);
+    fwrite(in->buffer, in->size_used, 1, conn->data->set.err);
   }
 
   Curl_write(conn, sockfd, in->buffer, in->size_used, &amount);
@@ -209,7 +209,7 @@ int GetLine(int sockfd, char *buf, struct connectdata *conn)
   ssize_t nread;
   int read_rc=1;
   char *ptr;
-  struct UrlData *data=conn->data;
+  struct SessionHandle *data=conn->data;
 
   ptr=buf;
 
@@ -224,10 +224,10 @@ int GetLine(int sockfd, char *buf, struct connectdata *conn)
   }
   *ptr=0; /* zero terminate */
   
-  if(data->bits.verbose) {
-    fputs("< ", data->err);
-    fwrite(buf, 1, nread, data->err);
-    fputs("\n", data->err);
+  if(data->set.verbose) {
+    fputs("< ", data->set.err);
+    fwrite(buf, 1, nread, data->set.err);
+    fputs("\n", data->set.err);
   }
   return nread>0?nread:0;
 }
@@ -238,12 +238,12 @@ int GetLine(int sockfd, char *buf, struct connectdata *conn)
  * This function checks the linked list of custom HTTP headers for a particular
  * header (prefix).
  */
-static bool checkheaders(struct UrlData *data, const char *thisheader)
+static bool checkheaders(struct SessionHandle *data, const char *thisheader)
 {
   struct curl_slist *head;
   size_t thislen = strlen(thisheader);
 
-  for(head = data->headers; head; head=head->next) {
+  for(head = data->set.headers; head; head=head->next) {
     if(strnequal(head->data, thisheader, thislen)) {
       return TRUE;
     }
@@ -263,7 +263,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
 {
   int httperror=0;
   int subversion=0;
-  struct UrlData *data=conn->data;
+  struct SessionHandle *data=conn->data;
 
   infof(data, "Establish HTTP proxy tunnel to %s:%d\n", hostname, remote_port);
 
@@ -275,14 +275,14 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
              "\r\n",
              hostname, remote_port,
              (conn->bits.proxy_user_passwd)?conn->allocptr.proxyuserpwd:"",
-             (data->useragent?conn->allocptr.uagent:"")
+             (data->set.useragent?conn->allocptr.uagent:"")
              );
 
   /* wait for the proxy to send us a HTTP/1.0 200 OK header */
-  while(GetLine(tunnelsocket, data->buffer, conn)) {
-    if('\r' == data->buffer[0])
+  while(GetLine(tunnelsocket, data->state.buffer, conn)) {
+    if('\r' == data->state.buffer[0])
       break; /* end of headers */
-    if(2 == sscanf(data->buffer, "HTTP/1.%d %d",
+    if(2 == sscanf(data->state.buffer, "HTTP/1.%d %d",
                    &subversion,
                    &httperror)) {
       ;
@@ -306,7 +306,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
  */
 CURLcode Curl_http_connect(struct connectdata *conn)
 {
-  struct UrlData *data;
+  struct SessionHandle *data;
   CURLcode result;
 
   data=conn->data;
@@ -318,7 +318,7 @@ CURLcode Curl_http_connect(struct connectdata *conn)
    * has occured, can we start talking SSL
    */
   if (conn->protocol & PROT_HTTPS) {
-    if (data->bits.httpproxy) {
+    if (data->change.proxy) {
       /* HTTPS through a proxy can only be done with a tunnel */
       result = Curl_ConnectHTTPProxyTunnel(conn, conn->firstsocket,
                                            conn->hostname, conn->remote_port);
@@ -332,10 +332,10 @@ CURLcode Curl_http_connect(struct connectdata *conn)
       return result;
   }
 
-  if(conn->bits.user_passwd && !data->bits.this_is_a_follow) {
+  if(conn->bits.user_passwd && !data->state.this_is_a_follow) {
     /* Authorization: is requested, this is not a followed location, get the
        original host name */
-    data->auth_host = strdup(conn->hostname);
+    data->state.auth_host = strdup(conn->hostname);
   }
 
   return CURLE_OK;
@@ -345,29 +345,29 @@ CURLcode Curl_http_connect(struct connectdata *conn)
    protocol-specific resources */
 CURLcode Curl_http_close(struct connectdata *conn)
 {
-  if(conn->data->auth_host)
-    free(conn->data->auth_host);
+  if(conn->data->state.auth_host)
+    free(conn->data->state.auth_host);
   return CURLE_OK;
 }
 
 CURLcode Curl_http_done(struct connectdata *conn)
 {
-  struct UrlData *data;
+  struct SessionHandle *data;
   long *bytecount = &conn->bytecount;
   struct HTTP *http;
 
   data=conn->data;
   http=conn->proto.http;
 
-  if(HTTPREQ_POST_FORM == data->httpreq) {
+  if(HTTPREQ_POST_FORM == data->set.httpreq) {
     *bytecount = http->readbytecount + http->writebytecount;
       
     Curl_formclean(http->sendit); /* Now free that whole lot */
 
-    data->fread = http->storefread; /* restore */
-    data->in = http->in; /* restore */
+    data->set.fread = http->storefread; /* restore */
+    data->set.in = http->in; /* restore */
   }
-  else if(HTTPREQ_PUT == data->httpreq) {
+  else if(HTTPREQ_PUT == data->set.httpreq) {
     *bytecount = http->readbytecount + http->writebytecount;
   }
 
@@ -377,8 +377,8 @@ CURLcode Curl_http_done(struct connectdata *conn)
 
 CURLcode Curl_http(struct connectdata *conn)
 {
-  struct UrlData *data=conn->data;
-  char *buf = data->buffer; /* this is a short cut to the buffer */
+  struct SessionHandle *data=conn->data;
+  char *buf = data->state.buffer; /* this is a short cut to the buffer */
   CURLcode result=CURLE_OK;
   struct HTTP *http;
   struct Cookie *co=NULL; /* no cookies from start */
@@ -402,8 +402,8 @@ CURLcode Curl_http(struct connectdata *conn)
   conn->bits.close = FALSE;
 
   if ( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
-       data->bits.upload) {
-    data->httpreq = HTTPREQ_PUT;
+       data->set.upload) {
+    data->set.httpreq = HTTPREQ_PUT;
   }
   
   /* The User-Agent string has been built in url.c already, because it might
@@ -420,45 +420,45 @@ CURLcode Curl_http(struct connectdata *conn)
 
     /* To prevent the user+password to get sent to other than the original
        host due to a location-follow, we do some weirdo checks here */
-    if(!data->bits.this_is_a_follow ||
-       !data->auth_host ||
-       strequal(data->auth_host, conn->hostname)) {
-      sprintf(data->buffer, "%s:%s", data->user, data->passwd);
-      if(Curl_base64_encode(data->buffer, strlen(data->buffer),
+    if(!data->state.this_is_a_follow ||
+       !data->state.auth_host ||
+       strequal(data->state.auth_host, conn->hostname)) {
+      sprintf(data->state.buffer, "%s:%s",
+              data->state.user, data->state.passwd);
+      if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
                             &authorization) >= 0) {
         if(conn->allocptr.userpwd)
           free(conn->allocptr.userpwd);
         conn->allocptr.userpwd = aprintf( "Authorization: Basic %s\015\012",
-                                     authorization);
+                                          authorization);
         free(authorization);
       }
     }
   }
-  if((data->bits.http_set_referer) && !checkheaders(data, "Referer:")) {
+  if((data->change.referer) && !checkheaders(data, "Referer:")) {
     if(conn->allocptr.ref)
       free(conn->allocptr.ref);
-    conn->allocptr.ref = aprintf("Referer: %s\015\012", data->referer);
+    conn->allocptr.ref = aprintf("Referer: %s\015\012", data->change.referer);
   }
-  if(data->cookie && !checkheaders(data, "Cookie:")) {
+  if(data->set.cookie && !checkheaders(data, "Cookie:")) {
     if(conn->allocptr.cookie)
       free(conn->allocptr.cookie);
-    conn->allocptr.cookie = aprintf("Cookie: %s\015\012", data->cookie);
+    conn->allocptr.cookie = aprintf("Cookie: %s\015\012", data->set.cookie);
   }
 
   if(data->cookies) {
     co = Curl_cookie_getlist(data->cookies,
-                             host,
-                             ppath,
+                             host, ppath,
                              conn->protocol&PROT_HTTPS?TRUE:FALSE);
   }
-  if ((data->bits.httpproxy) && !(conn->protocol&PROT_HTTPS))  {
+  if ((data->change.proxy) && !(conn->protocol&PROT_HTTPS))  {
     /* The path sent to the proxy is in fact the entire URL */
-    ppath = data->url;
+    ppath = data->change.url;
   }
-  if(HTTPREQ_POST_FORM == data->httpreq) {
+  if(HTTPREQ_POST_FORM == data->set.httpreq) {
     /* we must build the whole darned post sequence first, so that we have
        a size of the whole shebang before we start to send it */
-    http->sendit = Curl_getFormData(data->httppost, &http->postsize);
+    http->sendit = Curl_getFormData(data->set.httppost, &http->postsize);
   }
 
   if(!checkheaders(data, "Host:")) {
@@ -486,9 +486,9 @@ CURLcode Curl_http(struct connectdata *conn)
   if(!checkheaders(data, "Accept:"))
     http->p_accept = "Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*\r\n";
 
-  if(( (HTTPREQ_POST == data->httpreq) ||
-       (HTTPREQ_POST_FORM == data->httpreq) ||
-       (HTTPREQ_PUT == data->httpreq) ) &&
+  if(( (HTTPREQ_POST == data->set.httpreq) ||
+       (HTTPREQ_POST_FORM == data->set.httpreq) ||
+       (HTTPREQ_PUT == data->set.httpreq) ) &&
      conn->resume_from) {
     /**********************************************************************
      * Resuming upload in HTTP means that we PUT or POST and that we have
@@ -521,7 +521,8 @@ CURLcode Curl_http(struct connectdata *conn)
           readthisamountnow = BUFSIZE;
 
         actuallyread =
-          data->fread(data->buffer, 1, readthisamountnow, data->in);
+          data->set.fread(data->state.buffer, 1, readthisamountnow,
+                          data->set.in);
 
         passed += actuallyread;
         if(actuallyread != readthisamountnow) {
@@ -532,10 +533,10 @@ CURLcode Curl_http(struct connectdata *conn)
       } while(passed != conn->resume_from); /* loop until done */
 
       /* now, decrease the size of the read */
-      if(data->infilesize>0) {
-        data->infilesize -= conn->resume_from;
+      if(data->set.infilesize>0) {
+        data->set.infilesize -= conn->resume_from;
 
-        if(data->infilesize <= 0) {
+        if(data->set.infilesize <= 0) {
           failf(data, "File already completely uploaded\n");
           return CURLE_PARTIAL_FILE;
         }
@@ -549,16 +550,16 @@ CURLcode Curl_http(struct connectdata *conn)
      * or uploading and we always let customized headers override our internal
      * ones if any such are specified.
      */
-    if((data->httpreq == HTTPREQ_GET) &&
+    if((data->set.httpreq == HTTPREQ_GET) &&
        !checkheaders(data, "Range:")) {
       conn->allocptr.rangeline = aprintf("Range: bytes=%s\r\n", conn->range);
     }
-    else if((data->httpreq != HTTPREQ_GET) &&
+    else if((data->set.httpreq != HTTPREQ_GET) &&
             !checkheaders(data, "Content-Range:")) {
 
       if(conn->resume_from) {
         /* This is because "resume" was selected */
-        long total_expected_size= conn->resume_from + data->infilesize;
+        long total_expected_size= conn->resume_from + data->set.infilesize;
         conn->allocptr.rangeline = aprintf("Content-Range: bytes %s%ld/%ld\r\n",
                                       conn->range, total_expected_size-1,
                                       total_expected_size);
@@ -567,14 +568,14 @@ CURLcode Curl_http(struct connectdata *conn)
         /* Range was selected and then we just pass the incoming range and 
            append total size */
         conn->allocptr.rangeline = aprintf("Content-Range: bytes %s/%d\r\n",
-                                      conn->range, data->infilesize);
+                                      conn->range, data->set.infilesize);
       }
     }
   }
 
   do {
     send_buffer *req_buffer;
-    struct curl_slist *headers=data->headers;
+    struct curl_slist *headers=data->set.headers;
 
     /* initialize a dynamic send-buffer */
     req_buffer = add_buffer_init();
@@ -593,11 +594,11 @@ CURLcode Curl_http(struct connectdata *conn)
                 "%s" /* accept */
                 "%s", /* referer */
 
-                data->customrequest?data->customrequest:
-                (data->bits.no_body?"HEAD":
-                 ((HTTPREQ_POST == data->httpreq) ||
-                  (HTTPREQ_POST_FORM == data->httpreq))?"POST":
-                 (HTTPREQ_PUT == data->httpreq)?"PUT":"GET"),
+                data->set.customrequest?data->set.customrequest:
+                (data->set.no_body?"HEAD":
+                 ((HTTPREQ_POST == data->set.httpreq) ||
+                  (HTTPREQ_POST_FORM == data->set.httpreq))?"POST":
+                 (HTTPREQ_PUT == data->set.httpreq)?"PUT":"GET"),
                 ppath,
                 (conn->bits.proxy_user_passwd &&
                  conn->allocptr.proxyuserpwd)?conn->allocptr.proxyuserpwd:"",
@@ -605,13 +606,13 @@ CURLcode Curl_http(struct connectdata *conn)
                 conn->allocptr.userpwd:"",
                 (conn->bits.use_range && conn->allocptr.rangeline)?
                 conn->allocptr.rangeline:"",
-                (data->useragent && *data->useragent && conn->allocptr.uagent)?
+                (data->set.useragent && *data->set.useragent && conn->allocptr.uagent)?
                 conn->allocptr.uagent:"",
                 (conn->allocptr.cookie?conn->allocptr.cookie:""), /* Cookie: <data> */
                 (conn->allocptr.host?conn->allocptr.host:""), /* Host: host */
                 http->p_pragma?http->p_pragma:"",
                 http->p_accept?http->p_accept:"",
-                (data->bits.http_set_referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> <CRLF> */
+                (data->change.referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> <CRLF> */
                 );
 
     if(co) {
@@ -636,7 +637,7 @@ CURLcode Curl_http(struct connectdata *conn)
       co=NULL;
     }
 
-    if(data->timecondition) {
+    if(data->set.timecondition) {
       struct tm *thistime;
 
       /* Phil Karn (Fri, 13 Apr 2001) pointed out that the If-Modified-Since
@@ -651,9 +652,9 @@ CURLcode Curl_http(struct connectdata *conn)
       /* We assume that the presense of localtime_r() proves the presense
          of gmtime_r() which is a bit ugly but might work */
       struct tm keeptime;
-      thistime = (struct tm *)gmtime_r(&data->timevalue, &keeptime);
+      thistime = (struct tm *)gmtime_r(&data->set.timevalue, &keeptime);
 #else
-      thistime = gmtime(&data->timevalue);
+      thistime = gmtime(&data->set.timevalue);
 #endif
       if(NULL == thistime) {
         failf(data, "localtime() failed!");
@@ -667,7 +668,7 @@ CURLcode Curl_http(struct connectdata *conn)
       /* TODO: Right, we *could* write a replacement here */
       strcpy(buf, "no strftime() support");
 #endif
-      switch(data->timecondition) {
+      switch(data->set.timecondition) {
       case TIMECOND_IFMODSINCE:
       default:
         add_bufferf(req_buffer,
@@ -702,7 +703,7 @@ CURLcode Curl_http(struct connectdata *conn)
       headers = headers->next;
     }
 
-    if(HTTPREQ_POST_FORM == data->httpreq) {
+    if(HTTPREQ_POST_FORM == data->set.httpreq) {
       char contentType[256];
       int linelength=0;
       if(Curl_FormInit(&http->form, http->sendit)) {
@@ -710,13 +711,13 @@ CURLcode Curl_http(struct connectdata *conn)
         return CURLE_HTTP_POST_ERROR;
       }
 
-      http->storefread = data->fread; /* backup */
-      http->in = data->in; /* backup */
+      http->storefread = data->set.fread; /* backup */
+      http->in = data->set.in; /* backup */
           
-      data->fread = (curl_read_callback)
+      data->set.fread = (curl_read_callback)
         Curl_FormReader; /* set the read function to read from the
                             generated form data */
-      data->in = (FILE *)&http->form;
+      data->set.in = (FILE *)&http->form;
 
       add_bufferf(req_buffer,
                   "Content-Length: %d\r\n", http->postsize-2);
@@ -727,7 +728,7 @@ CURLcode Curl_http(struct connectdata *conn)
            there is one packet coming back from the web server) */
         add_bufferf(req_buffer,
                     "Expect: 100-continue\r\n");
-        data->bits.expect100header = TRUE;
+        data->set.expect100header = TRUE;
 
         /* Get Content-Type: line from Curl_FormReadOneLine, which happens
            to always be the first line. We can know this for sure since
@@ -747,7 +748,7 @@ CURLcode Curl_http(struct connectdata *conn)
       Curl_pgrsSetUploadSize(data, http->postsize);
 
       /* fire away the whole request to the server */
-      data->request_size = 
+      data->info.request_size = 
         add_buffer_send(conn->firstsocket, conn, req_buffer);
 
       /* setup variables for the upcoming transfer */
@@ -760,22 +761,22 @@ CURLcode Curl_http(struct connectdata *conn)
         return result;
       }
     }
-    else if(HTTPREQ_PUT == data->httpreq) {
+    else if(HTTPREQ_PUT == data->set.httpreq) {
       /* Let's PUT the data to the server! */
 
-      if(data->infilesize>0) {
+      if(data->set.infilesize>0) {
         add_bufferf(req_buffer,
                     "Content-Length: %d\r\n\r\n", /* file size */
-                    data->infilesize );
+                    data->set.infilesize );
       }
       else
         add_bufferf(req_buffer, "\015\012");
 
       /* set the upload size to the progress meter */
-      Curl_pgrsSetUploadSize(data, data->infilesize);
+      Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
       /* this sends the buffer and frees all the buffer resources */
-      data->request_size = 
+      data->info.request_size = 
         add_buffer_send(conn->firstsocket, conn, req_buffer);
 
       /* prepare for transfer */
@@ -788,17 +789,17 @@ CURLcode Curl_http(struct connectdata *conn)
       
     }
     else {
-      if(HTTPREQ_POST == data->httpreq) {
+      if(HTTPREQ_POST == data->set.httpreq) {
         /* this is the simple POST, using x-www-form-urlencoded style */
 
-        if(!data->postfields) {
+        if(!data->set.postfields) {
           /*
            * This is an attempt to do a POST without having anything to
            * actually send. Let's make a NULL pointer equal "" here. Good/bad
            * ?
            */
-          data->postfields = (char *)"";
-          data->postfieldsize = 0; /* it might been set to something illegal,
+          data->set.postfields = (char *)"";
+          data->set.postfieldsize = 0; /* it might been set to something illegal,
                                       anything > 0 would be! */
         }
 
@@ -807,32 +808,32 @@ CURLcode Curl_http(struct connectdata *conn)
              actually set your own */
           add_bufferf(req_buffer,
                       "Content-Length: %d\r\n",
-                      (data->postfieldsize?data->postfieldsize:
-                       strlen(data->postfields)) );
+                      (data->set.postfieldsize?data->set.postfieldsize:
+                       strlen(data->set.postfields)) );
 
         if(!checkheaders(data, "Content-Type:"))
           add_bufferf(req_buffer,
                       "Content-Type: application/x-www-form-urlencoded\r\n");
 
         /* and here comes the actual data */
-        if(data->postfieldsize) {
+        if(data->set.postfieldsize) {
           add_buffer(req_buffer, "\r\n", 2);
-          add_buffer(req_buffer, data->postfields,
-                     data->postfieldsize);
+          add_buffer(req_buffer, data->set.postfields,
+                     data->set.postfieldsize);
           add_buffer(req_buffer, "\r\n", 2);
         }
         else {
           add_bufferf(req_buffer,
                       "\r\n"
                       "%s\r\n",
-                      data->postfields );
+                      data->set.postfields );
         }
       }
       else
         add_buffer(req_buffer, "\r\n", 2);
 
       /* issue the request */
-      data->request_size = 
+      data->info.request_size = 
         add_buffer_send(conn->firstsocket, conn, req_buffer);
 
       /* HTTP GET/HEAD download: */

@@ -94,9 +94,9 @@ bool seed_enough(struct connectdata *conn, /* unused for now */
 static
 int random_the_seed(struct connectdata *conn)
 {
-  char *buf = conn->data->buffer; /* point to the big buffer */
+  char *buf = conn->data->state.buffer; /* point to the big buffer */
   int nread=0;
-  struct UrlData *data=conn->data;
+  struct SessionHandle *data=conn->data;
 
   /* Q: should we add support for a random file name as a libcurl option?
      A: Yes, it is here */
@@ -104,13 +104,13 @@ int random_the_seed(struct connectdata *conn)
 #ifndef RANDOM_FILE
   /* if RANDOM_FILE isn't defined, we only perform this if an option tells
      us to! */
-  if(data->ssl.random_file)
+  if(data->set.ssl.random_file)
 #define RANDOM_FILE "" /* doesn't matter won't be used */
 #endif
   {
     /* let the option override the define */
-    nread += RAND_load_file((data->ssl.random_file?
-                             data->ssl.random_file:RANDOM_FILE),
+    nread += RAND_load_file((data->set.ssl.random_file?
+                             data->set.ssl.random_file:RANDOM_FILE),
                             16384);
     if(seed_enough(conn, nread))
       return nread;
@@ -122,13 +122,13 @@ int random_the_seed(struct connectdata *conn)
 #ifndef EGD_SOCKET
   /* If we don't have the define set, we only do this if the egd-option
      is set */
-  if(data->ssl.egdsocket)
+  if(data->set.ssl.egdsocket)
 #define EGD_SOCKET "" /* doesn't matter won't be used */
 #endif
   {
     /* If there's an option and a define, the option overrides the
        define */
-    int ret = RAND_egd(data->ssl.egdsocket?data->ssl.egdsocket:EGD_SOCKET);
+    int ret = RAND_egd(data->set.ssl.egdsocket?data->set.ssl.egdsocket:EGD_SOCKET);
     if(-1 != ret) {
       nread += ret;
       if(seed_enough(conn, nread))
@@ -176,23 +176,23 @@ int cert_stuff(struct connectdata *conn,
                char *cert_file,
                char *key_file)
 {
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   if (cert_file != NULL) {
     SSL *ssl;
     X509 *x509;
 
-    if(data->cert_passwd) {
+    if(data->set.cert_passwd) {
 #ifndef HAVE_USERDATA_IN_PWD_CALLBACK
       /*
        * If password has been given, we store that in the global
        * area (*shudder*) for a while:
        */
-      strcpy(global_passwd, data->cert_passwd);
+      strcpy(global_passwd, data->set.cert_passwd);
 #else
       /*
        * We set the password in the callback userdata
        */
-      SSL_CTX_set_default_passwd_cb_userdata(conn->ssl.ctx, data->cert_passwd);
+      SSL_CTX_set_default_passwd_cb_userdata(conn->ssl.ctx, data->set.cert_passwd);
 #endif
       /* Set passwd callback: */
       SSL_CTX_set_default_passwd_cb(conn->ssl.ctx, passwd_callback);
@@ -331,11 +331,11 @@ void Curl_SSL_cleanup(void)
 /*
  * This sets up a session cache to the specified size.
  */
-CURLcode Curl_SSL_InitSessions(struct UrlData *data, long amount)
+CURLcode Curl_SSL_InitSessions(struct SessionHandle *data, long amount)
 {
   struct curl_ssl_session *session;
 
-  if(data->ssl.session)
+  if(data->set.ssl.session)
     /* this is just a precaution to prevent multiple inits */
     return CURLE_OK;
 
@@ -348,9 +348,9 @@ CURLcode Curl_SSL_InitSessions(struct UrlData *data, long amount)
   memset(session, 0, amount * sizeof(struct curl_ssl_session));
 
   /* store the info in the SSL section */
-  data->ssl.numsessions = amount;
-  data->ssl.session = session;
-  data->ssl.sessionage = 1; /* this is brand new */
+  data->set.ssl.numsessions = amount;
+  data->set.ssl.session = session;
+  data->set.ssl.sessionage = 1; /* this is brand new */
 
   return CURLE_OK;
 }
@@ -363,19 +363,19 @@ static int Get_SSL_Session(struct connectdata *conn,
                            SSL_SESSION **ssl_sessionid)
 {
   struct curl_ssl_session *check;
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   long i;
 
-  for(i=0; i< data->ssl.numsessions; i++) {
-    check = &data->ssl.session[i];
+  for(i=0; i< data->set.ssl.numsessions; i++) {
+    check = &data->set.ssl.session[i];
     if(!check->sessionid)
       /* not session ID means blank entry */
       continue;
     if(strequal(conn->name, check->name) &&
        (conn->remote_port == check->remote_port) ) {
       /* yes, we have a session ID! */
-      data->ssl.sessionage++;            /* increase general age */
-      check->age = data->ssl.sessionage; /* set this as used in this age */
+      data->set.ssl.sessionage++;            /* increase general age */
+      check->age = data->set.ssl.sessionage; /* set this as used in this age */
       *ssl_sessionid = check->sessionid;
       return FALSE;
     }
@@ -409,15 +409,15 @@ static int Kill_Single_Session(struct curl_ssl_session *session)
  * This function is called when the 'data' struct is going away. Close
  * down everything and free all resources!
  */
-int Curl_SSL_Close_All(struct UrlData *data)
+int Curl_SSL_Close_All(struct SessionHandle *data)
 {
   int i;
-  for(i=0; i< data->ssl.numsessions; i++)
+  for(i=0; i< data->set.ssl.numsessions; i++)
     /* the single-killer function handles empty table slots */
-    Kill_Single_Session(&data->ssl.session[i]);
+    Kill_Single_Session(&data->set.ssl.session[i]);
 
   /* free the cache data */
-  free(data->ssl.session);
+  free(data->set.ssl.session);
 
   return 0;
 }
@@ -430,8 +430,8 @@ static int Store_SSL_Session(struct connectdata *conn)
   SSL_SESSION *ssl_sessionid;
   struct curl_ssl_session *store;
   int i;
-  struct UrlData *data=conn->data; /* the mother of all structs */
-  int oldest_age=data->ssl.session[0].age; /* zero if unused */
+  struct SessionHandle *data=conn->data; /* the mother of all structs */
+  int oldest_age=data->set.ssl.session[0].age; /* zero if unused */
 
   /* ask OpenSSL, say please */
   ssl_sessionid = SSL_get1_session(conn->ssl.handle);
@@ -444,21 +444,21 @@ static int Store_SSL_Session(struct connectdata *conn)
      the oldest if necessary) */
 
   /* find an empty slot for us, or find the oldest */
-  for(i=0; (i<data->ssl.numsessions) && data->ssl.session[i].sessionid; i++) {
-    if(data->ssl.session[i].age < oldest_age) {
-      oldest_age = data->ssl.session[i].age;
-      store = &data->ssl.session[i];
+  for(i=0; (i<data->set.ssl.numsessions) && data->set.ssl.session[i].sessionid; i++) {
+    if(data->set.ssl.session[i].age < oldest_age) {
+      oldest_age = data->set.ssl.session[i].age;
+      store = &data->set.ssl.session[i];
     }
   }
-  if(i == data->ssl.numsessions)
+  if(i == data->set.ssl.numsessions)
     /* cache is full, we must "kill" the oldest entry! */
     Kill_Single_Session(store);
   else
-    store = &data->ssl.session[i]; /* use this slot */
+    store = &data->set.ssl.session[i]; /* use this slot */
   
   /* now init the session struct wisely */
   store->sessionid = ssl_sessionid;
-  store->age = data->ssl.sessionage;      /* set current age */
+  store->age = data->set.ssl.sessionage;      /* set current age */
   store->name = strdup(conn->name);       /* clone host name */
   store->remote_port = conn->remote_port; /* port number */
 
@@ -472,7 +472,7 @@ Curl_SSLConnect(struct connectdata *conn)
   CURLcode retcode = CURLE_OK;
 
 #ifdef USE_SSLEAY
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   int err;
   char * str;
   SSL_METHOD *req_method;
@@ -484,7 +484,7 @@ Curl_SSLConnect(struct connectdata *conn)
   /* Make funny stuff to get random input */
   random_the_seed(conn);
     
-  switch(data->ssl.version) {
+  switch(data->set.ssl.version) {
   default:
     req_method = SSLv23_client_method();
     break;
@@ -503,21 +503,21 @@ Curl_SSLConnect(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
   }
     
-  if(data->cert) {
-    if (!cert_stuff(conn, data->cert, data->cert)) {
+  if(data->set.cert) {
+    if (!cert_stuff(conn, data->set.cert, data->set.cert)) {
       /* failf() is already done in cert_stuff() */
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
 
-  if(data->ssl.verifypeer){
+  if(data->set.ssl.verifypeer){
     SSL_CTX_set_verify(conn->ssl.ctx,
                        SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
                        SSL_VERIFY_CLIENT_ONCE,
                        cert_verify_callback);
     if (!SSL_CTX_load_verify_locations(conn->ssl.ctx,
-                                       data->ssl.CAfile,
-                                       data->ssl.CApath)) {
+                                       data->set.ssl.CAfile,
+                                       data->set.ssl.CApath)) {
       failf(data,"error setting cerficate verify locations\n");
       return CURLE_SSL_CONNECT_ERROR;
     }
@@ -587,7 +587,7 @@ Curl_SSLConnect(struct connectdata *conn)
   infof(data, "\t subject: %s\n", str);
   CRYPTO_free(str);
 
-  if (data->ssl.verifyhost) {
+  if (data->set.ssl.verifyhost) {
     char peer_CN[257];
     if (X509_NAME_get_text_by_NID(X509_get_subject_name(conn->ssl.server_cert), NID_commonName, peer_CN, sizeof(peer_CN)) < 0) {
       failf(data, "SSL: unable to obtain common name from peer certificate");
@@ -596,7 +596,7 @@ Curl_SSLConnect(struct connectdata *conn)
     }
 
     if (!strequal(peer_CN, conn->hostname)) {
-      if (data->ssl.verifyhost > 1) {
+      if (data->set.ssl.verifyhost > 1) {
         failf(data, "SSL: certificate subject name '%s' does not match target host name '%s'",
             peer_CN, conn->hostname);
         X509_free(conn->ssl.server_cert);
@@ -622,16 +622,16 @@ Curl_SSLConnect(struct connectdata *conn)
   /* We could do all sorts of certificate verification stuff here before
      deallocating the certificate. */
 
-  if(data->ssl.verifypeer) {
-    data->ssl.certverifyresult=SSL_get_verify_result(conn->ssl.handle);
-    if (data->ssl.certverifyresult != X509_V_OK) {
+  if(data->set.ssl.verifypeer) {
+    data->set.ssl.certverifyresult=SSL_get_verify_result(conn->ssl.handle);
+    if (data->set.ssl.certverifyresult != X509_V_OK) {
       failf(data, "SSL certificate verify result: %d\n",
-            data->ssl.certverifyresult);
+            data->set.ssl.certverifyresult);
       retcode = CURLE_SSL_PEER_CERTIFICATE;
     }
   }
   else
-    data->ssl.certverifyresult=0;
+    data->set.ssl.certverifyresult=0;
 
   X509_free(conn->ssl.server_cert);
 #else /* USE_SSLEAY */

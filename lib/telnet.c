@@ -105,7 +105,7 @@ void telrcv(struct connectdata *,
 	    unsigned char *inbuf,	/* Data received from socket */
 	    int count);			/* Number of bytes received */
 
-static void printoption(struct UrlData *data,
+static void printoption(struct SessionHandle *data,
 			const char *direction,
 			int cmd, int option);
 
@@ -114,7 +114,7 @@ static void send_negotiation(struct connectdata *, int cmd, int option);
 static void set_local_option(struct connectdata *, int cmd, int option);
 static void set_remote_option(struct connectdata *, int cmd, int option);
 
-static void printsub(struct UrlData *data,
+static void printsub(struct SessionHandle *data,
 		     int direction, unsigned char *pointer, int length);
 static void suboption(struct connectdata *);
 
@@ -215,13 +215,13 @@ static void negotiate(struct connectdata *conn)
   }
 }
 
-static void printoption(struct UrlData *data,
+static void printoption(struct SessionHandle *data,
 			const char *direction, int cmd, int option)
 {
   const char *fmt;
   const char *opt;
    
-  if (data->bits.verbose)
+  if (data->set.verbose)
   {
     if (cmd == IAC)
     {
@@ -627,14 +627,14 @@ void rec_dont(struct connectdata *conn, int option)
 }
 
 
-static void printsub(struct UrlData *data,
+static void printsub(struct SessionHandle *data,
 		     int direction,		/* '<' or '>' */
 		     unsigned char *pointer,	/* where suboption data is */
 		     int length)		/* length of suboption data */
 {
   int i = 0;
 
-  if (data->bits.verbose)
+  if (data->set.verbose)
   {
     if (direction)
     {
@@ -745,7 +745,7 @@ static int check_telnet_options(struct connectdata *conn)
   char option_keyword[128];
   char option_arg[256];
   char *buf;
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
 
   /* Add the user name as an environment variable if it
@@ -753,13 +753,13 @@ static int check_telnet_options(struct connectdata *conn)
   if(conn->bits.user_passwd)
   {
     char *buf = malloc(256);
-    sprintf(buf, "USER,%s", data->user);
+    sprintf(buf, "USER,%s", data->state.user);
     tn->telnet_vars = curl_slist_append(tn->telnet_vars, buf);
 
     tn->us_preferred[TELOPT_NEW_ENVIRON] = YES;
   }
 
-  for(head = data->telnet_options; head; head=head->next) {
+  for(head = data->set.telnet_options; head; head=head->next) {
     if(sscanf(head->data, "%127[^= ]%*[ =]%255s",
               option_keyword, option_arg) == 2) {
 
@@ -814,7 +814,7 @@ static void suboption(struct connectdata *conn)
   int tmplen;
   char varname[128];
   char varval[128];
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
 
   printsub(data, '<', (unsigned char *)tn->subbuffer, SB_LEN(tn)+2);
@@ -868,7 +868,7 @@ void telrcv(struct connectdata *conn,
 {
   unsigned char c;
   int index = 0;
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
 
   while(count--)
@@ -1031,13 +1031,13 @@ CURLcode Curl_telnet_done(struct connectdata *conn)
 CURLcode Curl_telnet(struct connectdata *conn)
 {
   CURLcode code;
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   int sockfd = conn->firstsocket;
   fd_set readfd;
   fd_set keepfd;
 
   bool keepon = TRUE;
-  char *buf = data->buffer;
+  char *buf = data->state.buffer;
   ssize_t nread;
   struct TELNET *tn;
 

@@ -116,7 +116,7 @@ static void * DynaGetFunction(const char *name)
 
 static int WriteProc(void *param, char *text, int len)
 {
-  struct UrlData *data = (struct UrlData *)param;
+  struct SessionHandle *data = (struct SessionHandle *)param;
   len = 0; /* prevent compiler warning */
   Curl_client_write(data, CLIENTWRITE_BODY, text, 0);
   return 0;
@@ -142,9 +142,9 @@ CURLcode Curl_ldap(struct connectdata *conn)
   void *entryIterator;
 
   int ldaptext;
-  struct UrlData *data=conn->data;
+  struct SessionHandle *data=conn->data;
   
-  infof(data, "LDAP: %s %s\n", data->url);
+  infof(data, "LDAP: %s %s\n", data->change.url);
 
   DynaOpen();
   if (libldap == NULL) {
@@ -152,7 +152,7 @@ CURLcode Curl_ldap(struct connectdata *conn)
     return CURLE_LIBRARY_NOT_FOUND;
   }
 
-  ldaptext = data->bits.ftp_ascii; /* This is a dirty hack */
+  ldaptext = data->set.ftp_ascii; /* This is a dirty hack */
   
   /* The types are needed because ANSI C distinguishes between
    * pointer-to-object (data) and pointer-to-function.
@@ -173,12 +173,12 @@ CURLcode Curl_ldap(struct connectdata *conn)
 	  conn->hostname, conn->port);
     status = CURLE_COULDNT_CONNECT;
   } else {
-    rc = ldap_simple_bind_s(server, data->user, data->passwd);
+    rc = ldap_simple_bind_s(server, data->state.user, data->state.passwd);
     if (rc != 0) {
       failf(data, "LDAP: %s", ldap_err2string(rc));
       status = CURLE_LDAP_CANNOT_BIND;
     } else {
-      rc = ldap_url_search_s(server, data->url, 0, &result);
+      rc = ldap_url_search_s(server, data->change.url, 0, &result);
       if (rc != 0) {
 	failf(data, "LDAP: %s", ldap_err2string(rc));
 	status = CURLE_LDAP_SEARCH_FAILED;

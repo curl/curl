@@ -27,8 +27,8 @@
 
 #include "timeval.h"
 
-void Curl_speedinit(struct UrlData *data);
-CURLcode Curl_speedcheck(struct UrlData *data,
+void Curl_speedinit(struct SessionHandle *data);
+CURLcode Curl_speedcheck(struct SessionHandle *data,
                          struct timeval now);
 
 #endif

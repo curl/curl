@@ -28,10 +28,10 @@ void Curl_SSL_init(void);    /* Global SSL init */
 void Curl_SSL_cleanup(void); /* Global SSL cleanup */
 
 /* init the SSL session ID cache */
-CURLcode Curl_SSL_InitSessions(struct UrlData *, long);
+CURLcode Curl_SSL_InitSessions(struct SessionHandle *, long);
 void Curl_SSL_Close(struct connectdata *conn); /* close a SSL connection */
 
 /* tell the SSL stuff to close down all open information regarding 
    connections (and thus session ID caching etc) */
-int Curl_SSL_Close_All(struct UrlData *data);
+int Curl_SSL_Close_All(struct SessionHandle *data);
 #endif

@@ -142,8 +142,8 @@ CURLcode Curl_file(struct connectdata *conn)
   struct stat statbuf;
   ssize_t expected_size=-1;
   ssize_t nread;
-  struct UrlData *data = conn->data;
-  char *buf = data->buffer;
+  struct SessionHandle *data = conn->data;
+  char *buf = data->state.buffer;
   int bytecount = 0;
   struct timeval start = Curl_tvnow();
   struct timeval now = start;

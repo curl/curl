@@ -24,8 +24,8 @@
  *****************************************************************************/
 
 size_t Curl_sendf(int fd, struct connectdata *, const char *fmt, ...);
-void Curl_infof(struct UrlData *, const char *fmt, ...);
-void Curl_failf(struct UrlData *, const char *fmt, ...);
+void Curl_infof(struct SessionHandle *, const char *fmt, ...);
+void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 
 #define infof Curl_infof
 #define failf Curl_failf
@@ -41,7 +41,7 @@ typedef struct send_buffer send_buffer;
 #define CLIENTWRITE_HEADER 2
 #define CLIENTWRITE_BOTH   (CLIENTWRITE_BODY|CLIENTWRITE_HEADER)
 
-CURLcode Curl_client_write(struct UrlData *data, int type, char *ptr,
+CURLcode Curl_client_write(struct SessionHandle *data, int type, char *ptr,
                            size_t len);
 
 /* internal read-function, does plain socket, SSL and krb4 */

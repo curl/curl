@@ -98,7 +98,7 @@ static CURLcode _ftp_cwd(struct connectdata *conn, char *path);
 /* easy-to-use macro: */
 #define ftpsendf Curl_ftpsendf
 
-static CURLcode AllowServerConnect(struct UrlData *data,
+static CURLcode AllowServerConnect(struct SessionHandle *data,
                                    struct connectdata *conn,
                                    int sock)
 {
@@ -178,7 +178,7 @@ int Curl_GetFTPResponse(int sockfd,
   struct timeval interval;
   fd_set rkeepfd;
   fd_set readfd;
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   char *line_start;
   int code=0; /* default "error code" to return */
 
@@ -190,9 +190,9 @@ int Curl_GetFTPResponse(int sockfd,
   if(ftpcode)
     *ftpcode=0; /* 0 for errors */
 
-  if(data->timeout) {
+  if(data->set.timeout) {
     /* if timeout is requested, find out how much remaining time we have */
-    timeout = data->timeout - /* timeout time */
+    timeout = data->set.timeout - /* timeout time */
       (Curl_tvlong(Curl_tvnow()) - Curl_tvlong(conn->now)); /* spent time */
     if(timeout <=0 ) {
       failf(data, "Transfer aborted due to timeout");
@@ -255,9 +255,9 @@ int Curl_GetFTPResponse(int sockfd,
                the line isn't really terminated until the LF comes */
 
             /* output debug output if that is requested */
-            if(data->bits.verbose) {
-              fputs("< ", data->err);
-              fwrite(line_start, perline, 1, data->err);
+            if(data->set.verbose) {
+              fputs("< ", data->set.err);
+              fwrite(line_start, perline, 1, data->set.err);
               /* no need to output LF here, it is part of the data */
             }
 
@@ -339,8 +339,8 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 {
   /* this is FTP and no proxy */
   int nread;
-  struct UrlData *data=conn->data;
-  char *buf = data->buffer; /* this is our buffer */
+  struct SessionHandle *data=conn->data;
+  char *buf = data->state.buffer; /* this is our buffer */
   struct FTP *ftp;
   CURLcode result;
   int ftpcode;
@@ -360,11 +360,11 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   /* get some initial data into the ftp struct */
   ftp->bytecountp = &conn->bytecount;
 
-  /* duplicate to keep them even when the data struct changes */
-  ftp->user = strdup(data->user);
-  ftp->passwd = strdup(data->passwd);
+  /* no need to duplicate them, the data struct won't change */
+  ftp->user = data->state.user;
+  ftp->passwd = data->state.passwd;
 
-  if (data->bits.tunnel_thru_httpproxy) {
+  if (data->set.tunnel_thru_httpproxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
     result = Curl_ConnectHTTPProxyTunnel(conn, conn->firstsocket,
                                          conn->hostname, conn->remote_port);
@@ -393,14 +393,14 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
 #ifdef KRB4
   /* if not anonymous login, try a secure login */
-  if(data->bits.krb4) {
+  if(data->set.krb4) {
 
     /* request data protection level (default is 'clear') */
     Curl_sec_request_prot(conn, "private");
 
     /* We set private first as default, in case the line below fails to
        set a valid level */
-    Curl_sec_request_prot(conn, data->krb4_level);
+    Curl_sec_request_prot(conn, data->set.krb4_level);
 
     if(Curl_sec_login(conn) != 0)
       infof(data, "Logging in with password in cleartext!\n");
@@ -462,7 +462,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
     /* we may need to issue a KAUTH here to have access to the files
      * do it if user supplied a password
      */
-    if(conn->data->passwd && *conn->data->passwd)
+    if(conn->data->set.passwd && *conn->data->set.passwd)
       Curl_krb_kauth(conn);
 #endif
   }
@@ -530,16 +530,16 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 /* argument is already checked for validity */
 CURLcode Curl_ftp_done(struct connectdata *conn)
 {
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   struct FTP *ftp = conn->proto.ftp;
   ssize_t nread;
-  char *buf = data->buffer; /* this is our buffer */
+  char *buf = data->state.buffer; /* this is our buffer */
   int ftpcode;
 
-  if(data->bits.upload) {
-    if((-1 != data->infilesize) && (data->infilesize != *ftp->bytecountp)) {
+  if(data->set.upload) {
+    if((-1 != data->set.infilesize) && (data->set.infilesize != *ftp->bytecountp)) {
       failf(data, "Wrote only partial file (%d out of %d bytes)",
-            *ftp->bytecountp, data->infilesize);
+            *ftp->bytecountp, data->set.infilesize);
       return CURLE_PARTIAL_FILE;
     }
   }
@@ -550,7 +550,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
       return CURLE_PARTIAL_FILE;
     }
     else if(!conn->bits.resume_done &&
-            !data->bits.no_body &&
+            !data->set.no_body &&
             (0 == *ftp->bytecountp)) {
       failf(data, "No data was received!");
       return CURLE_FTP_COULDNT_RETR_FILE;
@@ -564,7 +564,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   sclose(conn->secondarysocket);
   conn->secondarysocket = -1;
 
-  if(!data->bits.no_body && !conn->bits.resume_done) {  
+  if(!data->set.no_body && !conn->bits.resume_done) {  
     /* now let's see what the server says about the transfer we
        just performed: */
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
@@ -581,8 +581,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   conn->bits.resume_done = FALSE; /* clean this for next connection */
 
   /* Send any post-transfer QUOTE strings? */
-  if(data->postquote) {
-    CURLcode result = _ftp_sendquote(conn, data->postquote);
+  if(data->set.postquote) {
+    CURLcode result = _ftp_sendquote(conn, data->set.postquote);
     return result;
   }
 
@@ -603,7 +603,7 @@ CURLcode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
       ftpsendf(conn->firstsocket, conn, "%s", item->data);
 
       nread = Curl_GetFTPResponse(conn->firstsocket, 
-                                  conn->data->buffer, conn, &ftpcode);
+                                  conn->data->state.buffer, conn, &ftpcode);
       if (nread < 0)
         return CURLE_OPERATION_TIMEOUTED;
 
@@ -627,7 +627,7 @@ CURLcode _ftp_cwd(struct connectdata *conn, char *path)
   
   ftpsendf(conn->firstsocket, conn, "CWD %s", path);
   nread = Curl_GetFTPResponse(conn->firstsocket, 
-                              conn->data->buffer, conn, &ftpcode);
+                              conn->data->state.buffer, conn, &ftpcode);
   if (nread < 0)
     return CURLE_OPERATION_TIMEOUTED;
 
@@ -645,7 +645,7 @@ CURLcode _ftp_getfiletime(struct connectdata *conn, char *file)
   CURLcode result=CURLE_OK;
   int ftpcode; /* for ftp status */
   ssize_t nread;
-  char *buf = conn->data->buffer;
+  char *buf = conn->data->state.buffer;
 
   /* we have requested to get the modified-time of the file, this is yet
      again a grey area as the MDTM is not kosher RFC959 */
@@ -666,7 +666,7 @@ CURLcode _ftp_getfiletime(struct connectdata *conn, char *file)
       sprintf(buf, "%04d%02d%02d %02d:%02d:%02d",
               year, month, day, hour, minute, second);
       /* now, convert this into a time() value: */
-      conn->data->progress.filetime = curl_getdate(buf, &secs);
+      conn->data->info.filetime = curl_getdate(buf, &secs);
     }
     else {
       infof(conn->data, "unsupported MDTM reply format\n");
@@ -678,10 +678,10 @@ CURLcode _ftp_getfiletime(struct connectdata *conn, char *file)
 static CURLcode _ftp_transfertype(struct connectdata *conn,
                                   bool ascii)
 {
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   int ftpcode;
   ssize_t nread;
-  char *buf=data->buffer;
+  char *buf=data->state.buffer;
 
   ftpsendf(conn->firstsocket, conn, "TYPE %s", ascii?"A":"I");
 
@@ -702,10 +702,10 @@ static
 CURLcode _ftp_getsize(struct connectdata *conn, char *file,
                       ssize_t *size)
 {
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   int ftpcode;
   ssize_t nread;
-  char *buf=data->buffer;
+  char *buf=data->state.buffer;
 
   ftpsendf(conn->firstsocket, conn, "SIZE %s", file);
   nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
@@ -729,8 +729,8 @@ CURLcode _ftp(struct connectdata *conn)
   /* this is FTP and no proxy */
   ssize_t nread;
   CURLcode result;
-  struct UrlData *data=conn->data;
-  char *buf = data->buffer; /* this is our buffer */
+  struct SessionHandle *data=conn->data;
+  char *buf = data->state.buffer; /* this is our buffer */
   /* for the ftp PORT mode */
   int portsock=-1;
 #if defined (HAVE_INET_NTOA_R)
@@ -750,8 +750,8 @@ CURLcode _ftp(struct connectdata *conn)
   int ftpcode; /* for ftp status */
 
   /* Send any QUOTE strings? */
-  if(data->quote) {
-    if ((result = _ftp_sendquote(conn, data->quote)) != CURLE_OK)
+  if(data->set.quote) {
+    if ((result = _ftp_sendquote(conn, data->set.quote)) != CURLE_OK)
       return result;
   }
     
@@ -770,7 +770,7 @@ CURLcode _ftp(struct connectdata *conn)
   }
 
   /* Requested time of file? */
-  if(data->bits.get_filetime && ftp->file) {
+  if(data->set.get_filetime && ftp->file) {
     result = _ftp_getfiletime(conn, ftp->file);
     if(result)
       return result;
@@ -778,7 +778,7 @@ CURLcode _ftp(struct connectdata *conn)
 
   /* If we have selected NOBODY, it means that we only want file information.
      Which in FTP can't be much more than the file size! */
-  if(data->bits.no_body) {
+  if(data->set.no_body) {
     /* The SIZE command is _not_ RFC 959 specified, and therefor many servers
        may not support it! It is however the only way we have to get a file's
        size! */
@@ -786,7 +786,7 @@ CURLcode _ftp(struct connectdata *conn)
 
     /* Some servers return different sizes for different modes, and thus we
        must set the proper type before we check the size */
-    result = _ftp_transfertype(conn, data->bits.ftp_ascii);
+    result = _ftp_transfertype(conn, data->set.ftp_ascii);
     if(result)
       return result;
 
@@ -804,13 +804,13 @@ CURLcode _ftp(struct connectdata *conn)
        well, we "emulate" a HTTP-style header in our output. */
 
 #ifdef HAVE_STRFTIME
-    if(data->bits.get_filetime && data->progress.filetime) {
+    if(data->set.get_filetime && data->info.filetime) {
       struct tm *tm;
 #ifdef HAVE_LOCALTIME_R
       struct tm buffer;
-      tm = (struct tm *)localtime_r(&data->progress.filetime, &buffer);
+      tm = (struct tm *)localtime_r(&data->info.filetime, &buffer);
 #else
-      tm = localtime(&data->progress.filetime);
+      tm = localtime(&data->info.filetime);
 #endif
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
       strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S %Z\r\n",
@@ -825,7 +825,7 @@ CURLcode _ftp(struct connectdata *conn)
   }
 
   /* We have chosen to use the PORT command */
-  if(data->bits.ftp_use_port) {
+  if(data->set.ftp_use_port) {
 #ifdef ENABLE_IPV6
     struct addrinfo hints, *res, *ai;
     struct sockaddr_storage ss;
@@ -1005,15 +1005,15 @@ CURLcode _ftp(struct connectdata *conn)
     unsigned short porttouse;
     char myhost[256] = "";
 
-    if(data->ftpport) {
-      if(Curl_if2ip(data->ftpport, myhost, sizeof(myhost))) {
+    if(data->set.ftpport) {
+      if(Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
         h = Curl_gethost(data, myhost, &hostdataptr);
       }
       else {
-        if(strlen(data->ftpport)>1)
-          h = Curl_gethost(data, data->ftpport, &hostdataptr);
+        if(strlen(data->set.ftpport)>1)
+          h = Curl_gethost(data, data->set.ftpport, &hostdataptr);
         if(h)
-          strcpy(myhost, data->ftpport); /* buffer overflow risk */
+          strcpy(myhost, data->set.ftpport); /* buffer overflow risk */
       }
     }
     if(! *myhost) {
@@ -1172,7 +1172,7 @@ CURLcode _ftp(struct connectdata *conn)
 
       sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
       newport = (port[0]<<8) + port[1];
-      if(data->bits.httpproxy) {
+      if(data->change.proxy) {
         /*
          * This is a tunnel through a http proxy and we need to connect to the
          * proxy again here. We already have the name info for it since the
@@ -1214,7 +1214,7 @@ CURLcode _ftp(struct connectdata *conn)
 	if (conn->secondarysocket < 0)
 	  continue;
 
-	if(data->bits.verbose) {
+	if(data->set.verbose) {
 	  char hbuf[NI_MAXHOST];
 	  char nbuf[NI_MAXHOST];
 	  char sbuf[NI_MAXSERV];
@@ -1258,7 +1258,7 @@ CURLcode _ftp(struct connectdata *conn)
 
       serv_addr.sin_port = htons(connectport);
 
-      if(data->bits.verbose) {
+      if(data->set.verbose) {
         struct in_addr in;
         struct hostent * answer;
 
@@ -1346,7 +1346,7 @@ CURLcode _ftp(struct connectdata *conn)
       }
 #endif /*ENABLE_IPV6*/
 
-      if (data->bits.tunnel_thru_httpproxy) {
+      if (data->set.tunnel_thru_httpproxy) {
         /* We want "seamless" FTP operations through HTTP proxy tunnel */
         result = Curl_ConnectHTTPProxyTunnel(conn, conn->secondarysocket,
                                              newhost, newport);
@@ -1360,10 +1360,10 @@ CURLcode _ftp(struct connectdata *conn)
   /* we have the (new) data connection ready */
   infof(data, "Connected the data stream!\n");
 
-  if(data->bits.upload) {
+  if(data->set.upload) {
 
     /* Set type to binary (unless specified ASCII) */
-    result = _ftp_transfertype(conn, data->bits.ftp_ascii);
+    result = _ftp_transfertype(conn, data->set.ftp_ascii);
     if(result)
       return result;
 
@@ -1395,7 +1395,7 @@ CURLcode _ftp(struct connectdata *conn)
         /* do we still game? */
         int passed=0;
         /* enable append instead */
-        data->bits.ftp_append = 1;
+        data->set.ftp_append = 1;
 
         /* Now, let's read off the proper amount of bytes from the
            input. If we knew it was a proper file we could've just
@@ -1408,7 +1408,8 @@ CURLcode _ftp(struct connectdata *conn)
             readthisamountnow = BUFSIZE;
 
           actuallyread =
-            data->fread(data->buffer, 1, readthisamountnow, data->in);
+            data->set.fread(data->state.buffer, 1, readthisamountnow,
+                            data->set.in);
 
           passed += actuallyread;
           if(actuallyread != readthisamountnow) {
@@ -1419,10 +1420,10 @@ CURLcode _ftp(struct connectdata *conn)
         while(passed != conn->resume_from);
 
         /* now, decrease the size of the read */
-        if(data->infilesize>0) {
-          data->infilesize -= conn->resume_from;
+        if(data->set.infilesize>0) {
+          data->set.infilesize -= conn->resume_from;
 
-          if(data->infilesize <= 0) {
+          if(data->set.infilesize <= 0) {
             infof(data, "File already completely uploaded\n");
 
             /* no data to transfer */
@@ -1440,8 +1441,8 @@ CURLcode _ftp(struct connectdata *conn)
       }
     }
 
-    /* Send everything on data->in to the socket */
-    if(data->bits.ftp_append)
+    /* Send everything on data->set.in to the socket */
+    if(data->set.ftp_append)
       /* we append onto the file instead of rewriting it */
       ftpsendf(conn->firstsocket, conn, "APPE %s", ftp->file);
     else
@@ -1457,7 +1458,7 @@ CURLcode _ftp(struct connectdata *conn)
       return CURLE_FTP_COULDNT_STOR_FILE;
     }
 
-    if(data->bits.ftp_use_port) {
+    if(data->set.ftp_use_port) {
       /* PORT means we are now awaiting the server to connect to us. */
       result = AllowServerConnect(data, conn, portsock);
       if( result )
@@ -1469,7 +1470,7 @@ CURLcode _ftp(struct connectdata *conn)
     /* When we know we're uploading a specified file, we can get the file
        size prior to the actual upload. */
 
-    Curl_pgrsSetUploadSize(data, data->infilesize);
+    Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
     result = Curl_Transfer(conn, -1, -1, FALSE, NULL, /* no download */
                       conn->secondarysocket, bytecountp);
@@ -1520,7 +1521,7 @@ CURLcode _ftp(struct connectdata *conn)
             from, to, totalsize);
     }
 
-    if((data->bits.ftp_list_only) || !ftp->file) {
+    if((data->set.ftp_list_only) || !ftp->file) {
       /* The specified path ends with a slash, and therefore we think this
          is a directory that is requested, use LIST. But before that we
          need to set ASCII transfer mode. */
@@ -1536,12 +1537,12 @@ CURLcode _ftp(struct connectdata *conn)
          standard in any way */
 
       ftpsendf(conn->firstsocket, conn, "%s",
-            data->customrequest?data->customrequest:
-            (data->bits.ftp_list_only?"NLST":"LIST"));
+            data->set.customrequest?data->set.customrequest:
+            (data->set.ftp_list_only?"NLST":"LIST"));
     }
     else {
       /* Set type to binary (unless specified ASCII) */
-      result = _ftp_transfertype(conn, data->bits.ftp_ascii);
+      result = _ftp_transfertype(conn, data->set.ftp_ascii);
       if(result)
         return result;
 
@@ -1647,7 +1648,7 @@ CURLcode _ftp(struct connectdata *conn)
       int size=-1; /* default unknown size */
 
       if(!dirlist &&
-         !data->bits.ftp_ascii &&
+         !data->set.ftp_ascii &&
          (-1 == downloadsize)) {
         /*
          * It seems directory listings either don't show the size or very
@@ -1684,7 +1685,7 @@ CURLcode _ftp(struct connectdata *conn)
       else if(downloadsize > -1)
         size = downloadsize;
 
-      if(data->bits.ftp_use_port) {
+      if(data->set.ftp_use_port) {
         result = AllowServerConnect(data, conn, portsock);
         if( result )
           return result;
@@ -1717,7 +1718,7 @@ CURLcode Curl_ftp(struct connectdata *conn)
 {
   CURLcode retcode;
 
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   struct FTP *ftp;
   int dirlength=0; /* 0 forces strlen() */
 
@@ -1793,8 +1794,8 @@ size_t Curl_ftpsendf(int fd, struct connectdata *conn,
   vsnprintf(s, 250, fmt, ap);
   va_end(ap);
 
-  if(conn->data->bits.verbose)
-    fprintf(conn->data->err, "> %s\n", s);
+  if(conn->data->set.verbose)
+    fprintf(conn->data->set.err, "> %s\n", s);
 
   strcat(s, "\r\n"); /* append a trailing CRLF */
 
@@ -1811,10 +1812,6 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
 
   /* The FTP session may or may not have been allocated/setup at this point! */
   if(ftp) {
-    if(ftp->user)
-      free(ftp->user);
-    if(ftp->passwd)
-      free(ftp->passwd);
     if(ftp->entrypath)
       free(ftp->entrypath);
   }

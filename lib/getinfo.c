@@ -35,22 +35,23 @@
  * This is supposed to be called in the beginning of a permform() session
  * and should reset all session-info variables
  */
-CURLcode Curl_initinfo(struct UrlData *data)
+CURLcode Curl_initinfo(struct SessionHandle *data)
 {
   struct Progress *pro = &data->progress;
+  struct PureInfo *info =&data->info;
 
   pro->t_nslookup = 0;
   pro->t_connect = 0;
   pro->t_pretransfer = 0;
 
-  pro->httpcode = 0;
-  pro->httpversion=0;
-  pro->filetime=0;
+  info->httpcode = 0;
+  info->httpversion=0;
+  info->filetime=0;
 
   return CURLE_OK;
 }
 
-CURLcode Curl_getinfo(struct UrlData *data, CURLINFO info, ...)
+CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
 {
   va_list arg;
   long *param_longp;
@@ -80,19 +81,19 @@ CURLcode Curl_getinfo(struct UrlData *data, CURLINFO info, ...)
   
   switch(info) {
   case CURLINFO_EFFECTIVE_URL:
-    *param_charp = data->url?data->url:(char *)"";
+    *param_charp = data->change.url?data->change.url:(char *)"";
     break;
   case CURLINFO_HTTP_CODE:
-    *param_longp = data->progress.httpcode;
+    *param_longp = data->info.httpcode;
     break;
   case CURLINFO_FILETIME:
-    *param_longp = data->progress.filetime;
+    *param_longp = data->info.filetime;
     break;
   case CURLINFO_HEADER_SIZE:
-    *param_longp = data->header_size;
+    *param_longp = data->info.header_size;
     break;
   case CURLINFO_REQUEST_SIZE:
-    *param_longp = data->request_size;
+    *param_longp = data->info.request_size;
     break;
   case CURLINFO_TOTAL_TIME:
     *param_doublep = data->progress.timespent;
@@ -119,7 +120,7 @@ CURLcode Curl_getinfo(struct UrlData *data, CURLINFO info, ...)
     *param_doublep = data->progress.ulspeed;
     break;
   case CURLINFO_SSL_VERIFYRESULT:
-    *param_longp = data->ssl.certverifyresult;
+    *param_longp = data->set.ssl.certverifyresult;
     break;
   case CURLINFO_CONTENT_LENGTH_DOWNLOAD:
     *param_doublep = data->progress.size_dl;

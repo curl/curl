@@ -37,13 +37,13 @@ typedef enum {
 } timerid;
   
 void Curl_pgrsDone(struct connectdata *);
-void Curl_pgrsStartNow(struct UrlData *data);
-void Curl_pgrsSetDownloadSize(struct UrlData *data, double size);
-void Curl_pgrsSetUploadSize(struct UrlData *data, double size);
-void Curl_pgrsSetDownloadCounter(struct UrlData *data, double size);
-void Curl_pgrsSetUploadCounter(struct UrlData *data, double size);
+void Curl_pgrsStartNow(struct SessionHandle *data);
+void Curl_pgrsSetDownloadSize(struct SessionHandle *data, double size);
+void Curl_pgrsSetUploadSize(struct SessionHandle *data, double size);
+void Curl_pgrsSetDownloadCounter(struct SessionHandle *data, double size);
+void Curl_pgrsSetUploadCounter(struct SessionHandle *data, double size);
 int Curl_pgrsUpdate(struct connectdata *);
-void Curl_pgrsTime(struct UrlData *data, timerid timer);
+void Curl_pgrsTime(struct SessionHandle *data, timerid timer);
 
 
 /* Don't show progress for sizes smaller than: */

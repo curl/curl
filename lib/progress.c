@@ -93,17 +93,17 @@ static char *max5data(double bytes, char *max5)
 
 void Curl_pgrsDone(struct connectdata *conn)
 {
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
   if(!(data->progress.flags & PGRS_HIDE)) {
     data->progress.lastshow=0;
     Curl_pgrsUpdate(conn); /* the final (forced) update */
     if(!data->progress.callback)
       /* only output if we don't use progress callback */
-      fprintf(data->err, "\n");
+      fprintf(data->set.err, "\n");
   }
 }
 
-void Curl_pgrsTime(struct UrlData *data, timerid timer)
+void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
 {
   switch(timer) {
   default:
@@ -135,23 +135,23 @@ void Curl_pgrsTime(struct UrlData *data, timerid timer)
   }
 }
 
-void Curl_pgrsStartNow(struct UrlData *data)
+void Curl_pgrsStartNow(struct SessionHandle *data)
 {
   data->progress.speeder_c = 0; /* reset the progress meter display */
   data->progress.start = Curl_tvnow();
 }
 
-void Curl_pgrsSetDownloadCounter(struct UrlData *data, double size)
+void Curl_pgrsSetDownloadCounter(struct SessionHandle *data, double size)
 {
   data->progress.downloaded = size;
 }
 
-void Curl_pgrsSetUploadCounter(struct UrlData *data, double size)
+void Curl_pgrsSetUploadCounter(struct SessionHandle *data, double size)
 {
   data->progress.uploaded = size;
 }
 
-void Curl_pgrsSetDownloadSize(struct UrlData *data, double size)
+void Curl_pgrsSetDownloadSize(struct SessionHandle *data, double size)
 {
   if(size > 0) {
     data->progress.size_dl = size;
@@ -159,7 +159,7 @@ void Curl_pgrsSetDownloadSize(struct UrlData *data, double size)
   }
 }
 
-void Curl_pgrsSetUploadSize(struct UrlData *data, double size)
+void Curl_pgrsSetUploadSize(struct SessionHandle *data, double size)
 {
   if(size > 0) {
     data->progress.size_ul = size;
@@ -188,7 +188,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   double total_transfer;
   double total_expected_transfer;
 
-  struct UrlData *data = conn->data;
+  struct SessionHandle *data = conn->data;
 
   int nowindex = data->progress.speeder_c% CURR_TIME;
   int checkindex;
@@ -211,9 +211,9 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   else if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
     if (!data->progress.callback) {
       if(conn->resume_from)
-        fprintf(data->err, "** Resuming transfer from byte position %d\n",
+        fprintf(data->set.err, "** Resuming transfer from byte position %d\n",
                 conn->resume_from);
-      fprintf(data->err,
+      fprintf(data->set.err,
               "  %% Total    %% Received %% Xferd  Average Speed          Time             Curr.\n"
               "                                 Dload  Upload Total    Current  Left    Speed\n");
     }
@@ -254,12 +254,12 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   if(data->progress.flags & PGRS_HIDE)
     return 0;
-  else if(data->fprogress) {
-    result= data->fprogress(data->progress_client,
-                            data->progress.size_dl,
-                            data->progress.downloaded,
-                            data->progress.size_ul,
-                            data->progress.uploaded);
+  else if(data->set.fprogress) {
+    result= data->set.fprogress(data->set.progress_client,
+                                data->progress.size_dl,
+                                data->progress.downloaded,
+                                data->progress.size_ul,
+                                data->progress.uploaded);
     if(result)
       failf(data, "Callback aborted");
     return result;
@@ -310,7 +310,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   if(total_expected_transfer)
     total_percen=(double)(total_transfer/total_expected_transfer)*100;
 
-  fprintf(data->err,
+  fprintf(data->set.err,
           "\r%3d %s  %3d %s  %3d %s  %s  %s %s %s %s %s",
           (int)total_percen,                            /* total % */
           max5data(total_expected_transfer, max5[2]),   /* total size */
@@ -328,7 +328,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
           );
 
   /* we flush the output stream to make it appear as soon as possible */
-  fflush(data->err);
+  fflush(data->set.err);
 
   return 0;
 }

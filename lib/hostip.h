@@ -24,11 +24,11 @@
  *****************************************************************************/
 
 struct addrinfo;
-struct addrinfo *Curl_getaddrinfo(struct UrlData *data,
+struct addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
                              char *hostname,
                              int port);
 
-struct hostent *Curl_gethost(struct UrlData *data,
+struct hostent *Curl_gethost(struct SessionHandle *data,
                              char *hostname,
                              char **bufp);
 

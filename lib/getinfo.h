@@ -22,7 +22,7 @@
  *
  * $Id$
  *****************************************************************************/
-CURLcode Curl_getinfo(struct UrlData *data, CURLINFO info, ...);
-CURLcode Curl_initinfo(struct UrlData *data);
+CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...);
+CURLcode Curl_initinfo(struct SessionHandle *data);
 
 #endif

@@ -209,16 +209,16 @@ Transfer(struct connectdata *c_conn)
   int writetype;
 
   /* the highest fd we use + 1 */
-  struct UrlData *data;
+  struct SessionHandle *data;
   struct connectdata *conn = (struct connectdata *)c_conn;
   char *buf;
   int maxfd;
 
   data = conn->data; /* there's the root struct */
-  buf = data->buffer;
+  buf = data->state.buffer;
   maxfd = (conn->sockfd>conn->writesockfd?conn->sockfd:conn->writesockfd)+1;
 
-  hbufp = data->headerbuff;
+  hbufp = data->state.headerbuff;
 
   myalarm (0);			/* switch off the alarm-style timeout */
 
@@ -244,7 +244,7 @@ Transfer(struct connectdata *c_conn)
   }
   /* we want header and/or body, if neither then don't do this! */
   if(conn->getheader ||
-     !data->bits.no_body) {
+     !data->set.no_body) {
     fd_set readfd;
     fd_set writefd;
     fd_set rkeepfd;
@@ -267,7 +267,7 @@ Transfer(struct connectdata *c_conn)
 
     FD_ZERO (&writefd);		/* clear it */
     if(conn->writesockfd != -1) {
-      if (data->bits.expect100header)
+      if (data->set.expect100header)
         /* wait with write until we either got 100-continue or a timeout */
         write_after_100_header = TRUE;
       else {
@@ -350,19 +350,19 @@ Transfer(struct connectdata *c_conn)
                  * We enlarge the header buffer if it seems to be too
                  * smallish
                  */
-                if (hbuflen + (int)str_length >= data->headersize) {
+                if (hbuflen + (int)str_length >= data->state.headersize) {
                   char *newbuff;
                   long newsize=MAX((hbuflen+str_length)*3/2,
-                                   data->headersize*2);
-                  hbufp_index = hbufp - data->headerbuff;
-                  newbuff = (char *)realloc(data->headerbuff, newsize);
+                                   data->state.headersize*2);
+                  hbufp_index = hbufp - data->state.headerbuff;
+                  newbuff = (char *)realloc(data->state.headerbuff, newsize);
                   if(!newbuff) {
                     failf (data, "Failed to alloc memory for big header!");
                     return CURLE_READ_ERROR;
                   }
-                  data->headersize=newsize;
-                  data->headerbuff = newbuff;
-                  hbufp = data->headerbuff + hbufp_index;
+                  data->state.headersize=newsize;
+                  data->state.headerbuff = newbuff;
+                  hbufp = data->state.headerbuff + hbufp_index;
                 }
                 strcpy (hbufp, str);
                 hbufp += strlen (str);
@@ -378,19 +378,19 @@ Transfer(struct connectdata *c_conn)
                * fit in the allocated header buffer, or else we enlarge 
                * it.
                */
-              if (hbuflen + (str - str_start) >= data->headersize) {
+              if (hbuflen + (str - str_start) >= data->state.headersize) {
                 char *newbuff;
                 long newsize=MAX((hbuflen+(str-str_start))*3/2,
-                                 data->headersize*2);
-                hbufp_index = hbufp - data->headerbuff;
-                newbuff = (char *)realloc(data->headerbuff, newsize);
+                                 data->state.headersize*2);
+                hbufp_index = hbufp - data->state.headerbuff;
+                newbuff = (char *)realloc(data->state.headerbuff, newsize);
                 if(!newbuff) {
                   failf (data, "Failed to alloc memory for big header!");
                   return CURLE_READ_ERROR;
                 }
-                data->headersize= newsize;
-                data->headerbuff = newbuff;
-                hbufp = data->headerbuff + hbufp_index;
+                data->state.headersize= newsize;
+                data->state.headerbuff = newbuff;
+                hbufp = data->state.headerbuff + hbufp_index;
               }
 
               /* copy to end of line */
@@ -399,7 +399,7 @@ Transfer(struct connectdata *c_conn)
               hbuflen += str - str_start;
               *hbufp = 0;
               
-              p = data->headerbuff;
+              p = data->state.headerbuff;
               
               /****
                * We now have a FULL header line that p points to
@@ -449,15 +449,15 @@ Transfer(struct connectdata *c_conn)
                 /* now, only output this if the header AND body are requested:
                  */
                 writetype = CLIENTWRITE_HEADER;
-                if (data->bits.http_include_header)
+                if (data->set.http_include_header)
                   writetype |= CLIENTWRITE_BODY;
 
-                urg = Curl_client_write(data, writetype, data->headerbuff,
-                                        p - data->headerbuff);
+                urg = Curl_client_write(data, writetype, data->state.headerbuff,
+                                        p - data->state.headerbuff);
                 if(urg)
                   return urg;
 
-                data->header_size += p - data->headerbuff;
+                data->info.header_size += p - data->state.headerbuff;
 
                 if(!header) {
                   /*
@@ -466,7 +466,7 @@ Transfer(struct connectdata *c_conn)
                    * If we requested a "no body", this is a good time to get
                    * out and return home.
                    */
-                  if(data->bits.no_body)
+                  if(data->set.no_body)
                     return CURLE_OK;
 
                   if(!conn->bits.close) {
@@ -489,7 +489,7 @@ Transfer(struct connectdata *c_conn)
 
                 /* We continue reading headers, so reset the line-based
                    header parsing variables hbufp && hbuflen */
-                hbufp = data->headerbuff;
+                hbufp = data->state.headerbuff;
                 hbuflen = 0;
                 continue;
               }
@@ -516,17 +516,17 @@ Transfer(struct connectdata *c_conn)
                 }
 
                 if (nc) {
-                  data->progress.httpcode = httpcode;
-                  data->progress.httpversion = httpversion;
+                  data->info.httpcode = httpcode;
+                  data->info.httpversion = httpversion;
 
                   /* 404 -> URL not found! */
                   if (
-                      ( ((data->bits.http_follow_location) &&
+                      ( ((data->set.http_follow_location) &&
                          (httpcode >= 400))
                         ||
-                        (!data->bits.http_follow_location &&
+                        (!data->set.http_follow_location &&
                          (httpcode >= 300)))
-                      && (data->bits.http_fail_on_error)) {
+                      && (data->set.http_fail_on_error)) {
                     /* If we have been told to fail hard on HTTP-errors,
                        here is the check for that: */
                     /* serious error, go home! */
@@ -624,14 +624,14 @@ Transfer(struct connectdata *c_conn)
               }
               else if(strnequal("Last-Modified:", p,
                                 strlen("Last-Modified:")) &&
-                      (data->timecondition || data->bits.get_filetime) ) {
+                      (data->set.timecondition || data->set.get_filetime) ) {
                 time_t secs=time(NULL);
                 timeofdoc = curl_getdate(p+strlen("Last-Modified:"), &secs);
-                if(data->bits.get_filetime)
-                  data->progress.filetime = timeofdoc;
+                if(data->set.get_filetime)
+                  data->info.filetime = timeofdoc;
               }
               else if ((httpcode >= 300 && httpcode < 400) &&
-                       (data->bits.http_follow_location) &&
+                       (data->set.http_follow_location) &&
                        strnequal("Location:", p, 9)) {
                 /* this is the URL that the server advices us to get instead */
                 char *ptr;
@@ -660,17 +660,17 @@ Transfer(struct connectdata *c_conn)
                */
 
               writetype = CLIENTWRITE_HEADER;
-              if (data->bits.http_include_header)
+              if (data->set.http_include_header)
                 writetype |= CLIENTWRITE_BODY;
 
               urg = Curl_client_write(data, writetype, p, hbuflen);
               if(urg)
                 return urg;
 
-              data->header_size += hbuflen;
+              data->info.header_size += hbuflen;
               
               /* reset hbufp pointer && hbuflen */
-              hbufp = data->headerbuff;
+              hbufp = data->state.headerbuff;
               hbuflen = 0;
             }
             while (*str);		/* header line within buffer */
@@ -706,7 +706,7 @@ Transfer(struct connectdata *c_conn)
                 }
                 else if (conn->resume_from &&
                          !content_range &&
-                         (data->httpreq==HTTPREQ_GET)) {
+                         (data->set.httpreq==HTTPREQ_GET)) {
                   /* we wanted to resume a download, although the server
                      doesn't seem to support this and we did this with a GET
                      (if it wasn't a GET we did a POST or PUT resume) */
@@ -714,23 +714,23 @@ Transfer(struct connectdata *c_conn)
                          "byte ranges. Cannot resume.");
                   return CURLE_HTTP_RANGE_ERROR;
                 }
-                else if(data->timecondition && !conn->range) {
+                else if(data->set.timecondition && !conn->range) {
                   /* A time condition has been set AND no ranges have been
                      requested. This seems to be what chapter 13.3.4 of
                      RFC 2616 defines to be the correct action for a
                      HTTP/1.1 client */
-                  if((timeofdoc > 0) && (data->timevalue > 0)) {
-                    switch(data->timecondition) {
+                  if((timeofdoc > 0) && (data->set.timevalue > 0)) {
+                    switch(data->set.timecondition) {
                     case TIMECOND_IFMODSINCE:
                     default:
-                      if(timeofdoc < data->timevalue) {
+                      if(timeofdoc < data->set.timevalue) {
                         infof(data,
                               "The requested document is not new enough\n");
                         return CURLE_OK;
                       }
                       break;
                     case TIMECOND_IFUNMODSINCE:
-                      if(timeofdoc > data->timevalue) {
+                      if(timeofdoc > data->set.timevalue) {
                         infof(data,
                               "The requested document is not old enough\n");
                         return CURLE_OK;
@@ -801,10 +801,10 @@ Transfer(struct connectdata *c_conn)
           int i, si;
           size_t bytes_written;
 
-          if(data->crlf)
-            buf = data->buffer; /* put it back on the buffer */
+          if(data->set.crlf)
+            buf = data->state.buffer; /* put it back on the buffer */
 
-          nread = data->fread(buf, 1, conn->upload_bufsize, data->in);
+          nread = data->set.fread(buf, 1, conn->upload_bufsize, data->set.in);
 
           /* the signed int typecase of nread of for systems that has
              unsigned size_t */
@@ -818,7 +818,7 @@ Transfer(struct connectdata *c_conn)
           Curl_pgrsSetUploadCounter(data, (double)writebytecount);            
 
           /* convert LF to CRLF if so asked */
-          if (data->crlf) {
+          if (data->set.crlf) {
             for(i = 0, si = 0; i < (int)nread; i++, si++) {
               if (buf[i] == 0x0a) {
                 scratch[si++] = 0x0d;
@@ -863,7 +863,7 @@ Transfer(struct connectdata *c_conn)
         conn->upload_bufsize=(long)min(data->progress.ulspeed, BUFSIZE);
       }
 
-      if (data->timeout && (Curl_tvdiff (now, start) > data->timeout)) {
+      if (data->set.timeout && (Curl_tvdiff (now, start) > data->set.timeout)) {
 	failf (data, "Operation timed out with %d out of %d bytes received",
 	       bytecount, conn->size);
 	return CURLE_OPERATION_TIMEOUTED;
@@ -876,7 +876,7 @@ Transfer(struct connectdata *c_conn)
    * returning.
    */
 
-  if(!(data->bits.no_body) && contentlength &&
+  if(!(data->set.no_body) && contentlength &&
      (bytecount != contentlength)) {
     failf(data, "transfer closed with %d bytes remaining to read",
           contentlength-bytecount);
@@ -898,14 +898,14 @@ Transfer(struct connectdata *c_conn)
   return CURLE_OK;
 }
 
-CURLcode Curl_perform(struct UrlData *data)
+CURLcode Curl_perform(struct SessionHandle *data)
 {
   CURLcode res;
   struct connectdata *conn=NULL;
-  bool port=TRUE; /* allow data->use_port to set port to use */
+  bool port=TRUE; /* allow data->set.use_port to set port to use */
   char *newurl = NULL; /* possibly a new URL to follow to! */
 
-  if(!data->url)
+  if(!data->change.url)
     /* we can't do anything wihout URL */
     return CURLE_URL_MALFORMAT;
 
@@ -913,11 +913,11 @@ CURLcode Curl_perform(struct UrlData *data)
   /* Init the SSL session ID cache here. We do it here since we want to
      do it after the *_setopt() calls (that could change the size) but
      before any transfer. */
-  Curl_SSL_InitSessions(data, data->ssl.numsessions);
+  Curl_SSL_InitSessions(data, data->set.ssl.numsessions);
 #endif
 
-  data->followlocation=0; /* reset the location-follow counter */
-  data->bits.this_is_a_follow = FALSE; /* reset this */
+  data->set.followlocation=0; /* reset the location-follow counter */
+  data->state.this_is_a_follow = FALSE; /* reset this */
 
   Curl_initinfo(data); /* reset session-specific information "variables" */
 
@@ -964,30 +964,28 @@ CURLcode Curl_perform(struct UrlData *data)
         port=TRUE; /* by default we use the user set port number even after
                       a Location: */
 
-	if (data->maxredirs && (data->followlocation >= data->maxredirs)) {
-	  failf(data,"Maximum (%d) redirects followed", data->maxredirs);
+	if (data->set.maxredirs && (data->set.followlocation >= data->set.maxredirs)) {
+	  failf(data,"Maximum (%d) redirects followed", data->set.maxredirs);
           res=CURLE_TOO_MANY_REDIRECTS;
 	  break;
 	}
 
         /* mark the next request as a followed location: */
-        data->bits.this_is_a_follow = TRUE;
+        data->state.this_is_a_follow = TRUE;
 
-        data->followlocation++; /* count location-followers */
+        data->set.followlocation++; /* count location-followers */
 
-        if(data->bits.http_auto_referer) {
+        if(data->set.http_auto_referer) {
           /* We are asked to automatically set the previous URL as the
              referer when we get the next URL. We pick the ->url field,
              which may or may not be 100% correct */
 
-          if(data->free_referer) {
+          if(data->change.referer_alloc)
             /* If we already have an allocated referer, free this first */
-            free(data->referer);
-          }
+            free(data->change.referer);
 
-          data->referer = strdup(data->url);
-          data->free_referer = TRUE;          /* yes, free this later */
-          data->bits.http_set_referer = TRUE; /* might have been false */
+          data->change.referer = strdup(data->change.url);
+          data->change.referer_alloc = TRUE; /* yes, free this later */
         }
 
         if(2 != sscanf(newurl, "%15[^:]://%c", prot, &letter)) {
@@ -1005,7 +1003,7 @@ CURLcode Curl_perform(struct UrlData *data)
 
           /* we must make our own copy of the URL to play with, as it may
              point to read-only data */
-          char *url_clone=strdup(data->url);
+          char *url_clone=strdup(data->change.url);
 
           if(!url_clone)
             return CURLE_OUT_OF_MEMORY;
@@ -1055,16 +1053,16 @@ CURLcode Curl_perform(struct UrlData *data)
           port = FALSE;
         }
 
-        if(data->bits.urlstringalloc)
-          free(data->url);
+        if(data->change.url_alloc)
+          free(data->change.url);
+        else
+          data->change.url_alloc = TRUE; /* the URL is allocated */
       
         /* TBD: set the URL with curl_setopt() */
-        data->url = newurl;
+        data->change.url = newurl;
         newurl = NULL; /* don't free! */
 
-        data->bits.urlstringalloc = TRUE; /* the URL is allocated */
-
-        infof(data, "Follows Location: to new URL: '%s'\n", data->url);
+        infof(data, "Follows Location: to new URL: '%s'\n", data->change.url);
 
         /*
          * We get here when the HTTP code is 300-399. We need to perform
@@ -1072,7 +1070,7 @@ CURLcode Curl_perform(struct UrlData *data)
          * Discussed on the curl mailing list and posted about on the 26th
          * of January 2001.
          */
-        switch(data->progress.httpcode) {
+        switch(data->info.httpcode) {
         case 300: /* Multiple Choices */
         case 301: /* Moved Permanently */
         case 306: /* Not used */
@@ -1103,7 +1101,7 @@ CURLcode Curl_perform(struct UrlData *data)
         case 303: /* See Other */
           /* Disable both types of POSTs, since doing a second POST when
            * following isn't what anyone would want! */
-          data->httpreq = HTTPREQ_GET; /* enforce GET request */
+          data->set.httpreq = HTTPREQ_GET; /* enforce GET request */
           infof(data, "Disables POST, goes with GET\n");
           break;
         case 304: /* Not Modified */
@@ -1132,7 +1130,7 @@ CURLcode Curl_perform(struct UrlData *data)
     free(newurl);
 
   /* make sure the alarm is switched off! */
-  if(data->timeout || data->connecttimeout)
+  if(data->set.timeout || data->set.connecttimeout)
     myalarm(0);
 
   return res;

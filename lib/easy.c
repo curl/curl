@@ -175,7 +175,7 @@ void curl_global_cleanup(void)
 CURL *curl_easy_init(void)
 {
   CURLcode res;
-  struct UrlData *data;
+  struct SessionHandle *data;
 
   /* Make sure we inited the global SSL stuff */
   if (!initialized)
@@ -185,9 +185,6 @@ CURL *curl_easy_init(void)
   res = Curl_open(&data);
   if(res != CURLE_OK)
     return NULL;
-
-  /* SAC */
-  data->device = NULL;
 
   return data;
 }
@@ -199,7 +196,7 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
   func_T param_func = (func_T)0;
   long param_long = 0;
   void *param_obj = NULL;
-  struct UrlData *data = curl;
+  struct SessionHandle *data = curl;
 
   va_start(arg, tag);
 
@@ -231,14 +228,14 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
 
 CURLcode curl_easy_perform(CURL *curl)
 {
-  struct UrlData *data = (struct UrlData *)curl;
+  struct SessionHandle *data = (struct SessionHandle *)curl;
 
   return Curl_perform(data);
 }
 
 void curl_easy_cleanup(CURL *curl)
 {
-  struct UrlData *data = (struct UrlData *)curl;
+  struct SessionHandle *data = (struct SessionHandle *)curl;
   Curl_close(data);
 }
 
@@ -246,7 +243,7 @@ CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...)
 {
   va_list arg;
   void *paramp;
-  struct UrlData *data = (struct UrlData *)curl;
+  struct SessionHandle *data = (struct SessionHandle *)curl;
 
   va_start(arg, info);
   paramp = va_arg(arg, void *);

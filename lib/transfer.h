@@ -22,7 +22,7 @@
  *
  * $Id$
  *****************************************************************************/
-CURLcode Curl_perform(struct UrlData *data);
+CURLcode Curl_perform(struct SessionHandle *data);
 
 /* This sets up a forthcoming transfer */
 CURLcode 
