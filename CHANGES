@@ -6,6 +6,42 @@
 
                                History of Changes
 
+Daniel (27 April 2001)
+- Updated the INTERALS document again. It was lagging a bit. I think I made it
+  more easy to follow now as well.
+
+- Brad Burdick found a problem with persistent connections when curl received
+  a "Content-Length: 0" header.
+
+- Giuseppe D'Ambrosio was first out to report that TELNET doesn't work in curl
+  compiled/built on win32. It seems to work for unixes though!
+
+- Dave Hamilton reported weird problems with CURL/PHP that I really can't
+  explain at the moment. I'm hoping on some help from the PHP crew.
+
+Daniel (26 April 2001)
+- I rewrote the FTP command response function. I had to do it to make ftps
+  work, as the OpenSSL read()-function didn't work the same way the normal
+  unix read() does, but it was also a huge performance boost. Previously the
+  function read one byte at a time, now it reads very large chunks, and it
+  makes a notable speed difference.
+
+Daniel (25 April 2001)
+- Connection re-use when not using a proxy didn't work properly for
+  non-default port numbers.
+
+Daniel (24 April 2001)
+- I've noticed that FTPS doesn't work. We attempt to use ssl even for the
+  data transfer, which causes the transfer to 'hang'... We need to fix this.
+
+- Improved the test suite to use 'stunnel' to do HTTPS and FTPS testing on
+  the alredy written perl servers easily.
+
+Daniel (23 April 2001)
+- The OpenSSL version string recently modified didn't zero terminate one
+  of the generated strings properly, which could lead to a crash or simply
+  weird version string output!
+
 Version 7.7.2
 
 Daniel (22 April 2001)
