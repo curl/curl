@@ -103,7 +103,7 @@ static CURLcode ftp_sendquote(struct connectdata *conn,
                               struct curl_slist *quote);
 static CURLcode ftp_cwd(struct connectdata *conn, char *path);
 static CURLcode ftp_mkd(struct connectdata *conn, char *path);
-static CURLcode cwd_and_mkd(struct connectdata *conn, char *path);
+static CURLcode ftp_cwd_and_mkd(struct connectdata *conn, char *path);
 
 /* easy-to-use macro: */
 #define FTPSENDF(x,y,z) if((result = Curl_ftpsendf(x,y,z))) return result
@@ -1984,7 +1984,7 @@ CURLcode ftp_perform(struct connectdata *conn,
      transfer is taking place, we must now get back to the original dir
      where we ended up after login: */
   if (conn->bits.reuse && ftp->entrypath) {
-    if ((result = cwd_and_mkd(conn, ftp->entrypath)) != CURLE_OK)
+    if ((result = ftp_cwd_and_mkd(conn, ftp->entrypath)) != CURLE_OK)
       return result;
   }
 
@@ -1993,7 +1993,7 @@ CURLcode ftp_perform(struct connectdata *conn,
     for (i=0; ftp->dirs[i]; i++) {
       /* RFC 1738 says empty components should be respected too, but
          that is plain stupid since CWD can't be used with an empty argument */
-      if ((result = cwd_and_mkd(conn, ftp->dirs[i])) != CURLE_OK)
+      if ((result = ftp_cwd_and_mkd(conn, ftp->dirs[i])) != CURLE_OK)
         return result;
     }
   }
@@ -2352,7 +2352,7 @@ CURLcode ftp_mkd(struct connectdata *conn, char *path)
  *
  * Send 'CWD' to the remote server to Change Working Directory.  It is the ftp
  * version of the unix 'cd' command. This function is only called from the
- * cwd_and_mkd() function these days.
+ * ftp_cwd_and_mkd() function these days.
  *
  * This function does NOT call failf().
  */
@@ -2384,7 +2384,7 @@ CURLcode ftp_cwd(struct connectdata *conn, char *path)
  * have been told to allow it, then create the directory and cd to it.
  *
  */
-static CURLcode cwd_and_mkd(struct connectdata *conn, char *path)
+static CURLcode ftp_cwd_and_mkd(struct connectdata *conn, char *path)
 {
   CURLcode result;
   
