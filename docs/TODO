@@ -32,12 +32,14 @@ TODO
    otherwise it isn't really interesting.
 
  * Data sharing. Tell which easy handles within a multi handle that should
-   share cookies, connection cache, dns cache, ssl session cache.
+   share cookies, connection cache, dns cache, ssl session cache.  Full
+   suggestion found here: http://curl.haxx.se/dev/sharing.txt
 
  * Mutexes. By adding mutex callback support, the 'data sharing' mentioned
    above can be made between several easy handles running in different threads
    too. The actual mutex implementations will be left for the application to
    implement, libcurl will merely call 'getmutex' and 'leavemutex' callbacks.
+   Part of the sharing suggestion at: http://curl.haxx.se/dev/sharing.txt
 
  * No-faster-then-this transfers. Many people have limited bandwidth and they
    want the ability to make sure their transfers never use more bandwith than
@@ -59,8 +61,8 @@ TODO
 
  DOCUMENTATION
 
- * Document all CURLcode error codes, why they happen and what most likely
-   will make them not happen again. In a libcurl point of view.
+ * Include documentation in the main archive about all the various libcurl
+   bindings.   
 
  FTP
 
