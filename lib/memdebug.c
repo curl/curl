@@ -60,15 +60,19 @@ FILE *logfile;
 /* this sets the log file name */
 void curl_memdebug(const char *logname)
 {
-  logfile = fopen(logname, "w");
+  if(logname)
+    logfile = fopen(logname, "w");
+  else
+    logfile = stderr;
 }
 
 
 void *curl_domalloc(size_t size, int line, const char *source)
 {
   void *mem=(malloc)(size);
-  fprintf(logfile?logfile:stderr, "MEM %s:%d malloc(%d) = %p\n",
-          source, line, size, mem);
+  if(logfile)
+    fprintf(logfile, "MEM %s:%d malloc(%d) = %p\n",
+            source, line, size, mem);
   return mem;
 }
 
@@ -85,16 +89,18 @@ char *curl_dostrdup(const char *str, int line, const char *source)
 
   mem=(strdup)(str);
   len=strlen(str)+1;
-  fprintf(logfile?logfile:stderr, "MEM %s:%d strdup(%p) (%d) = %p\n",
-          source, line, str, len, mem);
+  if(logfile)
+    fprintf(logfile, "MEM %s:%d strdup(%p) (%d) = %p\n",
+            source, line, str, len, mem);
   return mem;
 }
 
 void *curl_dorealloc(void *ptr, size_t size, int line, const char *source)
 {
   void *mem=(realloc)(ptr, size);
-  fprintf(logfile?logfile:stderr, "MEM %s:%d realloc(%p, %d) = %p\n",
-          source, line, ptr, size, mem);
+  if(logfile)
+    fprintf(logfile, "MEM %s:%d realloc(%p, %d) = %p\n",
+            source, line, ptr, size, mem);
   return mem;
 }
 
@@ -108,15 +114,16 @@ void curl_dofree(void *ptr, int line, const char *source)
 
   (free)(ptr);
 
-  fprintf(logfile?logfile:stderr, "MEM %s:%d free(%p)\n",
-          source, line, ptr);
+  if(logfile)
+    fprintf(logfile, "MEM %s:%d free(%p)\n", source, line, ptr);
 }
 
 int curl_socket(int domain, int type, int protocol, int line, char *source)
 {
   int sockfd=(socket)(domain, type, protocol);
-  fprintf(logfile?logfile:stderr, "FD %s:%d socket() = %d\n",
-          source, line, sockfd);
+  if(logfile)
+    fprintf(logfile, "FD %s:%d socket() = %d\n",
+            source, line, sockfd);
   return sockfd;
 }
 
@@ -124,8 +131,9 @@ int curl_accept(int s, struct sockaddr *addr, socklen_t *addrlen,
                 int line, const char *source)
 {
   int sockfd=(accept)(s, addr, addrlen);
-  fprintf(logfile?logfile:stderr, "FD %s:%d accept() = %d\n",
-          source, line, sockfd);
+  if(logfile)
+    fprintf(logfile, "FD %s:%d accept() = %d\n",
+            source, line, sockfd);
   return sockfd;
 }
 
@@ -133,8 +141,9 @@ int curl_accept(int s, struct sockaddr *addr, socklen_t *addrlen,
 int curl_sclose(int sockfd, int line, char *source)
 {
   int res=sclose(sockfd);
-  fprintf(logfile?logfile:stderr, "FD %s:%d sclose(%d)\n",
-          source, line, sockfd);
+  if(logfile)
+    fprintf(logfile, "FD %s:%d sclose(%d)\n",
+            source, line, sockfd);
   return res;
 }
 
@@ -142,16 +151,18 @@ FILE *curl_fopen(const char *file, const char *mode,
                  int line, const char *source)
 {
   FILE *res=(fopen)(file, mode);
-  fprintf(logfile?logfile:stderr, "FILE %s:%d fopen(\"%s\") = %p\n",
-          source, line, file, res);
+  if(logfile)
+    fprintf(logfile, "FILE %s:%d fopen(\"%s\") = %p\n",
+            source, line, file, res);
   return res;
 }
 
 int curl_fclose(FILE *file, int line, const char *source)
 {
   int res=(fclose)(file);
-  fprintf(logfile?logfile:stderr, "FILE %s:%d fclose(%p)\n",
-          source, line, file);
+  if(logfile)
+    fprintf(logfile, "FILE %s:%d fclose(%p)\n",
+            source, line, file);
   return res;
 }
 
