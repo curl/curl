@@ -24,9 +24,15 @@ To get fixed in 7.11.2 (planned release May/June 2004)
 28. Optimize the way libcurl uses CWD on each new request over a persistent
     connection (on FTP) even if it doesn't have to.
 
+31. Fix multi interface for windows with ares
+
+32. Fix possible memory leak on windows threaded name resolve.
+
 To get fixed in 7.12.0
 ======================
 
 25. curl_easy_strerror() curl_multi_strerror() curl_share_strerror()
 
-26. i18n of error messages
+26. i18n of error messages? 
+
+33. Add a function to replace the malloc-calls within libcurl.
