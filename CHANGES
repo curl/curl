@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (28 Jul 2002)
+- HAVE_SETVBUF was left out from src/main.c which made -N not work. Found out
+  by M T.
+
 Daniel (26 Jun 2002)
 - Glen Nakamura solved a crash in the name resolving function for IP-only
   addresses on Alpha Linux (at least).
