@@ -495,6 +495,8 @@ RETSIGTYPE alarmfunc(int signal)
 
 CURLcode Curl_disconnect(struct connectdata *conn)
 {
+  infof(conn->data, "Closing live connection (#%d)\n", conn->connectindex);
+
   if(-1 != conn->connectindex)
     /* unlink ourselves! */
     conn->data->connects[conn->connectindex] = NULL;
@@ -1838,6 +1840,8 @@ CURLcode Curl_done(struct connectdata *conn)
      in spite of all our efforts to be nice */
   if((CURLE_OK == result) && conn->bits.close)
     result = Curl_disconnect(conn); /* close the connection */
+  else
+    infof(data, "Connection (#%d) left alive\n", conn->connectindex);
 
   return result;
 }

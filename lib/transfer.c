@@ -396,6 +396,7 @@ Transfer(struct connectdata *c_conn)
                  * Default action for 1.0 is to close.
                  */
                 conn->bits.close = FALSE; /* don't close when done */
+                infof(data, "HTTP/1.0 proxy connection set to keep alive!\n");
               }
               else if (strnequal("Connection: close", p,
                                  strlen("Connection: close"))) {
