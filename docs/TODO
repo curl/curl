@@ -57,6 +57,14 @@ TODO
 
  FTP
 
+ * "PASV IP override" - When an FTPS host is behind a NAT firewall, passive
+   mode fails. The PASV response from the host ["227 PASV Entering passive
+   mode (_ip_address_, _port_)."] contains the private network IP address of
+   the host, which since it is encrypted, cannot be modified by the firewall
+   to the public IP address. What is needed is a cURL option to override the
+   IP address passed by the host "227 PASV" response. Requested by Ed
+   Hingsbergen
+
  * Support GSS/Kerberos 5 for ftp file transfer. This will allow user
    authentication and file encryption.  Possible libraries and example clients
    are available from MIT or Heimdal. Requsted by Markus Moeller.
@@ -144,6 +152,9 @@ TODO
    multi interface and friends will work for LDAP as well.
 
  CLIENT
+
+ * Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
+   Requested by Dane Jensen and others.
 
  * Add an option that prevents cURL from overwiting existing local files. When
    used, and there already is an existing file with the target file name
