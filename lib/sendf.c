@@ -383,19 +383,16 @@ int Curl_read(struct connectdata *conn,
       case SSL_ERROR_WANT_WRITE:
         /* there's data pending, re-invoke SSL_read() */
         return -1; /* basicly EWOULDBLOCK */
-      case SSL_ERROR_SYSCALL:
-        /* openssl/ssl.h says "look at error stack/return value/errno" */
-      {
-        char error_buffer[120]; /* OpenSSL documents that this must be at least
-                                   120 bytes long. */
-        int sslerror = ERR_get_error();
-        failf(conn->data, "SSL read: %s, errno %d",
-              ERR_error_string(sslerror, error_buffer),
-              Curl_ourerrno() );
-      }
-      return CURLE_RECV_ERROR;
       default:
-        failf(conn->data, "SSL read error: %d", err);
+        /* openssl/ssl.h says "look at error stack/return value/errno" */
+        {
+          char error_buffer[120]; /* OpenSSL documents that this must be at
+                                     least 120 bytes long. */
+          int sslerror = ERR_get_error();
+          failf(conn->data, "SSL read: %s, errno %d",
+                ERR_error_string(sslerror, error_buffer),
+                Curl_ourerrno() );
+        }
         return CURLE_RECV_ERROR;
       }
     }

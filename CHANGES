@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (19 October)
+- Georg Horn made libcurl output more info on SSL failures when receiving
+  data.
+
 Version 7.10.8-pre4 (18 October 2003)
 
 Daniel (17 October)
