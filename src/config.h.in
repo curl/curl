@@ -14,5 +14,8 @@
 /* Define if you have utime() */
 #undef HAVE_UTIME
 
-/* Define if you have utime.h */
+/* Define if you have the <utime.h> header file */
 #undef HAVE_UTIME_H
+
+/* Define if you have thhe <sys/utime.h> header file */
+#undef HAVE_SYS_UTIME_H
