@@ -4,7 +4,7 @@
                             | (__| |_| |  _ <| |___ 
                              \___|\___/|_| \_\_____|
 
-                          How cURL Become Like This
+                          How cURL Became Like This
 
 
 In the second half of 1997, Daniel Stenberg came up with the idea to make
@@ -58,8 +58,8 @@ visits daily.
 
 Released curl 6.0 in September. 15000 lines of code.
 
-December 28 1999, added project to Sourceforge and started using its services
-for managing the project.
+December 28 1999, added the project on Sourceforge and started using its
+services for managing the project.
 
 Spring 2000, major internal overhaul to provide a suitable library interface.
 The first non-beta release was named 7.1 and arrived in August. This offered
