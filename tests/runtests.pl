@@ -11,11 +11,12 @@ use strict;
 my $HOSTIP="127.0.0.1";
 my $HOSTPORT=8999; # bad name, but this is the HTTP server port
 my $FTPPORT=8921;  # this is the FTP server port
-my $CURL="../src/curl";
+my $CURL="../src/curl"; # what curl executable to run on the tests
 my $LOGDIR="log";
 my $TESTDIR="data";
-my $SERVERIN="$LOGDIR/server.input";
-my $CURLOUT="$LOGDIR/curl.out";
+my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
+my $CURLOUT="$LOGDIR/curl.out"; # curl output if not stdout
+my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
 
 # Normally, all test cases should be run, but at times it is handy to
 # simply run a particular one:
@@ -382,6 +383,8 @@ sub singletest {
         print "$CMDLINE\n";
     }
 
+    print CMDLOG "$CMDLINE\n";
+
     # run the command line we built
     my $res = system("$CMDLINE");
     $res /= 256;
@@ -454,8 +457,8 @@ sub singletest {
         # always differ!
 
         # verify the sent request
-        $res = compare($SERVERIN, $PROT, "http",
-                       "^(User-Agent:|--curl|Content-Type: multipart/form-data; boundary=|PORT 127,0,0,1).*\r\n");
+        $res = compare($SERVERIN, $PROT, "protocol",
+                       "^(User-Agent:|--curl|Content-Type: multipart/form-data; boundary=|PORT ).*\r\n");
         if($res) {
             return 1;
         }
@@ -577,6 +580,12 @@ if ( $TESTCASES eq "all") {
 }
 
 #######################################################################
+# Start the command line log
+#
+open(CMDLOG, ">$CURLLOG") ||
+    print "can't log command lines to $CURLLOG\n";
+
+#######################################################################
 # The main test-loop
 #
 
@@ -591,6 +600,11 @@ foreach $testnum (split(" ", $TESTCASES)) {
 
     # loop for next test
 }
+
+#######################################################################
+# Close command log
+#
+close(CMDLOG);
 
 #######################################################################
 # Tests done, stop the servers
