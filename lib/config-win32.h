@@ -39,7 +39,12 @@
 #undef SIZEOF_CURL_OFF_T
 #endif
 
+/* Borland lacks _lseeki64(), so we don't support >2GB files */
+#ifdef __BORLANDC__
+#define SIZEOF_CURL_OFF_T 4 
+#else
 #define SIZEOF_CURL_OFF_T 8
+#endif
 
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
