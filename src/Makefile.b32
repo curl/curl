@@ -35,7 +35,7 @@ TOPDIR   = ..
 CURNTDIR = .
 
 CXXFLAGS = -q -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
-LDFLAGS  = -lq -lap
+LDFLAGS  = -q -lq -lap
 
 INCDIRS  = -I$(CURNTDIR);$(TOPDIR)/include;$(TOPDIR)/lib
 LINKLIB  = $(BCCDIR)/lib/cw32mt.lib
