@@ -1009,7 +1009,7 @@ static int str2offset(curl_off_t *val, char *str)
   *val = strtoll(str, NULL, 0);
 #else
   /* this is a duplicate of the function that is also used in libcurl */
-  *val = Curl_strtoll(str, NULL, 0;
+  *val = Curl_strtoll(str, NULL, 0);
 #endif
 
   if ((*val == LLONG_MAX || *val == LLONG_MIN) && errno == ERANGE)
