@@ -92,7 +92,6 @@
 #include "sendf.h"
 #include "speedcheck.h"
 #include "progress.h"
-#include "getdate.h"
 #include "http.h"
 #include "url.h"
 #include "getinfo.h"
