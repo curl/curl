@@ -1814,7 +1814,8 @@ CURLcode Curl_connect(struct UrlData *data,
       int index;
       index = conn->connectindex; /* get the index */
       Curl_disconnect(conn);      /* close the connection */
-      data->connects[index]=NULL; /* clear the pointer */
+      if(-1 != index)
+        data->connects[index]=NULL; /* clear the pointer */
     }
   }
   return code;
