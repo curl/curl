@@ -1854,10 +1854,9 @@ CURLcode Curl_perform(struct SessionHandle *data)
          to the new URL */
       urlchanged = data->change.url_changed;
       if ((CURLE_OK == res) && urlchanged) {
-        char *gotourl;
         res = Curl_done(conn);
         if(CURLE_OK == res) {
-          newurl = strdup(data->change.url);
+          char *gotourl = strdup(data->change.url);
           res = Curl_follow(data, gotourl);
           if(res)
             free(gotourl);
