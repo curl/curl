@@ -4,22 +4,13 @@
 #
 # MEM mprintf.c:1094 malloc(32) = e5718
 # MEM mprintf.c:1103 realloc(e5718, 64) = e6118
-# MEM mprintf.c:1103 realloc(e6118, 128) = e6118
-# MEM url.c:268 malloc(52208) = e6288
-# MEM url.c:276 malloc(256) = f2e80
-# MEM url.c:692 malloc(4520) = f2f88
-# MEM hostip.c:122 malloc(9000) = f4138
-# MEM mprintf.c:1094 malloc(32) = e5740
-# MEM sendf.c:254 malloc(394) = f6628
 # MEM sendf.c:232 free(f6520)
-# MEM sendf.c:211 free(f6628)
 
 do {
     if($ARGV[0] eq "-v") {
         $verbose=1;
     }
 } while (shift @ARGV);
-
 
 while(<STDIN>) {
     chomp $_;
