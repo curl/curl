@@ -502,6 +502,9 @@ tells the remote server to connect to our specified IP address. The string may
 be a plain IP address, a host name, an network interface name (under Unix) or
 just a '-' letter to let the library use your systems default IP
 address. Default FTP operations are passive, and thus won't use PORT.
+
+You disable PORT again and go back to using the passive version by setting
+this option to NULL.
 .TP
 .B CURLOPT_QUOTE
 Pass a pointer to a linked list of FTP commands to pass to the server prior to
