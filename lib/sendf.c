@@ -163,23 +163,45 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   ssize_t bytes_written;
-  CURLcode result;
+  ssize_t write_len;
+  CURLcode res;
   char *s;
+  char *sptr;
   va_list ap;
   va_start(ap, fmt);
   s = vaprintf(fmt, ap); /* returns an allocated string */
   va_end(ap);
   if(!s)
-    return 0; /* failure */
+    return CURLE_OUT_OF_MEMORY; /* failure */
+
   if(data->set.verbose)
     fprintf(data->set.err, "> %s", s);
 
-  /* Write the buffer to the socket */
-  result = Curl_write(conn, sockfd, s, strlen(s), &bytes_written);
+  bytes_written=0;
+  write_len = strlen(s);
+  sptr = s;
+
+  do {
+    /* Write the buffer to the socket */
+    res = Curl_write(conn, sockfd, sptr, write_len, &bytes_written);
+
+    if(CURLE_OK != res)
+      break;
+
+    if(bytes_written != write_len) {
+      /* if not all was written at once, we must advance the pointer, decrease
+         the size left and try again! */
+      write_len -= bytes_written;
+      sptr += bytes_written;
+    }
+    else
+      break;
+
+  } while(1);
 
   free(s); /* free the output string */
 
-  return result;
+  return res;
 }
 
 /*
