@@ -1,0 +1,41 @@
+#include <winver.h>
+#include "../include/curl/curl.h"
+
+LANGUAGE  0x09,0x01
+
+#define RC_VERSION  LIBCURL_VERSION_MAJOR, LIBCURL_VERSION_MINOR, LIBCURL_VERSION_PATCH, 0
+
+VS_VERSION_INFO VERSIONINFO
+  FILEVERSION     RC_VERSION
+  PRODUCTVERSION  RC_VERSION
+  FILEFLAGSMASK   0x3fL
+#if CURLDEBUG
+  FILEFLAGS 1
+#else
+  FILEFLAGS 0
+#endif
+  FILEOS      VOS__WINDOWS32
+  FILETYPE    VFT_DLL
+  FILESUBTYPE 0x0L
+
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904b0"
+    BEGIN
+      VALUE "CompanyName",      "The cURL library, http://curl.haxx.se/\0"
+      VALUE "FileDescription",  "libcurl Shared Library\0"
+      VALUE "FileVersion",      LIBCURL_VERSION "\0"
+      VALUE "InternalName",     "libcurl\0"
+      VALUE "OriginalFilename", "libcurl.dll\0"
+      VALUE "ProductName",      "The cURL library\0"
+      VALUE "ProductVersion",   LIBCURL_VERSION "\0"
+      VALUE "LegalCopyright",   "Copyright 1996-2003 by Daniel Stenberg. http://curl.haxx.se/docs/copyright.html\0"
+    END
+  END
+
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END
