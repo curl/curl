@@ -35,11 +35,4 @@ Curl_Transfer (struct connectdata *data,
                                         the same we read from. -1 disables */
                long *writebytecountp /* return number of bytes written */
 );
-
-#ifdef _OLDCURL
-/* "hackish" define to make sources compile without too much human editing.
-   Don't use "Tranfer()" anymore! */
-#define Transfer(a,b,c,d,e,f,g) Curl_Transfer(a,b,c,d,e,f,g)
-#endif
-
 #endif
