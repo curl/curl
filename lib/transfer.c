@@ -522,7 +522,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             time_t secs=time(NULL);
             k->timeofdoc = curl_getdate(k->p+strlen("Last-Modified:"),
                                         &secs);
-            if(data->set.get_filetime>=0)
+            if(data->set.get_filetime)
               data->info.filetime = k->timeofdoc;
           }
           else if ((k->httpcode >= 300 && k->httpcode < 400) &&
