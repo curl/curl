@@ -567,9 +567,14 @@ sub singletest {
 
         # what to cut off from the live protocol sent by curl
         my @strip = getpart("verify", "strip");
-        @out = striparray( $strip[0], \@out);
 
-        my @protstrip= striparray($strip[0], \@protocol);
+        my @protstrip=@protocol;
+
+        for(@strip) {
+            # strip all patterns from both arrays
+            @out = striparray( $_, \@out);
+            @protstrip= striparray( $_, \@protstrip);
+        }
 
         $res = compare(\@out, \@protstrip);
         if($res) {
