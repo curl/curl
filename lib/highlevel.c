@@ -597,6 +597,8 @@ CURLcode curl_transfer(CURL *curl)
   struct UrlData *data = curl;
   struct connectdata *c_connect;
 
+  pgrsStartNow(data);
+
   do {
     res = curl_connect(curl, (CURLconnect **)&c_connect);
     if(res == CURLE_OK) {
@@ -701,67 +703,3 @@ CURLcode curl_transfer(CURL *curl)
   return res;
 }
 
-#if 0
-CURLcode curl_urlget(UrgTag tag, ...)
-{
-  va_list arg;
-  func_T param_func = (func_T)0;
-  long param_long = 0;
-  void *param_obj = NULL;
-  CURLcode res;
-
-  struct UrlData *data;
-
-  /* this is for the lame win32 socket crap */
-  if(curl_init())
-    return CURLE_FAILED_INIT;
-
-  /* We use curl_open() with undefined URL so far */
-  res = curl_open(&data, NULL);
-  if(res != CURLE_OK)
-    return CURLE_FAILED_INIT;
-
-  /* data is now filled with good-looking zeroes */
-
-  va_start(arg, tag);
-
-  while(tag != URGTAG_DONE) {
-    /* PORTING NOTE:
-       Object pointers can't necessarily be casted to function pointers and
-       therefore we need to know what type it is and read the correct type
-       at once. This should also correct problems with different sizes of
-       the types.
-    */
-    
-    if(tag < URGTYPE_OBJECTPOINT) {
-      /* This is a LONG type */
-      param_long = va_arg(arg, long);
-      curl_setopt(data, tag, param_long);
-    }
-    else if(tag < URGTYPE_FUNCTIONPOINT) {
-      /* This is a object pointer type */
-      param_obj = va_arg(arg, void *);
-      curl_setopt(data, tag, param_obj);
-    }
-    else {
-      param_func = va_arg(arg, func_T );
-      curl_setopt(data, tag, param_func);
-    }
-
-    /* printf("tag: %d\n", tag); */
-    tag = va_arg(arg, UrgTag);
-  }
-
-  va_end(arg);
-
-  pgrsMode(data, data->progress.mode);
-  pgrsStartNow(data);
-
-  /********* Now, connect to the remote site **********/
-
-  res = curl_transfer(data);
-  curl_close(data);
-
-  return res;
-}
-#endif
