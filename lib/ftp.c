@@ -23,7 +23,6 @@
 
 #include "setup.h"
 
-/* MN 06/07/02 */
 #ifndef CURL_DISABLE_FTP
 #include <stdio.h>
 #include <string.h>
@@ -656,26 +655,24 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   sclose(conn->secondarysocket);
   conn->secondarysocket = -1;
 
-  if(!data->set.no_body && !ftp->dont_check) {
+  if(!ftp->no_transfer) {
     /* now let's see what the server says about the transfer we just
        performed: */
     nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
-    /* 226 Transfer complete, 250 Requested file action okay, completed. */
-    if((ftpcode != 226) && (ftpcode != 250)) {
-      failf(data, "server did not report OK, got %d", ftpcode);
-      return CURLE_FTP_WRITE_ERROR;
+    if(!ftp->dont_check) {
+      /* 226 Transfer complete, 250 Requested file action okay, completed. */
+      if((ftpcode != 226) && (ftpcode != 250)) {
+        failf(data, "server did not report OK, got %d", ftpcode);
+        return CURLE_FTP_WRITE_ERROR;
+      }
     }
   }
-  if(ftp->dont_check)
-    /* if we don't check, we can't re-use this connection as it leaves the
-       control connection in a weird status */
-    conn->bits.close = TRUE;
 
-  /* reset these for next connection */
-  conn->bits.resume_done = FALSE;
+  /* clear these for next connection */
+  ftp->no_transfer = FALSE;
   ftp->dont_check = FALSE; 
 
   /* Send any post-transfer QUOTE strings? */
@@ -1563,6 +1560,8 @@ CURLcode ftp_perform(struct connectdata *conn)
        size! */
     ssize_t filesize;
 
+    ftp->no_transfer = TRUE; /* this means no actual transfer is made */
+    
     /* Some servers return different sizes for different modes, and thus we
        must set the proper type before we check the size */
     result = ftp_transfertype(conn, data->set.ftp_ascii);
@@ -1604,8 +1603,8 @@ CURLcode ftp_perform(struct connectdata *conn)
   }
 
   if(data->set.no_body)
-    /* don't transfer the data */
-    ;
+    /* doesn't really transfer any data */
+    ftp->no_transfer = TRUE;
   /* Get us a second connection up and connected */
   else if(data->set.ftp_use_port) {
     /* We have chosen to use the PORT command */
@@ -1701,11 +1700,9 @@ CURLcode ftp_perform(struct connectdata *conn)
             /* no data to transfer */
             result=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
             
-            /* Set resume done and dont_check so that we won't get any error
-             * in Curl_ftp_done() because we didn't transfer the amount of
-             * bytes that the local file file obviously is */
-            conn->bits.resume_done = TRUE; 
-            ftp->dont_check = TRUE;
+            /* Set no_transfer so that we won't get any error in
+             * Curl_ftp_done() because we didn't transfer anything! */
+            ftp->no_transfer = TRUE; 
 
             return CURLE_OK;
           }
@@ -1794,7 +1791,6 @@ CURLcode ftp_perform(struct connectdata *conn)
       }
       infof(data, "range-download from %d to %d, totally %d bytes\n",
             from, to, totalsize);
-      conn->bits.resume_done = TRUE; /* to prevent some error due to this */
       ftp->dont_check = TRUE; /* dont check for successful transfer */
     }
 
@@ -1888,12 +1884,9 @@ CURLcode ftp_perform(struct connectdata *conn)
           result=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
           infof(data, "File already completely downloaded\n");
 
-          /* Set resume done so that we won't get any error in Curl_ftp_done()
-           * because we didn't transfer the amount of bytes that the remote
-           * file obviously is */
-          conn->bits.resume_done = TRUE; 
-          ftp->dont_check = TRUE;
-
+          /* Set no_transfer so that we won't get any error in Curl_ftp_done()
+           * because we didn't transfer the any file */
+          ftp->no_transfer = TRUE;
           return CURLE_OK;
         }
 	

@@ -180,8 +180,12 @@ struct FTP {
 
   char *cache;       /* data cache between getresponse()-calls */
   size_t cache_size; /* size of cache in bytes */
-  bool dont_check;  /* set to TRUE to prevent the final (post-transfer)
-                       file size and 226/250 status check */
+  bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
+                       file size and 226/250 status check. It should still
+                       read the line, just ignore the result. */
+  bool no_transfer; /* nothing was transfered, (possibly because a resumed
+                       transfer already was complete) */
+
 };
 
 /****************************************************************************
@@ -204,9 +208,6 @@ struct ConnectBits {
 
   bool use_range;
   bool rangestringalloc; /* the range string is malloc()'ed */
-
-  bool resume_done; /* nothing was transfered, resumed transfer already
-                       complete */
 };
 
 /*
