@@ -1831,35 +1831,36 @@ CURLcode Curl_follow(struct SessionHandle *data,
    * We get here when the HTTP code is 300-399 (and 401). We need to perform
    * differently based on exactly what return code there was.
    *
-   * News from 7.10.6: we can also get here on a 401, in case we act on a
-   * HTTP authentication scheme other than Basic.
+   * News from 7.10.6: we can also get here on a 401 or 407, in case we act on
+   * a HTTP (proxy-) authentication scheme other than Basic.
    */
   switch(data->info.httpcode) {
-  case 401:
-    /* Act on an authentication, we keep on moving and do the Authorization:
-       XXXX header in the HTTP request code snippet */
-    break;
-  case 300: /* Multiple Choices */
-  case 306: /* Not used */
-  case 307: /* Temporary Redirect */
-  default:  /* for all unknown ones */
-    /* These are explicitly mention since I've checked RFC2616 and they
+    /* 401 - Act on a www-authentication, we keep on moving and do the
+       Authorization: XXXX header in the HTTP request code snippet */
+    /* 407 - Act on a proxy-authentication, we keep on moving and do the
+       Proxy-Authorization: XXXX header in the HTTP request code snippet */
+    /* 300 - Multiple Choices */
+    /* 306 - Not used */
+    /* 307 - Temporary Redirect */
+  default:  /* for all above (and the unknown ones) */
+    /* Some codes are explicitly mentioned since I've checked RFC2616 and they
      * seem to be OK to POST to.
      */
     break;
   case 301: /* Moved Permanently */
     /* (quote from RFC2616, section 10.3.2):
      * 
-     *  Note: When automatically redirecting a POST request after
-     *  receiving a 301 status code, some existing HTTP/1.0 user agents
-     *  will erroneously change it into a GET request.
+     * Note: When automatically redirecting a POST request after receiving a
+     * 301 status code, some existing HTTP/1.0 user agents will erroneously
+     * change it into a GET request.
      *
      * ----
-     * Warning: Because most of importants user agents do this clear
-     * RFC2616 violation, many webservers expect this misbehavior. So
-     * these servers often answers to a POST request with an error page.
-     * To be sure that libcurl gets the page that most user agents
-     * would get, libcurl has to force GET:
+     *
+     * Warning: Because most of importants user agents do this obvious RFC2616
+     * violation, many webservers expect this misbehavior. So these servers
+     * often answers to a POST request with an error page.  To be sure that
+     * libcurl gets the page that most user agents would get, libcurl has to
+     * force GET:
      */
     if( data->set.httpreq == HTTPREQ_POST
         || data->set.httpreq == HTTPREQ_POST_FORM) {
