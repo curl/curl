@@ -617,6 +617,11 @@ CURLcode Curl_http(struct connectdata *conn)
   }
 
   if(conn->bits.upload_chunky) {
+    /* RFC2616 section 4.4:
+       Messages MUST NOT include both a Content-Length header field and a
+       non-identity transfer-coding. If the message does include a non-
+       identity transfer-coding, the Content-Length MUST be ignored. */
+
     if(!checkheaders(data, "Transfer-Encoding:")) {
       te = "Transfer-Encoding: chunked\r\n";
     }
@@ -926,8 +931,10 @@ CURLcode Curl_http(struct connectdata *conn)
                             generated form data */
       data->set.in = (FILE *)&http->form;
 
-      add_bufferf(req_buffer,
-                  "Content-Length: %d\r\n", http->postsize);
+      if(!conn->bits.upload_chunky)
+        /* only add Content-Length if not uploading chunked */
+        add_bufferf(req_buffer,
+                    "Content-Length: %d\r\n", http->postsize);
 
       if(!checkheaders(data, "Expect:")) {
         /* if not disabled explicitly we add a Expect: 100-continue
@@ -985,13 +992,13 @@ CURLcode Curl_http(struct connectdata *conn)
 
     case HTTPREQ_PUT: /* Let's PUT the data to the server! */
 
-      if(data->set.infilesize>0) {
+      if((data->set.infilesize>0) && !conn->bits.upload_chunky)
+        /* only add Content-Length if not uploading chunked */
         add_bufferf(req_buffer,
-                    "Content-Length: %d\r\n\r\n", /* file size */
+                    "Content-Length: %d\r\n", /* file size */
                     data->set.infilesize );
-      }
-      else
-        add_bufferf(req_buffer, "\015\012");
+
+      add_bufferf(req_buffer, "\r\n");
 
       /* set the upload size to the progress meter */
       Curl_pgrsSetUploadSize(data, data->set.infilesize);
@@ -1014,14 +1021,20 @@ CURLcode Curl_http(struct connectdata *conn)
     case HTTPREQ_POST:
       /* this is the simple POST, using x-www-form-urlencoded style */
 
-      if(!checkheaders(data, "Content-Length:"))
-        /* we allow replacing this header, although it isn't very wise to
-           actually set your own */
-        add_bufferf(req_buffer,
-                    "Content-Length: %d\r\n",
-                    data->set.postfieldsize?
-                    data->set.postfieldsize:
-                    (data->set.postfields?strlen(data->set.postfields):0) );
+      if(!conn->bits.upload_chunky) {
+        /* We only set Content-Length and allow a custom Content-Length if
+           we don't upload data chunked, as RFC2616 forbids us to set both
+           kinds of headers (Transfer-Encoding: chunked and Content-Length) */
+
+        if(!checkheaders(data, "Content-Length:"))
+          /* we allow replacing this header, although it isn't very wise to
+             actually set your own */
+          add_bufferf(req_buffer,
+                      "Content-Length: %d\r\n",
+                      data->set.postfieldsize?
+                      data->set.postfieldsize:
+                      (data->set.postfields?strlen(data->set.postfields):0) );
+      }
 
       if(!checkheaders(data, "Content-Type:"))
         add_bufferf(req_buffer,
