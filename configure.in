@@ -524,9 +524,9 @@ AC_HEADER_TIME
 # mprintf() checks:
 
 # check for 'long double'
-AC_CHECK_SIZEOF(long double, 8)
+# AC_CHECK_SIZEOF(long double, 8)
 # check for 'long long'
-AC_CHECK_SIZEOF(long long, 4)
+# AC_CHECK_SIZEOF(long long, 4)
 
 # check for ssize_t
 AC_CHECK_TYPE(ssize_t, int)
