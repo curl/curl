@@ -7,6 +7,21 @@
                                   Changelog
 
 Daniel(2 February 2004)
+- curl_version() now includes c-ares version info, and curl_version_info() now
+  returns a struct with version SECOND that also includes that info.
+
+- We are now officially using c-ares for asynch name resolves. c-ares is the
+  new library, based on the existing ares but with an extended and slightly
+  modified API.
+
+- Dirk improved the ares timeout code, and now we also include the ares error
+  string when we fail to resolve a name.
+
+- Another tweak to make test case 91 run fine. Now we have another bit on a
+  connection that is set true if the connection is marked for 'retry'. That
+  makes the connection get closed and re-opened and the HTTP-done code must
+  not complain on the fact that no data was received.
+
 - Based on Dirk Manske's patch, I modified the name resolving with ares to
   feature a timeout for really slow lookups. It now defaults to 300 seconds,
   but is now adjusted to the CONNECTTIMEOUT/TIMOUE timeouts if one of them
