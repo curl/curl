@@ -55,9 +55,9 @@ Daniel (19 November)
   http://curl.haxx.se/mail/lib-2003-11/0079.html
 
 Daniel (17 November)
-- Maciej W. Rozycki made the script use a cache variable for the writable argv
-  test. This way, the default can be overridden better (for cross-compiles
-  etc)
+- Maciej W. Rozycki made the configure script use a cache variable for the
+  writable argv test. This way, the default can be overridden better (for
+  cross-compiles etc)
 
 Daniel (15 November)
 - Mathias Axelsson found out libcurl sometimes freed the server certificate
