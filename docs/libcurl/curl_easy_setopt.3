@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "22 Jan 2004" "libcurl 7.11.1" "libcurl Manual"
+.TH curl_easy_setopt 3 "25 Feb 2004" "libcurl 7.11.1" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -882,6 +882,13 @@ Pass a char * as parameter, pointing to data that should be associated with
 this curl handle.  The pointer can subsequently be retrieved using
 \fIcurl_easy_getinfo\fP with the CURLINFO_PRIVATE option. libcurl itself does
 nothing with this data. (Added in 7.10.3)
+.IP CURLOPT_SHARE
+Pass a share handle as a parameter. The share handle must have been created by
+a previous call to curl_share_init(). Setting this option, will make this curl
+handle use the data from the shared handle instead of keeping the data to
+itself. This enables several curl handles to share data. If the curl handles
+are used simultaneously, you \fBMUST\fP use the locking methods in the share
+handle. See \fIcurl_share_setopt(3)\fP for details.
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, non-zero means an
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP
