@@ -7,7 +7,7 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 EXTRA_DIST = \
 	CHANGES LEGAL maketgz MITX.txt MPL-1.1.txt \
 	config-win32.h reconf packages/README Makefile.dist \
-	curl-config.in
+	curl-config.in libtool
 
 bin_SCRIPTS = curl-config
 
