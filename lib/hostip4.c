@@ -362,8 +362,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   if(h) {
     ai = Curl_he2ai(h, port);
 
-    if (h == buf) /* used a *_r() function */
-      free(h);
+    if (buf) /* used a *_r() function */
+      free(buf);
   }
 
   return ai;
