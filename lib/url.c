@@ -1584,7 +1584,8 @@ static int handleSock5Proxy(const char *proxy_name,
   unsigned char socksreq[600]; /* room for large user/pw (255 max each) */
   ssize_t actualread;
   ssize_t written;
-  CURLcode result;
+  int result;
+  CURLcode code;
   int sock = conn->sock[FIRSTSOCKET];
 
   Curl_nonblock(sock, FALSE);
@@ -1594,9 +1595,9 @@ static int handleSock5Proxy(const char *proxy_name,
   socksreq[2] = 0; /* no authentication */
   socksreq[3] = 2; /* username/password */
 
-  result = Curl_write(conn, sock, (char *)socksreq, (2 + (int)socksreq[1]),
+  code = Curl_write(conn, sock, (char *)socksreq, (2 + (int)socksreq[1]),
                       &written);
-  if ((result != CURLE_OK) || (written != (2 + (int)socksreq[1]))) {
+  if ((code != CURLE_OK) || (written != (2 + (int)socksreq[1]))) {
     failf(conn->data, "Unable to send initial SOCKS5 request.");
     return 1;
   }
@@ -1638,8 +1639,8 @@ static int handleSock5Proxy(const char *proxy_name,
     memcpy(socksreq + len, proxy_password, (int) pwlen);
     len += pwlen;
 
-    result = Curl_write(conn, sock, (char *)socksreq, len, &written);
-    if ((result != CURLE_OK) || (len != written)) {
+    code = Curl_write(conn, sock, (char *)socksreq, len, &written);
+    if ((code != CURLE_OK) || (len != written)) {
       failf(conn->data, "Failed to send SOCKS5 sub-negotiation request.");
       return 1;
     }
@@ -1698,7 +1699,7 @@ static int handleSock5Proxy(const char *proxy_name,
     int rc = Curl_resolv(conn, conn->hostname, conn->remote_port, &dns);
     
     if(rc == -1)
-      return CURLE_COULDNT_RESOLVE_HOST;
+      return 1;
 
     if(rc == 1)
       /* this requires that we're in "wait for resolve" state */
@@ -1736,8 +1737,8 @@ static int handleSock5Proxy(const char *proxy_name,
   {
     const int packetsize = 10;
 
-    result = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
-    if ((result != CURLE_OK) || (written != packetsize)) {
+    code = Curl_write(conn, sock, (char *)socksreq, packetsize, &written);
+    if ((code != CURLE_OK) || (written != packetsize)) {
       failf(conn->data, "Failed to send SOCKS5 connect request.");
       return 1;
     }
