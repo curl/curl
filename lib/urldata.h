@@ -546,5 +546,187 @@ struct UrlData {
 #define LIBCURL_NAME "libcurl"
 #define LIBCURL_ID LIBCURL_NAME " " LIBCURL_VERSION " " SSL_ID
 
+/*
+ * Here follows function prototypes from what we used to plan to call
+ * the "low level" interface. It is no longer prioritized and it is not likely
+ * to ever be supported to external users.
+ */
+
+/*
+ * NAME	curl_init()
+ *
+ * DESCRIPTION
+ *
+ * Inits libcurl globally. This must be used before any libcurl calls can
+ * be used. This may install global plug-ins or whatever. (This does not
+ * do winsock inits in Windows.)
+ *
+ * EXAMPLE
+ *
+ * curl_init();
+ *
+ */
+CURLcode curl_init(void);
+
+/*
+ * NAME	curl_init()
+ *
+ * DESCRIPTION
+ *
+ * Frees libcurl globally. This must be used after all libcurl calls have
+ * been used. This may remove global plug-ins or whatever. (This does not
+ * do winsock cleanups in Windows.)
+ *
+ * EXAMPLE
+ *
+ * curl_free(curl);
+ *
+ */
+void curl_free(void);
+
+/*
+ * NAME curl_open()
+ *
+ * DESCRIPTION
+ *
+ * Opens a general curl session. It does not try to connect or do anything
+ * on the network because of this call. The specified URL is only required
+ * to enable curl to figure out what protocol to "activate".
+ *
+ * A session should be looked upon as a series of requests to a single host.  A
+ * session interacts with one host only, using one single protocol.
+ *
+ * The URL is not required. If set to "" or NULL, it can still be set later
+ * using the curl_setopt() function. If the curl_connect() function is called
+ * without the URL being known, it will return error.
+ *
+ * EXAMPLE
+ *
+ * CURLcode result;
+ * CURL *curl;
+ * result = curl_open(&curl, "http://curl.haxx.nu/libcurl/");
+ * if(result != CURL_OK) {
+ *   return result;
+ * }
+ * */
+CURLcode curl_open(CURL **curl, char *url);
+
+/*
+ * NAME curl_setopt()
+ *
+ * DESCRIPTION
+ *
+ * Sets a particular option to the specified value.
+ *
+ * EXAMPLE
+ *
+ * CURL curl;
+ * curl_setopt(curl, CURL_HTTP_FOLLOW_LOCATION, TRUE);
+ */
+CURLcode curl_setopt(CURL *handle, CURLoption option, ...);
+
+/*
+ * NAME curl_close()
+ *
+ * DESCRIPTION
+ *
+ * Closes a session previously opened with curl_open()
+ *
+ * EXAMPLE
+ *
+ * CURL *curl;
+ * CURLcode result;
+ *
+ * result = curl_close(curl);
+ */
+CURLcode curl_close(CURL *curl); /* the opposite of curl_open() */
+
+CURLcode curl_read(CURLconnect *c_conn, char *buf, size_t buffersize,
+                   ssize_t *n);
+CURLcode curl_write(CURLconnect *c_conn, char *buf, size_t amount,
+                    size_t *n);
+
+/*
+ * NAME curl_connect()
+ *
+ * DESCRIPTION
+ *
+ * Connects to the peer server and performs the initial setup. This function
+ * writes a connect handle to its second argument that is a unique handle for
+ * this connect. This allows multiple connects from the same handle returned
+ * by curl_open().
+ *
+ * EXAMPLE
+ *
+ * CURLCode result;
+ * CURL curl;
+ * CURLconnect connect;
+ * result = curl_connect(curl, &connect);
+ */
+
+CURLcode curl_connect(CURL *curl, CURLconnect **in_connect);
+
+/*
+ * NAME curl_do()
+ *
+ * DESCRIPTION
+ *
+ * (Note: May 3rd 2000: this function does not currently allow you to
+ * specify a document, it will use the one set previously)
+ *
+ * This function asks for the particular document, file or resource that
+ * resides on the server we have connected to. You may specify a full URL,
+ * just an absolute path or even a relative path. That means, if you're just
+ * getting one file from the remote site, you can use the same URL as input
+ * for both curl_open() as well as for this function.
+ *
+ * In the even there is a host name, port number, user name or password parts
+ * in the URL, you can use the 'flags' argument to ignore them completely, or
+ * at your choice, make the function fail if you're trying to get a URL from
+ * different host than you connected to with curl_connect().
+ *
+ * You can only get one document at a time using the same connection. When one
+ * document has been received you can although request again.
+ *
+ * When the transfer is done, curl_done() MUST be called.
+ *
+ * EXAMPLE
+ *
+ * CURLCode result;
+ * char *url;
+ * CURLconnect *connect;
+ * result = curl_do(connect, url, CURL_DO_NONE); */
+CURLcode curl_do(CURLconnect *in_conn);
+
+/*
+ * NAME curl_done()
+ *
+ * DESCRIPTION
+ *
+ * When the transfer following a curl_do() call is done, this function should
+ * get called.
+ *
+ * EXAMPLE
+ *
+ * CURLCode result;
+ * char *url;
+ * CURLconnect *connect;
+ * result = curl_done(connect); */
+CURLcode curl_done(CURLconnect *connect);
+
+/*
+ * NAME curl_disconnect()
+ *
+ * DESCRIPTION
+ *
+ * Disconnects from the peer server and performs connection cleanup.
+ *
+ * EXAMPLE
+ *
+ * CURLcode result;
+ * CURLconnect *connect;
+ * result = curl_disconnect(connect); */
+CURLcode curl_disconnect(CURLconnect *connect);
+
 
 #endif
