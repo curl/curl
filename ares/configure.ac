@@ -58,4 +58,12 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 
+dnl check for a few basic system headers we need
+AC_CHECK_HEADERS(
+        sys/types.h \
+        sys/time.h \
+        sys/select.h \
+        sys/socket.h \
+        )
+
 AC_OUTPUT(Makefile)
