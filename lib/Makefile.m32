@@ -13,7 +13,7 @@ RM = rm -f
 RANLIB = ranlib
 STRIP = strip -g
 OPENSSL_PATH = ../../openssl-0.9.6g
-ZLIB_PATH = ../../zlib-1.1.3
+ZLIB_PATH = ../../zlib-1.1.4
 
 ########################################################
 ## Nothing more to do below this line!
@@ -27,7 +27,7 @@ ifdef SSL
 endif
 ifdef ZLIB
 	INCLUDES += -I"$(ZLIB_PATH)"
-	CFLAGS += -DHAVE_ZLIB
+	CFLAGS += -DHAVE_ZLIB -DHAVE_ZLIB_H
 	DLL_LIBS += -L$(ZLIB_PATH) -lz
 endif
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
