@@ -1,7 +1,7 @@
-                                  _   _ ____  _     
-                              ___| | | |  _ \| |    
-                             / __| | | | |_) | |    
-                            | (__| |_| |  _ <| |___ 
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
 To Think About When Contributing Source Code
@@ -138,15 +138,15 @@ How To Make a Patch
 
  If you have modified a single file, try something like:
 
-     diff -u undmodified-file.c my-changed-one.c > my-fixes.diff
+     diff -u unmodified-file.c my-changed-one.c > my-fixes.diff
 
  If you have modified several files, possibly in different directories, you
  can use diff recursively:
 
-     diff -ur curl-original-dir curl-modfied-sources-dir > my-fixes.diff
+     diff -ur curl-original-dir curl-modified-sources-dir > my-fixes.diff
 
  The GNU diff and GNU patch tools exist for virtually all platforms, including
- all kinds of unixes and Windows:
+ all kinds of Unixes and Windows:
 
  For unix-like operating systems:
 

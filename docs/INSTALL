@@ -158,16 +158,8 @@ Win32
         Make the sources in the src/ drawer be a "win32 console application"
         project. Name it curl.
 
-        With VC++, add 'ws2_32.lib' to the link libs when you build curl!
-        Borland seems to do that itself magically. Of course you have to make
-        sure it links with the libcurl too!
-
         For VC++ 6, there's an included Makefile.vc6 that should be possible
         to use out-of-the-box.
-
-        Microsoft note: add /Zm200 to the compiler options to increase the
-        compiler's memory allocation limit, as the hugehelp.c won't compile
-        due to "too long puts string".
 
 
    With SSL:
@@ -596,3 +588,5 @@ Zlib
       http://www.gzip.org/zlib/
 
 
+
+ LocalWords:  MingW
