@@ -1,8 +1,8 @@
 /*****************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * $Id$
@@ -24,13 +24,23 @@ struct MemoryStruct {
   size_t size;
 };
 
+void *myrealloc(void *ptr, size_t size)
+{
+  /* There might be a realloc() out there that doesn't like reallocing
+     NULL pointers, so we take care of it here */
+  if(ptr)
+    return realloc(ptr, size);
+  else
+    return malloc(size);
+}
+
 size_t
 WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
   register int realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)data;
-  
-  mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
+
+  mem->memory = (char *)myrealloc(mem->memory, mem->size + realsize + 1);
   if (mem->memory) {
     memcpy(&(mem->memory[mem->size]), ptr, realsize);
     mem->size += realsize;
