@@ -594,11 +594,11 @@ printf("just fine");
 AC_ARG_ENABLE(thread,dnl
 [  --disable-thread       tell configure to not look for thread-safe functions],
   OPT_THREAD=off
+  AC_MSG_WARN(libcurl will not get built using thread-safe functions)
 )
 
 if test X"$OPT_THREAD" = Xoff
 then
-  AC_MSG_WARN(libcurl will not get built using thread-safe functions)
   AC_DEFINE(DISABLED_THREADSAFE, 1, \
 Set to explicitly specify we don't want to use thread-safe functions)
 else
