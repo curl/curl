@@ -1561,7 +1561,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
      * We don't want to rely on a former host lookup that might've expired
      * now, instead we remake the lookup here and now!
      */
-    rc = Curl_resolv(conn, conn->proxy.name, conn->port, &addr);
+    rc = Curl_resolv(conn, conn->proxy.name, (int)conn->port, &addr);
     if(rc == CURLRESOLV_PENDING)
       rc = Curl_wait_for_resolv(conn, &addr);
 
