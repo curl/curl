@@ -1,0 +1,6 @@
+MOOO /that.site.com/17 HTTP/1.0
+User-Agent: agent007 license to drill
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+

@@ -1,0 +1,11 @@
+#
+# Use a silly request without '--':
+request MOOO
+#
+# Set the user-agent using a short-option:
+# (NOTE: the agent string is stripped in the test program why this
+# will never be compared in the end)
+-A "agent007 license to drill\t"
+#
+# long option *with* '--':
+--max-time 180
