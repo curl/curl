@@ -979,10 +979,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               Curl_debug(data, CURLINFO_DATA_IN, data->state.headerbuff,
                          k->hbuflen, conn->host.dispname);
               if(k->badheader == HEADER_PARTHEADER)
-                Curl_debug(data, CURLINFO_DATA_IN, k->str, nread, conn->host.dispname);
+                Curl_debug(data, CURLINFO_DATA_IN, k->str, nread,
+                           conn->host.dispname);
             }
             else
-              Curl_debug(data, CURLINFO_DATA_IN, k->str, nread, conn->host.dispname);
+              Curl_debug(data, CURLINFO_DATA_IN, k->str, nread,
+                         conn->host.dispname);
           }
 
 #ifndef CURL_DISABLE_HTTP
@@ -1124,6 +1126,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           if(!k->upload_done) {
             /* HTTP pollution, this should be written nicer to become more
                protocol agnostic. */
+            int fillcount;
 
             if(k->wait100_after_headers &&
                (conn->proto.http->sending == HTTPSEND_BODY)) {
@@ -1140,9 +1143,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               break;
             }
 
-            result = Curl_fillreadbuffer(conn, BUFSIZE, &nread);
+            result = Curl_fillreadbuffer(conn, BUFSIZE, &fillcount);
             if(result)
               return result;
+
+            nread = (ssize_t)fillcount;
           }
           else
             nread = 0; /* we're done uploading/reading */
