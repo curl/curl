@@ -344,6 +344,11 @@ int Curl_resolv(struct connectdata *conn,
       
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+
+      if(!dns) {
+        /* returned failure, bail out nicely */
+        Curl_freeaddrinfo(addr);
+      }
     }
   }
 
