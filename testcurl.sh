@@ -38,9 +38,13 @@ export LANG
 
 die(){
     echo "testcurl: ENDING HERE"
-    if test -n "$build"; then
+    if test -n "$pwd/$build"; then
       # we have a build directory name, remove the dir
-      rm -rf $build
+      rm -rf "$pwd/$build"
+    fi
+    if test -r "$pwd/build.log"; then
+      # we have a build log output file left, remove it
+      rm -rf "$pwd/build.log"
     fi
     exit 1
 }
