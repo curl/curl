@@ -1269,7 +1269,7 @@ sub singletest {
     }
     else {
         if(!$short) {
-            print "curl returned $cmdres, ".(0+$errorcode)." was expected\n";
+            print "\ncurl returned $cmdres, ".(0+$errorcode)." was expected\n";
         }
         print " exit FAILED\n";
         return 1;
