@@ -870,13 +870,13 @@ void telrcv(struct connectdata *conn,
             int count)			/* Number of bytes received */
 {
   unsigned char c;
-  int index = 0;
+  int in = 0;
   struct SessionHandle *data = conn->data;
   struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
 
   while(count--)
   {
-    c = inbuf[index++];
+    c = inbuf[in++];
 
     switch (tn->telrcv_state)
     {
