@@ -3051,6 +3051,7 @@ static int create_dir_hierarchy(char *outfile)
   char *outdup;
   char *dirbuildup;
   int result=0;
+  extern int errno;
   
   outdup = strdup(outfile);
   dirbuildup = malloc(sizeof(char) * strlen(outfile));
