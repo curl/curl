@@ -139,9 +139,11 @@ UPLOADING
 
         curl -T localfile -a ftp://ftp.upload.com/remotefile
 
-  NOTE: Curl does not support ftp upload through a proxy! The reason for this
-  is simply that proxies are seldomly configured to allow this and that no
-  author has supplied code that makes it possible!
+  Curl also supports ftp upload through a proxy, but only if the proxy is
+  configured to allow that kind of tunneling. If it does, you can run curl in
+  a fashion similar to:
+
+        curl --proxytunnel -x proxy:port -T localfile ftp.upload.com
 
  HTTP
 
@@ -480,13 +482,14 @@ FTP and firewalls
   connect to the client on the given (as parameters to the PORT command) IP
   number and port.
 
-  The -P flag to curl allows for different options. Your machine may have
+  The -P flag to curl supports a few different options. Your machine may have
   several IP-addresses and/or network interfaces and curl allows you to select
   which of them to use. Default address can also be used:
 
         curl -P - ftp.download.com
 
-  Download with PORT but use the IP address of our 'le0' interface:
+  Download with PORT but use the IP address of our 'le0' interface (this does
+  not work on windows):
 
         curl -P le0 ftp.download.com
 
