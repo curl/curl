@@ -853,6 +853,7 @@ AC_CHECK_HEADERS(
         unistd.h \
         malloc.h \
         stdlib.h \
+        limits.h \
         arpa/inet.h \
         net/if.h \
         netinet/in.h \
