@@ -83,15 +83,11 @@ CURL *curl_easy_init(void)
   CURLcode res;
   struct UrlData *data;
 
-  if(curl_init())
-    return NULL;
-
   /* We use curl_open() with undefined URL so far */
-  res = curl_open((CURL **)&data, NULL);
+  res = Curl_open((CURL **)&data, NULL);
   if(res != CURLE_OK)
     return NULL;
 
-  data->interf = CURLI_EASY; /* mark it as an easy one */
   /* SAC */
   data->device = NULL;
 
@@ -119,16 +115,16 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
   if(tag < CURLOPTTYPE_OBJECTPOINT) {
     /* This is a LONG type */
     param_long = va_arg(arg, long);
-    curl_setopt(data, tag, param_long);
+    Curl_setopt(data, tag, param_long);
   }
   else if(tag < CURLOPTTYPE_FUNCTIONPOINT) {
     /* This is a object pointer type */
     param_obj = va_arg(arg, void *);
-    curl_setopt(data, tag, param_obj);
+    Curl_setopt(data, tag, param_obj);
   }
   else {
     param_func = va_arg(arg, func_T );
-    curl_setopt(data, tag, param_func);
+    Curl_setopt(data, tag, param_func);
   }
 
   va_end(arg);
@@ -137,13 +133,12 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
 
 CURLcode curl_easy_perform(CURL *curl)
 {
-  return curl_transfer(curl);
+  return Curl_perform(curl);
 }
 
 void curl_easy_cleanup(CURL *curl)
 {
-  curl_close(curl);
-  curl_free();
+  Curl_close(curl);
 }
 
 CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...)
@@ -153,5 +148,5 @@ CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...)
   va_start(arg, info);
   paramp = va_arg(arg, void *);
 
-  return curl_getinfo(curl, info, paramp);
+  return Curl_getinfo(curl, info, paramp);
 }
