@@ -7,6 +7,28 @@
                                History of Changes
 
 
+Daniel (27 January 2001)
+- So the HTTP PUT resume fix wasn't good. There should appearantly be a
+  Content-Range header when resuming a PUT.
+
+- I noticed I broke the download-check that verifies that a resumed HTTP
+  download is actually resumed. It got broke because my new 'httpreq' field
+  in the main curl struct. I should get slapped. I added a test case for
+  this now, so I won't be able to ruin this again without noticing.
+
+- Added a test case for content-length verifying when downloading HTTP.
+
+- Made the progress meter title say if the transfer is being transfered. It
+  makes the output slightly better for resumes.
+
+- When dealing with Location: and HTTP return codes, libcurl will not attempt
+  to follow the spirit of RFC2616 better. It means that when POSTing to a
+  URL that is being following to a second place, the standard will judge on
+  what to do. All HTTP codes except 303 and 305 will cause curl to make a
+  second POST operation. 303 will make a GET and 305 is not yet supported.
+
+  I also wrote two test cases for this POST/GET/Location stuff.
+
 Version 7.6
 
 Daniel (26 January 2001)
