@@ -22,10 +22,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
+#include <stdlib.h>
 
 #include <curl/curl.h>
-#include <curl/types.h>
-#include <curl/easy.h>
+
+#if (LIBCURL_VERSION_NUM < 0x070907)
+#error "too old libcurl version, get the latest!"
+#endif
 
 struct data {
   int type;
@@ -34,8 +37,8 @@ struct data {
     FILE *file;
   } handle;
 
-  /* TODO: We should perhaps document the biggest possible buffer chunk we can
-     get from libcurl in one single callback... */
+  /* This is the documented biggest possible buffer chunk we can get from
+     libcurl in one single callback! */
   char buffer[CURL_MAX_WRITE_SIZE];
 
   char *readptr; /* read from here */
@@ -62,6 +65,8 @@ size_t write_callback(char *buffer,
   url->readptr += size;
   url->bytes += size;
 
+  fprintf(stderr, "callback %d size bytes\n", size);
+
   return size;
 }
 
@@ -72,6 +77,7 @@ URL_FILE *url_fopen(char *url, char *operation)
 
   URL_FILE *file;
   int still_running;
+  (void)operation;
 
   file = (URL_FILE *)malloc(sizeof(URL_FILE));
   if(!file)
@@ -134,47 +140,51 @@ size_t url_fread(void *ptr, size_t size, size_t nmemb, URL_FILE *file)
         }
       }
       if(!still_running) {
-        printf("NO MORE RUNNING AROUND!\n");
+        printf("DONE RUNNING AROUND!\n");
         return 0;
       }
     }
 
-    FD_ZERO(&fdread);
-    FD_ZERO(&fdwrite);
-    FD_ZERO(&fdexcep);
+    do {
+
+      FD_ZERO(&fdread);
+      FD_ZERO(&fdwrite);
+      FD_ZERO(&fdexcep);
   
-    /* set a suitable timeout to fail on */
-    timeout.tv_sec = 500; /* 5 minutes */
-    timeout.tv_usec = 0;
+      /* set a suitable timeout to fail on */
+      timeout.tv_sec = 500; /* 5 minutes */
+      timeout.tv_usec = 0;
 
-    /* get file descriptors from the transfers */
-    curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
+      /* get file descriptors from the transfers */
+      curl_multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
 
-    rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
+      rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
 
-    switch(rc) {
-    case -1:
-      /* select error */
-      break;
-    case 0:
-      break;
-    default:
-      /* timeout or readable/writable sockets */
-      do {
-        file->m = curl_multi_perform(multi_handle, &still_running);
+      switch(rc) {
+      case -1:
+        /* select error */
+        break;
+      case 0:
+        break;
+      default:
+        /* timeout or readable/writable sockets */
+        printf("select() returned %d!\n", rc);
+        do {
+          file->m = curl_multi_perform(multi_handle, &still_running);
+          
+          if(file->bytes)
+            /* we have received data, return that now */
+            break;
+          
+        } while(CURLM_CALL_MULTI_PERFORM == file->m);
 
-        if(file->bytes)
-          /* we have received data, return that now */
-          break;
-
-      } while(CURLM_CALL_MULTI_PERFORM == file->m);
-
-
-      if(!still_running)
-        printf("NO MORE RUNNING AROUND!\n");
-
-      break;
-    }
+        
+        if(!still_running)
+          printf("DONE RUNNING AROUND!\n");
+        
+        break;
+      }
+    } while(still_running && (file->bytes <= 0));
   }
   else
     printf("(fread) Skip network read\n");
@@ -204,7 +214,10 @@ int main(int argc, char *argv[])
   int nread;
   char buffer[256];
 
-  handle = url_fopen("http://www.haxx.se", "r");
+  (void)argc;
+  (void)argv;
+
+  handle = url_fopen("http://curl.haxx.se/", "r");
 
   if(!handle) {
     printf("couldn't url_fopen()\n");
