@@ -26,10 +26,14 @@ included in the bundle, then you need to do one of the following:
 
     With the curl command tool: --cacert [file]
 
-This upgrade procedure has been deemed The Right Thing even though it adds
-this extra trouble for some users, since it adds security to a majority of the
-SSL connections that previously weren't really secure.
+Neglecting to use one of the above menthods when dealing with a server using a
+certficate that isn't signed by one of the certficates in the installed CA
+cert bundle, will cause SSL to report an error ("certificate verify failed")
+during the handshake and SSL will then refuse further communication with that
+server.
 
-It turned out many people were using previous versions of curl/libcurl without
-realizing the need for the CA cert options to get truly secure SSL
-connections.
+This procedure has been deemed The Right Thing even though it adds this extra
+trouble for some users, since it adds security to a majority of the SSL
+connections that previously weren't really secure. It turned out many people
+were using previous versions of curl/libcurl without realizing the need for
+the CA cert options to get truly secure SSL connections.
