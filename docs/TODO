@@ -15,20 +15,14 @@ TODO
  * Introduce an interface to libcurl that allows applications to easier get to
    know what cookies that are received. Pushing interface that calls a
    callback on each received cookie? Querying interface that asks about
-   existing cookies? We probably need both.
+   existing cookies? We probably need both. Enable applications to modify
+   existing cookies as well.
 
  * Make content encoding/decoding internally be made using a filter system.
 
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
    [http://curl.haxx.se/dev/no_copy_callbacks.txt]
-
- * Run-time querying about library characterics. What protocols do this
-   running libcurl support? What is the version number of the running libcurl
-   (returning the well-defined version-#define). This could possibly be made
-   by allowing curl_easy_getinfo() work with a NULL pointer for global info,
-   but perhaps better would be to introduce a new curl_getinfo() (or similar)
-   function for global info reading.
 
  * Add asynchronous name resolving (http://daniel.haxx.se/resolver/). This
    should be made to work on most of the supported platforms, or otherwise it
@@ -51,12 +45,9 @@ TODO
    >4GB all over. Bug reports (and source reviews) indicate that it doesn't
    currently work properly.
 
- * Make the built-in progress meter use its own dedicated output stream, and
-   make it possible to set it. Use stderr by default.
-
  * CURLOPT_MAXFILESIZE. Prevent downloads that are larger than the specified
    size. CURLE_FILESIZE_EXCEEDED would then be returned. Gautam Mani
-   requested. That is, the download should even begin but be aborted
+   requested. That is, the download should not even begin but be aborted
    immediately.
 
  * Allow the http_proxy (and other) environment variables to contain user and
@@ -66,8 +57,7 @@ TODO
  LIBCURL - multi interface
 
  * Make sure we don't ever loop because of non-blocking sockets return
-   EWOULDBLOCK or similar. This concerns the HTTP request sending (and
-   especially regular HTTP POST), the FTP command sending etc.
+   EWOULDBLOCK or similar. This FTP command sending etc.
 
  * Make uploads treated better. We need a way to tell libcurl we have data to
    write, as the current system expects us to upload data each time the socket
@@ -86,6 +76,9 @@ TODO
    receiver will convert the data from the standard form to his own internal
    form."
 
+ * Since USERPWD always override the user and password specified in URLs, we
+   might need another way to specify user+password for anonymous ftp logins.
+
  * An option to only download remote FTP files if they're newer than the local
    one is a good idea, and it would fit right into the same syntax as the
    already working http dito works. It of course requires that 'MDTM' works,
@@ -102,12 +95,6 @@ TODO
    the first URL uses (to prevent others from being able to read it), but this
    also prevents the authentication info from getting sent when following
    locations to legitimate other host names.
-
- * "Content-Encoding: compress/gzip/zlib" HTTP 1.1 clearly defines how to get
-   and decode compressed documents. There is the zlib that is pretty good at
-   decompressing stuff. This work was started in October 1999 but halted again
-   since it proved more work than we thought. It is still a good idea to
-   implement though. This requires the filter system mentioned above.
 
  * Authentication: NTLM. Support for that MS crap called NTLM
    authentication. MS proxies and servers sometime require that. Since that
