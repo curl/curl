@@ -94,6 +94,7 @@ void delete_ftp_command(void);
 
 
 int sec_fflush (struct connectdata *conn, FILE *);
+int sec_fflush_fd(struct connectdata *conn, int fd);
 int sec_fprintf (struct connectdata *, FILE *, const char *, ...);
 int sec_getc (struct connectdata *conn, FILE *);
 int sec_putc (struct connectdata *conn, int, FILE *);
