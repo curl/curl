@@ -576,6 +576,32 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
 }
 
 /*
+ * This function should return TRUE if the socket is to be assumed to
+ * be dead. Most commonly this happens when the server has closed the
+ * connection due to inactivity.
+ */
+static bool SocketIsDead(int sock) 
+{ 
+  int sval; 
+  bool ret_val = TRUE; 
+  fd_set check_set; 
+  struct timeval to; 
+
+  FD_ZERO(&check_set); 
+  FD_SET(sock,&check_set); 
+
+  to.tv_sec = 0; 
+  to.tv_usec = 1; 
+
+  sval = select(sock + 1, &check_set, 0, 0, &to);
+  if(sval == 0) 
+    /* timeout */
+    ret_val = FALSE; 
+  
+  return ret_val;
+}
+
+/*
  * Given one filled in connection struct, this function should detect if there
  * already is one that have all the significant details exactly the same and
  * thus should be used instead.
@@ -607,6 +633,16 @@ ConnectionExists(struct UrlData *data,
            !strequal(needle->data->passwd, check->proto.ftp->passwd)) {
           /* one of them was different */
           continue;
+        }
+      }
+      {
+        bool dead;
+        dead = SocketIsDead(check->firstsocket);
+        if(dead) {
+          infof(data, "Connection %d seems to be dead!\n", i);
+          curl_disconnect(check); /* disconnect resources */
+          data->connects[i]=NULL; /* nothing here */
+          continue; /* try another one now */
         }
       }
       *usethis = check;
@@ -908,7 +944,6 @@ static CURLcode ConnectPlease(struct UrlData *data,
 
   return CURLE_OK;
 }
-
 
 static CURLcode _connect(CURL *curl,
                          CURLconnect **in_connect,

@@ -2,14 +2,14 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_slist_append 3 "2 June 2000" "Curl 7.0" "libcurl Manual"
+.TH curl_slist_append 3 "1 Mar 2001" "Curl 7.7" "libcurl Manual"
 .SH NAME
 curl_slist_append - add a string to an slist
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
 .BI "struct curl_slist *curl_slist_append(struct curl_slit *" list,
-.BI "char * "string ");"
+.BI "const char * "string ");"
 .ad
 .SH DESCRIPTION
 curl_slist_append() appends a specified string to a linked list of

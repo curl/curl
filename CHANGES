@@ -8,6 +8,11 @@
 
 ** curl 7.7 DOES NOT currently WORK. **
 
+Daniel (4 March 2001)
+- Now, there's even a basic check that a re-used connection is still alive
+  before it is assumed so. A few first tests have proven that libcurl will
+  then re-connect instead of re-use the dead connection!
+
 Daniel (2 March 2001)
 - Now they work intermixed as well. Major coolness!
 
