@@ -21,9 +21,6 @@ To get fixed in 7.11.2 (planned release May/June 2004)
     At least the UTF8 conversion and comparison should be done. Patch?
     UNASSIGNED
 
-24. Make the progress meter use one digit more for the hour time fields.
-    Accomplish this by removing one of the times displayed.
-
 28. Optimize the way libcurl uses CWD on each new request over a persistent
     connection (on FTP) even if it doesn't have to.
 
