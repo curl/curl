@@ -423,8 +423,8 @@ CURLcode ftp_done(struct connectdata *conn)
      just performed: */
   nread = GetLastResponse(data->firstsocket, buf, data);
 
-  /* 226 Transfer complete */
-  if(strncmp(buf, "226", 3)) {
+  /* 226 Transfer complete, 250 Requested file action okay, completed. */
+  if(!strncmp(buf, "226", 3) && !strncmp(buf, "250", 3)) {
     failf(data, "%s", buf+4);
     return CURLE_FTP_WRITE_ERROR;
   }
