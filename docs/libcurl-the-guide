@@ -9,7 +9,7 @@ PROGRAMMING WITH LIBCURL
 
 About this Document
 
- This document will attempt to describe the general principle and some basic
+ This document attempts to describe the general principles and some basic
  approaches to consider when programming with libcurl. The text will focus
  mainly on the C interface but might apply fairly well on other interfaces as
  well as they usually follow the C one pretty closely.
@@ -878,7 +878,7 @@ FTP Peculiarities We Need
 
  libcurl can either connect to the server a second time or tell the server to
  connect back to it. The first option is the default and it is also what works
- best for all the people behind firewals, NATs or ip-masquarading setups.
+ best for all the people behind firewalls, NATs or IP-masquarading setups.
  libcurl then tells the server to open up a new port and wait for a second
  connection. This is by default attempted with EPSV first, and if that doesn't
  work it tries PASV instead. (EPSV is an extension to the original FTP spec
@@ -887,7 +887,7 @@ FTP Peculiarities We Need
  You can prevent libcurl from first trying the EPSV command by setting
  CURLOPT_FTP_USE_EPSV to FALSE.
 
- In some cases, you will perfer to have the server connect back to you for the
+ In some cases, you will prefer to have the server connect back to you for the
  second connection. This might be when the server is perhaps behind a firewall
  or something and only allows connections on a single port. libcurl then
  informs the remote server which IP address and port number to connect to.
