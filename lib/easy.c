@@ -78,14 +78,71 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-/* true globals */
+
+/* Silly win32 socket initialization functions */
+
+#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+static void win32_cleanup(void)
+{
+  WSACleanup();
+}
+
+static CURLcode win32_init(void)
+{
+  WORD wVersionRequested;  
+  WSADATA wsaData; 
+  int err; 
+  wVersionRequested = MAKEWORD(1, 1); 
+    
+  err = WSAStartup(wVersionRequested, &wsaData); 
+    
+  if (err != 0) 
+    /* Tell the user that we couldn't find a useable */ 
+    /* winsock.dll.     */ 
+    return CURLE_FAILED_INIT; 
+    
+  /* Confirm that the Windows Sockets DLL supports 1.1.*/ 
+  /* Note that if the DLL supports versions greater */ 
+  /* than 1.1 in addition to 1.1, it will still return */ 
+  /* 1.1 in wVersion since that is the version we */ 
+  /* requested. */ 
+    
+  if ( LOBYTE( wsaData.wVersion ) != 1 || 
+       HIBYTE( wsaData.wVersion ) != 1 ) { 
+    /* Tell the user that we couldn't find a useable */ 
+
+    /* winsock.dll. */ 
+    WSACleanup(); 
+    return CURLE_FAILED_INIT; 
+  }
+  return CURLE_OK;
+}
+/* The Windows Sockets DLL is acceptable. Proceed. */ 
+#else
+static CURLcode win32_init(void) { return CURLE_OK; }
+#define win32_cleanup()
+#endif
+
+
+/* true globals -- for curl_global_init() and curl_global_cleanup() */
 static unsigned int  initialized = 0;
 static long          init_flags  = 0;
 
+/**
+ * Globally initializes cURL given a bitwise set of 
+ * the different features to initialize.
+ */
 CURLcode curl_global_init(long flags)
 {
-  if(flags & CURL_GLOBAL_SSL)
+  if (initialized)
+    return CURLE_OK;
+ 
+  if (flags & CURL_GLOBAL_SSL)
     Curl_SSL_init();
+
+  if (flags & CURL_GLOBAL_WIN32)
+    if (win32_init() != CURLE_OK)
+      return CURLE_FAILED_INIT;
 
   initialized = 1;
   init_flags  = flags;
@@ -93,12 +150,23 @@ CURLcode curl_global_init(long flags)
   return CURLE_OK;
 }
 
+/**
+ * Globally cleanup cURL, uses the value of "init_flags" to determine
+ * what needs to be cleaned up and what doesn't
+ */
 void curl_global_cleanup(void)
 {
+  if (!initialized)
+    return;
+
   if (init_flags & CURL_GLOBAL_SSL)
     Curl_SSL_cleanup();
 
+  if (init_flags & CURL_GLOBAL_WIN32)
+    win32_cleanup();
+
   initialized = 0;
+  init_flags  = 0;
 }
 
 CURL *curl_easy_init(void)

@@ -20,11 +20,6 @@ To do in a future release (random order):
  * Consider an interface to libcurl that allows applications to easier get to
    know what cookies that are sent back in the response headers.
 
- * The win32_init() and win32_cleanup() functions that are present in
-   src/main.c (and docs/examples/win32sockets.c) would probably be fine to
-   add to curl_global_init() and performed if the correct flag is set. Makes
-   it easier for windows people.
-
  * Make SSL session ids get used if multiple HTTPS documents from the same
    host is requested. http://curl.haxx.se/dev/SSL_session_id.txt
 

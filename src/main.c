@@ -126,52 +126,6 @@ char *strdup(char *str)
 
 extern void hugehelp(void);
 
-/***********************************************************************
- * Start with some silly functions to make win32-systems survive
- ***********************************************************************/
-#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-static void win32_cleanup(void)
-{
-  WSACleanup();
-}
-
-static CURLcode win32_init(void)
-{
-  WORD wVersionRequested;  
-  WSADATA wsaData; 
-  int err; 
-  wVersionRequested = MAKEWORD(1, 1); 
-    
-  err = WSAStartup(wVersionRequested, &wsaData); 
-    
-  if (err != 0) 
-    /* Tell the user that we couldn't find a useable */ 
-    /* winsock.dll.     */ 
-    return CURLE_FAILED_INIT; 
-    
-  /* Confirm that the Windows Sockets DLL supports 1.1.*/ 
-  /* Note that if the DLL supports versions greater */ 
-  /* than 1.1 in addition to 1.1, it will still return */ 
-  /* 1.1 in wVersion since that is the version we */ 
-  /* requested. */ 
-    
-  if ( LOBYTE( wsaData.wVersion ) != 1 || 
-       HIBYTE( wsaData.wVersion ) != 1 ) { 
-    /* Tell the user that we couldn't find a useable */ 
-
-    /* winsock.dll. */ 
-    WSACleanup(); 
-    return CURLE_FAILED_INIT; 
-  }
-  return CURLE_OK;
-}
-/* The Windows Sockets DLL is acceptable. Proceed. */ 
-#else
-static CURLcode win32_init(void) { return CURLE_OK; }
-#define win32_cleanup()
-#endif
-
-
 /*
  * This is the main global constructor for the app. Call this before
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
@@ -179,8 +133,7 @@ static CURLcode win32_init(void) { return CURLE_OK; }
  */
 CURLcode main_init(void)
 {
-  curl_global_init(CURL_GLOBAL_DEFAULT);
-  return win32_init();
+  return curl_global_init(CURL_GLOBAL_DEFAULT);
 }
 
 /*
@@ -189,7 +142,6 @@ CURLcode main_init(void)
  */
 void main_free(void)
 {
-  win32_cleanup();
   curl_global_cleanup();
 }
 
