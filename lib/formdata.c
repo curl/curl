@@ -982,8 +982,8 @@ char *Curl_FormBoundary(void)
 			      the same form won't be identical */
   int i;
 
-  static char table64[]=
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  static char table62[]=
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
   retstring = (char *)malloc(BOUNDARY_LENGTH);
 
@@ -995,7 +995,7 @@ char *Curl_FormBoundary(void)
   strcpy(retstring, "curl"); /* bonus commercials 8*) */
 
   for(i=4; i<(BOUNDARY_LENGTH-1); i++) {
-    retstring[i] = table64[rand()%64];
+    retstring[i] = table62[rand()%62];
   }
   retstring[BOUNDARY_LENGTH-1]=0; /* zero terminate */
 
