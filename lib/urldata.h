@@ -28,6 +28,7 @@
 #include "setup.h"
 
 #define PORT_FTP 21
+#define PORT_FTPS 990
 #define PORT_TELNET 23
 #define PORT_GOPHER 70
 #define PORT_HTTP 80

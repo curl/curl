@@ -2441,11 +2441,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 /* MN 06/07/02 */
 #ifndef CURL_DISABLE_FTP
     char *type;
+    int port = PORT_FTP;
 
     if(strequal(conn->protostr, "FTPS")) {
 #ifdef USE_SSLEAY
       conn->protocol |= PROT_FTPS|PROT_SSL;
       conn->ssl[SECONDARYSOCKET].use = TRUE; /* send data securely */
+      port = PORT_FTPS;
 #else
       failf(data, LIBCURL_NAME
             " was built with SSL disabled, ftps: not supported!");
@@ -2454,8 +2456,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
 
     conn->port = (data->set.use_port && data->state.allow_port)?
-      data->set.use_port:PORT_FTP;
-    conn->remote_port = PORT_FTP;
+      data->set.use_port:port;
+    conn->remote_port = port;
     conn->protocol |= PROT_FTP;
 
     if(data->change.proxy &&

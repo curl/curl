@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (11 January 2004)
+- Dominick Meglio pointed out FTPS should use default port 990 according to
+  IANA.
+
 Daniel (8 January 2004)
 - Fixed the SPNEGO configure check to not use -R or other non-portable options
   in the LDFLAGS. Reported by Pierre in bug report #872930.
