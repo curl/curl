@@ -161,7 +161,7 @@ Curl_llist_destroy(curl_llist *list, void *user)
 {
   if(list) {
     while (list->size > 0)
-      Curl_llist_remove(list, CURL_LLIST_TAIL(list), user);
+      Curl_llist_remove(list, list->tail, user);
 
     free(list);
   }

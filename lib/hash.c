@@ -36,7 +36,7 @@
 
 
 static unsigned long
-_hash_str (const char *key, size_t key_length)
+hash_str(const char *key, size_t key_length)
 {
   char *end = (char *) key + key_length;
   unsigned long h = 5381;
@@ -50,7 +50,7 @@ _hash_str (const char *key, size_t key_length)
 }
 
 static void 
-_hash_element_dtor (void *user, void *element)
+hash_element_dtor(void *user, void *element)
 {
   curl_hash         *h = (curl_hash *) user;
   curl_hash_element *e = (curl_hash_element *) element;
@@ -77,7 +77,7 @@ Curl_hash_init(curl_hash *h, int slots, curl_hash_dtor dtor)
   h->table = (curl_llist **) malloc(slots * sizeof(curl_llist *));
   if(h->table) {
     for (i = 0; i < slots; ++i) {
-      h->table[i] = Curl_llist_alloc((curl_llist_dtor) _hash_element_dtor);
+      h->table[i] = Curl_llist_alloc((curl_llist_dtor) hash_element_dtor);
       if(!h->table[i]) {
         while(i--)
           Curl_llist_destroy(h->table[i], NULL);
@@ -109,7 +109,7 @@ Curl_hash_alloc(int slots, curl_hash_dtor dtor)
 }
 
 static int 
-_hash_key_compare (char *key1, size_t key1_len, char *key2, size_t key2_len)
+hash_key_compare(char *key1, size_t key1_len, char *key2, size_t key2_len)
 {
   if (key1_len == key2_len && 
       *key1 == *key2 &&
@@ -120,44 +120,47 @@ _hash_key_compare (char *key1, size_t key1_len, char *key2, size_t key2_len)
   return 0;
 }
 
-static int
-_mk_hash_element (curl_hash_element **e, char *key, size_t key_len,
-                  const void *p)
+static curl_hash_element *
+mk_hash_element(char *key, size_t key_len, const void *p)
 {
-  *e = (curl_hash_element *) malloc(sizeof(curl_hash_element));
-  (*e)->key = strdup(key);
-  (*e)->key_len = key_len;
-  (*e)->ptr = (void *) p;
-  return 0;
+  curl_hash_element *he =
+    (curl_hash_element *) malloc(sizeof(curl_hash_element));
+
+  if(he) {
+    he->key = strdup(key);
+    he->key_len = key_len;
+    he->ptr = (void *) p;
+  }
+  return he;
 }
 
-#define find_slot(__h, __k, __k_len) (_hash_str(__k, __k_len) % (__h)->slots)
+#define find_slot(__h, __k, __k_len) (hash_str(__k, __k_len) % (__h)->slots)
 
-#define FETCH_LIST \
-  curl_llist *l = h->table[find_slot(h, key, key_len)]
+#define FETCH_LIST(x,y,z) x->table[find_slot(x, y, z)]
 
 int 
-Curl_hash_add (curl_hash *h, char *key, size_t key_len, const void *p)
+Curl_hash_add(curl_hash *h, char *key, size_t key_len, const void *p)
 {
   curl_hash_element  *he;
   curl_llist_element *le;
-  FETCH_LIST;
+  curl_llist *l = FETCH_LIST(h, key, key_len);
 
-  for (le = CURL_LLIST_HEAD(l);
-       le != NULL;
-       le = CURL_LLIST_NEXT(le)) {
-    he = (curl_hash_element *) CURL_LLIST_VALP(le);
-    if (_hash_key_compare(he->key, he->key_len, key, key_len)) {
+  for (le = l->head;
+       le;
+       le = le->next) {
+    he = (curl_hash_element *) le->ptr;
+    if (hash_key_compare(he->key, he->key_len, key, key_len)) {
       h->dtor(he->ptr);
       he->ptr = (void *) p;
       return 1;
     }
   }
 
-  if (_mk_hash_element(&he, key, key_len, p) != 0) 
+  he = mk_hash_element(key, key_len, p);
+  if (!he) 
     return 0;
 
-  if (Curl_llist_insert_next(l, CURL_LLIST_TAIL(l), he)) {
+  if (Curl_llist_insert_next(l, l->tail, he)) {
     ++h->size;
     return 1;
   }
@@ -165,18 +168,19 @@ Curl_hash_add (curl_hash *h, char *key, size_t key_len, const void *p)
   return 0;
 }
 
+#if 0
 int 
 Curl_hash_delete(curl_hash *h, char *key, size_t key_len)
 {
   curl_hash_element  *he;
   curl_llist_element *le;
-  FETCH_LIST;
+  curl_llist *l = FETCH_LIST(h, key, key_len);
 
-  for (le = CURL_LLIST_HEAD(l);
-       le != NULL;
-       le = CURL_LLIST_NEXT(le)) {
-    he = CURL_LLIST_VALP(le);
-    if (_hash_key_compare(he->key, he->key_len, key, key_len)) {
+  for (le = l->head;
+       le;
+       le = le->next) {
+    he = le->ptr;
+    if (hash_key_compare(he->key, he->key_len, key, key_len)) {
       Curl_llist_remove(l, le, (void *) h);
       --h->size;
       return 1;
@@ -185,19 +189,20 @@ Curl_hash_delete(curl_hash *h, char *key, size_t key_len)
 
   return 0;
 }
+#endif
 
 void *
 Curl_hash_pick(curl_hash *h, char *key, size_t key_len)
 {
   curl_llist_element *le;
   curl_hash_element  *he;
-  FETCH_LIST;
+  curl_llist *l = FETCH_LIST(h, key, key_len);
 
-  for (le = CURL_LLIST_HEAD(l);
-       le != NULL;
-       le = CURL_LLIST_NEXT(le)) {
-    he = CURL_LLIST_VALP(le);
-    if (_hash_key_compare(he->key, he->key_len, key, key_len)) {
+  for (le = l->head;
+       le;
+       le = le->next) {
+    he = le->ptr;
+    if (hash_key_compare(he->key, he->key_len, key, key_len)) {
       return he->ptr;
     }
   }
@@ -205,6 +210,7 @@ Curl_hash_pick(curl_hash *h, char *key, size_t key_len)
   return NULL;
 }
 
+#if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
 void 
 Curl_hash_apply(curl_hash *h, void *user,
                 void (*cb)(void *user, void *ptr))
@@ -213,14 +219,15 @@ Curl_hash_apply(curl_hash *h, void *user,
   int                  i;
 
   for (i = 0; i < h->slots; ++i) {
-    for (le = CURL_LLIST_HEAD(h->table[i]);
-         le != NULL;
-         le = CURL_LLIST_NEXT(le)) {
-      curl_hash_element *el = CURL_LLIST_VALP(le);
+    for (le = (h->table[i])->head;
+         le;
+         le = le->next) {
+      curl_hash_element *el = le->ptr;
       cb(user, el->ptr);
     }
   }
 }
+#endif
 
 void
 Curl_hash_clean(curl_hash *h)
@@ -240,27 +247,32 @@ Curl_hash_clean_with_criterium(curl_hash *h, void *user,
 {
   curl_llist_element *le;
   curl_llist_element *lnext;
+  curl_llist *list;
   int i;
 
   for (i = 0; i < h->slots; ++i) {
-    le = CURL_LLIST_HEAD(h->table[i]);
-    while(le != NULL)
-      if (comp(user, ((curl_hash_element *) CURL_LLIST_VALP(le))->ptr)) {
-        lnext = CURL_LLIST_NEXT(le);
-        Curl_llist_remove(h->table[i], le, (void *) h);
-        --h->size;
-        le = lnext;
+    list = h->table[i];
+    le = list->head; /* get first list entry */
+    while(le) {
+      curl_hash_element *he = le->ptr;
+      lnext = le->next;
+      /* ask the callback function if we shall remove this entry or not */
+      if (comp(user, he->ptr)) {
+        Curl_llist_remove(list, le, (void *) h);
+        --h->size; /* one less entry in the hash now */
       }
-      else
-        le = CURL_LLIST_NEXT(le);
+      le = lnext;
+    }
   }
 }
 
+#if 0
 int
 Curl_hash_count(curl_hash *h)
 {
   return h->size;
 }
+#endif
 
 void 
 Curl_hash_destroy(curl_hash *h)
