@@ -21,9 +21,6 @@ char *spitout(FILE *stream, char *main, char *sub, int *size);
 #define DEFAULT_LOGFILE "log/sws.log"
 #endif
 
-#define DOCBUFSIZE 4
-#define BUFFERSIZE (DOCBUFSIZE * 1024)
-
 #define VERSION "cURL test suite HTTP server/0.1"
 
 #define REQUEST_DUMP "log/server.input"
@@ -73,7 +70,7 @@ static void sigpipe_handler(int sig)
 static void sigterm_handler(int sig)
 {
     char logbuf[100];
-    snprintf(logbuf, 100, "Got signal %d, terminating", sig);
+    sprintf(logbuf, "Got signal %d, terminating", sig);
     logmsg(logbuf);
     sigterm = 1;
 }
@@ -136,12 +133,12 @@ void storerequest(char *reqbuf)
 }
 
 
-#define REQBUFSIZ 50000
-#define REQBUFSIZ_TXT "49999"
+#define REQBUFSIZ 150000
+#define REQBUFSIZ_TXT "149999"
 
 /* very-big-path support */
-#define MAXDOCNAMELEN 40000
-#define MAXDOCNAMELEN_TXT "39999"
+#define MAXDOCNAMELEN 140000
+#define MAXDOCNAMELEN_TXT "139999"
 
 #define REQUEST_KEYWORD_SIZE 256
 static int get_request(int sock, int *part)
