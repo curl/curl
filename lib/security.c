@@ -546,3 +546,11 @@ Curl_sec_end(struct connectdata *conn)
 }
 
 #endif /* KRB4 */
+
+/*
+ * local variables:
+ * eval: (load-file "../curl-mode.el")
+ * end:
+ * vim600: et sw=2 ts=2 sts=2 tw=78 fdm=marker
+ * vim<600: et sw=2 ts=2 sts=2 tw=78
+ */

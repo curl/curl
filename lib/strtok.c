@@ -65,3 +65,10 @@ Curl_strtok_r(char *ptr, const char *sep, char **end)
 
 #endif /* this was only compiled if strtok_r wasn't present */
 
+/*
+ * local variables:
+ * eval: (load-file "../curl-mode.el")
+ * end:
+ * vim600: et sw=2 ts=2 sts=2 tw=78 fdm=marker
+ * vim<600: et sw=2 ts=2 sts=2 tw=78
+ */
