@@ -722,7 +722,7 @@ ToHour (int Hours, MERIDIAN Meridian)
 	Hours = 0;
       return Hours + 12;
     default:
-      abort ();
+      break; /* used to do abort() here */
     }
   /* NOTREACHED - but make gcc happy! */
   return -1;
