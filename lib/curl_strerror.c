@@ -506,10 +506,17 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   if (err >= 0 && err < sys_nerr) {
     /* These should be atomic and hopefully thread-safe */
 #ifdef HAVE_STRERROR_R
+#ifdef HAVE_POSIX_STRERROR_R
     strerror_r(err, buf, max); 
     /* this may set errno to ERANGE if insufficient storage was supplied via
        strerrbuf and buflen to contain the generated message string, or EINVAL
        if the value of errnum is not a valid error number.*/
+#else
+    /* HAVE_GLIBC_STRERROR_R */
+    char buffer[256];
+    char *msg = strerror_r(err, buffer, sizeof(buffer));
+    strncpy(buf, msg, max);
+#endif
 #else
     strncpy(buf, strerror(err), max);
 #endif
