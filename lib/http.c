@@ -626,6 +626,7 @@ CURLcode Curl_http(struct connectdata *conn)
   char *ppath = conn->ppath; /* three previous function arguments */
   char *host = conn->name;
   const char *te = ""; /* tranfer-encoding */
+  char *ptr;
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -737,7 +738,30 @@ CURLcode Curl_http(struct connectdata *conn)
      }
   }
 
-  if(!checkheaders(data, "Host:")) {
+  ptr = checkheaders(data, "Host:");
+  if(ptr) {
+    /* If we have a given custom Host: header, we extract the host name
+       in order to possibly use it for cookie reasons later on. */
+    char *start = ptr+strlen("Host:");
+    char *ptr;
+    while(*start && isspace((int)*start ))
+      start++;
+    ptr = start; /* start host-scanning here */
+
+    /* scan through the string to find the end */
+    while(*ptr && !isspace((int)*ptr))
+      ptr++;
+    
+    if(ptr != start) {
+      int len=ptr-start;
+      conn->allocptr.cookiehost = malloc(len+1);
+      if(!conn->allocptr.cookiehost)
+        return CURLE_OUT_OF_MEMORY;
+      memcpy(conn->allocptr.cookiehost, start, len);
+      conn->allocptr.cookiehost[len]=0;
+    }
+  }    
+  else {
     /* if ptr_host is already set, it is almost OK since we only re-use
        connections to the very same host and port, but when we use a HTTP
        proxy we have a persistant connect and yet we must change the Host:
