@@ -886,7 +886,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     break;
   case CURLOPT_ENCODING:
     /*
-     * String to use at the value of Accept-Encoding header. 08/28/02 jhrg
+     * String to use at the value of Accept-Encoding header.
      *
      * If the encoding is set to "" we use an Accept-Encoding header that
      * encompasses all the encodings we support.
