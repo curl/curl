@@ -95,6 +95,7 @@ char *Curl_if2ip(char *interface, char *buf, int buf_size)
     strcpy(req.ifr_name, interface);
     req.ifr_addr.sa_family = AF_INET;
     if (SYS_ERROR == ioctl(dummy, SIOCGIFADDR, &req, sizeof(req))) {
+      sclose(dummy);
       return NULL;
     }
     else {
@@ -109,7 +110,7 @@ char *Curl_if2ip(char *interface, char *buf, int buf_size)
       ip[buf_size - 1] = 0;
 #endif
     }
-    close(dummy);
+    sclose(dummy);
   }
   return ip;
 }
