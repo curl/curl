@@ -62,7 +62,7 @@ rpm:
 pkgadd:
 	umask 022 ; \
 	make install DESTDIR=`/bin/pwd`/packages/Solaris/root ; \
-	cat LEGAL MITX.txt MPL-1.1.txt > $(srcdir)/packages/Solaris/copyright ; \
+	cat COPYING > $(srcdir)/packages/Solaris/copyright ; \
 	cd $(srcdir)/packages/Solaris && $(MAKE) package
 
 #
