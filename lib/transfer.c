@@ -589,7 +589,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           }
           else if(data->cookies &&
                   strnequal("Set-Cookie:", k->p, 11)) {
-            Curl_cookie_add(data->cookies, TRUE, k->p+12, conn->name);
+            Curl_cookie_add(data->cookies, TRUE, k->p+11, conn->name);
           }
           else if(strnequal("Last-Modified:", k->p,
                             strlen("Last-Modified:")) &&
