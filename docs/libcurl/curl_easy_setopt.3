@@ -1,7 +1,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "13 Sep 2003" "libcurl 7.10.8" "libcurl Manual"
+.TH curl_easy_setopt 3 "16 Oct 2003" "libcurl 7.10.8" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -131,23 +131,6 @@ function actually get called.
 .B CURLOPT_PROGRESSDATA
 Pass a pointer that will be untouched by libcurl and passed as the first
 argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
-.TP
-.B CURLOPT_PASSWDFUNCTION
-Pass a pointer to a \fIcurl_passwd_callback\fP function that will be called
-instead of the internal one if libcurl requests a password. The function must
-match this prototype: \fBint getpass(void *client, char *prompt, char* buffer,
-int buflen );\fP.  If set to NULL, it sets back the function to the internal
-default one. If the function returns a non-zero value, it will abort the
-operation and an error (CURLE_BAD_PASSWORD_ENTERED) will be returned.
-\fIclient\fP is a generic pointer, see \fICURLOPT_PASSWDDATA\fP.  \fIprompt\fP
-is a zero-terminated string that is text that prefixes the input request.
-\fIbuffer\fP is a pointer to data where the entered password should be stored
-and \fIbuflen\fP is the maximum number of bytes that may be written in the
-buffer.
-.TP
-.B CURLOPT_PASSWDDATA
-Pass a void * to whatever data you want. The passed pointer will be the first
-argument sent to the specifed \fICURLOPT_PASSWDFUNCTION\fP function.
 .TP
 .B CURLOPT_HEADERFUNCTION
 Function pointer that should match the following prototype: \fIsize_t
