@@ -523,8 +523,8 @@ static char *file2string(FILE *file)
   char buffer[256];
   char *ptr;
   char *string=NULL;
-  int len=0;
-  int stringlen;
+  size_t len=0;
+  size_t stringlen;
 
   if(file) {
     while(fgets(buffer, sizeof(buffer), file)) {
@@ -1046,8 +1046,8 @@ static void checkpasswd(const char *kind, /* for what purpose */
     /* no password present, prompt for one */
     char passwd[256]="";
     char prompt[256];
-    int passwdlen;
-    int userlen = strlen(*userpwd);
+    size_t passwdlen;
+    size_t userlen = strlen(*userpwd);
     char *passptr;
 
     /* build a nice-looking prompt */
@@ -1206,7 +1206,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
      (('-' == flag[0]) && ('-' == flag[1]))) {
     /* this should be a long name */
     char *word=('-' == flag[0])?flag+2:flag;
-    int fnam=strlen(word);
+    size_t fnam=strlen(word);
     int numhits=0;
     for(j=0; j< sizeof(aliases)/sizeof(aliases[0]); j++) {
       if(curl_strnequal(aliases[j].lname, word, fnam)) {
@@ -1240,7 +1240,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     /* we can loop here if we have multiple single-letters */
 
     if(!longopt)
-      letter = parse?*parse:'\0';
+      letter = parse?(char)*parse:'\0';
     else {
       letter = parse[0];
       subletter = parse[1];
