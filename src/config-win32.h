@@ -2,6 +2,9 @@
 /* Define if you have the stricmp function.  */
 #define HAVE_STRICMP 1
 
+/* Define to 1 if you want the built-in manual */
+#define USE_MANUAL 1
+
 /* Define cpu-machine-OS */
 #define OS "i386-pc-win32"
 

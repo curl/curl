@@ -11,6 +11,9 @@
 /* Define cpu-machine-OS */
 #define OS "ARM-RISC OS"
 
+/* Define to 1 if you want the built-in manual */
+#define USE_MANUAL 1
+
 /* Define if you have the gethostbyaddr_r() function with 5 arguments */
 #undef HAVE_GETHOSTBYADDR_R_5
 

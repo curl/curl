@@ -2,6 +2,9 @@
 /* Define cpu-machine-OS */
 #define OS "ALPHA-COMPAQ-VMS"
 
+/* Define to 1 if you want the built-in manual */
+#define USE_MANUAL 1
+
 /* Define if you have the <unistd.h> header file.  */
 #define HAVE_UNISTD_H 1
 

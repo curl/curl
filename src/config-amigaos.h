@@ -2,6 +2,9 @@
 #ifndef CURL_CONFIG_AMIGAOS_H
 #define CURL_CONFIG_AMIGAOS_H
 
+/* Define to 1 if you want the built-in manual */
+#define USE_MANUAL 1
+
 #define OS "AmigaOS"
 
 #define HAVE_UNISTD_H		1

@@ -1,5 +1,8 @@
 /* lib/config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to 1 if you want the built-in manual */
+#define USE_MANUAL 1
+
 /* to disable DICT */
 #undef CURL_DISABLE_DICT
 
