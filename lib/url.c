@@ -1360,9 +1360,10 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->allocptr.host);
   Curl_safefree(conn->allocptr.cookiehost);
   Curl_safefree(conn->proxyhost);
-#ifdef USE_ARES
+#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
   /* possible left-overs from the async name resolve */
   Curl_safefree(conn->async.hostname);
+  Curl_safefree(conn->async.os_specific);
 #endif
   
   Curl_free_ssl_config(&conn->ssl_config);
@@ -3238,7 +3239,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
    then a successful name resolve has been received */
 CURLcode Curl_async_resolved(struct connectdata *conn)
 {
-#ifdef USE_ARES
+#if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
   CURLcode code = SetupConnection(conn, conn->async.dns);
 
   if(code)
