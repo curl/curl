@@ -2409,7 +2409,8 @@ operate(struct Configurable *config, int argc, char *argv[])
       
       res = curl_easy_perform(curl);
         
-      if(progressbar.calls) {
+      if((config->progressmode == CURL_PROGRESS_BAR) &&
+         progressbar.calls) {
         /* if the custom progress bar has been displayed, we output a
            newline here */
         fputs("\n", progressbar.out);
