@@ -735,6 +735,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               conn->bits.close = FALSE; /* don't close when done */
               infof(data, "HTTP/1.0 proxy connection set to keep alive!\n");
             }
+            else if((k->httpversion == 11) &&
+                    conn->bits.httpproxy &&
+                    Curl_compareheader(k->p,
+                                       "Proxy-Connection:", "close")) {
+              /*
+               * We get a HTTP/1.1 response from a proxy and it says it'll
+               * close down after this transfer.
+               */
+              conn->bits.close = TRUE; /* close when done */
+              infof(data, "HTTP/1.1 proxy connection set close!\n");
+            }
             else if((k->httpversion == 10) &&
                     Curl_compareheader(k->p, "Connection:", "keep-alive")) {
               /*
