@@ -107,8 +107,11 @@ while test $# -gt 0; do
 	;;
 
     --cflags)
-       	#echo -I@includedir@
-        echo ""
+       	if test "X@includedir@" = "X/usr/include"; then
+          echo ""
+        else
+          echo "-I@includedir@"
+        fi
        	;;
 
     --libs)
