@@ -2782,10 +2782,10 @@ operate(struct Configurable *config, int argc, char *argv[])
   int res = 0;
   int i;
   int up; /* upload file counter within a single upload glob */
-  int retry_sleep_default = config->retry_delay?
+  long retry_sleep_default = config->retry_delay?
     config->retry_delay*1000:RETRY_SLEEP_DEFAULT; /* ms */
-  int retry_numretries;
-  int retry_sleep = retry_sleep_default;
+  long retry_numretries;
+  long retry_sleep = retry_sleep_default;
   long response;
 
   char *env;
@@ -3554,8 +3554,8 @@ operate(struct Configurable *config, int argc, char *argv[])
                                         "FTP error"
                 };
                 fprintf(stderr, "Transient problem: %s\n"
-                        "Will retry in %d seconds. "
-                        "%d retries left.\n",
+                        "Will retry in %ld seconds. "
+                        "%ld retries left.\n",
                         m[retry],
                         retry_sleep/1000,
                         retry_numretries);
