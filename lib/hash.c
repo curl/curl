@@ -64,8 +64,9 @@ _hash_element_dtor (void *user, void *element)
   free(e);
 }
 
-void 
-Curl_hash_init (curl_hash *h, int slots, curl_hash_dtor dtor)
+/* return 1 on error, 0 is fine */
+int
+Curl_hash_init(curl_hash *h, int slots, curl_hash_dtor dtor)
 {
   int i;
 
@@ -74,21 +75,35 @@ Curl_hash_init (curl_hash *h, int slots, curl_hash_dtor dtor)
   h->slots = slots;  
 
   h->table = (curl_llist **) malloc(slots * sizeof(curl_llist *));
-  for (i = 0; i < slots; ++i) {
-    h->table[i] = Curl_llist_alloc((curl_llist_dtor) _hash_element_dtor);
+  if(h->table) {
+    for (i = 0; i < slots; ++i) {
+      h->table[i] = Curl_llist_alloc((curl_llist_dtor) _hash_element_dtor);
+      if(!h->table[i]) {
+        while(i--)
+          Curl_llist_destroy(h->table[i], NULL);
+        free(h->table);
+        return 1; /* failure */
+      }
+    }
+    return 0; /* fine */
   }
+  else
+    return 1; /* failure */
 }
 
 curl_hash *
-Curl_hash_alloc (int slots, curl_hash_dtor dtor)
+Curl_hash_alloc(int slots, curl_hash_dtor dtor)
 {
   curl_hash *h;
 
   h = (curl_hash *) malloc(sizeof(curl_hash));
-  if (NULL == h)
-    return NULL;
-
-  Curl_hash_init(h, slots, dtor);
+  if (h) {
+    if(Curl_hash_init(h, slots, dtor)) {
+      /* failure */
+      free(h);
+      h = NULL;
+    }
+  }
 
   return h;
 }
