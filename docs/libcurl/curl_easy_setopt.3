@@ -343,35 +343,35 @@ round-trip. Set the actual name and password with the \fICURLOPT_USERPWD\fP
 option. (Added in 7.10.6)
 .RS
 .TP 5
-.B CURLHTTP_BASIC
+.B CURLAUTH_BASIC
 HTTP Basic authentication. This is the default choice, and the only method
 that is in wide-spread use and supported virtually everywhere. This is sending
 the user name and password over the network in plain text, easily captured by
 others.
 .TP
-.B CURLHTTP_DIGEST
+.B CURLAUTH_DIGEST
 HTTP Digest authentication.  Digest authentication is defined in RFC2617 and
 is a more secure way to do authentication over public networks than the
 regular old-fashioned Basic method.
 .TP
-.B CURLHTTP_GSSNEGOTIATE
+.B CURLAUTH_GSSNEGOTIATE
 HTTP GSS-Negotiate authentication. The GSS-Negotiate method was designed by
 Microsoft and is used in their web aplications. It is primarily meant as a
 support for Kerberos5 authentication but may be also used along with another
 authentication methods. For more information see IETF draft
 draft-brezak-spnego-http-04.txt.
 .TP
-.B CURLHTTP_NTLM
+.B CURLAUTH_NTLM
 HTTP NTLM authentication. A proprietary protocol invented and used by
 Microsoft. It uses a challenge-response and hash concept similar to Digest to
 prevent the password from being evesdropped.
 .TP
-.B CURLHTTP_ANY
+.B CURLAUTH_ANY
 This is a convenience macro that sets all bits and thus makes libcurl pick any
 it finds suitable. libcurl will automaticly select the one it finds most
 secure.
 .TP
-.B CURLHTTP_ANYSAFE
+.B CURLAUTH_ANYSAFE
 This is a convenience macro that sets all bits except Basic and thus makes
 libcurl pick any it finds suitable. libcurl will automaticly select the one it
 finds most secure.
