@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (20 July)
+- David Gardner pointed out in bug report 770755 that using the FTP command
+  CWD with a blank argument is a bad idea and I made libcurl skip empty path
+  segments starting now.
+
 Daniel (18 July)
 - Cris pointed out that my fix on July 16th didn't work fully. His pointing
   out this (and his patch) also made me realize that we have a very similar
