@@ -7,6 +7,12 @@
                                History of Changes
 
 
+Daniel (21 February 2002)
+- Kevin Roth and Andrés García both found out that lib/config.h.in was missing
+  in the pre-release archive and thus the configure script failed.
+
+Version 7.9.5-pre2
+
 Daniel (20 February 2002)
 - Andrés García provided a solution to bug report #515228. the total time
   counter was not set correctly when -I was used during some conditions (all
