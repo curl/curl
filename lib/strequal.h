@@ -22,10 +22,14 @@
  *
  * $Id$
  *****************************************************************************/
-int Curl_strequal(const char *first, const char *second);
-int Curl_strnequal(const char *first, const char *second, size_t max);
 
-#define strequal(a,b) Curl_strequal(a,b)
-#define strnequal(a,b,c) Curl_strnequal(a,b,c)
+/*
+ * These two actually are public functions.
+ */
+int curl_strequal(const char *first, const char *second);
+int curl_strnequal(const char *first, const char *second, size_t max);
+
+#define strequal(a,b) curl_strequal(a,b)
+#define strnequal(a,b,c) curl_strnequal(a,b,c)
 
 #endif
