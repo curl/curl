@@ -7,6 +7,7 @@ Curl and libcurl 7.11.1. A bugfix release.
 
 This release includes the following changes:
 
+ o when doing FTP, curl now sends QUIT before disconnecting
  o name resolves can now timeout on windows too
  o $HOME is now recognized better when looking for .netrc files
  o now re-uses the ares handle when re-using curl handles
@@ -21,6 +22,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o share interface usage without (un)lock functions segfaulted
  o --limit-rate no longer cripples the --speed-limit feature
  o fixed verbose output problem with ipv6-enabled re-used connections
  o fixed the socks5 code to check version in the socks response properly
@@ -50,6 +52,9 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
+ o Many platforms are being used to autobuild and autotest curl on a daily
+   basis. Please join in and test curl on your systems:
+   http://curl.haxx.se/auto/
  o the curl mailing lists moved, (re-)subscribe to the new ones from here:
    http://curl.haxx.se/mail/
  o c-ares 1.0.0 was relased: http://daniel.haxx.se/projects/c-ares/
@@ -66,6 +71,6 @@ advice from friends like these:
  Ken Hirsch, Stadler Stephan, Domenico Andreoli, Patrick Smith, Tor Arntsen,
  Andrés García, Tim Baker, Len Krause, Gilad, Ken Rastatter, P R Schaffner,
  Greg Hewgill, Ben Greear, Jeff Lawson, Grigory Entin, Doug Porter, David
- Byron
+ Byron, Andy Serpa, Joe Halpin
 
         Thanks! (and sorry if I forgot to mention someone)

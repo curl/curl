@@ -8,6 +8,25 @@
 
 
 
+Daniel (27 February 2004)
+- Joe Halpin made the FTP code send QUIT on the control connection before
+  disconnecting the TCP connection. This is waht good-behaving ftp clients
+  should do.
+
+Daniel (26 February 2004)
+- David Byron updated several files to make curl build fine on MSVC 6. He
+  also added the 'buildconf.bat' that works like the 'buildconf + configure'
+  combo does on unixes.
+
+- Gisle Vanem made the memdebug stuff support calloc() as well.
+
+- Tor Arntsen pointed out that testcurl.sh needed to remove the generated
+  files in order to have them re-generated in each build.
+
+- Andy Serpa found out that the share interface did not enjoy life when not
+  having the lock and unlock callbacks set, even though documented to be
+  OK. It still is OK, and now the code won't segfault anymore!
+
 Daniel (25 February 2004)
 - Based on a patch by Greg Hewgill I modified how long long is used in the
   mprintf code, as we can use a 64bit type with MSVC that is a long long
