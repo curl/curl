@@ -23,11 +23,12 @@ This is not the real page either!
 # This is supposed to be returned when the server gets the second
 # Authorization: NTLM line passed-in from the client
 <data1002>
-HTTP/1.1 200 Things are fine in server land
+HTTP/1.1 401 You give me wrong password
 Server: Microsoft-IIS/5.0
+WWW-Authenticate: NTLM
 Content-Type: text/html; charset=iso-8859-1
 
-Finally, this is the real page!
+Wrong password dude. Get it fixed and return.
 </data1002>
 
 <datacheck>
@@ -41,11 +42,12 @@ Server: Microsoft-IIS/5.0
 Content-Type: text/html; charset=iso-8859-1
 WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 
-HTTP/1.1 200 Things are fine in server land
+HTTP/1.1 401 You give me wrong password
 Server: Microsoft-IIS/5.0
+WWW-Authenticate: NTLM
 Content-Type: text/html; charset=iso-8859-1
 
-Finally, this is the real page!
+Wrong password dude. Get it fixed and return.
 </datacheck>
 
 </reply>
@@ -60,10 +62,10 @@ SSL
 http
 </server>
  <name>
-HTTP with NTLM authorization
+HTTP with NTLM authorization and wrong password
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/67 -u testuser:testpass --ntlm
+http://%HOSTIP:%HOSTPORT/68 -u testuser:testpass --ntlm
 </command>
 </test>
 
@@ -73,20 +75,20 @@ http://%HOSTIP:%HOSTPORT/67 -u testuser:testpass --ntlm
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /67 HTTP/1.1
+GET /68 HTTP/1.1
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
 
-GET /67 HTTP/1.1
+GET /68 HTTP/1.1
 Authorization: NTLM TlRMTVNTUAABAAAAA7IAAAQABAAkAAAABAAEACAAAABIQVhYQ1VSTA==
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
 
-GET /67 HTTP/1.1
+GET /68 HTTP/1.1
 Authorization: NTLM TlRMTVNTUAADAAAAGAAYAGAAAAAYABgAeAAAAAgACABAAAAAEAAQAEgAAAAIAAgAWAAAAAAAAACQAAAAAYIAAEMAVQBSAEwAdABlAHMAdAB1AHMAZQByAEgAQQBYAFgAWmRDApEJkUyGOPS3DjvASModEeW/N/FBqYVyF4y6/y/7F6qmEQ7lXjXFF3tH1145
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
