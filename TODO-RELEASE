@@ -1,6 +1,16 @@
 Issues not sorted in any particular order.
 
-To get fixed in 7.12.2 (planned release: December 2004)
+To get fixed in 7.12.2 (planned release: mid October 2004)
 ======================
+
+40 - Larry Campbell's curl_easy_getinfo patch
+
+41 - Fedor Karpelevitch's formpost path basename patch
+
+42 - Bertrand Demiddelaer's CURLOPT_VERBOSE may read free()ed data patch
+
+43 - Gisle Vanem's IDN strerror patch
+
+44 - Alan Pinstein's SIGPIPE when uploading with CURLOPT_READDATA problem
 
  Bugfixes reported until late November
