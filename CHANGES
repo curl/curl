@@ -6,9 +6,41 @@
 
                                   Changelog
 
+Daniel (30 Apr)
+- David Balazic made curl more RFC1738-compliant for FTP URLs, by fixing so
+  that libcurl now uses one CWD command for each path part. A bunch of test
+  cases were fixed to work accordingly.
+
+- Cookie fixes:
+
+  A. Save domains in jars like Mozilla does. It means all domains set in
+     Set-Cookie: headers are dot-prefixed.
+  B. Save and use the 'tailmatch' field in the Mozilla/Netscape cookie jars
+     (the second column).
+  C. Reject cookies using illegal domains in the Set-Cookie: line. Concerns
+     both domains with too few dots or domains that are outside the currently
+     operating server host's domain.
+  D. Set the path part by default to the one used in the request, if none was
+     set in the Set-Cookie line.
+
+  To make item C really good, I also made libcurl notice custom Host: headers
+  and extract the host name set in there and use that as the host name for the
+  site we're getting the cookies from. This allows user to specify a site's
+  IP-address, but still be able to receive its cookies properly if you provide
+  a valid Host: name for the site.
+
+Daniel (29 Apr)
+- Peter Kovacs provided a patch that makes the CURLINFO_CONNECT_TIME work fine
+  when using the multi interface (too).
+
+Daniel (23 Apr)
+- Upgraded to libtool 1.5.
+
 Daniel (22 Apr)
 - Peter Sylvester pointed out that curl_easy_setopt() will always (wrongly)
   return CURLE_OK no matter what happens.
+
+- Dan Fandrich fixed some gzip decompression bugs and flaws.
 
 Daniel (16 Apr)
 - Fixed minor typo in man page, reported in the Debian bug tracker.
