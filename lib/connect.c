@@ -308,8 +308,9 @@ static CURLcode bindlocal(struct connectdata *conn,
 
   return CURLE_HTTP_PORT_FAILED;
 }
-#endif /* end of ipv4-specific section */
+#else /* end of ipv4-specific section */
 
+/* we only use socketerror() on IPv6-enabled machines */
 static
 int socketerror(int sockfd)
 {
@@ -322,6 +323,7 @@ int socketerror(int sockfd)
   
   return err;
 }
+#endif
 
 /*
  * TCP connect to the given host with timeout, proxy or remote doesn't matter.
@@ -331,9 +333,9 @@ int socketerror(int sockfd)
 
 CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                           Curl_addrinfo *remotehost, /* use one in here */
-                          int port,              /* connect to this */
-                          int *socket,           /* the connected socket */
-                          Curl_ipconnect **addr) /* the one we used */
+                          int port,                  /* connect to this */
+                          int *sockconn,             /* the connected socket */
+                          Curl_ipconnect **addr)     /* the one we used */
 {
   struct SessionHandle *data = conn->data;
   int rc;
@@ -531,7 +533,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   if(-1 == rc) {
     /* no good connect was made */
     sclose(sockfd);
-    *socket = -1;
+    *sockconn = -1;
     return CURLE_COULDNT_CONNECT;
   }
   
@@ -544,8 +546,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 #endif
 
   /* allow NULL-pointers to get passed in */
-  if(socket)
-    *socket = sockfd;    /* the socket descriptor we've connected */
+  if(sockconn)
+    *sockconn = sockfd;    /* the socket descriptor we've connected */
 
   return CURLE_OK;
 }
