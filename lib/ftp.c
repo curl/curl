@@ -860,7 +860,8 @@ CURLcode _ftp(struct connectdata *conn)
          * previous lookup.
          */
         he = conn->hp;
-        connectport = data->port; /* we connect to the proxy's port */
+        connectport =
+          (unsigned short)data->port; /* we connect to the proxy's port */
       }
       else {
         /* normal, direct, ftp connection */
