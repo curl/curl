@@ -72,6 +72,7 @@ FAQ
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows!
   5.8 libcurl.so.3: open failed: No such file or directory
+  5.9 How does libcurl resolve host names?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -795,6 +796,26 @@ FAQ
 
   'man ld.so' and 'man ld' will tell you more details
 
+  5.9 How does libcurl resolve host names?
+
+  libcurl includes a number of different name resolve functions:
+
+  - The non-ipv6 resolver that can use one out of four host name resolve calls
+    (depending on what your system supports):
+
+    A - gethostbyname()
+    B - gethostbyname_r() with 3 arguments
+    C - gethostbyname_r() with 5 arguments
+    D - gethostbyname_r() with 6 arguments
+
+  - The ipv6-resolver that uses getaddrinfo()
+
+  - The c-ares based name resolver that uses the c-ares library for resolves.
+
+  - The Windows threaded resolver. It use:
+
+    A - gethostbyname() on plain ipv4 windows hosts
+    B - getaddrinfo() on ipv6-enabled windows hosts
 
 6. License Issues
 
