@@ -6,6 +6,24 @@
 
                                History of Changes
 
+Daniel (20 December 2001)
+- Björn Stenberg caught an unpleasent (but hard-to-find) bug that could cause
+  libcurl to hang on transfers over proxy, when the proxy was specified with
+  an environment variable!
+
+- Added code to make ftp operations treat the NO_BODY and HEADERS options
+  better:
+
+   NO_BODY set TRUE and HEADERS set TRUE:
+    Return a set of headers with file info
+
+   NO_BODY set FALSE
+    Transfer data as usual, HEADERS is ignored
+
+   NO_BODY set TRUE and HEADERS set FALSE
+    Don't transfer any data, don't return any headers. Just perform the set
+    of FTP commands.
+
 Daniel (17 December 2001)
 - Götz Babin-Ebell dove into the dark dungeons of the OpenSSL ENGINE stuff and
   made libcurl support it! This allows libcurl to do SSL connections with the
