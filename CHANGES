@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Gisle (6 October 2004)
+- For USE_LIBIDN builds: Added Top-Level-Domain (TLD) check of host-name
+  used in fix_hostname(). Checks if characters in 'host->name' (indirectly
+  via 'ace_hostname') are legal according to the TLD tables in libidn.
+
 Daniel (6 October 2004)
 - Chih-Chung Chang reported that if you use CURLOPT_RESUME_FROM and enabled
   CURLOPT_FOLLOWLOCATION, libcurl reported error if a redirect happened even
@@ -310,7 +315,7 @@ Daniel (1 July 2004)
 - When using curl --trace or --trace-ascii, no trace messages that were sent
   by curl_easy_cleanup() were included in the trace file. This made the
   message "Closing connection #0" never appear in trace dumps.
-  
+
 Daniel (30 June 2004)
 - Niels van Tongeren found that setting CURLOPT_NOBODY to TRUE doesn't disable
   a previously set POST request, making a very odd request get sent (unless
@@ -327,7 +332,7 @@ Daniel (29 June 2004)
 - Fixed code to allow connects done using the multi interface to attempt the
   next IP when connecting to a host that resolves to multiple IPs and a
   connect attempt fails.
-  
+
 Daniel (27 June 2004)
 - Based on Rob Stanzel's bug report #979480, I wrote a configure check that
   checks if poll() can be used to wait on NULL as otherwise select() should be
@@ -400,7 +405,7 @@ Daniel (21 June 2004)
   Test case 513 was added to verify that it works. I had to improve the test
   HTTP server too to dump the request to a file even when the client
   disconnects prematurely.
-  
+
 Daniel (19 June 2004)
 - Luca Alteas provided a test case with a failing curl operation: when we POST
   to a site with --digest (or similar) set, and the server responded with a 302
@@ -485,7 +490,7 @@ Daniel (3 June 2004)
 - Chris Gaukroger pointed out that 'make test' attempts to run the tests even
   if curl is built cross-compiled. I've now made it output a short message
   instead, saying it isn't possible to do.
-  
+
 - Alexander Krasnostavsky brought FTP 3rd party transfer support to libcurl.
   You can now use libcurl to transfer files between two remote hosts using
   FTP. There are a bunch of new options to control this with:
@@ -560,7 +565,7 @@ Daniel (20 May 2004)
   wrong. The same was true for the download speed. Fixed now.
 
 Daniel (19 May 2004)
-- David Byron added test case 170 - this used to crash the previous version of 
+- David Byron added test case 170 - this used to crash the previous version of
   curl.
 
 Daniel (17 May 2004)
