@@ -20,6 +20,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o HTTP Digest fix for properties without quotes in the header
  o a bad Host: header case on re-used connections over proxy was fixed
  o a duplicate Host: header case on re-used connections was fixed
  o curl -o name#[num] now works when no globbing for [num] exists
@@ -67,6 +68,6 @@ advice from friends like these:
  Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam,
  Luca Alteas, Jean-Louis Lemaire, David Byron, David Cohen, Rob Stanzel,
  Niels van Tongeren, Andrés García, Toby Peterson, Casey O'Donnell, Brian
- Akins, Bertrand Demiddelaer
+ Akins, Bertrand Demiddelaer, Joel Chen
 
         Thanks! (and sorry if I forgot to mention someone)

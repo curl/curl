@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel (31 July 2004)
+- Joel Chen reported that the digest code assumed quotes around the contents a
+  bit too much.
 
 Daniel (28 July 2004)
 - Bertrand Demiddelaer fixed the host name to get setup properly even when a
