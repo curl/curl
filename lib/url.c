@@ -1312,7 +1312,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   if (data->device && (strlen(data->device)<255)) {
     struct sockaddr_in sa;
     struct hostent *h=NULL;
-    char *hostdataptr;
+    char *hostdataptr=NULL;
     size_t size;
     char myhost[256] = "";
     unsigned long in;
@@ -1425,7 +1425,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       return CURLE_HTTP_PORT_FAILED;
     }
 
-    free(hostdataptr); /* allocated by GetHost() */
+    if(hostdataptr)
+      free(hostdataptr); /* allocated by GetHost() */
 
   } /* end of device selection support */
 #endif  /* end of HAVE_INET_NTOA */
