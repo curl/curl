@@ -295,6 +295,22 @@ cannot be guaranteed to actually get the given size. (Added in 7.10)
 .IP CURLOPT_PORT
 Pass a long specifying what remote port number to connect to, instead of the
 one specified in the URL or the default port for the used protocol.
+.IP CURLOPT_TCP_NODELAY
+Pass a long specifying whether the TCP_NODELAY option should be set or
+cleared (1 = set, 0 = clear). The option is cleared by default. This
+will have no effect after the connection has been established.
+
+Setting this option will disable TCP's Nagle algorithm. The purpose of
+this algorithm is to try to minimize the number of small packets on
+the network (where "small packets" means TCP segments less than the
+Maximum Segment Size (MSS) for the network).
+
+Maximizing the amount of data sent per TCP segment is good because it
+amortizes the overhead of the send. However, in some cases (most
+notably telnet or rlogin) small segments may need to be sent
+without delay. This is less efficient than sending larger amounts of
+data at a time, and can contribute to congestion on the network if
+overdone. 
 .SH NAMES and PASSWORDS OPTIONS (Authentication)
 .IP CURLOPT_NETRC
 This parameter controls the preference of libcurl between using user names and

@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "5 Mar 2004" "Curl 7.11.1" "Curl Manual"
+.TH curl 1 "25 Mar 2004" "Curl 7.11.2" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -707,6 +707,11 @@ is a plain '-', it is instead written to stdout. This option has no point when
 you're using a shell with decent redirecting capabilities.
 
 If this option is used several times, the last one will be used.
+.IP "--tcp-nodelay"
+Turn on the TCP_NODELAY option. See the \fIcurl_easy_setopt(3)\fP man page for
+details about this option. (Added in 7.11.2)
+
+If this option is used several times, each occurance toggles this on/off.
 .IP "-t/--telnet-option <OPT=val>"
 Pass options to the telnet protocol. Supported options are:
 

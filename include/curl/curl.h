@@ -762,6 +762,9 @@ typedef enum {
   /* The _LARGE version of the standard POSTFIELDSIZE option */
   CINIT(POSTFIELDSIZE_LARGE, OFF_T, 120),
 
+  /* Enable/disable the TCP Nagle algorithm */
+  CINIT(TCP_NODELAY, LONG, 121),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

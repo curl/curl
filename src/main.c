@@ -294,6 +294,7 @@ static void help(void)
     "    --disable-epsv  Prevent curl from using EPSV (F)",
     " -D/--dump-header <file> Write the headers to this file",
     "    --egd-file <file> EGD socket path for random data (SSL)",
+    "    --tcp-nodelay   Set the TCP_NODELAY option",
 #ifdef USE_ENVIRONMENT
     "    --environment   Write result codes to environment variables (RISC OS)",
 #endif
@@ -506,6 +507,8 @@ struct Configurable {
   bool ftp_ssl;
 
   char *socks5proxy;
+
+  bool tcp_nodelay;
 };
 
 /* global variable to hold info about libcurl */
@@ -1140,6 +1143,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$a", "ftp-ssl",    FALSE},
     {"$b", "ftp-pasv",   FALSE},
     {"$c", "socks5",     TRUE},
+    {"$d", "tcp-nodelay",FALSE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1463,6 +1467,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'c': /* --socks specifies a socks5 proxy to use */
         GetStr(&config->socks5proxy, nextarg);
         break;
+      case 'd': /* --tcp-nodelay option */
+	config->tcp_nodelay ^= TRUE;
+	break;
       }
       break;
     case '#': /* added 19990617 larsa */
@@ -3111,6 +3118,9 @@ operate(struct Configurable *config, int argc, char *argv[])
           setmode( fileno(stdout), O_BINARY );
         }
 #endif
+
+	if(1 == config->tcp_nodelay)
+	  curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 1);
 
         curl_easy_setopt(curl, CURLOPT_SSLENGINE, config->engine);
         curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1);

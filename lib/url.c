@@ -1303,6 +1303,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.max_filesize = va_arg(param, curl_off_t);
     break;
 
+  case CURLOPT_TCP_NODELAY:
+    /*
+     * Enable or disable TCP_NODELAY, which will disable/enable the Nagle
+     * algorithm
+     */
+    data->tcp_nodelay = va_arg(param, long);
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_FAILED_INIT; /* correct this */

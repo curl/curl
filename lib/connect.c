@@ -31,6 +31,7 @@
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#include <netinet/tcp.h> /* for TCP_NODELAY */
 #endif
 #include <sys/ioctl.h>
 #ifdef HAVE_UNISTD_H
@@ -476,6 +477,23 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   return CURLE_OK;
 }
 
+static void Curl_setNoDelay(struct connectdata *conn,
+                            curl_socket_t sockfd,
+                            int ip)
+{
+#ifdef TCP_NODELAY
+  struct SessionHandle *data= conn->data;
+  socklen_t onoff = (socklen_t) data->tcp_nodelay;
+  infof(data,"Setting TCP_NODELAY for IPv%d\n", ip);
+  if(setsockopt(sockfd, IPPROTO_TCP, TCP_NODELAY, &onoff, sizeof(onoff)) < 0)
+    infof(data, "Could not set TCP_NODELAY: %s\n",
+          Curl_strerror(conn, Curl_ourerrno()));
+#else
+  (void)conn;
+  (void)sockfd;
+  (void)ip;
+#endif
+}
 
 /*
  * TCP connect to the given host with timeout, proxy or remote doesn't matter.
@@ -554,6 +572,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
     if (sockfd == CURL_SOCKET_BAD)
       continue;
+
+    else if(data->tcp_nodelay)
+      Curl_setNoDelay(conn, sockfd, 6);
 #else
   /*
    * Connecting with old style IPv4-only support
@@ -572,6 +593,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       failf(data, "couldn't create socket");
       return CURLE_COULDNT_CONNECT; /* big time error */
     }
+
+    else if(data->tcp_nodelay)
+      Curl_setNoDelay(conn, sockfd, 4);
 
     /* nasty address work before connect can be made */
     memset((char *) &serv_addr, '\0', sizeof(serv_addr));

@@ -908,6 +908,9 @@ struct SessionHandle {
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE*  engine;
 #endif /* USE_SSLEAY */
+
+  /* This tells CreateConnection() whether to enable TCP_NODELAY or not */
+  int tcp_nodelay;
 };
 
 #define LIBCURL_NAME "libcurl"
