@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH libcurl 5 "19 March 2001" "libcurl 7.8.1" "libcurl overview"
+.TH libcurl 5 "19 March 2002" "libcurl 7.8.1" "libcurl overview"
 .SH NAME
 libcurl \- client-side URL transfers
 .SH DESCRIPTION
@@ -97,13 +97,6 @@ Only use documented functions and functionality!
 libcurl works
 .B exactly
 the same, on any of the platforms it compiles and builds on.
-
-There's only one caution, and that is the win32 platform that may(*) require
-you to init the winsock stuff before you use the libcurl functions. Details on
-this are noted on the curl_easy_init() man page.
-
-(*) = it appears as if users of the cygwin environment get this done
-automatically, also libcurl 7.8.1 and later can handle this for you.
 .SH "THREADS"
 Never ever call curl-functions simultaneously using the same handle from
 several threads. libcurl is thread-safe and can be used in any number of
@@ -126,7 +119,3 @@ held by libcurl will be closed and forgotten.
 
 Note that the options set with curl_easy_setopt() will be used in on every
 repeat curl_easy_perform() call
-.SH "COMPATIBILITY WITH OLDER LIBCURLS"
-Repeated curl_easy_perform() calls on the same handle were not supported in
-pre-7.7 versions, and caused confusion and undefined behaviour.
-
