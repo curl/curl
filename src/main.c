@@ -1464,7 +1464,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     }
     hit = -1;
 
-  } while(!singleopt && *++parse && !*usedarg);
+  } while(!longopt && !singleopt && *++parse && !*usedarg);
 
   return PARAM_OK;
 }
