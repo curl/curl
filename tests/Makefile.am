@@ -6,9 +6,6 @@ SUBDIRS = data server libtest
 
 PERLFLAGS = -I$(srcdir)
 
-all:
-install:
-
 curl:
 	@(cd ..; make)
 
@@ -19,10 +16,6 @@ test: server/sws
 quiet-test: server/sws
 	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -s -a
-
-clean:
-	rm -rf log
-	find . -name "*~" | xargs rm -f
 
 server/sws:
 	cd server; make sws
