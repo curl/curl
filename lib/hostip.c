@@ -565,6 +565,27 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   *entry=NULL;
   return CURLE_COULDNT_RESOLVE_HOST;
 }
+
+CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
+                               fd_set *read_fd_set,
+                               fd_set *write_fd_set,
+                               int *max_fdp)
+{
+  (void)conn;
+  (void)read_fd_set;
+  (void)write_fd_set;
+  (void)max_fdp;
+  return CURLE_OK;
+}
+
+CURLcode Curl_is_resolved(struct connectdata *conn, bool *done)
+{
+  (void)conn;
+  *done = TRUE;
+
+  return CURLE_OK;
+}
+
 #endif
 
 #if defined(ENABLE_IPV6) && !defined(USE_ARES)
@@ -623,6 +644,8 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
   int s, pf = PF_UNSPEC;
   struct SessionHandle *data = conn->data;
 
+  *waitp=0; /* don't wait, we have the response now */
+
   /* see if we have an IPv6 stack */
   s = socket(PF_INET6, SOCK_DGRAM, 0);
   if (s < 0)
@@ -646,7 +669,6 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
     infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);    
     return NULL;
   }
-  *waitp=0; /* don't wait, we have the response now */
 
   return res;
 }
