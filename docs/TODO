@@ -22,8 +22,8 @@ To do in a future release (random order):
 
  * Document the undocumented libcurl functions: the printf clones (like
    curl_msprintf, curl_mfprintf, curl_msnprintf, curl_maprintf and
-   curl_mvfprintf) and the string compare functions (curl_strequal
-   and curl_strnequal).
+   curl_mvfprintf), the string compare functions (curl_strequal
+   and curl_strnequal) and the URL escape/unescape functions.
 
  * Add configure options that disables certain protocols in libcurl to
    decrease footprint.  '--disable-[protocol]' where protocol is http, ftp,
