@@ -122,7 +122,7 @@ CURLM *curl_multi_init(void)
     multi->type = CURL_MULTI_HANDLE;
   }
 
-  multi->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
+  multi->hostcache = Curl_mk_dnscache();
   if(!multi->hostcache) {
     /* failure, free mem and bail out */
     free(multi);

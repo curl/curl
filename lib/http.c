@@ -398,17 +398,14 @@ CURLcode Curl_http_auth(struct connectdata *conn,
         *availp |= CURLAUTH_DIGEST;
         if(data->state.authwant == CURLAUTH_DIGEST) {
           /* Digest authentication is activated */
-          CURLdigest dig = CURLDIGEST_BAD;
-
-          if(data->state.digest.nonce)
-            infof(data, "Authentication problem. Ignoring this.\n");
-          else
-            dig = Curl_input_digest(conn, start);
+          CURLdigest dig = Curl_input_digest(conn, start);
           
           if(CURLDIGEST_FINE == dig)
             /* We act on it. Store our new url, which happens to be
                the same one we already use! */
             conn->newurl = strdup(data->change.url); /* clone string */
+          else
+            infof(data, "Authentication problem. Ignoring this.\n");
         }
         else
           if(data->state.authwant & CURLAUTH_DIGEST) {

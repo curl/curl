@@ -74,8 +74,8 @@ void Curl_scan_cache_used(void *user, void *ptr);
 /* free name info */
 void Curl_freeaddrinfo(Curl_addrinfo *freeaddr);
 
-/* free cached name info */
-void Curl_freednsinfo(void *freethis);
+/* make a new dns cache and return the handle */
+curl_hash *Curl_mk_dnscache(void);
 
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct SessionHandle *data);

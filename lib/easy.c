@@ -271,7 +271,7 @@ CURLcode curl_easy_perform(CURL *curl)
     }
 
     if (!data->hostcache) {
-      data->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
+      data->hostcache = Curl_mk_dnscache();
 
       if(!data->hostcache)
         /* While we possibly could survive and do good without a host cache,

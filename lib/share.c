@@ -73,7 +73,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     {
       case CURL_LOCK_DATA_DNS:
         if (!share->hostcache) {
-          share->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
+          share->hostcache = Curl_mk_dnscache();
         }
         break;
 
