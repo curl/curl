@@ -78,8 +78,7 @@ HTMLPAGES = \
 	libcurl-multi.html \
 	libcurl-easy.html \
 	libcurl-share.html \
-	libcurl-errors.html \
-	index.html
+	libcurl-errors.html
 
 PDFPAGES = \
 	curl_easy_cleanup.pdf \
@@ -121,7 +120,7 @@ PDFPAGES = \
 
 CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
 
-EXTRA_DIST = $(man_MANS) $(HTMLPAGES) $(PDFPAGES)
+EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES)
 
 MAN2HTML= gnroff -man $< | man2html >$@
 
