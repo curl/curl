@@ -6,8 +6,10 @@
 .SH NAME
 libcurl \- client-side URL transfers
 .SH DESCRIPTION
-This is an overview on how to use libcurl in your c/c++ programs. There are
-specific man pages for each function mentioned in here.
+This is an overview on how to use libcurl in your C programs. There are
+specific man pages for each function mentioned in here. There's also the
+libcurl-the-guide document for a complete tutorial to programming with
+libcurl.
 
 libcurl can also be used directly from within your Java, PHP, Perl, Ruby or
 Tcl programs as well, look elsewhere for documentation on this!
@@ -55,9 +57,6 @@ get information about a performed transfer
 .TP
 .B curl_formadd()
 helps building a HTTP form POST
-.TP
-.B curl_formparse()
-helps building a HTTP form POST (deprecated since 7.9 use curl_formadd()!)
 .TP
 .B curl_formfree()
 free a list built with curl_formparse()/curl_formadd()
