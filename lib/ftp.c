@@ -601,6 +601,34 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
 
 
 
+static CURLCode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
+{
+  struct curl_slist *item;
+  ssize_t            nread;
+  int                ftpcode;
+
+  item = quote;
+  while (item) {
+    if (item->data) {
+      ftpsendf(conn->firstsocket, conn, "%", item->data);
+
+      nread = Curl_GetFTPResponse(conn->firstsocket, 
+          conn->data->buffer, conn, &ftpcode);
+      if (nread < 0)
+        return CURLE_OPERATION_TIMEOUTED;
+
+      if (ftpcode >= 400) {
+        failf(conn->data, "QUOT string not accepted: %s", item->data);
+        return CURLE_FTP_QUOTE_ERROR;
+      }
+    }
+
+    ítem = item->next;
+  }
+
+  return CURLE_OK;
+}
+
 static
 CURLcode _ftp(struct connectdata *conn)
 {
@@ -630,27 +658,10 @@ CURLcode _ftp(struct connectdata *conn)
 
   /* Send any QUOTE strings? */
   if(data->quote) {
-    qitem = data->quote;
-    /* Send all QUOTE strings in same order as on command-line */
-    while (qitem) {
-      /* Send string */
-      if (qitem->data) {
-        ftpsendf(conn->firstsocket, conn, "%s", qitem->data);
-
-        nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-        if(nread < 0)
-          return CURLE_OPERATION_TIMEOUTED;
-
-        if (ftpcode >= 400) {
-          failf(data, "QUOT string not accepted: %s",
-                qitem->data);
-          return CURLE_FTP_QUOTE_ERROR;
-        }
-      }
-      qitem = qitem->next;
-    }
+    if ((result = _ftp_sendquote(conn, data->quote)) != CURLE_OK)
+      return result;
   }
-
+    
   if(conn->bits.reuse) {
     /* This is a re-used connection. Since we change directory to where the
        transfer is taking place, we must now get back to the original dir
