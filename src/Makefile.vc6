@@ -1,10 +1,13 @@
 ########################################################
 ## Makefile for building curl.exe with MSVC6
-## Use: nmake -f makefile.vc6 [release | debug]
+## Use: nmake -f makefile.vc6 [release | debug] [CFG=release-ssl]
 ##      (default is release)
+## "nmake -f makefile.vc6 CFG=release-ssl" statically links OpenSSL
+## into curl.exe producing a standalone SSL-enabled executable.
 ##
 ## Comments to: Troy Engel <tengel@sonic.net>
 ## Updated by: Craig Davison <cd@securityfocus.com>
+## release-ssl added by Miklos Nemeth <mnemeth@kfkisystems.com>
 
 PROGRAM_NAME = curl.exe
 
