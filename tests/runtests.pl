@@ -296,7 +296,7 @@ sub runftpsserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/ftpsserver.pl $flag -r $FTPPORT $FTPSPORT &";
+    my $cmd="$perl $srcdir/ftpsserver.pl $flag -d $srcdir -r $FTPPORT $FTPSPORT &";
     system($cmd);
     if($verbose) {
         print "CMD: $cmd\n";

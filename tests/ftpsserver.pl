@@ -25,6 +25,12 @@ my $verbose=0; # set to 1 for debugging
 
 my $port = 8821;		# just our default, weird enough
 my $remote_port = 8921;		# test ftp-server port
+
+my $path = `pwd`;
+chomp $path;
+
+my $srcdir=$path;
+
 do {
     if($ARGV[0] eq "-v") {
         $verbose=1;
@@ -33,16 +39,17 @@ do {
         $remote_port=$ARGV[1];
         shift @ARGV;
     }
+    elsif($ARGV[0] eq "-d") {
+        $srcdir=$ARGV[1];
+        shift @ARGV;
+    }
     elsif($ARGV[0] =~ /^(\d+)$/) {
         $port = $1;
     }
 } while(shift @ARGV);
 
-my $path = `pwd`;
-chomp $path;
-
 my $conffile="$path/stunnel.conf";	# stunnel configuration data
-my $certfile="$path/stunnel.pem";	# stunnel server certificate
+my $certfile="$srcdir/stunnel.pem";	# stunnel server certificate
 my $pidfile="$path/.ftps.pid";		# stunnel process pid file
 
 open(CONF, ">$conffile") || return 1;
@@ -60,7 +67,7 @@ print CONF "
 	connect = $remote_port
 ";
 close CONF; 
-system("chmod go-rwx $conffile $path/stunnel.pem");	# secure permissions
+#system("chmod go-rwx $conffile $certfile");	# secure permissions
 
 		# works only with stunnel versions < 4.00
 my $cmd="$stunnel -p $certfile -P $pidfile -d $port -r $remote_port 2>/dev/null";
