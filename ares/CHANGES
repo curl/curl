@@ -1,9 +1,3 @@
-This package is built on ares 1.1.1 (written by Greg Hudson). I've decided to
-put together and release my own ares archives since the ares maintainer
-doesn't want these improvements.
-
-The package is called 'c-ares' for now since I (Daniel Stenberg) want this for
-use within the curl project (hence the letter C) and it makes a nice pun.
 
 * January 29, 2004:
 
