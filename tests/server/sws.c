@@ -74,15 +74,20 @@
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
 
+long prevtestno=-1; /* previous test number we served */
+long prevpartno=-1; /* previous part number we served */
+bool prevbounce;    /* instructs the server to increase the part number for
+                       a test in case the identical testno+partno request
+                       shows up again */
+
 struct httprequest {
   char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
   int offset;     /* size of the incoming request */
   long testno;     /* test number found in the request */
-  int partno;     /* part number found in the request */
+  long partno;     /* part number found in the request */
   int open;       /* keep connection open info, as found in the request */
   bool auth_req;  /* authentication required, don't wait for body unless
                      there's an Authorization header */
-
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
@@ -226,8 +231,6 @@ int ProcessRequest(struct httprequest *req)
     if(ptr) {
       FILE *stream;
       char *filename;
-      char *cmd = NULL;
-      size_t cmdsize = 0;
 
       if((strlen(doc) + strlen(request)) < 200)
         sprintf(logbuf, "Got request: %s %s HTTP/%d.%d",
@@ -260,7 +263,7 @@ int ProcessRequest(struct httprequest *req)
       else
         req->partno = 0;
 
-      sprintf(logbuf, "Reqested test number %ld part %d",
+      sprintf(logbuf, "Reqested test number %ld part %ld",
               req->testno, req->partno);
 
       logmsg(logbuf);
@@ -273,6 +276,9 @@ int ProcessRequest(struct httprequest *req)
         return 0;
       }
       else {    
+        char *cmd = NULL;
+        size_t cmdsize = 0;
+
         /* get the custom server control "commands" */
         cmd = (char *)spitout(stream, "reply", "servercmd", &cmdsize);
         fclose(stream);
@@ -284,6 +290,7 @@ int ProcessRequest(struct httprequest *req)
             logmsg("instructed to require authorization header");
             req->auth_req = TRUE;
           }
+          free(cmd);
         }
       }
     }
@@ -392,7 +399,7 @@ int ProcessRequest(struct httprequest *req)
   }
   if(strstr(req->reqbuf, "Connection: close"))
     req->open = FALSE; /* close connection after this request */
-  
+
   if(req->cl && (req->auth || !req->auth_req)) {
     if(req->cl <= strlen(end+strlen(END_OF_HEADERS)))
       return 1; /* done */
@@ -426,7 +433,6 @@ static int get_request(int sock, struct httprequest *req)
   char *reqbuf = req->reqbuf;
 
   /*** Init the httpreqest structure properly for the upcoming request ***/
-
   memset(req, 0, sizeof(struct httprequest));
 
   /* here's what should not be 0 from the start */
@@ -530,7 +536,7 @@ static int send_doc(int sock, struct httprequest *req)
     char *filename = test2file(req->testno);
 
     if(0 != req->partno)
-      sprintf(partbuf, "data%d", req->partno);
+      sprintf(partbuf, "data%ld", req->partno);
 
     stream=fopen(filename, "rb");
     if(!stream) {
@@ -569,6 +575,12 @@ static int send_doc(int sock, struct httprequest *req)
     persistant = FALSE;
     logmsg("connection close instruction swsclose found in response");
   }
+  if(strstr(buffer, "swsbounce")) {
+    prevbounce = TRUE;
+    logmsg("enable \"swsbounce\" in the next request");
+  }
+  else
+    prevbounce = FALSE;
 
   do {
     written = swrite(sock, buffer, count);
@@ -612,6 +624,9 @@ static int send_doc(int sock, struct httprequest *req)
     free(cmd);
 
   req->open = persistant;
+
+  prevtestno = req->testno;
+  prevpartno = req->partno;
 
   return 0;
 }
@@ -733,6 +748,15 @@ int main(int argc, char *argv[])
       if(get_request(msgsock, &req))
         /* non-zero means error, break out of loop */
         break;
+
+      if(prevbounce) {
+        /* bounce treatment requested */
+        if((req.testno == prevtestno) &&
+           (req.partno == prevpartno)) {
+          req.partno++;
+          logmsg("BOUNCE part number to %ld", req.partno);
+        }
+      }
 
       send_doc(msgsock, &req);
 
