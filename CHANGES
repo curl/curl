@@ -6,7 +6,49 @@
 
                                History of Changes
 
+Daniel (18 April 2001)
+- Input from Michael Mealling made me add --feature to curl-config. It
+  displays a list of features that have been built-in in the current
+  libcurl. The currently available features that can be listed are: SSL, KRB4
+  and IPv6.
+
+- I committed Cris and Georg's perl interface work. They've got callbacks
+  working and options that receives those slist pointers.
+
+- Puneet Pawaia detected a problem with resumed downloads that use persistant
+  connections and I made a rather large writeup to correct this. It is
+  important that all session-data is stored in the connectdata struct and not
+  in the main struct as this previously did.
+
+Daniel (17 April 2001)
+- Frederic Lepied fixed a ftp resumed download problem and introduced a new
+  error code that lets applications be able to detect when a resumed download
+  actually didn't download anything since the whole file is already present.
+  Should this return OK instead?
+
+- I added 'curl-config.in' to the root dir and configure script. Now, a
+  curl-config script is made when curl is built. The script can be used to
+  figure out compile time options used when libcurl was built, which in turn
+  should be options YOU should use to build applications that use libcurl.
+
+  This *-config style is not a new idea, but something that has been used
+  successfully in other (library based) projects.
+
+- Phil Karn pointed out that libcurl wrongly did not always use GMT time zone
+  for the If-Modified-Since style headers.
+
+- Georg Schwarz pointed out an extra needed #include file needed in src/main.c
+  for curl to build on Ultrix.
+
 Daniel (11 April 2001)
+- Cris Bailiff pointed out two problems that I corrected. First, libcurl's use
+  of the environment variable HTTP_PROXY in uppercase may become a security
+  hazard when people use libcurl in a server/cgi situation where the server
+  sets the HTTP_*-variables according to incoming headers in the HTTP
+  request. Thus, a "Proxy:"-header would set that environment variable!
+
+  Then, invoking curl_easy_perform() without having an URL set caused a crash.
+
 - SM brought a patch that make curl use non-blocking connects on windows when
   connection timeout is set, as it allows windows users to set that timeout!  
 
@@ -15,8 +57,8 @@ Daniel (11 April 2001)
 - Cris Bailiff, Forrest Cahoon and Georg Horn work on the Perl interface.
 
 - I've written a first shot at a Java interface to libcurl. Many thanks to
-  Daniel Marell for tirelessly answering to all my basic Java questions. The
-  interface doesn't work yet, but I'm getting closer...
+  Daniel Marell for tirelessly answering to all my basic Java questions. It
+  works, but it is still very basic.
 
 Daniel (10 April 2001)
 - The progress display could get silly when doing multiple file transfers, as
