@@ -1268,6 +1268,7 @@ AC_CONFIG_FILES([Makefile \
            packages/DOS/Makefile \
            packages/EPM/curl.list \
            packages/EPM/Makefile \
+           packages/vms/Makefile \
            curl-config
 ])
 AC_OUTPUT
