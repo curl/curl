@@ -9,7 +9,7 @@ EXTRA_DIST = README curlgtk.c sepheaders.c simple.c postit2.c		\
 	     multithread.c getinmemory.c ftpupload.c httpput.c		\
 	     simplessl.c ftpgetresp.c http-post.c post-callback.c	\
 	     multi-app.c multi-double.c multi-single.c multi-post.c	\
-	     fopen.c simplepost.c makefile.dj
+	     fopen.c simplepost.c makefile.dj curlx.c
 
 all:
 	@echo "done"
