@@ -439,7 +439,8 @@ for ( $waitedpid = 0;
 
         unless (m/^([A-Z]{3,4})\s?(.*)/i) {
             print "500 '$_': command not understood.\r\n";
-            next;
+            logmsg "unknown crap received, bailing out hard\n";
+            last;
         }
         my $FTPCMD=$1;
         my $FTPARG=$2;
