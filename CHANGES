@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (23 September)
+- Added support for -4/--ipv4 and -6/--ipv6 to force names to resolve to that
+  particular IP version. They only work for IPv6-enabled libcurls.
+
+- curl -V now outputs 'SPNEGO' as a feature in case libcurl was built to
+  support that.
+
 Version 7.10.8-pre2 (22 September 2003)
 
 Daniel (22 September)
