@@ -139,9 +139,7 @@ struct ssl_config_data {
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
 
-  struct curl_ssl_session *session; /* array of 'numsessions' size */
   long numsessions;                 /* SSL session id cache size */
-  long sessionage;                  /* number of the most recent session */
 };
 
 /****************************************************************************
@@ -437,6 +435,9 @@ struct UrlState {
                       following not keep sending user+password... This is
                       strdup() data.
                     */
+
+  struct curl_ssl_session *session; /* array of 'numsessions' size */
+  long sessionage;                  /* number of the most recent session */
 };
 
 

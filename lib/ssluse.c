@@ -335,7 +335,7 @@ CURLcode Curl_SSL_InitSessions(struct SessionHandle *data, long amount)
 {
   struct curl_ssl_session *session;
 
-  if(data->set.ssl.session)
+  if(data->state.session)
     /* this is just a precaution to prevent multiple inits */
     return CURLE_OK;
 
@@ -349,8 +349,8 @@ CURLcode Curl_SSL_InitSessions(struct SessionHandle *data, long amount)
 
   /* store the info in the SSL section */
   data->set.ssl.numsessions = amount;
-  data->set.ssl.session = session;
-  data->set.ssl.sessionage = 1; /* this is brand new */
+  data->state.session = session;
+  data->state.sessionage = 1; /* this is brand new */
 
   return CURLE_OK;
 }
@@ -367,15 +367,15 @@ static int Get_SSL_Session(struct connectdata *conn,
   long i;
 
   for(i=0; i< data->set.ssl.numsessions; i++) {
-    check = &data->set.ssl.session[i];
+    check = &data->state.session[i];
     if(!check->sessionid)
       /* not session ID means blank entry */
       continue;
     if(strequal(conn->name, check->name) &&
        (conn->remote_port == check->remote_port) ) {
       /* yes, we have a session ID! */
-      data->set.ssl.sessionage++;            /* increase general age */
-      check->age = data->set.ssl.sessionage; /* set this as used in this age */
+      data->state.sessionage++;            /* increase general age */
+      check->age = data->state.sessionage; /* set this as used in this age */
       *ssl_sessionid = check->sessionid;
       return FALSE;
     }
@@ -413,13 +413,13 @@ int Curl_SSL_Close_All(struct SessionHandle *data)
 {
   int i;
 
-  if(data->set.ssl.session) {    
+  if(data->state.session) {    
     for(i=0; i< data->set.ssl.numsessions; i++)
       /* the single-killer function handles empty table slots */
-      Kill_Single_Session(&data->set.ssl.session[i]);
+      Kill_Single_Session(&data->state.session[i]);
     
     /* free the cache data */
-    free(data->set.ssl.session);
+    free(data->state.session);
   }
   return 0;
 }
@@ -433,7 +433,7 @@ static int Store_SSL_Session(struct connectdata *conn)
   struct curl_ssl_session *store;
   int i;
   struct SessionHandle *data=conn->data; /* the mother of all structs */
-  int oldest_age=data->set.ssl.session[0].age; /* zero if unused */
+  int oldest_age=data->state.session[0].age; /* zero if unused */
 
   /* ask OpenSSL, say please */
   ssl_sessionid = SSL_get1_session(conn->ssl.handle);
@@ -446,21 +446,21 @@ static int Store_SSL_Session(struct connectdata *conn)
      the oldest if necessary) */
 
   /* find an empty slot for us, or find the oldest */
-  for(i=0; (i<data->set.ssl.numsessions) && data->set.ssl.session[i].sessionid; i++) {
-    if(data->set.ssl.session[i].age < oldest_age) {
-      oldest_age = data->set.ssl.session[i].age;
-      store = &data->set.ssl.session[i];
+  for(i=0; (i<data->set.ssl.numsessions) && data->state.session[i].sessionid; i++) {
+    if(data->state.session[i].age < oldest_age) {
+      oldest_age = data->state.session[i].age;
+      store = &data->state.session[i];
     }
   }
   if(i == data->set.ssl.numsessions)
     /* cache is full, we must "kill" the oldest entry! */
     Kill_Single_Session(store);
   else
-    store = &data->set.ssl.session[i]; /* use this slot */
+    store = &data->state.session[i]; /* use this slot */
   
   /* now init the session struct wisely */
   store->sessionid = ssl_sessionid;
-  store->age = data->set.ssl.sessionage;      /* set current age */
+  store->age = data->state.sessionage;      /* set current age */
   store->name = strdup(conn->name);       /* clone host name */
   store->remote_port = conn->remote_port; /* port number */
 
