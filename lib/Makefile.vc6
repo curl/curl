@@ -22,8 +22,18 @@
 # $Id: Makefile.vc6,v 1.17 2004/01/13 08:57:01 bagder Exp $
 ##############################################################
 
+#
+# Stem for static libs and DLLs
+#
 LIB_NAME       = libcurl
 LIB_NAME_DEBUG = libcurld
+
+#
+# Stem for DLL import libs
+#
+IMPLIB_NAME       = libcurl_imp
+IMPLIB_NAME_DEBUG = libcurld_imp
+
 !IFNDEF OPENSSL_PATH
 OPENSSL_PATH   = ../../openssl-0.9.7d
 !ENDIF
@@ -43,7 +53,7 @@ CCNODBG    = cl.exe /MD /O2 /DNDEBUG
 CCDEBUG    = cl.exe /MDd /Od /Gm /Zi /D_DEBUG /GZ
 CFLAGSSSL  = /DUSE_SSLEAY /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
 CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
-CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /DVC6 /D_MBCS /D_LIB /YX /FD /c /DBUILDING_LIBCURL
+CFLAGS     = /I. /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
 LNKDLL     = link.exe /DLL
 LNKLIB     = link.exe /lib
 LFLAGS     = /nologo
@@ -61,8 +71,8 @@ CFGSET     = FALSE
 # release
 
 !IF "$(CFG)" == "release"
-TARGET =$(LIB_NAME).lib
-DIROBJ =.\$(CFG)
+TARGET = $(LIB_NAME).lib
+DIROBJ = .\$(CFG)
 LNK    = $(LNKLIB) /out:$(TARGET)
 CC     = $(CCNODBG)
 CFGSET = TRUE
@@ -72,8 +82,8 @@ CFGSET = TRUE
 # release-zlib
 
 !IF "$(CFG)" == "release-zlib"
-TARGET   =$(LIB_NAME).lib
-DIROBJ   =.\$(CFG)
+TARGET   = $(LIB_NAME).lib
+DIROBJ   = .\$(CFG)
 LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LNK      = $(LNKLIB) $(LFLAGSZLIB) /out:$(TARGET)
 CC       = $(CCNODBG) $(CFLAGSZLIB)
@@ -84,9 +94,9 @@ CFGSET   = TRUE
 # release-dll
 
 !IF "$(CFG)" == "release-dll"
-TARGET =$(LIB_NAME).dll
-DIROBJ =.\$(CFG)
-LNK    = $(LNKDLL) $(WINLIBS) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
+TARGET = $(LIB_NAME).dll
+DIROBJ = .\$(CFG)
+LNK    = $(LNKDLL) $(WINLIBS) /out:$(TARGET) /IMPLIB:$(IMPLIB_NAME).lib
 CC     = $(CCNODBG)
 CFGSET = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
@@ -96,8 +106,8 @@ RESOURCE = $(DIROBJ)\libcurl.res
 # release-ssl
 
 !IF "$(CFG)" == "release-ssl"
-TARGET   =$(LIB_NAME).lib
-DIROBJ   =.\$(CFG)
+TARGET   = $(LIB_NAME).lib
+DIROBJ   = .\$(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32"
 LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
 CC       = $(CCNODBG) $(CFLAGSSSL)
@@ -108,10 +118,10 @@ CFGSET   = TRUE
 # release-ssl-dll
 
 !IF "$(CFG)" == "release-ssl-dll"
-TARGET   =$(LIB_NAME).dll
-DIROBJ   =.\$(CFG)
+TARGET   = $(LIB_NAME).dll
+DIROBJ   = .\$(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32dll"
-LNK      = $(LNKDLL) $(WINLIBS) $(SSLLIBS) $(WINLIBS) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
+LNK      = $(LNKDLL) $(SSLLIBS) $(WINLIBS) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:$(IMPLIB_NAME).lib
 CC       = $(CCNODBG) $(CFLAGSSSL)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
@@ -120,8 +130,8 @@ RESOURCE = $(DIROBJ)\libcurl.res
 ######################
 # release-ssl-zlib
 !IF "$(CFG)" == "release-ssl-zlib"
-TARGET   =$(LIB_NAME).lib
-DIROBJ   =.\$(CFG)
+TARGET   = $(LIB_NAME).lib
+DIROBJ   = .\$(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32"
 LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LNK      = $(LNKLIB) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(TARGET)
@@ -132,8 +142,8 @@ CFGSET   = TRUE
 ######################
 # release-libcurl-ssl-dll
 !IF "$(CFG)" == "release-libcurl-ssl-dll"
-TARGET   =$(LIB_NAME).lib
-DIROBJ   =.\$(CFG)
+TARGET   = $(LIB_NAME).lib
+DIROBJ   = .\$(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32dll"
 LNK      = $(LNKLIB) $(SSLLIBS) $(LFLAGSSSL) /out:$(TARGET)
 CC       = $(CCNODBG) $(CFLAGSSSL)
@@ -146,8 +156,8 @@ RESOURCE = $(DIROBJ)\libcurl.res
 # debug
 
 !IF "$(CFG)" == "debug"
-TARGET =$(LIB_NAME_DEBUG).lib
-DIROBJ =.\$(CFG)
+TARGET = $(LIB_NAME_DEBUG).lib
+DIROBJ = .\$(CFG)
 LNK    = $(LNKLIB) /out:$(TARGET)
 CC     = $(CCDEBUG)
 CFGSET = TRUE
@@ -157,9 +167,9 @@ CFGSET = TRUE
 # debug-dll
 
 !IF "$(CFG)" == "debug-dll"
-TARGET =$(LIB_NAME_DEBUG).dll
-DIROBJ =.\$(CFG)
-LNK    = $(LNKDLL) $(WINLIBS) /DEBUG /out:$(TARGET) /IMPLIB:"$(LIB_NAME_DEBUG).lib" /PDB:"$(LIB_NAME_DEBUG).pdb"
+TARGET = $(LIB_NAME_DEBUG).dll
+DIROBJ = .\$(CFG)
+LNK    = $(LNKDLL) $(WINLIBS) /DEBUG /out:$(TARGET) /IMPLIB:$(IMPLIB_NAME_DEBUG).lib /PDB:$(IMPLIB_NAME_DEBUG).pdb
 CC     = $(CCDEBUG)
 CFGSET = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
@@ -170,7 +180,7 @@ RESOURCE = $(DIROBJ)\libcurl.res
 #todo
 !IF "$(CFG)" == "debug-ssl"
 TARGET   = $(LIB_NAME_DEBUG).lib
-DIROBJ   =.\$(CFG)
+DIROBJ   = .\$(CFG)
 LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
 CC       = $(CCDEBUG) $(CFLAGSSSL)
 CFGSET   = TRUE
@@ -180,7 +190,7 @@ CFGSET   = TRUE
 # debug-zlib
 !IF "$(CFG)" == "debug-zlib"
 TARGET   = $(LIB_NAME_DEBUG).lib
-DIROBJ   =.\$(CFG)
+DIROBJ   = .\$(CFG)
 LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 LNK      = $(LNKLIB) $(LFLAGSZLIB) /out:$(TARGET)
 CC       = $(CCDEBUG) $(CFLAGSZLIB)
@@ -191,10 +201,10 @@ CFGSET   = TRUE
 # debug-ssl-dll
 
 !IF "$(CFG)" == "debug-ssl-dll"
-TARGET   =$(LIB_NAME_DEBUG).dll
-DIROBJ   =.\$(CFG)
+TARGET   = $(LIB_NAME_DEBUG).dll
+DIROBJ   = .\$(CFG)
 LFLAGSSSL = /LIBPATH:$(OPENSSL_PATH)/out32dll
-LNK      = $(LNKDLL) $(WINLIBS) $(LFLAGSSSL) /DEBUG /out:$(TARGET) /IMPLIB:"$(LIB_NAME_DEBUG).lib" /PDB:"$(LIB_NAME_DEBUG).pdb"
+LNK      = $(LNKDLL) $(WINLIBS) $(LFLAGSSSL) /DEBUG /out:$(TARGET) /IMPLIB:$(IMPLIB_NAME_DEBUG).lib /PDB:$(IMPLIB_NAME_DEBUG).pdb
 CC       = $(CCDEBUG) $(CFLAGSSSL)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
@@ -308,3 +318,4 @@ clean:
 	-@erase $(DIROBJ)\*.res
 	-@erase vc60.idb
 	-@erase vc60.pch
+
