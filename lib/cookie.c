@@ -230,7 +230,18 @@ Curl_cookie_add(struct CookieInfo *c,
         co->domain = strdup(ptr);
         break;
       case 1:
-        /* what _is_ this field for? */
+        /* This field got its explanation on the 23rd of May 2001 by
+           Andrés García:
+
+           flag: A TRUE/FALSE value indicating if all machines within a given
+           domain can access the variable. This value is set automatically by
+           the browser, depending on the value you set for the domain.
+
+           As far as I can see, it is set to true when the cookie says
+           .domain.com and to false when the domain is complete www.domain.com
+
+           We don't currently take advantage of this knowledge.
+        */
         break;
       case 2:
         /* It turns out, that sometimes the file format allows the path
