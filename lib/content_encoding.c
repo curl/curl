@@ -128,7 +128,7 @@ inflate_stream(struct SessionHandle *data,
       }
 
       /* Done with these bytes, exit */
-      if (status == Z_OK && z->avail_in == 0 && z->avail_out > 0) {
+      if (status == Z_OK && z->avail_in == 0) {
         free(decomp);
         return result;
       }
