@@ -933,7 +933,7 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
     CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
     CFLAGS="$CFLAGS -g" 
     if test "$GCC" = "yes"; then
-       CFLAGS="$CFLAGS -W -Wall -Wwrite-strings -pedantic -Wundef -Wpointer-arith -Wnested-externs"
+       CFLAGS="$CFLAGS -W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wundef -Wpointer-arith -Wnested-externs"
     fi
     dnl strip off optimizer flags
     NEWFLAGS=""
