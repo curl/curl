@@ -6,6 +6,33 @@
 
                                History of Changes
 
+Version 7.9.7-pre2
+
+Daniel (7 May 2002)
+- Updated the man page with --trace-ascii and -j/--junk-session-cookies.
+
+- Made --trace-ascii do pretty much the same as --trace but without the hex
+  part in the output.
+
+- Added CURLOPT_COOKIESESSION that when enabled makes libcurl ignore session
+  cookies read from a file. This option is enforced by the curl command line
+  tool using the new -j/--junk-session-cookies option. After discussions with
+  Kevin Roth. This makes it easier to use curl to fully emulate a browser's
+  behavior, even when it comes to "session cookies". Session cookies are
+  cookies that a normal browser discards when the browser is shut
+  down. They're identified by not having any expire date/time.
+
+- When CURLOPT_DEBUGDATA was set, it ruined the CURLOPT_STDERR setting and
+  this was discovered when --trace was made to crash.
+
+- Using -v and --trace at the same time confused matters. -v is now pretty
+  much ignored when --trace or --trace-ascii is used.
+
+- Made --trace (and --trace-ascii) support - as file name to pass output to
+  stdout instead. It makes it consistent with how other options work.
+
+Version 7.9.7-pre1
+
 Daniel (6 May 2002)
 - Added multi-post.c to the examples directory. I got the basic source for
   this from Gustaf Hui.
