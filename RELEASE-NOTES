@@ -10,6 +10,7 @@ Curl and libcurl 7.12.2
 
 This release includes the following changes:
 
+ o provides error texts for IDN errors
  o file upload parts in formposts now get their directory names cut off
  o added CURLINFO_OS_ERRNO
  o added CURLOPT_FTPSSLAUTH to allow ftp connects to attempt "AUTH TLS" instead
@@ -18,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o configure --with-libidn now checks the given path before defaults
  o a race condition sometimes resulting in CURLE_COULDNT_RESOLVE_HOST in the
    windows threaded name resolver code
  o isspace() invokes with negative values in the cookie code

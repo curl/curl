@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Daniel (5 October 2004)
+- Made configure --with-libidn=PATH try the given PATH before the default
+  paths to make it possible to override.
+
+- If idna_strerror() is present in libidn, we can use that instead of our
+  internal replacement. This function was added by Simon in libidn 0.5.6 and
+  is detected by configure.
+
+- It seems basename() on IRIX is in the libgen library and since we don't use
+  that, configure finds libgen.h but not basename and then we get a compiler
+  error because our basename() replacement doesn't match the proto in
+  libgen.h. Starting now, we don't include the file if basename wasn't found
+  as well.
+
 Daniel (4 October 2004)
 - Chris found a race condition resulting in CURLE_COULDNT_RESOLVE_HOST and
   potential crash, in the windows threaded name resolver code.
