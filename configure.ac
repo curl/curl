@@ -543,6 +543,8 @@ dnl **********************************************************************
 
 dnl Default to compiler & linker defaults for SSL files & libraries.
 OPT_SSL=off
+dnl Default to no CA bundle
+ca="no"
 AC_ARG_WITH(ssl,dnl
 AC_HELP_STRING([--with-ssl=PATH],[where to look for SSL, PATH points to the SSL installation (default: /usr/local/ssl)])
 AC_HELP_STRING([--without-ssl], [disable SSL]),
@@ -626,6 +628,36 @@ else
 
     AC_SUBST(OPENSSL_ENABLED)
 
+    AC_MSG_CHECKING([CA cert bundle install path])
+
+    AC_ARG_WITH(ca-bundle,
+AC_HELP_STRING([--with-ca-bundle=FILE], [File name to install the CA bundle as])
+AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
+    [ ca="$withval" ],
+    [
+      if test "x$prefix" != xNONE; then
+        ca="\${prefix}/share/curl/curl-ca-bundle.crt"
+      else
+        ca="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
+      fi
+    ] )
+
+    if test X"$OPT_SSL" = Xno; then
+      ca="no"
+    fi
+
+    if test "x$ca" != "xno"; then
+      CURL_CA_BUNDLE='"'$ca'"'
+      AC_SUBST(CURL_CA_BUNDLE)  
+    fi
+    AC_MSG_RESULT([$ca])
+
+    dnl these can only exist if openssl exists
+
+    AC_CHECK_FUNCS( RAND_status \
+                    RAND_screen \
+                    RAND_egd )
+
   fi
 
   if test X"$OPT_SSL" != Xoff &&
@@ -633,14 +665,9 @@ else
     AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
   fi
 
-
-  dnl these can only exist if openssl exists
-
-  AC_CHECK_FUNCS( RAND_status \
-                  RAND_screen \
-                  RAND_egd )
-
 fi
+
+AM_CONDITIONAL(CABUNDLE, test x$ca != xno)
 
 dnl **********************************************************************
 dnl Check for the presence of ZLIB libraries and headers
@@ -880,31 +907,6 @@ AC_SUBST(PERL)
 AC_PATH_PROGS( NROFF, gnroff nroff, , 
   $PATH:/usr/bin/:/usr/local/bin )
 AC_SUBST(NROFF)
-
-AC_MSG_CHECKING([CA cert bundle install path])
-
-AC_ARG_WITH(ca-bundle,
-AC_HELP_STRING([--with-ca-bundle=FILE], [File name to install the CA bundle as])
-AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
-   [ ca="$withval" ],
-   [
-  if test "x$prefix" != xNONE; then
-    ca="\${prefix}/share/curl/curl-ca-bundle.crt"
-  else
-    ca="$ac_default_prefix/share/curl/curl-ca-bundle.crt"
-  fi
-   ] )
-
-if test X"$OPT_SSL" = Xno
-then
-  ca="no"
-fi
-
-if test "x$ca" != "xno"; then
-  CURL_CA_BUNDLE='"'$ca'"'
-  AC_SUBST(CURL_CA_BUNDLE)  
-fi
-AC_MSG_RESULT([$ca])
 
 AC_PROG_YACC
 
