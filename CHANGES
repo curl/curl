@@ -6,6 +6,35 @@
 
                                   Changelog
 
+Daniel (21 Oct 2002)
+- Zvi Har'El pointed out a problem with curl's name resolving on Redhat 8
+  machines (running IPv6 disabled). Mats Lidell let me use an account on his
+  machine and I could verify that gethostbyname_r() has been changed to return
+  EAGAIN instead of ERANGE when the given buffer size is too small. This is
+  glibc 2.2.93.
+
+- Albert Chin helped me get the -no-undefined option corrected in
+  lib/Makefile.am since Cygwin builds want it there while Solaris builds don't
+  want it present.
+  
+- Nikita Schmidt provided a bug fix for a FOLLOW_LOCATION bug introduced when
+  the ../ support got in (7.10.1).
+
+Daniel (18 Oct 2002)
+- Fabrizio Ammollo pointed out a remaining problem with FOLLOW_LOCATION in
+  the multi interface.
+
+Daniel (17 Oct 2002)
+- Richard Cooper's experimenting proved that -j (CURLOPT_COOKIESESSION) didn't
+  work quite as supposed. You needed to set it *before* you use
+  CURLOPT_COOKIEFILE, and we dont' want that kind of dependencies.
+
+Daniel (15 Oct 2002)
+- Andrés García provided corrections for erratas in four libcurl man pages.
+
+Daniel (13 Oct 2002)
+- Starting now, we generate and include PDF versions of all the docs in the
+  release archives.
 
 Daniel (12 Oct 2002)
 - Trying to connect to a host on a bad port number caused the multi interface
