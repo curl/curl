@@ -19,6 +19,7 @@
 # files in the "cfg" directory, but then the make file
 # in \src would need to be changed.
 #
+# $Id: Makefile.vc6,v 1.17 2004/01/13 08:57:01 bagder Exp $
 ##############################################################
 # CHANGE LOG
 # ------------------------------------------------------------
@@ -37,12 +38,17 @@ LIB_NAME_DEBUG = libcurld
 OPENSSL_PATH   = ../../openssl-0.9.7a
 !ENDIF
 
+!IFNDEF ZLIB_PATH
+ZLIB_PATH  = ../../zlib-1.1.4
+!ENDIF
+
 #############################################################
 ## Nothing more to do below this line!
 
 CCNODBG   = cl.exe /MD /O2 /D "NDEBUG"
 CCDEBUG   = cl.exe /MDd /Od /Gm /Zi  /D "_DEBUG" /GZ
 CFLAGSSSL = /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
+CFLAGSZLIB = /D "HAVE_ZLIB_H" /D "HAVE_ZLIB" /D "HAVE_LIBZ" /I "$(ZLIB_PATH)"
 CFLAGS = /I "." /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS"
 
 LNKDLL    = link.exe /DLL  /def:libcurl.def
@@ -98,6 +104,19 @@ LNK      = $(LNKDLL) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
 CC       = $(CCNODBG)  $(CFLAGSSSL)
 CFGSET   = TRUE
 RESOURCE = $(DIROBJ)\libcurl.res
+!ENDIF
+
+######################
+# release-ssl-zlib
+
+!IF "$(CFG)" == "release-ssl-zlib"
+TARGET   =$(LIB_NAME).lib
+DIROBJ   =.\$(CFG)
+LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32"
+LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
+LNK      = $(LNKLIB) $(LFLAGSSSL) $(LFLAGSZLIB) /out:$(TARGET)
+CC       = $(CCNODBG) $(CFLAGSSSL) $(CFLAGSZLIB)
+CFGSET   = TRUE
 !ENDIF
 
 ######################
@@ -169,6 +188,7 @@ RESOURCE = $(DIROBJ)\libcurl.res
 !MESSAGE   release          - release static library
 !MESSAGE   release-dll      - release dll
 !MESSAGE   release-ssl      - release static library with ssl
+!MESSAGE   release-ssl-zlib - release static library with ssl and zlib
 !MESSAGE   release-ssl-dll  - release dll library with ssl
 !MESSAGE   release-libcurl-ssl-dll - static libcurl with shared ssl
 !MESSAGE   debug            - debug static library
@@ -223,6 +243,7 @@ X_OBJS= \
         $(DIROBJ)\http_ntlm.obj \
 	$(DIROBJ)\md5.obj \
 	$(DIROBJ)\strerror.obj \
+	$(DIROBJ)\content_encoding.obj \
 	$(RESOURCE)
 
 all : $(TARGET)
