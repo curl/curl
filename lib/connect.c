@@ -52,6 +52,13 @@
 #include <stdlib.h> /* required for free() prototype, without it, this crashes
                        on macos 68K */
 #endif
+#if (defined(HAVE_FIONBIO) && defined(__NOVELL_LIBC__))
+#include <sys/filio.h>
+#endif
+#if (defined(NETWARE) && defined(__NOVELL_LIBC__))
+#undef in_addr_t
+#define in_addr_t unsigned long
+#endif
 #ifdef	VMS
 #include <in.h>
 #include <inet.h>

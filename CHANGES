@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (17 March 2004)
+- Günter Knauf brought patches, code and makefiles to build curl on Novell
+  NetWare.
+
 Daniel (15 March 2004)
 - Lots of libcurl man pages were updated to contain references to other man
   pages the recognized way so that they appear as nice hyperlinks in the HTML

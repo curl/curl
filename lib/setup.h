@@ -50,6 +50,10 @@
 /* hand-modified VMS config.h! */
 #include "config-vms.h"
 #endif
+#ifdef NETWARE
+/* hand-modified NetWare config.h! */
+#include "config-netware.h"
+#endif
 #ifdef macintosh
 /* hand-modified MacOS config.h! */
 #include "config-mac.h"
@@ -288,6 +292,10 @@ typedef struct in_addr Curl_ipconnect;
    aspect, but it still compile fine! */
 #define ECONNRESET 10000
 #endif
+#endif
+
+#ifdef NETWARE
+#undef HAVE_ALARM
 #endif
 
 #endif /* __CONFIG_H */

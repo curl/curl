@@ -1,0 +1,277 @@
+#################################################################
+#
+## Makefile for building libcurl.nlm (NetWare version - gnu make)
+## Use: make -f Makefile.netware
+##
+## Comments to: Guenter Knauf <eflash@gmx.net>
+#
+#################################################################
+
+# Edit the path below to point to the base of your Novell NDK.
+BASE	= c:/novell
+INSTDIR	= s:/libcurl
+
+# Edit the path below to point to the base of your Zlib sources.
+ZLIB_PATH = ../../../cw/zlib-src-1.1.4
+
+# Edit the vars below to change NLM target settings.
+TARGET  = libcurl
+VERSION	= $(LIBCURL_VERSION)
+COPYR	= Copyright (c) 1996 - 2004, Daniel Stenberg, <daniel@haxx.se>
+DESCR	= cURL libcurl $(LIBCURL_VERSION_STR) - http://curl.haxx.se
+MTSAFE	= YES
+STACK	= 64000
+SCREEN	= none
+#MODULES	= libz.nlm
+EXPORTS	= @libcurl.imp
+
+# Edit the var below to point to your lib architecture.
+ifndef LIBARCH
+LIBARCH = LIBC
+endif
+
+# must be equal to DEBUG or NDEBUG
+DB	= NDEBUG
+# DB	= DEBUG
+# Optimization: -O<n> or debugging: -g
+ifeq ($(DB),NDEBUG)
+	OPT	= -O2
+	OBJDIR	= release
+else
+	OPT	= -g
+	OBJDIR	= debug
+endif
+
+# Include the version info retrieved from jk_version.h
+-include $(OBJDIR)/version.inc
+
+# The following line defines your compiler.
+ifdef METROWERKS
+	CC = mwccnlm
+else
+	CC = gcc
+endif
+# RM	= rm -f
+# CP	= cp -fv
+# if you want to mark the target as MTSAFE you will need a tool for
+# generating the xdc data for the linker; here's a minimal tool:
+# http://www.gknw.de/development/prgtools/mkxdc.zip
+MPKXDC	= mkxdc
+
+# Global flags for all compilers
+CFLAGS	= $(OPT) -D$(DB) -DNETWARE -nostdinc
+#CFLAGS	+= -DHAVE_LIBZ
+
+ifeq ($(CC),mwccnlm)
+LD	= mwldnlm
+LDFLAGS	= -nostdlib $(PRELUDE) $(OBJDIR)/*.o -o $(OBJDIR)/$(TARGET).nlm -commandfile
+CFLAGS	+= -gccinc -inline off -opt nointrinsics
+CFLAGS	+= -relax_pointers
+#CFLAGS	+= -w on
+ifeq ($(LIBARCH),LIBC)
+	PRELUDE = $(SDK_LIBC)/imports/libcpre.o
+	CFLAGS += -align 4 -inst mmx -proc 686
+	CFLAGS += -D_POSIX_SOURCE
+#	CFLAGS += -D__ANSIC__
+else
+	PRELUDE = "$(METROWERKS)/Novell Support/libraries/runtime/prelude.obj"
+#	CFLAGS += -include "$(METROWERKS)/Novell Support/headers/nlm_prefix.h"
+	CFLAGS += -align 1 -proc 586
+endif
+else
+LD	= nlmconv
+LDFLAGS	= -T
+CFLAGS	+= -fno-builtin -fpack-struct -fpcc-struct-return
+CFLAGS	+= -Wall # -pedantic
+ifeq ($(LIBARCH),LIBC)
+	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
+	CFLAGS += -D_POSIX_SOURCE
+#	CFLAGS += -D__ANSIC__
+else
+	PRELUDE = $(SDK_CLIB)/imports/clibpre.gcc.o
+	CFLAGS += -include $(BASE)/nlmconv/genlm.h
+endif
+endif
+
+LDLIBS	=
+
+NDK_ROOT = $(BASE)/ndk
+SDK_CLIB = $(NDK_ROOT)/nwsdk
+SDK_LIBC = $(NDK_ROOT)/libc
+SDK_LDAP = $(NDK_ROOT)/cldapsdk/netware
+CURL_INC = ../include
+
+INCLUDES = -I$(CURL_INC)
+INCLUDES += -I$(ZLIB_PATH)
+
+ifeq ($(LIBARCH),LIBC)
+	INCLUDES += -I$(SDK_LIBC)/include -I$(SDK_LIBC)/include/nks
+	INCLUDES += -I$(SDK_LIBC)/include/winsock
+	INCLUDES += -I$(SDK_LDAP)/libc/inc
+else
+	INCLUDES += -I$(SDK_CLIB)/include/nlm -I$(SDK_CLIB)/include
+	# INCLUDES += -I$(SDK_CLIB)/include/nlm/obsolete
+	INCLUDES += -I$(SDK_LDAP)/clib/inc
+	CFLAGS += -DNETDB_USE_INTERNET
+endif
+CFLAGS	+= $(INCLUDES)
+
+ifeq ($(MTSAFE),YES)
+	XDCDATA = $(OBJDIR)/$(TARGET).xdc
+endif
+
+ifeq ($(OSTYPE),linux)
+DL	= '
+-include $(BASE)/nlmconv/ncpfs.inc
+endif
+
+OBJS	= \
+	$(OBJDIR)/file.o \
+	$(OBJDIR)/timeval.o \
+	$(OBJDIR)/base64.o \
+	$(OBJDIR)/hostip.o \
+	$(OBJDIR)/progress.o \
+	$(OBJDIR)/formdata.o \
+	$(OBJDIR)/cookie.o \
+	$(OBJDIR)/http.o \
+	$(OBJDIR)/sendf.o \
+	$(OBJDIR)/ftp.o \
+	$(OBJDIR)/url.o \
+	$(OBJDIR)/dict.o \
+	$(OBJDIR)/if2ip.o \
+	$(OBJDIR)/speedcheck.o \
+	$(OBJDIR)/getdate.o \
+	$(OBJDIR)/transfer.o \
+	$(OBJDIR)/ldap.o \
+	$(OBJDIR)/ssluse.o \
+	$(OBJDIR)/version.o \
+	$(OBJDIR)/getenv.o \
+	$(OBJDIR)/escape.o \
+	$(OBJDIR)/mprintf.o \
+	$(OBJDIR)/telnet.o \
+	$(OBJDIR)/netrc.o \
+	$(OBJDIR)/getinfo.o \
+	$(OBJDIR)/strequal.o \
+	$(OBJDIR)/easy.o \
+	$(OBJDIR)/security.o \
+	$(OBJDIR)/krb4.o \
+	$(OBJDIR)/memdebug.o \
+	$(OBJDIR)/http_chunks.o \
+	$(OBJDIR)/strtok.o \
+	$(OBJDIR)/connect.o \
+	$(OBJDIR)/hash.o \
+	$(OBJDIR)/llist.o \
+	$(OBJDIR)/multi.o \
+	$(OBJDIR)/share.o \
+	$(OBJDIR)/content_encoding.o \
+	$(OBJDIR)/http_digest.o \
+	$(OBJDIR)/http_negotiate.o \
+	$(OBJDIR)/http_ntlm.o \
+	$(OBJDIR)/md5.o \
+	$(OBJDIR)/strtoofft.o \
+	$(OBJDIR)/nwlib.o
+
+
+all: $(OBJDIR) $(OBJDIR)/version.inc $(OBJDIR)/$(TARGET).nlm 
+
+$(OBJDIR)/%.o: %.c
+	@echo Compiling $<
+	@$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)/version.inc: $(CURL_INC)/curl/curl.h $(OBJDIR)
+	@echo Creating $@
+	@awk -f ../packages/netware/get_ver.awk $< > $@
+
+dist: all
+	-$(RM) $(OBJDIR)/*.o $(OBJDIR)/$(TARGET).map $(OBJDIR)/$(TARGET).ncv
+	-$(RM) $(OBJDIR)/$(TARGET).def $(OBJDIR)/version.inc $(XDCDATA)
+#	-$(CP) ../changes.txt $(OBJDIR)/
+
+install: all
+	@[ -d $(INSTDIR) ] || mkdir $(INSTDIR)
+	@$(CP) $(TARGET).nlm $(INSTDIR)
+
+clean:
+	-$(RM) -r $(OBJDIR)
+
+$(OBJDIR):
+	@mkdir $(OBJDIR)
+
+$(OBJDIR)/$(TARGET).nlm: $(OBJS) $(OBJDIR)/$(TARGET).def $(XDCDATA)
+	@echo Linking $@
+	@-$(RM) $@
+	@$(LD) $(LDFLAGS) $(OBJDIR)/$(TARGET).def
+
+$(OBJDIR)/%.xdc: Makefile.netware
+	@echo Creating $@
+	@$(MPKXDC) $(XDCOPT) $@
+
+$(OBJDIR)/%.def: Makefile.netware
+	@echo $(DL)# DEF file for linking with $(LD)$(DL) > $@
+	@echo $(DL)# Do not edit this file - it is created by make!$(DL) >> $@
+	@echo $(DL)# All your changes will be lost!!$(DL) >> $@
+	@echo $(DL)#$(DL) >> $@
+	@echo $(DL)copyright "$(COPYR)"$(DL) >> $@
+	@echo $(DL)description "$(DESCR)"$(DL) >> $@
+	@echo $(DL)version $(VERSION)$(DL) >> $@
+ifdef NLMTYPE
+	@echo $(DL)type $(NLMTYPE)$(DL) >> $@
+endif
+ifdef STACK
+	@echo $(DL)stack $(STACK)$(DL) >> $@
+endif
+ifdef SCREEN
+	@echo $(DL)screenname "$(SCREEN)"$(DL) >> $@
+else
+	@echo $(DL)screenname "DEFAULT"$(DL) >> $@
+endif
+ifeq ($(DB),DEBUG)
+	@echo $(DL)debug$(DL) >> $@
+endif
+	@echo $(DL)threadname "$(TARGET)"$(DL) >> $@
+ifdef XDCDATA
+	@echo $(DL)xdcdata $(XDCDATA)$(DL) >> $@
+endif
+ifeq ($(LIBARCH),CLIB)
+	@echo $(DL)start _Prelude$(DL) >> $@
+	@echo $(DL)exit _Stop$(DL) >> $@
+	@echo $(DL)import @$(SDK_CLIB)/imports/clib.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_CLIB)/imports/threads.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_CLIB)/imports/nlmlib.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_CLIB)/imports/socklib.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapsdk.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapssl.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
+	@echo $(DL)module clib$(DL) >> $@
+else
+ifeq ($(LD),nlmconv)
+	@echo $(DL)flag_on 64$(DL) >> $@
+else
+	@echo $(DL)autounload$(DL) >> $@
+endif
+	@echo $(DL)pseudopreemption$(DL) >> $@
+	@echo $(DL)start _LibCPrelude$(DL) >> $@
+	@echo $(DL)exit _LibCPostlude$(DL) >> $@
+	@echo $(DL)check _LibCCheckUnload$(DL) >> $@
+	@echo $(DL)import @$(SDK_LIBC)/imports/libc.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LIBC)/imports/netware.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapsdk.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapssl.imp$(DL) >> $@
+	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapx.imp$(DL) >> $@
+	@echo $(DL)module libc$(DL) >> $@
+endif
+ifdef MODULES
+	@echo $(DL)module $(MODULES)$(DL) >> $@
+endif
+ifdef EXPORTS
+	@echo $(DL)export $(EXPORTS)$(DL) >> $@
+endif
+ifdef IMPORTS
+	@echo $(DL)import $(IMPORTS)$(DL) >> $@
+endif
+ifeq ($(LD),nlmconv)
+	@echo $(DL)input $(OBJS)$(DL) >> $@
+	@echo $(DL)input $(PRELUDE)$(DL) >> $@
+	@echo $(DL)output $(TARGET).nlm$(DL) >> $@
+endif
+

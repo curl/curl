@@ -32,7 +32,7 @@
 #endif
 
 #if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN32__) && \
-    !defined(__riscos__) && !defined(__INTERIX)
+    !defined(__riscos__) && !defined(__INTERIX) && !defined(NETWARE)
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
@@ -125,5 +125,8 @@ char *Curl_if2ip(char *interface, char *buf, int buf_size)
 
 /* -- end of if2ip() -- */
 #else
-#define if2ip(x) NULL
+char *Curl_if2ip(char *interface, char *buf, int buf_size)
+{
+    return NULL;
+}
 #endif
