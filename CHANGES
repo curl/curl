@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel (23 Oct 2002)
+- Emiliano Ida confirmed that we now build properly with the Borland C++
+  compiler too. We needed yet another fix for the ISO cpp check in the curl.h
+  header file.
+
+- Yet another fix was needed to get the HTTP download without headers to work.
+  This time it was needed if the first "believed header" was read all in the
+  first read. Test 306 has not run properly since the 11th october fix.
+
 Daniel (21 Oct 2002)
 - Zvi Har'El pointed out a problem with curl's name resolving on Redhat 8
   machines (running IPv6 disabled). Mats Lidell let me use an account on his
@@ -15,13 +24,13 @@ Daniel (21 Oct 2002)
 
 - Albert Chin helped me get the -no-undefined option corrected in
   lib/Makefile.am since Cygwin builds want it there while Solaris builds don't
-  want it present.
+  want it present. Kevin Roth helped me try it out on cygwin.
   
-- Nikita Schmidt provided a bug fix for a FOLLOW_LOCATION bug introduced when
+- Nikita Schmidt provided a bug fix for a FOLLOWLOCATION bug introduced when
   the ../ support got in (7.10.1).
 
 Daniel (18 Oct 2002)
-- Fabrizio Ammollo pointed out a remaining problem with FOLLOW_LOCATION in
+- Fabrizio Ammollo pointed out a remaining problem with FOLLOWLOCATION in
   the multi interface.
 
 Daniel (17 Oct 2002)
@@ -74,7 +83,7 @@ Daniel (7 Oct 2002)
 - Kevin Roth pointed out that make install didn't do right if build outside
   the source tree (ca-bundle wise).
 
-- FOLLOW_LOCATION bugfix for the multi interface
+- FOLLOWLOCATION bugfix for the multi interface
 
 Daniel (4 Oct 2002)
 - Kevin Roth got problems with his cygwin build with -no-undefined was not
