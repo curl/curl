@@ -169,7 +169,7 @@ UrgSSLConnect (struct UrlData *data)
 #endif
     {
       /* We need to seed the PRNG properly! */
-#ifdef WIN32
+#ifdef HAVE_RAND_SCREEN
       /* This one gets a random value by reading the currently shown screen */
       RAND_screen();
 #else
