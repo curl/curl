@@ -21,7 +21,7 @@ LDFLAGS=@LDFLAGS@
 LIBS=@LIBS@
 ALL_CFLAGS=${CPPFLAGS} ${CFLAGS} ${DEFS}
 OBJS=	ares__close_sockets.o ares__get_hostent.o ares__read_line.o \
-	ares_destroy.o ares_expand_name.o ares_fds.o ares_free_errmem.o \
+	ares_destroy.o ares_expand_name.o ares_fds.o \
 	ares_free_hostent.o ares_free_string.o ares_gethostbyaddr.o \
 	ares_gethostbyname.o ares_init.o ares_mkquery.o ares_parse_a_reply.o \
 	ares_parse_ptr_reply.o ares_process.o ares_query.o ares_search.o \

@@ -1,3 +1,10 @@
+* February 23, 2004
+- Removed ares_free_errmem(), the function, the file and the man page. It was
+  not used and it did nothing.
+
+- Fixed a lot of code that wasn't "64bit clean" and thus caused a lot of
+  compiler warnings on picky compilers.
+
 * February 22, 2004
 - Dominick Meglio made ares init support multiple name servers in the
   NameServer key on Windows.
