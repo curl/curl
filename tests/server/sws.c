@@ -447,10 +447,12 @@ void storerequest(char *reqbuf)
 
   dump = fopen(REQUEST_DUMP, "ab"); /* b is for windows-preparing */
   if(dump) {
-    fwrite(reqbuf, 1, strlen(reqbuf), dump);
+    size_t len = strlen(reqbuf);
+    fwrite(reqbuf, 1, len, dump);
 
     fclose(dump);
-    logmsg("Wrote request input to " REQUEST_DUMP);
+    logmsg("Wrote request (%d bytes) input to " REQUEST_DUMP,
+           (int)len);
   }
   else {
     logmsg("Failed to write request input to " REQUEST_DUMP);
@@ -635,7 +637,8 @@ static int send_doc(int sock, struct httprequest *req)
 
   fclose(dump);
 
-  logmsg("Response sent (%d bytes)!", responsesize);
+  logmsg("Response sent (%d bytes) and written to " RESPONSE_DUMP,
+         responsesize);
 
   if(ptr)
     free(ptr);
@@ -773,7 +776,7 @@ int main(int argc, char *argv[])
     if (msgsock == -1)
       continue;
 
-    logmsg("** New client connected");
+    logmsg("====> Client connect");
 
     do {
       if(get_request(msgsock, &req))
@@ -805,7 +808,7 @@ int main(int argc, char *argv[])
       /* if we got a CONNECT, loop and get another request as well! */
     } while(req.open || (req.testno == DOCNUMBER_CONNECT));
 
-    logmsg("** Closing client connection");
+    logmsg("====> Client disconnect");
     sclose(msgsock);
 
     if (req.testno == DOCNUMBER_QUIT)
