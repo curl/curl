@@ -8,5 +8,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifndef FALSE
+#define FALSE 0
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#endif
+
 extern char *arg2; /* set by first.c to the argv[2] or NULL */
 
