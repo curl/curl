@@ -1,4 +1,4 @@
-all:
+iall:
 install:
 
 test:
@@ -17,4 +17,5 @@ test106  test115  test124  test190  test25   test303  test44   test38 \
 test107  test116  test125  test2    test26   test33   test45   test126 \
 test304  test39   test32   test128  test48 test306 \
 test130  test131  test132  test133  test134 test135 test403 test305 \
-test49 test50 test51 test52 test53 test54 test55 test56
+test49 test50 test51 test52 test53 test54 test55 test56 \
+test500 test501
