@@ -22,6 +22,9 @@ Funny-head: yesyes
 <server>
 http
 </server>
+<features>
+getrlimit
+</features>
 # tool is what to use instead of 'curl'
 <tool>
 lib518
@@ -38,8 +41,11 @@ http://%HOSTIP:%HTTPPORT/518
 #
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_FAILED_INIT (2)
-<errorcode>
-2
-</errorcode>
+<protocol>
+GET /518 HTTP/1.1
+Host: 127.0.0.1:%HTTPPORT
+Pragma: no-cache
+Accept: */*
+
+</protocol>
 </verify>

@@ -1,8 +1,23 @@
 #include "test.h"
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_RESOURCE_H
+#include <sys/resource.h>
+#endif
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+#ifdef UNISTD_H
+#include <unistd.h>
+#endif
 
 #include <mprintf.h>
 
@@ -15,6 +30,7 @@
 #endif
 
 #define NUM_OPEN (FD_SETSIZE + 10)
+#define NUM_NEEDED (NUM_OPEN + 16)
 
 #if defined(WIN32) || defined(_WIN32) || defined(MSDOS)
 #define DEV_NULL "NUL"
@@ -22,23 +38,55 @@
 #define DEV_NULL "/dev/null"
 #endif
 
+#if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 int test(char *URL)
 {
-  CURLcode res;
-  CURL *curl;
+  struct rlimit rl;
   int fd[NUM_OPEN];
   int i;
+  CURLcode res;
+  CURL *curl;
 
-  /* open a lot of file descriptors */
-  for (i = 0; i < NUM_OPEN; i++) {
-    fd[i] = open(DEV_NULL, O_RDONLY);
+  /* get open file limits */
+  if (getrlimit(RLIMIT_NOFILE, &rl) == -1) {
+    fprintf(stderr, "warning: getrlimit: failed to get RLIMIT_NOFILE\n");
+    goto skip_open;
+  }
+
+  /* check that hard limit is high enough */
+  if (rl.rlim_max < NUM_NEEDED) {
+    fprintf(stderr, "warning: RLIMIT_NOFILE hard limit is too low\n");
+    goto skip_open;
+  }
+
+  /* increase soft limit if needed */
+  if (rl.rlim_cur < NUM_NEEDED) {
+    rl.rlim_cur = NUM_NEEDED;
+    if (setrlimit(RLIMIT_NOFILE, &rl) == -1) {
+      fprintf(stderr, "warning: setrlimit: failed to set RLIMIT_NOFILE\n");
+      goto skip_open;
+    }
+  }
+
+  /* open a dummy descriptor */
+  fd[0] = open(DEV_NULL, O_RDONLY);
+  if (fd[0] == -1) {
+    fprintf(stderr, "open: failed to open %s\n", DEV_NULL);
+    return CURLE_FAILED_INIT;
+  }
+
+  /* create a bunch of file descriptors */
+  for (i = 1; i < NUM_OPEN; i++) {
+    fd[i] = dup(fd[0]);
     if (fd[i] == -1) {
-      fprintf(stderr, "open: attempt #%i: failed to open %s\n", i, DEV_NULL);
+      fprintf(stderr, "dup: attempt #%i failed\n", i);
       for (i--; i >= 0; i--)
         close(fd[i]);
       return CURLE_FAILED_INIT;
     }
   }
+
+skip_open:
 
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, URL);
@@ -51,3 +99,12 @@ int test(char *URL)
 
   return (int)res;
 }
+#else
+/* system lacks getrlimit() and/or setrlimit() */
+int test(char *URL)
+{
+  (void)URL;
+  fprintf(stderr, "system lacks necessary system function(s)");
+  return 1;
+}
+#endif

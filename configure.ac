@@ -1138,6 +1138,7 @@ AC_CHECK_HEADERS(
         utime.h \
         sys/utime.h \
         sys/poll.h \
+        sys/resource.h \
         libgen.h \
         locale.h \
         setjmp.h,
@@ -1240,7 +1241,9 @@ AC_CHECK_FUNCS( strtoll \
                 setlocale \
                 ftruncate \
                 pipe \
-                poll,
+                poll \
+                getrlimit \
+                setrlimit,
 dnl if found
 [],
 dnl if not found, $ac_func is the name we check for

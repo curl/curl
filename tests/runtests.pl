@@ -95,6 +95,7 @@ my $gdb = checkcmd("gdb");
 my $ssl_version; # set if libcurl is built with SSL support
 my $large_file;  # set if libcurl is built with large file support
 my $has_idn;     # set if libcurl is built with IDN support
+my $has_getrlimit;  # set if system has getrlimit()
 
 my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
@@ -763,6 +764,16 @@ sub checkcurl {
         die "couldn't run '$CURL'"
     }
 
+    if(-r "../lib/config.h") {
+        open(CONF, "<../lib/config.h");
+        while(<CONF>) {
+            if($_ =~ /^\#define HAVE_GETRLIMIT/) {
+                $has_getrlimit = 1;
+            }
+        }
+        close(CONF);
+    }
+
     if(!$curl_debug && $torture) {
         die "can't run torture tests since curl was not build with debug";
     }
@@ -859,6 +870,11 @@ sub singletest {
         }
         elsif($f eq "idn") {
             if($has_idn) {
+                next;
+            }
+        }
+        elsif($f eq "getrlimit") {
+            if($has_getrlimit) {
                 next;
             }
         }

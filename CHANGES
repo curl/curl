@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (22 November 2004)
+- David Phillips enhanced test 518. I made it depend on a "feature" so that
+  systems without getrlimit() won't attempt to test 518. configure now checks
+  for getrlimit() and setrlimit() for this test case.
+
 Daniel (18 November 2004)
 - David Phillips fixed libcurl to not crash anymore when more than FD_SETSIZE
   file descriptors are in use. Test case 518 added to verify.

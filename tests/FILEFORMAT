@@ -85,6 +85,7 @@ SSL
 netrc_debug
 large_file
 idn
+getrlimit
 </features>
 
 <killserver>
