@@ -16,6 +16,8 @@
 
 #define EINPROGRESS WSAEINPROGRESS
 #define EWOULDBLOCK WSAEWOULDBLOCK
+#define EMSGSIZE ERANGE /* FIX: is there a better replacement? */
+#define EAFNOSUPPORT ERANGE /* FIX: is there a better replacement? */
 
 /* Structure for scatter/gather I/O.  */
 struct iovec
@@ -36,8 +38,10 @@ int ares_gettimeofday(struct timeval *tv, struct timezone *tz);
 
 #endif  /* !NETWARE */
 
-#define NS_CMPRSFLGS  0xc0  
-
+#define NS_CMPRSFLGS  0xc0
+#define NS_IN6ADDRSZ  16
+#define NS_INT16SZ    2
+#define NS_INADDRSZ   4
 
   /* Flag bits indicating name compression. */
 #define INDIR_MASK    NS_CMPRSFLGS
@@ -134,7 +138,7 @@ typedef enum __ns_opcode {
 
 #define QUERY          ns_o_query
 
-#define NS_MAXLABEL   63 
+#define NS_MAXLABEL   63
 #define MAXLABEL       NS_MAXLABEL
 
 #define NS_RRFIXEDSZ  10      /* #/bytes of fixed data in r record */
