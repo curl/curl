@@ -82,6 +82,7 @@
 #include "sendf.h"
 #include "escape.h"
 #include "file.h"
+#include "speedcheck.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
