@@ -83,3 +83,8 @@ cygwinbin:
 install-data-hook:
 	cd include && $(MAKE) install
 	cd docs && $(MAKE) install
+
+# We extend the standard uninstall with a custom hook:
+uninstall-hook:
+	cd include && $(MAKE) uninstall
+	cd docs && $(MAKE) uninstall
