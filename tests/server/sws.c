@@ -85,7 +85,7 @@
 static void win32_cleanup(void);
 
 #if defined(ENABLE_IPV6) && defined(__MINGW32__)
-const struct in6_addr in6addr_any = IN6ADDR_ANY_INIT;
+const struct in6_addr in6addr_any = {{ IN6ADDR_ANY_INIT }};
 #endif
 #endif
 
