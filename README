@@ -64,17 +64,13 @@ CVS
 
   To download the very latest source off the CVS server do this:
 
-    cvs -d :pserver:cvsread@cvs.php.net:/repository login
+   cvs -d :pserver:anonymous@cool.haxx.se:/cvsroot/curl login
 
-  (enter "phpfi" when asked for password)
+  (just press enter when asked for password)
 
-    cvs -d :pserver:cvsread@cvs.php.net:/repository co curl 
+   cvs -d :pserver:anonymous@cool.haxx.se:/cvsroot/curl co curl
 
   (you'll get a directory named curl created, filled with the source code)
-
-    cvs -d :pserver:cvsread@cvs.php.net:/repository logout
-        
-  (you're off the hook!)
 
 NOTICE
 
