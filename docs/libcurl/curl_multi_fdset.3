@@ -1,0 +1,23 @@
+.\" $Id$
+.\"
+.TH curl_multi_fdset 3 "1 March 2002" "libcurl 7.9.5" "libcurl Manual"
+.SH NAME
+curl_multi_fdset - add an easy handle to a multi session
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLMcode curl_multi_fdset(CURLM *multi_handle,
+                           fd_set *read_fd_set,
+                           fd_set *write_fd_set,
+                           fd_set *exc_fd_set,
+                           int *max_fd);
+.ad
+.SH DESCRIPTION
+This function extracts file descriptor information from a given multi_handle.
+libcurl returns its fd_set sets. The application can use these to select() or
+poll() on. The curl_multi_perform() function should be called as soon as one
+of them are ready to be read from or written to.
+.SH RETURN VALUE
+CURLMcode type, general libcurl multi interface error code.
+.SH "SEE ALSO"
+.BR curl_multi_cleanup "(3)," curl_multi_init "(3)"

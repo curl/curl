@@ -1,0 +1,27 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" $Id$
+.\"
+.TH curl_formfree 3 "6 April 2001" "libcurl 7.7.1" "libcurl Manual"
+.SH NAME
+curl_formfree - free a previously build multipart/formdata HTTP POST chain
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "void curl_formfree(struct HttpPost *" form);
+.ad
+.SH DESCRIPTION
+curl_formfree() is used to clean up data previously built/appended with
+curl_formadd()/curl_formparse(). This must be called when the data has
+been used, which typically means after the curl_easy_perform() has
+been called.
+.SH RETURN VALUE
+None
+.SH "SEE ALSO"
+.BR curl_formparse "(3) [deprecated], "
+.BR curl_formadd "(3) "
+.SH BUGS
+libcurl 7.7.1 and earlier versions does not allow a NULL pointer to be used as
+argument.
+
+
