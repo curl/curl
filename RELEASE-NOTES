@@ -25,6 +25,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o following redirects and doing NTLM/Digest (where the first connection gets
+   closed) with the multi interface work better now
+ o file: progress meter and getinfo variables work now
  o CURLOPT_FRESH_CONNECT and CURLAUTH_NTLM now work when set together
  o share interface usage without (un)lock functions segfaulted
  o --limit-rate no longer cripples the --speed-limit feature
@@ -67,6 +70,7 @@ Other curl-related news since the previous public release:
  o PycURL 7.11.0 was released: http://pycurl.sourceforge.net/
  o the libcurl D binding was released:
    http://www.atari-soldiers.com/libcurl.html
+ o new Estonian web site mirror: http://curl.dope-brothers.com/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
