@@ -169,7 +169,7 @@ int Curl_nonblock(int sockfd,    /* operate on this */
  */
 static
 int waitconnect(int sockfd, /* socket */
-                int timeout_msec)
+                long timeout_msec)
 {
   fd_set fd;
   fd_set errfd;
