@@ -2075,11 +2075,10 @@ int my_fread(void *buffer, size_t size, size_t nmemb, void *userp)
 
 struct ProgressData {
   int calls;
-  double total;
   double prev;
-  double point;
   int width;
   FILE *out; /* where to write everything to */
+  int initial_size;
 };
 
 int myprogress (void *clientp,
@@ -2101,22 +2100,21 @@ int myprogress (void *clientp,
   int i;
 
   struct ProgressData *bar = (struct ProgressData *)clientp;
-  double total = dltotal + ultotal;
-
-  bar->point = dlnow + ulnow; /* we've come this far */
+  double total = dltotal + ultotal + bar->initial_size;
+  double point = dlnow + ulnow + bar->initial_size; /* we've come this far */
 
   bar->calls++; /* simply count invokes */
 
   if(0 == total) {
     int prevblock = (int)bar->prev / 1024;
-    int thisblock = (int)bar->point / 1024;
+    int thisblock = (int)point / 1024;
     while ( thisblock > prevblock ) {
       fprintf( bar->out, "#" );
       prevblock++;
     }
   }
   else {
-    frac = bar->point / total;
+    frac = point / total;
     percent = frac * 100.0f;
     barwidth = bar->width - 7;
     num = (int) (((double)barwidth) * frac);
@@ -2129,7 +2127,7 @@ int myprogress (void *clientp,
     sprintf( outline, format, line, percent );
     fprintf( bar->out, "\r%s", outline );
   }
-  bar->prev = bar->point;
+  bar->prev = point;
 
   return 0;
 }
@@ -2145,6 +2143,12 @@ void progressbarinit(struct ProgressData *bar,
   char *colp;
 
   memset(bar, 0, sizeof(struct ProgressData));
+
+  /* pass this through to progress function so
+   * it can display progress towards total file
+   * not just the part that's left. (21-may-03, dbyron) */
+  if (config->use_resume)
+    bar->initial_size = config->resume_from;
 
 /* TODO: get terminal width through ansi escapes or something similar.
          try to update width when xterm is resized... - 19990617 larsa */
