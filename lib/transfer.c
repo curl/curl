@@ -168,6 +168,10 @@ compareheader(char *headerline, /* line to check */
   return FALSE; /* no match */
 }
 
+/* We keep this static and global since this is read-only and NEVER
+   changed. It should just remain a blanked-out timeout value. */
+static struct timeval notimeout={0,0};
+
 CURLcode Curl_readwrite(struct connectdata *conn,
                         bool *done)
 {
@@ -176,6 +180,35 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   int result;
   ssize_t nread; /* number of bytes read */
   int didwhat=0;
+  
+  /* These two are used only if no other select() or _fdset() have been
+     invoked before this. This typicly happens if you use the multi interface
+     and call curl_multi_perform() without calling curl_multi_fdset()
+     first. */
+  fd_set extrareadfd;
+  fd_set extrawritefd;
+
+  fd_set *readfdp = k->readfdp;
+  fd_set *writefdp = k->writefdp;
+  
+  if((k->keepon & KEEP_READ) && !readfdp) {
+    /* reading is requested, but no socket descriptor pointer was set */
+    FD_ZERO(&extrareadfd);
+    FD_SET(conn->sockfd, &extrareadfd);
+    readfdp = &extrareadfd;
+
+    /* no write, no exceptions, no timeout */
+    select(conn->sockfd+1, readfdp, NULL, NULL, &notimeout);
+  }
+  if((k->keepon & KEEP_WRITE) && !writefdp) {
+    /* writing is requested, but no socket descriptor pointer was set */
+    FD_ZERO(&extrawritefd);
+    FD_SET(conn->writesockfd, &extrawritefd);
+    writefdp = &extrawritefd;
+
+    /* no read, no exceptions, no timeout */
+    select(conn->writesockfd+1, NULL, writefdp, NULL, &notimeout);
+  }
 
   do {
     /* If we still have reading to do, we check if we have a readable
@@ -183,7 +216,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
        the multi interface and then we can do nothing but to attempt a
        read to be sure. */
     if((k->keepon & KEEP_READ) &&
-       (!k->readfdp || FD_ISSET(conn->sockfd, k->readfdp))) {
+       (FD_ISSET(conn->sockfd, readfdp))) {
 
       /* read! */
       result = Curl_read(conn, conn->sockfd, k->buf,
@@ -755,7 +788,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
        the multi interface and then we can do nothing but to attempt a
        write to be sure. */
     if((k->keepon & KEEP_WRITE) &&
-       (!k->writefdp || FD_ISSET(conn->writesockfd, k->writefdp)) ) {
+       (FD_ISSET(conn->writesockfd, writefdp)) ) {
       /* write */
 
       int i, si;
@@ -970,9 +1003,6 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
     k->rkeepfd = k->readfd;
     k->wkeepfd = k->writefd;
 
-    k->writefdp = &k->writefd; /* store the address of the set */
-    k->readfdp = &k->readfd;   /* store the address of the set */
-
   }
 
   return CURLE_OK;
@@ -1033,6 +1063,9 @@ Transfer(struct connectdata *conn)
   /* we want header and/or body, if neither then don't do this! */
   if(!conn->getheader && data->set.no_body)
     return CURLE_OK;
+
+  k->writefdp = &k->writefd; /* store the address of the set */
+  k->readfdp = &k->readfd;   /* store the address of the set */
 
   while (!done) {
     struct timeval interval;
