@@ -83,7 +83,8 @@ int main(int argc, char **argv)
     default:
       /* one or more of curl's file descriptors say there's data to read
          or write */
-      curl_multi_perform(multi_handle, &still_running);
+      while(CURLM_CALL_MULTI_PERFORM ==
+            curl_multi_perform(multi_handle, &still_running));
       break;
     }
   }
