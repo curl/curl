@@ -1024,7 +1024,7 @@ sub singletest {
     }
 
     if($valgrind) {
-        $CMDLINE = "exec 3>log/valgrind$testnum && $CMDLINE";
+        $CMDLINE = "valgrind --leak-check=yes --logfile=log/valgrind$testnum -q $CMDLINE";
     }
 
     $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
@@ -1475,9 +1475,6 @@ if($valgrind) {
     if(($code>>8) != 1) {
         #print "Valgrind failure, disable it\n";
         undef $valgrind;
-    }
-    else {
-        $CURL="valgrind --leak-check=yes --logfile-fd=3 -q $CURL";
     }
 }
 
