@@ -997,7 +997,8 @@ CURLcode Curl_http(struct connectdata *conn)
       headers = headers->next;
     }
 
-    http->postdata = NULL; /* nothing to post at this point */
+    http->postdata = NULL;  /* nothing to post at this point */
+    Curl_pgrsSetUploadSize(data, 0); /* upload size is 0 atm */
 
     switch(data->set.httpreq) {
 
