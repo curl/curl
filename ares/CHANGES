@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* August 13
+
+- Harshal Pradhan made a minor syntax change in ares_init.c to make it build
+  fine with MSVC 7.1
+
 * July 24
 
 - Made the lib get built static only if --enable-debug is used.
