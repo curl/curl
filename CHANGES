@@ -6,7 +6,30 @@
 
                                History of Changes
 
+Daniel (4 January 2002)
+- I discovered that we wrongly used inet_ntoa() (instead of inet_ntoa_r() in
+  two places in the source code). One happened with VERBOSE set on connects,
+  and the other when VERBOSE was on and krb4 over nat was used... I honestly
+  don't think anyone has suffered from these mistakes.
+
+- I replaced a lot of silly occurances of printf() to instead use the more
+  appropriate Curl_infof() or Curl_failf(). The krb4 and telnet code were
+  affected.
+
+- Philip Gladstone found a few more problems with 64-bit archs (the 64-bit
+  sparc on solaris 8).
+
+- After discussions on the libcurl list with Raoul Cridlig, I just made FTP
+  response lines get passed to the header callback if such a one is
+  registered. It'll make it possible for any application to get all the
+  responses an FTP server sends to libcurl.
+
 Daniel (3 January 2002)
+- Sterling Hughes brought a few buckets of code. Now, libcurl will
+  automatically cache DNS lookups and re-use the previous results first if any
+  such is available. It greatly improves speed when doing many repeated
+  operations to the same host.
+
 - As the test case uses --include and then --head, I had to modify src/main.c
   to deal with this situation slightly better than previously. When done, we
   have 100% good tests again in the main branch.
