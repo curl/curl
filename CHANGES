@@ -6,6 +6,35 @@
 
                                History of Changes
 
+Daniel (10 April 2002)
+- Sebastien Willemijns found out that -x didn't use the default port number as
+  is documented. It does now.
+
+- libcurl-errors.3 is a new man page attempting to document all libcurl error
+  codes
+
+- Added two new error codes and changed the behaviour of two old ones
+  slightly:
+
+  CURLE_WRITE_ERROR
+   This error was returned *both* for errors that occured when writing
+   received data to a local file, as well as when we get problems writing data
+   to a remote server. CURLE_SEND_ERROR has now been added for the latter
+   error.
+
+ CURLE_READ_ERROR
+   This error was similarly returned *both* for errors when reading a local
+   file, as well as when getting problems when reading network data.
+   CURLE_RECV_ERROR has now been added for the latter error.
+
+ (Two test cases were adjusted accordingly.)
+
+Daniel (9 April 2002)
+- runtests.pl now sets the HOME variable before running curl, to prevent any
+  actual ~/.curlrc file to fool the tests!
+
+Version 7.9.6-pre4
+
 Daniel (8 April 2002)
 - Michael Curtis provided new functionality for curl on some platforms. Using
   the --environment option, curl will *set* a bunch of environment variables
