@@ -496,8 +496,8 @@ struct Configurable {
   HttpReq httpreq;
 
   /* for bandwidth limiting features: */
-  size_t sendpersecond; /* send to peer */
-  size_t recvpersecond; /* receive from peer */
+  curl_off_t sendpersecond; /* send to peer */
+  curl_off_t recvpersecond; /* receive from peer */
   struct timeval lastsendtime;
   size_t lastsendsize;
   struct timeval lastrecvtime;
@@ -1319,7 +1319,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         {
           /* We support G, M, K too */
           char *unit;
-          unsigned long value = strtol(nextarg, &unit, 0);
+          curl_off_t value = strtoofft(nextarg, &unit, 0);
           switch(nextarg[strlen(nextarg)-1]) {
           case 'G':
           case 'g':
@@ -2339,7 +2339,7 @@ static int my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
       /* If 'addit' is non-zero, it contains the total amount of bytes
          uploaded during the last 'timediff' milliseconds. If it is zero,
          we use the stored previous size. */
-      curl_off_t xfered = addit?addit:config->lastsendsize;
+      curl_off_t xfered = addit?addit:(curl_off_t)config->lastsendsize;
       addit = 0; /* clear it for the next round */
 
       if( xfered*1000 > config->sendpersecond*timediff) {
