@@ -54,7 +54,7 @@ Windows vs Unix
  Inside the source code, We make an effort to avoid '#ifdef [Your OS]'. All
  conditionals that deal with features *should* instead be in the format
  '#ifdef HAVE_THAT_WEIRD_FUNCTION'. Since Windows can't run configure scripts,
- we maintain two config-win32.h files (one in / and one in src/) that are
+ we maintain two config-win32.h files (one in lib/ and one in src/) that are
  supposed to look exactly as a config.h file would have looked like on a
  Windows machine!
 
@@ -69,10 +69,10 @@ Library
  rather small and easy-to-follow. All the ones prefixed with 'curl_easy' are
  put in the lib/easy.c file.
 
- Starting with libcurl 7.8, curl_global_init_() and curl_global_cleanup() were
- introduced. They should be called by the application to initialize and clean
- up global stuff in the library. As of today, they just do the global SSL
- initing if SSL is enabled. libcurl itself has no "global" scope.
+ curl_global_init_() and curl_global_cleanup() should be called by the
+ application to initialize and clean up global stuff in the library. As of
+ today, it can handle the global SSL initing if SSL is enabled and it can init
+ the socket layer on windows machines. libcurl itself has no "global" scope.
 
  All printf()-style functions use the supplied clones in lib/mprintf.c. This
  makes sure we stay absolutely platform independent.
