@@ -7,6 +7,8 @@
                                   Changelog
 
 
+Version 7.10.8-pre2 (22 September 2003)
+
 Daniel (22 September)
 - Giuseppe Attardi found a segfault in libcurl when using the multi interface
   with ares and doing repeated operations against a non-resolving host name.
