@@ -769,6 +769,10 @@ static int formparse(char *input,
     
     /* Allocate the contents */
     contents = strdup(contp+1);
+    if(!contents) {
+      fprintf(stderr, "out of memory\n");
+      return 1;
+    }
     contp = contents;
 
     if('@' == contp[0]) {
@@ -2927,6 +2931,8 @@ operate(struct Configurable *config, int argc, char *argv[])
                      (config->errors?config->errors:stderr):NULL);
       if(res != CURLE_OK) {
         clean_getout(config);
+        if(outfiles)
+          free(outfiles);
         break;
       }
     }
@@ -3021,10 +3027,9 @@ operate(struct Configurable *config, int argc, char *argv[])
           /* Create the directory hierarchy, if not pre-existant to a multiple
              file output call */
         
-          if(config->create_dirs)
-            if (-1 == create_dir_hierarchy(outfile)) {
-              return CURLE_WRITE_ERROR;
-            }
+          if(config->create_dirs &&
+             (-1 == create_dir_hierarchy(outfile)))
+            return CURLE_WRITE_ERROR;
           
           if(config->resume_from_current) {
             /* We're told to continue from where we are now. Get the
