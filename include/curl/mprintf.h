@@ -26,7 +26,8 @@
 
 #include <stdarg.h>
 #include <stdio.h> /* needed for FILE */
-#include <curl/curl.h>
+
+#include "curl.h"
 
 CURL_EXTERN int curl_mprintf(const char *format, ...);
 CURL_EXTERN int curl_mfprintf(FILE *fd, const char *format, ...);
