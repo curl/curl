@@ -987,8 +987,10 @@ CURLcode ftp_use_port(struct connectdata *conn)
             *q = '\0';
       }
 
-      FTPSENDF(conn, "%s |%d|%s|%s|", *modep, eprtaf,
-               portmsgbuf, tmp);
+      result = Curl_ftpsendf(conn, "%s |%d|%s|%s|", *modep, eprtaf,
+                             portmsgbuf, tmp);
+      if(result)
+        return result;
     } else if (strcmp(*modep, "LPRT") == 0 ||
                strcmp(*modep, "PORT") == 0) {
       int i;
@@ -1035,7 +1037,9 @@ CURLcode ftp_use_port(struct connectdata *conn)
         }
       }
       
-      FTPSENDF(conn, "%s %s", *modep, portmsgbuf);
+      result = Curl_ftpsendf(conn, "%s %s", *modep, portmsgbuf);
+      if(result)
+        return result;
     }
     
     nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
