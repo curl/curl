@@ -144,7 +144,11 @@ int Curl_nonblock(int socket,    /* operate on this */
 }
 
 /*
- * Return 0 on fine connect, -1 on error and 1 on timeout.
+ * waitconnect() returns:
+ * 0    fine connect
+ * -1   select() error
+ * 1    select() timeout
+ * 2    select() returned with an error condition
  */
 static
 int waitconnect(int sockfd, /* socket */
@@ -409,7 +413,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     if(err)
       return CURLE_COULDNT_CONNECT;
   }
-  else if(2 == rc)
+  else if(1 != rc)
     return CURLE_COULDNT_CONNECT;
 
   /*
