@@ -437,6 +437,8 @@ void Curl_SSL_cleanup(void)
     ENGINE_cleanup();
 #endif
 
+    CRYPTO_cleanup_all_ex_data();
+
     init_ssl=0; /* not inited any more */
   }
 #else
