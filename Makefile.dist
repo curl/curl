@@ -59,6 +59,12 @@ vc-ssl-dll:
 	cd ..\src
 	nmake -f Makefile.vc6
 
+vc-libcurl-ssl-dll:
+	cd lib
+	nmake -f Makefile.vc6 cfg=release-libcurl-ssl-dll
+	cd ..\src
+	nmake -f Makefile.vc6
+
 djgpp:
 	make -C lib -f Makefile.dj
 	make -C src -f Makefile.dj
