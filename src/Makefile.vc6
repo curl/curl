@@ -160,8 +160,8 @@ getpassd.obj: getpass.c
 	$(CCD) $(CFLAGS) /Fo"$@" getpass.c
 homedird.obj: homedir.c
 	$(CCD) $(CFLAGS) /Fo"$@" homedir.c
-timevald.obj: timeval.c
-	$(CCR) $(CFLAGS) /Fo"$@" timeval.c
+timevald.obj: ../lib/timeval.c
+	$(CCR) $(CFLAGS) /Fo"$@" ../lib/timeval.c
 strtoofftd.obj: ../lib/strtoofft.c
 	$(CCR) $(CFLAGS) /Fo"$@" ../lib/strtoofft.c
 maind.obj: main.c
