@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (20 Jan 2003)
+- Fixed 'buildconf' to check version number of the required tools before
+  they're actually used.
+
+- Wrote 'testcurl.sh', a script targeted for automatic and distributed curl
+  tests on various platforms.
+
 - David Thiel pointed out that the .netrc file was not being dealt with
   properly anymore. I broke this in the password prompting "fix".
 
