@@ -285,7 +285,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
          read or we get a EWOULDBLOCK */
       do {
         size_t buffersize = data->set.buffer_size?
-          data->set.buffer_size:BUFSIZE -1;
+          data->set.buffer_size:BUFSIZE;
 
         /* receive data from the network! */
         int readrc = Curl_read(conn, conn->sockfd, k->buf, buffersize, &nread);
