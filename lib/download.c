@@ -194,7 +194,14 @@ Transfer (struct UrlData *data,
 
       switch (select (maxfd, &readfd, &writefd, NULL, &interval)) {
       case -1:			/* select() error, stop reading */
-	keepon = 0; /* no more read or write */
+#ifdef EINTR
+        /* The EINTR is not serious, and it seems you might get this more
+           ofen when using the lib in a multi-threaded environment! */
+        if(errno == EINTR)
+          ;
+        else
+#endif
+          keepon = 0; /* no more read or write */
 	continue;
       case 0:			/* timeout */
 	break;
