@@ -1095,6 +1095,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.private = va_arg(param, char *);
     break;
 
+  case CURLOPT_HTTP200ALIASES:
+    /*
+     * Set a list of aliases for HTTP 200 in response header
+     */
+    data->set.http200aliases = va_arg(param, struct curl_slist *);
+    break;
+      
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_FAILED_INIT; /* correct this */

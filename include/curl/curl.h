@@ -616,6 +616,9 @@ typedef enum {
   /* Set pointer to private data */
   CINIT(PRIVATE, OBJECTPOINT, 103),
 
+  /* Set aliases for HTTP 200 in the HTTP Response header */
+  CINIT(HTTP200ALIASES, OBJECTPOINT, 104),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

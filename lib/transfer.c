@@ -162,6 +162,28 @@ static int fillbuffer(struct connectdata *conn,
   return nread;
 }
 
+/*
+ * checkhttpprefix()
+ *
+ * Returns TRUE if member of the list matches prefix of string
+ */
+static bool
+checkhttpprefix(struct SessionHandle *data,
+                const char *s)
+{
+  struct curl_slist *head = data->set.http200aliases;
+
+  while (head) {
+    if (checkprefix(head->data, s))
+      return TRUE;
+    head = head->next;
+  }
+
+  if(checkprefix("HTTP/", s))
+    return TRUE;
+
+  return FALSE;
+}
 
 CURLcode Curl_readwrite(struct connectdata *conn,
                         bool *done)
@@ -287,7 +309,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               k->hbuflen += nread;
               if (!k->headerline && (k->hbuflen>5)) {
                 /* make a first check that this looks like a HTTP header */
-                if(!checkprefix("HTTP/", data->state.headerbuff)) {
+                if(!checkhttpprefix(data, data->state.headerbuff)) {
                   /* this is not the beginning of a HTTP first header line */
                   k->header = FALSE;
                   k->badheader = HEADER_ALLBAD;
@@ -341,7 +363,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if(!k->headerline) {
               /* the first read header */
               if((k->hbuflen>5) &&
-                 !checkprefix("HTTP/", data->state.headerbuff)) {
+                 !checkhttpprefix(data, data->state.headerbuff)) {
                 /* this is not the beginning of a HTTP first header line */
                 k->header = FALSE;
                 k->badheader = HEADER_PARTHEADER;
@@ -468,6 +490,18 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 */
                 nc=sscanf (k->p, " HTTP %3d", &k->httpcode);
                 k->httpversion = 10;
+               
+               /* If user has set option HTTP200ALIASES,
+                  compare header line against list of aliases
+               */
+                if (!nc) {
+                  if (checkhttpprefix(data, k->p)) {
+                    nc = 1;
+                    k->httpcode = 200;
+                    k->httpversion =
+                      (data->set.httpversion==CURL_HTTP_VERSION_1_0)? 10 : 11;
+                  }
+                }
               }
 
               if (nc) {
