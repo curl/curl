@@ -66,7 +66,6 @@ for ( $waitedpid = 0;
 
         my @headers;
 
-      stdin:
         while(<STDIN>) {
             if($_ =~ /([A-Z]*) (.*) HTTP\/1.(\d)/) {
                 $request=$1;
@@ -96,6 +95,12 @@ for ( $waitedpid = 0;
                 if($request =~ /^(POST|PUT)$/) {
                     $left=$cl;
                 }
+                elsif($request =~ /^CONNECT$/) {
+                    if($verbose) {
+                        print STDERR "We're emulating a SSL proxy!\n";
+                    }
+                    $left = -1;
+                }
                 else {
                     $left = -1; # force abort
                 }
@@ -105,7 +110,13 @@ for ( $waitedpid = 0;
             }
         }
 
-        if($path =~ /verifiedserver/) {
+        if($request =~ /^CONNECT$/) {
+            # ssl proxy mode
+            print "HTTP/1.1 400 WE CANNOT ROOL NOW\r\n",
+            "Server: bahoooba\r\n\r\n";
+            exit;
+        }
+        elsif($path =~ /verifiedserver/) {
             # this is a hard-coded query-string for the test script
             # to verify that this is the server actually running!
             print "HTTP/1.1 999 WE ROOLZ\r\n";
