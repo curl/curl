@@ -26,6 +26,13 @@ Memory:
   automatically detect if that is the case, and it will use the ../memanalyze
   script to analyze the memory debugging output.
 
+Debug:
+  If a test case fails, you can conveniently get the script to invoke the
+  debugger (gdb) for you with the server running and the exact same command
+  line parameters that failed. Just invoke 'runtests.pl <test number> -g' and
+  then just type 'run' in the debugger to perform the command through the
+  debugger.
+
 Logs:
   All logs are generated in the logs/ subdirctory (it is emtpied first
   in the runtests.sh script)
