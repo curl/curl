@@ -243,7 +243,7 @@ POST (HTTP)
 
   To post to this, you enter a curl command line like:
 
-        curl -d "user=foobar&pass=12345&id=blablabla&dig=submit"  (continues)
+        curl -d "user=foobar&pass=12345&id=blablabla&ding=submit"  (continues)
           http://www.formpost.com/getthis/post.cgi
 
 
