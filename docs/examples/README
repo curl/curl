@@ -10,6 +10,10 @@ them for submission in future packages and on the web site.
 The Makefile.example is an example makefile that could be used to build these
 examples. Just edit the file according to your system and requirements first.
 
+Most examples should build fine using a command line like this:
+
+  $ gcc `curl-config --cflags` `curl-config --libs` -o example example.c
+
 Try the php/examples/ directory for PHP programming snippets!
 
   *PLEASE* do not use the curl.haxx.se site as a test target for your libcurl
