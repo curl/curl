@@ -18,6 +18,9 @@ SUBDIRS = docs lib src include tests packages perl php
 dist-hook:
 	cp $(srcdir)/Makefile.dist $(distdir)/Makefile
 
+html:
+	cd docs; make html
+
 check: test
 
 test:
