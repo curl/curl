@@ -95,7 +95,7 @@ void Curl_global_host_cache_dtor(void)
 
 struct curl_dns_cache_entry {
   Curl_addrinfo *addr;
-  int            timestamp;
+  time_t timestamp;
 };
 
 Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
