@@ -1440,12 +1440,10 @@ operate(struct Configurable *config, int argc, char *argv[])
   curl_memdebug("memdump");
 #endif
 
+  main_init(); /* inits winsock crap for windows */
+
   config->showerror=TRUE;
   config->conf=CONF_DEFAULT;
-#if 0
-  config->crlf=FALSE;
-  config->quote=NULL;
-#endif
 
   if(argc>1 &&
      (!strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
@@ -1454,9 +1452,6 @@ operate(struct Configurable *config, int argc, char *argv[])
      * The first flag, that is not a verbose name, but a shortname
      * and it includes the 'q' flag!
      */
-#if 0
-    fprintf(stderr, "I TURNED OFF THE CRAP\n");
-#endif
     ;
   }
   else {
@@ -1535,6 +1530,15 @@ operate(struct Configurable *config, int argc, char *argv[])
   }
   else
     allocuseragent = TRUE;
+
+  /*
+   * Get a curl handle to use for all forthcoming curl transfers.  Cleanup
+   * when all transfers are done. This is supported with libcurl 7.7 and
+   * should not be attempted on previous versions.
+   */
+  curl = curl_easy_init();
+  if(!curl)
+    return CURLE_FAILED_INIT;
 
   urlnode = config->url_list;
 
@@ -1721,121 +1725,109 @@ operate(struct Configurable *config, int argc, char *argv[])
 #endif
 
 
-      main_init();
+      curl_easy_setopt(curl, CURLOPT_FILE, (FILE *)&outs); /* where to store */
+      /* what call to write: */
+      curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
+      curl_easy_setopt(curl, CURLOPT_INFILE, infd); /* for uploads */
+      /* size of uploaded file: */
+      curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);
+      curl_easy_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
+      curl_easy_setopt(curl, CURLOPT_PROXY, config->proxy); /* proxy to use */
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
+      curl_easy_setopt(curl, CURLOPT_HEADER, config->conf&CONF_HEADER);
+      curl_easy_setopt(curl, CURLOPT_NOPROGRESS, config->conf&CONF_NOPROGRESS);
+      curl_easy_setopt(curl, CURLOPT_NOBODY, config->conf&CONF_NOBODY);
+      curl_easy_setopt(curl, CURLOPT_FAILONERROR,
+                       config->conf&CONF_FAILONERROR);
+      curl_easy_setopt(curl, CURLOPT_UPLOAD, config->conf&CONF_UPLOAD);
+      curl_easy_setopt(curl, CURLOPT_FTPLISTONLY,
+                       config->conf&CONF_FTPLISTONLY);
+      curl_easy_setopt(curl, CURLOPT_FTPAPPEND, config->conf&CONF_FTPAPPEND);
+      curl_easy_setopt(curl, CURLOPT_NETRC, config->conf&CONF_NETRC);
+      curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,
+                       config->conf&CONF_FOLLOWLOCATION);
+      curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config->conf&CONF_GETTEXT);
+      curl_easy_setopt(curl, CURLOPT_MUTE, config->conf&CONF_MUTE);
+      curl_easy_setopt(curl, CURLOPT_USERPWD, config->userpwd);
+      curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
+      curl_easy_setopt(curl, CURLOPT_RANGE, config->range);
+      curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
+      curl_easy_setopt(curl, CURLOPT_TIMEOUT, config->timeout);
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, config->postfields);
+        
+      /* new in libcurl 7.2: */
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, config->postfieldsize);
+        
+      curl_easy_setopt(curl, CURLOPT_REFERER, config->referer);
+      curl_easy_setopt(curl, CURLOPT_AUTOREFERER,
+                       config->conf&CONF_AUTO_REFERER);
+      curl_easy_setopt(curl, CURLOPT_USERAGENT, config->useragent);
+      curl_easy_setopt(curl, CURLOPT_FTPPORT, config->ftpport);
+      curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, config->low_speed_limit);
+      curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, config->low_speed_time);
+      curl_easy_setopt(curl, CURLOPT_RESUME_FROM,
+                       config->use_resume?config->resume_from:0);
+      curl_easy_setopt(curl, CURLOPT_COOKIE, config->cookie);
+      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, config->headers);
+      curl_easy_setopt(curl, CURLOPT_HTTPPOST, config->httppost);
+      curl_easy_setopt(curl, CURLOPT_SSLCERT, config->cert);
+      curl_easy_setopt(curl, CURLOPT_SSLCERTPASSWD, config->cert_passwd);
 
-      curl = curl_easy_init();
-      if(curl) {
-        curl_easy_setopt(curl, CURLOPT_FILE, (FILE *)&outs); /* where to store */
-        /* what call to write: */
-        curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
-        curl_easy_setopt(curl, CURLOPT_INFILE, infd); /* for uploads */
-        /* size of uploaded file: */
-        curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);
-        curl_easy_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
-        curl_easy_setopt(curl, CURLOPT_PROXY, config->proxy); /* proxy to use */
-        curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
-        curl_easy_setopt(curl, CURLOPT_HEADER, config->conf&CONF_HEADER);
-        curl_easy_setopt(curl, CURLOPT_NOPROGRESS, config->conf&CONF_NOPROGRESS);
-        curl_easy_setopt(curl, CURLOPT_NOBODY, config->conf&CONF_NOBODY);
-        curl_easy_setopt(curl, CURLOPT_FAILONERROR,
-                         config->conf&CONF_FAILONERROR);
-        curl_easy_setopt(curl, CURLOPT_UPLOAD, config->conf&CONF_UPLOAD);
-        curl_easy_setopt(curl, CURLOPT_FTPLISTONLY,
-                         config->conf&CONF_FTPLISTONLY);
-        curl_easy_setopt(curl, CURLOPT_FTPAPPEND, config->conf&CONF_FTPAPPEND);
-        curl_easy_setopt(curl, CURLOPT_NETRC, config->conf&CONF_NETRC);
-        curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,
-                         config->conf&CONF_FOLLOWLOCATION);
-        curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config->conf&CONF_GETTEXT);
-        curl_easy_setopt(curl, CURLOPT_MUTE, config->conf&CONF_MUTE);
-        curl_easy_setopt(curl, CURLOPT_USERPWD, config->userpwd);
-        curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
-        curl_easy_setopt(curl, CURLOPT_RANGE, config->range);
-        curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
-        curl_easy_setopt(curl, CURLOPT_TIMEOUT, config->timeout);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, config->postfields);
-        
-        /* new in libcurl 7.2: */
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, config->postfieldsize);
-        
-        curl_easy_setopt(curl, CURLOPT_REFERER, config->referer);
-        curl_easy_setopt(curl, CURLOPT_AUTOREFERER,
-                         config->conf&CONF_AUTO_REFERER);
-        curl_easy_setopt(curl, CURLOPT_USERAGENT, config->useragent);
-        curl_easy_setopt(curl, CURLOPT_FTPPORT, config->ftpport);
-        curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, config->low_speed_limit);
-        curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, config->low_speed_time);
-        curl_easy_setopt(curl, CURLOPT_RESUME_FROM,
-                         config->use_resume?config->resume_from:0);
-        curl_easy_setopt(curl, CURLOPT_COOKIE, config->cookie);
-        curl_easy_setopt(curl, CURLOPT_HTTPHEADER, config->headers);
-        curl_easy_setopt(curl, CURLOPT_HTTPPOST, config->httppost);
-        curl_easy_setopt(curl, CURLOPT_SSLCERT, config->cert);
-        curl_easy_setopt(curl, CURLOPT_SSLCERTPASSWD, config->cert_passwd);
-
-        if(config->cacert) {
-          /* available from libcurl 7.5: */
-          curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);
-          curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
-        }
-
-        if(config->conf&(CONF_NOBODY|CONF_USEREMOTETIME)) {
-          /* no body or use remote time */
-          /* new in 7.5 */
-          curl_easy_setopt(curl, CURLOPT_FILETIME, TRUE);
-        }
-      
-        /* 7.5 news: */
-        if (config->maxredirs) 
-          curl_easy_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs); 
-        else 
-          curl_easy_setopt(curl, CURLOPT_MAXREDIRS, DEFAULT_MAXREDIRS); 
- 
-        curl_easy_setopt(curl, CURLOPT_CRLF, config->crlf);
-        curl_easy_setopt(curl, CURLOPT_QUOTE, config->quote);
-        curl_easy_setopt(curl, CURLOPT_POSTQUOTE, config->postquote);
-        curl_easy_setopt(curl, CURLOPT_WRITEHEADER,
-                         config->headerfile?&heads:NULL);
-        curl_easy_setopt(curl, CURLOPT_COOKIEFILE, config->cookiefile);
-        curl_easy_setopt(curl, CURLOPT_SSLVERSION, config->ssl_version);
-        curl_easy_setopt(curl, CURLOPT_TIMECONDITION, config->timecond);
-        curl_easy_setopt(curl, CURLOPT_TIMEVALUE, config->condtime);
-        curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
-        curl_easy_setopt(curl, CURLOPT_STDERR, config->errors);
-      
-        /* three new ones in libcurl 7.3: */
-        curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel);
-        curl_easy_setopt(curl, CURLOPT_INTERFACE, config->iface);
-        curl_easy_setopt(curl, CURLOPT_KRB4LEVEL, config->krb4level);
-
-        if((config->progressmode == CURL_PROGRESS_BAR) &&
-           !(config->conf&(CONF_NOPROGRESS|CONF_MUTE))) {
-          /* we want the alternative style, then we have to implement it
-             ourselves! */
-          progressbarinit(&progressbar);
-          curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, myprogress);
-          curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
-        }
-        
-        /* new in libcurl 7.6.2: */
-        curl_easy_setopt(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
-        
-        res = curl_easy_perform(curl);
-        
-        if(config->writeout) {
-          ourWriteOut(curl, config->writeout);
-        }
-        
-        /* always cleanup */
-        curl_easy_cleanup(curl);
-        
-        if((res!=CURLE_OK) && config->showerror)
-          fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
+      if(config->cacert) {
+        /* available from libcurl 7.5: */
+        curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
       }
-      else
-        fprintf(config->errors, "curl: failed to init libcurl!\n");
-
-      main_free();
+      
+      if(config->conf&(CONF_NOBODY|CONF_USEREMOTETIME)) {
+        /* no body or use remote time */
+        /* new in 7.5 */
+        curl_easy_setopt(curl, CURLOPT_FILETIME, TRUE);
+      }
+      
+      /* 7.5 news: */
+      if (config->maxredirs) 
+        curl_easy_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs); 
+      else 
+        curl_easy_setopt(curl, CURLOPT_MAXREDIRS, DEFAULT_MAXREDIRS); 
+ 
+      curl_easy_setopt(curl, CURLOPT_CRLF, config->crlf);
+      curl_easy_setopt(curl, CURLOPT_QUOTE, config->quote);
+      curl_easy_setopt(curl, CURLOPT_POSTQUOTE, config->postquote);
+      curl_easy_setopt(curl, CURLOPT_WRITEHEADER,
+                       config->headerfile?&heads:NULL);
+      curl_easy_setopt(curl, CURLOPT_COOKIEFILE, config->cookiefile);
+      curl_easy_setopt(curl, CURLOPT_SSLVERSION, config->ssl_version);
+      curl_easy_setopt(curl, CURLOPT_TIMECONDITION, config->timecond);
+      curl_easy_setopt(curl, CURLOPT_TIMEVALUE, config->condtime);
+      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
+      curl_easy_setopt(curl, CURLOPT_STDERR, config->errors);
+      
+      /* three new ones in libcurl 7.3: */
+      curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel);
+      curl_easy_setopt(curl, CURLOPT_INTERFACE, config->iface);
+      curl_easy_setopt(curl, CURLOPT_KRB4LEVEL, config->krb4level);
+      
+      if((config->progressmode == CURL_PROGRESS_BAR) &&
+         !(config->conf&(CONF_NOPROGRESS|CONF_MUTE))) {
+        /* we want the alternative style, then we have to implement it
+           ourselves! */
+        progressbarinit(&progressbar);
+        curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, myprogress);
+        curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
+      }
+        
+      /* new in libcurl 7.6.2: */
+      curl_easy_setopt(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
+      
+      res = curl_easy_perform(curl);
+        
+      if(config->writeout) {
+        ourWriteOut(curl, config->writeout);
+      }
+        
+      if((res!=CURLE_OK) && config->showerror)
+        fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
 
       if((config->errors != stderr) &&
          (config->errors != stdout))
@@ -1882,6 +1874,11 @@ operate(struct Configurable *config, int argc, char *argv[])
 
   if(allocuseragent)
     free(config->useragent);
+
+  /* cleanup the curl handle! */
+  curl_easy_cleanup(curl);
+
+  main_free(); /* cleanup the winsock stuff for windows */
 
   return res;
 }
