@@ -60,6 +60,9 @@
 #include "hostip.h"
 #include "hash.h"
 
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
 #endif
@@ -121,7 +124,7 @@ static int _num_chars(int i)
 
 /* Create a hostcache id */
 static char *
-_create_hostcache_id(char *server, int port, size_t *entry_len)
+_create_hostcache_id(char *server, int port, ssize_t *entry_len)
 {
   char *id = NULL;
 
@@ -162,7 +165,7 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
 {
   char *entry_id = NULL;
   struct curl_dns_cache_entry *p = NULL;
-  size_t entry_len;
+  ssize_t entry_len;
   time_t now;
 
   /* If the host cache timeout is 0, we don't do DNS cach'ing
