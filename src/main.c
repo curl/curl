@@ -48,7 +48,7 @@
 /* This is now designed to have its own local setup.h */
 #include "setup.h"
 
-#ifdef WIN32
+#if defined(WIN32)&&!defined(__CYGWIN32__)
 #include <winsock.h>
 #endif
 
@@ -1713,7 +1713,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       if(!config->errors)
         config->errors = stderr;
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(__CYGWIN32__)
       if(!outfile && !(config->conf & CONF_GETTEXT)) {
         /* We get the output to stdout and we have not got the ASCII/text flag,
            then set stdout to be binary */

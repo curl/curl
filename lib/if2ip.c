@@ -32,7 +32,7 @@
 #include <unistd.h>
 #endif
 
-#if ! defined(WIN32) && ! defined(__BEOS__)
+#if ! defined(WIN32) && ! defined(__BEOS__) && !defined(__CYGWIN32__)
 
 #ifdef NEED_REENTRANT
 #define _REENTRANT

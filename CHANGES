@@ -6,6 +6,9 @@
 
                                History of Changes
 Daniel (24 January 2001)
+- Ingo Ralf Blum submitted a series of patches required to get curl to compile
+  properly with cygwin.
+
 - Robert Weaver posted a fix for the win32 section of the curl_getenv() code
   that corrected a potential memory leak.
 
