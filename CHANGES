@@ -6,9 +6,32 @@
 
                                History of Changes
 
+Version 7.7.2
+
+Daniel (22 April 2001)
+- Rosimildo da Silva updated the Makefiles for Borland/Windows.
+
+- Eric Rautman pointed out a problem with persistent connections that would
+  lead to broken Host: headers in the second HTTP request.
+
+Daniel (20 April 2001)
+- Added man pages for the curl_strequal() and curl_mprintf() families. Wrote
+  a 'libcurl overview' man page.
+
+- Spell-fixed some documents.
+
+- S. Moonesamy corrected mistakes in the man page.
+
+- Cris Bailiff fixed the curl_slists options in the perl interface, present
+  separately in the Curl::easy 1.1.4 package.
+
 Daniel (19 April 2001)
 - Linus Nielsen Feltzing removed the decimals from the size variables in the
   --write-out output. We hardly ever get fraction of bytes! :-)
+
+Version 7.7.2-pre1
+
+Daniel (19 April 2001)
 
 - Albert Chin provided a configure patch for the AC_SYS_LARGEFILE macro.
 
@@ -21,7 +44,7 @@ Daniel (18 April 2001)
 - I committed Cris and Georg's perl interface work. They've got callbacks
   working and options that receives those slist pointers.
 
-- Puneet Pawaia detected a problem with resumed downloads that use persistant
+- Puneet Pawaia detected a problem with resumed downloads that use persistent
   connections and I made a rather large writeup to correct this. It is
   important that all session-data is stored in the connectdata struct and not
   in the main struct as this previously did.
@@ -94,8 +117,8 @@ Daniel (3 April 2001)
   Also, the lib/Makefile.vc6 was corrected.
 
 - More investigations in the Location: following code made me realize that
-  it was not clean enough to work transparantly with persistant and non-
-  persistant connections. I think I've fixed it now.
+  it was not clean enough to work transparantly with persistent and non-
+  persistent connections. I think I've fixed it now.
 
 Daniel (29 March 2001)
 - Georg Horn mailed me some corrections for the Curl::easy perl interface.
@@ -117,7 +140,7 @@ Daniel (27 March 2001)
 Version 7.7.1-beta1
 
 Daniel (26 March 2001)
-- Mohamed Lrhazi reported problems with 7.6.1 and persistant HTTP/1.0
+- Mohamed Lrhazi reported problems with 7.6.1 and persistent HTTP/1.0
   connections (when the server replied a Connection: Keep-Alive) and this
   problem was not properly dealt with in 7.7 either. A patch was posted to the
   curl-and-php mailing list.
@@ -299,14 +322,14 @@ Daniel (12 March 2001)
   test cases.
 
 - Added 5 new libcurl options to curl/curl.h that can be used to control the
-  persistant connection support in libcurl. They're also documented (fairly
+  persistent connection support in libcurl. They're also documented (fairly
   thoroughly) in the curl_easy_setopt.3 man page. Three of them are now
   implemented, although not really tested at this point... Anyway, the new
   implemented options are named CURLOPT_MAXCONNECTS, CURLOPT_FRESH_CONNECT,
   CURLOPT_FORBID_REUSE. The ones still left to write code for are:
   CURLOPT_CLOSEPOLICY and its related option CURLOPT_CLOSEFUNCTION.
 
-- Made curl (the actual command line tool) use the new libcurl 7.7 persistant
+- Made curl (the actual command line tool) use the new libcurl 7.7 persistent
   connection support by re-using the same curl handle for every specified file
   transfer and after some more test case tweaking we have 100% test case OK.
   I made some test cases return HTTP/1.0 now to make sure that works as well.
@@ -326,7 +349,7 @@ Daniel (12 March 2001)
   of different HTTP proxies before I feel safe.
 
   Now I'm facing the problem with my test suite servers (both FTP and HTTP)
-  not supporting persistant connections and libcurl is doing them now. I have
+  not supporting persistent connections and libcurl is doing them now. I have
   to fix the test servers to get all the test cases do OK.
 
 Daniel (8 March 2001)
@@ -367,7 +390,7 @@ Daniel (2 March 2001)
 - Now they work intermixed as well. Major coolness!
 
 - More fiddling around, my 'tiny' client I have for testing purposes now has
-  proved to download both FTP and HTTP with persistant connections. They do
+  proved to download both FTP and HTTP with persistent connections. They do
   not work intermixed yet though.
 
 Daniel (1 March 2001)
@@ -376,7 +399,7 @@ Daniel (1 March 2001)
   now.
 
 Daniel (22 February 2001)
-- The persistant connections start to look good for HTTP. On a subsequent
+- The persistent connections start to look good for HTTP. On a subsequent
   request, it seems that libcurl now can pick an already existing connection
   if a suitable one exists, or it opens a new one.
 
@@ -401,7 +424,7 @@ Daniel (20 February 2001)
   mailing lists for discussions around how this is gonna be implemented. Docs
   and more will follow.
 
-  Studied the HTTP RFC to find out better how persistant connections should
+  Studied the HTTP RFC to find out better how persistent connections should
   work. Seems cool enough.
 
 Daniel (19 February 2001)
@@ -420,9 +443,9 @@ Daniel (15 February 2001)
   string switches off the POST again.
 
 - Excellent suggestions from Rich Gray, Rick Jones, Johan Nilsson and Bjorn
-  Reese helped me define a way how to incorporate persistant connections into
+  Reese helped me define a way how to incorporate persistent connections into
   libcurl in a very smooth way. If done right, no change may have to be made
-  to older programs and they will just start using persistant connections when
+  to older programs and they will just start using persistent connections when
   applicable!
 
 Daniel (13 February 2001)
