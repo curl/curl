@@ -705,6 +705,16 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
              /* point the main to us */
              mainco = newco;
            }
+           else {
+              /* failure, clear up the allocated chain and return NULL */
+             while(mainco) {
+               co = mainco->next;
+               free(mainco);
+               mainco = co;
+             }
+
+             return NULL;
+           }
          }
        }
      }
