@@ -6,6 +6,10 @@
 
                                History of Changes
 
+Daniel (25 June 2001)
+- Anton Kalmykov provided a fix that makes curl work with form field names
+  with spaces like when -F is used.
+
 Daniel (20 June 2001)
 - Mike Bytnar provided a fine report that proved that the --with-ssl option
   for configure needed tweaking. It no longer searches the default directories
