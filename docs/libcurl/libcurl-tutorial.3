@@ -195,20 +195,24 @@ and the function that gets invoked by libcurl. libcurl itself won't touch the
 data you pass with CURLOPT_WRITEDATA.
 
 libcurl offers its own default internal callback that'll take care of the data
-if you don't set the callback with CURLOPT_WRITEFUNCTION. It will then simply
-output the received data to stdout. You can have the default callback write
-the data to a different file handle by passing a 'FILE *' to a file opened for
-writing with the CURLOPT_WRITEDATA option.
+if you don't set the callback with \fICURLOPT_WRITEFUNCTION\fP. It will then
+simply output the received data to stdout. You can have the default callback
+write the data to a different file handle by passing a 'FILE *' to a file
+opened for writing with the \fICURLOPT_WRITEDATA\fP option.
 
 Now, we need to take a step back and have a deep breath. Here's one of those
 rare platform-dependent nitpicks. Did you spot it? On some platforms[2],
 libcurl won't be able to operate on files opened by the program. Thus, if you
-use the default callback and pass in a an open file with CURLOPT_WRITEDATA, it
-will crash. You should therefore avoid this to make your program run fine
-virtually everywhere.
+use the default callback and pass in a an open file with
+\fICURLOPT_WRITEDATA\fP, it will crash. You should therefore avoid this to
+make your program run fine virtually everywhere.
 
-(CURLOPT_WRITEDATA was formerly known as CURLOPT_FILE. Both names still work
-and do the same thing).
+(\fICURLOPT_WRITEDATA\fP was formerly known as \fICURLOPT_FILE\fP. Both names
+still work and do the same thing).
+
+If you're using libcurl as a win32 DLL, you MUST use the
+\fICURLOPT_WRITEFUNCTION\fP if you set \fICURLOPT_WRITEDATA\fP - or you will
+experience crashes.
 
 There are of course many more options you can set, and we'll get back to a few
 of them later. Let's instead continue to the actual transfer:
