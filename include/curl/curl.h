@@ -481,8 +481,8 @@ char *curl_escape(char *string, int length);
 char *curl_unescape(char *string, int length);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.7"
-#define LIBCURL_VERSION_NUM 0x070700
+#define LIBCURL_VERSION "7.7.1-beta1"
+#define LIBCURL_VERSION_NUM 0x070701
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {

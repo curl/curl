@@ -6,6 +6,8 @@
 
                                History of Changes
 
+Version 7.7.1-beta1
+
 Daniel (26 March 2001)
 - Mohamed Lrhazi reported problems with 7.6.1 and persistant HTTP/1.0
   connections (when the server replied a Connection: Keep-Alive) and this
