@@ -302,6 +302,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             break;		/* read more and try again */
           }
 
+          /* decrease the size of the remaining buffer */
+          nread -= (k->end_ptr - k->str)+1; 
+
           k->str = k->end_ptr + 1; /* move past new line */
 
           /*
@@ -695,13 +698,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         /* We might have reached the end of the header part here, but
            there might be a non-header part left in the end of the read
            buffer. */
-
-        if (!k->header) {
-          /* starting here, this is not part of the header! */
-
-          /* we subtract the remaining header size from the buffer */
-          nread -= (k->str - k->buf);
-        }
 
       }			/* end if header mode */
 
