@@ -11,7 +11,9 @@ Daniel (8 January 2001)
   the separator work again when getting multiple globbed URLs to stdout.
 
 - Worked with Loic Dachary to get the make dist and make distcheck work
-  correctly.
+  correctly. The 'maketgz' script is now using the automake generated 'make
+  dist' when creating release archives. Loic successfully made 'make rpms'
+  automatically build RPMs!
 
 Loic Dachary (6 January 2001)
 - Automated generation of rpm packages, no need to be root.

@@ -9,10 +9,12 @@ curl:
 	@(cd ..; make)
 
 test:
-	$(PERL) runtests.pl
+	$(MAKE) -C data test
+	srcdir=$(srcdir) $(PERL) $(srcdir)/runtests.pl
 
 quiet-test:
-	$(PERL) runtests.pl -s -a
+	$(MAKE) -C data test
+	srcdir=$(srcdir) $(PERL) $(srcdir)/runtests.pl -s -a
 
 clean:
 	rm -rf log

@@ -8,6 +8,7 @@
 
 use strict;
 
+my $srcdir = $ENV{'srcdir'} || '.';
 my $HOSTIP="127.0.0.1";
 my $HOSTPORT=8999; # bad name, but this is the HTTP server port
 my $FTPPORT=8921;  # this is the FTP server port
@@ -108,7 +109,7 @@ sub runhttpserver {
     }
 
     if ($RUNNING != 1) {
-        system("perl ./httpserver.pl $HOSTPORT &");
+        system("perl $srcdir/httpserver.pl $HOSTPORT &");
         sleep 1; # give it a little time to start
     }
     else {
@@ -149,7 +150,7 @@ sub runftpserver {
     }
 
     if ($RUNNING != 1) {
-        system("perl ./ftpserver.pl $FTPPORT &");
+        system("perl $srcdir/ftpserver.pl $FTPPORT &");
         sleep 1; # give it a little time to start
     }
     else {

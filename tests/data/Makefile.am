@@ -1,6 +1,9 @@
 all:
 install:
 
+test:
+	[ -f command1.txt ] || ln -s $(srcdir)/*.txt .
+
 EXTRA_DIST = command1.txt      error113.txt      name17.txt        prot8.txt \
 command10.txt     error114.txt      name18.txt        prot9.txt \
 command100.txt    error115.txt      name19.txt        reply1.txt \
