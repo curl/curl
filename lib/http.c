@@ -1274,7 +1274,6 @@ CURLcode Curl_http_done(struct connectdata *conn,
 {
   struct SessionHandle *data;
   struct HTTP *http;
-  (void)status; /* no use for us */
 
   data=conn->data;
   http=conn->proto.http;
@@ -1291,7 +1290,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
 
     free(buff->buffer);
     free(buff);
-    http->send_buffer = NULL; /* cleaer the pointer */
+    http->send_buffer = NULL; /* clear the pointer */
   }
 
   if(HTTPREQ_POST_FORM == data->set.httpreq) {
@@ -1306,6 +1305,9 @@ CURLcode Curl_http_done(struct connectdata *conn,
   }
   else if(HTTPREQ_PUT == data->set.httpreq)
     conn->bytecount = http->readbytecount + http->writebytecount;
+
+  if (status != CURLE_OK)
+    return (status);
 
   if(!conn->bits.retry &&
      ((http->readbytecount +
