@@ -5,6 +5,8 @@ To get fixed in 7.12.2 (planned release: mid October 2004)
 
 50 - threaded windows resolver problem reported by Traian Nicolescu
 
+51 - ?-letters in user name or password in ftp:// URLs
+
 To get fixed in 7.12.3 (planned release: December 2004)
 ======================
 
