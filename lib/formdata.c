@@ -556,15 +556,16 @@ static const char * ContentTypeForFilename (const char *filename,
  * Returns 0 on success and 1 if the malloc failed.
  *
  ***************************************************************************/
-static int AllocAndCopy (char **buffer, int buffer_length)
+static int AllocAndCopy(char **buffer, size_t buffer_length)
 {
   const char *src = *buffer;
-  int length, add = 0;
+  size_t length;
+  bool add = FALSE;
   if (buffer_length)
     length = buffer_length;
   else {
     length = strlen(*buffer);
-    add = 1;
+    add = TRUE;
   }
   *buffer = (char*)malloc(length+add);
   if (!*buffer)
@@ -1003,7 +1004,7 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
 
 static int AddFormData(struct FormData **formp,
                        const void *line,
-                       long length)
+                       size_t length)
 {
   struct FormData *newform = (struct FormData *)
     malloc(sizeof(struct FormData));
@@ -1047,7 +1048,7 @@ char *Curl_FormBoundary(void)
   char *retstring;
   static int randomizer=0; /* this is just so that two boundaries within
 			      the same form won't be identical */
-  int i;
+  size_t i;
 
   static char table16[]="abcdef0123456789";
 
@@ -1114,7 +1115,7 @@ void curl_formfree(struct curl_httppost *form)
 
 CURLcode Curl_getFormData(struct FormData **finalform,
                           struct curl_httppost *post,
-                          int *sizep)
+                          size_t *sizep)
 {
   struct FormData *form = NULL;
   struct FormData *firstform;
@@ -1232,7 +1233,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
         /* we should include the contents from the specified file */
         FILE *fileread;
         char buffer[1024];
-        int nread;
+        size_t nread;
 
         fileread = strequal("-", file->contents)?stdin:
           /* binary read for win32 crap */
@@ -1306,14 +1307,14 @@ int Curl_FormInit(struct Form *form, struct FormData *formdata )
 }
 
 /* fread() emulation */
-int Curl_FormReader(char *buffer,
-                    size_t size,
-                    size_t nitems,
-                    FILE *mydata)
+size_t Curl_FormReader(char *buffer,
+                       size_t size,
+                       size_t nitems,
+                       FILE *mydata)
 {
   struct Form *form;
-  int wantedsize;
-  int gotsize = 0;
+  size_t wantedsize;
+  size_t gotsize = 0;
 
   form=(struct Form *)mydata;
 
@@ -1352,21 +1353,21 @@ int Curl_FormReader(char *buffer,
 }
 
 /* possible (old) fread() emulation that copies at most one line */
-int Curl_FormReadOneLine(char *buffer,
-                         size_t size,
-                         size_t nitems,
-                         FILE *mydata)
+size_t Curl_FormReadOneLine(char *buffer,
+                            size_t size,
+                            size_t nitems,
+                            FILE *mydata)
 {
   struct Form *form;
-  int wantedsize;
-  int gotsize;
+  size_t wantedsize;
+  size_t gotsize;
 
   form=(struct Form *)mydata;
 
   wantedsize = size * nitems;
 
   if(!form->data)
-    return -1; /* nothing, error, empty */
+    return 0; /* nothing, error, empty */
 
   do {
   
@@ -1443,7 +1444,7 @@ int main()
   int value6length = strlen(value5);
   int errors = 0;
   int size;
-  int nread;
+  size_t nread;
   char buffer[4096];
   struct curl_httppost *httppost=NULL;
   struct curl_httppost *last_post=NULL;

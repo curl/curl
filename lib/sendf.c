@@ -152,7 +152,7 @@ void Curl_failf(struct SessionHandle *data, const char *fmt, ...)
     data->state.errorbuf = TRUE; /* wrote error string */
 
     if(data->set.verbose) {
-      int len = strlen(data->set.errorbuffer);
+      size_t len = strlen(data->set.errorbuffer);
       bool doneit=FALSE;
       if(len < CURL_ERROR_SIZE - 1) {
         doneit = TRUE;
@@ -174,7 +174,7 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
 {
   struct SessionHandle *data = conn->data;
   ssize_t bytes_written;
-  ssize_t write_len;
+  size_t write_len;
   CURLcode res;
   char *s;
   char *sptr;
@@ -199,7 +199,7 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
     if(data->set.verbose)
       Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written);
 
-    if(bytes_written != write_len) {
+    if((size_t)bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease
          the size left and try again! */
       write_len -= bytes_written;
@@ -284,7 +284,7 @@ CURLcode Curl_write(struct connectdata *conn,
     else
 #endif /* HAVE_KRB4 */
     {
-      bytes_written = swrite(sockfd, mem, len);
+      bytes_written = (ssize_t)swrite(sockfd, mem, len);
     }
     if(-1 == bytes_written) {
       int err = Curl_ourerrno();

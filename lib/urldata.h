@@ -205,7 +205,7 @@ struct negotiatedata {
  ***************************************************************************/
 struct HTTP {
   struct FormData *sendit;
-  int postsize;
+  size_t postsize;
   char *postdata;
 
   const char *p_pragma;      /* Pragma: string */

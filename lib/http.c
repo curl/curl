@@ -440,14 +440,14 @@ CURLcode Curl_http_auth(struct connectdata *conn,
 
 
 /* fread() emulation to provide POST and/or request data */
-static int readmoredata(char *buffer,
-                        size_t size,
-                        size_t nitems,
-                        void *userp)
+static size_t readmoredata(char *buffer,
+                           size_t size,
+                           size_t nitems,
+                           void *userp)
 {
   struct connectdata *conn = (struct connectdata *)userp;
   struct HTTP *http = conn->proto.http;
-  int fullsize = size * nitems;
+  size_t fullsize = size * nitems;
 
   if(0 == http->postsize)
     /* nothing to return */
@@ -528,9 +528,9 @@ CURLcode add_buffer_send(send_buffer *in,
   ssize_t amount;
   CURLcode res;
   char *ptr;
-  int size;
+  size_t size;
   struct HTTP *http = conn->proto.http;
-  int sendsize;
+  size_t sendsize;
   int sockfd = conn->sock[FIRSTSOCKET];
 
   /* The looping below is required since we use non-blocking sockets, but due
@@ -570,7 +570,7 @@ CURLcode add_buffer_send(send_buffer *in,
 
     *bytes_written += amount;
     
-    if(amount != size) {
+    if((size_t)amount != size) {
       /* The whole request could not be sent in one system call. We must queue
          it up and send it later when we get the chance. We must not loop here
          and wait until it might work again. */
@@ -639,7 +639,7 @@ static
 CURLcode add_buffer(send_buffer *in, const void *inptr, size_t size)
 {
   char *new_rb;
-  int new_size;
+  size_t new_size;
 
   if(!in->buffer ||
      ((in->size_used + size) > (in->size_max - 1))) {
@@ -744,7 +744,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   bool keepon=TRUE;
   ssize_t gotbytes;
   char *ptr;
-  int timeout = 3600; /* default timeout in seconds */
+  long timeout = 3600; /* default timeout in seconds */
   struct timeval interval;
   fd_set rkeepfd;
   fd_set readfd;
@@ -1164,7 +1164,7 @@ CURLcode Curl_http(struct connectdata *conn)
       ptr++;
     
     if(ptr != start) {
-      int len=ptr-start;
+      size_t len=ptr-start;
       conn->allocptr.cookiehost = malloc(len+1);
       if(!conn->allocptr.cookiehost)
         return CURLE_OUT_OF_MEMORY;
@@ -1260,8 +1260,8 @@ CURLcode Curl_http(struct connectdata *conn)
          input. If we knew it was a proper file we could've just
          fseek()ed but we only have a stream here */
       do {
-        curl_off_t readthisamountnow = (conn->resume_from - passed);
-        curl_off_t actuallyread;
+        size_t readthisamountnow = (conn->resume_from - passed);
+        size_t actuallyread;
 
         if(readthisamountnow > BUFSIZE)
           readthisamountnow = BUFSIZE;
@@ -1509,12 +1509,12 @@ CURLcode Curl_http(struct connectdata *conn)
            work, but we support it anyway.
         */
         char contentType[256];
-        int linelength=0;
-        linelength = Curl_FormReadOneLine (contentType,
-                                           sizeof(contentType),
-                                           1,
-                                           (FILE *)&http->form);
-        if(linelength == -1) {
+        size_t linelength=0;
+        linelength = Curl_FormReadOneLine(contentType,
+                                          sizeof(contentType),
+                                          1,
+                                          (FILE *)&http->form);
+        if(!linelength) {
           failf(data, "Could not get Content-Type header line!");
           return CURLE_HTTP_POST_ERROR;
         }

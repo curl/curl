@@ -115,8 +115,8 @@ free_cookiemess(struct Cookie *co)
 
 static bool tailmatch(const char *little, const char *bigone)
 {
-  unsigned int littlelen = strlen(little);
-  unsigned int biglen = strlen(bigone);
+  size_t littlelen = strlen(little);
+  size_t biglen = strlen(bigone);
 
   if(littlelen > biglen)
     return FALSE;
@@ -192,7 +192,7 @@ Curl_cookie_add(struct SessionHandle *data,
           char *whatptr;
 
           /* Strip off trailing whitespace from the 'what' */
-          int len=strlen(what);
+          size_t len=strlen(what);
           while(len && isspace((int)what[len-1])) {
             what[len-1]=0;
             len--;
@@ -360,7 +360,7 @@ Curl_cookie_add(struct SessionHandle *data,
       /* no path was given in the header line, set the default now */
       char *endslash = strrchr(path, '/');
       if(endslash) {
-        int pathlen = endslash-path+1; /* include the ending slash */
+        size_t pathlen = endslash-path+1; /* include the ending slash */
         co->path=malloc(pathlen+1); /* one extra for the zero byte */
         if(co->path) {
           memcpy(co->path, path, pathlen);

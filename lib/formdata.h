@@ -27,28 +27,25 @@
 struct FormData {
   struct FormData *next;
   char *line;
-  long length;
+  size_t length;
 };
 
 struct Form {
   struct FormData *data; /* current form line to send */
-  int sent; /* number of bytes of the current line that has already
-	       been sent in a previous invoke */
+  unsigned int sent; /* number of bytes of the current line that has already
+                        been sent in a previous invoke */
 };
 
 /* used by FormAdd for temporary storage */
 typedef struct FormInfo {
   char *name;
-  long namelength;
+  size_t namelength;
   char *value;
-  long contentslength;
+  size_t contentslength;
   char *contenttype;
   long flags;
-
-		/* CMC: Added support for buffer uploads */
   char *buffer;      /* pointer to existing buffer used for file upload */
-	long bufferlength;   
-
+  size_t bufferlength;
   char *showfilename; /* The file name to show. If not set, the actual
                          file name will be used */
   struct curl_slist* contentheader;
@@ -60,19 +57,19 @@ int Curl_FormInit(struct Form *form, struct FormData *formdata );
 CURLcode
 Curl_getFormData(struct FormData **,
                  struct curl_httppost *post,
-                 int *size);
+                 size_t *size);
 
 /* fread() emulation */
-int Curl_FormReader(char *buffer,
-                    size_t size,
-                    size_t nitems,
-                    FILE *mydata);
+size_t Curl_FormReader(char *buffer,
+                       size_t size,
+                       size_t nitems,
+                       FILE *mydata);
 
 /* possible (old) fread() emulation that copies at most one line */
-int Curl_FormReadOneLine(char *buffer,
-                         size_t size,
-                         size_t nitems,
-                         FILE *mydata);
+size_t Curl_FormReadOneLine(char *buffer,
+                            size_t size,
+                            size_t nitems,
+                            FILE *mydata);
 
 char *Curl_FormBoundary(void);
 
