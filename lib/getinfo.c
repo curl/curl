@@ -35,6 +35,11 @@
 #include	<stdlib.h>
 #endif
 
+/* Make this the last #include */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 /*
  * This is supposed to be called in the beginning of a permform() session
  * and should reset all session-info variables
