@@ -1391,6 +1391,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 
   Curl_safefree(conn->host.rawalloc); /* host name buffer */
   Curl_safefree(conn->proxy.rawalloc); /* proxy name buffer */
+#ifdef USE_LIBIDN
   if(conn->host.encalloc)
     idn_free(conn->host.encalloc); /* encoded host name buffer, must be freed
                                       with idn_free() since this was allocated
@@ -1399,6 +1400,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     idn_free(conn->proxy.encalloc); /* encoded proxy name buffer, must be
                                        freed with idn_free() since this was
                                        allocated by libidn */
+#endif
   Curl_SSL_Close(conn);
 
   /* close possibly still open sockets */
