@@ -16,6 +16,13 @@ function does not require that there actually is any data available for
 reading or that data can be written, it can be called just in case. It will
 write the number of handles that still transfer data in the second argument's
 integer-pointer.
+
+When you call curl_multi_perform() and the amount of \fIrunning_handles\fP is
+changed from the previous call (or is less than the amount of easy handles
+you've added to the multi handle), you know that there is one or more
+transfers less "running". You can then call \fIcurl_multi_info_read(3)\fP to
+get information about each individual completed transfer, and that returned
+info includes CURLcode and more.
 .SH "RETURN VALUE"
 CURLMcode type, general libcurl multi interface error code.
 
@@ -34,4 +41,5 @@ file descriptors, then it'll wait for action on them using select() and as
 soon as one or more of them are ready, \fIcurl_multi_perform(3)\fP gets
 called.
 .SH "SEE ALSO"
-.BR curl_multi_cleanup "(3)," curl_multi_init "(3)," curl_multi_fdset "(3)"
+.BR curl_multi_cleanup "(3), " curl_multi_init "(3), "
+.BR curl_multi_fdset "(3), " curl_multi_info_read "(3)"
