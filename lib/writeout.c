@@ -65,12 +65,12 @@ struct variable {
 
 
 static struct variable replacements[]={
-  {"effective_url", VAR_EFFECTIVE_URL},
+  {"url_effective", VAR_EFFECTIVE_URL},
   {"http_code", VAR_HTTP_CODE},
-  {"total_time", VAR_TOTAL_TIME},
-  {"namelookup_time", VAR_NAMELOOKUP_TIME},
-  {"connect_time", VAR_CONNECT_TIME},
-  {"pretransfer_time", VAR_PRETRANSFER_TIME},
+  {"time_total", VAR_TOTAL_TIME},
+  {"time_namelookup", VAR_NAMELOOKUP_TIME},
+  {"time_connect", VAR_CONNECT_TIME},
+  {"time_pretransfer", VAR_PRETRANSFER_TIME},
   {"size_download", VAR_SIZE_DOWNLOAD},
   {"size_upload", VAR_SIZE_UPLOAD},
   {"speed_download", VAR_SPEED_DOWNLOAD},
@@ -145,6 +145,9 @@ void WriteOut(struct UrlData *data)
     }
     else if('\\' == *ptr) {
       switch(ptr[1]) {
+      case 'r':
+        fputc('\r', stream);
+        break;
       case 'n':
         fputc('\n', stream);
         break;
