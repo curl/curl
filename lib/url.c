@@ -2118,12 +2118,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   int rc;
   bool reuse;
 
+#ifdef SIGALRM
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
   bool keep_copysig=FALSE;        /* did copy it? */
 #else
 #ifdef HAVE_SIGNAL
   void *keep_sigact;              /* store the old handler here */
+#endif
 #endif
 #endif
 
