@@ -374,7 +374,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
 CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 {
   va_list param;
-  char *cookiefile;
+  char *argptr;
 
   va_start(param, option);
 
@@ -728,12 +728,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Set cookie file to read and parse. Can be used multiple times.
      */
-    cookiefile = (char *)va_arg(param, void *);
-    if(cookiefile) {
+    argptr = (char *)va_arg(param, void *);
+    if(argptr) {
       struct curl_slist *cl;
       /* append the cookie file name to the list of file names, and deal with
          them later */
-      cl = curl_slist_append(data->change.cookielist, cookiefile);
+      cl = curl_slist_append(data->change.cookielist, argptr);
 
       if(!cl)
         return CURLE_OUT_OF_MEMORY;
@@ -1132,26 +1132,24 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * String that holds the SSL crypto engine.
      */
-    {
-      const char *cpTemp = va_arg(param, char *);
-      if (cpTemp && cpTemp[0]) {
+    argptr = va_arg(param, char *);
+    if (argptr && argptr[0]) {
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
-        ENGINE *e = ENGINE_by_id(cpTemp);
-        if (e) {
-          if (data->engine) {
-            ENGINE_free(data->engine);
-          }
-          data->engine = e;
+      ENGINE *e = ENGINE_by_id(argptr);
+      if (e) {
+        if (data->engine) {
+          ENGINE_free(data->engine);
         }
-        else {
-          failf(data, "SSL Engine '%s' not found", cpTemp);
-          return CURLE_SSL_ENGINE_NOTFOUND;
-        }
-#else
-        failf(data, "SSL Engine not supported");
-        return CURLE_SSL_ENGINE_NOTFOUND;
-#endif
+        data->engine = e;
       }
+      else {
+        failf(data, "SSL Engine '%s' not found", argptr);
+        return CURLE_SSL_ENGINE_NOTFOUND;
+      }
+#else
+      failf(data, "SSL Engine not supported");
+      return CURLE_SSL_ENGINE_NOTFOUND;
+#endif
     }
     break;
 
