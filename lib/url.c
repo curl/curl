@@ -1893,7 +1893,7 @@ static void verboseconnect(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
   const char *host=NULL;
-  char addrbuf[NI_MAXHOST];
+  char addrbuf[256];
 
   /* Get a printable version of the network address. */
 #ifdef ENABLE_IPV6
