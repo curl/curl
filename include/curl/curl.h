@@ -212,10 +212,8 @@ typedef enum {
      in the CURLOPT_FLAGS to activate this */
   CINIT(RANGE, OBJECTPOINT, 7),
 
-#if 0
-  /* Configuration flags */
-  CINIT(FLAGS, LONG, 8),
-#endif
+  /* not used */
+
   /* Specified file stream to upload from (use as input): */
   CINIT(INFILE, OBJECTPOINT, 9),
 
@@ -321,11 +319,8 @@ typedef enum {
   /* HTTP request, for odd commands like DELETE, TRACE and others */
   CINIT(STDERR, OBJECTPOINT, 37),
 
-#if 0
-  /* Progress mode set alternative progress mode displays. Alternative
-     ones should now be made by the client, not the lib! */     
-  CINIT(PROGRESSMODE, LONG, 38),
-#endif
+  /* 38 is not used */
+
   /* send linked-list of post-transfer QUOTE commands */
   CINIT(POSTQUOTE, OBJECTPOINT, 39),
 
@@ -465,6 +460,11 @@ typedef enum {
   /* Specify which HTTP version to use! This must be set to one of the
      CURL_HTTP_VERSION* enums set below. */
   CINIT(HTTP_VERSION, LONG, 84),
+
+  /* Specificly switch on or off the FTP engine's use of the EPSV command. By
+     default, that one will always be attempted before the more traditional
+     PASV command. */     
+  CINIT(FTP_USE_EPSV, LONG, 85),
   
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
