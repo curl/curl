@@ -6,8 +6,20 @@
 
                                   Changelog
 
+Daniel (19 May 2004)
+- David Byron added test case 170 - this used to crash the previous version of 
+  curl.
+
 Daniel (17 May 2004)
-- All 191 test cases run through the torture test OK!
+- Peter Sylvester's patch that addresses two flaws in the peer certificate
+  name verification:
+  o when multiple common names are used (as in the curl tests), the last name
+    needs to be selected.
+  o allow comparing with encoded values, at least with BMP and ISO latin1
+    encoded T61strings.
+
+- All 191 test cases run through the torture test OK! 'make test-torture' is
+  now available in the root makefile (on configure-based environments).
 
 Daniel (14 May 2004)
 - With a slightly modified ftpserver.pl I've now run almost all tests through

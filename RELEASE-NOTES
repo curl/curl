@@ -21,7 +21,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o allocation failures cause no leaks
+ o improved peer certificate name verification
+ o allocation failures cause no leaks nor crashes
  o the progress meter display now handles file sizes up to full 8 exabytes
    (which is as high a signed 64 bit number can reach)
  o general HTTP authentication improvements
@@ -44,6 +45,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, Tommy Tam, Luca Altea, James Bursa, Mihai Ionescu, Michael
- Benedict, Andrés García, Joe Halpin, Seshubabu Pasam
+ Benedict, Andrés García, Joe Halpin, Seshubabu Pasam, Peter Sylvester
 
         Thanks! (and sorry if I forgot to mention someone)
