@@ -2023,7 +2023,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'V':
     {
-      const char **proto;
+      const char * const *proto;
 
       printf(CURL_ID "%s\n", curl_version());
       if (curlinfo->protocols) {

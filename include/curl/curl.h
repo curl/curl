@@ -1337,7 +1337,7 @@ typedef enum {
 /* The 'CURLVERSION_NOW' is the symbolic name meant to be used by
    basicly all programs ever, that want to get version information. It is
    meant to be a built-in version number for what kind of struct the caller
-   expects. If the struct ever changes, we redfine the NOW to another enum
+   expects. If the struct ever changes, we redefine the NOW to another enum
    from above. */
 #define CURLVERSION_NOW CURLVERSION_THIRD
 
@@ -1347,11 +1347,11 @@ typedef struct {
   unsigned int version_num; /* LIBCURL_VERSION_NUM */
   const char *host;         /* OS/host/cpu/machine when configured */
   int features;             /* bitmask, see defines below */
-  char *ssl_version;        /* human readable string */
+  const char *ssl_version;  /* human readable string */
   long ssl_version_num;     /* number */
   const char *libz_version;       /* human readable string */
   /* protocols is terminated by an entry with a NULL protoname */
-  const char **protocols;
+  const char * const *protocols;
 
   /* The fields below this were added in CURLVERSION_SECOND */
   const char *ares;
