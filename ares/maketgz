@@ -12,6 +12,10 @@ if(!-f "ares.h") {
     exit;
 }
 
+if(!-f "configure") {
+    `autoconf`;
+}
+
 @files=`find . -name FILES`;
 
 my @entries;
