@@ -201,11 +201,11 @@ CURLcode Curl_file(struct connectdata *conn)
 #ifdef HAVE_STRFTIME
     if(fstated) {
       struct tm *tm;
-#ifdef HAVE_LOCALTIME_R
+#ifdef HAVE_GMTIME_R
       struct tm buffer;
-      tm = (struct tm *)localtime_r((time_t *)&statbuf.st_mtime, &buffer);
+      tm = (struct tm *)gmtime_r((time_t *)&statbuf.st_mtime, &buffer);
 #else
-      tm = localtime((time_t *)&statbuf.st_mtime);
+      tm = gmtime((time_t *)&statbuf.st_mtime);
 #endif
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
       strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S GMT\r\n",
