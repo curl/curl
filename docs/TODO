@@ -10,24 +10,42 @@ TODO
  send me patches that improve things! Also check the http://curl.haxx.se/dev
  web section for various development notes.
 
-To do in a future release (random order):
-
- * FTP ASCII upload does not follow RFC959 section 3.1.1.1: 
-    "The sender converts the data from an internal character representation to
-    the standard 8-bit NVT-ASCII representation (see the Telnet
-    specification).  The receiver will convert the data from the standard form
-    to his own internal form."
+ LIBCURL
 
  * Consider an interface to libcurl that allows applications to easier get to
    know what cookies that are sent back in the response headers.
 
- * HTTP PUT for files passed on stdin *OR* when the --crlf option is
-   used. Requires libcurl to send the file with chunked content
-   encoding. http://curl.haxx.se/dev/HTTP-PUT-stdin.txt
+ * Make content encoding/decoding internally be made using a filter system.
+
+ * The new 'multi' interface is being designed. Work out the details, start
+   implementing and write test applications!
+   [http://curl.haxx.se/dev/multi.h]
+
+ * Add a name resolve cache to libcurl to make repeated fetches to the same
+   host name (when persitancy isn't available) faster.
 
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
-   http://curl.haxx.se/dev/no_copy_callbacks.txt
+   [http://curl.haxx.se/dev/no_copy_callbacks.txt]
+
+ * Add configure options that disables certain protocols in libcurl to
+   decrease footprint.  '--disable-[protocol]' where protocol is http, ftp,
+   telnet, ldap, dict or file.
+
+ * Add asynchronous name resolving. http://curl.haxx.se/dev/async-resolver.txt
+
+ DOCUMENTATION
+
+ * Document all CURLcode error codes, why they happen and what most likely
+   will make them not happen again.
+
+ FTP
+
+ * FTP ASCII upload does not follow RFC959 section 3.1.1.1: "The sender
+   converts the data from an internal character representation to the standard
+   8-bit NVT-ASCII representation (see the Telnet specification).  The
+   receiver will convert the data from the standard form to his own internal
+   form."
 
  * An option to only download remote FTP files if they're newer than the local
    one is a good idea, and it would fit right into the same syntax as the
@@ -36,33 +54,25 @@ To do in a future release (random order):
 
  * Suggested on the mailing list: CURLOPT_FTP_MKDIR...!
 
- * Add configure options that disables certain protocols in libcurl to
-   decrease footprint.  '--disable-[protocol]' where protocol is http, ftp,
-   telnet, ldap, dict or file.
+ * Always use the FTP SIZE command before downloading, as that makes it more
+   likely that we know the size when downloading. Some sites support SIZE but
+   don't show the size in the RETR response!
 
- * Extend the test suite to include telnet. The telnet could just do ftp or
-   http operations (for which we have test servers).
+ * Make FTP PASV work with IPv6 support. RFC 2428 "FTP Extensions for IPv6 and
+   NATs" is interesting.
 
- * Make TELNET work on windows!
+ HTTP
 
- * Make curl's SSL layer option capable of using other free SSL libraries.
-   Such as the Mozilla Security Services
-   (http://www.mozilla.org/projects/security/pki/nss/) and GNUTLS
-   (http://gnutls.hellug.gr/)
-
- * Add asynchronous name resolving, as this enables full timeout support for
-   fork() systems. http://curl.haxx.se/dev/async-resolver.txt
-
- * Move non-URL related functions that are used by both the lib and the curl
-   application to a separate "portability lib".
-
- * Add libcurl support/interfaces for more languages. C++ wrapper perhaps?
+ * HTTP PUT for files passed on stdin *OR* when the --crlf option is
+   used. Requires libcurl to send the file with chunked content
+   encoding. [http://curl.haxx.se/dev/HTTP-PUT-stdin.txt] When the filter
+   system mentioned above gets real, it'll be a piece of cake to add.
 
  * "Content-Encoding: compress/gzip/zlib" HTTP 1.1 clearly defines how to get
    and decode compressed documents. There is the zlib that is pretty good at
    decompressing stuff. This work was started in October 1999 but halted again
    since it proved more work than we thought. It is still a good idea to
-   implement though.
+   implement though. This requires the filter system mentioned above.
 
  * Authentication: NTLM. Support for that MS crap called NTLM
    authentication. MS proxies and servers sometime require that. Since that
@@ -85,10 +95,27 @@ To do in a future release (random order):
    sends the password in cleartext over the network, this "Digest" method uses
    a challange-response protocol which increases security quite a lot.
 
- * Other proxies
-   Ftp-kind proxy, Socks5, whatever kind of proxies are there?
+ TELNET
 
- * Full IPv6 Awareness and support. (This is partly done.)  RFC 2428 "FTP
-   Extensions for IPv6 and NATs" is interesting. PORT should be replaced with
-   EPRT for IPv6 (done), and EPSV instead of PASV.
+ * Make TELNET work on windows98!
 
+ SSL
+
+ * Make curl's SSL layer option capable of using other free SSL libraries.
+   Such as the Mozilla Security Services
+   (http://www.mozilla.org/projects/security/pki/nss/) and GNUTLS
+   (http://gnutls.hellug.gr/)
+
+ LDAP
+
+ * Multiple URL requests don't work. [http://sourceforge.net/tracker/index.php?func=detail&aid=475407&group_id=976&atid=100976]
+
+ TEST SUITE
+
+ * Extend the test suite to include more protocols. The telnet could just do
+   ftp or http operations (for which we have test servers).
+
+ * Make the test suite work on more platforms. OpenBSD and Mac OS. Remove
+   fork()s and it should become even more portable.
+
+ * Introduce a test suite that tests libcurl better and more explicitly.
