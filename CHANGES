@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel (22 February 2005)
+- NTLM and ftp-krb4 buffer overflow fixed, as reported here:
+  http://www.securityfocus.com/archive/1/391042 and the CAN report here:
+  http://cve.mitre.org/cgi-bin/cvename.cgi?name=CAN-2005-0490
+
+  If these security guys were serious, we'd been notified in advance and we
+  could've saved a few of you a little surprise, but now we weren't.
+
 Daniel (19 February 2005)
 - Ralph Mitchell reported a flaw when you used a proxy with auth, and you
   requested data from a host and then followed a redirect to another

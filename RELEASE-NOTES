@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o NTLM/krb4 buffer overflow fixed (CAN-2005-0490)
  o proxy auth bug when following redirects to another host
  o socket leak when local bind failed
  o HTTP POST with --anyauth picking NTLM
