@@ -31,6 +31,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#include <sys/errno.h> /* NICO */
 
 #include <curl/curl.h>
 
@@ -410,7 +411,8 @@ static void help(void)
        " -1/--tlsv1         Force usage of TLSv1 (H)\n"
        " -2/--sslv2         Force usage of SSLv2 (H)\n"
        " -3/--sslv3         Force usage of SSLv3 (H)");
-  puts(" -#/--progress-bar  Display transfer progress as a progress bar");
+  puts(" -#/--progress-bar  Display transfer progress as a progress bar\n"
+       " -@/--create-dirs   Create the necessary local directory hierarchy");
 }
 
 struct LongShort {
@@ -484,6 +486,7 @@ struct Configurable {
   bool globoff;
   bool use_httpget;
   bool insecure_ok; /* set TRUE to allow insecure SSL connects */
+  bool create_dirs; /* NICO */
 
   char *writeout; /* %-styled format string to output */
   bool writeenv; /* write results to environment, if available */
@@ -523,6 +526,7 @@ struct Configurable {
 static int parseconfig(const char *filename,
 		       struct Configurable *config);
 static char *my_get_line(FILE *fp);
+static int create_dir_hierarchy(char *outfile); /* NICO */
 
 static void GetStr(char **string,
 		   char *value)
@@ -1069,6 +1073,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"z", "time-cond",   TRUE},
     {"Z", "max-redirs",   TRUE},
     {"#", "progress-bar",FALSE},
+    {"@", "create-dirs", FALSE}, /* NICO */
   };
 
   if(('-' != flag[0]) ||
@@ -1704,6 +1709,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       config->maxredirs = atoi(nextarg);
       break;
 
+    case '@':
+      /* NICO */
+      config->create_dirs = TRUE;
+      break;
+
     default: /* unknown flag */
       return PARAM_OPTION_UNKNOWN;
     }
@@ -2333,6 +2343,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   config->showerror=TRUE;
   config->conf=CONF_DEFAULT;
   config->use_httpget=FALSE;
+  config->create_dirs=FALSE; /* NICO */
 
   if(argc>1 &&
      (!strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
@@ -2555,13 +2566,19 @@ operate(struct Configurable *config, int argc, char *argv[])
           free(storefile);
         }
       
+        /* Create the directory hierarchy, if not pre-existant to a multiple
+           file output call */
+        
+        if(config->create_dirs)  /* NICO */
+          create_dir_hierarchy(outfile);
+        
         if(config->resume_from_current) {
-          /* we're told to continue where we are now, then we get the size of
-             the file as it is now and open it for append instead */
-
+          /* We're told to continue from where we are now. Get the
+             size of the file as it is now and open it for append instead */
+          
           struct stat fileinfo;
 
-/*VMS?? -- Danger, the filesize is only valid for stream files */
+          /*VMS?? -- Danger, the filesize is only valid for stream files */
           if(0 == stat(outfile, &fileinfo))
             /* set offset to current file size: */
             config->resume_from = fileinfo.st_size;
@@ -2569,7 +2586,7 @@ operate(struct Configurable *config, int argc, char *argv[])
             /* let offset be 0 */
             config->resume_from = 0;
         }
-      
+        
         if(config->resume_from) {
           /* open file for output: */
           outs.stream=(FILE *) fopen(outfile, config->resume_from?"ab":"wb");
@@ -3020,3 +3037,87 @@ static char *my_get_line(FILE *fp)
 
    return retval;
 }
+
+
+/* Create the needed directory hierarchy recursively in order to save
+   multi-GETs in file output, ie:
+   curl "http://my.site/dir[1-5]/file[1-5].txt" -o "dir#1/file#2.txt"
+   should create all the dir* automagically
+*/
+static int create_dir_hierarchy(char *outfile)
+{
+  char *tempdir;
+  char *tempdir2;
+  char *outdup;
+  char *dirbuildup;
+  int result=0;
+  
+  outdup = strdup(outfile);
+  dirbuildup = malloc(sizeof(char) * strlen(outfile));
+
+  tempdir = strtok(outdup, DIR_CHAR);
+
+  while (tempdir != NULL) {
+    tempdir2 = strtok(NULL, DIR_CHAR);
+    /* since strtok returns a token for the last word even
+       if not ending with DIR_CHAR, we need to prune it */
+    if (tempdir2 != NULL) {
+      if (strlen(dirbuildup) > 0)
+        sprintf(dirbuildup,"%s%s%s",dirbuildup, DIR_CHAR, tempdir);
+      else {
+        /* TODO: BEEEP this is not portable, we need to fix the '/' here! */
+        if (outdup[0] != '/')
+          sprintf(dirbuildup,"%s",tempdir);
+        else
+          sprintf(dirbuildup,"%s%s", DIR_CHAR, tempdir);
+      }
+      if (access(dirbuildup,F_OK) == -1) {
+        result = mkdir(dirbuildup,(mode_t)0000750);
+        if (-1 == result) {
+          switch (errno) {
+#ifdef EACCES
+          case EACCES:
+            fprintf(stderr,"You don't have permission to create %s.\n",
+                    dirbuildup);
+            break;
+#endif
+#ifdef ENAMETOOLONG
+          case ENAMETOOLONG:
+            fprintf(stderr,"The directory name %s is too long.\n",
+                    dirbuildup);
+            break;
+#endif
+#ifdef EROFS
+          case EROFS:
+            fprintf(stderr,"%s resides on a read-only file system.\n",
+                    dirbuildup);
+            break;
+#endif
+#ifdef ENOSPC
+          case ENOSPC:
+            fprintf(stderr,"No space left on the file system that will "
+                    "contain the directory %s.\n", dirbuildup);
+            break;
+#endif
+#ifdef EDQUOT
+          case EDQUOT:
+            fprintf(stderr,"Cannot create directory %s because you "
+                    "exceeded your quota.\n", dirbuildup);
+            break;
+#endif
+          default :
+            fprintf(stderr,"Error creating directory %s.\n", dirbuildup);
+            break;
+          }
+          break; /* get out of loop */
+        }
+      }
+    }
+    tempdir = tempdir2;
+  }
+  free(dirbuildup);
+  free(outdup);
+
+  return result; /* 0 is fine, -1 is badness */
+}
+
