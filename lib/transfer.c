@@ -2189,6 +2189,7 @@ CURLcode Curl_pretransfersec(struct connectdata *conn)
   CURLcode status = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct connectdata *sec_conn = NULL;   /* secondary connection */
+  bool reuse_fresh_tmp = data->set.reuse_fresh;
 
   /* update data with source host options */
   char *url = aprintf( "%s://%s/", conn->protostr, data->set.source_host);
@@ -2204,12 +2205,22 @@ CURLcode Curl_pretransfersec(struct connectdata *conn)
   data->set.ftpport = data->set.source_port;
   data->set.userpwd = data->set.source_userpwd;
 
+  /* if both remote hosts are the same host - create new connection */
+  if (strequal(conn->host.dispname, data->set.source_host))
+    /* NOTE: this is restored back to the original value after the connect is
+       done */
+    data->set.reuse_fresh = TRUE;
+
   /* secondary connection */
   status = Curl_connect_host(data, &sec_conn);
   if(CURLE_OK == status) {
+    sec_conn->sec_conn = NULL;  /* important if re-using existing connection
+                                   to prevent loop */
     sec_conn->data = data;
     conn->sec_conn = sec_conn;
   }
+
+  data->set.reuse_fresh = reuse_fresh_tmp;
 
   return status;
 }

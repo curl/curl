@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (19 October 2004)
+- Alexander Krasnostavsky made it possible to make FTP 3rd party transfers
+  with both source and destination being the same host. It can be useful if
+  you want to move a file on a server or similar.
+
 - Guillaume Arluison added CURLINFO_NUM_CONNECTS to allow an app to figure
   out how many new connects a previous transfer required.
 
