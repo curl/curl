@@ -116,6 +116,17 @@ esac
 AC_MSG_RESULT($mimpure)
 AM_CONDITIONAL(MIMPURE, test x$mimpure = xyes)
 
+AC_MSG_CHECKING([if we need BUILDING_LIBCURL])
+case $host in
+  *-*-mingw*)
+    AC_DEFINE(BUILDING_LIBCURL, 1, [when building libcurl itself])
+    AC_MSG_RESULT(yes)
+    ;;
+  *)
+    AC_MSG_RESULT(no)
+    ;;
+esac
+
 dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
