@@ -23,6 +23,10 @@
  * $Id$
  ***************************************************************************/
 
+/* This file shadows for <curl/easy.h> in some compilers
+ */
+#include <curl/easy.h>
+
 /*
  * Prototypes for library-wide functions provided by easy.c
  */
