@@ -22,3 +22,8 @@ README.win32
   in order to extract a separate text file:
 
         curl -M >manual.txt
+
+  Download all the libcurl man pages in HTML format using the link on the
+  bottom of this page:
+
+        http://curl.haxx.se/libcurl/c/
