@@ -5,40 +5,83 @@
 #
 #  'src' directory
 #
+#  'BCCDIR' has to be set up to point to the base directory
+#  of the compiler, i.e. SET BCCDIR = c:\Borland\BCC55
+#  where c:\Borland\BCC55 is the compiler is installed
+#
 #  Written by Jaepil Kim, pit@paradise.net.nz
 ############################################################
 
+# Edit the path below to point to the base of your Zlib sources.
+#ZLIB_PATH = ../../zlib-1.2.1
+
+# Edit the path below to point to the base of your OpenSSL package.
+!ifndef OPENSSL_PATH
+OPENSSL_PATH = ../../openssl-0.9.7d
+!endif
+
 # Set program's name
-PROGNAME  = curl.exe
+PROGNAME = curl.exe
 
 # Setup environment
-CXX       = bcc32
-CXXFLAGS  = -5 -O2 -WC -w-par -w-csu -w-aus
-RM        = del
-TOPDIR    = ..
-DEFINES   = -DNDEBUG -DLIBCURL_BIGENDIAN=0 -DWIN32 -D_CONSOLE -D_MBCS
-LD	  = bcc32
-LDFLAGS	  = -lap -e$(PROGNAME)
-INCDIRS   = -I$(TOPDIR)/include
-LIBCURLLIB= $(TOPDIR)/lib/libcurl.lib
+CXX      = bcc32
+LD       = bcc32
+CP       = copy
+RM       = del
+LIB      = tlib
+TOPDIR   = ..
+CURNTDIR = .
 
-# 'BCCDIR' has to be set up in your c:\autoexec.bat
-# i.e. SET BCCDIR = c:\Borland\BCC55
-# where c:\Borland\BCC55 is the compiler is installed
-LINKLIB  = $(BCCDIR)\Lib\psdk\ws2_32.lib 
+CXXFLAGS = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
+# CXXFLAGS = -5 -O2 -WC -w-par -w-csu -w-aus
+LDFLAGS  = -lap
 
-PROGRAMS  = \
-	curl.exe 
+# If you build without SSL support, remove "-DUSE_SSLEAY" from the line below.
+# DEFINES  = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS -DUSE_SSLEAY
+DEFINES  = -DNDEBUG -DLIBCURL_BIGENDIAN=0 -DWIN32 -D_CONSOLE -D_MBCS
+
+INCDIRS  = -I$(CURNTDIR);$(TOPDIR)/include;$(TOPDIR)/lib
+LINKLIB  = $(BCCDIR)/lib/psdk/ws2_32.lib
+
+LIBCURLLIB = $(TOPDIR)/lib/libcurl.lib
+
+.SUFFIXES: .c
+
+.autodepend
+
+# Makefile.inc provides the CSOURCES and HHEADERS defines
+top_srcdir = ..
+!include Makefile.inc
+
+CSOURCES = $(CURL_SOURCES) $(CURLX_ONES)
+OBJECTS  = $(CSOURCES:.c=.obj)
 
 .c.obj:
-	$(CXX) -c $(INCDIRS) $(CXXFLAGS) $(DEFINES) $*.c
+	$(CXX) -c $(INCDIRS) $(CXXFLAGS) $(DEFINES) $<
 
-all: $(PROGRAMS)
-
-curl.exe: $(LIBCURLLIB) $(LINKLIB) hugehelp.obj writeout.obj urlglob.obj main.obj homedir.obj
-	$(LD) $(LDFLAGS) hugehelp.obj writeout.obj urlglob.obj main.obj homedir.obj $(LIBCURLLIB) $(LINKLIB)
+all:	$(PROGNAME)
 
 clean:
-	$(RM) *.obj
-        $(RM) *.exe
-        $(RM) *.tds
+	-$(RM) $(PROGNAME)
+	-$(RM) *.obj
+	-$(RM) hugehelp.c
+
+$(PROGNAME): $(OBJECTS) $(LIBCURLLIB) $(LINKLIB)
+	@-$(RM) $@
+	$(LD) $(LDFLAGS) -e $@ $**
+
+hugehelp.c: hugehelp.c.cvs
+	@echo Creating $@
+	@$(CP) $** $@
+
+sys/utime.h: $(BCCDIR)\include\utime.h
+	@echo Fix missing header $@
+	@-mkdir sys
+	@$(CP) $** sys
+
+main.c: sys/utime.h
+
+test:
+	@echo OBJECTS = $(OBJECTS)
+
+
