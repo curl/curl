@@ -1,0 +1,32 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by Daniel.Stenberg@haxx.nu
+.\"
+.TH curl_getenv 3 "2 June 2000" "Curl 7.0" "libcurl Manual"
+.SH NAME
+curl_getenv - return value for environment name
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "char *curl_getenv(char *" name ");
+.ad
+.SH DESCRIPTION
+curl_getenv() is a portable wrapper for the getenv() function, meant to
+emulate its behaviour and provide an identical interface for all operating
+systems libcurl builds on (including win32).
+.SH RETURN VALUE
+If successful, curl_getenv() returns a pointer to the value of the specified
+environment. The memory it refers to is malloc()ed why the application must
+free() this when the data has completed to serve its purpose. When
+.I curl_getenv()
+fails to find the specified name, it returns a null pointer.
+.SH NOTE
+Under unix operating systems, there isn't any point in returning an allocated
+memory, although other systems won't work properly if this isn't done. The
+unix implementation thus have to suffer slightly from the drawbacks of other
+systems.
+.SH "SEE ALSO"
+.BR getenv "(3C), "
+.SH BUGS
+Surely there are some, you tell me!
+
