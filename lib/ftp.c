@@ -1174,19 +1174,19 @@ CURLcode ftp_use_port(struct connectdata *conn)
 
   if(data->set.ftpport) {
     if(Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
-      h = Curl_getaddrinfo(data, myhost, 0, &hostdataptr);
+      h = Curl_resolv(data, myhost, 0, &hostdataptr);
     }
     else {
-      if(strlen(data->set.ftpport)>1)
-        h = Curl_getaddrinfo(data, data->set.ftpport, 0, &hostdataptr);
+      int len = strlen(data->set.ftpport);
+      if(len>1)
+        h = Curl_resolv(data, data->set.ftpport, 0, &hostdataptr);
       if(h)
         strcpy(myhost, data->set.ftpport); /* buffer overflow risk */
     }
   }
   if(! *myhost) {
-    h=Curl_getaddrinfo(data,
-                       getmyhost(myhost, sizeof(myhost)),
-                       0, &hostdataptr);
+    char *tmp_host = getmyhost(myhost, sizeof(myhost));
+    h=Curl_resolv(data, tmp_host, 0, &hostdataptr);
   }
   infof(data, "We connect from %s\n", myhost);
   
@@ -1237,9 +1237,6 @@ CURLcode ftp_use_port(struct connectdata *conn)
       free(hostdataptr);
       return CURLE_FTP_PORT_FAILED;
     }
-    if(hostdataptr)
-      /* free the memory used for name lookup */
-      Curl_freeaddrinfo(hostdataptr);
   }
   else {
     failf(data, "could't find my own IP address (%s)", myhost);
@@ -1431,7 +1428,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   }
   else {
     /* normal, direct, ftp connection */
-    addr = Curl_getaddrinfo(data, newhostp, newport, &hostdataptr);
+    addr = Curl_resolv(data, newhostp, newport, &hostdataptr);
     if(!addr) {
       failf(data, "Can't resolve new host %s", newhost);
       return CURLE_FTP_CANT_GET_HOST;
@@ -1449,9 +1446,6 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
      data->set.verbose)
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(conn, conninfo, newhost, connectport);
-  
-  if(hostdataptr)
-    Curl_freeaddrinfo(hostdataptr);
   
   if(CURLE_OK != result)
     return result;

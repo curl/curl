@@ -940,9 +940,6 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   if(conn->proto.generic)
     free(conn->proto.generic);
 
-  if(conn->hostent_buf) /* host name info */
-    Curl_freeaddrinfo(conn->hostent_buf);
-
   if(conn->newurl)
     free(conn->newurl);
 
@@ -2060,8 +2057,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* Resolve target host right on */
     if(!conn->hostaddr) {
       /* it might already be set if reusing a connection */
-      conn->hostaddr = Curl_getaddrinfo(data, conn->name, conn->port,
-                                        &conn->hostent_buf);
+      conn->hostaddr = Curl_resolv(data, conn->name, conn->port,
+                                   &conn->hostent_buf);
     }
     if(!conn->hostaddr) {
       failf(data, "Couldn't resolve host '%s'", conn->name);
@@ -2075,8 +2072,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     /* resolve proxy */
     /* it might already be set if reusing a connection */
-    conn->hostaddr = Curl_getaddrinfo(data, conn->proxyhost, conn->port,
-                                      &conn->hostent_buf);
+    conn->hostaddr = Curl_resolv(data, conn->proxyhost, conn->port,
+                                 &conn->hostent_buf);
 
     if(!conn->hostaddr) {
       failf(data, "Couldn't resolve proxy '%s'", conn->proxyhost);

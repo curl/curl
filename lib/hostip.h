@@ -27,6 +27,14 @@ struct addrinfo;
 struct hostent;
 struct SessionHandle;
 
+void Curl_host_cache_init(void);
+void Curl_host_cache_dtor(void);
+
+Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
+			   char *hostname,
+			   int port,
+			   char **bufp);
+
 /* Get name info */
 Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
                                 char *hostname,

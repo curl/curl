@@ -58,6 +58,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "hostip.h"
+#include "hash.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
@@ -67,6 +68,38 @@
 #ifdef MALLOCDEBUG
 #include "memdebug.h"
 #endif
+
+static curl_hash hostname_cache;
+
+void Curl_host_cache_init(void)
+{
+  curl_hash_init(&hostname_cache, 7, Curl_freeaddrinfo);
+}
+
+void Curl_host_cache_dtor(void)
+{
+  curl_hash_clean(&hostname_cache);
+}
+
+
+Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
+                           char *hostname,
+                           int port,
+                           char **bufp)
+{
+  Curl_addrinfo *addr = NULL;
+  size_t hostname_len = strlen(hostname)+1;
+
+  if (curl_hash_find(&hostname_cache, hostname, hostname_len, (void **) &addr))
+    return addr;
+
+  addr = Curl_getaddrinfo(data, hostname, port, bufp);
+  if (!addr)
+    return NULL;
+
+  curl_hash_add(&hostname_cache, hostname, hostname_len, (const void *) addr);
+  return addr;
+}
 
 /*
  * This is a wrapper function for freeing name information in a protocol

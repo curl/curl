@@ -210,11 +210,11 @@ static CURLcode bindlocal(struct connectdata *conn,
     in_addr_t in;
 
     if(Curl_if2ip(data->set.device, myhost, sizeof(myhost))) {
-      h = Curl_getaddrinfo(data, myhost, 0, &hostdataptr);
+      h = Curl_resolv(data, myhost, 0, &hostdataptr);
     }
     else {
       if(strlen(data->set.device)>1) {
-        h = Curl_getaddrinfo(data, data->set.device, 0, &hostdataptr);
+        h = Curl_resolv(data, data->set.device, 0, &hostdataptr);
       }
       if(h) {
         /* we know data->set.device is shorter than the myhost array */
@@ -229,8 +229,6 @@ static CURLcode bindlocal(struct connectdata *conn,
          hostent_buf,
          sizeof(hostent_buf));
       */
-      if(hostdataptr)
-        free(hostdataptr); /* allocated by Curl_getaddrinfo() */
       return CURLE_HTTP_PORT_FAILED;
     }
 
@@ -303,9 +301,6 @@ static CURLcode bindlocal(struct connectdata *conn,
       failf(data, "could't find my own IP address (%s)", myhost);
       return CURLE_HTTP_PORT_FAILED;
     }
-
-    if(hostdataptr)
-      free(hostdataptr); /* allocated by Curl_getaddrinfo() */
 
     return CURLE_OK;
 

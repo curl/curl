@@ -76,6 +76,7 @@
 #include "ssluse.h"
 #include "url.h"
 #include "getinfo.h"
+#include "hostip.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -139,7 +140,9 @@ CURLcode curl_global_init(long flags)
 {
   if (initialized)
     return CURLE_OK;
- 
+
+  Curl_host_cache_init();
+  
   if (flags & CURL_GLOBAL_SSL)
     Curl_SSL_init();
 
@@ -162,6 +165,8 @@ void curl_global_cleanup(void)
   if (!initialized)
     return;
 
+  Curl_host_cache_dtor();
+  
   if (init_flags & CURL_GLOBAL_SSL)
     Curl_SSL_cleanup();
 
