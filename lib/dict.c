@@ -162,7 +162,8 @@ UrgError dict(struct UrlData *data, char *path, long *bytecount)
           word
           );
     
-    result = Download(data, data->firstsocket, -1, FALSE, bytecount);
+    result = Transfer(data, data->firstsocket, -1, FALSE, bytecount,
+                      -1, NULL); /* no upload */
       
     if(result)
       return result;
@@ -209,7 +210,8 @@ UrgError dict(struct UrlData *data, char *path, long *bytecount)
           word
           );
     
-    result = Download(data, data->firstsocket, -1, FALSE, bytecount);
+    result = Transfer(data, data->firstsocket, -1, FALSE, bytecount,
+                      -1, NULL); /* no upload */
       
     if(result)
       return result;
@@ -232,7 +234,8 @@ UrgError dict(struct UrlData *data, char *path, long *bytecount)
             "QUIT\n",
             ppath);
       
-      result = Download(data, data->firstsocket, -1, FALSE, bytecount);
+      result = Transfer(data, data->firstsocket, -1, FALSE, bytecount,
+                        -1, NULL);
       
       if(result)
         return result;

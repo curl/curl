@@ -127,6 +127,8 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
   struct Cookie *co = NULL;
   char *p_pragma = NULL;
   char *p_accept = NULL;
+  long readbytecount;
+  long writebytecount;
 
   buf = data->buffer; /* this is our buffer */
 
@@ -144,7 +146,7 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
   
   /* The User-Agent string has been built in url.c already, because it might
      have been used in the proxy connect, but if we have got a header with
-     the user-agent string specified, we erase the previosly made string
+     the user-agent string specified, we erase the previously made string
      here. */
   if(checkheaders(data, "User-Agent:") && data->ptr_uagent) {
     free(data->ptr_uagent);
@@ -315,16 +317,14 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
               "Content-Length: %d\r\n",
               postsize-2);
 	
-        conf = data->conf;
-        data->conf &= ~CONF_NOPROGRESS; /* enable progress meter */
         ProgressInit(data, postsize);
 
-        result = Upload(data, data->firstsocket, bytecount);
+        result = Transfer(data, data->firstsocket, -1, TRUE, &readbytecount,
+                          data->firstsocket, writebytecount);
+        *bytecount = readbytecount + writebytecount;
 
         FormFree(sendit); /* Now free that whole lot */
 
-        data->conf = conf; /* restore conf values for the download */
-          
         if(result)
           return result;
 	
@@ -348,27 +348,25 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
         sendf(data->firstsocket, data,
               "\015\012");
         
-      conf = data->conf;
-      data->conf &= ~CONF_NOPROGRESS; /* enable progress meter */
-
       ProgressInit(data, data->infilesize);
 
-      result = Upload(data, data->firstsocket, bytecount);
-        
-      data->conf = conf;
+      result = Transfer(data, data->firstsocket, -1, TRUE, &readbytecount,
+                        data->firstsocket, &writebytecount);
+      
+      *bytecount = readbytecount + writebytecount;
 
       if(result)
         return result;
 
-      /* reset the byte counter */
-      *bytecount=0;
     }
     else {
       sendf(data->firstsocket, data, "\r\n");
     }
-    /* HTTP GET/HEAD download: */
-    result = Download(data, data->firstsocket, -1, TRUE, bytecount);
-
+    if(0 == *bytecount) {
+      /* HTTP GET/HEAD download: */
+      result = Transfer(data, data->firstsocket, -1, TRUE, bytecount,
+                        -1, NULL); /* nothing to upload */
+    }
     if(result)
       return result;
       
