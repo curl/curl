@@ -6,6 +6,20 @@
 
                                   Changelog
 
+Version 7.12.1 (10 August 2004)
+
+Daniel (10 August 2004)
+- In OpenSSL 0.9.7d and earlier, ASN1_STRING_to_UTF8 fails if the input is
+  already UTF-8 encoded. This made the certificate verification fail if the
+  remote server used a certificate with the name UTF-8 encoded.
+
+  Work-around brought by Alexis S. L. Carvalho.
+
+Daniel (9 August 2004)
+- I fixed the configure script for krb4 to use -lcom_err as well, as I started
+  to get link problems with it unless I did that on my Solaris 2.7 box. I
+  don't understand why I started to get problems with this now!
+
 Daniel (5 August 2004)
 - Enrico Scholz fixed the HTTP-Negotiate service name to be uppercase as
   reported in bug report #1004105

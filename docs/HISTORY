@@ -128,3 +128,14 @@ December 2003, full-fledged SSL for FTP is supported.
 January 2004: curl 7.11.0 introduced large file support.
 
 June 2004: curl 7.12.0 introduced IDN support. 10 official web mirrors.
+
+August 2004:
+ Curl and libcurl 7.12.1
+
+ Public curl release number:               82
+ Releases counted from the very beginning: 109
+ Available command line options:           96
+ Available curl_easy_setopt() options:     120
+ Number of public functions in libcurl:    36
+ Amount of public web site mirrors:        12
+ Number of known libcurl bindings:         26

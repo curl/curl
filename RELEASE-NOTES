@@ -24,35 +24,36 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o fixed a krb4 link problem
+ o UTF-8 encoded certificate names can now be verified properly
+ o krb4 link problem
  o HTTP Negotiate service name now provided in uppercase
  o no longer accepts any cookies with domain set to just a TLD
- o HTTP Digest fix for properties without quotes in the header
- o a bad Host: header case on re-used connections over proxy was fixed
- o a duplicate Host: header case on re-used connections was fixed
+ o HTTP Digest properties without quotes in the header
+ o bad Host: header case on re-used connections over proxy
+ o duplicate Host: header case on re-used connections
  o curl -o name#[num] now works when no globbing for [num] exists
- o the test suite runs fine with valgrind 2.1.x
- o negative Content-Length is now ignored
- o test 505 runs fine on windows now
- o curl_share_cleanup() crash fixed
+ o test suite runs fine with valgrind 2.1.x
+ o negative Content-Length is ignored
+ o test 505 runs fine on windows
+ o curl_share_cleanup() crash
  o --trace files now get the final info lines too
  o multi interface connects fine to multi-IP resolving hosts
  o --limit-rate works on Mac OS X (and other systems with bad poll()s)
  o cookies can now hold 4999 bytes of content
  o HTTP POST/PUT with NTLM/Digest/Negotiate to a URL returning 3XX
- o HTTPS POST/PUT over a proxy requiring NTLM/Digest/Negotiate works now
+ o HTTPS POST/PUT over a proxy requiring NTLM/Digest/Negotiate
  o less restrictive libidn requirements, 0.4.1 or later is fine
- o fixed HTTP POST or PUT with Digest/Negotiate/NTLM selected but the server
+ o HTTP POST or PUT with Digest/Negotiate/NTLM selected but the server
    didn't require any authentication
  o win32 file:// transfer free memory bug
  o configure --disable-http builds a libcurl without HTTP support
  o CURLOPT_FILETIME had wrong type in curl.h, it expects a long argument
- o builds fine with Borland on Windows again
- o the msvc curllib.dsp now builds the libcurl.lib file again
- o builds fine on VMS again
- o builds fine on NetWare again
+ o builds fine with Borland on Windows
+ o the msvc curllib.dsp now builds the libcurl.lib file
+ o builds fine on VMS
+ o builds fine on NetWare
  o HTTP Digest authentication with proxies uses correct user name + password
- o now builds fine with lcc-win32
+ o builds fine with lcc-win32
 
 Other curl-related news since the previous public release:
 
@@ -76,6 +77,7 @@ advice from friends like these:
  Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam,
  Luca Alteas, Jean-Louis Lemaire, David Byron, David Cohen, Rob Stanzel,
  Niels van Tongeren, Andrés García, Toby Peterson, Casey O'Donnell, Brian
- Akins, Bertrand Demiddelaer, Joel Chen, Dylan Salisbury, Enrico Scholz
+ Akins, Bertrand Demiddelaer, Joel Chen, Dylan Salisbury, Enrico Scholz,
+ Alexis Carvalho
 
         Thanks! (and sorry if I forgot to mention someone)
