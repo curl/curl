@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (29 June 2004)
+- Fixed code to allow connects done using the multi interface to attempt the
+  next IP when connecting to a host that resolves to multiple IPs and a
+  connect attempt fails.
+  
 Daniel (27 June 2004)
 - Based on Rob Stanzel's bug report #979480, I wrote a configure check that
   checks if poll() can be used to wait on NULL as otherwise select() should be

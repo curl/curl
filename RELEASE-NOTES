@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o multi interface connects fine to multi-IP resolving hosts
  o --limit-rate works on Mac OS X (and other systems with bad poll()s)
  o cookies can now hold 4999 bytes of content
  o HTTP POST/PUT with NTLM/Digest/Negotiate to a URL returning 3XX
