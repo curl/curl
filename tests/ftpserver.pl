@@ -21,7 +21,7 @@ sub spawn;  # forward declaration
 open(FTPLOG, ">log/ftpd.log") ||
     print STDERR "failed to open log file, runs without logging\n";
 
-sub logmsg { print FTPLOG @_; }
+sub logmsg { print FTPLOG "$$: "; print FTPLOG @_; }
 
 sub ftpmsg { print INPUT @_; }
 
@@ -115,11 +115,13 @@ my @ftpdir=("total 20\r\n",
 sub LIST_command {
   #  print "150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)\r\n";
 
+    logmsg "$$: pass data to child pid\n";
     for(@ftpdir) {
         print KID_TO_WRITE $_;
         # print STDERR "PASS: $_";
     }
     close(KID_TO_WRITE);
+    logmsg "$$: done passing data to child pid\n";
 
     print "226 ASCII transfer complete\r\n";
     return 0;
@@ -179,10 +181,12 @@ sub PASV_command {
 
     if(0 == $pid) {
         # the child process runs the child function
+        logmsg "$$ is a child PASV\n";
     }
     else {
         # parent continues
  #       print STDERR "parent after fork!\n";
+        logmsg "$$ is a parent from PASV\n";
         return; # continue please
     }
 
@@ -198,6 +202,7 @@ sub PASV_command {
     }
     if(11000 == $port) {
         print "500 no free ports!\r\n";
+        logmsg "couldn't find free port\n";
         exit;
     }
     listen(Server2,SOMAXCONN) || die "listen: $!";
@@ -212,20 +217,17 @@ sub PASV_command {
     my($port,$iaddr) = sockaddr_in($paddr);
     my $name = gethostbyaddr($iaddr,AF_INET);
 
-    logmsg "data connection from $name [", inet_ntoa($iaddr), "] at port $port\n";
+    logmsg "$$: data connection from $name [", inet_ntoa($iaddr), "] at port $port\n";
 
     open(STDOUT, ">&Client2")   || die "can't dup client to stdout";
 
- #   print STDERR "#### CONN\n";
-
     while(<STDIN>) {
         print $_;
-   #     print STDERR "SEND: $_";
     }
-    close(SOCK);
 
     close(Client2);
 
+    logmsg "process dies here\n";
     exit;
 
 }
@@ -288,10 +290,15 @@ for ( $waitedpid = 0;
     my($port,$iaddr) = sockaddr_in($paddr);
     my $name = gethostbyaddr($iaddr,AF_INET);
 
+        # flush data:
+        $| = 1;
+        
+
     logmsg "connection from $name [", inet_ntoa($iaddr), "] at port $port\n";
 
     # this code is forked and run
-    spawn sub {
+         open(STDIN,  "<&Client")   || die "can't dup client to stdin";
+         open(STDOUT, ">&Client")   || die "can't dup client to stdout";
 
         open(INPUT, ">log/server.input") ||
             logmsg "failed to open log/server.input\n";
@@ -312,9 +319,6 @@ for ( $waitedpid = 0;
         # < 150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes).
         # * Getting file with size: -1
 
-        # flush data:
-        $| = 1;
-        
         print "220-running the curl suite test server\r\n",
         "220-running the curl suite test server\r\n",
         "220 running the curl suite test server\r\n";
@@ -365,15 +369,20 @@ for ( $waitedpid = 0;
             my $func = $commandfunc{$FTPCMD};
             if($func) {
                 # it is!
+                # flush the handles before the possible fork
+                FTPLOG->autoflush(1);
+                INPUT->autoflush(1);
                 \&$func($FTPARG);
             }
 
             logmsg "gone to state $state\n";
+            
+        } # while(1)
+         close(Client);
+        close(Client2);
+         close(Server2);
+         #   print "Hello there, $name, it's now ", scalar localtime, "\r\n";
 
-        }
-        exit;
-        #   print "Hello there, $name, it's now ", scalar localtime, "\r\n";
-    };
 }
 
 
