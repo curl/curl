@@ -1,0 +1,34 @@
+# Server-side
+<reply>
+<data>
+foo
+   bar
+bar
+   foo
+moo
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+file:/path URL with a single slash
+ </name>
+ <command>
+file:%PWD/log/test203.txt
+</command>
+<file name="log/test203.txt">
+foo
+   bar
+bar
+   foo
+moo
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>

@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel (29 October)
+- runtests.pl now checks for and use valgrind if present. It will redirect the
+  valgrind results in log/valgrind[num] but it currently doesn't scan that
+  file for any errors or anything, that is still only made manually.
+
+- David Hull made the file: URL parser also accept the somewhat sloppy file
+  syntax: file:/path. I added test case 203 to verify this.
+
 Daniel (28 October)
 - Dan C tracked down yet another weird behavior in the glibc gethostbyname_r()
   function for some specific versions (reported on 2.2.5 and 2.1.1), and

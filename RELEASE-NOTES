@@ -1,7 +1,11 @@
 Curl and libcurl 7.10.8 is out! A bugfix release.
 
+The 77th public curl release. Release number 104 counted from the very
+beginning.
+
 This release includes the following changes:
 
+ o file: URLs with only one initial slash now works too
  o we include a RELEASE-NOTES document in the release archive to summarize
    the big and visible changes and bugfixes
  o CURLOPT_MAXFILESIZE was added, and --max-filesize.

@@ -2002,9 +2002,19 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * proxy -- and we don't know if we will need to use SSL until we parse the
    * url ...
    ************************************************************/
-  if((2 == sscanf(data->change.url, "%64[^:]://%[^\n]",
+  if((2 == sscanf(data->change.url, "%64[^:]:%[^\n]",
                   conn->protostr,
                   conn->path)) && strequal(conn->protostr, "file")) {
+    if(conn->path[0] == '/' && conn->path[1] == '/') {
+      /* Allow omitted hostname (e.g. file:/<path>).  This is not strictly
+       * speaking a valid file: URL by RFC 1738, but treating file:/<path> as
+       * file://localhost/<path> is similar to how other schemes treat missing
+       * hostnames.  See RFC 1808. */
+
+      /* This cannot be done with strcpy() in a portable manner, since the
+         memory areas overlap! */
+      memmove(conn->path, conn->path + 2, strlen(conn->path + 2)+1);
+    }
     /*
      * we deal with file://<host>/<path> differently since it supports no
      * hostname other than "localhost" and "127.0.0.1", which is unique among
