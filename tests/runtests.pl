@@ -76,6 +76,7 @@ chomp($pwd = `pwd`);
 
 # enable memory debugging if curl is compiled with it
 $ENV{'CURL_MEMDEBUG'} = 1;
+$ENV{'HOME'}=$pwd;
 
 #######################################################################
 # Return the pid of the server as found in the given pid file
