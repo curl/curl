@@ -6,6 +6,24 @@
 
                                History of Changes
 
+Daniel (22 November 2000)
+- Added the libcurl CURLOPT_FILETIME setopt, when set it tries to get the
+  modified time of the remote document. This is a special option since it
+  involves an extra set of commands on FTP servers. (Using the MDTM command
+  which is not in the RFC959)
+
+  curl_easy_getinfo() got a corresponding CURLINFO_FILETIME to get the time
+  after a transfer. It'll return a zero if CURLOPT_FILETIME wasn't used or if
+  the time wasn't possible to get.
+
+  --head/-I used on a FTP server will now present a 'Last-Modified:' header
+  if curl could get the time of the specified file.
+
+- Added the option '--cacert [file]' to curl, which allows a specified PEM
+  file to be used to verify the peer's certificate when doing HTTPS
+  connections. This has been requested, rather recently by Hulka Bohuslav but
+  others have asked for it before as well.
+
 Daniel (21 November 2000)
 - Numerous fixes the test suite has brought into the daylight:
 

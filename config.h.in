@@ -79,8 +79,8 @@
 /* Define if you have the gethostname function.  */
 #undef HAVE_GETHOSTNAME
 
-/* Define if you have the getpass function.  */
-#undef HAVE_GETPASS
+/* Define if you have the getpass_r function.  */
+#undef HAVE_GETPASS_R
 
 /* Define if you have the getservbyname function.  */
 #undef HAVE_GETSERVBYNAME
@@ -111,6 +111,12 @@
 
 /* Define if you have the setvbuf function.  */
 #undef HAVE_SETVBUF
+
+/* Define if you have the sigaction function.  */
+#undef HAVE_SIGACTION
+
+/* Define if you have the signal function.  */
+#undef HAVE_SIGNAL
 
 /* Define if you have the socket function.  */
 #undef HAVE_SOCKET
