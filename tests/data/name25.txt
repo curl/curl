@@ -1,0 +1,1 @@
+looping HTTP Location: following with --max-redirs
