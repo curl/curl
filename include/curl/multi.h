@@ -46,8 +46,8 @@
   
 */
 #if defined(_WIN32) && !defined(WIN32)
-/* Chris Lewis mentioned that he doesn't get WIN32 defined, only _WIN32
-   so we make this like adjustment to catch this. */
+/* Chris Lewis mentioned that he doesn't get WIN32 defined, only _WIN32 so we
+   make this adjustment to catch this. */
 #define WIN32 1
 #endif
 
