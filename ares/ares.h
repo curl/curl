@@ -20,6 +20,10 @@
 
 #include <sys/types.h>
 
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+
 #ifdef WIN32
 #include <winsock.h>
 #include <windows.h>
