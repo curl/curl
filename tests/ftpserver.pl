@@ -16,6 +16,8 @@ use FileHandle;
 
 use strict;
 
+require "getpart.pm";
+
 open(FTPLOG, ">log/ftpd.log") ||
     print STDERR "failed to open log file, runs without logging\n";
 
@@ -190,27 +192,27 @@ sub RETR_command {
         return 0;
     }
 
-    my $filename = "data/reply$testno.txt";
+    loadtest("data/test$testno");
 
-    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-        $atime,$mtime,$ctime,$blksize,$blocks)
-        = stat($filename);
+    my @data = getpart("reply", "data");
+
+    my $size=0;
+    for(@data) {
+        $size =+ length($_);
+    }
 
     if($size) {
     
-        open(FILE, "<$filename");
         if($rest) {
             # move read pointer forward
-            seek(FILE, $rest, 1);
             $size -= $rest;
         }
         print "150 Binary data connection for $testno () ($size bytes).\r\n";
         $rest=0; # reset rest again
 
-        while(<FILE>) {
+        for(@data) {
             print SOCK $_;
         }
-        close(FILE);
         close(SOCK);
 
         print "226 File transfer complete\r\n";

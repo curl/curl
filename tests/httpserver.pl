@@ -5,6 +5,8 @@ use FileHandle;
 
 use strict;
 
+require "getpart.pm";
+
 sub spawn;  # forward declaration
 sub logmsg { #print "$0 $$: @_ at ", scalar localtime, "\n"
  }
@@ -140,15 +142,15 @@ for ( $waitedpid = 0;
                 "You must enter a test number to get good data back\r\n";
             }
             else {
+                loadtest("data/test$testnum");
                 # send a custom reply to the client
-                open(DATA, "<data/reply$testnum.txt");
-                while(<DATA>) {
+                my @data = getpart("reply", "data");
+                for(@data) {
                     print $_;
                     if($verbose) {
                         print STDERR "OUT: $_";
                     }
                 }
-                close(DATA);
             }
         }
      #   print "Hello there, $name, it's now ", scalar localtime, "\r\n";
