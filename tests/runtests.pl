@@ -335,13 +335,41 @@ sub singletest {
     my $res = system("$CMDLINE");
     $res /= 256;
 
+    my $ERRORCODE = "$TESTDIR/error$NUMBER.txt";
+
     if ($res != 0) {
-        print "*** Failed to invoke curl for test $NUMBER ***\n",
-        "*** [$DESC] ***\n",
-        "*** The command line was: ***\n $CMDLINE\n";
-        return 1;
+        # the invoked command return an error code
+
+        my $expectederror=0;
+
+        if(-f $ERRORCODE) {
+            open(ERRO, "<$ERRORCODE");
+            $expectederror = <ERRO>;
+            close(ERRO);
+            # strip non-digits
+            $expectederror =~ s/[^0-9]//g;
+        }
+
+        if($expectederror != $res) {
+
+            print "*** Failed to invoke curl for test $NUMBER ***\n",
+            "*** [$DESC] ***\n",
+            "*** The command returned $res for: ***\n $CMDLINE\n";
+            return 1;
+        }
+        elsif(!$short) {
+            print " error OK";
+        }
     }
     else {
+        if(-f $ERRORCODE) {
+            # this command was meant to fail, it didn't and thats WRONG
+            if(!$short) {
+                print " error FAILED";
+            }
+            return 1;
+        }
+
         if ( -r "$VALIDOUT" ) {
             # verify redirected stdout
             $res = compare($STDOUT, $VALIDOUT, "data");
@@ -385,27 +413,27 @@ sub singletest {
         unlink($STDOUT);
         unlink($STDERR);
 
-        if($memory_debug) {
-            if(! -f $memdump) {
-                print "\n** ALERT! memory debuggin without any output file?\n";
+    }
+    if($memory_debug) {
+        if(! -f $memdump) {
+            print "\n** ALERT! memory debuggin without any output file?\n";
+        }
+        else {
+            my @memdata=`$memanalyze < $memdump`;
+            my $leak=0;
+            for(@memdata) {
+                if($_ =~ /Leak detected/) {
+                    $leak=1;
+                }
+            }
+            if($leak) {
+                print "\n** MEMORY LEAK\n";
+                print @memdata;
+                return 1;
             }
             else {
-                my @memdata=`$memanalyze < $memdump`;
-                my $leak=0;
-                for(@memdata) {
-                    if($_ =~ /Leak detected/) {
-                        $leak=1;
-                    }
-                }
-                if($leak) {
-                    print "\n** MEMORY LEAK\n";
-                    print @memdata;
-                    return 1;
-                }
-                else {
-                    if(!$short) {
-                        print " memory OK";
-                    }
+                if(!$short) {
+                    print " memory OK";
                 }
             }
         }
