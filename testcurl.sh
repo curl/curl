@@ -18,8 +18,8 @@ version=1
 fixed=0
 
 die(){
-	echo "testcurl: ENDING HERE"
-	exit 1
+    echo "testcurl: ENDING HERE"
+    exit 1
 }
 
 if [ -f setup ]; then
