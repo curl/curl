@@ -5,6 +5,10 @@ doesn't want these improvements.
 The package is called 'c-ares' for now since I (Daniel Stenberg) want this for
 use within the curl project (hence the letter C) and it makes a nice pun.
 
+* January 29, 2004:
+
+- Dirk Manske fixed how the socket is set non-blocking.
+
 * January 4, 2004:
 
 - Dominick Meglio made the private gettimeofday() become ares_gettimeofday()

@@ -464,12 +464,14 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
   flags = 1;
   ioctlsocket(s, FIONBIO, &flags);
 #else
-  if (fcntl(s, F_GETFL, &flags) == -1)
+  flags = fcntl(s, F_GETFL, 0);
+
+  if (flags == -1)
     {
       close(s);
       return -1;
     }
-  flags &= O_NONBLOCK;
+  flags |= O_NONBLOCK;
   if (fcntl(s, F_SETFL, flags) == -1)
     {
       close(s);
