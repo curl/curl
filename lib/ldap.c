@@ -101,7 +101,7 @@ static void DynaClose(void)
 #endif
 }
 
-static void * DynaGetFunction(char *name)
+static void * DynaGetFunction(const char *name)
 {
   void *func = NULL;
 
@@ -117,13 +117,9 @@ static void * DynaGetFunction(char *name)
 static int WriteProc(void *param, char *text, int len)
 {
   struct UrlData *data = (struct UrlData *)param;
+  len = 0; /* prevent compiler warning */
   Curl_client_write(data, CLIENTWRITE_BODY, text, 0);
   return 0;
-}
-
-CURLcode Curl_ldap_done(struct connectdata *conn)
-{
-  return CURLE_OK;
 }
 
 /***********************************************************************
@@ -194,7 +190,7 @@ CURLcode Curl_ldap(struct connectdata *conn)
 	    if (ldaptext) {
 	      rc = ldap_entry2text(server, NULL, entryIterator, NULL,
 				   NULL, NULL, WriteProc, data,
-				   "", 0, 0);
+				   (char *)"", 0, 0);
 	      if (rc != 0) {
 		failf(data, "LDAP: %s", ldap_err2string(rc));
 		status = CURLE_LDAP_SEARCH_FAILED;
@@ -202,7 +198,7 @@ CURLcode Curl_ldap(struct connectdata *conn)
 	    } else {
 	      rc = ldap_entry2html(server, NULL, entryIterator, NULL,
 				   NULL, NULL, WriteProc, data,
-				   "", 0, 0, NULL, NULL);
+				   (char *)"", 0, 0, NULL, NULL);
 	      if (rc != 0) {
 		failf(data, "LDAP: %s", ldap_err2string(rc));
 		status = CURLE_LDAP_SEARCH_FAILED;
