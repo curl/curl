@@ -2,8 +2,14 @@
 # Script to build release-archives with
 #
 
-echo "LIB version number?"
-read version
+version=$1
+
+if [ -z "$version" ]; then
+  echo "Specify a version number!"
+  exit
+fi
+
+echo $version
 
 libversion="$version"
 
@@ -15,8 +21,8 @@ perl='$a=<STDIN>;@p=split("[\\.-]",$a);for(0..2){printf STDOUT ("%02x",$p[0+$_])
 
 numeric=`echo $libversion | perl -e "$perl"`
 
-echo "CURL version number?"
-read curlversion
+# we make curl the same version as libcurl
+curlversion=$libversion
 
 HEADER=include/curl/curl.h
 CHEADER=src/version.h
