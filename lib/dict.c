@@ -23,6 +23,8 @@
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_DICT
+
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
@@ -222,3 +224,4 @@ CURLcode Curl_dict(struct connectdata *conn)
 
   return CURLE_OK;
 }
+#endif /*CURL_DISABLE_DICT*/
