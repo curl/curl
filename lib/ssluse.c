@@ -371,7 +371,8 @@ static int Get_SSL_Session(struct connectdata *conn,
     if(!check->sessionid)
       /* not session ID means blank entry */
       continue;
-    if(strequal(conn->name, check->name)) {
+    if(strequal(conn->name, check->name) &&
+       (conn->remote_port == check->remote_port) ) {
       /* yes, we have a session ID! */
       data->ssl.sessionage++;            /* increase general age */
       check->age = data->ssl.sessionage; /* set this as used in this age */
@@ -457,8 +458,9 @@ static int Store_SSL_Session(struct connectdata *conn)
   
   /* now init the session struct wisely */
   store->sessionid = ssl_sessionid;
-  store->age = data->ssl.sessionage; /* set current age */
-  store->name = strdup(conn->name);   /* clone host name */
+  store->age = data->ssl.sessionage;      /* set current age */
+  store->name = strdup(conn->name);       /* clone host name */
+  store->remote_port = conn->remote_port; /* port number */
 
   return 0;
 }

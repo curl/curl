@@ -130,6 +130,7 @@ struct curl_ssl_session {
   char *name;       /* host name for which this ID was used */
   void *sessionid;  /* as returned from the SSL layer */
   long age;         /* just a number, the higher the more recent */
+  unsigned short remote_port; /* remote port to connect to */
 };
 
 struct ssl_config_data {
