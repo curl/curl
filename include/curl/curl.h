@@ -154,6 +154,7 @@ typedef enum {
   CURLE_TELNET_OPTION_SYNTAX ,   /* 49 - Malformed telnet option */
   CURLE_OBSOLETE,	         /* 50 - removed after 7.7.3 */
   CURLE_SSL_PEER_CERTIFICATE,    /* 51 - peer's certificate wasn't ok */
+  CURLE_GOT_NOTHING,             /* 52 - when this is a specific error */
   
   CURL_LAST /* never use! */
 } CURLcode;
