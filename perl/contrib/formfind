@@ -1,4 +1,5 @@
 #!/usr/bin/env perl
+# $Id$
 #
 # formfind.pl
 #
@@ -18,29 +19,10 @@
 
 $in="";
 
-$usestdin = 1;
-
 if($ARGV[0] eq "-h") {
     print  "Usage: $0 < HTML\n";
     exit;
 }
-# If you need a proxy for web access, edit your .curlrc file to feature
-# -x <proxy:port>
-
-# linkchecker, URL will be appended to the right of this command line
-# this is the one using HEAD:
-$linkcheck = "curl -s -m 20 -I";
-
-# as a second attempt, this will be used. This is not using HEAD but will
-# get the whole frigging document!
-$linkcheckfull = "curl -s -m 20 -i";
-
-# htmlget, URL will be appended to the right of this command line
-$htmlget = "curl -s";
-
-# urlget, URL will be appended to the right of this command line
-# this stores the file with the remote file name in the current dir
-$urlget = "curl -O -s";
 
 sub namevalue {
     my ($tag)=@_;
