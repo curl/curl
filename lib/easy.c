@@ -109,6 +109,9 @@ CURL *curl_easy_init(void)
     return NULL;
 
   data->interf = CURLI_EASY; /* mark it as an easy one */
+  /* SAC */
+  data->device = NULL;
+
   return data;
 }
 

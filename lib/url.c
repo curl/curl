@@ -52,7 +52,6 @@
 
 #include <errno.h>
 
-
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>
 #include <time.h>
@@ -497,6 +496,9 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     break;
   case CURLOPT_QUOTE:
     data->quote = va_arg(param, struct curl_slist *);
+    break;
+  case CURLOPT_INTERFACE:
+    data->device = va_arg(param, char *);
     break;
   default:
     /* unknown tag and its companion, just ignore: */
@@ -1176,6 +1178,136 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   conn->serv_addr.sin_family = conn->hp->h_addrtype;
   conn->serv_addr.sin_port = htons(data->port);
 
+/* sck 8/31/2000 add support for specifing device to bind socket to */
+/* #ifdef LINUX */
+/* I am using this, but it may not work everywhere, only tested on RedHat 6.2 */
+#ifdef HAVE_INET_NTOA
+
+#ifndef INADDR_NONE
+#define INADDR_NONE (unsigned long) ~0
+#endif
+
+  if (data->device && (strlen(data->device)<255)) {
+    struct ifreq ifr;
+    struct sockaddr_in sa;
+    struct hostent *h=NULL;
+    size_t size;
+    unsigned short porttouse;
+    char myhost[256] = "";
+    unsigned long in;
+
+    if(if2ip(data->device, myhost, sizeof(myhost))) {
+      h = GetHost(data, myhost, hostent_buf, sizeof(hostent_buf));
+    }
+    else {
+      if(strlen(data->device)>1) {
+        h = GetHost(data, data->device, hostent_buf,
+                    sizeof(hostent_buf));
+      }
+      if(h) {
+        strcpy(myhost,data->device);
+      }
+    }
+
+    if(! *myhost) {
+      /* need to fix this
+         h=GetHost(data,
+         getmyhost(*myhost,sizeof(myhost)),
+         hostent_buf,
+         sizeof(hostent_buf));
+      */
+      printf("in here\n");
+    }
+
+    infof(data, "We connect from %s\n", myhost);
+
+    if ( (in=inet_addr(myhost)) != INADDR_NONE ) {
+
+      if ( h ) {
+        memset((char *)&sa, 0, sizeof(sa));
+        memcpy((char *)&sa.sin_addr,
+               h->h_addr,
+               h->h_length);
+        sa.sin_family = AF_INET;
+        sa.sin_addr.s_addr = in;
+        sa.sin_port = 0; /* get any port */
+	
+        if( bind(data->firstsocket, (struct sockaddr *)&sa, sizeof(sa)) >= 0) {
+          /* we succeeded to bind */
+          struct sockaddr_in add;
+	
+          size = sizeof(add);
+          if(getsockname(data->firstsocket, (struct sockaddr *) &add,
+                         (int *)&size)<0) {
+            failf(data, "getsockname() failed");
+            return CURLE_HTTP_PORT_FAILED;
+          }
+        }
+        else {
+          switch(errno) {
+          case EBADF:
+            failf(data, "Invalid descriptor: %d", errno);
+            break;
+          case EINVAL:
+            failf(data, "Invalid request: %d", errno);
+            break;
+          case EACCES:
+            failf(data, "Address is protected, user not superuser: %d", errno);
+            break;
+          case ENOTSOCK:
+            failf(data,
+                  "Argument is a descriptor for a file, not a socket: %d",
+                  errno);
+            break;
+          case EFAULT:
+            failf(data, "Inaccessable memory error: %d", errno);
+            break;
+          case ENAMETOOLONG:
+            failf(data, "Address too long: %d", errno);
+            break;
+          case ENOMEM:
+            failf(data, "Insufficient kernel memory was available: %d", errno);
+            break;
+#if 0
+          case EROFS:
+            failf(data,
+                  "Socket inode would reside on a read-only file system: %d",
+                  errno);
+            break;
+          case ENOENT:
+            failf(data, "File does not exist: %d", errno);
+            break;
+          case ENOTDIR:
+            failf(data, "Component of path prefix is not a directory: %d",
+                  errno);
+            break;
+          case ELOOP:
+            failf(data,"Too many symbolic links encountered: %d",errno);
+            break;
+#endif
+          default:
+            failf(data,"errno %d\n");
+          } /* end of switch */
+	
+          return CURLE_HTTP_PORT_FAILED;
+        } /* end of else */
+	
+      } /* end of if  h */
+      else {
+	failf(data,"could't find my own IP address (%s)", myhost);
+	return CURLE_HTTP_PORT_FAILED;
+      }
+
+    } /* end of inet_addr */
+
+    else {
+      failf(data, "could't find my own IP address (%s)", myhost);
+      return CURLE_HTTP_PORT_FAILED;
+    }
+
+  } /* end of device selection support */
+#endif  /* end of HAVE_INET_NTOA */
+
   if (connect(data->firstsocket,
               (struct sockaddr *) &(conn->serv_addr),
               sizeof(conn->serv_addr)
@@ -1186,10 +1318,49 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     case ECONNREFUSED:
       failf(data, "Connection refused");
       break;
+    case EFAULT:
+      failf(data, "Invalid socket address: %d",errno);
+      break;
+    case EISCONN:
+      failf(data, "Socket already connected: %d",errno);
+      break;
+    case ETIMEDOUT:
+      failf(data, "Timeout while accepting connection, server busy: %d",errno);
+      break;
+    case ENETUNREACH:
+      failf(data, "Network is unreachable: %d",errno);
+      break;
+    case EADDRINUSE:
+      failf(data, "Local address already in use: %d",errno);
+      break;
+    case EINPROGRESS:
+      failf(data, "Socket is nonblocking and connection can not be completed immediately: %d",errno);
+      break;
+    case EALREADY:
+      failf(data, "Socket is nonblocking and a previous connection attempt not completed: %d",errno);
+      break;
+    case EAGAIN:
+      failf(data, "No more free local ports: %d",errno);
+      break;
+    case EACCES:
+    case EPERM:
+      failf(data, "Attempt to connect to broadcast address without socket broadcast flag or local firewall rule violated: %d",errno);
+      break;
 #endif
 #ifdef EINTR
     case EINTR:
       failf(data, "Connection timeouted");
+      break;
+#endif
+#if 0
+    case EAFNOSUPPORT:
+      failf(data, "Incorrect address family: %d",errno);
+      break;
+    case ENOTSOCK:
+      failf(data, "File descriptor is not a socket: %d",errno);
+      break;
+    case EBADF:
+      failf(data, "File descriptor is not a valid index in descriptor table: %d",errno);
       break;
 #endif
     default:

@@ -356,6 +356,7 @@ struct UrlData {
   char *useragent;   /* User-Agent string */
 
   char *ftpport; /* port to send with the PORT command */
+  char *device;  /* Interface to use */
 
   /* function that stores the output:*/
   curl_write_callback fwrite;
