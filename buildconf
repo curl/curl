@@ -5,6 +5,21 @@ die(){
 	exit
 }
 
+# this works as 'which' but we use a different name to make it more obvious we
+# aren't using 'which'! ;-)
+findtool(){
+  file="$1"
+
+  IFS=":"
+  for path in $PATH
+  do
+    if test -r "$path/$file"; then
+      echo "$path/$file"
+      return
+    fi
+  done
+}
+
 #--------------------------------------------------------------------------
 # autoconf 2.57 or newer
 #
@@ -79,11 +94,13 @@ LIBTOOL_WANTED_MINOR=4
 LIBTOOL_WANTED_PATCH=2
 LIBTOOL_WANTED_VERSION=1.4.2
 
-libtool=`which glibtool 2>/dev/null`
+# this approach that tries 'glibtool' first is some kind of work-around for
+# some BSD-systems I believe that use to provide the GNU libtool named
+# glibtool, with 'libtool' being something completely different.
+libtool=`findtool glibtool 2>/dev/null`
 if test ! -x "$libtool"; then
-  libtool=`which libtool`
+  libtool=`findtool libtool`
 fi
-#lt_pversion=`${LIBTOOL:-$libtool} --version 2>/dev/null|head -1| sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//'`
 lt_pversion=`$libtool --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//g' -e 's/[- ].*//'`
 if test -z "$lt_pversion"; then
   echo "buildconf: libtool not found."
