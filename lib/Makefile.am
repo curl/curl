@@ -91,6 +91,7 @@ $(srcdir)/getdate.c: getdate.y
 	  mv -f y.tab.c getdate.c
 
 $(srcdir)/ca-bundle.h: Makefile.in Makefile
+	chmod 0644 $@
 	echo "/* The file is generated automaticly */" > $@
 if CABUNDLE
 	echo '#define CURL_CA_BUNDLE @CURL_CA_BUNDLE@' >> $@
