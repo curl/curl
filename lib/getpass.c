@@ -45,8 +45,6 @@
 #  endif
 #endif
 
-#define INPUT_BUFFER 128
-
 #ifndef RETSIGTYPE
 #  define RETSIGTYPE void
 #endif
@@ -70,11 +68,10 @@
 #  define perror(x) fprintf(stderr, "Error in: %s\n", x)
 #endif
 
-char *getpass(const char *prompt)
+void my_getpass(const char *prompt, char *buffer, int buflen)
 {
   FILE *infp;
   FILE *outfp;
-  static char buf[INPUT_BUFFER];
   RETSIGTYPE (*sigint)();
 #ifndef __EMX__
   RETSIGTYPE (*sigtstp)();
@@ -142,8 +139,8 @@ char *getpass(const char *prompt)
   fputs(prompt, outfp);
   fflush(outfp);
 
-  bytes_read=read(infd, buf, INPUT_BUFFER);
-  buf[bytes_read > 0 ? (bytes_read -1) : 0] = '\0';
+  bytes_read=read(infd, buffer, buflen);
+  buffer[bytes_read > 0 ? (bytes_read -1) : 0] = '\0';
 
   /* print a new line if needed */
 #ifdef HAVE_TERMIOS_H
@@ -157,7 +154,7 @@ char *getpass(const char *prompt)
 
   /*
    * reset term charectaristics, use TCSAFLUSH incase the
-   * user types more than INPUT_BUFFER
+   * user types more than buflen
    */
 #ifdef HAVE_TERMIOS_H
   if(tcsetattr(outfd, TCSAFLUSH, &orig) != 0)
@@ -179,15 +176,25 @@ char *getpass(const char *prompt)
   signal(SIGTSTP, sigtstp);
 #endif
 
-  return(buf);
 }
-#else
+#else /* WIN32 */
 #include <stdio.h>
-char *getpass(const char *prompt)
+#include <conio.h>
+void my_getpass(const char *prompt, char *buffer, int buflen)
 {
-	static char password[80];
-	printf(prompt);
-	gets(password);
-	return password;
+  int i;
+  printf("%s", prompt);
+ 
+  for(i=0; i<buflen; i++) {
+    buffer[i] = getch();
+    if ( buffer[i] == '\r' ) {
+      buffer[i] = 0;
+      break;
+    }
+  }
+  /* if user didn't hit ENTER, terminate buffer */
+  if (i==buflen)
+    buffer[buflen-1]=0;
 }
-#endif /* don't do anything if WIN32 */
+#endif
+

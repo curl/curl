@@ -780,16 +780,16 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
     if(*data->userpwd != ':') {
       /* the name is given, get user+password */
-      sscanf(data->userpwd, "%127[^:]:%127[^@]",
+      sscanf(data->userpwd, "%127[^:]:%127[^\n]",
              data->user, data->passwd);
       }
     else
       /* no name given, get the password only */
-      sscanf(data->userpwd+1, "%127[^@]", data->passwd);
+      sscanf(data->userpwd+1, "%127[^\n]", data->passwd);
 
     /* check for password, if no ask for one */
     if( !data->passwd[0] ) {
-      strncpy(data->passwd, getpass("password: "), sizeof(data->passwd));
+      my_getpass("password:", data->passwd, sizeof(data->passwd));
     }
   }
 
@@ -799,16 +799,18 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
     if(*data->proxyuserpwd != ':') {
       /* the name is given, get user+password */
-      sscanf(data->proxyuserpwd, "%127[^:]:%127[^@]",
+      sscanf(data->proxyuserpwd, "%127[^:]:%127[^\n]",
              data->proxyuser, data->proxypasswd);
       }
     else
       /* no name given, get the password only */
-      sscanf(data->proxyuserpwd+1, "%127[^@]", data->proxypasswd);
+      sscanf(data->proxyuserpwd+1, "%127[^\n]", data->proxypasswd);
 
     /* check for password, if no ask for one */
     if( !data->proxypasswd[0] ) {
-      strncpy(data->proxypasswd, getpass("proxy password: "), sizeof(data->proxypasswd));
+      my_getpass("proxy password:",
+                 data->proxypasswd,
+                 sizeof(data->proxypasswd));
     }
 
   }
@@ -1117,7 +1119,7 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
       /* check for password, if no ask for one */
       if( !data->passwd[0] ) {
-        strncpy(data->passwd, getpass("password: "), sizeof(data->passwd));
+        my_getpass("password:",data->passwd,sizeof(data->passwd));
       }
 
       conn->name = ++ptr;

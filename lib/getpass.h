@@ -1,1 +1,1 @@
-char *getpass(const char *prompt);
+void my_getpass(const char *prompt, char* buffer, int buflen );
