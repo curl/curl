@@ -172,7 +172,9 @@ _Transfer(struct connectdata *c_conn)
     if(conn->size > 0)
       pgrsSetDownloadSize(data, conn->size);
   }
-  {
+  /* we want header and/or body, if neither then don't do this! */
+  if(conn->getheader ||
+     !data->bits.no_body) {
     fd_set readfd;
     fd_set writefd;
     fd_set rkeepfd;

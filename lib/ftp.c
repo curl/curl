@@ -471,7 +471,7 @@ CURLcode ftp_done(struct connectdata *conn)
       failf(data, "Received only partial file");
       return CURLE_PARTIAL_FILE;
     }
-    else if(0 == *ftp->bytecountp) {
+    else if(!data->bits.no_body && (0 == *ftp->bytecountp)) {
       failf(data, "No data was received!");
       return CURLE_FTP_COULDNT_RETR_FILE;
     }
@@ -479,17 +479,19 @@ CURLcode ftp_done(struct connectdata *conn)
   /* shut down the socket to inform the server we're done */
   sclose(data->secondarysocket);
   data->secondarysocket = -1;
-    
-  /* now let's see what the server says about the transfer we
-     just performed: */
-  nread = GetLastResponse(data->firstsocket, buf, conn);
-  if(nread < 0)
-    return CURLE_OPERATION_TIMEOUTED;
 
-  /* 226 Transfer complete, 250 Requested file action okay, completed. */
-  if(!strncmp(buf, "226", 3) && !strncmp(buf, "250", 3)) {
-    failf(data, "%s", buf+4);
-    return CURLE_FTP_WRITE_ERROR;
+  if(!data->bits.no_body) {  
+    /* now let's see what the server says about the transfer we
+       just performed: */
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
+
+    /* 226 Transfer complete, 250 Requested file action okay, completed. */
+    if(!strncmp(buf, "226", 3) && !strncmp(buf, "250", 3)) {
+      failf(data, "%s", buf+4);
+      return CURLE_FTP_WRITE_ERROR;
+    }
   }
 
   /* Send any post-transfer QUOTE strings? */
@@ -569,6 +571,19 @@ CURLcode _ftp(struct connectdata *conn)
         }
       }
       qitem = qitem->next;
+    }
+  }
+
+  /* change directory first! */
+  if(ftp->dir && ftp->dir[0]) {
+    sendf(data->firstsocket, data, "CWD %s\r\n", ftp->dir);
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
+
+    if(strncmp(buf, "250", 3)) {
+      failf(data, "Couldn't change to directory %s", ftp->dir);
+      return CURLE_FTP_ACCESS_DENIED;
     }
   }
 
@@ -850,20 +865,6 @@ CURLcode _ftp(struct connectdata *conn)
   }
   /* we have the (new) data connection ready */
   infof(data, "Connected!\n");
-
-  /* change directory first */
-
-  if(ftp->dir && ftp->dir[0]) {
-    sendf(data->firstsocket, data, "CWD %s\r\n", ftp->dir);
-    nread = GetLastResponse(data->firstsocket, buf, conn);
-    if(nread < 0)
-      return CURLE_OPERATION_TIMEOUTED;
-
-    if(strncmp(buf, "250", 3)) {
-      failf(data, "Couldn't change to directory %s", ftp->dir);
-      return CURLE_FTP_ACCESS_DENIED;
-    }
-  }
 
   if(data->bits.upload) {
 
