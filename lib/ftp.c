@@ -122,6 +122,8 @@ static CURLcode ftp_cwd_and_mkd(struct connectdata *conn, char *path);
 static CURLcode ftp_quit(struct connectdata *conn);
 static CURLcode ftp_3rdparty_pretransfer(struct connectdata *conn);
 static CURLcode ftp_3rdparty_transfer(struct connectdata *conn);
+static CURLcode ftp_parse_url_path(struct connectdata *conn);
+static CURLcode ftp_cwd_and_create_path(struct connectdata *conn);
 static CURLcode ftp_regular_transfer(struct connectdata *conn);
 static CURLcode ftp_3rdparty(struct connectdata *conn);
 
@@ -2109,23 +2111,9 @@ CURLcode ftp_perform(struct connectdata *conn,
       return result;
   }
 
-  /* This is a re-used connection. Since we change directory to where the
-     transfer is taking place, we must now get back to the original dir
-     where we ended up after login: */
-  if (conn->bits.reuse && ftp->entrypath) {
-    if ((result = ftp_cwd_and_mkd(conn, ftp->entrypath)) != CURLE_OK)
-      return result;
-  }
-
-  {
-    int i; /* counter for loop */
-    for (i=0; i < ftp->dirdepth; i++) {
-      /* RFC 1738 says empty components should be respected too, but
-         that is plain stupid since CWD can't be used with an empty argument */
-      if ((result = ftp_cwd_and_mkd(conn, ftp->dirs[i])) != CURLE_OK)
-        return result;
-    }
-  }
+  result = ftp_cwd_and_create_path(conn);
+  if (result)
+    return result;
 
   /* Requested time of file or time-depended transfer? */
   if((data->set.get_filetime || data->set.timecondition) &&
@@ -2267,6 +2255,10 @@ CURLcode ftp_perform(struct connectdata *conn,
 CURLcode Curl_ftp(struct connectdata *conn)
 {
   CURLcode retcode = CURLE_OK;
+
+  retcode = ftp_parse_url_path(conn);
+  if (retcode)
+    return retcode;
 
   if (conn->sec_conn) /* 3rd party transfer */
     retcode = ftp_3rdparty(conn);
@@ -2546,6 +2538,10 @@ static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
     port_conn = conn;
   }
 
+  result = ftp_cwd_and_create_path(conn);
+  if (result)
+    return result;
+
   /* sets the passive mode */
   FTPSENDF(pasv_conn, "%s", "PASV");
   result = Curl_GetFTPResponse(&nread, pasv_conn, &ftpcode);
@@ -2640,35 +2636,25 @@ static CURLcode ftp_3rdparty_transfer(struct connectdata *conn)
 
 /***********************************************************************
  *
- * ftp_regular_transfer()
+ * ftp_parse_url_path()
  *
- * The input argument is already checked for validity.
- * Performs a regular transfer between local and remote hosts.
+ * Parse the URL path into separate path components.
  *
- * ftp->ctl_valid starts out as FALSE, and gets set to TRUE if we reach the
- * Curl_ftp_done() function without finding any major problem.
  */
 static
-CURLcode ftp_regular_transfer(struct connectdata *conn)
+CURLcode ftp_parse_url_path(struct connectdata *conn)
 {
-  CURLcode retcode=CURLE_OK;
-  bool connected=0;
+  CURLcode retcode = CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct FTP *ftp;
 
   char *slash_pos;  /* position of the first '/' char in curpos */
-  char *cur_pos=conn->path; /* current position in ppath. point at the begin
-                               of next path component */
+  char *cur_pos = conn->path; /* current position in path. point at the begin
+                                 of next path component */
 
   /* the ftp struct is already inited in ftp_connect() */
   ftp = conn->proto.ftp;
   ftp->ctl_valid = FALSE;
-  conn->size = -1; /* make sure this is unknown at this point */
-
-  Curl_pgrsSetUploadCounter(data, 0);
-  Curl_pgrsSetDownloadCounter(data, 0);
-  Curl_pgrsSetUploadSize(data, 0);
-  Curl_pgrsSetDownloadSize(data, 0);
 
   ftp->dirdepth = 0;
   ftp->diralloc = 5; /* default dir depth to allocate */
@@ -2730,6 +2716,72 @@ CURLcode ftp_regular_transfer(struct connectdata *conn)
   else
     ftp->file=NULL; /* instead of point to a zero byte, we make it a NULL
                        pointer */
+
+  return retcode;
+}
+
+
+
+/***********************************************************************
+ *
+ * ftp_cwd_and_create_path()
+ *
+ * Creates full path on remote target host.
+ *
+ */
+static
+CURLcode ftp_cwd_and_create_path(struct connectdata *conn)
+{
+  CURLcode result = CURLE_OK;
+  /* the ftp struct is already inited in Curl_ftp_connect() */
+  struct FTP *ftp = conn->proto.ftp;
+  int i;
+
+  /* This is a re-used connection. Since we change directory to where the
+     transfer is taking place, we must now get back to the original dir
+     where we ended up after login: */
+  if (conn->bits.reuse && ftp->entrypath) {
+    if ((result = ftp_cwd_and_mkd(conn, ftp->entrypath)) != CURLE_OK)
+      return result;
+  }
+
+  for (i=0; i < ftp->dirdepth; i++) {
+    /* RFC 1738 says empty components should be respected too, but
+       that is plain stupid since CWD can't be used with an empty argument */
+    if ((result = ftp_cwd_and_mkd(conn, ftp->dirs[i])) != CURLE_OK)
+      return result;
+  }
+
+  return result;
+}
+
+
+/***********************************************************************
+ *
+ * ftp_regular_transfer()
+ *
+ * The input argument is already checked for validity.
+ * Performs a regular transfer between local and remote hosts.
+ *
+ * ftp->ctl_valid starts out as FALSE, and gets set to TRUE if we reach the
+ * Curl_ftp_done() function without finding any major problem.
+ */
+static
+CURLcode ftp_regular_transfer(struct connectdata *conn)
+{
+  CURLcode retcode=CURLE_OK;
+  bool connected=0;
+  struct SessionHandle *data = conn->data;
+  struct FTP *ftp;
+
+  /* the ftp struct is already inited in ftp_connect() */
+  ftp = conn->proto.ftp;
+  conn->size = -1; /* make sure this is unknown at this point */
+
+  Curl_pgrsSetUploadCounter(data, 0);
+  Curl_pgrsSetDownloadCounter(data, 0);
+  Curl_pgrsSetUploadSize(data, 0);
+  Curl_pgrsSetDownloadSize(data, 0);
 
   retcode = ftp_perform(conn, &connected);
 

@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (16 October 2004)
+- Alexander Krasnostavsky made the CURLOPT_FTP_CREATE_MISSING_DIRS option work
+  fine even for third party transfers.
+
 - runekl at opoint.com found out (and provided a fix) that libcurl leaked
   memory for cookies with the "max-age" field set.
 
