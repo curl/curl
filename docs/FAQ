@@ -51,7 +51,10 @@ FAQ
 
   1.1.1. native linker doesn't find openssl
 
-    Platforms: Solaris (native cc compiler) and HPUX (native cc compiler)
+    Affected platforms:
+      Solaris (native cc compiler)
+      HPUX (native cc compiler)
+      SGI IRIX (native cc compiler)
 
     When configuring curl, I specify --with-ssl. OpenSSL is installed in
     /usr/local/ssl Configure reports SSL in /usr/local/ssl, but fails to find
@@ -65,7 +68,7 @@ FAQ
     ./configure places the -L/usr/local/ssl/lib early enough in the command
     line to make things work
 
-    Submitted by: Bob Allison <allisonb@users.sourceforge.net>
+    Solution submitted by: Bob Allison <allisonb@users.sourceforge.net>
 
   1.1.2. only the libssl lib is missing
 
