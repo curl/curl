@@ -1,4 +1,4 @@
-Updated: May 15, 2002 (http://curl.haxx.se/docs/faq.shtml)
+Updated: May 21, 2002 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -31,7 +31,7 @@ FAQ
   3.3 Why doesn't my posting using -F work?
   3.4 How do I tell curl to run custom FTP commands?
   3.5 How can I disable the Pragma: nocache header?
-  3.6 Does curl support javascript, ASP, XML, XHTML or HTML version Y?
+  3.6 Does curl support ASP, XML, XHTML or HTML version Y?
   3.7 Can I use curl to delete/rename a file through FTP?
   3.8 How do I tell curl to follow HTTP redirects?
   3.9 How do I use curl in my favourite programming language?
@@ -39,6 +39,7 @@ FAQ
   3.11 How do I POST with a different Content-Type?
   3.12 Why do FTP specific features over HTTP proxy fail?
   3.13 Why does my single/double quotes fail?
+  3.14 Does curl support javascript or pac (automated proxy config)?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -325,16 +326,14 @@ FAQ
   the -H/--header option. By adding a header with empty contents you safely
   disable that one. Use -H "Pragma:" to disable that specific header.
 
-  3.6. Does curl support javascript, ASP, XML, XHTML or HTML version Y?
+  3.6. Does curl support ASP, XML, XHTML or HTML version Y?
 
   To curl, all contents are alike. It doesn't matter how the page was
   generated. It may be ASP, PHP, Perl, shell-script, SSI or plain
   HTML-files. There's no difference to curl and it doesn't even know what kind
   of language that generated the page.
 
-  Javascript is slightly different since that is code embedded in the HTML
-  that is sent for the client to interpret and curl has no javascript
-  interpreter.
+  See also item 3.13 regarding javascript.
 
   3.7. Can I use curl to delete/rename a file through FTP?
 
@@ -419,6 +418,30 @@ FAQ
 
   Remember that curl works and runs on more operating systems than most single
   individuals have ever tried.
+
+  3.14 Does curl support javascript or pac (automated proxy config)?
+
+  Many web pages do magic stuff using embedded javascript. Curl and libcurl
+  have no built-in support for that, so it will be treated just like any other
+  contents.
+
+  .pac files are a netscape invention and are sometimes used by organizations
+  to allow them to differentiate which proxies to use. The .pac contents is
+  just a javascript program that gets invoked by the browser and that returns
+  the name of the proxy to connect to. Since curl doesn't support javascript,
+  it can't support .pac proxy configuration either.
+
+  Some work-arounds usually suggested to overcome this javascript dependency:
+
+    - Depending on the javascript complexity, write up a script that
+      translates it to another language and execute that.
+
+    - Read the javascript code and rewrite the same logic in another language.
+
+    - Implement a javascript interpreted, people have successfully used the
+      Mozilla javascript engine in the past.
+
+    - Ask your admins to stop this, for a static proxy setup or similar.
 
 
 4. Running Problems
