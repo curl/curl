@@ -7,6 +7,8 @@
                                   Changelog
 
 
+Version 7.10.3 (14 Jan 2003)
+
 Daniel (10 Jan 2003)
 - Steve Oliphant pointed out that test case 105 did not work anymore and this
   was due to a missing fix for the password prompting.
