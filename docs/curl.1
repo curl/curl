@@ -220,11 +220,10 @@ be in PEM format.
 If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
 (HTTPS) Tells curl to use the specified certificate directory to verify the
-peer. The certificates must be in PEM format, and the directory must have been 
-processed using the c_rehash utility supplied with openssl. Certificate directories
-are not supported under Windows (because c_rehash uses symbolink links to
-create them). Using --capath can allow curl to make https connections much
-more efficiently than using --cacert if the --cacert file contains many CA certificates.
+peer. The certificates must be in PEM format, and the directory must have been
+processed using the c_rehash utility supplied with openssl. Using --capath can
+allow curl to make https connections much more efficiently than using --cacert
+if the --cacert file contains many CA certificates.
 
 If this option is used several times, the last one will be used.
 .IP "-f/--fail"
