@@ -4,7 +4,9 @@
 
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-INCLUDES = -I$(top_srcdir)/include
+# we use srcdir/include for the static global include files
+# we use builddir/src for the generated src/config.h file to get found
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/src
 
 bin_PROGRAMS = curl #memtest
 

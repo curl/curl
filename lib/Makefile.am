@@ -12,7 +12,9 @@ EXTRA_DIST = getdate.y \
 
 lib_LTLIBRARIES = libcurl.la
 
-INCLUDES = -I$(top_srcdir)/include
+# we use srcdir/include for the static global include files
+# we use builddir/lib for the generated lib/config.h file to get found
+INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/lib
 
 libcurl_la_LDFLAGS = -no-undefined -version-info 2:2:0
 # This flag accepts an argument of the form current[:revision[:age]]. So,
