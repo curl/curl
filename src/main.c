@@ -2245,6 +2245,41 @@ void free_config_fields(struct Configurable *config)
   curl_slist_free_all(config->headers); /*  */
 }
 
+#if defined(WIN32) && !defined(__CYGWIN32__)
+
+/* Function to find CACert bundle on a Win32 platform using SearchPath.
+ * (SearchPath is defined in windows.h, which is #included into libcurl)
+ * (Use the ASCII version instead of the unicode one!)
+ * The order of the directories it searches is:
+ *  1. application's directory
+ *  2. current working directory
+ *  3. Windows System directory (e.g. C:\windows\system32)
+ *  4. Windows Directory (e.g. C:\windows)
+ *  5. all directories along %PATH%
+ */
+static void FindWin32CACert(struct Configurable *config, 
+                            const char *bundle_file)
+{
+  curl_version_info_data *info;
+  info = curl_version_info(CURLVERSION_NOW);
+
+  /* only check for cert file if "we" support SSL */
+  if(info->features & CURL_VERSION_SSL) {
+    DWORD buflen;
+    char *ptr = NULL;
+    char *retval = (char *) malloc(sizeof (TCHAR) * (MAX_PATH + 1));
+    if (!retval)
+      return;
+    retval[0] = '\0';
+    buflen = SearchPathA(NULL, bundle_file, NULL, MAX_PATH+2, retval, &ptr);
+    if (buflen > 0) {
+      GetStr(&config->cacert, retval);
+    }
+    free(retval);
+  }
+}
+
+#endif
 
 static int 
 operate(struct Configurable *config, int argc, char *argv[])
@@ -2280,9 +2315,9 @@ operate(struct Configurable *config, int argc, char *argv[])
   int res = 0;
   int i;
 
+  char *env;
 #ifdef MALLOCDEBUG
   /* this sends all memory debug messages to a logfile named memdump */
-  char *env;
   env = curl_getenv("CURL_MEMDEBUG");
   if(env) {
     free(env);
@@ -2383,6 +2418,27 @@ operate(struct Configurable *config, int argc, char *argv[])
   }
   else
     allocuseragent = TRUE;
+
+  /* On WIN32 (non-cygwin), we can't set the path to curl-ca-bundle.crt
+   * at compile time. So we look here for the file in two ways:
+   * 1: look at the environment variable CURL_CA_BUNDLE for a path
+   * 2: if #1 isn't found, use the windows API function SearchPath()
+   *    to find it along the app's path (includes app's dir and CWD)
+   *
+   * We support the environment variable thing for non-Windows platforms
+   * too. Just for the sake of it.
+   */
+  if (! config->cacert) {
+    env = curl_getenv("CURL_CA_BUNDLE");
+    if(env) {
+      GetStr(&config->cacert, env);
+      free(env);
+    }
+  }
+#if defined(WIN32) && !defined(__CYGWIN32__)
+  if (! config->cacert)
+    FindWin32CACert(config, "curl-ca-bundle.crt");
+#endif
 
   if (config->postfields) {
     if (config->use_httpget) {
