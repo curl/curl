@@ -491,15 +491,15 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
             /* a newline is CRLF in ftp-talk, so the CR is ignored as
                the line isn't really terminated until the LF comes */
 
-            /* output debug output if that is requested */
-            if(data->set.verbose)
-              Curl_debug(data, CURLINFO_DATA_IN, line_start, perline);
-            
             if('\r' == line_start[0]) {
               /* end of headers */
               keepon=FALSE;
               break; /* breaks out of loop, not switch */
             }
+
+            /* output debug output if that is requested */
+            if(data->set.verbose)
+              Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline);
 
             if(2 == sscanf(line_start, "HTTP/1.%d %d",
                            &subversion,
