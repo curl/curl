@@ -87,8 +87,8 @@ Mono
 
 .NET
 
-  Written by Jeffrey Phillips
-  http://www.seasideresearch.com/downloads.html
+  libcurl-net Written by Jeffrey Phillips
+  http://sourceforge.net/projects/libcurl-net/
 
 Object-Pascal
 
@@ -149,6 +149,11 @@ Tcl
 
   Tclcurl is written by Andrés García
   http://personal1.iddeo.es/andresgarci/tclcurl/english/docs.html
+
+Visual Basic
+
+  libcurl-vb is written by Jeffrey Phillips
+  http://sourceforge.net/projects/libcurl-vb/
 
 Q
 
