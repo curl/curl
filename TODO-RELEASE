@@ -8,9 +8,6 @@ To get fixed in 7.11.1
 1. Introduce a new error code indicating authentication problems (for proxy
    CONNECT error 407 for example). #845941 UNASSIGNED
 
-2. Make the proxy CONNECT headers get passed to the callbacks just like other
-   headers are. #845941 UNASSIGNED
-
 4. Multi-threaded OpenSSL usage needs to be addressed (Dirk Manske has stepped
    forward on this)
 
