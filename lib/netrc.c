@@ -36,7 +36,9 @@
 #ifdef HAVE_PWD_H
 #include <pwd.h>
 #endif
-
+#ifdef VMS
+#include <unixlib.h>
+#endif
 
 #include <curl/curl.h>
 
@@ -88,8 +90,13 @@ int Curl_parsenetrc(char *host,
 #if defined(HAVE_GETPWUID) && defined(HAVE_GETEUID)
   struct passwd *pw;
   pw= getpwuid(geteuid());
-  if (pw)
+  if (pw) {
+#ifdef	VMS
+    home = decc$translate_vms(pw->pw_dir);
+#else
     home = pw->pw_dir;
+#endif
+  }
 #else
   void *pw=NULL;
 #endif
