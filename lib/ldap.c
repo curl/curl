@@ -148,7 +148,7 @@ CURLcode Curl_ldap(struct connectdata *conn)
   int ldaptext;
   struct SessionHandle *data=conn->data;
   
-  infof(data, "LDAP: %s %s\n", data->change.url);
+  infof(data, "LDAP: %s\n", data->change.url);
 
   DynaOpen();
   if (libldap == NULL) {
