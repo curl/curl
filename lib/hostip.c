@@ -314,6 +314,7 @@ Curl_cache_addr(struct SessionHandle *data,
   char *entry_id;
   size_t entry_len;
   struct Curl_dns_entry *dns;
+  struct Curl_dns_entry *dns2;
   time_t now;
 
   /* Create an entry id, based upon the hostname and port */
@@ -325,7 +326,6 @@ Curl_cache_addr(struct SessionHandle *data,
   /* Create a new cache entry */
   dns = (struct Curl_dns_entry *) malloc(sizeof(struct Curl_dns_entry));
   if (!dns) {
-    Curl_freeaddrinfo(addr);
     free(entry_id);
     return NULL;
   }
@@ -336,14 +336,15 @@ Curl_cache_addr(struct SessionHandle *data,
   /* Store the resolved data in our DNS cache. This function may return a
      pointer to an existing struct already present in the hash, and it may
      return the same argument we pass in. Make no assumptions. */
-  dns = Curl_hash_add(data->hostcache, entry_id, entry_len+1, (void *)dns);
-  if(!dns) {
-    /* Major badness, run away. When this happens, the 'dns' data has
-       already been cleared up by Curl_hash_add(). */
+  dns2 = Curl_hash_add(data->hostcache, entry_id, entry_len+1, (void *)dns);
+  if(!dns2) {
+    /* Major badness, run away. */
+    free(dns);
     free(entry_id);
     return NULL;
   }
   time(&now);
+  dns = dns2;
 
   dns->timestamp = now; /* used now */
   dns->inuse++;         /* mark entry as in-use */

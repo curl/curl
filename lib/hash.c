@@ -164,7 +164,7 @@ Curl_hash_add(curl_hash *h, char *key, size_t key_len, void *p)
     /* couldn't insert it, destroy the 'he' element again */
     hash_element_dtor(h, he);
   }
-  h->dtor(p); /* remove the NEW entry */
+
   return NULL; /* failure */
 }
 
