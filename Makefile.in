@@ -87,13 +87,12 @@ man1dir = $(mandir)/man1
 MANS = $(man_MANS)
 DIST_COMMON =  README ./stamp-h1.in INSTALL Makefile.am Makefile.in TODO \
 acconfig.h aclocal.m4 config.guess config.h.in config.sub configure \
-configure.in install-sh missing mkinstalldirs src/config.h.in \
-src/stamp-h2.in
+configure.in install-sh missing mkinstalldirs
 
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 all: all-redirect
 .SUFFIXES:
@@ -131,31 +130,12 @@ $(srcdir)/stamp-h1.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
 	cd $(top_srcdir) && $(AUTOHEADER)
 	@echo timestamp > $(srcdir)/stamp-h1.in 2> /dev/null
 
-src/config.h: src/stamp-h2
-	@if test ! -f $@; then \
-		rm -f src/stamp-h2; \
-		$(MAKE) src/stamp-h2; \
-	else :; fi
-src/stamp-h2: $(srcdir)/src/config.h.in $(top_builddir)/config.status
-	cd $(top_builddir) \
-	  && CONFIG_FILES= CONFIG_HEADERS=src/config.h \
-	     $(SHELL) ./config.status
-	@echo timestamp > src/stamp-h2 2> /dev/null
-$(srcdir)/src/config.h.in: $(srcdir)/src/stamp-h2.in
-	@if test ! -f $@; then \
-		rm -f $(srcdir)/src/stamp-h2.in; \
-		$(MAKE) $(srcdir)/src/stamp-h2.in; \
-	else :; fi
-$(srcdir)/src/stamp-h2.in: $(top_srcdir)/configure.in $(ACLOCAL_M4) acconfig.h
-	cd $(top_srcdir) && $(AUTOHEADER)
-	@echo timestamp > $(srcdir)/src/stamp-h2.in 2> /dev/null
-
 mostlyclean-hdr:
 
 clean-hdr:
 
 distclean-hdr:
-	-rm -f config.h src/config.h
+	-rm -f config.h
 
 maintainer-clean-hdr:
 

@@ -190,7 +190,7 @@ AC_PATH_PROG( PERL, perl, ,
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
 AC_SUBST(PERL)
 
-AC_PATH_PROGS( NROFF, nroff gnroff, , 
+AC_PATH_PROGS( NROFF, gnroff nroff, , 
   $PATH:/usr/bin/:/usr/local/bin )
 AC_SUBST(NROFF)
 

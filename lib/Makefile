@@ -65,7 +65,7 @@ host_alias = sparc-sun-solaris2.6
 host_triplet = sparc-sun-solaris2.6
 CC = gcc
 MAKEINFO = makeinfo
-NROFF = /bin/nroff
+NROFF = /usr/local/bin/gnroff
 PACKAGE = curl
 PERL = /usr/local/bin/perl
 RANLIB = ranlib
@@ -108,7 +108,7 @@ DIST_COMMON =  Makefile.am Makefile.in
 
 DISTFILES = $(DIST_COMMON) $(SOURCES) $(HEADERS) $(TEXINFOS) $(EXTRA_DIST)
 
-TAR = tar
+TAR = gtar
 GZIP_ENV = --best
 SOURCES = $(libcurl_a_SOURCES)
 OBJECTS = $(libcurl_a_OBJECTS)
@@ -117,7 +117,7 @@ all: all-redirect
 .SUFFIXES:
 .SUFFIXES: .S .c .o .s
 $(srcdir)/Makefile.in: Makefile.am $(top_srcdir)/configure.in $(ACLOCAL_M4) 
-	cd $(top_srcdir) && $(AUTOMAKE) --foreign --include-deps lib/Makefile
+	cd $(top_srcdir) && $(AUTOMAKE) --foreign lib/Makefile
 
 Makefile: $(srcdir)/Makefile.in  $(top_builddir)/config.status
 	cd $(top_builddir) \

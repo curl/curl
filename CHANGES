@@ -19,7 +19,8 @@ Daniel (10 January 2000):
    downloaded. Use your imagination! ;-)
  - Since I do the main development on solaris 2.6 now, I had to download and
    install GNU groff to generate the hugehelp.c file. The solaris nroff cores
-   on the man page!
+   on the man page! So, in order to make the solaris configure script find a
+   better result I made gnroff get checked prior to the regular nroff.
  - Added all the curl exit codes to the man page.
  - Jim Gallagher <jmgallag@usa.net> properly tracked down a bug in autoconf
    2.13. The AC_CHECK_LIB() macro wrongfully uses the -l flag before the -L
