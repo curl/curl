@@ -92,6 +92,7 @@ int fileno( FILE *stream);
 #ifdef word
 #undef word
 #endif
+#define HAVE_LIMITS_H /* we have limits.h */
 #define DIR_CHAR      "/"
 #define DOT_CHAR      "_"
 #else

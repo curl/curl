@@ -88,6 +88,10 @@
 
 #endif
 
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
+#endif
+
 #ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif

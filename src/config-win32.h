@@ -8,6 +8,9 @@
 /* Define if you have the <io.h> header file.  */
 #define HAVE_IO_H 1
  
+/* Define if you have the <limits.h> header file */
+#define HAVE_LIMITS_H 1
+
 /* Define if you have the strdup function.  */
 #define HAVE_STRDUP 1
 
