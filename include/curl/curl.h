@@ -453,6 +453,10 @@ typedef enum {
    * handshake, set 1 to check existence, 2 to ensure that it matches the
    * provided hostname. */
   CINIT(SSL_VERIFYHOST, LONG, 81),
+
+  /* Specify which file name to write all known cookies in after completed
+     operation. Set file name to "-" (dash) to make it go to stdout. */
+  CINIT(COOKIEJAR, OBJECTPOINT, 82),
   
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
