@@ -364,6 +364,9 @@ static CURLcode bindlocal(struct connectdata *conn,
     return CURLE_OK;
 
   } /* end of device selection support */
+#else
+  (void)conn;
+  (void)sockfd;
 #endif /* end of HAVE_INET_NTOA */
 
   return CURLE_HTTP_PORT_FAILED;

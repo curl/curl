@@ -24,12 +24,8 @@
  ***************************************************************************/
 #include "setup.h"
 
-#if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN32__) && \
-    !defined(__riscos__) && !defined(__INTERIX)
-extern char *Curl_if2ip(const char *interface, char *buf, int buf_size);
-#else
-#define Curl_if2ip(a,b,c) NULL
-#endif
+extern char *Curl_if2ip(const char *interf, char *buf, int buf_size);
+
 #ifdef __INTERIX
 /* Nedelcho Stanev's work-around for SFU 3.0 */
 struct ifreq {

@@ -346,7 +346,7 @@ curl_share_strerror(CURLSHcode error)
 static const char *
 get_winsock_error (int err, char *buf, size_t len)
 {
-  char *p;
+  const char *p;
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (err) {
