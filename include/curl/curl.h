@@ -315,9 +315,12 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
 /* Make a spelling correction for the operation timed-out define */
 #define CURLE_OPERATION_TIMEDOUT CURLE_OPERATION_TIMEOUTED
 
+#ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
+                          the obsolete stuff removed! */
 /* backwards compatibility with older names */
 #define CURLE_HTTP_NOT_FOUND CURLE_HTTP_RETURNED_ERROR
 #define CURLE_HTTP_PORT_FAILED CURLE_INTERFACE_FAILED
+#endif
 
 typedef enum {
   CURLPROXY_HTTP = 0,
@@ -333,14 +336,17 @@ typedef enum {
 #define CURLAUTH_ANY ~0               /* all types set */
 #define CURLAUTH_ANYSAFE (~CURLAUTH_BASIC)
 
+#ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
+                          the obsolete stuff removed! */
 /* this was the error code 50 in 7.7.3 and a few earlier versions, this
    is no longer used by libcurl but is instead #defined here only to not
    make programs break */
 #define CURLE_ALREADY_COMPLETE 99999
 
-/* This is just to make older programs not break: */
+/* These are just to make older programs not break: */
 #define CURLE_FTP_PARTIAL_FILE CURLE_PARTIAL_FILE
 #define CURLE_FTP_BAD_DOWNLOAD_RESUME CURLE_BAD_DOWNLOAD_RESUME
+#endif
 
 #define CURL_ERROR_SIZE 256
 
