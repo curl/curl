@@ -779,7 +779,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.cookiesession = (bool)va_arg(param, long);
     break;
-#endif
+#endif /* CURL_DISABLE_COOKIES */
 
   case CURLOPT_HTTPGET:
     /*
@@ -816,27 +816,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
        data->set.httpreq = HTTPREQ_CUSTOM;
        here, we continue as if we were using the already set type
        and this just changes the actual request keyword */
-    break;
-
-  case CURLOPT_PROXY:
-    /*
-     * Set proxy server:port to use as HTTP proxy.
-     *
-     * If the proxy is set to "" we explicitly say that we don't want to use a
-     * proxy (even though there might be environment variables saying so).
-     *
-     * Setting it to NULL, means no proxy but allows the environment variables
-     * to decide for us.
-     */
-    if(data->change.proxy_alloc) {
-      /*
-       * The already set string is allocated, free that first
-       */
-      data->change.proxy_alloc=FALSE;;
-      free(data->change.proxy);
-    }
-    data->set.set_proxy = va_arg(param, char *);
-    data->change.proxy = data->set.set_proxy;
     break;
 
   case CURLOPT_PROXYPORT:
@@ -886,6 +865,27 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
   }
   break;
 #endif   /* CURL_DISABLE_HTTP */
+
+  case CURLOPT_PROXY:
+    /*
+     * Set proxy server:port to use as HTTP proxy.
+     *
+     * If the proxy is set to "" we explicitly say that we don't want to use a
+     * proxy (even though there might be environment variables saying so).
+     *
+     * Setting it to NULL, means no proxy but allows the environment variables
+     * to decide for us.
+     */
+    if(data->change.proxy_alloc) {
+      /*
+       * The already set string is allocated, free that first
+       */
+      data->change.proxy_alloc=FALSE;;
+      free(data->change.proxy);
+    }
+    data->set.set_proxy = va_arg(param, char *);
+    data->change.proxy = data->set.set_proxy;
+    break;
 
   case CURLOPT_WRITEHEADER:
     /*
@@ -2439,6 +2439,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       return CURLE_OUT_OF_MEMORY;
   }
 
+#ifndef CURL_DISABLE_HTTP
   /*************************************************************
    * Detect what (if any) proxy to use
    *************************************************************/
@@ -2603,6 +2604,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(no_proxy)
       free(no_proxy);
   } /* if not using proxy */
+#endif /* CURL_DISABLE_HTTP */
 
   /*************************************************************
    * No protocol part in URL was used, add it!
