@@ -7,6 +7,58 @@
                                History of Changes
 
 
+Daniel (1 March 2002)
+- Moved the memanalyze.pl script into the tests/ dir and added it to the
+  release archives. It was previously only present in the CVS tree.
+
+- Modified the February 17th Host: fix, as bug report #523718 pointed out that
+  it caused crashes!
+
+- Nico Baggus added more error codes to the VMS stuff.
+
+- Wesley Laxton brought the code that introduced the new CURLOPT_PREQUOTE
+  option. It is just another FTP quote option that allows the user to specify
+  a list of FTP commands to issue *just before* the transfer command (RETR or
+  STOR etc). It has turned up a few systems that really need this.
+
+  The curl command line tool can also take advantage of this by prefixing the
+  quote commands with a plus (+) in similar style that post transfer quote
+  commands are specified.
+
+  This is not yet documented. There is no test case for this yet.
+
+Daniel (28 February 2002)
+- Ralph Mitchell made some serious efforts and put a lot of sweat in setting
+  up scripts and things for me to be able to repeat his problems, and I
+  finally could.  I found a problem with the header byte counter that wasn't
+  increased properly and thus we could return CURLE_GOT_NOTHING when we in
+  fact had received data.
+
+Daniel (27 February 2002)
+- I had to revert the non-space parsing cookie fix I posted to the mailing
+  list. Expire dates do have spaces and still need to get parsed properly!
+  Instead we just ignore trailing white space and it seems to work...
+
+Daniel (26 February 2002)
+- Made the cookie property 'Max-Age' work, just since we already tried to
+  support it, it is better to do it right. No one uses this anyway.
+
+- The cookie parser could crash if a really weird (illegal) cookie line was
+  received. I also made it better discard really oddly formatted lines better.
+
+  Made the cookie jar store the second field from the left using the syntax
+  that Netscape and Mozilla probably like. Curl itself ignores it.
+
+  Added test case 31 for these cases.
+
+  Clay Loveless' email regarding some cookie issues started my cleanup.
+
+- Kevin Roth pointed out that my automake fiddles broke the ability to build
+  outside the source-tree and I posted a patch to the mailing list that brings
+  this ability back.
+
+Version 7.9.5-pre4
+
 Daniel (25 February 2002)
 - Fiddled with the automake files to make all source files in the lib
   directory not have ../src in the include path, and the src sources shouldn't
