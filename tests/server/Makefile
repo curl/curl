@@ -1,7 +1,5 @@
 CC	= gcc
-OPTIM	= -O2
-DEF	= -DDEFAULT_PORT=7676
-CFLAGS	= -g -Wall $(OPTIM) $(DEF)
+CFLAGS	= -g -Wall
 
 .PHONY: all clean
 

@@ -14,9 +14,7 @@
 #include <netdb.h>
 #include <assert.h>
 
-#ifndef DEFAULT_PORT
-#define DEFAULT_PORT 8642
-#endif
+#define DEFAULT_PORT 8999
 
 #ifndef DEFAULT_LOGFILE
 #define DEFAULT_LOGFILE "/dev/null"
@@ -25,7 +23,9 @@
 #define DOCBUFSIZE 4
 #define BUFFERSIZE (DOCBUFSIZE * 1024)
 
-#define VERSION "SWS/0.1"
+#define VERSION "cURL test suite HTTP server/0.1"
+
+#define REQUEST_DUMP "http-request.dump"
 
 #define TEST_DATA_PATH "../data/test%d"
 
@@ -106,6 +106,20 @@ int ProcessRequest(char *request)
   return 1; /* done */
 }
 
+/* store the entire request in a file */
+void storerequest(char *reqbuf)
+{
+  FILE *dump;
+
+  dump = fopen(REQUEST_DUMP, "wb"); /* b is for windows-preparing */
+  if(dump) {
+    fwrite(reqbuf, 1, strlen(reqbuf), dump);
+
+    fclose(dump);
+  }
+
+}
+
 
 #define REQBUFSIZ 4096
 #define MAXDOCNAMELEN 1024
@@ -141,8 +155,10 @@ static int get_request(int sock)
   }
   reqbuf[offset]=0;
   
-  logmsg("Got request:");
-  logmsg(reqbuf);
+  logmsg("Received a request");
+
+  /* dump the request to an external file */
+  storerequest(reqbuf);
 
   if (sscanf(reqbuf, "%s %s HTTP/%d.%d",
              request,
@@ -218,30 +234,12 @@ static int send_doc(int sock, int doc)
   return 0;
 }
 
-
-static void usage(const char *me)
-{
-    fprintf(stderr, "Usage: %s [ OPTIONS ]\n", me);
-    fprintf(stderr,
-	    "-p NUM    --port=NUM         accept requests on port NUM (default %d)\n",
-	    DEFAULT_PORT);
-    fprintf(stderr,
-	    "-l FILE   --logfile=FILE     log requests to file FILE (default %s)\n",
-	    DEFAULT_LOGFILE);
-    fprintf(stderr,
-	    "-f NUM    --fork=NUM         fork NUM server processes (default 0)\n");
-    fprintf(stderr, "-h        --help             this screen\n");
-    exit(1);
-}
-
-
 int main(int argc, char *argv[])
 {
     struct sockaddr_in me;
     int sock, msgsock, flag;
     unsigned short port = DEFAULT_PORT;
     char *logfile = DEFAULT_LOGFILE;
-    int c, longind;
     
     if(argc>1)
       port = atoi(argv[1]);
