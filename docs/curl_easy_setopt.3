@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "11 Oct 2001" "libcurl 7.9.1" "libcurl Manual"
+.TH curl_easy_setopt 3 "12 Nov 2001" "libcurl 7.9.1" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -336,13 +336,15 @@ Pass a pointer to a linked list of FTP commands to pass to the server prior to
 your ftp request. The linked list should be a fully valid list of 'struct
 curl_slist' structs properly filled in. Use \fIcurl_slist_append(3)\fP to
 append strings (commands) to the list, and clear the entire list afterwards
-with \fIcurl_slist_free_all(3)\fP.
+with \fIcurl_slist_free_all(3)\fP. Disable this operation again by setting a
+NULL to this option.
 .TP
 .B CURLOPT_POSTQUOTE
 Pass a pointer to a linked list of FTP commands to pass to the server after
 your ftp transfer request. The linked list should be a fully valid list of
 struct curl_slist structs properly filled in as described for
-\fICURLOPT_QUOTE\fP.
+\fICURLOPT_QUOTE\fP. Disable this operation again by setting a NULL to this
+option.
 .TP
 .B CURLOPT_WRITEHEADER
 Pass a pointer to be used to write the header part of the received data to. If
