@@ -99,9 +99,9 @@ UNIX
 
    Use the executable `curl` in src/ directory.
 
-   'make install' copies the curl file to /usr/local/bin/ (or $prefix/bin
-   if you used the --prefix option to configure) and copies the curl.1
-   man page to a suitable place too.
+   'make install' copies the curl file to /usr/local/bin/ (or $prefix/bin if
+   you used the --prefix option to configure) and copies the man pages, the
+   lib and the include files to a suitable place too.
 
    KNOWN PROBLEMS
 
@@ -122,6 +122,11 @@ UNIX
        CC=cc ./configure
          or
        env Cc=cc ./configure
+
+     To force a static library compile, disable the shared library creation
+     by running configure like:
+
+       ./configure --disable-shared
 
 
 Win32
