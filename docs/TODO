@@ -21,6 +21,12 @@ To do for the 7.8 release:
 
 To do in a future release (random order):
 
+ * Rewrite parts of the test suite. Make a (XML?) format to store all
+   test-data in a single for a single test case. The current system makes far
+   too many separate files. We also need to have the test suite support
+   different behaviors, like when libcurl is compiled for IPv6 support and
+   thus performs a different set of FTP commands.
+
  * Add configure options that disables certain protocols in libcurl to
    decrease footprint.  '--disable-[protocol]' where protocol is http, ftp,
    telnet, ldap, dict or file.
@@ -33,9 +39,10 @@ To do in a future release (random order):
    stamp as the remote file. libcurl already is capable of fetching the remote
    file's date.
 
- * Make the SSL layer option capable of using the Mozilla Security Services as
-   an alternative to OpenSSL:
-   http://www.mozilla.org/projects/security/pki/nss/
+ * Make curl's SSL layer option capable of using other free SSL libraries.
+   Such as the Mozilla Security Services
+   (http://www.mozilla.org/projects/security/pki/nss/) and GNUTLS
+   (http://gnutls.hellug.gr/)
 
  * Add asynchronous name resolving, as this enables full timeout support for
    fork() systems.
