@@ -38,6 +38,8 @@
 /* Make this the last #include */
 #ifdef MALLOCDEBUG
 #include "memdebug.h"
+#else
+#include <stdlib.h>
 #endif
 
 /*

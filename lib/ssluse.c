@@ -697,6 +697,7 @@ static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
 #endif  
 
 /* ====================================================== */
+#ifdef USE_SSLEAY
 static int
 cert_hostcheck(const char *certname, const char *hostname)
 {
@@ -733,6 +734,7 @@ cert_hostcheck(const char *certname, const char *hostname)
   }
   return 0;
 }
+#endif
 
 /* ====================================================== */
 CURLcode
