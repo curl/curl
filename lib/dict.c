@@ -80,11 +80,6 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-CURLcode Curl_dict_done(struct connectdata *conn)
-{
-  return CURLE_OK;
-}
-
 CURLcode Curl_dict(struct connectdata *conn)
 {
   int nth;
@@ -129,10 +124,10 @@ CURLcode Curl_dict(struct connectdata *conn)
       failf(data, "lookup word is missing\n");
     }
     if ((database == NULL) || (*database == (char)0)) {
-      database = "!";
+      database = (char *)"!";
     }
     if ((strategy == NULL) || (*strategy == (char)0)) {
-      strategy = ".";
+      strategy = (char *)".";
     }
     if ((nthdef == NULL) || (*nthdef == (char)0)) {
       nth = 0;
@@ -182,7 +177,7 @@ CURLcode Curl_dict(struct connectdata *conn)
       failf(data, "lookup word is missing\n");
     }
     if ((database == NULL) || (*database == (char)0)) {
-      database = "!";
+      database = (char *)"!";
     }
     if ((nthdef == NULL) || (*nthdef == (char)0)) {
       nth = 0;
