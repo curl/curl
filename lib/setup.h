@@ -66,7 +66,7 @@
 #define FALSE 0
 #endif
 
-#if !defined(__cplusplus) && !defined(__BEOS__)
+#if !defined(__cplusplus) && !defined(__BEOS__) && !defined(typedef_bool)
 typedef unsigned char bool;
 #define typedef_bool
 #endif

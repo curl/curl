@@ -69,10 +69,9 @@
 #define FALSE 0
 #endif
 
-#ifndef __cplusplus
-#ifndef typedef_bool
+#if !defined(__cplusplus) && !defined(__BEOS__) && !defined(typedef_bool)
 typedef char bool;
-#endif
+#define typedef_bool
 #endif
 
 #ifndef OS
