@@ -63,6 +63,10 @@
 /* This is now designed to have its own local setup.h */
 #include "setup.h"
 
+#ifdef WIN32
+#include <winsock.h>
+#endif
+
 #include "version.h"
 
 #ifdef HAVE_IO_H /* typical win32 habit */
@@ -122,7 +126,7 @@ static void win32_cleanup(void)
   WSACleanup();
 }
 
-static UrgError win32_init(void)
+static CURLcode win32_init(void)
 {
   WORD wVersionRequested;  
   WSADATA wsaData; 

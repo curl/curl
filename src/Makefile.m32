@@ -9,7 +9,7 @@
 
 CC = gcc
 STRIP = strip -s
-OPENSSL_PATH = ../../openssl-0.9.4
+OPENSSL_PATH = ../../openssl-0.9.5a
 
 # We may need these someday
 # PERL = perl
@@ -19,7 +19,7 @@ OPENSSL_PATH = ../../openssl-0.9.4
 ## Nothing more to do below this line!
 
 INCLUDES = -I. -I.. -I../include
-CFLAGS = -g -O2 -DGLOBURL -DCURL_SEPARATORS
+CFLAGS = -g -O2
 LDFLAGS = 
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
