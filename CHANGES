@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (8 December 2004)
+- Rene Bernhardt found and fixed a buffer overrun in the NTLM code, where
+  libcurl always and unconditionally overwrote a stack-based array with 3 zero
+  bytes. This is not an exploitable buffer overflow. No need to get alarmed.
+
 Daniel (7 December 2004)
 - Fixed so that the final error message is sent to the verbose info "stream"
   even if no errorbuffer is set.

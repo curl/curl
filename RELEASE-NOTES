@@ -25,6 +25,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o bad memory access in the NTLM code
  o EPSV on multi-homed servers now works correctly
  o chunked-encoded transfers could get closed pre-maturely without error
  o proxy CONNECT now default timeouts after 3600 seconds
@@ -61,6 +62,6 @@ advice from friends like these:
  Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia,
  Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips,
  Wojciech Zwiefka, David Phillips, Reinout van Schouwen, Maurice Barnum,
- Richard Atterer
+ Richard Atterer, Rene Bernhardt
 
         Thanks! (and sorry if I forgot to mention someone)

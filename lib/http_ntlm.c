@@ -202,6 +202,8 @@ static void mkhash(char *password,
 #endif
   )
 {
+  /* 21 bytes fits 3 7-bytes chunks, as we use 56 bit (7 bytes) as DES input,
+     and we add three different ones, see the calc_resp() function */
   unsigned char lmbuffer[21];
 #ifdef USE_NTRESPONSES
   unsigned char ntbuffer[21];
@@ -239,7 +241,7 @@ static void mkhash(char *password,
     DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer+8),
                     DESKEY(ks), DES_ENCRYPT);
 
-    memset(lmbuffer+16, 0, 5);
+    memset(lmbuffer+16, 0, sizeof(lmbuffer)-16);
   }
   /* create LM responses */
   calc_resp(lmbuffer, nonce, lmresp);
@@ -260,7 +262,7 @@ static void mkhash(char *password,
     MD4_Update(&MD4, pw, 2*len);
     MD4_Final(ntbuffer, &MD4);
 
-    memset(ntbuffer+16, 0, 8);
+    memset(ntbuffer+16, 0, sizeof(ntbuffer)-16);
   }
 
   calc_resp(ntbuffer, nonce, ntresp);
