@@ -528,7 +528,8 @@ AC_CHECK_FUNCS( socket \
                 tcgetattr \
                 perror \
                 closesocket \
-                setvbuf
+                setvbuf \
+                sigaction
 )
 
 dnl removed 'getpass' check on October 26, 2000
