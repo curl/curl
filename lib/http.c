@@ -399,9 +399,22 @@ CURLcode http(struct connectdata *conn)
     }
 
     while(headers) {
-      sendf(data->firstsocket, data,
-            "%s\015\012",
-            headers->data);
+      char *ptr = strchr(headers->data, ':');
+      if(ptr) {
+        /* we require a colon for this to be a true header */
+
+        ptr++; /* pass the colon */
+        while(*ptr && isspace(*ptr))
+          ptr++;
+
+        if(*ptr) {
+          /* only send this if the contents was non-blank */
+
+          sendf(data->firstsocket, data,
+                "%s\015\012",
+                headers->data);
+        }
+      }
       headers = headers->next;
     }
 
