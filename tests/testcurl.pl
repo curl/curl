@@ -357,14 +357,14 @@ if ($gnulikebuild) {
 }
 
 logit "display lib/config$confsuffix.h";
-open(F, "lib/config$confsuffix.h") or die;
+open(F, "lib/config$confsuffix.h") or die "lib/config$confsuffix.h: $!";
 while (<F>) {
   print if /^ *#/;
 }
 close(F);
 
 logit "display src/config$confsuffix.h";
-open(F, "src/config$confsuffix.h") or die;
+open(F, "src/config$confsuffix.h") or die "src/config$confsuffix.h: $!";
 while (<F>) {
   print if /^ *#/;
 }
