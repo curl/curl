@@ -1,0 +1,80 @@
+# Server-side
+<reply>
+
+# This is supposed to be returned when the server gets a first
+# Authorization: NTLM line passed-in from the client
+<data1001>
+HTTP/1.1 407 Now gimme that second request of crap
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+
+This is not the real page either!
+</data1001>
+
+# This is supposed to be returned when the server gets the second
+# Authorization: NTLM line passed-in from the client
+<data1002>
+HTTP/1.1 200 Things are fine in server land swsclose
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+
+Finally, this is the real page!
+</data1002>
+
+<datacheck>
+HTTP/1.1 407 Now gimme that second request of crap
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 34
+Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+
+HTTP/1.1 200 Things are fine in server land swsclose
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+
+Finally, this is the real page!
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+# NTLM only works if SSL-support is present
+<features>
+SSL
+</features>
+<server>
+http
+</server>
+ <name>
+HTTP with proxy using NTLM authorization
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/81 --proxy-user testuser:testpass -x http://%HOSTIP:%HOSTPORT --proxy-ntlm
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET http://127.0.0.1:8999/81 HTTP/1.1
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET http://127.0.0.1:8999/81 HTTP/1.1
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEgAAAAAAAAAYAAAAAAAAABAAAAACAAIAEAAAAAAAAAASAAAAAAAAABgAAAAAYIAAHRlc3R1c2VyWmRDApEJkUyGOPS3DjvASModEeW/N/FB
+User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
