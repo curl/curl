@@ -523,6 +523,10 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
               easy->state = CURLM_STATE_CONNECT;
               result = CURLM_CALL_MULTI_PERFORM;
             }
+            else
+              /* Since we "took it", we are in charge of freeing this on
+                 failure */
+              free(newurl);
           }
           else {
             easy->state = CURLM_STATE_DONE;

@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (29 January 2005)
+- multi interface: when a request is denied due to "Maximum redirects
+  followed" libcurl leaked the last Location: URL.
+
 - Connect failures with the multi interface was often returned as "connect()
   timed out" even though the reason was different.
 
