@@ -116,21 +116,19 @@ TODO
  * Evaluate/apply Gertjan van Wingerde's SSL patches:
    http://curl.haxx.se/mail/lib-2004-03/0087.html
 
- * If you really want to improve the SSL situation, you should probably have a
-   look at SSL cafile loading as well - quick traces look to me like these are
-   done on every request as well, when they should only be necessary once per
-   ssl context (or once per handle). Even better would be to support the SSL
-   CAdir option - instead of loading all of the root CA certs for every
-   request, this option allows you to only read the CA chain that is actually
-   required (into the cache)...
+ * "Look at SSL cafile - quick traces look to me like these are done on every
+   request as well, when they should only be necessary once per ssl context
+   (or once per handle)". The major improvement we can rather easily do is to
+   make sure we don't create and kill a new SSL "context" for every request,
+   but instead make one for every connection and re-use that SSL context in
+   the same style connections are re-used. It will make us use slightly more
+   memory but it will libcurl do less creations and deletions of SSL contexts.
 
  * Add an interface to libcurl that enables "session IDs" to get
    exported/imported. Cris Bailiff said: "OpenSSL has functions which can
    serialise the current SSL state to a buffer of your choice, and
    recover/reset the state from such a buffer at a later date - this is used
-   by mod_ssl for apache to implement and SSL session ID cache". This whole
-   idea might become moot if we enable the 'data sharing' as mentioned in the
-   LIBCURL label above.
+   by mod_ssl for apache to implement and SSL session ID cache".
 
  * OpenSSL supports a callback for customised verification of the peer
    certificate, but this doesn't seem to be exposed in the libcurl APIs. Could
@@ -139,8 +137,12 @@ TODO
 
  * Make curl's SSL layer option capable of using other free SSL libraries.
    Such as the Mozilla Security Services
-   (http://www.mozilla.org/projects/security/pki/nss/) and GNUTLS
-   (http://gnutls.hellug.gr/)
+   (http://www.mozilla.org/projects/security/pki/nss/) and GnuTLS
+   (http://www.gnu.org/software/gnutls/) This subject has been brought up
+   again recently since GPL-licensed applications that link with libcurl MAY
+   NOT distribute binaries that use OpenSSL without adding an exception clause
+   to the GPL license. See the LICENSE-MIXING document and this:
+   http://www.gnome.org/~markmc/openssl-and-the-gpl.html
 
  LDAP
 
@@ -151,7 +153,7 @@ TODO
  CLIENT
 
  * Globbing support for -d and -F, as in 'curl -d "name=foo[0-9]" URL'.
-   Requested by Dane Jensen and others.
+   Requested by Dane Jensen and others. This is easily scripted though.
 
  * Add an option that prevents cURL from overwiting existing local files. When
    used, and there already is an existing file with the target file name
@@ -190,7 +192,7 @@ TODO
    command line. Possibly by letting ':' separate options between URLs,
    similar to this:
 
-      curl --data foo --url url.com :
+      curl --data foo --url url.com : \
           --url url2.com : \
           --url url3.com --data foo3
 
