@@ -10,9 +10,9 @@ Curl and libcurl 7.12.4
 
 This release includes the following changes:
 
- o src/getpass.c license issue sorted
+ o src/getpass.c license issue sorted (code was rewritten)
  o curl -w now supports 'http_connect' for the proxy's response to CONNECT
- o curl-config --protocols
+ o introducing "curl-config --protocols"
 
 This release includes the following bugfixes:
 
@@ -21,7 +21,7 @@ This release includes the following bugfixes:
  o -d with -G to multiple URLs crashed
  o double va_list access crash fixed
  o minor memory leak when "version" is set in a cookie header
- o builds fine on BeOS
+ o builds fine on BeOS and NetBSD
  o builds and runs fine on FreeBSD
 
 Other curl-related news since the previous public release:
