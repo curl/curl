@@ -8,6 +8,11 @@
 
 
 Daniel (15 December)
+- Old DNS cache entries are now only pruned after curl is done with a request,
+  and not in the actual name resolve call.
+
+- corrected the --enable-ares patch
+
 - Giuseppe Attardi found and fixed a problem within libcurl that re-used
   already freed memory.
 
