@@ -7,7 +7,37 @@
                                   Changelog
 
 
+Daniel (10 Oct 2002)
+- Jeff Lawson fixed a few problems with connection re-use that remained when
+  you set CURLOPT_PROXY to "".
+
+Daniel (9 Oct 2002)
+- Craig Davison found a terrible flaw and Cris Bailiff helped out in the
+  search. Getting HTTP data from servers when the headers are split up in
+  multiple reads, could cause junk data to get inserted among the saved
+  headers. This only concerns HTTP(S) headers.
+
+Daniel (8 Oct 2002)
+- Vincent Penquerc'h gave us the good suggestion that when the ERRRORBUFFER
+  is set internally, the error text is sent to the debug function as well.
+
+- I fixed the telnet code to timeout properly as the option tells it to. On
+  non-windows platforms.
+
+Daniel (7 Oct 2002)
+- John Crow pointed out that libcurl-the-guide wasn't included in the release
+  tarball!
+
+- Kevin Roth pointed out that make install didn't do right if build outside
+  the source tree (ca-bundle wise).
+
+- FOLLOW_LOCATION bugfix for the multi interface
+
 Daniel (4 Oct 2002)
+- Kevin Roth got problems with his cygwin build with -no-undefined was not
+  present in lib/Makefile.am so I put it back in there again. The poor one who
+  needs to remove it again must write a configure script to detect that need.
+
 - Ralph Mitchell pointed out that curl was a bit naive and didn't deal with ./
   or ../ stuff in the string passed back in a Location: header when following
   locations.
