@@ -143,10 +143,10 @@ CFGSET   = TRUE
 # release-ssl-dll
 
 !IF "$(CFG)" == "release-ssl-dll"
-TARGET   = $(LIB_NAME).lib
+TARGET   = $(LIB_NAME).dll
 DIROBJ   = $(CFG)
 LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)\out32dll"
-LNK      = $(LNKLIB) $(WINLIBS) $(SSLLIBS) $(LFLAGSSSL) /out:$(DIROBJ)\$(TARGET)
+LNK      = $(LNKDLL) $(WINLIBS) /out:$(DIROBJ)\$(TARGET) $(SSLLIBS) $(LFLAGSSSL) /IMPLIB:$(DIROBJ)\$(IMPLIB_NAME).lib
 CC       = $(CCNODBG) $(CFLAGSSSL)
 CFGSET   = TRUE
 !ENDIF
