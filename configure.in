@@ -64,8 +64,32 @@ AC_ARG_ENABLE(debug,
        AC_MSG_RESULT(no)
 )
 
+dnl ************************************************************
+dnl check for "localhost", if it doesn't exist, we can't do the
+dnl gethostbyname_r tests!
+dnl 
 
-dnl
+AC_DEFUN(CURL_CHECK_WORKING_RESOLVER,[
+AC_MSG_CHECKING([if "localhost" resolves])
+AC_TRY_RUN([
+#include <string.h>
+#include <sys/types.h>
+#include <netdb.h>
+
+int
+main () {
+struct hostent *h;
+h = gethostbyname("localhost");
+exit (h == NULL ? 1 : 0); }],[
+      AC_MSG_RESULT(yes)],[
+      AC_MSG_RESULT(no)
+      AC_MSG_ERROR([can't figure out gethostbyname_r() since localhost doesn't resolve])
+
+      ]
+)
+])
+
+dnl ************************************************************
 dnl check for working getaddrinfo()
 dnl
 AC_DEFUN(CURL_CHECK_WORKING_GETADDRINFO,[
@@ -680,6 +704,9 @@ then
   AC_DEFINE(DISABLED_THREADSAFE, 1, \
 Set to explicitly specify we don't want to use thread-safe functions)
 else
+
+  dnl check that 'localhost' resolves first
+  CURL_CHECK_WORKING_RESOLVER
 
   dnl dig around for gethostbyname_r()
   CURL_CHECK_GETHOSTBYNAME_R()
