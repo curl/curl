@@ -112,6 +112,7 @@ print <<HEAD
  * NEVER EVER edit this manually, fix the mkhelp.pl script instead!
  * Generation time: $now
  */
+#include "hugehelp.h"
 #include <stdio.h>
 HEAD
     ;

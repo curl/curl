@@ -42,6 +42,7 @@
 #include "writeout.h"
 #include "getpass.h"
 #include "homedir.h"
+#include "hugehelp.h"
 #ifdef USE_ENVIRONMENT
 #include "writeenv.h"
 #endif
@@ -191,14 +192,12 @@ char *strdup(char *str)
 #include "curlmsg_vms.h"
 #endif
 
-extern void hugehelp(void);
-
 /*
  * This is the main global constructor for the app. Call this before
  * _any_ libcurl usage. If this fails, *NO* libcurl functions may be
  * used, or havoc may be the result.
  */
-CURLcode main_init(void)
+static CURLcode main_init(void)
 {
   return curl_global_init(CURL_GLOBAL_DEFAULT);
 }
@@ -207,12 +206,12 @@ CURLcode main_init(void)
  * This is the main global destructor for the app. Call this after
  * _all_ libcurl usage is done.
  */
-void main_free(void)
+static void main_free(void)
 {
   curl_global_cleanup();
 }
 
-int SetHTTPrequest(HttpReq req, HttpReq *store)
+static int SetHTTPrequest(HttpReq req, HttpReq *store)
 {
   if((*store == HTTPREQ_UNSPEC) ||
      (*store == req)) {
@@ -257,7 +256,7 @@ struct getout {
 static void help(void)
 {
   int i;
-  const char *help[]={
+  static const char *helptext[]={
     "Usage: curl [options...] <url>",
     "Options: (H) means HTTP/HTTPS only, (F) means FTP only",
     " -a/--append        Append to target file when uploading (F)",
@@ -365,8 +364,8 @@ static void help(void)
     " -#/--progress-bar  Display transfer progress as a progress bar",
     NULL
   };
-  for(i=0; help[i]; i++)
-    puts(help[i]);
+  for(i=0; helptext[i]; i++)
+    puts(helptext[i]);
 }
 
 struct LongShort {
@@ -564,7 +563,7 @@ static char *file2memory(FILE *file, long *size)
     return NULL; /* no string */
 }
 
-void clean_getout(struct Configurable *config)
+static void clean_getout(struct Configurable *config)
 {
   struct getout *node=config->url_list;
   struct getout *next;
@@ -583,7 +582,7 @@ void clean_getout(struct Configurable *config)
   }
 }
 
-struct getout *new_getout(struct Configurable *config)
+static struct getout *new_getout(struct Configurable *config)
 {
   struct getout *node =malloc(sizeof(struct getout));
   struct getout *last= config->url_last;
@@ -951,7 +950,6 @@ static const char *param2text(ParameterError error)
   default:
     return "unknown error";
   }
-  return NULL;
 }
 
 static void cleanarg(char *str)
@@ -1032,7 +1030,7 @@ static void checkpasswd(const char *kind, /* for what purpose */
     char prompt[256];
     int passwdlen;
     int userlen = strlen(*userpwd);
-    char *ptr;
+    char *passptr;
 
     /* build a nice-looking prompt */
     curl_msnprintf(prompt, sizeof(prompt),
@@ -1043,16 +1041,16 @@ static void checkpasswd(const char *kind, /* for what purpose */
     getpass_r(prompt, passwd, sizeof(passwd));
     passwdlen = strlen(passwd);
 
-    /* extend the allocated memory are to fit the password too */
-    ptr = realloc(*userpwd,
-                  passwdlen + 1 + /* an extra for the colon */
-                  userlen + 1);   /* an extra for the zero */
+    /* extend the allocated memory area to fit the password too */
+    passptr = realloc(*userpwd,
+                      passwdlen + 1 + /* an extra for the colon */
+                      userlen + 1);   /* an extra for the zero */
 
-    if(ptr) {
+    if(passptr) {
       /* append the password separated with a colon */
-      ptr[userlen]=':';
-      memcpy(&ptr[userlen+1], passwd, passwdlen+1);
-      *userpwd = ptr;
+      passptr[userlen]=':';
+      memcpy(&passptr[userlen+1], passwd, passwdlen+1);
+      *userpwd = passptr;
     }
   }
 }
@@ -2190,7 +2188,7 @@ struct OutStruct {
   struct Configurable *config;
 };
 
-int my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
+static int my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
 {
   int rc;
   struct OutStruct *out=(struct OutStruct *)stream;
@@ -2236,7 +2234,7 @@ struct InStruct {
   struct Configurable *config;
 };
 
-int my_fread(void *buffer, size_t size, size_t nmemb, void *userp)
+static int my_fread(void *buffer, size_t size, size_t nmemb, void *userp)
 {
   struct InStruct *in=(struct InStruct *)userp;
 
@@ -2283,14 +2281,14 @@ struct ProgressData {
   curl_off_t initial_size;
 };
 
-int myprogress (void *clientp,
-                double dltotal,
-                double dlnow,
-                double ultotal,
-                double ulnow)
+static int myprogress (void *clientp,
+                       double dltotal,
+                       double dlnow,
+                       double ultotal,
+                       double ulnow)
 {
   /* The original progress-bar source code was written for curl by Lars Aas,
-     and this new edition inherites some of his concepts. */
+     and this new edition inherits some of his concepts. */
   
   char line[256];
   char outline[256];
@@ -2307,7 +2305,7 @@ int myprogress (void *clientp,
 
   bar->calls++; /* simply count invokes */
 
-  if(0 == total) {
+  if(total < 1) {
     int prevblock = (int)bar->prev / 1024;
     int thisblock = (int)point / 1024;
     while ( thisblock > prevblock ) {
@@ -2476,7 +2474,7 @@ int my_trace(CURL *handle, curl_infotype type,
   return 0;
 }
 
-void free_config_fields(struct Configurable *config)
+static void free_config_fields(struct Configurable *config)
 {
   if(config->random_file)
     free(config->random_file);
@@ -3018,8 +3016,8 @@ operate(struct Configurable *config, int argc, char *argv[])
         }
         if (httpgetfields) {
           /* Find out whether the url contains a file name */
-          char *pc =strstr(url, "://");
-          char separator='?';
+          const char *pc =strstr(url, "://");
+          char sep='?';
           if(pc)
             pc+=3;
           else
@@ -3032,8 +3030,8 @@ operate(struct Configurable *config, int argc, char *argv[])
 
             if(strchr(pc, '?'))
               /* Ouch, there's already a question mark in the URL string, we
-                 then appead the data with an amperand separator instead! */
-              separator='&';
+                 then append the data with an ampersand separator instead! */
+              sep='&';
           }
           /*
            * Then append ? followed by the get fields to the url.
@@ -3044,7 +3042,7 @@ operate(struct Configurable *config, int argc, char *argv[])
             return CURLE_OUT_OF_MEMORY;
           }
           if (pc)
-            sprintf(urlbuffer, "%s%c%s", url, separator, httpgetfields);
+            sprintf(urlbuffer, "%s%c%s", url, sep, httpgetfields);
           else
             /* Append  / before the ? to create a well-formed url
                if the url contains a hostname only
