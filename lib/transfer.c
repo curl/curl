@@ -2029,6 +2029,9 @@ CURLcode Curl_perform(struct SessionHandle *data)
         if(CURLE_OK == res)
           res = res2;
       }
+      else
+        /* Curl_do() failed, clean up left-overs in the done-call */
+        res2 = Curl_done(conn);
 
       /*
        * Important: 'conn' cannot be used here, since it may have been closed
