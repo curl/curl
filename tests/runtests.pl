@@ -114,7 +114,7 @@ sub checkserver {
 
     # check for pidfile
     if ( -f $pidfile ) {
-        my $PID=serverpid($pidfile);
+        $PID=serverpid($pidfile);
         if ($PID ne "" && kill(0, $PID)) {
             $RUNNING=1;
         }
