@@ -535,7 +535,7 @@ CURLcode ftp_done(struct connectdata *conn)
         if(nread < 0)
           return CURLE_OPERATION_TIMEOUTED;
 
-        if (buf[0] != '2') {
+        if (ftpcode >= 400) {
           failf(data, "QUOT string not accepted: %s",
                 qitem->data);
           return CURLE_FTP_QUOTE_ERROR;
@@ -589,7 +589,7 @@ CURLcode _ftp(struct connectdata *conn)
         if(nread < 0)
           return CURLE_OPERATION_TIMEOUTED;
 
-        if (buf[0] != '2') {
+        if (ftpcode >= 400) {
           failf(data, "QUOT string not accepted: %s",
                 qitem->data);
           return CURLE_FTP_QUOTE_ERROR;
