@@ -26,6 +26,7 @@ sub logmsg { print FTPLOG "$$: "; print FTPLOG @_; }
 sub ftpmsg { print INPUT @_; }
 
 my $verbose=0; # set to 1 for debugging
+my $retrweirdo=0;
 
 my $port = 8921; # just a default
 do {
@@ -226,16 +227,30 @@ sub RETR_command {
             logmsg "REST $rest was removed from size, makes $size left\n";
             $rest = 0; # reset REST offset again
         }
-        print "150 Binary data connection for $testno () ($size bytes).\r\n";
-        logmsg "150 Binary data connection for $testno ($size bytes).\n";
+        if($retrweirdo) {
+            print "150 Binary data connection for $testno () ($size bytes).\r\n",
+            "226 File transfer complete\r\n";
+            logmsg "150+226 in one shot!\n";
 
-        for(@data) {
-            my $send = $_;
-            print SOCK $send;
+            for(@data) {
+                my $send = $_;
+                print SOCK $send;
+            }
+            close(SOCK);
+            $retrweirdo=0; # switch off the weirdo again!
         }
-        close(SOCK);
+        else {
+            print "150 Binary data connection for $testno () ($size bytes).\r\n";
+            logmsg "150 Binary data connection for $testno ($size bytes).\n";
 
-        print "226 File transfer complete\r\n";
+            for(@data) {
+                my $send = $_;
+                print SOCK $send;
+            }
+            close(SOCK);
+
+            print "226 File transfer complete\r\n";
+        }
     }
     else {
         print "550 $testno: No such file or directory.\r\n";
@@ -366,6 +381,10 @@ sub customize {
         }
         elsif($_ =~ /DELAY ([A-Z]+) (\d*)/) {
             $delayreply{$1}=$2;
+        }
+        elsif($_ =~ /RETRWEIRDO/) {
+            print "instructed to use RETRWEIRDO\n";
+            $retrweirdo=1;
         }
     }
     close(CUSTOM);

@@ -1,0 +1,33 @@
+# Server-side
+<reply>
+<data>
+this is file contents
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP download with multiple replies at once in RETR
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/blalbla/lululul/126
+</command>
+<file name="log/ftpserver.cmd">
+RETRWEIRDO
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD blalbla/lululul
+EPSV
+TYPE I
+SIZE 126
+RETR 126
+</protocol>
+</verify>
