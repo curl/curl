@@ -2,7 +2,7 @@ EXTRA_DIST = ftpserver.pl httpserver.pl httpsserver.pl runtests.pl \
 	     ftpsserver.pl stunnel.pm getpart.pm FILEFORMAT README \
 	     stunnel.pem memanalyze.pl
 
-SUBDIRS = data server
+SUBDIRS = data server libtest
 
 PERLFLAGS = -I$(srcdir)
 
