@@ -53,7 +53,12 @@ struct send_buffer {
 };
 typedef struct send_buffer send_buffer;
 
+#define CLIENTWRITE_BODY   1
+#define CLIENTWRITE_HEADER 2
+#define CLIENTWRITE_BOTH   (CLIENTWRITE_BODY|CLIENTWRITE_HEADER)
 
+CURLcode client_write(struct UrlData *data, int type, char *ptr,
+                      size_t len);
 send_buffer *add_buffer_init(void);
 CURLcode add_buffer(send_buffer *in, void *inptr, size_t size);
 CURLcode add_bufferf(send_buffer *in, char *fmt, ...);
