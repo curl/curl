@@ -90,6 +90,8 @@
 #include "progress.h"
 #include "getdate.h"
 #include "http.h"
+#include "url.h"
+#include "getinfo.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -862,10 +864,9 @@ Transfer(struct connectdata *c_conn)
   return CURLE_OK;
 }
 
-CURLcode Curl_perform(CURL *curl)
+CURLcode Curl_perform(struct UrlData *data)
 {
   CURLcode res;
-  struct UrlData *data = (struct UrlData *)curl;
   struct connectdata *conn=NULL;
   bool port=TRUE; /* allow data->use_port to set port to use */
   char *newurl = NULL; /* possibly a new URL to follow to! */
@@ -876,6 +877,8 @@ CURLcode Curl_perform(CURL *curl)
 
   data->followlocation=0; /* reset the location-follow counter */
   data->bits.this_is_a_follow = FALSE; /* reset this */
+
+  Curl_initinfo(data); /* reset session-specific information "variables" */
 
   Curl_pgrsStartNow(data);
 
