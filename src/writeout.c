@@ -141,12 +141,12 @@ void ourWriteOut(CURL *curl, char *writeinfo)
               case VAR_SIZE_UPLOAD:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD, &doubleinfo))
-                  fprintf(stream, "%.3f", doubleinfo);
+                  fprintf(stream, "%.0f", doubleinfo);
                 break;
               case VAR_SIZE_DOWNLOAD:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_SIZE_DOWNLOAD, &doubleinfo))
-                  fprintf(stream, "%.3f", doubleinfo);
+                  fprintf(stream, "%.0f", doubleinfo);
                 break;
               case VAR_SPEED_DOWNLOAD:
                 if(CURLE_OK ==
