@@ -224,7 +224,7 @@ struct connectdata {
 #define PROT_FILE    (1<<8)
 #define PROT_FTPS    (1<<9)
 
-  Curl_addrinfo *hp; /* IP-protocol independent host info pointer list */
+  Curl_addrinfo *hostaddr; /* IP-protocol independent host info pointer list */
   char *hostent_buf; /* pointer to allocated memory for name info */
 
 #ifdef ENABLE_IPV6
