@@ -5,41 +5,36 @@ $Id$
                             | (__| |_| |  _ <| |___ 
                              \___|\___/|_| \_\_____|
 
-             How To Build libcurl to use ares for asynch name resolves
-             =========================================================
+          How To Build libcurl to Use ares For Asynch Name Resolves
+          =========================================================
 
 ares:
   ftp://athena-dist.mit.edu/pub/ATHENA/ares/ares-1.1.1.tar.gz
   http://curl.haxx.se/dev/ares-1.1.1.tar.gz
+  http://curl.sourceforge.net/dev/ares-1.1.1.tar.gz
   
-ares patch:
-  http://curl.haxx.se/dev/ares-curl2.diff
+  c-ares, a patched and improved version of ares:
+  http://curl.haxx.se/beta/arescurl-1.0-pre1.tar.gz
 
-Mac OS X quirk:
-  ares 1.1.1 contains too old versions of config.guess and config.sub. Copy
-  the ones from the curl source tree in to the ares source tree before you
-  run configure.
+NOTE
+  libcurl works with ares 1.1.1, but several patches and improvements have
+  been put into the c-ares package which has made it more portable and better
+  working on several platforms.
 
 Build ares
 ==========
 
-1. unpack the ares-1.1.1 archive
-2. cd ares-src
-3. patch -p0 < ares-curl-patch
-4. ./configure
-5. make
+1. unpack the ares archive
+2. cd ares-dir
+3. ./configure
+4. make
 
 Build libcurl to use ares
 =========================
 
-1. Move the ares source/build tree to subdirectory in the curl root named
-   'ares'.
-2. ./buildconf
-3. ./configure --enable-ares
-4. make
+1. name the ares source directory 'ares' in the curl source directory
+2. ./configure --enable-ares
+3. make
 
-If the configure script detects IPv6 support), you need to explicitly disable
+If the configure script enables IPv6 support you need to explicitly disable
 that (--disable-ipv6) since ares isn't IPv6 compatible (yet).
-
-Please let me know how it builds, runs, works or whatever. I had to do some
-fairly big changes in some code parts to get this to work.
