@@ -37,6 +37,11 @@
 #ifdef USE_SSLEAY
 #include <openssl/rand.h>
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 static char global_passwd[64];
 
 static int passwd_callback(char *buf, int num, int verify
