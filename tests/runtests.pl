@@ -784,7 +784,7 @@ sub singletest {
         print GDBCMD "set args $cmdargs\n";
         print GDBCMD "show args\n";
         close(GDBCMD);
-        system("gdb $DBGCURL -x log/gdbcmd");
+        system("gdb --directory libtest $DBGCURL -x log/gdbcmd");
         $res =0; # makes it always continue after a debugged run
     }
     else {
