@@ -545,9 +545,6 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
     }
   }
 
-  free(ftp);
-  data->proto.ftp=NULL; /* it is gone */
-
   return CURLE_OK;
 }
 

@@ -561,6 +561,10 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
 
   struct UrlData *data = conn->data;
 
+  if(data->proto.generic)
+    free(data->proto.generic);
+  data->proto.generic=NULL; /* it is gone */
+
 #ifdef ENABLE_IPV6
   if(conn->res) /* host name info */
     freeaddrinfo(conn->res);
@@ -1644,7 +1648,13 @@ CURLcode curl_do(CURLconnect *in_conn)
   if(!conn || (conn->handle!= STRUCT_CONNECT)) {
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
-  if(conn->state != CONN_INIT) {
+  switch(conn->state) {
+  case CONN_INIT:
+  case CONN_DONE:
+    /* these two states are OK */
+    break;
+  default:
+    /* anything else is bad */
     return CURLE_BAD_CALLING_ORDER;
   }
 
