@@ -30,9 +30,11 @@ Pass a pointer to a long to receive the last received HTTP code.
 .TP
 .B CURLINFO_FILETIME
 Pass a pointer to a long to receive the remote time of the retrieved
-document. If you get 0, it can be because of many reasons (unknown, the server
-hides it or the server doesn't support the command that tells document time
-etc) and the time of the document is unknown. (Added in 7.5)
+document. If you get -1, it can be because of many reasons (unknown, the
+server hides it or the server doesn't support the command that tells document
+time etc) and the time of the document is unknown. Note that you must tell the
+server to collect this information before the transfer is made, by using the
+CURLOPT_FILETIME option to \fIcurl_easy_setopt(3)\fP. (Added in 7.5)
 .TP
 .B CURLINFO_TOTAL_TIME
 Pass a pointer to a double to receive the total transaction time in seconds
