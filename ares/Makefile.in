@@ -12,6 +12,7 @@ libdir=@libdir@
 includedir=@includedir@
 mandir=@mandir@
 
+LIB=libcares.a
 CC=@CC@
 CPPFLAGS=@CPPFLAGS@
 CFLAGS=@CFLAGS@ ${WARN_CFLAGS} ${ERROR_CFLAGS}
@@ -26,17 +27,17 @@ OBJS=	ares__close_sockets.o ares__get_hostent.o ares__read_line.o \
 	ares_parse_ptr_reply.o ares_process.o ares_query.o ares_search.o \
 	ares_send.o ares_strerror.o ares_timeout.o ares_version.o
 
-all: libares.a adig ahost
+all: $(LIB) adig ahost
 
-libares.a: ${OBJS}
+$(LIB): ${OBJS}
 	ar cru $@ ${OBJS}
 	${RANLIB} $@
 
-adig: adig.o libares.a
-	${CC} ${LDFLAGS} -o $@ adig.o libares.a ${LIBS}
+adig: adig.o $(LIB)
+	${CC} ${LDFLAGS} -o $@ adig.o $(LIB) ${LIBS}
 
-ahost: ahost.o libares.a
-	${CC} ${LDFLAGS} -o $@ ahost.o libares.a ${LIBS}
+ahost: ahost.o $(LIB)
+	${CC} ${LDFLAGS} -o $@ ahost.o $(LIB) ${LIBS}
 
 ${OBJS}: ares.h ares_dns.h ares_private.h
 
@@ -49,9 +50,9 @@ install:
 	${top_srcdir}/mkinstalldirs ${DESTDIR}${libdir}
 	${top_srcdir}/mkinstalldirs ${DESTDIR}${includedir}
 	${top_srcdir}/mkinstalldirs ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 644 libares.a ${DESTDIR}${libdir}
-	${RANLIB} ${DESTDIR}${libdir}/libares.a
-	chmod u-w ${DESTDIR}${libdir}/libares.a
+	${INSTALL} -m 644 $(LIB) ${DESTDIR}${libdir}
+	${RANLIB} ${DESTDIR}${libdir}/$(LIB)
+	chmod u-w ${DESTDIR}${libdir}/$(LIB)
 	${INSTALL} -m 444 ${srcdir}/ares.h ${DESTDIR}${includedir}
 	${INSTALL} -m 444 ${srcdir}/ares_destroy.3 ${DESTDIR}${mandir}/man3
 	${INSTALL} -m 444 ${srcdir}/ares_expand_name.3 ${DESTDIR}${mandir}/man3
@@ -81,7 +82,7 @@ install:
 	${INSTALL} -m 444 ${srcdir}/ares_timeout.3 ${DESTDIR}${mandir}/man3
 
 clean:
-	rm -f ${OBJS} libares.a adig.o adig ahost.o ahost
+	rm -f ${OBJS} $(LIB) adig.o adig ahost.o ahost
 
 distclean: clean
 	rm -f config.cache config.log config.status Makefile
