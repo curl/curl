@@ -57,6 +57,13 @@ TODO
 
  FTP
 
+ * Optimize the way libcurl uses CWD on each new request over a persistent
+   connection (on FTP) even if it doesn't have to.
+
+ * REST fix for servers not behaving well on >2GB requests. This should fail
+   if the server doesn't set the pointer to the requested index. The tricky
+   part is to figure out if the server did the right thing or not.
+
  * Support the most common FTP proxies, Philip Newton provided a list
    allegedly from ncftp:
    http://curl.haxx.se/mail/archive-2003-04/0126.html
@@ -90,6 +97,15 @@ TODO
    work for telnet.
 
  SSL
+
+ * Anton Fedorov's "dumpcert" patch:
+   http://curl.haxx.se/mail/lib-2004-03/0088.html
+
+ * Evaluate/apply Gertjan van Wingerde's SSL patches:
+   http://curl.haxx.se/mail/lib-2004-03/0087.html
+
+ * Peter Sylvester's "Most Significant Common Name" change. Feedback welcome.
+   At least the UTF8 conversion and comparison should be done. Patch?
 
  * If you really want to improve the SSL situation, you should probably have a
    look at SSL cafile loading as well - quick traces look to me like these are
