@@ -35,14 +35,14 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "strequal.h"
-
+#include "base64.h"
 #include "http_negotiate.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
@@ -101,7 +101,7 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
   infof(conn->data, buf);
 }
 
-CURLcode Curl_input_negotiate(struct connectdata *conn, char *header)
+int Curl_input_negotiate(struct connectdata *conn, char *header)
 { 
   struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
   OM_uint32 major_status, minor_status, minor_status2;
@@ -133,13 +133,15 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, char *header)
 
   len = strlen(header);
   if (len > 0) {
+    int rawlen;
     input_token.length = (len+3)/4 * 3;
     input_token.value = malloc(input_token.length);
     if (input_token.value == NULL)
       return ENOMEM;
-    input_token.length = Curl_base64_decode(header, input_token.value);
-    if (input_token.length < 0)
+    rawlen = Curl_base64_decode(header, input_token.value);
+    if (rawlen < 0)
       return -1;
+    input_token.length = rawlen;
   }
 
   major_status = gss_init_sec_context(&minor_status,
@@ -160,7 +162,8 @@ CURLcode Curl_input_negotiate(struct connectdata *conn, char *header)
   neg_ctx->status = major_status;
   if (GSS_ERROR(major_status)) {
     /* Curl_cleanup_negotiate(conn->data) ??? */
-    log_gss_error(conn, minor_status, "gss_init_sec_context() failed: ");
+    log_gss_error(conn, minor_status,
+                  (char *)"gss_init_sec_context() failed: ");
     return -1;
   }
 
@@ -180,19 +183,17 @@ CURLcode Curl_output_negotiate(struct connectdata *conn)
   struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
   OM_uint32 minor_status;
   char *encoded = NULL;
-  size_t len;
-  
-  len = Curl_base64_encode(neg_ctx->output_token.value,
-                           neg_ctx->output_token.length,
-                           &encoded);
+  int len = Curl_base64_encode(neg_ctx->output_token.value,
+                               neg_ctx->output_token.length,
+                               &encoded);
   if (len < 0)
-    return -1;
+    return CURLE_OUT_OF_MEMORY;
 
   conn->allocptr.userpwd =
     aprintf("Authorization: GSS-Negotiate %s\r\n", encoded);
   free(encoded);
   gss_release_buffer(&minor_status, &neg_ctx->output_token);
-  return (conn->allocptr.userpwd == NULL) ? ENOMEM : 0;
+  return (conn->allocptr.userpwd == NULL) ? CURLE_OUT_OF_MEMORY : CURLE_OK;
 }
 
 void Curl_cleanup_negotiate(struct SessionHandle *data)
