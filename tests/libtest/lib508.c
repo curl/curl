@@ -4,7 +4,7 @@ static char data[]="this is what we post to the silly web server\n";
 
 struct WriteThis {
   char *readptr;
-  int sizeleft;
+  size_t sizeleft;
 };
 
 static size_t read_callback(void *ptr, size_t size, size_t nmemb, void *userp)
@@ -43,7 +43,7 @@ int test(char *URL)
     curl_easy_setopt(curl, CURLOPT_POST, TRUE);
 
     /* Set the expected POST size */
-    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, pooh.sizeleft);
+    curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)pooh.sizeleft);
 
     /* we want to use our own read function */
     curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
