@@ -403,24 +403,17 @@ Curl_http_output_auth(struct connectdata *conn,
        and if this is one single bit it'll be used instantly. */
     authproxy->picked = authproxy->want;
 
-  /* To prevent the user+password to get sent to other than the original
-     host due to a location-follow, we do some weirdo checks here */
-  if(!data->state.this_is_a_follow ||
-     !data->state.first_host ||
-     curl_strequal(data->state.first_host, conn->host.name) ||
-     data->set.http_disable_hostname_check_before_authentication) {
-
-    /* Send proxy authentication header if needed */
-    if (conn->bits.httpproxy &&
-        (conn->bits.tunnel_proxy == proxytunnel)) {
+  /* Send proxy authentication header if needed */
+  if (conn->bits.httpproxy &&
+      (conn->bits.tunnel_proxy == proxytunnel)) {
 #ifdef USE_SSLEAY
-      if(authproxy->want == CURLAUTH_NTLM) {
-        auth=(char *)"NTLM";
-        result = Curl_output_ntlm(conn, TRUE);
-        if(result)
-          return result;
-      }
-      else
+    if(authproxy->want == CURLAUTH_NTLM) {
+      auth=(char *)"NTLM";
+      result = Curl_output_ntlm(conn, TRUE);
+      if(result)
+        return result;
+    }
+    else
 #endif
       if(authproxy->want == CURLAUTH_BASIC) {
         /* Basic */
@@ -454,10 +447,17 @@ Curl_http_output_auth(struct connectdata *conn,
       else
         authproxy->multi = FALSE;
     }
-    else
-      /* we have no proxy so let's pretend we're done authenticating
-         with it */
-      authproxy->done = TRUE;
+  else
+    /* we have no proxy so let's pretend we're done authenticating
+       with it */
+    authproxy->done = TRUE;
+
+  /* To prevent the user+password to get sent to other than the original
+     host due to a location-follow, we do some weirdo checks here */
+  if(!data->state.this_is_a_follow ||
+     !data->state.first_host ||
+     curl_strequal(data->state.first_host, conn->host.name) ||
+     data->set.http_disable_hostname_check_before_authentication) {
 
     /* Send web authentication header if needed */
     {

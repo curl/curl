@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o proxy auth bug when following redirects to another host
  o socket leak when local bind failed
  o HTTP POST with --anyauth picking NTLM
  o SSL problems when downloading exactly 16KB data
@@ -34,6 +35,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, David Byron, Marty Kuhrt, Maruko, Eric Vergnaud, Christopher
- R. Palmer, Mike Dobbs, David in bug report #1124588
+ R. Palmer, Mike Dobbs, David in bug report #1124588, Ralph Mitchell
 
         Thanks! (and sorry if I forgot to mention someone)
