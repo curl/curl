@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_formparse 3 "8 February 2001" "Curl 7.0" "libcurl Manual"
+.TH curl_formparse 3 "22 February 2001" "Curl 7.0" "libcurl Manual"
 .SH NAME
 curl_formparse - add a section to a multipart/formdata HTTP POST
 .SH SYNOPSIS
@@ -42,14 +42,14 @@ Add a form field named 'name' with the contents as read from the local files
 named 'filename1' and 'filename2'. This is identical to the upper, except that
 you get the contents of several files in one section.
 .TP
-.B [name]=@[filename];[content-type]
+.B [name]=@[filename];[type=<content-type>]
 Whenever you specify a file to read from, you can optionally specify the
 content-type as well. The content-type is passed to the server together with
 the contents of the file. curl_formparse() will guess content-type for a
 number of well-known extensions and otherwise it will set it to binary. You
 can override the internal decision by using this option.
 .TP
-.B [name]=@[filename1,filename2,...];[content-type]
+.B [name]=@[filename1,filename2,...];[type=<content-type>]
 When you specify several files to read the contents from, you can set the
 content-type for all of them in the same way as with a single file.
 .PP
