@@ -413,18 +413,18 @@ sec_prot_internal(struct connectdata *conn, int level)
   }
 
   if(level){
-    Curl_ftpsendf(conn,
-                  "PBSZ %u", s);
-    /* wait for feedback */
+    Curl_ftpsendf(conn, "PBSZ %u", s);
     nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
     if(nread < 0)
-      return /*CURLE_OPERATION_TIMEOUTED*/-1;
-    if(/*ret != COMPLETE*/conn->data->state.buffer[0] != '2'){
+      return -1;
+
+    if(conn->data->state.buffer[0] != '2'){
       failf(conn->data, "Failed to set protection buffer size.\n");
       return -1;
     }
     conn->buffer_size = s;
-    p = strstr(/*reply_string*/conn->data->state.buffer, "PBSZ=");
+
+    p = strstr(conn->data->state.buffer, "PBSZ=");
     if(p)
       sscanf(p, "PBSZ=%u", &s);
     if(s < conn->buffer_size)
@@ -432,12 +432,11 @@ sec_prot_internal(struct connectdata *conn, int level)
   }
 
   Curl_ftpsendf(conn, "PROT %c", level["CSEP"]);
-  /* wait for feedback */
   nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
   if(nread < 0)
+    return -1;
 
-    return /*CURLE_OPERATION_TIMEOUTED*/-1;
-  if(/*ret != COMPLETE*/conn->data->state.buffer[0] != '2'){
+  if(conn->data->state.buffer[0] != '2'){
     failf(conn->data, "Failed to set protection level.\n");
     return -1;
   }
@@ -471,6 +470,7 @@ Curl_sec_login(struct connectdata *conn)
   struct Curl_sec_client_mech **m;
   ssize_t nread;
   struct SessionHandle *data=conn->data;
+  int ftpcode;
 
   for(m = mechs; *m && (*m)->name; m++) {
     void *tmp;
@@ -487,30 +487,34 @@ Curl_sec_login(struct connectdata *conn)
       continue;
     }
     infof(data, "Trying %s...\n", (*m)->name);
-    /*ret = command("AUTH %s", (*m)->name);***/
-    Curl_ftpsendf(conn,
-                  "AUTH %s", (*m)->name);
-    /* wait for feedback */
-    nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
+
+    Curl_ftpsendf(conn, "AUTH %s", (*m)->name);
+
+    nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, &ftpcode);
     if(nread < 0)
-      return /*CURLE_OPERATION_TIMEOUTED*/-1;
-    if(/*ret != CONTINUE*/conn->data->state.buffer[0] != '3'){
-      if(/*code == 504*/strncmp(conn->data->state.buffer,"504",3) == 0) {
+      return -1;
+
+    if(conn->data->state.buffer[0] != '3'){
+      switch(ftpcode) {
+      case 504:
         infof(data,
               "%s is not supported by the server.\n", (*m)->name);
-      }
-      else if(/*code == 534*/strncmp(conn->data->state.buffer,"534",3) == 0) {
+        break;
+      case 534:
         infof(data, "%s rejected as security mechanism.\n", (*m)->name);
-      }
-      else if(/*ret == ERROR*/conn->data->state.buffer[0] == '5') {
-        infof(data, "The server doesn't support the FTP "
-              "security extensions.\n");
-        return -1;
+        break;
+      default:
+        if(conn->data->state.buffer[0] == '5') {
+          infof(data, "The server doesn't support the FTP "
+                "security extensions.\n");
+          return -1;
+        }
+        break;
       }
       continue;
     }
 
-    ret = (*(*m)->auth)(conn->app_data, /*host***/conn);
+    ret = (*(*m)->auth)(conn->app_data, conn);
 	
     if(ret == AUTH_CONTINUE)
       continue;
