@@ -2413,7 +2413,7 @@ static int my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
 
 struct ProgressData {
   int calls;
-  double prev;
+  curl_off_t prev;
   int width;
   FILE *out; /* where to write everything to */
   curl_off_t initial_size;
@@ -2438,21 +2438,23 @@ static int myprogress (void *clientp,
   int i;
 
   struct ProgressData *bar = (struct ProgressData *)clientp;
-  double total = dltotal + ultotal + bar->initial_size;
-  double point = dlnow + ulnow + bar->initial_size; /* we've come this far */
+  curl_off_t total = (curl_off_t)dltotal + (curl_off_t)ultotal +
+    bar->initial_size; /* expected transfer size */
+  curl_off_t point = (curl_off_t)dlnow + (curl_off_t)ulnow +
+    bar->initial_size; /* we've come this far */
 
   bar->calls++; /* simply count invokes */
 
   if(total < 1) {
-    int prevblock = (int)bar->prev / 1024;
-    int thisblock = (int)point / 1024;
+    curl_off_t prevblock = bar->prev / 1024;
+    curl_off_t thisblock = point / 1024;
     while ( thisblock > prevblock ) {
       fprintf( bar->out, "#" );
       prevblock++;
     }
   }
   else {
-    frac = point / total;
+    frac = (double)point / (double)total;
     percent = frac * 100.0f;
     barwidth = bar->width - 7;
     num = (int) (((double)barwidth) * frac);
@@ -2461,8 +2463,8 @@ static int myprogress (void *clientp,
       line[i] = '#';
     }
     line[i] = '\0';
-    sprintf( format, "%%-%ds %%5.1f%%%%", barwidth );
-    sprintf( outline, format, line, percent );
+    snprintf( format, sizeof(format), "%%-%ds %%5.1f%%%%", barwidth );
+    snprintf( outline, sizeof(outline), format, line, percent );
     fprintf( bar->out, "\r%s", outline );
   }
   fflush(bar->out);
