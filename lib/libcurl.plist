@@ -15,7 +15,7 @@
 	<string>com.libcurl.libcurl</string>
 	
 	<key>CFBundleVersion</key>
-	<string>7.11.0</string>
+	<string>7.12.3</string>
 
 	<key>CFBundleName</key>
 	<string>libcurl</string>
@@ -27,9 +27,9 @@
 	<string>????</string>	
 	
 	<key>CFBundleShortVersionString</key>
-	<string>libcurl 7.11.0</string>
+	<string>libcurl 7.12.3</string>
 	
 	<key>CFBundleGetInfoString</key>
-	<string>libcurl.plist 7.11.0</string>
+	<string>libcurl.plist 7.12.3</string>
 </dict>
 </plist>
