@@ -1,0 +1,25 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by daniel@haxx.se
+.\"
+.TH curl_escape 3 "22 March 2001" "libcurl 7.7" "libcurl Manual"
+.SH NAME
+curl_escape - URL encodes the given string
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "char *curl_escape( char *" url ", int "length " );"
+.ad
+.SH DESCRIPTION
+This function will convert the given input string to an URL encoded string and
+return that as a new allocated string. All input characters that are not a-z,
+A-Z or 0-9 will be converted to their "URL escaped" version.
+
+If the 'length' argument is set to 0, curl_escape() will use strlen() on the
+input 'url' string to find out the size.
+
+You must free() the returned string when you're done with it.
+.SH RETURN VALUE
+A pointer to a zero terminated string or NULL if it failed.
+.SH "SEE ALSO"
+.I curl_unescape(), RFC 2396

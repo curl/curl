@@ -1,0 +1,27 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by daniel@haxx.se
+.\"
+.TH curl_unescape 3 "22 March 2001" "libcurl 7.7" "libcurl Manual"
+.SH NAME
+curl_unescape - URL decodes the given string
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "char *curl_unescape( char *" url ", int "length " );"
+.ad
+.SH DESCRIPTION
+This function will convert the given URL encoded input string to a "plain
+string" and return that as a new allocated string. All input characters that
+are URL encoded (%XX where XX is a two-digit hexadecimal number, or +) will be
+converted to their plain text versions (up to a ? letter, no letters to the
+right of a ? letter will be converted).
+
+If the 'length' argument is set to 0, curl_unescape() will use strlen() on the
+input 'url' string to find out the size.
+
+You must free() the returned string when you're done with it.
+.SH RETURN VALUE
+A pointer to a zero terminated string or NULL if it failed.
+.SH "SEE ALSO"
+.I curl_escape(), RFC 2396
