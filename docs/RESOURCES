@@ -15,6 +15,8 @@ Standards
 
   RFC 959  - Defines how FTP works
 
+  RFC 1635 - How to Use Anonymous FTP
+
   RFC 1738 - Uniform Resource Locators
 
   RFC 1777 - defines the LDAP protocol
@@ -40,14 +42,14 @@ Standards
            - Also, read Netscape's specification at
              http://curl.haxx.se/rfc/cookie_spec.html
 
-  RFC 2183 - "The Content-Disposition Header Field"
+  RFC 2183 - The Content-Disposition Header Field
 
-  RFC 2229 - "A Dictionary Server Protocol"
+  RFC 2229 - A Dictionary Server Protocol
 
   RFC 2255 - Newer LDAP URL syntax document.
 
-  RFC 2231 - "MIME Parameter Value and Encoded Word Extensions:
-             Character Sets, Languages, and Continuations"
+  RFC 2231 - MIME Parameter Value and Encoded Word Extensions:
+             Character Sets, Languages, and Continuations
 
   RFC 2388 - "Returning Values from Forms: multipart/form-data"
              Use this as an addition to the RFC1867 
@@ -56,15 +58,23 @@ Standards
              one obsoletes RFC 1738, but since RFC 1738 is often mentioned
              I've left it in this list.
 
-  RFC 2428 - "FTP Extensions for IPv6 and NATs"
+  RFC 2428 - FTP Extensions for IPv6 and NATs
+
+  RFC 2577 - FTP Security Considerations
 
   RFC 2616 - HTTP 1.1, the latest
 
   RFC 2617 - HTTP Authentication
 
-  RFC 2718 - "Guidelines for new URL Schemes"
-
-  RFC 2732 - "Format for Literal IPv6 Addresses in URL's"
+  RFC 2718 - Guidelines for new URL Schemes
+             
+  RFC 2732 - Format for Literal IPv6 Addresses in URL's
+             
+  RFC 2818 - HTTP Over TLS (TLS is the successor to SSL)
+             
+  RFC 2964 - Use of HTTP State Management
+             
+  RFC 2965 - HTTP State Management Mechanism. Cookies. Obsoletes RFC2109
 
 Compilers
 ---------
