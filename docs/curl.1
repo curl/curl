@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl 1 "3 May 2004" "Curl 7.12" "Curl Manual"
+.TH curl 1 "19 Oct 2004" "Curl 7.12.3" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -932,6 +932,9 @@ The average upload speed that curl measured for the complete upload.
 .TP
 .B content_type
 The Content-Type of the requested document, if there was any. (Added in 7.9.5)
+.TP
+.B num_connects
+Number of new connects made in the recent transfer. (Added in 7.12.3)
 .RE
 
 If this option is used several times, the last one will be used.
