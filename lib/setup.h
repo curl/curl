@@ -23,9 +23,6 @@
  * $Id$
  ***************************************************************************/
 
-/* MN 06/07/02 */
-/* #define HTTP_ONLY
-*/
 #ifdef HTTP_ONLY
 #define CURL_DISABLE_FTP
 #define CURL_DISABLE_LDAP
@@ -60,10 +57,10 @@
 
 #endif
 
-#ifndef __cplusplus        /* (rabe) */
+#if !defined(__cplusplus) && !defined(__BEOS__)
 typedef unsigned char bool;
 #define typedef_bool
-#endif                     /* (rabe) */
+#endif
 
 #ifdef NEED_REENTRANT
 /* Solaris machines needs _REENTRANT set for a few function prototypes and
@@ -154,9 +151,16 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 
 #else
 
+#ifdef __BEOS__
+#define sclose(x) closesocket(x)
+#define sread(x,y,z) (ssize_t)recv(x,y,z,0)
+#define swrite(x,y,z) (ssize_t)send(x,y,z,0)
+#else
 #define sclose(x) close(x)
 #define sread(x,y,z) recv(x,y,z,0)
 #define swrite(x,y,z) send(x,y,z,0)
+#endif
+
 #define HAVE_ALARM
 
 #endif
