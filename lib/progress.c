@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -70,7 +70,7 @@ static char *max5data(double bytes, char *max5)
   }
   if(bytes < (100*ONE_MEGABYTE)) {
     /* 'XX.XM' is good as long as we're less than 100 megs */
-    sprintf(max5, "%2.1fM", bytes/ONE_MEGABYTE);
+    sprintf(max5, "%4.1fM", bytes/ONE_MEGABYTE);
     return max5;
   }
   sprintf(max5, "%4dM", (int)bytes/ONE_MEGABYTE);
@@ -118,16 +118,16 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
     break;
 
   case TIMER_NAMELOOKUP:
-    data->progress.t_nslookup += Curl_tvdiff(Curl_tvnow(),
-                                        data->progress.t_startsingle);
+    data->progress.t_nslookup +=
+      Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
     break;
   case TIMER_CONNECT:
-    data->progress.t_connect += Curl_tvdiff(Curl_tvnow(),
-                                       data->progress.t_startsingle);
+    data->progress.t_connect +=
+      Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
     break;
   case TIMER_PRETRANSFER:
-    data->progress.t_pretransfer += Curl_tvdiff(Curl_tvnow(),
-                                           data->progress.t_startsingle);
+    data->progress.t_pretransfer +=
+      Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000;
     break;
   case TIMER_POSTRANSFER:
     /* this is the normal end-of-transfer thing */
@@ -192,7 +192,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   int nowindex = data->progress.speeder_c% CURR_TIME;
   int checkindex;
-  int count;
+
+  int countindex; /* amount of seconds stored in the speeder array */
 
   char time_left[10];
   char time_total[10];
@@ -222,14 +223,18 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   now = Curl_tvnow(); /* what time is it */
 
-  /* The exact time spent so far */
-  data->progress.timespent = Curl_tvdiff (now, data->progress.start);
+  /* The exact time spent so far (from the start) */
+  data->progress.timespent = Curl_tvdiff (now, data->progress.start)/1000;
 
   /* The average download speed this far */
-  data->progress.dlspeed = data->progress.downloaded/(data->progress.timespent!=0.0?data->progress.timespent:1.0);
+  data->progress.dlspeed =
+    data->progress.downloaded/(data->progress.timespent?
+                               data->progress.timespent:1);
 
   /* The average upload speed this far */
-  data->progress.ulspeed = data->progress.uploaded/(data->progress.timespent!=0.0?data->progress.timespent:1.0);
+  data->progress.ulspeed =
+    data->progress.uploaded/(data->progress.timespent?
+                             data->progress.timespent:1);
 
   if(data->progress.lastshow == Curl_tvlong(now))
     return 0; /* never update this more than once a second if the end isn't 
@@ -237,24 +242,54 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   data->progress.lastshow = now.tv_sec;
 
   /* Let's do the "current speed" thing, which should use the fastest
-         of the dl/ul speeds */
+     of the dl/ul speeds. Store the fasted speed at entry 'nowindex'. */
   data->progress.speeder[ nowindex ] =
     data->progress.downloaded>data->progress.uploaded?
     data->progress.downloaded:data->progress.uploaded;
-  data->progress.speeder_c++; /* increase */
-  count = ((data->progress.speeder_c>=CURR_TIME)?
-           CURR_TIME:data->progress.speeder_c) - 1;
-  checkindex = (data->progress.speeder_c>=CURR_TIME)?
-    data->progress.speeder_c%CURR_TIME:0;
 
-  /* find out the average speed the last CURR_TIME seconds */
-  data->progress.current_speed =
-    (data->progress.speeder[nowindex]-
-     data->progress.speeder[checkindex])/(count?count:1);
+  /* remember the exact time for this moment */
+  data->progress.speeder_time [ nowindex ] = now;
+
+  /* advance our speeder_c counter, which is increased every time we get
+     here and we expect it to never wrap as 2^32 is a lot of seconds! */
+  data->progress.speeder_c++;
+
+  /* figure out how many index entries of data we have stored in our speeder
+     array. With N_ENTRIES filled in, we have about N_ENTRIES-1 seconds of
+     transfer. Imagine, after one second we have filled in two entries,
+     after two seconds we've filled in three entries etc. */
+  countindex = ((data->progress.speeder_c>=CURR_TIME)?
+                CURR_TIME:data->progress.speeder_c) - 1;
+
+  /* first of all, we don't do this if there's no counted seconds yet */
+  if(countindex) {
+    long span_ms;
+
+    /* Get the index position to compare with the 'nowindex' position.
+       Get the oldest entry possible. While we have less than CURR_TIME
+       entries, the first entry will remain the oldest. */
+    checkindex = (data->progress.speeder_c>=CURR_TIME)?
+      data->progress.speeder_c%CURR_TIME:0;
+
+    /* Figure out the exact time for the time span */
+    span_ms = Curl_tvdiff(now,
+                          data->progress.speeder_time[checkindex]);
+
+    /* Calculate the average speed the last 'countindex' seconds */
+    data->progress.current_speed =
+      (data->progress.speeder[nowindex]-
+       data->progress.speeder[checkindex])/((double)span_ms/1000);
+  }
+  else
+    /* the first second we only have one speed information to use */
+    data->progress.current_speed = data->progress.speeder[nowindex];
 
   if(data->progress.flags & PGRS_HIDE)
     return 0;
+
   else if(data->set.fprogress) {
+    /* There's a callback set, so we call that instead of writing
+       anything ourselves. This really is the way to go. */
     result= data->set.fprogress(data->set.progress_client,
                                 data->progress.size_dl,
                                 data->progress.downloaded,
@@ -265,7 +300,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     return result;
   }
 
-      /* Figure out the estimated time of arrival for the upload */
+  /* Figure out the estimated time of arrival for the upload */
   if((data->progress.flags & PGRS_UL_SIZE_KNOWN) && data->progress.ulspeed){
     ulestimate = data->progress.size_ul / data->progress.ulspeed;
     ulpercen = (data->progress.uploaded / data->progress.size_ul)*100;
@@ -278,12 +313,12 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   }
     
   /* Now figure out which of them that is slower and use for the for
-         total estimate! */
+     total estimate! */
   total_estimate = ulestimate>dlestimate?ulestimate:dlestimate;
 
 
   /* If we have a total estimate, we can display that and the expected
-         time left */
+     time left */
   if(total_estimate) {
     time2str(time_left, total_estimate-(int) data->progress.timespent); 
     time2str(time_total, total_estimate);
