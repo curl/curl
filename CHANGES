@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (23 October)
+- Georg Horn fixed how the CA verification is made. Verifications can now be
+  made while at the same time the result of it can be ignored. This also
+  affects the curl tool as -k can now be used together with --cacert or
+  --capath.
+
 Daniel (22 October)
 - Gisle Vanem found out --disable-eprt didn't work and patched it.
 

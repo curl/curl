@@ -22,6 +22,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o --disable-eprt works now
+ o improved CA cert verification
  o --anyauth could bug when the first response had no body contents
  o double password prompting when doing NTLM fixed
  o improved performance when used multi-threaded on windows
