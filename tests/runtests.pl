@@ -517,7 +517,7 @@ sub singletest {
         }
         else {
             if(!$short) {
-                print "curl returned $res\n";
+                print "curl returned $res, ".(0+$errorcode)." was expected\n";
             }
             print " error FAILED\n";
             return 1;
