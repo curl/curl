@@ -50,5 +50,5 @@ hugehelp.c: $(README) $(MANPAGE)  mkhelp.pl
 
 # for distribution, generate an uncompressed help file!
 dist-hook:
-	chmod 0666 $(distdir)/hugehelp.c
+	chmod 0644 $(distdir)/hugehelp.c
 	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) $(README) > $(distdir)/hugehelp.c

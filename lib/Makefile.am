@@ -107,5 +107,5 @@ install-data-hook:
 # this hook is mainly for non-unix systems to build even if configure
 # isn't run
 dist-hook:
-	chmod 0666 $(distdir)/ca-bundle.h
+	chmod 0644 $(distdir)/ca-bundle.h
 	echo "/* ca bundle path set in here*/" > $(distdir)/ca-bundle.h
