@@ -52,10 +52,12 @@ number to return on a ftp SIZE command (set to -1 to make this command fail)
 what to send back if the client sends a (FTP) MDTM command, set to -1 to
 have it return that the file doesn't exist
 </mdtm>
-<cmd>
+<servercmd>
 special purpose server-command to control its behavior *before* the
-reply is sent
-</cmd>
+reply is sent:
+
+auth_required - server fails if no auth is provided
+</servercmd>
 <postcmd>
 special purpose server-command to control its behavior *after* the
 reply is sent
