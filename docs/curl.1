@@ -425,6 +425,8 @@ or use several variables like:
   curl http://{site,host}.host[1-5].com -o "#1_#2"
 
 You may use this option as many times as you have number of URLs.
+
+See also the -@ option to create the local directories dynamically.
 .IP "-O/--remote-name"
 Write output to a local file named like the remote file we get. (Only
 the file part of the remote file is used, the path is cut off.)
@@ -759,6 +761,9 @@ Make curl display progress information as a progress bar instead of the
 default statistics.
 
 If this option is used twice, the second will again disable the progress bar.
+.IP "-@/--create-dirs"
+When used in conjunction with the -o option, curl will create the necessary 
+local directory hierarchy as needed.
 .SH FILES
 .I ~/.curlrc
 .RS
