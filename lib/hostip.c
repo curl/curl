@@ -408,13 +408,13 @@ CURLcode Curl_is_resolved(struct connectdata *conn, bool *done)
   if(count)
     ares_process(data->state.areschannel, &read_fds, &write_fds);
 
+  *done = FALSE;
+
   if(conn->async.done) {
     if(!conn->async.dns)
       return CURLE_COULDNT_RESOLVE_HOST;
     *done = TRUE;
   }
-  else
-    *done = FALSE;
 
   return CURLE_OK;
 }
