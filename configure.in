@@ -56,26 +56,6 @@ dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
 
 dnl ************************************************************
-dnl lame option to switch on debug options
-dnl
-AC_MSG_CHECKING([whether to enable debug options])
-AC_ARG_ENABLE(debug,
-[  --enable-debug	Enable pedantic debug options
-  --disable-debug	Disable debug options],
-[ case "$enableval" in
-  no)
-       AC_MSG_RESULT(no)
-       ;;
-  *)   AC_MSG_RESULT(yes)
-
-    CPPFLAGS="$CPPFLAGS -DMALLOCDEBUG"
-    CFLAGS="-W -Wall -Wwrite-strings -pedantic -Wundef -Wpointer-arith -Wcast-align -Wnested-externs -g" 
-       ;;
-  esac ],
-       AC_MSG_RESULT(no)
-)
-
-dnl ************************************************************
 dnl switch off particular protocols
 dnl
 AC_MSG_CHECKING([whether to support http])
@@ -623,7 +603,8 @@ AC_CHECK_HEADERS( \
         io.h \
         pwd.h \
         utime.h \
-        sys/utime.h
+        sys/utime.h \
+        setjmp.h
 )
 
 dnl Check for libz header
@@ -678,8 +659,22 @@ AC_CHECK_FUNCS( socket \
                 getpwuid \
                 geteuid \
                 dlopen \
-                utime
+                utime \
+                sigsetjmp
 )
+
+dnl sigsetjmp() might be a macro and no function so if it isn't found already
+dnl we make an extra check here!
+if test "$ac_cv_func_sigsetjmp" != "yes"; then
+  AC_MSG_CHECKING([for sigsetjmp defined as macro])
+  AC_TRY_LINK( [#include <setjmp.h>],
+               [sigjmp_buf jmpenv;
+                sigsetjmp(jmpenv, 1);],
+               AC_MSG_RESULT(yes)
+               AC_DEFINE(HAVE_SIGSETJMP),
+               AC_MSG_RESULT(no)
+               )
+fi
 
 dnl removed 'getpass' check on October 26, 2000
 
@@ -703,6 +698,26 @@ AC_PROG_YACC
 dnl AC_PATH_PROG( RANLIB, ranlib, /usr/bin/ranlib, 
 dnl   $PATH:/usr/bin/:/usr/local/bin )
 dnl AC_SUBST(RANLIB)
+
+dnl ************************************************************
+dnl lame option to switch on debug options
+dnl
+AC_MSG_CHECKING([whether to enable debug options])
+AC_ARG_ENABLE(debug,
+[  --enable-debug	Enable pedantic debug options
+  --disable-debug	Disable debug options],
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+
+    CPPFLAGS="$CPPFLAGS -DMALLOCDEBUG"
+    CFLAGS="-W -Wall -Wwrite-strings -pedantic -Wundef -Wpointer-arith -Wcast-align -Wnested-externs -g" 
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
 
 AC_CONFIG_FILES([Makefile \
 	   docs/Makefile \

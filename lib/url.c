@@ -72,6 +72,10 @@
 #include <inet.h>
 #endif
 
+#ifdef HAVE_SETJMP_H
+#include <setjmp.h>
+#endif
+
 #ifndef HAVE_SELECT
 #error "We can't compile without select() support!"
 #endif
@@ -120,6 +124,7 @@
 #ifdef KRB4
 #include "security.h"
 #endif
+
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
 #include "memdebug.h"
@@ -143,6 +148,10 @@ RETSIGTYPE alarmfunc(int signal)
 {
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void)signal;
+#ifdef HAVE_SIGSETJMP
+  extern sigjmp_buf curl_jmpenv;
+  siglongjmp(curl_jmpenv, 1);
+#endif
   return;
 }
 #endif
