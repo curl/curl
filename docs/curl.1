@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "30 Jan 2004" "Curl 7.11.1" "Curl Manual"
+.TH curl 1 "6 Feb 2004" "Curl 7.11.1" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -260,6 +260,11 @@ the terminal. Note that this certificate is the private key and the private
 certificate concatenated!
 
 If this option is used several times, the last one will be used.
+.IP "--cert-type <type>"
+(SSL) Tells curl what certificate type the provided certificate is in. PEM,
+DER and ENG are recognized types.
+
+If this option is used several times, the last one will be used.
 .IP "--cacert <CA certificate>"
 (HTTPS) Tells curl to use the specified certificate file to verify the
 peer. The file may contain multiple CA certificates. The certificate(s) must
@@ -400,6 +405,16 @@ default. This makes all connections considered "insecure" to fail unless
 \fI-k/--insecure\fP is used.
 
 If this option is used twice, the second time will again disable it.
+.IP "--key <key>"
+(SSL) Private key file name. Allows you to provide your private key in this
+separate file.
+
+If this option is used several times, the last one will be used.
+.IP "--key-type <type>"
+(SSL) Private key file type. Specify which type your \fI--key\fP provided
+private key is. DER, PEM and ENG are supported.
+
+If this option is used several times, the last one will be used.
 .IP "--krb4 <level>"
 (FTP) Enable kerberos4 authentication and use. The level must be entered and
 should be one of 'clear', 'safe', 'confidential' or 'private'. Should you use
@@ -506,6 +521,9 @@ to ftp to the machine host.domain.com with user name \&'myself' and password
 .B "machine host.domain.com login myself password secret"
 
 If this option is used twice, the second will again disable netrc usage.
+.IP "--netrc-optional"
+Very similar to \fI--netrc\fP, but this option makes the .netrc usage
+\fBoptional\fP and not mandatory as the \fI--netrc\fP does.
 .IP "--negotiate"
 (HTTP) Enables GSS-Negotiate authentication. The GSS-Negotiate method was
 designed by Microsoft and is used in their web aplications. It is primarily
@@ -559,6 +577,14 @@ Write output to a local file named like the remote file we get. (Only the file
 part of the remote file is used, the path is cut off.)
 
 You may use this option as many times as you have number of URLs.
+.IP "--pass <phrase>"
+(SSL) Pass phrase for the private key
+
+If this option is used several times, the last one will be used.
+.IP "--proxy-ntlm"
+Tells curl to use NTLM authentication when communicating with the given proxy.
+
+If this option is used twice, the second will again disable proxy NTLM.
 .IP "-p/--proxytunnel"
 When an HTTP proxy is used, this option will cause non-HTTP protocols to
 attempt to tunnel through the proxy instead of merely using it to do HTTP-like
