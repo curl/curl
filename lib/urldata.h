@@ -570,8 +570,8 @@ struct UserDefined {
   bool http_fail_on_error;
   bool http_follow_location;
 
-  bool http_include_header;
-#define include_header http_include_header
+  bool include_header;
+#define http_include_header include_header /* former name */
 
   bool http_set_referer;
   bool http_auto_referer; /* set "correct" referer when following location: */
