@@ -152,7 +152,7 @@ typedef enum {
 /* This is just to make older programs not break: */
 #define CURLE_FTP_PARTIAL_FILE CURLE_PARTIAL_FILE
 
-#define URLGET_ERROR_SIZE 256
+#define CURL_ERROR_SIZE 256
 
 /* maximum URL length we deal with */
 #define URL_MAX_LENGTH 4096 
@@ -205,25 +205,25 @@ typedef enum {
   /* Specified file stream to upload from (use as input): */
   T(INFILE, OBJECTPOINT, 9),
 
-  /* Buffer to receive error messages in, must be at least URLGET_ERROR_SIZE
-     bytes big. If this is not used, error messages go to stderr instead: */
+  /* Buffer to receive error messages in, must be at least CURL_ERROR_SIZE
+   * bytes big. If this is not used, error messages go to stderr instead: */
   T(ERRORBUFFER, OBJECTPOINT, 10),
 
   /* Function that will be called to store the output (instead of fwrite). The
-     parameters will use fwrite() syntax, make sure to follow them. */
+   * parameters will use fwrite() syntax, make sure to follow them. */
   T(WRITEFUNCTION, FUNCTIONPOINT, 11),
 
   /* Function that will be called to read the input (instead of fread). The
-     parameters will use fread() syntax, make sure to follow them. */
+   * parameters will use fread() syntax, make sure to follow them. */
   T(READFUNCTION, FUNCTIONPOINT, 12),
 
   /* Time-out the read operation after this amount of seconds */
   T(TIMEOUT, LONG, 13),
 
-  /* If the CURLOPT_INFILE is used, this can be used to inform urlget about how
-     large the file being sent really is. That allows better error checking
-     and better verifies that the upload was succcessful. -1 means unknown
-     size. */
+  /* If the CURLOPT_INFILE is used, this can be used to inform libcurl about
+   * how large the file being sent really is. That allows better error
+   * checking and better verifies that the upload was succcessful. -1 means
+   * unknown size. */
   T(INFILESIZE, LONG, 14),
 
   /* POST input fields. */
@@ -381,8 +381,8 @@ char *curl_GetEnv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.0beta"
-#define LIBCURL_VERSION_NUM 0x070000
+#define LIBCURL_VERSION "7.0.1beta"
+#define LIBCURL_VERSION_NUM 0x070001
 
 /* linked-list structure for the CURLOPT_QUOTE option */
 struct curl_slist {
