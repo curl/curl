@@ -1242,10 +1242,10 @@ CURLcode Curl_perform(struct SessionHandle *data)
     return res;
 
   /*
-   * It is important that there is NO 'return' from this function any any
-   * other place than falling down the bottom! This is because we have cleanup
-   * stuff that must be done before we get back, and that is only performed
-   * after this do-while loop.
+   * It is important that there is NO 'return' from this function at any other
+   * place than falling down to the end of the function! This is because we
+   * have cleanup stuff that must be done before we get back, and that is only
+   * performed after this do-while loop.
    */
 
   do {
