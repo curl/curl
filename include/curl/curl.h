@@ -58,13 +58,6 @@
 # include <time.h>
 #endif /* defined (vms) */
 
-#ifndef TRUE
-#define TRUE 1
-#endif
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 #include "types.h"
 
 #ifdef  __cplusplus

@@ -57,6 +57,13 @@
 
 #endif
 
+#ifndef TRUE
+#define TRUE 1
+#endif
+#ifndef FALSE
+#define FALSE 0
+#endif
+
 #if !defined(__cplusplus) && !defined(__BEOS__)
 typedef unsigned char bool;
 #define typedef_bool
