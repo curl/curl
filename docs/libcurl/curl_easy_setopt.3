@@ -468,7 +468,7 @@ size is set to zero, the library will use strlen() to get the size.
 Pass a curl_off_t as parameter. Use this to set the size of the
 \fICURLOPT_POSTFIELDS\fP data to prevent libcurl from doing strlen() on the
 data to figure out the size. This is the large file version of the
-\fICURLOPT_POSTFIELDSIZE\fP option.
+\fICURLOPT_POSTFIELDSIZE\fP option. (Added in 7.11.1)
 .IP CURLOPT_HTTPPOST
 Tells libcurl you want a multipart/formdata HTTP POST to be made and you
 instruct what data to pass on to the server.  Pass a pointer to a linked list
