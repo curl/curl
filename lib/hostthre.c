@@ -184,8 +184,10 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
    * due to a resolver timeout.
    */
   HANDLE mutex_waiting = NULL;
-  if (!DuplicateHandle(GetCurrentProcess(), td->mutex_waiting,
-                       GetCurrentProcess(), &mutex_waiting, 0, FALSE,
+  HANDLE curr_proc = GetCurrentProcess();
+
+  if (!DuplicateHandle(curr_proc, td->mutex_waiting,
+                       curr_proc, &mutex_waiting, 0, FALSE,
                        DUPLICATE_SAME_ACCESS)) {
     /* failed to duplicate the mutex, no point in continuing */
     return 0;
@@ -252,14 +254,18 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
    * due to a resolver timeout.
    */
   HANDLE mutex_waiting = NULL;
-  if (!DuplicateHandle(GetCurrentProcess(), td->mutex_waiting,
-                       GetCurrentProcess(), &mutex_waiting, 0, FALSE,
+  HANDLE curr_proc = GetCurrentProcess();
+
+  if (!DuplicateHandle(curr_proc, td->mutex_waiting,
+                       curr_proc, &mutex_waiting, 0, FALSE,
                        DUPLICATE_SAME_ACCESS)) {
     /* failed to duplicate the mutex, no point in continuing */
     return 0;
   }
 
+#ifndef _WIN32_WCE
   *stderr = *td->stderr_file;
+#endif
 
   itoa(conn->async.port, service, 10);
 
@@ -383,7 +389,6 @@ static bool init_resolve_thread (struct connectdata *conn,
                                          (LPTHREAD_START_ROUTINE) THREAD_FUNC,
                                          conn, 0, &td->thread_id);
 #else
-
   td->thread_hnd = (HANDLE) _beginthreadex(NULL, 0, THREAD_FUNC,
                                            conn, 0, &td->thread_id);
 #endif
