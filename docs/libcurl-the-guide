@@ -949,11 +949,11 @@ Security Considerations
     .netrc is a pretty handy file/feature that allows you to login quickly and
     automaticly to frequently visited sites. The file contains passwords in
     clear text and is a real security risk. In some cases, your .netrc is also
-    stored in a home directory that is NFS mounter or used on another network
+    stored in a home directory that is NFS mounted or used on another network
     based file system, so the clear text password will fly through your
     network every time anyone reads that file!
 
-    To avoid this problem, don't use .netrc files and never store passwords as
+    To avoid this problem, don't use .netrc files and never store passwords in
     plain text anywhere.
 
   Clear Text Passwords
