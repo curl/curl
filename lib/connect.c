@@ -640,8 +640,10 @@ singleipconnect(struct connectdata *conn,
     /* user selected to bind the outgoing socket to a specified "device"
        before doing connect */
     CURLcode res = bindlocal(conn, sockfd);
-    if(res)
+    if(res) {
+      sclose(sockfd); /* close socket and bail out */
       return res;
+    }
   }
 
   /* set socket non-blocking */
