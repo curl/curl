@@ -9,7 +9,8 @@
 use strict;
 
 my $HOSTIP="127.0.0.1";
-my $HOSTPORT=8999;
+my $HOSTPORT=8999; # bad name, but this is the HTTP server port
+my $FTPPORT=8921;  # this is the FTP server port
 my $CURL="../src/curl";
 my $LOGDIR="log";
 my $TESTDIR="data";
@@ -28,6 +29,7 @@ my $TESTCASES="all";
 #
 
 my $PIDFILE=".server.pid";
+my $FTPPIDFILE=".ftpserver.pid";
 
 # this gets set if curl is compiled with memory debugging:
 my $memory_debug=0;
@@ -47,28 +49,33 @@ my $verbose;
 my $anyway;
 
 #######################################################################
-# Return the pid of the http server as found in the pid file
+# Return the pid of the server as found in the given pid file
 #
 sub serverpid {
+    my $PIDFILE = $_[0];
     open(PFILE, "<$PIDFILE");
     my $PID=<PFILE>;
     close(PFILE);
-    chomp $PID;
     return $PID;
 }
 
 #######################################################################
-# stop the test http server
+# stop the given test server
 #
 sub stopserver {
+    my $PIDFILE = $_[0];
     # check for pidfile
     if ( -f $PIDFILE ) {
-        my $PID = serverpid();
+        my $PID = serverpid($PIDFILE);
+
         my $res = kill (9, $PID); # die!
         unlink $PIDFILE; # server is killed
 
         if($res && $verbose) {
-            print "TCP server signalled to die\n";
+            print "Test server pid $PID signalled to die\n";
+        }
+        elsif($verbose) {
+            print "Test server pid $PID didn't exist\n";
         }
     }
 }
@@ -77,13 +84,13 @@ sub stopserver {
 # start the http server, or if it already runs, verify that it is our
 # test server on the test-port!
 #
-sub runserver {
+sub runhttpserver {
     my $verbose = $_[0];
     my $STATUS;
     my $RUNNING;
     # check for pidfile
     if ( -f $PIDFILE ) {
-        my $PID=serverpid();
+        my $PID=serverpid($PIDFILE);
         if ($PID ne "" && kill(0, $PID)) {
             $STATUS="httpd (pid $PID) running";
             $RUNNING=1;
@@ -117,6 +124,49 @@ sub runserver {
         print "The running HTTP server has been verified to be our server\n";
     }
 }
+
+sub runftpserver {
+    my $verbose = $_[0];
+    my $STATUS;
+    my $RUNNING;
+    # check for pidfile
+    if ( -f $FTPPIDFILE ) {
+        my $PID=serverpid($FTPPIDFILE);
+        if ($PID ne "" && kill(0, $PID)) {
+            $STATUS="ftpd (pid $PID) running";
+            $RUNNING=1;
+        }
+        else {
+            $STATUS="ftpd (pid $PID?) not running";
+            $RUNNING=0;
+        }
+    }
+    else {
+        $STATUS="ftpd (no pid file) not running";
+        $RUNNING=0;
+    }
+
+    if ($RUNNING != 1) {
+        system("perl ./ftpserver.pl $FTPPORT &");
+        sleep 1; # give it a little time to start
+    }
+    else {
+        print "$STATUS\n";
+
+        # verify that our server is one one running on this port:
+        my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver`;
+
+        if ( $data !~ /WE ROOLZ/ ) {
+            print "Another FTP server is running on port $FTPPORT\n",
+            "Edit runtests.pl to use another FTP port and rerun the ",
+            "test script\n";
+            exit;
+        }
+
+        print "The running FTP server has been verified to be our server\n";
+    }
+}
+
 
 #######################################################################
 # This function compares two binary files and return non-zero if they
@@ -276,8 +326,8 @@ sub singletest {
     # curl command to run
     my $CURLCMD="$TESTDIR/command$NUMBER.txt";
 
-    # this is the valid HTTP we should generate
-    my $HTTP="$TESTDIR/http$NUMBER.txt";
+    # this is the valid protocol file we should generate
+    my $PROT="$TESTDIR/prot$NUMBER.txt";
 
     # name of the test
     open(N, "<$TESTDIR/name$NUMBER.txt") ||
@@ -308,6 +358,7 @@ sub singletest {
     # make some nice replace operations
     $cmd =~ s/%HOSTIP/$HOSTIP/g;
     $cmd =~ s/%HOSTPORT/$HOSTPORT/g;
+    $cmd =~ s/%FTPPORT/$FTPPORT/g;
     #$cmd =~ s/%HOSTNAME/$HOSTNAME/g;
 
     if($memory_debug) {
@@ -391,8 +442,8 @@ sub singletest {
             }
         }
 
-        if (! -r $HTTP) {
-            print "** Missing HTTP file for test $NUMBER",
+        if (! -r $PROT) {
+            print "** Missing protocol file for test $NUMBER",
             ", should be similar to $SERVERIN\n";
             return 1;
         }
@@ -403,8 +454,8 @@ sub singletest {
         # always differ!
 
         # verify the sent request
-        $res = compare($SERVERIN, $HTTP, "http",
-                       "^(User-Agent:|--curl|Content-Type: multipart/form-data; boundary=).*\r\n");
+        $res = compare($SERVERIN, $PROT, "http",
+                       "^(User-Agent:|--curl|Content-Type: multipart/form-data; boundary=|PORT 127,0,0,1).*\r\n");
         if($res) {
             return 1;
         }
@@ -422,12 +473,14 @@ sub singletest {
             my @memdata=`$memanalyze < $memdump`;
             my $leak=0;
             for(@memdata) {
-                if($_ =~ /Leak detected/) {
+                if($_ ne "") {
+                    # well it could be other memory problems as well, but
+                    # we call it leak for short here
                     $leak=1;
                 }
             }
             if($leak) {
-                print "\n** MEMORY LEAK\n";
+                print "\n** MEMORY FAILURE\n";
                 print @memdata;
                 return 1;
             }
@@ -495,10 +548,11 @@ cleardir($LOGDIR);
 mkdir($LOGDIR, 0777);
 
 #######################################################################
-# First, start the TCP server
+# First, start our test servers
 #
 
-runserver($verbose);
+runhttpserver($verbose);
+runftpserver($verbose);
 
 #######################################################################
 # If 'all' tests are requested, find out all test numbers
@@ -539,7 +593,9 @@ foreach $testnum (split(" ", $TESTCASES)) {
 }
 
 #######################################################################
-# Tests done, stop the server
+# Tests done, stop the servers
 #
 
-stopserver();
+stopserver($FTPPIDFILE);
+stopserver($PIDFILE);
+
