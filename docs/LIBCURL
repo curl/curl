@@ -4,58 +4,69 @@
                         | | | |_) | (__| |_| | |  | |
                         |_|_|_.__/ \___|\__,_|_|  |_|
 
-
                      How To Use Libcurl In Your Program
 
-Interfaces
-
- libcurl currently offers two different interfaces to the URL transfer
- engine. They can be seen as one low-level and one high-level, in the sense
- that the low-level one will allow you to deal with a lot more details but on
- the other hand not offer as many fancy features (such as Location:
- following). The high-level interface is supposed to be a built-in
- implementation of the low-level interface. You will not be able to mix
- function calls from the different layers.
-
- As we currently ONLY support the high-level interface, the so called easy
- interface, I will not attempt to describe any low-level functions at this
- point.
-
-Function descriptions
-
- The interface is meant to be very simple for very simple
- implementations. Thus, we have minimized the number of entries.
+ The interface is meant to be very simple for applictions/programmers, hence
+ the name "easy". We have therefore minimized the number of entries.
 
 The Easy Interface
 
- When using the easy interface, you init your easy-session and get a handle,
- which you use as input to the following interface functions you use.
+ When using the easy interface, you init your session and get a handle, which
+ you use as input to the following interface functions you use. Use
+ curl_easy_init() to get the handle.
 
  You continue by setting all the options you want in the upcoming transfer,
- most important among them is the URL itself. You might want to set some
- callbacks as well that will be called from the library when data is available
- etc.
+ most important among them is the URL itself (you can't transfer anything
+ without a specified URL as you may have figured out yourself). You might want
+ to set some callbacks as well that will be called from the library when data
+ is available etc. curl_easy_setopt() is there for this.
 
- When all is setup, you tell libcurl to perform the transfer. It will then do
- the entire operation and won't return until it is done or failed.
+ When all is setup, you tell libcurl to perform the transfer using
+ curl_easy_perform(). It will then do the entire operation and won't return
+ until it is done or failed.
 
- After the transfer has been made, you cleanup the easy-session's handle and
- libcurl is entirely off the hook!
+ After the transfer has been made, you cleanup the session with
+ curl_easy_cleanup() and libcurl is entirely off the hook! If you want
+ persistant connections, you don't cleanup immediately, but instead run ahead
+ and perform other transfers. See the chapter below for Persistant
+ Connections.
 
-        curl_easy_init() 
-        curl_easy_setopt() 
-        curl_easy_perform() 
-        curl_easy_cleanup() 
+ While the above mentioned four functions are the main functions to use in the
+ easy interface, there is a series of other helpful functions to use. They
+ are:
 
- While the above four functions are the main functions to use in the easy
- interface, there is a series of helpful functions to use. They are:
+   curl_version()        - displays the libcurl version
+   curl_getdate()        - converts a date string to time_t
+   curl_getenv()         - portable environment variable reader
+   curl_easy_getinfo()   - get information about a performed transfer
+   curl_formparse()      - helps building a HTTP form POST
+   curl_formfree()       - free a list built with curl_formparse()
+   curl_slist_append()   - builds a linked list
+   curl_slist_free_all() - frees a whole curl_slist
 
-        curl_version()        - displays the libcurl version
-        curl_getdate()        - converts a date string to time_t
-        curl_getenv()         - portable environment variable reader
-        curl_formparse()      - helps building a HTTP form POST
-        curl_slist_append()   - builds a linked list
-        curl_slist_free_all() - frees a whole curl_slist
+ For details on these, read the separate man pages.
 
- Read the separate man pages for these functions for details!
+Persistant Connections
+
+ With libcurl 7.7, persistant connections were added. Persistant connections
+ means that libcurl can re-use the same connection for several transfers, if
+ the conditions are right.
+
+ libcurl will *always* attempt to use persistant connections. Whenever you use
+ curl_easy_perform(), libcurl will attempt to use an existing connection to do
+ the transfer, and if none exists it'll open a new one that will be subject
+ for re-use on a possible following call to curl_easy_perform().
+
+ To allow libcurl to take full advantage of persistant connections, you should
+ do as many of your file transfers as possible using the same curl
+ handle. When you call curl_easy_cleanup(), all the possibly open connections
+ held by libcurl will be closed and forgotten.
+
+ Note that the options set with curl_easy_setopt() will be used in on every
+ repeat curl_easy_perform() call
+
+Compatibility with older libcurls
+
+ Repeated curl_easy_perform() calls on the same handle were not supported in
+ pre-7.7 versions, and caused confusion and defined behaviour.
 
