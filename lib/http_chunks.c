@@ -82,15 +82,15 @@ void Curl_httpchunk_init(struct connectdata *conn)
 {
   struct Curl_chunker *chunk = &conn->proto.http->chunk;
   chunk->hexindex=0; /* start at 0 */
+  chunk->dataleft=0; /* no data left yet! */
   chunk->state = CHUNK_HEX; /* we get hex first! */
 }
 
 /*
- * chunk_read() returns a 0 for normal operations, or a positive return code
- * for errors. A negative number means this sequence of chunks is complete,
- * and that many ~bytes were NOT used at the end of the buffer passed in.
- * The 'wrote' argument is set to tell the caller how many bytes we actually
- * passed to the client (for byte-counting and whatever).
+ * chunk_read() returns a OK for normal operations, or a positive return code
+ * for errors. STOP means this sequence of chunks is complete.  The 'wrote'
+ * argument is set to tell the caller how many bytes we actually passed to the
+ * client (for byte-counting and whatever).
  *
  * The states and the state-machine is further explained in the header file.
  */
@@ -142,7 +142,7 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
           ch->state = CHUNK_STOP; /* stop reading! */
           if(1 == length) {
             /* This was the final byte, return right now */
-            return ~0;
+            return CHUNKE_STOP;
           }
         }
         else
@@ -179,7 +179,10 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
 
       break;
     case CHUNK_STOP:
-      return ~length; /* return the data size left */
+      /* If we arrive here, there is data left in the end of the buffer
+         even if there's no more chunks to read */
+      ch->dataleft = length;
+      return CHUNKE_STOP; /* return stop */
     default:
       return CHUNKE_STATE_ERROR;
     }

@@ -79,6 +79,8 @@
 
 #include <curl/curl.h>
 
+#include "http_chunks.h" /* for the structs and enum stuff */
+
 /* Download buffer size, keep it fairly big for speed reasons */
 #define BUFSIZE (1024*50)
 
@@ -167,6 +169,8 @@ struct HTTP {
   struct Form form;
   size_t (*storefread)(char *, size_t , size_t , FILE *);
   FILE *in;
+
+  struct Curl_chunker chunk;
 };
 
 /****************************************************************************

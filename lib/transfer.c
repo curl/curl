@@ -89,6 +89,7 @@
 #include "getpass.h"
 #include "progress.h"
 #include "getdate.h"
+#include "http.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -390,6 +391,9 @@ _Transfer(struct connectdata *c_conn)
                  * of chunks, and a chunk-data set to zero signals the
                  * end-of-chunks. */
                 conn->bits.chunk = TRUE; /* chunks coming our way */
+
+                /* init our chunky engine */
+                Curl_httpchunk_init(conn);
               }
               else if (strnequal("Content-Range", p, 13)) {
                 if (sscanf (p+13, ": bytes %d-", &offset) ||
@@ -536,8 +540,24 @@ _Transfer(struct connectdata *c_conn)
             if(conn->bits.chunk) {
               /*
                * Bless me father for I have sinned. Here come a chunked
-               * transfer flighing and we need to decode this properly.
-               */
+               * transfer flying and we need to decode this properly.  While
+               * the name says read, this function both reads and writes away
+               * the data. The returned 'nread' holds the number of actual
+               * data it wrote to the client.  */
+              CHUNKcode res =
+                Curl_httpchunk_read(conn, str, nread, &nread);
+
+              if(CHUNKE_OK < res)
+                return CURLE_READ_ERROR;
+              else if(CHUNKE_STOP == res) {
+                /* we're done reading chunks! */
+                keepon &= ~KEEP_READ; /* read no more */
+
+                /* There are now (~res) bytes at the end of the str buffer
+                   that weren't written to the client, but we don't care
+                   about them right now. */
+              }
+              /* If it returned OK, we just keep going */
             }
 
             if(conn->maxdownload &&
@@ -552,9 +572,12 @@ _Transfer(struct connectdata *c_conn)
 
             Curl_pgrsSetDownloadCounter(data, (double)bytecount);
             
-            urg = Curl_client_write(data, CLIENTWRITE_BODY, str, nread);
-            if(urg)
-              return urg;
+            if(! conn->bits.chunk) {
+              /* If this is chunky transfer, it was already written */
+              urg = Curl_client_write(data, CLIENTWRITE_BODY, str, nread);
+              if(urg)
+                return urg;
+            }
 
           } /* if (! header and data to read ) */
         } /* if( read from socket ) */

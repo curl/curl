@@ -49,15 +49,19 @@ typedef enum {
      HEX state. */
   CHUNK_DATA,
 
-  /* This is only used to really mark that we're out of the game */
+  /* This is mainly used to really mark that we're out of the game.
+     NOTE: that there's a 'dataleft' field in the struct that will tell how
+     many bytes that were not passed to the client in the end of the last
+     buffer! */
   CHUNK_STOP,
 
   CHUNK_LAST /* never use */
 } ChunkyState;
 
 typedef enum {
-  CHUNKE_OK,
-  CHUNKE_TOO_LONG_HEX,
+  CHUNKE_STOP = -1,
+  CHUNKE_OK = 0,
+  CHUNKE_TOO_LONG_HEX = 1,
   CHUNKE_WRITE_ERROR,
   CHUNKE_STATE_ERROR,
   CHUNKE_LAST
@@ -67,7 +71,8 @@ struct Curl_chunker {
   char hexbuffer[ MAXNUM_SIZE + 1];
   int hexindex;
   ChunkyState state;
-  unsigned long datasize;
+  size_t datasize;
+  size_t dataleft; /* untouched data amount at the end of the last buffer */
 };
 
 #endif

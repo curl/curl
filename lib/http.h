@@ -35,4 +35,9 @@ CURLcode Curl_http_done(struct connectdata *conn);
 CURLcode Curl_http_connect(struct connectdata *conn);
 CURLcode Curl_http_close(struct connectdata *conn);
 
+/* The following functions are defined in http_chunks.c */
+void Curl_httpchunk_init(struct connectdata *conn);
+CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
+                              ssize_t length, ssize_t *wrote);
+
 #endif
