@@ -454,6 +454,9 @@ int curl_formparse(char *string,
                    struct HttpPost **httppost,
                    struct HttpPost **last_post);
 
+/* cleanup a form: */
+void curl_formfree(struct HttpPost *form);
+
 /* Unix and Win32 getenv function call, this returns a malloc()'ed string that
    MUST be free()ed after usage is complete. */
 char *curl_getenv(char *variable);
@@ -462,7 +465,7 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.4.2-pre2"
+#define LIBCURL_VERSION "7.4.2"
 #define LIBCURL_VERSION_NUM 0x070402
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
