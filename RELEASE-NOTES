@@ -7,6 +7,8 @@ Curl and libcurl 7.11.1. A bugfix release.
 
 This release includes the following changes:
 
+ o $HOME is now recognized better when looking for .netrc files
+ o now re-uses the ares handle when re-using curl handles
  o SO_BINDTODEVICE is used for network interface binding
  o configure --disable-manual disables the built-in huge manual from the
    command line tool
@@ -61,6 +63,6 @@ advice from friends like these:
  Gisle Vanem, Vincent Bronner, Richard Bramante, Dirk Manske, Dan Fandrich,
  Ken Hirsch, Stadler Stephan, Domenico Andreoli, Patrick Smith, Tor Arntsen,
  Andrés García, Tim Baker, Len Krause, Gilad, Ken Rastatter, P R Schaffner,
- Greg Hewgill, Ben Greear, Jeff Lawson, Grigory Entin
+ Greg Hewgill, Ben Greear, Jeff Lawson, Grigory Entin, Doug Porter
 
         Thanks! (and sorry if I forgot to mention someone)

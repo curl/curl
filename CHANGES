@@ -7,7 +7,36 @@
                                   Changelog
 
 
+Daniel (19 February 2004)
+- Doug Porter made libcurl use the HOME environment variable before the
+  getpwuid results when looking for .netrc files.
+
+- If 'configure --enable-debug' is used with gcc, it now checks which gcc
+  version it is and uses as picky compiler options as possible for the
+  particular version.
+
+- Code that can be used in both the lib and in the curl app is now made to use
+  the curlx_ prefix. The first function to be available like this is the
+  curlx_strtoll() function. This is made to allow the app to use existing code,
+  but without polluting the libcurl API. Further explanations posted here:
+
+    http://curl.haxx.se/mail/lib-2004-02/0215.html
+
+Daniel (18 February 2004)
+- Fixed buildconf to not use "which" as AIX and Tru64 have what have been
+  referred to as "horribly broken 'which' programs".
+
+- Made sure dns cache timeout set to -1 really means caching forever.
+
+Daniel (17 February 2004)
+- Made it possibly to build c-ares with the libcurl memdebug system to better
+  track memory.
+
 Daniel (16 February 2004)
+- When using ares, we now initialize the ares 'channel' in curl_easy_init()
+  and re-use that same handle during the entire curl handle's life-time. It
+  improves performance.
+
 - Fixed a problem when displaying verbose for ipv6-enabled libcurls and
   re-used connections. Problem reported and fix verified by Grigory Entin.
 
