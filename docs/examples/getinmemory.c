@@ -74,6 +74,10 @@ int main(int argc, char **argv)
    * bytes big and contains the remote file.
    *
    * Do something nice with it!
+   *
+   * You should be aware of the fact that at this point we might have an
+   * allocated data block, and nothing has yet deallocated that data. So when
+   * you're done with it, you should free() it as a nice application.
    */
 
   return 0;
