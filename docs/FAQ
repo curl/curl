@@ -1,4 +1,4 @@
-Updated: December 21, 2004 (http://curl.haxx.se/docs/faq.html)
+Updated: April 5, 2005 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -43,6 +43,7 @@ FAQ
   3.15 Can I do recursive fetches with curl?
   3.16 What certificates do I need when I use SSL?
   3.17 How do I list the root dir of an FTP server?
+  3.18 Can I use curl to send a POST/PUT and not wait for a response?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -74,6 +75,7 @@ FAQ
   5.7 Link errors when building libcurl on Windows!
   5.8 libcurl.so.3: open failed: No such file or directory
   5.9 How does libcurl resolve host names?
+  5.10 How do I prevent libcurl from writing the response to stdout?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -533,6 +535,10 @@ FAQ
 
      curl ftp://ftp.sunet.se//tmp/
 
+  3.18 Can I use curl to send a POST/PUT and not wait for a response?
+ 
+  No.
+
 
 4. Running Problems
 
@@ -876,6 +882,16 @@ FAQ
 
     A - gethostbyname() on plain ipv4 windows hosts
     B - getaddrinfo() on ipv6-enabled windows hosts
+
+  Also note that libcurl never resolves or reverse-lookups addresses given as
+  pure numbers, such as 127.0.0.1 or ::1.
+
+  5.10 How do I prevent libcurl from writing the response to stdout?
+
+  libcurl provides a default built-in write function that writes received data
+  to stdout. Set a WRITEFUNCTION to receive the data, or possibly set
+  WRITEDATA to a different FILE * handle.
+
 
 6. License Issues
 
