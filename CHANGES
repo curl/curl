@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (29 January 2005)
+- Adjusted the KNOWN_BUGS #17 fix a bit more since the FTP code also did some
+  bad assumptions.
+
 - multi interface: when a request is denied due to "Maximum redirects
   followed" libcurl leaked the last Location: URL.
 

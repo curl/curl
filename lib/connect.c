@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -429,6 +429,25 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
   return rc;
 }
 
+CURLcode Curl_store_ip_addr(struct connectdata *conn)
+{
+  char addrbuf[256];
+  Curl_printable_address(conn->ip_addr, addrbuf, sizeof(addrbuf));
+
+  /* save the string */
+  Curl_safefree(conn->ip_addr_str);
+  conn->ip_addr_str = strdup(addrbuf);
+  if(!conn->ip_addr_str)
+    return CURLE_OUT_OF_MEMORY; /* FAIL */
+
+#ifdef PF_INET6
+  if(conn->ip_addr->ai_family == PF_INET6)
+    conn->bits.ipv6 = TRUE;
+#endif
+
+  return CURLE_OK;
+}
+
 /* Used within the multi interface. Try next IP address, return TRUE if no
    more address exists */
 static bool trynextip(struct connectdata *conn,
@@ -450,6 +469,8 @@ static bool trynextip(struct connectdata *conn,
       /* store the new socket descriptor */
       conn->sock[sockindex] = sockfd;
       conn->ip_addr = ai;
+
+      Curl_store_ip_addr(conn);
       return FALSE;
     }
     ai = ai->ai_next;

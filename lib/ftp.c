@@ -1226,12 +1226,10 @@ CURLcode ftp_use_port(struct connectdata *conn)
   }
 
 #ifdef PF_INET6
-  if(!conn->bits.ftp_use_eprt &&
-     (conn->ip_addr->ai_family == PF_INET6)) {
+  if(!conn->bits.ftp_use_eprt && conn->bits.ipv6)
     /* EPRT is disabled but we are connected to a IPv6 host, so we ignore the
-       request! */
+       request and enable EPRT again! */
     conn->bits.ftp_use_eprt = TRUE;
-  }
 #endif
 
   for (fcmd = EPRT; fcmd != DONE; fcmd++) {
@@ -1563,12 +1561,10 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   char newhost[NEWHOST_BUFSIZE];
 
 #ifdef PF_INET6
-  if(!conn->bits.ftp_use_epsv &&
-     (conn->ip_addr->ai_family == PF_INET6)) {
+  if(!conn->bits.ftp_use_epsv && conn->bits.ipv6)
     /* EPSV is disabled but we are connected to a IPv6 host, so we ignore the
-       request! */
+       request and enable EPSV again! */
     conn->bits.ftp_use_epsv = TRUE;
-  }
 #endif
 
   for (modeoff = (conn->bits.ftp_use_epsv?0:1);
@@ -1653,7 +1649,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
           newport = num;
 
           /* We must use the same IP we are already connected to */
-          Curl_printable_address(conn->ip_addr, newhost, NEWHOST_BUFSIZE);
+          snprintf(newhost, NEWHOST_BUFSIZE, "%s", conn->ip_addr_str);
         }
       }
       else
