@@ -38,13 +38,13 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+#include "setup.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <errno.h>
-
-#include "setup.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -680,7 +680,10 @@ CURLcode _ftp(struct connectdata *conn)
       unsigned short ip[5];
       (void) memcpy(&in.s_addr, *h->h_addr_list, sizeof (in.s_addr));
 #if defined (HAVE_INET_NTOA_R)
-      sscanf( inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)), "%hu.%hu.%hu.%hu",
+      /* ignore the return code from inet_ntoa_r() as it is int or
+         char * depending on system */
+      inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf));
+      sscanf( ntoa_buf, "%hu.%hu.%hu.%hu",
               &ip[0], &ip[1], &ip[2], &ip[3]);
 #else
       sscanf( inet_ntoa(in), "%hu.%hu.%hu.%hu",
@@ -815,7 +818,7 @@ CURLcode _ftp(struct connectdata *conn)
         infof(data, "Connecting to %s (%s) port %u\n",
               answer?answer->h_name:newhost,
 #if defined(HAVE_INET_NTOA_R)
-              ip_addr = inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)),
+              inet_ntoa_r(in, ip_addr=ntoa_buf, sizeof(ntoa_buf)),
 #else
               ip_addr = inet_ntoa(in),
 #endif
