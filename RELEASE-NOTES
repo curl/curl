@@ -16,6 +16,12 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o occational re-use of freed-memory problem fixed
+ o builds natively (without unix emulation) on AmigaOS
+ o configure --libs now include the ares link directory
+ o configure --enable-ares now accepts a given path
+ o -lz no longer appear twice on the link line
+ o more descriptive error message if the FTP response reader fails
  o curl-config --feature now shows 'AsynchDNS' when built with ares
  o VMS build up-to-date and clarified source code
  o resolve bug caused socks5 to fail
@@ -55,6 +61,6 @@ advice from friends like these:
  Peter Sylvester, Siddhartha Prakash Jain, Mathias Axelsson, Maciej
  W. Rozycki, Nicolas Croiset, Josh Kapell, Gaz Iqbal, Dave May, Markus
  Moeller, James Clancy, Giuseppe Attardi, swalkaus at yahoo.com, Steve Green,
- Marty Kuhrt, Dominick Meglio
+ Marty Kuhrt, Dominick Meglio, Diego Casorran
  
         Thanks! (and sorry if I forgot to mention someone)
