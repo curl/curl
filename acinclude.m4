@@ -30,7 +30,7 @@ AC_DEFUN(CURL_CHECK_NONBLOCKING_SOCKET,
 # define PLATFORM_AIX_V3
 #endif
 
-#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3)
+#if defined(PLATFORM_SUNOS4) || defined(PLATFORM_AIX_V3) || defined(__BEOS__)
 #error "O_NONBLOCK does not work on this platform"
 #endif
   int socket;
