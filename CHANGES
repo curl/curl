@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel (5 September)
+- Kevin Fisk reported that configure --enable-thread didn't work. I fixed.
+
+- De-macrofied the lib/hash.c source code somewhat.
+
+Daniel (4 September)
+- CURLINFO_HTTPAUTH_AVAIL and CURLINFO_PROXYAUTH_AVAIL added, Based on Joerg
+  Mueller-Tolk's patch,
+
 Early (4 September)
 - Added CURLOPT_FTP_RESPONSE_TIMEOUT - allows user to set strict timeout
   requirements on the FTP server's ability to respond to individual commands
