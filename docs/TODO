@@ -18,11 +18,6 @@ To do for the next release:
  * Make SSL session ids get used if multiple HTTPS documents from the same
    host is requested.
 
- * Document the undocumented libcurl functions: the printf clones (like
-   curl_msprintf, curl_mfprintf, curl_msnprintf, curl_maprintf and
-   curl_mvfprintf) and the string compare functions (curl_strequal
-   and curl_strnequal).
-
 To do in a future release (random order):
 
  * Rewrite parts of the test suite. Make a (XML?) format to store all
@@ -95,5 +90,3 @@ To do in a future release (random order):
    EPRT for IPv6 (done), and EPSV instead of PASV.  HTTP proxies are left to
    add support for.
 
- * SSL for more protocols, like SSL-FTP...
-   (http://search.ietf.org/internet-drafts/draft-murray-auth-ftp-ssl-05.txt)
