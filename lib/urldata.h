@@ -85,11 +85,6 @@
 /* Download buffer size, keep it fairly big for speed reasons */
 #define BUFSIZE (1024*20)
 
-/* Defaul upload buffer size, keep it smallish to get faster progress meter
-   updates. This is just default, it is dynamic and adjusts to the upload
-   speed. */
-#define UPLOAD_BUFSIZE (1024*2)
-
 /* Initial size of the buffer to store headers in, it'll be enlarged in case
    of need. */
 #define HEADERSIZE 256
@@ -317,10 +312,6 @@ struct connectdata {
   struct timeval created; /* creation time */
   int firstsocket;     /* the main socket to use */
   int secondarysocket; /* for i.e ftp transfers */
-
-  long upload_bufsize; /* adjust as you see fit, never bigger than BUFSIZE
-                          never smaller than UPLOAD_BUFSIZE */
-
   long maxdownload; /* in bytes, the maximum amount of data to fetch, 0
                        means unlimited */
   
