@@ -44,6 +44,7 @@
 #include "progress.h"
 #include "memory.h"
 #include "easy.h"
+#include "multi.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -210,6 +211,8 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
 
     /* clear out the usage of the shared DNS cache */
     easy->easy_handle->hostcache = NULL;
+    Curl_easy_addmulti(easy->easy_handle, NULL); /* clear the association
+                                                    to this multi handle */
 
     /* make the previous node point to our next */
     if(easy->prev)
@@ -610,7 +613,7 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       nexteasy=easy->next;
       /* clear out the usage of the shared DNS cache */
       easy->easy_handle->hostcache = NULL;
-      easy->easy_handle->multi = NULL;
+      Curl_easy_addmulti(easy->easy_handle, NULL); /* clear the association */
 
       if (easy->msg)
         free(easy->msg);
