@@ -1107,6 +1107,7 @@ int main(int argc, char *argv[])
                     URGTAG_CUSTOMREQUEST, config.customrequest,
                     URGTAG_STDERR, config.errors,
                     URGTAG_PROGRESSMODE, config.progressmode,
+                    URGTAG_WRITEINFO, config.writeout,
                     URGTAG_DONE); /* always terminate the list of tags */
   if((res!=URG_OK) && config.showerror)
     fprintf(config.errors, "curl: (%d) %s\n", res, errorbuffer);
