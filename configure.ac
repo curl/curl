@@ -24,14 +24,14 @@ AC_PATH_PROG( AR, ar, , $PATH:/usr/bin:/usr/local/bin:/usr/ccs/bin)
 AC_SUBST(AR)
 
 dnl figure out the libcurl version
-VERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curl.h`
+VERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curlver.h`
 AM_INIT_AUTOMAKE(curl,$VERSION)
 AC_MSG_CHECKING([curl version])
 AC_MSG_RESULT($VERSION)
 
 dnl
 dnl we extract the numerical version for curl-config only
-VERSIONNUM=`$SED -ne 's/^#define LIBCURL_VERSION_NUM 0x\(.*\)/\1/p' ${srcdir}/include/curl/curl.h`
+VERSIONNUM=`$SED -ne 's/^#define LIBCURL_VERSION_NUM 0x\(.*\)/\1/p' ${srcdir}/include/curl/curlver.h`
 AC_SUBST(VERSIONNUM)
 
 dnl Solaris pkgadd support definitions
