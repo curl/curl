@@ -2,7 +2,7 @@ Curl and libcurl 7.13.2
 
  Public curl release number:               87
  Releases counted from the very beginning: 114
- Available command line options:           105
+ Available command line options:           106
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        20
@@ -13,9 +13,14 @@ This release includes the following changes:
  o Added --form-string
  o libcurl can be built with SSPI support. curl_version_info() then returns
    a new feature bit: CURL_VERSION_SSPI. configure --enable-sspi added
+ o Added --proxy-anyauth
+ o Added runtests.1 and testcurl.1 man pages
 
 This release includes the following bugfixes:
 
+ o FTP-SSL
+ o reading FTP server response in multiple reads
+ o picking one out of multiple proxy auth methods
  o inet_ntoa_r() when built with uClibc
  o the so name issue for the LDAP library dynamic load
  o crash when using SOCKS4 proxy
@@ -36,6 +41,6 @@ advice from friends like these:
 
  Dan Fandrich, Ignacio Vazquez-Abrams, Randy McMurchy, Dominick Meglio,
  Jean-Marc Ranger, Tor Arntsen, Nodak Sodak, David Houlder, Gisle Vanem,
- Christopher R. Palmer, Gwenole Beauchesne
+ Christopher R. Palmer, Gwenole Beauchesne, Augustus Saunders, Jesper Jensen
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -7,6 +7,21 @@
                                   Changelog
 
 
+Daniel (29 March 2005)
+- Jesper Jensen found out that FTP-SSL didn't work since my FTP
+  rewrite. Fixing that was easy, but it also revealed a much worse problem:
+  the FTP server response reader function didn't properly deal with reading
+  responses in multiple tiny chunks properly! I modified the FTP server to
+  allow it to produce such split-up responses to make sure curl deals with
+  them as it should.
+
+- Based on Augustus Saunders' comments and findings, the HTTP output auth
+  function was fixed to use the proper proxy authentication when multiple ones
+  are accepted. test 239 and test 243 were added to repeat the problems and
+  verify the fixes.
+
+  --proxy-anyauth was added to the curl tool
+
 Daniel (16 March 2005)
 - Tru64 and some IRIX boxes seem to not like test 237 as it is. Their
   inet_addr() functions seems to use &255 on all numericals in a ipv4 dotted
