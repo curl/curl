@@ -6,6 +6,13 @@
 
                                History of Changes
 
+Daniel (8 January 2001)
+- Made some minor corrections to get the client to cleanup properly and I made
+  the separator work again when getting multiple globbed URLs to stdout.
+
+- Worked with Loic Dachary to get the make dist and make distcheck work
+  correctly.
+
 Loic Dachary (6 January 2001)
 - Automated generation of rpm packages, no need to be root.
 

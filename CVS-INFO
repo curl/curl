@@ -15,6 +15,8 @@ perl/         is a subdirectory with various perl scripts
 To build after having extracted everything from CVS, do this:
 
 % automake
+% aclocal
+% autoheader
 % autoconf
 % ./configure
 % make
