@@ -1,0 +1,9 @@
+HTTP/1.1 200 OK
+Server: fake
+Content-Range: bytes 200-3526/3527
+Content-Length: 84
+
+
+The Content-Range header's contents above aren't really genuine for this
+content.
+

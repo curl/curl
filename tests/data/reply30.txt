@@ -1,0 +1,7 @@
+HTTP/1.1 200 OK
+Server: fake
+Content-Length: 8400
+
+This file is a lot smaller than 8400 and thus curl should return an error
+for this.
+

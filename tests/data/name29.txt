@@ -1,0 +1,1 @@
+HTTP download resume with Content-Length validity
