@@ -1,4 +1,4 @@
-http://%HOSTIP:%HOSTPORT/want/25 -o - -o -
+http://%HOSTIP:%HOSTPORT/want/26 -o - -o -
 
 
 

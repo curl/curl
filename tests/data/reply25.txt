@@ -1,5 +1,7 @@
 HTTP/1.1 301 This is a weirdo text message
 Server: test-server/fake
 Location: data/reply/25
+Content-Length: 32
+Connection: close
 
 Redirect to the same URL again!

@@ -1,6 +1,7 @@
 HTTP/1.1 301 Moved Permanently
 Server: fake
 Location: /moo/moo/moo/310002
+Connection: close
 
 HTTP/1.1 200 Followed here fine
 Date: Thu, 09 Nov 2010 14:49:00 GMT

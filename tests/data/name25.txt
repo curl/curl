@@ -1,1 +1,1 @@
-looping HTTP Location: following with --max-redirs
+looping HTTP Location: following with --max-redirs, no persistance

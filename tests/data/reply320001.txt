@@ -1,6 +1,7 @@
 HTTP/1.1 303 See Other
 Server: fake
 Location: /moo/moo/moo/320002
+Connection: close
 
 HTTP/1.1 200 Followed here fine
 Date: Thu, 09 Nov 2010 14:49:00 GMT
