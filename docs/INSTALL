@@ -400,6 +400,17 @@ CROSS COMPILE
    The '--prefix' parameter specifies where cURL will be installed.  If
    'configure' completes successfully, do 'make' and 'make install' as usual.
 
+RISC OS
+=======
+   The library can be cross-compiled using gccsdk as follows:
+
+        CC=riscos-gcc AR=riscos-ar RANLIB='riscos-ar -s' ./configure \
+             --host=arm-riscos-aof --without-random --disable-shared
+        make
+
+   where riscos-gcc and riscos-ar are links to the gccsdk tools.
+   You can then link your program with curl/lib/.libs/libcurl.a
+
 PORTS
 =====
    This is a probably incomplete list of known hardware and operating systems
