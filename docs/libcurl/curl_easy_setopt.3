@@ -727,7 +727,7 @@ can be used after a transfer to extract the received time (if any).
 .B CURLOPT_NOBODY
 A non-zero parameter tells the library to not include the body-part in the
 output. This is only relevant for protocols that have separate header and body
-parts.
+parts. On HTTP(S) servers, this will make libcurl do a HEAD request.
 .TP
 .B CURLOPT_INFILESIZE
 When uploading a file to a remote site, this option should be used to tell
