@@ -12,8 +12,8 @@
 CC = gcc
 RM = rm -f
 STRIP = strip -s
-OPENSSL_PATH = ../../openssl-0.9.7a
-ZLIB_PATH = ../../zlib-1.1.4
+OPENSSL_PATH = ../../openssl-0.9.7c
+ZLIB_PATH = ../../zlib-1.2.1
 
 # We may need these someday
 # PERL = perl
