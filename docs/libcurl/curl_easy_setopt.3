@@ -361,9 +361,14 @@ will imply this option.
 .TP
 .B CURLOPT_POSTFIELDS
 Pass a char * as parameter, which should be the full data to post in a HTTP
-post operation. This is a normal application/x-www-form-urlencoded kind, which
-is the most commonly used one by HTML forms. See also the CURLOPT_POST. Since
-7.8, using CURLOPT_POSTFIELDS implies CURLOPT_POST.
+post operation. You need to make sure that the data is formatted the way you
+want the server to receive it. libcurl will not convert or encode it for
+you. Most web servers will assume this data to be url-encoded. Take note.
+
+This POST is a normal application/x-www-form-urlencoded kind (and libcurl will
+set that Content-Type by default when this option is used), which is the most
+commonly used one by HTML forms. See also the CURLOPT_POST. Using
+CURLOPT_POSTFIELDS implies CURLOPT_POST.
 
 \fBNote:\fP to make multipart/formdata posts (aka rfc1867-posts), check out
 the \fICURLOPT_HTTPPOST\fP option.
