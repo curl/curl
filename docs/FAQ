@@ -1,4 +1,4 @@
-Updated: June 17, 2003 (http://curl.haxx.se/docs/faq.html)
+Updated: December 8, 2003 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -66,7 +66,7 @@ FAQ
   5.2 How can I receive all data into a large memory chunk?
   5.3 How do I fetch multiple files with libcurl?
   5.4 Does libcurl do Winsock initing on win32 systems?
-  5.5 Does CURLOPT_FILE and CURLOPT_INFILE work on win32 ?
+  5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows!
 
@@ -699,13 +699,15 @@ FAQ
 
   Yes, if told to in the curl_global_init() call.
 
-  5.5 Does CURLOPT_FILE and CURLOPT_INFILE work on win32 ?
+  5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
 
   Yes, but you cannot open a FILE * and pass the pointer to a DLL and have
-  that DLL use the FILE *. If you set CURLOPT_FILE you must also use
-  CURLOPT_WRITEFUNCTION as well to set a function that writes the file, even
-  if that simply writes the data to the specified FILE*. Similarly, if you use
-  CURLOPT_INFILE you must also specify CURLOPT_READFUNCTION.
+  that DLL use the FILE * (as the DLL and the client application cannot access
+  each others' variable memory areas). If you set CURLOPT_WRITEDATA you must
+  also use CURLOPT_WRITEFUNCTION as well to set a function that writes the
+  file, even if that simply writes the data to the specified FILE *.
+  Similarly, if you use CURLOPT_READDATA you must also specify
+  CURLOPT_READFUNCTION.
 
   (Provided by Joel DeYoung and Bob Schader)
 
