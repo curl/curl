@@ -158,11 +158,19 @@ static CURLcode Curl_output_basic_proxy(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/*
+ * Curl_http_auth_act() checks what authentication methods that are available
+ * and decides which one (if any) to use. It will set 'newurl' if an auth
+ * metod was picked.
+ */
+
 void Curl_http_auth_act(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
 
   if(data->state.authavail) {
+    /* The order of these checks is highly relevant, as this will be the order
+       of preference in case of the existance of multiple accepted types. */
     if(data->state.authavail & CURLAUTH_GSSNEGOTIATE)
       data->state.authwant = CURLAUTH_GSSNEGOTIATE;
     else if(data->state.authavail & CURLAUTH_DIGEST)
@@ -341,6 +349,15 @@ CURLcode Curl_http_auth(struct connectdata *conn,
   while(*start && isspace((int)*start))
     start++;
 
+  /*
+   * Here we check if we want the specific single authentiction (using ==) and
+   * if we do, we initiate usage of it.
+   *
+   * If the provided authentication is wanted as one out of several accepted
+   * types (using &), we OR this authenticaion type to the authavail
+   * variable.
+   */
+  
 #ifdef HAVE_GSSAPI
   if (checkprefix("GSS-Negotiate", start) ||
       checkprefix("Negotiate", start)) {
@@ -1013,14 +1030,15 @@ CURLcode Curl_http_done(struct connectdata *conn)
 void Curl_http_auth_stage(struct SessionHandle *data,
                           int stage)
 {
-  if(stage == 401)
-    data->state.authwant = data->set.httpauth;
-  else if(stage == 407)
-    data->state.authwant = data->set.proxyauth;
-  else
-    return; /* bad input stage */
+  curlassert((stage == 401) || (stage == 407));
+
+  /* We set none, one or more bits for which authentication types we accept
+     for this stage. */
+  data->state.authwant = (stage == 401)?
+    data->set.httpauth:data->set.proxyauth;
+
   data->state.authstage = stage;
-  data->state.authavail = CURLAUTH_NONE;
+  data->state.authavail = CURLAUTH_NONE; /* no type available yet */
 }
 
 CURLcode Curl_http(struct connectdata *conn)
