@@ -94,7 +94,7 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
 
   /* Set the compressed input when this function is called */
   z->next_in = (Bytef *)k->str;
-  z->avail_in = nread;
+  z->avail_in = (uInt)nread;
 
   /* because the buffer size is fixed, iteratively decompress
      and transfer to the client via client_write. */
@@ -251,7 +251,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
     switch (check_gzip_header((unsigned char *)k->str, nread, &hlen)) {
     case GZIP_OK:
       z->next_in = (Bytef *)k->str + hlen;
-      z->avail_in = nread - hlen;
+      z->avail_in = (uInt)(nread - hlen);
       k->zlib_init = 3; /* Inflating stream state */
       break;
 
@@ -263,7 +263,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
        * the first place, and it's even more unlikely for a transfer to fail
        * immediately afterwards, it should seldom be a problem.
        */
-      z->avail_in = nread;
+      z->avail_in = (uInt)nread;
       z->next_in = malloc(z->avail_in);
       if (z->next_in == NULL) {
         return exit_zlib(z, &k->zlib_init, CURLE_OUT_OF_MEMORY);
@@ -299,7 +299,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
       free(z->next_in);
       /* Don't point into the malloced block since we just freed it */
       z->next_in = (Bytef *)k->str + hlen + nread - z->avail_in;
-      z->avail_in = z->avail_in - hlen;
+      z->avail_in = (uInt)(z->avail_in - hlen);
       k->zlib_init = 3;   /* Inflating stream state */
       break;
 
@@ -317,7 +317,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
   else {
     /* Inflating stream state */
     z->next_in = (Bytef *)k->str;
-    z->avail_in = nread;
+    z->avail_in = (uInt)nread;
   }
 
   if (z->avail_in == 0) {
