@@ -375,6 +375,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         
         if(CURLE_OK != easy->result) {
           /* failure detected */
+          Curl_disconnect(easy->easy_conn); /* disconnect properly */
           easy->easy_conn = NULL;           /* no more connection */
           break;
         }
