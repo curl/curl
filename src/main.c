@@ -951,6 +951,7 @@ typedef enum {
   PARAM_GOT_EXTRA_PARAMETER,
   PARAM_BAD_NUMERIC,
   PARAM_LIBCURL_DOESNT_SUPPORT,
+  PARAM_NO_MEM,
   PARAM_LAST
 } ParameterError;
 
@@ -972,6 +973,8 @@ static const char *param2text(int res)
     return "expected a proper numerical parameter";
   case PARAM_LIBCURL_DOESNT_SUPPORT:
     return "the installed libcurl version doesn't support this";
+  case PARAM_NO_MEM:
+    return "out of memory";
   default:
     return "unknown error";
   }
@@ -1085,6 +1088,18 @@ static void checkpasswd(const char *kind, /* for what purpose */
   }
 }
 
+static ParameterError add2list(struct curl_slist **list,
+                               char *ptr)
+{
+  struct curl_slist *newlist = curl_slist_append(*list, ptr);
+  if(newlist)
+    *list = newlist;
+  else
+    return PARAM_NO_MEM;
+
+  return PARAM_OK;
+}
+
 static ParameterError getparameter(char *flag, /* f or -long-flag */
                                    char *nextarg, /* NULL if unset */
                                    bool *usedarg, /* set to TRUE if the arg
@@ -1100,7 +1115,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
   int hit=-1;
   bool longopt=FALSE;
   bool singleopt=FALSE; /* when true means '-o foo' used '-ofoo' */
-
+  ParameterError err;
 
   /* single-letter,
      long-name,
@@ -1694,7 +1709,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       return PARAM_HELP_REQUESTED;
     case 'H':
       /* A custom header to append to a list */
-      config->headers = curl_slist_append(config->headers, nextarg);
+      err = add2list(&config->headers, nextarg);
+      if(err)
+        return err;
       break;
     case 'i':
       config->conf ^= CONF_HEADER; /* include the HTTP header as well */
@@ -1822,20 +1839,24 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'Q':
       /* QUOTE command to send to FTP server */
+      err = PARAM_OK;
       switch(nextarg[0]) {
       case '-':
         /* prefixed with a dash makes it a POST TRANSFER one */
         nextarg++;
-        config->postquote = curl_slist_append(config->postquote, nextarg);
+        err = add2list(&config->postquote, nextarg);
         break;
       case '+':
         /* prefixed with a plus makes it a just-before-transfer one */
         nextarg++;
-        config->prequote = curl_slist_append(config->prequote, nextarg);
+        err = add2list(&config->prequote, nextarg);
         break;
       default:
-        config->quote = curl_slist_append(config->quote, nextarg);
+        err = add2list(&config->quote, nextarg);
+        break;
       }
+      if(err)
+        return err;
       break;
     case 'r':
       /* byte range requested */
@@ -1856,8 +1877,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 't':
       /* Telnet options */
-      config->telnet_options =
-        curl_slist_append(config->telnet_options, nextarg);
+      err = add2list(&config->telnet_options, nextarg);
+      if(err)
+        return err;
       break;
     case 'T':
       /* we are uploading */
