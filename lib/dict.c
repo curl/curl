@@ -136,25 +136,25 @@ CURLcode Curl_dict(struct connectdata *conn)
       nth = atoi(nthdef);
     }
       
-    Curl_sendf(conn->firstsocket, conn,
-               "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
-               "MATCH "
-               "%s "    /* database */
-               "%s "    /* strategy */
-               "%s\n"   /* word */
-               "QUIT\n",
-	    
-               database,
-               strategy,
-               word
-               );
-    
-    result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
-                           -1, NULL); /* no upload */
-      
+    result = Curl_sendf(conn->firstsocket, conn,
+                        "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
+                        "MATCH "
+                        "%s "    /* database */
+                        "%s "    /* strategy */
+                        "%s\n"   /* word */
+                        "QUIT\n",
+                        
+                        database,
+                        strategy,
+                        word
+                        );
+    if(result)
+      failf(data, "Failed sending DICT request");
+    else
+      result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
+                             -1, NULL); /* no upload */      
     if(result)
       return result;
-    
   }
   else if (strnequal(path, DICT_DEFINE, sizeof(DICT_DEFINE)-1) ||
            strnequal(path, DICT_DEFINE2, sizeof(DICT_DEFINE2)-1) ||
@@ -186,19 +186,19 @@ CURLcode Curl_dict(struct connectdata *conn)
       nth = atoi(nthdef);
     }
       
-    Curl_sendf(conn->firstsocket, conn,
-               "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
-               "DEFINE "
-               "%s "     /* database */
-               "%s\n"    /* word */
-               "QUIT\n",
-               
-               database,
-               word
-               );
-    
-    result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
-                           -1, NULL); /* no upload */
+    result = Curl_sendf(conn->firstsocket, conn,
+                        "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
+                        "DEFINE "
+                        "%s "     /* database */
+                        "%s\n"    /* word */
+                        "QUIT\n",
+                        database,
+                        word);
+    if(result)
+      failf(data, "Failed sending DICT request");
+    else
+      result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
+                             -1, NULL); /* no upload */
     
     if(result)
       return result;
@@ -215,18 +215,17 @@ CURLcode Curl_dict(struct connectdata *conn)
         if (ppath[i] == ':')
           ppath[i] = ' ';
       }
-      Curl_sendf(conn->firstsocket, conn,
-                 "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
-                 "%s\n"
-                 "QUIT\n",
-                 ppath);
-      
-      result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
-                             -1, NULL);
-      
+      result = Curl_sendf(conn->firstsocket, conn,
+                          "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
+                          "%s\n"
+                          "QUIT\n", ppath);
+      if(result)
+        failf(data, "Failed sending DICT request");
+      else
+        result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
+                               -1, NULL);
       if(result)
         return result;
-      
     }
   }
 
