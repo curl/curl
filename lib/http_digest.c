@@ -133,7 +133,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   unsigned char ha1[33]; /* 32 digits and 1 zero byte */
   unsigned char ha2[33];
   unsigned char request_digest[33];
-  char *md5this;
+  unsigned char *md5this;
 
   struct SessionHandle *data = conn->data;
 
@@ -148,18 +148,20 @@ CURLcode Curl_output_digest(struct connectdata *conn,
          ":" unq(nonce-value) ":" unq(cnonce-value)
   */
   if(data->state.digest.algo == CURLDIGESTALGO_MD5SESS) {
-    md5this = aprintf("%s:%s:%s:%s:%s",
-                      data->state.user,
-                      data->state.digest.realm,
-                      data->state.passwd,
-                      data->state.digest.nonce,
-                      data->state.digest.cnonce);
+    md5this = (unsigned char *)
+      aprintf("%s:%s:%s:%s:%s",
+              data->state.user,
+              data->state.digest.realm,
+              data->state.passwd,
+              data->state.digest.nonce,
+              data->state.digest.cnonce);
   }
   else {
-    md5this = aprintf("%s:%s:%s",
-                      data->state.user,
-                      data->state.digest.realm,
-                      data->state.passwd);
+    md5this = (unsigned char *)
+      aprintf("%s:%s:%s",
+              data->state.user,
+              data->state.digest.realm,
+              data->state.passwd);
   }
   Curl_md5it(md5buf, md5this);
   free(md5this); /* free this again */
@@ -172,15 +174,13 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     5.1.1 of RFC 2616)
   */
 
-  md5this = aprintf("%s:%s", request, uripath);
+  md5this = (unsigned char *)aprintf("%s:%s", request, uripath);
   Curl_md5it(md5buf, md5this);
   free(md5this); /* free this again */
   md5_to_ascii(md5buf, ha2);
-
-  md5this = aprintf("%s:%s:%s",
-                    ha1,
-                    data->state.digest.nonce,
-                    ha2);
+  
+  md5this = (unsigned char *)aprintf("%s:%s:%s", ha1, data->state.digest.nonce,
+                                     ha2);
   Curl_md5it(md5buf, md5this);
   free(md5this); /* free this again */
   md5_to_ascii(md5buf, request_digest);
