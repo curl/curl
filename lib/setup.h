@@ -34,19 +34,19 @@
 #ifdef HAVE_CONFIG_H
 
 #ifdef VMS
-#include "../config-vms.h"
+#include "config-vms.h"
 #else
-#include "../config.h" /* the configure script results */
+#include "config.h" /* the configure script results */
 #endif
 
 #else
 #ifdef WIN32
 /* hand-modified win32 config.h! */
-#include "../config-win32.h"
+#include "config-win32.h"
 #endif
 #ifdef macintosh
 /* hand-modified MacOS config.h! */
-#include "../config-mac.h"
+#include "config-mac.h"
 #endif
 
 #endif
@@ -92,13 +92,13 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 
 #ifndef STDC_HEADERS /* no standard C headers! */
 #ifdef	VMS
-#include "../include/curl/stdcheaders.h"
+#include "<curl/stdcheaders.h>
 #else
-#include "curl/stdcheaders.h"
+#include <curl/stdcheaders.h>
 #endif
 #else
 #ifdef _AIX
-#include "curl/stdcheaders.h"
+#include <curl/stdcheaders.h>
 #endif
 #endif
 
