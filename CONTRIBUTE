@@ -37,7 +37,7 @@ Commenting
 General Style
 
  Keep your functions small. If they're small you avoid a lot of mistakes and
- you don't accidentaly mix up variables.
+ you don't accidentally mix up variables.
 
 Non-clobbering All Over
 

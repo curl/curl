@@ -46,11 +46,11 @@ BUGS
   should be replaced with the name of your debugger, in most cases that will
   be 'gdb', but 'dbx' and others also occur.
 
-  When the debugger has finnished loading the core file and presents you a
+  When the debugger has finished loading the core file and presents you a
   prompt, you can give the compiler instructions. Enter 'where' (without the
   quotes) and press return.
 
   The list that is presented is the stack trace. If everything worked, it is
-  supposed to contain the chaing of functions that were called when curl
+  supposed to contain the chain of functions that were called when curl
   crashed.
 

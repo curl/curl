@@ -7,51 +7,52 @@
                                 How To Compile
 
 Curl has been compiled and built on numerous different operating systems. The
-way to proceed is mainly devided in two different ways: the unix way or the
+way to proceed is mainly divided in two different ways: the unix way or the
 windows way.
 
 If you're using Windows (95, 98, NT) or OS/2, you should continue reading from
 the Win32 header below. All other systems should be capable of being installed
-as described un the the UNIX header.
+as described in the the UNIX header.
 
 PORTS
 =====
    Just to show off, this is a probably incomplete list of known hardware and
    operating systems that curl has been compiled for:
 
+        - Ultrix
+        - SINIX-Z v5
+        Alpha DEC OSF 4
+        HP-PA HP-UX
+        MIPS IRIX 6.2, 6.5
+        Power AIX 4.2, 4.3.1
+        PowerPC Mac OS X
         Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7
         Sparc SunOS 4.1.*
-        i386 Linux 1.3, 2.0, 2.2
-        MIPS IRIX 6.2, 6.5
-        HP-PA HP-UX
-        Alpha DEC OSF 4
-        i386 Solaris 2.7
-        PowerPC Mac OS X
-        Power AIX 4.3.1
-        - Ultrix
         i386 FreeBSD
+        i386 Linux 1.3, 2.0, 2.2
         i386 NetBSD
-        i386 OpenBSD
-        m68k OpenBSD
-        i386 Windows 95, 98, NT
         i386 OS/2
+        i386 OpenBSD
+        i386 Solaris 2.7
+        i386 Windows 95, 98, NT
         m68k AmigaOS 3
+        m68k OpenBSD
 
 UNIX
 ====
 
    The configure script *always* tries to find a working SSL library unless
-   explicitely told not to.  If you have SSLeay or OpenSSL installed in the
-   default search path for your compiler/linker, you don't need to do anything
+   explicitly told not to.  If you have OpenSSL installed in the default
+   search path for your compiler/linker, you don't need to do anything
    special.
 
-   If you have SSLeay or OpenSSL installed in /usr/local/ssl, you can
-   run configure like so:
+   If you have OpenSSL installed in /usr/local/ssl, you can run configure
+   like:
 
 	./configure --with-ssl
 
-   If you have SSLeay or OpenSSL installed somewhere else (for example,
-   /opt/OpenSSL,) you can run configure like this:
+   If you have OpenSSL installed somewhere else (for example, /opt/OpenSSL,)
+   you can run configure like this:
 
 	./configure --with-ssl=/opt/OpenSSL
 
@@ -60,10 +61,10 @@ UNIX
 
         ./configure --without-ssl
 
-   If you have SSLeay or OpenSSL installed, but with the libraries in
-   one place and the header files somewhere else, you'll have to set the
-   LDFLAGS and CPPFLAGS environment variables prior to running configure.
-   Something like this should work:
+   If you have OpenSSL installed, but with the libraries in one place and the
+   header files somewhere else, you'll have to set the LDFLAGS and CPPFLAGS
+   environment variables prior to running configure.  Something like this
+   should work:
 
      (with the Bourne shell and its clones):
 
@@ -193,9 +194,9 @@ Win32
 
       Microsoft / Borland style
       -------------------------
-        If you have OpenSSL/SSLeay, and want curl to take advantage of it,
-        edit your project properties to use the SSL include path, link with
-        the SSL libs and define the USE_SSLEAY symbol.
+        If you have OpenSSL, and want curl to take advantage of it, edit your
+        project properties to use the SSL include path, link with the SSL libs
+        and define the USE_SSLEAY symbol.
 
 
 IBM OS/2
@@ -213,10 +214,10 @@ IBM OS/2
       - GNU sed
       - autoconf 2.13
 
-   If you want to build with OpenSSL, SSLeay, or OpenLDAP support, you'll
-   need to download those libraries, too. Dirk Ohme has done some work to
-   port SSL libraries under OS/2, but it looks like he doesn't care about emx.
-   You'll find his patches on: http://come.to/Dirk.Ohme
+   If you want to build with OpenSSL or OpenLDAP support, you'll need to
+   download those libraries, too. Dirk Ohme has done some work to port SSL
+   libraries under OS/2, but it looks like he doesn't care about emx.  You'll
+   find his patches on: http://come.to/Dirk.Ohme
 
    If during the linking you get an error about _errno being an undefined
    symbol referenced from the text segment, you need to add -D__ST_MT_ERRNO__
@@ -228,8 +229,8 @@ IBM OS/2
    If you're getting huge binaries, probably your makefiles have the -g in
    CFLAGS.
 
-OpenSSL/SSLeay
-==============
+OpenSSL
+=======
 
    You'll find OpenSSL information at:
 

@@ -13,7 +13,7 @@ Daniel (23 March 2000):
   actually already told me about!
 
 - H. Daphne Luong <daphne@tellme.com> brought me a fix that now makes curl
-  ingore select() errors in the download if errno is EINTR, which turns out to
+  ignore select() errors in the download if errno is EINTR, which turns out to
   happen every now and then when using libcurl multi-threaded...
 
 Daniel (22 March 2000):
@@ -32,14 +32,13 @@ Version 6.5.2
 Daniel (21 March 2000):
 - Paul Harrington <paul@pizza.org> quickly pointed out to me that 6.5.1
   crashes hard. I upload 6.5.2 now as quickly as possible! The problem was
-  the -D adjustments in src/main.c, see also a separate 6.5.1-patch on the
-  web site.
+  the -D adjustments in src/main.c.
 
 Version 6.5.1
 
 Daniel (20 March 2000):
-- An anynomous post on sourceforge correctly pointed out a possible buffer
-  overflow in the curl_unescape() function for URL convertions. The main
+- An anonymous post on sourceforge correctly pointed out a possible buffer
+  overflow in the curl_unescape() function for URL conversions. The main
   problem with this bug is that the ftp download uses that function and this
   single- byte overflow could lead to very odd bugs (as one reported by Janne
   Johansson).
@@ -53,7 +52,7 @@ Daniel (17 March 2000):
 - Wham Bang <wham_bang@yahoo.com> supplied a patch for the lib/Makefile.vc6
   file. We still need some fixes for the config-win32.h since it appears that
   VC++ and mingw32 have different opinions about (at least) unistd.h's
-  existance.
+  existence.
 
 Daniel (15 March 2000):
 - I modified the -D/--dump-header workings so that it doesn't write anything
@@ -106,13 +105,13 @@ Daniel (2 March 2000):
 
 - Jörn Hartroth <Joern.Hartroth@telekom.de>, Chris <cbayliss@csc.come> and Ulf
   Möller from the openssl development team helped bringing me the details for
-  fixing an OpenSSL usage flaw. It became appearant when they released openssl
-  0.9.5 since that barfed on curl's bad behaviour (not seeding a random number
+  fixing an OpenSSL usage flaw. It became apparent when they released openssl
+  0.9.5 since that barfed on curl's bad behavior (not seeding a random number
   thing).
 
 - Yet another option: -N/--no-buffer disables buffering in the output stream.
   Probably most useful for very slow transfers when you really want to get
-  every byte curl receives within some prefered time. Andrew <tmr@gci.net>
+  every byte curl receives within some preferred time. Andrew <tmr@gci.net>
   suggested this.
 
 - Damien Adant <dams@usa.net> mailed me his fixes for making curl compile
@@ -145,7 +144,7 @@ Daniel (21 February 2000):
 - I added the -w/--write-out flag and some variables to go with it. -w is a
   single string, whatever you enter there will be written out when curl has
   completed a successful request. There are some variable substitutions and
-  they are specifed as '%{variable}' (without the quotes). Variables that
+  they are specified as '%{variable}' (without the quotes). Variables that
   exist as of this moment are:
 
         total_time     - total transfer time in seconds (with 2 decimals)
@@ -179,7 +178,7 @@ Daniel (11 February 2000):
 
 - Eetu Ojanen <esojanen@jyu.fi>'s suggestion of supporting the @-style for -b
   is implemented. Now -b@<filename> works as well as the old style. -b@- also
-  similarily reads the cookies from stdin.
+  similarly reads the cookies from stdin.
 
 - Reminder: -D should not write to the file until it needs to, in the same way
   -o does. That would enable curl to use -b and -D on the same file...
@@ -187,7 +186,7 @@ Daniel (11 February 2000):
 - Ellis Pritchard <ellis@citria.com> made getdate.y work for MacOS X.
 
 - Paul Harrington <paul@pizza.org> helped me out finding the crash in the
-  cookie parser. He also pointed out curl's habbit of sending empty cookies to
+  cookie parser. He also pointed out curl's habit of sending empty cookies to
   the server.
 
 Daniel (8 February 2000):
@@ -217,7 +216,7 @@ Daniel (31 January 2000):
    and let them get "uploaded" in Transfer() as well.
 
  - Zhibiao Wu <wuzb@erols.com> pointed out a curl bug in the location: area,
-   although I did not get a reproducable way to do this why I have to wait
+   although I did not get a reproducible way to do this why I have to wait
    with fixing anything.
 
  - Bob Schader <rschader@product-des.com> suggested I should implement resume
@@ -272,7 +271,7 @@ Daniel (10 January 2000):
  - Jim Gallagher <jmgallag@usa.net> properly tracked down a bug in autoconf
    2.13. The AC_CHECK_LIB() macro wrongfully uses the -l flag before the -L
    flag to 'ld' which causes the HP-UX 10.20 flavour to fail on all libchecks
-   and thefore you can't make the configure script find the openssl libs!
+   and therefore you can't make the configure script find the openssl libs!
 
 Daniel (28 December 1999):
  - Tim Verhoeven <dj@walhalla.sin.khk.be> correctly identified that curl
@@ -286,7 +285,7 @@ Daniel (28 December 1999):
 Daniel (27 December 1999):
  - When curl parsed cookies straight off a remote site, it corrupted the input
    data, which, if the downloaded headers were stored made very odd characters
-   in the saved data. Correctfully identified and reported by Paul Harrington
+   in the saved data. Correctly identified and reported by Paul Harrington
    <paul@pizza.org>.
 
 Daniel (13 December 1999):
@@ -365,7 +364,7 @@ Version 6.3
  Daniel (8 November 1999):
  - I made the -b/--cookie option capable of reading netscape formatted cookie
    files as well as normal http-header files. It should be able to
-   transparantly figure out what kind of file it got as input.
+   transparently figure out what kind of file it got as input.
 
  Daniel (29 October 1999):
  - Another one of Sebastiaan van Erk's ideas (that has been requested before
@@ -385,7 +384,7 @@ Version 6.3
    makes sense since if you access ftp through a HTTP proxy, you'd get the
    file size the same way.
 
-   I changed the order of the QUOTE command execusions. They're now executed
+   I changed the order of the QUOTE command executions. They're now executed
    just after the login and before any other command. I made this to enable
    quote commands to run before the -I stuff is done too.
 
@@ -631,7 +630,7 @@ Version 5.10
    OpenSSL. Now why couldn't they simply add a *new* function instead of
    modifying the parameters of an already existing function? This way, we get
    a compiler warning if compiling with 0.9.4 but not with earlier. So, I had
-   to come up with a #if contruction that deals with this...
+   to come up with a #if construction that deals with this...
 
  - Made curl output the SSL version number get displayed properly with 0.9.4.
 
@@ -715,7 +714,7 @@ Version 5.10
 
  T. Yamada <tai@imasy.or.jp> (30 July 1999)
  - It breaks with segfault when 1) curl is using .netrc to obtain
-   username/password (option '-n'), and 2) is auto-matically redirected to
+   username/password (option '-n'), and 2) is automatically redirected to
    another location (option '-L').
 
    There is a small bug in lib/url.c (block starting from line 641), which
