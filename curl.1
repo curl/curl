@@ -62,6 +62,11 @@ will make curl record incoming cookies too, which may be handy if you're using
 this in combination with the -L/--location option. The file format of the file
 to read cookies from should be plain HTTP headers or the netscape cookie file
 format.
+
+.B NOTE
+that the file specified with -b/--cookie is only used as input. No cookies
+will be stored in the file. To store cookies, save the HTTP headers to a file
+using -D/--dump-header!
 .IP "-B/--ftp-ascii"
 (FTP/LDAP)
 Use ASCII transfer when getting an FTP file or LDAP info. For FTP, this can
@@ -97,6 +102,10 @@ The contents of the file must already be url-encoded.
 (HTTP/FTP)
 Write the HTTP headers to this file. Write the FTP file info to this
 file if -I/--head is used.
+
+This option is handy to use when you want to store the cookies that a HTTP
+site sends to you. The cookies could then be read in a second curl invoke by
+using the -b/--cookie option!
 .IP "-e/--referer <URL>"
 (HTTP)
 Sends the "Referer Page" information to the HTTP server. Some badly
