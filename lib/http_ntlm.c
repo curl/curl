@@ -204,10 +204,17 @@ static void mkhash(char *password,
   unsigned char lmbuffer[21];
   unsigned char ntbuffer[21];
   
-  unsigned char pw[256]; /* for maximum 128-letter passwords! */
-  int len = strlen(password);
-  unsigned char magic[] = { 0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25 };
+  unsigned char *pw;
+  static const unsigned char magic[] = {
+    0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25
+  };
   int i;
+  int len = strlen(password);
+
+  /* make it fit at least 14 bytes */
+  pw = malloc(len<7?14:len*2);
+  if(!pw)
+    return; /* this will lead to a badly generated package */
 
   if (len > 14)
     len = 14;
@@ -249,12 +256,14 @@ static void mkhash(char *password,
     MD4_Update(&MD4, pw, 2*len);
     MD4_Final(ntbuffer, &MD4);
 
-    memset(ntbuffer+16, 0, 5);
+    memset(ntbuffer+16, 0, 8);
   }
 
   /* create responses */
   calc_resp(lmbuffer, nonce, lmresp);
   calc_resp(ntbuffer, nonce, ntresp);
+
+  free(pw);
 }
 
 /* convert an ascii string to upper case unicode, the destination buffer
@@ -399,8 +408,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     int lmrespoff;
     int ntrespoff;
     int useroff;
-    unsigned char lmresp[0x18+1];
-    unsigned char ntresp[0x18+1];
+    unsigned char lmresp[0x18]; /* fixed-size */
+    unsigned char ntresp[0x18]; /* fixed-size */
 
     int userlen = strlen(data->state.user);
     

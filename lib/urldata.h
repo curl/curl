@@ -340,7 +340,6 @@ struct Curl_transfer_keeper {
   /* for the low speed checks: */
   time_t timeofdoc;
   long bodywrites;
-  int writetype;
 
   char *buf;
   char *uploadbuf;
@@ -360,7 +359,7 @@ struct Curl_transfer_keeper {
   bool upload_done; /* set to TRUE when doing chunked transfer-encoding upload
                        and we're uploading the last chunk */
 
-  bool returnbeforebody; /* if to break transfer after headers */
+  bool ignorebody;  /* we read a response-body but we ignore it! */
 };
 
 /*

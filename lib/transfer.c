@@ -291,6 +291,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             int hbufp_index;
             int rest_length;
             int full_length;
+            int writetype;
               
             /* str_start is start of line within buf */
             k->str_start = k->str;
@@ -437,13 +438,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               /* now, only output this if the header AND body are requested:
                */
-              k->writetype = CLIENTWRITE_HEADER;
+              writetype = CLIENTWRITE_HEADER;
               if (data->set.http_include_header)
-                k->writetype |= CLIENTWRITE_BODY;
+                writetype |= CLIENTWRITE_BODY;
 
               headerlen = k->p - data->state.headerbuff;
 
-              result = Curl_client_write(data, k->writetype,
+              result = Curl_client_write(data, writetype,
                                          data->state.headerbuff,
                                          headerlen);
               if(result)
@@ -795,8 +796,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   *ptr = '\0';   /* zero terminate */
                   conn->newurl = strdup(start); /* clone string */
                   *ptr = backup; /* restore ending letter */
-
-                  k->returnbeforebody = TRUE; /* don't wait for contents */
                 }
               }
 #if 0 /* for consideration */
@@ -812,16 +811,15 @@ CURLcode Curl_readwrite(struct connectdata *conn,
              * End of header-checks. Write them to the client.
              */
 
-            k->writetype = CLIENTWRITE_HEADER;
+            writetype = CLIENTWRITE_HEADER;
             if (data->set.http_include_header)
-              k->writetype |= CLIENTWRITE_BODY;
+              writetype |= CLIENTWRITE_BODY;
 
             if(data->set.verbose)
               Curl_debug(data, CURLINFO_HEADER_IN,
                          k->p, k->hbuflen);
 
-            result = Curl_client_write(data, k->writetype, k->p,
-                                       k->hbuflen);
+            result = Curl_client_write(data, writetype, k->p, k->hbuflen);
             if(result)
               return result;
 
@@ -854,15 +852,22 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                write a piece of the body */
             if(conn->protocol&PROT_HTTP) {
               /* HTTP-only checks */
-              if (conn->newurl && k->returnbeforebody) {
-                /* abort after the headers if "follow Location" is set */
-                infof (data, "Send request to this URL: %s\n", conn->newurl);
-                k->keepon &= ~KEEP_READ;
-                FD_ZERO(&k->rkeepfd);
-                *done = TRUE;
-                return CURLE_OK;
+              if (conn->newurl) {
+                if(conn->bits.close) {
+                  /* Abort after the headers if "follow Location" is set
+                     and we're set to close anyway. */
+                  k->keepon &= ~KEEP_READ;
+                  FD_ZERO(&k->rkeepfd);
+                  *done = TRUE;
+                  return CURLE_OK;
+                }
+                /* We have a new url to load, but since we want to be able
+                   to re-use this connection properly, we read the full
+                   response in "ignore more" */
+                k->ignorebody = TRUE;
+                infof(data, "Ignoring the response-body\n");
               }
-              else if (conn->resume_from &&
+              if (conn->resume_from &&
                        !k->content_range &&
                        (data->set.httpreq==HTTPREQ_GET)) {
                 /* we wanted to resume a download, although the server
@@ -963,7 +968,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           if(!conn->bits.chunk && (nread || k->badheader)) {
             /* If this is chunky transfer, it was already written */
 
-            if(k->badheader) {
+            if(k->badheader && !k->ignorebody) {
               /* we parsed a piece of data wrongly assuming it was a header
                  and now we output it as body instead */
               result = Curl_client_write(data, CLIENTWRITE_BODY,
@@ -984,8 +989,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                    Content-Encoding header. See Curl_readwrite_init; the
                    memset() call initializes k->content_encoding to zero.
                    08/28/02 jhrg */
-                result = Curl_client_write(data, CLIENTWRITE_BODY, k->str, 
-                                           nread);
+                if(!k->ignorebody)
+                  result = Curl_client_write(data, CLIENTWRITE_BODY, k->str, 
+                                             nread);
 #ifdef HAVE_LIBZ
                 break;
 
@@ -1266,7 +1272,7 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   k->maxfd = (conn->sockfd>conn->writesockfd?
               conn->sockfd:conn->writesockfd)+1;
   k->hbufp = data->state.headerbuff;
-  k->returnbeforebody=FALSE;
+  k->ignorebody=FALSE;
 
   Curl_pgrsTime(data, TIMER_PRETRANSFER);
   Curl_speedinit(data);
