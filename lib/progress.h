@@ -49,6 +49,7 @@ typedef enum {
   TIMER_CONNECT,
   TIMER_PRETRANSFER,
   TIMER_POSTRANSFER,
+  TIMER_STARTSINGLE,
   TIMER_LAST /* must be last */
 } timerid;
   
