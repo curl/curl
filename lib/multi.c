@@ -62,6 +62,13 @@ struct Curl_one_easy {
 
   CURLMstate state;  /* the handle's state */
   CURLcode result;   /* previous result */
+
+  struct Curl_message *msg; /* A pointer to one single posted message.
+                               Cleanup should be done on this pointer NOT on
+                               the linked list in Curl_multi.  This message
+                               will be deleted when this handle is removed
+                               from the multi-handle */
+  int msg_num; /* number of messages left in 'msg' to return */
 };
 
 
@@ -81,14 +88,7 @@ struct Curl_multi {
   /* This is the amount of entries in the linked list above. */
   int num_easy;
 
-  /* this is a linked list of posted messages */
-  struct Curl_message *msgs; /* the messages remain here until the handle is
-                                closed */
-  struct Curl_message *lastmsg; /* points to the last entry */
-  struct Curl_message *readptr; /* NULL before no one read anything */
-
-  int num_msgs; /* amount of messages in the queue */
-  int num_read; /* amount of read messages */
+  int num_msgs; /* total amount of messages in the easy handles */
 
   /* Hostname cache */
   curl_hash *hostcache;
@@ -188,6 +188,8 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     
     /* NOTE NOTE NOTE
        We do not touch the easy handle here! */
+    if (easy->msg)
+      free(easy->msg);
     free(easy);
 
     multi->num_easy--; /* one less to care about now */
@@ -245,6 +247,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   struct Curl_one_easy *easy;
   bool done;
   CURLMcode result=CURLM_OK;
+  struct Curl_message *msg = NULL;
 
   *running_handles = 0; /* bump this once for every living handle */
 
@@ -315,35 +318,6 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       /* after we have DONE what we're supposed to do, go COMPLETED, and
          it doesn't matter what the Curl_done() returned! */
       easy->state = CURLM_STATE_COMPLETED;
-
-      /* clear out the usage of the shared DNS cache */
-      easy->easy_handle->hostcache = NULL;
-
-        /* now add a node to the Curl_message linked list with this info */
-      {
-        struct Curl_message *msg = (struct Curl_message *)
-          malloc(sizeof(struct Curl_message));
-
-        if(!msg)
-          return CURLM_OUT_OF_MEMORY;
-
-        msg->extmsg.msg = CURLMSG_DONE;
-        msg->extmsg.easy_handle = easy->easy_handle;
-        msg->extmsg.data.result = easy->result;
-        msg->next=NULL;
-
-        if(multi->lastmsg) {
-          multi->lastmsg->next = msg;
-          multi->lastmsg = msg;
-        }
-        else {
-          multi->msgs = msg;
-          multi->lastmsg = msg;
-        }
-        multi->num_msgs++; /* increase message counter */
-          
-      }
-      result = CURLM_CALL_MULTI_PERFORM;
       break;
 
     case CURLM_STATE_COMPLETED:
@@ -356,17 +330,37 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       return CURLM_INTERNAL_ERROR;
     }
 
-    if((CURLM_STATE_COMPLETED != easy->state) &&
-       (CURLE_OK != easy->result)) {
-      /*
-       * If an error was returned, and we aren't in completed now,
-       * then we go to completed and consider this transfer aborted.
-       */
-      easy->state = CURLM_STATE_COMPLETED;
+    if(CURLM_STATE_COMPLETED != easy->state) {
+      if(CURLE_OK != easy->result)
+        /*
+         * If an error was returned, and we aren't in completed state now,
+         * then we go to completed and consider this transfer aborted.  */
+        easy->state = CURLM_STATE_COMPLETED;
+      else
+        /* this one still lives! */
+        (*running_handles)++;
     }
-    else if(CURLM_STATE_COMPLETED != easy->state)
-      /* this one still lives! */
-      (*running_handles)++;
+
+    if ((CURLM_STATE_COMPLETED == easy->state) && !easy->msg) {
+      /* clear out the usage of the shared DNS cache */
+      easy->easy_handle->hostcache = NULL;
+
+      /* now add a node to the Curl_message linked list with this info */
+      msg = (struct Curl_message *)malloc(sizeof(struct Curl_message));
+
+      if(!msg)
+        return CURLM_OUT_OF_MEMORY;
+
+      msg->extmsg.msg = CURLMSG_DONE;
+      msg->extmsg.easy_handle = easy->easy_handle;
+      msg->extmsg.data.result = easy->result;
+      msg->next=NULL;
+
+      easy->msg = msg;
+      easy->msg_num = 1; /* there is one unread message here */
+
+      multi->num_msgs++; /* increase message counter */
+    }
 
     easy = easy->next; /* operate on next handle */
   }
@@ -379,8 +373,6 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
   struct Curl_one_easy *easy;
   struct Curl_one_easy *nexteasy;
-  struct Curl_message *msg;
-  struct Curl_message *nextmsg;
 
   if(GOOD_MULTI_HANDLE(multi)) {
     multi->type = 0; /* not good anymore */
@@ -393,16 +385,10 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
       /* clear out the usage of the shared DNS cache */
       easy->easy_handle->hostcache = NULL;
 
+      if (easy->msg)
+        free(easy->msg);
       free(easy);
       easy = nexteasy;
-    }
-
-    /* remove all struct Curl_message nodes left */
-    msg = multi->msgs;
-    while(msg) {
-      nextmsg = msg->next;
-      free(msg);
-      msg = nextmsg;
     }
 
     free(multi);
@@ -416,26 +402,28 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+
   if(GOOD_MULTI_HANDLE(multi)) {
-    CURLMsg *msg;
-
-    if(!multi->readptr && !multi->num_read)
-      multi->readptr = multi->msgs;
-
-    if(!multi->readptr) {
-      *msgs_in_queue = 0;
-      return NULL;
-    }
+    struct Curl_one_easy *easy;
     
-    multi->num_read++;
+    if(!multi->num_msgs)
+      return NULL; /* no messages left to return */
 
-    *msgs_in_queue = multi->num_msgs - multi->num_read;
-    msg = &multi->readptr->extmsg;
+    easy=multi->easy.next;
+    while(easy) {
+      if(easy->msg_num) {
+        easy->msg_num--;
+        break;
+      }
+      easy = easy->next;
+    }
+    if(!easy)
+      return NULL; /* this means internal count confusion really */
 
-    /* advance read pointer */
-    multi->readptr = multi->readptr->next;
+    multi->num_msgs--;
+    *msgs_in_queue = multi->num_msgs;
 
-    return msg;
+    return &easy->msg->extmsg;
   }
   else
     return NULL;
