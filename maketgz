@@ -11,16 +11,14 @@ fi
 
 libversion="$version"
 
-#
-# Now we have a section to get the major, minor and patch number from the
-# full version string. We create a single hexadecimal number from it '0xMMmmpp'
-#
-perl='$a=<STDIN>;@p=split("[\\.-]",$a);for(0..2){printf STDOUT ("%02x",$p[0+$_]);}';
-
-numeric=`echo $libversion | perl -e "$perl"`
-
 # we make curl the same version as libcurl
 curlversion=$libversion
+
+major=`echo $libversion |cut -d. -f1 | sed -e "s/[^0-9]//g"`
+minor=`echo $libversion |cut -d. -f2 | sed -e "s/[^0-9]//g"`
+patch=`echo $libversion |cut -d. -f3 | sed -e "s/[^0-9]//g"`
+
+numeric=`echo "obase=16; $major*256*256 + $minor*256 + $patch" | bc`
 
 HEADER=include/curl/curl.h
 CHEADER=src/version.h
@@ -28,6 +26,9 @@ CHEADER=src/version.h
 # Replace version number in header file:
 sed -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g' \
     -e 's/^#define LIBCURL_VERSION_NUM .*/#define LIBCURL_VERSION_NUM 0x'$numeric'/g' \
+    -e 's/^#define LIBCURL_VERSION_MAJOR .*/#define LIBCURL_VERSION_MAJOR '$major'/g' \
+    -e 's/^#define LIBCURL_VERSION_MINOR .*/#define LIBCURL_VERSION_MINOR '$minor'/g' \
+    -e 's/^#define LIBCURL_VERSION_PATCH .*/#define LIBCURL_VERSION_PATCH '$patch'/g' \
  $HEADER >$HEADER.dist
 
 # Replace version number in header file:
