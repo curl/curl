@@ -646,12 +646,21 @@ CURLcode Curl_http(struct connectdata *conn)
     if(data->timecondition) {
       struct tm *thistime;
 
+      /* Phil Karn (Fri, 13 Apr 2001) pointed out that the If-Modified-Since
+       * header family should have their times set in GMT as RFC2616 defines:
+       * "All HTTP date/time stamps MUST be represented in Greenwich Mean Time
+       * (GMT), without exception. For the purposes of HTTP, GMT is exactly
+       * equal to UTC (Coordinated Universal Time)." (see page 20 of RFC2616).
+       */
+
 #ifdef HAVE_LOCALTIME_R
       /* thread-safe version */
+      /* We assume that the presense of localtime_r() proves the presense
+         of gmtime_r() which is a bit ugly but might work */
       struct tm keeptime;
-      thistime = (struct tm *)localtime_r(&data->timevalue, &keeptime);
+      thistime = (struct tm *)gmtime_r(&data->timevalue, &keeptime);
 #else
-      thistime = localtime(&data->timevalue);
+      thistime = gmtime(&data->timevalue);
 #endif
       if(NULL == thistime) {
         failf(data, "localtime() failed!");
