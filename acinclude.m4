@@ -282,25 +282,27 @@ AC_DEFUN([CURL_CHECK_NI_WITHSCOPEID],[
   AC_CACHE_CHECK(for working NI_WITHSCOPEID, ac_cv_working_ni_withscopeid,[
 
  AC_RUN_IFELSE([[
+#include <stdio.h>
+#include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 int main()
 {
 #ifdef NI_WITHSCOPEID
    struct sockaddr_storage ss;
-   int sslen;
+   int sslen = sizeof(ss);
    int rc;
    char hbuf[NI_MAXHOST];
    int fd = socket(AF_INET6, SOCK_STREAM, 0);
    if(fd < 0) {
-     printf("couldn't create AF_INET6 socket\n");
-     return 4; /* couldn't create socket of either kind */
+     perror("socket()");
+     return 1; /* couldn't create socket of either kind */
    }
 
    rc = getsockname(fd, (struct sockaddr *)&ss, &sslen);
    if(rc) {
-     printf("getsockname() failed\n");
-     return 1; /* getsockname() failed unexpectedly */
+     perror("getsockname()");
+     return 2;
    }
 
    rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf),
@@ -309,13 +311,12 @@ int main()
 
    if(rc) {
      printf("rc = %s\n", gai_strerror(rc));
-     return 2; /* getnameinfo() failed, we take this as an indication to
-                  avoid NI_WITHSCOPEID */
+     return 3;
    }
 
    return 0; /* everything works fine, use NI_WITHSCOPEID! */
 #else
-   return 3; /* we don't seem to have the definition, don't use it */
+   return 4; /* we don't seem to have the definition, don't use it */
 #endif
 }
 ]],
