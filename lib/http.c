@@ -750,7 +750,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   fd_set readfd;
   char *line_start;
   char *host_port;
-  int tunnelsocket = conn->sock[sockindex];
+  curl_socket_t tunnelsocket = conn->sock[sockindex];
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1

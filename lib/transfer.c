@@ -1368,7 +1368,10 @@ void Curl_single_fdset(struct connectdata *conn,
   }
   if(conn->keep.keepon & KEEP_WRITE) {
     FD_SET(conn->writesockfd, write_fd_set);
-    if(conn->writesockfd > *max_fd)
+
+    /* since sockets are curl_socket_t nowadays, we typecast it to int here
+       to compare it nicely */
+    if((int)conn->writesockfd > *max_fd)
       *max_fd = conn->writesockfd;
     conn->keep.writefdp = write_fd_set; /* store the address of the set */
   }

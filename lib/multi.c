@@ -279,8 +279,8 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
           FD_SET(sockfd, write_fd_set);
         }
 
-        if(sockfd > *max_fd)
-          *max_fd = sockfd;
+        if((int)sockfd > *max_fd)
+          *max_fd = (int)sockfd;
       }
       break;
     case CURLM_STATE_PERFORM:
