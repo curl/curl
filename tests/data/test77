@@ -26,7 +26,7 @@ http
 HTTP with -z "older date"
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/77 -z "1999-12-12 12:00:00 MET"
+http://%HOSTIP:%HTTPPORT/77 -z "dec 12 12:00:00 1999 GMT"
 </command>
 </client>
 
@@ -41,7 +41,7 @@ GET /77 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
-If-Modified-Since: Sun, 12 Dec 1999 11:00:00 GMT
+If-Modified-Since: Sun, 12 Dec 1999 12:00:00 GMT
 
 </protocol>
 </verify>

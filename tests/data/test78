@@ -38,7 +38,7 @@ http
 HTTP with -z "newer date"
  </name>
  <command>
-http://%HOSTIP:%HTTPPORT/78 -z "1999-12-12 12:00:00 MET"
+http://%HOSTIP:%HTTPPORT/78 -z "dec 12 11:00:00 1999 GMT"
 </command>
 </client>
 
