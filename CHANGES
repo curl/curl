@@ -6,6 +6,20 @@
 
                                History of Changes
 
+Daniel (23 August 2000)
+- Albert Chin-A-Young made some very serious efforts and all the name
+  resolving problems seem to have been sorted out now on all the platforms
+  that previously showed them. I'll make another release now anyday because of
+  this.
+
+- The FAQ was much enhanced when it comes to the licensing issues thanks to
+  Bjorn Reese.
+
+Daniel (21 August 2000)
+- Rick Welykochy pointed out a problem when you use -d to post and you want to
+  keep the newlines, as curl strips them off as a bonus before posting...
+  This needs to be addressed.
+
 Version 7.1.1
 
 Daniel (21 August 2000)
