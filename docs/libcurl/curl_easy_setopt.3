@@ -695,10 +695,11 @@ want. It should be in the format "X-Y", where X or Y may be left out. HTTP
 transfers also support several intervals, separated with commas as in
 \fI"X-Y,N-M"\fP. Using this kind of multiple intervals will cause the HTTP
 server to send the response document in pieces (using standard MIME separation
-techniques).
+techniques). Pass a NULL to this option to disable the use of ranges.
 .IP CURLOPT_RESUME_FROM
 Pass a long as parameter. It contains the offset in number of bytes that you
-want the transfer to start from.
+want the transfer to start from. Set this option to 0 to make the transfer
+start from the beginning (effectively disabling resume).
 .IP CURLOPT_RESUME_FROM_LARGE
 Pass an curl_off_t as parameter. It contains the offset in number of bytes
 that you want the transfer to start from. (Added in 7.11.0)
