@@ -8,7 +8,7 @@ $Id$
 BUGS
 
   Curl and libcurl have grown substantially since the beginning. At the time
-  of writing (end of April 2002), there are 32000 lines of source code, and by
+  of writing (end of March 2003), there are 35000 lines of source code, and by
   the time you read this it has probably grown even more.
 
   Of course there are lots of bugs left. And lots of misfeatures.
@@ -19,18 +19,21 @@ BUGS
 WHERE TO REPORT
 
   If you can't fix a bug yourself and submit a fix for it, try to report an as
-  detailed report as possible to the curl mailing list to allow one of us to
+  detailed report as possible to a curl mailing list to allow one of us to
   have a go at a solution. You should also post your bug/problem at curl's bug
   tracking system over at
 
         http://sourceforge.net/bugs/?group_id=976
 
-  (but please read the section below first before doing that)
+  (but please read the sections below first before doing that)
+
+  If you feel you need to ask around first, find a suitable mailing list and
+  post there. The lists are available on http://curl.haxx.se/mail/
 
 WHAT TO REPORT
 
   When reporting a bug, you should include information that will help us
-  understand what's wrong what you expected to happen and how to repeat the
+  understand what's wrong, what you expected to happen and how to repeat the
   bad behavior. You therefore need to tell us:
 
    - your operating system's name and version number (uname -a under a unix
