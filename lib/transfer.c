@@ -1908,6 +1908,8 @@ CURLcode Curl_perform(struct SessionHandle *data)
                to retry! */
             infof(data, "Connection reset, retrying a fresh connect\n");
             newurl = strdup(conn->data->change.url);
+
+            conn->bits.close = TRUE; /* close this connection */
           }
           else
             /*
