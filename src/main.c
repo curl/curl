@@ -767,7 +767,7 @@ static int formparse(char *input,
   contents = malloc(strlen(input));
   contents[0] = '\000';
  
-  if(1 <= sscanf(input, "%255[^=]=%[^\n]", name, contents)) {
+  if(1 <= sscanf(input, "%255[^=]=%s", name, contents)) {
     /* the input was using the correct format */
     contp = contents;
 
