@@ -1,8 +1,8 @@
 /*****************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * $Id$
@@ -59,7 +59,7 @@ int test(char *URL)
   }
 
   /* get a FILE * of the same file, could also be made with
-     fdopen() from the previous descriptor, but hey this is just 
+     fdopen() from the previous descriptor, but hey this is just
      an example! */
   hd_src = fopen(arg2, "rb");
   if(NULL == hd_src) {
@@ -98,7 +98,7 @@ int test(char *URL)
 
     /* and give the size of the upload (optional) */
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                     file_info.st_size);
+                     (curl_off_t)file_info.st_size);
 
     /* Now run off and do what you've been told! */
     res = curl_easy_perform(curl);
