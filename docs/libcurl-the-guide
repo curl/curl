@@ -114,7 +114,7 @@ Global Preparation
  Repeated calls to curl_global_init() and curl_global_cleanup() should be
  avoided. They should be called once each.
 
-Handle the easy libcurl
+Handle the Easy libcurl
 
  libcurl version 7 is oriented around the so called easy interface. All
  operations in the easy interface are prefixed with 'curl_easy'.
@@ -238,12 +238,13 @@ Upload Data to a Remote Site
  the custom pointer libcurl will pass to our read callback. The read callback
  should have a prototype similar to:
 
-   size_t function(char *buffer, size_t size, size_t nitems, void *userp);
+    size_t function(char *bufptr, size_t size, size_t nitems, void *userp);
 
- Where buffer is the pointer to a buffer we fill in with data to upload and
- size*nitems is the size of the buffer. The 'userp' pointer is the custom
- pointer we set to point to a struct of ours to pass private data between the
- application and the callback.
+ Where bufptr is the pointer to a buffer we fill in with data to upload and
+ size*nitems is the size of the buffer and therefore also the maximum amount
+ of data we can return to libcurl in this call. The 'userp' pointer is the
+ custom pointer we set to point to a struct of ours to pass private data
+ between the application and the callback.
 
     curl_easy_setopt(easyhandle, CURLOPT_READFUNCTION, read_function);
 
@@ -259,7 +260,7 @@ Upload Data to a Remote Site
 
     curl_easy_setopt(easyhandle, CURLOPT_INFILESIZE, file_size);
 
- So, then you call curl_easy_perform() this time, it'll perform all necessary
+ When you call curl_easy_perform() this time, it'll perform all the necessary
  operations and when it has invoked the upload it'll call your supplied
  callback to get the data to upload. The program should return as much data as
  possible in every invoke, as that is likely to make the upload perform as
@@ -273,7 +274,30 @@ Passwords
  to be able to download or upload the data of your choice. libcurl offers
  several ways to specify them.
 
-  [ URL, options, callback ]
+ Most protocols support that you specify the name and password in the URL
+ itself. libcurl will detect this and use them accordingly. This is written
+ like this:
+
+        protocol://user:password@example.com/path/
+
+ If you need any odd letters in your user name or password, you should enter
+ them URL encoded, as %XX where XX is a two-digit hexadecimal number.
+
+ libcurl also provides options to set various passwords. The user name and
+ password as shown embedded in the URL can instead get set with the
+ CURLOPT_USERPWD option. The argument passed to libcurl should be a char * to
+ a string in the format "user:password:". In a manner like this:
+
+        curl_easy_setopt(easyhandle, CURLOPT_USERPWD, "myname:thesecret");
+
+ Another case where name and password might be needed at times, is for those
+ users who need to athenticate themselves to a proxy they use. libcurl offers
+ another option for this, the CURLOPT_PROXYUSERPWD. It is used quite similar
+ to the CURLOPT_USERPWD option like this:
+
+        curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "myname:thesecret");
+ 
+  [ more options, setting passsword callback ]
 
 
 Showing Progress
