@@ -778,15 +778,6 @@ if test "$ac_cv_func_sigsetjmp" != "yes"; then
                )
 fi
 
-dnl removed 'getpass' check on October 26, 2000
-
-if test "$ac_cv_func_select" != "yes"; then
-  AC_MSG_ERROR(Can't work without an existing select() function)
-fi
-if test "$ac_cv_func_socket" != "yes"; then
-  AC_MSG_ERROR(Can't work without an existing socket() function)
-fi
-
 AC_PATH_PROG( PERL, perl, , 
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
 AC_SUBST(PERL)
@@ -794,7 +785,6 @@ AC_SUBST(PERL)
 AC_PATH_PROGS( NROFF, gnroff nroff, , 
   $PATH:/usr/bin/:/usr/local/bin )
 AC_SUBST(NROFF)
-
 
 AC_MSG_CHECKING([CA cert bundle install path])
 
