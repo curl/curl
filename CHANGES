@@ -8,6 +8,9 @@
 
 
 Daniel (3 December)
+- Steve Green fixed a return code bug in Curl_resolv(), that made the socks5
+  code fail.
+
 - swalkaus at yahoo.com patched libcurl to ignore Content-Length: headers
   when Tranfer-Encoding: chunked is used, as mandated by RFC2616.
 

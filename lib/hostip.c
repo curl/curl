@@ -352,6 +352,8 @@ int Curl_resolv(struct connectdata *conn,
         /* returned failure, bail out nicely */
         Curl_freeaddrinfo(addr);
       }
+      else
+        rc = 0;
     }
   }
 
