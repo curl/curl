@@ -1238,6 +1238,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.http200aliases = va_arg(param, struct curl_slist *);
     break;
 
+  case CURLOPT_MAXFILESIZE:
+    /*
+     * Set the maximum size of a file to download.
+     */
+    data->set.max_filesize = va_arg(param, long);
+    break;
+
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_FAILED_INIT; /* correct this */

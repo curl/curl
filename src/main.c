@@ -428,6 +428,7 @@ static void help(void)
     "                    following locations, even when hostname changed",
     " -m/--max-time <seconds> Maximum time allowed for the transfer",
     "    --max-redirs <num> Set maximum number of redirections allowed (H)",
+    "    --max-filesize <bytes> Set the maximum file size to download (H/F)",
     " -M/--manual        Display huge help text",
     " -n/--netrc         Must read .netrc for user name and password",
     "    --netrc-optional  Use either .netrc or URL; overrides -n",
@@ -506,6 +507,7 @@ struct Configurable {
   long timeout;
   long connecttimeout;
   long maxredirs;
+  long max_filesize;
   char *headerfile;
   char *ftpport;
   char *iface;
@@ -1140,6 +1142,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*v", "stderr",      TRUE},
     {"*w", "interface",   TRUE},
     {"*x", "krb4",        TRUE},
+    {"*y", "max-filesize", TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1405,6 +1408,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'x': /* --krb4 */
         /* krb4 level string */
         GetStr(&config->krb4level, nextarg);
+        break;
+      case 'y': /* --max-filesize */
+        config->max_filesize = atoi(nextarg);
         break;
 
       default: /* the URL! */
@@ -3246,6 +3252,10 @@ operate(struct Configurable *config, int argc, char *argv[])
                          config->ftp_create_dirs);
         if(config->proxyntlm)
           curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
+
+        /* new in curl 7.10.8 */
+        if (config->max_filesize)
+          curl_easy_setopt(curl, CURLOPT_MAXFILESIZE, config->max_filesize);
 
         res = curl_easy_perform(curl);
         

@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "23 Sep 2003" "Curl 7.10.8" "Curl Manual"
+.TH curl 1 "17 Oct 2003" "Curl 7.10.8" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -456,6 +456,14 @@ authentication info (which is plaintext in the case of HTTP Basic
 authentication).
 
 If this option is used twice, the second will again disable location following.
+.IP "--max-filesize <bytes>"
+Specify the maximum size (in bytes) of a file to download. If the file
+requested is larger than this value, the transfer will not start and curl will
+return with exit code 63.
+
+NOTE: The file size is not always known prior to download, and for such files
+this option has no effect even if the file transfer ends up being larger than
+this given limit. This concerns both FTP and HTTP transfers.
 .IP "-m/--max-time <seconds>"
 Maximum time in seconds that you allow the whole operation to take.  This is
 useful for preventing your batch jobs from hanging for hours due to slow
@@ -1053,6 +1061,10 @@ Couldn't use specified SSL cipher
 Problem with the CA cert (path? permission?)
 .IP 61
 Unrecognized transfer encoding
+.IP 62
+Invalid LDAP URL
+.IP 63
+Maximum file size exceeded
 .IP XX
 There will appear more error codes here in future releases. The existing ones
 are meant to never change.

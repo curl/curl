@@ -218,6 +218,7 @@ typedef enum {
   CURLE_SSL_CACERT,              /* 60 - problem with the CA cert (path?) */
   CURLE_BAD_CONTENT_ENCODING,    /* 61 - Unrecognized transfer encoding */
   CURLE_LDAP_INVALID_URL,        /* 62 - Invalid LDAP URL */
+  CURLE_FILESIZE_EXCEEDED,       /* 63 - Maximum file size exceeded */
 
   CURL_LAST /* never use! */
 } CURLcode;
@@ -688,6 +689,10 @@ typedef enum {
      tell libcurl to resolve names to those IP versions only. This only has
      affect on systems with support for more than one, i.e IPv4 _and_ IPv6. */
   CINIT(IPRESOLVE, LONG, 113),
+
+  /* Set this option to limit the size of a file that will be downloaded from
+     an HTTP or FTP server. */
+  CINIT(MAXFILESIZE, LONG, 114),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

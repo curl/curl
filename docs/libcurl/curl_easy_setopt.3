@@ -719,6 +719,15 @@ libcurl what the expected size of the infile is.
 .B CURLOPT_UPLOAD
 A non-zero parameter tells the library to prepare for an upload. The
 CURLOPT_READDATA and CURLOPT_INFILESIZE are also interesting for uploads.
+.TP
+.B CURLOPT_MAXFILESIZE
+Pass a long as parameter. This allows you to specify the maximum size (in
+bytes) of a file to download. If the file requested is larger than this value,
+the transfer will not start and CURLE_FILESIZE_EXCEEDED will be returned.
+
+NOTE: The file size is not always known prior to download, and for such files
+this option has no effect even if the file transfer ends up being larger than
+this given limit. This concerns both FTP and HTTP transfers.
 .PP
 .SH CONNECTION OPTIONS
 .TP 0.4i

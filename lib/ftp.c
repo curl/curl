@@ -1777,8 +1777,13 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
          downloads and when talking to servers that don't give away the size
          in the RETR response line. */
       result = ftp_getsize(conn, ftp->file, &foundsize);
-      if(CURLE_OK == result)
+      if(CURLE_OK == result) {
+        if (data->set.max_filesize && foundsize > data->set.max_filesize) {
+          failf(data, "Maximum file size exceeded");
+          return CURLE_FILESIZE_EXCEEDED;
+        }
         downloadsize = foundsize;
+      }
 
       if(conn->resume_from) {
 

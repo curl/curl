@@ -578,6 +578,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             /* check for Content-Length: header lines to get size */
             if (checkprefix("Content-Length:", k->p) &&
                 sscanf (k->p+15, " %ld", &k->contentlength)) {
+              if (data->set.max_filesize && k->contentlength > 
+                  data->set.max_filesize) {
+                failf(data, "Maximum file size exceeded");
+                return CURLE_FILESIZE_EXCEEDED;
+              }
               conn->size = k->contentlength;
               Curl_pgrsSetDownloadSize(data, k->contentlength);
             }

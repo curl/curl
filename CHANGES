@@ -8,6 +8,8 @@
 
 
 Daniel (17 October)
+- Dominick Meglio implemented CURLOPT_MAXFILESIZE and --max-filesize.
+
 - Made libcurl show verbose info about what auth type and user name that is
   being sent in its HTTP request-headers.
 

@@ -34,11 +34,6 @@ TODO
    >4GB all over. Bug reports (and source reviews) show that it doesn't
    currently work.
 
- * CURLOPT_MAXFILESIZE. Prevent downloads that are larger than the specified
-   size. CURLE_FILESIZE_EXCEEDED would then be returned. Gautam Mani
-   requested. That is, the download should not even begin but be aborted
-   immediately.
-
  LIBCURL - multi interface
 
  * Add curl_multi_timeout() to make libcurl's ares-functionality better.

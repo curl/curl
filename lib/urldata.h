@@ -828,6 +828,8 @@ struct UserDefined {
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
 
   int ip_version; 
+
+  long max_filesize; /* Maximum file size to download */
   
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
