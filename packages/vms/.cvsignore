@@ -1,4 +1,4 @@
-CURLMSG.H
-CURLMSG.SDL
+curlmsg.h
+curlmsg.sdl
 Makefile
 Makefile.in
