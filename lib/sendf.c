@@ -53,6 +53,7 @@
 #endif
 #include <string.h>
 #include "memory.h"
+#include "strerror.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
