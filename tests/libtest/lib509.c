@@ -251,7 +251,7 @@ int test(char *URL)
   return i; 
 }
 #else /* USE_SSLEAY */
-CURLcode test(char *URL)
+int test(char *URL)
 {
   (void)URL;
   return CURLE_FAILED_INIT;
