@@ -11,13 +11,18 @@ AC_CONFIG_SRCDIR([lib/urldata.h])
 AM_CONFIG_HEADER(lib/config.h src/config.h tests/server/config.h lib/ca-bundle.h)
 AM_MAINTAINER_MODE
 
+AC_PATH_PROG( SED, sed, , $PATH:/usr/bin:/usr/local/bin)
+AC_SUBST(SED)
+
 dnl figure out the libcurl version
-VERSION=`sed -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curl.h`
+VERSION=`$SED -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curl.h`
 AM_INIT_AUTOMAKE(curl,$VERSION)
+AC_MSG_CHECKING([curl version])
+AC_MSG_RESULT($VERSION)
 
 dnl
 dnl we extract the numerical version for curl-config only
-VERSIONNUM=`sed -ne 's/^#define LIBCURL_VERSION_NUM 0x\(.*\)/\1/p' ${srcdir}/include/curl/curl.h`
+VERSIONNUM=`$SED -ne 's/^#define LIBCURL_VERSION_NUM 0x\(.*\)/\1/p' ${srcdir}/include/curl/curl.h`
 AC_SUBST(VERSIONNUM)
 
 dnl Solaris pkgadd support definitions
@@ -270,6 +275,20 @@ AC_CHECK_FUNC(connect, , [ AC_CHECK_LIB(socket, connect) ])
 
 dnl dl lib?
 AC_CHECK_FUNC(dlclose, , [ AC_CHECK_LIB(dl, dlopen) ])
+
+AC_MSG_CHECKING([whether to use libgcc])
+AC_ARG_ENABLE(libgcc,
+AC_HELP_STRING([--enable-libgcc],[use libgcc when linking]),
+[ case "$enableval" in
+  yes)
+        LIBS="$LIBS -lgcc"
+       AC_MSG_RESULT(yes)
+       ;;
+  *)   AC_MSG_RESULT(no)
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
 
 dnl **********************************************************************
 dnl Check how non-blocking sockets are set
@@ -627,7 +646,14 @@ dnl **********************************************************************
 
 dnl Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS( \
+
+dnl First check for the very most basic headers. Then we can use these
+dnl ones as default-headers when checking for the rest!
+AC_CHECK_HEADERS(
+        sys/types.h \
+        sys/time.h \
+        sys/select.h \
+        sys/socket.h \
         unistd.h \
         malloc.h \
         stdlib.h \
@@ -635,12 +661,8 @@ AC_CHECK_HEADERS( \
         net/if.h \
         netinet/in.h \
         netdb.h \
-        sys/select.h \
-        sys/socket.h \
         sys/sockio.h \
         sys/stat.h \
-        sys/types.h \
-        sys/time.h \
         sys/param.h \
         termios.h \
         termio.h \
@@ -655,7 +677,26 @@ AC_CHECK_HEADERS( \
         utime.h \
         sys/utime.h \
         sys/poll.h \
-        setjmp.h
+        setjmp.h,
+dnl to do if not found
+[],
+dnl to do if found
+[],
+dnl default includes
+[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+]
 )
 
 dnl Checks for typedefs, structures, and compiler characteristics.
@@ -736,9 +777,6 @@ fi
 AC_PATH_PROG( PERL, perl, , 
   $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
 AC_SUBST(PERL)
-
-AC_PATH_PROG( SED, sed, , $PATH:/usr/bin:/usr/local/bin)
-AC_SUBST(SED)
 
 AC_PATH_PROGS( NROFF, gnroff nroff, , 
   $PATH:/usr/bin/:/usr/local/bin )
