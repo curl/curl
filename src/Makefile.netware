@@ -246,3 +246,8 @@ ifeq ($(LD),nlmconv)
 	@echo $(DL)output $(TARGET).nlm$(DL) >> $@
 endif
 
+hugehelp.c: hugehelp.c.cvs
+	@echo Creating $@
+	$(CP) $< $@
+
+ 
