@@ -6,7 +6,9 @@ OBJS = javacurl.o
 CC = gcc
 CFLAGS = -c
 CPPFLAGS = -I/usr/j2se/include -I/usr/local/include -I/usr/j2se/include/solaris
-LDFLAGS = -lcurl -ldl -L/usr/local/ssl/lib -lssl -lcrypto
+
+# Linux might use -shared -Wl,-soname,libnative.so instead of -G
+LDFLAGS = -G -lcurl -ldl -L/usr/local/ssl/lib -lssl -lcrypto
 
 all: CurlGlue.h CurlGlue.class javacurl.o $(TARGET) test.class
 
@@ -27,7 +29,7 @@ CurlGlue.class: CurlGlue.java
 	javac $<
 
 $(TARGET): $(OBJS)
-	$(CC) -G -o $(TARGET) $(LDFLAGS) $(OBJS)
+	$(CC) -o $(TARGET) $(LDFLAGS) $(OBJS)
 
 clean:
 	rm -f javacurl.o CurlGlue.h CurlGlue.class
