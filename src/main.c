@@ -60,6 +60,10 @@
 #include <fcntl.h>
 #endif
 
+#ifdef HAVE_UTIME_H
+#include <utime.h>
+#endif
+
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
 /* this is low-level hard-hacking memory leak tracking shit */
@@ -88,7 +92,6 @@ typedef enum {
 /* Just a set of bits */
 #define CONF_DEFAULT  0
 
-#define CONF_USEREMOTETIME (1<<0) /* set the remote time on the local file */
 #define CONF_AUTO_REFERER (1<<4) /* the automatic referer-system please! */
 #define CONF_VERBOSE  (1<<5) /* talk a lot */
 #define CONF_HEADER   (1<<8) /* throw the header out too */
@@ -336,6 +339,7 @@ static void help(void)
        " -q                 When used as the first parameter disables .curlrc\n"
        " -Q/--quote <cmd>   Send QUOTE command to FTP before file transfer (F)");
   puts(" -r/--range <range> Retrieve a byte range from a HTTP/1.1 or FTP server\n"
+       " -R/--remote-time   Set the remote file's time on the local output\n"
        " -s/--silent        Silent mode. Don't output anything\n"
        " -S/--show-error    Show error. With -s, make curl show errors when they occur\n"
        "    --stderr <file> Where to redirect stderr. - means stdout.\n"
@@ -367,6 +371,7 @@ struct LongShort {
 };
 
 struct Configurable {
+  bool remote_time;
   char *random_file;
   char *egd_file;
   char *useragent;
@@ -634,6 +639,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"q", "disable",     FALSE},
     {"Q", "quote",       TRUE},
     {"r", "range",       TRUE},
+    {"R", "remote-time", FALSE},
     {"s", "silent",      FALSE},
     {"S", "show-error",  FALSE},
     {"t", "telnet-options", TRUE},
@@ -1054,6 +1060,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case 'r':
       /* byte range requested */
       GetStr(&config->range, nextarg);
+      break;
+    case 'R':
+      /* use remote file's time */
+      config->remote_time ^= TRUE;
       break;
     case 's':
       /* don't show progress meter, don't show errors : */
@@ -1957,7 +1967,6 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_SSLCERTPASSWD, config->cert_passwd);
 
       if(config->cacert) {
-        /* available from libcurl 7.5: */
         curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
@@ -1965,13 +1974,12 @@ operate(struct Configurable *config, int argc, char *argv[])
       else
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
       
-      if(config->conf&(CONF_NOBODY|CONF_USEREMOTETIME)) {
+      if((config->conf&CONF_NOBODY) ||
+         config->remote_time) {
         /* no body or use remote time */
-        /* new in 7.5 */
         curl_easy_setopt(curl, CURLOPT_FILETIME, TRUE);
       }
       
-      /* 7.5 news: */
       if (config->maxredirs) 
         curl_easy_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs); 
       else 
@@ -2018,11 +2026,11 @@ operate(struct Configurable *config, int argc, char *argv[])
       if(config->writeout) {
         ourWriteOut(curl, config->writeout);
       }
-        
+
 #ifdef	VMS
-	if (!config->showerror)  {
-		vms_show = VMSSTS_HIDE;
-	}
+      if (!config->showerror)  {
+        vms_show = VMSSTS_HIDE;
+      }
 #else
       if((res!=CURLE_OK) && config->showerror)
         fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
@@ -2035,6 +2043,23 @@ operate(struct Configurable *config, int argc, char *argv[])
         free(urlbuffer);
       if (outfile && !strequal(outfile, "-") && outs.stream)
         fclose(outs.stream);
+
+#ifdef HAVE_UTIME
+      /* Important that we set the time _after_ the file has been 
+         closed, as is done above here */
+      if(config->remote_time && outs.filename) {
+        /* as libcurl if we got a time. Pretty please */
+        long filetime;
+        curl_easy_getinfo(curl, CURLINFO_FILETIME, &filetime);
+        if(filetime >= 0) {
+          struct utimbuf times;
+          times.actime = filetime;
+          times.modtime = filetime;
+          utime(outs.filename, &times); /* set the time we got */
+        }
+      }
+#endif
+
       if (config->infile)
         fclose(infd);
       if(headerfilep)
