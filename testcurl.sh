@@ -132,6 +132,8 @@ log "NAME = $name"
 log "EMAIL = $email"
 log "DESC = $desc"
 log "CONFOPTS = $confopts"
+log "CFLAGS = $CFLAGS"
+log "CC = $CC"
 log "version = $version"
 log "date = `date -u`"
 
