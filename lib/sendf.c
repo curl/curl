@@ -122,7 +122,7 @@ void curl_slist_free_all(struct curl_slist *list)
 
 /* Curl_infof() is for info message along the way */
 
-void Curl_infof(struct UrlData *data, char *fmt, ...)
+void Curl_infof(struct UrlData *data, const char *fmt, ...)
 {
   va_list ap;
   if(data->bits.verbose) {
@@ -136,7 +136,7 @@ void Curl_infof(struct UrlData *data, char *fmt, ...)
 /* Curl_failf() is for messages stating why we failed, the LAST one will be
    returned for the user (if requested) */
 
-void Curl_failf(struct UrlData *data, char *fmt, ...)
+void Curl_failf(struct UrlData *data, const char *fmt, ...)
 {
   va_list ap;
   va_start(ap, fmt);
@@ -147,7 +147,7 @@ void Curl_failf(struct UrlData *data, char *fmt, ...)
 
 /* Curl_sendf() sends formated data to the server */
 size_t Curl_sendf(int sockfd, struct connectdata *conn,
-                  char *fmt, ...)
+                  const char *fmt, ...)
 {
   struct UrlData *data = conn->data;
   size_t bytes_written;
@@ -181,14 +181,20 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
   size_t bytes_written;
 
 #ifdef USE_SSLEAY
+  /* SSL_write() is said to return 'int' while write() and send() returns
+     'size_t' */
+  int ssl_bytes;
   if (conn->ssl.use) {
     int loop=100; /* just a precaution to never loop endlessly */
     while(loop--) {
-      bytes_written = SSL_write(conn->ssl.handle, mem, len);
-      if((-1 != bytes_written) ||
+      ssl_bytes = SSL_write(conn->ssl.handle, mem, len);
+      if((0 >= ssl_bytes) ||
          (SSL_ERROR_WANT_WRITE != SSL_get_error(conn->ssl.handle,
-                                                bytes_written) ))
+                                                ssl_bytes) )) {
+        /* this converts from signed to unsigned... */
+        bytes_written = ssl_bytes;
         break;
+      }
     }
   }
   else {
