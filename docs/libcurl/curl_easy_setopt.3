@@ -1,7 +1,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "7 Nov 2003" "libcurl 7.10.8" "libcurl Manual"
+.TH curl_easy_setopt 3 "11 Nov 2003" "libcurl 7.10.9" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -274,6 +274,11 @@ Only machine name, user name and password are taken into account
 \fBNote:\fP libcurl does not verify that the file has the correct properties
 set (as the standard Unix ftp client does). It should only be readable by
 user.
+.IP CURLOPT_NETRC_FILE
+Pass a char * as parameter, pointing to a zero terminated string containing
+the full path name to the file you want libcurl to use as .netrc file. If this
+option is omitted, and CURLOPT_NETRC is set, libcurl will attempt to find the
+a .netrc file in the current user's home directory.
 .IP CURLOPT_USERPWD
 Pass a char * as parameter, which should be [user name]:[password] to use for
 the connection. Use \fICURLOPT_HTTPAUTH\fP to decide authentication method.

@@ -854,6 +854,8 @@ struct UserDefined {
   bool upload;
   enum CURL_NETRC_OPTION
        use_netrc;        /* defined in include/curl.h */
+  char *netrc_file;      /* if not NULL, use this instead of trying to find
+                            $HOME/.netrc */
   bool verbose;
   bool krb4;             /* kerberos4 connection requested */
   bool reuse_forbid;     /* forbidden to be reused, close after use */

@@ -507,6 +507,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.use_netrc = va_arg(param, long);
     break;
+  case CURLOPT_NETRC_FILE:
+    /*
+     * Use this file instead of the $HOME/.netrc file
+     */
+    data->set.netrc_file = va_arg(param, char *);
+    break;
   case CURLOPT_FOLLOWLOCATION:
     /*
      * Follow Location: header hints on a HTTP-server.
@@ -2758,7 +2764,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   if (data->set.use_netrc != CURL_NETRC_IGNORED) {
     if(Curl_parsenetrc(conn->hostname,
-                       user, passwd)) {
+                       user, passwd,
+                       data->set.netrc_file)) {
       infof(data, "Couldn't find host %s in the .netrc file, using defaults",
             conn->hostname);
     }

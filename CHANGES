@@ -7,6 +7,24 @@
                                   Changelog
 
 
+Daniel (11 November)
+- Added CURLOPT_NETRC_FILE. Use this to tell libcurl which file to use instead
+  of trying to find a .netrc in the current user's home directory. The
+  existing .netrc file finder is somewhat naive and is far from perfect on
+  several platforms that aren't unix-style. If this option isn't set when
+  CURLOPT_NETRC is set, the previous approach will still be used.
+
+  The current .netrc check code now also support longer than 256 bytes path
+  names.
+
+Daniel (10 November)
+- Kang-Jin Lee pointed out that the generated ca-bundle.h file shouldn't be
+  written in the source dir if a different build dir is used.
+
+- After Sébastien Willemijns' bug report, we now check the separators properly
+  in the 229-reply servers respond on a EPSV command and bail out better if
+  the reply string is not RFC2428-compliant.
+
 Daniel (7 November)
 - Based on Gisle Vanem's patch, I made curl try harder to get the home
   directory of the current user, in order to find the default .curlrc file.

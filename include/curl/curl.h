@@ -693,6 +693,12 @@ typedef enum {
      an HTTP or FTP server. */
   CINIT(MAXFILESIZE, LONG, 114),
 
+  /* Set this option to the file name of your .netrc file you want libcurl
+     to parse (using the CURLOPT_NETRC option). If not set, libcurl will do
+     a poor attempt to find the user's home directory and check for a .netrc
+     file in there. */
+  CINIT(NETRC_FILE, OBJECTPOINT, 115),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
