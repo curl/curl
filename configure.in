@@ -2,7 +2,7 @@ dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(lib/urldata.h)
 AM_CONFIG_HEADER(config.h src/config.h)
-AM_INIT_AUTOMAKE(curl,"7.1.1")
+AM_INIT_AUTOMAKE(curl,"7.2")
 AM_PROG_LIBTOOL
 
 dnl
