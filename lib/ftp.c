@@ -79,7 +79,7 @@
 #include "progress.h"
 #include "upload.h"
 #include "download.h"
-
+#include "escape.h"
 
 /* returns last node in linked list */
 static struct curl_slist *slist_get_last(struct curl_slist *list)
@@ -1013,6 +1013,28 @@ UrgError _ftp(struct UrlData *data,
     failf(data, "%s", buf+4);
     return URG_FTP_WRITE_ERROR;
   }
+
+  /* Send any post-transfer QUOTE strings? */
+  if(data->postquote) {
+    qitem = data->postquote;
+    /* Send all QUOTE strings in same order as on command-line */
+    while (qitem) {
+      /* Send string */
+      if (qitem->data) {
+        sendf(data->firstsocket, data, "%s\r\n", qitem->data);
+
+        nread = GetLastResponse(data->firstsocket, buf, data);
+
+        if (buf[0] != '2') {
+          failf(data, "QUOT string not accepted: %s",
+                qitem->data);
+          return URG_FTP_QUOTE_ERROR;
+        }
+      }
+      qitem = qitem->next;
+    }
+  }
+
 
   return URG_OK;
 }

@@ -51,8 +51,8 @@
  *
  * ------------------------------------------------------------
  * $Log$
- * Revision 1.1  1999-12-29 14:21:30  bagder
- * Initial revision
+ * Revision 1.2  2000-01-10 23:36:14  bagder
+ * syncing with local edit
  *
  * Revision 1.3  1999/09/06 06:59:40  dast
  * Changed email info

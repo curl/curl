@@ -176,7 +176,8 @@ struct UrlData {
   X509*    server_cert;
 #endif /* USE_SSLEAY */
   long crlf;
-  struct curl_slist *quote;
+  struct curl_slist *quote;     /* before the transfer */
+  struct curl_slist *postquote; /* after the transfer */
 
   TimeCond timecondition;
   time_t timevalue;

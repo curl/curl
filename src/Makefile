@@ -85,7 +85,7 @@ curl_LDADD = ../lib/libcurl.a
 curl_DEPENDENCIES = ../lib/libcurl.a
 BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c
-NROFF = /bin/nroff
+NROFF = gnroff
 
 EXTRA_DIST = mkhelp.pl Makefile.vc6
 

@@ -9,6 +9,23 @@
 
 Version 6.4
 
+Daniel (10 January 2000):
+ - Renumbered some enums in curl/curl.h since tag number 35 was used twice!
+ - Added "postquote" support to the ftp section that enables post-ftp-transfer
+   quote commands.
+ - Now made the -Q/--quote parameter recognize '-' as a prefix, which means
+   that command will be issued AFTER a successful ftp transfer. This can of
+   course be used to delete or rename a file after it has been uploaded or
+   downloaded. Use your imagination! ;-)
+ - Since I do the main development on solaris 2.6 now, I had to download and
+   install GNU groff to generate the hugehelp.c file. The solaris nroff cores
+   on the man page!
+ - Added all the curl exit codes to the man page.
+ - Jim Gallagher <jmgallag@usa.net> properly tracked down a bug in autoconf
+   2.13. The AC_CHECK_LIB() macro wrongfully uses the -l flag before the -L
+   flag to 'ld' which causes the HP-UX 10.20 flavour to fail on all libchecks
+   and thefore you can't make the configure script find the openssl libs!
+
 Daniel (28 December 1999):
  - Tim Verhoeven <dj@walhalla.sin.khk.be> correctly identified that curl
    doesn't support URL formatted file names when getting ftp. Now, there's a

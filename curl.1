@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "8 November 1999" "Curl 6.3" "Curl Manual"
+.TH curl 1 "10 Janurary 2000" "Curl 6.4" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -227,7 +227,11 @@ file will not be read and used as a config file.
 .IP "-Q/--quote <comand>"
 (FTP) Send an arbitrary command to the remote FTP server, by using the QUOTE
 command of the server. Not all servers support this command, and the set of
-QUOTE commands are server specific!
+QUOTE commands are server specific! Quote commands are sent BEFORE the
+transfer is taking place. To make commands take place after a successful
+transfer, prefix them with a dash '-'. You may specify any amount of commands
+to be run before and after the transfer. If the server returns failure for one
+of the commands, the entire operation will be aborted.
 .IP "-r/--range <range>"
 (HTTP/FTP)
 Retrieve a byte range (i.e a partial document) from a HTTP/1.1 or FTP
@@ -350,10 +354,99 @@ asterisk '*' only, it matches all hosts.
 .IP "COLUMNS <integer>"
 The width of the terminal.  This variable only affects curl when the
 --progress-bar option is used.
-.SH DIAGNOSTICS
-There exists a bunch of different error messages that may appear during
-bad conditions. They're all pretty verbose and descriptive and therefore
-you won't find any closer description of them here.
+.SH EXIT CODES
+There exists a bunch of different error codes and their corresponding error
+messages that may appear during bad conditions. At the time of this writing,
+the exit codes are:
+.IP 1
+Unsupported protocol. This build of curl has no support for this protocol.
+.IP 2
+Failed to initialize.
+.IP 3
+URL malformat. The syntax was not correct.
+.IP 4
+URL user malformatted. The user-part of the URL syntax was not correct.
+.IP 5
+Couldn't resolve proxy. The given proxy host could not be resolved.
+.IP 6
+Couldn't resolve host. The given remote host was not resolved.
+.IP 7
+Failed to connect to host.
+.IP 8
+FTP weird server reply. The server sent data curl couldn't parse.
+.IP 9
+FTP access denied. The server denied login.
+.IP 10
+FTP user/password incorrect. Either one or both were not accepted by the
+server.
+.IP 11
+FTP weird PASS reply. Curl couldn't parse the reply sent to the PASS request.
+.IP 12
+FTP weird USER reply. Curl couldn't parse the reply sent to the USER request.
+.IP 13
+FTP weird PASV reply, Curl couldn't parse the reply sent to the PASV request.
+.IP 14
+FTP weird 227 formay. Curl couldn't parse the 227-line the server sent.
+.IP 15
+FTP can't get host. Couldn't resolve the host IP we got in the 227-line.
+.IP 16
+FTP can't reconnect. Couldn't connect to the host we got in the 227-line.
+.IP 17
+FTP couldn't set binary. Couldn't change transfer method to binary.
+.IP 18
+Partial file. Only a part of the file was transfered.
+.IP 19
+FTP couldn't RETR file. The RETR command failed.
+.IP 20
+FTP write error. The transfer was reported bad by the server.
+.IP 21
+FTP quote error. A quote command returned error from the server.
+.IP 22
+HTTP not found. The requested page was not found. This return code only
+appears if --fail is used.
+.IP 23
+Write error. Curl couldn't write data to a local filesystem or similar.
+.IP 24
+Malformat user. User name badly specified.
+.IP 25
+FTP couldn't STOR file. The server denied the STOR operation.
+.IP 26
+Read error. Various reading problems.
+.IP 27
+Out of memory. A memory allocation request failed.
+.IP 28
+Operation timeout. The specified time-out period was reached according to the
+conditions.
+.IP 29
+FTP couldn't set ASCII. The server returned an unknown reply.
+.IP 30
+FTP PORT failed. The PORT command failed.
+.IP 31
+FTP couldn't use REST. The REST command failed.
+.IP 32
+FTP couldn't use SIZE. The SIZE command failed. The command is an extension
+to the original FTP spec RFC 959.
+.IP 33
+HTTP range error. The range "command" didn't work.
+.IP 34
+HTTP post error. Internal post-request generation error.
+.IP 35
+SSL connect error. The SSL handshaking failed.
+.IP 36
+FTP bad download resume. Couldn't continue an earlier aborted download.
+.IP 37
+FILE couldn't read file. Failed to open the file. Permissions?
+.IP 38
+LDAP cannot bind. LDAP bind operation failed.
+.IP 39
+LDAP search failed.
+.IP 40
+Library not found. The LDAP library was not found.
+.IP 41
+Function not found. A required LDAP function was not found.
+.IP XX
+There will appear more error codes here in future releases. The existing ones
+are meant to never change.
 .SH BUGS
 If you do find any (or have other suggestions), mail Daniel Stenberg
 <Daniel.Stenberg@haxx.nu>.

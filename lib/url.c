@@ -413,6 +413,9 @@ UrgError curl_urlget(UrgTag tag, ...)
       case URGTAG_USERPWD:
         data->userpwd = (char *)param_obj;
         break;
+      case URGTAG_POSTQUOTE:
+        data->postquote = (struct curl_slist *)param_obj;
+        break;
       case URGTAG_PROXYUSERPWD:
         data->proxyuserpwd = (char *)param_obj;
         break;
