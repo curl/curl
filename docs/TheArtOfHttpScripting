@@ -1,7 +1,5 @@
 Online:  http://curl.haxx.se/docs/httpscripting.shtml
-Author:  Daniel Stenberg <daniel@haxx.se>
-Date:    November 6, 2001
-Version: 0.6
+Date:    December 7, 2004
 
                 The Art Of Scripting HTTP Requests Using Curl
                 =============================================
@@ -229,25 +227,25 @@ Version: 0.6
         curl -U proxyuser:proxypassword curl.haxx.se
 
  If your proxy requires the authentication to be done using the NTLM method,
- use --proxy-ntlm.
+ use --proxy-ntlm, if it requires Digest use --proxy-digest.
 
  If you use any one these user+password options but leave out the password
  part, curl will prompt for the password interactively.
 
- Do note that when a program is run, its parameters are possible to see when
- listing the running processes of the system. Thus, other users may be able to
- watch your passwords if you pass them as plain command line options. There
- are ways to circumvent this.
+ Do note that when a program is run, its parameters might be possible to see
+ when listing the running processes of the system. Thus, other users may be
+ able to watch your passwords if you pass them as plain command line
+ options. There are ways to circumvent this.
 
 7. REFERER
 
- A HTTP request may include a 'referer' field, which can be used to tell from
- which URL the client got to this particular resource. Some programs/scripts
- check the referer field of requests to verify that this wasn't arriving from
- an external site or an unknown page. While this is a stupid way to check
- something so easily forged, many scripts still do it. Using curl, you can put
- anything you want in the referer-field and thus more easily be able to fool
- the server into serving your request.
+ A HTTP request may include a 'referer' field (yes it is misspelled), which
+ can be used to tell from which URL the client got to this particular
+ resource. Some programs/scripts check the referer field of requests to verify
+ that this wasn't arriving from an external site or an unknown page. While
+ this is a stupid way to check something so easily forged, many scripts still
+ do it. Using curl, you can put anything you want in the referer-field and
+ thus more easily be able to fool the server into serving your request.
 
  Use curl to set the referer field with:
 
@@ -379,9 +377,15 @@ Version: 0.6
         curl -E mycert.pem https://that.secure.server.com
 
   curl also tries to verify that the server is who it claims to be, by
-  verifying the server's certificate against a CA cert bundle. Failing the
-  verification will cause curl to deny the connection. You must then use -k in
-  case you want to tell curl to ignore that the server can't be verified.
+  verifying the server's certificate against a locally stored CA cert
+  bundle. Failing the verification will cause curl to deny the connection. You
+  must then use -k in case you want to tell curl to ignore that the server
+  can't be verified.
+
+  More about server certificate verification and ca cert bundles can be read
+  in the SSLCERTS document, available online here:
+
+        http://curl.haxx.se/docs/sslcerts.html
 
 12. REFERENCES
 
