@@ -35,12 +35,15 @@
 
 # USAGE:
 # testcurl.pl [curl-daily-name] > output
+# or:
+# testcurl.pl --target=your_os > output
 
 # Updated:
-# v1.2 8-Mar-04 - rewritten in perl
-# v1.1 6-Nov-03 - to take an optional parameter, the name of a daily-build
-#                 directory.  If present, build from that directory, otherwise
-#                 perform a normal CVS build.
+# v1.7 22-Jun-04 - added --target option for other platform targets.
+# v1.2  8-Mar-04 - rewritten in perl
+# v1.1  6-Nov-03 - to take an optional parameter, the name of a daily-build
+#                  directory.  If present, build from that directory, otherwise
+#                  perform a normal CVS build.
 
 use strict;
 
@@ -49,20 +52,44 @@ use Cwd;
 # Turn on warnings (equivalent to -w, which can't be used with /usr/bin/env)
 BEGIN { $^W = 1; }
 
-use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog $buildlogname $gnulikebuild);
+use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog
+            $buildlogname $gnulikebuild $targetos $confsuffix $binext);
 use vars qw($name $email $desc $confopts);
 
 # version of this script
 $version='$Revision$';
 $fixed=0;
 
-# Determine if we're running from CVS or a canned copy of curl
+# Determine if we're running from CVS or a canned copy of curl,
+# or if we got a specific target option
+$CURLDIR="curl";
+$CVS=1;
 if (@ARGV && $ARGV[0]) {
-  $CURLDIR=$ARGV[0];
-  $CVS=0;
-} else {
-  $CURLDIR="curl";
-  $CVS=1;
+  if ($ARGV[0] =~ /--target=/) {
+    $targetos = (split(/=/, $ARGV[0]))[1];
+  } else {
+    $CURLDIR=$ARGV[0];
+    $CVS=0;
+  }
+}
+
+# Do the platform-specific stuff here
+$gnulikebuild = 1;
+$confsuffix = '';
+$binext = '';
+if ($^O eq 'MSWin32' || defined($targetos)) {
+  $gnulikebuild = 0;
+  if (!defined($targetos)) {
+    # If no target defined on Win32 lets assume vc
+    $targetos = 'vc';
+  }
+  if ($targetos =~ /vc/ || $targetos =~ /mingw32/) {
+    $confsuffix = '-win32';
+    $binext = '.exe';
+  } elsif ($targetos =~ /netware/) {
+    $confsuffix = '-netware';
+    $binext = '.nlm';
+  }
 }
 
 $ENV{LANG}="C";
@@ -116,11 +143,6 @@ sub mydie($){
     }
     logit "ENDING HERE"; # last line logged!
     exit 1;
-}
-
-$gnulikebuild = 1;
-if ($^O eq 'MSWin32') {
-  $gnulikebuild = 0;
 }
 
 if (open(F, "setup")) {
@@ -183,6 +205,7 @@ logit "DESC = $desc";
 logit "CONFOPTS = $confopts";
 logit "CFLAGS = ".($ENV{CFLAGS} ? $ENV{CFLAGS} : "");
 logit "CC = ".($ENV{CC} ? $ENV{CC} : "");
+logit "target = ".($targetos ? $targetos : "");
 logit "version = $version";
 logit "date = ".(scalar gmtime)." UTC";
 
@@ -286,7 +309,8 @@ if ($CVS) {
        mydie "buildconf was NOT successful";
     }
   } else {
-    system("buildconf.bat");
+    system("buildconf.bat") if ($^O eq 'MSWin32');
+    # logit "buildconf was successful (dummy message)" if ($^O eq 'linux');
   }
 
 }
@@ -314,24 +338,28 @@ if ($gnulikebuild) {
     mydie "configure didn't work";
   }
 } else {
-  system("xcopy /s /q ..\\$CURLDIR .");
+  system("xcopy /s /q ..\\$CURLDIR .") if ($^O eq 'MSWin32');
+  if ($^O eq 'linux') {
+    system("cp -ar ../$CURLDIR/* ."); 
+    system("cp -a ../$CURLDIR/Makefile.dist Makefile"); 
+  }
 }
 
-logit "display lib/config.h";
-open(F, $gnulikebuild ? "lib/config.h" : "lib/config-win32.h") or die;
+logit "display lib/config$confsuffix.h";
+open(F, "lib/config$confsuffix.h") or die;
 while (<F>) {
   print if /^ *#/;
 }
 close(F);
 
-logit "display src/config.h";
-open(F, $gnulikebuild ? "src/config.h" : "src/config-win32.h") or die;
+logit "display src/config$confsuffix.h";
+open(F, "src/config$confsuffix.h") or die;
 while (<F>) {
   print if /^ *#/;
 }
 close(F);
 
-if (grepfile("define USE_ARES", $gnulikebuild ? "lib/config.h" : "lib/config-win32.h")) {
+if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   logit "setup to build ares";
 
   logit "build ares";
@@ -362,7 +390,15 @@ if ($gnulikebuild) {
   }
   close(F);
 } else {
-  open(F, "nmake -i vc|") or die;
+  if ($^O eq 'MSWin32') {
+    if ($targetos =~ /vc/) {
+      open(F, "nmake -i $targetos|") or die;
+    } else {
+      open(F, "make -i $targetos |") or die;
+    }
+  } else {
+    open(F, "make -i $targetos 2>&1 |") or die;
+  }
   while (<F>) {
     s/$pwd//g;
     print;
@@ -370,16 +406,19 @@ if ($gnulikebuild) {
   close(F);
 }
 
-my $exe = $gnulikebuild ? "curl" : "curl.exe";
-if (-f "src/$exe") {
-  logit "src/curl was created fine ($exe)";
+if (-f "src/curl$binext") {
+  logit "src/curl was created fine (curl$binext)";
 } else {
-  mydie "src/curl was not created ($exe)";
+  mydie "src/curl was not created (curl$binext)";
 }
 
-logit "display $exe --version output";
+if (defined($targetos) && $targetos =~ /netware/) {
+  #system('../../curlver.sh');
+} else {
+logit "display curl$binext --version output";
 
-system("./src/$exe --version");
+system("./src/curl$binext --version");
+}
 
 if ($gnulikebuild) {
   logit "run make test-full";
