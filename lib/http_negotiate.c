@@ -166,7 +166,7 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
 
   len = strlen(header);
   if (len > 0) {
-    int rawlen = Curl_base64_decode(header, &input_token.value);
+    int rawlen = Curl_base64_decode(header, (unsigned char **)&input_token.value);
     if (rawlen < 0)
       return -1;
     input_token.length = rawlen;
@@ -206,7 +206,7 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
           input_token.length = mechTokenLength;
           free(mechToken);
           mechToken = NULL;
-          infof(conn->data, "Parse SPNEGO Target Token succeded\n");
+          infof(conn->data, "Parse SPNEGO Target Token succeeded\n");
         }
     }
 #endif
@@ -287,7 +287,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn)
       neg_ctx->output_token.length = spnegoTokenLength;
       free(spnegoToken);
       spnegoToken = NULL;
-      infof(conn->data, "Make SPNEGO Initial Token succeded\n");
+      infof(conn->data, "Make SPNEGO Initial Token succeeded\n");
     }
   }
 #endif
