@@ -97,4 +97,8 @@ int fileno( FILE *stream);
 #define USE_ENVIRONMENT
 #endif
 
+#ifdef __BEOS__
+#define typedef_bool
+#endif
+
 #endif /* __SETUP_H */
