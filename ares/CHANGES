@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* April 5
+
+- Dominick Meglio: Provided implementations of inet_net_pton and inet_pton
+  from BIND for systems that do not include these functions.
+
 * March 11, 2005
 
 - Dominick Meglio added ares_parse_aaaa_reply.c and did various

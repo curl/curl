@@ -120,4 +120,69 @@ CARES_CHECK_STRUCT(
      AC_DEFINE_UNQUOTED(HAVE_STRUCT_IN6_ADDR,1,[Define to 1 if you have struct in6_addr.])
 )
 
+dnl check for inet_pton
+AC_CHECK_FUNCS(inet_pton)
+dnl Some systems have it, but not IPv6
+if test "$ac_cv_func_inet_pton" = "yes" ; then
+AC_MSG_CHECKING(if inet_pton supports IPv6)
+AC_TRY_RUN(
+  [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+int main()
+  {
+    struct in6_addr addr6;
+    if (inet_pton(AF_INET6, "::1", &addr6) < 1)
+      exit(1);
+    else
+      exit(0);
+  }
+  ], [
+       AC_MSG_RESULT(yes)
+       AC_DEFINE_UNQUOTED(HAVE_INET_PTON_IPV6,1,[Define to 1 if inet_pton supports IPv6.])
+     ], AC_MSG_RESULT(no),AC_MSG_RESULT(no))
+fi
+dnl Check for inet_net_pton
+AC_CHECK_FUNCS(inet_net_pton)
+dnl Again, some systems have it, but not IPv6
+if test "$ac_cv_func_inet_net_pton" = "yes" ; then
+AC_MSG_CHECKING(if inet_net_pton supports IPv6)
+AC_TRY_RUN(
+  [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+int main()
+  {
+    struct in6_addr addr6;
+    if (inet_net_pton(AF_INET6, "::1", &addr6, sizeof(addr6)) < 1)
+      exit(1);
+    else
+      exit(0);
+  }
+  ], [
+       AC_MSG_RESULT(yes)
+       AC_DEFINE_UNQUOTED(HAVE_INET_NET_PTON_IPV6,1,[Define to 1 if inet_net_pton supports IPv6.])
+     ], AC_MSG_RESULT(no),AC_MSG_RESULT(no))
+fi
+
 AC_OUTPUT(Makefile)
