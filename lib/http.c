@@ -831,7 +831,7 @@ CURLcode Curl_http(struct connectdata *conn)
       data->set.in = (FILE *)&http->form;
 
       add_bufferf(req_buffer,
-                  "Content-Length: %d\r\n", http->postsize-2);
+                  "Content-Length: %d\r\n", http->postsize);
 
       if(!checkheaders(data, "Expect:")) {
         /* if not disabled explicitly we add a Expect: 100-continue
