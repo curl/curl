@@ -1,10 +1,30 @@
-                                  _   _ ____  _     
-                              ___| | | |  _ \| |    
-                             / __| | | | |_) | |    
-                            | (__| |_| |  _ <| |___ 
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
                                   Changelog
+
+Daniel (17 May 2004)
+- All 191 test cases run through the torture test OK!
+
+Daniel (14 May 2004)
+- With a slightly modified ftpserver.pl I've now run almost all tests through
+  with runtests.pl -t. This is goodness!
+
+- Since I have been unable to contact the CVS admins for several months, I've
+  decided that the current CVS hosting was not good enough. I've now moved the
+  CVS repo once again, see README for updated cvs checkout instructions.
+
+Daniel (13 May 2004)
+- runtests.pl -t now runs fine all the way to test 100. I believe test case
+  100 fails because of an FTP server problem.
+
+Daniel (12 May 2004)
+- General cleanups all over to make libcurl survive and do well when a memory
+  function returns NULL. runtests.pl -t now works fine for the first 26 test
+  cases.
 
 Daniel (11 May 2004)
 - Seshubabu Pasam provided a patch that introduces curl_global_init_mem() -

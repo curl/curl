@@ -21,6 +21,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o allocation failures cause no leaks
  o the progress meter display now handles file sizes up to full 8 exabytes
    (which is as high a signed 64 bit number can reach)
  o general HTTP authentication improvements
@@ -34,6 +35,7 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
+ o The CVS repository was moved to cool.haxx.se
  o AdacURL 7.11.2 was released: http://www.almroth.com/adacurl/
  o PycURL 7.11.3 was released: http://pycurl.sourceforge.net
  o A new German download mirror: http://www.mirrorspace.org/curl/
@@ -42,6 +44,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, Tommy Tam, Luca Altea, James Bursa, Mihai Ionescu, Michael
- Benedict, Andrés García, Joe Halpin
+ Benedict, Andrés García, Joe Halpin, Seshubabu Pasam
 
         Thanks! (and sorry if I forgot to mention someone)
