@@ -126,7 +126,7 @@ echo "buildconf: libtool version $lt_version (ok)"
 # run the correct scripts now
 
 echo "buildconf: running libtoolize"
-${LIBTOOLIZE:-libtoolize} --copy --automake || die "The command '${LIBTOOLIZE:-libtoolize}  --copy --automake' failed"
+${LIBTOOLIZE:-libtoolize} --copy --automake --force || die "The command '${LIBTOOLIZE:-libtoolize}  --copy --automake --force' failed"
 echo "buildconf: running aclocal"
 ${ACLOCAL:-aclocal}       || die "The command '${AUTOHEADER:-aclocal}' failed"
 echo "buildconf: running aclocal hack to convert all mv to mv -f"
