@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Version 7.11.1-pre1 (8 March 2004)
+
+Daniel (8 March 2004)
+- Minor fix to make curl CURL_VERSION_LARGEFILE is only set if curl_off_t is
+  larger than 4 bytes.
+
 Daniel (4 March 2004)
 - Improved PUT/POST with NTLM/Digest authentication, the so called issue 12.
 
