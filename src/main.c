@@ -116,16 +116,17 @@
 #define DEFAULT_MAXREDIRS  50L
 
 #ifdef __DJGPP__
-void *xmalloc(size_t);
+#include <dos.h>
+
 char *msdosify(char *);
 char *rename_if_dos_device_name(char *);
-void xfree(void *);
-struct pollfd {
-       int fd;
-       int events;     /* in param: what to poll for */
-       int revents;    /* out param: what events occured */
-     };
-int poll (struct pollfd *, int, int);
+
+/* we want to glob our own argv[] */
+char **__crt0_glob_function (char *arg)
+{
+  (void)arg;
+  return (char**)0;
+}
 #endif /* __DJGPP__ */
 
 #ifndef __cplusplus
@@ -367,7 +368,7 @@ static void help(void)
     " -v/--verbose       Make the operation more talkative",
     " -V/--version       Show version number and quit",
 #ifdef __DJGPP__
-    "    --wdebug        Turn on WATT-32 debugging under DJGPP",
+    "    --wdebug        Turn on Watt-32 debugging under DJGPP",
 #endif
     " -w/--write-out [format] What to output after completion",
     " -x/--proxy <host[:port]> Use HTTP proxy on given port",
@@ -2209,6 +2210,8 @@ static void go_sleep(long ms)
 #ifdef WIN32
   /* Windows offers a millisecond sleep */
   Sleep(ms);
+#elif defined(__MSDOS__)
+  delay(ms);
 #else
   /* Other systems must use select() for this */
   struct timeval timeout;
@@ -2920,10 +2923,11 @@ operate(struct Configurable *config, int argc, char *argv[])
             {
               /* This is for DOS, and then we do some major replacing of 
                  bad characters in the file name before using it */
-              char *file1=xmalloc(PATH_MAX);
+              char file1 [PATH_MAX];
+
               strcpy(file1, msdosify(outfile));
-              strcpy(outfile, rename_if_dos_device_name(file1));
-              xfree(file1);
+              free (outfile);
+              outfile = strdup (rename_if_dos_device_name(file1));
             }
 #endif /* __DJGPP__ */
           }
@@ -3688,7 +3692,6 @@ rename_if_dos_device_name (char *file_name)
   /* We could have a file whose name is a device on MS-DOS.  Trying to
    * retrieve such a file would fail at best and wedge us at worst.  We need
    * to rename such files. */
-  extern char *basename (const char *);
   char *base;
   struct stat st_buf;
   char fname[PATH_MAX];

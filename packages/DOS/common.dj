@@ -25,7 +25,12 @@ USE_ZLIB = 0
 #
 # Use Watt-32 IPv6 stack (only IPv6 name resolution working at the moment)
 #
-USE_IPV6 = 1
+USE_IPV6 = 0
+
+#
+# Enable debug code in libcurl/curl
+#
+USE_DEBUG = 0
 
 default: all
 
@@ -35,12 +40,12 @@ default: all
 #
 WATT32_ROOT  = $(subst \,/,$(WATT_ROOT))
 OPENSSL_ROOT = /net/openssl.098
-ZLIB_ROOT    = /djgpp/contrib/zlib.121
+ZLIB_ROOT    = /djgpp/contrib/zlib
 
 CC   = gcc
 YACC = bison -y
 
-CFLAGS = -g -O2 -I. -I../include -Wall -DHAVE_CONFIG_H -DHAVE_SPNEGO
+CFLAGS = -g -O2 -I. -I../include -I../lib -Wall -DHAVE_CONFIG_H
 
 ifeq ($(USE_SSL),1)
   CFLAGS += -DUSE_SSLEAY
@@ -52,6 +57,10 @@ endif
 
 ifeq ($(USE_IPV6),1)
   CFLAGS += -DENABLE_IPV6
+endif
+
+ifeq ($(USE_DEBUG),1)
+  CFLAGS += -DDEBUG=1 -DCURLDEBUG #-DMALLOCDEBUG=1 -DDPRINTF_DEBUG2=1
 endif
 
 #
