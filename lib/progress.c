@@ -172,18 +172,20 @@ void Curl_pgrsSetUploadCounter(struct SessionHandle *data, double size)
 
 void Curl_pgrsSetDownloadSize(struct SessionHandle *data, double size)
 {
-  if(size > 0) {
-    data->progress.size_dl = size;
+  data->progress.size_dl = size;
+  if(size > 0)
     data->progress.flags |= PGRS_DL_SIZE_KNOWN;
-  }
+  else
+    data->progress.flags &= ~PGRS_DL_SIZE_KNOWN;
 }
 
 void Curl_pgrsSetUploadSize(struct SessionHandle *data, double size)
 {
-  if(size > 0) {
-    data->progress.size_ul = size;
+  data->progress.size_ul = size;
+  if(size > 0)
     data->progress.flags |= PGRS_UL_SIZE_KNOWN;
-  }
+  else
+    data->progress.flags &= ~PGRS_UL_SIZE_KNOWN;
 }
 
 /* EXAMPLE OUTPUT to follow:
