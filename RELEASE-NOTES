@@ -10,6 +10,8 @@ Curl and libcurl 7.12.2
 
 This release includes the following changes:
 
+ o the IDN code now verifies that only TLD-legitmate letters are used in the
+   name or a warning is displayed (when verbose is enabled)
  o provides error texts for IDN errors
  o file upload parts in formposts now get their directory names cut off
  o added CURLINFO_OS_ERRNO
@@ -44,6 +46,7 @@ This release includes the following bugfixes:
  o curl_getdate() crash
  o downloading empty files now calls the write callback properly
  o no reverse DNS lookups for ip-only addresses with ipv6-enabled libcurl
+ o file handler leak when getting an empty file:// URL
  o libcurl works better multi-threaded on AIX (when built with xlc)
  o cookies over proxy didn't match the path properly
  o MSVC makefile fixes to build better
