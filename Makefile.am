@@ -13,10 +13,14 @@ bin_SCRIPTS = curl-config
 SUBDIRS = lib src
 DIST_SUBDIRS = $(SUBDIRS) tests include packages docs
 
-# create a root makefile in the distribution:
 dist-hook:
 	rm -rf $(top_builddir)/tests/log
-	cp $(srcdir)/Makefile.dist $(distdir)/Makefile
+	find $(distdir) -name "*.dist" -exec rm {} \;
+	(distit=`find $(srcdir) -name "*.dist"`; \
+	for file in $$distit; do \
+	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \
+	  cp $$file $(distdir)$$strip; \
+	done)
 
 html:
 	cd docs; make html
