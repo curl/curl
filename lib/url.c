@@ -2551,7 +2551,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   else if(strequal(conn->protostr, "FTP") ||
           strequal(conn->protostr, "FTPS")) {
 
-/* MN 06/07/02 */
 #ifndef CURL_DISABLE_FTP
     char *type;
     int port = PORT_FTP;
@@ -2626,8 +2625,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 	break;
       }
     }
-
-/* MN 06/07/02 */
 #else /* CURL_DISABLE_FTP */
     failf(data, LIBCURL_NAME
           " was built with FTP disabled, ftp/ftps: not supported!");
