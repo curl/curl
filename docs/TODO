@@ -18,9 +18,6 @@ To do in a future release (random order):
     specification).  The receiver will convert the data from the standard form
     to his own internal form."
 
- * Make the connect non-blocking so that timeouts work for connect in 
-   multi-threaded programs 
-
  * Consider an interface to libcurl that allows applications to easier get to
    know what cookies that are sent back in the response headers.
 
