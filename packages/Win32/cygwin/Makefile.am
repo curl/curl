@@ -19,7 +19,7 @@ cygwintmp = $(CURDIR)/cygwinbin-builddir
 
 cygwinbin:
 	rm -rf $(cygwintmp)
-	$(MAKE) -C $(top_builddir) install prefix=$(cygwintmp)/usr
+	$(MAKE) -C $(top_builddir) install-strip prefix=$(cygwintmp)/usr
 	$(mkinstalldirs) $(cygwintmp)/usr/doc/Cygwin \
 	                 $(cygwintmp)/usr/doc/$(PACKAGE)-$(VERSION)
 	cd $(top_srcdir); \
