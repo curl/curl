@@ -54,15 +54,19 @@ VERSION=-version-info 2:2:0
 if NO_UNDEFINED
 # The -no-undefined flag is CRUCIAL for this to build fine on Cygwin.
 UNDEF = -no-undefined
-else
-UNDEF =
+endif
+
+if MIMPURE
+# This is for gcc on Solaris (8+ ?) to avoid "relocations remain against
+# allocatable but non-writable sections" problems.
+MIMPURE = -mimpure-text
 endif
 
 if ARES
 ARESLIB = -lares -L$(top_builddir)/ares
 endif
 
-libcurl_la_LDFLAGS = $(UNDEF) $(VERSION) $(ARESLIB)
+libcurl_la_LDFLAGS = $(UNDEF) $(VERSION) $(ARESLIB) $(MIMPURE)
 
 libcurl_la_SOURCES = arpa_telnet.h file.c netrc.h timeval.c	\
 base64.c file.h hostip.c progress.c timeval.h base64.h formdata.c	\
