@@ -996,10 +996,20 @@ ConnectionExists(struct SessionHandle *data,
         }
         dead = SocketIsDead(check->firstsocket);
         if(dead) {
+          /*
+           * Even though the connection seems to have passed away, we could
+           * still make an effort to get the name information, as we intend to
+           * connect to the same host again.
+           *
+           * This is now subject to discussion. What do you think?
+           */
           infof(data, "Connection %d seems to be dead!\n", i);
           Curl_disconnect(check); /* disconnect resources */
           data->state.connects[i]=NULL; /* nothing here */
-          continue; /* try another one now */
+
+          /* There's no need to continue search, because we only store
+             one connection for each unique set of identifiers */
+          return FALSE;
         }
 
         *usethis = check;
