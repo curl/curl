@@ -99,6 +99,7 @@ static void DynaOpen(void)
            /* and some systems don't have the RTLD_GLOBAL symbol */
            RTLD_LAZY
 #endif
+#endif
            );
     libldap = dlopen("libldap.so", RTLD_LAZY);
   }
