@@ -6,6 +6,43 @@
 
                                History of Changes
 
+Daniel (3 Jun 2002)
+- T. Bharath fixed the CURLINFO_REDIRECT_TIME to return a correct time and
+  made the CURLINFO_REQUEST_SIZE return the correct total request size. He
+  also made the win32 timers use higher resolution than before.
+
+Daniel (29 May 2002)
+- Renaud Chaillat made me aware of the fact that libcurl returned an error if
+  you tried to get an empty FTP file. This seemed like a wrong thing to do, so
+  now it no longer does that! I just hope that no one built anything fancy
+  upon this unexpected behavior...
+
+Daniel (28 May 2002)
+- Cris Bailiff brought CURLOPT_CAPATH that works like CURLOPT_CAINFO but
+  specifies a path to a directory with certificates rather than a single file
+  with them all concatenated. --capath was added to the command line tool
+  for the same function.
+
+  Windows users need to pay attention that the directory should be setup with
+  the c_rehash tool of the OpenSSL package, and that creates symlinks by
+  default that need to be replaced with actual copies to work on Windows.
+
+- Gustaf Hui provided new code that changes how curl_multi_info_read()
+  messages are stored, so that they don't have to be kept around for the multi
+  handle's entire life time. He also made it return failure codes properly
+  which it didn't do before.
+
+Daniel (27 May 2002)
+- Gustaf Hui pointed out that running curl_multi_perform() without doing
+  curl_multi_fdset() first was not really a working combo. I added an internal
+  check for this and have some extra select() code without timeout to make the
+  library internals work identically nevertheless. We might need to somehow
+  either document that once you've used the *_fdset() you should remain using
+  them in select() or you should blank them somehow so that libcurl won't go
+  crazy.
+
+Version 7.9.8-pre1
+
 Daniel (22 May 2002)
 - James Cone brought an excellent patch, including several tests and docs!
   CURLOPT_NETRC now takes an enum as argument instead of the previous boolean.
