@@ -213,7 +213,7 @@ static void mkhash(char *password,
     0x4B, 0x47, 0x53, 0x21, 0x40, 0x23, 0x24, 0x25
   };
   int i;
-  int len = strlen(password);
+  size_t len = strlen(password);
 
   /* make it fit at least 14 bytes */
   pw = malloc(len<7?14:len*2);
@@ -282,8 +282,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 {
   const char *domain=""; /* empty */
   const char *host=""; /* empty */
-  int domlen=strlen(domain);
-  int hostlen = strlen(host);
+  int domlen=(int)strlen(domain);
+  int hostlen = (int)strlen(host);
   int hostoff; /* host name offset */
   int domoff;  /* domain name offset */
   size_t size;
