@@ -48,7 +48,9 @@ REQUIREMENTS
 
 MAC OS X
 
- For Mac OS X users, Guido Neitzer write down the following step-by-step guide:
+ With Mac OS X 10.2 and the associated Developer Tools, the installed versions
+ of the build tools are adequate.  For Mac OS X 10.1 users, Guido Neitzer
+ wrote the following step-by-step guide:
 
  1. Install fink (http://fink.sourceforge.net)
  2. Update fink to the newest version (with the installed fink)
