@@ -47,10 +47,6 @@ TODO
  * Set the SO_KEEPALIVE socket option to make libcurl notice and disconnect
    very long time idle connections.
 
- * Make sure we don't ever loop because of non-blocking sockets return
-   EWOULDBLOCK or similar. This concerns the HTTP request sending (and
-   especially regular HTTP POST), the FTP command sending etc.
-
  * Go through the code and verify that libcurl deals with big files >2GB and
    >4GB all over. Bug reports (and source reviews) indicate that it doesn't
    currently work properly.
@@ -63,8 +59,24 @@ TODO
    requested. That is, the download should even begin but be aborted
    immediately.
 
+ * Allow the http_proxy (and other) environment variables to contain user and
+   password as well in the style: http://proxyuser:proxypasswd@proxy:port
+   Berend Reitsma suggested.
+
+ LIBCURL - multi interface
+
+ * Make sure we don't ever loop because of non-blocking sockets return
+   EWOULDBLOCK or similar. This concerns the HTTP request sending (and
+   especially regular HTTP POST), the FTP command sending etc.
+
+ * Make uploads treated better. We need a way to tell libcurl we have data to
+   write, as the current system expects us to upload data each time the socket
+   is writable and there is no way to say that we want to upload data soon
+   just not right now, without that aborting the upload.
+
  DOCUMENTATION
 
+ * More and better
 
  FTP
 
@@ -173,6 +185,12 @@ TODO
    multi interface and friends will work for LDAP as well.
 
  CLIENT
+
+ * Add an option that prevents cURL from overwiting existing local files. When
+   used, and there already is an existing file with the target file name
+   (either -O or -o), a number should be appended (and increased if already
+   existing). So that index.html becomes first index.html.1 and then
+   index.html.2 etc. Jeff Pohlmeyer suggested.
 
  * "curl ftp://site.com/*.txt"
 
