@@ -153,6 +153,8 @@ struct asprintf {
   char *buffer; /* allocated buffer */
   size_t len;   /* length of string */
   size_t alloc; /* length of alloc */
+  bool fail;    /* TRUE if an alloc has failed and thus the output is not
+                   the complete data */
 };
 
 int curl_msprintf(char *buffer, const char *format, ...);
@@ -1032,8 +1034,10 @@ static int alloc_addbyter(int output, FILE *data)
  
   if(!infop->buffer) {
     infop->buffer=(char *)malloc(32);
-    if(!infop->buffer)
+    if(!infop->buffer) {
+      infop->fail = TRUE;
       return -1; /* fail */
+    }
     infop->alloc = 32;
     infop->len =0;
   }
@@ -1043,6 +1047,7 @@ static int alloc_addbyter(int output, FILE *data)
     newptr = (char *)realloc(infop->buffer, infop->alloc*2);
 
     if(!newptr) {
+      infop->fail = TRUE;
       return -1;
     }
     infop->buffer = newptr;
@@ -1065,11 +1070,12 @@ char *curl_maprintf(const char *format, ...)
   info.buffer = NULL;
   info.len = 0;
   info.alloc = 0;
+  info.fail = FALSE;
 
   va_start(ap_save, format);
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
   va_end(ap_save);
-  if(-1 == retcode) {
+  if((-1 == retcode) || info.fail) {
     if(info.alloc)
       free(info.buffer);
     return NULL;
@@ -1090,9 +1096,10 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
   info.buffer = NULL;
   info.len = 0;
   info.alloc = 0;
+  info.fail = FALSE;
 
   retcode = dprintf_formatf(&info, alloc_addbyter, format, ap_save);
-  if(-1 == retcode) {
+  if((-1 == retcode) || info.fail) {
     if(info.alloc)
       free(info.buffer);
     return NULL;
