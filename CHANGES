@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (13 December 2004)
+- Gisle fixed bug report #1083542, which pointed out a problem with resuming
+  large file (>4GB) file:// transfers on windows.
+
 Daniel (11 December 2004)
 - Made the test suite HTTP server (sws) capable of using IPv6, and then
   extended the test environment to support that and also added three test

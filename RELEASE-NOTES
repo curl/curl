@@ -25,6 +25,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o large file file:// resumes on Windows
  o URLs with username and IPv6 numerical addresses
  o configure works better with SSL libs in a "non-standard ld.so dir"
  o curl-config --vernum zero prefixed
