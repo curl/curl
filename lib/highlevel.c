@@ -722,6 +722,7 @@ CURLcode curl_transfer(CURL *curl)
         /* TBD: set the URL with curl_setopt() */
         data->url = data->newurl;
         data->newurl = NULL; /* don't show! */
+        data->bits.urlstringalloc = TRUE; /* the URL is allocated */
 
         /* Disable both types of POSTs, since doing a second POST when
            following isn't what anyone would want! */

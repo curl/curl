@@ -254,7 +254,8 @@ CURLcode http_done(struct connectdata *conn)
     *bytecount = http->readbytecount + http->writebytecount;
   }
 
-  /* TBD: the HTTP struct remains allocated here */
+  free(http);
+  data->proto.http=NULL; /* it is gone */
 
   return CURLE_OK;
 }

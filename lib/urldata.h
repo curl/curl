@@ -304,16 +304,18 @@ struct Configbits {
   bool mute;
   bool no_body;
   bool proxy_user_passwd;
-  bool proxystringalloc; /* the http proxy string is malloc()'ed */
   bool set_port;
   bool set_range;
-  bool rangestringalloc; /* the range string is malloc()'ed */
   bool upload;
   bool use_netrc;
   bool user_passwd;
   bool verbose;
   bool this_is_a_follow; /* this is a followed Location: request */
   bool krb4; /* kerberos4 connection requested */
+
+  bool proxystringalloc; /* the http proxy string is malloc()'ed */
+  bool rangestringalloc; /* the range string is malloc()'ed */
+  bool urlstringalloc;   /* the URL string is malloc()'ed */
 };
 
 /* What type of interface that intiated this struct */
