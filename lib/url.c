@@ -634,8 +634,9 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.use_port = va_arg(param, long);
     break;
   case CURLOPT_POST:
-    /* Does this option serve a purpose anymore? */
-
+    /* Does this option serve a purpose anymore? Yes it does, when
+       CURLOPT_POSTFIELDS isn't used and the POST data is read off the
+       callback! */
     if(va_arg(param, long))
       data->set.httpreq = HTTPREQ_POST;
     break;
