@@ -6,6 +6,83 @@
 
                                History of Changes
 
+Daniel (24 October 2001)
+- T. Bharath found a memory leak in the cookie engine. When we update a cookie
+  that we already knew about, we lost a chunk of memory in the progress... The
+  brand new test case 27 now tests for this occurrence. [http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/curl/curl/lib/cookie.c.diff?r1=1.24&r2=1.25]
+
+Daniel (23 October 2001)
+- pack_hostent() didn't properly align some pointers, so at least SPARC CPUs
+  would core. [http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/curl/curl/lib/hostip.c.diff?r1=1.34&r2=1.35]
+
+Daniel (22 October 2001)
+- Tom Benoist reported that this SGI IRIX compiler didn't handle indented
+  preprocessor instructions, so they're no longer in the source code!
+
+- Applied Kevin Roth's patches to make it easier to build cygwin packages from
+  the out-of-the-box curl release archives.
+
+- I forgot to mention it below, but libcurl now closes connections that report
+  transfer failures. Unconditionally. This could be made more nicely in the
+  future if we set a flag or something that the connection is still good to be
+  used for the errors that know that for a fact. We have to close the
+  connection for the cases where we abort for example a HTTP transfer in the
+  middle, or otherwise we might re-use that connection later with lots of data
+  still being sent to us on it.
+
+Daniel (19 October 2001)
+- CURLE_GOT_NOTHING is now returned when a HTTP server doesn't return
+  anything, not even a header. test case 37 was added to test for this.
+
+- T. Bharath made curl_easy_duphandle() properly clone the cookie status as
+  well.
+
+Version 7.9.1-pre4
+
+Daniel (18 October 2001)
+- CURLOPT_FAILONERROR, set with "curl --fail" no longer returns an error if
+  the HTTP return code is below 400.
+
+Daniel (17 October 2001)
+- The test suite now kills any running test http server when you re-start the
+  tests.
+
+- We had to remote 'use strict' from two perl scripts, as the cygwin
+  adjustments didn't play nicely otherwise for some reason. Any perl wizard
+  out there who can put the scrict back and still make it run good on unix and
+  cygwin?
+
+- A potential memory leak pointed out to us by Yanick Pelletier was removed.
+  It would occur when a http file transfer fails. [http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/curl/curl/lib/transfer.c.diff?r1=1.60&r2=1.61]
+
+- The memory debugging system should no longer display anything to stderr
+  if the curl_memdebug() hasn't been used to explicitly say so. This makes it
+  easier to use the memory debug system and switch the logging on/off.
+
+Daniel (16 October 2001)
+- Kevin Roth provided fixes for building curl nicer in cygwin environments.
+
+Daniel (12 October 2001)
+- Cleaning up the progress meter/info code. The "current speed" is now more
+  accurate than before as we now use the true time spent between the measures,
+  and not just "assuming" every-second-update like before. The output should
+  now also be of the same width at all times, never to show "extra" zeroes on
+  the right edge.
+
+- After talking about possible Location: bugs on the mailing list, I modified
+  the "absolute URL" checker in lib/transfer.c to be more strict when checking
+  if the redirected URL is absolute.
+
+Daniel (11 October 2001)
+- Kevin Roth provided patches that make the test suite run fine on Windows
+  2000 running cygwin.
+
+Daniel (10 October 2001)
+- Setting the -c or the CURLOPT_COOKIEJAR option now enables the cookie parser.
+  Previously -b or CURLOPT_COOKIEFILE was also required for the jar to work.
+
+Version 7.9.1-pre3
+
 Daniel (9 October 2001)
 - Added a new option to the command line client: -0/--http1.0. It uses the new
   libcurl option CURLOPT_HTTP_VERSION to request that libcurl uses HTTP 1.0
