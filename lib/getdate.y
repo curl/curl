@@ -751,7 +751,7 @@ LookupWord (YYSTYPE *yylval, char *buff)
   /* Make it lowercase. */
   for (p = buff; *p; p++)
     if (ISUPPER ((unsigned char) *p))
-      *p = tolower (*p);
+      *p = tolower ((int)*p);
 
   if (strcmp (buff, "am") == 0 || strcmp (buff, "a.m.") == 0)
     {
