@@ -1,0 +1,34 @@
+.\" You can view this file with:
+.\" nroff -man curl-config.1
+.\" Written by Daniel Stenberg
+.\"
+.TH curl-config 1 "18 March 2001" "Curl 7.7.2" "curl-config manual"
+.SH NAME
+curl-config \- Get information about a libcurl installation
+.SH SYNOPSIS
+.B curl-config [options]
+.SH DESCRIPTION
+.B curl-config
+displays information about a previous curl and libcurl installation.
+.SH OPTIONS
+.IP "--cflags"
+What set of CFLAGS that was used when libcurl was built. This is mostly a
+debug option that serves no particular use to most people.
+.IP "--feature"
+Lists what particular main features the installed libcurl was built with. At
+the time of writing, this list may include SSL, KRB4 or IPv6. Do not assume
+any particular order. The keywords will be separated by newlines. There may be
+none, one or several keywords in the list.
+.IP "--help"
+Displays the available options.
+.IP "--libs"
+Shows the complete set of libs and other linker options you will need in order
+to link your application with libcurl.
+.IP "--prefix"
+This is the prefix used when libcurl was installed. Libcurl is then installed
+in \$prefix/lib and its header files are installed in \$prefix/include and so
+on. The prefix is set with "configure --prefix".
+.IP "--version"
+Outputs version information about the installed libcurl.
+.SH "SEE ALSO"
+.BR curl (1)
