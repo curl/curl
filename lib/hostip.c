@@ -562,6 +562,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
     memset(buf, 0, CURL_NAMELOOKUP_SIZE);
 #ifdef HAVE_GETHOSTBYNAME_R_5
     /* Solaris, IRIX and more */
+    (void)res; /* prevent compiler warning */
     while(!h) {
       h = gethostbyname_r(hostname,
                           (struct hostent *)buf,
