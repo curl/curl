@@ -50,7 +50,7 @@ echo "buildconf: autoheader version $ah_version (ok)"
 #--------------------------------------------------------------------------
 # automake 1.5 or newer
 #
-am_version=`${AUTOMAKE:-automake} --version 2>/dev/null|head -1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
+am_version=`${AUTOMAKE:-automake} --version 2>/dev/null|head -1| sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//'`
 if test -z "$am_version"; then
   echo "buildconf: automake not found."
   echo "            You need automake version 1.5 or newer installed."
@@ -107,12 +107,12 @@ fi
 echo "buildconf: libtool version $lt_pversion (ok)"
 
 echo "buildconf: running aclocal"
-aclocal           || die "The command 'aclocal' failed"
+${ACLOCAL:-aclocal}       || die "The command '${AUTOHEADER:-aclocal}' failed"
 echo "buildconf: running autoheader"
-autoheader        || die "The command 'autoheader' failed"
+${AUTOHEADER:-autoheader} || die "The command '${AUTOHEADER:-autoheader}' failed"
 echo "buildconf: running autoconf"
-autoconf          || die "The command 'autoconf' failed"
+${AUTOCONF:-autoconf}     || die "The command '${AUTOCONF:-autoconf}' failed"
 echo "buildconf: running automake"
-automake -a       || die "The command 'automake -a' failed"
+${AUTOMAKE:-automake} -a  || die "The command '${AUTOMAKE:-automake} -a' failed"
 
 exit 0
