@@ -2672,7 +2672,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   }
 
   /* loop through the list of given URLs */
-  while(urlnode) {
+  while(urlnode && !res) {
 
     /* get the full URL (it might be NULL) */
     url=urlnode->url;
@@ -2765,10 +2765,11 @@ operate(struct Configurable *config, int argc, char *argv[])
           free(storefile);
           if(!outfile) {
             /* bad globbing */
-            helpf("bad output glob!\n");
-            return CURLE_FAILED_INIT;
+            fprintf(stderr, "bad output glob!\n");
+            free(url);
+            res = CURLE_FAILED_INIT;
+            break;
           }
-
         }
       
         /* Create the directory hierarchy, if not pre-existant to a multiple
