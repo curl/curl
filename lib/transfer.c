@@ -220,7 +220,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
       /* read! */
       result = Curl_read(conn, conn->sockfd, k->buf,
-                         BUFSIZE -1, &nread);
+                         data->set.buffer_size?
+                         data->set.buffer_size:BUFSIZE -1,
+                         &nread);
 
       if(0>result)
         break; /* get out of loop */

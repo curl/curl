@@ -631,6 +631,7 @@ struct UserDefined {
   struct ssl_config_data ssl;  /* user defined SSL stuff */
 
   int dns_cache_timeout; /* DNS cache timeout */
+  long buffer_size;      /* size of receive buffer to use */
   
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
