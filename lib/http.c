@@ -429,22 +429,6 @@ CURLcode Curl_http(struct connectdata *conn)
       }
     }
   }
-  if(data->bits.set_range) {
-    /*
-     * A range is selected. We use different headers whether we're downloading
-     * or uploading and we always let customized headers override our internal
-     * ones if any such are specified.
-     */
-    if((data->httpreq == HTTPREQ_GET) &&
-       !checkheaders(data, "Range:")) {
-      data->ptr_rangeline = aprintf("Range: bytes=%s\015\012", data->range);
-    }
-    else if((data->httpreq != HTTPREQ_GET) &&
-            !checkheaders(data, "Content-Range:")) {
-      data->ptr_rangeline = aprintf("Content-Range: bytes=%s\015\012",
-                                    data->range);
-    }
-  }
   if((data->bits.http_set_referer) && !checkheaders(data, "Referer:")) {
     data->ptr_ref = aprintf("Referer: %s\015\012", data->referer);
   }
@@ -539,6 +523,34 @@ CURLcode Curl_http(struct connectdata *conn)
         }
       }
       /* we've passed, proceed as normal */
+    }
+  }
+  if(data->bits.set_range) {
+    /*
+     * A range is selected. We use different headers whether we're downloading
+     * or uploading and we always let customized headers override our internal
+     * ones if any such are specified.
+     */
+    if((data->httpreq == HTTPREQ_GET) &&
+       !checkheaders(data, "Range:")) {
+      data->ptr_rangeline = aprintf("Range: bytes=%s\r\n", data->range);
+    }
+    else if((data->httpreq != HTTPREQ_GET) &&
+            !checkheaders(data, "Content-Range:")) {
+
+      if(data->resume_from) {
+        /* This is because "resume" was selected */
+        long total_expected_size= data->resume_from + data->infilesize;
+        data->ptr_rangeline = aprintf("Content-Range: bytes %s%ld/%ld\r\n",
+                                      data->range, total_expected_size-1,
+                                      total_expected_size);
+      }
+      else {
+        /* Range was selected and then we just pass the incoming range and 
+           append total size */
+        data->ptr_rangeline = aprintf("Content-Range: bytes %s/%d\r\n",
+                                      data->range, data->infilesize);
+      }
     }
   }
 
