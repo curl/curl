@@ -39,7 +39,7 @@
 
 char *curl_escape(char *string, int length)
 {
-  int alloc = (length?length:strlen(string))+1;  
+  int alloc = (length?length:(int)strlen(string))+1;  
   char *ns = malloc(alloc);
   unsigned char in;
   int newlen = alloc;
@@ -77,7 +77,7 @@ char *curl_escape(char *string, int length)
 
 char *curl_unescape(char *string, int length)
 {
-  int alloc = (length?length:strlen(string))+1;
+  int alloc = (length?length:(int)strlen(string))+1;
   char *ns = malloc(alloc);
   unsigned char in;
   int index=0;
