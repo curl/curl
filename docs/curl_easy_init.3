@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_init 3 "14 August 2001" "libcurl 7.8.1" "libcurl Manual"
+.TH curl_easy_init 3 "1 March 2002" "libcurl 7.8.1" "libcurl Manual"
 .SH NAME
 curl_easy_init - Start a libcurl session
 .SH SYNOPSIS
@@ -17,14 +17,6 @@ intializes curl and this call MUST have a corresponding call to
 .I curl_easy_cleanup
 when the operation is complete.
 
-On win32 systems, if you want to init the winsock stuff manually, libcurl will
-not do that for you. WSAStartup() and WSACleanup() should then be called
-accordingly.  If you want libcurl to handle this, use the CURL_GLOBAL_WIN32
-flag in the initial curl_global_init() call.
-
-Using libcurl 7.7 and later, you should perform all your sequential file
-transfers using the same curl handle. This enables libcurl to use persistant
-connections where possible.
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the
 other curl functions.
