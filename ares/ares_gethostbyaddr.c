@@ -87,10 +87,10 @@ static void next_lookup(struct addr_query *aquery)
 	{
 	case 'b':
 	  addr = ntohl(aquery->addr.s_addr);
-	  a1 = (int)(addr >> 24) & 0xff;
-	  a2 = (int)(addr >> 16) & 0xff;
-	  a3 = (int)(addr >> 8) & 0xff;
-	  a4 = (int)addr & 0xff;
+	  a1 = (int)((addr >> 24) & 0xff);
+	  a2 = (int)((addr >> 16) & 0xff);
+	  a3 = (int)((addr >> 8) & 0xff);
+	  a4 = (int)(addr & 0xff);
 	  sprintf(name, "%d.%d.%d.%d.in-addr.arpa", a4, a3, a2, a1);
 	  aquery->remaining_lookups = p + 1;
 	  ares_query(aquery->channel, name, C_IN, T_PTR, addr_callback,
