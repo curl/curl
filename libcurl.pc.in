@@ -1,0 +1,10 @@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+libdir=@libdir@
+includedir=@includedir@
+
+Name: libcurl
+Description: Library to transfer files with ftp, http, etc.
+Version: @VERSION@
+Libs: -L${libdir} -lcurl @LDFLAGS@ @LIBS@
+Cflags: -I${includedir}
