@@ -98,10 +98,9 @@ static void getssl_version(char *ptr, long *num)
 char *curl_version(void)
 {
   static char version[200];
-  char *ptr;
-  int len = sizeof(version);
-  strcpy(version, LIBCURL_NAME "/" LIBCURL_VERSION );
-  ptr=strchr(version, '\0');
+  char *ptr=version;
+  strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION );
+  ptr=strchr(ptr, '\0');
 
 #ifdef USE_SSLEAY
   {
@@ -110,7 +109,6 @@ char *curl_version(void)
     ptr=strchr(version, '\0');
   }
 #endif
-  len -= strlen(version);
 
 #ifdef HAVE_KRB4
   sprintf(ptr, " krb4");
