@@ -692,6 +692,9 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   conn->data = data; /* remember our daddy */
   conn->state = CONN_INIT;
 
+  conn->upload_bufsize = UPLOAD_BUFSIZE; /* the smallest upload buffer size
+                                            we use */
+
   buf = data->buffer; /* this is our buffer */
 
 #if 0
