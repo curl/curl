@@ -340,7 +340,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 {
   struct SessionHandle *data = conn->data;
   int rc;
-  int sockfd;
+  int sockfd=-1;
   int aliasindex=0;
 
   struct timeval after;
@@ -459,11 +459,18 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /*
    * Connecting with IPv4-only support
    */
-
+  if(!remotehost->h_addr_list[0]) {
+    /* If there is no addresses in the address list, then we return
+       error right away */
+    failf(data, "no address available");
+    return CURLE_COULDNT_CONNECT;
+  }
   /* create an IPv4 TCP socket */
   sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if(-1 == sockfd)
+  if(-1 == sockfd) {
+    failf(data, "couldn't create socket");
     return CURLE_COULDNT_CONNECT; /* big time error */
+  }
   
   if(conn->data->set.device) {
     /* user selected to bind the outgoing socket to a specified "device"
