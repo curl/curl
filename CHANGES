@@ -7,6 +7,19 @@
                                   Changelog
 
 
+Daniel (24 October)
+- I've introduced a -t option to the runtests.pl script. With that option set,
+  the script runs special "memory torture" tests. For each test command line
+  in that section, the script first runs the command line and counts the total
+  amount of allocations made. It then runs the exact same command line again,
+  forcing allocation number N to fail. It will try every N from 1 to the total
+  number of amounts made. For every invoke, it checks that no memory was
+  leaked as that would indicate a bad cleanup somewhere in the code.
+
+  This is just beginning to work, and I've already made some corrections in
+  libcurl code. When this code works somewhat fine, I'll make sure 'make test'
+  in the root dir will run these tests as well.
+
 Daniel (23 October)
 - Georg Horn fixed how the CA verification is made. Verifications can now be
   made while at the same time the result of it can be ignored. This also
