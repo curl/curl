@@ -73,8 +73,6 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "sendf.h"
-#include "formdata.h"
-#include "progress.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -96,11 +94,6 @@
 #define  SB_PEEK()   ((*subpointer)&0xff)
 #define  SB_EOF() (subpointer >= subend)
 #define  SB_LEN() (subend - subpointer)
-
-static
-void telwrite(struct UrlData *data,
-	      unsigned char *buffer,	/* Data to write */
-	      int count);		/* Number of bytes to write */
 
 static
 void telrcv(struct UrlData *data,
@@ -826,36 +819,6 @@ void telrcv(struct UrlData *data,
    }
 }
 
-static
-void telwrite(struct UrlData *data,
-	      unsigned char *buffer,	/* Data to write */
-	      int count)		/* Number of bytes to write */
-{
-   unsigned char outbuf[2];
-   int out_count = 0;
-   int bytes_written;
-
-   while(count--)
-   {
-      outbuf[0] = *buffer++;
-      out_count = 1;
-      if(outbuf[0] == IAC)
-	 outbuf[out_count++] = IAC;
-      
-#ifndef USE_SSLEAY
-      bytes_written = swrite(data->firstsocket, outbuf, out_count);
-#else
-      if (data->ssl.use) {
-        bytes_written = SSL_write(data->ssl.handle, (char *)outbuf,
-                                  out_count);
-      }
-      else {
-        bytes_written = swrite(data->firstsocket, outbuf, out_count);
-      }
-#endif /* USE_SSLEAY */
-   }
-}
-
 CURLcode Curl_telnet_done(struct connectdata *conn)
 {
   return CURLE_OK;
@@ -870,7 +833,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
 
   bool keepon = TRUE;
   char *buf = data->buffer;
-  int nread;
+  size_t nread;
 
   init_telnet(data);
    
@@ -880,49 +843,49 @@ CURLcode Curl_telnet(struct connectdata *conn)
 
   keepfd = readfd;
 
-   while (keepon)
-   {
-      readfd = keepfd;		/* set this every lap in the loop */
+  while (keepon) {
+    readfd = keepfd;		/* set this every lap in the loop */
 
-      switch (select (sockfd + 1, &readfd, NULL, NULL, NULL))
-      {
-      case -1:			/* error, stop reading */
-	 keepon = FALSE;
-	 continue;
-      case 0:			/* timeout */
-	 break;
-      default:			/* read! */
-	 if(FD_ISSET(1, &readfd))
-	 {
-	    nread = read(1, buf, 255);
-	    telwrite(data, (unsigned char *)buf, nread);
-	 }
+    switch (select (sockfd + 1, &readfd, NULL, NULL, NULL)) {
+    case -1:			/* error, stop reading */
+      keepon = FALSE;
+      continue;
+    case 0:			/* timeout */
+      break;
+    default:			/* read! */
+      if(FD_ISSET(1, &readfd)) { /* read from stdin */
+        unsigned char outbuf[2];
+        int out_count = 0;
+        size_t bytes_written;
+        char *buffer = buf;
+        
+        nread = read(1, buf, 255);
 
-	 if(FD_ISSET(sockfd, &readfd))
-	 {
-#ifndef USE_SSLEAY
-	    nread = sread (sockfd, buf, BUFSIZE - 1);
-#else
-	    if (data->ssl.use) {
-	       nread = SSL_read (data->ssl.handle, buf, BUFSIZE - 1);
-	    }
-	    else {
-	       nread = sread (sockfd, buf, BUFSIZE - 1);
-	    }
-#endif /* USE_SSLEAY */
-	 }
-
-	 /* if we receive 0 or less here, the server closed the connection and
-	   we bail out from this! */
-	if (nread <= 0) {
-	  keepon = FALSE;
-	  break;
-	}
-
-	 telrcv(data, (unsigned char *)buf, nread);
+        while(nread--) {
+          outbuf[0] = *buffer++;
+          out_count = 1;
+          if(outbuf[0] == IAC)
+            outbuf[out_count++] = IAC;
+      
+          Curl_write(conn, data->firstsocket, outbuf,
+                     out_count, &bytes_written);
+        }
       }
-   }
-   return CURLE_OK;
+
+      if(FD_ISSET(sockfd, &readfd))
+        Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
+
+      /* if we receive 0 or less here, the server closed the connection and
+         we bail out from this! */
+      if (nread <= 0) {
+        keepon = FALSE;
+        break;
+      }
+
+      telrcv(data, (unsigned char *)buf, nread);
+    }
+  }
+  return CURLE_OK;
 }
 
 
