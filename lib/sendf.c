@@ -392,13 +392,15 @@ int Curl_debug(struct SessionHandle *data, curl_infotype type,
     return (*data->set.fdebug)(data, type, ptr, size,
                                data->set.debugdata);
 
-  if(type >= CURLINFO_DATA_IN)
-    /* don't do the data parts now */
-    return 0;
-
-  fwrite(s_infotype[type], 2, 1, data->set.err);
-  fwrite(ptr, size, 1, data->set.err);
-
+  switch(type) {
+  case CURLINFO_TEXT:
+  case CURLINFO_HEADER_OUT:
+    fwrite(s_infotype[type], 2, 1, data->set.err);
+    fwrite(ptr, size, 1, data->set.err);
+    break;
+  default: /* nada */
+    break;
+  }
   return 0;
 }
 
