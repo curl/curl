@@ -1,0 +1,16 @@
+
+Describe the test stuff
+
+Requires:
+  perl, sh
+
+Run:
+  (should be) 'make test'
+
+Logs:
+  All logs are generated in the logs/ subdirctory (it is emtpied first
+  in the runtests.sh script)
+
+Data:
+  All test-data are put in the data/ subdirctory. Further descriptions on
+  the data format must be added here.
