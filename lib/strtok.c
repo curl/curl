@@ -43,7 +43,7 @@ Curl_strtok_r(char *ptr, const char *sep, char **end)
     char *start = ptr;
 
     /* set the end pointer to the first byte after the start */
-    *end = ptr + 1;
+    *end = start + 1;
 
     /* scan through the string to find where it ends, it ends on a
        null byte or a character that exists in the separator string */
