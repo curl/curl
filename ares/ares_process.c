@@ -42,7 +42,7 @@
 #include "ares_dns.h"
 #include "ares_private.h"
 
-#if defined(WIN32) || defined(WATT32)
+#if (defined(WIN32) || defined(WATT32)) && !defined(MSDOS)
 #define GET_ERRNO()  WSAGetLastError()
 #else
 #define GET_ERRNO()  errno
