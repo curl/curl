@@ -418,6 +418,10 @@ typedef enum {
      function */
   CINIT(PASSWDDATA, OBJECTPOINT, 67),
 
+  /* Pass a pointer to a time_t to get a possible date of the requested
+     document! Pass a NULL to shut it off. */
+  CINIT(FILETIME, OBJECTPOINT, 68),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
@@ -465,8 +469,8 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.4.2"
-#define LIBCURL_VERSION_NUM 0x070402
+#define LIBCURL_VERSION "7.5-pre2"
+#define LIBCURL_VERSION_NUM 0x070500
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
@@ -687,8 +691,9 @@ typedef enum {
   CURLINFO_HEADER_SIZE      = CURLINFO_LONG   + 11,
   CURLINFO_REQUEST_SIZE     = CURLINFO_LONG   + 12,
   CURLINFO_SSL_VERIFYRESULT = CURLINFO_LONG   + 13,
+  CURLINFO_FILETIME         = CURLINFO_LONG   + 14,
 
-  CURLINFO_LASTONE          = 14
+  CURLINFO_LASTONE          = 15
 } CURLINFO;
 
 /*
