@@ -20,6 +20,11 @@
 
 #ifndef HAVE_INET_PTON
 
+#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#define EAFNOSUPPORT WSAEAFNOSUPPORT
+#include <winsock.h>
+#else
+
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -34,6 +39,7 @@
 #endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
 #endif
 #include <string.h>
 #include <errno.h>
@@ -51,8 +57,8 @@
  * sizeof(int) < 4.  sizeof(int) > 4 is fine; all the world's not a VAX.
  */
 
-static int	inet_pton4(const char *src, u_char *dst);
-static int	inet_pton6(const char *src, u_char *dst);
+static int	inet_pton4(const char *src, unsigned char *dst);
+static int	inet_pton6(const char *src, unsigned char *dst);
 
 /* int
  * inet_pton(af, src, dst)
@@ -96,11 +102,11 @@ Curl_inet_pton(af, src, dst)
 static int
 inet_pton4(src, dst)
 	const char *src;
-	u_char *dst;
+	unsigned char *dst;
 {
 	static const char digits[] = "0123456789";
 	int saw_digit, octets, ch;
-	u_char tmp[INADDRSZ], *tp;
+	unsigned char tmp[INADDRSZ], *tp;
 
 	saw_digit = 0;
 	octets = 0;
@@ -150,11 +156,11 @@ inet_pton4(src, dst)
 static int
 inet_pton6(src, dst)
 	const char *src;
-	u_char *dst;
+	unsigned char *dst;
 {
 	static const char xdigits_l[] = "0123456789abcdef",
 			  xdigits_u[] = "0123456789ABCDEF";
-	u_char tmp[IN6ADDRSZ], *tp, *endp, *colonp;
+	unsigned char tmp[IN6ADDRSZ], *tp, *endp, *colonp;
 	const char *xdigits, *curtok;
 	int ch, saw_xdigit;
 	u_int val;
@@ -192,8 +198,8 @@ inet_pton6(src, dst)
 			}
 			if (tp + INT16SZ > endp)
 				return (0);
-			*tp++ = (u_char) (val >> 8) & 0xff;
-			*tp++ = (u_char) val & 0xff;
+			*tp++ = (unsigned char) (val >> 8) & 0xff;
+			*tp++ = (unsigned char) val & 0xff;
 			saw_xdigit = 0;
 			val = 0;
 			continue;
@@ -209,8 +215,8 @@ inet_pton6(src, dst)
 	if (saw_xdigit) {
 		if (tp + INT16SZ > endp)
 			return (0);
-		*tp++ = (u_char) (val >> 8) & 0xff;
-		*tp++ = (u_char) val & 0xff;
+		*tp++ = (unsigned char) (val >> 8) & 0xff;
+		*tp++ = (unsigned char) val & 0xff;
 	}
 	if (colonp != NULL) {
 		/*
