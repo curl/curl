@@ -777,9 +777,6 @@ CURLcode Curl_perform(CURL *curl)
 
 	if (data->maxredirs && (data->followlocation >= data->maxredirs)) {
 	  failf(data,"Maximum (%d) redirects followed", data->maxredirs);
-#ifdef USE_OLD_DISCONNECT
-          curl_disconnect(c_connect);
-#endif
           res=CURLE_TOO_MANY_REDIRECTS;
 	  break;
 	}
@@ -828,13 +825,8 @@ CURLcode Curl_perform(CURL *curl)
           protsep=strstr(url_clone, "//");
           if(!protsep)
             protsep=url_clone;
-          else {
-            port=FALSE; /* we got a full URL and thus we should not obey the
-                           port number that might have been set by the user
-                           in data->use_port */
-
+          else
             protsep+=2; /* pass the slashes */
-          }
 
           if('/' != conn->newurl[0]) {
             /* First we need to find out if there's a ?-letter in the URL,
@@ -941,15 +933,8 @@ CURLcode Curl_perform(CURL *curl)
            */
           break;
         }
-#ifdef USE_OLD_DISCONNECT
-        curl_disconnect(c_connect);
-#endif
         continue;
       }
-
-#ifdef USE_OLD_DISCONNECT
-      curl_disconnect(c_connect);
-#endif
     }
     break; /* it only reaches here when this shouldn't loop */
 
