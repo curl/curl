@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (14 July 2004)
+- Günter Knauf has made the Netware builds do without the config-netware.h
+  files, so they are now removed from the dist packages.
+
+- Günter Knauf made curl and libcurl build with Borland again.
+
+- Andres Garcia fixed the common test 505 failures on windows.
+
 Daniel (6 July 2004)
 - Andrés García found out why the windows tests failed on file:// "uploads".
 
