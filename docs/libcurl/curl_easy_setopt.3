@@ -175,6 +175,10 @@ curl_debug_callback (CURL *, curl_infotype, char *, size_t, void *);\fP
 This function will receive debug information if CURLOPT_VERBOSE is
 enabled. The curl_infotype argument specifies what kind of information it
 is. This funtion must return 0.
+
+NOTE: the data pointed to by the char * passed to this function WILL NOT be
+zero terminated, but will be exactly of the size as told by the size_t
+argument.
 .TP
 .B CURLOPT_DEBUGDATA
 Pass a pointer to whatever you want passed in to your CURLOPT_DEBUGFUNCTION in
