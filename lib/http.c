@@ -91,6 +91,7 @@
 #include "http_digest.h"
 #include "http_ntlm.h"
 #include "http_negotiate.h"
+#include "url.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -552,6 +553,12 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
       failf(data, "Received error code %d from proxy", httperror);
     return CURLE_RECV_ERROR;
   }
+  
+  /* If a proxy-authorization header was used for the proxy, then we should
+     make sure that it isn't accidentally used for the document request
+     after we've connected. So let's free and clear it here. */
+  Curl_safefree(conn->allocptr.proxyuserpwd);
+  conn->allocptr.proxyuserpwd = NULL;
 
   infof (data, "Proxy replied to CONNECT request\n");
   return CURLE_OK;
