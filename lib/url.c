@@ -506,7 +506,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Parse the $HOME/.netrc file
      */
-    data->set.use_netrc = va_arg(param, long);
+    data->set.use_netrc = (enum CURL_NETRC_OPTION)va_arg(param, long);
     break;
   case CURLOPT_NETRC_FILE:
     /*
@@ -557,7 +557,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Set HTTP time condition. This must be one of the defines in the
      * curl/curl.h header file.
      */
-    data->set.timecondition = va_arg(param, long);
+    data->set.timecondition = (curl_TimeCond)va_arg(param, long);
     break;
   case CURLOPT_TIMEVALUE:
     /*
@@ -1070,10 +1070,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
         }
       }
     }
+    break;
 #else
     return CURLE_SSL_ENGINE_NOTFOUND;
 #endif
-    break;
   case CURLOPT_SSLENGINE_DEFAULT:
     /*
      * flag to set engine as default.
@@ -1241,7 +1241,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Set proxy type. HTTP/SOCKS4/SOCKS5
      */
-    data->set.proxytype = va_arg(param, long);
+    data->set.proxytype = (curl_proxytype)va_arg(param, long);
     break;
 
   case CURLOPT_PRIVATE:
@@ -1269,7 +1269,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Make FTP transfers attempt to use SSL/TLS.
      */
-    data->set.ftp_ssl = va_arg(param, long);
+    data->set.ftp_ssl = (curl_ftpssl)va_arg(param, long);
     break;
 
   case CURLOPT_IPRESOLVE:
