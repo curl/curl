@@ -51,7 +51,7 @@ use Cwd;
 BEGIN { $^W = 1; }
 
 use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog
-            $buildlogname $gnulikebuild $targetos $confsuffix $binext);
+            $buildlogname $gnulikebuild $targetos $confsuffix $binext $libext);
 use vars qw($name $email $desc $confopts $setupfile);
 
 # version of this script
@@ -79,6 +79,7 @@ while ($ARGV[0]) {
 $gnulikebuild = 1;
 $confsuffix = '';
 $binext = '';
+$libext = '.a';
 if ($^O eq 'MSWin32' || $targetos ne '') {
   $gnulikebuild = 0;
   if ($targetos eq '') {
@@ -88,9 +89,10 @@ if ($^O eq 'MSWin32' || $targetos ne '') {
   if ($targetos =~ /vc/ || $targetos =~ /mingw32/) {
     $confsuffix = '-win32';
     $binext = '.exe';
+    $libext = '.lib' if ($targetos =~ /vc/);
   } elsif ($targetos =~ /netware/) {
-    $confsuffix = '-netware';
     $binext = '.nlm';
+    $libext = '.lib';
   }
 }
 
@@ -156,7 +158,7 @@ if (open(F, "$setupfile")) {
   close(F);
   $infixed=$fixed;
 } else {
-  $infixed=0;		# so that "additional args to configure" works properly first time...
+  $infixed=0;    # so that "additional args to configure" works properly first time...
 }
 
 if (!$name) {
@@ -307,13 +309,12 @@ if ($CVS) {
     close(LOG);
 
     if (grepfile("^buildconf: OK", $buildlog)) {
-        logit "buildconf was successful";
+      logit "buildconf was successful";
     } else {
-       mydie "buildconf was NOT successful";
+      mydie "buildconf was NOT successful";
     }
   } else {
-    system("buildconf.bat") if ($^O eq 'MSWin32');
-    # logit "buildconf was successful (dummy message)" if ($^O eq 'linux');
+    logit "buildconf was successful (dummy message)";
   }
 
 }
@@ -341,10 +342,14 @@ if ($gnulikebuild) {
     mydie "configure didn't work";
   }
 } else {
-  system("xcopy /s /q ..\\$CURLDIR .") if ($^O eq 'MSWin32');
-  if ($^O eq 'linux') {
+  if ($^O eq 'MSWin32') {
+    system("xcopy /s /q ..\\$CURLDIR .");
+    system("buildconf.bat");
+  } elsif ($^O eq 'linux') {
     system("cp -ar ../$CURLDIR/* ."); 
-    system("cp -a ../$CURLDIR/Makefile.dist Makefile"); 
+    system("cp -af ../$CURLDIR/Makefile.dist Makefile"); 
+    system("make -i -C lib -f Makefile.$targetos prebuild");
+    system("make -i -C src -f Makefile.$targetos prebuild");
   }
 }
 
@@ -367,17 +372,21 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
 
   logit "build ares";
   chdir "ares";
-  open(F, "make 2>&1 |") or die;
+  if ($targetos ne '') {
+    open(F, "make -f Makefile.$targetos 2>&1 |") or die;
+  } else {
+    open(F, "make 2>&1 |") or die;
+  }
   while (<F>) {
     s/$pwd//g;
     print;
   }
   close(F);
 
-  if (-f "libcares.a") {
-    logit "ares is now built successfully";
+  if (-f "libcares$libext") {
+    logit "ares is now built successfully (libcares.$libext)";
   } else {
-    logit "ares build failed";
+    logit "ares build failed (libares.$libext)";
   }
 
   # cd back to the curl build dir
