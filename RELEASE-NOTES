@@ -26,6 +26,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o -T upload multiple files with backslashes in file names
  o modified credentials between two requests on a persistent http connection
  o large file file:// resumes on Windows
  o URLs with username and IPv6 numerical addresses
@@ -69,6 +70,6 @@ advice from friends like these:
  Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips,
  Wojciech Zwiefka, David Phillips, Reinout van Schouwen, Maurice Barnum,
  Richard Atterer, Rene Bernhardt, Matt Veenstra, Bryan Henderson, Ton Voon,
- Kai Sommerfeld, David Byron, Harshal Pradhan
+ Kai Sommerfeld, David Byron, Harshal Pradhan, Tom Lee
 
         Thanks! (and sorry if I forgot to mention someone)

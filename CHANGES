@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (15 December 2004)
+- Tom Lee found out that globbing of strings with backslashes didn't work as
+  you'd expect. Backslashes are such a central part of windows file names that
+  forcing backslashes to have to be escaped with backslashes is a bit too
+  awkward to users. Starting now, you only need to escape globbing characters
+  such as the five letters: "[]{},". Added test case 214 to verify this.
+
 Daniel (14 December 2004)
 - Harshal Pradhan patched a HTTP persistent connection flaw: if the user name
   and/or password were modified between two requests on a persistent

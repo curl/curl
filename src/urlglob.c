@@ -73,6 +73,8 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
   ++glob->size;
 
   while (1) {
+    bool skip;
+
     switch (*pattern) {
     case '\0':                  /* URL ended while set was still open */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
@@ -122,14 +124,28 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
       return GLOB_ERROR;
 
     case '\\':                          /* escaped character, skip '\' */
-      if (*(buf+1) == '\0') {           /* but no escaping of '\0'! */
-        snprintf(glob->errormsg, sizeof(glob->errormsg),
-                 "illegal pattern at pos %d\n", (int)pos);
-        return GLOB_ERROR;
+      switch(pattern[1]) {
+      case '[':
+      case ']':
+      case '{':
+      case '}':
+      case ',':
+        skip = TRUE;
+        break;
+      default:
+        skip = FALSE;
+        break;
       }
-      ++pattern;
-      ++pos;                            /* intentional fallthrough */
-
+      if(skip) {
+        if (*(buf+1) == '\0') {           /* but no escaping of '\0'! */
+          snprintf(glob->errormsg, sizeof(glob->errormsg),
+                   "illegal pattern at pos %d\n", (int)pos);
+          return GLOB_ERROR;
+        }
+        ++pattern;
+        ++pos;
+      }
+      /* intentional fallthrough */
     default:
       *buf++ = *pattern++;              /* copy character to set element */
       ++pos;
