@@ -404,12 +404,12 @@ SPEED LIMIT
   To have curl abort the download if the speed is slower than 3000 bytes per
   second for 1 minute, run:
 
-        curl -y 3000 -Y 60 www.far-away-site.com
+        curl -Y 3000 -y 60 www.far-away-site.com
 
   This can very well be used in combination with the overall time limit, so
   that the above operatioin must be completed in whole within 30 minutes:
 
-        curl -m 1800 -y 3000 -Y 60 www.far-away-site.com
+        curl -m 1800 -Y 3000 -y 60 www.far-away-site.com
 
 CONFIG FILE
 
