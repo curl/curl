@@ -5,4 +5,5 @@ Makefile
 .deps
 .libs
 config.h
-stamp-h1
+stamp-*
+ca-bundle.h
