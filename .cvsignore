@@ -1,0 +1,9 @@
+config.log
+Makefile
+libtool
+Makefile.in
+aclocal.m4
+configure
+config.h
+config.status
+curl-config
