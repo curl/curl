@@ -116,6 +116,7 @@ Global Preparation
  Repeated calls to curl_global_init() and curl_global_cleanup() should be
  avoided. They should only be called once each.
 
+
 Handle the Easy libcurl
 
  libcurl version 7 is oriented around the so called easy interface. All
@@ -213,6 +214,23 @@ Handle the Easy libcurl
  again. Mind you, it is even preferred that you re-use an existing handle if
  you intend to make another transfer. libcurl will then attempt to re-use the
  previous
+
+
+Multi-threading issues
+
+ libcurl is completely thread safe, except for two issues: signals and alarm
+ handlers. Signals are needed for a SIGPIPE handler, and the alarm() syscall
+ is used to catch timeouts (mostly during DNS lookup).
+
+ So when using multiple threads you should first ignore SIGPIPE in your main
+ thread and set the CURLOPT_NOSIGNAL option to TRUE for all handles.
+
+ Everything will work fine except that timeouts are not honored during the DNS
+ lookup - this would require some sort of asynchronous DNS lookup (which is
+ planned for a future libcurl version).
+
+ For SIGPIPE info see the UNIX Socket FAQ at
+ http://www.unixguide.net/network/socketfaq/2.22.shtml
 
 
 When It Doesn't Work
