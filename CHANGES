@@ -6,6 +6,12 @@
 
                                History of Changes
 
+Daniel (19 January 2002)
+- Antonio filed bug report #505514 and provided a fix! When doing multipart
+  formposts, libcurl would include an error text in the actual post if a
+  specified file wasn't found. This is not libcurl's job. Instead we add an
+  empty part.
+
 Daniel (18 January 2002)
 - Played around with stricter compiler warnings for gcc (when ./configure
   --enable-debug is used) and changed some minor things to stop the warnings.

@@ -48,6 +48,10 @@ TODO
  * Set the SO_KEEPALIVE socket option to make libcurl notice and disconnect
    very long time idle connections.
 
+ * Make sure we don't ever loop because of non-blocking sockets return
+   EWOULDBLOCK or similar. This concerns the HTTP request sending, the FTP
+   command sending etc.
+
  DOCUMENTATION
 
  * Document all CURLcode error codes, why they happen and what most likely
