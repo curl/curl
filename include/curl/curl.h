@@ -467,8 +467,8 @@ struct curl_slist {
 	struct curl_slist	*next;
 };
 
-struct curl_slist *curl_slist_append(struct curl_slist *list, char *data);
-void curl_slist_free_all(struct curl_slist *list);
+struct curl_slist *curl_slist_append(struct curl_slist *, const char *);
+void curl_slist_free_all(struct curl_slist *);
 
 /*
  * NAME curl_getdate()
