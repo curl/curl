@@ -311,6 +311,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     passwdp = conn->passwd;
     ntlm = &conn->ntlm;
   }
+
+  if(!userp || !passwdp)
+    /* no user, no auth */
+    return CURLE_OK;
   
   switch(ntlm->state) {
   case NTLMSTATE_TYPE1:
