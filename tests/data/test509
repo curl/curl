@@ -47,4 +47,9 @@ Pragma: no-cache
 Accept: */*
 
 </protocol>
+# valgrind detects numerous problems in OpenSSL for this test case, disable
+# the valgrind logfile scan
+<valgrind>
+disable
+</valgrind>
 </verify>
