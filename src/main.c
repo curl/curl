@@ -1256,7 +1256,47 @@ void progressbarinit(struct ProgressData *bar)
 
 }
 
-int main(int argc, char *argv[])
+void free_config_fields(struct Configurable *confp)
+{
+  if(confp->url)
+    free(confp->url);
+  if(confp->userpwd)
+    free(confp->userpwd);
+  if(confp->postfields)
+    free(confp->postfields);
+  if(confp->proxy)
+    free(confp->proxy);
+  if(confp->proxyuserpwd)
+    free(confp->proxyuserpwd);
+  if(confp->cookie)
+    free(confp->cookie);
+  if(confp->cookiefile)
+    free(confp->cookiefile);
+  if(confp->krb4level)
+    free(confp->krb4level);
+  if(confp->headerfile)
+    free(confp->headerfile);
+  if(confp->outfile)
+    free(confp->outfile);
+  if(confp->infile)
+    free(confp->infile);
+  if(confp->range)
+    free(confp->range);
+  if(confp->customrequest)
+    free(confp->customrequest);
+  if(confp->writeout)
+    free(confp->writeout);
+  if(confp->httppost)
+    curl_formfree(confp->httppost);
+
+  curl_slist_free_all(confp->quote); /* the checks for confp->quote == NULL */
+  curl_slist_free_all(confp->postquote); /*  */
+  curl_slist_free_all(confp->headers); /*  */
+}
+
+
+static int 
+operate(int argc, char *argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
   char useragent[128]; /* buah, we don't want a larger default user agent */
@@ -1291,8 +1331,6 @@ int main(int argc, char *argv[])
   curl_memdebug("memdump");
 #endif
 
-  memset(&config, 0, sizeof(struct Configurable));
-  
   config.showerror=TRUE;
   config.conf=CONF_DEFAULT;
 #if 0
@@ -1686,37 +1724,7 @@ int main(int argc, char *argv[])
     printf("--%s--\n", MIMEseparator);
 #endif
 
-  if(config.url)
-    free(config.url);
-  if(config.userpwd)
-    free(config.userpwd);
-  if(config.postfields)
-    free(config.postfields);
-  if(config.proxy)
-    free(config.proxy);
-  if(config.proxyuserpwd)
-    free(config.proxyuserpwd);
-  if(config.cookie)
-    free(config.cookie);
-  if(config.cookiefile)
-    free(config.cookiefile);
-  if(config.krb4level)
-    free(config.krb4level);
-  if(config.headerfile)
-    free(config.headerfile);
-  if(config.outfile)
-    free(config.outfile);
-  if(config.infile)
-    free(config.infile);
-  if(config.range)
-    free(config.range);
-  if(config.customrequest)
-    free(config.customrequest);
-  if(config.writeout)
-    free(config.writeout);
-
-  if(config.httppost)
-    curl_formfree(config.httppost);
+  free_config_fields(&config);
 
   if(allocuseragent)
     free(config.useragent);
@@ -1724,9 +1732,17 @@ int main(int argc, char *argv[])
   /* cleanup memory used for URL globbing patterns */
   glob_cleanup(urls);
 
-  curl_slist_free_all(config.quote); /* the checks for config.quote == NULL */
-  curl_slist_free_all(config.postquote); /*  */
-  curl_slist_free_all(config.headers); /*  */
+  return res;
+}
+
+
+int main(int argc, char *argv[])
+{
+  int res;
+  memset(&config, 0, sizeof(struct Configurable));
+  
+  res = operate(argc, argv);
+  free_config_fields(&config);
 
   return res;
 }
