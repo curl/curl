@@ -731,7 +731,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     break;
   case CURLOPT_PROXY:
     /*
-     * Set proxy server:port to use as HTTP proxy
+     * Set proxy server:port to use as HTTP proxy.
+     *
+     * If the proxy is set to "" we explicitly say that we don't want to use a
+     * proxy (even though there might be environment variables saying so).
+     *
+     * Setting it to NULL, means no proxy but allows the environment variables
+     * to decide for us.
      */
     if(data->change.proxy_alloc) {
       /*
@@ -2137,6 +2143,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->protocol |= PROT_FTP;
 
     if(data->change.proxy &&
+       *data->change.proxy &&
        !data->set.tunnel_thru_httpproxy) {
       /* Unless we have asked to tunnel ftp operations through the proxy, we
          switch and use HTTP operations only */
@@ -2316,7 +2323,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
   }
 
-  if(data->change.proxy) {
+  if(data->change.proxy && *data->change.proxy) {
     /* If this is supposed to use a proxy, we need to figure out the proxy
        host name name, so that we can re-use an existing connection
        that may exist registered to the same proxy host. */
@@ -2630,7 +2637,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* re-used connection, no resolving is necessary */
     hostaddr = NULL;
   }
-  else if(!data->change.proxy) {
+  else if(!data->change.proxy || !*data->change.proxy) {
     /* If not connecting via a proxy, extract the port from the URL, if it is
      * there, thus overriding any defaults that might have been set above. */
     conn->port =  conn->remote_port; /* it is the same port */
@@ -2720,7 +2727,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * Send user-agent to HTTP proxies even if the target protocol
    * isn't HTTP.
    *************************************************************/
-  if((conn->protocol&PROT_HTTP) || data->change.proxy) {
+  if((conn->protocol&PROT_HTTP) ||
+     (data->change.proxy && *data->change.proxy)) {
     if(data->set.useragent) {
       if(conn->allocptr.uagent)
         free(conn->allocptr.uagent);
