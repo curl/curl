@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* Using CURLOPT_FAILONERROR (-f/--fail) will make authentication to stop
+  working if you use anything but plain Basic auth.
+
 * LDAP output is garbled. Hardly anyone seems to care about LDAP functionality
   in curl/libcurl why this report has been closed and set to be solved later.
   If you feel this is something you want fixed, get in touch and we'll start
