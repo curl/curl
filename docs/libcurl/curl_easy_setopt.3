@@ -533,9 +533,9 @@ due to some limitation in openssl. (Added in 7.9.8)
 Pass a pointer to a \fIcurl_passwd_callback\fP function that will be called
 instead of the internal one if libcurl requests a password. The function must
 match this prototype: \fBint my_getpass(void *client, char *prompt, char*
-buffer, int buflen );\fP.  If set to NULL, it equals to making the function
-always fail. If the function returns a non-zero value, it will abort the
-operation and an error (CURLE_BAD_PASSWORD_ENTERED) will be returned.
+buffer, int buflen );\fP.  If set to NULL, it sets back the function to the
+internal default one. If the function returns a non-zero value, it will abort
+the operation and an error (CURLE_BAD_PASSWORD_ENTERED) will be returned.
 \fIclient\fP is a generic pointer, see \fICURLOPT_PASSWDDATA\fP.  \fIprompt\fP
 is a zero-terminated string that is text that prefixes the input request.
 \fIbuffer\fP is a pointer to data where the entered password should be stored
