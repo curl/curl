@@ -23,6 +23,8 @@
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_CRYPTO_AUTH
+
 #ifndef USE_SSLEAY
 /* This code segment is only used if OpenSSL is not provided, as if it is
    we use the MD5-function provided there instead. No good duplicating
@@ -346,3 +348,5 @@ void Curl_md5it(unsigned char *outbuffer, /* 16 bytes */
   MD5_Update(&ctx, input, strlen((char *)input));
   MD5_Final(outbuffer, &ctx);
 }
+
+#endif

@@ -1473,6 +1473,25 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 
+dnl ************************************************************
+dnl disable cryptographic authentication
+dnl
+AC_MSG_CHECKING([whether to enable cryptographic authentication methods])
+AC_ARG_ENABLE(crypto-auth,
+AC_HELP_STRING([--enable-crypto-auth],[Enable cryptographic authentication])
+AC_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_CRYPTO_AUTH, 1, [to disable cryptographic authentication])
+       AC_SUBST(CURL_DISABLE_CRYPTO_AUTH)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 
 AC_CONFIG_FILES([Makefile \

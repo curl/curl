@@ -330,6 +330,7 @@ Curl_http_output_auth(struct connectdata *conn,
         }
         data->state.authproxy.done = TRUE;
       }
+#ifndef CURL_DISABLE_CRYPTO_AUTH
       else if(data->state.authproxy.want == CURLAUTH_DIGEST) {
         auth=(char *)"Digest";
         result = Curl_output_digest(conn,
@@ -339,7 +340,7 @@ Curl_http_output_auth(struct connectdata *conn,
         if(result)
           return result;
       }
-
+#endif
       infof(data, "Proxy auth using %s with user '%s'\n",
             auth, conn->proxyuser?conn->proxyuser:"");
     }
@@ -373,6 +374,7 @@ Curl_http_output_auth(struct connectdata *conn,
       else
 #endif
       {
+#ifndef CURL_DISABLE_CRYPTO_AUTH
         if(data->state.authhost.picked == CURLAUTH_DIGEST) {
           auth=(char *)"Digest";
           result = Curl_output_digest(conn,
@@ -381,8 +383,9 @@ Curl_http_output_auth(struct connectdata *conn,
                                       (unsigned char *)path);
           if(result)
             return result;
-        }
-        else if(data->state.authhost.picked == CURLAUTH_BASIC) {
+        } else
+#endif
+        if(data->state.authhost.picked == CURLAUTH_BASIC) {
           if(conn->bits.user_passwd &&
              !checkheaders(data, "Authorization:")) {
             auth=(char *)"Basic";
@@ -489,6 +492,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
     }
     else
 #endif
+#ifndef CURL_DISABLE_CRYPTO_AUTH
       if(checkprefix("Digest", start)) {
         CURLdigest dig;
         *availp |= CURLAUTH_DIGEST;
@@ -504,7 +508,9 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
           data->state.authproblem = TRUE;
         }
       }
-      else if(checkprefix("Basic", start)) {
+      else
+#endif
+      if(checkprefix("Basic", start)) {
         *availp |= CURLAUTH_BASIC;
         authp->avail |= CURLAUTH_BASIC;
         if(authp->picked == CURLAUTH_BASIC) {

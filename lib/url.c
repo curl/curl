@@ -250,7 +250,9 @@ CURLcode Curl_close(struct SessionHandle *data)
   }
   Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
 
+#ifndef CURL_DISABLE_CRYPTO_AUTH
   Curl_digest_cleanup(data);
+#endif
 #endif
 
   /* free the connection cache */

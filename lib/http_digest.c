@@ -22,7 +22,7 @@
  ***************************************************************************/
 #include "setup.h"
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
