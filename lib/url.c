@@ -153,16 +153,20 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_SSL_Close_All(data);
 #endif
 
+  if(data->state.auth_host)
+    free(data->state.auth_host);
+
   if(data->change.proxy_alloc)
     free(data->change.proxy);
+
   if(data->change.referer_alloc)
     free(data->change.referer);
+
   if(data->change.url_alloc)
     free(data->change.url);
 
   if(data->state.headerbuff)
     free(data->state.headerbuff);
-
 
   if(data->set.cookiejar)
     /* we have a "destination" for all the cookies to get dumped to */
@@ -1762,7 +1766,6 @@ static CURLcode Connect(struct SessionHandle *data,
     conn->protocol |= PROT_HTTP;
     conn->curl_do = Curl_http;
     conn->curl_done = Curl_http_done;
-    conn->curl_close = Curl_http_close;
   }
   else if (strequal(conn->protostr, "HTTPS")) {
 #ifdef USE_SSLEAY
@@ -1775,7 +1778,6 @@ static CURLcode Connect(struct SessionHandle *data,
     conn->curl_do = Curl_http;
     conn->curl_done = Curl_http_done;
     conn->curl_connect = Curl_http_connect;
-    conn->curl_close = Curl_http_close;
 
 #else /* USE_SSLEAY */
     failf(data, LIBCURL_NAME
@@ -1795,7 +1797,6 @@ static CURLcode Connect(struct SessionHandle *data,
     conn->protocol |= PROT_GOPHER;
     conn->curl_do = Curl_http;
     conn->curl_done = Curl_http_done;
-    conn->curl_close = Curl_http_close;
   }
   else if(strequal(conn->protostr, "FTP") ||
           strequal(conn->protostr, "FTPS")) {
@@ -1827,7 +1828,6 @@ static CURLcode Connect(struct SessionHandle *data,
       }
       conn->curl_do = Curl_http;
       conn->curl_done = Curl_http_done;
-      conn->curl_close = Curl_http_close;
     }
     else {
       conn->curl_do = Curl_ftp;
