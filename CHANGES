@@ -7,6 +7,15 @@
                                History of Changes
 
 
+Daniel (15 March 2001)
+- Added --connect-timeout to curl, which sets the new CURLOPT_CONNECTTIMEOUT
+  option in libcurl. It limits the time curl is allowed to spend in the
+  connection phase. This differs from -m/--max-time that limits the entire
+  file transfer operation. Requested by Larry Fahnoe and more.
+
+  I also updated the curl.1 and curl_easy_setopt.3 man pages and removed the
+  item from the TODO.
+
 Daniel (14 March 2001)
 - Made curl grok IPv6 with HTTP proxies and got everything to compile nicely
   again when ENABLE_IPV6 is set.
