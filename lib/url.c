@@ -1877,7 +1877,7 @@ static void verboseconnect(struct connectdata *conn,
 #ifdef ENABLE_IPV6
   {
     char hbuf[NI_MAXHOST];
-#ifdef NI_WITHSCOPEID
+#ifdef HAVE_NI_WITHSCOPEID
 #define NIFLAGS NI_NUMERICHOST | NI_WITHSCOPEID
 #else
 #define NIFLAGS NI_NUMERICHOST
