@@ -2278,7 +2278,7 @@ static int my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
 
       if( size*1000 > config->recvpersecond*timediff) {
         /* figure out how many milliseconds to rest */
-        sleep_time = size*1000/config->recvpersecond - timediff;
+        sleep_time = (long)(size*1000/config->recvpersecond - timediff);
 
         /*
          * Make sure we don't sleep for so long that we trigger the speed
@@ -2351,7 +2351,7 @@ static int my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
 
       if( xfered*1000 > config->sendpersecond*timediff) {
         /* figure out how many milliseconds to rest */
-        sleep_time = xfered*1000/config->sendpersecond - timediff;
+        sleep_time = (long)(xfered*1000/config->sendpersecond - timediff);
         if(sleep_time > 0) {
           go_sleep (sleep_time);
           now = curlx_tvnow();
@@ -2361,7 +2361,7 @@ static int my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
       
       if(size > config->sendpersecond) {
         /* lower the size to actually read */
-        nmemb = config->sendpersecond;
+        nmemb = (size_t)config->sendpersecond;
         sz = 1;
       }
     }
