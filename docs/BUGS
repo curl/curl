@@ -8,28 +8,44 @@ $Id$
 BUGS
 
   Curl and libcurl have grown substantially since the beginning. At the time
-  of writing (mid March 2001), there are 23000 lines of source code, and by
+  of writing (end of April 2002), there are 32000 lines of source code, and by
   the time you read this it has probably grown even more.
 
   Of course there are lots of bugs left. And lots of misfeatures.
 
   To help us make curl the stable and solid product we want it to be, we need
-  bug reports and bug fixes. If you can't fix a bug yourself and submit a fix
-  for it, try to report an as detailed report as possible to the curl mailing
-  list to allow one of us to have a go at a solution. You should also post
-  your bug/problem at curl's bug tracking system over at
+  bug reports and bug fixes.
+
+WHERE TO REPORT
+
+  If you can't fix a bug yourself and submit a fix for it, try to report an as
+  detailed report as possible to the curl mailing list to allow one of us to
+  have a go at a solution. You should also post your bug/problem at curl's bug
+  tracking system over at
 
         http://sourceforge.net/bugs/?group_id=976
 
-  When reporting a bug, you should include information that will help us
-  understand what's wrong, what you expected to happen and how to repeat the
-  bad behavior. You therefore need to supply your operating system's name and
-  version number (uname -a under a unix is fine), what version of curl you're
-  using (curl -V is fine), what URL you were working with and anything else
-  you think matters.
+  (but please read the section below first before doing that)
 
-  Since curl deals with networks, it often helps us a lot if you include a
-  protocol debug dump with your bug report. The output you get by using the -v
+WHAT TO REPORT
+
+  When reporting a bug, you should include information that will help us
+  understand what's wrong what you expected to happen and how to repeat the
+  bad behavior. You therefore need to tell us:
+
+   - your operating system's name and version number (uname -a under a unix
+     is fine)
+   - what version of curl you're using (curl -V is fine)
+   - what URL you were working with (if possible), at least which protocol
+
+  and anything and everything else you think matters. Tell us what you
+  expected to happen, tell use what did happen, tell us how you could make it
+  work another way. Dig around, try out, test. Then include all the tiny bits
+  and pieces in your report. You will benefit from this yourself, as it will
+  enable us to help you quicker and more accurately.
+
+  Since curl deals with networks, it often helps us if you include a protocol
+  debug dump with your bug report. The output you get by using the -v
   flag. Usually, you also get more info by using -i so that is likely to be
   useful when reporting bugs as well.
 
