@@ -443,6 +443,23 @@ static char *file2memory(FILE *file, long *size)
     return NULL; /* no string */
 }
 
+void clean_getout(struct Configurable *config)
+{
+  struct getout *node=config->url_list;
+  struct getout *next;
+
+  while(node) {
+    next = node->next;
+    if(node->url)
+      free(node->url);
+    if(node->outfile)
+      free(node->outfile);
+    free(node);
+
+    node = next; /* GOTO next */
+  }
+}
+
 struct getout *new_getout(struct Configurable *config)
 {
   struct getout *node =malloc(sizeof(struct getout));
@@ -1480,6 +1497,7 @@ operate(struct Configurable *config, int argc, char *argv[])
             /* no text */
             break;
           }
+          clean_getout(config);
 	  return CURLE_FAILED_INIT;
         }
 
@@ -1530,7 +1548,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     /* save outfile pattern before expansion */
     outfiles = urlnode->outfile?strdup(urlnode->outfile):NULL;
 
-    if (!outfiles || strequal(outfiles, "-") && urlnum > 1) {
+    if ((!outfiles || strequal(outfiles, "-")) && urlnum > 1) {
       /* multiple files extracted to stdout, insert separators! */
       separator = 1;
     }
