@@ -292,8 +292,18 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               k->hbufp = data->state.headerbuff + hbufp_index;
             }
             strcpy (k->hbufp, k->str);
-            k->hbufp += strlen (k->str);
-            k->hbuflen += strlen (k->str);
+            k->hbufp += str_length;
+            k->hbuflen += str_length;
+            if (!k->headerline && (k->hbuflen>5)) {
+              /* make a first check that this looks like a HTTP header */
+              if(!strnequal(data->state.headerbuff, "HTTP/", 5)) {
+                /* this is not the beginning of a HTTP first header line */
+                k->header = FALSE;
+                k->badheader = TRUE;
+                break;
+              }
+            }
+
             break;		/* read more and try again */
           }
 
@@ -496,22 +506,24 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               }
             }
             else {
-              k->header = FALSE;	/* this is not a header line */
+              k->header = FALSE;   /* this is not a header line */
+              k->badheader = TRUE; /* this was a bad header */
               break;
             }
           }
+
           /* check for Content-Length: header lines to get size */
           if (strnequal("Content-Length:", k->p, 15) &&
               sscanf (k->p+15, " %ld", &k->contentlength)) {
             conn->size = k->contentlength;
             Curl_pgrsSetDownloadSize(data, k->contentlength);
-          }
+            }
           /* check for Content-Type: header lines to get the mime-type */
           else if (strnequal("Content-Type:", k->p, 13)) {
             char *start;
             char *end;
             int len;
-
+              
             /* Find the first non-space letter */
             for(start=k->p+14;
                 *start && isspace((int)*start);
@@ -525,10 +537,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             /* allocate memory of a cloned copy */
             data->info.contenttype = malloc(len + 1);
             if (NULL == data->info.contenttype)
-	      return CURLE_OUT_OF_MEMORY;
+              return CURLE_OUT_OF_MEMORY;
 
             /* copy the content-type string */
-	    memcpy(data->info.contenttype, start, len);
+            memcpy(data->info.contenttype, start, len);
             data->info.contenttype[len] = 0; /* zero terminate */
           }
           else if((k->httpversion == 10) &&
@@ -690,8 +702,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
            buffer. */
 
         if (!k->header) {
-          /* the next token and forward is not part of
-             the header! */
+          /* starting here, this is not part of the header! */
 
           /* we subtract the remaining header size from the buffer */
           nread -= (k->str - k->buf);
@@ -712,8 +723,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if (conn->newurl) {
               /* abort after the headers if "follow Location" is set */
               infof (data, "Follow to new URL: %s\n", conn->newurl);
-                k->keepon &= ~KEEP_READ;
-                FD_ZERO(&k->rkeepfd);
+              k->keepon &= ~KEEP_READ;
+              FD_ZERO(&k->rkeepfd);
               return CURLE_OK;
             }
             else if (conn->resume_from &&
@@ -804,8 +815,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
         Curl_pgrsSetDownloadCounter(data, (double)k->bytecount);
             
-        if(!conn->bits.chunk && nread) {
+        if(!conn->bits.chunk && (nread || k->badheader)) {
           /* If this is chunky transfer, it was already written */
+
+          if(k->badheader) {
+            /* we parsed a piece of data wrongly assuming it was a header
+               and now we output it as body instead */
+            result = Curl_client_write(data, CLIENTWRITE_BODY,
+                                       data->state.headerbuff,
+                                       k->hbuflen);
+            k->badheader = FALSE; /* taken care of now */
+          }
 
           /* This switch handles various content encodings. If there's an
              error here, be sure to check over the almost identical code in

@@ -229,6 +229,8 @@ struct Curl_transfer_keeper {
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
   bool header;	                /* incoming data has HTTP header */
+  bool badheader;		/* the header was deemed bad and will be
+                                   written as body */
   int headerline;		/* counts header lines to better track the
                                    first one */
   char *hbufp;			/* points at *end* of header line */
@@ -245,8 +247,6 @@ struct Curl_transfer_keeper {
   bool write_after_100_header;  /* should we enable the write after
                                    we received a 100-continue/timeout
                                    or directly */
-
-  /* for content-encoding 08/28/02 jhrg */
   int content_encoding;  	/* What content encoding. sec 3.5, RFC2616. */
 
 #define IDENTITY 0		/* No encoding */
