@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "16 June 2000" "Curl 7.0" "libcurl Manual"
+.TH curl_easy_setopt 3 "24 August 2000" "Curl 7.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -19,6 +19,8 @@ options are set with the
 followed by a parameter. That parameter can be a long, a function pointer or
 an object pointer, all depending on what the option in question expects. Read
 this manual carefully as bad input values may cause libcurl to behave badly!
+You can only set one option in each function call. A typical application uses
+many calls in the setup phase.
 
 The
 .I "handle"
@@ -117,7 +119,7 @@ CURLOPT_INFILE and CURLOPT_INFILESIZE are also interesting for uploads.
 A non-zero parameter tells the library to do a regular HTTP post. This is a
 normal application/x-www-form-urlencoded kind, which is the most commonly used
 one by HTML forms. See the CURLOPT_POSTFIELDS option for how to specify the
-data to post.
+data to post and CURLOPT_POSTFIELDSIZE in how to set the data size.
 .TP
 .B CURLOPT_FTPLISTONLY
 A non-zero parameter tells the library to just list the names of an ftp
@@ -187,6 +189,12 @@ few minutes risk aborting perfectly normal operations.
 .B CURLOPT_POSTFIELDS
 Pass a char * as parameter, which should be the full data to post in a HTTP
 post operation. See also the CURLOPT_POST.
+.TP
+.B CURLOPT_POSTFIELDSIZE
+If you want to post data to the server without letting libcurl do a strlen()
+to measure the data size, this option must be used. Also, when this option is
+used, you can post fully binary data which otherwise is likely to fail. If
+this size is set to zero, the library will use strlen() to get the data size.
 .TP
 .B CURLOPT_REFERER
 Pass a pointer to a zero terminated string as parameter. It will be used to
