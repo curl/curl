@@ -1147,7 +1147,7 @@ sub singletest {
     }
 
     my %replyattr = getpartattr("reply", "data");
-    if(!$replyattr{'nocheck'} && @reply) {
+    if(!$replyattr{'nocheck'} && (@reply || $replyattr{'sendzero'})) {
         # verify the received data
         my @out = loadarray($CURLOUT);
         $res = compare("data", \@out, \@reply);

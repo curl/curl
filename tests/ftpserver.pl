@@ -318,7 +318,9 @@ sub RETR_command {
         $size += length($_);
     }
 
-    if($size) {
+    my %hash = getpartattr("reply", "data");
+
+    if($size || $hash{'sendzero'}) {
     
         if($rest) {
             # move read pointer forward
