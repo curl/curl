@@ -774,6 +774,9 @@ CURLcode _ftp(struct connectdata *conn)
         free(hostdataptr);
         return CURLE_FTP_PORT_FAILED;
       }
+      if(hostdataptr)
+        /* free the memory used for name lookup */
+        free(hostdataptr);
     }
     else {
       failf(data, "could't find my own IP address (%s)", myhost);
