@@ -327,7 +327,7 @@ CURLcode http(struct connectdata *conn)
   }
   if ((data->bits.httpproxy) && !(conn->protocol&PROT_HTTPS))  {
     /* The path sent to the proxy is in fact the entire URL */
-    strncpy(ppath, data->url, URL_MAX_LENGTH-1);
+    ppath = data->url;
   }
   if(data->bits.http_formpost) {
     /* we must build the whole darned post sequence first, so that we have

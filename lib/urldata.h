@@ -175,7 +175,7 @@ struct connectdata {
   char proto[64];
   char gname[256];
   char *name;
-  char path[URL_MAX_LENGTH];
+  char *path; /* formerly staticly this size: URL_MAX_LENGTH */
   char *ppath;
   long bytecount;
   struct timeval now;

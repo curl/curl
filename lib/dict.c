@@ -233,7 +233,7 @@ CURLcode dict(struct connectdata *conn)
       int i;
 	
       ppath++;
-      for (i = 0; (i < URL_MAX_LENGTH) && (ppath[i]); i++) {
+      for (i = 0; ppath[i]; i++) {
         if (ppath[i] == ':')
           ppath[i] = ' ';
       }

@@ -677,6 +677,9 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
   if(conn->hostent_buf) /* host name info */
     free(conn->hostent_buf);
 
+  if(conn->path) /* the URL path part */
+    free(conn->path);
+
   free(conn); /* free the connection oriented data */
 
   /* clean up the sockets and SSL stuff from the previous "round" */
@@ -696,6 +699,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 #ifdef HAVE_SIGACTION
   struct sigaction sigact;
 #endif
+  int urllen;
 
   if(!data || (data->handle != STRUCT_OPEN))
     return CURLE_BAD_FUNCTION_ARGUMENT; /* TBD: make error codes */
@@ -734,13 +738,25 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 
 #endif
 
+  /* We need to allocate memory to store the path in. We get the size of the
+     full URL to be sure, and we need to make it at least 256 bytes since
+     other parts of the code will rely on this fact */
+#define LEAST_PATH_ALLOC 256
+  urllen=strlen(data->url);
+  if(urllen < LEAST_PATH_ALLOC)
+    urllen=LEAST_PATH_ALLOC;
+  
+  conn->path=(char *)malloc(urllen);
+  if(NULL == conn->path)
+    return CURLE_OUT_OF_MEMORY; /* really bad error */
+
   /* Parse <url> */
   /* We need to parse the url, even when using the proxy, because
    * we will need the hostname and port in case we are trying
    * to SSL connect through the proxy -- and we don't know if we
    * will need to use SSL until we parse the url ...
    */
-  if((2 == sscanf(data->url, "%64[^:]://%" URL_MAX_LENGTH_TXT "[^\n]",
+  if((2 == sscanf(data->url, "%64[^:]://%[^\n]",
                   conn->proto,
                   conn->path)) && strequal(conn->proto, "file")) {
     /* we deal with file://<host>/<path> differently since it
@@ -760,11 +776,11 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     strcpy(conn->path, "/");
 
     if (2 > sscanf(data->url,
-                   "%64[^\n:]://%256[^\n/]%" URL_MAX_LENGTH_TXT "[^\n]",
+                   "%64[^\n:]://%256[^\n/]%[^\n]",
                    conn->proto, conn->gname, conn->path)) {
       
       /* badly formatted, let's try the browser-style _without_ 'http://' */
-      if((1 > sscanf(data->url, "%256[^\n/]%" URL_MAX_LENGTH_TXT "[^\n]",
+      if((1 > sscanf(data->url, "%256[^\n/]%[^\n]",
                      conn->gname, conn->path)) ) {
         failf(data, "<url> malformed");
         return CURLE_URL_MALFORMAT;
@@ -1548,6 +1564,8 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
        in the connectdata struct, free those here */
     conn = (struct connectdata *)*in_connect;
     if(conn) {
+      if(conn->path)
+        free(conn->path);
       if(conn->hostent_buf)
         free(conn->hostent_buf);
       free(conn);
