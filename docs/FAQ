@@ -1,4 +1,4 @@
-Updated: May 15, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: May 29, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -34,6 +34,7 @@ FAQ
   3.8 How do I tell curl to follow HTTP redirects?
   3.9 How do I use curl in PHP, Perl, Tcl, Ruby or Java?
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
+  3.11 How do I POST with a different Content-Type?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -346,6 +347,13 @@ FAQ
 
   Using libcurl or PHP's curl modules is just as fine and you'd just use the
   proper library options to do the same.
+
+  3.11 How do I POST with a different Content-Type?
+
+  You can always replace the internally generated headers with -H/--header.
+  To make a simple HTTP POST with text/xml as content-type, do something like:
+
+        curl -d "datatopost" -H "Content-Type: text/xml" [URL]
 
 4. Running Problems
 
