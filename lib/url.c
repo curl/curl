@@ -500,6 +500,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */ 
     data->set.ftp_create_missing_dirs = va_arg( param , long )?TRUE:FALSE;
     break;
+  case CURLOPT_FTP_RESPONSE_TIMEOUT:
+    /*
+     * An FTP option that specifies how quickly an FTP response must be 
+     * obtained before it is considered failure.
+     */
+    data->set.ftp_response_timeout = va_arg( param , long );
+    break;
   case CURLOPT_FTPLISTONLY:
     /*
      * An FTP option that changes the command to one that asks for a list

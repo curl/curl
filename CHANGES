@@ -6,6 +6,21 @@
 
                                   Changelog
 
+Early (4 September)
+- Added CURLOPT_FTP_RESPONSE_TIMEOUT - allows user to set strict timeout
+  requirements on the FTP server's ability to respond to individual commands
+  without placing global requirements on transfer or connect time.  Files
+  affected:
+    - include/curl/curl.h
+        Added option CURLOPT_FTP_RESPONSE_TIMEOUT
+    - lib/ftp.c
+        Added branch inside Curl_GetFTPResponse to check for 
+        data->set.ftp_response_timeout
+    - lib/url.c
+        Modified Curl_setopt to recognize CURLOPT_FTP_RESPONSE_TIMEOUT
+    - lib/urldata.h
+        Added ftp_response_timeout to struct UserDefined
+
 Daniel (3 September)
 - Peter Pentchev found and fixed two problems in the test suite's web server
   code, that made it segfault at times.

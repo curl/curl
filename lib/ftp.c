@@ -233,7 +233,15 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
   while((*nreadp<BUFSIZE) && (keepon && !result)) {
     /* check and reset timeout value every lap */
-    if(data->set.timeout)
+    if(data->set.ftp_response_timeout )
+      /* if CURLOPT_FTP_RESPONSE_TIMEOUT is set, use that to determine
+         remaining time.  Also, use "now" as opposed to "conn->now"
+         because ftp_response_timeout is only supposed to govern
+         the response for any given ftp response, not for the time
+         from connect to the given ftp response. */
+      timeout = data->set.ftp_response_timeout - /* timeout time */
+        Curl_tvdiff(Curl_tvnow(), now)/1000; /* spent time */
+    else if(data->set.timeout)
       /* if timeout is requested, find out how much remaining time we have */
       timeout = data->set.timeout - /* timeout time */
         Curl_tvdiff(Curl_tvnow(), conn->now)/1000; /* spent time */

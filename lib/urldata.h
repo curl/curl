@@ -773,6 +773,7 @@ struct UserDefined {
   void *passwd_client;               /* pass to the passwd callback */
   long timeout;         /* in seconds, 0 means no timeout */
   long connecttimeout;  /* in seconds, 0 means no timeout */
+  long ftp_response_timeout; /* in seconds, 0 means no timeout */
   long infilesize;      /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
