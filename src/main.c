@@ -345,7 +345,8 @@ static void help(void)
        " -C/--continue-at <offset> Specify absolute resume offset\n"
        " -d/--data <data>   HTTP POST data (H)\n"
        "    --data-ascii <data>   HTTP POST ASCII data (H)\n"
-       "    --data-binary <data>  HTTP POST binary data (H)");
+       "    --data-binary <data>  HTTP POST binary data (H)\n"
+       "    --digest        Enable HTTP Digest Authentication");
   puts("    --disable-eprt  Prevents curl from using EPRT or LPRT (F)\n"
        "    --disable-epsv  Prevents curl from using EPSV (F)\n"
        " -D/--dump-header <file> Write the headers to this file\n"
@@ -446,6 +447,7 @@ struct Configurable {
   char *cookiefile; /* read from this file */
   bool cookiesession; /* new session? */
   bool encoding;    /* Accept-Encoding please */
+  bool digest;      /* Digest Authentication */
   bool use_resume;
   bool resume_from_current;
   bool disable_epsv;
@@ -1037,6 +1039,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5h", "trace-ascii", TRUE},
     {"5i", "limit-rate", TRUE},
     {"5j", "compressed",  FALSE}, /* might take an arg someday */
+    {"5k", "digest",     FALSE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1259,6 +1262,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
       case 'j': /* --compressed */
  	config->encoding ^= TRUE;
+ 	break;
+
+      case 'k': /* --digest */
+ 	config->digest ^= TRUE;
  	break;
 
       default: /* the URL! */
@@ -2947,6 +2954,9 @@ operate(struct Configurable *config, int argc, char *argv[])
       if(config->disable_eprt)
         /* disable it */
         curl_easy_setopt(curl, CURLOPT_FTP_USE_EPRT, FALSE);
+
+      /* new in libcurl 7.10.6 */
+      curl_easy_setopt(curl, CURLOPT_HTTPDIGEST, config->digest);
       
       /* new in curl 7.9.7 */
       if(config->trace_dump) {
