@@ -8,6 +8,7 @@ Curl and libcurl 7.12.1
 
 This release includes the following changes:
 
+ o socks proxy support even when libcurl is built ipv6-enabled
  o read callbacks can stop the transfer by returning CURL_READFUNC_ABORT
  o libcurl-tutorial.3 is the new man page formerly known as libcurl-the-guide
  o additional SSL trace data might be sent to the debug callback using two new
