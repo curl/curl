@@ -307,7 +307,7 @@ CURLcode Curl_file(struct connectdata *conn)
       return result;
 
     result = Curl_client_write(data, CLIENTWRITE_BOTH,
-                               "Accept-ranges: bytes\r\n", 0);
+                               (char *)"Accept-ranges: bytes\r\n", 0);
     if(result)
       return result;
 
