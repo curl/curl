@@ -8,8 +8,6 @@ Fix before releasing 7.11.0
 12. The "PUT and (NTLM/Digest) auth" bug (test-patch posted, awaiting
     feedback/response) #862835
 
-17. Diego Casorran's AmigaOS patch (feedback sent to Diego, awaiting response)
-
 19. Resolve Giuseppe Attardi's "elusive cache bug" (work in progress)
 
 To get fixed in 7.11.1
