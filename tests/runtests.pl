@@ -74,6 +74,9 @@ my $pwd;          # current working directory
 
 chomp($pwd = `pwd`);
 
+# enable memory debugging if curl is compiled with it
+$ENV{'CURL_MEMDEBUG'} = 1;
+
 #######################################################################
 # Return the pid of the server as found in the given pid file
 #
@@ -171,7 +174,7 @@ sub runhttpserver {
         }
     }
 
-    if($pid) {
+    if($pid > 0) {
         my $res = kill (9, $pid); # die!
         if(!$res) {
             print "Failed to kill our HTTP test server, do it manually and",
