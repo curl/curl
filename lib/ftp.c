@@ -82,6 +82,7 @@
 
 #include "strequal.h"
 #include "ssluse.h"
+#include "connect.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -739,7 +740,7 @@ CURLcode ftp_getsize(struct connectdata *conn, char *file,
  */
 static void
 ftp_pasv_verbose(struct connectdata *conn,
-                 Curl_addrinfo *addr,
+                 Curl_ipconnect *addr,
                  char *newhost, /* ascii version */
                  int port)
 {
@@ -805,7 +806,7 @@ ftp_pasv_verbose(struct connectdata *conn,
 #else
   answer = NULL;
 #endif
-  (void) memcpy(&in.s_addr, *addr->h_addr_list, sizeof (in.s_addr));
+  (void) memcpy(&in.s_addr, addr, sizeof (Curl_ipconnect));
   infof(conn->data, "Connecting to %s (%s) port %u\n",
         answer?answer->h_name:newhost,
 #if defined(HAVE_INET_NTOA_R)
@@ -1223,12 +1224,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
     
     Curl_addrinfo *addr;
     char *hostdataptr=NULL;
-
-#ifdef ENABLE_IPV6
-    struct addrinfo *ai;
-#else
-    struct sockaddr_in serv_addr;
-#endif
+    Curl_ipconnect *conninfo;
     char *str=buf;
 
     /*
@@ -1277,72 +1273,22 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
       connectport = newport; /* we connect to the remote port */
     }
     
-#ifdef ENABLE_IPV6
-    conn->secondarysocket = -1;
-    for (ai = addr; ai; ai = ai->ai_next) {
-      /* XXX for now, we can do IPv4 only */
-      if (ai->ai_family != AF_INET)
-        continue;
-      
-      conn->secondarysocket = socket(ai->ai_family, ai->ai_socktype,
-                                     ai->ai_protocol);
-      if (conn->secondarysocket < 0)
-        continue;
-      
-      if (connect(conn->secondarysocket, ai->ai_addr, ai->ai_addrlen) < 0) {
-        close(conn->secondarysocket);
-        conn->secondarysocket = -1;
-        continue;
-      }
-
-      if(data->set.verbose)
-        /* this just dumps information about this second connection */
-        ftp_pasv_verbose(conn, ai, newhost, 0 /* port not really known */);
-      break;
-    }
-
-    if (conn->secondarysocket < 0) {
-      failf(data, strerror(errno));
-      return CURLE_FTP_CANT_RECONNECT;
-    }
-#else
-    /* IPv4 code */
-    conn->secondarysocket = socket(AF_INET, SOCK_STREAM, 0);
-
-    memset((char *) &serv_addr, '\0', sizeof(serv_addr));
-    memcpy((char *)&(serv_addr.sin_addr), addr->h_addr, addr->h_length);
-    serv_addr.sin_family = addr->h_addrtype;
-
-    serv_addr.sin_port = htons(connectport);
-
-    if(data->set.verbose)
+    result = Curl_connecthost(conn,
+                              addr,
+                              connectport,
+                              &conn->secondarysocket,
+                              &conninfo);
+    
+    if((CURLE_OK == result) &&       
+       data->set.verbose)
       /* this just dumps information about this second connection */
-      ftp_pasv_verbose(conn, addr, newhost, connectport);
+      ftp_pasv_verbose(conn, conninfo, newhost, connectport);
 	
     if(hostdataptr)
       free(hostdataptr);
-    
-    if (connect(conn->secondarysocket, (struct sockaddr *) &serv_addr,
-                sizeof(serv_addr)) < 0) {
-      switch(errno) {
-#ifdef ECONNREFUSED
-        /* this should be made nicer */
-      case ECONNREFUSED:
-        failf(data, "Connection refused by ftp server");
-        break;
-#endif
-#ifdef EINTR
-      case EINTR:
-        failf(data, "Connection timed out to ftp server");
-        break;
-#endif
-      default:
-        failf(data, "Can't connect to ftp server");
-        break;
-      }
-      return CURLE_FTP_CANT_RECONNECT;
-    }
-#endif /* end of IPv4-specific code*/
+
+    if(CURLE_OK != result)
+      return result;
 
     if (data->set.tunnel_thru_httpproxy) {
       /* We want "seamless" FTP operations through HTTP proxy tunnel */

@@ -1113,172 +1113,35 @@ ConnectionStore(struct SessionHandle *data,
   return i;
 }
 
-static CURLcode ConnectPlease(struct SessionHandle *data,
-                              struct connectdata *conn)
+static CURLcode ConnectPlease(struct connectdata *conn)
 {
-  long max_time=300000; /* milliseconds, default to five minutes */
-
-#if !defined(WIN32)||defined(__CYGWIN32__)
-  /* We don't generally like checking for OS-versions, we should make this
-     HAVE_XXXX based, although at the moment I don't have a decent test for
-     this! */
-
-#ifdef HAVE_INET_NTOA
-
-#ifndef INADDR_NONE
-#define INADDR_NONE (unsigned long) ~0
-#endif
-
-#ifndef ENABLE_IPV6
-  conn->firstsocket = socket(AF_INET, SOCK_STREAM, 0);
-
-  /*************************************************************
-   * Select device to bind socket to
-   *************************************************************/
-  if (data->set.device && (strlen(data->set.device)<255)) {
-    struct sockaddr_in sa;
-    struct hostent *h=NULL;
-    char *hostdataptr=NULL;
-    size_t size;
-    char myhost[256] = "";
-    unsigned long in;
-
-    if(Curl_if2ip(data->set.device, myhost, sizeof(myhost))) {
-      h = Curl_getaddrinfo(data, myhost, 0, &hostdataptr);
-    }
-    else {
-      if(strlen(data->set.device)>1) {
-        h = Curl_getaddrinfo(data, data->set.device, 0, &hostdataptr);
-      }
-      if(h) {
-        /* we know data->set.device is shorter than the myhost array */
-        strcpy(myhost, data->set.device);
-      }
-    }
-
-    if(! *myhost) {
-      /* need to fix this
-         h=Curl_gethost(data,
-         getmyhost(*myhost,sizeof(myhost)),
-         hostent_buf,
-         sizeof(hostent_buf));
-      */
-      printf("in here\n");
-    }
-
-    infof(data, "We connect from %s\n", myhost);
-
-    if ( (in=inet_addr(myhost)) != INADDR_NONE ) {
-
-      if ( h ) {
-        memset((char *)&sa, 0, sizeof(sa));
-        memcpy((char *)&sa.sin_addr,
-               h->h_addr,
-               h->h_length);
-        sa.sin_family = AF_INET;
-        sa.sin_addr.s_addr = in;
-        sa.sin_port = 0; /* get any port */
-	
-        if( bind(conn->firstsocket, (struct sockaddr *)&sa, sizeof(sa)) >= 0) {
-          /* we succeeded to bind */
-          struct sockaddr_in add;
-	
-          size = sizeof(add);
-          if(getsockname(conn->firstsocket, (struct sockaddr *) &add,
-                         (socklen_t *)&size)<0) {
-            failf(data, "getsockname() failed");
-            return CURLE_HTTP_PORT_FAILED;
-          }
-        }
-        else {
-          switch(errno) {
-          case EBADF:
-            failf(data, "Invalid descriptor: %d", errno);
-            break;
-          case EINVAL:
-            failf(data, "Invalid request: %d", errno);
-            break;
-          case EACCES:
-            failf(data, "Address is protected, user not superuser: %d", errno);
-            break;
-          case ENOTSOCK:
-            failf(data,
-                  "Argument is a descriptor for a file, not a socket: %d",
-                  errno);
-            break;
-          case EFAULT:
-            failf(data, "Inaccessable memory error: %d", errno);
-            break;
-          case ENAMETOOLONG:
-            failf(data, "Address too long: %d", errno);
-            break;
-          case ENOMEM:
-            failf(data, "Insufficient kernel memory was available: %d", errno);
-            break;
-          default:
-            failf(data,"errno %d\n");
-          } /* end of switch */
-	
-          return CURLE_HTTP_PORT_FAILED;
-        } /* end of else */
-	
-      } /* end of if  h */
-      else {
-	failf(data,"could't find my own IP address (%s)", myhost);
-	return CURLE_HTTP_PORT_FAILED;
-      }
-    } /* end of inet_addr */
-
-    else {
-      failf(data, "could't find my own IP address (%s)", myhost);
-      return CURLE_HTTP_PORT_FAILED;
-    }
-
-    if(hostdataptr)
-      free(hostdataptr); /* allocated by Curl_gethost() */
-
-  } /* end of device selection support */
-#endif  /* end of HAVE_INET_NTOA */
-#endif /* end of not WIN32 */
-#endif /*ENABLE_IPV6*/
-
-  /*************************************************************
-   * Figure out what maximum time we have left
-   *************************************************************/
-  if(data->set.timeout || data->set.connecttimeout) {
-    double has_passed;
-
-    /* Evaluate how much that that has passed */
-    has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
-
-#ifndef min
-#define min(a, b)   ((a) < (b) ? (a) : (b))
-#endif
-
-    /* get the most strict timeout of the ones converted to milliseconds */
-    if(data->set.timeout &&
-       (data->set.timeout>data->set.connecttimeout))
-      max_time = data->set.timeout*1000;
-    else
-      max_time = data->set.connecttimeout*1000;
-
-    /* subtract the passed time */
-    max_time -= (long)(has_passed * 1000);
-
-    if(max_time < 0)
-      /* a precaution, no need to continue if time already is up */
-      return CURLE_OPERATION_TIMEOUTED;
-  }
+  CURLcode result;
+  Curl_ipconnect *addr;
 
   /*************************************************************
    * Connect to server/proxy
    *************************************************************/
-  return Curl_connecthost(conn,
-                          max_time,
-                          conn->hostaddr,
-                          conn->port,
-                          conn->firstsocket, /* might be bind()ed */
-                          &conn->firstsocket);
+  result= Curl_connecthost(conn,
+                           conn->hostaddr,
+                           conn->port,
+                           &conn->firstsocket,
+                           &addr);
+  if(CURLE_OK == result) {
+    /* All is cool, then we store the current information from the hostaddr
+       struct to the serv_addr, as it might be needed later. The address
+       returned from the function above is crucial here. */
+#ifdef ENABLE_IPV6
+    conn->serv_addr = addr;
+#else
+    memset((char *) &conn->serv_addr, '\0', sizeof(conn->serv_addr));
+    memcpy((char *)&(conn->serv_addr.sin_addr),
+           (struct in_addr *)addr, sizeof(struct in_addr));
+    conn->serv_addr.sin_family = conn->hostaddr->h_addrtype;
+    conn->serv_addr.sin_port = htons(conn->port);
+#endif
+  }
+
+  return result;
 }
 
 static CURLcode CreateConnection(struct SessionHandle *data,
@@ -1904,16 +1767,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * port number of various reasons.
    *
    * To be able to detect port number flawlessly, we must not confuse them
-   * IPv6-specified addresses in the [0::1] style.
+   * IPv6-specified addresses in the [0::1] style. (RFC2732)
    *************************************************************/
 
   if((1 == sscanf(conn->name, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
      (']' == endbracket)) {
-    /* this is a IPv6-style specified IP-address */
-#ifndef ENABLE_IPV6
-    failf(data, "You haven't enabled IPv6 support");
-    return CURLE_URL_MALFORMAT;
-#else
+    /* This is a (IPv6-style) specified IP-address. We support _any_
+       IP within brackets to be really generic. */
     conn->name++; /* pass the starting bracket */
 
     tmp = strchr(conn->name, ']');
@@ -1922,7 +1782,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     tmp++; /* pass the ending bracket */
     if(':' != *tmp)
       tmp = NULL; /* no port number available */
-#endif
   }
   else {
     /* traditional IPv4-style port-extracting */
@@ -2148,7 +2007,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   if(-1 == conn->firstsocket) {
     /* Connect only if not already connected! */
-    result = ConnectPlease(data, conn);
+    result = ConnectPlease(conn);
     if(CURLE_OK != result)
       return result;
 
@@ -2196,8 +2055,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #else
   {
     struct in_addr in;
-    (void) memcpy(&in.s_addr, *conn->hostaddr->h_addr_list, sizeof (in.s_addr));
-    infof(data, "Connected to %s (%s)\n", conn->hostaddr->h_name, inet_ntoa(in));
+    (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
+    infof(data, "Connected to %s (%s)\n", conn->hostaddr->h_name,
+          inet_ntoa(in));
   }
 #endif
 

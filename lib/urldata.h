@@ -228,7 +228,7 @@ struct connectdata {
   char *hostent_buf; /* pointer to allocated memory for name info */
 
 #ifdef ENABLE_IPV6
-  struct addrinfo *ai; /* the particular host we use */
+  struct addrinfo *serv_addr;   /* the particular host we use */
 #else
   struct sockaddr_in serv_addr;
 #endif

@@ -27,12 +27,6 @@ struct addrinfo;
 struct hostent;
 struct SessionHandle;
 
-#ifdef ENABLE_IPV6
-typedef struct addrinfo Curl_addrinfo;
-#else
-typedef struct hostent Curl_addrinfo;
-#endif
-
 Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
                                 char *hostname,
                                 int port,

@@ -24,9 +24,9 @@
  *****************************************************************************/
 
 CURLcode Curl_connecthost(struct connectdata *conn,
-                          long timeout, /* milliseconds */
                           Curl_addrinfo *host, /* connect to this */
                           long port,    /* connect to this port number */
-                          int sockfd,   /* input socket, or -1 if none */
-                          int *socket); /* not set if error is returned */
+                          int *socket,  /* not set if error is returned */
+                          Curl_ipconnect **addr /* the one we used */
+                          ); /*  index we used */
 #endif
