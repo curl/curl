@@ -768,6 +768,7 @@ AC_CHECK_FUNCS( socket \
                 select \
                 strdup \
                 strstr \
+                strtok_r \
                 strftime \
                 uname \
                 strcasecmp \
