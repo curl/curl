@@ -178,6 +178,10 @@ CURLcode Curl_close(struct UrlData *data)
     /* the URL is allocated, free it! */
     free(data->url);
 
+  if(data->cookiejar)
+    /* we have a "destination" for all the cookies to get dumped to */
+    Curl_cookie_output(data->cookies, data->cookiejar);
+    
   Curl_cookie_cleanup(data->cookies);
 
   /* free the connection cache */
@@ -488,11 +492,18 @@ CURLcode Curl_setopt(struct UrlData *data, CURLoption option, ...)
 
   case CURLOPT_COOKIEFILE:
     /*
-     * Set cookie file to read and parse.
+     * Set cookie file to read and parse. Can be used multiple times.
      */
     cookiefile = (char *)va_arg(param, void *);
     if(cookiefile)
       data->cookies = Curl_cookie_init(cookiefile, data->cookies);
+    break;
+
+  case CURLOPT_COOKIEJAR:
+    /*
+     * Set cookie file name to dump all cookies to when we're done.
+     */
+    data->cookiejar = cookiefile = (char *)va_arg(param, void *);
     break;
   case CURLOPT_WRITEHEADER:
     /*

@@ -541,6 +541,7 @@ struct UrlData {
   char *cert_passwd; /* plain text certificate password */
 
   struct CookieInfo *cookies;
+  char *cookiejar; /* dump all cookies to this file */
 
   long crlf;
   struct curl_slist *quote;     /* before the transfer */
