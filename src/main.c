@@ -301,7 +301,8 @@ static void help(void)
        " -b/--cookie <name=string/file> Cookie string or file to read cookies from (H)\n"
        " -B/--use-ascii     Use ASCII/text transfer\n",
          curl_version());
-  puts(" -C/--continue-at <offset> Specify absolute resume offset\n"
+  puts(" -c/--cookie-jar <file> Write all cookies to this file after operation (H)\n"
+       " -C/--continue-at <offset> Specify absolute resume offset\n"
        " -d/--data <data>   HTTP POST data (H)\n"
        "    --data-ascii <data>   HTTP POST ASCII data (H)\n"
        "    --data-binary <data>  HTTP POST binary data (H)\n"
@@ -314,9 +315,9 @@ static void help(void)
        " -f/--fail          Fail silently (no output at all) on errors (H)\n"
        " -F/--form <name=content> Specify HTTP POST data (H)\n"
        " -g/--globoff       Disable URL sequences and ranges using {} and []\n"
-       " -G/--get           Send the -d data with a HTTP GET (H)\n");
+       " -G/--get           Send the -d data with a HTTP GET (H)");
   puts(" -h/--help          This help text\n"
-       " -H/--header <line> Custom header to pass to server. (H)"
+       " -H/--header <line> Custom header to pass to server. (H)\n"
        " -i/--include       Include the HTTP-header in the output (H)\n"
        " -I/--head          Fetch document info only (HTTP HEAD/FTP SIZE)\n"
        "    --interface <interface> Specify the interface to be used\n"
@@ -369,7 +370,9 @@ struct Configurable {
   char *random_file;
   char *egd_file;
   char *useragent;
-  char *cookie;
+  char *cookie;     /* single line with specified cookies */
+  char *cookiejar;  /* write to this file */
+  char *cookiefile; /* read from this file */
   bool use_resume;
   bool resume_from_current;
   int resume_from;
@@ -405,7 +408,6 @@ struct Configurable {
   char *cacert;
   char *cert_passwd;
   bool crlf;
-  char *cookiefile;
   char *customrequest;
   char *krb4level;
   bool progressmode;
@@ -601,7 +603,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"b", "cookie",      TRUE},
     {"B", "ftp-ascii",   FALSE}, /* this long format is OBSOLETE now! */
     {"B", "use-ascii",   FALSE},
-    {"c", "continue",    FALSE},
+    {"c", "cookie-jar",  TRUE},
     {"C", "continue-at", TRUE},
     {"d", "data",        TRUE},
     {"da", "data-ascii", TRUE},
@@ -816,9 +818,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       config->conf ^= CONF_GETTEXT;
       break;
     case 'c':
-      /* This makes us continue an ftp transfer */
-      config->use_resume^=TRUE;
-      fprintf(stderr, "-c is a deprecated switch, use '-C -' instead!\n");
+      /* get the file name to dump all cookies in */
+      GetStr(&config->cookiejar, nextarg);
       break;
     case 'C':
       /* This makes us continue an ftp transfer at given position */
@@ -1982,6 +1983,8 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_WRITEHEADER,
                        config->headerfile?&heads:NULL);
       curl_easy_setopt(curl, CURLOPT_COOKIEFILE, config->cookiefile);
+      /* cookie jar was added in 7.9 */
+      curl_easy_setopt(curl, CURLOPT_COOKIEJAR, config->cookiejar);
       curl_easy_setopt(curl, CURLOPT_SSLVERSION, config->ssl_version);
       curl_easy_setopt(curl, CURLOPT_TIMECONDITION, config->timecond);
       curl_easy_setopt(curl, CURLOPT_TIMEVALUE, config->condtime);
