@@ -97,11 +97,6 @@ TODO
 
  HTTP
 
- * HTTP PUT for files passed on stdin *OR* when the --crlf option is
-   used. Requires libcurl to send the file with chunked content
-   encoding. [http://curl.haxx.se/dev/HTTP-PUT-stdin.txt] When the filter
-   system mentioned above gets real, it'll be a piece of cake to add.
-
  * Pass a list of host name to libcurl to which we allow the user name and
    password to get sent to. Currently, it only get sent to the host name that
    the first URL uses (to prevent others from being able to read it), but this
