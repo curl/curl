@@ -853,7 +853,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 #ifndef USE_SSLEAY
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
-#ifdef GSSAPI
+#ifndef GSSAPI
     auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI */
 #endif
     if(!auth)
