@@ -1,89 +1,23 @@
-Curl and libcurl 7.11.0. A minor-features-added release.
+Curl and libcurl 7.11.1. A bugfix release.
 
-The 78th public curl release. Release number 105 counted from the very
+The 79th public curl release. Release number 106 counted from the very
 beginning.
 
 This release includes the following changes:
 
- o allows the URL to be set by a callback when using the multi interface
- o large file support was added. Use one of the new options: INFILESIZE_LARGE,
-   RESUME_FROM_LARGE and MAXFILESIZE_LARGE
- o the new --ftp-pasv overrides a previous --ftpport
- o CURLOPT_FTPSSL and ftps:// now do ssl over FTP "The Right Way" (the curl
-   tool now features the --ftp-ssl option)
- o The Windows DLLs are built with an added "resource file"
- o New LIBCURL_VERSION_* defines for easier checking version number
- o Included Mac OS X 'framework' makefile in the release archive
- o Removed the TRUE and FALSE #defines from the public curl header file
- o Added CURLOPT_NETRC_FILE
+ o 
 
 This release includes the following bugfixes:
 
- o improved config file parsing for options with required parameters
- o using --trace with a bad file name could crash
- o release archive contains compressed help text
- o the win32 password prompting supports backspace
- o builds natively on AmigaOS (without unix emulation)
- o ftps:// now uses port 990 by default
- o the "configure --with-spnego" action was improved
- o fixed a rare follow-redirect problem
- o curl-config --feature now outputs AsynchDNS if enabled
- o occational re-use of freed-memory problem fixed
- o curl-config --libs now include the ares link directory
- o configure --enable-ares now accepts a given path
- o -lz no longer appear twice on the link line
- o more descriptive error message if the FTP response reader fails
- o curl-config --feature now shows 'AsynchDNS' when built with ares
- o VMS build up-to-date and clarified source code
- o resolve bug caused socks5 to fail
- o Content-Length: is ignored when getting chunked Transfer-Encoding
- o POST over proxy to https server failed
- o improved how libcurl deals with persistant connections over FTP when a
-   transfer fails
- o accessing a proxy that requires Basic auth without password caused a hang
- o a free free-twice problem in the server certificate code
- o minor memory leak when using ranges on persistant connections
- o formpost parts sending files with .html extensions now use "Content-Type: 
-   text/html"
- o formpost parts now default to "Content-Type: application/octet-stream"
- o --progress-bar was slightly improved
- o Failing to connect to localhost, using the multi interface on Solaris
-   showed a connect problem now fixed.
- o The generated ca-bundle.h file is now generated in the build dir, not the
-   source dir
- o The FTP-EPSV response parser for the 229 code was fixed
- o curl finds the user's home dir slightly different and hopefully better on
-   Windows
- o testcurl.sh can now be used to autotest daily tarballs
- o a couple of command line options now check that the underlying library
-   actually supports the features before trying to enable them
- o uninitialized variable fix
- o better html versions of the man pages
+ o 
 
 Other curl-related news since the previous public release:
 
- o pycURL 7.10.8 was released: http://pycurl.sf.net/
- o TclCurl 0.10.8 was released:
-   http://personal1.iddeo.es/andresgarci/tclcurl/english/
- o the Ferite curl binding was released: http://www.ferite.org/
- o stopped the curl.sourceforge.net mirror, it now redirects to curl.haxx.se
- o fresh new curl web mirrors:
-   US Texas -      http://curl.cyberservers.net
-   US California - http://curl.mirrors.redwire.net
-   Germany -       http://curl.mirror.at.stealer.net
-   Thailand -      http://curl.siamu.ac.th
- o Dan Fandrich stepped forward and helps maintaining the download web page
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Kevin Roth, Troels Walsted Hansen, Matt Veenstra, Marty Kuhrt, Benjamin
- Gerard, Gisle Vanem, Ralph Mitchell, Sébastien Willemijns, Kang-Jin Lee,
- Peter Sylvester, Siddhartha Prakash Jain, Mathias Axelsson, Maciej
- W. Rozycki, Nicolas Croiset, Josh Kapell, Gaz Iqbal, Dave May, Markus
- Moeller, James Clancy, Giuseppe Attardi, swalkaus at yahoo.com, Steve Green,
- Marty Kuhrt, Dominick Meglio, Diego Casorran, David Byron, John McGowan,
- David J Meyer, Dan Fandrich, Pierre, Brian R Duffy, Luke Call, Vincent
- Bronner
  
+
         Thanks! (and sorry if I forgot to mention someone)
