@@ -54,19 +54,22 @@ static int init_by_options(ares_channel channel, struct ares_options *options,
 static int init_by_environment(ares_channel channel);
 static int init_by_resolv_conf(ares_channel channel);
 static int init_by_defaults(ares_channel channel);
-static int config_domain(ares_channel channel, char *str);
-static int config_lookup(ares_channel channel, const char *str,
-                         const char *bindch, const char *filech);
+
 static int config_nameserver(struct server_state **servers, int *nservers,
                              char *str);
-static int config_sortlist(struct apattern **sortlist, int *nsort,
-                           const char *str);
 static int set_search(ares_channel channel, const char *str);
 static int set_options(ares_channel channel, const char *str);
-static char *try_config(char *s, const char *opt);
 static const char *try_option(const char *p, const char *q, const char *opt);
 static int ip_addr(const char *s, int len, struct in_addr *addr);
 static void natural_mask(struct apattern *pat);
+#ifndef WIN32
+static int config_domain(ares_channel channel, char *str);
+static int config_lookup(ares_channel channel, const char *str,
+                         const char *bindch, const char *filech);
+static int config_sortlist(struct apattern **sortlist, int *nsort,
+                           const char *str);
+static char *try_config(char *s, const char *opt);
+#endif
 
 int ares_init(ares_channel *channelptr)
 {
@@ -709,6 +712,7 @@ static int init_by_defaults(ares_channel channel)
   return ARES_SUCCESS;
 }
 
+#ifndef WIN32
 static int config_domain(ares_channel channel, char *str)
 {
   char *q;
@@ -748,6 +752,8 @@ static int config_lookup(ares_channel channel, const char *str,
   channel->lookups = strdup(lookups);
   return (channel->lookups) ? ARES_SUCCESS : ARES_ENOMEM;
 }
+
+#endif
 
 static int config_nameserver(struct server_state **servers, int *nservers,
                              char *str)
@@ -810,6 +816,7 @@ static int config_nameserver(struct server_state **servers, int *nservers,
   return ARES_SUCCESS;
 }
 
+#ifndef WIN32
 static int config_sortlist(struct apattern **sortlist, int *nsort,
                            const char *str)
 {
@@ -856,6 +863,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
 
   return ARES_SUCCESS;
 }
+#endif
 
 static int set_search(ares_channel channel, const char *str)
 {
@@ -937,6 +945,7 @@ static int set_options(ares_channel channel, const char *str)
   return ARES_SUCCESS;
 }
 
+#ifndef WIN32
 static char *try_config(char *s, const char *opt)
 {
   size_t len;
@@ -949,6 +958,8 @@ static char *try_config(char *s, const char *opt)
     s++;
   return s;
 }
+
+#endif
 
 static const char *try_option(const char *p, const char *q, const char *opt)
 {
