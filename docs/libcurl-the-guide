@@ -222,7 +222,14 @@ Multi-threading issues
  handlers. Signals are needed for a SIGPIPE handler, and the alarm() syscall
  is used to catch timeouts (mostly during DNS lookup).
 
- So when using multiple threads you should first ignore SIGPIPE in your main
+ If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
+ then of course using OpenSSL multi-threaded and it has itself a few
+ requirements on this. Basicly, you need to provide one or two functions to
+ allow it to function properly. For all details, see this:
+
+   http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+
+ When using multiple threads you should first ignore SIGPIPE in your main
  thread and set the CURLOPT_NOSIGNAL option to TRUE for all handles.
 
  Everything will work fine except that timeouts are not honored during the DNS
