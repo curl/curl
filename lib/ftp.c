@@ -880,9 +880,11 @@ ftp_pasv_verbose(struct connectdata *conn,
   /* Bjorn Reese (November 28 2001):
      The Tru64 man page on gethostbyaddr_r() says that
      the hostent struct must be filled with zeroes before the call to
-     gethostbyaddr_r(). */
+     gethostbyaddr_r(). 
 
-  memset(hostent_buf, 0, sizeof(struct hostent));
+     ... as must be struct hostent_data Craig Markwardt 19 Sep 2002. */
+
+  memset(hostent_buf, 0, sizeof(struct hostent)+sizeof(struct hostent_data));
 
   if(gethostbyaddr_r((char *) &address,
                      sizeof(address), AF_INET,
