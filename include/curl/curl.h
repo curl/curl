@@ -147,7 +147,7 @@ typedef int (*curl_debug_callback)
         curl_infotype type, /* what kind of data */
         char *data,        /* points to the data */
         size_t size,       /* size of the data pointed to */
-        void *userp);      /* whatever the user please */
+        void *userptr);    /* whatever the user please */
   
 /* All possible error codes from all sorts of curl functions. Future versions
    may return other values, stay prepared.
@@ -223,6 +223,11 @@ typedef enum {
 
   CURL_LAST /* never use! */
 } CURLcode;
+
+typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
+                                          void *ssl_ctx, /* actually an
+                                                            OpenSSL SSL_CTX */
+                                          void *userptr);
 
 /* Make a spelling correction for the operation timed-out define */
 #define CURLE_OPERATION_TIMEDOUT CURLE_OPERATION_TIMEOUTED
@@ -658,6 +663,15 @@ typedef enum {
      methods you like. Use this in combination with CURLOPT_USERPWD.
      Note that setting multiple bits may cause extra network round-trips. */
   CINIT(HTTPAUTH, LONG, 107),
+
+  /* Set the ssl context callback function, currently only for OpenSSL ssl_ctx
+     in second argument. The function must be matching the
+     curl_ssl_ctx_callback proto. */
+  CINIT(SSL_CTX_FUNCTION, FUNCTIONPOINT, 108),
+
+  /* Set the userdata for the ssl context callback function's third
+     argument */
+  CINIT(SSL_CTX_DATA, OBJECTPOINT, 109),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

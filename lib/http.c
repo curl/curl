@@ -617,6 +617,9 @@ CURLcode Curl_http_done(struct connectdata *conn)
   conn->fread = data->set.fread; /* restore */
   conn->fread_in = data->set.in; /* restore */
 
+  if (http == NULL) 
+    return CURLE_OK;
+
   if(http->send_buffer) {
     send_buffer *buff = http->send_buffer;
     

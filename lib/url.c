@@ -723,6 +723,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     }
     data->set.set_url = va_arg(param, char *);
     data->change.url = data->set.set_url;
+    data->change.url_changed = TRUE;
     break;
   case CURLOPT_PORT:
     /*
@@ -1090,6 +1091,18 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Enable verification of the CN contained in the peer certificate
      */
     data->set.ssl.verifyhost = va_arg(param, long);
+    break;
+  case CURLOPT_SSL_CTX_FUNCTION:
+    /*
+     * Set a SSL_CTX callback
+     */
+       data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
+    break;
+  case CURLOPT_SSL_CTX_DATA:
+    /*
+     * Set a SSL_CTX callback parameter pointer
+     */
+    data->set.ssl.fsslctxp = va_arg(param, void *);
     break;
   case CURLOPT_CAINFO:
     /*

@@ -145,6 +145,8 @@ struct ssl_config_data {
   char *egdsocket;       /* path to file containing the EGD daemon socket */
   char *cipher_list;     /* list of ciphers to use */
   long numsessions;      /* SSL session id cache size */
+  curl_ssl_ctx_callback fsslctx; 	/* function to initialize ssl ctx */
+  void *fsslctxp; 	/*parameter for call back */
 };
 
 /* information stored about one single SSL session */
@@ -677,6 +679,10 @@ struct UrlState {
 struct DynamicStatic {
   char *url;        /* work URL, copied from UserDefined */
   bool url_alloc;   /* URL string is malloc()'ed */
+  bool url_changed; /* set on CURL_OPT_URL, used to detect if the URL was
+                       changed after the connect phase, as we allow callback
+                       to change it and if so, we reconnect to use the new 
+                       URL instead */
   char *proxy;      /* work proxy, copied from UserDefined */
   bool proxy_alloc; /* http proxy string is malloc()'ed */
   char *referer;    /* referer string */
