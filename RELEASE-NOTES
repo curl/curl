@@ -15,6 +15,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o --proxy-ntlm now checks if libcurl supports NTLM before using it
+ o minor --fail with authentication bugfix
  o CURLOPT_IPRESOLVE set to CURL_IPRESOLVE_V6 will now cause a returned error
    if the host only can resolve ipv4 addresses
  o curl -4/-6 now actually sets the requested option in libcurl
