@@ -1,7 +1,7 @@
-Curl and libcurl 7.13.1
+Curl and libcurl 7.13.2
 
- Public curl release number:               86
- Releases counted from the very beginning: 113
+ Public curl release number:               87
+ Releases counted from the very beginning: 114
  Available command line options:           104
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
@@ -10,38 +10,18 @@ Curl and libcurl 7.13.1
 
 This release includes the following changes:
 
- o CURLOPT_COOKIEFILE set to "" is now activating the cookie engine
- o FTP code overhaul => multi interface much less blocking
- o Added CURLE_LOGIN_DENIED to be returned when curl is denied login to FTP
-   servers
+ o
 
 This release includes the following bugfixes:
 
- o -# crash when more data than expected was retrieved
- o NTLM/krb4 buffer overflow fixed (CAN-2005-0490)
- o proxy auth bug when following redirects to another host
- o socket leak when local bind failed
- o HTTP POST with --anyauth picking NTLM
- o SSL problems when downloading exactly 16KB data
- o out of memory conditions preserve error codes better
- o a few crashes at out of memory
- o inflate buffer usage bugfix
- o better DICT protocol adherence
- o disable valgrind-checking while testing if libcurl is built shared
- o locale names in some date strings
+ o 
 
 Other curl-related news since the previous public release:
 
- o libcurl-vb 1.0 http://sf.net/projects/libcurl-vb/
- o pycurl 7.13.0: http://pycurl.sf.net/
- o new german mirror: http://curl.mons-new-media.de
- o new US mirror: http://curl.islandofpoker.com
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Gisle Vanem, David Byron, Marty Kuhrt, Maruko, Eric Vergnaud, Christopher
- R. Palmer, Mike Dobbs, David in bug report #1124588, Ralph Mitchell,
- Rene Rebe, Dave Dribin, Dan Fandrich
 
         Thanks! (and sorry if I forgot to mention someone)
