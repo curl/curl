@@ -13,6 +13,9 @@ Daniel (2 Sep 2002)
 
   curl --compressed is now used to request compressed contents.
 
+  curl-config --feature will include 'libz' if this feature was around when
+  the library was built.
+
 Daniel (30 Aug 2002)
 - Applied an anonymous SOCKS5-proxy patch. Not properly working in all
   situations though, as all getaddrinfo()-using libcurls will fail on this.
@@ -31,6 +34,8 @@ Daniel (27 Aug 2002)
   The curl tool now requires the -k/--insecure option in order to allow
   connections and operations on SSL sites that aren't properly verified with
   -cafile or --capath.
+
+  curl-config --ca displays the built-in path to the CA cert bundle.
 
 Daniel (26 Aug 2002)
 - Andrew Francis cleaned up some code that now compiles fine without the need
