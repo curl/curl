@@ -22,8 +22,9 @@
  *
  * $Id$
  *****************************************************************************/
-CURLcode curl_transfer(CURL *curl);
+CURLcode Curl_perform(CURL *curl);
 
+/* This sets up a forthcoming transfer */
 CURLcode 
 Curl_Transfer (struct connectdata *data,
                int sockfd,		/* socket to read from or -1 */
