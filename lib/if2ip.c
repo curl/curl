@@ -32,8 +32,8 @@
 #include <unistd.h>
 #endif
 
-#if ! defined(WIN32) && ! defined(__BEOS__) && !defined(__CYGWIN32__) && \
-    ! defined(__riscos__)
+#if !defined(WIN32) && !defined(__BEOS__) && !defined(__CYGWIN32__) && \
+    !defined(__riscos__) && !defined(__INTERIX)
 
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
