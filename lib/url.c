@@ -1427,8 +1427,8 @@ static int handleSock5Proxy(
     int sock)
 {
   unsigned char socksreq[600]; /* room for large user/pw (255 max each) */
-  int actualread;
-  int written;
+  ssize_t actualread;
+  ssize_t written;
   CURLcode result;
 
   Curl_nonblock(sock, FALSE);

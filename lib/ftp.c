@@ -173,7 +173,7 @@ static CURLcode AllowServerConnect(struct SessionHandle *data,
  * response and extract the relevant return code for the invoking function.
  */
 
-CURLcode Curl_GetFTPResponse(int *nreadp, /* return number of bytes read */
+CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
                              struct connectdata *conn,
                              int *ftpcode) /* return the ftp-code */
 {
@@ -387,7 +387,7 @@ CURLcode Curl_GetFTPResponse(int *nreadp, /* return number of bytes read */
 CURLcode Curl_ftp_connect(struct connectdata *conn)
 {
   /* this is FTP and no proxy */
-  int nread;
+  ssize_t nread;
   struct SessionHandle *data=conn->data;
   char *buf = data->state.buffer; /* this is our buffer */
   struct FTP *ftp;
