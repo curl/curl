@@ -915,6 +915,7 @@ printf("just fine");
 #endif
 ],
  [ AC_MSG_RESULT([yes])
+   RECENTAIX=yes
    OPT_THREAD=off ],
  [ AC_MSG_RESULT([no]) ]
 )
@@ -958,6 +959,16 @@ else
   AC_CHECK_FUNCS( gmtime_r )
 
 fi
+
+dnl for recent AIX versions, we skip all the thread-safe checks above since
+dnl they claim a thread-safe libc using the standard API. But the man page
+dnl says strerror() is not thread-safe, so we check for this only!
+
+if test "x$RECENTAIX" = "xyes"; then
+  dnl is there a strerror_r()
+  CURL_CHECK_STRERROR_R()
+fi
+
 
 dnl **********************************************************************
 dnl Back to "normal" configuring
