@@ -899,7 +899,7 @@ struct UserDefined {
   int dns_cache_timeout; /* DNS cache timeout */
   long buffer_size;      /* size of receive buffer to use */
 
-  char *private; /* Private data */
+  char *private_data; /* Private data */
 
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
 

@@ -1311,7 +1311,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Set private data pointer.
      */
-    data->set.private = va_arg(param, char *);
+    data->set.private_data = va_arg(param, char *);
     break;
 
   case CURLOPT_MAXFILESIZE:
