@@ -369,3 +369,6 @@
 
 /* Define if you have the `sigsetjmp' function. */
 #define HAVE_SIGSETJMP 1
+
+/* Define to 1 if you have the <setjmp.h> header file. */
+#define HAVE_SETJMP_H 1
