@@ -62,3 +62,5 @@
 #undef HAVE_O_NONBLOCK
 #undef HAVE_DISABLED_NONBLOCKING
 
+/* Define this to 'int' if in_addr_t is not an available typedefed type */
+#undef in_addr_t
