@@ -45,3 +45,6 @@ EXPORTS
 	curl_share_setopt @ 37;
 	curl_share_cleanup @ 38;
 	curl_global_init_mem @ 39;
+        curl_easy_strerror @ 40;
+        curl_multi_strerror @ 41;
+        curl_share_strerror @ 42;
