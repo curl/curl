@@ -19,6 +19,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o changed the curl_lock_function proto to prevent warnings on some compilers
+ o builds fine on QNX 6.2.x now
  o PUT with --digest works now 
  o --anyauth that picks NTLM and then follows a redirect (and does NTLM again)
    works now
@@ -53,7 +55,8 @@ advice from friends like these:
 
  Loren Kirkby, Jeff Pohlmeyer, Antoine Calando, Gerd v. Egidy, Vincent
  Sanders, John McGowan, Henrik Storner, Jörg Mueller-Tolk, Peter Pentchev,
- Early Ehlinger, Kevin Fisk, Jurij Smakov, Bjorn Reese, Tim Bartley,
- David Kimdon, Dominick Meglio, Markus Moeller, Giuseppe Attardi
+ Early Ehlinger, Kevin Fisk, Jurij Smakov, Bjorn Reese, Tim Bartley, David
+ Kimdon, Dominick Meglio, Markus Moeller, Giuseppe Attardi, James MacMillan,
+ Neil Spring
  
         Thanks! (and sorry if I forgot to mention someone)

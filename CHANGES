@@ -7,8 +7,13 @@
                                   Changelog
 
 
+Daniel (3 October)
+- Neil Spring posted the debian bug report #213180, and pointed out that using
+  the name 'access' in a function prototype is not very wise as some compilers
+  complain.
+
 Daniel (2 October)
-- James MacMillan's patch makes curl build on QNC 6.2.x.
+- James MacMillan's patch makes curl build on QNX 6.2.x.
 
 Daniel (26 September)
 - My daughter was born!
