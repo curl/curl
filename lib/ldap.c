@@ -242,7 +242,7 @@ CURLcode Curl_ldap(struct connectdata *conn)
   const char *mod_name;
   void *result;
   void *entryIterator;     /*! type should be 'LDAPMessage *' */
-  int ldaptext, num = 0;
+  int num = 0;
   struct SessionHandle *data=conn->data;
 
   infof(data, "LDAP local: %s\n", data->change.url);
@@ -251,8 +251,6 @@ CURLcode Curl_ldap(struct connectdata *conn)
     failf(data, "The %s LDAP library/libraries couldn't be opened", mod_name);
     return CURLE_LIBRARY_NOT_FOUND;
   }
-
-  ldaptext = data->set.ftp_ascii; /* This is a dirty hack */
 
   /* The types are needed because ANSI C distinguishes between
    * pointer-to-object (data) and pointer-to-function.
