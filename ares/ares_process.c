@@ -16,15 +16,20 @@
 #include "setup.h"
 #include <sys/types.h>
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(WATT32)
 #include "nameser.h"
+
 #else
 #include <sys/socket.h>
+#ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
+#endif
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/nameser.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #endif
 
 #include <string.h>
@@ -32,11 +37,12 @@
 #include <fcntl.h>
 #include <time.h>
 #include <errno.h>
+
 #include "ares.h"
 #include "ares_dns.h"
 #include "ares_private.h"
 
-#ifdef WIN32
+#if defined(WIN32) || defined(WATT32)
 #define GET_ERRNO()  WSAGetLastError()
 #else
 #define GET_ERRNO()  errno
@@ -234,7 +240,8 @@ static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now)
 	       */
 	      process_answer(channel, server->tcp_buffer, server->tcp_length,
 			     i, 1, now);
-	      free(server->tcp_buffer);
+          if (server->tcp_buffer)
+			free(server->tcp_buffer);
 	      server->tcp_buffer = NULL;
 	      server->tcp_lenbuf_pos = 0;
 	    }

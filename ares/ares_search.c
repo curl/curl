@@ -19,7 +19,7 @@
 #include <string.h>
 #include <ctype.h>
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(WATT32)
 #include "nameser.h"
 #endif
 

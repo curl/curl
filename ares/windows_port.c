@@ -1,6 +1,8 @@
 #include "setup.h"
 
-#ifdef WIN32 /* only do the following on windows */
+/* only do the following on windows
+ */
+#if (defined(WIN32) || defined(WATT32)) && !defined(MSDOS)
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -8,13 +10,19 @@
 #include <errno.h>
 #include <malloc.h>
 
+#ifdef WATT32
+#include <sys/socket.h>
+#else
 #include "nameser.h"
+#endif
+#include "ares.h"
+#include "ares_private.h"
 
 #ifndef __MINGW32__
 int
-ares_strncasecmp(const char *a, const char *b, size_t n)
+ares_strncasecmp(const char *a, const char *b, int n)
 {
-    size_t i;
+    int i;
 
     for (i = 0; i < n; i++) {
         int c1 = isupper(a[i]) ? tolower(a[i]) : a[i];
@@ -57,7 +65,7 @@ ares_gettimeofday(struct timeval *tv, struct timezone *tz)
 }
 
 int
-ares_writev (SOCKET s, const struct iovec *vector, size_t count)
+ares_writev (ares_socket_t s, const struct iovec *vector, size_t count)
 {
   char *buffer, *bp;
   size_t i, bytes = 0;

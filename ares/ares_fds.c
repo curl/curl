@@ -16,9 +16,7 @@
 #include "setup.h"
 #include <sys/types.h>
 
-#ifdef WIN32
-
-#else
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 

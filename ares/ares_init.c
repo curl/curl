@@ -16,18 +16,24 @@
 #include "setup.h"
 #include <sys/types.h>
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(WATT32)
 #include "nameser.h"
 #include <iphlpapi.h>
 #include <malloc.h>
+
 #else
 #include <sys/param.h>
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <arpa/nameser.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 #endif
 
 #include <stdio.h>
@@ -38,6 +44,10 @@
 #include <errno.h>
 #include "ares.h"
 #include "ares_private.h"
+
+#ifdef WATT32
+#undef WIN32  /* Redefined in MingW/MSVC headers */
+#endif
 
 static int init_by_options(ares_channel channel, struct ares_options *options,
 			   int optmask);

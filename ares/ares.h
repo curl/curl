@@ -27,11 +27,14 @@
 #include <sys/select.h>
 #endif
 
-#ifdef WIN32
-#include <winsock.h>
-#include <windows.h>
+#if defined(WATT32)
+  #include <netinet/in.h>
+  #include <tcp.h>
+#elif defined(WIN32)
+  #include <winsock.h>
+  #include <windows.h>
 #else
-#include <netinet/in.h>
+  #include <netinet/in.h>
 #endif
 
 #define ARES_SUCCESS		0
