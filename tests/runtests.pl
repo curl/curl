@@ -11,7 +11,6 @@ use strict;
 
 @INC=(@INC, $ENV{'srcdir'}, ".");
 
-require "stunnel.pm"; # stunnel functions
 require "getpart.pm"; # array functions
 
 my $srcdir = $ENV{'srcdir'} || '.';
