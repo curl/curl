@@ -33,7 +33,8 @@ HTTP
  - HEAD
  - POST
  - multipart formpost (RFC1867-style)
- - authentication (Basic, Digest, NTLM(*1), GSS-Negotiate(*3))
+ - authentication: Basic, Digest, NTLM(*1), GSS-Negotiate/Negotiate(*3) and
+   SPNEGO (*4)
  - resume (both GET and PUT)
  - follow redirects
  - maximum amount of redirects to follow
@@ -62,7 +63,7 @@ HTTPS (*1)
 FTP
  - download
  - authentication
- - kerberos security
+ - kerberos4 (*5)
  - active/passive using PORT, EPRT, PASV or EPSV
  - single file size information (compare to HTTP HEAD)
  - 'type=' URL support
@@ -97,6 +98,11 @@ GOPHER
 FILE
  - URL support
 
+FOOTNOTES
+=========
+
   *1 = requires OpenSSL
   *2 = requires OpenLDAP
   *3 = requires a GSSAPI-compliant library, such as Heimdal or similar.
+  *4 = requires FBopenssl
+  *5 = requires a krb4 library, such as the MIT one or similar.
