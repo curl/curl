@@ -16,7 +16,7 @@
 #include "setup.h"
 #include <sys/types.h>
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(WATT32)
 #include "nameser.h"
 #else
 #include <sys/socket.h>

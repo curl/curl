@@ -16,7 +16,7 @@
 #include "setup.h"
 #include <sys/types.h>
 
-#ifdef WIN32
+#if defined(WIN32) && !defined(WATT32)
 #include "nameser.h"
 #else
 #include <sys/socket.h>
@@ -28,8 +28,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 #include "ares.h"
 #include "ares_private.h"
+
+#ifdef WATT32
+#undef WIN32
+#endif
 
 struct addr_query {
   /* Arguments passed to ares_gethostbyaddr() */
