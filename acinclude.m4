@@ -697,6 +697,11 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
            WARN="$WARN -Wendif-labels -Wstrict-prototypes"
          fi
 
+         if test "$gccnum" -ge "304"; then
+           # try -Wunreachable-code on gcc 3.4
+           WARN="$WARN -Wunreachable-code"
+         fi
+
          for flag in $CPPFLAGS; do
            case "$flag" in
             -I*)
