@@ -23,9 +23,9 @@
 
 /* sws.c: simple (silly?) web server
 
-   This code was originally graciously donated to the project Juergen
+   This code was originally graciously donated to the project by Juergen
    Wilke. Thanks a bunch!
-   
+
  */
 
 #include <stdio.h>
@@ -66,7 +66,29 @@ spitout(FILE *stream,
 
 #define TEST_DATA_PATH "data/test%d"
 
+enum {
+  DOCNUMBER_BADCONNECT = -5,
+  DOCNUMBER_INTERNAL= -4,
+  DOCNUMBER_CONNECT = -3,
+  DOCNUMBER_WERULEZ = -2,
+  DOCNUMBER_404     = -1
+};
+
+/* sent as reply to a CONNECT */
+static const char *docconnect =
+"HTTP/1.1 200 Mighty fine indeed\r\n"
+"\r\n";
+
+/* sent as reply to a "bad" CONNECT */
+static const char *docbadconnect =
+"HTTP/1.1 501 Forbidden you fool\r\n"
+"\r\n";
+
+/* sent as reply to the magic to find out if we are the test server or
+   not */
 static const char *docfriends = "HTTP/1.1 200 Mighty fine indeed\r\n\r\nWE ROOLZ\r\n";
+
+/* send back this on 404 file not found */
 static const char *doc404 = "HTTP/1.1 404 Not Found\n"
     "Server: " VERSION "\n"
     "Connection: close\n"
@@ -94,10 +116,7 @@ static void logmsg(const char *msg)
 
     strcpy(loctime, asctime(curr_time));
     loctime[strlen(loctime) - 1] = '\0';
-    fprintf(logfp, "%s: pid %d: %s\n", loctime, (int)getpid(), msg);
-#ifdef DEBUG
-    fprintf(stderr, "%s: pid %d: %s\n", loctime, (int)getpid(), msg);
-#endif
+    fprintf(logfp, "%s: %d: %s\n", loctime, (int)getpid(), msg);
     fflush(logfp);
 }
 
@@ -207,10 +226,10 @@ static int get_request(int sock, int *part)
     if (got <= 0) {
       if (got < 0) {
         perror("recv");
-        return -1;
+        return DOCNUMBER_INTERNAL;
       }
       logmsg("Connection closed by client");
-      return -1;
+      return DOCNUMBER_INTERNAL;
     }
     offset += got;
 
@@ -222,20 +241,18 @@ static int get_request(int sock, int *part)
 
   if (offset >= REQBUFSIZ) {
     logmsg("Request buffer overflow, closing connection");
-    return -1;
+    return DOCNUMBER_INTERNAL;
   }
   reqbuf[offset]=0;
   
-  logmsg("Received a request");
-
   /* dump the request to an external file */
   storerequest(reqbuf);
 
-  if (sscanf(reqbuf, "%" REQBUFSIZ_TXT"s %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
-             request,
-             doc,
-             &prot_major,
-             &prot_minor) == 4) {
+  if(sscanf(reqbuf, "%" REQBUFSIZ_TXT"s %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
+            request,
+            doc,
+            &prot_major,
+            &prot_minor) == 4) {
     char *ptr;
     int test_no=0;
 
@@ -255,7 +272,7 @@ static int get_request(int sock, int *part)
       
       if(!strncmp("/verifiedserver", ptr, 15)) {
         logmsg("Are-we-friendly question received");
-        return -2;
+        return DOCNUMBER_WERULEZ;
       }
 
       ptr++; /* skip the slash */
@@ -271,8 +288,23 @@ static int get_request(int sock, int *part)
       logmsg(logbuf);
     }
     else {
+      if(sscanf(reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
+                doc,
+                &prot_major, &prot_minor) == 3) {
+        sprintf(logbuf, "Receiced a CONNECT %s HTTP/%d.%d request", 
+                doc, prot_major, prot_minor);
+        logmsg(logbuf);
 
-      logmsg("Did not find test number in PATH");
+        if(!strncmp(doc, "bad", 3))
+          /* if the host name starts with bad, we fake an error here */
+          test_no = DOCNUMBER_BADCONNECT;
+        else
+          test_no = DOCNUMBER_CONNECT;
+      }
+      else {
+        logmsg("Did not find test number in PATH");
+        test_no = DOCNUMBER_404;
+      }
     }
 
     return test_no;
@@ -299,13 +331,29 @@ static int send_doc(int sock, int doc, int part_no)
   char partbuf[80]="data";
 
   if(doc < 0) {
-    logmsg("Negative document number received, magic reply coming up");
-
-    if(-2 == doc)
+    switch(doc) {
+    case DOCNUMBER_WERULEZ:
       /* we got a "friends?" question, reply back that we sure are */
+      logmsg("Identifying ourselves as friends");
       buffer = docfriends;
-    else
+      break;
+    case DOCNUMBER_INTERNAL:
+      logmsg("Bailing out due to internal error");
+      return -1;
+    case DOCNUMBER_CONNECT:
+      logmsg("Replying to CONNECT");
+      buffer = docconnect;
+      break;
+    case DOCNUMBER_BADCONNECT:
+      logmsg("Replying to a bad CONNECT");
+      buffer = docbadconnect;
+      break;
+    case DOCNUMBER_404:
+    default:
+      logmsg("Replying to with a 404");
       buffer = doc404;
+      break;
+    }
     ptr = NULL;
     stream=NULL;
 
@@ -405,8 +453,6 @@ int main(int argc, char *argv[])
   if(argc>1)
     port = atoi(argv[1]);
 
-  /* FIX: write our pid to a file name */
-
   logfp = fopen(logfile, "a");
   if (!logfp) {
     perror(logfile);
@@ -414,9 +460,7 @@ int main(int argc, char *argv[])
   }
 
 #ifdef HAVE_SIGNAL
-  /* FIX: make a more portable signal handler */
   signal(SIGPIPE, sigpipe_handler);
-
   siginterrupt(SIGPIPE, 1);
 #endif
 
@@ -468,9 +512,14 @@ int main(int argc, char *argv[])
     
     logmsg("New client connected");
 
-    doc = get_request(msgsock, &part_no);
-    logmsg("Received request, now send response");
-    send_doc(msgsock, doc, part_no);
+    do {
+
+      doc = get_request(msgsock, &part_no);
+      logmsg("Received request, now send response");
+      send_doc(msgsock, doc, part_no);
+
+      /* if we got a CONNECT, loop and get another request as well! */
+    } while(doc == DOCNUMBER_CONNECT);
 
     logmsg("Closing client connection");
     close(msgsock);
