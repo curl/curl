@@ -1,3 +1,5 @@
+* February 10, 2004
+- Dirk Manske made ares_version.h installed with 'make install'
 
 * February 4, 2004
 - ares_free_errmem() is subject for removal, it is simply present for future
