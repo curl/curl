@@ -6,6 +6,56 @@
 
                                   Changelog
 
+Daniel (29 March 2004)
+- Gisle Vanem updated files for the djgpp/MS-DOS build.
+
+- Andrés García helped me work out a fix for the runtests.pl script to make
+  the file:// tests run fine when tested with the mingw-built version of curl.
+
+- Fixed an include issue with netinet/tcp.h on AIX, based on input by Tor.
+  This also required a minor fix of the configure script.
+
+- The postit2.c source example used the wrong struct name for the post data.
+
+Daniel (26 March 2004)
+- Gisle Vanem improved ipv6 support on windows by making the curl build to use
+  the correct getaddrinfo() function.
+
+Daniel (25 March 2004)
+- It turned out that AIX, despite having a "thread-safe libc", doesn't offer
+  all traditional functions thread-safe. This URL is informative on this
+  subject:
+
+    http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/aixprggd/ \
+    genprogc/thread_quick_ref.htm
+
+  As a result of this, we now check for three *_r() functions on recent AIX
+  versions as well that the URL mentions aren't thread-safe in AIX 5.1.
+
+- renamed curl_strerror.[ch] to strerror.[ch]
+
+- Joe Halpin added CURLOPT_TCP_NODELAY and --tcp-nodelay to make it possible
+  for users to disable the Nagle algorthim-usage.
+
+- Tor Arntsen provided some interesting strerror_r() knowledge. glibc has its
+  own API which differs from the POSIX one. Daniel adjusted the configure
+  script to detect the version in use, and the code now uses the new defines
+  accordingly.
+
+- Fixed some build flaws with the new lib/curl_strerror.c source file.
+
+Daniel (24 March 2004)
+- Gisle Vanem's fix to replace the bad use of strerror(). This introduces
+  Curl_strerror() that attempts to be thread-safe _and_ works on Windows too!
+
+- Tor Arntsen spell-fixed lots of libcurl man pages.
+
+- Tor Arntsen made testcurl.pl work with older perl 5 versions, and Daniel
+  made it not use chdir .. to go back, as that isn't very good when you've
+  setup a testdir containing symlinks.
+
+- Added a check for strerror_r() in the configure script.
+
 Daniel (23 March 2004)
 - Added Greg Hewgill's testcurl.pl script to CVS. We have not moved over to
   use this script for the real distributed testing just yet, but it is only
