@@ -1,4 +1,4 @@
-Updated: August 8, 2002 (http://curl.haxx.se/docs/faq.html)
+Updated: August 29, 2002 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -474,11 +474,12 @@ FAQ
 
      curl 'http://www.altavista.com/cgi-bin/query?text=yes&q=curl'
 
-  In win32, the standard DOS shell treats the %-letter specially and you may
-  need to quote the string properly when % is used in it.
+  In Windows, the standard DOS shell treats the %-letter specially and you
+  need to use TWO %-letters for each single one you want to use in the URL.
 
   Also note that if you want the literal %-letter to be part of the data you
-  pass in a POST using -d/--data you must encode it as '%25'.
+  pass in a POST using -d/--data you must encode it as '%25' (which then also
+  needs the %-letter doubled on Windows machines).
 
   4.3. How can I use {, }, [ or ] to specify multiple URLs?
 
