@@ -10,6 +10,9 @@ do {
     if($ARGV[0] eq "-v") {
         $verbose=1;
     }
+    elsif($ARGV[0] eq "-t") {
+        $trace=1;
+    }
 } while (shift @ARGV);
 
 my $maxmem;
@@ -43,11 +46,11 @@ while(<STDIN>) {
                 print "FREE ERROR: Previously freed at: ".$getmem{$addr}."\n";
             }
             else {
-                if(0 && $verbose) {
-                    print "malloc at ".$getmem{$addr}." is freed again at $source:$linenum\n";
-                }
-
                 $totalmem -= $sizeataddr{$addr};
+                if($trace) {
+                    print "FREE: malloc at ".$getmem{$addr}." is freed again at $source:$linenum\n";
+                    printf("FREE: %d bytes freed, left allocated: $totalmem bytes\n", $sizeataddr{$addr});
+                }
 
                 newtotal($totalmem);
                 $frees++;
@@ -69,8 +72,9 @@ while(<STDIN>) {
             $sizeataddr{$addr}=$size;
             $totalmem += $size;
 
-            if(0 && $verbose) {
-                print "malloc($size) at $source:$linenum\n";
+            if($trace) {
+                print "MALLOC: malloc($size) at $source:$linenum",
+                " makes totally $totalmem bytes\n";
             }
 
             newtotal($totalmem);
@@ -84,10 +88,17 @@ while(<STDIN>) {
             $newaddr = $3;
 
             $totalmem -= $sizeataddr{$oldaddr};
+            if($trace) {
+                printf("REALLOC: %d less bytes and ", $sizeataddr{$oldaddr});
+            }
             $sizeataddr{$oldaddr}=0;
 
             $totalmem += $newsize;
             $sizeataddr{$newaddr}=$newsize;
+
+            if($trace) {
+                printf("%d more bytes ($source:$linenum)\n", $newsize);
+            }
 
             newtotal($totalmem);
             $reallocs++;
@@ -105,6 +116,11 @@ while(<STDIN>) {
             $sizeataddr{$addr}=$size;
 
             $totalmem += $size;
+
+            if($trace) {
+                printf("STRDUP: $size bytes at %s, makes totally: %d bytes\n", 
+                       $getmem{$addr}, $totalmem);
+            }
 
             newtotal($totalmem);
             $strdups++;
