@@ -262,6 +262,10 @@ static int get_request(int sock, int *part, int *open)
 
   if (offset >= REQBUFSIZ) {
     logmsg("Request buffer overflow, closing connection");
+    /* dump the request to an external file anyway */
+    reqbuf[REQBUFSIZ-1]=0;
+    storerequest(reqbuf);
+
     return DOCNUMBER_INTERNAL;
   }
   reqbuf[offset]=0;
