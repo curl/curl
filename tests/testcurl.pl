@@ -46,6 +46,7 @@
 # --mktarball=[command]    Command to run after completed test
 # --name=[name]            Set name to report as
 # --nocvsup                Don't update from CVS even though it is a CVS tree
+# --runtestsopts=[options] Options to pass to runtests.pl
 # --setup=[file name]      File name to read setup from (deprecated)
 # --target=[your os]       Specify your target environment.
 #
@@ -62,8 +63,8 @@ use Cwd;
 use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog
             $buildlogname $configurebuild $targetos $confsuffix $binext
             $libext);
-use vars qw($name $email $desc $confopts $setupfile $mktarball $nocvsup
-            $crosscompile);
+use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
+            $nocvsup $crosscompile);
 
 # version of this script
 $version='$Revision$';
@@ -103,6 +104,9 @@ while ($ARGV[0]) {
   elsif ($ARGV[0] =~ /--crosscompile/) {
     $crosscompile=1;
     shift @ARGV;
+  }
+  elsif ($ARGV[0] =~ /--runtestopts=/) {
+    $runtestopts = (split(/=/, shift @ARGV, 2))[1];
   }
   else {
     $CURLDIR=shift @ARGV;
@@ -517,8 +521,8 @@ elsif(!$crosscompile) {
 }
 
 if ($configurebuild && !$crosscompile) {
-  logit "run make test-full";
-  open(F, "make test-full 2>&1 |") or die;
+  logit "run make TEST_F=\"$runtestopts\" test-full";
+  open(F, "make TEST_F=\"$runtestopts\" test-full 2>&1 |") or die;
   open(LOG, ">$buildlog") or die;
   while (<F>) {
     s/$pwd//g;
