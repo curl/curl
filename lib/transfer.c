@@ -193,7 +193,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       if ((k->bytecount == 0) && (k->writebytecount == 0))
         Curl_pgrsTime(data, TIMER_STARTTRANSFER);
 
-
       didwhat |= KEEP_READ;
 
       /* NULL terminate, allowing string ops to be used */
@@ -313,6 +312,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               k->headerline = 0; /* restart the header line counter */
               /* if we did wait for this do enable write now! */
               if (k->write_after_100_header) {
+
                 k->write_after_100_header = FALSE;
                 FD_SET (conn->writesockfd, &k->writefd); /* write */
                 k->keepon |= KEEP_WRITE;
@@ -749,8 +749,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         conn->upload_fromhere = k->uploadbuf;
 
         nread = data->set.fread(conn->upload_fromhere, 1,
-                                conn->upload_bufsize,
-                                data->set.in);
+                                BUFSIZE, data->set.in);
 
         /* the signed int typecase of nread of for systems that has
            unsigned size_t */
@@ -782,7 +781,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       else {
         /* We have a partial buffer left from a previous "round". Use
            that instead of reading more data */
-
       }
 
       /* write to socket */
@@ -811,7 +809,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         conn->upload_present = 0; /* no more bytes left */
       }
 
-      k->writebytecount += nread;
+      k->writebytecount += bytes_written;
       Curl_pgrsSetUploadCounter(data, (double)k->writebytecount);
 
     }
@@ -846,15 +844,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   if (result)
     return result;
     
-  if(data->progress.ulspeed > conn->upload_bufsize) {
-    /* If we're transfering more data per second than fits in our buffer,
-       we increase the buffer size to adjust to the current
-       speed. However, we must not set it larger than BUFSIZE. We don't
-       adjust it downwards again since we don't see any point in that!
-    */
-    conn->upload_bufsize=(long)min(data->progress.ulspeed, BUFSIZE);
-  }
-
   if (data->set.timeout &&
       ((Curl_tvdiff(k->now, k->start)/1000) >= data->set.timeout)) {
     failf (data, "Operation timed out with %d out of %d bytes received",
@@ -1008,7 +997,7 @@ Transfer(struct connectdata *conn)
     k->writefd = k->wkeepfd;
     interval.tv_sec = 1;
     interval.tv_usec = 0;
-    
+
     switch (select (k->maxfd, &k->readfd, &k->writefd, NULL,
                     &interval)) {
     case -1: /* select() error, stop reading */
@@ -1024,6 +1013,7 @@ Transfer(struct connectdata *conn)
     case 0:  /* timeout */
       result = Curl_readwrite(conn, &done);
       break;
+
     default: /* readable descriptors */
       result = Curl_readwrite(conn, &done);
       break;
