@@ -119,7 +119,7 @@ int FormParse(char *input,
   /* nextarg MUST be a string in the format 'name=contents' and we'll
      build a linked list with the info */
   char name[256];
-  char contents[1024]="";
+  char contents[4096]="";
   char major[128];
   char minor[128];
   long flags = 0;
@@ -132,7 +132,7 @@ int FormParse(char *input,
   struct HttpPost *subpost; /* a sub-node */
   unsigned int i;
 
-  if(1 <= sscanf(input, "%255[^ =] = %1023[^\n]", name, contents)) {
+  if(1 <= sscanf(input, "%255[^ =] = %4095[^\n]", name, contents)) {
     /* the input was using the correct format */
     contp = contents;
 
@@ -281,8 +281,14 @@ int FormParse(char *input,
       if(post) {
 	memset(post, 0, sizeof(struct HttpPost));
 	GetStr(&post->name, name);      /* get the name */
-	GetStr(&post->contents, contp); /* get the contents */
-	post->flags = 0;
+	if( contp[0]=='<' ) {
+	  GetStr(&post->contents, contp+1); /* get the contents */
+	  post->flags = HTTPPOST_READFILE;
+	}
+	else {
+	  GetStr(&post->contents, contp); /* get the contents */
+	  post->flags = 0;
+	}
 
 	/* make the previous point to this */
 	if(*last_post)
@@ -334,7 +340,7 @@ static int AddFormData(struct FormData **formp,
 static int AddFormDataf(struct FormData **formp,
 			 char *fmt, ...)
 {
-  char s[1024];
+  char s[4096];
   va_list ap;
   va_start(ap, fmt);
   vsprintf(s, fmt, ap);
@@ -454,15 +460,14 @@ struct FormData *getFormData(struct HttpPost *post,
       if(file->contenttype &&
 	 !strnequal("text/", file->contenttype, 5)) {
 	/* this is not a text content, mention our binary encoding */
-	size += AddFormDataf(&form,
-			     "\r\nContent-Transfer-Encoding: binary");
+	size += AddFormData(&form, "\r\nContent-Transfer-Encoding: binary", 0);
       }
 
 
-      size += AddFormDataf(&form,
-			   "\r\n\r\n");
+      size += AddFormData(&form, "\r\n\r\n", 0);
 
-      if(post->flags & HTTPPOST_FILENAME) {
+      if((post->flags & HTTPPOST_FILENAME) ||
+	 (post->flags & HTTPPOST_READFILE)) {
 	/* we should include the contents from the specified file */
 	FILE *fileread;
 	char buffer[1024];
@@ -479,15 +484,12 @@ struct FormData *getFormData(struct HttpPost *post,
 	  }
           if(fileread != stdin)
             fclose(fileread);
+	} else {
+	  size += AddFormData(&form, "[File wasn't found by client]", 0);
 	}
-	else {
-	  size += AddFormDataf(&form, "[File wasn't found by client]");
-	}
-      }
-      else {
+      } else {
 	/* include the contents we got */
-	size += AddFormDataf(&form,
-			     post->contents);
+	size += AddFormData(&form, post->contents, 0);
       }
     } while((file = file->more)); /* for each specified file for this field */
 

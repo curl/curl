@@ -76,6 +76,7 @@ struct HttpPost {
 			    link should link to following files */
   long flags;     /* as defined below */
 #define HTTPPOST_FILENAME (1<<0) /* specified content is a file name */
+#define HTTPPOST_READFILE (1<<1) /* specified content is a file name */
 };
 
 typedef int (*curl_progress_callback)(void *clientp,
