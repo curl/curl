@@ -2,7 +2,7 @@
 # $Id$
 #
 
-AUTOMAKE_OPTIONS = foreign
+AUTOMAKE_OPTIONS = foreign no-dependencies
 
 EXTRA_DIST = getdate.y \
        Makefile.b32 Makefile.b32.resp Makefile.m32 Makefile.vc6 \
