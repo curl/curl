@@ -176,6 +176,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,
   /*
    * Connecting with IPv6 support is so much easier and cleanly done
    */
+  port =0; /* we already have port in the 'remotehost' struct */
+
   if(sockfd != -1)
     /* don't use any previous one, it might be of wrong type */
     sclose(sockfd);
