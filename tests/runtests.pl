@@ -186,7 +186,7 @@ sub comparefiles {
     # silly win-crap
     binmode S;
     binmode D;
-    
+
     my $m = 20;
     my ($snum, $dnum, $s, $d);
     do {
@@ -196,7 +196,7 @@ sub comparefiles {
            ($s ne $d)) {
             print "$source and $dest differ\n";
             $res=1;
-            last;
+            $snum=0;
         }
     } while($snum);
     close(S);
@@ -330,19 +330,27 @@ sub singletest {
     # this is the valid protocol file we should generate
     my $PROT="$TESTDIR/prot$NUMBER.txt";
 
+    # redirected stdout/stderr here
+    $STDOUT="$LOGDIR/stdout$NUMBER";
+    $STDERR="$LOGDIR/stderr$NUMBER";
+
+    # if this file exists, we verify that the stdout contained this:
+    my $VALIDOUT="$TESTDIR/stdout$NUMBER.txt";
+
+    # if this file exists, we verify upload
+    my $UPLOAD="$TESTDIR/upload$NUMBER.txt";
+
+    if(! -r $CURLCMD) {
+        # this is not a test
+        next;
+    }
+
     # name of the test
     open(N, "<$TESTDIR/name$NUMBER.txt") ||
         print "** Couldn't read name on test $NUMBER\n";
     my $DESC=<N>;
     close(N);
     $DESC =~ s/[\r\n]//g;
-
-    # redirected stdout/stderr here
-    $STDOUT="$LOGDIR/stdout$NUMBER";
-    $STDERR="$LOGDIR/stderr$NUMBER";
-
-    # if this file exist, we verify that the stdout contained this:
-    my $VALIDOUT="$TESTDIR/stdout$NUMBER.txt";
 
     print "test $NUMBER...";
     if(!$short) {
@@ -432,18 +440,29 @@ sub singletest {
             }
         }
         else {
-            if (! -r $REPLY) {
+            if (! -r $REPLY && -r $CURLOUT) {
                 print "** Missing reply data file for test $NUMBER",
                 ", should be similar to $CURLOUT\n";
                 return 1;            
             }
 
-            # verify the received data
-            $res = compare($CURLOUT, $REPLY, "data");
+            if( -r $CURLOUT ) {
+                # verify the received data
+                $res = compare($CURLOUT, $REPLY, "data");
+                if ($res) {
+                    return 1;
+                }
+            }
+        }
+
+        if(-r $UPLOAD) {
+             # verify uploaded data
+            $res = compare("$LOGDIR/upload.$NUMBER", $UPLOAD, "upload");
             if ($res) {
                 return 1;
             }
         }
+
 
         if (! -r $PROT) {
             print "** Missing protocol file for test $NUMBER",
@@ -507,6 +526,7 @@ sub singletest {
 # Check options to this test program
 #
 
+my @testthis;
 do {
     if ($ARGV[0] eq "-v") {
         # verbose output
@@ -534,9 +554,14 @@ EOHELP
         exit;
     }
     elsif($ARGV[0] =~ /^(\d+)/) {
-        $TESTCASES=$ARGV[0]; # run these tests
+        push @testthis, $1;
     }
 } while(shift @ARGV);
+
+if($testthis[0] ne "") {
+    $TESTCASES=join(" ", @testthis);
+}
+
 
 #######################################################################
 # Output curl version and host info being tested
