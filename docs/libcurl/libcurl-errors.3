@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH libcurl-errors 3 "27 Apr 2004" "libcurl 7.12" "libcurl errors"
+.TH libcurl-errors 3 "9 Feb 2005" "libcurl 7.13.1" "libcurl errors"
 .SH NAME
 libcurl-errors \- error codes in libcurl
 .SH DESCRIPTION
@@ -187,6 +187,13 @@ Invalid LDAP URL
 Maximum file size exceeded
 .IP "CURLE_FTP_SSL_FAILED (64)"
 Requested FTP SSL level failed
+.IP "CURLE_SEND_FAIL_REWIND (65)"
+When doing a send operation curl had to rewind the data to retransmit, but the
+rewinding operation failed
+.IP "CURLE_SSL_ENGINE_INITFAILED (66)"
+Initiating the SSL Engine failed
+.IP "CURLE_LOGIN_DENIED (67)"
+The remote server denied curl to login (Added in 7.13.1)
 .SH "CURLMcode"
 This is the generic return code used by functions in the libcurl multi
 interface. Also consider \fIcurl_multi_strerror(3)\fI.
