@@ -2421,7 +2421,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
  */
 CURLcode Curl_ftp_quit(struct connectdata *conn)
 {
-  int nread;
+  ssize_t nread;
   int ftpcode;
   CURLcode ret;
 
