@@ -16,18 +16,20 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o double va_list access crash fixed
  o minor memory leak when "version" is set in a cookie header
  o builds fine on BeOS
  o builds and runs fine on FreeBSD
 
 Other curl-related news since the previous public release:
 
- o 
+ o cURLpp 0.3.2 - https://rrette.com/curlpp.html
+ o pycURL 7.12.3 - http://pycurl.sourceforge.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Dan Fandrich, Peter Pentchev, Marcin Konicki, Rune Kleveland, David Shaw,
- Werner Koch
+ Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt
 
         Thanks! (and sorry if I forgot to mention someone)

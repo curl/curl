@@ -7,6 +7,15 @@
                                   Changelog
 
 
+Daniel (4 January 2005)
+- Marty Kuhrt adjusted a VMS build script slightly
+
+- Kai Sommerfeld and Gisle Vanem fixed libcurl to build with IPv6 support on
+  Win2000.
+
+Daniel (2 January 2005)
+- Alex Neblett updated the MSVC makefiles slightly.
+
 Daniel (25 December 2004)
 - Removed src/config.h.in from CVS, it is now copied from the (generated)
   lib/config.h.in instead, as they can very well be the same. This removes a
