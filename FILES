@@ -25,6 +25,7 @@ maketgz
 Makefile.in
 Makefile.am
 acconfig.h
+acinclude.m4
 aclocal.m4
 config.guess
 config.h.in
