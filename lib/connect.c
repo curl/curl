@@ -24,14 +24,24 @@
 #include "setup.h"
 
 #ifndef WIN32
+/* headers for non-win32 */
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/ioctl.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
-#include <sys/fcntl.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
+
 #endif
 #include <stdio.h>
 #include <errno.h>
@@ -65,7 +75,7 @@
  */
 static
 int nonblock(int socket,    /* operate on this */
-                  int nonblock   /* TRUE or FALSE */)
+             int nonblock   /* TRUE or FALSE */)
 {
 #undef SETBLOCK
 #ifdef HAVE_O_NONBLOCK
@@ -149,11 +159,15 @@ int waitconnect(int sockfd, /* socket */
  */
 
 CURLcode Curl_connecthost(struct connectdata *conn,
+                          long timeout_ms,
                           int sockfd, /* input socket, or -1 if none */
                           int *socket)
 {
   struct SessionHandle *data = conn->data;
   int rc;
+
+  struct timeval after;
+  struct timeval before = Curl_tvnow();
 
 #ifdef ENABLE_IPV6
   /*
@@ -178,11 +192,16 @@ CURLcode Curl_connecthost(struct connectdata *conn,
       break;
 
     /* asynchronous connect, wait for connect or timeout */
-    rc = waitconnect(sockfd, timeout);
+    rc = waitconnect(sockfd, timeout_ms);
     if(0 != rc) {
       /* connect failed or timed out */
       sclose(sockfd);
       sockfd = -1;
+
+      /* get a new timeout for next attempt */
+      after = Curl_tvnow();
+      timeout_ms -= (long)(Curl_tvdiff(after, before)*1000);
+      before = after;
       continue;
     }
 
@@ -200,7 +219,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,
    * Connecting with IPv4-only support
    */
   int aliasindex;
-  int timeout_ms = 10000; /* while testing */
 
   /* non-block socket */
   nonblock(sockfd, TRUE);
@@ -250,8 +268,13 @@ CURLcode Curl_connecthost(struct connectdata *conn,
       }
     }
 
-    if(0 != rc)
+    if(0 != rc) {
+      /* get a new timeout for next attempt */
+      after = Curl_tvnow();
+      timeout_ms -= (long)(Curl_tvdiff(after, before)*1000);
+      before = after;
       continue; /* try next address */
+    }
     else
       break;
   }
