@@ -42,7 +42,7 @@ struct timeval {
 #endif
 #endif
 
-struct timeval Curl_tvnow ();
+struct timeval Curl_tvnow (void);
 
 /* the diff is from now on returned in number of milliseconds! */
 long Curl_tvdiff (struct timeval t1, struct timeval t2);
