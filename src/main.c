@@ -3457,7 +3457,8 @@ operate(struct Configurable *config, int argc, char *argv[])
 #else
         if((res!=CURLE_OK) && config->showerror) {
           fprintf(config->errors, "curl: (%d) %s\n", (int)res,
-                  errorbuffer[0]? errorbuffer: curl_easy_strerror(res));
+                  errorbuffer[0]? errorbuffer:
+                  curl_easy_strerror((CURLcode)res));
           if(CURLE_SSL_CACERT == res) {
 #define CURL_CA_CERT_ERRORMSG1 \
 "More details here: http://curl.haxx.se/docs/sslcerts.html\n\n" \
