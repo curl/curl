@@ -6,6 +6,17 @@
 
                                History of Changes
 
+Daniel (28 November 2000)
+- I filled in more error codes in the man page error code list that had been
+  lagging.
+
+- James Griffiths mailed me a fine patch that introduces the CURLOPT_MAXREDIRS
+  libcurl option. When used, it'll prevent location following more than the
+  set number of times. It is useful to break out of endless redirect-loops.
+
+Daniel (27 November 2000)
+- Added two test cases for file://.
+
 Daniel (22 November 2000)
 - Added the libcurl CURLOPT_FILETIME setopt, when set it tries to get the
   modified time of the remote document. This is a special option since it
