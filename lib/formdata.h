@@ -39,8 +39,10 @@ struct Form {
 /* used by FormAdd for temporary storage */
 typedef struct FormInfo {
   char *name;
+  bool name_alloc;
   size_t namelength;
   char *value;
+  bool value_alloc;
   size_t contentslength;
   char *contenttype;
   long flags;

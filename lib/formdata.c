@@ -152,9 +152,8 @@ AddHttpPost(char * name, size_t namelength,
             struct curl_httppost **last_post)
 {
   struct curl_httppost *post;
-  post = (struct curl_httppost *)malloc(sizeof(struct curl_httppost));
+  post = (struct curl_httppost *)calloc(sizeof(struct curl_httppost), 1);
   if(post) {
-    memset(post, 0, sizeof(struct curl_httppost));
     post->name = name;
     post->namelength = (long)(name?(namelength?namelength:strlen(name)):0);
     post->contents = value;
@@ -283,34 +282,38 @@ static const char * ContentTypeForFilename (const char *filename,
 
 /***************************************************************************
  *
- * AllocAndCopy()
+ * memdup()
  *	
- * Copies the data currently available under *buffer using newly allocated
- * buffer (that becomes *buffer). Uses buffer_length if not null, else
- * uses strlen to determine the length of the buffer to be copied
+ * Copies the 'source' data to a newly allocated buffer buffer (that is
+ * returned). Uses buffer_length if not null, else uses strlen to determine
+ * the length of the buffer to be copied
  *
- * Returns 0 on success and 1 if the malloc failed.
+ * Returns the new pointer or NULL on failure.
  *
  ***************************************************************************/
-static int AllocAndCopy(char **buffer, size_t buffer_length)
+static char *memdup(const char *src, size_t buffer_length)
 {
-  const char *src = *buffer;
   size_t length;
   bool add = FALSE;
+  char *buffer;
+  
   if (buffer_length)
     length = buffer_length;
   else {
-    length = strlen(*buffer);
+    length = strlen(src);
     add = TRUE;
   }
-  *buffer = (char*)malloc(length+add);
-  if (!*buffer)
-    return 1;
-  memcpy(*buffer, src, length);
+  buffer = (char*)malloc(length+add);
+  if (!buffer)
+    return NULL; /* fail */
+  
+  memcpy(buffer, src, length);
+
   /* if length unknown do null termination */
   if (add)
-    (*buffer)[length] = '\0';
-  return 0;
+    buffer[length] = '\0';
+
+  return buffer;
 }
 
 /***************************************************************************
@@ -383,22 +386,16 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   /*
    * We need to allocate the first struct to fill in.
    */
-  first_form = (FormInfo *)malloc(sizeof(struct FormInfo));
-  if(first_form) {
-    memset(first_form, 0, sizeof(FormInfo));
-    current_form = first_form;
-  }
-  else
+  first_form = (FormInfo *)calloc(sizeof(struct FormInfo), 1);
+  if(!first_form)
     return CURL_FORMADD_MEMORY;
 
-  /*
-   * Loop through all the options set.
-   */
-  while (1) {
+  current_form = first_form;
 
-    /* break if we have an error to report */
-    if (return_value != CURL_FORMADD_OK)
-      break;
+  /*
+   * Loop through all the options set. Break if we have an error to report.
+   */
+  while (return_value == CURL_FORMADD_OK) {
 
     /* first see if we have more parts of the array param */
     if ( array_state ) {
@@ -670,21 +667,24 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         if ( !(form->flags & HTTPPOST_PTRNAME) &&
              (form == first_form) ) {
           /* copy name (without strdup; possibly contains null characters) */
-          if (AllocAndCopy(&form->name, form->namelength)) {
+          form->name = memdup(form->name, form->namelength);
+          if (!form->name) {
             return_value = CURL_FORMADD_MEMORY;
             break;
           }
+          form->name_alloc = TRUE;
         }
         if ( !(form->flags & HTTPPOST_FILENAME) &&
              !(form->flags & HTTPPOST_READFILE) && 
              !(form->flags & HTTPPOST_PTRCONTENTS) &&
              !(form->flags & HTTPPOST_PTRBUFFER) ) {
-
           /* copy value (without strdup; possibly contains null characters) */
-          if (AllocAndCopy(&form->value, form->contentslength)) {
+          form->value = memdup(form->value, form->contentslength);
+          if (!form->value) {
             return_value = CURL_FORMADD_MEMORY;
             break;
           }
+          form->value_alloc = TRUE;
         }
         post = AddHttpPost(form->name, form->namelength,
                            form->value, form->contentslength,
@@ -694,13 +694,23 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
                            post, httppost,
                            last_post);
         
-        if(!post)
+        if(!post) {
           return_value = CURL_FORMADD_MEMORY;
+          break;
+        }
 
         if (form->contenttype)
           prevtype = form->contenttype;
       }
     }
+  }
+
+  if(return_value && form) {
+    /* we return on error, free possibly allocated fields */
+    if(form->name_alloc)
+      free(form->name);
+    if(form->value_alloc)
+      free(form->value);
   }
 
   /* always delete the allocated memory before returning */
