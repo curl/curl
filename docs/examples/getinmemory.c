@@ -44,8 +44,7 @@ WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 
 int main(int argc, char **argv)
 {
-  CURL *curl;
-  CURLcode res;
+  CURL *curl_handle;
 
   struct MemoryStruct chunk;
 
