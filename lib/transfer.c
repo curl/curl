@@ -179,7 +179,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   do {
     if((k->keepon & KEEP_READ) &&
-       FD_ISSET(conn->sockfd, &k->readfd)) {
+       FD_ISSET(conn->sockfd, k->readfdp)) {
 
       /* read! */
       result = Curl_read(conn, conn->sockfd, k->buf,
@@ -736,7 +736,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     } /* if( read from socket ) */
 
     if((k->keepon & KEEP_WRITE) &&
-       FD_ISSET(conn->writesockfd, &k->writefd)) {
+       FD_ISSET(conn->writesockfd, k->writefdp)) {
       /* write */
 
       int i, si;
@@ -946,6 +946,9 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
     k->rkeepfd = k->readfd;
     k->wkeepfd = k->writefd;
 
+    k->writefdp = &k->writefd; /* store the address of the set */
+    k->readfdp = &k->readfd;   /* store the address of the set */
+
   }
 
   return CURLE_OK;
@@ -961,11 +964,13 @@ void Curl_single_fdset(struct connectdata *conn,
   if(conn->keep.keepon & KEEP_READ) {
     FD_SET(conn->sockfd, read_fd_set);
     *max_fd = conn->sockfd;
+    conn->keep.readfdp = read_fd_set; /* store the address of the set */
   }
   if(conn->keep.keepon & KEEP_WRITE) {
     FD_SET(conn->writesockfd, write_fd_set);
     if(conn->writesockfd > *max_fd)
       *max_fd = conn->writesockfd;
+    conn->keep.writefdp = write_fd_set; /* store the address of the set */
   }
   /* we don't use exceptions, only touch that one to prevent compiler
      warnings! */
@@ -1012,8 +1017,7 @@ Transfer(struct connectdata *conn)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    switch (select (k->maxfd, &k->readfd, &k->writefd, NULL,
-                    &interval)) {
+    switch (select (k->maxfd, k->readfdp, k->writefdp, NULL, &interval)) {
     case -1: /* select() error, stop reading */
 #ifdef EINTR
       /* The EINTR is not serious, and it seems you might get this more
