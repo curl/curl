@@ -31,21 +31,23 @@ WEB SITE
   Visit the curl web site or mirrors for the latest news:
 
         Sweden    -- http://curl.haxx.se/
-        Russia    -- http://curl.tsuren.net/
-        US        -- http://curl.sf.net/
         Australia -- http://curl.planetmirror.com/
+        Russia    -- http://curl.tsuren.net/
+        US (CA)   -- http://curl.sf.net/
+        US (TX)   -- http://curl.cyberservers.net/
 
 DOWNLOAD
 
-  The official download mirror sites are:
+  The official download sites are:
 
-        Sweden    -- ftp://ftp.sunet.se/pub/www/utilities/curl/
-        Sweden    -- http://cool.haxx.se/curl/
-        Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
         Australia -- http://curl.planetmirror.com/download/
-        US        -- http://curl.sourceforge.net/download/
+        Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
         Hongkong  -- http://www.execve.net/curl/
         Russia    -- http://curl.tsuren.net/download/
+        Sweden    -- ftp://ftp.sunet.se/pub/www/utilities/curl/
+        Sweden    -- http://cool.haxx.se/curl/
+        US (CA)   -- http://curl.sourceforge.net/download/
+        US (TX)   -- http://curl.cyberservers.net/download/
 
 CVS
 
