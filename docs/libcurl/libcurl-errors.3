@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH libcurl-errors 3 "10 April 2002" "libcurl 7.9.6" "libcurl errors"
+.TH libcurl-errors 3 "18 Dec 2002" "libcurl 7.10.3" "libcurl errors"
 .SH NAME
 error codes in libcurl
 .SH DESCRIPTION
@@ -104,7 +104,7 @@ After a completed file transfer, the FTP server did not respond a proper
 When sending custom "QUOTE" commands to the remote server, one of the commands
 returned an error code that was 400 or higher.
 .TP
-.B CURLE_HTTP_NOT_FOUND (22)
+.B CURLE_HTTP_RETURNED_ERROR (22)
 This is returned if CURLOPT_FAILONERROR is set TRUE and the HTTP server
 returns an error code that is >= 400.
 .TP

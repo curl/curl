@@ -481,7 +481,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                      here is the check for that: */
                   /* serious error, go home! */
                   failf (data, "The requested file was not found");
-                  return CURLE_HTTP_NOT_FOUND;
+                  return CURLE_HTTP_RETURNED_ERROR;
                 }
 
                 if(k->httpversion == 10)

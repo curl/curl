@@ -162,7 +162,7 @@ typedef enum {
   CURLE_FTP_COULDNT_RETR_FILE,   /* 19 */
   CURLE_FTP_WRITE_ERROR,         /* 20 */
   CURLE_FTP_QUOTE_ERROR,         /* 21 */
-  CURLE_HTTP_NOT_FOUND,          /* 22 */
+  CURLE_HTTP_RETURNED_ERROR,     /* 22 */
   CURLE_WRITE_ERROR,             /* 23 */
   CURLE_MALFORMAT_USER,          /* 24 - user name is illegally specified */
   CURLE_FTP_COULDNT_STOR_FILE,   /* 25 - failed FTP upload */
@@ -209,6 +209,7 @@ typedef enum {
 
 /* Make a spelling correction for the operation timed-out define */
 #define CURLE_OPERATION_TIMEDOUT CURLE_OPERATION_TIMEOUTED
+#define CURLE_HTTP_NOT_FOUND CURLE_HTTP_RETURNED_ERROR
 
 typedef enum {
   CURLPROXY_HTTP = 0,
@@ -807,7 +808,7 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.10.3-pre2"
+#define LIBCURL_VERSION "7.10.3-test"
 #define LIBCURL_VERSION_NUM 0x070a03
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
