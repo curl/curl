@@ -21,6 +21,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o libcurl error message is now provided when send() fails
+ o no more SIGPIPE on Mac OS X and other SO_NOSIGPIPE-supporting platforms
  o HTTP resume was refused if redirected
  o configure's gethostbyname check when both nsl and socket libs are required
  o configure --with-libidn now checks the given path before defaults
@@ -67,6 +69,7 @@ advice from friends like these:
  Tarendash, Daniel at touchtunes, Bertrand Demiddelaer, Andreas Rieke,
  Jean-Claude Chauve, Dan Fandrich, Peter Sylvester, "Mekonikum", Jean-Philippe
  Barrette-LaPierre, Günter Knauf, Larry Campbell, Fedor Karpelevitch,
- Aleksandar Milivojevic, Gisle Vanem, Chris "Bob Bob", Chih-Chung Chang
+ Aleksandar Milivojevic, Gisle Vanem, Chris "Bob Bob", Chih-Chung Chang,
+ Andy Cedilnik, Alan Pinstein
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -12,6 +12,12 @@ Daniel (11 October 2004)
   the peer dies. The same effect is provide by the MSG_NOSIGNAL parameter to
   send() on other systems. Alan Pinstein verified the fix.
 
+Daniel (10 October 2004)
+- Systems with 64bit longs no longeruse strtoll() or our strtoll- replacement
+  to parse 64 bit numbers. strtol() works fine. Added a configure check to
+  detect if [constant]LL works and if so, use that in the strtoll replacement
+  code to work around compiler warnings reported by Andy Cedilnik.
+
 Gisle (6 October 2004)
 - For USE_LIBIDN builds: Added Top-Level-Domain (TLD) check of host-name
   used in fix_hostname(). Checks if characters in 'host->name' (indirectly
