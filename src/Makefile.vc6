@@ -23,6 +23,13 @@ OPENSSL_PATH = ../../openssl-0.9.9d
 
 ########################################################
 ## Nothing more to do below this line!
+CFLAGSZLIB = /D "HAVE_ZLIB_H" /D "HAVE_ZLIB" /D "HAVE_LIBZ" /I "$(ZLIB_PATH)"
+LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
+ZLIBLIBS   = zlib.lib
+SSLINC     = /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
+CFLAGSSSL  = /D "USE_SSLEAY"
+LFLAGSSSL  = /LIBPATH:"$(OPENSSL_PATH)/out32"
+SSLLIBS    = libeay32.lib ssleay32.lib gdi32.lib 
 
 ## Release
 CCR = cl.exe /MD /O2 /D "NDEBUG"
@@ -34,11 +41,11 @@ CCD = cl.exe /MDd /Gm /ZI /Od /D "_DEBUG" /GZ
 LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
 RCD = rc.exe /dCURLDEBUG=1
 
-CFLAGS = /I "../lib" /I "../include" /I "$(ZLIB_PATH)" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-LFLAGS = /nologo /libpath:"$(ZLIB_PATH)" /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
+CFLAGS = /I "../lib" /I "../include" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+LFLAGS = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
 RESFLAGS = /i "../include"
-LINKLIBS = wsock32.lib libcurl.lib winmm.lib zlib.lib
-LINKLIBS_DEBUG = wsock32.lib libcurld.lib winmm.lib zlib.lib
+LINKLIBS = wsock32.lib libcurl.lib winmm.lib
+LINKLIBS_DEBUG = wsock32.lib libcurld.lib winmm.lib
 
 RELEASE_OBJS= \
 	hugehelpr.obj \
@@ -61,14 +68,22 @@ DEBUG_OBJS= \
 	strtoofftd.obj \
 	maind.obj \
 	curld.res
-	
+
+######################
+# release-zlib
+
+!IF "$(CFG)" == "release-zlib"
+CFLAGS = $(CFLAGS) $(CFLAGSZLIB)
+LINKLIBS = $(LINKLIBS) $(ZLIBLIBS)
+LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) $(ZLIBLIBS)
+LFLAGS = $(LFLAGS) $(LFLAGSZLIB)
+!ENDIF
+
 ######################
 # release-ssl
  
 !IF "$(CFG)" == "release-ssl"
-LFLAGSSSL = /LIBPATH:"$(OPENSSL_PATH)/out32"
-SSLLIBS   = libeay32.lib ssleay32.lib gdi32.lib 
-CFLAGS = $(CFLAGS) -DUSE_SSLEAY
+CFLAGS = $(CFLAGS) $(CFLAGSSSL)
 LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
 LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS)
 LFLAGS = $(LFLAGS) $(LFLAGSSSL)
@@ -78,12 +93,20 @@ LFLAGS = $(LFLAGS) $(LFLAGSSSL)
 # release-libcurl-ssl-dll
 
 !IF "$(CFG)" == "release-libcurl-ssl-dll"
-LFLAGSSSL = /LIBPATH:"$(OPENSSL_PATH)/out32"
-SSLLIBS   = libeay32.lib ssleay32.lib gdi32.lib 
-CFLAGS = $(CFLAGS) -DUSE_SSLEAY
+CFLAGS = $(CFLAGS) $(CFLAGSSSL)
 LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
 LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS)
 LFLAGS = $(LFLAGS) $(LFLAGSSSL)
+!ENDIF
+
+######################
+# release-ssl-zlib
+ 
+!IF "$(CFG)" == "release-ssl-zlib"
+CFLAGS = $(CFLAGS) $(CFLAGSSSL) $(CFLAGSZLIB)
+LINKLIBS  = $(LINKLIBS) $(SSLLIBS) $(ZLIBLIBS)
+LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS) $(ZLIBLIBS)
+LFLAGS = $(LFLAGS) $(LFLAGSSSL) $(LFLAGSZLIB)
 !ENDIF
 
 
