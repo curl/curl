@@ -15,25 +15,43 @@ MAKEFILE = Makefile.dj
 # with djgpp/Watt-32. Set to 0 if you don't need https URLs
 # (reduces curl.exe with approx 700 kB)
 #
-USE_SSL = 1
+USE_SSL = 0
+
+#
+# Use zlib for contents encoding
+#
+USE_ZLIB = 0
+
+#
+# Use Watt-32 IPv6 stack (only IPv6 name resolution working at the moment)
+#
+USE_IPV6 = 1
 
 default: all
 
 #
-# Root directory for Waterloo tcp/ip. WATT_ROOT should be set
-# during Watt-32 install.
+# Root directory for Waterloo tcp/ip etc. Change to suite.
+# WATT_ROOT should be set during Watt-32 install.
 #
 WATT32_ROOT  = $(subst \,/,$(WATT_ROOT))
 OPENSSL_ROOT = /net/openssl.098
-ZLIB_ROOT    = $(DJDIR)/contrib/zlib
+ZLIB_ROOT    = /djgpp/contrib/zlib.121
 
 CC   = gcc
 YACC = bison -y
 
-CFLAGS = -g -O2 -I. -I../include -Wall -DHAVE_CONFIG_H
+CFLAGS = -g -O2 -I. -I../include -Wall -DHAVE_CONFIG_H -DHAVE_SPNEGO
 
 ifeq ($(USE_SSL),1)
-  CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
+  CFLAGS += -DUSE_SSLEAY
+endif
+
+ifeq ($(USE_ZLIB),1)
+  CFLAGS += -DUSE_ZLIB -I$(ZLIB_ROOT)
+endif
+
+ifeq ($(USE_IPV6),1)
+  CFLAGS += -DENABLE_IPV6
 endif
 
 #
@@ -43,7 +61,7 @@ endif
 # another machine). We therefore use a special 'specs' file during
 # pre-processing.
 #
-MM_SPECS = $(TMPDIR)/specs
+MM_SPECS = ./specs.dj
 
 depend: $(DEPEND_PREREQ)
 	@echo Generating dependencies..
