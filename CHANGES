@@ -6,12 +6,25 @@
 
                                   Changelog
 
+Daniel (27 April 2004)
+- I remodeled Gisle's IDN code slightly and now we convert both the host name
+  and proxy name to the ACE encoded version to use internally for resolves and
+  cookies etc. They are now using one 'struct hostname' each that keep both
+  the original name and the possibly encoded name. IDN resolves work for me
+  now using ipv6, ipv4 and ares resolving. Even cookies on IDN sites seem to
+  do right. I got some failures at first when CHARSET wasn't set at all which
+  confused libidn completely and it decided by encoding of choice was
+  'ANSI_X3.4-1968'...
+
+- made 'configure --without-libidn' work
+
 Daniel (25 April 2004)
 - Fixed the src/hugehelp.c file to include "setup.h" instead of "config.h" to
   make the problems with USE_MANUAL on windows go away.
 
 - configure --without-ssl could still wrongly include some OpenSSL info in the
-  Makefiles if pkg-config had info about OpenSSL.
+  Makefiles if pkg-config had info about OpenSSL. Bug #941762 reported by
+  Martin.
 
 - Since we can now build and use quite a large set of 3rd party libraries, I
   decided I would make configure produce a summary at the end showing what
