@@ -500,7 +500,7 @@ if test x"$want_spnego" = xyes; then
      AC_MSG_RESULT(no)
   else
      if test -z "$SPNEGO_LIB_DIR"; then
-        LDFLAGS="$LDFLAGS -L$SPNEGO_ROOT ${wl}-R$SPNEGO_ROOT -lfbopenssl"
+        LDFLAGS="$LDFLAGS -L$SPNEGO_ROOT -lfbopenssl"
      else
         LDFLAGS="$LDFLAGS $SPNEGO_LIB_DIR"
      fi
