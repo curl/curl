@@ -623,8 +623,14 @@ Curl_addrinfo *Curl_addrinfo_copy(Curl_addrinfo *orig)
      most often is only a fraction of the original alloc */
   newbuf=(char *)realloc(aptr, (long)(bufptr-aptr));
 
+  if(!newbuf) {
+    /* serious error, but since this is shrinking only requested, we can
+       still use the previous memory block */
+    newbuf = aptr;
+  }
+
   /* if the alloc moved, we need to adjust the hostent struct */
-  if(newbuf != aptr)
+  else if(newbuf != aptr)
     Curl_hostent_relocate((struct hostent*)newbuf, (long)(newbuf-aptr));
 
   /* setup the return */
