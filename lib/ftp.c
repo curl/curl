@@ -129,7 +129,7 @@ struct curl_slist *curl_slist_append(struct curl_slist *list, char *data)
 	}
 	else {
 		fprintf(stderr, "Cannot allocate memory for QUOTE list.\n");
-		exit(-1);
+		return NULL;
 	}
 
 	if (list) {
@@ -583,11 +583,6 @@ CURLcode ftp_done(struct connectdata *conn)
       qitem = qitem->next;
     }
   }
-
-  if(ftp->file)
-    free(ftp->file);
-  if(ftp->dir)
-    free(ftp->dir);
 
   free(ftp);
   data->proto.ftp=NULL; /* it is gone */
@@ -1406,13 +1401,15 @@ CURLcode ftp(struct connectdata *conn)
      it */
   ftp->file = strrchr(conn->ppath, '/');
   if(ftp->file) {
+    if(ftp->file != conn->ppath)
+      dirlength=ftp->file-conn->ppath; /* don't count the traling slash */
+
     ftp->file++; /* point to the first letter in the file name part or
                     remain NULL */
   }
   else {
     ftp->file = conn->ppath; /* there's only a file part */
   }
-  dirlength=ftp->file-conn->ppath;
 
   if(*ftp->file) {
     ftp->file = curl_unescape(ftp->file, 0);
@@ -1439,6 +1436,14 @@ CURLcode ftp(struct connectdata *conn)
     ftp->dir = NULL;
 
   retcode = _ftp(conn);
+
+  /* clean up here, success or error doesn't matter */
+  if(ftp->file)
+    free(ftp->file);
+  if(ftp->dir)
+    free(ftp->dir);
+
+  ftp->file = ftp->dir = NULL; /* zero */
 
   return retcode;
 }
