@@ -66,10 +66,12 @@ four is the number of lines
 ^User-Agent:.*
 </strip>
 <protocol>
-HEAD /88 HTTP/1.1
+PUT /88 HTTP/1.1
 Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
+Content-Length: 0
+Expect: 100-continue
 
 PUT /88 HTTP/1.1
 Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/88", response="78a49fa53d0c228778297687d4168e71"

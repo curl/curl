@@ -1,4 +1,8 @@
-EXAMPLES
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
+                             \___|\___/|_| \_\_____|
 
 This directory is for libcurl programming examples. They are meant to show
 some simple steps on how you can build your own application to take full
@@ -6,6 +10,8 @@ advantage of libcurl.
 
 If you end up with other small but still useful example sources, please mail
 them for submission in future packages and on the web site.
+
+BUILDING
 
 The Makefile.example is an example makefile that could be used to build these
 examples. Just edit the file according to your system and requirements first.
@@ -23,3 +29,34 @@ want you do reorganize them like:
 applications/experiments. Even if the examples in this directory use that site
 as an example URL at some places, it doesn't mean that the URLs work or that
 we expect you to actually torture our web site with your tests! Thanks.
+
+EXAMPLES
+
+anyauthput.c   - HTTP PUT using "any" authentication method
+curlgtk.c      - download using a GTK progress bar
+curlx.c        - getting file info from the remote cert data
+debug.c        - showing how to use the debug callback
+fileupload.c   - uploading to a file:// URL
+fopen.c        - fopen() layer that supports opening URLs and files
+ftp3rdparty.c  - FTP 3rd party transfer
+ftpget.c       - simple getting a file from FTP
+ftpgetresp.c   - get the response strings from the FTP server
+ftpupload.c    - upload a file to a FTP server
+getinfo.c      - get the Content-Type from the recent transfer
+getinmemory.c  - download a file to memory only
+http-post.c    - HTTP POST
+httpput.c      - HTTP PUT a local file
+https.c        - simple HTTPS transfer
+multi-app.c    - a multi-interface app
+multi-debugcallback.c - a multi-interface app using the debug callback
+multi-double.c - a multi-interface app doing two simultaneous transfers
+multi-post.c   - a multi-interface app doing a multipart formpost
+multi-single.c - a multi-interface app getting a single file
+multithread.c  - an example using multi-treading transfering multiple files
+persistant.c   - request two URLs with a persistant connection
+post-callback.c - send a HTTP POST using a callback
+postit2.c      - send a HTTP multipart formpost
+sepheaders.c   - download headers to a separate file
+simple.c       - the most simple download a URL source
+simplepost.c   - HTTP POST
+simplessl.c    - HTTPS example with certificates many options set

@@ -2420,8 +2420,30 @@ struct InStruct {
   struct Configurable *config;
 };
 
+static curlioerr my_ioctl(CURL *handle, curliocmd cmd, void *userp)
+{
+  struct InStruct *in=(struct InStruct *)userp;
+  (void)handle; /* not used in here */
+
+  switch(cmd) {
+  case CURLIOCMD_RESTARTREAD:
+    /* mr libcurl kindly asks as to rewind the read data stream to start */
+    if(-1 == fseek(in->stream, 0, SEEK_SET))
+      /* couldn't rewind, the reason is in errno but errno is just not
+         portable enough and we don't actually care that much why we failed. */
+      return CURLIOE_FAILRESTART;
+
+    break;
+
+  default: /* ignore unknown commands */
+    return CURLIOE_UNKNOWNCMD;
+  }
+  return CURLIOE_OK;
+}
+
 static int my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
 {
+  int rc;
   struct InStruct *in=(struct InStruct *)userp;
   struct Configurable *config = in->config;
   curl_off_t size = (curl_off_t)(sz * nmemb);  /* typecast to prevent warnings
@@ -2480,7 +2502,11 @@ static int my_fread(void *buffer, size_t sz, size_t nmemb, void *userp)
     config->lastsendsize = sz*nmemb;
   }
 
-  return fread(buffer, sz, nmemb, in->stream);
+  rc = fread(buffer, sz, nmemb, in->stream);
+#if 0
+  fprintf(stderr, "CALLBACK returning %d bytes data\n", (int)rc);
+#endif
+  return rc;
 }
 
 struct ProgressData {
@@ -3332,6 +3358,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_READDATA, &input);
         /* what call to read */
         curl_easy_setopt(curl, CURLOPT_READFUNCTION, my_fread);
+
+        /* libcurl 7.12.3 business: */
+        curl_easy_setopt(curl, CURLOPT_IOCTLDATA, &input);
+        curl_easy_setopt(curl, CURLOPT_IOCTLFUNCTION, my_ioctl);
 
         if(config->recvpersecond) {
           /* tell libcurl to use a smaller sized buffer as it allows us to

@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "12 Mar 2004" "libcurl 7.11.1" "libcurl Manual"
+.TH curl_easy_setopt 3 "21 Nov 2004" "libcurl 7.12.3" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -142,6 +142,18 @@ don't specify a read callback, this must be a valid FILE *.
 
 This option is also known with the older name \fICURLOPT_INFILE\fP, the name
 \fICURLOPT_READDATA\fP was introduced in 7.9.7.
+.IP CURLOPT_IOCTLFUNCTION
+Function pointer that should match the \fIcurl_ioctl_callback\fP prototype
+found in \fI<curl/curl.h>\fP. This function gets called by libcurl when
+something special I/O-related needs to be done that the library can't do by
+itself. For now, rewinding the read data stream is the only action it can
+request. The rewinding of the read data stream may be necessary when doing a
+HTTP PUT or POST with a multi-pass authentication method.  (Opion added in
+7.12.3)
+.IP CURLOPT_IOCTLDATA
+Pass a pointer that will be untouched by libcurl and passed as the 3rd
+argument in the ioctl callback set with \fICURLOPT_IOCTLFUNCTION\fP.  (Option
+added in 7.12.3)
 .IP CURLOPT_PROGRESSFUNCTION
 Function pointer that should match the \fIcurl_progress_callback\fP prototype
 found in \fI<curl/curl.h>\fP. This function gets called by libcurl instead of

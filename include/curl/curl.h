@@ -163,19 +163,39 @@ typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t nitems,
                                       void *outstream);
 
-/* This is a brand new return code for the read callback that will signal
-   the caller to immediately abort the current transfer. */
+/* This is a return code for the read callback that, when returned, will
+   signal libcurl to immediately abort the current transfer. */
 #define CURL_READFUNC_ABORT 0x10000000
 typedef size_t (*curl_read_callback)(char *buffer,
-                                     size_t size,
-                                     size_t nitems,
-                                     void *instream);
+                                      size_t size,
+                                      size_t nitems,
+                                      void *instream);
 
+
+#ifndef CURL_NO_OLDIES
   /* not used since 7.10.8, will be removed in a future release */
 typedef int (*curl_passwd_callback)(void *clientp,
                                     const char *prompt,
                                     char *buffer,
                                     int buflen);
+#endif
+
+typedef enum {
+  CURLIOE_OK,            /* I/O operation successful */
+  CURLIOE_UNKNOWNCMD,    /* command was unknown to callback */
+  CURLIOE_FAILRESTART,   /* failed to restart the read */
+  CURLIOE_LAST           /* never use */
+} curlioerr;
+
+typedef enum  {
+  CURLIOCMD_NOP,         /* no operation */
+  CURLIOCMD_RESTARTREAD, /* restart the read stream from start */
+  CURLIOCMD_LAST         /* never use */
+} curliocmd;
+
+typedef curlioerr (*curl_ioctl_callback)(CURL *handle,
+                                         int cmd,
+                                         void *clientp);
 
 /*
  * The following typedef's are signatures of malloc, free, realloc, strdup and
@@ -282,7 +302,8 @@ typedef enum {
   CURLE_LDAP_INVALID_URL,        /* 62 - Invalid LDAP URL */
   CURLE_FILESIZE_EXCEEDED,       /* 63 - Maximum file size exceeded */
   CURLE_FTP_SSL_FAILED,          /* 64 - Requested FTP SSL level failed */
-
+  CURLE_SEND_FAIL_REWIND,        /* 65 - Sending the data requires a rewind
+                                    that failed */
   CURL_LAST /* never use! */
 } CURLcode;
 
@@ -853,6 +874,9 @@ typedef enum {
      CURLFTPAUTH_TLS     - try "AUTH TLS" first, then SSL
   */
   CINIT(FTPSSLAUTH, LONG, 129),
+
+  CINIT(IOCTLFUNCTION, FUNCTIONPOINT, 130),
+  CINIT(IOCTLDATA, OBJECTPOINT, 131),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;

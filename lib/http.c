@@ -193,6 +193,80 @@ static bool pickoneauth(struct auth *pick)
 }
 
 /*
+ * perhapsrewind()
+ *
+ * If we are doing POST or PUT {
+ *   If we have more data to send {
+ *     If we are doing NTLM {
+ *       Keep sending since we must not disconnect
+ *     }
+ *     else {
+ *       If there is more than just a little data left to send, close
+ *       the current connection by force.
+ *     }
+ *   }
+ *   If we have sent any data {
+ *     If we don't have track of all the data {
+ *       call app to tell it to rewind
+ *     }
+ *     else {
+ *       rewind internally so that the operation can restart fine
+ *     }
+ *   }
+ * }
+ */
+static CURLcode perhapsrewind(struct connectdata *conn)
+{
+  struct HTTP *http = conn->proto.http;
+  struct SessionHandle *data = conn->data;
+  curl_off_t bytessent = http->writebytecount;
+  curl_off_t expectsend = -1; /* default is unknown */
+
+  /* figure out how much data we are expected to send */
+  switch(data->set.httpreq) {
+  case HTTPREQ_POST:
+    if(data->set.postfieldsize != -1)
+      expectsend = data->set.postfieldsize;
+    break;
+  case HTTPREQ_PUT:
+    if(data->set.infilesize != -1)
+      expectsend = data->set.infilesize;
+    break;
+  case HTTPREQ_POST_FORM:
+    expectsend = http->postsize;
+    break;
+  default:
+    break;
+  }
+
+  conn->bits.rewindaftersend = FALSE; /* default */
+
+  if((expectsend == -1) || (expectsend > bytessent)) {
+    /* There is still data left to send */
+    if((data->state.authproxy.picked == CURLAUTH_NTLM) ||/* using NTLM */
+       (data->state.authhost.picked == CURLAUTH_NTLM) ) {
+      conn->bits.close = FALSE; /* don't close, keep on sending */
+
+      /* rewind data when completely done sending! */
+      conn->bits.rewindaftersend = TRUE;
+      return CURLE_OK;
+    }
+    else {
+      /* If there is more than just a little data left to send, close the
+       * current connection by force.
+       */
+      conn->bits.close = TRUE;
+      conn->size = 0; /* don't download any more than 0 bytes */
+    }
+  }
+
+  if(bytessent)
+    return Curl_readrewind(conn);
+
+  return CURLE_OK;
+}
+
+/*
  * Curl_http_auth_act() gets called when a all HTTP headers have been received
  * and it checks what authentication methods that are available and decides
  * which one (if any) to use. It will set 'newurl' if an auth metod was
@@ -211,25 +285,33 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
 
   if(conn->bits.user_passwd &&
      ((conn->keep.httpcode == 401) ||
-      (conn->bits.authprobe && conn->keep.httpcode < 300))) {
+      (conn->bits.authneg && conn->keep.httpcode < 300))) {
     pickhost = pickoneauth(&data->state.authhost);
     if(!pickhost)
       data->state.authproblem = TRUE;
   }
   if(conn->bits.proxy_user_passwd &&
      ((conn->keep.httpcode == 407) ||
-      (conn->bits.authprobe && conn->keep.httpcode < 300))) {
+      (conn->bits.authneg && conn->keep.httpcode < 300))) {
     pickproxy = pickoneauth(&data->state.authproxy);
     if(!pickproxy)
       data->state.authproblem = TRUE;
   }
 
-  if(pickhost || pickproxy)
+  if(pickhost || pickproxy) {
     conn->newurl = strdup(data->change.url); /* clone URL */
+
+    if((data->set.httpreq != HTTPREQ_GET) &&
+       (data->set.httpreq != HTTPREQ_HEAD)) {
+      code = perhapsrewind(conn);
+      if(code)
+        return code;
+    }
+  }
 
   else if((conn->keep.httpcode < 300) &&
           (!data->state.authhost.done) &&
-          conn->bits.authprobe) {
+          conn->bits.authneg) {
     /* no (known) authentication available,
        authentication is not "done" yet and
        no authentication seems to be required and
@@ -273,29 +355,34 @@ Curl_http_output_auth(struct connectdata *conn,
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
   char *auth=NULL;
+  struct auth *authhost;
+  struct auth *authproxy;
 
   curlassert(data);
+
+  authhost = &data->state.authhost;
+  authproxy = &data->state.authproxy;
 
   if((conn->bits.httpproxy && conn->bits.proxy_user_passwd) ||
      conn->bits.user_passwd)
     /* continue please */ ;
   else {
-    data->state.authhost.done = TRUE;
-    data->state.authproxy.done = TRUE;
+    authhost->done = TRUE;
+    authproxy->done = TRUE;
     return CURLE_OK; /* no authentication with no user or password */
   }
 
-  if(data->state.authhost.want && !data->state.authhost.picked)
+  if(authhost->want && !authhost->picked)
     /* The app has selected one or more methods, but none has been picked
        so far by a server round-trip. Then we set the picked one to the
        want one, and if this is one single bit it'll be used instantly. */
-    data->state.authhost.picked = data->state.authhost.want;
+    authhost->picked = authhost->want;
 
-  if(data->state.authproxy.want && !data->state.authproxy.picked)
+  if(authproxy->want && !authproxy->picked)
     /* The app has selected one or more methods, but none has been picked so
        far by a proxy round-trip. Then we set the picked one to the want one,
        and if this is one single bit it'll be used instantly. */
-    data->state.authproxy.picked = data->state.authproxy.want;
+    authproxy->picked = authproxy->want;
 
   /* To prevent the user+password to get sent to other than the original
      host due to a location-follow, we do some weirdo checks here */
@@ -308,7 +395,7 @@ Curl_http_output_auth(struct connectdata *conn,
     if (conn->bits.httpproxy &&
         (conn->bits.tunnel_proxy == proxytunnel)) {
 #ifdef USE_SSLEAY
-      if(data->state.authproxy.want == CURLAUTH_NTLM) {
+      if(authproxy->want == CURLAUTH_NTLM) {
         auth=(char *)"NTLM";
         result = Curl_output_ntlm(conn, TRUE);
         if(result)
@@ -316,7 +403,7 @@ Curl_http_output_auth(struct connectdata *conn,
       }
       else
 #endif
-      if(data->state.authproxy.want == CURLAUTH_BASIC) {
+      if(authproxy->want == CURLAUTH_BASIC) {
         /* Basic */
         if(conn->bits.proxy_user_passwd &&
            !checkheaders(data, "Proxy-authorization:")) {
@@ -325,10 +412,12 @@ Curl_http_output_auth(struct connectdata *conn,
           if(result)
             return result;
         }
-        data->state.authproxy.done = TRUE;
+        /* NOTE: Curl_output_basic() should set 'done' TRUE, as the other auth
+           functions work that way */
+        authproxy->done = TRUE;
       }
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-      else if(data->state.authproxy.want == CURLAUTH_DIGEST) {
+      else if(authproxy->want == CURLAUTH_DIGEST) {
         auth=(char *)"Digest";
         result = Curl_output_digest(conn,
                                     TRUE, /* proxy */
@@ -338,31 +427,36 @@ Curl_http_output_auth(struct connectdata *conn,
           return result;
       }
 #endif
-      infof(data, "Proxy auth using %s with user '%s'\n",
-            auth, conn->proxyuser?conn->proxyuser:"");
+      if(auth) {
+        infof(data, "Proxy auth using %s with user '%s'\n",
+              auth, conn->proxyuser?conn->proxyuser:"");
+        authproxy->multi = !authproxy->done;
+      }
+      else
+        authproxy->multi = FALSE;
     }
     else
       /* we have no proxy so let's pretend we're done authenticating
          with it */
-      data->state.authproxy.done = TRUE;
+      authproxy->done = TRUE;
 
     /* Send web authentication header if needed */
     {
       auth = NULL;
 #ifdef HAVE_GSSAPI
-      if((data->state.authhost.want == CURLAUTH_GSSNEGOTIATE) &&
+      if((authhost->want == CURLAUTH_GSSNEGOTIATE) &&
          data->state.negotiate.context &&
          !GSS_ERROR(data->state.negotiate.status)) {
         auth=(char *)"GSS-Negotiate";
         result = Curl_output_negotiate(conn);
         if (result)
           return result;
-        data->state.authhost.done = TRUE;
+        authhost->done = TRUE;
       }
       else
 #endif
 #ifdef USE_SSLEAY
-      if(data->state.authhost.picked == CURLAUTH_NTLM) {
+      if(authhost->picked == CURLAUTH_NTLM) {
         auth=(char *)"NTLM";
         result = Curl_output_ntlm(conn, FALSE);
         if(result)
@@ -372,7 +466,7 @@ Curl_http_output_auth(struct connectdata *conn,
 #endif
       {
 #ifndef CURL_DISABLE_CRYPTO_AUTH
-        if(data->state.authhost.picked == CURLAUTH_DIGEST) {
+        if(authhost->picked == CURLAUTH_DIGEST) {
           auth=(char *)"Digest";
           result = Curl_output_digest(conn,
                                       FALSE, /* not a proxy */
@@ -382,7 +476,7 @@ Curl_http_output_auth(struct connectdata *conn,
             return result;
         } else
 #endif
-        if(data->state.authhost.picked == CURLAUTH_BASIC) {
+        if(authhost->picked == CURLAUTH_BASIC) {
           if(conn->bits.user_passwd &&
              !checkheaders(data, "Authorization:")) {
             auth=(char *)"Basic";
@@ -391,16 +485,21 @@ Curl_http_output_auth(struct connectdata *conn,
               return result;
           }
           /* basic is always ready */
-          data->state.authhost.done = TRUE;
+          authhost->done = TRUE;
         }
       }
-      if(auth)
+      if(auth) {
         infof(data, "Server auth using %s with user '%s'\n",
               auth, conn->user);
+
+        authhost->multi = !authhost->done;
+      }
+      else
+        authhost->multi = FALSE;
     }
   }
   else
-    data->state.authhost.done = TRUE;
+    authhost->done = TRUE;
 
   return result;
 }
@@ -1304,20 +1403,15 @@ CURLcode Curl_http(struct connectdata *conn)
   if(result)
     return result;
 
-  if((!data->state.authhost.done || !data->state.authproxy.done ) &&
-     (httpreq != HTTPREQ_GET)) {
-    /* Until we are authenticated, we switch over to HEAD. Unless its a GET
-       we want to do. The explanation for this is rather long and boring, but
-       the point is that it can't be done otherwise without risking having to
-       send the POST or PUT data multiple times. */
-    httpreq = HTTPREQ_HEAD;
-    request = (char *)"HEAD";
-    conn->bits.no_body = TRUE;
-    conn->bits.authprobe = TRUE; /* this is a request done to probe for
-                                    authentication methods */
+  if((data->state.authhost.multi || data->state.authproxy.multi) &&
+     (httpreq != HTTPREQ_GET) &&
+     (httpreq != HTTPREQ_HEAD)) {
+    /* Auth is required and we are not authenticated yet. Make a PUT or POST
+       with content-length zero as a "probe". */
+    conn->bits.authneg = TRUE;
   }
   else
-    conn->bits.authprobe = FALSE;
+    conn->bits.authneg = FALSE;
 
   Curl_safefree(conn->allocptr.ref);
   if(data->change.referer && !checkheaders(data, "Referer:"))
@@ -1759,7 +1853,7 @@ CURLcode Curl_http(struct connectdata *conn)
     switch(httpreq) {
 
     case HTTPREQ_POST_FORM:
-      if(!http->sendit) {
+      if(!http->sendit || conn->bits.authneg) {
         /* nothing to post! */
         result = add_bufferf(req_buffer, "Content-Length: 0\r\n\r\n");
         if(result)
@@ -1857,11 +1951,16 @@ CURLcode Curl_http(struct connectdata *conn)
 
     case HTTPREQ_PUT: /* Let's PUT the data to the server! */
 
-      if((data->set.infilesize>0) && !conn->bits.upload_chunky) {
+      if(conn->bits.authneg)
+        postsize = 0;
+      else
+        postsize = data->set.infilesize;
+
+      if((postsize != -1) && !conn->bits.upload_chunky) {
         /* only add Content-Length if not uploading chunked */
         result = add_bufferf(req_buffer,
-                             "Content-Length: %" FORMAT_OFF_T "\r\n", /* size */
-                             data->set.infilesize );
+                             "Content-Length: %" FORMAT_OFF_T "\r\n",
+                             postsize );
         if(result)
           return result;
       }
@@ -1884,19 +1983,19 @@ CURLcode Curl_http(struct connectdata *conn)
         return result;
 
       /* set the upload size to the progress meter */
-      Curl_pgrsSetUploadSize(data, data->set.infilesize);
+      Curl_pgrsSetUploadSize(data, postsize);
 
       /* this sends the buffer and frees all the buffer resources */
       result = add_buffer_send(req_buffer, conn,
                                &data->info.request_size);
       if(result)
-        failf(data, "Failed sending POST request");
+        failf(data, "Failed sending PUT request");
       else
         /* prepare for transfer */
         result = Curl_Transfer(conn, FIRSTSOCKET, -1, TRUE,
                                &http->readbytecount,
-                               FIRSTSOCKET,
-                               &http->writebytecount);
+                               postsize?FIRSTSOCKET:-1,
+                               postsize?&http->writebytecount:NULL);
       if(result)
         return result;
       break;
@@ -1904,10 +2003,13 @@ CURLcode Curl_http(struct connectdata *conn)
     case HTTPREQ_POST:
       /* this is the simple POST, using x-www-form-urlencoded style */
 
-      /* store the size of the postfields */
-      postsize = (data->set.postfieldsize != -1)?
-        data->set.postfieldsize:
-        (data->set.postfields?(curl_off_t)strlen(data->set.postfields):0);
+      if(conn->bits.authneg)
+        postsize = 0;
+      else
+        /* figure out the size of the postfields */
+        postsize = (data->set.postfieldsize != -1)?
+          data->set.postfieldsize:
+          (data->set.postfields?(curl_off_t)strlen(data->set.postfields):0);
 
       if(!conn->bits.upload_chunky) {
         /* We only set Content-Length and allow a custom Content-Length if

@@ -319,9 +319,14 @@ struct ConnectBits {
                          This is implicit when SSL-protocols are used through
                          proxies, but can also be enabled explicitly by
                          apps */
-  bool authprobe;     /* set TRUE when this transfer is done to probe for auth
-                         types, as when asking for "any" type when speaking
-                         HTTP */
+  bool authneg;       /* TRUE when the auth phase has started, which means
+                         that we are creating a request with an auth header,
+                         but it is not the final request in the auth
+                         negotiation. */
+  bool rewindaftersend;/* TRUE when the sending couldn't be stopped even
+                          though it will be discarded. When the whole send
+                          operation is done, we must call the data rewind
+                          callback. */
 };
 
 struct hostname {
@@ -696,6 +701,9 @@ struct auth {
                  resource */
   bool done;  /* TRUE when the auth phase is done and ready to do the *actual*
                  request */
+  bool multi; /* TRUE if this is not yet authenticated but within the auth
+                 multipass negotiation */
+
 };
 
 struct UrlState {
@@ -827,7 +835,9 @@ struct UserDefined {
   curl_read_callback fread;          /* function that reads the input */
   curl_progress_callback fprogress;  /* function for progress information */
   curl_debug_callback fdebug;      /* function that write informational data */
+  curl_ioctl_callback ioctl;       /* function for I/O control */
   void *progress_client; /* pointer to pass to the progress callback */
+  void *ioctl_client;   /* pointer to pass to the ioctl callback */
   long timeout;         /* in seconds, 0 means no timeout */
   long connecttimeout;  /* in seconds, 0 means no timeout */
   long ftp_response_timeout; /* in seconds, 0 means no timeout */

@@ -91,6 +91,11 @@ network round-trip. This is used instead of setting a specific authentication
 method, which you can do with \fI--basic\fP, \fI--digest\fP, \fI--ntlm\fP, and
 \fI--negotiate\fP. (Added in 7.10.6)
 
+Note that using --anyauth is not recommended if you do uploads from stdin,
+since it may require data to be sent twice and then the client must be able to
+rewind. If the need should arise when uploading from stdin, the upload
+operation will fail.
+
 If this option is used several times, the following occurrences make no
 difference.
 .IP "-b/--cookie <name=data>"

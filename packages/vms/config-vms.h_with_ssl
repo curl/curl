@@ -15,12 +15,6 @@
 #endif
 #endif
 
-/* Define to set number of kilobytes in initial POST message. On VMS systems
-   this is important as the default is 100 and the maximum amount of data
-   transferable in a VMS $QIO is 64K. All VMS versions prior to Alpha/I64
-   V8.2 and TCP/IP V5.5 are affected by this. */
-#define MAX_INITIAL_POST_SIZE (60*1024)
-
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
 

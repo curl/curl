@@ -3,13 +3,16 @@ Curl and libcurl 7.12.3
  Public curl release number:               84
  Releases counted from the very beginning: 111
  Available command line options:           100
- Available curl_easy_setopt() options:     121
+ Available curl_easy_setopt() options:     123
  Number of public functions in libcurl:    46
  Amount of public web site mirrors:        13
  Number of known libcurl bindings:         29
 
 This release includes the following changes:
 
+ o CURLOPT_IOCTLFUNCTION and CURLOPT_IOCTLDATA added. If your app uses HTTP
+   Digest, NTLM or Negotiate authentication, you will most likely want to use
+   these
  o -w time_redirect and num_redirects
  o no longer uses libcurl.def for building on Windows, OS/2 and Netware
  o builds on Windows CE
@@ -19,6 +22,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o HTTP PUT/POST with Digest, NTLM or Negotiate no longer uses HEAD
  o now gracefully bails out when exceeding FD_SETSIZE file descriptors
  o CURLINFO_REDIRECT_TIME works
  o building with gssapi libs and hdeaders in the default dirs

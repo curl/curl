@@ -19,6 +19,11 @@
    determined. Possibly the current transfer speed should be taken into
    account as well.
 
+   NOTE: if the size of the POST data is less than MAX_INITIAL_POST_SIZE (when
+   CURLOPT_POSTFIELDS is used), libcurl will send everything in one single
+   write() (all request-headers and request-body) and thus it will
+   unconditionally send the full post data here.
+
 2. PUT/POST with multi-pass auth but not yet completely negotiated:
 
    Send a PUT/POST request, we know that it will be rejected and thus we claim

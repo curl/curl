@@ -38,6 +38,11 @@ TODO
 
  LIBCURL - multi interface
 
+ * Add a curl_multi_fdset() alternative that returns only two arrays with file
+   desrciptors for reading and writing to allow the app to use whatever
+   function it prefers. Plus, this allows apps to avoid the FD_SETSIZE problem
+   with select().
+
  * Add curl_multi_timeout() to make libcurl's ares-functionality better.
 
  * Make sure we don't ever loop because of non-blocking sockets return

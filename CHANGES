@@ -11,6 +11,16 @@ Daniel (24 November 2004)
   with Msys/Mingw on Windows.
 
 Daniel (22 November 2004)
+- Made HTTP PUT and POST requests no longer use HEAD when doing multi-pass
+  auth negotiation (NTLM, Digest and Negotiate), but instead use the request
+  keyword "properly". Details in lib/README.httpauth. This also introduces
+  CURLOPT_IOCTLFUNCTION and CURLOPT_IOCTLDATA, to be used by apps that use the
+  "any" auth alternative as then libcurl may need to send the PUT/POST data
+  more than once and thus may need to ask the app to "rewind" the read data
+  stream to start.
+
+  See also the new example using this: docs/examples/anyauthput.c
+
 - David Phillips enhanced test 518. I made it depend on a "feature" so that
   systems without getrlimit() won't attempt to test 518. configure now checks
   for getrlimit() and setrlimit() for this test case.
