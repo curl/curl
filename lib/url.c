@@ -1856,9 +1856,6 @@ static CURLcode ConnectPlease(struct connectdata *conn,
 static void verboseconnect(struct connectdata *conn,
                            struct Curl_dns_entry *dns)
 {
-#ifdef HAVE_INET_NTOA_R
-  char ntoa_buf[64];
-#endif
   struct SessionHandle *data = conn->data;
 
   /* Figure out the ip-number and display the first host name it shows: */
@@ -1896,6 +1893,9 @@ static void verboseconnect(struct connectdata *conn,
   }
 #else
   {
+#ifdef HAVE_INET_NTOA_R
+    char ntoa_buf[64];
+#endif
     Curl_addrinfo *hostaddr=dns?dns->addr:NULL;
     struct in_addr in;
     (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
