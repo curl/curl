@@ -13,3 +13,26 @@ of environment. You should include files from here using...
 
 ... style and point the compiler's include path to the directory holding the
 curl subdirectory. It makes it more likely to survive future modifications.
+
+NOTE FOR LIBCURL HACKERS
+
+All the include files in this tree are written and intended to be installed on
+a system that may serve multiple platforms and multiple applications, all
+using libcurl (possibly even different libcurl installations using different
+versions). Therefore, all header files in here must obey these rules:
+
+* They cannot depend on or use configure-generated results from libcurl's or
+  curl's directories. Other applications may not run configure as (lib)curl
+  does, and using platform dependent info here may break other platforms.
+
+* We cannot assume anything else but very basic compiler features being
+  present. While libcurl requires an ANSI C compiler to build, some of the
+  earler ANSI compilers clearly can't deal with some operators.
+
+* Newlines must remain unix-style for older compilers' sake.
+
+* Comments must be written in the old-style /* unnested C-fashion */
+
+To figure out how to do good and portable checks for features, operating
+systems or specific hardwarare, a very good resource is Bjorn Reese's
+collection at http://predef.sf.net/
