@@ -30,6 +30,9 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        ;;
   *)   AC_MSG_RESULT(yes)
 
+    dnl Checks for standard header files, to make memdebug.h inclusions bettter
+    AC_HEADER_STDC
+
     CPPFLAGS="$CPPFLAGS -DCURLDEBUG -I../include"
     CFLAGS="$CFLAGS -g" 
     if test "$GCC" = "yes"; then
