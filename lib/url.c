@@ -2411,7 +2411,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(conn->resume_from) {
     if(!conn->bits.use_range) {
       /* if it already was in use, we just skip this */
-      snprintf(resumerange, sizeof(resumerange), FORMAT_OFF_T "-",
+      snprintf(resumerange, sizeof(resumerange), "%" FORMAT_OFF_T "-",
 	       conn->resume_from);
       conn->range=strdup(resumerange); /* tell ourselves to fetch this range */
       conn->bits.rangestringalloc = TRUE; /* mark as allocated */
@@ -2941,7 +2941,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      */
     conn->resume_from = data->set.set_resume_from;
     if (conn->resume_from) {
-      snprintf(resumerange, sizeof(resumerange), FORMAT_OFF_T "-",
+      snprintf(resumerange, sizeof(resumerange), "%" FORMAT_OFF_T "-",
 	       conn->resume_from);
       if (conn->bits.rangestringalloc == TRUE)
         free(conn->range);

@@ -1240,8 +1240,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     
   if (data->set.timeout &&
       ((Curl_tvdiff(k->now, k->start)/1000) >= data->set.timeout)) {
-    failf (data, "Operation timed out with " FORMAT_OFF_T " out of "
-           FORMAT_OFF_T " bytes received",
+    failf (data, "Operation timed out with %" FORMAT_OFF_T
+           " out of %" FORMAT_OFF_T " bytes received",
            k->bytecount, conn->size);
     return CURLE_OPERATION_TIMEOUTED;
   }
@@ -1255,7 +1255,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if(!(data->set.no_body) && (conn->size != -1) &&
        (k->bytecount != conn->size) &&
        !conn->newurl) {
-      failf(data, "transfer closed with " FORMAT_OFF_T
+      failf(data, "transfer closed with %" FORMAT_OFF_T
             " bytes remaining to read",
             conn->size - k->bytecount);
       return CURLE_PARTIAL_FILE;

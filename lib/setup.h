@@ -82,11 +82,10 @@ typedef unsigned char bool;
 
 /* We set up our internal prefered (CURL_)FORMAT_OFF_T here */
 #if defined(SIZEOF_CURL_OFF_T) && (SIZEOF_CURL_OFF_T > 4)
-#define FORMAT_OFF_T "%lld"
+#define FORMAT_OFF_T "lld"
 #else
-#define FORMAT_OFF_T "%ld"
+#define FORMAT_OFF_T "ld"
 #endif
-
 
 #ifdef NEED_REENTRANT
 /* Solaris machines needs _REENTRANT set for a few function prototypes and
