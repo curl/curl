@@ -785,10 +785,12 @@ dnl in LDAP_NAME holding the string "libldap.so.2".
 AC_DEFUN([CURL_DLLIB_NAME],
 [
 AC_MSG_CHECKING([name of dynamic library $2])
+dnl Work around a bug in libtool ver. 1.5
+test -z "$shared_ext" && shared_ext="$shrext_cmds"
 
 dnl Create the dynamic library name of the correct form for this platform
 DLGUESSLIB=`name=$2 eval echo "$libname_spec"`
-DLGUESSFILE=`libname=$DLGUESSLIB release="" major="" eval echo "$soname_spec"`
+DLGUESSFILE=`libname="$DLGUESSLIB" release="" major="" eval echo "$soname_spec"`
 
 if test "$cross_compiling" = yes; then
   dnl Can't look at filesystem when cross-compiling
