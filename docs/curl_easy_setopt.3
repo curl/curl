@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "13 March 2001" "libcurl 7.7" "libcurl Manual"
+.TH curl_easy_setopt 3 "27 March 2001" "libcurl 7.7" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -313,7 +313,9 @@ struct curl_slist structs properly filled in as described for
 .I "CURLOPT_QUOTE"
 .TP
 .B CURLOPT_WRITEHEADER
-Pass a FILE * to be used to write the header part of the received data to.
+Pass a FILE * to be used to write the header part of the received data to. The
+headers are guaranteed to be written one-by-one to this file handle and only
+complete lines are written. Parsing headers should be easy enough using this.
 .TP
 .B CURLOPT_COOKIEFILE
 Pass a pointer to a zero terminated string as parameter. It should contain the
