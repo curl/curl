@@ -26,31 +26,50 @@ These are informations that can be extracted:
 Pass a pointer to a 'char *' to receive the last used effective URL.
 .TP
 .B CURLINFO_HTTP_CODE
-Add informative text here
+Pass a pointer to a long to receive the last received HTTP code.
 .TP
 .B CURLINFO_TOTAL_TIME
-Add informative text here
+Pass a pointer to a double to receive the total transaction time in seconds
+for the previous transfer.
 .TP
 .B CURLINFO_NAMELOOKUP_TIME
-Add informative text here
+Pass a pointer to a double to receive the time, in seconds, it took from the
+start until the name resolving was completed.
 .TP
 .B CURLINFO_CONNECT_TIME
-Add informative text here
+Pass a pointer to a double to receive the time, in seconds, it took from the
+start until the connect to the remote host (or proxy) was completed.
 .TP
 .B CURLINFO_PRETRANSFER_TIME
-Add informative text here
+Pass a pointer to a double to receive the time, in seconds, it took from the
+start until the file transfer is just about to begin. This includes all
+pre-transfer commands and negotiations that are specific to the particular
+protocol(s) involved.
 .TP
 .B CURLINFO_SIZE_UPLOAD
-Add informative text here
+Pass a pointer to a double to receive the total amount of bytes that were
+uploaded.
 .TP
 .B CURLINFO_SIZE_DOWNLOAD
-Add informative text here
+Pass a pointer to a double to receive the total amount of bytes that were
+downloaded.
 .TP
 .B CURLINFO_SPEED_DOWNLOAD
-Add informative text here
+Pass a pointer to a double to receive the average download speed that curl
+measured for the complete download.
 .TP
 .B CURLINFO_SPEED_UPLOAD
-Add informative text here
+Pass a pointer to a double to receive the average upload speed that curl
+measured for the complete upload.
+.TP
+.B CURLINFO_HEADER_SIZE
+Pass a pointer to a long to receive the total size of all the headers
+received.
+.TP
+.B CURLINFO_REQUEST_SIZE
+Pass a pointer to a long to receive the total size of the issued
+requests. This is so far only for HTTP requests. Note that this may be more
+than one request if FOLLOWLOCATION is true.
 .PP
 
 .SH RETURN VALUE
