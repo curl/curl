@@ -10,6 +10,7 @@ Curl and libcurl 7.12.3
 
 This release includes the following changes:
 
+ o added CURLINFO_SSL_ENGINES
  o new configure options: --disable-cookies, --disable-crypto-auth and
    --disable-verbose
  o persistent ftp request improvements
@@ -25,6 +26,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o modified credentials between two requests on a persistent http connection
  o large file file:// resumes on Windows
  o URLs with username and IPv6 numerical addresses
  o configure works better with SSL libs in a "non-standard ld.so dir"
@@ -67,6 +69,6 @@ advice from friends like these:
  Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips,
  Wojciech Zwiefka, David Phillips, Reinout van Schouwen, Maurice Barnum,
  Richard Atterer, Rene Bernhardt, Matt Veenstra, Bryan Henderson, Ton Voon,
- Kai Sommerfeld, David Byron
+ Kai Sommerfeld, David Byron, Harshal Pradhan
 
         Thanks! (and sorry if I forgot to mention someone)
