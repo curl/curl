@@ -13,16 +13,12 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id$";
-
 #include <assert.h>
 #include "ares.h"
 
-const char *ares_strerror(int code, char **memptr)
+const char *ares_strerror(int code)
 {
-  /* A future implementation may want to handle internationalization.
-   * For now, just return a string literal from a table.
-   */
+  /* Return a string literal from a table. */
   const char *errtext[] = {
     "Successful completion",
     "DNS server returned answer with no data",

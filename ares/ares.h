@@ -124,7 +124,7 @@ int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
 			 int addrlen, int family, struct hostent **host);
 void ares_free_string(char *str);
 void ares_free_hostent(struct hostent *host);
-const char *ares_strerror(int code, char **memptr);
+const char *ares_strerror(int code);
 void ares_free_errmem(char *mem);
 
 #endif /* ARES__H */
