@@ -30,7 +30,6 @@
 
 #include "urldata.h"
 #include <curl/curl.h>
-#include <curl/types.h>
 #include "sendf.h"
 #include "content_encoding.h"
 
