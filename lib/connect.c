@@ -387,6 +387,8 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       return CURLE_OK;
     }
     /* nope, not connected for real */
+    if(err)
+      return CURLE_COULDNT_CONNECT;
   }
 
   /*
