@@ -98,12 +98,65 @@
 #include "memdebug.h"
 #endif
 
+/* fread() emulation to provide POST and/or request data */
+static int readmoredata(char *buffer,
+                        size_t size,
+                        size_t nitems,
+                        void *userp)
+{
+  struct connectdata *conn = (struct connectdata *)userp;
+  struct HTTP *http = conn->proto.http;
+  int fullsize = size * nitems;
+
+  if(0 == http->postsize)
+    /* nothing to return */
+    return 0;
+  
+  /* make sure that a HTTP request is never sent away chunked! */
+  conn->bits.forbidchunk= (http->sending == HTTPSEND_REQUEST)?TRUE:FALSE;
+
+  if(http->postsize <= fullsize) {
+    memcpy(buffer, http->postdata, http->postsize);
+    fullsize = http->postsize;
+
+    if(http->backup.postsize) {
+      /* move backup data into focus and continue on that */
+      http->postdata = http->backup.postdata;
+      http->postsize = http->backup.postsize;
+      conn->fread =    http->backup.fread;
+      conn->fread_in = http->backup.fread_in;
+
+      http->sending++; /* move one step up */
+
+      http->backup.postsize=0;
+    }
+    else
+      http->postsize = 0;
+
+    return fullsize;
+  }
+
+  memcpy(buffer, http->postdata, fullsize);
+  http->postdata += fullsize;
+  http->postsize -= fullsize;
+
+  return fullsize;
+}
+
 /* ------------------------------------------------------------------------- */
 /*
  * The add_buffer series of functions are used to build one large memory chunk
  * from repeated function invokes. Used so that the entire HTTP request can
  * be sent in one go.
  */
+
+struct send_buffer {
+  char *buffer;
+  size_t size_max;
+  size_t size_used;
+};
+typedef struct send_buffer send_buffer;
+
 static CURLcode
  add_buffer(send_buffer *in, const void *inptr, size_t size);
 
@@ -136,33 +189,52 @@ CURLcode add_buffer_send(send_buffer *in,
   CURLcode res;
   char *ptr;
   int size;
+  struct HTTP *http = conn->proto.http;
 
   /* The looping below is required since we use non-blocking sockets, but due
      to the circumstances we will just loop and try again and again etc */
 
   ptr = in->buffer;
   size = in->size_used;
-  do {
-    res = Curl_write(conn, sockfd, ptr, size, &amount);
 
-    if(CURLE_OK != res)
-      break;
+  res = Curl_write(conn, sockfd, ptr, size, &amount);
+
+  if(CURLE_OK == res) {
 
     if(conn->data->set.verbose)
       /* this data _may_ contain binary stuff */
       Curl_debug(conn->data, CURLINFO_HEADER_OUT, ptr, amount);
 
     *bytes_written += amount;
-
+    
     if(amount != size) {
+      /* The whole request could not be sent in one system call. We must queue
+         it up and send it later when we get the chance. We must not loop here
+         and wait until it might work again. */
+
       size -= amount;
       ptr += amount;
+    
+      /* backup the currently set pointers */
+      http->backup.fread = conn->fread;
+      http->backup.fread_in = conn->fread_in;
+      http->backup.postdata = http->postdata;
+      http->backup.postsize = http->postsize;
+
+      /* set the new pointers for the request-sending */
+      conn->fread = (curl_read_callback)readmoredata;
+      conn->fread_in = (void *)conn;
+      http->postdata = ptr;
+      http->postsize = size;
+
+      http->send_buffer = in;
+      http->sending = HTTPSEND_REQUEST;
+      
+      return CURLE_OK;
     }
-    else
-      break;
 
-  } while(1);
-
+    /* the full buffer was sent, clean up and return */
+  }
   if(in->buffer)
     free(in->buffer);
   free(in);
@@ -519,6 +591,13 @@ CURLcode Curl_http_done(struct connectdata *conn)
   conn->fread = data->set.fread; /* restore */
   conn->fread_in = data->set.in; /* restore */
 
+  if(http->send_buffer) {
+    send_buffer *buff = http->send_buffer;
+    
+    free(buff->buffer);
+    free(buff);
+  }
+
   if(HTTPREQ_POST_FORM == data->set.httpreq) {
     conn->bytecount = http->readbytecount + http->writebytecount;
       
@@ -535,33 +614,6 @@ CURLcode Curl_http_done(struct connectdata *conn)
   }
 
   return CURLE_OK;
-}
-
-/* fread() emulation to provide POST data */
-static int POSTReader(char *buffer,
-                      size_t size,
-                      size_t nitems,
-                      void *userp)
-{
-  struct HTTP *http = (struct HTTP *)userp;
-  int fullsize = size * nitems;
-
-  if(0 == http->postsize)
-    /* nothing to return */
-    return 0;
-  
-  if(http->postsize <= fullsize) {
-    memcpy(buffer, http->postdata, http->postsize);
-    fullsize = http->postsize;
-    http->postsize = 0;
-    return fullsize;
-  }
-
-  memcpy(buffer, http->postdata, fullsize);
-  http->postdata += fullsize;
-  http->postsize -= fullsize;
-
-  return fullsize;
 }
 
 CURLcode Curl_http(struct connectdata *conn)
@@ -957,6 +1009,8 @@ CURLcode Curl_http(struct connectdata *conn)
       conn->fread = (curl_read_callback)Curl_FormReader;
       conn->fread_in = &http->form;
 
+      http->sending = HTTPSEND_BODY;
+
       if(!conn->bits.upload_chunky)
         /* only add Content-Length if not uploading chunked */
         add_bufferf(req_buffer,
@@ -1076,9 +1130,17 @@ CURLcode Curl_http(struct connectdata *conn)
           http->postsize = strlen(data->set.postfields);
         http->postdata = data->set.postfields;
 
-        conn->fread = (curl_read_callback)POSTReader;
-        conn->fread_in = (void *)http;
+        http->sending = HTTPSEND_BODY;
+
+        conn->fread = (curl_read_callback)readmoredata;
+        conn->fread_in = (void *)conn;
+
+        /* set the upload size to the progress meter */
+        Curl_pgrsSetUploadSize(data, http->postsize);
       }
+      else
+        /* set the upload size to the progress meter */
+        Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
       /* issue the request, headers-only */
       result = add_buffer_send(req_buffer, conn->firstsocket, conn,
@@ -1107,7 +1169,8 @@ CURLcode Curl_http(struct connectdata *conn)
         /* HTTP GET/HEAD download: */
         result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
                                &http->readbytecount,
-                               -1, NULL); /* nothing to upload */
+                               http->postdata?conn->firstsocket:-1,
+                               http->postdata?&http->writebytecount:NULL);
     }
     if(result)
       return result;

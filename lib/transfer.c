@@ -118,6 +118,51 @@ enum {
    changed. It should just remain a blanked-out timeout value. */
 static struct timeval notimeout={0,0};
 
+/*
+ * This function will call the read callback to fill our buffer with data
+ * to upload.
+ */
+static int fillbuffer(struct connectdata *conn,
+                      int bytes)
+{
+  int buffersize = bytes;
+  int nread;
+
+  if(conn->bits.upload_chunky) {
+    /* if chunked Transfer-Encoding */
+    buffersize -= (8 + 2 + 2);   /* 32bit hex + CRLF + CRLF */
+    conn->upload_fromhere += 10; /* 32bit hex + CRLF */
+  }
+  
+  nread = conn->fread(conn->upload_fromhere, 1,
+                      buffersize, conn->fread_in);
+          
+  if(!conn->bits.forbidchunk && conn->bits.upload_chunky) {
+    /* if chunked Transfer-Encoding */
+    char hexbuffer[11];
+    int hexlen = snprintf(hexbuffer, sizeof(hexbuffer),
+                          "%x\r\n", nread);
+    /* move buffer pointer */
+    conn->upload_fromhere -= hexlen;
+    nread += hexlen;
+
+    /* copy the prefix to the buffer */
+    memcpy(conn->upload_fromhere, hexbuffer, hexlen);
+    if(nread>hexlen) {
+      /* append CRLF to the data */
+      memcpy(conn->upload_fromhere +
+             nread, "\r\n", 2);
+      nread+=2;
+    }
+    else {
+      /* mark this as done once this chunk is transfered */
+      conn->keep.upload_done = TRUE;
+    }
+  }
+  return nread;
+}
+
+
 CURLcode Curl_readwrite(struct connectdata *conn,
                         bool *done)
 {
@@ -862,44 +907,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         /* only read more data if there's no upload data already
            present in the upload buffer */
         if(0 == conn->upload_present) {
-          size_t buffersize = BUFSIZE;
           /* init the "upload from here" pointer */
           conn->upload_fromhere = k->uploadbuf;
 
-          if(!k->upload_done) {
-
-            if(conn->bits.upload_chunky) {
-              /* if chunked Transfer-Encoding */
-              buffersize -= (8 + 2 + 2);   /* 32bit hex + CRLF + CRLF */
-              conn->upload_fromhere += 10; /* 32bit hex + CRLF */
-            }
-
-            nread = conn->fread(conn->upload_fromhere, 1,
-                                buffersize, conn->fread_in);
-          
-            if(conn->bits.upload_chunky) {
-              /* if chunked Transfer-Encoding */
-              char hexbuffer[9];
-              int hexlen = snprintf(hexbuffer, sizeof(hexbuffer),
-                                    "%x\r\n", nread);
-              /* move buffer pointer */
-              conn->upload_fromhere -= hexlen;
-              nread += hexlen;
-
-              /* copy the prefix to the buffer */
-              memcpy(conn->upload_fromhere, hexbuffer, hexlen);
-              if(nread>hexlen) {
-                /* append CRLF to the data */
-                memcpy(conn->upload_fromhere +
-                       nread, "\r\n", 2);
-                nread+=2;
-              }
-              else {
-                /* mark this as done once this chunk is transfered */
-                k->upload_done = TRUE;
-              }
-            }
-          }
+          if(!k->upload_done)
+            nread = fillbuffer(conn, BUFSIZE);
           else
             nread = 0; /* we're done uploading/reading */
 

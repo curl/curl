@@ -157,6 +157,8 @@ struct ssl_config_data {
 struct HTTP {
   struct FormData *sendit;
   int postsize;
+  char *postdata;
+
   const char *p_pragma;      /* Pragma: string */
   const char *p_accept;      /* Accept: string */
   long readbytecount; 
@@ -166,7 +168,22 @@ struct HTTP {
   struct Form form;
   struct Curl_chunker chunk;
 
-  char *postdata; /* for regular POSTs */
+  struct back {
+    curl_read_callback fread; /* backup storage for fread pointer */
+    void *fread_in;           /* backup storage for fread_in pointer */
+    char *postdata;
+    int postsize;
+  } backup;
+
+  enum {
+    HTTPSEND_NADA,    /* init */
+    HTTPSEND_REQUEST, /* sending a request */
+    HTTPSEND_BODY,    /* sending body */
+    HTTPSEND_LAST     /* never use this */
+  } sending;
+
+  void *send_buffer; /* used if the request couldn't be sent in one chunk,
+                        points to an allocated send_buffer struct */
 };
 
 /****************************************************************************
@@ -221,8 +238,11 @@ struct ConnectBits {
 
   bool upload_chunky; /* set TRUE if we are doing chunked transfer-encoding
                          on upload */
+  bool getheader;     /* TRUE if header parsing is wanted */
 
-  bool getheader;	 /* TRUE if header parsing is wanted */
+  bool forbidchunk;   /* used only to explicitly forbid chunk-upload for
+                         specific upload buffers. See readmoredata() in
+                         http.c for details. */
 };
 
 /*
