@@ -179,6 +179,9 @@
 /* Define if you have the RAND_screen function when using SSL  */
 #define HAVE_RAND_SCREEN 1
 
+/* Define if you have the `RAND_status' function. */
+#define HAVE_RAND_STATUS 1
+
 /* Define this to if in_addr_t is not an available typedefed type */
 #define in_addr_t unsigned long
 
