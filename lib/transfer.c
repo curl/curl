@@ -215,6 +215,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
          headers at the moment or not. */          
       if (k->header) {
         /* we are in parse-the-header-mode */
+        bool stop_reading = FALSE;
 
         /* header line within buffer loop */
         do {
@@ -356,8 +357,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                * If we requested a "no body", this is a good time to get
                * out and return home.
                */
-              bool stop_reading = FALSE;
-
               if(data->set.no_body)
                 stop_reading = TRUE;
               else if(!conn->bits.close) {
@@ -380,9 +379,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 /* we make sure that this socket isn't read more now */
                 k->keepon &= ~KEEP_READ;
                 FD_ZERO(&k->rkeepfd);
-                /* for a progress meter/info update before going away */
-                Curl_pgrsUpdate(conn);
-                return CURLE_OK;
               }
 
               break;		/* exit header line loop */
@@ -609,7 +605,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           k->hbufp = data->state.headerbuff;
           k->hbuflen = 0;
         }
-        while (*k->str); /* header line within buffer */
+        while (!stop_reading && *k->str); /* header line within buffer */
+
+        if(stop_reading)
+          /* We've stopped dealing with input, get out of the do-while loop */
+          break;
 
         /* We might have reached the end of the header part here, but
            there might be a non-header part left in the end of the read
