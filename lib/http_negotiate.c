@@ -1,0 +1,217 @@
+/***************************************************************************
+ *                                  _   _ ____  _     
+ *  Project                     ___| | | |  _ \| |    
+ *                             / __| | | | |_) | |    
+ *                            | (__| |_| |  _ <| |___ 
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) 1998 - 2003, Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at http://curl.haxx.se/docs/copyright.html.
+ * 
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * $Id$
+ ***************************************************************************/
+#include "setup.h"
+
+#ifdef GSSAPI
+
+#ifndef CURL_DISABLE_HTTP
+/* -- WIN32 approved -- */
+#include <stdio.h>
+#include <string.h>
+#include <stdarg.h>
+#include <stdlib.h>
+#include <ctype.h>
+
+#include "urldata.h"
+#include "sendf.h"
+#include "strequal.h"
+
+#include "http_negotiate.h"
+
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
+static int
+get_gss_name(struct connectdata *conn, gss_name_t *server)
+{
+  OM_uint32 major_status, minor_status;
+  gss_buffer_desc token = GSS_C_EMPTY_BUFFER;
+  char name[2048];
+
+#ifdef KRB5
+  token.length = strlen("khttp@") + strlen(conn->hostname) + 1;
+#els
+  token.length = strlen("host/") + strlen(conn->hostname) + 1;
+#endif
+  if (token.length + 1 > sizeof(name))
+    return EMSGSIZE;
+#ifdef KRB5
+  sprintf(name, "khttp@%s", conn->hostname);
+#else
+  sprintf(name, "host/%s", conn->hostname);
+#endif
+  token.value = (void *) name;
+  major_status = gss_import_name(&minor_status,
+                                 &token,
+                                 GSS_C_NT_HOSTBASED_SERVICE,
+                                 server);
+  return GSS_ERROR(major_status) ? -1 : 0;
+}
+
+static void
+log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
+{
+  OM_uint32 maj_stat, min_stat;
+  OM_uint32 msg_ctx = 0;
+  gss_buffer_desc status_string;
+  char buf[1024];
+  size_t len;
+
+  snprintf(buf, sizeof(buf), "%s", prefix);
+  len = strlen(buf);
+  do {
+    maj_stat = gss_display_status (&min_stat,
+                                   error_status,
+                                   GSS_C_MECH_CODE,
+                                   GSS_C_NO_OID,
+                                   &msg_ctx,
+                                   &status_string);
+    if (sizeof(buf) > len + status_string.length + 1) {
+      sprintf(buf + len, ": %s", (char*) status_string.value);
+      len += status_string.length;
+    }
+    gss_release_buffer(&min_stat, &status_string);
+  } while (!GSS_ERROR(maj_stat) && msg_ctx != 0);
+
+  infof(conn->data, buf);
+}
+
+CURLcode Curl_input_negotiate(struct connectdata *conn, char *header)
+{ 
+  struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
+  OM_uint32 major_status, minor_status, minor_status2;
+  gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
+  gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
+  int ret;
+  size_t len;
+
+  while(*header && isspace((int)*header))
+    header++;
+  if(!checkprefix("GSS-Negotiate", header))
+    return -1;
+
+  if (neg_ctx->context && neg_ctx->status == GSS_S_COMPLETE) {
+    /* We finished succesfully our part of authentication, but server
+     * rejected it (since we're again here). Exit with an error since we
+     * can't invent anything better */
+    Curl_cleanup_negotiate(conn->data);
+    return -1;
+  }
+
+  if (neg_ctx->server_name == NULL &&
+      (ret = get_gss_name(conn, &neg_ctx->server_name)))
+    return ret;
+
+  header += strlen("GSS-Negotiate");
+  while(*header && isspace((int)*header))
+    header++;
+
+  len = strlen(header);
+  if (len > 0) {
+    input_token.length = (len+3)/4 * 3;
+    input_token.value = malloc(input_token.length);
+    if (input_token.value == NULL)
+      return ENOMEM;
+    input_token.length = Curl_base64_decode(header, input_token.value);
+    if (input_token.length < 0)
+      return -1;
+  }
+
+  major_status = gss_init_sec_context(&minor_status,
+                                      GSS_C_NO_CREDENTIAL,
+                                      &neg_ctx->context,
+                                      neg_ctx->server_name,
+                                      GSS_C_NO_OID,
+                                      GSS_C_DELEG_FLAG,
+                                      0,
+                                      GSS_C_NO_CHANNEL_BINDINGS,
+                                      &input_token,
+                                      NULL,
+                                      &output_token,
+                                      NULL,
+                                      NULL);
+  if (input_token.length > 0)
+    gss_release_buffer(&minor_status2, &input_token);
+  neg_ctx->status = major_status;
+  if (GSS_ERROR(major_status)) {
+    /* Curl_cleanup_negotiate(conn->data) ??? */
+    log_gss_error(conn, minor_status, "gss_init_sec_context() failed: ");
+    return -1;
+  }
+
+  if (output_token.length == 0) {
+    return -1;
+  }
+
+  neg_ctx->output_token = output_token;
+  /* conn->bits.close = FALSE; */
+
+  return 0;
+}
+   
+
+CURLcode Curl_output_negotiate(struct connectdata *conn)
+{ 
+  struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
+  OM_uint32 minor_status;
+  char *encoded = NULL;
+  size_t len;
+  
+  len = Curl_base64_encode(neg_ctx->output_token.value,
+                           neg_ctx->output_token.length,
+                           &encoded);
+  if (len < 0)
+    return -1;
+
+  conn->allocptr.userpwd =
+    aprintf("Authorization: GSS-Negotiate %s\r\n", encoded);
+  free(encoded);
+  gss_release_buffer(&minor_status, &neg_ctx->output_token);
+  return (conn->allocptr.userpwd == NULL) ? ENOMEM : 0;
+}
+
+void Curl_cleanup_negotiate(struct SessionHandle *data)
+{ 
+  OM_uint32 minor_status;
+  struct negotiatedata *neg_ctx = &data->state.negotiate;
+
+  if (neg_ctx->context != GSS_C_NO_CONTEXT)
+    gss_delete_sec_context(&minor_status, &neg_ctx->context, GSS_C_NO_BUFFER);
+
+  if (neg_ctx->output_token.length != 0)
+    gss_release_buffer(&minor_status, &neg_ctx->output_token);
+
+  if (neg_ctx->server_name != GSS_C_NO_NAME)
+    gss_release_name(&minor_status, &neg_ctx->server_name);
+  
+  memset(neg_ctx, 0, sizeof(*neg_ctx));
+}
+
+
+#endif
+#endif

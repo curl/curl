@@ -96,6 +96,9 @@
 #include "getinfo.h"
 #include "ssluse.h"
 #include "http_digest.h"
+#ifdef GSSAPI
+#include "http_negotiate.h"
+#endif
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -719,6 +722,20 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               if(data->set.get_filetime)
                 data->info.filetime = k->timeofdoc;
             }
+#ifdef GSSAPI
+	    else if (Curl_compareheader(k->p, "WWW-Authenticate:",
+                                        "GSS-Negotiate") &&
+		     (401 == k->httpcode) &&
+		     data->set.httpnegotiate) {
+	      int neg;
+
+	      neg = Curl_input_negotiate(conn,
+		    			 k->p+strlen("WWW-Authenticate:"));
+	      if (neg == 0)
+                /* simulate redirection to make curl send the request again */
+                conn->newurl = strdup(data->change.url);
+	    }
+#endif
             else if(checkprefix("WWW-Authenticate:", k->p) &&
                     (401 == k->httpcode) &&
                     data->set.httpdigest /* Digest authentication is 

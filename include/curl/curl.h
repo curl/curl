@@ -629,6 +629,10 @@ typedef enum {
      You should use this in combination with CURLOPT_USERPWD. */
   CINIT(HTTPDIGEST, LONG, 107),
 
+  /* Set this to a non-zero value to enable HTTP Negotiate Authentication.
+     You should use this in combination with CURLOPT_USERPWD. */
+  CINIT(HTTPNEGOTIATE, LONG, 108),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

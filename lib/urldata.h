@@ -86,6 +86,10 @@
 #include <zlib.h> 		/* for content-encoding 08/28/02 jhrg */
 #endif
 
+#ifdef GSSAPI
+#include <gssapi.h>
+#endif
+
 /* Download buffer size, keep it fairly big for speed reasons */
 #define BUFSIZE CURL_MAX_WRITE_SIZE
 
@@ -159,6 +163,15 @@ struct digestdata {
   char *realm;
   int algo;
 };
+
+#ifdef GSSAPI
+struct negotiatedata {
+  OM_uint32 status;
+  gss_ctx_id_t context;
+  gss_name_t server_name;
+  gss_buffer_desc output_token;
+};
+#endif
 
 /****************************************************************************
  * HTTP unique setup
@@ -627,6 +640,10 @@ struct UrlState {
                       is always set TRUE when curl_easy_perform() is called. */
 
   struct digestdata digest;
+
+#ifdef GSSAPI
+  struct negotiatedata negotiate;
+#endif
 };
 
 
@@ -672,6 +689,9 @@ struct UserDefined {
   long use_port;     /* which port to use (when not using default) */
   char *userpwd;     /* <user:password>, if used */
   bool httpdigest;   /* if HTTP Digest is enabled */
+#ifdef GSSAPI
+  bool httpnegotiate; /* if HTTP Negotiate authentication is enabled */
+#endif
   char *set_range;   /* range, if used. See README for detailed specification
                         on this syntax. */
   long followlocation; /* as in HTTP Location: */

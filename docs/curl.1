@@ -185,6 +185,14 @@ sent over the wire in clear text. Use this in combination with the normal
 -u/--user option to set user name and password.  (Option added in curl 7.10.6)
 
 If this option is used several times,  each occurrence will toggle this on/off.
+.IP "--negotiate"
+(HTTP) Enables Negotiate authentication. The Negotiate method was designed by
+Microsoft and is used in their web aplications. It is primarily meant as a
+support for Kerberos5 authentication but may be also used along with another
+authentication methods. For more information see IETF draft
+draft-brezak-spnego-http-04.txt.
+
+If this option is used several times,  each occurrence will toggle this on/off.
 .IP "--disable-epsv"
 (FTP) Tell curl to disable the use of the EPSV command when doing passive FTP
 downloads. Curl will normally always first attempt to use EPSV before PASV,

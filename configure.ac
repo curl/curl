@@ -454,6 +454,63 @@ else
   AC_MSG_RESULT(no)
 fi
 
+dnl **********************************************************************
+dnl Check for GSS-API libraries
+dnl **********************************************************************
+
+AC_ARG_WITH(gssapi-includes,
+  AC_HELP_STRING([--with-gssapi-includes=DIR],
+                 [Specify location of GSSAPI header]),
+  [ GSSAPI_INCS="-I$withval" 
+    want_gss="yes" ]
+)
+
+AC_ARG_WITH(gssapi-libs,
+  AC_HELP_STRING([--with-gssapi-libs=DIR],
+  		 [Specify location of GSSAPI libs]),
+  [ GSSAPI_LIBS="-L$withval -lgssapi"
+    want_gss="yes" ]
+)
+
+AC_ARG_WITH(gssapi,
+  AC_HELP_STRING([--with-gssapi=DIR],
+                 [Where to look for GSSAPI]),
+  [ GSSAPI_ROOT="$withval"
+    want_gss="yes" ]
+)
+
+AC_MSG_CHECKING([if GSSAPI support is requested])
+if test x"$want_gss" = xyes; then
+  if test -z "$GSSAPI_INCS"; then
+     if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+        gss_cppflags=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
+	CPPFLAGS="$CPPFLAGS $gss_cppflags"
+     else
+        CPPFLAGS="$GSSAPI_ROOT/include"
+     fi
+  else
+     CPPFLAGS="$CPPFLAGS $GSSAPI_INCS"
+  fi
+  
+  if test -z "$GSSAPI_LIB_DIR"; then
+     if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
+        gss_ldflags=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
+	LDFLAGS="$LDFLAGS $gss_ldflags"
+     else
+        LDFLAGS="$LDFLAGS $GSSAPI_ROOT/lib -lgssapi"
+     fi
+  else
+     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
+  fi
+
+  AC_MSG_RESULT(yes)
+  AC_DEFINE(GSSAPI, 1, [if you have the gssapi libraries])
+  
+else
+  AC_MSG_RESULT(no)
+fi
+  
+
 dnl Detect the pkg-config tool, as it may have extra info about the
 dnl openssl installation we can use. I *believe* this is what we are
 dnl expected to do on really recent Redhat Linux hosts.

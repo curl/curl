@@ -272,7 +272,7 @@ The main point of this would be that the write callback gets called more often
 and with smaller chunks. This is just treated as a request, not an order. You
 cannot be guaranteed to actually get the given size. (Added in 7.10)
 .PP
-.SH NAMES and PASSWORDS OPTIONS
+.SH NAMES and PASSWORDS OPTIONS (Authentication)
 .TP 0.4i
 .B CURLOPT_NETRC
 This parameter controls the preference of libcurl between using user names and
@@ -322,15 +322,31 @@ prompt function.
 
 When using HTTP and CURLOPT_FOLLOWLOCATION, libcurl might perform several
 requests to possibly different hosts. libcurl will only send this user and
-password information to hosts using the initial host name, so if libcurl
-follows locations to other hosts it will not send the user and password to
-those. This is enforced to prevent accidental information leakage.
+password information to hosts using the initial host name (unless
+CURLOPT_UNRESTRICTED_AUTH is set), so if libcurl follows locations to other
+hosts it will not send the user and password to those. This is enforced to
+prevent accidental information leakage.
 .TP
 .B CURLOPT_PROXYUSERPWD
 Pass a char * as parameter, which should be [user name]:[password] to use for
 the connection to the HTTP proxy. If the password is left out, you will be
 prompted for it. \fICURLOPT_PASSWDFUNCTION\fP can be used to set your own
 prompt function.
+.TP
+.B CURLOPT_HTTPDIGEST
+Pass a long set to a non-zero value to enable HTTP Digest authentication.
+Digest authentication is defined in RFC2617 and is a somewhat more secure way
+to do user+password checking over public networks than the regular
+old-fashioned Basic authentication. By default, libcurl uses Basic. Set name
+and password with the CURLOPT_USERPWD option. (Added in 7.10.6)
+.TP
+.B CURLOPT_HTTPNEGOTIATE
+Pass a long set to a non-zero value to enable HTTP Negotiate authentication.
+The Negotiate method was designed by Microsoft and is used in their web
+aplications. It is primarily meant as a support for Kerberos5 authentication
+but may be also used along with another authentication methods. For more
+information see IETF draft draft-brezak-spnego-http-04.txt.  Set name and
+password with the CURLOPT_USERPWD option. (Added in 7.10.6)
 .PP
 .SH HTTP OPTIONS
 .TP 0.4i

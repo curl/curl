@@ -359,6 +359,9 @@ static void help(void)
        " -d/--data <data>   HTTP POST data (H)\n"
        "    --data-ascii <data>   HTTP POST ASCII data (H)\n"
        "    --data-binary <data>  HTTP POST binary data (H)\n"
+#ifdef GSSAPI
+       "    --negotiate     Enable HTTP Negotiate Authentication\n"
+#endif
        "    --digest        Enable HTTP Digest Authentication");
   puts("    --disable-eprt  Prevents curl from using EPRT or LPRT (F)\n"
        "    --disable-epsv  Prevents curl from using EPSV (F)\n"
@@ -461,6 +464,9 @@ struct Configurable {
   bool cookiesession; /* new session? */
   bool encoding;    /* Accept-Encoding please */
   bool digest;      /* Digest Authentication */
+#ifdef GSSAPI
+  bool negotiate;   /* Negotiate Authentication */
+#endif
   bool use_resume;
   bool resume_from_current;
   bool disable_epsv;
@@ -1053,6 +1059,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5i", "limit-rate", TRUE},
     {"5j", "compressed",  FALSE}, /* might take an arg someday */
     {"5k", "digest",     FALSE},
+#ifdef GSSAPI
+    {"5l",  "negotiate", FALSE},
+#endif
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1280,6 +1289,12 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'k': /* --digest */
  	config->digest ^= TRUE;
  	break;
+
+#ifdef GSSAPI
+      case 'l': /* --negotiate */
+	config->negotiate ^= TRUE;
+	break;
+#endif
 
       default: /* the URL! */
         {
@@ -2976,6 +2991,10 @@ operate(struct Configurable *config, int argc, char *argv[])
 
       /* new in libcurl 7.10.6 */
       curl_easy_setopt(curl, CURLOPT_HTTPDIGEST, config->digest);
+
+#ifdef GSSAPI
+      curl_easy_setopt(curl, CURLOPT_HTTPNEGOTIATE, config->negotiate);
+#endif
       
       /* new in curl 7.9.7 */
       if(config->trace_dump) {

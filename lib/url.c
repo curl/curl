@@ -108,6 +108,9 @@
 #include "share.h"
 #include "content_encoding.h"
 #include "http_digest.h"
+#ifdef GSSAPI
+#include "http_negotiate.h"
+#endif
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -847,6 +850,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.httpdigest = va_arg(param, long);
     break;
+#ifdef GSSAPI
+  case CURLOPT_HTTPNEGOTIATE:
+    /* Enable HTTP Negotaiate authentication */
+    data->set.httpnegotiate = va_arg(param, long);
+    break;
+#endif
   case CURLOPT_USERPWD:
     /*
      * user:password to use in the operation
