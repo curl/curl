@@ -133,8 +133,6 @@ _Transfer(struct connectdata *c_conn)
   CURLcode urg;
   time_t timeofdoc=0;
   long bodywrites=0;
-
-  char newurl[URL_MAX_LENGTH];		/* buffer for Location: URL */
   int writetype;
 
   /* the highest fd we use + 1 */
@@ -389,12 +387,21 @@ _Transfer(struct connectdata *c_conn)
               }
               else if ((code >= 300 && code < 400) &&
                        (data->bits.http_follow_location) &&
-                       strnequal("Location", p, 8) &&
-                       sscanf (p+8, ": %" URL_MAX_LENGTH_TXT "s",
-                               newurl)) {
-                /* this is the URL that the server advices us to get
-                   instead */
-                data->newurl = strdup (newurl);
+                       strnequal("Location: ", p, 10)) {
+                /* this is the URL that the server advices us to get instead */
+                char *ptr;
+                char *start=p;
+                char backup;
+
+                start += 10; /* pass "Location: " */
+                ptr = start; /* start scanning here */
+                /* scan through the string to find the end */
+                while(*ptr && !isspace((int)*ptr))
+                  ptr++;
+                backup = *ptr; /* store the ending letter */
+                *ptr = '\0';   /* zero terminate */
+                data->newurl = strdup(start); /* clone string */
+                *ptr = backup; /* restore ending letter */
               }
 
               writetype = CLIENTWRITE_HEADER;
@@ -613,8 +620,9 @@ CURLcode curl_transfer(CURL *curl)
  
            This is assumed to happen for HTTP(S) only!
         */
-        char prot[16];
-        char path[URL_MAX_LENGTH];
+        char prot[16]; /* URL protocol string storage */
+        char letter;   /* used for a silly sscanf */
+
 	if (data->maxredirs && (data->followlocation >= data->maxredirs)) {
 	  failf(data,"Maximum (%d) redirects followed", data->maxredirs);
           curl_disconnect(c_connect);
@@ -638,12 +646,11 @@ CURLcode curl_transfer(CURL *curl)
           }
 
           data->referer = strdup(data->url);
-          data->free_referer = TRUE; /* yes, free this later */
+          data->free_referer = TRUE;          /* yes, free this later */
           data->bits.http_set_referer = TRUE; /* might have been false */
         }
 
-        if(2 != sscanf(data->newurl, "%15[^:]://%" URL_MAX_LENGTH_TXT
-                       "s", prot, path)) {
+        if(2 != sscanf(data->newurl, "%15[^:]://%c", prot, &letter)) {
           /***
            *DANG* this is an RFC 2068 violation. The URL is supposed
            to be absolute and this doesn't seem to be that!
