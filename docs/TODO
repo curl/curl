@@ -45,8 +45,7 @@ To do in a future release (random order):
  * Move non-URL related functions that are used by both the lib and the curl
    application to a separate "portability lib".
 
- * Add libcurl support/interfaces for more languages.  C++ wrapper? Python
-   anyone?
+ * Add libcurl support/interfaces for more languages. C++ wrapper perhaps?
 
  * "Content-Encoding: compress/gzip/zlib" HTTP 1.1 clearly defines how to get
    and decode compressed documents. There is the zlib that is pretty good at
