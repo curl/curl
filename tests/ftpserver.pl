@@ -3,7 +3,7 @@
 # $Id$
 # This is the FTP server designed for the curl test suite.
 #
-# It is meant to excersive curl, it is not meant to become a fully working
+# It is meant to exercise curl, it is not meant to be a fully working
 # or even very standard compliant server.
 #
 # You may optionally specify port on the command line, otherwise it'll
@@ -115,6 +115,14 @@ my %commandfunc = ( 'PORT' => \&PORT_command,
                     'APPE' => \&STOR_command, # append looks like upload
                     );
 
+my $rest=0;
+sub REST_command {
+    $rest = $_[0];
+}
+
+sub LIST_command {
+  #  print "150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)\r\n";
+
 # this is a built-in fake-dir ;-)
 my @ftpdir=("total 20\r\n",
 "drwxr-xr-x   8 98       98           512 Oct 22 13:06 .\r\n",
@@ -127,14 +135,6 @@ my @ftpdir=("total 20\r\n",
 "dr-xr-xr-x   2 0        1            512 Nov 30  1995 etc\r\n",
 "drwxrwxrwx   2 98       1            512 Oct 30 14:33 pub\r\n",
 "dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr\r\n");
-
-my $rest=0;
-sub REST_command {
-    $rest = $_[0];
-}
-
-sub LIST_command {
-  #  print "150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)\r\n";
 
     logmsg "$$: pass data to child pid\n";
     for(@ftpdir) {
@@ -257,17 +257,26 @@ sub STOR_command {
     return 0;
 }
 
+my $pasvport=9000;
 sub PASV_command {
     socket(Server2, PF_INET, SOCK_STREAM, $proto) || die "socket: $!";
     setsockopt(Server2, SOL_SOCKET, SO_REUSEADDR,
                pack("l", 1)) || die "setsockopt: $!";
-    while($port < 11000) {
-        if(bind(Server2, sockaddr_in($port, INADDR_ANY))) {
+
+    my $ok=0;
+
+    $pasvport++; # don't reuse the previous
+    for(1 .. 10) {
+        if($pasvport > 65535) {
+            $pasvport = 1025;
+        }
+        if(bind(Server2, sockaddr_in($pasvport, INADDR_ANY))) {
+            $ok=1;
             last;
         }
-        $port++; # try next port please
+        $pasvport+= 3; # try another port please
     }
-    if(11000 == $port) {
+    if(!$ok) {
         print "500 no free ports!\r\n";
         logmsg "couldn't find free port\n";
         return 0;
@@ -275,18 +284,17 @@ sub PASV_command {
     listen(Server2,SOMAXCONN) || die "listen: $!";
 
     printf("227 Entering Passive Mode (127,0,0,1,%d,%d)\n",
-           ($port/256), ($port%256));
+           ($pasvport/256), ($pasvport%256));
 
-    my $waitedpid;
-    my $paddr;
-
-    $paddr = accept(SOCK, Server2);
-    my($port,$iaddr) = sockaddr_in($paddr);
+    my $paddr = accept(SOCK, Server2);
+    my($iport,$iaddr) = sockaddr_in($paddr);
     my $name = gethostbyaddr($iaddr,AF_INET);
 
-    logmsg "$$: data connection from $name [", inet_ntoa($iaddr), "] at port $port\n";
+    close(Server2); # close the listener when its served its purpose!
 
-    return \&SOCK;
+    logmsg "$$: data connection from $name [", inet_ntoa($iaddr), "] at port $iport\n";
+
+    return;
 }
 
 sub PORT_command {
@@ -435,5 +443,4 @@ for ( $waitedpid = 0;
     } # while(1)
     close(Client);
     close(Client2);
-    close(Server2);
 }
