@@ -94,7 +94,6 @@ struct curl_slist *curl_slist_append(struct curl_slist *list,
     new_item->data = strdup(data);
   }
   if (new_item == NULL || new_item->data == NULL) {
-    fprintf(stderr, "Cannot allocate memory for QUOTE list.\n");
     return NULL;
   }
 
@@ -229,6 +228,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
                     ssize_t *written)
 {
   ssize_t bytes_written;
+  CURLcode retcode;
   (void)conn;
 
 #ifdef USE_SSLEAY
@@ -244,13 +244,28 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
       switch(err) {
       case SSL_ERROR_WANT_READ:
       case SSL_ERROR_WANT_WRITE:
-        /* this is basicly the EWOULDBLOCK equivalent */
+        /* The operation did not complete; the same TLS/SSL I/O function
+           should be called again later. This is basicly an EWOULDBLOCK
+           equivalent. */
         *written = 0;
         return CURLE_OK;
       case SSL_ERROR_SYSCALL:
         failf(conn->data, "SSL_write() returned SYSCALL, errno = %d\n",
               Curl_ourerrno());
         return CURLE_SEND_ERROR;
+      case SSL_ERROR_SSL:
+      {
+        /*  A failure in the SSL library occurred, usually a
+            protocol error.  The OpenSSL error queue contains more
+            information on the error. */
+        char error_buffer[120]; /* OpenSSL documents that this must be at least
+                                   120 bytes long. */
+        int sslerror = ERR_get_error();
+        failf(conn->data, "SSL_write() error: %s\n",
+              ERR_error_string(sslerror, error_buffer));
+        return CURLE_SEND_ERROR;
+      }
+        break;
       }
       /* a true error */
       failf(conn->data, "SSL_write() return error %d\n", err);
@@ -271,27 +286,30 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
     }
     if(-1 == bytes_written) {
       int err = Curl_ourerrno();
-#ifdef WIN32
-      if(WSAEWOULDBLOCK == err)
+
+      if(
+#ifdef WSAEWOULDBLOCK
+        /* This is how Windows does it */
+        (WSAEWOULDBLOCK == err)
 #else
-      /* As pointed out by Christophe Demory on March 11 2003, errno
-         may be EWOULDBLOCK or on some systems EAGAIN when it returned
-         due to its inability to send off data without blocking. We
-         therefor treat both error codes the same here */
-      if((EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err))
+        /* As pointed out by Christophe Demory on March 11 2003, errno
+           may be EWOULDBLOCK or on some systems EAGAIN when it returned
+           due to its inability to send off data without blocking. We
+           therefor treat both error codes the same here */
+        (EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err)
 #endif
-      {
+        )
         /* this is just a case of EWOULDBLOCK */
-        *written=0;
-        return CURLE_OK;
-      }
+        bytes_written=0;
     }
 #ifdef USE_SSLEAY
   }
 #endif
 
   *written = bytes_written;
-  return (-1 != bytes_written)?CURLE_OK:CURLE_SEND_ERROR;
+  retcode = (-1 != bytes_written)?CURLE_OK:CURLE_SEND_ERROR;
+
+  return retcode;
 }
 
 /* client_write() sends data to the write callback(s)
