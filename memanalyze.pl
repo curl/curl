@@ -168,6 +168,37 @@ while(<STDIN>) {
             }
         }
     }
+    # ADDR url.c:1282 getaddrinfo() = 0x5ddd
+    elsif($_ =~ /^ADDR ([^:]*):(\d*) (.*)/) {
+        # generic match for the filename+linenumber
+        $source = $1;
+        $linenum = $2;
+        $function = $3;
+
+        if($function =~ /getaddrinfo\(\) = (\(nil\)|0x([0-9a-f]*))/) {
+            my $add = $2;
+            if($add eq "(nil)") {
+                ;
+            }
+            else {
+                $addrinfo{$add}=1;
+                $addrinfofile{$add}="$source:$linenum";
+                $addrinfos++;
+            }
+        }
+        # fclose(0x1026c8)
+        elsif($function =~ /freeaddrinfo\(0x([0-9a-f]*)\)/) {
+            if(!$addrinfo{$1}) {
+                print "freeaddrinfo() without getaddrinfo(): $line\n";
+            }
+            else {
+                $addrinfo{$1}=0;
+                $addrinfos--;
+            }
+        }
+
+        
+    }
     else {
         print "Not recognized prefix line: $line\n";
     }
@@ -199,6 +230,15 @@ if($fopens) {
     for(keys %fopen) {
         if($fopen{$_} == 1) {
             print "fopen() called at ".$fopenfile{$_}."\n";
+        }
+    }
+}
+
+if($addrinfos) {
+    print "IPv6-style name resolve data left at:\n";
+    for(keys %addrinfofile) {
+        if($addrinfo{$_} == 1) {
+            print "getaddrinfo() called at ".$addrinfofile{$_}."\n";
         }
     }
 }
