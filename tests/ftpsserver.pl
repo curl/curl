@@ -40,7 +40,7 @@ do {
 
 my $path = `pwd`;
 chomp $path;
-my $cmd = "$stunnel -p $path/data/stunnel.pem -P $path/.ftps.pid -d $port -r $ftp";
+my $cmd = "$stunnel -p $path/stunnel.pem -P $path/.ftps.pid -d $port -r $ftp";
 
 if($verbose) {
     print "FTPS server: $cmd\n";
