@@ -430,6 +430,9 @@ UrgError curl_urlget(UrgTag tag, ...)
       case URGTAG_WRITEFUNCTION:
         data->fwrite = (size_t (*)(char *, size_t, size_t, FILE *))param_func;
         break;
+      case URGTAG_WRITEINFO:
+        data->writeinfo = (char *)param_obj;
+        break;
       case URGTAG_READFUNCTION:
         data->fread = (size_t (*)(char *, size_t, size_t, FILE *))param_func;
         break;
@@ -545,6 +548,12 @@ UrgError curl_urlget(UrgTag tag, ...)
   }
   else
     res = URG_FAILED_INIT; /* failed */
+
+  if((URG_OK == res) && data->writeinfo) {
+    /* Time to output some info to stdout */
+    WriteOut(data);
+  }
+
 
   /* total cleanup */
   urlfree(data, TRUE);
