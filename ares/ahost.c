@@ -52,7 +52,7 @@ int main(int argc, char **argv)
   WSAStartup(wVersionRequested, &wsaData);
 #endif  
 
-  if (argc == 0)
+  if (argc <= 1)
     usage();
 
   status = ares_init(&channel);
