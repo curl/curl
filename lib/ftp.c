@@ -174,6 +174,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
     }
     break;
   }
+
   return CURLE_OK;
 }
 
@@ -504,47 +505,6 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
       conn->ssl[SECONDARYSOCKET].use = FALSE; /* clear-text data */
     }
   }
-  if(conn->ssl[FIRSTSOCKET].use) {
-    /* PBSZ = PROTECTION BUFFER SIZE.
-
-       The 'draft-murray-auth-ftp-ssl' (draft 12, page 7) says:
-
-       Specifically, the PROT command MUST be preceded by a PBSZ command
-       and a PBSZ command MUST be preceded by a successful security data
-       exchange (the TLS negotiation in this case)
-
-       ... (and on page 8):
-         
-       Thus the PBSZ command must still be issued, but must have a parameter
-       of '0' to indicate that no buffering is taking place and the data
-       connection should not be encapsulated.
-    */
-    FTPSENDF(conn, "PBSZ %d", 0);
-    result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
-    if(result)
-      return result;
-
-    /* For TLS, the data connection can have one of two security levels.
-
-       1)Clear (requested by 'PROT C')
-
-       2)Private (requested by 'PROT P')
-    */
-    if(!conn->ssl[SECONDARYSOCKET].use) {
-      FTPSENDF(conn, "PROT %c", 'P');
-      result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
-      if(result)
-        return result;
-    
-      if(ftpcode == 200)
-        /* We have enabled SSL for the data connection! */
-        conn->ssl[SECONDARYSOCKET].use = TRUE;
-
-      /* FTP servers typically responds with 500 if they decide to reject
-         our 'P' request */
-    }
-  }
-
   
   /* send USER */
   FTPSENDF(conn, "USER %s", ftp->user?ftp->user:"");
@@ -609,6 +569,47 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   else {
     failf(data, "Odd return code after USER");
     return CURLE_FTP_WEIRD_USER_REPLY;
+  }
+
+  if(conn->ssl[FIRSTSOCKET].use) {
+    /* PBSZ = PROTECTION BUFFER SIZE.
+
+       The 'draft-murray-auth-ftp-ssl' (draft 12, page 7) says:
+
+       Specifically, the PROT command MUST be preceded by a PBSZ command
+       and a PBSZ command MUST be preceded by a successful security data
+       exchange (the TLS negotiation in this case)
+
+       ... (and on page 8):
+         
+       Thus the PBSZ command must still be issued, but must have a parameter
+       of '0' to indicate that no buffering is taking place and the data
+       connection should not be encapsulated.
+    */
+    FTPSENDF(conn, "PBSZ %d", 0);
+    result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+    if(result)
+      return result;
+
+    /* For TLS, the data connection can have one of two security levels.
+
+       1)Clear (requested by 'PROT C')
+
+       2)Private (requested by 'PROT P')
+    */
+    if(!conn->ssl[SECONDARYSOCKET].use) {
+      FTPSENDF(conn, "PROT %c", 'P');
+      result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+      if(result)
+        return result;
+    
+      if(ftpcode == 200)
+        /* We have enabled SSL for the data connection! */
+        conn->ssl[SECONDARYSOCKET].use = TRUE;
+
+      /* FTP servers typically responds with 500 if they decide to reject
+         our 'P' request */
+    }
   }
 
   /* send PWD to discover our entry point */
@@ -1611,7 +1612,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
     /* this just dumps information about this second connection */
     ftp_pasv_verbose(conn, conninfo, newhostp, connectport);
   
-  if (data->set.tunnel_thru_httpproxy) {
+  if(data->set.tunnel_thru_httpproxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
     result = Curl_ConnectHTTPProxyTunnel(conn, SECONDARYSOCKET,
                                          newhostp, newport);
@@ -1753,6 +1754,15 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       result = AllowServerConnect(conn);
       if( result )
         return result;
+    }
+
+    if(conn->ssl[SECONDARYSOCKET].use) {
+      /* since we only have a plaintext TCP connection here, we must now
+	 do the TLS stuff */
+      infof(data, "Doing the SSL/TSL handshake on the data stream\n");
+      result = Curl_SSLConnect(conn, SECONDARYSOCKET);
+      if(result)
+	return result;
     }
 
     *bytecountp=0;
@@ -2011,15 +2021,15 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
           return result;
       }
 
-#if 1
       if(conn->ssl[SECONDARYSOCKET].use) {
-        /* since we only have a TCP connection, we must now do the TLS stuff */
-        infof(data, "Doing the SSL/TSL handshake on the data stream\n");
-        result = Curl_SSLConnect(conn, SECONDARYSOCKET);
-        if(result)
-          return result;
+	/* since we only have a plaintext TCP connection here, we must now
+	   do the TLS stuff */
+	infof(data, "Doing the SSL/TSL handshake on the data stream\n");
+	result = Curl_SSLConnect(conn, SECONDARYSOCKET);
+	if(result)
+	  return result;
       }
-#endif
+
       infof(data, "Getting file with size: %d\n", size);
 
       /* FTP download: */
