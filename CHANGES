@@ -6,6 +6,22 @@
 
                                   Changelog
 
+Daniel(23 January 2004)
+- More Windows fixes for large files. We now build and link with
+  ../lib/strtoofft.c in the app code since Curl_strtoll() is not a provided
+  libcurl function... Perhaps we should consider a 'common' dir or similar
+  where we put source code used in both the lib and the client. Or perhaps
+  we'll just make this function available in the library...
+
+- Vincent Bronner found out the socks5 code crashed when no username was
+  set.
+
+- Vincent Bronner spotted a problem with proxy username/password when re-using
+  a persistant connection.
+
+- Fixed the progress meter display for files larger than 2^31 bytes. Gisle
+  Vanem reported.
+
 Daniel(22 January 2004)
 - Gisle Vanem made strtoll() get used when curl is built with the mingw
   compiler.
