@@ -38,19 +38,30 @@ reply is sent
 </reply>
 
 <client>
+
 <server>
 protocols as in 'http' 'ftp' etc. Give only one per line. Used for test cases
 500+ (at this point) to specify which servers the test case requires. In the
 future all test cases should use this. Makes us independent of the test
 case number.
-</server
+</server>
+
+<killserver>
+Using the same syntax as in <server> but when mentioned here these servers
+are explicitly KILLED when this test case is completed. Only use this if there
+is no other alternatives. Using this of course requires subsequent tests to
+restart servers.
+</killserver>
+
 <tool>
 Name of tool to use instead of "curl". This tool must be built and exist
 in the libtest/ directory.
 </tool>
+
 <name>
 test case description
 </name>
+
 <command [option=no-output]>
 command line to run, there's a bunch of %variables that get replaced
 accordingly. more about them elsewhere
@@ -68,10 +79,12 @@ Available substitute variables include:
 %SRCDIR    - Full path to the source dir
 %PWD       - Current directory
 </command>
+
 <file name="log/filename">
 this creates the named file with this content before the test case is run
 which is useful if the test case needs a file to act on.
 </file>
+
 </client>
 
 <verify>
