@@ -81,6 +81,11 @@ my $pwd;          # current working directory
 
 my %run;	  # running server
 
+# torture test variables
+my $torture;
+my $tortnum;
+my $tortalloc;
+
 chomp($pwd = `pwd`);
 
 # enable memory debugging if curl is compiled with it
@@ -109,6 +114,101 @@ sub serverpid {
     my $PID=0+<PFILE>;
     close(PFILE);
     return $PID;
+}
+
+#######################################################################
+# Memory allocation test and failure torture testing.
+#
+sub torture {
+    # start all test servers (http, https, ftp, ftps)
+    &startservers(("http", "https", "ftp", "ftps"));
+    my $c;
+
+    my @test=('http://%HOSTIP:%HOSTPORT/1',
+              'ftp://%HOSTIP:%FTPPORT/');
+    
+    # loop over the different tests commands
+    for(@test) {
+        my $testcmd = "$CURL $_ >log/torture.stdout 2>log/torture.stderr";
+
+        subVariables(\$testcmd);
+
+        # First get  test server, ignore the output/result
+        system($testcmd);
+
+        $c++;
+
+        if($tortnum && ($tortnum != $c)) {
+            next;
+        }
+
+        print "Torture test $c starting up\n",
+        " CMD: $testcmd\n";
+        
+        # memanalyze -v is our friend, get the number of allocations made
+        my $count;
+        my @out = `$memanalyze -v memdump`;
+        for(@out) {
+            if(/^Allocations: (\d+)/) {
+                $count = $1;
+                last;
+            }
+        }
+        if(!$count) {
+            # hm, no allocations in this fetch, ignore and get next
+            next;
+        }
+        print " $count allocations to excersize\n";
+
+        for ( 1 .. $count ) {
+            my $limit = $_;
+            my $fail;
+
+            if($tortalloc && ($tortalloc != $limit)) {
+                next;
+            }
+            
+            # make the memory allocation function number $limit return failure
+            $ENV{'CURL_MEMLIMIT'} = $limit;
+
+            # remove memdump first to be sure we get a new nice and clean one
+            unlink("memdump");
+
+            my $ret = system($testcmd);
+
+            # verify that it returns a proper error code, doesn't leak memory
+            # and doesn't core dump
+            if($ret & 255) {
+                print " system() returned $ret\n";
+                $fail=1;
+            }
+            else {
+                my @memdata=`$memanalyze $memdump`;
+                my $leak=0;
+                for(@memdata) {
+                    if($_ ne "") {
+                        # well it could be other memory problems as well, but
+                        # we call it leak for short here
+                        $leak=1;
+                    }
+                }
+                if($leak) {
+                    print "** MEMORY FAILURE\n";
+                    print @memdata;
+                    $fail = 1;
+                }
+            }
+            if($fail) {
+                print " Failed on alloc number $limit in test $c.\n",
+                " invoke with -t$c,$limit to repeat this single case.\n";
+                stopservers();
+                exit 1;
+            }
+        }
+        print " torture test $c did GOOD\n";
+
+        # all is well, now test a different kind of URL
+    }
 }
 
 #######################################################################
@@ -972,37 +1072,22 @@ sub singletest {
     return 0;
 }
 
-##############################################################################
-# This function makes sure the right set of server is running for the
-# specified test case. This is a useful design when we run single tests as not
-# all servers need to run then!
+#######################################################################
+# Stop all running test servers
+sub stopservers {
+    print "Shutting down test suite servers:\n" if (!$short);
+    for(keys %run) {
+        printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if(!$short);
+        stopserver($run{$_}); # the pid file is in the hash table
+    }
+}
+
+#######################################################################
+# startservers() starts all the named servers
 #
-# Returns:
-# 100 if this is not a test case
-# 99  if this test case has no servers specified
-# 2   if one of the required servers couldn't be started
-# 1   if this test is skipped due to unfulfilled SSL/stunnel-requirements
-
-sub serverfortest {
-    my ($testnum)=@_;
+sub startservers {
+    my @what = @_;
     my $pid;
-
-    # load the test case file definition
-    if(loadtest("${TESTDIR}/test${testnum}")) {
-        if($verbose) {
-            # this is not a test
-            print "$testnum doesn't look like a test case!\n";
-        }
-        return 100;
-    }
-
-    my @what = getpart("client", "server");
-
-    if(!$what[0]) {
-        warn "Test case $testnum has no server(s) specified!";
-        return 99;
-    }
-
     for(@what) {
         my $what = lc($_);
         $what =~ s/[^a-z]//g;
@@ -1075,6 +1160,40 @@ sub serverfortest {
             warn "we don't support a server for $what";
         }
     }
+    return 0;
+}
+
+##############################################################################
+# This function makes sure the right set of server is running for the
+# specified test case. This is a useful design when we run single tests as not
+# all servers need to run then!
+#
+# Returns:
+# 100 if this is not a test case
+# 99  if this test case has no servers specified
+# 2   if one of the required servers couldn't be started
+# 1   if this test is skipped due to unfulfilled SSL/stunnel-requirements
+
+sub serverfortest {
+    my ($testnum)=@_;
+
+    # load the test case file definition
+    if(loadtest("${TESTDIR}/test${testnum}")) {
+        if($verbose) {
+            # this is not a test
+            print "$testnum doesn't look like a test case!\n";
+        }
+        return 100;
+    }
+
+    my @what = getpart("client", "server");
+
+    if(!$what[0]) {
+        warn "Test case $testnum has no server(s) specified!";
+        return 99;
+    }
+
+    return &startservers(@what);
 }
 
 #######################################################################
@@ -1106,6 +1225,14 @@ do {
         # short output
         $short=1;
     }
+    elsif($ARGV[0] =~ /^-t(.*)/) {
+        # torture
+        $torture=1;
+        my $xtra = $1;
+        if($xtra =~ /(\d+),(\d+)/) {
+            ($tortnum, $tortalloc)= ($1, $2);
+        }
+    }
     elsif($ARGV[0] eq "-a") {
         # continue anyway, even if a test fail
         $anyway=1;
@@ -1129,6 +1256,7 @@ Usage: runtests.pl [options]
   -k       keep stdout and stderr files present after tests
   -l       list all test case names/descriptions
   -s       short output
+  -t       torture
   -v       verbose output
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
 EOHELP
@@ -1199,6 +1327,13 @@ open(CMDLOG, ">$CURLLOG") ||
     print "can't log command lines to $CURLLOG\n";
 
 #######################################################################
+# Torture the memory allocation system and checks
+#
+if($torture) {
+    &torture();
+    exit; # for now, we stop after these tests
+}
+#######################################################################
 # The main test-loop
 #
 
@@ -1240,15 +1375,9 @@ foreach $testnum (split(" ", $TESTCASES)) {
 #
 close(CMDLOG);
 
-#######################################################################
-# Tests done, stop the servers
-#
 
-print "Shutting down test suite servers:\n" if (!$short);
-for(keys %run) {
-    printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if(!$short);
-    stopserver($run{$_}); # the pid file is in the hash table
-}
+# Tests done, stop the servers
+stopservers();
 
 my $all = $total + $skipped;
 
