@@ -1491,7 +1491,6 @@ ConnectionKillOne(struct SessionHandle *data)
   int highscore=-1;
   int connindex=-1;
   int score;
-  CURLcode result;
   struct timeval now;
 
   now = Curl_tvnow();
@@ -1531,7 +1530,7 @@ ConnectionKillOne(struct SessionHandle *data)
   if(connindex >= 0) {
 
     /* the winner gets the honour of being disconnected */
-    result = Curl_disconnect(data->state.connects[connindex]);
+    (void) Curl_disconnect(data->state.connects[connindex]);
 
     /* clean the array entry */
     data->state.connects[connindex] = NULL;
