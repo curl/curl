@@ -1,4 +1,4 @@
-Updated: August 29, 2002 (http://curl.haxx.se/docs/faq.html)
+Updated: September 3, 2002 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -688,12 +688,10 @@ FAQ
 
 6. License Issues
 
-  Curl and libcurl are released under a MIT/X derivate license *or* the MPL,
-  the Mozilla Public License. To get a really good answer to your license
-  conflict questions, you should study the MPL and MIT/X licenses and the
-  license you are about to use and check for clashes yourself. This section is
-  just a brief summary for the cases we get the most questions. (Parts of this
-  section was much enhanced by Bjorn Reese.)
+  Curl and libcurl are released under a MIT/X derivate license. The license is
+  very liberal and should not impose a problem for your project. This section
+  is just a brief summary for the cases we get the most questions. (Parts of
+  this section was much enhanced by Bjorn Reese.)
 
   6.1. I have a GPL program, can I use the libcurl library?
 
