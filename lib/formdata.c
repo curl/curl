@@ -126,6 +126,11 @@ Content-Disposition: form-data; name="FILECONTENT"
 /* The last #include file should be: */
 #include "memdebug.h"
 
+#if defined(HAVE_BASENAME) && defined(NEED_BASENAME_PROTO)
+/* This system has a basename() but no prototype for it! */
+char *basename(char *path);
+#endif
+
 /* What kind of Content-Type to use on un-specified files with unrecognized
    extensions. */
 #define HTTPPOST_CONTENTTYPE_DEFAULT "application/octet-stream"

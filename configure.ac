@@ -1234,6 +1234,16 @@ if test "$ac_cv_func_sigsetjmp" != "yes"; then
                )
 fi
 
+AC_CHECK_DECL(basename, ,
+              AC_DEFINE(NEED_BASENAME_PROTO, 1, [If you lack a fine basename() prototype]),
+#ifdef HAVE_STRING_H
+#include <string.h>
+#endif
+#ifdef HAVE_LIBGEN_H
+#include <libgen.h>
+#endif
+)
+
 dnl poll() might be badly emulated, as in Mac OS X 10.3 (and other BSDs?) and
 dnl to find out we make an extra check here!
 if test "$ac_cv_func_poll" = "yes"; then
