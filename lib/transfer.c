@@ -718,6 +718,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               infof (data, "Follow to new URL: %s\n", conn->newurl);
               k->keepon &= ~KEEP_READ;
               FD_ZERO(&k->rkeepfd);
+              *done = TRUE;
               return CURLE_OK;
             }
             else if (conn->resume_from &&
@@ -742,6 +743,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   if(k->timeofdoc < data->set.timevalue) {
                     infof(data,
                           "The requested document is not new enough\n");
+                    *done = TRUE;
                     return CURLE_OK;
                   }
                   break;
@@ -749,6 +751,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   if(k->timeofdoc > data->set.timevalue) {
                     infof(data,
                           "The requested document is not old enough\n");
+                    *done = TRUE;
                     return CURLE_OK;
                   }
                   break;
