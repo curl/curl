@@ -719,7 +719,7 @@ Curl_SSLConnect(struct connectdata *conn)
 #ifdef USE_SSLEAY
   struct SessionHandle *data = conn->data;
   int err;
-  int what=0;
+  int what;
   char * str;
   SSL_METHOD *req_method;
   SSL_SESSION *ssl_sessionid=NULL;
@@ -822,24 +822,6 @@ Curl_SSLConnect(struct connectdata *conn)
     struct timeval interval;
     long timeout_ms;
 
-    err = SSL_connect(conn->ssl.handle);
-
-    FD_ZERO(&writefd);
-    FD_ZERO(&readfd);
-
-    if(1 != err) {
-      /* anything besides 1 returned fom SSL_connect() is not OK */
-
-      what = SSL_get_error(conn->ssl.handle, err);
-
-      if(SSL_ERROR_WANT_READ == what)
-        FD_SET(conn->firstsocket, &readfd);
-      else if(SSL_ERROR_WANT_WRITE == what)
-        FD_SET(conn->firstsocket, &writefd);
-      else
-        break; /* untreated error */
-    }
-
     /* Find out if any timeout is set. If not, use 300 seconds.
        Otherwise, figure out the most strict timeout of the two possible one
        and then how much time that has elapsed to know how much time we
@@ -874,6 +856,40 @@ Curl_SSLConnect(struct connectdata *conn)
       /* no particular time-out has been set */
       timeout_ms=300000; /* milliseconds, default to five minutes */
 
+
+    FD_ZERO(&writefd);
+    FD_ZERO(&readfd);
+
+    err = SSL_connect(conn->ssl.handle);
+
+    /* 1  is fine
+       0  is "not successful but was shut down controlled"
+       <0 is "handshake was not successful, because a fatal error occurred" */
+    if(1 != err) {
+      int detail = SSL_get_error(conn->ssl.handle, err);
+
+      if(SSL_ERROR_WANT_READ == detail)
+        FD_SET(conn->firstsocket, &readfd);
+      else if(SSL_ERROR_WANT_WRITE == detail)
+        FD_SET(conn->firstsocket, &writefd);
+      else {
+        /* untreated error */
+        char error_buffer[120]; /* OpenSSL documents that this must be at least
+                                   120 bytes long. */
+        /* detail is already set to the SSL error above */
+        failf(data, "SSL: %s", ERR_error_string(detail, error_buffer));
+
+        /* OpenSSL 0.9.6 and later has a function named
+           ERRO_error_string_n() that takes the size of the buffer as a third
+           argument, and we should possibly switch to using that one in the
+           future. */
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+    }
+    else
+      /* we have been connected fine, get out of the connect loop */
+      break;
+
     interval.tv_sec = timeout_ms/1000;
     timeout_ms -= interval.tv_sec*1000;
 
@@ -891,18 +907,6 @@ Curl_SSLConnect(struct connectdata *conn)
     else
       break; /* get out of loop */
   } while(1);
-
-  /* 1  is fine
-     0  is "not successful but was shut down controlled"
-     <0 is "handshake was not successful, because a fatal error occurred" */
-  if (err <= 0) {
-    char error_buffer[120]; /* OpenSSL documents that this must be at least
-                               120 bytes long. */
-
-    /* what is already set to the SSL error before */
-    failf(data, "SSL: %s", ERR_error_string(what, error_buffer));
-    return CURLE_SSL_CONNECT_ERROR;
-  }
 
   /* Informational message */
   infof (data, "SSL connection using %s\n",
