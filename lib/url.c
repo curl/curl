@@ -1292,7 +1292,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   /* and we setup a few fields in case we end up actually using this struct */
   conn->data = data;           /* remember our daddy */
-  conn->upload_bufsize = UPLOAD_BUFSIZE; /* default upload buffer size */
   conn->firstsocket = -1;     /* no file descriptor */
   conn->secondarysocket = -1; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
