@@ -257,17 +257,13 @@ int Curl_pgrsUpdate(struct UrlData *data)
   }
 
       /* Figure out the estimated time of arrival for the upload */
-  if(data->progress.flags & PGRS_UL_SIZE_KNOWN) {
-    if(!data->progress.ulspeed)
-      data->progress.ulspeed=1;
+  if((data->progress.flags & PGRS_UL_SIZE_KNOWN) && data->progress.ulspeed){
     ulestimate = data->progress.size_ul / data->progress.ulspeed;
     ulpercen = (data->progress.uploaded / data->progress.size_ul)*100;
   }
 
   /* ... and the download */
-  if(data->progress.flags & PGRS_DL_SIZE_KNOWN) {
-    if(!data->progress.dlspeed)
-      data->progress.dlspeed=1;
+  if((data->progress.flags & PGRS_DL_SIZE_KNOWN) && data->progress.dlspeed) {
     dlestimate = data->progress.size_dl / data->progress.dlspeed;
     dlpercen = (data->progress.downloaded / data->progress.size_dl)*100;
   }
