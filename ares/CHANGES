@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* July 3
+- Günter Knauf made c-ares build and run on Novell Netware.
+
 * July 1
 - Gisle Vanem provided Makefile.dj to build with djgpp, added a few more djgpp
   fixes and made ares not use 'errno' to provide further info on Windows.
