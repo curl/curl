@@ -160,17 +160,6 @@ typedef unsigned char bool;
 #define WIN32_LEAN_AND_MEAN  /* Prevent including <winsock*.h> in <windows.h> */
 #endif
 
-#if (defined(ENABLE_IPV6) || defined(CURLDEBUG)) && defined(_MSC_VER) && \
-    (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x0500)
-/*
- * Needed to pull in the real getaddrinfo() and not the inline version
- * in <wspiAPI.H> which doesn't support IPv6 (IPv4 only). <wspiAPI.H> is
- * included from <ws2tcpip.h> for <= 0x0500 SDKs.
- */
-#undef  _WIN32_WINNT
-#define _WIN32_WINNT 0x0501
-#endif
-
 #if HAVE_WINSOCK2_H
 #include <winsock2.h>        /* required by telnet.c */
 #endif
