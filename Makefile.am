@@ -4,7 +4,7 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST = CHANGES COPYING maketgz UPGRADE reconf Makefile.dist	\
+EXTRA_DIST = CHANGES COPYING maketgz SSLCERTS reconf Makefile.dist	\
 curl-config.in build_vms.com curl-mode.el
 
 bin_SCRIPTS = curl-config
