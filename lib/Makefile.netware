@@ -74,9 +74,9 @@ CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
 
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
-LDFLAGS	= -nostdlib $(PRELUDE) $(OBJDIR)/*.o -o $(TARGET).nlm -commandfile
+LDFLAGS	= -nostdlib $(PRELUDE) $(OBJL) -o $(TARGET).nlm -commandfile
 AR	= mwldnlm
-ARFLAGS	= -type library -w nocmdline $(OBJDIR)/*.o -o
+ARFLAGS	= -type library -w nocmdline $(OBJS) -o
 CFLAGS	+= -msgstyle gcc -gccinc -inline off -opt nointrinsics -proc 586
 CFLAGS	+= -relax_pointers
 #CFLAGS	+= -w on
@@ -114,7 +114,7 @@ INCLUDES = -I. -I../include
 
 ifdef WITH_ARES
 	INCLUDES += -I../ares
-	LFLAGS += -L../ares -lcares
+	LIBCARES = ../ares/libcares.lib
 endif
 ifdef ZLIB_PATH
 	INCLUDES += -I$(ZLIB_PATH)
@@ -123,7 +123,7 @@ ifdef ZLIB_PATH
 endif
 ifdef SSL
 	INCLUDES += -I$(OPENSSL_PATH)/outinc_nw_libc -I$(OPENSSL_PATH)/outinc_nw_libc/openssl
-	LFLAGS += -L$(OPENSSL_PATH)/out_nw_libc -crypto -lssl
+	LIBSSL = $(OPENSSL_PATH)/out_nw_libc/crypto.lib $(OPENSSL_PATH)/out_nw_libc/ssl.lib
 endif
 
 ifeq ($(LIBARCH),LIBC)
@@ -158,7 +158,7 @@ endif
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES)))
+OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(strip $(CSOURCES))) $(LIBCARES) $(LIBSSL)
 
 OBJL	= $(OBJS) $(OBJDIR)/nwlib.o
 
@@ -205,10 +205,10 @@ $(TARGET).lib: $(OBJS)
 	@-$(RM) $@
 	@$(AR) $(ARFLAGS) $@ $^
 
-$(TARGET).nlm: $(OBJL) $(OBJDIR)/$(TARGET).def $(XDCDATA)
+$(TARGET).nlm: $(OBJDIR)/$(TARGET).def $(OBJL) $(XDCDATA)
 	@echo Linking $@
 	@-$(RM) $@
-	@$(LD) $(LDFLAGS) $(OBJDIR)/$(TARGET).def
+	@$(LD) $(LDFLAGS) $<
 
 $(OBJDIR)/%.xdc: Makefile.netware
 	@echo Creating $@
@@ -274,6 +274,12 @@ ifdef IMPORTS
 	@echo $(DL)import $(IMPORTS)$(DL) >> $@
 endif
 ifeq ($(LD),nlmconv)
+ifdef WITH_ARES
+	@echo $(DL)input $(LIBCARES)$(DL) >> $@
+endif
+ifdef SSL
+	@echo $(DL)input $(LIBSSL)$(DL) >> $@
+endif
 	@echo $(DL)input $(OBJL)$(DL) >> $@
 	@echo $(DL)input $(PRELUDE)$(DL) >> $@
 	@echo $(DL)output $(TARGET).nlm$(DL) >> $@
@@ -375,5 +381,8 @@ getdate.c:
 	@$(CP) getdate.c.cvs $@
 
 url.c: ca-bundle.h
+
+$(LIBCARES):
+	$(MAKE) -C ../ares -f Makefile.netware lib
 
 
