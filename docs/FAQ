@@ -1,4 +1,4 @@
-Updated: January 22, 2002 (http://curl.haxx.se/docs/faq.shtml)
+Updated: March 11, 2002 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -37,6 +37,7 @@ FAQ
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
   3.11 How do I POST with a different Content-Type?
   3.12 Why do FTP specific features over HTTP proxy fail?
+  3.13 Why does my single/double quotes fail?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -382,6 +383,30 @@ FAQ
   the given HTTP proxy. Proxy tunneling is enabled with a special option (-p)
   and is generally not available as proxy admins usually disable tunneling to
   other ports than 443 (which is used for HTTPS access through proxies).
+
+  3.13 Why does my single/double quotes fail?
+
+  To specify a command line option that includes spaces, you might need to
+  put the entire option within quotes. Like in:
+
+   curl -d " with spaces " url.com
+  
+  or perhaps
+
+   curl -d ' with spaces ' url.com
+
+  Exactly what kind of quotes and how to do this is entirely up to the shell
+  or command line interepreter that you are using. For most unix shells, you
+  can more or less pick either single (') or double (") quotes. For
+  Windows/DOS prompts I believe you're forced to use double (") quotes.
+
+  Please study the documentaion for your particular environment. Examples in
+  the curl docs will use a mix of both these ones as shown above. You must
+  adjust them to work in your environment.
+
+  Remember that curl works and runs on more operating systems than most
+  individuals have ever tried.
+
 
 4. Running Problems
 
