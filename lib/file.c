@@ -340,12 +340,12 @@ CURLcode Curl_file(struct connectdata *conn)
     return result;
   }
 
-  /* Added by Dolbneff A.V & Spiridonoff A.V */
   if (conn->resume_from <= expected_size)
     expected_size -= conn->resume_from;
-  else
-    /* Is this error code suitable in such situation? */
-    return CURLE_FTP_BAD_DOWNLOAD_RESUME;
+  else {
+    failf(data, "failed to resume file:// transfer");
+    return CURLE_BAD_DOWNLOAD_RESUME;
+  }
 
   if (fstated && (expected_size == 0))
     return CURLE_OK;
