@@ -7,6 +7,8 @@
                                   Changelog
 
 
+Version 7.10.8 (1 November 2003)
+
 Daniel (31 October)
 - Assume that MDTM on an FTP server returns the timestamp using the UTC time
   zone. This changes the time CURLINFO_FILETIME returns for a given file over
@@ -14,11 +16,11 @@ Daniel (31 October)
   the functionality more similar to how the HTTP one is already working.
 
 - Command line options that take numerical parameters (such as -y, -Y, -C etc)
-  now reports error and exits if the parameter isn't truly a number greater
-  than or equal to zero. This helps the user to notice bad usage
-  earlier. Before, when the user forgot or missed to add a numerical parameter
-  to an option, the command line parser would simply "eat" the following
-  option and it would cause great confusion.
+  now report error and exit if the parameter isn't truly a number greater than
+  or equal to zero. This helps users to notice bad usage earlier. Before, when
+  a user forgot or missed to add a numerical parameter to an option, the
+  command line parser would simply "eat" the following option and it would
+  cause great confusion.
 
 Daniel (30 October)
 - David Hull made libcurl deal with NOBODY and HEADER for file:// the same way
