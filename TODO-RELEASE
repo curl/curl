@@ -2,8 +2,6 @@ Fix before releasing 7.11.0
 ===========================
 (Issues not sorted in any particular order)
 
-3. Apply Peter Sylvester's multi patches (work in progress)
-
 8. Resolve the occational test case 91 failure. This still has no
    resolution. (David Byron has done lots of research, no resolution yet)
 
