@@ -97,7 +97,7 @@ int ares_inet_pton(int af, const char *src, void *dst);
 #if defined(HAVE_INET_NET_PTON) && defined(HAVE_INET_NET_PTON_IPV6)
 #define ares_inet_net_pton(w,x,y,z) inet_net_pton(w,x,y,z)
 #else
-int ares_inet_net_pton(int af, const char *src, void *dst, unsigned int size);
+int ares_inet_net_pton(int af, const char *src, void *dst, size_t size);
 #endif
 
 #endif /* ARES_SETUP_H */
