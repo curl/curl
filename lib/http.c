@@ -54,7 +54,6 @@
 #endif
 #endif
 
-#include <sys/resource.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
