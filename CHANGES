@@ -6,6 +6,16 @@
 
                                History of Changes
 
+Version 7.9.3
+
+Daniel (23 January 2002)
+- Andrés García found a persistancy problem when doing HTTP HEAD, that made
+  curl "hang" until the connection was closed by the server. This problem has
+  been introduced in 7.9.3 due to internal rewrites, this was not present in
+  7.9.2.
+
+Version 7.9.3-pre4
+
 Daniel (19 January 2002)
 - Antonio filed bug report #505514 and provided a fix! When doing multipart
   formposts, libcurl would include an error text in the actual post if a
@@ -40,8 +50,8 @@ Daniel (17 January 2002)
   FTP). Sterling fixed it.
 
 Daniel (16 January 2002)
-- Georg Horn pointed out a timed out transfer without error text. I found it
-  and corrected it.
+- Georg Horn could make a transfer time-out without error text. I found it and
+  corrected it.
 
 - SSL writes didn't work, they return an uninitialized value that caused
   havoc all over. Georg Horn experienced this.
