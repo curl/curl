@@ -616,7 +616,6 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 {
   CURLcode rc=CURLE_OK;
   struct SessionHandle *data = conn->data;
-  struct timeval now = Curl_tvnow();
   long timeout = CURL_TIMEOUT_RESOLVE; /* default name resolve timeout */
 
   /* now, see if there's a connect timeout or a regular timeout to
@@ -632,6 +631,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     fd_set read_fds, write_fds;
     struct timeval *tvp, tv, store;
     int count;
+    struct timeval now = Curl_tvnow();
 
     store.tv_sec = (int)timeout;
     store.tv_usec = 0;
