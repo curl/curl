@@ -1105,7 +1105,6 @@ CURLcode ftp_use_port(struct connectdata *conn)
 
   enum ftpcommand { EPRT, LPRT, PORT, DONE } fcmd;
   const char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
-  char **modep;
   int rc;
   int error;
 
