@@ -1764,6 +1764,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
 
+  /* Set the start time temporary to this creation time to allow easier
+     timeout checks before the transfer has started for real. The start time
+     is later set "for real" using Curl_pgrsStartNow(). */
+  conn->data->progress.start = conn->created; 
 
   /***********************************************************
    * We need to allocate memory to store the path in. We get the size of the
