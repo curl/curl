@@ -38,23 +38,17 @@
 #include <ctype.h>
 #include <string.h>
 
-#include <curl/curl.h> /* for the curl_off_t type */
-
 #include <curl/mprintf.h>
 
 #ifndef SIZEOF_LONG_DOUBLE
 #define SIZEOF_LONG_DOUBLE 0
 #endif
 
-#ifdef HAVE_LONGLONG
+#ifdef DPRINTF_DEBUG
+#define HAVE_LONGLONG
 #define LONG_LONG long long
 #define ENABLE_64BIT
-#else
-#ifdef _MSC_VER
-#define LONG_LONG __int64
-#define ENABLE_64BIT
 #endif
-#endif /* HAVE_LONGLONG */
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG
@@ -391,14 +385,13 @@ static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list a
 	  if (sizeof(size_t) > sizeof(unsigned int))
 	    flags |= FLAGS_LONG;
 	  break;
-
-	case 'O':
+        case 'O':
 #if SIZEOF_CURL_OFF_T > 4
           flags |= FLAGS_LONGLONG;
 #else
           flags |= FLAGS_LONG;
 #endif
-	  break;
+          break;
 	case '0':
 	  if (!(flags & FLAGS_LEFT))
 	    flags |= FLAGS_PAD_NIL;
@@ -1165,13 +1158,15 @@ int main()
   char buffer[129];
   char *ptr;
 #ifdef ENABLE_64BIT
-  LONG_LONG hullo;
-  dprintf("%3$12s %1$s %2$qd %4$d\n", "daniel", hullo, "stenberg", 65);
+  long long one=99;
+  long long two=100;
+  long long test = 0x1000000000LL;
+  curl_mprintf("%lld %lld %lld\n", one, two, test);
 #endif
 
-  mprintf("%3d %5d\n", 10, 1998);
+  curl_mprintf("%3d %5d\n", 10, 1998);
   
-  ptr=maprintf("test this then baby %s%s%s%s%s%s %d %d %d loser baby get a hit in yer face now!", "", "pretty long string pretty long string pretty long string pretty long string pretty long string", "/", "/", "/", "pretty long string", 1998, 1999, 2001);
+  ptr=curl_maprintf("test this then baby %s%s%s%s%s%s %d %d %d loser baby get a hit in yer face now!", "", "pretty long string pretty long string pretty long string pretty long string pretty long string", "/", "/", "/", "pretty long string", 1998, 1999, 2001);
 
   puts(ptr);
 
@@ -1180,15 +1175,15 @@ int main()
   free(ptr);
 
 #if 1
-  mprintf(buffer, "%s %s %d", "daniel", "stenberg", 19988);
+  curl_mprintf(buffer, "%s %s %d", "daniel", "stenberg", 19988);
   puts(buffer);
 
-  mfprintf(stderr, "%s %#08x\n", "dummy", 65);
+  curl_mfprintf(stderr, "%s %#08x\n", "dummy", 65);
 
   printf("%s %#08x\n", "dummy", 65);
   {
     double tryout = 3.14156592;
-    mprintf(buffer, "%.2g %G %f %e %E", tryout, tryout, tryout, tryout, tryout);
+    curl_mprintf(buffer, "%.2g %G %f %e %E", tryout, tryout, tryout, tryout, tryout);
     puts(buffer);
     printf("%.2g %G %f %e %E\n", tryout, tryout, tryout, tryout, tryout);
   }
