@@ -32,8 +32,15 @@ $! 29-JAN-2004, MSK, moved logical defines into defines.com
 $!  6-FEB-2004, MSK, put in various SSL support bits
 $!  9-MAR-2004, MSK, the config-vms.h* files are now copied to the lib and
 $!                   src directories as config.h.
+$! 15-MAR-2004, MSK, All of the curlmsg*.* files have also been moved to 
+$!                   this build directory.  They will be copied to the src 
+$!                   directory before build.  The .msg file will be compiled 
+$!                   to get the .obj for messages, but the .h and .sdl files 
+$!                   are not automatically created since they partly rely on 
+$!                   the freeware SDL tool.
 $!
 $ on control_y then goto Common_Exit
+$ ctrl_y  = 1556 
 $ origdir = f$environment("DEFAULT")
 $ proc    = f$environment("PROCEDURE")
 $ thisdir = f$parse( proc,,,"DEVICE") + f$parse( proc,,,"DIRECTORY")
@@ -48,10 +55,15 @@ $ vo_l = "write sys$output"
 $ vo_o = "!"
 $!
 $ defines = thisdir + "defines.com"
-$ if f$search( defines) .eqs. "" 
-$ then
-$    write sys$output "%CURL-F-DEFFNF, cannot find defines.com procedure"
-$    exit %X18290 ! FNF
+$ if f$trnlnm( "curl_defines_done") .eqs. "" 
+$ then 
+$    if f$search( defines) .eqs. "" 
+$    then
+$       write sys$output "%CURL-F-DEFFNF, cannot find defines.com procedure"
+$       exit %X18290 ! FNF
+$    else
+$       @'defines'
+$    endif
 $ endif
 $ set def 'thisdir'
 $ cc_qual = "/define=HAVE_CONFIG_H=1/OBJ=OBJDIR:"
@@ -83,41 +95,30 @@ $!
 $ if ( openssl .eq. 1) .or. ( hpssl .eq. 1)
 $ then
 $    'vo_c' "%CURL-I-BLDSSL, building with SSL support"
-$    source_h = "CONFIG-VMS.H_WITH_SSL"
+$    config_h = "CONFIG-VMS.H_WITH_SSL"
 $ else
 $    'vo_c' "%CURL-I-BLDNOSSL, building without SSL support"
-$    source_h = "CONFIG-VMS.H_WITHOUT_SSL"
+$    config_h = "CONFIG-VMS.H_WITHOUT_SSL"
 $ endif
 $!
 $! Only do the copy if the source and destination files are different.
-$! Put this block into Set NoOn mode so that if the diff command triggers
-$! an error while error message reporting is turned off, then it won't 
-$! just exit the command procedure mysteriously.
 $!
-$ set noon
-$ set message/nof/noi/nos/not
-$ diff/out=nla0: 'source_h' [--.SRC]CONFIG.H
-$ status = $status
-$ set message/f/i/s/t
-$ if ( status .ne. %X006C8009) ! if status is not "no diff"
-$ then
-$    copy 'source_h' [--.SRC]CONFIG.H
-$    purge/nolog [--.SRC]CONFIG.H
-$ endif
-$ set message/nof/noi/nos/not
-$ diff/out=nla0: 'source_h' [--.LIB]CONFIG.H
-$ status = $status
-$ set message/f/i/s/t
-$ if ( status .ne. %X006C8009) ! if status is not "no diff"
-$ then
-$    copy 'source_h' [--.LIB]CONFIG.H
-$    purge/nolog [--.LIB]CONFIG.H
-$ endif
+$ call MoveIfDiff 'config_h' "[--.LIB]CONFIG.H"
+$ call MoveIfDiff 'config_h' "[--.SRC]CONFIG.H"
+$! call MoveIfDiff "SETUP.H" "[--.LIB]"
+$! call MoveIfDiff "SETUP.H" "[--.SRC]"
+$ call MoveIfDiff "CURLMSG.H" "[--.SRC]"
+$ call MoveIfDiff "CURLMSG.MSG" "[--.SRC]"
+$ call MoveIfDiff "CURLMSG.SDL" "[--.SRC]"
+$ call MoveIfDiff "CURLMSG_VMS.H" "[--.SRC]"
 $ on control_y then goto Common_Exit
 $!
 $ call build "[--.lib]" "*.c" "objdir:curllib.olb"
+$ if ($status .eq. ctrl_y) then goto Common_Exit
 $ call build "[--.src]" "*.c" "objdir:curlsrc.olb"
+$ if ($status .eq. ctrl_y) then goto Common_Exit
 $ call build "[--.src]" "*.msg" "objdir:curlsrc.olb"
+$ if ($status .eq. ctrl_y) then goto Common_Exit
 $ if ( openssl .eq. 1) .and. ( hpssl .eq. 0)
 $ then
 $    'vo_l' "%CURL-I-LINK_OSSL, linking with OpenSSL"
@@ -148,7 +149,7 @@ $! the directory passed in via P1 and put it in the object library named
 $! via P3
 $!
 $build:   subroutine
-$ on control_y then exit 2
+$ on control_y then return ctrl_y ! SS$_CONTROLY
 $ set noon
 $   set default 'p1'
 $   search = p2
@@ -168,7 +169,7 @@ $      then
 $         if (f$cvtime(f$file(file,"rdt")) .gts. f$cvtime(f$file(obj,"rdt")))
 $         then
 $            call compile 'file'
-$            if .not. $status then exit $status
+$            if .not. $status then return $status
 $            lib/object 'p3' 'objfile'
 $         else
 $            'vo_o' "%CURL-I-OBJUTD, ", objfile, " is up to date"
@@ -176,12 +177,13 @@ $         endif
 $      else
 $         'vo_o' "%CURL-I-OBJDNE, ", file, " does not exist"
 $         call compile 'file'
-$         if .not. $status then exit $status
+$         if .not. $status then return $status
 $         lib/object 'p3' 'objfile'
 $      endif
 $   goto Loop
 $EndLoop:
 $   !purge
+$   on control_y then return ctrl_y ! SS$_CONTROLY
 $   set def 'origdir'
 $   endsubroutine   ! Build
 $!
@@ -189,7 +191,7 @@ $! Based on the file TYPE, do the right compile command.
 $! Only C and MSG supported.
 $!
 $compile:   subroutine
-$   on control_y then exit 2
+$   on control_y then return ctrl_y ! SS$_CONTROLY
 $   set noon
 $   file = p1
 $   qual = p2+p3+p4+p5+p6+p7+p8
@@ -199,7 +201,26 @@ $   cmd_msg = "MESSAGE "+msg_qual
 $   x = cmd_'typ'
 $   'vo_c' x," ",file
 $   'x' 'file'
+$   on control_y then return ctrl_y ! SS$_CONTROLY
 $   ENDSUBROUTINE   ! Compile
+$!
+$! Do a diff of the file specified in P1 with that in P2.  If different
+$! copy P1 to P2.  This also covers if P2 doesn't exist, but not if P2
+$! is an invalid filespec.
+$!
+$MoveIfDiff:  subroutine
+$   set NoOn
+$   set message/nof/noi/nos/not
+$   diff/out=nla0: 'p1' 'p2'
+$   status = $status
+$   set message/f/i/s/t
+$   if ( status .ne. %X006C8009) ! if status is not "no diff"
+$   then
+$      copy 'p1' 'p2'
+$      purge/nolog 'p2'
+$   endif
+$   on control_y then return ctrl_y ! SS$_CONTROLY
+$   ENDSUBROUTINE   ! MoveIfDiff
 $!
 $Common_Exit:
 $   set default 'origdir'
