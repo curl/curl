@@ -1,0 +1,89 @@
+#!/usr/bin/env perl
+
+$version = $ARGV[0];
+
+if($version eq "") {
+    print "Enter version number!\n";
+    exit;
+}
+
+if(!-f "ares.h") {
+    print "run this script in the ares source root dir\n";
+    exit;
+}
+
+@files=`find . -name FILES`;
+
+my @entries;
+
+sub dirpart {
+    my ($file)=@_;
+    my @p=split("/", $file);
+    $p[$#p]=""; # blank the last one
+    my $dir=join("/", @p);
+
+    $dir =~ s/^\.\///; # cut off ./ beginnings
+
+    $dir =~ s/\/$//;  # off / trailers
+
+    if(!$dir) {
+        $dir = ".";
+    }
+
+    return $dir;
+}
+
+sub add {
+    my ($file)=@_;
+
+    my $dir=dirpart($file);
+
+    open(FILE, "<$file");
+    while(<FILE>) {
+        if($_ =~ /^ *\#/) {
+            next;
+        }
+        chomp;
+        push @entries, "$dir/$_";
+    }
+    close(FILE);
+}
+
+for(@files) {
+    chomp;
+    add($_);
+}
+
+sub mkalldir {
+    my ($dir) = @_;
+
+    my @parts = split("/", $dir);
+
+    #print "IN: $dir\n";
+
+    my $sub="";
+    for(@parts) {
+        #print "PART: $_\n";
+
+        $sub .= "$_";
+        if($_ eq "") {
+            next;
+        }
+        mkdir($sub, 0777);
+        #print "make $sub\n";
+        $sub .= "/";
+    }
+    
+}
+
+for(@entries) {
+    my $dir = dirpart("arescurl-$version/$_");
+ #   print "Create $dir\n";
+    mkalldir($dir);
+ #   print "Copy $_ to $dir\n";
+    `cp -p $_ $dir`;
+}
+
+`tar -cf arescurl-$version.tar arescurl-$version`;
+`gzip -9 arescurl-$version.tar`;
+`rm -rf arescurl-$version`;
