@@ -128,11 +128,8 @@ Content-Disposition: form-data; name="FILECONTENT"
 #include "memdebug.h"
 #endif
 
-/* Length of the random boundary string. The risk of this being used
-   in binary data is very close to zero, 64^32 makes
-   6277101735386680763835789423207666416102355444464034512896
-   combinations... */
-#define BOUNDARY_LENGTH 32
+/* Length of the random boundary string. */
+#define BOUNDARY_LENGTH 40
 
 /* What kind of Content-Type to use on un-specified files with unrecognized
    extensions. */
@@ -1049,22 +1046,23 @@ char *Curl_FormBoundary(void)
 			      the same form won't be identical */
   int i;
 
-  static char table62[]=
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  static char table16[]="abcdef0123456789";
 
-  retstring = (char *)malloc(BOUNDARY_LENGTH);
+  retstring = (char *)malloc(BOUNDARY_LENGTH+1);
 
   if(!retstring)
     return NULL; /* failed */
 
   srand(time(NULL)+randomizer++); /* seed */
 
-  strcpy(retstring, "curl"); /* bonus commercials 8*) */
+  strcpy(retstring, "----------------------------");
 
-  for(i=4; i<(BOUNDARY_LENGTH-1); i++) {
-    retstring[i] = table62[rand()%62];
-  }
-  retstring[BOUNDARY_LENGTH-1]=0; /* zero terminate */
+  for(i=strlen(retstring); i<BOUNDARY_LENGTH; i++)
+    retstring[i] = table16[rand()%16];
+
+  /* 28 dashes and 12 hexadecimal digits makes 12^16 (184884258895036416)
+     combinations */
+  retstring[BOUNDARY_LENGTH]=0; /* zero terminate */
 
   return retstring;
 }
