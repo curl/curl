@@ -864,7 +864,7 @@ static int dprintf_formatf(
 	    p->flags &= (~FLAGS_ALT);
 	  }
 	  else {
-	    str = "";
+	    str = (char *)"";
 	    len = 0;
 	  }
 	}
