@@ -107,7 +107,7 @@ int FormParse(char *input,
   char minor[128];
   long flags = 0;
   char *contp;
-  char *type = NULL;
+  const char *type = NULL;
   char *prevtype = NULL;
   char *sep;
   char *sep2;
@@ -165,7 +165,7 @@ int FormParse(char *input,
 	      return 2; /* illegal content-type syntax! */
 	    }
 	    /* now point beyond the content-type specifier */
-	    sep = type + strlen(major)+strlen(minor)+1;
+	    sep = (char *)type + strlen(major)+strlen(minor)+1;
 
 	    /* find the following comma */
 	    sep=strchr(sep, FORM_FILE_SEPARATOR);
@@ -186,10 +186,10 @@ int FormParse(char *input,
 	   * extensions and pick the first we match!
 	   */
 	  struct ContentType {
-	    char *extension;
-	    char *type;
+	    const char *extension;
+	    const char *type;
 	  };
-	  static struct ContentType ctts[]={
+          static struct ContentType ctts[]={
 	    {".gif",  "image/gif"},
 	    {".jpg",  "image/jpeg"},
 	    {".jpeg", "image/jpeg"},
@@ -229,7 +229,7 @@ int FormParse(char *input,
 	    GetStr(&post->contents, contp); /* get the contents */
 	    post->flags = flags;
 	    if(type) {
-	      GetStr(&post->contenttype, type); /* get type */
+	      GetStr(&post->contenttype, (char *)type); /* get type */
 	      prevtype=post->contenttype; /* point to the allocated string! */
 	    }
 	    /* make the previous point to this */
@@ -252,8 +252,8 @@ int FormParse(char *input,
 	     GetStr(&subpost->contents, contp); /* get the contents */
 	     subpost->flags = flags;
 	     if(type) {
-	       GetStr(&subpost->contenttype, type); /* get type */
-	       prevtype=subpost->contenttype; /* point to the allocated string! */
+	       GetStr(&subpost->contenttype, (char *)type); /* get type */
+	       prevtype=subpost->contenttype; /* point to allocated string! */
 	     }
 	     /* now, point our 'more' to the original 'more' */
 	     subpost->more = post->more;
@@ -308,8 +308,8 @@ int curl_formparse(char *input,
 }
 
 static int AddFormData(struct FormData **formp,
-			void *line,
-			long length)
+                       const void *line,
+                       long length)
 {
   struct FormData *newform = (struct FormData *)
     malloc(sizeof(struct FormData));
@@ -336,7 +336,7 @@ static int AddFormData(struct FormData **formp,
 
 
 static int AddFormDataf(struct FormData **formp,
-			 char *fmt, ...)
+                        const char *fmt, ...)
 {
   char s[4096];
   va_list ap;
