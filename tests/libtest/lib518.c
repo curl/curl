@@ -40,8 +40,11 @@
 
 #if defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT)
 
+static int fd[NUM_OPEN];
+
 static int rlimit(void)
 {
+  int i;
   struct rlimit rl;
 
   fprintf(stderr, "NUM_OPEN: %d\n", NUM_OPEN);
@@ -57,7 +60,7 @@ static int rlimit(void)
   if (rl.rlim_max < NUM_NEEDED) {
     fprintf(stderr, "warning: RLIMIT_NOFILE hard limit %d < %d\n",
             (int)rl.rlim_max, NUM_NEEDED);
-    return -1;
+    return -2;
   }
 
   /* increase soft limit if needed */
@@ -65,16 +68,33 @@ static int rlimit(void)
     rl.rlim_cur = NUM_NEEDED;
     if (setrlimit(RLIMIT_NOFILE, &rl) == -1) {
       fprintf(stderr, "warning: setrlimit: failed to set RLIMIT_NOFILE\n");
-      return -1;
+      return -3;
     }
   }
+
+  /* open a dummy descriptor */
+  fd[0] = open(DEV_NULL, O_RDONLY);
+  if (fd[0] == -1) {
+    fprintf(stderr, "open: failed to open %s\n", DEV_NULL);
+    return -4;
+  }
+
+  /* create a bunch of file descriptors */
+  for (i = 1; i < NUM_OPEN; i++) {
+    fd[i] = dup(fd[0]);
+    if (fd[i] == -1) {
+      fprintf(stderr, "dup: attempt #%i failed\n", i);
+      for (i--; i >= 0; i--)
+        close(fd[i]);
+      return -5;
+    }
+  }
+
   return 0;
 }
 
 int test(char *URL)
 {
-  int fd[NUM_OPEN];
-  int i;
   CURLcode res;
   CURL *curl;
 
@@ -91,32 +111,13 @@ int test(char *URL)
     /* failure */
     return 100;
 
-  /* open a dummy descriptor */
-  fd[0] = open(DEV_NULL, O_RDONLY);
-  if (fd[0] == -1) {
-    fprintf(stderr, "open: failed to open %s\n", DEV_NULL);
-    return CURLE_FAILED_INIT;
-  }
-
-  /* create a bunch of file descriptors */
-  for (i = 1; i < NUM_OPEN; i++) {
-    fd[i] = dup(fd[0]);
-    if (fd[i] == -1) {
-      fprintf(stderr, "dup: attempt #%i failed\n", i);
-      for (i--; i >= 0; i--)
-        close(fd[i]);
-      return CURLE_FAILED_INIT;
-    }
-  }
-
   curl = curl_easy_init();
   curl_easy_setopt(curl, CURLOPT_URL, URL);
   curl_easy_setopt(curl, CURLOPT_HEADER, TRUE);
   res = curl_easy_perform(curl);
   curl_easy_cleanup(curl);
 
-  for (i = 0; i < NUM_OPEN; i++)
-    close(fd[i]);
+  /* we never close the file descriptors */
 
   return (int)res;
 }
