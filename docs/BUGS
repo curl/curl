@@ -8,7 +8,7 @@ $Id$
 BUGS
 
   Curl and libcurl have grown substantially since the beginning. At the time
-  of writing (end of March 2003), there are 35000 lines of source code, and by
+  of writing (August 2003), there are about 40000 lines of source code, and by
   the time you read this it has probably grown even more.
 
   Of course there are lots of bugs left. And lots of misfeatures.
@@ -32,7 +32,7 @@ WHERE TO REPORT
 
 WHAT TO REPORT
 
-  When reporting a bug, you should include information that will help us
+  When reporting a bug, you should include all information that will help us
   understand what's wrong, what you expected to happen and how to repeat the
   bad behavior. You therefore need to tell us:
 
@@ -48,16 +48,15 @@ WHAT TO REPORT
   enable us to help you quicker and more accurately.
 
   Since curl deals with networks, it often helps us if you include a protocol
-  debug dump with your bug report. The output you get by using the -v
-  flag. Usually, you also get more info by using -i so that is likely to be
-  useful when reporting bugs as well.
+  debug dump with your bug report. The output you get by using the -v or
+  --trace options.
 
   If curl crashed, causing a core dump (in unix), there is hardly any use to
   send that huge file to anyone of us. Unless we have an exact same system
-  setup as you, we can't do much with it. What we instead ask of you is to get
-  a stack trace and send that (much smaller) output to us instead!
+  setup as you, we can't do much with it. Instead we ask you to get a stack
+  trace and send that (much smaller) output to us instead!
 
-  The address and how to subscribe to the mailing list is detailed in the
+  The address and how to subscribe to the mailing lists are detailed in the
   MANUAL file.
 
 HOW TO GET A STACK TRACE
@@ -66,7 +65,7 @@ HOW TO GET A STACK TRACE
   don't 'strip' the final executable. Try to avoid optimizing the code as
   well, remove -O, -O2 etc from the compiler options.
 
-  Run the program until it dumps core.
+  Run the program until it cores.
 
   Run your debugger on the core file, like '<debugger> curl core'. <debugger>
   should be replaced with the name of your debugger, in most cases that will
