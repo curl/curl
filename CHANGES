@@ -19,6 +19,15 @@ Daniel (10 September 2004)
 
   This change is verified by the two new test cases 184 and 185.
 
+Daniel (8 September 2004)
+- Modified the test suite to be able to use and run with customized port
+  numbers. This was always intended but never before possible. Now a simple
+  change in the runtests.pl script can make all tests use different ports.
+  The default ports in use from now on are 8990 to 8993.
+
+Daniel (2 September 2004)
+- Minor modification of an SSL-related error message.
+
 Daniel (31 August 2004)
 - David Tarendash fount out that curl_multi_add_handle() returned
   CURLM_CALL_MULTI_PERFORM instead of CURLM_OK.
