@@ -728,7 +728,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   }
 
 #ifdef KRB4
-  Curl_sec_fflush_fd(conn, conn->secondarysocket);
+  Curl_sec_fflush_fd(conn, conn->sock[SECONDARYSOCKET]);
 #endif
   /* shut down the socket to inform the server we're done */
   sclose(conn->sock[SECONDARYSOCKET]);
@@ -1334,7 +1334,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
       /* we set the secondary socket variable to this for now, it
          is only so that the cleanup function will close it in case
          we fail before the true secondary stuff is made */
-      conn->secondarysocket = portsock;
+      conn->sock[SECONDARYSOCKET] = portsock;
 
       if(!sa_filled_in) {
         memset((char *)&sa, 0, sizeof(sa));

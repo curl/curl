@@ -209,7 +209,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   CURLcode result;
 
-  if(getsockname(conn->firstsocket,
+  if(getsockname(conn->sock[FIRSTSOCKET],
                  (struct sockaddr *)LOCAL_ADDR, &l) < 0)
     perror("getsockname()");
 
