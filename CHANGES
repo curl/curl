@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (8 August)
+- I added the --ftp-create-dirs to the client code, which activates Early's
+  CURLOPT_FTP_CREATE_MISSING_DIRS option, and wrote test case 147 to verify
+  it. Added the option to the curl.1 man page too. Added the option to the
+  curl_easy_setopt.3 man page too.
+
 Daniel (7 August)
 - Test case 60 failed on ia64 and AMD Opteron. Fixed now.
 
