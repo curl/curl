@@ -39,6 +39,8 @@
 #include <memory.h>
 #endif
 
+#define logfile curl_debuglogfile
+
 extern FILE *logfile;
 
 /* memory functions */
@@ -47,6 +49,7 @@ void *curl_dorealloc(void *ptr, size_t size, int line, const char *source);
 void curl_dofree(void *ptr, int line, const char *source);
 char *curl_dostrdup(const char *str, int line, const char *source);
 void curl_memdebug(const char *logname);
+void curl_memlimit(long limit);
 
 /* file descriptor manipulators */
 int curl_socket(int domain, int type, int protocol, int, const char *);
