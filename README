@@ -25,7 +25,6 @@ README
 
         Sweden    -- ftp://ftp.sunet.se/pub/www/utilities/curl/
         Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
-        Australia -- http://curl.linuxworx.com.au/
 
   To download the very latest source off the CVS server do this:
 
@@ -42,3 +41,7 @@ README
         cvs -d :pserver:anonymous@cvs.curl.sourceforge.net:/cvsroot/curl logout
         
      (you're off the hook!)
+
+  Curl contains pieces of source code that is Copyright (c) 1998, 1999
+  Kungliga Tekniska Högskolan. This notice is included here to comply with the
+  distribution terms.
