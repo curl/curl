@@ -124,12 +124,12 @@ FAQ
    part of a URL, you should qoute the entire URL by using single (') or
    double (") quotes round it.
 
-10. Why do I get problems when I use {, }, [ or ] to use multiple URLs?
+10. How can I use {, }, [ or ] to specify multiple URLs?
 
    Because those letters have a special meaning to the shell, and to be used
    in a URL specified to curl you must quote them.
 
-11. Where can I find a copy of LIBEAY32.DLL so I can use the SSL version?
+11. Where can I find a copy of LIBEAY32.DLL?
 
    Curl uses OpenSSL to do the SSL stuff. The LIBEAY32.DLL is what curl needs
    on a windows machine to do https://. Check out the curl web page to find
@@ -164,7 +164,7 @@ FAQ
    safelt disables the headers. Use -H "Pragma:" to disable that specific
    header.
 
-15. Can you please tell me what an error code 142 means?
+15. Can you tell me what error code 142 means?
 
    All error codes that are larger than the highest documented error code
    means that curl has existed due to a timeout. There is currentl no nice way
@@ -185,7 +185,7 @@ FAQ
    at least hide them from being read by human eyes, but that is not what
    anyone would call security.
 
-17. Does curl support javascript/ASP/VBscript/XML/XHTML or HTML version Y?
+17. Does curl support javascript, ASP, XML, XHTML or HTML version Y?
 
     To curl, all contents are alike. It doesn't matter how the page was
    generated. It may be ASP, PHP, perl, shell-script, SSI or plain
