@@ -1,0 +1,45 @@
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK swsclose
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: yes
+Connection: close
+
+hello
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib512
+</tool>
+
+ <name>
+simple curl_easy_duplicate() test
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/512
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /512 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: */*
+
+</protocol>
+</verify>
