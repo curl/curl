@@ -33,3 +33,6 @@
 
 /* Define if you need the _REENTRANT define for some functions */
 #undef NEED_REENTRANT
+
+/* Define if you have the Kerberos4 libraries (including -ldes) */
+#undef KRB4

@@ -8,6 +8,18 @@
 
 Version 7.3
 
+Daniel (28 September 2000)
+- Removed the base64_krb.[ch] files. They've now replaced the former
+  base64.[ch] files.
+
+Daniel (26 September 2000)
+- Updated some docs.
+
+- I changed the OpenSSL fix to work with older versions as well. The posted
+  patch was only working with 0.9.6 and no older ones.
+  
+Version 7.3-pre8
+
 Daniel (25 September 2000)
 - Erdmut Pfeifer informed us that curl didn't build with OpenSSL 0.9.6 and
   showed us what needed to get patched in order to make it build properly
@@ -33,7 +45,7 @@ Daniel (21 September 2000)
 Daniel (20 September 2000)
 - Richard Prescott solved another name lookup buffer size problem. I took this
   opportunity to rewrite the GetHost() function. With these large buffer
-  sizes, I think keeping them as local arrays quickly turn ugly. I know use
+  sizes, I think keeping them as local arrays quickly turn ugly. I now use
   malloc() to get the buffer memory. Thanks to this, I now can realloc() to a
   large buffer in case of demand (errno == ERANGE) in case a solution like
   that would become necessary. I still want to avoid that kind of nastiness.

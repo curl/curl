@@ -295,7 +295,7 @@ CURLcode http(struct connectdata *conn)
        !data->auth_host ||
        strequal(data->auth_host, data->hostname)) {
       sprintf(data->buffer, "%s:%s", data->user, data->passwd);
-      if(base64Encode(data->buffer, 0, /* size zero makes it do strlen() */
+      if(base64_encode(data->buffer, strlen(data->buffer),
                       &authorization) >= 0) {
         data->ptr_userpwd = maprintf( "Authorization: Basic %s\015\012",
                                       authorization);

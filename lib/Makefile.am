@@ -2,7 +2,7 @@
 # $Id$
 #
 
-AUTOMAKE_OPTIONS = foreign no-dependencies
+AUTOMAKE_OPTIONS = foreign
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -23,7 +23,8 @@ download.c     getdate.h      ldap.c         ssluse.c       version.c \
 download.h     getenv.c       ldap.h         ssluse.h       \
 escape.c       getenv.h       mprintf.c      telnet.c       \
 escape.h       getpass.c      netrc.c        telnet.h       \
-writeout.c writeout.h highlevel.c strequal.c strequal.h easy.c
+writeout.c writeout.h highlevel.c strequal.c strequal.h easy.c \
+security.h security.c krb4.c
 
 # Say $(srcdir), so GNU make does not report an ambiguity with the .y.c rule.
 $(srcdir)/getdate.c: getdate.y

@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_init 3 "22 May 2000" "Curl 7.0" "libcurl Manual"
+.TH curl_easy_init 3 "26 September 2000" "Curl 7.0" "libcurl Manual"
 .SH NAME
 curl_easy_init - Start a libcurl "easy" session
 .SH SYNOPSIS
@@ -16,6 +16,9 @@ that you shall use as input to the other easy-functions. The init calls
 intializes curl and this call MUST have a corresponding call to
 .I curl_easy_cleanup
 when the operation is complete.
+
+On win32 systems, you need to init the winsock stuff manually, libcurl will
+not do that for you. WSAStartup() and WSACleanup() should be used accordingly.
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the
 other curl functions.

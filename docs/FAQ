@@ -141,6 +141,7 @@ FAQ
       Solaris (native cc compiler)
       HPUX (native cc compiler)
       SGI IRIX (native cc compiler)
+      SCO UNIX (native cc compiler)
 
     When configuring curl, I specify --with-ssl. OpenSSL is installed in
     /usr/local/ssl Configure reports SSL in /usr/local/ssl, but fails to find
