@@ -111,10 +111,6 @@ SOURCE=.\dict.c
 # End Source File
 # Begin Source File
 
-SOURCE=.\dllinit.c
-# End Source File
-# Begin Source File
-
 SOURCE=.\easy.c
 # End Source File
 # Begin Source File
