@@ -47,11 +47,12 @@
   Example sources using this interface is here: ../multi/
 
 */
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
+
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>
+#else
+#include <sys/socket.h>
+#include <sys/time.h>
 #endif
 
 #include <curl/curl.h>
