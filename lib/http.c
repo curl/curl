@@ -232,7 +232,7 @@ CURLcode add_buffer_send(send_buffer *in,
       
       return CURLE_OK;
     }
-
+    http->sending = HTTPSEND_BODY;
     /* the full buffer was sent, clean up and return */
   }
   if(in->buffer)

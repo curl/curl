@@ -108,6 +108,8 @@
 #define min(a, b)   ((a) < (b) ? (a) : (b))
 #endif
 
+#define CURL_TIMEOUT_EXPECT_100 1000 /* counting ms here */
+
 enum {
   KEEP_NONE,
   KEEP_READ,
@@ -248,8 +250,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         if(result>0)
           return result;
 
-        if ((k->bytecount == 0) && (k->writebytecount == 0))
+        if ((k->bytecount == 0) && (k->writebytecount == 0)) {
           Curl_pgrsTime(data, TIMER_STARTTRANSFER);
+          if(k->wait100_after_headers)
+            /* set time stamp to compare with when waiting for the 100 */
+            k->start100 = Curl_tvnow();
+        }
 
         didwhat |= KEEP_READ;
 
@@ -382,9 +388,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               if(100 == k->httpcode) {
                 /*
-                 * we have made a HTTP PUT or POST and this is 1.1-lingo
+                 * We have made a HTTP PUT or POST and this is 1.1-lingo
                  * that tells us that the server is OK with this and ready
-                 * to receive our stuff.
+                 * to receive the data.
                  * However, we'll get more headers now so we must get
                  * back into the header-parsing state!
                  */
@@ -954,8 +960,27 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           /* init the "upload from here" pointer */
           conn->upload_fromhere = k->uploadbuf;
 
-          if(!k->upload_done)
+          if(!k->upload_done) {
+            /* HTTP pollution, this should be written nicer to become more
+               protocol agnostic. */
+
+            if(k->wait100_after_headers &&
+               (conn->proto.http->sending == HTTPSEND_BODY)) {
+              /* If this call is to send body data, we must take some action:
+                 We have sent off the full HTTP 1.1 request, and we shall now
+                 go into the Expect: 100 state and await such a header */
+              k->wait100_after_headers = FALSE; /* headers sent */
+              k->write_after_100_header = TRUE; /* wait for the header */
+              FD_ZERO (&k->writefd);            /* clear it */
+              k->wkeepfd = k->writefd;          /* set the keeper variable */
+              k->keepon &= ~KEEP_WRITE;         /* disable writing */
+              k->start100 = Curl_tvnow();       /* timeout count starts now */
+              didwhat &= ~KEEP_WRITE;  /* we didn't write anything actually */
+              break;
+            }
+
             nread = fillbuffer(conn, BUFSIZE);
+          }
           else
             nread = 0; /* we're done uploading/reading */
 
@@ -1054,6 +1079,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   } while(0); /* just to break out from! */
 
+  k->now = Curl_tvnow();
   if(didwhat) {
     /* Update read/write counters */
     if(conn->bytecountp)
@@ -1067,14 +1093,27 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       /* This should allow some time for the header to arrive, but only a
          very short time as otherwise it'll be too much wasted times too
          often. */
-      k->write_after_100_header = FALSE;
-      FD_SET (conn->writesockfd, &k->writefd); /* write socket */
-      k->keepon |= KEEP_WRITE;
-      k->wkeepfd = k->writefd;
+
+      /* Quoting RFC2616, section "8.2.3 Use of the 100 (Continue) Status":
+         
+      Therefore, when a client sends this header field to an origin server
+      (possibly via a proxy) from which it has never seen a 100 (Continue)
+      status, the client SHOULD NOT wait for an indefinite period before
+      sending the request body.
+
+      */
+
+      int ms = Curl_tvdiff(k->now, k->start100);
+      if(ms > CURL_TIMEOUT_EXPECT_100) {
+        /* we've waited long enough, continue anyway */
+        k->write_after_100_header = FALSE;
+        FD_SET (conn->writesockfd, &k->writefd); /* write socket */
+        k->keepon |= KEEP_WRITE;
+        k->wkeepfd = k->writefd;
+      }
     }    
   }
 
-  k->now = Curl_tvnow();
   if(Curl_pgrsUpdate(conn))
     result = CURLE_ABORTED_BY_CALLBACK;
   else
@@ -1160,10 +1199,26 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
 
     FD_ZERO (&k->writefd);              /* clear it */
     if(conn->writesockfd != -1) {
-      if (data->set.expect100header)
+      /* HTTP 1.1 magic:
+
+         Even if we require a 100-return code before uploading data, we might
+         need to write data before that since the REQUEST may not have been
+         finished sent off just yet.
+
+         Thus, we must check if the request has been sent before we set the
+         state info where we wait for the 100-return code
+      */
+      if (data->set.expect100header &&
+          (conn->proto.http->sending == HTTPSEND_BODY)) {
         /* wait with write until we either got 100-continue or a timeout */
         k->write_after_100_header = TRUE;
+        k->start100 = k->start;
+      }
       else {
+        if(data->set.expect100header)
+          /* when we've sent off the rest of the headers, we must await a
+             100-continue */
+          k->wait100_after_headers = TRUE;
         FD_SET (conn->writesockfd, &k->writefd); /* write socket */
         k->keepon |= KEEP_WRITE;
       }
