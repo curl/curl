@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (21 June 2004)
+- Kjetil Jacobsen brought my attention to the fact that you cannot properly
+  abort an upload with the readfunction callback, since returning 0 or -1 only
+  stops the upload and libcurl will continue waiting for downloaded data and
+  the server often waits for the rest of the upload data to arrive.
+
+  Thus, I've now added the ability for read callbacks to return
+  CURL_READFUNC_ABORT to abort an upload from a read callback. This will stop
+  the transfer immediately with a CURLE_ABORTED_BY_CALLBACK return code.
+  
 Daniel (19 June 2004)
 - Luca Alteas provided a test case with a failing curl operation: when we POST
   to a site with --digest (or similar) set, and the server responded with a 302
