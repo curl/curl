@@ -1,4 +1,4 @@
-Updated: March 16, 2004 (http://curl.haxx.se/docs/faq.html)
+Updated: August 10, 2004 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -19,8 +19,8 @@ FAQ
 
  2. Install Related Problems
   2.1 configure doesn't find OpenSSL even when it is installed
-   2.1.1. native linker doesn't find OpenSSL
-   2.1.2. only the libssl lib is missing
+   2.1.1 native linker doesn't find OpenSSL
+   2.1.2 only the libssl lib is missing
   2.2 Does curl work/build with other SSL libraries?
   2.3 Where can I find a copy of LIBEAY32.DLL?
   2.4 Does cURL support Socks (RFC 1928) ?
@@ -70,6 +70,7 @@ FAQ
   5.5 Does CURLOPT_WRITEDATA and CURLOPT_READDATA work on win32 ?
   5.6 What about Keep-Alive or persistent connections?
   5.7 Link errors when building libcurl on Windows!
+  5.8 libcurl.so.3: open failed: No such file or directory
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -223,11 +224,11 @@ FAQ
 
 2. Install Related Problems
 
-  2.1. configure doesn't find OpenSSL even when it is installed
+  2.1 configure doesn't find OpenSSL even when it is installed
 
   This may be because of several reasons.
 
-    2.1.1. native linker doesn't find openssl
+    2.1.1 native linker doesn't find openssl
 
     Affected platforms:
       Solaris (native cc compiler)
@@ -249,7 +250,7 @@ FAQ
 
     Solution submitted by: Bob Allison <allisonb@users.sourceforge.net>
 
-    2.1.2. only the libssl lib is missing
+    2.1.2 only the libssl lib is missing
 
     If all include files and the libcrypto lib is present, with only the
     libssl being missing according to configure, this is mostly likely because
@@ -262,14 +263,14 @@ FAQ
     configure. Make sure that you remove the config.cache file before you
     rerun configure with the new flags.
 
-  2.2. Does curl work/build with other SSL libraries?
+  2.2 Does curl work/build with other SSL libraries?
 
   Curl has been written to use OpenSSL, although there should not be much
   problems using a different library. If anyone does "port" curl to use a
   different SSL library, we are of course very interested in getting the
   patch!
 
-  2.3. Where can I find a copy of LIBEAY32.DLL?
+  2.3 Where can I find a copy of LIBEAY32.DLL?
 
   That is an OpenSSL binary built for Windows.
 
@@ -278,14 +279,14 @@ FAQ
   accurate and up-to-date pointers to recent OpenSSL DLLs and other binary
   packages.
 
-  2.4. Does cURL support Socks (RFC 1928) ?
+  2.4 Does cURL support Socks (RFC 1928) ?
 
-  Yes, SOCKS5 is supported when curl is built with IPv6 support disabled.
+  Yes, SOCKS5 is supported.
 
 
 3. Usage problems
 
-  3.1. curl: (1) SSL is disabled, https: not supported
+  3.1 curl: (1) SSL is disabled, https: not supported
 
   If you get this output when trying to get anything from a https:// server,
   it means that the configure script couldn't find all libs and include files
@@ -300,13 +301,13 @@ FAQ
   Also, check out the other paragraph in this FAQ labeled "configure doesn't
   find OpenSSL even when it is installed".
 
-  3.2. How do I tell curl to resume a transfer?
+  3.2 How do I tell curl to resume a transfer?
 
   Curl supports resumed transfers both ways on both FTP and HTTP.
 
   Try the -C option.
 
-  3.3. Why doesn't my posting using -F work?
+  3.3 Why doesn't my posting using -F work?
 
   You can't simply use -F or -d at your choice. The web server that will
   receive your post assumes one of the formats. If the form you're trying to
@@ -320,7 +321,7 @@ FAQ
   through the mailing list archives for old postings and questions regarding
   this.
 
-  3.4. How do I tell curl to run custom FTP commands?
+  3.4 How do I tell curl to run custom FTP commands?
 
   You can tell curl to perform optional commands both before and/or after a
   file transfer. Study the -Q/--quote option.
@@ -329,13 +330,13 @@ FAQ
   FTP commands without transferring anything. Therefore you must always specify
   a URL to transfer to/from even when doing custom FTP commands.
 
-  3.5. How can I disable the Pragma: nocache header?
+  3.5 How can I disable the Pragma: nocache header?
 
   You can change all internally generated headers by adding a replacement with
   the -H/--header option. By adding a header with empty contents you safely
   disable that one. Use -H "Pragma:" to disable that specific header.
 
-  3.6. Does curl support ASP, XML, XHTML or HTML version Y?
+  3.6 Does curl support ASP, XML, XHTML or HTML version Y?
 
   To curl, all contents are alike. It doesn't matter how the page was
   generated. It may be ASP, PHP, Perl, shell-script, SSI or plain
@@ -344,7 +345,7 @@ FAQ
 
   See also item 3.14 regarding javascript.
 
-  3.7. Can I use curl to delete/rename a file through FTP?
+  3.7 Can I use curl to delete/rename a file through FTP?
 
   Yes. You specify custom FTP commands with -Q/--quote.
 
@@ -456,15 +457,16 @@ FAQ
   3.15 Can I do recursive fetches with curl?
 
   No. curl itself has no code that performs recursive operations, such as
-  those performed by wget.
+  those performed by wget and similar tools.
 
   There exist wrapper scripts with that functionality (for example the
   curlmirror perl script), and you can write programs based on libcurl to do
   it, but the command line tool curl itself cannot.
 
+
 4. Running Problems
 
-  4.1. Problems connecting to SSL servers.
+  4.1 Problems connecting to SSL servers.
 
   It took a very long time before we could sort out why curl had problems to
   connect to certain SSL servers when using SSLeay or OpenSSL v0.9+.  The
@@ -479,7 +481,7 @@ FAQ
   There have also been examples where the remote server didn't like the SSLv2
   request and instead you had to force curl to use SSLv3 with -3/--sslv3.
 
-  4.2. Why do I get problems when I use & or % in the URL?
+  4.2 Why do I get problems when I use & or % in the URL?
 
   In general unix shells, the & letter is treated special and when used, it
   runs the specified command in the background. To safely send the & as a part
@@ -497,7 +499,7 @@ FAQ
   pass in a POST using -d/--data you must encode it as '%25' (which then also
   needs the %-letter doubled on Windows machines).
 
-  4.3. How can I use {, }, [ or ] to specify multiple URLs?
+  4.3 How can I use {, }, [ or ] to specify multiple URLs?
 
   Because those letters have a special meaning to the shell, and to be used in
   a URL specified to curl you must quote them.
@@ -511,7 +513,7 @@ FAQ
 
     curl -g 'www.site.com/weirdname[].html'
 
-  4.4. Why do I get downloaded data even though the web page doesn't exist?
+  4.4 Why do I get downloaded data even though the web page doesn't exist?
 
   Curl asks remote servers for the page you specify. If the page doesn't exist
   at the server, the HTTP protocol defines how the server should respond and
@@ -562,14 +564,14 @@ FAQ
     slash. Try the same operation again _with_ the trailing URL, or use the
     -L/--location option to follow the redirection.
 
-  4.6. Can you tell me what error code 142 means?
+  4.6 Can you tell me what error code 142 means?
 
   All error codes that are larger than the highest documented error code means
   that curl has exited due to a crash. This is a serious error, and we
   appreciate a detailed bug report from you that describes how we could go
   ahead and repeat this!
 
-  4.7. How do I keep user names and passwords secret in Curl command lines?
+  4.7 How do I keep user names and passwords secret in Curl command lines?
 
   This problem has two sides:
 
@@ -603,7 +605,7 @@ FAQ
   If there is a bug, read the BUGS document first. Then report it as described
   in there.
 
-  4.9. Curl can't authenticate to the server that requires NTLM?
+  4.9 Curl can't authenticate to the server that requires NTLM?
 
   This is supported in curl 7.10.6 or later. No earlier curl version knows
   of this magic.
@@ -651,9 +653,10 @@ FAQ
   Details are also in the SSLCERTS file in the release archives, found online
   here: http://curl.haxx.se/docs/sslcerts.html
 
+
 5. libcurl Issues
 
-  5.1. Is libcurl thread-safe?
+  5.1 Is libcurl thread-safe?
 
   Yes.
 
@@ -687,7 +690,7 @@ FAQ
         size_t
         WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
         {
-          register int realsize = size * nmemb;
+          size_t realsize = size * nmemb;
           struct MemoryStruct *mem = (struct MemoryStruct *)data;
 
           mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
@@ -743,6 +746,27 @@ FAQ
 
   (Provided by Andrew Francis)
 
+  5.8 libcurl.so.3: open failed: No such file or directory
+
+  This is an error message you might get when you try to run a program linked
+  with a shared version of libcurl and your run-time linker (ld.so) couldn't
+  find the shared library named libcurl.so.3.
+
+  You need to make sure that ld.so finds libcurl.so.3. You can do that
+  multiple ways, and it differs somewhat between different operating systems,
+  but they are usually:
+
+  * Add an option to the linker command line that specify the hard-coded path
+    the run-time linker should check for the lib (usually -R)
+
+  * Set an environment variable (LD_LIBRARY_PATH for example) where ld.so
+    should check for libs
+
+  * Adjust the system's config to check for libs in the directory where you've
+    put the dir (like Linux's /etc/ld.so.conf)
+
+  'man ld.so' and 'man ld' will tell you more details
+
 
 6. License Issues
 
@@ -751,32 +775,32 @@ FAQ
   is just a brief summary for the cases we get the most questions. (Parts of
   this section was much enhanced by Bjorn Reese.)
 
-  6.1. I have a GPL program, can I use the libcurl library?
+  6.1 I have a GPL program, can I use the libcurl library?
 
   Yes!
 
   Since libcurl may be distributed under the MIT/X derivate license, it can be
   used together with GPL in any software.
 
-  6.2. I have a closed-source program, can I use the libcurl library?
+  6.2 I have a closed-source program, can I use the libcurl library?
 
   Yes!
 
   libcurl does not put any restrictions on the program that uses the library.
 
-  6.3. I have a BSD licensed program, can I use the libcurl library?
+  6.3 I have a BSD licensed program, can I use the libcurl library?
 
   Yes!
 
   libcurl does not put any restrictions on the program that uses the library.
 
-  6.4. I have a program that uses LGPL libraries, can I use libcurl?
+  6.4 I have a program that uses LGPL libraries, can I use libcurl?
 
   Yes!
 
   The LGPL license doesn't clash with other licenses.
 
-  6.5. Can I modify curl/libcurl for my program and keep the changes secret?
+  6.5 Can I modify curl/libcurl for my program and keep the changes secret?
 
   Yes!
 
@@ -784,7 +808,7 @@ FAQ
   the sources, on the condition that the copyright texts in the sources are
   left intact.
 
-  6.6. Can you please change the curl/libcurl license to XXXX?
+  6.6 Can you please change the curl/libcurl license to XXXX?
 
   No.
 
