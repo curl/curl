@@ -1831,7 +1831,7 @@ static int handleSock5Proxy(const char *proxy_name,
       return 1;
     }
     else if (socksreq[1] == 255) {
-      if (proxy_name[0] == 0) {
+      if (!proxy_name || !*proxy_name) {
         failf(conn->data,
               "No authentication method was acceptable. (It is quite likely"
               " that the SOCKS5 server wanted a username/password, since none"
