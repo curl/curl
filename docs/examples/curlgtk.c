@@ -42,7 +42,7 @@ int my_progress_func(GtkWidget *Bar,
   return 0;
 }
 
-void *curl_thread(void *ptr)
+void *my_thread(void *ptr)
 {
   CURL *curl;
   CURLcode res;
@@ -94,7 +94,7 @@ int main(int argc, char **argv)
   gtk_container_add(GTK_CONTAINER(Frame2), Bar);
   gtk_widget_show_all(Window);
 
-  if (!g_thread_create(&curl_thread, argv[1], FALSE, NULL) != 0)
+  if (!g_thread_create(&my_thread, argv[1], FALSE, NULL) != 0)
     g_warning("can't create the thread");
 
 
