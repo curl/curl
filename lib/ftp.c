@@ -91,6 +91,9 @@
 #include "memdebug.h"
 #endif
 
+/* Used in more than one place in the file */
+static CURLcode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quote);
+
 /* easy-to-use macro: */
 #define ftpsendf Curl_ftpsendf
 
@@ -575,25 +578,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
 
   /* Send any post-transfer QUOTE strings? */
   if(data->postquote) {
-    qitem = data->postquote;
-    /* Send all QUOTE strings in same order as on command-line */
-    while (qitem) {
-      /* Send string */
-      if (qitem->data) {
-        ftpsendf(conn->firstsocket, conn, "%s", qitem->data);
-
-        nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-        if(nread < 0)
-          return CURLE_OPERATION_TIMEOUTED;
-
-        if (ftpcode >= 400) {
-          failf(data, "QUOT string not accepted: %s",
-                qitem->data);
-          return CURLE_FTP_QUOTE_ERROR;
-        }
-      }
-      qitem = qitem->next;
-    }
+    CURLcode result = _ftp_sendquote(conn, data->postquote);
+    return result;
   }
 
   return CURLE_OK;
