@@ -7,7 +7,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	    \
        Makefile.vc6 Makefile.riscos libcurl.def dllinit.c curllib.dsp	    \
        curllib.dsw config-vms.h config-win32.h config-riscos.h config-mac.h \
-       config.h.in
+       config.h.in ca-bundle.crt
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -62,7 +62,6 @@ security.h security.c krb4.c krb4.h memdebug.c memdebug.h inet_ntoa_r.h \
 http_chunks.c http_chunks.h strtok.c strtok.h connect.c connect.h \
 llist.c llist.h hash.c hash.h multi.c share.c share.h
 
-
 noinst_HEADERS = setup.h transfer.h
 
 # Say $(srcdir), so GNU make does not report an ambiguity with the .y.c rule.
@@ -70,3 +69,8 @@ $(srcdir)/getdate.c: getdate.y
 	cd $(srcdir) && \
 	  $(YACC) $(YFLAGS) getdate.y; \
 	  mv -f y.tab.c getdate.c
+
+install-data-hook:
+	@if test -n "@CURL_CA_BUNDLE@"; then \
+	  @INSTALL_DATA@ ca-bundle.crt @CURL_CA_BUNDLE@; \
+        fi
