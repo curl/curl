@@ -41,7 +41,13 @@ require "getpart.pm";
 open(FTPLOG, ">log/ftpd.log") ||
     print STDERR "failed to open log file, runs without logging\n";
 
-sub logmsg { print FTPLOG "$$: "; print FTPLOG @_; }
+sub logmsg {
+    my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
+        localtime(time);
+    printf FTPLOG ("%02d:%02d:%02d (%d) ",
+                   $hour, $min, $sec, $$);
+    print FTPLOG @_;
+}
 
 sub ftpmsg {
   # append to the server.input file
@@ -165,6 +171,12 @@ my %commandfunc = ( 'PORT' => \&PORT_command,
                     'MDTM' => \&MDTM_command,
                     );
 
+
+sub close_dataconn {
+    close(SOCK);
+    logmsg "Closed data connection\n";
+}
+
 my $rest=0;
 sub REST_command {
     $rest = $_[0];
@@ -187,12 +199,12 @@ my @ftpdir=("total 20\r\n",
 "drwxrwxrwx   2 98       1            512 Oct 30 14:33 pub\r\n",
 "dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr\r\n");
 
-    logmsg "$$: pass data to child pid\n";
+    logmsg "pass LIST data on data connection\n";
     for(@ftpdir) {
         print SOCK $_;
     }
-    close(SOCK);
-    logmsg "$$: done passing data to child pid\n";
+    close_dataconn();
+    logmsg "done passing data\n";
 
     print "226 ASCII transfer complete\r\n";
     return 0;
@@ -200,10 +212,11 @@ my @ftpdir=("total 20\r\n",
 
 sub NLST_command {
     my @ftpdir=("file", "with space", "fake", "..", " ..", "funny", "README");
+    logmsg "pass NLST data on data connection\n";
     for(@ftpdir) {
         print SOCK "$_\r\n";
     }
-    close(SOCK);
+    close_dataconn();
     print "226 ASCII transfer complete\r\n";
     return 0;
 }
@@ -240,7 +253,7 @@ sub SIZE_command {
 
     loadtest("$srcdir/data/test$testno");
 
-    logmsg "SIZE number $testno\n";
+    logmsg "SIZE file \"$testno\"\n";
 
     my @data = getpart("reply", "size");
 
@@ -277,7 +290,7 @@ sub SIZE_command {
 sub RETR_command {
     my $testno = $_[0];
 
-    logmsg "RETR test number $testno\n";
+    logmsg "RETR file \"$testno\"\n";
 
     if($testno =~ /^verifiedserver$/) {
         # this is the secret command that verifies that this actually is
@@ -285,8 +298,9 @@ sub RETR_command {
         my $response = "WE ROOLZ: $$\r\n";
         my $len = length($response);
         print "150 Binary junk ($len bytes).\r\n";
+        logmsg "pass our pid on the data connection\n";
         print SOCK "WE ROOLZ: $$\r\n";
-        close(SOCK);
+        close_dataconn();
         print "226 File transfer complete\r\n";
         if($verbose) {
             print STDERR "FTPD: We returned proof we are the test server\n";
@@ -317,11 +331,12 @@ sub RETR_command {
             "226 File transfer complete\r\n";
             logmsg "150+226 in one shot!\n";
 
+            logmsg "pass RETR data on data connection\n";
             for(@data) {
                 my $send = $_;
                 print SOCK $send;
             }
-            close(SOCK);
+            close_dataconn();
             $retrweirdo=0; # switch off the weirdo again!
         }
         else {
@@ -333,12 +348,12 @@ sub RETR_command {
             print "150 Binary data connection for $testno () $sz.\r\n";
             logmsg "150 Binary data connection for $testno () $sz.\n";
 
+            logmsg "pass RETR data on data connection\n";
             for(@data) {
                 my $send = $_;
                 print SOCK $send;
             }
-            close(SOCK);
-
+            close_dataconn();
             print "226 File transfer complete\r\n";
         }
     }
@@ -358,6 +373,8 @@ sub STOR_command {
 
     print "125 Gimme gimme gimme!\r\n";
 
+    logmsg "retrieve STOR data on data connection\n";
+
     open(FILE, ">$filename") ||
         return 0; # failed to open output
 
@@ -368,7 +385,7 @@ sub STOR_command {
         print FILE $line;
     }
     close(FILE);
-    close(SOCK);
+    close_dataconn();
 
     logmsg "received $ulsize bytes upload\n";
 
@@ -422,7 +439,7 @@ sub PASV_command {
 
     close(Server2); # close the listener when its served its purpose!
 
-    logmsg "$$: data connection from $name [", inet_ntoa($iaddr), "] at port $iport\n";
+    logmsg "data connection from $name [", inet_ntoa($iaddr), "] at port $iport\n";
 
     return;
 }
@@ -542,7 +559,7 @@ for ( $waitedpid = 0;
         my $FTPARG=$2;
         my $full=$_;
                  
-        logmsg "GOT: ($1) $_\n";
+        logmsg "Received \"$full\"\n";
 
         if($verbose) {
             print STDERR "IN: $full\n";
@@ -559,6 +576,10 @@ for ( $waitedpid = 0;
             # remain in the same state
         }
         else {
+            
+            if($state != $newstate) {
+                logmsg "switch to state $state\n";
+            }
             $state = $newstate;
         }
 
@@ -594,8 +615,6 @@ for ( $waitedpid = 0;
                 \&$func($FTPARG, $FTPCMD);
             }
         }
-
-        logmsg "set to state $state\n";
             
     } # while(1)
     close(Client);
