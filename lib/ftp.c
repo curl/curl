@@ -637,7 +637,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
     }
     else if(!conn->bits.resume_done &&
             !data->set.no_body &&
-            (0 == *ftp->bytecountp)) {
+            (!*ftp->bytecountp && (conn->size>0))) {
       /* We consider this an error, but there's no true FTP error received
          why we need to continue to "read out" the server response too.
          We don't want to leave a "waiting" server reply if we'll get told
