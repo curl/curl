@@ -655,11 +655,14 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
       failf(data, "Received only partial file");
       return CURLE_PARTIAL_FILE;
     }
-    else if(!data->bits.no_body && (0 == *ftp->bytecountp)) {
+    else if(!conn->bits.resume_done &&
+            !data->bits.no_body &&
+            (0 == *ftp->bytecountp)) {
       failf(data, "No data was received!");
       return CURLE_FTP_COULDNT_RETR_FILE;
     }
   }
+
 #ifdef KRB4
   sec_fflush_fd(conn, conn->secondarysocket);
 #endif
@@ -667,7 +670,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   sclose(conn->secondarysocket);
   conn->secondarysocket = -1;
 
-  if(!data->bits.no_body) {  
+  if(!data->bits.no_body && !conn->bits.resume_done) {  
     /* now let's see what the server says about the transfer we
        just performed: */
     nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
@@ -680,6 +683,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
       return CURLE_FTP_WRITE_ERROR;
     }
   }
+
+  conn->bits.resume_done = FALSE; /* clean this for next connection */
 
   /* Send any post-transfer QUOTE strings? */
   if(data->postquote) {
@@ -1499,8 +1504,17 @@ again:;
           data->infilesize -= conn->resume_from;
 
           if(data->infilesize <= 0) {
-            failf(data, "File already completely uploaded\n");
-            return CURLE_FTP_COULDNT_STOR_FILE;
+            infof(data, "File already completely uploaded\n");
+
+            /* no data to transfer */
+            result=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+            
+            /* Set resume done so that we won't get any error in
+             * Curl_ftp_done() because we didn't transfer the amount of bytes
+             * that the local file file obviously is */
+            conn->bits.resume_done = TRUE; 
+
+            return CURLE_OK;
           }
         }
         /* we've passed, proceed as normal */
@@ -1677,8 +1691,16 @@ again:;
         }
 
 	if (downloadsize == 0) {
-	  failf(data, "File already complete");
-	  return CURLE_ALREADY_COMPLETE;
+          /* no data to transfer */
+          result=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+	  infof(data, "File already completely downloaded\n");
+
+          /* Set resume done so that we won't get any error in Curl_ftp_done()
+           * because we didn't transfer the amount of bytes that the remote
+           * file obviously is */
+          conn->bits.resume_done = TRUE; 
+
+	  return CURLE_OK;
 	}
 	
         /* Set resume file transfer offset */

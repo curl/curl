@@ -188,6 +188,9 @@ struct ConnectBits {
 
   bool use_range;
   bool rangestringalloc; /* the range string is malloc()'ed */
+
+  bool resume_done; /* nothing was transfered, resumed transfer already
+                       complete */
 };
 
 /*
