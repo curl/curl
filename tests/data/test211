@@ -3,10 +3,6 @@
 <data>
 data blobb
 </data>
-<datacheck>
-data blobb
-data blobb
-</datacheck>
 </reply>
 
 # Client-side
@@ -23,7 +19,11 @@ ftp://%HOSTIP:%FTPPORT/a/path/211 ftp://%HOSTIP:%FTPPORT/a/path/211
 <file name="log/ftpserver.cmd">
 REPLY EPSV 500 no such command
 </file>
-</test>
+<stdout>
+data blobb
+data blobb
+</stdout>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -1,36 +1,13 @@
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 No Authorization Required swsclose swsbounce
+HTTP/1.1 200 No Authorization Required swsclose
 Server: Apache/1.3.27 (Darwin) PHP/4.1.2
 Content-Type: text/html; charset=iso-8859-1
 Connection: close
 
+PUT received fine. Thank you very much
 </data>
-
-<data1>
-HTTP/1.1 200 No Authorization Required swsclose
-Server: Apache/1.3.27 (Darwin) PHP/4.1.2
-Content-Type: text/html; charset=iso-8859-1
-Connection: close
-
-PUT received fine. Thank you very much
-</data1>
-
-<datacheck>
-HTTP/1.1 200 No Authorization Required swsclose swsbounce
-Server: Apache/1.3.27 (Darwin) PHP/4.1.2
-Content-Type: text/html; charset=iso-8859-1
-Connection: close
-
-HTTP/1.1 200 No Authorization Required swsclose
-Server: Apache/1.3.27 (Darwin) PHP/4.1.2
-Content-Type: text/html; charset=iso-8859-1
-Connection: close
-
-PUT received fine. Thank you very much
-</datacheck>
-
 </reply>
 
 # Client-side

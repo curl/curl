@@ -3,9 +3,6 @@
 <data>
 data blobb
 </data>
-<datacheck>
-data blobb
-data blobb
 </datacheck>
 </reply>
 
@@ -27,7 +24,11 @@ ftp://%HOSTIP:%FTPPORT/a/path/212 ftp://%HOSTIP:%FTPPORT/a/path/212 -P -
 REPLY EPRT 500 no such command
 REPLY LPRT 500 no such command
 </file>
-</test>
+<stdout>
+data blobb
+data blobb
+</stdout>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>
