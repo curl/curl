@@ -308,6 +308,8 @@ static int get_request(int sock, int *part, int *open)
         *part = test_no % 10000;
         test_no /= 10000;
       }
+      else
+        *part = 0;
 
       sprintf(logbuf, "Found test number %d in path", test_no);
       logmsg(logbuf);
@@ -316,18 +318,18 @@ static int get_request(int sock, int *part, int *open)
         /* If the client is passing this Digest-header, we set the part number
            to 1000. Not only to spice up the complexity of this, but to make
            Digest stuff to work in the test suite. */
-        logmsg("Received Digest request, sending back data 1000");
-        *part = 1000;
+        *part += 1000;
+        logmsg("Received Digest request, sending back data %d", *part);
       }
       else if(strstr(reqbuf, "Authorization: NTLM TlRMTVNTUAAD")) {
         /* If the client is passing this type-3 NTLM header */
-        logmsg("Received NTLM type-3, sending back data 1002");
-        *part = 1002;
+        *part += 1002;
+        logmsg("Received NTLM type-3, sending back data %d", *part);
       }
       else if(strstr(reqbuf, "Authorization: NTLM TlRMTVNTUAAB")) {
         /* If the client is passing this type-1 NTLM header */
-        logmsg("Received NTLM type-1, sending back data 1001");
-        *part = 1001;
+        *part += 1001;
+        logmsg("Received NTLM type-1, sending back data %d", *part);
       }
 
       if(strstr(reqbuf, "Connection: close"))
