@@ -1756,7 +1756,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 #ifdef WIN32
           if(ptr &&
              (ptr == &nextarg[1]) &&
-             (nextarg[2] == '\\') &&
+             (nextarg[2] == '\\' || nextarg[2] == '/') &&
              (isalpha((int)nextarg[0])) )
              /* colon in the second column, followed by a backslash, and the
                 first character is an alphabetic letter:
