@@ -646,7 +646,7 @@ CURLcode curl_transfer(CURL *curl)
         /* mark the next request as a followed location: */
         data->bits.this_is_a_follow = TRUE;
 
-        data->proto.http->followlocation++; /* count location-followers */
+        data->followlocation++; /* count location-followers */
 
         if(data->bits.http_auto_referer) {
           /* We are asked to automatically set the previous URL as the
