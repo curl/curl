@@ -62,6 +62,7 @@ struct HttpPost {
   char *contents; /* pointer to allocated data contents */
   long contentslength; /* length of contents field */
   char *contenttype; /* Content-Type */
+  struct curl_slist* contentheader; /* list of extra headers for this form */
   struct HttpPost *more; /* if one field name has more than one file, this
 			    link should link to following files */
   long flags;     /* as defined below */
@@ -543,6 +544,7 @@ typedef enum {
   CFINIT(ARRAY_START), /* below are the options allowed within a array */
   CFINIT(FILE),
   CFINIT(CONTENTTYPE),
+  CFINIT(CONTENTHEADER),
   CFINIT(END),
   CFINIT(ARRAY_END),   /* up are the options allowed within a array */
 

@@ -44,6 +44,7 @@ typedef struct FormInfo {
   long contentslength;
   char *contenttype;
   long flags;
+  struct curl_slist* contentheader;
   struct FormInfo *more;
 } FormInfo;
 

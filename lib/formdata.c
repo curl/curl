@@ -396,15 +396,16 @@ int curl_formparse(char *input,
  * Returns newly allocated HttpPost on success and NULL if malloc failed.
  *
  ***************************************************************************/
-static struct HttpPost * AddHttpPost (char * name,
-                                      long namelength,
-                                      char * value,
-                                      long contentslength,
-				      char *contenttype,
-                                      long flags,
-                                      struct HttpPost *parent_post,
-                                      struct HttpPost **httppost,
-                                      struct HttpPost **last_post)
+static struct HttpPost * AddHttpPost(char * name,
+                                     long namelength,
+                                     char * value,
+                                     long contentslength,
+                                     char *contenttype,
+                                     long flags,
+                                     struct curl_slist* contentHeader,
+                                     struct HttpPost *parent_post,
+                                     struct HttpPost **httppost,
+                                     struct HttpPost **last_post)
 {
   struct HttpPost *post;
   post = (struct HttpPost *)malloc(sizeof(struct HttpPost));
@@ -415,6 +416,7 @@ static struct HttpPost * AddHttpPost (char * name,
     post->contents = value;
     post->contentslength = contentslength;
     post->contenttype = contenttype;
+    post->contentheader = contentHeader;
     post->flags = flags;
   }
   else
@@ -823,6 +825,21 @@ FORMcode FormAdd(struct HttpPost **httppost,
 	}
         break;
       }
+    case CURLFORM_CONTENTHEADER:
+      {
+        struct curl_slist* list = NULL;
+        if( array_state )
+          list = (struct curl_slist*)array_value;
+        else
+          list = va_arg(params,struct curl_slist*);
+        
+        if( current_form->contentheader )
+          return_value = FORMADD_OPTION_TWICE;
+        else
+          current_form->contentheader = list;
+        
+        break;
+      }
     default:
       fprintf (stderr, "got unknown CURLFORM_OPTION: %d\n", option);
       return_value = FORMADD_UNKNOWN_OPTION;
@@ -872,13 +889,16 @@ FORMcode FormAdd(struct HttpPost **httppost,
             break;
           }
         }
-        if ( (post = AddHttpPost(form->name, form->namelength,
-                                 form->value, form->contentslength,
-                                 form->contenttype, form->flags,
-                                 post, httppost,
-                                 last_post)) == NULL) {
+        post = AddHttpPost(form->name, form->namelength,
+                           form->value, form->contentslength,
+                           form->contenttype, form->flags,
+                           form->contentheader,
+                           post, httppost,
+                           last_post);
+        
+        if(!post)
           return_value = FORMADD_MEMORY;
-        }
+
         if (form->contenttype)
           prevtype = form->contenttype;
       }
@@ -1029,6 +1049,8 @@ struct FormData *Curl_getFormData(struct HttpPost *post,
   int size =0;
   char *boundary;
   char *fileboundary=NULL;
+  struct curl_slist* curList;
+
 
   if(!post)
     return NULL; /* no input => no output! */
@@ -1088,6 +1110,13 @@ struct FormData *Curl_getFormData(struct HttpPost *post,
 	size += AddFormDataf(&form,
 			     "\r\nContent-Type: %s",
 			     file->contenttype);
+      }
+
+      curList = file->contentheader;
+      while( curList ) {
+        /* Process the additional headers specified for this form */
+        size += AddFormDataf( &form, "\r\n%s", curList->data );
+        curList = curList->next;
       }
 
 #if 0

@@ -6,6 +6,25 @@
 
                                History of Changes
 
+Daniel (14 December 2001)
+- Marcus Webster provided code for the new CURLFORM_CONTENTHEADER option for
+  curl_formadd(), that lets an application add a set of headers for that
+  particular part in a multipart/form-post. We need to add 
+
+Daniel (11 December 2001)
+- Ben Greear made me aware of the fact that the Curl_failf() usage internally
+  was a bit sloppy with adding newlines or not to the error messages. Let's
+  once and for all say that they do not belong there!
+
+- When uploading files with -T to give a local file name, and you end the URL
+  with a slash to have the local file name used remote too, we now no longer
+  use the local directory as well. Only the file part of the -T file name
+  will be appended to the right of the slash in the URL.
+
+Daniel (7 December 2001)
+- Michal Bonino pointed out that Digital Unix doesn't have gmtime_r so the
+  link failed. Added a configure check and corrected source code.
+
 Version 7.9.2
 
 Daniel (5 December 2001)
