@@ -114,9 +114,6 @@ enum protection_level {
 };
 #endif
 
-#ifndef HAVE_OPENSSL_ENGINE_H
-typedef void ENGINE;
-#endif
 /* struct for data related to SSL and SSL connections */
 struct ssl_connect_data {
   bool use;              /* use ssl encrypted communications TRUE/FALSE */
@@ -781,7 +778,7 @@ struct SessionHandle {
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */
   struct PureInfo info;        /* stats, reports and info data */
-#ifdef USE_SSLEAY
+#ifdef HAVE_OPENSSL_ENGINE_H
   ENGINE*  engine;
 #endif /* USE_SSLEAY */
 };
