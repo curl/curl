@@ -171,6 +171,10 @@ struct digestdata {
   char *realm;
   int algo;
   bool stale; /* set true for re-negotiation */
+  char *opaque;
+  char *qop;
+  char *algorithm;
+  int nc; /* nounce count */
 };
 
 typedef enum {
