@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (2 October 2004)
+- Gisle Vanem provided code that displays an error message when the (libidn
+  based) IDN conversion fails. This is really due to a missing suitable
+  function in the libidn API that I hope we can remove once libidn gets a
+  function like this.
+
 Daniel (1 October 2004)
 - Aleksandar Milivojevic reported a problem in the Redhat bugzilla (see
   https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=134133) and not to
