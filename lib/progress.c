@@ -212,13 +212,13 @@ int Curl_pgrsUpdate(struct UrlData *data)
 
   now = Curl_tvnow(); /* what time is it */
 
+  /* The exact time spent so far */
+  data->progress.timespent = Curl_tvdiff (now, data->progress.start);
+
   if(data->progress.lastshow == Curl_tvlong(now))
     return 0; /* never update this more than once a second if the end isn't 
                  reached */
   data->progress.lastshow = now.tv_sec;
-
-  /* The exact time spent so far */
-  data->progress.timespent = Curl_tvdiff (now, data->progress.start);
 
   /* The average download speed this far */
   data->progress.dlspeed = data->progress.downloaded/(data->progress.timespent!=0.0?data->progress.timespent:1.0);
