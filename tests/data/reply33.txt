@@ -1,0 +1,7 @@
+HTTP/1.1 303 See Other
+Server: fake
+Location: /moo/moo/moo/320002
+
+This Location should be fetched with a GET!
+
+

@@ -1,0 +1,18 @@
+PUT /33 HTTP/1.0
+Content-Range: bytes 50-149/150
+User-Agent: curl/7.6 (sparc-sun-solaris2.7) libcurl 7.6-pre4 (SSL 0.9.6) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Content-Length: 100
+
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
+012345678
