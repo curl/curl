@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o "curl dictionary.com" no longer assumes DICT protocol
  o re-invoke some system calls on EINTR
  o duplicate Host: when failed connection re-use
  o SOCKS5 version check
@@ -38,6 +39,6 @@ advice from friends like these:
  Dan Fandrich, Peter Pentchev, Marcin Konicki, Rune Kleveland, David Shaw,
  Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt,
  Hzhijun, Pavel Orehov, Bruce Mitchener, Cyrill Osterwalder, Dan Torop,
- Martijn Koster
+ Martijn Koster, Alex aka WindEagle
 
         Thanks! (and sorry if I forgot to mention someone)
