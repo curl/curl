@@ -2149,6 +2149,7 @@ void dump(const char *text,
     }
     fputc('\n', stream); /* newline */
   }
+  fflush(stream);
 }
 
 static
