@@ -59,7 +59,11 @@ SOURCES	   = \
 	easy.c \
 	strequal.c \
 	strtok.c \
-	connect.c
+	connect.c \
+        hash.c \
+        llist.c \
+        multi.c \
+        content_encoding.c
 
 OBJECTS = $(SOURCES:.c=.obj)
 

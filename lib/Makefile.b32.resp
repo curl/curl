@@ -28,4 +28,8 @@
 +easy.obj &
 +strequal.obj &
 +strtok.obj &
-+connect.obj
++connect.obj &
++hash.obj &
++llist.obj &
++multi.obj &
++content_encoding.obj
