@@ -22,9 +22,10 @@ PORTS
         - Ultrix
         - SINIX-Z v5
         Alpha DEC OSF 4
+        Alpha Digital UNIX V3.2D-1 (rev 41)
         HP-PA HP-UX 10.X 11.X
         MIPS IRIX 6.2, 6.5
-        Power AIX 4.2, 4.3.1
+        Power AIX 4.2, 4.3.1, 4.3.2
         PowerPC Darwin 1.0
         PowerPC Mac OS X
         Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7
