@@ -119,7 +119,7 @@ for ( $waitedpid = 0;
                 $testnum=$1;
 
                 if($verbose) {
-                    print STDERR "sending reply $testnum\n";
+                    print STDERR "OUT: sending reply $testnum\n";
                 }
             }
             else {
