@@ -114,7 +114,7 @@ Global Preparation
  call initialized.
 
  Repeated calls to curl_global_init() and curl_global_cleanup() should be
- avoided. They should be called once each.
+ avoided. They should only be called once each.
 
 Handle the Easy libcurl
 
@@ -741,6 +741,15 @@ Customizing Operations
  consideration and you should be aware that you may violate the HTTP protocol
  when doing so.
 
+ There's only one aspect left in the HTTP requests that we haven't yet
+ mentioned how to modify: the version field. All HTTP requests includes the
+ version number to tell the server which version we support. libcurl speak
+ HTTP 1.1 by default. Some very old servers don't like getting 1.1-requests
+ and when dealing with stubborn old things like that, you can tell libcurl to
+ use 1.0 instead by doing something like this:
+
+    curl_easy_setopt(easyhandle, CURLOPT_HTTP_VERSION, CURLHTTP_VERSION_1_0);
+
  Not all protocols are HTTP-like, and thus the above may not help you when you
  want to make for example your FTP transfers to behave differently.
 
@@ -770,16 +779,71 @@ Customizing Operations
  instead be called CURLOPT_POSTQUOTE and used the exact same way.
 
  The custom FTP command will be issued to the server in the same order they
- are built in the list, and if a command gets an error code returned back from
- the server no more commands will be issued and libcurl will bail out with an
- error code. Note that if you use CURLOPT_QUOTE to send commands before a
- transfer, no transfer will actually take place then.
+ are added to the list, and if a command gets an error code returned back from
+ the server, no more commands will be issued and libcurl will bail out with an
+ error code (CURLE_FTP_QUOTE_ERROR). Note that if you use CURLOPT_QUOTE to
+ send commands before a transfer, no transfer will actually take place when a
+ quote command has failed.
 
- [ custom FTP commands without transfer, FTP "header-only", HTTP 1.0 ]
+ If you set the CURLOPT_HEADER to true, you will tell libcurl to get
+ information about the target file and output "headers" about it. The headers
+ will be in "HTTP-style", looking like they do in HTTP.
+
+ The option to enable headers or to run custom FTP commands may be useful to
+ combine with CURLOPT_NOBODY. If this option is set, no actual file content
+ transfer will be performed.
+
 
 Cookies Without Chocolate Chips
 
- [ set cookies, read cookies from file, cookie-jar ]
+ In the HTTP sense, a cookie is a name with an associated value. A server
+ sends the name and value to the client, and expects it to get sent back on
+ every subsequent request to the server that matches the particular conditions
+ set. The conditions include that the domain name and path match and that the
+ cookie hasn't become too old.
+
+ In real-world cases, servers send new cookies to replace existing one to
+ update them. Server use cookies to "track" users and to keep "sessions".
+
+ Cookies are sent from server to clients with the header Set-Cookie: and
+ they're sent from clients to servers with the Cookie: header.
+
+ To just send whatever cookie you want to a server, you can use CURLOPT_COOKIE
+ to set a cookie string like this:
+
+    curl_easy_setopt(easyhandle, CURLOPT_COOKIE, "name1=var1; name2=var2;");
+
+ In many cases, that is not enough. You might want to dynamicly save whatever
+ cookies the remote server passes to you, and make sure those cookies are then
+ use accordingly on later requests.
+
+ One way to do this, is to save all headers you receive in a plain file and
+ when you make a request, you tell libcurl to read the previous headers to
+ figure out which cookies to use. Set header file to read cookies from with
+ CURLOPT_COOKIEFILE.
+
+ The CURLOPT_COOKIEFILE option also automaticly enables the cookie parser in
+ libcurl. Until the cookie parser is enabled, libcurl will not parse or
+ understand incoming cookies and they will just be ignored. However, when the
+ parser is enabled the cookies will be understood and the cookies will be kept
+ in memory and used properly in subsequent requests when the same handle is
+ used. Many times this is enough, and you may not have to save the cookies to
+ disk at all. Note that the file you specify to CURLOPT_COOKIEFILE doesn't
+ have to exist to enable the parser, so a common way to just enable the parser
+ and not read able might be to use a file name you know doesn't exist.
+
+ If you rather use existing cookies that you've previously received with your
+ Netscape or Mozilla browsers, you can make libcurl use that cookie file as
+ input. The CURLOPT_COOKIEFILE is used for that too, as libcurl will
+ automaticly find out what kind of file it is and act accordingly.
+
+ The perhaps most advanced cookie operation libcurl offers, is saving the
+ entire internal cookie state back into a Netscape/Mozilla formatted cookie
+ file. We call that the cookie-jar. When you set a file name with
+ CURLOPT_COOKIEJAR, that file name will be created and all received cookies
+ will be stored in it when curl_easy_cleanup() is called. This enabled cookies
+ to get passed on properly between multiple handles without any information
+ getting lost.
 
 
 Headers Equal Fun
