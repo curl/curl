@@ -154,8 +154,8 @@ void Curl_infof(struct SessionHandle *data, const char *fmt, ...)
 void Curl_failf(struct SessionHandle *data, const char *fmt, ...)
 {
   va_list ap;
-  va_start(ap, fmt);
   size_t len;
+  va_start(ap, fmt);
 
   vsnprintf(data->state.buffer, BUFSIZE, fmt, ap);
 
