@@ -590,7 +590,7 @@ static int dprintf_formatf(
                  the second argument */
   /* function pointer called for each output character */
 
-#if _WIN32_WCE
+#ifdef _WIN32_WCE
   int (__cdecl *stream) (int, FILE *),
 #else
   int (*stream)(int, FILE *),
