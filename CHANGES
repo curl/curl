@@ -7,6 +7,17 @@
                                   Changelog
 
 
+Daniel (19 December)
+- CURLOPT_IPRESOLVE was not possible to set.
+
+Daniel (18 December)
+- John McGowan reported a redirect-problem that happened if a site used a URL
+  like "url.com?var=content" (without a proper slash) and from that address
+  redirected the user-agent to an absolute directory.
+
+- David Byron made libcurl build fine with both the .NET and VC6 versions of
+  MSVC
+
 Daniel (16 December)
 - Updated test 506 since it started to fail after the cache prune change
   yesterday. I also changed it slightly to feature a counter in each debug
