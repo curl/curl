@@ -226,17 +226,18 @@ int GetLine(int sockfd, char *buf, struct connectdata *conn)
       (nread<BUFSIZE) && read_rc;
       nread++, ptr++) {
     if((CURLE_OK != Curl_read(conn, sockfd, ptr, 1, &nread)) ||
+       (nread <= 0) ||
        (*ptr == '\n'))
       break;
   }
   *ptr=0; /* zero terminate */
-
+  
   if(data->bits.verbose) {
     fputs("< ", data->err);
     fwrite(buf, 1, nread, data->err);
     fputs("\n", data->err);
   }
-  return nread;
+  return nread>0?nread:0;
 }
 
 
