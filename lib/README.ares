@@ -23,11 +23,13 @@ Mac OS X quirk:
 Build ares
 ==========
 
-1. ./configure
-2. make
+1. unpack the ares-1.1.1 archive
+2. apply patch (if you're on Mac OS X or windows)
+3. ./configure
+4. make
 
-Build
-=====
+Build libcurl to use ares
+=========================
 
 1. Move the ares source/build tree to subdirectory in the curl root named
    'ares'.
