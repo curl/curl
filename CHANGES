@@ -6,6 +6,23 @@
 
                                History of Changes
 
+Daniel (29 March 2001)
+- Georg Horn mailed me some corrections for the Curl::easy perl interface.
+
+- Experimental ftps:// support added. It is basically FTP over SSL for the
+  control connection. It still makes all data transfers going over unencrypted
+  connections. Rainer Weikusat's ftpd-ssl server hack supports this and I used
+  that to verify the functionality.
+
+Daniel (27 March 2001)
+- Guenole Bescon discovered that if you set a CURLOPT_TIMEOUT and then tried
+  to get a file from a site and it fails, the SIGALRM would still be sent
+  after the timeout-time, quite inexpectedly!
+
+- I added an ftp transfer example to docs/examples/ and I also wrote a tiny
+  example makefile that can be used as a start when building one of the
+  examples.
+
 Version 7.7.1-beta1
 
 Daniel (26 March 2001)
