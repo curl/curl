@@ -67,6 +67,7 @@ A list of features that must be present in the client/library for this test
 to be able to run. Features testable here are:
 SSL
 netrc_debug
+large_file
 </features>
 
 <killserver>
