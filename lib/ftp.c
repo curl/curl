@@ -1212,7 +1212,13 @@ CURLcode ftp_use_port(struct connectdata *conn)
   bool sa_filled_in = FALSE;
 
   if(data->set.ftpport) {
-    if(Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
+    in_addr_t in;
+
+    /* First check if the given name is an IP address */
+    in=inet_addr(data->set.ftpport);
+
+    if((in == CURL_INADDR_NONE) &&
+       Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
       h = Curl_resolv(data, myhost, 0);
     }
     else {
