@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "18 June 2003" "Curl 7.10.6" "Curl Manual"
+.TH curl 1 "8 Aug 2003" "Curl 7.10.7" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -290,6 +290,12 @@ like this to better enable scripts etc to better deal with failed attempts. In
 normal cases when a HTTP server fails to deliver a document, it returns a HTML
 document stating so (which often also describes why and more). This flag will
 prevent curl from outputting that and fail silently instead.
+
+If this option is used twice, the second will again disable silent failure.
+.IP "--ftp-create-dirs"
+(FTP) When an FTP URL/operation uses a path that doesn't currently exist on
+the server, the standard behaviour of curl is to fail. Using this option, curl
+will instead attempt to create missing directories.
 
 If this option is used twice, the second will again disable silent failure.
 .IP "-F/--form <name=content>"
