@@ -540,15 +540,21 @@ Curl_SSLConnect(struct connectdata *conn)
 
   /* Make funny stuff to get random input */
   random_the_seed(conn);
-    
+
+  /* check to see if we've been told to use an explicit SSL/TLS version */
   switch(data->set.ssl.version) {
   default:
+  case CURL_SSLVERSION_DEFAULT:
+    /* we try to figure out version */
     req_method = SSLv23_client_method();
     break;
-  case 2:
+  case CURL_SSLVERSION_TLSv1:
+    req_method = TLSv1_client_method();
+    break;
+  case CURL_SSLVERSION_SSLv2:
     req_method = SSLv2_client_method();
     break;
-  case 3:
+  case CURL_SSLVERSION_SSLv3:
     req_method = SSLv3_client_method();
     break;
   }
