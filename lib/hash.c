@@ -72,7 +72,7 @@ _hash_element_dtor (void *user, void *element)
 /* {{{ void curl_hash_init (curl_hash *, int, curl_hash_dtor)
  */
 void 
-curl_hash_init (curl_hash *h, int slots, curl_hash_dtor dtor)
+Curl_hash_init (curl_hash *h, int slots, curl_hash_dtor dtor)
 {
   int i;
 
@@ -82,7 +82,7 @@ curl_hash_init (curl_hash *h, int slots, curl_hash_dtor dtor)
 
   h->table = (curl_llist **) malloc(slots * sizeof(curl_llist *));
   for (i = 0; i < slots; ++i) {
-    h->table[i] = curl_llist_alloc((curl_llist_dtor) _hash_element_dtor);
+    h->table[i] = Curl_llist_alloc((curl_llist_dtor) _hash_element_dtor);
   }
 }
 /* }}} */
@@ -90,7 +90,7 @@ curl_hash_init (curl_hash *h, int slots, curl_hash_dtor dtor)
 /* {{{ curl_hash *curl_hash_alloc (int, curl_hash_dtor)
  */
 curl_hash *
-curl_hash_alloc (int slots, curl_hash_dtor dtor)
+Curl_hash_alloc (int slots, curl_hash_dtor dtor)
 {
   curl_hash *h;
 
@@ -98,7 +98,7 @@ curl_hash_alloc (int slots, curl_hash_dtor dtor)
   if (NULL == h)
     return NULL;
 
-  curl_hash_init(h, slots, dtor);
+  Curl_hash_init(h, slots, dtor);
 
   return h;
 }
@@ -142,7 +142,7 @@ _mk_hash_element (curl_hash_element **e, char *key, size_t key_len, const void *
 /* {{{ int curl_hash_add (curl_hash *, char *, size_t, const void *)
  */
 int 
-curl_hash_add (curl_hash *h, char *key, size_t key_len, const void *p)
+Curl_hash_add (curl_hash *h, char *key, size_t key_len, const void *p)
 {
   curl_hash_element  *he;
   curl_llist_element *le;
@@ -162,7 +162,7 @@ curl_hash_add (curl_hash *h, char *key, size_t key_len, const void *p)
   if (_mk_hash_element(&he, key, key_len, p) != 0) 
     return 0;
 
-  if (curl_llist_insert_next(l, CURL_LLIST_TAIL(l), he)) {
+  if (Curl_llist_insert_next(l, CURL_LLIST_TAIL(l), he)) {
     ++h->size;
     return 1;
   }
@@ -174,7 +174,7 @@ curl_hash_add (curl_hash *h, char *key, size_t key_len, const void *p)
 /* {{{ int curl_hash_delete (curl_hash *, char *, size_t)
  */
 int 
-curl_hash_delete(curl_hash *h, char *key, size_t key_len)
+Curl_hash_delete(curl_hash *h, char *key, size_t key_len)
 {
   curl_hash_element  *he;
   curl_llist_element *le;
@@ -185,7 +185,7 @@ curl_hash_delete(curl_hash *h, char *key, size_t key_len)
        le = CURL_LLIST_NEXT(le)) {
     he = CURL_LLIST_VALP(le);
     if (_hash_key_compare(he->key, he->key_len, key, key_len)) {
-      curl_llist_remove(l, le, (void *) h);
+      Curl_llist_remove(l, le, (void *) h);
       --h->size;
       return 1;
     }
@@ -198,7 +198,7 @@ curl_hash_delete(curl_hash *h, char *key, size_t key_len)
 /* {{{ int curl_hash_find (curl_hash *, char *, size_t, void **)
  */
 int 
-curl_hash_find(curl_hash *h, char *key, size_t key_len, void **p)
+Curl_hash_find(curl_hash *h, char *key, size_t key_len, void **p)
 {
   curl_llist_element *le;
   curl_hash_element  *he;
@@ -221,13 +221,16 @@ curl_hash_find(curl_hash *h, char *key, size_t key_len, void **p)
 /* {{{ void curl_hash_apply (curl_hash *, void *, void (*)(void *, curl_hash_element *))
  */
 void 
-curl_hash_apply(curl_hash *h, void *user, void (*cb)(void *, curl_hash_element *))
+Curl_hash_apply(curl_hash *h, void *user,
+                void (*cb)(void *, curl_hash_element *))
 {
   curl_llist_element  *le;
   int                  i;
 
   for (i = 0; i < h->slots; ++i) {
-    for (le = CURL_LLIST_HEAD(h->table[i]); le != NULL; le = CURL_LLIST_NEXT(le)) {
+    for (le = CURL_LLIST_HEAD(h->table[i]);
+         le != NULL;
+         le = CURL_LLIST_NEXT(le)) {
       cb(user, (curl_hash_element *) CURL_LLIST_VALP(le));
     }
   }
@@ -237,42 +240,47 @@ curl_hash_apply(curl_hash *h, void *user, void (*cb)(void *, curl_hash_element *
 /* {{{ void curl_hash_clean (curl_hash *)
  */
 void
-curl_hash_clean(curl_hash *h)
+Curl_hash_clean(curl_hash *h)
 {
   int i;
 
   for (i = 0; i < h->slots; ++i) {
-    curl_llist_destroy(h->table[i], (void *) h);
+    Curl_llist_destroy(h->table[i], (void *) h);
   }
 
   free(h->table);
 }
 /* }}} */
 
-/* {{{ void curl_hash_clean_with_criterium (curl_hash *, void *, int (*)(void *, void *))
+/* {{{ void curl_hash_clean_with_criterium (curl_hash *, void *,
+   int (*)(void *, void *))
  */
 void
-curl_hash_clean_with_criterium(curl_hash *h, void *user, int (*comp)(void *, void *))
+Curl_hash_clean_with_criterium(curl_hash *h, void *user,
+                               int (*comp)(void *, void *))
 {
   curl_llist_element *le;
+  curl_llist_element *lnext;
   int i;
 
   for (i = 0; i < h->slots; ++i) {
-    for (le = CURL_LLIST_HEAD(h->table[i]);
-         le != NULL;
-         le = CURL_LLIST_NEXT(le)) {
+    le = CURL_LLIST_HEAD(h->table[i]);
+    while(le != NULL)
       if (comp(user, ((curl_hash_element *) CURL_LLIST_VALP(le))->ptr)) {
-        curl_llist_remove(h->table[i], le, (void *) h);
+        lnext = CURL_LLIST_NEXT(le);
+        Curl_llist_remove(h->table[i], le, (void *) h);
         --h->size;
+        le = lnext;
       }
-    }
+      else
+        le = CURL_LLIST_NEXT(le);
   }
 }
 
 /* {{{ int curl_hash_count (curl_hash *)
  */
 int 
-curl_hash_count(curl_hash *h)
+Curl_hash_count(curl_hash *h)
 {
   return h->size;
 }
@@ -281,12 +289,12 @@ curl_hash_count(curl_hash *h)
 /* {{{ void curl_hash_destroy (curl_hash *)
  */
 void 
-curl_hash_destroy(curl_hash *h)
+Curl_hash_destroy(curl_hash *h)
 {
   if (!h)
     return;
 
-  curl_hash_clean(h);
+  Curl_hash_clean(h);
   free(h);
 }
 /* }}} */
