@@ -11,6 +11,7 @@ specify standards used by curl, software that extends curl, web pages with
 that we use to build/compile/develop curl.
 
 Standards
+---------
 
   RFC 959  - Defines how FTP works
 
@@ -61,29 +62,41 @@ Standards
   RFC 2617 - HTTP Authentication
 
 Compilers
-
+---------
   MingW32 - http://www.xraylith.wisc.edu/~khan/software/gnu-win32/index.html
+
   gcc     - http://www.gnu.org/software/gcc/gcc.html
 
 Software
-
+--------
   OpenSSL -  http://www.openssl.org
+
   OpenLDAP - http://www.openldap.org
+
   zlib -     http://www.cdrom.com/pub/infozip/zlib/
 
-Competitors
-
+Similar Tools
+-------------
   wget    - ftp://prep.ai.mit.edu/pub/gnu/
+
   snarf   - http://www.xach.com/snarf/
+
   lynx    - http://lynx.browser.org/ (well at least when -dump is used)
+
   swebget - http://www.uni-hildesheim.de/~smol0075/swebget/
+
   fetch   - ?
 
 Related Software
-
+----------------
   ftpparse - http://cr.yp.to/ftpparse.html parses FTP LIST responses
+
   autoconf - http://www.gnu.org/software/autoconf/autoconf.html
+
   automake - http://www.gnu.org/software/automake/automake.html
+
   bison    - http://www.gnu.org/software/bison/bison.html
+
   gzip     - http://www.gnu.org/software/gzip/gzip.html
+
   tar      - http://www.gnu.org/software/tar/tar.html
