@@ -735,13 +735,18 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
 
 /*
  * AddFormData() adds a chunk of data to the FormData linked list.
+ *
+ * size is incremented by the chunk length, unless it is NULL
  */
-static size_t AddFormData(struct FormData **formp,
-                          const void *line,
-                          size_t length)
+static CURLcode AddFormData(struct FormData **formp,
+                            const void *line,
+                            size_t length,
+                            size_t *size)
 {
   struct FormData *newform = (struct FormData *)
     malloc(sizeof(struct FormData));
+  if (!newform)
+    return CURLE_OUT_OF_MEMORY;
   newform->next = NULL;
 
   /* we make it easier for plain strings: */
@@ -749,6 +754,10 @@ static size_t AddFormData(struct FormData **formp,
     length = strlen((char *)line);
 
   newform->line = (char *)malloc(length+1);
+  if (!newform->line) {
+    free(newform);
+    return CURLE_OUT_OF_MEMORY;
+  }
   memcpy(newform->line, line, length);
   newform->length = length;
   newform->line[length]=0; /* zero terminate for easier debugging */
@@ -760,14 +769,17 @@ static size_t AddFormData(struct FormData **formp,
   else
     *formp = newform;
 
-  return length;
+  if (size)
+    *size += length;
+  return CURLE_OK;
 }
 
 /*
  * AddFormDataf() adds printf()-style formatted data to the formdata chain.
  */
 
-static size_t AddFormDataf(struct FormData **formp,
+static CURLcode AddFormDataf(struct FormData **formp,
+                           size_t *size,
                            const char *fmt, ...)
 {
   char s[4096];
@@ -776,7 +788,7 @@ static size_t AddFormDataf(struct FormData **formp,
   vsprintf(s, fmt, ap);
   va_end(ap);
 
-  return AddFormData(formp, s, 0);
+  return AddFormData(formp, s, 0, size);
 }
 
 /*
@@ -875,7 +887,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
   struct curl_httppost *file;
   CURLcode result = CURLE_OK;
 
-  curl_off_t size =0;
+  size_t size =0;
   char *boundary;
   char *fileboundary=NULL;
   struct curl_slist* curList;
@@ -888,28 +900,43 @@ CURLcode Curl_getFormData(struct FormData **finalform,
   boundary = Curl_FormBoundary();
   
   /* Make the first line of the output */
-  AddFormDataf(&form,
+  result = AddFormDataf(&form, 0,
                "Content-Type: multipart/form-data;"
                " boundary=%s\r\n",
                boundary);
+  if (result != CURLE_OK) {
+    free(boundary);
+    return result;
+  }
   /* we DO NOT count that line since that'll be part of the header! */
 
   firstform = form;
   
   do {
 
-    if(size)
-      size += AddFormDataf(&form, "\r\n");
+    if(size) {
+      result = AddFormDataf(&form, &size, "\r\n");
+      if (result != CURLE_OK)
+        break;
+    }
 
     /* boundary */
-    size += AddFormDataf(&form, "--%s\r\n", boundary);
+    result = AddFormDataf(&form, &size, "--%s\r\n", boundary);
+    if (result != CURLE_OK)
+      break;
 
-    size += AddFormData(&form,
-                        "Content-Disposition: form-data; name=\"", 0);
+    result = AddFormData(&form,
+                        "Content-Disposition: form-data; name=\"", 0, &size);
+    if (result != CURLE_OK)
+      break;
 
-    size += AddFormData(&form, post->name, post->namelength);
+    result = AddFormData(&form, post->name, post->namelength, &size);
+    if (result != CURLE_OK)
+      break;
 
-    size += AddFormData(&form, "\"", 0);
+    size += AddFormData(&form, "\"", 0, &size);
+    if (result != CURLE_OK)
+      break;
 
     if(post->more) {
       /* If used, this is a link to more file names, we must then do
@@ -917,10 +944,12 @@ CURLcode Curl_getFormData(struct FormData **finalform,
 
       fileboundary = Curl_FormBoundary();
 
-      size += AddFormDataf(&form,
+      result = AddFormDataf(&form, &size,
                            "\r\nContent-Type: multipart/mixed,"
                            " boundary=%s\r\n",
                            fileboundary);
+      if (result != CURLE_OK)
+        break;
     }
 
     file = post;
@@ -933,34 +962,47 @@ CURLcode Curl_getFormData(struct FormData **finalform,
 
       if(post->more) {
         /* if multiple-file */
-        size += AddFormDataf(&form,
+        result = AddFormDataf(&form, &size,
                              "\r\n--%s\r\nContent-Disposition: "
                              "attachment; filename=\"%s\"",
                              fileboundary,
                              (file->showfilename?file->showfilename:
                               file->contents));
+        if (result != CURLE_OK)
+          break;
       }
       else if((post->flags & HTTPPOST_FILENAME) ||
               (post->flags & HTTPPOST_BUFFER)) {
 
-        size += AddFormDataf(&form,
+        result = AddFormDataf(&form, &size,
                              "; filename=\"%s\"",
                              (post->showfilename?post->showfilename:
                               post->contents));
+        if (result != CURLE_OK)
+          break;
       }
       
       if(file->contenttype) {
         /* we have a specified type */
-        size += AddFormDataf(&form,
+        result = AddFormDataf(&form, &size,
                              "\r\nContent-Type: %s",
                              file->contenttype);
+        if (result != CURLE_OK)
+          break;
       }
 
       curList = file->contentheader;
       while( curList ) {
         /* Process the additional headers specified for this form */
-        size += AddFormDataf( &form, "\r\n%s", curList->data );
+        result = AddFormDataf( &form, &size, "\r\n%s", curList->data );
+        if (result != CURLE_OK)
+          break;
         curList = curList->next;
+      }
+      if (result != CURLE_OK) {
+        Curl_formclean(firstform);
+        free(boundary);
+        return result;
       }
 
 #if 0
@@ -977,7 +1019,9 @@ CURLcode Curl_getFormData(struct FormData **finalform,
       }
 #endif
 
-      size += AddFormData(&form, "\r\n\r\n", 0);
+      result = AddFormData(&form, "\r\n\r\n", 0, &size);
+      if (result != CURLE_OK)
+        break;
 
       if((post->flags & HTTPPOST_FILENAME) ||
          (post->flags & HTTPPOST_READFILE)) {
@@ -995,8 +1039,16 @@ CURLcode Curl_getFormData(struct FormData **finalform,
          */
 
         if(fileread) {
-          while((nread = fread(buffer, 1, 1024, fileread)))
-            size += AddFormData(&form, buffer, nread);
+          while((nread = fread(buffer, 1, 1024, fileread))) {
+            result = AddFormData(&form, buffer, nread, &size);
+            if (result != CURLE_OK)
+              break;
+          }
+          if (result != CURLE_OK) {
+            Curl_formclean(firstform);
+            free(boundary);
+            return result;
+          }
 
           if(fileread != stdin)
             fclose(fileread);
@@ -1011,30 +1063,53 @@ CURLcode Curl_getFormData(struct FormData **finalform,
       } 
       else if (post->flags & HTTPPOST_BUFFER) {
           /* include contents of buffer */
-          size += AddFormData(&form, post->buffer, post->bufferlength);
+          result = AddFormData(&form, post->buffer, post->bufferlength,
+                               &size);
+          if (result != CURLE_OK)
+            break;
       }
 
       else {
         /* include the contents we got */
-        size += AddFormData(&form, post->contents, post->contentslength);
+        result = AddFormData(&form, post->contents, post->contentslength,
+                             &size);
+        if (result != CURLE_OK)
+          break;
       }
     } while((file = file->more)); /* for each specified file for this field */
+    if (result != CURLE_OK) {
+      Curl_formclean(firstform);
+      free(boundary);
+      return result;
+    }
 
     if(post->more) {
       /* this was a multiple-file inclusion, make a termination file
          boundary: */
-      size += AddFormDataf(&form,
+      result = AddFormDataf(&form, &size,
                            "\r\n--%s--",
                            fileboundary);     
       free(fileboundary);
+      if (result != CURLE_OK)
+        break;
     }
 
   } while((post=post->next)); /* for each field */
+  if (result != CURLE_OK) {
+    Curl_formclean(firstform);
+    free(boundary);
+    return result;
+  }
 
   /* end-boundary for everything */
-  size += AddFormDataf(&form,
+  result = AddFormDataf(&form, &size,
                        "\r\n--%s--\r\n",
                        boundary);
+  if (result != CURLE_OK) {
+    Curl_formclean(firstform);
+    free(boundary);
+    return result;
+  }
 
   *sizep = size;
 
