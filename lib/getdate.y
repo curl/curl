@@ -83,6 +83,10 @@
 #include "memdebug.h"
 #endif
 
+#ifndef YYMAXDEPTH
+#define YYMAXDEPTH 0
+#endif
+
 #if __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 7)
 # define __attribute__(x)
 #endif
@@ -1058,8 +1062,8 @@ curl_getdate (const char *p, const time_t *now)
       struct tm *gmt;
 #ifdef HAVE_GMTIME_R
       /* thread-safe version */
-      struct tm keeptime;
-      gmt = (struct tm *)gmtime_r(&Start, &keeptime);
+      struct tm keeptime2;
+      gmt = (struct tm *)gmtime_r(&Start, &keeptime2);
 #else
       gmt = gmtime(&Start);
 #endif
