@@ -1149,9 +1149,11 @@ CURLcode Curl_http(struct connectdata *conn)
   }
 
   ptr = checkheaders(data, "Host:");
-  if(ptr) {
-    /* If we have a given custom Host: header, we extract the host name
-       in order to possibly use it for cookie reasons later on. */
+  if(ptr && !data->state.this_is_a_follow) {
+    /* If we have a given custom Host: header, we extract the host name in
+       order to possibly use it for cookie reasons later on. We only allow the
+       custom Host: header if this is NOT a redirect, as setting Host: in the
+       redirected request is being out on thin ice. */
     char *start = ptr+strlen("Host:");
     while(*start && isspace((int)*start ))
       start++;
@@ -1171,13 +1173,7 @@ CURLcode Curl_http(struct connectdata *conn)
     }
   }    
   else {
-    /* if ptr_host is already set, it is almost OK since we only re-use
-       connections to the very same host and port, but when we use a HTTP
-       proxy we have a persistant connect and yet we must change the Host:
-       header! */
-
-    if(conn->allocptr.host)
-      free(conn->allocptr.host);
+    Curl_safefree(conn->allocptr.host);
 
     /* When building Host: headers, we must put the host name within
        [brackets] if the host name is a plain IPv6-address. RFC2732-style. */
