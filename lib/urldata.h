@@ -93,6 +93,9 @@
    of need. */
 #define HEADERSIZE 256
 
+/* Maximum number of dirs supported by libcurl in a FTP dir hierarchy */
+#define CURL_MAX_FTP_DIRDEPTH 100
+
 /* Just a convenience macro to get the larger value out of two given */
 #ifndef MAX
 #define MAX(x,y) ((x)>(y)?(x):(y))
@@ -193,7 +196,7 @@ struct FTP {
   char *user;    /* user name string */
   char *passwd;  /* password string */
   char *urlpath; /* the originally given path part of the URL */
-  char *dir;     /* decoded directory */
+  char *dirs[CURL_MAX_FTP_DIRDEPTH]; /* path components */
   char *file;    /* decoded file */
 
   char *entrypath; /* the PWD reply when we logged on */
@@ -435,6 +438,7 @@ struct connectdata {
     char *ref; /* free later if not NULL! */
     char *cookie; /* free later if not NULL! */
     char *host; /* free later if not NULL */
+    char *cookiehost; /* free later if not NULL */
   } allocptr;
 
   char *newurl; /* This can only be set if a Location: was in the
