@@ -2243,7 +2243,7 @@ static void parseconfig(const char *filename,
 
 static void go_sleep(long ms)
 {
-#ifdef HAVE_POLL
+#ifdef HAVE_POLL_FINE
   /* portable subsecond "sleep" */
   poll((void *)0, 0, ms);
 #else
@@ -2259,7 +2259,7 @@ static void go_sleep(long ms)
   struct timeval timeout;
 
   timeout.tv_sec = ms/1000;
-  ms -= ms/1000;
+  ms = ms%1000;
   timeout.tv_usec = ms * 1000;
 
   select(0, NULL,  NULL, NULL, &timeout);

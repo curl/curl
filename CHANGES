@@ -6,6 +6,21 @@
 
                                   Changelog
 
+Daniel (27 June 2004)
+- Based on Bob's bug report #979480, I wrote a configure check that checks if
+  poll() can be used to wait on NULL as otherwise select() should be used to
+  do it. The select() usage was also fixed according to his report.
+
+  Mac OS X 10.3 says "poll() functionality for Mac OS X is implemented via an
+  emulation layer on top of select(), not in the kernel directly. It is
+  recommended that programs running under OS X 10.3 prefer select() over
+  poll(). Configure scripts should look for the _POLL_EMUL_H_ define (instead
+  of _POLL_H_ or _SYS_POLL_H_) and avoid implementations where poll is not
+  implemented in the kernel."
+
+  Yes, we can probably use select() on most platforms but today I prefered to
+  leave the code unaltered.
+
 Daniel (24 June 2004)
 - The standard curl_version() string now only includes version info about
   involved libraries and not about particular features. Thus it will no longer

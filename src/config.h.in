@@ -35,6 +35,9 @@
 /* Define if you have the `poll' function. */
 #undef HAVE_POLL
 
+/* Define if you have a good `poll' function that can wait on NULL. */
+#undef HAVE_POLL_FINE
+
 /* Define if you can write to argc[] strings */
 #undef HAVE_WRITABLE_ARGV
 
