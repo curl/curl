@@ -378,9 +378,7 @@ int Curl_resolv(struct connectdata *conn,
   int wait;
   struct SessionHandle *data = conn->data;
   CURLcode result;
-
-  /* default to failure */
-  int rc = CURLRESOLV_ERROR;
+  int rc;
   *entry = NULL;
 
 #ifdef HAVE_SIGSETJMP
@@ -412,6 +410,8 @@ int Curl_resolv(struct connectdata *conn,
 
   /* free the allocated entry_id again */
   free(entry_id);
+
+  rc = CURLRESOLV_ERROR; /* default to failure */
 
   if (!dns) {
     /* The entry was not in the cache. Resolve it to IP address */
