@@ -408,6 +408,7 @@ int Curl_debug(struct SessionHandle *data, curl_infotype type,
   switch(type) {
   case CURLINFO_TEXT:
   case CURLINFO_HEADER_OUT:
+  case CURLINFO_HEADER_IN:
     fwrite(s_infotype[type], 2, 1, data->set.err);
     fwrite(ptr, size, 1, data->set.err);
     break;
