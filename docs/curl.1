@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "9 June 2000" "Curl 7.0" "Curl Manual"
+.TH curl 1 "14 June 2000" "Curl 7.0" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -67,10 +67,10 @@ format.
 that the file specified with -b/--cookie is only used as input. No cookies
 will be stored in the file. To store cookies, save the HTTP headers to a file
 using -D/--dump-header!
-.IP "-B/--ftp-ascii"
-(FTP/LDAP)
+.IP "-B/--use-ascii"
 Use ASCII transfer when getting an FTP file or LDAP info. For FTP, this can
-also be enforced by using an URL that ends with ";type=A".
+also be enforced by using an URL that ends with ";type=A". This option causes
+data sent to stdout to be in text mode for win32 systems.
 .IP "-c/--continue"
 Continue/Resume a previous file transfer. This instructs curl to
 continue appending data on the file where it was previously left,
@@ -557,7 +557,7 @@ If you do find any (or have other suggestions), mail Daniel Stenberg
  - Kjell Ericson <Kjell.Ericson@haxx,nu>
  - Troy Engel <tengel@sonic.net>
  - Ryan Nelson <ryan@inch.com>
- - Bjorn Stenberg <Bjorn.Stenberg@haxx.se>
+ - Björn Stenberg <Bjorn.Stenberg@haxx.se>
  - Angus Mackay <amackay@gus.ml.org>
  - Eric Young <eay@cryptsoft.com>
  - Simon Dick <simond@totally.irrelevant.org>
@@ -575,7 +575,7 @@ If you do find any (or have other suggestions), mail Daniel Stenberg
  - Ralph Beckmann <rabe@uni-paderborn.de>
  - T. Yamada <tai@imasy.or.jp>
  - Lars J. Aas <larsa@sim.no>
- - Jörn Hartroth <Joern.Hartroth@telekom.de>
+ - Jörn Hartroth <Joern.Hartroth@computer.org>
  - Matthew Clarke <clamat@van.maves.ca>
  - Linus Nielsen <Linus.Nielsen@haxx.se>
  - Felix von Leitner <felix@convergence.de>
@@ -591,6 +591,7 @@ If you do find any (or have other suggestions), mail Daniel Stenberg
  - Paul Marquis <pmarquis@iname.com>
  - David LeBlanc <dleblanc@qnx.com>
  - Rich Gray at Plus Technologies
+ - Luong Dinh Dung <u8luong@lhsystems.hu>
  
 .SH WWW
 http://curl.haxx.se
