@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "30 Nov 2001" "Curl 7.9.2" "Curl Manual"
+.TH curl 1 "25 Feb 2002" "Curl 7.9.5" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -594,6 +594,9 @@ The average download speed that curl measured for the complete download.
 .TP
 .B speed_upload
 The average upload speed that curl measured for the complete upload.
+.TP
+.B content_type
+The Content-Type of the requested document, if there was any. (Added in 7.9.5)
 .RE
 
 If this option is used several times, the last one will be used.
