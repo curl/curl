@@ -737,6 +737,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 conn->newurl = strdup(data->change.url);
 	    }
 #endif
+#ifdef USE_SSLEAY
+            /* NTLM support requires the SSL crypto libs */
             else if(Curl_compareheader(k->p,
                                        "WWW-Authenticate:", "NTLM") &&
                     (401 == k->httpcode) &&
@@ -748,6 +750,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               conn->newurl = strdup(data->change.url); /* clone string */
             }
+#endif
             else if(checkprefix("WWW-Authenticate:", k->p) &&
                     (401 == k->httpcode) &&
                     data->set.httpdigest /* Digest authentication is 
@@ -789,6 +792,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   *ptr = '\0';   /* zero terminate */
                   conn->newurl = strdup(start); /* clone string */
                   *ptr = backup; /* restore ending letter */
+
+                  k->returnbeforebody = TRUE; /* don't wait for contents */
                 }
               }
 #if 0 /* for consideration */
@@ -846,7 +851,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                write a piece of the body */
             if(conn->protocol&PROT_HTTP) {
               /* HTTP-only checks */
-              if (conn->newurl) {
+              if (conn->newurl && k->returnbeforebody) {
                 /* abort after the headers if "follow Location" is set */
                 infof (data, "Send request to this URL: %s\n", conn->newurl);
                 k->keepon &= ~KEEP_READ;
@@ -1258,6 +1263,7 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   k->maxfd = (conn->sockfd>conn->writesockfd?
               conn->sockfd:conn->writesockfd)+1;
   k->hbufp = data->state.headerbuff;
+  k->returnbeforebody=FALSE;
 
   Curl_pgrsTime(data, TIMER_PRETRANSFER);
   Curl_speedinit(data);
