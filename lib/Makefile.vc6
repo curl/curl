@@ -252,12 +252,12 @@ $(DIROBJ):
 debug-dll\libcurl.res \
 debug-ssl-dll\libcurl.res \
 release-libcurl-ssl-dll\libcurl.res: libcurl.rc
-	rc /dCURL_DEBUG=1 /Fo $@ libcurl.rc
+	rc /dCURLDEBUG=1 /Fo $@ libcurl.rc
 
 release-dll\libcurl.res \
 release-ssl-dll\libcurl.res \
 release-libcurl-ssl-dll\libcurl.res: libcurl.rc
-	rc /dCURL_DEBUG=0 /Fo $@ libcurl.rc
+	rc /dCURLDEBUG=0 /Fo $@ libcurl.rc
 
 clean:
 	-@erase $(DIROBJ)\*.obj
