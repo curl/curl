@@ -414,14 +414,14 @@ sec_prot_internal(struct connectdata *conn, int level)
   }
 
   if(level){
+    int code;
     if(Curl_ftpsendf(conn, "PBSZ %u", s))
       return -1;
 
-    nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
-    if(nread < 0)
+    if(Curl_GetFTPResponse(&nread, conn, &code))
       return -1;
 
-    if(conn->data->state.buffer[0] != '2'){
+    if(code/100 != '2'){
       failf(conn->data, "Failed to set protection buffer size.");
       return -1;
     }
@@ -437,8 +437,7 @@ sec_prot_internal(struct connectdata *conn, int level)
   if(Curl_ftpsendf(conn, "PROT %c", level["CSEP"]))
     return -1;
 
-  nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, NULL);
-  if(nread < 0)
+  if(Curl_GetFTPResponse(&nread, conn, NULL))
     return -1;
 
   if(conn->data->state.buffer[0] != '2'){
@@ -496,8 +495,7 @@ Curl_sec_login(struct connectdata *conn)
     if(Curl_ftpsendf(conn, "AUTH %s", (*m)->name))
       return -1;
 
-    nread = Curl_GetFTPResponse(conn->data->state.buffer, conn, &ftpcode);
-    if(nread < 0)
+    if(Curl_GetFTPResponse(&nread, conn, &ftpcode))
       return -1;
 
     if(conn->data->state.buffer[0] != '3'){

@@ -190,7 +190,9 @@ struct FTP {
                        read the line, just ignore the result. */
   bool no_transfer; /* nothing was transfered, (possibly because a resumed
                        transfer already was complete) */
-
+  long response_time; /* When no timeout is given, this is the amount of
+                         seconds we await for an FTP response. Initialized
+                         in Curl_ftp_connect() */
 };
 
 /****************************************************************************
