@@ -317,7 +317,8 @@ static void help(void)
        "    --egd-file <file> EGD socket path for random data (SSL)\n"
        " -e/--referer       Referer page (H)");
   puts(" -E/--cert <cert[:passwd]> Specifies your certificate file and password (HTTPS)\n"
-       "    --cacert <file> CA certifciate to verify peer against (HTTPS)\n"
+       "    --cacert <file> CA certifciate to verify peer against (SSL)\n"
+       "    --ciphers <list> What SSL ciphers to use (SSL)\n"
        "    --connect-timeout <seconds> Maximum time allowed for connection\n"
        " -f/--fail          Fail silently (no output at all) on errors (H)\n"
        " -F/--form <name=content> Specify HTTP POST data (H)\n"
@@ -413,6 +414,7 @@ struct Configurable {
   struct getout *url_get;  /* point to the node to fill in URL */
   struct getout *url_out;  /* point to the node to fill in outfile */
 
+  char *cipher_list;
   char *cert;
   char *cacert;
   char *cert_passwd;
@@ -604,6 +606,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5a", "random-file", TRUE},
     {"5b", "egd-file",   TRUE},
     {"5c", "connect-timeout", TRUE},
+    {"5d", "ciphers",    TRUE},
 
     {"2", "sslv2",       FALSE},
     {"3", "sslv3",       FALSE},
@@ -764,6 +767,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'c': /* connect-timeout */
         config->connecttimeout=atoi(nextarg);
+        break;
+      case 'd': /* ciphers */
+        GetStr(&config->cipher_list, nextarg);
         break;
       default: /* the URL! */
         {
@@ -2024,6 +2030,10 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_RANDOM_FILE, config->random_file);
       curl_easy_setopt(curl, CURLOPT_EGDSOCKET, config->egd_file);
       curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, config->connecttimeout);
+
+      /* debug */
+      if(config->cipher_list)
+        curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, config->cipher_list);
       
       res = curl_easy_perform(curl);
         
