@@ -26,9 +26,9 @@
  *
  * ------------------------------------------------------------
  * Main author:
- * - Daniel Stenberg <Daniel.Stenberg@haxx.nu>
+ * - Daniel Stenberg <daniel@haxx.se>
  *
- * 	http://curl.haxx.nu
+ * 	http://curl.haxx.se
  *
  * $Source$
  * $Revision$
@@ -40,6 +40,7 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+#include <stdio.h>
 /* The include stuff here is mainly for time_t! */
 #ifdef vms
 # include <types.h>
@@ -470,8 +471,8 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.5"
-#define LIBCURL_VERSION_NUM 0x070500
+#define LIBCURL_VERSION "7.5.1"
+#define LIBCURL_VERSION_NUM 0x070501
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
