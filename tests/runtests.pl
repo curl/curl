@@ -372,7 +372,7 @@ sub runhttpserver {
     my $verified;
     for(1 .. 10) {
         # verify that our server is up and running:
-        my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null`;
+        my $data=`$CURL --silent $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null`;
 
         if ( $data =~ /WE ROOLZ: (\d+)/ ) {
             $pid = 0+$1;
