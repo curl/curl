@@ -1,15 +1,15 @@
 #############################################################
 ## Makefile for building curl.exe with MingW32 (GCC-2.95) and
-## optionally OpenSSL (0.9.4)
+## optionally OpenSSL (0.9.6)
 ##
-## Use: make -f Makefile.m32 [SSL=1]
+## Use: make -f Makefile.m32 [SSL=1] [DYN=1]
 ##
 ## Comments to: Troy Engel <tengel@sonic.net> or
 ##              Joern Hartroth <hartroth@acm.org>
 
 CC = gcc
 STRIP = strip -s
-OPENSSL_PATH = ../../openssl-0.9.5a
+OPENSSL_PATH = ../../openssl-0.9.6
 
 # We may need these someday
 # PERL = perl
@@ -25,10 +25,16 @@ COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 
 curl_PROGRAMS = curl.exe
-curl_OBJECTS =  main.o hugehelp.o urlglob.o
-curl_SOURCES = main.c hugehelp.c urlglob.c
-curl_DEPENDENCIES = ../lib/libcurl.a
-curl_LDADD = -L../lib -lcurl -lwsock32
+curl_OBJECTS = main.o hugehelp.o urlglob.o writeout.o
+curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c
+ifdef DYN
+  curl_DEPENDENCIES = ../lib/libcurldll.a ../lib/libcurl.dll
+  curl_LDADD = -L../lib -lcurldll
+else
+  curl_DEPENDENCIES = ../lib/libcurl.a
+  curl_LDADD = -L../lib -lcurl
+endif
+curl_LDADD += -lwsock32
 ifdef SSL
   curl_LDADD += -L$(OPENSSL_PATH)/out -leay32 -lssl32 -lRSAglue
 endif
@@ -37,12 +43,12 @@ PROGRAMS = $(curl_PROGRAMS)
 SOURCES = $(curl_SOURCES)
 OBJECTS = $(curl_OBJECTS)
 
-all: curl
+all: curl.exe
 
-curl: $(curl_OBJECTS) $(curl_DEPENDENCIES)
-	-@erase curl.exe
+curl.exe: $(curl_OBJECTS) $(curl_DEPENDENCIES)
+	-@erase $@
 	$(LINK) $(curl_OBJECTS) $(curl_LDADD)
-	$(STRIP) $(curl_PROGRAMS)
+	$(STRIP) $@
 
 # We don't have nroff normally under win32
 # hugehelp.c: ../README.curl ../curl.1 mkhelp.pl
