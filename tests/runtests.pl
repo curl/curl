@@ -653,7 +653,7 @@ sub compare {
     if($result) {
         if(!$short) {
             print "\n $subject FAILED:\n";
-            print showdiff($firstref, $secondref);
+            print showdiff($LOGDIR, $firstref, $secondref);
         }
         else {
             print "FAILED\n";

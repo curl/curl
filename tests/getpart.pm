@@ -154,22 +154,8 @@ sub striparray {
 sub compareparts {
  my ($firstref, $secondref)=@_;
 
- my $sizefirst=scalar(@$firstref);
- my $sizesecond=scalar(@$secondref);
-
- my $first;
- my $second;
-
- for(1 .. $sizefirst) {
-     my $index = $_ - 1;
-     if($firstref->[$index] ne $secondref->[$index]) {
-         (my $aa = $firstref->[$index]) =~ s/\r+\n$/\n/;
-         (my $bb = $secondref->[$index]) =~ s/\r+\n$/\n/;
-         
-         $first .= $firstref->[$index];
-         $second .= $secondref->[$index];
-     }
- }
+ my $first = join("", @$firstref);
+ my $second = join("", @$secondref);
 
  # we cannot compare arrays index per index since with the base64 chunks,
  # they may not be "evenly" distributed
@@ -214,16 +200,14 @@ sub loadarray {
     return @array;
 }
 
-#
-# Given two array references, this function will store them in two
-# temporary files, run 'diff' on them, store the result, remove the
-# temp files and return the diff output!
-# 
-sub showdiff {
-    my ($firstref, $secondref)=@_;
+# Given two array references, this function will store them in two temporary
+# files, run 'diff' on them, store the result and return the diff output!
 
-    my $file1=".generated";
-    my $file2=".expected";
+sub showdiff {
+    my ($logdir, $firstref, $secondref)=@_;
+
+    my $file1="$logdir/check-generated";
+    my $file2="$logdir/check-expected";
     
     open(TEMP, ">$file1");
     for(@$firstref) {
@@ -238,7 +222,6 @@ sub showdiff {
     close(TEMP);
     my @out = `diff -u $file2 $file1`;
 
-    unlink $file1, $file2;
     return @out;
 }
 
