@@ -60,18 +60,22 @@ sub REAPER {
 
 # USER is ok in fresh state
 my %commandok = (
-                 "USER" => "fresh",
-                 "PASS" => "passwd",
-                 "PASV" => "loggedin|twosock",
-                 "PORT" => "loggedin|twosock",
-                 "TYPE" => "loggedin|twosock",
-                 "LIST" => "twosock",
-                 "NLST" => "twosock",
-                 "RETR" => "twosock",
-                 "STOR" => "twosock",
-                 "CWD"  => "loggedin",
-                 "SIZE" => "loggedin|twosock",
-                 "QUIT"  => "loggedin|twosock",
+                 'USER' => 'fresh',
+                 'PASS' => 'passwd',
+                 'PASV' => 'loggedin|twosock',
+                 'PORT' => 'loggedin|twosock',
+                 'TYPE' => 'loggedin|twosock',
+                 'LIST' => 'twosock',
+                 'NLST' => 'twosock',
+                 'RETR' => 'twosock',
+                 'STOR' => 'twosock',
+                 'APPE' => 'twosock',
+                 'REST' => 'twosock',
+                 'CWD'  => 'loggedin|twosock',
+                 'SYST' => 'loggedin',
+                 'SIZE' => 'loggedin|twosock',
+                 'PWD'  => 'loggedin|twosock',
+                 'QUIT'  => 'loggedin|twosock',
                  );
 
 # initially, we're in 'fresh' state
@@ -82,24 +86,29 @@ my %statechange = ( 'USER' => 'passwd',    # USER goes to passwd state
                     );
 
 # this text is shown before the function specified below is run
-my %displaytext = ('USER' => '331 We are happy you popped in!', # output FTP line
+my %displaytext = ('USER' => '331 We are happy you popped in!',
                    'PASS' => '230 Welcome you silly person',
                    'PORT' => '200 You said PORT - I say FINE',
                    'TYPE' => '200 I modify TYPE as you wanted',
                    'LIST' => '150 here comes a directory',
                    'NLST' => '150 here comes a directory',
                    'CWD'  => '250 CWD command successful.',
-                   'QUIT' => '221 bye bye baby',
+                   'SYST' => '215 UNIX Type: L8', # just fake something
+                   'QUIT' => '221 bye bye baby', # just reply something
+                   'PWD'  => '257 "/nowhere/anywhere" is current directory',
+                   'REST' => '350 Yeah yeah we set it there for you',
                    );
 
 # callback functions for certain commands
 my %commandfunc = ( 'PORT' => \&PORT_command,
                     'LIST' => \&LIST_command,
-                    'NLST' => \&LIST_command, # use LIST for now
+                    'NLST' => \&NLST_command,
                     'PASV' => \&PASV_command,
                     'RETR' => \&RETR_command,   
                     'SIZE' => \&SIZE_command,
+                    'REST' => \&REST_command,
                     'STOR' => \&STOR_command,
+                    'APPE' => \&STOR_command, # append looks like upload
                     );
 
 # this is a built-in fake-dir ;-)
@@ -115,6 +124,11 @@ my @ftpdir=("total 20\r\n",
 "drwxrwxrwx   2 98       1            512 Oct 30 14:33 pub\r\n",
 "dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr\r\n");
 
+my $rest=0;
+sub REST_command {
+    $rest = $_[0];
+}
+
 sub LIST_command {
   #  print "150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)\r\n";
 
@@ -125,6 +139,16 @@ sub LIST_command {
     close(SOCK);
     logmsg "$$: done passing data to child pid\n";
 
+    print "226 ASCII transfer complete\r\n";
+    return 0;
+}
+
+sub NLST_command {
+    my @ftpdir=("file", "with space", "fake", "..", " ..", "funny", "README");
+    for(@ftpdir) {
+        print SOCK "$_\r\n";
+    }
+    close(SOCK);
     print "226 ASCII transfer complete\r\n";
     return 0;
 }
@@ -172,9 +196,15 @@ sub RETR_command {
 
     if($size) {
     
-        print "150 Binary data connection for $testno () ($size bytes).\r\n";
-
         open(FILE, "<$filename");
+        if($rest) {
+            # move read pointer forward
+            seek(FILE, $rest, 1);
+            $size -= $rest;
+        }
+        print "150 Binary data connection for $testno () ($size bytes).\r\n";
+        $rest=0; # reset rest again
+
         while(<FILE>) {
             print SOCK $_;
         }
@@ -194,7 +224,7 @@ sub STOR_command {
 
     logmsg "STOR test number $testno\n";
 
-    my $filename = "log/ftpout.$testno";
+    my $filename = "log/upload.$testno";
 
     print "125 Gimme gimme gimme!\r\n";
 
@@ -318,6 +348,10 @@ for ( $waitedpid = 0;
         my $full=$_;
                  
         logmsg "GOT: ($1) $_\n";
+
+        if($verbose) {
+            print STDERR "IN: $full\n";
+        }
 
         my $ok = $commandok{$FTPCMD};
         if($ok !~ /$state/) {
