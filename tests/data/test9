@@ -29,33 +29,34 @@ bar
 # Verify data after the test has been "shot"
 <verify>
 <strip>
-^(User-Agent:|Content-Type: multipart/form-data;|--curl).*
+^(User-Agent:|Content-Type: multipart/form-data;|------------).*
 </strip>
 <protocol>
 POST /we/want/9 HTTP/1.1
+User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
-Content-Length: 375
+Content-Length: 411
 Expect: 100-continue
-Content-Type: multipart/form-data; boundary=curluczemxkcWWsxptLlAImrFQHwQ3W
+Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
 
---curluczemxkcWWsxptLlAImrFQHwQ3W
+------------------------------9ef8d6205763
 Content-Disposition: form-data; name="name"
 
 daniel
---curluczemxkcWWsxptLlAImrFQHwQ3W
+------------------------------9ef8d6205763
 Content-Disposition: form-data; name="tool"
 
 curl
---curluczemxkcWWsxptLlAImrFQHwQ3W
+------------------------------9ef8d6205763
 Content-Disposition: form-data; name="file"; filename="log/test9.txt"
 Content-Type: text/plain
 
 foo-
 This is a moo-
 bar
---curluczemxkcWWsxptLlAImrFQHwQ3W--
 
+------------------------------9ef8d6205763--
 </protocol>
 </verify>
