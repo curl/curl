@@ -1,4 +1,4 @@
-Updated: February 16, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: March 6, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -486,6 +486,9 @@ FAQ
 
   5.3 How do I fetch multiple files with libcurl?
 
+  Starting with version 7.7, curl and libcurl will have excellent support for
+  transferring multiple files.
+
   The easy interface of libcurl does not support multiple requests using the
   same connection. The only available way to do multiple requests is to
   init/perform/cleanup for each request.
@@ -511,6 +514,9 @@ FAQ
   (Provided by Joel DeYoung and Bob Schader)
 
   5.6 What about Keep-Alive or persistant connections?
+
+  Starting with version 7.7, curl and libcurl will have excellent support for
+  persistant connections when transferring several files from the same server.
 
   This is closely related to issue 5.3. Since libcurl has no real support
   for doing multiple file transfers, there's no support for Keep-Alive or
