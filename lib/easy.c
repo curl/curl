@@ -555,6 +555,7 @@ void curl_easy_reset(CURL *curl)
   data->set.fread = (curl_read_callback)fread;
 
   data->set.infilesize = -1; /* we don't know any size */
+  data->set.postfieldsize = -1;
 
   data->state.current_speed = -1; /* init to negative == impossible */
 

@@ -177,7 +177,6 @@ typedef enum {
 #define CONF_NETRC    (1<<22)  /* read user+password from .netrc */
 #define CONF_FOLLOWLOCATION (1<<23) /* use Location: Luke! */
 #define CONF_GETTEXT  (1<<24) /* use ASCII/text for transfer */
-#define CONF_HTTPPOST (1<<25) /* multipart/form-data HTTP POST */
 #define CONF_MUTE     (1<<28) /* force NOPROGRESS */
 
 #define CONF_NETRC_OPT (1<<29)  /* read user+password from either
@@ -2850,6 +2849,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     helpf("error initializing curl library\n");
     return CURLE_FAILED_INIT;
   }
+  config->postfieldsize = -1;
   config->showerror=TRUE;
   config->conf=CONF_DEFAULT;
   config->use_httpget=FALSE;
@@ -3365,11 +3365,18 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_RANGE, config->range);
         curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
         curl_easy_setopt(curl, CURLOPT_TIMEOUT, config->timeout);
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, config->postfields);
 
-        /* new in libcurl 7.2: */
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, config->postfieldsize);
-
+        switch(config->httpreq) {
+        case HTTPREQ_SIMPLEPOST:
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDS, config->postfields);
+          curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, config->postfieldsize);
+          break;
+        case HTTPREQ_POST:
+          curl_easy_setopt(curl, CURLOPT_HTTPPOST, config->httppost);
+          break;
+        default:
+          break;
+        }
         curl_easy_setopt(curl, CURLOPT_REFERER, config->referer);
         curl_easy_setopt(curl, CURLOPT_AUTOREFERER,
                          config->conf&CONF_AUTO_REFERER);
@@ -3381,7 +3388,6 @@ operate(struct Configurable *config, int argc, char *argv[])
                          config->use_resume?config->resume_from:0);
         curl_easy_setopt(curl, CURLOPT_COOKIE, config->cookie);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, config->headers);
-        curl_easy_setopt(curl, CURLOPT_HTTPPOST, config->httppost);
         curl_easy_setopt(curl, CURLOPT_SSLCERT, config->cert);
         curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, config->cert_type);
         curl_easy_setopt(curl, CURLOPT_SSLKEY, config->key);

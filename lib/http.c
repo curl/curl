@@ -1767,6 +1767,24 @@ CURLcode Curl_http(struct connectdata *conn)
     switch(httpreq) {
 
     case HTTPREQ_POST_FORM:
+      if(!http->sendit) {
+        /* nothing to post! */
+        result = add_bufferf(req_buffer, "Content-Length: 0\r\n\r\n");
+        if(result)
+          return result;
+
+        result = add_buffer_send(req_buffer, conn,
+                                 &data->info.request_size);
+        if(result)
+          failf(data, "Failed sending POST request");
+        else
+          /* setup variables for the upcoming transfer */
+          result = Curl_Transfer(conn, FIRSTSOCKET, -1, TRUE,
+                                 &http->readbytecount,
+                                 -1, NULL);
+        break;
+      }
+
       if(Curl_FormInit(&http->form, http->sendit)) {
         failf(data, "Internal HTTP POST error!");
         return CURLE_HTTP_POST_ERROR;
@@ -1895,7 +1913,7 @@ CURLcode Curl_http(struct connectdata *conn)
       /* this is the simple POST, using x-www-form-urlencoded style */
 
       /* store the size of the postfields */
-      postsize = data->set.postfieldsize?
+      postsize = (data->set.postfieldsize != -1)?
         data->set.postfieldsize:
         (data->set.postfields?(curl_off_t)strlen(data->set.postfields):0);
 
@@ -1989,12 +2007,14 @@ CURLcode Curl_http(struct connectdata *conn)
       else {
         add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
 
-        /* set the upload size to the progress meter */
-        Curl_pgrsSetUploadSize(data, data->set.infilesize);
+        if(data->set.postfieldsize) {
+          /* set the upload size to the progress meter */
+          Curl_pgrsSetUploadSize(data, postsize?postsize:-1);
 
-        /* set the pointer to mark that we will send the post body using
-           the read callback */
-        http->postdata = (char *)&http->postdata;
+          /* set the pointer to mark that we will send the post body using
+             the read callback */
+          http->postdata = (char *)&http->postdata;
+        }
       }
       /* issue the request */
       result = add_buffer_send(req_buffer, conn,

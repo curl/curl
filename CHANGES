@@ -6,6 +6,24 @@
 
                                   Changelog
 
+Daniel (12 November 2004)
+-                 *** New Behaviour Alert ***
+
+  Setting CURLOPT_POSTFIELDS to NULL will no longer do a GET.
+
+  Setting CURLOPT_POSTFIELDS to "" will send a zero byte POST and setting
+  CURLOPT_POSTFIELDS to NULL and CURLOPT_POSTFIELDSIZE to zero will also make
+  a zero byte POST. Added test case 515 to verify this.
+
+  Setting CURLOPT_HTTPPOST to NULL makes a zero byte post. Added test case 516
+  to verify this.
+
+  CURLOPT_POSTFIELDSIZE must now be set to -1 to signal "we don't know".
+  Setting it to zero simply says this is a zero byte POST.
+
+  When providing POST data with a read callback, setting the size up front
+  is now made with CURLOPT_POSTFIELDSIZE and not with CURLOPT_INFILESIZE.
+
 Daniel (11 November 2004)
 - Dan Fandrich added --disable-verbose to the configure script to allow builds
   without verbose strings in the code, to save some 12KB space. Makes sense
