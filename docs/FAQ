@@ -1,4 +1,4 @@
-Updated: January 4, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: January 11, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -48,7 +48,7 @@ FAQ
   4.9 Curl can't authenticate to the server that requires NTLM?
 
  5. libcurl Issues
-  5.1 Is libcurl thread safe?
+  5.1 Is libcurl thread-safe?
   5.2 How can I receive all data into a large memory chunk?
   5.3 How do I fetch multiple files with libcurl?
   5.4 Does libcurl do Winsock initing on win32 systems?
@@ -73,9 +73,9 @@ FAQ
   fact it can also be pronounced 'see URL' also helped.
 
   Curl supports a range of common internet protocols, currently including
-  HTTP, HTTPS, FTP, GOPHER, LDAP, DICT and FILE.
+  HTTP, HTTPS, FTP, GOPHER, LDAP, DICT, TELNET and FILE.
 
-  Please spell it cURL or just curl.
+  We spell it cURL or just curl.
 
   1.2 What is libcurl?
 
@@ -406,11 +406,13 @@ FAQ
 
 5. libcurl Issues
 
-  5.1. Is libcurl thread safe?
+  5.1. Is libcurl thread-safe?
 
-  We have attempted to write the entire code adjusted for multi-threaded
-  programs. If your system has such, curl will attempt to use threadsafe
-  functions instead of non-safe ones.
+  Yes.
+
+  We have written the libcurl code specificly adjusted for multi-threaded
+  programs. libcurl will use thread-safe functions instead of non-safe ones if
+  your system has such.
 
   I am very interested in once and for all getting some kind of report or
   README file from those who have used libcurl in a threaded environment,
