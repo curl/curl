@@ -7,18 +7,25 @@ Curl and libcurl 7.11.2. A bugfix release.
 
 This release includes the following changes:
 
- o 
+ o curl/curlver.h contains the libcurl version info now
 
 This release includes the following bugfixes:
 
- o 
+ o better error message when --interface fails on windows
+ o the progress meter now displays very long times better
+ o CURLINFO_CONTENT_LENGTH_DOWNLOAD with CURLOPT_NOBODY set TRUE now works
+ o passwords longer than 14 letters work with NTLM
+ o 'make netware' works better now
+ o VMS builds fine again and even nicer than before
 
 Other curl-related news since the previous public release:
 
- o 
+ o PycURL 7.11.1 was released: http://pycurl.sf.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+ Thomas Schwinge, Marty Kuhrt, Günter Knauf, Kevin Roth, Glen Nakamura,
+ Gisle Vanem, Greg Hewgill
 
         Thanks! (and sorry if I forgot to mention someone)
