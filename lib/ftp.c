@@ -773,7 +773,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
 
   path = curl_unescape(conn->path, 0); /* get the "raw" path */
   if(!path)
-    CURLE_OUT_OF_MEMORY;
+    return CURLE_OUT_OF_MEMORY;
 
   flen = ftp->file?strlen(ftp->file):0; /* file is "raw" already */
   dlen = strlen(path)-flen;
