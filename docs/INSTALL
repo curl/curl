@@ -206,8 +206,14 @@ Win32
 
       Microsoft command line style
       ----------------------------
+        Please read the OpenSSL documentation on how to compile and install
+        the OpenSSL library.  This generates the libeay32.dll and ssleay32.dll
+        files.
+
         Run the 'vcvars32.bat' file to get the proper environment variables
-        set, then run 'nmake vc-ssl' in the root dir.
+        set. Edit the makefile.vc6 in the lib directory and define
+        OPENSSL_PATH.  Set the location of the OpenSSL library and run 'nmake
+        vc-ssl' in the root directory.
 
         The vcvars32.bat file is part of the Microsoft development
         environment.
