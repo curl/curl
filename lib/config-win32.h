@@ -217,6 +217,9 @@
 /* Define this to if in_addr_t is not an available typedefed type */
 #define in_addr_t unsigned long
 
+/* use ioctlsocket() for non-blocking sockets */
+#define HAVE_IOCTLSOCKET
+
 /*************************************************
  * This section is for compiler specific defines.*
  *************************************************/
