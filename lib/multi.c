@@ -462,6 +462,13 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
             }
           }
         }
+        else {
+          /* failure detected */
+          Curl_posttransfer(easy->easy_handle);
+          Curl_done(&easy->easy_conn, easy->result);
+          Curl_disconnect(easy->easy_conn); /* close the connection */
+          easy->easy_conn = NULL;           /* no more connection */
+        }
         break;
 
       case CURLM_STATE_DO_MORE:
