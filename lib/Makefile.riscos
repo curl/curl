@@ -1,0 +1,128 @@
+# Makefile for project libcurl
+# Generated on Sun,13 Jan 2002.16:57:00 by EasyGCC (0.1.3 [beta 2] (3 Jan 2002))
+# Contact: easygcc@melotech.co.uk
+
+# Project objects:
+objs =	o.base64 o.connect o.cookie o.dict \
+	o.dllinit o.easy o.escape o.file \
+	o.formdata o.ftp o.getdate o.getenv \
+	o.getinfo o.getpass o.hostip o.http \
+	o.http_chunks o.if2ip o.krb4 o.ldap \
+	o.memdebug o.mprintf o.netrc o.progress \
+	o.security o.sendf o.speedcheck o.ssluse \
+	o.strequal o.strtok o.telnet o.timeval \
+	o.transfer o.url o.version 
+
+# Compile options:
+linkopts	= -o libcurl
+compileropts	= -mpoke-function-name -IUtilLib: -mthrowback 
+
+# Project target:
+libcurl:		$(objs)
+		makealf $(linkopts) $(objs)
+
+# Static dependancies:
+o.base64:	c.base64
+		gcc $(compileropts) -c -o base64.o c.base64
+
+o.connect:	c.connect
+		gcc $(compileropts) -c -o connect.o c.connect
+
+o.cookie:	c.cookie
+		gcc $(compileropts) -c -o cookie.o c.cookie
+
+o.dict:	c.dict
+		gcc $(compileropts) -c -o dict.o c.dict
+
+o.dllinit:	c.dllinit
+		gcc $(compileropts) -c -o dllinit.o c.dllinit
+
+o.easy:	c.easy
+		gcc $(compileropts) -c -o easy.o c.easy
+
+o.escape:	c.escape
+		gcc $(compileropts) -c -o escape.o c.escape
+
+o.file:	c.file
+		gcc $(compileropts) -c -o file.o c.file
+
+o.formdata:	c.formdata
+		gcc $(compileropts) -c -o formdata.o c.formdata
+
+o.ftp:	c.ftp
+		gcc $(compileropts) -c -o ftp.o c.ftp
+
+o.getdate:	c.getdate
+		gcc $(compileropts) -c -o getdate.o c.getdate
+
+o.getenv:	c.getenv
+		gcc $(compileropts) -c -o getenv.o c.getenv
+
+o.getinfo:	c.getinfo
+		gcc $(compileropts) -c -o getinfo.o c.getinfo
+
+o.getpass:	c.getpass
+		gcc $(compileropts) -c -o getpass.o c.getpass
+
+o.hostip:	c.hostip
+		gcc $(compileropts) -c -o hostip.o c.hostip
+
+o.http:	c.http
+		gcc $(compileropts) -c -o http.o c.http
+
+o.http_chunks:	c.http_chunks
+		gcc $(compileropts) -c -o http_chunks.o c.http_chunks
+
+o.if2ip:	c.if2ip
+		gcc $(compileropts) -c -o if2ip.o c.if2ip
+
+o.krb4:	c.krb4
+		gcc $(compileropts) -c -o krb4.o c.krb4
+
+o.ldap:	c.ldap
+		gcc $(compileropts) -IOpenLDAP: -c -o ldap.o c.ldap
+
+o.memdebug:	c.memdebug
+		gcc $(compileropts) -c -o memdebug.o c.memdebug
+
+o.mprintf:	c.mprintf
+		gcc $(compileropts) -c -o mprintf.o c.mprintf
+
+o.netrc:	c.netrc
+		gcc $(compileropts) -c -o netrc.o c.netrc
+
+o.progress:	c.progress
+		gcc $(compileropts) -c -o progress.o c.progress
+
+o.security:	c.security
+		gcc $(compileropts) -c -o security.o c.security
+
+o.sendf:	c.sendf
+		gcc $(compileropts) -c -o sendf.o c.sendf
+
+o.speedcheck:	c.speedcheck
+		gcc $(compileropts) -c -o speedcheck.o c.speedcheck
+
+o.ssluse:	c.ssluse
+		gcc $(compileropts) -c -o ssluse.o c.ssluse
+
+o.strequal:	c.strequal
+		gcc $(compileropts) -c -o strequal.o c.strequal
+
+o.strtok:	c.strtok
+		gcc $(compileropts) -c -o strtok.o c.strtok
+
+o.telnet:	c.telnet
+		gcc $(compileropts) -c -o telnet.o c.telnet
+
+o.timeval:	c.timeval
+		gcc $(compileropts) -c -o timeval.o c.timeval
+
+o.transfer:	c.transfer
+		gcc $(compileropts) -c -o transfer.o c.transfer
+
+o.url:	c.url
+		gcc $(compileropts) -c -o url.o c.url
+
+o.version:	c.version
+		gcc $(compileropts) -c -o version.o c.version

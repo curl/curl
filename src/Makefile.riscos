@@ -1,0 +1,48 @@
+# Makefile for project cURL
+# Generated on Sun,13 Jan 2002.17:11:10 by EasyGCC (0.1.3 [beta 2] (3 Jan 2002))
+# Contact: easygcc@melotech.co.uk
+
+# Project objects:
+objs =	o.hugehelp o.main o.urlglob o.writeout o.writeenv \
+	
+
+# Compile options:
+linkopts	= ../lib/libcurl openldap:libraries/libldap/libldap -o curl
+compileropts	= -mpoke-function-name -IUtilLib: -mthrowback 
+
+# Project target:
+curl:		$(objs)
+		gcc $(linkopts) $(objs)
+
+# Static dependancies:
+o.hugehelp:	c.hugehelp
+		gcc $(compileropts) -c -o hugehelp.o c.hugehelp
+
+o.main:	c.main
+		gcc $(compileropts) -c -o main.o c.main
+
+o.urlglob:	c.urlglob
+		gcc $(compileropts) -c -o urlglob.o c.urlglob
+
+o.writeout:	c.writeout
+		gcc $(compileropts) -c -o writeout.o c.writeout
+
+o.writeenv:	c.writeenv
+		gcc $(compileropts) -c -o writeenv.o c.writeenv
+
+# Dynamic dependancies:
+o.hugehelp:	c.hugehelp
+
+o.main:	c.main
+o.main:	h.setup
+o.main:	h.urlglob
+o.main:	h.writeout
+o.main:	h.version
+
+o.urlglob:	c.urlglob
+o.urlglob:	h.setup
+o.urlglob:	h.urlglob
+
+o.writeout:	c.writeout
+o.writeout:	h.writeout
+
