@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (8 February 2005)
+- Gisle fixed problems when libcurl runs out of memory, and worked on making
+  sure the proper error code is returned for those occations.
+
+Daniel (7 February 2005)
+- Maruko pointed out a problem with inflate decompressing exactly 64K
+  contents.
+
 Daniel (5 February 2005)
 - Eric Vergnaud found a use of an uninitialised variable in the ftp when doing
   PORT on ipv6-enabled hosts.
