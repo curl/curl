@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "10 April 2001" "libcurl 7.7.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "8 May 2001" "libcurl 7.7.3" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -336,8 +336,9 @@ return code). (Added in libcurl 7.7.2)
 .TP
 .B CURLOPT_COOKIEFILE
 Pass a pointer to a zero terminated string as parameter. It should contain the
-name of your file holding cookie data. The cookie data may be in netscape
-cookie data format or just regular HTTP-style headers dumped to a file.
+name of your file holding cookie data. The cookie data may be in Netscape /
+Mozilla cookie data format or just regular HTTP-style headers dumped to a
+file.
 .TP
 .B CURLOPT_SSLVERSION
 Pass a long as parameter. Set what version of SSL to attempt to use, 2 or

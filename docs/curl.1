@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "20 April 2001" "Curl 7.7.2" "Curl Manual"
+.TH curl 1 "8 May 2001" "Curl 7.7.3" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -72,11 +72,11 @@ The data should be in the format "NAME1=VALUE1; NAME2=VALUE2".
 
 If no '=' letter is used in the line, it is treated as a filename to use to
 read previously stored cookie lines from, which should be used in this session
-if they match. Using this method also activates the "cookie parser" which
-will make curl record incoming cookies too, which may be handy if you're using
-this in combination with the -L/--location option. The file format of the file
-to read cookies from should be plain HTTP headers or the netscape cookie file
-format.
+if they match. Using this method also activates the "cookie parser" which will
+make curl record incoming cookies too, which may be handy if you're using this
+in combination with the -L/--location option. The file format of the file to
+read cookies from should be plain HTTP headers or the Netscape/Mozilla cookie
+file format.
 
 .B NOTE
 that the file specified with -b/--cookie is only used as input. No cookies
