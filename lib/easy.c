@@ -119,8 +119,9 @@ static CURLcode win32_init(void)
 }
 /* The Windows Sockets DLL is acceptable. Proceed. */ 
 #else
+/* These functions exist merely to prevent compiler warnings */
 static CURLcode win32_init(void) { return CURLE_OK; }
-#define win32_cleanup()
+static void win32_cleanup(void) { }
 #endif
 
 
@@ -179,7 +180,7 @@ CURL *curl_easy_init(void)
     curl_global_init(CURL_GLOBAL_DEFAULT);
 
   /* We use curl_open() with undefined URL so far */
-  res = Curl_open((CURL **)&data, NULL);
+  res = Curl_open((CURL **)&data);
   if(res != CURLE_OK)
     return NULL;
 
