@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (15 January 2004)
+- Peter Sylvester pointed out some necessary escaping needed in the
+  acinclude.m4 file when automake 1.8 or later is used.
+
 Daniel (14 January 2004)
 - Vincent Bronner fixed the Curl_resolv() return code. This extends the fix
   Steve Green provided on december 3...
