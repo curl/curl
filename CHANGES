@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (26 October)
+- James Bursa found out that curl_msnprintf() could write the trailing
+  zero-byte outside its given buffer size. This could happen if you generated
+  a very long error message as then libcurl would overwrite the ERRORBUFFER
+  with one byte. Using a non-existing very long local file:// name is one case
+  that could make this occur.
+
 Daniel (24 October)
 - David Hull filed bug report #829827. It identified a problem with -C - if
   the full file already was downloaded and thus the server responded with a

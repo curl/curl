@@ -24,6 +24,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o a rare ERRORBUFFER single-byte overflow was fixed
  o HTTP-resuming an already downloaded file works better
  o builds better on Solaris 8+ with gcc
  o --disable-eprt works now
@@ -81,6 +82,7 @@ advice from friends like these:
  Neil Spring, Siddhartha Prakash Jain, Jon Turner, Vincent Bronner, Shard,
  Jeremy Friesner, Florian Schoppmann, Neil Dunbar, Frank Ticheler, Lachlan
  O'Dea, Dirk Manske, Domenico Andreoli, Gisle Vanem, Kimmo Kinnunen, Andrew
- Fuller, Georg Horn, Andrés García, Dylan Ellicott, Kevin Roth, David Hull
+ Fuller, Georg Horn, Andrés García, Dylan Ellicott, Kevin Roth, David Hull,
+ James Bursa
  
         Thanks! (and sorry if I forgot to mention someone)
