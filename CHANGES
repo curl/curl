@@ -6,6 +6,11 @@
 
                                History of Changes
 
+Daniel (6 August 2001)
+- Jonathan Hseu noticed that you couldn't get a header callback unless you
+  set CURLOPT_WRITEHEADER to non-NULL, even if you didn't care about that
+  data. This is now fixed.
+
 Daniel (5 August 2001)
 - Sergio Ballestrero provided a patch for reading responses from NCSA httpd
   1.5.x servers, as they return really screwed up response headers when asked

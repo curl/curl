@@ -514,7 +514,7 @@ sub singletest {
             if(!$short) {
                 print "curl returned $res\n";
             }
-            print " error FAILED";
+            print " error FAILED\n";
             return 1;
         }
     }
@@ -525,7 +525,7 @@ sub singletest {
 
         $res = compare(\@actual, \@validstdout);
         if($res) {
-            print " stdout FAILED";
+            print " stdout FAILED\n";
             return 1;
         }
         if(!$short) {
@@ -540,7 +540,7 @@ sub singletest {
         my @out = loadarray($CURLOUT);
         $res = compare(\@out, \@reply);
         if ($res) {
-            print " data FAILED";
+            print " data FAILED\n";
             return 1;
         }
         if(!$short) {
@@ -553,7 +553,7 @@ sub singletest {
         my @out = loadarray("$LOGDIR/upload.$testnum");
         $res = compare(\@out, \@upload);
         if ($res) {
-            print " upload FAILED";
+            print " upload FAILED\n";
             return 1;
         }
         if(!$short) {
@@ -578,7 +578,7 @@ sub singletest {
 
         $res = compare(\@out, \@protstrip);
         if($res) {
-            print " protocol FAILED";
+            print " protocol FAILED\n";
             return 1;
         }
         if(!$short) {
@@ -600,7 +600,7 @@ sub singletest {
 
         $res = compare(\@generated, \@outfile);
         if($res) {
-            print " output FAILED";
+            print " output FAILED\n";
             return 1;
         }
         if(!$short) {
