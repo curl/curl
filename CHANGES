@@ -6,6 +6,11 @@
 
                                History of Changes
 
+Daniel (17 September 2001)
+- libtool 1.4.2 is now in use!
+
+Version 7.9-pre5
+
 Daniel (14 September 2001)
 - Added another 14 ftp tests.
 
@@ -23,6 +28,8 @@ Daniel (12 September 2001)
 
 - T. Bharath found a memory leak in libcurl's windows version. It turned out
   to be the new duphandle() that didn't quite work yet.
+
+Version 7.9-pre4
 
 Daniel (11 September 2001)
 - Added verbose output for SSL connections that output the server
