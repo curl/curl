@@ -242,7 +242,15 @@ typedef enum {
  * platforms.
  */
 #if defined(__STDC__) || defined(_MSC_VER) || defined(__cplusplus) || \
-  defined(__HP_aCC)
+  defined(__HP_aCC) || defined(__BORLANDC__)
+  /* This compiler is believed to have an ISO compatible preprocessor */
+#define CURL_ISOCPP
+#else
+  /* This compiler is believed NOT to have an ISO compatible preprocessor */
+#undef CURL_ISOCPP
+#endif
+
+#ifdef CURL_ISOCPP
 #define CINIT(name,type,number) CURLOPT_ ## name = CURLOPTTYPE_ ## type + number
 #else
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
@@ -689,8 +697,7 @@ int curl_formparse(char *, struct curl_httppost **,
 #undef CFINIT
 #endif
 
-#if defined(__STDC__) || defined(_MSC_VER) || defined(__cplusplus) || \
-  defined(__HP_aCC)
+#ifdef CURL_ISOCPP
 #define CFINIT(name) CURLFORM_ ## name
 #else
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
@@ -793,8 +800,8 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.10.1"
-#define LIBCURL_VERSION_NUM 0x070a01
+#define LIBCURL_VERSION "7.10.2-test"
+#define LIBCURL_VERSION_NUM 0x070a02
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
