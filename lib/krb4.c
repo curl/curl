@@ -50,6 +50,7 @@
 #include <syslog.h>
 #include <string.h>
 #include <krb.h>
+#include <des.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h> /* for getpid() */
@@ -186,6 +187,10 @@ mk_auth(struct krb4_data *d, KTEXT adat,
     memset(&cred, 0, sizeof(cred));
     return ret;
 }
+
+#ifdef HAVE_KRB_GET_OUR_IP_FOR_REALM
+int krb_get_our_ip_for_realm(char *, struct in_addr *);
+#endif
 
 static int
 krb4_auth(void *app_data, struct connectdata *conn)
@@ -328,7 +333,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
 
   if(conn->data->state.buffer[0] != '3'){
     Curl_set_command_prot(conn, save);
-    return;
+    return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
 
   p = strstr(conn->data->state.buffer, "T=");
@@ -361,16 +366,16 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   des_string_to_key (conn->data->state.passwd, &key);
   des_key_sched(&key, schedule);
     
-  des_pcbc_encrypt((des_cblock*)tkt.dat, (des_cblock*)tktcopy.dat,
+  des_pcbc_encrypt((void *)tkt.dat, (void *)tktcopy.dat,
                    tkt.length,
                    schedule, &key, DES_DECRYPT);
   if (strcmp ((char*)tktcopy.dat + 8,
               KRB_TICKET_GRANTING_TICKET) != 0) {
-    afs_string_to_key (passwd,
-                       krb_realmofhost(conn->hostname),
-                       &key);
-    des_key_sched (&key, schedule);
-    des_pcbc_encrypt((des_cblock*)tkt.dat, (des_cblock*)tktcopy.dat,
+    afs_string_to_key(passwd,
+                      krb_realmofhost(conn->hostname),
+                      &key);
+    des_key_sched(&key, schedule);
+    des_pcbc_encrypt((void *)tkt.dat, (void *)tktcopy.dat,
                      tkt.length,
                      schedule, &key, DES_DECRYPT);
   }
