@@ -171,6 +171,8 @@ curl_hash_add (curl_hash *h, char *key, size_t key_len, const void *p)
 }
 /* }}} */
 
+/* {{{ int curl_hash_delete (curl_hash *, char *, size_t)
+ */
 int 
 curl_hash_delete(curl_hash *h, char *key, size_t key_len)
 {
@@ -191,7 +193,10 @@ curl_hash_delete(curl_hash *h, char *key, size_t key_len)
 
   return 0;
 }
+/* }}} */
 
+/* {{{ int curl_hash_find (curl_hash *, char *, size_t, void **)
+ */
 int 
 curl_hash_find(curl_hash *h, char *key, size_t key_len, void **p)
 {
@@ -211,7 +216,10 @@ curl_hash_find(curl_hash *h, char *key, size_t key_len, void **p)
 
   return 0;
 }
+/* }}} */
 
+/* {{{ void curl_hash_apply (curl_hash *, void *, void (*)(void *, curl_hash_element *))
+ */
 void 
 curl_hash_apply(curl_hash *h, void *user, void (*cb)(void *, curl_hash_element *))
 {
@@ -224,7 +232,10 @@ curl_hash_apply(curl_hash *h, void *user, void (*cb)(void *, curl_hash_element *
     }
   }
 }
+/* }}} */
 
+/* {{{ void curl_hash_clean (curl_hash *)
+ */
 void
 curl_hash_clean(curl_hash *h)
 {
@@ -236,13 +247,19 @@ curl_hash_clean(curl_hash *h)
 
   free(h->table);
 }
+/* }}} */
 
-size_t 
+/* {{{ int curl_hash_count (curl_hash *)
+ */
+int 
 curl_hash_count(curl_hash *h)
 {
   return h->size;
 }
+/* }}} */
 
+/* {{{ void curl_hash_destroy (curl_hash *)
+ */
 void 
 curl_hash_destroy(curl_hash *h)
 {
@@ -252,6 +269,7 @@ curl_hash_destroy(curl_hash *h)
   curl_hash_clean(h);
   free(h);
 }
+/* }}} */
 
 /*
  * local variables:

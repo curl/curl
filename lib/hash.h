@@ -51,7 +51,7 @@ int curl_hash_add(curl_hash *, char *, size_t, const void *);
 int curl_hash_delete(curl_hash *h, char *key, size_t key_len);
 int curl_hash_find(curl_hash *, char *, size_t, void **p);
 void curl_hash_apply(curl_hash *h, void *user, void (*cb)(void *, curl_hash_element *));
-size_t curl_hash_count(curl_hash *h);
+int curl_hash_count(curl_hash *h);
 void curl_hash_clean(curl_hash *h);
 void curl_hash_destroy(curl_hash *h);
 
