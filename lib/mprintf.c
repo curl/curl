@@ -24,73 +24,11 @@
  * - Max 128 parameters
  * - No 'long double' support.
  *
- *************************************************************************
- *
- *
- * 1998/01/10  (v2.8)
- *   Daniel
- *   - Updated version number.
- *   - Corrected a static non-zero prefixed width problem.
- *
- * 1998/11/17 - Daniel
- *   Added daprintf() and dvaprintf() for allocated printf() and vprintf().
- *   They return an allocated buffer with the result inside. The result must
- *   be free()ed!
- *
- * 1998/08/23 - breese
- *
- *   Converted all non-printable (and non-whitespace) characters into
- *   their decimal ASCII value preceeded by a '\' character
- *   (this only applies to snprintf family so far)
- *
- *   Added %S (which is the same as %#s)
- *
- * 1998/05/05 (v2.7)
- *
- *   Fixed precision and width qualifiers (%.*s)
- *
- *   Added support for snprintf()
- *
- *   Quoting (%#s) is disabled for the (nil) pointer
- *
- * 1997/06/09 (v2.6)
- *
- *   %#s means that the string will be quoted with "
- *   (I was getting tired of writing \"%s\" all the time)
- *
- *   [ERR] for strings changed to (nil)
- *
- * v2.5
- * - Added C++ support
- * - Prepended all internal functions with dprintf_
- * - Defined the booleans
- *
- * v2.4
- * - Added dvsprintf(), dvfprintf() and dvprintf().
- * - Made the formatting function available with the name _formatf() to enable
- *   other *printf()-inspired functions. (I considered adding a dmsprintf()
- *   that works like sprintf() but allocates the destination string and
- *   possibly enlarges it itself, but things like that should be done with the
- *   new _formatf() instead.)
- *
- * v2.3
- * - Small modifications to make it compile nicely at both Daniel's and
- *   Bjorn's place.
- *
- * v2.2
- * - Made it work with text to the right of the last %!
- * - Introduced dprintf(), dsprintf() and dfprintf().
- * - Float/double support enabled. This system is currently using the ordinary
- *   sprintf() function. NOTE that positional parameters, widths and precisions
- *   will still work like it should since the d-system takes care of that and
- *   passes that information re-formatted to the old sprintf().
- *
- * v2.1
- * - Fixed space padding (i.e %d was extra padded previously)
- * - long long output is supported
- * - alternate output is done correct like in %#08x
- *
- ****************************************************************************/
+ * If you ever want truly portable and good *printf() clones, the project that
+ * took on from here is named 'Trio' and you find more details on the trio web
+ * page at http://daniel.haxx.se/trio/
+ */
+
 
 #include "setup.h"
 #include <sys/types.h>
