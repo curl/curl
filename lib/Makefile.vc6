@@ -31,11 +31,11 @@ LIB_NAME_DEBUG = libcurld
 #
 # Stem for DLL import libs
 #
-IMPLIB_NAME       = libcurl_imp
-IMPLIB_NAME_DEBUG = libcurld_imp
+IMPLIB_NAME       = libcurl
+IMPLIB_NAME_DEBUG = libcurld
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.7d
+OPENSSL_PATH   = ../../openssl-0.9.7e
 !ENDIF
 
 !IFNDEF ZLIB_PATH

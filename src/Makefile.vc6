@@ -20,7 +20,7 @@ ZLIB_PATH = ../../zlib-1.2.1
 !ENDIF
 
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH = ../../openssl-0.9.7d
+OPENSSL_PATH = ../../openssl-0.9.7e
 !ENDIF
 
 ########################################################
@@ -30,17 +30,17 @@ LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
 ZLIBLIBS   = zlib.lib
 SSLINC     = /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
 CFLAGSSSL  = /DUSE_SSLEAY
-LFLAGSSSL  = /LIBPATH:"$(OPENSSL_PATH)/out32"
+LFLAGSSSL  = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
 SSLLIBS    = libeay32.lib ssleay32.lib gdi32.lib
 
 ## Release
 CCR   = cl.exe /MD /O2 /DNDEBUG
-LINKR = link.exe /incremental:no /libpath:../lib
+LINKR = link.exe /incremental:no /libpath:"../lib"
 RCR   = rc.exe /dCURLDEBUG=0
 
 ## Debug
 CCD   = cl.exe /MDd /Gm /ZI /Od /D_DEBUG /GZ
-LINKD = link.exe /incremental:yes /debug /libpath:../lib
+LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
 RCD   = rc.exe /dCURLDEBUG=1
 
 CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c
