@@ -293,6 +293,12 @@ CURL *curl_easy_duphandle(CURL *incurl)
   outcurl->progress.flags    = data->progress.flags;
   outcurl->progress.callback = data->progress.callback;
 
+  if(data->cookies)
+    /* If cookies are enabled in the parent handle, we enable them
+       in the clone as well! */
+    outcurl->cookies = Curl_cookie_init(data->cookies->filename,
+                                        outcurl->cookies);
+
   /* duplicate all values in 'change' */
   if(data->change.url) {
     outcurl->change.url = strdup(data->change.url);
