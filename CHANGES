@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (7 October)
+- HTTP POST using the read callback didn't work, as Florian Schoppmann
+  reported.
+
 Daniel (5 October)
 - Shared provided a few fixes to make libcurl build on BeOS
   out-of-the-box. New code for BeOS-style non-blocking sockets, provided by
