@@ -470,7 +470,7 @@ sub singletest {
     # run curl, add -v for debug information output
     my $cmdargs="$out--include -v $cmd";
 
-    my @stdintest = getpart("verify", "stdin");
+    my @stdintest = getpart("client", "stdin");
 
     if(@stdintest) {
         my $stdinfile="$LOGDIR/stdin-for-$testnum";
@@ -533,7 +533,9 @@ sub singletest {
         }
     }
 
-    if(@reply) {
+    my %replyattr = getpartattr("reply", "data");
+    if(!$replyattr{'nocheck'} &&
+       @reply) {
         # verify the received data
         my @out = loadarray($CURLOUT);
         $res = compare(\@out, \@reply);
