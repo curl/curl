@@ -23,7 +23,7 @@ const char *dates[]={
   "Sat, 11 Sep 2004 21:32:11 +0200",
   "20040912 15:05:58 -0700",
   "20040911 +0200",
-  "2094 Nov 6",
+/*  "2094 Nov 6", See ../data/test517 for details */
   NULL
 };
 
