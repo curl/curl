@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "10 Apr 2002" "Curl 7.9.5" "Curl Manual"
+.TH curl 1 "4 May 2002" "Curl 7.9.7" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -125,6 +125,10 @@ Use "-C -" to tell curl to automatically find out where/how to resume the
 transfer. It then uses the given output/input files to figure that out.
 
 If this option is used several times, the last one will be used.
+.IP "--crlf"
+(FTP) Convert LF to CRLF in upload. Useful for MVS (OS/390).
+
+If this option is used twice, the second will again disable crlf converting.
 .IP "-d/--data <data>"
 (HTTP) Sends the specified data in a POST request to the HTTP server, in a way
 that can emulate as if a user has filled in a HTML form and pressed the submit
@@ -167,7 +171,7 @@ append data.
 downloads. Curl will normally always first attempt to use EPSV before PASV,
 but with this option, it will not try using EPSV.
 
-IF this option is used several times, each occurrence will toggle this on/off.
+If this option is used several times, each occurrence will toggle this on/off.
 .IP "-D/--dump-header <file>"
 (HTTP/FTP)
 Write the HTTP headers to this file. Write the FTP file info to this
@@ -187,6 +191,12 @@ previous URL when it follows a Location: header. The ";auto" string can be
 used alone, even if you don't set an initial referer.
 
 If this option is used several times, the last one will be used.
+.IP "--environment"
+(RISC OS ONLY) Sets a range of environment variables, using the names the -w
+option supports, to easier allow extraction of useful information after having
+run curl.
+
+If this option is used several times, each occurrence will toggle this on/off.
 .IP "--egd-file <file>"
 (HTTPS) Specify the path name to the Entropy Gathering Daemon socket. The
 socket is used to seed the random engine for SSL connections. See also the
@@ -485,6 +495,12 @@ If this option is used twice, the second will again disable mute.
 When used with -s it makes curl show error message if it fails.
 
 If this option is used twice, the second will again disable show error.
+.IP "--stderr <file>"
+Redirect all writes to stderr to the specified file instead. If the file name
+is a plain '-', it is instead written to stdout. This option has no point when
+you're using a shell with decent redirecting capabilities.
+
+If this option is used several times, the last one will be used.
 .IP "-t/--telnet-option <OPT=val>"
 Pass options to the telnet protocol. Supported options are:
 
@@ -502,6 +518,11 @@ file name to use. That will most likely cause the upload operation to fail. If
 this is used on a http(s) server, the PUT command will be used.
 
 Use the file name "-" (a single dash) to use stdin instead of a given file.
+
+If this option is used several times, the last one will be used.
+.IP "--trace <file>"
+Enables a full trace dump of all incoming and outgoing data, including
+descriptive information, to the given output file.
 
 If this option is used several times, the last one will be used.
 .IP "-u/--user <user:password>"
@@ -655,6 +676,12 @@ that is older than the given date/time, default is a document that is newer
 than the specified date/time.
 
 If this option is used several times, the last one will be used.
+.IP "-Z/--max-redirs <num>"
+Set maximum number of redirection-followings allowed. If -L/--location is
+used, this option can be used to prevent curl from following redirections "in
+absurdum".
+
+If this option is used several times, the last one will be used.
 .IP "-3/--sslv3"
 (HTTPS)
 Forces curl to use SSL version 3 when negotiating with a remote SSL server.
@@ -669,16 +696,6 @@ Make curl display progress information as a progress bar instead of the
 default statistics.
 
 If this option is used twice, the second will again disable the progress bar.
-.IP "--crlf"
-(FTP) Convert LF to CRLF in upload. Useful for MVS (OS/390).
-
-If this option is used twice, the second will again disable crlf converting.
-.IP "--stderr <file>"
-Redirect all writes to stderr to the specified file instead. If the file name
-is a plain '-', it is instead written to stdout. This option has no point when
-you're using a shell with decent redirecting capabilities.
-
-If this option is used several times, the last one will be used.
 .SH FILES
 .I ~/.curlrc
 .RS
