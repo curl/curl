@@ -27,8 +27,9 @@ USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
 DELE before_transfer
-PASV
+EPSV
 TYPE I
+SIZE 121
 RETR 121
 DELE after_transfer
 </protocol>

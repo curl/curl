@@ -34,6 +34,7 @@ PWD
 CWD a/path
 PORT 127,0,0,1,246,33
 TYPE I
+SIZE 103
 RETR 103
 </protocol>
 </verify>

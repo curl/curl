@@ -30,6 +30,7 @@ USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
 TYPE I
+SIZE 119
 RETR 119
 </protocol>
 </verify>

@@ -25,6 +25,9 @@ FTPS dir list PASV
  <command>
 ftps://%HOSTIP:%FTPSPORT/
 </command>
+<file name="log/ftpserver.cmd">
+REPLY EPSV 500 no such command
+</file>
 </test>
 
 #
@@ -37,6 +40,7 @@ filter off really nothing
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
+EPSV
 PASV
 TYPE A
 LIST

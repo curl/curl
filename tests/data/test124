@@ -15,6 +15,7 @@ ftp://%HOSTIP:%FTPPORT/124
 </command>
 <file name="log/ftpserver.cmd">
 REPLY PWD 314 bluah you f00l!
+REPLY EPSV 314 bluah you f00l!
 </file>
 </test>
 
@@ -24,8 +25,10 @@ REPLY PWD 314 bluah you f00l!
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
+EPSV
 PASV
 TYPE I
+SIZE 124
 RETR 124
 </protocol>
 </verify>

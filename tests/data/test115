@@ -12,6 +12,7 @@ ftp://%HOSTIP:%FTPPORT/115
 </command>
 <file name="log/ftpserver.cmd">
 REPLY PASV 314 bluah you f00l!
+REPLY EPSV 314 bluah you f00l!
 </file>
 </test>
 
@@ -24,6 +25,7 @@ REPLY PASV 314 bluah you f00l!
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
+EPSV
 PASV
 </protocol>
 </verify>

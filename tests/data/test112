@@ -25,7 +25,7 @@ worx?
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-PASV
+EPSV
 TYPE I
 APPE 112
 </protocol>

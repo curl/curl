@@ -31,7 +31,7 @@ works
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-PASV
+EPSV
 TYPE I
 STOR 107
 </protocol>

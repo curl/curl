@@ -21,7 +21,7 @@ ftp://%HOSTIP:%FTPPORT/123 -T log/upload123 -C 51
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-PASV
+EPSV
 TYPE I
 </protocol>
 </verify>

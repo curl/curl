@@ -18,6 +18,9 @@ ftp download with post-quote delete operation
  <command>
 ftp://%HOSTIP:%FTPPORT/120 -Q "-DELE file"
 </command>
+<file name="log/ftpserver.cmd">
+REPLY EPSV 314 bluah you f00l!
+</file>
 </test>
 
 # Verify data after the test has been "shot"
@@ -26,8 +29,10 @@ ftp://%HOSTIP:%FTPPORT/120 -Q "-DELE file"
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
+EPSV
 PASV
 TYPE I
+SIZE 120
 RETR 120
 DELE file
 </protocol>

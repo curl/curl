@@ -26,7 +26,7 @@ Moooooooooooo
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-PASV
+EPSV
 TYPE I
 APPE 109
 </protocol>
