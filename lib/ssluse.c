@@ -1803,6 +1803,7 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
                                  256 bytes long. */
       CURLcode rc;
       const char *cert_problem = NULL;
+      long lerr;
 
       connssl->connecting_state = ssl_connect_2; /* the connection failed,
                                                     we're not waiting for
@@ -1824,12 +1825,22 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
            SSL routines:
            SSL3_GET_SERVER_CERTIFICATE:
            certificate verify failed */
-        cert_problem = "SSL certificate problem, verify that the CA cert is"
-          " OK. Details:\n";
         rc = CURLE_SSL_CACERT;
+
+        lerr = SSL_get_verify_result(connssl->handle);
+        if(lerr != X509_V_OK) {
+          snprintf(error_buffer, sizeof(error_buffer),
+                   "SSL certificate problem: %s",
+                   X509_verify_cert_error_string(lerr));
+        }
+        else
+          cert_problem = "SSL certificate problem, verify that the CA cert is"
+            " OK.";
+
         break;
       default:
         rc = CURLE_SSL_CONNECT_ERROR;
+        SSL_strerror(errdetail, error_buffer, sizeof(error_buffer));
         break;
       }
 
@@ -1846,7 +1857,6 @@ ossl_connect_step2(struct connectdata *conn, int sockindex)
       }
       /* Could be a CERT problem */
 
-      SSL_strerror(errdetail, error_buffer, sizeof(error_buffer));
       failf(data, "%s%s", cert_problem ? cert_problem : "", error_buffer);
       return rc;
     }
