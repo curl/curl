@@ -6,8 +6,55 @@
 
                                History of Changes
 
+Version XX
+
+Daniel (31 January 2000):
+ - Paul Harrington <paul@pizza.org> found another core dump in the cookie
+   parser.
+
+ - Mark W. Eichin <eichin@thok.org> found that while curl is uploading a form
+   to a web site, it doesn't read incoming data why it'll hang after a while
+   since the socket "pipe" becomes full.
+
+ - Zhibiao Wu <wuzb@erols.com> pointed out a curl bug in the location: area,
+   although I did not get a reproducable way to do this why I have to wait
+   with fixing anything.
+
+ - Bob Schader <rschader@product-des.com> suggested I should implement resume
+   support for the HTTP PUT operation, and as I think it is a valid suggestion
+   I'll work on it.
+
+Daniel (25 January 2000):
+ - M Travis Obenhaus <Travis.Obenhaus@aud.alcatel.com> pointed out a manual
+   mixup with -y and -Y that was corrected.
+
+ - Jens Schleusener <Jens.Schleusener@dlr.de> pointed out a problem to compile
+   curl on AIX 4.1.4 and gave me a solution. This problem was already fixed
+   by Jörn's recent #include modifications!
+
+Daniel (19 January 2000):
+ - Oskar Liljeblad <osk@hem.passagen.se> pointed out and corrected a problem
+   in the Location: following system that made curl following a location: to a
+   different protocol to fail.
+
+   At January 31st I re-considered this fix and the surrounding source code. I
+   could not really see that the patch did any difference, why I removed it
+   again for further research and debugging. (It disabled location: following
+   on server not running on default ports.)
+
+ - Jörn Hartroth <Joern.Hartroth@telekom.de> brought a fix that once again
+   made it possible to select progress bar.
+
+ - Jörn also fixed a few include problems.
 
 Version 6.4
+
+Daniel (17 January 2000):
+ - Based on suggestions from Björn Stenberg (bjorn@haxx.nu), I made the
+   progress deal better with larger files and added a "Time" field which shows
+   the time spent on the download so far.
+ - I'm now using the CVS repository on sourceforge.net, which also allows web
+   browsing. See http://curl.haxx.nu.
 
 Daniel (10 January 2000):
  - Renumbered some enums in curl/curl.h since tag number 35 was used twice!
