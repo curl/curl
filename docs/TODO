@@ -21,8 +21,6 @@ To do in a future release (random order):
  * Make the connect non-blocking so that timeouts work for connect in 
    multi-threaded programs 
 
- * Add an interface that enables a user to select prefered SSL ciphers to use.
-
  * Consider an interface to libcurl that allows applications to easier get to
    know what cookies that are sent back in the response headers.
 
