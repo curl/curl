@@ -2592,7 +2592,9 @@ operate(struct Configurable *config, int argc, char *argv[])
     if(!config->globoff) {
       /* Unless explicitly shut off, we expand '{...}' and '[...]' expressions
          and return total number of URLs in pattern set */
-      res = glob_url(&urls, url, &urlnum);
+      res = glob_url(&urls, url, &urlnum,
+                     config->showerror?
+                     (config->errors?config->errors:stderr):NULL);
       if(res != CURLE_OK)
         return res;
     }
@@ -2606,7 +2608,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       separator = 1;
     }
     for(i = 0;
-        (url = urls?next_url(urls):(i?NULL:strdup(url)));
+        (url = urls?glob_next_url(urls):(i?NULL:strdup(url)));
         i++) {
       char *outfile;
       outfile = outfiles?strdup(outfiles):NULL;
@@ -2636,7 +2638,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         else if(urls) {
           /* fill '#1' ... '#9' terms from URL pattern */
           char *storefile = outfile;
-          outfile = match_url(storefile, urls);
+          outfile = glob_match_url(storefile, urls);
           free(storefile);
         }
       

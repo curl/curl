@@ -35,6 +35,7 @@
 #include "../lib/memdebug.h"
 #endif
 
+char globerrormsg[80]; /* nasty global error message buffer for globbing */
 typedef enum {
   GLOB_OK,
   GLOB_ERROR
@@ -46,12 +47,12 @@ typedef enum {
  * Input a full globbed string, set the forth argument to the amount of
  * strings we get out of this. Return GlobCode.
  */
-GlobCode glob_word(URLGlob *, /* object anchor */
-                   char *,    /* globbed string */
-                   int,       /* position */
-                   int *);    /* returned number of strings */
+static GlobCode glob_word(URLGlob *, /* object anchor */
+                          char *,    /* globbed string */
+                          int,       /* position */
+                          int *);    /* returned number of strings */
 
-GlobCode glob_set(URLGlob *glob, char *pattern, int pos, int *amount)
+static GlobCode glob_set(URLGlob *glob, char *pattern, int pos, int *amount)
 {
   /* processes a set expression with the point behind the opening '{'
      ','-separated elements are collected until the next closing '}'
@@ -70,12 +71,14 @@ GlobCode glob_set(URLGlob *glob, char *pattern, int pos, int *amount)
   while (1) {
     switch (*pattern) {
     case '\0':			/* URL ended while set was still open */
-      /*printf("error: unmatched brace at pos %d\n", pos);*/
+      snprintf(globerrormsg, sizeof(globerrormsg),
+               "unmatched brace at pos %d\n", pos);
       return GLOB_ERROR;
 
     case '{':
     case '[':			/* no nested expressions at this time */
-      /*printf("error: nested braces not supported %d\n", pos);*/
+      snprintf(globerrormsg, sizeof(globerrormsg),
+               "nested braces not supported at pos %d\n", pos);
       return GLOB_ERROR;
 
     case ',':
@@ -85,7 +88,7 @@ GlobCode glob_set(URLGlob *glob, char *pattern, int pos, int *amount)
         realloc(pat->content.Set.elements,
                 (pat->content.Set.size + 1) * sizeof(char*));
       if (!pat->content.Set.elements) {
-	/*printf("out of memory in set pattern\n");*/
+        snprintf(globerrormsg, sizeof(globerrormsg), "out of memory");
         return GLOB_ERROR;
       }
       pat->content.Set.elements[pat->content.Set.size] =
@@ -110,12 +113,14 @@ GlobCode glob_set(URLGlob *glob, char *pattern, int pos, int *amount)
       break;
 
     case ']':				/* illegal closing bracket */
-      /*printf("error: illegal pattern at pos %d\n", pos);*/
+      snprintf(globerrormsg, sizeof(globerrormsg), 
+               "illegal pattern at pos %d\n", pos);
       return GLOB_ERROR;
 
     case '\\':				/* escaped character, skip '\' */
       if (*(buf+1) == '\0') {		/* but no escaping of '\0'! */
-	/*printf("error: illegal pattern at pos %d\n", pos); */
+        snprintf(globerrormsg, sizeof(globerrormsg), 
+                 "illegal pattern at pos %d\n", pos);
 	return GLOB_ERROR;
       }
       ++pattern;
@@ -126,10 +131,11 @@ GlobCode glob_set(URLGlob *glob, char *pattern, int pos, int *amount)
       ++pos;
     }
   }
+  snprintf(globerrormsg, sizeof(globerrormsg), "malformatted pattern");
   return GLOB_ERROR;
 }
 
-GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
+static GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
 {
   /* processes a range expression with the point behind the opening '['
      - char range: e.g. "a-z]", "B-Q]"
@@ -152,10 +158,8 @@ GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
 	pat->content.CharRange.min_c >= pat->content.CharRange.max_c ||
 	pat->content.CharRange.max_c - pat->content.CharRange.min_c > 'z' - 'a') {
       /* the pattern is not well-formed */ 
-#if 0
-      printf("error: illegal pattern or range specification after pos %d\n",
-             pos);
-#endif
+      snprintf(globerrormsg, sizeof(globerrormsg),
+               "illegal pattern or range specification after pos %d\n", pos);
       return GLOB_ERROR;
     }
     pat->content.CharRange.ptr_c = pat->content.CharRange.min_c;
@@ -180,10 +184,9 @@ GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
                &pat->content.NumRange.max_n) != 2 ||
 	pat->content.NumRange.min_n >= pat->content.NumRange.max_n) {
       /* the pattern is not well-formed */ 
-#if 0
-      printf("error: illegal pattern or range specification after pos %d\n",
-             pos);
-#endif
+      snprintf(globerrormsg, sizeof(globerrormsg), 
+               "error: illegal pattern or range specification after pos %d\n",
+               pos);
       return GLOB_ERROR;
     }
     if (*pattern == '0') {		/* leading zero specified */
@@ -193,7 +196,13 @@ GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
                                               instances of this pattern */
     }
     pat->content.NumRange.ptr_n = pat->content.NumRange.min_n;
-    c = (char*)(strchr(pattern, ']') + 1);	/* continue after next ']' */
+    c = (char*)strchr(pattern, ']'); /* continue after next ']' */
+    if(c)
+      c++;
+    else {
+      snprintf(globerrormsg, sizeof(globerrormsg), "missing ']'");
+      return GLOB_ERROR; /* missing ']' */
+    }
 
     /* always check for a literal (may be "") between patterns */
 
@@ -206,12 +215,12 @@ GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
 
     return GLOB_OK;
   }
-  /*printf("error: illegal character in range specification at pos %d\n",
-    pos);*/
+  snprintf(globerrormsg, sizeof(globerrormsg), 
+           "illegal character in range specification at pos %d\n", pos);
   return GLOB_ERROR;
 }
 
-GlobCode glob_word(URLGlob *glob, char *pattern, int pos, int *amount)
+static GlobCode glob_word(URLGlob *glob, char *pattern, int pos, int *amount)
 {
   /* processes a literal string component of a URL
      special characters '{' and '[' branch to set/range processing functions
@@ -261,7 +270,7 @@ GlobCode glob_word(URLGlob *glob, char *pattern, int pos, int *amount)
   return GLOB_ERROR; /* something got wrong */
 }
 
-int glob_url(URLGlob** glob, char* url, int *urlnum)
+int glob_url(URLGlob** glob, char* url, int *urlnum, FILE *error)
 {
   /*
    * We can deal with any-size, just make a buffer with the same length
@@ -271,12 +280,15 @@ int glob_url(URLGlob** glob, char* url, int *urlnum)
   int amount;
   char *glob_buffer=(char *)malloc(strlen(url)+1);
 
-  if(NULL == glob_buffer)
+  if(NULL == glob_buffer) {
+    snprintf(globerrormsg, sizeof(globerrormsg), "out of memory");
     return CURLE_OUT_OF_MEMORY;
+  }
 
   glob_expand = (URLGlob*)malloc(sizeof(URLGlob));
   if(NULL == glob_expand) {
     free(glob_buffer);
+    snprintf(globerrormsg, sizeof(globerrormsg), "out of memory");
     return CURLE_OUT_OF_MEMORY;
   }
   glob_expand->size = 0;
@@ -291,6 +303,12 @@ int glob_url(URLGlob** glob, char* url, int *urlnum)
     free(glob_expand);
     glob_expand = NULL;
     *urlnum = 1;
+    if(error && globerrormsg[0]) {
+      /* send error description to the error-stream */
+      fprintf(error, "curl: (%d) [globbing] %s\n",
+              CURLE_URL_MALFORMAT, globerrormsg);
+    }
+    return CURLE_URL_MALFORMAT;
   }
 
   *glob = glob_expand;
@@ -317,7 +335,7 @@ void glob_cleanup(URLGlob* glob)
   free(glob);
 }
 
-char *next_url(URLGlob *glob)
+char *glob_next_url(URLGlob *glob)
 {
   char *buf = glob->glob_buffer;
   URLPattern *pat;
@@ -393,7 +411,7 @@ char *next_url(URLGlob *glob)
   return strdup(glob->glob_buffer);
 }
 
-char *match_url(char *filename, URLGlob *glob)
+char *glob_match_url(char *filename, URLGlob *glob)
 {
   char *target;
   URLPattern pat;

@@ -53,9 +53,9 @@ typedef struct {
   char beenhere;
 } URLGlob;
 
-int glob_url(URLGlob**, char*, int *);
-char* next_url(URLGlob*);
-char* match_url(char*, URLGlob *); 
+int glob_url(URLGlob**, char*, int *, FILE *);
+char* glob_next_url(URLGlob*);
+char* glob_match_url(char*, URLGlob *); 
 void glob_cleanup(URLGlob* glob);
 
 #endif
