@@ -587,8 +587,9 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
   count = select(nfds, &read_fds, &write_fds, NULL,
                  (struct timeval *)&tv);
 
-  if(count)
-    ares_process(data->state.areschannel, &read_fds, &write_fds);
+  /* Call ares_process() unconditonally here, even if we simply timed out
+     above, as otherwise the ares name resolve won't timeout! */
+  ares_process(data->state.areschannel, &read_fds, &write_fds);
 
   *dns = NULL;
 
