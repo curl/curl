@@ -131,6 +131,8 @@ struct ssl_config_data {
   long verifypeer;       /* set TRUE if this is desired */
   char *CApath;          /* DOES NOT WORK ON WINDOWS */
   char *CAfile;          /* cerficate to verify peer against */
+  char *random_file;     /* path to file containing "random" data */
+  char *egdsocket;       /* path to file containing the EGD daemon socket */
 };
 
 /****************************************************************************
