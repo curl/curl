@@ -29,7 +29,7 @@
 #include <sys/types.h>
 #include <sys/malloc.h>
 #else
-#include <malloc.h>
+
 #endif
 #include <string.h>
 #include <stdio.h>
@@ -37,6 +37,12 @@
 
 #if HAVE_STDLIB_H
 # include <stdlib.h> /* for `free'; used by Bison 1.27 */
+#else
+
+#ifdef HAVE_MALLOC_H
+#include <malloc.h>
+#endif
+
 #endif
 
 #if defined (STDC_HEADERS) || (!defined (isascii) && !defined (HAVE_ISASCII))
