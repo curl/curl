@@ -32,19 +32,20 @@ WEB SITE
 
         Sweden    -- http://curl.haxx.se/
         Australia -- http://curl.planetmirror.com/
-        Estonia   -- http://curl.dope-brothers.com/
+        Estonia   -- http://curl.wildyou.net/
         Germany   -- http://curl.mirror.at.stealer.net/
         Germany   -- http://curl.netmirror.org/
         Russia    -- http://curl.tsuren.net/
         Thailand  -- http://curl.siamu.ac.th/
         US (CA)   -- http://curl.mirror.redwire.net/
+        US        -- http://curl.signal42.com/
 
 DOWNLOAD
 
   The official download mirror sites are:
 
         Australia -- http://curl.planetmirror.com/download.html
-        Estonia   -- http://curl.dope-brothers.com/download.html
+        Estonia   -- http://curl.wildyou.net/download.html
         Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
         Germany   -- http://curl.mirror.at.stealer.net/download.html
         Germany   -- http://curl.netmirror.org/download.html
