@@ -2077,6 +2077,7 @@ static CURLcode Connect(struct UrlData *data,
         
         /* tell ourselves to fetch this range */
         conn->range = strdup(resumerange);
+        conn->bits.use_range = TRUE;        /* enable range download */
         conn->bits.rangestringalloc = TRUE; /* mark range string allocated */
     }
     
