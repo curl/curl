@@ -253,7 +253,7 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
 
       thistime = localtime(&data->timevalue);
 
-#if defined(HAVE_STRFTIME) || defined(WIN32)
+#ifdef HAVE_STRFTIME
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
       strftime(buf, BUFSIZE-1, "%a, %d %b %Y %H:%M:%S %Z", thistime);
 #else
