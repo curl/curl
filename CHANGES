@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (24 July 2004)
+- I fixed the autobuilds with ares, since they now need to have buildconf run
+  in the ares dir before the configure script is run.
+
+- Added Casey O'Donnell's curl_easy_reset() function. It has a proto in
+  curl/curl.h but we have no man page yet.
+
 Daniel (20 July 2004)
 - Added buildconf and buildconf.bat to the release archives, since they are
   handy for rebuilding curl when using a daily snapshot (and not a pure CVS
