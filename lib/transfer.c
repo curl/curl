@@ -1188,11 +1188,19 @@ CURLcode Curl_perform(struct SessionHandle *data)
            * may be free()ed in the Curl_done() function.
            */
           newurl = conn->newurl?strdup(conn->newurl):NULL;
-        else
+        else {
           /* The transfer phase returned error, we mark the connection to get
            * closed to prevent being re-used. This is becasue we can't
            * possibly know if the connection is in a good shape or not now. */
           conn->bits.close = TRUE;
+
+          if(-1 !=conn->secondarysocket) {
+            /* if we failed anywhere, we must clean up the secondary socket if
+               it was used */
+            sclose(conn->secondarysocket);
+            conn->secondarysocket=-1;
+          }
+        }
 
         /* Always run Curl_done(), even if some of the previous calls
            failed, but return the previous (original) error code */
@@ -1413,13 +1421,6 @@ CURLcode Curl_perform(struct SessionHandle *data)
   res2 = Curl_posttransfer(data);
   if(!res && res2)
     res = res2;
-
-  if(conn && (-1 !=conn->secondarysocket)) {
-    /* if we failed anywhere, we must clean up the secondary socket if it
-       was used */
-    sclose(conn->secondarysocket);
-    conn->secondarysocket=-1;
-  }
 
   return res;
 }
