@@ -716,9 +716,9 @@ NETRC
   passwords, so therefor most unix programs won't read this file unless it is
   only readable by yourself (curl doesn't care though).
 
-  Curl supports .netrc files if told so (using the -n/--netrc option). This is
-  not restricted to only ftp, but curl can use it for all protocols where
-  authentication is used.
+  Curl supports .netrc files if told so (using the -n/--netrc and
+  --netrc-optional options). This is not restricted to only ftp,
+  but curl can use it for all protocols where authentication is used.
 
   A very simple .netrc file could look something like:
 

@@ -181,10 +181,39 @@ A non-zero parameter tells the library to append to the remote file instead of
 overwrite it. This is only useful when uploading to a ftp site.
 .TP
 .B CURLOPT_NETRC
-A non-zero parameter tells the library to scan your \fI~/.netrc\fP file to
-find user name and password for the remote site you are about to access. Only
-machine name, user name and password is taken into account (init macros and
-similar things aren't supported).
+This parameter controls the preference of libcurl between using user names and
+passwords from your \fI~/.netrc\fP file, relative to user names and passwords
+in the URL supplied with \fICURLOPT_URL\fP.
+
+\fBNote:\fP libcurl uses a user name (and supplied or prompted password)
+supplied with \fICURLOPT_USERPWD\fP in preference to any of the options
+controlled by this parameter.
+
+Pass a long, set to one of the values described below.
+.RS
+.TP 5
+.B CURL_NETRC_OPTIONAL
+The use of your \fI~/.netrc\fP file is optional,
+and information in the URL is to be preferred.  The file will be scanned
+with the host and user name (to find the password only) or with the host only,
+to find the first user name and password after that \fImachine\fP,
+which ever information is not specified in the URL.
+
+Undefined values of the option will have this effect.
+.TP     
+.B CURL_NETRC_IGNORED
+The library will ignore the file and use only the information in the URL.
+
+This is the default.
+.TP
+.B CURL_NETRC_REQUIRED
+This value tells the library that use of the file is required,
+to ignore the information in the URL,
+and to search the file with the host only.
+.RE
+.TP
+Only machine name, user name and password are taken into account 
+(init macros and similar things aren't supported).
 
 \fBNote:\fP libcurl does not verify that the file has the correct properties
 set (as the standard Unix ftp client does). It should only be readable by
