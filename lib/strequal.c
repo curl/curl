@@ -47,7 +47,7 @@ int strequal(const char *first, const char *second)
 #elif defined(HAVE_STRCMPI)
   return !strcmpi(first, second);
 #elif defined(HAVE_STRICMP)
-  return !strcmpi(first, second);
+  return !stricmp(first, second);
 #else
   while (*first && *second) {
     if (toupper(*first) != toupper(*second)) {
