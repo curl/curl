@@ -6,6 +6,42 @@
 
                                   Changelog
 
+Daniel (30 April 2004)
+- runtests.pl now scans the valgrind log for valgrind-detected memory leaks
+  after each test case if valgrind was found and used.
+
+- I modified the app-code in curl to include the new lib/curlx.h and only
+  access those functions using the curlx_-prefix in preparation for the future
+  removal of several curl_-functions from the public libcurl API.
+
+- Introduced lib/curlx.h as a single header to provide the curlx_-functions
+  to apps.
+
+- Added notices in the man pages for curl_getenv, curl_mprintf, curl_strequal
+  and curl_strnequal that they are subject for removal in a future release.
+  STOP USING THESE FUNCTIONS.
+
+- Mihai Ionescu noticed he couldn't do formposts with whitespace in the file
+  names and yes, I broke that on April 23. Sigh. I fixed it now and added
+  test case 166 to verify it.
+
+- Luca Altea pointed out a mistake left from the Digest patch of yesterday.
+
+Daniel (29 April 2004)
+- Made IDN domains work when sending requsts over HTTP proxy as well. Added
+  test case 165 to verify the functionality.
+
+- Fixed a bug in the new internal host name setup when re-using connections.
+
+- James Bursa found out that curl_easy_duphandle() with ares-built libcurl
+  created a bad handle that would crash in the first name resolve attempt. This
+  is now fixed and test case 512 was added to verify it.
+
+- Luca Altea provided a major HTTP Digest code fix and cleanup. We now follow
+  the Digest RFC a lot better.
+
+- Gisle Vanem made the SSL code use ERR_error_string_n() where applicable.
+
 Daniel (27 April 2004)
 - I remodeled Gisle's IDN code slightly and now we convert both the host name
   and proxy name to the ACE encoded version to use internally for resolves and
