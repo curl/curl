@@ -3,6 +3,9 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* curl version 7.12.2 fails on AIX if compiled with --enable-ares.
+  The workaround is to combine --enable-ares with --disable-shared
+
 * When connecting to a SOCKS proxy, the (connect) timeout is not properly
   acknowledged after the actual TCP connect (during the SOCKS "negotiate"
   phase). Pointed out by Lucas. Fix: need to select() and timeout properly.
