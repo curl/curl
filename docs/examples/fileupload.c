@@ -22,7 +22,7 @@ int main(void)
   double speed_upload, total_time;
   FILE *fd;
 
-  fd = fopen("debugit", "r"); /* open file to upload */
+  fd = fopen("debugit", "rb"); /* open file to upload */
   if(!fd) {
 
     return 1; /* can't continue */
