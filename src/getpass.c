@@ -197,7 +197,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #else /* WIN32 */
 #include <stdio.h>
 #include <conio.h>
-char *getpass_r(const char *prompt, char *buffer, int buflen)
+char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
   int i;
   printf("%s", prompt);
