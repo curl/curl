@@ -3067,7 +3067,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(Curl_parsenetrc(conn->host.name,
                        user, passwd,
                        data->set.netrc_file)) {
-      infof(data, "Couldn't find host %s in the .netrc file, using defaults\n",
+      infof(data, "Couldn't find host %s in the " DOT_CHAR "netrc file, using defaults\n",
             conn->host.name);
     }
     else
