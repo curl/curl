@@ -771,7 +771,8 @@ PERSISTANT CONNECTIONS
   Note that curl cannot use persistant connections for transfers that are used
   in subsequence curl invokes. Try to stuff as many URLs as possible on the
   same command line if they are using the same host, as that'll make the
-  transfers faster.
+  transfers faster. If you use a http proxy for file transfers, practicly
+  all transfers will be persistant.
 
   Persistant connections were introduced in curl 7.7.
 
