@@ -1,4 +1,7 @@
 
+all:
+install:
+
 test:
 	./runtests.sh
 
