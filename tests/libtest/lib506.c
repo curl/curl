@@ -106,7 +106,7 @@ void *fire(void *ptr)
   code = curl_easy_perform(curl);
   if( code != CURLE_OK ) {
     fprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
-            tdata->url, i, code);
+            tdata->url, i, (int)code);
   }
 
   printf( "CLEANUP\n" );
