@@ -299,6 +299,13 @@ POST (HTTP)
 
         curl -F "docpicture=@dog.gif" -F "catpicture=@cat.gif" 
 
+  To send a field value literally without interpreting a leading '@'
+  or '<', or an embedded ';type=', use --form-string instead of
+  -F. This is recommended when the value is obtained from a user or
+  some other unpredictable source. Under these circumstances, using
+  -F instead of --form-string would allow a user to trick curl into
+  uploading a file.
+
 REFERRER
 
   A HTTP request has the option to include information about which address

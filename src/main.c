@@ -355,6 +355,7 @@ static void help(void)
     "    --ftp-pasv      Use PASV instead of PORT (F)",
     "    --ftp-ssl       Enable SSL/TLS for the ftp transfer (F)",
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
+    "    --form-string <name=string> Specify HTTP multipart POST data (H)",
     " -g/--globoff       Disable URL sequences and ranges using {} and []",
     " -G/--get           Send the -d data with a HTTP GET (H)",
     " -h/--help          This help text",
@@ -774,6 +775,9 @@ static void list_engines (const struct curl_slist *engines)
  * Specify files to upload with 'name=@filename'. Supports specified
  * given Content-Type of the files. Such as ';type=<content-type>'.
  *
+ * If literal_value is set, any initial '@' or '<' in the value string
+ * loses its special meaning, as does any embedded ';type='.
+ *
  * You may specify more than one file for a single name (field). Specify
  * multiple files by writing it like:
  *
@@ -804,7 +808,8 @@ static void list_engines (const struct curl_slist *engines)
 
 static int formparse(char *input,
                      struct curl_httppost **httppost,
-                     struct curl_httppost **last_post)
+                     struct curl_httppost **last_post,
+                     bool literal_value)
 {
   /* nextarg MUST be a string in the format 'name=contents' and we'll
      build a linked list with the info */
@@ -829,7 +834,7 @@ static int formparse(char *input,
     }
     contp = contents;
 
-    if('@' == contp[0]) {
+    if('@' == contp[0] && !literal_value) {
       struct multi_files *multi_start = NULL, *multi_current = NULL;
       /* we use the @-letter to indicate file name(s) */
       contp++;
@@ -974,7 +979,7 @@ static int formparse(char *input,
     else {
       struct curl_forms info[4];
       int i = 0;
-      char *ct = strstr(contp, ";type=");
+      char *ct = literal_value? NULL: strstr(contp, ";type=");
 
       info[i].option = CURLFORM_COPYNAME;
       info[i].value = name;
@@ -987,7 +992,7 @@ static int formparse(char *input,
         ct[0]=0; /* zero terminate here */
       }
 
-      if( contp[0]=='<' ) {
+      if( contp[0]=='<' && !literal_value) {
         info[i].option = CURLFORM_FILECONTENT;
         info[i].value = contp+1;
         i++;
@@ -1280,6 +1285,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"Eg","capath ",     TRUE},
     {"f", "fail",        FALSE},
     {"F", "form",        TRUE},
+    {"Fs","form-string", TRUE},
     {"g", "globoff",     FALSE},
     {"G", "get",         FALSE},
     {"h", "help",        FALSE},
@@ -1361,8 +1367,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
   do {
     /* we can loop here if we have multiple single-letters */
 
-    if(!longopt)
+    if(!longopt) {
       letter = parse?(char)*parse:'\0';
+      subletter='\0';
+    }
     else {
       letter = parse[0];
       subletter = parse[1];
@@ -1833,7 +1841,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
          to sort this out slowly and carefully */
       if(formparse(nextarg,
                    &config->httppost,
-                   &config->last_post))
+                   &config->last_post,
+                   subletter=='s')) /* 's' means literal string */
         return PARAM_BAD_USE;
       if(SetHTTPrequest(HTTPREQ_POST, &config->httpreq))
         return PARAM_BAD_USE;
