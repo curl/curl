@@ -108,9 +108,7 @@
 #include "share.h"
 #include "content_encoding.h"
 #include "http_digest.h"
-#ifdef GSSAPI
 #include "http_negotiate.h"
-#endif
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -137,7 +135,7 @@
 #endif
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
@@ -846,36 +844,21 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
   case CURLOPT_HTTPAUTH:
     /*
-     * Set HTTP Authentication type.
+     * Set HTTP Authentication type BITMASK.
      */
   {
-    curl_httpauth auth = va_arg(param, long);
-    switch(auth) {
-    case CURLAUTH_BASIC:
-    case CURLAUTH_DIGEST:
-      data->set.httpauth = auth;      
-      break;
-    case CURLAUTH_NTLM:
-      /* Enable HTTP NTLM authentication */
-#ifdef USE_SSLEAY
-      /* We can only support NTLM if OpenSSL is present, as we need their
-         crypto package for it */
-      data->set.httpauth = auth;
-      break;
-#else
-      /* fall-through */
+    long auth = va_arg(param, long);
+    /* switch off bits we can't support */
+#ifndef USE_SSLEAY
+    auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
-    case CURLAUTH_GSSNEGOTIATE:
 #ifdef GSSAPI
-      /* Enable HTTP Negotaiate authentication */
-      data->set.httpauth = auth;
-      break;
-#else
-      /* fall-through */
+    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI */
 #endif
-    default:
-      return CURLE_FAILED_INIT; /* unsupported type */
-    }
+    if(!auth)
+      return CURLE_FAILED_INIT; /* no supported types left! */
+
+    data->set.httpauth = auth;
   }
   break;
   
@@ -3081,7 +3064,7 @@ CURLcode Curl_done(struct connectdata *conn)
   if(conn->connect_addr)
     Curl_resolv_unlock(conn->data, conn->connect_addr); /* done with this */
 
-#if defined(MALLOCDEBUG) && defined(AGGRESIVE_TEST)
+#if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
   /* scan for DNS cache entries still marked as in use */
   Curl_hash_apply(data->hostcache,
                   NULL, Curl_scan_cache_used);
