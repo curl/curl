@@ -101,6 +101,9 @@
 /* Define if you have the <alloca.h> header file.  */
 /*#define HAVE_ALLOCA_H 1*/
 
+/* Define if you have the malloc.h file.  */
+#define HAVE_MALLOC_H 1
+
 /* Define if you have the <arpa/inet.h> header file.  */
 #define HAVE_ARPA_INET_H 1
 
@@ -184,4 +187,29 @@
 /* Define if you have the <unistd.h> header file.  */
 #define HAVE_UNISTD_H 1
 
+#endif
+
+/**************************************************
+ *This is to eliminate the warnings when compiled *
+ * using MS VC++ compiler	  			  *
+ **************************************************/
+#ifdef _MSC_VER
+
+#pragma warning (disable: 4244)	/* truncation from 'const int' to 'char' */
+#pragma warning (disable: 4127)	/* conditional expression is constant */
+#pragma warning (disable: 4706)	/* assignment within conditional expression */
+#pragma warning (disable: 4761)	/* integral size mismatch in argument */
+#pragma warning (disable: 4101)	/* unreferenced local variable */
+#pragma warning (disable: 4131)	/* uses old-style declarator */
+#pragma warning (disable: 4057)	/* const char *' differs in indirection to
+                                   slightly different base types from
+                                   'unsigned char [x] */
+#pragma warning (disable: 4100)	/* unreferenced formal parameter */
+#pragma warning (disable: 4055)	/* type cast' : from data pointer 'void *' to
+                                   function pointer
+                                   'void *(__cdecl *)(char *,int ) */
+#pragma warning (disable: 4701)	/* local variable may be used without having
+                                   been initialized */
+#pragma warning (disable: 4715)	/* ToHour' : not all control paths return a
+                                   value */
 #endif
