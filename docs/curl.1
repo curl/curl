@@ -338,7 +338,7 @@ If this option is used twice, the second will again disable silent failure.
 If this option is used twice, the second will again disable silent failure.
 .IP "-F/--form <name=content>"
 (HTTP) This lets curl emulate a filled in form in which a user has pressed the
-submit button. This causes curl to POST data using the content-type
+submit button. This causes curl to POST data using the Content-Type
 multipart/form-data according to RFC1867. This enables uploading of binary
 files etc. To force the 'content' part to be be a file, prefix the file name
 with an @ sign. To just get the content part from a file, prefix the file name
@@ -355,10 +355,14 @@ input:
 To read the file's content from stdin insted of a file, use - where the file
 name should've been. This goes for both @ and < constructs.
 
-You can also tell curl what Content-Type to use for the file upload part, by
-using 'type=', in a manner similar to:
+You can also tell curl what Content-Type to use by using 'type=', in a manner
+similar to:
 
 \fBcurl\fP -F "web=@index.html;type=text/html" url.com
+
+or
+
+\fBcurl\fP -F "name=daniel;type=text/foo" url.com
 
 See further examples and details in the MANUAL.
 

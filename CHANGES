@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (10 September 2004)
+- As found out by Jonas Forsman, curl didn't allow -F to set Content-Type on
+  text-parts. Starting now, we can do -F "name=daniel;type=text/extra". Added
+  test case 186 to verify.
+
 - Bug report #1025986. When following a Location: with a custom Host: header
   replacement, curl only replaced the Host: header on the initial request
   and didn't replace it on the following ones. This resulted in requests with

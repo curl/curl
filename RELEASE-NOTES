@@ -14,6 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o -F can now add Content-Type on non-file sections
  o double Host: header when following Location: with replaced Host: fixed
  o curl_multi_add_handle() return code fix
  o "Proxy-Connection: close" is now understood and properly dealt with

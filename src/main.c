@@ -920,19 +920,42 @@ static int formparse(char *input,
       }
     }
     else {
+      struct curl_forms info[4];
+      int i = 0;
+      char *ct = strstr(contp, ";type=");
+
+      info[i].option = CURLFORM_COPYNAME;
+      info[i].value = name;
+      i++;
+
+      if(ct) {
+        info[i].option = CURLFORM_CONTENTTYPE;
+        info[i].value = &ct[6];
+        i++;
+        ct[0]=0; /* zero terminate here */
+      }
+
       if( contp[0]=='<' ) {
+        info[i].option = CURLFORM_FILECONTENT;
+        info[i].value = contp+1;
+        i++;
+        info[i].option = CURLFORM_END;
+
         if (curl_formadd(httppost, last_post,
-                         CURLFORM_COPYNAME, name,
-                         CURLFORM_FILECONTENT, contp+1, CURLFORM_END) != 0) {
-          fprintf(stderr, "curl_formadd failed!\n");
+                         CURLFORM_ARRAY, info, CURLFORM_END ) != 0) {
+          fprintf(stderr, "curl_formadd failed, possibly the file %s is bad!\n",
+                  contp+1);
           free(contents);
           return 6;
         }
       }
       else {
+        info[i].option = CURLFORM_COPYCONTENTS;
+        info[i].value = contp;
+        i++;
+        info[i].option = CURLFORM_END;
         if (curl_formadd(httppost, last_post,
-                         CURLFORM_COPYNAME, name,
-                         CURLFORM_COPYCONTENTS, contp, CURLFORM_END) != 0) {
+                         CURLFORM_ARRAY, info, CURLFORM_END) != 0) {
           fprintf(stderr, "curl_formadd failed!\n");
           free(contents);
           return 7;
