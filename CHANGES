@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (18 February 2005)
+- Mike Dobbs reported a mingw build failure due to the lack of
+  BUILDING_LIBCURL being defined when libcurl is built. Now this is defined by
+  configure when mingw is used.
+
+Daniel (17 February 2005)
+- David in bug report #1124588 found and fixed a socket leak when libcurl
+  didn't close the socket properly when returning error due to failing
+  localbind
+
 Daniel (16 February 2005)
 - Christopher R. Palmer reported a problem with HTTP-POSTing using "anyauth"
   that picks NTLM. Thanks to David Byron letting me test NTLM against his
