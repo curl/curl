@@ -359,7 +359,7 @@ static void help(void)
        "    --key-type <type> Specifies private key  file type (DER/PEM/ENG) (HTTPS)\n"
        "    --pass  <pass>  Specifies passphrase for the private key (HTTPS)");
   puts("    --engine <eng>  Specifies the crypto engine to use (HTTPS)\n"
-       "    --cacert <file> CA certifciate to verify peer against (SSL)\n"
+       "    --cacert <file> CA certificate to verify peer against (SSL)\n"
        "    --capath <directory> CA directory (made using c_rehash) to verify\n"
        "                    peer against (SSL)\n"
        "    --ciphers <list> What SSL ciphers to use (SSL)\n"
@@ -2969,15 +2969,24 @@ operate(struct Configurable *config, int argc, char *argv[])
       if((res!=CURLE_OK) && config->showerror) {
         if(CURLE_SSL_CACERT == res) {
           fprintf(config->errors, "curl: (%d) %s\n\n", res, errorbuffer);
-#define CURL_CA_CERT_ERRORMSG \
+#define CURL_CA_CERT_ERRORMSG1 \
 "More details here: http://curl.haxx.se/docs/sslcerts.html\n\n" \
-"curl does peer SSL certificate verification by default. If you\n" \
-"communicate with HTTPS servers using certificates that are signed by CAs\n" \
-"present in the bundle, you will get truly secure SSL connections.\n" \
-"Since you get this error, you probably forgot to point out a working CA\n" \
-"cert for your server, or you forgot to use the -k (or --insecure) option.\n"
+"curl performs SSL certificate verification by default, using a \"bundle\"\n" \
+" of Certificate Authority (CA) public keys (CA certs). The default\n" \
+" bundle is named curl-ca-bundle.crt; you can specify an alternate file\n" \
+" using the --cacert option.\n"
 
-          fprintf(config->errors, "%s", CURL_CA_CERT_ERRORMSG);
+#define CURL_CA_CERT_ERRORMSG2 \
+"If this HTTPS server uses a certificate signed by a CA represented in\n" \
+" the bundle, the certificate verification probably failed due to a\n" \
+" problem with the certificate (it might be expired, or the name might\n" \
+" not match the domain name in the URL).\n" \
+"If you'd like to turn off curl's verification of the certificate, use\n" \
+" the -k (or --insecure) option.\n"
+
+          fprintf(config->errors, "%s%s",
+                  CURL_CA_CERT_ERRORMSG1,
+                  CURL_CA_CERT_ERRORMSG2 );
         }
         else
           fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
