@@ -85,7 +85,7 @@ name_to_level(const char *name)
   return (enum protection_level)-1;
 }
 
-static const struct Curl_sec_client_mech *mechs[] = {
+static const struct Curl_sec_client_mech * const mechs[] = {
 #ifdef KRB5
   /* not supported */
 #endif
@@ -400,7 +400,7 @@ int
 Curl_sec_login(struct connectdata *conn)
 {
   int ret;
-  const struct Curl_sec_client_mech **m;
+  const struct Curl_sec_client_mech * const *m;
   ssize_t nread;
   struct SessionHandle *data=conn->data;
   int ftpcode;
