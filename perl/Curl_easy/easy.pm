@@ -16,20 +16,30 @@ require AutoLoader;
 # Do not simply export all your public functions/methods/constants.
 @EXPORT = qw(
 CURLOPT_AUTOREFERER
+CURLOPT_CAINFO
+CURLOPT_CLOSEFUNCTION
+CURLOPT_CLOSEPOLICY
+CURLOPT_CONNECTTIMEOUT
 CURLOPT_COOKIE
 CURLOPT_COOKIEFILE
+CURLOPT_COOKIEJAR
 CURLOPT_CRLF
 CURLOPT_CUSTOMREQUEST
+CURLOPT_EGDSOCKET
 CURLOPT_ERRORBUFFER
 CURLOPT_FAILONERROR
 CURLOPT_FILE
+CURLOPT_FILETIME
 CURLOPT_FOLLOWLOCATION
+CURLOPT_FORBID_REUSE
+CURLOPT_FRESH_CONNECT
 CURLOPT_FTPAPPEND
 CURLOPT_FTPASCII
 CURLOPT_FTPLISTONLY
 CURLOPT_FTPPORT
 CURLOPT_HEADER
 CURLOPT_HEADERFUNCTION
+CURLOPT_HTTPGET
 CURLOPT_HTTPHEADER
 CURLOPT_HTTPPOST
 CURLOPT_HTTPPROXYTUNNEL
@@ -40,6 +50,8 @@ CURLOPT_INTERFACE
 CURLOPT_KRB4LEVEL
 CURLOPT_LOW_SPEED_LIMIT
 CURLOPT_LOW_SPEED_TIME
+CURLOPT_MAXCONNECTS
+CURLOPT_MAXREDIRS
 CURLOPT_MUTE
 CURLOPT_NETRC
 CURLOPT_NOBODY
@@ -59,6 +71,7 @@ CURLOPT_PROXYPORT
 CURLOPT_PROXYUSERPWD
 CURLOPT_PUT
 CURLOPT_QUOTE
+CURLOPT_RANDOM_FILE
 CURLOPT_RANGE
 CURLOPT_READFUNCTION
 CURLOPT_REFERER
@@ -66,7 +79,11 @@ CURLOPT_RESUME_FROM
 CURLOPT_SSLCERT
 CURLOPT_SSLCERTPASSWD
 CURLOPT_SSLVERSION
+CURLOPT_SSL_CIPHER_LIST
+CURLOPT_SSL_VERIFYHOST
+CURLOPT_SSL_VERIFYPEER
 CURLOPT_STDERR
+CURLOPT_TELNETOPTIONS
 CURLOPT_TIMECONDITION
 CURLOPT_TIMEOUT
 CURLOPT_TIMEVALUE
@@ -78,17 +95,7 @@ CURLOPT_USERPWD
 CURLOPT_VERBOSE
 CURLOPT_WRITEFUNCTION
 CURLOPT_WRITEHEADER
-CURLOPT_MAXREDIRS
-CURLOPT_FILETIME
-CURLOPT_TELNETOPTIONS
-CURLOPT_MAXCONNECTS
-CURLOPT_CLOSEPOLICY
-CURLOPT_CLOSEFUNCTION
-CURLOPT_FRESH_CONNECT
-CURLOPT_FORBID_REUSE
-CURLOPT_RANDOM_FILE
-CURLOPT_EGD_SOCKET
-CURLOPT_CONNECTTIMEOUT
+CURLOPT_WRITEINFO
 
 CURLINFO_EFFECTIVE_URL
 CURLINFO_HTTP_CODE
@@ -110,7 +117,7 @@ CURLINFO_CONTENT_LENGTH_UPLOAD
 USE_INTERNAL_VARS
 );
 
-$VERSION = '1.1.7';
+$VERSION = '1.1.8';
 
 $Curl::easy::headers = "";
 $Curl::easy::content = "";
@@ -133,25 +140,31 @@ bootstrap Curl::easy $VERSION;
 __END__
 # Below is the stub of documentation for your module. You better edit it!
 
+=pod 
+
 =head1 NAME
 
 Curl::easy - Perl extension for libcurl
 
 =head1 SYNOPSIS
 
-  use Curl::easy;
+	use Curl::easy;
  
-  $curl = Curl::easy::init();
-  $CURLcode = Curl::easy::setopt($curl, CURLoption, Value);
-  $CURLcode = Curl::easy::perform($curl);
-  Curl::easy::cleanup($curl);
+	$curl = Curl::easy::init();
+	$CURLcode = Curl::easy::setopt($curl, CURLoption, Value);
+	$CURLcode = Curl::easy::perform($curl);
+	Curl::easy::cleanup($curl);
+
+	Read curl_easy_setopt for details of most CURLoption values
+
+=head1 DESCRIPTION 
+
+
  
-=head1 DESCRIPTION
- 
-This perl module provides an interface to the libcurl C library. See
+B<Curl::easy> provides an interface to the libcurl C library. See
 http://curl.haxx.se/ for more information on cURL and libcurl.
- 
-=head1 FILES and CALLBACKS
+
+=head2 FILES and CALLBACKS
 
 Curl::easy supports the various options of curl_easy_setopt which require either a FILE * or
 a callback function.
@@ -254,8 +267,10 @@ indicate an error.
  
 Georg Horn <horn@koblenz-net.de>
  
-Additional callback,pod and test work by Cris Bailiff <c.bailiff@devsecure.com>
+Additional callback, pod and test work by Cris Bailiff <c.bailiff@devsecure.com>
 and Forrest Cahoon <forrest.cahoon@merrillcorp.com>
+
+Currently maintained by Cris Bailiff <c.bailiff@devsecure.com>
 
 =head1 Copyright
 

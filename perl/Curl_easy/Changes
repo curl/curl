@@ -1,6 +1,14 @@
 Revision history for Perl extension Curl::easy.
 Check out the file README for more info.
 
+1.1.8  Thu Sep 20 2001: - Cris Bailiff <c.bailiff@devsecure.com>
+    - Re-generate CURLOPT_ constants from curl.h and enhance makefile
+      to allow this to be repeated in future or for older versions of
+      libcurl. Constants up-to-date for libcurl-7.9(pre)
+    - Split tests into t/*.t to simplify each case
+    - Add test cases for new SSL switches. This needs ca-bundle.crt
+      (from mod_ssl) for verifying test cases.
+
 1.1.7  Thu Sep 13 2001: - Cris Bailiff <c.bailiff@devsecure.com>
     - Documentation Update only - Explicitly state that Curl_easy
       is released under the MIT-X/MPL dual licence. No code changes.

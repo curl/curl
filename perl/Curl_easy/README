@@ -11,19 +11,27 @@ installed. You then may install this module via the usual way:
     make test
     make install
 
+If you have an older version of libcurl, you can remove 'curlopt-constants.c' 
+and have it rebuilt by 'perl Makefile.PL'.
+
+You can also do this for a later version of libcurl, except currently
+you will have to update the module EXPORTS list manually.
+
 The module provides the same functionality as libcurl provides to C programs,
 please refer to the documentation of libcurl. Some examples may be found in
-test.pl.
+t/*.t.
 
 This software is distributed AS IS, WITHOUT WARRANTY OF ANY KIND, either
 express or implied. Send praise, patches, money, beer and pizza to the author.
 Send complaints to /dev/null. ;-)
 
-The author of this software is Georg Horn <horn@koblenz-net.de>
-Parts of the callback support have been added by Cris Bailiff
-<c.bailiff@awayweb.com> and Forrest Cahoon <forrest.cahoon@merrillcorp.com>
+The original author of this software is Georg Horn <horn@koblenz-net.de>
+Parts of the callback support, tests and documentation have been added by
+Cris Bailiff <c.bailiff@devsecure.com> and Forrest Cahoon <forrest.cahoon@merrillcorp.com>
 
-The latest version can be downloaded from http://koblenz-net.de/~horn/export/
+The current maintainer is Cris Bailiff <c.bailiff@devsecure.com>
+
+The latest version can be downloaded from http://curl.haxx.se/libcurl/perl/
  
 Copyright (C) 2000, Daniel Stenberg, , et al.  
 You may opt to use, copy, modify, merge, publish, distribute and/or sell
