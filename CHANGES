@@ -7,6 +7,14 @@
                                History of Changes
 
 Daniel (12 November 2001)
+- Ricardo Cadime fell over a multiple requests problem when first a FTP
+  directory fetch failed and then a second request is made after that. The
+  second request happened to get the FTP server response back from the
+  previous request, when it did its initial CWD command.
+
+- Bjorn Reese pointed out that we could improved the time diff function to
+  prevent truncation a bit.
+
 - Kai-Uwe Rommel made me aware that -p (http proxy tunnel) silly enough didn't
   work for plain HTTP requests! So I made that work.
 
