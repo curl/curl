@@ -852,14 +852,13 @@ print <<EOM
  *PLEASE* help us fixing this. We have to make our new test server written
  in C work and get used instead of the perl version previously used.
 
- The working version of the test server is found here:
+ The working version of the test server is found in the tests/server
+ directory in the CVS tree.
 
- http://curl.haxx.se/dev/sws-0.2.tar.gz
-   
- If you unpack this in the tests/ directory and run the server in there, you
+ If you run this in the tests/ directory and run the server in there, you
  can actually get test-responses if you do like this:
 
- \$ ./sws 8080 &
+ \$ ./server/sws 8080 &
  \$ curl localhost:8080/3
 
 EOM
