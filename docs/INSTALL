@@ -102,7 +102,7 @@ UNIX
 
        CC=cc ./configure
          or
-       env Cc=cc ./configure
+       env CC=cc ./configure
 
      To force a static library compile, disable the shared library creation
      by running configure like:
@@ -363,9 +363,9 @@ VMS
    +----+------------+-------------+---+
 
    With the Ctrl-bits an application can tell if part or the whole message has
-   allready been printed from the program, DCL doesn't need to print it again.
+   already been printed from the program, DCL doesn't need to print it again.
 
-   Facility - basicaly the program ID. A code assigned to the program
+   Facility - basically the program ID. A code assigned to the program
    the name can be fetched from external or internal message libraries
    Errorcode - the errodes assigned by the application
    Sev. - severity: Even = error, off = non error
@@ -397,7 +397,7 @@ QNX
 ===
    (This section was graciously brought to us by David Bentham)
 
-   As QNX is targetted for resource constrained environments, the QNX headers
+   As QNX is targeted for resource constrained environments, the QNX headers
    set conservative limits. This includes the FD_SETSIZE macro, set by default
    to 32. Socket descriptors returned within the CURL library may exceed this,
    resulting in memory faults/SIGSEGV crashes when passed into select(..)
@@ -407,44 +407,6 @@ QNX
    libcurl, by overriding CFLAGS during configure, example
    #  configure CFLAGS='-DFD_SETSIZE=64 -g -O2'
 
-CROSS COMPILE
-=============
-
-   (This section was graciously brought to us by Jim Duey, 23-oct-2001)
-
-   Download and unpack the cURL package.  Version should be 7.9.1 or later.
-
-   'cd' to the new directory. (ie. curl-7.9.1-pre4)
-
-   Set environment variables to point to the cross-compile toolchain and call
-   configure with any options you need.  Be sure and specify the '--host' and
-   '--build' parameters at configuration time.  The following script is an
-   example of cross-compiling for the IBM 405GP PowerPC processor using the
-   toolchain from MonteVista for Hardhat Linux.
-
-   (begin script)
-
-   #! /bin/sh
-
-   export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
-   export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
-   export AR=ppc_405-ar
-   export AS=ppc_405-as
-   export LD=ppc_405-ld
-   export RANLIB=ppc_405-ranlib
-   export CC=ppc_405-gcc
-   export NM=ppc_405-nm
-
-   configure --target=powerpc-hardhat-linux \
-	--host=powerpc-hardhat-linux \
-	--build=i586-pc-linux-gnu \
-	--prefix=/opt/hardhat/devkit/ppc/405/target/usr/local \
-	--exec-prefix=/usr/local
-
-   (end script)
-
-   The '--prefix' parameter specifies where cURL will be installed.  If
-   'configure' completes successfully, do 'make' and 'make install' as usual.
 
 RISC OS
 =======
@@ -488,29 +450,105 @@ NetWare
    - gnu make and awk running on the platform you compile on;
      native Win32 versions can be downloaded from:
      http://www.gknw.com/development/prgtools/ 
-   - recent Novell LibC SDK availabable from:
+   - recent Novell LibC SDK available from:
      http://developer.novell.com/ndk/libc.htm
    - optional zlib sources (at the moment only dynamic linking with zlib.imp); 
-     sources with NetWare Makefile can be optained from:
+     sources with NetWare Makefile can be obtained from:
      http://www.gknw.com/mirror/zlib/
 
    Set a search path to your compiler, linker and tools; if you want to have
    zlib support then set the environment var ZLIB_PATH pointing to your zlib
    sources, on Linux make sure the var OSTYPE contains the string 'linux';
    and finally type 'make netware' from the top source directory...
-   I found on some Linux systems (RH9) that OS detection didnt work although
+   I found on some Linux systems (RH9) that OS detection didnlt work although
    a 'set | grep OSTYPE' shows the var present and set; I simply overwrote it
    with 'OSTYPE=linux-rh9-gnu' and the detection in the Makefile worked...;
    other options are currently not supported, although partly prepared.
    The Ares lib builds arlready fine, and both test tools work fine at least 
-   when build with CodeWarrior...; dont know yet why they fail when build with
+   when build with CodeWarrior...; don't know yet why they fail when build with
    gcc though; if you want to compile with Ares support then set an env var
-   WITH_ARES=1; I've not tested yet including libcares into curl.
+   WITH_ARES=1; I've not tested yet including libares into curl.
    Any help in testing appreciated!
-   Buils automatically created 4 times a day from current CVS are here:
+   Builds automatically created 4 times a day from current CVS are here:
    http://www.gknw.com/mirror/curl/autobuilds/
-   the status of these buids can be viewed at the autobuild table:
+   the status of these builds can be viewed at the autobuild table:
    http://curl.haxx.se/auto/
+
+
+CROSS COMPILE
+=============
+
+   (This section was graciously brought to us by Jim Duey, with additions by
+   Dan Fandrich)
+
+   Download and unpack the cURL package.  Version should be 7.9.1 or later.
+
+   'cd' to the new directory. (e.g. cd curl-7.12.3)
+
+   Set environment variables to point to the cross-compile toolchain and call
+   configure with any options you need.  Be sure and specify the '--host' and
+   '--build' parameters at configuration time.  The following script is an
+   example of cross-compiling for the IBM 405GP PowerPC processor using the
+   toolchain from MonteVista for Hardhat Linux.
+
+   (begin script)
+
+   #! /bin/sh
+
+   export PATH=$PATH:/opt/hardhat/devkit/ppc/405/bin
+   export CPPFLAGS="-I/opt/hardhat/devkit/ppc/405/target/usr/include"
+   export AR=ppc_405-ar
+   export AS=ppc_405-as
+   export LD=ppc_405-ld
+   export RANLIB=ppc_405-ranlib
+   export CC=ppc_405-gcc
+   export NM=ppc_405-nm
+
+   ./configure --target=powerpc-hardhat-linux \
+	--host=powerpc-hardhat-linux \
+	--build=i586-pc-linux-gnu \
+	--prefix=/opt/hardhat/devkit/ppc/405/target/usr/local \
+	--exec-prefix=/usr/local
+
+   (end script)
+
+   You may also need to provide a parameter like '--with-random=/dev/urandom'
+   to configure as it cannot detect the presence of a random number
+   generating device for a target system.  The '--prefix' parameter
+   specifies where cURL will be installed.  If 'configure' completes
+   successfully, do 'make' and 'make install' as usual.
+
+   In some cases, you may be able to simplify the above commands to as
+   little as:
+
+       ./configure --host=ARCH-OS
+
+   There are a number of configure options that can be used to reduce the
+   size of libcurl for embedded applications where binary size is an
+   important factor.  First, be sure to set the CFLAGS environment variable
+   when configuring with any compiler optimization flags to reduce the
+   size of the binary.  For gcc, this would mean at minimum:
+
+      env CFLAGS='-Os' ./configure ...
+
+   Be sure to specify as many --disable- and --without- flags on the configure
+   command-line as you can to disable all the libcurl features that you
+   know your application is not going to need.  Besides specifying the
+   --disable-PROTOCOL flags for all the types of URLs your application
+   will not use, here are some other flags that can reduce the size of the
+   library:
+
+     --disable-ares (disables support for the ARES DNS library)
+     --disable-cookies (disables support for HTTP cookies)
+     --disable-crypto-auth (disables HTTP cryptographic authentication)
+     --disable-ipv6 (disables support for IPv6)
+     --disable-verbose (eliminates debugging strings and error code strings)
+     --without-libidn (disables support for the libidn DNS library)
+     --without-ssl (disables support for SSL/TLS)
+     --without-zlib (disables support for on-the-fly decompression)
+
+   You may find that statically linking libcurl to your application will
+   result in a lower total size.
 
 
 PORTS
@@ -548,6 +586,7 @@ PORTS
         - Ultrix 4.3a
         - i386 BeOS
         - i386 DOS
+        - i386 Esix 4.1
         - i386 FreeBSD
         - i386 HURD
         - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4
