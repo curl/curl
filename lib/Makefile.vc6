@@ -42,7 +42,25 @@ OPENSSL_PATH   = ../../openssl-0.9.7e
 ZLIB_PATH  = ../../zlib-1.2.1
 !ENDIF
 
-# Use the high resolution time by default.  Comment this out to use low
+# USE_WINDOWS_SSPI uses windows libraries to allow NTLM authentication
+# without an openssl installation and offers the ability to authenticate
+# using the "current logged in user".  It does however require that the
+# Windows SDK be installed.
+#
+# If, for some reason the Windows SDK is installed but not installed
+# in the default location, you can specify WINDOWS_SDK_PATH.
+# It can be downloaded from:
+# http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
+
+# USE_WINDOWS_SSPI = 1
+
+!IFDEF WINDOWS_SSPI
+!IFNDEF WINDOWS_SDK_PATH
+WINDOWS_SDK_PATH = "C:\Program Files\Microsoft SDK"
+!ENDIF
+!ENDIF
+
+Use the high resolution time by default.  Comment this out to use low
 # resolution time and not require winmm.lib
 USEMM_LIBS = YES
 
@@ -68,6 +86,11 @@ CFLAGS     = $(CFLAGS) /DWITHOUT_MM_LIB
 !ENDIF
 #  RSAglue.lib was formerly needed in the SSLLIBS
 CFGSET     = FALSE
+
+!IFDEF WINDOWS_SSPI
+CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
+LFLAGS = $(LFLAGS) $(WINDOWS_SDK_PATH)\lib\secur32.lib
+!ENDIF
 
 ######################
 # release

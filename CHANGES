@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (11 March 2005)
+- Christopher R. Palmer made it possible to build libcurl with the
+  USE_WINDOWS_SSPI on Windows, and then libcurl will be built to use the
+  native way to do NTLM. SSPI also allows libcurl to pass on the current user
+  and its password in the request.
+
 Daniel (9 March 2005)
 - Dan F improved the SSL lib setup in configure.
 

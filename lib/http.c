@@ -406,7 +406,7 @@ Curl_http_output_auth(struct connectdata *conn,
   /* Send proxy authentication header if needed */
   if (conn->bits.httpproxy &&
       (conn->bits.tunnel_proxy == proxytunnel)) {
-#ifdef USE_SSLEAY
+#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
     if(authproxy->want == CURLAUTH_NTLM) {
       auth=(char *)"NTLM";
       result = Curl_output_ntlm(conn, TRUE);
@@ -474,7 +474,7 @@ Curl_http_output_auth(struct connectdata *conn,
       }
       else
 #endif
-#ifdef USE_SSLEAY
+#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
       if(authhost->picked == CURLAUTH_NTLM) {
         auth=(char *)"NTLM";
         result = Curl_output_ntlm(conn, FALSE);
@@ -587,7 +587,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
   }
   else
 #endif
-#ifdef USE_SSLEAY
+#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
     /* NTLM support requires the SSL crypto libs */
     if(checkprefix("NTLM", start)) {
       *availp |= CURLAUTH_NTLM;

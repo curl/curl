@@ -832,7 +832,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
   {
     long auth = va_arg(param, long);
     /* switch off bits we can't support */
-#ifndef USE_SSLEAY
+#if ! defined(USE_SSLEAY) && !defined(USE_WINDOWS_SSPI)
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
 #ifndef HAVE_GSSAPI
@@ -1449,6 +1449,10 @@ CURLcode Curl_disconnect(struct connectdata *conn)
       data->state.authhost.want;
 
     data->state.authproblem = FALSE;
+
+#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
+    Curl_ntlm_cleanup(conn);
+#endif
   }
 
   if(conn->curl_disconnect)

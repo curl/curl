@@ -188,10 +188,30 @@ typedef enum {
   NTLMSTATE_LAST
 } curlntlm;
 
+#ifdef USE_WINDOWS_SSPI
+/* When including these headers, you must define either SECURITY_WIN32
+ * or SECURITY_KERNEL, indicating who is compiling the code.
+ */
+#define SECURITY_WIN32 1
+#include <sspi.h>
+#include <Security.h>
+#include <rpc.h>
+#endif
+
 /* Struct used for NTLM challenge-response authentication */
 struct ntlmdata {
   curlntlm state;
+#ifdef USE_WINDOWS_SSPI
+  CredHandle handle;
+  CtxtHandle c_handle;
+  SEC_WINNT_AUTH_IDENTITY identity;
+  SEC_WINNT_AUTH_IDENTITY *p_identity;
+  int has_handles;
+  void *type_2;
+  int n_type_2;
+#else
   unsigned char nonce[8];
+#endif
 };
 
 #ifdef HAVE_GSSAPI

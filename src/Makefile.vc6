@@ -23,6 +23,24 @@ ZLIB_PATH = ../../zlib-1.2.1
 OPENSSL_PATH = ../../openssl-0.9.7e
 !ENDIF
 
+# USE_WINDOWS_SSPI uses windows libraries to allow NTLM authentication
+# without an openssl installation and offers the ability to authenticate
+# using the "current logged in user".  It does however require that the
+# Windows SDK be installed.
+#
+# If, for some reason the Windows SDK is installed but not installed
+# in the default location, you can specify WINDOWS_SDK_PATH.
+# It can be downloaded from:
+# http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
+
+# USE_WINDOWS_SSPI = 1
+
+!IFDEF WINDOWS_SSPI
+!IFNDEF WINDOWS_SDK_PATH
+WINDOWS_SDK_PATH = "C:\Program Files\Microsoft SDK"
+!ENDIF
+!ENDIF
+
 ########################################################
 ## Nothing more to do below this line!
 ZLIB_CFLAGS   = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
@@ -49,6 +67,12 @@ CFLAGS   = /I../lib /I../include /nologo /W3 /GX /DWIN32 /YX /FD /c
 LFLAGS   = /nologo /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
 RESFLAGS = /i../include
 
+!IFDEF WINDOWS_SSPI
+CFLAGS = $(CFLAGS) /DUSE_WINDOWS_SSPI /I$(WINDOWS_SDK_PATH)\include
+LFLAGS = $(LFLAGS) $(WINDOWS_SDK_PATH)\lib\secur32.lib
+!ENDIF
+
+CFLAGS = $(CFLAGS) /DCURLDEBUG
 
 RELEASE_OBJS= \
 	hugehelpr.obj \

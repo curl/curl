@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -30,7 +30,7 @@
 */
 
 #ifndef CURL_DISABLE_HTTP
-#ifdef USE_SSLEAY
+#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
 /* We need OpenSSL for the crypto lib to provide us with MD4 and DES */
 
 /* -- WIN32 approved -- */
@@ -51,6 +51,8 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+#ifndef USE_WINDOWS_SSPI
+
 #include <openssl/des.h>
 #include <openssl/md4.h>
 #include <openssl/ssl.h>
@@ -69,6 +71,12 @@
 /* Modern version */
 #define DESKEYARG(x) *x
 #define DESKEY(x) &x
+#endif
+
+#else
+
+#include <rpc.h>
+
 #endif
 
 /* The last #include file should be: */
@@ -130,6 +138,14 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
 
       ntlm->state = NTLMSTATE_TYPE2; /* we got a type-2 */
 
+#ifdef USE_WINDOWS_SSPI
+      if ((ntlm->type_2 = malloc(size+1)) == NULL) {
+        free(buffer);
+        return CURLE_OUT_OF_MEMORY;
+      }
+      ntlm->n_type_2 = size;
+      memcpy(ntlm->type_2, buffer, size);
+#else
       if(size >= 48)
         /* the nonce of interest is index [24 .. 31], 8 bytes */
         memcpy(ntlm->nonce, &buffer[24], 8);
@@ -138,6 +154,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
       /* at index decimal 20, there's a 32bit NTLM flag field */
 
       free(buffer);
+#endif
     }
     else {
       if(ntlm->state >= NTLMSTATE_TYPE1)
@@ -148,6 +165,8 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
   }
   return CURLNTLM_FINE;
 }
+
+#ifndef USE_WINDOWS_SSPI
 
 /*
  * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
@@ -275,6 +294,32 @@ static void mkhash(char *password,
   free(pw);
 }
 
+#endif
+
+#ifdef USE_WINDOWS_SSPI
+
+static void
+ntlm_sspi_cleanup(struct ntlmdata *ntlm)
+{
+  if (ntlm->type_2) {
+    free(ntlm->type_2);
+    ntlm->type_2 = NULL;
+  }
+  if (ntlm->has_handles) {
+    DeleteSecurityContext(&ntlm->c_handle);
+    FreeCredentialsHandle(&ntlm->handle);
+    ntlm->has_handles = 0;
+  }
+  if (ntlm->p_identity) {
+    if (ntlm->identity.User) free(ntlm->identity.User);
+    if (ntlm->identity.Password) free(ntlm->identity.Password);
+    if (ntlm->identity.Domain) free(ntlm->identity.Domain);
+    ntlm->p_identity = NULL;
+  }
+}
+
+#endif
+
 #define SHORTPAIR(x) ((x) & 0xff), ((x) >> 8)
 #define LONGQUARTET(x) ((x) & 0xff), (((x) >> 8)&0xff), \
   (((x) >>16)&0xff), ((x)>>24)
@@ -333,6 +378,90 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   switch(ntlm->state) {
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
+#ifdef USE_WINDOWS_SSPI
+  {
+    SecBuffer buf;
+    SecBufferDesc desc;
+    SECURITY_STATUS status;
+    ULONG attrs;
+    const char *user;
+    int domlen;
+
+    ntlm_sspi_cleanup(ntlm);
+
+    user = strchr(userp, '\\');
+    if (!user)
+      user = strchr(userp, '/');
+
+    if (user) {
+      domain = userp;
+      domlen = user - userp;
+      user++;
+    }
+    else {
+      user = userp;
+      domain = "";
+      domlen = 0;
+    }
+
+    if (user && *user) {
+      /* note: initialize all of this before doing the mallocs so that
+       * it can be cleaned up later without leaking memory.
+       */
+      ntlm->p_identity = &ntlm->identity;
+      memset(ntlm->p_identity, 0, sizeof(*ntlm->p_identity));
+      if ((ntlm->identity.User = strdup(user)) == NULL)
+        return CURLE_OUT_OF_MEMORY;
+      ntlm->identity.UserLength = strlen(user);
+      if ((ntlm->identity.Password = strdup(passwdp)) == NULL)
+        return CURLE_OUT_OF_MEMORY;
+      ntlm->identity.PasswordLength = strlen(passwdp);
+      if ((ntlm->identity.Domain = malloc(domlen+1)) == NULL)
+        return CURLE_OUT_OF_MEMORY;
+      strncpy(ntlm->identity.Domain, domain, domlen);
+      ntlm->identity.Domain[domlen] = '\0';
+      ntlm->identity.DomainLength = domlen;
+      ntlm->identity.Flags = SEC_WINNT_AUTH_IDENTITY_ANSI;
+    }
+    else {
+      ntlm->p_identity = NULL;
+    }
+
+    if (AcquireCredentialsHandle(
+          NULL, "NTLM", SECPKG_CRED_OUTBOUND, NULL, ntlm->p_identity,
+          NULL, NULL, &ntlm->handle, NULL
+        ) != SEC_E_OK) {
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    desc.ulVersion = SECBUFFER_VERSION;
+    desc.cBuffers  = 1;
+    desc.pBuffers  = &buf;
+    buf.cbBuffer   = sizeof(ntlmbuf);
+    buf.BufferType = SECBUFFER_TOKEN;
+    buf.pvBuffer   = ntlmbuf;
+
+    status = InitializeSecurityContext(&ntlm->handle, NULL, (char *) host,
+                                       ISC_REQ_CONFIDENTIALITY |
+                                       ISC_REQ_REPLAY_DETECT |
+                                       ISC_REQ_CONNECTION,
+                                       0, SECURITY_NETWORK_DREP, NULL, 0,
+                                       &ntlm->c_handle, &desc, &attrs, NULL
+                                      );
+
+    if (status == SEC_I_COMPLETE_AND_CONTINUE ||
+        status == SEC_I_CONTINUE_NEEDED) {
+      CompleteAuthToken(&ntlm->c_handle, &desc);
+    }
+    else if (status != SEC_E_OK) {
+      FreeCredentialsHandle(&ntlm->handle);
+      return CURLE_RECV_ERROR;
+    }
+
+    ntlm->has_handles = 1;
+    size = buf.cbBuffer;
+  }
+#else
     hostoff = 32;
     domoff = hostoff + hostlen;
 
@@ -382,6 +511,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
     /* initial packet length */
     size = 32 + hostlen + domlen;
+#endif
 
     /* now keeper of the base64 encoded package size */
     size = Curl_base64_encode((char *)ntlmbuf, size, &base64);
@@ -417,6 +547,41 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     */
 
   {
+#ifdef USE_WINDOWS_SSPI
+    SecBuffer type_2, type_3;
+    SecBufferDesc type_2_desc, type_3_desc;
+    SECURITY_STATUS status;
+    ULONG attrs;
+
+    type_2_desc.ulVersion  = type_3_desc.ulVersion  = SECBUFFER_VERSION;
+    type_2_desc.cBuffers   = type_3_desc.cBuffers   = 1;
+    type_2_desc.pBuffers   = &type_2;
+    type_3_desc.pBuffers   = &type_3;
+
+    type_2.BufferType = SECBUFFER_TOKEN;
+    type_2.pvBuffer   = ntlm->type_2;
+    type_2.cbBuffer   = ntlm->n_type_2;
+    type_3.BufferType = SECBUFFER_TOKEN;
+    type_3.pvBuffer   = ntlmbuf;
+    type_3.cbBuffer   = sizeof(ntlmbuf);
+
+    status = InitializeSecurityContext(&ntlm->handle, &ntlm->c_handle,
+                                       (char *) host,
+                                       ISC_REQ_CONFIDENTIALITY |
+                                       ISC_REQ_REPLAY_DETECT |
+                                       ISC_REQ_CONNECTION,
+                                       0, SECURITY_NETWORK_DREP, &type_2_desc,
+                                       0, &ntlm->c_handle, &type_3_desc,
+                                       &attrs, NULL);
+
+    if (status != SEC_E_OK)
+      return CURLE_RECV_ERROR;
+
+    size = type_3.cbBuffer;
+
+    ntlm_sspi_cleanup(ntlm);
+
+#else
     int lmrespoff;
     int ntrespoff;
     int useroff;
@@ -556,6 +721,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     ntlmbuf[56] = (unsigned char)(size & 0xff);
     ntlmbuf[57] = (unsigned char)(size >> 8);
 
+#endif
+
     /* convert the binary blob into base64 */
     size = Curl_base64_encode((char *)ntlmbuf, size, &base64);
 
@@ -587,5 +754,16 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
   return CURLE_OK;
 }
+
+
+void
+Curl_ntlm_cleanup(struct connectdata *conn)
+{
+#ifdef USE_WINDOWS_SSPI
+  ntlm_sspi_cleanup(&conn->ntlm);
+  ntlm_sspi_cleanup(&conn->proxyntlm);
+#endif
+}
+
 #endif /* USE_SSLEAY */
 #endif /* !CURL_DISABLE_HTTP */
