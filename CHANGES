@@ -6,14 +6,19 @@
 
                                History of Changes
 
-Verson 7.3pre2
+Version 7.3
+
+Daniel (15 September 2000)
+- Updated all sorts of documents in regards to the new proxytunnel support.
+
+Version 7.3pre2
 
 Daniel (15 September 2000)
 - Kai-Uwe Rommel pointed out a problem in the httpproxytunnel stuff for ftp.
   Adjusted it. Added better info message when setting up the tunnel and the
   pasv message when doing the second connect.
   
-Verson 7.3pre1
+Version 7.3pre1
 
 Daniel (15 September 2000)
 - libcurl now allows "httpproxytunnel" to an arbitrary host and port name. The
@@ -2187,7 +2192,7 @@ Version 4 (1998-03-20)
 
 ***************************************************************************
 
-Version 3.12
+Version 3.12 (14 March 1998)
  Daniel Stenberg
  - End-of-header tracking still lacked support for \r\n or just \n at the
    end of the last header line.

@@ -22,7 +22,8 @@ For the future
  * Move non-URL related functions that are used by both the lib and the curl
    application to a separate "portability lib".
 
- * Add support for other languages than C (not important)
+ * Add support for other languages than C (not important). C++ and perl comes
+   to mind. Python?
 
  * Improve the -K config file parser.
 
@@ -70,12 +71,6 @@ For the future
    sends the password in cleartext over the network, this "Digest" method uses
    a challange-response protocol which increases security quite a lot.
 
- * Different FTP Upload Through Web Proxy
-   I don't know any web proxies that allow CONNECT through on port 21, but
-   that would be the best way to do ftp upload. All we would need to do would
-   be to 'CONNECT <host>:<port> HTTP/1.0\r\n\r\n' and then do business as
-   usual. I least I think so. It would be fun if someone tried this...
-
  * Multiple Proxies?
    Is there anyone that actually uses serial-proxies? I mean, send CONNECT to
    the first proxy to connect to the second proxy to which you send CONNECT to
@@ -86,8 +81,7 @@ For the future
    Ftp-kind proxy, Socks5, whatever kind of proxies are there?
 
  * IPv6 Awareness and support
-   Where ever it would fit. I am not that into v6 yet to fully grasp what we
-   would need to do, but letting the autoconf search for v6-versions of a few
+   Where ever it would fit.  configure search for v6-versions of a few
    functions and then use them instead is of course the first thing to do...
    RFC 2428 "FTP Extensions for IPv6 and NATs" will be interesting. PORT
    should be replaced with EPRT for IPv6, and EPSV instead of PASV.
@@ -100,5 +94,5 @@ For the future
  * Make curl capable of verifying the server's certificate when connecting
    with HTTPS://.
 
- * Kerberos-FTP
+ * Kerberos-FTP, krb4-ftp
 
