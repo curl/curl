@@ -18,6 +18,10 @@ use strict;
 
 require "getpart.pm";
 
+if($] >= 5.8) {
+    require 'open'; import( 'open', OUT => ':raw' );
+}
+
 open(FTPLOG, ">log/ftpd.log") ||
     print STDERR "failed to open log file, runs without logging\n";
 
@@ -95,7 +99,8 @@ my %commandok = (
                  'QUIT'  => 'loggedin|twosock',
                  'RNFR'  => 'loggedin|twosock',
                  'RNTO'  => 'loggedin|twosock',
-                 'DELE' => 'loggedin|twosock'
+                 'DELE' => 'loggedin|twosock',
+                 'MDTM' => 'loggedin|twosock',
                  );
 
 # initially, we're in 'fresh' state
@@ -134,6 +139,7 @@ my %commandfunc = ( 'PORT' => \&PORT_command,
                     'REST' => \&REST_command,
                     'STOR' => \&STOR_command,
                     'APPE' => \&STOR_command, # append looks like upload
+                    'MDTM' => \&MDTM_command,
                     );
 
 my $rest=0;
@@ -176,6 +182,33 @@ sub NLST_command {
     }
     close(SOCK);
     print "226 ASCII transfer complete\r\n";
+    return 0;
+}
+
+sub MDTM_command {
+    my $testno = $_[0];
+
+    loadtest("data/test$testno");
+
+    logmsg "MDTM $testno\n";
+
+    my @data = getpart("reply", "mdtm");
+
+    my $reply = $data[0];
+    chomp $reply;
+
+    if($reply <0) {
+        print "550 $testno: no such file.\r\n";
+        logmsg "MDTM $testno: no such file\n";
+    }
+    elsif($reply) {
+        print "$reply\r\n";
+        logmsg "MDTM $testno returned $reply\n";
+    }
+    else {
+        print "500 MDTM: no such command.\r\n";
+        logmsg "MDTM: no such command\n";
+    }
     return 0;
 }
 
