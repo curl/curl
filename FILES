@@ -17,6 +17,8 @@ docs/README.libcurl
 docs/RESOURCES
 docs/TODO
 docs/curl.1
+docs/Makefile.in
+docs/Makefile.am
 docs/*.3
 maketgz
 Makefile.in
