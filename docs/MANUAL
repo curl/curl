@@ -745,16 +745,22 @@ TELNET
   to track when the login prompt is received and send the username and
   password accordingly.
 
-MAILING LIST
+MAILING LISTS
 
-  We have an open mailing list to discuss curl, its development and things
-  relevant to this.
+  For your convenience, we have several open mailing lists to discuss curl,
+  its development and things relevant to this.
 
-  To subscribe, mail curl-request@contactor.se with "subscribe <fill in your
-  email address>" in the body.
+  To subscribe to the main curl list, mail curl-request@contactor.se with
+  "subscribe <fill in your email address>" in the body.
 
-  To post to the list, mail curl@contactor.se.
+  To subscribe to the libcurl users list, follow the instructions at
+  http://curl.haxx.se/mail/
 
-  To unsubcribe, mail curl-request@contactor.se with "unsubscribe <your
-  subscribed email address>" in the body.
+  To subscribe to the curl announce list, to only get information about new
+  releases, follow the instructions at http://curl.haxx.se/mail/
 
+  To subscribe to the curl-and-PHP list in which curl using with PHP is
+  discussed, follow the instructions at http://curl.haxx.se/mail/
+
+  Please direct curl questions, feature requests and trouble reports to one of
+  these mailing lists instead of mailing any individual.
