@@ -155,9 +155,6 @@ CURLcode file(struct connectdata *conn)
      this is both more efficient than the former call to download() and
      it avoids problems with select() and recv() on file descriptors
      in Winsock */
-#if 0
-  ProgressInit (data, expected_size);
-#endif
   if(expected_size != -1)
     pgrsSetDownloadSize(data, expected_size);
 
