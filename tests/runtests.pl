@@ -6,7 +6,7 @@
 #                            | (__| |_| |  _ <| |___
 #                             \___|\___/|_| \_\_____|
 #
-# Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+# Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
@@ -29,6 +29,7 @@ use strict;
 @INC=(@INC, $ENV{'srcdir'}, ".");
 
 require "getpart.pm"; # array functions
+require "valgrind.pm"; # valgrind report parser
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $HOSTIP="127.0.0.1";
@@ -94,6 +95,15 @@ if($valgrind) {
     if (($? >> 8)==0) {
         $valgrind_tool="--tool=memcheck ";
     }
+    open(C, "<$CURL");
+    my $l = <C>;
+    if($l =~ /^\#\!/) {
+        # The first line starts with "#!" which implies a shell-script.
+        # This means libcurl is built shared and curl is a wrapper-script
+        # Disable valgrind in this setup
+        $valgrind=0;
+    }
+    close(C);
 }
 
 my $gdb = checkcmd("gdb");
@@ -1434,60 +1444,20 @@ sub singletest {
                 if($f =~ /^valgrind$testnum\.pid/) {
                     $l = $f;
                     last;
-            }
-            }
-            my $leak;
-            my $invalidread;
-            my $uninitedvar;
-            my $error;
-            my $partial;
-
-            open(VAL, "<log/$l");
-            while(<VAL>) {
-                if($_ =~ /definitely lost: (\d*) bytes/) {
-                    $leak = $1;
-                    if($leak) {
-                        $error++;
-                    }
-                    last;
-                }
-                elsif($_ =~ /Invalid read of size (\d+)/) {
-                    $invalidread = $1;
-                    $error++;
-                    last;
-                }
-                elsif($_ =~ /Conditional jump or move/) {
-                    # If we require SSL, this test case most probaly makes
-                    # us use OpenSSL. OpenSSL produces numerous valgrind
-                    # errors of this kind, rendering it impossible for us to
-                    # detect (valid) reports on actual curl or libcurl code.
-
-                    if(!$feature{'SSL'}) {
-                        $uninitedvar = 1;
-                        $error++;
-                        last;
-                    }
-                    else {
-                        $partial=1;
-                    }
                 }
             }
-            close(VAL);
-            if($error) {
+            my $src=$ENV{'srcdir'};
+            if(!$src) {
+                $src=".";
+            }
+            my @e = valgrindparse($src, $feature{'SSL'}, "log/$l");
+            if($e[0]) {
                 print " valgrind ERROR ";
-                if($leak) {
-                    print "\n Leaked $leak bytes\n";
-                }
-                if($invalidread) {
-                    print "\n Read $invalidread invalid bytes\n";
-                }
-                if($uninitedvar) {
-                    print "\n Conditional jump or move depends on uninitialised value(s)\n";
-                }
+                print @e;
                 return 1;
             }
             elsif(!$short) {
-                printf " valgrind %s", $partial?"PARTIAL":"OK";
+                printf " valgrind OK";
             }
         }
         else {
