@@ -91,7 +91,7 @@ int Curl_parsenetrc(char *host,
 
   char state_login=0;      /* Found a login keyword */
   char state_password=0;   /* Found a password keyword */
-  char state_our_login=0;  /* With specific_login, found *our* login name */
+  int state_our_login=FALSE;  /* With specific_login, found *our* login name */
 
 #define NETRC DOT_CHAR "netrc"
 
@@ -210,7 +210,7 @@ int Curl_parsenetrc(char *host,
 	  else if(strequal("machine", tok)) {
 	    /* ok, there's machine here go => */
 	    state = HOSTFOUND;
-            state_our_login = 0;
+            state_our_login = FALSE;
 	  }
 	  break;
 	} /* switch (state) */
