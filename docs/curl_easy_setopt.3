@@ -237,7 +237,7 @@ want the transfer to start from.
 .B CURLOPT_COOKIE
 Pass a pointer to a zero terminated string as parameter. It will be used to
 set a cookie in the http request. The format of the string should be
-'[NAME]=[CONTENTS];' Where NAME is the cookie name.
+[NAME]=[CONTENTS]; Where NAME is the cookie name.
 .TP
 .B CURLOPT_HTTPHEADER
 Pass a pointer to a linked list of HTTP headers to pass to the server in your
@@ -267,7 +267,7 @@ the password required to use the CURLOPT_SSLCERT certificate. If the password
 is not supplied, you will be prompted for it.
 .TP
 .B CURLOPT_CRLF
-TBD.
+Convert unix newlines to CRLF newlines on FTP uploads.
 .TP
 .B CURLOPT_QUOTE
 Pass a pointer to a linked list of FTP commands to pass to the server prior to
