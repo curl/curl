@@ -103,7 +103,9 @@ sub loadtest {
     }
     else {
         # failure
-        print STDERR "file $file wouldn't open!\n";
+        if($warning) {
+            print STDERR "file $file wouldn't open!\n";
+        }
         return 1;
     }
     return 0;
