@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel (6 December 2004)
+- Dan Fandrich added the --disable-cookies option to configure to build
+  libcurl without cookie support. This is mainly useful if you want to build a
+  minimalistic libcurl with no cookies support at all. Like for embedded
+  systems or similar.
+
 - Richard Atterer fixed libcurl's way of dealing with the EPSV
   response. Previously, libcurl would re-resolve the host name with the new
   port number and attempt to connect to that, while it should use the IP from

@@ -858,6 +858,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 /* we asked for a resume and we got it */
                 k->content_range = TRUE;
             }
+#if !defined(CURL_DISABLE_COOKIES)
             else if(data->cookies &&
                     checkprefix("Set-Cookie:", k->p)) {
               Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
@@ -871,6 +872,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                               conn->path);
               Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
             }
+#endif
             else if(checkprefix("Last-Modified:", k->p) &&
                     (data->set.timecondition || data->set.get_filetime) ) {
               time_t secs=time(NULL);
@@ -1614,7 +1616,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   /* If there was a list of cookie files to read and we haven't done it before,
      do it now! */
   if(data->change.cookielist) {

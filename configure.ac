@@ -1509,6 +1509,25 @@ AC_HELP_STRING([--disable-crypto-auth],[Disable cryptographic authentication]),
        AC_MSG_RESULT(yes)
 )
 
+dnl ************************************************************
+dnl disable cookies support
+dnl
+AC_MSG_CHECKING([whether to enable support for cookies])
+AC_ARG_ENABLE(cookies,
+AC_HELP_STRING([--enable-cookies],[Enable cookies support])
+AC_HELP_STRING([--disable-cookies],[Disable cookies support]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_COOKIES, 1, [to disable cookies support])
+       AC_SUBST(CURL_DISABLE_COOKIES)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 
 AC_CONFIG_FILES([Makefile \

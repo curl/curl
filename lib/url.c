@@ -214,9 +214,6 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_SSL_Close_All(data);
 #endif
 
-  if(data->change.cookielist) /* clean up list if any */
-    curl_slist_free_all(data->change.cookielist);
-
   Curl_safefree(data->state.first_host);
   Curl_safefree(data->state.scratch);
 
@@ -231,7 +228,10 @@ CURLcode Curl_close(struct SessionHandle *data)
 
   Curl_safefree(data->state.headerbuff);
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
+  if(data->change.cookielist) /* clean up list if any */
+    curl_slist_free_all(data->change.cookielist);
+
   Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
   if(data->set.cookiejar) {
     /* we have a "destination" for all the cookies to get dumped to */
@@ -244,10 +244,10 @@ CURLcode Curl_close(struct SessionHandle *data)
     Curl_cookie_cleanup(data->cookies);
   }
   Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
-
-#ifndef CURL_DISABLE_CRYPTO_AUTH
-  Curl_digest_cleanup(data);
 #endif
+
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_CRYPTO_AUTH)
+  Curl_digest_cleanup(data);
 #endif
 
   /* free the connection cache */
@@ -719,6 +719,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.http200aliases = va_arg(param, struct curl_slist *);
     break;
 
+#if !defined(CURL_DISABLE_COOKIES)
   case CURLOPT_COOKIE:
     /*
      * Cookie string to send to the remote server in the request.
@@ -776,6 +777,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.cookiesession = (bool)va_arg(param, long);
     break;
+#endif
 
   case CURLOPT_HTTPGET:
     /*
@@ -1310,7 +1312,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
           data->hostcache = data->share->hostcache;
         }
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
         if(data->share->cookies) {
           /* use shared cookie list, first free own one if any */
           if (data->cookies)
@@ -1321,7 +1323,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
         Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
 
       }
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
       /* check cookie list is set */
       if(!data->cookies)
         data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE );

@@ -464,7 +464,7 @@ CURL *curl_easy_duphandle(CURL *incurl)
     outcurl->progress.flags    = data->progress.flags;
     outcurl->progress.callback = data->progress.callback;
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
     if(data->cookies) {
       /* If cookies are enabled in the parent handle, we enable them
          in the clone as well! */

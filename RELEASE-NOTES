@@ -10,6 +10,8 @@ Curl and libcurl 7.12.3
 
 This release includes the following changes:
 
+ o new configure options: --disable-cookies, --disable-crypto-auth and
+   --disable-verbose
  o persistent ftp request improvements
  o CURLOPT_IOCTLFUNCTION and CURLOPT_IOCTLDATA added. If your app uses HTTP
    Digest, NTLM or Negotiate authentication, you will most likely want to use

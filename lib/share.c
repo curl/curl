@@ -77,7 +77,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
       }
       break;
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
     case CURL_LOCK_DATA_COOKIE:
       if (!share->cookies) {
         share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE );
@@ -108,7 +108,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
         }
         break;
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
       case CURL_LOCK_DATA_COOKIE:
         if (share->cookies) {
           Curl_cookie_cleanup(share->cookies);
@@ -171,7 +171,7 @@ curl_share_cleanup(CURLSH *sh)
   if(share->hostcache)
     Curl_hash_destroy(share->hostcache);
 
-#ifndef CURL_DISABLE_HTTP
+#if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   if(share->cookies)
     Curl_cookie_cleanup(share->cookies);
 #endif   /* CURL_DISABLE_HTTP */

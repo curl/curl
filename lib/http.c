@@ -1449,6 +1449,7 @@ CURLcode Curl_http(struct connectdata *conn)
   ptr = checkheaders(data, "Host:");
   if(ptr && (!data->state.this_is_a_follow ||
              curl_strequal(data->state.first_host, conn->host.name))) {
+#if !defined(CURL_DISABLE_COOKIES)
     /* If we have a given custom Host: header, we extract the host name in
        order to possibly use it for cookie reasons later on. We only allow the
        custom Host: header if this is NOT a redirect, as setting Host: in the
@@ -1472,6 +1473,7 @@ CURLcode Curl_http(struct connectdata *conn)
       memcpy(conn->allocptr.cookiehost, start, len);
       conn->allocptr.cookiehost[len]=0;
     }
+#endif
 
     conn->allocptr.host = NULL;
   }
@@ -1708,6 +1710,7 @@ CURLcode Curl_http(struct connectdata *conn)
     if(result)
       return result;
 
+#if !defined(CURL_DISABLE_COOKIES)
     if(data->cookies || addcookies) {
       struct Cookie *co=NULL; /* no cookies from start */
       int count=0;
@@ -1757,6 +1760,7 @@ CURLcode Curl_http(struct connectdata *conn)
       if(result)
         return result;
     }
+#endif
 
     if(data->set.timecondition) {
       struct tm *thistime;
