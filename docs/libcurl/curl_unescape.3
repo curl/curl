@@ -13,9 +13,8 @@ curl_unescape - URL decodes the given string
 .SH DESCRIPTION
 This function will convert the given URL encoded input string to a "plain
 string" and return that as a new allocated string. All input characters that
-are URL encoded (%XX where XX is a two-digit hexadecimal number, or +) will be
-converted to their plain text versions (up to a ? letter, no + letters to the
-right of a ? letter will be converted).
+are URL encoded (%XX where XX is a two-digit hexadecimal number) will be
+converted to their plain text versions.
 
 If the 'length' argument is set to 0, curl_unescape() will use strlen() on the
 input 'url' string to find out the size.
