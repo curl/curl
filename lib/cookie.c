@@ -145,6 +145,8 @@ Curl_cookie_add(struct CookieInfo *c,
                        name, what)) {
           /* this is a <name>=<what> pair */
 
+          char *whatptr;
+
           /* Strip off trailing whitespace from the 'what' */
           int len=strlen(what);
           while(len && isspace((int)what[len-1])) {
@@ -152,15 +154,21 @@ Curl_cookie_add(struct CookieInfo *c,
             len--;
           }
 
+          /* Skip leading whitespace from the 'what' */
+          whatptr=what;
+          while(isspace((int)*whatptr)) {
+            whatptr++;
+          }
+
           if(strequal("path", name)) {
-            co->path=strdup(what);
+            co->path=strdup(whatptr);
           }
           else if(strequal("domain", name)) {
-            co->domain=strdup(what);
-            co->field1= (what[0]=='.')?2:1;
+            co->domain=strdup(whatptr);
+            co->field1= (whatptr[0]=='.')?2:1;
           }
           else if(strequal("version", name)) {
-            co->version=strdup(what);
+            co->version=strdup(whatptr);
           }
           else if(strequal("max-age", name)) {
             /* Defined in RFC2109:
@@ -172,17 +180,17 @@ Curl_cookie_add(struct CookieInfo *c,
                cookie should be discarded immediately.
 
              */
-            co->maxage = strdup(what);
+            co->maxage = strdup(whatptr);
             co->expires =
               atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]) + now;
           }
           else if(strequal("expires", name)) {
-            co->expirestr=strdup(what);
+            co->expirestr=strdup(whatptr);
             co->expires = curl_getdate(what, &now);
           }
           else if(!co->name) {
             co->name = strdup(name);
-            co->value = strdup(what);
+            co->value = strdup(whatptr);
           }
           /*
             else this is the second (or more) name we don't know
