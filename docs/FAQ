@@ -1,4 +1,4 @@
-Updated: October 8, 2002 (http://curl.haxx.se/docs/faq.html)
+Updated: November 12, 2002 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -58,6 +58,7 @@ FAQ
   4.8 I found a bug!
   4.9 Curl can't authenticate to the server that requires NTLM?
   4.10 My HTTP request using HEAD, PUT or DELETE doesn't work!
+  4.11 Why does my HTTP range requests return the full document?
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -601,6 +602,10 @@ FAQ
   software you're trying to interact with. This is not anything curl can do
   anything about.
 
+  4.11 Why does my HTTP range requests return the full document?
+
+  Because the range may not be supported by the server, or the server may
+  choose to ignore it and return the full document anyway.
 
 5. libcurl Issues
 
