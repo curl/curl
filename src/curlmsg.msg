@@ -48,4 +48,9 @@ BADPARAM		<Internal Error, Bad parameter to function>
 BADORDER		<Internal Error, Bad function calling order>	
 BADPWD			<Bad password entered>				
 MNYREDIR		<Too many redirects>				
+UNKTELNET		<Unknown TELNET option specified>
+UNKMSG			<Unknown message (50)>
+BADSSLCERT		<Remote peer's SSL certificate wasn't OK>
+SRVNOERR		<The Server didn't reply anything, which here is considered an error>
+MAXMSG			<This is the LAST KNOWN MESSAGE, appearantly more have been added>
 .END
