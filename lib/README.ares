@@ -8,26 +8,35 @@ $Id$
              How To Build libcurl to use ares for asynch name resolves
              =========================================================
 
-ares URL:
+ares:
+  ftp://athena-dist.mit.edu/pub/ATHENA/ares/ares-1.1.1.tar.gz
+  http://curl.haxx.se/dev/ares-1.1.1.tar.gz
+  
+ares patch:
+  http://curl.haxx.se/dev/ares2.diff
 
-ares patch URL:
-   http://curl.haxx.se/dev/ares2.diff
+Mac OS X quirk:
+  ares 1.1.1 contains too old versions of config.guess and config.sub. Copy
+  the ones from the curl source tree in to the ares source tree before you
+  run configure.
 
-Mac OS X quirk (config.guess and config.sub)
+Build ares
+==========
+
+1. ./configure
+2. make
 
 Build
 =====
 
-If you update curl from CVS, and put 'ares' in a subdirectory in the curl
-root, you should be able to build libcurl to use ares for asynch name
-resolves! Just make sure you:
+1. Move the ares source/build tree to subdirectory in the curl root named
+   'ares'.
+2. ./buildconf
+3. ./configure --enable-ares
+4. make
 
-1. run ./buildconf
-2. run './configure --enable-ares'
-3. run 'make'
-
-If the configure script autodetects IPv6 support, you need to explicitly
-disable that since ares isn't IPv6 compatible (yet).
+If the configure script detects IPv6 support), you need to explicitly disable
+that (--disable-ipv6) since ares isn't IPv6 compatible (yet).
 
 Please let me know how it builds, runs, works or whatever. I had to do some
 fairly big changes in some code parts to get this to work.
