@@ -449,7 +449,7 @@ void ares__send_query(ares_channel channel, struct query *query, time_t now)
 static int open_tcp_socket(ares_channel channel, struct server_state *server)
 {
   int s, flags;
-  struct sockaddr_in sin;
+  struct sockaddr_in sockin;
 
   /* Acquire a socket. */
   s = socket(AF_INET, SOCK_STREAM, 0);
@@ -478,11 +478,11 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
 #endif
   
   /* Connect to the server. */
-  memset(&sin, 0, sizeof(sin));
-  sin.sin_family = AF_INET;
-  sin.sin_addr = server->addr;
-  sin.sin_port = channel->tcp_port;
-  if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) == -1
+  memset(&sockin, 0, sizeof(sockin));
+  sockin.sin_family = AF_INET;
+  sockin.sin_addr = server->addr;
+  sockin.sin_port = channel->tcp_port;
+  if (connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1
       && errno != EINPROGRESS)
     {
       closesocket(s);
@@ -496,7 +496,7 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
 static int open_udp_socket(ares_channel channel, struct server_state *server)
 {
   int s;
-  struct sockaddr_in sin;
+  struct sockaddr_in sockin;
 
   /* Acquire a socket. */
   s = socket(AF_INET, SOCK_DGRAM, 0);
@@ -504,11 +504,11 @@ static int open_udp_socket(ares_channel channel, struct server_state *server)
     return -1;
 
   /* Connect to the server. */
-  memset(&sin, 0, sizeof(sin));
-  sin.sin_family = AF_INET;
-  sin.sin_addr = server->addr;
-  sin.sin_port = channel->udp_port;
-  if (connect(s, (struct sockaddr *) &sin, sizeof(sin)) == -1)
+  memset(&sockin, 0, sizeof(sockin));
+  sockin.sin_family = AF_INET;
+  sockin.sin_addr = server->addr;
+  sockin.sin_port = channel->udp_port;
+  if (connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1)
     {
       closesocket(s);
       return -1;
