@@ -1263,13 +1263,12 @@ AC_CHECK_FUNCS( strtoll \
                 inet_addr \
                 inet_ntoa \
                 inet_pton \
-                tcsetattr \
-                tcgetattr \
                 perror \
                 closesocket \
                 siginterrupt \
                 sigaction \
                 signal \
+                getpass \
                 getpass_r \
                 strlcat \
                 getpwuid \

@@ -49,7 +49,7 @@
 #endif
 #endif
 
-#ifdef CURLDEBUG
+#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
 /* This is an ugly hack for CURLDEBUG conditions only. We need to include
    the file here, since it might set the _FILE_OFFSET_BITS define, which must
    be set BEFORE all normal system headers. */
