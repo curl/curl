@@ -475,6 +475,11 @@ char *curl_getenv(char *variable);
 /* Returns a static ascii string of the libcurl version. */
 char *curl_version(void);
 
+/* Escape and unescape URL encoding in strings. The functions return a new
+ * allocated string or NULL if an error occurred.  */
+char *curl_escape(char *string, int length);
+char *curl_unescape(char *string, int length);
+
 /* This is the version number */
 #define LIBCURL_VERSION "7.7-beta5"
 #define LIBCURL_VERSION_NUM 0x070700
