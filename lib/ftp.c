@@ -113,7 +113,7 @@ static CURLcode AllowServerConnect(struct UrlData *data,
   dt.tv_sec = 10;
   dt.tv_usec = 0;
 
-  switch ( select(sock+1, &rdset, NULL, NULL, &dt)) {
+  switch (select(sock+1, &rdset, NULL, NULL, &dt)) {
   case -1: /* error */
     /* let's die here */
     failf(data, "Error while waiting for server connect");
@@ -264,11 +264,11 @@ int Curl_GetFTPResponse(int sockfd,
               /* This is the end of the last line, copy the last
                * line to the start of the buffer and zero terminate,
                * for old times sake (and krb4)! */
-              char *moo;
+              char *meow;
               int i;
-              for(moo=line_start, i=0; moo<ptr; moo++, i++)
-                buf[i] = *moo;
-              moo[i]=0; /* zero terminate */
+              for(meow=line_start, i=0; meow<ptr; meow++, i++)
+                buf[i] = *meow;
+              meow[i]=0; /* zero terminate */
               keepon=FALSE;
               break;
             }
