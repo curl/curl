@@ -35,8 +35,6 @@
 #endif
 
 
-/* {{{ static unsigned long _hash_str (const char *, size_t)
- */
 static unsigned long
 _hash_str (const char *key, size_t key_length)
 {
@@ -50,10 +48,7 @@ _hash_str (const char *key, size_t key_length)
 
   return h;
 }
-/* }}} */
 
-/* {{{ static void _hash_element_dtor (void *, void *)
- */
 static void 
 _hash_element_dtor (void *user, void *element)
 {
@@ -68,10 +63,7 @@ _hash_element_dtor (void *user, void *element)
 
   free(e);
 }
-/* }}} */
 
-/* {{{ void curl_hash_init (curl_hash *, int, curl_hash_dtor)
- */
 void 
 Curl_hash_init (curl_hash *h, int slots, curl_hash_dtor dtor)
 {
@@ -86,10 +78,7 @@ Curl_hash_init (curl_hash *h, int slots, curl_hash_dtor dtor)
     h->table[i] = Curl_llist_alloc((curl_llist_dtor) _hash_element_dtor);
   }
 }
-/* }}} */
 
-/* {{{ curl_hash *curl_hash_alloc (int, curl_hash_dtor)
- */
 curl_hash *
 Curl_hash_alloc (int slots, curl_hash_dtor dtor)
 {
@@ -103,10 +92,7 @@ Curl_hash_alloc (int slots, curl_hash_dtor dtor)
 
   return h;
 }
-/* }}} */
 
-/* {{{ static int _hash_key_compare (char *, size_t, char *, size_t)
- */
 static int 
 _hash_key_compare (char *key1, size_t key1_len, char *key2, size_t key2_len)
 {
@@ -118,12 +104,10 @@ _hash_key_compare (char *key1, size_t key1_len, char *key2, size_t key2_len)
 
   return 0;
 }
-/* }}} */
 
-/* {{{ static int _mk_hash_element (curl_hash_element **, char *, size_t, const void *)
- */
 static int
-_mk_hash_element (curl_hash_element **e, char *key, size_t key_len, const void *p)
+_mk_hash_element (curl_hash_element **e, char *key, size_t key_len,
+                  const void *p)
 {
   *e = (curl_hash_element *) malloc(sizeof(curl_hash_element));
   (*e)->key = strdup(key);
@@ -131,16 +115,12 @@ _mk_hash_element (curl_hash_element **e, char *key, size_t key_len, const void *
   (*e)->ptr = (void *) p;
   return 0;
 }
-/* }}} */
 
 #define find_slot(__h, __k, __k_len) (_hash_str(__k, __k_len) % (__h)->slots)
 
 #define FETCH_LIST \
   curl_llist *l = h->table[find_slot(h, key, key_len)]
 
-
-/* {{{ int curl_hash_add (curl_hash *, char *, size_t, const void *)
- */
 int 
 Curl_hash_add (curl_hash *h, char *key, size_t key_len, const void *p)
 {
@@ -169,10 +149,7 @@ Curl_hash_add (curl_hash *h, char *key, size_t key_len, const void *p)
 
   return 0;
 }
-/* }}} */
 
-/* {{{ int curl_hash_delete (curl_hash *, char *, size_t)
- */
 int 
 Curl_hash_delete(curl_hash *h, char *key, size_t key_len)
 {
@@ -193,10 +170,7 @@ Curl_hash_delete(curl_hash *h, char *key, size_t key_len)
 
   return 0;
 }
-/* }}} */
 
-/* {{{ int curl_hash_pick (curl_hash *, char *, size_t, void **)
- */
 void *
 Curl_hash_pick(curl_hash *h, char *key, size_t key_len)
 {
@@ -215,10 +189,7 @@ Curl_hash_pick(curl_hash *h, char *key, size_t key_len)
 
   return NULL;
 }
-/* }}} */
 
-/* {{{ void curl_hash_apply (curl_hash *, void *, void (*)(void *, curl_hash_element *))
- */
 void 
 Curl_hash_apply(curl_hash *h, void *user,
                 void (*cb)(void *user, void *ptr))
@@ -235,10 +206,7 @@ Curl_hash_apply(curl_hash *h, void *user,
     }
   }
 }
-/* }}} */
 
-/* {{{ void curl_hash_clean (curl_hash *)
- */
 void
 Curl_hash_clean(curl_hash *h)
 {
@@ -250,11 +218,7 @@ Curl_hash_clean(curl_hash *h)
 
   free(h->table);
 }
-/* }}} */
 
-/* {{{ void curl_hash_clean_with_criterium (curl_hash *, void *,
-   int (*)(void *, void *))
- */
 void
 Curl_hash_clean_with_criterium(curl_hash *h, void *user,
                                int (*comp)(void *, void *))
@@ -277,17 +241,12 @@ Curl_hash_clean_with_criterium(curl_hash *h, void *user,
   }
 }
 
-/* {{{ int curl_hash_count (curl_hash *)
- */
-int 
+int
 Curl_hash_count(curl_hash *h)
 {
   return h->size;
 }
-/* }}} */
 
-/* {{{ void curl_hash_destroy (curl_hash *)
- */
 void 
 Curl_hash_destroy(curl_hash *h)
 {
@@ -297,12 +256,4 @@ Curl_hash_destroy(curl_hash *h)
   Curl_hash_clean(h);
   free(h);
 }
-/* }}} */
 
-/*
- * local variables:
- * eval: (load-file "../curl-mode.el")
- * end:
- * vim600: fdm=marker
- * vim: et sw=2 ts=2 sts=2 tw=78
- */
