@@ -92,7 +92,7 @@
 
 #include "timeval.h"
 
-
+#include <curl/curl.h>
 
 /* Download buffer size, keep it fairly big for speed reasons */
 #define BUFSIZE (1024*50)
@@ -263,22 +263,6 @@ struct Configbits {
   bool verbose;
 };
 
-typedef size_t (*progress_callback)(void *clientp,
-                                    size_t dltotal,
-                                    size_t dlnow,
-                                    size_t ultotal,
-                                    size_t ulnow);
-
-typedef size_t (*write_callback)(char *buffer,
-                                 size_t size,
-                                 size_t nitems,
-                                 FILE *outstream);
-
-typedef size_t (*read_callback)(char *buffer,
-                                 size_t size,
-                                 size_t nitems,
-                                 FILE *instream);
-
 /* What type of interface that intiated this struct */
 typedef enum {
   CURLI_NONE,
@@ -355,13 +339,13 @@ struct UrlData {
   char *ftpport; /* port to send with the PORT command */
 
   /* function that stores the output:*/
-  write_callback fwrite;
+  curl_write_callback fwrite;
 
   /* function that reads the input:*/
-  read_callback fread;
+  curl_read_callback fread;
 
   /* function that wants progress information */
-  progress_callback fprogress;
+  curl_progress_callback fprogress;
   void *progress_client; /* pointer to pass to the progress callback */
 
   long timeout; /* in seconds, 0 means no timeout */

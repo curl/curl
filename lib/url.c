@@ -96,7 +96,6 @@
 #endif
 
 #include "urldata.h"
-#include <curl/curl.h>
 #include "netrc.h"
 
 #include "formdata.h"
@@ -388,7 +387,7 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     data->bits.ftp_use_port = data->ftpport?1:0;
     break;
   case CURLOPT_HTTPHEADER:
-    data->headers = va_arg(param, struct HttpHeader *);
+    data->headers = va_arg(param, struct curl_slist *);
     break;
   case CURLOPT_CUSTOMREQUEST:
     data->customrequest = va_arg(param, char *);
@@ -449,6 +448,12 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
   case CURLOPT_POSTQUOTE:
     data->postquote = va_arg(param, struct curl_slist *);
     break;
+  case CURLOPT_PROGRESSFUNCTION:
+    data->fprogress = va_arg(param, curl_progress_callback);
+    break;
+  case CURLOPT_PROGRESSDATA:
+    data->progress_client = va_arg(param, void *);
+    break;
   case CURLOPT_PROXYUSERPWD:
     data->proxyuserpwd = va_arg(param, char *);
     data->bits.proxy_user_passwd = data->proxyuserpwd?1:0;
@@ -464,13 +469,13 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     data->err = va_arg(param, FILE *);
     break;
   case CURLOPT_WRITEFUNCTION:
-    data->fwrite = va_arg(param, write_callback);
+    data->fwrite = va_arg(param, curl_write_callback);
     break;
   case CURLOPT_WRITEINFO:
     data->writeinfo = va_arg(param, char *);
     break;
   case CURLOPT_READFUNCTION:
-    data->fread = va_arg(param, read_callback);
+    data->fread = va_arg(param, curl_read_callback);
     break;
   case CURLOPT_SSLCERT:
     data->cert = va_arg(param, char *);
