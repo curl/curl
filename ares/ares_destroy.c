@@ -28,7 +28,8 @@ void ares_destroy(ares_channel channel)
   for (i = 0; i < channel->ndomains; i++)
     free(channel->domains[i]);
   free(channel->domains);
-  free(channel->sortlist);
+  if(channel->sortlist)
+    free(channel->sortlist);
   free(channel->lookups);
   while (channel->queries)
     {

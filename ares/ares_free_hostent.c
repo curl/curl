@@ -22,6 +22,7 @@
 #endif
 
 #include "ares.h"
+#include "ares_private.h" /* for memdebug */
 
 void ares_free_hostent(struct hostent *host)
 {
