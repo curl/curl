@@ -233,13 +233,11 @@ CURLcode curl_close(CURL *curl)
   
   void *protocol = data->proto.generic;
 
-  /* total session cleanup */
+  /* total session cleanup (frees 'data' as well!)*/
   urlfree(data, TRUE);
 
   if(protocol)
     free(protocol);
-
-  free(data);
 
   return CURLE_OK;
 }

@@ -6,6 +6,10 @@
 
                                History of Changes
 
+Daniel (13 June 2000)
+- Luong Dinh Dung <dung at sch.bme.hu> found a problem in curl_easy_cleanup()
+  since it free()ed the main curl struct *twice*. This is now corrected.
+
 Daniel (9 June 2000)
 - Updated the RESOURCES file, added a README.win32 file.
 
