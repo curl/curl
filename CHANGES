@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.9.9-pre1
+
 Daniel (12 Aug 2002)
 - Applied my initial take on making the multi stuff more asynchronous. Connects
   should now return back without "hanging" until it has connected for real.
