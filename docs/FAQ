@@ -116,7 +116,7 @@ FAQ
 
     libcurl is free, thread-safe, IPv6 compatible, feature rich, well
     supported and fast.
-    
+
   curl
 
     A command line tool for getting or sending files using URL syntax.
@@ -802,6 +802,22 @@ FAQ
   to be the most commonly used option.
 
   (Provided by Andrew Francis)
+
+  When building an application that uses the static libcurl library, you must
+  add -DCURL_STATICLIB to your CFLAGS. Otherwise the linker will look for
+  dynamic import symbols. If you get linker error like "unknown symbol
+  __imp__curl_easy_init ..." you have linked against the wrong (static) library.
+  If you want to use the curl.dll and import lib, you don't need any extra CFLAGS,
+  but use one of the import libraries below. These are the libraries produced by
+  the various lib/Makefile.* files:
+
+  Target:          static lib.   import lib for curl*.dll.
+  --------------------------------------------------------
+  MingW:           libcurl.a     libcurldll.a
+  MSVC (release):  libcurl.lib   libcurl_imp.lib
+  MSVC (debug):    libcurld.lib  libcurld_imp.lib
+  Borland:         libcurl.lib   libcurl_imp.lib
+
 
   5.8 libcurl.so.3: open failed: No such file or directory
 
