@@ -177,7 +177,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* increase the node-counter */
   multi->num_easy++;
 
-  return CURLM_CALL_MULTI_PERFORM;
+  return CURLM_OK;
 }
 
 CURLMcode curl_multi_remove_handle(CURLM *multi_handle,

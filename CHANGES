@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (31 August 2004)
+- David Tarendash fount out that curl_multi_add_handle() returned
+  CURLM_CALL_MULTI_PERFORM instead of CURLM_OK.
+
 Daniel (30 August 2004)
 - Make "Proxy-Connection: close" close the current proxy connection, as Roman
   Koifman found out.
