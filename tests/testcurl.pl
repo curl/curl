@@ -227,7 +227,6 @@ if (-d $CURLDIR) {
     logit "$CURLDIR is verified to be a fine source dir";
     # remove the generated sources to force them to be re-generated each
     # time we run this test
-    unlink "$CURLDIR/lib/getdate.c";
     unlink "$CURLDIR/src/hugehelp.c";
   } elsif (!$CVS && -f "$CURLDIR/tests/testcurl.pl") {
     logit "$CURLDIR is verified to be a fine daily source dir"
