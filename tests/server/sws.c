@@ -226,6 +226,7 @@ static int get_request(int sock, int *part)
     if (got <= 0) {
       if (got < 0) {
         perror("recv");
+        logmsg("recv() returned error");
         return DOCNUMBER_INTERNAL;
       }
       logmsg("Connection closed by client");
@@ -312,7 +313,7 @@ static int get_request(int sock, int *part)
   
   logmsg("Got illegal request");
   fprintf(stderr, "Got illegal request\n");
-  return -1;
+  return DOCNUMBER_404;
 }
 
 

@@ -24,9 +24,9 @@ TODO
    less copy of data and thus a faster operation.
    [http://curl.haxx.se/dev/no_copy_callbacks.txt]
 
- * Add asynchronous name resolving (http://daniel.haxx.se/resolver/). This
-   should be made to work on most of the supported platforms, or otherwise it
-   isn't really interesting.
+ * Add asynchronous name resolving (http://libdenise.sf.net/). This should be
+   made to work on most of the supported platforms, or otherwise it isn't
+   really interesting.
 
  * Data sharing. Tell which easy handles within a multi handle that should
    share cookies, connection cache, dns cache, ssl session cache.  Full
@@ -57,12 +57,15 @@ TODO
  LIBCURL - multi interface
 
  * Make sure we don't ever loop because of non-blocking sockets return
-   EWOULDBLOCK or similar. This FTP command sending etc.
+   EWOULDBLOCK or similar. This FTP command sending, the SSL connection etc.
 
- * Make uploads treated better. We need a way to tell libcurl we have data to
-   write, as the current system expects us to upload data each time the socket
-   is writable and there is no way to say that we want to upload data soon
-   just not right now, without that aborting the upload.
+ * Make transfers treated more carefully. We need a way to tell libcurl we
+   have data to write, as the current system expects us to upload data each
+   time the socket is writable and there is no way to say that we want to
+   upload data soon just not right now, without that aborting the upload. The
+   opposite situation should be possible as well, that we tell libcurl we're
+   ready to accept read data. Today libcurl feeds the data as soon as it is
+   available for reading, no matter what.
 
  DOCUMENTATION
 

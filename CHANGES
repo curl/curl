@@ -6,7 +6,36 @@
 
                                   Changelog
 
+Version 7.10.4-pre2 (24 Feb 2003)
+
+Daniel (24 Feb)
+- Kjetil Jacobsen found out that setting CURLOPT_MAXCONNECTS to a value higher
+  than 5 could cause a segfault.
+
+- I believe I fixed the 'Expect: 100-continue' behavior that has been broken
+  for a while (I think since my change dated Dec 10 2002). When this header is
+  used, libcurl should wait for a HTTP 100 (or timeout) before sending the
+  post/put data.
+
+Daniel (14 Feb)
+- Matthew Clarke provided some info what to modify to make curl build
+  flawlessly on AIX 3.2.5.
+
+- Martin C. Martin found and fixed a problem in the multi interface when
+  running on Windows and trying to connect to a port without a listener.
+
+Daniel (13 Feb)
+- Christopher R. Palmer fixed Curl_base64_encode() to deal with zeroes in the
+  data to encode.
+
 Daniel (4 Feb)
+- Jean-Philippe added the first code that enables the 'share' system. This
+  should now enable sharing of DNS data between two curl easy handles.
+
+- Incorporated Nico Baggus' fixes to again compile flawlessly on VMS.
+
+- James Bursa corrected a bad comment in the public include file curl/multi.h
+
 - Peter Forret reported one of those error:00000000 cases in libcurl again
   when connecting to a HTTPS site, and this time I did discover some oddities
   in how curl reports SSL errors back. It could miss showing the actual error.

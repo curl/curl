@@ -811,8 +811,8 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.10.3"
-#define LIBCURL_VERSION_NUM 0x070a03
+#define LIBCURL_VERSION "7.10.4-pre2"
+#define LIBCURL_VERSION_NUM 0x070a04
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
