@@ -16,11 +16,7 @@ lib_LTLIBRARIES = libcurl.la
 # we use srcdir/lib for the lib-private header files
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/lib -I$(top_srcdir)/lib
 
-# The -no-undefined flag is CRUCIAL for this to build fine on Cygwin. If we
-# find a case in which we need to remove this flag, we should most likely
-# write a configure check that detects when this flag is needed and when its
-# not.
-libcurl_la_LDFLAGS = -no-undefined -version-info 2:2:0
+VERSION=-version-info 2:2:0
 
 # This flag accepts an argument of the form current[:revision[:age]]. So,
 # passing -version-info 3:12:1 sets current to 3, revision to 12, and age to
@@ -49,6 +45,16 @@ libcurl_la_LDFLAGS = -no-undefined -version-info 2:2:0
 # 6.If any interfaces have been removed since the last public release, then
 # set age to 0.
 #
+
+if NO_UNDEFINED
+# The -no-undefined flag is CRUCIAL for this to build fine on Cygwin. If we
+# find a case in which we need to remove this flag, we should most likely
+# write a configure check that detects when this flag is needed and when its
+# not.
+libcurl_la_LDFLAGS = -no-undefined $(VERSION)
+else
+libcurl_la_LDFLAGS = $(VERSION)
+endif
 
 libcurl_la_SOURCES = arpa_telnet.h file.c getpass.h netrc.h timeval.c	\
 base64.c file.h hostip.c progress.c timeval.h base64.h formdata.c	\

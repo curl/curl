@@ -51,6 +51,17 @@ AC_LIBTOOL_WIN32_DLL
 dnl libtool setup
 AM_PROG_LIBTOOL
 
+case $host in
+  cygwin* | mingw* | pw32*)
+    need_no_undefined=yes
+    ;;
+  *)
+    need_no_undefined=no
+    ;;
+esac
+
+AM_CONDITIONAL(NO_UNDEFINED, test x$need_no_undefined = xyes)
+
 dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
