@@ -17,7 +17,7 @@ SUBDIRS = examples libcurl
 EXTRA_DIST = MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS		\
 	     README.win32 RESOURCES TODO TheArtOfHttpScripting THANKS	\
 	     VERSIONS KNOWN_BUGS BINDINGS $(man_MANS) $(HTMLPAGES) \
-	     HISTORY INSTALL
+	     HISTORY INSTALL libcurl-the-guide
 
 MAN2HTML= gnroff -man $< | man2html >$@
 
