@@ -68,6 +68,8 @@ my $debugprotocol;
 my $anyway;
 my $gdbthis;      # run test case with gdb debugger
 my $keepoutfiles; # keep stdout and stderr files after tests
+my $listonly;     # only list the tests
+
 my $pwd;          # current working directory
 
 chomp($pwd = `pwd`);
@@ -427,14 +429,6 @@ sub singletest {
 
     my $CURLOUT="$LOGDIR/curl$testnum.out"; # curl output if not stdout
 
-    # remove previous server output logfile
-    unlink($SERVERIN);
-
-    if(@ftpservercmd) {
-        # write the instructions to file
-        writearray($FTPDCMD, \@ftpservercmd);
-    }
-
     # name of the test
     my @testname= getpart("client", "name");
 
@@ -443,6 +437,18 @@ sub singletest {
         my $name = $testname[0];
         $name =~ s/\n//g;
         print "[$name]\n";
+    }
+
+    if($listonly) {
+        return 0; # look successful
+    }
+
+    # remove previous server output logfile
+    unlink($SERVERIN);
+
+    if(@ftpservercmd) {
+        # write the instructions to file
+        writearray($FTPDCMD, \@ftpservercmd);
     }
 
     # get the command line options to use
@@ -775,6 +781,10 @@ do {
         # continue anyway, even if a test fail
         $anyway=1;
     }
+    elsif($ARGV[0] eq "-l") {
+        # lists the test case names only
+        $listonly=1;
+    }
     elsif($ARGV[0] eq "-k") {
         # keep stdout and stderr files after tests
         $keepoutfiles=1;
@@ -788,6 +798,7 @@ Usage: runtests.pl [options]
   -g       run the test case with gdb
   -h       this help text
   -k       keep stdout and stderr files present after tests
+  -l       list all test case names/descriptions
   -s       short output
   -v       verbose output
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
