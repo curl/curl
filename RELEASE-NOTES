@@ -5,7 +5,7 @@ Curl and libcurl 7.12.2
  Available command line options:           96
  Available curl_easy_setopt() options:     121
  Number of public functions in libcurl:    36
- Amount of public web site mirrors:        12
+ Amount of public web site mirrors:        13
  Number of known libcurl bindings:         27
 
 This release includes the following changes:
@@ -67,6 +67,7 @@ Other curl-related news since the previous public release:
  o libcurl.NET was announce: http://www.seasideresearch.com/downloads.html
  o Get your fresh Mozilla-extracted ca cert bundle here:
    http://curl.haxx.se/docs/caextract.html
+ o New web mirror in Taiwan: http://curl.cs.pu.edu.tw/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
