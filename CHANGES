@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (16 Jan 2003)
+- Markus Oberhumer fixed curl-config -cflags when the prefix was not
+  /usr/include.
+
+- Markus Oberhumer fixed CURLINFO_PRIVATE to properly return NULL if it was
+  set to NULL!
 
 Version 7.10.3 (14 Jan 2003)
 
