@@ -238,7 +238,7 @@ CURLcode curl_easy_perform(CURL *curl)
       data->hostcache = Curl_global_host_cache_get();
     }
     else {
-      data->hostcache = Curl_hash_alloc(7, Curl_freeaddrinfo);
+      data->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
     }
   }
 

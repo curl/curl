@@ -65,7 +65,10 @@ struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
 void Curl_scan_cache_used(void *user, void *ptr);
 
 /* free name info */
-void Curl_freeaddrinfo(void *freethis);
+void Curl_freeaddrinfo(Curl_addrinfo *freeaddr);
+
+/* free cached name info */
+void Curl_freednsinfo(void *freethis);
 
 #ifdef MALLOCDEBUG
 void curl_freeaddrinfo(struct addrinfo *freethis,
