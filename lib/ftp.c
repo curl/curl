@@ -343,53 +343,6 @@ char *getmyhost(char *buf, int buf_size)
   return buf;
 }
 
-#if 0
-/*
- * URLfix()
- *
- * This function returns a string converted FROM the input URL format to a
- * format that is more likely usable for the remote server. That is, all
- * special characters (found as %XX-codes) will be eascaped with \<letter>.
- */
-
-static char *URLfix(char *string)
-{
-  /* The length of the new string can't be longer than twice the original
-     string, if all letters are '+'... */
-  int alloc = strlen(string)*2;
-  char *ns = malloc(alloc);
-  unsigned char in;
-  int index=0;
-  int hex;
-   
-  while(*string) {
-    in = *string;
-    switch(in) {
-    case '+':
-      ns[index++] = '\\';
-      ns[index++] = ' ';
-      string++;
-      continue;
-
-    case '%':
-      /* encoded part */
-      if(sscanf(string+1, "%02X", &hex)) {
-        ns[index++] = '\\';
-        ns[index++] = hex;
-        string+=3;
-        continue;
-      }
-      /* FALLTHROUGH */
-    default:
-      ns[index++] = in;
-      string++;
-    }
-  }
-  ns[index]=0; /* terminate it */
-  return ns;
-}
-#endif
-
 /* ftp_connect() should do everything that is to be considered a part
    of the connection phase. */
 CURLcode ftp_connect(struct connectdata *conn)
@@ -1079,25 +1032,9 @@ CURLcode _ftp(struct connectdata *conn)
       if(data->resume_from) {
         /* do we still game? */
         int passed=0;
-#if 0
-        /* Set resume file transfer offset */
-        infof(data, "Instructs server to resume from offset %d\n",
-              data->resume_from);
-
-        ftpsendf(data->firstsocket, conn, "REST %d", data->resume_from);
-
-        nread = GetLastResponse(data->firstsocket, buf, conn, &ftpcode);
-        if(nread < 0)
-          return CURLE_OPERATION_TIMEOUTED;
-
-        if(ftpcode != 350) {
-          failf(data, "Couldn't use REST: %s", buf+4);
-          return CURLE_FTP_COULDNT_USE_REST;
-        }
-#else
         /* enable append instead */
         data->bits.ftp_append = 1;
-#endif
+
         /* Now, let's read off the proper amount of bytes from the
            input. If we knew it was a proper file we could've just
            fseek()ed but we only have a stream here */
@@ -1162,9 +1099,7 @@ CURLcode _ftp(struct connectdata *conn)
        size prior to the actual upload. */
 
     pgrsSetUploadSize(data, data->infilesize);
-#if 0
-    ProgressInit(data, data->infilesize);
-#endif
+
     result = Transfer(conn, -1, -1, FALSE, NULL, /* no download */
                       data->secondarysocket, bytecountp);
     if(result)
@@ -1212,11 +1147,7 @@ CURLcode _ftp(struct connectdata *conn)
       infof(data, "range-download from %d to %d, totally %d bytes\n",
             from, to, totalsize);
     }
-#if 0
-    if(!ppath[0])
-      /* make sure this becomes a valid name */
-      ppath="./";
-#endif
+
     if((data->bits.ftp_list_only) || !ftp->file) {
       /* The specified path ends with a slash, and therefore we think this
          is a directory that is requested, use LIST. But before that we
@@ -1385,24 +1316,9 @@ CURLcode _ftp(struct connectdata *conn)
           }
             
         }
-#if 0
-        if(2 != sscanf(buf, "%*[^(](%d bytes%c", &size, &paren))
-          size=-1;
-#endif
       }
       else if(downloadsize > -1)
         size = downloadsize;
-
-#if 0
-      if((size > -1) && (data->resume_from>0)) {
-        size -= data->resume_from;
-        if(size <= 0) {
-          failf(data, "Offset (%d) was beyond file size (%d)",
-                data->resume_from, data->resume_from+size);
-          return CURLE_PARTIAL_FILE;
-        }
-      }
-#endif
 
       if(data->bits.ftp_use_port) {
         result = AllowServerConnect(data, portsock);
