@@ -25,6 +25,10 @@ Basic
   ScriptBasic bindings to libcurl. Writtten by Peter Verhas
   http://scriptbasic.com/
 
+C
+  libcurl is a C library in itself!
+  http://curl.haxx.se/libcurl/
+
 C++
 
   Written by Jean-Philippe Barrette-LaPierre
@@ -68,7 +72,7 @@ glib/GTK+
 
 Java
 
-  Written by Daniel Stenberg
+  Maintained by Vic Hanson
   http://curl.haxx.se/libcurl/java/
 
 Lua
@@ -76,15 +80,15 @@ Lua
   Written by Steve Dekorte
   http://curl.haxx.se/libcurl/lua/
 
-.NET
-
-  Written by Jeffrey Phillips
-  http://www.seasideresearch.com/downloads.html
-
 Mono
 
   Written by Jeffrey Phillips
   http://forge.novell.com/modules/xfmod/project/?libcurl-mono
+
+.NET
+
+  Written by Jeffrey Phillips
+  http://www.seasideresearch.com/downloads.html
 
 Object-Pascal
 
