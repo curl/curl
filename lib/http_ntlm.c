@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -23,7 +23,7 @@
 #include "setup.h"
 
 /* NTLM details:
-   
+
    http://davenport.sourceforge.net/ntlm.html
    http://www.innovation.ch/java/ntlm.html
 
@@ -133,7 +133,7 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
         memcpy(ntlm->nonce, &buffer[24], 8);
 
       /* at index decimal 20, there's a 32bit NTLM flag field */
-      
+
     }
     else {
       if(ntlm->state >= NTLMSTATE_TYPE1)
@@ -220,7 +220,7 @@ static void mkhash(char *password,
 
   if (len > 14)
     len = 14;
-  
+
   for (i=0; i<len; i++)
     pw[i] = toupper(password[i]);
 
@@ -234,7 +234,7 @@ static void mkhash(char *password,
     setup_des_key(pw, DESKEY(ks));
     DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer,
                     DESKEY(ks), DES_ENCRYPT);
-  
+
     setup_des_key(pw+7, DESKEY(ks));
     DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer+8),
                     DESKEY(ks), DES_ENCRYPT);
@@ -323,13 +323,13 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
   if(!passwdp)
     passwdp=(char *)"";
-  
+
   switch(ntlm->state) {
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     hostoff = 32;
     domoff = hostoff + hostlen;
-    
+
     /* Create and send a type-1 message:
 
     Index Description          Content
@@ -391,7 +391,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY; /* FIX TODO */
 
     break;
-    
+
   case NTLMSTATE_TYPE2:
     /* We received the type-2 already, create a type-3 message:
 
@@ -409,7 +409,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     52 (64) start of data block
 
     */
-  
+
   {
     int lmrespoff;
     int ntrespoff;
@@ -459,25 +459,25 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                     "%c%c" /* NT-response allocated space */
                     "%c%c" /* NT-response offset */
                     "%c%c" /* 2 zeroes */
-                    
+
                     "%c%c"  /* domain length */
                     "%c%c"  /* domain allocated space */
                     "%c%c"  /* domain name offset */
                     "%c%c"  /* 2 zeroes */
-                    
+
                     "%c%c"  /* user length */
                     "%c%c"  /* user allocated space */
                     "%c%c"  /* user offset */
                     "%c%c"  /* 2 zeroes */
-                    
+
                     "%c%c"  /* host length */
                     "%c%c"  /* host allocated space */
                     "%c%c"  /* host offset */
                     "%c%c%c%c%c%c"  /* 6 zeroes */
-                    
+
                     "\xff\xff"  /* message length */
                     "%c%c"  /* 2 zeroes */
-                    
+
                     "\x01\x82" /* flags */
                     "%c%c"  /* 2 zeroes */
 
@@ -494,7 +494,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                     SHORTPAIR(0x18),
                     SHORTPAIR(lmrespoff),
                     0x0, 0x0,
-                    
+
 #ifdef USE_NTRESPONSES
                     SHORTPAIR(0x18),  /* NT-response length, twice */
                     SHORTPAIR(0x18),
@@ -514,12 +514,12 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
                     SHORTPAIR(userlen),
                     SHORTPAIR(useroff),
                     0x0, 0x0,
-                    
+
                     SHORTPAIR(hostlen),
                     SHORTPAIR(hostlen),
                     SHORTPAIR(hostoff),
                     0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-             
+
                     0x0, 0x0,
 
                     0x0, 0x0);
@@ -541,7 +541,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
 
 #ifdef USE_NTRESPONSES
-    if(size < ((int)sizeof(ntlmbuf) - 0x18)) {      
+    if(size < ((int)sizeof(ntlmbuf) - 0x18)) {
       memcpy(&ntlmbuf[size], ntresp, 0x18);
       size += 0x18;
     }
