@@ -145,11 +145,18 @@ sub runhttpserver {
 
     if ( $data =~ /WE ROOLZ(: |)(\d*)/ ) {
         $pid = 0+$2;
+
+        if(!$pid) {
+            print "Test server already running with unkown pid! Use it...\n";
+            return;
+        }
+
         if($verbose) {
             print "Test server already running with pid $pid, killing it...\n";
         }
     }
     elsif($data ne "") {
+        print "GOT: $data\n";
         print "An alien HTTP server is running on port $HOSTPORT\n",
         "Edit runtests.pl to use another port and rerun the test script\n";
         exit;

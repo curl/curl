@@ -29,7 +29,7 @@ char *spitout(FILE *stream, char *main, char *sub, int *size);
 
 #define TEST_DATA_PATH "data/test%d"
 
-static char *docfriends = "WE ROOLZ\r\n";
+static char *docfriends = "HTTP/1.1 200 Mighty fine indeed\r\n\r\nWE ROOLZ\r\n";
 static char *doc404 = "HTTP/1.1 404 Not Found\n"
     "Server: " VERSION "\n"
     "Connection: close\n"
@@ -125,7 +125,7 @@ void storerequest(char *reqbuf)
 {
   FILE *dump;
 
-  dump = fopen(REQUEST_DUMP, "wb"); /* b is for windows-preparing */
+  dump = fopen(REQUEST_DUMP, "ab"); /* b is for windows-preparing */
   if(dump) {
     fwrite(reqbuf, 1, strlen(reqbuf), dump);
 
@@ -144,6 +144,7 @@ static int get_request(int sock, int *part)
   char request[REQUEST_KEYWORD_SIZE];
   unsigned int offset = 0;
   int prot_major, prot_minor;
+  char logbuf[256];
 
   *part = 0; /* part zero equals none */
 
@@ -189,7 +190,12 @@ static int get_request(int sock, int *part)
 
     /* get the number after it */
     if(ptr) {
-      if(!strcmp("/verifiedserver", ptr)) {
+
+      sprintf(logbuf, "Got request: %s %s HTTP/%d.%d",
+              request, doc, prot_major, prot_minor);
+      logmsg(logbuf);
+
+      if(!strncmp("/verifiedserver", ptr, 15)) {
         logmsg("Are-we-friendly question received");
         return -2;
       }
@@ -203,7 +209,8 @@ static int get_request(int sock, int *part)
         test_no /= 10000;
       }
 
-      logmsg("Found test number in PATH");
+      sprintf(logbuf, "Found test number %d in path", test_no);
+      logmsg(logbuf);
     }
     else {
 
@@ -238,6 +245,8 @@ static int send_doc(int sock, int doc, int part_no)
       buffer = doc404;
     ptr = NULL;
     stream=NULL;
+
+    count = strlen(buffer);
   }
   else {
     sprintf(filename, TEST_DATA_PATH, doc);
@@ -258,7 +267,8 @@ static int send_doc(int sock, int doc, int part_no)
   do {
     written = send(sock, buffer, count, 0);
     if (written < 0) {
-      fclose(stream);
+      if(stream)
+        fclose(stream);
       return -1;
     }
     count -= written;
