@@ -152,8 +152,8 @@ curl_easy_strerror(CURLcode error)
   case CURLE_SSL_CONNECT_ERROR:
     return "SSL connect error";
 
-  case CURLE_FTP_BAD_DOWNLOAD_RESUME:
-    return "couldn't resume FTP download";
+  case CURLE_BAD_DOWNLOAD_RESUME:
+    return "couldn't resume download";
 
   case CURLE_FILE_COULDNT_READ_FILE:
     return "couldn't read a file:// file";
