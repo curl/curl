@@ -7,6 +7,21 @@
                                   Changelog
 
 
+Daniel (4 Oct 2002)
+- Ralph Mitchell pointed out that curl was a bit naive and didn't deal with ./
+  or ../ stuff in the string passed back in a Location: header when following
+  locations.
+
+- Albert Chin helped me to work out a better configure.in check for zlib, and
+  both --without-zlib and -with-zlib seem to work rather well right now.
+
+- Zvi Har'El improvied the OpenSSL ENGINE check in the configure script to
+  become more accurate.
+
+Daniel (1 Oct 2002)
+- Detlef Schmier pointed out the lack of a --without-libz option to configure,
+  so I added one.
+
 Version 7.10 (1 Oct 2002)
 
 Daniel (30 Sep 2002)
@@ -31,7 +46,8 @@ Daniel (26 Sep 2002)
 - Extended curl_version_info() more and wrote a man page for it.
 
 Daniel (25 Sep 2002)
-- libcurl could leak memory when downloading multiple files using http ranges.
+- libcurl could leak memory when downloading multiple files using http ranges,
+  reported and fixed by Jean-Luc Guevel.
 
 - Walter J. Mack provided code and docs for the new curl_free() function that
   shall be used to free memory that is allocated by libcurl and returned back
