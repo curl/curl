@@ -1156,6 +1156,8 @@ CURLcode Curl_perform(struct SessionHandle *data)
   struct connectdata *conn=NULL;
   char *newurl = NULL; /* possibly a new URL to follow to! */
 
+  data->state.used_interface = Curl_if_easy;
+
   res = Curl_pretransfer(data);
   if(res)
     return res;

@@ -263,10 +263,13 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     case CURLM_STATE_INIT:
       /* init this transfer. */
       easy->result=Curl_pretransfer(easy->easy_handle);
+
       if(CURLE_OK == easy->result) {
         /* after init, go CONNECT */
         easy->state = CURLM_STATE_CONNECT;
         result = CURLM_CALL_MULTI_PERFORM; 
+        
+        easy->easy_handle->state.used_interface = Curl_if_multi;
       }
       break;
     case CURLM_STATE_CONNECT:

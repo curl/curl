@@ -488,6 +488,12 @@ typedef enum {
 #define MAX_CURL_PASSWORD_LENGTH 256
 
 struct UrlState {
+  enum {
+    Curl_if_none,
+    Curl_if_easy,
+    Curl_if_multi
+  } used_interface;
+
   /* buffers to store authentication data in, as parsed from input options */
   char user[MAX_CURL_USER_LENGTH];
   char passwd[MAX_CURL_PASSWORD_LENGTH];
