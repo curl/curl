@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o release archive contains compressed help text
  o the win32 password prompting supports backspace
  o builds natively on AmigaOS (without unix emulation)
  o ftps:// now uses port 990 by default
