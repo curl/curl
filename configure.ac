@@ -1365,6 +1365,8 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 
+AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
+
 AC_CONFIG_FILES([Makefile \
 	   docs/Makefile \
            docs/examples/Makefile \
