@@ -12,6 +12,6 @@ test101  test110  test12   test15   test202  test3    test4    test6 \
 test102  test111  test120  test16   test21   test30   test400  test7 \
 test103  test112  test121  test17   test22   test300  test401  test8 \
 test104  test113  test122  test18   test23   test301  test402  test9 \
-test105  test114  test123  test19   test24   test302  test43   \
+test105  test114  test123  test19   test24   test302  test43   test31 \
 test106  test115  test124  test190  test25   test303  test44   test38 \
 test107  test116  test125  test2    test26   test33   test45   test126
