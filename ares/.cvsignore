@@ -20,3 +20,4 @@ stamp-h1
 depcomp
 libcares.la
 missing
+ares_version.h.dist
