@@ -6,6 +6,29 @@
 
                                   Changelog
 
+Daniel (4 March 2004)
+- Modified the test HTTP server a lot to work with the upcoming changes for
+  PUT/POST with NTLM/Digest authentication (like test case 88). Added Andrés
+  García's win32-changes. Improved the logging.
+
+- Fixed the file:-related progress/getinfo stuff a bit more.
+
+Daniel (4 March 2004)
+- I corrected a problem with the multi interface when following a Location:
+  header or when doing multiple-request authentications. A subsequent request
+  could erroneously re-use a previous connection that was sent with
+  Connection: close. Christopher R. Palmer reported.
+
+- Andrés García patched curl to prevent warnings while compiling with mingw,
+  mainly because it is now possible to have both WIN32 and HAVE_CONFIG_H
+  defined.
+
+- When transferring files from a file: URL, the progress meter and other
+  transfer metrics were not updated properly.
+
+- David Byron provided a "version resource" file to the curl executable for
+  the windows builds.
+
 Daniel (3 March 2004)
 - David Byron's work on making libcurl only require winsock 1.1 on Windows
   machines.
