@@ -1,0 +1,80 @@
+# Server-side
+<reply>
+
+# this is returned first since we get no proxy-auth
+<data1001>
+HTTP/1.1 407 Authorization Required to proxy me my dear
+Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+Content-Length: 33
+
+Hey you, authenticate or go away!
+</data1001>
+
+# This is supposed to be returned when the server gets the second
+# Authorization: NTLM line passed-in from the client
+<data1002>
+HTTP/1.1 200 Things are fine in proxy land swsclose
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length; 42
+
+Contents of that page you requested, sir.
+</data1002>
+
+<datacheck>
+HTTP/1.1 407 Authorization Required to proxy me my dear
+Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+Content-Length: 33
+
+HTTP/1.1 200 Things are fine in proxy land swsclose
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length; 42
+
+Contents of that page you requested, sir.
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+NTLM
+</features>
+ <name>
+HTTP proxy-auth NTLM and then POST
+ </name>
+ <command>
+http://%HOSTIP:%HTTPPORT/239 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm -d "postit"
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol nonewline=yes>
+POST http://%HOSTIP:%HTTPPORT/239 HTTP/1.1
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
+Host: %HOSTIP:%HTTPPORT
+Pragma: no-cache
+Accept: */*
+Content-Length: 0
+Content-Type: application/x-www-form-urlencoded
+
+POST http://127.0.0.1:8990/239 HTTP/1.1
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEUAAAAYABgAXQAAAAAAAABAAAAABQAFAEAAAAAAAAAARQAAAAAAAAB1AAAAAYIAAHNpbGx5oB5CPMq0JDu5tbxLow3sHn3jfoYDE+7QJVE7DA0GyDEwvj2BxsBctP9tT4fnCtL1
+User-Agent: curl/7.13.2-CVS (i686-pc-linux-gnu) libcurl/7.13.2-CVS OpenSSL/0.9.7e zlib/1.2.2 libidn/0.5.13
+Host: 127.0.0.1:8990
+Pragma: no-cache
+Accept: */*
+Content-Length: 6
+Content-Type: application/x-www-form-urlencoded
+
+postit
+</protocol>
+</verify>
