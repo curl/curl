@@ -1,4 +1,4 @@
-Updated: April 22, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: May 15, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -496,6 +496,8 @@ FAQ
   used libcurl in a threaded environment.
 
   5.2 How can I receive all data into a large memory chunk?
+
+  [ See also the examples/getinmemory.c source ]
 
   You are in full control of the callback function that gets called every time
   there is data received from the remote server. You can make that callback do
