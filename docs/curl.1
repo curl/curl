@@ -39,14 +39,14 @@ supported at the moment:
 
  http://www.any.org/archive[1996-1999]/volume[1-4]part{a,b,c,index}.html
 
-Starting with curl 7.6, you can specify any amount of URLs on the command
-line. They will be fetched in a sequential manner in the specified order.
+You can specify any amount of URLs on the command line. They will be fetched
+in a sequential manner in the specified order.
 
-Starting with curl 7.7, curl will attempt to re-use connections for multiple
-file transfers, so that getting many files from the same server will not do
-multiple connects/handshakes. This improves speed. Of course this is only done
-on files specified on a single command line and cannot be used between
-separate curl invokes.
+Curl will attempt to re-use connections for multiple file transfers, so that
+getting many files from the same server will not do multiple connects /
+handshakes. This improves speed. Of course this is only done on files
+specified on a single command line and cannot be used between separate curl
+invokes.
 .SH OPTIONS
 .IP "-a/--append"
 (FTP)
