@@ -193,6 +193,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
 {
   CURLcode result = CURLE_OK;
   struct SessionHandle *data = conn->data;
+  char *auth=NULL;
 
   *ready = FALSE; /* default is no */
 
@@ -218,6 +219,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
     if (data->state.authstage == 407) {
 #ifdef USE_SSLEAY
       if(data->state.authwant == CURLAUTH_NTLM) {
+        auth=(char *)"NTLM";
         result = Curl_output_ntlm(conn, TRUE, ready);
         if(result)
           return result;
@@ -227,6 +229,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
       if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
          conn->bits.proxy_user_passwd &&
          !checkheaders(data, "Proxy-authorization:")) {
+        auth=(char *)"Basic";
         result = Curl_output_basic_proxy(conn);
         if(result)
           return result;
@@ -234,13 +237,17 @@ CURLcode http_auth_headers(struct connectdata *conn,
         /* Switch to web authentication after proxy authentication is done */
         Curl_http_auth_stage(data, 401);
       }
+      infof(data, "Proxy auth using %s with user '%s'\n",
+            auth, conn->proxyuser);
     }
     /* Send web authentication header if needed */
     if (data->state.authstage == 401) {
+      auth = NULL;
 #ifdef HAVE_GSSAPI
       if((data->state.authwant == CURLAUTH_GSSNEGOTIATE) &&
          data->state.negotiate.context && 
          !GSS_ERROR(data->state.negotiate.status)) {
+        auth="GSS-Negotiate";
         result = Curl_output_negotiate(conn);
         if (result)
           return result;
@@ -250,6 +257,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
 #endif
 #ifdef USE_SSLEAY
       if(data->state.authwant == CURLAUTH_NTLM) {
+        auth=(char *)"NTLM";
         result = Curl_output_ntlm(conn, FALSE, ready);
         if(result)
           return result;
@@ -259,6 +267,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
       {
         if((data->state.authwant == CURLAUTH_DIGEST) &&
            data->state.digest.nonce) {
+          auth=(char *)"Digest";
           result = Curl_output_digest(conn,
                                       (unsigned char *)request,
                                       (unsigned char *)path);
@@ -269,12 +278,16 @@ CURLcode http_auth_headers(struct connectdata *conn,
         else if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
                 conn->bits.user_passwd &&
                 !checkheaders(data, "Authorization:")) {
+          auth=(char *)"Basic";
           result = Curl_output_basic(conn);
           if(result)
             return result;
           *ready = TRUE;
         }
       }
+      if(auth)
+        infof(data, "Server auth using %s with user '%s'\n",
+              auth, conn->user);
     }
   }
   else
