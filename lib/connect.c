@@ -132,6 +132,7 @@ int waitconnect(int sockfd, /* socket */
                 int timeout_msec)
 {
   fd_set fd;
+  fd_set errfd;
   struct timeval interval;
   int rc;
 
@@ -139,12 +140,15 @@ int waitconnect(int sockfd, /* socket */
   FD_ZERO(&fd);
   FD_SET(sockfd, &fd);
 
+  FD_ZERO(&errfd);
+  FD_SET(sockfd, &errfd);
+
   interval.tv_sec = timeout_msec/1000;
   timeout_msec -= interval.tv_sec*1000;
 
   interval.tv_usec = timeout_msec*1000;
 
-  rc = select(sockfd+1, NULL, &fd, NULL, &interval);
+  rc = select(sockfd+1, NULL, &fd, &errfd, &interval);
   if(-1 == rc)
     /* error, no connect here, try next */
     return -1;
@@ -153,10 +157,16 @@ int waitconnect(int sockfd, /* socket */
     /* timeout, no connect today */
     return 1;
 
+  if(FD_ISSET(sockfd, &errfd)) {
+    /* error condition caught */
+    return 2;
+  }
+
   /* we have a connect! */
   return 0;
 }
 
+#ifndef ENABLE_IPV6
 static CURLcode bindlocal(struct connectdata *conn,
                           int sockfd)
 {
@@ -171,7 +181,6 @@ static CURLcode bindlocal(struct connectdata *conn,
 #define INADDR_NONE (unsigned long) ~0
 #endif
 
-#ifndef ENABLE_IPV6
   struct SessionHandle *data = conn->data;
 
   /*************************************************************
@@ -284,12 +293,12 @@ static CURLcode bindlocal(struct connectdata *conn,
     return CURLE_OK;
 
   } /* end of device selection support */
-#endif  /* end of HAVE_INET_NTOA */
+#endif /* end of HAVE_INET_NTOA */
 #endif /* end of not WIN32 */
-#endif /*ENABLE_IPV6*/
 
   return CURLE_HTTP_PORT_FAILED;
 }
+#endif /* end of ipv4-specific section */
 
 /*
  * TCP connect to the given host with timeout, proxy or remote doesn't matter.
@@ -341,54 +350,82 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   }
 
 #ifdef ENABLE_IPV6
-  struct addrinfo *ai;
   /*
    * Connecting with IPv6 support is so much easier and cleanly done
    */
-  port =0; /* we already have port in the 'remotehost' struct */
+  {
+    struct addrinfo *ai;
 
-  for (ai = remotehost; ai; ai = ai->ai_next, aliasindex++) {
-    sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-    if (sockfd < 0)
-      continue;
+    for (ai = remotehost; ai; ai = ai->ai_next, aliasindex++) {
+      sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+      if (sockfd < 0)
+        continue;
 
-    /* set socket non-blocking */
-    nonblock(sockfd, TRUE);
+      /* set socket non-blocking */
+      nonblock(sockfd, TRUE);
 
-    rc = connect(sockfd, ai->ai_addr, ai->ai_addrlen);
+      rc = connect(sockfd, ai->ai_addr, ai->ai_addrlen);
 
-    if(0 == rc)
-      /* direct connect, awesome! */
-      break;
+      if(-1 == rc) {
+        int error;
+#ifdef WIN32
+        error = (int)GetLastError();
+#else
+        error = errno;
+#endif
+        switch (error) {
+        case EINPROGRESS:
+        case EWOULDBLOCK:
+#if defined(EAGAIN) && EAGAIN != EWOULDBLOCK
+          /* On some platforms EAGAIN and EWOULDBLOCK are the
+           * same value, and on others they are different, hence
+           * the odd #if
+           */
+        case EAGAIN:
+#endif
+        case EINTR:
 
-    /* asynchronous connect, wait for connect or timeout */
-    rc = waitconnect(sockfd, timeout_ms);
-    if(0 != rc) {
-      /* connect failed or timed out */
-      sclose(sockfd);
-      sockfd = -1;
-
-      /* get a new timeout for next attempt */
-      after = Curl_tvnow();
-      timeout_ms -= (long)(Curl_tvdiff(after, before)*1000);
-      if(timeout_ms < 0)
+          /* asynchronous connect, wait for connect or timeout */
+          rc = waitconnect(sockfd, timeout_ms);
+          break;
+        case ECONNREFUSED: /* no one listening */
+        default:
+          /* unknown error, fallthrough and try another address! */
+          failf(data, "Failed to connect to IP number %d", aliasindex+1);
+          break;
+        }
+      }
+      if(0 == rc)
+        /* direct connect, awesome! */
         break;
-      before = after;
-      continue;
+
+      else {
+        /* connect failed or timed out */
+        sclose(sockfd);
+        sockfd = -1;
+
+        /* get a new timeout for next attempt */
+        after = Curl_tvnow();
+        timeout_ms -= (long)(Curl_tvdiff(after, before)*1000);
+        if(timeout_ms < 0) {
+          failf(data, "connect() timed out!");
+          return CURLE_OPERATION_TIMEOUTED;
+        }
+        before = after;
+        continue;
+      }
+    }
+    if (sockfd < 0) {
+      failf(data, "connect() failed");
+      return CURLE_COULDNT_CONNECT;
     }
 
     /* now disable the non-blocking mode again */
     nonblock(sockfd, FALSE);
-    break;
-  }
-  if (sockfd < 0) {
-    failf(data, strerror(errno));
-    return CURLE_COULDNT_CONNECT;
-  }
 
-  if(addr)
-    *addr = ai; /* the address we ended up connected to */
-
+    if(addr)
+      *addr = ai; /* the address we ended up connected to */
+  }
 #else
   /*
    * Connecting with IPv4-only support

@@ -1949,7 +1949,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(!conn->hostaddr) {
       /* it might already be set if reusing a connection */
       conn->hostaddr = Curl_getaddrinfo(data, conn->name, conn->port,
-                                  &conn->hostent_buf);
+                                        &conn->hostent_buf);
     }
     if(!conn->hostaddr) {
       failf(data, "Couldn't resolve host '%s'", conn->name);
@@ -1963,7 +1963,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* resolve proxy */
     /* it might already be set if reusing a connection */
     conn->hostaddr = Curl_getaddrinfo(data, conn->proxyhost, conn->port,
-                                &conn->hostent_buf);
+                                      &conn->hostent_buf);
 
     if(!conn->hostaddr) {
       failf(data, "Couldn't resolve proxy '%s'", conn->proxyhost);
@@ -2040,7 +2040,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #else
     const int niflags = NI_NUMERICHOST;
 #endif
-    struct addrinfo *ai = conn->ai;
+    struct addrinfo *ai = conn->serv_addr;
 
     if (getnameinfo(ai->ai_addr, ai->ai_addrlen, hbuf, sizeof(hbuf), NULL, 0,
 	niflags)) {
