@@ -6,3 +6,12 @@ ahost
 config.log
 config.status
 aclocal.m4
+.deps
+Makefile.in
+config.guess
+config.h
+config.h.in
+config.sub
+libtool
+ltmain.sh
+stamp-h1
