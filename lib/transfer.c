@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -136,10 +136,10 @@ static int fillbuffer(struct connectdata *conn,
     buffersize -= (8 + 2 + 2);   /* 32bit hex + CRLF + CRLF */
     conn->upload_fromhere += 10; /* 32bit hex + CRLF */
   }
-  
+
   nread = conn->fread(conn->upload_fromhere, 1,
                       buffersize, conn->fread_in);
-          
+
   if(!conn->bits.forbidchunk && conn->bits.upload_chunky) {
     /* if chunked Transfer-Encoding */
     char hexbuffer[11];
@@ -200,7 +200,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   CURLcode result;
   ssize_t nread; /* number of bytes read */
   int didwhat=0;
-  
+
   /* These two are used only if no other select() or _fdset() have been
      invoked before this. This typicly happens if you use the multi interface
      and call curl_multi_perform() without calling curl_multi_fdset()
@@ -211,7 +211,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   fd_set *readfdp = k->readfdp;
   fd_set *writefdp = k->writefdp;
   curl_off_t contentlength;
-  
+
   if((k->keepon & KEEP_READ) && !readfdp) {
     /* reading is requested, but no socket descriptor pointer was set */
     FD_ZERO(&extrareadfd);
@@ -287,7 +287,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         k->str = k->buf;
 
         /* Since this is a two-state thing, we check if we are parsing
-           headers at the moment or not. */          
+           headers at the moment or not. */
         if (k->header) {
           /* we are in parse-the-header-mode */
           bool stop_reading = FALSE;
@@ -298,12 +298,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             int rest_length;
             size_t full_length;
             int writetype;
-              
+
             /* str_start is start of line within buf */
             k->str_start = k->str;
-              
+
             k->end_ptr = strchr (k->str_start, '\n');
-              
+
             if (!k->end_ptr) {
               /* Not a complete header line within buffer, append the data to
                  the end of the headerbuff. */
@@ -311,8 +311,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               if (k->hbuflen + nread >= data->state.headersize) {
                 /* We enlarge the header buffer as it is too small */
                 char *newbuff;
-                long newsize=CURLMAX((k->hbuflen+nread)*3/2,
-                                     data->state.headersize*2);
+                size_t newsize=CURLMAX((k->hbuflen+nread)*3/2,
+                                       data->state.headersize*2);
                 hbufp_index = k->hbufp - data->state.headerbuff;
                 newbuff = (char *)realloc(data->state.headerbuff, newsize);
                 if(!newbuff) {
@@ -341,7 +341,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
             /* decrease the size of the remaining (supposed) header line */
             rest_length = (k->end_ptr - k->str)+1;
-            nread -= rest_length; 
+            nread -= rest_length;
 
             k->str = k->end_ptr + 1; /* move past new line */
 
@@ -350,7 +350,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             /*
              * We're about to copy a chunk of data to the end of the
              * already received header. We make sure that the full string
-             * fit in the allocated header buffer, or else we enlarge 
+             * fit in the allocated header buffer, or else we enlarge
              * it.
              */
             if (k->hbuflen + full_length >=
@@ -375,9 +375,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             k->hbuflen += full_length;
             *k->hbufp = 0;
             k->end_ptr = k->hbufp;
-              
+
             k->p = data->state.headerbuff;
-              
+
             /****
              * We now have a FULL header line that p points to
              *****/
@@ -499,7 +499,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 if(result)
                   return result;
               }
-              
+
               if(!k->header) {
                 /*
                  * really end-of-headers.
@@ -539,7 +539,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                    have nothing and can safely return ok now! */
                 if(0 == conn->maxdownload)
                   stop_reading = TRUE;
-                    
+
                 if(stop_reading) {
                   /* we make sure that this socket isn't read more now */
                   k->keepon &= ~KEEP_READ;
@@ -559,7 +559,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             /*
              * Checks for special headers coming up.
              */
-              
+
             if (!k->headerline++) {
               /* This is the first header, it MUST be the error code line
                  or else we consiser this to be the body right away! */
@@ -577,7 +577,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 */
                 nc=sscanf(k->p, " HTTP %3d", &k->httpcode);
                 k->httpversion = 10;
-               
+
                /* If user has set option HTTP200ALIASES,
                   compare header line against list of aliases
                */
@@ -651,12 +651,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
             /* Check for Content-Length: header lines to get size. Ignore
                the header completely if we get a 416 response as then we're
-               resuming a document that we don't get, and this header contains 
+               resuming a document that we don't get, and this header contains
                info about the true size of the document we didn't get now. */
             if ((k->httpcode != 416) &&
                 checkprefix("Content-Length:", k->p)) {
               contentlength = curlx_strtoofft(k->p+15, NULL, 10);
-              if (data->set.max_filesize && contentlength > 
+              if (data->set.max_filesize && contentlength >
                   data->set.max_filesize) {
                 failf(data, "Maximum file size exceeded");
                 return CURLE_FILESIZE_EXCEEDED;
@@ -668,7 +668,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               char *start;
               char *end;
               size_t len;
-              
+
               /* Find the first non-space letter */
               for(start=k->p+13;
                   *start && isspace((int)*start);
@@ -684,10 +684,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
                 /* get length of the type */
                 len = end-start+1;
-              
+
                 /* allocate memory of a cloned copy */
                 Curl_safefree(data->info.contenttype);
-              
+
                 data->info.contenttype = malloc(len + 1);
                 if (NULL == data->info.contenttype)
                   return CURLE_OUT_OF_MEMORY;
@@ -766,10 +766,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 k->content_encoding = IDENTITY;
               else if (checkprefix("deflate", start))
                 k->content_encoding = DEFLATE;
-              else if (checkprefix("gzip", start) 
+              else if (checkprefix("gzip", start)
                        || checkprefix("x-gzip", start))
                 k->content_encoding = GZIP;
-              else if (checkprefix("compress", start) 
+              else if (checkprefix("compress", start)
                        || checkprefix("x-compress", start))
                 k->content_encoding = COMPRESS;
             }
@@ -789,7 +789,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 ptr++;
 
               k->offset = curlx_strtoofft(ptr, NULL, 10);
-              
+
               if (conn->resume_from == k->offset)
                 /* we asked for a resume and we got it */
                 k->content_range = TRUE;
@@ -837,7 +837,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                    white spaces after the "Location:" keyword. */
                 while(*start && isspace((int)*start ))
                   start++;
-                
+
                 /* Scan through the string from the end to find the last
                    non-space. k->end_ptr points to the actual terminating zero
                    letter, move pointer one letter back and start from
@@ -884,7 +884,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
             data->info.header_size += k->hbuflen;
             conn->headerbytecount += k->hbuflen;
-              
+
             /* reset hbufp pointer && hbuflen */
             k->hbufp = data->state.headerbuff;
             k->hbuflen = 0;
@@ -905,7 +905,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
            parsing, where the beginning of the buffer is headers and the end
            is non-headers. */
         if (k->str && !k->header && (nread > 0)) {
-            
+
           if(0 == k->bodywrites) {
             /* These checks are only made the first time we are about to
                write a piece of the body */
@@ -1014,7 +1014,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           k->bytecount += nread;
 
           Curl_pgrsSetDownloadCounter(data, k->bytecount);
-            
+
           if(!conn->bits.chunk && (nread || k->badheader)) {
             /* If this is chunky transfer, it was already written */
 
@@ -1039,12 +1039,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                    Content-Encoding header. See Curl_readwrite_init; the
                    memset() call initializes k->content_encoding to zero. */
                 if(!k->ignorebody)
-                  result = Curl_client_write(data, CLIENTWRITE_BODY, k->str, 
+                  result = Curl_client_write(data, CLIENTWRITE_BODY, k->str,
                                              nread);
 #ifdef HAVE_LIBZ
                 break;
 
-              case DEFLATE: 
+              case DEFLATE:
                 /* Assume CLIENTWRITE_BODY; headers are not encoded. */
                 result = Curl_unencode_deflate_write(data, k, nread);
                 break;
@@ -1098,7 +1098,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
        * data to send or until we get EWOULDBLOCK back
        */
       do {
-        
+
         /* only read more data if there's no upload data already
            present in the upload buffer */
         if(0 == conn->upload_present) {
@@ -1189,7 +1189,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           /* show the data before we change the pointer upload_fromhere */
           Curl_debug(data, CURLINFO_DATA_OUT, conn->upload_fromhere,
                      bytes_written);
-      
+
         if(conn->upload_present != bytes_written) {
           /* we only wrote a part of the buffer (if anything), deal with it! */
 
@@ -1219,7 +1219,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         Curl_pgrsSetUploadCounter(data, k->writebytecount);
 
       } while(!writedone); /* loop until we're done writing! */
-      
+
     }
 
   } while(0); /* just to break out from! */
@@ -1240,7 +1240,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
          often. */
 
       /* Quoting RFC2616, section "8.2.3 Use of the 100 (Continue) Status":
-         
+
       Therefore, when a client sends this header field to an origin server
       (possibly via a proxy) from which it has never seen a 100 (Continue)
       status, the client SHOULD NOT wait for an indefinite period before
@@ -1256,7 +1256,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         k->keepon |= KEEP_WRITE;
         k->wkeepfd = k->writefd;
       }
-    }    
+    }
   }
 
   if(Curl_pgrsUpdate(conn))
@@ -1265,7 +1265,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     result = Curl_speedcheck (data, k->now);
   if (result)
     return result;
-    
+
   if (data->set.timeout &&
       ((Curl_tvdiff(k->now, k->start)/1000) >= data->set.timeout)) {
     failf (data, "Operation timed out with %" FORMAT_OFF_T
@@ -1483,7 +1483,7 @@ Transfer(struct connectdata *conn)
     }
     if(result)
       return result;
-    
+
     /* "done" signals to us if the transfer(s) are ready */
   }
 
@@ -1548,7 +1548,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
    *************************************************************/
   if(!data->set.no_signal)
     data->state.prev_signal = signal(SIGPIPE, SIG_IGN);
-#endif  
+#endif
 
   Curl_initinfo(data); /* reset session-specific information "variables" */
   Curl_pgrsStartNow(data);
@@ -1567,7 +1567,7 @@ CURLcode Curl_posttransfer(struct SessionHandle *data)
     signal(SIGPIPE, data->state.prev_signal);
 #else
   (void)data; /* unused parameter */
-#endif  
+#endif
 
   return CURLE_OK;
 }
@@ -1647,7 +1647,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
   char letter;   /* used for a silly sscanf */
   size_t newlen;
   char *newest;
-  
+
   if (data->set.maxredirs &&
       (data->set.followlocation >= data->set.maxredirs)) {
     failf(data,"Maximum (%d) redirects followed", data->set.maxredirs);
@@ -1709,7 +1709,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
       pathsep = strrchr(protsep, '?');
       if(pathsep)
         *pathsep=0;
-      
+
       /* we have a relative path to append to the last slash if
          there's one available */
       pathsep = strrchr(protsep, '/');
@@ -1729,11 +1729,11 @@ CURLcode Curl_follow(struct SessionHandle *data,
 
       if((useurl[0] == '.') && (useurl[1] == '/'))
         useurl+=2; /* just skip the "./" */
-            
+
       while((useurl[0] == '.') &&
             (useurl[1] == '.') &&
             (useurl[2] == '/')) {
-        level++; 
+        level++;
         useurl+=3; /* pass the "../" */
       }
 
@@ -1775,10 +1775,10 @@ CURLcode Curl_follow(struct SessionHandle *data,
     newlen = strlen_url(useurl);
 
     urllen = strlen(url_clone);
-    
+
     newest=(char *)malloc( urllen + 1 + /* possible slash */
                            newlen + 1 /* zero byte */);
-    
+
     if(!newest) {
       free(url_clone); /* don't leak this */
       return CURLE_OUT_OF_MEMORY; /* go out from this */
@@ -1824,7 +1824,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
     free(data->change.url);
   else
     data->change.url_alloc = TRUE; /* the URL is allocated */
-      
+
   data->change.url = newurl;
   newurl = NULL; /* don't free! */
 
@@ -1852,7 +1852,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
     break;
   case 301: /* Moved Permanently */
     /* (quote from RFC2616, section 10.3.2):
-     * 
+     *
      * Note: When automatically redirecting a POST request after receiving a
      * 301 status code, some existing HTTP/1.0 user agents will erroneously
      * change it into a GET request.
@@ -1874,7 +1874,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
     break;
   case 302: /* Found */
     /* (From 10.3.3)
-       
+
     Note: RFC 1945 and RFC 2068 specify that the client is not allowed
     to change the method on the redirected request.  However, most
     existing user agent implementations treat 302 as if it were a 303
@@ -1882,13 +1882,13 @@ CURLcode Curl_follow(struct SessionHandle *data,
     of the original request method. The status codes 303 and 307 have
     been added for servers that wish to make unambiguously clear which
     kind of reaction is expected of the client.
-    
+
     (From 10.3.4)
-    
+
     Note: Many pre-HTTP/1.1 user agents do not understand the 303
     status. When interoperability with such clients is a concern, the
     302 status code may be used instead, since most user agents react
-    to a 302 response as described here for 303.             
+    to a 302 response as described here for 303.
     */
   case 303: /* See Other */
     /* Disable both types of POSTs, since doing a second POST when
@@ -1945,7 +1945,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
    * performed after this do-while loop.
    */
 
-  do {  
+  do {
     int urlchanged = FALSE;
     do {
       bool async;
@@ -1959,11 +1959,11 @@ CURLcode Curl_perform(struct SessionHandle *data)
         res = Curl_wait_for_resolv(conn, NULL);
         if(CURLE_OK == res)
           /* Resolved, continue with the connection */
-          res = Curl_async_resolved(conn);              
+          res = Curl_async_resolved(conn);
       }
       if(res)
         break;
-      
+
       /* If a callback (or something) has altered the URL we should use within
          the Curl_connect(), we detect it here and act as if we are redirected
          to the new URL */
@@ -1977,7 +1977,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
             free(gotourl);
         }
       }
-    } while (urlchanged && res == CURLE_OK) ; 
+    } while (urlchanged && res == CURLE_OK);
 
     if(res == CURLE_OK) {
       res = Curl_do(&conn);
@@ -2068,7 +2068,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
  * Curl_Transfer() is called to setup some basic properties for the upcoming
  * transfer.
  */
-CURLcode 
+CURLcode
 Curl_Transfer(struct connectdata *c_conn, /* connection data */
               int sockindex,       /* socket index to read from or -1 */
               curl_off_t size,     /* -1 if unknown at this point */
