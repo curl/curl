@@ -317,7 +317,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 }
               }
 
-              break;		/* read more and try again */
+              break; /* read more and try again */
             }
 
             /* decrease the size of the remaining buffer */
@@ -459,7 +459,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   FD_ZERO(&k->rkeepfd);
                 }
 
-                break;		/* exit header line loop */
+                break;          /* exit header line loop */
               }
 
               /* We continue reading headers, so reset the line-based
@@ -742,7 +742,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
              there might be a non-header part left in the end of the read
              buffer. */
 
-        }			/* end if header mode */
+        }                       /* end if header mode */
 
         /* This is not an 'else if' since it may be a rest from the header
            parsing, where the beginning of the buffer is headers and the end
@@ -1135,13 +1135,13 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   /* we want header and/or body, if neither then don't do this! */
   if(conn->bits.getheader || !data->set.no_body) {
 
-    FD_ZERO (&k->readfd);		/* clear it */
+    FD_ZERO (&k->readfd);               /* clear it */
     if(conn->sockfd != -1) {
       FD_SET (conn->sockfd, &k->readfd); /* read socket */
       k->keepon |= KEEP_READ;
     }
 
-    FD_ZERO (&k->writefd);		/* clear it */
+    FD_ZERO (&k->writefd);              /* clear it */
     if(conn->writesockfd != -1) {
       if (data->set.expect100header)
         /* wait with write until we either got 100-continue or a timeout */
@@ -1647,10 +1647,10 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
 CURLcode 
 Curl_Transfer(struct connectdata *c_conn, /* connection data */
-              int sockfd,	/* socket to read from or -1 */
-              int size,		/* -1 if unknown at this point */
-              bool getheader,	/* TRUE if header parsing is wanted */
-              long *bytecountp,	/* return number of bytes read or NULL */
+              int sockfd,       /* socket to read from or -1 */
+              int size,         /* -1 if unknown at this point */
+              bool getheader,   /* TRUE if header parsing is wanted */
+              long *bytecountp, /* return number of bytes read or NULL */
               int writesockfd,  /* socket to write to, it may very well be
                                    the same we read from. -1 disables */
               long *writebytecountp /* return number of bytes written or
