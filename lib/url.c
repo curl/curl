@@ -1566,6 +1566,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
           /* we have a proxy here to set */
           data->change.proxy = proxy;
           data->change.proxy_alloc=TRUE; /* this needs to be freed later */
+          conn->bits.httpproxy = TRUE;
         }
       } /* if (!nope) - it wasn't specified non-proxy */
     } /* NO_PROXY wasn't specified or '*' */
