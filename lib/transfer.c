@@ -403,7 +403,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 else {
                   /* this was all we read so its all a bad header */
                   k->badheader = HEADER_ALLBAD;
-                  nread = rest_length;
+                  nread = (ssize_t)rest_length;
                 }
                 break;
               }
