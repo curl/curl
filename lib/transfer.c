@@ -839,6 +839,12 @@ Transfer(struct connectdata *c_conn)
         break;
       }
 
+      /* Update read/write counters */
+      if(conn->bytecountp)
+        *conn->bytecountp = bytecount; /* read count */
+      if(conn->writebytecountp)
+        *conn->writebytecountp = writebytecount; /* write count */
+
       now = Curl_tvnow();
       if(Curl_pgrsUpdate(conn))
         urg = CURLE_ABORTED_BY_CALLBACK;
@@ -862,6 +868,7 @@ Transfer(struct connectdata *c_conn)
 	       bytecount, conn->size);
 	return CURLE_OPERATION_TIMEOUTED;
       }
+
     }
   }
 
@@ -883,11 +890,6 @@ Transfer(struct connectdata *c_conn)
   }
   if(Curl_pgrsUpdate(conn))
     return CURLE_ABORTED_BY_CALLBACK;
-
-  if(conn->bytecountp)
-    *conn->bytecountp = bytecount; /* read count */
-  if(conn->writebytecountp)
-    *conn->writebytecountp = writebytecount; /* write count */
 
   return CURLE_OK;
 }
