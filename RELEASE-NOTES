@@ -10,12 +10,15 @@ Curl and libcurl 7.12.2
 
 This release includes the following changes:
 
+ o file upload parts in formposts now get their directory names cut off
+ o added CURLINFO_OS_ERRNO
  o added CURLOPT_FTPSSLAUTH to allow ftp connects to attempt "AUTH TLS" instead
    before "AUTH SSL"
  o curl_getdate() completely rewritten, which may affect curl -z use cases
 
 This release includes the following bugfixes:
 
+ o curl/multi.h works better included in winsock-using apps
  o curl_easy_reset() no longer enables the progress meter
  o build fix for SSL disabled curl with SSL Engine support present
  o configure --with-ssl=PATH now ignores pkg-config path info
@@ -46,6 +49,7 @@ advice from friends like these:
  Casey O'Donnell, Roland Krikava, Alex, Alexander Krasnostavsky, Kjetil
  Jacobsen, Ling Thio, Roman Koifman, Harshal Pradhan, Jonas Forsman, David
  Tarendash, Daniel at touchtunes, Bertrand Demiddelaer, Andreas Rieke,
- Jean-Claude Chauve, Dan Fandrich, Peter Sylvester, "Mekonikum"
+ Jean-Claude Chauve, Dan Fandrich, Peter Sylvester, "Mekonikum", Jean-Philippe
+ Barrette-LaPierre, Günter Knauf, Larry Campbell, Fedor Karpelevitch
 
         Thanks! (and sorry if I forgot to mention someone)
