@@ -175,7 +175,7 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
       return -1;
     input_token.length = rawlen;
 
-#ifdef SPNEGO /* Handle SPNEGO */
+#ifdef HAVE_SPNEGO /* Handle SPNEGO */
     if (checkprefix("Negotiate", header)) {
         ASN1_OBJECT *   object            = NULL;
         int             rc                = 1;
@@ -257,7 +257,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn)
   char *encoded = NULL;
   int len;
 
-#ifdef SPNEGO /* Handle SPNEGO */
+#ifdef HAVE_SPNEGO /* Handle SPNEGO */
   if (checkprefix("Negotiate",neg_ctx->protocol)) {
     ASN1_OBJECT *   object            = NULL;
     int             rc                = 1;
