@@ -6,6 +6,16 @@
 
                                History of Changes
 
+Daniel (1 September 2001)
+- Heikki Korpela pointed out that I did not ship the proper libtool stuff in 
+  the pre-releases, even though that was my intention. libtoolize has now
+  been re-run.
+
+- Heikki also patched away the bad use of 'make -C' in the test suite
+  makefile. make -C is not very portable and is now banned from here.
+
+Version 7.9-pre2
+
 Daniel (31 August 2001)
 - I just made a huge internal struct rehaul, and all the big internally used
   structs have been renamed, redesigned and stuff have been moved around a bit
