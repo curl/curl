@@ -1,6 +1,7 @@
+Online:  http://curl.haxx.se/docs/httpscripting.shtml
 Author:  Daniel Stenberg <daniel@haxx.se>
-Date:    September 15, 2000
-Version: 0.3
+Date:    August 20, 2001
+Version: 0.4
 
                 The Art Of Scripting HTTP Requests Using Curl
                 =============================================
@@ -174,6 +175,19 @@ Version: 0.3
 
         curl -d "birthyear=1905&press=OK&person=daniel" [URL]
 
+ 4.5 FIGURE OUT WHAT A POST LOOKS LIKE
+
+  When you're about fill in a form and send to a server by using curl instead
+  of a browser, you're of course very interested in sending a POST exactly the
+  way your browser does.
+
+  An easy way to get to see this, is to save the HTML page with the form on
+  your local disk, mofidy the 'method' to a GET, and press the submit button
+  (you could also change the action URL if you want to).
+
+  You will then clearly see the data get appended to the URL, separated with a
+  '?'-letter as GET forms are supposed to.
+
 5. PUT
 
  The perhaps best way to upload data to a HTTP server is to use PUT. Then
@@ -182,7 +196,7 @@ Version: 0.3
 
  Put a file to a HTTP server with curl:
 
-        curl -t uploadfile www.uploadhttp.com/receive.cgi
+        curl -T uploadfile www.uploadhttp.com/receive.cgi
 
 6. AUTHENTICATION
 
@@ -289,7 +303,6 @@ Version: 0.3
 
         curl -b "name=Daniel" www.cookiesite.com
 
-
  Cookies are sent as common HTTP headers. This is practical as it allows curl
  to record cookies simply by recording headers. Record cookies with curl by
  using the -D option like:
@@ -303,6 +316,14 @@ Version: 0.3
  you run curl like:
 
         curl -b stored_cookies_in_file www.cookiesite.com
+
+ Curl's "cookie engine" gets enabled when you use the -b option. If you only
+ want curl to understand received cookies, use -b with a file that doesn't
+ exist. Example, if you want to let curl understand cookies from a page and
+ follow a location (and thus possibly send back cookies it received), you can
+ invoke it like:
+
+        curl -b nada -L www.cookiesite.com
 
 11. HTTPS
 
