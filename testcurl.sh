@@ -75,9 +75,9 @@ die(){
       log "removing the $build dir"
       rm -rf "$pwd/$build"
     fi
-    if test -r "$pwd/$buildlog"; then
+    if test -r "$buildlog"; then
       # we have a build log output file left, remove it
-      log "removing the $buildlog file"
+      log "removing the $buildlogname file"
       rm -rf "$buildlog"
     fi
     log "ENDING HERE" # last line logged!
@@ -152,11 +152,15 @@ if [ -d "$CURLDIR" ]; then
   fi
 fi
 build="build-$$"
-buildlog="buildlog-$$"
+buildlogname="buildlog-$$"
+buildlog="$pwd/$buildlogname"
 
 # remove any previous left-overs
 rm -rf build-*
 rm -rf buildlog-*
+
+# this is to remove old build logs that ended up in the wrong dir
+rm -rf $CURLDIR/buildlog-*
 
 # create a dir to build in
 mkdir $build
