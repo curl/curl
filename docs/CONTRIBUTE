@@ -10,6 +10,12 @@ To Think About When Contributing Source Code
  in mind when you decide to write a contribution to the project. This concerns
  new features as well as corrections to existing flaws or bugs.
 
+Join the Community
+
+ Skip over to http://curl.haxx.se/mail/ and join the appropriate mailing
+ list(s).  Read up on details before you post questions. Read this file before
+ you start sending patches!
+
 The License Issue
 
  When contributing with code, you agree to put your changes and new code under
@@ -20,6 +26,12 @@ The License Issue
  the rest of the package and they make sense. Such "separate parts" can not be
  GPL (as we don't want the GPL virus to attack users of libcurl) but they must
  use "GPL compatible" licenses.
+
+What To Read
+
+ Source code, the man pages, the INTERALS document, the TODO, the most recent
+ CHANGES. Just lurking on the libcurl mailing list is gonna give you a lot of
+ insights on what's going on right now.
 
 Naming
 
@@ -87,7 +99,9 @@ Write Access to CVS Repository
  If you are a frequent contributor, or have another good reason, you can of
  course get write access to the CVS repository and then you'll be able to
  check-in all your changes straight into the CVS tree instead of sending all
- changes by mail as patches. Just ask if this is what you'd want.
+ changes by mail as patches. Just ask if this is what you'd want. You will be
+ required to have posted a few quality patches first, before you can be
+ granted write access.
 
 Test Cases
 
