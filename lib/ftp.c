@@ -316,6 +316,11 @@ int Curl_GetFTPResponse(int sockfd,
   return nread; /* total amount of bytes read */
 }
 
+#ifndef ENABLE_IPV6
+/*
+ * This function is only used by code that works on IPv4. When we add proper
+ * support for that functionality with IPv6, this function can go in again.
+ */
 /* -- who are we? -- */
 static char *getmyhost(char *buf, int buf_size)
 {
@@ -332,6 +337,9 @@ static char *getmyhost(char *buf, int buf_size)
 #endif
   return buf;
 }
+
+#endif /* ipv4-only function */
+
 
 /* ftp_connect() should do everything that is to be considered a part
    of the connection phase. */
@@ -722,6 +730,129 @@ CURLcode _ftp_getsize(struct connectdata *conn, char *file,
   return CURLE_OK;
 }
 
+/***************************************************************************
+ *
+ * ftp_pasv_verbose()
+ *
+ * This function only outputs some informationals about this second connection
+ * when we've issued a PASV command before and thus we have connected to a
+ * possibly new IP address.
+ *
+ */
+static void
+ftp_pasv_verbose(struct connectdata *conn,
+#ifdef ENABLE_IPV6
+                 struct addrinfo *newhost
+#else
+                 char *newhost /* ipv4 */
+#endif
+)
+{
+#ifndef ENABLE_IPV6
+  /*****************************************************************
+   *
+   * IPv4-only code section
+   */
+
+  struct in_addr in;
+  struct hostent * answer;
+
+#if defined (HAVE_INET_NTOA_R)
+  char ntoa_buf[64];
+#endif
+#ifndef ENABLE_IPV6
+  struct sockaddr_in serv_addr;
+  char hostent_buf[8192];
+#endif
+
+#if defined(HAVE_INET_ADDR)
+  unsigned long address;
+# if defined(HAVE_GETHOSTBYADDR_R)
+  int h_errnop;
+# endif
+
+  address = inet_addr(newhost);
+# ifdef HAVE_GETHOSTBYADDR_R
+
+#  ifdef HAVE_GETHOSTBYADDR_R_5
+  /* AIX, Digital Unix style:
+     extern int gethostbyaddr_r(char *addr, size_t len, int type,
+     struct hostent *htent, struct hostent_data *ht_data); */
+
+  /* Fred Noz helped me try this out, now it at least compiles! */
+
+  if(gethostbyaddr_r((char *) &address,
+                     sizeof(address), AF_INET,
+                     (struct hostent *)hostent_buf,
+                     hostent_buf + sizeof(*answer)))
+    answer=NULL;
+                           
+#  endif
+#  ifdef HAVE_GETHOSTBYADDR_R_7
+  /* Solaris and IRIX */
+  answer = gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
+                           (struct hostent *)hostent_buf,
+                           hostent_buf + sizeof(*answer),
+                           sizeof(hostent_buf) - sizeof(*answer),
+                           &h_errnop);
+#  endif
+#  ifdef HAVE_GETHOSTBYADDR_R_8
+  /* Linux style */
+  if(gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
+                     (struct hostent *)hostent_buf,
+                     hostent_buf + sizeof(*answer),
+                     sizeof(hostent_buf) - sizeof(*answer),
+                     &answer,
+                     &h_errnop))
+    answer=NULL; /* error */
+#  endif
+        
+# else
+  answer = gethostbyaddr((char *) &address, sizeof(address), AF_INET);
+# endif
+#else
+  answer = NULL;
+#endif
+  (void) memcpy(&in.s_addr, *addr->h_addr_list, sizeof (in.s_addr));
+  infof(conn->data, "Connecting to %s (%s) port %u\n",
+        answer?answer->h_name:newhost,
+#if defined(HAVE_INET_NTOA_R)
+        inet_ntoa_r(in, ip_addr=ntoa_buf, sizeof(ntoa_buf)),
+#else
+        ip_addr = inet_ntoa(in),
+#endif
+        connectport);
+
+#else
+  /*****************************************************************
+   *
+   * IPv6-only code section
+   */
+  char hbuf[NI_MAXHOST]; /* ~1KB */
+  char nbuf[NI_MAXHOST]; /* ~1KB */
+  char sbuf[NI_MAXSERV]; /* around 32 */
+#ifdef NI_WITHSCOPEID
+  const int niflags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
+#else
+  const int niflags = NI_NUMERICHOST | NI_NUMERICSERV;
+#endif
+  if (getnameinfo(newhost->ai_addr, newhost->ai_addrlen,
+                  nbuf, sizeof(nbuf), sbuf, sizeof(sbuf), niflags)) {
+    snprintf(nbuf, sizeof(nbuf), "?");
+    snprintf(sbuf, sizeof(sbuf), "?");
+  }
+        
+  if (getnameinfo(newhost->ai_addr, newhost->ai_addrlen,
+                  hbuf, sizeof(hbuf), NULL, 0, 0)) {
+    infof(conn->data, "Connecting to %s port %s\n", nbuf, sbuf);
+  } 
+  else {
+    infof(conn->data, "Connecting to %s (%s) port %s\n", hbuf, nbuf, sbuf);
+  }
+#endif
+
+}
+
 
 static
 CURLcode _ftp(struct connectdata *conn)
@@ -733,16 +864,6 @@ CURLcode _ftp(struct connectdata *conn)
   char *buf = data->state.buffer; /* this is our buffer */
   /* for the ftp PORT mode */
   int portsock=-1;
-#if defined (HAVE_INET_NTOA_R)
-  char ntoa_buf[64];
-#endif
-#ifdef ENABLE_IPV6
-  struct addrinfo *ai;
-#else
-  struct sockaddr_in serv_addr;
-  char hostent_buf[8192];
-#endif
-
   /* the ftp struct is already inited in ftp_connect() */
   struct FTP *ftp = conn->proto.ftp;
 
@@ -901,7 +1022,7 @@ CURLcode _ftp(struct connectdata *conn)
       return CURLE_FTP_PORT_FAILED;
     }
 
-    for (modep = (char *)mode; modep && *modep; modep++) {
+    for (modep = (char **)mode; modep && *modep; modep++) {
       int lprtaf, eprtaf;
 
       switch (sa->sa_family) {
@@ -1152,11 +1273,13 @@ CURLcode _ftp(struct connectdata *conn)
       unsigned short connectport; /* the local port connect() should use! */
       char newhost[32];
 
-      Curl_addrinfo *he;
+      Curl_addrinfo *addr;
       char *hostdataptr=NULL;
 
 #ifndef ENABLE_IPV6
       char *ip_addr;
+#else
+      struct addrinfo *ai;
 #endif
       char *str=buf;
 
@@ -1192,14 +1315,14 @@ CURLcode _ftp(struct connectdata *conn)
          * proxy again here. We already have the name info for it since the
          * previous lookup.
          */
-        he = conn->hp;
+        addr = conn->hp;
         connectport =
           (unsigned short)conn->port; /* we connect to the proxy's port */
       }
       else {
         /* normal, direct, ftp connection */
-        he = Curl_getaddrinfo(data, newhost, newport, &hostdataptr);
-        if(!he) {
+        addr = Curl_getaddrinfo(data, newhost, newport, &hostdataptr);
+        if(!addr) {
           failf(data, "Can't resolve new host %s", newhost);
           return CURLE_FTP_CANT_GET_HOST;
         }
@@ -1208,7 +1331,7 @@ CURLcode _ftp(struct connectdata *conn)
 	
 #ifdef ENABLE_IPV6
       conn->secondarysocket = -1;
-      for (ai = res; ai; ai = ai->ai_next) {
+      for (ai = addr; ai; ai = ai->ai_next) {
         /* XXX for now, we can do IPv4 only */
         if (ai->ai_family != AF_INET)
           continue;
@@ -1218,35 +1341,15 @@ CURLcode _ftp(struct connectdata *conn)
         if (conn->secondarysocket < 0)
           continue;
 
-      	if(data->set.verbose) {
-          char hbuf[NI_MAXHOST];
-          char nbuf[NI_MAXHOST];
-          char sbuf[NI_MAXSERV];
-#ifdef NI_WITHSCOPEID
-          const int niflags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
-#else
-          const int niflags = NI_NUMERICHOST | NI_NUMERICSERV;
-#endif
-          if (getnameinfo(res->ai_addr, res->ai_addrlen, nbuf, sizeof(nbuf),
-                          sbuf, sizeof(sbuf), niflags)) {
-            snprintf(nbuf, sizeof(nbuf), "?");
-            snprintf(sbuf, sizeof(sbuf), "?");
-          }
-        
-          if (getnameinfo(res->ai_addr, res->ai_addrlen, hbuf, sizeof(hbuf),
-                          NULL, 0, 0)) {
-            infof(data, "Connecting to %s port %s\n", nbuf, sbuf);
-          } else {
-            infof(data, "Connecting to %s (%s) port %s\n", hbuf, nbuf, sbuf);
-          }
-        }
-
         if (connect(conn->secondarysocket, ai->ai_addr, ai->ai_addrlen) < 0) {
           close(conn->secondarysocket);
           conn->secondarysocket = -1;
           continue;
         }
 
+      	if(data->set.verbose)
+          /* this just dumps information about this second connection */
+          ftp_pasv_verbose(conn, ai);
       	break;
       }
 
@@ -1255,76 +1358,18 @@ CURLcode _ftp(struct connectdata *conn)
         return CURLE_FTP_CANT_RECONNECT;
       }
 #else
+      /* IPv4 code */
       conn->secondarysocket = socket(AF_INET, SOCK_STREAM, 0);
 
       memset((char *) &serv_addr, '\0', sizeof(serv_addr));
-      memcpy((char *)&(serv_addr.sin_addr), he->h_addr, he->h_length);
-      serv_addr.sin_family = he->h_addrtype;
+      memcpy((char *)&(serv_addr.sin_addr), addr->h_addr, addr->h_length);
+      serv_addr.sin_family = addr->h_addrtype;
 
       serv_addr.sin_port = htons(connectport);
 
-      if(data->set.verbose) {
-        struct in_addr in;
-        struct hostent * answer;
-
-#if defined(HAVE_INET_ADDR)
-        unsigned long address;
-# if defined(HAVE_GETHOSTBYADDR_R)
-        int h_errnop;
-# endif
-
-        address = inet_addr(newhost);
-# ifdef HAVE_GETHOSTBYADDR_R
-
-#  ifdef HAVE_GETHOSTBYADDR_R_5
-        /* AIX, Digital Unix style:
-           extern int gethostbyaddr_r(char *addr, size_t len, int type,
-           struct hostent *htent, struct hostent_data *ht_data); */
-
-        /* Fred Noz helped me try this out, now it at least compiles! */
-
-        if(gethostbyaddr_r((char *) &address,
-                           sizeof(address), AF_INET,
-                           (struct hostent *)hostent_buf,
-                           hostent_buf + sizeof(*answer)))
-           answer=NULL;
-                           
-#  endif
-#  ifdef HAVE_GETHOSTBYADDR_R_7
-        /* Solaris and IRIX */
-        answer = gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
-                                 (struct hostent *)hostent_buf,
-                                 hostent_buf + sizeof(*answer),
-                                 sizeof(hostent_buf) - sizeof(*answer),
-                                 &h_errnop);
-#  endif
-#  ifdef HAVE_GETHOSTBYADDR_R_8
-        /* Linux style */
-        if(gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
-                           (struct hostent *)hostent_buf,
-                           hostent_buf + sizeof(*answer),
-                           sizeof(hostent_buf) - sizeof(*answer),
-                           &answer,
-                           &h_errnop))
-           answer=NULL; /* error */
-#  endif
-        
-# else
-        answer = gethostbyaddr((char *) &address, sizeof(address), AF_INET);
-# endif
-#else
-        answer = NULL;
-#endif
-        (void) memcpy(&in.s_addr, *he->h_addr_list, sizeof (in.s_addr));
-        infof(data, "Connecting to %s (%s) port %u\n",
-              answer?answer->h_name:newhost,
-#if defined(HAVE_INET_NTOA_R)
-              inet_ntoa_r(in, ip_addr=ntoa_buf, sizeof(ntoa_buf)),
-#else
-              ip_addr = inet_ntoa(in),
-#endif
-              connectport);
-      }
+      if(data->set.verbose)
+        /* this just dumps information about this second connection */
+        ftp_pasv_verbose(conn, newhost);
 	
       if(hostdataptr)
         free(hostdataptr);
@@ -1349,7 +1394,7 @@ CURLcode _ftp(struct connectdata *conn)
         }
         return CURLE_FTP_CANT_RECONNECT;
       }
-#endif /*ENABLE_IPV6*/
+#endif /* end of IPv4-specific code*/
 
       if (data->set.tunnel_thru_httpproxy) {
         /* We want "seamless" FTP operations through HTTP proxy tunnel */
