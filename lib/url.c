@@ -533,6 +533,8 @@ UrgError curl_urlget(UrgTag tag, ...)
 
       infof(data, "Follows Location: to new URL: '%s'\n", data->url);
 
+      data->port = 0; /* clear the port number so that we don't make any silly
+                         assumptions for the new URL! */
       /* clean up the sockets and SSL stuff from the previous "round" */
       urlfree(data, FALSE);
 
