@@ -7,6 +7,8 @@
 
 DEPEND_PREREQ = config.h hugehelp.c
 
+top_srcdir = ..
+
 include ../packages/DOS/common.dj
 include Makefile.inc
 
