@@ -156,7 +156,7 @@ sub runhttpserver {
     $pid = checkserver ($HTTPPIDFILE);
 
     # verify if our/any server is running on this port
-    my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver`;
+    my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null`;
 
     if ( $data =~ /WE ROOLZ(: |)(\d*)/ ) {
         if($2) {
@@ -242,7 +242,7 @@ sub runftpserver {
         my $flag=$debugprotocol?"-v ":"";
 
         # verify that our server is NOT running on this port:
-        my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver`;
+        my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver 2>/dev/null`;
 
         if ( $data =~ /WE ROOLZ/ ) {
             print "A previous FTP server session is already running and we ",
@@ -262,7 +262,7 @@ sub runftpserver {
         }
 
         # verify that our server is one one running on this port:
-        my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver`;
+        my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver 2>/dev/null`;
 
         if ( $data !~ /WE ROOLZ/ ) {
             print "Another FTP server is running on port $FTPPORT\n",
