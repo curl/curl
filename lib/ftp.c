@@ -481,8 +481,9 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   if(conn->protocol & PROT_FTPS) {
     /* FTPS is simply ftp with SSL for the control channel */
     /* now, perform the SSL initialization for this socket */
-    if(Curl_SSLConnect(conn))
-      return CURLE_SSL_CONNECT_ERROR;
+    result = Curl_SSLConnect(conn);
+    if(result)
+      return result;
   }
 
 

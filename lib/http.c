@@ -336,8 +336,9 @@ CURLcode Curl_http_connect(struct connectdata *conn)
     }
 
     /* now, perform the SSL initialization for this socket */
-    if(Curl_SSLConnect(conn))
-      return CURLE_SSL_CONNECT_ERROR;
+    result = Curl_SSLConnect(conn);
+    if(result)
+      return result;
   }
 
   if(conn->bits.user_passwd && !data->bits.this_is_a_follow) {
