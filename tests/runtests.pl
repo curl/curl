@@ -344,7 +344,7 @@ sub runhttpserver {
     }
 
     my $verified;
-    for(1 .. 5) {
+    for(1 .. 10) {
         # verify that our server is up and running:
         my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null`;
 
@@ -354,7 +354,10 @@ sub runhttpserver {
             last;
         }
         else {
-            sleep(1);
+            if($verbose) {
+                print STDERR "RUN: Retrying HTTP server existence in 3 sec\n";
+            }
+            sleep(3);
             next;
         }
     }
@@ -377,11 +380,12 @@ sub runhttpsserver {
     my $verbose = $_[0];
     my $STATUS;
     my $RUNNING;
-    my $pid=checkserver($HTTPSPIDFILE );
 
     if(!$stunnel) {
         return 0;
     }
+
+    my $pid=checkserver($HTTPSPIDFILE );
 
     if($pid > 0) {
         # kill previous stunnel!
@@ -398,7 +402,20 @@ sub runhttpsserver {
         print "CMD: $cmd\n";
     }
     sleep(1);
-    $pid=checkserver($HTTPSPIDFILE);
+
+    for(1 .. 10) {
+        $pid=checkserver($HTTPSPIDFILE);
+
+        if($pid <= 0) {
+            if($verbose) {
+                print STDERR "RUN: waiting 3 sec for HTTPS server\n";
+            }
+            sleep(3);
+        }
+        else {
+            last;
+        }
+    }
 
     return $pid;
 }
@@ -458,7 +475,7 @@ sub runftpserver {
     system($cmd);
 
     my $verified;
-    for(1 .. 5) {
+    for(1 .. 10) {
         # verify that our server is up and running:
         my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver 2>/dev/null`;
 
@@ -469,9 +486,9 @@ sub runftpserver {
         }
         else {
             if($verbose) {
-                print STDERR "RUN: Retrying FTP server existance in 1 sec\n";
+                print STDERR "RUN: Retrying FTP server existence in 3 sec\n";
             }
-            sleep(1);
+            sleep(3);
             next;
         }
     }
@@ -494,11 +511,11 @@ sub runftpsserver {
     my $verbose = $_[0];
     my $STATUS;
     my $RUNNING;
-    my $pid=checkserver($FTPSPIDFILE );
 
     if(!$stunnel) {
         return 0;
     }
+    my $pid=checkserver($FTPSPIDFILE );
 
     if($pid > 0) {
         # kill previous stunnel!
@@ -516,7 +533,20 @@ sub runftpsserver {
     }
     sleep(1);
 
-    $pid=checkserver($FTPSPIDFILE );
+    for(1 .. 10) {
+
+        $pid=checkserver($FTPSPIDFILE );
+
+        if($pid <= 0) {
+            if($verbose) {
+                print STDERR "RUN: waiting 3 sec for FTPS server\n";
+            }
+            sleep(3);
+        }
+        else {
+            last;
+        }
+    }
 
     return $pid;
 }
@@ -716,7 +746,7 @@ sub singletest {
             }
         }
 
-        $why = "lacks $f";
+        $why = "curl lacks $f support";
         $serverproblem = 15; # set it here
         last;
     }
@@ -741,7 +771,10 @@ sub singletest {
             # set above, a lacking prereq
         }
         elsif($serverproblem == 1) {
-            $why = "no SSL-capable server";
+            $why = "no HTTPS server";
+        }
+        elsif($serverproblem == 3) {
+            $why = "no FTPS server";
         }
         else {
             $why = "unfulfilled requirements";
@@ -1170,9 +1203,9 @@ sub startservers {
         }
         elsif($what eq "ftps") {
             if(!$stunnel || !$ssl_version) {
-                # we can't run https tests without stunnel
+                # we can't run ftps tests without stunnel
                 # or if libcurl is SSL-less
-                return 1;
+                return 3;
             }
             if(!$run{'ftp'}) {
                 $pid = runftpserver($verbose);
@@ -1234,8 +1267,9 @@ sub startservers {
 # Returns:
 # 100 if this is not a test case
 # 99  if this test case has no servers specified
+# 3   if this test is skipped due to no FTPS server
 # 2   if one of the required servers couldn't be started
-# 1   if this test is skipped due to unfulfilled SSL/stunnel-requirements
+# 1   if this test is skipped due to no HTTPS server
 
 sub serverfortest {
     my ($testnum)=@_;
