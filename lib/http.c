@@ -232,11 +232,11 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
         if(co->value && strlen(co->value)) {
           if(0 == count) {
             sendf(data->firstsocket, data,
-                  "Cookie: ");
+                  "Cookie:");
           }
           count++;
           sendf(data->firstsocket, data,
-                "%s=%s;", co->name, co->value);
+                " %s=%s;", co->name, co->value);
         }
         co = co->next; /* next cookie please */
       }
