@@ -546,7 +546,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   else {
     if((-1 != conn->size) && (conn->size != *ftp->bytecountp) &&
        (conn->maxdownload != *ftp->bytecountp)) {
-      failf(data, "Received only partial file");
+      failf(data, "Received only partial file: %d bytes", *ftp->bytecountp);
       return CURLE_PARTIAL_FILE;
     }
     else if(!conn->bits.resume_done &&
@@ -1569,7 +1569,7 @@ CURLcode _ftp(struct connectdata *conn)
         result = _ftp_getsize(conn, ftp->file, &foundsize);
 
         if(CURLE_OK != result) {
-          infof(data, "ftp server doesn't support SIZE");
+          infof(data, "ftp server doesn't support SIZE\n");
           /* We couldn't get the size and therefore we can't know if there
              really is a part of the file left to get, although the server
              will just close the connection when we start the connection so it
@@ -1706,8 +1706,8 @@ CURLcode _ftp(struct connectdata *conn)
 
       /* FTP download: */
       result=Curl_Transfer(conn, conn->secondarysocket, size, FALSE,
-                      bytecountp,
-                      -1, NULL); /* no upload here */
+                           bytecountp,
+                           -1, NULL); /* no upload here */
       if(result)
         return result;
     }
