@@ -1,0 +1,29 @@
+# Server-side
+<reply>
+<data>
+0123456789abcdef
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+FTP with user and no password
+ </name>
+ <command>
+-u user: ftp://%HOSTIP:%FTPPORT/136
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER user
+PASS 
+PWD
+EPSV
+TYPE I
+SIZE 136
+RETR 136
+</protocol>
+</verify>
