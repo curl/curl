@@ -123,6 +123,20 @@ typedef enum {
   CONN_LAST   /* illegal state */
 } ConnState;
 
+#ifdef KRB4
+struct krb4buffer {
+  void *data;
+  size_t size;
+  size_t index;
+  int eof_flag;
+};
+enum protection_level { 
+    prot_clear, 
+    prot_safe, 
+    prot_confidential, 
+    prot_private 
+};
+#endif
 
 /*
  * The connectdata struct contains all fields and variables that should be
@@ -150,6 +164,7 @@ struct connectdata {
 #define PROT_LDAP    (1<<7)
 #define PROT_FILE    (1<<8)
 
+  char *hostent_buf; /* pointer to allocated memory for name info */
   struct hostent *hp;
   struct sockaddr_in serv_addr;
   char proto[64];
@@ -188,6 +203,20 @@ struct connectdata {
                             the same we read from. -1 disables */
   long *writebytecountp; /* return number of bytes written or NULL */
 
+
+#ifdef KRB4
+
+  enum protection_level command_prot;
+  enum protection_level data_prot;
+  enum protection_level request_data_prot;
+
+  size_t buffer_size;
+
+  struct krb4buffer in_buffer, out_buffer;
+  int sec_complete;
+  void *app_data;
+
+#endif
 };
 
 struct Progress {
@@ -271,6 +300,7 @@ struct Configbits {
   bool user_passwd;
   bool verbose;
   bool this_is_a_follow; /* this is a followed Location: request */
+  bool krb4; /* kerberos4 connection requested */
 };
 
 /* What type of interface that intiated this struct */
@@ -446,6 +476,11 @@ struct UrlData {
   char *ptr_ref; /* free later if not NULL! */
   char *ptr_cookie; /* free later if not NULL! */
   char *ptr_host; /* free later if not NULL */
+
+  char *krb4_level;
+#ifdef KRB4
+  FILE *cmdchannel;
+#endif
 };
 
 #define LIBCURL_NAME "libcurl"
