@@ -1,0 +1,73 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+HTTP RFC1867-type formposting with filename= and type=
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/we/want/39 -F name=daniel -F tool=curl -F "file=@log/test39.txt;filename=fakerfile;type=moo/foobar" -F file2=@log/test39.txt
+</command>
+# We create this file before the command is invoked!
+<file name="log/test39.txt">
+foo bar
+This is a bar foo
+bar
+foo
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^(User-Agent:|Content-Type: multipart/form-data;|--curl).*
+</strip>
+<protocol>
+POST /we/want/39 HTTP/1.1
+User-Agent: curl/7.9.5 (sparc-sun-solaris2.7) libcurl 7.9.5 (OpenSSL 0.9.6c) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Content-Length: 553
+Expect: 100-continue
+Content-Type: multipart/form-data; boundary=curl4T+HO20DMiXx0k2FI9gR0lqf7C/
+
+--curl4T+HO20DMiXx0k2FI9gR0lqf7C/
+Content-Disposition: form-data; name="name"
+
+daniel
+--curl4T+HO20DMiXx0k2FI9gR0lqf7C/
+Content-Disposition: form-data; name="tool"
+
+curl
+--curl4T+HO20DMiXx0k2FI9gR0lqf7C/
+Content-Disposition: form-data; name="file"; filename="fakerfile"
+Content-Type: moo/foobar
+
+foo bar
+This is a bar foo
+bar
+foo
+
+--curl4T+HO20DMiXx0k2FI9gR0lqf7C/
+Content-Disposition: form-data; name="file2"; filename="log/test39.txt"
+Content-Type: text/plain
+
+foo bar
+This is a bar foo
+bar
+foo
+
+--curl4T+HO20DMiXx0k2FI9gR0lqf7C/--
+</protocol>
+</verify>
