@@ -24,14 +24,16 @@ About this Document
 Building
 
   There are many different ways to build C programs. This chapter will assume
-  a unix-style build process
+  a unix-style build process. If you use a different build system, you can
+  still read this to get general information that may apply to your
+  environment as well.
 
   Compiling the Program
 
     Your compiler needs to know where the libcurl headers are
     located. Therefore you must set your compiler's include path to point to
-    the directory where you installed them. The 'curl-config' tool can be used
-    to get this information:
+    the directory where you installed them. The 'curl-config'[3] tool can be
+    used to get this information:
 
         $ curl-config --cflags
 
@@ -60,6 +62,17 @@ Building
     And if SSL is supported, the keyword 'SSL' will be written to stdout,
     possibly together with a few other features that can be on and off on
     different libcurls.
+
+
+Portable Code in a Portable World
+
+ The people behind libcurl have put a considerable effort to make libcurl work
+ on a large amount of different operating systems and environments.
+
+ You program libcurl the same way on all platforms that libcurl runs on. There
+ are only very few minor considerations that differs. If you just make sure to
+ write your code portable enough, you may very well create yourself a very
+ portable program. libcurl shouldn't stop you from that.
 
 
 Global Preparation
@@ -150,6 +163,19 @@ Handle the easy libcurl
  and the function that gets invoked by libcurl. libcurl itself won't touch the
  data you pass with CURLOPT_FILE.
 
+ libcurl offers its own default internal callback that'll take care of the
+ data if you don't set the callback with CURLOPT_WRITEFUNCTION. It will then
+ simply output the received data to stdout. You can have the default callback
+ write the data to a different file handle by passing a 'FILE *' to a file
+ opened for writing with the CURLOPT_FILE option.
+
+ Now, we need to take a step back and have a deep breath. Here's one of those
+ rare platform-dependent nitpicks. Did you spot it? On some platforms[2],
+ libcurl won't be able to operate on files opened by the program. Thus, if you
+ use the default callback and pass in a an open file with CURLOPT_FILE, it
+ will crash. You should therefore avoid this to make your program run fine
+ virtually everywhere.
+
  There are of course many more options you can set, and we'll get back to a
  few of them later. Let's instead continue to the actual transfer:
 
@@ -173,6 +199,7 @@ Handle the easy libcurl
  you intend to make another transfer. libcurl will then attempt to re-use the
  previous
 
+
 When It Doesn't Work
 
  There will always be times when the transfer fails for some reason. You might
@@ -187,6 +214,14 @@ When It Doesn't Work
  received output to study is also a clever way to get a better understanding
  wht the server behaves the way it does. Include headers in the normal body
  output with CURLOPT_HEADER set TRUE.
+
+ Of course there are bugs left. We need to get to know about them to be able
+ to fix them, so we're quite dependent on your bug reports! When you do report
+ suspected bugs in libcurl, please include as much details you possibly can: a
+ protocol dump that CURLOPT_VERBOSE produces, library version, as much as
+ possible of your code that uses libcurl, operating system name and version,
+ compiler name and version etc.
+
 
 Upload Data to a Remote Site
 
@@ -231,6 +266,19 @@ Upload Data to a Remote Site
  fast as possible. The callback should return the number of bytes it wrote in
  the buffer. Returning 0 will signal the end of the upload.
 
+
+Passwords
+
+ Many protocols use or even require that user name and password are provided
+ to be able to download or upload the data of your choice. libcurl offers
+ several ways to specify them.
+
+  [ URL, options, callback ]
+
+
+Showing Progress
+
+
 libcurl with C++
 
  There's basicly only one thing to keep in mind when using C++ instead of C
@@ -253,6 +301,16 @@ libcurl with C++
  any "this" pointer available etc.
 
 
+Security Considerations
+
+
+Certificates and Other SSL Tricks
+
+
+Future
+
+
+
 -----
 Footnotes:
 
@@ -260,3 +318,11 @@ Footnotes:
       but libcurl does not support the chunked transfers on uploading that is
       necessary for this feature to work. We'd gratefully appreciate patches
       that bring this functionality...
+
+[2] = This happens on Windows machines when libcurl is built and used as a
+      DLL. However, you can still do this on Windows if you link with a static
+      library.
+
+[3] = The curl-config tool is generated at build-time (on unix-like systems)
+      and should be installed with the 'make install' or similar instruction
+      that installs the library, header files, man pages etc.
