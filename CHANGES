@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (10 December)
+- Dominick Meglio made configure --enable-ares support a given path to the
+  installed ares lib, instead of always using it in the curl source tree.
+  This also fixed the curl-config --libs output.
+
 Daniel (8 December)
 - Fixed the flaw that made -lz appear twice on the link command line.
 
