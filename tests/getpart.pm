@@ -138,10 +138,6 @@ sub compareparts {
  my $sizefirst=scalar(@$firstref);
  my $sizesecond=scalar(@$secondref);
 
- if($sizefirst != $sizesecond) {
-     return -1;
- }
-
  for(1 .. $sizefirst) {
      my $index = $_ - 1;
      if($firstref->[$index] ne $secondref->[$index]) {
