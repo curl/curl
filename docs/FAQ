@@ -1,4 +1,4 @@
-Updated: October 18, 2000 (http://curl.haxx.se/docs/faq.shtml)
+Updated: October 27, 2000 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -43,6 +43,8 @@ FAQ
    4.5.4 "404 Not Found"
    4.5.5 "405 Method Not Allowed"
   4.6 Can you tell me what error code 142 means?
+  4.7 How do I keep usernames and passwords secret in Curl command lines?
+  4.8 I found a bug!
 
  5. libcurl Issues
   5.1 Is libcurl thread safe?
@@ -63,7 +65,8 @@ FAQ
 
   cURL (or simply just 'curl') is a command line tool for getting or sending
   files using URL syntax. The name is a play on 'Client for URLs', originally
-  with URL spelled in uppercase to make it obvious it deals with URLs.
+  with URL spelled in uppercase to make it obvious it deals with URLs. The
+  fact it can also be pronounced 'see URL' also helped.
 
   Curl supports a range of common internet protocols, currently including
   HTTP, HTTPS, FTP, GOPHER, LDAP, DICT and FILE.
@@ -76,7 +79,7 @@ FAQ
   transfer library.
 
   Any application is free to use libcurl, even commercial or closed-source
-  ones. Just make sure changes to the lib itself is made public.
+  ones. Just make sure changes to the lib itself are made public.
 
   1.3 What is cURL not?
   
@@ -97,7 +100,7 @@ FAQ
   or with PHP.
 
   Curl is not a single-OS program. Curl exists, compiles, builds and runs
-  under a long range of operating systems, including all modern Unixes,
+  under a wide range of operating systems, including all modern Unixes,
   Windows, Amiga, BeOS, OS/2, OS X, QNX etc.
 
   1.4 When will you make curl do XXXX ?
@@ -135,7 +138,7 @@ FAQ
 
   This may be because of several reasons.
 
-  2.1.1. native linker doesn't find openssl
+    2.1.1. native linker doesn't find openssl
 
     Affected platforms:
       Solaris (native cc compiler)
@@ -157,7 +160,7 @@ FAQ
 
     Solution submitted by: Bob Allison <allisonb@users.sourceforge.net>
 
-  2.1.2. only the libssl lib is missing
+    2.1.2. only the libssl lib is missing
 
     If all include files and the libcrypto lib is present, with only the
     libssl being missing according to configure, this is mostly likely because
@@ -192,7 +195,6 @@ FAQ
 
   No. Nobody has wanted it that badly yet. I would appriciate patches that
   brings this functionality.
-
 
 
 3. Usage problems
@@ -325,26 +327,26 @@ FAQ
   RFC2616 clearly explains the return codes. I'll make a short transcript
   here. Go read the RFC for exact details:
 
-  4.5.1 "400 Bad Request"
+    4.5.1 "400 Bad Request"
 
     The request could not be understood by the server due to malformed
     syntax. The client SHOULD NOT repeat the request without modifications.
 
-  4.5.2 "401 Unauthorized"
+    4.5.2 "401 Unauthorized"
 
     The request requires user authentication.
 
-  4.5.3 "403 Forbidden"
+    4.5.3 "403 Forbidden"
 
     The server understood the request, but is refusing to fulfill it.
     Authorization will not help and the request SHOULD NOT be repeated.
 
-  4.5.4 "404 Not Found"
+    4.5.4 "404 Not Found"
 
     The server has not found anything matching the Request-URI. No indication
     is given of whether the condition is temporary or permanent.
 
-  4.5.5 "405 Method Not Allowed"
+    4.5.5 "405 Method Not Allowed"
 
     The method specified in the Request-Line is not allowed for the resource
     identified by the Request-URI. The response MUST include an Allow header
@@ -353,9 +355,9 @@ FAQ
   4.6. Can you tell me what error code 142 means?
 
   All error codes that are larger than the highest documented error code means
-  that curl has existed due to a timeout. There is currentl no nice way for
+  that curl has existed due to a timeout. There is currently no nice way for
   curl to abort from such a condition and that's why it gets this undocumented
-  error. This is planned to change in a future release.
+  error. This should be changed in releases after 7.4.1.
 
   4.7. How do I keep usernames and passwords secret in Curl command lines?
 
@@ -371,15 +373,30 @@ FAQ
   at least hide them from being read by human eyes, but that is not what
   anyone would call security.
 
+  4.8 I found a bug!
+
+  It is not a bug if the behaviour is documented. Read the docs first.
+
+  If it is a problem with a binary you've downloaded or a package for your
+  particular platform, try contacting the person who built the package/archive
+  you have.
+
+  If there is a bug, post a bug report in the Curl Bug Track System over at
+  http://sourceforge.net/bugs/?group_id=976 or mail a detailed bug description
+  to curl-bug@haxx.se.
+
+  Always include as many details you can think of, including curl version,
+  operating system name and version and complete instructions how to repeat
+  the bug.
+
 
 5. libcurl Issues
 
   5.1. Is libcurl thread safe?
 
-  As version seven is slowly marching in as the libcurl version to use, we
-  have made a serious attempt to address all places in the code where we could
-  forsee problems for multi-threaded programs. If your system has them, curl
-  will attempt to use threadsafe functions instead of non-safe ones.
+  We have attempted to write the entire code adjusted for multi-threaded
+  programs. If your system has such, curl will attempt to use threadsafe
+  functions instead of non-safe ones.
 
   I am very interested in once and for all getting some kind of report or
   README file from those who have used libcurl in a threaded environment,
@@ -388,10 +405,11 @@ FAQ
 6. License Issues
 
   Curl and libcurl are released under the MPL, the Mozilla Public License. To
-  get a really good answer to this or other licensing questions, you should
+  get a really good answer to your license conflict questions, you should
   study the MPL license and the license you are about to use and check for
-  clashes yourself. This is a brief summary for the cases we get the most
-  questions. (Parts of this section was enhanced by Bjorn Reese.)
+  clashes yourself. This section is just a brief summary for the cases we get
+  the most questions. (Parts of this section was much enhanced by Bjorn
+  Reese.)
 
   6.1. I have a GPL program, can I use the libcurl library?
 
@@ -427,33 +445,33 @@ FAQ
 
   6.2. I have a closed-source program, can I use the libcurl library?
 
-    Yes, libcurl does not put any restrictions on the program that uses the
-    library. If you end up doing changes to the library, only those changes
-    must be made available, not the ones to your program.
+  Yes, libcurl does not put any restrictions on the program that uses the
+  library. If you end up doing changes to the library, only those changes must
+  be made available, not the ones to your program.
 
   6.3. I have a BSD licensed program, can I use the libcurl library?
 
-    Yes, libcurl does not put any restrictions on the program that uses the
-    library. If you end up doing changes to the library, only those changes
-    must be made available, not the ones to your program.
+  Yes, libcurl does not put any restrictions on the program that uses the
+  library. If you end up doing changes to the library, only those changes must
+  be made available, not the ones to your program.
 
   6.4. I have a program that uses LGPL libraries, can I use libcurl?
 
-    Yes you can. LGPL libraries don't spread to other libraries the same way
-    GPL ones do.
+  Yes you can. LGPL libraries don't spread to other libraries the same way GPL
+  ones do.
 
-    However, when you read paragraph (3) of the LGPL license, you'll see that
-    anyone - at will - may at any time convert that LGPL program into GPL. And
-    GPL programs can't be distributed together with MPL programs, neither with
-    (lib)curl source code and not as a binary.
+  However, when you read paragraph (3) of the LGPL license, you'll see that
+  anyone - at will - may at any time convert that LGPL program into GPL. And
+  GPL programs can't be distributed together with MPL programs, neither with
+  (lib)curl source code and not as a binary.
 
   6.5. Can I modify curl/libcurl for my program and keep the changes secret?
 
-    No, you're not allowed to do that.
+  No, you're not allowed to do that.
 
   6.6. Can you please change the curl/libcurl license to XXXX?
 
-    No. We carefully picked this license years ago and a large amount of
-    people have contributed with source code knowing that this is the license
-    we use. This license puts the restrictions we want on curl/libcurl and it
-    does not spread to other programs or libraries that use it.
+  No. We carefully picked this license years ago and a large amount of people
+  have contributed with source code knowing that this is the license we
+  use. This license puts the restrictions we want on curl/libcurl and it does
+  not spread to other programs or libraries that use it.
