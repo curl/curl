@@ -58,9 +58,9 @@ Commenting
 
  Comment your source code extensively using C comments (/* comment */), DO NOT
  use C++ comments (// this style). Commented code is quality code and enables
- future modifications much more. Uncommented code much more risk being
- completely replaced when someone wants to extend things, since other persons'
- source code can get quite hard to read.
+ future modifications much more. Uncommented code risk having to be completely
+ replaced when someone wants to extend things, since other persons' source
+ code can get quite hard to read.
 
 General Style
 
@@ -128,7 +128,7 @@ Test Cases
  improve it, all new features and functions that are added need to be tested
  in the test suite. Every feature that is added should get at least one valid
  test case that verifies that it works as documented. If every submitter also
- post a few test cases, it won't end up as a heavy burden on a single person!
+ posts a few test cases, it won't end up as a heavy burden on a single person!
 
 How To Make a Patch
 
