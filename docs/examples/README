@@ -44,6 +44,8 @@ ftpgetresp.c   - get the response strings from the FTP server
 ftpupload.c    - upload a file to a FTP server
 getinfo.c      - get the Content-Type from the recent transfer
 getinmemory.c  - download a file to memory only
+htmltitle.cc   - download a HTML file and extract the <title> tag from a HTML
+                 page using libxml
 http-post.c    - HTTP POST
 httpput.c      - HTTP PUT a local file
 https.c        - simple HTTPS transfer
