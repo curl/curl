@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "29 Aug 2001" "Curl 7.9" "Curl Manual"
+.TH curl 1 "5 Sep 2001" "Curl 7.9" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -453,6 +453,12 @@ FTP range downloads only support the simple syntax 'start-stop' (optionally
 with one of the numbers omitted). It depends on the non-RFC command SIZE.
 
 If this option is used several times, the last one will be used.
+.IP "-R/--remote-time"
+When used, this will make libcurl attempt to figure out the timestamp of the
+remote file, and if that is available make the local file get that same
+timestamp.
+
+If this option is used twice, the second time disables this again.
 .IP "-s/--silent"
 Silent mode. Don't show progress meter or error messages.  Makes
 Curl mute.
