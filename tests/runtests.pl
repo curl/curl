@@ -338,7 +338,7 @@ sub runhttpserver {
     if ( $data =~ /WE ROOLZ: (\d+)/ ) {
         $pid = 0+$1;
     }
-    elsif($data) {
+    elsif($data || ($res != 7)) {
         print "RUN: Unknown HTTP server is running on port $HOSTPORT\n";
         return -2;
     }
