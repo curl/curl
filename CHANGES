@@ -6,6 +6,26 @@
 
                                History of Changes
 
+Daniel (20 June 2000)
+- As Eetu Ojanen suggested, I finally took the step and now libcurl no longer
+  makes a POST after it has followed a location. When the initial POST has
+  been done, it'll turned into a GET for the further requests. This is only
+  interesting when using -L/--location *and* doing a POST at the same time.
+
+  While messing with this, I added another weird feature I call 'auto
+  referer'. If you append ';auto' to the right of a given referer string (or
+  only use that string as referer), libcurl will automatically set the
+  previoud URL as refered when it follows a Location: and gets a succeeding
+  document.
+
+- My hero Rich Gray found the very obscure FTP bug that happened to him only
+  when passing through a particular firewall and using the PORT command. It
+  turned out that PORT was the only command in the lib/ftp.c source that
+  didn't send a proper \r\n sequence but instead used the faulty \n which as
+  it seemed is supported by most major ftp servers... :-O
+
+Version 7.0.7beta
+
 Daniel (16 June 2000)
 - I had avoided this long enough now, so I moved the alternative progress bar
   stuff from the lib and added it to the client code. This is now using the
