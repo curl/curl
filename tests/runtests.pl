@@ -1013,9 +1013,6 @@ sub singletest {
 
         $cmdargs .= " <$stdinfile";
     }
-    if($valgrind) {
-        $cmdargs .= " 3>log/valgrind$testnum";
-    }
     my $CMDLINE;
 
     if(!$tool) {
@@ -1024,6 +1021,10 @@ sub singletest {
     else {
         $CMDLINE="$LIBDIR/$tool";
         $DBGCURL=$CMDLINE;
+    }
+
+    if($valgrind) {
+        $CMDLINE = "exec 3>log/valgrind$testnum && $CMDLINE";
     }
 
     $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
