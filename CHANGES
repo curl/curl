@@ -6,6 +6,50 @@
 
                                History of Changes
 
+Daniel (20 November 2000)
+- Made libcurl capable of dealing with any-length URLs. The former limit of
+  4096 bytes was a bit annoying when people wanted to use curl to really make
+  life tough on a web server. Now, the command line limit is the most annoying
+  but that can be circumvented by using a config file.
+
+  NOTE: there is still a 4096-byte limit on URLs extracted from Location:
+  headers.
+
+- Corrected the spelling of 'resolve' in two error messages.
+
+- Alexander Kourakos posted a bug report and a patch that corrected it! It
+  turned out that lynx and wget support lowercase environment variable names
+  where curl only looked for the uppercase versions. Now curl will use the
+  lowercase versions if they exist, but if they don't, it'll use the uppercase
+  versions.
+
+Daniel (17 November 2000)
+- curl_formfree() was added. How come no one missed that one before? I ran the
+  test suite with the malloc debug enabled and got lots of "nice" warnings on
+  memory leaks. The most serious one was this. There were also leaks in the
+  cookie handling, and a few errors when curl failed to connect and similar
+  things. More tests cases were added to cover up and to verify that these
+  problems have been removed.
+
+- Mucho updated config file parser (I'm dead tired of all the bug reports and
+  weird behaviour I get on the former one). It works slightly differently now,
+  although I doubt many people will notice the differences. The main
+  difference being that if you use options that require parameters, they must
+  both be specified on the same line. With this new parser, you can also
+  specify long options without '--' and you may separate options and
+  parameters with : or =. It makes a config file line could look like:
+
+        user-agent = "foobar and something"
+
+  Parameters within quotes may contain spaces. Without quotes, they're
+  expected to be a single non-space word.
+
+  Had to patch the command line argument parser a little to make this work.
+
+- Added --url as an option to allow the URL to be specified this way. It makes
+  way nicer config files. The previous way of specifying URLs in the config
+  file doesn't work anymore.
+
 Daniel (15 November 2000)
 - Using certain characters in usernames or passwords for HTTP authentication
   failed. This was due to the mprintf() that had a silly check for letters,
