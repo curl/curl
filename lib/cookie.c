@@ -638,17 +638,15 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
                                     struct CookieInfo *inc,
                                     bool newsession)
 {
-  char line[MAX_COOKIE_LINE];
   struct CookieInfo *c;
   FILE *fp;
   bool fromfile=TRUE;
 
   if(NULL == inc) {
     /* we didn't get a struct, create one */
-    c = (struct CookieInfo *)malloc(sizeof(struct CookieInfo));
+    c = (struct CookieInfo *)calloc(1, sizeof(struct CookieInfo));
     if(!c)
       return NULL; /* failed to get memory */
-    memset(c, 0, sizeof(struct CookieInfo));
     c->filename = strdup(file?file:"none"); /* copy the name just in case */
   }
   else {
@@ -669,20 +667,25 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
   if(fp) {
     char *lineptr;
     bool headerline;
-    while(fgets(line, MAX_COOKIE_LINE, fp)) {
-      if(checkprefix("Set-Cookie:", line)) {
-        /* This is a cookie line, get it! */
-        lineptr=&line[11];
-        headerline=TRUE;
-      }
-      else {
-        lineptr=line;
-        headerline=FALSE;
-      }
-      while(*lineptr && isspace((int)*lineptr))
-        lineptr++;
 
-      Curl_cookie_add(data, c, headerline, lineptr, NULL, NULL);
+    char *line = (char *)malloc(MAX_COOKIE_LINE);
+    if(line) {
+      while(fgets(line, MAX_COOKIE_LINE, fp)) {
+        if(checkprefix("Set-Cookie:", line)) {
+          /* This is a cookie line, get it! */
+          lineptr=&line[11];
+          headerline=TRUE;
+        }
+        else {
+          lineptr=line;
+          headerline=FALSE;
+        }
+        while(*lineptr && isspace((int)*lineptr))
+          lineptr++;
+
+        Curl_cookie_add(data, c, headerline, lineptr, NULL, NULL);
+      }
+      free(line); /* free the line buffer */
     }
     if(fromfile)
       fclose(fp);
