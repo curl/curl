@@ -11,8 +11,7 @@ struct javacurl {
   struct writecallback {
     jmethodID mid;
     JNIEnv *java;
-    jclass cls;
-    jobject obj;
+    jobject object;
   } write;
 };
 
@@ -89,17 +88,24 @@ static int javacurl_write_callback(void *ptr,
   struct javacurl *curl = (struct javacurl *)stream;
   size_t realsize = size * nmemb;
   JNIEnv *java = curl->write.java;
-  jbyteArray jb;
-  int ret;
+  jbyteArray jb=NULL;
+  int ret=0;
+
+  fprintf(stderr, "%d bytes data received in callback, ptr %p, java =%p\n",
+          realsize, curl, java);
 
   jb=(*java)->NewByteArray(java, realsize);
   (*java)->SetByteArrayRegion(java, jb, 0, 
                               realsize, (jbyte *)ptr);
 
+  fprintf(stderr, "created byte-array\n");
+
   ret = (*java)->CallIntMethod(java,
-                               curl->write.obj,
+                               curl->write.object,
                                curl->write.mid,
                                jb);
+
+  fprintf(stderr, "java-method returned %d\n", ret);
 
   return realsize;
 }
@@ -109,9 +115,9 @@ static int javacurl_write_callback(void *ptr,
  */
 
 JNIEXPORT jint JNICALL Java_CurlGlue_jni_1setopt__IILCurlWrite_2
-  (JNIEnv *java, jobject myself, jint jcurl, jint option, jobject value)
+  (JNIEnv *java, jobject myself, jint jcurl, jint option, jobject object)
 {
-  jclass cls = (*java)->GetObjectClass(java, value);
+  jclass cls = (*java)->GetObjectClass(java, object);
   jmethodID mid;
   struct javacurl *curl = (struct javacurl *)jcurl;
 
@@ -129,10 +135,10 @@ JNIEXPORT jint JNICALL Java_CurlGlue_jni_1setopt__IILCurlWrite_2
     }
     curl->write.mid = mid;
     curl->write.java = java;
-    curl->write.cls = cls;
-    curl->write.obj = value;
+    curl->write.object = object;
 
-    puts("setopt write callback and write file pointer");
+    fprintf(stderr, "setopt write callback and write file pointer %p, java = %p\n",
+            curl, java);
 
     curl_easy_setopt(curl->libcurl, CURLOPT_WRITEFUNCTION,
                      javacurl_write_callback);
