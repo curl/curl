@@ -745,6 +745,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   if (sockfd == CURL_SOCKET_BAD) {
     /* no good connect was made */
     *sockconn = CURL_SOCKET_BAD;
+    failf(data, "couldn't connect to host");
     return CURLE_COULDNT_CONNECT;
   }
 
