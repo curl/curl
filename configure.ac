@@ -1203,7 +1203,10 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
          dnl we only like gcc less than 5.0, since if it is above that it is
          dnl likely just a compiler that looks like gcc (like icc 8.0)!
          dnl here's the standard setup
-         WARN="-W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wno-format-nonliteral -Wundef -Wpointer-arith -Wnested-externs -Wcast-align -Winline -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wsign-compare"
+         WARN="-W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wno-format-nonliteral -Wundef -Wpointer-arith -Wnested-externs -Winline -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wsign-compare"
+
+         dnl -Wcast-align is a bit too annoying ;-)
+
          if test "$gccnum" -ge "296"; then
            dnl gcc 2.96 or later
            WARN="$WARN -Wfloat-equal"
