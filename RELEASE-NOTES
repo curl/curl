@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o the "configure --with-spnego" action was improved
  o fixed a rare follow-redirect problem
  o curl-configure --feature now outputs AsynchDNS if enabled
  o occational re-use of freed-memory problem fixed
@@ -62,7 +63,7 @@ Other curl-related news since the previous public release:
  o stopped the curl.sourceforge.net mirror, it now redirects to curl.haxx.se
  o fresh new curl web mirrors:
    US Texas -      http://curl.cyberservers.net
-   US California - http://curl.mirror.redwire.net
+   US California - http://curl.mirrors.redwire.net
    Germany -       http://curl.mirror.at.stealer.net
    Thailand -      http://curl.siamu.ac.th
 
@@ -75,6 +76,6 @@ advice from friends like these:
  W. Rozycki, Nicolas Croiset, Josh Kapell, Gaz Iqbal, Dave May, Markus
  Moeller, James Clancy, Giuseppe Attardi, swalkaus at yahoo.com, Steve Green,
  Marty Kuhrt, Dominick Meglio, Diego Casorran, David Byron, John McGowan,
- David J Meyer, Dan Fandrich
+ David J Meyer, Dan Fandrich, Pierre
  
         Thanks! (and sorry if I forgot to mention someone)
