@@ -1,5 +1,5 @@
 #include <winver.h>
-#include "../include/curl/curl.h"
+#include "../include/curl/curlver.h"
 
 LANGUAGE  0x09,0x01
 
