@@ -13,7 +13,10 @@ curl_escape - URL encodes the given string
 .SH DESCRIPTION
 This function will convert the given input string to an URL encoded string and
 return that as a new allocated string. All input characters that are not a-z,
-A-Z or 0-9 will be converted to their "URL escaped" version.
+A-Z or 0-9 will be converted to their "URL escaped" version. If a sequence of
+%NN (where NN is a two-digit hexadecimal number) is found in the string to
+encode, that 3-letter combination will be copied to the output unmodifed,
+assuming that it is an already encoded piece of data.
 
 If the 'length' argument is set to 0, curl_escape() will use strlen() on the
 input 'url' string to find out the size.
