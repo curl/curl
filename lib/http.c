@@ -105,6 +105,278 @@
 
 static CURLcode Curl_output_basic_proxy(struct connectdata *conn);
 
+/*
+ * This function checks the linked list of custom HTTP headers for a particular
+ * header (prefix).
+ */
+static char *checkheaders(struct SessionHandle *data, const char *thisheader)
+{
+  struct curl_slist *head;
+  size_t thislen = strlen(thisheader);
+
+  for(head = data->set.headers; head; head=head->next) {
+    if(strnequal(head->data, thisheader, thislen))
+      return head->data;
+  }
+  return NULL;
+}
+
+static CURLcode Curl_output_basic(struct connectdata *conn)
+{
+  char *authorization;
+  struct SessionHandle *data=conn->data;
+
+  sprintf(data->state.buffer, "%s:%s", conn->user, conn->passwd);
+  if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
+                        &authorization) >= 0) {
+    if(conn->allocptr.userpwd)
+      free(conn->allocptr.userpwd);
+    conn->allocptr.userpwd = aprintf( "Authorization: Basic %s\015\012",
+                                      authorization);
+    free(authorization);
+  }
+  else
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
+}
+
+static CURLcode Curl_output_basic_proxy(struct connectdata *conn)
+{
+  char *authorization;
+  struct SessionHandle *data=conn->data;
+
+  sprintf(data->state.buffer, "%s:%s", conn->proxyuser, conn->proxypasswd);
+  if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
+                        &authorization) >= 0) {
+    Curl_safefree(conn->allocptr.proxyuserpwd);
+    conn->allocptr.proxyuserpwd =
+      aprintf("Proxy-authorization: Basic %s\015\012", authorization);
+    free(authorization);
+  }
+  else
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
+}
+
+void Curl_http_auth_act(struct connectdata *conn)
+{
+  struct SessionHandle *data = conn->data;
+
+  if(data->state.authavail) {
+    if(data->state.authavail & CURLAUTH_GSSNEGOTIATE)
+      data->state.authwant = CURLAUTH_GSSNEGOTIATE;
+    else if(data->state.authavail & CURLAUTH_DIGEST)
+      data->state.authwant = CURLAUTH_DIGEST;
+    else if(data->state.authavail & CURLAUTH_NTLM)
+      data->state.authwant = CURLAUTH_NTLM;
+    else if(data->state.authavail & CURLAUTH_BASIC)
+      data->state.authwant = CURLAUTH_BASIC;
+    else
+      data->state.authwant = CURLAUTH_NONE; /* none */
+
+    if(data->state.authwant)
+      conn->newurl = strdup(data->change.url); /* clone string */
+    
+    data->state.authavail = CURLAUTH_NONE; /* clear it here */
+  }
+}
+
+/*
+ * Setup the authentication headers for the host/proxy and the correct
+ * authentication method.
+ */
+
+CURLcode http_auth_headers(struct connectdata *conn,
+                           char *request,
+                           char *path)
+{
+  CURLcode result = CURLE_OK;
+  struct SessionHandle *data = conn->data;
+
+  if(!data->state.authstage) {
+    if(conn->bits.httpproxy && conn->bits.proxy_user_passwd)
+      Curl_http_auth_stage(data, 407);
+    else
+      Curl_http_auth_stage(data, 401);
+  }
+
+  /* To prevent the user+password to get sent to other than the original
+     host due to a location-follow, we do some weirdo checks here */
+  if(!data->state.this_is_a_follow ||
+     !data->state.auth_host ||
+     curl_strequal(data->state.auth_host, conn->hostname) ||
+     data->set.http_disable_hostname_check_before_authentication) {
+
+  /* Send proxy authentication header if needed */
+    if (data->state.authstage == 407) {
+#ifdef USE_SSLEAY
+      if(data->state.authwant == CURLAUTH_NTLM) {
+        result = Curl_output_ntlm(conn, TRUE);
+        if(result)
+          return result;
+      }
+      else
+#endif
+      if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
+         conn->bits.proxy_user_passwd &&
+         !checkheaders(data, "Proxy-authorization:")) {
+        result = Curl_output_basic_proxy(conn);
+        if(result)
+          return result;
+        /* Switch to web authentication after proxy authentication is done */
+        Curl_http_auth_stage(data, 401);
+      }
+    }
+    /* Send web authentication header if needed */
+    if (data->state.authstage == 401) {
+#ifdef GSSAPI
+      if((data->state.authwant == CURLAUTH_GSSNEGOTIATE) &&
+         data->state.negotiate.context && 
+         !GSS_ERROR(data->state.negotiate.status)) {
+        result = Curl_output_negotiate(conn);
+        if (result)
+          return result;
+      }
+      else
+#endif
+#ifdef USE_SSLEAY
+      if(data->state.authwant == CURLAUTH_NTLM) {
+        result = Curl_output_ntlm(conn, FALSE);
+        if(result)
+          return result;
+      }
+      else
+#endif
+      {
+        if((data->state.authwant == CURLAUTH_DIGEST) &&
+           data->state.digest.nonce) {
+          result = Curl_output_digest(conn,
+                                      (unsigned char *)request,
+                                      (unsigned char *)path);
+          if(result)
+            return result;
+        }
+        else if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
+                conn->bits.user_passwd &&
+                !checkheaders(data, "Authorization:")) {
+          result = Curl_output_basic(conn);
+          if(result)
+            return result;
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+
+/*
+ * Curl_http_auth() deals with Proxy-Authenticate: and WWW-Authenticate:
+ * headers. They are dealt with both in the transfer.c main loop and in the
+ * proxy CONNECT loop.
+ */
+
+CURLcode Curl_http_auth(struct connectdata *conn,
+                        int httpcode,
+                        char *header) /* pointing to the first non-space */
+{
+  /*
+   * This resource requires authentication
+   */
+  struct SessionHandle *data = conn->data;
+
+  char *start = (httpcode == 407) ? 
+    header+strlen("Proxy-authenticate:"): 
+    header+strlen("WWW-Authenticate:");
+  /*
+   * Switch from proxy to web authentication and back if needed
+   */
+  if (httpcode == 407 && data->state.authstage != 407)
+    Curl_http_auth_stage(data, 407);
+              
+  else if (httpcode == 401 && data->state.authstage != 401)
+    Curl_http_auth_stage(data, 401);
+
+  /* pass all white spaces */
+  while(*start && isspace((int)*start))
+    start++;
+
+#ifdef GSSAPI
+  if (checkprefix("GSS-Negotiate", start)) {
+    if(data->state.authwant == CURLAUTH_GSSNEGOTIATE) {
+      /* if exactly this is wanted, go */
+      int neg = Curl_input_negotiate(conn, start);
+      if (neg == 0)
+        conn->newurl = strdup(data->change.url);
+    }
+    else
+      if(data->state.authwant & CURLAUTH_GSSNEGOTIATE)
+        data->state.authavail |= CURLAUTH_GSSNEGOTIATE;
+  }
+  else
+#endif
+#ifdef USE_SSLEAY
+    /* NTLM support requires the SSL crypto libs */
+    if(checkprefix("NTLM", start)) {
+      if(data->state.authwant == CURLAUTH_NTLM) {
+        /* NTLM authentication is activated */
+        CURLntlm ntlm =
+          Curl_input_ntlm(conn, (bool)(httpcode == 407), start);
+                  
+        if(CURLNTLM_BAD != ntlm)
+          conn->newurl = strdup(data->change.url); /* clone string */
+        else
+          infof(data, "Authentication problem. Ignoring this.\n");
+      }
+      else
+        if(data->state.authwant & CURLAUTH_NTLM)
+          data->state.authavail |= CURLAUTH_NTLM;
+    }
+    else
+#endif
+      if(checkprefix("Digest", start)) {
+        if(data->state.authwant == CURLAUTH_DIGEST) {
+          /* Digest authentication is activated */
+          CURLdigest dig = CURLDIGEST_BAD;
+
+          if(data->state.digest.nonce)
+            infof(data, "Authentication problem. Ignoring this.\n");
+          else
+            dig = Curl_input_digest(conn, start);
+          
+          if(CURLDIGEST_FINE == dig)
+            /* We act on it. Store our new url, which happens to be
+               the same one we already use! */
+            conn->newurl = strdup(data->change.url); /* clone string */
+        }
+        else
+          if(data->state.authwant & CURLAUTH_DIGEST) {
+            /* We don't know if Digest is what we're gonna use, but we
+               call this function anyway to store the digest data that
+               is provided on this line, to skip the extra round-trip
+               we need to do otherwise. We must sure to free this
+               data! */
+            Curl_input_digest(conn, start);
+            data->state.authavail |= CURLAUTH_DIGEST;
+          }
+      }
+      else if(checkprefix("Basic", start)) {
+        if((data->state.authwant == CURLAUTH_BASIC) && (httpcode == 401)) {
+          /* We asked for Basic authentication but got a 401 back
+             anyway, which basicly means our name+password isn't
+             valid. */
+          data->state.authavail = CURLAUTH_NONE;
+          infof(data, "Authentication problem. Ignoring this.\n");
+        }
+        else if(data->state.authwant & CURLAUTH_BASIC) {
+          data->state.authavail |= CURLAUTH_BASIC;
+        }
+      }
+  return CURLE_OK;
+}
+
+
 /* fread() emulation to provide POST and/or request data */
 static int readmoredata(char *buffer,
                         size_t size,
@@ -384,22 +656,6 @@ Curl_compareheader(char *headerline,    /* line to check */
 }
 
 /*
- * This function checks the linked list of custom HTTP headers for a particular
- * header (prefix).
- */
-static char *checkheaders(struct SessionHandle *data, const char *thisheader)
-{
-  struct curl_slist *head;
-  size_t thislen = strlen(thisheader);
-
-  for(head = data->set.headers; head; head=head->next) {
-    if(strnequal(head->data, thisheader, thislen))
-      return head->data;
-  }
-  return NULL;
-}
-
-/*
  * ConnectHTTPProxyTunnel() requires that we're connected to a HTTP proxy. This
  * function will issue the necessary commands to get a seamless tunnel through
  * this proxy. After that, the socket can be used just as a normal socket.
@@ -407,9 +663,10 @@ static char *checkheaders(struct SessionHandle *data, const char *thisheader)
 
 CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
                                      int tunnelsocket,
-                                     char *hostname, int remote_port)
+                                     char *hostname,
+                                     int remote_port)
 {
-  int httperror=0;
+  int httpcode=0;
   int subversion=0;
   struct SessionHandle *data=conn->data;
   CURLcode result;
@@ -425,6 +682,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   fd_set rkeepfd;
   fd_set readfd;
   char *line_start;
+  char *host_port;
 
 #define SELECT_OK      0
 #define SELECT_ERROR   1
@@ -433,137 +691,168 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
 
   infof(data, "Establish HTTP proxy tunnel to %s:%d\n", hostname, remote_port);
 
-  /*
-   * This code currently only supports Basic authentication for this CONNECT
-   * request to a proxy.
-   */
-  if(conn->bits.proxy_user_passwd)
-    Curl_output_basic_proxy(conn);
-
-  /* OK, now send the connect request to the proxy */
-  result =
-    Curl_sendf(tunnelsocket, conn,
-               "CONNECT %s:%d HTTP/1.0\015\012"
-               "%s"
-               "%s"
-               "\r\n",
-               hostname, remote_port,
-               (conn->bits.proxy_user_passwd)?conn->allocptr.proxyuserpwd:"",
-               (data->set.useragent?conn->allocptr.uagent:"")
-               );
-  if(result) {
-    failf(data, "Failed sending CONNECT to proxy");
-    return result;
-  }
-
-  /* Now, read the full reply we get from the proxy */
-
-
-  if(data->set.timeout) {
-    /* if timeout is requested, find out how much remaining time we have */
-    timeout = data->set.timeout - /* timeout time */
-      Curl_tvdiff(Curl_tvnow(), conn->now)/1000; /* spent time */
-    if(timeout <=0 ) {
-      failf(data, "Transfer aborted due to timeout");
-      return -SELECT_TIMEOUT; /* already too little time */
+  do {
+    if(conn->newurl) {
+      /* This only happens if we've looped here due to authentication reasons,
+         and we don't really use the newly cloned URL here then. Just free()
+         it. */
+      free(conn->newurl); 
+      conn->newurl = NULL;
     }
-  }
 
-  FD_ZERO (&readfd);		/* clear it */
-  FD_SET (tunnelsocket, &readfd);     /* read socket */
+    host_port = aprintf("%s:%d", hostname, remote_port);
+    if(!host_port)
+      return CURLE_OUT_OF_MEMORY;
 
-  /* get this in a backup variable to be able to restore it on each lap in the
-     select() loop */
-  rkeepfd = readfd;
+    /* Setup the proxy-authorization header, if any */
+    result = http_auth_headers(conn, (char *)"CONNECT", host_port);
+    if(CURLE_OK == result) {
 
-  ptr=data->state.buffer;
-  line_start = ptr;
+      /* OK, now send the connect request to the proxy */
+      result =
+        Curl_sendf(tunnelsocket, conn,
+                   "CONNECT %s:%d HTTP/1.0\015\012"
+                   "%s"
+                   "%s"
+                   "\r\n",
+                   hostname, remote_port,
+                   conn->bits.proxy_user_passwd?
+                   conn->allocptr.proxyuserpwd:"",
+                   data->set.useragent?conn->allocptr.uagent:""
+                   );
+      if(result)
+        failf(data, "Failed sending CONNECT to proxy");
+    }
+    free(host_port);
+    if(result)
+      return result;
 
-  nread=0;
-  perline=0;
-  keepon=TRUE;
+    FD_ZERO (&readfd);		/* clear it */
+    FD_SET (tunnelsocket, &readfd);     /* read socket */
 
-  while((nread<BUFSIZE) && (keepon && !error)) {
-    readfd = rkeepfd;		   /* set every lap */
-    interval.tv_sec = timeout;
-    interval.tv_usec = 0;
+    /* get this in a backup variable to be able to restore it on each lap in
+       the select() loop */
+    rkeepfd = readfd;
 
-    switch (select (tunnelsocket+1, &readfd, NULL, NULL, &interval)) {
-    case -1: /* select() error, stop reading */
-      error = SELECT_ERROR;
-      failf(data, "Transfer aborted due to select() error");
-      break;
-    case 0: /* timeout */
-      error = SELECT_TIMEOUT;
-      failf(data, "Transfer aborted due to timeout");
-      break;
-    default:
-      /*
-       * This code previously didn't use the kerberos sec_read() code
-       * to read, but when we use Curl_read() it may do so. Do confirm
-       * that this is still ok and then remove this comment!
-       */
-      res= Curl_read(conn, tunnelsocket, ptr, BUFSIZE-nread,
-                     &gotbytes);
-      if(res< 0)
-        /* EWOULDBLOCK */
-        continue; /* go loop yourself */
-      else if(res)
-        keepon = FALSE;
-      else if(gotbytes <= 0) {
-        keepon = FALSE;
-        error = SELECT_ERROR;
-        failf(data, "Connection aborted");
-      }
-      else {
-        /* we got a whole chunk of data, which can be anything from one
-         * byte to a set of lines and possibly just a piece of the last
-         * line */
-        int i;
+    ptr=data->state.buffer;
+    line_start = ptr;
 
-        nread += gotbytes;
-        for(i = 0; i < gotbytes; ptr++, i++) {
-          perline++; /* amount of bytes in this line so far */
-          if(*ptr=='\n') {
-            /* a newline is CRLF in ftp-talk, so the CR is ignored as
-               the line isn't really terminated until the LF comes */
+    nread=0;
+    perline=0;
+    keepon=TRUE;
 
-            if('\r' == line_start[0]) {
-              /* end of headers */
-              keepon=FALSE;
-              break; /* breaks out of loop, not switch */
-            }
+    while((nread<BUFSIZE) && (keepon && !error)) {
+      readfd = rkeepfd;     /* set every lap */
+      interval.tv_sec = 1;  /* timeout each second and check the timeout */
+      interval.tv_usec = 0;
 
-            /* output debug output if that is requested */
-            if(data->set.verbose)
-              Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline);
-
-            if(2 == sscanf(line_start, "HTTP/1.%d %d",
-                           &subversion,
-                           &httperror)) {
-              ;
-            }
-
-            perline=0; /* line starts over here */
-            line_start = ptr+1;
-          }
+      if(data->set.timeout) {
+        /* if timeout is requested, find out how much remaining time we have */
+        timeout = data->set.timeout - /* timeout time */
+          Curl_tvdiff(Curl_tvnow(), conn->now)/1000; /* spent time */
+        if(timeout <=0 ) {
+          failf(data, "Proxy connection aborted due to timeout");
+          error = SELECT_TIMEOUT; /* already too little time */
+          break;
         }
       }
-      break;
-    } /* switch */
-  } /* while there's buffer left and loop is requested */
+      
+      switch (select (tunnelsocket+1, &readfd, NULL, NULL, &interval)) {
+      case -1: /* select() error, stop reading */
+        error = SELECT_ERROR;
+        failf(data, "Proxy CONNECT aborted due to select() error");
+        break;
+      case 0: /* timeout */
+        break;
+      default:
+        /*
+         * This code previously didn't use the kerberos sec_read() code
+         * to read, but when we use Curl_read() it may do so. Do confirm
+         * that this is still ok and then remove this comment!
+         */
+        res= Curl_read(conn, tunnelsocket, ptr, BUFSIZE-nread, &gotbytes);
+        if(res< 0)
+          /* EWOULDBLOCK */
+          continue; /* go loop yourself */
+        else if(res)
+          keepon = FALSE;
+        else if(gotbytes <= 0) {
+          keepon = FALSE;
+          error = SELECT_ERROR;
+          failf(data, "Proxy CONNECT aborted");
+        }
+        else {
+          /*
+           * We got a whole chunk of data, which can be anything from one byte
+           * to a set of lines and possibly just a piece of the last line.
+           *
+           * TODO: To make this code work less error-prone, we need to make
+           * sure that we read and create full lines before we compare them,
+           * as there is really nothing that stops the proxy from delivering
+           * the response lines in multiple parts, each part consisting of
+           * only a little piece of the line(s).  */
+          int i;
 
-  if(error)
-    return CURLE_RECV_ERROR;
+          nread += gotbytes;
+          for(i = 0; i < gotbytes; ptr++, i++) {
+            perline++; /* amount of bytes in this line so far */
+            if(*ptr=='\n') {
+              char letter;
+              /* Newlines are CRLF, so the CR is ignored as the line isn't
+                 really terminated until the LF comes */
 
-  data->info.httpproxycode = httperror;
+              if('\r' == line_start[0]) {
+                /* end of response-headers from the proxy */
+                keepon=FALSE;
+                break; /* breaks out of for-loop, not switch() */
+              }
 
-  if(200 != httperror) {
-    if(407 == httperror)
-      /* Added Nov 6 1998 */
-      failf(data, "Proxy requires authorization!");
-    else 
-      failf(data, "Received error code %d from proxy", httperror);
+              /* output debug output if that is requested */
+              if(data->set.verbose)
+                Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline);
+
+              /* keep a backup of the position we are about to blank */
+              letter = line_start[perline];
+              line_start[perline]=0; /* zero terminate the buffer */
+              if((checkprefix("WWW-Authenticate:", line_start) &&
+                  (401 == httpcode)) ||
+                 (checkprefix("Proxy-authenticate:", line_start) &&
+                  (407 == httpcode))) {
+                result = Curl_http_auth(conn, httpcode, line_start);
+                if(result)
+                  return result;
+              }
+              else if(2 == sscanf(line_start, "HTTP/1.%d %d",
+                                  &subversion,
+                                  &httpcode)) {
+                ;
+              }
+              /* put back the letter we blanked out before */
+              line_start[perline]= letter;
+
+              perline=0; /* line starts over here */
+              line_start = ptr+1; /* this skips the zero byte we wrote */
+            }
+          }
+        }
+        break;
+      } /* switch */
+    } /* while there's buffer left and loop is requested */
+
+    if(error)
+      return CURLE_RECV_ERROR;
+
+    /* Deal with the possibly already received authenticate headers. 'newurl'
+       is set to a new URL if we must loop. */
+    Curl_http_auth_act(conn);
+  
+  } while(conn->newurl);
+
+  /* store the HTTP code after the looping is done */
+  data->info.httpproxycode = httpcode;
+
+  if(200 != httpcode) {
+    failf(data, "Received HTTP code %d from proxy after CONNECT", httpcode);
     return CURLE_RECV_ERROR;
   }
   
@@ -575,7 +864,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
 
   Curl_http_auth_stage(data, 401); /* move on to the host auth */
 
-  infof (data, "Proxy replied to CONNECT request\n");
+  infof (data, "Proxy replied OK to CONNECT request\n");
   return CURLE_OK;
 }
 
@@ -667,43 +956,6 @@ CURLcode Curl_http_done(struct connectdata *conn)
   return CURLE_OK;
 }
 
-static CURLcode Curl_output_basic(struct connectdata *conn)
-{
-  char *authorization;
-  struct SessionHandle *data=conn->data;
-
-  sprintf(data->state.buffer, "%s:%s", conn->user, conn->passwd);
-  if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
-                        &authorization) >= 0) {
-    if(conn->allocptr.userpwd)
-      free(conn->allocptr.userpwd);
-    conn->allocptr.userpwd = aprintf( "Authorization: Basic %s\015\012",
-                                      authorization);
-    free(authorization);
-  }
-  else
-    return CURLE_OUT_OF_MEMORY;
-  return CURLE_OK;
-}
-
-static CURLcode Curl_output_basic_proxy(struct connectdata *conn)
-{
-  char *authorization;
-  struct SessionHandle *data=conn->data;
-
-  sprintf(data->state.buffer, "%s:%s", conn->proxyuser, conn->proxypasswd);
-  if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
-                        &authorization) >= 0) {
-    Curl_safefree(conn->allocptr.proxyuserpwd);
-    conn->allocptr.proxyuserpwd =
-      aprintf("Proxy-authorization: Basic %s\015\012", authorization);
-    free(authorization);
-  }
-  else
-    return CURLE_OUT_OF_MEMORY;
-  return CURLE_OK;
-}
-
 void Curl_http_auth_stage(struct SessionHandle *data,
                           int stage)
 {
@@ -729,13 +981,6 @@ CURLcode Curl_http(struct connectdata *conn)
   const char *te = ""; /* tranfer-encoding */
   char *ptr;
   char *request;
-
-  if(!data->state.authstage) {
-    if(conn->bits.httpproxy && conn->bits.proxy_user_passwd)
-      Curl_http_auth_stage(data, 407);
-    else
-      Curl_http_auth_stage(data, 401);
-  }
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -773,72 +1018,10 @@ CURLcode Curl_http(struct connectdata *conn)
     conn->allocptr.uagent=NULL;
   }
 
-  /* To prevent the user+password to get sent to other than the original
-     host due to a location-follow, we do some weirdo checks here */
-  if(!data->state.this_is_a_follow ||
-     !data->state.auth_host ||
-     curl_strequal(data->state.auth_host, conn->hostname) ||
-     data->set.http_disable_hostname_check_before_authentication) {
-
-  /* Send proxy authentication header if needed */
-    if (data->state.authstage == 407) {
-#ifdef USE_SSLEAY
-      if(data->state.authwant == CURLAUTH_NTLM) {
-        result = Curl_output_ntlm(conn, TRUE);
-        if(result)
-          return result;
-      }
-      else
-#endif
-      if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
-         conn->bits.proxy_user_passwd &&
-         !checkheaders(data, "Proxy-authorization:")) {
-        result = Curl_output_basic_proxy(conn);
-        if(result)
-          return result;
-        /* Switch to web authentication after proxy authentication is done */
-        Curl_http_auth_stage(data, 401);
-      }
-    }
-    /* Send web authentication header if needed */
-    if (data->state.authstage == 401) {
-#ifdef GSSAPI
-      if((data->state.authwant == CURLAUTH_GSSNEGOTIATE) &&
-         data->state.negotiate.context && 
-         !GSS_ERROR(data->state.negotiate.status)) {
-        result = Curl_output_negotiate(conn);
-        if (result)
-          return result;
-      }
-      else
-#endif
-#ifdef USE_SSLEAY
-      if(data->state.authwant == CURLAUTH_NTLM) {
-        result = Curl_output_ntlm(conn, FALSE);
-        if(result)
-          return result;
-      }
-      else
-#endif
-      {
-        if((data->state.authwant == CURLAUTH_DIGEST) &&
-           data->state.digest.nonce) {
-          result = Curl_output_digest(conn,
-                                      (unsigned char *)request,
-                                      (unsigned char *)ppath);
-          if(result)
-            return result;
-        }
-        else if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
-                conn->bits.user_passwd &&
-                !checkheaders(data, "Authorization:")) {
-          result = Curl_output_basic(conn);
-          if(result)
-            return result;
-        }
-      }
-    }
-  }
+  /* setup the authentication headers */
+  result = http_auth_headers(conn, request, ppath);
+  if(result)
+    return result;
 
   if((data->change.referer) && !checkheaders(data, "Referer:")) {
     if(conn->allocptr.ref)

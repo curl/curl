@@ -727,100 +727,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 data->info.filetime = k->timeofdoc;
             }
             else if((checkprefix("WWW-Authenticate:", k->p) &&
-                    (401 == k->httpcode)) ||
+                     (401 == k->httpcode)) ||
                     (checkprefix("Proxy-authenticate:", k->p) &&
-                    (407 == k->httpcode))) {
-              /*
-               * This page requires authentication
-               */
-              char *start = (k->httpcode == 407) ? 
-                            k->p+strlen("Proxy-authenticate:"): 
-                            k->p+strlen("WWW-Authenticate:");
-              /*
-               * Switch from proxy to web authentication and back if needed
-               */
-              if (k->httpcode == 407 && data->state.authstage != 407)
-                Curl_http_auth_stage(data, 407);
-              
-              else if (k->httpcode == 401 && data->state.authstage != 401)
-                Curl_http_auth_stage(data, 401);
-
-              /* pass all white spaces */
-              while(*start && isspace((int)*start))
-                start++;
-
-#ifdef GSSAPI
-              if (checkprefix("GSS-Negotiate", start)) {
-                if(data->state.authwant == CURLAUTH_GSSNEGOTIATE) {
-                  /* if exactly this is wanted, go */
-                  int neg = Curl_input_negotiate(conn, start);
-                  if (neg == 0)
-                    conn->newurl = strdup(data->change.url);
-                }
-                else
-                  if(data->state.authwant & CURLAUTH_GSSNEGOTIATE)
-                    data->state.authavail |= CURLAUTH_GSSNEGOTIATE;
-              }
-              else
-#endif
-#ifdef USE_SSLEAY
-            /* NTLM support requires the SSL crypto libs */
-              if(checkprefix("NTLM", start)) {
-                if(data->state.authwant == CURLAUTH_NTLM) {
-                  /* NTLM authentication is activated */
-                  CURLntlm ntlm =
-                    Curl_input_ntlm(conn, (bool)(k->httpcode == 407), start);
-                  
-                  if(CURLNTLM_BAD != ntlm)
-                    conn->newurl = strdup(data->change.url); /* clone string */
-                  else
-                    infof(data, "Authentication problem. Ignoring this.\n");
-                }
-                else
-                  if(data->state.authwant & CURLAUTH_NTLM)
-                    data->state.authavail |= CURLAUTH_NTLM;
-              }
-              else
-#endif
-              if(checkprefix("Digest", start)) {
-                if(data->state.authwant == CURLAUTH_DIGEST) {
-                  /* Digest authentication is activated */
-                  CURLdigest dig = CURLDIGEST_BAD;
-
-                  if(data->state.digest.nonce)
-                    infof(data, "Authentication problem. Ignoring this.\n");
-                  else
-                    dig = Curl_input_digest(conn, start);
-
-                  if(CURLDIGEST_FINE == dig)
-                    /* We act on it. Store our new url, which happens to be
-                       the same one we already use! */
-                    conn->newurl = strdup(data->change.url); /* clone string */
-                }
-                else
-                  if(data->state.authwant & CURLAUTH_DIGEST) {
-                    /* We don't know if Digest is what we're gonna use, but we
-                       call this function anyway to store the digest data that
-                       is provided on this line, to skip the extra round-trip
-                       we need to do otherwise. We must sure to free this
-                       data! */
-                    Curl_input_digest(conn, start);
-                    data->state.authavail |= CURLAUTH_DIGEST;
-                  }
-              }
-              else if(checkprefix("Basic", start)) {
-                if((data->state.authwant == CURLAUTH_BASIC) &&
-                   (k->httpcode == 401)) {
-                  /* We asked for Basic authentication but got a 401 back
-                     anyway, which basicly means our name+password isn't
-                     valid. */
-                  data->state.authavail = CURLAUTH_NONE;
-                  infof(data, "Authentication problem. Ignoring this.\n");
-                }
-                else if(data->state.authwant & CURLAUTH_BASIC) {
-                  data->state.authavail |= CURLAUTH_BASIC;
-                }
-              }
+                     (407 == k->httpcode))) {
+              result = Curl_http_auth(conn, k->httpcode, k->p);
+              if(result)
+                return result;
             }
             else if ((k->httpcode >= 300 && k->httpcode < 400) &&
                      checkprefix("Location:", k->p)) {
@@ -908,25 +820,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                write a piece of the body */
             if(conn->protocol&PROT_HTTP) {
               /* HTTP-only checks */
+
+              /* *auth_act() checks what authentication methods that are
+                 available and decides which one (if any) to use. It will
+                 set 'newurl' if an auth metod was picked. */
+              Curl_http_auth_act(conn);
               
-              if(data->state.authavail) {
-                if(data->state.authavail & CURLAUTH_GSSNEGOTIATE)
-                  data->state.authwant = CURLAUTH_GSSNEGOTIATE;
-                else if(data->state.authavail & CURLAUTH_DIGEST)
-                  data->state.authwant = CURLAUTH_DIGEST;
-                else if(data->state.authavail & CURLAUTH_NTLM)
-                  data->state.authwant = CURLAUTH_NTLM;
-                else if(data->state.authavail & CURLAUTH_BASIC)
-                  data->state.authwant = CURLAUTH_BASIC;
-                else
-                  data->state.authwant = CURLAUTH_NONE; /* none */
-
-                if(data->state.authwant)
-                  conn->newurl = strdup(data->change.url); /* clone string */
-
-                data->state.authavail = CURLAUTH_NONE; /* clear it here */
-              }
-
               if (conn->newurl) {
                 if(conn->bits.close) {
                   /* Abort after the headers if "follow Location" is set
