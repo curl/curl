@@ -50,7 +50,7 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-#ifdef defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>
 #endif
 
