@@ -127,7 +127,7 @@ static CURLcode Curl_output_basic(struct connectdata *conn)
 
   sprintf(data->state.buffer, "%s:%s", conn->user, conn->passwd);
   if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
-                        &authorization) >= 0) {
+                        &authorization) > 0) {
     if(conn->allocptr.userpwd)
       free(conn->allocptr.userpwd);
     conn->allocptr.userpwd = aprintf( "Authorization: Basic %s\015\012",
@@ -147,7 +147,7 @@ static CURLcode Curl_output_basic_proxy(struct connectdata *conn)
   sprintf(data->state.buffer, "%s:%s",
           conn->proxyuser, conn->proxypasswd);
   if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
-                        &authorization) >= 0) {
+                        &authorization) > 0) {
     Curl_safefree(conn->allocptr.proxyuserpwd);
     conn->allocptr.proxyuserpwd =
       aprintf("Proxy-authorization: Basic %s\015\012", authorization);
