@@ -543,11 +543,10 @@ data to figure out the size. This is the large file version of the
 .IP CURLOPT_HTTPPOST
 Tells libcurl you want a multipart/formdata HTTP POST to be made and you
 instruct what data to pass on to the server.  Pass a pointer to a linked list
-of HTTP post structs as parameter.  The linked list should be a fully valid
-list of 'struct HttpPost' structs properly filled in. The best and most
-elegant way to do this, is to use \fIcurl_formadd(3)\fP as documented. The
-data in this list must remain intact until you close this curl handle again
-with \fIcurl_easy_cleanup(3)\fP.
+of curl_httppost structs as parameter. . The easiest way to create such a
+list, is to use \fIcurl_formadd(3)\fP as documented. The data in this list
+must remain intact until you close this curl handle again with
+\fIcurl_easy_cleanup(3)\fP.
 
 Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
 You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
