@@ -5,10 +5,14 @@ beginning.
 
 This release includes the following changes:
 
- o 
+ o curl --socks can be used to set a SOCKS5 proxy to use
+ o response-headers received after a (proxy) CONNECT request are now passd
+   to the header callback just like other headers
 
 This release includes the following bugfixes:
 
+ o fixed the unconditional #include of config.h in hugehelp.c
+ o builds fine on MPE/iX
  o upload using chunked transfer-encoding now sends the last chunk properly
    teriminated with an extra CRLF
  o Fixed the progress meter display for files >2GB
@@ -24,6 +28,7 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Gisle Vanem, Vincent Bronner, Richard Bramante
+ Gisle Vanem, Vincent Bronner, Richard Bramante, Dirk Manske, Dan Fandrich,
+ Ken Hirsch, Stadler Stephan
 
         Thanks! (and sorry if I forgot to mention someone)
