@@ -16,7 +16,7 @@
 int test(char *URL)
 {
   CURL *c;
-  CURLcode ret=CURLE_OK;
+  int ret=0;
   CURLM *m;
   fd_set rd, wr, exc;
   CURLMcode res;
