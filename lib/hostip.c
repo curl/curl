@@ -165,6 +165,7 @@ struct hostent *GetHost(struct UrlData *data,
 #endif
       {
       infof(data, "gethostbyname_r(2) failed for %s\n", hostname);
+      h = NULL; /* set return code to NULL */
     }
 #else
   else {
