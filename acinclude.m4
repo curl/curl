@@ -423,14 +423,18 @@ main () {
     return 0;
 }
 ],
-    dnl if it worked fine
+    GLIBC_STRERROR_R="1"
     AC_DEFINE(HAVE_GLIBC_STRERROR_R, 1, [we have a glibc-style strerror_r()])
     AC_MSG_RESULT([yes]),
-    dnl this didn't work!
-    AC_MSG_RESULT([no])
+    AC_MSG_RESULT([no]),
+    dnl cross-compiling!
+    AC_MSG_NOTICE([cannot determine strerror_r() style: edit lib/config.h manually!])
+    )
 
-    AC_MSG_CHECKING([for a POSIX strerror_r API])
-    AC_TRY_RUN([
+    if test -z "$GLIBC_STRERROR_R"; then
+
+      AC_MSG_CHECKING([for a POSIX strerror_r API])
+      AC_TRY_RUN([
 #include <string.h>
 #include <errno.h>
 int
@@ -445,18 +449,16 @@ main () {
     return 0;
 }
 ],
-    dnl it worked, we have POSIX-style strerror()
-    AC_DEFINE(HAVE_POSIX_STRERROR_R, 1, [we have a POSIX-style strerror_r()])
-    AC_MSG_RESULT([yes]),
-    dnl it failed, we don't have POSIX-style
-    AC_MSG_RESULT([no])
-    ) dnl end of AC_TRY_RUN() for POSIX strerror_r()
+      AC_DEFINE(HAVE_POSIX_STRERROR_R, 1, [we have a POSIX-style strerror_r()])
+      AC_MSG_RESULT([yes]),
+      AC_MSG_RESULT([no]) ,
+      dnl cross-compiling!
+      AC_MSG_NOTICE([cannot determine strerror_r() style: edit lib/config.h manually!])
+    )
 
-    dnl cross-compiling!
-    ,
-    AC_MSG_NOTICE([cannot determine strerror_r() style: edit lib/config.h manually!])
-  ) dnl end of AC_TRY_RUN() for glibc strerror_r()
-  fi
+    fi dnl if not using glibc API
+
+  fi dnl we have a strerror_r
 
 ])
 
