@@ -673,6 +673,7 @@ AC_CHECK_HEADERS( \
         winsock.h \
         time.h \
         io.h \
+        pwd.h
 )
 
 dnl Check for libz header
@@ -746,7 +747,9 @@ AC_CHECK_FUNCS( socket \
                 sigaction \
                 signal \
                 getpass_r \
-                strlcat
+                strlcat \
+                getpwuid \
+                geteuid
 )
 
 dnl removed 'getpass' check on October 26, 2000
