@@ -2158,8 +2158,10 @@ CURLcode Curl_pretransfersec(struct connectdata *conn)
 
   /* secondary connection */
   status = Curl_connect_host(data, &sec_conn);
-  sec_conn->data = data;
-  conn->sec_conn = sec_conn;
+  if(CURLE_OK == status) {
+    sec_conn->data = data;
+    conn->sec_conn = sec_conn;
+  }
 
   return status;
 }
