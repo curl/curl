@@ -365,8 +365,10 @@ _Transfer(struct connectdata *c_conn)
               }
               /* check for Content-Length: header lines to get size */
               if (strnequal("Content-Length", p, 14) &&
-                  sscanf (p+14, ": %ld", &contentlength))
+                  sscanf (p+14, ": %ld", &contentlength)) {
                 conn->size = contentlength;
+                Curl_pgrsSetDownloadSize(data, contentlength);
+              }
               else if (strnequal("Connection: close", p,
                                  strlen("Connection: close"))) {
                 /*
@@ -624,8 +626,6 @@ _Transfer(struct connectdata *c_conn)
 
   return CURLE_OK;
 }
-
-typedef int (*func_T)(void);
 
 CURLcode curl_transfer(CURL *curl)
 {
