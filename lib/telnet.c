@@ -1050,6 +1050,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
   char *buf = data->state.buffer;
   ssize_t nread;
   struct TELNET *tn;
+  struct timeval now;           /* current time */
 
   code = init_telnet(conn);
   if(code)
@@ -1149,9 +1150,13 @@ CURLcode Curl_telnet(struct connectdata *conn)
   keepfd = readfd;
 
   while (keepon) {
-    readfd = keepfd;		/* set this every lap in the loop */
+    struct timeval interval;
 
-    switch (select (sockfd + 1, &readfd, NULL, NULL, NULL)) {
+    readfd = keepfd;		/* set this every lap in the loop */
+    interval.tv_sec = 1;
+    interval.tv_usec = 0;
+
+    switch (select (sockfd + 1, &readfd, NULL, NULL, &interval)) {
     case -1:			/* error, stop reading */
       keepon = FALSE;
       continue;
@@ -1199,10 +1204,20 @@ CURLcode Curl_telnet(struct connectdata *conn)
         }
       }
     }
+    if(data->set.timeout) {
+      now = Curl_tvnow();
+      if(Curl_tvdiff(now, conn->created)/1000 >= data->set.timeout) {
+        failf(data, "Time-out");
+        code = CURLE_OPERATION_TIMEOUTED;
+        keepon = FALSE;
+      }
+    }
   }
 #endif
   /* mark this as "no further transfer wanted" */
-  return Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+  Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
+
+  return code;
 }
 
 /*
