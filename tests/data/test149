@@ -1,0 +1,43 @@
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP with multiple uploads
+ </name>
+ <command>
+-T log/upload148 ftp://%HOSTIP:%FTPPORT/dir1/148 -T log/upload148 ftp://%HOSTIP:%FTPPORT/dir2/148
+</command>
+<file name="log/upload148">
+send away this contents
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+# strip all kinds of PORT, EPRT and LPRT curl can do
+<strip>
+^PORT 127,0,0,1,.*
+^EPRT.*
+^LPRT.*
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+CWD dir1
+EPSV
+TYPE I
+STOR 148
+CWD /nowhere/anywhere
+CWD dir2
+EPSV
+TYPE I
+STOR 148
+</protocol>
+</verify>
