@@ -71,7 +71,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
     while(more) {
       char value[32];
       char content[128];
-      int totlen=0;
+      size_t totlen=0;
 
       while(*header && isspace((int)*header))
         header++;
