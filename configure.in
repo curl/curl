@@ -119,6 +119,8 @@ dnl Checks for header files.
 AC_HEADER_STDC
 AC_CHECK_HEADERS( \
         unistd.h \
+        malloc.h \
+        stdlib.h \
         arpa/inet.h \
         net/if.h \
         netinet/in.h \
@@ -183,7 +185,8 @@ AC_CHECK_FUNCS( socket \
                 getpass \
                 closesocket \
                 setvbuf \
-                RAND_status
+                RAND_status \
+                RAND_screen
 )
 
 
