@@ -26,19 +26,41 @@ $TESTCASES="all";
 
 $PIDFILE=".server.pid";
 
+#######################################################################
+# Return the pid of the http server as found in the pid file
+#
+sub serverpid {
+    open(PFILE, "<$PIDFILE");
+    my $PID=<PFILE>;
+    close(PFILE);
+    chomp $PID;
+    return $PID;
+}
+
+#######################################################################
+# stop the test http server
+#
 sub stopserver {
     # check for pidfile
     if ( -f $PIDFILE ) {
-        $PID=`cat $PIDFILE`;
-        kill (9, $PID); # die!
+        $PID = serverpid();
+        $res = kill (9, $PID); # die!
         unlink $PIDFILE; # server is killed
+
+        if($res) {
+            print "TCP server signalled to die\n";
+        }
     }
 }
 
+#######################################################################
+# start the http server, or if it already runs, verify that it is our
+# test server on the test-port!
+#
 sub runserver {
     # check for pidfile
     if ( -f $PIDFILE ) {
-        $PID=`cat $PIDFILE`;
+        $PID=serverpid();
         if ($PID ne "" && kill(0, $PID)) {
             $STATUS="httpd (pid $PID) running";
             $RUNNING=1;
@@ -73,6 +95,62 @@ sub runserver {
     }
 }
 
+#######################################################################
+# This function compares two binary files and return non-zero if they
+# differ
+#
+sub comparefiles {
+    my $source=$_[0];
+    my $dest=$_[1];
+
+    open(S, "<$source") ||
+        return 1;
+    open(D, "<$dest") ||
+        return 1;
+
+    # silly win-crap
+    binmode S;
+    binmode D;
+    
+    $m = 20;
+    do {
+        $snum = read(S, $s, $m);
+        $dnum = read(D, $d, $m);
+        if(($snum != $dnum) ||
+           ($s ne $d)) {
+            print "$source and $dest differ\n";
+            last;
+        }
+    } while($snum);
+    close(S);
+    close(D);
+    return 0;
+}
+
+#######################################################################
+# Remove all files in the specified directory
+#
+sub cleardir {
+    my $dir = $_[0];
+    my $count;
+
+    # Get all files
+    opendir(DIR, $dir) ||
+        return 0; # can't open dir
+    while($file = readdir(DIR)) {
+        if($file !~ /^\./) {
+            unlink("$dir/$file");
+            $count++;
+        }
+    }
+    closedir DIR;
+    return $count;
+}
+
+#######################################################################
+# filter out the specified pattern from the given input file and store the
+# results in the given output file
+#
 sub filteroff {
     my $infile=$_[0];
     my $filter=$_[1];
@@ -86,7 +164,6 @@ sub filteroff {
 
     # print "FILTER: off $filter from $infile to $ofile\n";
 
-    # system("egrep -v \"$strip\" < $first > $LOGDIR/generated.tmp");
     while(<IN>) {
         $_ =~ s/$filter//;
         print OUT $_;
@@ -95,6 +172,12 @@ sub filteroff {
     close(OUT);    
     return 0;
 }
+
+#######################################################################
+# compare test results with the expected output, we might filter off
+# some pattern that is allowed to differ, output test results
+#
+
 sub compare {
     # filter off the 4 pattern before compare!
 
@@ -106,23 +189,27 @@ sub compare {
     if ($strip ne "") {
         filteroff($first, $strip, "$LOGDIR/generated.tmp");
         filteroff($sec, $strip, "$LOGDIR/stored.tmp");
-#        system("egrep -v \"$strip\" < $sec > $LOGDIR/stored.tmp");
                 
         $first="$LOGDIR/generated.tmp";
         $sec="$LOGDIR/stored.tmp";
     }
 
-    $res = system("cmp $first $sec");
-    $res /= 256;
+#    $res = system("cmp $first $sec");
+#    $res /= 256;
+
+    comparefiles($first, $sec);
     if ($res != 0) {
-        print " $text FAILED\n";
+        print " $text FAILED";
         return 1;
     }
 
-    print " $text OK\n";
+    print " $text OK";
     return 0;
 }
 
+#######################################################################
+# display information about curl and the host the test suite runs on
+#
 sub displaydata {
     my $version=`$CURL -V`;
     my $hostname=`hostname`;
@@ -133,6 +220,10 @@ sub displaydata {
     "* host $hostname",
     "* system $hosttype";
 }
+
+#######################################################################
+# Run a single specified test case
+#
 
 sub singletest {
     my $NUMBER=$_[0];
@@ -150,7 +241,10 @@ sub singletest {
     $HTTP="$TESTDIR/http$NUMBER.txt";
 
     # name of the test
-    $DESC=`cat $TESTDIR/name$NUMBER.txt | tr -d '\012'`;
+    open(N, "<$TESTDIR/name$NUMBER.txt");
+    $DESC=<N>;
+    close(N);
+    $DESC =~ s/[\r\n]//g;
 
     # redirected stdout/stderr here
     $STDOUT="$LOGDIR/stdout$NUMBER";
@@ -159,7 +253,10 @@ sub singletest {
     # if this file exist, we verify that the stdout contained this:
     $VALIDOUT="$TESTDIR/stdout$NUMBER.txt";
 
-    print "test $NUMBER... [$DESC]\n";
+    print "test $NUMBER...";
+    if(!$short) {
+        print "[$DESC]\n";
+    }
 
     # get the command line options to use
 
@@ -227,6 +324,7 @@ sub singletest {
         unlink($STDERR);
 
     }
+    print "\n";
 
     return 0;
 }
@@ -236,9 +334,19 @@ sub singletest {
 # Check options to this test program
 #
 
-if ($ARGV[0] eq "-v") {
-    $verbose=1;
-}
+do {
+    if ($ARGV[0] eq "-v") {
+        # verbose output
+        $verbose=1;
+    }
+    elsif($ARGV[0] eq "-s") {
+        # short output
+        $short=1;
+    }
+    elsif($ARGV[0] =~ /^(\d+)/) {
+        $TESTCASES=$ARGV[0]; # run these tests
+    }
+} while(shift @ARGV);
 
 #######################################################################
 # Output curl version and host info being tested
@@ -247,10 +355,10 @@ if ($ARGV[0] eq "-v") {
 displaydata();
 
 #######################################################################
-# remove and recreate logging directory:
+# clear and create logging directory:
 #
-system("rm -rf $LOGDIR");
-mkdir("$LOGDIR", 0777);
+cleardir($LOGDIR);
+mkdir($LOGDIR, 0777);
 
 #######################################################################
 # First, start the TCP server
@@ -259,12 +367,26 @@ mkdir("$LOGDIR", 0777);
 runserver();
 
 #######################################################################
-# The main test-loop
+# If 'all' tests are requested, find out all test numbers
 #
 
 if ( $TESTCASES eq "all") {
-    $TESTCASES=`ls -1 $TESTDIR/command*.txt | sed -e 's/[a-z\/\.]*//g' | sort -n`;
+    # Get all commands and find out their test numbers
+    opendir(DIR, $TESTDIR) || die "can't opendir $TESTDIR: $!";
+    my @cmds = grep { /^command/ && -f "$TESTDIR/$_" } readdir(DIR);
+    closedir DIR;
+
+    $TESTCASES="";
+    for(@cmds) {
+        # cut off everything but the digits 
+        $_ =~ s/[a-z\/\.]*//g;
+        $TESTCASES .= " $_";
+    }
 }
+
+#######################################################################
+# The main test-loop
+#
 
 foreach $testnum (split(" ", $TESTCASES)) {
 
