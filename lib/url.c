@@ -531,7 +531,11 @@ UrgError curl_urlget(UrgTag tag, ...)
 	free(data->newurl);
 	data->newurl = newest;
       }
-
+      else {
+        /* This was an absolute URL, clear the port number! */
+        data->port = 0;
+      }
+      
       data->url = data->newurl;
       data->newurl = NULL; /* don't show! */
 
@@ -1174,6 +1178,10 @@ static UrgError _urlget(struct UrlData *data)
     (void) memcpy(&in.s_addr, *hp->h_addr_list, sizeof (in.s_addr));
     infof(data, "Connected to %s (%s)\n", hp->h_name, inet_ntoa(in));
   }
+
+#if 0 /* Kerberos experiements! Beware! Take cover! */
+  kerberos_connect(data, name);
+#endif
 
   if((data->conf&(CONF_FTP|CONF_PROXY)) == CONF_FTP) {
     result = ftp(data, &bytecount, data->user, data->passwd, ppath);
