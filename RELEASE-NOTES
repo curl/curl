@@ -45,12 +45,14 @@ Other curl-related news since the previous public release:
 
  o James Hu took over after Kevin Roth as maintainer of the curl package on
    cygwin. Many saludos to Kevin for a work well done during many years.
- o Gambas binding for libcurl: http://gambas.sf.net/
+ o Gambas binding: http://gambas.sf.net/
  o pycurl 7.12.0 was released http://pycurl.sf.net/
  o wxWidgets binding: http://homepage.mac.com/codonnell/wxcurldav/
  o New Austrian curl web mirror: http://curl.gds.tuwien.ac.at/
  o TclCurl 0.12.0 was released:
    http://personal1.iddeo.es/andresgarci/tclcurl/english/
+ o Ch binding: http://chcurl.sourceforge.net
+ o New US curl web mirror: http://curl.109k.com/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:

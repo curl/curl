@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel (20 July 2004)
+- Added buildconf and buildconf.bat to the release archives, since they are
+  handy for rebuilding curl when using a daily snapshot (and not a pure CVS
+  checkout).
+
+Daniel (16 July 2004)
+- As suggested by Toby Peterson, libcurl now ignores Content-Length data if the
+  given size is a negative number. Test case 178 verifies this.
+
 Daniel (14 July 2004)
 - Günter Knauf has made the Netware builds do without the config-netware.h
   files, so they are now removed from the dist packages.
