@@ -519,6 +519,7 @@ static int send_doc(int sock, struct httprequest *req)
   size_t cmdsize=0;
   FILE *dump;
   int persistant = TRUE;
+  size_t responsesize;
 
   static char weare[256];
 
@@ -613,6 +614,8 @@ static int send_doc(int sock, struct httprequest *req)
   else
     prevbounce = FALSE;
 
+
+  responsesize = count;
   do {
     written = swrite(sock, buffer, count);
     if (written < 0) {
@@ -628,7 +631,7 @@ static int send_doc(int sock, struct httprequest *req)
 
   fclose(dump);
 
-  logmsg("Response sent!");
+  logmsg("Response sent (%d bytes)!", responsesize);
 
   if(ptr)
     free(ptr);
