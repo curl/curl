@@ -143,12 +143,11 @@ operation and an error (CURLE_BAD_PASSWORD_ENTERED) will be returned.
 is a zero-terminated string that is text that prefixes the input request.
 \fIbuffer\fP is a pointer to data where the entered password should be stored
 and \fIbuflen\fP is the maximum number of bytes that may be written in the
-buffer.  (Added in 7.4.2)
+buffer.
 .TP
 .B CURLOPT_PASSWDDATA
 Pass a void * to whatever data you want. The passed pointer will be the first
-argument sent to the specifed \fICURLOPT_PASSWDFUNCTION\fP function. (Added in
-7.4.2)
+argument sent to the specifed \fICURLOPT_PASSWDFUNCTION\fP function.
 .TP
 .B CURLOPT_HEADERFUNCTION
 Function pointer that should match the following prototype: \fIsize_t
@@ -161,7 +160,7 @@ multiplied with \fInmemb\fP.  The pointer named \fIstream\fP will be the one
 you passed to libcurl with the \fICURLOPT_WRITEHEADER\fP option.  Return the
 number of bytes actually written or return -1 to signal error to the library
 (it will cause it to abort the transfer with a \fICURLE_WRITE_ERROR\fP return
-code). (Added in 7.7.2)
+code).
 .TP
 .B CURLOPT_WRITEHEADER
 Pass a pointer to be used to write the header part of the received data to. If
@@ -248,23 +247,23 @@ default. (Added in 7.10)
 Set the parameter to non-zero to get the library to tunnel all operations
 through a given HTTP proxy. Note that there is a big difference between using
 a proxy and to tunnel through it. If you don't know what this means, you
-probably don't want this tunneling option. (Added in 7.3)
+probably don't want this tunneling option.
 .TP
 .B CURLOPT_INTERFACE
 Pass a char * as parameter. This set the interface name to use as outgoing
 network interface. The name can be an interface name, an IP address or a host
-name. (Added in 7.3)
+name.
 .TP
 .B CURLOPT_DNS_CACHE_TIMEOUT
 Pass a long, this sets the timeout in seconds. Name resolves will be kept in
 memory for this number of seconds. Set to zero (0) to completely disable
 caching, or set to -1 to make the cached entries remain forever. By default,
-libcurl caches info for 60 seconds. (Added in 7.9.3)
+libcurl caches info for 60 seconds.
 .TP
 .B CURLOPT_DNS_USE_GLOBAL_CACHE
 Pass a long. If the value is non-zero, it tells curl to use a global DNS cache
 that will survive between easy handle creations and deletions. This is not
-thread-safe and this will use a global varible. (Added in 7.9.3)
+thread-safe and this will use a global varible.
 .TP
 .B CURLOPT_BUFFERSIZE
 Pass a long specifying your prefered size for the receive buffer in libcurl.
@@ -422,7 +421,7 @@ that this is meaningful only when setting \fICURLOPT_FOLLOWLOCATION\fP.
 Pass a long. The set number will be the redirection limit. If that many
 redirections have been followed, the next redirect will cause an error
 (\fICURLE_TOO_MANY_REDIRECTS\fP). This option only makes sense if the
-\fICURLOPT_FOLLOWLOCATION\fP is used at the same time. (Added in 7.5)
+\fICURLOPT_FOLLOWLOCATION\fP is used at the same time.
 .TP
 .B CURLOPT_PUT
 A non-zero parameter tells the library to use HTTP PUT to transfer data. The
@@ -454,8 +453,7 @@ the \fICURLOPT_HTTPPOST\fP option.
 If you want to post data to the server without letting libcurl do a strlen()
 to measure the data size, this option must be used. When this option is used
 you can post fully binary data, which otherwise is likely to fail. If this
-size is set to zero, the library will use strlen() to get the size. (Added in
-libcurl 7.2)
+size is set to zero, the library will use strlen() to get the size.
 .TP
 .B CURLOPT_HTTPPOST
 Tells libcurl you want a multipart/formdata HTTP POST to be made and you
@@ -545,7 +543,7 @@ internally known cookies to the specified file when \fIcurl_easy_cleanup(3)\fP
 is called. If no cookies are known, no file will be created. Specify "-" to
 instead have the cookies written to stdout. Using this option also enables
 cookies for this session, so if you for example follow a location it will make
-matching cookies get sent accordingly. (Added in 7.9)
+matching cookies get sent accordingly.
 
 .B NOTE
 If the cookie jar file can't be created or written to (when the
@@ -567,7 +565,7 @@ CURLOPT_TIMECONDITION.
 .B CURLOPT_HTTPGET
 Pass a long. If the long is non-zero, this forces the HTTP request to get back
 to GET. Only really usable if POST, PUT or a custom request have been used
-previously using the same curl handle. (Added in 7.8.1)
+previously using the same curl handle.
 .TP
 .B CURLOPT_HTTP_VERSION
 Pass a long, set to one of the values described below. They force libcurl to
@@ -698,8 +696,7 @@ Pass a long. If it is a non-zero value, libcurl will attempt to get the
 modification date of the remote document in this operation. This requires that
 the remote server sends the time or replies to a time querying command. The
 \fIcurl_easy_getinfo(3)\fP function with the \fICURLINFO_FILETIME\fP argument
-can be used after a transfer to extract the received time (if any). (Added in
-7.5)
+can be used after a transfer to extract the received time (if any).
 .TP
 .B CURLOPT_NOBODY
 A non-zero parameter tells the library to not include the body-part in the
@@ -750,7 +747,7 @@ open connections to increase.
 
 \fBNOTE:\fP if you already have performed transfers with this curl handle,
 setting a smaller MAXCONNECTS than before may cause open connections to get
-closed unnecessarily. (Added in 7.7)
+closed unnecessarily.
 .TP
 .B CURLOPT_CLOSEPOLICY
 Pass a long. This option sets what policy libcurl should use when the
@@ -761,7 +758,7 @@ the connection that was least recently used, that connection is also least
 likely to be capable of re-use. Use \fICURLCLOSEPOLICY_OLDEST\fP to make
 libcurl close the oldest connection, the one that was created first among the
 ones in the connection cache. The other close policies are not support
-yet. (Added in 7.7)
+yet.
 .TP
 .B CURLOPT_FRESH_CONNECT
 Pass a long. Set to non-zero to make the next transfer use a new (fresh)
@@ -769,7 +766,7 @@ connection by force. If the connection cache is full before this connection,
 one of the existing connections will be closed as according to the selected or
 default policy. This option should be used with caution and only if you
 understand what it does. Set this to 0 to have libcurl attempt re-using an
-existing connection (default behavior).  (Added in 7.7)
+existing connection (default behavior).
 .TP
 .B CURLOPT_FORBID_REUSE
 Pass a long. Set to non-zero to make the next transfer explicitly close the
@@ -777,7 +774,7 @@ connection when done. Normally, libcurl keep all connections alive when done
 with one transfer in case there comes a succeeding one that can re-use them.
 This option should be used with caution and only if you understand what it
 does. Set to 0 to have libcurl keep the connection open for possibly later
-re-use (default behavior). (Added in 7.7)
+re-use (default behavior).
 .TP
 .B CURLOPT_CONNECTTIMEOUT
 Pass a long. It should contain the maximum time in seconds that you allow the
@@ -814,12 +811,11 @@ a certificate but you need one to load your private key.
 .B CURLOPT_SSLKEY
 Pass a pointer to a zero terminated string as parameter. The string should be
 the file name of your private key. The default format is "PEM" and can be
-changed with \fICURLOPT_SSLKEYTYPE\fP. (Added in 7.9.3)
+changed with \fICURLOPT_SSLKEYTYPE\fP.
 .TP
 .B CURLOPT_SSLKEYTYPE
 Pass a pointer to a zero terminated string as parameter. The string should be
 the format of your private key. Supported formats are "PEM", "DER" and "ENG".
-(Added in 7.9.3)
 
 \fBNOTE:\fPThe format "ENG" enables you to load the private key from a crypto
 engine. in this case \fICURLOPT_SSLKEY\fP is used as an identifier passed to
@@ -830,19 +826,18 @@ Pass a pointer to a zero terminated string as parameter. It will be used as
 the password required to use the \fICURLOPT_SSLKEY\fP private key. If the
 password is not supplied, you will be prompted for
 it. \fICURLOPT_PASSWDFUNCTION\fP can be used to set your own prompt function.
-(Added in 7.9.3)
 .TP
 .B CURLOPT_SSL_ENGINE
 Pass a pointer to a zero terminated string as parameter. It will be used as
 the identifier for the crypto engine you want to use for your private
-key. (Added in 7.9.3)
+key.
 
 \fBNOTE:\fPIf the crypto device cannot be loaded,
 \fICURLE_SSL_ENGINE_NOTFOUND\fP is returned.
 .TP
 .B CURLOPT_SSL_ENGINEDEFAULT
 Sets the actual crypto engine as the default for (asymetric) crypto
-operations. (Added in 7.9.3)
+operations.
 
 \fBNOTE:\fPIf the crypto device cannot be set,
 \fICURLE_SSL_ENGINE_SETFAILED\fP is returned.
@@ -856,15 +851,15 @@ servers make this difficult why you at times may have to use this option.
 Pass a long that is set to a zero value to stop curl from verifying the peer's
 certificate (7.10 starting setting this option to TRUE by default).  Alternate
 certificates to verify against can be specified with the CURLOPT_CAINFO option
-(Added in 7.4.2) or a certificate directory can be specified with the
-CURLOPT_CAPATH option (Added in 7.9.8).  As of 7.10, curl installs a default
-bundle.  CURLOPT_SSL_VERIFYHOST may also need to be set to 1 or 0 if
+or a certificate directory can be specified with the CURLOPT_CAPATH option
+(Added in 7.9.8).  As of 7.10, curl installs a default bundle.
+CURLOPT_SSL_VERIFYHOST may also need to be set to 1 or 0 if
 CURLOPT_SSL_VERIFYPEER is disabled (it defaults to 2).
 .TP
 .B CURLOPT_CAINFO
 Pass a char * to a zero terminated string naming a file holding one or more
 certificates to verify the peer with. This only makes sense when used in
-combination with the CURLOPT_SSL_VERIFYPEER option. (Added in 7.4.2)
+combination with the CURLOPT_SSL_VERIFYPEER option.
 .TP
 .B CURLOPT_CAPATH
 Pass a char * to a zero terminated string naming a directory holding multiple
@@ -886,8 +881,7 @@ socket. It will be used to seed the random engine for SSL.
 .B CURLOPT_SSL_VERIFYHOST
 Pass a long. Set if we should verify the Common name from the peer certificate
 in the SSL handshake, set 1 to check existence, 2 to ensure that it matches
-the provided hostname. This is by default set to 2. (Added in 7.8.1, default
-changed in 7.10)
+the provided hostname. This is by default set to 2. (default changed in 7.10)
 .TP
 .B CURLOPT_SSL_CIPHER_LIST
 Pass a char *, pointing to a zero terminated string holding the list of
@@ -906,7 +900,7 @@ Pass a char * as parameter. Set the krb4 security level, this also enables
 krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
 \&'private'.  If the string is set but doesn't match one of these, 'private'
 will be used. Set the string to NULL to disable kerberos4. The kerberos
-support only works for FTP. (Added in 7.3)
+support only works for FTP.
 .PP
 .SH OTHER OPTIONS
 .TP 0.4i
