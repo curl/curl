@@ -6,9 +6,25 @@
 
                                   Changelog
 
+
+Daniel (28 July 2004)
+- Bertrand Demiddelaer fixed the host name to get setup properly even when a
+  connection is re-used, when a proxy is in use. Previously the wrong Host:
+  header could get sent when re-using a proxy connection to a different target
+  host.
+
+- Fixed Brian Akins' reported problems with duplicate Host: headers on re-used
+  connections. If you attempted to replace the Host: header in the second
+  request, you got two such headers!
+
+- src/Makefile.am now includes the Makefile.inc file to get info about files
+
 Daniel (26 July 2004)
 - Made "curl [URL] -o name#2" work as expected. If there's no globbing for the
   #-number, it will simply be used as #2 in the file name.
+
+- Bertrand Demiddelaer fixed testing with valgrind 2.1.x and added two missing
+  newlines in the cookie informationals.
 
 Daniel (24 July 2004)
 - I fixed the autobuilds with ares, since they now need to have buildconf run
