@@ -55,6 +55,7 @@
 #define ARES_EFILE		14
 #define ARES_ENOMEM		15
 #define ARES_EDESTRUCTION	16
+#define ARES_EBADSTR		17
 
 /* Flag values */
 #define ARES_FLAG_USEVC		(1 << 0)
@@ -125,6 +126,8 @@ int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
 		 int rd, unsigned char **buf, int *buflen);
 int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
 		     int alen, char **s, long *enclen);
+int ares_expand_string(const unsigned char *encoded, const unsigned char *abuf,
+		     int alen, unsigned char **s, long *enclen);
 int ares_parse_a_reply(const unsigned char *abuf, int alen,
 		       struct hostent **host);
 int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,

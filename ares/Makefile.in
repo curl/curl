@@ -25,7 +25,16 @@ OBJS=	ares__close_sockets.o ares__get_hostent.o ares__read_line.o \
 	ares_free_hostent.o ares_free_string.o ares_gethostbyaddr.o \
 	ares_gethostbyname.o ares_init.o ares_mkquery.o ares_parse_a_reply.o \
 	ares_parse_ptr_reply.o ares_process.o ares_query.o ares_search.o \
-	ares_send.o ares_strerror.o ares_timeout.o ares_version.o
+	ares_send.o ares_strerror.o ares_timeout.o ares_version.o \
+	ares_expand_string.o
+
+MANPAGES= ares_destroy.3 ares_expand_name.3 ares_expand_string.3 ares_fds.3   \
+        ares_free_hostent.3 ares_free_string.3 ares_gethostbyaddr.3	      \
+        ares_gethostbyname.3 ares_init.3 ares_init_options.3 ares_mkquery.3   \
+        ares_parse_a_reply.3 ares_parse_ptr_reply.3 ares_process.3	      \
+        ares_query.3 ares_search.3 ares_send.3 ares_strerror.3 ares_timeout.3 \
+        ares_version.3
+
 
 $(LIB): ${OBJS}
 	ar cru $@ ${OBJS}
@@ -60,31 +69,9 @@ install:
 	chmod u-w ${DESTDIR}${libdir}/$(LIB)
 	${INSTALL} -m 444 ${srcdir}/ares.h ${DESTDIR}${includedir}
 	${INSTALL} -m 444 ${srcdir}/ares_version.h ${DESTDIR}${includedir}
-	${INSTALL} -m 444 ${srcdir}/ares_destroy.3 ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_expand_name.3 ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_fds.3 ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_free_hostent.3 \
-		${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_free_string.3 \
-		${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_gethostbyaddr.3 \
-		${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_gethostbyname.3 \
-		${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_init.3 ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_init_options.3 \
-		${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_mkquery.3 ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_parse_a_reply.3 \
-		${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_parse_ptr_reply.3 \
-		${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_process.3 ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_query.3 ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_search.3 ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_send.3 ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_strerror.3 ${DESTDIR}${mandir}/man3
-	${INSTALL} -m 444 ${srcdir}/ares_timeout.3 ${DESTDIR}${mandir}/man3
+	(for man in $(MANPAGES); do \
+	   ${INSTALL} -m 444 ${srcdir}/$${man} ${DESTDIR}${mandir}/man3; \
+	done)
 
 clean:
 	rm -f ${OBJS} $(LIB) adig.o adig ahost.o ahost

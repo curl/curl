@@ -1,3 +1,10 @@
+* March 30, 2004
+- Dominick Meglio's new ares_expand_string. A helper function when decoding
+  incoming DNS packages.
+
+- Daniel Stenberg modified the Makefile.in to use a for loop for the man page
+  installation to improve overview and make it easier to add man pages.
+
 * March 9, 2004
 - Gisle Vanem improved build on Windows.
 
