@@ -282,6 +282,8 @@ REFERER
 
         curl -e www.coolsite.com http://www.showme.com/
 
+  NOTE: The referer field is defined in the HTTP spec to be a full URL.
+
 USER AGENT
 
   A HTTP request has the option to include information about the browser
