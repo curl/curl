@@ -42,10 +42,6 @@
 #define	INADDRSZ	 4
 #define	INT16SZ		 2
 
-#ifndef	AF_INET6
-#define	AF_INET6	AF_MAX+1	/* just to let this compile */
-#endif
-
 #ifdef WIN32
 #define EAFNOSUPPORT    WSAEAFNOSUPPORT
 #endif
@@ -56,7 +52,9 @@
  */
 
 static int	inet_pton4(const char *src, unsigned char *dst);
+#ifdef ENABLE_IPV6
 static int	inet_pton6(const char *src, unsigned char *dst);
+#endif
 
 /* int
  * inet_pton(af, src, dst)
@@ -78,8 +76,13 @@ Curl_inet_pton(af, src, dst)
 	switch (af) {
 	case AF_INET:
 		return (inet_pton4(src, dst));
+#ifdef ENABLE_IPV6
+#ifndef	AF_INET6
+#define	AF_INET6	AF_MAX+1	/* just to let this compile */
+#endif
 	case AF_INET6:
 		return (inet_pton6(src, dst));
+#endif
 	default:
 		errno = EAFNOSUPPORT;
 		return (-1);
@@ -138,6 +141,7 @@ inet_pton4(src, dst)
 	return (1);
 }
 
+#ifdef ENABLE_IPV6
 /* int
  * inet_pton6(src, dst)
  *	convert presentation level address to network order binary form.
@@ -236,5 +240,6 @@ inet_pton6(src, dst)
 	memcpy(dst, tmp, IN6ADDRSZ);
 	return (1);
 }
+#endif /* ENABLE_IPV6 */
 
 #endif /* HAVE_INET_PTON */
