@@ -24,6 +24,7 @@
 #include "setup.h"
 
 #include <stdio.h>
+#include <string.h>
 #if defined(__MINGW32__)
 #include <winsock.h>
 #endif
