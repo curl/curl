@@ -3,10 +3,8 @@
 #
 # formfind.pl
 #
-# This script gets a HTML page from the specified URL and presents form
-# information you may need in order to machine-make a respond to the form.
-#
-# Written to use 'curl' for URL fetching.
+# This script gets a HTML page on stdin and presents form information on
+# stdout.
 #
 # Author: Daniel Stenberg <daniel@haxx.se>
 # Version: 0.2 Nov 18, 2002
