@@ -8,6 +8,11 @@
 
 
 Daniel (29 March 2005)
+- Tom Moers identified a flaw when you sent a POST with Digest authentication,
+  as in the first request when curl sends a POST with Content-Length: 0, it
+  still forcibly closed the connection before doing the next step in the auth
+  negotiation.
+
 - Jesper Jensen found out that FTP-SSL didn't work since my FTP
   rewrite. Fixing that was easy, but it also revealed a much worse problem:
   the FTP server response reader function didn't properly deal with reading

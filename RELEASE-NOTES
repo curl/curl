@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o better connection keep-alive when POSTing with HTTP Digest
  o FTP-SSL
  o reading FTP server response in multiple reads
  o picking one out of multiple proxy auth methods
@@ -31,6 +32,11 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
+ o the cURL projected is now over 7 years old
+ o we now provide daily CVS windows-builds:
+   http://cool.haxx.se/curl-daily/
+ o curl-tracker is a new mailinglist for "tracker" activities:
+   http://cool.haxx.se/mailman/listinfo/curl-tracker
  o libcurl binding for Common Lisp: http://common-lisp.net/project/cl-curl/
  o pycurl 7.13.1 http://pycurl.sf.net
  o http://curl.tolix.org is a new Californian mirror
@@ -41,6 +47,7 @@ advice from friends like these:
 
  Dan Fandrich, Ignacio Vazquez-Abrams, Randy McMurchy, Dominick Meglio,
  Jean-Marc Ranger, Tor Arntsen, Nodak Sodak, David Houlder, Gisle Vanem,
- Christopher R. Palmer, Gwenole Beauchesne, Augustus Saunders, Jesper Jensen
+ Christopher R. Palmer, Gwenole Beauchesne, Augustus Saunders, Jesper Jensen,
+ Tom Moers
 
         Thanks! (and sorry if I forgot to mention someone)
