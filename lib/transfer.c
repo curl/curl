@@ -187,6 +187,7 @@ checkhttpprefix(struct SessionHandle *data,
   return FALSE;
 }
 
+
 /*
  * Curl_readwrite() is the low-level function to be called when data is to
  * be read and written to/from the connection.
@@ -442,6 +443,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 FD_ZERO(&k->wkeepfd);
               }
 
+#ifndef CURL_DISABLE_HTTP
               /*
                * When all the headers have been parsed, see if we should give
                * up and return an error.
@@ -451,6 +453,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                        k->httpcode);
                 return CURLE_HTTP_RETURNED_ERROR;
               }
+#endif   /* CURL_DISABLE_HTTP */
 
               /* now, only output this if the header AND body are requested:
                */
@@ -488,7 +491,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   return CURLE_HTTP_RANGE_ERROR;
                 }
               }
-
+#ifndef CURL_DISABLE_HTTP
               if(!stop_reading) {
                 /* Curl_http_auth_act() checks what authentication methods
                  * that are available and decides which one (if any) to
@@ -498,6 +501,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 if(result)
                   return result;
               }
+#endif   /* CURL_DISABLE_HTTP */
 
               if(!k->header) {
                 /*
@@ -696,6 +700,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 data->info.contenttype[len] = 0; /* zero terminate */
               }
             }
+#ifndef CURL_DISABLE_HTTP
             else if((k->httpversion == 10) &&
                     conn->bits.httpproxy &&
                     Curl_compareheader(k->p,
@@ -864,6 +869,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               }
 #endif
             }
+#endif   /* CURL_DISABLE_HTTP */
 
             /*
              * End of header-checks. Write them to the client.
@@ -970,6 +976,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               Curl_debug(data, CURLINFO_DATA_IN, k->str, nread, conn->host.dispname);
           }
 
+#ifndef CURL_DISABLE_HTTP
           if(conn->bits.chunk) {
             /*
              * Bless me father for I have sinned. Here comes a chunked
@@ -999,6 +1006,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
             /* If it returned OK, we just keep going */
           }
+#endif   /* CURL_DISABLE_HTTP */
 
           if((-1 != conn->maxdownload) &&
              (k->bytecount + nread >= conn->maxdownload)) {
@@ -1302,6 +1310,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   return CURLE_OK;
 }
 
+
 /*
  * Curl_readwrite_init() inits the readwrite session.
  */
@@ -1517,6 +1526,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   data->state.authhost.want = data->set.httpauth;
   data->state.authproxy.want = data->set.proxyauth;
 
+#ifndef CURL_DISABLE_HTTP
   /* If there was a list of cookie files to read and we haven't done it before,
      do it now! */
   if(data->change.cookielist) {
@@ -1533,7 +1543,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
     curl_slist_free_all(data->change.cookielist); /* clean up list */
     data->change.cookielist = NULL; /* don't do this again! */
   }
-
+#endif   /* CURL_DISABLE_HTTP */
 
 
  /* Allow data->set.use_port to set which port to use. This needs to be

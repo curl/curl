@@ -238,14 +238,14 @@ CURLcode Curl_close(struct SessionHandle *data)
     Curl_cookie_cleanup(data->cookies);
   }
   Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
+
+  Curl_digest_cleanup(data);
 #endif
 
   /* free the connection cache */
   free(data->state.connects);
 
   Curl_safefree(data->info.contenttype);
-
-  Curl_digest_cleanup(data);
 
 #ifdef USE_ARES
   /* this destroys the channel and we cannot use it anymore after this */
@@ -555,27 +555,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.netrc_file = va_arg(param, char *);
     break;
-  case CURLOPT_FOLLOWLOCATION:
-    /*
-     * Follow Location: header hints on a HTTP-server.
-     */
-    data->set.http_follow_location = va_arg(param, long)?TRUE:FALSE;
-    break;
-  case CURLOPT_UNRESTRICTED_AUTH:
-    /*
-     * Send authentication (user+password) when following locations, even when
-     * hostname changed.
-     */
-    data->set.http_disable_hostname_check_before_authentication =
-      va_arg(param, long)?TRUE:FALSE;
-    break;
-  case CURLOPT_HTTP_VERSION:
-    /*
-     * This sets a requested HTTP version to be used. The value is one of
-     * the listed enums in curl/curl.h.
-     */
-    data->set.httpversion = va_arg(param, long);
-    break;
   case CURLOPT_TRANSFERTEXT:
     /*
      * This option was previously named 'FTPASCII'. Renamed to work with
@@ -607,26 +586,135 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.ssl.version = va_arg(param, long);
     break;
 
-  case CURLOPT_COOKIESESSION:
+#ifndef CURL_DISABLE_HTTP
+  case CURLOPT_AUTOREFERER:
     /*
-     * Set this option to TRUE to start a new "cookie session". It will
-     * prevent the forthcoming read-cookies-from-file actions to accept
-     * cookies that are marked as being session cookies, as they belong to a
-     * previous session.
-     *
-     * In the original Netscape cookie spec, "session cookies" are cookies
-     * with no expire date set. RFC2109 describes the same action if no
-     * 'Max-Age' is set and RFC2965 includes the RFC2109 description and adds
-     * a 'Discard' action that can enforce the discard even for cookies that
-     * have a Max-Age.
-     *
-     * We run mostly with the original cookie spec, as hardly anyone implements
-     * anything else.
+     * Switch on automatic referer that gets set if curl follows locations.
      */
-    data->set.cookiesession = (bool)va_arg(param, long);
+    data->set.http_auto_referer = va_arg(param, long)?1:0;
     break;
 
-#ifndef CURL_DISABLE_HTTP
+  case CURLOPT_ENCODING:
+    /*
+     * String to use at the value of Accept-Encoding header.
+     *
+     * If the encoding is set to "" we use an Accept-Encoding header that
+     * encompasses all the encodings we support.
+     * If the encoding is set to NULL we don't send an Accept-Encoding header
+     * and ignore an received Content-Encoding header.
+     *
+     */
+    data->set.encoding = va_arg(param, char *);
+    if(data->set.encoding && !*data->set.encoding)
+      data->set.encoding = (char*)ALL_CONTENT_ENCODINGS;
+    break;
+
+  case CURLOPT_FOLLOWLOCATION:
+    /*
+     * Follow Location: header hints on a HTTP-server.
+     */
+    data->set.http_follow_location = va_arg(param, long)?TRUE:FALSE;
+    break;
+
+  case CURLOPT_UNRESTRICTED_AUTH:
+    /*
+     * Send authentication (user+password) when following locations, even when
+     * hostname changed.
+     */
+    data->set.http_disable_hostname_check_before_authentication =
+      va_arg(param, long)?TRUE:FALSE;
+    break;
+
+  case CURLOPT_MAXREDIRS:
+    /*
+     * The maximum amount of hops you allow curl to follow Location:
+     * headers. This should mostly be used to detect never-ending loops.
+     */
+    data->set.maxredirs = va_arg(param, long);
+    break;
+
+  case CURLOPT_POST:
+    /* Does this option serve a purpose anymore? Yes it does, when
+       CURLOPT_POSTFIELDS isn't used and the POST data is read off the
+       callback! */
+    if(va_arg(param, long))
+      data->set.httpreq = HTTPREQ_POST;
+    break;
+
+  case CURLOPT_POSTFIELDS:
+    /*
+     * A string with POST data. Makes curl HTTP POST.
+     */
+    data->set.postfields = va_arg(param, char *);
+    if(data->set.postfields)
+      data->set.httpreq = HTTPREQ_POST;
+    break;
+
+  case CURLOPT_POSTFIELDSIZE:
+    /*
+     * The size of the POSTFIELD data to prevent libcurl to do strlen() to
+     * figure it out. Enables binary posts.
+     */
+    data->set.postfieldsize = va_arg(param, long);
+    break;
+
+  case CURLOPT_POSTFIELDSIZE_LARGE:
+    /*
+     * The size of the POSTFIELD data to prevent libcurl to do strlen() to
+     * figure it out. Enables binary posts.
+     */
+    data->set.postfieldsize = va_arg(param, curl_off_t);
+    break;
+
+  case CURLOPT_HTTPPOST:
+    /*
+     * Set to make us do HTTP POST
+     */
+    data->set.httppost = va_arg(param, struct curl_httppost *);
+    if(data->set.httppost)
+      data->set.httpreq = HTTPREQ_POST_FORM;
+    break;
+
+  case CURLOPT_REFERER:
+    /*
+     * String to set in the HTTP Referer: field.
+     */
+    if(data->change.referer_alloc) {
+      free(data->change.referer);
+      data->change.referer_alloc = FALSE;
+    }
+    data->set.set_referer = va_arg(param, char *);
+    data->change.referer = data->set.set_referer;
+    break;
+
+  case CURLOPT_USERAGENT:
+    /*
+     * String to use in the HTTP User-Agent field
+     */
+    data->set.useragent = va_arg(param, char *);
+    break;
+
+  case CURLOPT_HTTPHEADER:
+    /*
+     * Set a list with HTTP headers to use (or replace internals with)
+     */
+    data->set.headers = va_arg(param, struct curl_slist *);
+    break;
+
+  case CURLOPT_HTTP200ALIASES:
+    /*
+     * Set a list of aliases for HTTP 200 in response header
+     */
+    data->set.http200aliases = va_arg(param, struct curl_slist *);
+    break;
+
+  case CURLOPT_COOKIE:
+    /*
+     * Cookie string to send to the remote server in the request.
+     */
+    data->set.cookie = va_arg(param, char *);
+    break;
+
   case CURLOPT_COOKIEFILE:
     /*
      * Set cookie file to read and parse. Can be used multiple times.
@@ -658,19 +746,137 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->cookies = Curl_cookie_init(data, NULL, data->cookies,
                                      data->set.cookiesession);
     break;
+
+  case CURLOPT_COOKIESESSION:
+    /*
+     * Set this option to TRUE to start a new "cookie session". It will
+     * prevent the forthcoming read-cookies-from-file actions to accept
+     * cookies that are marked as being session cookies, as they belong to a
+     * previous session.
+     *
+     * In the original Netscape cookie spec, "session cookies" are cookies
+     * with no expire date set. RFC2109 describes the same action if no
+     * 'Max-Age' is set and RFC2965 includes the RFC2109 description and adds
+     * a 'Discard' action that can enforce the discard even for cookies that
+     * have a Max-Age.
+     *
+     * We run mostly with the original cookie spec, as hardly anyone implements
+     * anything else.
+     */
+    data->set.cookiesession = (bool)va_arg(param, long);
+    break;
+
+  case CURLOPT_HTTPGET:
+    /*
+     * Set to force us do HTTP GET
+     */
+    if(va_arg(param, long)) {
+      data->set.httpreq = HTTPREQ_GET;
+      data->set.upload = FALSE; /* switch off upload */
+    }
+    break;
+
+  case CURLOPT_HTTP_VERSION:
+    /*
+     * This sets a requested HTTP version to be used. The value is one of
+     * the listed enums in curl/curl.h.
+     */
+    data->set.httpversion = va_arg(param, long);
+    break;
+
+  case CURLOPT_HTTPPROXYTUNNEL:
+    /*
+     * Tunnel operations through the proxy instead of normal proxy use
+     */
+    data->set.tunnel_thru_httpproxy = va_arg(param, long)?TRUE:FALSE;
+    break;
+
+  case CURLOPT_CUSTOMREQUEST:
+    /*
+     * Set a custom string to use as request
+     */
+    data->set.customrequest = va_arg(param, char *);
+
+    /* we don't set
+       data->set.httpreq = HTTPREQ_CUSTOM;
+       here, we continue as if we were using the already set type
+       and this just changes the actual request keyword */
+    break;
+
+  case CURLOPT_PROXY:
+    /*
+     * Set proxy server:port to use as HTTP proxy.
+     *
+     * If the proxy is set to "" we explicitly say that we don't want to use a
+     * proxy (even though there might be environment variables saying so).
+     *
+     * Setting it to NULL, means no proxy but allows the environment variables
+     * to decide for us.
+     */
+    if(data->change.proxy_alloc) {
+      /*
+       * The already set string is allocated, free that first
+       */
+      data->change.proxy_alloc=FALSE;;
+      free(data->change.proxy);
+    }
+    data->set.set_proxy = va_arg(param, char *);
+    data->change.proxy = data->set.set_proxy;
+    break;
+
+  case CURLOPT_PROXYPORT:
+    /*
+     * Explicitly set HTTP proxy port number.
+     */
+    data->set.proxyport = va_arg(param, long);
+    break;
+
+  case CURLOPT_HTTPAUTH:
+    /*
+     * Set HTTP Authentication type BITMASK.
+     */
+  {
+    long auth = va_arg(param, long);
+    /* switch off bits we can't support */
+#ifndef USE_SSLEAY
+    auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
+#ifndef HAVE_GSSAPI
+    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI */
+#endif
+    if(!auth)
+      return CURLE_FAILED_INIT; /* no supported types left! */
+
+    data->set.httpauth = auth;
+  }
+  break;
+
+  case CURLOPT_PROXYAUTH:
+    /*
+     * Set HTTP Authentication type BITMASK.
+     */
+  {
+    long auth = va_arg(param, long);
+    /* switch off bits we can't support */
+#ifndef USE_SSLEAY
+    auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
+#endif
+#ifndef HAVE_GSSAPI
+    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI */
+#endif
+    if(!auth)
+      return CURLE_FAILED_INIT; /* no supported types left! */
+
+    data->set.proxyauth = auth;
+  }
+  break;
+#endif   /* CURL_DISABLE_HTTP */
 
   case CURLOPT_WRITEHEADER:
     /*
      * Custom pointer to pass the header write callback function
      */
     data->set.writeheader = (void *)va_arg(param, void *);
-    break;
-  case CURLOPT_COOKIE:
-    /*
-     * Cookie string to send to the remote server in the request.
-     */
-    data->set.cookie = va_arg(param, char *);
     break;
   case CURLOPT_ERRORBUFFER:
     /*
@@ -699,42 +905,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
   case CURLOPT_FTP_USE_EPSV:
     data->set.ftp_use_epsv = va_arg(param, long)?TRUE:FALSE;
-    break;
-
-  case CURLOPT_HTTPHEADER:
-    /*
-     * Set a list with HTTP headers to use (or replace internals with)
-     */
-    data->set.headers = va_arg(param, struct curl_slist *);
-    break;
-  case CURLOPT_CUSTOMREQUEST:
-    /*
-     * Set a custom string to use as request
-     */
-    data->set.customrequest = va_arg(param, char *);
-
-    /* we don't set
-       data->set.httpreq = HTTPREQ_CUSTOM;
-       here, we continue as if we were using the already set type
-       and this just changes the actual request keyword */
-    break;
-  case CURLOPT_HTTPPOST:
-    /*
-     * Set to make us do HTTP POST
-     */
-    data->set.httppost = va_arg(param, struct curl_httppost *);
-    if(data->set.httppost)
-      data->set.httpreq = HTTPREQ_POST_FORM;
-    break;
-
-  case CURLOPT_HTTPGET:
-    /*
-     * Set to force us do HTTP GET
-     */
-    if(va_arg(param, long)) {
-      data->set.httpreq = HTTPREQ_GET;
-      data->set.upload = FALSE; /* switch off upload */
-    }
     break;
 
   case CURLOPT_INFILE:
@@ -791,84 +961,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.use_port = va_arg(param, long);
     break;
-  case CURLOPT_POST:
-    /* Does this option serve a purpose anymore? Yes it does, when
-       CURLOPT_POSTFIELDS isn't used and the POST data is read off the
-       callback! */
-    if(va_arg(param, long))
-      data->set.httpreq = HTTPREQ_POST;
-    break;
-  case CURLOPT_POSTFIELDS:
-    /*
-     * A string with POST data. Makes curl HTTP POST.
-     */
-    data->set.postfields = va_arg(param, char *);
-    if(data->set.postfields)
-      data->set.httpreq = HTTPREQ_POST;
-    break;
-  case CURLOPT_POSTFIELDSIZE:
-    /*
-     * The size of the POSTFIELD data to prevent libcurl to do strlen() to
-     * figure it out. Enables binary posts.
-     */
-    data->set.postfieldsize = va_arg(param, long);
-    break;
-  case CURLOPT_POSTFIELDSIZE_LARGE:
-    /*
-     * The size of the POSTFIELD data to prevent libcurl to do strlen() to
-     * figure it out. Enables binary posts.
-     */
-    data->set.postfieldsize = va_arg(param, curl_off_t);
-    break;
-  case CURLOPT_REFERER:
-    /*
-     * String to set in the HTTP Referer: field.
-     */
-    if(data->change.referer_alloc) {
-      free(data->change.referer);
-      data->change.referer_alloc = FALSE;
-    }
-    data->set.set_referer = va_arg(param, char *);
-    data->change.referer = data->set.set_referer;
-    break;
-  case CURLOPT_AUTOREFERER:
-    /*
-     * Switch on automatic referer that gets set if curl follows locations.
-     */
-    data->set.http_auto_referer = va_arg(param, long)?1:0;
-    break;
-  case CURLOPT_PROXY:
-    /*
-     * Set proxy server:port to use as HTTP proxy.
-     *
-     * If the proxy is set to "" we explicitly say that we don't want to use a
-     * proxy (even though there might be environment variables saying so).
-     *
-     * Setting it to NULL, means no proxy but allows the environment variables
-     * to decide for us.
-     */
-    if(data->change.proxy_alloc) {
-      /*
-       * The already set string is allocated, free that first
-       */
-      data->change.proxy_alloc=FALSE;;
-      free(data->change.proxy);
-    }
-    data->set.set_proxy = va_arg(param, char *);
-    data->change.proxy = data->set.set_proxy;
-    break;
-  case CURLOPT_HTTPPROXYTUNNEL:
-    /*
-     * Tunnel operations through the proxy instead of normal proxy use
-     */
-    data->set.tunnel_thru_httpproxy = va_arg(param, long)?TRUE:FALSE;
-    break;
-  case CURLOPT_PROXYPORT:
-    /*
-     * Explicitly set HTTP proxy port number.
-     */
-    data->set.proxyport = va_arg(param, long);
-    break;
   case CURLOPT_TIMEOUT:
     /*
      * The maximum time you allow curl to use for a single transfer
@@ -882,73 +974,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.connecttimeout = va_arg(param, long);
     break;
-  case CURLOPT_MAXREDIRS:
-    /*
-     * The maximum amount of hops you allow curl to follow Location:
-     * headers. This should mostly be used to detect never-ending loops.
-     */
-    data->set.maxredirs = va_arg(param, long);
-    break;
-  case CURLOPT_USERAGENT:
-    /*
-     * String to use in the HTTP User-Agent field
-     */
-    data->set.useragent = va_arg(param, char *);
-    break;
-  case CURLOPT_ENCODING:
-    /*
-     * String to use at the value of Accept-Encoding header.
-     *
-     * If the encoding is set to "" we use an Accept-Encoding header that
-     * encompasses all the encodings we support.
-     * If the encoding is set to NULL we don't send an Accept-Encoding header
-     * and ignore an received Content-Encoding header.
-     *
-     */
-    data->set.encoding = va_arg(param, char *);
-    if(data->set.encoding && !*data->set.encoding)
-      data->set.encoding = (char*)ALL_CONTENT_ENCODINGS;
-    break;
-
-  case CURLOPT_HTTPAUTH:
-    /*
-     * Set HTTP Authentication type BITMASK.
-     */
-  {
-    long auth = va_arg(param, long);
-    /* switch off bits we can't support */
-#ifndef USE_SSLEAY
-    auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
-#endif
-#ifndef HAVE_GSSAPI
-    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI */
-#endif
-    if(!auth)
-      return CURLE_FAILED_INIT; /* no supported types left! */
-
-    data->set.httpauth = auth;
-  }
-  break;
-
-  case CURLOPT_PROXYAUTH:
-    /*
-     * Set HTTP Authentication type BITMASK.
-     */
-  {
-    long auth = va_arg(param, long);
-    /* switch off bits we can't support */
-#ifndef USE_SSLEAY
-    auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
-#endif
-#ifndef HAVE_GSSAPI
-    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI */
-#endif
-    if(!auth)
-      return CURLE_FAILED_INIT; /* no supported types left! */
-
-    data->set.proxyauth = auth;
-  }
-  break;
 
   case CURLOPT_USERPWD:
     /*
@@ -1262,22 +1287,22 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
           data->hostcache = data->share->hostcache;
         }
-
+#ifndef CURL_DISABLE_HTTP
         if(data->share->cookies) {
           /* use shared cookie list, first free own one if any */
           if (data->cookies)
             Curl_cookie_cleanup(data->cookies);
           data->cookies = data->share->cookies;
         }
-
+#endif   /* CURL_DISABLE_HTTP */
         Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
 
       }
-
+#ifndef CURL_DISABLE_HTTP
       /* check cookie list is set */
       if(!data->cookies)
         data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE );
-
+#endif   /* CURL_DISABLE_HTTP */
       /* check for host cache not needed,
        * it will be done by curl_easy_perform */
     }
@@ -1295,13 +1320,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Set private data pointer.
      */
     data->set.private = va_arg(param, char *);
-    break;
-
-  case CURLOPT_HTTP200ALIASES:
-    /*
-     * Set a list of aliases for HTTP 200 in response header
-     */
-    data->set.http200aliases = va_arg(param, struct curl_slist *);
     break;
 
   case CURLOPT_MAXFILESIZE:
