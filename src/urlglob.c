@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -222,15 +222,19 @@ GlobCode glob_word(URLGlob *glob, char *pattern, int pos, int *amount)
   *amount = 1; /* default is one single string */
 
   while (*pattern != '\0' && *pattern != '{' && *pattern != '[') {
-    if (*pattern == '}' || *pattern == ']') {
+    if (*pattern == '}' || *pattern == ']')
       return GLOB_ERROR;
-    }
-    if (*pattern == '\\') {		/* escape character, skip '\' */
+
+    /* only allow \ to escape known "special letters" */
+    if (*pattern == '\\' &&
+        (*(pattern+1) == '{' || *(pattern+1) == '[' ||
+         *(pattern+1) == '}' || *(pattern+1) == ']') ) {
+
+      /* escape character, skip '\' */
       ++pattern;
       ++pos;
-      if (*pattern == '\0') {		/* but no escaping of '\0'! */
+      if (*pattern == '\0')		/* but no escaping of '\0'! */
 	return GLOB_ERROR;
-      }
     }
     *buf++ = *pattern++;		/* copy character to literal */
     ++pos;
