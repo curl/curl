@@ -8,6 +8,9 @@
 
 
 Daniel (22 December 2004)
+- Rune Kleveland fixed a minor memory leak for received cookies with the
+  (rare) version attribute set.
+
 - Marcin Konicki provided two configure fixes and a source fix to make curl
   build out-of-the-box on BeOS.
 
