@@ -6,6 +6,15 @@
 
                                History of Changes
 
+Daniel (19 January 2001)
+- Made the Location: parsers deal with any-length URLs. Thus I removed the last
+  code that restricts the length of URLs that curl supports.
+
+- Added a --globoff test case (#28) and it quickly identified a memory problem
+  in src/main.c that I took care of.
+
+Version 7.6-pre3
+
 Daniel (17 January 2001)
 - Made the two former files lib/download.c and lib/highlevel.c become the new
   lib/transfer.c which makes more sense. I also did the rename from Transfer()
