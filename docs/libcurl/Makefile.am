@@ -30,8 +30,8 @@ HTMLPAGES = curl_easy_cleanup.html curl_easy_getinfo.html		\
  curl_multi_perform.html curl_multi_remove_handle.html			\
  curl_share_cleanup.html curl_share_init.html curl_share_setopt.html	\
  libcurl.html libcurl-multi.html libcurl-easy.html libcurl-share.html	\
- libcurl-errors.html curl_easy_strerror.3 curl_multi_strerror.3		\
- curl_share_strerror.3
+ libcurl-errors.html curl_easy_strerror.html curl_multi_strerror.html \
+ curl_share_strerror.html
 
 PDFPAGES = curl_easy_cleanup.pdf curl_easy_getinfo.pdf			\
  curl_easy_init.pdf curl_easy_perform.pdf curl_easy_setopt.pdf		\
@@ -46,8 +46,8 @@ PDFPAGES = curl_easy_cleanup.pdf curl_easy_getinfo.pdf			\
  curl_multi_remove_handle.pdf curl_share_cleanup.pdf			\
  curl_share_init.pdf curl_share_setopt.pdf libcurl.pdf			\
  libcurl-multi.pdf libcurl-easy.pdf libcurl-share.pdf			\
- libcurl-errors.pdf curl_easy_strerror.3 curl_multi_strerror.3		\
- curl_share_strerror.3
+ libcurl-errors.pdf curl_easy_strerror.pdf curl_multi_strerror.pdf      \
+ curl_share_strerror.pdf
 
 CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
 
