@@ -68,28 +68,28 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     /* this is a type this share will share */
     type = va_arg(param, int);
     share->specifier |= (1<<type);
-    switch( type )
-    {
-      case CURL_LOCK_DATA_DNS:
-        if (!share->hostcache) {
-          share->hostcache = Curl_mk_dnscache();
-        }
-        break;
+    switch( type ) {
+    case CURL_LOCK_DATA_DNS:
+      if (!share->hostcache) {
+        share->hostcache = Curl_mk_dnscache();
+        if(!share->hostcache)
+          return CURLSHE_NOMEM;
+      }
+      break;
+      
+    case CURL_LOCK_DATA_COOKIE:
+      if (!share->cookies) {
+        share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE );
+        if(!share->cookies)
+          return CURLSHE_NOMEM;
+      }
+      break;
 
-      case CURL_LOCK_DATA_COOKIE:
-        if (!share->cookies) {
-          share->cookies = Curl_cookie_init(NULL, NULL, NULL, TRUE );
-        }
-        break;
+    case CURL_LOCK_DATA_SSL_SESSION: /* not supported (yet) */
+    case CURL_LOCK_DATA_CONNECT:     /* not supported (yet) */
 
-      case CURL_LOCK_DATA_SSL_SESSION:
-        break;
-
-      case CURL_LOCK_DATA_CONNECT:
-        break;
-
-      default:
-        return CURLSHE_BAD_OPTION;
+    default:
+      return CURLSHE_BAD_OPTION;
     }
     break;
 
