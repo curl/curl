@@ -90,7 +90,7 @@ int ProcessRequest(char *request)
 
   do {
     if(!strncasecmp("Content-Length:", line, 15))
-      contentlength = strtol(line, &line, 10);
+      contentlength = strtol(line+15, &line, 10);
 
     line = strchr(line, '\n');
     if(line)
