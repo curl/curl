@@ -1,0 +1,5 @@
+GET /want/data/110002.txt?coolsite=yes HTTP/1.0
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+

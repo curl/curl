@@ -1,0 +1,6 @@
+GET /want/12 HTTP/1.0
+Range: bytes=100-200
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+

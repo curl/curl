@@ -1,0 +1,5 @@
+HTTP/1.1 200 Read you
+Deleted: suppose we got a header like this! ;-)
+
+blabla custom request result
+

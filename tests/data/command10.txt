@@ -1,0 +1,3 @@
+http://%HOSTIP:%HOSTPORT/we/want/10 -T data/command10.txt
+
+

@@ -1,0 +1,6 @@
+HTTP/1.4 200 OK
+Fake: yes
+Fake: yes
+Fake: yes
+
+Repeated nonsense-headers

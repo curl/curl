@@ -1,0 +1,4 @@
+http://%HOSTIP:%HOSTPORT/want/15 --write-out '%{url_effective} %{http_code} %{size_download}\n'
+
+
+
