@@ -15,20 +15,20 @@ EXTRA_DIST = README
 CYGBUILD = 1
 
 # Cygwin tarball build dir (fully-qualified name, gets deleted when done)
-cygwintmp = $(CURDIR)/cygwinbin-builddir
+cygwintmp = $(CURDIR)/tmp_binbuild
 
 cygwinbin:
 	rm -rf $(cygwintmp)
 	$(MAKE) -C $(top_builddir) install-strip prefix=$(cygwintmp)/usr
 	$(mkinstalldirs) $(cygwintmp)/usr/doc/Cygwin \
 	                 $(cygwintmp)/usr/doc/$(PACKAGE)-$(VERSION)
-	cd $(top_srcdir); \
-	  cp packages/Win32/cygwin/README \
+	cp $(srcdir)/README \
 	  $(cygwintmp)/usr/doc/Cygwin/$(PACKAGE)-$(VERSION)-$(CYGBUILD).README
-	cd $(top_srcdir) ; \
-	  cp CHANGES LEGAL MPL-1.1.txt README docs/FAQ docs/FEATURES docs/TODO \
+	cd $(top_srcdir) ; cp CHANGES LEGAL MPL-1.1.txt MITX.txt README \
+	  docs/FAQ docs/FEATURES docs/TODO \
 	  $(cygwintmp)/usr/doc/$(PACKAGE)-$(VERSION)
 	cd $(cygwintmp) ; \
 	  tar cjf $(PACKAGE)-$(VERSION)-$(CYGBUILD).tar.bz2 usr
 	mv $(cygwintmp)/$(PACKAGE)-$(VERSION)-$(CYGBUILD).tar.bz2 . \
 	  && rm -rf $(cygwintmp)
+

@@ -1,35 +1,37 @@
-Curl is a tool for transferring files with URL syntax, supporting FTP, FTPS,
- HTTP, HTTPS, GOPHER, TELNET, DICT, FILE and LDAP. Curl supports HTTPS 
- certificates, HTTP POST, HTTP PUT, FTP uploading, kerberos, HTTP form based
- upload, proxies, cookies, user+password authentication, file transfer resume,
- http proxy tunneling and a busload of other useful tricks.
- See /usr/doc/curl-<version>/FEATURES for more info.
+Curl is a tool for transferring files with URL syntax, supporting 
+  FTP, FTPS, HTTP, HTTPS, GOPHER, TELNET, DICT, FILE and LDAP.
+  Curl supports HTTPS certificates, HTTP POST, HTTP PUT, 
+  FTP uploading, kerberos, HTTP form based upload, proxies, 
+  cookies, user+password authentication, file transfer resume,
+  http proxy tunneling and a busload of other useful tricks.
 
-cURL (as of 7.9.1) builds 100% cleanly OOTB.
-
-The Cygwin specific source files (README and a Makefile for
- building binary tarballs) are not in a CYGWIN-PATCHES directory.
-They are at: <srctop>/packages/Win32/cygwin/
+See /usr/doc/curl-<version>/FEATURES for more info.
 
 
-Direct Dependencies:
-  OpenSSL 0.9.6b 
+Runtime Dependencies:
+  - Cygwin
+
+Compile-time Dependencies:
+  - OpenSSL 0.9.6b (*)
+
   (*) cURL can be built without SSL support:  ./configure --without-ssl
 
 
-Canonical Homepage:
+Canonical Homepage and Downloads:
   http://curl.haxx.se/
-
-
-Canonical Download:
   http://curl.haxx.se/download.html
 
 
-Build Instructions:
-  Download the source, move it to a location of your choosing, and then:
+Cygwin specific source files (a .README template and a Makefile
+  for building binary tarballs) are maintained in the upstream
+  CVS at: <srctop>/packages/Win32/cygwin/
 
-  $ tar xjf curl-<ver>-X-src.tar.bz2
-  $ cd curl-<ver>-X
+
+Build Instructions (as distributed via cygwin's setup.exe):
+  (NOTE: as of curl 7.9.1, compiles/tests 100% cleanly OOTB under cygwin)
+
+  Download the source, unpack it to a location of your choosing, and then:
+
   $ ./configure --prefix=/usr 
   $ make
   $ make test    # optional, requires perl
@@ -42,19 +44,45 @@ Build Instructions:
 
 
 Packaging Instructions:
-  To create a new binary tarball for cygwin's setup.exe, the first step is to
-  do a clean build (./configure and make). The 'make install' step is optional.
-  Then do:
+  ---BINARY---
+  Compile cleanly (./configure + make). Then:
 
-  $ cd curl-<ver>-X
-  $ make cygwinbin CYGBUILD=X 
+  $ make cygwinbin CYGBUILD=n
 
-  where "X" is the cygwin release number (e.g. the "-1" in curl-7.9.3-1).
-  If you leave off "CYGBUILD=X", X defaults to 1.
+  where n is the cygwin release number (e.g. the "1" in curl-7.9-1).
+  If you leave off "CYGBUILD=n", n defaults to 1.
   
-  Assuming everything worked properly, you'll find your cygwin
-  binary tarball in the curl-<ver>-X/packages/Win32/cygwin/ directory.
+  Assuming everything worked properly, you'll find your binary tarball
+  in the packages/Win32/cygwin/ sub-directory.
+
+  ---SOURCE---
+  1. unpack the pristine source into an otherwise empty directory
+  2. rename the source dir to add the "-$(REL)" suffix, e.g.:
+     $ mv curl-7.9 curl-7.9-1
+  3. add a CYGWIN-PATCHES directory, and add this readme to it
+     $ cd curl-7.9-$(REL); mkdir CYGWIN-PATCHES
+     $ cp packages/Win32/cygwin/README CYGWIN-PATCHES/curl-7.9-$(REL).README
+  4. if applicable, document any changes in the README file
+  5. create a patch which, when applied (patch -p1 < curl-7.9-$(REL).patch) 
+     will remove any patches you've applied:
+     $ cd ..
+     $ diff -Nrup (patched-src-dir) (pristine-src-dir) > curl-7.9-$(REL).patch
+     and then move it into the CYGWIN-PATCHES directory
+  6. repack
+
+  ---SETUP.HINT---
+  sdesc: "a client that groks URLs"
+  ldesc: "Curl is a tool for transferring files with URL syntax,
+  supporting FTP, FTPS, HTTP, HTTPS, GOPHER, TELNET, DICT, FILE 
+  and LDAP. Curl supports HTTPS certificates, HTTP POST, HTTP PUT, 
+  FTP uploading, kerberos, HTTP form based upload, proxies, 
+  cookies, user+password authentication, file transfer resume,
+  http proxy tunneling and a busload of other useful tricks."
+  category: Web Libs
+  requires: cygwin
 
 
-Cygwin port maintained by: 
+Cygwin port maintained by:
   Kevin Roth <kproth at bigfoot dot com>
+  Questions regarding cURL use should be directed to curl@contactor.se.
+  Questions regarding its packaging should be directed to cygwin@cygwin.com.
