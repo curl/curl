@@ -36,10 +36,6 @@ TODO
  * Option to set the SO_KEEPALIVE socket option to make libcurl notice and
    disconnect very long time idle connections.
 
- * When posting multipart forms, we should _not_ create the whole data chunk
-   in memory before the upload starts but do it in a "streaming" manner to
-   allow uploads that are way larger than the amount of system memory.
-
  LIBCURL - multi interface
 
  * Add curl_multi_timeout() to make libcurl's ares-functionality better.
@@ -88,9 +84,6 @@ TODO
    slightly too often.
 
  HTTP
-
- * GSS-Negotiate support for HTTP proxies. They only work on direct
-   connections to the server.
 
  * Pipelining. Sending multiple requests before the previous one(s) are done.
    This could possibly be implemented using the multi interface to queue
