@@ -47,7 +47,8 @@ dnl the code was bad, try a different program now, test 2
 #include <unistd.h>
 #include <stropts.h>
 ],[
-/* FIONBIO source test */
+/* FIONBIO source test (old-style unix) */
+ int socket;
  int flags = ioctl(socket, FIONBIO, &flags);
 ],[
 dnl FIONBIO test was good
@@ -62,28 +63,49 @@ dnl the code was bad, try a different program now, test 3
 #include <windows.h>
 ],[
 /* ioctlsocket source code */
+ int socket;
  int flags = ioctlsocket(socket, FIONBIO, &flags);
 ],[
 dnl ioctlsocket test was good
 nonblock="ioctlsocket"
 AC_DEFINE(HAVE_IOCTLSOCKET, 1, [use ioctlsocket() for non-blocking sockets])
 ],[
-dnl ioctlsocket didnt compile!
+dnl ioctlsocket didnt compile!, go to test 4
 
-  AC_TRY_COMPILE([
+  AC_TRY_LINK([
 /* headers for IoctlSocket test (Amiga?) */
 #include <sys/ioctl.h>
 ],[
 /* IoctlSocket source code */
+ int socket;
  int flags = IoctlSocket(socket, FIONBIO, (long)1);
 ],[
 dnl ioctlsocket test was good
 nonblock="IoctlSocket"
 AC_DEFINE(HAVE_IOCTLSOCKET_CASE, 1, [use Ioctlsocket() for non-blocking sockets])
 ],[
-dnl ioctlsocket didnt compile!
+dnl Ioctlsocket didnt compile, do test 5!
+  AC_TRY_COMPILE([
+/* headers for SO_NONBLOCK test (BeOS) */
+#include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
+],[
+/* SO_NONBLOCK source code */
+ long b = 1;
+ int socket;
+ int flags = setsockopt(socket, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
+],[
+dnl the SO_NONBLOCK test was good
+nonblock="SO_NONBLOCK"
+AC_DEFINE(HAVE_SO_NONBLOCK, 1, [use SO_NONBLOCK for non-blocking sockets])
+],[
+dnl test 5 didnt compile!
 nonblock="nada"
 AC_DEFINE(HAVE_DISABLED_NONBLOCKING, 1, [disabled non-blocking sockets])
+])
+dnl end of fifth test
+
 ])
 dnl end of forth test
 
