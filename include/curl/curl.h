@@ -164,6 +164,8 @@ typedef enum {
   CURLE_GOT_NOTHING,             /* 52 - when this is a specific error */
   CURLE_SSL_ENGINE_NOTFOUND,     /* 53 - SSL crypto engine not found */
   CURLE_SSL_ENGINE_SETFAILED,    /* 54 - can not set SSL crypto engine as default */
+  CURLE_SEND_ERROR,              /* 55 - failed sending network data */
+  CURLE_RECV_ERROR,              /* 56 - failure in receiving network data */
 
   CURL_LAST /* never use! */
 } CURLcode;
@@ -637,7 +639,7 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.9.6-pre3"
+#define LIBCURL_VERSION "7.9.6-pre4"
 #define LIBCURL_VERSION_NUM 0x070906
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
