@@ -6,6 +6,16 @@
 
                                History of Changes
 
+Daniel (29 June 2001)
+- Nic Roets brought a fix for the certificate verification when using SSL.
+
+Daniel (27 June 2001)
+- Made the FTP tests run OK even on machines running curl IPv6-enabled.
+
+- Troy Engel corrected some RPM package details.
+
+Version 7.8.1-pre2
+
 Daniel (25 June 2001)
 - Björn Stenberg correctly identified a problem that occurred when downloading
   several files with curl, and using resume. The first file's resume index was
@@ -13,6 +23,8 @@ Daniel (25 June 2001)
 
 - Anton Kalmykov provided a fix that makes curl work with form field names
   with spaces like when -F is used.
+
+Version 7.8.1-pre1
 
 Daniel (20 June 2001)
 - Mike Bytnar provided a fine report that proved that the --with-ssl option
