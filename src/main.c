@@ -61,11 +61,11 @@
 #endif
 
 #ifdef HAVE_UTIME_H
- #include <utime.h>
+#include <utime.h>
 #else
- #ifdef HAVE_SYS_UTIME_H
- #include <sys/utime.h>
- #endif
+#ifdef HAVE_SYS_UTIME_H
+#include <sys/utime.h>
+#endif
 #endif
 
 /* The last #include file should be: */
