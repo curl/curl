@@ -64,7 +64,7 @@ rm -rf %{builddir}
 %attr(0755,root,root) %{_bindir}/curl
 %attr(0644,root,root) %{_mandir}/man1/*
 %{_libdir}/libcurl.so*
-%doc CHANGES FILES LEGAL MITX.txt MPL-1.1.txt README docs/BUGS
+%doc CHANGES LEGAL MITX.txt MPL-1.1.txt README docs/BUGS
 %doc docs/CONTRIBUTE docs/FAQ docs/FEATURES docs/INSTALL docs/INTERNALS
 %doc docs/LIBCURL docs/MANUAL docs/README* docs/RESOURCES docs/TODO
 %doc docs/TheArtOfHttpScripting
