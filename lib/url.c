@@ -816,6 +816,9 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     free(conn->hostent_buf);
 #endif
 
+  if(conn->newurl)
+    free(conn->newurl);
+
   if(conn->path) /* the URL path part */
     free(conn->path);
 
@@ -2147,8 +2150,10 @@ CURLcode Curl_connect(struct UrlData *data,
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
     conn = (struct connectdata *)*in_connect;
-    if(conn)
+    if(conn) {
       Curl_disconnect(conn);      /* close the connection */
+      *in_connect = NULL;         /* return a NULL */
+    }
   }
   return code;
 }

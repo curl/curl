@@ -955,7 +955,7 @@ CURLcode Curl_perform(CURL *curl)
 
   } while(1); /* loop if Location: */
 
-  if(conn->newurl) {
+  if((CURLE_OK == res) && conn->newurl) {
     free(conn->newurl);
     conn->newurl = NULL;
   }
