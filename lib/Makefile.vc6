@@ -198,7 +198,8 @@ X_OBJS= \
 	$(DIROBJ)\strtok.obj \
 	$(DIROBJ)\connect.obj \
 	$(DIROBJ)\hash.obj \
-	$(DIROBJ)\llist.obj
+	$(DIROBJ)\llist.obj \
+	$(DIROBJ)\multi.obj
 
 all : $(TARGET)
 
