@@ -82,7 +82,8 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
   struct send_request *sendreq;
   struct iovec *vec;
   int i;
-  ssize_t count;
+  ssize_t scount;
+  int wcount;
   size_t n;
 
   for (i = 0; i < channel->nservers; i++)
@@ -110,21 +111,21 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
 	      vec[n].iov_len = sendreq->len;
 	      n++;
 	    }
-	  count = writev(server->tcp_socket, vec, n);
+	  wcount = writev(server->tcp_socket, vec, n);
 	  free(vec);
-	  if (count < 0)
+	  if (wcount < 0)
 	    {
 	      handle_error(channel, i, now);
 	      continue;
 	    }
 
 	  /* Advance the send queue by as many bytes as we sent. */
-	  while (count)
+	  while (wcount)
 	    {
 	      sendreq = server->qhead;
-	      if ((size_t)count >= sendreq->len)
+	      if ((size_t)wcount >= sendreq->len)
 		{
-		  count -= sendreq->len;
+		  wcount -= sendreq->len;
 		  server->qhead = sendreq->next;
 		  if (server->qhead == NULL)
 		    server->qtail = NULL;
@@ -132,8 +133,8 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
 		}
 	      else
 		{
-		  sendreq->data += count;
-		  sendreq->len -= count;
+		  sendreq->data += wcount;
+		  sendreq->len -= wcount;
 		  break;
 		}
 	    }
@@ -143,16 +144,16 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
 	  /* Can't allocate iovecs; just send the first request. */
 	  sendreq = server->qhead;
 
-          count = send(server->tcp_socket, sendreq->data, sendreq->len, 0);
+          scount = send(server->tcp_socket, sendreq->data, sendreq->len, 0);
 
-	  if (count < 0)
+	  if (scount < 0)
 	    {
 	      handle_error(channel, i, now);
 	      continue;
 	    }
 
 	  /* Advance the send queue by as many bytes as we sent. */
-	  if ((size_t)count == sendreq->len)
+	  if ((size_t)scount == sendreq->len)
 	    {
 	      server->qhead = sendreq->next;
 	      if (server->qhead == NULL)
@@ -161,8 +162,8 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
 	    }
 	  else
 	    {
-	      sendreq->data += count;
-	      sendreq->len -= count;
+	      sendreq->data += scount;
+	      sendreq->len -= scount;
 	    }
 	}
     }
