@@ -32,11 +32,11 @@ CURLcode curl_easy_setopt(CURL *handle, CURLoption option, parameter);
 curl_easy_setopt() is used to tell libcurl how to behave. By using the
 appropriate options to \fIcurl_easy_setopt\fP, you can change libcurl's
 behavior.  All options are set with the \fIoption\fP followed by a
-\fIparameter\fP. That parameter can be a long, a function pointer or an object
-pointer, all depending on what the specific option expects. Read this manual
-carefully as bad input values may cause libcurl to behave badly!  You can only
-set one option in each function call. A typical application uses many
-curl_easy_setopt() calls in the setup phase.
+\fIparameter\fP. That parameter can be a \fBlong\fP, a \fBfunction pointer\fP,
+an \fBobject pointer\fP or a \fBcurl_off_t\fP, depending on what the specific
+option expects. Read this manual carefully as bad input values may cause
+libcurl to behave badly!  You can only set one option in each function call. A
+typical application uses many curl_easy_setopt() calls in the setup phase.
 
 Options set with this function call are valid for all forthcoming transfers
 performed using this \fIhandle\fP.  The options are not in any way reset
@@ -723,8 +723,8 @@ Pass a long as parameter. It contains the offset in number of bytes that you
 want the transfer to start from. Set this option to 0 to make the transfer
 start from the beginning (effectively disabling resume).
 .IP CURLOPT_RESUME_FROM_LARGE
-Pass an curl_off_t as parameter. It contains the offset in number of bytes
-that you want the transfer to start from. (Added in 7.11.0)
+Pass a curl_off_t as parameter. It contains the offset in number of bytes that
+you want the transfer to start from. (Added in 7.11.0)
 .IP CURLOPT_CUSTOMREQUEST
 Pass a pointer to a zero terminated string as parameter. It will be user
 instead of GET or HEAD when doing an HTTP request, or instead of LIST or NLST
