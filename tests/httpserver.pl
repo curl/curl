@@ -3,20 +3,25 @@ use Socket;
 use Carp;
 use FileHandle;
 
+use strict;
+
 sub spawn;  # forward declaration
 sub logmsg { #print "$0 $$: @_ at ", scalar localtime, "\n"
  }
 
 my $port = $ARGV[0];
-my $proto = getprotobyname('tcp');
+my $proto = getprotobyname('tcp') || 6;
 $port = $1 if $port =~ /(\d+)/; # untaint port number
 
+my $protocol;
 if($ARGV[1] =~ /^ftp$/i) {
     $protocol="FTP";
 }
 else {
     $protocol="HTTP";
 }
+
+my $verbose=0; # set to 1 for debugging
 
 socket(Server, PF_INET, SOCK_STREAM, $proto)|| die "socket: $!";
 setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
@@ -40,18 +45,53 @@ sub REAPER {
 }
 
 # USER is ok in fresh state
-%commandok = ( "USER" => "fresh",
-               "PASS" => "passwd",
-               "PASV" => "loggedin",
-               );
+my %commandok = ( "USER" => "fresh",
+                  "PASS" => "passwd",
+                  # "PASV" => "loggedin", we can't handle PASV yet
+                  "PORT" => "loggedin",
+                  );
 
-%statechange = ( 'USER' => 'passwd',   # USER goes to passwd state
-                 'PASS' => 'loggedin', # PASS goes to loggedin state
-                 );
+my %statechange = ( 'USER' => 'passwd',    # USER goes to passwd state
+                    'PASS' => 'loggedin',  # PASS goes to loggedin state
+                    'PORT' => 'ported',    # PORT goes to ported
+                    );
 
-%displaytext = ('USER' => '331 We are happy you popped in!', # output FTP line
-                'PASS' => '230 Welcome you silly person',
-                );
+my %displaytext = ('USER' => '331 We are happy you popped in!', # output FTP line
+                   'PASS' => '230 Welcome you silly person',
+                   );
+
+my %commandfunc = ( 'PORT', \&PORT_command );
+
+sub PORT_command {
+    my $arg = $_[0];
+    print STDERR "fooo: $arg\n";
+
+    # "193,15,23,1,172,201"
+
+    if($arg !~ /(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/) {
+        print STDERR "bad PORT-line: $arg\n";
+        print "314 silly you, go away\r\n";
+        return 1;
+    }
+    my $iaddr = inet_aton("$1.$2.$3.$4");
+    my $paddr = sockaddr_in(($5<<8)+$6, $iaddr);
+    my $proto   = getprotobyname('tcp') || 6;
+
+    socket(SOCK, PF_INET, SOCK_STREAM, $proto) || die "major failure";
+    print STDERR "socket()\n";
+
+    connect(SOCK, $paddr)    || return 1;
+    print STDERR "connect()\n";
+
+    my $line;
+    while (defined($line = <SOCK>)) {
+        print STDERR $line;
+    }
+
+    close(SOCK);
+    print STDERR "close()\n";
+
+}
 
 $SIG{CHLD} = \&REAPER;
 
@@ -94,7 +134,7 @@ for ( $waitedpid = 0;
             "220-running the curl suite test server\r\n",
             "220 running the curl suite test server\r\n";
 
-            $state="fresh";
+            my $state="fresh";
 
             while(1) {
 
@@ -109,12 +149,13 @@ for ( $waitedpid = 0;
                         "badly formed command received: ".$_;
                     exit 0;
                 }
-                $FTPCMD=$1;
-                $full=$_;
+                my $FTPCMD=$1;
+                my $FTPARG=$2;
+                my $full=$_;
                  
                 print STDERR "GOT: ($1) $_\n";
 
-                $ok = $commandok{$FTPCMD};
+                my $ok = $commandok{$FTPCMD};
                 if($ok !~ /$state/) {
                     print "314 $FTPCMD not OK ($ok) in state: $state!\r\n";
                     exit;
@@ -125,15 +166,24 @@ for ( $waitedpid = 0;
                     print "314 Wwwwweeeeird internal error state: $state\r\n";
                     exit;
                 }
+
+                # see if the new state is a function caller.
+                my $func = $commandfunc{$FTPCMD};
+                if($func) {
+                    # it is!
+                    spawn \&$func($FTPARG);
+                }
+
                 print STDERR "gone to state $state\n";
 
-                $text = $displaytext{$FTPCMD};
+                my $text = $displaytext{$FTPCMD};
                 print "$text\r\n";
             }
             exit;
         }
         # otherwise, we're doing HTTP
 
+        my @headers;
         while(<STDIN>) {
             if($_ =~ /([A-Z]*) (.*) HTTP\/1.(\d)/) {
                 $request=$1;
@@ -144,6 +194,10 @@ for ( $waitedpid = 0;
                 $cl=$1;
             }
 
+            if($verbose) {
+                print STDERR "IN: $_";
+            }
+            
             push @headers, $_;
 
             if($left > 0) {
@@ -181,6 +235,7 @@ for ( $waitedpid = 0;
             # test number that this server will use to know what
             # contents to pass back to the client
             #
+            my $testnum;
             if($path =~ /.*\/(\d*)/) {
                 $testnum=$1;
             }
