@@ -4,23 +4,19 @@
 #
 .SUFFIXES: .exe
 
+include Makefile.inc
+
 WATT32_ROOT = $(subst \,/,$(WATT_ROOT))
+ZLIB_ROOT   = /dev/env/DJGPP/contrib/zlib
 
 CC      = gcc
 CFLAGS  = -O2 -Wall -DWATT32 -Dselect=select_s -I$(WATT32_ROOT)/inc
 LDFLAGS = -s
 EX_LIBS = $(WATT32_ROOT)/lib/libwatt.a
 
-SOURCE = ares_cancel.c ares_destroy.c ares_expand_name.c ares_expand_string.c ares_fds.c \
-         ares_free_hostent.c ares_free_string.c ares_gethostbyaddr.c ares_gethostbyname.c \
-         ares_init.c ares_mkquery.c ares_parse_a_reply.c ares_parse_ptr_reply.c \
-         ares_process.c ares_query.c ares_search.c ares_send.c ares_strerror.c \
-         ares_timeout.c ares__close_sockets.c ares__get_hostent.c ares__read_line.c \
-         ares_version.c
-
 OBJ_DIR = djgpp
 
-OBJECTS = $(addprefix $(OBJ_DIR)/, $(SOURCE:.c=.o))
+OBJECTS = $(addprefix $(OBJ_DIR)/, $(CSOURCES:.c=.o))
 
 
 all: $(OBJ_DIR) libcares.a ahost.exe adig.exe
@@ -50,7 +46,7 @@ $(OBJ_DIR)/%.o: %.c
 	@echo
 
 depend:
-	$(CC) -MM $(CFLAGS) $(SOURCE) | \
+	$(CC) -MM $(CFLAGS) $(CSOURCES) | \
 	sed -e 's/^\([a-zA-Z0-9_-]*\.o:\)/$$(OBJ_DIR)\/\1/' > depend.dj
 
 -include depend.dj
