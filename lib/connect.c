@@ -336,7 +336,7 @@ static CURLcode bindlocal(struct connectdata *conn,
         Curl_resolv_unlock(data, h);
         /* we don't need it anymore after this function has returned */
 
-        if( bind(sockfd, addr->ai_addr, addr->ai_addrlen) >= 0) {
+        if( bind(sockfd, addr->ai_addr, (socklen_t)addr->ai_addrlen) >= 0) {
           /* we succeeded to bind */
 #ifdef ENABLE_IPV6
           struct sockaddr_in6 add;
