@@ -1,8 +1,13 @@
-Date: 15 March 2000
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
 
-             Frequently Asked Questions about Curl
+FAQ
 
-1. Problems connecting to SSL servers.
+Problems connecting to SSL servers.
+===================================
 
   It took a very long time before I could sort out why curl had problems
   to connect to certain SSL servers when using SSLeay or OpenSSL v0.9+.
@@ -17,11 +22,13 @@ Date: 15 March 2000
   I have also seen examples where the remote server didn't like the SSLv2
   request and instead you had to force curl to use SSLv3 with -3/--sslv3.
 
-2. Does curl support resume?
+Does curl support resume?
+=========================
 
   Yes. Both ways on FTP, download ways on HTTP.
 
-3. Is libcurl thread safe?
+Is libcurl thread safe?
+=======================
 
   Yes, as far as curl's own code goes. It does use system calls that often
   aren't thread safe in most environments, such as gethostbyname().
@@ -30,7 +37,8 @@ Date: 15 March 2000
   README file from those who have used libcurl in a threaded environment,
   since I haven't and I get this question more and more frequently!
 
-4. Why doesn't my posting using -F work?
+Why doesn't my posting using -F work?
+=====================================
 
   You can't simply use -F or -d at your choice. The web server that will
   receive your post assumes one of the formats. If the form you're trying to
@@ -38,3 +46,14 @@ Date: 15 March 2000
   use the -F type. In all the most common cases, you should use -d which then
   causes a posting with the type 'application/x-www-form-urlencoded'.
 
+Does curl support custom FTP commands?
+======================================
+
+  Yes it does, you can tell curl to perform optional commands both before
+  and/or after a file transfer. Study the -Q/--quote option.
+
+  Since curl is used for file transfers, you don't use curl to just perform
+  ftp commands without transfering anything. Therefore you must always specify
+  a URL to transfer to/from even when doing custom FTP commands.
+
+  
