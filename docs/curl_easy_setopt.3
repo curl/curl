@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "6 March 2001" "libcurl 7.5" "libcurl Manual"
+.TH curl_easy_setopt 3 "12 March 2001" "libcurl 7.7" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -25,6 +25,13 @@ many curl_easy_setopt() calls in the setup phase.
 NOTE: strings passed to libcurl as 'char *' arguments, will not be copied by
 the library. Instead you should keep them available until libcurl no longer
 needs them. Failing to do so will cause very odd behaviour or even crashes.
+
+More note: the options set with this function call are valid for the
+forthcoming data transfers that are performed when you invoke
+.I curl_easy_perform .
+The options are not in any way reset between transfers, so if you want
+subsequent transfers with different options, you must change them between the
+transfers.
 
 The
 .I "handle"

@@ -58,8 +58,15 @@ Portability
  you to init the winsock stuff before you use the libcurl functions. Details
  on this are noted on the curl_easy_init() man page.
 
- (*) = it appears users of the cygwin environment gets this done
+ (*) = it appears as if users of the cygwin environment get this done
        automatically.
+
+Threads
+
+ Never *ever* call curl-functions simultaneously using the same handle from
+ several threads. libcurl is thread-safe and can be used in any number of
+ threads, but you must use separate curl handles if you want to use libcurl in
+ more than one thread simultaneously.
 
 Persistant Connections
 
