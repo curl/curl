@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (5 February 2005)
+- Eric Vergnaud found a use of an uninitialised variable in the ftp when doing
+  PORT on ipv6-enabled hosts.
+
+- David Byron pointed out we could use BUFSIZE to read data (in
+  lib/transfer.c) instead of using BUFSIZE -1.
+
 Version 7.13.0 (1 February 2005)
 
 Daniel (31 January 2005)
