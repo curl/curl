@@ -61,6 +61,27 @@ while test $# -gt 0; do
 	if test "@IPV6_ENABLED@" = "1"; then
           echo "IPv6"
         fi
+	if test "@CURL_DISABLE_HTTP@" = "1"; then
+          echo "HTTP-disabled"
+        fi
+	if test "@CURL_DISABLE_FTP@" = "1"; then
+          echo "FTP-disabled"
+        fi
+	if test "@CURL_DISABLE_GOPHER@" = "1"; then
+          echo "GOPHER-disabled"
+        fi
+	if test "@CURL_DISABLE_FILE@" = "1"; then
+          echo "FILE-disabled"
+        fi
+	if test "@CURL_DISABLE_TELNET@" = "1"; then
+          echo "TELNET-disabled"
+        fi
+	if test "@CURL_DISABLE_LDAP@" = "1"; then
+          echo "LDAP-disabled"
+        fi
+	if test "@CURL_DISABLE_DICT@" = "1"; then
+          echo "DICT-disabled"
+        fi
 	;;
 
     --version)

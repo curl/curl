@@ -60,8 +60,8 @@ dnl lame option to switch on debug options
 dnl
 AC_MSG_CHECKING([whether to enable debug options])
 AC_ARG_ENABLE(debug,
-[  --enable-debug		Enable pedantic debug options
-  --disable-debug		Disable debug options],
+[  --enable-debug	Enable pedantic debug options
+  --disable-debug	Disable debug options],
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -75,6 +75,119 @@ AC_ARG_ENABLE(debug,
        AC_MSG_RESULT(no)
 )
 
+dnl ************************************************************
+dnl switch off particular protocols
+dnl
+AC_MSG_CHECKING([whether to support http])
+AC_ARG_ENABLE(http,
+[  --enable-http		Enable HTTP support
+  --disable-http	Disable HTTP support],
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_HTTP)
+       AC_MSG_WARN([disable HTTP disables FTP over proxy and GOPHER too])
+       AC_DEFINE(CURL_DISABLE_GOPHER)
+       AC_SUBST(CURL_DISABLE_HTTP)
+       AC_SUBST(CURL_DISABLE_GOPHER)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+AC_MSG_CHECKING([whether to support ftp])
+AC_ARG_ENABLE(ftp,
+[  --enable-ftp		Enable FTP support
+  --disable-ftp	Disable FTP support],
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_FTP)
+       AC_SUBST(CURL_DISABLE_FTP)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+AC_MSG_CHECKING([whether to support gopher])
+AC_ARG_ENABLE(gopher,
+[  --enable-gopher		Enable GOPHER support
+  --disable-gopher	Disable GOPHER support],
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_GOPHER)
+       AC_SUBST(CURL_DISABLE_GOPHER)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+AC_MSG_CHECKING([whether to support file])
+AC_ARG_ENABLE(file,
+[  --enable-file		Enable FILE support
+  --disable-file	Disable FILE support],
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_FILE)
+       AC_SUBST(CURL_DISABLE_FILE)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+AC_MSG_CHECKING([whether to support ldap])
+AC_ARG_ENABLE(ldap,
+[  --enable-ldap		Enable LDAP support
+  --disable-ldap	Disable LDAP support],
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_LDAP)
+       AC_SUBST(CURL_DISABLE_LDAP)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+AC_MSG_CHECKING([whether to support dict])
+AC_ARG_ENABLE(dict,
+[  --enable-dict		Enable DICT support
+  --disable-dict	Disable DICT support],
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_DICT)
+       AC_SUBST(CURL_DISABLE_DICT)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+AC_MSG_CHECKING([whether to support telnet])
+AC_ARG_ENABLE(telnet,
+[  --enable-telnet		Enable TELNET support
+  --disable-telnet	Disable TELNET support],
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_TELNET)
+       AC_SUBST(CURL_DISABLE_TELNET)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+
 dnl **********************************************************************
 dnl Checks for IPv6
 dnl **********************************************************************
@@ -82,7 +195,7 @@ dnl **********************************************************************
 AC_MSG_CHECKING([whether to enable ipv6])
 AC_ARG_ENABLE(ipv6,
 [  --enable-ipv6		Enable ipv6 (with ipv4) support
-  --disable-ipv6		Disable ipv6 support],
+  --disable-ipv6	Disable ipv6 support],
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
