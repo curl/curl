@@ -935,7 +935,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
  * be dead. Most commonly this happens when the server has closed the
  * connection due to inactivity.
  */
-static bool SocketIsDead(int sock) 
+static bool SocketIsDead(struct connectdata *conn, int sock) 
 { 
   int sval; 
   bool ret_val = TRUE; 
@@ -949,9 +949,17 @@ static bool SocketIsDead(int sock)
   to.tv_usec = 1; 
 
   sval = select(sock + 1, &check_set, 0, 0, &to);
-  if(sval == 0) 
+  if(sval == 0) {
     /* timeout */
-    ret_val = FALSE; 
+    ret_val = FALSE;
+#ifdef USE_SSLEAY
+    /* the socket seems fine, but is the SSL later fine too? */
+    if(conn->ssl.use) {
+      if(SSL_get_shutdown(conn->ssl.handle))
+        return TRUE; /* this connection is dead! */
+    }
+#endif
+  }
   
   return ret_val;
 }
@@ -994,7 +1002,7 @@ ConnectionExists(struct SessionHandle *data,
             continue;
           }
         }
-        dead = SocketIsDead(check->firstsocket);
+        dead = SocketIsDead(check, check->firstsocket);
         if(dead) {
           infof(data, "Connection %d seems to be dead!\n", i);
           Curl_disconnect(check); /* disconnect resources */
