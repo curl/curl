@@ -58,7 +58,8 @@ getenv.c       ldap.h         ssluse.h       \
 escape.c       mprintf.c      telnet.c       \
 escape.h       getpass.c      netrc.c        telnet.h       \
 getinfo.c transfer.c strequal.c strequal.h easy.c \
-security.h security.c krb4.c krb4.h memdebug.c memdebug.h inet_ntoa_r.h
+security.h security.c krb4.c krb4.h memdebug.c memdebug.h inet_ntoa_r.h \
+http_chunks.c http_chunks.h
 
 noinst_HEADERS = setup.h transfer.h
 
