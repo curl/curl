@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "17 Oct 2003" "Curl 7.10.8" "Curl Manual"
+.TH curl 1 "22 Oct 2003" "Curl 7.10.8" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -90,8 +90,8 @@ file format.
 
 .B NOTE
 that the file specified with -b/--cookie is only used as input. No cookies
-will be stored in the file. To store cookies, save the HTTP headers to a file
-using -D/--dump-header!
+will be stored in the file. To store cookies, use the -c/--cookie-jar option
+or you could even save the HTTP headers to a file using -D/--dump-header!
 
 If this option is set more than once, the last one will be the one that's
 used.
@@ -224,9 +224,10 @@ If this option is used several times, each occurrence will toggle this on/off.
 .IP "-D/--dump-header <file>"
 Write the protocol headers to the specified file.
 
-This option is handy to use when you want to store the cookies that a HTTP
-site sends to you. The cookies could then be read in a second curl invoke by
-using the -b/--cookie option!
+This option is handy to use when you want to store the headers that a HTTP
+site sends to you. Cookies from the headers could then be read in a second
+curl invoke by using the -b/--cookie option! The -c/--cookie-jar option is
+however a better way to store cookies.
 
 When used on FTP, the ftp server response lines are considered being "headers"
 and thus are saved there.
