@@ -1,0 +1,41 @@
+#############################################################################
+#                                  _   _ ____  _     
+#  Project                     ___| | | |  _ \| |    
+#                             / __| | | | |_) | |    
+#                            | (__| |_| |  _ <| |___ 
+#                             \___|\___/|_| \_\_____|
+#
+# $Id$
+#
+
+# What to call the final executable
+TARGET = example
+
+# Which object files that the executable consists of
+OBJS= ftpget.o
+
+# What compiler to use
+CC = gcc
+
+# Compiler flags, -g for debug, -c to make an object file
+CFLAGS = -c -g
+
+# This should point to a directory that holds libcurl, if it isn't
+# in the system's standard lib dir
+# We also set a -L to include the directory where we have the openssl
+# libraries
+LDFLAGS = -L/home/dast/lib -L/usr/local/ssl/lib
+
+# We need -lcurl for the curl stuff
+# We need -lsocket and -lnsl when on Solaris
+# We need -lssl and -lcrypto when using libcurl with SSL support
+# We need -ldl for dlopen() if that is in libdl
+LIBS = -lcurl -lsocket -lnsl -lssl -lcrypto -dl
+
+# Link the target with all objects and libraries
+$(TARGET) : $(OBJS)
+	$(CC) $(LDFLAGS) $(LIBS) -o $(TARGET) $(OBJS)
+
+# Compile the source files into object files
+ftpget.o : ftpget.c
+	$(CC) $(CFLAGS) $<
