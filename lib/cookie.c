@@ -198,7 +198,7 @@ Curl_cookie_add(struct CookieInfo *c,
 
     if(NULL == co->domain)
       /* no domain given in the header line, set the default now */
-      co->domain=strdup(domain);
+      co->domain=domain?strdup(domain):NULL;
   }
   else {
     /* This line is NOT a HTTP header style line, we do offer support for
