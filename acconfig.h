@@ -85,3 +85,6 @@
 
 /* Define to disable TELNET */
 #undef CURL_DISABLE_TELNET
+
+/* Define if you have zlib present */
+#undef HAVE_LIBZ

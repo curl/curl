@@ -522,20 +522,21 @@ dnl NOTE:  We *always* look for ZLIB headers & libraries, all this option
 dnl        does is change where we look (by adjusting LIBS and CPPFLAGS.)
 dnl
 
-dnl AC_MSG_CHECKING(where to look for ZLIB)
-dnl if test X"$OPT_ZLIB" = Xno
-dnl then
-dnl 	AC_MSG_RESULT([defaults (or given in environment)])
-dnl else
-dnl	test X"$OPT_ZLIB" = Xyes && OPT_ZLIB=/usr/local
-dnl	LIBS="$LIBS -L$OPT_ZLIB/lib"
-dnl	CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
-dnl	AC_MSG_RESULT([$OPT_ZLIB])
-dnl fi
+AC_MSG_CHECKING(where to look for ZLIB)
+if test X"$OPT_ZLIB" = Xno
+then
+	AC_MSG_RESULT([defaults (or given in environment)])
+else
+	test X"$OPT_ZLIB" = Xyes && OPT_ZLIB=/usr/local
+	LIBS="$LIBS -L$OPT_ZLIB/lib"
+	CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
+	AC_MSG_RESULT([$OPT_ZLIB])
+fi
 
-dnl z lib?
 dnl AC_CHECK_FUNC(gzread, , AC_CHECK_LIB(z, gzread))
-
+AC_CHECK_LIB(z, gzread, [AM_CONDITIONAL(CONTENT_ENCODING, true) 
+		         AC_DEFINE(HAVE_LIBZ)
+			 LIBS="$LIBS -lz"])
 
 dnl Default is to try the thread-safe versions of a few functions
 OPT_THREAD=on
@@ -606,7 +607,7 @@ AC_CHECK_HEADERS( \
 )
 
 dnl Check for libz header
-dnl AC_CHECK_HEADERS(zlib.h)
+AC_CHECK_HEADERS(zlib.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

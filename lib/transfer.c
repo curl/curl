@@ -82,6 +82,8 @@
 #include <curl/types.h>
 #include "netrc.h"
 
+#include "content_encoding.h"   /* content encoding support. 08/27/02 jhrg */
+
 #include "hostip.h"
 #include "transfer.h"
 #include "sendf.h"
@@ -368,7 +370,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                * we got: "417 Expectation Failed" this means:
                * we have made a HTTP call and our Expect Header
                * seems to cause a problem => abort the write operations
-               * (or prevent them from starting
+               * (or prevent them from starting).
                */
               k->write_after_100_header = FALSE;
               k->keepon &= ~KEEP_WRITE;
@@ -575,6 +577,34 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             /* init our chunky engine */
             Curl_httpchunk_init(conn);
           }
+          else if (strnequal("Content-Encoding:", k->p, 17) &&
+                   data->set.encoding) {
+            /*
+             * Process Content-Encoding. Look for the values: identity, gzip,
+             * defalte, compress, x-gzip and x-compress. x-gzip and
+             * x-compress are the same as gzip and compress. (Sec 3.5 RFC
+             * 2616). zlib cannot handle compress, and gzip is not currently
+             * implemented. However, errors are handled further down when the
+             * response body is processed 08/27/02 jhrg */
+            char *start;
+
+            /* Find the first non-space letter */
+            for(start=k->p+18;
+                *start && isspace((int)*start);
+                start++);
+
+            /* Record the content-encoding for later use. 08/27/02 jhrg */
+            if (strnequal("identity", start, 8))
+              k->content_encoding = IDENTITY;
+            else if (strnequal("deflate", start, 7))
+              k->content_encoding = DEFLATE;
+            else if (strnequal("gzip", start, 4) 
+                     || strnequal("x-gzip", start, 6))
+              k->content_encoding = GZIP;
+            else if (strnequal("compress", start, 8) 
+                     || strnequal("x-compress", start, 10))
+              k->content_encoding = COMPRESS;
+          }
           else if (strnequal("Content-Range:", k->p, 14)) {
             if (sscanf (k->p+14, " bytes %d-", &k->offset) ||
                 sscanf (k->p+14, " bytes: %d-", &k->offset)) {
@@ -737,6 +767,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
            * the name says read, this function both reads and writes away
            * the data. The returned 'nread' holds the number of actual
            * data it wrote to the client.  */
+          /* Handle chunking here? 08/27/02 jhrg */
           CHUNKcode res =
             Curl_httpchunk_read(conn, k->str, nread, &nread);
 
@@ -776,8 +807,39 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             
         if(!conn->bits.chunk && nread) {
           /* If this is chunky transfer, it was already written */
-          result = Curl_client_write(data, CLIENTWRITE_BODY, k->str,
-                                     nread);
+
+          /* This switch handles various content encodings. If there's an
+             error here, be sure to check over the almost identical code in
+             http_chunk.c. 08/29/02 jhrg */
+#ifdef HAVE_LIBZ
+          switch (k->content_encoding) {
+            case IDENTITY:
+#endif
+              /* This is the default when the server sends no
+                 Content-Encoding header. See Curl_readwrite_init; the
+                 memset() call initializes k->content_encoding to zero.
+                 08/28/02 jhrg */
+              result = Curl_client_write(data, CLIENTWRITE_BODY, k->str, 
+                                         nread);
+#ifdef HAVE_LIBZ
+              break;
+
+            case DEFLATE: 
+              /* Assume CLIENTWRITE_BODY; headers are not encoded. */
+              result = Curl_unencode_deflate_write(data, k, nread);
+              break;
+
+            case GZIP:          /* FIXME 08/27/02 jhrg */
+            case COMPRESS:
+            default:
+              failf (data, "Unrecognized content encoding type. "
+                     "libcurl understands `identity' and `deflate' "
+                     "content encodings.");
+              result = CURLE_BAD_CONTENT_ENCODING;
+              break;
+          }
+#endif
+
           if(result)
             return result;
         }
@@ -954,6 +1016,8 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   struct SessionHandle *data = conn->data;
   struct Curl_transfer_keeper *k = &conn->keep;
 
+  /* NB: the content encoding software depends on this initialization of
+     Curl_transfer_keeper. 08/28/02 jhrg */
   memset(k, 0, sizeof(struct Curl_transfer_keeper));
 
   k->start = Curl_tvnow(); /* start time */

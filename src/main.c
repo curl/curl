@@ -352,8 +352,10 @@ static void help(void)
        "    --cacert <file> CA certifciate to verify peer against (SSL)\n"
        "    --capath <directory> CA directory (made using c_rehash) to verify\n"
        "                    peer against (SSL, NOT Windows)\n"
-       "    --ciphers <list> What SSL ciphers to use (SSL)");
+       "    --ciphers <list> What SSL ciphers to use (SSL)\n"
+       "    --compressed    Request a compressed response (using deflate).");
   puts("    --connect-timeout <seconds> Maximum time allowed for connection\n"
+       "    --crlf          Convert LF to CRLF in upload. Useful for MVS (OS/390)\n"
        " -f/--fail          Fail silently (no output at all) on errors (H)\n"
        " -F/--form <name=content> Specify HTTP POST data (H)\n"
        " -g/--globoff       Disable URL sequences and ranges using {} and []\n"
@@ -408,8 +410,7 @@ static void help(void)
        " -1/--tlsv1         Force usage of TLSv1 (H)\n"
        " -2/--sslv2         Force usage of SSLv2 (H)\n"
        " -3/--sslv3         Force usage of SSLv3 (H)");
-  puts(" -#/--progress-bar  Display transfer progress as a progress bar\n"
-       "    --crlf          Convert LF to CRLF in upload. Useful for MVS (OS/390)");
+  puts(" -#/--progress-bar  Display transfer progress as a progress bar");
 }
 
 struct LongShort {
@@ -427,6 +428,7 @@ struct Configurable {
   char *cookiejar;  /* write to this file */
   char *cookiefile; /* read from this file */
   bool cookiesession; /* new session? */
+  bool encoding;    /* Accept-Encoding please */
   bool use_resume;
   bool resume_from_current;
   bool disable_epsv;
@@ -999,6 +1001,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5g", "trace",      TRUE},
     {"5h", "trace-ascii", TRUE},
     {"5i", "limit-rate", TRUE},
+    {"5j", "compressed",  FALSE}, /* might take an arg someday */
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1213,6 +1216,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           config->sendpersecond = value;
         }
         break;
+
+      case 'j': /* --compressed */
+ 	config->encoding ^= TRUE;
+ 	break;
+
       default: /* the URL! */
         {
           struct getout *url;
@@ -2805,6 +2813,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         config->conf |= CONF_VERBOSE; /* force verbose */
       }
       curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
+
+      /* new in curl 7.10 */
+      curl_easy_setopt(curl, CURLOPT_ENCODING, 
+                       (config->encoding) ? "deflate" : NULL);
 
       res = curl_easy_perform(curl);
         

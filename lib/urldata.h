@@ -82,6 +82,10 @@
 
 #include "http_chunks.h" /* for the structs and enum stuff */
 
+#ifdef HAVE_ZLIB_H
+#include <zlib.h> 		/* for content-encoding 08/28/02 jhrg */
+#endif
+
 /* Download buffer size, keep it fairly big for speed reasons */
 #define BUFSIZE CURL_MAX_WRITE_SIZE
 
@@ -241,6 +245,20 @@ struct Curl_transfer_keeper {
                                    we received a 100-continue/timeout
                                    or directly */
 
+  /* for content-encoding 08/28/02 jhrg */
+  int content_encoding;  	/* What content encoding. sec 3.5, RFC2616. */
+
+#define IDENTITY 0		/* No encoding */
+#define DEFLATE 1		/* zlib delfate [RFC 1950 & 1951] */
+#define GZIP 2			/* gzip algorithm [RFC 1952] */
+#define COMPRESS 3		/* Not handled, added for completeness */
+
+#ifdef HAVE_LIBZ
+  bool zlib_init;		/* True if zlib already initialized;
+				   undefined if Content-Encdoing header. */
+  z_stream z;			/* State structure for zlib. */
+#endif
+
   /* for the low speed checks: */
   time_t timeofdoc;
   long bodywrites;
@@ -365,6 +383,7 @@ struct connectdata {
   struct dynamically_allocated_data {
     char *proxyuserpwd; /* free later if not NULL! */
     char *uagent; /* free later if not NULL! */
+    char *accept_encoding; /* free later if not NULL! 08/28/02 jhrg */
     char *userpwd; /* free later if not NULL! */
     char *rangeline; /* free later if not NULL! */
     char *ref; /* free later if not NULL! */
@@ -423,6 +442,8 @@ struct connectdata {
   bool do_more; /* this is set TRUE if the ->curl_do_more() function is
                    supposed to be called, after ->curl_do() */
 };
+
+/* The end of connectdata. 08/27/02 jhrg */
 
 /*
  * Struct to keep statistical and informational data.
@@ -593,6 +614,7 @@ struct UserDefined {
   bool free_referer; /* set TRUE if 'referer' points to a string we
                         allocated */
   char *useragent;   /* User-Agent string */
+  char *encoding;    /* Accept-Encoding string 08/28/02 jhrg */
   char *postfields;  /* if POST, set the fields' values here */
   size_t postfieldsize; /* if POST, this might have a size to use instead of
                            strlen(), and then the data *may* be binary (contain

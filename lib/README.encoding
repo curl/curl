@@ -1,0 +1,53 @@
+
+		    Content Encoding Support for libcurl
+
+* About content encodings: 
+
+HTTP/1.1 [RFC 2616] specifies that a client may request that a server encode
+its response. This is usually used to compress a response using one of a set
+of commonly available compression techniques. These schemes are `deflate'
+(the zlib algorithm), `gzip' and `compress' [sec 3.5, RFC 2616]. A client
+requests that the sever perform an encoding by including an Accept-Encoding
+header in the request document. The value of the header should be one of the
+recognized tokens `deflate', ... (there's a way to register new
+schemes/tokens, see sec 3.5 of the spec). A server MAY honor the client's
+encoding request. When a response is encoded, the server includes a
+Content-Encoding header in the response. The value of the Content-Encoding
+header indicates which scheme was used to encode the data.
+
+A client may tell a server that it can understand several different encoding
+schemes. In this case the server may choose any one of those and use it to
+encode the response (indicating which one using the Content-Encoding header).
+It's also possible for a client to attach priorities to different schemes so
+that the server knows which it prefers. See sec 14.3 of RFC 2616 for more
+information on the Accept-Encoding header.
+
+* Current support for content encoding:
+
+I added support for the 'deflate' content encoding to both libcurl and curl.
+Both regular and chunked transfers should work although I've tested only the
+former. The library zlib is required for this feature. Places where I
+modified the source code are commented and typically include my initials and
+the date (e.g., 08/29/02 jhrg).
+
+* The libcurl interface:
+
+To cause libcurl to request a content encoding use: 
+
+    curl_easy_setopt(curl, CURLOPT_ENCODING, <string>) 
+
+where <string> is the intended value of the Accept-Encoding header.
+
+Currently, libcurl only understands how to process responses that use the
+`deflate' Content-Encoding, so the only value for CURLOPT_ENCODING that will
+work (besides "identity," which does nothing) is "deflate." If a response is
+encoded using either the `gzip' or `compress' methods, libcurl will return an
+error indicating that the response could not be decoded. If <string> is null
+or empty no Accept-Encoding header is generated.
+
+* The curl interface:
+
+Use the --compressed option with curl to cause it to ask servers to compress
+responses using deflate. 
+
+James Gallagher <jgallagher@gso.uri.edu>

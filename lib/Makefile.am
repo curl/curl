@@ -7,7 +7,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	    \
        Makefile.vc6 Makefile.riscos libcurl.def dllinit.c curllib.dsp	    \
        curllib.dsw config-vms.h config-win32.h config-riscos.h config-mac.h \
-       config.h.in ca-bundle.crt
+       config.h.in ca-bundle.crt README.encoding
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -45,6 +45,8 @@ libcurl_la_LDFLAGS = -version-info 2:2:0
 # set age to 0.
 #
 
+# I could not get conditional compilation using LIBADD or LDADD and
+# EXTRA_..._SOURCES to work. 08/28/02 jhrg
 libcurl_la_SOURCES = \
 arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c \
 base64.c       file.h         hostip.c       progress.c     timeval.h \
@@ -60,7 +62,7 @@ escape.h       getpass.c      netrc.c        telnet.h       \
 getinfo.c getinfo.h transfer.c strequal.c strequal.h easy.c \
 security.h security.c krb4.c krb4.h memdebug.c memdebug.h inet_ntoa_r.h \
 http_chunks.c http_chunks.h strtok.c strtok.h connect.c connect.h \
-llist.c llist.h hash.c hash.h multi.c share.c share.h
+llist.c llist.h hash.c hash.h multi.c content_encoding.c
 
 noinst_HEADERS = setup.h transfer.h
 

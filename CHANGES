@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (2 Sep 2002)
+- James Gallagher added Content-Encoding support to libcurl so now curl and
+  libcurl-using apps can request compressed contents using the 'deflate'
+  method. See the special file lib/README.encoding for details.
+
+  curl --compressed is now used to request compressed contents.
+
 Daniel (30 Aug 2002)
 - Applied an anonymous SOCKS5-proxy patch. Not properly working in all
   situations though, as all getaddrinfo()-using libcurls will fail on this.

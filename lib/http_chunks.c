@@ -33,6 +33,8 @@
 #include "urldata.h" /* it includes http_chunks.h */
 #include "sendf.h"   /* for the client write stuff */
 
+#include "content_encoding.h"   /* 08/29/02 jhrg */
+
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
@@ -172,7 +174,32 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       piece = (ch->datasize >= length)?length:ch->datasize;
 
       /* Write the data portion available */
-      result = Curl_client_write(conn->data, CLIENTWRITE_BODY, datap, piece);
+      /* Added content-encoding here; untested but almost identical to the
+         tested code in transfer.c. 08/29/02 jhrg */
+#ifdef HAVE_LIBZ
+      switch (conn->keep.content_encoding) {
+        case IDENTITY:
+#endif
+          result = Curl_client_write(conn->data, CLIENTWRITE_BODY, datap,
+                                     piece);
+#ifdef HAVE_LIBZ
+          break;
+
+        case DEFLATE: 
+          result = Curl_unencode_deflate_write(conn->data, &conn->keep, piece);
+          break;
+
+        case GZIP:
+        case COMPRESS:
+        default:
+          failf (conn->data,
+                 "Unrecognized content encoding type. "
+                 "libcurl understands `identity' and `deflate' "
+                 "content encodings.");
+          return CHUNKE_BAD_ENCODING;
+      }
+#endif
+
       if(result)
         return CHUNKE_WRITE_ERROR;
       *wrote += piece;

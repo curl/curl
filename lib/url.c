@@ -303,7 +303,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
   data->set.ssl.verifyhost = 2;
 #ifdef CURL_CA_BUNDLE
   /* This is our prefered CA cert bundle since install time */
-  data->set.ssl.CAfile = CURL_CA_BUNDLE;
+  data->set.ssl.CAfile = (char *)CURL_CA_BUNDLE;
 #endif
 
 
@@ -781,6 +781,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.useragent = va_arg(param, char *);
     break;
+  case CURLOPT_ENCODING:
+    /*
+     * String to use at the value of Accept-Encoding header. 08/28/02 jhrg
+     */
+    data->set.encoding = va_arg(param, char *);
+    break;
+
   case CURLOPT_USERPWD:
     /*
      * user:password to use in the operation
@@ -1127,6 +1134,8 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     free(conn->allocptr.uagent);
   if(conn->allocptr.userpwd)
     free(conn->allocptr.userpwd);
+  if(conn->allocptr.accept_encoding)
+    free(conn->allocptr.accept_encoding);
   if(conn->allocptr.rangeline)
     free(conn->allocptr.rangeline);
   if(conn->allocptr.ref)
@@ -2715,6 +2724,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
   }
 
+    if(data->set.encoding) {
+      if(conn->allocptr.accept_encoding)
+        free(conn->allocptr.accept_encoding);
+      conn->allocptr.accept_encoding =
+        aprintf("Accept-Encoding: %s\015\012", data->set.encoding);
+    }
   conn->bytecount = 0;
   conn->headerbytecount = 0;
   
