@@ -28,7 +28,11 @@ CLEANFILES = hugehelp.c
 NROFF=@NROFF@
 
 EXTRA_DIST = mkhelp.pl curlmsg.msg \
-	Makefile.vc6 Makefile.b32 Makefile.m32 config.h.in
+	Makefile.vc6 Makefile.b32 Makefile.m32 config.h.in \
+	macos/curl.mcp.xml.sit.hqx \
+	macos/MACINSTALL.TXT \
+	macos/src/curl_GUSIConfig.cpp \
+	macos/src/macos_main.cpp
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
