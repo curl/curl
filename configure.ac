@@ -695,7 +695,7 @@ AC_HELP_STRING([--without-ssl], [disable SSL]),
 
 if test X"$OPT_SSL" = Xno
 then
-  AC_MSG_WARN(SSL/https support disabled)  
+  AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more])  
 else
 
   dnl Check for and handle argument to --with-ssl.
