@@ -853,6 +853,9 @@ CURLcode Curl_http(struct connectdata *conn)
           return CURLE_HTTP_POST_ERROR;
         }
         add_buffer(req_buffer, contentType, linelength);
+
+        /* make the request end in a true CRLF */
+        add_buffer(req_buffer, "\r\n", 2);
       }
 
       /* set upload size to the progress meter */
