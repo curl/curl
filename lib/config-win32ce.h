@@ -1,8 +1,8 @@
 /* config.h.  Generated automatically by configure.  */
 /* config.h.in.  Generated automatically from configure.in by autoheader.  */
 
-#ifndef __CONFIG_WIN32_H
-#define __CONFIG_WIN32_H
+#ifndef __CONFIG_WIN32CE_H
+#define __CONFIG_WIN32CE_H
 
 /* Define if on AIX 3.
    System headers sometimes define this.
@@ -40,7 +40,7 @@
 #endif
 
 /* Borland lacks _lseeki64(), so we don't support >2GB files */
-#define SIZEOF_CURL_OFF_T 4 
+#define SIZEOF_CURL_OFF_T 4
 
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
@@ -49,7 +49,7 @@
 /* #define TIME_WITH_SYS_TIME 1 */
 
 /* Define cpu-machine-OS */
-#define OS "i386-pc-win32"
+#define OS "i386-pc-win32ce"
 
 /* The number of bytes in a long double.  */
 #define SIZEOF_LONG_DOUBLE 16
