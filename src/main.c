@@ -362,6 +362,8 @@ static void help(void)
     " -r/--range <range> Retrieve a byte range from a HTTP/1.1 or FTP server",
     "    --random-file <file> File for reading random data from (SSL)",
     " -R/--remote-time   Set the remote file's time on the local output",
+    "    --retry <num>   Retry request <num> times if transient problems occur",
+    "    --retry-delay <seconds> When retrying, wait this many seconds between each",
     " -s/--silent        Silent mode. Don't output anything",
     " -S/--show-error    Show error. With -s, make curl show errors when they occur",
     "    --socks <host[:port]> Use SOCKS5 proxy on given host + port",
@@ -445,13 +447,10 @@ struct Configurable {
   char *proxy;
   bool proxytunnel;
   long conf;
-
   struct getout *url_list; /* point to the first node */
   struct getout *url_last; /* point to the last/current node */
-
   struct getout *url_get;  /* point to the node to fill in URL */
   struct getout *url_out;  /* point to the node to fill in outfile */
-
   char *cipher_list;
   char *cert;
   char *cert_type;
@@ -468,7 +467,6 @@ struct Configurable {
   FILE *trace_stream;
   bool trace_fopened;
   bool trace_ascii;
-
   long httpversion;
   bool progressmode;
   bool nobuffer;
@@ -480,29 +478,21 @@ struct Configurable {
   bool proxyntlm;
   bool proxydigest;
   bool proxybasic;
-
   char *writeout; /* %-styled format string to output */
   bool writeenv; /* write results to environment, if available */
-
   FILE *errors; /* if stderr redirect is requested */
   bool errors_fopened;
-
   struct curl_slist *quote;
   struct curl_slist *postquote;
   struct curl_slist *prequote;
-
   long ssl_version;
   long ip_version;
   curl_TimeCond timecond;
   time_t condtime;
-
   struct curl_slist *headers;
-
   struct curl_httppost *httppost;
   struct curl_httppost *last_post;
-
   struct curl_slist *telnet_options;
-
   HttpReq httpreq;
 
   /* for bandwidth limiting features: */
@@ -512,10 +502,11 @@ struct Configurable {
   size_t lastsendsize;
   struct timeval lastrecvtime;
   size_t lastrecvsize;
-
   bool ftp_ssl;
   char *socks5proxy;
   bool tcp_nodelay;
+  long req_retry;   /* number of retries */
+  long retry_delay; /* delay between retries (in seconds) */
 };
 
 /* global variable to hold info about libcurl */
@@ -1197,6 +1188,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$d", "tcp-nodelay",FALSE},
     {"$e", "proxy-digest", FALSE},
     {"$f", "proxy-basic", FALSE},
+    {"$g", "retry",      TRUE},
+    {"$h", "retry-delay", TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1531,6 +1524,14 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'f': /* --proxy-basic */
         config->proxybasic ^= TRUE;
+        break;
+      case 'g': /* --retry */
+        if(str2num(&config->req_retry, nextarg))
+          return PARAM_BAD_NUMERIC;
+        break;
+      case 'h': /* --retry-delay */
+        if(str2num(&config->retry_delay, nextarg))
+          return PARAM_BAD_NUMERIC;
         break;
       }
       break;
@@ -2299,6 +2300,8 @@ struct OutStruct {
   char *filename;
   FILE *stream;
   struct Configurable *config;
+  curl_off_t bytes; /* amount written so far */
+  curl_off_t init;  /* original size (non-zero when appending) */
 };
 
 static int my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
@@ -2366,6 +2369,11 @@ static int my_fwrite(void *buffer, size_t sz, size_t nmemb, void *stream)
   }
 
   rc = fwrite(buffer, sz, nmemb, out->stream);
+
+  if((int)(sz * nmemb) == rc) {
+    /* we added this amount of data to the output */
+    out->bytes += (sz * nmemb);
+  }
 
   if(config->nobuffer)
     /* disable output buffering */
@@ -2731,6 +2739,9 @@ static void FindWin32CACert(struct Configurable *config,
 
 #endif
 
+#define RETRY_SLEEP_DEFAULT 1000  /* ms */
+#define RETRY_SLEEP_MAX     600000 /* ms == 10 minutes */
+
 static int
 operate(struct Configurable *config, int argc, char *argv[])
 {
@@ -2771,6 +2782,11 @@ operate(struct Configurable *config, int argc, char *argv[])
   int res = 0;
   int i;
   int up; /* upload file counter within a single upload glob */
+  int retry_sleep_default = config->retry_delay?
+    config->retry_delay*1000:RETRY_SLEEP_DEFAULT; /* ms */
+  int retry_numretries;
+  int retry_sleep = retry_sleep_default;
+  long response;
 
   char *env;
 #ifdef CURLDEBUG
@@ -2974,6 +2990,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     /* default output stream is stdout */
     outs.stream = stdout;
     outs.config = config;
+    outs.bytes = 0; /* nothing written yet */
 
     /* save outfile pattern before expansion */
     outfiles = urlnode->outfile?strdup(urlnode->outfile):NULL;
@@ -3105,6 +3122,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           outs.filename = outfile;
 
           if(config->resume_from) {
+            outs.init = config->resume_from;
             /* open file for output: */
             outs.stream=(FILE *) fopen(outfile, config->resume_from?"ab":"wb");
             if (!outs.stream) {
@@ -3471,7 +3489,107 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
         }
 
-        res = curl_easy_perform(curl);
+        retry_numretries = config->req_retry;
+
+        do {
+          res = curl_easy_perform(curl);
+
+          if(retry_numretries) {
+            enum {
+              RETRY_NO,
+              RETRY_TIMEOUT,
+              RETRY_HTTP,
+              RETRY_FTP,
+              RETRY_LAST /* not used */
+            } retry = RETRY_NO;
+            if(CURLE_OPERATION_TIMEDOUT == res)
+              /* retry timeout always */
+              retry = RETRY_TIMEOUT;
+            else if(CURLE_OK == res) {
+              /* Check for HTTP transient errors */
+              char *url=NULL;
+              curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url);
+              if(url &&
+                 curlx_strnequal(url, "http", 4)) {
+                /* This was HTTP(S) */
+                curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+
+                switch(response) {
+                case 500: /* Internal Server Error */
+                case 502: /* Bad Gateway */
+                case 503: /* Service Unavailable */
+                case 504: /* Gateway Timeout */
+                  retry = RETRY_HTTP;
+                  /*
+                   * At this point, we have already written data to the output
+                   * file (or terminal). If we write to a file, we must rewind
+                   * or close/re-open the file so that the next attempt starts
+                   * over from the beginning.
+                   *
+                   * TODO: similar action for the upload case. We might need
+                   * to start over reading from a previous point if we have
+                   * uploaded something when this was returned.
+                   */
+                  break;
+                }
+              }
+            } /* if CURLE_OK */
+            else if(CURLE_FTP_USER_PASSWORD_INCORRECT == res) {
+              curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+
+              if(response/100 == 5)
+                /*
+                 * This is typically when the FTP server only allows a certain
+                 * amount of users and we are not one of them. It mostly
+                 * returns 530 in this case, but all 5xx codes are transient.
+                 */
+                retry = RETRY_FTP;
+            }
+
+            if(retry) {
+              if(!(config->conf&CONF_MUTE)) {
+                static const char *m[]={NULL,
+                                        "timeout",
+                                        "HTTP error",
+                                        "FTP error"
+                };
+                fprintf(stderr, "Transient problem: %s\n"
+                        "Will retry in %d seconds. "
+                        "%d retries left.\n",
+                        m[retry],
+                        retry_sleep/1000,
+                        retry_numretries);
+              }
+              go_sleep(retry_sleep);
+              retry_numretries--;
+              if(!config->retry_delay) {
+                retry_sleep *= 2;
+                if(retry_sleep > RETRY_SLEEP_MAX)
+                  retry_sleep = RETRY_SLEEP_MAX;
+              }
+              if(outs.bytes && outs.filename) {
+                /* We have written data to a output file, we truncate file
+                 */
+                if(!(config->conf&CONF_MUTE))
+                  fprintf(stderr, "Throwing away " CURL_FORMAT_OFF_T
+                          " bytes\n", outs.bytes);
+                fflush(outs.stream);
+                /* truncate file at the position where we started appending */
+                ftruncate( fileno(outs.stream), outs.init);
+                /* now seek to the end of the file, the position where we
+                   just truncated the file */
+                fseek(outs.stream, 0, SEEK_END);
+                outs.bytes = 0; /* clear for next round */
+              }
+              continue;
+            }
+          } /* if retry_numretries */
+
+          /* In all ordinary cases, just break out of loop here */
+          retry_sleep = retry_sleep_default;
+          break;
+
+        } while(1);
 
         if((config->progressmode == CURL_PROGRESS_BAR) &&
            progressbar.calls) {

@@ -1,0 +1,30 @@
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP response 530 after PASS, temporarily not allowed access
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/195
+</command>
+<file name="log/ftpserver.cmd">
+REPLY PASS 530 temporarily not available
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+10
+</errorcode>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+</protocol>
+</verify>

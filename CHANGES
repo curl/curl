@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (27 October 2004)
+- Added a --retry option to curl that takes a numerical option for the number
+  of times the operation should be retried. It is retried if a transient error
+  is detected or if a timeout occurred. By default, it will first wait one
+  second between the retries and then double the delay time between each retry
+  until the delay time is ten minutes which then will be the delay time
+  between all forthcoming retries. You can set a static delay time with
+  "--retry-delay [num]" where [num] is the number of seconds to wait between
+  each retry.
+
 Daniel (25 October 2004)
 - Tomas Pospisek filed bug report #1053287 that proved -C - and --fail on a
   file that was already completely downloaded caused an error, while it
