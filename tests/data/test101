@@ -27,8 +27,11 @@ ftp://%HOSTIP:%FTPPORT/ -P %HOSTIP
 
 # Verify data after the test has been "shot"
 <verify>
+# strip all kinds of PORT, EPRT and LPRT curl can do
 <strip>
 ^PORT 127,0,0,1,.*
+^EPRT.*
+^LPRT.*
 </strip>
 <protocol>
 USER anonymous
