@@ -1007,7 +1007,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                             &bytes_written);       /* actually send away */
         if(result)
           return result;
-        else if(conn->upload_present != bytes_written) {
+
+        if(data->set.verbose)
+          /* show the data before we change the pointer upload_fromhere */
+          Curl_debug(data, CURLINFO_DATA_OUT, conn->upload_fromhere,
+                     bytes_written);
+      
+        if(conn->upload_present != bytes_written) {
           /* we only wrote a part of the buffer (if anything), deal with it! */
 
           /* store the amount of bytes left in the buffer to write */
@@ -1031,11 +1037,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             writedone = TRUE;
           }
         }
-
-        if(data->set.verbose)
-          Curl_debug(data, CURLINFO_DATA_OUT, conn->upload_fromhere,
-                     bytes_written);
-      
 
         k->writebytecount += bytes_written;
         Curl_pgrsSetUploadCounter(data, (double)k->writebytecount);
