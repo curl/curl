@@ -984,7 +984,7 @@ case "$LIBIDN" in
          curl_idn_msg="enabled"
          dnl different versions of libidn have different setups of these:
          AC_CHECK_FUNCS( idn_free idna_strerror tld_strerror)
-         AC_CHECK_HEADERS( idn-free.h )
+         AC_CHECK_HEADERS( idn-free.h tld.h )
        fi
                     
        ;; 
