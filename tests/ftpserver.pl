@@ -45,7 +45,7 @@ listen(Server,SOMAXCONN) || die "listen: $!";
 
 #print "FTP server started on port $port\n";
 
-open(PID, ">.ftpserver.pid");
+open(PID, ">.ftp.pid");
 print PID $$;
 close(PID);
 

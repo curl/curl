@@ -8,7 +8,9 @@
 
 use strict;
 
-use stunnel;
+@INC=(@INC, $ENV{'srcdir'}, ".");
+
+require "stunnel.pm";
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $HOSTIP="127.0.0.1";
@@ -34,10 +36,10 @@ my $TESTCASES="all";
 # No variables below this point should need to be modified
 #
 
-my $HTTPPIDFILE=".server.pid";
+my $HTTPPIDFILE=".http.pid";
 my $HTTPSPIDFILE=".https.pid";
-my $FTPPIDFILE=".ftps.pid";
-my $FTPSPIDFILE=".ftpsserver.pid";
+my $FTPPIDFILE=".ftp.pid";
+my $FTPSPIDFILE=".ftps.pid";
 
 # this gets set if curl is compiled with memory debugging:
 my $memory_debug=0;
@@ -191,11 +193,22 @@ sub runftpserver {
 
     if ($pid <= 0) {
         my $flag=$debugprotocol?"-v ":"";
+
+        # verify that our server is NOT running on this port:
+        my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver`;
+
+        if ( $data =~ /WE ROOLZ/ ) {
+            print "A previous FTP server session is already running and we ",
+            "can't kill it!\n";
+            exit;
+        }
+
         if($debugprotocol) {
             print "* Starts ftp server verbose:\n";
             print "perl $srcdir/ftpserver.pl $flag $FTPPORT &\n";
         }
         system("perl $srcdir/ftpserver.pl $flag $FTPPORT &");
+
         if($verbose) {
             print "ftpd started\n";
         }
@@ -475,6 +488,7 @@ sub singletest {
     $cmd =~ s/%HTTPSPORT/$HTTPSPORT/g;
     $cmd =~ s/%FTPPORT/$FTPPORT/g;
     $cmd =~ s/%FTPSPORT/$FTPSPORT/g;
+    $cmd =~ s/%SRCDIR/$srcdir/g;
     #$cmd =~ s/%HOSTNAME/$HOSTNAME/g;
 
     if($memory_debug) {

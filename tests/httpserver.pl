@@ -33,7 +33,7 @@ if($verbose) {
     print "HTTP server started on port $port\n";
 }
 
-open(PID, ">.server.pid");
+open(PID, ">.http.pid");
 print PID $$;
 close(PID);
 
