@@ -11,14 +11,19 @@
 #include <curl/curl.h>
 
 struct Cookie {
-   struct Cookie *next; /* next in the chain */
-   char *name;        /* <this> = value */
-   char *value;       /* name = <this> */
-   char *path;	      /* path = <this> */
-   char *domain;      /* domain = <this> */
-   time_t expires;    /* expires = <this> */
-   char *expirestr;  /* the plain text version */
-   bool secure;       /* whether the 'secure' keyword was used */
+  struct Cookie *next; /* next in the chain */
+  char *name;        /* <this> = value */
+  char *value;       /* name = <this> */
+  char *path;	      /* path = <this> */
+  char *domain;      /* domain = <this> */
+  time_t expires;    /* expires = <this> */
+  char *expirestr;   /* the plain text version */
+  
+  /* RFC 2109 keywords. Version=1 means 2109-compliant cookie sending */
+  char *version;     /* Version = <value> */
+  char *maxage;      /* Max-Age = <value> */
+  
+  bool secure;       /* whether the 'secure' keyword was used */
 };
 
 struct CookieInfo {

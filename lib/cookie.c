@@ -101,6 +101,7 @@ struct Cookie *cookie_add(struct CookieInfo *c,
       *semiptr='\0'; /* zero terminate for a while */
       /* we have a <what>=<this> pair or a 'secure' word here */
       if(strchr(ptr, '=')) {
+        name[0]=what[0]=0; /* init the buffers */
         if(2 == sscanf(ptr, "%" MAX_NAME_TXT "[^=]=%"
                        MAX_COOKIE_LINE_TXT "[^\r\n]",
                        name, what)) {
@@ -110,6 +111,23 @@ struct Cookie *cookie_add(struct CookieInfo *c,
           }
           else if(strequal("domain", name)) {
             co->domain=strdup(what);
+          }
+          else if(strequal("version", name)) {
+            co->version=strdup(what);
+          }
+          else if(strequal("max-age", name)) {
+            /* Defined in RFC2109:
+
+               Optional.  The Max-Age attribute defines the lifetime of the
+               cookie, in seconds.  The delta-seconds value is a decimal non-
+               negative integer.  After delta-seconds seconds elapse, the
+               client should discard the cookie.  A value of zero means the
+               cookie should be discarded immediately.
+
+             */
+            co->maxage = strdup(what);
+            co->expires =
+              atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]);
           }
           else if(strequal("expires", name)) {
             co->expirestr=strdup(what);
@@ -263,6 +281,11 @@ struct Cookie *cookie_add(struct CookieInfo *c,
           free(clist->path);
         if(clist->expirestr)
           free(clist->expirestr);
+
+        if(clist->version)
+          free(clist->version);
+        if(clist->maxage)
+          free(clist->maxage);
 
         *clist = *co;  /* then store all the new data */
       }
@@ -447,6 +470,11 @@ void cookie_cleanup(struct CookieInfo *c)
 	    free(co->path);
 	 if(co->expirestr)
 	    free(co->expirestr);
+
+	 if(co->version)
+	    free(co->version);
+	 if(co->maxage)
+	    free(co->maxage);
 
 	 next = co->next;
 	 free(co);
