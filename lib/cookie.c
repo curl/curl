@@ -347,7 +347,13 @@ Curl_cookie_add(struct CookieInfo *c,
       /* the names are identical */
 
       if(clist->domain && co->domain) {
-        if(strequal(clist->domain, co->domain))
+        if(strequal(clist->domain, co->domain) ||
+           (clist->domain[0]=='.' &&
+            strequal(&(clist->domain[1]), co->domain)) ||
+           (co->domain[0]=='.' &&
+            strequal(clist->domain, &(co->domain[1]))) )
+          /* The domains are identical, or at least identical if you skip the
+             preceeding dot */
           replace_old=TRUE;
       }
       else if(!clist->domain && !co->domain)
