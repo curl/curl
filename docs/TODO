@@ -101,5 +101,3 @@ For the future
 
  * HTTP POST resume using Range:
 
- * Make curl capable of verifying the server's certificate when connecting
-   with HTTPS://.
