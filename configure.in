@@ -801,6 +801,7 @@ AC_OUTPUT( Makefile \
            perl/Makefile \
            perl/Curl_easy/Makefile \
            php/Makefile \
-           php/examples/Makefile
+           php/examples/Makefile \
+           curl-config
 )
 
