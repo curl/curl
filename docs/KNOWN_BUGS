@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* Test case 241 fails on all systems that support IPv6 but that don't have the
+  host name 'ip6-localhost' in /etc/hosts (or similar) since the test case
+  uses that host name to test the IPv6 name to address resolver.
+
 * Test case 165 might fail on system which has libidn present, but with an
   old iconv version (2.1.3 is a known bad version), since it doesn't recognize
   the charset when named ISO8859-1. Changing the name to ISO-8859-1 makes the
