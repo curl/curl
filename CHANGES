@@ -7,6 +7,19 @@
                                   Changelog
 
 
+Daniel (6 November)
+- Unitialized variable fix, reported by both Marty Kuhrt and Benjamin Gerard.
+
+- Matt Veenstra provided build files to build libcurl as a "framework" under
+  Mac OS X. See the lib/libcurl.framework.make for details.
+
+- Removed the defines of TRUE and FALSE from the curl/curl.h header file.
+  They're not in our name space so we should not fiddle with them.
+
+Daniel (5 November)
+- Replaced the man page to HTML converter program with a new one:
+  roffit. Makes nicer web pages.
+
 Daniel (4 November)
 - Troels Walsted Hansen fixed the MSVC makefiles to let them build curl fine
   on Windows.
