@@ -600,8 +600,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
 }
 
 
-
-static CURLCode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
+static CURLcode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 {
   struct curl_slist *item;
   ssize_t            nread;
