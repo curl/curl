@@ -27,6 +27,10 @@ before comparing with the one actually received by the client
 <size>
 number to return on a ftp SIZE command (set to -1 to make this command fail)
 </size>
+<mdtm>
+what to send back if the client sends a (FTP) MDTM command, set to -1 to
+have it return that the file doesn't exist
+</mdtm>
 <cmd>
 special purpose server-command to control its behavior *before* the
 reply is sent
