@@ -1,0 +1,34 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 302 This is a weirdo text message
+Connection: close
+Location:  
+
+This server reply is for testing
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+HTTP with blank Location:
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/want/54 -L
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /want/54 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
