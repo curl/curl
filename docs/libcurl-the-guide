@@ -65,6 +65,8 @@ Building
     possibly together with a few other features that can be on and off on
     different libcurls.
 
+    See also the "Features libcurl Provides" further down.
+
 
 Portable Code in a Portable World
 
@@ -117,15 +119,23 @@ Global Preparation
  avoided. They should only be called once each.
 
 
+Features libcurl Provides
+
+ It is considered best-practise to determine libcurl features run-time rather
+ than build-time (if possible of course). By calling curl_version_info() and
+ checking tout he details of the returned struct, your program can figure out
+ exactly what the currently running libcurl supports.
+
+
 Handle the Easy libcurl
 
- libcurl version 7 is oriented around the so called easy interface. All
- operations in the easy interface are prefixed with 'curl_easy'.
+ libcurl first introduced the so called easy interface. All operations in the
+ easy interface are prefixed with 'curl_easy'.
 
- Future libcurls will also offer the multi interface. More about that
- interface, what it is targeted for and how to use it is still only debated on
- the libcurl mailing list and developer web pages. Join up to discuss and
- figure out!
+ Recent libcurl versions also offer the multi interface. More about that
+ interface, what it is targeted for and how to use it is detailed in a
+ separate chapter further down. You still need to understand the easy
+ interface first, so please continue reading for better understanding.
 
  To use the easy interface, you must first create yourself an easy handle. You
  need one handle for each easy session you want to perform. Basicly, you
@@ -1101,10 +1111,6 @@ Security Considerations
     information with faked data.
 
 
-SSL, Certificates and Other Tricks
-
- [ seeding, passwords, keys, certificates, ENGINE, ca certs ]
-
 Multiple Transfers Using the multi Interface
 
  The easy interface as described in detail in this document is a synchronous
@@ -1115,12 +1121,63 @@ Multiple Transfers Using the multi Interface
  multiple files in both directions at the same time, without forcing you to
  use multiple threads.
 
- [fill in lots of more multi stuff here]
+ To use this interface, you are better off if you first understand the basics
+ of how to use the easy interface. The multi interface is simply a way to make
+ multiple transfers at the same time, by adding up multiple easy handles in to
+ a "multi stack".
 
-Future
+ You create the easy handles you want and you set all the options just like
+ you have been told above, and then you create a multi handle with
+ curl_multi_init() and add all those easy handles to that multi handle with
+ curl_multi_add_handle().
 
- [ sharing between handles, mutexes, pipelining ]
+ When you've added the handles you have for the moment (you can still add new
+ ones at any time), you start the transfers by call curl_multi_perform().
 
+ curl_multi_perform() is asynchronous. It will only execute as little as
+ possible and then return back control to your program. It is designed to
+ never block. If it returns CURLM_CALL_MULTI_PERFORM you better call it again
+ soon, as that is a signal that it still has local data to send or remote data
+ to receive.
+
+ The best usage of this interface is when you do a select() on all possible
+ file descriptors or sockets to know when to call libcurl again. This also
+ makes it easy for you to wait and respond to actions on your own
+ application's sockets/handles. You figure out what to select() for by using
+ curl_multi_fdset(), that fills in a set of fd_set variables for you with the
+ particular file descriptors libcurl uses for the moment.
+
+ When you then call select(), it'll return when one of the file handles signal
+ action and you then call curl_multi_perform() to allow libcurl to do what it
+ wants to do. Take note that libcurl does also feature some time-out code so
+ we advice you to never use very long timeouts on select() before you call
+ curl_multi_perform(), which thus should be called unconditionally every now
+ and then even if none of its file descriptors have signalled ready. Another
+ precation you should use: always call curl_multi_fdset() immediately before
+ the select() call since the current set of file descriptors may change when
+ calling a curl function.
+
+ If you want to stop the transfer of one of the easy handles in the stack, you
+ can use curl_multi_remove_handle() to remove individual easy
+ handles. Remember that easy handles should be curl_easy_cleanup()ed.
+
+ When a transfer within the multi stack has finished, the counter of running
+ transfers (as filled in by curl_multi_perform()) will decrease. When the
+ number reaches zero, all transfers are done.
+
+ curl_multi_info_read() can be used to get information about completed
+ transfers. It then returns the CURLcode for each easy transfer, to allow you
+ to figure out success on each individual transfer.
+
+
+SSL, Certificates and Other Tricks
+
+ [ seeding, passwords, keys, certificates, ENGINE, ca certs ]
+
+
+Sharing Data Between Easy Handles
+
+ [ fill in ]
 
 -----
 Footnotes:
