@@ -297,13 +297,15 @@ int
 Curl_sec_read_msg(struct connectdata *conn, char *s, int level)
 {
   int len;
-  char *buf;
+  unsigned char *buf;
   int code;
 
-  buf = malloc(strlen(s));
-  len = Curl_base64_decode(s + 4, buf); /* XXX */
+  len = Curl_base64_decode(s + 4, &buf); /* XXX */
+  if(len > 0)
+    len = (conn->mech->decode)(conn->app_data, buf, len, level, conn);
+  else
+    return -1;
 
-  len = (conn->mech->decode)(conn->app_data, buf, len, level, conn);
   if(len < 0) {
     free(buf);
     return -1;
@@ -314,10 +316,10 @@ Curl_sec_read_msg(struct connectdata *conn, char *s, int level)
   if(buf[3] == '-')
     code = 0;
   else
-    sscanf(buf, "%d", &code);
+    sscanf((char *)buf, "%d", &code);
   if(buf[len-1] == '\n')
     buf[len-1] = '\0';
-  strcpy(s, buf);
+  strcpy(s, (char *)buf);
   free(buf);
   return code;
 }
