@@ -3,6 +3,21 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* test case 57 has </test> that should be </client> but when corrected, the
+  test case fails!
+
+* 1. create a multi handle
+  2. add an easy handle
+  3. fetch a URL that is persistent (leaves the connection alive)
+  4. remove the easy handle from the multi
+  5. kill the multi handle
+  6. create a multi handle
+  7. add the same easy handle to the new multi handle
+  8. fetch a URL from the same server as before (re-using the connection)
+
+  Use valgrind to see the memory problems when libcurl assumes that the DNS
+  data lives as long as the connection
+
 * FTP URLs passed to curl may contain NUL (0x00) in the RFC 1738 <user>,
   <password>, and <fpath> components, encoded as "%00".  The problem is that
   curl_unescape does not detect this, but instead returns a shortened C
