@@ -1,4 +1,4 @@
-Updated: March 23, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: April 22, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -32,7 +32,7 @@ FAQ
   3.6 Does curl support javascript, ASP, XML, XHTML or HTML version Y?
   3.7 Can I use curl to delete/rename a file through FTP?
   3.8 How do I tell curl to follow HTTP redirects?
-  3.9 How do I use curl in PHP?
+  3.9 How do I use curl in PHP, Perl, Tcl, Ruby or Java?
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
  4. Running Problems
@@ -47,7 +47,7 @@ FAQ
    4.5.4 "404 Not Found"
    4.5.5 "405 Method Not Allowed"
   4.6 Can you tell me what error code 142 means?
-  4.7 How do I keep usernames and passwords secret in Curl command lines?
+  4.7 How do I keep user names and passwords secret in Curl command lines?
   4.8 I found a bug!
   4.9 Curl can't authenticate to the server that requires NTLM?
 
@@ -57,7 +57,7 @@ FAQ
   5.3 How do I fetch multiple files with libcurl?
   5.4 Does libcurl do Winsock initing on win32 systems?
   5.5 Does CURLOPT_FILE and CURLOPT_INFILE work on win32 ?
-  5.6 What about Keep-Alive or persistant connections?
+  5.6 What about Keep-Alive or persistent connections?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -78,7 +78,7 @@ FAQ
   with URL spelled in uppercase to make it obvious it deals with URLs. The
   fact it can also be pronounced 'see URL' also helped.
 
-  Curl supports a range of common internet protocols, currently including
+  Curl supports a range of common Internet protocols, currently including
   HTTP, HTTPS, FTP, GOPHER, LDAP, DICT, TELNET and FILE.
 
   We spell it cURL or just curl. We pronounce it with an initial k sound:
@@ -87,7 +87,7 @@ FAQ
   1.2 What is libcurl?
 
   libcurl is a reliable and portable library which provides you with an easy
-  interface to a range of common internet protocols.
+  interface to a range of common Internet protocols.
 
   You can use libcurl for free in your application even if it is commercial
   or closed-source.
@@ -103,8 +103,8 @@ FAQ
   something: fine, go ahead and write a script that wraps around curl to make
   it reality (like curlmirror.pl does).
 
-  Curl is not an ftp site mirroring program. Sure, get and send ftp with curl
-  but if you want systematic and sequential behaviour you should write a
+  Curl is not an FTP site mirroring program. Sure, get and send FTP with curl
+  but if you want systematic and sequential behavior you should write a
   script (or write a new program that interfaces libcurl) and do it.
 
   Curl is not a PHP tool, even though it works perfectly well when used from
@@ -162,7 +162,7 @@ FAQ
 
   Project cURL is entirely free and open, without any commercial interests or
   money involved. No person gets paid in any way for developing curl. We all
-  do this volountarily on our spare time.
+  do this voluntarily on our spare time.
 
   We get some help from companies. Contactor Data hosts the curl web site and
   the main mailing list, Haxx owns the curl web site's domain and
@@ -204,7 +204,7 @@ FAQ
     a few functions are left out from the libssl.
 
     If the function names missing include RSA or RSAREF you can be certain
-    that this is because libssl requires the RSA and RSASEF libs to build.
+    that this is because libssl requires the RSA and RSAREF libs to build.
 
     See the INSTALL file section that explains how to add those libs to
     configure. Make sure that you remove the config.cache file before you
@@ -223,12 +223,12 @@ FAQ
 
   Curl uses OpenSSL to do the SSL stuff. The LIBEAY32.DLL is what curl needs
   on a windows machine to do https://. Check out the curl web site to find
-  accurate and up-to-date pointers to recent OpenSSL DDLs and other binary
+  accurate and up-to-date pointers to recent OpenSSL DLLs and other binary
   packages.
 
   2.4. Does cURL support Socks (RFC 1928) ?
 
-  No. Nobody has wanted it that badly yet. We appriciate patches that bring
+  No. Nobody has wanted it that badly yet. We appreciate patches that bring
   this functionality.
 
 
@@ -263,10 +263,11 @@ FAQ
   use the -F type. In all the most common cases, you should use -d which then
   causes a posting with the type 'application/x-www-form-urlencoded'.
 
-  This is described in some detail in the README.curl file, and if you don't
-  understand it the first time, read it again before you post questions about
-  this to the mailing list. Also, try reading through the mailing list
-  archives for old postings and questions regarding this.
+  This is described in some detail in the MANUAL and TheArtOfHttpScripting
+  documents, and if you don't understand it the first time, read it again
+  before you post questions about this to the mailing list. Also, try reading
+  through the mailing list archives for old postings and questions regarding
+  this.
 
   3.4. How do I tell curl to run custom FTP commands?
 
@@ -274,7 +275,7 @@ FAQ
   file transfer. Study the -Q/--quote option.
 
   Since curl is used for file transfers, you don't use curl to just perform
-  ftp commands without transfering anything. Therefore you must always specify
+  FTP commands without transferring anything. Therefore you must always specify
   a URL to transfer to/from even when doing custom FTP commands.
 
   3.5. How can I disable the Pragma: nocache header?
@@ -286,7 +287,7 @@ FAQ
   3.6. Does curl support javascript, ASP, XML, XHTML or HTML version Y?
 
   To curl, all contents are alike. It doesn't matter how the page was
-  generated. It may be ASP, PHP, perl, shell-script, SSI or plain
+  generated. It may be ASP, PHP, Perl, shell-script, SSI or plain
   HTML-files. There's no difference to curl and it doesn't even know what kind
   of language that generated the page.
 
@@ -296,7 +297,7 @@ FAQ
 
   3.7. Can I use curl to delete/rename a file through FTP?
 
-  Yes. You specify custom ftp commands with -Q/--quote.
+  Yes. You specify custom FTP commands with -Q/--quote.
 
   One example would be to delete a file after you have downloaded it:
 
@@ -310,8 +311,21 @@ FAQ
 
      curl -L http://redirector.com
 
-  3.9 How do I use curl in PHP?
+  3.9 How do I use curl in PHP, Perl, Tcl, Ruby or Java?
 
+  There exist many language-interfaces for curl that integrates it better with
+  various languages. If you are fluid in a script language, you may very well
+  opt to use such an interface instead of using the command line tool.
+
+  At the time of writing, there are bindings for the five language mentioned
+  above, but chances are there are even more by the time you read this. Or you
+  may be able you write your own wrapper for a not-yet support language!
+
+  Find out more about which languages that support curl directly, and how to
+  install and use them, in the libcurl section of the curl web site:
+
+        http://curl.haxx.se/libcurl/
+  
   PHP4 has the ability to use libcurl as an internal module if built with that
   option enabled. You then get a set of extra functions that can be used
   within your PHP programs. You find all details about those functions in the
@@ -326,7 +340,7 @@ FAQ
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
   Curl adheres to the HTTP spec, which basically means you can play with *any*
-  protocol that is built ontop of HTTP. Protocols such as SOAP, WEBDAV and
+  protocol that is built on top of HTTP. Protocols such as SOAP, WEBDAV and
   XML-RPC are all such ones. You can use -X to set custom requests and -H to
   set custom headers (or replace internally generated ones).
 
@@ -354,7 +368,7 @@ FAQ
 
   In general unix shells, the & letter is treated special and when used, it
   runs the specified command in the background. To safely send the & as a part
-  of a URL, you should qoute the entire URL by using single (') or double (")
+  of a URL, you should quote the entire URL by using single (') or double (")
   quotes around it.
 
   An example that would invoke a remote CGI that uses &-letters could be:
@@ -429,13 +443,13 @@ FAQ
   abort from such a condition and that's why it got this undocumented
   error. This should not occur in releases after 7.4.1.
 
-  4.7. How do I keep usernames and passwords secret in Curl command lines?
+  4.7. How do I keep user names and passwords secret in Curl command lines?
 
   This problem has two sides:
 
   The first part is to avoid having clear-text passwords in the command line
   so that they don't appear in 'ps' outputs and similar. That is easily
-  avoided by using the "-K" option tho tell curl to read parameters from a
+  avoided by using the "-K" option to tell curl to read parameters from a
   file or stdin to which you can pass the secret info.
 
   To keep the passwords in your account secret from the rest of the world is
@@ -445,11 +459,11 @@ FAQ
 
   Also note that regular HTTP and FTP passwords are sent in clear across the
   network. All it takes for anyone to fetch them is to listen on the network.
-  Evesdropping is very easy.
+  Eavesdropping is very easy.
 
   4.8 I found a bug!
 
-  It is not a bug if the behaviour is documented. Read the docs first.
+  It is not a bug if the behavior is documented. Read the docs first.
 
   If it is a problem with a binary you've downloaded or a package for your
   particular platform, try contacting the person who built the package/archive
@@ -478,14 +492,14 @@ FAQ
   programs. libcurl will use thread-safe functions instead of non-safe ones if
   your system has such.
 
-  We would appriciate some kind of report or README file from those who have
+  We would appreciate some kind of report or README file from those who have
   used libcurl in a threaded environment.
 
   5.2 How can I receive all data into a large memory chunk?
 
   You are in full control of the callback function that gets called every time
   there is data received from the remote server. You can make that callback do
-  whatever you want. You do not have to write the receivied data to a file.
+  whatever you want. You do not have to write the received data to a file.
 
   One solution to this problem could be to have a pointer to a struct that you
   pass to the callback function. You set the pointer using the
@@ -521,7 +535,7 @@ FAQ
   curl_easy_setopt() and then transfer it with curl_easy_perform(). The handle
   you get from curl_easy_init() is not only reusable starting with libcurl
   7.7, but also you're encouraged to reuse it if you can, as that will enable
-  libcurl to use persistant connections.
+  libcurl to use persistent connections.
 
   For libcurl prior to 7.7, there was no multiple file support. The only
   available way to do multiple requests was to init/perform/cleanup for each
@@ -547,15 +561,15 @@ FAQ
 
   (Provided by Joel DeYoung and Bob Schader)
 
-  5.6 What about Keep-Alive or persistant connections?
+  5.6 What about Keep-Alive or persistent connections?
 
   Starting with version 7.7, curl and libcurl will have excellent support for
-  persistant connections when transferring several files from the same server.
+  persistent connections when transferring several files from the same server.
   Curl will attempt to reuse connections for all URLs specified on the same
   command line/config file, and libcurl will reuse connections for all
   transfers that are made using the same libcurl handle.
 
-  Previous versions had no persistant connection support.
+  Previous versions had no persistent connection support.
 
 6. License Issues
 
