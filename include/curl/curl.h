@@ -684,9 +684,10 @@ typedef enum {
   CURLINFO_LASTONE          = 19
 } CURLINFO;
 
-/* unfortunately, the easy.h include file needs the options and info stuff
-   before it can be included! */
+/* unfortunately, the easy.h and multi.h include files need options and info
+  stuff before they can be included! */
 #include <curl/easy.h> /* nothing in curl is fun without the easy stuff */
+#include <curl/multi.h>
 
 typedef enum {
   CURLCLOSEPOLICY_NONE, /* first, never use this */
