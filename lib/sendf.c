@@ -270,7 +270,11 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
 #ifdef WIN32
       if(WSAEWOULDBLOCK == GetLastError())
 #else
-      if(EWOULDBLOCK == errno)
+      /* As pointed out by Christophe Demory on March 11 2003, errno
+         may be EWOULDBLOCK or on some systems EAGAIN when it returned
+         due to its inability to send off data without blocking. We
+         therefor treat both error codes the same here */
+      if((EWOULDBLOCK == errno) || ((EAGAIN == errno))
 #endif
       {
         /* this is just a case of EWOULDBLOCK */
