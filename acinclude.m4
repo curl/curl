@@ -785,18 +785,27 @@ dnl in LDAP_NAME holding the string "libldap.so.2".
 AC_DEFUN([CURL_DLLIB_NAME],
 [
 AC_MSG_CHECKING([name of dynamic library $2])
-dnl Work around an apparent bug in libtool ver. 1.5
+dnl The shared library extension variable name changes from version to
+dnl version of libtool.  Try a few names then just set one statically.
 test -z "$shared_ext" && shared_ext="$shrext_cmds"
+test -z "$shared_ext" && shared_ext="$shrext"
+test -z "$shared_ext" && shared_ext=".so"
 
-dnl Create the dynamic library name of the correct form for this platform
+dnl Create the library link name of the correct form for this platform
 LIBNAME_LINK_SPEC=`echo "$library_names_spec" | $SED 's/^.* //'`
 DLGUESSLIB=`name=$2 eval echo "$libname_spec"`
 DLGUESSFILE=`libname="$DLGUESSLIB" release="" major="" versuffix="" eval echo "$LIBNAME_LINK_SPEC"`
 
+dnl Synthesize a likely dynamic library name in case we can't find an actual one
+SO_NAME_SPEC="$soname_spec"
+dnl soname_spec undefined when identical to the 1st entry in library_names_spec
+test -z "$SO_NAME_SPEC" && SO_NAME_SPEC=`echo "$library_names_spec" | $SED 's/ .*$//'`
+DLGUESSSOFILE=`libname="$DLGUESSLIB" release="" major="" versuffix="" eval echo "$SO_NAME_SPEC"`
+
 if test "$cross_compiling" = yes; then
   dnl Can't look at filesystem when cross-compiling
-  AC_DEFINE_UNQUOTED($1, "$DLGUESSFILE", [$2 dynamic library file])
-  AC_MSG_RESULT([$DLGUESSFILE (guess while cross-compiling)])
+  AC_DEFINE_UNQUOTED($1, "$DLGUESSSOFILE", [$2 dynamic library file])
+  AC_MSG_RESULT([$DLGUESSSOFILE (guess while cross-compiling)])
 else
 
   DLFOUNDFILE=""
@@ -818,12 +827,8 @@ else
   fi
 
   if test -z "$DLFOUNDFILE" ; then
-    dnl Couldn't find a link library. Synthesize a likely dynamic name instead.
-    SO_NAME_SPEC="$soname_spec"
-    dnl soname_spec only exists if it's different from the first entry
-    dnl in library_names_spec
-    test -z "$SO_NAME_SPEC" && SO_NAME_SPEC=`echo "$library_names_spec" | $SED 's/ .*$//'`
-    DLFOUNDFILE=`libname="$DLGUESSLIB" release="" major="" versuffix="" eval echo "$SO_NAME_SPEC"`
+    dnl Couldn't find a link library, so guess at a name.
+    DLFOUNDFILE="$DLGUESSSOFILE"
   fi
 
   AC_DEFINE_UNQUOTED($1, "$DLFOUNDFILE", [$2 dynamic library file])
