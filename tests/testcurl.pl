@@ -52,7 +52,7 @@ BEGIN { $^W = 1; }
 
 use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog
             $buildlogname $gnulikebuild $targetos $confsuffix $binext $libext);
-use vars qw($name $email $desc $confopts $setupfile);
+use vars qw($name $email $desc $confopts $setupfile $mktarball);
 
 # version of this script
 $version='$Revision$';
@@ -64,11 +64,14 @@ $CURLDIR="curl";
 $CVS=1;
 $targetos = '';
 $setupfile = 'setup';
+$mktarball = '';
 while ($ARGV[0]) {
   if ($ARGV[0] =~ /--target=/) {
     $targetos = (split(/=/, shift @ARGV))[1];
   } elsif ($ARGV[0] =~ /--setup=/) {
     $setupfile = (split(/=/, shift @ARGV))[1];
+  } elsif ($ARGV[0] =~ /--mktarball=/) {
+    $mktarball = (split(/=/, shift @ARGV))[1];
   } else {
     $CURLDIR=shift @ARGV;
     $CVS=0;
@@ -425,7 +428,9 @@ if (-f "src/curl$binext") {
 }
 
 if ($targetos ne '' && $targetos =~ /netware/) {
-  #system('../../curlver.sh');
+  if (-f '../../curlver') {
+    system('../../curlver');
+  }
 } else {
 logit "display curl$binext --version output";
 
@@ -459,9 +464,9 @@ if ($gnulikebuild) {
   print "TESTDONE: 1 tests out of 0 (dummy message)\n"; # dummy message to feign success
 }
 
-# simple way to create a tarball just before the build is deleted.
-if (-f '../mktarball') {
-  system('../mktarball');
+# create a tarball if we got that option.
+if ($mktarball ne '') {
+  system($mktarball);
 }
 
 # mydie to cleanup
