@@ -79,4 +79,11 @@ int curl_getaddrinfo(char *hostname, char *service,
                      int line, const char *source);
 #endif
 
+#ifndef INADDR_NONE
+#define CURL_INADDR_NONE (in_addr_t) ~0
+#else
+#define CURL_INADDR_NONE INADDR_NONE
+#endif
+
+
 #endif

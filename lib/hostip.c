@@ -532,10 +532,6 @@ static char *MakeIP(unsigned long num, char *addr, int addr_len)
   return (addr);
 }
 
-#ifndef INADDR_NONE
-#define INADDR_NONE (in_addr_t) ~0
-#endif
-
 static void hostcache_fixoffset(struct hostent *h, int offset)
 {
   int i=0;
@@ -573,7 +569,8 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
   port=0; /* unused in IPv4 code */
   ret = 0; /* to prevent the compiler warning */
 
-  if ( (in=inet_addr(hostname)) != INADDR_NONE ) {
+  in=inet_addr(hostname);
+  if (in != CURL_INADDR_NONE) {
     struct in_addr *addrentry;
     struct namebuf {
         struct hostent hostentry;
