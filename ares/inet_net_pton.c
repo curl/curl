@@ -45,6 +45,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "inet_net_pton.h"
+
 #if !defined(HAVE_INET_NET_PTON) || !defined(HAVE_INET_NET_PTON_IPV6) || \
     !defined(HAVE_INET_PTON) || !defined(HAVE_INET_PTON_IPV6)
 

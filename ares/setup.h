@@ -78,26 +78,4 @@ int ares_strcasecmp(const char *s1, const char *s2);
 #endif
 #endif
 
-#ifndef HAVE_PF_INET6
-#define PF_INET6 AF_INET6
-#endif
-
-#ifndef HAVE_STRUCT_IN6_ADDR
-struct in6_addr
-{
-  unsigned char s6_addr[16];
-};
-#endif
-
-#if defined(HAVE_INET_PTON) && defined(HAVE_INET_PTON_IPV6)
-#define ares_inet_pton(x,y,z) inet_pton(x,y,z)
-#else
-int ares_inet_pton(int af, const char *src, void *dst);
-#endif
-#if defined(HAVE_INET_NET_PTON) && defined(HAVE_INET_NET_PTON_IPV6)
-#define ares_inet_net_pton(w,x,y,z) inet_net_pton(w,x,y,z)
-#else
-int ares_inet_net_pton(int af, const char *src, void *dst, size_t size);
-#endif
-
 #endif /* ARES_SETUP_H */
