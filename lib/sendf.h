@@ -23,7 +23,7 @@
  * $Id$
  *****************************************************************************/
 
-size_t Curl_sendf(int fd, struct connectdata *, const char *fmt, ...);
+CURLcode Curl_sendf(int fd, struct connectdata *, const char *fmt, ...);
 void Curl_infof(struct SessionHandle *, const char *fmt, ...);
 void Curl_failf(struct SessionHandle *, const char *fmt, ...);
 
