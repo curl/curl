@@ -83,6 +83,7 @@ typedef unsigned char bool;
 #ifdef HAVE_ASSERT_H
 #include <assert.h>
 #endif
+#include <errno.h>
 
 #ifndef OS
 #ifdef WIN32
