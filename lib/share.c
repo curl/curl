@@ -22,6 +22,7 @@
  ***************************************************************************/
 
 #include "setup.h"
+#include <stdarg.h>
 #include <stdlib.h>
 #include <curl/curl.h>
 #include "urldata.h"
