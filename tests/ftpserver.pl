@@ -175,8 +175,14 @@ sub SIZE_command {
     my $size = $data[0];
 
     if($size) {
-        print "213 $size\r\n";
-        logmsg "SIZE $testno returned $size\n";
+        if($size > -1) {
+            print "213 $size\r\n";
+            logmsg "SIZE $testno returned $size\n";
+        }
+        else {
+            print "550 $testno: No such file or directory.\r\n";
+            logmsg "SIZE $testno: no such file\n";
+        }
     }
     else {
         $size=0;
