@@ -194,7 +194,7 @@ if (-d $CURLDIR) {
     # time we run this test
     unlink "$CURLDIR/lib/getdate.c";
     unlink "$CURLDIR/src/hugehelp.c";
-  } elsif (!$CVS && -f "$CURLDIR/testcurl.pl") {
+  } elsif (!$CVS && -f "$CURLDIR/tests/testcurl.pl") {
     logit "curl is verified to be a fine daily source dir"
   } else {
     mydie "curl is not a daily source dir or checked out from CVS!"
