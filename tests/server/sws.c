@@ -639,8 +639,10 @@ static int send_doc(int sock, struct httprequest *req)
     char *ptr=cmd;
     do {
       if(2 == sscanf(ptr, "%31s %d", command, &num)) {
-        if(!strcmp("wait", command))
+        if(!strcmp("wait", command)) {
+          logmsg("Told to sleep for %d seconds", num);
           sleep(num); /* wait this many seconds */
+        }
         else
           logmsg("Unknown command in reply command section");
       }
