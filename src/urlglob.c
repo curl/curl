@@ -232,6 +232,7 @@ static GlobCode glob_word(URLGlob *glob, char *pattern, int pos, int *amount)
    */ 
   char* buf = glob->glob_buffer;
   int litindex;
+  GlobCode res = GLOB_OK;
 
   *amount = 1; /* default is one single string */
 
@@ -261,18 +262,24 @@ static GlobCode glob_word(URLGlob *glob, char *pattern, int pos, int *amount)
 
   switch (*pattern) {
   case '\0':
-    return GLOB_OK;			/* singular URL processed  */
+    break;			/* singular URL processed  */
 
   case '{':
     /* process set pattern */
-    return glob_set(glob, ++pattern, ++pos, amount);
+    res = glob_set(glob, ++pattern, ++pos, amount);
+    break;
 
   case '[':
     /* process range pattern */
-    return glob_range(glob, ++pattern, ++pos, amount);
+    res= glob_range(glob, ++pattern, ++pos, amount);
+    break;
   }
 
-  return GLOB_ERROR; /* something got wrong */
+  if(GLOB_OK != res)
+    /* free that strdup'ed string again */
+    free(glob->literal[litindex]);
+
+  return res; /* something got wrong */
 }
 
 int glob_url(URLGlob** glob, char* url, int *urlnum, FILE *error)
@@ -463,7 +470,9 @@ char *glob_match_url(char *filename, URLGlob *glob)
         appendlen=1;
 	break;
       case UPTNumRange:
-	sprintf(numbuf, "%0*d", pat.content.NumRange.padlength, pat.content.NumRange.ptr_n);
+	sprintf(numbuf, "%0*d",
+                pat.content.NumRange.padlength,
+                pat.content.NumRange.ptr_n);
         appendthis = numbuf;
         appendlen = (int)strlen(numbuf);
 	break;
