@@ -62,6 +62,8 @@
 #include "urldata.h"
 #include "sendf.h"
 
+#define _REENTRANT
+
 #ifdef HAVE_INET_NTOA_R
 #include "inet_ntoa_r.h"
 #endif
@@ -139,7 +141,7 @@ struct hostent *GetHost(struct UrlData *data,
                         &h_errnop))
 #endif
 #ifdef HAVE_GETHOSTBYNAME_R_3
-    /* AIX, Digital Unix, more? */
+    /* AIX, Digital Unix, HPUX 10, more? */
 
     /* August 4th, 2000. I don't have any such system around so I write this
        blindly in hope it might work or that someone else will help me fix
@@ -147,8 +149,8 @@ struct hostent *GetHost(struct UrlData *data,
 
     h = gethostbyname_r(hostname,
                         (struct hostent *)buf,
-                        (struct hostent_data *) buf +  sizeof(struct hostent));
-    *h_errnop= errno; /* we don't deal with this, but set it anyway */
+                        (struct hostent_data *)(buf + sizeof(struct hostent)));
+    h_errnop= errno; /* we don't deal with this, but set it anyway */
     if(NULL == h)
 #endif
       {
