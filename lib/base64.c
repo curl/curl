@@ -44,19 +44,40 @@
 static char table64[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
   
-void base64Encode(char *intext, char *output)
+/*
+ * base64Encode()
+ *
+ * Returns the length of the newly created base64 string. The third argument
+ * is a pointer to an allocated area holding the base64 data. If something
+ * went wrong, -1 is returned.
+ *
+ * Modifed my version to resemble the krb4 one. The krb4 sources then won't
+ * need its own.
+ *
+ */
+int base64Encode(char *indata, int insize, char **outptr)
 {
   unsigned char ibuf[3];
   unsigned char obuf[4];
   int i;
   int inputparts;
+  char *output;
+  char *base64data;
 
-  while(*intext) {
+  if(0 == insize)
+    insize = strlen(indata);
+
+  base64data = output = (char*)malloc(insize*4/3+4);
+  if(NULL == output)
+    return -1;
+
+  while(insize > 0) {
     for (i = inputparts = 0; i < 3; i++) { 
-      if(*intext) {
+      if(*indata) {
         inputparts++;
-        ibuf[i] = *intext;
-        intext++;
+        ibuf[i] = *indata;
+        indata++;
+        insize--;
       }
       else
         ibuf[i] = 0;
@@ -90,5 +111,8 @@ void base64Encode(char *intext, char *output)
     output += 4;
   }
   *output=0;
+  *outptr = base64data; /* make it return the actual data memory */
+
+  return strlen(base64data); /* return the length of the new data */
 }
 /* ---- End of Base64 Encoding ---- */

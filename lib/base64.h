@@ -40,5 +40,5 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
-void base64Encode(char *intext, char *output);
+int base64Encode(char *indata, int insize, char **output);
 #endif
