@@ -11,12 +11,14 @@ TODO
  product! (Yes, you may add things not mentioned here, these are just a
  few teasers...)
 
-To be done for the 7.7 relase:
+To be done for the 7.7 release:
 
  * Fix the random seeding. Add --egd-socket and --random-file options to the
    curl client and libcurl curl_easy_setopt() interface.
 
  * Support persistant connections (fully detailed elsewhere)
+
+ * Add a special connection-timeout that only goes for the connection phase.
 
 To be done after the 7.7 release:
 
