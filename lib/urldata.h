@@ -1,10 +1,10 @@
 #ifndef __URLDATA_H
 #define __URLDATA_H
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -12,7 +12,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -48,7 +48,7 @@
 
 #include "cookie.h"
 #include "formdata.h"
-    
+
 #ifdef USE_SSLEAY
 /* SSLeay stuff usually in /usr/local/ssl/include */
 #ifdef USE_OPENSSL
@@ -119,11 +119,11 @@ struct krb4buffer {
   size_t index;
   int eof_flag;
 };
-enum protection_level { 
-    prot_clear, 
-    prot_safe, 
-    prot_confidential, 
-    prot_private 
+enum protection_level {
+    prot_clear,
+    prot_safe,
+    prot_confidential,
+    prot_private
 };
 #endif
 
@@ -212,7 +212,7 @@ struct HTTP {
 
   const char *p_pragma;      /* Pragma: string */
   const char *p_accept;      /* Accept: string */
-  curl_off_t readbytecount; 
+  curl_off_t readbytecount;
   curl_off_t writebytecount;
 
   /* For FORM posting */
@@ -262,7 +262,7 @@ struct FTP {
   long response_time; /* When no timeout is given, this is the amount of
                          seconds we await for an FTP response. Initialized
                          in Curl_ftp_connect() */
-  bool ctl_valid;     /* Tells Curl_ftp_quit() whether or not to do 
+  bool ctl_valid;     /* Tells Curl_ftp_quit() whether or not to do
                          anything. If the connection has timed out or
                          been closed, this should be FALSE when it gets
                          to Curl_ftp_quit() */
@@ -466,14 +466,14 @@ struct connectdata {
 
   char *proxyuser;    /* proxy user name string, allocated */
   char *proxypasswd;  /* proxy password string, allocated */
-  
+
   struct timeval now;     /* "current" time */
   struct timeval created; /* creation time */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
   curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch, 0
                              means unlimited */
-  
+
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
   struct ssl_config_data ssl_config;
 
@@ -492,17 +492,17 @@ struct connectdata {
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * after the connect() and everything is done, as a step in the connection.
-   */ 
+   */
   CURLcode (*curl_connect)(struct connectdata *);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * by the curl_disconnect(), as a step in the disconnection.
-   */ 
+   */
   CURLcode (*curl_disconnect)(struct connectdata *);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * in the curl_close() function if protocol-specific cleanups are required.
-   */ 
+   */
   CURLcode (*curl_close)(struct connectdata *);
 
   /**** curl_get() phase fields */
@@ -511,7 +511,7 @@ struct connectdata {
   curl_socket_t sockfd;	  /* socket to read from or CURL_SOCKET_BAD */
   curl_off_t size;	  /* -1 if unknown at this point */
   curl_off_t *bytecountp; /* return number of bytes read or NULL */
-          
+
   /* WRITE stuff */
   curl_socket_t writesockfd; /* socket to write to, it may very
                                 well be the same we read from.
@@ -762,7 +762,7 @@ struct DynamicStatic {
   bool url_alloc;   /* URL string is malloc()'ed */
   bool url_changed; /* set on CURL_OPT_URL, used to detect if the URL was
                        changed after the connect phase, as we allow callback
-                       to change it and if so, we reconnect to use the new 
+                       to change it and if so, we reconnect to use the new
                        URL instead */
   char *proxy;      /* work proxy, copied from UserDefined */
   bool proxy_alloc; /* http proxy string is malloc()'ed */
@@ -787,7 +787,7 @@ struct UserDefined {
   char *proxyuserpwd;  /* Proxy <user:password>, if used */
   long proxyport; /* If non-zero, use this port number by default. If the
                      proxy string features a ":[port]" that one will override
-                     this. */  
+                     this. */
   void *out;         /* the fetched file goes here */
   void *in;          /* the uploaded file is read from here */
   void *writeheader; /* write the header to this is non-NULL */
@@ -864,10 +864,10 @@ struct UserDefined {
 
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
 
-  int ip_version; 
+  int ip_version;
 
   curl_off_t max_filesize; /* Maximum file size to download */
-  
+
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
    and they don't change during operations. */
