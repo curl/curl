@@ -191,10 +191,10 @@ static void logmsg(const char *msg, ...)
   logfp = fopen(DEFAULT_LOGFILE, "a");
 
   fprintf(logfp?logfp:stderr, /* write to stderr if the logfile doesn't open */
-          "%02d:%02d:%02d (%d) %s\n",
+          "%02d:%02d:%02d %s\n",
           curr_time->tm_hour,
           curr_time->tm_min,
-          curr_time->tm_sec, (int)getpid(), buffer);
+          curr_time->tm_sec, buffer);
   if(logfp)
     fclose(logfp);
 }

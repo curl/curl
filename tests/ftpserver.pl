@@ -43,8 +43,7 @@ sub logmsg {
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
         localtime(time);
     open(FTPLOG, ">>log/ftpd.log");
-    printf FTPLOG ("%02d:%02d:%02d (%d) ",
-                   $hour, $min, $sec, $$);
+    printf FTPLOG ("%02d:%02d:%02d ", $hour, $min, $sec);
     print FTPLOG @_;
     close(FTPLOG);
 }
