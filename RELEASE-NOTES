@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o resume was not possible to switch off properly once enabled
  o fixed the ipv4 connect code when a DNS entry has multiple IPs
  o now checks subjectAltNames when matching certs
  o HTTP POST using read callback works again
@@ -65,6 +66,7 @@ advice from friends like these:
  Early Ehlinger, Kevin Fisk, Jurij Smakov, Bjorn Reese, Tim Bartley, David
  Kimdon, Dominick Meglio, Markus Moeller, Giuseppe Attardi, James MacMillan,
  Neil Spring, Siddhartha Prakash Jain, Jon Turner, Vincent Bronner, Shard,
- Jeremy Friesner, Florian Schoppmann, Neil Dunbar, Frank Ticheler
+ Jeremy Friesner, Florian Schoppmann, Neil Dunbar, Frank Ticheler, Lachlan
+ O'Dea
  
         Thanks! (and sorry if I forgot to mention someone)

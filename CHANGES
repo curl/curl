@@ -8,6 +8,10 @@
 
 
 Daniel (9 October)
+- Lachlan O'Dea fixed a resume problem: "If I set CURLOPT_RESUME_FROM, perform
+  an HTTP download, then reset CURLOPT_RESUME_FROM to 0, the next download
+  still has a Range header with a garbage value." bug report #820502
+
 - Dominick Meglio made the inet_pton.c file build fine using MSVC.
 
 - The 'sws' test suite web server now #include setup.h from the lib directory.
