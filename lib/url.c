@@ -1981,6 +1981,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   char user[MAX_CURL_USER_LENGTH];
   char passwd[MAX_CURL_PASSWORD_LENGTH];
   int rc;
+  bool reuse;
 
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
@@ -2870,10 +2871,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config))
     return CURLE_OUT_OF_MEMORY;
 
-  /* reuse_fresh is set TRUE if we are told to use a fresh connection
-     by force */
-  if(!data->set.reuse_fresh &&
-     ConnectionExists(data, conn, &conn_temp)) {
+  /* reuse_fresh is TRUE if we are told to use a new connection by force, but
+     we only acknowledge this option if this is not a re-used connection
+     already (which happens due to follow-location or during a HTTP
+     authentication phase). */
+  if(data->set.reuse_fresh && !conn->bits.reuse)
+    reuse = FALSE;
+  else 
+    reuse = ConnectionExists(data, conn, &conn_temp);
+
+  if(reuse) {
     /*
      * We already have a connection for this, we got the former connection
      * in the conn_temp variable and thus we need to cleanup the one we
