@@ -30,6 +30,11 @@
 #include "transfer.h"
 #include "url.h"
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 struct Curl_message {
   /* the 'CURLMsg' is the part that is visible to the external user */
   struct CURLMsg extmsg;
@@ -77,9 +82,14 @@ struct Curl_multi {
   int num_easy;
 
   /* this is a linked list of posted messages */
-  struct Curl_message *msgs;
-  /* amount of messages in the queue */
-  int num_msgs;
+  struct Curl_message *msgs; /* the messages remain here until the handle is
+                                closed */
+  struct Curl_message *lastmsg; /* points to the last entry */
+  struct Curl_message *readptr; /* NULL before no one read anything */
+
+  int num_msgs; /* amount of messages in the queue */
+  int num_read; /* amount of read messages */
+
   /* Hostname cache */
   curl_hash *hostcache;
 };
@@ -259,7 +269,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       }
       else {
         if (multi->hostcache == NULL) {
-          multi->hostcache = curl_hash_alloc(7, Curl_freeaddrinfo);
+          multi->hostcache = Curl_hash_alloc(7, Curl_freeaddrinfo);
         }
 
         easy->easy_handle->hostcache = multi->hostcache;
@@ -301,9 +311,34 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     case CURLM_STATE_DONE:
       /* post-transfer command */
       easy->result = Curl_done(easy->easy_conn);
-      /* after we have DONE what we're supposed to do, go COMPLETED */
-      if(CURLE_OK == easy->result)
-        easy->state = CURLM_STATE_COMPLETED;
+
+      /* after we have DONE what we're supposed to do, go COMPLETED, and
+         it doesn't matter what the Curl_done() returned! */
+      easy->state = CURLM_STATE_COMPLETED;
+
+      /* clear out the usage of the shared DNS cache */
+      easy->easy_handle->hostcache = NULL;
+
+        /* now add a node to the Curl_message linked list with this info */
+      {
+        struct Curl_message *msg = (struct Curl_message *)
+          malloc(sizeof(struct Curl_message));
+        msg->extmsg.msg = CURLMSG_DONE;
+        msg->extmsg.easy_handle = easy->easy_handle;
+        msg->extmsg.data.result = easy->result;
+        msg->next=NULL;
+
+        if(multi->lastmsg) {
+          multi->lastmsg->next = msg;
+          multi->lastmsg = msg;
+        }
+        else {
+          multi->msgs = msg;
+          multi->lastmsg = msg;
+        }
+        multi->num_msgs++; /* increase message counter */
+          
+      }
       break;
     case CURLM_STATE_COMPLETED:
       /* this is a completed transfer, it is likely to still be connected */
@@ -335,10 +370,30 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 CURLMcode curl_multi_cleanup(CURLM *multi_handle)
 {
   struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  struct Curl_one_easy *easy;
+  struct Curl_one_easy *nexteasy;
+  struct Curl_message *msg;
+  struct Curl_message *nextmsg;
+
   if(GOOD_MULTI_HANDLE(multi)) {
     multi->type = 0; /* not good anymore */
-    curl_hash_destroy(multi->hostcache);
+    Curl_hash_destroy(multi->hostcache);
+
     /* remove all easy handles */
+    easy = multi->easy.next;
+    while(easy) {
+      nexteasy=easy->next;
+      free(easy);
+      easy = nexteasy;
+    }
+
+    /* remove all struct Curl_message nodes left */
+    msg = multi->msgs;
+    while(msg) {
+      nextmsg = msg->next;
+      free(msg);
+      msg = nextmsg;
+    }
 
     free(multi);
 
@@ -348,7 +403,33 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle)
     return CURLM_BAD_HANDLE;
 }
 
-CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue);
+CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
+{
+  struct Curl_multi *multi=(struct Curl_multi *)multi_handle;
+  if(GOOD_MULTI_HANDLE(multi)) {
+    CURLMsg *msg;
+
+    if(!multi->readptr && !multi->num_read)
+      multi->readptr = multi->msgs;
+
+    if(!multi->readptr) {
+      *msgs_in_queue = 0;
+      return NULL;
+    }
+    
+    multi->num_read++;
+
+    *msgs_in_queue = multi->num_msgs - multi->num_read;
+    msg = &multi->readptr->extmsg;
+
+    /* advance read pointer */
+    multi->readptr = multi->readptr->next;
+
+    return msg;
+  }
+  else
+    return CURLM_BAD_HANDLE;
+}
 
 /*
  * local variables:
