@@ -44,6 +44,8 @@
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
+
+#define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
 
 #include "writeout.h"
@@ -174,6 +176,8 @@ void ourWriteOut(CURL *curl, char *writeinfo)
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_SPEED_UPLOAD, &doubleinfo))
                   fprintf(stream, "%.3f", doubleinfo);
+                break;
+              default:
                 break;
               }
               break;

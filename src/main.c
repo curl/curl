@@ -53,6 +53,8 @@
 #include <curl/mprintf.h>
 
 #include "urlglob.h"
+#include "writeout.h"
+
 #define CURLseparator	"--_curl_--"
 #define MIMEseparator	"_curl_"
 
@@ -360,7 +362,6 @@ struct Configurable {
 static int parseconfig(char *filename,
 		       struct Configurable *config);
 static char *my_get_line(FILE *fp);
-static char *my_get_token(const char *line);
 
 static void GetStr(char **string,
 		   char *value)
@@ -408,14 +409,13 @@ static char *file2string(FILE *file)
 static char *file2memory(FILE *file, long *size)
 {
   char buffer[1024];
-  char *ptr;
   char *string=NULL;
   char *newstring=NULL;
   long len=0;
   long stringlen=0;
 
   if(file) {
-    while(len = fread(buffer, 1, sizeof(buffer), file)) {
+    while((len = fread(buffer, 1, sizeof(buffer), file))) {
       if(string) {
         newstring = realloc(string, len+stringlen);
         if(newstring)
@@ -708,7 +708,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           /* the data begins with a '@' letter, it means that a file name
              or - (stdin) follows */
           FILE *file;
-          char *ptr;
 
           nextarg++; /* pass the @ */
 
@@ -962,7 +961,6 @@ static int parseconfig(char *filename,
 {
   int res;
   FILE *file;
-  char configbuffer[4096];
   char filebuffer[256];
   bool usedarg;
   char *home=NULL;
@@ -1007,7 +1005,7 @@ static int parseconfig(char *filename,
       alloced_param=FALSE;
 
       /* lines with # in the fist column is a comment! */
-      while(isspace(*line))
+      while(isspace((int)*line))
         line++;
 
       switch(*line) {
@@ -1023,7 +1021,7 @@ static int parseconfig(char *filename,
 
       /* the option keywords starts here */
       option = line;
-      while(*line && !isspace(*line) && !isseparator(*line))
+      while(*line && !isspace((int)*line) && !isseparator(*line))
         line++;
       /* ... and has ended here */
 
@@ -1034,7 +1032,7 @@ static int parseconfig(char *filename,
 #endif
 
       /* pass spaces and separator(s) */
-      while(isspace(*line) || isseparator(*line))
+      while(isspace((int)*line) || isseparator(*line))
         line++;
       
       /* the parameter starts here (unless quoted) */
@@ -1079,7 +1077,7 @@ static int parseconfig(char *filename,
       }
       else {
         param=line; /* parameter starts here */
-        while(*line && !isspace(*line))
+        while(*line && !isspace((int)*line))
           line++;
         *line=0; /* zero terminate */
       }
@@ -1185,8 +1183,6 @@ int myprogress (void *clientp,
   int barwidth;
   int num;
   int i;
-  int prevblock;
-  int thisblock;
 
   struct ProgressData *bar = (struct ProgressData *)clientp;
   size_t total = dltotal + ultotal;
@@ -1773,37 +1769,4 @@ static char *my_get_line(FILE *fp)
      *nl = '\0';
 
    return retval;
-}
-
-static char *my_get_token(const char *line)
-{
-  static const char *save = NULL;
-  const char *first = NULL;
-  const char *last = NULL;
-  char *retval = NULL;
-  size_t size;
-
-  if (NULL == line)
-    line = save;
-  if (NULL == line)
-    return NULL;
-
-  while (('\0' != *line) && (isspace(*line)))
-    line++;
-  first = line;
-  while (('\0' != *line) && (!isspace(*line)))
-    line++;
-  save = line;
-  while ('\0' != *line)
-    line++;
-  last = line;
-
-  size = last - first;
-  if (0 == size)
-    return NULL;
-  if (NULL == (retval = malloc(size + 1)))
-    return NULL;
-  memcpy(retval, first, size);
-  retval[size] = '\0';
-  return retval;
 }

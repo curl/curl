@@ -70,5 +70,6 @@ typedef struct {
 int glob_url(URLGlob**, char*, int *);
 char* next_url(URLGlob*);
 char* match_url(char*, URLGlob); 
+void glob_cleanup(URLGlob* glob);
 
 #endif
