@@ -1,8 +1,8 @@
 .\" You can view this file with:
-.\" nroff -man libcurl.5
+.\" nroff -man [file]
 .\" Written by Daniel Stenberg
 .\"
-.TH libcurl 5 "20 April 2001" "libcurl 7.7.2" "libcurl overview"
+.TH libcurl 5 "23 April 2001" "libcurl 7.7.2" "libcurl overview"
 .SH NAME
 libcurl \- client-side URL transfers
 .SH DESCRIPTION
@@ -64,6 +64,12 @@ builds a linked list
 .TP
 .B curl_slist_free_all()
 frees a whole curl_slist
+.TP
+.B curl_mprintf()
+portable printf() functions
+.TP
+.B curl_streual()
+portable case insensitive string comparisons
 .RE
 
 .SH "LINKING WITH LIBCURL"
@@ -120,5 +126,5 @@ Note that the options set with curl_easy_setopt() will be used in on every
 repeat curl_easy_perform() call
 .SH "COMPATIBILITY WITH OLDER LIBCURLS"
 Repeated curl_easy_perform() calls on the same handle were not supported in
-pre-7.7 versions, and caused confusion and defined behaviour.
+pre-7.7 versions, and caused confusion and undefined behaviour.
 
