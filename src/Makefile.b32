@@ -31,26 +31,31 @@ LD       = bcc32
 CP       = copy
 RM       = del
 LIB      = tlib
-TOPDIR   = ..
-CURNTDIR = .
 
 CXXFLAGS = -q -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
 LDFLAGS  = -q -lq -lap
 
-INCDIRS  = -I$(CURNTDIR);$(TOPDIR)/include;$(TOPDIR)/lib
+INCDIRS  = -I.;../include;../lib
 LINKLIB  = $(BCCDIR)/lib/cw32mt.lib
 
-LIBCURLLIB = $(TOPDIR)/lib/libcurl.lib
-
 # If you build with SSL support, set WITH_SSL=1
-DEFINES  = -DNDEBUG -DLIBCURL_BIGENDIAN=0 -DWIN32 -D_CONSOLE -D_MBCS
+DEFINES  = -DNDEBUG -DWIN32
+
+!ifdef DYNAMIC
+LIBCURL_LIB = ../lib/libcurl_imp.lib
+!else
+LIBCURL_LIB = ../lib/libcurl.lib
+DEFINES = $(DEFINES) -DCURL_STATICLIB
+!endif
+
 !ifdef WITH_ZLIB
 DEFINES  = $(DEFINES) -DHAVE_LIBZ -DHAVE_ZLIB_H
 INCDIRS  = $(INCDIRS);$(ZLIB_PATH)
 LINKLIB  = $(LINKLIB) $(ZLIB_PATH)/zlib.lib
 !endif
+
 !ifdef WITH_SSL
-DEFINES  = $(DEFINES) -DUSE_SSLEAY 
+DEFINES  = $(DEFINES) -DUSE_SSLEAY
 INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)/inc32;$(OPENSSL_PATH)/inc32/openssl
 LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)/out32/ssleay32.lib $(OPENSSL_PATH)/out32/libeay32.lib
 !endif
@@ -74,19 +79,12 @@ clean:
 	-$(RM) *.obj
 	-$(RM) hugehelp.c
 
-$(PROGNAME): $(OBJECTS) $(LIBCURLLIB) $(LINKLIB)
+$(PROGNAME): $(OBJECTS) $(LIBCURL_LIB) $(LINKLIB)
 	@-$(RM) $@
 	$(LD) $(LDFLAGS) -e$@ $**
 
 hugehelp.c: hugehelp.c.cvs
 	@echo Creating $@
 	@$(CP) $** $@
-
-sys/utime.h: $(BCCDIR)\include\utime.h
-	@echo Fix missing header $@
-	@-mkdir sys
-	@$(CP) $** sys
-
-main.c: sys/utime.h
 
 
