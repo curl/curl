@@ -108,8 +108,13 @@ PostgreSQL
 
 Python
 
-  Written by Kjetil Jacobsen
+  PycURL is written by Kjetil Jacobsen
   http://pycurl.sourceforge.net/
+
+R
+
+  RCurl is written by Duncan Temple Lang
+  http://www.omegahat.org/RCurl/
 
 Rexx
 
@@ -128,7 +133,7 @@ Scheme
 
 Tcl
 
-  Written by Andrés García
+  Tclcurl is written by Andrés García
   http://personal1.iddeo.es/andresgarci/tclcurl/english/docs.html
 
 Q
