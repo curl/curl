@@ -1089,7 +1089,9 @@ CURLcode Curl_telnet(struct connectdata *conn)
   WSAEVENT event_handle;
   WSANETWORKEVENTS events;
   HANDLE stdin_handle;
-  HANDLE objs[2];
+  HANDLE objs[2];         
+  DWORD  obj_count;
+  DWORD  wait_timeout;
   DWORD waitret;
   DWORD readfile_read;
 #else
@@ -1181,8 +1183,8 @@ CURLcode Curl_telnet(struct connectdata *conn)
   stdin_handle = GetStdHandle(STD_INPUT_HANDLE);
 
   /* Create the list of objects to wait for */
-  objs[0] = stdin_handle;
-  objs[1] = event_handle;
+  objs[0] = event_handle;
+  objs[1] = stdin_handle;
 
   /* Tell winsock what events we want to listen to */
   if(event_select_func(sockfd, event_handle, FD_READ|FD_CLOSE) == SOCKET_ERROR) {
@@ -1190,12 +1192,60 @@ CURLcode Curl_telnet(struct connectdata *conn)
     FreeLibrary(wsock2);
     return 0;
   }
-
+                                   
+  /* If stdin_handle is a pipe, use PeekNamedPipe() method to check it, 
+     else use the old WaitForMultipleObjects() way */         
+  if(GetFileType(stdin_handle) == FILE_TYPE_PIPE) {
+    /* Don't wait for stdin_handle, just wait for event_handle */
+    obj_count = 1;      
+    /* Check stdin_handle per 100 milliseconds */
+    wait_timeout = 100;  
+  } else {
+    obj_count = 2;
+    wait_timeout = INFINITE;
+  }
+  
   /* Keep on listening and act on events */
   while(keepon) {
-    waitret = WaitForMultipleObjects(2, objs, FALSE, INFINITE);
-    switch(waitret - WAIT_OBJECT_0) {
-    case 0:
+    waitret = WaitForMultipleObjects(obj_count, objs, FALSE, wait_timeout);
+    switch(waitret) {
+    case WAIT_TIMEOUT:
+    {
+      unsigned char outbuf[2];
+      int out_count = 0;
+      ssize_t bytes_written;
+      char *buffer = buf;
+
+      for(;;) {
+        if(!PeekNamedPipe(stdin_handle,NULL,0,NULL,&nread,NULL)) {
+          keepon = FALSE;
+          break;
+        }
+        
+        if(!nread)
+          break;
+          
+        if(!ReadFile(stdin_handle, buf, sizeof(data->state.buffer),
+                     &readfile_read, NULL)) {
+          keepon = FALSE;
+          break;
+        }
+        nread = readfile_read;
+        
+        while(nread--) {
+          outbuf[0] = *buffer++;
+          out_count = 1;
+          if(outbuf[0] == CURL_IAC)
+            outbuf[out_count++] = CURL_IAC;
+            
+          Curl_write(conn, conn->sock[FIRSTSOCKET], outbuf,
+                     out_count, &bytes_written);
+        }
+      }
+    }      
+    break;
+    
+    case WAIT_OBJECT_0 + 1:
     {
       unsigned char outbuf[2];
       int out_count = 0;
@@ -1221,7 +1271,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
     }
     break;
       
-    case 1:
+    case WAIT_OBJECT_0:
       if(enum_netevents_func(sockfd, event_handle, &events)
          != SOCKET_ERROR) {
         if(events.lNetworkEvents & FD_READ) {
