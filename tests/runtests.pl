@@ -52,9 +52,7 @@ my $perl="perl -I$srcdir";
 my $memory_debug=0;
 
 # this gets set if curl is compiled with netrc debugging:
-# It has to be in the global symbol table because of the way 'requires' works
-$main::netrc_debug=0;
-my $netrc_debug = \$main::netrc_debug;
+my $netrc_debug = 0;
 
 # name of the file that the memory debugging creates:
 my $memdump="memdump";
@@ -465,11 +463,11 @@ sub displaydata {
 
         # there's only one debug control in the configure script
         # so hope netrc debugging is enabled and set it up
-        $$netrc_debug = 1;
+        $netrc_debug = 1;
         $ENV{'CURL_DEBUG_NETRC'} = 'log/netrc';
     }
     printf("* Memory debugging: %s\n", $memory_debug?"ON":"OFF");
-    printf("* Netrc debugging:  %s\n", $$netrc_debug?"ON":"OFF");
+    printf("* Netrc debugging:  %s\n", $netrc_debug?"ON":"OFF");
     printf("* HTTPS server:     %s\n", $checkstunnel?"ON":"OFF");
     printf("* FTPS server:      %s\n", $checkstunnel?"ON":"OFF");
     printf("* libcurl SSL:      %s\n", $ssl_version?"ON":"OFF");
@@ -507,6 +505,26 @@ sub singletest {
         return -1;
     }
 
+    my @what = getpart("client", "features");
+    for(@what) {
+        my $f = $_;
+        $f =~ s/\s//g;
+
+        if($f eq "SSL") {
+            if($ssl_version) {
+                next;
+            }
+        }
+        elsif($f eq "netrc_debug") {
+            if($netrc_debug) {
+                next;
+            }
+        }
+
+        warn "Test case $testnum requires the missing feature: $_";
+        return -1;
+    }
+
     my $serverproblem = serverfortest($testnum);
 
     if($serverproblem) {
@@ -521,27 +539,6 @@ sub singletest {
         }
         return -1;
     }
-
-    {
-        my %hash = getpartattr("client");
-        my $requires = $hash{'requires'};
-
-        if (defined($requires)) {
-            no strict "refs";
-            my $value=${$requires};
-#            print "This test requires '$requires' with value '$value' \n";
-
-            if (${$requires}) {
-                # this test is OK
-                ;
-            }else {
-                print "$testnum requires $requires, which is not set; skipping\n";
-                $skipped++;
-                return -1;  # return test-not-run
-            }
-        }
-    }
-
 
     # extract the reply data
     my @reply = getpart("reply", "data");
@@ -930,26 +927,6 @@ sub serverfortest {
         }
         return 100;
     }
-
-    my @what = getpart("client", "features");
-
-    for(@what) {
-        my $f = $_;
-
-        $f =~ s/\s//g;
-
-        print STDERR "CHECK FOR $f\n";
-
-        if($f eq "SSL") {
-            if($ssl_version) {
-                last;
-            }
-        }
-
-        warn "Test case $testnum requires the missing feature: $_";
-        return 100;
-    }
-
 
     my @what = getpart("client", "server");
 
