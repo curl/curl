@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -222,7 +222,7 @@ int waitconnect(curl_socket_t sockfd, /* socket */
   if(-1 == rc)
     /* error, no connect here, try next */
     return WAITCONN_SELECT_ERROR;
-  
+
   else if(0 == rc)
     /* timeout, no connect today */
     return WAITCONN_TIMEOUT;
@@ -255,7 +255,7 @@ static CURLcode bindlocal(struct connectdata *conn,
 
     /* First check if the given name is an IP address */
     in=inet_addr(data->set.device);
-      
+
     if((in == CURL_INADDR_NONE) &&
        Curl_if2ip(data->set.device, myhost, sizeof(myhost))) {
       /*
@@ -336,7 +336,7 @@ static CURLcode bindlocal(struct connectdata *conn,
           struct sockaddr_in6 add;
 
           bindworked = TRUE;
-	
+
           size = sizeof(add);
           if(getsockname(sockfd, (struct sockaddr *) &add,
                          (socklen_t *)&size)<0) {
@@ -353,13 +353,13 @@ static CURLcode bindlocal(struct connectdata *conn,
           sa.sin_family = AF_INET;
           sa.sin_addr.s_addr = in;
           sa.sin_port = 0; /* get any port */
-	
+
           if( bind(sockfd, (struct sockaddr *)&sa, sizeof(sa)) >= 0) {
             /* we succeeded to bind */
             struct sockaddr_in add;
-	
+
             bindworked = TRUE;
-            
+
             size = sizeof(add);
             if(getsockname(sockfd, (struct sockaddr *) &add,
                            (socklen_t *)&size)<0) {
@@ -373,7 +373,7 @@ static CURLcode bindlocal(struct connectdata *conn,
           failf(data, "%s", Curl_strerror(conn, Curl_ourerrno()));
           return CURLE_HTTP_PORT_FAILED;
         }
-	
+
       } /* end of if  h */
       else {
 	failf(data,"could't find my own IP address (%s)", myhost);
@@ -467,7 +467,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     if(data->set.timeout && data->set.connecttimeout) {
       if (data->set.timeout < data->set.connecttimeout)
         has_passed -= data->set.timeout*1000;
-      else 
+      else
         has_passed -= data->set.connecttimeout*1000;
     }
     else if(data->set.timeout)
@@ -559,7 +559,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
 #ifdef ENABLE_IPV6
   struct addrinfo *ai;
-#endif  
+#endif
 
   /*************************************************************
    * Figure out what maximum time we have left
@@ -582,7 +582,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     if(data->set.timeout && data->set.connecttimeout) {
       if (data->set.timeout < data->set.connecttimeout)
         timeout_ms = data->set.timeout*1000;
-      else 
+      else
         timeout_ms = data->set.connecttimeout*1000;
     }
     else if(data->set.timeout)
@@ -683,7 +683,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         if(data->state.used_interface == Curl_if_multi)
           /* don't hang when doing multi */
           timeout_ms = 0;
-        
+
         rc = waitconnect(sockfd, timeout_ms);
         break;
       default:
@@ -702,7 +702,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       rc = 0;
       break;
     }
-      
+
     if(0 == rc) {
       if (verifyconnect(sockfd,NULL)) {
         /* we are connected, awesome! */
