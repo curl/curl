@@ -79,6 +79,10 @@ char *curl_escape(const char *string, int length)
   return ns;
 }
 
+#define ishex(in) ((in >= 'a' && in <= 'f') || \
+                   (in >= 'A' && in <= 'F') || \
+                   (in >= '0' && in <= '9'))
+
 char *curl_unescape(const char *string, int length)
 {
   int alloc = (length?length:(int)strlen(string))+1;
@@ -93,13 +97,19 @@ char *curl_unescape(const char *string, int length)
   
   while(--alloc > 0) {
     in = *string;
-    if('%' == in) {
-      /* encoded part */
-      if(sscanf(string+1, "%02X", &hex)) {
-        in = hex;
-        string+=2;
-        alloc-=2;
-      }
+    if(('%' == in) && ishex(string[1]) && ishex(string[2])) {
+      /* this is two hexadecimal digits following a '%' */
+      char hexstr[3];
+      char *ptr;
+      hexstr[0] = string[1];
+      hexstr[1] = string[2];
+      hexstr[2] = 0;
+
+      hex = strtol(hexstr, &ptr, 16);
+
+      in = hex;
+      string+=2;
+      alloc-=2;
     }
     
     ns[index++] = in;
@@ -109,6 +119,9 @@ char *curl_unescape(const char *string, int length)
   return ns;
 }
 
+/* For operating systems/environments that use different malloc/free
+   ssystems for the app and for this library, we provide a free that uses
+   the library's memory system */
 void curl_free(void *p)
 {
   free(p);
