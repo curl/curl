@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (21 January 2004)
+- Removed the defines in the public header file with TIMECOND_ prefixes. They
+  have been obsolete since April 22nd 2002, and if this causes anyone any
+  problems now it is very easy to just add CURL_ to the names. This corrects
+  this name space pollution.
+
 Daniel (19 January 2004)
 - David Byron cleaned up how --trace with no option was treated, and also
   arguments in a config file without a required parameter!
