@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -624,8 +624,8 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.9.5-cvs"
-#define LIBCURL_VERSION_NUM 0x070905
+#define LIBCURL_VERSION "7.9.6-pre1"
+#define LIBCURL_VERSION_NUM 0x070906
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {

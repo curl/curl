@@ -1,5 +1,5 @@
 /* ============================================================================
- * Copyright (C) 1998 Angus Mackay. All rights reserved; 
+ * Copyright (C) 1998 - 2002, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * Redistribution and use are freely permitted provided that:
  *
