@@ -1,7 +1,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "3 Dec 2002" "libcurl 7.10.3" "libcurl Manual"
+.TH curl_easy_setopt 3 "10 Jun 2003" "libcurl 7.10.6" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -333,20 +333,29 @@ the connection to the HTTP proxy. If the password is left out, you will be
 prompted for it. \fICURLOPT_PASSWDFUNCTION\fP can be used to set your own
 prompt function.
 .TP
-.B CURLOPT_HTTPDIGEST
-Pass a long set to a non-zero value to enable HTTP Digest authentication.
-Digest authentication is defined in RFC2617 and is a somewhat more secure way
-to do user+password checking over public networks than the regular
-old-fashioned Basic authentication. By default, libcurl uses Basic. Set name
-and password with the CURLOPT_USERPWD option. (Added in 7.10.6)
+.B CURLOPT_HTTPAUTH
+Pass a long set to one of the curl_httpauth values, to tell libcurl what
+authentication method you want it to use. Set the actual name and password
+with the \fICURLOPT_USERPWD\fP option. (Added in 7.10.6)
+.RS
+.TP 5
+.B CURLHTTP_BASIC
+enables HTTP Basic authentication. This is the default choice, and the only
+method that is in wide-spread use and supported everywhere.
 .TP
-.B CURLOPT_HTTPNEGOTIATE
-Pass a long set to a non-zero value to enable HTTP Negotiate authentication.
-The Negotiate method was designed by Microsoft and is used in their web
-aplications. It is primarily meant as a support for Kerberos5 authentication
-but may be also used along with another authentication methods. For more
-information see IETF draft draft-brezak-spnego-http-04.txt.  Set name and
-password with the CURLOPT_USERPWD option. (Added in 7.10.6)
+.B CURLHTTP_DIGEST
+enables HTTP Digest authentication.  Digest authentication is defined in
+RFC2617 and is a somewhat more secure way to do user+password checking over
+public networks than the regular old-fashioned Basic authentication. By
+default, libcurl uses Basic.
+.TP
+.B CURLHTTP_NEGOTIATE
+enables HTTP Negotiate authentication.  The Negotiate method was designed by
+Microsoft and is used in their web aplications. It is primarily meant as a
+support for Kerberos5 authentication but may be also used along with another
+authentication methods. For more information see IETF draft
+draft-brezak-spnego-http-04.txt.
+.RE
 .PP
 .SH HTTP OPTIONS
 .TP 0.4i
