@@ -8,6 +8,19 @@
 
 Version XX
 
+Daniel (16 February 2000):
+- Jörn Hartroth brought me some fixes for the progress meter and I continued
+  working on it. It seems to work for http download, http post, ftp download
+  and ftp upload. It should be a pretty good test it works generally good.
+
+- Still need to add the -# progress bar into the new style progress interface.
+
+- Gonna have a go at my new output option parameter next.
+
+Daniel (15 February 2000):
+- The progress meter stuff is slowly taking place. There's more left before it
+  is working ok and everything is tested, but we're reaching there. Slowly!
+
 Daniel (11 February 2000):
 - Paul Marquis <pmarquis@iname.com> fixed the config file parsing of curl to
   deal with any-length lines, removing the previous limit of 4K.
