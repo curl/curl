@@ -364,6 +364,7 @@ static void help(void)
        " -z/--time-cond <time> Includes a time condition to the server (H)\n"
        " -Z/--max-redirs <num> Set maximum number of redirections allowed (H)\n"
        " -0/--http1.0       Force usage of HTTP 1.0 (H)\n"
+       " -1/--tlsv1         Force usage of TLSv1 (H)\n"
        " -2/--sslv2         Force usage of SSLv2 (H)\n"
        " -3/--sslv3         Force usage of SSLv3 (H)");
   puts(" -#/--progress-bar  Display transfer progress as a progress bar\n"
@@ -863,6 +864,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5d", "ciphers",    TRUE},
 
     {"0", "http1.0",     FALSE},
+    {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
     {"3", "sslv3",       FALSE},
     {"a", "append",      FALSE},
@@ -1060,13 +1062,17 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       /* HTTP version 1.0 */
       config->httpversion = CURL_HTTP_VERSION_1_0;
       break;
+    case '1':
+      /* TLS version 1 */
+      config->ssl_version = CURL_SSLVERSION_TLSv1;
+      break;
     case '2': 
       /* SSL version 2 */
-      config->ssl_version = 2;
+      config->ssl_version = CURL_SSLVERSION_SSLv2;
       break;
     case '3': 
-      /* SSL version 2 */
-      config->ssl_version = 3;
+      /* SSL version 3 */
+      config->ssl_version = CURL_SSLVERSION_SSLv3;
       break;
     case 'a':
       /* This makes the FTP sessions use APPE instead of STOR */
