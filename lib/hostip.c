@@ -409,10 +409,9 @@ CURLcode Curl_is_resolved(struct connectdata *conn, bool *done)
     ares_process(data->state.areschannel, &read_fds, &write_fds);
 
   if(conn->async.done) {
-    *done = TRUE;
-
     if(!conn->async.dns)
       return CURLE_COULDNT_RESOLVE_HOST;
+    *done = TRUE;
   }
   else
     *done = FALSE;
