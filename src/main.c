@@ -2642,6 +2642,8 @@ operate(struct Configurable *config, int argc, char *argv[])
   }
 #endif
 
+  memset(&outs,0,sizeof(outs));
+
   /* we get libcurl info right away */
   curlinfo = curl_version_info(CURLVERSION_NOW);
 
@@ -2946,6 +2948,8 @@ operate(struct Configurable *config, int argc, char *argv[])
               config->resume_from = 0;
           }
         
+	  outs.filename = outfile;
+
           if(config->resume_from) {
             /* open file for output: */
             outs.stream=(FILE *) fopen(outfile, config->resume_from?"ab":"wb");
@@ -2955,7 +2959,6 @@ operate(struct Configurable *config, int argc, char *argv[])
             }
           }
           else {
-            outs.filename = outfile;
             outs.stream = NULL; /* open when needed */
           }
         }
