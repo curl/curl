@@ -444,10 +444,14 @@ _Transfer(struct connectdata *c_conn)
                  write a chunk of the body */
               if(conn->protocol&PROT_HTTP) {
                 /* HTTP-only checks */
-                if (data->resume_from && !content_range ) {
+                if (data->resume_from &&
+                    !content_range &&
+                    (data->httpreq==HTTPREQ_GET)) {
                   /* we wanted to resume a download, although the server
-                     doesn't seem to support this */
-                  failf (data, "HTTP server doesn't seem to support byte ranges. Cannot resume.");
+                     doesn't seem to support this and we did this with a GET
+                     (if it wasn't a GET we did a POST or PUT resume) */
+                  failf (data, "HTTP server doesn't seem to support "
+                         "byte ranges. Cannot resume.");
                   return CURLE_HTTP_RANGE_ERROR;
                 }
                 else if (data->newurl) {
