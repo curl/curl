@@ -196,6 +196,7 @@ struct FILE {
 struct ConnectBits {
   bool close; /* if set, we close the connection after this request */
   bool reuse; /* if set, this is a re-used connection */
+  bool chunk; /* if set, this is a chunked transfer-encoding */
 };
 
 /*

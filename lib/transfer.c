@@ -379,10 +379,22 @@ _Transfer(struct connectdata *c_conn)
                  */
                 conn->bits.close = TRUE; /* close when done */
               }
+              else if (strnequal("Transfer-Encoding: chunked", p,
+                                 strlen("Transfer-Encoding: chunked"))) {
+                /*
+                 * [RFC 2616, section 3.6.1] A 'chunked' transfer encoding
+                 * means that the server will send a series of "chunks". Each
+                 * chunk starts with line with info (including size of the
+                 * coming block) (terminated with CRLF), then a block of data
+                 * with the previously mentioned size. There can be any amount
+                 * of chunks, and a chunk-data set to zero signals the
+                 * end-of-chunks. */
+                conn->bits.chunk = TRUE; /* chunks coming our way */
+              }
               else if (strnequal("Content-Range", p, 13)) {
                 if (sscanf (p+13, ": bytes %d-", &offset) ||
                     sscanf (p+13, ": bytes: %d-", &offset)) {
-                  /* This second format was added August 1st by Igor
+                  /* This second format was added August 1st 2000 by Igor
                      Khristophorov since Sun's webserver JavaWebServer/1.1.1
                      obviously sends the header this way! :-( */
                   if (data->resume_from == offset) {
@@ -457,9 +469,14 @@ _Transfer(struct connectdata *c_conn)
              is non-headers. */
           if (str && !header && ((signed int)nread > 0)) {
             
+            /*
+             * If we requested a HTTP header, this might be a good time to get
+             * out and return home.
+             */
+
             if(0 == bodywrites) {
               /* These checks are only made the first time we are about to
-                 write a chunk of the body */
+                 write a piece of the body */
               if(conn->protocol&PROT_HTTP) {
                 /* HTTP-only checks */
                 if (data->newurl) {
@@ -515,6 +532,13 @@ _Transfer(struct connectdata *c_conn)
               } /* this is HTTP */
             } /* this is the first time we write a body part */
             bodywrites++;
+
+            if(conn->bits.chunk) {
+              /*
+               * Bless me father for I have sinned. Here come a chunked
+               * transfer flighing and we need to decode this properly.
+               */
+            }
 
             if(conn->maxdownload &&
                (bytecount + nread >= conn->maxdownload)) {
