@@ -24,9 +24,6 @@ To get fixed in 7.11.2 (planned release May/June 2004)
 24. Make the progress meter use one digit more for the hour time fields.
     Accomplish this by removing one of the times displayed.
 
-27. Put the version defines in their own header file, so that lib/libcurl.rc
-    can include only that to reduce problems with MSVC.
-
 28. Optimize the way libcurl uses CWD on each new request over a persistent
     connection (on FTP) even if it doesn't have to.
 
