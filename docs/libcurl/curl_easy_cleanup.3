@@ -2,28 +2,24 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_cleanup 3 "5 March 2001" "libcurl 7.7" "libcurl Manual"
+.TH curl_easy_cleanup 3 "4 March 2002" "libcurl 7.7" "libcurl Manual"
 .SH NAME
-curl_easy_cleanup - End a libcurl session
+curl_easy_cleanup - End a libcurl easy session
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
 .BI "void curl_easy_cleanup(CURL *" handle ");"
 .ad
 .SH DESCRIPTION
-This function must be the last function to call for a curl session. It is the
-opposite of the
-.I curl_easy_init
-function and must be called with the same
-.I handle
-as input as the curl_easy_init call returned.
+This function must be the last function to call for an easy session. It is the
+opposite of the \fIcurl_easy_init\fP function and must be called with the same
+\fIhandle\fP as input that the curl_easy_init call returned.
 
-This will effectively close all connections libcurl has been used and possibly
+This will effectively close all connections this handle has used and possibly
 has kept open until now. Don't call this function if you intend to transfer
-more files (libcurl 7.7 or later).
+more files.
 .SH RETURN VALUE
 None
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), "
-.SH BUGS
-Surely there are some, you tell me!
+
