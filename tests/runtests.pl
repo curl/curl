@@ -56,8 +56,8 @@ my $memdump="memdump";
 # the path to the script that analyzes the memory debug output file:
 my $memanalyze="./memanalyze.pl";
 
-my $checkstunnel = checkcmd("stunnel");
-my $checkvalgrind = checkcmd("valgrind");
+my $stunnel = checkcmd("stunnel");
+my $valgrind = checkcmd("valgrind");
 
 my $ssl_version; # set if libcurl is built with SSL support
 
@@ -65,7 +65,7 @@ my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 
-if($checkvalgrind) {
+if($valgrind) {
     # we have found valgrind on the host, use it
 
     # perhaps we should verify that valgrind works before we actually use it?
@@ -385,6 +385,10 @@ sub runhttpsserver {
     my $RUNNING;
     my $pid=checkserver($HTTPSPIDFILE );
 
+    if(!$stunnel) {
+        return 0;
+    }
+
     if($pid > 0) {
         # kill previous stunnel!
         if($verbose) {
@@ -394,7 +398,7 @@ sub runhttpsserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/httpsserver.pl $flag -d $srcdir -r $HOSTPORT $HTTPSPORT &";
+    my $cmd="$perl $srcdir/httpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $HOSTPORT $HTTPSPORT &";
     system($cmd);
     if($verbose) {
         print "CMD: $cmd\n";
@@ -498,6 +502,10 @@ sub runftpsserver {
     my $RUNNING;
     my $pid=checkserver($FTPSPIDFILE );
 
+    if(!$stunnel) {
+        return 0;
+    }
+
     if($pid > 0) {
         # kill previous stunnel!
         if($verbose) {
@@ -507,7 +515,7 @@ sub runftpsserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/ftpsserver.pl $flag -d $srcdir -r $FTPPORT $FTPSPORT &";
+    my $cmd="$perl $srcdir/ftpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $FTPPORT $FTPSPORT &";
     system($cmd);
     if($verbose) {
         print "CMD: $cmd\n";
@@ -652,10 +660,10 @@ sub checkcurl {
     "* Host: $hostname",
     "* System: $hosttype";
 
-    printf("* Server SSL:       %s\n", $checkstunnel?"ON":"OFF");
+    printf("* Server SSL:       %s\n", $stunnel?"ON":"OFF");
     printf("* libcurl SSL:      %s\n", $ssl_version?"ON":"OFF");
     printf("* libcurl debug:    %s\n", $curl_debug?"ON":"OFF");
-    printf("* valgrind:         %s\n", $checkvalgrind?"ON":"OFF");
+    printf("* valgrind:         %s\n", $valgrind?"ON":"OFF");
     print "***************************************** \n";
 }
 
@@ -902,7 +910,7 @@ sub singletest {
 
         $cmdargs .= " <$stdinfile";
     }
-    if($checkvalgrind) {
+    if($valgrind) {
         $cmdargs .= " 3>log/valgrind$testnum";
     }
     my $CMDLINE;
@@ -935,7 +943,15 @@ sub singletest {
     }
     else {
         $res = system("$CMDLINE");
-        $res /= 256;
+        my $signal_num  = $res & 127;
+        my $dumped_core = $res & 128;
+
+        if(!$anyway && ($signal_num || $dumped_core)) {
+            $res = 1000;
+        }
+        else {
+            $res /= 256;
+        }
     }
 
     # remove the special FTP command file after each test!
@@ -1158,7 +1174,7 @@ sub startservers {
             }
         }
         elsif($what eq "ftps") {
-            if(!$checkstunnel || !$ssl_version) {
+            if(!$stunnel || !$ssl_version) {
                 # we can't run https tests without stunnel
                 # or if libcurl is SSL-less
                 return 1;
@@ -1183,7 +1199,7 @@ sub startservers {
             # we support it but have no server!
         }
         elsif($what eq "https") {
-            if(!$checkstunnel || !$ssl_version) {
+            if(!$stunnel || !$ssl_version) {
                 # we can't run https tests without stunnel
                 # or if libcurl is SSL-less
                 return 1;

@@ -7,19 +7,14 @@
 
 use strict;
 
-use stunnel;
-
-my $stunnel = &checkstunnel;
-
-if(!$stunnel) {
-    exit;
-}
+my $stunnel = "stunnel";
 
 #
 # -p pemfile
 # -P pid dir
 # -d listen port
 # -r target port
+# -s stunnel path
 
 my $verbose=0; # set to 1 for debugging
 
@@ -41,6 +36,10 @@ do {
     }
     elsif($ARGV[0] eq "-d") {
         $srcdir=$ARGV[1];
+        shift @ARGV;
+    }
+    elsif($ARGV[0] eq "-s") {
+        $stunnel=$ARGV[1];
         shift @ARGV;
     }
     elsif($ARGV[0] =~ /^(\d+)$/) {
