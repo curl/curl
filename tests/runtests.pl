@@ -1187,7 +1187,7 @@ close(CMDLOG);
 
 print "Shutting down test suite servers:\n" if (!$short);
 for(keys %run) {
-    printf STDERR ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if(!$short);
+    printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if(!$short);
     stopserver($run{$_}); # the pid file is in the hash table
 }
 
