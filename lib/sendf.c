@@ -326,7 +326,7 @@ int Curl_read(struct connectdata *conn,
         /* if there's data pending, then we re-invoke SSL_read() */
         break;
       }
-    } while(0);
+    } while(1);
     if(loop && SSL_pending(conn->ssl.handle))
       return -1; /* basicly EWOULDBLOCK */
   }
