@@ -136,12 +136,6 @@ char **__crt0_glob_function (char *arg)
 }
 #endif /* __DJGPP__ */
 
-#ifndef __cplusplus
-#ifndef typedef_bool
-typedef char bool;
-#endif
-#endif
-
 #define CURL_PROGRESS_STATS 0 /* default progress display */
 #define CURL_PROGRESS_BAR   1
 
