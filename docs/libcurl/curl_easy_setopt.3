@@ -712,10 +712,13 @@ Pass a long as parameter. Set what version of SSL to attempt to use, 2 or
 servers make this difficult why you at times may have to use this option.
 .TP
 .B CURLOPT_SSL_VERIFYPEER
-Pass a long that is set to a non-zero value to make curl verify the peer's
-certificate. The certificate to verify against must be specified with the
-CURLOPT_CAINFO option (Added in 7.4.2) or a certificate directory must be specified
-with the CURLOPT_CAPATH option (Added in 7.9.8).
+Pass a long that is set to a zero value to stop curl from verifying the peer's
+certificate (7.10 starting setting this option to TRUE by default).  Alternate
+certificates to verify against can be specified with the CURLOPT_CAINFO option
+(Added in 7.4.2) or a certificate directory can be specified with the
+CURLOPT_CAPATH option (Added in 7.9.8).  As of 7.10, curl installs a default
+bundle.  CURLOPT_SSL_VERIFYHOST may also need to be set to 1 or 0 if
+CURLOPT_SSL_VERIFYPEER is disabled (it defaults to 2).
 .TP
 .B CURLOPT_CAINFO
 Pass a char * to a zero terminated string naming a file holding one or more
@@ -742,7 +745,8 @@ socket. It will be used to seed the random engine for SSL.
 .B CURLOPT_SSL_VERIFYHOST
 Pass a long. Set if we should verify the Common name from the peer certificate
 in the SSL handshake, set 1 to check existence, 2 to ensure that it matches
-the provided hostname. (Added in 7.8.1)
+the provided hostname. This is by default set to 2. (Added in 7.8.1, default
+changed in 7.10)
 .TP
 .B CURLOPT_SSL_CIPHER_LIST
 Pass a char *, pointing to a zero terminated string holding the list of
