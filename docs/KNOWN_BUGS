@@ -23,13 +23,6 @@ may have been fixed since this was written!
   indicate that the user wants to reach the root dir (this exception SHALL
   remain even when this bug is fixed).
 
-* 1) libcurl does a POST
-  2) receives a 100-continue
-  3) sends away the POST
-  Now, if nothing else is returned from the server, libcurl MUST return
-  CURLE_GOT_NOTHING, but it seems it returns CURLE_OK as it seems to count
-  the 100-continue reply as a good enough reply.
-
 * libcurl doesn't treat the content-length of compressed data properly, as
   it seems HTTP servers send the *uncompressed* length in that header and
   libcurl thinks of it as the *compressed* lenght. Some explanations are here:

@@ -468,6 +468,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               data->info.header_size += headerlen;
               conn->headerbytecount += headerlen;
 
+              conn->deductheadercount =
+                (100 == k->httpcode)?conn->headerbytecount:0;
+
               if (conn->resume_from &&
                   !k->content_range &&
                   (data->set.httpreq==HTTPREQ_GET)) {

@@ -13,9 +13,12 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o getting only a 100 Continue response and nothing else, when talking HTTP,
+   is now treated as an error by libcurl
  o fixed minor memory leak in libcurl for Windows when staticly linked
  o POST/PUT using Digest/NTLM/Negotiate (including anyauth) now work better
- o --limit-rate with high speed rates is a lot more accurate now
+ o --limit-rate with high speed rates is a lot more accurate now, and supports
+   limiting to speeds >2GB/sec on systems with Large File support.
  o curl_strnqual.3 "refer-to" man page fix
  o fixed a minor very old progress meter final update bug
  o added checks for a working NI_WITHSCOPEID before that is used
@@ -39,6 +42,7 @@ This release includes the following bugfixes:
 Other curl-related news since the previous public release:
 
  o PycURL 7.11.1 was released: http://pycurl.sf.net/
+ o New German web mirror: http://curl.netmirror.org/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:

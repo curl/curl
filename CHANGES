@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (7 April 2004)
+- A request that sends "Expect: 100-continue" and gets nothing but a single
+  100 response back will now return a CURLE_GOT_NOTHING. Test 158 verifies.
+
+- The strtoofft() macro is now named curlx_strtoofft() to use the curlx_*
+  approach fully.
+
 Daniel (6 April 2004)
 - Gisle Vanem's fixed bug #927979 reported by Nathan O'Sullivan. The problem
   made libcurl on Windows leak a small amount of memory in each name resolve

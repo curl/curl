@@ -438,6 +438,11 @@ struct connectdata {
   char *ppath;
   curl_off_t bytecount;
   long headerbytecount;  /* only count received headers */
+  long deductheadercount; /* this amount of bytes doesn't count when we check
+                             if anything has been transfered at the end of
+                             a connection. We use this counter to make only
+                             a 100 reply (without a following second response
+                             code) result in a CURLE_GOT_NOTHING error code */
 
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
