@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (25 April 2004)
+- Fixed the src/hugehelp.c file to include "setup.h" instead of "config.h" to
+  make the problems with USE_MANUAL on windows go away.
+
+- configure --without-ssl could still wrongly include some OpenSSL info in the
+  Makefiles if pkg-config had info about OpenSSL.
+
 - Since we can now build and use quite a large set of 3rd party libraries, I
   decided I would make configure produce a summary at the end showing what
   libraries it uses and if not, what option to use to make it use that. I also
