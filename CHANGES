@@ -7,6 +7,17 @@
                                   Changelog
 
 
+Daniel (6 February 2004)
+- Andrés García made the configure script find gethostbyname() fine when run
+  with mingw on windows.
+
+- Modifed the ldap code to use proper function pointers all over (instead of
+  mixed data and function pointers) to work-around the picky MIPSPro compiler
+  warnings.
+
+- A custom Host: header is only considered if the request is not made by
+  following a location. After discussions with Tim Baker.
+
 Daniel (5 February 2004)
 - The libz part of the configure script now only set the two libz-related
   define HAVE_ZLIB_H and HAVE_LIBZ if both the lib and the header is found.
