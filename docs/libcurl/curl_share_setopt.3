@@ -1,0 +1,46 @@
+.\" $Id$
+.\"
+.TH curl_share_setopt 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.SH NAME
+curl_share_setopt - Set options for a shared object
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
+.ad
+.SH DESCRIPTION
+Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
+.SH OPTIONS
+.TP 0.4i
+.B CURLSHOPT_LOCKFUNC
+The \fIparameter\fP must be a pointer to a function matching the following
+prototype:
+
+void lock_function(CURL *handle, curl_lock_data data, curl_lock_access access,
+void *userptr);
+
+\fIdata\fP defines what data libcurl wants to lock, and you must make sure that
+only one lock is given at any time for each kind of data.
+
+\fIaccess\fP defines what access type libcurl wants, shared or single.
+
+\fIuserptr\fP is the pointer you set with \fICURLSHOPT_USERDAT\fP.
+
+.TP
+.B CURLSHOPT_UNLOCKFUNC
+hej
+.TP
+.B CURLSHOPT_SHARE
+hej
+.TP
+.B CURLSHOPT_UNSHARE
+hej
+.TP
+.B CURLSHOPT_USERDATA
+hej
+.PP
+.SH RETURN VALUE
+If this function returns non-zero, something was wrong!
+
+.SH "SEE ALSO"
+.BR curl_share_cleanup "(3), " curl_share_init "(3)"

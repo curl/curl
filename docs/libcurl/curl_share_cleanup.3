@@ -1,0 +1,19 @@
+.\" $Id$
+.\"
+.TH curl_share_cleanup 3 "8 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.SH NAME
+curl_share_cleanup - Clean up a shared object
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "CURLSHcode curl_share_cleanup( );"
+.ad
+.SH DESCRIPTION
+This function deletes a shared object. The share handle cannot be used anymore
+when this function has been called.
+
+.SH RETURN VALUE
+If this function returns non-zero, the object was not properly deleted and it
+still remains!
+.SH "SEE ALSO"
+.BR curl_share_init "(3), " curl_share_setopt "(3)"
