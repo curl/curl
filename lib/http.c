@@ -209,7 +209,7 @@ CURLcode http(struct connectdata *conn)
 {
   struct UrlData *data=conn->data;
   char *buf = data->buffer; /* this is a short cut to the buffer */
-  CURLcode result;
+  CURLcode result=CURLE_OK;
   struct HTTP *http;
   struct Cookie *co=NULL; /* no cookies from start */
   char *ppath = conn->ppath; /* three previous function arguments */
@@ -370,46 +370,34 @@ CURLcode http(struct connectdata *conn)
       headers = headers->next;
     }
 
-    if(data->bits.http_post || data->bits.http_formpost) {
-      if(data->bits.http_post) {
-        /* this is the simple x-www-form-urlencoded style */
-        sendf(data->firstsocket, data,
-              "Content-Length: %d\015\012"
-              "Content-Type: application/x-www-form-urlencoded\r\n\r\n"
-              "%s\015\012",
-              strlen(data->postfields),
-              data->postfields );
+    if(data->bits.http_formpost) {
+      if(FormInit(&http->form, http->sendit)) {
+        failf(data, "Internal HTTP POST error!\n");
+        return CURLE_HTTP_POST_ERROR;
       }
-      else {
 
-        if(FormInit(&http->form, http->sendit)) {
-          failf(data, "Internal HTTP POST error!\n");
-          return CURLE_HTTP_POST_ERROR;
-        }
-
-        http->storefread = data->fread; /* backup */
-        http->in = data->in; /* backup */
+      http->storefread = data->fread; /* backup */
+      http->in = data->in; /* backup */
           
-        data->fread =
-          (size_t (*)(char *, size_t, size_t, FILE *))
-          FormReader; /* set the read function to read from the
-                         generated form data */
-        data->in = (FILE *)&http->form;
+      data->fread =
+        (size_t (*)(char *, size_t, size_t, FILE *))
+        FormReader; /* set the read function to read from the
+                       generated form data */
+      data->in = (FILE *)&http->form;
 
-        sendf(data->firstsocket, data,
-              "Content-Length: %d\r\n",
-              http->postsize-2);
+      sendf(data->firstsocket, data,
+            "Content-Length: %d\r\n",
+            http->postsize-2);
 
-	pgrsSetUploadSize(data, http->postsize);
+      pgrsSetUploadSize(data, http->postsize);
 
-        result = Transfer(conn, data->firstsocket, -1, TRUE,
-                          &http->readbytecount,
+      result = Transfer(conn, data->firstsocket, -1, TRUE,
+                        &http->readbytecount,
                           data->firstsocket,
-                          &http->writebytecount);
-        if(result) {
-          FormFree(http->sendit); /* free that whole lot */
-          return result;
-        }
+                        &http->writebytecount);
+      if(result) {
+        FormFree(http->sendit); /* free that whole lot */
+        return result;
       }
     }
     else if(data->bits.http_put) {
@@ -432,10 +420,20 @@ CURLcode http(struct connectdata *conn)
                         &http->writebytecount);
       if(result)
         return result;
-
+      
     }
     else {
-      sendf(data->firstsocket, data, "\r\n");
+      if(data->bits.http_post) {
+        /* this is the simple x-www-form-urlencoded style */
+        sendf(data->firstsocket, data,
+              "Content-Length: %d\015\012"
+              "Content-Type: application/x-www-form-urlencoded\r\n\r\n"
+              "%s\r\n",
+              strlen(data->postfields),
+              data->postfields );
+      }
+      else
+        sendf(data->firstsocket, data, "\r\n");
 
       /* HTTP GET/HEAD download: */
       result = Transfer(conn, data->firstsocket, -1, TRUE, bytecount,
