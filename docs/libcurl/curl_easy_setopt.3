@@ -278,7 +278,7 @@ user.
 Pass a char * as parameter, pointing to a zero terminated string containing
 the full path name to the file you want libcurl to use as .netrc file. If this
 option is omitted, and CURLOPT_NETRC is set, libcurl will attempt to find the
-a .netrc file in the current user's home directory.
+a .netrc file in the current user's home directory. (Added in 7.10.9)
 .IP CURLOPT_USERPWD
 Pass a char * as parameter, which should be [user name]:[password] to use for
 the connection. Use \fICURLOPT_HTTPAUTH\fP to decide authentication method.
