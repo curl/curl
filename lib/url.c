@@ -1191,7 +1191,6 @@ static UrgError _urlget(struct UrlData *data)
    * you download to stdout and redirect it to a file). */
 
   if ((data->out)->_handle == NULL) {
-    fprintf(stderr, "_fsetmode\n");
     _fsetmode(stdout, "b");
   }
 #endif
