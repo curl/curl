@@ -1,5 +1,10 @@
   Changelog for the c-ares project
 
+* March 11, 2005
+
+- Dominick Meglio added ares_parse_aaaa_reply.c and did various
+  adjustments. The first little steps towards IPv6 support!
+
 * November 7
 
 - Fixed the VC project and makefile to use ares_cancel and ares_version

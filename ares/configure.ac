@@ -63,4 +63,32 @@ AC_CHECK_HEADERS(
        sys/socket.h \
        )
 
+dnl check for AF_INET6
+CARES_CHECK_CONSTANT(
+  [
+    #include <sys/types.h>
+    #include <sys/socket.h>
+  ], [PF_INET6], 
+     AC_DEFINE_UNQUOTED(HAVE_PF_INET6,1,[Define to 1 if you have PF_INET6.])
+)
+
+dnl check for PF_INET6
+CARES_CHECK_CONSTANT(
+  [
+    #include <sys/types.h>
+    #include <sys/socket.h>
+  ], [AF_INET6], 
+     AC_DEFINE_UNQUOTED(HAVE_AF_INET6,1,[Define to 1 if you have AF_INET6.])
+)
+
+
+dnl check for the in6_addr structure
+CARES_CHECK_STRUCT(
+  [
+    #include <sys/types.h>
+    #include <netinet/in.h>
+  ], [in6_addr], 
+     AC_DEFINE_UNQUOTED(HAVE_STRUCT_IN6_ADDR,1,[Define to 1 if you have struct in6_addr.])
+)
+
 AC_OUTPUT(Makefile)

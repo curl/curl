@@ -99,3 +99,52 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
 
 ]) dnl end of AC_DEFUN()
 
+
+dnl This macro determines if the specified struct exists in the specified file
+dnl Syntax:
+dnl CARES_CHECK_STRUCT(headers, struct name, if found, [if not found])
+
+AC_DEFUN([CARES_CHECK_STRUCT], [
+  AC_MSG_CHECKING([for struct $2])
+  AC_TRY_COMPILE([$1], 
+    [
+      struct $2 struct_instance;
+    ], ac_struct="yes", ac_found="no")
+  if test "$ac_struct" = "yes" ; then
+    AC_MSG_RESULT(yes)
+    $3
+  else
+    AC_MSG_RESULT(no)
+    $4
+  fi
+])
+
+dnl This macro determines if the specified constant exists in the specified file
+dnl Syntax:
+dnl CARES_CHECK_CONSTANT(headers, constant name, if found, [if not found])
+
+AC_DEFUN([CARES_CHECK_CONSTANT], [
+  AC_MSG_CHECKING([for $2])
+  AC_TRY_RUN( 
+    [
+      $1
+
+      int main()
+      {
+        #ifdef $2
+          return 0;
+        #else
+          return 1;
+        #endif
+      }
+    ], ac_constant="yes", ac_constant="no")
+  if test "$ac_constant" = "yes" ; then
+    AC_MSG_RESULT(yes)
+    $3
+  else
+    AC_MSG_RESULT(no)
+    $4
+  fi
+])
+
+

@@ -137,12 +137,13 @@ int ares_expand_string(const unsigned char *encoded, const unsigned char *abuf,
                      int alen, unsigned char **s, long *enclen);
 int ares_parse_a_reply(const unsigned char *abuf, int alen,
                        struct hostent **host);
+int ares_parse_aaaa_reply(const unsigned char *abuf, int alen,
+                       struct hostent **host);
 int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
                          int addrlen, int family, struct hostent **host);
 void ares_free_string(void *str);
 void ares_free_hostent(struct hostent *host);
 const char *ares_strerror(int code);
-void ares_free_errmem(char *mem);
 
 #ifdef  __cplusplus
 }
