@@ -692,20 +692,34 @@ CURLcode _ftp(struct connectdata *conn)
 
 #if defined(HAVE_INET_ADDR)
         unsigned long address;
-#if defined(HAVE_GETHOSTBYADDR_R)
+# if defined(HAVE_GETHOSTBYADDR_R)
         int h_errnop;
-#endif
+# endif
 
         address = inet_addr(newhost);
-#if defined(HAVE_GETHOSTBYADDR_R)
+# if defined(HAVE_GETHOSTBYADDR_R)
+
+#  if (GETHOSTBYADDR_R_NARGS < 8)
+        /* Solaris and IRIX */
         answer = gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
                                  (struct hostent *)hostent_buf,
                                  hostent_buf + sizeof(*answer),
                                  sizeof(hostent_buf) - sizeof(*answer),
                                  &h_errnop);
-#else
+#  else
+        /* Linux style */
+        if(gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
+                           (struct hostent *)hostent_buf,
+                           hostent_buf + sizeof(*answer),
+                           sizeof(hostent_buf) - sizeof(*answer),
+                           &answer,
+                           &h_errnop))
+           answer=NULL; /* error */
+#  endif
+        
+# else
         answer = gethostbyaddr((char *) &address, sizeof(address), AF_INET);
-#endif
+# endif
 #else
         answer = NULL;
 #endif
