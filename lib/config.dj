@@ -10,7 +10,6 @@
 /* #define HAVE_DLOPEN 1 maybe not (DXE3) */
 #endif
 
-#define HAVE_ALARM             1
 #define HAVE_ASSERT_T          1
 #define HAVE_ARPA_INET_H       1
 #define HAVE_BASENAME          1
