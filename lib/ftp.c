@@ -632,6 +632,8 @@ CURLcode _ftp_cwd(struct connectdata *conn, char *path)
     failf(conn->data, "Couldn't change back to directory %s", path);
     return CURLE_FTP_ACCESS_DENIED;
   }
+
+  return CURLE_OK;
 }
 
 static
@@ -667,9 +669,9 @@ CURLcode _ftp(struct connectdata *conn)
       return result;
   }
     
-    /* This is a re-used connection. Since we change directory to where the
-       transfer is taking place, we must now get back to the original dir
-       where we ended up after login: */
+  /* This is a re-used connection. Since we change directory to where the
+     transfer is taking place, we must now get back to the original dir
+     where we ended up after login: */
   if (conn->bits.reuse) {
     if ((result = _ftp_cwd(conn, ftp->entrypath)) != CURLE_OK)
       return result;
@@ -678,15 +680,8 @@ CURLcode _ftp(struct connectdata *conn)
 
   /* change directory first! */
   if(ftp->dir && ftp->dir[0]) {
-    ftpsendf(conn->firstsocket, conn, "CWD %s", ftp->dir);
-    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
-    if(nread < 0)
-      return CURLE_OPERATION_TIMEOUTED;
-
-    if(ftpcode != 250) {
-      failf(data, "Couldn't change to directory %s", ftp->dir);
-      return CURLE_FTP_ACCESS_DENIED;
-    }
+    if ((result = _ftp_cwd(conn, ftp->dir)) != CURLE_OK)
+        return result;
   }
 
   if(data->bits.get_filetime && ftp->file) {
