@@ -1,4 +1,4 @@
-                                       Updated for curl 7.7 on March 13, 2001
+                                       Updated for curl 7.7.2 on April 26, 2001
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -73,7 +73,7 @@ Library
  makes sure we stay absolutely platform independent.
 
  curl_easy_init() allocates an internal struct and makes some initializations.
- The returned handle does not revail internals.
+ The returned handle does not reveal internals.
 
  curl_easy_setopt() takes a three arguments, where the option stuff must be
  passed in pairs, the parameter-ID and the parameter-value. The list of
@@ -81,33 +81,68 @@ Library
 
  curl_easy_perform() does a whole lot of things:
 
- It starts off in the lib/easy.c file by calling curl_transfer(), but the main
- work is lib/url.c. The function first analyzes the URL, it separates the
- different components and connects to the remote host. This may involve using
- a proxy and/or using SSL. The Curl_gethost() function in lib/hostip.c is used
- for looking up host names.
+ It starts off in the lib/easy.c file by calling Curl_perform() and the main
+ work then continues lib/url.c. The flow continues with a call to
+ Curl_connect() to connect to the remote site.
 
- When connected, the proper protocol-specific function is called. The
- functions are named after the protocols they handle. Curl_ftp(), Curl_http(),
- Curl_dict(), etc. They all reside in their respective files (ftp.c, http.c
- and dict.c).
+ o Curl_connect()
 
- The protocol-specific functions of course deal with protocol-specific
- negotiations and setup. They have access to the Curl_sendf() (from
- lib/sendf.c) function to send printf-style formatted data to the remote host
- and when they're ready to make the actual file transfer they call the
- Curl_Transfer() function (in lib/transfer.c) to setup the transfer and
- returns. Curl_perform() then calls Transfer() in lib/transfer.c that performs
- the entire file transfer. Curl_perform() is what does the main "connect - do
- - transfer - done" loop. It loops if there's a Location: to follow.
+   ... analyzes the URL, it separates the different components and connects to
+   the remote host. This may involve using a proxy and/or using SSL. The
+   Curl_gethost() function in lib/hostip.c is used for looking up host names.
 
- During transfer, the progress functions in lib/progress.c are called at a
- frequent interval (or at the user's choice, a specified callback might get
- called). The speedcheck functions in lib/speedcheck.c are also used to verify
- that the transfer is as fast as required.
+   When Curl_connect is done, we are connected to the remote site. Then it is
+   time to tell the server to get a document/file. Curl_do() arranges this.
+
+ o Curl_do()
+
+   Curl_do() makes sure the proper protocol-specific function is called. The
+   functions are named after the protocols they handle. Curl_ftp(),
+   Curl_http(), Curl_dict(), etc. They all reside in their respective files
+   (ftp.c, http.c and dict.c).
+
+   The protocol-specific functions of course deal with protocol-specific
+   negotiations and setup. They have access to the Curl_sendf() (from
+   lib/sendf.c) function to send printf-style formatted data to the remote
+   host and when they're ready to make the actual file transfer they call the
+   Curl_Transfer() function (in lib/transfer.c) to setup the transfer and
+   returns.
+
+ o Transfer()
+
+   Curl_perform() then calls Transfer() in lib/transfer.c that performs
+   the entire file transfer.
+
+   During transfer, the progress functions in lib/progress.c are called at a
+   frequent interval (or at the user's choice, a specified callback might get
+   called). The speedcheck functions in lib/speedcheck.c are also used to
+   verify that the transfer is as fast as required.
+
+ o Curl_done()
+
+   Called after a transfer is done. This function takes care of everything
+   that has to be done after a transfer. This function attempts to leave
+   matters in a state so that Curl_do() should be possible to call again on
+   the same connection (in a persistent connection case). It may also soon be
+   closed with Curl_disconnect().
+
+ o Curl_disconnect()
+
+   During normal connection and transfers, no one ever tries to close any
+   connection so this is not normally called when curl_easy_perform() is
+   used. This function is only used when we are certain that no more transfers
+   is going to be made on the connection (it can be also closed by
+   force). This function can also be called at times to make sure that libcurl
+   doesn't keep too many connections alive at the same time.
+
+   This function cleans up all resources that are associated with a single
+   connection.
+
+ Curl_perform() is the function that does the main "connect - do - transfer -
+ done" loop. It loops if there's a Location: to follow.
 
  When completed, the curl_easy_cleanup() should be called to free up used
- resources.
+ resources. It runs Curl_disconnect() on all open connectons.
 
  A quick roundup on internal function sequences (many of these call
  protocol-specific function-pointers):
@@ -257,6 +292,7 @@ Client
 ======
 
  main() resides in src/main.c together with most of the client code.
+
  src/hugehelp.c is automatically generated by the mkhelp.pl perl script to
  display the complete "manual" and the src/urlglob.c file holds the functions
  used for the URL-"globbing" support. Globbing in the sense that the {} and []
@@ -272,25 +308,26 @@ Client
  curl_easy_getinfo() function to extract useful information from the curl
  session.
 
- Recent versions may loop and do all that several times if many URLs were
+ Recent versions may loop and do all this several times if many URLs were
  specified on the command line or config file.
 
 Memory Debugging
 ================
 
- The file named lib/memdebug.c contains debug-versions of a few
- functions. Functions such as malloc, free, fopen, fclose, etc that somehow
- deal with resources that might give us problems if we "leak" them. The
- functions in the memdebug system do nothing fancy, they do their normal
- function and then log information about what they just did. The logged data
- can then be analyzed after a complete session,
+ The file lib/memdebug.c contains debug-versions of a few functions. Functions
+ such as malloc, free, fopen, fclose, etc that somehow deal with resources
+ that might give us problems if we "leak" them. The functions in the memdebug
+ system do nothing fancy, they do their normal function and then log
+ information about what they just did. The logged data can then be analyzed
+ after a complete session,
 
- memanalyze.pl is a perl script present only present in CVS (not part of the
+ memanalyze.pl is the perl script present only present in CVS (not part of the
  release archives) that analyzes a log file generated by the memdebug
  system. It detects if resources are allocated but never freed and other kinds
  of errors related to resource management.
 
- Use -DMALLOCDEBUG when compiling to enable memory debugging.
+ Use -DMALLOCDEBUG when compiling to enable memory debugging, this is also
+ switched on by running configure with --enable-debug.
 
 Test Suite
 ==========
