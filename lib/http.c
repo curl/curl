@@ -624,6 +624,7 @@ CURLcode Curl_http_done(struct connectdata *conn)
     
     free(buff->buffer);
     free(buff);
+    http->send_buffer = NULL; /* cleaer the pointer */
   }
 
   if(HTTPREQ_POST_FORM == data->set.httpreq) {
