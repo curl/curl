@@ -777,13 +777,12 @@ CURLcode _ftp(struct connectdata *conn)
            extern int gethostbyaddr_r(char *addr, size_t len, int type,
            struct hostent *htent, struct hostent_data *ht_data); */
 
-        /* Daniel: this implementation is really just guessing, please
-           verify this before trusting this. I don't have access to any
-           such system to try out! */
+        /* Fred Noz helped me try this out, now it at least compiles! */
+
         if(gethostbyaddr_r((char *) &address,
                            sizeof(address), AF_INET,
                            (struct hostent *)hostent_buf,
-                           hostent_buf + sizeof(*answer))
+                           hostent_buf + sizeof(*answer)))
            answer=NULL;
                            
 #  endif
