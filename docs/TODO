@@ -84,12 +84,15 @@ TODO
 
  * An option to only download remote FTP files if they're newer than the local
    one is a good idea, and it would fit right into the same syntax as the
-   already working http dito works. It of course requires that 'MDTM' works,
-   and it isn't a standard FTP command.
+   already working http dito works (-z). It of course requires that 'MDTM'
+   works, and it isn't a standard FTP command.
 
  * Add FTPS support with SSL for the data connection too.  This should be made
    according to the specs written in draft-murray-auth-ftp-ssl-08.txt,
    "Securing FTP with TLS"
+
+ * --disable-epsv exists, but for active connections we have no --disable-eprt
+   (or even --disable-lprt).
 
  HTTP
 
