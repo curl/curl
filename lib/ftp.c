@@ -774,7 +774,7 @@ CURLcode ftp_getfiletime(struct connectdata *conn, char *file)
                      &year, &month, &day, &hour, &minute, &second)) {
         /* we have a time, reformat it */
         time_t secs=time(NULL);
-        sprintf(buf, "%04d%02d%02d %02d:%02d:%02d",
+        sprintf(buf, "%04d%02d%02d %02d:%02d:%02d GMT",
                 year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
         conn->data->info.filetime = curl_getdate(buf, &secs);
@@ -2097,14 +2097,14 @@ CURLcode ftp_perform(struct connectdata *conn,
 #ifdef HAVE_STRFTIME
     if(data->set.get_filetime && (data->info.filetime>=0) ) {
       struct tm *tm;
-#ifdef HAVE_LOCALTIME_R
+#ifdef HAVE_GMTIME_R
       struct tm buffer;
-      tm = (struct tm *)localtime_r((time_t *)&data->info.filetime, &buffer);
+      tm = (struct tm *)gmtime_r((time_t *)&data->info.filetime, &buffer);
 #else
-      tm = localtime((time_t *)&data->info.filetime);
+      tm = gmtime((time_t *)&data->info.filetime);
 #endif
       /* format: "Tue, 15 Nov 1994 12:45:26" */
-      strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S\r\n",
+      strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S GMT\r\n",
                tm);
       result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
       if(result)
