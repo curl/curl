@@ -41,6 +41,7 @@
 #include "urlglob.h"
 #include "writeout.h"
 #include "getpass.h"
+#include "homedir.h"
 #ifdef USE_ENVIRONMENT
 #include "writeenv.h"
 #endif
@@ -2054,11 +2055,10 @@ static int parseconfig(const char *filename,
 
 #define CURLRC DOT_CHAR "curlrc"
 
-    filename = CURLRC;          /* sensible default */
-    home = curl_getenv("HOME"); /* portable environment reader */
+    filename = CURLRC;   /* sensible default */
+    home = homedir();    /* portable homedir finder */
     if(home) {
       if(strlen(home)<(sizeof(filebuffer)-strlen(CURLRC))) {
-
         snprintf(filebuffer, sizeof(filebuffer),
                  "%s%s%s", home, DIR_CHAR, CURLRC);
 

@@ -67,3 +67,9 @@
 
 /* Define to 1 if you have the <termio.h> header file. */
 #undef HAVE_TERMIO_H
+
+/* Define to 1 if you have the `getpwuid' function. */
+#undef HAVE_GETPWUID
+
+/* Define to 1 if you have the `geteuid' function. */
+#undef HAVE_GETEUID
