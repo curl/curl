@@ -748,7 +748,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       /* the name is given, get user+password */
       sscanf(data->userpwd, "%127[^:]:%127[^\n]",
              data->user, data->passwd);
-      }
+    }
     else
       /* no name given, get the password only */
       sscanf(data->userpwd+1, "%127[^\n]", data->passwd);
