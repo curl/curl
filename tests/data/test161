@@ -1,0 +1,39 @@
+# Server-side
+<reply>
+<data>
+1oooooooooooooooooooooooooooooooooooooooooo2
+</data>
+<size>
+10928
+</size>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP RETR PASV
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/161
+</command>
+</test>
+
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+EPSV
+TYPE I
+SIZE 161
+RETR 161
+</protocol>
+<errorcode>
+18
+</errrorcode>
+</verify>

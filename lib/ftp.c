@@ -117,6 +117,7 @@ static CURLcode ftp_sendquote(struct connectdata *conn,
 static CURLcode ftp_cwd(struct connectdata *conn, char *path);
 static CURLcode ftp_mkd(struct connectdata *conn, char *path);
 static CURLcode ftp_cwd_and_mkd(struct connectdata *conn, char *path);
+static CURLcode ftp_quit(struct connectdata *conn);
 
 /* easy-to-use macro: */
 #define FTPSENDF(x,y,z) if((result = Curl_ftpsendf(x,y,z))) return result
@@ -604,22 +605,22 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
     infof(data, "We have successfully logged in\n");
     if (conn->ssl[FIRSTSOCKET].use) {
 #ifdef HAVE_KRB4
-	/* we are logged in (with Kerberos)
-	 * now set the requested protection level
-	 */
-    if(conn->sec_complete)
-      Curl_sec_set_protection_level(conn);
-
-    /* we may need to issue a KAUTH here to have access to the files
-     * do it if user supplied a password
-     */
-    if(conn->passwd && *conn->passwd) {
-      result = Curl_krb_kauth(conn);
-      if(result)
-        return result;
-    }
+      /* We are logged in with Kerberos, now set the requested protection
+       * level
+       */
+      if(conn->sec_complete)
+        Curl_sec_set_protection_level(conn);
+      
+      /* We may need to issue a KAUTH here to have access to the files
+       * do it if user supplied a password
+       */
+      if(conn->passwd && *conn->passwd) {
+        result = Curl_krb_kauth(conn);
+        if(result)
+          return result;
+      }
 #endif
-  }
+    }
   }
   else {
     failf(data, "Odd return code after USER");
@@ -743,9 +744,12 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   ssize_t nread;
   int ftpcode;
   CURLcode result=CURLE_OK;
+  bool was_ctl_valid = ftp->ctl_valid;
 
   /* free the dir tree and file parts */
   freedirs(ftp);
+
+  ftp->ctl_valid = FALSE;
 
   if(data->set.upload) {
     if((-1 != data->set.infilesize) &&
@@ -779,6 +783,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
       result = CURLE_FTP_COULDNT_RETR_FILE;
     }
   }
+  
+  ftp->ctl_valid = was_ctl_valid;
 
 #ifdef HAVE_KRB4
   Curl_sec_fflush_fd(conn, conn->sock[SECONDARYSOCKET]);
@@ -2312,7 +2318,7 @@ CURLcode ftp_perform(struct connectdata *conn,
  * The input argument is already checked for validity.
  *
  * ftp->ctl_valid starts out as FALSE, and gets set to TRUE if we reach the
- * end of the function.
+ * Curl_ftp_done() function without finding any major problem.
  */
 CURLcode Curl_ftp(struct connectdata *conn)
 {
@@ -2419,7 +2425,8 @@ CURLcode Curl_ftp(struct connectdata *conn)
   else
     freedirs(ftp);
 
-  ftp->ctl_valid = TRUE;
+  ftp->ctl_valid = TRUE; /* seems good */
+
   return retcode;
 }
 
@@ -2474,7 +2481,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 
 /***********************************************************************
  *
- * Curl_ftp_quit()
+ * ftp_quit()
  *
  * This should be called before calling sclose() on an ftp control connection
  * (not data connections). We should then wait for the response from the 
@@ -2482,7 +2489,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
  * connection.
  *
  */
-CURLcode Curl_ftp_quit(struct connectdata *conn)
+static CURLcode ftp_quit(struct connectdata *conn)
 {
   ssize_t nread;
   int ftpcode;
@@ -2512,13 +2519,13 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
      bad in any way, sending quit and waiting around here will make the
      disconnect wait in vain and cause more problems than we need to.
 
-     Curl_ftp_quit() will check the state of ftp->ctl_valid. If it's ok it
+     ftp_quit() will check the state of ftp->ctl_valid. If it's ok it
      will try to send the QUIT command, otherwise it will just return.
   */
 
   /* The FTP session may or may not have been allocated/setup at this point! */
   if(ftp) {
-    (void)Curl_ftp_quit(conn); /* ignore errors on the QUIT */
+    (void)ftp_quit(conn); /* ignore errors on the QUIT */
 
     if(ftp->entrypath)
       free(ftp->entrypath);

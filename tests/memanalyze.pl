@@ -258,6 +258,11 @@ while(<FILE>) {
             }
         }
     }
+    # GETNAME url.c:1901 getnameinfo()
+    elsif($_ =~ /^GETNAME ([^ ]*):(\d*) (.*)/) {
+        # not much to do
+    }
+
     # ADDR url.c:1282 getaddrinfo() = 0x5ddd
     elsif($_ =~ /^ADDR ([^ ]*):(\d*) (.*)/) {
         # generic match for the filename+linenumber
