@@ -58,6 +58,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
   bool more = TRUE;
   struct SessionHandle *data=conn->data;
   bool before = FALSE; /* got a nonce before */
+  struct digestdata *d = &data->state.digest;
 
   /* skip initial whitespaces */
   while(*header && isspace((int)*header))
@@ -67,7 +68,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
     header += strlen("Digest");
 
     /* If we already have received a nonce, keep that in mind */
-    if(data->state.digest.nonce)
+    if(d->nonce)
       before = TRUE;
 
     /* clear off any former leftovers and init to defaults */
@@ -82,25 +83,32 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
         header++;
     
       /* how big can these strings be? */
-      if(2 == sscanf(header, "%31[^=]=\"%127[^\"]\"",
-                     value, content)) {
+      if((2 == sscanf(header, "%31[^=]=\"%127[^\"]\"",
+                      value, content)) ||
+         /* try the same scan but without quotes around the content but don't
+            include the possibly trailing comma */
+         (2 ==  sscanf(header, "%31[^=]=%127[^,]",
+                       value, content)) ) {
         if(strequal(value, "nonce")) {
-          data->state.digest.nonce = strdup(content);
+          d->nonce = strdup(content);
         }
         else if(strequal(value, "stale")) {
           if(strequal(content, "true"))
-            data->state.digest.stale = TRUE;
+            d->stale = TRUE;
         }
         else if(strequal(value, "cnonce")) {
-          data->state.digest.cnonce = strdup(content);
+          d->cnonce = strdup(content);
         }
         else if(strequal(value, "realm")) {
-          data->state.digest.realm = strdup(content);
+          d->realm = strdup(content);
         }
         else if(strequal(value, "algorithm")) {
           if(strequal(content, "MD5-sess"))
-            data->state.digest.algo = CURLDIGESTALGO_MD5SESS;
-          /* else, remain using the default md5 */
+            d->algo = CURLDIGESTALGO_MD5SESS;
+          else if(strequal(content, "MD5"))
+            d->algo = CURLDIGESTALGO_MD5;
+          else
+            return CURLDIGEST_BADALGO;
         }
         else {
           /* unknown specifier, ignore it! */
@@ -119,11 +127,11 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
     'stale=true'. This means we provided bad credentials in the previous
     request */
 
-    if(before && !data->state.digest.stale)
+    if(before && !d->stale)
       return CURLDIGEST_BAD;
 
     /* We got this header without a nonce, that's a bad Digest line! */
-    if(!data->state.digest.nonce)
+    if(!d->nonce)
       return CURLDIGEST_BAD;
   }
   else 
@@ -156,6 +164,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   unsigned char *md5this;
 
   struct SessionHandle *data = conn->data;
+  struct digestdata *d = &data->state.digest;
 
   /*
     if the algorithm is "MD5" or unspecified (which then defaults to MD5):
@@ -167,20 +176,20 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     A1 = H( unq(username-value) ":" unq(realm-value) ":" passwd )
          ":" unq(nonce-value) ":" unq(cnonce-value)
   */
-  if(data->state.digest.algo == CURLDIGESTALGO_MD5SESS) {
+  if(d->algo == CURLDIGESTALGO_MD5SESS) {
     md5this = (unsigned char *)
       aprintf("%s:%s:%s:%s:%s",
               conn->user,
-              data->state.digest.realm,
+              d->realm,
               conn->passwd,
-              data->state.digest.nonce,
-              data->state.digest.cnonce);
+              d->nonce,
+              d->cnonce);
   }
   else {
     md5this = (unsigned char *)
       aprintf("%s:%s:%s",
               conn->user,
-              data->state.digest.realm,
+              d->realm,
               conn->passwd);
   }
   Curl_md5it(md5buf, md5this);
@@ -199,7 +208,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   free(md5this); /* free this again */
   md5_to_ascii(md5buf, ha2);
   
-  md5this = (unsigned char *)aprintf("%s:%s:%s", ha1, data->state.digest.nonce,
+  md5this = (unsigned char *)aprintf("%s:%s:%s", ha1, d->nonce,
                                      ha2);
   Curl_md5it(md5buf, md5this);
   free(md5this); /* free this again */
@@ -211,6 +220,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     nonce="1053604145", uri="/64", response="c55f7f30d83d774a3d2dcacf725abaca"
   */
 
+  Curl_safefree(conn->allocptr.userpwd);
   conn->allocptr.userpwd =
     aprintf( "Authorization: Digest "
              "username=\"%s\", "
@@ -219,8 +229,8 @@ CURLcode Curl_output_digest(struct connectdata *conn,
              "uri=\"%s\", "
              "response=\"%s\"\r\n",
              conn->user,
-             data->state.digest.realm,
-             data->state.digest.nonce,
+             d->realm,
+             d->nonce,
              uripath, /* this is the PATH part of the URL */ 
              request_digest );
 
