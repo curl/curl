@@ -466,8 +466,10 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
   if(!conn->async.dns) {
     /* a name was not resolved */
-    if(conn->async.done)
+    if(conn->async.done) {
+      failf(data, "Could not resolve host: %s", conn->name);
       rc = CURLE_COULDNT_RESOLVE_HOST;
+    }
     else
       rc = CURLE_OPERATION_TIMEDOUT;
 
