@@ -26,6 +26,7 @@ is the return code from the
 .I "curl_easy_init"
 call.
 .SH OPTIONS
+These options are in a bit of random order, but you'll figure it out!
 .TP 0.8i
 .B CURLOPT_FILE
 Data pointer to pass instead of FILE * to the file write function. Note that
@@ -302,6 +303,23 @@ Pass a pointer to a zero terminated string as parameter. It will be used to
 report information after a successful request. This string may contain
 variables that will be substituted by their contents when output. Described
 elsewhere.
+.TP
+.B CURLOPT_PROGRESSFUNCTION
+Function pointer that should match the
+.BI curl_progress_callback
+prototype found in
+.I <curl/curl.h>
+This function gets called by libcurl instead of its internal
+equivalent. Unknown/unused argument values will be set to zero (like if you
+only download data, the upload size will remain 0). Returning a non-zero value
+from this callback will cause libcurl to abort the transfer and return
+CURLE_ABORTED_BY_CALLBACK.
+.TP
+.B CURLOPT_PROGRESSDATA
+Pass a pointer that will be untouched by libcurl and passed as the first
+argument in the progress callback set with
+.I CURLOPT_PROGRESSFUNCTION
+ .
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as
