@@ -250,3 +250,6 @@ TODO
 
    They will instead become curlx_ - alternatives. That makes the curl app
    still capable of building with them from source.
+
+ * Remove support for CURLOPT_FAILONERROR, it has gotten too kludgy and weird
+   internally. Let the app judge success or not for itself.

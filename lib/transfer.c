@@ -487,7 +487,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 (100 == k->httpcode)?conn->headerbytecount:0;
 
               if (conn->resume_from &&
-                  !k->content_range &&
                   (data->set.httpreq==HTTPREQ_GET) &&
                   (k->httpcode == 416)) {
                 /* "Requested Range Not Satisfiable" */
@@ -613,10 +612,19 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                     (k->httpcode >= 400) &&
                     (k->httpcode != 401) &&
                     (k->httpcode != 407)) {
-                  /* serious error, go home! */
-                  failf (data, "The requested URL returned error: %d",
-                         k->httpcode);
-                  return CURLE_HTTP_RETURNED_ERROR;
+
+                  if (conn->resume_from &&
+                      (data->set.httpreq==HTTPREQ_GET) &&
+                      (k->httpcode == 416)) {
+                    /* "Requested Range Not Satisfiable", just proceed and
+                       pretend this is no error */
+                  }
+                  else {
+                    /* serious error, go home! */
+                    failf (data, "The requested URL returned error: %d",
+                           k->httpcode);
+                    return CURLE_HTTP_RETURNED_ERROR;
+                  }
                 }
 
                 if(k->httpversion == 10)
@@ -954,8 +962,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 /* we wanted to resume a download, although the server doesn't
                  * seem to support this and we did this with a GET (if it
                  * wasn't a GET we did a POST or PUT resume) */
-                failf (data, "HTTP server doesn't seem to support "
-                       "byte ranges. Cannot resume.");
+                failf(data, "HTTP server doesn't seem to support "
+                      "byte ranges. Cannot resume.");
                 return CURLE_HTTP_RANGE_ERROR;
               }
 

@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (25 October 2004)
+- Tomas Pospisek filed bug report #1053287 that proved -C - and --fail on a
+  file that was already completely downloaded caused an error, while it
+  doesn't if you don't use --fail! I added test case 194 to verify the fix.
+  Grrr. CURLOPT_FAILONERROR is now added to the list stuff to remove in
+  libcurl v8 due to all the kludges needed to support it.
+
 - Mohun Biswas found out that formposting a zero-byte file didn't work very
   good. I fixed.
 

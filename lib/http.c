@@ -553,6 +553,14 @@ int Curl_http_should_fail(struct connectdata *conn)
   if (k->httpcode < 400)
     return 0;
 
+  if (conn->resume_from &&
+      (data->set.httpreq==HTTPREQ_GET) &&
+      (k->httpcode == 416)) {
+    /* "Requested Range Not Satisfiable", just proceed and
+       pretend this is no error */
+    return 0;
+  }
+
   /*
   ** Any code >= 400 that's not 401 or 407 is always
   ** a terminal error
