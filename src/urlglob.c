@@ -473,7 +473,8 @@ char *glob_match_url(char *filename, URLGlob *glob)
           appendlen = (int)strlen(numbuf);
           break;
         default:
-          printf("internal error: invalid pattern type (%d)\n", pat.type);
+          printf("internal error: invalid pattern type (%d)\n",
+                 (int)pat.type);
           free(target);
           return NULL;
         }
