@@ -2,23 +2,23 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "13 Sep 2002" "libcurl 7.10" "libcurl Manual"
+.TH curl_easy_setopt 3 "18 Sep 2002" "libcurl 7.10" "libcurl Manual"
 .SH NAME
-curl_easy_setopt - Set curl easy-session options
+curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
 #include <curl/curl.h>
 
 CURLcode curl_easy_setopt(CURL *handle, CURLoption option, parameter);
 .ad
 .SH DESCRIPTION
-curl_easy_setopt() is used to tell libcurl how to behave. Most operations in
-libcurl have default actions, and by using the appropriate options to
-\fIcurl_easy_setopt\fP, you can change them.  All options are set with the
-\fIoption\fP followed by a \fIparameter\fP. That parameter can be a long, a
-function pointer or an object pointer, all depending on what the specific
-option expects. Read this manual carefully as bad input values may cause
-libcurl to behave badly!  You can only set one option in each function call. A
-typical application uses many curl_easy_setopt() calls in the setup phase.
+curl_easy_setopt() is used to tell libcurl how to behave. By using the
+appropriate options to \fIcurl_easy_setopt\fP, you can change libcurl's
+behavior.  All options are set with the \fIoption\fP followed by a
+\fIparameter\fP. That parameter can be a long, a function pointer or an object
+pointer, all depending on what the specific option expects. Read this manual
+carefully as bad input values may cause libcurl to behave badly!  You can only
+set one option in each function call. A typical application uses many
+curl_easy_setopt() calls in the setup phase.
 
 \fBNOTE:\fP strings passed to libcurl as 'char *' arguments, will not be
 copied by the library. Instead you should keep them available until libcurl no
@@ -33,26 +33,42 @@ transfers.
 
 The \fIhandle\fP is the return code from a \fIcurl_easy_init(3)\fP or
 \fIcurl_easy_duphandle(3)\fP call.
-.SH OPTIONS
-The options are listed in a sort of random order, but you'll figure it out!
+.SH BEHAVIOR OPTIONS
 .TP 0.4i
-.B CURLOPT_WRITEDATA
-Data pointer to pass to the file write function. Note that if you specify the
-\fICURLOPT_WRITEFUNCTION\fP, this is the pointer you'll get as input. If you
-don't use a callback, you must pass a 'FILE *' as libcurl will pass this to
-fwrite() when writing data.
+.B CURLOPT_VERBOSE
+Set the parameter to non-zero to get the library to display a lot of verbose
+information about its operations. Very useful for libcurl and/or protocol
+debugging and understanding.
 
-\fBNOTE:\fP If you're using libcurl as a win32 DLL, you MUST use the
-\fICURLOPT_WRITEFUNCTION\fP if you set this option or you will experience
-crashes.
-
-This option is also known with the older name \fBCURLOPT_FILE\fP, the name
-CURLOPT_WRITEDATA was introduced in 7.9.7.
+You hardly ever want this set in production use, you will almost always want
+this when you debug/report problems. Another neat option for debugging is the
+\fICURLOPT_DEBUGFUNCTION\fP.
 .TP
+.B CURLOPT_HEADER
+A non-zero parameter tells the library to include the header in the body
+output. This is only relevant for protocols that actually have headers
+preceding the data (like HTTP).
+.TP
+.B CURLOPT_NOPROGRESS
+A non-zero parameter tells the library to shut of the built-in progress meter
+completely.
+
+\fBNOTE:\fP future versions of libcurl is likely to not have any built-in
+progress meter at all.
+.TP
+.B CURLOPT_NOSIGNAL
+Pass a long. If it is non-zero, libcurl will not use any functions that
+install signal handlers or any functions that cause signals to be sent to the
+process. This option is mainly here to allow multi-threaded unix applications
+to still set/use all timeout options etc, without risking getting signals.
+(Added in 7.10)
+.PP
+.SH CALLBACK OPTIONS
+.TP 0.4i
 .B CURLOPT_WRITEFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
 function( void *ptr, size_t size, size_t nmemb, void *stream);\fP This
-function gets called by libcurl as soon as there is data available that needs
+function gets called by libcurl as soon as there is data reveiced that needs
 to be saved. The size of the data pointed to by \fIptr\fP is \fIsize\fP
 multiplied with \fInmemb\fP.  Return the number of bytes actually taken care
 of. If that amount differs from the amount passed to your function, it'll
@@ -66,16 +82,18 @@ you cannot possibly make any assumptions. It may be one byte, it may be
 thousands. The maximum amount of data that can be passed to the write callback
 is defined in the curl.h header file: CURL_MAX_WRITE_SIZE.
 .TP
-.B CURLOPT_READDATA
-Data pointer to pass to the file read function. Note that if you specify the
-\fICURLOPT_READFUNCTION\fP, this is the pointer you'll get as input. If you
-don't specify a read callback, this must be a valid FILE *.
+.B CURLOPT_WRITEDATA
+Data pointer to pass to the file write function. Note that if you specify the
+\fICURLOPT_WRITEFUNCTION\fP, this is the pointer you'll get as input. If you
+don't use a callback, you must pass a 'FILE *' as libcurl will pass this to
+fwrite() when writing data.
 
-\fBNOTE:\fP If you're using libcurl as a win32 DLL, you MUST use a
-\fICURLOPT_READFUNCTION\fP if you set this option.
+\fBNOTE:\fP If you're using libcurl as a win32 DLL, you MUST use the
+\fICURLOPT_WRITEFUNCTION\fP if you set this option or you will experience
+crashes.
 
-This option is also known with the older name \fBCURLOPT_INFILE\fP, the name
-CURLOPT_READDATA was introduced in 7.9.7.
+This option is also known with the older name \fBCURLOPT_FILE\fP, the name
+CURLOPT_WRITEDATA was introduced in 7.9.7.
 .TP
 .B CURLOPT_READFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
@@ -87,10 +105,106 @@ bytes. Your function must return the actual number of bytes that you stored in
 that memory area. Returning 0 will signal end-of-file to the library and cause
 it to stop the current transfer.
 .TP
-.B CURLOPT_INFILESIZE
-When uploading a file to a remote site, this option should be used to tell
-libcurl what the expected size of the infile is.
+.B CURLOPT_READDATA
+Data pointer to pass to the file read function. Note that if you specify the
+\fICURLOPT_READFUNCTION\fP, this is the pointer you'll get as input. If you
+don't specify a read callback, this must be a valid FILE *.
+
+\fBNOTE:\fP If you're using libcurl as a win32 DLL, you MUST use a
+\fICURLOPT_READFUNCTION\fP if you set this option.
+
+This option is also known with the older name \fBCURLOPT_INFILE\fP, the name
+CURLOPT_READDATA was introduced in 7.9.7.
 .TP
+.B CURLOPT_PROGRESSFUNCTION
+Function pointer that should match the \fIcurl_progress_callback\fP prototype
+found in \fI<curl/curl.h>\fP. This function gets called by libcurl instead of
+its internal equivalent with a frequent interval during data transfer.
+Unknown/unused argument values will be set to zero (like if you only download
+data, the upload size will remain 0). Returning a non-zero value from this
+callback will cause libcurl to abort the transfer and return
+\fICURLE_ABORTED_BY_CALLBACK\fP.
+
+Also note that \fICURLOPT_NOPROGRESS\fP must be set to FALSE to make this
+function actually get called.
+.TP
+.B CURLOPT_PROGRESSDATA
+Pass a pointer that will be untouched by libcurl and passed as the first
+argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
+.TP
+.B CURLOPT_PASSWDFUNCTION
+Pass a pointer to a \fIcurl_passwd_callback\fP function that will be called
+instead of the internal one if libcurl requests a password. The function must
+match this prototype: \fBint getpass(void *client, char *prompt, char* buffer,
+int buflen );\fP.  If set to NULL, it sets back the function to the internal
+default one. If the function returns a non-zero value, it will abort the
+operation and an error (CURLE_BAD_PASSWORD_ENTERED) will be returned.
+\fIclient\fP is a generic pointer, see \fICURLOPT_PASSWDDATA\fP.  \fIprompt\fP
+is a zero-terminated string that is text that prefixes the input request.
+\fIbuffer\fP is a pointer to data where the entered password should be stored
+and \fIbuflen\fP is the maximum number of bytes that may be written in the
+buffer.  (Added in 7.4.2)
+.TP
+.B CURLOPT_PASSWDDATA
+Pass a void * to whatever data you want. The passed pointer will be the first
+argument sent to the specifed \fICURLOPT_PASSWDFUNCTION\fP function. (Added in
+7.4.2)
+.TP
+.B CURLOPT_HEADERFUNCTION
+Function pointer that should match the following prototype: \fIsize_t
+function( void *ptr, size_t size, size_t nmemb, void *stream);\fP. This
+function gets called by libcurl as soon as there is received header data that
+needs to be written down. The headers are guaranteed to be written one-by-one
+and only complete lines are written. Parsing headers should be easy enough
+using this. The size of the data pointed to by \fIptr\fP is \fIsize\fP
+multiplied with \fInmemb\fP.  The pointer named \fIstream\fP will be the one
+you passed to libcurl with the \fICURLOPT_WRITEHEADER\fP option.  Return the
+number of bytes actually written or return -1 to signal error to the library
+(it will cause it to abort the transfer with a \fICURLE_WRITE_ERROR\fP return
+code). (Added in 7.7.2)
+.TP
+.B CURLOPT_WRITEHEADER
+Pass a pointer to be used to write the header part of the received data to. If
+you don't use your own callback to take care of the writing, this must be a
+valid FILE *. See also the \fICURLOPT_HEADERFUNCTION\fP option below on how to
+set a custom get-all-headers callback.
+.TP
+.B CURLOPT_DEBUGFUNCTION
+Function pointer that should match the following prototype: \fIint
+curl_debug_callback (CURL *, curl_infotype, char *, size_t, void *);\fP
+This function will receive debug information if CURLOPT_VERBOSE is
+enabled. The curl_infotype argument specifies what kind of information it
+is. This funtion must return 0.
+.TP
+.B CURLOPT_DEBUGDATA
+Pass a pointer to whatever you want passed in to your CURLOPT_DEBUGFUNCTION in
+the last void * argument. This pointer is not used by libcurl, it is only
+passed to the callback.
+.PP
+.SH ERROR OPTIONS
+.TP 0.4i
+.B CURLOPT_ERRORBUFFER
+Pass a char * to a buffer that the libcurl may store human readable error
+messages in. This may be more helpful than just the return code from the
+library. The buffer must be at least CURL_ERROR_SIZE big.
+
+Use \fICURLOPT_VERBOSE\fP and \fICURLOPT_DEBUGFUNCTION\fP to better
+debug/trace why errors happen.
+
+\fBNote:\fP if the library does not return an error, the buffer may not have
+been touched. Do not rely on the contents in those cases.
+.TP
+.B CURLOPT_STDERR
+Pass a FILE * as parameter. This is the stream to use instead of stderr
+internally when reporting errors.
+.TP
+.B CURLOPT_FAILONERROR
+A non-zero parameter tells the library to fail silently if the HTTP code
+returned is equal to or larger than 300. The default action would be to return
+the page normally, ignoring that code.
+.PP
+.SH NETWORK OPTIONS
+.TP 0.4i
 .B CURLOPT_URL
 The actual URL to deal with. The parameter should be a char * to a zero
 terminated string. The string must remain present until curl no longer needs
@@ -121,67 +235,41 @@ you tunnel through the HTTP proxy. Such tunneling is activated with
 Pass a long with this option to set the proxy port to connect to unless it is
 specified in the proxy string \fICURLOPT_PROXY\fP.
 .TP
+.B CURLOPT_PROXTYPE
+Pass a long with this option to set type of the proxy. Available options for
+this are CURLPROXY_HTTP and CURLPROXY_SOCKS5, with the HTTP one being
+default. (Added in 7.10)
+.TP
 .B CURLOPT_HTTPPROXYTUNNEL
 Set the parameter to non-zero to get the library to tunnel all operations
 through a given HTTP proxy. Note that there is a big difference between using
 a proxy and to tunnel through it. If you don't know what this means, you
 probably don't want this tunneling option. (Added in 7.3)
 .TP
-.B CURLOPT_VERBOSE
-Set the parameter to non-zero to get the library to display a lot of verbose
-information about its operations. Very useful for libcurl and/or protocol
-debugging and understanding.
-
-You hardly ever want this set in production use, you will almost always want
-this when you debug/report problems.
+.B CURLOPT_INTERFACE
+Pass a char * as parameter. This set the interface name to use as outgoing
+network interface. The name can be an interface name, an IP address or a host
+name. (Added in 7.3)
 .TP
-.B CURLOPT_HEADER
-A non-zero parameter tells the library to include the header in the body
-output. This is only relevant for protocols that actually have headers
-preceding the data (like HTTP).
+.B CURLOPT_DNS_CACHE_TIMEOUT
+Pass a long, this sets the timeout in seconds. Name resolves will be kept in
+memory for this number of seconds. Set to zero (0) to completely disable
+caching, or set to -1 to make the cached entries remain forever. By default,
+libcurl caches info for 60 seconds. (Added in 7.9.3)
 .TP
-.B CURLOPT_NOPROGRESS
-A non-zero parameter tells the library to shut of the built-in progress meter
-completely.
-
-\fBNOTE:\fP future versions of libcurl is likely to not have any built-in
-progress meter at all.
+.B CURLOPT_DNS_USE_GLOBAL_CACHE
+Pass a long. If the value is non-zero, it tells curl to use a global DNS cache
+that will survive between easy handle creations and deletions. This is not
+thread-safe and this will use a global varible. (Added in 7.9.3)
 .TP
-.B CURLOPT_NOBODY
-A non-zero parameter tells the library to not include the body-part in the
-output. This is only relevant for protocols that have separate header and body
-parts.
-.TP
-.B CURLOPT_FAILONERROR
-A non-zero parameter tells the library to fail silently if the HTTP code
-returned is equal to or larger than 300. The default action would be to return
-the page normally, ignoring that code.
-.TP
-.B CURLOPT_UPLOAD
-A non-zero parameter tells the library to prepare for an upload. The
-CURLOPT_INFILE and CURLOPT_INFILESIZE are also interesting for uploads.
-.TP
-.B CURLOPT_POST
-A non-zero parameter tells the library to do a regular HTTP post. This is a
-normal application/x-www-form-urlencoded kind, which is the most commonly used
-one by HTML forms. See the CURLOPT_POSTFIELDS option for how to specify the
-data to post and CURLOPT_POSTFIELDSIZE in how to set the data size. Starting
-with libcurl 7.8, this option is obsolete. Using the CURLOPT_POSTFIELDS option
-will imply this option.
-.TP
-.B CURLOPT_FTPLISTONLY
-A non-zero parameter tells the library to just list the names of an ftp
-directory, instead of doing a full directory listing that would include file
-sizes, dates etc.
-
-This causes an FTP NLST command to be sent.  Beware that some FTP servers
-list only files in their response to NLST; they do not include
-subdirectories and symbolic links.
-.TP
-.B CURLOPT_FTPAPPEND
-A non-zero parameter tells the library to append to the remote file instead of
-overwrite it. This is only useful when uploading to a ftp site.
-.TP
+.B CURLOPT_BUFFERSIZE
+Pass a long specifying your prefered size for the receive buffer in libcurl.
+The main point of this would be that the write callback gets called more often
+and with smaller chunks. This is just treated as a request, not an order. You
+cannot be guaranteed to actually get the given size. (Added in 7.10)
+.PP
+.SH NAMES and PASSWORDS OPTIONS
+.TP 0.4i
 .B CURLOPT_NETRC
 This parameter controls the preference of libcurl between using user names and
 passwords from your \fI~/.netrc\fP file, relative to user names and passwords
@@ -221,27 +309,6 @@ Only machine name, user name and password are taken into account
 set (as the standard Unix ftp client does). It should only be readable by
 user.
 .TP
-.B CURLOPT_FOLLOWLOCATION
-A non-zero parameter tells the library to follow any Location: header that the
-server sends as part of a HTTP header.
-
-\fBNOTE:\fP this means that the library will re-send the same request on the
-new location and follow new Location: headers all the way until no more such
-headers are returned. \fICURLOPT_MAXREDIRS\fP can be used to limit the number
-of redirects libcurl will follow.
-.TP
-.B CURLOPT_TRANSFERTEXT
-A non-zero parameter tells the library to use ASCII mode for ftp transfers,
-instead of the default binary transfer. For LDAP transfers it gets the data in
-plain text instead of HTML and for win32 systems it does not set the stdout to
-binary mode. This option can be usable when transferring text data between
-systems with different views on certain characters, such as newlines or
-similar.
-.TP
-.B CURLOPT_PUT
-A non-zero parameter tells the library to use HTTP PUT to transfer data. The
-data should be set with CURLOPT_INFILE and CURLOPT_INFILESIZE.
-.TP
 .B CURLOPT_USERPWD
 Pass a char * as parameter, which should be [user name]:[password] to use for
 the connection. If the password is left out, you will be prompted for it.
@@ -252,32 +319,35 @@ Pass a char * as parameter, which should be [user name]:[password] to use for
 the connection to the HTTP proxy. If the password is left out, you will be
 prompted for it. \fICURLOPT_PASSWDFUNCTION\fP can be used to set your own
 prompt function.
-.TP
-.B CURLOPT_RANGE
-Pass a char * as parameter, which should contain the specified range you
-want. It should be in the format "X-Y", where X or Y may be left out. HTTP
-transfers also support several intervals, separated with commas as in
-\fI"X-Y,N-M"\fP. Using this kind of multiple intervals will cause the HTTP
-server to send the response document in pieces (using standard MIME separation
-techniques).
-.TP
-.B CURLOPT_ERRORBUFFER
-Pass a char * to a buffer that the libcurl may store human readable error
-messages in. This may be more helpful than just the return code from the
-library. The buffer must be at least CURL_ERROR_SIZE big.
+.PP
+.SH HTTP OPTIONS
+.TP 0.4i
+.B CURLOPT_FOLLOWLOCATION
+A non-zero parameter tells the library to follow any Location: header that the
+server sends as part of a HTTP header.
 
-\fBNote:\fP if the library does not return an error, the buffer may not have
-been touched. Do not rely on the contents in those cases.
+\fBNOTE:\fP this means that the library will re-send the same request on the
+new location and follow new Location: headers all the way until no more such
+headers are returned. \fICURLOPT_MAXREDIRS\fP can be used to limit the number
+of redirects libcurl will follow.
 .TP
-.B CURLOPT_TIMEOUT
-Pass a long as parameter containing the maximum time in seconds that you allow
-the libcurl transfer operation to take. Normally, name lookups can take a
-considerable time and limiting operations to less than a few minutes risk
-aborting perfectly normal operations. This option will cause curl to use the
-SIGALRM to enable time-outing system calls.
-
-\fBNOTE:\fP this is not recommended to use in unix multi-threaded programs, as
-it uses signals unless CURLOPT_NOSIGNAL (see below) is set.
+.B CURLOPT_MAXREDIRS
+Pass a long. The set number will be the redirection limit. If that many
+redirections have been followed, the next redirect will cause an error
+(\fICURLE_TOO_MANY_REDIRECTS\fP). This option only makes sense if the
+\fICURLOPT_FOLLOWLOCATION\fP is used at the same time. (Added in 7.5)
+.TP
+.B CURLOPT_PUT
+A non-zero parameter tells the library to use HTTP PUT to transfer data. The
+data should be set with CURLOPT_READDATA and CURLOPT_INFILESIZE.
+.TP
+.B CURLOPT_POST
+A non-zero parameter tells the library to do a regular HTTP post. This is a
+normal application/x-www-form-urlencoded kind, which is the most commonly used
+one by HTML forms. See the CURLOPT_POSTFIELDS option for how to specify the
+data to post and CURLOPT_POSTFIELDSIZE in how to set the data size. Starting
+with libcurl 7.8, this option is obsolete. Using the CURLOPT_POSTFIELDS option
+will imply this option.
 .TP
 .B CURLOPT_POSTFIELDS
 Pass a char * as parameter, which should be the full data to post in a HTTP
@@ -295,6 +365,15 @@ you can post fully binary data, which otherwise is likely to fail. If this
 size is set to zero, the library will use strlen() to get the size. (Added in
 libcurl 7.2)
 .TP
+.B CURLOPT_HTTPPOST
+Tells libcurl you want a multipart/formdata HTTP POST to be made and you
+instruct what data to pass on to the server.  Pass a pointer to a linked list
+of HTTP post structs as parameter.  The linked list should be a fully valid
+list of 'struct HttpPost' structs properly filled in. The best and most
+elegant way to do this, is to use \fIcurl_formadd(3)\fP as documented. The
+data in this list must remain intact until you close this curl handle again
+with \fIcurl_easy_cleanup(3)\fP.
+.TP
 .B CURLOPT_REFERER
 Pass a pointer to a zero terminated string as parameter. It will be used to
 set the Referer: header in the http request sent to the remote server. This
@@ -306,41 +385,6 @@ Pass a pointer to a zero terminated string as parameter. It will be used to
 set the User-Agent: header in the http request sent to the remote server. This
 can be used to fool servers or scripts. You can also set any custom header
 with \fICURLOPT_HTTPHEADER\fP.
-.TP
-.B CURLOPT_FTPPORT
-Pass a pointer to a zero terminated string as parameter. It will be used to
-get the IP address to use for the ftp PORT instruction. The PORT instruction
-tells the remote server to connect to our specified IP address. The string may
-be a plain IP address, a host name, an network interface name (under Unix) or
-just a '-' letter to let the library use your systems default IP
-address. Default FTP operations are passive, and thus won't use PORT.
-.TP
-.B CURLOPT_LOW_SPEED_LIMIT
-Pass a long as parameter. It contains the transfer speed in bytes per second
-that the transfer should be below during CURLOPT_LOW_SPEED_TIME seconds for
-the library to consider it too slow and abort.
-.TP
-.B CURLOPT_LOW_SPEED_TIME
-Pass a long as parameter. It contains the time in seconds that the transfer
-should be below the CURLOPT_LOW_SPEED_LIMIT for the library to consider it too
-slow and abort.
-.TP
-.B CURLOPT_RESUME_FROM
-Pass a long as parameter. It contains the offset in number of bytes that you
-want the transfer to start from.
-.TP
-.B CURLOPT_COOKIE
-Pass a pointer to a zero terminated string as parameter. It will be used to
-set a cookie in the http request. The format of the string should be
-NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie
-should contain.
-
-If you need to set mulitple cookies, you need to set them all using a single
-option and thus you need to concat them all in one single string. Set multiple
-cookies in one string like this: "name1=content1; name2=content2;" etc.
-
-Using this option multiple times will only make the latest string override the
-previously ones.
 .TP
 .B CURLOPT_HTTPHEADER
 Pass a pointer to a linked list of HTTP headers to pass to the server in your
@@ -356,15 +400,250 @@ new headers, replace internal headers and remove internal headers.
 \fBNOTE:\fPThe most commonly replaced headers have "shortcuts" in the options
 CURLOPT_COOKIE, CURLOPT_USERAGENT and CURLOPT_REFERER.
 .TP
-.B CURLOPT_HTTPPOST
-Tells libcurl you want a multipart/formdata HTTP POST to be made and you
-instruct what data to pass on to the server.  Pass a pointer to a linked list
-of HTTP post structs as parameter.  The linked list should be a fully valid
-list of 'struct HttpPost' structs properly filled in. The best and most
-elegant way to do this, is to use \fIcurl_formadd(3)\fP as documented. The
-data in this list must remained intact until you close this curl handle again
-with \fIcurl_easy_cleanup(3)\fP.
+.B CURLOPT_COOKIE
+Pass a pointer to a zero terminated string as parameter. It will be used to
+set a cookie in the http request. The format of the string should be
+NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie
+should contain.
+
+If you need to set mulitple cookies, you need to set them all using a single
+option and thus you need to concat them all in one single string. Set multiple
+cookies in one string like this: "name1=content1; name2=content2;" etc.
+
+Using this option multiple times will only make the latest string override the
+previously ones.
 .TP
+.B CURLOPT_COOKIEFILE
+Pass a pointer to a zero terminated string as parameter. It should contain the
+name of your file holding cookie data to read. The cookie data may be in
+Netscape / Mozilla cookie data format or just regular HTTP-style headers
+dumped to a file.
+
+Given an empty or non-existing file, this option will enable cookies for this
+curl handle, making it understand and parse received cookies and then use
+matching cookies in future request.
+.TP
+.B CURLOPT_COOKIEJAR
+Pass a file name as char *, zero terminated. This will make libcurl write all
+internally known cookies to the specified file when \fIcurl_easy_cleanup(3)\fP
+is called. If no cookies are known, no file will be created. Specify "-" to
+instead have the cookies written to stdout. Using this option also enables
+cookies for this session, so if you for example follow a location it will make
+matching cookies get sent accordingly. (Added in 7.9)
+.TP
+.B CURLOPT_TIMECONDITION
+Pass a long as parameter. This defines how the CURLOPT_TIMEVALUE time value is
+treated. You can set this parameter to TIMECOND_IFMODSINCE or
+TIMECOND_IFUNMODSINCE. This is a HTTP-only feature. (TBD)
+.TP
+.B CURLOPT_TIMEVALUE
+Pass a long as parameter. This should be the time in seconds since 1 jan 1970,
+and the time will be used in a condition as specified with
+CURLOPT_TIMECONDITION.
+.TP
+.B CURLOPT_HTTPGET
+Pass a long. If the long is non-zero, this forces the HTTP request to get back
+to GET. Only really usable if POST, PUT or a custom request have been used
+previously using the same curl handle. (Added in 7.8.1)
+.TP
+.B CURLOPT_HTTP_VERSION
+Pass a long, set to one of the values described below. They force libcurl to
+use the specific HTTP versions. This is not sensible to do unless you have a
+good reason.
+.RS
+.TP 5
+.B CURL_HTTP_VERSION_NONE
+We don't care about what version the library uses. libcurl will use whatever
+it thinks fit.
+.TP
+.B CURL_HTTP_VERSION_1_0
+Enforce HTTP 1.0 requests.
+.TP
+.B CURL_HTTP_VERSION_1_1
+Enforce HTTP 1.1 requests.
+.RE
+.PP
+.SH FTP OPTIONS
+.TP 0.4i
+.B CURLOPT_FTPPORT
+Pass a pointer to a zero terminated string as parameter. It will be used to
+get the IP address to use for the ftp PORT instruction. The PORT instruction
+tells the remote server to connect to our specified IP address. The string may
+be a plain IP address, a host name, an network interface name (under Unix) or
+just a '-' letter to let the library use your systems default IP
+address. Default FTP operations are passive, and thus won't use PORT.
+.TP
+.B CURLOPT_QUOTE
+Pass a pointer to a linked list of FTP commands to pass to the server prior to
+your ftp request. This will be done before any other FTP commands are issued
+(even before the CWD command). The linked list should be a fully valid list of
+'struct curl_slist' structs properly filled in. Use \fIcurl_slist_append(3)\fP
+to append strings (commands) to the list, and clear the entire list afterwards
+with \fIcurl_slist_free_all(3)\fP. Disable this operation again by setting a
+NULL to this option.
+.TP
+.B CURLOPT_POSTQUOTE
+Pass a pointer to a linked list of FTP commands to pass to the server after
+your ftp transfer request. The linked list should be a fully valid list of
+struct curl_slist structs properly filled in as described for
+\fICURLOPT_QUOTE\fP. Disable this operation again by setting a NULL to this
+option.
+.TP
+.B CURLOPT_PREQUOTE
+Pass a pointer to a linked list of FTP commands to pass to the server after
+the transfer type is set. The linked list should be a fully valid list of
+struct curl_slist structs properly filled in as described for
+\fICURLOPT_QUOTE\fP. Disable this operation again by setting a NULL to this
+option.
+.TP
+.B CURLOPT_FTPLISTONLY
+A non-zero parameter tells the library to just list the names of an ftp
+directory, instead of doing a full directory listing that would include file
+sizes, dates etc.
+
+This causes an FTP NLST command to be sent.  Beware that some FTP servers list
+only files in their response to NLST; they might not include subdirectories
+and symbolic links.
+.TP
+.B CURLOPT_FTPAPPEND
+A non-zero parameter tells the library to append to the remote file instead of
+overwrite it. This is only useful when uploading to a ftp site.
+.TP
+.B CURLOPT_FTP_USE_EPSV
+Pass a long. If the value is non-zero, it tells curl to use the EPSV command
+when doing passive FTP downloads (which it always does by default). Using EPSV
+means that it will first attempt to use EPSV before using PASV, but if you
+pass FALSE (zero) to this option, it will not try using EPSV, only plain PASV.
+.PP
+.SH PROTOCOL OPTIONS
+.TP 0.4i
+.B CURLOPT_TRANSFERTEXT
+A non-zero parameter tells the library to use ASCII mode for ftp transfers,
+instead of the default binary transfer. For LDAP transfers it gets the data in
+plain text instead of HTML and for win32 systems it does not set the stdout to
+binary mode. This option can be usable when transferring text data between
+systems with different views on certain characters, such as newlines or
+similar.
+.TP
+.B CURLOPT_CRLF
+Convert Unix newlines to CRLF newlines on transfers.
+.TP
+.B CURLOPT_RANGE
+Pass a char * as parameter, which should contain the specified range you
+want. It should be in the format "X-Y", where X or Y may be left out. HTTP
+transfers also support several intervals, separated with commas as in
+\fI"X-Y,N-M"\fP. Using this kind of multiple intervals will cause the HTTP
+server to send the response document in pieces (using standard MIME separation
+techniques).
+.TP
+.B CURLOPT_RESUME_FROM
+Pass a long as parameter. It contains the offset in number of bytes that you
+want the transfer to start from.
+.TP
+.B CURLOPT_CUSTOMREQUEST
+Pass a pointer to a zero terminated string as parameter. It will be user
+instead of GET or HEAD when doing the HTTP request. This is useful for doing
+DELETE or other more or less obscure HTTP requests. Don't do this at will,
+make sure your server supports the command first.
+.TP
+.B CURLOPT_FILETIME
+Pass a long. If it is a non-zero value, libcurl will attempt to get the
+modification date of the remote document in this operation. This requires that
+the remote server sends the time or replies to a time querying command. The
+\fIcurl_easy_getinfo(3)\fP function with the \fICURLINFO_FILETIME\fP argument
+can be used after a transfer to extract the received time (if any). (Added in
+7.5)
+.TP
+.B CURLOPT_NOBODY
+A non-zero parameter tells the library to not include the body-part in the
+output. This is only relevant for protocols that have separate header and body
+parts.
+.TP
+.B CURLOPT_INFILESIZE
+When uploading a file to a remote site, this option should be used to tell
+libcurl what the expected size of the infile is.
+.TP
+.B CURLOPT_UPLOAD
+A non-zero parameter tells the library to prepare for an upload. The
+CURLOPT_READDATA and CURLOPT_INFILESIZE are also interesting for uploads.
+.PP
+.SH CONNECTION OPTIONS
+.TP 0.4i
+.B CURLOPT_TIMEOUT
+Pass a long as parameter containing the maximum time in seconds that you allow
+the libcurl transfer operation to take. Normally, name lookups can take a
+considerable time and limiting operations to less than a few minutes risk
+aborting perfectly normal operations. This option will cause curl to use the
+SIGALRM to enable time-outing system calls.
+
+\fBNOTE:\fP this is not recommended to use in unix multi-threaded programs, as
+it uses signals unless CURLOPT_NOSIGNAL (see below) is set.
+.TP
+.B CURLOPT_LOW_SPEED_LIMIT
+Pass a long as parameter. It contains the transfer speed in bytes per second
+that the transfer should be below during CURLOPT_LOW_SPEED_TIME seconds for
+the library to consider it too slow and abort.
+.TP
+.B CURLOPT_LOW_SPEED_TIME
+Pass a long as parameter. It contains the time in seconds that the transfer
+should be below the CURLOPT_LOW_SPEED_LIMIT for the library to consider it too
+slow and abort.
+.TP
+.B CURLOPT_MAXCONNECTS
+Pass a long. The set number will be the persistent connection cache size. The
+set amount will be the maximum amount of simultaneously open connections that
+libcurl may cache. Default is 5, and there isn't much point in changing this
+value unless you are perfectly aware of how this work and changes libcurl's
+behaviour. This concerns connection using any of the protocols that support
+persistent connections.
+
+When reaching the maximum limit, curl uses the \fICURLOPT_CLOSEPOLICY\fP to
+figure out which of the existing connections to close to prevent the number of
+open connections to increase.
+
+\fBNOTE:\fP if you already have performed transfers with this curl handle,
+setting a smaller MAXCONNECTS than before may cause open connections to get
+closed unnecessarily. (Added in 7.7)
+.TP
+.B CURLOPT_CLOSEPOLICY
+Pass a long. This option sets what policy libcurl should use when the
+connection cache is filled and one of the open connections has to be closed to
+make room for a new connection. This must be one of the CURLCLOSEPOLICY_*
+defines. Use \fICURLCLOSEPOLICY_LEAST_RECENTLY_USED\fP to make libcurl close
+the connection that was least recently used, that connection is also least
+likely to be capable of re-use. Use \fICURLCLOSEPOLICY_OLDEST\fP to make
+libcurl close the oldest connection, the one that was created first among the
+ones in the connection cache. The other close policies are not support
+yet. (Added in 7.7)
+.TP
+.B CURLOPT_FRESH_CONNECT
+Pass a long. Set to non-zero to make the next transfer use a new (fresh)
+connection by force. If the connection cache is full before this connection,
+one of the existing connections will be closed as according to the selected or
+default policy. This option should be used with caution and only if you
+understand what it does. Set this to 0 to have libcurl attempt re-using an
+existing connection (default behavior).  (Added in 7.7)
+.TP
+.B CURLOPT_FORBID_REUSE
+Pass a long. Set to non-zero to make the next transfer explicitly close the
+connection when done. Normally, libcurl keep all connections alive when done
+with one transfer in case there comes a succeeding one that can re-use them.
+This option should be used with caution and only if you understand what it
+does. Set to 0 to have libcurl keep the connection open for possibly later
+re-use (default behavior). (Added in 7.7)
+.TP
+.B CURLOPT_CONNECTTIMEOUT
+Pass a long. It should contain the maximum time in seconds that you allow the
+connection to the server to take.  This only limits the connection phase, once
+it has connected, this option is of no more use. Set to zero to disable
+connection timeout (it will then only timeout on the system's internal
+timeouts). See also the \fICURLOPT_TIMEOUT\fP option.
+
+\fBNOTE:\fP this is not recommended to use in unix multi-threaded programs, as
+it uses signals unless CURLOPT_NOSIGNAL (see below) is set.
+.PP
+.SH SSL and SECURITY OPTIONS
+.TP 0.4i
 .B CURLOPT_SSLCERT
 Pass a pointer to a zero terminated string as parameter. The string should be
 the file name of your certificate. The default format is "PEM" and can be
@@ -421,105 +700,10 @@ operations. (Added in 7.9.3)
 \fBNOTE:\fPIf the crypto device cannot be set,
 \fICURLE_SSL_ENGINE_SETFAILED\fP is returned.
 .TP
-.B CURLOPT_CRLF
-Convert Unix newlines to CRLF newlines on FTP uploads.
-.TP
-.B CURLOPT_QUOTE
-Pass a pointer to a linked list of FTP commands to pass to the server prior to
-your ftp request. The linked list should be a fully valid list of 'struct
-curl_slist' structs properly filled in. Use \fIcurl_slist_append(3)\fP to
-append strings (commands) to the list, and clear the entire list afterwards
-with \fIcurl_slist_free_all(3)\fP. Disable this operation again by setting a
-NULL to this option.
-.TP
-.B CURLOPT_POSTQUOTE
-Pass a pointer to a linked list of FTP commands to pass to the server after
-your ftp transfer request. The linked list should be a fully valid list of
-struct curl_slist structs properly filled in as described for
-\fICURLOPT_QUOTE\fP. Disable this operation again by setting a NULL to this
-option.
-.TP
-.B CURLOPT_WRITEHEADER
-Pass a pointer to be used to write the header part of the received data to. If
-you don't use your own callback to take care of the writing, this must be a
-valid FILE *. See also the \fICURLOPT_HEADERFUNCTION\fP option below on how to set a
-custom get-all-headers callback.
-.TP
-.B CURLOPT_HEADERFUNCTION
-Function pointer that should match the following prototype: \fIsize_t
-function( void *ptr, size_t size, size_t nmemb, void *stream);\fP. This
-function gets called by libcurl as soon as there is received header data that
-needs to be written down. The headers are guaranteed to be written one-by-one
-and only complete lines are written. Parsing headers should be easy enough
-using this. The size of the data pointed to by \fIptr\fP is \fIsize\fP
-multiplied with \fInmemb\fP.  The pointer named \fIstream\fP will be the one
-you passed to libcurl with the \fICURLOPT_WRITEHEADER\fP option.  Return the
-number of bytes actually written or return -1 to signal error to the library
-(it will cause it to abort the transfer with a \fICURLE_WRITE_ERROR\fP return
-code). (Added in 7.7.2)
-.TP
-.B CURLOPT_COOKIEFILE
-Pass a pointer to a zero terminated string as parameter. It should contain the
-name of your file holding cookie data. The cookie data may be in Netscape /
-Mozilla cookie data format or just regular HTTP-style headers dumped to a
-file.
-
-Given an empty or non-existing file, this option will only enable cookies for
-this curl handle, making it understand and parse received cookies and then use
-matching cookies in future request.
-.TP
 .B CURLOPT_SSLVERSION
 Pass a long as parameter. Set what version of SSL to attempt to use, 2 or
 3. By default, the SSL library will try to solve this by itself although some
 servers make this difficult why you at times may have to use this option.
-.TP
-.B CURLOPT_TIMECONDITION
-Pass a long as parameter. This defines how the CURLOPT_TIMEVALUE time value is
-treated. You can set this parameter to TIMECOND_IFMODSINCE or
-TIMECOND_IFUNMODSINCE. This is a HTTP-only feature. (TBD)
-.TP
-.B CURLOPT_TIMEVALUE
-Pass a long as parameter. This should be the time in seconds since 1 jan 1970,
-and the time will be used in a condition as specified with
-CURLOPT_TIMECONDITION.
-.TP
-.B CURLOPT_CUSTOMREQUEST
-Pass a pointer to a zero terminated string as parameter. It will be user
-instead of GET or HEAD when doing the HTTP request. This is useful for doing
-DELETE or other more or less obscure HTTP requests. Don't do this at will,
-make sure your server supports the command first.
-.TP
-.B CURLOPT_STDERR
-Pass a FILE * as parameter. This is the stream to use instead of stderr
-internally when reporting errors.
-.TP
-.B CURLOPT_INTERFACE
-Pass a char * as parameter. This set the interface name to use as outgoing
-network interface. The name can be an interface name, an IP address or a host
-name. (Added in 7.3)
-.TP
-.B CURLOPT_KRB4LEVEL
-Pass a char * as parameter. Set the krb4 security level, this also enables
-krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
-\&'private'.  If the string is set but doesn't match one of these, 'private'
-will be used. Set the string to NULL to disable kerberos4. The kerberos
-support only works for FTP. (Added in 7.3)
-.TP
-.B CURLOPT_PROGRESSFUNCTION
-Function pointer that should match the \fIcurl_progress_callback\fP prototype
-found in \fI<curl/curl.h>\fP. This function gets called by libcurl instead of
-its internal equivalent with a frequent interval during data transfer.
-Unknown/unused argument values will be set to zero (like if you only download
-data, the upload size will remain 0). Returning a non-zero value from this
-callback will cause libcurl to abort the transfer and return
-\fICURLE_ABORTED_BY_CALLBACK\fP.
-
-Also note that \fICURLOPT_NOPROGRESS\fP must be set to FALSE to make this
-function actually get called.
-.TP
-.B CURLOPT_PROGRESSDATA
-Pass a pointer that will be untouched by libcurl and passed as the first
-argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
 .TP
 .B CURLOPT_SSL_VERIFYPEER
 Pass a long that is set to a non-zero value to make curl verify the peer's
@@ -533,86 +717,12 @@ certificates to verify the peer with. This only makes sense when used in
 combination with the CURLOPT_SSL_VERIFYPEER option. (Added in 7.4.2)
 .TP
 .B CURLOPT_CAPATH
-Pass a char * to a zero terminated string naming a directory holding multiple CA
-certificates to verify the peer with. The certificate directory must be prepared using
-the openssl c_rehash utility. This only makes sense when used in combination with the
-CURLOPT_SSL_VERIFYPEER option. The CAPATH function apparently does not work in Windows
-due to some limitation in openssl. (Added in 7.9.8)
-.TP
-.B CURLOPT_PASSWDFUNCTION
-Pass a pointer to a \fIcurl_passwd_callback\fP function that will be called
-instead of the internal one if libcurl requests a password. The function must
-match this prototype: \fBint my_getpass(void *client, char *prompt, char*
-buffer, int buflen );\fP.  If set to NULL, it sets back the function to the
-internal default one. If the function returns a non-zero value, it will abort
-the operation and an error (CURLE_BAD_PASSWORD_ENTERED) will be returned.
-\fIclient\fP is a generic pointer, see \fICURLOPT_PASSWDDATA\fP.  \fIprompt\fP
-is a zero-terminated string that is text that prefixes the input request.
-\fIbuffer\fP is a pointer to data where the entered password should be stored
-and \fIbuflen\fP is the maximum number of bytes that may be written in the
-buffer.  (Added in 7.4.2)
-.TP
-.B CURLOPT_PASSWDDATA
-Pass a void * to whatever data you want. The passed pointer will be the first
-argument sent to the specifed \fICURLOPT_PASSWDFUNCTION\fP function. (Added in
-7.4.2)
-.TP
-.B CURLOPT_FILETIME
-Pass a long. If it is a non-zero value, libcurl will attempt to get the
-modification date of the remote document in this operation. This requires that
-the remote server sends the time or replies to a time querying command. The
-\fIcurl_easy_getinfo(3)\fP function with the \fICURLINFO_FILETIME\fP argument
-can be used after a transfer to extract the received time (if any). (Added in
-7.5)
-.TP
-.B CURLOPT_MAXREDIRS
-Pass a long. The set number will be the redirection limit. If that many
-redirections have been followed, the next redirect will cause an error
-(\fICURLE_TOO_MANY_REDIRECTS\fP). This option only makes sense if the
-\fICURLOPT_FOLLOWLOCATION\fP is used at the same time. (Added in 7.5)
-.TP
-.B CURLOPT_MAXCONNECTS
-Pass a long. The set number will be the persistent connection cache size. The
-set amount will be the maximum amount of simultaneously open connections that
-libcurl may cache. Default is 5, and there isn't much point in changing this
-value unless you are perfectly aware of how this work and changes libcurl's
-behaviour. This concerns connection using any of the protocols that support
-persistent connections.
-
-When reaching the maximum limit, curl uses the \fICURLOPT_CLOSEPOLICY\fP to
-figure out which of the existing connections to close to prevent the number of
-open connections to increase.
-
-\fBNOTE:\fP if you already have performed transfers with this curl handle,
-setting a smaller MAXCONNECTS than before may cause open connections to get
-closed unnecessarily. (Added in 7.7)
-.TP
-.B CURLOPT_CLOSEPOLICY
-Pass a long. This option sets what policy libcurl should use when the
-connection cache is filled and one of the open connections has to be closed to
-make room for a new connection. This must be one of the CURLCLOSEPOLICY_*
-defines. Use \fICURLCLOSEPOLICY_LEAST_RECENTLY_USED\fP to make libcurl close
-the connection that was least recently used, that connection is also least
-likely to be capable of re-use. Use \fICURLCLOSEPOLICY_OLDEST\fP to make
-libcurl close the oldest connection, the one that was created first among the
-ones in the connection cache. The other close policies are not support
-yet. (Added in 7.7)
-.TP
-.B CURLOPT_FRESH_CONNECT
-Pass a long. Set to non-zero to make the next transfer use a new (fresh)
-connection by force. If the connection cache is full before this connection,
-one of the existing connections will be closed as according to the selected or
-default policy. This option should be used with caution and only if you
-understand what it does. Set this to 0 to have libcurl attempt re-using an
-existing connection (default behavior).  (Added in 7.7)
-.TP
-.B CURLOPT_FORBID_REUSE
-Pass a long. Set to non-zero to make the next transfer explicitly close the
-connection when done. Normally, libcurl keep all connections alive when done
-with one transfer in case there comes a succeeding one that can re-use them.
-This option should be used with caution and only if you understand what it
-does. Set to 0 to have libcurl keep the connection open for possibly later
-re-use (default behavior). (Added in 7.7)
+Pass a char * to a zero terminated string naming a directory holding multiple
+CA certificates to verify the peer with. The certificate directory must be
+prepared using the openssl c_rehash utility. This only makes sense when used
+in combination with the CURLOPT_SSL_VERIFYPEER option. The CAPATH function
+apparently does not work in Windows due to some limitation in openssl. (Added
+in 7.9.8)
 .TP
 .B CURLOPT_RANDOM_FILE
 Pass a char * to a zero terminated file name. The file will be used to read
@@ -623,35 +733,10 @@ the more secure the SSL connection will become.
 Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
 socket. It will be used to seed the random engine for SSL.
 .TP
-.B CURLOPT_CONNECTTIMEOUT
-Pass a long. It should contain the maximum time in seconds that you allow the
-connection to the server to take.  This only limits the connection phase, once
-it has connected, this option is of no more use. Set to zero to disable
-connection timeout (it will then only timeout on the system's internal
-timeouts). See also the \fICURLOPT_TIMEOUT\fP option.
-
-\fBNOTE:\fP this is not recommended to use in unix multi-threaded programs, as
-it uses signals unless CURLOPT_NOSIGNAL (see below) is set.
-.TP
-.B CURLOPT_HTTPGET
-Pass a long. If the long is non-zero, this forces the HTTP request to get back
-to GET. Only really usable if POST, PUT or a custom request have been used
-previously using the same curl handle. (Added in 7.8.1)
-.TP
 .B CURLOPT_SSL_VERIFYHOST
 Pass a long. Set if we should verify the Common name from the peer certificate
 in the SSL handshake, set 1 to check existence, 2 to ensure that it matches
 the provided hostname. (Added in 7.8.1)
-.TP
-.B CURLOPT_COOKIEJAR
-Pass a file name as char *, zero terminated. This will make libcurl dump all
-internally known cookies to the specified file when \fIcurl_easy_cleanup(3)\fP
-is called. If no cookies are known, no file will be created. Specify "-" to
-instead have the cookies written to stdout. Using this option also enables
-cookies for this session, so if you for example follow a location it will make
-matching cookies get sent accordingly.
-
-(Added in 7.9)
 .TP
 .B CURLOPT_SSL_CIPHER_LIST
 Pass a char *, pointing to a zero terminated string holding the list of
@@ -665,64 +750,12 @@ compile OpenSSL.
 You'll find more details about cipher lists on this URL:
 \fIhttp://www.openssl.org/docs/apps/ciphers.html\fP
 .TP
-.B CURLOPT_HTTP_VERSION
-Pass a long, set to one of the values described below. They force libcurl to
-use the specific HTTP versions. This is not sensible to do unless you have a
-good reason.
-.RS
-.TP 5
-.B CURL_HTTP_VERSION_NONE
-We don't care about what version the library uses. libcurl will use whatever
-it thinks fit.
-.TP
-.B CURL_HTTP_VERSION_1_0
-Enforce HTTP 1.0 requests.
-.TP
-.B CURL_HTTP_VERSION_1_1
-Enforce HTTP 1.1 requests.
-.RE
-.TP
-.B CURLOPT_FTP_USE_EPSV
-Pass a long. If the value is non-zero, it tells curl to use the EPSV command
-when doing passive FTP downloads (which it always does by default). Using EPSV
-means that it will first attempt to use EPSV before using PASV, but if you
-pass FALSE (zero) to this option, it will not try using EPSV, only plain PASV.
-.TP
-.B CURLOPT_DNS_CACHE_TIMEOUT
-Pass a long, this sets the timeout in seconds. Name resolves will be kept in
-memory for this number of seconds. Set to zero (0) to completely disable
-caching, or set to -1 to make the cached entries remain forever. By default,
-libcurl caches info for 60 seconds. (Added in 7.9.3)
-.TP
-.B CURLOPT_DNS_USE_GLOBAL_CACHE
-Pass a long. If the value is non-zero, it tells curl to use a global DNS cache
-that will survive between easy handle creations and deletions. This is not
-thread-safe and this will use a global varible. (Added in 7.9.3)
-.TP
-.B CURLOPT_DEBUGFUNCTION
-Function pointer that should match the following prototype: \fIint
-curl_debug_callback (CURL *, curl_infotype, char *, size_t, void *);\fP
-This function will receive debug information if CURLOPT_VERBOSE is
-enabled. The curl_infotype argument specifies what kind of information it
-is. This funtion must return 0.
-.TP
-.B CURLOPT_DEBUGDATA
-Pass a pointer to whatever you want passed in to your CURLOPT_DEBUGFUNCTION in
-the last void * argument. This pointer is not used by libcurl, it is only
-passed to the callback.
-.TP
-.B CURLOPT_BUFFERSIZE
-Pass a long specifying your prefered size for the receive buffer in libcurl.
-The main point of this would be that the write callback gets called more often
-and with smaller chunks. This is just treated as a request, not an order. You
-cannot be guaranteed to actually get the given size. (Added in 7.10)
-.TP
-.B CURLOPT_NOSIGNAL
-Pass a long. If it is non-zero, libcurl will not use any functions that
-install signal handlers or any functions that cause signals to be sent to the
-process. This option is mainly here to allow multi-threaded unix applications
-to still set/use all timeout options etc, without risking getting signals.
-(Added in 7.10)
+.B CURLOPT_KRB4LEVEL
+Pass a char * as parameter. Set the krb4 security level, this also enables
+krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
+\&'private'.  If the string is set but doesn't match one of these, 'private'
+will be used. Set the string to NULL to disable kerberos4. The kerberos
+support only works for FTP. (Added in 7.3)
 .PP
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, non-zero means an
