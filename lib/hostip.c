@@ -568,16 +568,6 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
   int count;
   struct SessionHandle *data = conn->data;
   int nfds;
-  long diff;
-
-  diff = Curl_tvdiff(Curl_tvnow(),
-                     data->progress.t_startsingle)/1000;
-
-  if(diff > CURL_TIMEOUT_RESOLVE) {
-    /* Waited many seconds, this is a name resolve timeout! */
-    failf(data, "Name resolve timeout after %ld seconds", diff);
-    return CURLE_OPERATION_TIMEDOUT;
-  }
 
   FD_ZERO(&read_fds);
   FD_ZERO(&write_fds);
