@@ -121,7 +121,7 @@ void Curl_addrinfo_callback(void *arg,
 
 /* This is a utility-function for ipv4-builds to create a hostent struct
    from a numerical-only IP address */
-Curl_addrinfo *Curl_ip2addr(unsigned long num, char *hostname);
+Curl_addrinfo *Curl_ip2addr(in_addr_t num, char *hostname);
 
 /* relocate a hostent struct */
 void Curl_hostent_relocate(struct hostent *h, long offset);
