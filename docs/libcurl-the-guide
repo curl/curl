@@ -300,6 +300,104 @@ Passwords
   [ more options, setting passsword callback ]
 
 
+HTTP POSTing
+
+ We get many questions regarding how to issue HTTP POSTs with libcurl the
+ proper way. This chapter will thus include examples using both different
+ versions of HTTP POST that libcurl supports.
+
+ The first version is the simple POST, the most common version, that most HTML
+ pages using the <form> tag uses. We provide a pointer to the data and tell
+ libcurl to post it all to the remote site:
+
+    char *data="name=daniel&project=curl";
+    curl_easy_setopt(easyhandle, CURLOPT_POSTFIELDS, data);
+    curl_easy_setopt(easyhandle, CURLOPT_URL, "http://posthere.com/");
+
+    curl_easy_perform(easyhandle); /* post away! */
+
+ Simple enough, huh? Ok, so what if you want to post binary data that also
+ requires you to set the Content-Type: header of the post? Well, binary posts
+ prevents libcurl from being able to do strlen() on the data to figure out the
+ size, so therefore we must tell libcurl the size of the post data. Setting
+ headers in libcurl requests are done in a generic way, by building a list of
+ our own headers and then passing that list to libcurl.
+
+    struct curl_slist *headers=NULL;
+    headers = curl_slist_append(headers, "Content-Type: text/xml");
+
+    /* post binary data */
+    curl_easy_setopt(easyhandle, CURLOPT_POSTFIELD, binaryptr);
+
+    /* set the size of the postfields data */
+    curl_easy_setopt(easyhandle, CURLOPT_POSTFIELDSIZE, 23);
+
+    /* pass our list of custom made headers */
+    curl_easy_setopt(easyhandle, CURLOPT_HTTPHEADER, headers);
+
+    curl_easy_perform(easyhandle); /* post away! */
+
+    curl_slist_free_all(headers); /* free the header list */
+
+ While the simple examples above cover the majority of all cases where HTTP
+ POST operations are required, they don't do multipart formposts. Multipart
+ formposts were introduced as a better way to post (possibly large) binary
+ data and was first documented in the RFC1867. They're called multipart
+ because they're built by a chain of parts, each being a single unit. Each
+ part has its own name and contents. You can in fact create and post a
+ multipart formpost with the regular libcurl POST support described above, but
+ that would require that you build a formpost yourself and provide to
+ libcurl. To make that easier, libcurl provides curl_formadd(). Using this
+ function, you add parts to the form. When you're done adding parts, you post
+ the whole form.
+
+ The following example sets two simple text parts with plain textual contents,
+ and then a file with binary contents and upload the whole thing.
+
+    struct HttpPost *post=NULL;
+    struct HttpPost *last=NULL;
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "name",
+                 CURLFORM_COPYCONTENTS, "daniel", CURLFORM_END);
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "project",
+                 CURLFORM_COPYCONTENTS, "curl", CURLFORM_END);
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "logotype-image",
+                 CURLFORM_FILECONTENT, "curl.png", CURLFORM_END);
+
+    /* Set the form info */
+    curl_easy_setopt(easyhandle, CURLOPT_HTTPPOST, post);
+
+    curl_easy_perform(easyhandle); /* post away! */
+
+    /* free the post data again */
+    curl_formfree(post);
+
+ The multipart formposts are a chain of parts using MIME-style separators and
+ headers. That means that each of these separate parts get a few headers set
+ that describes its individual content-type, size etc. Now, to enable your
+ application to handicraft this formpost even more, libcurl allows you to
+ supply your own custom headers to an individual form part. You can of course
+ supply headers to as many parts you like, but this little example will show
+ how you have set headers to one specific part when you add that to post
+ handle:
+
+    struct curl_slist *headers=NULL;
+    headers = curl_slist_append(headers, "Content-Type: text/xml");
+
+    curl_formadd(&post, &last,
+                 CURLFORM_COPYNAME, "logotype-image",
+                 CURLFORM_FILECONTENT, "curl.xml",
+                 CURLFORM_CONTENTHEADER, headers,
+                 CURLFORM_END);
+
+    curl_easy_perform(easyhandle); /* post away! */
+
+    curl_formfree(post); /* free post */
+    curl_slist_free_all(post); /* free custom header list */
+
+
 Showing Progress
 
 
@@ -325,7 +423,14 @@ libcurl with C++
  any "this" pointer available etc.
 
 
+Proxies
+
+ [ regular http, authorization, ftp => http, SSL, tunneling ]
+
+
 Security Considerations
+
+ [ ps output, netrc plain text, plain text protocols / base64 ]
 
 
 Certificates and Other SSL Tricks
