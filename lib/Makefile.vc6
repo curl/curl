@@ -236,7 +236,7 @@ X_OBJS= \
 	$(DIROBJ)\ldap.obj \
 	$(DIROBJ)\dict.obj \
 	$(DIROBJ)\telnet.obj \
-	$(DIROBJ)\getdate.obj \
+	$(DIROBJ)\parsedate.obj \
 	$(DIROBJ)\getenv.obj \
 	$(DIROBJ)\inet_pton.obj \
 	$(DIROBJ)\hostip.obj \
