@@ -573,26 +573,5 @@ struct UrlData {
 #define LIBCURL_NAME "libcurl"
 #define LIBCURL_ID LIBCURL_NAME " " LIBCURL_VERSION " " SSL_ID
 
-CURLcode Curl_getinfo(CURL *curl, CURLINFO info, ...);
-
-/*
- * Here follows function prototypes from what we used to plan to call
- * the "low level" interface. It is no longer prioritized and it is not likely
- * to ever be supported to external users.
- *
- * I removed all the comments to them as well, as they were no longer accurate
- * and they're not meant for "public use" anymore.
- */
-
-CURLcode Curl_open(CURL **curl);
-CURLcode Curl_setopt(CURL *handle, CURLoption option, ...);
-CURLcode Curl_close(CURL *curl); /* the opposite of curl_open() */
-CURLcode Curl_connect(struct UrlData *,
-                      struct connectdata **,
-                      bool allow_port);
-CURLcode Curl_do(struct connectdata *);
-CURLcode Curl_done(struct connectdata *);
-CURLcode Curl_disconnect(struct connectdata *);
-
 
 #endif
