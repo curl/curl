@@ -55,7 +55,8 @@ SOURCES	   = \
 	getinfo.c \
 	version.c \
 	easy.c \
-	strequal.c
+	strequal.c \
+	strtok.c
 
 OBJECTS = $(SOURCES:.c=.obj)
 
