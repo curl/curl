@@ -6,6 +6,9 @@
 
                                History of Changes
 
+
+Version 7.6
+
 Daniel (26 January 2001)
 - Lots of mails back and forth with Bob Schader finally made me add a small
   piece of code in the HTTP engine so that HTTP upload resume works. You can
