@@ -29,6 +29,10 @@
 #include <curl/curl.h>
 #include "urldata.h"
 
+#ifdef USE_ARES
+#include <ares_version.h>
+#endif
+
 #ifdef USE_SSLEAY
 static void getssl_version(char *ptr, long *num)
 {
@@ -118,6 +122,11 @@ char *curl_version(void)
   sprintf(ptr, " GSS");
   ptr += strlen(ptr);
 #endif
+#ifdef USE_ARES
+  /* this function is only present in c-ares, not in the original ares */
+  sprintf(ptr, " c-ares/%s", ares_version(NULL));
+  ptr += strlen(ptr);
+#endif
 
   return version;
 }
@@ -159,7 +168,7 @@ static const char *protocols[] = {
 };
 
 static curl_version_info_data version_info = {
-  CURLVERSION_FIRST,
+  CURLVERSION_SECOND,
   LIBCURL_VERSION,
   LIBCURL_VERSION_NUM,
   OS, /* as found by configure or set by hand at build-time */
@@ -193,7 +202,8 @@ static curl_version_info_data version_info = {
   NULL, /* ssl_version */
   0,    /* ssl_version_num */
   NULL, /* zlib_version */
-  protocols
+  protocols,
+  NULL, /* c-ares version */
 };
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
@@ -211,6 +221,13 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #ifdef HAVE_LIBZ
   version_info.libz_version = zlibVersion();
   /* libz left NULL if non-existing */
+#endif
+#ifdef USE_ARES
+  {
+    int aresnum;
+    version_info.ares = ares_version(&aresnum);
+    version_info.ares_num = aresnum;
+  }
 #endif
   (void)stamp; /* avoid compiler warnings, we don't use this */
 
