@@ -2,16 +2,16 @@
 .\" nroff -man [file]
 .\" $Id: 
 .\"
-.TH curl_free 3 "24 Sept 2002" "libcurl 7.10" "libcurl Manual"
+.TH curl_free 3 "12 Aug 2003" "libcurl 7.10" "libcurl Manual"
 .SH NAME
 curl_free - reclaim memory that has been obtained through a libcurl call
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "void *curl_free( char *" ptr " );"
+.BI "void curl_free( char *" ptr " );"
 .ad
 .SH DESCRIPTION
 curl_free reclaims memory that has been obtained through a libcurl call. 
 Use curl_free() instead of free() to avoid anomalies that can result from differences in memory management between your application and libcurl.
 .SH "SEE ALSO"
-.I curl_unescape(), curl_free()
+.I curl_unescape()
