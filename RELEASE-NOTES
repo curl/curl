@@ -1,4 +1,4 @@
-Curl and libcurl 7.12.3
+Curl and libcurl 7.12.4
 
  Public curl release number:               85
  Releases counted from the very beginning: 112
@@ -10,12 +10,13 @@ Curl and libcurl 7.12.3
 
 This release includes the following changes:
 
- o 
+ o src/getpass.c license issue sorted
+ o curl -w now supports 'http_connect' for the proxy's response to CONNECT
+ o curl-config --protocols
 
 This release includes the following bugfixes:
 
  o minor memory leak when "version" is set in a cookie header
- o curl-config --feature lists the disabled protocols properly
  o builds fine on BeOS
  o builds and runs fine on FreeBSD
 
@@ -26,5 +27,7 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+ Dan Fandrich, Peter Pentchev, Marcin Konicki, Rune Kleveland, David Shaw,
+ Werner Koch
 
         Thanks! (and sorry if I forgot to mention someone)

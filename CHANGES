@@ -7,6 +7,24 @@
                                   Changelog
 
 
+Daniel (25 December 2004)
+- Removed src/config.h.in from CVS, it is now copied from the (generated)
+  lib/config.h.in instead, as they can very well be the same. This removes a
+  "manual hassle". You may want to re-run buildconf now.
+
+- Werner Koch filed Debian bug report #286794, mentioning that curl contained
+  non-free (by Debian's view) source code. This was Angus Mackay's
+  src/getpass.c source code. I tried to contact him about it to quickly solve
+  this issue, but his email addresses bounce and I got some time "over" and
+  reimplemented the functionality once brought by Angus. We no longer use any
+  of Angus' original code and the new function is much simpler (IMO). Issue
+  solved.
+
+Daniel (24 December 2004)
+- David Shaw added --protocols to curl-config, so that it now lists all
+  protocols libcurl was built to support. --feature no longer lists disabled
+  protocols.
+
 Daniel (23 December 2004)
 - David Shaw fixed the configure --disable-[protocol] variables so that
   curl-config --feature now works correctly!
@@ -25,6 +43,7 @@ Daniel (21 December 2004)
 - Fixed lib/select.c include order to build fine on FreeBSD
 
 - Fixed failf()'s reuse of the va_list variable that crashed on FreeBSD.
+  Pointed out by Peter Pentchev.
 
 Version 7.12.3 (20 December 2004)
 
