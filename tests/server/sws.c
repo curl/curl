@@ -88,6 +88,17 @@ int ProcessRequest(char *request)
     /* we don't have a complete request yet! */
     return 0;
 
+  /* **** Persistancy ****
+   *
+   * If the request is a HTTP/1.0 one, we close the connection unconditionally
+   * when we're done.
+   *
+   * If the request is a HTTP/1.1 one, we MUST check for a "Connection:"
+   * header that might say "close". If it does, we close a connection when
+   * this request is processed. Otherwise, we keep the connection alive for X
+   * seconds.
+   */
+
   do {
     if(!strncasecmp("Content-Length:", line, 15))
       contentlength = strtol(line+15, &line, 10);
