@@ -75,6 +75,7 @@
 #include "transfer.h"
 #include "ssluse.h"
 #include "url.h"
+#include "getinfo.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
