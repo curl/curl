@@ -230,7 +230,8 @@ CURLcode Curl_client_write(struct UrlData *data,
       return CURLE_WRITE_ERROR;
     }
   }
-  if((type & CLIENTWRITE_HEADER) && data->writeheader) {
+  if((type & CLIENTWRITE_HEADER) &&
+     (data->fwrite_header || data->writeheader) ) {
     /*
      * Write headers to the same callback or to the especially setup
      * header callback function (added after version 7.7.1).
