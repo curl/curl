@@ -7,9 +7,6 @@ To get fixed in 7.12.3 (planned release: December 2004)
      Awaits OpenSSL support for this, no need to support this in libcurl before
      there's an OpenSSL release that does it.
 
-48 - MSVC Makefile improvements by Samuel Díaz García
-     Still lacks user feedback. Possibly not going to get in.
-
 51 - PUT/POST with multipass authenticaion
      Daniel works on this.
 
