@@ -622,8 +622,10 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   CURLcode result=CURLE_OK;
 
   if(data->set.upload) {
-    if((-1 != data->set.infilesize) && (data->set.infilesize != *ftp->bytecountp)) {
-      failf(data, "Wrote only partial file (%d out of %d bytes)",
+    if((-1 != data->set.infilesize) &&
+       (data->set.infilesize != *ftp->bytecountp) &&
+       !data->set.crlf) {
+      failf(data, "Uploaded unaligned file size (%d out of %d bytes)",
             *ftp->bytecountp, data->set.infilesize);
       return CURLE_PARTIAL_FILE;
     }
@@ -1460,7 +1462,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
     /* normal, direct, ftp connection */
     addr = Curl_resolv(data, newhostp, newport, &hostdataptr);
     if(!addr) {
-      failf(data, "Can't resolve new host %s", newhost);
+      failf(data, "Can't resolve new host %s:%d", newhostp, newport);
       return CURLE_FTP_CANT_GET_HOST;
     }
     connectport = newport; /* we connect to the remote port */
@@ -1475,7 +1477,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   if((CURLE_OK == result) &&       
      data->set.verbose)
     /* this just dumps information about this second connection */
-    ftp_pasv_verbose(conn, conninfo, newhost, connectport);
+    ftp_pasv_verbose(conn, conninfo, newhostp, connectport);
   
   if(CURLE_OK != result)
     return result;
@@ -1483,7 +1485,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   if (data->set.tunnel_thru_httpproxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
     result = Curl_ConnectHTTPProxyTunnel(conn, conn->secondarysocket,
-                                         newhost, newport);
+                                         newhostp, newport);
     if(CURLE_OK != result)
       return result;
   }
