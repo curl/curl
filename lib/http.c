@@ -761,7 +761,7 @@ CURLcode add_buffer_send(send_buffer *in,
       conn->fread = (curl_read_callback)readmoredata;
       conn->fread_in = (void *)conn;
       http->postdata = ptr;
-      http->postsize = size;
+      http->postsize = (curl_off_t)size;
 
       http->send_buffer = in;
       http->sending = HTTPSEND_REQUEST;
