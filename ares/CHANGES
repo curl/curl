@@ -1,5 +1,7 @@
   Changelog for the c-ares project
 
+Version 1.2.0 (April 13, 2004)
+
 * April 2, 2004
 - Updated various man pages to look nicer when converted to HTML on the web
   site.
@@ -17,6 +19,8 @@
 
 - Daniel Stenberg modified the Makefile.in to use a for loop for the man page
   installation to improve overview and make it easier to add man pages.
+
+Version 1.1.0 (March 11, 2004)
 
 * March 9, 2004
 - Gisle Vanem improved build on Windows.
