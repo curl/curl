@@ -789,5 +789,10 @@ AC_OUTPUT( Makefile \
 	   packages/Linux/Makefile \
 	   packages/Linux/RPM/Makefile \
 	   packages/Linux/RPM/curl.spec \
-	   packages/Linux/RPM/curl-ssl.spec )
+	   packages/Linux/RPM/curl-ssl.spec \
+           perl/Makefile \
+           perl/Curl_easy/Makefile \
+           php/Makefile \
+           php/examples/Makefile
+)
 
