@@ -315,8 +315,16 @@ user.
 .TP
 .B CURLOPT_USERPWD
 Pass a char * as parameter, which should be [user name]:[password] to use for
-the connection. If the password is left out, you will be prompted for it.
-\fICURLOPT_PASSWDFUNCTION\fP can be used to set your own prompt function.
+the connection. If both the colon and password is left out, you will be
+prompted for it while using a colon with no password will make libcurl use an
+empty password. \fICURLOPT_PASSWDFUNCTION\fP can be used to set your own
+prompt function.
+
+When using HTTP and CURLOPT_FOLLOWLOCATION, libcurl might perform several
+requests to possibly different hosts. libcurl will only send this user and
+password information to hosts using the initial host name, so if libcurl
+follows locations to other hosts it will not send the user and password to
+those. This is enforced to prevent accidental information leakage.
 .TP
 .B CURLOPT_PROXYUSERPWD
 Pass a char * as parameter, which should be [user name]:[password] to use for
