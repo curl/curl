@@ -8,6 +8,8 @@
 
 
 Daniel (8 December)
+- Fixed the flaw that made -lz appear twice on the link command line.
+
 - After correspondance with Gisle Vanem, I changed the 'connection aborted'
   error text when the FTP response reader failed to more specificly identify
   what the problem is.
