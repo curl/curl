@@ -10,7 +10,8 @@ man_MANS = \
 
 HTMLPAGES = \
 	curl.html \
-	curl-config.html
+	curl-config.html \
+	index.html
 
 PDFPAGES = \
 	curl.pdf \
