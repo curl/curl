@@ -2631,12 +2631,14 @@ operate(struct Configurable *config, int argc, char *argv[])
 
   /*
    * Get a curl handle to use for all forthcoming curl transfers.  Cleanup
-   * when all transfers are done. This is supported with libcurl 7.7 and
-   * should not be attempted on previous versions.
+   * when all transfers are done.
    */
   curl = curl_easy_init();
   if(!curl)
     return CURLE_FAILED_INIT;
+
+  /* After this point, we should call curl_easy_cleanup() if we decide to bail
+   * out from this function! */
 
   urlnode = config->url_list;
 
@@ -2680,8 +2682,10 @@ operate(struct Configurable *config, int argc, char *argv[])
       res = glob_url(&urls, url, &urlnum,
                      config->showerror?
                      (config->errors?config->errors:stderr):NULL);
-      if(res != CURLE_OK)
-        return res;
+      if(res != CURLE_OK) {
+        clean_getout(config);
+        break;
+      }
     }
 
 
@@ -2714,10 +2718,17 @@ operate(struct Configurable *config, int argc, char *argv[])
           else
             pc=url;
           pc = strrchr(pc, '/');
-          outfile = (char *) NULL == pc ? NULL : strdup(pc+1) ;
-          if(!outfile) {
+
+          if(pc) {
+            /* duplicate the string beyond the slash */
+            pc++;
+            outfile = *pc ? strdup(pc): NULL;
+          }
+          if(!outfile || !*outfile) {
             helpf("Remote file name has no length!\n");
-            return CURLE_WRITE_ERROR;
+            res = CURLE_WRITE_ERROR;
+            free(url);
+            break;
           }
 #if defined(__DJGPP__)
           {
@@ -2741,8 +2752,9 @@ operate(struct Configurable *config, int argc, char *argv[])
            file output call */
         
         if(config->create_dirs)
-          if (-1 == create_dir_hierarchy(outfile))
+          if (-1 == create_dir_hierarchy(outfile)) {
             return CURLE_WRITE_ERROR;
+          }
         
         if(config->resume_from_current) {
           /* We're told to continue from where we are now. Get the
@@ -3230,19 +3242,17 @@ static char *my_get_line(FILE *fp)
    char *nl = NULL;
    char *retval = NULL;
 
-   do
-   {
-      if (NULL == fgets(buf, sizeof(buf), fp))
+   do {
+     if (NULL == fgets(buf, sizeof(buf), fp))
+       break;
+     if (NULL == retval)
+       retval = strdup(buf);
+     else {
+       if (NULL == (retval = realloc(retval,
+                                     strlen(retval) + strlen(buf) + 1)))
          break;
-      if (NULL == retval)
-         retval = strdup(buf);
-      else
-      {
-         if (NULL == (retval = realloc(retval,
-                                       strlen(retval) + strlen(buf) + 1)))
-            break;
-         strcat(retval, buf);
-      }
+       strcat(retval, buf);
+     }
    }
    while (NULL == (nl = strchr(retval, '\n')));
 
