@@ -1,8 +1,8 @@
-Updated: December 22, 2003 (http://curl.haxx.se/docs/faq.html)
-                                  _   _ ____  _     
-                              ___| | | |  _ \| |    
-                             / __| | | | |_) | |    
-                            | (__| |_| |  _ <| |___ 
+Updated: March 16, 2004 (http://curl.haxx.se/docs/faq.html)
+                                  _   _ ____  _
+                              ___| | | |  _ \| |
+                             / __| | | | |_) | |
+                            | (__| |_| |  _ <| |___
                              \___|\___/|_| \_\_____|
 
 FAQ
@@ -90,7 +90,7 @@ FAQ
   with URL spelled in uppercase to make it obvious it deals with URLs. The
   fact it can also be pronounced 'see URL' also helped, it works as an
   abbrivation for "Client URL Request Library" or why not the recursive
-  version: "Curl is a URL Request Library".
+  version: "Curl URL Request Library".
 
   Curl supports a range of common Internet protocols, currently including
   HTTP, HTTPS, FTP, FTPS, GOPHER, LDAP, DICT, TELNET and FILE.
@@ -101,7 +101,7 @@ FAQ
   NOTE: there are numerous sub-projects and related projects that also use the
   word curl in the project names in various combinations, but you should take
   notice that this FAQ is directed at the command-line tool named curl (and
-  libcurl the library), and may therefore not be valid for other curl
+  libcurl the library), and may therefore not be valid for other curl-related
   projects.
 
   1.2 What is libcurl?
@@ -109,16 +109,16 @@ FAQ
   libcurl is a reliable and portable library which provides you with an easy
   interface to a range of common Internet protocols.
 
-  You can use libcurl for free in your application even if it is commercial
-  or closed-source.
+  You can use libcurl for free in your application, be it open source,
+  commercial or closed-source.
 
   1.3 What is cURL not?
-  
-  Curl is *not* a wget clone even though that is a very common misconception.
-  Never, during curl's development, have we intended curl to replace wget or
-  compete on its market. Curl is targeted at single-shot file transfers.
 
-  Curl is not a web site mirroring program. If you wanna use curl to mirror
+  Curl is *not* a wget clone. That is a common misconception.  Never, during
+  curl's development, have we intended curl to replace wget or compete on its
+  market. Curl is targeted at single-shot file transfers.
+
+  Curl is not a web site mirroring program. If you want to use curl to mirror
   something: fine, go ahead and write a script that wraps around curl to make
   it reality (like curlmirror.pl does).
 
@@ -181,9 +181,8 @@ FAQ
   curl. We do this voluntarily on our spare time.
 
   We get some help from companies. Contactor Data hosts the curl web site,
-  Haxx owns the curl web site's domain and sourceforge.net hosts several
-  project services we take advantage from, like the bug tracker, mailing lists
-  and more.
+  Haxx owns the curl web site's domain and sourceforge.net hosts project
+  services we take advantage from, like the bug tracker.
 
   If you want to support our project with a donation or similar, one way of
   doing that would be to buy "gift certificates" at useful online shopping
@@ -198,7 +197,7 @@ FAQ
   programming language for the web, named CURL.
 
   We are in no way associated with curl.com or their CURL programming
-  language. 
+  language.
 
   Our project name curl has been in effective use since 1998. We were not the
   first computer related project to use the name "curl" and do not claim any
@@ -281,8 +280,7 @@ FAQ
 
   2.4. Does cURL support Socks (RFC 1928) ?
 
-  There is limited support for SOCKS5 for curl built with IPv6 support
-  disabled.
+  Yes, SOCKS5 is supported when curl is built with IPv6 support disabled.
 
 
 3. Usage problems
@@ -414,7 +412,7 @@ FAQ
   put the entire option within quotes. Like in:
 
    curl -d " with spaces " url.com
-  
+
   or perhaps
 
    curl -d ' with spaces ' url.com
@@ -478,7 +476,7 @@ FAQ
   requests properly. To correct this problem, tell curl to select SSLv2 from
   the command line (-2/--sslv2).
 
-  There has also been examples where the remote server didn't like the SSLv2
+  There have also been examples where the remote server didn't like the SSLv2
   request and instead you had to force curl to use SSLv3 with -3/--sslv3.
 
   4.2. Why do I get problems when I use & or % in the URL?
@@ -554,7 +552,7 @@ FAQ
     containing a list of valid methods for the requested resource.
 
     4.5.6 "301 Moved Permanently"
- 
+
     If you get this return code and an HTML output similar to this:
 
        <H1>Moved Permanently</H1> The document has moved <A
@@ -577,21 +575,26 @@ FAQ
 
   The first part is to avoid having clear-text passwords in the command line
   so that they don't appear in 'ps' outputs and similar. That is easily
-  avoided by using the "-K" option to tell curl to read parameters from a
-  file or stdin to which you can pass the secret info.
+  avoided by using the "-K" option to tell curl to read parameters from a file
+  or stdin to which you can pass the secret info. curl itself will also
+  attempt to "hide" the given password by blanking out the option - this
+  doesn't work on all platforms.
 
   To keep the passwords in your account secret from the rest of the world is
   not a task that curl addresses. You could of course encrypt them somehow to
   at least hide them from being read by human eyes, but that is not what
   anyone would call security.
 
-  Also note that regular HTTP and FTP passwords are sent in clear across the
-  network. All it takes for anyone to fetch them is to listen on the network.
-  Eavesdropping is very easy.
+  Also note that regular HTTP (using Basic authentication) and FTP passwords
+  are sent in clear across the network. All it takes for anyone to fetch them
+  is to listen on the network.  Eavesdropping is very easy. Use more secure
+  authentication methods (like Digest, Negotiate or even NTLM) or consider the
+  SSL-based alternatives HTTPS and FTPS.
 
   4.8 I found a bug!
 
   It is not a bug if the behavior is documented. Read the docs first.
+  Especially check out the KNOWN_BUGS file, it may be a documented bug!
 
   If it is a problem with a binary you've downloaded or a package for your
   particular platform, try contacting the person who built the package/archive
@@ -629,7 +632,7 @@ FAQ
   You invoke curl 7.10 or later to communicate on a https:// URL and get an
   error back looking something similar to this:
 
-      curl: (35) SSL: error:14090086:SSL routines: 
+      curl: (35) SSL: error:14090086:SSL routines:
       SSL3_GET_SERVER_CERTIFICATE:certificate verify failed
 
   Then it means that curl couldn't verify that the server's certificate was
@@ -686,7 +689,7 @@ FAQ
         {
           register int realsize = size * nmemb;
           struct MemoryStruct *mem = (struct MemoryStruct *)data;
-        
+
           mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
           if (mem->memory) {
             memcpy(&(mem->memory[mem->size]), ptr, realsize);
