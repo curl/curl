@@ -635,6 +635,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   char resumerange[40]="";
   struct UrlData *data = curl;
   struct connectdata *conn;
+  char endbracket;
 #ifdef HAVE_SIGACTION
   struct sigaction sigact;
 #endif
@@ -1146,15 +1147,40 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     }
   }
 
+  /* No matter if we use a proxy or not, we have to figure out the remote
+     port number of various reasons.
+     
+     To be able to detect port number flawlessly, we must not confuse them
+     IPv6-specified addresses in the [0::1] style.
+  */
+  if((1 == sscanf(conn->name, "[%*39[0-9a-fA-F:]%c", &endbracket)) &&
+     (']' == endbracket)) {
+    /* this is a IPv6-style specified IP-address */
+#ifndef ENABLE_IPV6
+    failf(data, "You haven't enabled IPv6 support");
+    return CURLE_URL_MALFORMAT;
+#else
+    tmp = strchr(conn->name, ']');
+
+    tmp++; /* pass the ending bracket */
+    if(':' != *tmp)
+      tmp = NULL; /* no port number available */
+#endif
+  }
+  else {
+    /* traditional IPv4-style port-extracting */
+    tmp = strchr(conn->name, ':');
+  }
+
+  if (tmp) {
+    *tmp++ = '\0'; /* cut off the name there */
+    data->remote_port = atoi(tmp);
+  }
+
   if(!data->bits.httpproxy) {
     /* If not connecting via a proxy, extract the port from the URL, if it is
      * there, thus overriding any defaults that might have been set above. */
-    tmp = strchr(conn->name, ':');
-    if (tmp) {
-      *tmp++ = '\0';
-      data->port = atoi(tmp);
-    }
-    data->remote_port = data->port; /* it is the same port */
+    data->port =  data->remote_port; /* it is the same port */
 
     /* Connect to target host right on */
     conn->hp = Curl_gethost(data, conn->name, &conn->hostent_buf);
@@ -1177,14 +1203,6 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     if(NULL == proxydup) {
       failf(data, "memory shortage");
       return CURLE_OUT_OF_MEMORY;
-    }
-
-    /* we use proxy all right, but we wanna know the remote port for SSL
-       reasons */
-    tmp = strchr(conn->name, ':');
-    if (tmp) {
-      *tmp++ = '\0'; /* cut off the name there */
-      data->remote_port = atoi(tmp);
     }
 
     /* Daniel Dec 10, 1998:
