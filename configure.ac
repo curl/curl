@@ -1176,10 +1176,31 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
     CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
     CFLAGS="$CFLAGS -g" 
     if test "$GCC" = "yes"; then
-       CFLAGS="$CFLAGS -W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wno-format-nonliteral -Wundef -Wpointer-arith -Wnested-externs"
 
-       dnl here's a more aggressive set to use:
-       dnl CFLAGS="$CFLAGS -W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wundef -Wpointer-arith -Wnested-externs -Wcast-align -Winline -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wshadow -Wfloat-equal -Wsign-compare -Wunreachable-code"
+       dnl figure out gcc version!
+       AC_MSG_CHECKING([gcc version])
+       gccver=`$CC -dumpversion`
+       num1=`echo $gccver | cut -d . -f1`
+       num2=`echo $gccver | cut -d . -f2`
+       gccnum=`(expr $num1 "*" 100 + $num2) 2>/dev/null`
+       AC_MSG_RESULT($gccver)
+
+       dnl here's the standard setup
+       WARN="-W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wno-format-nonliteral -Wundef -Wpointer-arith -Wnested-externs -Wcast-align -Winline -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wsign-compare"
+       if test "$gccnum" -ge "296"; then
+         dnl gcc 2.96 or later
+         WARN="$WARN -Wfloat-equal"
+
+         dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
+         dnl on i686-Linux as it gives us heaps with false positives
+         if test "$gccnum" -ge "303"; then
+           dnl gcc 3.3 and later
+           WARN="$WARN -Wendif-labels"
+         fi
+       
+       fi
+
+       CFLAGS="$CFLAGS $WARN"
     fi
     dnl strip off optimizer flags
     NEWFLAGS=""
