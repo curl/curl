@@ -44,7 +44,7 @@ of [test case number]%10000.
 B) The request was HTTP and included digest details, which adds 1000 to NUM
 C) If a HTTP request is NTLM type-1, it adds 1001 to num
 D) If a HTTP request is NTLM type-3, it adds 1002 to num
-</dateNUM>
+</dataNUM>
 <datacheck [nonewline=yes]>
 if the data is sent but this is what should be checked afterwards. If
 'nonewline' is set, we will cut off the trailing newline of this given data
