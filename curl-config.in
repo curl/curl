@@ -66,6 +66,9 @@ while test $# -gt 0; do
 	if test "@IPV6_ENABLED@" = "1"; then
           echo "IPv6"
         fi
+	if test "@HAVE_LIBZ@" = "1"; then
+          echo "libz"
+        fi
 	if test "@CURL_DISABLE_HTTP@" = "1"; then
           echo "HTTP-disabled"
         fi

@@ -536,7 +536,9 @@ fi
 dnl AC_CHECK_FUNC(gzread, , AC_CHECK_LIB(z, gzread))
 AC_CHECK_LIB(z, gzread, [AM_CONDITIONAL(CONTENT_ENCODING, true) 
 		         AC_DEFINE(HAVE_LIBZ)
-			 LIBS="$LIBS -lz"])
+			 LIBS="$LIBS -lz"
+                         HAVE_LIBZ="1"
+                         AC_SUBST(HAVE_LIBZ)])
 
 dnl Default is to try the thread-safe versions of a few functions
 OPT_THREAD=on
