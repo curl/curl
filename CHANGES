@@ -6,6 +6,18 @@
 
                                   Changelog
 
+Daniel (13 January 2004)
+- Matt Veenstra updated the Mac OS X framework files.
+
+- Brian R Duffy brought a section to the INSTALL file on how to build a
+  SSL-enabled curl using the free Borland C++ compiler. He also updated the
+  Borland lib/Makefile.b32.
+
+- I fixed the test case 509 which I broke yesterday. Now the libtest are
+  compiled with an include path that points to the library's source dir, so
+  that the libtests can include files from the source tree. This was made to
+  make it possible to use the USE_SSLEAY define in the library test files.
+
 Daniel (12 January 2004)
 - Peter Sylvester brought code that now allows a callback to modified the URL
   even when the multi interface is used, and then libcurl will simulate a
