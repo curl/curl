@@ -6,6 +6,10 @@
 
                                History of Changes
 
+Daniel (26 April 2002)
+- Fixed the test suite http server to not use snprintf() anymore due to better
+  portability.
+
 Daniel (25 April 2002)
 - With Sterling Hughes' new DNS pruning, Jacky Lam asked if this wouldn't
   cause problems since the pruning is only checking the entry time, and it
