@@ -58,8 +58,16 @@ mingw32-ssl:
 	cd src; make -f Makefile.m32 SSL=1
 
 vc:
-	cd lib; nmake -f Makefile.vc6
-	cd src; nmake -f Makefile.vc6
+	cd lib
+	nmake -f Makefile.vc6
+	cd ..\src
+	nmake -f Makefile.vc6
+
+vc-ssl:
+	cd lib
+	nmake -f Makefile.vc6 release-ssl
+	cd ..\src
+	nmake -f Makefile.vc6
 
 cygwin:
 	./configure
