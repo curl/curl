@@ -416,9 +416,9 @@ AddHttpPost(char * name, size_t namelength,
     post->name = name;
     post->namelength = (long)(name?(namelength?namelength:strlen(name)):0);
     post->contents = value;
-    post->contentslength = contentslength;
+    post->contentslength = (long)contentslength;
     post->buffer = buffer;
-    post->bufferlength = bufferlength;
+    post->bufferlength = (long)bufferlength;
     post->contenttype = contenttype;
     post->contentheader = contentHeader;
     post->showfilename = showfilename;
@@ -987,9 +987,9 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
   return result;
 }
 
-static int AddFormData(struct FormData **formp,
-                       const void *line,
-                       size_t length)
+static size_t AddFormData(struct FormData **formp,
+                          const void *line,
+                          size_t length)
 {
   struct FormData *newform = (struct FormData *)
     malloc(sizeof(struct FormData));
@@ -1015,7 +1015,7 @@ static int AddFormData(struct FormData **formp,
 }
 
 
-static int AddFormDataf(struct FormData **formp,
+static size_t AddFormDataf(struct FormData **formp,
                         const char *fmt, ...)
 {
   char s[4096];
@@ -1107,7 +1107,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
   struct curl_httppost *file;
   CURLcode result = CURLE_OK;
 
-  int size =0;
+  size_t size =0;
   char *boundary;
   char *fileboundary=NULL;
   struct curl_slist* curList;
