@@ -19,6 +19,7 @@ Available values for OPTION include:
   --cflags    pre-processor and compiler flags
   --feature   newline separated list of enabled features
   --help      display this help and exit
+  --include   display compiler flag(s) to set curl\'s include path
   --libs      library linking information
   --prefix    curl install prefix
   --version   output version information
@@ -74,6 +75,10 @@ while test $# -gt 0; do
 
     --cflags)
        	echo @CPPFLAGS@
+       	;;
+
+    --include)
+       	echo -I@includedir@
        	;;
 
     --libs)
