@@ -2,7 +2,7 @@ dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(lib/urldata.h)
 AM_CONFIG_HEADER(config.h src/config.h)
-AM_INIT_AUTOMAKE(curl,"7.0beta")
+AM_INIT_AUTOMAKE(curl,"7.0.1beta")
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -131,6 +131,7 @@ AC_CHECK_HEADERS( \
         sys/sockio.h \
         sys/stat.h \
         sys/types.h \
+        sys/time.h \
         getopt.h \
         sys/param.h \
         termios.h \
