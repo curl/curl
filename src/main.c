@@ -1579,7 +1579,9 @@ operate(struct Configurable *config, int argc, char *argv[])
       /* multiple files extracted to stdout, insert separators! */
       separator = 1;
     }
-    for (i = 0; (url = urls?next_url(urls):(i?NULL:url)); ++i) {
+    for(i = 0;
+        (url = urls?next_url(urls):(i?NULL:strdup(url)));
+        i++) {
       char *outfile;
       outfile = outfiles?strdup(outfiles):NULL;
  
