@@ -85,6 +85,19 @@ Data:
                of the ftp server. It uses a simple syntax that is left to
                describe here!
 
+TEST CASE NUMBERS
+
+ So far, I've used this system:
+
+ 1   -  99   HTTP
+ 100 - 199   FTP
+ 200 - 299   FILE
+ 300 - 399   HTTPS
+ 400 - 499   FTPS
+
+  ... if we run out of test numbers for a particular protocol, then we need
+  to fix it.
+
 TODO:
 
   * Make httpserver.pl work when we PUT without Content-Length:
