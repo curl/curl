@@ -592,8 +592,11 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
     if(ftpcode == 530) {
       /* 530 Login incorrect.
-         (the username and/or the password are incorrect) */
-      failf(data, "the username and/or the password are incorrect");
+         (the username and/or the password are incorrect)
+      or
+         530 Sorry, the maximum number of allowed users are already connected
+      */
+      failf(data, "not logged in: %s", &buf[4]);
       return CURLE_FTP_USER_PASSWORD_INCORRECT;
     }
     else if(ftpcode == 230) {

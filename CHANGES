@@ -6,6 +6,15 @@
 
                                   Changelog
 
+Daniel (11 August 2004)
+- configure now defines _XOPEN_SOURCE to 500 on systems that need it to build
+  warning-free (the only known one so far is non-gcc builds on 64bit SGI
+  IRIX).
+
+- the FTP code now includes the server response in the error message when the
+  server gives back a 530 after the password is provided, as it isn't
+  necessary because of a bad user name or password.
+
 Version 7.12.1 (10 August 2004)
 
 Daniel (10 August 2004)
