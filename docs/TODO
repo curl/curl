@@ -12,6 +12,9 @@ TODO
 
 To do in a future release (random order):
 
+ * Make the connect non-blocking so that timeouts work for connect in 
+   multi-threaded programs 
+
  * Using FILE * in the libcurl API introduces a serious limitation since (at
    least in the *nix falvours I know) you can fopen only the first 256
    files. This means, that an application that first opens or fopens 256 files
