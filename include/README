@@ -12,4 +12,4 @@ of environment. You should include files from here using...
         #include <curl/curl.h>
 
 ... style and point the compiler's include path to the directory holding the
-curl subdirectory. It makes it more likely to survice future modifications.
+curl subdirectory. It makes it more likely to survive future modifications.
