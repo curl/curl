@@ -6,17 +6,60 @@
 
                                History of Changes
 
+Version 7.9.1-pre7
+
+Daniel (31 October 2001)
+- The curl_easy_getinfo() timers accidentally lost they're subsecond accuracy
+  as the calculations used longs instead of doubles! Paul Harrington reported.
+
+- The SSL SocketIsDead() checks weren't good enough (as expected really), so I
+  had to add a generic internal try-it-out system. If the request on a re-used
+  connection seems to fail, then we go back and get a new (fresh) connection
+  and re-tries the request on that instead. It kind of makes the
+  SocketIsDead() check obsolete, but I think it is a quicker way for those
+  cases where it actually discovers that the connection is dead.
+
+- When fixing the above, I noticed that we did quite a few writes to sockets
+  in libcurl where we didn't check the return code (that it actually worked to
+  send the data). With the new "attempted request" system we must detect those
+  situations so I went over a bunch of functions, changed return types and
+  added checks for what they actually return.
+
+Version 7.9.1-pre6
+
+Daniel (31 October 2001)
+- Paul Harrington detected a problem with persistant SSL connections. Or to be
+  more exact, we didn't properly detect that the connection was dead and then
+  a second connection would try to re-use it wrongly. The solution to this
+  problem is still not very clear and I'm working on it. One OpenSSL insider
+  said there is no way to know if the SSL connection is alive or not without
+  actually trying an operation.
+
+Daniel (30 October 2001)
+- If a cookie was read from a file, it could accidentally strdup() a NULL
+  pointer. Paul Harrington reported. [http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/curl/curl/lib/cookie.c.diff?r1=1.25&r2=1.26]
+
+- The MANUAL file now documents -t correctly. I also fixed the -T description
+  in the curl.1 man page.
+
 Daniel (29 October 2001)
+- John Janssen found out that curl_formadd was missing in the libcurl.def file
+  and that the docs stated the wrong return type for the function.
+
+- Andrés García found a bug with multiple files in the curl_formadd() function,
+  that I removed with this patch [http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/curl/curl/lib/formdata.c.diff?r1=1.25&r2=1.26].
+
 - Kevin Roth brought another patch that moved the cygwin package files to the
   packages/Win32/cygwin directory.
 
 - A bug in the connection re-use logic made repeated requests to the same FTP
   server (when using name+pasword in the URL) sometimes use more than one
-  connection.
+  connection. [http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/curl/curl/lib/url.c.diff?r1=1.166&r2=1.167]
 
 - Moonesamy tracked down and fixed a problem with the new 7.9.1 connect
-  code. This might be the error Kevin Roth reported on the 7.9.1-pre5
-  release...
+  code. This corrected the error Kevin Roth reported on the 7.9.1-pre5 release
+  (test 19)...
+  [http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/curl/curl/lib/connect.c.diff?r1=1.13&r2=1.14]
 
 Daniel (26 October 2001)
 - Added test28 which verifies that "Location:"-following works even if the
@@ -69,7 +112,7 @@ Daniel (17 October 2001)
 - The test suite now kills any running test http server when you re-start the
   tests.
 
-- We had to remote 'use strict' from two perl scripts, as the cygwin
+- We had to remove 'use strict' from two perl scripts, as the cygwin
   adjustments didn't play nicely otherwise for some reason. Any perl wizard
   out there who can put the scrict back and still make it run good on unix and
   cygwin?
