@@ -492,8 +492,18 @@ char *curl_version(void);
 char *curl_escape(char *string, int length);
 char *curl_unescape(char *string, int length);
 
+/* curl_global_init() should be invoked exactly once for each application that
+   uses libcurl */
+CURLcode curl_global_init(long flags);
+
+/* curl_global_cleanup() should be invoked exactly once for each application
+   that uses libcurl */
+void curl_global_cleanup(void);
+
+
+
 /* This is the version number */
-#define LIBCURL_VERSION "7.7.4-pre2"
+#define LIBCURL_VERSION "7.7.4-pre3"
 #define LIBCURL_VERSION_NUM 0x070704
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */

@@ -8,7 +8,7 @@ curl_global_init - Global libcurl initialisation
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "CURLcode curl_global_init(void);"
+.BI "CURLcode curl_global_init( " long flags " );"
 .ad
 .SH DESCRIPTION
 This function should be called once (no matter how many threads or libcurl
@@ -16,6 +16,9 @@ sessions that'll be used) by every application that uses libcurl.
 
 If this function hasn't been invoked when \fIcurl_easy_init\fP is called, it
 will be done automatically by libcurl.
+
+The flags option should be set to zero. It will be used to tell libcurl what
+specific features it should \fBnot\fP init.
 
 You must however \fBalways\fP use the \fIcurl_global_cleanup\fP function, as
 that cannot be called automatically for you by libcurl.
