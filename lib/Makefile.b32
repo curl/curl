@@ -24,29 +24,37 @@ OPENSSL_PATH = ../../openssl-0.9.7d
 
 # Set libcurl's name
 LIBCURLLIB = libcurl.lib
+LIBCURLDLL = libcurl.dll
 
 # Setup environment
 CXX      = bcc32
+LD       = bcc32
 CP       = copy
 RM       = del
 LIB      = tlib
 TOPDIR   = ..
 CURNTDIR = .
 
-CXXFLAGS = -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
+CXXFLAGS = -q -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
+LDFLAGS  = -q -lq -laa -tWD
 
 INCDIRS  = -I$(CURNTDIR);$(TOPDIR)/include
-
-#LINKLIB  = $(BCCDIR)\lib\psdk\ws2_32.lib
+LINKLIB  = $(BCCDIR)/lib/cw32mt.lib
 
 # If you build with SSL support, set WITH_SSL=1
-DEFINES  = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -DCONSOLE -DMBCS
+DEFINES  = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -D_CONSOLE -D_MBCS
+!ifdef WITH_ZLIB
+DEFINES  = $(DEFINES) -DHAVE_LIBZ -DHAVE_ZLIB_H
+INCDIRS  = $(INCDIRS);$(ZLIB_PATH)
+# LINKLIB  = $(LINKLIB) $(ZLIB_PATH)/zlib.lib
+!endif
 !ifdef WITH_SSL
 DEFINES  = $(DEFINES) -DUSE_SSLEAY 
 INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)/inc32;$(OPENSSL_PATH)/inc32/openssl
+# LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)/out32/ssleay32.lib $(OPENSSL_PATH)/out32/libeay32.lib
 !endif
 
-.SUFFIXES: .c
+.autodepend
 
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 !include Makefile.inc
@@ -63,9 +71,13 @@ clean:
 	-$(RM) *.obj
 	-$(RM) getdate.c
 
-$(LIBCURLLIB): $(OBJECTS) $(LINKLIB)
+$(LIBCURLLIB): $(OBJECTS)
 	@-$(RM) $@
 	$(LIB) $@ /a $**
+
+$(LIBCURLDLL): $(OBJECTS) $(LINKLIB)
+	@-$(RM) $@
+	$(LD) $(LDFLAGS) -e$@ $**
 
 getdate.c: getdate.c.cvs
 	@echo Creating $@
