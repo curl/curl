@@ -48,13 +48,13 @@ struct addr_query {
 
 static void next_lookup(struct addr_query *aquery);
 static void addr_callback(void *arg, int status, unsigned char *abuf,
-			  int alen);
+                          int alen);
 static void end_aquery(struct addr_query *aquery, int status,
-		       struct hostent *host);
+                       struct hostent *host);
 static int file_lookup(struct in_addr *addr, struct hostent **host);
 
 void ares_gethostbyaddr(ares_channel channel, const void *addr, int addrlen,
-			int family, ares_host_callback callback, void *arg)
+                        int family, ares_host_callback callback, void *arg)
 {
   struct addr_query *aquery;
 
@@ -90,27 +90,27 @@ static void next_lookup(struct addr_query *aquery)
   for (p = aquery->remaining_lookups; *p; p++)
     {
       switch (*p)
-	{
-	case 'b':
-	  addr = ntohl(aquery->addr.s_addr);
-	  a1 = (int)((addr >> 24) & 0xff);
-	  a2 = (int)((addr >> 16) & 0xff);
-	  a3 = (int)((addr >> 8) & 0xff);
-	  a4 = (int)(addr & 0xff);
-	  sprintf(name, "%d.%d.%d.%d.in-addr.arpa", a4, a3, a2, a1);
-	  aquery->remaining_lookups = p + 1;
-	  ares_query(aquery->channel, name, C_IN, T_PTR, addr_callback,
-		     aquery);
-	  return;
-	case 'f':
-	  status = file_lookup(&aquery->addr, &host);
-	  if (status != ARES_ENOTFOUND)
-	    {
-	      end_aquery(aquery, status, host);
-	      return;
-	    }
-	  break;
-	}
+        {
+        case 'b':
+          addr = ntohl(aquery->addr.s_addr);
+          a1 = (int)((addr >> 24) & 0xff);
+          a2 = (int)((addr >> 16) & 0xff);
+          a3 = (int)((addr >> 8) & 0xff);
+          a4 = (int)(addr & 0xff);
+          sprintf(name, "%d.%d.%d.%d.in-addr.arpa", a4, a3, a2, a1);
+          aquery->remaining_lookups = p + 1;
+          ares_query(aquery->channel, name, C_IN, T_PTR, addr_callback,
+                     aquery);
+          return;
+        case 'f':
+          status = file_lookup(&aquery->addr, &host);
+          if (status != ARES_ENOTFOUND)
+            {
+              end_aquery(aquery, status, host);
+              return;
+            }
+          break;
+        }
     }
   end_aquery(aquery, ARES_ENOTFOUND, NULL);
 }
@@ -123,7 +123,7 @@ static void addr_callback(void *arg, int status, unsigned char *abuf, int alen)
   if (status == ARES_SUCCESS)
     {
       status = ares_parse_ptr_reply(abuf, alen, &aquery->addr,
-				    sizeof(struct in_addr), AF_INET, &host);
+                                    sizeof(struct in_addr), AF_INET, &host);
       end_aquery(aquery, status, host);
     }
   else if (status == ARES_EDESTRUCTION)
@@ -133,7 +133,7 @@ static void addr_callback(void *arg, int status, unsigned char *abuf, int alen)
 }
 
 static void end_aquery(struct addr_query *aquery, int status,
-		       struct hostent *host)
+                       struct hostent *host)
 {
   aquery->callback(aquery->arg, status, host);
   if (host)
@@ -150,18 +150,18 @@ static int file_lookup(struct in_addr *addr, struct hostent **host)
 
   char PATH_HOSTS[MAX_PATH];
   if (IS_NT()) {
-	char tmp[MAX_PATH];
-	HKEY hkeyHosts;
+        char tmp[MAX_PATH];
+        HKEY hkeyHosts;
 
-	if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, WIN_NS_NT_KEY, 0, KEY_READ, &hkeyHosts)
-		== ERROR_SUCCESS)
-	{
-		DWORD dwLength = MAX_PATH;
-		RegQueryValueEx(hkeyHosts, DATABASEPATH, NULL, NULL, tmp,
-			&dwLength);
-		ExpandEnvironmentStrings(tmp, PATH_HOSTS, MAX_PATH);
-		RegCloseKey(hkeyHosts);
-	}
+        if (RegOpenKeyEx(HKEY_LOCAL_MACHINE, WIN_NS_NT_KEY, 0, KEY_READ, &hkeyHosts)
+                == ERROR_SUCCESS)
+        {
+                DWORD dwLength = MAX_PATH;
+                RegQueryValueEx(hkeyHosts, DATABASEPATH, NULL, NULL, tmp,
+                        &dwLength);
+                ExpandEnvironmentStrings(tmp, PATH_HOSTS, MAX_PATH);
+                RegCloseKey(hkeyHosts);
+        }
   }
   else
     GetWindowsDirectory(PATH_HOSTS, MAX_PATH);
@@ -183,7 +183,7 @@ static int file_lookup(struct in_addr *addr, struct hostent **host)
   while ((status = ares__get_hostent(fp, host)) == ARES_SUCCESS)
     {
       if (memcmp((*host)->h_addr, addr, sizeof(struct in_addr)) == 0)
-	break;
+        break;
       ares_free_hostent(*host);
     }
   fclose(fp);
