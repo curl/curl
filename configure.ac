@@ -1199,33 +1199,36 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        gccnum=`(expr $num1 "*" 100 + $num2) 2>/dev/null`
        AC_MSG_RESULT($gccver)
 
-       dnl here's the standard setup
-       WARN="-W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wno-format-nonliteral -Wundef -Wpointer-arith -Wnested-externs -Wcast-align -Winline -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wsign-compare"
-       if test "$gccnum" -ge "296"; then
-         dnl gcc 2.96 or later
-         WARN="$WARN -Wfloat-equal"
+       if test "$gccnum" -lt "500"; then
+         dnl we only like gcc less than 5.0, since if it is above that it is
+         dnl likely just a compiler that looks like gcc (like icc 8.0)!
+         dnl here's the standard setup
+         WARN="-W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wno-format-nonliteral -Wundef -Wpointer-arith -Wnested-externs -Wcast-align -Winline -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wsign-compare"
+         if test "$gccnum" -ge "296"; then
+           dnl gcc 2.96 or later
+           WARN="$WARN -Wfloat-equal"
 
-         dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
-         dnl on i686-Linux as it gives us heaps with false positives
-         if test "$gccnum" -ge "303"; then
-           dnl gcc 3.3 and later
-           WARN="$WARN -Wendif-labels"
+           dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
+           dnl on i686-Linux as it gives us heaps with false positives
+           if test "$gccnum" -ge "303"; then
+             dnl gcc 3.3 and later
+             WARN="$WARN -Wendif-labels"
+           fi
          fi
-       
+
+         NEWFLAGS=""
+         for flag in $CPPFLAGS; do
+           case "$flag" in
+            -I*)
+              dnl include path
+              add=`echo $flag | sed 's/^-I/-isystem /g'`
+              NEWFLAGS="$NEWFLAGS $add"
+              ;;
+           esac
+         done
+
+         CFLAGS="$CFLAGS $WARN $NEWFLAGS"
        fi
-
-       NEWFLAGS=""
-       for flag in $CPPFLAGS; do
-         case "$flag" in
-          -I*)
-            dnl include path
-            add=`echo $flag | sed 's/^-I/-isystem /g'`
-            NEWFLAGS="$NEWFLAGS $add"
-            ;;
-         esac
-       done
-
-       CFLAGS="$CFLAGS $WARN $NEWFLAGS"
 
     fi
     dnl strip off optimizer flags
