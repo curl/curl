@@ -366,3 +366,6 @@
 #define HAVE_MEMORY_H   1
 
 #define HAVE_FIONBIO	1
+
+/* Define if you have the `sigsetjmp' function. */
+#define HAVE_SIGSETJMP 1
