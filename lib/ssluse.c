@@ -900,14 +900,30 @@ Curl_SSLConnect(struct connectdata *conn)
         /* untreated error */
         char error_buffer[120]; /* OpenSSL documents that this must be at least
                                    120 bytes long. */
-        /* detail is already set to the SSL error above */
-        failf(data, "SSL: %s", ERR_error_string(detail, error_buffer));
 
-        /* OpenSSL 0.9.6 and later has a function named
-           ERRO_error_string_n() that takes the size of the buffer as a third
-           argument, and we should possibly switch to using that one in the
-           future. */
-        return CURLE_SSL_CONNECT_ERROR;
+        detail = ERR_get_error(); /* Gets the earliest error code from the
+                                     thread's error queue and removes the
+                                     entry. */
+
+        
+        if(0x14090086 == detail) {
+          /* 14090086:
+             SSL routines:
+             SSL3_GET_SERVER_CERTIFICATE:
+             certificate verify failed */
+          failf(data,
+                "SSL certificate problem, verify that the CA cert is OK");
+          return CURLE_SSL_CACERT;
+        }
+        else {
+          /* detail is already set to the SSL error above */
+          failf(data, "SSL: %s", ERR_error_string(detail, error_buffer));
+          /* OpenSSL 0.9.6 and later has a function named
+             ERRO_error_string_n() that takes the size of the buffer as a third
+             argument, and we should possibly switch to using that one in the
+             future. */
+          return CURLE_SSL_CONNECT_ERROR;
+        }
       }
     }
     else
