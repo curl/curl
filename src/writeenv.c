@@ -18,13 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
+ * $Id$
  *****************************************************************************/
 
 #include "setup.h"
-
 #include <curl/curl.h>
-
-#include "writeout.h"
 
 #ifdef __riscos__
 #include <kernel.h>
