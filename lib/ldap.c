@@ -37,7 +37,7 @@
 #if defined(WIN32)
 # include <windows.h>
 # include <malloc.h>
-# include <WinLdap.h>
+# include <winldap.h>
 #endif
 
 #ifdef HAVE_UNISTD_H
