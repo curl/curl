@@ -100,6 +100,21 @@
 
 #define DEFAULT_MAXREDIRS  50L
 
+#ifdef __DJGPP__
+void *xmalloc(size_t);
+char *msdosify(char *);
+char *rename_if_dos_device_name(char *);
+void xfree(void *);
+#include <limits.h>
+#include <fcntl.h>
+struct pollfd {
+       int fd;
+       int events;     /* in param: what to poll for */
+       int revents;    /* out param: what events occured */
+     };
+int poll (struct pollfd *, int, int);
+#endif /* __DJGPP__ */
+
 #ifndef __cplusplus        /* (rabe) */
 #ifndef typedef_bool
 typedef char bool;
@@ -2704,6 +2719,16 @@ operate(struct Configurable *config, int argc, char *argv[])
             helpf("Remote file name has no length!\n");
             return CURLE_WRITE_ERROR;
           }
+#if defined(__DJGPP__)
+          {
+            /* This is for DOS, and then we do some major replacing of 
+               bad characters in the file name before using it */
+            char *file1=xmalloc(PATH_MAX);
+            strcpy(file1, msdosify(outfile));
+            strcpy(outfile, rename_if_dos_device_name(file1));
+            xfree(file1);
+          }
+#endif /* __DJGPP__ */
         }
         else if(urls) {
           /* fill '#1' ... '#9' terms from URL pattern */
@@ -2877,11 +2902,11 @@ operate(struct Configurable *config, int argc, char *argv[])
       if(!config->errors)
         config->errors = stderr;
 
-#if defined(WIN32) && !defined(__CYGWIN32__)
+#ifdef O_BINARY
       if(!outfile && !(config->conf & CONF_GETTEXT)) {
         /* We get the output to stdout and we have not got the ASCII/text flag,
            then set stdout to be binary */
-        setmode( 1, O_BINARY );
+        setmode( fileno(stdout), O_BINARY );
       }
 #endif
 
@@ -3312,3 +3337,119 @@ static int create_dir_hierarchy(char *outfile)
   return result; /* 0 is fine, -1 is badness */
 }
 
+#ifdef __DJGPP__
+/* The following functions are taken with modification from the DJGPP
+ * port of tar 1.12. They use algorithms originally from DJTAR. */
+
+char *
+msdosify (char *file_name)
+{
+  static char dos_name[PATH_MAX];
+  static char illegal_chars_dos[] = ".+, ;=[]|<>\\\":?*";
+  static char *illegal_chars_w95 = &illegal_chars_dos[8];
+  int idx, dot_idx;
+  char *s = file_name, *d = dos_name;
+  char *illegal_aliens = illegal_chars_dos;
+  size_t len = sizeof (illegal_chars_dos) - 1;
+  int lfn = 0;
+
+  /* Support for Windows 9X VFAT systems, when available.  */
+  if (_use_lfn (file_name))
+    lfn = 1;
+  if (lfn) {
+    illegal_aliens = illegal_chars_w95;
+    len -= (illegal_chars_w95 - illegal_chars_dos);
+  }
+  
+  /* Get past the drive letter, if any. */
+  if (s[0] >= 'A' && s[0] <= 'z' && s[1] == ':') {
+    *d++ = *s++;
+    *d++ = *s++;
+  }
+
+  for (idx = 0, dot_idx = -1; *s; s++, d++) {
+    if (memchr (illegal_aliens, *s, len)) {
+      /* Dots are special: DOS doesn't allow them as the leading character,
+         and a file name cannot have more than a single dot.  We leave the
+         first non-leading dot alone, unless it comes too close to the
+         beginning of the name: we want sh.lex.c to become sh_lex.c, not
+         sh.lex-c.  */
+      if (*s == '.') {
+        if (idx == 0 && (s[1] == '/' || (s[1] == '.' && s[2] == '/'))) {
+          /* Copy "./" and "../" verbatim.  */
+          *d++ = *s++;
+          if (*s == '.')
+            *d++ = *s++;
+          *d = *s;
+        }
+        else if (idx == 0)
+          *d = '_';
+        else if (dot_idx >= 0) {
+          if (dot_idx < 5) { /* 5 is a heuristic ad-hoc'ery */
+            d[dot_idx - idx] = '_'; /* replace previous dot */
+            *d = '.';
+          }
+          else
+            *d = '-';
+        }
+        else
+          *d = '.';
+
+        if (*s == '.')
+          dot_idx = idx;
+      }
+      else if (*s == '+' && s[1] == '+') {
+        if (idx - 2 == dot_idx) { /* .c++, .h++ etc. */
+          *d++ = 'x';
+          *d   = 'x';
+        }
+        else {
+          /* libg++ etc.  */
+          memcpy (d, "plus", 4);
+          d += 3;
+        }
+        s++;
+        idx++;
+      }
+      else
+        *d = '_';
+    }
+    else
+      *d = *s;
+    if (*s == '/') {
+      idx = 0;
+      dot_idx = -1;
+    }
+    else
+      idx++;
+  }
+
+  *d = '\0';
+  return dos_name;
+}
+
+char *
+rename_if_dos_device_name (char *file_name)
+{
+  /* We could have a file whose name is a device on MS-DOS.  Trying to
+   * retrieve such a file would fail at best and wedge us at worst.  We need
+   * to rename such files. */
+  extern char *basename (const char *);
+  char *base;
+  struct stat st_buf;
+  char fname[PATH_MAX];
+
+  strcpy (fname, file_name);
+  base = basename (fname);
+  if (((stat(base, &st_buf)) == 0) && (S_ISCHR(st_buf.st_mode))) {
+    size_t blen = strlen (base);
+
+    /* Prepend a '_'.  */
+    memmove (base + 1, base, blen + 1);
+    base[0] = '_';
+    strcpy (file_name, fname);
+  }
+  return file_name;
+}
+
+#endif /* __DJGPP__ */
