@@ -493,7 +493,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   }
   else {
     if((-1 != conn->size) && (conn->size != *ftp->bytecountp) &&
-       (data->maxdownload != *ftp->bytecountp)) {
+       (conn->maxdownload != *ftp->bytecountp)) {
       failf(data, "Received only partial file");
       return CURLE_PARTIAL_FILE;
     }
@@ -1393,16 +1393,16 @@ again:;
       else if(from < 0) {
         /* -Y */
         totalsize = -from;
-        data->maxdownload = -from;
+        conn->maxdownload = -from;
         data->resume_from = from;
         infof(data, "FTP RANGE the last %d bytes\n", totalsize);
       }
       else {
         /* X-Y */
         totalsize = to-from;
-        data->maxdownload = totalsize+1; /* include the last mentioned byte */
+        conn->maxdownload = totalsize+1; /* include the last mentioned byte */
         data->resume_from = from;
-        infof(data, "FTP RANGE from %d getting %d bytes\n", from, data->maxdownload);
+        infof(data, "FTP RANGE from %d getting %d bytes\n", from, conn->maxdownload);
       }
       infof(data, "range-download from %d to %d, totally %d bytes\n",
             from, to, totalsize);

@@ -242,6 +242,9 @@ struct connectdata {
   long upload_bufsize; /* adjust as you see fit, never bigger than BUFSIZE
                           never smaller than UPLOAD_BUFSIZE */
 
+  long maxdownload; /* in bytes, the maximum amount of data to fetch, 0
+                       means unlimited */
+  
   struct ssl_connect_data ssl; /* this is for ssl-stuff */
 
   struct ConnectBits bits;    /* various state-flags for this connection */
@@ -274,6 +277,17 @@ struct connectdata {
                             the same we read from. -1 disables */
   long *writebytecountp; /* return number of bytes written or NULL */
 
+  /** Dynamicly allocated strings, may need to be freed before this **/
+  /** struct is killed.                                             **/
+  struct dynamically_allocated_data {
+    char *proxyuserpwd; /* free later if not NULL! */
+    char *uagent; /* free later if not NULL! */
+    char *userpwd; /* free later if not NULL! */
+    char *rangeline; /* free later if not NULL! */
+    char *ref; /* free later if not NULL! */
+    char *cookie; /* free later if not NULL! */
+    char *host; /* free later if not NULL */
+  } allocptr;
 
 #ifdef KRB4
 
@@ -411,11 +425,15 @@ typedef enum {
  *
  * (Request)
  * 3 - Request-specific. Variables that are of interest for this particular
- *     transfer being made right now.
+ *     transfer being made right now. THIS IS WRONG STRUCT FOR THOSE.
  *
  * In Febrary 2001, this is being done stricter. The 'connectdata' struct
  * MUST have all the connection oriented stuff as we may now have several
  * simultaneous connections and connection structs in memory.
+ *
+ * From now on, the 'UrlData' must only contain data that is set once to go
+ * for many (perhaps) independent connections. Values that are generated or
+ * calculated internally MUST NOT be a part of this struct.
  */
 
 struct UrlData {
@@ -488,9 +506,6 @@ struct UrlData {
   long timeout; /* in seconds, 0 means no timeout */
   long infilesize; /* size of file to upload, -1 means unknown */
 
-  long maxdownload; /* in bytes, the maximum amount of data to fetch, 0
-                       means unlimited */
-  
   char buffer[BUFSIZE+1]; /* buffer with size BUFSIZE */
 
   double current_speed;  /* the ProgressShow() funcion sets this */
@@ -545,15 +560,6 @@ struct UrlData {
   char passwd[MAX_CURL_PASSWORD_LENGTH];
   char proxyuser[MAX_CURL_USER_LENGTH];
   char proxypasswd[MAX_CURL_PASSWORD_LENGTH];
-
-  /**** Dynamicly allocated strings, may need to be freed on return ****/
-  char *ptr_proxyuserpwd; /* free later if not NULL! */
-  char *ptr_uagent; /* free later if not NULL! */
-  char *ptr_userpwd; /* free later if not NULL! */
-  char *ptr_rangeline; /* free later if not NULL! */
-  char *ptr_ref; /* free later if not NULL! */
-  char *ptr_cookie; /* free later if not NULL! */
-  char *ptr_host; /* free later if not NULL */
 
   char *krb4_level; /* what security level */
 #ifdef KRB4

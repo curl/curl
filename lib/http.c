@@ -282,8 +282,8 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
              "%s"
              "\r\n",
              hostname, remote_port,
-             (data->bits.proxy_user_passwd)?data->ptr_proxyuserpwd:"",
-             (data->useragent?data->ptr_uagent:"")
+             (data->bits.proxy_user_passwd)?conn->allocptr.proxyuserpwd:"",
+             (data->useragent?conn->allocptr.uagent:"")
              );
 
   /* wait for the proxy to send us a HTTP/1.0 200 OK header */
@@ -405,9 +405,9 @@ CURLcode Curl_http(struct connectdata *conn)
      have been used in the proxy connect, but if we have got a header with
      the user-agent string specified, we erase the previously made string
      here. */
-  if(checkheaders(data, "User-Agent:") && data->ptr_uagent) {
-    free(data->ptr_uagent);
-    data->ptr_uagent=NULL;
+  if(checkheaders(data, "User-Agent:") && conn->allocptr.uagent) {
+    free(conn->allocptr.uagent);
+    conn->allocptr.uagent=NULL;
   }
 
   if((data->bits.user_passwd) && !checkheaders(data, "Authorization:")) {
@@ -421,23 +421,23 @@ CURLcode Curl_http(struct connectdata *conn)
       sprintf(data->buffer, "%s:%s", data->user, data->passwd);
       if(Curl_base64_encode(data->buffer, strlen(data->buffer),
                             &authorization) >= 0) {
-        if(data->ptr_userpwd)
-          free(data->ptr_userpwd);
-        data->ptr_userpwd = aprintf( "Authorization: Basic %s\015\012",
+        if(conn->allocptr.userpwd)
+          free(conn->allocptr.userpwd);
+        conn->allocptr.userpwd = aprintf( "Authorization: Basic %s\015\012",
                                      authorization);
         free(authorization);
       }
     }
   }
   if((data->bits.http_set_referer) && !checkheaders(data, "Referer:")) {
-    if(data->ptr_ref)
-      free(data->ptr_ref);
-    data->ptr_ref = aprintf("Referer: %s\015\012", data->referer);
+    if(conn->allocptr.ref)
+      free(conn->allocptr.ref);
+    conn->allocptr.ref = aprintf("Referer: %s\015\012", data->referer);
   }
   if(data->cookie && !checkheaders(data, "Cookie:")) {
-    if(data->ptr_cookie)
-      free(data->ptr_cookie);
-    data->ptr_cookie = aprintf("Cookie: %s\015\012", data->cookie);
+    if(conn->allocptr.cookie)
+      free(conn->allocptr.cookie);
+    conn->allocptr.cookie = aprintf("Cookie: %s\015\012", data->cookie);
   }
 
   if(data->cookies) {
@@ -457,7 +457,7 @@ CURLcode Curl_http(struct connectdata *conn)
   }
 
   if(!checkheaders(data, "Host:") &&
-     !data->ptr_host) {
+     !conn->allocptr.host) {
     /* if ptr_host is already set, it is OK since we only re-use connections
        to the very same host and port */
 
@@ -465,9 +465,10 @@ CURLcode Curl_http(struct connectdata *conn)
        (!(conn->protocol&PROT_HTTPS) && (data->remote_port == PORT_HTTP)) )
       /* If (HTTPS on port 443) OR (non-HTTPS on port 80) then don't include
          the port number in the host string */
-      data->ptr_host = aprintf("Host: %s\r\n", host);
+      conn->allocptr.host = aprintf("Host: %s\r\n", host);
     else
-      data->ptr_host = aprintf("Host: %s:%d\r\n", host, data->remote_port);
+      conn->allocptr.host = aprintf("Host: %s:%d\r\n", host,
+                                    data->remote_port);
   }
 
   if(!checkheaders(data, "Pragma:"))
@@ -541,7 +542,7 @@ CURLcode Curl_http(struct connectdata *conn)
      */
     if((data->httpreq == HTTPREQ_GET) &&
        !checkheaders(data, "Range:")) {
-      data->ptr_rangeline = aprintf("Range: bytes=%s\r\n", data->range);
+      conn->allocptr.rangeline = aprintf("Range: bytes=%s\r\n", data->range);
     }
     else if((data->httpreq != HTTPREQ_GET) &&
             !checkheaders(data, "Content-Range:")) {
@@ -549,14 +550,14 @@ CURLcode Curl_http(struct connectdata *conn)
       if(data->resume_from) {
         /* This is because "resume" was selected */
         long total_expected_size= data->resume_from + data->infilesize;
-        data->ptr_rangeline = aprintf("Content-Range: bytes %s%ld/%ld\r\n",
+        conn->allocptr.rangeline = aprintf("Content-Range: bytes %s%ld/%ld\r\n",
                                       data->range, total_expected_size-1,
                                       total_expected_size);
       }
       else {
         /* Range was selected and then we just pass the incoming range and 
            append total size */
-        data->ptr_rangeline = aprintf("Content-Range: bytes %s/%d\r\n",
+        conn->allocptr.rangeline = aprintf("Content-Range: bytes %s/%d\r\n",
                                       data->range, data->infilesize);
       }
     }
@@ -572,7 +573,7 @@ CURLcode Curl_http(struct connectdata *conn)
     /* add the main request stuff */
     add_bufferf(req_buffer,
                 "%s " /* GET/HEAD/POST/PUT */
-                "%s HTTP/1.0\r\n" /* path */
+                "%s HTTP/1.1\r\n" /* path */
                 "%s" /* proxyuserpwd */
                 "%s" /* userpwd */
                 "%s" /* range */
@@ -588,15 +589,15 @@ CURLcode Curl_http(struct connectdata *conn)
                  (data->bits.http_post || data->bits.http_formpost)?"POST":
                  (data->bits.http_put)?"PUT":"GET"),
                 ppath,
-                (data->bits.proxy_user_passwd && data->ptr_proxyuserpwd)?data->ptr_proxyuserpwd:"",
-                (data->bits.user_passwd && data->ptr_userpwd)?data->ptr_userpwd:"",
-                (data->bits.set_range && data->ptr_rangeline)?data->ptr_rangeline:"",
-                (data->useragent && *data->useragent && data->ptr_uagent)?data->ptr_uagent:"",
-                (data->ptr_cookie?data->ptr_cookie:""), /* Cookie: <data> */
-                (data->ptr_host?data->ptr_host:""), /* Host: host */
+                (data->bits.proxy_user_passwd && conn->allocptr.proxyuserpwd)?conn->allocptr.proxyuserpwd:"",
+                (data->bits.user_passwd && conn->allocptr.userpwd)?conn->allocptr.userpwd:"",
+                (data->bits.set_range && conn->allocptr.rangeline)?conn->allocptr.rangeline:"",
+                (data->useragent && *data->useragent && conn->allocptr.uagent)?conn->allocptr.uagent:"",
+                (conn->allocptr.cookie?conn->allocptr.cookie:""), /* Cookie: <data> */
+                (conn->allocptr.host?conn->allocptr.host:""), /* Host: host */
                 http->p_pragma?http->p_pragma:"",
                 http->p_accept?http->p_accept:"",
-                (data->bits.http_set_referer && data->ptr_ref)?data->ptr_ref:"" /* Referer: <data> <CRLF> */
+                (data->bits.http_set_referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> <CRLF> */
                 );
 
     if(co) {

@@ -158,35 +158,6 @@ CURLcode curl_close(CURL *curl)
     data->bits.rangestringalloc=0; /* free now */
   }
 
-  if(data->ptr_proxyuserpwd) {
-    free(data->ptr_proxyuserpwd);
-    data->ptr_proxyuserpwd=NULL;
-  }
-  if(data->ptr_uagent) {
-    free(data->ptr_uagent);
-    data->ptr_uagent=NULL;
-  }
-  if(data->ptr_userpwd) {
-    free(data->ptr_userpwd);
-    data->ptr_userpwd=NULL;
-  }
-  if(data->ptr_rangeline) {
-    free(data->ptr_rangeline);
-    data->ptr_rangeline=NULL;
-  }
-  if(data->ptr_ref) {
-    free(data->ptr_ref);
-    data->ptr_ref=NULL;
-  }
-  if(data->ptr_cookie) {
-    free(data->ptr_cookie);
-    data->ptr_cookie=NULL;
-  }
-  if(data->ptr_host) {
-    free(data->ptr_host);
-    data->ptr_host=NULL;
-  }
-
   /* check for allocated [URL] memory to free: */
   if(data->freethis)
     free(data->freethis);
@@ -577,12 +548,25 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
   /* close possibly still open sockets */
   if(-1 != conn->secondarysocket) {
     sclose(conn->secondarysocket);
-    conn->secondarysocket = -1;	
   }
   if(-1 != conn->firstsocket) {
     sclose(conn->firstsocket);
-    conn->firstsocket=-1;
   }
+
+  if(conn->allocptr.proxyuserpwd)
+    free(conn->allocptr.proxyuserpwd);
+  if(conn->allocptr.uagent)
+    free(conn->allocptr.uagent);
+  if(conn->allocptr.userpwd)
+    free(conn->allocptr.userpwd);
+  if(conn->allocptr.rangeline)
+    free(conn->allocptr.rangeline);
+  if(conn->allocptr.ref)
+    free(conn->allocptr.ref);
+  if(conn->allocptr.cookie)
+    free(conn->allocptr.cookie);
+  if(conn->allocptr.host)
+    free(conn->allocptr.host);
 
   free(conn); /* free all the connection oriented data */
 
@@ -1544,6 +1528,11 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     free(conn->path);        /* free the previous path pointer */
     conn->path = path;       /* use this one */
     conn->ppath = path;      /* set this too */
+
+    /* re-use init */
+    conn->maxdownload = 0; /* might have been used previously! */
+
+    infof(data, "Re-using existing connection! (#%d)\n", conn->connectindex);
   }
   else {
     /*
@@ -1653,9 +1642,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
              data->proxyuser, data->proxypasswd);
     if(Curl_base64_encode(data->buffer, strlen(data->buffer),
                           &authorization) >= 0) {
-      if(data->ptr_proxyuserpwd)
-        free(data->ptr_proxyuserpwd);
-      data->ptr_proxyuserpwd =
+      if(conn->allocptr.proxyuserpwd)
+        free(conn->allocptr.proxyuserpwd);
+      conn->allocptr.proxyuserpwd =
         aprintf("Proxy-authorization: Basic %s\015\012", authorization);
       free(authorization);
     }
@@ -1667,9 +1656,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
    *************************************************************/
   if((conn->protocol&PROT_HTTP) || data->bits.httpproxy) {
     if(data->useragent) {
-      if(data->ptr_uagent)
-        free(data->ptr_uagent);
-      data->ptr_uagent =
+      if(conn->allocptr.uagent)
+        free(conn->allocptr.uagent);
+      conn->allocptr.uagent =
         aprintf("User-Agent: %s\015\012", data->useragent);
     }
   }
