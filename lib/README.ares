@@ -13,7 +13,7 @@ ares:
   http://curl.haxx.se/dev/ares-1.1.1.tar.gz
   
 ares patch:
-  http://curl.haxx.se/dev/ares2.diff
+  http://curl.haxx.se/dev/ares-curl2.diff
 
 Mac OS X quirk:
   ares 1.1.1 contains too old versions of config.guess and config.sub. Copy
@@ -24,9 +24,10 @@ Build ares
 ==========
 
 1. unpack the ares-1.1.1 archive
-2. apply patch (if you're on Mac OS X or windows)
-3. ./configure
-4. make
+2. cd ares-src
+3. patch -p0 < ares-curl-patch
+4. ./configure
+5. make
 
 Build libcurl to use ares
 =========================
