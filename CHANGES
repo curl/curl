@@ -8,6 +8,12 @@
 
 
 Daniel (7 October)
+- Neil Dunbar provided a patch that now makes libcurl check SSL
+  subjectAltNames when matching certs. This is apparently detailed in RFC2818
+  as the right thing to do. I had to add configure checks for inet_pton() and
+  our own (strictly speaking, code from BIND written by Paul Vixie) provided
+  code for the function for platforms that miss it.
+
 - HTTP POST using the read callback didn't work, as Florian Schoppmann
   reported.
 

@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o libcurl checks subjectAltNames when matching certs
  o HTTP POST using read callback works again
  o builds fine on BeOS now
  o CURLOPT_COOKIE set to NULL no longer sends the previously set cookie
@@ -63,6 +64,6 @@ advice from friends like these:
  Early Ehlinger, Kevin Fisk, Jurij Smakov, Bjorn Reese, Tim Bartley, David
  Kimdon, Dominick Meglio, Markus Moeller, Giuseppe Attardi, James MacMillan,
  Neil Spring, Siddhartha Prakash Jain, Jon Turner, Vincent Bronner, Shard,
- Jeremy Friesner, Florian Schoppmann
+ Jeremy Friesner, Florian Schoppmann, Neil Dunbar
  
         Thanks! (and sorry if I forgot to mention someone)
