@@ -78,6 +78,9 @@ TODO
 
  HTTP
 
+ * Make it possible to supply normal POST data through the ordinary read data
+   callback.
+
  * HTTP PUT for files passed on stdin *OR* when the --crlf option is
    used. Requires libcurl to send the file with chunked content
    encoding. [http://curl.haxx.se/dev/HTTP-PUT-stdin.txt] When the filter
