@@ -11,6 +11,8 @@ aclocal.m4
 acinclude.m4
 Makefile.in
 Makefile.dj
+Makefile.m32
+Makefile.netware
 install-sh
 mkinstalldirs
 configure
