@@ -1374,7 +1374,7 @@ Curl_SSLConnect(struct connectdata *conn,
       break;
 
     while(1) {
-      what = Curl_select(readfd, writefd, timeout_ms);
+      what = Curl_select(readfd, writefd, (int)timeout_ms);
       if(what > 0)
         /* reabable or writable, go loop in the outer loop */
         break;
