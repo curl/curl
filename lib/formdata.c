@@ -923,7 +923,7 @@ static int AddFormData(struct FormData **formp,
     length = strlen((char *)line);
 
   newform->line = (char *)malloc(length+1);
-  memcpy(newform->line, line, length+1);
+  memcpy(newform->line, line, length);
   newform->length = length;
   newform->line[length]=0; /* zero terminate for easier debugging */
   
