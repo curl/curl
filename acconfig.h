@@ -43,6 +43,9 @@
 /* Define this to 'int' if ssize_t is not an available typedefed type */
 #undef ssize_t
 
+/* Define this to 'int' if socklen_t is not an available typedefed type */
+#undef socklen_t
+
 /* Define this as a suitable file to read random data from */
 #undef RANDOM_FILE
 
