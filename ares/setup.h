@@ -19,12 +19,6 @@
 #else
 /* simple work-around for now, for systems without configure support */
 #define ssize_t int
-
-#ifdef __MINGW32__
-#define HAVE_SYS_TIME_H
-#define HAVE_UNISTD_H
-#endif
-
 #endif
 
 /* Recent autoconf versions define these symbols in config.h. We don't want
@@ -58,7 +52,7 @@ typedef int ares_socket_t;
 #define HAVE_UNISTD_H 
 #endif
 
-#if !defined(HAVE_SYS_UIO_H) && !defined(WIN32) 
+#if !defined(HAVE_SYS_UIO_H) && !defined(WIN32) && !defined(MSDOS)
 #define HAVE_SYS_UIO_H
 #endif
 
