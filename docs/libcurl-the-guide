@@ -137,9 +137,22 @@ Handle the Easy libcurl
 
  It returns an easy handle. Using that you proceed to the next step: setting
  up your preferred actions. A handle is just a logic entity for the upcoming
- transfer or series of transfers. One of the most basic properties to set in
- the handle is the URL. You set your preferred URL to transfer with
- CURLOPT_URL in a manner similar to:
+ transfer or series of transfers.
+
+ You set properties and options for this handle using curl_easy_setopt(). They
+ control how the subsequent transfer or transfers will be made. Options remain
+ set in the handle until set again to something different. Alas, multiple
+ requests using the same handle will use the same options.
+
+ Many of the informationals you set in libcurl are "strings", pointers to data
+ terminated with a zero byte. Keep in mind that when you set strings with
+ curl_easy_setopt(), libcurl will not copy the data. It will merely point to
+ the data. You MUST make sure that the data remains available for libcurl to
+ use until finished or until you use the same option again to point to
+ something else.
+
+ One of the most basic properties to set in the handle is the URL. You set
+ your preferred URL to transfer with CURLOPT_URL in a manner similar to:
 
     curl_easy_setopt(easyhandle, CURLOPT_URL, "http://curl.haxx.se/");
 
@@ -358,12 +371,16 @@ HTTP POSTing
 
     curl_easy_perform(easyhandle); /* post away! */
 
- Simple enough, huh? Ok, so what if you want to post binary data that also
- requires you to set the Content-Type: header of the post? Well, binary posts
- prevents libcurl from being able to do strlen() on the data to figure out the
- size, so therefore we must tell libcurl the size of the post data. Setting
- headers in libcurl requests are done in a generic way, by building a list of
- our own headers and then passing that list to libcurl.
+ Simple enough, huh? Since you set the POST options with the
+ CURLOPT_POSTFIELDS, this automaticly switches the handle to use POST in the
+ upcoming request.
+
+ Ok, so what if you want to post binary data that also requires you to set the
+ Content-Type: header of the post? Well, binary posts prevents libcurl from
+ being able to do strlen() on the data to figure out the size, so therefore we
+ must tell libcurl the size of the post data. Setting headers in libcurl
+ requests are done in a generic way, by building a list of our own headers and
+ then passing that list to libcurl.
 
     struct curl_slist *headers=NULL;
     headers = curl_slist_append(headers, "Content-Type: text/xml");
@@ -416,14 +433,14 @@ HTTP POSTing
     /* free the post data again */
     curl_formfree(post);
 
- The multipart formposts are a chain of parts using MIME-style separators and
- headers. That means that each of these separate parts get a few headers set
- that describes its individual content-type, size etc. Now, to enable your
+ Multipart formposts are chains of parts using MIME-style separators and
+ headers. It means that each one of these separate parts get a few headers set
+ that describe the individual content-type, size etc. To enable your
  application to handicraft this formpost even more, libcurl allows you to
- supply your own custom headers to an individual form part. You can of course
- supply headers to as many parts you like, but this little example will show
- how you have set headers to one specific part when you add that to post
- handle:
+ supply your own set of custom headers to such an individual form part. You
+ can of course supply headers to as many parts you like, but this little
+ example will show how you set headers to one specific part when you add that
+ to the post handle:
 
     struct curl_slist *headers=NULL;
     headers = curl_slist_append(headers, "Content-Type: text/xml");
@@ -439,8 +456,21 @@ HTTP POSTing
     curl_formfree(post); /* free post */
     curl_slist_free_all(post); /* free custom header list */
 
+ Since all options on an easyhandle are "sticky", they remain the same until
+ changed even if you do call curl_easy_perform(), you may need to tell curl to
+ go back to a plain GET request if you intend to do such a one as your next
+ request. You force an easyhandle to back to GET by using the CURLOPT_HTTPGET
+ option:
+
+    curl_easy_setopt(easyhandle, CURLOPT_HTTPGET, TRUE);
+
+ Just setting CURLOPT_POSTFIELDS to "" or NULL will *not* stop libcurl from
+ doing a POST. It will just make it POST without any data to send!
+
 
 Showing Progress
+
+ [ built-in progress meter, progress callback ]
 
 
 libcurl with C++
@@ -488,16 +518,107 @@ Proxies
  proxy is using the HTTP protocol. For example, you can't invoke your own
  custom FTP commands or even proper FTP directory listings.
 
- To tell libcurl to use a proxy at a given port number:
+  Proxy Options
 
-    curl_easy_setopt(easyhandle, CURLOPT_PROXY, "proxy-host.com:8080");
+    To tell libcurl to use a proxy at a given port number:
 
- Some proxies require user authentication before allowing a request, and you
- pass that information similar to this:
+       curl_easy_setopt(easyhandle, CURLOPT_PROXY, "proxy-host.com:8080");
 
-    curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "user:password");
+    Some proxies require user authentication before allowing a request, and
+    you pass that information similar to this:
 
- [ environment variables, SSL, tunneling, automatic proxy config (.pac) ]
+       curl_easy_setopt(easyhandle, CURLOPT_PROXYUSERPWD, "user:password");
+
+    If you want to, you can specify the host name only in the CURLOPT_PROXY
+    option, and set the port number separately with CURLOPT_PROXYPORT.
+
+  Environment Variables
+
+    libcurl automaticly checks and uses a set of environment variables to know
+    what proxies to use for certain protocols. The names of the variables are
+    following an ancient de facto standard and are built up as
+    "[protocol]_proxy" (note the lower casing). Which makes the variable
+    'http_proxy' checked for a name of a proxy to use when the input URL is
+    HTTP. Following the same rule, the variable named 'ftp_proxy' is checked
+    for FTP URLs. Again, the proxies are always HTTP proxies, the different
+    names of the variables simply allows different HTTP proxies to be used.
+
+    The proxy environment variable contents should be in the format
+    "[protocol://]machine[:port]". Where the protocol:// part is simply
+    ignored if present (so http://proxy and bluerk://proxy will do the same)
+    and the optional port number specifies on which port the proxy operates on
+    the host. If not specified, the internal default port number will be used
+    and that is most likely *not* the one you would like it to be.
+
+    There are two special environment variables. 'all_proxy' is what sets
+    proxy for any URL in case the protocol specific variable wasn't set, and
+    'no_proxy' defines a list of hosts that should not use a proxy even though
+    a variable may say so. If 'no_proxy' is a plain asterisk ("*") it matches
+    all hosts.
+
+  SSL and Proxies
+
+    SSL is for secure point-to-point connections. This envolves strong
+    encryption and similar things, which effectivly makes it impossible for a
+    proxy to operate as a "man in between" which the proxy's task is as
+    previously discussed. Instead, the only way to have SSL work over a HTTP
+    proxy is to ask the proxy to tunnel trough everything without being able
+    to check the traffic.
+
+    Opening an SSL connection over a HTTP proxy is therefor a matter of asking
+    the proxy for a straight connection to the target host on a specified
+    port. This is made with the HTTP request CONNECT.
+
+    Because of the nature of this operation, where the proxy has no idea what
+    kind of data that is passed in and out through this tunnel, this
+    effectively breaks some of the pros a proxy might offer, such as caching.
+    Many organizations prevent this kind of tunneling to other destination
+    port numbers than 443 (which is the default HTTPS port number).
+
+  Tunneling Through Proxy
+
+    As explained above, tunneling is required for SSL to work and often even
+    restricted to the operation intended for SSL; HTTPS.
+
+    This is however not the only time proxy-tunneling might offer benefits to
+    you or your application.
+
+    As tunneling opens a direct connection from your application to the remote
+    machine, it suddenly also re-introduces the ability to do non-HTTP
+    operations over a HTTP proxy. You can in fact use things such as FTP
+    upload or FTP custom commands this way.
+
+    Again, this is often prevented by the adminstrators of proxies and is
+    rarely allowed.
+
+    Tell libcurl to use proxy tunneling like this:
+
+       curl_easy_setopt(easyhandle, CURLOPT_HTTPPROXYTUNNEL, TRUE);
+
+  Proxy Auto-Config
+
+    Netscape first came up with this. It is basicly a web page (usually using
+    a .pac extension) with a javascript that when executed by the browser with
+    the requested URL as input, returns information to the browser on how to
+    connect to the URL. The returned information might be "DIRECT" (which
+    means no proxy should be used), "PROXY host:port" (to tell the browser
+    where the proxy for this particular URL is) or "SOCKS host:port" (to
+    direct the brower to a SOCKS proxy).
+
+    libcurl has no means to interpret or evaluate javascript and thus it
+    doesn't support this. If you get yourself in a position where you face
+    this nasty invention, the following advice have been mentioned and used in
+    the past:
+
+    - Depending on the javascript complexity, write up a script that
+      translates it to another language and execute that.
+
+    - Read the javascript code and rewrite the same logic in another language.
+
+    - Implement a javascript interpreted, people have successfully used the
+      Mozilla javascript engine in the past.
+
+    - Ask your admins to stop this, for a static proxy setup or similar.
 
 
 Security Considerations
@@ -505,7 +626,7 @@ Security Considerations
  [ ps output, netrc plain text, plain text protocols / base64 ]
 
 
-Certificates and Other SSL Tricks
+SSL, Certificates and Other Tricks
 
 
 Future
