@@ -198,6 +198,9 @@ static curl_version_info_data version_info = {
 #ifdef HAVE_SPNEGO
   | CURL_VERSION_SPNEGO
 #endif
+#ifdef ENABLE_64BIT
+  | CURL_VERSION_LARGEFILE
+#endif
   ,
   NULL, /* ssl_version */
   0,    /* ssl_version_num */
