@@ -26,9 +26,6 @@
 #include <string.h>
 #include <time.h>
 
-/* 20000318 mgs
- * later we use _scrsize to determine the screen width, this emx library
- * function needs stdlib.h to be included */
 #if defined(__EMX__)
 #include <stdlib.h>
 #endif
@@ -36,19 +33,34 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "sendf.h"
-
 #include "progress.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-
-static void time2str(char *r, int t)
+/* Provide a string that is 2 + 1 + 2 + 1 + 2 = 8 letters long (plus the zero
+   byte) */
+static void time2str(char *r, long t)
 {
-  int h = (t/3600);
-  int m = (t-(h*3600))/60;
-  int s = (t-(h*3600)-(m*60));
-  sprintf(r,"%2d:%02d:%02d",h,m,s);
+  int h;
+  if(!t) {
+    strcpy(r, "--:--:--");
+    return;
+  }
+  h = (t/3600);
+  if(h <= 99) {
+    int m = (t-(h*3600))/60;
+    int s = (t-(h*3600)-(m*60));
+    sprintf(r, "%2d:%02d:%02d",h,m,s);
+  }
+  else {
+    /* this equals to more than 99 hours, switch to a more suitable output
+       format to fit within the limits. */
+    if(h/24 <= 99)
+      sprintf(r, " %2dd %02dh", h/24, h-(h/24)*24);
+    else
+      sprintf(r, "%7dd", h/24);
+  }
 }
 
 /* The point of this function would be to return a string of the input data,
@@ -195,44 +207,27 @@ void Curl_pgrsSetUploadSize(struct SessionHandle *data, curl_off_t size)
     data->progress.flags &= ~PGRS_UL_SIZE_KNOWN;
 }
 
-/* EXAMPLE OUTPUT to follow:
-
-  % Total    % Received % Xferd  Average Speed          Time             Curr.
-                                 Dload  Upload Total    Current  Left    Speed
-100 12345  100 12345  100 12345  12345  12345 12:12:12 12:12:12 12:12:12 12345
-
- */
-
 int Curl_pgrsUpdate(struct connectdata *conn)
 {
   struct timeval now;
   int result;
-
   char max5[6][10];
-  double dlpercen=0;
-  double ulpercen=0;
-  double total_percen=0;
-
+  int dlpercen=0;
+  int ulpercen=0;
+  int total_percen=0;
   curl_off_t total_transfer;
   curl_off_t total_expected_transfer;
-  double timespent;
-
+  long timespent;
   struct SessionHandle *data = conn->data;
-
   int nowindex = data->progress.speeder_c% CURR_TIME;
   int checkindex;
-
   int countindex; /* amount of seconds stored in the speeder array */
-
   char time_left[10];
   char time_total[10];
-  char time_current[10];
-      
-  double ulestimate=0;
-  double dlestimate=0;
-  
-  double total_estimate;
-
+  char time_spent[10];
+  long ulestimate=0;
+  long dlestimate=0;
+  long total_estimate;
 
   if(data->progress.flags & PGRS_HIDE)
     ; /* We do enter this function even if we don't wanna see anything, since
@@ -246,26 +241,26 @@ int Curl_pgrsUpdate(struct connectdata *conn)
                 "\n",
                 conn->resume_from);
       fprintf(data->set.err,
-              "  %% Total    %% Received %% Xferd  Average Speed          Time             Curr.\n"
-              "                                 Dload  Upload Total    Current  Left    Speed\n");
+              "  %% Total    %% Received %% Xferd  Average Speed   Time    Time     Time  Current\n"
+              "                                 Dload  Upload   Total   Spent    Left  Speed\n");
     }
     data->progress.flags |= PGRS_HEADERS_OUT; /* headers are shown */
   }
 
   now = Curl_tvnow(); /* what time is it */
 
-  /* The exact time spent so far (from the start) */
-  timespent = (double)Curl_tvdiff (now, data->progress.start)/1000;
+  /* The time spent so far (from the start) */
+  timespent = Curl_tvdiff(now, data->progress.start)/1000;
 
-  data->progress.timespent = timespent;
+  data->progress.timespent = (double)timespent;
 
   /* The average download speed this far */
   data->progress.dlspeed =
-    data->progress.downloaded/(timespent>0.01?timespent:1);
+    data->progress.downloaded/(timespent?timespent:1);
 
   /* The average upload speed this far */
   data->progress.ulspeed =
-    data->progress.uploaded/(timespent>0.01?timespent:1);
+    data->progress.uploaded/(timespent?timespent:1);
 
   if(data->progress.lastshow == Curl_tvlong(now))
     return 0; /* never update this more than once a second if the end isn't 
@@ -338,35 +333,25 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   /* Figure out the estimated time of arrival for the upload */
   if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
      (data->progress.ulspeed > 0)) {
-    ulestimate = (double)data->progress.size_ul / data->progress.ulspeed;
-    ulpercen = ((double)data->progress.uploaded / data->progress.size_ul)*100;
+    ulestimate = data->progress.size_ul / data->progress.ulspeed;
+    ulpercen = (data->progress.uploaded / data->progress.size_ul)*100;
   }
 
   /* ... and the download */
   if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
      (data->progress.dlspeed > 0)) {
-    dlestimate = (double)data->progress.size_dl / data->progress.dlspeed;
-    dlpercen = ((double)data->progress.downloaded / data->progress.size_dl)*100;
+    dlestimate = data->progress.size_dl / data->progress.dlspeed;
+    dlpercen = (data->progress.downloaded / data->progress.size_dl)*100;
   }
     
   /* Now figure out which of them that is slower and use for the for
      total estimate! */
   total_estimate = ulestimate>dlestimate?ulestimate:dlestimate;
 
-
-  /* If we have a total estimate, we can display that and the expected
-     time left */
-  if(total_estimate > 0) {
-    time2str(time_left, (int)(total_estimate - data->progress.timespent)); 
-    time2str(time_total, (int)total_estimate);
-  }
-  else {
-    /* otherwise we blank those times */
-    strcpy(time_left,  "--:--:--");
-    strcpy(time_total, "--:--:--");
-  }
-  /* The time spent so far is always known */
-  time2str(time_current, (int)data->progress.timespent);
+  /* create the three time strings */
+  time2str(time_left, total_estimate > 0?(total_estimate - timespent):0);
+  time2str(time_total, total_estimate);
+  time2str(time_spent, timespent);
 
   /* Get the total amount of data expected to get transfered */
   total_expected_transfer = 
@@ -384,18 +369,17 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   fprintf(data->set.err,
           "\r%3d %s  %3d %s  %3d %s  %s  %s %s %s %s %s",
-          (int)total_percen,                            /* total % */
+          total_percen,  /* 3 letters */                /* total % */
           max5data(total_expected_transfer, max5[2]),   /* total size */
-          (int)dlpercen,                                /* rcvd % */
+          dlpercen,      /* 3 letters */                /* rcvd % */
           max5data(data->progress.downloaded, max5[0]), /* rcvd size */
-          (int)ulpercen,                                /* xfer % */
+          ulpercen,      /* 3 letters */                /* xfer % */
           max5data(data->progress.uploaded, max5[1]),   /* xfer size */
-
-          max5data(data->progress.dlspeed, max5[3]), /* avrg dl speed */
-          max5data(data->progress.ulspeed, max5[4]), /* avrg ul speed */
-          time_total,                           /* total time */
-          time_current,                         /* current time */
-          time_left,                            /* time left */
+          max5data(data->progress.dlspeed, max5[3]),    /* avrg dl speed */
+          max5data(data->progress.ulspeed, max5[4]),    /* avrg ul speed */
+          time_total,    /* 8 letters */                /* total time */
+          time_spent,    /* 8 letters */                /* time spent */
+          time_left,     /* 8 letters */                /* time left */
           max5data(data->progress.current_speed, max5[5]) /* current speed */
           );
 
