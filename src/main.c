@@ -133,6 +133,14 @@ typedef char bool;
 #define CURL_PROGRESS_STATS 0 /* default progress display */
 #define CURL_PROGRESS_BAR   1
 
+/**
+ * @def MIN
+ * standard MIN macro
+ */
+#ifndef MIN
+#define MIN(X,Y)	(((X) < (Y)) ? (X) : (Y))
+#endif
+
 typedef enum {
   HTTPREQ_UNSPEC,
   HTTPREQ_GET,
@@ -2220,12 +2228,23 @@ static int my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
 
     time_t timediff;
     time_t now;
+    time_t sleep_time;
 
     now = time(NULL);
     timediff = now - config->lastrecvtime;
     if( size*nmemb > config->recvpersecond*timediff) {
       /* figure out how many milliseconds to rest */
-      go_sleep ( (size*nmemb)*1000/config->recvpersecond - timediff*1000 );
+      sleep_time = (size*nmemb)*1000/config->recvpersecond - timediff*1000;
+
+      /*
+       * Make sure we don't sleep for so long that we trigger the speed limit.
+       * This won't limit the bandwidth quite the way we've been asked to, but
+       * at least the transfer has a chance.
+       */
+      if (config->low_speed_time > 0)
+        sleep_time = MIN(sleep_time,(config->low_speed_time * 1000) / 2);
+
+      go_sleep (sleep_time);
       now = time(NULL);
     }
     config->lastrecvtime = now;
