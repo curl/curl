@@ -622,7 +622,7 @@ Transfer(struct connectdata *c_conn)
               /* If it returned OK, we just keep going */
             }
 
-            if(conn->maxdownload &&
+            if((-1 != conn->maxdownload) &&
                (bytecount + nread >= conn->maxdownload)) {
               nread = conn->maxdownload - bytecount;
               if((signed int)nread < 0 ) /* this should be unusual */
@@ -634,7 +634,7 @@ Transfer(struct connectdata *c_conn)
 
             Curl_pgrsSetDownloadCounter(data, (double)bytecount);
             
-            if(! conn->bits.chunk) {
+            if(!conn->bits.chunk && nread) {
               /* If this is chunky transfer, it was already written */
               urg = Curl_client_write(data, CLIENTWRITE_BODY, str, nread);
               if(urg)

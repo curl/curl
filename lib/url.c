@@ -1364,6 +1364,9 @@ static CURLcode Connect(struct UrlData *data,
   conn->bits.user_passwd = data->userpwd?1:0;
   conn->bits.proxy_user_passwd = data->proxyuserpwd?1:0;
 
+  /* maxdownload must be -1 on init, as 0 is a valid value! */
+  conn->maxdownload = -1;  /* might have been used previously! */
+
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
 
@@ -2029,8 +2032,8 @@ static CURLcode Connect(struct UrlData *data,
     conn->ppath = path;      /* set this too */
 
     /* re-use init */
-    conn->maxdownload = 0;   /* might have been used previously! */
     conn->bits.reuse = TRUE; /* yes, we're re-using here */
+    conn->maxdownload = -1;  /* might have been used previously! */
 
     free(old_conn);          /* we don't need this anymore */
 
