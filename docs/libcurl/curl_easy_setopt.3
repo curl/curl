@@ -310,7 +310,7 @@ amortizes the overhead of the send. However, in some cases (most
 notably telnet or rlogin) small segments may need to be sent
 without delay. This is less efficient than sending larger amounts of
 data at a time, and can contribute to congestion on the network if
-overdone. 
+overdone.
 .SH NAMES and PASSWORDS OPTIONS (Authentication)
 .IP CURLOPT_NETRC
 This parameter controls the preference of libcurl between using user names and
@@ -340,7 +340,7 @@ This value tells the library that use of the file is required,
 to ignore the information in the URL,
 and to search the file with the host only.
 .RE
-Only machine name, user name and password are taken into account 
+Only machine name, user name and password are taken into account
 (init macros and similar things aren't supported).
 
 \fBNote:\fP libcurl does not verify that the file has the correct properties
@@ -522,7 +522,7 @@ The first line in a request (usually containing a GET or POST) is not a header
 and cannot be replaced using this option. Only the lines following the
 request-line are headers.
 
-\fBNOTE:\fPThe most commonly replaced headers have "shortcuts" in the options
+\fBNOTE:\fP The most commonly replaced headers have "shortcuts" in the options
 \fICURLOPT_COOKIE\fP, \fICURLOPT_USERAGENT\fP and \fICURLOPT_REFERER\fP.
 .IP CURLOPT_HTTP200ALIASES
 Pass a pointer to a linked list of aliases to be treated as valid HTTP 200
@@ -535,7 +535,7 @@ The linked list should be a fully valid list of struct curl_slist structs, and
 be properly filled in.  Use \fIcurl_slist_append(3)\fP to create the list and
 \fIcurl_slist_free_all(3)\fP to clean up an entire list.
 
-\fBNOTE:\fPThe alias itself is not parsed for any version strings.  So if your
+\fBNOTE:\fP The alias itself is not parsed for any version strings.  So if your
 alias is "MYHTTP/9.9", Libcurl will not treat the server as responding with
 HTTP version 9.9.  Instead Libcurl will use the value set by option
 \fICURLOPT_HTTP_VERSION\fP.
@@ -706,11 +706,11 @@ when doing an ftp directory listing. This is useful for doing DELETE or other
 more or less obscure HTTP requests. Don't do this at will, make sure your
 server supports the command first.
 
-NOTE: many people have wrongly used this option to replace the entire request
-with their own, including multiple headers and POST contents. While that might
-work in many cases, it will cause libcurl to send invalid requests and it
-could possibly confuse the remote server badly. Use \fICURLOPT_POST\fP and
-\fICURLOPT_POSTFIELDS\fP to set POST data. Use \fICURLOPT_HTTPHEADER\fP to
+\fBNOTE:\fP Many people have wrongly used this option to replace the entire
+request with their own, including multiple headers and POST contents. While
+that might work in many cases, it will cause libcurl to send invalid requests
+and it could possibly confuse the remote server badly. Use \fICURLOPT_POST\fP
+and \fICURLOPT_POSTFIELDS\fP to set POST data. Use \fICURLOPT_HTTPHEADER\fP to
 replace or extend the set of headers sent by libcurl. Use
 \fICURLOPT_HTTP_VERSION\fP to change HTTP version.
 .IP CURLOPT_FILETIME
@@ -740,29 +740,29 @@ Pass a long as parameter. This allows you to specify the maximum size (in
 bytes) of a file to download. If the file requested is larger than this value,
 the transfer will not start and CURLE_FILESIZE_EXCEEDED will be returned.
 
-NOTE: The file size is not always known prior to download, and for such files
-this option has no effect even if the file transfer ends up being larger than
-this given limit. This concerns both FTP and HTTP transfers.
+\fBNOTE:\fP The file size is not always known prior to download, and for such
+files this option has no effect even if the file transfer ends up being larger
+than this given limit. This concerns both FTP and HTTP transfers.
 .IP CURLOPT_MAXFILESIZE_LARGE
 Pass a curl_off_t as parameter. This allows you to specify the maximum size
 (in bytes) of a file to download. If the file requested is larger than this
 value, the transfer will not start and \fICURLE_FILESIZE_EXCEEDED\fP will be
 returned. (Added in 7.11.0)
 
-NOTE: The file size is not always known prior to download, and for such files
-this option has no effect even if the file transfer ends up being larger than
-this given limit. This concerns both FTP and HTTP transfers.
+\fBNOTE:\fP The file size is not always known prior to download, and for such
+files this option has no effect even if the file transfer ends up being larger
+than this given limit. This concerns both FTP and HTTP transfers.
 .IP CURLOPT_TIMECONDITION
 Pass a long as parameter. This defines how the \fICURLOPT_TIMEVALUE\fP time
 value is treated. You can set this parameter to \fICURL_TIMECOND_IFMODSINCE\fP
 or \fICURL_TIMECOND_IFUNMODSINCE\fP. This feature applies to HTTP and FTP.
 
-NOTE: The last modification time of a file is not always known and in such
+\fBNOTE:\fP The last modification time of a file is not always known and in such
 instances this feature will have no effect even if the given time condition
 would have not been met.
 .IP CURLOPT_TIMEVALUE
 Pass a long as parameter. This should be the time in seconds since 1 jan 1970,
-and the time will be used in a condition as specified with 
+and the time will be used in a condition as specified with
 \fICURLOPT_TIMECONDITION\fP.
 .SH CONNECTION OPTIONS
 .IP CURLOPT_TIMEOUT
@@ -866,9 +866,10 @@ changed with \fICURLOPT_SSLKEYTYPE\fP.
 Pass a pointer to a zero terminated string as parameter. The string should be
 the format of your private key. Supported formats are "PEM", "DER" and "ENG".
 
-\fBNOTE:\fPThe format "ENG" enables you to load the private key from a crypto
-engine. in this case \fICURLOPT_SSLKEY\fP is used as an identifier passed to
+\fBNOTE:\fP The format "ENG" enables you to load the private key from a crypto
+engine. In this case \fICURLOPT_SSLKEY\fP is used as an identifier passed to
 the engine. You have to set the crypto engine with \fICURLOPT_SSLENGINE\fP.
+\&"DER" format key file currently does not work because of a bug in OpenSSL.
 .IP CURLOPT_SSLKEYPASSWD
 Pass a pointer to a zero terminated string as parameter. It will be used as
 the password required to use the \fICURLOPT_SSLKEY\fP private key.
@@ -877,13 +878,13 @@ Pass a pointer to a zero terminated string as parameter. It will be used as
 the identifier for the crypto engine you want to use for your private
 key.
 
-\fBNOTE:\fPIf the crypto device cannot be loaded,
+\fBNOTE:\fP If the crypto device cannot be loaded,
 \fICURLE_SSL_ENGINE_NOTFOUND\fP is returned.
 .IP CURLOPT_SSLENGINE_DEFAULT
 Sets the actual crypto engine as the default for (asymmetric) crypto
 operations.
 
-\fBNOTE:\fPIf the crypto device cannot be set,
+\fBNOTE:\fP If the crypto device cannot be set,
 \fICURLE_SSL_ENGINE_SETFAILED\fP is returned.
 .IP CURLOPT_SSLVERSION
 Pass a long as parameter. Set what version of SSL to attempt to use, 2 or
