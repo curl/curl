@@ -5,3 +5,12 @@ Issues not sorted in any particular order.
 
 To get fixed in 7.12.0 (planned release: June 2004)
 ======================
+* fix CONNECT to proxy with auth
+
+* curllib.dsp
+
+To get fixed in 7.12.1 (planned release: August 2004)
+======================
+
+* FTP 3rd party transfers
+
