@@ -49,6 +49,8 @@ src/setup.h
 src/urlglob.c
 src/urlglob.h
 src/version.h
+src/writeout.c
+src/writeout.h
 src/*.in
 src/*.am
 src/mkhelp.pl
