@@ -11,8 +11,7 @@ CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option, parameter);
 .SH DESCRIPTION
 Set the \fIoption\fP to \fIparameter\fP for the given \fIshare\fP.
 .SH OPTIONS
-.TP 0.4i
-.B CURLSHOPT_LOCKFUNC
+.IP CURLSHOPT_LOCKFUNC
 The \fIparameter\fP must be a pointer to a function matching the following
 prototype:
 
@@ -24,23 +23,35 @@ only one lock is given at any time for each kind of data.
 
 \fIaccess\fP defines what access type libcurl wants, shared or single.
 
-\fIuserptr\fP is the pointer you set with \fICURLSHOPT_USERDAT\fP.
+\fIuserptr\fP is the pointer you set with \fICURLSHOPT_USERDATA\fP.
+.IP CURLSHOPT_UNLOCKFUNC
+The \fIparameter\fP must be a pointer to a function matching the following
+prototype:
 
-.TP
-.B CURLSHOPT_UNLOCKFUNC
-hej
-.TP
-.B CURLSHOPT_SHARE
-hej
-.TP
-.B CURLSHOPT_UNSHARE
-hej
-.TP
-.B CURLSHOPT_USERDATA
-hej
-.PP
+void unlock_function(CURL *handle, curl_lock_data data, void *userptr);
+
+\fIdata\fP defines what data libcurl wants to unlock, and you must make sure
+that only one lick is given at any time for each kind of data.
+
+\fIuserptr\fP is the pointer you set with \fICURLSHOPT_USERDATA\fP.
+.IP CURLSHOPT_SHARE
+The \fIparameter\fP specifies a type of data that should be shared. This may
+be set to one of the values described below.
+.IP CURL_LOCK_DATA_COOKIE
+COOKIE data will be shared across the easy handles using this shared object.
+.IP CURL_LOCK_DATA_DNS
+Cached DNS hosts will be shared across the easy handles using this shared
+object.
+.IP CURLSHOPT_UNSHARE
+This option does the opposite of \fICURLSHOPT_SHARE\fP. It specifies that
+the specified \fIparameter\fP will no longer be shared. Valid values are 
+the same as those for \fICURLSHOPT_SHARE\fP.
+.IP CURLSHOPT_USERDATA
+The \fIparameter\fP allows you to specify a pointer to data that will passed
+to the lock_function and unlock_function each time it is called.
 .SH RETURN VALUE
-If this function returns non-zero, something was wrong!
-
+CURLSHE_OK (zero) means that the option was set properly, non-zero means an
+error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP
+man page for the full list with descriptions.
 .SH "SEE ALSO"
 .BR curl_share_cleanup "(3), " curl_share_init "(3)"

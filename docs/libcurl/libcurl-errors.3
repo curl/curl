@@ -15,7 +15,6 @@ human readable error string that may offer more details about the error cause
 than just the error code does.
 
 CURLcode is one of the following:
-.RS 0
 .IP "CURLE_OK (0)"
 All fine. Proceed as usual.
 .IP "CURLE_UNSUPPORTED_PROTOCOL (1)"
@@ -183,8 +182,22 @@ Unrecognized transfer encoding
 Invalid LDAP URL
 .IP "CURLE_FILESIZE_EXCEEDED (63)"
 Maximum file size exceeded
-.RE
-
 .SH "CURLMcode"
 This is the generic return code used by functions in the libcurl multi
 interface.
+
+This is left to be documented.
+.SH "CURLSHcode"
+The "share" interface will return a CURLSHcode to indicate when an 
+error has occurred. 
+
+CURLSHcode is one of the following:
+.IP "CURLSHE_OK (0)"
+All fine. Proceed as usual.
+.IP "CURLSHE_BAD_OPTION (1)"
+An invalid option was passed to the function.
+.IP "CURLSHE_IN_USE (2)"
+The share object is currently in use.
+.IP "CURLSHE_INVALID (3)"
+An invalid share object was passed to the function.
+

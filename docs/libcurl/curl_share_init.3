@@ -14,8 +14,8 @@ share-functions, sometimes refered to as a share handle on some places in the
 documentation. This init call MUST have a corresponding call to
 \fIcurl_share_cleanup\fP when all operations using the share are complete.
 .SH RETURN VALUE
-If this function returns NULL, something went wrong and you got no share
-object to use.
+If this function returns NULL, something went wrong (out of memory, etc.)
+and therefore the share object was not created.
 .SH "SEE ALSO"
 .BR curl_share_cleanup "(3), " curl_share_setopt "(3)"
 
