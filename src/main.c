@@ -392,14 +392,14 @@ struct Configurable {
   bool resume_from_current;
   bool disable_epsv;
   bool disable_eprt;
-  off_t resume_from;
+  curl_off_t resume_from;
   char *postfields;
   long postfieldsize;
   char *referer;
   long timeout;
   long connecttimeout;
   long maxredirs;
-  off_t max_filesize;
+  curl_off_t max_filesize;
   char *headerfile;
   char *ftpport;
   char *iface;
@@ -996,15 +996,15 @@ static int str2num(long *val, char *str)
  * @param str  the buffer containing the offset
  * @return zero if successful, non-zero if failure.
  */
-static int str2offset(off_t *val, char *str)
+static int str2offset(curl_off_t *val, char *str)
 {
-#if SIZEOF_OFF_T > 4
+#if SIZEOF_CURL_OFF_T > 4
   /* Ugly, but without going through a bunch of rigmarole, we don't have the
    * definitions for LLONG_{MIN,MAX} or LONG_LONG_{MIN,MAX}.
    */
 #ifndef LLONG_MAX
-#define LLONG_MAX (off_t)0x7FFFFFFFFFFFFFFFLL
-#define LLONG_MIN (off_t)0x8000000000000000LL
+#define LLONG_MAX (curl_off_t)0x7FFFFFFFFFFFFFFFLL
+#define LLONG_MIN (curl_off_t)0x8000000000000000LL
 #endif
 
 #ifdef HAVE_STRTOLL
@@ -2281,7 +2281,7 @@ struct ProgressData {
   double prev;
   int width;
   FILE *out; /* where to write everything to */
-  off_t initial_size;
+  curl_off_t initial_size;
 };
 
 int myprogress (void *clientp,
@@ -2583,7 +2583,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   bool infdfopen;
   FILE *headerfilep = NULL;
   char *urlbuffer=NULL;
-  off_t uploadfilesize; /* -1 means unknown */
+  curl_off_t uploadfilesize; /* -1 means unknown */
   bool stillflags=TRUE;
 
   bool allocuseragent=FALSE;

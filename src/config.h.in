@@ -80,8 +80,8 @@
 /* Define to 1 if you have the `strtoll' function. */
 #undef HAVE_STRTOLL
 
-/* The size of a `off_t', as computed by sizeof. */
-#undef SIZEOF_OFF_T
+/* The size of a `curl_off_t', as computed by sizeof. */
+#undef SIZEOF_CURL_OFF_T
 
 /* If zlib is available */
 #undef HAVE_LIBZ
