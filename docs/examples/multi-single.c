@@ -70,6 +70,8 @@ int main(int argc, char **argv)
     switch(rc) {
     case -1:
       /* select error */
+      still_running = 0;
+      printf("select() returns error, this is badness\n");
       break;
     case 0:
     default:
