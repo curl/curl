@@ -573,7 +573,7 @@ static int Kill_Single_Session(struct curl_ssl_session *session)
 
     Curl_free_ssl_config(&session->ssl_config);
 
-    free(session->name);
+    Curl_safefree(session->name);
     session->name = NULL; /* no name */
 
     return 0; /* ok */
@@ -619,6 +619,11 @@ static int Store_SSL_Session(struct connectdata *conn,
   struct SessionHandle *data=conn->data; /* the mother of all structs */
   struct curl_ssl_session *store = &data->state.session[0];
   int oldest_age=data->state.session[0].age; /* zero if unused */
+  char *clone_host;
+
+  clone_host = strdup(conn->host.name);
+  if(!clone_host)
+    return -1; /* bail out */
 
   /* ask OpenSSL, say please */
 
@@ -662,7 +667,7 @@ static int Store_SSL_Session(struct connectdata *conn,
   /* now init the session struct wisely */
   store->sessionid = ssl_sessionid;
   store->age = data->state.sessionage;    /* set current age */
-  store->name = strdup(conn->host.name);   /* clone host name */
+  store->name = clone_host;               /* clone host name */
   store->remote_port = conn->remote_port; /* port number */
 
   Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config);
