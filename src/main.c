@@ -52,7 +52,7 @@
 #define CURLseparator	"--_curl_--"
 
 #if defined(WIN32)&&!defined(__CYGWIN32__)
-#include <winsock.h>
+#include <winsock2.h>
 #endif
 
 #ifdef TIME_WITH_SYS_TIME
@@ -1017,8 +1017,13 @@ static int str2offset(curl_off_t *val, char *str)
    * definitions for LLONG_{MIN,MAX} or LONG_LONG_{MIN,MAX}.
    */
 #ifndef LLONG_MAX
+#ifdef _MSC_VER
+#define LLONG_MAX (curl_off_t)0x7FFFFFFFFFFFFFFFi64
+#define LLONG_MIN (curl_off_t)0x8000000000000000i64
+#else
 #define LLONG_MAX (curl_off_t)0x7FFFFFFFFFFFFFFFLL
 #define LLONG_MIN (curl_off_t)0x8000000000000000LL
+#endif
 #endif
 
   /* this is a duplicate of the function that is also used in libcurl */

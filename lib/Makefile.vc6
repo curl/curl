@@ -43,10 +43,10 @@ OPENSSL_PATH   = ../../openssl-0.9.7a
 CCNODBG   = cl.exe /MD /O2 /D "NDEBUG"
 CCDEBUG   = cl.exe /MDd /Od /Gm /Zi  /D "_DEBUG" /GZ
 CFLAGSSSL = /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
-CFLAGS = /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS"
+CFLAGS = /I "." /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS"
 
 LNKDLL    = link.exe /DLL  /def:libcurl.def
-LNKLIB    = link.exe -lib
+LNKLIB    = link.exe /lib
 LFLAGS    = /nologo
 LINKLIBS  = ws2_32.lib winmm.lib
 SSLLIBS   = libeay32.lib ssleay32.lib
@@ -170,7 +170,7 @@ RESOURCE = $(DIROBJ)\libcurl.res
 # Usage
 #
 !IF "$(CFGSET)" == "FALSE"
-!MESSAGE Usage: nmake -f makefile.vc6 CFG=<config> <target>
+!MESSAGE Usage: nmake /f makefile.vc6 CFG=<config> <target>
 !MESSAGE where <config> is one of:
 !MESSAGE   release          - release static library
 !MESSAGE   release-dll      - release dll

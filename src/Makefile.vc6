@@ -28,7 +28,7 @@ LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
 ZLIB_PATH  = ../../zlib-1.1.4
 !ENDIF
 
-CFLAGS = /I "../include" /I "$(ZLIB_PATH)" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+CFLAGS = /I "../lib" /I "../include" /I "$(ZLIB_PATH)" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 LFLAGS = /nologo /libpath:"$(ZLIB_PATH)" /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
 LINKLIBS = ws2_32.lib libcurl.lib winmm.lib zlib.lib
 LINKLIBS_DEBUG = ws2_32.lib libcurld.lib winmm.lib zlib.lib
@@ -49,14 +49,6 @@ DEBUG_OBJS= \
 	homedird.obj \
 	maind.obj
 	
-LINK_OBJS= \
-	hugehelp.obj \
-	writeout.obj \
-	urlglob.obj \
-	getpass.obj \
-	homedir.obj \
-	main.obj
- 
 ######################
 # release-ssl
  
@@ -67,44 +59,45 @@ OPENSSL_PATH   = ../../openssl-0.9.7a
 LFLAGSSSL = /LIBPATH:"$(OPENSSL_PATH)/out32"
 SSLLIBS   = libeay32.lib ssleay32.lib gdi32.lib 
 LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
+LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS)
 LFLAGS = $(LFLAGS) $(LFLAGSSSL)
 !ENDIF
  
 all : release
 
 release: $(RELEASE_OBJS)
-	$(LINKR) $(LFLAGS) $(LINKLIBS) $(LINK_OBJS)
+	$(LINKR) $(LFLAGS) $(LINKLIBS) $(RELEASE_OBJS)
 
 debug: $(DEBUG_OBJS)
-	$(LINKD) $(LFLAGS) $(LINKLIBS_DEBUG) $(LINK_OBJS)
+	$(LINKD) $(LFLAGS) $(LINKLIBS_DEBUG) $(DEBUG_OBJS)
 
 ## Release
 hugehelpr.obj: hugehelp.c
-	$(CCR) $(CFLAGS) /Zm200 hugehelp.c
+	$(CCR) $(CFLAGS) /Zm200 /Fo"$@" hugehelp.c
 writeoutr.obj: writeout.c
-	$(CCR) $(CFLAGS) writeout.c
+	$(CCR) $(CFLAGS) /Fo"$@" writeout.c
 urlglobr.obj: urlglob.c
-	$(CCR) $(CFLAGS) urlglob.c
+	$(CCR) $(CFLAGS) /Fo"$@" urlglob.c
 getpassr.obj: getpass.c
-	$(CCR) $(CFLAGS) getpass.c
+	$(CCR) $(CFLAGS) /Fo"$@" getpass.c
 homedirr.obj: homedir.c
-	$(CCR) $(CFLAGS) homedir.c
+	$(CCR) $(CFLAGS) /Fo"$@" homedir.c
 mainr.obj: main.c
-	$(CCR) $(CFLAGS) main.c
+	$(CCR) $(CFLAGS) /Fo"$@" main.c
 
 ## Debug
 hugehelpd.obj: hugehelp.c
-	$(CCD) $(CFLAGS) /Zm200 hugehelp.c
+	$(CCD) $(CFLAGS) /Zm200 /Fo"$@" hugehelp.c
 writeoutd.obj: writeout.c
-	$(CCD) $(CFLAGS) writeout.c
+	$(CCD) $(CFLAGS) /Fo"$@" writeout.c
 urlglobd.obj: urlglob.c
-	$(CCD) $(CFLAGS) urlglob.c
+	$(CCD) $(CFLAGS) /Fo"$@" urlglob.c
 getpassd.obj: getpass.c
-	$(CCD) $(CFLAGS) getpass.c
+	$(CCD) $(CFLAGS) /Fo"$@" getpass.c
 homedird.obj: homedir.c
-	$(CCD) $(CFLAGS) homedir.c
+	$(CCD) $(CFLAGS) /Fo"$@" homedir.c
 maind.obj: main.c
-	$(CCD) $(CFLAGS) main.c
+	$(CCD) $(CFLAGS) /Fo"$@" main.c
 
 clean:
 	-@erase homedir.obj

@@ -52,7 +52,7 @@
 #endif
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
-#include <winsock.h>
+#include <winsock2.h>
 #else
 
 #ifdef _AIX

@@ -43,27 +43,27 @@ mingw32-ssl:
 
 vc:
 	cd lib
-	nmake -f Makefile.vc6 cfg=release
+	nmake /f Makefile.vc6 cfg=release
 	cd ..\src
-	nmake -f Makefile.vc6
+	nmake /f Makefile.vc6
 
 vc-ssl:
 	cd lib
-	nmake -f Makefile.vc6 cfg=release-ssl
+	nmake /f Makefile.vc6 cfg=release-ssl
 	cd ..\src
-	nmake -f Makefile.vc6 cfg=release-ssl
+	nmake /f Makefile.vc6 cfg=release-ssl
 
 vc-ssl-dll:
 	cd lib
-	nmake -f Makefile.vc6 cfg=release-ssl-dll
+	nmake /f Makefile.vc6 cfg=release-ssl-dll
 	cd ..\src
-	nmake -f Makefile.vc6
+	nmake /f Makefile.vc6
 
 vc-libcurl-ssl-dll:
 	cd lib
-	nmake -f Makefile.vc6 cfg=release-libcurl-ssl-dll
+	nmake /f Makefile.vc6 cfg=release-libcurl-ssl-dll
 	cd ..\src
-	nmake -f Makefile.vc6
+	nmake /f Makefile.vc6
 
 djgpp:
 	make -C lib -f Makefile.dj

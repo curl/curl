@@ -25,7 +25,8 @@ Compile and build instructions follow below.
 
   perl/         is a subdirectory with various perl scripts
 
-To build after having extracted everything from CVS, do this:
+To build in environments that support configure, after having extracted
+everything from CVS, do this:
 
 ./buildconf
 ./configure
@@ -35,10 +36,15 @@ make
 
   ./configure --disable-shared --enable-debug --enable-maintainer-mode
 
+In environments that don't support configure (i.e. Microsoft), do this:
+
+buildconf.bat
+
 
 REQUIREMENTS
 
- You need the following software installed:
+ For buildconf (not buildconf.bat) to work, you need the following software
+installed:
 
  o autoconf 2.57  (or later)
  o automake 1.7   (or later)

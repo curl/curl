@@ -32,6 +32,10 @@
 #endif
 
 /* The size of a `curl_off_t', as computed by sizeof. */
+#ifdef SIZEOF_CURL_OFF_T
+#undef SIZEOF_CURL_OFF_T
+#endif
+
 #define SIZEOF_CURL_OFF_T 8
 
 /* Define if you have the ANSI C header files.  */
