@@ -770,12 +770,17 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 static void hostcache_fixoffset(struct hostent *h, int offset)
 {
   int i=0;
+
   h->h_name=(char *)((long)h->h_name+offset);
+  if(h->h_aliases) {
+    /* only relocate aliases if there are any! */
   h->h_aliases=(char **)((long)h->h_aliases+offset);
   while(h->h_aliases[i]) {
     h->h_aliases[i]=(char *)((long)h->h_aliases[i]+offset);
     i++;
   }
+  }
+
   h->h_addr_list=(char **)((long)h->h_addr_list+offset);
   i=0;
   while(h->h_addr_list[i]) {
@@ -893,7 +898,7 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
       buf=(int *)h;
     }
     else
-#endif
+#endif /* HAVE_GETHOSTBYNAME_R_5 */
 #ifdef HAVE_GETHOSTBYNAME_R_6
     /* Linux */
     do {
@@ -941,7 +946,7 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
       buf=(int *)h;
     }
     else
-#endif
+#endif/* HAVE_GETHOSTBYNAME_R_6 */
 #ifdef HAVE_GETHOSTBYNAME_R_3
     /* AIX, Digital Unix, HPUX 10, more? */
 
@@ -976,13 +981,13 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
     h = (struct hostent*)buf;
     h_errnop= errno; /* we don't deal with this, but set it anyway */
     if(ret)
-#endif
+#endif /* HAVE_GETHOSTBYNAME_R_3 */
       {
       infof(data, "gethostbyname_r(2) failed for %s\n", hostname);
       h = NULL; /* set return code to NULL */
       free(buf);
     }
-#else
+#else /* HAVE_GETHOSTBYNAME_R */
   else {
     if ((h = gethostbyname(hostname)) == NULL ) {
       infof(data, "gethostbyname(2) failed for %s\n", hostname);
@@ -995,8 +1000,9 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
          want/expect that */
       h = pack_hostent(&buf, h);
     }
-#endif
+#endif /*HAVE_GETHOSTBYNAME_R */
   }
+
   return (h);
 }
 
