@@ -637,7 +637,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   struct curl_httppost *post = NULL;
   CURLformoption option;
   struct curl_forms *forms = NULL;
-  char *array_value; /* value read from an array */
+  char *array_value=NULL; /* value read from an array */
 
   /* This is a state variable, that if TRUE means that we're parsing an
      array that we got passed to us. If FALSE we're parsing the input
