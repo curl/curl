@@ -10,6 +10,8 @@ TODO
  send us patches that improve things! Also check the http://curl.haxx.se/dev
  web section for various technical development notes.
 
+ All bugs documented in the KNOWN_BUGS document are subject for fixing!
+
  LIBCURL
 
  * Introduce an interface to libcurl that allows applications to easier get to
@@ -18,32 +20,19 @@ TODO
    existing cookies? We probably need both. Enable applications to modify
    existing cookies as well. http://curl.haxx.se/dev/COOKIES
 
- * Make content encoding/decoding internally be made using a filter system.
-
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
    [http://curl.haxx.se/dev/no_copy_callbacks.txt]
 
- * Add asynchronous name resolving (http://libdenise.sf.net/). This should be
-   made to work on most of the supported platforms, or otherwise it isn't
-   really interesting.
-
- * Data sharing. Tell which easy handles within a multi handle that should
-   share cookies, connection cache, dns cache, ssl session cache.  Full
-   suggestion found here: http://curl.haxx.se/dev/sharing.txt
-
- * Mutexes. By adding mutex callback support, the 'data sharing' mentioned
-   above can be made between several easy handles running in different threads
-   too. The actual mutex implementations will be left for the application to
-   implement, libcurl will merely call 'getmutex' and 'leavemutex' callbacks.
-   Part of the sharing suggestion at: http://curl.haxx.se/dev/sharing.txt
+ * More data sharing. curl_share_* functions already exist and work, and they
+   can be extended to share more.
 
  * Set the SO_KEEPALIVE socket option to make libcurl notice and disconnect
    very long time idle connections.
 
  * Go through the code and verify that libcurl deals with big files >2GB and
-   >4GB all over. Bug reports (and source reviews) indicate that it doesn't
-   currently work properly.
+   >4GB all over. Bug reports (and source reviews) show that it doesn't
+   currently work.
 
  * CURLOPT_MAXFILESIZE. Prevent downloads that are larger than the specified
    size. CURLE_FILESIZE_EXCEEDED would then be returned. Gautam Mani
@@ -51,6 +40,8 @@ TODO
    immediately.
 
  LIBCURL - multi interface
+
+ * Add curl_multi_timeout() to make libcurl's ares-functionality better.
 
  * Make sure we don't ever loop because of non-blocking sockets return
    EWOULDBLOCK or similar. This FTP command sending, the SSL connection etc.
