@@ -40,4 +40,7 @@ EPSV
 TYPE I
 STOR 148
 </protocol>
+<file name="log/upload148">
+send away this contents
+</file>
 </verify>
