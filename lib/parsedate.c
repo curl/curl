@@ -369,10 +369,17 @@ static time_t Curl_parsedate(const char *date)
   tm.tm_yday = 0;
   tm.tm_isdst = 0;
 
+  /* mktime() returns a time_t. time_t is often 32 bits, even on many
+     architectures that feature 64 bit 'long'.
+
+     Some systems have 64 bit time_t and deal with years beyond 2038. However,
+     even some of the systems with 64 bit time_t returns -1 for dates beyond
+     03:14:07 UTC, January 19, 2038. (Such as AIX 5100-06)
+  */
   t = mktime(&tm);
 
   /* time zone adjust */
-  {
+  if(-1 != t) {
     struct tm *gmt;
     long delta;
     time_t t2;

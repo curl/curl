@@ -85,7 +85,12 @@ This function returns -1 when it fails to parse the date string. Otherwise it
 returns the number of seconds as described.
 
 If the year is larger than 2037 on systems with 32 bit time_t, this function
-will return 0x7fffffff (since that is the largest possible 31 bit number).
+will return 0x7fffffff (since that is the largest possible signed 32 bit
+number).
+
+Having a 64 bit time_t is not a guarantee that dates beyond 03:14:07 UTC,
+January 19, 2038 will work fine. On systems with a 64 bit time_t but with a
+crippled mktime(), \fIcurl_getdate\fP will return -1 in this case.
 .SH REWRITE
 The former version of this function was built with yacc and was not only very
 large, it was also never quite understood and it wasn't possible to build with
