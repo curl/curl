@@ -213,7 +213,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
   fd_set *readfdp = k->readfdp;
   fd_set *writefdp = k->writefdp;
-  long contentlength;
+  curl_off_t contentlength;
   
   if((k->keepon & KEEP_READ) && !readfdp) {
     /* reading is requested, but no socket descriptor pointer was set */
