@@ -111,8 +111,8 @@
  */
 static bool
 compareheader(char *headerline, /* line to check */
-              char *header,     /* header keyword _with_ colon */
-              char *content)    /* content string to find */
+              const char *header,     /* header keyword _with_ colon */
+              const char *content)    /* content string to find */
 {
   /* RFC2616, section 4.2 says: "Each header field consists of a name followed
    * by a colon (":") and the field value. Field names are case-insensitive.
@@ -172,7 +172,7 @@ compareheader(char *headerline, /* line to check */
  * <butlerm@xmission.com>.
  */
 
-CURLcode static
+static CURLcode
 Transfer(struct connectdata *c_conn)
 {
   ssize_t nread;                /* number of bytes read */
@@ -800,7 +800,7 @@ Transfer(struct connectdata *c_conn)
           urg = Curl_write(conn, conn->writesockfd, buf, nread,
                            &bytes_written);
 
-          if(nread != bytes_written) {
+          if(nread != (int)bytes_written) {
             failf(data, "Failed uploading data");
             return CURLE_WRITE_ERROR;
           }
