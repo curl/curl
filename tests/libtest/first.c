@@ -1,6 +1,6 @@
 #include "test.h"
 
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 /* provide a proto for this debug function */
 extern void curl_memdebug(const char *);
 #endif
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 
   fprintf(stderr, "URL: %s\n", URL);
 
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
   curl_memdebug("memdump");
 #endif
   return test(URL);
