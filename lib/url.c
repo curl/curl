@@ -1996,7 +1996,10 @@ static CURLcode Connect(struct UrlData *data,
     failf(data, "You haven't enabled IPv6 support");
     return CURLE_URL_MALFORMAT;
 #else
+    conn->name++; /* pass the starting bracket */
+
     tmp = strchr(conn->name, ']');
+    *tmp = 0; /* zero terminate */
 
     tmp++; /* pass the ending bracket */
     if(':' != *tmp)
