@@ -735,15 +735,14 @@ TELNET
         curl telnet://remote.server.com
 
   And enter the data to pass to the server on stdin. The result will be sent
-  stdout or to the file you specify with -o.
+  to stdout or to the file you specify with -o.
 
   You might want the -N/--no-buffer option to switch off the buffered output
-  for slow connections or if the output from the remote site is slow and/or
-  without newlines.
+  for slow connections or similar.
 
   NOTE: the telnet protocol does not specify any way to login with a specified
-  user and password and thus curl can't do that automatically. To do that, you
-  need to track when the login prompt is received and send the username and
+  user and password so curl can't do that automatically. To do that, you need
+  to track when the login prompt is received and send the username and
   password accordingly.
 
 MAILING LIST

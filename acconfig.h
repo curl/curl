@@ -39,3 +39,7 @@
 
 /* Define if you want to enable IPv6 support */
 #undef ENABLE_IPV6
+
+/* Define this to 'int' if ssize_t is not an available typedefed type */
+#undef ssize_t
+

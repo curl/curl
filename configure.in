@@ -659,6 +659,9 @@ AC_CHECK_SIZEOF(long double, 8)
 # check for 'long long'
 AC_CHECK_SIZEOF(long long, 4)
 
+# check for ssize_t
+AC_CHECK_TYPE(ssize_t, int)
+
 dnl Get system canonical name
 AC_CANONICAL_HOST
 AC_DEFINE_UNQUOTED(OS, "${host}")

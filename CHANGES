@@ -7,6 +7,21 @@
                                History of Changes
 
 
+Daniel (7 February 2001)
+- SM found a flaw in the response reading function for FTP that could make
+  libcurl not get out of the loop properly when it should, if libcurl got -1
+  returned when reading the socket.
+
+- I found a similar mistake in http.c when using a proxy and reading the
+  results from the proxy connection.
+
+Daniel (6 February 2001)
+- A friendly person named "SM" (nntp at iname.com) pointed out that the VC
+  makefile in src/ needed the libpath set for the debug build to work.
+
+- Daniel Gehriger stepped in to assist with the VC++ stuff Robert Weaver
+  brought up yesterday.
+
 Daniel (5 February 2001)
 - Jun-ichiro itojun Hagino brought a big patch that brings IPv6-awareness to
   a bunch of different areas within libcurl.
@@ -14,13 +29,15 @@ Daniel (5 February 2001)
 - Robert Weaver told me about the problems the MS VC++ 6.0 compiler has with
   the 'static' keyword on a number of libcurl functions. I might need to add a
   patch that redefines static when libcurl is compiled with that compiler.
+  How do I know when VC++ compiles, anyone?
 
 Daniel (4 February 2001)
 - curl_getinfo() was extended with two new options:
   CURLINFO_CONTENT_LENGTH_DOWNLOAD and CURLINFO_CONTENT_LENGTH_UPLOAD. They
   return the full assumed content length of the transfer in the given
   direction. The CURLINFO_CONTENT_LENGTH_DOWNLOAD will be the Content-Length:
-  size of a HTTP download. Added descriptions to the man page as well.
+  size of a HTTP download. Added descriptions to the man page as well. This
+  was done after discussions with Bob Schader.
 
 Daniel (3 February 2001)
 - Ingo Ralf Blum provided another fix that makes curl build under the more
@@ -31,8 +48,9 @@ Version 7.6.1-pre2
 
 Daniel (31 January 2001)
 - Curl_read() and curl_read() now return a ssize_t for the size, as it had to
-  be able to return -1. The telnet support crashed due to this and there was
-  a possibility to weird behaviour all over.
+  be able to return -1. The telnet support crashed due to this and there was a
+  possibility to weird behaviour all over. Linus Nielsen Feltzing helped me
+  find this.
 
 - Added a configure.in check for a working getaddrinfo() if IPv6 is requested.
   I also made the configure script feature --enable-debug which sets a couple
