@@ -836,8 +836,6 @@ PERSISTANT CONNECTIONS
   transfers faster. If you use a http proxy for file transfers, practicly
   all transfers will be persistant.
 
-  Persistant connections were introduced in curl 7.7.
-
 MAILING LISTS
 
   For your convenience, we have several open mailing lists to discuss curl,
