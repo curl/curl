@@ -9,7 +9,7 @@ EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	    \
        curllib.dsw config-vms.h config-win32.h config-riscos.h config-mac.h \
        config.h.in ca-bundle.crt README.encoding README.memoryleak	    \
        README.ares makefile.dj config.dj				    \
-       libcurl.framework.make libcurl.plist
+       libcurl.framework.make libcurl.plist libcurl.rc
 
 lib_LTLIBRARIES = libcurl.la
 

@@ -70,13 +70,13 @@ libcurl.a: $(libcurl_a_OBJECTS) $(libcurl_a_DEPENDENCIES)
 	$(RANLIB) libcurl.a
 	$(STRIP) $@
 
-DLLINITOBJ =
+RESOURCE = libcurl.res
 
 # remove the last line above to keep debug info
 
-libcurl.dll libcurldll.a: libcurl.a libcurl.def $(DLLINITOBJ)
+libcurl.dll libcurldll.a: libcurl.a libcurl.def $(RESOURCE)
 	$(RM) $@
-	dllwrap --dllname $@ --output-lib libcurldll.a --export-all --def libcurl.def $(libcurl_a_LIBRARIES) $(DLLINITOBJ) $(DLL_LIBS) -lwsock32 -lws2_32 -lwinmm
+	dllwrap --dllname $@ --output-lib libcurldll.a --export-all --def libcurl.def $(libcurl_a_LIBRARIES) $(RESOURCE) $(DLL_LIBS) -lwsock32 -lws2_32 -lwinmm
 	$(STRIP) $@
 
 # remove the last line above to keep debug info
@@ -90,10 +90,12 @@ libcurl.dll libcurldll.a: libcurl.a libcurl.def $(DLLINITOBJ)
 .S.o:
 	$(COMPILE) -c $<
 
+libcurl.res: libcurl.rc
+	windres -DCURLDEBUG=0 -O COFF -o $@ -i $^
+
 clean:
-	$(RM) $(libcurl_a_OBJECTS)
+	$(RM) $(libcurl_a_OBJECTS) $(RESOURCE)
 
 distrib: clean
-
 	$(RM) $(libcurl_a_LIBRARIES)
 

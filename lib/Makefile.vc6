@@ -62,6 +62,7 @@ DIROBJ =.\$(CFG)
 LNK    = $(LNKLIB) /out:$(TARGET)
 CC     = $(CCNODBG)
 CFGSET = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
@@ -73,6 +74,7 @@ DIROBJ =.\$(CFG)
 LNK    = $(LNKDLL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
 CC     = $(CCNODBG)
 CFGSET = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
@@ -86,6 +88,7 @@ LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
 LINKLIBS = $(LINKLIBS)
 CC       = $(CCNODBG) $(CFLAGSSSL)
 CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
@@ -99,6 +102,7 @@ LNK      = $(LNKDLL) $(LFLAGSSSL) /out:$(TARGET) /IMPLIB:"$(LIB_NAME).lib"
 LINKLIBS = $(LINKLIBS) $(SSLLIBS)
 CC       = $(CCNODBG)  $(CFLAGSSSL)
 CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
@@ -111,6 +115,7 @@ LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
 LINKLIBS = $(LINKLIBS) $(SSLLIBS)
 CC       = $(CCNODBG)  $(CFLAGSSSL)
 CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 
@@ -123,6 +128,7 @@ DIROBJ =.\$(CFG)
 LNK    = $(LNKLIB) /out:$(TARGET)
 CC     = $(CCDEBUG)
 CFGSET = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
@@ -134,6 +140,7 @@ DIROBJ =.\$(CFG)
 LNK    = $(LNKDLL) /DEBUG /out:$(TARGET) /IMPLIB:"$(LIB_NAME_DEBUG).lib" /PDB:"$(LIB_NAME_DEBUG).pdb"
 CC     = $(CCDEBUG)
 CFGSET = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
@@ -146,6 +153,7 @@ LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
 LINKLIBS = $(LINKLIBS)
 CC       = $(CCDEBUG) $(CFLAGSSSL)
 CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
@@ -159,6 +167,7 @@ LNK      = $(LNKDLL) $(LFLAGSSSL) /DEBUG /out:$(TARGET) /IMPLIB:"$(LIB_NAME_DEBU
 LINKLIBS = $(LINKLIBS) $(SSLLIBS)
 CC       = $(CCDEBUG) $(CFLAGSSSL)
 CFGSET   = TRUE
+RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 #######################
@@ -221,7 +230,8 @@ X_OBJS= \
 	$(DIROBJ)\http_digest.obj \
         $(DIROBJ)\http_negotiate.obj \
         $(DIROBJ)\http_ntlm.obj \
-	$(DIROBJ)\md5.obj
+	$(DIROBJ)\md5.obj \
+	$(RESOURCE)
 
 all : $(TARGET)
 
@@ -234,12 +244,23 @@ $(X_OBJS): $(DIROBJ)
 $(DIROBJ):
 	@if not exist "$(DIROBJ)" mkdir $(DIROBJ)
 
-.SUFFIXES: .c .obj
+.SUFFIXES: .c .obj .res
 
 {.\}.c{$(DIROBJ)\}.obj:
 	$(CC) $(CFLAGS) /Fo"$@"  $<
 
+debug-dll\libcurl.res \
+debug-ssl-dll\libcurl.res \
+release-libcurl-ssl-dll\libcurl.res: libcurl.rc
+	rc /dCURL_DEBUG=1 /Fo $@ libcurl.rc
+
+release-dll\libcurl.res \
+release-ssl-dll\libcurl.res \
+release-libcurl-ssl-dll\libcurl.res: libcurl.rc
+	rc /dCURL_DEBUG=0 /Fo $@ libcurl.rc
+
 clean:
 	-@erase $(DIROBJ)\*.obj
+	-@erase $(DIROBJ)\*.res
 	-@erase vc60.idb
 	-@erase vc60.pch
