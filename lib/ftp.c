@@ -1066,7 +1066,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
   struct sockaddr *sa=(struct sockaddr *)&ss;
   unsigned char *ap;
   unsigned char *pp;
-  char portmsgbuf[4096], tmp[4096];
+  char portmsgbuf[1024], tmp[1024];
 
   const char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
   char **modep;
