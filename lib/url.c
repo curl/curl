@@ -1118,13 +1118,6 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 {
   long max_time=300000; /* milliseconds, default to five minutes */
 
-#ifndef ENABLE_IPV6
-  conn->firstsocket = socket(AF_INET, SOCK_STREAM, 0);
-#else
-  /* IPv6-style */
-  struct addrinfo *ai;
-#endif
-
 #if !defined(WIN32)||defined(__CYGWIN32__)
   /* We don't generally like checking for OS-versions, we should make this
      HAVE_XXXX based, although at the moment I don't have a decent test for
@@ -1137,6 +1130,8 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 #endif
 
 #ifndef ENABLE_IPV6
+  conn->firstsocket = socket(AF_INET, SOCK_STREAM, 0);
+
   /*************************************************************
    * Select device to bind socket to
    *************************************************************/
@@ -1261,7 +1256,11 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 #endif
 
     /* get the most strict timeout of the ones converted to milliseconds */
-    max_time = min(data->set.timeout, data->set.connecttimeout)*1000;
+    if(data->set.timeout &&
+       (data->set.timeout>data->set.connecttimeout))
+      max_time = data->set.timeout*1000;
+    else
+      max_time = data->set.connecttimeout*1000;
 
     /* subtract the passed time */
     max_time -= (long)(has_passed * 1000);
