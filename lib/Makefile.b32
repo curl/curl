@@ -49,7 +49,6 @@ SOURCES	   = \
 	telnet.c \
 	getdate.c \
 	getenv.c \
-	getpass.c \
 	hostip.c \
 	if2ip.c \
 	mprintf.c \
