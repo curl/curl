@@ -61,8 +61,18 @@ char *curl_version(void)
   ptr=strchr(ptr, '\0');
 #endif
 
+#if defined(KRB4) || defined(ENABLE_IPV6)
+  strcat(ptr, " (");
+  ptr+=2;
 #ifdef KRB4
-  sprintf(ptr, " (krb4 enabled)");
+  sprintf(ptr, "krb4 ");
+  ptr += strlen(ptr);
+#endif
+#ifdef ENABLE_IPV6
+  sprintf(ptr, "ipv6 ");
+  ptr += strlen(ptr);
+#endif
+  sprintf(ptr, "enabled)");
   ptr += strlen(ptr);
 #endif
 
