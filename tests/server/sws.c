@@ -73,7 +73,7 @@ spitout(FILE *stream,
 #define TEST_DATA_PATH "%s/data/test%d"
 
 /* global variable, where to find the 'data' dir */
-char *path=".";
+const char *path=".";
 
 enum {
   DOCNUMBER_QUIT    = -6,
