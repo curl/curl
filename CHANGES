@@ -6,6 +6,11 @@
 
                                History of Changes
 
+Daniel (27 November 2001)
+- There's now some initial code to support the EPSV FTP command. That should
+  be used to do passive transfers IPv6-style. The code is still #if 0'ed in
+  lib/ftp.c as I have no IPv6 ftp server to test this with.
+
 Daniel (26 November 2001)
 - Robert Schlabbach had problems to understand how to do resumed transfers,
   and I clarified the man page -C section somewhat.
