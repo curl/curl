@@ -399,6 +399,7 @@ CURLcode Curl_http_auth(struct connectdata *conn,
       if (neg == 0) {
         conn->newurl = strdup(data->change.url);
         data->state.authproblem = (conn->newurl == NULL);
+      }
       else {
         infof(data, "Authentication problem. Ignoring this.\n");
         data->state.authproblem = TRUE;
