@@ -6,6 +6,15 @@
 
                                History of Changes
 
+Daniel (14 April 2002)
+- Dirk Manske brought a fix that makes libcurl strip off white spaces from the
+  beginning of cookie contents.
+
+- Had to patch include/curl/curl.h since MSVC doesn't set the __STDC__ define.
+  Moonesamy pointed out the problem, Bjorn Reese the solution.
+
+Version 7.9.6-pre5
+
 Daniel (12 April 2002)
 - Fixed the TIMER_CONNECT to be more accurate for FTP transfers. Previously
   FTP transfers got the "connect done" time set after the initial FTP commands
