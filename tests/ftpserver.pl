@@ -27,6 +27,7 @@ sub ftpmsg { print INPUT @_; }
 
 my $verbose=0; # set to 1 for debugging
 my $retrweirdo=0;
+my $retrnosize=0;
 
 my $port = 8921; # just a default
 do {
@@ -240,8 +241,13 @@ sub RETR_command {
             $retrweirdo=0; # switch off the weirdo again!
         }
         else {
-            print "150 Binary data connection for $testno () ($size bytes).\r\n";
-            logmsg "150 Binary data connection for $testno ($size bytes).\n";
+            my $sz = "($size bytes)";
+            if($retrnosize) {
+                $sz = "size?";
+            }
+
+            print "150 Binary data connection for $testno () $sz.\r\n";
+            logmsg "150 Binary data connection for $testno () $sz.\n";
 
             for(@data) {
                 my $send = $_;
@@ -385,6 +391,10 @@ sub customize {
         elsif($_ =~ /RETRWEIRDO/) {
             print "instructed to use RETRWEIRDO\n";
             $retrweirdo=1;
+        }
+        elsif($_ =~ /RETRNOSIZE/) {
+            print "instructed to use RETRNOSIZE\n";
+            $retrnosize=1;
         }
     }
     close(CUSTOM);
