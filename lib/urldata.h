@@ -400,6 +400,10 @@ struct Configbits {
   bool proxystringalloc; /* the http proxy string is malloc()'ed */
   bool rangestringalloc; /* the range string is malloc()'ed */
   bool urlstringalloc;   /* the URL string is malloc()'ed */
+  bool reuse_forbid;     /* if this is forbidden to be reused, close 
+                            after use */
+  bool reuse_fresh;      /* do not re-use an existing connection for this
+                            transfer */
 };
 
 /*

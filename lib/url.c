@@ -250,117 +250,275 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
   va_start(param, option);
 
   switch(option) {
+  case CURLOPT_MAXCONNECTS:
+    /*
+     * Set the absolute number of maximum simultaneous alive connection that
+     * libcurl is allowed to have.
+     */
+    {
+      long newconnects= va_arg(param, long);
+      struct connectdata **newptr;
+
+      if(newconnects < data->numconnects) {
+        /* Since this number is *decreased* from the existing number, we must
+           close the possibly open connections that live on the indexes that
+           are being removed! */
+        int i;
+        for(i=newconnects; i< data->numconnects; i++)
+          Curl_disconnect(data->connects[i]);
+      }
+      if(newconnects) {
+        newptr= (struct connectdata **)
+          realloc(data->connects,
+                  sizeof(struct connectdata *) * newconnects);
+        if(!newptr)
+          /* we closed a few connections in vain, but so what? */
+          return CURLE_OUT_OF_MEMORY;
+        data->connects = newptr;
+        data->numconnects = newconnects;
+      }
+      else {
+        /* zero makes NO cache at all */
+        if(data->connects)
+          free(data->connects);
+        data->connects=NULL;
+        data->numconnects=0;
+      }
+    }
+    break;
+  case CURLOPT_FORBID_REUSE:
+    /*
+     * When this transfer is done, it must not be left to be reused by a
+     * subsequent transfer but shall be closed immediately.
+     */
+    data->bits.reuse_forbid = va_arg(param, long)?TRUE:FALSE;
+    break;
+  case CURLOPT_FRESH_CONNECT:
+    /*
+     * This transfer shall not use a previously cached connection but
+     * should be made with a fresh new connect!
+     */
+    data->bits.reuse_fresh = va_arg(param, long)?TRUE:FALSE;
+    break;
   case CURLOPT_VERBOSE:
+    /*
+     * Verbose means infof() calls that give a lot of information about
+     * the connection and transfer procedures as well as internal choices.
+     */
     data->bits.verbose = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_HEADER:
+    /*
+     * Set to include the header in the general data output stream.
+     */
     data->bits.http_include_header = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_NOPROGRESS:
+    /*
+     * Shut off the internal supported progress meter
+     */
     data->bits.hide_progress = va_arg(param, long)?TRUE:FALSE;
     if(data->bits.hide_progress)
       data->progress.flags |= PGRS_HIDE;
     break;
   case CURLOPT_NOBODY:
+    /*
+     * Do not include the body part in the output data stream.
+     */
     data->bits.no_body = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FAILONERROR:
+    /*
+     * Don't output the >=300 error code HTML-page, but instead only
+     * return error.
+     */
     data->bits.http_fail_on_error = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_UPLOAD:
+    /*
+     * We want to sent data to the remote host
+     */
     data->bits.upload = va_arg(param, long)?TRUE:FALSE;
     if(data->bits.upload)
       /* If this is HTTP, PUT is what's needed to "upload" */
       data->httpreq = HTTPREQ_PUT;
     break;
   case CURLOPT_FILETIME:
+    /*
+     * Try to get the file time of the remote document. The time will
+     * later (possibly) become available using curl_easy_getinfo().
+     */
     data->bits.get_filetime = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FTPLISTONLY:
+    /*
+     * An FTP option that changes the command to one that asks for a list
+     * only, no file info details.
+     */
     data->bits.ftp_list_only = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FTPAPPEND:
+    /*
+     * We want to upload and append to an existing (FTP) file.
+     */
     data->bits.ftp_append = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_NETRC:
+    /*
+     * Parse the $HOME/.netrc file
+     */
     data->bits.use_netrc = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FOLLOWLOCATION:
+    /*
+     * Follow Location: header hints on a HTTP-server.
+     */
     data->bits.http_follow_location = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FTPASCII:
+    /*
+     * Transfer FTP using ASCII instead of BINARY.
+     */
     data->bits.ftp_ascii = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_PUT:
+    /*
+     * Use the HTTP PUT request to transfer data.
+     */
     data->bits.http_put = va_arg(param, long)?TRUE:FALSE;
     if(data->bits.http_put)
       data->httpreq = HTTPREQ_PUT;
     break;
   case CURLOPT_MUTE:
+    /*
+     * Stay absolutely quiet.
+     */
     data->bits.mute = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_TIMECONDITION:
+    /*
+     * Set HTTP time condition. This must be one of the defines in the
+     * curl/curl.h header file.
+     */
     data->timecondition = va_arg(param, long);
     break;
   case CURLOPT_TIMEVALUE:
+    /*
+     * This is the value to compare with the remote document with the
+     * method set with CURLOPT_TIMECONDITION
+     */
     data->timevalue = va_arg(param, long);
     break;
   case CURLOPT_SSLVERSION:
+    /*
+     * Set explicit SSL version to try to connect with, as some SSL
+     * implementations are lame.
+     */
     data->ssl.version = va_arg(param, long);
     break;
 
   case CURLOPT_COOKIEFILE:
+    /*
+     * Set cookie file to read and parse.
+     */
     cookiefile = (char *)va_arg(param, void *);
     if(cookiefile) {
       data->cookies = Curl_cookie_init(cookiefile);
     }
     break;
   case CURLOPT_WRITEHEADER:
+    /*
+     * Callback function for header data
+     */
     data->writeheader = (FILE *)va_arg(param, FILE *);
     break;
   case CURLOPT_COOKIE:
+    /*
+     * Cookie string to send to the remote server in the request.
+     */
     data->cookie = va_arg(param, char *);
     break;
   case CURLOPT_ERRORBUFFER:
+    /*
+     * Error buffer provided by the caller to get the human readable
+     * error string in.
+     */
     data->errorbuffer = va_arg(param, char *);
     break;
   case CURLOPT_FILE:
+    /*
+     * FILE pointer to write to or include in the data write callback
+     */
     data->out = va_arg(param, FILE *);
     break;
   case CURLOPT_FTPPORT:
+    /*
+     * Use FTP PORT, this also specifies which IP address to use
+     */
     data->ftpport = va_arg(param, char *);
     data->bits.ftp_use_port = data->ftpport?1:0;
     break;
   case CURLOPT_HTTPHEADER:
+    /*
+     * Set a list with HTTP headers to use (or replace internals with)
+     */
     data->headers = va_arg(param, struct curl_slist *);
     break;
   case CURLOPT_CUSTOMREQUEST:
+    /*
+     * Set a custom string to use as request
+     */
     data->customrequest = va_arg(param, char *);
     if(data->customrequest)
       data->httpreq = HTTPREQ_CUSTOM;
     break;
   case CURLOPT_HTTPPOST:
+    /*
+     * Set to make us do HTTP POST
+     */
     data->httppost = va_arg(param, struct HttpPost *);
     data->bits.http_formpost = data->httppost?1:0;
     if(data->bits.http_formpost)
       data->httpreq = HTTPREQ_POST_FORM;
     break;
   case CURLOPT_INFILE:
+    /*
+     * FILE pointer to read the file to be uploaded from. Or possibly
+     * used as argument to the read callback.
+     */
     data->in = va_arg(param, FILE *);
     break;
   case CURLOPT_INFILESIZE:
+    /*
+     * If known, this should inform curl about the file size of the
+     * to-be-uploaded file.
+     */
     data->infilesize = va_arg(param, long);
     break;
   case CURLOPT_LOW_SPEED_LIMIT:
+    /*
+     * The low speed limit that if transfers are below this for
+     * CURLOPT_LOW_SPEED_TIME, the transfer is aborted.
+     */
     data->low_speed_limit=va_arg(param, long);
     break;
   case CURLOPT_LOW_SPEED_TIME:
+    /*
+     * The low speed time that if transfers are below the set
+     * CURLOPT_LOW_SPEED_LIMIT during this time, the transfer is aborted.
+     */
     data->low_speed_time=va_arg(param, long);
     break;
   case CURLOPT_URL:
+    /*
+     * The URL to fetch.
+     */
     data->url = va_arg(param, char *);
     break;
   case CURLOPT_PORT:
+    /*
+     * The port number to use when getting the URL
+     */
     data->use_port = va_arg(param, long);
     break;
   case CURLOPT_POST:
@@ -370,107 +528,206 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
       data->httpreq = HTTPREQ_POST;
     break;
   case CURLOPT_POSTFIELDS:
+    /*
+     * A string with POST data. Makes curl HTTP POST.
+     */
     data->postfields = va_arg(param, char *);
     data->bits.http_post = data->postfields?TRUE:FALSE;
     if(data->bits.http_post)
       data->httpreq = HTTPREQ_POST;
     break;
   case CURLOPT_POSTFIELDSIZE:
+    /*
+     * The size of the POSTFIELD data, if curl should now do a strlen
+     * to find out. Enables binary posts.
+     */
     data->postfieldsize = va_arg(param, long);
     break;
   case CURLOPT_REFERER:
+    /*
+     * String to set in the HTTP Referer: field.
+     */
     data->referer = va_arg(param, char *);
     data->bits.http_set_referer = (data->referer && *data->referer)?1:0;
     break;
   case CURLOPT_AUTOREFERER:
+    /*
+     * Switch on automatic referer that gets set if curl follows locations.
+     */
     data->bits.http_auto_referer = va_arg(param, long)?1:0;
     break;
   case CURLOPT_PROXY:
+    /*
+     * Set proxy server:port to use as HTTP proxy
+     */
     data->proxy = va_arg(param, char *);
     data->bits.httpproxy = data->proxy?1:0;
     break;
   case CURLOPT_HTTPPROXYTUNNEL:
+    /*
+     * Tunnel operations through the proxy instead of normal proxy use
+     */
     data->bits.tunnel_thru_httpproxy = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_PROXYPORT:
+    /*
+     * Explicitly set HTTP proxy port number.
+     */
     data->proxyport = va_arg(param, long);
     break;
   case CURLOPT_TIMEOUT:
+    /*
+     * The maximum time you allow curl to use for a single transfer
+     * operation.
+     */
     data->timeout = va_arg(param, long);
     break;
   case CURLOPT_MAXREDIRS:
+    /*
+     * The maximum amount of hops you allow curl to follow Location:
+     * headers. This should mostly be used to detect never-ending loops.
+     */
     data->maxredirs = va_arg(param, long);
     break;
   case CURLOPT_USERAGENT:
+    /*
+     * String to use in the HTTP User-Agent field
+     */
     data->useragent = va_arg(param, char *);
     break;
   case CURLOPT_USERPWD:
+    /*
+     * user:password to use in the operation
+     */
     data->userpwd = va_arg(param, char *);
     data->bits.user_passwd = data->userpwd?1:0;
     break;
   case CURLOPT_POSTQUOTE:
+    /*
+     * List of RAW FTP commands to use after a transfer 
+     */
     data->postquote = va_arg(param, struct curl_slist *);
     break;
+  case CURLOPT_QUOTE:
+    /*
+     * List of RAW FTP commands to use before a transfer 
+     */
+    data->quote = va_arg(param, struct curl_slist *);
+    break;
   case CURLOPT_PROGRESSFUNCTION:
+    /*
+     * Progress callback function
+     */
     data->fprogress = va_arg(param, curl_progress_callback);
     data->progress.callback = TRUE; /* no longer internal */
     break;
   case CURLOPT_PROGRESSDATA:
+    /*
+     * Custom client data to pass to the progress callback
+     */
     data->progress_client = va_arg(param, void *);
     break;
   case CURLOPT_PASSWDFUNCTION:
+    /*
+     * Password prompt callback
+     */
     data->fpasswd = va_arg(param, curl_passwd_callback);
     break;
   case CURLOPT_PASSWDDATA:
+    /*
+     * Custom client data to pass to the password callback
+     */
     data->passwd_client = va_arg(param, void *);
     break;
   case CURLOPT_PROXYUSERPWD:
+    /*
+     * user:password needed to use the proxy
+     */
     data->proxyuserpwd = va_arg(param, char *);
     data->bits.proxy_user_passwd = data->proxyuserpwd?1:0;
     break;
   case CURLOPT_RANGE:
+    /*
+     * What range of the file you want to transfer
+     */
     data->range = va_arg(param, char *);
     data->bits.set_range = data->range?1:0;
     break;
   case CURLOPT_RESUME_FROM:
+    /*
+     * Resume transfer at the give file position
+     */
     data->resume_from = va_arg(param, long);
     break;
   case CURLOPT_STDERR:
+    /*
+     * Set to a FILE * that should receive all error writes. This
+     * defaults to stderr for normal operations.
+     */
     data->err = va_arg(param, FILE *);
     break;
   case CURLOPT_WRITEFUNCTION:
+    /*
+     * Set data write callback
+     */
     data->fwrite = va_arg(param, curl_write_callback);
     break;
   case CURLOPT_READFUNCTION:
+    /*
+     * Read data callback
+     */
     data->fread = va_arg(param, curl_read_callback);
     break;
   case CURLOPT_SSLCERT:
+    /*
+     * String that holds file name of the SSL certificate to use
+     */
     data->cert = va_arg(param, char *);
     break;
   case CURLOPT_SSLCERTPASSWD:
+    /*
+     * String that holds the SSL certificate password.
+     */
     data->cert_passwd = va_arg(param, char *);
     break;
   case CURLOPT_CRLF:
+    /*
+     * Kludgy option to enable CRLF convertions. Subject for
+     * removal.
+     */
     data->crlf = va_arg(param, long);
     break;
-  case CURLOPT_QUOTE:
-    data->quote = va_arg(param, struct curl_slist *);
-    break;
   case CURLOPT_INTERFACE:
+    /*
+     * Set what interface to bind to when performing an operation and thus
+     * what from-IP your connection will use.
+     */
     data->device = va_arg(param, char *);
     break;
   case CURLOPT_KRB4LEVEL:
+    /*
+     * A string that defines the krb4 security level.
+     */
     data->krb4_level = va_arg(param, char *);
     data->bits.krb4=data->krb4_level?TRUE:FALSE;
     break;
   case CURLOPT_SSL_VERIFYPEER:
+    /*
+     * Enable peer SSL verifying.
+     */
     data->ssl.verifypeer = va_arg(param, long);
     break;
   case CURLOPT_CAINFO:
+    /*
+     * Set CA info for SSL connection. Specify file name of the CA certificate
+     */
     data->ssl.CAfile = va_arg(param, char *);
     data->ssl.CApath = NULL; /*This does not work on windows.*/
     break;
   case CURLOPT_TELNETOPTIONS:
+    /*
+     * Set a linked list of telnet options
+     */
     data->telnet_options = va_arg(param, struct curl_slist *);
     break;
   default:
@@ -495,6 +752,9 @@ RETSIGTYPE alarmfunc(int signal)
 
 CURLcode Curl_disconnect(struct connectdata *conn)
 {
+  if(!conn)
+    return CURLE_OK; /* this is closed and fine already */
+
   infof(conn->data, "Closing live connection (#%d)\n", conn->connectindex);
 
   if(-1 != conn->connectindex)
@@ -1626,7 +1886,10 @@ static CURLcode Connect(struct UrlData *data,
    * new one.
    *************************************************************/
 
-  if(ConnectionExists(data, conn, &conn_temp)) {
+  /* reuse_fresh is set TRUE if we are told to use a fresh connection
+     by force */
+  if(!data->bits.reuse_fresh &&
+     ConnectionExists(data, conn, &conn_temp)) {
     /*
      * We already have a connection for this, we got the former connection
      * in the conn_temp variable and thus we need to cleanup the one we
@@ -1836,9 +2099,14 @@ CURLcode Curl_done(struct connectdata *conn)
 
   Curl_pgrsDone(data); /* done with the operation */
 
-  /* if bits.close is TRUE, it means that the connection should be closed
-     in spite of all our efforts to be nice */
-  if((CURLE_OK == result) && conn->bits.close)
+  /* if data->bits.reuse_forbid is TRUE, it means the libcurl client has
+     forced us to close this no matter what we think.
+    
+     if conn->bits.close is TRUE, it means that the connection should be
+     closed in spite of all our efforts to be nice, due to protocol
+     restrictions in our or the server's end */
+  if(data->bits.reuse_forbid ||
+     ((CURLE_OK == result) && conn->bits.close))
     result = Curl_disconnect(conn); /* close the connection */
   else
     infof(data, "Connection (#%d) left alive\n", conn->connectindex);
