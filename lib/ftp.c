@@ -1504,7 +1504,7 @@ again:;
             data->resume_from = foundsize - downloadsize;
           }
           else {
-            if(foundsize <= data->resume_from) {
+            if(foundsize < data->resume_from) {
               failf(data, "Offset (%d) was beyond file size (%d)",
                     data->resume_from, foundsize);
               return CURLE_FTP_BAD_DOWNLOAD_RESUME;
@@ -1514,6 +1514,11 @@ again:;
           }
         }
 
+	if (downloadsize == 0) {
+	  failf(data, "File already complete");
+	  return CURLE_ALREADY_COMPLETE;
+	}
+	
         /* Set resume file transfer offset */
         infof(data, "Instructs server to resume from offset %d\n",
               data->resume_from);
