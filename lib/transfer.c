@@ -571,8 +571,10 @@ Transfer(struct connectdata *c_conn)
               CHUNKcode res =
                 Curl_httpchunk_read(conn, str, nread, &nread);
 
-              if(CHUNKE_OK < res)
+              if(CHUNKE_OK < res) {
+                failf(data, "Receeived problem in the chunky parser");
                 return CURLE_READ_ERROR;
+              }
               else if(CHUNKE_STOP == res) {
                 /* we're done reading chunks! */
                 keepon &= ~KEEP_READ; /* read no more */
