@@ -212,8 +212,9 @@ will output the data in chunks, not necessarily exactly when the data arrives.
 Using this option will disable that buffering.
 .IP "-o/--output <file>"
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
-multiple documents, you can use #[num] in the <file> specifier. That variable
-will be replaced with the current string for the URL being fetched. Like in:
+multiple documents, you can use '#' followed by a number in the <file>
+specifier. That variable will be replaced with the current string for the URL
+being fetched. Like in:
 
   curl http://{one,two}.site.com -o "file_#1.txt"
 
