@@ -588,7 +588,8 @@ CURLcode ftp_done(struct connectdata *conn)
   if(ftp->dir)
     free(ftp->dir);
 
-  /* TBD: the ftp struct is still allocated here */
+  free(ftp);
+  data->proto.ftp=NULL; /* it is gone */
 
   return CURLE_OK;
 }
