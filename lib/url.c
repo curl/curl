@@ -301,6 +301,8 @@ CURLcode curl_open(CURL **curl, char *url)
 
     data->current_speed = -1; /* init to negative == impossible */
 
+    data->httpreq = HTTPREQ_GET; /* Default HTTP request */
+
     *curl = data;
     return CURLE_OK;
   }
@@ -340,6 +342,7 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     break;
   case CURLOPT_POST:
     data->bits.http_post = va_arg(param, long)?TRUE:FALSE;
+    data->httpreq = HTTPREQ_POST;
     break;
   case CURLOPT_FILETIME:
     data->bits.get_filetime = va_arg(param, long)?TRUE:FALSE;
@@ -361,19 +364,17 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     break;
   case CURLOPT_PUT:
     data->bits.http_put = va_arg(param, long)?TRUE:FALSE;
+    data->httpreq = HTTPREQ_PUT;
     break;
   case CURLOPT_MUTE:
     data->bits.mute = va_arg(param, long)?TRUE:FALSE;
     break;
-
   case CURLOPT_TIMECONDITION:
     data->timecondition = va_arg(param, long);
     break;
-
   case CURLOPT_TIMEVALUE:
     data->timevalue = va_arg(param, long);
     break;
-
   case CURLOPT_SSLVERSION:
     data->ssl.version = va_arg(param, long);
     break;
@@ -405,10 +406,12 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     break;
   case CURLOPT_CUSTOMREQUEST:
     data->customrequest = va_arg(param, char *);
+    data->httpreq = HTTPREQ_CUSTOM;
     break;
   case CURLOPT_HTTPPOST:
     data->httppost = va_arg(param, struct HttpPost *);
     data->bits.http_formpost = data->httppost?1:0;
+    data->httpreq = HTTPREQ_POST_FORM;
     break;
   case CURLOPT_INFILE:
     data->in = va_arg(param, FILE *);

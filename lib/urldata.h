@@ -278,9 +278,25 @@ struct FTP {
   char *file;    /* decoded file */
 };
 
+typedef enum {
+  HTTPREQ_NONE, /* first in list */
+  HTTPREQ_GET,
+  HTTPREQ_POST,
+  HTTPREQ_POST_FORM, /* we make a difference internally */
+  HTTPREQ_PUT,
+  HTTPREQ_CUSTOM,
+  HTTPREQ_LAST /* last in list */
+} Curl_HttpReq;
+
 /* This struct is for boolean settings that define how to behave during
    this session. */
 struct Configbits {
+  /* these four request types mirror the httpreq field */
+  bool http_formpost;
+  bool http_post;
+  bool http_put;
+  bool http_get;
+
   bool get_filetime;
   bool tunnel_thru_httpproxy;
   bool ftp_append;
@@ -290,10 +306,7 @@ struct Configbits {
   bool hide_progress;
   bool http_fail_on_error;
   bool http_follow_location;
-  bool http_formpost;
   bool http_include_header;
-  bool http_post;
-  bool http_put;
   bool http_set_referer;
   bool http_auto_referer; /* set "correct" referer when following location: */
   bool httpproxy;
@@ -308,7 +321,6 @@ struct Configbits {
   bool verbose;
   bool this_is_a_follow; /* this is a followed Location: request */
   bool krb4; /* kerberos4 connection requested */
-
   bool proxystringalloc; /* the http proxy string is malloc()'ed */
   bool rangestringalloc; /* the range string is malloc()'ed */
   bool urlstringalloc;   /* the URL string is malloc()'ed */
@@ -480,6 +492,8 @@ struct UrlData {
 
   TimeCond timecondition; /* kind of comparison */
   time_t timevalue;       /* what time to compare with */
+
+  Curl_HttpReq httpreq; /* what kind of HTTP request (if any) is this */
 
   char *customrequest; /* http/ftp request to use */
 
