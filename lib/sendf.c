@@ -234,7 +234,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
       }
       /* a true error */
       failf(conn->data, "SSL_write() return error %d\n", err);
-      return CURLE_WRITE_ERROR;
+      return CURLE_SEND_ERROR;
     }
     bytes_written = rc;
   }
@@ -266,7 +266,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
 #endif
 
   *written = bytes_written;
-  return (-1 != bytes_written)?CURLE_OK:CURLE_WRITE_ERROR;
+  return (-1 != bytes_written)?CURLE_OK:CURLE_SEND_ERROR;
 }
 
 /* client_write() sends data to the write callback(s)
@@ -349,7 +349,7 @@ int Curl_read(struct connectdata *conn,
         break;
       default:
         failf(conn->data, "SSL read error: %d", err);
-        return CURLE_READ_ERROR;
+        return CURLE_RECV_ERROR;
       }
     } while(loop);
     if(loop && SSL_pending(conn->ssl.handle))

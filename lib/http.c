@@ -392,7 +392,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   } /* while there's buffer left and loop is requested */
 
   if(error)
-    return CURLE_READ_ERROR;
+    return CURLE_RECV_ERROR;
 
   if(200 != httperror) {
     if(407 == httperror)
@@ -400,7 +400,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
       failf(data, "Proxy requires authorization!");
     else 
       failf(data, "Received error code %d from proxy", httperror);
-    return CURLE_READ_ERROR;
+    return CURLE_RECV_ERROR;
   }
 
   infof (data, "Proxy replied to CONNECT request\n");

@@ -950,7 +950,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     break;
   default:
     /* unknown tag and its companion, just ignore: */
-    return CURLE_READ_ERROR; /* correct this */
+    return CURLE_FAILED_INIT; /* correct this */
   }
   return CURLE_OK;
 }
@@ -2363,7 +2363,7 @@ CURLcode Curl_do(struct connectdata **connp)
 
     /* This was formerly done in transfer.c, but we better do it here */
     
-    if((CURLE_WRITE_ERROR == result) && conn->bits.reuse) {
+    if((CURLE_SEND_ERROR == result) && conn->bits.reuse) {
       /* This was a re-use of a connection and we got a write error in the
        * DO-phase. Then we DISCONNECT this connection and have another attempt
        * to CONNECT and then DO again! The retry cannot possibly find another
