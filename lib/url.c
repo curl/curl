@@ -930,7 +930,7 @@ ConnectionExists(struct UrlData *data,
 
       if(strequal(needle->protostr, check->protostr) &&
          strequal(needle->name, check->name) &&
-         (needle->port == check->port) ) {
+         (needle->remote_port == check->remote_port) ) {
         bool dead;
         if(strequal(needle->protostr, "FTP")) {
           /* This is FTP, verify that we're using the same name and
