@@ -367,8 +367,8 @@ char *Curl_FormBoundary(void)
   return retstring;
 }
 
-/* Used from http.c */ 
-void Curl_FormFree(struct FormData *form)
+/* Used from http.c, this cleans a built FormData linked list */ 
+void Curl_formclean(struct FormData *form)
 {
   struct FormData *next;
 
@@ -501,7 +501,9 @@ struct FormData *Curl_getFormData(struct HttpPost *post,
 
 	fileread = strequal("-", file->contents)?stdin:
           /* binary read for win32 crap */
-          fopen(file->contents, "rb");
+/*VMS??*/ fopen(file->contents, "rb");  /* ONLY ALLOWS FOR STREAM FILES ON VMS */
+/*VMS?? Stream files are OK, as are FIXED & VAR files WITHOUT implied CC */
+/*VMS?? For implied CC, every record needs to have a \n appended & 1 added to SIZE */
 	if(fileread) {
 	  while((nread = fread(buffer, 1, 1024, fileread))) {
 	    size += AddFormData(&form,

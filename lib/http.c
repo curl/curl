@@ -364,7 +364,7 @@ CURLcode Curl_http_done(struct connectdata *conn)
   if(HTTPREQ_POST_FORM == data->httpreq) {
     *bytecount = http->readbytecount + http->writebytecount;
       
-    Curl_FormFree(http->sendit); /* Now free that whole lot */
+    Curl_formclean(http->sendit); /* Now free that whole lot */
 
     data->fread = http->storefread; /* restore */
     data->in = http->in; /* restore */
@@ -731,7 +731,7 @@ CURLcode Curl_http(struct connectdata *conn)
                           conn->firstsocket,
                         &http->writebytecount);
       if(result) {
-        Curl_FormFree(http->sendit); /* free that whole lot */
+        Curl_formclean(http->sendit); /* free that whole lot */
         return result;
       }
     }

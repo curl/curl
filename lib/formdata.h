@@ -49,6 +49,6 @@ int Curl_FormReader(char *buffer,
 
 char *Curl_FormBoundary(void);
 
-void Curl_FormFree(struct FormData *);
+void Curl_formclean(struct FormData *);
 
 #endif
