@@ -1,5 +1,5 @@
-EXTRA_DIST = ftpserver.pl httpserver.pl runtests.pl ftpsserver.pl stunnel.pm \
-	getpart.pm
+EXTRA_DIST = ftpserver.pl httpserver.pl httpsserver.pl runtests.pl \
+	     ftpsserver.pl stunnel.pm getpart.pm
 
 SUBDIRS = data
 
