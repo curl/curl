@@ -133,3 +133,4 @@ echo "maketgz report:"
 echo ""
 ls -l $targz $bzip2 $zip
 
+md5sum $targz $bzip2 $zip
