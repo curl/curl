@@ -3,9 +3,13 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* If you use a very large amount of file descriptors (more than FD_SETSIZE)
+  and then use libcurl, it might crash on its use of select() which then
+  stores data out of bounds. Bug report #948950.
+
 * --limit-rate using -d or -F does not work. This is because the limit logic
   is provided by the curl app in its read/write callbacks, and when doing
-  -d/-F the callbacks aren't used!
+  -d/-F the callbacks aren't used! Bug report #921395.
 
 * Doing resumed upload over HTTP does not work with '-C -', because curl
   doesn't do a HEAD first to get the initial size. This needs to be done
