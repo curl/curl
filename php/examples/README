@@ -1,0 +1,16 @@
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
+
+PHP program examples
+
+getpageinvar.php
+ - Fetch a single URL and return in a variable
+
+simpleget.php
+ - A very simple example that gets a HTTP page
+
+simplepost.php
+ - Example that sends a HTTP POST to a remote site
