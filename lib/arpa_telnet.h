@@ -39,7 +39,7 @@
 /*
  * The telnet options represented as strings
  */
-static char *telnetoptions[]=
+static const char *telnetoptions[]=
 {
   "BINARY",      "ECHO",           "RCP",           "SUPPRESS GO AHEAD",
   "NAME",        "STATUS"          "TIMING MARK",   "RCTE",
@@ -78,7 +78,7 @@ static char *telnetoptions[]=
 /*
  * Then those numbers represented as strings:
  */
-static char *telnetcmds[]=
+static const char *telnetcmds[]=
 {
   "EOF",  "SUSP",  "ABORT", "EOR",  "SE",
   "NOP",  "DMARK", "BRK",   "IP",   "AO",
