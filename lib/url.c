@@ -143,7 +143,9 @@ static unsigned int ConnectionStore(struct SessionHandle *data,
 #ifndef RETSIGTYPE
 #define RETSIGTYPE void
 #endif
+#ifdef HAVE_SIGSETJMP
 extern sigjmp_buf curl_jmpenv;
+#endif
 static
 RETSIGTYPE alarmfunc(int signal)
 {
