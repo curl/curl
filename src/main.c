@@ -49,7 +49,6 @@
 #include <curl/types.h> /* new for v7 */
 #include <curl/easy.h> /* new for v7 */
 #include <curl/mprintf.h>
-#include "../lib/getdate.h"
 
 #include "urlglob.h"
 #define CURLseparator	"--_curl_--"
@@ -305,8 +304,7 @@ struct Configurable {
   TimeCond timecond;
   time_t condtime;
 
-  struct HttpHeader *headers;
-  struct HttpHeader *last_header;
+  struct curl_slist *headers;
 
   struct HttpPost *httppost;
   struct HttpPost *last_post;
@@ -369,7 +367,6 @@ static int getparameter(char *flag, /* f or -long-flag */
   char letter;
   char *parse=NULL;
   int res;
-  struct HttpHeader *head;
   int j;
   time_t now;
   int hit=-1;
@@ -634,7 +631,7 @@ static int getparameter(char *flag, /* f or -long-flag */
     case 'F':
       /* "form data" simulation, this is a little advanced so lets do our best
 	 to sort this out slowly and carefully */
-      if(curl_FormParse(nextarg,
+      if(curl_formparse(nextarg,
                         &config->httppost,
                         &config->last_post))
 	return CURLE_FAILED_INIT;    
@@ -644,21 +641,8 @@ static int getparameter(char *flag, /* f or -long-flag */
       help();
       return CURLE_FAILED_INIT;
     case 'H':
-      head = (struct HttpHeader *)malloc(sizeof(struct HttpHeader));
-      if(head) {
-	head->next = NULL;
-	head->header = NULL; /* first zero this */
-	GetStr(&head->header, nextarg); /* now get the header line */
-
-	/* point on our new one */
-	if(config->last_header)
-	  config->last_header->next = head;
-	else {
-	  config->headers = head;
-	}
-
-	config->last_header = head;
-      }
+      /* A custom header to append to a list */
+      config->headers = curl_slist_append(config->headers, nextarg);
       break;
     case 'i':
       config->conf ^= CONF_HEADER; /* include the HTTP header as well */
@@ -839,7 +823,7 @@ static int parseconfig(char *filename,
 
 #define CURLRC DOT_CHAR "curlrc"
 
-    home = curl_GetEnv("HOME"); /* portable environment reader */
+    home = curl_getenv("HOME"); /* portable environment reader */
 
     if(!home)
       return CURLE_OK;
@@ -1359,6 +1343,8 @@ int main(int argc, char *argv[])
 #endif
 
   curl_slist_free_all(config.quote); /* the checks for config.quote == NULL */
+  curl_slist_free_all(config.postquote); /*  */
+  curl_slist_free_all(config.headers); /*  */
 
   return(res);
 }
