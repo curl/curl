@@ -12,34 +12,51 @@ specify standards used by curl, software that extends curl and web pages with
 Standards
 
   RFC 959  - Defines how FTP works
+
   RFC 1738 - Uniform Resource Locators
+
   RFC 1777 - defines the LDAP protocol
+
   RFC 1808 - Relative Uniform Resource Locators
+
   RFC 1867 - Form-based File Upload in HTML
 
   RFC 1950 - ZLIB Compressed Data Format Specification
+
   RFC 1951 - DEFLATE Compressed Data Format Specification
+
   RFC 1952 - gzip compression format
 
   RFC 1959 - LDAP URL syntax
+
   RFC 2045-2049 - Everything you need to know about MIME! (needed for form
                   based upload)
+
   RFC 2068 - HTTP 1.1 (obsoleted by RFC 2616)
+
   RFC 2109 - HTTP State Management Mechanism (cookie stuff)
            - Also, read Netscape's specification at
              http://www.netscape.com/newsref/std/cookie_spec.html
+
   RFC 2183 - "The Content-Disposition Header Field"
+
   RFC 2229 - "A Dictionary Server Protocol"
+
   RFC 2231 - "MIME Parameter Value and Encoded Word Extensions:
               Character Sets, Languages, and Continuations"
+
   RFC 2388 - "Returning Values from Forms: multipart/form-data"
    Use this as an addition to the 1867 
+
   RFC 2396 - "Uniform Resource Identifiers: Generic Syntax and Semantics" 
    This one obsoletes 1738, but since 1738 is often mentioned I've left it
    in this list.
+
   RFC 2428 - "FTP Extensions for IPv6 and NATs"
    This should be considered when introducing IPv6 awareness.
+
   RFC 2616 - HTTP 1.1
+
   RFC 2617 - HTTP Authentication
 
 Compilers
