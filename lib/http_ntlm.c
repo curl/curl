@@ -46,7 +46,6 @@
 #include "base64.h"
 #include "http_ntlm.h"
 #include "url.h"
-#include "http.h" /* for Curl_http_auth_stage() */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -298,23 +297,26 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   char *passwdp;
   /* point to the correct struct with this */
   struct ntlmdata *ntlm;
+  struct auth *authp;
 
   curlassert(conn);
   curlassert(conn->data);
-  conn->data->state.authdone = FALSE;
 
   if(proxy) {
     allocuserpwd = &conn->allocptr.proxyuserpwd;
     userp = conn->proxyuser;
     passwdp = conn->proxypasswd;
     ntlm = &conn->proxyntlm;
+    authp = &conn->data->state.authproxy;
   }
   else {
     allocuserpwd = &conn->allocptr.userpwd;
     userp = conn->user;
     passwdp = conn->passwd;
     ntlm = &conn->ntlm;
+    authp = &conn->data->state.authhost;
   }
+  authp->done = FALSE;
 
   /* not set means empty */
   if(!userp)
@@ -563,11 +565,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY; /* FIX TODO */
 
     ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
-    conn->data->state.authdone = TRUE;
-
-    /* Switch to web authentication after proxy authentication is done */
-    if (proxy)
-      Curl_http_auth_stage(conn->data, 401);
+    authp->done = TRUE;
   }
   break;
 
@@ -578,7 +576,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       free(*allocuserpwd);
       *allocuserpwd=NULL;
     }
-    conn->data->state.authdone = TRUE;
+    authp->done = TRUE;
     break;
   }
 

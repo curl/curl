@@ -445,9 +445,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               }
 
               /*
-              ** Now that all of the headers have been parsed, see
-              ** if we should give up and return an error.
-              */
+               * When all the headers have been parsed, see if we should give
+               * up and return an error.
+               */
               if (Curl_http_should_fail(conn)) {
                 failf (data, "The requested URL returned error: %d",
                        k->httpcode);
@@ -483,19 +483,23 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 }
                 else {
                   /* we wanted to resume a download, although the server
-                     doesn't seem to support this and we did this with a GET
-                     (if it wasn't a GET we did a POST or PUT resume) */
+                   * doesn't seem to support this and we did this with a GET
+                   * (if it wasn't a GET we did a POST or PUT resume) */
                   failf (data, "HTTP server doesn't seem to support "
                          "byte ranges. Cannot resume.");
                   return CURLE_HTTP_RANGE_ERROR;
                 }
               }
 
-              if(!stop_reading)
-                /* *auth_act() checks what authentication methods that are
-                   available and decides which one (if any) to use. It will
-                   set 'newurl' if an auth metod was picked. */
-                Curl_http_auth_act(conn);
+              if(!stop_reading) {
+                /* Curl_http_auth_act() checks what authentication methods
+                 * that are available and decides which one (if any) to
+                 * use. It will set 'newurl' if an auth metod was picked. */
+                result = Curl_http_auth_act(conn);
+
+                if(result)
+                  return result;
+              }
               
               if(!k->header) {
                 /*
@@ -593,22 +597,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 data->info.httpversion = k->httpversion;
 
                 /*
-                ** This code executes as part of processing
-                ** the header.  As a result, it's not
-                ** totally clear how to interpret the
-                ** response code yet as that depends on what
-                ** other headers may be present.  401 and
-                ** 407 may be errors, but may be OK
-                ** depending on how authentication is
-                ** working.  Other codes are definitely
-                ** errors, so give up here.
-                */
+                 * This code executes as part of processing the header.  As a
+                 * result, it's not totally clear how to interpret the
+                 * response code yet as that depends on what other headers may
+                 * be present.  401 and 407 may be errors, but may be OK
+                 * depending on how authentication is working.  Other codes
+                 * are definitely errors, so give up here.
+                 */
                 if (data->set.http_fail_on_error &&
                     (k->httpcode >= 400) &&
                     (k->httpcode != 401) &&
                     (k->httpcode != 407)) {
-                  /* If we have been told to fail hard on HTTP-errors,
-                     here is the check for that: */
                   /* serious error, go home! */
                   failf (data, "The requested URL returned error: %d",
                          k->httpcode);
@@ -821,7 +820,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                      (401 == k->httpcode)) ||
                     (checkprefix("Proxy-authenticate:", k->p) &&
                      (407 == k->httpcode))) {
-              result = Curl_http_auth(conn, k->httpcode, k->p);
+              result = Curl_http_input_auth(conn, k->httpcode, k->p);
               if(result)
                 return result;
             }
@@ -1514,10 +1513,9 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
 
-  /* set preferred authentication, default to basic */
-
-  data->state.authstage = 0; /* initialize authentication later */
   data->state.authproblem = FALSE;
+  data->state.authhost.want = data->set.httpauth;
+  data->state.authproxy.want = data->set.proxyauth;
 
   /* If there was a list of cookie files to read and we haven't done it before,
      do it now! */

@@ -49,7 +49,7 @@ moo
 <verify>
 <protocol>
 CONNECT 127.0.0.1:8433 HTTP/1.0
-Proxy-authorization: Basic dGVzdDppbmc=
+Proxy-Authorization: Basic dGVzdDppbmc=
 
 GET /503 HTTP/1.1
 Authorization: Basic dGVzdDppbmc=

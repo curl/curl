@@ -1,0 +1,107 @@
+# Server-side
+<reply>
+
+# this is returned first since we get no proxy-auth
+<data>
+HTTP/1.1 407 Authorization Required to proxy me my dear swsclose
+Proxy-Authenticate: NTLM
+
+And you should ignore this data.
+</data>
+
+# then this is returned since we get no server-auth
+<data1000>
+HTTP/1.1 200 Authorizated fine
+Content-Length: 27
+
+Welcome to the end station
+</data1000>
+
+<data1001>
+HTTP/1.1 407 NTLM type-1 received sending back type-2
+Server: Microsoft-IIS/5.0
+Content-Length: 34
+Content-Type: text/html; charset=iso-8859-1
+Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+
+This is not the real page either!
+</data1001>
+
+# This is supposed to be returned when the server gets the second
+# Authorization: NTLM line passed-in from the client
+<data1002>
+HTTP/1.1 401 You now need to authenticate with the host
+Server: Microsoft-IIS/5.0
+WWW-Authenticate: Digest realm="r e a l m", nonce="abcdef"
+Content-Length: 40
+Content-Type: text/html; charset=iso-8859-1
+
+We have not authenticated with the server yet
+</data1002>
+
+<datacheck>
+HTTP/1.1 407 NTLM type-1 received sending back type-2
+Server: Microsoft-IIS/5.0
+Content-Length: 34
+Content-Type: text/html; charset=iso-8859-1
+Proxy-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+
+HTTP/1.1 401 You now need to authenticate with the host
+Server: Microsoft-IIS/5.0
+WWW-Authenticate: Digest realm="r e a l m", nonce="abcdef"
+Content-Length: 40
+Content-Type: text/html; charset=iso-8859-1
+
+HTTP/1.1 200 Authorizated fine
+Content-Length: 27
+
+Welcome to the end station
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# NTLM only works if we are built with SSL
+<features>
+SSL
+</features>
+ <name>
+HTTP with proxy-requiring-NTLM to site-requiring-Digest
+ </name>
+ <command>
+http://data.from.server.requiring.digest.hohoho.com/169 --proxy http://%HOSTIP:%HOSTPORT --proxy-user foo:bar --proxy-ntlm --digest --user digest:alot
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol>
+GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
+Host: data.from.server.requiring.digest.hohoho.com
+Pragma: no-cache
+Accept: */*
+
+GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
+Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEMAAAAYABgAWwAAAAAAAABAAAAAAwADAEAAAAAAAAAAQwAAAAAAAABzAAAAAYIAAGZvb4P6B+XVQ6vQsx3DfDXUVhd9436GAxPu0IYcl2Z7LxHmNeOAWQ+vxUmhuCFJBUgXCQ==
+User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
+Host: data.from.server.requiring.digest.hohoho.com
+Pragma: no-cache
+Accept: */*
+
+GET http://data.from.server.requiring.digest.hohoho.com/169 HTTP/1.1
+Authorization: Digest username="digest", realm="r e a l m", nonce="abcdef", uri="/169", response="95d48591985a03c4b49cb962aa7bd3e6"
+User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.3
+Host: data.from.server.requiring.digest.hohoho.com
+Pragma: no-cache
+Accept: */*
+
+</protocol>
+</verify>

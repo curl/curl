@@ -35,7 +35,7 @@ http://%HOSTIP:%HOSTPORT/82 --proxy-user testuser:testpass -x http://%HOSTIP:%HO
 </strip>
 <protocol>
 GET http://127.0.0.1:8999/82 HTTP/1.1
-Proxy-authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
+Proxy-Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
 Host: 127.0.0.1:8999
 Pragma: no-cache

@@ -47,14 +47,16 @@
 #include "memdebug.h"
 #endif
 
-/* Test example header:
+/* Test example headers:
 
 WWW-Authenticate: Digest realm="testrealm", nonce="1053604598"
+Proxy-Authenticate: Digest realm="testrealm", nonce="1053604598"
 
 */
 
 CURLdigest Curl_input_digest(struct connectdata *conn,
-                             char *header) /* rest of the www-authenticate:
+                             bool proxy,
+                             char *header) /* rest of the *-authenticate:
                                               header */
 {
   bool more = TRUE;
@@ -64,7 +66,14 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
   bool foundAuthInt = FALSE;
   struct SessionHandle *data=conn->data;
   bool before = FALSE; /* got a nonce before */
-  struct digestdata *d = &data->state.digest;
+  struct digestdata *d;
+  
+  if(proxy) {
+    d = &data->state.proxydigest;
+  }
+  else {
+    d = &data->state.digest;
+  }
 
   /* skip initial whitespaces */
   while(*header && isspace((int)*header))
@@ -78,7 +87,7 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
       before = TRUE;
 
     /* clear off any former leftovers and init to defaults */
-    Curl_digest_cleanup(data);
+    Curl_digest_cleanup_one(d);
 
     while(more) {
       char value[32];
@@ -183,6 +192,7 @@ static void md5_to_ascii(unsigned char *source, /* 16 bytes */
 }
 
 CURLcode Curl_output_digest(struct connectdata *conn,
+                            bool proxy,
                             unsigned char *request,
                             unsigned char *uripath)
 {
@@ -198,9 +208,28 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   char *cnonce;
   char *tmp = NULL;
   struct timeval now;
+  struct auth *authp;
+  char **userp;
 
   struct SessionHandle *data = conn->data;
-  struct digestdata *d = &data->state.digest;
+  struct digestdata *d;
+
+  if(proxy) {
+    d = &data->state.proxydigest;
+    authp = &data->state.authproxy;
+    userp = &conn->allocptr.proxyuserpwd;
+  }
+  else {
+    d = &data->state.digest;
+    authp = &data->state.authhost;
+    userp = &conn->allocptr.userpwd;
+  }
+
+  if(!d->nonce) {
+    authp->done = FALSE;
+    return CURLE_OK;
+  }
+  authp->done = TRUE;
 
   ha1 = (unsigned char *)malloc(33); /* 32 digits and 1 zero byte */
 
@@ -293,8 +322,8 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   Curl_safefree(conn->allocptr.userpwd);
 
   if (d->qop) {
-    conn->allocptr.userpwd =
-      aprintf( "Authorization: Digest "
+    *userp =
+      aprintf( "%sAuthorization: Digest "
                "username=\"%s\", "
                "realm=\"%s\", "
                "nonce=\"%s\", "
@@ -303,6 +332,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                "nc=\"%08x\", "
                "qop=\"%s\", "
                "response=\"%s\"",
+               proxy?"Proxy-":"",
                conn->user,
                d->realm,
                d->nonce,
@@ -318,13 +348,14 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                   same nonce in the qop=auth mode. */
   }
   else {
-    conn->allocptr.userpwd =
-      aprintf( "Authorization: Digest "
+    *userp =
+      aprintf( "%sAuthorization: Digest "
                "username=\"%s\", "
                "realm=\"%s\", "
                "nonce=\"%s\", "
                "uri=\"%s\", "
                "response=\"%s\"",
+               proxy?"Proxy-":"",
                conn->user,
                d->realm,
                d->nonce,
@@ -336,36 +367,28 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   if(d->opaque) {
     /* append opaque */
     tmp = aprintf(", opaque=\"%s\"", d->opaque);
-    conn->allocptr.userpwd = (char*)
-      realloc(conn->allocptr.userpwd,
-              strlen(conn->allocptr.userpwd) + strlen(tmp) + 1);
-    strcat(conn->allocptr.userpwd, tmp);
+    *userp = (char*) realloc(*userp, strlen(*userp) + strlen(tmp) + 1);
+    strcat(*userp, tmp);
     free(tmp);
   }
 
   if(d->algorithm) {
     /* append algorithm */
     tmp = aprintf(", algorithm=\"%s\"", d->algorithm);
-    conn->allocptr.userpwd = (char*)
-      realloc(conn->allocptr.userpwd,
-              strlen(conn->allocptr.userpwd) + strlen(tmp) + 1);
+    *userp = (char*) realloc(*userp, strlen(*userp) + strlen(tmp) + 1);
     strcat(conn->allocptr.userpwd, tmp);
     free(tmp);
   }
 
   /* append CRLF to the userpwd header */
-  conn->allocptr.userpwd = (char*)
-    realloc(conn->allocptr.userpwd,
-            strlen(conn->allocptr.userpwd) + 3 + 1);
-  strcat(conn->allocptr.userpwd, "\r\n");
+  *userp = (char*) realloc(*userp, strlen(*userp) + 3 + 1);
+  strcat(*userp, "\r\n");
 
   return CURLE_OK;
 }
 
-void Curl_digest_cleanup(struct SessionHandle *data)
+void Curl_digest_cleanup_one(struct digestdata *d)
 {
-  struct digestdata *d = &data->state.digest;
-
   if(d->nonce)
     free(d->nonce);
   d->nonce = NULL;
@@ -393,6 +416,13 @@ void Curl_digest_cleanup(struct SessionHandle *data)
   d->nc = 0;
   d->algo = CURLDIGESTALGO_MD5; /* default algorithm */
   d->stale = FALSE; /* default means normal, not stale */
+}
+
+
+void Curl_digest_cleanup(struct SessionHandle *data)
+{
+  Curl_digest_cleanup_one(&data->state.digest);
+  Curl_digest_cleanup_one(&data->state.proxydigest);
 }
 
 #endif

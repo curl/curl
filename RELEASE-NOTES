@@ -2,12 +2,14 @@ Curl and libcurl 7.12.0.
 
  Public curl release number:               81
  Releases counted from the very beginning: 108
- Available command line options:           94
+ Available command line options:           95
  Available curl_easy_setopt() options:     113
  Number of public functions in libcurl:    35
 
 This release includes the following changes:
 
+ o curl --proxy-digest is a new command line option
+ o the Windows version of libcurl can use wldap32.dll for LDAP
  o curl_easy_strerror(), curl_multi_strerror() and curl_share_strerror()
  o IPv6-enabled Windows hosts now resolves names threaded/asynch as well
  o configure --with-libidn can be used to point out the root dir of a libidn
@@ -16,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o HTTP Digest authentication with the proxy works
  o mulipart formposting with -F and file names with spaces work again
  o curl_easy_duphandle() now works when ares-enabled
  o HTTP Digest authentication works a lot more like the RFC says

@@ -678,6 +678,16 @@ typedef enum {
 #define MAX_CURL_USER_LENGTH_TXT "255"
 #define MAX_CURL_PASSWORD_LENGTH_TXT "255"
 
+struct auth {
+  long want;  /* Bitmask set to the authentication methods wanted by the app
+                 (with CURLOPT_HTTPAUTH or CURLOPT_PROXYAUTH). */
+  long picked;
+  long avail; /* bitmask for what the server reports to support for this
+                 resource */
+  bool done;  /* TRUE when the auth phase is done and ready to do the *actual*
+                 request */
+};
+
 struct UrlState {
   enum {
     Curl_if_none,
@@ -724,22 +734,16 @@ struct UrlState {
                       is always set TRUE when curl_easy_perform() is called. */
 
   struct digestdata digest;
+  struct digestdata proxydigest;
 
 #ifdef HAVE_GSSAPI
   struct negotiatedata negotiate;
 #endif
 
-  long authstage; /*   0 - authwant and authavail are still not initialized
-                     401 - web authentication is performed
-                     407 - proxy authentication is performed */
-  long authwant;  /* initially set to authentication methods requested by
-                     client (either with CURLOPT_HTTPAUTH or CURLOPT_PROXYAUTH
-                     depending on authstage) */
-  long authavail; /* what the server reports */
+  struct auth authhost;
+  struct auth authproxy;
 
   bool authproblem; /* TRUE if there's some problem authenticating */
-  bool authdone; /* TRUE when the auth phase is done and ready
-                    to do the *actual* request */
 #ifdef USE_ARES
   ares_channel areschannel; /* for name resolves */
 #endif

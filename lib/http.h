@@ -45,9 +45,9 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
 
 /* These functions are in http.c */
 void Curl_http_auth_stage(struct SessionHandle *data, int stage);
-CURLcode Curl_http_auth(struct connectdata *conn,
-                        int httpcode, char *header);
-void Curl_http_auth_act(struct connectdata *conn);
+CURLcode Curl_http_input_auth(struct connectdata *conn,
+                              int httpcode, char *header);
+CURLcode Curl_http_auth_act(struct connectdata *conn);
 
 int Curl_http_should_fail(struct connectdata *conn);
 #endif

@@ -45,7 +45,7 @@ http://%HOSTIP:%HOSTPORT/we/want/that/page/80 -p -x %HOSTIP:%HOSTPORT --user iam
 </strip>
 <protocol>
 CONNECT 127.0.0.1:8999 HTTP/1.0
-Proxy-authorization: Basic eW91YXJlOnlvdXJzZWxm
+Proxy-Authorization: Basic eW91YXJlOnlvdXJzZWxm
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 
 GET /we/want/that/page/80 HTTP/1.1

@@ -38,12 +38,15 @@ enum {
 };
 
 /* this is for digest header input */
-CURLdigest Curl_input_digest(struct connectdata *conn, char *header);
+CURLdigest Curl_input_digest(struct connectdata *conn,
+                             bool proxy, char *header);
 
 /* this is for creating digest header output */
 CURLcode Curl_output_digest(struct connectdata *conn,
+                            bool proxy,
                             unsigned char *request,
                             unsigned char *uripath);
 void Curl_digest_cleanup(struct SessionHandle *data);
+void Curl_digest_cleanup_one(struct digestdata *dig);
 
 #endif

@@ -1332,8 +1332,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
 CURLcode Curl_disconnect(struct connectdata *conn)
 {
+  struct SessionHandle *data;
   if(!conn)
     return CURLE_OK; /* this is closed and fine already */
+
+  data = conn->data;
 
   /*
    * The range string is usually freed in curl_done(), but we might
@@ -1346,11 +1349,20 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   }
 
   if((conn->ntlm.state != NTLMSTATE_NONE) ||
-     (conn->proxyntlm.state != NTLMSTATE_NONE))
+     (conn->proxyntlm.state != NTLMSTATE_NONE)) {
     /* Authentication data is a mix of connection-related and sessionhandle-
        related stuff. NTLM is connection-related so when we close the shop
        we shall forget. */
-    conn->data->state.authstage = 0;
+    data->state.authhost.done = FALSE;
+    data->state.authhost.picked = 
+      data->state.authhost.want;
+
+    data->state.authproxy.done = FALSE;
+    data->state.authproxy.picked = 
+      data->state.authhost.want;
+
+    data->state.authproblem = FALSE;
+  }
 
   if(conn->curl_disconnect)
     /* This is set if protocol-specific cleanups should be made */
@@ -1358,8 +1370,8 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 
   if(-1 != conn->connectindex) {
     /* unlink ourselves! */
-    infof(conn->data, "Closing connection #%d\n", conn->connectindex);
-    conn->data->state.connects[conn->connectindex] = NULL;
+    infof(data, "Closing connection #%d\n", conn->connectindex);
+    data->state.connects[conn->connectindex] = NULL;
   }
 
   Curl_safefree(conn->proto.generic);
@@ -1488,7 +1500,7 @@ ConnectionExists(struct SessionHandle *data,
         }
         if((needle->protocol & PROT_FTP) ||
            ((needle->protocol & PROT_HTTP) &&
-            (needle->data->state.authwant==CURLAUTH_NTLM))) {
+            (needle->data->state.authhost.want==CURLAUTH_NTLM))) {
           /* This is FTP or HTTP+NTLM, verify that we're using the same name
              and password as well */
           if(!strequal(needle->user, check->user) ||

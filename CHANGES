@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel (3 May 2004)
+- Rewritten HTTP authentication code. The previous code could not properly
+  deal with the added test cases 167, 168 and 169. I've now rewritten the code
+  to better separate host and proxy authentication and not re-use the same
+  variables as much as before as it proved non working in the more involved
+  cases. All the current tests run OK now, and so do the new ones. The curl
+  tool got a new option named --proxy-digest to enable HTTP Digest
+  authentication with the proxy. I also made the library support it.
+
+- Gisle Vanem made the LDAP code work with wldap32.dll as supplied with
+  Win-98/ME/2000/XP, so no extra .dlls are required when curl/libcurl is used
+  on these Windows versions.
+
 Daniel (30 April 2004)
 - runtests.pl now scans the valgrind log for valgrind-detected memory leaks
   after each test case if valgrind was found and used.
