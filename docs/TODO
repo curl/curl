@@ -7,13 +7,20 @@
 TODO
 
  Things to do in project cURL. Please tell me what you think, contribute and
- send me patches that improve things!
+ send me patches that improve things! Also check the http://curl.haxx.se/dev
+ web section for various development notes.
 
 To do in a future release (random order):
 
  * Make SSL session ids get used if multiple HTTPS documents from the same
-   host is requested. Note: is this really prioritized now with the persistent
-   connections?
+   host is requested. http://curl.haxx.se/dev/SSL_session_id.txt
+
+ * HTTP PUT for files passed on stdin. Requires libcurl to send the file
+   with chunked content encoding. http://curl.haxx.se/dev/HTTP-PUT-stdin.txt
+
+ * Introduce another callback interface for upload/download that makes one
+   less copy of data and thus a faster operation.
+   http://curl.haxx.se/dev/no_copy_callbacks.txt
 
  * Suggested on the mailing list: CURLOPT_FTP_MKDIR...!
 
@@ -40,7 +47,7 @@ To do in a future release (random order):
    (http://gnutls.hellug.gr/)
 
  * Add asynchronous name resolving, as this enables full timeout support for
-   fork() systems.
+   fork() systems. http://curl.haxx.se/dev/async-resolver.txt
 
  * Move non-URL related functions that are used by both the lib and the curl
    application to a separate "portability lib".
