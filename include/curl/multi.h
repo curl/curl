@@ -73,7 +73,7 @@ typedef enum {
 
 typedef enum {
   CURLMSG_NONE, /* first, not used */
-  CURLMSG_DONE, /* This easy handle has completed. 'whatever' points to
+  CURLMSG_DONE, /* This easy handle has completed. 'result' contains
                    the CURLcode of the transfer */
   CURLMSG_LAST /* last, not used */
 } CURLMSG;
