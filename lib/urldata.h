@@ -179,6 +179,8 @@ struct FTP {
   char *urlpath; /* the originally given path part of the URL */
   char *dir;     /* decoded directory */
   char *file;    /* decoded file */
+
+  char *entrypath; /* the PWD reply when we logged on */
 };
 
 /*
@@ -186,6 +188,7 @@ struct FTP {
  */
 struct ConnectBits {
   bool close; /* if set, we close the connection after this request */
+  bool reuse; /* if set, this is a re-used connection */
 };
 
 /*
@@ -258,6 +261,11 @@ struct connectdata {
    * after the connect() and everything is done, as a step in the connection.
    */ 
   CURLcode (*curl_connect)(struct connectdata *connect);
+
+  /* This function *MAY* be set to a protocol-dependent function that is run
+   * by the curl_disconnect(), as a step in the disconnection.
+   */ 
+  CURLcode (*curl_disconnect)(struct connectdata *connect);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * in the curl_close() function if protocol-specific cleanups are required.
