@@ -211,6 +211,7 @@ typedef enum __ns_rcode {
 #define T_MAILA         ns_t_maila
 #define T_ANY           ns_t_any
 
+#ifndef __MINGW32__
 /* protos for the functions we provide in windows_port.c */
 int ares_strncasecmp(const char *s1, const char *s2, size_t n);
 int ares_strcasecmp(const char *s1, const char *s2);
@@ -220,5 +221,6 @@ int ares_strcasecmp(const char *s1, const char *s2);
    same */
 #define strncasecmp(a,b,c) ares_strncasecmp(a,b,c)
 #define strcasecmp(a,b) ares_strcasecmp(a,b)
+#endif
 
 #endif /* ARES_NAMESER_H */

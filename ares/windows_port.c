@@ -5,6 +5,7 @@
 
 #include "nameser.h"
 
+#ifndef __MINGW32__
 int
 ares_strncasecmp(const char *a, const char *b, size_t n)
 {
@@ -23,6 +24,7 @@ ares_strcasecmp(const char *a, const char *b)
 {
     return strncasecmp(a, b, strlen(a)+1);
 }
+#endif
 
 int 
 ares_gettimeofday(struct timeval *tv, struct timezone *tz) 
