@@ -762,13 +762,12 @@ static int formparse(char *input,
   char *sep;
   char *sep2;
 
-  /* Preallocate contents to the length of input to make sure we don't
-     overwrite anything. */
-  contents = malloc(strlen(input));
-  contents[0] = '\000';
- 
-  if(1 <= sscanf(input, "%255[^=]=%s", name, contents)) {
+  if((1 == sscanf(input, "%255[^=]=", name)) &&
+     (contp = strchr(input, '='))) {
     /* the input was using the correct format */
+    
+    /* Allocate the contents */
+    contents = strdup(contp+1);
     contp = contents;
 
     if('@' == contp[0]) {
