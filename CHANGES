@@ -6,6 +6,48 @@
 
                                History of Changes
 
+Daniel (21 May 2001)
+- I made ftps:// work. Added test case 400 to the release archive, as the
+  first ftps:// test case. Requires stunnel.
+
+- Also made the test cases that runs ssl tests not run if libcurl isn't built
+  with ssl support.
+
+Daniel (19 May 2001)
+- Made the configure not add any extra -L LDFLAGS or -I CPPFLAGS unless they
+  are actually needed. Albert Chin's and Domenico Andreoli's suggestions
+  helped out.
+
+Version 7.7.4-pre2
+
+Daniel (18 May 2001)
+- Nicer configure-check for the OpenSSL headers, which then sets the proper
+  variable to have curl-config be good. (Albert Chin provided the fix)
+
+- For systems that don't have theiw own 'strlcat()' libcurl provides its own.
+  It was now renamed to prevent collides with other libs. (After discussions
+  with Sterling Hughes and the implications this had on PHP builds.)
+
+Daniel (17 May 2001)
+- Colm Buckley posted a detailed bug report on (the debianized) 7.7.3, that
+  turned out to be a problem with the debian-built 7.7.3-package that
+  contained files from the 7.7.2 release!
+
+- I added the CURLE_ALREADY_COMPLETE again, but with a fake value, just to
+  make programs that use it, not fail when compiling against this version of
+  libcurl.
+
+Daniel (14 May 2001)
+- Pawel A. Gajda fixed a problem with resumed transfers on re-used persistent
+  connections.
+
+Version 7.7.4-pre1
+
+Daniel (14 May 2001)
+- Jun-ichiro itojun Hagino fixed FTP PORT for IPv6-enabled libcurl.
+
+- Added the first HTTPS test to the test suite in the release archive.
+
 Daniel (12 May 2001)
 - Jukka Pihl suggested that if (lib)curl is told to verify the peer's
   certificate and the peer can't be verified, it should fail and return a
@@ -41,6 +83,9 @@ Daniel (9 May 2001)
   makes curl use the non-standard ftp command "SIZE". If it failed, libcurl
   returned error. Starting now, it just don't output the file size instead.
   Anonymous bug report.
+
+- stunnel.pm was accidentally left out from the release archive, it is now
+  added (stunnel is needed to run the https-tests in the test suite)
   
 Daniel (7 May 2001)
 - Corrected two minor compiler warnings due to the FILE * to void * conversion
