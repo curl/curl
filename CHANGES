@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel(2 February 2004)
+- Added a configure test to check for which option the (g)nroff tool wants
+  to extract plain text from the man pages. Tor Arntsen told us the AIX
+  version of GNU gnroff doesn't support -man!
+
+- Added an undef of accept in memdebug.h to make curl build with --enable-debug
+  on AIX 5.2 which seems to have accept defined. Reported by Tor Arntsen.
+
 - curl_version() now includes c-ares version info, and curl_version_info() now
   returns a struct with version SECOND that also includes that info.
 
