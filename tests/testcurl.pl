@@ -449,9 +449,11 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   chdir "ares";
 
   if ($targetos && !$configurebuild) {
+      logit "make -f Makefile.$targetos";
       open(F, "make -f Makefile.$targetos 2>&1 |") or die;
   }
   else {
+      logit "make";
       open(F, "make 2>&1 |") or die;
   }
   while (<F>) {
@@ -470,8 +472,8 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   chdir "$pwd/$build";
 }
 
-logit "run make";
 if ($configurebuild) {
+  logit "make -i";
   open(F, "make -i 2>&1 |") or die;
   while (<F>) {
     s/$pwd//g;
@@ -480,6 +482,7 @@ if ($configurebuild) {
   close(F);
 }
 else {
+  logit "make -i $targetos";
   if ($^O eq 'MSWin32') {
     if ($targetos =~ /vc/) {
       open(F, "nmake -i $targetos|") or die;
@@ -527,7 +530,7 @@ if ($configurebuild && !$crosscompile) {
   if($runtestopts) {
       $o = "TEST_F=\"$runtestopts\" ";
   }
-  logit "run make ${o}test-full";
+  logit "make ${o}test-full";
   open(F, "make ${o}test-full 2>&1 |") or die;
   open(LOG, ">$buildlog") or die;
   while (<F>) {
