@@ -1031,7 +1031,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   ssize_t gotbytes;
   char *ptr;
   long timeout = 3600; /* default timeout in seconds */
-  int interval_ms;
+
   char *line_start;
   char *host_port;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
@@ -1087,7 +1087,6 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
     keepon=TRUE;
 
     while((nread<BUFSIZE) && (keepon && !error)) {
-      interval_ms = 1;  /* timeout each second and check the timeout */
 
       if(data->set.timeout) {
         /* if timeout is requested, find out how much remaining time we have */
@@ -1100,7 +1099,8 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
         }
       }
 
-      switch (Curl_select(tunnelsocket, CURL_SOCKET_BAD, interval_ms)) {
+      /* timeout each second and check the timeout */
+      switch (Curl_select(tunnelsocket, CURL_SOCKET_BAD, 1000)) {
       case -1: /* select() error, stop reading */
         error = SELECT_ERROR;
         failf(data, "Proxy CONNECT aborted due to select() error");
@@ -1108,12 +1108,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
       case 0: /* timeout */
         break;
       default:
-        /*
-         * This code previously didn't use the kerberos sec_read() code
-         * to read, but when we use Curl_read() it may do so. Do confirm
-         * that this is still ok and then remove this comment!
-         */
-        res= Curl_read(conn, tunnelsocket, ptr, BUFSIZE-nread, &gotbytes);
+        res = Curl_read(conn, tunnelsocket, ptr, BUFSIZE-nread, &gotbytes);
         if(res< 0)
           /* EWOULDBLOCK */
           continue; /* go loop yourself */
@@ -1128,12 +1123,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
           /*
            * We got a whole chunk of data, which can be anything from one byte
            * to a set of lines and possibly just a piece of the last line.
-           *
-           * TODO: To make this code work less error-prone, we need to make
-           * sure that we read and create full lines before we compare them,
-           * as there is really nothing that stops the proxy from delivering
-           * the response lines in multiple parts, each part consisting of
-           * only a little piece of the line(s).  */
+           */
           int i;
 
           nread += gotbytes;
@@ -1143,7 +1133,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
               char letter;
               int writetype;
 
-              /* output debug output if that is requested */
+              /* output debug if that is requested */
               if(data->set.verbose)
                 Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline,
                            conn->host.dispname);
