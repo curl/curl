@@ -134,10 +134,10 @@ static CURLcode AllowServerConnect(struct SessionHandle *data,
 
       sclose(sock); /* close the first socket */
 
-      if( -1 == s) {
-	/* DIE! */
-	failf(data, "Error accept()ing server connect");
-	return CURLE_FTP_PORT_FAILED;
+      if (-1 == s) {
+        /* DIE! */
+        failf(data, "Error accept()ing server connect");
+      	return CURLE_FTP_PORT_FAILED;
       }
       infof(data, "Connection accepted from server\n");
 
@@ -187,8 +187,8 @@ int Curl_GetFTPResponse(int sockfd,
 #define SELECT_TIMEOUT 2
   int error = SELECT_OK;
 
-  if(ftpcode)
-    *ftpcode=0; /* 0 for errors */
+  if (ftpcode)
+    *ftpcode = 0; /* 0 for errors */
 
   if(data->set.timeout) {
     /* if timeout is requested, find out how much remaining time we have */
@@ -248,7 +248,7 @@ int Curl_GetFTPResponse(int sockfd,
         int i;
 
         nread += gotbytes;
-        for(i=0; i< gotbytes; ptr++, i++) {
+        for(i = 0; i < gotbytes; ptr++, i++) {
           perline++;
           if(*ptr=='\n') {
             /* a newline is CRLF in ftp-talk, so the CR is ignored as
@@ -855,7 +855,7 @@ CURLcode _ftp(struct connectdata *conn)
       return CURLE_FTP_PORT_FAILED;
 
     if (getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL, 0,
-	niflags))
+                    niflags))
       return CURLE_FTP_PORT_FAILED;
 
     memset(&hints, 0, sizeof(hints));
@@ -872,18 +872,18 @@ CURLcode _ftp(struct connectdata *conn)
     for (ai = res; ai; ai = ai->ai_next) {
       portsock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
       if (portsock < 0)
-	continue;
+        continue;
 
       if (bind(portsock, ai->ai_addr, ai->ai_addrlen) < 0) {
-	sclose(portsock);
-	portsock = -1;
-	continue;
+        sclose(portsock);
+        portsock = -1;
+        continue;
       }
 
       if (listen(portsock, 1) < 0) {
-	sclose(portsock);
-	portsock = -1;
-	continue;
+        sclose(portsock);
+        portsock = -1;
+        continue;
       }
 
       break;
@@ -906,87 +906,96 @@ CURLcode _ftp(struct connectdata *conn)
 
       switch (sa->sa_family) {
       case AF_INET:
-	ap = (unsigned char *)&((struct sockaddr_in *)&ss)->sin_addr;
-	alen = sizeof(((struct sockaddr_in *)&ss)->sin_addr);
-	pp = (unsigned char *)&((struct sockaddr_in *)&ss)->sin_port;
-	plen = sizeof(((struct sockaddr_in *)&ss)->sin_port);
-	lprtaf = 4;
-	eprtaf = 1;
-	break;
+        ap = (unsigned char *)&((struct sockaddr_in *)&ss)->sin_addr;
+        alen = sizeof(((struct sockaddr_in *)&ss)->sin_addr);
+        pp = (unsigned char *)&((struct sockaddr_in *)&ss)->sin_port;
+        plen = sizeof(((struct sockaddr_in *)&ss)->sin_port);
+        lprtaf = 4;
+        eprtaf = 1;
+        break;
       case AF_INET6:
-	ap = (unsigned char *)&((struct sockaddr_in6 *)&ss)->sin6_addr;
-	alen = sizeof(((struct sockaddr_in6 *)&ss)->sin6_addr);
-	pp = (unsigned char *)&((struct sockaddr_in6 *)&ss)->sin6_port;
-	plen = sizeof(((struct sockaddr_in6 *)&ss)->sin6_port);
-	lprtaf = 6;
-	eprtaf = 2;
-	break;
+        ap = (unsigned char *)&((struct sockaddr_in6 *)&ss)->sin6_addr;
+        alen = sizeof(((struct sockaddr_in6 *)&ss)->sin6_addr);
+        pp = (unsigned char *)&((struct sockaddr_in6 *)&ss)->sin6_port;
+        plen = sizeof(((struct sockaddr_in6 *)&ss)->sin6_port);
+        lprtaf = 6;
+        eprtaf = 2;
+        break;
       default:
-	ap = pp = NULL;
-	lprtaf = eprtaf = -1;
-	break;
+        ap = pp = NULL;
+        lprtaf = eprtaf = -1;
+        break;
       }
 
       if (strcmp(*modep, "EPRT") == 0) {
-	if (eprtaf < 0)
-	  continue;
-	if (getnameinfo((struct sockaddr *)&ss, sslen,
-	    portmsgbuf, sizeof(portmsgbuf), tmp, sizeof(tmp), niflags))
-	  continue;
-	/* do not transmit IPv6 scope identifier to the wire */
-	if (sa->sa_family == AF_INET6) {
-	  char *q = strchr(portmsgbuf, '%');
-	  if (q)
-	    *q = '\0';
-	}
-	ftpsendf(conn->firstsocket, conn, "%s |%d|%s|%s|", *modep, eprtaf,
-	    portmsgbuf, tmp);
+        if (eprtaf < 0)
+          continue;
+        if (getnameinfo((struct sockaddr *)&ss, sslen,
+                         portmsgbuf, sizeof(portmsgbuf), tmp, sizeof(tmp), niflags))
+          continue;
+
+        /* do not transmit IPv6 scope identifier to the wire */
+      	if (sa->sa_family == AF_INET6) {
+          char *q = strchr(portmsgbuf, '%');
+          if (q)
+            *q = '\0';
+        }
+
+        ftpsendf(conn->firstsocket, conn, "%s |%d|%s|%s|", *modep, eprtaf,
+                 portmsgbuf, tmp);
       } else if (strcmp(*modep, "LPRT") == 0 ||
                  strcmp(*modep, "PORT") == 0) {
-	int i;
+        int i;
 
         if (strcmp(*modep, "LPRT") == 0 && lprtaf < 0)
-	  continue;
+          continue;
         if (strcmp(*modep, "PORT") == 0 && sa->sa_family != AF_INET)
-	  continue;
+          continue;
 
-	portmsgbuf[0] = '\0';
+        portmsgbuf[0] = '\0';
         if (strcmp(*modep, "LPRT") == 0) {
-	  snprintf(tmp, sizeof(tmp), "%d,%d", lprtaf, alen);
-	  if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf)) {
-	    continue;
-	  }
-	}
-	for (i = 0; i < alen; i++) {
-	  if (portmsgbuf[0])
-	    snprintf(tmp, sizeof(tmp), ",%u", ap[i]);
-	  else
-	    snprintf(tmp, sizeof(tmp), "%u", ap[i]);
-	  if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf)) {
-	    continue;
-	  }
-	}
-        if (strcmp(*modep, "LPRT") == 0) {
-	  snprintf(tmp, sizeof(tmp), ",%d", plen);
-	  if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf))
-	    continue;
-	}
-	for (i = 0; i < plen; i++) {
-	  snprintf(tmp, sizeof(tmp), ",%u", pp[i]);
-	  if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf)) {
+          snprintf(tmp, sizeof(tmp), "%d,%d", lprtaf, alen);
+          if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf)) {
             continue;
-	  }
-	}
-	ftpsendf(conn->firstsocket, conn, "%s %s", *modep, portmsgbuf);
+          }
+        }
+
+        for (i = 0; i < alen; i++) {
+          if (portmsgbuf[0])
+            snprintf(tmp, sizeof(tmp), ",%u", ap[i]);
+          else
+            snprintf(tmp, sizeof(tmp), "%u", ap[i]);
+
+          if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf)) {
+            continue;
+          }
+        }
+
+        if (strcmp(*modep, "LPRT") == 0) {
+          snprintf(tmp, sizeof(tmp), ",%d", plen);
+
+          if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf))
+            continue;
+        }
+
+        for (i = 0; i < plen; i++) {
+          snprintf(tmp, sizeof(tmp), ",%u", pp[i]);
+
+          if (strlcat(portmsgbuf, tmp, sizeof(portmsgbuf)) >= sizeof(portmsgbuf)) {
+              continue;
+          }
+        }
+
+        ftpsendf(conn->firstsocket, conn, "%s %s", *modep, portmsgbuf);
       }
 
       nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
       if(nread < 0)
-	return CURLE_OPERATION_TIMEOUTED;
+        return CURLE_OPERATION_TIMEOUTED;
 
       if (ftpcode != 200) {
-	failf(data, "Server does not grok %s", *modep);
-	continue;
+        failf(data, "Server does not grok %s", *modep);
+        continue;
       } else
         break;
     }
@@ -1122,10 +1131,10 @@ CURLcode _ftp(struct connectdata *conn)
       ftpsendf(conn->firstsocket, conn, mode[modeoff]);
       nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
       if(nread < 0)
-	return CURLE_OPERATION_TIMEOUTED;
+        return CURLE_OPERATION_TIMEOUTED;
 
       if (ftpcode == results[modeoff])
-	break;
+        break;
     }
 
     if (!mode[modeoff]) {
@@ -1159,15 +1168,16 @@ CURLcode _ftp(struct connectdata *conn)
        */
       
       while(*str) {
-	 if (6 == sscanf(str, "%d,%d,%d,%d,%d,%d",
-			 &ip[0], &ip[1], &ip[2], &ip[3],
-			 &port[0], &port[1]))
-	    break;
-	 str++;
+	      if (6 == sscanf(str, "%d,%d,%d,%d,%d,%d",
+                        &ip[0], &ip[1], &ip[2], &ip[3],
+                        &port[0], &port[1]))
+    	    break;
+        str++;
       }
+
       if(!*str) {
-	 failf(data, "Couldn't interpret this 227-reply: %s", buf);
-	 return CURLE_FTP_WEIRD_227_FORMAT;
+        failf(data, "Couldn't interpret this 227-reply: %s", buf);
+        return CURLE_FTP_WEIRD_227_FORMAT;
       }
 
       sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
@@ -1205,48 +1215,49 @@ CURLcode _ftp(struct connectdata *conn)
 #ifdef ENABLE_IPV6
       conn->secondarysocket = -1;
       for (ai = res; ai; ai = ai->ai_next) {
-	/* XXX for now, we can do IPv4 only */
-	if (ai->ai_family != AF_INET)
-	  continue;
+        /* XXX for now, we can do IPv4 only */
+        if (ai->ai_family != AF_INET)
+          continue;
 
-	conn->secondarysocket = socket(ai->ai_family, ai->ai_socktype,
-	    ai->ai_protocol);
-	if (conn->secondarysocket < 0)
-	  continue;
+        conn->secondarysocket = socket(ai->ai_family, ai->ai_socktype,
+                                       ai->ai_protocol);
+        if (conn->secondarysocket < 0)
+          continue;
 
-	if(data->set.verbose) {
-	  char hbuf[NI_MAXHOST];
-	  char nbuf[NI_MAXHOST];
-	  char sbuf[NI_MAXSERV];
+      	if(data->set.verbose) {
+          char hbuf[NI_MAXHOST];
+          char nbuf[NI_MAXHOST];
+          char sbuf[NI_MAXSERV];
 #ifdef NI_WITHSCOPEID
-	  const int niflags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
+          const int niflags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
 #else
-	  const int niflags = NI_NUMERICHOST | NI_NUMERICSERV;
+          const int niflags = NI_NUMERICHOST | NI_NUMERICSERV;
 #endif
-	  if (getnameinfo(res->ai_addr, res->ai_addrlen, nbuf, sizeof(nbuf),
-	      sbuf, sizeof(sbuf), niflags)) {
-	    snprintf(nbuf, sizeof(nbuf), "?");
-	    snprintf(sbuf, sizeof(sbuf), "?");
-	  }
-	  if (getnameinfo(res->ai_addr, res->ai_addrlen, hbuf, sizeof(hbuf),
-	      NULL, 0, 0)) {
-	    infof(data, "Connecting to %s port %s\n", nbuf, sbuf);
-	  } else {
-	    infof(data, "Connecting to %s (%s) port %s\n", hbuf, nbuf, sbuf);
-	  }
-	}
+          if (getnameinfo(res->ai_addr, res->ai_addrlen, nbuf, sizeof(nbuf),
+                          sbuf, sizeof(sbuf), niflags)) {
+            snprintf(nbuf, sizeof(nbuf), "?");
+            snprintf(sbuf, sizeof(sbuf), "?");
+          }
+        
+          if (getnameinfo(res->ai_addr, res->ai_addrlen, hbuf, sizeof(hbuf),
+                          NULL, 0, 0)) {
+            infof(data, "Connecting to %s port %s\n", nbuf, sbuf);
+          } else {
+            infof(data, "Connecting to %s (%s) port %s\n", hbuf, nbuf, sbuf);
+          }
+        }
 
-	if (connect(conn->secondarysocket, ai->ai_addr, ai->ai_addrlen) < 0) {
-	  close(conn->secondarysocket);
-	  conn->secondarysocket = -1;
-	  continue;
-	}
+        if (connect(conn->secondarysocket, ai->ai_addr, ai->ai_addrlen) < 0) {
+          close(conn->secondarysocket);
+          conn->secondarysocket = -1;
+          continue;
+        }
 
-	break;
+      	break;
       }
 
       if (conn->secondarysocket < 0) {
-	failf(data, strerror(errno));
+        failf(data, strerror(errno));
         return CURLE_FTP_CANT_RECONNECT;
       }
 #else
@@ -1590,18 +1601,18 @@ CURLcode _ftp(struct connectdata *conn)
           }
         }
 
-	if (downloadsize == 0) {
+        if (downloadsize == 0) {
           /* no data to transfer */
           result=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
-	  infof(data, "File already completely downloaded\n");
+          infof(data, "File already completely downloaded\n");
 
           /* Set resume done so that we won't get any error in Curl_ftp_done()
            * because we didn't transfer the amount of bytes that the remote
            * file obviously is */
           conn->bits.resume_done = TRUE; 
 
-	  return CURLE_OK;
-	}
+          return CURLE_OK;
+        }
 	
         /* Set resume file transfer offset */
         infof(data, "Instructs server to resume from offset %d\n",
@@ -1817,3 +1828,12 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
   }
   return CURLE_OK;
 }
+
+/*
+ * Local variables:
+ * tab-width: 2
+ * c-basic-offset: 2
+ * End:
+ * vim600: et sw=2 ts=2 sts=2 tw=78 fdm=marker
+ * vim<600: et sw=2 ts=2 sts=2 tw=78
+ */
