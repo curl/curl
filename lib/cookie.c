@@ -121,7 +121,7 @@ static bool tailmatch(const char *little, const char *bigone)
   if(littlelen > biglen)
     return FALSE;
 
-  return strequal(little, bigone+biglen-littlelen);
+  return (bool)strequal(little, bigone+biglen-littlelen);
 }
 
 /****************************************************************************
@@ -415,7 +415,7 @@ Curl_cookie_add(struct SessionHandle *data,
            As far as I can see, it is set to true when the cookie says
            .domain.com and to false when the domain is complete www.domain.com
         */
-        co->tailmatch=strequal(ptr, "TRUE"); /* store information */
+        co->tailmatch=(bool)strequal(ptr, "TRUE"); /* store information */
         break;
       case 2:
         /* It turns out, that sometimes the file format allows the path
@@ -431,7 +431,7 @@ Curl_cookie_add(struct SessionHandle *data,
         fields++; /* add a field and fall down to secure */
         /* FALLTHROUGH */
       case 3:
-        co->secure = strequal(ptr, "TRUE");
+        co->secure = (bool)strequal(ptr, "TRUE");
         break;
       case 4:
         co->expires = atoi(ptr);
