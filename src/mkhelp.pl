@@ -112,6 +112,10 @@ print <<HEAD
  * NEVER EVER edit this manually, fix the mkhelp.pl script instead!
  * Generation time: $now
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef USE_MANUAL
 #include "hugehelp.h"
 #include <stdio.h>
 HEAD
@@ -179,6 +183,7 @@ void hugehelp(void)
 }
 EOF
     ;
+foot();
 exit;
 }
 else {
@@ -211,5 +216,13 @@ for(@out) {
 
 }
 
-print ", stdout) ;\n}\n"
-    
+print ", stdout) ;\n}\n";
+
+foot();
+
+sub foot {
+  print <<FOOT
+#endif /* USE_MANUAL */
+FOOT
+  ;
+}
