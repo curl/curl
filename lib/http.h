@@ -25,7 +25,8 @@
  *****************************************************************************/
 
 /* ftp can use this as well */
-CURLcode Curl_ConnectHTTPProxyTunnel(struct UrlData *data, int tunnelsocket,
+CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
+                                     int tunnelsocket,
                                      char *hostname, int remote_port);
 
 /* protocol-specific functions set up to be called by the main engine */
