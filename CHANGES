@@ -7,8 +7,8 @@
                                   Changelog
 
 Daniel (14 January 2004)
-- Vincent Bronner fixed the Curl_resolv() return code. This looks like the same
-  fix Steve Green provided on december 3... ?
+- Vincent Bronner fixed the Curl_resolv() return code. This extends the fix
+  Steve Green provided on december 3...
 
 Daniel (13 January 2004)
 - Luke Call made the win32 version of the password prompting function support
