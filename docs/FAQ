@@ -1,4 +1,4 @@
-Updated: August 23, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: October 23, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -36,6 +36,7 @@ FAQ
   3.9 How do I use curl in PHP, Perl, Tcl, Ruby or Java?
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
   3.11 How do I POST with a different Content-Type?
+  3.12 Why do FTP specific features over HTTP proxy fails?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -374,6 +375,18 @@ FAQ
   To make a simple HTTP POST with text/xml as content-type, do something like:
 
         curl -d "datatopost" -H "Content-Type: text/xml" [URL]
+
+  3.12 Why do FTP specific features over HTTP proxy fails?
+
+  Because when you use a HTTP proxy, the protocol spoken on the network will
+  be HTTP, even if you specify a FTP URL. This effectively means that you
+  normally can't use FTP specific features such as ftp upload and ftp quote
+  etc.
+
+  There is one exception to this rule, and that is if you can "tunnel through"
+  the given HTTP proxy. Proxy tunneling is enabled with a special option (-P)
+  and is generally not available as proxy admins usuable disable tunneling to
+  other ports than 443 (which is used for HTTPS access through proxies).
 
 4. Running Problems
 
