@@ -149,7 +149,7 @@ Curl_cookie_add(struct SessionHandle *data,
                                     unless set */
 {
   struct Cookie *clist;
-  char what[MAX_COOKIE_LINE];
+  char *what;
   char name[MAX_NAME];
   char *ptr;
   char *semiptr;
@@ -167,6 +167,13 @@ Curl_cookie_add(struct SessionHandle *data,
   if(httpheader) {
     /* This line was read off a HTTP-header */
     char *sep;
+
+    what = malloc(MAX_COOKIE_LINE);
+    if(!what) {
+      free(co);
+      return NULL;
+    }
+
     semiptr=strchr(lineptr, ';'); /* first, find a semicolon */
 
     while(*lineptr && isspace((int)*lineptr))
@@ -386,6 +393,8 @@ Curl_cookie_add(struct SessionHandle *data,
           badcookie = TRUE;
       }
     }
+
+    free(what);
 
     if(badcookie || !co->name) {
       /* we didn't get a cookie name or a bad one,
