@@ -150,7 +150,7 @@ CURLcode Curl_dict(struct connectdata *conn)
     if(result)
       failf(data, "Failed sending DICT request");
     else
-      result = Curl_Transfer(conn, sockfd, -1, FALSE, bytecount,
+      result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                              -1, NULL); /* no upload */      
     if(result)
       return result;
@@ -196,7 +196,7 @@ CURLcode Curl_dict(struct connectdata *conn)
     if(result)
       failf(data, "Failed sending DICT request");
     else
-      result = Curl_Transfer(conn, sockfd, -1, FALSE, bytecount,
+      result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                              -1, NULL); /* no upload */
     
     if(result)
@@ -221,7 +221,7 @@ CURLcode Curl_dict(struct connectdata *conn)
       if(result)
         failf(data, "Failed sending DICT request");
       else
-        result = Curl_Transfer(conn, sockfd, -1, FALSE, bytecount,
+        result = Curl_Transfer(conn, FIRSTSOCKET, -1, FALSE, bytecount,
                                -1, NULL);
       if(result)
         return result;
