@@ -352,7 +352,7 @@ chdir "$pwd/$build";
 
 if ($gnulikebuild) {
   # run configure script
-  system("../$CURLDIR/configure $confopts 2>&1");
+  print `../$CURLDIR/configure $confopts 2>&1`;
 
   if (-f "lib/Makefile") {
     logit "configure seems to have finished fine";
