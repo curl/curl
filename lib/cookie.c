@@ -234,7 +234,13 @@ Curl_cookie_add(struct CookieInfo *c,
                 break;
               }
             }
-            if(dotcount < 3) {
+            /* The original Netscape cookie spec defined that this domain name
+               MUST have three dots (or two if one of the seven holy TLDs),
+               but it seems that these kinds of cookies are in use "out there"
+               so we cannot be that strict. I've therefore lowered the check
+               to not allow less than two dots. */
+            
+            if(dotcount < 2) {
               /* Received and skipped a cookie with a domain using too few
                  dots. */
               badcookie=TRUE; /* mark this as a bad cookie */
