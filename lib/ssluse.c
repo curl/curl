@@ -507,7 +507,7 @@ static int Get_SSL_Session(struct connectdata *conn,
     if(!check->sessionid)
       /* not session ID means blank entry */
       continue;
-    if(strequal(conn->name, check->name) &&
+    if(curl_strequal(conn->name, check->name) &&
        (conn->remote_port == check->remote_port) ) {
       /* yes, we have a session ID! */
       data->state.sessionage++;            /* increase general age */
@@ -688,7 +688,7 @@ cert_hostcheck(const char *certname, const char *hostname)
      !strlen(hostname)) /* sanity check */
     return 0;
 
-  if(strequal(certname, hostname)) /* trivial case */
+  if(curl_strequal(certname, hostname)) /* trivial case */
     return 1;
 
   certdomain = certname + 1;
@@ -704,7 +704,7 @@ cert_hostcheck(const char *certname, const char *hostname)
   if(tmp) {
     /* ok the certname's domain matches the hostname, let's check that it's a
        tail-match */
-    if(strequal(tmp, certdomain))
+    if(curl_strequal(tmp, certdomain))
       /* looks like a match. Just check we havent swallowed a '.' */
       return tmp == strchr(hostname, '.');
     else

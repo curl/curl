@@ -108,7 +108,7 @@ void ourWriteOut(CURL *curl, char *writeinfo)
           keepit=*end;
           *end=0; /* zero terminate */
           for(i=0; replacements[i].name; i++) {
-            if(strequal(ptr, replacements[i].name)) {
+            if(curl_strequal(ptr, replacements[i].name)) {
               switch(replacements[i].id) {
               case VAR_EFFECTIVE_URL:
                 if((CURLE_OK ==

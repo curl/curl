@@ -1104,10 +1104,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     int fnam=strlen(word);
     int numhits=0;
     for(j=0; j< sizeof(aliases)/sizeof(aliases[0]); j++) {
-      if(strnequal(aliases[j].lname, word, fnam)) {
+      if(curl_strnequal(aliases[j].lname, word, fnam)) {
         longopt = TRUE;
         numhits++;
-        if(strequal(aliases[j].lname, word)) {
+        if(curl_strequal(aliases[j].lname, word)) {
           parse = aliases[j].letter;
           hit = j;
           numhits = 1; /* a single unique hit */
@@ -1323,7 +1323,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'C':
       /* This makes us continue an ftp transfer at given position */
-      if(!strequal(nextarg, "-")) {
+      if(!curl_strequal(nextarg, "-")) {
         config->resume_from= atoi(nextarg);
         config->resume_from_current = FALSE;
       }
@@ -1345,7 +1345,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
           nextarg++; /* pass the @ */
 
-          if(strequal("-", nextarg))
+          if(curl_strequal("-", nextarg))
             file = stdin;
           else 
             file = fopen(nextarg, "rb");
@@ -1637,7 +1637,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case 'T':
       /* we are uploading */
       config->conf |= CONF_UPLOAD;
-      if(!strequal("-", nextarg))
+      if(!curl_strequal("-", nextarg))
         /* make - equal stdin */
         GetStr(&config->infile, nextarg);
       break;
@@ -1664,7 +1664,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
            or - (stdin) follows */
         FILE *file;
         nextarg++; /* pass the @ */
-        if(strequal("-", nextarg))
+        if(curl_strequal("-", nextarg))
           file = stdin;
         else 
           file = fopen(nextarg, "r");
@@ -2199,7 +2199,7 @@ int my_trace(CURL *handle, curl_infotype type,
 
   if(!config->trace_stream) {
     /* open for append */
-    if(strequal("-", config->trace_dump))
+    if(curl_strequal("-", config->trace_dump))
       config->trace_stream = stdout;
     else {
       config->trace_stream = fopen(config->trace_dump, "w");
@@ -2370,7 +2370,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   config->create_dirs=FALSE;
 
   if(argc>1 &&
-     (!strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
+     (!curl_strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
      strchr(argv[1], 'q')) {
     /*
      * The first flag, that is not a verbose name, but a shortname
@@ -2399,7 +2399,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       
       char *flag = argv[i];
 
-      if(strequal("--", argv[i]))
+      if(curl_strequal("--", argv[i]))
 	/* this indicates the end of the flags and thus enables the
 	   following (URL) argument to start with -. */
 	stillflags=FALSE;
@@ -2553,7 +2553,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     /* save outfile pattern before expansion */
     outfiles = urlnode->outfile?strdup(urlnode->outfile):NULL;
 
-    if ((!outfiles || strequal(outfiles, "-")) && urlnum > 1) {
+    if ((!outfiles || curl_strequal(outfiles, "-")) && urlnum > 1) {
       /* multiple files extracted to stdout, insert separators! */
       separator = 1;
     }
@@ -2564,7 +2564,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       outfile = outfiles?strdup(outfiles):NULL;
  
       if((urlnode->flags&GETOUT_USEREMOTE) ||
-         (outfile && !strequal("-", outfile)) ) {
+         (outfile && !curl_strequal("-", outfile)) ) {
 
         /* 
          * We have specified a file name to store the result in, or we have
@@ -2946,7 +2946,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
 #endif
 
-      if (outfile && !strequal(outfile, "-") && outs.stream)
+      if (outfile && !curl_strequal(outfile, "-") && outs.stream)
         fclose(outs.stream);
 
 #ifdef HAVE_UTIME
