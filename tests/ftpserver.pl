@@ -16,8 +16,6 @@ use FileHandle;
 
 use strict;
 
-sub spawn;  # forward declaration
-
 open(FTPLOG, ">log/ftpd.log") ||
     print STDERR "failed to open log file, runs without logging\n";
 
@@ -63,16 +61,19 @@ sub REAPER {
 }
 
 # USER is ok in fresh state
-my %commandok = ( "USER" => "fresh",
-                  "PASS" => "passwd",
-                  "PASV" => "loggedin",
-                  "PORT" => "loggedin",
-                  "TYPE" => "loggedin|twosock",
-                  "LIST" => "twosock",
-                  "RETR" => "twosock",
-                  "CWD"  => "loggedin",
-                  "QUIT"  => "loggedin|twosock",
-                  );
+my %commandok = (
+                 "USER" => "fresh",
+                 "PASS" => "passwd",
+                 "PASV" => "loggedin",
+                 "PORT" => "loggedin",
+                 "TYPE" => "loggedin|twosock",
+                 "LIST" => "twosock",
+                 "RETR" => "twosock",
+                 "STOR" => "twosock",
+                 "CWD"  => "loggedin",
+                 "SIZE" => "loggedin|twosock",
+                 "QUIT"  => "loggedin|twosock",
+                 );
 
 # initially, we're in 'fresh' state
 my %statechange = ( 'USER' => 'passwd',    # USER goes to passwd state
@@ -92,13 +93,15 @@ my %displaytext = ('USER' => '331 We are happy you popped in!', # output FTP lin
                    );
 
 # callback functions for certain commands
-my %commandfunc = ( 'PORT', \&PORT_command,
-                    'LIST', \&LIST_command,
-                    'PASV', \&PASV_command,
-                    'RETR', \&RETR_command);
+my %commandfunc = ( 'PORT' => \&PORT_command,
+                    'LIST' => \&LIST_command,
+                    'PASV' => \&PASV_command,
+                    'RETR' => \&RETR_command,   
+                    'SIZE' => \&SIZE_command,
+                    'STOR' => \&STOR_command,
+                    );
 
-my $pid;
-
+# this is a built-in fake-dir ;-)
 my @ftpdir=("total 20\r\n",
 "drwxr-xr-x   8 98       98           512 Oct 22 13:06 .\r\n",
 "drwxr-xr-x   8 98       98           512 Oct 22 13:06 ..\r\n",
@@ -110,7 +113,6 @@ my @ftpdir=("total 20\r\n",
 "dr-xr-xr-x   2 0        1            512 Nov 30  1995 etc\r\n",
 "drwxrwxrwx   2 98       1            512 Oct 30 14:33 pub\r\n",
 "dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr\r\n");
-
 
 sub LIST_command {
   #  print "150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)\r\n";
@@ -124,6 +126,26 @@ sub LIST_command {
     logmsg "$$: done passing data to child pid\n";
 
     print "226 ASCII transfer complete\r\n";
+    return 0;
+}
+
+sub SIZE_command {
+    my $testno = $_[0];
+
+    logmsg "SIZE number $testno\n";
+
+    my $filename = "data/reply$testno.txt";
+
+    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
+        $atime,$mtime,$ctime,$blksize,$blocks)
+        = stat($filename);
+
+    if($size) {
+        print "213 $size\r\n";
+    }
+    else {
+        print "550 $testno: No such file or directory.\r\n";
+    }
     return 0;
 }
 
@@ -157,23 +179,26 @@ sub RETR_command {
     return 0;
 }
 
+sub STOR_command {
+    my $testno=$_[0];
 
-# < 220 pm1 FTP server (SunOS 5.7) ready.
-# > USER anonymous
-# < 331 Guest login ok, send ident as password.
-# > PASS curl_by_daniel@haxx.se
-# < 230 Guest login ok, access restrictions apply.
-# * We have successfully logged in
-# * Connected to 127.0.0.1 (127.0.0.1)
-# > PASV
-# < 227 Entering Passive Mode (127,0,0,1,210,112)
-# * Connecting to localhost (127.0.0.1) port 53872
-# * Connected the data stream!
-# > TYPE A
-# < 200 Type set to A.
-# > LIST
-# < 150 ASCII data connection for /bin/ls (127.0.0.1,53873) (0 bytes).
-#
+    logmsg "STOR test number $testno\n";
+
+    my $filename = "log/ftp.upload";
+
+    open(FILE, ">$filename") ||
+        return 0; # failed to open output
+
+    my $line;
+    while (defined($line = <SOCK>)) {
+        print FILE $line;
+    }
+    close(FILE);
+    close(SOCK);
+
+    print "226 File transfer complete\r\n";
+    return 0;
+}
 
 sub PASV_command {
     socket(Server2, PF_INET, SOCK_STREAM, $proto) || die "socket: $!";
@@ -227,6 +252,13 @@ sub PORT_command {
 
 $SIG{CHLD} = \&REAPER;
 
+my @welcome=(
+            '220-        _   _ ____  _     '."\r\n",
+            '220-    ___| | | |  _ \| |    '."\r\n",
+            '220-   / __| | | | |_) | |    '."\r\n",
+            '220-  | (__| |_| |  _ <| |___ '."\r\n",
+            '220    \___|\___/|_| \_\_____|'."\r\n");
+
 for ( $waitedpid = 0;
       ($paddr = accept(Client,Server)) || $waitedpid;
         $waitedpid = 0, close Client)
@@ -235,122 +267,72 @@ for ( $waitedpid = 0;
     my($port,$iaddr) = sockaddr_in($paddr);
     my $name = gethostbyaddr($iaddr,AF_INET);
 
-        # flush data:
-        $| = 1;
+    # flush data:
+    $| = 1;
         
-
     logmsg "connection from $name [", inet_ntoa($iaddr), "] at port $port\n";
-
-    # this code is forked and run
-         open(STDIN,  "<&Client")   || die "can't dup client to stdin";
-         open(STDOUT, ">&Client")   || die "can't dup client to stdout";
-
-        open(INPUT, ">log/server.input") ||
-            logmsg "failed to open log/server.input\n";
-
-        # < 220 pm1 FTP server (SunOS 5.7) ready.
-        # > USER anonymous
-        # < 331 Guest login ok, send ident as password.
-        # > PASS curl_by_daniel@haxx.se
-        # < 230 Guest login ok, access restrictions apply.
-        # * We have successfully logged in
-        # * Connected to pm1 (193.15.23.1)
-        # > PASV
-        # < 227 Entering Passive Mode (193,15,23,1,231,59)
-        # * Connecting to pm1 (193.15.23.1) port 59195
-        # > TYPE A
-        # < 200 Type set to A.
-        # > LIST
-        # < 150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes).
-        # * Getting file with size: -1
-
-        print "220-running the curl suite test server\r\n",
-        "220-running the curl suite test server\r\n",
-        "220 running the curl suite test server\r\n";
-        
-        my $state="fresh";
-
-        while(1) {
-
-            last unless defined ($_ = <STDIN>);
-
-            ftpmsg $_;
-
-            # Remove trailing CRLF.
-            s/[\n\r]+$//;
-
-            unless (m/^([A-Z]{3,4})\s?(.*)/i) {
-                print "500 '$_': command not understood.\r\n";
-                next;
-            }
-            my $FTPCMD=$1;
-            my $FTPARG=$2;
-            my $full=$_;
-                 
-            logmsg "GOT: ($1) $_\n";
-
-            my $ok = $commandok{$FTPCMD};
-            if($ok !~ /$state/) {
-                print "500 $FTPCMD not OK in state: $state!\r\n";
-                next;
-            }
-
-            my $newstate=$statechange{$FTPCMD};
-            if($newstate eq "") {
-                # remain in the same state
-                #print "314 Wwwwweeeeird internal error state: $state\r\n";
-                #exit;
-            }
-            else {
-                $state = $newstate;
-            }
-
-            my $text = $displaytext{$FTPCMD};
-            if($text) {
-                print "$text\r\n";
-            }
-
-            # see if the new state is a function caller.
-            my $func = $commandfunc{$FTPCMD};
-            if($func) {
-                # it is!
-                # flush the handles before the possible fork
-                FTPLOG->autoflush(1);
-                INPUT->autoflush(1);
-                \&$func($FTPARG);
-            }
-
-            logmsg "gone to state $state\n";
-            
-        } # while(1)
-         close(Client);
-        close(Client2);
-         close(Server2);
-         #   print "Hello there, $name, it's now ", scalar localtime, "\r\n";
-
-}
-
-
-sub spawn {
-    my $coderef = shift;
-
-    unless (@_ == 0 && $coderef && ref($coderef) eq 'CODE') {
-        confess "usage: spawn CODEREF";
-    }
-
-    my $pid;
-    if (!defined($pid = fork)) {
-        logmsg "cannot fork: $!\n";
-        return;
-    } elsif ($pid) {
-        logmsg "begat $pid\n";
-        return; # I'm the parent
-    }
-    # else I'm the child -- go spawn
-
-
+    
     open(STDIN,  "<&Client")   || die "can't dup client to stdin";
     open(STDOUT, ">&Client")   || die "can't dup client to stdout";
-    ## open(STDERR, ">&STDOUT") || die "can't dup stdout to stderr";
-    exit &$coderef();
+    
+    open(INPUT, ">log/server.input") ||
+        logmsg "failed to open log/server.input\n";
+
+    FTPLOG->autoflush(1);
+    INPUT->autoflush(1);
+
+    print @welcome;
+    my $state="fresh";
+
+    while(1) {
+
+        last unless defined ($_ = <STDIN>);
+        
+        ftpmsg $_;
+        
+        # Remove trailing CRLF.
+        s/[\n\r]+$//;
+
+        unless (m/^([A-Z]{3,4})\s?(.*)/i) {
+            print "500 '$_': command not understood.\r\n";
+            next;
+        }
+        my $FTPCMD=$1;
+        my $FTPARG=$2;
+        my $full=$_;
+                 
+        logmsg "GOT: ($1) $_\n";
+
+        my $ok = $commandok{$FTPCMD};
+        if($ok !~ /$state/) {
+            print "500 $FTPCMD not OK in state: $state!\r\n";
+            next;
+        }
+
+        my $newstate=$statechange{$FTPCMD};
+        if($newstate eq "") {
+            # remain in the same state
+        }
+        else {
+            $state = $newstate;
+        }
+
+        my $text = $displaytext{$FTPCMD};
+        if($text) {
+            print "$text\r\n";
+        }
+
+        # see if the new state is a function caller.
+        my $func = $commandfunc{$FTPCMD};
+        if($func) {
+            # it is!
+            \&$func($FTPARG);
+        }
+
+        logmsg "set to state $state\n";
+            
+    } # while(1)
+    close(Client);
+    close(Client2);
+    close(Server2);
 }
