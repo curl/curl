@@ -36,8 +36,7 @@ UNIX
    The configure script always tries to find a working SSL library unless
    explicitly told not to. If you have OpenSSL installed in the default search
    path for your compiler/linker, you don't need to do anything special. If
-   you have OpenSSL installed in e.g /usr/local/ssl, you can run configure
-   like:
+   you have OpenSSL installed in /usr/local/ssl, you can run configure like:
 
 	./configure --with-ssl
 
@@ -46,13 +45,13 @@ UNIX
 
 	./configure --with-ssl=/opt/OpenSSL
 
-   If you insist on forcing a build *without* SSL support, even though you may
-   have it installed in your system, you can run configure like this:
+   If you insist on forcing a build without SSL support, even though you may
+   have OpenSSL installed in your system, you can run configure like this:
 
         ./configure --without-ssl
 
    If you have OpenSSL installed, but with the libraries in one place and the
-   header files somewhere else, you'll have to set the LDFLAGS and CPPFLAGS
+   header files somewhere else, you have to set the LDFLAGS and CPPFLAGS
    environment variables prior to running configure.  Something like this
    should work:
 
@@ -72,7 +71,7 @@ UNIX
      LIBS=-lRSAglue -lrsaref
      (as suggested by Doug Kaufman)
 
-   KNOWN PROBLEMS
+   KNOWN PROBLEMS (these ones should not happen anymore)
 
      If you happen to have autoconf installed, but a version older than 2.12
      you will get into trouble. Then you can still build curl by issuing these
@@ -101,8 +100,8 @@ UNIX
 
    MORE OPTIONS
 
-     Remember, to force configure to use the standard cc compiler if both
-     cc and gcc are present, run configure like
+     To force configure to use the standard cc compiler if both cc and gcc are
+     present, run configure like
 
        CC=cc ./configure
          or
@@ -129,11 +128,6 @@ UNIX
      In most cases, /usr/athena is the install prefix and then it works with
 
        ./configure --with-krb4=/usr/athena
-
-     If your system support shared libraries, but you want to built a static
-     version only, you can disable building the shared version by using:
-
-       ./configure --disable-shared
 
      If you're a curl developer and use gcc, you might want to enable more
      debug options with the --enable-debug option.

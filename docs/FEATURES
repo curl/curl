@@ -56,7 +56,7 @@ FTP
  - download
  - authentication
  - kerberos security
- - PORT or PASV
+ - active/passive using PORT, EPRT, PASV or EPSV
  - single file size information (compare to HTTP HEAD)
  - 'type=' URL support
  - dir listing
