@@ -469,7 +469,7 @@ int Curl_debug(struct SessionHandle *data, curl_infotype type,
   int rc;
   if(data->set.printhost && host) {
     char buffer[160];
-    char *t=NULL;
+    const char *t=NULL;
     switch (type) {
     case CURLINFO_HEADER_IN:
     case CURLINFO_DATA_IN:
