@@ -169,3 +169,6 @@
 
 /* Define if you have the setvbuf function.  */
 #define HAVE_SETVBUF 1
+
+/* Define if you have the RAND_screen function when using SSL  */
+#define HAVE_RAND_SCREEN 1
