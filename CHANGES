@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (8 November 2004)
+- Made the configure script check for tld.h if libidn was detected, since
+  libidn 0.3.X didn't have such a header and we don't work with anything
+  before libidn 0.4.1 anyway! Suse 9.1 apparently ships with a 0.3.X version
+  of libidn which makes the curl 7.12.2 build fail. Jean-Philippe
+  Barrette-LaPierre helped pointing this out.
+
 - Ian Gulliver reported in debian bug report #278691: if curl is invoked in an
   environment where stderr is closed the -v output will still be sent to file
   descriptor 2 which then might be the network socket handle! Now we have a

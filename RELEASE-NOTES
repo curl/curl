@@ -17,6 +17,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl -v when stderr is closed wrote debug messages to the network socket
+ o build failure with libidn 0.3.X or older
  o huge POSTs on VMS
  o configure no longer uses pkg-config on cross-compiles
  o potential gzip decompress memory leak
@@ -35,6 +37,6 @@ advice from friends like these:
 
  Peter Wullinger, Guillaume Arluison, Alexander Krasnostavsky, Mohun Biswas,
  Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia,
- Tim Sneddon
+ Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre
 
         Thanks! (and sorry if I forgot to mention someone)
