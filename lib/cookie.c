@@ -423,7 +423,7 @@ struct CookieInfo *Curl_cookie_init(char *file, struct CookieInfo *inc)
   }
   c->running = FALSE; /* this is not running, this is init */
 
-  if(strequal(file, "-")) {
+  if(file && strequal(file, "-")) {
     fp = stdin;
     fromfile=FALSE;
   }

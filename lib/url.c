@@ -503,7 +503,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Set cookie file name to dump all cookies to when we're done.
      */
-    data->set.cookiejar = cookiefile = (char *)va_arg(param, void *);
+    data->set.cookiejar = (char *)va_arg(param, void *);
+
+    /*
+     * Activate the cookie parser. This may or may not already
+     * have been made.
+     */
+    data->cookies = Curl_cookie_init(NULL, data->cookies);
     break;
   case CURLOPT_WRITEHEADER:
     /*
