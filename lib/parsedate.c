@@ -21,6 +21,8 @@
  * $Id$
  ***************************************************************************/
 /*
+  A brief summary of the date string formats this parser groks:
+
   RFC 2616 3.3.1
 
   Sun, 06 Nov 1994 08:49:37 GMT  ; RFC 822, updated by RFC 1123
@@ -33,16 +35,27 @@
   06-Nov-94 08:49:37 GMT
   Nov  6 08:49:37 1994
 
-  and without the time zone (we always assume GMT):
+  without the time zone (we always assume GMT):
 
   06 Nov 1994 08:49:37
   06-Nov-94 08:49:37
 
-  or even in weird order:
+  weird order:
 
   1994 Nov 6 08:49:37  (curl_getdate() and GNU date fails)
-  08:49:37 06-Nov-94
+  GMT 08:49:37 06-Nov-94 Sunday
   94 6 Nov 08:49:37    (curl_getdate() and GNU date fails)
+
+  time left out:
+
+  1994 Nov 6
+  06-Nov-94
+  Sun Nov 6 94
+
+  odd separators:
+
+  1994.Nov.6
+  Sun/Nov/6/94/GMT
 
 */
 #include "setup.h"
@@ -132,6 +145,7 @@ static void skip(const char **date)
     (*date)++;
 }
 
+#if 0
 #define TM_YEAR_ORIGIN 1900
 
 /* Yield A - B, measured in seconds. (from getdate.y)  */
@@ -154,6 +168,7 @@ difftm (struct tm *a, struct tm *b)
 		+ (a->tm_min - b->tm_min))
 	  + (a->tm_sec - b->tm_sec));
 }
+#endif
 
 enum assume {
   DATE_MDAY,
@@ -177,7 +192,7 @@ time_t Curl_parsedate(const char *date)
 
   int part = 0; /* max 6 parts */
 
-  while(part < 6) {
+  while(*date && (part < 6)) {
     bool found=FALSE;
 
     skip(&date);
@@ -186,7 +201,7 @@ time_t Curl_parsedate(const char *date)
       /* a name coming up */
       char buf[32]="";
       size_t len;
-      sscanf(date, "%31[^ ,\n\t-]", buf);
+      sscanf(date, "%31[A-Za-z]", buf);
       len = strlen(buf);
 
       if(wdaynum == -1) {
@@ -281,6 +296,8 @@ time_t Curl_parsedate(const char *date)
   {
     struct tm *gmt;
     long delta;
+    time_t t2;
+
 #ifdef HAVE_GMTIME_R
     /* thread-safe version */
     struct tm keeptime2;
@@ -288,7 +305,16 @@ time_t Curl_parsedate(const char *date)
 #else
     gmt = gmtime(&t); /* use gmtime_r() if available */
 #endif
+#if 0
+    /* previous involved version (that bugs?) */
     delta = difftm(&tm, gmt);
+#endif
+
+    t2 = mktime(gmt);
+    delta = t - t2;
+
+    /* if we would like to adjust to a different input time zone than GMT,
+       we would add that to the delta value right here */
 
     if(t + delta < t)
       return -1; /* time_t overflow */
