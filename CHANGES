@@ -7,6 +7,19 @@
                                History of Changes
 
 
+Daniel (16 January 2002)
+- Mofied the main transfer loop and related stuff to deal with non-blocking
+  sockets in the upload section. While doing this, I've now separated the
+  connection oriented buffers to have one for downloads and one for uploads
+  (as two can happen simultaneously). I also shrunk the buffers to 20K
+  each. As we have a scratch buffer twice the size of the upload buffer, we
+  arrived at 80K for buffers compared with the previous 150K.
+
+- Added the --cc option to curl-config command as it enables so very cool
+  one-liners. Have a go a this one, building the simple.c example:
+
+        $ `curl-config --cc --cflags --libs` -o example simple.c
+
 Daniel (14 January 2002)
 - I made all socket reads (recv) handle EWOULDBLOCK. I hope nicely. Now we
   only need to address all writes (send) too and then I'm ready for another
