@@ -163,22 +163,6 @@ if [ $CVS -eq 1 ]; then
     die
   fi
   
-  # figure out the current collected CVS status
-  newstat="../allcvs.log"
-  oldstat="../oldcvs.log"
-  find . -name Entries -exec cat {} \; > "$newstat"
-  
-  if [ -r "$oldstat" ]; then
-    # there is a previous cvs stat file to compare with
-    if { cmp "$oldstat" "$newstat"; } then
-      echo "testcurl: this is the same CVS status as before"
-      echo "testcurl: ALREADY TESTED THIS SETUP BEFORE"
-      #die
-    else
-      echo "testcurl: there has been a change in the CVS"
-    fi
-  fi
-
   # remove possible left-overs from the past
   rm -f configure
   rm -rf autom4te.cache
