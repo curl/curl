@@ -52,8 +52,14 @@
 #include <curl/mprintf.h>
 
 #ifdef USE_SSLEAY
+
+#ifdef USE_OPENSSL
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
+#else
+#include <rand.h>
+#include <x509v3.h>
+#endif
 
 #include "memory.h"
 
