@@ -7,6 +7,15 @@
                                   Changelog
 
 Daniel (7 May 2004)
+- James Bursa fixed the memanalyze.pl script to conder malloc(0) areas OK to
+  free() and he made two failed-resolve error messages use the new display-
+  name instead of the internally-used name.
+
+- Gisle Vanem tried curl with
+  www.etdomenenavnkanmaksimaltinneholdesekstitrebokstaversliksomdette.com
+  which caused problems, and I fixed the single zero byte buffer overwrite
+  that occurred.
+
 - Made the lib/curllib.dsp file get generated automaticly when a distribution
   package is made, with the msvcproj.* files as templates and all
   win32-sources added. I think this can be made to work better than the always
