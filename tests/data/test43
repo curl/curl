@@ -1,0 +1,64 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 301 This is a weirdo text message
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Location: data/110002.txt?coolsite=yes
+Connection: close
+
+This server reply is for testing a simple Location: following
+
+</data>
+<data2>
+HTTP/1.1 200 Followed here fine
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+If this is received, the location following worked
+
+</data2>
+<datacheck>
+HTTP/1.1 301 This is a weirdo text message
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Location: data/110002.txt?coolsite=yes
+Connection: close
+
+HTTP/1.1 200 Followed here fine
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+If this is received, the location following worked
+
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+ <name>
+HTTP Location: following over HTTP proxy
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/want/11 -L -x %HOSTIP:%HOSTPORT
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET http://127.0.0.1:8999/want/11 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET http://127.0.0.1:8999/want/data/110002.txt?coolsite=yes HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
