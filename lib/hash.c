@@ -34,55 +34,45 @@
 #endif
 
 
-static unsigned long 
-curl_hash_str(const char *key, unsigned int key_length)
+/* {{{ static unsigned long _hash_str (const char *, size_t)
+ */
+static unsigned long
+_hash_str (const char *key, size_t key_length)
 {
-  register unsigned long h = 0;
-  register unsigned long g;
-  register char *p = (char *) key;
-  register char *end = (char *) key + key_length;
+  char *end = (char *) key + key_length;
+  unsigned long h = 5381;
 
-  while (p < end) {
-    h = (h << 4) + *p++;
-    if ((g = (h & 0xF0000000))) {
-      h = h ^ (g >> 24);
-      h = h ^ g;
-    }
+  while (key < end) {
+    h += h << 5;
+    h ^= (unsigned long) *key++;
   }
 
   return h;
 }
+/* }}} */
 
-static unsigned long 
-curl_hash_num(unsigned long key)
-{
-  key += ~(key << 15);
-  key ^= (key >> 10);
-  key += (key << 3);
-  key ^= (key >> 6);
-  key += (key << 11);
-  key ^= (key >> 16);
-
-  return key;
-}
-
+/* {{{ static void _hash_element_dtor (void *, void *)
+ */
 static void 
-hash_element_dtor(void *u, void *ele)
+_hash_element_dtor (void *user, void *element)
 {
-  curl_hash_element *e = (curl_hash_element *) ele; 
-  curl_hash         *h = (curl_hash *) u; 
-	
-  if (e->key.type == CURL_HASH_KEY_IS_STRING) {
-    free(e->key.value.str.val);
+  curl_hash         *h = (curl_hash *) user;
+  curl_hash_element *e = (curl_hash_element *) element;
+
+  if (e->key) {
+    free(e->key);
   }
+
   h->dtor(e->ptr);
 
   free(e);
-  e = NULL;
 }
+/* }}} */
 
+/* {{{ void curl_hash_init (curl_hash *, int, curl_hash_dtor)
+ */
 void 
-curl_hash_init(curl_hash *h, int slots, curl_hash_dtor dtor)
+curl_hash_init (curl_hash *h, int slots, curl_hash_dtor dtor)
 {
   int i;
 
@@ -91,115 +81,108 @@ curl_hash_init(curl_hash *h, int slots, curl_hash_dtor dtor)
   h->slots = slots;  
 
   h->table = (curl_llist **) malloc(slots * sizeof(curl_llist *));
-  for (i = 0; i < h->slots; ++i) {
-    h->table[i] = curl_llist_alloc((curl_llist_dtor) hash_element_dtor);
+  for (i = 0; i < slots; ++i) {
+    h->table[i] = curl_llist_alloc((curl_llist_dtor) _hash_element_dtor);
   }
 }
+/* }}} */
 
+/* {{{ curl_hash *curl_hash_alloc (int, curl_hash_dtor)
+ */
 curl_hash *
-curl_hash_alloc(int slots, curl_hash_dtor dtor)
+curl_hash_alloc (int slots, curl_hash_dtor dtor)
 {
   curl_hash *h;
 
-  h = (curl_hash *)malloc(sizeof(curl_hash));
-  if(NULL == h)
+  h = (curl_hash *) malloc(sizeof(curl_hash));
+  if (NULL == h)
     return NULL;
 
   curl_hash_init(h, slots, dtor);
 
   return h;
 }
+/* }}} */
 
-#define FIND_SLOT(__h, __s_key, __s_key_len, __n_key) \
-  ((__s_key ? curl_hash_str(__s_key, __s_key_len) : curl_hash_num(__n_key)) % (__h)->slots)
-
-#define KEY_CREATE(__k, __s_key, __s_key_len, __n_key, __dup) \
-  if (__s_key) { \
-    if (__dup) { \
-      (__k)->value.str.val = (char *) malloc(__s_key_len); \
-      memcpy((__k)->value.str.val, __s_key, __s_key_len); \
-    } else { \
-      (__k)->value.str.val = __s_key; \
-    } \
-    (__k)->value.str.len = __s_key_len; \
-    (__k)->type = CURL_HASH_KEY_IS_STRING; \
-  } else { \
-    (__k)->value.num = __n_key; \
-    (__k)->type = CURL_HASH_KEY_IS_NUM; \
-  }
-
-#define MIN(a, b) (a > b ? b : a)
-
+/* {{{ static int _hash_key_compare (char *, size_t, char *, size_t)
+ */
 static int 
-curl_hash_key_compare(curl_hash_key *key1, curl_hash_key *key2)
+_hash_key_compare (char *key1, size_t key1_len, char *key2, size_t key2_len)
 {
-  if (key1->type == CURL_HASH_KEY_IS_NUM) {
-    if (key2->type == CURL_HASH_KEY_IS_STRING)
-      return 0;
-
-    if (key1->value.num == key2->value.num)
-      return 1;
-  } else {
-    if (key2->type == CURL_HASH_KEY_IS_NUM)
-      return 0;
-
-    if (memcmp(key1->value.str.val, key2->value.str.val, 
-               MIN(key1->value.str.len, key2->value.str.len)) == 0)
-      return 1;
+  if (key1_len == key2_len && 
+      *key1 == *key2 &&
+      memcmp(key1, key2, key1_len) == 0) {
+    return 1;
   }
 
   return 0;
 }
+/* }}} */
 
-int 
-curl_hash_add_or_update(curl_hash *h, char *str_key, unsigned int str_key_len, 
-                        unsigned long num_key, const void *p)
+/* {{{ static int _mk_hash_element (curl_hash_element **, char *, size_t, const void *)
+ */
+static int
+_mk_hash_element (curl_hash_element **e, char *key, size_t key_len, const void *p)
 {
-  curl_hash_element  *e;
-  curl_hash_key       tmp;
-  curl_llist         *l; 
-  curl_llist_element *le;
-  int                slot;
+  *e = (curl_hash_element *) malloc(sizeof(curl_hash_element));
+  (*e)->key = strdup(key);
+  (*e)->key_len = key_len;
+  (*e)->ptr = (void *) p;
 
-  slot = FIND_SLOT(h, str_key, str_key_len, num_key);
-  l = h->table[slot];
-  KEY_CREATE(&tmp, str_key, str_key_len, num_key, 0);
-  for (le = CURL_LLIST_HEAD(l); le != NULL; le = CURL_LLIST_NEXT(le)) {
-    if (curl_hash_key_compare(&tmp, &((curl_hash_element *) CURL_LLIST_VALP(le))->key)) {
-      curl_hash_element *to_update = CURL_LLIST_VALP(le);
-      h->dtor(to_update->ptr);
-      to_update->ptr = (void *) p;
+  return 0;
+}
+/* }}} */
+
+#define find_slot(__h, __k, __k_len) (_hash_str(__k, __k_len) % (__h)->slots)
+
+#define FETCH_LIST \
+  curl_llist *l = h->table[find_slot(h, key, key_len)]
+
+
+/* {{{ int curl_hash_add (curl_hash *, char *, size_t, const void *)
+ */
+int 
+curl_hash_add (curl_hash *h, char *key, size_t key_len, const void *p)
+{
+  curl_hash_element  *he;
+  curl_llist_element *le;
+  FETCH_LIST;
+
+  for (le = CURL_LLIST_HEAD(l);
+       le != NULL;
+       le = CURL_LLIST_NEXT(le)) {
+    he = (curl_hash_element *) CURL_LLIST_VALP(le);
+    if (_hash_key_compare(he->key, he->key_len, key, key_len)) {
+      h->dtor(he->ptr);
+      he->ptr = (void *) p;
       return 1;
     }
   }
 
-  e = (curl_hash_element *) malloc(sizeof(curl_hash_element));
-  KEY_CREATE(&e->key, str_key, str_key_len, num_key, 1);
-  e->ptr = (void *) p;
+  if (_mk_hash_element(&he, key, key_len, p) != 0) 
+    return 0;
 
-  if (curl_llist_insert_next(l, CURL_LLIST_TAIL(l), e)) {
+  if (curl_llist_insert_next(l, CURL_LLIST_TAIL(l), he)) {
     ++h->size;
     return 1;
-  } else {
-    return 0;
   }
+
+  return 0;
 }
+/* }}} */
 
 int 
-curl_hash_extended_delete(curl_hash *h, char *str_key, unsigned int str_key_len, 
-                          unsigned long num_key)
+curl_hash_delete(curl_hash *h, char *key, size_t key_len)
 {
-  curl_llist         *l;
+  curl_hash_element  *he;
   curl_llist_element *le;
-  curl_hash_key       tmp;
-  int                slot;
+  FETCH_LIST;
 
-  slot = FIND_SLOT(h, str_key, str_key_len, num_key);
-  l = h->table[slot];
-
-  KEY_CREATE(&tmp, str_key, str_key_len, num_key, 0);
-  for (le = CURL_LLIST_HEAD(l); le != NULL; le = CURL_LLIST_NEXT(le)) {
-    if (curl_hash_key_compare(&tmp, &((curl_hash_element *) CURL_LLIST_VALP(le))->key)) {
+  for (le = CURL_LLIST_HEAD(l);
+       le != NULL;
+       le = CURL_LLIST_NEXT(le)) {
+    he = CURL_LLIST_VALP(le);
+    if (_hash_key_compare(he->key, he->key_len, key, key_len)) {
       curl_llist_remove(l, le, (void *) h);
       --h->size;
       return 1;
@@ -210,21 +193,18 @@ curl_hash_extended_delete(curl_hash *h, char *str_key, unsigned int str_key_len,
 }
 
 int 
-curl_hash_extended_find(curl_hash *h, char *str_key, unsigned int str_key_len, 
-                        unsigned long num_key, void **p)
+curl_hash_find(curl_hash *h, char *key, size_t key_len, void **p)
 {
-  curl_llist         *l;
   curl_llist_element *le;
-  curl_hash_key       tmp;
-  int                slot;
+  curl_hash_element  *he;
+  FETCH_LIST;
 
-  slot = FIND_SLOT(h, str_key, str_key_len, num_key);
-  l = h->table[slot];
-
-  KEY_CREATE(&tmp, str_key, str_key_len, num_key, 0);
-  for (le = CURL_LLIST_HEAD(l); le != NULL; le = CURL_LLIST_NEXT(le)) {
-    if (curl_hash_key_compare(&tmp, &((curl_hash_element *) CURL_LLIST_VALP(le))->key)) {
-      *p = ((curl_hash_element *) CURL_LLIST_VALP(le))->ptr;
+  for (le = CURL_LLIST_HEAD(l);
+       le != NULL;
+       le = CURL_LLIST_NEXT(le)) {
+    he = CURL_LLIST_VALP(le);
+    if (_hash_key_compare(he->key, he->key_len, key, key_len)) {
+      *p = he->ptr;
       return 1;
     }
   }
@@ -255,7 +235,6 @@ curl_hash_clean(curl_hash *h)
   }
 
   free(h->table);
-  h->table = NULL;
 }
 
 size_t 
@@ -267,13 +246,11 @@ curl_hash_count(curl_hash *h)
 void 
 curl_hash_destroy(curl_hash *h)
 {
-  if (!h) {
+  if (!h)
     return;
-  }
 
   curl_hash_clean(h);
   free(h);
-  h = NULL;
 }
 
 /*
