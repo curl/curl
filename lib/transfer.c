@@ -367,6 +367,12 @@ Transfer(struct connectdata *c_conn)
                     return CURLE_HTTP_NOT_FOUND;
                   }
                   data->progress.httpcode = code;
+                  data->progress.httpversion = httpversion;
+                  if(httpversion == 0)
+                    /* Default action for HTTP/1.0 must be to close, unless
+                       we get one of those fancy headers that tell us the
+                       server keeps it open for us! */
+                    conn->bits.close = TRUE;
                 }
                 else {
                   header = FALSE;	/* this is not a header line */
@@ -378,6 +384,18 @@ Transfer(struct connectdata *c_conn)
                   sscanf (p+14, ": %ld", &contentlength)) {
                 conn->size = contentlength;
                 Curl_pgrsSetDownloadSize(data, contentlength);
+              }
+              else if((httpversion == 0) &&
+                      conn->bits.httpproxy &&
+                      strnequal("Proxy-Connection: keep-alive", p,
+                                strlen("Proxy-Connection: keep-alive"))) {
+                /*
+                 * When a HTTP/1.0 reply comes when using a proxy, the
+                 * 'Proxy-Connection: keep-alive' line tells us the
+                 * connection will be kept alive for our pleasure.
+                 * Default action for 1.0 is to close.
+                 */
+                conn->bits.close = FALSE; /* don't close when done */
               }
               else if (strnequal("Connection: close", p,
                                  strlen("Connection: close"))) {
