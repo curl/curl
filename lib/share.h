@@ -26,6 +26,7 @@
 
 #include "setup.h"
 #include <curl/curl.h>
+#include "cookie.h"
 
 /* this struct is libcurl-private, don't export details */
 struct Curl_share {
@@ -37,6 +38,7 @@ struct Curl_share {
   void *clientdata;
 
   curl_hash *hostcache;
+  struct CookieInfo *cookies;
 };
 
 CURLSHcode Curl_share_lock (

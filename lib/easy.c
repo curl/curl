@@ -76,6 +76,7 @@
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
+#include "share.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -233,15 +234,18 @@ CURLcode curl_easy_perform(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
 
-  if (Curl_global_host_cache_use(data) && data->hostcache != Curl_global_host_cache_get()) {
-    if (data->hostcache) {
-      Curl_hash_destroy(data->hostcache);
-    }
-    data->hostcache = Curl_global_host_cache_get();
-  }
+  if ( ! (data->share && data->share->hostcache) ) {
 
-  if (!data->hostcache) {
-    data->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
+    if (Curl_global_host_cache_use(data) &&
+        data->hostcache != Curl_global_host_cache_get()) {
+      if (data->hostcache)
+        Curl_hash_destroy(data->hostcache);
+      data->hostcache = Curl_global_host_cache_get();
+    }
+
+    if (!data->hostcache)
+      data->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
+
   }
   
   return Curl_perform(data);
@@ -250,8 +254,10 @@ CURLcode curl_easy_perform(CURL *curl)
 void curl_easy_cleanup(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
-  if (!Curl_global_host_cache_use(data)) {
-    Curl_hash_destroy(data->hostcache);
+  if ( ! (data->share && data->share->hostcache) ) {
+    if ( !Curl_global_host_cache_use(data)) {
+      Curl_hash_destroy(data->hostcache);
+    }
   }
   Curl_close(data);
 }

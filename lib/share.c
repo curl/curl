@@ -76,6 +76,9 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
         break;
 
       case CURL_LOCK_DATA_COOKIE:
+        if (!share->cookies) {
+          share->cookies = Curl_cookie_init( NULL, NULL, TRUE );
+        }
         break;
 
       case CURL_LOCK_DATA_SSL_SESSION:
@@ -103,6 +106,10 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
         break;
 
       case CURL_LOCK_DATA_COOKIE:
+        if (share->cookies) {
+          Curl_cookie_cleanup(share->cookies);
+          share->cookies = NULL;
+        }
         break;
 
       case CURL_LOCK_DATA_SSL_SESSION:
@@ -144,6 +151,12 @@ CURLSHcode curl_share_cleanup(CURLSH *sh)
   if (share->dirty)
     return CURLSHE_IN_USE;
 
+  if(share->hostcache)
+    Curl_hash_destroy(share->hostcache);
+
+  if(share->cookies)
+    Curl_cookie_cleanup(share->cookies);
+
   free (share);
   
   return CURLSHE_OK;
@@ -151,7 +164,8 @@ CURLSHcode curl_share_cleanup(CURLSH *sh)
 
 
 CURLSHcode
-Curl_share_lock(struct SessionHandle *data, curl_lock_data type, curl_lock_access access)
+Curl_share_lock(struct SessionHandle *data, curl_lock_data type,
+                curl_lock_access access)
 {
   struct Curl_share *share = data->share;
 

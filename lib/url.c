@@ -191,10 +191,6 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_SSL_Close_All(data);
 #endif
 
-  /* No longer a dirty share, if it exists */
-  if (data->share)
-    data->share->dirty--;
-
   if(data->change.cookielist) /* clean up list if any */
     curl_slist_free_all(data->change.cookielist);
 
@@ -213,13 +209,17 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_safefree(data->state.headerbuff);
 
 #ifndef CURL_DISABLE_HTTP
+  Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
   if(data->set.cookiejar) {
     /* we have a "destination" for all the cookies to get dumped to */
     if(Curl_cookie_output(data->cookies, data->set.cookiejar))
       infof(data, "WARNING: failed to save cookies in given jar\n");
   }
 
-  Curl_cookie_cleanup(data->cookies);
+  if( !data->share || (data->cookies != data->share->cookies) ) {
+    Curl_cookie_cleanup(data->cookies);
+  }
+  Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
 #endif
 
   /* free the connection cache */
@@ -228,6 +228,10 @@ CURLcode Curl_close(struct SessionHandle *data)
   Curl_safefree(data->info.contenttype);
 
   Curl_digest_cleanup(data);
+
+  /* No longer a dirty share, if it exists */
+  if (data->share)
+    data->share->dirty--;
 
   free(data);
   return CURLE_OK;
@@ -1148,34 +1152,56 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     {
       struct Curl_share *set;
       set = va_arg(param, struct Curl_share *);
-      if(data->share)
-      {
+
+      /* disconnect from old share, if any */
+      if(data->share) {
         Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
 
-        /* checking the dns cache stuff */
         if(data->share->hostcache == data->hostcache)
-        {
           data->hostcache = NULL;
-        }
+
+        if(data->share->cookies == data->cookies)
+          data->cookies = NULL;
 
         data->share->dirty--;
 
         Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
+        data->share = NULL;
       }
 
+      /* use new share if it set */
       data->share = set;
+      if(data->share) {
 
-      Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
+        Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
 
-      data->share->dirty++;
+        data->share->dirty++;
 
-      if( data->hostcache )
-      {
-        Curl_hash_destroy(data->hostcache);
-        data->hostcache = data->share->hostcache;
+        if(data->share->hostcache) {
+          /* use shared host cache, first free own one if any */
+          if(data->hostcache)
+            Curl_hash_destroy(data->hostcache);
+
+          data->hostcache = data->share->hostcache;
+        }
+        
+        if(data->share->cookies) {
+          /* use shared cookie list, first free own one if any */
+          if (data->cookies)
+            Curl_cookie_cleanup(data->cookies);
+          data->cookies = data->share->cookies;
+        }
+
+        Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
+        
       }
 
-      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
+      /* check cookie list is set */
+      if(!data->cookies)
+        data->cookies = Curl_cookie_init( NULL, NULL, TRUE );
+      
+      /* check for host cache not needed,
+       * it will be done by curl_easy_perform */ 
     }
     break;
 

@@ -707,12 +707,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
             else if(data->cookies &&
                     checkprefix("Set-Cookie:", k->p)) {
+              Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
               Curl_cookie_add(data->cookies, TRUE, k->p+11,
                               /* If there is a custom-set Host: name, use it
                                  here, or else use real peer host name. */
                               conn->allocptr.cookiehost?
                               conn->allocptr.cookiehost:conn->name,
                               conn->ppath);
+              Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
             }
             else if(checkprefix("Last-Modified:", k->p) &&
                     (data->set.timecondition || data->set.get_filetime) ) {
@@ -1509,12 +1511,14 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
      do it now! */
   if(data->change.cookielist) {
     struct curl_slist *list = data->change.cookielist;
+    Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
     while(list) {
       data->cookies = Curl_cookie_init(list->data,
                                        data->cookies,
                                        data->set.cookiesession);
       list = list->next;
     }
+    Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     curl_slist_free_all(data->change.cookielist); /* clean up list */
     data->change.cookielist = NULL; /* don't do this again! */
   }
