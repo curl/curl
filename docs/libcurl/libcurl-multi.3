@@ -1,0 +1,80 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" $Id$
+.\"
+.TH libcurl-multi 5 "19 March 2001" "libcurl 7.9.5" "libcurl multi interface"
+.SH NAME
+libcurl-multi \- how to use the multi interface
+.SH DESCRIPTION
+This is an overview on how to use the libcurl multi interface in your C
+programs. There are specific man pages for each function mentioned in
+here. There's also the libcurl-the-guide document for a complete tutorial to
+programming with libcurl and the \fIlibcurl(3)\fP man page for an overview of
+the libcurl easy interface.
+
+All functions in the multi interface are prefixed with curl_multi.
+.SH "OBJECTIVES"
+The multi interface introduces several new abilities that the easy interface
+refuses to offer. They are mainly:
+
+1. Enable a "pull" interface. The application that uses libcurl decides where
+and when to ask libcurl to get/send data.
+
+2. Enable multiple simultaneous transfers in the same thread without making it
+complicated for the application.
+
+3. Enable the application to select() on its own file descriptors and curl's
+file descriptors simultaneous easily.
+.SH "ONE MULTI HANDLE MANY EASY HANDLES"
+To use the multi interface, you must first create a 'multi handle' with
+\fIcurl_multi_init\fP. This handle is then used as input to all further
+curl_multi_* functions.
+
+Each single transfer is built up with an easy handle. You must create them,
+and setup the appropriate options for each easy handle, as outlined in the
+\fIlibcurl(3)\fP man page.
+
+When the easy handle is setup for a transfer, then instead of using
+\fIcurl_easy_perform\fP (as when using the easy interface for transfers), you
+should instead add the easy handle to the multi handle using
+\fIcurl_easy_add_handl\fP. The multi handle is sometimes referred to as a
+\'multi stack\' because of the fact that it may hold a large amount of easy
+handles.
+
+Should you change your mind, the easy handle is again removed from the multi
+stack using \fIcurl_multi_remove_handle\fP. Once removed from the multi
+handle, you can again use other easy interface functions like
+curl_easy_perform or whatever you think is necessary.
+
+Adding the easy handles to the multi handle does not start any
+transfer. Remember that one of the main ideas with this interface is to let
+your application drive. You drive the transfers by invoking
+\fIcurl_multi_perform\fP. libcurl will then transfer data if there is anything
+available to transfer. It'll use the callbacks and everything else you have
+setup in the individual easy handles. It'll transfer data on all current
+transfers in the multi stack that are ready to transfer anything. It may be
+all, it may be none.
+
+Your application can acquire knowledge from libcurl when it would like to get
+invoked to transfer data, so that you don't have to busy-loop and call that
+\fIcurl_multi_perform\fP like a mad man! \fIcurl_multi_fdset\fP offers an
+interface using which you can extract fd_sets from libcurl to use in select()
+or poll() calls in order to get to know when the transfers in the multi stack
+might need attention. This also makes it very easy for your program to wait
+for input on your own private file descriptors at the same time or perhaps
+timeout every now and then, should you want that.
+
+\fIcurl_multi_perform\fP stores the number of still running transfers in one
+of its input arguments, and by reading that you can figure out when all the
+transfers in the multi handles are done. 'done' does not mean successful. One
+or more of the transfers may have failed.
+
+To get information about completed transfers, to figure out success or not and
+similar, \fIcurl_multi_info_read\fP should be called. It can return a message
+about a current or previous transfer. Repeated invokes of the function get
+more messages until the message queue is empty.
+
+When all transfers in the multi stack are done, cleanup the multi handle with
+\fIcurl_multi_cleanup\fP. Be careful and please note that you \fBMUST\fP
+invoke separate \fIcurl_easy_cleanup\fP calls on every single easy handle to
+clean them up properly.
