@@ -247,9 +247,11 @@ static void help(void)
        "    --data-ascii <data>   HTTP POST ASCII data (H)\n"
        "    --data-binary <data>  HTTP POST binary data (H)\n"
        " -D/--dump-header <file> Write the headers to this file\n"
+       "    --egd-file <file> EGD socket path for random data (SSL)\n"
        " -e/--referer       Referer page (H)");
   puts(" -E/--cert <cert[:passwd]> Specifies your certificate file and password (HTTPS)\n"
        "    --cacert <file> CA certifciate to verify peer against (HTTPS)\n"
+       "    --connect-timeout <seconds> Maximum time allowed for connection\n"
        " -f/--fail          Fail silently (no output at all) on errors (H)\n"
        " -F/--form <name=content> Specify HTTP POST data (H)\n"
        " -g/--globoff       Disable URL sequences and ranges using {} and []\n"
@@ -275,6 +277,7 @@ static void help(void)
   puts(" -r/--range <range> Retrieve a byte range from a HTTP/1.1 or FTP server\n"
        " -s/--silent        Silent mode. Don't output anything\n"
        " -S/--show-error    Show error. With -s, make curl show errors when they occur\n"
+       "    --stderr <file> Where to redirect stderr. - means stdout.\n"
        " -t/--telnet-option <OPT=val> Set telnet option\n"
        " -T/--upload-file <file> Transfer/upload <file> to remote site\n"
        "    --url <URL>     Another way to specify URL to work with");
@@ -284,6 +287,7 @@ static void help(void)
        " -V/--version       Outputs version number then quits\n"
        " -w/--write-out [format] What to output after completion\n"
        " -x/--proxy <host[:port]>  Use proxy. (Default port is 1080)\n"
+       "    --random-file <file> File to use for reading random data from (SSL)\n"
        " -X/--request <command> Specific request command to use");
   puts(" -y/--speed-time    Time needed to trig speed-limit abort. Defaults to 30\n"
        " -Y/--speed-limit   Stop transfer if below speed-limit for 'speed-time' secs\n"
@@ -292,10 +296,7 @@ static void help(void)
        " -2/--sslv2         Force usage of SSLv2 (H)\n"
        " -3/--sslv3         Force usage of SSLv3 (H)");
   puts(" -#/--progress-bar  Display transfer progress as a progress bar\n"
-       "    --crlf          Convert LF to CRLF in upload. Useful for MVS (OS/390)\n"
-       "    --stderr <file> Where to redirect stderr. - means stdout.\n"
-       "    --random-file <file> File to use for reading random data from (SSL)\n"
-       "    --egd-file <file> EGD socket path for random data (SSL)");
+       "    --crlf          Convert LF to CRLF in upload. Useful for MVS (OS/390)");
 }
 
 struct LongShort {
@@ -315,6 +316,7 @@ struct Configurable {
   long postfieldsize;
   char *referer;
   long timeout;
+  long connecttimeout;
   long maxredirs;
   char *headerfile;
   char *ftpport;
@@ -528,6 +530,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5", "url",         TRUE},
     {"5a", "random-file", TRUE},
     {"5b", "egd-file",   TRUE},
+    {"5c", "connect-timeout", TRUE},
 
     {"2", "sslv2",       FALSE},
     {"3", "sslv3",       FALSE},
@@ -683,6 +686,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'b': /* egd-file */
         GetStr(&config->egd_file, nextarg);
+        break;
+      case 'c': /* connect-timeout */
+        config->connecttimeout=atoi(nextarg);
         break;
       default: /* the URL! */
         {
@@ -1839,6 +1845,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       /* new in libcurl 7.7: */
       curl_easy_setopt(curl, CURLOPT_RANDOM_FILE, config->random_file);
       curl_easy_setopt(curl, CURLOPT_EGDSOCKET, config->egd_file);
+      curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, config->connecttimeout);
       
       res = curl_easy_perform(curl);
         
