@@ -67,6 +67,25 @@
 #include <unistd.h>
 #endif
 
+#ifndef HAVE_STRDUP
+/* Ultrix doesn't have strdup(), so make a quick clone: */
+char *strdup(char *str)
+{
+  int len;
+  char *newstr;
+
+  len = strlen(str);
+  newstr = (char *) malloc((len+1)*sizeof(char));
+  if (!newstr)
+    return (char *)NULL;
+
+  strcpy(newstr,str);
+
+  return newstr;
+
+}
+#endif 
+
 extern void hugehelp(void);
 
 static void helpf(char *fmt, ...)
@@ -109,6 +128,7 @@ static void help(void)
        " -m/--max-time <seconds> Maximum time allowed for the transfer\n"
        " -M/--manual        Display huge help text\n"
        " -n/--netrc         Read .netrc for user name and password\n"
+       " -N/--no-buffer     Disables the buffering of the output stream\n"
        " -o/--output <file> Write output to <file> instead of stdout\n"
        " -O/--remote-name   Write output to a file named as the remote file\n"
 #if 0
@@ -177,6 +197,7 @@ struct Configurable {
   char *cookiefile;
   char *customrequest;
   bool progressmode;
+  bool nobuffer;
 
   char *writeout; /* %-styled format string to output */
 
@@ -288,6 +309,7 @@ static int getparameter(char *flag, /* f or -long-flag */
     {"m", "max-time",    TRUE},
     {"M", "manual",      FALSE},
     {"n", "netrc",       FALSE},
+    {"N", "no-buffer",   FALSE},
     {"o", "output",      TRUE},
     {"O", "remote-name", FALSE},
 #if 0
@@ -573,6 +595,10 @@ static int getparameter(char *flag, /* f or -long-flag */
 	 automatically enfore user+password with the request */
       config->conf ^= CONF_NETRC;
       break;
+    case 'N':
+      /* disable the output I/O buffering */
+      config->nobuffer ^= 1;
+      break;
     case 'o':
       /* output file */
       GetStr(&config->outfile, nextarg); /* write to this file */
@@ -806,6 +832,9 @@ struct OutStruct {
   FILE *stream;
 };
 
+/* having this global is a bit dirty, but hey, who said we weren't? ;-) */
+struct Configurable config;
+
 int my_fwrite(void *buffer, size_t size, size_t nmemb, FILE *stream)
 {
   struct OutStruct *out=(struct OutStruct *)stream;
@@ -814,6 +843,12 @@ int my_fwrite(void *buffer, size_t size, size_t nmemb, FILE *stream)
     out->stream=fopen(out->filename, "wb");
     if(!out->stream)
       return -1; /* failure */
+    if(config.nobuffer) {
+      /* disable output buffering */
+#ifdef HAVE_SETVBUF
+      setvbuf(out->stream, NULL, _IONBF, 0);
+#endif
+    }
   }
   return fwrite(buffer, size, nmemb, out->stream);
 }
@@ -841,7 +876,6 @@ int main(int argc, char *argv[])
 
   int res=URG_OK;
   int i;
-  struct Configurable config;
 
   outs.stream = stdout;
 
