@@ -229,13 +229,15 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
       int count=0;
       /* now loop through all cookies that matched */
       while(co) {
-        if(0 == count) {
+        if(co->value && strlen(co->value)) {
+          if(0 == count) {
+            sendf(data->firstsocket, data,
+                  "Cookie: ");
+          }
+          count++;
           sendf(data->firstsocket, data,
-                "Cookie: ");
+                "%s=%s;", co->name, co->value);
         }
-        count++;
-        sendf(data->firstsocket, data,
-              "%s=%s;", co->name, co->value);
         co = co->next; /* next cookie please */
       }
       if(count) {
