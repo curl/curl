@@ -36,6 +36,7 @@ TOPDIR   = ..
 CURNTDIR = .
 
 CXXFLAGS = -q -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
+LIBFLAGS = /C /P32
 LDFLAGS  = -q -lq -laa -tWD
 
 INCDIRS  = -I$(CURNTDIR);$(TOPDIR)/include
@@ -73,7 +74,10 @@ clean:
 
 $(LIBCURLLIB): $(OBJECTS)
 	@-$(RM) $@
-	$(LIB) $@ /a $**
+	$(LIB) $(LIBFLAGS) $@ @&&!
++$(**: = &^
++)
+!
 
 $(LIBCURLDLL): $(OBJECTS) $(LINKLIB)
 	@-$(RM) $@
