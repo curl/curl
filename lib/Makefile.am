@@ -5,12 +5,6 @@
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
 lib_LTLIBRARIES = libcurl.la
-include_HEADERS = \
-	$(top_srcdir)/include/curl/curl.h \
-	$(top_srcdir)/include/curl/easy.h \
-	$(top_srcdir)/include/curl/mprintf.h \
-	$(top_srcdir)/include/curl/stdcheaders.h \
-	$(top_srcdir)/include/curl/types.h
 
 # Some flags needed when trying to cause warnings ;-)
 # CFLAGS = -g -Wall #-pedantic
