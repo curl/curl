@@ -6,6 +6,39 @@
 
                                History of Changes
 
+Daniel (15 November 2000)
+- Using certain characters in usernames or passwords for HTTP authentication
+  failed. This was due to the mprintf() that had a silly check for letters,
+  and if they weren't isprint() they weren't outputed "as-is". This caused
+  passwords and usernames using '§' (for example) to fail.
+
+Version 7.4.2
+
+Daniel (15 November 2000)
+- 'tests/runtests.pl' now sorts the test cases properly when 'all' is used.
+
+Daniel (14 November 2000)
+- I fell over the draft-ietf-ftpext-mlst-12.txt Internet Draft titled
+  "Extensions to FTP" that contains a defined way how the ftp command SIZE
+  could be assumed to work.
+
+- Laurent Papier posted a bug report about using "-C -" and FTP uploading a
+  file that isn't prsent on the server. The server might then return a 550 and
+  curl will fail. Should it instead as Laurent Papier suggests, start
+  uploading from the beginning as a normal upload?
+
+Daniel (13 November 2000)
+- Fixed a crash with the followlocation counter.
+
+- While writing test cases for the test suite, I discovered an old limitation
+  that prevented -o and -T to be used at the same time. I removed this
+  immediately as this has no relevance in the current libcurl.
+  
+- Chris Faherty fixed a free-twice problem in lib/file.c
+
+- I fixed the perl http server problem in the test suite.
+
+Version 7.4.2 pre4
 
 Daniel (10 November 2000)
 - I've (finally) started working on the curl test suite. It is in the new

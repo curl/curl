@@ -73,3 +73,11 @@ packages/Linux/RPM/make_curl_rpm
 packages/Linux/RPM/README
 packages/Win32/README
 packages/README
+tests/Makefile.am
+tests/data/*
+tests/runtests.pl
+tests/Makefile.in
+tests/README
+tests/httpserver.pl
+
+
