@@ -122,6 +122,19 @@ static unsigned int ConnectionStore(struct UrlData *data,
                                     struct connectdata *conn);
 
 
+#if !defined(WIN32)||defined(__CYGWIN32__)
+#ifndef RETSIGTYPE
+#define RETSIGTYPE void
+#endif
+static
+RETSIGTYPE alarmfunc(int signal)
+{
+  /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
+  (void)signal;
+  return;
+}
+#endif
+
 CURLcode Curl_close(CURL *curl)
 {
   struct UrlData *data=(struct UrlData *)curl;
@@ -186,6 +199,9 @@ CURLcode Curl_open(CURL **curl, char *url)
 {
   /* We don't yet support specifying the URL at this point */
   struct UrlData *data;
+#ifdef HAVE_SIGACTION
+  struct sigaction sigact;
+#endif
 
   /* Very simple start-up: alloc the struct, init it with zeroes and return */
   data = (struct UrlData *)malloc(sizeof(struct UrlData));
@@ -234,6 +250,26 @@ CURLcode Curl_open(CURL **curl, char *url)
     memset(data->connects, 0, sizeof(struct connectdata *)*data->numconnects);
 
     *curl = data;
+
+    /*************************************************************
+     * Set signal handler
+     *************************************************************/
+#ifdef HAVE_SIGACTION
+    sigaction(SIGALRM, NULL, &sigact);
+    sigact.sa_handler = alarmfunc;
+#ifdef SA_RESTART
+    /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
+    sigact.sa_flags &= ~SA_RESTART;
+#endif
+    sigaction(SIGALRM, &sigact, NULL);
+#else
+    /* no sigaction(), revert to the much lamer signal() */
+#ifdef HAVE_SIGNAL
+    signal(SIGALRM, alarmfunc);
+#endif
+
+#endif
+
     return CURLE_OK;
   }
 
@@ -595,6 +631,12 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
      */
     data->timeout = va_arg(param, long);
     break;
+  case CURLOPT_CONNECTTIMEOUT:
+    /*
+     * The maximum time you allow curl to use to connect.
+     */
+    data->connecttimeout = va_arg(param, long);
+    break;
   case CURLOPT_MAXREDIRS:
     /*
      * The maximum amount of hops you allow curl to follow Location:
@@ -747,19 +789,6 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
   }
   return CURLE_OK;
 }
-
-#if !defined(WIN32)||defined(__CYGWIN32__)
-#ifndef RETSIGTYPE
-#define RETSIGTYPE void
-#endif
-static
-RETSIGTYPE alarmfunc(int signal)
-{
-  /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
-  (void)signal;
-  return;
-}
-#endif
 
 CURLcode Curl_disconnect(struct connectdata *conn)
 {
@@ -1246,9 +1275,6 @@ static CURLcode Connect(struct UrlData *data,
   struct connectdata *conn;
   struct connectdata *conn_temp;
   char endbracket;
-#ifdef HAVE_SIGACTION
-  struct sigaction sigact;
-#endif
   int urllen;
 
   /*************************************************************
@@ -1387,25 +1413,6 @@ static CURLcode Connect(struct UrlData *data,
   }
 
   buf = data->buffer; /* this is our buffer */
-
-  /*************************************************************
-   * Set signal handler
-   *************************************************************/
-#ifdef HAVE_SIGACTION
-  sigaction(SIGALRM, NULL, &sigact);
-  sigact.sa_handler = alarmfunc;
-#ifdef SA_RESTART
-  /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
-  sigact.sa_flags &= ~SA_RESTART;
-#endif
-  sigaction(SIGALRM, &sigact, NULL);
-#else
-  /* no sigaction(), revert to the much lamer signal() */
-#ifdef HAVE_SIGNAL
-  signal(SIGALRM, alarmfunc);
-#endif
-
-#endif
 
   /*************************************************************
    * Take care of user and password authentication stuff
@@ -1603,11 +1610,16 @@ static CURLcode Connect(struct UrlData *data,
   /*************************************************************
    * Set timeout if that is being used
    *************************************************************/
-  if(data->timeout) {
+  if(data->timeout || data->connecttimeout) {
     /* We set the timeout on the connection/resolving phase first, separately
      * from the download/upload part to allow a maximum time on everything */
-    myalarm(data->timeout); /* this sends a signal when the timeout fires
-			       off, and that will abort system calls */
+
+    /* myalarm() makes a signal get sent when the timeout fires off, and that
+       will abort system calls */
+    if(data->connecttimeout)
+      myalarm(data->connecttimeout);
+    else
+      myalarm(data->timeout);
   }
 
   /*************************************************************

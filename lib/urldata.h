@@ -496,8 +496,9 @@ struct UrlData {
   curl_passwd_callback fpasswd;
   void *passwd_client; /* pointer to pass to the passwd callback */
 
-  long timeout; /* in seconds, 0 means no timeout */
-  long infilesize; /* size of file to upload, -1 means unknown */
+  long timeout;        /* in seconds, 0 means no timeout */
+  long connecttimeout; /* in seconds, 0 means no timeout */
+  long infilesize;     /* size of file to upload, -1 means unknown */
 
   char buffer[BUFSIZE+1]; /* buffer with size BUFSIZE */
 
