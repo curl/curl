@@ -292,6 +292,8 @@ void Curl_SSL_cleanup(void)
     /* EVP_cleanup() removes all ciphers and digests from the
        table. */
     EVP_cleanup();
+
+    init_ssl=0; /* not inited any more */
   }
 #else
   /* SSL disabled, do nothing */
