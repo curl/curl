@@ -19,9 +19,9 @@
 #include <curl/types.h>
 #include <curl/easy.h>
 
-size_t  write_data(void *ptr, size_t size, size_t nmemb, FILE *stream)
+size_t write_data(void *ptr, size_t size, size_t nmemb, void *stream)
 {
-  written = fwrite(ptr,size,nmemb,outfile);
+  written = fwrite(ptr, size, nmemb, (FILE *)stream);
   return written;
 }
 
