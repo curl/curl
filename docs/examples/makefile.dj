@@ -20,7 +20,7 @@ PROGRAMS  = fopen.exe ftpget.exe ftpgetresp.exe ftpupload.exe \
             multi-double.exe multi-post.exe multi-single.exe \
             persistant.exe post-callback.exe postit2.exe \
             sepheaders.exe simple.exe simplessl.exe https.exe \
-            ftp3rdparty.exe getinfo.exe
+            ftp3rdparty.exe getinfo.exe anyauthput.exe
 
 all: $(PROGRAMS)
 
