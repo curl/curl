@@ -6,6 +6,19 @@
 
                                History of Changes
 
+Daniel (21 August 2001)
+- Andrés García's suggested flushing of the progress meter output stream was
+  added. It should make the progress meter look better on Windows.
+
+- Troy Engel pointed out a mistake in the configure script that made it fail
+  on many Red Hat boxes!
+
+Daniel (20 August 2001)
+- We need an updated libtool to make a better build environment for OpenBSD
+  as well as FreeBSD
+
+Version 7.8.1
+
 Daniel (20 August 2001)
 - Brad pointed out that we ship two extra libtool files in the tarballs that
   we really don't need to! Removing them makes the gz-archive about 60K
