@@ -389,26 +389,23 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
     case CURLM_STATE_WAITCONNECT:
       /* awaiting a completion of an asynch connect */
-      {
-        bool connected;
-        easy->result = Curl_is_connected(easy->easy_conn,
-                                         easy->easy_conn->firstsocket,
-                                         &connected);
-        if(connected)
-          easy->result = Curl_protocol_connect(easy->easy_conn, NULL);
+      easy->result = Curl_is_connected(easy->easy_conn,
+                                       easy->easy_conn->firstsocket,
+                                       &connected);
+      if(connected)
+        easy->result = Curl_protocol_connect(easy->easy_conn, NULL);
 
-        if(CURLE_OK != easy->result) {
-          /* failure detected */
-          Curl_disconnect(easy->easy_conn); /* close the connection */
-          easy->easy_conn = NULL;           /* no more connection */
-          break;
-        }
+      if(CURLE_OK != easy->result) {
+        /* failure detected */
+        Curl_disconnect(easy->easy_conn); /* close the connection */
+        easy->easy_conn = NULL;           /* no more connection */
+        break;
+      }
 
-        if(connected) {
-          /* after the connect has completed, go DO */
-          easy->state = CURLM_STATE_DO;
-          result = CURLM_CALL_MULTI_PERFORM; 
-        }
+      if(connected) {
+        /* after the connect has completed, go DO */
+        easy->state = CURLM_STATE_DO;
+        result = CURLM_CALL_MULTI_PERFORM; 
       }
       break;
 
