@@ -118,6 +118,7 @@ my %commandfunc = ( 'PORT' => \&PORT_command,
 my $rest=0;
 sub REST_command {
     $rest = $_[0];
+    logmsg "Set REST position to $rest\n"
 }
 
 sub LIST_command {
@@ -160,6 +161,8 @@ sub NLST_command {
 sub SIZE_command {
     my $testno = $_[0];
 
+    loadtest("data/test$testno");
+
     logmsg "SIZE number $testno\n";
 
     my @data = getpart("reply", "size");
@@ -168,9 +171,11 @@ sub SIZE_command {
 
     if($size) {
         print "213 $size\r\n";
+        logmsg "SIZE $testno returned $size\n";
     }
     else {
         print "550 $testno: No such file or directory.\r\n";
+        logmsg "SIZE $testno: no such file\n";
     }
     return 0;
 }
@@ -204,18 +209,14 @@ sub RETR_command {
         if($rest) {
             # move read pointer forward
             $size -= $rest;
-            if($verbose) {
-                print STDERR "** REST $rest was removed from size.\n";
-            }
+            logmsg "REST $rest was removed from size, makes $size left\n";
         }
         print "150 Binary data connection for $testno () ($size bytes).\r\n";
-        $rest=0; # reset rest again
+        logmsg "150 Binary data connection for $testno ($size bytes).\n";
 
-        if($verbose) {
-            print STDERR "150 Binary data connection for $testno ($size bytes).\n";
-        }
         for(@data) {
-            print SOCK $_;
+            my $send = $_;
+            print SOCK $send;
         }
         close(SOCK);
 
@@ -223,9 +224,7 @@ sub RETR_command {
     }
     else {
         print "550 $testno: No such file or directory.\r\n";
-        if($verbose) {
-            print STDERR "550 $testno: no such file\n";
-        }
+        logmsg "550 $testno: no such file\n";
     }
     return 0;
 }
@@ -331,9 +330,7 @@ sub customize {
     open(CUSTOM, "<log/ftpserver.cmd") ||
         return 1;
 
-    if($verbose) {
-        print STDERR "FTPD: Getting commands from log/ftpserver.cmd\n";
-    }
+    logmsg "FTPD: Getting commands from log/ftpserver.cmd\n";
 
     while(<CUSTOM>) {
         if($_ =~ /REPLY ([A-Z]+) (.*)/) {
