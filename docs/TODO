@@ -12,6 +12,11 @@ TODO
 
 To do in a future release (random order):
 
+ * Make curl deal with cookies better. libcurl should be able to maintain a
+   "cookie jar". Updating it with cookies that is received, and using it to
+   pass cookies to the servers that have matching cookies in the jar.
+   http://curl.haxx.se/dev/cookie-jar.txt
+
  * Make SSL session ids get used if multiple HTTPS documents from the same
    host is requested. http://curl.haxx.se/dev/SSL_session_id.txt
 
