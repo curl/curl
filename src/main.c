@@ -339,13 +339,14 @@ static void help(void)
 #endif
        " -e/--referer       Referer page (H)");
   puts(" -E/--cert <cert[:passwd]> Specifies your certificate file and password (HTTPS)\n"
-       "    --cert-type <type> Specifies your certificate file type (DER/PEM/ENG) (HTTPS)\n"
-       "    --key <key>     Specifies your private key file (HTTPS)\n"
-       "    --key-type <type> Specifies your private key  file type (DER/PEM/ENG) (HTTPS)\n"
-       "    --pass  <pass>  Specifies your passphrase for the private key (HTTPS)");
+       "    --cert-type <type> Specifies certificate file type (DER/PEM/ENG) (HTTPS)\n"
+       "    --key <key>     Specifies private key file (HTTPS)\n"
+       "    --key-type <type> Specifies private key  file type (DER/PEM/ENG) (HTTPS)\n"
+       "    --pass  <pass>  Specifies passphrase for the private key (HTTPS)");
   puts("    --engine <eng>  Specifies the crypto engine to use (HTTPS)\n"
        "    --cacert <file> CA certifciate to verify peer against (SSL)\n"
-       "    --capath <directory> CA directory (made using c_rehash) to verify peer against (SSL, NOT Windows)\n"
+       "    --capath <directory> CA directory (made using c_rehash) to verify\n"
+       "                    peer against (SSL, NOT Windows)\n"
        "    --ciphers <list> What SSL ciphers to use (SSL)\n"
        "    --connect-timeout <seconds> Maximum time allowed for connection\n"
        " -f/--fail          Fail silently (no output at all) on errors (H)\n"
