@@ -10,10 +10,17 @@ Curl and libcurl 7.12.3
 
 This release includes the following changes:
 
+ o builds on Windows CE
+ o request retrying, --retry and family added
+ o FTP 3rd party transfers with source and dest on the same host now works
  o added CURLINFO_NUM_CONNECTS
 
 This release includes the following bugfixes:
 
+ o configure no longer use pkg-config on cross-compiles
+ o gzip decompress memory leak
+ o "-C - --fail" on a HTTP page already downloaded
+ o formposting a zero byte file
  o test 165 works with older iconv versions as well
  o use setlocale() for better IDN functionality by default
 
@@ -25,6 +32,7 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Peter Wullinger, Guillaume Arluison
+ Peter Wullinger, Guillaume Arluison, Alexander Krasnostavsky, Mohun Biswas,
+ Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan
 
         Thanks! (and sorry if I forgot to mention someone)
