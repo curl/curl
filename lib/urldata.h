@@ -82,8 +82,8 @@
 /* Download buffer size, keep it fairly big for speed reasons */
 #define BUFSIZE (1024*50)
 
-/* Upload buffer size, keep it smallish to get faster progress meter
-   updates. This should probably become dynamic and adjust to the upload
+/* Defaul upload buffer size, keep it smallish to get faster progress meter
+   updates. This is just default, it is dynamic and adjusts to the upload
    speed. */
 #define UPLOAD_BUFSIZE (1024*2)
 
@@ -91,10 +91,14 @@
    of need. */
 #define HEADERSIZE 256
 
+/* Just a convenience macro to get the larger value out of two given */
 #ifndef MAX
 #define MAX(x,y) ((x)>(y)?(x):(y))
 #endif
 
+/* Type of handle. All publicly returned 'handles' in the curl interface
+   have a handle first in the struct that describes what kind of handle it
+   is. Used to detect bad handle usage. */
 typedef enum {
   STRUCT_NONE,
   STRUCT_OPEN,
@@ -102,6 +106,8 @@ typedef enum {
   STRUCT_LAST
 } Handle;
 
+/* Connecting to a remote server using the curl interface is moving through
+   a state machine, this type is used to store the current state */
 typedef enum {
   CONN_NONE,  /* illegal state */
   CONN_INIT,  /* curl_connect() has been called */
@@ -112,6 +118,7 @@ typedef enum {
 } ConnState;
 
 #ifdef KRB4
+/* Types needed for krb4-ftp connections */
 struct krb4buffer {
   void *data;
   size_t size;
@@ -155,13 +162,13 @@ struct connectdata {
   char *hostent_buf; /* pointer to allocated memory for name info */
   struct hostent *hp;
   struct sockaddr_in serv_addr;
-  char proto[64];
-  char gname[256];
-  char *name;
-  char *path; /* formerly staticly this size: URL_MAX_LENGTH */
+  char proto[64];  /* store the protocol string in this buffer */
+  char gname[257]; /* store the hostname in this buffer */
+  char *name;      /* host name pointer to fool around with */
+  char *path;      /* formerly staticly this size: URL_MAX_LENGTH */
   char *ppath;
   long bytecount;
-  struct timeval now;
+  struct timeval now; /* current time */
 
   long upload_bufsize; /* adjust as you see fit, never bigger than BUFSIZE
                           never smaller than UPLOAD_BUFSIZE */
@@ -248,9 +255,9 @@ struct Progress {
 struct HTTP {
   struct FormData *sendit;
   int postsize;
-  char *p_pragma;
-  char *p_accept;
-  long readbytecount;
+  char *p_pragma;      /* Pragma: string */
+  char *p_accept;      /* Accept: string */
+  long readbytecount; 
   long writebytecount;
 
   /* For FORM posting */
@@ -264,13 +271,15 @@ struct HTTP {
  ***************************************************************************/
 struct FTP {
   long *bytecountp;
-  char *user;
-  char *passwd;
+  char *user;    /* user name string */
+  char *passwd;  /* password string */
   char *urlpath; /* the originally given path part of the URL */
   char *dir;     /* decoded directory */
   char *file;    /* decoded file */
 };
 
+/* This struct is for boolean settings that define how to behave during
+   this session. */
 struct Configbits {
   bool get_filetime;
   bool tunnel_thru_httpproxy;
@@ -313,6 +322,7 @@ typedef enum {
   CURLI_LAST
 } CurlInterface;
 
+/* struct for data related to SSL and SSL connections */
 struct ssldata {
   bool use;              /* use ssl encrypted communications TRUE/FALSE */
   long version;          /* what version the client wants to use */
@@ -468,8 +478,8 @@ struct UrlData {
   struct curl_slist *quote;     /* before the transfer */
   struct curl_slist *postquote; /* after the transfer */
 
-  TimeCond timecondition;
-  time_t timevalue;
+  TimeCond timecondition; /* kind of comparison */
+  time_t timevalue;       /* what time to compare with */
 
   char *customrequest; /* http/ftp request to use */
 
@@ -482,7 +492,7 @@ struct UrlData {
                        completion */
 #endif
 
-  struct Progress progress;
+  struct Progress progress; /* for all the progress meter data */
 
 #define MAX_CURL_USER_LENGTH 128
 #define MAX_CURL_PASSWORD_LENGTH 128
@@ -492,6 +502,7 @@ struct UrlData {
                     * host (which location-following otherwise could lead to)
                     */
 
+  /* buffers to store authentication data in */
   char user[MAX_CURL_USER_LENGTH];
   char passwd[MAX_CURL_PASSWORD_LENGTH];
   char proxyuser[MAX_CURL_USER_LENGTH];
@@ -506,7 +517,7 @@ struct UrlData {
   char *ptr_cookie; /* free later if not NULL! */
   char *ptr_host; /* free later if not NULL */
 
-  char *krb4_level;
+  char *krb4_level; /* what security level */
 #ifdef KRB4
   FILE *cmdchannel;
 #endif
