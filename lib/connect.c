@@ -550,8 +550,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   int rc, error;
   int aliasindex;
   int num_addr;
-  const char *hostname;
   bool conected;
+  char addr_buf[256];
 
   Curl_ipconnect *curr_addr;
   struct timeval after;
@@ -641,12 +641,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     serv_addr.sin_port = htons((unsigned short)port);
 #endif
 
-    {
-      char addr_buf[256] = "";
 
-      Curl_printable_address(curr_addr, addr_buf, sizeof(addr_buf));
-      infof(data, "  Trying %s... ", addr_buf);
-    }
+    Curl_printable_address(curr_addr, addr_buf, sizeof(addr_buf));
+    infof(data, "  Trying %s... ", addr_buf);
 
     if(data->set.tcp_nodelay)
       Curl_setNoDelay(conn, sockfd);
@@ -693,8 +690,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         break;
       default:
         /* unknown error, fallthrough and try another address! */
-        failf(data, "Failed to connect to %s IP number %d: %s",
-              hostname, aliasindex+1, Curl_strerror(conn,error));
+        failf(data, "Failed to connect to %s (IP number %d): %s",
+              addr_buf, aliasindex+1, Curl_strerror(conn,error));
         break;
       }
     }
