@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH libcurl-errors 3 "18 Oct 2003" "libcurl 7.10.8" "libcurl errors"
+.TH libcurl-errors 3 "8 Mar 2004" "libcurl 7.11.0" "libcurl errors"
 .SH NAME
 libcurl-errors \- error codes in libcurl
 .SH DESCRIPTION
@@ -182,6 +182,8 @@ Unrecognized transfer encoding
 Invalid LDAP URL
 .IP "CURLE_FILESIZE_EXCEEDED (63)"
 Maximum file size exceeded
+.IP "CURLE_FTP_SSL_FAILED (64)"
+Requested FTP SSL level failed
 .SH "CURLMcode"
 This is the generic return code used by functions in the libcurl multi
 interface.
