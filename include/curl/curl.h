@@ -143,6 +143,9 @@ typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t nitems,
                                       void *outstream);
 
+/* This is a brand new return code for the read callback that will signal
+   the caller to immediately abort the current transfer. */
+#define CURL_READFUNC_ABORT 0x10000000
 typedef size_t (*curl_read_callback)(char *buffer,
                                      size_t size,
                                      size_t nitems,
