@@ -3236,9 +3236,15 @@ CURLcode Curl_done(struct connectdata *conn)
      if conn->bits.close is TRUE, it means that the connection should be
      closed in spite of all our efforts to be nice, due to protocol
      restrictions in our or the server's end */
-  if(data->set.reuse_forbid ||
-     ((CURLE_OK == result) && conn->bits.close))
-    result = Curl_disconnect(conn); /* close the connection */
+  if(data->set.reuse_forbid || conn->bits.close) {
+    CURLcode res2;
+    res2 = Curl_disconnect(conn); /* close the connection */
+
+    /* If we had an error already, make sure we return that one. But
+       if we got a new error, return that. */
+    if(!result && res2)
+      result = res2;
+  }
   else
     infof(data, "Connection #%d left intact\n", conn->connectindex);
 
