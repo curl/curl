@@ -125,6 +125,9 @@ typedef enum {
 
 #define CONF_NETRC_OPT (1<<29)  /* read user+password from either
                                  * .netrc or URL*/
+#define CONF_UNRESTRICTED_AUTH (1<<30)
+/* Send authentication (user+password) when following
+ * locations, even when hostname changed */
 
 #ifndef HAVE_STRDUP
 /* Ultrix doesn't have strdup(), so make a quick clone: */
@@ -380,6 +383,8 @@ static void help(void)
        " -l/--list-only     List only names of an FTP directory (F)\n"
        "    --limit-rate <rate> Limit how fast transfers to allow");
   puts(" -L/--location      Follow Location: hints (H)\n"
+       "    --location-trusted Same, and continue to send authentication when \n"
+       "                    following locations, even when hostname changed\n"
        " -m/--max-time <seconds> Maximum time allowed for the transfer\n"
        " -M/--manual        Display huge help text\n"
        " -n/--netrc         Must read .netrc for user name and password\n"
@@ -1064,6 +1069,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"K", "config",      TRUE},
     {"l", "list-only",   FALSE},
     {"L", "location",    FALSE},
+    {"Lt", "location-trusted", FALSE},
     {"m", "max-time",    TRUE},
     {"M", "manual",      FALSE},
     {"n", "netrc",       FALSE},
@@ -1521,6 +1527,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'L':
       config->conf ^= CONF_FOLLOWLOCATION; /* Follow Location: HTTP headers */
+      switch (subletter) {
+      case 't':
+        /* Continue to send authentication (user+password) when following
+         * locations, even when hostname changed */
+        config->conf ^= CONF_UNRESTRICTED_AUTH;
+        break;
+      }
       break;
     case 'm':
       /* specified max time */
@@ -2809,6 +2822,8 @@ operate(struct Configurable *config, int argc, char *argv[])
 
       curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,
                        config->conf&CONF_FOLLOWLOCATION);
+      curl_easy_setopt(curl, CURLOPT_UNRESTRICTED_AUTH,
+                       config->conf&CONF_UNRESTRICTED_AUTH);
       curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config->conf&CONF_GETTEXT);
       curl_easy_setopt(curl, CURLOPT_MUTE, config->conf&CONF_MUTE);
       curl_easy_setopt(curl, CURLOPT_USERPWD, config->userpwd);
