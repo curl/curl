@@ -125,8 +125,8 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 
 #else
 #define sclose(x) close(x)
-#define sread(x,y,z) read(x,y,z)
-#define swrite(x,y,z) write(x,y,z)
+#define sread(x,y,z) recv(x,y,z,0)
+#define swrite(x,y,z) send(x,y,z,0)
 #define myalarm(x) alarm(x)
 
 #define PATH_CHAR     ":"
