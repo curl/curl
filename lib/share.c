@@ -44,7 +44,7 @@
 
 #define CURL_SHARE_GET(__handle) (((struct SessionHandle *) (__handle))->share)
 
-curl_share *
+CURLSH *
 curl_share_init (void)
 {
   curl_share *share = (curl_share *) malloc (sizeof (curl_share));

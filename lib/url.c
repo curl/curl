@@ -101,6 +101,7 @@
 #include "strequal.h"
 #include "escape.h"
 #include "strtok.h"
+#include "share.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -1071,8 +1072,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
   case CURLOPT_SHARE:
     {
-      curl_share *set;
-      set = va_arg(param, curl_share *);
+      struct Curl_share *set;
+      set = va_arg(param, struct Curl_share *);
       if(data->share)
         data->share->dirty--;
 

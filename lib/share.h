@@ -34,8 +34,19 @@ typedef enum {
   SHARE_ERROR_LAST
 } Curl_share_error;
 
-Curl_share_error Curl_share_aquire_lock (CURL *, curl_lock_type);
-Curl_share_error Curl_share_release_lock (CURL *, curl_lock_type);
+/* this struct is libcurl-private, don't export details */
+struct Curl_share {
+  unsigned int specifier;
+  unsigned int locked;
+  unsigned int dirty;
+  
+  curl_lock_function lockfunc;
+  curl_unlock_function unlockfunc;
+  void *clientdata;
+};
+
+Curl_share_error Curl_share_aquire_lock (CURL *, curl_lock_data);
+Curl_share_error Curl_share_release_lock (CURL *, curl_lock_data);
 
 #endif /* __CURL_SHARE_H */
 
