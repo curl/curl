@@ -212,6 +212,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
       failf(conn->data, "SSL_write() return error %d\n", err);
       return CURLE_WRITE_ERROR;
     }
+    bytes_written = rc;
   }
   else {
 #endif
