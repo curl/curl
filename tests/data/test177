@@ -1,0 +1,39 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 302 *MOVED* swsclose swsbounce
+Server: Microsoft-IIS/6.0
+Location: /mooooo/177
+Content-Type: text/html; charset=iso-8859-1
+
+</data>
+</reply>
+
+# Client-side
+<client>
+# 
+<server>
+http
+</server>
+ <name>
+HTTP POST --digest to server doing a 302-location response
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/177 -u auser:apasswd --digest -d "junkelijunk"
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+HEAD /177 HTTP/1.1
+User-Agent: curl/7.12.1-CVS (i686-pc-linux-gnu) libcurl/7.12.1-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.6
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: */*
+
+</protocol>
+</verify>
