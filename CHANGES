@@ -6,7 +6,37 @@
 
                                   Changelog
 
-Daniel(2 February 2004)
+
+Daniel (5 February 2004)
+- The libz part of the configure script now only set the two libz-related
+  define HAVE_ZLIB_H and HAVE_LIBZ if both the lib and the header is found.
+  If one is missing, none of the defines is set.
+
+- Andrés García fixed the Mingw makefiles.
+
+- Len Krause reported that curl 7.9.X could do uploading from stdin without
+  doing chunked encoding, which current curl cannot do even if you disable
+  the transfer-encoding chunked header. Now it can again, and test case 98
+  verifies this functionality.
+
+- Tor Arntsen fixed a weird getaddrinfo() usage in the FTP code, preventing
+  the ipv6-code for PORT work on AIX 5.2. We now also provide (better) error
+  messages when bailing out in the that function.
+
+- Tor Arntsen now provides AIX and IRIX (using gcc, xlc and the MIPSPro
+  compilers) automated build logs (http://curl.haxx.se/auto/) and we've fixed
+  numerous minor quirks to make less warnings appear.
+
+Daniel (4 February 2004)
+- Based on a patch by Gilad, we now use the custom timeouts when waiting for a
+  server to connect when using FTP PORT. Previously we always waited 10
+  seconds, no more no less. We now also changed the default (if no timeout is
+  set) to wait 60 seconds for the connect before we fail.
+
+Daniel (3 February 2004)
+- Modified to link with c-ares instead of ares.
+
+Daniel (2 February 2004)
 - Added a configure test to check for which option the (g)nroff tool wants
   to extract plain text from the man pages. Tor Arntsen told us the AIX
   version of GNU gnroff doesn't support -man!
@@ -40,7 +70,7 @@ Daniel(2 February 2004)
 - Added test case 97, a simple POST with a custom Content-Type header
   replacing the original application/x-www-form-urlencoded one.
 
-Daniel(30 January 2004)
+Daniel (30 January 2004)
 - Added code that attempts to fix the test 91 failure. As has been figured out
   by Patrick Smith, the error happens because we re-use a connection that the
   server is just about to close and we even manage to send away the request
@@ -58,7 +88,7 @@ Daniel(30 January 2004)
   while, just not provided by the curl tool. This does not currently work for
   IPv6-enabled libcurls.
 
-Daniel(29 January 2004)
+Daniel (29 January 2004)
 - Stadler Stephan pointed out that src/hugehelp.c included config.h without
   checking the define if its present...
 
@@ -72,18 +102,18 @@ Daniel(29 January 2004)
 - Dirk Manske fixed a flaw in ares that prevented it to use non-blocking
   sockets properly.
 
-Daniel(28 January 2004)
+Daniel (28 January 2004)
 - Richard Bramante fixed chunked transfer-encoded "uploads" to send a final
   CRLF combo properly.
 
-Daniel(27 January 2004)
+Daniel (27 January 2004)
 - Made the response-headers during a CONNECT request to a proxy get passed on
   as regular headers, so they appear with -i/-I options and similar.
 
 - Based on a patch by Gisle Vanem, I've made the progress meter display
   properly switch to a GB-display when more than 9999MB have been transfered.
 
-Daniel(23 January 2004)
+Daniel (23 January 2004)
 - Gisle Vanem pointed out a curlrc parser problem/crash when an option with a
   required didn't have one and was on the last line of a file.
 
@@ -102,7 +132,7 @@ Daniel(23 January 2004)
 - Fixed the progress meter display for files larger than 2^31 bytes. Gisle
   Vanem reported.
 
-Daniel(22 January 2004)
+Daniel (22 January 2004)
 - Gisle Vanem made strtoll() get used when curl is built with the mingw
   compiler.
 
