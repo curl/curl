@@ -964,7 +964,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
 
               /* send the header to the callback */
               writetype = CLIENTWRITE_HEADER;
-              if(data->set.http_include_header)
+              if(data->set.include_header)
                 writetype |= CLIENTWRITE_BODY;
 
               result = Curl_client_write(data, writetype, line_start, perline);

@@ -868,9 +868,7 @@ struct UserDefined {
   bool http_fail_on_error;
   bool http_follow_location;
   bool http_disable_hostname_check_before_authentication;
-  bool include_header;
-#define http_include_header include_header /* former name */
-
+  bool include_header;   /* include received protocol headers in data output */
   bool http_set_referer;
   bool http_auto_referer; /* set "correct" referer when following location: */
   bool opt_no_body;      /* as set with CURLOPT_NO_BODY */

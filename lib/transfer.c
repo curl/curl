@@ -454,7 +454,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               /* now, only output this if the header AND body are requested:
                */
               writetype = CLIENTWRITE_HEADER;
-              if (data->set.http_include_header)
+              if (data->set.include_header)
                 writetype |= CLIENTWRITE_BODY;
 
               headerlen = k->p - data->state.headerbuff;
@@ -868,7 +868,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
              */
 
             writetype = CLIENTWRITE_HEADER;
-            if (data->set.http_include_header)
+            if (data->set.include_header)
               writetype |= CLIENTWRITE_BODY;
 
             if(data->set.verbose)
