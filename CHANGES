@@ -6,6 +6,30 @@
 
                                   Changelog
 
+Daniel (6 April 2004)
+- lib/strerror.c no longer uses sys_nerr on non-windows platforms since it
+  isn't portable enough
+
+Daniel (2 April 2004)
+- In the curl_strnqual.3 man page, we now prepend the man3 dir to the file
+  name to work better. As pointed out by Robin Kay.
+
+- Andrés García updated the mingw makefiles.
+
+- Dirk Manske fixed a problem I recently added in the progress meter code that
+  broke subsecond resolution for CURLINFO_TOTAL_TIME. He also pointed out a
+  mistake in the code that produces the final update of the progress meter
+  that would often prevent it from actually being updated that final time.
+
+Daniel (1 April 2004)
+- Dirk Manske fixed a memory leak that happened when we use ares for name
+  resolves and decides to time-out before ares does it. This fix uses the
+  brand new ares_cancel() function which is not present in c-ares 1.1.0.
+
+  When told to enable ares, the configure script now checks for presence of
+  the ares_cancel function to alert users if they attempt to use a too old
+  c-ares library.
+
 Daniel (31 March 2004)
 - Roy Shan fixed a flaw that prevented ares name resolve timeouts to occur!
 
