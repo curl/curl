@@ -2692,6 +2692,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   }
 
   if(!config->url_list || !config->url_list->url) {
+    clean_getout(config);
     helpf("no URL specified!\n");
     return CURLE_FAILED_INIT;
   }
@@ -2750,8 +2751,10 @@ operate(struct Configurable *config, int argc, char *argv[])
    * when all transfers are done.
    */
   curl = curl_easy_init();
-  if(!curl)
+  if(!curl) {
+    clean_getout(config);
     return CURLE_FAILED_INIT;
+  }
 
   /* After this point, we should call curl_easy_cleanup() if we decide to bail
    * out from this function! */
