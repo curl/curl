@@ -257,8 +257,8 @@ IBM OS/2
 
 PORTS
 =====
-   This is a probably incomplete list of known hardware and
-   operating systems that curl has been compiled for:
+   This is a probably incomplete list of known hardware and operating systems
+   that curl has been compiled for:
 
         - Ultrix 4.3a
         - SINIX-Z v5
@@ -266,7 +266,9 @@ PORTS
         - Alpha Digital UNIX v3.2
         - Alpha FreeBSD 4.1
         - Alpha Linux 2.2.16
+        - Alpha OpenVMS V7.1-1H2
         - Alpha Tru64 v5.0 5.1
+        - ARM RISC OS
         - HP-PA HP-UX 9.X 10.X 11.X
         - MIPS IRIX 6.2, 6.5
         - Power AIX 4.2, 4.3.1, 4.3.2
