@@ -312,28 +312,32 @@ COOKIES
 
 PROGRESS METER
 
-  The progress meter was introduced to better show a user that something
-  actually is happening. The different fields in the output have the following
-  meaning:
+  The progress meter exists to show a user that something actually is
+  happening. The different fields in the output have the following meaning:
 
-  %   Received    Total    Speed  Estimated   Time      Left   Curr.Speed
-  0      97980  149081186  15211   2:43:21   0:00:06   2:43:15  14843  
+  % Total    % Received % Xferd  Average Speed          Time             Curr.
+                                 Dload  Upload Total    Current  Left    Speed
+  0  151M    0 38608    0     0   9406      0  4:41:43  0:00:04  4:41:39  9287
 
   From left-to-right:
-   "%" - column, is the percentage of the file currently transfered.
-   "Received" - means the total number of bytes that has been transfered.
-   "Total" -  is the total number of bytes expected to transfer.
-   "Speed" - is average speed in bytes/second for the whole transfer so far.
-   "Estimated" - is the estimated total transfer time.
-   "Time" - is the time spent so far for this transfer
-   "Left" - is the estimated time left for this transfer to finnish if the
-    current average speed will remain steady.
-   "Curr.Speed" - is the average transfer speed the last 5 seconds (the first
-    5 seconds of a transfer is based on less time of course.)
+   %             - percentage completed of the whole transfer
+   Total         - total size of the whole expected transfer
+   %             - percentage completed of the download
+   Received      - currently downloaded amount of bytes
+   %             - percentage completed of the upload
+   Xferd         - currently uploaded amount of bytes
+   Average Speed
+   Dload         - the average transfer speed of the download
+   Average Speed
+   Upload        - the average transfer speed of the upload
+   Time Total    - expected time to complete the operation
+   Time Current  - time passed since the invoke
+   Time Left     - expected time left to completetion
+   Curr.Speed    - the average transfer speed the last 5 seconds (the first
+                   5 seconds of a transfer is based on less time of course.)
 
-  NOTE: Much of the output is based on the fact that the size of the transfer
-  is known before it takes place. If it isn't, a much less fancy display will
-  be used.
+  The -# option will display a totally different progress bar that doesn't
+  need much explanation!
 
 SPEED LIMIT
 
