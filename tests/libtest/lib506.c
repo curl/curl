@@ -46,7 +46,7 @@ void lock(CURL *handle, curl_lock_data data, curl_lock_access access,
       what = "cookie";  
       break;
     default:
-      fprintf(stderr, "lock: no such data: %d\n",data);
+      fprintf(stderr, "lock: no such data: %d\n", (int)data);
       return;
   }
   printf("lock:   %-6s <%s>: %d\n", what, user->text, user->counter);
@@ -70,7 +70,7 @@ void unlock(CURL *handle, curl_lock_data data, void *useptr )
       what = "cookie";  
       break;
     default:
-      fprintf(stderr, "unlock: no such data: %d\n",data);
+      fprintf(stderr, "unlock: no such data: %d\n", (int)data);
       return;
   }
   printf("unlock: %-6s <%s>: %d\n", what, user->text, user->counter);
@@ -120,7 +120,7 @@ void *fire(void *ptr)
 /* build request url */
 char *suburl(char *base, int i)
 {
-  int len = strlen(base);
+  size_t len = strlen(base);
   char *url = (char *)malloc(len+5);
   if (!url) {
     abort();
@@ -218,9 +218,8 @@ int test(char *URL)
   printf( "SHARE_CLEANUP\n" );
   scode = curl_share_cleanup( share );
   if ( scode!=CURLSHE_OK )
-  {
-    fprintf(stderr, "curl_share_cleanup failed, code errno %d\n", scode);
-  }
+    fprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
+            (int)scode);
   
   printf( "GLOBAL_CLEANUP\n" );
   curl_global_cleanup();
