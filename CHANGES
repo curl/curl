@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (11 Apr)
+- Nic Hines provided a second patch for gzip decompression, and fixed a bug
+  when deflate or gzip contents were downloaded using chunked encoding.
+
+- Dan Fandrich made libcurl support automatic decompression of gzip contents
+  (as an addition to the previous deflate support).
+
+- I made the CWD command during FTP session consider all 2xy codes to be OK
+  responses.
+
 Daniel (10 Apr)
 - Vlad Krupin fixed a URL parsing issue. URLs that were not using a slash
   after the host name, but still had "?" and parameters appended, as in
