@@ -1,4 +1,4 @@
-Updated: January 13, 2003 (http://curl.haxx.se/docs/faq.html)
+Updated: February 25, 2003 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -630,7 +630,7 @@ FAQ
   this check.
 
   Details are also in the SSLCERTS file in the release archives, found online
-  here: http://curl.haxx.se/lxr/source/SSLCERTS
+  here: http://curl.haxx.se/docs/sslcerts.html
 
 5. libcurl Issues
 
