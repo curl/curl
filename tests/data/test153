@@ -63,6 +63,7 @@ http://%HOSTIP:%HOSTPORT/1530001 -u testuser:testpass --digest http://%HOSTIP:%H
 # Verify data after the test has been "shot"
 <verify>
 <strip>
+^Authorization.*cnonce
 ^User-Agent:.*
 </strip>
 <protocol>
