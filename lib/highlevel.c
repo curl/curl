@@ -115,7 +115,7 @@
 #include <curl/mprintf.h>
 
 CURLcode 
-_Transfer (struct connectdata *c_conn)
+_Transfer(struct connectdata *c_conn)
 {
   size_t nread;                 /* number of bytes read */
   int bytecount = 0;            /* total number of bytes read */
@@ -440,7 +440,7 @@ _Transfer (struct connectdata *c_conn)
           /* This is not an 'else if' since it may be a rest from the header
              parsing, where the beginning of the buffer is headers and the end
              is non-headers. */
-          if (str && !header && (nread > 0)) {
+          if (str && !header && ((signed int)nread > 0)) {
             
             if(0 == bodywrites) {
               /* These checks are only made the first time we are about to
@@ -490,7 +490,7 @@ _Transfer (struct connectdata *c_conn)
             if(data->maxdownload &&
                (bytecount + nread > data->maxdownload)) {
               nread = data->maxdownload - bytecount;
-              if(nread < 0 ) /* this should be unusual */
+              if((signed int)nread < 0 ) /* this should be unusual */
                 nread = 0;
               keepon &= ~KEEP_READ; /* we're done reading */
             }
@@ -518,15 +518,16 @@ _Transfer (struct connectdata *c_conn)
             buf = data->buffer; /* put it back on the buffer */
 
           nread = data->fread(buf, 1, BUFSIZE, data->in);
-          writebytecount += nread;
 
-          pgrsSetUploadCounter(data, (double)writebytecount);
-            
-          if (nread<=0) {
+          /* the signed int typecase of nread of for systems that has
+             unsigned size_t */
+          if ((signed int)nread<=0) {
             /* done */
             keepon &= ~KEEP_WRITE; /* we're done writing */
             break;
           }
+          writebytecount += nread;
+          pgrsSetUploadCounter(data, (double)writebytecount);            
 
           /* convert LF to CRLF if so asked */
           if (data->crlf) {
