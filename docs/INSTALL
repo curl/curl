@@ -488,6 +488,7 @@ PORTS
         - Alpha Tru64 v5.0 5.1
         - HP-PA HP-UX 9.X 10.X 11.X
         - HP-PA Linux
+        - HP3000 MPE/iX
         - MIPS IRIX 6.2, 6.5
         - MIPS Linux
         - Pocket PC/Win CE 3.0
