@@ -70,6 +70,11 @@
 #include "inet_ntoa_r.h"
 #endif
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 #define SYS_ERROR -1
 
 char *Curl_if2ip(char *interface, char *buf, int buf_size)

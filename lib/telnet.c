@@ -82,6 +82,11 @@
 
 #include "arpa_telnet.h"
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 #define SUBBUFSIZE 512
 
 #define  SB_CLEAR(x)  x->subpointer = x->subbuffer;

@@ -42,6 +42,11 @@
 
 #include "strequal.h"
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 /* Debug this single source file with:
    'make netrc' then run './netrc'!
 

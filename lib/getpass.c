@@ -66,6 +66,11 @@
 #  endif
 #endif
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
 /* no perror? make an fprintf! */
 #ifndef HAVE_PERROR
 #  define perror(x) fprintf(stderr, "Error in: %s\n", x)
