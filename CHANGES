@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (23 December 2004)
+- David Shaw fixed the configure --disable-[protocol] variables so that
+  curl-config --feature now works correctly!
+
 Daniel (22 December 2004)
 - Rune Kleveland fixed a minor memory leak for received cookies with the
   (rare) version attribute set.

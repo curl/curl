@@ -14,7 +14,10 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o minor memory leak when "version" is set in a cookie header
+ o curl-config --feature lists the disabled protocols properly
+ o builds fine on BeOS
+ o builds and runs fine on FreeBSD
 
 Other curl-related news since the previous public release:
 
