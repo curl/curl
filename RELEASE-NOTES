@@ -28,7 +28,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o curl -E on windows accepts "c:/path" with forward-slash
- o various improvements for large file support on windows
+ o several improvements for large file support on windows
  o file handle leak in aborted multipart formpost file upload
  o -T upload multiple files with backslashes in file names
  o modified credentials between two requests on a persistent http connection
@@ -40,11 +40,11 @@ This release includes the following bugfixes:
  o EPSV on multi-homed servers now works correctly
  o chunked-encoded transfers could get closed pre-maturely without error
  o proxy CONNECT now default timeouts after 3600 seconds
- o --disable-epsv and --disable-eprt are ignored when connecting to an IPv6 ftp
-   server
- o no more extra progress meter newline output after each Location: followed
+ o disabling EPSV or EPRT is ignored when connecting to an IPv6 FTP server
+ o no extra progress meter newline output after each Location: followed
  o HTTP PUT/POST with Digest, NTLM or Negotiate no longer uses HEAD
- o now gracefully bails out when exceeding FD_SETSIZE file descriptors
+ o works with or gracefully bails out when exceeding FD_SETSIZE file
+   descriptors
  o CURLINFO_REDIRECT_TIME works
  o building with gssapi libs and hdeaders in the default dirs
  o curl_getdate() parsing of dates later than year 2037 with 32 bit time_t
