@@ -36,6 +36,8 @@ missing
 mkinstalldirs
 reconf
 stamp-h.in
+ltconfig
+ltmain.sh
 src/*.[ch]
 src/*in
 src/*am
