@@ -35,7 +35,7 @@ To get fixed in 7.11.2 (planned release May/June 2004)
 
 29. Define USE_NTRESPONSES in the NTLM code to work properly with >14 letter
     passwords against IIS servers. Requires test cases to be updated
-    accordingly.
+    accordingly. #915609
 
 To get fixed in 7.12.0
 ======================
