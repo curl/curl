@@ -412,13 +412,15 @@ static int Kill_Single_Session(struct curl_ssl_session *session)
 int Curl_SSL_Close_All(struct SessionHandle *data)
 {
   int i;
-  for(i=0; i< data->set.ssl.numsessions; i++)
-    /* the single-killer function handles empty table slots */
-    Kill_Single_Session(&data->set.ssl.session[i]);
 
-  /* free the cache data */
-  free(data->set.ssl.session);
-
+  if(data->set.ssl.session) {    
+    for(i=0; i< data->set.ssl.numsessions; i++)
+      /* the single-killer function handles empty table slots */
+      Kill_Single_Session(&data->set.ssl.session[i]);
+    
+    /* free the cache data */
+    free(data->set.ssl.session);
+  }
   return 0;
 }
 
