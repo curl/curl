@@ -176,8 +176,9 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
     }
   }
 
-  /* we give the server 60 seconds to connect to us, or a custom timeout */
-  timeout_ms = (timeout?timeout:60) * 1000;
+  /* We allow the server 60 seconds to connect to us, or a custom timeout.
+     Note the typecast here. */
+  timeout_ms = (timeout?(int)timeout:60) * 1000;
 
   switch (Curl_select(sock, CURL_SOCKET_BAD, timeout_ms)) {
   case -1: /* error */
