@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (14 September)
+- Jeff Pohlmeyer tracked down a very hard-to-find bug where we removed a
+  cached DNS entry even though it may be in use, which caused "random" memory
+  to get overwritten and thus "random" crashes.
+
 Daniel (12 September)
 - Based on a bug report by David Kimdon, I made the runtests.pl script clear
   all possible proxy environment variables before the tests are run.
