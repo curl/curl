@@ -1737,7 +1737,12 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   if(CURLE_OK != code) {
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
+    struct UrlData *data;
+    int index;
+
     conn = (struct connectdata *)*in_connect;
+    data = conn->data;
+#if 0
     if(conn) {
       if(conn->path)
         free(conn->path);
@@ -1751,6 +1756,11 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
       free(conn);
       *in_connect=NULL;
     }
+#endif
+    index = conn->connectindex; /* get the index */
+    curl_disconnect(conn);      /* close the connection */
+    data->connects[index]=NULL; /* clear the pointer */
+
   }
   return code;
 }
