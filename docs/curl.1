@@ -318,6 +318,8 @@ to be made secure by using the CA certificate bundle installed by
 default. This makes all connections considered "insecure" to fail unless
 -k/--insecure is used.
 
+This option is ignored if --cacert or --capath is used!
+
 If this option is used twice, the second time will again disable it.
 .IP "--krb4 <level>"
 (FTP) Enable kerberos4 authentication and use. The level must be entered and
