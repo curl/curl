@@ -6,7 +6,29 @@
 
                                   Changelog
 
+Version 7.10.6 (28 July 2003)
+
+Daniel (28 July)
+- François Pons brought a patch that once again made curl deal with ftp and
+  "double slash" as indicating the root directory. In the RFC1738-fix of April
+  30, that ability was removed (since it is not the "right" way). So, starting
+  now we can list the root dir of an ftp server both these ways:
+
+    curl ftp://server.com/%2f  as well as
+    curl ftp://server.com//
+
+Daniel (24 July)
+- Henry Bland pointed out that we included sys/resource.h without good reason
+  in several source files. Without it included, QNX builds better...
+
+- Andrés García updated the mingw makefiles.
+
 Daniel (23 July)
+- Tracy Boehrer experienced DNS cache problems and did some nice debugging
+  and tracking which made it easy for me to correct the problem and Tracy
+  could verify that it did cure the problem! When re-using a connection we
+  now make sure we don't re-use the 'connect_addr' struct.
+
 - Daniel Kouril corrected the GSS-Negotiate code.
 
 - Juan F. Codagnone provided fixes to allow curl to build fine on Windows
