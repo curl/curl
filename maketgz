@@ -32,7 +32,7 @@ sed -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g'
  $HEADER >$HEADER.dist
 
 # Replace version number in header file:
-sed 's/#define CURL_VERSION.*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER >$CHEADER.dist
+sed 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER >$CHEADER.dist
 
 echo "curl version $curlversion"
 echo "libcurl version $libversion"
