@@ -98,10 +98,18 @@ struct curl_dns_cache_entry {
   time_t timestamp;
 };
 
+/* count the number of characters that an integer takes up */
 static int _num_chars(int i)
 {
   int chars = 0;
 
+  /* While the number divided by 10 is greater than one, 
+   * re-divide the number by 10, and increment the number of 
+   * characters by 1.
+   *
+   * this relies on the fact that for every multiple of 10, 
+   * a new digit is added onto every number
+   */
   do {
     chars++;
 
@@ -111,21 +119,28 @@ static int _num_chars(int i)
   return chars;
 }
 
+/* Create a hostcache id */
 static char *
-_create_hostcache_id(char *server, int server_len, int port)
+_create_hostcache_id(char *server, int port, size_t *entry_len)
 {
   char *id = NULL;
-  int   id_len;
 
-  id_len = server_len + _num_chars(port);
-
-  id = malloc(id_len + 1);
+  /* Get the length of the new entry id */
+  *entry_len = *entry_len +      /* Hostname length */
+               1 +               /* The ':' seperator */
+               _num_chars(port); /* The number of characters the port will take up */
+  
+  /* Allocate the new entry id */
+  id = malloc(*entry_len + 1);
   if (!id) {
     return NULL;
   }
 
-  id_len = sprintf(id, "%s:%d", server, port);
-  if (id_len <= 0) {
+  /* Create the new entry */
+  /* If sprintf() doesn't return the entry length, that signals failure */
+  if (sprintf(id, "%s:%d", server, port) != *entry_len) {
+    /* Free the allocated id, set length to zero and return NULL */
+    *entry_len = 0;
     free(id);
     return NULL;
   }
@@ -133,16 +148,21 @@ _create_hostcache_id(char *server, int server_len, int port)
   return id;
 }
 
-  
+/* Macro to save redundant free'ing of entry_id */
+#define _hostcache_return(__v) \
+{ \
+  free(entry_id); \
+  return (__v); \
+}
 
 Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
                            char *hostname,
                            int port,
                            char **bufp)
 {
-  char *cache_id = NULL;
+  char *entry_id = NULL;
   struct curl_dns_cache_entry *p = NULL;
-  size_t hostname_len;
+  size_t entry_len;
   time_t now;
 
   /* If the host cache timeout is 0, we don't do DNS cach'ing
@@ -151,42 +171,47 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
     return Curl_getaddrinfo(data, hostname, port, bufp);
   }
 
-  hostname_len = strlen(hostname);
-
-  cache_id = _create_hostcache_id(hostname, hostname_len, port);
+  /* Create an entry id, based upon the hostname and port */
+  entry_len = strlen(hostname);
+  entry_id = _create_hostcache_id(hostname, port, &entry_len);
+  /* If we can't create the entry id, don't cache, just fall-through
+     to the plain Curl_getaddrinfo() */
+  if (!entry_id) {
+    return Curl_getaddrinfo(data, hostname, port, bufp);
+  }
   
   time(&now);
   /* See if its already in our dns cache */
-  if (cache_id && curl_hash_find(data->hostcache, hostname, hostname_len+1, (void **) &p)) {
+  if (entry_id && curl_hash_find(data->hostcache, entry_id, entry_len+1, (void **) &p)) {
     /* Do we need to check for a cache timeout? */
     if (data->set.dns_cache_timeout != -1) {
       /* Return if the entry has not timed out */
       if ((now - p->timestamp) < data->set.dns_cache_timeout) {
-        return p->addr;
+        _hostcache_return(p->addr);
       }
     }
     else {
-      return p->addr;
+      _hostcache_return(p->addr);
     }
   }
 
   /* Create a new cache entry */
-  p = (struct curl_dns_cache_entry *)
-    malloc(sizeof(struct curl_dns_cache_entry));
-  if (!p)
-    return NULL;
+  p = (struct curl_dns_cache_entry *) malloc(sizeof(struct curl_dns_cache_entry));
+  if (!p) {
+   _hostcache_return(NULL);
+  }
 
   p->addr = Curl_getaddrinfo(data, hostname, port, bufp);
   if (!p->addr) {
     free(p);
-    return NULL;
+    _hostcache_return(NULL);
   }
   p->timestamp = now;
 
   /* Save it in our host cache */
-  curl_hash_update(data->hostcache, hostname, hostname_len+1, (const void *) p);
+  curl_hash_update(data->hostcache, entry_id, entry_len+1, (const void *) p);
 
-  return p->addr;
+  _hostcache_return(p->addr);
 }
 
 /*
