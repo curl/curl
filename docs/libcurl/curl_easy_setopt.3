@@ -414,6 +414,22 @@ of the headers you specified.
 \fBNOTE:\fPThe most commonly replaced headers have "shortcuts" in the options
 CURLOPT_COOKIE, CURLOPT_USERAGENT and CURLOPT_REFERER.
 .TP
+.B CURLOPT_HTTP200ALIASES
+Pass a pointer to a linked list of aliases to be treated as valid HTTP 200
+responses.  Some servers respond with a custom header response line.  For
+example, IceCast servers respond with "ICY 200 OK".  By including this string
+in your list of aliases, the response will be treated as a valid HTTP header
+line such as "HTTP/1.0 200 OK". (Added in 7.10.3)
+
+The linked list should be a fully valid list of struct curl_slist structs, and
+be properly filled in.  Use \fIcurl_slist_append(3)\fP to create the list and
+\fIcurl_slist_free_all(3)\fP to clean up an entire list.
+
+\fBNOTE:\fPThe alias itself is not parsed for any version strings.  So if your
+alias is "MYHTTP/9.9", Libcurl will not treat the server as responding with
+HTTP version 9.9.  Instead Libcurl will use the value set by option
+\fICURLOPT_HTTP_VERSION\fP.
+.TP
 .B CURLOPT_COOKIE
 Pass a pointer to a zero terminated string as parameter. It will be used to
 set a cookie in the http request. The format of the string should be
