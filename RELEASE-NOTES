@@ -16,6 +16,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o proxy environment variables are now ignored when built HTTP-disabled
+ o CURLOPT_PROXY can now disable HTTP proxy even when built HTTP-disabled
  o "curl dictionary.com" no longer assumes DICT protocol
  o re-invoke some system calls on EINTR
  o duplicate Host: when failed connection re-use
@@ -39,6 +41,7 @@ advice from friends like these:
  Dan Fandrich, Peter Pentchev, Marcin Konicki, Rune Kleveland, David Shaw,
  Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt,
  Hzhijun, Pavel Orehov, Bruce Mitchener, Cyrill Osterwalder, Dan Torop,
- Martijn Koster, Alex aka WindEagle, Cody Jones, Samuel Díaz García
+ Martijn Koster, Alex aka WindEagle, Cody Jones, Samuel Díaz García,
+ Stephan Bergmann
 
         Thanks! (and sorry if I forgot to mention someone)
