@@ -83,8 +83,12 @@
 #error "We can't compile without socket() support!"
 #endif
 
+
 #endif
 
+#ifdef HAVE_OPENSSL_ENGINE_H
+#include <openssl/engine.h>
+#endif
 #include "urldata.h"
 #include "netrc.h"
 
