@@ -2,6 +2,11 @@
 /* Define if you have the stricmp function.  */
 #define HAVE_STRICMP 1
 
+#ifdef MINGW32
+/* Define to 1 if you have the `ftruncate' function. */
+#define HAVE_FTRUNCATE 1
+#endif
+
 /* Define to 1 if you want the built-in manual */
 #define USE_MANUAL 1
 
