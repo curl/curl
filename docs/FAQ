@@ -1,4 +1,4 @@
-Updated: November 1, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: November 14, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -171,9 +171,11 @@ FAQ
   sourceforge.net hosts several project tools we take advantage from like the
   bug tracker, mailing lists and more.
 
-  If you feel you want to show support our project with a donation, a very
-  nice way of doing that would be to buy "gift certificates" at useful online
-  shopping sites, such as amazon.com or thinkgeek.com.
+  If you feel you want to show support our project with a donation, one way of
+  doing that would be to buy "gift certificates" at useful online shopping
+  sites, such as amazon.com or thinkgeek.com. Another way would be to sponsor
+  us through a banner-program or by simply helping us coding, documenting,
+  testing etc.
 
   1.7 What about CURL from curl.com?
 
@@ -480,7 +482,7 @@ FAQ
 
   All error codes that are larger than the highest documented error code means
   that curl has exited due to a crash. This is a serious error, and we
-  appriciate a detailed bug report from you that describes how we could go
+  appreciate a detailed bug report from you that describes how we could go
   ahead and repeat this!
 
   4.7. How do I keep user names and passwords secret in Curl command lines?
