@@ -222,7 +222,7 @@ X_OBJS= \
         $(DIROBJ)\http_negotiate.obj \
         $(DIROBJ)\http_ntlm.obj \
 	$(DIROBJ)\md5.obj \
-	$(DIROBJ)\curl_strerror.obj \
+	$(DIROBJ)\strerror.obj \
 	$(RESOURCE)
 
 all : $(TARGET)
