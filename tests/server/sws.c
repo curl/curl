@@ -198,8 +198,11 @@ void storerequest(char *reqbuf)
     fwrite(reqbuf, 1, strlen(reqbuf), dump);
 
     fclose(dump);
+    logmsg("Wrote request input to " REQUEST_DUMP);
   }
-
+  else {
+    logmsg("Failed to write request input to " REQUEST_DUMP);
+  }
 }
 
 
