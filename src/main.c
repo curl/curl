@@ -863,7 +863,6 @@ static int formparse(char *input,
               ptr++;
 
             if(curlx_strnequal("type=", ptr, 5)) {
-
               /* set type pointer */
               type = &ptr[5];
 
@@ -878,9 +877,13 @@ static int formparse(char *input,
               /* now point beyond the content-type specifier */
               sep = (char *)type + strlen(major)+strlen(minor)+1;
 
-              *sep=0; /* zero terminate type string */
+              if(*sep) {
+                *sep=0; /* zero terminate type string */
 
-              ptr=sep+1;
+                ptr=sep+1;
+              }
+              else
+                ptr = NULL; /* end */
             }
             else if(curlx_strnequal("filename=", ptr, 9)) {
               filename = &ptr[9];
