@@ -26,24 +26,26 @@ Function descriptions
  The interface is meant to be very simple for very simple
  implementations. Thus, we have minimized the number of entries.
 
-Main Operations
+The Easy Interface
 
- You INIT the lib
+ When using the easy interface, you init your easy-session and get a handle,
+ which you use as input to the following interface functions you use.
 
- You SET OPTIONS you want the lib to use.
+ You continue be setting all the options you want in the upcoming transfer,
+ most important among them is the URL itself. You might want to set some
+ callbacks as well that will be called from the library when data is available
+ etc.
 
- You tell the lib to PERFORM the transfer.
+ When all is setup, you tell libcurl to perform the transfer. It will then do
+ the entire operation and won't return until it is done or failed.
 
- You CLEAN UP the lib
+ After the performance is made, you cleanup the easy-session's handle and
+ libcurl is entire off the hook!
 
- done.
+ See the separate man pages for the libcurl functions for details:
 
- See the separate man pages for the libcurl functions for details.
+        curl_easy_init() 
+        curl_easy_setopt() 
+        curl_easy_perform() 
+        curl_easy_cleanup() 
 
-
-        CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
-
-
-
-CURLcode curl_easy_perform(CURL *curl);
-void curl_easy_cleanup(CURL *curl);
