@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (16 January 2005)
+- Alex aka WindEagle pointed out that when doing "curl -v dictionary.com", curl
+  assumed this used the DICT protocol. While guessing protocols will remain
+  fuzzy, I've now made sure that the host names must start with "[protocol]."
+  for them to be a valid guessable name. I also removed "https" as a prefix
+  that indicates HTTPS, since we hardly ever see any host names using that.
+
 Daniel (13 January 2005)
 - Inspired by Martijn Koster's patch and example source at
   http://www.greenhills.co.uk/mak/gentoo/curl-eintr-bug.c, I now made the

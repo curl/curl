@@ -2356,21 +2356,19 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       /* Note: if you add a new protocol, please update the list in
        * lib/version.c too! */
 
-      if(checkprefix("GOPHER", conn->host.name))
+      if(checkprefix("GOPHER.", conn->host.name))
         strcpy(conn->protostr, "gopher");
 #ifdef USE_SSLEAY
-      else if(checkprefix("HTTPS", conn->host.name))
-        strcpy(conn->protostr, "https");
       else if(checkprefix("FTPS", conn->host.name))
         strcpy(conn->protostr, "ftps");
 #endif /* USE_SSLEAY */
-      else if(checkprefix("FTP", conn->host.name))
+      else if(checkprefix("FTP.", conn->host.name))
         strcpy(conn->protostr, "ftp");
-      else if(checkprefix("TELNET", conn->host.name))
+      else if(checkprefix("TELNET.", conn->host.name))
         strcpy(conn->protostr, "telnet");
-      else if (checkprefix("DICT", conn->host.name))
+      else if (checkprefix("DICT.", conn->host.name))
         strcpy(conn->protostr, "DICT");
-      else if (checkprefix("LDAP", conn->host.name))
+      else if (checkprefix("LDAP.", conn->host.name))
         strcpy(conn->protostr, "LDAP");
       else {
         strcpy(conn->protostr, "http");
