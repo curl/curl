@@ -1,21 +1,25 @@
-Part of this software is distributed under the Mozilla Public License
-version 1.0, which is part of this distribution (MPL-1.0.txt) and
-available on-line at http://www.mozilla.org/MPL/
+ Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
 
-The terminology used here is described in the Mozilla Public License.
+ Everyone is permitted to copy and distribute verbatim copies of this license
+ document, but changing it is not allowed.
 
-In accordance with section "4. Inability to Comply Due to Statute or
-Regulation" the following exemptions apply to this software:
+ In order to be useful for every potential user, the curl and libcurl are
+ dual-licensed under the MPL and the MIT/X-derivate licenses.
 
- * The Initial Developer has the right, regardless of the citizenship
-   of any involved party, to choose the location for settling disputes
-   as refered to under section "11. Miscellaneous" of the Mozilla Public
-   License.
+ You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ copies of the Software, and permit persons to whom the Software is furnished
+ to do so, under the terms of the MPL or the MIT/X-derivate licenses. You may
+ pick one of these licenses. The files MITX.txt and MPL-1.1.txt contain the
+ license texts.
 
-Initial Developers of this software are:
+ As a courtesy to the open-source and free software community, we ask you to
+ dual-license any modifications that you make as well, under the terms of this
+ document.
 
-  Daniel Stenberg <daniel@haxx.se>
+ Please remember to always keep the licensing information included in
+ individual source files up-to-date, so as to avoid misleading anyone as to
+ the status of these files.
 
-Curl is Copyright (C) 1996-2000 Daniel Stenberg
-
- 
+ I will use a submission policy according to which I will only enter
+ contributions into the CVS tree if the contributor agrees to both licenses
+ and this dual-license approach.

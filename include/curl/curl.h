@@ -7,38 +7,21 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- *  The contents of this file are subject to the Mozilla Public License
- *  Version 1.0 (the "License"); you may not use this file except in
- *  compliance with the License. You may obtain a copy of the License at
- *  http://www.mozilla.org/MPL/
+ * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- *  Software distributed under the License is distributed on an "AS IS"
- *  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
- *  License for the specific language governing rights and limitations
- *  under the License.
+ * In order to be useful for every potential user, curl and libcurl are
+ * dual-licensed under the MPL and the MIT/X-derivate licenses.
  *
- *  The Original Code is Curl.
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the MPL or the MIT/X-derivate
+ * licenses. You may pick one of these licenses.
  *
- *  The Initial Developer of the Original Code is Daniel Stenberg.
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
  *
- *  Portions created by the Initial Developer are Copyright (C) 1998.
- *  All Rights Reserved.
- *
- * ------------------------------------------------------------
- * Main author:
- * - Daniel Stenberg <daniel@haxx.se>
- *
- * 	http://curl.haxx.se
- *
- * $Source$
- * $Revision$
- * $Date$
- * $Author$
- * $State$
- * $Locker$
- *
- * ------------------------------------------------------------
- ****************************************************************************/
+ * $Id$
+ *****************************************************************************/
 
 #include <stdio.h>
 /* The include stuff here is mainly for time_t! */

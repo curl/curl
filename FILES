@@ -1,7 +1,8 @@
 CHANGES
 FILES
 LEGAL
-MPL-1.0.txt
+MPL-1.1.txt
+MITX.txt
 README
 docs/BUGS
 docs/CONTRIBUTE
@@ -11,7 +12,7 @@ docs/INSTALL
 docs/INTERNALS
 docs/MANUAL
 docs/README.win32
-docs/README.libcurl
+docs/LIBCURL
 docs/RESOURCES
 docs/TODO
 docs/curl.1

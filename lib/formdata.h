@@ -8,69 +8,21 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- *  The contents of this file are subject to the Mozilla Public License
- *  Version 1.0 (the "License"); you may not use this file except in
- *  compliance with the License. You may obtain a copy of the License at
- *  http://www.mozilla.org/MPL/
+ * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
- *  Software distributed under the License is distributed on an "AS IS"
- *  basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
- *  License for the specific language governing rights and limitations
- *  under the License.
+ * In order to be useful for every potential user, curl and libcurl are
+ * dual-licensed under the MPL and the MIT/X-derivate licenses.
  *
- *  The Original Code is Curl.
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the MPL or the MIT/X-derivate
+ * licenses. You may pick one of these licenses.
  *
- *  The Initial Developer of the Original Code is Daniel Stenberg.
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
  *
- *  Portions created by the Initial Developer are Copyright (C) 1998.
- *  All Rights Reserved.
- *
- *  Contributor(s):
- *   Rafael Sagula <sagula@inf.ufrgs.br>
- *   Sampo Kellomaki <sampo@iki.fi>
- *   Linas Vepstas <linas@linas.org>
- *   Bjorn Reese <breese@imada.ou.dk>
- *   Johan Anderson <johan@homemail.com>
- *   Kjell Ericson <Kjell.Ericson@haxx.se>
- *   Troy Engel <tengel@palladium.net>
- *   Ryan Nelson <ryan@inch.com>
- *   Bjorn Stenberg <Bjorn.Stenberg@haxx.se>
- *   Angus Mackay <amackay@gus.ml.org>
- *
- * ------------------------------------------------------------
- * Main author:
- * - Daniel Stenberg <daniel@haxx.se>
- *
- * 	http://curl.haxx.se
- *
- * $Source$
- * $Revision$
- * $Date$
- * $Author$
- * $State$
- * $Locker$
- *
- * ------------------------------------------------------------
- * $Log$
- * Revision 1.3  2000-06-20 15:31:26  bagder
- * haxx.nu => haxx.se
- *
- * Revision 1.2  2000/01/10 23:36:14  bagder
- * syncing with local edit
- *
- * Revision 1.4  1999/09/06 06:59:40  dast
- * Changed email info
- *
- * Revision 1.3  1999/08/13 07:34:47  dast
- * Changed the URL in the header
- *
- * Revision 1.2  1999/07/30 12:59:47  dast
- * FormFree() was added to properly cleanup after a form was posted.
- *
- * Revision 1.1.1.1  1999/03/11 22:23:34  dast
- * Imported sources
- *
- ****************************************************************************/
+ * $Id$
+ *****************************************************************************/
 /* plain and simple linked list with lines to send */
 struct FormData {
   struct FormData *next;
