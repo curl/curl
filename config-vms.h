@@ -56,7 +56,7 @@
 #undef ssize_t
 
 /* Define this to 'int' if socklen_t is not an available typedefed type */
-#undef socklen_t
+#undef socklen_t size_t
 
 /* Define this as a suitable file to read random data from */
 #undef RANDOM_FILE
@@ -334,7 +334,34 @@
 /* Set to explicitly specify we don't want to use thread-safe functions */
 #undef DISABLED_THREADSAFE
 
-/* VMS ones...*/
-#define	HAVE_MEMORY_H	1
 #define	HAVE_TIMEVAL_H	1
-#define	socklen_t size_t
+
+/* Name of this package! */
+#define PACKAGE "not-used"
+
+/* Version number of this archive. */
+#define VERSION "not-used"
+
+/* Define if you have the getpass function.  */
+#undef HAVE_GETPASS
+
+/* Define if you have a working OpenSSL installation */
+#undef OPENSSL_ENABLED
+
+/* Define if you have the `dlopen' function. */
+#undef HAVE_DLOPEN
+
+/* Define if you have the <inttypes.h> header file. */
+#undef HAVE_INTTYPES_H
+
+/* Define if you have the <strings.h> header file. */
+#define HAVE_STRINGS_H 1
+
+/* Define if you have the <string.h> header file. */
+#define HAVE_STRING_H 1
+
+/* Define if you have the `strtok_r' function. */
+#undef HAVE_STRTOK_R
+
+#define HAVE_MEMORY_H   1
+
