@@ -1513,7 +1513,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   zlib support:    ${curl_zlib_msg}
   krb4 support:    ${curl_krb4_msg}
   GSSAPI support:  ${curl_gss_msg}
-  SNPEGO support:  ${curl_spnego_msg}
+  SPNEGO support:  ${curl_spnego_msg}
   c-ares support:  ${curl_ares_msg}
   ipv6 support:    ${curl_ipv6_msg}
   IDN support:     ${curl_idn_msg}
