@@ -77,7 +77,13 @@ terminated string. NOTE: this option is currently required!
 .B CURLOPT_PROXY
 If you need libcurl to use a http proxy to access the outside world, set the
 proxy string with this option. The parameter should be a char * to a zero
-terminated string.
+terminated string. To specify port number in this string, append":[port]" to
+the end of the host name. The proxy string may be prefixed with
+"[protocol]://" since any such prefix will be ignored.
+.TP
+.B CURLOPT_PROXYPORT
+Set this long with this option to set the proxy port to use unless it is
+specified in the proxy string CURLOPT_PROXY.
 .TP
 .B CURLOPT_VERBOSE
 Set the parameter to non-zero to get the library to display a lot of verbose
