@@ -4,8 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define EAT_SPACE(ptr) while( ptr && *ptr && isspace(*ptr) ) ptr++
-#define EAT_WORD(ptr) while( ptr && *ptr && !isspace(*ptr) && ('>' != *ptr)) ptr++
+#define EAT_SPACE(ptr) while( ptr && *ptr && isspace((int)*ptr) ) ptr++
+#define EAT_WORD(ptr) while( ptr && *ptr && !isspace((int)*ptr) && ('>' != *ptr)) ptr++
 
 #ifdef DEBUG
 #define show(x) printf x

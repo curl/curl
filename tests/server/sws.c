@@ -13,7 +13,10 @@
 #include <netinet/in.h>
 #include <netdb.h>
 
-char *spitout(FILE *stream, char *main, char *sub, int *size);
+const char *
+spitout(FILE *stream,
+        const char *main,
+        const char *sub, int *size);
 
 #define DEFAULT_PORT 8999
 
@@ -27,8 +30,8 @@ char *spitout(FILE *stream, char *main, char *sub, int *size);
 
 #define TEST_DATA_PATH "data/test%d"
 
-static char *docfriends = "HTTP/1.1 200 Mighty fine indeed\r\n\r\nWE ROOLZ\r\n";
-static char *doc404 = "HTTP/1.1 404 Not Found\n"
+static const char *docfriends = "HTTP/1.1 200 Mighty fine indeed\r\n\r\nWE ROOLZ\r\n";
+static const char *doc404 = "HTTP/1.1 404 Not Found\n"
     "Server: " VERSION "\n"
     "Connection: close\n"
     "Content-Type: text/html\n"
@@ -41,7 +44,9 @@ static char *doc404 = "HTTP/1.1 404 Not Found\n"
     "The requested URL was not found on this server.\n"
     "<P><HR><ADDRESS>" VERSION "</ADDRESS>\n" "</BODY></HTML>\n";
 
-static volatile int sigpipe, sigterm;
+#ifdef HAVE_SIGNAL
+static volatile int sigpipe;
+#endif
 static FILE *logfp;
 
 
@@ -53,27 +58,21 @@ static void logmsg(const char *msg)
 
     strcpy(loctime, asctime(curr_time));
     loctime[strlen(loctime) - 1] = '\0';
-    fprintf(logfp, "%s: pid %d: %s\n", loctime, getpid(), msg);
+    fprintf(logfp, "%s: pid %d: %s\n", loctime, (int)getpid(), msg);
 #ifdef DEBUG
-    fprintf(stderr, "%s: pid %d: %s\n", loctime, getpid(), msg);
+    fprintf(stderr, "%s: pid %d: %s\n", loctime, (int)getpid(), msg);
 #endif
     fflush(logfp);
 }
 
 
+#ifdef HAVE_SIGNAL
 static void sigpipe_handler(int sig)
 {
-    sigpipe = 1;
+  (void)sig; /* prevent warning */
+  sigpipe = 1;
 }
-
-
-static void sigterm_handler(int sig)
-{
-    char logbuf[100];
-    sprintf(logbuf, "Got signal %d, terminating", sig);
-    logmsg(logbuf);
-    sigterm = 1;
-}
+#endif
 
 int ProcessRequest(char *request)
 {
@@ -237,7 +236,7 @@ static int send_doc(int sock, int doc, int part_no)
 {
   int written;
   int count;
-  char *buffer;
+  const char *buffer;
   char *ptr;
   FILE *stream;
   char *cmd=NULL;
@@ -271,7 +270,8 @@ static int send_doc(int sock, int doc, int part_no)
       return 0;
     }
     else {
-      ptr = buffer = spitout(stream, "reply", partbuf, &count);
+      buffer = spitout(stream, "reply", partbuf, &count);
+      ptr = (char *)buffer;
       fclose(stream);
     }
 
@@ -283,7 +283,7 @@ static int send_doc(int sock, int doc, int part_no)
     }
     else {    
       /* get the custom server control "commands" */
-      cmd = spitout(stream, "reply", "postcmd", &cmdsize);
+      cmd = (char *)spitout(stream, "reply", "postcmd", &cmdsize);
       fclose(stream);
     }
   }
@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
   struct sockaddr_in me;
   int sock, msgsock, flag;
   unsigned short port = DEFAULT_PORT;
-  char *logfile = DEFAULT_LOGFILE;
+  const char *logfile = DEFAULT_LOGFILE;
   int part_no;
   FILE *pidfile;
   
@@ -348,12 +348,8 @@ int main(int argc, char *argv[])
 #ifdef HAVE_SIGNAL
   /* FIX: make a more portable signal handler */
   signal(SIGPIPE, sigpipe_handler);
-  signal(SIGINT, sigterm_handler);
-  signal(SIGTERM, sigterm_handler);
 
   siginterrupt(SIGPIPE, 1);
-  siginterrupt(SIGINT, 1);
-  siginterrupt(SIGTERM, 1);
 #endif
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -394,18 +390,13 @@ int main(int argc, char *argv[])
 
   fprintf(stderr, "*** %s listening on port %u ***\n", VERSION, port);
 
-  while (!sigterm) {
+  while (1) {
     int doc;
 
     msgsock = accept(sock, NULL, NULL);
     
-    if (msgsock == -1) {
-      if (sigterm) {
-        break;
-      }
-      /* perror("accept"); */
+    if (msgsock == -1)
       continue;
-    }
     
     logmsg("New client connected");
 
