@@ -33,6 +33,9 @@ TODO
    return informational stuff as errors, consider a new info returned by
    curl_easy_getinfo() #845941
 
+ * Use 'struct lifreq' and SIOCGLIFADDR instead of 'struct ifreq' and
+   SIOCGIFADDR on newer Solaris versions as they claim the latter is obsolete.
+
  LIBCURL - multi interface
 
  * Add curl_multi_timeout() to make libcurl's ares-functionality better.
