@@ -70,6 +70,25 @@ typedef unsigned char bool;
 #define typedef_bool
 #endif
 
+#ifdef HAVE_LONGLONG
+#define LONG_LONG long long
+#define ENABLE_64BIT
+#else
+#ifdef _MSC_VER
+#define LONG_LONG __int64
+#define ENABLE_64BIT
+#endif
+#endif /* HAVE_LONGLONG */
+
+/* We set up our internal prefered CURL_FORMAT_OFF_T here */
+#undef CURL_FORMAT_OFF_T
+#if SIZEOF_CURL_OFF_T > 4
+#define CURL_FORMAT_OFF_T "%lld"
+#else
+#define CURL_FORMAT_OFF_T "%ld"
+#endif
+
+
 #ifdef NEED_REENTRANT
 /* Solaris machines needs _REENTRANT set for a few function prototypes and
    things to appear in the #include files. We need to #define it before all
