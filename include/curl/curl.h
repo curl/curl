@@ -66,9 +66,9 @@ struct curl_httppost {
   char *contents; /* pointer to allocated data contents */
   long contentslength; /* length of contents field */
 
-	/* CMC: Added support for buffer uploads */
-	char *buffer; /* pointer to allocated buffer contents */
-	long bufferlength; /* length of buffer field */
+  /* CMC: Added support for buffer uploads */
+  char *buffer; /* pointer to allocated buffer contents */
+  long bufferlength; /* length of buffer field */
 
   char *contenttype; /* Content-Type */
   struct curl_slist* contentheader; /* list of extra headers for this form */
@@ -899,35 +899,54 @@ typedef enum {
  * Setup defines, protos etc for the sharing stuff.
  */
 
-/* Different types of locks that a share can aquire */
+/* Different data locks for a single share */
 typedef enum {
-  CURL_LOCK_TYPE_NONE = 0,
-  CURL_LOCK_TYPE_COOKIE = 1<<0,
-  CURL_LOCK_TYPE_DNS = 1<<1,
-  CURL_LOCK_TYPE_SSL_SESSION = 2<<1,
-  CURL_LOCK_TYPE_CONNECT = 2<<2,
-  CURL_LOCK_TYPE_LAST
-} curl_lock_type;
+  CURL_LOCK_DATA_NONE = 0,
+  CURL_LOCK_DATA_COOKIE = 1,
+  CURL_LOCK_DATA_DNS = 2,
+  CURL_LOCK_DATA_SSL_SESSION = 3,
+  CURL_LOCK_DATA_CONNECT = 4,
+  CURL_LOCK_DATA_LAST
+} curl_lock_data;
 
-typedef void (*curl_lock_function)(CURL *, curl_lock_type, void *);
-typedef void (*curl_unlock_function)(CURL *, curl_lock_type, void *);
+/* Different lock access types */
+typedef enum {
+  CURL_LOCK_ACCESS_NONE = 0,   /* unspecified action */
+  CURL_LOCK_ACCESS_SHARED = 1, /* for read perhaps */
+  CURL_LOCK_ACCESS_SINGLE = 2, /* for write perhaps */
+  CURL_LOCK_ACCESS_LAST        /* never use */
+} curl_lock_access;
 
-typedef struct {
-  unsigned int specifier;
-  unsigned int locked;
-  unsigned int dirty;
-  
-  curl_lock_function lockfunc;
-  curl_unlock_function unlockfunc;
-  void *clientdata;
-} curl_share;
+typedef void (*curl_lock_function)(CURL *handle,
+                                   curl_lock_data data,
+                                   curl_lock_access access,
+                                   void *userptr);
+typedef void (*curl_unlock_function)(CURL *handle,
+                                     curl_lock_data data,
+                                     void *userptr);
 
-curl_share *curl_share_init (void);
-CURLcode curl_share_setopt (curl_share *, curl_lock_type, int);
-CURLcode curl_share_set_lock_function (curl_share *, curl_lock_function);
-CURLcode curl_share_set_unlock_function (curl_share *, curl_unlock_function);
-CURLcode curl_share_set_lock_data (curl_share *, void *);
-CURLcode curl_share_destroy (curl_share *);
+typedef void CURLSH;
+
+typedef enum {
+  CURLSH_OK,  /* all is fine */
+  CURLSH_BAD_OPTION, /* 1 */
+  CURLSH_LAST /* never use */
+} CURLSHcode;
+
+typedef enum {
+  CURLSHOPT_NONE,  /* don't use */
+  CURLSHOPT_SHARE,   /* specify a data type to share */
+  CURLSHOPT_UNSHARE, /* specify shich data type to stop sharing */
+  CURLSHOPT_LOCKFUNC,   /* pass in a 'curl_lock_function' pointer */
+  CURLSHOPT_UNLOCKFUNC, /* pass in a 'curl_unlock_function' pointer */
+  CURLSHOPT_USERDATA,   /* pass in a user data pointer used in the lock/unlock
+                           callback functions */
+  CURLSHOPT_LAST  /* never use */
+} CURLSHoption;
+
+CURLSH *curl_share_init(void);
+CURLSHcode curl_share_setopt(CURLSH *, CURLSHoption option, ...);
+CURLSHcode curl_share_cleanup(CURLSH *);
 
 /****************************************************************************
  * Structures for querying information about the curl library at runtime.
