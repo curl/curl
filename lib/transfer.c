@@ -408,11 +408,21 @@ Transfer(struct connectdata *c_conn)
                   }
                   data->progress.httpcode = httpcode;
                   data->progress.httpversion = httpversion;
+
                   if(httpversion == 0)
                     /* Default action for HTTP/1.0 must be to close, unless
                        we get one of those fancy headers that tell us the
                        server keeps it open for us! */
                     conn->bits.close = TRUE;
+
+                  if (httpcode == 304)
+                    /* (quote from RFC2616, section 10.3.5):
+                     *  The 304 response MUST NOT contain a
+                     * message-body, and thus is always
+                     * terminated by the first empty line
+                     * after the header fields.
+                     */
+                    conn->size=0;
                 }
                 else {
                   header = FALSE;	/* this is not a header line */
