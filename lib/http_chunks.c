@@ -214,10 +214,8 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
          even if there's no more chunks to read */
       ch->dataleft = length;
       return CHUNKE_STOP; /* return stop */
-#if 0
     default:
       return CHUNKE_STATE_ERROR;
-#endif
     }
   }
   return CHUNKE_OK;
