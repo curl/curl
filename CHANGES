@@ -6,6 +6,39 @@
 
                                   Changelog
 
+Daniel (31 Mar)
+- Frankie Fong reported a problem with libcurl if you re-used an easy handle
+  with a proxy, and you first made a https:// connction to a host and then
+  switched to a http:// one to the same host. libcurl would then wrongly re-use
+  the same connection for it and fail to get the second URL properly
+
+Daniel (29 Mar)
+- Dan Shearer's fix that makes curl complain if invoked with nothing but "curl
+  -O" was applied.
+
+Daniel (26 Mar)
+- Bryan Kemp was friendly enough to lend me an account on his Redhat 9 box and
+  I could fix the configure problems on redhat 8.1 and 9 in no time thanks to
+  this. Thanks a bunch Bryan!
+
+Daniel (25 Mar)
+- Renamed configure.in to configure.ac
+
+Version 7.10.4-pre5 (25 Mar 2003)
+
+Daniel (25 Mar)
+- Richard Bramante provided a fix for a handle re-use problem seen when you
+  change options on an SSL-enabled connection between requests. Previously,
+  changing peer verification or host verification and similar things was not
+  taken into account when a connection were checked for re-use and thus
+  enabling stricter check between requests on a re-used connection made no
+  difference and the connection would thus be used erroneously.
+
+Daniel (24 Mar)
+- Götz Babin-Ebell pointed out that the ca-bundle.crt file contained a
+  certificate from Trustcenter that was a demo certificate only that was never
+  indended to be part of a CA bundle.
+
 Daniel (21 Mar)
 - Life is a mystery. Within a time period of 17 hours, Tim Pope and Michael
   Churchill filed one bug report each, both identifying problems with a second
