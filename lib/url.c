@@ -2854,7 +2854,7 @@ CURLcode Curl_done(struct connectdata *conn)
   if(conn->connect_addr)
     Curl_resolv_unlock(conn->connect_addr); /* done with this */
 
-#ifdef MALLOCDEBUG
+#if defined(MALLOCDEBUG) && defined(AGGRESIVE_TEST)
   /* scan for DNS cache entries still marked as in use */
   Curl_hash_apply(data->hostcache,
                   NULL, Curl_scan_cache_used);

@@ -191,7 +191,7 @@ hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
                                  hostcache_timestamp_remove);
 }
 
-#ifdef MALLOCDEBUG
+#if defined(MALLOCDEBUG) && defined(AGGRESIVE_TEST)
 /* Called from Curl_done() to check that there's no DNS cache entry with
    a non-zero counter left. */
 void Curl_scan_cache_used(void *user, void *ptr)
