@@ -41,7 +41,8 @@ typical application uses many curl_easy_setopt() calls in the setup phase.
 Options set with this function call are valid for all forthcoming transfers
 performed using this \fIhandle\fP.  The options are not in any way reset
 between transfers, so if you want subsequent transfers with different options,
-you must change them between the transfers.
+you must change them between the transfers. You can optionally reset all
+options back to internal default with \fIcurl_easy_reset(3)\fP.
 
 \fBNOTE:\fP strings passed to libcurl as 'char *' arguments, will not be
 copied by the library. Instead you should keep them available until libcurl no
@@ -994,4 +995,4 @@ If you try to set an option that libcurl doesn't know about, perhaps because
 the library is too old to support it or the option was removed in a recent
 version, this function will return \fICURLE_FAILED_INIT\fP.
 .SH "SEE ALSO"
-.BR curl_easy_init "(3), " curl_easy_cleanup "(3), "
+.BR curl_easy_init "(3), " curl_easy_cleanup "(3), " curl_easy_reset "(3), "
