@@ -6,6 +6,12 @@
 
                                History of Changes
 
+Daniel (19 April 2001)
+- Linus Nielsen Feltzing removed the decimals from the size variables in the
+  --write-out output. We hardly ever get fraction of bytes! :-)
+
+- Albert Chin provided a configure patch for the AC_SYS_LARGEFILE macro.
+
 Daniel (18 April 2001)
 - Input from Michael Mealling made me add --feature to curl-config. It
   displays a list of features that have been built-in in the current
@@ -49,8 +55,9 @@ Daniel (11 April 2001)
 
   Then, invoking curl_easy_perform() without having an URL set caused a crash.
 
-- SM brought a patch that make curl use non-blocking connects on windows when
-  connection timeout is set, as it allows windows users to set that timeout!  
+- S. Moonesamy brought a patch that make curl use non-blocking connects on
+  windows when connection timeout is set, as it allows windows users to set
+  that timeout!
 
 - Hirotaka Matsuyuki wrote a Ruby interface to libcurl!
 
@@ -127,7 +134,7 @@ Daniel (23 March 2001)
 - Corrected the Curl::easy perl interface to use curl_easy_setopt() and not
   curl_setopt() which was removed in 7.7!
 
-- SM provided updates on three documents (MANUAL, INSTALL and FAQ).
+- S. Moonesamy provided updates on three documents (MANUAL, INSTALL and FAQ).
 
 - When following a Location:, libcurl would sometimes write to the URL string
   in a way it shouldn't. As the pointer is passed-in to libcurl from an
@@ -449,16 +456,16 @@ Daniel (8 February 2001)
 Version 7.6.1-pre3
 
 Daniel (7 February 2001)
-- SM found a flaw in the response reading function for FTP that could make
-  libcurl not get out of the loop properly when it should, if libcurl got -1
-  returned when reading the socket.
+- S. Moonesamy found a flaw in the response reading function for FTP that
+  could make libcurl not get out of the loop properly when it should, if
+  libcurl got -1 returned when reading the socket.
 
 - I found a similar mistake in http.c when using a proxy and reading the
   results from the proxy connection.
 
 Daniel (6 February 2001)
-- A friendly person named "SM" (nntp at iname.com) pointed out that the VC
-  makefile in src/ needed the libpath set for the debug build to work.
+- S. Moonesamy pointed out that the VC makefile in src/ needed the libpath set
+  for the debug build to work.
 
 - Daniel Gehriger stepped in to assist with the VC++ stuff Robert Weaver
   brought up yesterday.
