@@ -1386,7 +1386,7 @@ void Curl_single_fdset(struct connectdata *conn,
  * The transfer must already have been setup by a call to Curl_Transfer().
  *
  * Note that headers are created in a preallocated buffer of a default size.
- * That buffer can be enlarged on demand, but it is never shrinken again.
+ * That buffer can be enlarged on demand, but it is never shrunken again.
  *
  * Parts of this function was once written by the friendly Mark Butler
  * <butlerm@xmission.com>.
@@ -1400,7 +1400,10 @@ Transfer(struct connectdata *conn)
   struct Curl_transfer_keeper *k = &conn->keep;
   bool done=FALSE;
 
-  Curl_readwrite_init(conn);
+  if(!(conn->protocol & PROT_FILE))
+    /* Only do this if we are not transferring FILE:, since the file: treatment
+       is different*/
+    Curl_readwrite_init(conn);
 
   if((conn->sockfd == -1) && (conn->writesockfd == -1))
     /* nothing to read, nothing to write, we're already OK! */

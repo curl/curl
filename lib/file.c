@@ -83,6 +83,7 @@
 #include "escape.h"
 #include "file.h"
 #include "speedcheck.h"
+#include "getinfo.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -177,10 +178,14 @@ CURLcode Curl_file(struct connectdata *conn)
   int fd;
   struct timeval now = Curl_tvnow();
 
+  Curl_readwrite_init(conn);
+  Curl_initinfo(data);
+  Curl_pgrsStartNow(data);
+
   /* get the fd from the connection phase */
   fd = conn->proto.file->fd;
 
-/*VMS?? -- This only works reliable for STREAMLF files */
+  /* VMS: This only works reliable for STREAMLF files */
   if( -1 != fstat(fd, &statbuf)) {
     /* we could stat it, then read out the size */
     expected_size = statbuf.st_size;
