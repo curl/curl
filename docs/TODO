@@ -127,6 +127,14 @@ TODO
 
  SSL
 
+ * If you really want to improve the SSL situation, you should probably have a
+   look at SSL cafile loading as well - quick traces look to me like these are
+   done on every request as well, when they should only be necessary once per
+   ssl context (or once per handle). Even better would be to support the SSL
+   CAdir option - instead of loading all of the root CA certs for every
+   request, this option allows you to only read the CA chain that is actually
+   required (into the cache)...
+
  * Add an interface to libcurl that enables "session IDs" to get
    exported/imported. Cris Bailiff said: "OpenSSL has functions which can
    serialise the current SSL state to a buffer of your choice, and
