@@ -1,3 +1,4 @@
+$! $Id$
 $! BUILD_VMS.COM 
 $!
 $! I've taken the original build_vms.com, supplied by Nico Baggus, if
@@ -41,6 +42,7 @@ $!                   the freeware SDL tool.
 $!  8-FEB-2005, MSK, merged the two config-vms.h* files into one that uses
 $!                   USE_SSLEAY to define if the target has SSL support built
 $!                   in.  Changed the cc/define parameter accordingly.
+$! 11-FEB-2005, MSK, If [--.LIB]AMIGAOS.C and NWLIB.C are there, rename them
 $!
 $ on control_y then goto Common_Exit
 $ ctrl_y  = 1556 
@@ -114,6 +116,18 @@ $ call MoveIfDiff "CURLMSG.H" "[--.SRC]"
 $ call MoveIfDiff "CURLMSG.MSG" "[--.SRC]"
 $ call MoveIfDiff "CURLMSG.SDL" "[--.SRC]"
 $ call MoveIfDiff "CURLMSG_VMS.H" "[--.SRC]"
+$!
+$! The [--.LIB]amigaos.c and nwlib.c files aren't needed for the VMS build.
+$! If they are there, rename them so the brute force build works right.
+$!
+$ if f$search( "[--.lib]amigaos.c") .nes. "" 
+$ then
+$    rename [--.lib]amigaos.c .c_not_used
+$ endif
+$ if f$search( "[--.lib]nwlib.c") .nes. "" 
+$ then
+$    rename [--.lib]nwlib.c .c_not_used
+$ endif
 $ on control_y then goto Common_Exit
 $!
 $ call build "[--.lib]" "*.c" "objdir:curllib.olb"
