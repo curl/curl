@@ -282,7 +282,7 @@ int Curl_GetFTPResponse(char *buf,
               int i;
               for(meow=line_start, i=0; meow<ptr; meow++, i++)
                 buf[i] = *meow;
-              meow[i]=0; /* zero terminate */
+              *meow=0; /* zero terminate */
               keepon=FALSE;
               break;
             }
