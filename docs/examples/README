@@ -12,7 +12,7 @@ examples. Just edit the file according to your system and requirements first.
 
 Most examples should build fine using a command line like this:
 
-  $ gcc `curl-config --cflags` `curl-config --libs` -o example example.c
+  $ `curl-config --cc --cflags --libs` -o example example.c
 
 Try the php/examples/ directory for PHP programming snippets!
 
