@@ -266,6 +266,8 @@ int main(int argc, char *argv[])
     exit(EXIT_FAILURE);
   }
 
+  curl_global_init(CURL_GLOBAL_DEFAULT);
+
   // Initialize CURL connection
 
   if (!init(conn, argv[1]))
@@ -278,6 +280,8 @@ int main(int argc, char *argv[])
   // Retrieve content for the URL
 
   code = curl_easy_perform(conn);
+  curl_easy_cleanup(conn);
+
   if (code != CURLE_OK)
   {
     fprintf(stderr, "Failed to get '%s' [%s]\n", argv[1], errorBuffer);
