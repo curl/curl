@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel (20 February 2004)
+- configure --enable-debug with gcc now also tries to detect the icc compiler
+  (which somehow gets treated as if it is a gcc) to stop using all the gcc
+  options with it, and we also provide -isystem options for each extra -I
+  option the configure script has figured out (for OpenSSL, kerberos, zlib,
+  Heimdal etc). This of course to prevent warnings on headers we don't have
+  control of.
+
 Daniel (19 February 2004)
 - Doug Porter made libcurl use the HOME environment variable before the
   getpwuid results when looking for .netrc files.
