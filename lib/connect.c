@@ -427,6 +427,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
    * Figure out what maximum time we have left
    *************************************************************/
   long timeout_ms=300000; /* milliseconds, default to five minutes */
+
+  *connected = FALSE; /* default to not connected */
+
   if(data->set.timeout || data->set.connecttimeout) {
     double has_passed;
 
