@@ -405,10 +405,9 @@ dnl **********************************************************************
 dnl Default to compiler & linker defaults for SSL files & libraries.
 OPT_SSL=off
 AC_ARG_WITH(ssl,dnl
-[  --with-ssl[=DIR]        where to look for SSL [compiler/linker default paths]
-                          DIR points to the SSL installation [/usr/local/ssl]],
-  OPT_SSL=$withval
-)
+AC_HELP_STRING([--with-ssl=PATH], [where to look for SSL, PATH points to the SSL installation (default: /usr/local/ssl)])
+AC_HELP_STRING([--without-ssl], [disable SSL]),
+  OPT_SSL=$withval)
 
 if test X"$OPT_SSL" = Xno
 then
@@ -508,37 +507,36 @@ dnl **********************************************************************
 dnl Check for the presence of ZLIB libraries and headers
 dnl **********************************************************************
 
-dnl Default to compiler & linker defaults for files & libraries.
-dnl OPT_ZLIB=no
-dnl AC_ARG_WITH(zlib,dnl
-dnl [  --with-zlib[=DIR]  where to look for ZLIB [compiler/linker default paths]
-dnl                      DIR points to the ZLIB installation prefix [/usr/local]],
-dnl  OPT_ZLIB=$withval,
-dnl )
-
 dnl Check for & handle argument to --with-zlib.
-dnl
-dnl NOTE:  We *always* look for ZLIB headers & libraries, all this option
-dnl        does is change where we look (by adjusting LIBS and CPPFLAGS.)
-dnl
 
-AC_MSG_CHECKING(where to look for ZLIB)
-if test X"$OPT_ZLIB" = Xno
+OPT_ZLIB="yes"
+AC_ARG_WITH(libz,
+AC_HELP_STRING([--with-libz=PATH], [where to look for zlib])
+AC_HELP_STRING([--without-libz], [disable zlib]),
+              [ OPT_ZLIB="$withval" ])
+
+if test -n "$OPT_ZLIB"
 then
-	AC_MSG_RESULT([defaults (or given in environment)])
-else
-	test X"$OPT_ZLIB" = Xyes && OPT_ZLIB=/usr/local
-	LIBS="$LIBS -L$OPT_ZLIB/lib"
-	CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
-	AC_MSG_RESULT([$OPT_ZLIB])
+  if test X"$OPT_ZLIB" != Xno
+  then
+    AC_MSG_CHECKING(for zlib in)
+    test X"$OPT_ZLIB" = Xyes && OPT_ZLIB=/usr/local
+    LIBS="$LIBS -L$OPT_ZLIB/lib"
+    CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
+    AC_MSG_RESULT([$OPT_ZLIB])
+  fi
 fi
 
-dnl AC_CHECK_FUNC(gzread, , AC_CHECK_LIB(z, gzread))
-AC_CHECK_LIB(z, gzread, [AM_CONDITIONAL(CONTENT_ENCODING, true) 
-		         AC_DEFINE(HAVE_LIBZ)
-			 LIBS="$LIBS -lz"
-                         HAVE_LIBZ="1"
-                         AC_SUBST(HAVE_LIBZ)])
+if test X"$OPT_ZLIB" != Xno
+then
+  AC_CHECK_LIB(z, gzread, [AM_CONDITIONAL(CONTENT_ENCODING, true) 
+	  	          AC_DEFINE(HAVE_LIBZ)
+			  LIBS="$LIBS -lz"
+                          HAVE_LIBZ="1"
+                          AC_SUBST(HAVE_LIBZ)])
+else
+  AC_MSG_WARN([zlib usage deliberately disabled])
+fi
 
 dnl Default is to try the thread-safe versions of a few functions
 OPT_THREAD=on
