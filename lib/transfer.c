@@ -356,11 +356,10 @@ Transfer(struct connectdata *c_conn)
                   /*
                    * end-of-headers.
                    *
-                   * If we requested a "no body" and this isn't a "close"
-                   * connection, this is a good time to get out and return
-                   * home.
+                   * If we requested a "no body", this is a good time to get
+                   * out and return home.
                    */
-                  if(!conn->bits.close && data->bits.no_body)
+                  if(data->bits.no_body)
                     return CURLE_OK;
                   break;		/* exit header line loop */
                 }
