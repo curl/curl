@@ -1769,7 +1769,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      is later set "for real" using Curl_pgrsStartNow(). */
   conn->data->progress.start = conn->created; 
 
-  conn->upload_chunky =
+  conn->bits.upload_chunky =
     ((conn->protocol&PROT_HTTP) &&
      data->set.upload &&
      (data->set.infilesize == -1) &&
@@ -2889,7 +2889,7 @@ CURLcode Curl_do(struct connectdata **connp)
   struct connectdata *conn = *connp;
   struct SessionHandle *data=conn->data;
 
-  conn->do_more = FALSE; /* by default there's no curl_do_more() to use */
+  conn->bits.do_more = FALSE; /* by default there's no curl_do_more() to use */
 
   if(conn->curl_do) {
     /* generic protocol-specific function pointer set in curl_connect() */

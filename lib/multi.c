@@ -360,7 +360,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       if(CURLE_OK == easy->result) {
 
         /* after do, go PERFORM... or DO_MORE */
-        if(easy->easy_conn->do_more) {
+        if(easy->easy_conn->bits.do_more) {
           /* we're supposed to do more, but we need to sit down, relax
              and wait a little while first */
           easy->state = CURLM_STATE_DO_MORE;

@@ -214,6 +214,14 @@ struct ConnectBits {
                    IP address */
   bool use_range;
   bool rangestringalloc; /* the range string is malloc()'ed */
+
+  bool do_more; /* this is set TRUE if the ->curl_do_more() function is
+                   supposed to be called, after ->curl_do() */
+
+  bool upload_chunky; /* set TRUE if we are doing chunked transfer-encoding
+                         on upload */
+
+  bool getheader;	 /* TRUE if header parsing is wanted */
 };
 
 /*
@@ -381,7 +389,6 @@ struct connectdata {
   /* READ stuff */
   int sockfd;		 /* socket to read from or -1 */
   int size;		 /* -1 if unknown at this point */
-  bool getheader;	 /* TRUE if header parsing is wanted */
   long *bytecountp;	 /* return number of bytes read or NULL */
           
   /* WRITE stuff */
@@ -449,12 +456,6 @@ struct connectdata {
       and the 'upload_present' contains the number of bytes available at this
       position */
   char *upload_fromhere;
-
-  bool do_more; /* this is set TRUE if the ->curl_do_more() function is
-                   supposed to be called, after ->curl_do() */
-
-  bool upload_chunky; /* set TRUE if we are doing chunked transfer-encoding
-                         on upload */
 };
 
 /* The end of connectdata. 08/27/02 jhrg */

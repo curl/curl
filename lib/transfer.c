@@ -905,7 +905,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
         if(!k->upload_done) {
 
-          if(conn->upload_chunky) {
+          if(conn->bits.upload_chunky) {
             /* if chunked Transfer-Encoding */
             buffersize -= (8 + 2 + 2);   /* 32bit hex + CRLF + CRLF */
             conn->upload_fromhere += 10; /* 32bit hex + CRLF */
@@ -914,7 +914,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           nread = data->set.fread(conn->upload_fromhere, 1,
                                   buffersize, data->set.in);
           
-          if(conn->upload_chunky) {
+          if(conn->bits.upload_chunky) {
             /* if chunked Transfer-Encoding */
             char hexbuffer[9];
             int hexlen = snprintf(hexbuffer, sizeof(hexbuffer),
@@ -1112,13 +1112,13 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   Curl_pgrsSetUploadCounter(data, 0);
   Curl_pgrsSetDownloadCounter(data, 0);
 
-  if (!conn->getheader) {
+  if (!conn->bits.getheader) {
     k->header = FALSE;
     if(conn->size > 0)
       Curl_pgrsSetDownloadSize(data, conn->size);
   }
   /* we want header and/or body, if neither then don't do this! */
-  if(conn->getheader || !data->set.no_body) {
+  if(conn->bits.getheader || !data->set.no_body) {
 
     FD_ZERO (&k->readfd);		/* clear it */
     if(conn->sockfd != -1) {
@@ -1200,7 +1200,7 @@ Transfer(struct connectdata *conn)
     return CURLE_OK;
 
   /* we want header and/or body, if neither then don't do this! */
-  if(!conn->getheader && data->set.no_body)
+  if(!conn->bits.getheader && data->set.no_body)
     return CURLE_OK;
 
   k->writefdp = &k->writefd; /* store the address of the set */
@@ -1649,7 +1649,7 @@ Curl_Transfer(struct connectdata *c_conn, /* connection data */
   /* now copy all input parameters */
   conn->sockfd = sockfd;
   conn->size = size;
-  conn->getheader = getheader;
+  conn->bits.getheader = getheader;
   conn->bytecountp = bytecountp;
   conn->writesockfd = writesockfd;
   conn->writebytecountp = writebytecountp;

@@ -2089,7 +2089,7 @@ CURLcode Curl_ftp(struct connectdata *conn)
       retcode = Curl_ftp_nextconnect(conn);
     else
       /* since we didn't connect now, we want do_more to get called */
-      conn->do_more = TRUE;
+      conn->bits.do_more = TRUE;
   }
 
   return retcode;
