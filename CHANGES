@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (4 November)
+- Troels Walsted Hansen fixed the MSVC makefiles to let them build curl fine
+  on Windows.
+
+- Kevin Roth corrected the cygwin package generator and spell-fixed the
+  comment in the ca-bundle.h file.
+
 Version 7.10.8 (1 November 2003)
 
 Daniel (31 October)
