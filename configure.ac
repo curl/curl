@@ -1214,7 +1214,19 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        
        fi
 
-       CFLAGS="$CFLAGS $WARN"
+       NEWFLAGS=""
+       for flag in $CPPFLAGS; do
+         case "$flag" in
+          -I*)
+            dnl include path
+            add=`echo $flag | sed 's/^-I/-isystem /g'`
+            NEWFLAGS="$NEWFLAGS $add"
+            ;;
+         esac
+       done
+
+       CFLAGS="$CFLAGS $WARN $NEWFLAGS"
+
     fi
     dnl strip off optimizer flags
     NEWFLAGS=""
