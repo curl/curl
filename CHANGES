@@ -7,6 +7,14 @@
                                   Changelog
 
 Daniel(2 February 2004)
+- Based on Dirk Manske's patch, I modified the name resolving with ares to
+  feature a timeout for really slow lookups. It now defaults to 300 seconds,
+  but is now adjusted to the CONNECTTIMEOUT/TIMOUE timeouts if one of them
+  is set.
+
+- Fixed the inclusion of ca-bundle.h to really use the one in the build dir
+  before the one in the source dir. Domenico Andreoli found out and reported.
+
 - Added test case 97, a simple POST with a custom Content-Type header
   replacing the original application/x-www-form-urlencoded one.
 
