@@ -1,7 +1,7 @@
 Online:  http://curl.haxx.se/docs/httpscripting.shtml
 Author:  Daniel Stenberg <daniel@haxx.se>
-Date:    October 31, 2001
-Version: 0.5
+Date:    November 6, 2001
+Version: 0.6
 
                 The Art Of Scripting HTTP Requests Using Curl
                 =============================================
@@ -65,7 +65,8 @@ Version: 0.5
 
  All HTTP replies contain a set of headers that are normally hidden, use
  curl's -i option to display them as well as the rest of the document. You can
- also ask the remote server for ONLY the headers by using the -I option.
+ also ask the remote server for ONLY the headers by using the -I option (which
+ will make curl issue a HEAD request).
 
 4. Forms
 
@@ -122,16 +123,21 @@ Version: 0.5
 
         <form method="POST" action="junk.cgi">
           <input type=text name="birthyear">
-          <input type=submit name=press value="OK">
+          <input type=submit name=press value=" OK ">
         </form>
 
   And to use curl to post this form with the same data filled in as before, we
   could do it like:
 
-        curl -d "birthyear=1905&press=OK" www.hotmail.com/when/junk.cgi
+        curl -d "birthyear=1905&press=%20OK%20" www.hotmail.com/when/junk.cgi
 
   This kind of POST will use the Content-Type
   application/x-www-form-urlencoded and is the most widely used POST kind.
+
+  The data you send to the server MUST already be properly encoded, curl will
+  not do that for you. For example, if you want the data to contain a space,
+  you need to replace that space with %20 etc. Failing to comply with this
+  will most likely cause your data to be received wrongly and messed up.
 
  4.3 FILE UPLOAD POST
 
@@ -202,14 +208,18 @@ Version: 0.5
 
  Authentication is the ability to tell the server your username and password
  so that it can verify that you're allowed to do the request you're doing. The
- basic authentication used in HTTP is *plain* *text* based, which means it
- sends username and password only slightly obfuscated, but still fully
- readable by anyone that sniffs on the network between you and the remote
- server.
+ Basic authentication used in HTTP (which is the type curl uses by default) is
+ *plain* *text* based, which means it sends username and password only
+ slightly obfuscated, but still fully readable by anyone that sniffs on the
+ network between you and the remote server.
 
  To tell curl to use a user and password for authentication:
 
         curl -u name:password www.secrets.com
+
+ The site might require a different authentication method (check the headers
+ returned by the server), and then --ntlm, --digest, --negotiate or even
+ --anyauth might be options that suit you.
  
  Sometimes your HTTP access is only available through the use of a HTTP
  proxy. This seems to be especially common at various companies. A HTTP proxy
@@ -217,6 +227,9 @@ Version: 0.5
  the Internet. To specify those with curl, run something like:
 
         curl -U proxyuser:proxypassword curl.haxx.se
+
+ If your proxy requires the authentication to be done using the NTLM method,
+ use --proxy-ntlm.
 
  If you use any one these user+password options but leave out the password
  part, curl will prompt for the password interactively.
@@ -309,6 +322,9 @@ Version: 0.5
 
         curl -D headers_and_cookies www.cookiesite.com
 
+ (Take note that the -c option described below is a better way to store
+ cookies.)
+
  Curl has a full blown cookie parsing engine built-in that comes to use if you
  want to reconnect to a server and use cookies that were stored from a
  previous connection (or handicrafted manually to fool the server into
@@ -361,6 +377,11 @@ Version: 0.5
   HTTPS server like:
 
         curl -E mycert.pem https://that.secure.server.com
+
+  curl also tries to verify that the server is who it claims to be, by
+  verifying the server's certificate against a CA cert bundle. Failing the
+  verification will cause curl to deny the connection. You must then use -k in
+  case you want to tell curl to ignore that the server can't be verified.
 
 12. REFERENCES
 
