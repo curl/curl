@@ -402,6 +402,9 @@ CURLcode Curl_http(struct connectdata *conn)
   else
     http = conn->proto.http;
 
+  /* We default to persistant connections */
+  conn->bits.close = FALSE;
+
   if ( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
        data->bits.upload) {
     data->bits.http_put=1;

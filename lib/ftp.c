@@ -296,6 +296,9 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   memset(ftp, 0, sizeof(struct FTP));
   conn->proto.ftp = ftp;
 
+  /* We always support persistant connections on ftp */
+  conn->bits.close = FALSE;
+
   /* get some initial data into the ftp struct */
   ftp->bytecountp = &conn->bytecount;
 
