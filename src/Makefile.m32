@@ -2,7 +2,7 @@
 # $Id$
 #
 ## Makefile for building curl.exe with MingW32 (GCC-3.2) and
-## optionally OpenSSL (0.9.6)
+## optionally OpenSSL (0.9.7)
 ##
 ## Use: make -f Makefile.m32 [SSL=1] [DYN=1]
 ##
@@ -32,8 +32,8 @@ COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 
 curl_PROGRAMS = curl.exe
-curl_OBJECTS = main.o hugehelp.o urlglob.o writeout.o
-curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c
+curl_OBJECTS = main.o hugehelp.o urlglob.o writeout.o getpass.o
+curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c getpass.c
 ifdef DYN
   curl_DEPENDENCIES = ../lib/libcurldll.a ../lib/libcurl.dll
   curl_LDADD = -L../lib -lcurldll

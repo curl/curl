@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (21 October)
+- Andrés García updated the mingw32 makefiles.
+
+Version 7.10.8-pre5 (21 October 2003)
+
 Daniel (19 October)
 - Georg Horn made libcurl output more info on SSL failures when receiving
   data.
