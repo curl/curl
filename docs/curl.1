@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "5 Sep 2001" "Curl 7.9" "Curl Manual"
+.TH curl 1 "11 Sep 2001" "Curl 7.9" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -325,6 +325,8 @@ file in the user's home directory for login name and password. This is
 typically used for ftp on unix. If used with http, curl will enable user
 authentication. See
 .BR netrc(4)
+or
+.BR ftp(1)
 for details on the file format. Curl will not complain if that file
 hasn't the right permissions (it should not be world nor group
 readable). The environment variable "HOME" is used to find the home
