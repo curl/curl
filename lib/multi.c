@@ -403,14 +403,40 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
     case CURLM_STATE_PERFORM:
       /* read/write data if it is ready to do so */
       easy->result = Curl_readwrite(easy->easy_conn, &done);
-      /* hm, when we follow redirects, we may need to go back to the CONNECT
-         state */
+
+      if(easy->result)  {
+        /* The transfer phase returned error, we mark the connection to get
+         * closed to prevent being re-used. This is becasue we can't
+         * possibly know if the connection is in a good shape or not now. */
+        easy->easy_conn->bits.close = TRUE;
+
+        if(-1 !=easy->easy_conn->secondarysocket) {
+          /* if we failed anywhere, we must clean up the secondary socket if
+             it was used */
+          sclose(easy->easy_conn->secondarysocket);
+          easy->easy_conn->secondarysocket=-1;
+        }
+        Curl_posttransfer(easy->easy_handle);
+        Curl_done(easy->easy_conn);
+      }
+
       /* after the transfer is done, go DONE */
-      if(TRUE == done) {
+      else if(TRUE == done) {
+
         /* call this even if the readwrite function returned error */
-        easy->result = Curl_posttransfer(easy->easy_handle);
-        easy->state = CURLM_STATE_DONE;
-        result = CURLM_CALL_MULTI_PERFORM; 
+        Curl_posttransfer(easy->easy_handle);
+
+        /* When we follow redirects, must to go back to the CONNECT state */
+        if(easy->easy_conn->newurl) {
+          easy->result = Curl_follow(easy->easy_handle,
+                                     strdup(easy->easy_conn->newurl));
+          if(CURLE_OK == easy->result)
+            easy->state = CURLM_STATE_CONNECT;
+        }
+        else {
+          easy->state = CURLM_STATE_DONE;
+          result = CURLM_CALL_MULTI_PERFORM; 
+        }
       }
       break;
     case CURLM_STATE_DONE:
