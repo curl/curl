@@ -1,6 +1,10 @@
 Revision history for Perl extension Curl::easy.
 Check out the file README for more info.
 
+1.1.6  Mon Sep 10 2001: - Cris Bailiff <c.bailiff@devsecure.com>
+    - Fix segfault due to changes in header callback behaviour
+      since curl-7.8.1-pre3
+
 1.1.5  Fri Apr 20 2001: - Cris Bailiff <c.bailiff@devsecure.com>
     - Add latest CURLOPT_ and CURLINFO_ constants to the constants list
 

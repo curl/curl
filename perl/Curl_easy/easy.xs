@@ -101,12 +101,14 @@ fwrite_wrapper (const void *ptr,
 
 	if (stream == stdout) {
 	    sv = newSViv(0);	/* FIXME: should cast stdout to GLOB somehow? */
-	} else {		/* its already an SV */
+	} else if (stream == NULL) {
+            sv = &PL_sv_undef;
+        } else {		/* its already an SV */
 	    sv = stream;
 	}
 
 	if (ptr != NULL) {
-	    XPUSHs(sv_2mortal(newSVpvn(ptr, size * nmemb)));
+	    XPUSHs(sv_2mortal(newSVpvn((char *)ptr, (STRLEN)(size * nmemb))));
 	} else {
 	    XPUSHs(sv_2mortal(newSVpv("", 0)));
 	}
@@ -130,15 +132,20 @@ fwrite_wrapper (const void *ptr,
     } else {
 	/* default to a normal 'fwrite' */
 	/* stream could be a FILE * or an SV * */
+        /* or NULL since libcurl-7.8.1pre3  */
 	FILE *f;
 
-	if (stream == stdout) {	/* the only possible FILE ? Think so */
+	if (stream == stdout ||
+            stream == NULL) { /* the only possible FILE ? Think so */
 	    f = stream;
 	} else {		/* its a GLOB */
 	    f = IoIFP(sv_2io(stream));	/* may barf if not a GLOB */
 	}
 
-	return fwrite(ptr, size, nmemb, f);
+	if (f)
+           return fwrite(ptr, size, nmemb, f);
+	else
+           return (size_t) size*nmemb;
     }
 }
 

@@ -110,7 +110,7 @@ CURLINFO_CONTENT_LENGTH_UPLOAD
 USE_INTERNAL_VARS
 );
 
-$VERSION = '1.1.5';
+$VERSION = '1.1.6';
 
 $Curl::easy::headers = "";
 $Curl::easy::content = "";
@@ -254,7 +254,7 @@ indicate an error.
  
 Georg Horn <horn@koblenz-net.de>
  
-Additional callback,pod and tes work by Cris Bailiff <c.bailiff@devsecure.com>
+Additional callback,pod and test work by Cris Bailiff <c.bailiff@devsecure.com>
 and Forrest Cahoon <forrest.cahoon@merrillcorp.com>
 
 =head1 SEE ALSO
