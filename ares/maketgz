@@ -2,6 +2,8 @@
 
 $version = $ARGV[0];
 
+$name="c-ares";
+
 if($version eq "") {
     print "Enter version number!\n";
     exit;
@@ -81,13 +83,16 @@ sub mkalldir {
 }
 
 for(@entries) {
-    my $dir = dirpart("arescurl-$version/$_");
+    my $dir = dirpart("$name-$version/$_");
  #   print "Create $dir\n";
     mkalldir($dir);
  #   print "Copy $_ to $dir\n";
     `cp -p $_ $dir`;
 }
 
-`tar -cf arescurl-$version.tar arescurl-$version`;
-`gzip -9 arescurl-$version.tar`;
-`rm -rf arescurl-$version`;
+# make a tarball
+`tar -cf $name-$version.tar $name-$version`;
+# gzip the tarball
+`gzip -9 $name-$version.tar`;
+# remove the dir
+`rm -rf $name-$version`;
