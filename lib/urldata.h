@@ -429,7 +429,7 @@ struct Curl_async {
 struct connectdata {
   /**** Fields set when inited and not modified again */
   struct SessionHandle *data; /* link to the root CURL struct */
-  int connectindex; /* what index in the connects index this particular
+  long connectindex; /* what index in the connects index this particular
                        struct has */
 
   long protocol; /* PROT_* flags concerning the protocol set */
