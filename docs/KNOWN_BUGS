@@ -35,9 +35,6 @@ may have been fixed since this was written!
   locally, which is because libcurl doesn't call the write callback with zero
   bytes. Explained here: http://curl.haxx.se/mail/archive-2003-04/0143.html
 
-* Using CURLOPT_FAILONERROR (-f/--fail) will make authentication to stop
-  working if you use anything but plain Basic auth.
-
 * IPv6 support on AIX 4.3.3 doesn't work due to a missing sockaddr_storage
   struct. It has been reported to work on AIX 5.1 though.
 
