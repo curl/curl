@@ -105,7 +105,8 @@ Specify to which file you want curl to write all cookies after a completed
 operation. Curl writes all cookies previously read from a specified file as
 well as all cookies received from remote server(s). If no cookies are known,
 no file will be written. The file will be written using the Netscape cookie
-file format.
+file format. If you set the file name to a single dash, "-", the cookies will
+be written to stdout.
 
 If this option is used several times, the last specfied file name will be
 used.
