@@ -170,6 +170,9 @@
 /* Define if you have the <winsock.h> header file.  */
 #define HAVE_WINSOCK_H 1
 
+/* Define if you have the <stdlib.h> header file.  */
+#define HAVE_STDLIB_H 1
+
 /* Define if you have the closesocket function.  */
 #define HAVE_CLOSESOCKET 1
 
