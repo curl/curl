@@ -6,6 +6,21 @@
 
                                History of Changes
 
+Daniel (8 August 2001)
+- curl -E uses a colon to separate a file name from a passphrase. This turned
+  out really bad for the windows people who wants to include a drive letter in
+  the file name like "c:\cert.pem". There's now a win32 work-around
+  implemented that tries work around that, when the colon seems to be used for
+  this kind of construct.
+
+- Patrick Bihan-Faou introduced CURLOPT_SSL_VERIFYHOST, which makes curl
+  verify the server's CN field when talking https://. If --cacert is not used,
+  any failures in matching is only displayed as information (-v).
+
+Daniel (7 August 2001)
+- Wrote up nine more test cases, more or less converted from the former test
+  suite.
+
 Daniel (6 August 2001)
 - Heikki Korpela posted a patch that makes 'curl-config --libs' include the
   directory in which libcurl itself is installed in. While this wasn't my
