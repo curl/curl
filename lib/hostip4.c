@@ -196,6 +196,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   struct hostent *h = NULL;
   in_addr_t in;
   struct SessionHandle *data = conn->data;
+  struct hostent *buf = NULL;
+
   (void)port; /* unused in IPv4 code */
 
   *waitp = 0; /* don't wait, we act synchronously */
@@ -215,7 +217,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   else {
     int h_errnop;
     int res=ERANGE;
-    int *buf = (int *)calloc(CURL_HOSTENT_SIZE, 1);
+
+    buf = (struct hostent *)calloc(CURL_HOSTENT_SIZE, 1);
     if(!buf)
       return NULL; /* major failure */
     /*
@@ -326,7 +329,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
     if(!res) { /* success */
 
-      h = (struct hostent*)buf; /* result expected in h */
+      h = buf; /* result expected in h */
 
       /* This is the worst kind of the different gethostbyname_r() interfaces.
        * Since we don't know how big buffer this particular lookup required,
@@ -359,7 +362,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   if(h) {
     ai = Curl_he2ai(h, port);
 
-    free(h);
+    if (h == buf) /* used a *_r() function */
+      free(h);
   }
 
   return ai;
