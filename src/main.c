@@ -2828,6 +2828,8 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, config->key_type);
       curl_easy_setopt(curl, CURLOPT_SSLKEYPASSWD, config->key_passwd);
 
+      /* default to strict verifyhost */
+      curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
       if(config->cacert || config->capath) {
         if (config->cacert)
           curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);
@@ -2835,15 +2837,13 @@ operate(struct Configurable *config, int argc, char *argv[])
         if (config->capath)
           curl_easy_setopt(curl, CURLOPT_CAPATH, config->capath);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
       }
-      else {
-        if(config->insecure_ok)
+      else
+        if(config->insecure_ok) {
           /* new stuff needed for libcurl 7.10 */
           curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-
-        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
-      }
+          curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
+        }
       
       if((config->conf&CONF_NOBODY) ||
          config->remote_time) {
