@@ -8,6 +8,9 @@
 
 
 Daniel (13 October)
+- Giuseppe Attardi reported yet another segfault with ares and the multi
+  interface. Me fixed.
+
 - Domenico Andreoli removed the extra LDFLAGS assignment in lib/Makefile.am
   that was reported about in the debian bug report #212086.
 
