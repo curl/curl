@@ -82,6 +82,8 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
     z->zalloc = (alloc_func)Z_NULL;
     z->zfree = (free_func)Z_NULL;
     z->opaque = 0;              /* of dubious use 08/27/02 jhrg */
+    z->next_in = NULL;
+    z->avail_in = 0;
     if (inflateInit(z) != Z_OK)
       return process_zlib_error(data, z);
     k->zlib_init = 1;
@@ -224,6 +226,8 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
     z->zalloc = (alloc_func)Z_NULL;
     z->zfree = (free_func)Z_NULL;
     z->opaque = 0;              /* of dubious use 08/27/02 jhrg */
+    z->next_in = NULL;
+    z->avail_in = 0;
     if (inflateInit2(z, -MAX_WBITS) != Z_OK)
       return process_zlib_error(data, z);
     k->zlib_init = 1;   /* Initial call state */
