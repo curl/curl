@@ -242,6 +242,19 @@ CURLcode Curl_readrewind(struct connectdata *conn)
   return CURLE_OK;
 }
 
+#ifdef USE_SSLEAY
+static int data_pending(struct connectdata *conn)
+{
+  if(conn->ssl[FIRSTSOCKET].handle)
+    /* SSL is in use */
+    return SSL_pending(conn->ssl[FIRSTSOCKET].handle);
+
+  return 0; /* nothing */
+}
+#else
+/* non-SSL never have pending data */
+#define data_pending(x) 0
+#endif
 
 /*
  * Curl_readwrite() is the low-level function to be called when data is to
@@ -1147,7 +1160,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           k->keepon &= ~KEEP_READ;
         }
 
-      } while(0);
+      } while(data_pending(conn));
 
     } /* if( read from socket ) */
 
