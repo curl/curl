@@ -161,7 +161,7 @@ int test(char *URL)
   CURLM* multi;
   sslctxparm p;
 
-  int i;
+  int i = 0;
   CURLMsg *msg;
 
   curl_global_init(CURL_GLOBAL_ALL);
@@ -211,7 +211,8 @@ int test(char *URL)
       
       if (res != CURLM_OK) {
         fprintf(stderr, "not okay???\n");
-        return 80;
+        i = 80;
+        break;
       }
 
       FD_ZERO(&rd);
@@ -221,19 +222,22 @@ int test(char *URL)
 
       if (curl_multi_fdset(multi, &rd, &wr, &exc, &max_fd) != CURLM_OK) {
         fprintf(stderr, "unexpected failured of fdset.\n");
-        return 89;
+        i = 89;
+        break;
       }
 
       if (select(max_fd+1, &rd, &wr, &exc, &interval) == -1) {
         fprintf(stderr, "bad select??\n");
-        return 95;
+        i =95;
+        break;
       }
 
       res = CURLM_CALL_MULTI_PERFORM;
     }
     msg = curl_multi_info_read(multi, &running);
     /* this should now contain a result code from the easy handle, get it */
-    i = msg->data.result;
+    if(msg)
+      i = msg->data.result;
   }
 
   fprintf(stderr, "all done\n");
