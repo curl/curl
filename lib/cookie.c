@@ -234,24 +234,29 @@ Curl_cookie_add(struct CookieInfo *c,
                 break;
               }
             }
-            if(dotcount < 3)
+            if(dotcount < 3) {
               /* Received and skipped a cookie with a domain using too few
                  dots. */
               badcookie=TRUE; /* mark this as a bad cookie */
+            }
             else {
               /* Now, we make sure that our host is within the given domain,
                  or the given domain is not valid and thus cannot be set. */
 
               if(!domain || tailmatch(whatptr, domain)) {
-                co->domain=strdup(whatptr);
+                char *ptr=whatptr;
+                if(ptr[0] == '.')
+                  ptr++;
+                co->domain=strdup(ptr); /* dont prefix with dots internally */
                 co->tailmatch=TRUE; /* we always do that if the domain name was
                                        given */
               }
-              else
+              else {
                 /* we did not get a tailmatch and then the attempted set domain
                    is not a domain to which the current host belongs. Mark as
                    bad. */
                 badcookie=TRUE;
+              }
             }
           }
           else if(strequal("version", name)) {
@@ -381,6 +386,8 @@ Curl_cookie_add(struct CookieInfo *c,
         ptr=strtok_r(NULL, "\t", &tok_buf), fields++) {
       switch(fields) {
       case 0:
+        if(ptr[0]=='.') /* skip preceeding dots */
+          ptr++;
         co->domain = strdup(ptr);
         break;
       case 1:
@@ -453,14 +460,8 @@ Curl_cookie_add(struct CookieInfo *c,
       /* the names are identical */
 
       if(clist->domain && co->domain) {
-        if(strequal(clist->domain, co->domain) ||
-           (co->tailmatch && /* only do the dot magic if tailmatching is OK */
-            ((clist->domain[0]=='.' &&
-              strequal(&(clist->domain[1]), co->domain)) ||
-             (co->domain[0]=='.' &&
-              strequal(clist->domain, &(co->domain[1]))))) )
-          /* The domains are identical, or at least identical if you skip the
-             preceeding dot */
+        if(strequal(clist->domain, co->domain))
+          /* The domains are identical */
           replace_old=TRUE;
       }
       else if(!clist->domain && !co->domain)
@@ -550,7 +551,6 @@ Curl_cookie_add(struct CookieInfo *c,
   }
 
   c->numcookies++; /* one more cookie in the jar */
-
   return co;
 }
 
