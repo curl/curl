@@ -2186,7 +2186,7 @@ int my_trace(CURL *handle, curl_infotype type,
     text = "=> Send header";
     break;
   case CURLINFO_DATA_OUT:
-    text = "=> Send data ";
+    text = "=> Send data";
     break;
   case CURLINFO_HEADER_IN:
     text = "<= Recv header";
