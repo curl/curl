@@ -10,12 +10,6 @@ To get fixed in 7.11.2 (planned release May/June 2004)
     blank fdsets during name lookup which causes a following select() to fail!
     High prio.
 
-35. Rearrange lib/hostip.c to reduce the amount of #ifdefs and make it easier
-    to follow "the flow". Daniel's task.
-    Medium prio.
-
-36. Make sure most of the windows builds work after issue 35.
-
 To get fixed in 7.12.0
 ======================
 
@@ -28,3 +22,7 @@ To get fixed in 7.12.0
 
 33. Add a function to replace the malloc-calls within libcurl.
     Low prio. Seshubabu Pasam works on this.
+
+35. Rearrange lib/hostip.c to reduce the amount of #ifdefs and make it easier
+    to follow "the flow". Daniel's task.
+    Medium prio.
