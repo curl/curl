@@ -49,7 +49,7 @@
 #define FALSE 0
 #endif
 
-#include <curl/types.h>
+#include "types.h"
 
 #ifdef  __cplusplus
 extern "C" {
@@ -823,8 +823,8 @@ typedef enum {
 
 /* unfortunately, the easy.h and multi.h include files need options and info
   stuff before they can be included! */
-#include <curl/easy.h> /* nothing in curl is fun without the easy stuff */
-#include <curl/multi.h>
+#include "easy.h" /* nothing in curl is fun without the easy stuff */
+#include "multi.h"
 
 typedef enum {
   CURLCLOSEPOLICY_NONE, /* first, never use this */

@@ -55,7 +55,7 @@
 #include <sys/time.h>
 #endif
 
-#include <curl/curl.h>
+#include "curl.h"
 
 typedef void CURLM;
 
