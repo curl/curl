@@ -1,0 +1,83 @@
+         License Mixing with apps, libcurl and Third Party Libraries
+         ===========================================================
+
+libcurl can be built to use a fair amount of various third party libraries,
+libraries that are written and provided by other parties that are distributed
+using their own licenses. Even libcurl itself contains code that may cause
+problems to some. This document attempts to describe what licenses libcurl and
+the other libraries use and what possible dilemmas linking and mixing them all
+can lead to for end users.
+
+I am not a lawyer and this is not legal advice!
+
+One common dilemma is that GPL[*]-licensed code is not allowed to be linked
+with code licensed under the Original BSD license (with the announcement
+clause, unless there's a specified exception in the GPL-licensed module). You
+may still build your own copies that use them all, but distributing them as
+binaries would be to violate the GPL license. This particular problem was
+addressed when the Modified BSD license was created, which does not have the
+annoncement clause that collides with GPL.
+
+libcurl http://curl.haxx.se/docs/copyright.html
+
+        Uses an MIT (or Modified BSD)-style license that is as liberal as
+        possible.  Some of the source files that deal with KRB4 have Original
+        BSD-style announce-clause licenses. You may not distribute binaries
+        with krb4-enabled libcurl that also link with GPL-licensed code!
+
+OpenSSL http://www.openssl.org/source/license.html
+
+        Uses an Original BSD-style license with an announement clause that
+        makes it "incompatible" with GPL. You are not allowed to ship binaries
+        that link with OpenSSL that includes GPL code (unless that specific
+        GPL code includes an exception for OpenSSL - a habit that is growing
+        more and more common).
+
+c-ares  http://daniel.haxx.se/projects/c-ares/license.html
+
+        Uses an MIT license that is very liberal and imposes no restrictions
+        on any other library or part you may link with.
+
+zlib    http://www.gzip.org/zlib/zlib_license.html
+
+        Uses an MIT-style license that shouldn't collide with any other
+        library.
+
+krb4
+
+        While nothing in particular says that a Kerberos4 library must use any
+        particular license, the one I've tried and used successfully so far
+        (kth-krb4) is Original BSD-licensed with the announcement clause. Some
+        of the code in libcurl that is written to deal with Kerberos4 likewise
+        have such a license.
+
+GSSAPI
+
+        While nothing in particular says that a GSS/Kerberos5 library must use
+        any particular license, the one I've used (Heimdal) is Original BSD-
+        licensed with the announcement clause.
+
+fbopenssl
+
+        Unclear license. Based on its name, I assume that it uses the OpenSSL
+        license and thus shares the same issues as described for OpenSSL
+        above.
+
+libidn  http://www.gnu.org/licenses/lgpl.html
+
+        Uses the GNU Lesser General Public License. LGPL is a variation of GPL
+        with slightly less aggressive "copyleft". This license requires more
+        requirements to be met when distributing binaries, see the license for
+        details. Also note that if you distribute a binary that includes this
+        library, you must also include the full LGPL license text. Please
+        properly point out what parts of the distributed package that the
+        license addresses.
+
+OpenLDAP http://www.openldap.org/software/release/license.html
+
+        Uses a Modified BSD-style license. Since libcurl uses OpenLDAP as a
+        shared library only, I have not heard of anyone that ships OpenLDAP
+        linked with libcurl in an app.
+
+
+[*] = GPL - GNU General Public License: http://www.gnu.org/licenses/gpl.html
