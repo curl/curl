@@ -10,6 +10,8 @@ This file is only present in the CVS - never in release archives. It contains
 information about other files and things that the CVS repository keeps in its
 inner sanctum.
 
+Use autoconf 2.50 and no earlier. Also, try having automake 1.4 and libtool
+1.4 at least.
 
 
   CHANGES.0     contains ancient changes.
