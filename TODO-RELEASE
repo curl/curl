@@ -13,4 +13,6 @@ To get fixed in 7.12.2 (planned release: mid October 2004)
 
 44 - Alan Pinstein's SIGPIPE when uploading with CURLOPT_READDATA problem
 
+45 - Chris' suspected race condition in the windows threaded resolver
+
  Bugfixes reported until late November
