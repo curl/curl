@@ -770,6 +770,10 @@ can be used after a transfer to extract the received time (if any).
 A non-zero parameter tells the library to not include the body-part in the
 output. This is only relevant for protocols that have separate header and body
 parts. On HTTP(S) servers, this will make libcurl do a HEAD request.
+
+To change back to GET, you should use \fICURLOPT_HTTPGET\fP. To change back to
+POST, you should use \fICURLOPT_POST\fP. Setting \fICURLOPT_NOBODY\fP to zero
+has no effect.
 .IP CURLOPT_INFILESIZE
 When uploading a file to a remote site, this option should be used to tell
 libcurl what the expected size of the infile is. This value should be passed
