@@ -943,9 +943,9 @@ static bool SocketIsDead(int sock)
 }
 
 /*
- * Given one filled in connection struct, this function should detect if there
- * already is one that have all the significant details exactly the same and
- * thus should be used instead.
+ * Given one filled in connection struct (named needle), this function should
+ * detect if there already is one that have all the significant details
+ * exactly the same and thus should be used instead.
  */
 static bool
 ConnectionExists(struct SessionHandle *data,
@@ -964,8 +964,14 @@ ConnectionExists(struct SessionHandle *data,
     if(!check)
       /* NULL pointer means not filled-in entry */
       continue;
-    if(!needle->bits.httpproxy) {
-      /* The requested connection does not use a HTTP proxy */
+    if(!needle->bits.httpproxy || needle->protocol&PROT_SSL) {
+      /* The requested connection does not use a HTTP proxy or it
+         uses SSL. */
+
+      if(!(needle->protocol&PROT_SSL) && check->bits.httpproxy)
+        /* we don't do SSL but the cached connection has a proxy,
+           then don't match this */
+        continue;
 
       if(strequal(needle->protostr, check->protostr) &&
          strequal(needle->name, check->name) &&
@@ -1556,8 +1562,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     conn->port = (data->set.use_port && allow_port)?data->set.use_port:PORT_HTTPS;
     conn->remote_port = PORT_HTTPS;
-    conn->protocol |= PROT_HTTP;
-    conn->protocol |= PROT_HTTPS;
+    conn->protocol |= PROT_HTTP|PROT_HTTPS|PROT_SSL;
 
     conn->curl_do = Curl_http;
     conn->curl_done = Curl_http_done;
@@ -1588,7 +1593,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
     if(strequal(conn->protostr, "FTPS")) {
 #ifdef USE_SSLEAY
-      conn->protocol |= PROT_FTPS;
+      conn->protocol |= PROT_FTPS|PROT_SSL;
 #else
       failf(data, LIBCURL_NAME
             " was built with SSL disabled, ftps: not supported!");
