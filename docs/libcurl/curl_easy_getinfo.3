@@ -100,6 +100,13 @@ protocol used doesn't support this.  (Added in 7.9.4)
 Pass a pointer to a 'char *' to receive the pointer to the private data
 associated with the curl handle (set with the CURLOPT_PRIVATE option to
 curl_easy_setopt). (Added in 7.10.3)
+.IP CURLINFO_HTTPAUTH_AVAIL
+Pass a pointer to a long to receive a bitmask indicating the authentication
+method(s) available. The meaning of the bits is explained in the
+CURLOPT_HTTPAUTH option for curl_easy_setopt.  (Added in 7.10.8)
+.IP CURLINFO_PROXYAUTH_AVAIL
+Pass a pointer to a long to receive a bitmask indicating the authentication
+method(s) available for your proxy athentication.  (Added in 7.10.8)
 .SH RETURN VALUE
 If the operation was successful, CURLE_OK is returned. Otherwise an
 appropriate error code will be returned.
