@@ -98,8 +98,6 @@ int main(int argc, char **argv)
     }
   }
 
-  curl_multi_cleanup(multi_handle);
-
   /* See how the transfers went */
   while ((msg = curl_multi_info_read(multi_handle, &msgs_left))) {
     if (msg->msg == CURLMSG_DONE) {
@@ -119,6 +117,8 @@ int main(int argc, char **argv)
        }
     }
   }
+
+  curl_multi_cleanup(multi_handle);
 
   /* Free the CURL handles */
   for (i=0; i<HANDLECOUNT; i++)
