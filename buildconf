@@ -6,18 +6,19 @@ die(){
 }
 
 #--------------------------------------------------------------------------
-# autoconf 2.50 or newer
+# autoconf 2.57 or newer
 #
+need_autoconf="2.57"
 ac_version=`${AUTOCONF:-autoconf} --version 2>/dev/null|head -1| sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ac_version"; then
   echo "buildconf: autoconf not found."
-  echo "            You need autoconf version 2.50 or newer installed."
+  echo "            You need autoconf version $need_autoconf or newer installed."
   exit 1
 fi
 IFS=.; set $ac_version; IFS=' '
-if test "$1" = "2" -a "$2" -lt "50" || test "$1" -lt "2"; then
+if test "$1" = "2" -a "$2" -lt "57" || test "$1" -lt "2"; then
   echo "buildconf: autoconf version $ac_version found."
-  echo "            You need autoconf version 2.50 or newer installed."
+  echo "            You need autoconf version $need_autoconf or newer installed."
   echo "            If you have a sufficient autoconf installed, but it"
   echo "            is not named 'autoconf', then try setting the"
   echo "            AUTOCONF environment variable."
@@ -48,18 +49,19 @@ fi
 echo "buildconf: autoheader version $ah_version (ok)"
 
 #--------------------------------------------------------------------------
-# automake 1.5 or newer
+# automake 1.7 or newer
 #
+need_automake="1.7"
 am_version=`${AUTOMAKE:-automake} --version 2>/dev/null|head -1| sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//'`
 if test -z "$am_version"; then
   echo "buildconf: automake not found."
-  echo "            You need automake version 1.5 or newer installed."
+  echo "            You need automake version $need_automake or newer installed."
   exit 1
 fi
 IFS=.; set $am_version; IFS=' '
-if test "$1" = "1" -a "$2" -lt "5" || test "$1" -lt "1"; then
+if test "$1" = "1" -a "$2" -lt "7" || test "$1" -lt "1"; then
   echo "buildconf: automake version $am_version found."
-  echo "            You need automake version 1.5 or newer installed."
+  echo "            You need automake version $need_automake or newer installed."
   echo "            If you have a sufficient automake installed, but it"
   echo "            is not named 'autommake', then try setting the"
   echo "            AUTOMAKE environment variable."
@@ -67,6 +69,50 @@ if test "$1" = "1" -a "$2" -lt "5" || test "$1" -lt "1"; then
 fi
 
 echo "buildconf: automake version $am_version (ok)"
+
+
+#--------------------------------------------------------------------------
+# libtool 1.5 or newer
+#
+LIBTOOL_WANTED_MAJOR=1
+LIBTOOL_WANTED_MINOR=5
+LIBTOOL_WANTED_PATCH=
+LIBTOOL_WANTED_VERSION=1.5
+
+libtool=`which glibtool 2>/dev/null`
+if test ! -x "$libtool"; then
+  libtool=`which libtool`
+fi
+#lt_pversion=`${LIBTOOL:-$libtool} --version 2>/dev/null|head -1| sed -e 's/^.* \([0-9]\)/\1/' -e 's/[a-z]* *$//'`
+lt_pversion=`$libtool --version 2>/dev/null|head -1|sed -e 's/^[^0-9]*//g' -e 's/[- ].*//'`
+if test -z "$lt_pversion"; then
+  echo "buildconf: libtool not found."
+  echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
+  exit 1
+fi
+lt_version=`echo $lt_pversion` #|sed -e 's/\([a-z]*\)$/.\1/'`
+IFS=.; set $lt_version; IFS=' '
+lt_status="good"
+if test "$1" = "$LIBTOOL_WANTED_MAJOR"; then
+   if test "$2" -lt "$LIBTOOL_WANTED_MINOR"; then
+      lt_status="bad"
+   elif test ! -z "$LIBTOOL_WANTED_PATCH"; then
+       if test "$3" -lt "$LIBTOOL_WANTED_PATCH"; then
+           lt_status="bad"
+       fi
+   fi
+fi
+if test $lt_status != "good"; then
+  echo "buildconf: libtool version $lt_pversion found."
+  echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
+  exit 1
+fi
+
+echo "buildconf: libtool version $lt_version (ok)"
+
+# ------------------------------------------------------------
+
+# run the correct scripts now
 
 echo "buildconf: running aclocal"
 ${ACLOCAL:-aclocal}       || die "The command '${AUTOHEADER:-aclocal}' failed"
