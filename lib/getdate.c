@@ -1524,9 +1524,11 @@ yyerrhandle:
    the same signature as the function definition does. */
 #include "getdate.h"
 
+#ifndef WIN32 /* the windows dudes don't need these, does anyone really? */
 extern struct tm	*gmtime ();
 extern struct tm	*localtime ();
 extern time_t		mktime ();
+#endif
 
 /* Month and day table. */
 static TABLE const MonthDayTable[] = {
