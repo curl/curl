@@ -102,7 +102,7 @@ int FormParse(char *input,
   /* nextarg MUST be a string in the format 'name=contents' and we'll
      build a linked list with the info */
   char name[256];
-  char contents[4096]="";
+  char *contents;
   char major[128];
   char minor[128];
   long flags = 0;
@@ -115,7 +115,12 @@ int FormParse(char *input,
   struct HttpPost *subpost; /* a sub-node */
   unsigned int i;
 
-  if(1 <= sscanf(input, "%255[^=]=%4095[^\n]", name, contents)) {
+  /* Preallocate contents to the length of input to make sure we don't
+     overwrite anything. */
+  contents = malloc(strlen(input));
+  contents[0] = '\000';
+ 
+  if(1 <= sscanf(input, "%255[^=]=%[^\n]", name, contents)) {
     /* the input was using the correct format */
     contp = contents;
 
@@ -156,6 +161,7 @@ int FormParse(char *input,
 	    if(2 != sscanf(type, "%127[^/]/%127[^,\n]",
 			   major, minor)) {
 	      fprintf(stderr, "Illegally formatted content-type field!\n");
+              free(contents);
 	      return 2; /* illegal content-type syntax! */
 	    }
 	    /* now point beyond the content-type specifier */
@@ -287,8 +293,10 @@ int FormParse(char *input,
   }
   else {
     fprintf(stderr, "Illegally formatted input field!\n");
+    free(contents);
     return 1;
   }
+  free(contents);
   return 0;
 }
 
