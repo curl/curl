@@ -3158,12 +3158,11 @@ operate(struct Configurable *config, int argc, char *argv[])
             curl_easy_setopt(curl, CURLOPT_CAPATH, config->capath);
           curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
         }
-        else
-          if(config->insecure_ok) {
-            /* new stuff needed for libcurl 7.10 */
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
-            curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
-          }
+        if(config->insecure_ok) {
+          /* new stuff needed for libcurl 7.10 */
+          curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+          curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 1);
+        }
       
         if((config->conf&CONF_NOBODY) ||
            config->remote_time) {
