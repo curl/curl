@@ -64,9 +64,8 @@ Welcome to the end station
 <server>
 http
 </server>
-# NTLM only works if we are built with SSL
 <features>
-SSL
+NTLM
 </features>
  <name>
 HTTP with proxy-requiring-NTLM to site-requiring-Digest

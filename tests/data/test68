@@ -45,9 +45,8 @@ Wrong password dude. Get it fixed and return.
 
 # Client-side
 <client>
-# NTLM only works if SSL-support is present
 <features>
-SSL
+NTLM
 </features>
 <server>
 http

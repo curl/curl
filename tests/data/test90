@@ -109,9 +109,8 @@ Finally, this is the real page!
 
 # Client-side
 <client>
-# NTLM only works if SSL-support is present
 <features>
-SSL
+NTLM
 </features>
 <server>
 http

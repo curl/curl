@@ -62,9 +62,8 @@ daniel
 <server>
 http
 </server>
-# NTLM requires SSL
 <features>
-SSL
+NTLM
 </features>
  <name>
 HTTP proxy CONNECT auth NTLM

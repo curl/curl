@@ -35,9 +35,8 @@ content for you
 
 # Client-side
 <client>
-# require SSL since we need that for NTLM
 <features>
-SSL
+NTLM
 </features>
 <server>
 http
