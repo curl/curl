@@ -968,16 +968,19 @@ case "$LIBIDN" in
 
        idn=""
        dnl if there is a given path, check that FIRST
-       if test "x$LIBIDN" != "xyes"; then
-          oldLDFLAGS=$LDFLAGS
-          oldCPPFLAGS=$CPPFLAGS
-          LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
-          CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
-          idn="yes"
-          AC_CHECK_LIB(idn, idna_to_ascii_4i, ,
-                       idn=""
-                       LDFLAGS=$oldLDFLAGS
-                       CPPFLAGS=$oldCPPFLAGS)
+       if test -n "$LIBIDN"; then
+         if test "x$LIBIDN" != "xyes"; then
+            AC_MSG_WARN([moo moo $LIBIDN])
+            oldLDFLAGS=$LDFLAGS
+            oldCPPFLAGS=$CPPFLAGS
+            LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
+            CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
+            idn="yes"
+            AC_CHECK_LIB(idn, idna_to_ascii_4i, ,
+                         idn=""
+                         LDFLAGS=$oldLDFLAGS
+                         CPPFLAGS=$oldCPPFLAGS)
+         fi
        fi
 
        if test "x$idn" != "xyes"; then
