@@ -6,6 +6,52 @@
 
                                   Changelog
 
+Daniel (10 Apr)
+- Vlad Krupin fixed a URL parsing issue. URLs that were not using a slash
+  after the host name, but still had "?" and parameters appended, as in
+  "http://hostname.com?foobar=moo", were not properly parsed by libcurl.
+
+Daniel (9 Apr)
+- Made CURLOPT_TIMECONDITION work for FTP transfers, using the same syntax as
+  for HTTP. This then made -z work for ftp transfers too. Added test case 139
+  and 140 for verifying this.
+
+- Getting the file date of an ftp file used the wrong time zone when
+  displayed. It is supposedly always GMT. Added test case 141 for this.
+
+- Made the test suite's FTP server support MDTM.
+
+- The default DEBUGFUNCTION, as enabled with CURLOPT_VERBOSE now outputs
+  CURLINFO_HEADER_IN data as well. The most notable effect from this is that
+  using curl -v, you get to see the incoming "headers" as well. This is
+  perhaps most useful when doing ftp.
+
+Daniel (8 Apr)
+- James Bursa fixed a flaw in the Content-Type extraction code, which missed
+  the first letter if no space followed the colon.
+
+- Magnus Nilsson pointed out that share.c was missing in the MSVC project
+  file.
+
+Daniel (6 Apr)
+- Ryan Weaver provided a patch that makes the CA cert bundle not get installed
+  anymore when 'configure --without-ssl' has been used.
+
+Daniel (4 Apr)
+- Martijn Broenland found another cases where a server application didn't
+  like the boundary string used by curl when foing a multi-part/formpost. We
+  modified the boundary string to look like the one IE uses, as this is
+  probably gonna make curl work with more applications.
+
+Daniel (3 Apr)
+- Kevin Roth reported that a bunch of tests fails on cygwin. One set fails
+  when using perl 5.8 (and they run fine with perl 5.6), and another set
+  failed because of an artifact in the test suite's FTP server that I
+  corrected. It turned out the FTP server code was still having a file opened
+  while the main test script removed it and invoked the HTTP server that
+  attempted to create the same file name of the file the FTP server kept open.
+  This operation works fine on unix, but not on cygwin.
+
 Version 7.10.4 (2 Apr 2003)
 
 Daniel (1 Apr)
