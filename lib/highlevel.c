@@ -112,6 +112,10 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+#ifndef min
+#define min(a, b)   ((a) < (b) ? (a) : (b))
+#endif
+
 CURLcode 
 _Transfer(struct connectdata *c_conn)
 {
@@ -522,7 +526,7 @@ _Transfer(struct connectdata *c_conn)
           if(data->crlf)
             buf = data->buffer; /* put it back on the buffer */
 
-          nread = data->fread(buf, 1, BUFSIZE, data->in);
+          nread = data->fread(buf, 1, conn->upload_bufsize, data->in);
 
           /* the signed int typecase of nread of for systems that has
              unsigned size_t */
@@ -569,6 +573,15 @@ _Transfer(struct connectdata *c_conn)
         urg = speedcheck (data, now);
       if (urg)
 	return urg;
+
+      if(data->progress.ulspeed > conn->upload_bufsize) {
+        /* If we're transfering more data per second than fits in our buffer,
+           we increase the buffer size to adjust to the current
+           speed. However, we must not set it larger than BUFSIZE. We don't
+           adjust it downwards again since we don't see any point in that!
+        */
+        conn->upload_bufsize=(long)min(data->progress.ulspeed, BUFSIZE);
+      }
 
       if (data->timeout && (tvdiff (now, start) > data->timeout)) {
 	failf (data, "Operation timed out with %d out of %d bytes received",
