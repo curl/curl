@@ -7,9 +7,15 @@
                                   Changelog
 
 Daniel (16 August 2004)
+- libcurl now allows a custom "Accept-Encoding:" header override the
+  internally set one that gets set with CURLOPT_ENCODING. Pointed out by Alex.
+
 - Roland Krikava found and fixed a cookie problem when using a proxy (the
   path matching was wrong). I added test case 179 to verify that we now do
   right.
+
+Daniel (15 August 2004)
+- Casey O'Donnell fixed some MSVC makefile targets to link properly.
 
 Daniel (11 August 2004)
 - configure now defines _XOPEN_SOURCE to 500 on systems that need it to build

@@ -14,14 +14,17 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o cookies over proxy didn't match the path properly
+ o MSVC makefile fixes to build better
+ o FTP response 530 on 'PASS' now sends back a better error message
 
 Other curl-related news since the previous public release:
 
- o 
+ o pycurl version 7.12.1 http://pycurl.sourceforge.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+ Casey O'Donnell, Roland Krikava, Alex
 
         Thanks! (and sorry if I forgot to mention someone)
