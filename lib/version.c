@@ -79,8 +79,14 @@ char *curl_version(void)
   ptr=strchr(ptr, '\0');
 #endif
 
+#ifdef KRB4
+  sprintf(ptr, " (krb4 enabled)");
+  ptr += strlen(ptr);
+#endif
+
 #ifdef USE_ZLIB
   sprintf(ptr, " (zlib %s)", zlibVersion());
+  ptr += strlen(ptr);
 #endif
 
   return version;
