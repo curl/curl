@@ -303,48 +303,48 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
 
   switch(option) {
   case CURLOPT_VERBOSE:
-    data->bits.verbose = va_arg(param, long);
+    data->bits.verbose = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_HEADER:
-    data->bits.http_include_header = va_arg(param, long);
+    data->bits.http_include_header = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_NOPROGRESS:
-    data->bits.hide_progress = va_arg(param, long);
+    data->bits.hide_progress = va_arg(param, long)?TRUE:FALSE;
     if(data->bits.hide_progress)
       data->progress.flags |= PGRS_HIDE;
     break;
   case CURLOPT_NOBODY:
-    data->bits.no_body = va_arg(param, long);
+    data->bits.no_body = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FAILONERROR:
-    data->bits.http_fail_on_error = va_arg(param, long);
+    data->bits.http_fail_on_error = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_UPLOAD:
-    data->bits.upload = va_arg(param, long);
+    data->bits.upload = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_POST:
-    data->bits.http_post = va_arg(param, long);
+    data->bits.http_post = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FTPLISTONLY:
-    data->bits.ftp_list_only = va_arg(param, long);
+    data->bits.ftp_list_only = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FTPAPPEND:
-    data->bits.ftp_append = va_arg(param, long);
+    data->bits.ftp_append = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_NETRC:
-    data->bits.use_netrc = va_arg(param, long);
+    data->bits.use_netrc = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FOLLOWLOCATION:
-    data->bits.http_follow_location = va_arg(param, long);
+    data->bits.http_follow_location = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_FTPASCII:
-    data->bits.ftp_ascii = va_arg(param, long);
+    data->bits.ftp_ascii = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_PUT:
-    data->bits.http_put = va_arg(param, long);
+    data->bits.http_put = va_arg(param, long)?TRUE:FALSE;
     break;
   case CURLOPT_MUTE:
-    data->bits.mute = va_arg(param, long);
+    data->bits.mute = va_arg(param, long)?TRUE:FALSE;
     break;
 
   case CURLOPT_TIMECONDITION:
@@ -626,6 +626,10 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   char resumerange[12]="";
   struct UrlData *data = curl;
   struct connectdata *conn;
+
+  /* I believe the longest possible name in a DNS is set to 255 letters, FQDN
+     so this should be safe: */
+  char hostent_buf[512];
 
   if(!data || (data->handle != STRUCT_OPEN))
     return CURLE_BAD_FUNCTION_ARGUMENT; /* TBD: make error codes */
@@ -1036,7 +1040,7 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     }
     
     /* Connect to target host right on */
-    if(!(conn->hp = GetHost(data, conn->name))) {
+    if(!(conn->hp = GetHost(data, conn->name, hostent_buf, sizeof(hostent_buf)))) {
       failf(data, "Couldn't resolv host '%s'", conn->name);
       return CURLE_COULDNT_RESOLVE_HOST;
     }
@@ -1086,7 +1090,7 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     }
 
     /* connect to proxy */
-    if(!(conn->hp = GetHost(data, proxyptr))) {
+    if(!(conn->hp = GetHost(data, proxyptr, hostent_buf, sizeof(hostent_buf)))) {
       failf(data, "Couldn't resolv proxy '%s'", proxyptr);
       return CURLE_COULDNT_RESOLVE_PROXY;
     }

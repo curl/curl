@@ -39,6 +39,7 @@
  ****************************************************************************/
 
 #include <string.h>
+#include <malloc.h>
 
 #include "setup.h"
 
@@ -61,51 +62,77 @@
 #include "urldata.h"
 #include "sendf.h"
 
+#ifdef HAVE_INET_NTOA_R
+#include "inet_ntoa_r.h"
+#endif
+
 /* --- resolve name or IP-number --- */
 
-char *MakeIP(unsigned long num)
+char *MakeIP(unsigned long num,char *addr, int addr_len)
 {
-#ifdef HAVE_INET_NTOA
+#if defined(HAVE_INET_NTOA) || defined(HAVE_INET_NTOA_R)
   struct in_addr in;
-
   in.s_addr = htonl(num);
-  return (inet_ntoa(in));
+
+#if defined(HAVE_INET_NTOA_R)
+  inet_ntoa_r(in,addr,addr_len);
 #else
-  static char addr[128];
+  strncpy(addr,inet_ntoa(in),addr_len);
+#endif
+#else
   unsigned char *paddr;
 
   num = htonl(num);  /* htonl() added to avoid endian probs */
   paddr = (unsigned char *)&num;
   sprintf(addr, "%u.%u.%u.%u", paddr[0], paddr[1], paddr[2], paddr[3]);
-  return (addr);
 #endif
+  return (addr);
 }
 
-/* Stolen from Dancer source code, written by
-   Bjorn Reese <breese@imada.ou.dk> */
+/* The original code to this function was stolen from the Dancer source code,
+   written by Bjorn Reese, it has since been patched and modified. */
 #ifndef INADDR_NONE
 #define INADDR_NONE (unsigned long) ~0
 #endif
-struct hostent *GetHost(struct UrlData *data, char *hostname)
+struct hostent *GetHost(struct UrlData *data,
+                        char *hostname,
+                        char *buf,
+                        int buf_size )
 {
   struct hostent *h = NULL;
   unsigned long in;
-  static struct hostent he;
-  static char name[MAXHOSTNAMELEN];
-  static char *addrlist[2];
-  static struct in_addr addrentry;
 
   if ( (in=inet_addr(hostname)) != INADDR_NONE ) {
-    addrentry.s_addr = in;
-    addrlist[0] = (char *)&addrentry;
-    addrlist[1] = NULL;
-    he.h_name = strncpy(name, MakeIP(ntohl(in)), MAXHOSTNAMELEN);
-    he.h_addrtype = AF_INET;
-    he.h_length = sizeof(struct in_addr);
-    he.h_addr_list = addrlist;
-    h = &he;
-  } else if ( (h=gethostbyname(hostname)) == NULL ) {
-    infof(data, "gethostbyname(2) failed for %s\n", hostname);
+    struct in_addr *addrentry;
+
+    h = (struct hostent*)buf;
+    h->h_addr_list = (char**)(buf + sizeof(*h));
+    addrentry = (struct in_addr*)(h->h_addr_list + 2);
+    addrentry->s_addr = in;
+    h->h_addr_list[0] = (char*)addrentry;
+    h->h_addr_list[1] = NULL;
+    h->h_addrtype = AF_INET;
+    h->h_length = sizeof(*addrentry);
+    h->h_name = (char*)(h->h_addr_list + h->h_length);
+    MakeIP(ntohl(in),h->h_name,buf_size - (long)(h->h_name) + (long)buf);
+#if defined(HAVE_GETHOSTBYNAME_R)
+  }
+  else {
+    int h_errnop;
+    memset(buf,0,buf_size);	/* workaround for gethostbyname_r bug in qnx nto */
+    if ((h = gethostbyname_r(hostname,
+                             (struct hostent *)buf,buf +
+                             sizeof(struct hostent),buf_size -
+                             sizeof(struct hostent),&h_errnop)) == NULL ) {
+      infof(data, "gethostbyname_r(2) failed for %s\n", hostname);
+    }
+#else
+  }
+  else {
+    if ((h = gethostbyname(hostname)) == NULL ) {
+      infof(data, "gethostbyname(2) failed for %s\n", hostname);
+    }
+#endif
   }
   return (h);
 }

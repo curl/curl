@@ -74,9 +74,13 @@
 #include <sys/sockio.h>
 #endif
 
+#ifdef HAVE_INET_NTOA_R
+#include "inet_ntoa_r.h"
+#endif
+
 #define SYS_ERROR -1
 
-char *if2ip(char *interface)
+char *if2ip(char *interface, char *buf, int buf_size)
 {
   int dummy;
   char *ip=NULL;
@@ -101,7 +105,12 @@ char *if2ip(char *interface)
 
       struct sockaddr_in *s = (struct sockaddr_in *)&req.ifr_dstaddr;
       memcpy(&in, &(s->sin_addr.s_addr), sizeof(in));
-      ip = (char *)strdup(inet_ntoa(in));
+#if defined(HAVE_INET_NTOA_R)
+      ip = inet_ntoa_r(in,buf,buf_size);
+#else
+      ip = strncpy(buf,inet_ntoa(in),buf_size);
+      ip[buf_size - 1] = 0;
+#endif
     }
     close(dummy);
   }

@@ -56,7 +56,10 @@
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>
 #else /* some kind of unix */
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#include <sys/types.h>
 #include <netinet/in.h>
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
@@ -69,6 +72,9 @@
 #include <errno.h>
 #endif
 
+#ifdef HAVE_INET_NTOA_R
+#include "inet_ntoa_r.h"
+#endif
 
 #include <curl/curl.h>
 #include "urldata.h"
@@ -241,26 +247,20 @@ int GetLastResponse(int sockfd, char *buf,
 }
 
 /* -- who are we? -- */
-char *getmyhost(void)
+char *getmyhost(char *buf, int buf_size)
 {
-  static char myhost[256];
-#ifdef HAVE_UNAME
+#if defined(HAVE_GETHOSTNAME)
+  gethostname(buf, buf_size);
+#elif defined(HAVE_UNAME)
   struct utsname ugnm;
-
-  if (uname(&ugnm) < 0)
-    return "localhost";
-
-  (void) strncpy(myhost, ugnm.nodename, 255);
-  myhost[255] = '\0';
-#endif
-#ifdef HAVE_GETHOSTNAME
-  gethostname(myhost, 256);
-#endif
-#if !defined(HAVE_UNAME) && !defined(HAVE_GETHOSTNAME)
+  strncpy(buf, uname(&ugnm) < 0 ? "localhost" : ugnm.nodename, buf_size - 1);
+  buf[buf_size - 1] = '\0';
+#else
   /* We have no means of finding the local host name! */
-  strcpy(myhost, "localhost");
+  strncpy(buf, "localhost", buf_size);
+  buf[buf_size - 1] = '\0';
 #endif
-  return myhost;
+  return buf;
 }
 
 #if 0
@@ -473,6 +473,10 @@ CURLcode _ftp(struct connectdata *conn)
   /* for the ftp PORT mode */
   int portsock=-1;
   struct sockaddr_in serv_addr;
+  char hostent_buf[512];
+#if defined (HAVE_INET_NTOA_R)
+  char ntoa_buf[64];
+#endif
 
   struct curl_slist *qitem; /* QUOTE item */
   /* the ftp struct is already inited in ftp_connect() */
@@ -542,24 +546,21 @@ CURLcode _ftp(struct connectdata *conn)
     struct hostent *h=NULL;
     size_t size;
     unsigned short porttouse;
+    char myhost[256] = "";
 
-    char *myhost=NULL;
-      
     if(data->ftpport) {
-      myhost = if2ip(data->ftpport);
-      if(myhost) {
-        h = GetHost(data, myhost);
+      if(if2ip(data->ftpport, myhost, sizeof(myhost))) {
+        h = GetHost(data, myhost, hostent_buf, sizeof(hostent_buf));
       }
       else {
         if(strlen(data->ftpport)>1)
-          h = GetHost(data, data->ftpport);
+          h = GetHost(data, data->ftpport, hostent_buf, sizeof(hostent_buf));
         if(h)
-          myhost=data->ftpport;
+          strcpy(myhost,data->ftpport);
       }
     }
-    if(!myhost) {
-      myhost = getmyhost();
-      h=GetHost(data, myhost);
+    if(! *myhost) {
+      h=GetHost(data, getmyhost(myhost,sizeof(myhost)), hostent_buf, sizeof(hostent_buf));
     }
     infof(data, "We connect from %s\n", myhost);
 
@@ -609,8 +610,13 @@ CURLcode _ftp(struct connectdata *conn)
       struct in_addr in;
       unsigned short ip[5];
       (void) memcpy(&in.s_addr, *h->h_addr_list, sizeof (in.s_addr));
+#if defined (HAVE_INET_NTOA_R)
+      sscanf( inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)), "%hu.%hu.%hu.%hu",
+              &ip[0], &ip[1], &ip[2], &ip[3]);
+#else
       sscanf( inet_ntoa(in), "%hu.%hu.%hu.%hu",
               &ip[0], &ip[1], &ip[2], &ip[3]);
+#endif
       sendf(data->firstsocket, data, "PORT %d,%d,%d,%d,%d,%d\n",
             ip[0], ip[1], ip[2], ip[3],
             porttouse >> 8,
@@ -640,7 +646,7 @@ CURLcode _ftp(struct connectdata *conn)
       unsigned short newport;
       char newhost[32];
       struct hostent *he;
-      char *str=buf;
+      char *str=buf,*ip_addr;
 
       /*
        * New 227-parser June 3rd 1999.
@@ -665,7 +671,7 @@ CURLcode _ftp(struct connectdata *conn)
 	 return CURLE_FTP_WEIRD_227_FORMAT;
       }
       sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-      he = GetHost(data, newhost);
+      he = GetHost(data, newhost, hostent_buf, sizeof(hostent_buf));
       if(!he) {
         failf(data, "Can't resolve new host %s", newhost);
         return CURLE_FTP_CANT_GET_HOST;
@@ -682,25 +688,36 @@ CURLcode _ftp(struct connectdata *conn)
 
       if(data->bits.verbose) {
         struct in_addr in;
-#if 1
         struct hostent * answer;
 
-        unsigned long address;
 #if defined(HAVE_INET_ADDR)
+        unsigned long address;
+#if defined(HAVE_GETHOSTBYADDR_R)
+        int h_errnop;
+#endif
+
         address = inet_addr(newhost);
-        answer = gethostbyaddr((char *) &address, sizeof(address), 
-                               AF_INET);
+#if defined(HAVE_GETHOSTBYADDR_R)
+        answer = gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
+                                 (struct hostent *)hostent_buf,
+                                 hostent_buf + sizeof(*answer),
+                                 sizeof(hostent_buf) - sizeof(*answer),
+                                 &h_errnop);
+#else
+        answer = gethostbyaddr((char *) &address, sizeof(address), AF_INET);
+#endif
 #else
         answer = NULL;
 #endif
         (void) memcpy(&in.s_addr, *he->h_addr_list, sizeof (in.s_addr));
         infof(data, "Connecting to %s (%s) port %u\n",
-              answer?answer->h_name:newhost, inet_ntoa(in), newport);
+              answer?answer->h_name:newhost,
+#if defined(HAVE_INET_NTOA_R)
+              ip_addr = inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)),
 #else
-        (void) memcpy(&in.s_addr, *he->h_addr_list, sizeof (in.s_addr));
-        infof(data, "Connecting to %s (%s) port %u\n",
-              he->h_name, inet_ntoa(in), newport);
+              ip_addr = inet_ntoa(in),
 #endif
+              newport);
       }
 	
       if (connect(data->secondarysocket, (struct sockaddr *) &serv_addr,
@@ -727,6 +744,7 @@ CURLcode _ftp(struct connectdata *conn)
 
   }
   /* we have the (new) data connection ready */
+  infof(data, "Connected!\n");
 
   /* change directory first */
 
