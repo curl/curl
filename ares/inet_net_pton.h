@@ -39,4 +39,16 @@ int ares_inet_pton(int af, const char *src, void *dst);
 int ares_inet_net_pton(int af, const char *src, void *dst, size_t size);
 #endif
 
+#ifndef NS_IN6ADDRSZ
+#define NS_IN6ADDRSZ SIZEOF_STRUCT_IN6_ADDR
+#endif
+
+#ifndef NS_INADDRSZ
+#define NS_INADDRSZ SIZEOF_STRUCT_IN_ADDR
+#endif
+
+#ifndef NS_INT16SZ
+#define NS_INT16SZ 2
+#endif
+
 #endif /* INET_NET_PTON_H */

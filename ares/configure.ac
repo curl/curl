@@ -188,4 +188,38 @@ int main()
      ], AC_MSG_RESULT(no),AC_MSG_RESULT(no))
 fi
 
+AC_CHECK_SIZEOF(struct in6_addr, ,
+[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]
+)
+AC_CHECK_SIZEOF(struct in_addr, ,
+[
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_WINSOCK_H
+#include <winsock.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+]
+)
+
+
 AC_OUTPUT(Makefile)
