@@ -75,9 +75,11 @@ my $memanalyze="./memanalyze.pl";
 
 my $stunnel = checkcmd("stunnel");
 my $valgrind = checkcmd("valgrind");
+my $gdb = checkcmd("gdb");
 
 my $ssl_version; # set if libcurl is built with SSL support
 my $large_file;  # set if libcurl is built with large file support
+my $has_idn;     # set if libcurl is built with IDN support
 
 my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
@@ -739,6 +741,10 @@ sub checkcurl {
                 # large file support
                 $large_file=1;
             }
+            if($feat =~ /IDN/i) {
+                # IDN support
+                $has_idn=1;
+            }
         }
     }
     if(!$curl) {
@@ -818,6 +824,11 @@ sub singletest {
         }
         elsif($f eq "large_file") {
             if($large_file) {
+                next;
+            }
+        }
+        elsif($f eq "idn") {
+            if($has_idn) {
                 next;
             }
         }
@@ -1035,6 +1046,9 @@ sub singletest {
 
     print CMDLOG "$CMDLINE\n";
 
+    unlink("core");
+
+    my $dumped_core;
     my $cmdres;
     # run the command line we built
     if($gdbthis) {
@@ -1048,13 +1062,31 @@ sub singletest {
     else {
         $cmdres = system("$CMDLINE");
         my $signal_num  = $cmdres & 127;
-        my $dumped_core = $cmdres & 128;
+        $dumped_core = $cmdres & 128;
 
         if(!$anyway && ($signal_num || $dumped_core)) {
             $cmdres = 1000;
         }
         else {
             $cmdres /= 256;
+        }
+    }
+    if(!$dumped_core) {
+        if(-r "core") {
+            # there's core file present now!
+            $dumped_core = 1;
+        }
+    }
+
+    if($dumped_core) {
+        print "core dumped!\n";
+        if($gdb) {
+            print "running gdb for post-mortem analysis:\n";
+            open(GDBCMD, ">log/gdbcmd2");
+            print GDBCMD "bt\n";
+            close(GDBCMD);
+            system("gdb --directory libtest -x log/gdbcmd2 -batch $DBGCURL core ");
+     #       unlink("log/gdbcmd2");
         }
     }
 
@@ -1127,7 +1159,7 @@ sub singletest {
         }
 
         for(@strip) {
-            # strip all patterns from both arrays
+            # strip off all lines that match the patterns from both arrays
             chomp $_;
             @out = striparray( $_, \@out);
             @protstrip= striparray( $_, \@protstrip);

@@ -27,7 +27,7 @@ sub getpartattr {
              ) {
             $inside++;
             my $attr=$1;
-            my @p=split("[ \t]", $attr);
+            my @p=split("[\t]", $attr);
             my $assign;
 
             foreach $assign (@p) {
