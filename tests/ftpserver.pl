@@ -298,6 +298,24 @@ sub PORT_command {
 
 $SIG{CHLD} = \&REAPER;
 
+my %customreply;
+sub customize {
+    open(CUSTOM, "<log/ftpserver.cmd") ||
+        return 1;
+
+    if($verbose) {
+        print STDERR "FTPD: Getting commands from log/ftpserver.cmd\n";
+    }
+
+    undef %customreply;
+    while(<CUSTOM>) {
+        if($_ =~ /REPLY ([A-Z]+) (.*)/) {
+            $customreply{$1}=$2;
+        }
+    }
+    close(CUSTOM);
+}
+
 my @welcome=(
             '220-        _   _ ____  _     '."\r\n",
             '220-    ___| | | |  _ \| |    '."\r\n",
@@ -326,6 +344,8 @@ for ( $waitedpid = 0;
 
     FTPLOG->autoflush(1);
     INPUT->autoflush(1);
+
+    &customize(); # read test control instructions
 
     print @welcome;
     my $state="fresh";
@@ -367,16 +387,24 @@ for ( $waitedpid = 0;
             $state = $newstate;
         }
 
-        my $text = $displaytext{$FTPCMD};
+        my $text;
+        $text = $customreply{$FTPCMD};
+        my $fake = $text;
+        if($text eq "") {
+            $text = $displaytext{$FTPCMD};
+        }
         if($text) {
             print "$text\r\n";
         }
 
-        # see if the new state is a function caller.
-        my $func = $commandfunc{$FTPCMD};
-        if($func) {
-            # it is!
-            \&$func($FTPARG);
+        if($fake eq "") {
+            # only perform this if we're not faking a reply
+            # see if the new state is a function caller.
+            my $func = $commandfunc{$FTPCMD};
+            if($func) {
+                # it is!
+                \&$func($FTPARG);
+            }
         }
 
         logmsg "set to state $state\n";
