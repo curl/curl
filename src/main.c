@@ -1225,7 +1225,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           if(strequal("-", nextarg))
             file = stdin;
           else 
-            file = fopen(nextarg, "r");
+            file = fopen(nextarg, "rb");
 
           if(subletter == 'b') /* forced binary */
             postdata = file2memory(file, &config->postfieldsize);
