@@ -3,12 +3,15 @@
 #
 
 # Some flags needed when trying to cause warnings ;-)
-# CFLAGS = -Wall -pedantic
+# CFLAGS = -g -DMALLOCDEBUG # -Wall -pedantic
 #CPPFLAGS = -DGLOBURL -DCURL_SEPARATORS
 
 INCLUDES = -I$(top_srcdir)/include
 
-bin_PROGRAMS = curl
+bin_PROGRAMS = curl #memtest
+
+#memtest_SOURCES = memtest.c
+#memtest_LDADD = $(top_srcdir)/lib/libcurl.la
 
 curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c
 curl_LDADD = $(top_srcdir)/lib/libcurl.la
