@@ -99,8 +99,11 @@
 #endif
 
 /* Local API functions */
-static CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote);
+static CURLcode ftp_sendquote(struct connectdata *conn,
+                              struct curl_slist *quote);
 static CURLcode ftp_cwd(struct connectdata *conn, char *path);
+static CURLcode ftp_mkd(struct connectdata *conn, char *path);
+static CURLcode cwd_and_mkd(struct connectdata *conn, char *path);
 
 /* easy-to-use macro: */
 #define FTPSENDF(x,y,z) if((result = Curl_ftpsendf(x,y,z))) return result
@@ -1784,7 +1787,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       if(result)
         return result;
 
-      /* Send any PREQUOTE strings after transfer type is set? (Wesley Laxton)*/
+      /* Send any PREQUOTE strings after transfer type is set? */
       if(data->set.prequote) {
         if ((result = ftp_sendquote(conn, data->set.prequote)) != CURLE_OK)
           return result;
@@ -2003,20 +2006,21 @@ CURLcode ftp_perform(struct connectdata *conn,
     if ((result = ftp_sendquote(conn, data->set.quote)) != CURLE_OK)
       return result;
   }
-    
+
   /* This is a re-used connection. Since we change directory to where the
      transfer is taking place, we must now get back to the original dir
      where we ended up after login: */
   if (conn->bits.reuse && ftp->entrypath) {
-    if ((result = ftp_cwd(conn, ftp->entrypath)) != CURLE_OK)
+    if ((result = cwd_and_mkd(conn, ftp->entrypath)) != CURLE_OK)
       return result;
   }
 
   {
     int i; /* counter for loop */
     for (i=0; ftp->dirs[i]; i++) {
-      /* RFC 1738 says empty components should be respected too */
-      if ((result = ftp_cwd(conn, ftp->dirs[i])) != CURLE_OK)
+      /* RFC 1738 says empty components should be respected too, but
+         that is plain stupid since CWD can't be used with an empty argument */
+      if ((result = cwd_and_mkd(conn, ftp->dirs[i])) != CURLE_OK)
         return result;
     }
   }
@@ -2025,33 +2029,38 @@ CURLcode ftp_perform(struct connectdata *conn,
   if((data->set.get_filetime || data->set.timecondition) &&
      ftp->file) {
     result = ftp_getfiletime(conn, ftp->file);
-    if(result)
-      return result;
-
-    if(data->set.timecondition) {
-      if((data->info.filetime > 0) && (data->set.timevalue > 0)) {
-        switch(data->set.timecondition) {
-        case TIMECOND_IFMODSINCE:
-        default:
-          if(data->info.filetime < data->set.timevalue) {
-            infof(data, "The requested document is not new enough\n");
-            ftp->no_transfer = TRUE; /* mark this to not transfer data */
-            return CURLE_OK;
+    switch( result )
+      {
+      case CURLE_FTP_COULDNT_RETR_FILE:
+      case CURLE_OK:
+        if(data->set.timecondition) {
+          if((data->info.filetime > 0) && (data->set.timevalue > 0)) {
+            switch(data->set.timecondition) {
+            case TIMECOND_IFMODSINCE:
+            default:
+              if(data->info.filetime < data->set.timevalue) {
+                infof(data, "The requested document is not new enough\n");
+                ftp->no_transfer = TRUE; /* mark this to not transfer data */
+                return CURLE_OK;
+              }
+              break;
+            case TIMECOND_IFUNMODSINCE:
+              if(data->info.filetime > data->set.timevalue) {
+                infof(data, "The requested document is not old enough\n");
+                ftp->no_transfer = TRUE; /* mark this to not transfer data */
+                return CURLE_OK;
+              }
+              break;
+            } /* switch */
           }
-          break;
-        case TIMECOND_IFUNMODSINCE:
-          if(data->info.filetime > data->set.timevalue) {
-            infof(data, "The requested document is not old enough\n");
-            ftp->no_transfer = TRUE; /* mark this to not transfer data */
-            return CURLE_OK;
+          else {
+            infof(data, "Skipping time comparison\n");
           }
-          break;
-        } /* switch */
-      }
-      else {
-        infof(data, "Skipping time comparison\n");
-      }
-    }
+        }
+        break;
+      default:
+        return result;
+      } /* switch */
   }
 
   /* If we have selected NOBODY and HEADER, it means that we only want file
@@ -2324,6 +2333,59 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
     freedirs(ftp);
   }
   return CURLE_OK;
+}
+
+/***********************************************************************
+ *
+ * ftp_mkd()
+ *
+ * Makes a directory on the FTP server.
+ */
+CURLcode ftp_mkd(struct connectdata *conn, char *path)
+{
+  CURLcode result=CURLE_OK;
+  int ftpcode; /* for ftp status */
+  ssize_t nread;
+
+  /* Create a directory on the remote server */
+  FTPSENDF(conn, "MKD %s", path);
+
+  result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+  if(result)
+    return result;
+  
+  switch(ftpcode) {
+  case 257:
+    /* success! */
+    infof( conn->data , "Created Remote Directory %s\n" , path );
+    break;
+  default:
+    infof(conn->data, "unrecognized MKD response %d\n", result );
+    result = ~CURLE_OK;
+    break;
+  }
+  return  result;
+}
+
+/***********************************************************************
+ *
+ * ftp_cwd_and_mkd()
+ *
+ * Change to the given directory.  If the directory is not present, and we
+ * have been told to allow it, then create the directory and cd to it.
+ */
+static CURLcode cwd_and_mkd(struct connectdata *conn, char *path)
+{
+  CURLcode result;
+  
+  result = ftp_cwd(conn, path);
+  if ((CURLE_OK != result) && conn->data->set.ftp_create_missing_dirs) {
+    result = ftp_mkd(conn, path);
+    if ( CURLE_OK != result)
+      return result;
+    result = ftp_cwd(conn, path);
+  }
+  return result;
 }
 
 #endif /* CURL_DISABLE_FTP */

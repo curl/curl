@@ -6,6 +6,79 @@
 
                                   Changelog
 
+Daniel (7 August)
+- Test case 60 failed on ia64 and AMD Opteron. Fixed now.
+
+- Fixed a printf problem that resulted in urlglobbing bugs (bug #203827 in the
+  debian bug tracker). Added test case 74 to verify the fix and to discover if
+  this breaks in the future.
+
+- make distcheck works again.
+
+Version 7.10.7-pre2 (6 August 2003)
+
+Daniel (5 August)
+- Duncan Wilcox helped me verify that the latest incarnation of my ares patch
+  builds fine on Mac OS X (see the new lib/README.ares) file for all details.
+
+- Salvatore Sorrentino filed bug report #783116 and Early Ehlinger posted a
+  bug report to the libcurl list, both identifying a problem with FTP
+  persitent connections and how the dir hiearchy was not properly reset
+  between files.
+
+- David Byron's thoughts on a fixed Makefile in tests/ were applied.
+
+- Jan Sundin reported a case where curl ignored a cookie that browsers don't,
+  which turned up to be due to the number of dots in the 'domain'. I've now
+  made curl follow the the original netscape cookie spec less strict on that
+  part.
+
+Daniel (4 August)
+- Dirk Manske added cookie support for the experimental, hidden and still
+  undocumented share feature!
+
+- Mark Fletcher provided an excellent bug report that identified a problem
+  with FOLLOWLOCATION and chunked transfer-encoding, as libcurl would not
+  properly ignore the body contents of 3XX response that included the
+  Location: header.
+
+Early (6 August)
+- Added option CURLOPT_FTP_CREATE_MISSING_DIRS
+    This option will force the target file's path to be created if it
+    does not already exist on the remote system.
+ 
+  Files affected:
+    - include/curl/curl.h
+        Added option CURLOPT_FTP_CREATE_MISSING_DIRS
+    - lib/ftp.c
+        Added function ftp_mkd, which issues a MKD command
+        Added function ftp_force_cwd, which attempts a CWD,
+          and does a MKD and retries the CWD if the original CWD
+          fails
+        Modified ftp_perform() to call its change directory function
+          through a pointer.  The pointer points to ftp_cwd by default,
+          and is modified to point to ftp_force_cwd IFF
+          data->set.ftp_create_missing_dirs is not 0.        
+    - lib/url.c
+        Modified Curl_setopt to recognize CURLOPT_FTP_CREATE_MISSING_DIRS
+    - lib/urldata.h
+        Added ftp_create_missing_dirs to struct UserDefined
+       
+- Minor Bugfix for CURLOPT_TIMECONDITION with FTP - if the file was not
+  present to do the time comparison, it would fail.
+  Files affected:
+    - lib/ftp.c
+        In ftp_perform(), the call to ftp_getfiletime() used to be followed
+        by
+	  if (result)
+            return result;
+        And then by the code that actually did the time comparison.
+        The code that did the comparison handled the case where the filetime
+        was not available (as indicated by info.filetime < 0 or set.timevalue 
+        < 0), so I replaced the if (result) return result with a switch(result)
+        that allows CURLE_FTP_COULDNT_RETR_FILE to fall through to the 
+        normal time comparison.
+
 Daniel (3 August)
 - When proxy authentication is used in a CONNECT request (as used for all SSL
   connects and otherwise enforced tunnel-thru-proxy requests), the same

@@ -489,6 +489,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.get_filetime = va_arg(param, long)?TRUE:FALSE;
     break;
+  case CURLOPT_FTP_CREATE_MISSING_DIRS:
+    /*
+     * An FTP option that modifies an upload to create missing directories on
+     * the server.
+     */ 
+    data->set.ftp_create_missing_dirs = va_arg( param , long )?TRUE:FALSE;
+    break;
   case CURLOPT_FTPLISTONLY:
     /*
      * An FTP option that changes the command to one that asks for a list

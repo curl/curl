@@ -818,6 +818,7 @@ struct UserDefined {
   bool ftp_append;
   bool ftp_ascii;
   bool ftp_list_only;
+  bool ftp_create_missing_dirs;
   bool ftp_use_port;
   bool hide_progress;
   bool http_fail_on_error;
