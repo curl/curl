@@ -6,7 +6,51 @@
 
                                History of Changes
 
+Daniel (28 November 2001)
+- Fiddled with some Tru64 problems reported by Dimitris Sarris. They appear
+  only when using VERBOSE ftp transfers. Do we use a too small buffer for
+  gethostbyaddr_r(), was the lack of using in_addr_t wrong or is it that the
+  hostent struct must be blanked before use? I hope Dimitris will found out
+  and tell us.
+
+- CURLOPT_FTP_USE_EPSV was added and can be set to FALSE to prevent libcurl
+  from using the EPSV command before trying the normal PASV. Heikki Korpela
+  pointed out that some firewalls and similar don't like the EPSV so we must
+  be able to shut if off to work everywhere.
+
+- I added a configure check for 'in_addr_t' and made the ftp code use that to
+  receive the inet_addr() return code in. Works on Solaris and Linux at
+  least. The Linux man page for inet_addr() doesn't even mention in_addr_t...
+
+- Adjusted (almost) all FTP tests to the new command sequence.
+
+- FTP command sequence changes:
+
+  EPSV is now always attempted before PASV. It is the final touch to make IPv6
+  passive FTP downloads to work, but EPSV is not restricted to IPv6 but works
+  fine with IPv4 too on the servers that support it.
+
+  SIZE is now always issued before RETR. It makes curl know the actual
+  download size before the download takes place, as it makes it less important
+  to find the size sent in RETR responses. Many sites don't include the size
+  in there.
+
+  Both these changes made it necessary to change the test suite's ftp server
+  code, and all FTP test cases need to be checked and adjusted!
+
 Daniel (27 November 2001)
+- Hans Steegers pointed out that the telnet code read from stdout, not stdin
+  as it is supposed to do!
+
+Version 7.9.2-pre6
+
+Daniel (27 November 2001)
+- Eric Lavigne's minor changes to build on MacOS before OS X were applied.
+
+- greep at mindspring.com provided a main index.html page for our release
+  archive docs directory. It just links to all the existing HTML files, but
+  I think it may come useful to people.
+
 - There's now some initial code to support the EPSV FTP command. That should
   be used to do passive transfers IPv6-style. The code is still #if 0'ed in
   lib/ftp.c as I have no IPv6 ftp server to test this with.
@@ -14,6 +58,8 @@ Daniel (27 November 2001)
 Daniel (26 November 2001)
 - Robert Schlabbach had problems to understand how to do resumed transfers,
   and I clarified the man page -C section somewhat.
+
+Version 7.9.2-pre5
 
 Daniel (22 November 2001)
 - Andrés García helped me out to track down the roots of bug report #479537,
@@ -34,7 +80,7 @@ Daniel (21 November 2001)
   archives).
 
 - Eric Lavigne mailed me bugfixes and patches for building libcurl on MacOS
-  (non-X). He'll get back with more updated patches soon.
+  (non-X).
 
 - Kevin Roth modified the cygwin files once again, now to build against the
   shared OpenSSL DLLs.
