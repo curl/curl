@@ -510,7 +510,9 @@ const char *Curl_strerror(struct connectdata *conn, int err)
 
 #if defined(WIN32) && !defined(__CYGWIN__)
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
-  if (err >= 0 && err < sys_nerr) {
+  if (err >= 0 && err < sys_nerr)
+    strncpy(buf, strerror(err), max);
+  else {
     if (!get_winsock_error (err, buf, max) &&
         !FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
                         LANG_NEUTRAL, buf, max, NULL))
