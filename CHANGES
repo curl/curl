@@ -6,6 +6,24 @@
 
                                History of Changes
 
+Daniel (21 November 2000)
+- Numerous fixes the test suite has brought into the daylight:
+
+   * curl_unescape() could return a too long string
+   * on ftp transfer failures, there could be memory leaks
+   * ftp CWD could use bad directory names
+   * memdebug now uses the mprintf() routines for better portability
+   * free(NULL) removed when doing resumed transfers
+
+- Added a bunch of test cases for FTP.
+
+- General cleanups to make less warnings with gcc -Wall -pedantic.
+
+- I made the tests/ftpserver.pl work with the most commonly used ftp
+  operations. PORT, PASV, RETR, STOR, LIST, SIZE, USER, PASS all work now. Now
+  all I have to do is integrate the ftp server doings in the runtests.pl
+  script so that ftp tests can be run the same way http tests already run.
+
 Daniel (20 November 2000)
 - Made libcurl capable of dealing with any-length URLs. The former limit of
   4096 bytes was a bit annoying when people wanted to use curl to really make
