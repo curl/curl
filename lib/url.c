@@ -1183,6 +1183,19 @@ static UrgError _urlget(struct UrlData *data)
   kerberos_connect(data, name);
 #endif
 
+#ifdef __EMX__
+  /* 20000330 mgs
+   * the check is quite a hack...
+   * we're calling _fsetmode to fix the problem with fwrite converting newline
+   * characters (you get mangled text files, and corrupted binary files when
+   * you download to stdout and redirect it to a file). */
+
+  if ((data->out)->_handle == NULL) {
+    fprintf(stderr, "_fsetmode\n");
+    _fsetmode(stdout, "b");
+  }
+#endif
+
   if((data->conf&(CONF_FTP|CONF_PROXY)) == CONF_FTP) {
     result = ftp(data, &bytecount, data->user, data->passwd, ppath);
     if(result)
