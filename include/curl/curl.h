@@ -183,7 +183,7 @@ typedef enum {
   CURLE_UNSUPPORTED_PROTOCOL,    /* 1 */
   CURLE_FAILED_INIT,             /* 2 */
   CURLE_URL_MALFORMAT,           /* 3 */
-  CURLE_URL_MALFORMAT_USER,      /* 4 */
+  CURLE_URL_MALFORMAT_USER,      /* 4 (NOT USED) */
   CURLE_COULDNT_RESOLVE_PROXY,   /* 5 */
   CURLE_COULDNT_RESOLVE_HOST,    /* 6 */
   CURLE_COULDNT_CONNECT,         /* 7 */
@@ -203,7 +203,7 @@ typedef enum {
   CURLE_FTP_QUOTE_ERROR,         /* 21 */
   CURLE_HTTP_RETURNED_ERROR,     /* 22 */
   CURLE_WRITE_ERROR,             /* 23 */
-  CURLE_MALFORMAT_USER,          /* 24 - user name is illegally specified */
+  CURLE_MALFORMAT_USER,          /* 24 - NOT USED */
   CURLE_FTP_COULDNT_STOR_FILE,   /* 25 - failed FTP upload */
   CURLE_READ_ERROR,              /* 26 - could open/read from file */
   CURLE_OUT_OF_MEMORY,           /* 27 */
@@ -223,13 +223,13 @@ typedef enum {
   CURLE_FUNCTION_NOT_FOUND,      /* 41 */
   CURLE_ABORTED_BY_CALLBACK,     /* 42 */
   CURLE_BAD_FUNCTION_ARGUMENT,   /* 43 */
-  CURLE_BAD_CALLING_ORDER,       /* 44 */
-  CURLE_HTTP_PORT_FAILED,        /* 45 - HTTP Interface operation failed */
-  CURLE_BAD_PASSWORD_ENTERED,    /* 46 - my_getpass() returns fail */
+  CURLE_BAD_CALLING_ORDER,       /* 44 - NOT USED */
+  CURLE_INTERFACE_FAILED,        /* 45 - CURLOPT_INTERFACE failed */
+  CURLE_BAD_PASSWORD_ENTERED,    /* 46 - NOT USED */
   CURLE_TOO_MANY_REDIRECTS ,     /* 47 - catch endless re-direct loops */
   CURLE_UNKNOWN_TELNET_OPTION,   /* 48 - User specified an unknown option */
   CURLE_TELNET_OPTION_SYNTAX ,   /* 49 - Malformed telnet option */
-  CURLE_OBSOLETE,	         /* 50 - removed after 7.7.3 */
+  CURLE_OBSOLETE,	         /* 50 - NOT USED */
   CURLE_SSL_PEER_CERTIFICATE,    /* 51 - peer's certificate wasn't ok */
   CURLE_GOT_NOTHING,             /* 52 - when this is a specific error */
   CURLE_SSL_ENGINE_NOTFOUND,     /* 53 - SSL crypto engine not found */
@@ -256,7 +256,10 @@ typedef CURLcode (*curl_ssl_ctx_callback)(CURL *curl,    /* easy handle */
 
 /* Make a spelling correction for the operation timed-out define */
 #define CURLE_OPERATION_TIMEDOUT CURLE_OPERATION_TIMEOUTED
+
+/* backwards compatibility with older names */
 #define CURLE_HTTP_NOT_FOUND CURLE_HTTP_RETURNED_ERROR
+#define CURLE_HTTP_PORT_FAILED CURLE_INTERFACE_FAILED
 
 typedef enum {
   CURLPROXY_HTTP = 0,
@@ -1196,6 +1199,7 @@ CURLSHcode curl_share_cleanup(CURLSH *);
 typedef enum {
   CURLVERSION_FIRST,
   CURLVERSION_SECOND,
+  CURLVERSION_THIRD,
   CURLVERSION_LAST /* never actually use this */
 } CURLversion;
 
@@ -1204,7 +1208,7 @@ typedef enum {
    meant to be a built-in version number for what kind of struct the caller
    expects. If the struct ever changes, we redfine the NOW to another enum
    from above. */
-#define CURLVERSION_NOW CURLVERSION_SECOND
+#define CURLVERSION_NOW CURLVERSION_THIRD
 
 typedef struct {
   CURLversion age;          /* age of the returned struct */
@@ -1221,18 +1225,22 @@ typedef struct {
   /* The fields below this were added in CURLVERSION_SECOND */
   const char *ares;
   int ares_num;
+
+  /* This field was aded in CURLVERSION_THIRD */
+  char *libidn;
 } curl_version_info_data;
 
-#define CURL_VERSION_IPV6      (1<<0)
-#define CURL_VERSION_KERBEROS4 (1<<1)
-#define CURL_VERSION_SSL       (1<<2)
-#define CURL_VERSION_LIBZ      (1<<3)
-#define CURL_VERSION_NTLM      (1<<4)
-#define CURL_VERSION_GSSNEGOTIATE (1<<5)
-#define CURL_VERSION_DEBUG     (1<<6) /* built with debug capabilities */
-#define CURL_VERSION_ASYNCHDNS (1<<7)
-#define CURL_VERSION_SPNEGO    (1<<8)
-#define CURL_VERSION_LARGEFILE (1<<9) /* supports files bigger than 2GB */
+#define CURL_VERSION_IPV6      (1<<0)  /* IPv6-enabled */
+#define CURL_VERSION_KERBEROS4 (1<<1)  /* kerberos auth is supported */
+#define CURL_VERSION_SSL       (1<<2)  /* SSL options are present */
+#define CURL_VERSION_LIBZ      (1<<3)  /* libz features are present */
+#define CURL_VERSION_NTLM      (1<<4)  /* NTLM auth is supported */
+#define CURL_VERSION_GSSNEGOTIATE (1<<5) /* Negotiate auth support */
+#define CURL_VERSION_DEBUG     (1<<6)  /* built with debug capabilities */
+#define CURL_VERSION_ASYNCHDNS (1<<7)  /* asynchronous dns resolves */
+#define CURL_VERSION_SPNEGO    (1<<8)  /* SPNEGO auth */
+#define CURL_VERSION_LARGEFILE (1<<9)  /* supports files bigger than 2GB */
+#define CURL_VERSION_IDN       (1<<10) /* International Domain Names support */
 
 /*
  * NAME curl_version_info()
