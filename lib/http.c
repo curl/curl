@@ -869,6 +869,21 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
             perline++; /* amount of bytes in this line so far */
             if(*ptr=='\n') {
               char letter;
+              int writetype;
+            
+              /* output debug output if that is requested */
+              if(data->set.verbose)
+                Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline);
+
+              /* send the header to the callback */
+              writetype = CLIENTWRITE_HEADER;
+              if(data->set.http_include_header)
+                writetype |= CLIENTWRITE_BODY;
+
+              result = Curl_client_write(data, writetype, line_start, perline);
+              if(result)
+                return result;
+
               /* Newlines are CRLF, so the CR is ignored as the line isn't
                  really terminated until the LF comes. Treat a following CR
                  as end-of-headers as well.*/
@@ -879,10 +894,6 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
                 keepon=FALSE;
                 break; /* breaks out of for-loop, not switch() */
               }
-
-              /* output debug output if that is requested */
-              if(data->set.verbose)
-                Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline);
 
               /* keep a backup of the position we are about to blank */
               letter = line_start[perline];

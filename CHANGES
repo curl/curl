@@ -6,7 +6,17 @@
 
                                   Changelog
 
+Daniel(27 January 2004)
+- Made the response-headers during a CONNECT request to a proxy get passed on
+  as regular headers, so they appear with -i/-I options and similar.
+
+- Based on a patch by Gisle Vanem, I've made the progress meter display
+  properly switch to a GB-display when more than 9999MB have been transfered.
+
 Daniel(23 January 2004)
+- Gisle Vanem pointed out a curlrc parser problem/crash when an option with a
+  required didn't have one and was on the last line of a file.
+
 - More Windows fixes for large files. We now build and link with
   ../lib/strtoofft.c in the app code since Curl_strtoll() is not a provided
   libcurl function... Perhaps we should consider a 'common' dir or similar
