@@ -40,7 +40,7 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
-#include <stdio.h>
+
 
 #if !defined(WIN32) && defined(_WIN32)
 /* This _might_ be a good Borland fix. Please report whether this works or
@@ -57,6 +57,7 @@
 #endif
 #endif
 
+#include <stdio.h>
 #ifndef OS
 #ifdef WIN32
 #define OS "win32"
