@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (15 October)
+- Avoid doing getsockopt() on Windows to verify connects. It seems that this
+  hogs Windows machines when libcurl is being used multi-threaded (with > ~50
+  threads). Andrew Fuller helped us verify and test this.
+
 Daniel (14 October)
 - Kimmo Kinnunen fixed a crash with duphandle() when CURLDEBUG is set.
 
