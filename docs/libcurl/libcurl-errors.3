@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH libcurl-errors 3 "18 Dec 2002" "libcurl 7.10.3" "libcurl errors"
+.TH libcurl-errors 3 "18 Oct 2003" "libcurl 7.10.8" "libcurl errors"
 .SH NAME
 error codes in libcurl
 .SH DESCRIPTION
@@ -229,6 +229,27 @@ Failed sending network data.
 .TP
 .B CURLE_RECV_ERROR (56)
 Failure with receiving network data.
+.TP
+.B CURLE_RECV_ERROR (57)
+Failure with receiving network data.
+.TP
+.B CURLE_SSL_CERTPROBLEM (58)
+problem with the local certificate
+.TP
+.B CURLE_SSL_CIPHER (59)
+couldn't use specified cipher
+.TP
+.B CURLE_SSL_CACERT (60)
+problem with the CA cert (path? access rights?) 
+.TP
+.B CURLE_BAD_CONTENT_ENCODING (61)
+Unrecognized transfer encoding
+.TP
+.B CURLE_LDAP_INVALID_URL (62)
+Invalid LDAP URL
+.TP
+.B CURLE_FILESIZE_EXCEEDED (63)
+Maximum file size exceeded
 .TP
 .B CURL_LAST
 This is not an error, but in the curl/curl.h file this can be used to know how
