@@ -481,13 +481,27 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 {
   CURLcode rc=CURLE_OK;
   struct SessionHandle *data = conn->data;
-    
+  struct timeval now = Curl_tvnow();
+  bool timedout = FALSE;
+  long timeout = 300; /* default name resolve timeout in seconds */
+  long elapsed = 0; /* time taken so far */
+
+  /* now, see if there's a connect timeout or a regular timeout to
+     use instead of the default one */
+  if(conn->data->set.connecttimeout)
+    timeout = conn->data->set.connecttimeout;
+  else if(conn->data->set.timeout)
+    timeout = conn->data->set.timeout;
+
   /* Wait for the name resolve query to complete. */
   while (1) {
     int nfds=0;
     fd_set read_fds, write_fds;
-    struct timeval *tvp, tv;
+    struct timeval *tvp, tv, store;
     int count;
+
+    store.tv_sec = timeout - elapsed;
+    store.tv_usec = 0;
     
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
@@ -495,13 +509,18 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     if (nfds == 0)
       break;
     tvp = ares_timeout(data->state.areschannel,
-                       NULL, /* pass in our maximum time here */
-                       &tv);
+                       &store, &tv);
     count = select(nfds, &read_fds, &write_fds, NULL, tvp);
     if (count < 0 && errno != EINVAL)
       break;
-
+    else if(!count) {
+      /* timeout */
+      timedout = TRUE;
+      break;
+    }
     ares_process(data->state.areschannel, &read_fds, &write_fds);
+
+    elapsed = Curl_tvdiff(Curl_tvnow(), now)/1000; /* spent time */
   }
 
   /* Operation complete, if the lookup was successful we now have the entry
@@ -515,7 +534,11 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
   if(!conn->async.dns) {
     /* a name was not resolved */
-    if(conn->async.done) {
+    if(timedout) {
+      failf(data, "Resolving host timed out: %s", conn->name);
+      rc = CURLE_OPERATION_TIMEDOUT;
+    }
+    else if(conn->async.done) {
       failf(data, "Could not resolve host: %s", conn->name);
       rc = CURLE_COULDNT_RESOLVE_HOST;
     }
