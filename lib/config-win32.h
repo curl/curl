@@ -229,31 +229,3 @@
 #define HAVE_UNISTD_H 1
 
 #endif
-
-/**************************************************
- *This is to eliminate the warnings when compiled *
- * using MS VC++ compiler	  			  *
- **************************************************/
-#if 0
-
-#pragma warning (disable: 4244)	/* truncation from 'const int' to 'char' */
-#pragma warning (disable: 4127)	/* conditional expression is constant */
-#pragma warning (disable: 4706)	/* assignment within conditional expression */
-#pragma warning (disable: 4761)	/* integral size mismatch in argument */
-#pragma warning (disable: 4101)	/* unreferenced local variable */
-#pragma warning (disable: 4131)	/* uses old-style declarator */
-#pragma warning (disable: 4057)	/* const char *' differs in indirection to
-                                   slightly different base types from
-                                   'unsigned char [x] */
-#pragma warning (disable: 4100)	/* unreferenced formal parameter */
-#pragma warning (disable: 4055)	/* type cast' : from data pointer 'void *' to
-                                   function pointer
-                                   'void *(__cdecl *)(char *,int ) */
-#pragma warning (disable: 4701)	/* local variable may be used without having
-                                   been initialized */
-#pragma warning (disable: 4715)	/* ToHour' : not all control paths return a
-                                   value */
-#pragma warning (disable: 4115) /* warning C4115: '_RPC_ASYNC_STATE' : named
-                                   type definition in parentheses */
-#pragma warning (disable: 4206) /* this does what? */
-#endif
