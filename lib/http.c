@@ -105,8 +105,10 @@
 static CURLcode Curl_output_basic_proxy(struct connectdata *conn);
 
 /*
- * This function checks the linked list of custom HTTP headers for a particular
- * header (prefix).
+ * checkheaders() checks the linked list of custom HTTP headers for a
+ * particular header (prefix).
+ *
+ * Returns a pointer to the first matching header or NULL if none matched.
  */
 static char *checkheaders(struct SessionHandle *data, const char *thisheader)
 {
@@ -120,6 +122,12 @@ static char *checkheaders(struct SessionHandle *data, const char *thisheader)
   return NULL;
 }
 
+/*
+ * Curl_output_basic() sets up an Authorization: header for HTTP Basic
+ * authentication. It uses the conn->user, conn->passwd fields for it.
+ *
+ * Returns CURLcode.
+ */
 static CURLcode Curl_output_basic(struct connectdata *conn)
 {
   char *authorization;
@@ -139,6 +147,13 @@ static CURLcode Curl_output_basic(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/*
+ * Curl_output_basic_proxy() sets up a proxy-Authorization: header for HTTP
+ * Basic proxy authentication. It uses the conn->proxyuser and
+ * conn->proxypasswd fields for it.
+ *
+ * Returns CURLcode.
+ */
 static CURLcode Curl_output_basic_proxy(struct connectdata *conn)
 {
   char *authorization;
@@ -200,11 +215,13 @@ void Curl_http_auth_act(struct connectdata *conn)
 }
 
 /**
- * Setup the authentication headers for the host/proxy and the correct
- * authentication method.  @p conn->data->state.authdone set to TRUE
- * when authentication is done.
+ * http_auth_headers() setups the authentication headers for the host/proxy
+ * and the correct authentication method. conn->data->state.authdone is set to
+ * TRUE when authentication is done.
  *
  * @param conn all information about the current connection
+ *
+ * Returns CURLcode
  */
 static CURLcode http_auth_headers(struct connectdata *conn,
                                   char *request,
@@ -450,8 +467,8 @@ CURLcode Curl_http_auth(struct connectdata *conn,
 }
 
 /**
- * determine whether an http response has gotten us into an
- * error state or not.
+ * Curl_http_should_fail() determines whether an HTTP response has gotten us
+ * into an error state or not.
  *
  * @param conn all information about the current connection
  *
@@ -529,7 +546,14 @@ int Curl_http_should_fail(struct connectdata *conn)
   return 1;
 }
 
-/* fread() emulation to provide POST and/or request data */
+/*
+ * readmoredata() is a "fread() emulation" to provide POST and/or request
+ * data. It is used when a huge POST is to be made and the entire chunk wasn't
+ * sent in the first send(). This function will then be called from the
+ * transfer.c loop when more data is to be sent to the peer.
+ *
+ * Returns the amount of bytes it filled the buffer with.
+ */
 static size_t readmoredata(char *buffer,
                            size_t size,
                            size_t nitems,
@@ -592,7 +616,7 @@ static CURLcode
  add_buffer(send_buffer *in, const void *inptr, size_t size);
 
 /*
- * add_buffer_init() returns a fine buffer struct
+ * add_buffer_init() sets up and returns a fine buffer struct
  */
 static
 send_buffer *add_buffer_init(void)
@@ -608,6 +632,8 @@ send_buffer *add_buffer_init(void)
 
 /*
  * add_buffer_send() sends a buffer and frees all associated memory.
+ *
+ * Returns CURLcode
  */
 static
 CURLcode add_buffer_send(send_buffer *in,
@@ -698,7 +724,7 @@ CURLcode add_buffer_send(send_buffer *in,
 
 
 /* 
- * add_bufferf() builds a buffer from the formatted input
+ * add_bufferf() add the formatted input to the buffer.
  */
 static
 CURLcode add_bufferf(send_buffer *in, const char *fmt, ...)
@@ -723,7 +749,7 @@ CURLcode add_bufferf(send_buffer *in, const char *fmt, ...)
 }
 
 /*
- * add_buffer() appends a memory chunk to the existing one
+ * add_buffer() appends a memory chunk to the existing buffer
  */
 static
 CURLcode add_buffer(send_buffer *in, const void *inptr, size_t size)
@@ -1038,7 +1064,8 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
 }
 
 /*
- * HTTP stuff to do at connect-time.
+ * Curl_http_connect() performs HTTP stuff to do at connect-time, called from
+ * the generic Curl_connect().
  */
 CURLcode Curl_http_connect(struct connectdata *conn)
 {
@@ -1083,6 +1110,11 @@ CURLcode Curl_http_connect(struct connectdata *conn)
 
   return CURLE_OK;
 }
+
+/*
+ * Curl_http_done() gets called from Curl_done() after a single HTTP request
+ * has been performed.
+ */
 
 CURLcode Curl_http_done(struct connectdata *conn)
 {
@@ -1129,6 +1161,10 @@ CURLcode Curl_http_done(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/*
+ * Curl_http_auth_stage() sets the "authentication stage" - which is 407 for
+ * proxy authentication or 401 for host authentication.
+ */
 void Curl_http_auth_stage(struct SessionHandle *data,
                           int stage)
 {
@@ -1143,6 +1179,11 @@ void Curl_http_auth_stage(struct SessionHandle *data,
   data->state.authavail = CURLAUTH_NONE; /* no type available yet */
 }
 
+/*
+ * Curl_http() gets called from the generic Curl_do() function when a HTTP
+ * request is to be performed. This creates and sends a propperly constructed
+ * HTTP request.
+ */
 CURLcode Curl_http(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
