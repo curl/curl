@@ -6,7 +6,14 @@
 
                                   Changelog
 
+Daniel (4 November 2004)
+- Andres Garcia made it build on mingw againa, my --retry code broke the build.
+
 Daniel (2 November 2004)
+- Added --retry-max-time that allows a maximum time that may not have been
+  reached for a retry to be made. If not set there is no maximum time, only
+  the amount of retries set with --retry.
+
 - Paul Nolan provided a patch to make libcurl build nicely on Windows CE.
 
 Daniel (1 November 2004)

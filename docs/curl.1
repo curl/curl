@@ -726,26 +726,32 @@ If this option is used twice, the second time disables this again.
 .IP "--retry <num>"
 If a transient error is returned when curl tries to perform a transfer, it
 will retry this number of times before giving up. Setting the number to 0
-makes curl do no retries (which is the default).
-
-Transient error means either: timeout, an FTP 5xx response code or a HTTP 5xx
-response code.
+makes curl do no retries (which is the default). Transient error means either:
+a timeout, an FTP 5xx response code or an HTTP 5xx response code.
 
 When curl is about to retry a transfer, it will first wait one second and then
 for all forthcoming retries it will double the waiting time until it reaches
-10 minutes which then will be the delay between the rest of the retries.
-
-By using \fI--retry-delay\fP you disable this exponential backoff algorithm.
-(Option added in 7.12.3)
+10 minutes which then will be the delay between the rest of the retries.  By
+using \fI--retry-delay\fP you disable this exponential backoff algorithm. See
+also \fI--retry-max-time\fP to limit the total time allowed for
+retries. (Option added in 7.12.3)
 
 If this option is used multiple times, the last occurance decide the amount.
 .IP "--retry-delay <seconds>"
 Make curl sleep this amount of time between each retry when a transfer has
 failed with a transient error (it changes the default backoff time algorithm
-between retries). This option is only interestinf if \fI--retry\fP is also
-used. (Option added in 7.12.3)
+between retries). This option is only interesting if \fI--retry\fP is also
+used. Setting this delay to zero will make curl use the default backoff time.
+(Option added in 7.12.3)
 
-Setting the delay to zero will make curl use the default backoff time.
+If this option is used multiple times, the last occurance decide the amount.
+.IP "--retry-max-time <seconds>"
+The retry timer is reset before the first transfer attempt. Retries will be
+done as usual (see \fI--retry\fP) as long as the timer hasn't reached this
+given limit. Notice that if the timer hasn't reached the limit, the request
+will be made and while performing, it may take longer than this given time
+period. To limit a single request\'s maximum time, use \fI-m/--max-time\fP.
+Set this option to zero to not timeout retries. (Option added in 7.12.3)
 
 If this option is used multiple times, the last occurance decide the amount.
 .IP "-s/--silent"
@@ -845,7 +851,7 @@ starting with '>' means data sent by curl, '<' means data received by curl
 that is hidden in normal cases and lines starting with '*' means additional
 info provided by curl.
 
-Note that if you want to see HTTP headers in the output, \fI-i/--include\fP
+Note that if you only want HTTP headers in the output, \fI-i/--include\fP
 might be option you're looking for.
 
 If you think this option still doesn't give you enough details, consider using

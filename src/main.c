@@ -386,6 +386,7 @@ static void help(void)
     " -R/--remote-time   Set the remote file's time on the local output",
     "    --retry <num>   Retry request <num> times if transient problems occur",
     "    --retry-delay <seconds> When retrying, wait this many seconds between each",
+    "    --retry-max-time <seconds> Retry only within this period",
     " -s/--silent        Silent mode. Don't output anything",
     " -S/--show-error    Show error. With -s, make curl show errors when they occur",
     "    --socks <host[:port]> Use SOCKS5 proxy on given host + port",
@@ -529,6 +530,7 @@ struct Configurable {
   bool tcp_nodelay;
   long req_retry;   /* number of retries */
   long retry_delay; /* delay between retries (in seconds) */
+  long retry_maxtime; /* maximum time to keep retrying */
 };
 
 /* global variable to hold info about libcurl */
@@ -1212,6 +1214,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"$f", "proxy-basic", FALSE},
     {"$g", "retry",      TRUE},
     {"$h", "retry-delay", TRUE},
+    {"$i", "retry-max-time", TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1553,6 +1556,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'h': /* --retry-delay */
         if(str2num(&config->retry_delay, nextarg))
+          return PARAM_BAD_NUMERIC;
+        break;
+      case 'i': /* --retry-max-time */
+        if(str2num(&config->retry_maxtime, nextarg))
           return PARAM_BAD_NUMERIC;
         break;
       }
@@ -2809,6 +2816,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   long retry_numretries;
   long retry_sleep = retry_sleep_default;
   long response;
+  struct timeval retrystart;
 
   char *env;
 #ifdef CURLDEBUG
@@ -3513,10 +3521,17 @@ operate(struct Configurable *config, int argc, char *argv[])
 
         retry_numretries = config->req_retry;
 
+        retrystart = curlx_tvnow();
+
         do {
           res = curl_easy_perform(curl);
 
-          if(retry_numretries) {
+          /* if retry-max-time is non-zero, make sure we haven't exceeded the
+             time */
+          if(retry_numretries &&
+             (!config->retry_maxtime ||
+              (curlx_tvdiff(curlx_tvnow(), retrystart)<
+               config->retry_maxtime*1000)) ) {
             enum {
               RETRY_NO,
               RETRY_TIMEOUT,
