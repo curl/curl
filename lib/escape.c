@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -33,12 +33,15 @@
 #include <string.h>
 #include "memory.h"
 
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
 /* The last #include file should be: */
 #include "memdebug.h"
 
 char *curl_escape(const char *string, int length)
 {
-  size_t alloc = (length?(size_t)length:strlen(string))+1;  
+  size_t alloc = (length?(size_t)length:strlen(string))+1;
   char *ns;
   char *testing_ptr = NULL;
   unsigned char in;
@@ -93,10 +96,10 @@ char *curl_unescape(const char *string, int length)
   unsigned char in;
   int strindex=0;
   long hex;
- 
+
   if( !ns )
     return NULL;
-  
+
   while(--alloc > 0) {
     in = *string;
     if(('%' == in) && ishex(string[1]) && ishex(string[2])) {
@@ -113,7 +116,7 @@ char *curl_unescape(const char *string, int length)
       string+=2;
       alloc-=2;
     }
-    
+
     ns[strindex++] = in;
     string++;
   }
