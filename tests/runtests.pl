@@ -620,15 +620,9 @@ sub singletest {
 
         subVariables \$s;
 
-        print "MOO: $s\n";
-        
         if($s =~ /([^=]*)=(.*)/) {
             my ($var, $content)=($1, $2);
-            
             $ENV{$var}=$content;
-
-            print "setenv $var to $content\n";
-
             # remember which, so that we can clear them afterwards!
             push @envs, $var;
         }
