@@ -84,16 +84,16 @@
 
 #define SUBBUFSIZE 512
 
-#define  SB_CLEAR()  subpointer = subbuffer;
-#define  SB_TERM()   { subend = subpointer; SB_CLEAR(); }
-#define  SB_ACCUM(c) if (subpointer < (subbuffer+sizeof subbuffer)) { \
-            *subpointer++ = (c); \
+#define  SB_CLEAR(x)  x->subpointer = x->subbuffer;
+#define  SB_TERM(x)   { x->subend = x->subpointer; SB_CLEAR(x); }
+#define  SB_ACCUM(x,c) if (x->subpointer < (x->subbuffer+sizeof x->subbuffer)) { \
+            *x->subpointer++ = (c); \
          }
 
-#define  SB_GET() ((*subpointer++)&0xff)
-#define  SB_PEEK()   ((*subpointer)&0xff)
-#define  SB_EOF() (subpointer >= subend)
-#define  SB_LEN() (subend - subpointer)
+#define  SB_GET(x) ((*x->subpointer++)&0xff)
+#define  SB_PEEK(x)   ((*x->subpointer)&0xff)
+#define  SB_EOF(x) (x->subpointer >= x->subend)
+#define  SB_LEN(x) (x->subend - x->subpointer)
 
 static
 void telrcv(struct connectdata *,
@@ -113,14 +113,19 @@ static void printsub(struct UrlData *data,
 		     int direction, unsigned char *pointer, int length);
 static void suboption(struct connectdata *);
 
-/* suboptions */
-static char subbuffer[SUBBUFSIZE];
-static char *subpointer, *subend;    /* buffer for sub-options */
+/* For negotiation compliant to RFC 1143 */
+#define NO	0
+#define YES 	1
+#define WANTYES	2
+#define WANTNO	3
+
+#define EMPTY	 0
+#define OPPOSITE 1
 
 /*
  * Telnet receiver states for fsm
  */
-static enum
+typedef enum
 {
    TS_DATA = 0,
    TS_IAC,
@@ -131,63 +136,76 @@ static enum
    TS_CR,
    TS_SB,   /* sub-option collection */
    TS_SE   /* looking for sub-option end */
-} telrcv_state;
+} TelnetReceive;
 
-/* For negotiation compliant to RFC 1143 */
-#define NO	0
-#define YES 	1
-#define WANTYES	2
-#define WANTNO	3
+struct TELNET {
+  int please_negotiate;
+  int already_negotiated;
+  int us[256]; 
+  int usq[256]; 
+  int us_preferred[256]; 
+  int him[256]; 
+  int himq[256]; 
+  int him_preferred[256]; 
+  char *subopt_ttype;             /* Set with suboption TTYPE */
+  char *subopt_xdisploc;          /* Set with suboption XDISPLOC */
+  struct curl_slist *telnet_vars; /* Environment variables */
 
-#define EMPTY	 0
-#define OPPOSITE 1
-
-static int please_negotiate = 0;
-static int already_negotiated = 0;
-static int us[256]; 
-static int usq[256]; 
-static int us_preferred[256]; 
-static int him[256]; 
-static int himq[256]; 
-static int him_preferred[256]; 
-
-static char *subopt_ttype = NULL; /* Set with suboption TTYPE */
-static char *subopt_xdisploc = NULL; /* Set with suboption XDISPLOC */
-static struct curl_slist *telnet_vars = NULL; /* Environment variables */
+  /* suboptions */
+  char subbuffer[SUBBUFSIZE];
+  char *subpointer, *subend;      /* buffer for sub-options */
+  
+  TelnetReceive telrcv_state;
+};
 
 static
-void init_telnet(struct connectdata *conn)
+CURLcode init_telnet(struct connectdata *conn)
 {
-  telrcv_state = TS_DATA;
+  struct TELNET *tn;
+
+  tn = (struct TELNET *)malloc(sizeof(struct TELNET));
+  if(!tn)
+    return CURLE_OUT_OF_MEMORY;
+  
+  conn->proto.telnet = (void *)tn; /* make us known */
+
+  memset(tn, 0, sizeof(struct TELNET));
+
+  tn->telrcv_state = TS_DATA;
 
   /* Init suboptions */
-  SB_CLEAR();
+  SB_CLEAR(tn);
 
   /* Set all options to NO */
-  memset(us, NO, 256);
-  memset(usq, NO, 256);
-  memset(us_preferred, NO, 256);
-  memset(him, NO, 256);
-  memset(himq, NO, 256);
-  memset(him_preferred, NO, 256);
-
+#if 0
+  /* NO is zero => default fill pattern */
+  memset(tn->us, NO, 256);
+  memset(tn->usq, NO, 256);
+  memset(tn->us_preferred, NO, 256);
+  memset(tn->him, NO, 256);
+  memset(tn->himq, NO, 256);
+  memset(tn->him_preferred, NO, 256);
+#endif
   /* Set the options we want by default */
-  us_preferred[TELOPT_BINARY] = YES;
-  us_preferred[TELOPT_SGA] = YES;
-  him_preferred[TELOPT_BINARY] = YES;
-  him_preferred[TELOPT_SGA] = YES;
+  tn->us_preferred[TELOPT_BINARY] = YES;
+  tn->us_preferred[TELOPT_SGA] = YES;
+  tn->him_preferred[TELOPT_BINARY] = YES;
+  tn->him_preferred[TELOPT_SGA] = YES;
+
+  return CURLE_OK;
 }
 
 static void negotiate(struct connectdata *conn)
 {
   int i;
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
    
   for(i = 0;i < NTELOPTS;i++)
   {
-    if(us_preferred[i] == YES)
+    if(tn->us_preferred[i] == YES)
       set_local_option(conn, i, YES);
       
-    if(him_preferred[i] == YES)
+    if(tn->him_preferred[i] == YES)
       set_remote_option(conn, i, YES);
   }
 }
@@ -247,12 +265,13 @@ static void send_negotiation(struct connectdata *conn, int cmd, int option)
 static
 void set_remote_option(struct connectdata *conn, int option, int newstate)
 {
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
   if(newstate == YES)
   {
-    switch(him[option])
+    switch(tn->him[option])
     {
       case NO:
-        him[option] = WANTYES;
+        tn->him[option] = WANTYES;
         send_negotiation(conn, DO, option);
         break;
 	 
@@ -261,11 +280,11 @@ void set_remote_option(struct connectdata *conn, int option, int newstate)
         break;
 	 
       case WANTNO:
-        switch(himq[option])
+        switch(tn->himq[option])
         {
           case EMPTY:
             /* Already negotiating for YES, queue the request */
-            himq[option] = OPPOSITE;
+            tn->himq[option] = OPPOSITE;
             break;
           case OPPOSITE:
             /* Error: already queued an enable request */
@@ -274,13 +293,13 @@ void set_remote_option(struct connectdata *conn, int option, int newstate)
         break;
 	 
       case WANTYES:
-        switch(himq[option])
+        switch(tn->himq[option])
         {
           case EMPTY:
             /* Error: already negotiating for enable */
             break;
           case OPPOSITE:
-            himq[option] = EMPTY;
+            tn->himq[option] = EMPTY;
             break;
         }
         break;
@@ -288,34 +307,34 @@ void set_remote_option(struct connectdata *conn, int option, int newstate)
   }
   else /* NO */
   {
-    switch(him[option])
+    switch(tn->him[option])
     {
       case NO:
         /* Already disabled */
         break;
 	 
       case YES:
-        him[option] = WANTNO;
+        tn->him[option] = WANTNO;
         send_negotiation(conn, DONT, option);
         break;
 	 
       case WANTNO:
-        switch(himq[option])
+        switch(tn->himq[option])
         {
           case EMPTY:
             /* Already negotiating for NO */
             break;
           case OPPOSITE:
-            himq[option] = EMPTY;
+            tn->himq[option] = EMPTY;
             break;
         }
         break;
 	 
       case WANTYES:
-        switch(himq[option])
+        switch(tn->himq[option])
         {
           case EMPTY:
-            himq[option] = OPPOSITE;
+            tn->himq[option] = OPPOSITE;
             break;
           case OPPOSITE:
             break;
@@ -328,12 +347,13 @@ void set_remote_option(struct connectdata *conn, int option, int newstate)
 static
 void rec_will(struct connectdata *conn, int option)
 {
-  switch(him[option])
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  switch(tn->him[option])
   {
     case NO:
-      if(him_preferred[option] == YES)
+      if(tn->him_preferred[option] == YES)
       {
-        him[option] = YES;
+        tn->him[option] = YES;
         send_negotiation(conn, DO, option);
       }
       else
@@ -347,29 +367,29 @@ void rec_will(struct connectdata *conn, int option)
       break;
 	 
     case WANTNO:
-      switch(himq[option])
+      switch(tn->himq[option])
       {
         case EMPTY:
           /* Error: DONT answered by WILL */
-          him[option] = NO;
+          tn->him[option] = NO;
           break;
         case OPPOSITE:
           /* Error: DONT answered by WILL */
-          him[option] = YES;
-          himq[option] = EMPTY;
+          tn->him[option] = YES;
+          tn->himq[option] = EMPTY;
           break;
       }
       break;
 	 
     case WANTYES:
-      switch(himq[option])
+      switch(tn->himq[option])
       {
         case EMPTY:
-          him[option] = YES;
+          tn->him[option] = YES;
           break;
         case OPPOSITE:
-          him[option] = WANTNO;
-          himq[option] = EMPTY;
+          tn->him[option] = WANTNO;
+          tn->himq[option] = EMPTY;
           send_negotiation(conn, DONT, option);
           break;
       }
@@ -380,41 +400,42 @@ void rec_will(struct connectdata *conn, int option)
 static
 void rec_wont(struct connectdata *conn, int option)
 {
-  switch(him[option])
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  switch(tn->him[option])
   {
     case NO:
       /* Already disabled */
       break;
 	 
     case YES:
-      him[option] = NO;
+      tn->him[option] = NO;
       send_negotiation(conn, DONT, option);
       break;
 	 
     case WANTNO:
-      switch(himq[option])
+      switch(tn->himq[option])
       {
         case EMPTY:
-          him[option] = NO;
+          tn->him[option] = NO;
           break;
 	 
         case OPPOSITE:
-          him[option] = WANTYES;
-          himq[option] = EMPTY;
+          tn->him[option] = WANTYES;
+          tn->himq[option] = EMPTY;
           send_negotiation(conn, DO, option);
           break;
       }
       break;
 	 
     case WANTYES:
-      switch(himq[option])
+      switch(tn->himq[option])
       {
         case EMPTY:
-          him[option] = NO;
+          tn->him[option] = NO;
           break;
         case OPPOSITE:
-          him[option] = NO;
-          himq[option] = EMPTY;
+          tn->him[option] = NO;
+          tn->himq[option] = EMPTY;
           break;
       }
       break;
@@ -423,12 +444,13 @@ void rec_wont(struct connectdata *conn, int option)
    
 void set_local_option(struct connectdata *conn, int option, int newstate)
 {
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
   if(newstate == YES)
   {
-    switch(us[option])
+    switch(tn->us[option])
     {
       case NO:
-        us[option] = WANTYES;
+        tn->us[option] = WANTYES;
         send_negotiation(conn, WILL, option);
         break;
 	 
@@ -437,11 +459,11 @@ void set_local_option(struct connectdata *conn, int option, int newstate)
         break;
 	 
       case WANTNO:
-        switch(usq[option])
+        switch(tn->usq[option])
         {
           case EMPTY:
             /* Already negotiating for YES, queue the request */
-            usq[option] = OPPOSITE;
+            tn->usq[option] = OPPOSITE;
             break;
           case OPPOSITE:
             /* Error: already queued an enable request */
@@ -450,13 +472,13 @@ void set_local_option(struct connectdata *conn, int option, int newstate)
         break;
 	 
       case WANTYES:
-        switch(usq[option])
+        switch(tn->usq[option])
         {
           case EMPTY:
             /* Error: already negotiating for enable */
             break;
           case OPPOSITE:
-            usq[option] = EMPTY;
+            tn->usq[option] = EMPTY;
             break;
         }
         break;
@@ -464,34 +486,34 @@ void set_local_option(struct connectdata *conn, int option, int newstate)
   }
   else /* NO */
   {
-    switch(us[option])
+    switch(tn->us[option])
     {
       case NO:
         /* Already disabled */
         break;
 	 
       case YES:
-        us[option] = WANTNO;
+        tn->us[option] = WANTNO;
         send_negotiation(conn, WONT, option);
         break;
 	 
       case WANTNO:
-        switch(usq[option])
+        switch(tn->usq[option])
         {
           case EMPTY:
             /* Already negotiating for NO */
             break;
           case OPPOSITE:
-            usq[option] = EMPTY;
+            tn->usq[option] = EMPTY;
             break;
         }
         break;
 	 
       case WANTYES:
-        switch(usq[option])
+        switch(tn->usq[option])
         {
           case EMPTY:
-            usq[option] = OPPOSITE;
+            tn->usq[option] = OPPOSITE;
             break;
           case OPPOSITE:
             break;
@@ -504,12 +526,13 @@ void set_local_option(struct connectdata *conn, int option, int newstate)
 static
 void rec_do(struct connectdata *conn, int option)
 {
-  switch(us[option])
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  switch(tn->us[option])
   {
     case NO:
-      if(us_preferred[option] == YES)
+      if(tn->us_preferred[option] == YES)
       {
-        us[option] = YES;
+        tn->us[option] = YES;
         send_negotiation(conn, WILL, option);
       }
       else
@@ -523,29 +546,29 @@ void rec_do(struct connectdata *conn, int option)
       break;
 	 
     case WANTNO:
-      switch(usq[option])
+      switch(tn->usq[option])
       {
         case EMPTY:
           /* Error: DONT answered by WILL */
-          us[option] = NO;
+          tn->us[option] = NO;
           break;
         case OPPOSITE:
           /* Error: DONT answered by WILL */
-          us[option] = YES;
-          usq[option] = EMPTY;
+          tn->us[option] = YES;
+          tn->usq[option] = EMPTY;
           break;
       }
       break;
 	 
     case WANTYES:
-      switch(usq[option])
+      switch(tn->usq[option])
       {
         case EMPTY:
-          us[option] = YES;
+          tn->us[option] = YES;
           break;
         case OPPOSITE:
-          us[option] = WANTNO;
-          himq[option] = EMPTY;
+          tn->us[option] = WANTNO;
+          tn->himq[option] = EMPTY;
           send_negotiation(conn, WONT, option);
           break;
       }
@@ -556,41 +579,42 @@ void rec_do(struct connectdata *conn, int option)
 static   
 void rec_dont(struct connectdata *conn, int option)
 {
-  switch(us[option])
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  switch(tn->us[option])
   {
     case NO:
       /* Already disabled */
       break;
 	 
     case YES:
-      us[option] = NO;
+      tn->us[option] = NO;
       send_negotiation(conn, WONT, option);
       break;
 	 
     case WANTNO:
-      switch(usq[option])
+      switch(tn->usq[option])
       {
         case EMPTY:
-          us[option] = NO;
+          tn->us[option] = NO;
           break;
 	 
         case OPPOSITE:
-          us[option] = WANTYES;
-          usq[option] = EMPTY;
+          tn->us[option] = WANTYES;
+          tn->usq[option] = EMPTY;
           send_negotiation(conn, WILL, option);
           break;
       }
       break;
 	 
     case WANTYES:
-      switch(usq[option])
+      switch(tn->usq[option])
       {
         case EMPTY:
-          us[option] = NO;
+          tn->us[option] = NO;
           break;
         case OPPOSITE:
-          us[option] = NO;
-          usq[option] = EMPTY;
+          tn->us[option] = NO;
+          tn->usq[option] = EMPTY;
           break;
       }
       break;
@@ -717,6 +741,7 @@ static int check_telnet_options(struct connectdata *conn)
   char option_arg[256];
   char *buf;
   struct UrlData *data = conn->data;
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
 
   /* Add the user name as an environment variable if it
      was given on the command line */
@@ -724,9 +749,9 @@ static int check_telnet_options(struct connectdata *conn)
   {
     char *buf = malloc(256);
     sprintf(buf, "USER,%s", data->user);
-    telnet_vars = curl_slist_append(telnet_vars, buf);
+    tn->telnet_vars = curl_slist_append(tn->telnet_vars, buf);
 
-    us_preferred[TELOPT_NEW_ENVIRON] = YES;
+    tn->us_preferred[TELOPT_NEW_ENVIRON] = YES;
   }
 
   for(head = data->telnet_options; head; head=head->next) {
@@ -735,15 +760,15 @@ static int check_telnet_options(struct connectdata *conn)
 
       /* Terminal type */
       if(strequal(option_keyword, "TTYPE")) {
-        subopt_ttype = option_arg;
-        us_preferred[TELOPT_TTYPE] = YES;
+        tn->subopt_ttype = option_arg;
+        tn->us_preferred[TELOPT_TTYPE] = YES;
         continue;
       }
 
       /* Display variable */
       if(strequal(option_keyword, "XDISPLOC")) {
-        subopt_xdisploc = option_arg;
-        us_preferred[TELOPT_XDISPLOC] = YES;
+        tn->subopt_xdisploc = option_arg;
+        tn->us_preferred[TELOPT_XDISPLOC] = YES;
         continue;
       }
 
@@ -752,8 +777,8 @@ static int check_telnet_options(struct connectdata *conn)
         buf = strdup(option_arg);
         if(!buf)
           return CURLE_OUT_OF_MEMORY;
-        telnet_vars = curl_slist_append(telnet_vars, buf);
-        us_preferred[TELOPT_NEW_ENVIRON] = YES;
+        tn->telnet_vars = curl_slist_append(tn->telnet_vars, buf);
+        tn->us_preferred[TELOPT_NEW_ENVIRON] = YES;
         continue;
       }
 
@@ -786,22 +811,23 @@ static void suboption(struct connectdata *conn)
   char varname[128];
   char varval[128];
   struct UrlData *data = conn->data;
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
 
-  printsub(data, '<', (unsigned char *)subbuffer, SB_LEN()+2);
-  switch (subchar = SB_GET()) {
+  printsub(data, '<', (unsigned char *)tn->subbuffer, SB_LEN(tn)+2);
+  switch (subchar = SB_GET(tn)) {
     case TELOPT_TTYPE:
-      len = strlen(subopt_ttype) + 4 + 2;
+      len = strlen(tn->subopt_ttype) + 4 + 2;
       snprintf((char *)temp, sizeof(temp),
                "%c%c%c%c%s%c%c", IAC, SB, TELOPT_TTYPE,
-               TELQUAL_IS, subopt_ttype, IAC, SE);
+               TELQUAL_IS, tn->subopt_ttype, IAC, SE);
       swrite(conn->firstsocket, temp, len);
       printsub(data, '>', &temp[2], len-2);
       break;
     case TELOPT_XDISPLOC:
-      len = strlen(subopt_xdisploc) + 4 + 2;
+      len = strlen(tn->subopt_xdisploc) + 4 + 2;
       snprintf((char *)temp, sizeof(temp),
                "%c%c%c%c%s%c%c", IAC, SB, TELOPT_XDISPLOC,
-               TELQUAL_IS, subopt_xdisploc, IAC, SE);
+               TELQUAL_IS, tn->subopt_xdisploc, IAC, SE);
       swrite(conn->firstsocket, temp, len);
       printsub(data, '>', &temp[2], len-2);
       break;
@@ -810,7 +836,7 @@ static void suboption(struct connectdata *conn)
                "%c%c%c%c", IAC, SB, TELOPT_NEW_ENVIRON, TELQUAL_IS);
       len = 4;
 
-      for(v = telnet_vars;v;v = v->next) {
+      for(v = tn->telnet_vars;v;v = v->next) {
         tmplen = (strlen(v->data) + 1);
         /* Add the variable only if it fits */
         if(len + tmplen < sizeof(temp)-6) {
@@ -839,15 +865,16 @@ void telrcv(struct connectdata *conn,
   unsigned char c;
   int index = 0;
   struct UrlData *data = conn->data;
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
 
   while(count--)
   {
     c = inbuf[index++];
 
-    switch (telrcv_state)
+    switch (tn->telrcv_state)
     {
       case TS_CR:
-        telrcv_state = TS_DATA;
+        tn->telrcv_state = TS_DATA;
         if (c == '\0')
         {
           break;   /* Ignore \0 after CR */
@@ -859,12 +886,12 @@ void telrcv(struct connectdata *conn,
       case TS_DATA:
         if (c == IAC)
         {
-          telrcv_state = TS_IAC;
+          tn->telrcv_state = TS_IAC;
           break;
         }
         else if(c == '\r')
         {
-          telrcv_state = TS_CR;
+          tn->telrcv_state = TS_CR;
         }
 
         Curl_client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
@@ -875,20 +902,20 @@ void telrcv(struct connectdata *conn,
       switch (c)
       {
         case WILL:
-          telrcv_state = TS_WILL;
+          tn->telrcv_state = TS_WILL;
           continue;
         case WONT:
-          telrcv_state = TS_WONT;
+          tn->telrcv_state = TS_WONT;
           continue;
         case DO:
-          telrcv_state = TS_DO;
+          tn->telrcv_state = TS_DO;
           continue;
         case DONT:
-          telrcv_state = TS_DONT;
+          tn->telrcv_state = TS_DONT;
           continue;
         case SB:
-          SB_CLEAR();
-          telrcv_state = TS_SB;
+          SB_CLEAR(tn);
+          tn->telrcv_state = TS_SB;
           continue;
         case IAC:
           Curl_client_write(data, CLIENTWRITE_BODY, (char *)&c, 1);
@@ -900,45 +927,45 @@ void telrcv(struct connectdata *conn,
           printoption(data, "RCVD", IAC, c);
           break;
       }
-      telrcv_state = TS_DATA;
+      tn->telrcv_state = TS_DATA;
       continue;
 
       case TS_WILL:
         printoption(data, "RCVD", WILL, c);
-        please_negotiate = 1;
+        tn->please_negotiate = 1;
         rec_will(conn, c);
-        telrcv_state = TS_DATA;
+        tn->telrcv_state = TS_DATA;
         continue;
       
       case TS_WONT:
         printoption(data, "RCVD", WONT, c);
-        please_negotiate = 1;
+        tn->please_negotiate = 1;
         rec_wont(conn, c);
-        telrcv_state = TS_DATA;
+        tn->telrcv_state = TS_DATA;
         continue;
       
       case TS_DO:
         printoption(data, "RCVD", DO, c);
-        please_negotiate = 1;
+        tn->please_negotiate = 1;
         rec_do(conn, c);
-        telrcv_state = TS_DATA;
+        tn->telrcv_state = TS_DATA;
         continue;
       
       case TS_DONT:
         printoption(data, "RCVD", DONT, c);
-        please_negotiate = 1;
+        tn->please_negotiate = 1;
         rec_dont(conn, c);
-        telrcv_state = TS_DATA;
+        tn->telrcv_state = TS_DATA;
         continue;
 
       case TS_SB:
         if (c == IAC)
         {
-          telrcv_state = TS_SE;
+          tn->telrcv_state = TS_SE;
         }
         else
         {
-          SB_ACCUM(c);
+          SB_ACCUM(tn,c);
         }
         continue;
 
@@ -959,27 +986,27 @@ void telrcv(struct connectdata *conn,
              * we terminate the suboption, and process the
              * partial suboption if we can.
              */
-            SB_ACCUM((unsigned char)IAC);
-            SB_ACCUM(c);
-            subpointer -= 2;
-            SB_TERM();
+            SB_ACCUM(tn, (unsigned char)IAC);
+            SB_ACCUM(tn, c);
+            tn->subpointer -= 2;
+            SB_TERM(tn);
 	    
             printoption(data, "In SUBOPTION processing, RCVD", IAC, c);
             suboption(conn);   /* handle sub-option */
-            telrcv_state = TS_IAC;
+            tn->telrcv_state = TS_IAC;
             goto process_iac;
           }
-          SB_ACCUM(c);
-          telrcv_state = TS_SB;
+          SB_ACCUM(tn,c);
+          tn->telrcv_state = TS_SB;
         }
         else
         {
-          SB_ACCUM((unsigned char)IAC);
-          SB_ACCUM((unsigned char)SE);
-          subpointer -= 2;
-          SB_TERM();
+          SB_ACCUM(tn, (unsigned char)IAC);
+          SB_ACCUM(tn, (unsigned char)SE);
+          tn->subpointer -= 2;
+          SB_TERM(tn);
           suboption(conn);   /* handle sub-option */
-          telrcv_state = TS_DATA;
+          tn->telrcv_state = TS_DATA;
         }
         break;
     }
@@ -988,7 +1015,8 @@ void telrcv(struct connectdata *conn,
 
 CURLcode Curl_telnet_done(struct connectdata *conn)
 {
-  curl_slist_free_all(telnet_vars);
+  struct TELNET *tn = (struct TELNET *)conn->proto.telnet;
+  curl_slist_free_all(tn->telnet_vars);
   return CURLE_OK;
 }
 
@@ -1003,9 +1031,14 @@ CURLcode Curl_telnet(struct connectdata *conn)
   bool keepon = TRUE;
   char *buf = data->buffer;
   ssize_t nread;
+  struct TELNET *tn;
 
-  init_telnet(conn);
-   
+  code = init_telnet(conn);
+  if(code)
+    return code;
+
+  tn = (struct TELNET *)conn->proto.telnet;
+
   code = check_telnet_options(conn);
   if(code)
     return code;
@@ -1060,9 +1093,9 @@ CURLcode Curl_telnet(struct connectdata *conn)
         /* Negotiate if the peer has started negotiating,
            otherwise don't. We don't want to speak telnet with
            non-telnet servers, like POP or SMTP. */
-        if(please_negotiate && !already_negotiated) {
+        if(tn->please_negotiate && !tn->already_negotiated) {
           negotiate(conn);
-          already_negotiated = 1;
+          tn->already_negotiated = 1;
         }
       }
     }

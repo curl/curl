@@ -326,8 +326,8 @@ struct connectdata {
     struct HTTP *https;  /* alias, just for the sake of being more readable */
     struct FTP *ftp;
     struct FILE *file;
+    void *telnet;        /* private for telnet.c-eyes only */
 #if 0 /* no need for special ones for these: */
-    struct TELNET *telnet;
     struct LDAP *ldap;
     struct DICT *dict;
 #endif
