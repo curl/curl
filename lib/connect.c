@@ -26,8 +26,12 @@
 #ifndef WIN32
 /* headers for non-win32 */
 #include <sys/time.h>
-#include <sys/socket.h>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
 #include <sys/ioctl.h>
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
@@ -170,6 +174,11 @@ int waitconnect(int sockfd, /* socket */
   fd_set errfd;
   struct timeval interval;
   int rc;
+
+  /* Call this function once now, and ignore the results. We do this to
+     "clear" the error state on the socket so that we can later read it
+     reliably. This is reported necessary on the MPE/iX operating system. */
+  verifyconnect();
 
   /* now select() until we get connect or timeout */
   FD_ZERO(&fd);
