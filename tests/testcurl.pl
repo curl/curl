@@ -447,9 +447,10 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
   logit "build ares";
   chdir "ares";
 
-  if ($targetos ne '') {
+  if ($targetos && !$configurebuild) {
       open(F, "make -f Makefile.$targetos 2>&1 |") or die;
-  } else {
+  }
+  else {
       open(F, "make 2>&1 |") or die;
   }
   while (<F>) {
