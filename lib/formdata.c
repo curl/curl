@@ -127,36 +127,6 @@ Content-Disposition: form-data; name="FILECONTENT"
    extensions. */
 #define HTTPPOST_CONTENTTYPE_DEFAULT "application/octet-stream"
 
-/* This is a silly duplicate of the function in main.c to enable this source
-   to compile stand-alone for better debugging */
-static void GetStr(char **string,
-		   const char *value)
-{
-  if(*string)
-    free(*string);
-  *string = strdup(value);
-}
-
-/***************************************************************************
- *
- * FormParse()
- *	
- * Reads a 'name=value' paramter and builds the appropriate linked list.
- *
- * Specify files to upload with 'name=@filename'. Supports specified
- * given Content-Type of the files. Such as ';type=<content-type>'.
- *
- * You may specify more than one file for a single name (field). Specify
- * multiple files by writing it like:
- *
- * 'name=@filename,filename2,filename3'
- *
- * If you want content-types specified for each too, write them like:
- *
- * 'name=@filename;type=image/gif,filename2,filename3'
- *
- ***************************************************************************/
-
 #define FORM_FILE_SEPARATOR ','
 #define FORM_TYPE_SEPARATOR ';'
 
@@ -348,8 +318,7 @@ static int AllocAndCopy(char **buffer, size_t buffer_length)
  *
  * FormAdd()
  *	
- * Stores a 'name=value' formpost parameter and builds the appropriate
- * linked list.
+ * Stores a formpost parameter and builds the appropriate linked list.
  *
  * Has two principal functionalities: using files and byte arrays as
  * post parts. Byte arrays are either copied or just the pointer is stored
