@@ -516,6 +516,9 @@ sub singletest {
         $res /= 256;
     }
 
+    # remove the special FTP command file after each test!
+    unlink($FTPDCMD);
+
     my @err = getpart("verify", "errorcode");
     my $errorcode = $err[0];
 
