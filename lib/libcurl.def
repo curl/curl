@@ -48,3 +48,4 @@ EXPORTS
         curl_easy_strerror @ 40;
         curl_multi_strerror @ 41;
         curl_share_strerror @ 42;
+        curl_easy_reset @ 43;
