@@ -13,7 +13,7 @@ void curl_memdebug(char *logname);
 /* file descriptor manipulators */
 int curl_socket(int domain, int type, int protocol, int, char *);
 int curl_sclose(int sockfd, int, char *);
-int curl_accept(int s, struct sockaddr *addr, int *addrlen,
+int curl_accept(int s, struct sockaddr *addr, socklen_t *addrlen,
                 int line, char *source);
 
 /* FILE functions */

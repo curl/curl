@@ -120,7 +120,7 @@ int curl_socket(int domain, int type, int protocol, int line, char *source)
   return sockfd;
 }
 
-int curl_accept(int s, struct sockaddr *addr, int *addrlen,
+int curl_accept(int s, struct sockaddr *addr, socklen_t *addrlen,
                 int line, char *source)
 {
   int sockfd=(accept)(s, addr, addrlen);
