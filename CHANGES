@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (17 November)
+- Maciej W. Rozycki made the script use a cache variable for the writable argv
+  test. This way, the default can be overridden better (for cross-compiles
+  etc)
+
 Daniel (15 November)
 - Mathias Axelsson found out libcurl sometimes freed the server certificate
   twice, leading to crashes!
