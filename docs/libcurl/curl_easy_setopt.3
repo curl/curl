@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "21 Jan 2004" "libcurl 7.11.0" "libcurl Manual"
+.TH curl_easy_setopt 3 "22 Jan 2004" "libcurl 7.11.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -646,7 +646,8 @@ Pass a long as parameter. It contains the offset in number of bytes that you
 want the transfer to start from.
 .IP CURLOPT_RESUME_FROM_LARGE
 Pass an off_t as parameter. It contains the offset in number of bytes that you
-want the transfer to start from. (Added in 7.11.0)
+want the transfer to start from. This does not yet support large files on
+Windows. (Added in 7.11.0)
 .IP CURLOPT_CUSTOMREQUEST
 Pass a pointer to a zero terminated string as parameter. It will be user
 instead of GET or HEAD when doing a HTTP request, or instead of LIST or NLST
@@ -678,7 +679,8 @@ as a long. See also \fICURLOPT_INFILESIZE_LARGE\fP.
 .IP CURLOPT_INFILESIZE_LARGE
 When uploading a file to a remote site, this option should be used to tell
 libcurl what the expected size of the infile is.  This value should be passed
-as an off_t.  (Added in 7.11.0)
+as an off_t. This does not yet support large files on Windows. (Added in
+7.11.0)
 .IP CURLOPT_UPLOAD
 A non-zero parameter tells the library to prepare for an upload. The
 \fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE_LARGE\fP are also interesting
@@ -695,7 +697,7 @@ this given limit. This concerns both FTP and HTTP transfers.
 Pass an off_t as parameter. This allows you to specify the maximum size (in
 bytes) of a file to download. If the file requested is larger than this value,
 the transfer will not start and CURLE_FILESIZE_EXCEEDED will be returned.
-(Added in 7.11.0)
+This does not yet support large files on Windows. (Added in 7.11.0)
 
 NOTE: The file size is not always known prior to download, and for such files
 this option has no effect even if the file transfer ends up being larger than
