@@ -90,11 +90,14 @@
 #include "../lib/memdebug.h"
 #endif
 
-#define DEBUG_CONFIG
+#define DEFAULT_MAXREDIRS  50L
 
 #ifndef __cplusplus        /* (rabe) */
 typedef char bool;
 #endif                     /* (rabe) */
+
+#define CURL_PROGRESS_STATS 0 /* default progress display */
+#define CURL_PROGRESS_BAR   1
 
 typedef enum {
   HTTPREQ_UNSPEC,
@@ -291,6 +294,7 @@ static void help(void)
        " -y/--speed-time    Time needed to trig speed-limit abort. Defaults to 30\n"
        " -Y/--speed-limit   Stop transfer if below speed-limit for 'speed-time' secs\n"
        " -z/--time-cond <time> Includes a time condition to the server (H)\n"
+       " -Z/--max-redirs <num> Set maximum number of redirections allowed (H)\n"
        " -2/--sslv2         Force usage of SSLv2 (H)\n"
        " -3/--sslv3         Force usage of SSLv3 (H)\n"
        " -#/--progress-bar  Display transfer progress as a progress bar\n"
@@ -315,6 +319,7 @@ struct Configurable {
   long postfieldsize;
   char *referer;
   long timeout;
+  long maxredirs;
   char *outfile;
   char *headerfile;
   char remotefile;
@@ -529,6 +534,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"Y", "speed-limit",  TRUE},
     {"y", "speed-time", TRUE},
     {"z", "time-cond",   TRUE},
+    {"Z", "max-redirs",   TRUE},
     {"#", "progress-bar",FALSE},
   };
 
@@ -601,40 +607,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       *usedarg = TRUE; /* mark it as used */
 
     switch(letter) {
-    case 'z': /* time condition coming up */
-      switch(*nextarg) {
-      case '+':
-        nextarg++;
-      default:
-        /* If-Modified-Since: (section 14.28 in RFC2068) */
-        config->timecond = TIMECOND_IFMODSINCE;
-        break;
-      case '-':
-        /* If-Unmodified-Since:  (section 14.24 in RFC2068) */
-        config->timecond = TIMECOND_IFUNMODSINCE;
-        nextarg++;
-        break;
-      case '=':
-        /* Last-Modified:  (section 14.29 in RFC2068) */
-        config->timecond = TIMECOND_LASTMOD;
-        nextarg++;
-        break;
-      }
-      now=time(NULL);
-      config->condtime=curl_getdate(nextarg, &now);
-      if(-1 == config->condtime) {
-        /* now let's see if it is a file name to get the time from instead! */
-        struct stat statbuf;
-        if(-1 == stat(nextarg, &statbuf)) {
-          /* failed, remove time condition */
-          config->timecond = TIMECOND_NONE;
-        }
-        else {
-          /* pull the time out from the file */
-          config->condtime = statbuf.st_mtime;
-        }
-      }
-      break;
     case '9': /* there is no short letter for this */
       /* LF -> CRLF conversinon? */
       config->crlf = TRUE;
@@ -951,6 +923,44 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       config->low_speed_limit = atoi(nextarg);
       if(!config->low_speed_time)
 	config->low_speed_time=30;
+      break;
+    case 'z': /* time condition coming up */
+      switch(*nextarg) {
+      case '+':
+        nextarg++;
+      default:
+        /* If-Modified-Since: (section 14.28 in RFC2068) */
+        config->timecond = TIMECOND_IFMODSINCE;
+        break;
+      case '-':
+        /* If-Unmodified-Since:  (section 14.24 in RFC2068) */
+        config->timecond = TIMECOND_IFUNMODSINCE;
+        nextarg++;
+        break;
+      case '=':
+        /* Last-Modified:  (section 14.29 in RFC2068) */
+        config->timecond = TIMECOND_LASTMOD;
+        nextarg++;
+        break;
+      }
+      now=time(NULL);
+      config->condtime=curl_getdate(nextarg, &now);
+      if(-1 == config->condtime) {
+        /* now let's see if it is a file name to get the time from instead! */
+        struct stat statbuf;
+        if(-1 == stat(nextarg, &statbuf)) {
+          /* failed, remove time condition */
+          config->timecond = TIMECOND_NONE;
+        }
+        else {
+          /* pull the time out from the file */
+          config->condtime = statbuf.st_mtime;
+        }
+      }
+      break;
+    case 'Z':
+      /* specified max no of redirects (http(s)) */
+      config->maxredirs = atoi(nextarg);
       break;
 
     default: /* unknown flag */
@@ -1675,6 +1685,13 @@ operate(struct Configurable *config, int argc, char *argv[])
         /* new in 7.5 */
         curl_easy_setopt(curl, CURLOPT_FILETIME, TRUE);
       }
+      
+      /* 7.5 news: */
+      if (config->maxredirs) 
+        curl_easy_setopt(curl, CURLOPT_MAXREDIRS, config->maxredirs); 
+      else 
+        curl_easy_setopt(curl, CURLOPT_MAXREDIRS, DEFAULT_MAXREDIRS); 
+ 
 
       curl_easy_setopt(curl, CURLOPT_CRLF, config->crlf);
       curl_easy_setopt(curl, CURLOPT_QUOTE, config->quote);
