@@ -1,5 +1,13 @@
   Changelog for the c-ares project
 
+* August 29
+
+- Gisle Vanem fixed the MSVC build files.
+
+* August 20
+
+- Gisle Vanem made c-ares build and work with his Watt-32 TCP/IP stack.
+
 * August 13
 
 - Harshal Pradhan made a minor syntax change in ares_init.c to make it build
