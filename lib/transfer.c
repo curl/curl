@@ -949,7 +949,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
       int i, si;
       ssize_t bytes_written;
-      bool writedone=FALSE;
+      bool writedone=TRUE;
 
       if ((k->bytecount == 0) && (k->writebytecount == 0))
         Curl_pgrsTime(data, TIMER_STARTTRANSFER);
