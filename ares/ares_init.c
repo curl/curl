@@ -567,6 +567,7 @@ DhcpNameServer
     fclose(fp);
 
     if (!channel->lookups) {
+      /* Many systems (Solaris, Linux, BSD's) use nsswitch.conf */
       fp = fopen("/etc/nsswitch.conf", "r");
       if (fp) {
         while ((status = ares__read_line(fp, &line, &linesize)) == ARES_SUCCESS)
@@ -577,13 +578,28 @@ DhcpNameServer
         fclose(fp);
       }
     }
+
     if (!channel->lookups) {
+      /* Linux / GNU libc 2.x and possibly others have host.conf */
       fp = fopen("/etc/host.conf", "r");
       if (fp) {
         while ((status = ares__read_line(fp, &line, &linesize)) == ARES_SUCCESS)
         {
           if ((p = try_config(line, "order")) && !channel->lookups)
             status = config_lookup(channel, p, "bind", "hosts");
+        }
+        fclose(fp);
+      }
+    }
+
+    if (!channel->lookups) {
+      /* Tru64 uses /etc/svc.conf */
+      fp = fopen("/etc/svc.conf", "r");
+      if (fp) {
+        while ((status = ares__read_line(fp, &line, &linesize)) == ARES_SUCCESS)
+        {
+          if ((p = try_config(line, "hosts=")) && !channel->lookups)
+            status = config_lookup(channel, p, "bind", "local");
         }
         fclose(fp);
       }
@@ -684,7 +700,7 @@ static int init_by_defaults(ares_channel channel)
 
   if (!channel->lookups)
     {
-      channel->lookups = strdup("bf");
+      channel->lookups = strdup("fb");
       if (!channel->lookups)
 	return ARES_ENOMEM;
     }

@@ -1,11 +1,20 @@
   Changelog for the c-ares project
 
+* September 29
+
+- Henrik Stoerner fix: got a report that Tru64 Unix (the unix from Digital
+  when they made Alpha's) uses /etc/svc.conf for the purpose fixed below for
+  other OSes. He made c-ares check for and understand it if present.
+
+- Now c-ares will use local host name lookup _before_ DNS resolving by default
+  if nothing else is told.
+
 * September 26
 
-- Henrik Stoerner: found out that C-ARES does not look at the /etc/host.conf
+- Henrik Stoerner: found out that c-ares does not look at the /etc/host.conf
   file to determine the sequence in which to search /etc/hosts and DNS.  So on
   systems where this order is defined by /etc/host.conf instead of a "lookup"
-  entry in /etc/resolv.conf, C-ARES will always default to looking in DNS
+  entry in /etc/resolv.conf, c-ares will always default to looking in DNS
   first, and /etc/hosts second.
 
   c-ares now looks at
