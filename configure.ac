@@ -494,15 +494,20 @@ AC_ARG_WITH(spnego,
 )
 AC_MSG_CHECKING([if SPNEGO support is requested])
 if test x"$want_spnego" = xyes; then
- 
-  if test -z "$SPNEGO_LIB_DIR"; then
-     LDFLAGS="$LDFLAGS -L$SPNEGO_ROOT $(wl)-R$SPNEGO_ROOT -lfbopenssl"
+
+  if test X"$SPNEGO_ROOT" = Xyes; then
+     AC_MSG_ERROR([FBOpenSSL libs and/or directories were not found where specified!])
+     AC_MSG_RESULT(no)
   else
-     LDFLAGS="$LDFLAGS $SPNEGO_LIB_DIR"
-  fi
+     if test -z "$SPNEGO_LIB_DIR"; then
+        LDFLAGS="$LDFLAGS -L$SPNEGO_ROOT ${wl}-R$SPNEGO_ROOT -lfbopenssl"
+     else
+        LDFLAGS="$LDFLAGS $SPNEGO_LIB_DIR"
+     fi
  
-  AC_DEFINE(HAVE_SPNEGO, 1, [Define this if you have the SPNEGO library fbopenssl])
-  AC_MSG_RESULT(yes)
+     AC_MSG_RESULT(yes)
+     AC_DEFINE(HAVE_SPNEGO, 1, [Define this if you have the SPNEGO library fbopenssl])
+  fi
 else
   AC_MSG_RESULT(no)
 fi
