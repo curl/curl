@@ -2233,6 +2233,12 @@ CURLcode Curl_done(struct connectdata *conn)
     conn->bits.rangestringalloc = FALSE;
   }
 
+  /* Cleanup possible redirect junk */
+  if(conn->newurl) {
+    free(conn->newurl);
+    conn->newurl = NULL;
+  }
+ 
   /* this calls the protocol-specific function pointer previously set */
   if(conn->curl_done)
     result = conn->curl_done(conn);

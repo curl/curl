@@ -910,6 +910,7 @@ CURLcode Curl_perform(CURL *curl)
       
         /* TBD: set the URL with curl_setopt() */
         data->url = newurl;
+        newurl = NULL; /* don't free! */
 
         data->bits.urlstringalloc = TRUE; /* the URL is allocated */
 
