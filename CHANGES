@@ -6,6 +6,23 @@
 
                                History of Changes
 
+Daniel (3 December 2001)
+- Eric Lavigne reported two problems:
+
+  First one in the curl_strnequal() function. I think this problem is rather
+  macos 9 specific, as most platform provides a function to use instead of the
+  one provided by libcurl.
+
+  A second, more important, was in the way we take care of FTP responses. The
+  code would read a large chunk of data and search for the end-of-response
+  line within that chunk. When found, it would just skip the rest of the
+  data. However, when the network connections are special, or perhaps the
+  server is, we could actually get more than one response in that chunk of
+  data so that when the next invoke to this function was done, the response
+  had already been read and thrown away. Now, we cache the data not used in
+  one call, as it could be useful in the subsequent call. Test case 126 was
+  added and the test ftp server modified, to exercise this particular case.
+
 Version 7.9.2-pre8
 
 Daniel (2 December 2001)
