@@ -68,6 +68,8 @@ unlock: share   <Pigs in space>
 PERFORM
 lock:   dns     <Pigs in space>
 unlock: dns     <Pigs in space>
+lock:   dns     <Pigs in space>
+unlock: dns     <Pigs in space>
 lock:   cookie  <Pigs in space>
 unlock: cookie  <Pigs in space>
 lock:   cookie  <Pigs in space>

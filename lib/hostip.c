@@ -307,6 +307,9 @@ int Curl_resolv(struct connectdata *conn,
 
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->hostcache, entry_id, entry_len+1);
+  
+  if(data->share)
+    Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
   /* free the allocated entry_id again */
   free(entry_id);
@@ -332,12 +335,18 @@ int Curl_resolv(struct connectdata *conn,
       }
     }
     else
+    {
+      if(data->share)
+        Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
+
       /* we got a response, store it in the cache */
       dns = cache_resolv_response(data, addr, hostname, port);
+      
+      if(data->share)
+        Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
+    }
   }
 
-  if(data->share)
-    Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
   *entry = dns;
 
