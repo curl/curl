@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "9 January 2001" "Curl 7.6" "Curl Manual"
+.TH curl 1 "19 January 2001" "Curl 7.6" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -205,6 +205,12 @@ To read the file's content from stdin insted of a file, use - where the file
 name should've been. This goes for both @ and < constructs.
 
 This option can be used multiple times.
+.IP "-g/--globoff"
+This option switches off the "URL globbing parser". When you set this option,
+you can specify URLs that contain the letters {}[] without having them being
+interpreted by curl itself. Note that these letters are not normal legal URL
+contents but they should be encoded according to the URI standard. (Option
+added in curl 7.6)
 .IP "-h/--help"
 Usage help.
 .IP "-H/--header <header>"
