@@ -1,0 +1,75 @@
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * $Id$
+.\" **************************************************************************
+.\"
+.TH runtests.pl 1 "17 Mar 2005" "Curl 7.13.2" "runtests"
+.SH NAME
+runtests.pl \- run one or more test cases
+.SH SYNOPSIS
+.B runtests.pl [options] [test number]
+.SH DESCRIPTION
+\fIruntests.pl\fP runs one, several or all the existing test cases in curl's
+test suite. It is often called from the root Makefile of the curl package with
+\&'make test'.
+.SH "TEST NUMBER"
+If no test case number is given, all existing tests that the script can find
+will be considered for running. You can specify single test cases to run,
+space-separated, like "1 3 5 7 11", and you can specify a range like "45 to
+67".
+.SH OPTIONS
+.IP "-v"
+not yet written
+.IP "-c"
+not yet written
+.IP "-d"
+not yet written
+.IP "-g"
+not yet written
+.IP "-s"
+not yet written
+.IP "-n"
+not yet written
+.IP "-t"
+not yet written
+.IP "-a"
+not yet written
+.IP "-p"
+not yet written
+.IP "-l"
+not yet written
+.IP "-k"
+not yet written
+.IP "-h"
+not yet written
+.SH "RUNNING TESTS"
+Many tests have conditions that must be met before the test case can run
+fine. They could depend on built-in features in libcurl or features present in
+the operating system or even in 3rd party libraries that curl may or may not
+use.
+
+The test script checks this by itself, why it is safe to attempt to run all
+tests. They who cannot be run due to failed requirements, while simply be
+skipped and you'll get a report about it when all test cases have completed.
+.SH "WRITING TESTS"
+The simples way to write test cases is to start with a similar existing test,
+save it with a new number and then adjust it to fit. There's an attempt to
+document the test case file format in the tests/FILEFORMAT.
