@@ -54,6 +54,14 @@
 #define DES_set_odd_parity des_set_odd_parity
 #define DES_set_key des_set_key
 #define DES_ecb_encrypt des_ecb_encrypt
+
+/* This is how things were done in the old days */#define DESKEY(x) x
+#define DESKEY(x) x
+#define DESKEYARG(x) x
+#else
+/* Modern version */
+#define DESKEYARG(x) *x
+#define DESKEY(x) &x
 #endif
 
 /* The last #include file should be: */
@@ -144,7 +152,7 @@ requests show that 0x18-0x1f seems to be the nonce anyway.
  * key schedule ks is also set.
  */
 static void setup_des_key(unsigned char *key_56,
-                          DES_key_schedule *ks)
+                          DES_key_schedule DESKEYARG(ks))
 {
   DES_cblock key;
 
@@ -170,19 +178,19 @@ static void calc_resp(unsigned char *keys,
                       unsigned char *plaintext,
                       unsigned char *results)
 {
-  des_key_schedule ks;
+  DES_key_schedule ks;
 
-  setup_des_key(keys, &ks);
-  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) results, &ks,
-                  DES_ENCRYPT);
+  setup_des_key(keys, DESKEY(ks));
+  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) results,
+                  DESKEY(ks), DES_ENCRYPT);
 
-  setup_des_key(keys+7, &ks);
-  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results+8), &ks,
-                  DES_ENCRYPT);
+  setup_des_key(keys+7, DESKEY(ks));
+  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results+8),
+                  DESKEY(ks), DES_ENCRYPT);
 
-  setup_des_key(keys+14, &ks);
-  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results+16), &ks,
-                  DES_ENCRYPT);
+  setup_des_key(keys+14, DESKEY(ks));
+  DES_ecb_encrypt((DES_cblock*) plaintext, (DES_cblock*) (results+16),
+                  DESKEY(ks), DES_ENCRYPT);
 }
 
 /*
@@ -215,12 +223,12 @@ static void mkhash(char *password,
 
     DES_key_schedule ks;
 
-    setup_des_key(pw, &ks);
-    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer, &ks,
+    setup_des_key(pw, DESKEY(ks));
+    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer, DESKEY(ks),
                     DES_ENCRYPT);
   
-    setup_des_key(pw+7, &ks);
-    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer+8, &ks,
+    setup_des_key(pw+7, DESKEY(ks));
+    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer+8, DESKEY(ks),
                     DES_ENCRYPT);
 
     memset(lmbuffer+16, 0, 5);
