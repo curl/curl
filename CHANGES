@@ -6,6 +6,10 @@
 
                                History of Changes
 
+Daniel (4 December 2001)
+- Incorporated more macos fixes and added four specific files in a new
+  subdirectory below src.
+
 Daniel (3 December 2001)
 - Eric Lavigne reported two problems:
 
