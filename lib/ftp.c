@@ -1970,11 +1970,37 @@ CURLcode ftp_perform(struct connectdata *conn,
         return result;
   }
 
-  /* Requested time of file? */
-  if(data->set.get_filetime && ftp->file) {
+  /* Requested time of file or time-depended transfer? */
+  if((data->set.get_filetime || data->set.timecondition) &&
+     ftp->file) {
     result = ftp_getfiletime(conn, ftp->file);
     if(result)
       return result;
+
+    if(data->set.timecondition) {
+      if((data->info.filetime > 0) && (data->set.timevalue > 0)) {
+        switch(data->set.timecondition) {
+        case TIMECOND_IFMODSINCE:
+        default:
+          if(data->info.filetime < data->set.timevalue) {
+            infof(data, "The requested document is not new enough\n");
+            ftp->no_transfer = TRUE; /* mark this to not transfer data */
+            return CURLE_OK;
+          }
+          break;
+        case TIMECOND_IFUNMODSINCE:
+          if(data->info.filetime > data->set.timevalue) {
+            infof(data, "The requested document is not old enough\n");
+            ftp->no_transfer = TRUE; /* mark this to not transfer data */
+            return CURLE_OK;
+          }
+          break;
+        } /* switch */
+      }
+      else {
+        infof(data, "Skipping time comparison\n");
+      }
+    }
   }
 
   /* If we have selected NOBODY and HEADER, it means that we only want file
@@ -2017,7 +2043,7 @@ CURLcode ftp_perform(struct connectdata *conn,
       tm = localtime((unsigned long *)&data->info.filetime);
 #endif
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-      strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S %Z\r\n",
+      strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S GMT\r\n",
                tm);
       result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
       if(result)
@@ -2063,7 +2089,7 @@ CURLcode ftp_perform(struct connectdata *conn,
 CURLcode Curl_ftp(struct connectdata *conn)
 {
   CURLcode retcode;
-  bool connected;
+  bool connected=0;
 
   struct SessionHandle *data = conn->data;
   struct FTP *ftp;
@@ -2116,9 +2142,16 @@ CURLcode Curl_ftp(struct connectdata *conn)
   if(CURLE_OK == retcode) {
     if(connected)
       retcode = Curl_ftp_nextconnect(conn);
-    else
-      /* since we didn't connect now, we want do_more to get called */
-      conn->bits.do_more = TRUE;
+    else {
+      if(ftp->no_transfer) {
+        /* no data to transfer */
+        retcode=Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);        
+      }
+      else {
+        /* since we didn't connect now, we want do_more to get called */
+        conn->bits.do_more = TRUE;
+      }
+    }
   }
 
   return retcode;
