@@ -8,12 +8,20 @@
 
 
 Daniel (10 December)
+- Gisle Vanem reported that the dict support was broken. I broke it during my
+  ftps-changes overhaul. I've now added a 'curlassert' function that can be
+  used to verify expressions, to prevent future errors of the same
+  kind. They're only present in debug-builds.
+
 - Diego Casorran made curl and libcurl possible to build natively (no more
   need for the ixemul library) on AmigaOS.
 
 - Dominick Meglio made configure --enable-ares support a given path to the
   installed ares lib, instead of always using it in the curl source tree.
   This also fixed the curl-config --libs output.
+
+- Eric S. Raymond patched a very minor man page format error in
+  libcurl-errors.3
 
 Daniel (8 December)
 - Fixed the flaw that made -lz appear twice on the link command line.
