@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "30 Nov 2001" "libcurl 7.9.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "10 Dec 2001" "libcurl 7.9.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -77,9 +77,8 @@ function gets called by libcurl as soon as it needs to read data in order to
 send it to the peer. The data area pointed at by the pointer \fIptr\fP may be
 filled with at most \fIsize\fP multiplied with \fInmemb\fP number of
 bytes. Your function must return the actual number of bytes that you stored in
-that memory area. Returning -1 will signal an error to the library and cause
-it to abort the current transfer immediately (with a \fICURLE_READ_ERROR\fP
-return code).
+that memory area. Returning 0 will signal end-of-file to the library and cause
+it to stop the current transfer.
 .TP
 .B CURLOPT_INFILESIZE
 When uploading a file to a remote site, this option should be used to tell
