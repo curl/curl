@@ -1,0 +1,3 @@
+ftp://%HOSTIP:%FTPPORT/106 -Q "-DELE file"
+
+

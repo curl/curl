@@ -1,0 +1,1 @@
+ftp download with post-quote delete operation
