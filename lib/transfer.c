@@ -747,6 +747,7 @@ CURLcode Curl_perform(CURL *curl)
   struct UrlData *data = (struct UrlData *)curl;
   struct connectdata *conn=NULL;
   bool port=TRUE; /* allow data->use_port to set port to use */
+  char *newurl = NULL; /* possibly a new URL to follow to! */
 
   data->followlocation=0; /* reset the location-follow counter */
   data->bits.this_is_a_follow = FALSE; /* reset this */
@@ -760,11 +761,23 @@ CURLcode Curl_perform(CURL *curl)
       res = Curl_do(conn);
       if(res == CURLE_OK) {
         res = Transfer(conn); /* now fetch that URL please */
-        if(res == CURLE_OK)
+        if(res == CURLE_OK) {
+          /*
+           * We must duplicate the new URL here as the connection data
+           * may be free()ed in the Curl_done() function.
+           */
+          newurl = conn->newurl?strdup(conn->newurl):NULL;
+
           res = Curl_done(conn);
+        }
       }
 
-      if((res == CURLE_OK) && conn->newurl) {
+      /*
+       * Important: 'conn' cannot be used here, since it may have been closed
+       * in 'Curl_done' or other functions.
+       */
+
+      if((res == CURLE_OK) && newurl) {
         /* Location: redirect
  
            This is assumed to happen for HTTP(S) only!
@@ -801,7 +814,7 @@ CURLcode Curl_perform(CURL *curl)
           data->bits.http_set_referer = TRUE; /* might have been false */
         }
 
-        if(2 != sscanf(conn->newurl, "%15[^:]://%c", prot, &letter)) {
+        if(2 != sscanf(newurl, "%15[^:]://%c", prot, &letter)) {
           /***
            *DANG* this is an RFC 2068 violation. The URL is supposed
            to be absolute and this doesn't seem to be that!
@@ -828,7 +841,7 @@ CURLcode Curl_perform(CURL *curl)
           else
             protsep+=2; /* pass the slashes */
 
-          if('/' != conn->newurl[0]) {
+          if('/' != newurl[0]) {
             /* First we need to find out if there's a ?-letter in the URL,
                and cut it and the right-side of that off */
             pathsep = strrchr(protsep, '?');
@@ -851,15 +864,15 @@ CURLcode Curl_perform(CURL *curl)
 
           newest=(char *)malloc( strlen(url_clone) +
                                  1 + /* possible slash */
-                                 strlen(conn->newurl) + 1/* zero byte */);
+                                 strlen(newurl) + 1/* zero byte */);
 
           if(!newest)
             return CURLE_OUT_OF_MEMORY;
-          sprintf(newest, "%s%s%s", url_clone, ('/' == conn->newurl[0])?"":"/",
-                  conn->newurl);
-          free(conn->newurl);
+          sprintf(newest, "%s%s%s", url_clone, ('/' == newurl[0])?"":"/",
+                  newurl);
+          free(newurl);
           free(url_clone);
-          conn->newurl = newest;
+          newurl = newest;
         }
         else {
           /* This is an absolute URL, don't use the custom port number */
@@ -870,8 +883,8 @@ CURLcode Curl_perform(CURL *curl)
           free(data->url);
       
         /* TBD: set the URL with curl_setopt() */
-        data->url = conn->newurl;
-        conn->newurl = NULL; /* don't show! */
+        data->url = newurl;
+
         data->bits.urlstringalloc = TRUE; /* the URL is allocated */
 
         infof(data, "Follows Location: to new URL: '%s'\n", data->url);
@@ -940,10 +953,8 @@ CURLcode Curl_perform(CURL *curl)
 
   } while(1); /* loop if Location: */
 
-  if((CURLE_OK == res) && conn->newurl) {
-    free(conn->newurl);
-    conn->newurl = NULL;
-  }
+  if(newurl)
+    free(newurl);
 
   /* make sure the alarm is switched off! */
   if(data->timeout || data->connecttimeout)
