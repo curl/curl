@@ -1,5 +1,5 @@
 %define name curl
-%define version 6.0
+%define version 6.5.2
 %define release 1
 %define prefix /usr/local
 
@@ -35,11 +35,12 @@ rm -rf %{builddir}
 
 %build
 export CFLAGS=$RPM_OPT_FLAGS 
-./configure --prefix=$RPM_BUILD_ROOT%{prefix}
+./configure --prefix=$RPM_BUILD_ROOT%{prefix} --without-ssl
 make 
 
 %install
 make install-strip
+install -m 0644 curl.1 $RPM_BUILD_ROOT%{prefix}/man/man1
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -48,5 +49,6 @@ rm -rf %{builddir}
 %files
 %defattr(-,root,root)
 %attr(0755,root,root) %{prefix}/bin/curl
-%doc curl.1 README* CHANGES CONTRIBUTE FAQ FILES INSTALL LEGAL MPL-1.0.txt RESOURCES TODO perl/
+%attr(0644,root,root) %{prefix}/man/man1/curl.1
+%doc BUGS CHANGES CONTRIBUTE FAQ FEATURES FILES INSTALL LEGAL MPL-1.0.txt README* RESOURCES TODO
 
