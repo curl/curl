@@ -174,7 +174,7 @@ typedef enum {
   CURLE_HTTP_RANGE_ERROR,        /* 33 - RANGE "command" didn't work */
   CURLE_HTTP_POST_ERROR,         /* 34 */
   CURLE_SSL_CONNECT_ERROR,       /* 35 - wrong when connecting with SSL */
-  CURLE_FTP_BAD_DOWNLOAD_RESUME, /* 36 - couldn't resume download */
+  CURLE_BAD_DOWNLOAD_RESUME,     /* 36 - couldn't resume download */
   CURLE_FILE_COULDNT_READ_FILE,  /* 37 */
   CURLE_LDAP_CANNOT_BIND,        /* 38 */
   CURLE_LDAP_SEARCH_FAILED,      /* 39 */
@@ -218,6 +218,7 @@ typedef enum {
 
 /* This is just to make older programs not break: */
 #define CURLE_FTP_PARTIAL_FILE CURLE_PARTIAL_FILE
+#define CURLE_FTP_BAD_DOWNLOAD_RESUME CURLE_BAD_DOWNLOAD_RESUME
 
 #define CURL_ERROR_SIZE 256
 
