@@ -11,7 +11,7 @@
 ifndef NDKBASE
 NDKBASE	= /novell
 endif
-INSTDIR	= s:/libcurl
+INSTDIR	= ..\curl-$(LIBCURL_VERSION_STR)-bin-nw
 
 # Edit the path below to point to the base of your Zlib sources.
 #ZLIB_PATH = ../../zlib-1.2.1
@@ -44,7 +44,7 @@ else
 	OBJDIR	= debug
 endif
 
-# Include the version info retrieved from jk_version.h
+# Include the version info retrieved from curlver.h
 -include $(OBJDIR)/version.inc
 
 # The following line defines your compiler.
@@ -53,8 +53,8 @@ ifdef METROWERKS
 else
 	CC = gcc
 endif
+CP	= cp -afv
 # RM	= rm -f
-CP	= cp -fv
 # if you want to mark the target as MTSAFE you will need a tool for
 # generating the xdc data for the linker; here's a minimal tool:
 # http://www.gknw.de/development/prgtools/mkxdc.zip
@@ -63,29 +63,28 @@ MPKXDC	= mkxdc
 # Global flags for all compilers
 CFLAGS	= $(OPT) -D$(DB) -DNETWARE -nostdinc
 CFLAGS	+= -DUSE_MANUAL
-#CFLAGS	+= -DHAVE_LIBZ
 
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
 LDFLAGS	= -nostdlib $(PRELUDE) $(OBJDIR)/*.o -o $(OBJDIR)/$(TARGET).nlm -commandfile
-CFLAGS	+= -gccinc -inline off -opt nointrinsics
+CFLAGS	+= -gccinc -inline off -opt nointrinsics -proc 586
 CFLAGS	+= -relax_pointers
 #CFLAGS	+= -w on
 ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.o
-	CFLAGS += -align 4 -inst mmx -proc 686
+	CFLAGS += -align 4
 	CFLAGS += -D_POSIX_SOURCE
 #	CFLAGS += -D__ANSIC__
 else
 	PRELUDE = "$(METROWERKS)/Novell Support/libraries/runtime/prelude.obj"
 #	CFLAGS += -include "$(METROWERKS)/Novell Support/headers/nlm_prefix.h"
-	CFLAGS += -align 1 -proc 586
+	CFLAGS += -align 1
 endif
 else
 LD	= nlmconv
 LDFLAGS	= -T
 CFLAGS	+= -fno-builtin -fpack-struct -fpcc-struct-return
-CFLAGS	+= -Wall #-Wno-main # -pedantic
+CFLAGS	+= -Wall # -pedantic
 ifeq ($(LIBARCH),LIBC)
 	PRELUDE = $(SDK_LIBC)/imports/libcpre.gcc.o
 	CFLAGS += -D_POSIX_SOURCE
@@ -148,8 +147,8 @@ vpath %.c ../lib
 all: $(OBJDIR) $(OBJDIR)/version.inc $(OBJDIR)/$(TARGET).nlm 
 
 $(OBJDIR)/%.o: %.c
-	@echo Compiling $<
-	@$(CC) $(CFLAGS) -c $< -o $@
+#	@echo Compiling $<
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)/version.inc: $(CURL_INC)/curl/curlver.h $(OBJDIR)
 	@echo Creating $@
@@ -158,14 +157,15 @@ $(OBJDIR)/version.inc: $(CURL_INC)/curl/curlver.h $(OBJDIR)
 dist: all
 	-$(RM) $(OBJDIR)/*.o $(OBJDIR)/$(TARGET).map $(OBJDIR)/$(TARGET).ncv
 	-$(RM) $(OBJDIR)/$(TARGET).def $(OBJDIR)/version.inc $(XDCDATA)
-#	-$(CP) ../changes.txt $(OBJDIR)/
 
-install: all
-	@[ -d $(INSTDIR) ] || mkdir $(INSTDIR)
+install: $(INSTDIR) all
 	@$(CP) $(TARGET).nlm $(INSTDIR)
 
 clean:
 	-$(RM) -r $(OBJDIR)
+
+$(INSTDIR):
+	@mkdir $(INSTDIR)
 
 $(OBJDIR):
 	@mkdir $(OBJDIR)
