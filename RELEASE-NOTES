@@ -1,74 +1,24 @@
-Curl and libcurl 7.11.2. A bugfix release.
+Curl and libcurl 7.12.0.
 
- Public curl release number:               80
- Releases counted from the very beginning: 107
+ Public curl release number:               81
+ Releases counted from the very beginning: 108
  Available command line options:           94
  Available curl_easy_setopt() options:     113
 
 This release includes the following changes:
 
- o removed maximum user+password+hostname size limit
- o removed maximum dir depth limit for FTP
- o the ares build now requires c-ares 1.2.0 or later
- o --tcp-nodelay and CURLOPT_TCP_NODELAY were added
- o curl/curlver.h contains the libcurl version info now
+ o 
 
 This release includes the following bugfixes:
 
- o configure --disable-manual works better
- o removed a memory leak when doing a windows threaded resolve and it failed
- o --proxy-ntlm now checks if libcurl supports NTLM before using it
- o minor --fail with authentication bugfix
- o CURLOPT_IPRESOLVE set to CURL_IPRESOLVE_V6 will now cause a returned error
-   if the host only can resolve ipv4 addresses
- o curl -4/-6 now actually sets the requested option in libcurl
- o multi interface on Windows without ares works again
- o improved resolution for the CURLINFO_*_TIME info variables
- o getting only a 100 Continue response and nothing else, when talking HTTP,
-   is now treated as an error by libcurl
- o fixed minor memory leak in libcurl for Windows when statically linked
- o POST/PUT using Digest/NTLM/Negotiate (including anyauth) now work better
- o --limit-rate with high speed rates is a lot more accurate now, and supports
-   limiting to speeds >2GB/sec on systems with Large File support.
- o curl_strnqual.3 "refer-to" man page fix
- o fixed a minor very old progress meter final update bug
- o added checks for a working NI_WITHSCOPEID before that is used
- o fixed a flaw that prevented ares name resolve timeouts to occur
- o getting user name from http_proxy env variable works now
- o fixed too early name resolve timeouts with ares
- o HTTP Digest "re-negotiation" works now
- o CURLOPT_FAILONERROR (-f/--fail) works with all kinds of authentication
- o better thread-safety thanks to the internal strerror() replacement
- o better thread-safety on AIX thanks to better function detection
- o minor ipv6 build fix for windows
- o the test suite runs fine with mingw-built curl
- o the postit2.c example works now
- o better error message when --interface fails on windows
- o the progress meter now displays very long times better
- o CURLINFO_CONTENT_LENGTH_DOWNLOAD with CURLOPT_NOBODY set TRUE now works
- o passwords longer than 14 letters work with NTLM
- o 'make netware' in the root dir works now
- o builds fine on VMS again and even nicer than before
+ o 
 
 Other curl-related news since the previous public release:
 
- o PycURL 7.11.1 was released: http://pycurl.sf.net/
- o CURLHandle 1.9 was released: http://curlhandle.sourceforge.net/
- o A curl module for the Q language was announced:
-   http://q-lang.sourceforge.net/
- o c-ares 1.2.0 was released: http://daniel.haxx.se/projects/c-ares/
- o New curl web mirrors:
-   Germany  http://curl.netmirror.org/
-   USA      http://curl.signal42.com/
-   Denmark  http://curl.cofman.dk/
+ o 
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Thomas Schwinge, Marty Kuhrt, Günter Knauf, Kevin Roth, Glen Nakamura, Gisle
- Vanem, Greg Hewgill, Joe Halpin, Tor Arntsen, Dirk Manske, Roy Shan, Mitz
- Wark, Andrés García, Robin Kay, Alan Pinstein, David Byron, Nathan
- O'Sullivan, Erwin Authried
- 
 
         Thanks! (and sorry if I forgot to mention someone)
