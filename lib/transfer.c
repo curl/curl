@@ -620,7 +620,7 @@ Transfer(struct connectdata *c_conn)
               }
               else if(data->cookies &&
                       strnequal("Set-Cookie:", p, 11)) {
-                Curl_cookie_add(data->cookies, TRUE, &p[12]);
+                Curl_cookie_add(data->cookies, TRUE, &p[12], conn->name);
               }
               else if(strnequal("Last-Modified:", p,
                                 strlen("Last-Modified:")) &&

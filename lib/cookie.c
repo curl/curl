@@ -104,7 +104,8 @@ Example set of cookies:
 struct Cookie *
 Curl_cookie_add(struct CookieInfo *c,
                 bool httpheader, /* TRUE if HTTP header-style line */
-                char *lineptr) /* first non-space of the line */
+                char *lineptr,   /* first non-space of the line */
+                char *domain)    /* default domain */
 {
   struct Cookie *clist;
   char what[MAX_COOKIE_LINE];
@@ -194,6 +195,10 @@ Curl_cookie_add(struct CookieInfo *c,
         ptr++;
       semiptr=strchr(ptr, ';'); /* now, find the next semicolon */
     } while(semiptr);
+
+    if(NULL == co->domain)
+      /* no domain given in the header line, set the default now */
+      co->domain=strdup(domain);
   }
   else {
     /* This line is NOT a HTTP header style line, we do offer support for
@@ -441,7 +446,7 @@ struct CookieInfo *Curl_cookie_init(char *file, struct CookieInfo *inc)
       while(*lineptr && isspace((int)*lineptr))
         lineptr++;
 
-      Curl_cookie_add(c, headerline, lineptr);
+      Curl_cookie_add(c, headerline, lineptr, NULL);
     }
     if(fromfile)
       fclose(fp);
@@ -632,13 +637,13 @@ int Curl_cookie_output(struct CookieInfo *c, char *dumphere)
               "%u\t" /* expires */
               "%s\t" /* name */
               "%s\n", /* value */
-              co->domain,
+              co->domain?co->domain:"unknown",
               co->field1==2?"TRUE":"FALSE",
-              co->path,
+              co->path?co->path:"/",
               co->secure?"TRUE":"FALSE",
               (unsigned int)co->expires,
               co->name,
-              co->value);
+              co->value?co->value:"");
 
       co=co->next;
     }
