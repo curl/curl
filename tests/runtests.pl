@@ -584,7 +584,7 @@ sub singletest {
     }
     else {
         if (!@validstdout) {
-            $out="--output $CURLOUT ";
+            $out=" --output $CURLOUT ";
         }
     }
 
