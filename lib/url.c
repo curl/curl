@@ -83,9 +83,6 @@
 #include <sys/select.h>
 #endif
 
-#ifndef HAVE_VPRINTF
-#error "We can't compile without vprintf() support!"
-#endif
 #ifndef HAVE_SELECT
 #error "We can't compile without select() support!"
 #endif
