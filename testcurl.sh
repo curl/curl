@@ -36,16 +36,28 @@ LANG="C"
 
 export LANG
 
+log() {
+    text=$1
+    if test -n "$text"; then
+      echo "testcurl: $text"
+    fi
+}
+
 die(){
-    echo "testcurl: ENDING HERE"
+    text=$1
+    log "$text"
+
     if test -n "$pwd/$build"; then
       # we have a build directory name, remove the dir
+      log "removing the $build dir"
       rm -rf "$pwd/$build"
     fi
-    if test -r "$pwd/build.log"; then
+    if test -r "$pwd/$buildlog"; then
       # we have a build log output file left, remove it
-      rm -rf "$pwd/build.log"
+      log "removing the $buildlog file"
+      rm -rf "$buildlog"
     fi
+    log "ENDING HERE" # last line logged!
     exit 1
 }
 
@@ -92,13 +104,13 @@ if [ "$fixed" -gt "0" ]; then
   echo "fixed='$fixed'" >> setup
 fi
 
-echo "testcurl: STARTING HERE"
-echo "testcurl: NAME = $name"
-echo "testcurl: EMAIL = $email"
-echo "testcurl: DESC = $desc"
-echo "testcurl: CONFOPTS = $confopts"
-echo "testcurl: version = $version"
-echo "testcurl: date = `date -u`"
+log "STARTING HERE" # first line logged
+log "NAME = $name"
+log "EMAIL = $email"
+log "DESC = $desc"
+log "CONFOPTS = $confopts"
+log "version = $version"
+log "date = `date -u`"
 
 # Make $pwd to become the path without newline. We'll use that in order to cut
 # off that path from all possible logs and error messages etc.
@@ -107,15 +119,15 @@ pwd=`echo $ipwd | sed -e 's/$//g'`
 
 if [ -d "$CURLDIR" ]; then
   if [ $CVS -eq 1 -a -d $CURLDIR/CVS ]; then
-    echo "testcurl: curl is verified to be a fine source dir"
+    log "curl is verified to be a fine source dir"
   elif [ $CVS -eq 0 -a -f $CURLDIR/testcurl.sh ]; then
-    echo "testcurl: curl is verified to be a fine daily source dir"
+    log "curl is verified to be a fine daily source dir"
   else
-    echo "testcurl: curl is not a daily source dir or checked out from CVS!"
-    die
+    die "curl is not a daily source dir or checked out from CVS!"
   fi
 fi
 build="build-$$"
+buildlog="buildlog-$$"
 
 # remove any previous left-overs
 rm -rf build-*
@@ -124,10 +136,9 @@ rm -rf build-*
 mkdir $build
 
 if [ -d $build ]; then
-  echo "testcurl: build dir $build was created fine"
+  log "build dir $build was created fine"
 else
-  echo "testcurl: failed to create dir $build"
-  die
+  die "failed to create dir $build"
 fi
 
 # get in the curl source tree root
@@ -135,11 +146,11 @@ cd $CURLDIR
 
 # Do the CVS thing, or not...
 if [ $CVS -eq 1 ]; then
-  echo "testcurl: update from CVS"
+  log "update from CVS"
 
   cvsup() {
     # update quietly to the latest CVS
-    echo "testcurl: run cvs up"
+    log "run cvs up"
     cvs -Q up -dP 2>&1
 
     cvsstat=$?
@@ -152,7 +163,7 @@ if [ $CVS -eq 1 ]; then
   att="0"
   while cvsup; do
     att=`expr $att + 1`
-    echo "testcurl: failed CVS update attempt number $att."
+    log "failed CVS update attempt number $att."
     if [ $att -gt 10 ]; then
       cvsstat="111"
       break # get out of the loop
@@ -160,11 +171,8 @@ if [ $CVS -eq 1 ]; then
     sleep 5
   done
   
-  echo "testcurl: cvs returned: $cvsstat"
-  
   if [ "$cvsstat" -ne "0" ]; then
-    echo "testcurl: failed to update from CVS, exiting"
-    die
+    die "failed to update from CVS ($cvsstat), exiting"
   fi
   
   # remove possible left-overs from the past
@@ -172,22 +180,20 @@ if [ $CVS -eq 1 ]; then
   rm -rf autom4te.cache
 
   # generate the build files
-  ./buildconf 2>&1 | tee build.log
+  ./buildconf 2>&1 | tee $buildlog
 
-  if { grep "^buildconf: OK" build.log >/dev/null 2>&1; } then
-     echo "testcurl: buildconf was successful"
+  if { grep "^buildconf: OK" $buildlog >/dev/null 2>&1; } then
+     log "buildconf was successful"
   else
-     echo "testcurl: buildconf was NOT successful"
-     die
+     die "buildconf was NOT successful"
   fi
 
 fi
 
 if [ -f configure ]; then
-  echo "testcurl: configure created"
+  log "configure created"
 else
-  echo "testcurl: no configure created"
-  die
+  die "no configure created"
 fi
 
 # change to build dir
@@ -197,50 +203,54 @@ cd "../$build"
 ../$CURLDIR/configure $confopts 2>&1
 
 if [ -f lib/Makefile ]; then
-  echo "testcurl: configure seems to have finished fine"
+  log "configure seems to have finished fine"
 else
-  echo "testcurl: configure didn't work"
-  die
+  die "configure didn't work"
 fi
 
-echo "testcurl: display lib/config.h"
+log "display lib/config.h"
 grep "^ *#" lib/config.h
 
 if { grep "define USE_ARES" lib/config.h; } then
-  echo "testcurl: setup to build ares"
+  log "setup to build ares"
 
-  echo "testcurl: build ares"
+  log "build ares"
   cd ares
   make 2>&1 | sed -e "s:$pwd::g"
-  echo "testcurl: ares is now built"
+
+  if [ -f libcares.a]; then
+    log "ares is now built successfully"
+  else
+    log "ares build failed"
+  fi
 
   # cd back to the curl build dir
   cd ..
 fi
 
-echo "testcurl: now run make"
+log "run make"
 make -i 2>&1 | sed -e "s:$pwd::g"
 
 if [ -f src/curl ]; then
-  echo "testcurl: src/curl was created fine"
+  log "src/curl was created fine"
 else
-  echo "testcurl: src/curl was not created"
-  die
+  die "src/curl was not created"
 fi
 
-echo "testcurl: now run make test-full"
-make test-full 2>&1 | sed -e "s:$pwd::g" | tee build.log
+log "run make test-full"
+make test-full 2>&1 | sed -e "s:$pwd::g" | tee $buildlog
 
-if { grep "^TESTFAIL:" build.log; } then
-  echo "testcurl: the tests were not successful"
+if { grep "^TEST" $buildlog >/dev/null 2>&1; } then
+  log "tests were run"
 else
-  echo "testcurl: the tests were successful!"  
+  die "test suite failure"
 fi
 
-# get out of dir
-cd ..
+if { grep "^TESTFAIL:" $buildlog >/dev/null 2>&1; } then
+  log "the tests were not successful"
+else
+  log "the tests were successful!"  
+fi
 
-# delete build dir
-rm -rf "$build"
-
-die
+# die to cleanup
+die "ending nicely"
