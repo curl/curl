@@ -7,6 +7,9 @@ Curl and libcurl 7.11.1. A bugfix release.
 
 This release includes the following changes:
 
+ o configure --disable-manual disables the built-in huge manual from the
+   command line tool
+ o the default Accept: header used in HTTP requests changed
  o asynch dns lookups now require the c-ares library
  o curl --socks can be used to set a SOCKS5 proxy to use
  o response-headers received after a (proxy) CONNECT request are now passed
@@ -14,14 +17,15 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o configure with mingw detects gethostbyname
+ o better docs for the share interface
+ o configure with mingw now detects gethostbyname and OpenSSL
  o setting a Host: header is no longer affecting the Host: header used when
    libcurl follows a Location:
  o fixed numerous compiler warnings on several operating systems and compilers
  o PUTing from stdin couldn't disable chunked transfer-encoding
  o corrected the mingw makefiles
  o improved the configure libz detection
- o improved EPRT use when doing FTP on ipv6-enabled AIX hosts
+ o fixed EPRT/PORT use when doing FTP on ipv6-enabled AIX hosts
  o *nroff commands that only support -mandoc and not -man are now supported
    (for the built-in manual text in the command line tool)
  o fixed the unconditional #include of config.h in hugehelp.c
@@ -37,6 +41,8 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
+ o the curl mailing lists moved, (re-)subscribe to the new ones from here:
+   http://curl.haxx.se/mail/
  o c-ares 1.0.0 was relased: http://daniel.haxx.se/projects/c-ares/
  o TclCurl 0.11.0 was released:
    http://personal1.iddeo.es/andresgarci/tclcurl/english/
@@ -46,6 +52,6 @@ advice from friends like these:
 
  Gisle Vanem, Vincent Bronner, Richard Bramante, Dirk Manske, Dan Fandrich,
  Ken Hirsch, Stadler Stephan, Domenico Andreoli, Patrick Smith, Tor Arntsen,
- Andrés García, Tim Baker, Len Krause, Gilad
+ Andrés García, Tim Baker, Len Krause, Gilad, Ken Rastatter, P R Schaffner
 
         Thanks! (and sorry if I forgot to mention someone)
