@@ -6,6 +6,43 @@
 
                                History of Changes
 
+Daniel (29 January 2002)
+- T. Bharath pointed out that we seed SSL on every connect, which is a time-
+  consuming operation that should only be needed to do once. We patched
+  libcurl to now only seed on the first connect when unseeded. The seeded
+  status is global so it'll now only happen once during a program's life time.
+
+- Giaslas Georgios introduced CURLINFO_CONTENT_TYPE that lets
+  curl_easy_getinfo() read the content-type from the previous request.
+
+Daniel (28 January 2002)
+- Kjetil Jacobsen found a way to crash curl and after much debugging, it
+  turned out it was a IPv4-linux only problem introduced in 7.9.3 related to
+  name resolving.
+
+- Andreas Damm posted a huge patch that made the curl_getdate() function fully
+  reentrant!
+
+- Steve Marx pointed out that you couldn't mix CURLOPT_CUSTOMREQUEST with
+  CURLOPT_POSTFIELDS. You can now!
+
+Daniel (25 January 2002)
+- Krishnendu Majumdar pointed out that the header length counter was not reset
+  between multiple requests on the same handle.
+
+- Pedro Neves rightfully questioned why curl always append \r\n to the data
+  that is sent in HTTP POST requests. Unfortunately, this broke the test suite
+  as the test HTTP server is lame enough not to deal with this... :-O
+
+- Following Location: headers when the connection didn't close didn't work as
+  libcurl didn't properly stop reading. This problem was added in 7.9.3 due to
+  the restructured internals. 'Frank' posted a bug report about this.
+
+Daniel (24 January 2002)
+- Kevin Roth very quickly spotted that we wrongly installed the example
+  programs that were built in the multi directory, when 'make install' was
+  used. :-/
+
 Version 7.9.3
 
 Daniel (23 January 2002)
