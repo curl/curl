@@ -816,8 +816,8 @@ static int dprintf_formatf(
     case FORMAT_STRING:
             /* String.  */
       {
-        static char null[] = "(nil)";
-        char *str;
+        static const char null[] = "(nil)";
+        const char *str;
         size_t len;
 
         str = (char *) p->data.str;
@@ -830,7 +830,7 @@ static int dprintf_formatf(
             p->flags &= (~FLAGS_ALT);
           }
           else {
-            str = (char *)"";
+            str = "";
             len = 0;
           }
         }
@@ -875,8 +875,8 @@ static int dprintf_formatf(
         }
         else {
           /* Write "(nil)" for a nil pointer.  */
-          static char strnil[] = "(nil)";
-          char *point;
+          static const char strnil[] = "(nil)";
+          const char *point;
 
           width -= sizeof(strnil) - 1;
           if (p->flags & FLAGS_LEFT)

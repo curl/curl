@@ -110,7 +110,7 @@ size_t Curl_base64_decode(const char *src, char *dest)
 }
 
 /* ---- Base64 Encoding --- */
-static char table64[]=
+static const char table64[]=
   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 /*

@@ -68,7 +68,7 @@ struct variable {
 };
 
 
-static struct variable replacements[]={
+static const struct variable replacements[]={
   {"url_effective", VAR_EFFECTIVE_URL},
   {"http_code", VAR_HTTP_CODE},
   {"time_total", VAR_TOTAL_TIME},

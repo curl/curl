@@ -1191,7 +1191,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
      long-name,
      boolean whether it takes an additional argument
      */
-  struct LongShort aliases[]= {
+  static const struct LongShort aliases[]= {
     /* all these ones, starting with "*" or "$" as a short-option have *no*
        short option to mention. */
     {"*", "url",         TRUE},
@@ -2036,7 +2036,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           const char *name;
           int bitmask;
         };
-        struct feat feats[] = {
+        static const struct feat feats[] = {
           {"AsynchDNS", CURL_VERSION_ASYNCHDNS},
           {"Debug", CURL_VERSION_DEBUG},
           {"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
@@ -4014,11 +4014,11 @@ char *
 msdosify (char *file_name)
 {
   static char dos_name[PATH_MAX];
-  static char illegal_chars_dos[] = ".+, ;=[]|<>\\\":?*";
-  static char *illegal_chars_w95 = &illegal_chars_dos[8];
+  static const char illegal_chars_dos[] = ".+, ;=[]|<>\\\":?*";
+  static const char *illegal_chars_w95 = &illegal_chars_dos[8];
   int idx, dot_idx;
   char *s = file_name, *d = dos_name;
-  char *illegal_aliens = illegal_chars_dos;
+  const char *illegal_aliens = illegal_chars_dos;
   size_t len = sizeof (illegal_chars_dos) - 1;
   int lfn = 0;
 

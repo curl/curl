@@ -26,12 +26,13 @@
 #ifdef USE_ENVIRONMENT
 
 #include <curl/curl.h>
+#include "writeenv.h"
 
 #ifdef __riscos__
 #include <kernel.h>
 #endif
 
-struct
+static const struct
 {
   const char * name;
   CURLINFO id;

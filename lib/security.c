@@ -65,7 +65,7 @@
 
 #define min(a, b)   ((a) < (b) ? (a) : (b))
 
-static struct {
+static const struct {
     enum protection_level level;
     const char *name;
 } level_names[] = {
@@ -85,7 +85,7 @@ name_to_level(const char *name)
   return (enum protection_level)-1;
 }
 
-static struct Curl_sec_client_mech *mechs[] = {
+static const struct Curl_sec_client_mech *mechs[] = {
 #ifdef KRB5
   /* not supported */
 #endif
@@ -400,7 +400,7 @@ int
 Curl_sec_login(struct connectdata *conn)
 {
   int ret;
-  struct Curl_sec_client_mech **m;
+  const struct Curl_sec_client_mech **m;
   ssize_t nread;
   struct SessionHandle *data=conn->data;
   int ftpcode;
