@@ -52,7 +52,7 @@ dnl libtool setup
 AM_PROG_LIBTOOL
 
 case $host in
-  cygwin* | mingw* | pw32*)
+  *-*-cygwin | *-*-mingw* | *-*-pw32*)
     need_no_undefined=yes
     ;;
   *)
