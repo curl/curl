@@ -19,15 +19,18 @@ Windows vs Unix
  the Windows way. The four most notable details are:
 
  1. Different function names for close(), read(), write()
- 2. Windows requires a couple of init calls
+ 2. Windows requires a couple of init calls for the socket stuff
  3. The file descriptors for network communication and file operations are
     not easily interchangable as in unix
  4. When writing data to stdout, Windows makes end-of-lines the DOS way, thus
     destroying binary data, although you do want that conversion if it is
     text coming through... (sigh)
 
- In curl, (1) and (2) are done with defines and macros, so that the source
- looks the same at all places except for the header file that defines them.
+ In curl, (1) is made with defines and macros, so that the source looks the
+ same at all places except for the header file that defines them.
+
+ (2) must be made by the application that uses libcurl, in curl that means
+ src/main.c has some code #ifdef'ed to do just that.
 
  (3) is simply avoided by not trying any funny tricks on file descriptors.
 
@@ -44,19 +47,26 @@ Windows vs Unix
 Library
 =======
 
- There is a few entry points to the library, namely each publicly defined
+ As described elsewhere, libcurl is meant to get two different "layers" of
+ interface. At the present point only the high-level, the "easy", interface
+ has been fully implemented and thus documented. We assume the easy-interface
+ in this description, the low-level interface will be documented when fully
+ implemented.
+
+ There are plenty of entry points to the library, namely each publicly defined
  function that libcurl offers to applications. All of those functions are
- rather small and easy-to-follow, accept the one single and do-it-all named
- curl_urlget() (entry point in lib/url.c).
+ rather small and easy-to-follow. All the ones prefixed with 'curl_easy' are
+ put in the lib/easy.c file.
 
- curl_urlget() takes a variable amount of arguments, and they must all be
+ curl_easy_setopt() takes a three arguments, where the option stuff must be
  passed in pairs, the parameter-ID and the parameter-value. The list of
- arguments must be ended with a end-of-arguments parameter-ID.
+ options is documented in the man page.
 
- The function then continues to analyze the URL, get the different components
- and connects to the remote host. This may involve using a proxy and/or using
- SSL. The GetHost() function in lib/hostip.c is used for looking up host
- names.
+ curl_easy_perform() does a whole lot of things.
+
+ The function analyzes the URL, get the different components and connects to
+ the remote host. This may involve using a proxy and/or using SSL. The
+ GetHost() function in lib/hostip.c is used for looking up host names.
 
  When connected, the proper function is called. The functions are named after
  the protocols they handle. ftp(), http(), dict(), etc. They all reside in
@@ -70,12 +80,16 @@ Library
  supplied clones in lib/mprintf.c.
 
  While transfering, the progress functions in lib/progress.c are called at a
- frequent interval. The speedcheck functions in lib/speedcheck.c are also used
- to verify that the transfer is as fast as required.
+ frequent interval (or at the user's choice, a specified callback might get
+ called). The speedcheck functions in lib/speedcheck.c are also used to verify
+ that the transfer is as fast as required.
 
  When the operation is done, the writeout() function in lib/writeout.c may be
  called to report about the operation as specified previously in the arguments
- to curl_urlget().
+ to curl_easy_setopt().
+
+ When completed curl_easy_cleanup() should be called to free up used
+ resources.
 
  HTTP(S)
 
@@ -88,12 +102,16 @@ Library
  (lib/cookie.c).
 
  HTTPS uses in almost every means the same procedure as HTTP, with only two
- exceptions: the connect procedure is different and the function used
+ exceptions: the connect procedure is different and the function used to read
+ or write from the socket is different, although the latter fact is hidden in
+ the source by the use of curl_read() for reading and curl_write() for writing
+ data to the remote server.
 
  FTP
 
  The if2ip() function can be used for getting the IP number of a specified
- network interface, and it resides in lib/if2ip.c
+ network interface, and it resides in lib/if2ip.c. It is only used for the FTP
+ PORT command.
 
  TELNET
 
@@ -113,11 +131,12 @@ Library
  is found in lib/escape.c.
 
  While transfering data in Transfer() a few functions might get
- used. get_date() in lib/getdate.c is for HTTP date comparisons.
+ used. curl_getdate() in lib/getdate.c is for HTTP date comparisons (and
+ more).
 
- lib/getenv.c is for reading environment variables in a neat platform
- independent way. That's used in the client, but also in lib/url.c when
- checking the PROXY variables.
+ lib/getenv.c offers curl_getenv() which is for reading environment variables
+ in a neat platform independent way. That's used in the client, but also in
+ lib/url.c when checking the PROXY variables.
 
  lib/netrc.c keeps the .netrc parser
 
@@ -135,6 +154,7 @@ Client
  functions used for the multiple-URL support.
 
  The client mostly mess around to setup its config struct properly, then it
- calls the curl_urlget() function in the library and when it gets back control
- it checks status and exits.
+ calls the curl_easy_*() functions of the library and when it gets back
+ control after the curl_easy_perform() it cleans up the library, checks status
+ and exits.
 
