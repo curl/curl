@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel (31 October)
+- Command line options that take numerical parameters (such as -y, -Y, -C etc)
+  now reports error and exits if the parameter isn't truly a number greater
+  than or equal to zero. This helps the user to notice bad usage
+  earlier. Before, when the user forgot or missed to add a numerical parameter
+  to an option, the command line parser would simply "eat" the following
+  option and it would cause great confusion.
+
 Daniel (30 October)
 - David Hull made libcurl deal with NOBODY and HEADER for file:// the same way
   it already does for FTP: it provides HTTP-looking headers that provide info
