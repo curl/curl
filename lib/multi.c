@@ -121,7 +121,13 @@ CURLM *curl_multi_init(void)
     memset(multi, 0, sizeof(struct Curl_multi));
     multi->type = CURL_MULTI_HANDLE;
   }
-  
+
+  multi->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
+  if(!multi->hostcache) {
+    /* failure, free mem and bail out */
+    free(multi);
+    multi = NULL;
+  }
   return (CURLM *) multi;
 }
 
@@ -150,6 +156,9 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   /* set the easy handle */
   easy->easy_handle = easy_handle;
   easy->state = CURLM_STATE_INIT;
+
+  /* for multi interface connections, we share DNS cache automaticly */
+  easy->easy_handle->hostcache = multi->hostcache;
   
   /* We add this new entry first in the list. We make our 'next' point to the
      previous next and our 'prev' point back to the 'first' struct */
@@ -332,16 +341,6 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       break;
 
     case CURLM_STATE_CONNECT:
-      if (Curl_global_host_cache_use(easy->easy_handle)) {
-        easy->easy_handle->hostcache = Curl_global_host_cache_get();
-      }
-      else {
-        if (multi->hostcache == NULL)
-          multi->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
-
-        easy->easy_handle->hostcache = multi->hostcache;
-      }
-
       /* Connect. We get a connection identifier filled in. */
       Curl_pgrsTime(easy->easy_handle, TIMER_STARTSINGLE);
       easy->result = Curl_connect(easy->easy_handle, &easy->easy_conn, &async);
