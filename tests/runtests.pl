@@ -51,6 +51,7 @@ my $short;
 my $verbose;
 my $debugprotocol;
 my $anyway;
+my $gdbthis; # run test case with gdb debugger
 
 #######################################################################
 # Return the pid of the server as found in the given pid file
@@ -397,12 +398,13 @@ sub singletest {
     }
 
     # run curl, add -v for debug information output
-    my $CMDLINE="$CURL $out--include -v --silent $cmd >$STDOUT 2>$STDERR";
+    my $cmdargs="$out--include -v --silent $cmd";
 
     my $STDINFILE="$TESTDIR/stdin$NUMBER.txt";
     if(-f $STDINFILE) {
-        $CMDLINE .= " < $STDINFILE";
+        $cmdargs .= " < $STDINFILE";
     }
+    my $CMDLINE="$CURL $cmdargs >$STDOUT 2>$STDERR";
 
     if($verbose) {
         print "$CMDLINE\n";
@@ -410,9 +412,20 @@ sub singletest {
 
     print CMDLOG "$CMDLINE\n";
 
+    my $res;
     # run the command line we built
-    my $res = system("$CMDLINE");
-    $res /= 256;
+    if($gdbthis) {
+        open(GDBCMD, ">log/gdbcmd");
+        print GDBCMD "set args $cmdargs\n";
+        print GDBCMD "show args\n";
+        close(GDBCMD);
+        system("gdb $CURL -x log/gdbcmd");
+        $res =0; # makes it always continue after a debugged run
+    }
+    else {
+        $res = system("$CMDLINE");
+        $res /= 256;
+    }
 
     my $ERRORCODE = "$TESTDIR/error$NUMBER.txt";
 
@@ -560,6 +573,10 @@ do {
         # have the servers display protocol output 
         $debugprotocol=1;
     }
+    elsif ($ARGV[0] eq "-g") {
+        # run this test with gdb
+        $gdbthis=1;
+    }
     elsif($ARGV[0] eq "-s") {
         # short output
         $short=1;
@@ -574,6 +591,7 @@ do {
 Usage: runtests.pl [-h][-s][-v][numbers]
   -a       continue even if a test fails
   -d       display server debug info
+  -g       run the test case with gdb
   -h       this help text
   -s       short output
   -v       verbose output
