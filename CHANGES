@@ -8,6 +8,14 @@
 
 Version XX
 
+Daniel (8 February 2000):
+ - Ron Zapp <rzapper@yahoo.com> corrected a problem in src/urlglob.c that
+   prevented curl from getting compiled on sunos 4. The problem had to do
+   with the difference in sprintf() return code types.
+
+ - Transfer() should now be able to download and upload simultaneously. Let's
+   do some progress meter fixes later this week.
+
 Daniel (31 January 2000):
  - Paul Harrington <paul@pizza.org> found another core dump in the cookie
    parser. Curl doesn't properly recognize the 'version' keyword and I think
