@@ -8,6 +8,11 @@
 
 
 Daniel (19 September)
+- Added the CURLOPT_IPRESOLVE option, that allows an application to select
+  what kind of IP addresses he wants to use when resolving host names. This
+  is only interesting when using host names that resolve addresses using more
+  than one version of IP.
+
 - Applied Markus Moeller's patch that introduces SPNEGO support if libcurl
   is built with the FBopenssl libraries. curl_version_info() now returns
   info on SPNEGO availability. The patch also made the GSSAPI stuff work fine

@@ -678,14 +678,27 @@ typedef enum {
      Note that setting multiple bits may cause extra network round-trips. */
   CINIT(PROXYAUTH, LONG, 111),
 
-  /* FPT Option that changes the timeout, in seconds, associated with 
+  /* FTP option that changes the timeout, in seconds, associated with 
      getting a response.  This is different from transfer timeout time and
      essentially places a demand on the FTP server to acknowledge commands
      in a timely manner. */
   CINIT(FTP_RESPONSE_TIMEOUT, LONG , 112),
 
+  /* Set this option to one of the CURL_IPRESOLVE_* defines (see below) to
+     tell libcurl to resolve names to those IP versions only. This only has
+     affect on systems with support for more than one, i.e IPv4 _and_ IPv6. */
+  CINIT(IPRESOLVE, LONG, 113),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
+
+  /* Below here follows defines for the CURLOPT_IPRESOLVE option. If a host
+     name resolves addresses using more than one IP protocol version, this
+     option might be handy to force libcurl to use a specific IP version. */
+#define CURL_IPRESOLVE_WHATEVER 0 /* default, resolves addresses to all IP
+                                     versions that your system allows */
+#define CURL_IPRESOLVE_V4       1 /* resolve to ipv4 addresses */
+#define CURL_IPRESOLVE_V6       2 /* resolve to ipv6 addresses */
 
   /* two convenient "aliases" that follow the name scheme better */
 #define CURLOPT_WRITEDATA CURLOPT_FILE

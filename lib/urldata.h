@@ -826,6 +826,8 @@ struct UserDefined {
   char *private; /* Private data */
 
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
+
+  int ip_version; 
   
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially
