@@ -6,6 +6,41 @@
 
                                History of Changes
 
+
+Daniel (10 November 2000)
+- I've (finally) started working on the curl test suite. It is in the new
+  tests/ directory. It requires sh and perl. There's a TCP server in perl and
+  most of the other stuff running a pretty simple shell script.
+
+  I've only made four test cases so far, but it proves the system can work.
+
+- Laurent Papier noticed that curl didn't set TYPE when doing --head checks
+  for sizes on FTP servers. Some servers seem to return different sizes
+  depending on whether ASCII or BINARY is used!
+
+- Laurent Papier detected that if you appended a FTP upload and everything was
+  already uploaded, curl would hang.
+
+- Angus Mackay's getpass_r() in lib/getpass.c is now compliant with the
+  getpass_r() function it seems some systems actually have.
+  
+- Venkataramana Mokkapati detected a bug in the cookie parser and corrected
+  it.  If the cookie was set for the full host name (domain=full.host.com),
+  the cookie was never sent back because of a faulty length comparison between
+  the set domain length and the current host name.
+
+Daniel (9 November 2000)
+- Added a configure check for gethostbyname in -lsocket (OS/2 seems to need
+  it). Added a check for RSAglue/rsaref for the cases where libcrypto is found
+  but libssl isn't. I haven't verified this fix yet though, as I have no
+  system that requires those libs to build.
+  
+Version 7.4.2 pre3
+
+Daniel (7 November 2000)
+- Removed perror() outputs from getpass.c. Angus Mackay also agreed to a
+  slightly modified license of the getpass.c file as the prototype was changed.
+
 Daniel (6 November 2000)
 - Added possibility to set a password callback to use instead of the built-in.
   They're controled with curl_easy_setopt() of course, the tags are
