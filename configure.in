@@ -3,7 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(lib/urldata.h)
 AM_CONFIG_HEADER(config.h src/config.h)
 
-VERSION=`sed -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' include/curl/curl.h`
+VERSION=`sed -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curl.h`
 AM_INIT_AUTOMAKE(curl,$VERSION)
 AM_PROG_LIBTOOL
 
