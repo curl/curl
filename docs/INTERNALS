@@ -1,4 +1,4 @@
-                                     Updated for curl 7.6 on January 26, 2001
+                                       Updated for curl 7.7 on March 13, 2001
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -103,8 +103,9 @@ Library
  lib/sendf.c) function to send printf-style formatted data to the remote host
  and when they're ready to make the actual file transfer they call the
  Curl_Transfer() function (in lib/transfer.c) to setup the transfer and
- returns. curl_transfer() then calls _Tranfer() in lib/transfer.c that
- performs the entire file transfer.
+ returns. Curl_perform() then calls Transfer() in lib/transfer.c that performs
+ the entire file transfer. Curl_perform() is what does the main "connect - do
+ - transfer - done" loop. It loops if there's a Location: to follow.
 
  During transfer, the progress functions in lib/progress.c are called at a
  frequent interval (or at the user's choice, a specified callback might get
@@ -160,7 +161,7 @@ Library
  URL encoding and decoding, called escaping and unescaping in the source code,
  is found in lib/escape.c.
 
- While transfering data in _Transfer() a few functions might get
+ While transfering data in Transfer() a few functions might get
  used. curl_getdate() in lib/getdate.c is for HTTP date comparisons (and
  more).
 
@@ -181,6 +182,34 @@ Library
  If authentication is requested but no password is given, a getpass_r() clone
  exists in lib/getpass.c. libcurl offers a custom callback that can be used
  instead of this, but it doesn't change much to us.
+
+Persistant Connections
+======================
+
+ With curl 7.7, we added persistant connection support to libcurl which has
+ introduced a somewhat different treatmeant of things inside of libcurl.
+
+ o The 'UrlData' struct returned in the curl_easy_init() call must never
+   hold connection-oriented data. It is meant to hold the root data as well
+   as all the options etc that the library-user may choose.
+ o The 'UrlData' struct holds the cache array of pointers to 'connectdata'
+   structs. There's one connectdata struct for each connection that libcurl
+   knows about.
+ o This also enables the 'curl handle' to be reused on subsequent transfers,
+   something that was illegal in pre-7.7 versions.
+ o When we are about to perform a transfer with curl_easy_perform(), we first
+   check for an already existing connection in the cache that we can use,
+   otherwise we create a new one and add to the cache. If the cache is full
+   already when we add a new connection, we close one of the present ones. We
+   select which one to close dependent on the close policy that may have been
+   previously set.
+ o When the tranfer operation is complete, we try to leave the connection open.
+   Particular options may tell us not to, and protocols may signal closure on
+   connections and then we don't keep it open of course.
+ o When curl_easy_cleanup() is called, we close all still opened connections.
+
+ You do realize that the curl handle must be re-used in order for the
+ persistant connections to work.
 
 Library Symbols
 ===============
@@ -256,8 +285,8 @@ Test Suite
  httpserver.pl and ftpserver.pl before all the test cases are performed. The
  test suite currently only runs on unix-like platforms.
 
- You'll find a complete description of the test case data files in the README
- file in the test directory.
+ You'll find a complete description of the test case data files in the
+ tests/README file.
 
  The test suite automatically detects if curl was built with the memory
  debugging enabled, and if it was it will detect memory leaks too.
@@ -269,6 +298,7 @@ Building Releases
  released, run the 'maketgz' script (using 'make distcheck' will give you a
  pretty good view on the status of the current sources). maketgz prompts for
  version number of the client and the library before it creates a release
- archive.
+ archive. maketgz uses 'make dist' for the actual archive building, why you
+ need to fill in the Makefile.am files properly for which files that should
+ be included in the release archives.
 
- You must have autoconf installed to build release archives.
