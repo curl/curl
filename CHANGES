@@ -6,7 +6,35 @@
 
                                   Changelog
 
+Daniel (11 August)
+- Mike Cherepov made the local binding code work for Windows, which makes
+  the option CURLOPT_INTERFACE work on Windows as well.
+
+- Vincent Sanders updated the fopen.c example code a lot.
+
+- --proxy-ntlm is now supported by the curl tool. It forces the proxy
+  authentication to be made using NTLM. It does not yet work for HTTPS over
+  proxies (or other proxy-tunneling options). Test case 81 and 82 do some
+  simple initial ntlm testing.
+
+- Found and fixed a minor memory leak on re-used connections with
+  proxy-authentication.
+
+- I removed -@ and -Z as valid short options. They were very rarely used (@
+  wasn't even documented).
+
+- Serge Semashko introduced CURLOPT_PROXYAUTH, and make it work when set to
+  CURLAUTH_NTLM and/or CURLAUTH_BASIC. The PROXAUTH is similar to HTTPAUTH,
+  but is for the proxy connection only, and HTTPAUTH is for the remote host.
+
+- Fixed loading of cookies with blank contents from a cookie jar. Also made the
+  cookie functions inform on added and skipped cookies (for cookie debugging).
+
+Version 7.10.7-pre3 (8 August 2003)
+
 Daniel (8 August)
+- Applied David Byron's fix for file:// URLs with drive letters included.
+
 - I added the --ftp-create-dirs to the client code, which activates Early's
   CURLOPT_FTP_CREATE_MISSING_DIRS option, and wrote test case 147 to verify
   it. Added the option to the curl.1 man page too. Added the option to the
@@ -19,7 +47,7 @@ Daniel (7 August)
   debian bug tracker). Added test case 74 to verify the fix and to discover if
   this breaks in the future.
 
-- make distcheck works again.
+- "make distcheck" works again.
 
 Version 7.10.7-pre2 (6 August 2003)
 
