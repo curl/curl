@@ -40,6 +40,8 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+#include "setup.h"
+
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <time.h>
 #include <winsock.h>
@@ -47,7 +49,6 @@
 #include <sys/time.h>
 #endif
 
-#include "setup.h"
 
 #ifndef HAVE_GETTIMEOFDAY
 #if !defined(_WINSOCKAPI_) && !defined(__MINGW32__)
