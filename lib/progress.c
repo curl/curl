@@ -304,7 +304,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
       span_ms=1; /* at least one millisecond MUST have passed */
 
     /* Calculate the average speed the last 'countindex' seconds */
-    data->progress.current_speed =
+    data->progress.current_speed = (curl_off_t)
       (data->progress.speeder[nowindex]-
        data->progress.speeder[checkindex])/((double)span_ms/1000);
   }
@@ -333,15 +333,15 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   /* Figure out the estimated time of arrival for the upload */
   if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
      (data->progress.ulspeed > 0)) {
-    ulestimate = data->progress.size_ul / data->progress.ulspeed;
-    ulpercen = (data->progress.uploaded / data->progress.size_ul)*100;
+    ulestimate = (long)(data->progress.size_ul / data->progress.ulspeed);
+    ulpercen = (long)(data->progress.uploaded / data->progress.size_ul)*100;
   }
 
   /* ... and the download */
   if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
      (data->progress.dlspeed > 0)) {
-    dlestimate = data->progress.size_dl / data->progress.dlspeed;
-    dlpercen = (data->progress.downloaded / data->progress.size_dl)*100;
+    dlestimate = (long)(data->progress.size_dl / data->progress.dlspeed);
+    dlpercen = (long)(data->progress.downloaded / data->progress.size_dl)*100;
   }
     
   /* Now figure out which of them that is slower and use for the for
@@ -365,7 +365,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* Get the percentage of data transfered so far */
   if(total_expected_transfer > 0)
-    total_percen=((double)total_transfer/total_expected_transfer)*100;
+    total_percen=(int)(total_transfer/total_expected_transfer)*100;
 
   fprintf(data->set.err,
           "\r%3d %s  %3d %s  %3d %s  %s  %s %s %s %s %s",
