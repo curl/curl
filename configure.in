@@ -2,7 +2,7 @@ dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(lib/urldata.h)
 AM_CONFIG_HEADER(config.h src/config.h)
-AM_INIT_AUTOMAKE(curl,"6.3.1")
+AM_INIT_AUTOMAKE(curl,"6.5pre1")
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -181,14 +181,16 @@ AC_CHECK_FUNCS( socket \
                 tcgetattr \
                 perror \
                 getpass \
-                closesocket
+                closesocket \
+                setvbuf \
+                RAND_status
 )
 
 
 
-AC_PATH_PROG( PERL, perl, , 
-  $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
-AC_SUBST(PERL)
+dnl AC_PATH_PROG( PERL, perl, , 
+dnl  $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
+dnl AC_SUBST(PERL)
 
 AC_PATH_PROGS( NROFF, gnroff nroff, , 
   $PATH:/usr/bin/:/usr/local/bin )
@@ -203,8 +205,8 @@ dnl AC_SUBST(RANLIB)
 
 AC_OUTPUT( Makefile \
 	   src/Makefile \
-           lib/Makefile \
-	   perl/checklinks.pl \
-	   perl/getlinks.pl \
-           perl/formfind.pl \
-	   perl/recursiveftpget.pl  )
+           lib/Makefile )
+dnl	   perl/checklinks.pl \
+dnl	   perl/getlinks.pl \
+dnl        perl/formfind.pl \
+dnl	   perl/recursiveftpget.pl  )
