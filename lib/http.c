@@ -764,6 +764,17 @@ CURLcode Curl_http(struct connectdata *conn)
       if(HTTPREQ_POST == data->httpreq) {
         /* this is the simple POST, using x-www-form-urlencoded style */
 
+        if(!data->postfields) {
+          /*
+           * This is an attempt to do a POST without having anything to
+           * actually send. Let's make a NULL pointer equal "" here. Good/bad
+           * ?
+           */
+          data->postfields = "";
+          data->postfieldsize = 0; /* it might been set to something illegal,
+                                      anything > 0 would be! */
+        }
+
         if(!checkheaders(data, "Content-Length:"))
           /* we allow replacing this header, although it isn't very wise to
              actually set your own */
