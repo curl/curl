@@ -22,9 +22,10 @@ ZLIB_PATH = ../../zlib-1.2.1
 OPENSSL_PATH = ../../openssl-0.9.7d
 !endif
 
-# Set libcurl's name
-LIBCURLLIB = libcurl.lib
-LIBCURLDLL = libcurl.dll
+# Set libcurl static lib, dll and import lib
+LIBCURL_LIB    = libcurl.lib
+LIBCURL_DLL    = libcurl.dll
+LIBCURL_IMPLIB = libcurl_imp.lib
 
 # Setup environment
 CXX      = bcc32
@@ -32,27 +33,28 @@ LD       = bcc32
 CP       = copy
 RM       = del
 LIB      = tlib
-TOPDIR   = ..
-CURNTDIR = .
+IMPLIB   = implib
 
 CXXFLAGS = -q -5 -O2 -w-aus -w-ccc -w-csu -w-par -w-pia -w-rch -w-inl -w-ngu -w-pro -tWM
 LIBFLAGS = /C /P32
 LDFLAGS  = -q -lq -laa -tWD
 
-INCDIRS  = -I$(CURNTDIR);$(TOPDIR)/include
+INCDIRS  = -I.;../include
 LINKLIB  = $(BCCDIR)/lib/cw32mt.lib
 
 # If you build with SSL support, set WITH_SSL=1
-DEFINES  = -DLIBCURL_BIGENDIAN=0 -DNDEBUG -DWIN32 -D_CONSOLE -D_MBCS
+DEFINES  = -DNDEBUG -DWIN32 -D_CONSOLE -D_MBCS -DBUILDING_LIBCURL
+
 !ifdef WITH_ZLIB
 DEFINES  = $(DEFINES) -DHAVE_LIBZ -DHAVE_ZLIB_H
 INCDIRS  = $(INCDIRS);$(ZLIB_PATH)
-# LINKLIB  = $(LINKLIB) $(ZLIB_PATH)/zlib.lib
+LINKLIB  = $(LINKLIB) $(ZLIB_PATH)/zlib.lib
 !endif
+
 !ifdef WITH_SSL
-DEFINES  = $(DEFINES) -DUSE_SSLEAY 
+DEFINES  = $(DEFINES) -DUSE_SSLEAY
 INCDIRS  = $(INCDIRS);$(OPENSSL_PATH)/inc32;$(OPENSSL_PATH)/inc32/openssl
-# LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)/out32/ssleay32.lib $(OPENSSL_PATH)/out32/libeay32.lib
+LINKLIB  = $(LINKLIB) $(OPENSSL_PATH)/out32/ssleay32.lib $(OPENSSL_PATH)/out32/libeay32.lib
 !endif
 
 .autodepend
@@ -65,21 +67,24 @@ OBJECTS = $(CSOURCES:.c=.obj)
 .c.obj:
 	$(CXX) -c $(INCDIRS) $(CXXFLAGS) $(DEFINES) $<
 
-all:	$(LIBCURLLIB)
+all:	$(LIBCURL_LIB) $(LIBCURL_DLL)
 
 clean:
-	-$(RM) $(LIBCURLLIB)
+	-$(RM) $(LIBCURL_LIB)
+	-$(RM) $(LIBCURL_IMPLIB)
+	-$(RM) libcurl.tds
 	-$(RM) *.obj
 
-$(LIBCURLLIB): $(OBJECTS)
+$(LIBCURL_LIB): $(OBJECTS)
 	@-$(RM) $@
 	$(LIB) $(LIBFLAGS) $@ @&&!
 +$(**: = &^
 +)
 !
 
-$(LIBCURLDLL): $(OBJECTS) $(LINKLIB)
-	@-$(RM) $@
-	$(LD) $(LDFLAGS) -e$@ $**
-
+$(LIBCURL_DLL) $(LIBCURL_IMPLIB): $(OBJECTS) $(LINKLIB)
+	@-$(RM) $(LIBCURL_DLL)
+	@-$(RM) $(LIBCURL_IMPLIB)
+	$(LD) $(LDFLAGS) -e$(LIBCURL_DLL) $**
+	$(IMPLIB) $(LIBCURL_IMPLIB) $(LIBCURL_DLL)
 
