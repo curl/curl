@@ -26,8 +26,9 @@
 # 02.05.2002   Miklos Nemeth OPENSSL_PATH environment; no need
 #              for OpenSSL libraries when creating a 
 #              static libcurl.lib
-#
-#
+# 10.14.2003   Added a target release-libcurl-ssl-dll which
+#              is intended to allow static linking of libcurl with dynamic
+#              linking of openssl
 ##############################################################
 
 LIB_NAME       = libcurl
@@ -101,6 +102,19 @@ CFGSET   = TRUE
 !ENDIF
 
 ######################
+# release-libcurl-ssl-dll
+!IF "$(CFG)" == "release-libcurl-ssl-dll"
+TARGET   =$(LIB_NAME).lib
+DIROBJ   =.\$(CFG)
+LFLAGSSSL = "/LIBPATH:$(OPENSSL_PATH)/out32dll"
+LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
+LINKLIBS = $(LINKLIBS) $(SSLLIBS)
+CC       = $(CCNODBG)  $(CFLAGSSSL)
+CFGSET   = TRUE
+!ENDIF
+
+
+######################
 # debug
 
 !IF "$(CFG)" == "debug"
@@ -157,6 +171,7 @@ CFGSET   = TRUE
 !MESSAGE   release-dll      - release dll
 !MESSAGE   release-ssl      - release static library with ssl
 !MESSAGE   release-ssl-dll  - release dll library with ssl
+!MESSAGE   release-libcurl-ssl-dll - static libcurl with shared ssl
 !MESSAGE   debug            - debug static library
 !MESSAGE   debug-dll        - debug dll
 !MESSAGE   debug-ssl        - debug static library with ssl
