@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_init 3 "22 November 2000" "Curl 7.5" "libcurl Manual"
+.TH curl_easy_init 3 "4 February 2001" "Curl 7.6.1" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - Extract information from a curl session (added in 7.4)
 .SH SYNOPSIS
@@ -81,6 +81,14 @@ than one request if FOLLOWLOCATION is true.
 Pass a pointer to a long to receive the result of the certification
 verification that was requested (using the CURLOPT_SSL_VERIFYPEER option to
 curl_easy_setopt). (Added in 7.4.2)
+.TP
+.B CURLINFO_CONTENT_LENGTH_DOWNLOAD
+Pass a pointer to a double to receive the content-length of the download.
+(Added in 7.6.1)
+.TP
+.B CURLINFO_CONTENT_LENGTH_UPLOAD
+Pass a pointer to a double to receive the specified size of the upload.
+(Added in 7.6.1)
 .PP
 
 .SH RETURN VALUE
