@@ -21,7 +21,7 @@ lib503
 </tool>
 
  <name>
-simple multi https:// through proxy with authentication info
+simple multi http:// through proxytunnel with authentication info
  </name>
  <command>
 http://%HOSTIP:%HTTPSPORT/503 localhost:%HOSTPORT
