@@ -5,19 +5,40 @@ beginning.
 
 This release includes the following changes:
 
- o 
+ o The Windows DLLs are built with an added "resource file"
+ o New LIBCURL_VERSION_* defines for easier checking version number
+ o Included Mac OS X 'framework' makefile in the release archive
+ o Removed the TRUE and FALSE #defines from the public curl header file
+ o Added CURLOPT_NETRC_FILE
 
 This release includes the following bugfixes:
 
- o 
+ o formpost parts sending files with .html extensions now use "Content-Type: 
+   text/html"
+ o formpost parts now default to "Content-Type: application/octet-stream"
+ o --progress-bar was slightly improved
+ o Failing to connect to localhost, using the multi interface on Solaris
+   showed a connect problem now fixed.
+ o The generated ca-bundle.h file is now generated in the build dir, not the
+   source dir
+ o The FTP-EPSV response parser for the 229 code was fixed
+ o curl finds the user's home dir slightly different and hopefully better on
+   Windows
+ o testcurl.sh can now be used to autotest daily tarballs
+ o a couple of command line options now check that the underyling library
+   actually supports the features before trying to enable them
+ o uninitialized variable fix
+ o better html versions of the man pages
 
 Other curl-related news since the previous public release:
 
- o 
+ o pycURL 7.10.8 was released: http://pycurl.sf.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-
+ Kevin Roth, Troels Walsted Hansen, Matt Veenstra, Marty Kuhrt, Benjamin
+ Gerard, Gisle Vanem, Ralph Mitchell, Sébastien Willemijns, Kang-Jin Lee,
+ Peter Sylvester
  
         Thanks! (and sorry if I forgot to mention someone)
