@@ -737,9 +737,17 @@ printf("just fine");
 )
 
 AC_ARG_ENABLE(thread,dnl
-AC_HELP_STRING([--disable-thread],[don't look for thread-safe functions]),
-  OPT_THREAD=off
-  AC_MSG_WARN(libcurl will not get built using thread-safe functions)
+AC_HELP_STRING([--disable-thread],[don't look for thread-safe functions])
+AC_HELP_STRING([--enable-thread],[look for thread-safe functions]),
+[ case "$enableval" in
+  no)
+    OPT_THREAD=off
+    AC_MSG_WARN(libcurl will not get built using thread-safe functions)
+    ;;
+  *)
+    ;;
+  esac
+]
 )
 
 if test X"$OPT_THREAD" = Xoff
