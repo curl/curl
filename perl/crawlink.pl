@@ -9,9 +9,13 @@
 # Written to use 'curl' for URL checking.
 #
 # Author: Daniel Stenberg <daniel@haxx.se>
-# Version: 0.1 Dec 14, 2000
+# Version: 0.2 Dec 19, 2000
 #
 # HISTORY
+#
+# 0.2 - Made it only HEAD non html files (i.e skip the GET). Makes it a lot
+#       faster to skip large non HTML files such as pdfs or big RFCs! ;-)
+#       Added a -c option that allows me to pass options to curl.
 #
 # 0.1 - The given url works as the root. This script will only continue
 #       and check other URLs if the leftmost part of the new URL is identical
@@ -26,10 +30,17 @@ my $usestdin;
 my $linenumber;
 my $help;
 my $external;
+my $curlopts;
 
  argv:
 if($ARGV[0] eq "-v" ) {
     $verbose++;
+    shift @ARGV;
+    goto argv;
+}
+elsif($ARGV[0] eq "-c" ) {
+    $curlopts=$ARGV[1];
+    shift @ARGV;
     shift @ARGV;
     goto argv;
 }
@@ -68,10 +79,11 @@ if(($geturl eq "") || $help) {
     exit;
 }
 
-# This is necessary from where I tried this:
-my $proxy="";
-#$proxy =" -x 194.237.142.41:80";
-
+my $proxy;
+if($curlopts ne "") {
+    $proxy=" $curlopts";
+    #$proxy =" -x 194.237.142.41:80";
+}
 
 # linkchecker, URL will be appended to the right of this command line
 # this is the one using HEAD:
@@ -169,20 +181,22 @@ sub GetRootPage {
 	exit;
     }
 
-    open(WEBGET, "$htmlget $geturl|") ||
-	die "Couldn't get web page for some reason";
-
-    while(<WEBGET>) {
-	my $line = $_;
-	push @indoc, $line;
-	$line=~ s/\n/ /g;
-	$line=~ s/\r//g;
-#    print $line."\n";
-	$in=$in.$line;
+    if($type ne "text/html") {
+        # there no point in getting anything but HTML
+        $in="";
     }
-
-    close(WEBGET);
-
+    else {
+        open(WEBGET, "$htmlget $geturl|") ||
+            die "Couldn't get web page for some reason";
+        while(<WEBGET>) {
+            my $line = $_;
+            push @indoc, $line;
+            $line=~ s/\n/ /g;
+            $line=~ s/\r//g;
+            $in=$in.$line;
+        }
+        close(WEBGET);
+    }
     return ($in, $code, $type);
 }
 
@@ -252,6 +266,9 @@ sub GetLinks {
 		if($done{$url}) {
 		    # if this url already is done, do next
 		    $done{$url}++;
+                    if($verbose) {
+                        print " FOUND $url but that is already checked\n";
+                    }
 		    next;
 		}
 
@@ -311,8 +328,8 @@ while(1) {
     }
 
     if($error >= 400) {
-        print "$geturl return $error, exiting\n";
-        exit;
+        print "ROOT page $geturl returned $error\n";
+        next;
     }
 
     if($verbose == 2) {
@@ -375,8 +392,6 @@ while(1) {
         
         print "$success $count <".$tagtype{$url}."> $link $url\n";
 
-        $rooturls{$link}++; # check this if not checked already
-        
         if("BAD" eq $success) {
             $badlinks++;
             if($linenumber) {
@@ -388,6 +403,10 @@ while(1) {
                     $line++;
                 }
             }
+        }
+        else {
+            # the link works, add it!
+            $rooturls{$link}++; # check this if not checked already
         }
         
     }
