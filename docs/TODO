@@ -17,6 +17,20 @@ For the future
    300' convention. It should be able to work if '-m300' is considered to be
    space separated to the next option.
 
+ * Make the curl tool support URLs that start with @ that would then mean that
+   the following is a plain list with URLs to download. Thus @filename.txt
+   reads a list of URLs from a local file. A fancy option would then be to
+   support @http://whatever.com that would first load a list and then get the
+   URLs mentioned in the list. I figure -O or something would have to be
+   implied by such an action.
+
+ * Improve the regular progress meter with --continue is used. It should be
+   noticable when there's a resume going on.
+
+ * Add a command line option that allows the output file to get the same time
+   stamp as the remote file. This requires some fiddling on FTP but comes
+   almost free for HTTP.
+
  * Make the SSL layer option capable of using the Mozilla Security Services as
    an alternative to OpenSSL:
    http://www.mozilla.org/projects/security/pki/nss/
@@ -30,7 +44,9 @@ For the future
  * Move non-URL related functions that are used by both the lib and the curl
    application to a separate "portability lib".
 
- * Add support for other languages than C. C++ and perl comes to mind. Python?
+ * Add support for other languages than C.  C++ (rumours have been heard about
+   something being worked on in this area) and perl (we have seen the first
+   versions of this!) comes to mind. Python anyone?
 
  * Improve the -K config file parser (the parameter following the flag should
    be possible to get specified *exactly* as it is done on a shell command
