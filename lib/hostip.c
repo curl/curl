@@ -187,12 +187,14 @@ struct hostent *GetHost(struct UrlData *data,
       infof(data, "gethostbyname_r(2) failed for %s\n", hostname);
       h = NULL; /* set return code to NULL */
       free(buf);
+      *bufp=NULL;
     }
 #else
   else {
     if ((h = gethostbyname(hostname)) == NULL ) {
       infof(data, "gethostbyname(2) failed for %s\n", hostname);
       free(buf);
+      *bufp=NULL;
     }
 #endif
   }
