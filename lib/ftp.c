@@ -812,7 +812,7 @@ ftp_pasv_verbose(struct connectdata *conn,
 #ifdef HAVE_INET_NTOA_R
   char ntoa_buf[64];
 #endif
-  char hostent_buf[8192];
+  char hostent_buf[9000];
 
 #if defined(HAVE_INET_ADDR)
   in_addr_t address;
@@ -824,11 +824,18 @@ ftp_pasv_verbose(struct connectdata *conn,
 # ifdef HAVE_GETHOSTBYADDR_R
 
 #  ifdef HAVE_GETHOSTBYADDR_R_5
-  /* AIX, Digital Unix style:
+  /* AIX, Digital Unix (OSF1, Tru64) style:
      extern int gethostbyaddr_r(char *addr, size_t len, int type,
      struct hostent *htent, struct hostent_data *ht_data); */
 
   /* Fred Noz helped me try this out, now it at least compiles! */
+
+  /* Bjorn Reese (November 28 2001):
+     The Tru64 man page on gethostbyaddr_r() says that
+     the hostent struct must be filled with zeroes before the call to
+     gethostbyaddr_r(). */
+
+  memset(hostent_buf, 0, sizeof(struct hostent));
 
   if(gethostbyaddr_r((char *) &address,
                      sizeof(address), AF_INET,
@@ -1297,7 +1304,8 @@ CURLcode ftp_use_pasv(struct connectdata *conn)
   char newhost[48];
   char *newhostp=NULL;
   
-  for (modeoff = 0; mode[modeoff]; modeoff++) {
+  for (modeoff = (data->set.ftp_use_epsv?0:1);
+       mode[modeoff]; modeoff++) {
     result = Curl_ftpsendf(conn, mode[modeoff]);
     if(result)
       return result;

@@ -245,6 +245,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
   data->state.current_speed = -1; /* init to negative == impossible */
 
   data->set.httpreq = HTTPREQ_GET; /* Default HTTP request */
+  data->set.ftp_use_epsv = TRUE;   /* FTP defaults to EPSV operations */
 
   /* make libcurl quiet by default: */
   data->set.hide_progress = TRUE;  /* CURLOPT_NOPROGRESS changes these */
@@ -523,6 +524,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.ftpport = va_arg(param, char *);
     data->set.ftp_use_port = data->set.ftpport?1:0;
     break;
+
+  case CURLOPT_FTP_USE_EPSV:
+    data->set.ftp_use_epsv = va_arg(param, long)?TRUE:FALSE;
+    break;
+
   case CURLOPT_HTTPHEADER:
     /*
      * Set a list with HTTP headers to use (or replace internals with)

@@ -567,6 +567,7 @@ struct UserDefined {
   bool reuse_forbid;     /* forbidden to be reused, close after use */
   bool reuse_fresh;      /* do not re-use an existing connection  */
   bool expect100header;  /* TRUE if we added Expect: 100-continue */
+  bool ftp_use_epsv;     /* if EPSV is to be attempted or not */
 };
 
 /*
