@@ -521,8 +521,12 @@ elsif(!$crosscompile) {
 }
 
 if ($configurebuild && !$crosscompile) {
-  logit "run make TEST_F=\"$runtestopts\" test-full";
-  open(F, "make TEST_F=\"$runtestopts\" test-full 2>&1 |") or die;
+  my $o;
+  if($runtestopts) {
+      $o = "TEST_F=\"$runtestopts\" ";
+  }
+  logit "run make ${o}test-full";
+  open(F, "make ${o}test-full 2>&1 |") or die;
   open(LOG, ">$buildlog") or die;
   while (<F>) {
     s/$pwd//g;
