@@ -26,6 +26,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o various improvements for large file support on windows
  o file handle leak in aborted multipart formpost file upload
  o -T upload multiple files with backslashes in file names
  o modified credentials between two requests on a persistent http connection
