@@ -377,8 +377,15 @@ Curl_cookie_add(struct CookieInfo *c,
 
         free(co);   /* free the newly alloced memory */
         co = clist; /* point to the previous struct instead */
-      }
 
+        /* We have replaced a cookie, now skip the rest of the list but
+           make sure the 'lastc' pointer is properly set */
+        do {
+          lastc = clist;
+          clist = clist->next;
+        } while(clist);
+        break;
+      }
     }
     lastc = clist;
     clist = clist->next;
