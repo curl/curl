@@ -25,8 +25,7 @@ LIBCURLLIB= $(TOPDIR)/lib/libcurl.lib
 # 'BCCDIR' has to be set up in your c:\autoexec.bat
 # i.e. SET BCCDIR = c:\Borland\BCC55
 # where c:\Borland\BCC55 is the compiler is installed
-LINKLIB   = $(BCCDIR)/lib/psdk/wsock32.lib
-
+LINKLIB  = $(BCCDIR)\Lib\psdk\ws2_32.lib 
 
 PROGRAMS  = \
 	curl.exe 
@@ -36,8 +35,8 @@ PROGRAMS  = \
 
 all: $(PROGRAMS)
 
-curl.exe: $(LIBCURLLIB) $(LINKLIB) hugehelp.obj writeout.obj urlglob.obj main.obj
-	$(LD) $(LDFLAGS) hugehelp.obj writeout.obj urlglob.obj main.obj $(LIBCURLLIB) $(LINKLIB)
+curl.exe: $(LIBCURLLIB) $(LINKLIB) hugehelp.obj writeout.obj urlglob.obj main.obj homedir.obj
+	$(LD) $(LDFLAGS) hugehelp.obj writeout.obj urlglob.obj main.obj homedir.obj $(LIBCURLLIB) $(LINKLIB)
 
 clean:
 	$(RM) *.obj

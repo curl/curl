@@ -1,4 +1,5 @@
 +base64.obj &
++md5.obj &
 +cookie.obj &
 +transfer.obj &
 +escape.obj &
@@ -6,6 +7,7 @@
 +ftp.obj &
 +http.obj &
 +http_chunks.obj &
++http_digest.obj &
 +ldap.obj &
 +dict.obj &
 +telnet.obj &
