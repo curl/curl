@@ -1,12 +1,9 @@
 Issues not sorted in any particular order.
 
-
-To get fixed in 7.12.1 (planned release: August 2004)
-======================
-
- Bugfixes reported until late July
-
 To get fixed in 7.12.2 (planned release: December 2004)
 ======================
+
+36. Fix HTTP Negotiate authentication so that no bogus user name needs to be
+    provided to activate it.
 
  Bugfixes reported until late November
