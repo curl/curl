@@ -159,6 +159,24 @@ dnl dl lib?
 AC_CHECK_FUNC(dlclose, , AC_CHECK_LIB(dl, dlopen))
 
 dnl **********************************************************************
+dnl Check how non-blocking sockets are set
+dnl **********************************************************************
+AC_ARG_ENABLE(nonblocking,
+[  --enable-nonblocking  Makes the script detect how to do it
+  --disable-nonblocking Makes the script disable non-blocking sockets],
+[
+  if test "$enableval" = "no" ; then
+    AC_MSG_WARN([non-blocking sockets disabled])
+    AC_DEFINE(HAVE_DISABLED_NONBLOCKING)
+  else
+    CURL_CHECK_NONBLOCKING_SOCKET
+  fi
+],
+[
+  CURL_CHECK_NONBLOCKING_SOCKET
+])
+
+dnl **********************************************************************
 dnl Check for the random seed preferences 
 dnl **********************************************************************
 
