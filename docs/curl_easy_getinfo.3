@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_init 3 "2 October 2000" "Curl 7.4" "libcurl Manual"
+.TH curl_easy_init 3 "30 October 2000" "Curl 7.4.2" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - Extract information from a curl session (added in 7.4)
 .SH SYNOPSIS
@@ -70,6 +70,11 @@ received.
 Pass a pointer to a long to receive the total size of the issued
 requests. This is so far only for HTTP requests. Note that this may be more
 than one request if FOLLOWLOCATION is true.
+.TP
+.B CURLINFO_SSL_VERIFYRESULT
+Pass a pointer to a long to receive the result of the certification
+verification that was requested (using the CURLOPT_SSL_VERIFYPEER option to
+curl_easy_setopt). (Added in 7.4.2)
 .PP
 
 .SH RETURN VALUE
