@@ -1,4 +1,4 @@
-#
+rörl#
 # Server-side
 <reply>
 <data>
@@ -14,7 +14,7 @@ ETag: "21025-dc7-39462498"
 # Client-side
 <client>
 <server>
-https
+http
 </server>
 # tool is what to use instead of 'curl'
 <tool>
