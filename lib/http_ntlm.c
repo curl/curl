@@ -114,6 +114,9 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
         memcpy(data->state.ntlm.nonce, &buffer[24], 8);
     }
     else {
+      if(data->state.ntlm.state >= NTLMSTATE_TYPE1)
+        return CURLNTLM_BAD;
+
       data->state.ntlm.state = NTLMSTATE_TYPE1; /* we should sent away a
                                                   type-1 */
     }
@@ -264,7 +267,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     hostoff = 32;
     domoff = hostoff + hostlen;
     
-    /* IE used this in the initial dump:
+    /* IE used this as type-1 maessage:
 
     Authorization: NTLM \
     TlRMTVNTUAABAAAABoIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAwAAAA\r\n
@@ -306,7 +309,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
 
     /* initial packet length */
     size = 8 + 1 + 3 + 18 + hostlen + domlen;
-#if 0
+#if 1
     #define CHUNK "\x4e\x54\x4c\x4d\x53\x53\x50\x00\x01\x00\x00\x00\x06\x82\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x30\x00\x00\x00\x00\x00\x00\x00\x30\x00\x00\x00"
     memcpy(ntlm, CHUNK, sizeof(CHUNK)-1);
     size = sizeof(CHUNK)-1;
@@ -343,13 +346,6 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
       Note how the domain + username + hostname ARE NOT unicoded in any way.
       Domain and hostname are uppercase, while username are case sensitive.
 
-      We sent (badly):
-
-      4e 54 4c 4d 53 53 50 00 03 00 00 00 18 00 18 00 56 00 00 00 00 00 00 00
-      6e 00 00 00 05 00 05 00 40 00 00 00 06 00 06 00 45 00 00 00 0b 00 0b 00
-      4b 00 00 00 00 00 00 00 6c 00 00 00 01 82 48 45 4d 4d 41 64 61 6e 69 65
-      6c 4c 49 4c 4c 41 53 59 53 54 45 52 86 99 4a 4f 1a 54 93 85 f9 a4 85 d7
-      ed 14 17 31 8c a6 4d e9 c1 b1 23 a7
     */
 
     int lmrespoff;
@@ -472,12 +468,12 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
       memcpy(&ntlm[size], lmresp, 0x18);
       size += 0x18;
     }
-#ifdef USE_NT
+
     if(size < ((int)sizeof(ntlm) - 0x18)) {      
       memcpy(&ntlm[size+0x18], ntresp, 0x18);
       size += 0x18*2;
     }
-#endif
+
 
     ntlm[56] = size & 0xff;
     ntlm[57] = size >> 8;
