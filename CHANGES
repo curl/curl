@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (22 September)
+- Giuseppe Attardi found a segfault in libcurl when using the multi interface
+  with ares and doing repeated operations against a non-resolving host name.
+
 Daniel (19 September)
 - Added the CURLOPT_IPRESOLVE option, that allows an application to select
   what kind of IP addresses he wants to use when resolving host names. This
