@@ -43,7 +43,7 @@ do {
 
 my $path = `pwd`;
 chomp $path;
-my $cmd = "$stunnel -p $path/data/stunnel.pem -P $path/.https.pid -d $port -r $http";
+my $cmd = "$stunnel -p $path/stunnel.pem -P $path/.https.pid -d $port -r $http";
 
 if($verbose) {
     print "$cmd\n";
