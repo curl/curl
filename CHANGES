@@ -25,6 +25,9 @@ Daniel (3 October)
   the name 'access' in a function prototype is not very wise as some compilers
   complain.
 
+- Peter Sylvester provided his and Jean-Paul Merlin's curlx.c example source
+  code that shows how they use ssl and callbacks.
+
 Daniel (2 October)
 - James MacMillan's patch makes curl build on QNX 6.2.x.
 
