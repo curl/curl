@@ -206,7 +206,7 @@ fi
 echo "testcurl: display lib/config.h"
 grep "^ *#" lib/config.h
 
-if { grep USE_ARES lib/config.h; } then
+if { grep "define USE_ARES" lib/config.h; } then
   echo "testcurl: setup to build ares"
 
   echo "testcurl: build ares"
