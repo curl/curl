@@ -6,6 +6,31 @@
 
                                   Changelog
 
+
+Daniel (20 Sep 2002)
+- Craig Markwardt fixed another Tru64 IP resolve problem.
+
+Daniel (19 Sep 2002)
+- Dolbneff A.V and Spiridonoff A.V made the file:// code work with resumes
+  in the same style other code does.
+
+- Ilguiz Latypov fixed a flaw in the client code when fetching multiple URLs
+  and -C - was used. The first file's resume position was then accidentally
+  reused on all the other files too.
+
+Daniel (18 Sep 2002)
+- The curl_easy_setopt.3 man page was greatly modified and the options have
+  now been grouped in logical groups so that it should be somewhat easier to
+  read it and find things you search for.
+
+Daniel (13 Sep 2002)
+- Kevin Roth pinpointed a scary flaw in libcurl, when the HTTP server doesn't
+  send any headers back, only raw content. Right, that is a violation of the
+  standard but still happens at times and we need to deal with it. Test case
+  306 was added to verify that we do right now.
+
+Version 7.10-pre3
+
 Daniel (11 Sep 2002)
 - Lukasz Czekierda found out that curl didn't send a correct HTTP Host: header
   when you specified the URL with an IPv6 IP-address.
