@@ -61,8 +61,10 @@ Data:
 
     replyN.txt: the full dump the server should reply to curl for this test.
                If the final result that curl should've got is not in this
-               file, you can instead name the file replyN0001.txt. This enables
-               you to fiddle more. ;-)
+               file, you can instead name the file replyN0001.txt. This
+               enables you to fiddle more. ;-) Alas, the server sends the
+               replyN.txt file but checks the result after the test against
+               the *0001.txt file.
 
     stdoutN.txt: if this file is present, curl's stdout is compared against
                this file to see that they're identical. If this is present,
