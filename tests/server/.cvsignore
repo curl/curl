@@ -1,0 +1,8 @@
+.libs
+Makefile.in
+stamp-h3.in
+sws
+.deps
+stamp-h3
+config.h
+Makefile
