@@ -381,6 +381,8 @@ static time_t Curl_parsedate(const char *date)
 #else
     gmt = gmtime(&t); /* use gmtime_r() if available */
 #endif
+    if(!gmt)
+      return -1; /* illegal date/time */
 
     t2 = mktime(gmt);
 
