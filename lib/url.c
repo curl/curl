@@ -1806,18 +1806,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->bits.httpproxy = (data->change.proxy && *data->change.proxy &&
                           (data->set.proxytype == CURLPROXY_HTTP))?
     TRUE:FALSE; /* http proxy or not */
-  conn->bits.use_range = data->set.set_range?TRUE:FALSE; /* range status */
-  conn->range = data->set.set_range;              /* clone the range setting */
-  conn->resume_from = data->set.set_resume_from;   /* inherite resume_from */
 
   /* Default protocol-independent behavior doesn't support persistant
      connections, so we set this to force-close. Protocols that support
      this need to set this to FALSE in their "curl_do" functions. */
   conn->bits.close = TRUE;
-
-  /* inherite initial knowledge from the data struct */
-  conn->bits.user_passwd = data->set.userpwd?1:0;
-  conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
 
   /* maxdownload must be -1 on init, as 0 is a valid value! */
   conn->maxdownload = -1;  /* might have been used previously! */
@@ -1825,23 +1818,20 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /* Store creation time to help future close decision making */
   conn->created = Curl_tvnow();
 
+  conn->bits.use_range = data->set.set_range?TRUE:FALSE; /* range status */
+  conn->range = data->set.set_range;              /* clone the range setting */
+  conn->resume_from = data->set.set_resume_from;   /* inherite resume_from */
+
   /* Set the start time temporary to this creation time to allow easier
      timeout checks before the transfer has started for real. The start time
      is later set "for real" using Curl_pgrsStartNow(). */
   conn->data->progress.start = conn->created; 
 
-  conn->bits.upload_chunky =
-    ((conn->protocol&PROT_HTTP) &&
-     data->set.upload &&
-     (data->set.infilesize == -1) &&
-     (data->set.httpversion != CURL_HTTP_VERSION_1_0))?
-    /* HTTP, upload, unknown file size and not HTTP 1.0 */
-    TRUE:
-  /* else, no chunky upload */
-  FALSE;
+  conn->bits.user_passwd = data->set.userpwd?1:0;
+  conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
 
-  conn->fread = data->set.fread;
-  conn->fread_in = data->set.in;
+  /* This initing continues below, see the comment "Continue connectdata
+   * initialization here" */
 
   /***********************************************************
    * We need to allocate memory to store the path in. We get the size of the
@@ -2631,7 +2621,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     char *ppath = old_conn->ppath; /* this is the modified path pointer */
     if(old_conn->proxyhost)
       free(old_conn->proxyhost);
+
     conn = conn_temp;        /* use this connection from now on */
+
+    /* get the user+password information from the old_conn struct since it may
+     * be new for this request even when we re-use an existing connection */
+    conn->bits.user_passwd = old_conn->bits.user_passwd;
+    conn->bits.proxy_user_passwd = conn->bits.proxy_user_passwd;
 
     /* If we speak over a proxy, we need to copy the host name too, as it
        might be another remote host even when re-using a connection */
@@ -2689,6 +2685,23 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      */
     ConnectionStore(data, conn);
   }
+
+  /* Continue connectdata initialization here.
+   * 
+   * Inherit the proper values from the urldata struct AFTER we have arranged
+   * the persistant conncetion stuff */
+  conn->fread = data->set.fread;
+  conn->fread_in = data->set.in;
+
+  conn->bits.upload_chunky =
+    ((conn->protocol&PROT_HTTP) &&
+     data->set.upload &&
+     (data->set.infilesize == -1) &&
+     (data->set.httpversion != CURL_HTTP_VERSION_1_0))?
+    /* HTTP, upload, unknown file size and not HTTP 1.0 */
+    TRUE:
+  /* else, no chunky upload */
+  FALSE;
 
   /*************************************************************
    * Set timeout if that is being used
