@@ -115,6 +115,20 @@ esac
 AC_MSG_RESULT($mimpure)
 AM_CONDITIONAL(MIMPURE, test x$mimpure = xyes)
 
+AC_MSG_CHECKING([if we need _XOPEN_SOURCE defined to 500])
+case $host in
+  mips-sgi-irix*)
+    if test "$GCC" != "yes"; then
+      xopen="yes"
+      CPPFLAGS="$CPPFLAGS -D_XOPEN_SOURCE=500"
+    fi
+    ;;
+  *)
+    xopen=no
+    ;;
+esac
+AC_MSG_RESULT($xopen)
+
 dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
