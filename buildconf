@@ -75,9 +75,9 @@ echo "buildconf: automake version $am_version (ok)"
 # libtool 1.5 or newer
 #
 LIBTOOL_WANTED_MAJOR=1
-LIBTOOL_WANTED_MINOR=5
-LIBTOOL_WANTED_PATCH=
-LIBTOOL_WANTED_VERSION=1.5
+LIBTOOL_WANTED_MINOR=4
+LIBTOOL_WANTED_PATCH=2
+LIBTOOL_WANTED_VERSION=1.4.2
 
 libtool=`which glibtool 2>/dev/null`
 if test ! -x "$libtool"; then
