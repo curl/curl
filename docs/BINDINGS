@@ -6,14 +6,19 @@
 
                                libcurl bindings
 
-Creative people have written particular bindings or interfaces for various
-environments and programming languages. Using one of these allows you to take
-advantage of curl powers from within your favourite language or system.
+Creative people have written bindings or interfaces for various environments
+and programming languages. Using one of these allows you to take advantage of
+curl powers from within your favourite language or system.
 
 This is a list of all known interfaces as of this writing.
 
 The bindings listed below are not part of the curl/libcurl distribution
 archives, but must be downloaded and installed separately.
+
+Ada95
+
+  Writtten by Andreas Almroth.
+  http://www.almroth.com/adacurl/index.html
 
 Basic
 
@@ -22,8 +27,8 @@ Basic
 
 C++
 
-  Maintained by Jean-Philippe Barrette-LaPierre.
-  http://curl.haxx.se/libcurl/cplusplus/
+  Written by Jean-Philippe Barrette-LaPierre.
+  http://www.sourceforge.net/projects/curlpp
 
 Cocoa
 
@@ -34,6 +39,11 @@ Dylan
 
   Written by Chris Double.
   http://dylanlibs.sourceforge.net/
+
+Euphoria
+
+  Written by Ray Smith.
+  http://rays-web.com/eulibcurl.htm
 
 Java
 
@@ -49,6 +59,11 @@ Object-Pascal
 
   Free Pascal, Delphi and Kylix binding written by Christophe Espern.
   http://www.tekool.com/opcurl
+
+O'Caml
+
+  Written by Lars Nilsson.
+  http://sourceforge.net/projects/ocurl/
 
 Pascal
 
