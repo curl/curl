@@ -30,5 +30,25 @@ in $prefix/lib and its header files are installed in $prefix/include and so
 on. The prefix is set with "configure --prefix".
 .IP "--version"
 Outputs version information about the installed libcurl.
+.SH "EXAMPLES"
+What is the path to the curl header files?
+
+  echo `curl-config --prefix`/include
+
+What is the path to libcurl?
+
+  echo `curl-config --prefix`/lib
+
+What other linker options do I need when I link with libcurl?
+
+  curl-config --libs
+
+How do I know if libcurl was built with SSL support?
+
+  curl-config --feature | grep SSL
+
+What's the installed libcurl version?
+
+  curl-config --version
 .SH "SEE ALSO"
 .BR curl (1)
