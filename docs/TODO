@@ -80,16 +80,14 @@ TODO
 
  HTTP
 
- * Digest, NTLM and GSS-Negotiate support for HTTP proxies. They all work
-   on direct-connections to the server.
+ * Digest and GSS-Negotiate support for HTTP proxies. They only work on
+   direct-connections to the server.
 
  * Pipelining. Sending multiple requests before the previous one(s) are done.
    This could possibly be implemented using the multi interface to queue
    requests and the response data.
 
  TELNET
-
- * Make TELNET work on windows98!
 
  * Reading input (to send to the remote server) on stdin is a crappy solution
    for library purposes. We need to invent a good way for the application to
@@ -143,14 +141,10 @@ TODO
 
  * "curl ftp://site.com/*.txt"
 
- * Several URLs can be specified to get downloaded. We should be able to use
-   the same syntax to specify several files to get uploaded (using the same
-   persistant connection), using -T.
-
- * When the multi interface has been implemented and proved to work, the
-   client could be told to use maximum N simultaneous transfers and then just
-   make sure that happens. It should of course not make more than one
-   connection to the same remote host.
+ * The client could be told to use maximum N simultaneous transfers and then
+   just make sure that happens. It should of course not make more than one
+   connection to the same remote host. This would require the client to use
+   the multi interface.
 
  * Extending the capabilities of the multipart formposting. How about leaving
    the ';type=foo' syntax as it is and adding an extra tag (headers) which
