@@ -2102,7 +2102,14 @@ curl_getdate (const char *p, const time_t *now)
   if (cookie.yyHaveZone)
     {
       long delta;
-      struct tm *gmt = gmtime (&Start);
+      struct tm *gmt;
+#ifdef HAVE_GMTIME_R
+      /* thread-safe version */
+      struct tm keeptime;
+      gmt = (struct tm *)gmtime_r(&Start, &keeptime);
+#else
+      gmt = gmtime(&Start);
+#endif
       if (!gmt)
 	return -1;
       delta = cookie.yyTimezone * 60L + difftm (&tm, gmt);
