@@ -18,7 +18,7 @@ http
 HTTP, send cookies when using custom Host:
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/62 -b log/jar62.txt -H "Host: www.host.foo.com"
+http://%HOSTIP:%HTTPPORT/we/want/62 -b log/jar62.txt -H "Host: www.host.foo.com"
 </command>
 <file name="log/jar62.txt">
 # Netscape HTTP Cookie File

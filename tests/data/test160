@@ -29,7 +29,7 @@ http
 HTTP with delayed close, conn reuse, connection reset and retry
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/want/160 http://%HOSTIP:%HOSTPORT/wantmore/1600001
+http://%HOSTIP:%HTTPPORT/want/160 http://%HOSTIP:%HTTPPORT/wantmore/1600001
 </command>
 </test>
 
@@ -53,12 +53,12 @@ surprise2
 </strip>
 <protocol>
 GET /want/160 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
 GET /wantmore/1600001 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

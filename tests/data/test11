@@ -43,7 +43,7 @@ http
 simple HTTP Location: following
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/want/11 -L
+http://%HOSTIP:%HTTPPORT/want/11 -L
 </command>
 </test>
 
@@ -54,12 +54,12 @@ http://%HOSTIP:%HOSTPORT/want/11 -L
 </strip>
 <protocol>
 GET /want/11 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
 GET /want/data/110002.txt?coolsite=yes HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

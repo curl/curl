@@ -34,7 +34,7 @@ http
 HTTP, urlglob {}-retrieval and -o #[num] usage
  </name>
  <command option=no-output>
-"http://%HOSTIP:%HOSTPORT/{74,740001}" -o "log/dumpit#1.dump"
+"http://%HOSTIP:%HTTPPORT/{74,740001}" -o "log/dumpit#1.dump"
 </command>
 </client>
 
@@ -46,12 +46,12 @@ HTTP, urlglob {}-retrieval and -o #[num] usage
 </strip>
 <protocol>
 GET /74 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
 GET /740001 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

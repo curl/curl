@@ -72,7 +72,7 @@ SSL
 HTTP with proxy-requiring-NTLM to site-requiring-Digest
  </name>
  <command>
-http://data.from.server.requiring.digest.hohoho.com/169 --proxy http://%HOSTIP:%HOSTPORT --proxy-user foo:bar --proxy-ntlm --digest --user digest:alot
+http://data.from.server.requiring.digest.hohoho.com/169 --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm --digest --user digest:alot
 </command>
 </test>
 

@@ -20,7 +20,7 @@ http
 HTTP with simple cookie send
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/that/page/6 -b "name=contents;name2=content2"
+http://%HOSTIP:%HTTPPORT/we/want/that/page/6 -b "name=contents;name2=content2"
 </command>
 </test>
 
@@ -31,7 +31,7 @@ http://%HOSTIP:%HOSTPORT/we/want/that/page/6 -b "name=contents;name2=content2"
 </strip>
 <protocol>
 GET /we/want/that/page/6 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Cookie: name=contents;name2=content2

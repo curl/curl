@@ -13,7 +13,7 @@ http
 HTTP with no data in server reply
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/want/30
+http://%HOSTIP:%HTTPPORT/want/30
 </command>
 </test>
 
@@ -24,7 +24,7 @@ http://%HOSTIP:%HOSTPORT/want/30
 </strip>
 <protocol>
 GET /want/30 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

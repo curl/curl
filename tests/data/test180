@@ -18,7 +18,7 @@ http
 HTTP 1.0 PUT
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/180 -T log/test180.txt --http1.0
+http://%HOSTIP:%HTTPPORT/we/want/180 -T log/test180.txt --http1.0
 </command>
 <file name="log/test180.txt">
 Weird
@@ -40,7 +40,7 @@ the
 </strip>
 <protocol>
 PUT /we/want/180 HTTP/1.0
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Content-Length: 78

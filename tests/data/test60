@@ -19,7 +19,7 @@ http
 HTTP PUT from stdin with wrong content-length
 </name>
  <command>
-http://%HOSTIP:%HOSTPORT/bzz/60 -T - -H "Content-Length: 1" < log/60.txt
+http://%HOSTIP:%HTTPPORT/bzz/60 -T - -H "Content-Length: 1" < log/60.txt
 </command>
 <file name="log/60.txt">
 more than one byte
@@ -33,7 +33,7 @@ more than one byte
 </strip>
 <protocol>
 PUT /bzz/60 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Transfer-Encoding: chunked

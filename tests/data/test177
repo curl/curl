@@ -19,7 +19,7 @@ http
 HTTP POST --digest to server doing a 302-location response
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/177 -u auser:apasswd --digest -d "junkelijunk"
+http://%HOSTIP:%HTTPPORT/177 -u auser:apasswd --digest -d "junkelijunk"
 </command>
 </test>
 
@@ -31,7 +31,7 @@ http://%HOSTIP:%HOSTPORT/177 -u auser:apasswd --digest -d "junkelijunk"
 <protocol>
 HEAD /177 HTTP/1.1
 User-Agent: curl/7.12.1-CVS (i686-pc-linux-gnu) libcurl/7.12.1-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS libidn/0.4.6
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

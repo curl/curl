@@ -19,7 +19,7 @@ http
 HTTP resume request without server supporting it
  </name>
  <command option="no-output">
-http://%HOSTIP:%HOSTPORT/want/38 -C - -i -o log/fewl.txt
+http://%HOSTIP:%HTTPPORT/want/38 -C - -i -o log/fewl.txt
 </command>
 <file name="log/fewl.txt">
 This text is here to simulate a partly downloaded file to resume
@@ -38,7 +38,7 @@ download on.
 <protocol>
 GET /want/38 HTTP/1.1
 Range: bytes=78-
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

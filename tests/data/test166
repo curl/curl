@@ -18,7 +18,7 @@ http
 HTTP formpost a file with spaces in name
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/166 -F "name=@log/fie ld 166"
+http://%HOSTIP:%HTTPPORT/we/want/166 -F "name=@log/fie ld 166"
 </command>
 # We create this file before the command is invoked!
 <file name="log/fie ld 166">
@@ -34,7 +34,7 @@ data inside the file
 <protocol>
 POST /we/want/166 HTTP/1.1
 User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b zlib/1.1.4 c-ares/1.2.0 libidn/0.4.3
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Content-Length: 227

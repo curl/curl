@@ -38,7 +38,7 @@ http
 HTTP with -z "newer date"
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/78 -z "1999-12-12 12:00:00 MET"
+http://%HOSTIP:%HTTPPORT/78 -z "1999-12-12 12:00:00 MET"
 </command>
 </client>
 
@@ -50,7 +50,7 @@ http://%HOSTIP:%HOSTPORT/78 -z "1999-12-12 12:00:00 MET"
 </strip>
 <protocol>
 GET /78 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 If-Modified-Since: Sun, 12 Dec 1999 11:00:00 GMT

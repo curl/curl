@@ -12,7 +12,7 @@ none
 urlglob with bad -o #[num] usage
  </name>
  <command option=no-output>
-"http://%HOSTIP:%HOSTPORT/[870001-870003]" -o "log/dumpit#2.dump"
+"http://%HOSTIP:%HTTPPORT/[870001-870003]" -o "log/dumpit#2.dump"
 </command>
 </client>
 

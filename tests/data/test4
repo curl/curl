@@ -21,7 +21,7 @@ http
 Replaced internal and added custom HTTP headers
  </name>
  <command>
- -H "extra-header: here" -H "Accept: replaced" http://%HOSTIP:%HOSTPORT/4
+ -H "extra-header: here" -H "Accept: replaced" http://%HOSTIP:%HTTPPORT/4
 </command>
 </test>
 
@@ -33,7 +33,7 @@ Replaced internal and added custom HTTP headers
 </strip>
 <protocol>
 GET /4 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 extra-header: here
 Accept: replaced

@@ -29,7 +29,7 @@ lib514
 First set options to POST and then to make HEAD
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/514
+http://%HOSTIP:%HTTPPORT/514
 </command>
 </client>
 
@@ -41,7 +41,7 @@ http://%HOSTIP:%HOSTPORT/514
 </strip>
 <protocol>
 HEAD /514 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

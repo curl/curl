@@ -19,7 +19,7 @@ http
 HTTP with -d and -G and -I
  </name>
  <command>
--d "foo=moo&moo=poo" http://%HOSTIP:%HOSTPORT/48 -G -I
+-d "foo=moo&moo=poo" http://%HOSTIP:%HTTPPORT/48 -G -I
 </command>
 </client>
 
@@ -31,7 +31,7 @@ HTTP with -d and -G and -I
 </strip>
 <protocol>
 HEAD /48?foo=moo&moo=poo HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

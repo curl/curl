@@ -34,7 +34,7 @@ lib503
 simple multi http:// through proxytunnel with authentication info
  </name>
  <command>
-http://%HOSTIP:%HTTPSPORT/503 localhost:%HOSTPORT
+http://%HOSTIP:%HTTPSPORT/503 localhost:%HTTPPORT
 </command>
 <file name="log/test503.txt">
 foo
@@ -48,12 +48,12 @@ moo
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-CONNECT 127.0.0.1:8433 HTTP/1.0
+CONNECT 127.0.0.1:%HTTPSPORT HTTP/1.0
 Proxy-Authorization: Basic dGVzdDppbmc=
 
 GET /503 HTTP/1.1
 Authorization: Basic dGVzdDppbmc=
-Host: 127.0.0.1:8433
+Host: 127.0.0.1:%HTTPSPORT
 Pragma: no-cache
 Accept: */*
 

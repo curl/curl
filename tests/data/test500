@@ -31,7 +31,7 @@ lib500
 simple libcurl HTTP GET tool
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/500
+http://%HOSTIP:%HTTPPORT/500
 </command>
 </client>
 
@@ -40,7 +40,7 @@ http://%HOSTIP:%HOSTPORT/500
 <verify>
 <protocol>
 GET /500 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

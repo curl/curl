@@ -50,7 +50,7 @@ HTTP with shared cookie list (and dns cache)
 lib506
 </tool>
 <command>
-http://%HOSTIP:%HOSTPORT/506
+http://%HOSTIP:%HTTPPORT/506
 </command>
 </client>
 
@@ -139,7 +139,7 @@ unlock: share  <Pigs in space>: 55
 GLOBAL_CLEANUP
 </stdout>
 <stderr>
-http://%HOSTIP:%HOSTPORT/506 
+http://%HOSTIP:%HTTPPORT/506 
 </stderr>
 <file name="log/jar506">
 # Netscape HTTP Cookie File

@@ -4,7 +4,6 @@
 <data>
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
-Server: localhost:8433
 Content-length:6
 
 Hello
@@ -31,7 +30,7 @@ lib509
 simple HTTPS GET and URL redirect in certificate
  </name>
  <command>
-https://localhost:%HTTPSPORT/dvcs
+https://localhost:%HTTPSPORT/dvcs %HTTPSPORT
 </command>
 </client>
 
@@ -43,7 +42,7 @@ https://localhost:%HTTPSPORT/dvcs
 </strip>
 <protocol>
 GET /509 HTTP/1.1
-Host: localhost:8433
+Host: localhost:%HTTPSPORT
 Pragma: no-cache
 Accept: */*
 

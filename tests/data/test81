@@ -52,7 +52,7 @@ http
 HTTP with proxy using NTLM authorization
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/81 --proxy-user testuser:testpass -x http://%HOSTIP:%HOSTPORT --proxy-ntlm
+http://%HOSTIP:%HTTPPORT/81 --proxy-user testuser:testpass -x http://%HOSTIP:%HTTPPORT --proxy-ntlm
 </command>
 </test>
 
@@ -62,17 +62,17 @@ http://%HOSTIP:%HOSTPORT/81 --proxy-user testuser:testpass -x http://%HOSTIP:%HO
 ^User-Agent:.*
 </strip>
 <protocol>
-GET http://127.0.0.1:8999/81 HTTP/1.1
+GET http://127.0.0.1:%HTTPPORT/81 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
-GET http://127.0.0.1:8999/81 HTTP/1.1
+GET http://127.0.0.1:%HTTPPORT/81 HTTP/1.1
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEgAAAAYABgAYAAAAAAAAABAAAAACAAIAEAAAAAAAAAASAAAAAAAAAB4AAAAAYIAAHRlc3R1c2VyWmRDApEJkUyGOPS3DjvASModEeW/N/FBqYVyF4y6/y/7F6qmEQ7lXjXFF3tH1145
 User-Agent: curl/7.10.6-pre1 (i686-pc-linux-gnu) libcurl/7.10.6-pre1 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

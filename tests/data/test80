@@ -33,7 +33,7 @@ http
 HTTP CONNECT with proxy and host Basic authentication
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/that/page/80 -p -x %HOSTIP:%HOSTPORT --user iam:myself --proxy-user youare:yourself
+http://%HOSTIP:%HTTPPORT/we/want/that/page/80 -p -x %HOSTIP:%HTTPPORT --user iam:myself --proxy-user youare:yourself
 </command>
 </test>
 
@@ -44,14 +44,14 @@ http://%HOSTIP:%HOSTPORT/we/want/that/page/80 -p -x %HOSTIP:%HOSTPORT --user iam
 ^User-Agent:.*
 </strip>
 <protocol>
-CONNECT 127.0.0.1:8999 HTTP/1.0
+CONNECT 127.0.0.1:%HTTPPORT HTTP/1.0
 Proxy-Authorization: Basic eW91YXJlOnlvdXJzZWxm
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
 
 GET /we/want/that/page/80 HTTP/1.1
 Authorization: Basic aWFtOm15c2VsZg==
 User-Agent: curl/7.10.7-pre2 (i686-pc-linux-gnu) libcurl/7.10.7-pre2 OpenSSL/0.9.7a zlib/1.1.3
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

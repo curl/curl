@@ -21,7 +21,7 @@ http
 HTTP PUT from stdin with set size, disabling chunked transfer-encoding
  </name>
  <command>
- -T - -H "Transfer-Encoding:" -H "Content-Length: 14" http://%HOSTIP:%HOSTPORT/98
+ -T - -H "Transfer-Encoding:" -H "Content-Length: 14" http://%HOSTIP:%HTTPPORT/98
 </command>
 <stdin>
 data on stdin
@@ -36,7 +36,7 @@ data on stdin
 </strip>
 <protocol>
 PUT /98 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Content-Length: 14

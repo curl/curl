@@ -13,7 +13,7 @@ https
 insecure HTTPS without permission
  </name>
  <command>
-https://%HOSTIP:%HOSTPORT/want/305 --cacert moooo
+https://%HOSTIP:%HTTPPORT/want/305 --cacert moooo
 </command>
 </test>
 

@@ -13,7 +13,7 @@ none
 HTTP, urlglob retrieval with bad range
  </name>
  <command option=no-output>
-"http://%HOSTIP:%HOSTPORT/[1-1]" -o "log/weee#1.dump" --stderr -
+"http://%HOSTIP:%HTTPPORT/[1-1]" -o "log/weee#1.dump" --stderr -
 </command>
 </client>
 

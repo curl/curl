@@ -31,7 +31,7 @@ http
 HTTP with weirdly formatted cookies and cookiejar storage
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/31 -b none -c log/jar31.txt
+http://%HOSTIP:%HTTPPORT/we/want/31 -b none -c log/jar31.txt
 </command>
 </test>
 
@@ -42,7 +42,7 @@ http://%HOSTIP:%HOSTPORT/we/want/31 -b none -c log/jar31.txt
 </strip>
 <protocol>
 GET /we/want/31 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

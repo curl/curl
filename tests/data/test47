@@ -20,7 +20,7 @@ http
 simple HTTP 1.0 GET
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/47 -0
+http://%HOSTIP:%HTTPPORT/47 -0
 </command>
 </test>
 
@@ -32,7 +32,7 @@ http://%HOSTIP:%HOSTPORT/47 -0
 </strip>
 <protocol>
 GET /47 HTTP/1.0
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

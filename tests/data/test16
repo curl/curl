@@ -21,7 +21,7 @@ http
 HTTP with proxy athorization
  </name>
  <command>
- -U fake@user:§§§looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x %HOSTIP:%HOSTPORT http://we.want.that.site.com/16
+ -U fake@user:§§§looooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooong -x %HOSTIP:%HTTPPORT http://we.want.that.site.com/16
 </command>
 </test>
 

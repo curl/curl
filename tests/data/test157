@@ -19,7 +19,7 @@ http
 HTTP GET with --anyauth (when the server requires none)
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/157 -u testuser:testpass --anyauth
+http://%HOSTIP:%HTTPPORT/157 -u testuser:testpass --anyauth
 </command>
 </client>
 
@@ -30,7 +30,7 @@ http://%HOSTIP:%HOSTPORT/157 -u testuser:testpass --anyauth
 </strip>
 <protocol>
 GET /157 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

@@ -26,7 +26,7 @@ lib510
 send HTTP POST using read callback, using chunked transfer-encoding
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/510
+http://%HOSTIP:%HTTPPORT/510
 </command>
 </client>
 
@@ -35,7 +35,7 @@ http://%HOSTIP:%HOSTPORT/510
 <verify>
 <protocol>
 POST /510 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Transfer-Encoding: chunked

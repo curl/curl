@@ -21,7 +21,7 @@ http
 HTTP, junk session cookies
  </name>
  <command>
-%HOSTIP:%HOSTPORT/want/53 -b log/injar53 -j
+%HOSTIP:%HTTPPORT/want/53 -b log/injar53 -j
 </command>
 <file name="log/injar53">
 127.0.0.1	FALSE	/	FALSE	2139150993	mooo	indeed
@@ -37,7 +37,7 @@ HTTP, junk session cookies
 </strip>
 <protocol>
 GET /want/53 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Cookie: mooo=indeed

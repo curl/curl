@@ -21,7 +21,7 @@ http
 HTTP, get cookie with dot prefixed full domain
  </name>
  <command>
--c log/jar171 -x %HOSTIP:%HOSTPORT http://z.x.com/171
+-c log/jar171 -x %HOSTIP:%HTTPPORT http://z.x.com/171
 </command>
 </client>
 

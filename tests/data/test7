@@ -22,7 +22,7 @@ http
 HTTP with cookie parser and header recording
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/7 -b none -D log/heads7.txt
+http://%HOSTIP:%HTTPPORT/we/want/7 -b none -D log/heads7.txt
 </command>
 </test>
 
@@ -33,7 +33,7 @@ http://%HOSTIP:%HOSTPORT/we/want/7 -b none -D log/heads7.txt
 </strip>
 <protocol>
 GET /we/want/7 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

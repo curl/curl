@@ -32,10 +32,14 @@ require "getpart.pm"; # array functions
 
 my $srcdir = $ENV{'srcdir'} || '.';
 my $HOSTIP="127.0.0.1";
-my $HOSTPORT=8999; # bad name, but this is the HTTP server port
-my $HTTPSPORT=8433; # this is the HTTPS server port
-my $FTPPORT=8921;  # this is the FTP server port
-my $FTPSPORT=8821;  # this is the FTPS server port
+
+my $base = 8990; # base port number
+
+my $HTTPPORT; # HTTP server port
+my $HTTPSPORT; # HTTPS server port
+my $FTPPORT; # FTP server port
+my $FTPSPORT; # FTPS server port
+
 my $CURL="../src/curl"; # what curl executable to run on the tests
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
 my $LOGDIR="log";
@@ -325,7 +329,7 @@ sub runhttpserver {
     $pid = checkserver ($HTTPPIDFILE);
 
     # verify if our/any server is running on this port
-    my $cmd = "$CURL -o log/verifiedserver http://$HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null";
+    my $cmd = "$CURL -o log/verifiedserver http://$HOSTIP:$HTTPPORT/verifiedserver 2>/dev/null";
     print "CMD; $cmd\n" if ($verbose);
     my $res = system($cmd);
 
@@ -343,7 +347,7 @@ sub runhttpserver {
         $pid = 0+$1;
     }
     elsif($data || ($res != 7)) {
-        print "RUN: Unknown HTTP server is running on port $HOSTPORT\n";
+        print "RUN: Unknown HTTP server is running on port $HTTPPORT\n";
         return -2;
     }
 
@@ -362,7 +366,7 @@ sub runhttpserver {
     if($dir) {
         $flag .= "-d \"$dir\" ";
     }
-    $cmd="$perl $srcdir/httpserver.pl $flag $HOSTPORT &";
+    $cmd="$perl $srcdir/httpserver.pl $flag $HTTPPORT &";
     system($cmd);
     if($verbose) {
         print "CMD: $cmd\n";
@@ -371,7 +375,7 @@ sub runhttpserver {
     my $verified;
     for(1 .. 10) {
         # verify that our server is up and running:
-        my $data=`$CURL --silent $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null`;
+        my $data=`$CURL --silent $HOSTIP:$HTTPPORT/verifiedserver 2>/dev/null`;
 
         if ( $data =~ /WE ROOLZ: (\d+)/ ) {
             $pid = 0+$1;
@@ -421,7 +425,7 @@ sub runhttpsserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/httpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $HOSTPORT $HTTPSPORT &";
+    my $cmd="$perl $srcdir/httpsserver.pl $flag -s \"$stunnel\" -d $srcdir -r $HTTPPORT $HTTPSPORT &";
     system($cmd);
     if($verbose) {
         print "CMD: $cmd\n";
@@ -776,6 +780,12 @@ sub checkcurl {
     printf("* libcurl SSL:      %s\n", $ssl_version?"ON":"OFF");
     printf("* libcurl debug:    %s\n", $curl_debug?"ON":"OFF");
     printf("* valgrind:         %s\n", $valgrind?"ON":"OFF");
+    printf("* HTTP on port:     %d\n", $HTTPPORT);
+    printf("* FTP on port:      %d\n", $FTPPORT);
+    if($stunnel) {
+        printf("* FTPS on port:     %d\n", $FTPSPORT);
+        printf("* HTTPS on port:    %d\n", $HTTPSPORT);
+    }
     print "***************************************** \n";
 }
 
@@ -786,13 +796,21 @@ sub checkcurl {
 sub subVariables {
   my ($thing) = @_;
   $$thing =~ s/%HOSTIP/$HOSTIP/g;
-  $$thing =~ s/%HOSTPORT/$HOSTPORT/g;
-  $$thing =~ s/%HTTPPORT/$HOSTPORT/g;
+  $$thing =~ s/%HTTPPORT/$HTTPPORT/g;
   $$thing =~ s/%HTTPSPORT/$HTTPSPORT/g;
   $$thing =~ s/%FTPPORT/$FTPPORT/g;
   $$thing =~ s/%FTPSPORT/$FTPSPORT/g;
   $$thing =~ s/%SRCDIR/$srcdir/g;
   $$thing =~ s/%PWD/$pwd/g;
+}
+
+sub fixarray {
+    my @in = @_;
+
+    for(@in) {
+        subVariables \$_;
+    }
+    return @in;
 }
 
 #######################################################################
@@ -908,17 +926,17 @@ sub singletest {
     }
 
     # curl command to run
-    my @curlcmd= getpart("client", "command");
+    my @curlcmd= fixarray ( getpart("client", "command") );
 
     # this is the valid protocol blurb curl should generate
-    my @protocol= getpart("verify", "protocol");
+    my @protocol= fixarray ( getpart("verify", "protocol") );
 
     # redirected stdout/stderr to these files
     $STDOUT="$LOGDIR/stdout$testnum";
     $STDERR="$LOGDIR/stderr$testnum";
 
     # if this section exists, we verify that the stdout contained this:
-    my @validstdout = getpart("verify", "stdout");
+    my @validstdout = fixarray ( getpart("verify", "stdout") );
 
     # if this section exists, we verify upload
     my @upload = getpart("verify", "upload");
@@ -1587,6 +1605,11 @@ if($valgrind) {
         undef $valgrind;
     }
 }
+
+$HTTPPORT =  $base + 0; # HTTP server port
+$HTTPSPORT = $base + 1; # HTTPS server port
+$FTPPORT =   $base + 2; # FTP server port
+$FTPSPORT =  $base + 3; # FTPS server port
 
 #######################################################################
 # Output curl version and host info being tested

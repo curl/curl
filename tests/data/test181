@@ -18,7 +18,7 @@ http
 HTTP 1.0 POST
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/181 --data-binary @log/test181.txt --http1.0
+http://%HOSTIP:%HTTPPORT/we/want/181 --data-binary @log/test181.txt --http1.0
 </command>
 <file name="log/test181.txt">
 Weird
@@ -40,7 +40,7 @@ the
 </strip>
 <protocol>
 POST /we/want/181 HTTP/1.0
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Content-Length: 79

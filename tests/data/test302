@@ -14,7 +14,7 @@ https
 HTTPS GET over HTTP proxy fails
  </name>
  <command>
--k -U fake:user -x %HOSTIP:%HOSTPORT https://bad.fakeurl-to.test/slash/302
+-k -U fake:user -x %HOSTIP:%HTTPPORT https://bad.fakeurl-to.test/slash/302
 </command>
 </test>
 

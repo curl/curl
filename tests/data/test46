@@ -26,7 +26,7 @@ http
 HTTP, get cookies and store in cookie jar
  </name>
  <command>
-%HOSTIP:%HOSTPORT/want/46 -c log/jar46 -b log/injar46
+%HOSTIP:%HTTPPORT/want/46 -c log/jar46 -b log/injar46
 </command>
 <file name="log/injar46">
 # Netscape HTTP Cookie File
@@ -47,7 +47,7 @@ www.loser.com	FALSE	/	FALSE	1139150993	UID	99
 </strip>
 <protocol>
 GET /want/46 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Cookie: empty=; mooo=indeed

@@ -19,7 +19,7 @@ http
 HTTP PUT from file with weird letters
 </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/ -T log/58te[]st.txt -g
+http://%HOSTIP:%HTTPPORT/we/want/ -T log/58te[]st.txt -g
 </command>
 <file name="log/58te[]st.txt">
 a few bytes
@@ -33,7 +33,7 @@ a few bytes
 </strip>
 <protocol>
 PUT /we/want/58te%5B%5Dst%2Etxt HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Content-Length: 12

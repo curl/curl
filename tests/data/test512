@@ -25,7 +25,7 @@ lib512
 simple curl_easy_duplicate() test
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/512
+http://%HOSTIP:%HTTPPORT/512
 </command>
 </client>
 
@@ -37,7 +37,7 @@ http://%HOSTIP:%HOSTPORT/512
 </strip>
 <protocol>
 GET /512 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

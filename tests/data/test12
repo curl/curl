@@ -27,7 +27,7 @@ http
 HTTP range support
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/want/12 -r 100-200
+http://%HOSTIP:%HTTPPORT/want/12 -r 100-200
 </command>
 </test>
 
@@ -39,7 +39,7 @@ http://%HOSTIP:%HOSTPORT/want/12 -r 100-200
 <protocol>
 GET /want/12 HTTP/1.1
 Range: bytes=100-200
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

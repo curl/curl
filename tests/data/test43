@@ -43,7 +43,7 @@ http
 HTTP Location: following over HTTP proxy
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/want/43 -L -x %HOSTIP:%HOSTPORT
+http://%HOSTIP:%HTTPPORT/want/43 -L -x %HOSTIP:%HTTPPORT
 </command>
 </test>
 
@@ -53,13 +53,13 @@ http://%HOSTIP:%HOSTPORT/want/43 -L -x %HOSTIP:%HOSTPORT
 ^User-Agent:.*
 </strip>
 <protocol>
-GET http://127.0.0.1:8999/want/43 HTTP/1.1
-Host: 127.0.0.1:8999
+GET http://127.0.0.1:%HTTPPORT/want/43 HTTP/1.1
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
-GET http://127.0.0.1:8999/want/data/430002.txt?coolsite=yes HTTP/1.1
-Host: 127.0.0.1:8999
+GET http://127.0.0.1:%HTTPPORT/want/data/430002.txt?coolsite=yes HTTP/1.1
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

@@ -32,7 +32,7 @@ http
 multiple requests using {} in URL
  </name>
  <command>
-'%HOSTIP:%HOSTPORT/{18,180002,180003}'
+'%HOSTIP:%HTTPPORT/{18,180002,180003}'
 </command>
 </test>
 
@@ -44,37 +44,37 @@ multiple requests using {} in URL
 <protocol>
 GET /18 HTTP/1.1
 User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
 GET /180002 HTTP/1.1
 User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
 GET /180003 HTTP/1.1
 User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
 </protocol>
 <stdout>
---_curl_--127.0.0.1:8999/18
+--_curl_--127.0.0.1:%HTTPPORT/18
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
 
 moo
---_curl_--127.0.0.1:8999/180002
+--_curl_--127.0.0.1:%HTTPPORT/180002
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4
 
 foo
---_curl_--127.0.0.1:8999/180003
+--_curl_--127.0.0.1:%HTTPPORT/180003
 HTTP/1.1 200 OK
 Funny-head: yesyes
 Content-Length: 4

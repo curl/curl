@@ -20,7 +20,7 @@ http
 HTTP URL with slash but with "parameter"
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT?mooo/59
+http://%HOSTIP:%HTTPPORT?mooo/59
 </command>
 </client>
 
@@ -32,7 +32,7 @@ http://%HOSTIP:%HOSTPORT?mooo/59
 </strip>
 <protocol>
 GET /?mooo/59 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

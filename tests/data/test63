@@ -18,7 +18,7 @@ http
 HTTP with proxy authorization set in environment
  </name>
 <setenv>
-http_proxy=http://fake:user@%HOSTIP:%HOSTPORT/
+http_proxy=http://fake:user@%HOSTIP:%HTTPPORT/
 </setenv>
  <command>
 http://we.want.that.site.com/63

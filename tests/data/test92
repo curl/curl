@@ -23,7 +23,7 @@ http
 HTTP resume transfer with the whole file already downloaded
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/want/92 -C 87
+http://%HOSTIP:%HTTPPORT/want/92 -C 87
 </command>
 </client>
 
@@ -35,7 +35,7 @@ http://%HOSTIP:%HOSTPORT/want/92 -C 87
 <protocol>
 GET /want/92 HTTP/1.1
 Range: bytes=87-
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

@@ -47,7 +47,7 @@ http
 HTTP with proxy-requiring-Digest to site-requiring-Digest
  </name>
  <command>
-http://data.from.server.requiring.digest.hohoho.com/168 --proxy http://%HOSTIP:%HOSTPORT --proxy-user foo:bar --proxy-digest --digest --user digest:alot
+http://data.from.server.requiring.digest.hohoho.com/168 --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-digest --digest --user digest:alot
 </command>
 </test>
 

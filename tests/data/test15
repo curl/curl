@@ -20,7 +20,7 @@ http
 --write-out test
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/want/15 --write-out '%{url_effective} %{http_code} %{size_download}\n'
+http://%HOSTIP:%HTTPPORT/want/15 --write-out '%{url_effective} %{http_code} %{size_download}\n'
 </command>
 </test>
 
@@ -34,14 +34,14 @@ Fake: yes
 Content-Length: 26
 
 Repeated nonsense-headers
-http://127.0.0.1:8999/want/15 200 26
+http://127.0.0.1:%HTTPPORT/want/15 200 26
 </stdout>
 <strip>
 ^User-Agent:.*
 </strip>
 <protocol>
 GET /want/15 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

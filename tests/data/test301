@@ -34,7 +34,7 @@ HTTPS GET with user and password
 <protocol>
 GET /301 HTTP/1.1
 Authorization: Basic ZmFrZTp1c2Vy
-Host: 127.0.0.1:8433
+Host: 127.0.0.1:%HTTPSPORT
 Pragma: no-cache
 Accept: */*
 

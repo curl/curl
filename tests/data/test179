@@ -21,7 +21,7 @@ http
 HTTP using proxy and cookies with path checks
  </name>
  <command>
-http://supertrooper.fake/c/179 -b log/injar179 -x %HOSTIP:%HOSTPORT
+http://supertrooper.fake/c/179 -b log/injar179 -x %HOSTIP:%HTTPPORT
 </command>
 <file name="log/injar179">
 supertrooper.fake	FALSE	/a	FALSE	2139150993	mooo	indeed

@@ -22,7 +22,7 @@ http
 simple HTTP GET with negative Content-Length
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/178
+http://%HOSTIP:%HTTPPORT/178
 </command>
 </client>
 
@@ -34,7 +34,7 @@ http://%HOSTIP:%HOSTPORT/178
 </strip>
 <protocol>
 GET /178 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

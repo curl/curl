@@ -21,7 +21,7 @@ http
 HTTP GET with failed proxy auth
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/93 -x %HOSTIP:%HOSTPORT
+http://%HOSTIP:%HTTPPORT/93 -x %HOSTIP:%HTTPPORT
 </command>
 </client>
 
@@ -32,8 +32,8 @@ http://%HOSTIP:%HOSTPORT/93 -x %HOSTIP:%HOSTPORT
 ^User-Agent:.*
 </strip>
 <protocol>
-GET http://127.0.0.1:8999/93 HTTP/1.1
-Host: 127.0.0.1:8999
+GET http://127.0.0.1:%HTTPPORT/93 HTTP/1.1
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

@@ -43,7 +43,7 @@ http
 simple HTTP Location: without protocol in initial URL
  </name>
  <command>
-%HOSTIP:%HOSTPORT/want/45 -L
+%HOSTIP:%HTTPPORT/want/45 -L
 </command>
 </test>
 
@@ -54,12 +54,12 @@ simple HTTP Location: without protocol in initial URL
 </strip>
 <protocol>
 GET /want/45 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
 GET /want/data.cgi?moo=http://&/450002 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

@@ -17,7 +17,7 @@ http
 HTTP with cookie parsing from header file
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/8 -b log/heads8.txt
+http://%HOSTIP:%HTTPPORT/we/want/8 -b log/heads8.txt
 </command>
 
 # We create this file before the command is invoked!
@@ -41,7 +41,7 @@ Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
 </strip>
 <protocol>
 GET /we/want/8 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Cookie: partmatch=present; foobar=name

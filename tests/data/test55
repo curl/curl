@@ -35,7 +35,7 @@ http
 HTTP follow redirect with single slash in path
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/55 -L
+http://%HOSTIP:%HTTPPORT/55 -L
 </command>
 </client>
 
@@ -45,13 +45,13 @@ http://%HOSTIP:%HOSTPORT/55 -L
 </strip>
 <protocol>
 GET /55 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
 GET /550002 HTTP/1.1
 User-Agent: curl/7.10 (i686-pc-linux-gnu) libcurl/7.10 OpenSSL/0.9.6c ipv6 zlib/1.1.3
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

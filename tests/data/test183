@@ -21,7 +21,7 @@ SSL
 HTTP GET two URLs over a single proxy with persistent connection
  </name>
  <command>
-http://deathstar.another.galaxy/183 http://a.galaxy.far.far.away/183 --proxy http://%HOSTIP:%HOSTPORT
+http://deathstar.another.galaxy/183 http://a.galaxy.far.far.away/183 --proxy http://%HOSTIP:%HTTPPORT
 </command>
 </test>
 

@@ -28,7 +28,7 @@ http
 HTTP POST with auth and contents but with content-length set to 0
  </name>
  <command>
- -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HOSTPORT/3
+ -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HTTPPORT/3
 </command>
 </test>
 
@@ -41,7 +41,7 @@ HTTP POST with auth and contents but with content-length set to 0
 <protocol nonewline=yes>
 POST /3 HTTP/1.1
 Authorization: Basic ZmFrZTotdXNlcg==
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Content-Length: 37

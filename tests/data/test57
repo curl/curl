@@ -17,7 +17,7 @@ http
 HTTP content-type with spaces in
  </name>
  <command>
--w '%{content_type}\n' %HOSTIP:%HOSTPORT/57 -o log/out57
+-w '%{content_type}\n' %HOSTIP:%HTTPPORT/57 -o log/out57
 </command>
 </test>
 
@@ -31,7 +31,7 @@ text/html; charset=ISO-8859-4
 </strip>
 <protocol>
 GET /57 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

@@ -18,7 +18,7 @@ http
 HTTP with cookies file and custom added cookie
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/172 -b log/jar172.txt -b "tool=curl; name=fool"
+http://%HOSTIP:%HTTPPORT/we/want/172 -b log/jar172.txt -b "tool=curl; name=fool"
 </command>
 <file name="log/jar172.txt">
 # Netscape HTTP Cookie File
@@ -38,7 +38,7 @@ http://%HOSTIP:%HOSTPORT/we/want/172 -b log/jar172.txt -b "tool=curl; name=fool"
 </strip>
 <protocol>
 GET /we/want/172 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Cookie: nodomain=value; partmatch=present; tool=curl; name=fool

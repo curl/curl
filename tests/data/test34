@@ -37,7 +37,7 @@ http
 HTTP GET with chunked Transfer-Encoding
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/34
+http://%HOSTIP:%HTTPPORT/34
 </command>
 </test>
 
@@ -49,7 +49,7 @@ http://%HOSTIP:%HOSTPORT/34
 </strip>
 <protocol>
 GET /34 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

@@ -27,7 +27,7 @@ CHARSET=ISO8859-1
 HTTP over proxy with IDN host name
  </name>
  <command>
-http://www.едц.se/page/165 -x %HOSTIP:%HOSTPORT
+http://www.едц.se/page/165 -x %HOSTIP:%HTTPPORT
 </command>
 </test>
 

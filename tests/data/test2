@@ -21,7 +21,7 @@ http
 HTTP GET with user and password
  </name>
  <command>
- -u fake:user http://%HOSTIP:%HOSTPORT/2
+ -u fake:user http://%HOSTIP:%HTTPPORT/2
 </command>
 </test>
 
@@ -34,7 +34,7 @@ HTTP GET with user and password
 <protocol>
 GET /2 HTTP/1.1
 Authorization: Basic ZmFrZTp1c2Vy
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

@@ -33,7 +33,7 @@ http
 HTTP GET with bad chunked Transfer-Encoding
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/36
+http://%HOSTIP:%HTTPPORT/36
 </command>
 </test>
 
@@ -48,7 +48,7 @@ http://%HOSTIP:%HOSTPORT/36
 </strip>
 <protocol>
 GET /36 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

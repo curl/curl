@@ -13,7 +13,7 @@ none
 HTTP, -O with no file name part in the URL
  </name>
  <command option=no-output>
-http://%HOSTIP:%HOSTPORT/76/ -O
+http://%HOSTIP:%HTTPPORT/76/ -O
 </command>
 </client>
 

@@ -18,6 +18,7 @@
 #include <openssl/bio.h>
 #include <openssl/ssl.h>
 
+int portnum; /* the HTTPS port number we use */
 
 typedef struct sslctxparm_st {
   CURL* curl;
@@ -62,6 +63,8 @@ static unsigned char *my_get_ext(X509 * cert, const int type,
 }
 
 void * globalparm = NULL;
+
+char newurl[512];
 
 static int ssl_app_verify_callback(X509_STORE_CTX *ctx, void *arg)
 {
@@ -113,7 +116,15 @@ static int ssl_app_verify_callback(X509_STORE_CTX *ctx, void *arg)
                 (char *)accessinfoURL, (char *)p->accessinfoURL);
         OPENSSL_free(p->accessinfoURL);
         p->accessinfoURL = accessinfoURL;
-        curl_easy_setopt(p->curl, CURLOPT_URL,p->accessinfoURL);
+
+        /* We need to be able to deal with a custom port number, but the
+           URL in the cert uses a static one. We thus need to create a new
+           URL that uses the currently requested port number which may not
+           be the one this URL uses! */
+        sprintf(newurl, "https://localhost:%d/509", portnum);
+        fprintf(stderr, "But *really* Setting URL <%s>\n", newurl);
+
+        curl_easy_setopt(p->curl, CURLOPT_URL, newurl);
       }
       else
         OPENSSL_free(accessinfoURL);
@@ -163,6 +174,10 @@ int test(char *URL)
 
   int i = 0;
   CURLMsg *msg;
+
+  if(arg2) {
+    portnum = atoi(arg2);
+  }
 
   curl_global_init(CURL_GLOBAL_ALL);
 

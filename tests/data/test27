@@ -18,7 +18,7 @@ http
 Get same cookie page several times
  </name>
  <command>
-'http://%HOSTIP:%HOSTPORT/want/{27,27,27}' -b none
+'http://%HOSTIP:%HTTPPORT/want/{27,27,27}' -b none
 </command>
 </test>
 
@@ -29,18 +29,18 @@ Get same cookie page several times
 </strip>
 <protocol>
 GET /want/27 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
 GET /want/27 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Cookie: thewinneris=nowayyouwin
 
 GET /want/27 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Cookie: thewinneris=nowayyouwin

@@ -24,7 +24,7 @@ SSL
 HTTPS GET with failed proxy auth
  </name>
  <command>
-https://test.anything.really.com:94 -x %HOSTIP:%HOSTPORT
+https://test.anything.really.com:94 -x %HOSTIP:%HTTPPORT
 </command>
 </client>
 

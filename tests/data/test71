@@ -24,7 +24,7 @@ HTTP and -F upload in config file
 -F file=@log/test71.txt
 </stdin>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/71 -K -
+http://%HOSTIP:%HTTPPORT/we/want/71 -K -
 </command>
 # We create this file before the command is invoked!
 <file name="log/test71.txt">
@@ -42,7 +42,7 @@ bar
 <protocol>
 POST /we/want/71 HTTP/1.1
 User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 zlib/1.1.3
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Content-Length: 412

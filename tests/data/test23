@@ -13,7 +13,7 @@ http
 unsupported protocol:// URL
  </name>
  <command>
-htfp://%HOSTIP:%HOSTPORT/none.htfml
+htfp://%HOSTIP:%HTTPPORT/none.htfml
 </command>
 </test>
 

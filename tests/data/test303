@@ -21,7 +21,7 @@ https
 HTTPS with 2 secs timeout
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/want/303 -m 2
+http://%HOSTIP:%HTTPPORT/want/303 -m 2
 </command>
 </test>
 
@@ -32,7 +32,7 @@ http://%HOSTIP:%HOSTPORT/want/303 -m 2
 </strip>
 <protocol>
 GET /want/303 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 

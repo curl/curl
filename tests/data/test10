@@ -19,7 +19,7 @@ http
 simple HTTP PUT from file
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/10 -T log/test10.txt
+http://%HOSTIP:%HTTPPORT/we/want/10 -T log/test10.txt
 </command>
 <file name="log/test10.txt">
 Weird
@@ -41,7 +41,7 @@ the
 </strip>
 <protocol>
 PUT /we/want/10 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Content-Length: 78

@@ -17,7 +17,7 @@ lib513
 send HTTP POST using read callback that returns CURL_READFUNC_ABORT
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/513
+http://%HOSTIP:%HTTPPORT/513
 </command>
 </client>
 
@@ -26,7 +26,7 @@ http://%HOSTIP:%HOSTPORT/513
 <verify>
 <protocol>
 POST /513 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 Content-Length: 1

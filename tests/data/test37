@@ -15,7 +15,7 @@ http
 HTTP GET with nothing returned from server
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/37
+http://%HOSTIP:%HTTPPORT/37
 </command>
 </test>
 
@@ -30,7 +30,7 @@ http://%HOSTIP:%HOSTPORT/37
 </strip>
 <protocol>
 GET /37 HTTP/1.1
-Host: 127.0.0.1:8999
+Host: 127.0.0.1:%HTTPPORT
 Pragma: no-cache
 Accept: */*
 
