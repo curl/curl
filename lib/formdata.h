@@ -45,6 +45,10 @@ typedef struct FormInfo {
   char *contenttype;
   long flags;
 
+		/* CMC: Added support for buffer uploads */
+  char *buffer;      /* pointer to existing buffer used for file upload */
+	long bufferlength;   
+
   char *showfilename; /* The file name to show. If not set, the actual
                          file name will be used */
   struct curl_slist* contentheader;

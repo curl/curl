@@ -400,6 +400,10 @@ int curl_formparse(char *input,
 static struct curl_httppost *
 AddHttpPost(char * name, long namelength,
             char * value, long contentslength,
+
+            /* CMC: Added support for buffer uploads */
+            char * buffer, long bufferlength,
+
             char *contenttype,
             long flags,
             struct curl_slist* contentHeader,
@@ -416,6 +420,11 @@ AddHttpPost(char * name, long namelength,
     post->namelength = name?(namelength?namelength:(long)strlen(name)):0;
     post->contents = value;
     post->contentslength = contentslength;
+
+    /* CMC: Added support for buffer uploads */
+    post->buffer = buffer;
+    post->bufferlength = bufferlength;
+
     post->contenttype = contenttype;
     post->contentheader = contentHeader;
     post->showfilename = showfilename;
@@ -783,9 +792,63 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         }
         break;
       }
+
+    /* CMC: Added support for buffer uploads */
+    case CURLFORM_BUFFER:
+      {
+        char *filename = array_state?array_value:
+          va_arg(params, char *);
+
+        if (current_form->value) {
+          if (current_form->flags & HTTPPOST_BUFFER) {
+            if (filename) {
+              if (!(current_form = AddFormInfo(strdup(filename),
+                                               NULL, current_form)))
+                return_value = CURL_FORMADD_MEMORY;
+            }
+            else
+              return_value = CURL_FORMADD_NULL;
+          }
+          else
+            return_value = CURL_FORMADD_OPTION_TWICE;
+        }
+        else {
+          if (filename)
+            current_form->value = strdup(filename);
+          else
+            return_value = CURL_FORMADD_NULL;
+          current_form->flags |= HTTPPOST_BUFFER;
+        }
+        break;
+      }
+      
+    /* CMC: Added support for buffer uploads */
+    case CURLFORM_BUFFERPTR:
+        current_form->flags |= HTTPPOST_PTRBUFFER;
+      if (current_form->buffer)
+        return_value = CURL_FORMADD_OPTION_TWICE;
+      else {
+        char *buffer =
+          array_state?array_value:va_arg(params, char *);
+        if (buffer)
+          current_form->buffer = buffer; /* store for the moment */
+        else
+          return_value = CURL_FORMADD_NULL;
+      }
+      break;
+
+    /* CMC: Added support for buffer uploads */
+    case CURLFORM_BUFFERLENGTH:
+      if (current_form->bufferlength)
+        return_value = CURL_FORMADD_OPTION_TWICE;
+      else
+        current_form->bufferlength =
+          array_state?(long)array_value:va_arg(params, long);
+      break;
+
     case CURLFORM_CONTENTTYPE:
       {
-	char *contenttype =
+        char *contenttype =
           array_state?array_value:va_arg(params, char *);
         if (current_form->contenttype) {
           if (current_form->flags & HTTPPOST_FILENAME) {
@@ -852,6 +915,12 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
              (form->flags & HTTPPOST_FILENAME) ) ||
            ( (form->flags & HTTPPOST_FILENAME) &&
              (form->flags & HTTPPOST_PTRCONTENTS) ) ||
+
+           /* CMC: Added support for buffer uploads */
+           ( (!form->buffer) &&
+             (form->flags & HTTPPOST_BUFFER) &&
+             (form->flags & HTTPPOST_PTRBUFFER) ) ||
+
            ( (form->flags & HTTPPOST_READFILE) &&
              (form->flags & HTTPPOST_PTRCONTENTS) )
            ) {
@@ -859,7 +928,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         break;
       }
       else {
-        if ( (form->flags & HTTPPOST_FILENAME) &&
+        if ( ((form->flags & HTTPPOST_FILENAME) ||
+              (form->flags & HTTPPOST_BUFFER)) &&
              !form->contenttype ) {
           /* our contenttype is missing */
           form->contenttype
@@ -875,7 +945,11 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         }
         if ( !(form->flags & HTTPPOST_FILENAME) &&
              !(form->flags & HTTPPOST_READFILE) && 
-             !(form->flags & HTTPPOST_PTRCONTENTS) ) {
+             !(form->flags & HTTPPOST_PTRCONTENTS) &&
+
+             /* CMC: Added support for buffer uploads */
+             !(form->flags & HTTPPOST_PTRBUFFER) ) {
+
           /* copy value (without strdup; possibly contains null characters) */
           if (AllocAndCopy(&form->value, form->contentslength)) {
             return_value = CURL_FORMADD_MEMORY;
@@ -884,6 +958,10 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         }
         post = AddHttpPost(form->name, form->namelength,
                            form->value, form->contentslength,
+
+                           /* CMC: Added support for buffer uploads */
+                           form->buffer, form->bufferlength,
+
                            form->contenttype, form->flags,
                            form->contentheader, form->showfilename,
                            post, httppost,
@@ -1085,9 +1163,9 @@ CURLcode Curl_getFormData(struct FormData **finalform,
       fileboundary = Curl_FormBoundary();
 
       size += AddFormDataf(&form,
-			   "\r\nContent-Type: multipart/mixed,"
-			   " boundary=%s\r\n",
-			   fileboundary);
+                           "\r\nContent-Type: multipart/mixed,"
+                           " boundary=%s\r\n",
+                           fileboundary);
     }
 
     file = post;
@@ -1099,26 +1177,30 @@ CURLcode Curl_getFormData(struct FormData **finalform,
          local file name should be added. */
 
       if(post->more) {
-	/* if multiple-file */
-	size += AddFormDataf(&form,
-			     "\r\n--%s\r\nContent-Disposition: "
+        /* if multiple-file */
+        size += AddFormDataf(&form,
+                             "\r\n--%s\r\nContent-Disposition: "
                              "attachment; filename=\"%s\"",
-			     fileboundary,
+                             fileboundary,
                              (file->showfilename?file->showfilename:
                               file->contents));
       }
-      else if(post->flags & HTTPPOST_FILENAME) {
-	size += AddFormDataf(&form,
-			     "; filename=\"%s\"",
-			     (post->showfilename?post->showfilename:
+      else if((post->flags & HTTPPOST_FILENAME) ||
+
+              /* CMC: Added support for buffer uploads */
+              (post->flags & HTTPPOST_BUFFER)) {
+
+        size += AddFormDataf(&form,
+                             "; filename=\"%s\"",
+                             (post->showfilename?post->showfilename:
                               post->contents));
       }
       
       if(file->contenttype) {
-	/* we have a specified type */
-	size += AddFormDataf(&form,
-			     "\r\nContent-Type: %s",
-			     file->contenttype);
+        /* we have a specified type */
+        size += AddFormDataf(&form,
+                             "\r\nContent-Type: %s",
+                             file->contenttype);
       }
 
       curList = file->contentheader;
@@ -1136,47 +1218,53 @@ CURLcode Curl_getFormData(struct FormData **finalform,
        */
       
       if(file->contenttype &&
-	 !strnequal("text/", file->contenttype, 5)) {
-	/* this is not a text content, mention our binary encoding */
-	size += AddFormData(&form, "\r\nContent-Transfer-Encoding: binary", 0);
+         !strnequal("text/", file->contenttype, 5)) {
+        /* this is not a text content, mention our binary encoding */
+        size += AddFormData(&form, "\r\nContent-Transfer-Encoding: binary", 0);
       }
 #endif
 
       size += AddFormData(&form, "\r\n\r\n", 0);
 
       if((post->flags & HTTPPOST_FILENAME) ||
-	 (post->flags & HTTPPOST_READFILE)) {
-	/* we should include the contents from the specified file */
-	FILE *fileread;
-	char buffer[1024];
-	int nread;
+         (post->flags & HTTPPOST_READFILE)) {
+        /* we should include the contents from the specified file */
+        FILE *fileread;
+        char buffer[1024];
+        int nread;
 
-	fileread = strequal("-", file->contents)?stdin:
+        fileread = strequal("-", file->contents)?stdin:
           /* binary read for win32 crap */
-/*VMS??*/ fopen(file->contents, "rb");  /* ONLY ALLOWS FOR STREAM FILES ON VMS */
-/*VMS?? Stream files are OK, as are FIXED & VAR files WITHOUT implied CC */
-/*VMS?? For implied CC, every record needs to have a \n appended & 1 added to SIZE */
-	if(fileread) {
-	  while((nread = fread(buffer, 1, 1024, fileread)))
-	    size += AddFormData(&form, buffer, nread);
+          /*VMS??*/ fopen(file->contents, "rb");  /* ONLY ALLOWS FOR STREAM FILES ON VMS */
+        /*VMS?? Stream files are OK, as are FIXED & VAR files WITHOUT implied CC */
+        /*VMS?? For implied CC, every record needs to have a \n appended & 1 added to SIZE */
+        if(fileread) {
+          while((nread = fread(buffer, 1, 1024, fileread)))
+            size += AddFormData(&form, buffer, nread);
 
           if(fileread != stdin)
             fclose(fileread);
-	}
+        }
         else {
 #if 0
           /* File wasn't found, add a nothing field! */
-	  size += AddFormData(&form, "", 0);
+          size += AddFormData(&form, "", 0);
 #endif
           Curl_formclean(firstform);
           free(boundary);
           *finalform = NULL;
           return CURLE_READ_ERROR;
-	}
+        }
+
+        /* CMC: Added support for buffer uploads */
+      } else if (post->flags & HTTPPOST_BUFFER) {
+          /* include contents of buffer */
+          size += AddFormData(&form, post->buffer, post->bufferlength);
       }
+
       else {
-	/* include the contents we got */
-	size += AddFormData(&form, post->contents, post->contentslength);
+        /* include the contents we got */
+        size += AddFormData(&form, post->contents, post->contentslength);
       }
     } while((file = file->more)); /* for each specified file for this field */
 
@@ -1184,8 +1272,8 @@ CURLcode Curl_getFormData(struct FormData **finalform,
       /* this was a multiple-file inclusion, make a termination file
          boundary: */
       size += AddFormDataf(&form,
-			   "\r\n--%s--",
-			   fileboundary);     
+                           "\r\n--%s--",
+                           fileboundary);     
       free(fileboundary);
     }
 
@@ -1193,8 +1281,8 @@ CURLcode Curl_getFormData(struct FormData **finalform,
 
   /* end-boundary for everything */
   size += AddFormDataf(&form,
-		       "\r\n--%s--\r\n",
-		       boundary);
+                       "\r\n--%s--\r\n",
+                       boundary);
 
   *sizep = size;
 

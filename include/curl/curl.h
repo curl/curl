@@ -65,6 +65,11 @@ struct curl_httppost {
   long namelength; /* length of name length */
   char *contents; /* pointer to allocated data contents */
   long contentslength; /* length of contents field */
+
+	/* CMC: Added support for buffer uploads */
+	char *buffer; /* pointer to allocated buffer contents */
+	long bufferlength; /* length of buffer field */
+
   char *contenttype; /* Content-Type */
   struct curl_slist* contentheader; /* list of extra headers for this form */
   struct curl_httppost *more; /* if one field name has more than one file, this
@@ -76,6 +81,11 @@ struct curl_httppost {
                                    do not free in formfree */
 #define HTTPPOST_PTRCONTENTS (1<<3) /* contents is only stored pointer
                                        do not free in formfree */
+
+/* CMC: Added support for buffer uploads */
+#define HTTPPOST_BUFFER (1<<4) /* upload file from buffer */
+#define HTTPPOST_PTRBUFFER (1<<5) /* upload file from pointer contents */
+
   char *showfilename; /* The file name to show. If not set, the actual
                          file name will be used (if this is a file part) */
 };
@@ -658,6 +668,11 @@ typedef enum {
   CFINIT(ARRAY),
   CFINIT(OBSOLETE),
   CFINIT(FILE),
+
+  CFINIT(BUFFER),
+  CFINIT(BUFFERPTR),
+  CFINIT(BUFFERLENGTH),
+
   CFINIT(CONTENTTYPE),
   CFINIT(CONTENTHEADER),
   CFINIT(FILENAME),
