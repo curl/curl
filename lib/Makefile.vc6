@@ -192,7 +192,8 @@ X_OBJS= \
 	$(DIROBJ)\version.obj \
 	$(DIROBJ)\easy.obj \
 	$(DIROBJ)\strequal.obj \
-	$(DIROBJ)\strtok.obj
+	$(DIROBJ)\strtok.obj \
+	$(DIROBJ)\connect.obj
 
 
 all : $(TARGET)
