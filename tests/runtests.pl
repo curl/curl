@@ -65,20 +65,6 @@ my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 
-if($valgrind) {
-    # we have found valgrind on the host, use it
-
-    # verify that we can invoke it fine
-    my $code = system("valgrind >/dev/null 2>&1");
-
-    if(($code>>8) != 1) {
-        #print "Valgrind failure, disable it\n";
-        undef $valgrind;
-    }
-    else {
-        $CURL="valgrind --leak-check=yes --logfile-fd=3 -q $CURL";
-    }
-}
 #######################################################################
 # variables the command line options may set
 #
@@ -1299,6 +1285,10 @@ do {
         # short output
         $short=1;
     }
+    elsif($ARGV[0] eq "-n") {
+        # no valgrind
+        undef $valgrind;
+    }
     elsif($ARGV[0] =~ /^-t(.*)/) {
         # torture
         $torture=1;
@@ -1332,6 +1322,7 @@ Usage: runtests.pl [options]
   -h       this help text
   -k       keep stdout and stderr files present after tests
   -l       list all test case names/descriptions
+  -n       No valgrind
   -s       short output
   -t       torture
   -v       verbose output
@@ -1359,6 +1350,21 @@ EOHELP
 
 if($testthis[0] ne "") {
     $TESTCASES=join(" ", @testthis);
+}
+
+if($valgrind) {
+    # we have found valgrind on the host, use it
+
+    # verify that we can invoke it fine
+    my $code = system("valgrind >/dev/null 2>&1");
+
+    if(($code>>8) != 1) {
+        #print "Valgrind failure, disable it\n";
+        undef $valgrind;
+    }
+    else {
+        $CURL="valgrind --leak-check=yes --logfile-fd=3 -q $CURL";
+    }
 }
 
 #######################################################################
