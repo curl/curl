@@ -316,10 +316,25 @@ if ($CVS) {
     } else {
       mydie "buildconf was NOT successful";
     }
-  } else {
-    logit "buildconf was successful (dummy message)";
-  }
 
+    if($confopts =~ /--enable-ares/) {
+        logit "run buildconf for ares";
+        chdir "ares";
+        open(F, "./buildconf 2>&1 |") or die;
+        open(LOG, ">$buildlog") or die;
+        while (<F>) {
+            next if /warning: underquoted definition of/;
+            print;
+            print LOG;
+        }
+        close(F);
+        close(LOG);
+        chdir "..";
+    }
+
+  } else {
+      logit "buildconf was successful (dummy message)";
+  }
 }
 
 if ($gnulikebuild) {
@@ -375,10 +390,11 @@ if (grepfile("define USE_ARES", "lib/config$confsuffix.h")) {
 
   logit "build ares";
   chdir "ares";
+
   if ($targetos ne '') {
-    open(F, "make -f Makefile.$targetos 2>&1 |") or die;
+      open(F, "make -f Makefile.$targetos 2>&1 |") or die;
   } else {
-    open(F, "make 2>&1 |") or die;
+      open(F, "make 2>&1 |") or die;
   }
   while (<F>) {
     s/$pwd//g;
