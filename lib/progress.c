@@ -53,34 +53,36 @@ static void time2str(char *r, int t)
 
 /* The point of this function would be to return a string of the input data,
    but never longer than 5 columns. Add suffix k, M, G when suitable... */
-static char *max5data(double bytes, char *max5)
+static char *max5data(curl_off_t bytes, char *max5)
 {
 #define ONE_KILOBYTE 1024
 #define ONE_MEGABYTE (1024*1024)
 #define ONE_GIGABYTE (1024*1024*1024)
 
   if(bytes < 100000) {
-    sprintf(max5, "%5" FORMAT_OFF_T, (curl_off_t)bytes);
-    return max5;
+    sprintf(max5, "%5" FORMAT_OFF_T, bytes);
   }
-  if(bytes < (10000*ONE_KILOBYTE)) {
-    sprintf(max5, "%4" FORMAT_OFF_T "k", (curl_off_t)bytes/ONE_KILOBYTE);
-    return max5;
+  else if(bytes < (10000*ONE_KILOBYTE)) {
+    sprintf(max5, "%4" FORMAT_OFF_T "k", (curl_off_t)(bytes/ONE_KILOBYTE));
   }
-  if(bytes < (100*ONE_MEGABYTE)) {
+  else if(bytes < (100*ONE_MEGABYTE)) {
     /* 'XX.XM' is good as long as we're less than 100 megs */
-    sprintf(max5, "%4.1fM", bytes/ONE_MEGABYTE);
-    return max5;
+    sprintf(max5, "%2d.%0dM",
+            (int)(bytes/ONE_MEGABYTE),
+            (int)(bytes%ONE_MEGABYTE)/(ONE_MEGABYTE/10) );
   }
 #if SIZEOF_CURL_OFF_T > 4
-  if((curl_off_t)bytes < ((curl_off_t)10000*ONE_MEGABYTE)) {
-    sprintf(max5, "%4" FORMAT_OFF_T "M", (curl_off_t)bytes/ONE_MEGABYTE);
-    return max5;
+  else if(bytes < ((curl_off_t)10000*ONE_MEGABYTE)) {
+    sprintf(max5, "%4" FORMAT_OFF_T "M", (curl_off_t)(bytes/ONE_MEGABYTE));
   }
-  /* 10000 MB - 8589934587 GB !! */
-  sprintf(max5, "%4.1fG", bytes/ONE_GIGABYTE);
+  else
+    /* 10000 MB - 8589934587 GB !! */
+    sprintf(max5, "%2d.%0dG",
+            (int)(bytes/ONE_GIGABYTE),
+            (int)(bytes%ONE_GIGABYTE)/(ONE_GIGABYTE/10) );
 #else
-  sprintf(max5, "%4" FORMAT_OFF_T "M", (curl_off_t)bytes/ONE_MEGABYTE);
+  else
+    sprintf(max5, "%4" FORMAT_OFF_T "M", (curl_off_t)(bytes/ONE_MEGABYTE));
 #endif
 
   return max5;
@@ -259,7 +261,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* The average download speed this far */
   data->progress.dlspeed =
-    data->progress.downloaded/(timespent>0.01?timespent:1.0);
+    data->progress.downloaded/(timespent>0.01?timespent:1);
 
   /* The average upload speed this far */
   data->progress.ulspeed =
