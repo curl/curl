@@ -80,10 +80,8 @@ static int passwd_callback(char *buf, int num, int verify
 }
 
 static
-bool seed_enough(struct connectdata *conn, /* unused for now */
-                 int nread)
+bool seed_enough(int nread)
 {
-  conn = NULL; /* to prevent compiler warnings */
 #ifdef HAVE_RAND_STATUS
   nread = 0; /* to prevent compiler warnings */
 
@@ -99,11 +97,10 @@ bool seed_enough(struct connectdata *conn, /* unused for now */
 }
 
 static
-int random_the_seed(struct connectdata *conn)
+int random_the_seed(struct SessionHandle *data)
 {
-  char *buf = conn->data->state.buffer; /* point to the big buffer */
+  char *buf = data->state.buffer; /* point to the big buffer */
   int nread=0;
-  struct SessionHandle *data=conn->data;
 
   /* Q: should we add support for a random file name as a libcurl option?
      A: Yes, it is here */
@@ -119,7 +116,7 @@ int random_the_seed(struct connectdata *conn)
     nread += RAND_load_file((data->set.ssl.random_file?
                              data->set.ssl.random_file:RANDOM_FILE),
                             16384);
-    if(seed_enough(conn, nread))
+    if(seed_enough(nread))
       return nread;
   }
 
@@ -138,7 +135,7 @@ int random_the_seed(struct connectdata *conn)
     int ret = RAND_egd(data->set.ssl.egdsocket?data->set.ssl.egdsocket:EGD_SOCKET);
     if(-1 != ret) {
       nread += ret;
-      if(seed_enough(conn, nread))
+      if(seed_enough(nread))
         return nread;
     }
   }
@@ -170,11 +167,11 @@ int random_the_seed(struct connectdata *conn)
   if ( buf[0] ) {
     /* we got a file name to try */
     nread += RAND_load_file(buf, 16384);
-    if(seed_enough(conn, nread))
+    if(seed_enough(nread))
       return nread;
   }
 
-  infof(conn->data, "Your connection is using a weak random seed!\n");
+  infof(data, "libcurl is now using a weak random seed!\n");
   return nread;
 }
 
@@ -363,6 +360,10 @@ int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
 #ifdef USE_SSLEAY
 /* "global" init done? */
 static int init_ssl=0;
+
+/* we have the "SSL is seeded" boolean global for the application to
+   prevent multiple time-consuming seedings in vain */
+static bool ssl_seeded = FALSE;
 #endif
 
 /* Global init */
@@ -677,8 +678,12 @@ Curl_SSLConnect(struct connectdata *conn)
   /* mark this is being ssl enabled from here on out. */
   conn->ssl.use = TRUE;
 
-  /* Make funny stuff to get random input */
-  random_the_seed(conn);
+  if(!ssl_seeded) {
+    /* Make funny stuff to get random input */
+    random_the_seed(data);
+
+    ssl_seeded = TRUE;
+  }
 
   /* check to see if we've been told to use an explicit SSL/TLS version */
   switch(data->set.ssl.version) {
