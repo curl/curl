@@ -225,9 +225,13 @@ to create the list and
 to clean up an entire list.
 .TP
 .B CURLOPT_HTTPPOST
-Pass a pointer to a linked list of HTTP post data to pass to the server in
-your http request.  The linked list should be a fully valid list of 'struct
-HttpPost' structs properly filled in. TBD!
+Tells libcurl you want a multipart/formdata HTTP POST to be made and you
+instruct what data to pass on to the server.  Pass a pointer to a linked list
+of HTTP post structs as parameter.  The linked list should be a fully valid
+list of 'struct HttpPost' structs properly filled in. The best and most
+elegant way to do this, is to use
+.I curl_formparse(3)
+as documented.
 .TP
 .B CURLOPT_SSLCERT
 Pass a pointer to a zero terminated string as parameter. The string should be
