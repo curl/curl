@@ -11,41 +11,8 @@ way to proceed is mainly divided in two different ways: the unix way or the
 windows way.
 
 If you're using Windows (95, 98, NT) or OS/2, you should continue reading from
-the Win32 header below. All other systems should be capable of being installed
-as described in the the UNIX header.
-
-PORTS
-=====
-   Just to show off, this is a probably incomplete list of known hardware and
-   operating systems that curl has been compiled for:
-
-        - Ultrix
-        - SINIX-Z v5
-        - Alpha DEC OSF 4
-        - Alpha Digital UNIX v3.2
-        - Alpha FreeBSD 4.1
-        - Alpha Linux 2.2.16
-        - Alpha Tru64 v5.0 5.1
-        - HP-PA HP-UX 9.X 10.X 11.X
-        - MIPS IRIX 6.2, 6.5
-        - Power AIX 4.2, 4.3.1, 4.3.2
-        - PowerPC Darwin 1.0
-        - PowerPC Linux
-        - PowerPC Mac OS X
-        - Sparc Linux
-        - Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7, 8
-        - Sparc SunOS 4.1.*
-        - i386 BeOS
-        - i386 FreeBSD
-        - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4
-        - i386 NetBSD
-        - i386 OS/2
-        - i386 OpenBSD
-        - i386 Solaris 2.7
-        - i386 Windows 95, 98, NT, 2000
-        - ia64 Linux 2.3.99
-        - m68k AmigaOS 3
-        - m68k OpenBSD
+the Win32 or OS/2 headers further down. All other systems should be capable of
+being installed as described below.
 
 UNIX
 ====
@@ -53,7 +20,9 @@ UNIX
    The configure script *always* tries to find a working SSL library unless
    explicitly told not to.  If you have OpenSSL installed in the default
    search path for your compiler/linker, you don't need to do anything
-   special.
+   special:
+
+        ./configure
 
    If you have OpenSSL installed in /usr/local/ssl, you can run configure
    like:
@@ -101,9 +70,17 @@ UNIX
 
    Use the executable `curl` in src/ directory.
 
-   'make install' copies the curl file to /usr/local/bin/ (or $prefix/bin if
-   you used the --prefix option to configure) and copies the man pages, the
-   lib and the include files to a suitable place too.
+   To install curl on your system, run
+
+     make install
+
+   This will copy curl to /usr/local/bin/ (or $prefix/bin if you used the
+   --prefix option to configure) and it copies the man pages, the lib and the
+   include files to suitable places.
+
+   To make sure everything runs as supposed, run the test suite:
+
+     make test
 
    KNOWN PROBLEMS
 
@@ -258,6 +235,39 @@ IBM OS/2
 
    If you're getting huge binaries, probably your makefiles have the -g in
    CFLAGS.
+
+PORTS
+=====
+   Just to show off, this is a probably incomplete list of known hardware and
+   operating systems that curl has been compiled for:
+
+        - Ultrix
+        - SINIX-Z v5
+        - Alpha DEC OSF 4
+        - Alpha Digital UNIX v3.2
+        - Alpha FreeBSD 4.1
+        - Alpha Linux 2.2.16
+        - Alpha Tru64 v5.0 5.1
+        - HP-PA HP-UX 9.X 10.X 11.X
+        - MIPS IRIX 6.2, 6.5
+        - Power AIX 4.2, 4.3.1, 4.3.2
+        - PowerPC Darwin 1.0
+        - PowerPC Linux
+        - PowerPC Mac OS X
+        - Sparc Linux
+        - Sparc Solaris 2.4, 2.5, 2.5.1, 2.6, 7, 8
+        - Sparc SunOS 4.1.*
+        - i386 BeOS
+        - i386 FreeBSD
+        - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4
+        - i386 NetBSD
+        - i386 OS/2
+        - i386 OpenBSD
+        - i386 Solaris 2.7
+        - i386 Windows 95, 98, NT, 2000
+        - ia64 Linux 2.3.99
+        - m68k AmigaOS 3
+        - m68k OpenBSD
 
 OpenSSL
 =======
