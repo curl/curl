@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (9 November 2004)
+- Gisle Vanem marked all external function calls with CURL_EXTERN so that now
+  the Windows, Netware and other builds no longer need libcurl.def or similar
+  files.
+
 Daniel (8 November 2004)
 - Made the configure script check for tld.h if libidn was detected, since
   libidn 0.3.X didn't have such a header and we don't work with anything
