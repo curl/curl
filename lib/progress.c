@@ -187,6 +187,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   double total_transfer;
   double total_expected_transfer;
+  double timespent;
 
   struct SessionHandle *data = conn->data;
 
@@ -224,17 +225,17 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   now = Curl_tvnow(); /* what time is it */
 
   /* The exact time spent so far (from the start) */
-  data->progress.timespent = Curl_tvdiff (now, data->progress.start)/1000;
+  timespent = (double)Curl_tvdiff (now, data->progress.start)/1000;
+
+  data->progress.timespent = (long)timespent;
 
   /* The average download speed this far */
   data->progress.dlspeed =
-    data->progress.downloaded/(data->progress.timespent?
-                               data->progress.timespent:1);
+    data->progress.downloaded/(timespent>0.01?timespent:1);
 
   /* The average upload speed this far */
   data->progress.ulspeed =
-    data->progress.uploaded/(data->progress.timespent?
-                             data->progress.timespent:1);
+    data->progress.uploaded/(timespent>0.01?timespent:1);
 
   if(data->progress.lastshow == Curl_tvlong(now))
     return 0; /* never update this more than once a second if the end isn't 
@@ -281,8 +282,10 @@ int Curl_pgrsUpdate(struct connectdata *conn)
        data->progress.speeder[checkindex])/((double)span_ms/1000);
   }
   else
-    /* the first second we only have one speed information to use */
-    data->progress.current_speed = data->progress.speeder[nowindex];
+    /* the first second we use the main average */
+    data->progress.current_speed =
+      (data->progress.ulspeed>data->progress.dlspeed)?
+      data->progress.ulspeed:data->progress.dlspeed;
 
   if(data->progress.flags & PGRS_HIDE)
     return 0;
