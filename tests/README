@@ -77,4 +77,4 @@ TEST CASE NUMBERS
 
 TODO:
 
-  * Add persistant connection support and test cases
+  * Add tests for TELNET, GOPHER, LDAP, DICT...
