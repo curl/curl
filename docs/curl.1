@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "26 Nov 2001" "Curl 7.9.1" "Curl Manual"
+.TH curl 1 "30 Nov 2001" "Curl 7.9.2" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -161,10 +161,14 @@ using this option the entire context of the posted data is kept as-is. If you
 want to post a binary file without the strip-newlines feature of the
 --data-ascii option, this is for you.
 
-If this option is used several times, the last one will be used.
-
 If this option is used several times, the ones following the first will
 append data.
+.IP "--disable-epsv"
+(FTP) Tell curl to disable the use of the EPSV command when doing passive FTP
+downloads. Curl will normally always first attempt to use EPSV before PASV,
+but with this option, it will not try using EPSV.
+
+IF this option is used several times, each occurrence will toggle this on/off.
 .IP "-D/--dump-header <file>"
 (HTTP/FTP)
 Write the HTTP headers to this file. Write the FTP file info to this
