@@ -100,6 +100,3 @@ clean:
 
 distrib: clean
 	-@erase $(PROGRAM_NAME)
-
-hugehelp.c: hugehelp.c.cvs
-	copy hugehelp.c.cvs hugehelp.c
