@@ -205,15 +205,15 @@ CODE:
     if (option < CURLOPTTYPE_OBJECTPOINT) {
 	/* This is an option specifying an integer value: */
 	long value = (long)SvIV(ST(2));
-	RETVAL = curl_setopt(curl, option, value);
+	RETVAL = curl_easy_setopt(curl, option, value);
     } else if (option == CURLOPT_FILE || option == CURLOPT_INFILE ||
 	    option == CURLOPT_WRITEHEADER) {
 	/* This is an option specifying a FILE * value: */
 	FILE * value = IoIFP(sv_2io(ST(2)));
-	RETVAL = curl_setopt(curl, option, value);
+	RETVAL = curl_easy_setopt(curl, option, value);
     } else if (option == CURLOPT_ERRORBUFFER) {
 	SV *sv;
-	RETVAL = curl_setopt(curl, option, errbuf);
+	RETVAL = curl_easy_setopt(curl, option, errbuf);
 	if (errbufvarname) free(errbufvarname);
 	errbufvarname = strdup(value);
 	sv = perl_get_sv(errbufvarname, TRUE | GV_ADDMULTI);
@@ -224,7 +224,7 @@ CODE:
 	RETVAL = -1;
     } else {
 	/* default, option specifying a char * value: */
-	RETVAL = curl_setopt(curl, option, value);
+	RETVAL = curl_easy_setopt(curl, option, value);
     }
 OUTPUT:
     RETVAL
