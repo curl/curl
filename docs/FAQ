@@ -1,4 +1,4 @@
-Updated: August 22, 2000 (http://curl.haxx.se/docs/faq.shtml)
+Updated: October 18, 2000 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -117,7 +117,7 @@ FAQ
     program or redirect to another file for the next program to interpret.
 
   * I focus on protocol related issues and improvements. If you wanna do more
-    magic with the supported protocols than curl currently does, changes are
+    magic with the supported protocols than curl currently does, chances are
     big I will agree. If you wanna add more protocols, I may very well
     agree.
 
@@ -339,12 +339,12 @@ FAQ
     The server understood the request, but is refusing to fulfill it.
     Authorization will not help and the request SHOULD NOT be repeated.
 
-   4.5.4 "404 Not Found"
+  4.5.4 "404 Not Found"
 
     The server has not found anything matching the Request-URI. No indication
     is given of whether the condition is temporary or permanent.
 
-   4.5.5 "405 Method Not Allowed"
+  4.5.5 "405 Method Not Allowed"
 
     The method specified in the Request-Line is not allowed for the resource
     identified by the Request-URI. The response MUST include an Allow header
