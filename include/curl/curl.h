@@ -1079,7 +1079,7 @@ typedef enum {
 
 typedef void (*curl_lock_function)(CURL *handle,
                                    curl_lock_data data,
-                                   curl_lock_access access,
+                                   curl_lock_access locktype,
                                    void *userptr);
 typedef void (*curl_unlock_function)(CURL *handle,
                                      curl_lock_data data,
