@@ -2119,7 +2119,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     char proxyuser[MAX_CURL_USER_LENGTH]="";
     char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";
 
-    sscanf(data->set.proxyuserpwd, "%127[^:]:%127[^\n]",
+    sscanf(data->set.proxyuserpwd,
+           "%" MAX_CURL_USER_LENGTH_TXT "[^:]:"
+           "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^\n]",
            proxyuser, proxypasswd);
 
     conn->proxyuser = strdup(proxyuser);
@@ -2730,7 +2732,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    */
   if (data->set.userpwd != NULL) {
     /* the name is given, get user+password */
-    sscanf(data->set.userpwd, "%127[^:]:%127[^\n]",
+    sscanf(data->set.userpwd,
+           "%" MAX_CURL_USER_LENGTH_TXT "[^:]:"
+           "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^\n]",
            user, passwd);
   }
 
@@ -2745,18 +2749,19 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
 
   /* If our protocol needs a password and we have none, use the defaults */
-  if ( (conn->protocol & (PROT_FTP|PROT_HTTP)) &&
+  if ( (conn->protocol & PROT_FTP) &&
        !conn->bits.user_passwd) {
 
-    strcpy(user, CURL_DEFAULT_USER);
-    strcpy(passwd, CURL_DEFAULT_PASSWORD);
+    conn->user = strdup(CURL_DEFAULT_USER);
+    conn->passwd = strdup(CURL_DEFAULT_PASSWORD);
 
     /* This is the default password, so DON'T set conn->bits.user_passwd */
   }
-
-  /* store user + password */
-  conn->user = strdup(user);
-  conn->passwd = strdup(passwd);
+  else {
+    /* store user + password */
+    conn->user = user[0]?strdup(user):NULL;
+    conn->passwd = passwd[0]?strdup(passwd):NULL;
+  }
 
   /*************************************************************
    * Check the current list of connections to see if we can
@@ -2817,8 +2822,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
                                  otherwise */
     conn->maxdownload = -1;  /* might have been used previously! */
 
-    free(old_conn->user);
-    free(old_conn->passwd);
+    Curl_safefree(old_conn->user);
+    Curl_safefree(old_conn->passwd);
     Curl_safefree(old_conn->proxyuser);
     Curl_safefree(old_conn->proxypasswd);
 
