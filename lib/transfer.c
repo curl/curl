@@ -939,6 +939,11 @@ CURLcode Curl_perform(struct SessionHandle *data)
            * may be free()ed in the Curl_done() function.
            */
           newurl = conn->newurl?strdup(conn->newurl):NULL;
+        else
+          /* The transfer phase returned error, we mark the connection to get
+           * closed to prevent being re-used. This is becasue we can't
+           * possibly know if the connection is in a good shape or not now. */
+          conn->bits.close = TRUE;
 
         /* Always run Curl_done(), even if some of the previous calls
            failed, but return the previous (original) error code */
