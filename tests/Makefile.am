@@ -2,6 +2,9 @@
 all:
 install:
 
+curl:
+	@(cd ..; make)
+
 test:
 	perl runtests.pl
 
