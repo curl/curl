@@ -5,6 +5,15 @@
                              \___|\___/|_| \_\_____|
 
                                History of Changes
+
+Daniel (26 January 2001)
+- Lots of mails back and forth with Bob Schader finally made me add a small
+  piece of code in the HTTP engine so that HTTP upload resume works. You can
+  now do an operation like 'curl -T file -C <offset> <URL>' and curl will PUT
+  the ending part of the file starting at given offet to the specified URL.
+
+Version 7.6-pre4
+
 Daniel (25 January 2001)
 - I took hold of Rick Jones' question why we don't use recv() and send() for
   reading/writing to the sockets and I've now modified the sread() and
