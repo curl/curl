@@ -412,10 +412,6 @@ typedef enum {
 
 #ifdef __BEOS__
 #include <support/SupportDefs.h>
-#else
-#ifndef __cplusplus        /* (rabe) */
-typedef char bool;
-#endif                     /* (rabe) */
 #endif
 
 
@@ -442,8 +438,8 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.3"
-#define LIBCURL_VERSION_NUM 0x070300
+#define LIBCURL_VERSION "7.4-pre5"
+#define LIBCURL_VERSION_NUM 0x070400
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
@@ -661,8 +657,10 @@ typedef enum {
   CURLINFO_SIZE_DOWNLOAD    = CURLINFO_DOUBLE + 8,
   CURLINFO_SPEED_DOWNLOAD   = CURLINFO_DOUBLE + 9,
   CURLINFO_SPEED_UPLOAD     = CURLINFO_DOUBLE + 10,
-  CURLINFO_LASTONE          = 11,
+  CURLINFO_HEADER_SIZE      = CURLINFO_LONG   + 11,
+  CURLINFO_REQUEST_SIZE     = CURLINFO_LONG   + 12,
 
+  CURLINFO_LASTONE          = 13,
 } CURLINFO;
 
 /*

@@ -48,6 +48,8 @@
 #include <curl/curl.h>
 #include <curl/types.h> /* new for v7 */
 #include <curl/easy.h> /* new for v7 */
+
+#define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
 #include <curl/mprintf.h>
 
 #include "urlglob.h"
@@ -85,6 +87,10 @@
 /* this is low-level hard-hacking memory leak tracking shit */
 #include "../lib/memdebug.h"
 #endif
+
+#ifndef __cplusplus        /* (rabe) */
+typedef char bool;
+#endif                     /* (rabe) */
 
 typedef enum {
   HTTPREQ_UNSPEC,
@@ -1530,7 +1536,6 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_TIMEVALUE, config.condtime);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, config.customrequest);
     curl_easy_setopt(curl, CURLOPT_STDERR, config.errors);
-    curl_easy_setopt(curl, CURLOPT_WRITEINFO, config.writeout);
 
     /* three new ones in libcurl 7.3: */
     curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config.proxytunnel);
@@ -1592,6 +1597,9 @@ int main(int argc, char *argv[])
   if (separator)
     printf("--%s--\n", MIMEseparator);
 #endif
+
+  /* cleanup memory used for URL globbing patterns */
+  glob_cleanup(urls);
 
   curl_slist_free_all(config.quote); /* the checks for config.quote == NULL */
   curl_slist_free_all(config.postquote); /*  */
