@@ -33,5 +33,10 @@ EXPORTS
 	curl_version @ 24 ; 
 	curl_write @ 25 ; 
 	maprintf @ 26 ; 
-	strequal @ 27 ; 
-	strnequal @ 28 ; 
+ 	mfprintf @ 27 ;
+ 	mprintf @ 28 ;
+ 	msprintf @ 29 ;
+ 	msnprintf @ 30 ;
+ 	mvfprintf @ 31 ;
+	strequal @ 32 ; 
+	strnequal @ 33 ; 
