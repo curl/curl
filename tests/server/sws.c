@@ -27,7 +27,7 @@
 
 #define REQUEST_DUMP "http-request.dump"
 
-#define TEST_DATA_PATH "../data/test%d"
+#define TEST_DATA_PATH "data/test%d"
 
 static char *doc404 = "HTTP/1.1 404 Not Found\n"
     "Server: " VERSION "\n"
