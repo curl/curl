@@ -6,6 +6,14 @@
 
                                History of Changes
 
+Daniel (23 September 2001)
+- Found and removed a 'socket leak' that would occur on IPv6 enabled hosts
+  when FTP RETR failed.
+
+- Made the FTP upload tests run fine on machines with IPv6 enabled.
+
+Version 7.9-pre8
+
 Daniel (19 September 2001)
 - Vojtech Minarik set up a special-purpose test server and provided me with
   test certificates in order for me to repeat the bug reports #440068 and
