@@ -488,7 +488,8 @@ sub PORT_command {
         print "500 silly you, go away\r\n";
         return 0;
     }
-    my $iaddr = inet_aton("$1.$2.$3.$4");
+    #my $iaddr = inet_aton("$1.$2.$3.$4");
+    my $iaddr = inet_aton("127.0.0.1"); # always use localhost
 
     my $port = ($5<<8)+$6;
 
