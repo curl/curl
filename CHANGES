@@ -6,7 +6,57 @@
 
                                   Changelog
 
+Daniel (12 May)
+- George Comninos pointed out that libcurl uploads had two quirks:
+   o when using FTP PORT command, it used blocking sockets!
+   o it could loop a long time without doing progress meter updates
+  Both items are fixed now.
+
+Daniel (9 May)
+- Dan Fandrich changed CURLOPT_ENCODING to select all supported encodings if
+  set to "".  This frees the application from having to know which encodings
+  the library supports.
+
+- Dan Fandrich pointed out we had three unnecessary files in CVS that is
+  generated with libtoolize, so they're now removed and libtoolize is invoked
+  accordinly in the buildconf script.
+
+- Avery Fay found out that the CURLOPT_INTERFACE way of first checking if the
+  given name is a network interface gave a real performance penalty on Linux,
+  so now we more appropriately first check if it is an IP number and if so
+  we don't check for a network interface with that name.
+
+- CURLOPT_FTP_USE_EPRT added. Set this to FALSE to disable libcurl's attempts
+  to use EPRT and LPRT before the traditional PORT command. The command line
+  tool sets this option with '--disable-eprt'.
+
+Daniel (6 May)
+- Kevin Delafield reported another case where we didn't correctly check for
+  EAGAIN but only EWOULDBLOCK, which caused badness on HPUX.
+
+Daniel (4 May)
+- Ben Greear noticed that the check for 'writable argv' exited the configure
+  script when run for cross-compiling, which wasn't nice. Now it'll default to
+  no and output a warning about the fact that it was not checked for.
+
+Daniel (2 May)
+- Added test case 62 and fixed some more on the cookie sending with a custom
+  Host: header set.
+
+Daniel (1 May)
+- Andy Cedilnik fixed a few compiler warnings.
+
+- Made the "SSL read error: 5" error message more verbose, by adding code that
+  queries the OpenSSL library to fill in the error buffer.
+
 Daniel (30 Apr)
+- Added sys/select.h include in the curl/multi.h file, after having been
+  reminded about this by Rich Gray.
+
+- I made each test set its own server requirements, thus abandoning the
+  previous system where the test number implied what server(s) to use for a
+  specific test.
+
 - David Balazic made curl more RFC1738-compliant for FTP URLs, by fixing so
   that libcurl now uses one CWD command for each path part. A bunch of test
   cases were fixed to work accordingly.
@@ -26,8 +76,8 @@ Daniel (30 Apr)
   To make item C really good, I also made libcurl notice custom Host: headers
   and extract the host name set in there and use that as the host name for the
   site we're getting the cookies from. This allows user to specify a site's
-  IP-address, but still be able to receive its cookies properly if you provide
-  a valid Host: name for the site.
+  IP-address, but still be able to receive and send its cookies properly if
+  you provide a valid Host: name for the site.
 
 Daniel (29 Apr)
 - Peter Kovacs provided a patch that makes the CURLINFO_CONNECT_TIME work fine
