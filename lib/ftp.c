@@ -2234,6 +2234,8 @@ CURLcode Curl_ftp(struct connectdata *conn)
       /* since we didn't connect now, we want do_more to get called */
       conn->bits.do_more = TRUE;
   }
+  else
+    freedirs(ftp);
 
   return retcode;
 }
