@@ -27,3 +27,8 @@ To get fixed in 7.14.0
      and return the easy handle's return code. This will thus make everything
      internally use and assume the multi interface. The select()-loop should
      use the new function from (55).
+
+57 - Add an interface to libcurl for getting and setting cookies from an easy
+     handle. One idea: http://curl.haxx.se/mail/lib-2004-12/0195.html the
+     older idea: http://curl.haxx.se/dev/COOKIES. We need to settle on some
+     middle ground I guess.
