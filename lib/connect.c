@@ -581,6 +581,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     /* no good connect was made */
     sclose(sockfd);
     *sockconn = -1;
+    failf(data, "Connect failed");
     return CURLE_COULDNT_CONNECT;
   }
 
