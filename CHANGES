@@ -6,6 +6,25 @@
 
                                   Changelog
 
+Daniel (9 February 2005)
+- Converted lots of FTP code to a statemachine, so that the multi interface
+  doesn't block while communicating commands-responses with an FTP server.
+
+  I've added a comment like BLOCKING in the code on all spots I could find
+  where we still have blocking operations. When we change curl_easy_perform()
+  to use the multi interface, we'll also be able to simplify the code since
+  there will only be one "internal interface".
+
+  While doing this, I've now made CURLE_FTP_ACCESS_DENIED separate from the
+  new CURLE_LOGIN_DENIED. The first one is now access denied to a function,
+  like changing directory or retrieving a file, while the second means that we
+  were denied login.
+
+  The CVS tag 'before_ftp_statemachine' was set just before this went in, in
+  case of future need.
+
+- Gisle made the DICT code send CRLF and not just LF as the spec says so.
+
 Daniel (8 February 2005)
 - Gisle fixed problems when libcurl runs out of memory, and worked on making
   sure the proper error code is returned for those occations.
