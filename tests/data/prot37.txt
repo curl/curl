@@ -1,0 +1,7 @@
+GET /37 HTTP/1.1
+Authorization: Basic dVVzU2VFcnJyOnBwcGFzc3dyZA==
+User-Agent: curl/7.7-beta1 (i686-pc-linux-gnu) libcurl 7.7-beta1 (SSL 0.9.5)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
