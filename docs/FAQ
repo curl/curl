@@ -40,6 +40,8 @@ FAQ
 
   Yes. Both ways on FTP, download ways on HTTP.
 
+  Try the -c and -C options.
+
 4. Is libcurl thread safe?
 
   As version seven is slowly marching in as the libcurl version to use, we
@@ -124,12 +126,22 @@ FAQ
    part of a URL, you should qoute the entire URL by using single (') or
    double (") quotes round it.
 
+   An example that would invoke a remote CGI that uses &-letters could be:
+
+   # curl "http://www.altavista.com/cgi-bin/query?text=yes&q=curl"
+
 10. How can I use {, }, [ or ] to specify multiple URLs?
 
    Because those letters have a special meaning to the shell, and to be used
    in a URL specified to curl you must quote them.
 
+   An example that downloads two URLs (sequentially) would do:
+
+   # curl '{curl,www}.haxx.se'
+
 11. Where can I find a copy of LIBEAY32.DLL?
+
+   That is an OpenSSL binary built for Windows.
 
    Curl uses OpenSSL to do the SSL stuff. The LIBEAY32.DLL is what curl needs
    on a windows machine to do https://. Check out the curl web page to find
@@ -142,6 +154,9 @@ FAQ
    exist at the server, the HTTP protocol defines how the server should
    respond and that means that headers and a "page" will be returned. That's
    simply how HTTP works.
+
+   By using the --fail option you can tell curl explicitly to not get any data
+   if the HTTP return code doesn't say success.
 
 13. Why do I get "HTTP/1.1 403 Forbidden" from a http server?
 
@@ -173,12 +188,12 @@ FAQ
 
 16. How do I keep usernames and passwords secret in Curl command lines?
 
-   I see this problem in two parts:
+   I see this problem as two parts:
 
     The first part is to avoid having clear-text passwords in the command line
-   so that they appear in 'ps' outputs and similar. That is easily avoided by
-   using the "-K -" contruct that causes curl to read parameters from stdin to
-   which you can pass the secret info.
+   so that they don't appear in 'ps' outputs and similar. That is easily
+   avoided by using the "-K" option that tells curl to read parameters from a
+   file or stdin to which you can pass the secret info.
 
     To keep the passwords in your account secret from the rest of the world is
    not a task that curl addresses. You could of course encrypt them somehow to
@@ -204,3 +219,8 @@ FAQ
 19. Can I use curl to delete/rename a file through FTP?
 
    Yes. You specify custom ftp commands with -Q/--quote.
+
+   One example would be to delete a file after you have downloaded it:
+
+   # curl -O ftp://download.com/coolfile -Q "-DELE coolfile"
+
