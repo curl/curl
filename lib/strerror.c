@@ -563,11 +563,13 @@ const char *Curl_strerror(struct connectdata *conn, int err)
 
 #ifdef USE_LIBIDN
 /*
- * Return error-string for libidn status as returned
- * from idna_to_ascii_lz().
+ * Return error-string for libidn status as returned from idna_to_ascii_lz().
  */
 const char *Curl_idn_strerror (struct connectdata *conn, int err)
 {
+#ifdef HAVE_IDNA_STRERROR
+  return idna_strerror((Idna_rc) err);
+#else
   const char *str;
   char *buf;
   size_t max;
@@ -623,5 +625,6 @@ const char *Curl_idn_strerror (struct connectdata *conn, int err)
     strncpy(buf, str, max);
   buf[max] = '\0';
   return (buf);
+#endif
 }
 #endif  /* USE_LIBIDN */
