@@ -19,10 +19,13 @@ check: test
 test:
 	@(cd tests; make quiet-test)
 
+#
 # Build source and binary rpms. For rpm-3.0 and above, the ~/.rpmmacros
 # must contain the following line:
 # %_topdir /home/loic/local/rpm
 # and that /home/loic/local/rpm contains the directory SOURCES, BUILD etc.
+#
+# cd /home/loic/local/rpm ; mkdir -p SOURCES BUILD RPMS/i386 SPECS SRPMS
 #
 # If additional configure flags are needed to build the package, add the
 # following in ~/.rpmmacros
