@@ -45,8 +45,9 @@ server is probably not an OK FTP server.
 We were denied access when trying to login to an FTP server or when trying to
 change working directory to the one given in the URL.
 .IP "CURLE_FTP_USER_PASSWORD_INCORRECT (10)"
-The username and/or the password were incorrect when trying to login to an FTP
-server.
+The FTP server rejected access to the server after the password was sent to
+it. It might be because the username and/or the password were incorrect or
+just that the server is not allowing you access for the moment etc.
 .IP "CURLE_FTP_WEIRD_PASS_REPLY (11)"
 After having sent the FTP password to the server, libcurl expects a proper
 reply. This error code indicates that an unexpected code was returned.
