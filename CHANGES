@@ -8,6 +8,81 @@
 
 Version 7.3
 
+Daniel (25 September 2000)
+- Erdmut Pfeifer informed us that curl didn't build with OpenSSL 0.9.6 and
+  showed us what needed to get patched in order to make it build properly
+  again.
+
+- Dirk Kruschewski found a bug in the cookie parser. I made an alternative
+  approach to the solution Dirk himself suggested. The bug made a cookie
+  header that didn't end with a trailing semicolon to not get parsed.
+
+- I've marked -c and -t deprecated now. If you use any of them, curl will tell
+  you to use "-C -" or "-T -" instead. I don't think occupying two letters for
+  nearly identical functions is good use. Also, -T - kind of follows the curl
+  tradition of using - for stdin where a file name is expected.
+
+Daniel (23 September 2000)
+- Martin Hedenfalk provided the patch that finally made the krb4 ftp upload
+  work!
+
+Daniel (21 September 2000)
+- The kerberos code is not quite thread-safe yet. There are a few more globals
+  that need to be take care of. Let's get the upload working first!
+
+Daniel (20 September 2000)
+- Richard Prescott solved another name lookup buffer size problem. I took this
+  opportunity to rewrite the GetHost() function. With these large buffer
+  sizes, I think keeping them as local arrays quickly turn ugly. I know use
+  malloc() to get the buffer memory. Thanks to this, I now can realloc() to a
+  large buffer in case of demand (errno == ERANGE) in case a solution like
+  that would become necessary. I still want to avoid that kind of nastiness.
+
+- Tried to compile and run curl on Linux for alpha and FreeBSD for alpha. Went
+  as smooth as it could.
+
+- Added a docs/examples directory with two tiny example sources that show how
+  to use libcurl. I hope users will supply me with more useful examples
+  further on.
+
+- Applied a patch by Jörn Hartroth to no longer use the word 'inteface' in the
+  config struct in the src/main.c file since certain compilers have that word
+  "reservered".  I figure that is some kind of C++ decease.
+
+- Updated the curl.1 man page with --interface and --krb4.
+
+- Modified the base64Encode() function to work like the kerberos one, so that
+  I could remove the use of that. There is no need for *two* base64 encoding
+  functions! ;-)
+
+Version 7.3pre5
+
+Daniel (19 September 2000)
+- The kerberos4-layer source code that is much "influenced" by the original
+  krb4 source code, through yafc into curl, was using quite a lot of global
+  variables. libcurl can't work properly with globals like that why I had to
+  clean up almost every function in the new security.c to make them use
+  connection specific variables instead of the globals. I just hope I didn't
+  destroy anything now... :-) configure updated, version string now reflects
+  krb4 built-in. It almost works now. Only uploads are still being naughty.
+
+Version 7.3pre3
+
+Daniel (18 September 2000)
+- Martin Hedenfalk supplied a major patch that introduces krb4-ftp support to
+  curl. Martin is the primary author of the ftp client named yafc and he did
+  not hesitate to help us implement this when I asked him. Many and sincere
+  thanks to a splendid effort. It didn't even take many hours!
+
+- Stephen Kick supplied a big patch that introduces the --interface flag to
+  the curl tool and CURLOPT_INTERFACE for libcurl. It allows you to specify an
+  outgoing interface to use for your request. This may not work on all
+  platforms. This needs testing.
+
+- Richard Prescott noticed that curl on Tru64 unix could core dumped if the
+  name didn't resolve properly. This was due to the GetHost() function not
+  returning an error even though it failed on some platforms!
+
 Daniel (15 September 2000)
 - Updated all sorts of documents in regards to the new proxytunnel support.
 
