@@ -294,7 +294,7 @@ static int get_iphlpapi_dns_info (char *ret_buf, size_t ret_size)
 {
   FIXED_INFO    *fi   = alloca (sizeof(*fi));
   DWORD          size = sizeof (*fi);
-  DWORD WINAPI (*GetNetworkParams) (FIXED_INFO*, DWORD*);  /* available only on Win-98/2000+ */
+  DWORD (WINAPI *GetNetworkParams) (FIXED_INFO*, DWORD*);  /* available only on Win-98/2000+ */
   HMODULE        handle;
   IP_ADDR_STRING *ipAddr;
   int            i, count = 0;
