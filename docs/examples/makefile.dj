@@ -29,3 +29,36 @@ all: $(PROGRAMS)
 clean:
 	rm -f $(PROGRAMS)
 
+- 1,32 ----
+#
+#  Adapted for djgpp / Watt-32 / DOS by
+#  Gisle Vanem <giva@bgnett.no>
+#
+
+include ../../packages/DOS/common.dj
+
+CFLAGS += -I../../include
+
+LIBS = ../../lib/libcurl.a
+
+ifeq ($(USE_SSL),1)
+  LIBS += $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
+endif
+
+LIBS += $(WATT32_ROOT)/lib/libwatt.a $(ZLIB_ROOT)/libz.a
+
+PROGRAMS  = fopen.exe ftpget.exe ftpgetre.exe ftpuploa.exe getinmem.exe \
+            http-pos.exe httpput.exe multi-ap.exe multi-do.exe          \
+            multi-po.exe multi-si.exe persista.exe post-cal.exe         \
+            postit2.exe sepheade.exe simple.exe simpless.exe https.exe  \
+            ftp3rdpa.exe getinfo.exe
+
+all: $(PROGRAMS)
+
+%.exe: %.c
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+	@echo
+
+clean:
+	rm -f $(PROGRAMS)
+
