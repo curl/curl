@@ -6,7 +6,24 @@
 
                                   Changelog
 
+Daniel (4 October 2004)
+- Chris found a race condition resulting in CURLE_COULDNT_RESOLVE_HOST and
+  potential crash, in the windows threaded name resolver code.
+
+Daniel (3 October 2004)
+- Replaced the use of isspace() in cookie.c with our own version instead since
+  we have most data as 'char *' and that makes us pass in negative values if
+  there is 8bit data in the string. Changing to unsigned causes too much
+  warnings or too many required typecasts to the normal string functions.
+  Harshal Pradhan identified this problem.
+
 Daniel (2 October 2004)
+- Bertrand Demiddelaer found a case where libcurl could read already freed
+  data when CURLOPT_VERBOSE is used and a (very) persistent connection. It
+  happened when the dns cache entry for the connection was pruned while the
+  connection was still alive and then again re-used. We worked together on
+  this fix.
+
 - Gisle Vanem provided code that displays an error message when the (libidn
   based) IDN conversion fails. This is really due to a missing suitable
   function in the libidn API that I hope we can remove once libidn gets a

@@ -14,10 +14,17 @@ This release includes the following changes:
  o added CURLINFO_OS_ERRNO
  o added CURLOPT_FTPSSLAUTH to allow ftp connects to attempt "AUTH TLS" instead
    before "AUTH SSL"
- o curl_getdate() completely rewritten, which may affect curl -z use cases
+ o curl_getdate() completely rewritten: may affect rare curl -z use cases
 
 This release includes the following bugfixes:
 
+ o a race condition sometimes resulting in CURLE_COULDNT_RESOLVE_HOST in the
+   windows threaded name resolver code
+ o isspace() invokes with negative values in the cookie code
+ o a case of read-already-freed-data when CURLOPT_VERBOSE is used and a (very)
+   persistent connection
+ o now includes descriptive error messages for IDN errors
+ o more forgivning PASS response code check for better working with proftpd
  o curl/multi.h works better included in winsock-using apps
  o curl_easy_reset() no longer enables the progress meter
  o build fix for SSL disabled curl with SSL Engine support present
@@ -27,10 +34,10 @@ This release includes the following bugfixes:
  o connect failures properly stores an error message in the errorbuffer
  o Rare Location:-following problem with bad original URL
  o -F can now add Content-Type on non-file sections
- o double Host: header when following Location: with replaced Host: fixed
- o curl_multi_add_handle() return code fix
+ o double Host: header when following Location: with replaced Host:
+ o curl_multi_add_handle() return code
  o "Proxy-Connection: close" is now understood and properly dealt with
- o curl_getdate() crash fixed
+ o curl_getdate() crash
  o downloading empty files now calls the write callback properly
  o no reverse DNS lookups for ip-only addresses with ipv6-enabled libcurl
  o libcurl works better multi-threaded on AIX (when built with xlc)
@@ -42,6 +49,8 @@ Other curl-related news since the previous public release:
 
  o AdacURL version 7.12.1 http://www.almroth.com/adacurl/index.html
  o pycurl version 7.12.1 http://pycurl.sourceforge.net/
+ o tclcurl version 0.12.1
+   http://personal1.iddeo.es/andresgarci/tclcurl/english/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
@@ -50,6 +59,7 @@ advice from friends like these:
  Jacobsen, Ling Thio, Roman Koifman, Harshal Pradhan, Jonas Forsman, David
  Tarendash, Daniel at touchtunes, Bertrand Demiddelaer, Andreas Rieke,
  Jean-Claude Chauve, Dan Fandrich, Peter Sylvester, "Mekonikum", Jean-Philippe
- Barrette-LaPierre, Günter Knauf, Larry Campbell, Fedor Karpelevitch
+ Barrette-LaPierre, Günter Knauf, Larry Campbell, Fedor Karpelevitch,
+ Aleksandar Milivojevic, Gisle Vanem, Chris "Bob Bob"
 
         Thanks! (and sorry if I forgot to mention someone)
