@@ -877,7 +877,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 
   if(-1 != conn->connectindex) {
     /* unlink ourselves! */
-    infof(conn->data, "Closing live connection (#%d)\n", conn->connectindex);
+    infof(conn->data, "Closing connection #%d\n", conn->connectindex);
     conn->data->state.connects[conn->connectindex] = NULL;
   }
 
@@ -935,7 +935,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
  * be dead. Most commonly this happens when the server has closed the
  * connection due to inactivity.
  */
-static bool SocketIsDead(struct connectdata *conn, int sock) 
+static bool SocketIsDead(int sock) 
 { 
   int sval; 
   bool ret_val = TRUE; 
@@ -949,36 +949,9 @@ static bool SocketIsDead(struct connectdata *conn, int sock)
   to.tv_usec = 1; 
 
   sval = select(sock + 1, &check_set, 0, 0, &to);
-  if(sval == 0) {
+  if(sval == 0)
     /* timeout */
     ret_val = FALSE;
-#ifdef USE_SSLEAY
-    /* the socket seems fine, but is the SSL later fine too? */
-    if(conn->ssl.use) {
-      int peek;
-      int error;
-      Curl_nonblock(sock, TRUE);
-
-      peek = SSL_peek(conn->ssl.handle,
-                      conn->data->state.buffer, BUFSIZE);
-
-      infof(conn->data, "SSL_peek returned %d\n", peek);
-
-      if(-1 == peek) {
-        error = SSL_get_error(conn->ssl.handle, peek);
-        infof(conn->data, "SSL_error returned %d\n", error);
-        
-        if(SSL_ERROR_WANT_READ != error)
-          ret_val = TRUE;
-      }
-      else
-        /* peek did not return -1 */
-        ret_val = TRUE;
-      
-      Curl_nonblock(sock, FALSE);      
-    }
-#endif
-  }
   
   return ret_val;
 }
@@ -1021,7 +994,7 @@ ConnectionExists(struct SessionHandle *data,
             continue;
           }
         }
-        dead = SocketIsDead(check, check->firstsocket);
+        dead = SocketIsDead(check->firstsocket);
         if(dead) {
           infof(data, "Connection %d seems to be dead!\n", i);
           Curl_disconnect(check); /* disconnect resources */
@@ -2167,7 +2140,7 @@ CURLcode Curl_done(struct connectdata *conn)
      ((CURLE_OK == result) && conn->bits.close))
     result = Curl_disconnect(conn); /* close the connection */
   else
-    infof(data, "Connection (#%d) left alive\n", conn->connectindex);
+    infof(data, "Connection #%d left intact\n", conn->connectindex);
 
   return result;
 }
