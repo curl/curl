@@ -44,6 +44,7 @@
 #include "url.h" /* for the ssl config check function */
 #include "inet_pton.h"
 #include "ssluse.h"
+#include "connect.h" /* Curl_ourerrno() proto */
 
 #ifdef USE_SSLEAY
 #include <openssl/rand.h>
@@ -1157,18 +1158,28 @@ Curl_SSLConnect(struct connectdata *conn,
 
     interval.tv_usec = timeout_ms*1000;
 
-    what = select(sockfd+1, &readfd, &writefd, NULL, &interval);
-    if(what > 0)
-      /* reabable or writable, go loop yourself */
-      continue;
-    else if(0 == what) {
-      /* timeout */
-      failf(data, "SSL connection timeout");
-      return CURLE_OPERATION_TIMEOUTED;
-    }
-    else
-      break; /* get out of loop */
-  } /* loop */
+    while(1) {
+      what = select(sockfd+1, &readfd, &writefd, NULL, &interval);
+      if(what > 0)
+        /* reabable or writable, go loop in the outer loop */
+        break;
+      else if(0 == what) {
+        /* timeout */
+        failf(data, "SSL connection timeout");
+        return CURLE_OPERATION_TIMEDOUT;
+      }
+      else {
+#ifdef EINTR
+        /* For platforms without EINTR all errnos are bad */
+        if (errno == EINTR)
+          continue; /* retry the select() */
+#endif
+        /* anything other than the unimportant EINTR is fatally bad */
+        failf(data, "select on SSL socket, errno: %d", Curl_ourerrno());
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+    } /* while()-loop for the select() */
+  } /* while()-loop for the SSL_connect() */
 
   /* Informational message */
   infof (data, "SSL connection using %s\n",
