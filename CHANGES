@@ -8,6 +8,26 @@
 
 Version XX
 
+Daniel (21 February 2000):
+
+- I added the -w/--write-out flag and some variables to go with it. -w is a
+  single string, whatever you enter there will be written out when curl has
+  completed a successful request. There are some variable substitutions and
+  they are specifed as '%{variable}' (without the quotes). Variables that
+  exist as of this moment are:
+
+        total_time     - total transfer time in seconds (with 2 decimals)
+        size_download  - total downloaded amount of bytes
+        size_upload    - total uploaded amount of bytes
+        speed_download - the average speed of the entire download
+        speed_upload   - the average speed of the entire upload
+
+  I will of course add more variables, but I need input on these and others.
+
+- It struck me that the -# progress bar will be hard to just apply on the new
+  progress bar concept. I need some feedback on this before that'll get re-
+  introduced! :-/
+
 Daniel (16 February 2000):
 - Jörn Hartroth brought me some fixes for the progress meter and I continued
   working on it. It seems to work for http download, http post, ftp download
