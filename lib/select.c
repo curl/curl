@@ -146,7 +146,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
     VERIFY_SOCK(writefd);
     FD_SET(writefd, &fds_write);
     FD_SET(writefd, &fds_err);
-    if (writefd > maxfd)s
+    if (writefd > maxfd)
       maxfd = writefd;
   }
 
