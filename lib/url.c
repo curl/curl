@@ -2022,14 +2022,20 @@ static CURLcode Connect(struct UrlData *data,
     if(old_conn->proxyhost)
       free(old_conn->proxyhost);
     conn = conn_temp;        /* use this connection from now on */
-    free(conn->path);        /* free the previous path pointer */
 
     /* we need these pointers if we speak over a proxy */
     conn->name = conn->gname;
     conn->hostname = old_conn->gname;
 
     conn->path = path;       /* use this one */
-    conn->ppath = path;      /* set this too */
+
+    /* The 'ppath' may have been advanced a few steps from the 'path' start
+       point. We must also advance our new pointer as many steps as the
+       previous one was! This was the cause of the multiple ftp file bug
+       found on May 9 2001 libcurl 7.7.3 */
+    conn->ppath = (old_conn->ppath - old_conn->path)+path;
+
+    free(old_conn->path);    /* free the previous path pointer */
 
     /* re-use init */
     conn->bits.reuse = TRUE; /* yes, we're re-using here */
