@@ -1181,6 +1181,8 @@ sub startservers {
                 $run{'ftp'}=$pid;
             }
             if(!$run{'ftps'}) {
+                return 2;
+
                 $pid = runftpsserver($verbose);
                 if($pid <= 0) {
                     return 2;
