@@ -194,6 +194,41 @@ POST (HTTP)
         curl -d "name=Rafael%20Sagula&phone=3320780" \
                 http://www.where.com/guest.cgi
 
+  How to post a form with curl, lesson #1:
+
+  Dig out all the <input> tags in the form that you want to fill in. (There's
+  a perl program called formfind.pl on the curl site that helps with this).
+
+  If there's a "normal" post, you use -d to post. -d takes a full "post
+  string", which is in the format
+
+        <variable1>=<data1>&<variable2>=<data2>&...
+
+  The 'variable' names are the names set with "name=" in the <input> tags, and
+  the data is the contents you want to fill in for the inputs. The data *must*
+  be properly URL encoded. That means you replace space with + and that you
+  write weird letters with %XX where XX is the hexadecimal representation of
+  the letter's ASCII code.
+
+  Example:
+
+  (page located at http://www.formpost.com/getthis/
+
+        <form action="post.cgi" method="post">
+        <input name=user size=10>
+        <input name=pass type=password size=10>
+        <input name=id type=hidden value="blablabla">
+        <input name=ding value="submit">
+        </form>
+
+  We want to enter user 'foobar' with password '12345'.
+
+  To post to this, you enter a curl command line like:
+
+        curl -d "user=foobar&pass=12345&id=blablabla&dig=submit"  (continues)
+          http://www.formpost.com/getthis/post.cgi
+
+
   While -d uses the application/x-www-form-urlencoded mime-type, generally
   understood by CGI's and similar, curl also supports the more capable
   multipart/form-data type. This latter type supports things like file upload.
