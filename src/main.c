@@ -309,6 +309,7 @@ struct Configurable {
   char *useragent;
   char *cookie;
   bool use_resume;
+  bool resume_from_current;
   int resume_from;
   char *postfields;
   long postfieldsize;
@@ -757,8 +758,14 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'C':
       /* This makes us continue an ftp transfer at given position */
-      if(!strequal(nextarg, "-"))
+      if(!strequal(nextarg, "-")) {
         config->resume_from= atoi(nextarg);
+        config->resume_from_current = FALSE;
+      }
+      else {
+        config->resume_from_current = TRUE;
+        config->resume_from = 0;
+      }
       config->use_resume=TRUE;
       break;
     case 'd':
@@ -1639,7 +1646,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           free(storefile);
         }
       
-        if((0 == config->resume_from) && config->use_resume) {
+        if(config->resume_from_current) {
           /* we're told to continue where we are now, then we get the size of
              the file as it is now and open it for append instead */
 
@@ -1707,8 +1714,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       
       }
       if((config->conf&CONF_UPLOAD) &&
-         config->use_resume &&
-         (0==config->resume_from)) {
+         config->resume_from_current) {
         config->resume_from = -1; /* -1 will then force get-it-yourself */
       }
       if(config->headerfile) {
