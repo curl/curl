@@ -430,9 +430,12 @@ CURLcode Curl_setopt(struct UrlData *data, CURLoption option, ...)
      */
     data->bits.http_follow_location = va_arg(param, long)?TRUE:FALSE;
     break;
-  case CURLOPT_FTPASCII:
+  case CURLOPT_TRANSFERTEXT:
     /*
-     * Transfer FTP using ASCII instead of BINARY.
+     * This option was previously named 'FTPASCII'. Renamed to work with
+     * more protocols than merely FTP.
+     *
+     * Transfer using ASCII (instead of BINARY).
      */
     data->bits.ftp_ascii = va_arg(param, long)?TRUE:FALSE;
     break;
