@@ -6,7 +6,40 @@
 
                                History of Changes
 
+Daniel (20 August 2001)
+- Brad pointed out that we ship two extra libtool files in the tarballs that
+  we really don't need to! Removing them makes the gz-archive about 60K
+  smaller!
+
+- Albert Chin brought fixes for the configure script to detect socklen_t
+  properly as well as moving lots of our custom autoconf macros to
+  acinclude.m4.
+
+Daniel (19 August 2001)
+- Moonesamy improved his -G feature for host names only URLs...
+
+Daniel (17 August 2001)
+- Finally cleaned up the kerberos code to use Curl_ prefixes on all global
+  symbols and to not use global variables.
+
+Version 7.8.1-pre6
+
+Daniel (16 August 2001)
+- S. Moonesamy added the -G option to curl, that converts the data specified
+  with -d to a GET request. Default action when using -d is POST. When -G is
+  used, the -d specified data will be appended to the URL with a '?'
+  separator. As suggested previously by Kevin Roth.
+
+- curl-config --libs should now display all linker options required to link
+  with libcurl. It includes the path and options for libcurl itself.
+  curl-config --cflags displays the compiler option(s) needed to compile
+  source files that use libcurl functions. Basically, that sets the include
+  path correct.
+
 Daniel (15 August 2001)
+- Arkadiusz Miskiewicz pointed out a mistake in how IPv6-style IP-addresses
+  were parsed and used. (RFC2732-format)
+
 - Bug #12733 over on php.net identified a problem in libcurl that made it core
   dump if you used CURLOPT_POST without setting any data to post with
   CURLOPT_POSTFIELDS! This is no longer the case. Not using CURLOPT_POSTFIELDS
