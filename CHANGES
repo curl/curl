@@ -7,6 +7,18 @@
                                History of Changes
 
 
+Daniel (6 March 2002)
+- Ralph Mitchell patched away a few compiler warnings in tests/server/sws.c
+
+Daniel (5 March 2002)
+- I noticed that the typedef in curl.h for the progress callback prototype was
+  wrong and thus applications that used it would not get the proper input
+  data. It used size_t where the implementation actually uses doubles!
+
+  I wish I could blame someone else, but this was my fault. Again.
+
+Version 7.9.5-pre6
+
 Daniel (4 March 2002)
 - Cut off the changes done during 2001 from this changelog file and put them
   in a separate file (CHANGES.2001), available from CVS of course.
