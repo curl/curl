@@ -217,6 +217,13 @@ X_OBJS= \
 	$(DIROBJ)\getenv.obj \
 	$(DIROBJ)\inet_pton.obj \
 	$(DIROBJ)\hostip.obj \
+	$(DIROBJ)\hostasyn.obj \
+	$(DIROBJ)\hostsyn.obj \
+	$(DIROBJ)\hostares.obj \
+	$(DIROBJ)\hostthre.obj \
+	$(DIROBJ)\hostip4.obj \
+	$(DIROBJ)\hostip6.obj \
+	$(DIROBJ)\inet_ntop.c \
 	$(DIROBJ)\if2ip.obj \
 	$(DIROBJ)\mprintf.obj \
 	$(DIROBJ)\netrc.obj \
