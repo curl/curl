@@ -36,7 +36,7 @@ void Curl_single_fdset(struct connectdata *conn,
 CURLcode Curl_readwrite_init(struct connectdata *conn);
 CURLcode Curl_readrewind(struct connectdata *conn);
 CURLcode Curl_fillreadbuffer(struct connectdata *conn, int bytes, int *nreadp);
-
+bool Curl_retry_request(struct connectdata *conn, char **url);
 /* This sets up a forthcoming transfer */
 CURLcode
 Curl_Transfer (struct connectdata *data,

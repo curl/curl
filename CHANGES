@@ -7,6 +7,17 @@
                                   Changelog
 
 Daniel (29 January 2005)
+- Using the multi interface, and doing a requsted a re-used connection that
+  gets closed just after the request has been sent failed and did not re-issue
+  a request on a fresh reconnect like the easy interface did. Now it does!
+
+- Define CURL_MULTIEASY when building libcurl (lib/easy.c to be exact), to use
+  my new curl_easy_perform() that uses the multi interface to run the
+  request. It is a great testbed for the multi interface and I believe we
+  shall do it this way for real in the future when we have a successor to
+  curl_multi_fdset(). I've used this approach to detect and fix several of the
+  recent multi-interfaces issues.
+
 - Adjusted the KNOWN_BUGS #17 fix a bit more since the FTP code also did some
   bad assumptions.
 

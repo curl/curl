@@ -506,19 +506,24 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
           Curl_done(&easy->easy_conn, easy->result);
         }
 
-        /* after the transfer is done, go DONE */
         else if(TRUE == done) {
+          char *newurl;
+          bool retry = Curl_retry_request(easy->easy_conn, &newurl);
 
           /* call this even if the readwrite function returned error */
           Curl_posttransfer(easy->easy_handle);
 
           /* When we follow redirects, must to go back to the CONNECT state */
-          if(easy->easy_conn->newurl) {
-            char *newurl = easy->easy_conn->newurl;
-            easy->easy_conn->newurl = NULL;
+          if(easy->easy_conn->newurl || retry) {
+            if(!retry) {
+              /* if the URL is a follow-location and not just a retried request
+                 then figure out the URL here */
+              newurl = easy->easy_conn->newurl;
+              easy->easy_conn->newurl = NULL;
+            }
             easy->result = Curl_done(&easy->easy_conn, CURLE_OK);
             if(easy->result == CURLE_OK)
-              easy->result = Curl_follow(easy->easy_handle, newurl, FALSE);
+              easy->result = Curl_follow(easy->easy_handle, newurl, retry);
             if(CURLE_OK == easy->result) {
               easy->state = CURLM_STATE_CONNECT;
               result = CURLM_CALL_MULTI_PERFORM;
@@ -529,6 +534,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
               free(newurl);
           }
           else {
+            /* after the transfer is done, go DONE */
             easy->state = CURLM_STATE_DONE;
             result = CURLM_CALL_MULTI_PERFORM;
           }
