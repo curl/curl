@@ -444,20 +444,20 @@ _Transfer(struct connectdata *c_conn)
                  write a chunk of the body */
               if(conn->protocol&PROT_HTTP) {
                 /* HTTP-only checks */
-                if (data->resume_from &&
-                    !content_range &&
-                    (data->httpreq==HTTPREQ_GET)) {
+                if (data->newurl) {
+                  /* abort after the headers if "follow Location" is set */
+                  infof (data, "Follow to new URL: %s\n", data->newurl);
+                  return CURLE_OK;
+                }
+                else if (data->resume_from &&
+                         !content_range &&
+                         (data->httpreq==HTTPREQ_GET)) {
                   /* we wanted to resume a download, although the server
                      doesn't seem to support this and we did this with a GET
                      (if it wasn't a GET we did a POST or PUT resume) */
                   failf (data, "HTTP server doesn't seem to support "
                          "byte ranges. Cannot resume.");
                   return CURLE_HTTP_RANGE_ERROR;
-                }
-                else if (data->newurl) {
-                  /* abort after the headers if "follow Location" is set */
-                  infof (data, "Follow to new URL: %s\n", data->newurl);
-                  return CURLE_OK;
                 }
                 else if(data->timecondition && !data->range) {
                   /* A time condition has been set AND no ranges have been
