@@ -690,9 +690,14 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
          fi
        else dnl $ICC = yes
          dnl this is a set of options we believe *ALL* gcc versions support:
-         WARN="-W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wpointer-arith -Wnested-externs -Winline -Wmissing-declarations -Wmissing-prototypes -Wsign-compare"
+         WARN="-W -Wall -Wwrite-strings -pedantic -Wpointer-arith -Wnested-externs -Winline -Wmissing-prototypes"
 
          dnl -Wcast-align is a bit too annoying on all gcc versions ;-)
+
+         if test "$gccnum" -ge "207"; then
+           dnl gcc 2.7 or later (well, they don't work on 2.2.2)
+           WARN="$WARN -Wno-long-long -Wmissing-declarations -Wsign-compare"
+         fi
 
          if test "$gccnum" -gt "295"; then
            dnl only if the compiler is newer than 2.95 since we got lots of
