@@ -7,6 +7,41 @@
                                   Changelog
 
 
+Daniel (28 Nov 2002)
+- I visited Lars Nordgren and had a go with his problem, which lead me to
+  implement this fix. If libcurl detects the added custom header
+  "Transfer-Encoding: chunked", it will now enable a chunked transfer.
+
+  Also, chunked transfer didn't quite work before but seems to do so now.
+
+- Kjetil Jacobsen pointed out that ./configure --disable-ipv6 --without-zlib
+  didn't work on any platform...
+
+Daniel (26 Nov 2002)
+- Fixed a bad addrinfo free in the hostip.c code, hardly exposed anywhere
+
+- Dan Becker found and fixed a minor memory leak on persistent connnections
+  using CURLOPT_USERPWD.
+
+Daniel (22 Nov 2002)
+- Based on Ralph Mitchell's excellent analysis I found a bug in the test suite
+  web server (sws) which now lets test case 306 run fine even in combination
+  with the other test cases.
+
+- Juan Ignacio Hervás found a crash in the verbose connect message that is
+  used on persistent connections. This bug was added in 7.10.2 due to the
+  rearranged name resolve code.
+
+Daniel (20 Nov 2002)
+- Kjetil Jacobsen provided a patch that introduces:
+
+   CURLOPT_PRIVATE stores a private pointer in the curl handle.
+
+   CURLINFO_PRIVATE retrieves the private pointer from the curl handle.
+
+- Karol Pietrzak pointed out how curl-config --cflags didn't output a good
+  include dir so I've removed that for now.
+
 Version 7.10.2 (18 Nov 2002)
 
 Daniel (11 Nov 2002)
