@@ -6,6 +6,27 @@
 
                                History of Changes
 
+Version XX
+
+Daniel (23 March 2000):
+- Marco G. Salvagno <mgs@whiz.cjb.net> corrected my badly applied patch he
+  actually already told me about!
+
+- H. Daphne Luong <daphne@tellme.com> brought me a fix that now makes curl
+  ingore select() errors in the download if errno is EINTR, which turns out to
+  happen every now and then when using libcurl multi-threaded...
+
+Daniel (22 March 2000):
+- Wham Bang <wham_bang@yahoo.com> supplied a couple of win32 fixes. HAVE_UNAME
+  was accidentally #defined in config-win32.h, which it shouldn't have been.
+  The HAVE_UNISTD_H is not defined when compiling with the Makefile.vc6
+  makefile for MS VC++.
+
+Daniel (21 March 2000):
+- I removed the AC_PROG_INSTALL macro from configure.in, since it appears that
+  one of the AM_* macros searches for a BSD compatible install already. Janne
+  Johansson made me aware of this.
+
 Version 6.5.2
 
 Daniel (21 March 2000):
@@ -29,10 +50,10 @@ Daniel (19 March 2000):
   the INSTALL file. Very nice job!
 
 Daniel (17 March 2000):
-- Wham Bang <wham_bang@yahoo.com> (is that Pascal Gaudette?) supplied a patch
-  for the lib/Makefile.vc6 file. We still need some fixes for the
-  config-win32.h since it appears that VC++ and mingw32 have different
-  opinions about (at least) unistd.h's existance.
+- Wham Bang <wham_bang@yahoo.com> supplied a patch for the lib/Makefile.vc6
+  file. We still need some fixes for the config-win32.h since it appears that
+  VC++ and mingw32 have different opinions about (at least) unistd.h's
+  existance.
 
 Daniel (15 March 2000):
 - I modified the -D/--dump-header workings so that it doesn't write anything
