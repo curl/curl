@@ -21,10 +21,14 @@
  * $Id$
  *****************************************************************************/
 
+/* This is now designed to have its own local setup.h */
+#include "setup.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
+#include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
 
@@ -37,9 +41,6 @@
 #include "writeout.h"
 
 #define CURLseparator	"--_curl_--"
-
-/* This is now designed to have its own local setup.h */
-#include "setup.h"
 
 #if defined(WIN32)&&!defined(__CYGWIN32__)
 #include <winsock.h>
