@@ -1,4 +1,4 @@
-Updated: April 27, 2002 (http://curl.haxx.se/docs/faq.shtml)
+Updated: May 15, 2002 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -56,6 +56,7 @@ FAQ
   4.7 How do I keep user names and passwords secret in Curl command lines?
   4.8 I found a bug!
   4.9 Curl can't authenticate to the server that requires NTLM?
+  4.10 My HTTP request using HEAD, PUT or DELETE doesn't work!
 
  5. libcurl Issues
   5.1 Is libcurl thread-safe?
@@ -561,6 +562,18 @@ FAQ
   NTLM is a Microsoft proprietary protocol. Unfortunately, curl does not
   currently support that. Proprietary formats are evil. You should not use
   such ones.
+
+  4.10 My HTTP request using HEAD, PUT or DELETE doesn't work!
+
+  Many web servers allow or demand that the administrator configures the
+  server properly for these requests to work on the web server.
+
+  Some servers seem to support HEAD only on certain kinds of URLs.
+
+  To fully grasp this, try the documentation for the particular server
+  software you're trying to interact with. This is not anything curl can do
+  anything about.
+
 
 5. libcurl Issues
 
