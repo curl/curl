@@ -1,6 +1,6 @@
 .\" $Id$
 .\"
-.TH curl_multi_remove_handle 3 "1 March 2002" "libcurl 7.9.5" "libcurl Manual"
+.TH curl_multi_remove_handle 3 "6 March 2002" "libcurl 7.9.5" "libcurl Manual"
 .SH NAME
 curl_multi_remove_handle - add an easy handle to a multi session
 .SH SYNOPSIS
@@ -11,6 +11,9 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle, CURL *easy_handle);
 .SH DESCRIPTION
 Removes a given easy_handle from the multi_handle. This will make the
 specified easy handle be removed from this multi handle's control.
+
+When the easy handle has been removed from a multi stack, it is again
+perfectly legal to invoke \fIcurl_easy_perform()\fP on this easy handle.
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"
