@@ -712,13 +712,11 @@ the format of your certificate. Supported formats are "PEM" and "DER".  (Added
 in 7.9.3)
 .IP CURLOPT_SSLCERTPASSWD
 Pass a pointer to a zero terminated string as parameter. It will be used as
-the password required to use the \fICURLOPT_SSLCERT\fP certificate. If the
-password is not supplied, you will be prompted for it.
-\fICURLOPT_PASSWDFUNCTION\fP can be used to set your own prompt function.
+the password required to use the \fICURLOPT_SSLCERT\fP certificate.
 
-\fBNOTE:\fPThis option is replaced by \fICURLOPT_SSLKEYPASSWD\fP and only
-cept for backward compatibility. You never needed a pass phrase to load
-a certificate but you need one to load your private key.
+This option is replaced by \fICURLOPT_SSLKEYPASSWD\fP and should only be used
+for backward compatibility. You never needed a pass phrase to load a
+certificate but you need one to load your private key.
 .IP CURLOPT_SSLKEY
 Pass a pointer to a zero terminated string as parameter. The string should be
 the file name of your private key. The default format is "PEM" and can be
@@ -732,9 +730,7 @@ engine. in this case \fICURLOPT_SSLKEY\fP is used as an identifier passed to
 the engine. You have to set the crypto engine with \fICURLOPT_SSL_ENGINE\fP.
 .IP CURLOPT_SSLKEYPASSWD
 Pass a pointer to a zero terminated string as parameter. It will be used as
-the password required to use the \fICURLOPT_SSLKEY\fP private key. If the
-password is not supplied, you will be prompted for
-it. \fICURLOPT_PASSWDFUNCTION\fP can be used to set your own prompt function.
+the password required to use the \fICURLOPT_SSLKEY\fP private key.
 .IP CURLOPT_SSL_ENGINE
 Pass a pointer to a zero terminated string as parameter. It will be used as
 the identifier for the crypto engine you want to use for your private
