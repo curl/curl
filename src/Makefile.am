@@ -2,26 +2,26 @@
 # $Id$
 #
 
-# Some flags needed when trying to cause warnings ;-)
-# CFLAGS = -g -DMALLOCDEBUG # -Wall -pedantic
-#CPPFLAGS = -DGLOBURL -DCURL_SEPARATORS
+AUTOMAKE_OPTIONS = foreign nostdinc
 
 INCLUDES = -I$(top_srcdir)/include
 
 bin_PROGRAMS = curl #memtest
 
-noinst_HEADERS = setup.h \
+#memtest_SOURCES = memtest.c
+#memtest_LDADD = $(top_srcdir)/lib/libcurl.la
+
+curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c setup.h \
 	config-win32.h \
 	config-mac.h \
 	config-vms.h \
 	urlglob.h \
 	version.h \
-	writeout.h
+	writeout.h \
+	config-win32.h \
+	config-mac.h \
+	config-vms.h	
 
-#memtest_SOURCES = memtest.c
-#memtest_LDADD = $(top_srcdir)/lib/libcurl.la
-
-curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c
 curl_LDADD = ../lib/libcurl.la
 curl_DEPENDENCIES = ../lib/libcurl.la
 BUILT_SOURCES = hugehelp.c
@@ -33,12 +33,7 @@ EXTRA_DIST = mkhelp.pl curlmsg.msg \
 	macos/curl.mcp.xml.sit.hqx \
 	macos/MACINSTALL.TXT \
 	macos/src/curl_GUSIConfig.cpp \
-	macos/src/macos_main.cpp \
-	config-win32.h \
-	config-mac.h \
-	config-vms.h	
-
-AUTOMAKE_OPTIONS = foreign no-dependencies
+	macos/src/macos_main.cpp
 
 MANPAGE=$(top_srcdir)/docs/curl.1
 README=$(top_srcdir)/docs/MANUAL

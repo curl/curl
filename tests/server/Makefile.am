@@ -9,4 +9,4 @@ noinst_PROGRAMS = sws
 
 sws_SOURCES= sws.c getpart.c
 
-all:
+extra_DIST = config.h.in

@@ -2,7 +2,7 @@
 # $Id$
 #
 
-AUTOMAKE_OPTIONS = foreign no-dependencies
+AUTOMAKE_OPTIONS = foreign nostdinc
 
 EXTRA_DIST = getdate.y \
        Makefile.b32 Makefile.b32.resp Makefile.m32 Makefile.vc6 \
@@ -13,7 +13,6 @@ EXTRA_DIST = getdate.y \
 lib_LTLIBRARIES = libcurl.la
 
 INCLUDES = -I$(top_srcdir)/include
-
 
 libcurl_la_LDFLAGS = -no-undefined -version-info 2:2:0
 # This flag accepts an argument of the form current[:revision[:age]]. So,
