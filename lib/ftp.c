@@ -387,31 +387,6 @@ int Curl_GetFTPResponse(char *buf,
   return nread; /* total amount of bytes read */
 }
 
-#ifndef ENABLE_IPV6
-/*
- * This function is only used by code that works on IPv4. When we add proper
- * support for that functionality with IPv6, this function can go in again.
- */
-/* -- who are we? -- */
-static char *getmyhost(char *buf, int buf_size)
-{
-#if defined(HAVE_GETHOSTNAME)
-  gethostname(buf, buf_size);
-#elif defined(HAVE_UNAME)
-  struct utsname ugnm;
-  strncpy(buf, uname(&ugnm) < 0 ? "localhost" : ugnm.nodename, buf_size - 1);
-  buf[buf_size - 1] = '\0';
-#else
-  /* We have no means of finding the local host name! */
-  strncpy(buf, "localhost", buf_size);
-  buf[buf_size - 1] = '\0';
-#endif
-  return buf;
-}
-
-#endif /* ipv4-only function */
-
-
 /* ftp_connect() should do everything that is to be considered a part
    of the connection phase. */
 CURLcode Curl_ftp_connect(struct connectdata *conn)
@@ -1229,7 +1204,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
     socklen_t sslen;
     
     sslen = sizeof(sa);
-    if (getsockname(conn->firstsocket, &sa, &sslen) < 0) {
+    if (getsockname(conn->firstsocket, (struct sockaddr *)&sa, &sslen) < 0) {
       failf(data, "getsockname() failed");
       return CURLE_FTP_PORT_FAILED;
     }
@@ -1299,7 +1274,9 @@ CURLcode ftp_use_port(struct connectdata *conn)
     struct in_addr in;
     unsigned short ip[5];
     (void) memcpy(&in.s_addr,
-                  h?*h->h_addr_list:&sa.sin_addr.s_addr, sizeof (in.s_addr));
+                  h?*h->h_addr_list:(char *)&sa.sin_addr.s_addr,
+                  sizeof (in.s_addr));
+
 #ifdef HAVE_INET_NTOA_R
     /* ignore the return code from inet_ntoa_r() as it is int or
        char * depending on system */
