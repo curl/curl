@@ -58,9 +58,6 @@ TODO
    likely that we know the size when downloading. Some sites support SIZE but
    don't show the size in the RETR response!
 
- * Make FTP PASV work with IPv6 support. RFC 2428 "FTP Extensions for IPv6 and
-   NATs" is interesting.
-
  HTTP
 
  * HTTP PUT for files passed on stdin *OR* when the --crlf option is
