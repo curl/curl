@@ -38,11 +38,6 @@
 
 #define CURLseparator	"--_curl_--"
 
-/* This define make use of the "Curlseparator" as opposed to the
-   MIMEseparator. We might add support for the latter one in the
-   future, and that's why this is left in the source. */
-#define CURL_SEPARATORS
-
 /* This is now designed to have its own local setup.h */
 #include "setup.h"
 
