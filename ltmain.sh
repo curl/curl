@@ -55,8 +55,8 @@ modename="$progname"
 # Constants.
 PROGRAM=ltmain.sh
 PACKAGE=libtool
-VERSION=1.4
-TIMESTAMP=" (1.920 2001/04/24 23:26:18)"
+VERSION=1.4.0a
+TIMESTAMP=" (1.922.2.27 2001/08/18 22:31:47)"
 
 default_mode=
 help="Try \`$progname --help' for more information."
@@ -201,6 +201,11 @@ if test -n "$prevopt"; then
   $echo "$help" 1>&2
   exit 1
 fi
+
+# If this variable is set in any of the actions, the command in it
+# will be execed at the end.  This prevents here-documents from being
+# left over by shells.
+exec_cmd=
 
 if test -z "$show_help"; then
 
@@ -615,6 +620,10 @@ compiler."
 	# Now arrange that obj and lo_libobj become the same file
 	$show "(cd $xdir && $LN_S $baseobj $libobj)"
 	if $run eval '(cd $xdir && $LN_S $baseobj $libobj)'; then
+	  # Unlock the critical section if it was locked
+	  if test "$need_locks" != no; then
+	    $run $rm "$lockfile"
+	  fi
 	  exit 0
 	else
 	  error=$?
@@ -1031,6 +1040,18 @@ compiler."
 	    # These systems don't actually have a C library (as such)
 	    test "X$arg" = "X-lc" && continue
 	    ;;
+          *-*-openbsd*)
+            # Do not include libc due to us having libc/libc_r.
+            test "X$arg" = "X-lc" && continue
+            ;;
+          esac
+         fi
+         if test "X$arg" = "X-lc_r"; then
+          case $host in
+          *-*-openbsd*)
+            # Do not include libc_r directly, use -pthread flag.
+            continue
+            ;;
 	  esac
 	fi
 	deplibs="$deplibs $arg"
@@ -2408,6 +2429,9 @@ compiler."
 	  *-*-netbsd*)
 	    # Don't link with libc until the a.out ld.so is fixed.
 	    ;;
+          *-*-openbsd*)
+            # Do not include libc due to us having libc/libc_r.
+            ;;
 	  *)
 	    # Add libc to deplibs on all other systems if necessary.
 	    if test $build_libtool_need_lc = "yes"; then
@@ -3287,27 +3311,25 @@ extern \"C\" {
 #undef lt_preloaded_symbols
 
 #if defined (__STDC__) && __STDC__
-# define lt_ptr_t void *
+# define lt_ptr void *
 #else
-# define lt_ptr_t char *
+# define lt_ptr char *
 # define const
 #endif
 
 /* The mapping between symbol names and symbols. */
 const struct {
   const char *name;
-  lt_ptr_t address;
+  lt_ptr address;
 }
 lt_preloaded_symbols[] =
 {\
 "
 
-	    sed -n -e 's/^: \([^ ]*\) $/  {\"\1\", (lt_ptr_t) 0},/p' \
-		-e 's/^. \([^ ]*\) \([^ ]*\)$/  {"\2", (lt_ptr_t) \&\2},/p' \
-		  < "$nlist" >> "$output_objdir/$dlsyms"
+	    eval "$global_symbol_to_c_name_address" < "$nlist" >> "$output_objdir/$dlsyms"
 
 	    $echo >> "$output_objdir/$dlsyms" "\
-  {0, (lt_ptr_t) 0}
+  {0, (lt_ptr) 0}
 };
 
 /* This works around a problem in FreeBSD linker */
@@ -3618,8 +3640,9 @@ else
 
     # relink executable if necessary
     if test -n \"\$relink_command\"; then
-      if (eval \$relink_command); then :
+      if relink_command_output=\`eval \$relink_command 2>&1\`; then :
       else
+        $echo \"\$relink_command_output\" >&2
 	$rm \"\$progdir/\$file\"
 	exit 1
       fi
@@ -4368,11 +4391,10 @@ relink_command=\"$relink_command\""
     if test -n "$current_libdirs"; then
       # Maybe just do a dry run.
       test -n "$run" && current_libdirs=" -n$current_libdirs"
-      exec $SHELL $0 --finish$current_libdirs
-      exit 1
+      exec_cmd='$SHELL $0 --finish$current_libdirs'
+    else
+      exit 0
     fi
-
-    exit 0
     ;;
 
   # libtool finish mode
@@ -4575,11 +4597,8 @@ relink_command=\"$relink_command\""
 	LANG="$save_LANG"; export LANG
       fi
 
-      # Now actually exec the command.
-      eval "exec \$cmd$args"
-
-      $echo "$modename: cannot exec \$cmd$args"
-      exit 1
+      # Now prepare to actually exec the command.
+      exec_cmd='"$cmd"$args'
     else
       # Display what would be done.
       if test -n "$shlibpath_var"; then
@@ -4744,10 +4763,17 @@ relink_command=\"$relink_command\""
     ;;
   esac
 
-  $echo "$modename: invalid operation mode \`$mode'" 1>&2
-  $echo "$generic_help" 1>&2
-  exit 1
+  if test -z "$exec_cmd"; then
+    $echo "$modename: invalid operation mode \`$mode'" 1>&2
+    $echo "$generic_help" 1>&2
+    exit 1
+  fi
 fi # test -z "$show_help"
+
+if test -n "$exec_cmd"; then
+  eval exec $exec_cmd
+  exit 1
+fi
 
 # We need to display help for each of the modes.
 case $mode in
