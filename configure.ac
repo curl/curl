@@ -490,8 +490,8 @@ AC_HELP_STRING([--with-krb4=DIR],[where to look for Kerberos4]),[
   OPT_KRB4="$withval"
   if test X"$OPT_KRB4" != Xyes
   then
-    LDFLAGS="$LDFLAGS -L$OPT_KRB4/lib"
-    KRB4LIB="$OPT_KRB4/lib"
+    LDFLAGS="$LDFLAGS -L$OPT_KRB4/lib$libsuff"
+    KRB4LIB="$OPT_KRB4/lib$libsuff"
     CPPFLAGS="$CPPFLAGS -I$OPT_KRB4/include"
     KRB4INC="$OPT_KRB4/include"
   fi
@@ -627,7 +627,7 @@ if test x"$want_gss" = xyes; then
         gss_ldflags=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
 	LDFLAGS="$LDFLAGS $gss_ldflags"
      else
-        LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib -lgssapi"
+        LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff -lgssapi"
      fi
   else
      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
@@ -710,7 +710,7 @@ else
   *)
     dnl check the given spot right away!
     EXTRA_SSL=$OPT_SSL
-    LDFLAGS="$LDFLAGS -L$EXTRA_SSL/lib"
+    LDFLAGS="$LDFLAGS -L$EXTRA_SSL/lib$libsuff"
     CPPFLAGS="$CPPFLAGS -I$EXTRA_SSL/include/openssl -I$EXTRA_SSL/include"
     ;;
   esac
@@ -720,7 +720,7 @@ else
      ],[
      OLDLDFLAGS="$LDFLAGS"
      OLDCPPFLAGS="$CPPFLAGS"
-     LDFLAGS="$CLEANLDFLAGS -L$EXTRA_SSL/lib"
+     LDFLAGS="$CLEANLDFLAGS -L$EXTRA_SSL/lib$libsuff"
      CPPFLAGS="$CLEANCPPFLAGS -I$EXTRA_SSL/include/openssl -I$EXTRA_SSL/include"
      AC_CHECK_LIB(crypto, CRYPTO_add_lock,[
        HAVECRYPTO="yes" ], [
@@ -852,7 +852,7 @@ case "$OPT_ZLIB" in
                    dnl if no lib found, try to add the given library
                    [if test -d "$OPT_ZLIB"; then
                       CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
-                      LDFLAGS="$LDFLAGS -L$OPT_ZLIB/lib"
+                      LDFLAGS="$LDFLAGS -L$OPT_ZLIB/lib$libsuff"
                    fi])
 
     AC_CHECK_HEADER(zlib.h,
