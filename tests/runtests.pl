@@ -156,8 +156,8 @@ sub torture {
             $testcmd = "gdb $CURL -x log/gdbcmd";
         }
 
-        print "Torture test $c starting up\n",
-        " CMD: $testcmd\n";
+        print "Torture test $c:\n";
+        print " CMD: $testcmd\n" if($verbose);
         
         # memanalyze -v is our friend, get the number of allocations made
         my $count;
