@@ -8,6 +8,7 @@ CHANGES
 FILES
 maketgz
 aclocal.m4
+acinclude.m4
 Makefile.in
 install-sh
 mkinstalldirs

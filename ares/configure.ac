@@ -35,35 +35,22 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
 
     CPPFLAGS="$CPPFLAGS -DCURLDEBUG -I../include"
     CFLAGS="$CFLAGS -g" 
-    if test "$GCC" = "yes"; then
-       dnl these work for gcc 2.95
-       CFLAGS="$CFLAGS -W -Wall -Wwrite-strings -pedantic -Wundef -Wpointer-arith -Wnested-externs -Wcast-align -Winline -Wstrict-prototypes -Wmissing-declarations -Wmissing-prototypes -Wshadow -Wsign-compare"
-       dnl 2.96 or higher: -Wfloat-equal -Wunreachable-code
-    fi
-    dnl strip off optimizer flags
-    NEWFLAGS=""
-    for flag in $CFLAGS; do
-      case "$flag" in
-      -O*)
-        dnl echo "cut off $flag"
-        ;;
-      *)
-        NEWFLAGS="$NEWFLAGS $flag"
-        ;;
-      esac
-    done
-    CFLAGS=$NEWFLAGS
+
+    dnl set compiler "debug" options to become more picky, and remove
+    dnl optimize options from CFLAGS
+    CURL_CC_DEBUG_OPTS
+
        ;;
   esac ],
        AC_MSG_RESULT(no)
 )
 
 dnl check for a few basic system headers we need
-AC_CHECK_HEADERS(
-        sys/types.h \
-        sys/time.h \
-        sys/select.h \
-        sys/socket.h \
-        )
+dnl AC_CHECK_HEADERS(
+dnl        sys/types.h \
+dnl        sys/time.h \
+dnl        sys/select.h \
+dnl        sys/socket.h \
+dnl        )
 
 AC_OUTPUT(Makefile)
