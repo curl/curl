@@ -187,8 +187,19 @@ Requested FTP SSL level failed
 .SH "CURLMcode"
 This is the generic return code used by functions in the libcurl multi
 interface.
-
-This is left to be documented.
+.IP "CURLM_CALL_MULTI_PERFORM (-1)"
+This is not really an error. It means you should call
+\fIcurl_multi_perform(3)\fP again without doing select() or similar in between.
+.IP "CURLM_OK (0)"
+Things are fine.
+.IP "CURLM_BAD_HANDLE (1)"
+The passed-in handle is not a valid CURLM handle.
+.IP "CURLM_BAD_EASY_HANDLE (2)"
+An easy handle was not good/valid.
+.IP "CURLM_OUT_OF_MEMORY (3)"
+You are doomed.
+.IP "CURLM_INTERNAL_ERROR (4)"
+This can only be returned if libcurl bugs. Please report it to us!
 .SH "CURLSHcode"
 The "share" interface will return a CURLSHcode to indicate when an 
 error has occurred. 

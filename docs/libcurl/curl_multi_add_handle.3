@@ -14,6 +14,17 @@ this \fImulti_handle\fP control the specified \fIeasy_handle\fP.
 
 When an easy handle has been added to a multi stack, you can not and you must
 not use \fIcurl_easy_perform(3)\fP on that handle!
+
+The easy handle will remain added until you remove it again with
+\fIcurl_multi_remove_handle(3)\fP. You should remove the easy handle from the
+multi stack before you terminate first the easy handle and then the multi
+handle:
+
+1 - \fIcurl_multi_remove_handle(3)\fP
+
+2 - \fIcurl_easy_cleanup(3)\fP
+
+3 - \fIcurl_multi_cleanup(3)\fP
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"

@@ -11,7 +11,16 @@ curl_multi_cleanup - close down a multi session
 .SH DESCRIPTION
 Cleans up and removes a whole multi stack. It does not free or touch any
 individual easy handles in any way - they still need to be closed
-individually, using the usual \fIcurl_easy_cleanup(3)\fP way.
+individually, using the usual \fIcurl_easy_cleanup(3)\fP way. The order of
+cleaning up should be:
+
+1 - \fIcurl_multi_remove_handle(3)\fP before any easy handles are cleaned up
+
+2 - \fIcurl_easy_cleanup(3)\fP can now be called independently since the easy
+handle is no longer connected to the multi handle
+
+3 - \fIcurl_multi_cleanup(3)\fP should be called when all easy handles are
+removed
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"
