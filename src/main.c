@@ -91,8 +91,10 @@
 #endif
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
-/* this is low-level hard-hacking memory leak tracking shit */
+#ifdef CURLDEBUG
+/* This is low-level hard-hacking memory leak tracking and similar. Using
+   the library level code from this client-side is ugly, but we do this
+   anyway for convenience. */
 #include "../lib/memdebug.h"
 #endif
 
@@ -327,7 +329,8 @@ static void helpf(const char *fmt, ...)
     vfprintf(stderr, fmt, ap);
     va_end(ap);
   }
-  fprintf(stderr, "curl: try 'curl --help' for more information\n");
+  fprintf(stderr, "curl: try 'curl --help' or "
+          "'curl --manual' for more information\n");
 }
 
 /*
@@ -351,7 +354,9 @@ static void help(void)
        "Options: (H) means HTTP/HTTPS only, (F) means FTP only\n"
        " -a/--append        Append to target file when uploading (F)\n"
        " -A/--user-agent <string> User-Agent to send to server (H)\n"
+       "    --anyauth       Tell curl to choose authentication method (H)\n"
        " -b/--cookie <name=string/file> Cookie string or file to read cookies from (H)\n"
+       "    --basic         Enable HTTP Basic Authentication (H)\n"
        " -B/--use-ascii     Use ASCII/text transfer\n",
          curl_version());
   puts(" -c/--cookie-jar <file> Write all cookies to this file after operation (H)\n"
@@ -462,9 +467,7 @@ struct Configurable {
   char *cookiefile; /* read from this file */
   bool cookiesession; /* new session? */
   bool encoding;    /* Accept-Encoding please */
-  bool ntlm;        /* NTLM Authentication */
-  bool digest;      /* Digest Authentication */
-  bool negotiate;   /* Negotiate Authentication */
+  long authtype;    /* auth bitmask */  
   bool use_resume;
   bool resume_from_current;
   bool disable_epsv;
@@ -557,6 +560,9 @@ struct Configurable {
   time_t lastrecvtime;
   size_t lastrecvsize;
 };
+
+/* global variable to hold info about libcurl */
+static curl_version_info_data *curlinfo;
 
 static int parseconfig(const char *filename,
 		       struct Configurable *config);
@@ -1059,6 +1065,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5k", "digest",     FALSE},
     {"5l", "negotiate",  FALSE},
     {"5m", "ntlm",       FALSE},
+    {"5n", "basic",      FALSE},
+    {"5o", "anyauth",    FALSE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1284,15 +1292,23 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
  	break;
 
       case 'k': /* --digest */
- 	config->digest ^= TRUE;
+ 	config->authtype = CURLAUTH_DIGEST;
  	break;
 
       case 'l': /* --negotiate */
-	config->negotiate ^= TRUE;
+	config->authtype = CURLAUTH_GSSNEGOTIATE;
 	break;
 
       case 'm': /* --ntlm */
-	config->ntlm ^= TRUE;
+	config->authtype = CURLAUTH_NTLM;
+	break;
+
+      case 'n': /* --basic for completeness */
+	config->authtype = CURLAUTH_BASIC;
+	break;
+
+      case 'o': /* --anyauth, let libcurl pick it */
+	config->authtype = CURLAUTH_ANY;
 	break;
 
       default: /* the URL! */
@@ -1714,17 +1730,37 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'V':
     {
-      curl_version_info_data *info;
       const char **proto;
 
       printf(CURL_ID "%s\n", curl_version());
-      info = curl_version_info(CURLVERSION_NOW);
-      if (info->protocols) {
-        printf("Supported protocols: ");
-        for (proto=info->protocols; *proto; ++proto) {
+      if (curlinfo->protocols) {
+        printf("Protocols: ");
+        for (proto=curlinfo->protocols; *proto; ++proto) {
           printf("%s ", *proto);
         }
-        printf("\n");
+        puts(""); /* newline */
+      }
+      if(curlinfo->features) {
+        unsigned int i;
+        struct feat {
+          const char *name;
+          int bitmask;
+        };
+        struct feat feats[] = {
+          {"IPv6", CURL_VERSION_IPV6},
+          {"krb4", CURL_VERSION_KERBEROS4},
+          {"SSL",  CURL_VERSION_SSL},
+          {"libz", CURL_VERSION_LIBZ},
+          {"NTLM", CURL_VERSION_NTLM},
+          {"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
+          {"Debug", CURL_VERSION_DEBUG}
+        };
+        printf("Features: ");
+        for(i=0; i<sizeof(feats)/sizeof(feats[0]); i++) {
+          if(curlinfo->features & feats[i].bitmask)
+            printf("%s ", feats[i].name);
+        }
+        puts(""); /* newline */
       }
     }
     return PARAM_HELP_REQUESTED;
@@ -1844,7 +1880,7 @@ static int parseconfig(const char *filename,
 
         filename = filebuffer;
       }
-      free(home); /* we've used it, now free it */
+      curl_free(home); /* we've used it, now free it */
     }
   }
 
@@ -2195,7 +2231,7 @@ void progressbarinit(struct ProgressData *bar,
   colp = curl_getenv("COLUMNS");
   if (colp != NULL) {
     bar->width = atoi(colp);
-    free(colp);
+    curl_free(colp);
   }
   else
     bar->width = 79;
@@ -2370,11 +2406,8 @@ void free_config_fields(struct Configurable *config)
 static void FindWin32CACert(struct Configurable *config, 
                             const char *bundle_file)
 {
-  curl_version_info_data *info;
-  info = curl_version_info(CURLVERSION_NOW);
-
   /* only check for cert file if "we" support SSL */
-  if(info->features & CURL_VERSION_SSL) {
+  if(curlinfo->features & CURL_VERSION_SSL) {
     DWORD buflen;
     char *ptr = NULL;
     char *retval = (char *) malloc(sizeof (TCHAR) * (MAX_PATH + 1));
@@ -2426,14 +2459,17 @@ operate(struct Configurable *config, int argc, char *argv[])
   int i;
 
   char *env;
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
   /* this sends all memory debug messages to a logfile named memdump */
   env = curl_getenv("CURL_MEMDEBUG");
   if(env) {
-    free(env);
+    curl_free(env);
     curl_memdebug("memdump");
   }
 #endif
+
+  /* we get libcurl info right away */
+  curlinfo = curl_version_info(CURLVERSION_NOW);
 
   errorbuffer[0]=0; /* prevent junk from being output */
 
@@ -2545,7 +2581,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     env = curl_getenv("CURL_CA_BUNDLE");
     if(env) {
       GetStr(&config->cacert, env);
-      free(env);
+      curl_free(env);
     }
 #if defined(WIN32) && !defined(__CYGWIN32__)
     else
@@ -3002,12 +3038,8 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_FTP_USE_EPRT, FALSE);
 
       /* new in libcurl 7.10.6 (default is Basic) */
-      if(config->digest)
-        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
-      else if(config->negotiate)
-        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_GSSNEGOTIATE);
-      else if(config->ntlm)
-        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
+      if(config->authtype)
+        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, config->authtype);
       
       /* new in curl 7.9.7 */
       if(config->trace_dump) {
@@ -3143,13 +3175,12 @@ operate(struct Configurable *config, int argc, char *argv[])
   return res;
 }
 
-
 int main(int argc, char *argv[])
 {
   int res;
   struct Configurable config;
   memset(&config, 0, sizeof(struct Configurable));
-  
+
   res = operate(&config, argc, argv);
   free_config_fields(&config);
 
