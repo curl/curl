@@ -12,8 +12,10 @@ ares:
   ftp://athena-dist.mit.edu/pub/ATHENA/ares/ares-1.1.1.tar.gz
   http://curl.haxx.se/dev/ares-1.1.1.tar.gz
   http://curl.sourceforge.net/dev/ares-1.1.1.tar.gz
+  http://curl.planetmirror.com/dev/ares-1.1.1.tar.gz
+  http://curl.tsuren.net/dev/ares-1.1.1.tar.gz
   
-  c-ares, a patched and improved version of ares:
+c-ares: (a patched and improved version of ares)
   http://curl.haxx.se/beta/arescurl-1.0-pre1.tar.gz
 
 NOTE
