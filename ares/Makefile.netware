@@ -306,7 +306,6 @@ else
 	@echo $(DL)#define HAVE_SYS_SOCKET_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_SYS_SOCKIO_H 1$(DL) >> $@
 	@echo $(DL)#define HAVE_NETDB_H 1$(DL) >> $@
-	@echo $(DL)#define HAVE_AF_INET6_H 1$(DL) >> $@
 endif
 ifdef OLD_NOVELLSDK
 	@echo $(DL)#define socklen_t int$(DL) >> $@
