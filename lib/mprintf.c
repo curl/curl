@@ -1,25 +1,281 @@
-/***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
- *                             \___|\___/|_| \_\_____|
- *
- * Copyright (C) 1998 - 2003, Daniel Stenberg, <daniel@haxx.se>, et al.
- *
- * This software is licensed as described in the file COPYING, which
- * you should have received as part of this distribution. The terms
- * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
- * You may opt to use, copy, modify, merge, publish, distribute and/or sell
- * copies of the Software, and permit persons to whom the Software is
- * furnished to do so, under the terms of the COPYING file.
- *
- * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
- * KIND, either express or implied.
+/****************************************************************************
  *
  * $Id$
- ***************************************************************************/
+ *
+ *************************************************************************
+ *
+ * Permission to use, copy, modify, and distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+ * MERCHANTIBILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE AUTHORS AND
+ * CONTRIBUTORS ACCEPT NO RESPONSIBILITY IN ANY CONCEIVABLE MANNER.
+ *
+ * Purpose:
+ *  A merge of Bjorn Reese's format() function and Daniel's dsprintf()
+ *  1.0. A full blooded printf() clone with full support for <num>$
+ *  everywhere (parameters, widths and precisions) including variabled
+ *  sized parameters (like doubles, long longs, long doubles and even
+ *  void * in 64-bit architectures).
+ *
+ * Current restrictions:
+ * - Max 128 parameters
+ * - No 'long double' support.
+ *
+ * If you ever want truly portable and good *printf() clones, the project that
+ * took on from here is named 'Trio' and you find more details on the trio web
+ * page at http://daniel.haxx.se/trio/
+ */
+
+
+#include "setup.h"
+#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+#include <ctype.h>
+#include <string.h>
+
+#ifndef SIZEOF_LONG_LONG
+/* prevents warnings on picky compilers */
+#define SIZEOF_LONG_LONG 0
+#endif
+#ifndef SIZEOF_LONG_DOUBLE
+#define SIZEOF_LONG_DOUBLE 0
+#endif
+
+
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+#include "memdebug.h"
+#endif
+
+#define BUFFSIZE 256 /* buffer for long-to-str and float-to-str calcs */
+#define MAX_PARAMETERS 128 /* lame static limit */
+
+#undef TRUE
+#undef FALSE
+#undef BOOL
+#ifdef __cplusplus
+# define TRUE true
+# define FALSE false
+# define BOOL bool
+#else
+# define TRUE  ((char)(1 == 1))
+# define FALSE ((char)(0 == 1))
+# define BOOL char
+#endif
+
+
+/* Lower-case digits.  */
+static const char lower_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+
+/* Upper-case digits.  */
+static const char upper_digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+#define	OUTCHAR(x) done+=(stream(x, (FILE *)data)==-1?0:1)
+
+/* Data type to read from the arglist */
+typedef enum  {
+  FORMAT_UNKNOWN = 0,
+  FORMAT_STRING,
+  FORMAT_PTR,
+  FORMAT_INT,
+  FORMAT_INTPTR,
+  FORMAT_LONG,
+  FORMAT_LONGLONG,
+  FORMAT_DOUBLE,
+  FORMAT_LONGDOUBLE,
+  FORMAT_WIDTH /* For internal use */
+} FormatType;
+
+/* convertion and display flags */
+enum {
+  FLAGS_NEW        = 0,
+  FLAGS_SPACE      = 1<<0,
+  FLAGS_SHOWSIGN   = 1<<1,
+  FLAGS_LEFT       = 1<<2,
+  FLAGS_ALT        = 1<<3,
+  FLAGS_SHORT      = 1<<4,
+  FLAGS_LONG       = 1<<5,
+  FLAGS_LONGLONG   = 1<<6,
+  FLAGS_LONGDOUBLE = 1<<7,
+  FLAGS_PAD_NIL    = 1<<8,
+  FLAGS_UNSIGNED   = 1<<9,
+  FLAGS_OCTAL      = 1<<10,
+  FLAGS_HEX        = 1<<11,
+  FLAGS_UPPER      = 1<<12,
+  FLAGS_WIDTH      = 1<<13, /* '*' or '*<num>$' used */
+  FLAGS_WIDTHPARAM = 1<<14, /* width PARAMETER was specified */
+  FLAGS_PREC       = 1<<15, /* precision was specified */
+  FLAGS_PRECPARAM  = 1<<16, /* precision PARAMETER was specified */
+  FLAGS_CHAR       = 1<<17, /* %c story */
+  FLAGS_FLOATE     = 1<<18, /* %e or %E */
+  FLAGS_FLOATG     = 1<<19  /* %g or %G */
+};
+
+typedef struct {
+  FormatType type;
+  int flags;
+  int width;     /* width OR width parameter number */
+  int precision; /* precision OR precision parameter number */
+  union {
+    char *str;
+    void *ptr;
+    long num;
+#if SIZEOF_LONG_LONG /* if this is non-zero */
+    long long lnum;
+#endif
+    double dnum;
+#if SIZEOF_LONG_DOUBLE
+    long double ldnum;
+#endif
+  } data;
+} va_stack_t;
+
+struct nsprintf {
+  char *buffer;
+  size_t length;
+  size_t max;
+};
+
+struct asprintf {
+  char *buffer; /* allocated buffer */
+  size_t len;   /* length of string */
+  size_t alloc; /* length of alloc */
+};
+
+int curl_msprintf(char *buffer, const char *format, ...);
+
+static int dprintf_DollarString(char *input, char **end)
+{
+  int number=0;
+  while(isdigit((int)*input)) {
+    number *= 10;
+    number += *input-'0';
+    input++;
+  }
+  if(number && ('$'==*input++)) {
+    *end = input;
+    return number;
+  }
+  return 0;
+}
+
+static BOOL dprintf_IsQualifierNoDollar(char c)
+{
+  switch (c) {
+  case '-': case '+': case ' ': case '#': case '.':
+  case '0': case '1': case '2': case '3': case '4':
+  case '5': case '6': case '7': case '8': case '9':
+  case 'h': case 'l': case 'L': case 'Z': case 'q':
+    return TRUE;
+  default:
+    return FALSE;
+  }
+}
+
+#ifdef DPRINTF_DEBUG2
+int dprintf_Pass1Report(va_stack_t *vto, int max)
+{
+  int i;
+  char buffer[128];
+  int bit;
+  int flags;
+
+  for(i=0; i<max; i++) {
+    char *type;
+    switch(vto[i].type) {
+    case FORMAT_UNKNOWN:
+      type = "unknown";
+      break;
+    case FORMAT_STRING:
+      type ="string";
+      break;
+    case FORMAT_PTR:
+      type ="pointer";
+      break;
+    case FORMAT_INT:
+      type = "int";
+      break;
+    case FORMAT_LONG:
+      type = "long";
+      break;
+    case FORMAT_LONGLONG:
+      type = "long long";
+      break;
+    case FORMAT_DOUBLE:
+      type = "double";
+      break;
+    case FORMAT_LONGDOUBLE:
+      type = "long double";
+      break;      
+    }
+
+
+    buffer[0]=0;
+
+    for(bit=0; bit<31; bit++) {
+      flags = vto[i].flags & (1<<bit);
+
+      if(flags & FLAGS_SPACE)
+	strcat(buffer, "space ");
+      else if(flags & FLAGS_SHOWSIGN)
+	strcat(buffer, "plus ");
+      else if(flags & FLAGS_LEFT)
+	strcat(buffer, "left ");
+      else if(flags & FLAGS_ALT)
+	strcat(buffer, "alt ");
+      else if(flags & FLAGS_SHORT)
+	strcat(buffer, "short ");
+      else if(flags & FLAGS_LONG)
+	strcat(buffer, "long ");
+      else if(flags & FLAGS_LONGLONG)
+	strcat(buffer, "longlong ");
+      else if(flags & FLAGS_LONGDOUBLE)
+	strcat(buffer, "longdouble ");
+      else if(flags & FLAGS_PAD_NIL)
+	strcat(buffer, "padnil ");
+      else if(flags & FLAGS_UNSIGNED)
+	strcat(buffer, "unsigned ");
+      else if(flags & FLAGS_OCTAL)
+	strcat(buffer, "octal ");
+      else if(flags & FLAGS_HEX)
+	strcat(buffer, "hex ");
+      else if(flags & FLAGS_UPPER)
+	strcat(buffer, "upper ");
+      else if(flags & FLAGS_WIDTH)
+	strcat(buffer, "width ");
+      else if(flags & FLAGS_WIDTHPARAM)
+	strcat(buffer, "widthparam ");
+      else if(flags & FLAGS_PREC)
+	strcat(buffer, "precision ");
+      else if(flags & FLAGS_PRECPARAM)
+	strcat(buffer, "precparam ");
+      else if(flags & FLAGS_CHAR)
+	strcat(buffer, "char ");
+      else if(flags & FLAGS_FLOATE)
+	strcat(buffer, "floate ");
+      else if(flags & FLAGS_FLOATG)
+	strcat(buffer, "floatg ");
+    }
+    printf("REPORT: %d. %s [%s]\n", i, type, buffer);
+
+  }
+
+
+}
+#endif
+
+/******************************************************************
+ *
+ * Pass 1:
+ * Create an index with the type of each parameter entry and its
+ * value (may vary in size)
+ *
+ ******************************************************************/
 
 static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list arglist)
 {
