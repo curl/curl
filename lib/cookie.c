@@ -88,7 +88,6 @@ Example set of cookies:
 
 #include "urldata.h"
 #include "cookie.h"
-#include "getdate.h"
 #include "strequal.h"
 #include "strtok.h"
 #include "sendf.h"
