@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel (30 Jul 2002)
+- Correct the description for CURLOPT_PASSWDFUNCTION, if set to NULL the
+  internal default function will be put back.
+
+- danfuzz at milk.com found out that libcurl badly assumed a space after
+  'Set-Cookie:' so if it wasn't present, it caused the first letter of the
+  cookie name to fall off!
+
+Daniel (29 Jul 2002)
+- The password prompt asking for user password used stdout and now uses
+  stderr instead to better allow redirecting. It also leaked a fopen() file
+  handle that is now fixed.
+
 Daniel (28 Jul 2002)
 - HAVE_SETVBUF was left out from src/main.c which made -N not work. Found out
   by M T.
