@@ -199,14 +199,14 @@ int curl_dogetnameinfo(const struct sockaddr *sa, socklen_t salen,
 
 /* This is the callback function that is used when we build with asynch
    resolve, ipv4 */
-void Curl_addrinfo4_callback(void *arg,
-                            int status,
-                            struct hostent *hostent);
+CURLcode Curl_addrinfo4_callback(void *arg,
+                                 int status,
+                                 struct hostent *hostent);
 /* This is the callback function that is used when we build with asynch
    resolve, ipv6 */
-void Curl_addrinfo6_callback(void *arg,
-                            int status,
-                            struct addrinfo *ai);
+CURLcode Curl_addrinfo6_callback(void *arg,
+                                 int status,
+                                 struct addrinfo *ai);
 
 
 /* [ipv4 only] Creates a Curl_addrinfo struct from a numerical-only IP

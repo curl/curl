@@ -291,7 +291,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
     /* areschannel is already setup in the Curl_open() function */
     ares_gethostbyname(data->state.areschannel, hostname, PF_INET,
-                       Curl_addrinfo4_callback, conn);
+                       (ares_callback)Curl_addrinfo4_callback, conn);
 
     *waitp = TRUE; /* please wait for the response */
   }

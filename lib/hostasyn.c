@@ -108,12 +108,13 @@
  *
  * The storage operation locks and unlocks the DNS cache.
  */
-static void addrinfo_callback(void *arg, /* "struct connectdata *" */
-                              int status,
-                              void *addr)
+static CURLcode addrinfo_callback(void *arg, /* "struct connectdata *" */
+                                  int status,
+                                  void *addr)
 {
   struct connectdata *conn = (struct connectdata *)arg;
   struct Curl_dns_entry *dns = NULL;
+  CURLcode rc = CURLE_OK;
 
   conn->async.status = status;
 
@@ -135,13 +136,17 @@ static void addrinfo_callback(void *arg, /* "struct connectdata *" */
       dns = Curl_cache_addr(data, ai,
                             conn->async.hostname,
                             conn->async.port);
-      if(!dns)
+      if(!dns) {
         /* failed to store, cleanup and return error */
         Curl_freeaddrinfo(ai);
+        rc = CURLE_OUT_OF_MEMORY;
+      }
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
     }
+    else
+      rc = CURLE_OUT_OF_MEMORY;
   }
 
   conn->async.dns = dns;
@@ -153,21 +158,22 @@ static void addrinfo_callback(void *arg, /* "struct connectdata *" */
 
   /* ipv4: The input hostent struct will be freed by ares when we return from
      this function */
+  return rc;
 }
 
-void Curl_addrinfo4_callback(void *arg, /* "struct connectdata *" */
-                             int status,
-                             struct hostent *hostent)
+CURLcode Curl_addrinfo4_callback(void *arg, /* "struct connectdata *" */
+                                 int status,
+                                 struct hostent *hostent)
 {
-  addrinfo_callback(arg, status, hostent);
+  return addrinfo_callback(arg, status, hostent);
 }
 
 #ifdef CURLRES_IPV6
-void Curl_addrinfo6_callback(void *arg, /* "struct connectdata *" */
-                             int status,
-                             struct addrinfo *ai)
+CURLcode Curl_addrinfo6_callback(void *arg, /* "struct connectdata *" */
+                                 int status,
+                                 struct addrinfo *ai)
 {
-  addrinfo_callback(arg, status, ai);
+  return addrinfo_callback(arg, status, ai);
 }
 #endif
 

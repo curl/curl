@@ -190,7 +190,7 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
                        curr_proc, &mutex_waiting, 0, FALSE,
                        DUPLICATE_SAME_ACCESS)) {
     /* failed to duplicate the mutex, no point in continuing */
-    return 0;
+    return -1;
   }
 
   /* Sharing the same _iob[] element with our parent thread should
@@ -214,12 +214,10 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
     SetEvent(td->event_resolved);
 
     if (he) {
-      Curl_addrinfo4_callback(conn, CURL_ASYNC_SUCCESS, he);
-      rc = 1;
+      rc = Curl_addrinfo4_callback(conn, CURL_ASYNC_SUCCESS, he);
     }
     else {
-      Curl_addrinfo4_callback(conn, (int)WSAGetLastError(), NULL);
-      rc = 0;
+      rc = Curl_addrinfo4_callback(conn, (int)WSAGetLastError(), NULL);
     }
     TRACE(("Winsock-error %d, addr %s\n", conn->async.status,
            he ? inet_ntoa(*(struct in_addr*)he->h_addr) : "unknown"));
@@ -260,7 +258,7 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
                        curr_proc, &mutex_waiting, 0, FALSE,
                        DUPLICATE_SAME_ACCESS)) {
     /* failed to duplicate the mutex, no point in continuing */
-    return 0;
+    return -1;
   }
 
 #ifndef _WIN32_WCE
@@ -286,10 +284,10 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
 #ifdef DEBUG_THREADING_GETADDRINFO
       dump_addrinfo (conn, res);
 #endif
-      Curl_addrinfo6_callback(conn, CURL_ASYNC_SUCCESS, res);
+      rc = Curl_addrinfo6_callback(conn, CURL_ASYNC_SUCCESS, res);
     }
     else {
-      Curl_addrinfo6_callback(conn, (int)WSAGetLastError(), NULL);
+      rc = Curl_addrinfo6_callback(conn, (int)WSAGetLastError(), NULL);
       TRACE(("Winsock-error %d, no address\n", conn->async.status));
     }
   }
@@ -493,7 +491,11 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
   if (!conn->async.dns) {
     /* a name was not resolved */
-    if (td->thread_status == (DWORD)-1 || conn->async.status == NO_DATA) {
+    if (td->thread_status == CURLE_OUT_OF_MEMORY) {
+      rc = CURLE_OUT_OF_MEMORY;
+      failf(data, "Could not resolve host: %s", curl_easy_strerror(rc));
+    }
+    else if (td->thread_status == (DWORD)-1 || conn->async.status == NO_DATA) {
       failf(data, "Resolving host timed out: %s", conn->host.name);
       rc = CURLE_OPERATION_TIMEDOUT;
     }
@@ -508,10 +510,8 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
   destroy_thread_data(&conn->async);
 
-  if(CURLE_OK != rc)
-    /* close the connection, since we must not return failure from here
-       without cleaning up this connection properly */
-    Curl_disconnect(conn);
+  if(!conn->async.dns)
+    conn->bits.close = TRUE;
 
   return (rc);
 }
