@@ -874,7 +874,6 @@ CURLcode Curl_perform(CURL *curl)
         switch(data->progress.httpcode) {
         case 300: /* Multiple Choices */
         case 301: /* Moved Permanently */
-        case 302: /* Found */
         case 306: /* Not used */
         case 307: /* Temporary Redirect */
         default:  /* for all unknown ones */
@@ -882,6 +881,24 @@ CURLcode Curl_perform(CURL *curl)
            * seem to be OK to POST to.
            */
           break;
+        case 302: /* Found */
+          /* (From 10.3.3)
+
+            Note: RFC 1945 and RFC 2068 specify that the client is not allowed
+            to change the method on the redirected request.  However, most
+            existing user agent implementations treat 302 as if it were a 303
+            response, performing a GET on the Location field-value regardless
+            of the original request method. The status codes 303 and 307 have
+            been added for servers that wish to make unambiguously clear which
+            kind of reaction is expected of the client.
+
+            (From 10.3.4)
+
+            Note: Many pre-HTTP/1.1 user agents do not understand the 303
+            status. When interoperability with such clients is a concern, the
+            302 status code may be used instead, since most user agents react
+            to a 302 response as described here for 303.             
+          */
         case 303: /* See Other */
           /* Disable both types of POSTs, since doing a second POST when
            * following isn't what anyone would want! */
