@@ -1,4 +1,6 @@
 #############################################################
+# $Id$
+#
 ## Makefile for building curl.exe with MingW32 (GCC-2.95) and
 ## optionally OpenSSL (0.9.6)
 ##
