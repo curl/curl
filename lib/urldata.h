@@ -344,6 +344,7 @@ struct Progress {
   double t_connect;
   double t_pretransfer;
   int httpcode;
+  int httpversion;
   time_t filetime; /* If requested, this is might get set. It may be 0 if
                       the time was unretrievable */
 
