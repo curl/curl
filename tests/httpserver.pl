@@ -18,10 +18,9 @@ else {
     $protocol="HTTP";
 }
 
-
 socket(Server, PF_INET, SOCK_STREAM, $proto)|| die "socket: $!";
-    setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
-               pack("l", 1)) || die "setsockopt: $!";
+setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
+           pack("l", 1)) || die "setsockopt: $!";
 bind(Server, sockaddr_in($port, INADDR_ANY))|| die "bind: $!";
 listen(Server,SOMAXCONN) || die "listen: $!";
 
@@ -40,14 +39,19 @@ sub REAPER {
     logmsg "reaped $waitedpid" . ($? ? " with exit $?" : '');
 }
 
-$commandok{ USER => 'fresh'}; # USER is ok in fresh state
+# USER is ok in fresh state
+%commandok = ( "USER" => "fresh",
+               "PASS" => "passwd",
+               "PASV" => "loggedin",
+               );
 
-print "TEST: ".$commandok{"USER"}."\n";
+%statechange = ( 'USER' => 'passwd',   # USER goes to passwd state
+                 'PASS' => 'loggedin', # PASS goes to loggedin state
+                 );
 
-
-$statechange{ 'USER' => 'passwd'}; # USER goes to passwd state
-
-$displaytext{'USER' => '331 We are happy you arrived!'}; # output FTP line
+%displaytext = ('USER' => '331 We are happy you popped in!', # output FTP line
+                'PASS' => '230 Welcome you silly person',
+                );
 
 $SIG{CHLD} = \&REAPER;
 
@@ -117,10 +121,12 @@ for ( $waitedpid = 0;
                 }
 
                 $state=$statechange{$FTPCMD};
-                if($command{$1} eq "") {
-                    print "314 Wwwwweeeeird internal error\r\n";
-                    exit
+                if($state eq "") {
+                    print "314 Wwwwweeeeird internal error state: $state\r\n";
+                    exit;
                 }
+                print STDERR "gone to state $state\n";
+
                 $text = $displaytext{$FTPCMD};
                 print "$text\r\n";
             }
