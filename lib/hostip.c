@@ -672,11 +672,11 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   if(!conn->async.dns) {
     /* a name was not resolved */
     if((timeout < 0) || (conn->async.status == ARES_ETIMEOUT)) {
-      failf(data, "Resolving host timed out: %s", conn->name);
+      failf(data, "Resolving host timed out: %s", conn->hostname);
       rc = CURLE_OPERATION_TIMEDOUT;
     }
     else if(conn->async.done) {
-      failf(data, "Could not resolve host: %s (%s)", conn->name,
+      failf(data, "Could not resolve host: %s (%s)", conn->hostname,
             ares_strerror(conn->async.status));
       rc = CURLE_COULDNT_RESOLVE_HOST;
     }
@@ -1518,12 +1518,12 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   if (!conn->async.dns) {
     /* a name was not resolved */
     if (td->thread_status == (DWORD)-1 || conn->async.status == NO_DATA) {
-      failf(data, "Resolving host timed out: %s", conn->name);
+      failf(data, "Resolving host timed out: %s", conn->hostname);
       rc = CURLE_OPERATION_TIMEDOUT;
     }
     else if(conn->async.done) {
       failf(data, "Could not resolve host: %s; %s",
-            conn->name, Curl_strerror(conn,conn->async.status));
+            conn->hostname, Curl_strerror(conn,conn->async.status));
       rc = CURLE_COULDNT_RESOLVE_HOST;
     }
     else
