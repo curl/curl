@@ -351,7 +351,8 @@ typedef enum {
 
   CINIT(TRANSFERTEXT, LONG, 53), /* transfer data in text/ASCII format */
   CINIT(PUT, LONG, 54),          /* PUT the input file */
-  CINIT(MUTE, LONG, 55),         /* force NOPROGRESS */
+
+  CINIT(MUTE, LONG, 55),         /* OBSOLETE OPTION, removed in 7.8 */
 
   /* Function that will be called instead of the internal progress display
    * function. This function should be defined as the curl_progress_callback
@@ -503,7 +504,7 @@ void curl_global_cleanup(void);
 
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.8-pre2"
+#define LIBCURL_VERSION "7.8-pre3"
 #define LIBCURL_VERSION_NUM 0x070800
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
