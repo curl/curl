@@ -1,6 +1,7 @@
 /* MSK, 02/05/04, Hand edited for trail build on Alpha V7.3, DEC C 6.5-003 */
 /* MSK, 03/09/04, Seems to work for all platforms I've built on so far.    */
 /*      Added HAVE_SYS_IOCTL_H, IOCTL_3_ARGS and SIZEOF_CURL_OFF_T defines */
+/* MSK, 06/04/04, Added HAVE_INET_NTOP                                     */
 
 /* Define cpu-machine-OS */
 #ifdef __ALPHA
@@ -258,3 +259,6 @@
 #else
 #define SIZEOF_CURL_OFF_T 8
 #endif
+
+/* Somewhere around 7.12.0 HAVE_INET_NTOP was introduced. */
+#define HAVE_INET_NTOP 1

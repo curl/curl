@@ -45,12 +45,22 @@
 #include descrip
 #include starlet
 #include iodef
-#include iosbdef
+/* #include iosbdef */
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
   long sts;
   short chan;
   struct _iosb iosb;
+  /* MSK, 23-JAN-2004, iosbdef.h wasn't in VAX V7.2 or CC 6.4  */
+  /* distribution so I created this.  May revert back later to */
+  /* struct _iosb iosb;                                        */
+  struct _iosb
+     {
+     short int iosb$w_status; /* status     */
+     short int iosb$w_bcnt;   /* byte count */
+     int       unused;        /* unused     */
+     } iosb;
+
   $DESCRIPTOR(ttdesc, "TT");
 
   buffer[0]='\0';
