@@ -1677,7 +1677,7 @@ static CURLcode ftp_state_port_resp(struct connectdata *conn,
 {
   struct FTP *ftp = conn->proto.ftp;
   struct SessionHandle *data = conn->data;
-  ftpport fcmd = ftp->count1;
+  ftpport fcmd = (ftpport)ftp->count1;
   CURLcode result = CURLE_OK;
 
   if(ftpcode != 200) {
