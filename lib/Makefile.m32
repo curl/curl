@@ -26,7 +26,7 @@ STRIP = strip -g
 ## Nothing more to do below this line!
 
 INCLUDES = -I. -I../include
-CFLAGS = -g -O2 -DMINGW32 -DBUILDING_LIBCURL
+CFLAGS = -g -O2 -DMINGW32 -DBUILDING_LIBCURL -DHAVE_LONGLONG
 ifdef SSL
   INCLUDES += -I"$(OPENSSL_PATH)/outinc" -I"$(OPENSSL_PATH)/outinc/openssl"
   CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
