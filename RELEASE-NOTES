@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o fixed a rare follow-redirect problem
  o curl-configure --feature now outputs AsynchDNS if enabled
  o occational re-use of freed-memory problem fixed
  o builds natively (without unix emulation) on AmigaOS
@@ -53,6 +54,9 @@ This release includes the following bugfixes:
 Other curl-related news since the previous public release:
 
  o pycURL 7.10.8 was released: http://pycurl.sf.net/
+ o TclCurl 0.10.8 was released:
+   http://personal1.iddeo.es/andresgarci/tclcurl/english/
+ o the Ferite curl binding was released: http://www.ferite.org/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
@@ -62,6 +66,6 @@ advice from friends like these:
  Peter Sylvester, Siddhartha Prakash Jain, Mathias Axelsson, Maciej
  W. Rozycki, Nicolas Croiset, Josh Kapell, Gaz Iqbal, Dave May, Markus
  Moeller, James Clancy, Giuseppe Attardi, swalkaus at yahoo.com, Steve Green,
- Marty Kuhrt, Dominick Meglio, Diego Casorran
+ Marty Kuhrt, Dominick Meglio, Diego Casorran, David Byron, John McGowan
  
         Thanks! (and sorry if I forgot to mention someone)
