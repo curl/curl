@@ -72,7 +72,7 @@ echo "buildconf: automake version $am_version (ok)"
 
 
 #--------------------------------------------------------------------------
-# libtool 1.5 or newer
+# libtool check
 #
 LIBTOOL_WANTED_MAJOR=1
 LIBTOOL_WANTED_MINOR=4
