@@ -124,11 +124,11 @@ struct pollfd {
 int poll (struct pollfd *, int, int);
 #endif /* __DJGPP__ */
 
-#ifndef __cplusplus        /* (rabe) */
+#ifndef __cplusplus
 #ifndef typedef_bool
 typedef char bool;
 #endif
-#endif                     /* (rabe) */
+#endif
 
 #define CURL_PROGRESS_STATS 0 /* default progress display */
 #define CURL_PROGRESS_BAR   1
