@@ -1990,22 +1990,18 @@ static CURLcode ConnectPlease(struct connectdata *conn,
 static void verboseconnect(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  const char *host=NULL;
-  char addrbuf[256];
+  char addrbuf[256] = "";
+#ifdef ENABLE_IPV6
+  const Curl_ipconnect *addr = conn->serv_addr;
+#else
+  const Curl_ipconnect *addr = &conn->serv_addr.sin_addr;
+#endif
 
   /* Get a printable version of the network address. */
-#ifdef ENABLE_IPV6
-  struct addrinfo *ai = conn->serv_addr;
-  host = Curl_printable_address(ai->ai_family, ai->ai_addr,
-                                addrbuf, sizeof(addrbuf));
-#else
-  struct in_addr in;
-  (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
-  host = Curl_inet_ntop(AF_INET, &in, addrbuf, sizeof(addrbuf));
-#endif
+  Curl_printable_address(addr, addrbuf, sizeof(addrbuf));
   infof(data, "Connected to %s (%s) port %d\n",
-        conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname,
-        host?host:"", conn->port);
+        conn->bits.httpproxy ? conn->proxy.dispname : conn->host.dispname,
+        addrbuf[0] ? addrbuf : "??", conn->port);
 }
 
 /*

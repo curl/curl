@@ -79,6 +79,7 @@
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
+#include "inet_ntop.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -165,6 +166,43 @@ void Curl_global_host_cache_dtor(void)
     Curl_hash_clean(&hostname_cache);
     host_cache_initialized = 0;
   }
+}
+
+/*
+ * Return # of adresses in a Curl_addrinfo struct
+ */
+int Curl_num_addresses(const Curl_addrinfo *addr)
+{
+  int i;
+
+#ifdef ENABLE_IPV6
+  for (i = 0; addr; addr = addr->ai_next, i++)
+#else
+  for (i = 0; addr->h_addr_list[i]; i++)
+#endif
+      ;
+  return (i);
+}
+
+/*
+ * Curl_printable_address() returns a printable version of the 1st
+ * address given in the 2nd argument. The result will be stored in
+ * the buf that is bufsize bytes big.
+ *
+ * If the conversion fails, it returns NULL.
+ */
+const char *Curl_printable_address(const Curl_ipconnect *ip,
+                                   char *buf, size_t bufsize)
+{
+#ifdef CURLRES_IPV6
+  const void *ip4 = &((const struct sockaddr_in*)ip->ai_addr)->sin_addr;
+  const void *ip6 = &((const struct sockaddr_in6*)ip->ai_addr)->sin6_addr;
+  int af = ip->ai_family;
+
+  return Curl_inet_ntop(af, af == AF_INET6 ? ip6 : ip4, buf, bufsize);
+#else
+  return Curl_inet_ntop(AF_INET, ip, buf, bufsize);
+#endif
 }
 
 /*

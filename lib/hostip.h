@@ -102,6 +102,9 @@ curl_hash *Curl_mk_dnscache(void);
 /* prune old entries from the DNS cache */
 void Curl_hostcache_prune(struct SessionHandle *data);
 
+/* Return # of adresses in a Curl_addrinfo struct */
+int Curl_num_addresses (const Curl_addrinfo *addr);
+
 #ifdef CURLDEBUG
 void curl_dofreeaddrinfo(struct addrinfo *freethis,
                          int line, const char *source);
@@ -133,12 +136,11 @@ void Curl_hostent_relocate(struct hostent *h, long offset);
 Curl_addrinfo *Curl_addrinfo_copy(Curl_addrinfo *orig);
 
 /*
- * (IPv6) Curl_printable_address() returns a printable version of the
- * ai->ai_addr address given in the 2nd argument. The first should be the
- * ai->ai_family and the result will be stored in the buf that is bufsize
- * bytes big.
+ * Curl_printable_address() returns a printable version of the
+ * 1st address given in the 2nd argument. The result will be stored
+ * in the buf that is bufsize bytes big.
  */
-const char *Curl_printable_address(int af, void *addr,
+const char *Curl_printable_address(const Curl_ipconnect *ip,
                                    char *buf, size_t bufsize);
 
 /*

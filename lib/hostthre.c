@@ -142,7 +142,7 @@ static void dump_addrinfo (struct connectdata *conn, const struct addrinfo *ai)
 
     trace_it("    fam %2d, CNAME %s, ",
              ai->ai_family, ai->ai_canonname ? ai->ai_canonname : "<none>");
-    if (Curl_printable_address(ai->ai_family, ai->ai_addr, buf, sizeof(buf)))
+    if (Curl_printable_address(ai, buf, sizeof(buf)))
       trace_it("%s\n", buf);
     else
       trace_it("failed; %s\n", Curl_strerror(conn,WSAGetLastError()));

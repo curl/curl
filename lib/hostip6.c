@@ -79,7 +79,6 @@
 #include "share.h"
 #include "strerror.h"
 #include "url.h"
-#include "inet_ntop.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -105,26 +104,6 @@ void Curl_freeaddrinfo(Curl_addrinfo *p)
 {
   freeaddrinfo(p);
 }
-
-/*
- * Curl_printable_address() returns a printable version of the ai->ai_addr
- * address given in the 2nd argument. The first should be the ai->ai_family
- * and the result will be stored in the buf that is bufsize bytes big.
- *
- * If the conversion fails, it returns NULL.
- */
-const char *Curl_printable_address(int af, void *addr,
-                                   char *buf, size_t bufsize)
-{
-  const struct in_addr *addr4 =
-    &((const struct sockaddr_in*)addr)->sin_addr;
-  const struct in6_addr *addr6 =
-    &((const struct sockaddr_in6*)addr)->sin6_addr;
-  return Curl_inet_ntop(af, af == AF_INET6 ?
-                        (const void *)addr6 :
-                        (const void *)addr4, buf, bufsize);
-}
-
 
 #ifdef CURLRES_ASYNCH
 /*
