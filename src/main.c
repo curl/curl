@@ -410,6 +410,7 @@ static void help(void)
     "    --crlf          Convert LF to CRLF in upload",
     " -f/--fail          Fail silently (no output at all) on errors (H)",
     "    --ftp-create-dirs Create the remote dirs if not present (F)",
+    "    --ftp-ssl       Enable SSL/TLS for the ftp transfer (F)",
     " -F/--form <name=content> Specify HTTP multipart POST data (H)",
     " -g/--globoff       Disable URL sequences and ranges using {} and []",
     " -G/--get           Send the -d data with a HTTP GET (H)",
@@ -591,6 +592,8 @@ struct Configurable {
 
   time_t lastrecvtime;
   size_t lastrecvsize;
+
+  bool ftp_ssl;
 };
 
 /* global variable to hold info about libcurl */
@@ -1153,8 +1156,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
      boolean whether it takes an additional argument
      */
   struct LongShort aliases[]= {
-    /* all these ones, starting with "*" as a short-option have *no* short
-       option to mention. */
+    /* all these ones, starting with "*" or "$" as a short-option have *no*
+       short option to mention. */
     {"*", "url",         TRUE},
     {"*a", "random-file", TRUE},
     {"*b", "egd-file",   TRUE},
@@ -1176,7 +1179,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 #ifdef __DJGPP__
     {"*p", "wdebug",     FALSE},
 #endif
-    {"*q", "ftp-create-dirs", FALSE},    
+    {"*q", "ftp-create-dirs", FALSE},
     {"*r", "create-dirs", FALSE},
     {"*s", "max-redirs",   TRUE},
     {"*t", "proxy-ntlm",   FALSE},
@@ -1186,6 +1189,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*x", "krb4",        TRUE},
     {"*y", "max-filesize", TRUE},
     {"*z", "disable-eprt", FALSE},
+    {"$a", "ftp-ssl",    FALSE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1493,6 +1497,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
             url->flags |= GETOUT_URL;
           }
         }
+      }
+      break;
+    case '$': /* more options without a short option */
+      switch(subletter) {
+      case 'a': /* --ftp-ssl */
+        config->ftp_ssl ^= TRUE;
+        break;
       }
       break;
     case '#': /* added 19990617 larsa */
@@ -3285,8 +3296,12 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
 
         /* new in curl 7.10.8 */
-        if (config->max_filesize)
+        if(config->max_filesize)
           curl_easy_setopt(curl, CURLOPT_MAXFILESIZE, config->max_filesize);
+
+        /* new in curl 7.10.9 */
+        if(config->ftp_ssl)
+          curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
 
         res = curl_easy_perform(curl);
         
