@@ -340,6 +340,8 @@ int ProcessRequest(struct httprequest *req)
           /* if the host name starts with bad, we fake an error here */
           req->testno = DOCNUMBER_BADCONNECT;
         else if(!strncmp(doc, "test", 4)) {
+          /* if the host name starts with test, the port number used in the
+             CONNECT line will be used as test number! */
           char *ptr = strchr(doc, ':');
           if(ptr)
             req->testno = atoi(ptr+1);
