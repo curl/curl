@@ -125,22 +125,27 @@ send_buffer *add_buffer_init(void)
  * add_buffer_send() sends a buffer and frees all associated memory.
  */
 static
-size_t add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in)
+CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
+                         long *bytes_written)
 {
   size_t amount;
+  CURLcode result;
+
   if(conn->data->set.verbose) {
     fputs("> ", conn->data->set.err);
     /* this data _may_ contain binary stuff */
     fwrite(in->buffer, in->size_used, 1, conn->data->set.err);
   }
 
-  Curl_write(conn, sockfd, in->buffer, in->size_used, &amount);
+  result = Curl_write(conn, sockfd, in->buffer, in->size_used, &amount);
 
   if(in->buffer)
     free(in->buffer);
   free(in);
 
-  return amount;
+  *bytes_written = amount;
+
+  return result;
 }
 
 
@@ -251,19 +256,25 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   int httperror=0;
   int subversion=0;
   struct SessionHandle *data=conn->data;
+  CURLcode result;
 
   infof(data, "Establish HTTP proxy tunnel to %s:%d\n", hostname, remote_port);
 
   /* OK, now send the connect request to the proxy */
-  Curl_sendf(tunnelsocket, conn,
-             "CONNECT %s:%d HTTP/1.0\015\012"
-             "%s"
-             "%s"
-             "\r\n",
-             hostname, remote_port,
-             (conn->bits.proxy_user_passwd)?conn->allocptr.proxyuserpwd:"",
-             (data->set.useragent?conn->allocptr.uagent:"")
-             );
+  result =
+    Curl_sendf(tunnelsocket, conn,
+               "CONNECT %s:%d HTTP/1.0\015\012"
+               "%s"
+               "%s"
+               "\r\n",
+               hostname, remote_port,
+               (conn->bits.proxy_user_passwd)?conn->allocptr.proxyuserpwd:"",
+               (data->set.useragent?conn->allocptr.uagent:"")
+               );
+  if(result) {
+    failf(data, "Failed sending CONNECT to proxy");
+    return result;
+  }
 
   /* wait for the proxy to send us a HTTP/1.0 200 OK header */
   while(GetLine(tunnelsocket, data->state.buffer, conn)) {
@@ -740,14 +751,16 @@ CURLcode Curl_http(struct connectdata *conn)
       Curl_pgrsSetUploadSize(data, http->postsize);
 
       /* fire away the whole request to the server */
-      data->info.request_size = 
-        add_buffer_send(conn->firstsocket, conn, req_buffer);
-
-      /* setup variables for the upcoming transfer */
-      result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
-                             &http->readbytecount,
-                             conn->firstsocket,
-                             &http->writebytecount);
+      result = add_buffer_send(conn->firstsocket, conn, req_buffer,
+                               &data->info.request_size);
+      if(result)
+        failf(data, "Failed sending POST request");
+      else
+        /* setup variables for the upcoming transfer */
+        result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
+                               &http->readbytecount,
+                               conn->firstsocket,
+                               &http->writebytecount);
       if(result) {
         Curl_formclean(http->sendit); /* free that whole lot */
         return result;
@@ -768,14 +781,16 @@ CURLcode Curl_http(struct connectdata *conn)
       Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
       /* this sends the buffer and frees all the buffer resources */
-      data->info.request_size = 
-        add_buffer_send(conn->firstsocket, conn, req_buffer);
-
-      /* prepare for transfer */
-      result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
-                        &http->readbytecount,
-                        conn->firstsocket,
-                        &http->writebytecount);
+      result = add_buffer_send(conn->firstsocket, conn, req_buffer,
+                               &data->info.request_size);
+      if(result)
+        failf(data, "Faied sending POST request");
+      else
+        /* prepare for transfer */
+        result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
+                               &http->readbytecount,
+                               conn->firstsocket,
+                               &http->writebytecount);
       if(result)
         return result;
       
@@ -825,12 +840,15 @@ CURLcode Curl_http(struct connectdata *conn)
         add_buffer(req_buffer, "\r\n", 2);
 
       /* issue the request */
-      data->info.request_size = 
-        add_buffer_send(conn->firstsocket, conn, req_buffer);
+      result = add_buffer_send(conn->firstsocket, conn, req_buffer,
+                               &data->info.request_size);
 
-      /* HTTP GET/HEAD download: */
-      result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE, bytecount,
-                        -1, NULL); /* nothing to upload */
+      if(result)
+        failf(data, "Failed sending HTTP request");
+      else
+        /* HTTP GET/HEAD download: */
+        result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE, bytecount,
+                               -1, NULL); /* nothing to upload */
     }
     if(result)
       return result;
