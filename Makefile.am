@@ -8,7 +8,7 @@ EXTRA_DIST =						\
 	CHANGES LEGAL maketgz MITX.txt MPL-1.1.txt	\
 	config-win32.h reconf Makefile.dist		\
 	curl-config.in build_vms.com config-riscos.h	\
-	config-vms.h
+	config-vms.h curl-mode.el
 
 bin_SCRIPTS = curl-config
 
