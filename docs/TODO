@@ -215,6 +215,8 @@ TODO
 
  * remove obsolete defines from curl/curl.h
 
+ * make several functions use size_t instead of int in their APIs
+
  * remove the following functions from the public API:
    curl_getenv
    curl_mprintf (and variations)
