@@ -463,12 +463,20 @@ struct FormData *getFormData(struct HttpPost *post,
 			     "\r\nContent-Type: %s",
 			     file->contenttype);
       }
+
+#if 0
+      /* The header Content-Transfer-Encoding: seems to confuse some receivers
+       * (like the built-in PHP engine). While I can't see any reason why it
+       * should, I can just as well skip this to the benefit of the users who
+       * are using such confused receivers.
+       */
+      
       if(file->contenttype &&
 	 !strnequal("text/", file->contenttype, 5)) {
 	/* this is not a text content, mention our binary encoding */
 	size += AddFormData(&form, "\r\nContent-Transfer-Encoding: binary", 0);
       }
-
+#endif
 
       size += AddFormData(&form, "\r\n\r\n", 0);
 
