@@ -1,3 +1,4 @@
+                                     Updated for curl 7.6 on January 26, 2001
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -11,13 +12,6 @@ INTERNALS
  applications to use it.
 
  Thus, the largest amount of code and complexity is in the library part.
-
-SYMBOLS
-=======
- All symbols used internally must use a 'Curl_' prefix if they're used in more
- than a single file. Single-file symbols must be made static. Public
- (exported) symbols must use a 'curl_' prefix. (There are exceptions, but they
- are destined to be changed to follow this pattern in the future.)
 
 CVS
 ===
@@ -35,10 +29,11 @@ Windows vs Unix
  There are a few differences in how to program curl the unix way compared to
  the Windows way. The four perhaps most notable details are:
 
- 1. Different function names for close(), read(), write()
+ 1. Different function names for socket operations.
 
    In curl, this is solved with defines and macros, so that the source looks
-   the same at all places except for the header file that defines them.
+   the same at all places except for the header file that defines them. The
+   macros in use are sclose(), sread() and swrite().
 
  2. Windows requires a couple of init calls for the socket stuff
 
@@ -186,6 +181,15 @@ Library
  If authentication is requested but no password is given, a getpass_r() clone
  exists in lib/getpass.c. libcurl offers a custom callback that can be used
  instead of this, but it doesn't change much to us.
+
+Library Symbols
+===============
+ 
+ All symbols used internally in libcurl must use a 'Curl_' prefix if they're
+ used in more than a single file. Single-file symbols must be made
+ static. Public (exported) symbols must use a 'curl_' prefix. (There are
+ exceptions, but they are destined to be changed to follow this pattern in the
+ future.)
 
 Return Codes and Informationals
 ===============================
