@@ -851,7 +851,7 @@ MAILING LISTS
 
   For your convenience, we have several open mailing lists to discuss curl,
   its development and things relevant to this. Get all info at
-  http://curl.haxx.se/mail/. The lists available are:
+  http://curl.haxx.se/mail/. Some of the lists available are:
 
   curl-users
 
@@ -865,24 +865,18 @@ MAILING LISTS
 
   curl-announce
 
-    Low-traffic. Only announcements of new public versions.
+    Low-traffic. Only receives announcements of new public versions. At worst,
+    that makes something like one or two mails per month, but usually only one
+    mail every second month.
 
-  curl-and-PHP
+  curl-and-php
 
     Using the curl functions in PHP. Everything curl with a PHP angle. Or PHP
     with a curl angle.
 
-  curl-commits
+  curl-and-python
 
-    Receives notifications on all CVS commits done to the curl source module.
-    This can become quite a large amount of mails during intense development,
-    be aware. This is for us who like email...
-
-  curl-www-commits
-
-    Receives notifications on all CVS commits done to the curl www module
-    (basicly the web site).  This can become quite a large amount of mails
-    during intense changing, be aware. This is for us who like email...
+    Python hackers using curl with or without the python binding pycurl.
 
   Please direct curl questions, feature requests and trouble reports to one of
   these mailing lists instead of mailing any individual.
