@@ -1,8 +1,8 @@
 dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(lib/urldata.h)
-AM_CONFIG_HEADER(config.h)
-AM_INIT_AUTOMAKE(curl,"7.4-pre3")
+AM_CONFIG_HEADER(config.h src/config.h)
+AM_INIT_AUTOMAKE(curl,"7.4.1")
 AM_PROG_LIBTOOL
 
 dnl
@@ -554,7 +554,6 @@ AC_OUTPUT( Makefile \
 	   docs/Makefile \
 	   include/Makefile \
 	   include/curl/Makefile \
-           src/config.h \
 	   src/Makefile \
            lib/Makefile )
 dnl	   perl/checklinks.pl \

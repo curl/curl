@@ -6,12 +6,20 @@
 
                                History of Changes
 
-Version *upcoming* 7.4
+Version 7.4.1
+Daniel (16 October 2000)
+- I forgot to remove some of the malloc debug defines from the makefiles in
+  the release archive (of course).
+
+Version 7.4
+
+Daniel (16 October 2000)
+- The buffer overflow mentioned below was posted to bugtraq on Friday 13th.
 
 Daniel (12 October 2000)
 - Colin Robert Phipps elegantly corrected a buffer overflow. It could be used
-  by an evil ftp to crash curl. I took the opportunity of replacing a few
-  other sprintf()s into snprintf()s as well.
+  by an evil ftp server to crash curl. I took the opportunity of replacing a
+  few other sprintf()s into snprintf()s as well.
 
 Daniel (11 October 2000)
 - Found some more memory leaks. This new simple memory debugger has turned out
@@ -48,7 +56,8 @@ Daniel (9 October 2000)
   all memory fiddling functions. An additional perl script is used to analyze
   the output logfile and to match malloc()s with free()s etc. The memory leak
   Georg found turned out to be the main cookie struct that cookie_cleanup()
-  didn't free!
+  didn't free! The perl script is named memanalyze.pl and it is available in
+  the CVS respository, not in the release archive.
 
 Daniel (8 October 2000)
 - Georg Horn found a GetHost() problem. It turned out it never assigned the

@@ -82,11 +82,11 @@ AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libcurl.la
 
 # Some flags needed when trying to cause warnings ;-)
-# CFLAGS = -g -Wall #-pedantic
+# CFLAGS = -DMALLOCDEBUG -g # -Wall #-pedantic
 
 INCLUDES = -I$(top_srcdir)/include
 
-libcurl_la_SOURCES =  arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c base64.c       file.h         hostip.c       progress.c     timeval.h base64.h       formdata.c     hostip.h       progress.h     cookie.c       formdata.h     http.c         sendf.c        cookie.h       ftp.c          http.h         sendf.h        url.c dict.c         ftp.h          if2ip.c        speedcheck.c   url.h dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h download.c     getdate.h      ldap.c         ssluse.c       version.c download.h     getenv.c       ldap.h         ssluse.h       escape.c       getenv.h       mprintf.c      telnet.c       escape.h       getpass.c      netrc.c        telnet.h       writeout.c writeout.h highlevel.c strequal.c strequal.h easy.c security.h security.c krb4.c
+libcurl_la_SOURCES =  arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c base64.c       file.h         hostip.c       progress.c     timeval.h base64.h       formdata.c     hostip.h       progress.h     cookie.c       formdata.h     http.c         sendf.c        cookie.h       ftp.c          http.h         sendf.h        url.c dict.c         ftp.h          if2ip.c        speedcheck.c   url.h dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h download.c     getdate.h      ldap.c         ssluse.c       version.c download.h     getenv.c       ldap.h         ssluse.h       escape.c       getenv.h       mprintf.c      telnet.c       escape.h       getpass.c      netrc.c        telnet.h       getinfo.c highlevel.c strequal.c strequal.h easy.c security.h security.c krb4.c memdebug.c memdebug.h
 
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h ../src/config.h
@@ -103,8 +103,8 @@ libcurl_la_LIBADD =
 libcurl_la_OBJECTS =  file.lo timeval.lo base64.lo hostip.lo progress.lo \
 formdata.lo cookie.lo http.lo sendf.lo ftp.lo url.lo dict.lo if2ip.lo \
 speedcheck.lo getdate.lo download.lo ldap.lo ssluse.lo version.lo \
-getenv.lo escape.lo mprintf.lo telnet.lo getpass.lo netrc.lo \
-writeout.lo highlevel.lo strequal.lo easy.lo security.lo krb4.lo
+getenv.lo escape.lo mprintf.lo telnet.lo getpass.lo netrc.lo getinfo.lo \
+highlevel.lo strequal.lo easy.lo security.lo krb4.lo memdebug.lo
 CFLAGS = @CFLAGS@
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
