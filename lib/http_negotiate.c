@@ -166,12 +166,7 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
 
   len = strlen(header);
   if (len > 0) {
-    int rawlen;
-    input_token.length = (len+3)/4 * 3;
-    input_token.value = malloc(input_token.length);
-    if (input_token.value == NULL)
-      return ENOMEM;
-    rawlen = Curl_base64_decode(header, input_token.value);
+    int rawlen = Curl_base64_decode(header, &input_token.value);
     if (rawlen < 0)
       return -1;
     input_token.length = rawlen;

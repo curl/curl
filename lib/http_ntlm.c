@@ -123,17 +123,17 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
          32 (48) start of data block
       */
       size_t size;
-      unsigned char *buffer = (unsigned char *)malloc(strlen(header));
-      if (buffer == NULL)
+      unsigned char *buffer;
+      size = Curl_base64_decode(header, &buffer);
+      if(!buffer)
         return CURLNTLM_BAD;
-
-      size = Curl_base64_decode(header, (char *)buffer);
 
       ntlm->state = NTLMSTATE_TYPE2; /* we got a type-2 */
 
       if(size >= 48)
         /* the nonce of interest is index [24 .. 31], 8 bytes */
         memcpy(ntlm->nonce, &buffer[24], 8);
+      /* FIX: add an else here! */
 
       /* at index decimal 20, there's a 32bit NTLM flag field */
 

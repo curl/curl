@@ -76,10 +76,10 @@ static void decodeQuantum(unsigned char *dest, const char *src)
 /*
  * Curl_base64_decode()
  *
- * Given a base64 string at src, decode it into the memory pointed to by
- * dest. Returns the length of the decoded data.
+ * Given a base64 string at src, decode it and return an allocated memory in
+ * the *outptr. Returns the length of the decoded data.
  */
-size_t Curl_base64_decode(const char *src, char *dest)
+size_t Curl_base64_decode(const char *src, unsigned char **outptr)
 {
   int length = 0;
   int equalsTerm = 0;
@@ -87,6 +87,9 @@ size_t Curl_base64_decode(const char *src, char *dest)
   int numQuantums;
   unsigned char lastQuantum[3];
   size_t rawlen=0;
+  unsigned char *newstr;
+
+  *outptr = NULL;
 
   while((src[length] != '=') && src[length])
     length++;
@@ -97,15 +100,22 @@ size_t Curl_base64_decode(const char *src, char *dest)
 
   rawlen = (numQuantums * 3) - equalsTerm;
 
+  newstr = malloc(rawlen+1);
+  if(!newstr)
+    return 0;
+
+  *outptr = newstr;
+
   for(i = 0; i < numQuantums - 1; i++) {
-    decodeQuantum((unsigned char *)dest, src);
-    dest += 3; src += 4;
+    decodeQuantum((unsigned char *)newstr, src);
+    newstr += 3; src += 4;
   }
 
   decodeQuantum(lastQuantum, src);
   for(i = 0; i < 3 - equalsTerm; i++)
-    dest[i] = lastQuantum[i];
+    newstr[i] = lastQuantum[i];
 
+  newstr[i] = 0; /* zero terminate */
   return rawlen;
 }
 

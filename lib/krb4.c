@@ -199,6 +199,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
 {
   int ret;
   char *p;
+  unsigned char *ptr;
   int len;
   KTEXT_ST adat;
   MSG_DAT msg_data;
@@ -275,11 +276,17 @@ krb4_auth(void *app_data, struct connectdata *conn)
     return AUTH_ERROR;
   }
   p += 5;
-  len = Curl_base64_decode(p, (char *)adat.dat);
-  if(len < 0) {
+  len = Curl_base64_decode(p, &ptr);
+  if(len > sizeof(adat.dat)-1) {
+    free(ptr);
+    len=0;
+  }
+  if(!len || !ptr) {
     Curl_failf(data, "Failed to decode base64 from server");
     return AUTH_ERROR;
   }
+  memcpy((char *)adat.dat, ptr, len);
+  free(ptr);
   adat.length = len;
   ret = krb_rd_safe(adat.dat, adat.length, &d->key,
                     (struct sockaddr_in *)hisctladdr,
@@ -321,6 +328,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   ssize_t nread;
   int save;
   CURLcode result;
+  unsigned char *ptr;
 
   save = Curl_set_command_prot(conn, prot_private);
 
@@ -346,12 +354,18 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   }
 
   p += 2;
-  tmp = Curl_base64_decode(p, (char *)tkt.dat);
-  if(tmp < 0) {
+  tmp = Curl_base64_decode(p, &ptr);
+  if(len > sizeof(tkt.dat)-1) {
+    free(ptr);
+    len=0;
+  }
+  if(!len || !ptr) {
     Curl_failf(conn->data, "Failed to decode base64 in reply.\n");
     Curl_set_command_prot(conn, save);
     return CURLE_FTP_WEIRD_SERVER_REPLY;
   }
+  memcpy((char *)tkt.dat, ptr, tmp);
+  free(ptr);
   tkt.length = tmp;
   tktcopy.length = tkt.length;
 
