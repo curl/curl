@@ -111,8 +111,9 @@ void Curl_freeaddrinfo(Curl_addrinfo *p)
  * address. But this is an ipv6 build and then we don't copy the address, we
  * just return the same pointer!
  */
-Curl_addrinfo *Curl_addrinfo_copy(Curl_addrinfo *source)
+Curl_addrinfo *Curl_addrinfo_copy(void *source, int port)
 {
+  (void) port;
   return source;
 }
 #endif

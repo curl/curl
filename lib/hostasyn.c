@@ -96,8 +96,8 @@
  **********************************************************************/
 #ifdef CURLRES_ASYNCH
 /*
- * Curl_addrinfo_callback() gets called by ares/gethostbyname_thread() when we
- * got the name resolved (or not!).
+ * addrinfo_callback() gets called by ares, gethostbyname_thread() or
+ * getaddrinfo_thread() when we got the name resolved (or not!).
  *
  * If the status argument is CURL_ASYNC_SUCCESS, we might need to copy the
  * address field since it might be freed when this function returns. This
@@ -161,9 +161,9 @@ void Curl_addrinfo4_callback(void *arg, /* "struct connectdata *" */
 #ifdef CURLRES_IPV6
 void Curl_addrinfo6_callback(void *arg, /* "struct connectdata *" */
                              int status,
-                             struct addrinfo *hostent)
+                             struct addrinfo *ai)
 {
-  addrinfo_callback(arg, status, hostent);
+  addrinfo_callback(arg, status, ai);
 }
 #endif
 

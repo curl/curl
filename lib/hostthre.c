@@ -163,7 +163,7 @@ struct thread_data {
 
 #if defined(CURLRES_IPV4)
 /*
- * gethostbyname_thread() resolves a name, calls the Curl_addrinfo_callback
+ * gethostbyname_thread() resolves a name, calls the Curl_addrinfo4_callback
  * and then exits.
  *
  * For builds without ARES/ENABLE_IPV6, create a resolver thread and wait on
@@ -201,7 +201,7 @@ static unsigned __stdcall gethostbyname_thread (void *arg)
 #elif defined(CURLRES_IPV6)
 
 /*
- * getaddrinfo_thread() resolves a name, calls Curl_addrinfo_callback and then
+ * getaddrinfo_thread() resolves a name, calls Curl_addrinfo6_callback and then
  * exits.
  *
  * For builds without ARES, but with ENABLE_IPV6, create a resolver thread
@@ -227,10 +227,10 @@ static unsigned __stdcall getaddrinfo_thread (void *arg)
 #ifdef DEBUG_THREADING_GETADDRINFO
     dump_addrinfo (conn, res);
 #endif
-    Curl_addrinfo_callback(conn, CURL_ASYNC_SUCCESS, res);
+    Curl_addrinfo6_callback(conn, CURL_ASYNC_SUCCESS, res);
   }
   else {
-    Curl_addrinfo_callback(conn, (int)WSAGetLastError(), NULL);
+    Curl_addrinfo6_callback(conn, (int)WSAGetLastError(), NULL);
     TRACE(("Winsock-error %d, no address\n", conn->async.status));
   }
   return (rc);
@@ -345,7 +345,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   status = WaitForSingleObject(td->thread_hnd, 1000UL*timeout);
   if (status == WAIT_OBJECT_0 || status == WAIT_ABANDONED) {
      /* Thread finished before timeout; propagate Winsock error to this thread.
-      * 'conn->async.done = TRUE' is set in Curl_addrinfo_callback().
+      * 'conn->async.done = TRUE' is set in Curl_addrinfo4/6_callback().
       */
      WSASetLastError(conn->async.status);
      GetExitCodeThread(td->thread_hnd, &td->thread_status);
