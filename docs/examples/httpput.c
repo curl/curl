@@ -1,8 +1,8 @@
 /*****************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * $Id$
@@ -39,7 +39,6 @@ int main(int argc, char **argv)
 {
   CURL *curl;
   CURLcode res;
-  FILE *ftpfile;
   FILE * hd_src ;
   int hd ;
   struct stat file_info;
@@ -49,17 +48,17 @@ int main(int argc, char **argv)
 
   if(argc < 3)
     return 1;
- 
+
   file= argv[1];
   url = argv[2];
-  
+
   /* get the file size of the local file */
   hd = open(file, O_RDONLY) ;
   fstat(hd, &file_info);
   close(hd) ;
 
   /* get a FILE * of the same file, could also be made with
-     fdopen() from the previous descriptor, but hey this is just 
+     fdopen() from the previous descriptor, but hey this is just
      an example! */
   hd_src = fopen(file, "rb");
 
