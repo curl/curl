@@ -313,6 +313,7 @@ static void help(void)
        " -d/--data <data>   HTTP POST data (H)\n"
        "    --data-ascii <data>   HTTP POST ASCII data (H)\n"
        "    --data-binary <data>  HTTP POST binary data (H)\n"
+       "    --disable-epsv  Prevents curl from using EPSV (F)\n"
        " -D/--dump-header <file> Write the headers to this file\n"
        "    --egd-file <file> EGD socket path for random data (SSL)\n"
        " -e/--referer       Referer page (H)");
@@ -387,6 +388,7 @@ struct Configurable {
   char *cookiefile; /* read from this file */
   bool use_resume;
   bool resume_from_current;
+  bool disable_epsv;
   int resume_from;
   char *postfields;
   long postfieldsize;
@@ -862,6 +864,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5b", "egd-file",   TRUE},
     {"5c", "connect-timeout", TRUE},
     {"5d", "ciphers",    TRUE},
+    {"5e", "disable-epsv", FALSE},
 
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
@@ -1027,6 +1030,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'd': /* ciphers */
         GetStr(&config->cipher_list, nextarg);
+        break;
+      case 'e': /* --disable-epsv */
+        config->disable_epsv ^= TRUE;
         break;
       default: /* the URL! */
         {
@@ -2305,6 +2311,11 @@ operate(struct Configurable *config, int argc, char *argv[])
 
       if(config->httpversion)
         curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, config->httpversion);
+
+      /* new in libcurl 7.9.2: */
+      if(config->disable_epsv)
+        /* disable it */
+        curl_easy_setopt(curl, CURLOPT_FTP_USE_EPSV, FALSE);
       
       res = curl_easy_perform(curl);
         

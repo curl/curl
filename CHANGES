@@ -7,7 +7,11 @@
                                History of Changes
 
 Daniel (29 November 2001)
-- Eric provided a few more fixes for building on Macs.
+- Added --disable-epsv as an option. When used, curl won't attempt to use the
+  EPSV command when doing passive FTP downloads.
+
+- Eric provided a few more fixes for building on Macs. He also pointed out
+  a flaw in the signal handler restoration code.
 
 Daniel (28 November 2001)
 - Fiddled with some Tru64 problems reported by Dimitris Sarris. They appear
