@@ -9,8 +9,6 @@ To get fixed in 7.11.1 (planned release in March 2004)
 12. PUT and POST with multiple auth bits or simply with NTLM or Digest do
     wrong. #862835 Patch posted to list. (Awaiting feedback)
 
-21. Send QUIT before closing an FTP connection. Joe Halpin works on this.
-
 To get fixed in 7.11.2 (planned release May/June 2004)
 ======================
 
