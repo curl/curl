@@ -51,7 +51,7 @@ int test(char *URL)
       }
       if(done)
         break;
-      
+
       if (res != CURLM_OK) {
         fprintf(stderr, "not okay???\n");
         break;
@@ -78,7 +78,7 @@ int test(char *URL)
   curl_multi_remove_handle(m, c);
   curl_easy_cleanup(c);
   curl_multi_cleanup(m);
-	
+
   return CURLE_OK;
 }
 
