@@ -34,7 +34,7 @@
 #  include <sys/time.h>
 #  include <time.h>
 # else
-   include <sys/time.h>
+#  include <sys/time.h>
 # endif
 #endif /* defined (vms) */
 
