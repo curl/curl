@@ -92,8 +92,6 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
                          char *header) /* rest of the www-authenticate:
                                           header */
 {
-  struct SessionHandle *data=conn->data;
-
   /* skip initial whitespaces */
   while(*header && isspace((int)*header))
     header++;
@@ -122,20 +120,20 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn,
 
       int size = Curl_base64_decode(header, buffer);
 
-      data->state.ntlm.state = NTLMSTATE_TYPE2; /* we got a type-2 */
+      conn->ntlm.state = NTLMSTATE_TYPE2; /* we got a type-2 */
 
       if(size >= 48)
         /* the nonce of interest is index [24 .. 31], 8 bytes */
-        memcpy(data->state.ntlm.nonce, &buffer[24], 8);
+        memcpy(conn->ntlm.nonce, &buffer[24], 8);
 
       /* at index decimal 20, there's a 32bit NTLM flag field */
 
     }
     else {
-      if(data->state.ntlm.state >= NTLMSTATE_TYPE1)
+      if(conn->ntlm.state >= NTLMSTATE_TYPE1)
         return CURLNTLM_BAD;
 
-      data->state.ntlm.state = NTLMSTATE_TYPE1; /* we should sent away a
+      conn->ntlm.state = NTLMSTATE_TYPE1; /* we should sent away a
                                                   type-1 */
     }
   }
@@ -284,7 +282,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
   char *base64=NULL;
 
   unsigned char ntlm[256]; /* enough, unless the host/domain is very long */
-  switch(data->state.ntlm.state) {
+  switch(conn->ntlm.state) {
   case NTLMSTATE_TYPE1:
   default: /* for the weird cases we (re)start here */
     hostoff = 32;
@@ -392,7 +390,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
       user = data->state.user;
     userlen = strlen(user);
 
-    mkhash(data->state.passwd, &data->state.ntlm.nonce[0], lmresp
+    mkhash(data->state.passwd, &conn->ntlm.nonce[0], lmresp
 #ifdef USE_NTRESPONSES
            , ntresp
 #endif
@@ -519,7 +517,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     else
       return CURLE_OUT_OF_MEMORY; /* FIX TODO */
 
-    data->state.ntlm.state = NTLMSTATE_TYPE3; /* we sent a type-3 */
+    conn->ntlm.state = NTLMSTATE_TYPE3; /* we sent a type-3 */
     
   }
   break;

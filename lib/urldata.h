@@ -528,6 +528,9 @@ struct connectdata {
   curl_read_callback fread; /* function that reads the input */
   void *fread_in;           /* pointer to pass to the fread() above */
 
+  struct ntlmdata ntlm;     /* NTLM differs from other authentication schemes
+                               because it authenticates connections, not
+                               single requests! */
 };
 
 /* The end of connectdata. */
@@ -658,7 +661,6 @@ struct UrlState {
                       is always set TRUE when curl_easy_perform() is called. */
 
   struct digestdata digest;
-  struct ntlmdata ntlm;
 
 #ifdef GSSAPI
   struct negotiatedata negotiate;
