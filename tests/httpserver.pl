@@ -50,6 +50,16 @@ sub REAPER {
     logmsg "reaped $waitedpid" . ($? ? " with exit $?" : '');
 }
 
+sub performcmd {
+    my @cmd = @_;
+    for(@cmd) {
+        if($_ =~ /^ *wait *(\d*)/) {
+            # instructed to sleep!
+            sleep($1);
+        }
+    }
+}
+
 $SIG{CHLD} = \&REAPER;
 
 for ( $waitedpid = 0;
@@ -164,6 +174,14 @@ for ( $waitedpid = 0;
                 }
 
                 loadtest("data/test$testnum");
+
+
+                my @cmd = getpart("reply", "cmd");
+                performcmd(@cmd);
+
+                # flush data:
+                $| = 1;
+
                 # send a custom reply to the client
                 my @data = getpart("reply", "data$part");
                 for(@data) {
@@ -172,6 +190,8 @@ for ( $waitedpid = 0;
                         print STDERR "OUT: $_";
                     }
                 }
+                my @postcmd = getpart("reply", "postcmd");
+                performcmd(@postcmd);
             }
         }
      #   print "Hello there, $name, it's now ", scalar localtime, "\r\n";

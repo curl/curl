@@ -23,6 +23,14 @@ if the data is sent but this is what should be checked afterwards
 <size>
 number to return on a ftp SIZE command
 </size>
+<cmd>
+special purpose server-command to control its behavior *before* the
+reply is sent
+</cmd>
+<postcmd>
+special purpose server-command to control its behavior *after* the
+reply is sent
+</oistcmd>
 </reply>
 
 <client>
