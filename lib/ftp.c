@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1130,49 +1130,58 @@ CURLcode ftp_use_port(struct connectdata *conn)
   struct addrinfo hints, *res, *ai;
   struct sockaddr_storage ss;
   socklen_t sslen;
-  char hbuf[NI_MAXHOST];
-
+  char hbuf[NI_MAXHOST]="";
   struct sockaddr *sa=(struct sockaddr *)&ss;
   unsigned char *ap;
   unsigned char *pp;
   char portmsgbuf[1024], tmp[1024];
-
   enum ftpcommand { EPRT, LPRT, PORT, DONE } fcmd;
   const char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
   int rc;
   int error;
+  char *host=NULL;
+  struct Curl_dns_entry *h=NULL;
 
-  /*
-   * we should use Curl_if2ip?  given pickiness of recent ftpd,
-   * I believe we should use the same address as the control connection.
-   */
-  sslen = sizeof(ss);
-  rc = getsockname(conn->sock[FIRSTSOCKET], (struct sockaddr *)&ss, &sslen);
-  if(rc < 0) {
-    failf(data, "getsockname() returned %d\n", rc);
-    return CURLE_FTP_PORT_FAILED;
+  if(data->set.ftpport && (strlen(data->set.ftpport) > 1)) {
+    /* attempt to get the address of the given interface name */
+    if(!Curl_if2ip(data->set.ftpport, hbuf, sizeof(hbuf)))
+      /* not an interface, use the given string as host name instead */
+      host = data->set.ftpport;
+    else
+      host = hbuf; /* use the hbuf for host name */
+  } /* data->set.ftpport */
+
+  if(!host) {
+    /* not an interface and not a host name, get default by extracting
+       the IP from the control connection */
+
+    sslen = sizeof(ss);
+    rc = getsockname(conn->sock[FIRSTSOCKET], (struct sockaddr *)&ss, &sslen);
+    if(rc < 0) {
+      failf(data, "getsockname() returned %d\n", rc);
+      return CURLE_FTP_PORT_FAILED;
+    }
+
+    rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL,
+                     0, NIFLAGS);
+    if(rc) {
+      failf(data, "getnameinfo() returned %d\n", rc);
+      return CURLE_FTP_PORT_FAILED;
+    }
+    host = hbuf; /* use this host name */
   }
 
-  rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL, 0,
-                   NIFLAGS);
-  if(rc) {
-    failf(data, "getnameinfo() returned %d\n", rc);
-    return CURLE_FTP_PORT_FAILED;
-  }
-
-  memset(&hints, 0, sizeof(hints));
-  hints.ai_family = sa->sa_family;
-  /*hints.ai_family = ss.ss_family;
-    this way can be used if sockaddr_storage is properly defined, as glibc
-    2.1.X doesn't do*/
-  hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags = AI_PASSIVE;
-
-  rc = getaddrinfo(hbuf, NULL, &hints, &res);
-  if(rc) {
-    failf(data, "getaddrinfo() returned %d\n", rc);
-    return CURLE_FTP_PORT_FAILED;
-  }
+  rc = Curl_resolv(conn, host, 0, &h);
+  if(rc == CURLRESOLV_PENDING)
+    rc = Curl_wait_for_resolv(conn, &h);
+  if(h) {
+    res = h->addr;
+    /* when we return from this function, we can forget about this entry
+       to we can unlock it now already */
+    Curl_resolv_unlock(data, h);
+  } /* (h) */
+  else
+    res = NULL; /* failure! */
 
   portsock = CURL_SOCKET_BAD;
   error = 0;
@@ -1188,7 +1197,6 @@ CURLcode ftp_use_port(struct connectdata *conn)
       error = Curl_ourerrno();
       continue;
     }
-
     if (bind(portsock, ai->ai_addr, ai->ai_addrlen) < 0) {
       error = Curl_ourerrno();
       sclose(portsock);
@@ -1205,7 +1213,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
 
     break;
   }
-  freeaddrinfo(res);
+
   if (portsock == CURL_SOCKET_BAD) {
     failf(data, "%s", Curl_strerror(conn,error));
     return CURLE_FTP_PORT_FAILED;
@@ -1225,7 +1233,6 @@ CURLcode ftp_use_port(struct connectdata *conn)
     conn->bits.ftp_use_eprt = TRUE;
   }
 #endif
-
 
   for (fcmd = EPRT; fcmd != DONE; fcmd++) {
     int lprtaf, eprtaf;

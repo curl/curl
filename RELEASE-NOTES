@@ -22,6 +22,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o CURLOPT_FTPPORT and -P work when built ipv6-enabled
  o FTP third party transfers was much improved
  o proxy environment variables are now ignored when built HTTP-disabled
  o CURLOPT_PROXY can now disable HTTP proxy even when built HTTP-disabled
@@ -50,6 +51,6 @@ advice from friends like these:
  Werner Koch, Gisle Vanem, Alex Neblett, Kai Sommerfeld, Marty Kuhrt,
  Hzhijun, Pavel Orehov, Bruce Mitchener, Cyrill Osterwalder, Dan Torop,
  Martijn Koster, Alex aka WindEagle, Cody Jones, Samuel Díaz García,
- Stephan Bergmann, Philippe Hameau, Ian Ford
+ Stephan Bergmann, Philippe Hameau, Ian Ford, Stephen More
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (28 January 2005)
+- Stephen More pointed out that CURLOPT_FTPPORT and the -P option didn't work
+  when built ipv6-enabled. I've now made a fix for it. Writing test cases for
+  custom port hosts turned too tricky so unfortunately there's none.
+
 Daniel (25 January 2005)
 - Ian Ford asked about support for the FTP command ACCT, and I discovered it
   is present in RFC959... so now (lib)curl supports it as well. --ftp-account
