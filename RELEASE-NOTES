@@ -52,9 +52,11 @@ Other curl-related news since the previous public release:
  o CURLHandle 1.9 was released: http://curlhandle.sourceforge.net/
  o A curl module for the Q language was announced:
    http://q-lang.sourceforge.net/
- o New German web mirror: http://curl.netmirror.org/
  o c-ares 1.2.0 was released: http://daniel.haxx.se/projects/c-ares/
- o New US web mirror: http://curl.signal42.com/
+ o New curl web mirrors:
+   Germany  http://curl.netmirror.org/
+   USA      http://curl.signal42.com/
+   Denmark  http://curl.cofman.dk/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
