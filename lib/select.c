@@ -36,7 +36,7 @@
 #ifdef WIN32
 #define VALID_SOCK(s) (1)  /* Win-sockets are not in range [0..FD_SETSIZE> */
 #else
-#define VALID_SOCK(s) ((s) >= 0) && ((s) < FD_SETSIZE))
+#define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
 #endif
 
 /*
@@ -49,7 +49,7 @@
  *    0 = timeout
  *    CSELECT_IN | CSELECT_OUT | CSELECT_ERR
  */
-int Curl_select(int readfd, int writefd, int timeout_ms)
+int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 {
 #ifdef HAVE_POLL_FINE
   struct pollfd pfd[2];
