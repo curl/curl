@@ -1339,14 +1339,16 @@ static CURLcode ftp_state_post_cwd(struct connectdata *conn)
 
 
 /* This is called after the TYPE and possible quote commands have been sent */
-static CURLcode ftp_state_ul_setup(struct connectdata *conn)
+static CURLcode ftp_state_ul_setup(struct connectdata *conn,
+                                   bool sizechecked)
 {
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->proto.ftp;
   struct SessionHandle *data = conn->data;
   curl_off_t passed=0;
 
-  if(conn->resume_from) {
+  if((conn->resume_from && !sizechecked) ||
+     ((conn->resume_from > 0) && sizechecked)) {
     /* we're about to continue the uploading of a file */
     /* 1. get already existing file's size. We use the SIZE command for this
        which may not exist in the server!  The SIZE command is not in
@@ -1480,7 +1482,7 @@ static CURLcode ftp_state_quote(struct connectdata *conn,
       state(conn, FTP_RETR_SIZE);
       break;
     case FTP_STOR_PREQUOTE:
-      result = ftp_state_ul_setup(conn);
+      result = ftp_state_ul_setup(conn, FALSE);
       break;
     case FTP_POSTQUOTE:
       break;
@@ -1936,7 +1938,7 @@ static CURLcode ftp_state_size_resp(struct connectdata *conn,
     result = ftp_state_post_retr_size(conn, filesize);
   else if(instate == FTP_STOR_SIZE) {
     conn->resume_from = filesize;
-    result = ftp_state_ul_setup(conn);
+    result = ftp_state_ul_setup(conn, TRUE);
   }
 
   return result;

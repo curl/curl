@@ -1,0 +1,42 @@
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP resumed upload but no file present remotely
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/235 -T log/upload235 -C -
+</command>
+<file name="log/upload235">
+this is the *****crap******** that we're gonna upload
+
+worx?
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+EPSV
+TYPE I
+SIZE 235
+STOR 235
+QUIT
+</protocol>
+<upload>
+this is the *****crap******** that we're gonna upload
+
+worx?
+</upload>
+</verify>

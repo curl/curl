@@ -7,6 +7,20 @@
                                   Changelog
 
 
+Daniel (5 March 2005)
+- Added test case 235 that makes a resumed upload of a file that isn't present
+  on the remote side. This then converts the operation to an ordinary STOR
+  upload. This was requested/pointed out by Ignacio Vazquez-Abrams.
+
+  It also proved (and I fixed) a bug in the newly rewritten ftp code (and
+  present in the 7.13.1 release) when trying to resume an upload and the
+  servers returns an error to the SIZE command. libcurl then loops and sends
+  SIZE commands infinitely.
+
+- Dan Fandrich fixed a SSL problem introduced on February 9th that made
+  libcurl attempt to load the whole random file to seed the PRNG. This is
+  really bad since this turns out to be using /dev/urandom at times...
+
 Version 7.13.1 (4 March 2005)
 
 Daniel (4 March 2005)

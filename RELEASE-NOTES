@@ -14,7 +14,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o 
+ o FTP upload resume now works even if no file is present on the site
+ o SSL seeding no longer attempts to read the whole random file
 
 Other curl-related news since the previous public release:
 
@@ -23,5 +24,6 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+ Dan Fandrich, Ignacio Vazquez-Abrams
 
         Thanks! (and sorry if I forgot to mention someone)
