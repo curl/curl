@@ -7,6 +7,62 @@
                                History of Changes
 
 
+Daniel (18 March 2002)
+- Tomas Szepe found out that -d and -G didn't mix as they should. I broke this
+  in 7.9.5... Added test case 32 for this.
+
+Version 7.9.6-pre1
+
+Daniel (16 March 2002)
+- Peter at verhas.com pointed out that the curl_escape and curl_unscape man
+  pages contained factual errors.
+
+- Albert Choy found and corrected a problem with the verbose output when doing
+  PASV ftp transfers. It could make libcurl crash.
+
+  Details in bug report #530562:
+  http://sourceforge.net/tracker/?func=detail&atid=100976&aid=530562&group_id=976
+
+Daniel (15 March 2002)
+- Jun-ichiro itojun Hagino filed bug report #530204 that clearly pointed out
+  the PF_INET fix from February 19 as a not-very-good fix as it broke IPv6
+  capability! That patch is now reverted.
+
+  The problem with slow name lookups with getaddrinfo() on non-IPv6 enabled
+  hosts are instead made by first checking if the stack is IPv6-enabled and if
+  not, the PF_INET is used and otherwise we go with the full PF_UNSPEC.
+
+- T. Bharath pointed out that when we return an "error" from a WRITEFUNCTION
+  as described in the man page, libcurl did not return the documented error
+  code (CURLE_WRITE_ERROR) but would instead return CURLE_READ_ERROR. This is
+  now corrected.
+
+Daniel (14 March 2002)
+- Setting CURLOPT_POST without setting CURLOPT_POSTFIELDS now read the POST-
+  data from the callback.
+
+- The GOPHER support seems to be broken. I don't think I'll even start fixing
+  it until someone else finds out... :-)
+
+Daniel (13 March 2002)
+- Trying 'curl -I ftp.sunet.se' or similar did a SIZE on a silly "(nil)"
+  string. If such a file would be present, curl returned the size of it! Now
+  we prevent this.
+
+- Curl_sendf() was fixed to deal with situation where Curl_write() would've
+  blocked and thus return -1.
+
+- Setting CURLOPT_PROGRESSFUNCTION to NULL now restores the internal function.
+
+- All CURLFORM_* options can now be used in a CURLFORM_ARRAY except the
+  CURLFORM_ARRAY itself. This was necessary since we couldn't expand the
+  CURLFORM_* list proprely and unrestricted until this was the case. It was
+  also a bit peculiar to users why some options could be used in an array
+  while others couldn't.
+
+- Removed some silly CRLF lines that had accidentally slipped into src/main.c
+  Nico Baggus pointed them out to me.
+
 Daniel (11 March 2002)
 - CURLFORM_FILENAME was added. This can be set when creating a file upload
   part, to set the 'filename' field to a custom value. If this isn't used,
@@ -19,6 +75,12 @@ Daniel (11 March 2002)
   and this can be combined with type= too, in a manner similar to:
 
    -F "file=@log/test39.txt;filename=fakerfile;type=moo/foobar"
+
+  Test case 39 was added to verify this functionality.
+
+- The struct formerly known as HttpPost is now named curl_httppost to properly
+  use the curl name space. I added a #define for the old name to make existing
+  programs compile even when this new include file is used.
 
 Daniel (8 March 2002)
 - Clifford also discovered that if the client code failed early, as when doing
