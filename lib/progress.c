@@ -149,7 +149,7 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
     break;
   case TIMER_REDIRECT:
     data->progress.t_redirect =
-      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000.0;
+      (double)Curl_tvdiff(Curl_tvnow(), data->progress.start)/1000.0;
     break;
   }
 }
