@@ -112,7 +112,7 @@ difference.
 .IP "--ciphers <list of ciphers>"
 (SSL) Specifies which ciphers to use in the connection. The list of ciphers
 must be using valid ciphers. Read up on SSL cipher list details on this URL:
-.I http://www.openssl.org/docs/apps/ciphers.html
+\fIhttp://www.openssl.org/docs/apps/ciphers.html\fP
 
 If this option is used several times, the last one will override the others.
 .IP "--compressed"
@@ -237,10 +237,9 @@ If this option is used several times, the last one will be used.
 .IP "-e/--referer <URL>"
 (HTTP) Sends the "Referer Page" information to the HTTP server. This can also
 be set with the -H/--header flag of course.  When used with
-.I -L/--location 
-you can append ";auto" to the referer URL to make curl automatically set the
-previous URL when it follows a Location: header. The ";auto" string can be
-used alone, even if you don't set an initial referer.
+\fI-L/--location\fP you can append ";auto" to the referer URL to make curl
+automatically set the previous URL when it follows a Location: header. The
+";auto" string can be used alone, even if you don't set an initial referer.
 
 If this option is used several times, the last one will be used.
 .IP "--environment"
@@ -252,8 +251,7 @@ If this option is used several times, each occurrence will toggle this on/off.
 .IP "--egd-file <file>"
 (HTTPS) Specify the path name to the Entropy Gathering Daemon socket. The
 socket is used to seed the random engine for SSL connections. See also the
-.I "--random-file"
-option.
+\fI--random-file\fP option.
 .IP "-E/--cert <certificate[:password]>"
 (HTTPS)
 Tells curl to use the specified certificate file when getting a file
@@ -452,11 +450,11 @@ takes curl to a different host, it won't intercept the user+password. See also
 
 If this option is used twice, the second will again disable location following.
 .IP "--location-trusted"
-(HTTP/HTTPS) Like \fI--location\fP, but will allow sending the name + password
-to all hosts that the site may redirect to. This may or may not introduce a
-security breach if the site redirects you do a site to which you'll send your
-authentication info (which is plaintext in the case of HTTP Basic
-authentication).
+(HTTP/HTTPS) Like \fI-L/--location\fP, but will allow sending the name +
+password to all hosts that the site may redirect to. This may or may not
+introduce a security breach if the site redirects you do a site to which
+you'll send your authentication info (which is plaintext in the case of HTTP
+Basic authentication).
 
 If this option is used twice, the second will again disable location following.
 .IP "--max-filesize <bytes>"
@@ -477,11 +475,9 @@ If this option is used several times, the last one will be used.
 .IP "-M/--manual"
 Manual. Display the huge help text.
 .IP "-n/--netrc"
-Makes curl scan the
-.I .netrc
-file in the user's home directory for login name and password. This is
-typically used for ftp on unix. If used with http, curl will enable user
-authentication. See
+Makes curl scan the \fI.netrc\fP file in the user's home directory for login
+name and password. This is typically used for ftp on unix. If used with http,
+curl will enable user authentication. See
 .BR netrc(4)
 or
 .BR ftp(1)
@@ -490,10 +486,9 @@ hasn't the right permissions (it should not be world nor group
 readable). The environment variable "HOME" is used to find the home
 directory.
 
-A quick and very simple example of how to setup a
-.I .netrc
-to allow curl to ftp to the machine host.domain.com with user name
-\&'myself' and password 'secret' should look similar to:
+A quick and very simple example of how to setup a \fI.netrc\fP to allow curl
+to ftp to the machine host.domain.com with user name \&'myself' and password
+'secret' should look similar to:
 
 .B "machine host.domain.com login myself password secret"
 
@@ -579,8 +574,7 @@ i.e "my.host.domain" to specify machine
 
 If this option is used several times, the last one will be used.
 .IP "-q"
-If used as the first parameter on the command line, the
-.I $HOME/.curlrc
+If used as the first parameter on the command line, the \fI$HOME/.curlrc\fP
 file will not be read and used as a config file.
 .IP "-Q/--quote <comand>"
 (FTP) Send an arbitrary command to the remote FTP server, by using the QUOTE
@@ -723,11 +717,8 @@ If this option is used several times, the last one will be used.
 Specify a URL to fetch. This option is mostly handy when you want to specify
 URL(s) in a config file.
 
-This option may be used any number of times. To control where this URL is written, use the
-.I -o
-or the
-.I -O
-options.
+This option may be used any number of times. To control where this URL is
+written, use the \fI-o\fP or the \fI-O\fP options.
 .IP "-v/--verbose"
 Makes the fetching more verbose/talkative. Mostly usable for debugging. Lines
 starting with '>' means data sent by curl, '<' means data received by curl
