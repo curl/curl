@@ -3,6 +3,7 @@
 *.3
 NEWS
 README
+README.cares
 CHANGES
 FILES
 maketgz
