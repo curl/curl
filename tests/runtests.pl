@@ -66,7 +66,8 @@ my $checkstunnel = &checkstunnel;
 
 my $ssl_version; # set if libcurl is built with SSL support
 
-my $skipped=0; # number of tests skipped; reported in main loop
+my $skipped=0;  # number of tests skipped; reported in main loop
+my $problems=0; # number of tests that didn't run due to run-time problems
 
 #######################################################################
 # variables the command line options may set
@@ -94,7 +95,7 @@ $ENV{'HOME'}=$pwd;
 sub serverpid {
     my $PIDFILE = $_[0];
     open(PFILE, "<$PIDFILE");
-    my $PID=<PFILE>;
+    my $PID=0+<PFILE>;
     close(PFILE);
     return $PID;
 }
@@ -112,10 +113,10 @@ sub stopserver {
         unlink $PIDFILE; # server is killed
 
         if($res && $verbose) {
-            print "Test server pid $PID signalled to die\n";
+            print "RUN: Test server pid $PID signalled to die\n";
         }
         elsif($verbose) {
-            print "Test server pid $PID didn't exist\n";
+            print "RUN: Test server pid $PID didn't exist\n";
         }
     }
 }
@@ -157,42 +158,36 @@ sub runhttpserver {
     $pid = checkserver ($HTTPPIDFILE);
 
     # verify if our/any server is running on this port
-    my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null`;
+    my $cmd = "$CURL -o log/verifiedserver --silent -i $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null";
+    print "CMD; $cmd" if ($verbose);
+    my $res = system($cmd);
 
-    if ( $data =~ /WE ROOLZ(: |)(\d*)/ ) {
-        if($2) {
-            $pid = 0+$2;
-        }
+    $res >>= 8; # rotate the result
+    my $data;
 
-        if(!$pid) {
-            print "Test server already running with unknown pid! Use it...\n";
-            return;
-        }
+    print "RUN: curl command returned $res\n" if ($verbose);
 
-        if($verbose) {
-            print "Test server already running with pid $pid, killing it...\n";
-        }
+    open(FILE, "<log/verifiedserver");
+    my @file=<FILE>;
+    close(FILE);
+    $data=$file[0]; # first line
+
+    if ( $data =~ /WE ROOLZ: (\d+)/ ) {
+        $pid = 0+$1;
     }
-    elsif($data ne "") {
-        print "GOT: $data\n";
-        print "An alien HTTP server is running on port $HOSTPORT\n",
-        "Edit runtests.pl to use another port and rerun the test script\n";
-        exit;
-    }
-    else {
-        if($verbose) {
-            print "No server running, start it\n";
-        }
+    elsif($data) {
+        print "RUN: Unknown HTTP server is running on port $HOSTPORT\n";
+        return 2;
     }
 
     if($pid > 0) {
         my $res = kill (9, $pid); # die!
         if(!$res) {
-            print "Failed to kill our HTTP test server, do it manually and",
+            print "RUN: Failed to kill test HTTP server, do it manually and",
             " restart the tests.\n";
             exit;
         }
-        sleep(2);
+        sleep(1);
     }
 
     my $flag=$debugprotocol?"-v ":"";
@@ -202,6 +197,30 @@ sub runhttpserver {
         print "CMD: $cmd\n";
     }
 
+    my $verified;
+    for(1 .. 5) {
+        # verify that our server is up and running:
+        my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null`;
+
+        if ( $data !~ /WE ROOLZ/ ) {
+            sleep(1);
+            next;
+        }
+        else {
+            $verified = 1;
+            last;
+        }
+    }
+    if(!$verified) {
+        print STDERR "RUN: failed to start our HTTP server\n";
+        return 1;
+    }
+
+    if($verbose) {
+        print "RUN: HTTP server is now verified to be our server\n";
+    }
+
+    return 0;
 }
 
 #######################################################################
@@ -216,7 +235,7 @@ sub runhttpsserver {
     if($PID > 0) {
         # kill previous stunnel!
         if($verbose) {
-            print "kills off running stunnel at $PID\n";
+            print "RUN: kills off running stunnel at $PID\n";
         }
         stopserver($HTTPSPIDFILE);
     }
@@ -227,6 +246,7 @@ sub runhttpsserver {
     if($verbose) {
         print "CMD: $cmd\n";
     }
+    sleep(1);
 }
 
 #######################################################################
@@ -240,42 +260,72 @@ sub runftpserver {
     my $pid = checkserver ($FTPPIDFILE );
 
     if ($pid <= 0) {
-        my $flag=$debugprotocol?"-v ":"";
+        print "RUN: Check port $FTPPORT for our own FTP server\n"
+            if ($verbose);
 
-        # verify that our server is NOT running on this port:
-        my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver 2>/dev/null`;
 
-        if ( $data =~ /WE ROOLZ/ ) {
-            print "A previous FTP server session is already running and we ",
-            "can't kill it!\n";
+        my $time=time();
+        # check if this is our server running on this port:
+        my $data=`$CURL -m4 --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver 2>/dev/null`;
+
+        # if this took more than 2 secs, we assume it "hung" on a weird server
+        my $took = time()-$time;
+        
+        if ( $data =~ /WE ROOLZ: (\d+)/ ) {
+            # this is our test server with a known pid!
+            $pid = $1;
+        }
+        else {
+            if($data || ($took > 2)) {
+                # this is not a known server
+                print "RUN: Unknown server on our favourite port: $FTPPORT\n";
+                return 1;
+            }
+        }
+    }
+
+    if($pid > 0) {
+        print "RUN: Killing a previous server using pid $pid\n" if($verbose);
+        my $res = kill (9, $pid); # die!
+        if(!$res) {
+            print "RUN: Failed to kill our FTP test server, do it manually and",
+            " restart the tests.\n";
             exit;
         }
-
-        my $cmd="$perl $srcdir/ftpserver.pl $flag $FTPPORT &";
-        if($verbose) {
-            print "CMD: $cmd\n";
-        }
-        system($cmd);
+        sleep(1);
     }
-    else {
-        if($verbose) {
-            print "ftpd ($pid) is already running\n";
-        }
+    
+    # now (re-)start our server:
+    my $flag=$debugprotocol?"-v ":"";
+    my $cmd="$perl $srcdir/ftpserver.pl $flag $FTPPORT &";
+    if($verbose) {
+        print "CMD: $cmd\n";
+    }
+    system($cmd);
 
-        # verify that our server is one one running on this port:
+    my $verified;
+    for(1 .. 5) {
+        # verify that our server is up and running:
         my $data=`$CURL --silent -i ftp://$HOSTIP:$FTPPORT/verifiedserver 2>/dev/null`;
 
         if ( $data !~ /WE ROOLZ/ ) {
-            print "Another FTP server is running on port $FTPPORT\n",
-            "Edit runtests.pl to use another FTP port and rerun the ",
-            "test script\n";
-            exit;
+            sleep(1);
+            next;
         }
-
-        if($verbose) {
-            print "The running FTP server has been verified to be our server\n";
+        else {
+            $verified = 1;
+            last;
         }
     }
+    if(!$verified) {
+        die "RUN: failed to start our FTP server\n";
+    }
+
+    if($verbose) {
+        print "RUN: FTP server is now verified to be our server\n";
+    }
+
+    return 0;
 }
 
 #######################################################################
@@ -301,6 +351,7 @@ sub runftpsserver {
     if($verbose) {
         print "CMD: $cmd\n";
     }
+    sleep(1);
 }
 
 #######################################################################
@@ -440,7 +491,7 @@ sub singletest {
     if(loadtest("${TESTDIR}/test${testnum}")) {
         if($verbose) {
             # this is not a test
-            print "$testnum doesn't look like a test case!\n";
+            print "RUN: $testnum doesn't look like a test case!\n";
         }
         return -1;
     }
@@ -450,7 +501,13 @@ sub singletest {
     if($serverproblem) {
         # there's a problem with the server, don't run
         # this particular server, but count it as "skipped"
-        $skipped++;
+        if($serverproblem> 1) {
+            print "RUN: test case $testnum couldn't run!\n";
+            $problems++;
+        }
+        else {
+            $skipped++;
+        }
         return -1;
     }
 
@@ -868,13 +925,17 @@ sub serverfortest {
         $what =~ s/[^a-z]//g;
         if($what eq "ftp") {
             if(!$run{'ftp'}) {
-                runftpserver($verbose);
+                if(runftpserver($verbose)) {
+                    return 2; # error starting it
+                }
                 $run{'ftp'}=$FTPPIDFILE;
             }
         }
         elsif($what eq "http") {
             if(!$run{'http'}) {
-                runhttpserver($verbose);
+                if(runhttpserver($verbose)) {
+                    return 2; # error starting
+                }
                 $run{'http'}=$HTTPPIDFILE;
             }
         }
@@ -885,7 +946,9 @@ sub serverfortest {
                 return 1;
             }
             if(!$run{'ftp'}) {
-                runftpserver($verbose);
+                if(runftpserver($verbose)) {
+                    return 2; # error starting it
+                }
                 $run{'ftp'}=$FTPPIDFILE;
             }
             if(!$run{'ftps'}) {
@@ -903,7 +966,9 @@ sub serverfortest {
                 return 1;
             }
             if(!$run{'http'}) {
-                runhttpserver($verbose);
+                if(runhttpserver($verbose)) {
+                    return 2; # problems starting server
+                }
                 $run{'http'}=$HTTPPIDFILE;
             }
             if(!$run{'https'}) {
@@ -915,7 +980,6 @@ sub serverfortest {
             warn "we don't support a server for $what";
         }
     }
-    sleep 1; # give a second for the server(s) to startup
     return 0; # ok
 }
 
@@ -1100,6 +1164,9 @@ else {
 }
 if($skipped) {
     print "TESTINFO: $skipped tests were skipped due to restraints\n";
+}
+if($problems) {
+    print "TESTINFO: $problems tests didn't run due to run-time problems\n";
 }
 if($total && ($ok != $total)) {
     exit 1;
