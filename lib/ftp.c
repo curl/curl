@@ -2135,16 +2135,23 @@ CURLcode Curl_ftp(struct connectdata *conn)
   /* parse the URL path into separate path components */
   while((slash_pos=strchr(cur_pos, '/'))) {
     /* seek out the next path component */
-    if (0 == slash_pos-cur_pos)  /* empty path component, like "x//y" */
-      ftp->dirs[path_part] = strdup(""); /* empty string */
-    else
+    if (slash_pos-cur_pos) {
+      /* we skip empty path components, like "x//y" since the FTP command CWD
+         requires a parameter and a non-existant parameter a) doesn't work on
+         many servers and b) has no effect on the others. */
       ftp->dirs[path_part] = curl_unescape(cur_pos,slash_pos-cur_pos);
     
-    if (!ftp->dirs[path_part]) { /* run out of memory ... */
-      failf(data, "no memory");
-      retcode = CURLE_OUT_OF_MEMORY;
+      if (!ftp->dirs[path_part]) { /* run out of memory ... */
+        failf(data, "no memory");
+        retcode = CURLE_OUT_OF_MEMORY;
+      }
     }
     else {
+      cur_pos = slash_pos + 1; /* jump to the rest of the string */
+      continue;
+    }
+
+    if(!retcode) {
       cur_pos = slash_pos + 1; /* jump to the rest of the string */
       if(++path_part >= (CURL_MAX_FTP_DIRDEPTH-1)) {
         /* too deep, we need the last entry to be kept NULL at all
