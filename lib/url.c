@@ -200,7 +200,7 @@ CURLcode Curl_open(CURL **curl, char *url)
       return CURLE_OUT_OF_MEMORY;
     }
 
-    data-> headersize=HEADERSIZE;
+    data->headersize=HEADERSIZE;
 
     data->out = stdout; /* default output to stdout */
     data->in  = stdin;  /* default input from stdin */
@@ -1627,18 +1627,25 @@ static CURLcode Connect(struct UrlData *data,
      * just allocated before we can move along and use the previously
      * existing one.
      */
-    char *path = conn->path; /* setup the current path pointer properly */
-    if(conn->proxyhost)
-      free(conn->proxyhost);
-    free(conn);              /* we don't need this new one */
+    struct connectdata *old_conn = conn;
+    char *path = old_conn->path; /* setup the current path pointer properly */
+    if(old_conn->proxyhost)
+      free(old_conn->proxyhost);
     conn = conn_temp;        /* use this connection from now on */
     free(conn->path);        /* free the previous path pointer */
+
+    /* we need these pointers if we speak over a proxy */
+    conn->name = old_conn->name;
+    conn->hostname = old_conn->hostname;
+
     conn->path = path;       /* use this one */
     conn->ppath = path;      /* set this too */
 
     /* re-use init */
     conn->maxdownload = 0;   /* might have been used previously! */
     conn->bits.reuse = TRUE; /* yes, we're re-using here */
+
+    free(old_conn);          /* we don't need this anymore */
 
     *in_connect = conn;      /* return this instead! */
 
