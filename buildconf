@@ -177,7 +177,7 @@ if test -d ares; then
 fi
 
 echo "buildconf: running automake"
-${AUTOMAKE:-automake} -a  || die "The command '${AUTOMAKE:-automake} -a' failed"
+${AUTOMAKE:-automake} -a  || die "The automake command failed"
 
 echo "buildconf: OK"
 exit 0
