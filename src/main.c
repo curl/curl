@@ -345,7 +345,8 @@ static void help(void)
        " -C/--continue-at <offset> Specify absolute resume offset\n"
        " -d/--data <data>   HTTP POST data (H)\n"
        "    --data-ascii <data>   HTTP POST ASCII data (H)\n"
-       "    --data-binary <data>  HTTP POST binary data (H)\n"
+       "    --data-binary <data>  HTTP POST binary data (H)");
+  puts("    --disable-eprt  Prevents curl from using EPRT or LPRT (F)\n"
        "    --disable-epsv  Prevents curl from using EPSV (F)\n"
        " -D/--dump-header <file> Write the headers to this file\n"
        "    --egd-file <file> EGD socket path for random data (SSL)\n"
@@ -445,6 +446,7 @@ struct Configurable {
   bool use_resume;
   bool resume_from_current;
   bool disable_epsv;
+  bool disable_eprt;
   int resume_from;
   char *postfields;
   long postfieldsize;
@@ -1212,6 +1214,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'e': /* --disable-epsv */
         config->disable_epsv ^= TRUE;
+        break;
+      case 'f': /* --disable-eprt */
+        config->disable_eprt ^= TRUE;
         break;
 #ifdef USE_ENVIRONMENT
       case 'f':
@@ -2932,6 +2937,11 @@ operate(struct Configurable *config, int argc, char *argv[])
         /* disable it */
         curl_easy_setopt(curl, CURLOPT_FTP_USE_EPSV, FALSE);
 
+      /* new in libcurl 7.10.5 */
+      if(config->disable_eprt)
+        /* disable it */
+        curl_easy_setopt(curl, CURLOPT_FTP_USE_EPRT, FALSE);
+      
       /* new in curl 7.9.7 */
       if(config->trace_dump) {
         curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
