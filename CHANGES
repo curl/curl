@@ -10,6 +10,17 @@ Daniel (12 September)
 - Based on a bug report by David Kimdon, I made the runtests.pl script clear
   all possible proxy environment variables before the tests are run.
 
+- By default, easy handles within a multi handle now share DNS cache.
+
+- Tim Bartley brought a patch that makes the GSSNEGOTIATE option work for
+  Microsoft's "Negotiate" authentication as well.
+
+Daniel (11 September)
+- A zero-length proxy string confused FTP transfers.
+
+- Bjorn Reese found a case with an uninitialized pointer, only present when
+  built for ares.
+
 Version 7.10.8-pre1 (8 September 2003)
 
 Daniel (7 September)
