@@ -42,6 +42,17 @@ AC_SUBST(PKGADD_PKG)
 AC_SUBST(PKGADD_NAME)
 AC_SUBST(PKGADD_VENDOR)
 
+dnl
+dnl initialize all the info variables to 'no'
+    curl_ssl_msg="no     (--with-ssl)"
+   curl_zlib_msg="no     (--with-zlib)"
+   curl_krb4_msg="no     (--with-krb4*)"
+    curl_gss_msg="no     (--with-gssapi)"
+ curl_spnego_msg="no     (--with-spnego)"
+   curl_ares_msg="no     (--enable-ares)"
+   curl_ipv6_msg="no     (--enable-ipv6)"
+    curl_idn_msg="no     (--with-libidn)"
+ curl_manual_msg="no     (--enable-manual)"
 
 dnl
 dnl Detect the canonical host and target build environment
@@ -383,6 +394,8 @@ main()
 ))
 
 if test "$ipv6" = "yes"; then
+  curl_ipv6_msg="enabled"
+
   CURL_CHECK_WORKING_GETADDRINFO
 
   CURL_CHECK_NI_WITHSCOPEID
@@ -549,6 +562,8 @@ then
       KRB4_ENABLED=1
       AC_SUBST(KRB4_ENABLED)
 
+      curl_krb4_msg="enabled"
+
       dnl the krb4 stuff needs a strlcpy()
       AC_CHECK_FUNCS(strlcpy)
 
@@ -582,7 +597,9 @@ if test x"$want_spnego" = xyes; then
      fi
  
      AC_MSG_RESULT(yes)
-     AC_DEFINE(HAVE_SPNEGO, 1, [Define this if you have the SPNEGO library fbopenssl])
+     AC_DEFINE(HAVE_SPNEGO, 1,
+               [Define this if you have the SPNEGO library fbopenssl])
+     curl_spnego_msg="enabled"
   fi
 else
   AC_MSG_RESULT(no)
@@ -637,6 +654,8 @@ if test x"$want_gss" = xyes; then
 
   AC_MSG_RESULT(yes)
   AC_DEFINE(HAVE_GSSAPI, 1, [if you have the gssapi libraries])
+
+  curl_gss_msg="enabled"
 
   if test -n "$GSSAPI_INCS"; then
     # cut off the preceding -I from the include path
@@ -772,10 +791,12 @@ else
     dnl Check for SSLeay headers
     AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
                      openssl/pem.h openssl/ssl.h openssl/err.h,
+      curl_ssl_msg="enabled"
       OPENSSL_ENABLED=1)
 
     if test $ac_cv_header_openssl_x509_h = no; then
       AC_CHECK_HEADERS(x509.h rsa.h crypto.h pem.h ssl.h err.h,
+        curl_ssl_msg="enabled"
         OPENSSL_ENABLED=1)
     fi
 
@@ -896,12 +917,119 @@ case "$OPT_ZLIB" in
       dnl replace 'HAVE_LIBZ' in the automake makefile.ams
       AMFIXLIB="1"
       AC_MSG_NOTICE([found both libz and libz.h header])
+      curl_zlib_msg="enabled"
     fi
     ;;
 esac
 
 dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(HAVE_LIBZ, test x"$AMFIXLIB" = x1)
+
+AC_MSG_CHECKING([whether to build with libidn])
+AC_ARG_WITH(idn,
+AC_HELP_STRING([--with-libidn=PATH],[Enable libidn usage])
+AC_HELP_STRING([--without-libidn],[Disable libidn usage]),
+  [LIBIDN="$withval" ])
+
+case "$LIBIDN" in
+  no)
+       AC_MSG_RESULT(no)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       AC_CHECK_LIB(idn, idna_to_ascii_lz, ,
+                    [
+                    dnl if there was a given path, try it
+                    if test "x$LIBIDN" != "x"; then
+                      oldLDFLAGS=$LDFLAGS
+                      oldCPPFLAGS=$CPPFLAGS
+                      LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
+                      CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
+                      AC_CHECK_LIB(idn, idna_to_ascii_4i, ,
+                                   nolibidn="true"
+                                   AC_MSG_WARN([no libidn found in $LIBIDN])
+                                   LDFLAGS=$oldLDFLAGS
+                                   CPPFLAGS=$oldCPPFLAGS)
+                    fi
+                    ])
+       if test "x$nolibidn" != "xtrue"; then
+         curl_idn_msg="enabled"
+       fi
+                    
+       ;; 
+esac
+
+AC_MSG_CHECKING([whether to enable ares])
+AC_ARG_ENABLE(ares,
+AC_HELP_STRING([--enable-ares=PATH],[Enable ares for name lookups])
+AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+
+       if test "x$IPV6_ENABLED" = "x1"; then
+         AC_MSG_ERROR([ares doesn't work with ipv6, disable ipv6 to use ares])
+       fi
+
+       AC_DEFINE(USE_ARES, 1, [Define if you want to enable ares support])
+       dnl substitute HAVE_ARES for curl-config and similar
+       HAVE_ARES="1"
+       AC_SUBST(HAVE_ARES)
+       curl_ares_msg="enabled"
+
+       LIBS="$LIBS -lcares"
+
+       dnl For backwards compatibility default to includes/lib in srcdir/ares
+       dnl If a value is specified it is assumed that the libs are in $val/lib
+       dnl and the includes are in $val/include. This is the default setup for
+       dnl ares so it should not be a problem.
+       if test "x$enableval" = "xyes" ; then
+         if test -d "$srcdir/ares"; then
+            aresembedded="yes"
+            AC_CONFIG_SUBDIRS(ares)
+            aresinc=`cd $srcdir/ares && pwd`
+            CPPFLAGS="$CPPFLAGS -I$aresinc"
+
+            dnl the pwd= below cannot 'cd' into the ares dir to get the full
+            dnl path to it, since it may not exist yet if we build outside of
+            dnl the source tree
+            pwd=`pwd`
+            LDFLAGS="$LDFLAGS -L$pwd/ares"
+         fi
+       else
+         CPPFLAGS="$CPPFLAGS -I$enableval/include"
+         LDFLAGS="$LDFLAGS -L$enableval/lib"
+       fi
+
+       if test -z "$aresembedded"; then
+         dnl verify that a sufficient c-ares is here if we have pointed one
+         dnl out and don't use the "embedded" ares dir (in which case we don't
+         dnl check it because it might not have been built yet)
+         AC_MSG_CHECKING([that c-ares is good and recent enough])
+         AC_LINK_IFELSE( [
+#include <ares.h>
+/* provide a set of dummy functions in case c-ares was built with debug */
+void curl_dofree() { }
+void curl_sclose() { }
+void curl_domalloc() { }
+
+int main(void)
+{
+  ares_channel channel;
+  ares_cancel(channel);
+  return 0;
+}
+],
+          AC_MSG_RESULT(yes),
+          AC_MSG_RESULT(no)
+          AC_MSG_ERROR([c-ares library defective or too old])
+          )
+       fi
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
 
 dnl Default is to try the thread-safe versions of a few functions
 OPT_THREAD=on
@@ -1192,6 +1320,7 @@ dnl manual
 
 if test "$USE_MANUAL" = "1"; then
   AC_DEFINE(USE_MANUAL, 1, [If you want to build curl with the built-in manual])
+  curl_manual_msg="enabled"
 fi
 
 dnl set variable for use in automakefile(s)
@@ -1227,107 +1356,6 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 
-AC_MSG_CHECKING([whether to build with libidn])
-AC_ARG_WITH(idn,
-AC_HELP_STRING([--with-libidn=PATH],[Enable libidn usage])
-AC_HELP_STRING([--without-libidn],[Disable libidn usage]),
-  [LIBIDN="$withval" ])
-
-case "$LIBIDN" in
-  no)
-       AC_MSG_RESULT(no)
-       ;;
-  *)   AC_MSG_RESULT(yes)
-       AC_CHECK_LIB(idn, idna_to_ascii_lz, ,
-                    [
-                    dnl if there was a given path, try it
-                    if test "x$LIBIDN" != "xyes"; then
-                      oldLDFLAGS=$LDFLAGS
-                      oldCPPFLAGS=$CPPFLAGS
-                      LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
-                      CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
-                      AC_CHECK_LIB(idn, idna_to_ascii_4i, ,
-                                   AC_MSG_WARN([no libidn found in $LIBIDN])
-                                   LDFLAGS=$oldLDFLAGS
-                                   CPPFLAGS=$oldCPPFLAGS)
-                    fi
-                    ])
-                    
-       ;; 
-esac
-
-AC_MSG_CHECKING([whether to enable ares])
-AC_ARG_ENABLE(ares,
-AC_HELP_STRING([--enable-ares=PATH],[Enable ares for name lookups])
-AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
-[ case "$enableval" in
-  no)
-       AC_MSG_RESULT(no)
-       ;;
-  *)   AC_MSG_RESULT(yes)
-
-       if test "x$IPV6_ENABLED" = "x1"; then
-         AC_MSG_ERROR([ares doesn't work with ipv6, disable ipv6 to use ares])
-       fi
-
-       AC_DEFINE(USE_ARES, 1, [Define if you want to enable ares support])
-       dnl substitute HAVE_ARES for curl-config and similar
-       HAVE_ARES="1"
-       AC_SUBST(HAVE_ARES)
-
-       LIBS="$LIBS -lcares"
-
-       dnl For backwards compatibility default to includes/lib in srcdir/ares
-       dnl If a value is specified it is assumed that the libs are in $val/lib
-       dnl and the includes are in $val/include. This is the default setup for
-       dnl ares so it should not be a problem.
-       if test "x$enableval" = "xyes" ; then
-         if test -d "$srcdir/ares"; then
-            aresembedded="yes"
-            AC_CONFIG_SUBDIRS(ares)
-            aresinc=`cd $srcdir/ares && pwd`
-            CPPFLAGS="$CPPFLAGS -I$aresinc"
-
-            dnl the pwd= below cannot 'cd' into the ares dir to get the full
-            dnl path to it, since it may not exist yet if we build outside of
-            dnl the source tree
-            pwd=`pwd`
-            LDFLAGS="$LDFLAGS -L$pwd/ares"
-         fi
-       else
-         CPPFLAGS="$CPPFLAGS -I$enableval/include"
-         LDFLAGS="$LDFLAGS -L$enableval/lib"
-       fi
-
-       if test -z "$aresembedded"; then
-         dnl verify that a sufficient c-ares is here if we have pointed one
-         dnl out and don't use the "embedded" ares dir (in which case we don't
-         dnl check it because it might not have been built yet)
-         AC_MSG_CHECKING([that c-ares is good and recent enough])
-         AC_LINK_IFELSE( [
-#include <ares.h>
-/* provide a set of dummy functions in case c-ares was built with debug */
-void curl_dofree() { }
-void curl_sclose() { }
-void curl_domalloc() { }
-
-int main(void)
-{
-  ares_channel channel;
-  ares_cancel(channel);
-  return 0;
-}
-],
-          AC_MSG_RESULT(yes),
-          AC_MSG_RESULT(no)
-          AC_MSG_ERROR([c-ares library defective or too old])
-          )
-       fi
-       ;;
-  esac ],
-       AC_MSG_RESULT(no)
-)
-
 AC_CONFIG_FILES([Makefile \
 	   docs/Makefile \
            docs/examples/Makefile \
@@ -1355,3 +1383,21 @@ AC_CONFIG_FILES([Makefile \
            curl-config
 ])
 AC_OUTPUT
+
+AC_MSG_NOTICE([Configured to build curl/libcurl:
+
+  curl version:    ${VERSION}
+  Host setup:      ${host}
+  Install prefix:  ${prefix}
+  Compiler:        ${CC}
+  SSL support:     ${curl_ssl_msg}
+  zlib support:    ${curl_zlib_msg}
+  krb4 support:    ${curl_krb4_msg}
+  GSSAPI support:  ${curl_gss_msg}
+  SNPEGO support:  ${curl_spnego_msg}
+  c-ares support:  ${curl_ares_msg}
+  ipv6 support:    ${curl_ipv6_msg}
+  libidn support:  ${curl_idn_msg}
+  Build libcurl:   Shared=${enable_shared}, Static=${enable_static} 
+  Built-in manual: ${curl_manual_msg}
+])

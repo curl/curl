@@ -6,8 +6,18 @@
 
                                   Changelog
 
-Daniel and Gisle (25 April 2004)
-- The file previously known as hostip.c has now undergone a huge cleanup and
+Daniel (25 April 2004)
+- Since we can now build and use quite a large set of 3rd party libraries, I
+  decided I would make configure produce a summary at the end showing what
+  libraries it uses and if not, what option to use to make it use that. I also
+  added some other random info that is nice in a "configure summary" output.
+
+- Applied TommyTam's patch that now make curl work with telnet and stdin
+  properly on Windows.
+
+- The changes for today below were made by me and Gisle Vanem.
+
+  The file previously known as hostip.c has now undergone a huge cleanup and
   split:
 
   hostip.c explained
