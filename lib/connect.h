@@ -37,4 +37,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,
                           Curl_ipconnect **addr, /* the one we used */
                           bool *connected /* truly connected? */
                           );
+
+int Curl_ourerrno(void);
 #endif
