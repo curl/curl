@@ -203,6 +203,9 @@ int Curl_pgrsUpdate(struct UrlData *data)
          even when not displayed! */
   else if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
     if (!data->progress.callback) {
+      if(data->resume_from)
+        fprintf(data->err, "** Resuming transfer from byte position %d\n",
+                data->resume_from);
       fprintf(data->err,
               "  %% Total    %% Received %% Xferd  Average Speed          Time             Curr.\n"
               "                                 Dload  Upload Total    Current  Left    Speed\n");
