@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2000, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -231,11 +231,7 @@ long	vms_cond[] = {
 	CURL_BADPWD,
 	CURL_MNYREDIR
 };
-
-
 #endif
-
-
 
 extern void hugehelp(void);
 
@@ -318,6 +314,7 @@ static void help(void)
        " -f/--fail          Fail silently (no output at all) on errors (H)\n"
        " -F/--form <name=content> Specify HTTP POST data (H)\n"
        " -g/--globoff       Disable URL sequences and ranges using {} and []\n"
+       " -G/--get           HTTP GET(H)\n"
        " -h/--help          This help text\n"
        " -H/--header <line> Custom header to pass to server. (H)");
   puts(" -i/--include       Include the HTTP-header in the output (H)\n"
@@ -414,6 +411,7 @@ struct Configurable {
   bool progressmode;
   bool nobuffer;
   bool globoff;
+  bool use_httpget;
 
   char *writeout; /* %-styled format string to output */
 
@@ -601,7 +599,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"a", "append",      FALSE},
     {"A", "user-agent",  TRUE},
     {"b", "cookie",      TRUE},
-    {"B", "ftp-ascii",   FALSE}, /* this long format is OBSOLETEE now! */
+    {"B", "ftp-ascii",   FALSE}, /* this long format is OBSOLETE now! */
     {"B", "use-ascii",   FALSE},
     {"c", "continue",    FALSE},
     {"C", "continue-at", TRUE},
@@ -615,6 +613,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"f", "fail",        FALSE},
     {"F", "form",        TRUE},
     {"g", "globoff",     FALSE},
+    {"G", "get",         FALSE},
     {"h", "help",        FALSE},
     {"H", "header",      TRUE},
     {"i", "include",     FALSE},
@@ -873,8 +872,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           config->postfields=postdata;
       }
 
-      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
-        return PARAM_BAD_USE;
+/*      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
+        return PARAM_BAD_USE;*/
       break;
     case 'D':
       /* dump-header to given file name */
@@ -941,6 +940,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
     case 'g': /* g disables URLglobbing */
       config->globoff ^= TRUE;
+      break;
+
+    case 'G': /* HTTP GET */
+      config->use_httpget = TRUE;
       break;
 
     case 'h': /* h for help */
@@ -1542,6 +1545,8 @@ operate(struct Configurable *config, int argc, char *argv[])
 
   bool allocuseragent=FALSE;
 
+  char *httpgetfields=NULL;
+
   CURL *curl;
   int res;
   int i;
@@ -1555,6 +1560,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
   config->showerror=TRUE;
   config->conf=CONF_DEFAULT;
+  config->use_httpget=FALSE;
 
   if(argc>1 &&
      (!strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
@@ -1641,6 +1647,23 @@ operate(struct Configurable *config, int argc, char *argv[])
   }
   else
     allocuseragent = TRUE;
+
+  if (config->postfields) {
+    if (config->use_httpget) {
+      /* Use the postfields data for a http get */
+      httpgetfields = strdup(config->postfields);
+      free(config->postfields);
+      config->postfields = NULL;
+      if(SetHTTPrequest(HTTPREQ_GET, &config->httpreq)) {
+        free(httpgetfields);
+        return PARAM_BAD_USE;
+      }
+    }
+    else {
+      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
+        return PARAM_BAD_USE;
+    }
+  }
 
   /*
    * Get a curl handle to use for all forthcoming curl transfers.  Cleanup
@@ -1832,6 +1855,19 @@ operate(struct Configurable *config, int argc, char *argv[])
         if (separator)
           printf("%s%s\n", CURLseparator, url);
       }
+      if (httpgetfields) {
+        /*
+         * Then append ? followed by the get fields to the url.
+         */
+        urlbuffer=(char *)malloc(strlen(url) + strlen(httpgetfields) + 2);
+        if(!urlbuffer) {
+          helpf("out of memory\n");
+          return CURLE_OUT_OF_MEMORY;
+        }
+        sprintf(urlbuffer, "%s?%s", url, httpgetfields);
+        free(url); /* free previous URL */
+        url = urlbuffer; /* use our new URL instead! */
+      }
 
       if(!config->errors)
         config->errors = stderr;
@@ -1975,6 +2011,9 @@ operate(struct Configurable *config, int argc, char *argv[])
       if(headerfilep)
         fclose(headerfilep);
       
+      if (httpgetfields)
+        free(httpgetfields);
+
       if(url)
         free(url);
 
