@@ -931,7 +931,7 @@ void curl_formfree(struct curl_httppost *form)
   required to be reentrant is not required to be thread-safe.
 
 */
-char *basename(char *path)
+static char *basename(char *path)
 {
   /* Ignore all the details above for now and make a quick and simple
      implementaion here */
