@@ -91,6 +91,7 @@
 #include "cookie.h"
 #include "strequal.h"
 #include "escape.h"
+#include "strtok.h"
 
 /* And now for the protocols */
 #include "ftp.h"

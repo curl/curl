@@ -30,6 +30,8 @@
 #ifndef HAVE_STRTOK_R
 char *Curl_strtok_r(char *s, const char *delim, char **last);
 #define strtok_r Curl_strtok_r
+#else
+extern char *strtok_r(char *s1, const char *s2, char **lasts);
 #endif
 
 #endif

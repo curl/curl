@@ -86,6 +86,7 @@ Example set of cookies:
 #include "cookie.h"
 #include "getdate.h"
 #include "strequal.h"
+#include "strtok.h"
 
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
