@@ -246,6 +246,9 @@ fi
 log "display lib/config.h"
 grep "^ *#" lib/config.h
 
+log "display src/config.h"
+grep "^ *#" src/config.h
+
 if { grep "define USE_ARES" lib/config.h; } then
   log "setup to build ares"
 
