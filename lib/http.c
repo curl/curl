@@ -91,12 +91,13 @@
 #include "ssluse.h"
 #include "http_digest.h"
 #include "http_ntlm.h"
+#include "http_negotiate.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
@@ -237,7 +238,8 @@ CURLcode add_buffer_send(send_buffer *in,
          and wait until it might work again. */
 
       size -= amount;
-      ptr += amount;
+
+      ptr = in->buffer + amount;
     
       /* backup the currently set pointers */
       http->backup.fread = conn->fread;
@@ -640,6 +642,26 @@ CURLcode Curl_http_done(struct connectdata *conn)
   return CURLE_OK;
 }
 
+static CURLcode Curl_output_basic(struct connectdata *conn)
+{
+  char *authorization;
+  struct SessionHandle *data=conn->data;
+
+  sprintf(data->state.buffer, "%s:%s",
+          data->state.user, data->state.passwd);
+  if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
+                        &authorization) >= 0) {
+    if(conn->allocptr.userpwd)
+      free(conn->allocptr.userpwd);
+    conn->allocptr.userpwd = aprintf( "Authorization: Basic %s\015\012",
+                                      authorization);
+    free(authorization);
+  }
+  else
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
+}
+
 CURLcode Curl_http(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
@@ -689,49 +711,50 @@ CURLcode Curl_http(struct connectdata *conn)
     conn->allocptr.uagent=NULL;
   }
 
-#ifdef GSSAPI
-  if (data->state.negotiate.context && 
-      !GSS_ERROR(data->state.negotiate.status)) {
-     result = Curl_output_negotiate(conn);
-     if (result)
-	return result;
-  } else
-#endif
-  if(data->state.ntlm.state) {
-    result = Curl_output_ntlm(conn);
-    if(result)
-      return result;
-  }
-  else if(data->state.digest.nonce) {
-    result = Curl_output_digest(conn,
-                                (unsigned char *)request,
-                                (unsigned char *)ppath);
-    if(result)
-      return result;
-  }
-  else if((data->set.httpauth == CURLAUTH_BASIC) && /* if Basic is desired */
-          conn->bits.user_passwd &&
-          !checkheaders(data, "Authorization:")) {
-    char *authorization;
+  /* To prevent the user+password to get sent to other than the original
+     host due to a location-follow, we do some weirdo checks here */
+  if(!data->state.this_is_a_follow ||
+     !data->state.auth_host ||
+     curl_strequal(data->state.auth_host, conn->hostname) ||
+     data->set.http_disable_hostname_check_before_authentication) {
 
-    /* To prevent the user+password to get sent to other than the original
-       host due to a location-follow, we do some weirdo checks here */
-    if(!data->state.this_is_a_follow ||
-       !data->state.auth_host ||
-       curl_strequal(data->state.auth_host, conn->hostname) ||
-       data->set.http_disable_hostname_check_before_authentication) {
-      sprintf(data->state.buffer, "%s:%s",
-              data->state.user, data->state.passwd);
-      if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
-                            &authorization) >= 0) {
-        if(conn->allocptr.userpwd)
-          free(conn->allocptr.userpwd);
-        conn->allocptr.userpwd = aprintf( "Authorization: Basic %s\015\012",
-                                          authorization);
-        free(authorization);
+#ifdef GSSAPI
+    if((data->state.authwant == CURLAUTH_GSSNEGOTIATE) &&
+       data->state.negotiate.context && 
+       !GSS_ERROR(data->state.negotiate.status)) {
+      result = Curl_output_negotiate(conn);
+      if (result)
+	return result;
+    }
+    else
+#endif
+#ifdef USE_SSLEAY
+    if(data->state.authwant == CURLAUTH_NTLM) {
+      result = Curl_output_ntlm(conn);
+      if(result)
+        return result;
+    }
+    else
+#endif
+    {
+      if((data->state.authwant == CURLAUTH_DIGEST) &&
+         data->state.digest.nonce) {
+        result = Curl_output_digest(conn,
+                                    (unsigned char *)request,
+                                    (unsigned char *)ppath);
+        if(result)
+          return result;
+      }
+      else if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
+              conn->bits.user_passwd &&
+              !checkheaders(data, "Authorization:")) {
+        result = Curl_output_basic(conn);
+        if(result)
+          return result;
       }
     }
   }
+
   if((data->change.referer) && !checkheaders(data, "Referer:")) {
     if(conn->allocptr.ref)
       free(conn->allocptr.ref);
