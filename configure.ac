@@ -659,7 +659,8 @@ AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
 
     AC_CHECK_FUNCS( RAND_status \
                     RAND_screen \
-                    RAND_egd )
+                    RAND_egd \
+                    CRYPTO_cleanup_all_ex_data )
 
   fi
 
