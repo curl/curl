@@ -282,7 +282,9 @@ sub RETR_command {
     if($testno =~ /^verifiedserver$/) {
         # this is the secret command that verifies that this actually is
         # the curl test server
-        print "150 Binary junk (10 bytes).\r\n";
+        my $response = "WE ROOLZ: $$\r\n";
+        my $len = length($response);
+        print "150 Binary junk ($len bytes).\r\n";
         print SOCK "WE ROOLZ: $$\r\n";
         close(SOCK);
         print "226 File transfer complete\r\n";
