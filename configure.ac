@@ -647,7 +647,7 @@ if test x"$want_gss" = xyes; then
   if test -z "$GSSAPI_INCS"; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
-     else
+     elif test "$GSSAPI_ROOT" != "yes"; then
         GSSAPI_INCS="-I$GSSAPI_ROOT/include"
      fi
   fi
@@ -657,8 +657,10 @@ if test x"$want_gss" = xyes; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         gss_ldflags=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
 	LDFLAGS="$LDFLAGS $gss_ldflags"
-     else
+     elif test "$GSSAPI_ROOT" != "yes"; then
         LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff -lgssapi"
+     else
+        LDFLAGS="$LDFLAGS -lgssapi"
      fi
   else
      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
@@ -669,17 +671,21 @@ if test x"$want_gss" = xyes; then
 
   curl_gss_msg="enabled"
 
-  if test -n "$GSSAPI_INCS"; then
-    # cut off the preceding -I from the include path
-    GSSAPI_INCS=`echo $GSSAPI_INCS | sed -e s/^-I//g`
-  fi
-
-  if test -f "$GSSAPI_INCS/gssapi.h"; then
+  AC_CHECK_HEADER(gssapi.h,
+    [
+       dnl found in the given dirs
       AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have the Heimdal gssapi libraries])
-  else
-      AC_DEFINE(HAVE_GSSMIT, 1, [if you have the MIT gssapi libraries])
-  fi
-  
+    ],
+    [
+      dnl not found, check in gssapi/ subdir 
+      AC_CHECK_HEADER(gssapi/gssapi.h,
+        dnl found 
+        AC_DEFINE(HAVE_GSSMIT, 1, [if you have the MIT gssapi libraries])
+      )
+      
+    ]
+  )
+
 else
   AC_MSG_RESULT(no)
 fi

@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (10 November 2004)
+- I installed Heimdal on my Debian box (using the debian package) and noticed
+  that configure --with-gssapi failed to create a nice build. Fixed now.
+
 Daniel (9 November 2004)
 - Gisle Vanem marked all external function calls with CURL_EXTERN so that now
   the Windows, Netware and other builds no longer need libcurl.def or similar
