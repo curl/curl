@@ -23,7 +23,19 @@ open(FTPLOG, ">log/ftpd.log") ||
 
 sub logmsg { print FTPLOG "$$: "; print FTPLOG @_; }
 
-sub ftpmsg { print INPUT @_; }
+sub ftpmsg {
+  # append to the server.input file
+  open(INPUT, ">>log/server.input") ||
+    logmsg "failed to open log/server.input\n";
+
+  INPUT->autoflush(1);
+  print INPUT @_;
+  close(INPUT);
+
+  # use this, open->print->close system only to make the file
+  # open as little as possible, to make the test suite run
+  # better on windows/cygwin
+}
 
 my $verbose=0; # set to 1 for debugging
 my $retrweirdo=0;
@@ -437,12 +449,7 @@ for ( $waitedpid = 0;
     open(STDIN,  "<&Client")   || die "can't dup client to stdin";
     open(STDOUT, ">&Client")   || die "can't dup client to stdout";
     
-    open(INPUT, ">log/server.input") ||
-        logmsg "failed to open log/server.input\n";
-
     FTPLOG->autoflush(1);
-    INPUT->autoflush(1);
-
     &customize(); # read test control instructions
 
     print @welcome;
