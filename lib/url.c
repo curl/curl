@@ -1280,14 +1280,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     strcpy(conn->path, "/");
 
     if (2 > sscanf(data->change.url,
-                   "%64[^\n:]://%256[^\n/]%[^\n]",
+                   "%64[^\n:]://%512[^\n/]%[^\n]",
                    conn->protostr, conn->gname, conn->path)) {
       
       /*
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
        */
-      if((1 > sscanf(data->change.url, "%256[^\n/]%[^\n]",
+      if((1 > sscanf(data->change.url, "%512[^\n/]%[^\n]",
                      conn->gname, conn->path)) ) {
         /*
          * We couldn't even get this format.
@@ -1872,7 +1872,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn = conn_temp;        /* use this connection from now on */
 
     /* we need these pointers if we speak over a proxy */
-    conn->name = conn->gname;
     conn->hostname = old_conn->gname;
 
     free(conn->path);    /* free the previously allocated path pointer */
