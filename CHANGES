@@ -6,6 +6,13 @@
 
                                History of Changes
 
+Version 7.9.2
+
+Daniel (5 December 2001)
+- Jon Travis found out that if you used libcurl and CURLOPT_UPLOAD and then
+  on the same handle used CURLOPT_HTTPGET it would still attempt to upload.
+  His suggested fix was perfect.
+
 Daniel (4 December 2001)
 - Incorporated more macos fixes and added four specific files in a new
   subdirectory below src.
