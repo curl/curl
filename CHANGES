@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (5 October)
+- Shared provided a few fixes to make libcurl build on BeOS
+  out-of-the-box. New code for BeOS-style non-blocking sockets, provided by
+  Shard and Jeremy Friesner. Modified the autoconf check for non-blocking
+  sockets to check for this kind too.
+
 Daniel (4 October)
 - Vincent Bronner pointed out that if you set CURLOPT_COOKIE for a transfer
   and then set it to NULL in a subsequent one, the previous cookie was still
