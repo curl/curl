@@ -17,13 +17,14 @@ Misc
  - progress bar/time specs while downloading
  - "standard" proxy environment variables support
  - config file support
- - compiles on win32
+ - compiles on win32 (reported built on 29 operating systems)
  - redirectable stderr
  - use selected network interface for outgoing traffic
  - IPv6 support
  - persistant connections
 
 HTTP
+ - HTTP/1.1 compliant
  - GET
  - PUT
  - HEAD
