@@ -688,7 +688,8 @@ int curl_formparse(char *, struct curl_httppost **,
 #undef CFINIT
 #endif
 
-#if defined(__STDC__) || defined(_MSC_VER) || defined(__cplusplus)
+#if defined(__STDC__) || defined(_MSC_VER) || defined(__cplusplus) || \
+  defined(__HP_aCC)
 #define CFINIT(name) CURLFORM_ ## name
 #else
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
@@ -916,7 +917,20 @@ CURLcode curl_share_destroy (curl_share *);
  * Structures for querying information about the curl library at runtime.
  */
 
+typedef enum {
+  CURLVERSION_FIRST,
+  CURLVERSION_LAST /* never actually use this */
+} CURLversion;
+
+/* The 'CURLVERSION_NOW' is the symbolic name meant to be used by
+   basicly all programs ever, that want to get version information. It is
+   meant to be a built-in version number for what kind of struct the caller
+   expects. If the struct ever changes, we redfine the NOW to another enum
+   from above. */
+#define CURLVERSION_NOW CURLVERSION_FIRST
+
 typedef struct {
+  CURLversion age;          /* age of the returned struct */
   const char *version;      /* LIBCURL_VERSION */
   unsigned int version_num; /* LIBCURL_VERSION_NUM */
   const char *host;         /* OS/host/cpu/machine when configured */
@@ -925,7 +939,7 @@ typedef struct {
   long ssl_version_num;     /* number */
   const char *libz_version;       /* human readable string */
   /* protocols is terminated by an entry with a NULL protoname */
-  const char *protocols[1];
+  const char **protocols;
 } curl_version_info_data;
 
 #define CURL_VERSION_IPV6      (1<<0)
@@ -934,7 +948,7 @@ typedef struct {
 #define CURL_VERSION_LIBZ      (1<<3)
 
 /* returns a pointer to a static copy of the version info struct */
-curl_version_info_data *curl_version_info(void);
+curl_version_info_data *curl_version_info(CURLversion);
 
 #ifdef  __cplusplus
 }

@@ -122,39 +122,40 @@ char *curl_version(void)
 
 static const char *protocols[] = {
 #ifndef CURL_DISABLE_FTP
-  { "ftp" },
+  "ftp",
 #endif
 #ifndef CURL_DISABLE_GOPHER
-  { "gopher" },
+  "gopher",
 #endif
 #ifndef CURL_DISABLE_TELNET
-  { "telnet" },
+  "telnet",
 #endif
 #ifndef CURL_DISABLE_DICT
-  { "dict" },
+  "dict",
 #endif
 #ifndef CURL_DISABLE_LDAP
-  { "ldap" },
+  "ldap",
 #endif
 #ifndef CURL_DISABLE_HTTP
-  { "http" },
+  "http",
 #endif
 #ifndef CURL_DISABLE_FILE
-  { "file" },
+  "file",
 #endif
 
 #ifdef USE_SSLEAY
 #ifndef CURL_DISABLE_HTTP
-  { "https" },
+  "https",
 #endif
 #ifndef CURL_DISABLE_FTP
-  { "ftps" },
+  "ftps",
 #endif
 #endif
-  { NULL }
+  NULL
 };
 
 static curl_version_info_data version_info = {
+  CURLVERSION_FIRST,
   LIBCURL_VERSION,
   LIBCURL_VERSION_NUM,
   OS, /* as found by configure or set by hand at build-time */
@@ -178,7 +179,7 @@ static curl_version_info_data version_info = {
   protocols
 };
 
-curl_version_info_data *curl_version_info(void)
+curl_version_info_data *curl_version_info(CURLversion stamp)
 {
 #ifdef USE_SSLEAY
   static char ssl_buffer[80];
@@ -194,6 +195,7 @@ curl_version_info_data *curl_version_info(void)
   version_info.libz_version = zlibVersion();
   /* libz left NULL if non-existing */
 #endif
+  (void)stamp; /* avoid compiler warnings, we don't use this */
 
   return &version_info;
 }
