@@ -7,6 +7,19 @@
                                   Changelog
 
 
+Daniel (7 January 2005)
+- Improved the test script's valgrind log parser to actually work! Also added
+  the ability to disable the log scanner for specific test cases. Test case
+  509 results in numerous problems and leaks in OpenSSL and has to get it
+  disabled.
+
+Daniel (6 January 2005)
+- Fixed a single-byte read out of bounds in test case 39 in the curl tool code
+  (i.e not in the library).
+
+- Bug report #1097019 identified a problem when doing -d "data" with -G and
+  sending it to two URLs with {}. Added test 199 to verify the fix.
+
 Daniel (4 January 2005)
 - Marty Kuhrt adjusted a VMS build script slightly
 

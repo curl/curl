@@ -16,6 +16,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o -d with -G to multiple URLs crashed
  o double va_list access crash fixed
  o minor memory leak when "version" is set in a cookie header
  o builds fine on BeOS
