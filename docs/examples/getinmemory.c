@@ -37,7 +37,7 @@ void *myrealloc(void *ptr, size_t size)
 size_t
 WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
-  register int realsize = size * nmemb;
+  size_t realsize = size * nmemb;
   struct MemoryStruct *mem = (struct MemoryStruct *)data;
 
   mem->memory = (char *)myrealloc(mem->memory, mem->size + realsize + 1);
