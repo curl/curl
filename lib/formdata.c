@@ -1468,4 +1468,10 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
   return CURL_FORMADD_DISABLED;
 }
 
+void curl_formfree(struct curl_httppost *form)
+{
+  (void)form;
+  /* does nothing HTTP is disabled */
+}
+
 #endif  /* CURL_DISABLE_HTTP */
