@@ -1003,6 +1003,7 @@ static CURLcode verifyhost(struct connectdata *conn,
 #else
   struct in_addr addr;
 #endif
+  CURLcode res = CURLE_OK;
 
 #ifdef ENABLE_IPV6
   if(conn->bits.ipv6_ip &&
@@ -1131,8 +1132,7 @@ static CURLcode verifyhost(struct connectdata *conn,
       if(data->set.ssl.verifyhost > 1) {
         failf(data, "SSL: certificate subject name '%s' does not match "
               "target host name '%s'", peer_CN, conn->host.dispname);
-        OPENSSL_free(peer_CN);
-        return CURLE_SSL_PEER_CERTIFICATE ;
+        res = CURLE_SSL_PEER_CERTIFICATE;
       }
       else
         infof(data, "\t common name: %s (does not match '%s')\n",
@@ -1140,10 +1140,11 @@ static CURLcode verifyhost(struct connectdata *conn,
     }
     else {
       infof(data, "\t common name: %s (matched)\n", peer_CN);
-      OPENSSL_free(peer_CN);
     }
+    if(peer_CN)
+      OPENSSL_free(peer_CN);
   }
-  return CURLE_OK;
+  return res;
 }
 #endif
 

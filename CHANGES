@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (10 January 2005)
+- Hzhijun reported a memory leak in the SSL certificate code, that leaked the
+  remote certificate name when it didn't match the used host name.
+
 Gisle (8 January 2005)
 - Added Makefile.Watcom files (src/lib). Updated Makefile.dist.
 
