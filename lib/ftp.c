@@ -700,12 +700,14 @@ CURLcode Curl_ftp_fdset(struct connectdata *conn,
   struct FTP *ftp = conn->proto.ftp;
   curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
-  if(ftp->sendleft)
+  if(ftp->sendleft) {
     /* write mode */
     FD_SET(sockfd, write_fd_set);
-  else
+  }
+  else {
     /* read mode */
     FD_SET(sockfd, read_fd_set);
+  }
 
   if((int)sockfd > *max_fdp)
     *max_fdp = (int)sockfd;
