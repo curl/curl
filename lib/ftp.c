@@ -2032,6 +2032,8 @@ CURLcode ftp_perform(struct connectdata *conn,
        may not support it! It is however the only way we have to get a file's
        size! */
     ssize_t filesize;
+    ssize_t nread;
+    int ftpcode;
 
     ftp->no_transfer = TRUE; /* this means no actual transfer is made */
     
@@ -2047,6 +2049,18 @@ CURLcode ftp_perform(struct connectdata *conn,
     if(CURLE_OK == result) {
       sprintf(buf, "Content-Length: %d\r\n", filesize);
       result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
+      if(result)
+        return result;
+    }
+
+    /* Determine if server can respond to REST command and therefore
+       whether it can do a range */
+    FTPSENDF(conn, "REST 0", NULL);
+    result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+
+    if ((CURLE_OK == result) && (ftpcode == 350)) {
+      result = Curl_client_write(data, CLIENTWRITE_BOTH,
+                                 (char *)"Accept-ranges: bytes\r\n", 0);
       if(result)
         return result;
     }
