@@ -10,10 +10,8 @@ To get fixed in 7.12.3 (planned release: December 2004)
 48 - MSVC Makefile improvements by Samuel Díaz García
      Still lacks user feedback. Possibly not going to get in.
 
-51 - PUT/POST with multipass authenticaion (API change required)
-     Being discussed on the libcurl list.
-
-52 - POST with NULL contents should still POST.
+51 - PUT/POST with multipass authenticaion
+     Daniel works on this.
 
 To get fixed in 7.13 (planned release: March 2005)
 ======================
