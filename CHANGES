@@ -7,12 +7,17 @@
                                History of Changes
 
 
+Daniel (5 February 2001)
+- Robert Weaver told me about the problems the MS VC++ 6.0 compiler has with
+  the 'static' keyword on a number of libcurl functions. I might need to add a
+  patch that redefines static when libcurl is compiled with that compiler.
+
 Daniel (4 February 2001)
 - curl_getinfo() was extended with two new options:
   CURLINFO_CONTENT_LENGTH_DOWNLOAD and CURLINFO_CONTENT_LENGTH_UPLOAD. They
   return the full assumed content length of the transfer in the given
   direction. The CURLINFO_CONTENT_LENGTH_DOWNLOAD will be the Content-Length:
-  size of a HTTP download.
+  size of a HTTP download. Added descriptions to the man page as well.
 
 Daniel (3 February 2001)
 - Ingo Ralf Blum provided another fix that makes curl build under the more
