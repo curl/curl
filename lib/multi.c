@@ -438,7 +438,7 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle, int *msgs_in_queue)
     return msg;
   }
   else
-    return CURLM_BAD_HANDLE;
+    return NULL;
 }
 
 /*
