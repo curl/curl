@@ -233,11 +233,11 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   if(!conn->async.dns) {
     /* a name was not resolved */
     if((timeout < 0) || (conn->async.status == ARES_ETIMEOUT)) {
-      failf(data, "Resolving host timed out: %s", conn->hostname);
+      failf(data, "Resolving host timed out: %s", conn->host.name);
       rc = CURLE_OPERATION_TIMEDOUT;
     }
     else if(conn->async.done) {
-      failf(data, "Could not resolve host: %s (%s)", conn->hostname,
+      failf(data, "Could not resolve host: %s (%s)", conn->host.name,
             ares_strerror(conn->async.status));
       rc = CURLE_COULDNT_RESOLVE_HOST;
     }

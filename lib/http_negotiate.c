@@ -71,10 +71,10 @@ get_gss_name(struct connectdata *conn, gss_name_t *server)
   else
     service = "http";
 
-  token.length = strlen(service) + 1 + strlen(conn->hostname) + 1;
+  token.length = strlen(service) + 1 + strlen(conn->host.name) + 1;
   if (token.length + 1 > sizeof(name))
     return EMSGSIZE;
-  sprintf(name, "%s@%s", service, conn->hostname);
+  sprintf(name, "%s@%s", service, conn->host.name);
 
   token.value = (void *) name;
   major_status = gss_import_name(&minor_status,

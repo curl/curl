@@ -253,7 +253,7 @@ static CURLcode http_auth_headers(struct connectdata *conn,
      host due to a location-follow, we do some weirdo checks here */
   if(!data->state.this_is_a_follow ||
      !data->state.auth_host ||
-     curl_strequal(data->state.auth_host, TRUE_HOSTNAME(conn)) ||
+     curl_strequal(data->state.auth_host, conn->host.name) ||
      data->set.http_disable_hostname_check_before_authentication) {
 
   /* Send proxy authentication header if needed */
@@ -1113,7 +1113,8 @@ CURLcode Curl_http_connect(struct connectdata *conn)
 
     /* either HTTPS over proxy, OR explicitly asked for a tunnel */
     result = Curl_ConnectHTTPProxyTunnel(conn, FIRSTSOCKET,
-                                         TRUE_HOSTNAME(conn), conn->remote_port);
+                                         conn->host.name,
+                                         conn->remote_port);
     if(CURLE_OK != result)
       return result;
   }    
@@ -1132,7 +1133,7 @@ CURLcode Curl_http_connect(struct connectdata *conn)
       /* Free to avoid leaking memory on multiple requests*/
       free(data->state.auth_host);
 
-    data->state.auth_host = strdup(TRUE_HOSTNAME(conn));
+    data->state.auth_host = strdup(conn->host.name);
   }
 
   return CURLE_OK;
@@ -1219,7 +1220,7 @@ CURLcode Curl_http(struct connectdata *conn)
   struct HTTP *http;
   struct Cookie *co=NULL; /* no cookies from start */
   char *ppath = conn->path;
-  char *host = TRUE_HOSTNAME(conn);
+  char *host = conn->host.name;
   const char *te = ""; /* tranfer-encoding */
   char *ptr;
   char *request;

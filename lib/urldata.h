@@ -304,6 +304,13 @@ struct ConnectBits {
   bool no_body;       /* CURLOPT_NO_BODY (or similar) was set */
 };
 
+struct hostname {
+  char *rawalloc; /* allocated "raw" version of the name */
+  char *encalloc; /* allocated IDN-encoded version of the name */
+  char *name;     /* name to use internally, might be encoded, might be raw */
+  char *dispname; /* name to display, as 'name' might be encoded */
+};
+
 /*
  * This struct is all the previously local variables from Curl_perform() moved
  * to struct to allow the function to return and get re-invoked better without
@@ -428,16 +435,10 @@ struct connectdata {
   struct sockaddr_in serv_addr;
 #endif
   char protostr[64];  /* store the protocol string in this buffer */
-  char *namebuffer; /* allocated buffer to store the hostname in */
-  char *hostname;  /* hostname to use, as parsed from url. points to
-                      somewhere within the namebuffer[] area */
-#ifdef USE_LIBIDN
-  char *ace_hostname; /* hostname possibly converted to ACE form */
-#define TRUE_HOSTNAME(conn) \
- (conn->ace_hostname ? conn->ace_hostname : conn->hostname)
-#else
-#define TRUE_HOSTNAME(conn) conn->hostname
-#endif
+
+  struct hostname host;
+  struct hostname proxy;
+
   char *pathbuffer;/* allocated buffer to store the URL's path part in */
   char *path;      /* path to use, points to somewhere within the pathbuffer
                       area */
@@ -455,8 +456,6 @@ struct connectdata {
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
   curl_off_t resume_from; /* continue [ftp] transfer from here */
-
-  char *proxyhost; /* name of the http proxy host */
 
   char *user;    /* user name string, allocated */
   char *passwd;  /* password string, allocated */

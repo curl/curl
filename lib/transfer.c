@@ -805,7 +805,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                               /* If there is a custom-set Host: name, use it
                                  here, or else use real peer host name. */
                               conn->allocptr.cookiehost?
-                              conn->allocptr.cookiehost:conn->hostname,
+                              conn->allocptr.cookiehost:conn->host.name,
                               conn->path);
               Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
             }

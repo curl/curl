@@ -149,10 +149,6 @@ static unsigned int ConnectionStore(struct SessionHandle *data,
                                     struct connectdata *conn);
 static bool safe_strequal(char* str1, char* str2);
 
-#ifdef USE_LIBIDN
-static bool is_ASCII_name(const char *hostname);
-#endif
-
 #ifndef USE_ARES
 /* not for Win32, unless it is cygwin
    not for ares builds */
@@ -1369,10 +1365,17 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->proto.generic);
   Curl_safefree(conn->newurl);
   Curl_safefree(conn->pathbuffer); /* the URL path buffer */
-  Curl_safefree(conn->namebuffer); /* the URL host name buffer */
-#ifdef USE_LIBIDN
-  Curl_safefree(conn->ace_hostname);
-#endif
+
+  Curl_safefree(conn->host.rawalloc); /* host name buffer */
+  Curl_safefree(conn->proxy.rawalloc); /* proxy name buffer */
+  if(conn->host.encalloc)
+    (free)(conn->host.encalloc); /* encoded host name buffer, must be freed
+                                    with free() since this was allocated by
+                                    libidn */
+  if(conn->proxy.encalloc)
+    (free)(conn->proxy.encalloc); /* encoded proxy name buffer, must be freed
+                                     with free() since this was allocated by
+                                     libidn */
   Curl_SSL_Close(conn);
 
   /* close possibly still open sockets */
@@ -1394,7 +1397,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->allocptr.cookie);
   Curl_safefree(conn->allocptr.host);
   Curl_safefree(conn->allocptr.cookiehost);
-  Curl_safefree(conn->proxyhost);
+
 #if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
     defined(USE_THREADING_GETADDRINFO)
   /* possible left-overs from the async name resolve */
@@ -1473,7 +1476,7 @@ ConnectionExists(struct SessionHandle *data,
         continue;
 
       if(strequal(needle->protostr, check->protostr) &&
-         strequal(TRUE_HOSTNAME(needle), TRUE_HOSTNAME(check)) &&
+         strequal(needle->host.name, check->host.name) &&
          (needle->remote_port == check->remote_port) ) {
         if(needle->protocol & PROT_SSL) {
           /* This is SSL, verify that we're using the same
@@ -1500,7 +1503,7 @@ ConnectionExists(struct SessionHandle *data,
     else { /* The requested needle connection is using a proxy,
               is the checked one using the same? */
       if(check->bits.httpproxy &&
-         strequal(needle->proxyhost, check->proxyhost) &&
+         strequal(needle->proxy.name, check->proxy.name) &&
          needle->port == check->port) {
         /* This is the same proxy connection, use it! */
         match = TRUE;
@@ -1763,7 +1766,7 @@ static int handleSock5Proxy(const char *proxy_name,
 #ifndef ENABLE_IPV6
     struct Curl_dns_entry *dns;
     Curl_addrinfo *hp=NULL;
-    int rc = Curl_resolv(conn, TRUE_HOSTNAME(conn), conn->remote_port, &dns);
+    int rc = Curl_resolv(conn, conn->host.name, conn->remote_port, &dns);
     
     if(rc == CURLRESOLV_ERROR)
       return 1;
@@ -1788,7 +1791,7 @@ static int handleSock5Proxy(const char *proxy_name,
     }
     else {
       failf(conn->data, "Failed to resolve \"%s\" for SOCKS5 connect.",
-            conn->hostname);
+            conn->host.name);
       return 1;
     }
 #else
@@ -1906,7 +1909,7 @@ static void verboseconnect(struct connectdata *conn)
   host = Curl_inet_ntop(AF_INET, &in, addrbuf, sizeof(addrbuf));
 #endif
   infof(data, "Connected to %s (%s) port %d\n",
-        conn->bits.httpproxy?conn->proxyhost:conn->hostname,
+        conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname,
         host?host:"", conn->port);
 }
 
@@ -1949,6 +1952,50 @@ CURLcode Curl_protocol_connect(struct connectdata *conn)
 
   return result; /* pass back status */
 }
+
+/*
+ * Helpers for IDNA convertions.
+ */
+#ifdef USE_LIBIDN
+static bool is_ASCII_name (const char *hostname)
+{
+  const unsigned char *ch = (const unsigned char*)hostname;
+
+  while (*ch) {
+    if (*ch++ & 0x80)
+      return FALSE;
+  }
+  return TRUE;
+}
+#endif
+
+static void fix_hostname(struct connectdata *conn, struct hostname *host)
+{
+  /* set the name we use to display the host name */
+  conn->host.dispname = conn->host.name;
+
+#ifdef USE_LIBIDN
+  /*************************************************************
+   * Check name for non-ASCII and convert hostname to ACE form.
+   *************************************************************/
+  if (!is_ASCII_name(host->name)) {
+    char *ace_hostname = NULL;
+    struct SessionHandle *data = conn->data;
+    int rc = idna_to_ascii_lz(host->name, &ace_hostname, 0);
+    infof (data, "Input domain encoded as `%s'\n",
+           stringprep_locale_charset ());
+    if (rc != IDNA_SUCCESS)
+      infof(data, "Failed to convert %s to ACE; IDNA error %d\n",
+            host->name, rc);
+    else {
+      host->encalloc = ace_hostname;
+      /* change the name pointer to point to the encoded hostname */
+      host->name = host->encalloc;
+    }
+  }
+#endif
+}
+
 
 /**
  * CreateConnection() sets up a new connectdata struct, or re-uses an already
@@ -2075,10 +2122,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     return CURLE_OUT_OF_MEMORY; /* really bad error */
   conn->path = conn->pathbuffer;
 
-  conn->namebuffer=(char *)malloc(urllen);
-  if(NULL == conn->namebuffer)
+  conn->host.rawalloc=(char *)malloc(urllen);
+  if(NULL == conn->host.rawalloc)
     return CURLE_OUT_OF_MEMORY;
-  conn->hostname = conn->namebuffer;
+  conn->host.name = conn->host.rawalloc;
 
   /*************************************************************
    * Parse the URL.
@@ -2139,9 +2186,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     strcpy(conn->protostr, "file"); /* store protocol string lowercase */
   }
   else {
-    /* Set default host and default path */
-    strcpy(conn->namebuffer, "curl.haxx.se");
+    /* Set default path */
     strcpy(conn->path, "/");
+
     /* We need to search for '/' OR '?' - whichever comes first after host
      * name but before the path. We need to change that to handle things like
      * http://example.com?param= (notice the missing '/'). Later we'll insert
@@ -2150,14 +2197,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if (2 > sscanf(data->change.url,
                    "%64[^\n:]://%[^\n/?]%[^\n]",
                    conn->protostr,
-                   conn->namebuffer, conn->path)) {
+                   conn->host.name, conn->path)) {
 
       /*
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
        */
       if((1 > sscanf(data->change.url, "%[^\n/?]%[^\n]",
-                     conn->namebuffer, conn->path)) ) {
+                     conn->host.name, conn->path)) ) {
         /*
          * We couldn't even get this format.
          */
@@ -2173,21 +2220,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       /* Note: if you add a new protocol, please update the list in
        * lib/version.c too! */
 
-      if(checkprefix("GOPHER", conn->namebuffer))
+      if(checkprefix("GOPHER", conn->host.name))
         strcpy(conn->protostr, "gopher");
 #ifdef USE_SSLEAY
-      else if(checkprefix("HTTPS", conn->namebuffer))
+      else if(checkprefix("HTTPS", conn->host.name))
         strcpy(conn->protostr, "https");
-      else if(checkprefix("FTPS", conn->namebuffer))
+      else if(checkprefix("FTPS", conn->host.name))
         strcpy(conn->protostr, "ftps");
 #endif /* USE_SSLEAY */
-      else if(checkprefix("FTP", conn->namebuffer))
+      else if(checkprefix("FTP", conn->host.name))
         strcpy(conn->protostr, "ftp");
-      else if(checkprefix("TELNET", conn->namebuffer))
+      else if(checkprefix("TELNET", conn->host.name))
         strcpy(conn->protostr, "telnet");
-      else if (checkprefix("DICT", conn->namebuffer))
+      else if (checkprefix("DICT", conn->host.name))
         strcpy(conn->protostr, "DICT");
-      else if (checkprefix("LDAP", conn->namebuffer))
+      else if (checkprefix("LDAP", conn->host.name))
         strcpy(conn->protostr, "LDAP");
       else {
         strcpy(conn->protostr, "http");
@@ -2212,7 +2259,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /*
    * So if the URL was A://B/C,
    *   conn->protostr is A
-   *   conn->namebuffer is B
+   *   conn->host.name is B
    *   conn->path is /C
    */
 
@@ -2275,15 +2322,15 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       nope=no_proxy?strtok_r(no_proxy, ", ", &no_proxy_tok_buf):NULL;
       while(nope) {
         unsigned int namelen;
-        char *endptr = strchr(conn->hostname, ':');
+        char *endptr = strchr(conn->host.name, ':');
         if(endptr)
-          namelen=endptr-conn->hostname;
+          namelen=endptr-conn->host.name;
         else
-          namelen=strlen(conn->hostname);
+          namelen=strlen(conn->host.name);
 
         if(strlen(nope) <= namelen) {
           char *checkn=
-            conn->hostname + namelen - strlen(nope);
+            conn->host.name + namelen - strlen(nope);
           if(checkprefix(nope, checkn)) {
             /* no proxy for this host! */
             break;
@@ -2546,7 +2593,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      * we'll try to get now! */
     type=strstr(conn->path, ";type=");
     if(!type) {
-      type=strstr(conn->namebuffer, ";type=");
+      type=strstr(conn->host.rawalloc, ";type=");
     }
     if(type) {
       char command;
@@ -2655,23 +2702,23 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * To be able to detect port number flawlessly, we must not confuse them
    * IPv6-specified addresses in the [0::1] style. (RFC2732)
    *
-   * The conn->hostname is currently [user:passwd@]host[:port] where host
+   * The conn->host.name is currently [user:passwd@]host[:port] where host
    * could be a hostname, IPv4 address or IPv6 address.
    *************************************************************/
-  if((1 == sscanf(conn->hostname, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
+  if((1 == sscanf(conn->host.name, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
      (']' == endbracket)) {
     /* this is a RFC2732-style specified IP-address */
     conn->bits.ipv6_ip = TRUE;
 
-    conn->hostname++; /* pass the starting bracket */
-    tmp = strchr(conn->hostname, ']');
+    conn->host.name++; /* pass the starting bracket */
+    tmp = strchr(conn->host.name, ']');
     *tmp = 0; /* zero terminate */
     tmp++; /* pass the ending bracket */
     if(':' != *tmp)
       tmp = NULL; /* no port number available */
   }
   else
-    tmp = strrchr(conn->hostname, ':');
+    tmp = strrchr(conn->host.name, ':');
 
   if (tmp) {
     char *rest;
@@ -2740,7 +2787,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
 
     /* now, clone the cleaned proxy host name */
-    conn->proxyhost = strdup(proxyptr);
+    conn->proxy.rawalloc = strdup(proxyptr);
+    conn->proxy.name = conn->proxy.rawalloc;
 
     free(proxydup); /* free the duplicate pointer and not the modified */
   }
@@ -2753,7 +2801,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * Inputs: data->set.userpwd   (CURLOPT_USERPWD)
    *         data->set.fpasswd   (CURLOPT_PASSWDFUNCTION)
    *         data->set.use_netrc (CURLOPT_NETRC)
-   *         conn->hostname
+   *         conn->host.name
    *         netrc file
    *         hard-coded defaults
    *
@@ -2761,11 +2809,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    *          conn->bits.user_passwd  - non-zero if non-default passwords exist
    *          conn->user              - non-zero length if defined
    *          conn->passwd            -   ditto
-   *          conn->hostname          - remove user name and password
+   *          conn->host.name          - remove user name and password
    */
 
   /* At this point, we're hoping all the other special cases have
-   * been taken care of, so conn->hostname is at most
+   * been taken care of, so conn->host.name is at most
    *    [user[:password]]@]hostname
    *
    * We need somewhere to put the embedded details, so do that first.
@@ -2778,12 +2826,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* This is a FTP or HTTP URL, we will now try to extract the possible
      * user+password pair in a string like:
      * ftp://user:password@ftp.my.site:8021/README */
-    char *ptr=strchr(conn->hostname, '@');
-    char *userpass = conn->hostname;
+    char *ptr=strchr(conn->host.name, '@');
+    char *userpass = conn->host.name;
     if(ptr != NULL) {
       /* there's a user+password given here, to the left of the @ */
 
-      conn->hostname = ++ptr;
+      conn->host.name = ++ptr;
 
       /* So the hostname is sane.  Only bother interpreting the
        * results if we could care.  It could still be wasted
@@ -2844,11 +2892,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
 
   if (data->set.use_netrc != CURL_NETRC_IGNORED) {
-    if(Curl_parsenetrc(conn->hostname,
+    if(Curl_parsenetrc(conn->host.name,
                        user, passwd,
                        data->set.netrc_file)) {
       infof(data, "Couldn't find host %s in the .netrc file, using defaults\n",
-            conn->hostname);
+            conn->host.name);
     }
     else
       conn->bits.user_passwd = 1; /* enable user+password */
@@ -2898,8 +2946,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      */
     struct connectdata *old_conn = conn;
 
-    if(old_conn->proxyhost)
-      free(old_conn->proxyhost);
+    if(old_conn->proxy.rawalloc)
+      free(old_conn->proxy.rawalloc);
 
     /* free the SSL config struct from this connection struct as this was
        allocated in vain and is targeted for destruction */
@@ -2915,13 +2963,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* get the newly set value, not the old one */
     conn->bits.no_body = old_conn->bits.no_body;
 
-    free(conn->namebuffer); /* free the newly allocated name buffer */
-    conn->namebuffer = old_conn->namebuffer; /* use the old one */
-    conn->hostname = old_conn->hostname;
-#ifdef USE_LIBIDN
-    Curl_safefree(conn->ace_hostname);
-    conn->ace_hostname = old_conn->ace_hostname;
-#endif
+    free(conn->host.rawalloc); /* free the newly allocated name buffer */
+    conn->host.rawalloc = old_conn->host.rawalloc; /* use the old one */
+    conn->host.name = old_conn->host.name;
+
+    conn->host.encalloc = old_conn->host.encalloc; /* use the old one */
+    conn->host.dispname = old_conn->host.dispname;
 
     free(conn->pathbuffer); /* free the newly allocated path pointer */
     conn->pathbuffer = old_conn->pathbuffer; /* use the old one */
@@ -3056,35 +3103,45 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->connect_addr = NULL; /* we don't connect now so we don't have any
                                   fresh connect_addr struct to point to */
   }
-  else if(!data->change.proxy || !*data->change.proxy) {
-    /* If not connecting via a proxy, extract the port from the URL, if it is
-     * there, thus overriding any defaults that might have been set above. */
-    conn->port =  conn->remote_port; /* it is the same port */
-
-    /* Resolve target host right on */
-    rc = Curl_resolv(conn, TRUE_HOSTNAME(conn), conn->port, &hostaddr);
-    if(rc == CURLRESOLV_PENDING)
-      *async = TRUE;
-
-    else if(!hostaddr) {
-      failf(data, "Couldn't resolve host '%s'", conn->hostname);
-      result =  CURLE_COULDNT_RESOLVE_HOST;
-      /* don't return yet, we need to clean up the timeout first */
-    }
-  }
   else {
-    /* This is a proxy that hasn't been resolved yet. */
+    /* this is a fresh connect */
 
-    /* resolve proxy */
-    rc = Curl_resolv(conn, conn->proxyhost, conn->port, &hostaddr);
+    /* set a pointer to the hostname we display */
+    fix_hostname(conn, &conn->host);
 
-    if(rc == CURLRESOLV_PENDING)
-      *async = TRUE;
+    if(!data->change.proxy || !*data->change.proxy) {
+      /* If not connecting via a proxy, extract the port from the URL, if it is
+       * there, thus overriding any defaults that might have been set above. */
+      conn->port =  conn->remote_port; /* it is the same port */
 
-    else if(!hostaddr) {
-      failf(data, "Couldn't resolve proxy '%s'", conn->proxyhost);
-      result = CURLE_COULDNT_RESOLVE_PROXY;
-      /* don't return yet, we need to clean up the timeout first */
+      /* Resolve target host right on */
+      rc = Curl_resolv(conn, conn->host.name, conn->port, &hostaddr);
+      if(rc == CURLRESOLV_PENDING)
+        *async = TRUE;
+
+      else if(!hostaddr) {
+        failf(data, "Couldn't resolve host '%s'", conn->host.dispname);
+        result =  CURLE_COULDNT_RESOLVE_HOST;
+        /* don't return yet, we need to clean up the timeout first */
+      }
+    }
+    else {
+      /* This is a proxy that hasn't been resolved yet. */
+
+      /* IDN check */
+      fix_hostname(conn, &conn->proxy);
+
+      /* resolve proxy */
+      rc = Curl_resolv(conn, conn->proxy.name, conn->port, &hostaddr);
+
+      if(rc == CURLRESOLV_PENDING)
+        *async = TRUE;
+
+      else if(!hostaddr) {
+        failf(data, "Couldn't resolve proxy '%s'", conn->proxy.dispname);
+        result = CURLE_COULDNT_RESOLVE_PROXY;
+        /* don't return yet, we need to clean up the timeout first */
+      }
     }
   }
   *addr = hostaddr;
@@ -3149,25 +3206,6 @@ static CURLcode SetupConnection(struct connectdata *conn,
     /* There's nothing in this function to setup if we're only doing
        a file:// transfer */
     return result;
-
-#ifdef USE_LIBIDN
-  /*************************************************************
-   * Check name for non-ASCII and convert hostname to ACE form.
-   *************************************************************/
-
-  if(!conn->bits.reuse && conn->remote_port) {
-    const char *host = conn->hostname;
-    char *ace_hostname;
-
-    if (!is_ASCII_name(host)) {
-      int rc = idna_to_ascii_lz (host, &ace_hostname, 0);
-      if (rc == IDNA_SUCCESS)
-        conn->ace_hostname = ace_hostname;
-      else
-        infof(data, "Failed to convert %s to ACE; IDNA error %d\n", host, rc);
-    }
-  }
-#endif
 
   /*************************************************************
    * Send user-agent to HTTP proxies even if the target protocol
@@ -3502,18 +3540,3 @@ void Curl_free_ssl_config(struct ssl_config_data* sslc)
     free(sslc->random_file);
 }
 
-/*
- * Helpers for IDNA convertions.
- */
-#ifdef USE_LIBIDN
-static bool is_ASCII_name (const char *hostname)
-{
-  const unsigned char *ch = (const unsigned char*)hostname;
-
-  while (*ch) {
-    if (*ch++ > 0x80)
-      return FALSE;
-  }
-  return TRUE;
-}
-#endif

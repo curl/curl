@@ -479,7 +479,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   else if(1 != rc) {
     int error = Curl_ourerrno();
     failf(data, "Failed connect to %s:%d; %s",
-          conn->hostname, conn->port, Curl_strerror(conn,error));
+          conn->host.name, conn->port, Curl_strerror(conn,error));
     return CURLE_COULDNT_CONNECT;
   }
   /*
@@ -576,7 +576,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
   }
 
-  hostname = data->change.proxy?conn->proxyhost:conn->hostname;
+  hostname = data->change.proxy?conn->proxy.name:conn->host.name;
   infof(data, "About to connect() to %s port %d\n",
         hostname, port);
 

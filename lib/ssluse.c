@@ -544,7 +544,7 @@ static int Get_SSL_Session(struct connectdata *conn,
     if(!check->sessionid)
       /* not session ID means blank entry */
       continue;
-    if(curl_strequal(conn->hostname, check->name) &&
+    if(curl_strequal(conn->host.name, check->name) &&
        (conn->remote_port == check->remote_port) &&
        Curl_ssl_config_matches(&conn->ssl_config, &check->ssl_config)) {
       /* yes, we have a session ID! */
@@ -662,7 +662,7 @@ static int Store_SSL_Session(struct connectdata *conn,
   /* now init the session struct wisely */
   store->sessionid = ssl_sessionid;
   store->age = data->state.sessionage;    /* set current age */
-  store->name = strdup(conn->hostname);   /* clone host name */
+  store->name = strdup(conn->host.name);   /* clone host name */
   store->remote_port = conn->remote_port; /* port number */
 
   Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config);
@@ -796,13 +796,13 @@ static CURLcode verifyhost(struct connectdata *conn,
  
 #ifdef ENABLE_IPV6
   if(conn->bits.ipv6_ip && 
-     Curl_inet_pton(AF_INET6, conn->hostname, &addr)) {
+     Curl_inet_pton(AF_INET6, conn->host.name, &addr)) {
     target = GEN_IPADD;
     addrlen = sizeof(struct in6_addr);
   }
   else
 #endif
-    if(Curl_inet_pton(AF_INET, conn->hostname, &addr)) {
+    if(Curl_inet_pton(AF_INET, conn->host.name, &addr)) {
       target = GEN_IPADD;
       addrlen = sizeof(struct in_addr);
     }
@@ -818,8 +818,8 @@ static CURLcode verifyhost(struct connectdata *conn,
     int i;
         
     if(GEN_DNS == target) {
-      hostlen = (int)strlen(conn->hostname);
-      domain = strchr(conn->hostname, '.');
+      hostlen = (int)strlen(conn->host.name);
+      domain = strchr(conn->host.name, '.');
       if(domain)
         domainlen = (int)strlen(domain);
     }
@@ -843,7 +843,7 @@ static CURLcode verifyhost(struct connectdata *conn,
         case GEN_DNS: /* name comparison */
           /* Is this an exact match? */
           if((hostlen == altlen) &&
-             curl_strnequal(conn->hostname, altptr, hostlen))
+             curl_strnequal(conn->host.name, altptr, hostlen))
             matched = TRUE;
         
           /* Is this a wildcard match? */
@@ -867,7 +867,7 @@ static CURLcode verifyhost(struct connectdata *conn,
  
   if(matched)
     /* an alternative name matched the server hostname */
-    infof(data, "\t subjectAltName: %s matched\n", conn->hostname);
+    infof(data, "\t subjectAltName: %s matched\n", conn->host.name);
   else {
     bool obtain=FALSE;
     if(X509_NAME_get_text_by_NID(X509_get_subject_name(server_cert),
@@ -889,15 +889,15 @@ static CURLcode verifyhost(struct connectdata *conn,
       obtain = TRUE;
          
     if(obtain) {
-      if(!cert_hostcheck(peer_CN, conn->hostname)) {
+      if(!cert_hostcheck(peer_CN, conn->host.name)) {
         if(data->set.ssl.verifyhost > 1) {
           failf(data, "SSL: certificate subject name '%s' does not match "
-                "target host name '%s'", peer_CN, conn->hostname);
+                "target host name '%s'", peer_CN, conn->host.name);
           return CURLE_SSL_PEER_CERTIFICATE;
         }
         else
           infof(data, "\t common name: %s (does not match '%s')\n",
-                peer_CN, conn->hostname);
+                peer_CN, conn->host.name);
       }
       else
         infof(data, "\t common name: %s (matched)\n", peer_CN);
