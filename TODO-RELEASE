@@ -21,5 +21,17 @@ To get fixed in 7.12.0 (no date)
     Low prio. Seshubabu Pasam works on this.
 
 35. Rearrange lib/hostip.c to reduce the amount of #ifdefs and make it easier
-    to follow "the flow".
+    to understand and edit. Daniel works on this. See
+      http://curl.haxx.se/beta/hostip-cleanup1.patch
     Medium prio.
+
+36. Add support for a threaded getaddrinfo() on Windows and IPv6 enabled
+    libcurl.
+
+37. Configure option "--with-libidn" to support IDNA (Internationalising
+    Domain Names in Applications). Translate to/from ACE encoded domain
+    names as needed.
+
+38. Make the ldap protocol work with Windows' built-in LDAP-client.
+    I.e. dynamically link to WLDAP32.DLL and add ldap URL parsing
+    (WLDAP32.DLL doesn't have an UTF-8 ldap_url_parse).
