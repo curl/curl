@@ -269,9 +269,12 @@ CURLcode http(struct connectdata *conn)
     http->sendit = getFormData(data->httppost, &http->postsize);
   }
 
-  if(!checkheaders(data, "Host:"))
-    data->ptr_host = maprintf("Host: %s\r\n", host);
-
+  if(!checkheaders(data, "Host:")) {
+    if(data->port != PORT_HTTP)
+      data->ptr_host = maprintf("Host: %s:%d\r\n", host, data->port);
+    else
+      data->ptr_host = maprintf("Host: %s\r\n", host);
+  }
 
   if(!checkheaders(data, "Pragma:"))
     http->p_pragma = "Pragma: no-cache\r\n";
