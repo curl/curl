@@ -367,7 +367,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
       return CURLE_OUT_OF_MEMORY; /* FIX TODO */
   }
   else {
-    /* We are not in the first state, create a type-3 message */
+    if(NTLMSTATE_TYPE2 == data->state.ntlm.state) {
+      /* We received the type-2 already, create a type-3 message */
 
     /*
       My test-IE session sent this type-3:
@@ -557,6 +558,17 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     else
       return CURLE_OUT_OF_MEMORY; /* FIX TODO */
 
+      data->state.ntlm.state = NTLMSTATE_TYPE3; /* we sent a type-3 */
+
+    } else 
+      if(NTLMSTATE_TYPE3 == data->state.ntlm.state) {
+        /* connection is already authenticated,
+         * don't send a header in future requests */
+          if(conn->allocptr.userpwd) {
+            free(conn->allocptr.userpwd);
+            conn->allocptr.userpwd=NULL;
+          }
+      }
   }
 
   return CURLE_OK;
