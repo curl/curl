@@ -1,0 +1,22 @@
+.\" $Id$
+.\"
+.TH curl_easy_reset 3 "31 July 2004" "libcurl 7.12.1" "libcurl Manual"
+.SH NAME
+curl_easy_reset - reset all options of a libcurl session handle
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+
+.BI "void curl_easy_reset(CURL *"handle ");"
+
+.SH DESCRIPTION
+Re-initializes all options previously set on a specified CURL handle to the
+default values. This puts back the handle to the same state as it was in when
+it was just created with \fIcurl_easy_init(3)\fP.
+
+It does not change the following information kept in the handle: live
+connections, the Session ID cache, the DNS cache, the cookies and shares.
+.SH RETURN VALUE
+Nothing
+.SH "SEE ALSO"
+.BR curl_easy_init "(3)," curl_easy_cleanup "(3)," curl_easy_setopt "(3)
+
