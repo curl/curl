@@ -6,6 +6,32 @@
 
                                History of Changes
 
+Daniel (16 June 2000)
+- I had avoided this long enough now, so I moved the alternative progress bar
+  stuff from the lib and added it to the client code. This is now using the
+  recently added progress callback and it seems to work pretty much like
+  before. Since it is only one progress bar and you and download and upload at
+  the same time, this bar shows the combined progress of both directions. This
+  code was just ported from the old place to this, Lars is still our saviour!
+  ;-) This also made the documentation more accurate since I never removed
+  this function from any docs! Although I now removed the CURLOPT_PROGRESSMODE
+  from the library since the lib has only one internal progress meter and it
+  will never get another. It is although likely that the internal one also
+  will be moved to the client code in the future (when I have other means of
+  getting the writeout data and move that too to the client).
+
+- I took the opportunity to verify that standard progress meter works and I
+  found out it didn't get inited properly. Grrr. I corrected that as well.
+
+Daniel (15 June 2000)
+- I thought I'd better verify that the -F option still works in v7 and of
+  course it didn't... :-/ Anyway, I had the problems I could discover
+  corrected. About one month of beta testing and not a single person has used
+  this feature with v7?
+
+- Björn correctly pointed out that the --progress-bar still doesn't work in
+  v7. Hm.
+
 Daniel (14 June 2000)
 - Tim Tassonis discovered that curl 7 didn't handle normal http POST as it
   should. I corrected this.
