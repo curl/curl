@@ -313,3 +313,9 @@ if (Curl::easy::perform($curl) == 0) {
 Curl::easy::cleanup($curl);
 print "ok 21\n";
 
+# Copyright (C) 2000, Daniel Stenberg, , et al.
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the MPL or the MIT/X-derivate
+# licenses. You may pick one of these licenses.
+                                                  
