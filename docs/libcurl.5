@@ -1,0 +1,124 @@
+.\" You can view this file with:
+.\" nroff -man libcurl.5
+.\" Written by Daniel Stenberg
+.\"
+.TH libcurl 5 "20 April 2001" "libcurl 7.7.2" "libcurl overview"
+.SH NAME
+libcurl \- client-side URL transfers
+.SH DESCRIPTION
+This is an overview on how to use libcurl in your c/c++ programs. There are
+specific man pages for each function mentioned in here.
+
+libcurl can also be used directly from within your Java, PHP, Perl, Ruby or
+Tcl programs as well, look elsewhere for documentation on this!
+
+When using libcurl's easy interface, you init your session and get a handle,
+which you use as input to the following interface functions you use. Use
+.B curl_easy_init()
+to get the handle.
+
+You continue by setting all the options you want in the upcoming transfer,
+most important among them is the URL itself (you can't transfer anything
+without a specified URL as you may have figured out yourself). You might want
+to set some callbacks as well that will be called from the library when data
+is available etc.
+.B curl_easy_setopt()
+is there for this.
+
+When all is setup, you tell libcurl to perform the transfer using
+.B curl_easy_perform().
+It will then do the entire operation and won't return until it is done
+(successfully or not).
+
+After the transfer has been made, you can set new options and make another
+transfer, or if you're done, cleanup the session by calling
+.B curl_easy_cleanup().
+If you want persistant connections, you don't cleanup immediately, but instead
+run ahead and perform other transfers using the same handle. See the chapter
+below for Persistant Connections.
+
+There is also a series of other helpful functions to use. They are:
+
+.RS
+.TP 10
+.B curl_version()
+displays the libcurl version
+.TP
+.B curl_getdate()
+converts a date string to time_t
+.TP
+.B curl_getenv()
+portable environment variable reader
+.TP
+.B curl_easy_getinfo()
+get information about a performed transfer
+.TP
+.B curl_formparse()
+helps building a HTTP form POST
+.TP
+.B curl_formfree()
+free a list built with curl_formparse()
+.TP
+.B curl_slist_append()
+builds a linked list
+.TP
+.B curl_slist_free_all()
+frees a whole curl_slist
+.RE
+
+.SH "LINKING WITH LIBCURL"
+Starting with 7.7.2 (on unix-like machines), there's a tool named curl-config
+that gets installed with the rest of the curl stuff when 'make install' is
+performed.
+
+curl-config is added to make it easier for applications to link with libcurl
+and developers to learn about libcurl and how to use it.
+
+Run 'curl-config --libs' to get the (additional) linker options you need to
+link with the particular version of libcurl you've installed.
+
+For details, see the curl-config.1 man page.
+.SH "LIBCURL SYMBOL NAMES"
+All public functions in the libcurl interface are prefixed with 'curl_' (with
+a lowercase c). You can find other functions in the library source code, but
+other prefixes indicate the functions are private and may change without
+further notice in the next release.
+
+Only use documented functions and functionality!
+.SH "PORTABILITY"
+libcurl works
+.B exactly
+the same, on any of the platforms it compiles and builds on.
+
+There's only one caution, and that is the win32 platform that may(*) require
+you to init the winsock stuff before you use the libcurl functions. Details on
+this are noted on the curl_easy_init() man page.
+
+(*) = it appears as if users of the cygwin environment get this done
+automatically.
+.SH "THREADS"
+Never ever call curl-functions simultaneously using the same handle from
+several threads. libcurl is thread-safe and can be used in any number of
+threads, but you must use separate curl handles if you want to use libcurl in
+more than one thread simultaneously.
+.SH "PERSISTANT CONNECTIONS"
+With libcurl 7.7, persistant connections were added. Persistant connections
+means that libcurl can re-use the same connection for several transfers, if
+the conditions are right.
+
+libcurl will *always* attempt to use persistant connections. Whenever you use
+curl_easy_perform(), libcurl will attempt to use an existing connection to do
+the transfer, and if none exists it'll open a new one that will be subject
+for re-use on a possible following call to curl_easy_perform().
+
+To allow libcurl to take full advantage of persistant connections, you should
+do as many of your file transfers as possible using the same curl
+handle. When you call curl_easy_cleanup(), all the possibly open connections
+held by libcurl will be closed and forgotten.
+
+Note that the options set with curl_easy_setopt() will be used in on every
+repeat curl_easy_perform() call
+.SH "COMPATIBILITY WITH OLDER LIBCURLS"
+Repeated curl_easy_perform() calls on the same handle were not supported in
+pre-7.7 versions, and caused confusion and defined behaviour.
+
