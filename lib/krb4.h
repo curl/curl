@@ -22,6 +22,6 @@
  *
  * $Id$
  ***************************************************************************/
-void Curl_krb_kauth(struct connectdata *conn);
+CURLcode Curl_krb_kauth(struct connectdata *conn);
 
 #endif
