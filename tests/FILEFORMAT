@@ -24,6 +24,8 @@ Send back this contents instead of the <data> one. The num is set by:
 A) The test number in the request line is >10000 and this is the remainder
 of [test case number]%10000.
 B) The request was HTTP and included digest details, which sets NUM to 1000.
+C) If a HTTP request is NTLM type-1, it sets num to 1001
+D) If a HTTP request is NTLM type-3, it sets num to 1002
 </dateNUM>
 <datacheck [nonewline=yes]>
 if the data is sent but this is what should be checked afterwards. If
