@@ -1018,6 +1018,18 @@ static UrgError _urlget(struct UrlData *data)
     char *prox_portno;
     char *endofprot;
 
+    /* We need to make a duplicate of the proxy so that we can modify the
+       string safely. */
+    char *proxydup=strdup(data->proxy);
+
+    /* We use 'proxyptr' to point to the proxy name from now on... */
+    char *proxyptr=proxydup;
+
+    if(NULL == proxydup) {
+      failf(data, "memory shortage");
+      return URG_OUT_OF_MEMORY;
+    }
+
     /* we use proxy all right, but we wanna know the remote port for SSL
        reasons */
     tmp = strchr(name, ':');
@@ -1032,13 +1044,13 @@ static UrgError _urlget(struct UrlData *data)
        ignored. */
 
     /* 1. skip the protocol part if present */
-    endofprot=strstr(data->proxy, "://");
+    endofprot=strstr(proxyptr, "://");
     if(endofprot) {
-      data->proxy = endofprot+3;
+      proxyptr = endofprot+3;
     }
 
     /* allow user to specify proxy.server.com:1080 if desired */
-    prox_portno = strchr (data->proxy, ':');
+    prox_portno = strchr (proxyptr, ':');
     if (prox_portno) {
       *prox_portno = 0x0; /* cut off number from host name */
       prox_portno ++;
@@ -1047,10 +1059,12 @@ static UrgError _urlget(struct UrlData *data)
     }
 
     /* connect to proxy */
-    if(!(hp = GetHost(data, data->proxy))) {
-      failf(data, "Couldn't resolv proxy '%s'", data->proxy);
+    if(!(hp = GetHost(data, proxyptr))) {
+      failf(data, "Couldn't resolv proxy '%s'", proxyptr);
       return URG_COULDNT_RESOLVE_PROXY;
     }
+
+    free(proxydup); /* free the duplicate pointer and not the modified */
   }
   pgrsTime(data, TIMER_NAMELOOKUP);
 
