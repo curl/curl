@@ -12,6 +12,13 @@ TODO
 
 To do in a future release (random order):
 
+ * Using FILE * in the libcurl API introduces a serious limitation since (at
+   least in the *nix falvours I know) you can fopen only the first 256
+   files. This means, that an application that first opens or fopens 256 files
+   has no chance to use libcurl. Using open and file descriptors instead of
+   FILE * would solve the problem. This implies a minor API
+   change/enhancement. ck1 <ck1@swissonline.ch>
+
  * It would be nice to be able to use "-d" (or something similar) to attach
    parameters of EITHER the GET or POST type... It would either require
    another curl argument to specify "GET" (obviously the default should remain
