@@ -24,8 +24,7 @@ ares_send \- Initiate a DNS query
 .B typedef void (*ares_callback)(void *\fIarg\fP, int \fIstatus\fP,
 .B	unsigned char *\fIabuf\fP, int \fIalen\fP)
 .PP
-.B
-void ares_send(ares_channel \fIchannel\fP, const unsigned char *\fIqbuf\fP,
+.B void ares_send(ares_channel \fIchannel\fP, const unsigned char *\fIqbuf\fP,
 .B 	int \fIqlen\fP, ares_callback \fIcallback\fP, void *\fIarg\fP)
 .fi
 .SH DESCRIPTION

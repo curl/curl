@@ -21,11 +21,9 @@ ares_mkquery \- Compose a single-question DNS query buffer
 .nf
 .B #include <ares.h>
 .PP
-.B
-int ares_mkquery(const char *\fIname\fP, int \fIdnsclass\fP, int \fItype\fP,
-.B
-	unsigned short \fIid\fP, int \fIrd\fP, char **\fIbuf\fP,
-	int *\fIbuflen\fP)
+.B int ares_mkquery(const char *\fIname\fP, int \fIdnsclass\fP, int \fItype\fP,
+.B	unsigned short \fIid\fP, int \fIrd\fP, char **\fIbuf\fP,
+.B	int *\fIbuflen\fP)
 .fi
 .SH DESCRIPTION
 The
