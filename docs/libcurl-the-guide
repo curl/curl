@@ -226,8 +226,9 @@ Multi-threading issues
  thread and set the CURLOPT_NOSIGNAL option to TRUE for all handles.
 
  Everything will work fine except that timeouts are not honored during the DNS
- lookup - this would require some sort of asynchronous DNS lookup (which is
- planned for a future libcurl version).
+ lookup - which you can work around by building libcurl with ares-support.
+ Ares is a library that provides asynchronous name resolves. Unfortunately,
+ ares does not yet support IPv6.
 
  For SIGPIPE info see the UNIX Socket FAQ at
  http://www.unixguide.net/network/socketfaq/2.22.shtml
@@ -300,6 +301,7 @@ Upload Data to a Remote Site
  knowledge of the expected file size. So, set the upload file size using the
  CURLOPT_INFILESIZE_LARGE for all known file sizes like this[1]:
 
+    /* in this example, file_size must be an off_t variable */
     curl_easy_setopt(easyhandle, CURLOPT_INFILESIZE_LARGE, file_size);
 
  When you call curl_easy_perform() this time, it'll perform all the necessary
@@ -361,20 +363,44 @@ Passwords
  without it. There are times when the password isn't optional, like when
  you're using an SSL private key for secure transfers.
 
- You can in this situation either pass a password to libcurl to use to unlock
- the private key, or you can let libcurl prompt the user for it. If you prefer
- to ask the user, then you can provide your own callback function that will be
- called when libcurl wants the password. That way, you can control how the
- question will appear to the user.
-
  To pass the known private key password to libcurl:
 
     curl_easy_setopt(easyhandle, CURLOPT_SSLKEYPASSWD, "keypassword");
 
- To make a password callback:
 
-    int enter_passwd(void *ourp, const char *prompt, char *buffer, int len);
-    curl_easy_setopt(easyhandle, CURLOPT_PASSWDFUNCTION, enter_passwd);
+HTTP Authentication
+
+ The previous chapter showed how to set user name and password for getting
+ URLs that require authentication. When using the HTTP protocol, there are
+ many different ways a client can provide those credentials to the server and
+ you can control what way libcurl will (attempt to) use. The default HTTP
+ authentication method is called 'Basic', which is sending the name and
+ password in clear-text in the HTTP request, base64-encoded. This is unsecure.
+
+ At the time of this writing libcurl can be built to use: Basic, Digest, NTLM,
+ Negotiate, GSS-Negotiate and SPNEGO. You can tell libcurl which one to use
+ with CURLOPT_HTTPAUTH as in:
+
+    curl_easy_setopt(easyhandle, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
+
+ And when you send authentication to a proxy, you can also set authentication
+ type the same way but instead with CURLOPT_PROXYAUTH:
+
+    curl_easy_setopt(easyhandle, CURLOPT_PROXYAUTH, CURLAUTH_NTLM);
+
+ Both these options allow you to set multiple types (by ORing them together),
+ to make libcurl pick the most secure one out of the types the server/proxy
+ claims to support. This method does however add a round-trip since libcurl
+ must first ask the server what it supports:
+
+    curl_easy_setopt(easyhandle, CURLOPT_HTTPAUTH,
+                                 CURLAUTH_DIGEST|CURLAUTH_BASIC);
+
+ For convenience, you can use the 'CURLAUTH_ANY' define (instead of a list
+ with specific types) which allows libcurl to use whatever method it wants.
+
+ When asking for multiple types, libcurl will pick the available one it
+ considers "best" in its own internal order of preference.
 
 
 HTTP POSTing
@@ -976,6 +1002,10 @@ FTP Peculiarities We Need
  or even a local network interface name that libcurl will get the IP address
  from.
 
+ When doing the "PORT" approach, libcurl will attempt to use the EPRT and the
+ LPRT before trying PORT, as they work with more protocols. You can disable
+ this behavior by setting CURLOPT_FTP_USE_EPRT to FALSE.
+
 
 Headers Equal Fun
 
@@ -1091,7 +1121,6 @@ Footnotes:
 [1] = libcurl 7.10.3 and later have the ability to switch over to chunked
       Tranfer-Encoding in cases were HTTP uploads are done with data of an
       unknown size.
-
 
 [2] = This happens on Windows machines when libcurl is built and used as a
       DLL. However, you can still do this on Windows if you link with a static
