@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (1 July 2004)
+- When using curl --trace or --trace-ascii, no trace messages that were sent
+  by curl_easy_cleanup() were included in the trace file. This made the
+  message "Closing connection #0" never appear in trace dumps.
+  
 Daniel (30 June 2004)
 - Niels van Tongeren found that setting CURLOPT_NOBODY to TRUE doesn't disable
   a previously set POST request, making a very odd request get sent (unless

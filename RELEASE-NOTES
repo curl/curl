@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o --trace files now get the final info lines too
  o multi interface connects fine to multi-IP resolving hosts
  o --limit-rate works on Mac OS X (and other systems with bad poll()s)
  o cookies can now hold 4999 bytes of content
@@ -44,12 +45,14 @@ Other curl-related news since the previous public release:
  o Gambas binding for libcurl: http://gambas.sf.net/
  o pycurl 7.12.0 was released http://pycurl.sf.net/
  o wxWidgets binding: http://homepage.mac.com/codonnell/wxcurldav/
+ o New Austrian curl web mirror: http://curl.gds.tuwien.ac.at/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, Vincent Bronner, Alexander Krasnostavsky, Chris Gaukroger,
  Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam,
- Luca Alteas, Jean-Louis Lemaire, David Byron, David Cohen, Rob Stanzel
+ Luca Alteas, Jean-Louis Lemaire, David Byron, David Cohen, Rob Stanzel,
+ Niels van Tongeren
 
         Thanks! (and sorry if I forgot to mention someone)
