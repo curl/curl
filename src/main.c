@@ -166,7 +166,6 @@ typedef enum {
 #define CONF_FOLLOWLOCATION (1<<23) /* use Location: Luke! */
 #define CONF_GETTEXT  (1<<24) /* use ASCII/text for transfer */
 #define CONF_HTTPPOST (1<<25) /* multipart/form-data HTTP POST */
-
 #define CONF_MUTE     (1<<28) /* force NOPROGRESS */
 
 #define CONF_NETRC_OPT (1<<29)  /* read user+password from either
@@ -3145,7 +3144,6 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_UNRESTRICTED_AUTH,
                          config->conf&CONF_UNRESTRICTED_AUTH);
         curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config->conf&CONF_GETTEXT);
-        curl_easy_setopt(curl, CURLOPT_MUTE, config->conf&CONF_MUTE);
         curl_easy_setopt(curl, CURLOPT_USERPWD, config->userpwd);
         curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
         curl_easy_setopt(curl, CURLOPT_RANGE, config->range);
