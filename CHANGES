@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (22 June 2004)
+- Gisle Vanem fixed the certificate wildcard checks to support a '*'-letter
+  anywhere in the wildcard string, support multiple '*'-letters in the
+  wildcard and to allow the '*'-letter to match a string that includes a dot.
+
 Daniel (21 June 2004)
 - testcurl.sh is now removed completely, tests/testcurl.pl is the script to
   use when autobuilding curl!
