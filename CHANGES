@@ -6,6 +6,8 @@
 
                                History of Changes
 
+Version 7.5.2
+
 Daniel (4 January 2001)
 - As Kevin P Roth suggested, I've added text to the man page for every command
   line option and what happens when you specify that option more than
@@ -14,6 +16,16 @@ Daniel (4 January 2001)
 - Made the configure script possible to run from outside the source-tree. For
   odd reasons I can't build curl properly outside though. It has to do with
   curl's dependencies on libcurl...
+
+- Cut off all older (dated 1999 and earlier) CHANGES entries from this file.
+  The older piece is named CHANGES.0 and is added to the CVS repository in
+  case anyone would need it.
+
+- I added another file 'CVS-INFO' to the CVS. It contains information about
+  files in the CVS that aren't included in release archives and how to build
+  curl when you get the sources off CVS.
+
+- Updated CONTRIBUTE and FAQ due to the new license.
 
 Daniel (3 January 2001)
 - Renamed README.libcurl to LIBCURL
@@ -30,7 +42,8 @@ Daniel (30 December 2000)
 
 Daniel (19 December 2000)
 - Added file desrciptor and FILE handle leak detection to the memdebug system
-  and thus I found and removed a file handler leakage in the ftp parts.
+  and thus I found and removed a file descriptor leakage in the ftp parts
+  that happened when you did PORTed downloads.
 
 - Added an include <stdio.h> in <curl/curl.h> since it uses FILE *.
 
