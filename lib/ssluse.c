@@ -975,21 +975,46 @@ Curl_SSLConnect(struct connectdata *conn)
     }
   }
 
-  if(data->set.ssl.verifypeer) {
-    SSL_CTX_set_verify(conn->ssl.ctx,
-                       SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
-                       SSL_VERIFY_CLIENT_ONCE,
-                       cert_verify_callback);
-    if((data->set.ssl.CAfile || data->set.ssl.CApath) &&
-       !SSL_CTX_load_verify_locations(conn->ssl.ctx,
-                                      data->set.ssl.CAfile,
-                                      data->set.ssl.CApath)) {
-      failf(data,"error setting certificate verify locations");
-      return CURLE_SSL_CACERT;
+  if (data->set.ssl.CAfile || data->set.ssl.CApath) {
+    /* tell SSL where to find CA certificates that are used to verify
+       the servers certificate. */
+    if (!SSL_CTX_load_verify_locations(conn->ssl.ctx, data->set.ssl.CAfile,
+                                       data->set.ssl.CApath)) {
+      if (data->set.ssl.verifypeer) {
+ 	/* Fail if we insist on successfully verifying the server. */
+        failf(data,"error setting certificate verify locations:\n"
+              "  CAfile: %s\n  CApath: %s\n",
+              data->set.ssl.CAfile ? data->set.ssl.CAfile : "none",
+              data->set.ssl.CApath ? data->set.ssl.CApath : "none");
+        return CURLE_SSL_CACERT;
+      }
+      else {
+        /* Just continue with a warning if no strict  certificate verification
+           is required. */
+        infof(data,"error setting certificate verify locations,"
+              " continuing anyway:\n");
+        infof(data, "  CAfile: %s\n",
+              data->set.ssl.CAfile ? data->set.ssl.CAfile : "none");
+        infof(data, "  CApath: %s\n",
+              data->set.ssl.CApath ? data->set.ssl.CApath : "none");
+      }
+    }
+    else {
+      /* Everything is fine. */
+      infof(data,"successfully set certificate verify locations:\n");
+      infof(data, "  CAfile: %s\n",
+            data->set.ssl.CAfile ? data->set.ssl.CAfile : "none");
+      infof(data, "  CApath: %s\n",
+            data->set.ssl.CApath ? data->set.ssl.CApath : "none");
     }
   }
-  else
-    SSL_CTX_set_verify(conn->ssl.ctx, SSL_VERIFY_NONE, cert_verify_callback);
+  /* SSL always tries to verify the peer, this only says whether it should
+   * fail to connect if the verification fails, or if it should continue
+   * anyway. In the latter case the result of the verification is checked with
+   * SSL_get_verify_result() below. */
+  SSL_CTX_set_verify(conn->ssl.ctx,
+                     data->set.ssl.verifypeer?SSL_VERIFY_PEER:SSL_VERIFY_NONE,
+                     cert_verify_callback);
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
@@ -1175,33 +1200,41 @@ Curl_SSLConnect(struct connectdata *conn)
 
   if(data->set.ssl.verifyhost) {
     retcode = verifyhost(conn);
-    if(retcode)
+    if(retcode) {
+      X509_free(conn->ssl.server_cert);
       return retcode;
+    }
   }
 
   str = X509_NAME_oneline(X509_get_issuer_name(conn->ssl.server_cert),
                           NULL, 0);
   if(!str) {
     failf(data, "SSL: couldn't get X509-issuer name!");
-    X509_free(conn->ssl.server_cert);
-    return CURLE_SSL_CONNECT_ERROR;
+    retcode = CURLE_SSL_CONNECT_ERROR;
   }
-  infof(data, "\t issuer: %s\n", str);
-  CRYPTO_free(str);
+  else {
+    infof(data, "\t issuer: %s\n", str);
+    CRYPTO_free(str);
 
-  /* We could do all sorts of certificate verification stuff here before
-     deallocating the certificate. */
-
-  if(data->set.ssl.verifypeer) {
+    /* We could do all sorts of certificate verification stuff here before
+       deallocating the certificate. */
+    
     data->set.ssl.certverifyresult=SSL_get_verify_result(conn->ssl.handle);
     if(data->set.ssl.certverifyresult != X509_V_OK) {
-      failf(data, "SSL certificate verify result: %d",
-            data->set.ssl.certverifyresult);
-      retcode = CURLE_SSL_PEER_CERTIFICATE;
+      if(data->set.ssl.verifypeer) {
+        /* We probably never reach this, because SSL_connect() will fail
+           and we return earlyer if verifypeer is set? */
+        failf(data, "SSL certificate verify result: %d",
+              data->set.ssl.certverifyresult);
+        retcode = CURLE_SSL_PEER_CERTIFICATE;
+      }
+      else
+        infof(data, "SSL certificate verify result: %d, continuing anyway.\n",
+              data->set.ssl.certverifyresult);
     }
+    else
+      infof(data, "SSL certificate verify ok.\n");
   }
-  else
-    data->set.ssl.certverifyresult=0;
 
   X509_free(conn->ssl.server_cert);
 #else /* USE_SSLEAY */
