@@ -44,51 +44,41 @@
 #include "urldata.h"  /* for struct connectdata * */
 
 struct sec_client_mech {
-    char *name;
-    size_t size;
-    int (*init)(void *);
-    int (*auth)(void *, struct connectdata *);
-    void (*end)(void *);
-    int (*check_prot)(void *, int);
-    int (*overhead)(void *, int, int);
-    int (*encode)(void *, void*, int, int, void**, struct connectdata *);
-    int (*decode)(void *, void*, int, int, struct connectdata *);
+  const char *name;
+  size_t size;
+  int (*init)(void *);
+  int (*auth)(void *, struct connectdata *);
+  void (*end)(void *);
+  int (*check_prot)(void *, int);
+  int (*overhead)(void *, int, int);
+  int (*encode)(void *, void*, int, int, void**, struct connectdata *);
+  int (*decode)(void *, void*, int, int, struct connectdata *);
 };
 
 struct sec_server_mech {
-    char *name;
-    size_t size;
-    int (*init)(void *);
-    void (*end)(void *);
-    int (*check_prot)(void *, int);
-    int (*overhead)(void *, int, int);
-    int (*encode)(void *, void*, int, int, void**);
-    int (*decode)(void *, void*, int, int);
+  char *name;
+  size_t size;
+  int (*init)(void *);
+  void (*end)(void *);
+  int (*check_prot)(void *, int);
+  int (*overhead)(void *, int, int);
+  int (*encode)(void *, void*, int, int, void**);
+  int (*decode)(void *, void*, int, int);
 
-    int (*auth)(void *);
-    int (*adat)(void *, void*, size_t);
-    size_t (*pbsz)(void *, size_t);
-    int (*ccc)(void*);
-    int (*userok)(void*, char*);
+  int (*auth)(void *);
+  int (*adat)(void *, void*, size_t);
+  size_t (*pbsz)(void *, size_t);
+  int (*ccc)(void*);
+  int (*userok)(void*, char*);
 };
 
 #define AUTH_OK		0
 #define AUTH_CONTINUE	1
 #define AUTH_ERROR	2
 
-#ifdef FTP_SERVER
-extern struct sec_server_mech krb4_server_mech, gss_server_mech;
-#else
 extern struct sec_client_mech krb4_client_mech, gss_client_mech;
-#endif
 
 extern int sec_complete;
-
-#ifdef FTP_SERVER
-extern char *ftp_command;
-void new_ftp_command(char*);
-void delete_ftp_command(void);
-#endif
 
 /* ---- */
 
@@ -106,29 +96,14 @@ int sec_fprintf2(struct connectdata *conn, FILE *f, const char *fmt, ...);
 int sec_vfprintf2(struct connectdata *conn, FILE *, const char *, va_list);
 int sec_write (struct connectdata *conn, int, char *, int);
 
-#ifdef FTP_SERVER
-void adat (char *);
-void auth (char *);
-void ccc (void);
-void mec (char *, enum protection_level);
-void pbsz (int);
-void prot (char *);
-void delete_ftp_command (void);
-void new_ftp_command (char *);
-int sec_userok (char *);
-int secure_command (void);
-enum protection_level get_command_prot(void);
-#else
 void sec_end (struct connectdata *);
 int sec_login (struct connectdata *);
 void sec_prot (int, char **);
-int sec_request_prot (struct connectdata *conn, char *);
+int sec_request_prot (struct connectdata *conn, const char *level);
 void sec_set_protection_level(struct connectdata *conn);
 void sec_status (void);
 
 enum protection_level set_command_prot(struct connectdata *,
                                        enum protection_level);
-
-#endif
 
 #endif /* __security_h__ */  
