@@ -6,6 +6,29 @@
 
                                History of Changes
 
+Daniel (15 August 2001)
+- Bug #12733 over on php.net identified a problem in libcurl that made it core
+  dump if you used CURLOPT_POST without setting any data to post with
+  CURLOPT_POSTFIELDS! This is no longer the case. Not using CURLOPT_POSTFIELDS
+  now equals setting it to no data at all.
+
+- Ramana Mokkapati reported that curl with '-w %{http_code}' didn't work
+  properly when used for multiple URLs on a single command line. Indeed, the
+  variable was not reset between the requests. This is now fixed.
+
+- David James fixed the Borland makefile so that libcurl still compiles and
+  builds with that compiler.
+
+Daniel (14 August 2001)
+- Oops. I ruined Nico's socklen_t define in config-vms.h, corrected it now.
+
+- An older item not mentioned here before: CURL_GLOBAL_WIN32 is a define for
+  windows users to curl_global_init(), that makes libcurl init the winsock
+  stuff. If libcurl is all socket stuff you do, then allowing it to fiddle
+  with this is a comfortable shortcut to fame.
+
+Version 7.8.1-pre5
+
 Daniel (14 August 2001)
 - Nico Baggus provided more feedback from his VMS porting efforts and a few
   minor changes were necessary.
