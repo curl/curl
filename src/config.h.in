@@ -94,3 +94,6 @@
 
 /* Define to 1 if you want the built-in manual */
 #undef USE_MANUAL
+
+/* Define to 1 if you have the `gettimeofday' function. */
+#undef HAVE_GETTIMEOFDAY
