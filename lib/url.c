@@ -1055,14 +1055,14 @@ ConnectionKillOne(struct SessionHandle *data)
        * Set higher score for the age passed since the connection
        * was used.
        */
-      score = Curl_tvlong(now) - Curl_tvlong(conn->now);
+      score = Curl_tvdiff(now, conn->now);
       break;
     case CURLCLOSEPOLICY_OLDEST:
       /*
        * Set higher score for the age passed since the connection
        * was created.
        */
-      score = Curl_tvlong(now) - Curl_tvlong(conn->created);
+      score = Curl_tvdiff(now, conn->created);
       break;
     }
 

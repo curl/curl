@@ -353,7 +353,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   if(data->set.timeout || data->set.connecttimeout) {
     double has_passed;
 
-    /* Evaluate how much that that has passed */
+    /* Evaluate in milliseconds how much time that has passed */
     has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
 
 #ifndef min
@@ -368,7 +368,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       timeout_ms = data->set.connecttimeout*1000;
 
     /* subtract the passed time */
-    timeout_ms -= (long)(has_passed * 1000);
+    timeout_ms -= (long)has_passed;
 
     if(timeout_ms < 0)
       /* a precaution, no need to continue if time already is up */
@@ -436,7 +436,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
       /* get a new timeout for next attempt */
       after = Curl_tvnow();
-      timeout_ms -= (long)(Curl_tvdiff(after, before)*1000);
+      timeout_ms -= Curl_tvdiff(after, before);
       if(timeout_ms < 0) {
         failf(data, "connect() timed out!");
         return CURLE_OPERATION_TIMEOUTED;
@@ -521,7 +521,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     if(0 != rc) {
       /* get a new timeout for next attempt */
       after = Curl_tvnow();
-      timeout_ms -= (long)(Curl_tvdiff(after, before)*1000);
+      timeout_ms -= Curl_tvdiff(after, before);
       if(timeout_ms < 0) {
         failf(data, "Connect timeout on IP number %d", aliasindex+1);
         break;

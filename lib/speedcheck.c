@@ -51,7 +51,8 @@ CURLcode Curl_speedcheck(struct SessionHandle *data,
        for "low speed time" seconds we consider that enough reason
        to abort the download. */
     
-    if( Curl_tvdiff(now, data->state.keeps_speed) > data->set.low_speed_time) {
+    if( (Curl_tvdiff(now, data->state.keeps_speed)/1000) >
+        data->set.low_speed_time) {
       /* we have been this slow for long enough, now die */
       failf(data,
 	    "Operation too slow. "
