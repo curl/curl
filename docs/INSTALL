@@ -28,10 +28,21 @@ UNIX
 
    You probably need to be root when doing the last command.
 
+   If you have checked out the sources from the CVS repository, read the
+   CVS-INFO on how to proceed.
+
    If you want to install curl in a different file hierarchy than /usr/local,
    you need to specify that already when running configure:
 
         ./configure --prefix=/path/to/curl/tree
+
+   If you happen to have write permission in that directory, you can do 'make
+   install' without being root. An example of this would be to make a local
+   install in your own home directory:
+
+        ./configure --prefix=$HOME
+        make
+        make install
 
    The configure script always tries to find a working SSL library unless
    explicitly told not to. If you have OpenSSL installed in the default search
@@ -70,33 +81,6 @@ UNIX
 
      LIBS=-lRSAglue -lrsaref
      (as suggested by Doug Kaufman)
-
-   KNOWN PROBLEMS (these ones should not happen anymore)
-
-     If you happen to have autoconf installed, but a version older than 2.12
-     you will get into trouble. Then you can still build curl by issuing these
-     commands (note that this requires curl to be built staticly): (from Ralph
-     Beckmann)
-
-       ./configure [...]
-       cd lib; make; cd ..
-       cd src; make; cd ..
-       cp src/curl elsewhere/bin/
-
-     As suggested by David West, you can make a faked version of autoconf and
-     autoheader:
-
-       ----start of autoconf----
-       #!/bin/bash
-       #fake autoconf for building curl
-       if [ "$1" = "--version" ] then
-         echo "Autoconf version 2.13"
-       fi
-       ----end of autoconf----
-
-     Then make autoheader a symbolic link to the same script and make sure
-     they're executable and set to appear in the path *BEFORE* the actual (but
-     obsolete) autoconf and autoheader scripts.
 
    MORE OPTIONS
 
