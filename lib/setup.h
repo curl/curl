@@ -57,6 +57,10 @@
 #endif
 #endif
 
+#ifndef __cplusplus        /* (rabe) */
+typedef char bool;
+#endif                     /* (rabe) */
+
 #include <stdio.h>
 #ifndef OS
 #ifdef WIN32
