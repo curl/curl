@@ -6,6 +6,17 @@
 
                                   Changelog
 
+Daniel(29 January 2004)
+- Ken Hirsch provided patches to make curl build fine on the MPE/iX operating
+  system.
+
+- Dan Fandrich compiled curl with lots of aggresively pedantic compiler
+  options and thus found a few minor errors and did some general cleanups to
+  avoid them.
+
+- Dirk Manske fixed a flaw in ares that prevented it to use non-blocking
+  sockets properly.
+
 Daniel(28 January 2004)
 - Richard Bramante fixed chunked transfer-encoded "uploads" to send a final
   CRLF combo properly.
