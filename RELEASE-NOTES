@@ -7,6 +7,9 @@ Curl and libcurl 7.11.1. A bugfix release.
 
 This release includes the following changes:
 
+ o CURL_VERSION_LARGEFILE is a feature bit returned by libcurls that feature
+   large file support
+ o libcurl only requires winsock 1.1 on windows now
  o when doing FTP, curl now sends QUIT before disconnecting
  o name resolves can now timeout on windows too
  o $HOME is now recognized better when looking for .netrc files
