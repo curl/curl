@@ -200,7 +200,7 @@ int cert_stuff(struct connectdata *conn,
 
     if (SSL_CTX_use_certificate_file(conn->ssl.ctx,
 				     cert_file,
-				     SSL_FILETYPE_PEM) <= 0) {
+				     SSL_FILETYPE_PEM) != 1) {
       failf(data, "unable to set certificate file (wrong password?)\n");
       return(0);
     }
@@ -209,7 +209,7 @@ int cert_stuff(struct connectdata *conn,
 
     if (SSL_CTX_use_PrivateKey_file(conn->ssl.ctx,
 				    key_file,
-				    SSL_FILETYPE_PEM) <= 0) {
+				    SSL_FILETYPE_PEM) != 1) {
       failf(data, "unable to set public key file\n");
       return(0);
     }
@@ -612,7 +612,10 @@ Curl_SSLConnect(struct connectdata *conn)
   SSL_set_fd (conn->ssl.handle, conn->firstsocket);
   err = SSL_connect (conn->ssl.handle);
 
-  if (-1 == err) {
+  /* 1  is fine
+     0  is "not successful but was shut down controlled"
+     <0 is "handshake was not successful, because a fatal error occurred" */
+  if (err <= 0) {
     err = ERR_get_error(); 
     failf(data, "SSL: %s", ERR_error_string(err, NULL));
     return CURLE_SSL_CONNECT_ERROR;
