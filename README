@@ -29,16 +29,16 @@ README
 
   To download the very latest source off the CVS server do this:
 
-        cvs -d :pserver:cvs@curl.sourceforge.net/curl login
+        cvs -d :pserver:anonymous@cvs.curl.sourceforge.net:/cvsroot/curl login
 
         (just press enter when asked for password)
 
-        cvs -d :pserver:cvs@curl.sourceforge.net/curl co .
+        cvs -d :pserver:anonymous@cvs.curl.sourceforge.net:/cvsroot/curl co .
 
         (now, you'll get all the latest sources downloaded into your current
         directory. Note that this does not create a directory named curl or
         anything)
 
-        cvs -d :pserver:cvs@curl.sourceforge.net/curl logout
+        cvs -d :pserver:anonymous@cvs.curl.sourceforge.net:/cvsroot/curl logout
         
         (you're off the hook!)
