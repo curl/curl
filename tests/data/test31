@@ -7,12 +7,12 @@ Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
 Set-Cookie: foobar=name; domain=127.0.0.1; path=/ ; secure
-Set-Cookie:mismatch=this  ; domain=127.0.0.1; path=/silly/
+Set-Cookie:ismatch=this  ; domain=127.0.0.1; path=/silly/
 Set-Cookie: partmatch=present; domain=127.0.0.1 ; path=/;
-Set-Cookie: eat=this; domain=moo.foo.moo;
+Set-Cookie:eat=this; domain=moo.foo.moo;
 Set-Cookie: eat=this-too; domain=.foo.moo;
 Set-Cookie: nodomainnovalue
-Set-Cookie: nodomain=value; expires=Tue Feb 1 11:56:27 MET 2014
+Set-Cookie:   nodomain=value; expires=Tue Feb 1 11:56:27 MET 2014
 Set-Cookie: nodomainnovalue; domain=reallysilly
 
 boo
