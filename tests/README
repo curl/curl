@@ -13,8 +13,9 @@ Run:
   'make test'. This invokes the 'runtests.pl' perl script. Edit the top
   variables of that script in case you have some specific needs.
 
-  The script breaks on the first test that doesn't do OK. Run the script
-  with -v for more verbose output.
+  The script breaks on the first test that doesn't do OK. Use -a to prevent
+  the script to abort on the first error. Run the script with -v for more
+  verbose output.
 
   Use -s fort shorter output, or pass a string with test numbers to run
   specific tests only (like ./runtests.pl "3 4" to test 3 and 4 only)
@@ -41,7 +42,9 @@ Data:
                you to fiddle more. ;-)
 
     stdoutN.txt: if this file is present, curl's stdout is compared against
-               this file to see that they're identical
+               this file to see that they're identical. If this is present,
+               curl will not be run with -o but instead all output is compared
+               against this file!
 
 FIX:
 
