@@ -1020,19 +1020,19 @@ CURLcode _ftp(struct connectdata *conn)
 
     if(data->set.ftpport) {
       if(Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
-        h = Curl_gethost(data, myhost, &hostdataptr);
+        h = Curl_getaddrinfo(data, myhost, 0, &hostdataptr);
       }
       else {
         if(strlen(data->set.ftpport)>1)
-          h = Curl_gethost(data, data->set.ftpport, &hostdataptr);
+          h = Curl_getaddrinfo(data, data->set.ftpport, 0, &hostdataptr);
         if(h)
           strcpy(myhost, data->set.ftpport); /* buffer overflow risk */
       }
     }
     if(! *myhost) {
-      h=Curl_gethost(data,
-                     getmyhost(myhost, sizeof(myhost)),
-                     &hostdataptr);
+      h=Curl_getaddrinfo(data,
+                         getmyhost(myhost, sizeof(myhost)),
+                         0, &hostdataptr);
     }
     infof(data, "We connect from %s\n", myhost);
 
@@ -1151,11 +1151,11 @@ CURLcode _ftp(struct connectdata *conn)
       unsigned short newport; /* remote port, not necessary the local one */
       unsigned short connectport; /* the local port connect() should use! */
       char newhost[32];
-#ifdef ENABLE_IPV6
-      struct addrinfo *res;
-#else
-      struct hostent *he;
+
+      Curl_addrinfo *he;
       char *hostdataptr=NULL;
+
+#ifndef ENABLE_IPV6
       char *ip_addr;
 #endif
       char *str=buf;
@@ -1192,24 +1192,14 @@ CURLcode _ftp(struct connectdata *conn)
          * proxy again here. We already have the name info for it since the
          * previous lookup.
          */
-#ifdef ENABLE_IPV6
-        res = conn->hp;
-#else
         he = conn->hp;
-#endif
         connectport =
           (unsigned short)conn->port; /* we connect to the proxy's port */
       }
       else {
         /* normal, direct, ftp connection */
-#ifdef ENABLE_IPV6
-        res = Curl_getaddrinfo(data, newhost, newport);
-        if(!res)
-#else
-        he = Curl_gethost(data, newhost, &hostdataptr);
-        if(!he)
-#endif
-        {
+        he = Curl_getaddrinfo(data, newhost, newport, &hostdataptr);
+        if(!he) {
           failf(data, "Can't resolve new host %s", newhost);
           return CURLE_FTP_CANT_GET_HOST;
         }

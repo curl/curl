@@ -1158,11 +1158,11 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
     unsigned long in;
 
     if(Curl_if2ip(data->set.device, myhost, sizeof(myhost))) {
-      h = Curl_gethost(data, myhost, &hostdataptr);
+      h = Curl_getaddrinfo(data, myhost, 0, &hostdataptr);
     }
     else {
       if(strlen(data->set.device)>1) {
-        h = Curl_gethost(data, data->set.device, &hostdataptr);
+        h = Curl_getaddrinfo(data, data->set.device, 0, &hostdataptr);
       }
       if(h) {
         /* we know data->set.device is shorter than the myhost array */
@@ -2163,16 +2163,11 @@ static CURLcode Connect(struct SessionHandle *data,
 
     /* Resolve target host right on */
     if(!conn->hp) {
-#ifdef ENABLE_IPV6
       /* it might already be set if reusing a connection */
-      conn->hp = Curl_getaddrinfo(data, conn->name, conn->port);
-#else
-      /* it might already be set if reusing a connection */
-      conn->hp = Curl_gethost(data, conn->name, &conn->hostent_buf);
-#endif
+      conn->hp = Curl_getaddrinfo(data, conn->name, conn->port,
+                                  &conn->hostent_buf);
     }
-    if(!conn->hp)
-    {
+    if(!conn->hp) {
       failf(data, "Couldn't resolve host '%s'", conn->name);
       return CURLE_COULDNT_RESOLVE_HOST;
     }
@@ -2182,12 +2177,10 @@ static CURLcode Connect(struct SessionHandle *data,
        if we're reusing an existing connection. */
 
     /* resolve proxy */
-#ifdef ENABLE_IPV6
-      /* it might already be set if reusing a connection */
-    conn->hp = Curl_getaddrinfo(data, conn->proxyhost, conn->port);
-#else
-    conn->hp = Curl_gethost(data, conn->proxyhost, &conn->hostent_buf);
-#endif
+    /* it might already be set if reusing a connection */
+    conn->hp = Curl_getaddrinfo(data, conn->proxyhost, conn->port,
+                                &conn->hostent_buf);
+
     if(!conn->hp) {
       failf(data, "Couldn't resolve proxy '%s'", conn->proxyhost);
       return CURLE_COULDNT_RESOLVE_PROXY;

@@ -55,6 +55,7 @@
 
 #include "urldata.h"
 #include "sendf.h"
+#include "hostip.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
@@ -89,13 +90,16 @@ static char *MakeIP(unsigned long num,char *addr, int addr_len)
 }
 
 #ifdef ENABLE_IPV6
-struct addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
-			       char *hostname,
-			       int port)
+Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
+                                char *hostname,
+                                int port,
+                                char **bufp)
 {
   struct addrinfo hints, *res;
   int error;
   char sbuf[NI_MAXSERV];
+
+  *bufp=NULL; /* pointer unused with IPv6 */
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = PF_UNSPEC;
@@ -109,7 +113,7 @@ struct addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
   }
   return res;
 }
-#endif
+#else /* following code is IPv4-only */
 
 /* The original code to this function was once stolen from the Dancer source
    code, written by Bjorn Reese, it has since been patched and modified
@@ -119,9 +123,10 @@ struct addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
 #define INADDR_NONE (unsigned long) ~0
 #endif
 
-struct hostent *Curl_gethost(struct SessionHandle *data,
-                             char *hostname,
-                             char **bufp)
+Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
+                                char *hostname,
+                                int port,
+                                char **bufp)
 {
   struct hostent *h = NULL;
   unsigned long in;
@@ -137,6 +142,7 @@ struct hostent *Curl_gethost(struct SessionHandle *data,
     return NULL; /* major failure */
   *bufp = buf;
 
+  port=0; /* unused in IPv4 code */
   ret = 0; /* to prevent the compiler warning */
 
   if ( (in=inet_addr(hostname)) != INADDR_NONE ) {
@@ -215,6 +221,8 @@ struct hostent *Curl_gethost(struct SessionHandle *data,
   }
   return (h);
 }
+
+#endif /* end of IPv4-specific code */
 
 /*
  * local variables:

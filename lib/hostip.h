@@ -24,12 +24,18 @@
  *****************************************************************************/
 
 struct addrinfo;
-struct addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
-                             char *hostname,
-                             int port);
+struct hostent;
+struct SessionHandle;
 
-struct hostent *Curl_gethost(struct SessionHandle *data,
-                             char *hostname,
-                             char **bufp);
+#ifdef ENABLE_IPV6
+typedef struct addrinfo Curl_addrinfo;
+#else
+typedef struct hostent Curl_addrinfo;
+#endif
+
+Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
+                                char *hostname,
+                                int port,
+                                char **bufp);
 
 #endif
