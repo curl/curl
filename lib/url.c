@@ -3599,6 +3599,7 @@ CURLcode Curl_async_resolved(struct connectdata *conn,
   return code;
 #else
   (void)conn;
+  (void)protocol_done;
   return CURLE_OK;
 #endif
 }
