@@ -35,6 +35,12 @@
 #include "ares_dns.h"
 #include "ares_private.h"
 
+#ifdef WIN32
+#define GET_ERRNO()  WSAGetLastError()
+#else
+#define GET_ERRNO()  errno
+#endif
+
 static void write_tcp_data(ares_channel channel, fd_set *write_fds,
 			   time_t now);
 static void read_tcp_data(ares_channel channel, fd_set *read_fds, time_t now);
@@ -476,18 +482,20 @@ static int open_tcp_socket(ares_channel channel, struct server_state *server)
       return -1;
     }
 #endif
-  
+
   /* Connect to the server. */
   memset(&sockin, 0, sizeof(sockin));
   sockin.sin_family = AF_INET;
   sockin.sin_addr = server->addr;
   sockin.sin_port = channel->tcp_port;
-  if (connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1
-      && errno != EINPROGRESS)
-    {
+  if (connect(s, (struct sockaddr *) &sockin, sizeof(sockin)) == -1) {
+    int err = GET_ERRNO();
+
+    if (err != EINPROGRESS && err != EWOULDBLOCK) {
       closesocket(s);
       return -1;
     }
+  }
 
   server->tcp_socket = s;
   return 0;
