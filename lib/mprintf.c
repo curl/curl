@@ -207,7 +207,7 @@ struct asprintf {
   size_t alloc; /* length of alloc */
 };
 
-int Curl_msprintf(char *buffer, const char *format, ...);
+int curl_msprintf(char *buffer, const char *format, ...);
 
 static int dprintf_DollarString(char *input, char **end)
 {
@@ -955,11 +955,11 @@ static int dprintf_formatf(
 
 	if(width >= 0) {
 	  /* RECURSIVE USAGE */
-	  fptr += Curl_msprintf(fptr, "%d", width);
+	  fptr += curl_msprintf(fptr, "%d", width);
 	}
 	if(prec >= 0) {
 	  /* RECURSIVE USAGE */
-	  fptr += Curl_msprintf(fptr, ".%d", prec);
+	  fptr += curl_msprintf(fptr, ".%d", prec);
 	}
 	if (p->flags & FLAGS_LONG)
 	  strcat(fptr, "l");
@@ -1025,7 +1025,7 @@ static int addbyter(int output, FILE *data)
   return -1;
 }
 
-int Curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
+int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 {
   va_list ap_save; /* argument pointer */
   int retcode;
@@ -1045,7 +1045,7 @@ int Curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
   return retcode;
 }
 
-int Curl_mvsnprintf(char *buffer, size_t maxlength, const char *format, va_list ap_save)
+int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format, va_list ap_save)
 {
   int retcode;
   struct nsprintf info;
@@ -1092,7 +1092,7 @@ static int alloc_addbyter(int output, FILE *data)
 
 }
 
-char *Curl_maprintf(const char *format, ...)
+char *curl_maprintf(const char *format, ...)
 {
   va_list ap_save; /* argument pointer */
   int retcode;
@@ -1113,7 +1113,7 @@ char *Curl_maprintf(const char *format, ...)
     return NULL;
 }
 
-char *Curl_mvaprintf(const char *format, va_list ap_save)
+char *curl_mvaprintf(const char *format, va_list ap_save)
 {
   int retcode;
   struct asprintf info;
@@ -1140,7 +1140,7 @@ static int storebuffer(int output, FILE *data)
   return output; /* act like fputc() ! */
 }
 
-int Curl_msprintf(char *buffer, const char *format, ...)
+int curl_msprintf(char *buffer, const char *format, ...)
 {
   va_list ap_save; /* argument pointer */
   int retcode;
@@ -1153,7 +1153,7 @@ int Curl_msprintf(char *buffer, const char *format, ...)
 
 extern int fputc(int, FILE *);
 
-int Curl_mprintf(const char *format, ...)
+int curl_mprintf(const char *format, ...)
 {
   int retcode;
   va_list ap_save; /* argument pointer */
@@ -1163,7 +1163,7 @@ int Curl_mprintf(const char *format, ...)
   return retcode;
 }
 
-int Curl_mfprintf(FILE *whereto, const char *format, ...)
+int curl_mfprintf(FILE *whereto, const char *format, ...)
 {
   int retcode;
   va_list ap_save; /* argument pointer */
@@ -1173,7 +1173,7 @@ int Curl_mfprintf(FILE *whereto, const char *format, ...)
   return retcode;
 }
 
-int Curl_mvsprintf(char *buffer, const char *format, va_list ap_save)
+int curl_mvsprintf(char *buffer, const char *format, va_list ap_save)
 {
   int retcode;
   retcode = dprintf_formatf(&buffer, storebuffer, format, ap_save);
@@ -1181,12 +1181,12 @@ int Curl_mvsprintf(char *buffer, const char *format, va_list ap_save)
   return retcode;
 }
 
-int Curl_mvprintf(const char *format, va_list ap_save)
+int curl_mvprintf(const char *format, va_list ap_save)
 {
   return dprintf_formatf(stdout, fputc, format, ap_save);
 }
 
-int Curl_mvfprintf(FILE *whereto, const char *format, va_list ap_save)
+int curl_mvfprintf(FILE *whereto, const char *format, va_list ap_save)
 {
   return dprintf_formatf(whereto, fputc, format, ap_save);
 }
