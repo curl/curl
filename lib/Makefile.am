@@ -66,6 +66,10 @@ endif
 
 libcurl_la_LDFLAGS = $(UNDEF) $(VERSION) $(ARESLIB)
 
+# We don't need the libs when we build the lib, they are needed when linking
+# the app later.
+LIBS =
+
 libcurl_la_SOURCES = arpa_telnet.h file.c getpass.h netrc.h timeval.c	\
 base64.c file.h hostip.c progress.c timeval.h base64.h formdata.c	\
 hostip.h progress.h cookie.c formdata.h http.c sendf.c cookie.h ftp.c	\
