@@ -299,7 +299,7 @@ if ($gnulikebuild) {
 }
 
 # change to build dir
-chdir "../$build";
+chdir "$pwd/$build";
 
 if ($gnulikebuild) {
   # run configure script
@@ -347,7 +347,7 @@ if (grepfile("define USE_ARES", $gnulikebuild ? "lib/config.h" : "lib/config-win
   }
 
   # cd back to the curl build dir
-  chdir "..";
+  chdir "$pwd/$build";
 }
 
 logit "run make";
