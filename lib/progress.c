@@ -62,7 +62,7 @@ static char *max5data(double bytes, char *max5)
     sprintf(max5, "%5d", (int)bytes);
     return max5;
   }
-  if(bytes < (9999*ONE_KILOBYTE)) {
+  if(bytes < (10000*ONE_KILOBYTE)) {
     sprintf(max5, "%4dk", (int)bytes/ONE_KILOBYTE);
     return max5;
   }
