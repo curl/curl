@@ -981,7 +981,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Set CA info for SSL connection. Specify file name of the CA certificate
      */
     data->set.ssl.CAfile = va_arg(param, char *);
-    data->set.ssl.CApath = NULL; /*This does not work on windows.*/
+    break;
+  case CURLOPT_CAPATH:
+    /*
+     * Set CA path info  for SSL connection. Specify directory name of the CA certificates
+     * which have been prepared using openssl c_rehash utility.
+     */
+    data->set.ssl.CApath = va_arg(param, char *); /*This does not work on windows.*/
     break;
   case CURLOPT_TELNETOPTIONS:
     /*

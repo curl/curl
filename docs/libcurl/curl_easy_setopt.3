@@ -514,12 +514,20 @@ argument in the progress callback set with \fICURLOPT_PROGRESSFUNCTION\fP.
 .B CURLOPT_SSL_VERIFYPEER
 Pass a long that is set to a non-zero value to make curl verify the peer's
 certificate. The certificate to verify against must be specified with the
-CURLOPT_CAINFO option. (Added in 7.4.2)
+CURLOPT_CAINFO option (Added in 7.4.2) or a certificate directory must be specified
+with the CURLOPT_CAPATH option (Added in 7.9.8).
 .TP
 .B CURLOPT_CAINFO
-Pass a char * to a zero terminated file naming holding the certificate to
-verify the peer with. This only makes sense when used in combination with the
-CURLOPT_SSL_VERIFYPEER option. (Added in 7.4.2)
+Pass a char * to a zero terminated string naming a file holding one or more
+certificates to verify the peer with. This only makes sense when used in
+combination with the CURLOPT_SSL_VERIFYPEER option. (Added in 7.4.2)
+.TP
+.B CURLOPT_CAPATH
+Pass a char * to a zero terminated string naming a directory holding multiple CA
+certificates to verify the peer with. The certificate directory must be prepared using
+the openssl c_rehash utility. This only makes sense when used in combination with the
+CURLOPT_SSL_VERIFYPEER option. The CAPATH function apparently does not work in Windows
+due to some limitation in openssl. (Added in 7.9.8)
 .TP
 .B CURLOPT_PASSWDFUNCTION
 Pass a pointer to a \fIcurl_passwd_callback\fP function that will be called

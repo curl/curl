@@ -345,6 +345,7 @@ static void help(void)
        "    --pass  <pass>  Specifies your passphrase for the private key (HTTPS)");
   puts("    --engine <eng>  Specifies the crypto engine to use (HTTPS)\n"
        "    --cacert <file> CA certifciate to verify peer against (SSL)\n"
+       "    --capath <directory> CA directory (made using c_rehash) to verify peer against (SSL, NOT Windows)\n"
        "    --ciphers <list> What SSL ciphers to use (SSL)\n"
        "    --connect-timeout <seconds> Maximum time allowed for connection\n"
        " -f/--fail          Fail silently (no output at all) on errors (H)\n"
@@ -454,6 +455,7 @@ struct Configurable {
   char *cert;
   char *cert_type;
   char *cacert;
+  char *capath;
   char *key;
   char *key_type;
   char *key_passwd;
@@ -999,6 +1001,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"Ed","key-type",    TRUE},
     {"Ee","pass",        TRUE},
     {"Ef","engine",      TRUE},
+    {"Eg","capath ",     TRUE},
     {"f", "fail",        FALSE},
     {"F", "form",        TRUE},
     {"g", "globoff",     FALSE},
@@ -1334,6 +1337,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
+        break;
+      case 'g': /* CA info PEM file */
+        /* CA cert directory */
+        GetStr(&config->capath, nextarg);
         break;
       default: /* certificate file */
         {
@@ -2082,6 +2089,8 @@ void free_config_fields(struct Configurable *config)
     curl_formfree(config->httppost);
   if(config->cacert)
     free(config->cacert);
+  if(config->capath)
+    free(config->capath);
   if(config->cookiejar)
     free(config->cookiejar);
 
@@ -2558,8 +2567,9 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, config->key_type);
       curl_easy_setopt(curl, CURLOPT_SSLKEYPASSWD, config->key_passwd);
 
-      if(config->cacert) {
-        curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);
+      if(config->cacert || config->capath) {
+        if (config->cacert) curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);
+        if (config->capath) curl_easy_setopt(curl, CURLOPT_CAPATH, config->capath);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
         curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 2);
       }
