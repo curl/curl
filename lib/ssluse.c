@@ -744,118 +744,117 @@ cert_hostcheck(const char *certname, const char *hostname)
   return 0;
 }
 
-/* this subjectAltName patch is code originating from OpenLDAP, which uses
-   a license as described here: 
-   http://www.openldap.org/software/release/license.html
+/* Quote from RFC2818 section 3.1 "Server Identity"
 
-   It is not GPL-compatible, so we cannot have this situation in a release-
-   version of libcurl.
+   If a subjectAltName extension of type dNSName is present, that MUST
+   be used as the identity. Otherwise, the (most specific) Common Name
+   field in the Subject field of the certificate MUST be used. Although
+   the use of the Common Name is existing practice, it is deprecated and
+   Certification Authorities are encouraged to use the dNSName instead.
 
-   This needs to be addressed!
+   Matching is performed using the matching rules specified by
+   [RFC2459].  If more than one identity of a given type is present in
+   the certificate (e.g., more than one dNSName name, a match in any one
+   of the set is considered acceptable.) Names may contain the wildcard
+   character * which is considered to match any single domain name
+   component or component fragment. E.g., *.a.com matches foo.a.com but
+   not bar.foo.a.com. f*.com matches foo.com but not bar.com.
+
+   In some cases, the URI is specified as an IP address rather than a
+   hostname. In this case, the iPAddress subjectAltName must be present
+   in the certificate and must exactly match the IP in the URI.
+
 */
-
 static CURLcode verifyhost(struct connectdata *conn)
 {
   char peer_CN[257];
-  int ntype = 3; /* 1 = IPv6, 2 = IPv4, 3=DNS */
-  int i;
-  int altmatch = 0;
+  bool matched = FALSE; /* no alternative match yet */
+  int target = GEN_DNS; /* target type, GEN_DNS or GEN_IPADD */
+  int addrlen;
+  struct SessionHandle *data = conn->data;
+  STACK_OF(GENERAL_NAME) *altnames;
 #ifdef ENABLE_IPV6
   struct in6_addr addr;
 #else
   struct in_addr addr;
 #endif
-  char *ptr;
-  struct SessionHandle *data = conn->data;
-     
+ 
 #ifdef ENABLE_IPV6
-  if(conn->hostname[0] == '[' && strchr(conn->hostname, ']')) {
-    char *n2 = strdup(conn->hostname+1);
-    *strchr(n2, ']') = '\0';
-    if(Curl_inet_pton(AF_INET6, n2, &addr))
-      ntype = 1;
-    free(n2);
+  if(conn->bits.ipv6_ip && 
+     Curl_inet_pton(AF_INET6, conn->hostname, &addr)) {
+    target = GEN_IPADD;
+    addrlen = sizeof(struct in6_addr);
   }
   else
 #endif
-  {
-    if((ptr = strrchr(conn->hostname, '.')) &&
-       isdigit((unsigned char)ptr[1])) {
-      if(Curl_inet_pton(AF_INET, conn->hostname, &addr))
-        ntype = 2;
+    if(Curl_inet_pton(AF_INET, conn->hostname, &addr)) {
+      target = GEN_IPADD;
+      addrlen = sizeof(struct in_addr);
     }
-  }
- 	
-  i = X509_get_ext_by_NID(conn->ssl.server_cert, NID_subject_alt_name, -1);
-  if(i >= 0) {
-    X509_EXTENSION *ex;
-    STACK_OF(GENERAL_NAME) *alt;
- 
-    ex = X509_get_ext(conn->ssl.server_cert, i);
-    alt = X509V3_EXT_d2i(ex);
-    if(alt) {
-      int n, len1 = 0, len2 = 0;
-      char *domain = NULL;
-      GENERAL_NAME *gn;
+  
+  /* get a "list" of alternative names */
+  altnames = X509_get_ext_d2i(conn->ssl.server_cert, NID_subject_alt_name,
+                              NULL, NULL);
+  
+  if(altnames) {
+    int hostlen;
+    int domainlen;
+    char *domain;
+    int numalts;
+    int i;
         
-      if(ntype == 3) {
-        len1 = strlen(conn->hostname);
-        domain = strchr(conn->hostname, '.');
-        if(domain) {
-          len2 = len1 - (domain-conn->hostname);
-        }
-      }
-      n = sk_GENERAL_NAME_num(alt);
-      for (i=0; i<n; i++) {
-        char *sn;
-        int sl;
-        gn = sk_GENERAL_NAME_value(alt, i);
-        if(gn->type == GEN_DNS) {
-          if(ntype != 3)
-            continue;
-          
-          sn = (char *) ASN1_STRING_data(gn->d.ia5);
-          sl = ASN1_STRING_length(gn->d.ia5);
-            
+    if(GEN_DNS == target) {
+      hostlen = strlen(conn->hostname);
+      domain = strchr(conn->hostname, '.');
+      if(domain)
+        domainlen = strlen(domain);
+    }
+
+    /* get amount of alternatives, RFC2459 claims there MUST be at least
+       one, but we don't depend on it... */
+    numalts = sk_GENERAL_NAME_num(altnames);
+
+    /* loop through all alternatives while none has matched */
+    for (i=0; (i<numalts) && !matched; i++) {
+      /* get a handle to alternative name number i */
+      const GENERAL_NAME *check = sk_GENERAL_NAME_value(altnames, i);
+
+      /* only check alternatives of the same type the target is */
+      if(check->type == target) {
+        /* get data and length */
+        const char *altptr = (char *)ASN1_STRING_data(check->d.ia5);
+        const int altlen = ASN1_STRING_length(check->d.ia5);
+
+        switch(target) {
+        case GEN_DNS: /* name comparison */
           /* Is this an exact match? */
-          if((len1 == sl) && curl_strnequal(conn->hostname, sn, len1))
-            break;
-                     
+          if((hostlen == altlen) &&
+             curl_strnequal(conn->hostname, altptr, hostlen))
+            matched = TRUE;
+        
           /* Is this a wildcard match? */
-          if((*sn == '*') && domain && (len2 == sl-1) &&
-             curl_strnequal(domain, sn+1, len2))
-            break;
- 
-        }
-        else if(gn->type == GEN_IPADD) {
-          if(ntype == 3)
-            continue;
-                     
-          sn = (char *) ASN1_STRING_data(gn->d.ia5);
-          sl = ASN1_STRING_length(gn->d.ia5);
- 
-#ifdef ENABLE_IPv6
-          if(ntype == 1 && sl != sizeof(struct in6_addr))
-            continue;
-          else
-#endif
-            if(ntype == 2 && sl != sizeof(struct in_addr))
-              continue;
+          else if((altptr[0] == '*') &&
+                  (domainlen == altlen-1) &&
+                  curl_strnequal(domain, altptr+1, domainlen))
+            matched = TRUE;
+          break;
           
-          if(!memcmp(sn, &addr, sl))
-            break;
+        case GEN_IPADD: /* IP address comparison */          
+          /* compare alternative IP address if the data chunk is the same size
+             our server IP address is */
+          if((altlen == addrlen) && !memcmp(altptr, &addr, altlen))
+            matched = TRUE;
+          break;
         }
-      }
-             
-      GENERAL_NAMES_free(alt);
-      if(i < n) {	/* got a match in altnames */
-        altmatch = 1;
-        infof(data, "\t subjectAltName: %s matched\n", conn->hostname);
       }
     }
+    GENERAL_NAMES_free(altnames);
   }
  
-  if(!altmatch) {
+  if(matched)
+    /* an alternative name matched the server hostname */
+    infof(data, "\t subjectAltName: %s matched\n", conn->hostname);
+  else {
     bool obtain=FALSE;
     if(X509_NAME_get_text_by_NID(X509_get_subject_name(conn->ssl.server_cert),
                                  NID_commonName,
