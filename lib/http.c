@@ -555,6 +555,10 @@ CURLcode Curl_http(struct connectdata *conn)
   }
 
   do {
+    /* Use 1.1 unless the use specificly asked for 1.0 */
+    const char *httpstring=
+      data->set.httpversion==CURL_HTTP_VERSION_1_0?"1.0":"1.1";
+
     send_buffer *req_buffer;
     struct curl_slist *headers=data->set.headers;
 
@@ -564,7 +568,7 @@ CURLcode Curl_http(struct connectdata *conn)
     /* add the main request stuff */
     add_bufferf(req_buffer,
                 "%s " /* GET/HEAD/POST/PUT */
-                "%s HTTP/1.1\r\n" /* path */
+                "%s HTTP/%s\r\n" /* path */
                 "%s" /* proxyuserpwd */
                 "%s" /* userpwd */
                 "%s" /* range */
@@ -580,7 +584,7 @@ CURLcode Curl_http(struct connectdata *conn)
                  ((HTTPREQ_POST == data->set.httpreq) ||
                   (HTTPREQ_POST_FORM == data->set.httpreq))?"POST":
                  (HTTPREQ_PUT == data->set.httpreq)?"PUT":"GET"),
-                ppath,
+                ppath, httpstring,
                 (conn->bits.proxy_user_passwd &&
                  conn->allocptr.proxyuserpwd)?conn->allocptr.proxyuserpwd:"",
                 (conn->bits.user_passwd && conn->allocptr.userpwd)?

@@ -444,6 +444,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.http_follow_location = va_arg(param, long)?TRUE:FALSE;
     break;
+  case CURLOPT_HTTP_VERSION:
+    /*
+     * This sets a requested HTTP version to be used. The value is one of
+     * the listed enums in curl/curl.h.
+     */
+    data->set.httpversion = va_arg(param, long);
+    break;
   case CURLOPT_TRANSFERTEXT:
     /*
      * This option was previously named 'FTPASCII'. Renamed to work with
@@ -461,15 +468,6 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     if(va_arg(param, long))
       data->set.httpreq = HTTPREQ_PUT;
     break;
-#if 0
-    /* obsolete stuff, kept here a while for informational purposes */
-  case CURLOPT_MUTE:
-    /*
-     * Stay absolutely quiet.
-     */
-    data->set.mute = va_arg(param, long)?TRUE:FALSE;
-    break;
-#endif
   case CURLOPT_TIMECONDITION:
     /*
      * Set HTTP time condition. This must be one of the defines in the
