@@ -1293,6 +1293,7 @@ struct ProgressData {
   size_t prev;
   size_t point;
   int width;
+  FILE *out; /* where to write everything to */
 };
 
 int myprogress (void *clientp,
@@ -1322,7 +1323,7 @@ int myprogress (void *clientp,
     int prevblock = bar->prev / 1024;
     int thisblock = bar->point / 1024;
     while ( thisblock > prevblock ) {
-      fprintf( stderr, "#" );
+      fprintf( bar->out, "#" );
       prevblock++;
     }
   }
@@ -1338,14 +1339,16 @@ int myprogress (void *clientp,
     line[i] = '\0';
     sprintf( format, "%%-%ds %%5.1f%%%%", barwidth );
     sprintf( outline, format, line, percent );
-    fprintf( stderr, "\r%s", outline );
+    fprintf( bar->out, "\r%s", outline );
   }
   bar->prev = bar->point;
 
   return 0;
 }
 
-void progressbarinit(struct ProgressData *bar)
+static
+void progressbarinit(struct ProgressData *bar,
+                     struct Configurable *config)
 {
 #ifdef __EMX__
   /* 20000318 mgs */
@@ -1379,6 +1382,7 @@ void progressbarinit(struct ProgressData *bar)
   bar->width = scr_size[0] - 1;
 #endif
 
+  bar->out = config->errors;
 }
 
 void free_config_fields(struct Configurable *config)
@@ -1832,7 +1836,7 @@ operate(struct Configurable *config, int argc, char *argv[])
          !(config->conf&(CONF_NOPROGRESS|CONF_MUTE))) {
         /* we want the alternative style, then we have to implement it
            ourselves! */
-        progressbarinit(&progressbar);
+        progressbarinit(&progressbar, config);
         curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, myprogress);
         curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
       }
