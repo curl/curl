@@ -24,3 +24,8 @@
 CURLcode Curl_unencode_deflate_write(struct SessionHandle *data, 
                                      struct Curl_transfer_keeper *k, 
                                      ssize_t nread);
+
+CURLcode
+Curl_unencode_gzip_write(struct SessionHandle *data, 
+                         struct Curl_transfer_keeper *k,
+                         ssize_t nread);

@@ -648,7 +648,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                      data->set.encoding) {
               /*
                * Process Content-Encoding. Look for the values: identity, gzip,
-               * defalte, compress, x-gzip and x-compress. x-gzip and
+               * deflate, compress, x-gzip and x-compress. x-gzip and
                * x-compress are the same as gzip and compress. (Sec 3.5 RFC
                * 2616). zlib cannot handle compress, and gzip is not currently
                * implemented. However, errors are handled further down when the
@@ -888,7 +888,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if(k->badheader < HEADER_ALLBAD) {
               /* This switch handles various content encodings. If there's an
                  error here, be sure to check over the almost identical code
-                 in http_chunk.c. 08/29/02 jhrg */
+                 in http_chunks.c. 08/29/02 jhrg */
 #ifdef HAVE_LIBZ
               switch (k->content_encoding) {
               case IDENTITY:
@@ -907,8 +907,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 result = Curl_unencode_deflate_write(data, k, nread);
                 break;
 
-              case GZIP:          /* FIXME 08/27/02 jhrg */
-              case COMPRESS:
+              case GZIP:
+                /* Assume CLIENTWRITE_BODY; headers are not encoded. */
+                result = Curl_unencode_gzip_write(data, k, nread);
+                break;
+
+              case COMPRESS:          /* FIXME 08/27/02 jhrg */
               default:
                 failf (data, "Unrecognized content encoding type. "
                        "libcurl understands `identity' and `deflate' "

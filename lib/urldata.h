@@ -296,7 +296,7 @@ struct Curl_transfer_keeper {
 
 #ifdef HAVE_LIBZ
   bool zlib_init;		/* True if zlib already initialized;
-				   undefined if Content-Encdoing header. */
+				   undefined if Content-Encoding header. */
   z_stream z;			/* State structure for zlib. */
 #endif
 

@@ -190,6 +190,9 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
           break;
 
         case GZIP:
+          result = Curl_unencode_gzip_write(conn->data, &conn->keep, piece);
+          break;
+
         case COMPRESS:
         default:
           failf (conn->data,
