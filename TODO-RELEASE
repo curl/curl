@@ -18,21 +18,11 @@ To get fixed in 7.11.1 (planned release in March 2004)
 
 14. Evaluate/apply Gertjan van Wingerde's SSL patches, UNASSIGNED
 
-19. Resolve Giuseppe Attardi's "elusive cache bug" FIXED?
-
 21. Send QUIT before closing an FTP connection. Joe Halpin works on this.
 
 23. Peter Sylvester's "Most Significant Common Name" patch. Feedback welcome.
     At least the UTF8 conversion and comparison should be done. Patch?
     UNASSIGNED
-
-25. Curl_strtoll() is not part of the libcurl API, yet 'curl' needs a function
-    like this. We need to sort out how to deal with it. I really don't like
-    adding non-transfer related functions to the API. Is there a downside with
-    putting such files in a common dir for functions/code that can be used by
-    both the lib and the client code? Other functions that could be treated
-    the same way include the *printf and the string comparison functions etc.
-    Daniel's task. Comments welcome!
 
 26. Make it possible to share the ares channel with the share interface.
     UNASSIGNED
