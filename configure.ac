@@ -1227,6 +1227,35 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 
+AC_MSG_CHECKING([whether to build with libidn])
+AC_ARG_WITH(idn,
+AC_HELP_STRING([--with-libidn=PATH],[Enable libidn usage])
+AC_HELP_STRING([--without-libidn],[Disable libidn usage]),
+  [LIBIDN="$withval" ])
+
+case "$LIBIDN" in
+  no)
+       AC_MSG_RESULT(no)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       AC_CHECK_LIB(idn, idna_to_ascii_lz, ,
+                    [
+                    dnl if there was a given path, try it
+                    if test "x$LIBIDN" != "xyes"; then
+                      oldLDFLAGS=$LDFLAGS
+                      oldCPPFLAGS=$CPPFLAGS
+                      LDFLAGS="$LDFLAGS -L$LIBIDN/lib"
+                      CPPFLAGS="$CPPFLAGS -I$LIBIDN/include"
+                      AC_CHECK_LIB(idn, idna_to_ascii_4i, ,
+                                   AC_MSG_WARN([no libidn found in $LIBIDN])
+                                   LDFLAGS=$oldLDFLAGS
+                                   CPPFLAGS=$oldCPPFLAGS)
+                    fi
+                    ])
+                    
+       ;; 
+esac
+
 AC_MSG_CHECKING([whether to enable ares])
 AC_ARG_ENABLE(ares,
 AC_HELP_STRING([--enable-ares=PATH],[Enable ares for name lookups])
