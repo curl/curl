@@ -7,6 +7,38 @@
                                   Changelog
 
 
+Daniel (10 Dec)
+- Moved around more logic:
+
+  First, POST data is never sent as part of the request headers in the http.c
+  code. It is always sent the "normal" read callback then send() way. This now
+  enables a plain HTTP POST to be sent chunked if we want to. This also
+  reduces the risk of having very big POSTs causing problems.
+
+  Further, sending off the initial HTTP request is not done using a loop
+  anymore. If it wasn't all sent off in the first send(), the rest of the
+  request is sent off in the normal transfer select() loop. This makes several
+  things possible, but mainly it makes libcurl block less when used from the
+  multi interface and it also reduces the risk of problems with issuing very
+  large requests.
+
+Daniel (9 Dec)
+- Moved the read callback pointer and data within the structs to a more
+  suitable place. This in preparation for a better HTTP-request sending code
+  without (a silly) loop.
+
+- The Dodds fix seems not to work.
+
+- Vojtech Janota tests proved that the resolve fix from oct 21st is not good
+  enough since obviously older glibcs might return EAGAIN without this meaning
+  that the buffer was too small.
+
+- [the other day] Made libcurl loop on recv() and send() now until done, and
+  then get back to select(). Previously it went back to select() more often
+  which really was a slight overhead. This was due to the reported performance
+  problems on HTTP PUT on Windows. I couldn't see any notable difference on
+  Linux...
+
 Version 7.10.3-pre2 (4 Dec 2002)
 
 Daniel (4 Dec 2002)
