@@ -92,9 +92,6 @@ static void MD5Transform(UINT4 [4], unsigned char [64]);
 static void Encode(unsigned char *, UINT4 *, unsigned int);
 static void Decode(UINT4 *, unsigned char *, unsigned int);
 
-#define MD5_memcpy(dst,src,len) memcpy(dst,src,len)
-#define MD5_memset(dst,val,len) memset(dst,val,len)
-
 static unsigned char PADDING[64] = {
   0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -174,7 +171,7 @@ unsigned int inputLen;                     /* length of input block */
 
   /* Transform as many times as possible. */
   if (inputLen >= partLen) {
-    MD5_memcpy((void *)&context->buffer[bufindex], (void *)input, partLen);
+    memcpy((void *)&context->buffer[bufindex], (void *)input, partLen);
     MD5Transform(context->state, context->buffer);
     
     for (i = partLen; i + 63 < inputLen; i += 64)
@@ -186,8 +183,7 @@ unsigned int inputLen;                     /* length of input block */
     i = 0;
 
   /* Buffer remaining input */
-  MD5_memcpy((void *)&context->buffer[bufindex], (void *)&input[i],
-             inputLen-i);
+  memcpy((void *)&context->buffer[bufindex], (void *)&input[i], inputLen-i);
 }
 
 /* MD5 finalization. Ends an MD5 message-digest operation, writing the
@@ -215,7 +211,7 @@ struct md5_ctx *context;                                       /* context */
   Encode (digest, context->state, 16);
 
   /* Zeroize sensitive information. */
-  MD5_memset ((void *)context, 0, sizeof (*context));
+  memset ((void *)context, 0, sizeof (*context));
 }
 
 /* MD5 basic transformation. Transforms state based on block. */
@@ -305,7 +301,7 @@ unsigned char block[64];
   state[3] += d;
 
   /* Zeroize sensitive information. */
-  MD5_memset ((void *)x, 0, sizeof (x));
+  memset((void *)x, 0, sizeof (x));
 }
 
 /* Encodes input (UINT4) into output (unsigned char). Assumes len is
