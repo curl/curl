@@ -353,18 +353,27 @@ static CURLcode bindlocal(struct connectdata *conn,
   return CURLE_HTTP_PORT_FAILED;
 }
 
-
-static
-int socketerror(int sockfd)
+/*
+ * verifyconnect() returns TRUE if the connect really has happened.
+ */
+static bool verifyconnect(int sockfd)
 {
+#if defined(SO_ERROR) && !defined(WIN32)
   int err = 0;
   socklen_t errSize = sizeof(err);
-#ifdef SO_ERROR
   if( -1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR,
                        (void *)&err, &errSize))
     err = Curl_ourerrno();
+
+  if ((0 == err) || (EISCONN == err))
+    /* we are connected, awesome! */
+    return TRUE;
+  
+  /* This wasn't a successful connect */
+  return FALSE;
+#else
+  return TRUE;
 #endif
-  return err;
 }
 
 /*
@@ -415,14 +424,13 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   rc = waitconnect(sockfd, 0);
 
   if(0 == rc) {
-    int err = socketerror(sockfd);
-    if ((0 == err) || (EISCONN == err)) {
+    if (verifyconnect(sockfd)) {
       /* we are connected, awesome! */
       *connected = TRUE;
       return CURLE_OK;
     }
     /* nope, not connected for real */
-    failf(data, "Connection failed, socket error: %d", err);
+    failf(data, "Connection failed");
     return CURLE_COULDNT_CONNECT;
   }
   else if(1 != rc) {
@@ -568,10 +576,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
       if(0 == rc) {
         /* we might be connected, if the socket says it is OK! Ask it! */
-        int err;
-
-        err = socketerror(sockfd);
-        if ((0 == err) || (EISCONN == err)) {
+        if(verifyconnect(sockfd)) {
           /* we are connected, awesome! */
           *connected = TRUE; /* this is truly a connect */
           break;
@@ -695,8 +700,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
 
     if(0 == rc) {
-      int err = socketerror(sockfd);
-      if ((0 == err) || (EISCONN == err)) {
+      if (verifyconnect(sockfd)) {
         /* we are connected, awesome! */
         *connected = TRUE; /* this is a true connect */
         break;
