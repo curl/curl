@@ -686,7 +686,12 @@ struct UrlState {
   struct negotiatedata negotiate;
 #endif
 
-  long authwant;  /* inherited from what the user set with CURLOPT_HTTPAUTH */
+  long authstage; /*   0 - authwant and authavail are still not initialized
+                     401 - web authentication is performed
+                     407 - proxy authentication is performed */
+  long authwant;  /* initially set to authentication methods requested by
+                     client (either with CURLOPT_HTTPAUTH or CURLOPT_PROXYAUTH
+                     depending on authstage) */
   long authavail; /* what the server reports */
 
 #ifdef USE_ARES
@@ -741,6 +746,7 @@ struct UserDefined {
   long use_port;     /* which port to use (when not using default) */
   char *userpwd;     /* <user:password>, if used */
   long httpauth;     /* what kind of HTTP authentication to use (bitmask) */
+  long proxyauth;    /* what kind of proxy authentication to use (bitmask) */
   char *set_range;   /* range, if used. See README for detailed specification
                         on this syntax. */
   long followlocation; /* as in HTTP Location: */

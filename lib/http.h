@@ -42,5 +42,6 @@ CURLcode Curl_http_connect(struct connectdata *conn);
 void Curl_httpchunk_init(struct connectdata *conn);
 CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
                               ssize_t length, ssize_t *wrote);
+void Curl_http_auth_stage(struct SessionHandle *data, int stage);
 #endif
 #endif

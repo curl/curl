@@ -726,12 +726,24 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               if(data->set.get_filetime)
                 data->info.filetime = k->timeofdoc;
             }
-            else if(checkprefix("WWW-Authenticate:", k->p) &&
-                    (401 == k->httpcode)) {
+            else if((checkprefix("WWW-Authenticate:", k->p) &&
+                    (401 == k->httpcode)) ||
+                    (checkprefix("Proxy-authenticate:", k->p) &&
+                    (407 == k->httpcode))) {
               /*
                * This page requires authentication
                */
-              char *start = k->p+strlen("WWW-Authenticate:");
+              char *start = (k->httpcode == 407) ? 
+                            k->p+strlen("Proxy-authenticate:"): 
+                            k->p+strlen("WWW-Authenticate:");
+              /*
+               * Switch from proxy to web authentication and back if needed
+               */
+              if (k->httpcode == 407 && data->state.authstage != 407)
+                Curl_http_auth_stage(data, 407);
+              
+              else if (k->httpcode == 401 && data->state.authstage != 401)
+                Curl_http_auth_stage(data, 401);
 
               /* pass all white spaces */
               while(*start && isspace((int)*start))
@@ -757,7 +769,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 if(data->state.authwant == CURLAUTH_NTLM) {
                   /* NTLM authentication is activated */
                   CURLntlm ntlm =
-                    Curl_input_ntlm(conn, FALSE, start);
+                    Curl_input_ntlm(conn, k->httpcode == 407, start);
                   
                   if(CURLNTLM_BAD != ntlm)
                     conn->newurl = strdup(data->change.url); /* clone string */
@@ -1506,8 +1518,8 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   data->state.errorbuf = FALSE; /* no error has occurred */
 
   /* set preferred authentication, default to basic */
-  data->state.authwant = data->set.httpauth?data->set.httpauth:CURLAUTH_BASIC;
-  data->state.authavail = CURLAUTH_NONE; /* nothing so far */
+
+  data->state.authstage = 0; /* initialize authentication later */
 
   /* If there was a list of cookie files to read and we haven't done it before,
      do it now! */

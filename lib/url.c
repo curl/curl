@@ -312,6 +312,9 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
   data->set.proxytype = CURLPROXY_HTTP; /* defaults to HTTP proxy */
 
+  data->set.httpauth = CURLAUTH_BASIC; /* defaults to basic authentication */
+  data->set.proxyauth = CURLAUTH_BASIC; /* defaults to basic authentication */
+
   /* create an array with connection data struct pointers */
   data->state.numconnects = 5; /* hard-coded right now */
   data->state.connects = (struct connectdata **)
@@ -878,6 +881,26 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
   }
   break;
   
+  case CURLOPT_PROXYAUTH:
+    /*
+     * Set HTTP Authentication type BITMASK.
+     */
+  {
+    long auth = va_arg(param, long);
+    /* switch off bits we can't support */
+#ifndef USE_SSLEAY
+    auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
+#endif
+#ifndef GSSAPI
+    auth &= ~CURLAUTH_GSSNEGOTIATE; /* no GSS-Negotiate without GSSAPI */
+#endif
+    if(!auth)
+      return CURLE_FAILED_INIT; /* no supported types left! */
+
+    data->set.proxyauth = auth;
+  }
+  break;
+
   case CURLOPT_USERPWD:
     /*
      * user:password to use in the operation
@@ -3066,6 +3089,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
   /*************************************************************
    * Proxy authentication
    *************************************************************/
+#if 0 /* This code is not needed anymore (moved to http.c) */
   if(conn->bits.proxy_user_passwd) {
     char *authorization;
     snprintf(data->state.buffer, BUFSIZE, "%s:%s",
@@ -3078,6 +3102,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
       free(authorization);
     }
   }
+#endif
 
   /*************************************************************
    * Send user-agent to HTTP proxies even if the target protocol

@@ -551,7 +551,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
       return CURLE_OUT_OF_MEMORY; /* FIX TODO */
 
     ntlm->state = NTLMSTATE_TYPE3; /* we sent a type-3 */
-    
+
+    /* Switch to web authentication after proxy authentication is done */
+    if (proxy)
+      Curl_http_auth_stage(conn->data, 401);
   }
   break;
 

@@ -93,6 +93,7 @@
 #include "http_negotiate.h"
 #include "url.h"
 #include "share.h"
+#include "http.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -101,6 +102,8 @@
 #ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
+
+static CURLcode Curl_output_basic_proxy(struct connectdata *conn);
 
 /* fread() emulation to provide POST and/or request data */
 static int readmoredata(char *buffer,
@@ -430,6 +433,13 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
 
   infof(data, "Establish HTTP proxy tunnel to %s:%d\n", hostname, remote_port);
 
+  /*
+   * This code currently only supports Basic authentication for this CONNECT
+   * request to a proxy.
+   */
+  if(conn->bits.proxy_user_passwd)
+    Curl_output_basic_proxy(conn);
+
   /* OK, now send the connect request to the proxy */
   result =
     Curl_sendf(tunnelsocket, conn,
@@ -561,6 +571,8 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   Curl_safefree(conn->allocptr.proxyuserpwd);
   conn->allocptr.proxyuserpwd = NULL;
 
+  Curl_http_auth_stage(data, 401); /* move on to the host auth */
+
   infof (data, "Proxy replied to CONNECT request\n");
   return CURLE_OK;
 }
@@ -672,6 +684,37 @@ static CURLcode Curl_output_basic(struct connectdata *conn)
   return CURLE_OK;
 }
 
+static CURLcode Curl_output_basic_proxy(struct connectdata *conn)
+{
+  char *authorization;
+  struct SessionHandle *data=conn->data;
+
+  sprintf(data->state.buffer, "%s:%s", conn->proxyuser, conn->proxypasswd);
+  if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
+                        &authorization) >= 0) {
+    Curl_safefree(conn->allocptr.proxyuserpwd);
+    conn->allocptr.proxyuserpwd =
+      aprintf("Proxy-authorization: Basic %s\015\012", authorization);
+    free(authorization);
+  }
+  else
+    return CURLE_OUT_OF_MEMORY;
+  return CURLE_OK;
+}
+
+void Curl_http_auth_stage(struct SessionHandle *data,
+                          int stage)
+{
+  if(stage == 401)
+    data->state.authwant = data->set.httpauth;
+  else if(stage == 407)
+    data->state.authwant = data->set.proxyauth;
+  else
+    return; /* bad input stage */
+  data->state.authstage = stage;
+  data->state.authavail = CURLAUTH_NONE;
+}
+
 CURLcode Curl_http(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
@@ -684,6 +727,13 @@ CURLcode Curl_http(struct connectdata *conn)
   const char *te = ""; /* tranfer-encoding */
   char *ptr;
   char *request;
+
+  if(!data->state.authstage) {
+    if(conn->bits.httpproxy)
+      Curl_http_auth_stage(data, 407);
+    else
+      Curl_http_auth_stage(data, 401);
+  }
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -728,39 +778,62 @@ CURLcode Curl_http(struct connectdata *conn)
      curl_strequal(data->state.auth_host, conn->hostname) ||
      data->set.http_disable_hostname_check_before_authentication) {
 
-#ifdef GSSAPI
-    if((data->state.authwant == CURLAUTH_GSSNEGOTIATE) &&
-       data->state.negotiate.context && 
-       !GSS_ERROR(data->state.negotiate.status)) {
-      result = Curl_output_negotiate(conn);
-      if (result)
-	return result;
-    }
-    else
-#endif
+  /* Send proxy authentication header if needed */
+    if (data->state.authstage == 407) {
 #ifdef USE_SSLEAY
-    if(data->state.authwant == CURLAUTH_NTLM) {
-      result = Curl_output_ntlm(conn, FALSE);
-      if(result)
-        return result;
-    }
-    else
-#endif
-    {
-      if((data->state.authwant == CURLAUTH_DIGEST) &&
-         data->state.digest.nonce) {
-        result = Curl_output_digest(conn,
-                                    (unsigned char *)request,
-                                    (unsigned char *)ppath);
+      if(data->state.authwant == CURLAUTH_NTLM) {
+        result = Curl_output_ntlm(conn, TRUE);
         if(result)
           return result;
       }
-      else if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
-              conn->bits.user_passwd &&
-              !checkheaders(data, "Authorization:")) {
-        result = Curl_output_basic(conn);
+      else
+#endif
+      if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
+         conn->bits.proxy_user_passwd &&
+         !checkheaders(data, "Proxy-authorization:")) {
+        result = Curl_output_basic_proxy(conn);
         if(result)
           return result;
+        /* Switch to web authentication after proxy authentication is done */
+        Curl_http_auth_stage(data, 401);
+      }
+    }
+    /* Send web authentication header if needed */
+    if (data->state.authstage == 401) {
+#ifdef GSSAPI
+      if((data->state.authwant == CURLAUTH_GSSNEGOTIATE) &&
+         data->state.negotiate.context && 
+         !GSS_ERROR(data->state.negotiate.status)) {
+        result = Curl_output_negotiate(conn);
+        if (result)
+          return result;
+      }
+      else
+#endif
+#ifdef USE_SSLEAY
+      if(data->state.authwant == CURLAUTH_NTLM) {
+        result = Curl_output_ntlm(conn, FALSE);
+        if(result)
+          return result;
+      }
+      else
+#endif
+      {
+        if((data->state.authwant == CURLAUTH_DIGEST) &&
+           data->state.digest.nonce) {
+          result = Curl_output_digest(conn,
+                                      (unsigned char *)request,
+                                      (unsigned char *)ppath);
+          if(result)
+            return result;
+        }
+        else if((data->state.authwant == CURLAUTH_BASIC) && /* Basic */
+                conn->bits.user_passwd &&
+                !checkheaders(data, "Authorization:")) {
+          result = Curl_output_basic(conn);
+          if(result)
+            return result;
+        }
       }
     }
   }
