@@ -180,10 +180,16 @@ CURLcode Curl_file_done(struct connectdata *conn,
   return CURLE_OK;
 }
 
+#if defined(WIN32) || defined(__EMX__)
+#define DIRSEP '\\'
+#else
+#define DIRSEP '/'
+#endif
+
 static CURLcode file_upload(struct connectdata *conn)
 {
   struct FILEPROTO *file = conn->proto.file;
-  char *dir = strchr(file->path, '/');
+  char *dir = strchr(file->path, DIRSEP);
   FILE *fp;
   CURLcode res=CURLE_OK;
   struct SessionHandle *data = conn->data;
