@@ -1343,6 +1343,8 @@ CURLcode Curl_perform(struct SessionHandle *data)
           char *pathsep;
           char *newest;
 
+          char *useurl = newurl;
+
           /* we must make our own copy of the URL to play with, as it may
              point to read-only data */
           char *url_clone=strdup(data->change.url);
@@ -1360,6 +1362,8 @@ CURLcode Curl_perform(struct SessionHandle *data)
             protsep+=2; /* pass the slashes */
 
           if('/' != newurl[0]) {
+            int level=0;
+
             /* First we need to find out if there's a ?-letter in the URL,
                and cut it and the right-side of that off */
             pathsep = strrchr(protsep, '?');
@@ -1371,6 +1375,40 @@ CURLcode Curl_perform(struct SessionHandle *data)
             pathsep = strrchr(protsep, '/');
             if(pathsep)
               *pathsep=0;
+
+            /* Check if there's any slash after the host name, and if so,
+               remember that position instead */
+            pathsep = strchr(protsep, '/');
+            if(pathsep)
+              protsep = pathsep+1;
+            else
+              protsep = NULL;
+
+              /* now deal with one "./" or any amount of "../" in the newurl
+                 and act accordingly */
+
+            if((useurl[0] == '.') && (useurl[1] == '/'))
+              useurl+=2; /* just skip the "./" */
+            
+            while((useurl[0] == '.') &&
+                  (useurl[1] == '.') &&
+                  (useurl[2] == '/')) {
+              level++; 
+              useurl+=3; /* pass the "../" */
+            }
+
+            if(protsep) {
+              while(level--) {
+                /* cut off one more level from the right of the original URL */
+                pathsep = strrchr(protsep, '/');
+                if(pathsep)
+                  *pathsep=0;
+                else {
+                  *protsep=0;
+                  break;
+                }
+              }
+            }
           }
           else {
             /* We got a new absolute path for this server, cut off from the
@@ -1382,15 +1420,16 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
           newest=(char *)malloc( strlen(url_clone) +
                                  1 + /* possible slash */
-                                 strlen(newurl) + 1/* zero byte */);
+                                 strlen(useurl) + 1/* zero byte */);
 
           if(!newest) {
             res = CURLE_OUT_OF_MEMORY;
             break; /* go go go out from this loop */
           }
-          sprintf(newest, "%s%s%s", url_clone, ('/' == newurl[0])?"":"/",
-                  newurl);
-          free(newurl);
+          sprintf(newest, "%s%s%s", url_clone,
+                  (('/' == useurl[0]) || !*protsep)?"":"/",
+                  useurl);
+          free(newurl); /* newurl is the allocated pointer */
           free(url_clone);
           newurl = newest;
         }
