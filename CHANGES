@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Gisle (8 January 2005)
+- Added Makefile.Watcom files (src/lib). Updated Makefile.dist.
+
 Daniel (7 January 2005)
 - Improved the test script's valgrind log parser to actually work! Also added
   the ability to disable the log scanner for specific test cases. Test case
@@ -83,7 +86,7 @@ Daniel (18 December 2004)
 - Samuel Listopad added support for PKCS12 formatted certificates.
 
 - Samuel Listopad fixed -E to support "C:/path" (with forward slash) as well.
-  
+
 Daniel (16 December 2004)
 - Gisle found and fixed a problem in the directory re-use for FTP.
 
@@ -148,7 +151,7 @@ Daniel (9 December 2004)
 - Bryan Henderson pointed out in bug report #1081788 that the curl-config
   --vernum output wasn't zero prefixed properly (as claimed in documentation).
   This is fixed in maketgz now.
-  
+
 Daniel (8 December 2004)
 - Matt Veenstra updated the mach-O framework files for Mac OS X.
 
@@ -256,7 +259,7 @@ Daniel (15 November 2004)
 
 - Wojciech Zwiefka found out that CURLINFO_REDIRECT_TIME didn't work as
   documented.
-  
+
 Daniel (12 November 2004)
 - Gisle Vanem modigied the MSVC and Netware makefiles to build without
   libcurl.def
@@ -356,7 +359,7 @@ Daniel (27 October 2004)
   instead of storing it on the stack. The allocation/free is done for every
   incoming packet, which is suboptimal, but should be dwarfed by the actual
   decompression computation.
- 
+
   I've also factored out some common code between deflate and gzip to reduce
   the code footprint somewhat.  I've tested the gzip code on a few test files
   and I tried deflate using the freshmeat.net server, and it all looks OK. I
