@@ -214,7 +214,8 @@ if [ $CVS -eq 1 ]; then
   rm -rf autom4te.cache
 
   # generate the build files
-  ./buildconf 2>&1 | tee $buildlog
+  log "invoke buildconf, but filter off the silly aclocal warnings"
+  ./buildconf 2>&1 | grep -v "warning: underquoted definition of" | tee $buildlog
 
   if { grep "^buildconf: OK" $buildlog >/dev/null 2>&1; } then
      log "buildconf was successful"
