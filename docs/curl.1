@@ -2,18 +2,19 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "5 January 2001" "Curl 7.5.2" "Curl Manual"
+.TH curl 1 "9 January 2001" "Curl 7.6" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
 .SH SYNOPSIS
 .B curl [options]
-.I url
+.I [URL...]
 .SH DESCRIPTION
 .B curl
-is a client to get documents/files from servers, using any of the
-supported protocols. The command is designed to work without user
-interaction or any kind of interactivity.
+is a client to get documents/files from or send documents to a server, using
+any of the supported protocols (HTTP, HTTPS, FTP, GOPHER, DICT, TELNET, LDAP
+or FILE). The command is designed to work without user interaction or any kind
+of interactivity.
 
 curl offers a busload of useful tricks like proxy support, user
 authentication, ftp upload, HTTP post, SSL (https:) connections, cookies, file
@@ -37,6 +38,9 @@ It is possible to specify up to 9 sets or series for a URL, but no nesting is
 supported at the moment:
 
  http://www.any.org/archive[1996-1999]/volume[1-4]part{a,b,c,index}.html
+
+Starting with curl 7.6, you can specify any amount of URLs on the command
+line. They will be fetched in a sequential manner in the specified order.
 .SH OPTIONS
 .IP "-a/--append"
 (FTP)
@@ -316,11 +320,12 @@ or use several variables like:
 
   curl http://{site,host}.host[1-5].com -o "#1_#2"
 
-If this option is used serveral times, the last one will be used.
+You may use this option as many times as you have number of URLs.
 .IP "-O/--remote-name"
 Write output to a local file named like the remote file we get. (Only
 the file part of the remote file is used, the path is cut off.)
 
+You may use this option as many times as you have number of URLs.
 .IP "-p/--proxytunnel"
 When an HTTP proxy is used, this option will cause non-HTTP protocols to
 attempt to tunnel through the proxy instead of merely using it to do HTTP-like
@@ -441,10 +446,14 @@ password is specified, curl will ask for it interactively.
 
 If this option is used serveral times, the last one will be used.
 .IP "--url <URL>"
-Set the URL to fetch. This option is mostly handy when you wanna specify URL
-in a config file.
+Specify a URL to fetch. This option is mostly handy when you wanna specify
+URL(s) in a config file.
 
-If this option is used serveral times, the last one will be used.
+This option may be used any number of times. To control where this URL is written, use the
+.I -o
+or the
+.I -O
+options.
 .IP "-v/--verbose"
 Makes the fetching more verbose/talkative. Mostly usable for
 debugging. Lines starting with '>' means data sent by curl, '<'
