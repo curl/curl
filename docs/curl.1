@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "4 May 2002" "Curl 7.9.7" "Curl Manual"
+.TH curl 1 "7 May 2002" "Curl 7.9.7" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -99,10 +99,7 @@ If this option is used severl times, the last one will override the others.
 .IP "--connect-timeout <seconds>"
 Maximum time in seconds that you allow the connection to the server to take.
 This only limits the connection phase, once curl has connected this option is
-of no more use. This option didn't work in win32 systems until 7.7.2.  See
-also the
-.I "--max-time"
-option.
+of no more use. See also the \fI--max-time\fP option.
 
 If this option is used several times, the last one will be used.
 .IP "-c/--cookie-jar <file name>"
@@ -173,13 +170,14 @@ but with this option, it will not try using EPSV.
 
 If this option is used several times, each occurrence will toggle this on/off.
 .IP "-D/--dump-header <file>"
-(HTTP/FTP)
-Write the HTTP headers to this file. Write the FTP file info to this
-file if -I/--head is used.
+Write the protocol headers to the specified file.
 
 This option is handy to use when you want to store the cookies that a HTTP
 site sends to you. The cookies could then be read in a second curl invoke by
 using the -b/--cookie option!
+
+When used on FTP, the ftp server response lines are considered being "headers"
+and thus are saved there.
 
 If this option is used several times, the last one will be used.
 .IP "-e/--referer <URL>"
@@ -217,13 +215,11 @@ peer. The certificate must be in PEM format.
 
 If this option is used several times, the last one will be used.
 .IP "-f/--fail"
-(HTTP)
-Fail silently (no output at all) on server errors. This is mostly done
-like this to better enable scripts etc to better deal with failed
-attempts. In normal cases when a HTTP server fails to deliver a
-document, it returns a HTML document stating so (which often also
-describes why and more). This flag will prevent curl from
-outputting that and fail silently instead.
+(HTTP) Fail silently (no output at all) on server errors. This is mostly done
+like this to better enable scripts etc to better deal with failed attempts. In
+normal cases when a HTTP server fails to deliver a document, it returns a HTML
+document stating so (which often also describes why and more). This flag will
+prevent curl from outputting that and fail silently instead.
 
 If this option is used twice, the second will again disable silent failure.
 .IP "-F/--form <name=content>"
@@ -251,13 +247,17 @@ This option can be used multiple times.
 This option switches off the "URL globbing parser". When you set this option,
 you can specify URLs that contain the letters {}[] without having them being
 interpreted by curl itself. Note that these letters are not normal legal URL
-contents but they should be encoded according to the URI standard. (Option
-added in curl 7.6)
+contents but they should be encoded according to the URI standard.
 .IP "-G/--get"
 When used, this option will make all data specified with -d/--data or
 --data-binary to be used in a HTTP GET request instead of the POST request
 that otherwise would be used. The data will be appended to the URL with a '?'
 separator. (Option added in curl 7.9)
+
+If used in combination with -I, the POST data will instead be appended to the
+URL with a HEAD request.
+
+If used multiple times, nothing special happens.
 .IP "-h/--help"
 Usage help.
 .IP "-H/--header <header>"
@@ -270,7 +270,7 @@ set headers without knowing perfectly well what you're doing. Replacing an
 internal header with one without content on the right side of the colon will
 prevent that header from appearing.
 
-This option can be used multiple times.
+This option can be used multiple times to add/replace/remove multiple headers.
 .IP "-i/--include"
 (HTTP)
 Include the HTTP-header in the output. The HTTP-header includes things
@@ -291,6 +291,13 @@ which this uses to get nothing but the header of a document. When used
 on a FTP file, curl displays the file size only.
 
 If this option is used twice, the second will again disable header only.
+.IP "-j/--junk-session-cookies"
+(HTTP) When curl is told to read cookies from a given file, this option will
+make it discard all "session cookies". This will basicly have the same effect
+as if a new session is started. Typical browsers always discard session
+cookies when they're closed down. (Added in 7.9.7)
+
+If this option is used several times, each occurrence will toggle this on/off.
 .IP "--krb4 <level>"
 (FTP) Enable kerberos4 authentication and use. The level must be entered and
 should be one of 'clear', 'safe', 'confidential' or 'private'. Should you use
@@ -335,10 +342,8 @@ If this option is used twice, the second will again disable location following.
 .IP "-m/--max-time <seconds>"
 Maximum time in seconds that you allow the whole operation to take.  This is
 useful for preventing your batch jobs from hanging for hours due to slow
-networks or links going down.  This doesn't work fully in win32 systems.
-See also the
-.I "--connect-timeout"
-option.
+networks or links going down.  This doesn't work fully in win32 systems.  See
+also the \fI--connect-timeout\fP option.
 
 If this option is used several times, the last one will be used.
 .IP "-M/--manual"
@@ -522,7 +527,19 @@ Use the file name "-" (a single dash) to use stdin instead of a given file.
 If this option is used several times, the last one will be used.
 .IP "--trace <file>"
 Enables a full trace dump of all incoming and outgoing data, including
-descriptive information, to the given output file.
+descriptive information, to the given output file. Use "-" as filename to have
+the output sent to stdout.
+
+If this option is used several times, the last one will be used. (Added in
+curl 7.9.7)
+.IP "--trace-ascii <file>"
+Enables a full trace dump of all incoming and outgoing data, including
+descriptive information, to the given output file. Use "-" as filename to have
+the output sent to stdout.
+
+This is very similar to --trace, but leaves out the hex part and only shows
+the ASCII part of the dump. It makes smaller output that might be easier to
+read for untrained humans.
 
 If this option is used several times, the last one will be used. (Added in
 curl 7.9.7)
