@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel (23 March 2004)
+- Added Greg Hewgill's testcurl.pl script to CVS. We have not moved over to
+  use this script for the real distributed testing just yet, but it is only
+  a matter of time.
+
+- Gisle Vanem provided code that makes curl report a better error message
+  if --interface fails on windows.
+
 - The regular progress meter is now fixed to never wrap due to long lines. All
   fields are now static sized. If the time in the time fields get a time value
   that would represent a time that is 100 hours or more (if not, it remains
