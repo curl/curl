@@ -512,6 +512,10 @@ typedef enum {
   CURLINFO_LASTONE          = 17
 } CURLINFO;
 
+/* unfortunately, the easy.h include file needs the options and info stuff
+   before it can be included! */
+#include <curl/easy.h> /* nothing in curl is fun without the easy stuff */
+
 /*
  * NAME curl_getinfo()
  *
