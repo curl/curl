@@ -538,7 +538,7 @@ CURLcode _ftp(struct connectdata *conn)
   /* for the ftp PORT mode */
   int portsock=-1;
   struct sockaddr_in serv_addr;
-  char hostent_buf[512];
+  char hostent_buf[8192];
 #if defined (HAVE_INET_NTOA_R)
   char ntoa_buf[64];
 #endif
