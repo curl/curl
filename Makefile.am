@@ -9,4 +9,4 @@ EXTRA_DIST = curl.spec curl-ssl.spec
 SUBDIRS = docs lib src include tests
 
 test:
-	@(cd tests; make test)
+	@(cd tests; make quiet-test)
