@@ -325,7 +325,7 @@ CURLcode Curl_open(struct SessionHandle **curl)
 
     if(!data->state.connects)
       res = CURLE_OUT_OF_MEMORY;
-    else 
+    else
       memset(data->state.connects, 0,
              sizeof(struct connectdata *)*data->state.numconnects);
 
@@ -507,12 +507,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * An FTP option that modifies an upload to create missing directories on
      * the server.
-     */ 
+     */
     data->set.ftp_create_missing_dirs = va_arg( param , long )?TRUE:FALSE;
     break;
   case CURLOPT_FTP_RESPONSE_TIMEOUT:
     /*
-     * An FTP option that specifies how quickly an FTP response must be 
+     * An FTP option that specifies how quickly an FTP response must be
      * obtained before it is considered failure.
      */
     data->set.ftp_response_timeout = va_arg( param , long );
@@ -695,7 +695,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
   case CURLOPT_FTP_USE_EPSV:
     data->set.ftp_use_epsv = va_arg(param, long)?TRUE:FALSE;
     break;
-    
+
   case CURLOPT_HTTPHEADER:
     /*
      * Set a list with HTTP headers to use (or replace internals with)
@@ -924,7 +924,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.httpauth = auth;
   }
   break;
-  
+
   case CURLOPT_PROXYAUTH:
     /*
      * Set HTTP Authentication type BITMASK.
@@ -1257,7 +1257,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
           data->hostcache = data->share->hostcache;
         }
-        
+
         if(data->share->cookies) {
           /* use shared cookie list, first free own one if any */
           if (data->cookies)
@@ -1266,15 +1266,15 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
         }
 
         Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
-        
+
       }
 
       /* check cookie list is set */
       if(!data->cookies)
         data->cookies = Curl_cookie_init(data, NULL, NULL, TRUE );
-      
+
       /* check for host cache not needed,
-       * it will be done by curl_easy_perform */ 
+       * it will be done by curl_easy_perform */
     }
     break;
 
@@ -1363,11 +1363,11 @@ CURLcode Curl_disconnect(struct connectdata *conn)
        related stuff. NTLM is connection-related so when we close the shop
        we shall forget. */
     data->state.authhost.done = FALSE;
-    data->state.authhost.picked = 
+    data->state.authhost.picked =
       data->state.authhost.want;
 
     data->state.authproxy.done = FALSE;
-    data->state.authproxy.picked = 
+    data->state.authproxy.picked =
       data->state.authhost.want;
 
     data->state.authproblem = FALSE;
@@ -1425,7 +1425,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   Curl_safefree(conn->async.hostname);
   Curl_safefree(conn->async.os_specific);
 #endif
-  
+
   Curl_free_ssl_config(&conn->ssl_config);
 
   free(conn); /* free all the connection oriented data */
@@ -1788,14 +1788,14 @@ static int handleSock5Proxy(const char *proxy_name,
     struct Curl_dns_entry *dns;
     Curl_addrinfo *hp=NULL;
     int rc = Curl_resolv(conn, conn->host.name, conn->remote_port, &dns);
-    
+
     if(rc == CURLRESOLV_ERROR)
       return 1;
 
     if(rc == CURLRESOLV_PENDING)
       /* this requires that we're in "wait for resolve" state */
       rc = Curl_wait_for_resolv(conn, &dns);
-    
+
     /*
      * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
      * returns a Curl_addrinfo pointer that may not always look the same.
@@ -2066,7 +2066,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
   *addr = NULL; /* nothing yet */
   *async = FALSE;
-  
+
   /*************************************************************
    * Check input data
    *************************************************************/
@@ -2299,7 +2299,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->proxyuser = strdup(proxyuser);
     if(!conn->proxyuser)
       return CURLE_OUT_OF_MEMORY;
-    
+
     conn->proxypasswd = strdup(proxypasswd);
     if(!conn->proxypasswd)
       return CURLE_OUT_OF_MEMORY;
@@ -2958,7 +2958,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * new one.
    *************************************************************/
 
-  /* get a cloned copy of the SSL config situation stored in the 
+  /* get a cloned copy of the SSL config situation stored in the
      connection struct */
   if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config))
     return CURLE_OUT_OF_MEMORY;
@@ -2969,7 +2969,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      authentication phase). */
   if(data->set.reuse_fresh && !data->state.this_is_a_follow)
     reuse = FALSE;
-  else 
+  else
     reuse = ConnectionExists(data, conn, &conn_temp);
 
   if(reuse) {
@@ -3126,7 +3126,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #endif /* SIGALRM */
   }
 #endif /* USE_ARES */
-  
+
   /*************************************************************
    * Resolve the name of the server or proxy
    *************************************************************/
@@ -3203,7 +3203,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
       /* the alarm period is counted in even number of seconds */
       alarm_set = prev_alarm - elapsed_ms/1000;
-      
+
       if(!alarm_set ||
          ((alarm_set >= 0x80000000) && (prev_alarm < 0x80000000)) ) {
         /* if the alarm time-left reached zero or turned "negative" (counted
@@ -3228,7 +3228,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 /* SetupConnection() should be called after the name resolve initiated in
  * CreateConnection() is all done.
  */
- 
+
 static CURLcode SetupConnection(struct connectdata *conn,
                                 struct Curl_dns_entry *hostaddr)
 {
@@ -3319,7 +3319,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
   struct Curl_dns_entry *dns;
 
   *asyncp = FALSE; /* assume synchronous resolves by default */
-  
+
   /* call the stuff that needs to be called */
   code = CreateConnection(data, in_connect, &dns, asyncp);
 
@@ -3333,7 +3333,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
     /* else
          response will be received and treated async wise */
   }
-  
+
   if(CURLE_OK != code) {
     /* We're not allowed to return failure with memory left allocated
        in the connectdata struct, free those here */
@@ -3474,13 +3474,13 @@ CURLcode Curl_do(struct connectdata **connp)
             result = Curl_wait_for_resolv(conn, NULL);
             if(result)
               return result;
-            
+
             /* Resolved, continue with the connection */
-            result = Curl_async_resolved(conn);              
+            result = Curl_async_resolved(conn);
             if(result)
               return result;
           }
-          
+
           /* ... finally back to actually retry the DO phase */
           result = conn->curl_do(conn);
         }
