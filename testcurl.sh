@@ -17,6 +17,10 @@
 version=1
 fixed=0
 
+LANG="C"
+
+export LANG
+
 die(){
     echo "testcurl: ENDING HERE"
     exit 1
