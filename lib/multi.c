@@ -440,8 +440,9 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
         /* When we follow redirects, must to go back to the CONNECT state */
         if(easy->easy_conn->newurl) {
-          easy->result = Curl_follow(easy->easy_handle,
-                                     strdup(easy->easy_conn->newurl));
+          char *newurl = easy->easy_conn->newurl;
+          easy->easy_conn->newurl = NULL;
+          easy->result = Curl_follow(easy->easy_handle, newurl);
           if(CURLE_OK == easy->result) {
             easy->state = CURLM_STATE_CONNECT;
             result = CURLM_CALL_MULTI_PERFORM;
