@@ -24,9 +24,20 @@ USE_SSL = 0
 USE_ZLIB = 0
 
 #
+# Use libidn for international domain names
+#
+USE_IDNA = 0
+
+#
 # Use Watt-32 IPv6 stack (only IPv6 name resolution working at the moment)
 #
 USE_IPV6 = 0
+
+#
+# Use C-Ares resolver library
+# This conflicts with USE_IPV6=1
+#
+USE_ARES = 0
 
 #
 # Enable debug code in libcurl/curl
@@ -42,11 +53,13 @@ default: all
 WATT32_ROOT  = $(subst \,/,$(WATT_ROOT))
 OPENSSL_ROOT = /net/openssl.098
 ZLIB_ROOT    = /djgpp/contrib/zlib
+LIBIDN_ROOT  = ../../IDN/libidn
+ARES_ROOT    = ../ares
 
 CC   = gcc
 YACC = bison -y
 
-CFLAGS = -g -O2 -I. -I../include -I../lib -Wall -DHAVE_CONFIG_H
+CFLAGS = -g -O2 -I. -I../include -I../lib -I$(WATT32_ROOT)/inc -Wall -DHAVE_CONFIG_H
 
 ifeq ($(USE_SSL),1)
   CFLAGS += -DUSE_SSLEAY -I$(OPENSSL_ROOT)
@@ -58,6 +71,15 @@ endif
 
 ifeq ($(USE_IPV6),1)
   CFLAGS += -DENABLE_IPV6
+endif
+
+ifeq ($(USE_ARES),1)
+  CFLAGS += -DUSE_ARES -I$(ARES_ROOT)
+endif
+
+ifeq ($(USE_IDNA),1)
+  CFLAGS   += -DHAVE_LIBIDN -DHAVE_IDN_FREE_H -DHAVE_IDN_FREE -DHAVE_TLD_H \
+              -DHAVE_TLD_STRERROR -I$(LIBIDN_ROOT)/lib
 endif
 
 ifeq ($(USE_DEBUG),1)
@@ -86,7 +108,7 @@ depend: $(DEPEND_PREREQ)
 	@echo "*cpp: %(cpp_cpu) %{posix:-D_POSIX_SOURCE} -remap" > $(MM_SPECS)
 	sed -e "/^# DO NOT DELETE THIS LINE/,$$d" < Makefile.bak > $(MAKEFILE)
 	echo "# DO NOT DELETE THIS LINE"                        >> $(MAKEFILE)
-	$(CC) -MM -specs=$(MM_SPECS) $(CFLAGS) $(SOURCES) | \
-	  sed -e 's/^\([a-zA-Z0-9_-]*\.o:\)/'$(OBJ_DIR)'\/\1/'  >> $(MAKEFILE)
+	$(CC) -MM -specs=$(MM_SPECS) $(CFLAGS) $(CSOURCES) | \
+	sed -e 's/^\([a-zA-Z0-9_-]*\.o:\)/$$(OBJ_DIR)\/\1/'    >> $(MAKEFILE)
 	rm -f $(MM_SPECS)
 
