@@ -92,8 +92,8 @@ CURLcode test(char *URL)
     curl_easy_setopt(curl, CURLOPT_INFILE, hd_src);
 
     /* and give the size of the upload (optional) */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE,
-                     (long)file_info.st_size);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE,
+                     file_info.st_size);
 
     /* Now run off and do what you've been told! */
     res = curl_easy_perform(curl);

@@ -34,6 +34,7 @@
 
 #include <errno.h>
 
+#include "strtoofft.h"
 #include "strequal.h"
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
@@ -599,8 +600,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                resuming a document that we don't get, and this header contains 
                info about the true size of the document we didn't get now. */
             if ((k->httpcode != 416) &&
-                checkprefix("Content-Length:", k->p) &&
-                sscanf (k->p+15, " %ld", &contentlength)) {
+                checkprefix("Content-Length:", k->p)) {
+              contentlength = strtoofft(k->p+15, NULL, 10);
               if (data->set.max_filesize && contentlength > 
                   data->set.max_filesize) {
                 failf(data, "Maximum file size exceeded");
@@ -718,17 +719,26 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                        || checkprefix("x-compress", start))
                 k->content_encoding = COMPRESS;
             }
-            else if (checkprefix("Content-Range:", k->p)) {
-              if (sscanf (k->p+14, " bytes %d-", &k->offset) ||
-                  sscanf (k->p+14, " bytes: %d-", &k->offset)) {
-                /* This second format was added August 1st 2000 by Igor
-                   Khristophorov since Sun's webserver JavaWebServer/1.1.1
-                   obviously sends the header this way! :-( */
-                if (conn->resume_from == k->offset) {
-                  /* we asked for a resume and we got it */
-                  k->content_range = TRUE;
-                }
-              }
+            else if (Curl_compareheader(k->p, "Content-Range:", "bytes")) {
+              /* Content-Range: bytes [num]-
+                 Content-Range: bytes: [num]-
+
+                 The second format was added August 1st 2000 by Igor
+                 Khristophorov since Sun's webserver JavaWebServer/1.1.1
+                 obviously sends the header this way! :-( */
+
+              char *ptr = strstr(k->p, "bytes");
+              ptr+=5;
+
+              if(*ptr == ':')
+                /* stupid colon skip */
+                ptr++;
+
+              k->offset = strtoofft(ptr, NULL, 10);
+              
+              if (conn->resume_from == k->offset)
+                /* we asked for a resume and we got it */
+                k->content_range = TRUE;
             }
             else if(data->cookies &&
                     checkprefix("Set-Cookie:", k->p)) {
@@ -947,7 +957,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
           if((-1 != conn->maxdownload) &&
              (k->bytecount + nread >= conn->maxdownload)) {
-            nread = conn->maxdownload - k->bytecount;
+            nread = (ssize_t) (conn->maxdownload - k->bytecount);
             if(nread < 0 ) /* this should be unusual */
               nread = 0;
 
@@ -1213,7 +1223,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     
   if (data->set.timeout &&
       ((Curl_tvdiff(k->now, k->start)/1000) >= data->set.timeout)) {
-    failf (data, "Operation timed out with %d out of %d bytes received",
+    failf (data, "Operation timed out with %Od out of %Od bytes received",
            k->bytecount, conn->size);
     return CURLE_OPERATION_TIMEOUTED;
   }
@@ -1227,7 +1237,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if(!(data->set.no_body) && (conn->size != -1) &&
        (k->bytecount != conn->size) &&
        !conn->newurl) {
-      failf(data, "transfer closed with %d bytes remaining to read",
+      failf(data, "transfer closed with %Od bytes remaining to read",
             conn->size - k->bytecount);
       return CURLE_PARTIAL_FILE;
     }
@@ -1277,7 +1287,7 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   if (!conn->bits.getheader) {
     k->header = FALSE;
     if(conn->size > 0)
-      Curl_pgrsSetDownloadSize(data, conn->size);
+      Curl_pgrsSetDownloadSize(data, (double)conn->size);
   }
   /* we want header and/or body, if neither then don't do this! */
   if(conn->bits.getheader || !data->set.no_body) {
@@ -1946,13 +1956,13 @@ CURLcode Curl_perform(struct SessionHandle *data)
 CURLcode 
 Curl_Transfer(struct connectdata *c_conn, /* connection data */
               int sockindex,    /* socket index to read from or -1 */
-              int size,         /* -1 if unknown at this point */
+              off_t size,         /* -1 if unknown at this point */
               bool getheader,   /* TRUE if header parsing is wanted */
-              long *bytecountp, /* return number of bytes read or NULL */
+              off_t *bytecountp, /* return number of bytes read or NULL */
               int writesockindex,  /* socket index to write to, it may very
                                       well be the same we read from. -1
                                       disables */
-              long *writebytecountp /* return number of bytes written or
+              off_t *writebytecountp /* return number of bytes written or
                                        NULL */
               )
 {

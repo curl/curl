@@ -228,7 +228,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   else if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
     if (!data->progress.callback) {
       if(conn->resume_from)
-        fprintf(data->set.err, "** Resuming transfer from byte position %d\n",
+        fprintf(data->set.err,
+		"** Resuming transfer from byte position %Od\n",
                 conn->resume_from);
       fprintf(data->set.err,
               "  %% Total    %% Received %% Xferd  Average Speed          Time             Curr.\n"

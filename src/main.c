@@ -388,14 +388,14 @@ struct Configurable {
   bool resume_from_current;
   bool disable_epsv;
   bool disable_eprt;
-  long resume_from;
+  off_t resume_from;
   char *postfields;
   long postfieldsize;
   char *referer;
   long timeout;
   long connecttimeout;
   long maxredirs;
-  long max_filesize;
+  off_t max_filesize;
   char *headerfile;
   char *ftpport;
   char *iface;
@@ -984,6 +984,42 @@ static int str2num(long *val, char *str)
   return retcode;  
 }
 
+/**
+ * Parses the given string looking for an offset (which may be
+ * a larger-than-integer value).
+ *
+ * @param val  the offset to populate
+ * @param str  the buffer containing the offset
+ * @return zero if successful, non-zero if failure.
+ */
+static int str2offset(off_t *val, char *str)
+{
+#if SIZEOF_OFF_T > 4
+  /* Ugly, but without going through a bunch of rigamarole,
+   * we don't have the definitions for LLONG_{MIN,MAX} or
+   * LONG_LONG_{MIN,MAX}.
+   */
+#ifndef LLONG_MAX
+#define LLONG_MAX (off_t)0x7FFFFFFFFFFFFFFFLL
+#define LLONG_MIN (off_t)0x8000000000000000LL
+#endif
+
+#ifdef HAVE_STRTOLL
+  *val = strtoll(str, NULL, 0);
+#else
+  /* TODO:  Handle strtoll stuff...sigh... */
+#endif
+
+  if ((*val == LLONG_MAX || *val == LLONG_MIN) && errno == ERANGE)
+    return 1;
+#else
+  *val = strtol(str, NULL, 0);
+  if ((*val == LONG_MIN || *val == LONG_MAX) && errno == ERANGE)
+    return 1;
+#endif
+  return 0;
+}
+
 static void checkpasswd(const char *kind, /* for what purpose */
                         char **userpwd) /* pointer to allocated string */
 {
@@ -1353,7 +1389,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
       case 'y': /* --max-filesize */
-        if(str2num(&config->max_filesize, nextarg))
+        if(str2offset(&config->max_filesize, nextarg))
           return PARAM_BAD_NUMERIC;
         break;
       case 'z': /* --disable-eprt */
@@ -1457,7 +1493,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     case 'C':
       /* This makes us continue an ftp transfer at given position */
       if(!curl_strequal(nextarg, "-")) {
-        if(str2num(&config->resume_from, nextarg))
+        if(str2offset(&config->resume_from, nextarg))
           return PARAM_BAD_NUMERIC;
         config->resume_from_current = FALSE;
       }
@@ -2221,7 +2257,7 @@ struct ProgressData {
   double prev;
   int width;
   FILE *out; /* where to write everything to */
-  int initial_size;
+  off_t initial_size;
 };
 
 int myprogress (void *clientp,
@@ -2523,7 +2559,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   bool infdfopen;
   FILE *headerfilep = NULL;
   char *urlbuffer=NULL;
-  long uploadfilesize; /* -1 means unknown */
+  off_t uploadfilesize; /* -1 means unknown */
   bool stillflags=TRUE;
 
   bool allocuseragent=FALSE;
@@ -3029,7 +3065,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         }
 
         /* size of uploaded file: */
-        curl_easy_setopt(curl, CURLOPT_INFILESIZE, uploadfilesize);
+        curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, uploadfilesize);
         curl_easy_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
         curl_easy_setopt(curl, CURLOPT_PROXY, config->proxy); /* proxy to use */
         curl_easy_setopt(curl, CURLOPT_HEADER, config->conf&CONF_HEADER);
@@ -3072,7 +3108,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_FTPPORT, config->ftpport);
         curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, config->low_speed_limit);
         curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, config->low_speed_time);
-        curl_easy_setopt(curl, CURLOPT_RESUME_FROM,
+        curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE,
                          config->use_resume?config->resume_from:0);
         curl_easy_setopt(curl, CURLOPT_COOKIE, config->cookie);
         curl_easy_setopt(curl, CURLOPT_HTTPHEADER, config->headers);
@@ -3190,7 +3226,8 @@ operate(struct Configurable *config, int argc, char *argv[])
 
         /* new in curl 7.10.8 */
         if(config->max_filesize)
-          curl_easy_setopt(curl, CURLOPT_MAXFILESIZE, config->max_filesize);
+          curl_easy_setopt(curl, CURLOPT_MAXFILESIZE_LARGE,
+                           config->max_filesize);
 
         /* new in curl 7.10.9 */
         if(config->ftp_ssl)

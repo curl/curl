@@ -74,7 +74,8 @@ memdebug.h inet_ntoa_r.h http_chunks.c http_chunks.h strtok.c strtok.h	\
 connect.c connect.h llist.c llist.h hash.c hash.h multi.c		\
 content_encoding.c content_encoding.h share.c share.h http_digest.c \
 md5.c md5.h http_digest.h http_negotiate.c http_negotiate.h \
-http_ntlm.c http_ntlm.h ca-bundle.h inet_pton.c inet_pton.h
+http_ntlm.c http_ntlm.h ca-bundle.h inet_pton.c inet_pton.h \
+strtoofft.c strtoofft.h
 
 noinst_HEADERS = setup.h transfer.h
 

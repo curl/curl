@@ -218,6 +218,7 @@ X_OBJS= \
 	$(DIROBJ)\easy.obj \
 	$(DIROBJ)\strequal.obj \
 	$(DIROBJ)\strtok.obj \
+	$(DIROBJ)\strtoofft.obj \
 	$(DIROBJ)\connect.obj \
 	$(DIROBJ)\hash.obj \
 	$(DIROBJ)\llist.obj \

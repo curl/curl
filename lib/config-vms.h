@@ -363,6 +363,9 @@
 /* Define if you have the `strtok_r' function. */
 #undef HAVE_STRTOK_R
 
+/* Define if you have the `strtoll' function. */
+#undef HAVE_STRTOLL
+
 #define HAVE_MEMORY_H   1
 
 #define HAVE_FIONBIO	1

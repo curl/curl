@@ -30,6 +30,7 @@
 +easy.obj &
 +strequal.obj &
 +strtok.obj &
++strtoofft.obj &
 +connect.obj &
 +hash.obj &
 +share.obj &

@@ -711,6 +711,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.infilesize = va_arg(param, long);
     break;
+  case CURLOPT_INFILESIZE_LARGE:
+    /*
+     * If known, this should inform curl about the file size of the
+     * to-be-uploaded file.
+     */
+    data->set.infilesize = va_arg(param, off_t);
+    break;
   case CURLOPT_LOW_SPEED_LIMIT:
     /*
      * The low speed limit that if transfers are below this for
@@ -954,6 +961,12 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Resume transfer at the give file position
      */
     data->set.set_resume_from = va_arg(param, long);
+    break;
+  case CURLOPT_RESUME_FROM_LARGE:
+    /*
+     * Resume transfer at the give file position
+     */
+    data->set.set_resume_from = va_arg(param, off_t);
     break;
   case CURLOPT_DEBUGFUNCTION:
     /*
@@ -1260,6 +1273,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
 
   case CURLOPT_IPRESOLVE:
     data->set.ip_version = va_arg(param, long);
+    break;
+
+  case CURLOPT_MAXFILESIZE_LARGE:
+    /*
+     * Set the maximum size of a file to download.
+     */
+    data->set.max_filesize = va_arg(param, off_t);
     break;
 
   default:
@@ -2348,7 +2368,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(conn->resume_from) {
     if(!conn->bits.use_range) {
       /* if it already was in use, we just skip this */
-      snprintf(resumerange, sizeof(resumerange), "%d-", conn->resume_from);
+      snprintf(resumerange, sizeof(resumerange), "%Od-",
+	       conn->resume_from);
       conn->range=strdup(resumerange); /* tell ourselves to fetch this range */
       conn->bits.rangestringalloc = TRUE; /* mark as allocated */
       conn->bits.use_range = 1; /* switch on range usage */
@@ -2869,7 +2890,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      */
     conn->resume_from = data->set.set_resume_from;
     if (conn->resume_from) {
-      snprintf(resumerange, sizeof(resumerange), "%d-", conn->resume_from);
+      snprintf(resumerange, sizeof(resumerange), "%Od-",
+	       conn->resume_from);
       if (conn->bits.rangestringalloc == TRUE)
         free(conn->range);
 

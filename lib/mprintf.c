@@ -167,7 +167,7 @@ static BOOL dprintf_IsQualifierNoDollar(char c)
   case '0': case '1': case '2': case '3': case '4':
   case '5': case '6': case '7': case '8': case '9':
   case 'h': case 'l': case 'L': case 'Z': case 'q':
-  case '*':
+  case '*': case 'O':
     return TRUE;
   default:
     return FALSE;
@@ -375,6 +375,13 @@ static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list a
 	    flags |= FLAGS_LONGLONG;
 	  if (sizeof(size_t) > sizeof(unsigned int))
 	    flags |= FLAGS_LONG;
+	  break;
+	case 'O':
+	  if (sizeof(off_t) > sizeof(unsigned long int)) {
+	    flags |= FLAGS_LONGLONG;
+	  } else if (sizeof(off_t) > sizeof(unsigned int)) {
+	    flags |= FLAGS_LONG;
+	  }
 	  break;
 	case '0':
 	  if (!(flags & FLAGS_LEFT))

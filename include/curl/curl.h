@@ -270,6 +270,7 @@ typedef enum {
 #define CURLOPTTYPE_LONG          0
 #define CURLOPTTYPE_OBJECTPOINT   10000
 #define CURLOPTTYPE_FUNCTIONPOINT 20000
+#define CURLOPTTYPE_OFF_T         30000
 
 /* name is uppercase CURLOPT_<name>,
    type is one of the defined CURLOPTTYPE_<type>
@@ -300,6 +301,7 @@ typedef enum {
 #define LONG          CURLOPTTYPE_LONG
 #define OBJECTPOINT   CURLOPTTYPE_OBJECTPOINT
 #define FUNCTIONPOINT CURLOPTTYPE_FUNCTIONPOINT
+#define OFF_T         CURLOPTTYPE_OFF_T
 #define CINIT(name,type,number) CURLOPT_/**/name = type + number
 #endif
 
@@ -356,7 +358,12 @@ typedef enum {
   /* If the CURLOPT_INFILE is used, this can be used to inform libcurl about
    * how large the file being sent really is. That allows better error
    * checking and better verifies that the upload was succcessful. -1 means
-   * unknown size. */
+   * unknown size.
+   *
+   * For large file support, there is also a _LARGE version of the key
+   * which takes an off_t type, allowing platforms with larger off_t
+   * sizes to handle larger files.  See below for INFILESIZE_LARGE.
+   */
   CINIT(INFILESIZE, LONG, 14),
 
   /* POST input fields. */
@@ -384,7 +391,12 @@ typedef enum {
   /* Set the "low speed time" */
   CINIT(LOW_SPEED_TIME, LONG, 20),
 
-  /* Set the continuation offset */
+  /* Set the continuation offset.
+   *
+   * Note there is also a _LARGE version of this key which uses
+   * off_t types, allowing for large file offsets on platforms which
+   * use larger-than-32-bit off_t's.  Look below for RESUME_FROM_LARGE.
+   */
   CINIT(RESUME_FROM, LONG, 21),
 
   /* Set cookie in request: */
@@ -699,8 +711,26 @@ typedef enum {
   CINIT(IPRESOLVE, LONG, 113),
 
   /* Set this option to limit the size of a file that will be downloaded from
-     an HTTP or FTP server. */
+     an HTTP or FTP server.
+
+     Note there is also _LARGE version which adds large file support for
+     platforms which have larger off_t sizes.  See MAXFILESIZE_LARGE below. */
   CINIT(MAXFILESIZE, LONG, 114),
+
+  /* See the comment for INFILESIZE above, but in short, specifies
+   * the size of the file being uploaded.  -1 means unknown.
+   */
+  CINIT(INFILESIZE_LARGE, OFF_T, 115),
+
+  /* Sets the continuation offset.  There is also a LONG version of this;
+   * look above for RESUME_FROM.
+   */
+  CINIT(RESUME_FROM_LARGE, OFF_T, 116),
+
+  /* Sets the maximum size of data that will be downloaded from
+   * an HTTP or FTP server.  See MAXFILESIZE above for the LONG version.
+   */
+  CINIT(MAXFILESIZE_LARGE, OFF_T, 117),
 
   /* Set this option to the file name of your .netrc file you want libcurl
      to parse (using the CURLOPT_NETRC option). If not set, libcurl will do

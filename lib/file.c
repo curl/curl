@@ -163,12 +163,12 @@ CURLcode Curl_file(struct connectdata *conn)
   */
   CURLcode res = CURLE_OK;
   struct stat statbuf;
-  unsigned long expected_size=0;
+  off_t expected_size=0;
   bool fstated=FALSE;
   ssize_t nread;
   struct SessionHandle *data = conn->data;
   char *buf = data->state.buffer;
-  int bytecount = 0;
+  off_t bytecount = 0;
   struct timeval start = Curl_tvnow();
   struct timeval now = start;
   int fd;
@@ -188,7 +188,7 @@ CURLcode Curl_file(struct connectdata *conn)
      date. */
   if(data->set.no_body && data->set.include_header && fstated) {
     CURLcode result;
-    sprintf(buf, "Content-Length: %lu\r\n", expected_size);
+    sprintf(buf, "Content-Length: %Od\r\n", expected_size);
     result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
     if(result)
       return result;
@@ -217,7 +217,7 @@ CURLcode Curl_file(struct connectdata *conn)
   }
 
   /* Added by Dolbneff A.V & Spiridonoff A.V */
-  if (conn->resume_from <= (long)expected_size)
+  if (conn->resume_from <= expected_size)
     expected_size -= conn->resume_from;
   else
     /* Is this error code suitable in such situation? */

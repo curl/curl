@@ -1227,25 +1227,25 @@ CURLcode Curl_http(struct connectdata *conn)
 
     if(conn->resume_from) {
       /* do we still game? */
-      int passed=0;
+      off_t passed=0;
 
       /* Now, let's read off the proper amount of bytes from the
          input. If we knew it was a proper file we could've just
          fseek()ed but we only have a stream here */
       do {
-        int readthisamountnow = (conn->resume_from - passed);
-        int actuallyread;
+        off_t readthisamountnow = (conn->resume_from - passed);
+        off_t actuallyread;
 
         if(readthisamountnow > BUFSIZE)
           readthisamountnow = BUFSIZE;
 
         actuallyread =
-          data->set.fread(data->state.buffer, 1, readthisamountnow,
+          data->set.fread(data->state.buffer, 1, (size_t)readthisamountnow,
                           data->set.in);
 
         passed += actuallyread;
         if(actuallyread != readthisamountnow) {
-          failf(data, "Could only read %d bytes from the input",
+          failf(data, "Could only read %Od bytes from the input",
                 passed);
           return CURLE_READ_ERROR;
         }
@@ -1281,16 +1281,18 @@ CURLcode Curl_http(struct connectdata *conn)
 
       if(conn->resume_from) {
         /* This is because "resume" was selected */
-        long total_expected_size= conn->resume_from + data->set.infilesize;
-        conn->allocptr.rangeline = aprintf("Content-Range: bytes %s%ld/%ld\r\n",
-                                      conn->range, total_expected_size-1,
-                                      total_expected_size);
+        off_t total_expected_size= conn->resume_from + data->set.infilesize;
+        conn->allocptr.rangeline =
+	    aprintf("Content-Range: bytes %s%Od/%Od\r\n",
+		    conn->range, total_expected_size-1,
+		    total_expected_size);
       }
       else {
         /* Range was selected and then we just pass the incoming range and 
            append total size */
-        conn->allocptr.rangeline = aprintf("Content-Range: bytes %s/%d\r\n",
-                                      conn->range, data->set.infilesize);
+        conn->allocptr.rangeline =
+	    aprintf("Content-Range: bytes %s/%Od\r\n",
+		    conn->range, data->set.infilesize);
       }
     }
   }
@@ -1519,13 +1521,13 @@ CURLcode Curl_http(struct connectdata *conn)
       if((data->set.infilesize>0) && !conn->bits.upload_chunky)
         /* only add Content-Length if not uploading chunked */
         add_bufferf(req_buffer,
-                    "Content-Length: %d\r\n", /* file size */
+                    "Content-Length: %Od\r\n", /* file size */
                     data->set.infilesize );
 
       add_bufferf(req_buffer, "\r\n");
 
       /* set the upload size to the progress meter */
-      Curl_pgrsSetUploadSize(data, data->set.infilesize);
+      Curl_pgrsSetUploadSize(data, (double)data->set.infilesize);
 
       /* this sends the buffer and frees all the buffer resources */
       result = add_buffer_send(req_buffer, conn,
@@ -1602,7 +1604,7 @@ CURLcode Curl_http(struct connectdata *conn)
       }
       else {
         /* set the upload size to the progress meter */
-        Curl_pgrsSetUploadSize(data, data->set.infilesize);
+        Curl_pgrsSetUploadSize(data, (double)data->set.infilesize);
 
         /* set the pointer to mark that we will send the post body using
            the read callback */

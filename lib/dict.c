@@ -92,7 +92,7 @@ CURLcode Curl_dict(struct connectdata *conn)
   int sockfd = conn->sock[FIRSTSOCKET];
 
   char *path = conn->path;
-  long *bytecount = &conn->bytecount;
+  off_t *bytecount = &conn->bytecount;
 
   if(conn->bits.user_passwd) {
     /* AUTH is missing */

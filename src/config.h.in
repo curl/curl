@@ -76,3 +76,9 @@
 
 /* Define to 1 if you have the <pwd.h> header file. */
 #undef HAVE_PWD_H
+
+/* Define to 1 if you have the `strtoll' function. */
+#undef HAVE_STRTOLL
+
+/* The size of a `off_t', as computed by sizeof. */
+#undef SIZEOF_OFF_T

@@ -602,6 +602,9 @@ techniques).
 .IP CURLOPT_RESUME_FROM
 Pass a long as parameter. It contains the offset in number of bytes that you
 want the transfer to start from.
+.IP CURLOPT_RESUME_FROM_LARGE
+Pass an off_t as parameter. It contains the offset in number of bytes that you
+want the transfer to start from.
 .IP CURLOPT_CUSTOMREQUEST
 Pass a pointer to a zero terminated string as parameter. It will be user
 instead of GET or HEAD when doing a HTTP request, or instead of LIST or NLST
@@ -628,13 +631,26 @@ output. This is only relevant for protocols that have separate header and body
 parts. On HTTP(S) servers, this will make libcurl do a HEAD request.
 .IP CURLOPT_INFILESIZE
 When uploading a file to a remote site, this option should be used to tell
-libcurl what the expected size of the infile is.
+libcurl what the expected size of the infile is. This value should be passed
+as a long. See also \fICURLOPT_INFILESIZE_LARGE\fP.
+.IP CURLOPT_INFILESIZE_LARGE
+When uploading a file to a remote site, this option should be used to tell
+libcurl what the expected size of the infile is.  This value should be passed
+as an off_t.
 .IP CURLOPT_UPLOAD
 A non-zero parameter tells the library to prepare for an upload. The
-\fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE\fP are also interesting for
-uploads.
+\fICURLOPT_READDATA\fP and \fICURLOPT_INFILESIZE_LARGE\fP are also interesting
+for uploads.
 .IP CURLOPT_MAXFILESIZE
 Pass a long as parameter. This allows you to specify the maximum size (in
+bytes) of a file to download. If the file requested is larger than this value,
+the transfer will not start and CURLE_FILESIZE_EXCEEDED will be returned.
+
+NOTE: The file size is not always known prior to download, and for such files
+this option has no effect even if the file transfer ends up being larger than
+this given limit. This concerns both FTP and HTTP transfers.
+.IP CURLOPT_MAXFILESIZE_LARGE
+Pass an off_t as parameter. This allows you to specify the maximum size (in
 bytes) of a file to download. If the file requested is larger than this value,
 the transfer will not start and CURLE_FILESIZE_EXCEEDED will be returned.
 

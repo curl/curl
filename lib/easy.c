@@ -202,6 +202,7 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
   func_T param_func = (func_T)0;
   long param_long = 0;
   void *param_obj = NULL;
+  off_t param_offset = 0;
   struct SessionHandle *data = curl;
   CURLcode ret=CURLE_FAILED_INIT;
 
@@ -224,9 +225,14 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
     param_obj = va_arg(arg, void *);
     ret = Curl_setopt(data, tag, param_obj);
   }
-  else {
+  else if(tag < CURLOPTTYPE_OFF_T) {
+    /* This is a function pointer type */
     param_func = va_arg(arg, func_T );
     ret = Curl_setopt(data, tag, param_func);
+  } else {
+    /* This is an off_t type */
+    param_offset = va_arg(arg, off_t);
+    ret = Curl_setopt(data, tag, param_offset);
   }
 
   va_end(arg);

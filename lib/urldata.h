@@ -210,8 +210,8 @@ struct HTTP {
 
   const char *p_pragma;      /* Pragma: string */
   const char *p_accept;      /* Accept: string */
-  long readbytecount; 
-  long writebytecount;
+  off_t readbytecount; 
+  off_t writebytecount;
 
   /* For FORM posting */
   struct Form form;
@@ -239,7 +239,7 @@ struct HTTP {
  * FTP unique setup
  ***************************************************************************/
 struct FTP {
-  long *bytecountp;
+  off_t *bytecountp;
   char *user;    /* user name string */
   char *passwd;  /* password string */
   char *urlpath; /* the originally given path part of the URL */
@@ -249,7 +249,7 @@ struct FTP {
   char *entrypath; /* the PWD reply when we logged on */
 
   char *cache;       /* data cache between getresponse()-calls */
-  size_t cache_size; /* size of cache in bytes */
+  off_t cache_size; /* size of cache in bytes */
   bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
                        read the line, just ignore the result. */
@@ -304,7 +304,7 @@ struct ConnectBits {
  */
 
 struct Curl_transfer_keeper {
-  int bytecount;                /* total number of bytes read */
+  off_t bytecount;                /* total number of bytes read */
   int writebytecount;           /* number of bytes written */
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
@@ -325,7 +325,7 @@ struct Curl_transfer_keeper {
   char *end_ptr;		/* within buf */
   char *p;			/* within headerbuff */
   bool content_range;      	/* set TRUE if Content-Range: was found */
-  int offset;	                /* possible resume offset read from the
+  off_t offset;	                /* possible resume offset read from the
                                    Content-Range: header */
   int httpcode;		        /* error code from the 'HTTP/1.? XXX' line */
   int httpversion;		/* the HTTP version*10 */
@@ -427,12 +427,12 @@ struct connectdata {
   unsigned short remote_port; /* what remote port to connect to,
                                  not the proxy port! */
   char *ppath;
-  long bytecount;
+  off_t bytecount;
   long headerbytecount;  /* only count received headers */
 
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
-  ssize_t resume_from; /* continue [ftp] transfer from here */
+  off_t resume_from; /* continue [ftp] transfer from here */
 
   char *proxyhost; /* name of the http proxy host */
 
@@ -446,8 +446,8 @@ struct connectdata {
   struct timeval created; /* creation time */
   int sock[2];       /* two sockets, the second is used for the data transfer
                         when doing FTP */
-  long maxdownload; /* in bytes, the maximum amount of data to fetch, 0
-                       means unlimited */
+  off_t maxdownload; /* in bytes, the maximum amount of data to fetch, 0
+                        means unlimited */
   
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
   struct ssl_config_data ssl_config;
@@ -484,13 +484,13 @@ struct connectdata {
 
   /* READ stuff */
   int sockfd;		 /* socket to read from or -1 */
-  int size;		 /* -1 if unknown at this point */
-  long *bytecountp;	 /* return number of bytes read or NULL */
+  off_t size;		 /* -1 if unknown at this point */
+  off_t *bytecountp;	 /* return number of bytes read or NULL */
           
   /* WRITE stuff */
   int writesockfd;       /* socket to write to, it may very
                             well be the same we read from. -1 disables */
-  long *writebytecountp; /* return number of bytes written or NULL */
+  off_t *writebytecountp; /* return number of bytes written or NULL */
 
   /** Dynamicly allocated strings, may need to be freed before this **/
   /** struct is killed.                                             **/
@@ -784,10 +784,10 @@ struct UserDefined {
   long timeout;         /* in seconds, 0 means no timeout */
   long connecttimeout;  /* in seconds, 0 means no timeout */
   long ftp_response_timeout; /* in seconds, 0 means no timeout */
-  long infilesize;      /* size of file to upload, -1 means unknown */
+  off_t infilesize;      /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
-  int set_resume_from;  /* continue [ftp] transfer from here */
+  off_t set_resume_from;  /* continue [ftp] transfer from here */
   char *cookie;         /* HTTP cookie string to send */
   struct curl_slist *headers; /* linked list of extra headers */
   struct HttpPost *httppost;  /* linked list of POST data */
@@ -829,7 +829,7 @@ struct UserDefined {
 
   int ip_version; 
 
-  long max_filesize; /* Maximum file size to download */
+  off_t max_filesize; /* Maximum file size to download */
   
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially

@@ -82,6 +82,7 @@
 #include "krb4.h"
 #endif
 
+#include "strtoofft.h"
 #include "strequal.h"
 #include "ssluse.h"
 #include "connect.h"
@@ -284,9 +285,16 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
        */
       if(ftp->cache) {
         /* we had data in the "cache", copy that instead of doing an actual
-           read */
-        memcpy(ptr, ftp->cache, ftp->cache_size);
-        gotbytes = ftp->cache_size;
+         * read
+	 *
+	 * Dave Meyer, December 2003:
+	 * ftp->cache_size is cast to int here.  This should be safe,
+	 * because it would have been populated with something of size
+	 * int to begin with, even though its datatype may be larger
+	 * than an int.
+	 */
+        memcpy(ptr, ftp->cache, (int)ftp->cache_size);
+        gotbytes = (int)ftp->cache_size;
         free(ftp->cache);    /* free the cache */
         ftp->cache = NULL;   /* clear the pointer */
         ftp->cache_size = 0; /* zero the size just in case */
@@ -364,9 +372,9 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
              already!  Cleverly figured out by Eric Lavigne in December
              2001. */
           ftp->cache_size = gotbytes - i;
-          ftp->cache = (char *)malloc(ftp->cache_size);
+          ftp->cache = (char *)malloc((int)ftp->cache_size);
           if(ftp->cache)
-            memcpy(ftp->cache, line_start, ftp->cache_size);
+            memcpy(ftp->cache, line_start, (int)ftp->cache_size);
           else
             return CURLE_OUT_OF_MEMORY; /**BANG**/
         }
@@ -712,8 +720,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
     if((-1 != data->set.infilesize) &&
        (data->set.infilesize != *ftp->bytecountp) &&
        !data->set.crlf) {
-      failf(data, "Uploaded unaligned file size (%d out of %d bytes)",
-            *ftp->bytecountp, data->set.infilesize);
+      failf(data, "Uploaded unaligned file size (%Od out of %Od bytes)",
+	    *ftp->bytecountp, data->set.infilesize);
       conn->bits.close = TRUE; /* close this connection since we don't
                                   know what state this error leaves us in */
       return CURLE_PARTIAL_FILE;
@@ -722,7 +730,8 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   else {
     if((-1 != conn->size) && (conn->size != *ftp->bytecountp) &&
        (conn->maxdownload != *ftp->bytecountp)) {
-      failf(data, "Received only partial file: %d bytes", *ftp->bytecountp);
+      failf(data, "Received only partial file: %Od bytes",
+	    *ftp->bytecountp);
       conn->bits.close = TRUE; /* close this connection since we don't
                                   know what state this error leaves us in */
       return CURLE_PARTIAL_FILE;
@@ -912,7 +921,7 @@ static CURLcode ftp_transfertype(struct connectdata *conn,
 
 static
 CURLcode ftp_getsize(struct connectdata *conn, char *file,
-                      ssize_t *size)
+                      off_t *size)
 {
   struct SessionHandle *data = conn->data;
   int ftpcode;
@@ -927,7 +936,7 @@ CURLcode ftp_getsize(struct connectdata *conn, char *file,
 
   if(ftpcode == 213) {
     /* get the size from the ascii string: */
-    *size = atoi(buf+4);
+    *size = strtoofft(buf+4, NULL, 0);
   }
   else
     return CURLE_FTP_COULDNT_GET_SIZE;
@@ -1651,7 +1660,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 
   /* the ftp struct is already inited in Curl_ftp_connect() */
   struct FTP *ftp = conn->proto.ftp;
-  long *bytecountp = ftp->bytecountp;
+  off_t *bytecountp = ftp->bytecountp;
 
   if(data->set.upload) {
 
@@ -1683,7 +1692,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       if(conn->resume_from < 0 ) {
         /* we could've got a specified offset from the command line,
            but now we know we didn't */
-        ssize_t gottensize;
+        off_t gottensize;
 
         if(CURLE_OK != ftp_getsize(conn, ftp->file, &gottensize)) {
           failf(data, "Couldn't get remote file size");
@@ -1694,7 +1703,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 
       if(conn->resume_from) {
         /* do we still game? */
-        int passed=0;
+        off_t passed=0;
         /* enable append instead */
         data->set.ftp_append = 1;
 
@@ -1702,19 +1711,20 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
            input. If we knew it was a proper file we could've just
            fseek()ed but we only have a stream here */
         do {
-          int readthisamountnow = (conn->resume_from - passed);
-          int actuallyread;
+          off_t readthisamountnow = (conn->resume_from - passed);
+          off_t actuallyread;
 
           if(readthisamountnow > BUFSIZE)
             readthisamountnow = BUFSIZE;
 
           actuallyread =
-            conn->fread(data->state.buffer, 1, readthisamountnow,
+            conn->fread(data->state.buffer, 1, (size_t)readthisamountnow,
                         conn->fread_in);
 
           passed += actuallyread;
           if(actuallyread != readthisamountnow) {
-            failf(data, "Could only read %d bytes from the input", passed);
+            failf(data, "Could only read %Od bytes from the input",
+		  passed);
             return CURLE_FTP_COULDNT_USE_REST;
           }
         }
@@ -1781,7 +1791,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
     /* When we know we're uploading a specified file, we can get the file
        size prior to the actual upload. */
 
-    Curl_pgrsSetUploadSize(data, data->set.infilesize);
+    Curl_pgrsSetUploadSize(data, (double)data->set.infilesize);
 
     result = Curl_Transfer(conn, -1, -1, FALSE, NULL, /* no download */
                            SECONDARYSOCKET, bytecountp);
@@ -1792,18 +1802,18 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
   else if(!data->set.no_body) {
     /* Retrieve file or directory */
     bool dirlist=FALSE;
-    long downloadsize=-1;
+    off_t downloadsize=-1;
 
     if(conn->bits.use_range && conn->range) {
-      long from, to;
-      int totalsize=-1;
+      off_t from, to;
+      off_t totalsize=-1;
       char *ptr;
       char *ptr2;
 
-      from=strtol(conn->range, &ptr, 0);
+      from=strtoofft(conn->range, &ptr, 0);
       while(ptr && *ptr && (isspace((int)*ptr) || (*ptr=='-')))
         ptr++;
-      to=strtol(ptr, &ptr2, 0);
+      to=strtoofft(ptr, &ptr2, 0);
       if(ptr == ptr2) {
         /* we didn't get any digit */
         to=-1;
@@ -1811,25 +1821,25 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       if((-1 == to) && (from>=0)) {
         /* X - */
         conn->resume_from = from;
-        infof(data, "FTP RANGE %d to end of file\n", from);
+        infof(data, "FTP RANGE %Od to end of file\n", from);
       }
       else if(from < 0) {
         /* -Y */
         totalsize = -from;
         conn->maxdownload = -from;
         conn->resume_from = from;
-        infof(data, "FTP RANGE the last %d bytes\n", totalsize);
+        infof(data, "FTP RANGE the last %Od bytes\n", totalsize);
       }
       else {
         /* X-Y */
         totalsize = to-from;
         conn->maxdownload = totalsize+1; /* include the last mentioned byte */
         conn->resume_from = from;
-        infof(data, "FTP RANGE from %d getting %d bytes\n", from,
-              conn->maxdownload);
+        infof(data, "FTP RANGE from %Od getting %Od bytes\n", from,
+	      conn->maxdownload);
       }
-      infof(data, "range-download from %d to %d, totally %d bytes\n",
-            from, to, conn->maxdownload);
+      infof(data, "range-download from %Od to %Od, totally %Od bytes\n",
+	    from, to, conn->maxdownload);
       ftp->dont_check = TRUE; /* dont check for successful transfer */
     }
 
@@ -1853,7 +1863,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
             (data->set.ftp_list_only?"NLST":"LIST"));
     }
     else {
-      ssize_t foundsize;
+      off_t foundsize;
 
       /* Set type to binary (unless specified ASCII) */
       result = ftp_transfertype(conn, data->set.ftp_ascii);
@@ -1903,7 +1913,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
           if(conn->resume_from< 0) {
             /* We're supposed to download the last abs(from) bytes */
             if(foundsize < -conn->resume_from) {
-              failf(data, "Offset (%d) was beyond file size (%d)",
+              failf(data, "Offset (%Od) was beyond file size (%Od)",
                     conn->resume_from, foundsize);
               return CURLE_FTP_BAD_DOWNLOAD_RESUME;
             }
@@ -1914,7 +1924,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
           }
           else {
             if(foundsize < conn->resume_from) {
-              failf(data, "Offset (%d) was beyond file size (%d)",
+              failf(data, "Offset (%Od) was beyond file size (%Od)",
                     conn->resume_from, foundsize);
               return CURLE_FTP_BAD_DOWNLOAD_RESUME;
             }
@@ -1935,10 +1945,10 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         }
 	
         /* Set resume file transfer offset */
-        infof(data, "Instructs server to resume from offset %d\n",
+        infof(data, "Instructs server to resume from offset %Od\n",
               conn->resume_from);
 
-        FTPSENDF(conn, "REST %d", conn->resume_from);
+        FTPSENDF(conn, "REST %Od", conn->resume_from);
 
         result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
         if(result)
@@ -1976,7 +1986,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         E:
         125 Data connection already open; Transfer starting. */
 
-      int size=-1; /* default unknown size */
+      off_t size=-1; /* default unknown size */
 
 
       /*
@@ -2018,7 +2028,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
           /* only if we have nothing but digits: */
           if(bytes++) {
             /* get the number! */
-            size = atoi(bytes);
+            size = strtoofft(bytes, NULL, 0);
           }
             
         }
@@ -2041,10 +2051,10 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 	  return result;
       }
 
-      if(size > conn->maxdownload)
+      if(size > conn->maxdownload && conn->maxdownload > 0)
         size = conn->size = conn->maxdownload;
 
-      infof(data, "Getting file with size: %d\n", size);
+      infof(data, "Getting file with size: %Od\n", size);
 
       /* FTP download: */
       result=Curl_Transfer(conn, SECONDARYSOCKET, size, FALSE,
@@ -2160,7 +2170,7 @@ CURLcode ftp_perform(struct connectdata *conn,
     /* The SIZE command is _not_ RFC 959 specified, and therefor many servers
        may not support it! It is however the only way we have to get a file's
        size! */
-    ssize_t filesize;
+    off_t filesize;
     ssize_t nread;
     int ftpcode;
 
@@ -2176,7 +2186,7 @@ CURLcode ftp_perform(struct connectdata *conn,
     result = ftp_getsize(conn, ftp->file, &filesize);
 
     if(CURLE_OK == result) {
-      sprintf(buf, "Content-Length: %d\r\n", filesize);
+      sprintf(buf, "Content-Length: %Od\r\n", filesize);
       result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
       if(result)
         return result;
