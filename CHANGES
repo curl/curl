@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (29 November 2004)
+- As reported in Mandrake's bug tracker bug 12285
+  (http://qa.mandrakesoft.com/show_bug.cgi?id=12285), when connecting to an
+  IPv6 host with FTP, --disable-epsv (or --disable-eprt) effectively disables
+  the ability to transfer a file. Now, when connected to an FTP server with
+  IPv6, these FTP commands can't be disabled even if asked to with the
+  available libcurl options.
+
 Daniel (26 November 2004)
 - As reported in Mandrake's bug tracker bug 12289
   (http://qa.mandrakesoft.com/show_bug.cgi?id=12289), curl would print a

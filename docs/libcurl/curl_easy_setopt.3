@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "21 Nov 2004" "libcurl 7.12.3" "libcurl Manual"
+.TH curl_easy_setopt 3 "29 Nov 2004" "libcurl 7.12.3" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -706,11 +706,15 @@ LPRT) command when doing active FTP downloads (which is enabled by
 \fICURLOPT_FTPPORT\fP). Using EPRT means that it will first attempt to use
 EPRT and then LPRT before using PORT, but if you pass FALSE (zero) to this
 option, it will not try using EPRT or LPRT, only plain PORT. (Added in 7.10.5)
+
+If the server is an IPv6 host, this option will have no effect as of 7.12.3.
 .IP CURLOPT_FTP_USE_EPSV
 Pass a long. If the value is non-zero, it tells curl to use the EPSV command
 when doing passive FTP downloads (which it always does by default). Using EPSV
 means that it will first attempt to use EPSV before using PASV, but if you
 pass FALSE (zero) to this option, it will not try using EPSV, only plain PASV.
+
+If the server is an IPv6 host, this option will have no effect as of 7.12.3.
 .IP CURLOPT_FTP_CREATE_MISSING_DIRS
 Pass a long. If the value is non-zero, curl will attempt to create any remote
 directory that it fails to CWD into. CWD is the command that changes working
