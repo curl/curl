@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "22 Oct 2003" "Curl 7.10.8" "Curl Manual"
+.TH curl 1 "7 Nov 2003" "Curl 7.10.8" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -395,6 +395,9 @@ If this option is used twice, the second time will again disable it.
 should be one of 'clear', 'safe', 'confidential' or 'private'. Should you use
 a level that is not one of these, 'private' will instead be used.
 
+This option requiures that the library was built with kerberos4 support. This
+is not very common. Use \fI--version\fP to see if your version supports it.
+
 If this option is used several times, the last one will be used.
 .IP "-K/--config <config file>"
 Specify which config file to read curl arguments from. The config file is a
@@ -500,9 +503,9 @@ meant as a support for Kerberos5 authentication but may be also used along
 with another authentication methods. For more information see IETF draft
 draft-brezak-spnego-http-04.txt. (Added in 7.10.6)
 
-\fBNOTE\fP that this option requiures that the library was built with GSSAPI
-support. This is not very common. Use \fIcurl --version\fP to see if your
-version supports GSS-Negotiate.
+This option requiures that the library was built with GSSAPI support. This is
+not very common. Use \fI--version\fP to see if your version supports
+GSS-Negotiate.
 
 If this option is used several times, the following occurrences make no
 difference.
@@ -521,8 +524,8 @@ on their efforts. This kind of behavior should not be endorsed, you should
 encourage everyone who uses NTLM to switch to a public and documented
 authentication method instead. Such as Digest. (Added in 7.10.6)
 
-\fBNOTE\fP that this option requiures that the library was built with SSL
-support. Use \fIcurl --version\fP to see if your version supports NTLM.
+This option requiures that the library was built with SSL support. Use \fIcurl
+--version\fP to see if your version supports NTLM.
 
 If this option is used several times, the following occurrences make no
 difference.
