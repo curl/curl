@@ -395,7 +395,7 @@ _Transfer(struct connectdata *c_conn)
               }
               else if(strnequal("Last-Modified:", p,
                                 strlen("Last-Modified:")) &&
-                      data->timecondition) {
+                      (data->timecondition || data->bits.get_filetime) ) {
                 time_t secs=time(NULL);
                 timeofdoc = curl_getdate(p+strlen("Last-Modified:"), &secs);
                 if(data->bits.get_filetime)

@@ -365,6 +365,9 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
   case CURLOPT_POST:
     data->bits.http_post = va_arg(param, long)?TRUE:FALSE;
     break;
+  case CURLOPT_FILETIME:
+    data->bits.get_filetime = va_arg(param, long)?TRUE:FALSE;
+    break;
   case CURLOPT_FTPLISTONLY:
     data->bits.ftp_list_only = va_arg(param, long)?TRUE:FALSE;
     break;

@@ -659,9 +659,9 @@ CURLcode _ftp(struct connectdata *conn)
     }
   }
 
-  if(data->bits.get_filetime) {
+  if(data->bits.get_filetime && ftp->file) {
     /* we have requested to get the modified-time of the file, this is yet
-       again a grey area the MDTM is not kosher RFC959 */
+       again a grey area as the MDTM is not kosher RFC959 */
     ftpsendf(data->firstsocket, conn, "MDTM %s", ftp->file);
 
     nread = GetLastResponse(data->firstsocket, buf, conn, &ftpcode);
@@ -725,10 +725,29 @@ CURLcode _ftp(struct connectdata *conn)
     /* get the size from the ascii string: */
     filesize = atoi(buf+4);
 
-    sprintf(buf, "Content-Length: %d\n", filesize);
+    sprintf(buf, "Content-Length: %d\r\n", filesize);
     result = client_write(data, CLIENTWRITE_BOTH, buf, 0);
     if(result)
       return result;
+
+#ifdef HAVE_STRFTIME
+    if(data->bits.get_filetime && data->progress.filetime) {
+      struct tm *tm;
+#ifdef HAVE_LOCALTIME_R
+      struct tm buffer;
+      tm = (struct tm *)localtime_r(&data->progress.filetime, &buffer);
+#else
+      tm = localtime(&data->progress.filetime);
+#endif
+      /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
+      strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S %Z\r\n",
+               tm);
+      result = client_write(data, CLIENTWRITE_BOTH, buf, 0);
+      if(result)
+        return result;
+    }
+#endif
+
     return CURLE_OK;
   }
 
