@@ -208,6 +208,15 @@ char *strdup(char *str)
 #include "curlmsg_vms.h"
 #endif
 
+/* Support uploading and resuming of >2GB files
+ */
+#if defined(WIN32) && (SIZEOF_CURL_OFF_T > 4)
+#define struct_stat struct _stati64
+#define stat(file,st) _stati64(file,st)
+#else
+#define struct_stat struct stat
+#endif
+
 #ifdef WIN32
 /*
  * Truncate a file handle at a 64-bit position 'where'.
@@ -2115,7 +2124,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       config->condtime=curl_getdate(nextarg, &now);
       if(-1 == (int)config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
-        struct stat statbuf;
+        struct_stat statbuf;
         if(-1 == stat(nextarg, &statbuf)) {
           /* failed, remove time condition */
           config->timecond = CURL_TIMECOND_NONE;
@@ -3191,7 +3200,7 @@ operate(struct Configurable *config, int argc, char *argv[])
             /* We're told to continue from where we are now. Get the
                size of the file as it is now and open it for append instead */
 
-            struct stat fileinfo;
+            struct_stat fileinfo;
 
             /* VMS -- Danger, the filesize is only valid for stream files */
             if(0 == stat(outfile, &fileinfo))
@@ -3222,7 +3231,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           /*
            * We have specified a file to upload and it isn't "-".
            */
-          struct stat fileinfo;
+          struct_stat fileinfo;
 
           /* If no file name part is given in the URL, we add this file name */
           char *ptr=strstr(url, "://");
