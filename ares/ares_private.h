@@ -41,7 +41,7 @@
 
 #if defined(WIN32) && !defined(WATT32)
 
-#define IsNT ((int)GetVersion()>0)
+#define IS_NT()        ((int)GetVersion() > 0)
 #define WIN_NS_9X      "System\\CurrentControlSet\\Services\\VxD\\MSTCP"
 #define WIN_NS_NT_KEY  "System\\CurrentControlSet\\Services\\Tcpip\\Parameters"
 #define NAMESERVER     "NameServer"
