@@ -5,10 +5,11 @@
 ##
 ## Comments to: Troy Engel <tengel@sonic.net>
 ## Updated by: Craig Davison <cd@securityfocus.com>
+## Updated by: SM <sm@technologist.com>
 
 PROGRAM_NAME = libcurl.lib
 PROGRAM_NAME_DEBUG = libcurld.lib
-OPENSSL_PATH = ../../openssl-0.9.6
+#OPENSSL_PATH = ../../openssl-0.9.6a
 
 ########################################################
 ## Nothing more to do below this line!
@@ -22,7 +23,7 @@ CCD = cl.exe /MDd /Gm /ZI /Od /D "_DEBUG" /GZ
 LINKD = link.exe -lib /out:$(PROGRAM_NAME_DEBUG)
 
 ## SSL Release
-CCRS = cl.exe /MD /O2 /D "NDEBUG" /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/include" /I "$(OPENSSL_PATH)/include/openssl"
+CCRS = cl.exe /MD /O2 /D "NDEBUG" /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
 LINKRS = link.exe -lib /out:$(PROGRAM_NAME) /LIBPATH:$(OPENSSL_PATH)/out32dll
 
 CFLAGS = /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS"
@@ -299,6 +300,8 @@ formdatars.obj: formdata.c
 	$(CCRS) $(CFLAGS) formdata.c
 ftprs.obj: ftp.c
 	$(CCRS) $(CFLAGS) ftp.c
+httprs.obj: http.c
+	$(CCR) $(CFLAGS) http.c
 http_chunksrs.obj: http_chunks.c
 	$(CCRS) $(CFLAGS) http_chunks.c
 ldaprs.obj: ldap.c
