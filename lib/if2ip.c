@@ -77,6 +77,10 @@
 #include "memdebug.h"
 #endif
 
+#ifdef DJGPP
+#define IOCTL_3_ARGS
+#endif
+
 #define SYS_ERROR -1
 
 char *Curl_if2ip(char *interface, char *buf, int buf_size)
