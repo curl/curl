@@ -403,6 +403,7 @@ PORTS
         - Alpha FreeBSD 4.1, 4.5
         - Alpha Linux 2.2, 2.4
         - Alpha NetBSD 1.5.2
+        - Alpha OpenBSD 3.0
         - Alpha OpenVMS V7.1-1H2
         - Alpha Tru64 v5.0 5.1
         - HP-PA HP-UX 9.X 10.X 11.X
