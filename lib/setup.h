@@ -134,7 +134,6 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #endif
 
 #if defined(CURLDEBUG) && defined(HAVE_ASSERT_H)
-#define NDEBUG
 #define curlassert(x) assert(x)
 #else
 /* does nothing without CURLDEBUG defined */
