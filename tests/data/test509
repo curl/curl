@@ -1,0 +1,51 @@
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: localhost:8433
+Content-length:6
+
+Hello
+</data>
+<datacheck>
+Hello
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+https
+</server>
+<features>
+SSL
+</features>
+<tool>
+lib509
+</tool>
+
+ <name>
+simple HTTPS GET and URL redirect in certificate
+ </name>
+ <command>
+https://localhost:%HTTPSPORT/dvcs
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /509 HTTP/1.1
+Host: localhost:8433
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>

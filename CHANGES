@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (12 January 2004)
+- Peter Sylvester brought code that now allows a callback to modified the URL
+  even when the multi interface is used, and then libcurl will simulate a
+  "follow location" to that new URL. Test 509 was added to test this feature.
+
 - Extended the time we retry servers in the test script, and I also made it
   retry the https and ftps servers before they are considered bad. I believe
   the previous approach could turn problematic on really slow hosts.

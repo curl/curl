@@ -320,45 +320,62 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   easy=multi->easy.next;
   while(easy) {
-
 #ifdef CURLDEBUG
     fprintf(stderr, "HANDLE %p: State: %x\n",
             (char *)easy, easy->state);
 #endif
+    do {
+      if (CURLM_STATE_WAITCONNECT <= easy->state &&
+          easy->state <= CURLM_STATE_DO &&
+          easy->easy_handle->change.url_changed) {
+        char *gotourl;
+        Curl_posttransfer(easy->easy_handle);
 
-    switch(easy->state) {
-    case CURLM_STATE_INIT:
-      /* init this transfer. */
-      easy->result=Curl_pretransfer(easy->easy_handle);
+        gotourl = strdup(easy->easy_handle->change.url);
+        easy->easy_handle->change.url_changed = FALSE;
+        easy->result = Curl_follow(easy->easy_handle, gotourl);
+        if(CURLE_OK == easy->result)
+          easy->state = CURLM_STATE_CONNECT;
+        else
+          free(gotourl);
+      }
+    
+      easy->easy_handle->change.url_changed = FALSE;
 
-      if(CURLE_OK == easy->result) {
-        /* after init, go CONNECT */
-        easy->state = CURLM_STATE_CONNECT;
-        result = CURLM_CALL_MULTI_PERFORM; 
+      switch(easy->state) {
+      case CURLM_STATE_INIT:
+        /* init this transfer. */
+        easy->result=Curl_pretransfer(easy->easy_handle);
+
+        if(CURLE_OK == easy->result) {
+          /* after init, go CONNECT */
+          easy->state = CURLM_STATE_CONNECT;
+          result = CURLM_CALL_MULTI_PERFORM; 
         
-        easy->easy_handle->state.used_interface = Curl_if_multi;
-      }
-      break;
-
-    case CURLM_STATE_CONNECT:
-      /* Connect. We get a connection identifier filled in. */
-      Curl_pgrsTime(easy->easy_handle, TIMER_STARTSINGLE);
-      easy->result = Curl_connect(easy->easy_handle, &easy->easy_conn, &async);
-
-      if(CURLE_OK == easy->result) {
-        if(async)
-          /* We're now waiting for an asynchronous name lookup */
-          easy->state = CURLM_STATE_WAITRESOLVE;
-        else {
-          /* after the connect has been sent off, go WAITCONNECT */
-          easy->state = CURLM_STATE_WAITCONNECT;
-          result = CURLM_CALL_MULTI_PERFORM;
+          easy->easy_handle->state.used_interface = Curl_if_multi;
         }
-      }
-      break;
+        break;
 
-    case CURLM_STATE_WAITRESOLVE:
-      /* awaiting an asynch name resolve to complete */
+      case CURLM_STATE_CONNECT:
+        /* Connect. We get a connection identifier filled in. */
+        Curl_pgrsTime(easy->easy_handle, TIMER_STARTSINGLE);
+        easy->result = Curl_connect(easy->easy_handle, &easy->easy_conn,
+                                    &async);
+
+        if(CURLE_OK == easy->result) {
+          if(async)
+            /* We're now waiting for an asynchronous name lookup */
+            easy->state = CURLM_STATE_WAITRESOLVE;
+          else {
+            /* after the connect has been sent off, go WAITCONNECT */
+            easy->state = CURLM_STATE_WAITCONNECT;
+            result = CURLM_CALL_MULTI_PERFORM;
+          }
+        }
+        break;
+
+      case CURLM_STATE_WAITRESOLVE:
+        /* awaiting an asynch name resolve to complete */
       {
         struct Curl_dns_entry *dns;
 
@@ -387,146 +404,149 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       }
       break;
 
-    case CURLM_STATE_WAITCONNECT:
-      /* awaiting a completion of an asynch connect */
-      easy->result = Curl_is_connected(easy->easy_conn,
-                                       easy->easy_conn->sock[FIRSTSOCKET],
-                                       &connected);
-      if(connected)
-        easy->result = Curl_protocol_connect(easy->easy_conn, NULL);
+      case CURLM_STATE_WAITCONNECT:
+        /* awaiting a completion of an asynch connect */
+        easy->result = Curl_is_connected(easy->easy_conn,
+                                         easy->easy_conn->sock[FIRSTSOCKET],
+                                         &connected);
+        if(connected)
+          easy->result = Curl_protocol_connect(easy->easy_conn, NULL);
 
-      if(CURLE_OK != easy->result) {
-        /* failure detected */
-        Curl_disconnect(easy->easy_conn); /* close the connection */
-        easy->easy_conn = NULL;           /* no more connection */
-        break;
-      }
-
-      if(connected) {
-        /* after the connect has completed, go DO */
-        easy->state = CURLM_STATE_DO;
-        result = CURLM_CALL_MULTI_PERFORM; 
-      }
-      break;
-
-    case CURLM_STATE_DO:
-      /* Do the fetch or put request */
-      easy->result = Curl_do(&easy->easy_conn);
-      if(CURLE_OK == easy->result) {
-
-        /* after do, go PERFORM... or DO_MORE */
-        if(easy->easy_conn->bits.do_more) {
-          /* we're supposed to do more, but we need to sit down, relax
-             and wait a little while first */
-          easy->state = CURLM_STATE_DO_MORE;
-          result = CURLM_OK;
+        if(CURLE_OK != easy->result) {
+          /* failure detected */
+          Curl_disconnect(easy->easy_conn); /* close the connection */
+          easy->easy_conn = NULL;           /* no more connection */
+          break;
         }
-        else {
-          /* we're done with the DO, now PERFORM */
-          easy->result = Curl_readwrite_init(easy->easy_conn);
+
+        if(connected) {
+          /* after the connect has completed, go DO */
+          easy->state = CURLM_STATE_DO;
+          result = CURLM_CALL_MULTI_PERFORM; 
+        }
+        break;
+
+      case CURLM_STATE_DO:
+        /* Do the fetch or put request */
+        easy->result = Curl_do(&easy->easy_conn);
+        if(CURLE_OK == easy->result) {
+
+          /* after do, go PERFORM... or DO_MORE */
+          if(easy->easy_conn->bits.do_more) {
+            /* we're supposed to do more, but we need to sit down, relax
+               and wait a little while first */
+            easy->state = CURLM_STATE_DO_MORE;
+            result = CURLM_OK;
+          }
+          else {
+            /* we're done with the DO, now PERFORM */
+            easy->result = Curl_readwrite_init(easy->easy_conn);
+            if(CURLE_OK == easy->result) {
+              easy->state = CURLM_STATE_PERFORM;
+              result = CURLM_CALL_MULTI_PERFORM; 
+            }
+          }
+        }
+        break;
+
+      case CURLM_STATE_DO_MORE:
+        /*
+         * First, check if we really are ready to do more.
+         */
+        easy->result =
+          Curl_is_connected(easy->easy_conn,
+                            easy->easy_conn->sock[SECONDARYSOCKET],
+                            &connected);
+        if(connected) {
+          /*
+           * When we are connected, DO MORE and then go PERFORM
+           */
+          easy->result = Curl_do_more(easy->easy_conn);
+
+          if(CURLE_OK == easy->result)
+            easy->result = Curl_readwrite_init(easy->easy_conn);
+
           if(CURLE_OK == easy->result) {
             easy->state = CURLM_STATE_PERFORM;
             result = CURLM_CALL_MULTI_PERFORM; 
           }
         }
-      }
-      break;
+        break;
 
-    case CURLM_STATE_DO_MORE:
-      /*
-       * First, check if we really are ready to do more.
-       */
-      easy->result = Curl_is_connected(easy->easy_conn,
-                                       easy->easy_conn->sock[SECONDARYSOCKET],
-                                       &connected);
-      if(connected) {
-        /*
-         * When we are connected, DO MORE and then go PERFORM
-         */
-        easy->result = Curl_do_more(easy->easy_conn);
+      case CURLM_STATE_PERFORM:
+        /* read/write data if it is ready to do so */
+        easy->result = Curl_readwrite(easy->easy_conn, &done);
 
-        if(CURLE_OK == easy->result)
-          easy->result = Curl_readwrite_init(easy->easy_conn);
+        if(easy->result)  {
+          /* The transfer phase returned error, we mark the connection to get
+           * closed to prevent being re-used. This is becasue we can't
+           * possibly know if the connection is in a good shape or not now. */
+          easy->easy_conn->bits.close = TRUE;
 
-        if(CURLE_OK == easy->result) {
-          easy->state = CURLM_STATE_PERFORM;
-          result = CURLM_CALL_MULTI_PERFORM; 
+          if(-1 !=easy->easy_conn->sock[SECONDARYSOCKET]) {
+            /* if we failed anywhere, we must clean up the secondary socket if
+               it was used */
+            sclose(easy->easy_conn->sock[SECONDARYSOCKET]);
+            easy->easy_conn->sock[SECONDARYSOCKET]=-1;
+          }
+          Curl_posttransfer(easy->easy_handle);
+          Curl_done(easy->easy_conn);
         }
-      }
-      break;
 
-    case CURLM_STATE_PERFORM:
-      /* read/write data if it is ready to do so */
-      easy->result = Curl_readwrite(easy->easy_conn, &done);
+        /* after the transfer is done, go DONE */
+        else if(TRUE == done) {
 
-      if(easy->result)  {
-        /* The transfer phase returned error, we mark the connection to get
-         * closed to prevent being re-used. This is becasue we can't
-         * possibly know if the connection is in a good shape or not now. */
-        easy->easy_conn->bits.close = TRUE;
+          /* call this even if the readwrite function returned error */
+          Curl_posttransfer(easy->easy_handle);
 
-        if(-1 !=easy->easy_conn->sock[SECONDARYSOCKET]) {
-          /* if we failed anywhere, we must clean up the secondary socket if
-             it was used */
-          sclose(easy->easy_conn->sock[SECONDARYSOCKET]);
-          easy->easy_conn->sock[SECONDARYSOCKET]=-1;
-        }
-        Curl_posttransfer(easy->easy_handle);
-        Curl_done(easy->easy_conn);
-      }
-
-      /* after the transfer is done, go DONE */
-      else if(TRUE == done) {
-
-        /* call this even if the readwrite function returned error */
-        Curl_posttransfer(easy->easy_handle);
-
-        /* When we follow redirects, must to go back to the CONNECT state */
-        if(easy->easy_conn->newurl) {
-          char *newurl = easy->easy_conn->newurl;
-          easy->easy_conn->newurl = NULL;
-          easy->result = Curl_follow(easy->easy_handle, newurl);
-          if(CURLE_OK == easy->result) {
-            easy->state = CURLM_STATE_CONNECT;
-            result = CURLM_CALL_MULTI_PERFORM;
+          /* When we follow redirects, must to go back to the CONNECT state */
+          if(easy->easy_conn->newurl) {
+            char *newurl = easy->easy_conn->newurl;
+            easy->easy_conn->newurl = NULL;
+            easy->result = Curl_follow(easy->easy_handle, newurl);
+            if(CURLE_OK == easy->result) {
+              easy->state = CURLM_STATE_CONNECT;
+              result = CURLM_CALL_MULTI_PERFORM;
+            }
+          }
+          else {
+            easy->state = CURLM_STATE_DONE;
+            result = CURLM_CALL_MULTI_PERFORM; 
           }
         }
-        else {
-          easy->state = CURLM_STATE_DONE;
-          result = CURLM_CALL_MULTI_PERFORM; 
-        }
-      }
-      break;
-    case CURLM_STATE_DONE:
-      /* post-transfer command */
-      easy->result = Curl_done(easy->easy_conn);
+        break;
+      case CURLM_STATE_DONE:
+        /* post-transfer command */
+        easy->result = Curl_done(easy->easy_conn);
 
-      /* after we have DONE what we're supposed to do, go COMPLETED, and
-         it doesn't matter what the Curl_done() returned! */
-      easy->state = CURLM_STATE_COMPLETED;
-      break;
-
-    case CURLM_STATE_COMPLETED:
-      /* this is a completed transfer, it is likely to still be connected */
-
-      /* This node should be delinked from the list now and we should post
-         an information message that we are complete. */
-      break;
-    default:
-      return CURLM_INTERNAL_ERROR;
-    }
-
-    if(CURLM_STATE_COMPLETED != easy->state) {
-      if(CURLE_OK != easy->result) {
-        /*
-         * If an error was returned, and we aren't in completed state now,
-         * then we go to completed and consider this transfer aborted.  */
+        /* after we have DONE what we're supposed to do, go COMPLETED, and
+           it doesn't matter what the Curl_done() returned! */
         easy->state = CURLM_STATE_COMPLETED;
+        break;
+
+      case CURLM_STATE_COMPLETED:
+        /* this is a completed transfer, it is likely to still be connected */
+
+        /* This node should be delinked from the list now and we should post
+           an information message that we are complete. */
+        break;
+      default:
+        return CURLM_INTERNAL_ERROR;
       }
-      else
-        /* this one still lives! */
-        (*running_handles)++;
-    }
+
+      if(CURLM_STATE_COMPLETED != easy->state) {
+        if(CURLE_OK != easy->result) {
+          /*
+           * If an error was returned, and we aren't in completed state now,
+           * then we go to completed and consider this transfer aborted.  */
+          easy->state = CURLM_STATE_COMPLETED;
+        }
+        else
+          /* this one still lives! */
+          (*running_handles)++;
+      }
+
+    } while (easy->easy_handle->change.url_changed);
 
     if ((CURLM_STATE_COMPLETED == easy->state) && !easy->msg) {
       /* clear out the usage of the shared DNS cache */
