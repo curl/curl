@@ -190,6 +190,10 @@ checkhttpprefix(struct SessionHandle *data,
   return FALSE;
 }
 
+/*
+ * Curl_readwrite() is the low-level function to be called when data is to
+ * be read and written to/from the connection.
+ */
 CURLcode Curl_readwrite(struct connectdata *conn,
                         bool *done)
 {
@@ -1300,6 +1304,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   return CURLE_OK;
 }
 
+/*
+ * Curl_readwrite_init() inits the readwrite session.
+ */
+
 CURLcode Curl_readwrite_init(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
@@ -1379,6 +1387,13 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/*
+ * Curl_single_fdset() gets called by the multi interface code when the app
+ * has requested to get the fd_sets for the current connection. This function
+ * will then be called once for every connection that the multi interface
+ * keeps track of. This function will only be called for connections that are
+ * in the proper state to have this information available.
+ */
 void Curl_single_fdset(struct connectdata *conn,
                        fd_set *read_fd_set,
                        fd_set *write_fd_set,
@@ -1432,7 +1447,8 @@ Transfer(struct connectdata *conn)
        is different*/
     Curl_readwrite_init(conn);
 
-  if((conn->sockfd == CURL_SOCKET_BAD) && (conn->writesockfd == CURL_SOCKET_BAD))
+  if((conn->sockfd == CURL_SOCKET_BAD) &&
+     (conn->writesockfd == CURL_SOCKET_BAD))
     /* nothing to read, nothing to write, we're already OK! */
     return CURLE_OK;
 
@@ -1475,6 +1491,9 @@ Transfer(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/*
+ * Curl_pretransfer() is called immediately before a transfer starts.
+ */
 CURLcode Curl_pretransfer(struct SessionHandle *data)
 {
   if(!data->change.url)
@@ -1539,6 +1558,9 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   return CURLE_OK;
 }
 
+/*
+ * Curl_posttransfer() is called immediately after a transfer ends
+ */
 CURLcode Curl_posttransfer(struct SessionHandle *data)
 {
 #if defined(HAVE_SIGNAL) && defined(SIGPIPE) && !defined(HAVE_MSG_NOSIGNAL)
@@ -1552,6 +1574,10 @@ CURLcode Curl_posttransfer(struct SessionHandle *data)
   return CURLE_OK;
 }
 
+/*
+ * strlen_url() returns the length of the given URL if the spaces within the
+ * URL were properly URL encoded.
+ */
 static int strlen_url(char *url)
 {
   char *ptr;
@@ -1576,6 +1602,9 @@ static int strlen_url(char *url)
   return newlen;
 }
 
+/* strcpy_url() copies a url to a output buffer and URL-encodes the spaces in
+ * the source URL accordingly.
+ */
 static void strcpy_url(char *output, char *url)
 {
   /* we must add this with whitespace-replacing */
@@ -1606,6 +1635,10 @@ static void strcpy_url(char *output, char *url)
 
 }
 
+/*
+ * Curl_follow() handles the URL redirect magic. Pass in the 'newurl' string
+ * as given by the remote server and set up the new URL to request.
+ */
 CURLcode Curl_follow(struct SessionHandle *data,
                      char *newurl) /* this 'newurl' is the Location: string,
                                       and it must be malloc()ed before passed
@@ -1886,6 +1919,11 @@ CURLcode Curl_follow(struct SessionHandle *data,
   return CURLE_OK;
 }
 
+/*
+ * Curl_perform() is the internal high-level function that gets called by the
+ * external curl_easy_perform() function. It inits, performs and cleans up a
+ * single file transfer.
+ */
 CURLcode Curl_perform(struct SessionHandle *data)
 {
   CURLcode res;
@@ -2022,6 +2060,10 @@ CURLcode Curl_perform(struct SessionHandle *data)
   return res;
 }
 
+/*
+ * Curl_Transfer() is called to setup some basic properties for the upcoming
+ * transfer.
+ */
 CURLcode 
 Curl_Transfer(struct connectdata *c_conn, /* connection data */
               int sockindex,       /* socket index to read from or -1 */
