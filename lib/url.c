@@ -849,19 +849,28 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     /* If proxy was not specified, we check for default proxy environment
        variables, to enable i.e Lynx compliance:
 
-       HTTP_PROXY http://some.server.dom:port/
-       HTTPS_PROXY http://some.server.dom:port/
-       FTP_PROXY http://some.server.dom:port/
-       GOPHER_PROXY http://some.server.dom:port/
-       NO_PROXY host.domain.dom  (a comma-separated list of hosts which should
-       not be proxied, or an asterisk to override all proxy variables)
-       ALL_PROXY seems to exist for the CERN www lib. Probably the first to
-       check for.
- 
+       http_proxy=http://some.server.dom:port/
+       https_proxy=http://some.server.dom:port/
+       ftp_proxy=http://some.server.dom:port/
+       gopher_proxy=http://some.server.dom:port/
+       no_proxy=domain1.dom,host.domain2.dom
+                                 (a comma-separated list of hosts which should
+                                  not be proxied, or an asterisk to override
+                                  all proxy variables)
+       all_proxy=http://some.server.dom:port/
+                                 (seems to exist for the CERN www lib. Probably
+                                  the first to check for.)
+
+       For compatibility, the all-uppercase versions of these variables are
+       checked if the lowercase versions don't exist.
        */
-    char *no_proxy=GetEnv("NO_PROXY");
+    char *no_proxy=NULL;
     char *proxy=NULL;
     char proxy_env[128];
+
+    no_proxy=GetEnv("no_proxy");
+    if(!no_proxy)
+      no_proxy=GetEnv("NO_PROXY");
 
     if(!no_proxy || !strequal("*", no_proxy)) {
       /* NO_PROXY wasn't specified or it wasn't just an asterisk */
@@ -885,23 +894,31 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 	char *envp = proxy_env;
 	char *prox;
 
-	/* Now, build <PROTOCOL>_PROXY and check for such a one to use */
-	while(*protop) {
-	  *envp++ = toupper(*protop++);
-	}
-	/* append _PROXY */
-	strcpy(envp, "_PROXY");
-#if 0
-	infof(data, "DEBUG: checks the environment variable %s\n", proxy_env);
-#endif
+	/* Now, build <protocol>_proxy and check for such a one to use */
+	while(*protop)
+	  *envp++ = tolower(*protop++);
+
+	/* append _proxy */
+	strcpy(envp, "_proxy");
+
 	/* read the protocol proxy: */
 	prox=GetEnv(proxy_env);
 
+	if(!prox) {
+          /* There was no lowercase variable, try the uppercase version: */
+	  for(envp = proxy_env; *envp; envp++)
+	    *envp = toupper(*envp);
+	  prox=GetEnv(proxy_env);
+	}
+
 	if(prox && *prox) { /* don't count "" strings */
 	  proxy = prox; /* use this */
-        }
-        else
-          proxy = GetEnv("ALL_PROXY"); /* default proxy to use */
+	}
+	else {
+	  proxy = GetEnv("all_proxy"); /* default proxy to use */
+	  if(!proxy)
+            proxy=GetEnv("ALL_PROXY");
+	}
 
         if(proxy && *proxy) {
           /* we have a proxy here to set */
@@ -909,7 +926,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
           data->bits.proxystringalloc=1; /* this needs to be freed later */
           data->bits.httpproxy=1;
         }
-      } /* if (!nope) - it wasn't specfied non-proxy */
+      } /* if (!nope) - it wasn't specified non-proxy */
     } /* NO_PROXY wasn't specified or '*' */
     if(no_proxy)
       free(no_proxy);
