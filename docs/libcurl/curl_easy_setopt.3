@@ -462,6 +462,10 @@ curl adds CRLF after each header item. Failure to comply with this will
 result in strange bugs because the server will most likely ignore part
 of the headers you specified.
 
+The first line in a request (usually containing a GET or POST) is not a header
+and cannot be replaced using this option. Only the lines following the
+request-line are headers.
+
 \fBNOTE:\fPThe most commonly replaced headers have "shortcuts" in the options
 CURLOPT_COOKIE, CURLOPT_USERAGENT and CURLOPT_REFERER.
 .TP
@@ -643,6 +647,14 @@ Pass a pointer to a zero terminated string as parameter. It will be user
 instead of GET or HEAD when doing the HTTP request. This is useful for doing
 DELETE or other more or less obscure HTTP requests. Don't do this at will,
 make sure your server supports the command first.
+
+NOTE: many people have wrongly used this option to replace the entire request
+with their own, including multiple headers and POST contents. While that might
+work in many cases, it will cause libcurl to send invalid requests and it
+could possibly confuse the remote server badly. Use \fICURLOPT_POST\fP and
+\fICURLOPT_POSTFIELDS\fP to set POST data. Use \fICURLOPT_HTTPHEADER\fP to
+replace or extend the set of headers sent by libcurl. Use
+\fICURLOPT_HTTP_VERSION\fP to change HTTP version.
 .TP
 .B CURLOPT_FILETIME
 Pass a long. If it is a non-zero value, libcurl will attempt to get the
