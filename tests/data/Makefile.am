@@ -1,8 +1,6 @@
 iall:
 install:
-
 test:
-	[ -f test1 ] || ln -s $(srcdir)/test* .
 
 EXTRA_DIST = \
 test1    test108  test117  test127  test20   test27   test34   test46 \
