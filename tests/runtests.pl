@@ -94,6 +94,7 @@ my $anyway;
 my $gdbthis;      # run test case with gdb debugger
 my $keepoutfiles; # keep stdout and stderr files after tests
 my $listonly;     # only list the tests
+my $postmortem;   # display detailed info about failed tests
 
 my $pwd;          # current working directory
 
@@ -1029,7 +1030,7 @@ sub singletest {
 
     if($verbose) {
         print "$CMDLINE\n"; 
-   }
+    }
 
     print CMDLOG "$CMDLINE\n";
 
@@ -1416,6 +1417,9 @@ do {
         # continue anyway, even if a test fail
         $anyway=1;
     }
+    elsif($ARGV[0] eq "-p") {
+        $postmortem=1;
+    }
     elsif($ARGV[0] eq "-l") {
         # lists the test case names only
         $listonly=1;
@@ -1435,6 +1439,7 @@ Usage: runtests.pl [options]
   -k       keep stdout and stderr files present after tests
   -l       list all test case names/descriptions
   -n       No valgrind
+  -p       Print log file contents when a test fails
   -s       short output
   -t       torture
   -v       verbose output
@@ -1527,6 +1532,33 @@ open(CMDLOG, ">$CURLLOG") ||
 if($torture) {
     &torture();
 }
+
+sub displaylogcontent {
+    my ($file)=@_;
+    open(SINGLE, "<$file");
+    while(<SINGLE>) {
+        print " $_";
+    }
+    close(SINGLE);
+}
+
+sub displaylogs {
+    opendir(DIR, "$LOGDIR") ||
+        die "can't open dir: $!";
+    my @logs = readdir(DIR);
+    closedir DIR;
+    my $log;
+    print "== Contents of files in the log/ dir:\n";
+    foreach $log (sort @logs) {
+        # ignore . and .. and the file has nonzero size
+        if(($log !~ /^\.(\.|)$/) && (-s "$LOGDIR/$log")) {
+            print "== Start of file $log\n";
+            #displaylogcontent("$LOGDIR/$log");
+            print "== End of file $log\n";
+        }
+    }
+}
+
 #######################################################################
 # The main test-loop
 #
@@ -1551,6 +1583,10 @@ foreach $testnum (split(" ", $TESTCASES)) {
 
     if($error>0) {
         $failed.= "$testnum ";
+        if($postmortem) {
+            # display all files in log/ in a nice way
+            displaylogs();
+        }
         if(!$anyway) {
             # a test failed, abort
             print "\n - abort tests\n";
