@@ -4,28 +4,30 @@
 ##      (default is release)
 ##
 ## Comments to: Troy Engel <tengel@sonic.net>
+## Updated by: Craig Davison <cd@securityfocus.com>
 
 PROGRAM_NAME = libcurl.lib
-OPENSSL_PATH = ../../openssl-0.9.3a
+PROGRAM_NAME_DEBUG = libcurld.lib
+OPENSSL_PATH = ../../openssl-0.9.6
 
 ########################################################
 ## Nothing more to do below this line!
 
 ## Release
-CCR = cl.exe /ML /O2 /D "NDEBUG"
-LINKR = link.exe -lib
+CCR = cl.exe /MD /O2 /D "NDEBUG"
+LINKR = link.exe -lib /out:$(PROGRAM_NAME)
 
 ## Debug
-CCD = cl.exe /MLd /Gm /ZI /Od /D "_DEBUG" /GZ
-LINKD = link.exe -lib
+CCD = cl.exe /MDd /Gm /ZI /Od /D "_DEBUG" /GZ
+LINKD = link.exe -lib /out:$(PROGRAM_NAME_DEBUG)
 
 ## SSL Release
-CCRS = cl.exe /ML /O2 /D "NDEBUG" /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
-LINKRS = link.exe -lib /LIBPATH:$(OPENSSL_PATH)/out32dll
+CCRS = cl.exe /MD /O2 /D "NDEBUG" /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/include" /I "$(OPENSSL_PATH)/include/openssl"
+LINKRS = link.exe -lib /out:$(PROGRAM_NAME) /LIBPATH:$(OPENSSL_PATH)/out32dll
 
 CFLAGS = /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS"
-LFLAGS = /nologo /out:$(PROGRAM_NAME)
-LINKLIBS = kernel32.lib wsock32.lib
+LFLAGS = /nologo
+LINKLIBS = wsock32.lib
 LINKSLIBS = libeay32.lib ssleay32.lib RSAglue.lib
 
 RELEASE_OBJS= \
@@ -53,11 +55,11 @@ RELEASE_OBJS= \
 	timevalr.obj \
 	urlr.obj \
 	filer.obj \
-    writeoutr.obj \
+	getinfor.obj \
 	versionr.obj \
-    easyr.obj \
-    highlevelr.obj \
-    strequalr.obj
+	easyr.obj \
+	highlevelr.obj \
+	strequalr.obj
 
 DEBUG_OBJS= \
 	base64d.obj \
@@ -67,7 +69,7 @@ DEBUG_OBJS= \
 	formdatad.obj \
 	ftpd.obj \
 	httpd.obj \
-    ldapd.obj \
+	ldapd.obj \
 	dictd.obj \
 	telnetd.obj \
 	getdated.obj \
@@ -84,11 +86,11 @@ DEBUG_OBJS= \
 	timevald.obj \
 	urld.obj \
 	filed.obj \
-    writeoutd.obj \
-    versiond.obj  \
-    easyd.obj \
-    highleveld.obj \
-    strequald.obj
+	getinfod.obj \
+	versiond.obj  \
+	easyd.obj \
+	highleveld.obj \
+	strequald.obj
 
 RELEASE_SSL_OBJS= \
 	base64rs.obj \
@@ -98,7 +100,7 @@ RELEASE_SSL_OBJS= \
 	formdatars.obj \
 	ftprs.obj \
 	httprs.obj \
-    ldaprs.obj \
+	ldaprs.obj \
 	dictrs.obj \
 	telnetrs.obj \
 	getdaters.obj \
@@ -115,11 +117,11 @@ RELEASE_SSL_OBJS= \
 	timevalrs.obj \
 	urlrs.obj \
 	filers.obj \
-    writeouts.obj \
+	getinfors.obj \
 	versionrs.obj \
-    easyrs.obj \
-    highlevelrs.obj \
-    strequalrs.obj
+	easyrs.obj \
+	highlevelrs.obj \
+	strequalrs.obj
 
 LINK_OBJS= \
 	base64.obj \
@@ -129,7 +131,7 @@ LINK_OBJS= \
 	formdata.obj \
 	ftp.obj \
 	http.obj \
-    ldap.obj \
+	ldap.obj \
 	dict.obj \
 	telnet.obj \
 	getdate.obj \
@@ -146,11 +148,11 @@ LINK_OBJS= \
 	timeval.obj \
 	url.obj \
 	file.obj \
-    writeout.obj \
+	getinfo.obj \
 	version.obj \
-    easy.obj \
-    highlevel.obj \
-    strequal.obj
+	easy.obj \
+	highlevel.obj \
+	strequal.obj
 
 all : release
 
@@ -162,7 +164,6 @@ debug: $(DEBUG_OBJS)
 
 release-ssl: $(RELEASE_SSL_OBJS)
 	$(LINKRS) $(LFLAGS) $(LINKLIBS) $(LINKSLIBS) $(LINK_OBJS)
-
 
 ## Release
 base64r.obj: base64.c
@@ -213,8 +214,8 @@ urlr.obj: url.c
 	$(CCR) $(CFLAGS) url.c
 filer.obj: file.c
 	$(CCR) $(CFLAGS) file.c
-writeoutr.obj: writeout.c
-        $(CCR) $(CFLAGS) writeout.c
+getinfor.obj: getinfo.c
+	$(CCR) $(CFLAGS) getinfo.c
 versionr.obj: version.c
 	$(CCR) $(CFLAGS) version.c
 easyr.obj: easy.c
@@ -240,7 +241,7 @@ ftpd.obj: ftp.c
 httpd.obj: http.c
 	$(CCD) $(CFLAGS) http.c
 ldapd.obj: ldap.c
-	$(CCR) $(CFLAGS) ldap.c
+	$(CCD) $(CFLAGS) ldap.c
 dictd.obj: dict.c
 	$(CCD) $(CFLAGS) dict.c
 telnetd.obj: telnet.c
@@ -273,16 +274,16 @@ urld.obj: url.c
 	$(CCD) $(CFLAGS) url.c
 filed.obj: file.c
 	$(CCD) $(CFLAGS) file.c
-writeoutd.obj: writeout.c
-        $(CCR) $(CFLAGS) writeout.c
+getinfod.obj: getinfo.c
+	$(CCD) $(CFLAGS) getinfo.c
 versiond.obj: version.c
 	$(CCD) $(CFLAGS) version.c
 easyd.obj: easy.c
-	$(CCR) $(CFLAGS) easy.c
+	$(CCD) $(CFLAGS) easy.c
 highleveld.obj: highlevel.c
-	$(CCR) $(CFLAGS) highlevel.c
+	$(CCD) $(CFLAGS) highlevel.c
 strequald.obj: strequal.c
-	$(CCR) $(CFLAGS) strequal.c
+	$(CCD) $(CFLAGS) strequal.c
 
 
 ## Release SSL
@@ -301,7 +302,7 @@ ftprs.obj: ftp.c
 httprs.obj: http.c
 	$(CCRS) $(CFLAGS) http.c
 ldaprs.obj: ldap.c
-	$(CCR) $(CFLAGS) ldap.c
+	$(CCRS) $(CFLAGS) ldap.c
 dictrs.obj: dict.c
 	$(CCRS) $(CFLAGS) dict.c
 telnetrs.obj: telnet.c
@@ -334,16 +335,17 @@ urlrs.obj: url.c
 	$(CCRS) $(CFLAGS) url.c
 filers.obj: file.c
 	$(CCRS) $(CFLAGS) file.c
-writeoutrs.obj: writeout.c
-        $(CCR) $(CFLAGS) writeout.c
+getinfors.obj: getinfo.c
+	$(CCRS) $(CFLAGS) getinfo.c
 versionrs.obj: version.c
 	$(CCRS) $(CFLAGS) version.c
 easyrs.obj: easy.c
-	$(CCR) $(CFLAGS) easy.c
+	$(CCRS) $(CFLAGS) easy.c
 highlevelrs.obj: highlevel.c
-	$(CCR) $(CFLAGS) highlevel.c
+	$(CCRS) $(CFLAGS) highlevel.c
 strequalrs.obj: strequal.c
-	$(CCR) $(CFLAGS) strequal.c
+	$(CCRS) $(CFLAGS) strequal.c
+
 
 clean:
 	-@erase *.obj
