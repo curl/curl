@@ -986,6 +986,7 @@ case "$LIBIDN" in
 
        if test "x$idn" != "xyes"; then
           dnl check with default paths
+          idn="yes"
           AC_CHECK_LIB(idn, idna_to_ascii_lz, ,
                        idn="")
        fi
