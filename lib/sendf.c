@@ -278,7 +278,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
          may be EWOULDBLOCK or on some systems EAGAIN when it returned
          due to its inability to send off data without blocking. We
          therefor treat both error codes the same here */
-      if((EWOULDBLOCK == err) || (EAGAIN == err))
+      if((EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err))
 #endif
       {
         /* this is just a case of EWOULDBLOCK */
@@ -399,7 +399,7 @@ int Curl_read(struct connectdata *conn,
 #ifdef WIN32
       if(WSAEWOULDBLOCK == err)
 #else
-      if(EWOULDBLOCK == err)
+      if((EWOULDBLOCK == err) || (EAGAIN == err) || (EINTR == err))
 #endif
         return -1;
     }
