@@ -433,13 +433,32 @@ sub PASV_command {
         printf("229 Entering Passive Mode (|||%d|)\n", $pasvport);
     }
 
-    my $paddr = accept(SOCK, Server2);
-    my($iport,$iaddr) = sockaddr_in($paddr);
-    my $name = gethostbyaddr($iaddr,AF_INET);
 
-    close(Server2); # close the listener when its served its purpose!
+    my $paddr;
+    eval {
+        local $SIG{ALRM} = sub { die "alarm\n" };
+        alarm 2; # assume swift operations!
+        $paddr = accept(SOCK, Server2);
+        alarm 0;
+    };
+    if ($@) {
+        # timed out
+        
+        close(Server2);
+        logmsg "accept failed\n";
+        return;
+    }
+    else {
+        logmsg "accept worked\n";
 
-    logmsg "data connection from $name [", inet_ntoa($iaddr), "] at port $iport\n";
+        my($iport,$iaddr) = sockaddr_in($paddr);
+        my $name = gethostbyaddr($iaddr,AF_INET);
+
+        close(Server2); # close the listener when its served its purpose!
+
+        logmsg "data connection from $name [", inet_ntoa($iaddr),
+        "] at port $iport\n";
+    }
 
     return;
 }
