@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel (16 Dec)
+- Christopher Palmer also noticed what Vojtech Janota already was
+  experiencing: The attempted name resolve fix for glibc 2.2.93 caused libcurl
+  to crash when used on some older glibc versions. The problem is of course
+  the silliness of the 2.2.93. I committed a fix that hopefully should make
+  the binary run fine on either one of the versions, even though the solution
+  is not as nice as I'd like it to be.
+
 Daniel (13 Dec)
 - Bug report #651460 by Christopher R. Palmer showed that when using libcurl
   to for example go over a proxy on localhost, it would attempt to connect
