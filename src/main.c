@@ -179,7 +179,7 @@ static CURLcode win32_init(void) { return CURLE_OK; }
  */
 CURLcode main_init(void)
 {
-  curl_global_init();
+  curl_global_init(0);
   return win32_init();
 }
 
