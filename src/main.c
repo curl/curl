@@ -439,14 +439,16 @@ static int getparameter(char *flag, /* f or -long-flag */
       GetStr(&config->useragent, nextarg);
       break;
     case 'b': /* cookie string coming up: */
-      if(strchr(nextarg, '=')) {
+      if(nextarg[0] == '@') {
+        nextarg++;
+      }
+      else if(strchr(nextarg, '=')) {
         /* A cookie string must have a =-letter */
         GetStr(&config->cookie, nextarg);
+        break;
       }
-      else {
-        /* We have a cookie file to read from! */
-        GetStr(&config->cookiefile, nextarg);
-      }
+      /* We have a cookie file to read from! */
+      GetStr(&config->cookiefile, nextarg);
       break;
     case 'B':
       /* use type ASCII when transfering ftp files */
