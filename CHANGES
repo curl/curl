@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (17 October)
+- Made libcurl show verbose info about what auth type and user name that is
+  being sent in its HTTP request-headers.
+
 Daniel (16 October)
 - Removed support for CURLOPT_PASSWDFUNCTION and CURLOPT_PASSWDDATA. libcurl
   no longer prompt for passwords under any circumstances. Password prompting
