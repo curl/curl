@@ -3,6 +3,13 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* libcurl ignores empty path parts in FTP URLs, whereas RFC1738 states that
+  such parts should be sent to the server as 'CWD ' (without an argument).
+  The only exception to this rule, is that we knowingly break this if the
+  empty part is first in the path, as then we use the double slashes to
+  indicate that the user wants to reach the root dir (this exception SHALL
+  remain even when this bug is fixed).
+
 * 1) libcurl does a POST
   2) receives a 100-continue
   3) sends away the POST
