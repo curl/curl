@@ -11,8 +11,8 @@ About this Document
 
  This document will attempt to describe the general principle and some basic
  approaches to consider when programming with libcurl. The text will focus
- mainly on the C/C++ interface but might apply fairly well on other interfaces
- as well as they usually follow the C one pretty closely.
+ mainly on the C interface but might apply fairly well on other interfaces as
+ well as they usually follow the C one pretty closely.
 
  This document will refer to 'the user' as the person writing the source code
  that uses libcurl. That would probably be you or someone in your position.
