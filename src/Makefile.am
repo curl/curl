@@ -38,7 +38,7 @@ curl_LDADD = ../lib/libcurl.la
 curl_DEPENDENCIES = ../lib/libcurl.la
 BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c
-NROFF=@NROFF@
+NROFF=@NROFF@ @MANOPT@ # figured out by the configure script
 
 EXTRA_DIST = mkhelp.pl curlmsg.msg makefile.dj \
 	Makefile.vc6 Makefile.b32 Makefile.m32 Makefile.riscos config.h.in \
@@ -60,12 +60,12 @@ $(HUGE): $(README) $(MANPAGE)  mkhelp.pl
 	echo '#include "config.h"' >> $(HUGE)
 	echo '#endif' >> $(HUGE)
 	echo '#ifndef HAVE_LIBZ' >> $(HUGE)
-	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
 	echo '#else' >> $(HUGE)
-	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) -c $(README) >> $(HUGE)
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) -c $(README) >> $(HUGE)
 	echo '#endif /* HAVE_LIBZ */' >> $(HUGE)
 else
 # This generates the hugehelp.c file uncompressed only
 $(HUGE): $(README) $(MANPAGE)  mkhelp.pl
-	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) $(README) > $(HUGE)
+	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) > $(HUGE)
 endif
