@@ -783,9 +783,11 @@ Curl_SSLConnect(struct connectdata *conn)
       /* subtract the passed time */
       timeout_ms -= (long)has_passed;
       
-      if(timeout_ms < 0)
+      if(timeout_ms < 0) {
         /* a precaution, no need to continue if time already is up */
-        return CURLE_OPERATION_TIMEOUTED;      
+        failf(data, "SSL connection timeout");
+        return CURLE_OPERATION_TIMEOUTED;
+      }
     }
     else
       /* no particular time-out has been set */
