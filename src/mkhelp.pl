@@ -112,9 +112,7 @@ print <<HEAD
  * NEVER EVER edit this manually, fix the mkhelp.pl script instead!
  * Generation time: $now
  */
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "setup.h"
 #ifdef USE_MANUAL
 #include "hugehelp.h"
 #include <stdio.h>

@@ -63,9 +63,7 @@ if USE_MANUAL
 if HAVE_LIBZ
 # This generates the hugehelp.c file in both uncompressed and compressed formats
 $(HUGE): $(README) $(MANPAGE)  mkhelp.pl
-	echo '#ifdef HAVE_CONFIG_H' > $(HUGE)
-	echo '#include "config.h"' >> $(HUGE)
-	echo '#endif' >> $(HUGE)
+	echo '#include "setup.h"' > $(HUGE)
 	echo '#ifndef HAVE_LIBZ' >> $(HUGE)
 	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
 	echo '#else' >> $(HUGE)
@@ -74,9 +72,7 @@ $(HUGE): $(README) $(MANPAGE)  mkhelp.pl
 else # HAVE_LIBZ
 # This generates the hugehelp.c file uncompressed only
 $(HUGE): $(README) $(MANPAGE)  mkhelp.pl
-	echo '#ifdef HAVE_CONFIG_H' > $(HUGE)
-	echo '#include "config.h"' >> $(HUGE)
-	echo '#endif' >> $(HUGE)
+	echo '#include "setup.h"' > $(HUGE)
 	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> $(HUGE)
 endif
 
