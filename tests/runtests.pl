@@ -75,6 +75,17 @@ my $memanalyze="./memanalyze.pl";
 
 my $stunnel = checkcmd("stunnel");
 my $valgrind = checkcmd("valgrind");
+
+my $valgrind_tool;
+if($valgrind) {
+    # since valgrind 2.1.x, '--tool' option is mandatory
+    # use it, if it is supported by the version installed on the system
+    system("valgrind --help 2>&1 | grep -- --tool > /dev/null 2>&1");
+    if (($? >> 8)==0) {
+        $valgrind_tool="--tool=memcheck ";
+    }
+}
+
 my $gdb = checkcmd("gdb");
 
 my $ssl_version; # set if libcurl is built with SSL support
@@ -1036,7 +1047,7 @@ sub singletest {
     }
 
     if($valgrind) {
-        $CMDLINE = "valgrind --leak-check=yes --logfile=log/valgrind$testnum -q $CMDLINE";
+        $CMDLINE = "valgrind ".$valgrind_tool."--leak-check=yes --logfile=log/valgrind$testnum -q $CMDLINE";
     }
 
     $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
