@@ -206,7 +206,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   int checksum;
   u_int32_t cs;
   struct krb4_data *d = app_data;
-  char *host = conn->hostname;
+  char *host = conn->host.name;
   ssize_t nread;
   int l = sizeof(conn->local_addr);
   struct SessionHandle *data = conn->data;
@@ -375,7 +375,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   if (strcmp ((char*)tktcopy.dat + 8,
               KRB_TICKET_GRANTING_TICKET) != 0) {
     afs_string_to_key(passwd,
-                      krb_realmofhost(conn->hostname),
+                      krb_realmofhost(conn->host.name),
                       &key);
     des_key_sched(&key, schedule);
     des_pcbc_encrypt((void *)tkt.dat, (void *)tktcopy.dat,
