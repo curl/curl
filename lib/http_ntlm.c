@@ -226,17 +226,16 @@ static void mkhash(char *password,
     pw[i] = 0;
 
   {
-  /* create LanManager hashed password */
-
+    /* create LanManager hashed password */
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));
-    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer, DESKEY(ks),
-                    DES_ENCRYPT);
+    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer,
+                    DESKEY(ks), DES_ENCRYPT);
   
     setup_des_key(pw+7, DESKEY(ks));
-    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)lmbuffer+8, DESKEY(ks),
-                    DES_ENCRYPT);
+    DES_ecb_encrypt((DES_cblock *)magic, (DES_cblock *)(lmbuffer+8),
+                    DESKEY(ks), DES_ENCRYPT);
 
     memset(lmbuffer+16, 0, 5);
   }
