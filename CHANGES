@@ -6,6 +6,33 @@
 
                                   Changelog
 
+Daniel (11 Mar)
+- Christophe Demory fixed the socket sending code to work better on HP-UX
+  when sending data to a socket that would block. It then returns EAGAIN, not
+  EWOULDBLOCK.
+
+- Richard Gorton improved the seeding function for systems without a good
+  and reliable random source.
+
+- Richard Gorton fixed a few warnings that popped up when you built curl
+  using the Sun compiler on a 64bit SPARC platform.
+
+- Martin C. Martin fixed a case where a connect failure using the multi
+  interface didn't produce a human readable error string.
+
+Daniel (10 Mar)
+- Reverted ltmain.sh back to libtool 1.4.2 status again, as the 1.4.3 version
+  broke the build on numerous platforms. It seems that libtool 1.4.3 puts some
+  requirements on what versions of the other tools (autoconf + automake) that
+  I am not familiar with and thus I couldn't fulfill at this point.
+
+  Yes, this is more than mildly frustrating.
+
+Daniel (7 Mar)
+- Run libtoolize version 1.4.3.
+
+Version 7.10.4-pre3 (4 Mar 2003)
+
 Daniel (3 Mar)
 - Added share.obj to the VC6 and Borland libcurl makefiles.
 
