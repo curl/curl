@@ -54,6 +54,7 @@
 #define H_MPRINTF
 
 #include <stdarg.h>
+#include <stdio.h> /* needed for FILE */
 
 int curl_mprintf(const char *format, ...);
 int curl_mfprintf(FILE *fd, const char *format, ...);
