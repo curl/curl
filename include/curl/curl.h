@@ -438,14 +438,14 @@ int curl_formparse(char *string,
    MUST be free()ed after usage is complete. */
 char *curl_getenv(char *variable);
 
-/* returns ascii string of the libcurl version */
+/* Returns a static ascii string of the libcurl version. */
 char *curl_version(void);
 
 /* This is the version number */
 #define LIBCURL_VERSION "7.3"
 #define LIBCURL_VERSION_NUM 0x070300
 
-/* linked-list structure for the CURLOPT_QUOTE option */
+/* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
 	char			*data;
 	struct curl_slist	*next;
@@ -641,6 +641,43 @@ CURLcode curl_disconnect(CURLconnect *connect);
  * etc.
  */
 time_t curl_getdate(const char *p, const time_t *now);
+
+
+#define CURLINFO_STRING   0x100000
+#define CURLINFO_LONG     0x200000
+#define CURLINFO_DOUBLE   0x300000
+#define CURLINFO_MASK     0x0fffff
+#define CURLINFO_TYPEMASK 0xf00000
+
+typedef enum {
+  CURLINFO_NONE, /* first, never use this */
+  CURLINFO_EFFECTIVE_URL    = CURLINFO_STRING + 1,
+  CURLINFO_HTTP_CODE        = CURLINFO_LONG   + 2,
+  CURLINFO_TOTAL_TIME       = CURLINFO_DOUBLE + 3,
+  CURLINFO_NAMELOOKUP_TIME  = CURLINFO_DOUBLE + 4,
+  CURLINFO_CONNECT_TIME     = CURLINFO_DOUBLE + 5,
+  CURLINFO_PRETRANSFER_TIME = CURLINFO_DOUBLE + 6,
+  CURLINFO_SIZE_UPLOAD      = CURLINFO_DOUBLE + 7,
+  CURLINFO_SIZE_DOWNLOAD    = CURLINFO_DOUBLE + 8,
+  CURLINFO_SPEED_DOWNLOAD   = CURLINFO_DOUBLE + 9,
+  CURLINFO_SPEED_UPLOAD     = CURLINFO_DOUBLE + 10,
+  CURLINFO_LASTONE          = 11,
+
+} CURLINFO;
+
+/*
+ * NAME curl_getinfo()
+ *
+ * DESCRIPTION
+ *
+ * Request internal information from the curl session with this function.
+ * The third argument MUST be a pointer to a long or a pointer to a char *.
+ * The data pointed to will be filled in accordingly and can be relied upon
+ * only if the function returns CURLE_OK.
+ * This function is intended to get used *AFTER* a performed transfer, all
+ * results are undefined before the transfer is completed.
+ */
+CURLcode curl_getinfo(CURL *curl, CURLINFO info, ...);
 
 #ifdef  __cplusplus
 }

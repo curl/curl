@@ -48,6 +48,21 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption option, ...);
 CURLcode curl_easy_perform(CURL *curl);
 void curl_easy_cleanup(CURL *curl);
 
+/*
+ * NAME curl_easy_getinfo()
+ *
+ * DESCRIPTION
+ *
+ * Request internal information from the curl session with this function.  The
+ * third argument MUST be a pointer to a long, a pointer to a char * or a
+ * pointer to a double (as the documentation describes elsewhere).  The data
+ * pointed to will be filled in accordingly and can be relied upon only if the
+ * function returns CURLE_OK.  This function is intended to get used *AFTER* a
+ * performed transfer, all results from this function are undefined until the
+ * transfer is completed.
+ */
+CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...);
+
 #ifdef  __cplusplus
 }
 #endif
