@@ -684,6 +684,9 @@ case "$OPT_ZLIB" in
     ;;
 esac
 
+dnl set variable for use in automakefile(s)
+AM_CONDITIONAL(HAVE_LIBZ, test x"$HAVE_LIBZ" = x1)
+
 dnl Default is to try the thread-safe versions of a few functions
 OPT_THREAD=on
 
