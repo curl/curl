@@ -661,7 +661,8 @@ AC_CHECK_FUNCS( socket \
                 geteuid \
                 dlopen \
                 utime \
-                sigsetjmp
+                sigsetjmp \
+                poll
 )
 
 dnl sigsetjmp() might be a macro and no function so if it isn't found already
