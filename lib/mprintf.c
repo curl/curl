@@ -1133,10 +1133,6 @@ int curl_msprintf(char *buffer, const char *format, ...)
   return retcode;
 }
 
-#ifndef WIN32 /* not needed on win32 */
-extern int fputc(int, FILE *);
-#endif
-
 int curl_mprintf(const char *format, ...)
 {
   int retcode;
