@@ -440,6 +440,10 @@ CURLcode Curl_http_connect(struct connectdata *conn)
   if(conn->bits.user_passwd && !data->state.this_is_a_follow) {
     /* Authorization: is requested, this is not a followed location, get the
        original host name */
+    if (data->state.auth_host)
+      /* Free to avoid leaking memory on multiple requests*/
+      free(data->state.auth_host);
+
     data->state.auth_host = strdup(conn->hostname);
   }
 
