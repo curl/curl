@@ -173,8 +173,12 @@ transfer. It then uses the given output/input files to figure that out.
 
 If this option is used several times, the last one will be used.
 .IP "--create-dirs"
-When used in conjunction with the -o option, curl will create the necessary 
-local directory hierarchy as needed.
+When used in conjunction with the -o option, curl will create the necessary
+local directory hierarchy as needed. This option creates the dirs mentioned
+with the -o option, nothing else. If the -o file name uses no dir or if the
+dirs it mentions already exist, no dir will be created.
+
+To create remote directories when using FTP, try \fI--ftp-create-dirs\fP.
 .IP "--crlf"
 (FTP) Convert LF to CRLF in upload. Useful for MVS (OS/390).
 
