@@ -1,17 +1,10 @@
 Fix before releasing 7.11.0
 ===========================
-(Issues not sorted in any particular order)
 
-8. Resolve the occational test case 91 failure. This still has no
-   resolution. (David Byron has done lots of research, no resolution yet)
-
-12. The "PUT and (NTLM/Digest) auth" bug (test-patch posted, awaiting
-    feedback/response) #862835
-
-19. Resolve Giuseppe Attardi's "elusive cache bug" (work in progress)
 
 To get fixed in 7.11.1
 ======================
+(Issues not sorted in any particular order)
 
 1. Introduce a new error code indicating authentication problems (for proxy
    CONNECT error 407 for example) (no progress yet) #845941
@@ -24,11 +17,17 @@ To get fixed in 7.11.1
 6. REST fix for servers not behaving well on >2GB requests (some outstanding
    issues, Dave Meyer works on this)
 
+8. Resolve the occational test case 91 failure. This still has no
+   resolution. (David Byron has done lots of research, no resolution yet)
+
 9. Modify ares to do 'files bind' order instead of 'bind files' by default
    (not actually part of libcurl) See details by Frank Ticheler posted here:
    http://curl.haxx.se/mail/archive-2003-11/0020.html
 
 10. Anton Fedorov's "dumpcert" patch (only mailed to me privately)
+
+12. The "PUT and (NTLM/Digest) auth" bug (test-patch posted, awaiting
+    feedback/response) #862835
 
 14. Evaluate/apply Gertjan van Wingerde's SSL patches
 
@@ -37,9 +36,13 @@ To get fixed in 7.11.1
 
 18. Modified Accept: header in the default HTTP request (being discussed)
 
+19. Resolve Giuseppe Attardi's "elusive cache bug" (work in progress)
+
 20. Directory listing support for file:///dir/ (patch by David Hull)
     http://sourceforge.net/tracker/index.php?func=detail&aid=844036&group_id=976&atid=300976
     This patch needs work to become portable.
 
 21. Send QUIT before closing an FTP connection. Joe Halpin has volunteered
     to provide a patch.
+
+23. Peter Sylvester's "Most Significant Common Name" patch
