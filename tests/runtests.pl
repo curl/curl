@@ -1519,11 +1519,15 @@ sub startservers {
             # we support it but have no server!
         }
         elsif($what eq "https") {
-            if(!$stunnel || !$ssl_version) {
-                # we can't run https tests without stunnel
-                # or if libcurl is SSL-less
-                return 1;
+            if(!$stunnel) {
+                # we can't run ftps tests without stunnel
+                return "no stunnel";
             }
+            if(!!$ssl_version) {
+                # we can't run ftps tests if libcurl is SSL-less
+                return "curl lacks SSL support";
+            }
+
             if(!$run{'http'}) {
                 $pid = runhttpserver($verbose);
                 if($pid <= 0) {
