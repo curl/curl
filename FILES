@@ -19,6 +19,7 @@ docs/TODO
 docs/curl.1
 docs/Makefile.in
 docs/Makefile.am
+docs/TheArtOfHttpScripting
 docs/*.3
 maketgz
 Makefile.in
