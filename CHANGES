@@ -8,6 +8,9 @@
 
 
 Daniel (11 March 2005)
+- curl_version_info() returns the feature bit CURL_VERSION_SSPI if it was
+  built with SSPI support.
+
 - Christopher R. Palmer made it possible to build libcurl with the
   USE_WINDOWS_SSPI on Windows, and then libcurl will be built to use the
   native way to do NTLM. SSPI also allows libcurl to pass on the current user

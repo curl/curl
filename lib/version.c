@@ -196,7 +196,10 @@ static curl_version_info_data version_info = {
   | CURL_VERSION_SSL
 #endif
 #if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
-  | CURL_VERSION_NTLM /* since this requires OpenSSL */
+  | CURL_VERSION_NTLM
+#endif
+#ifdef USE_WINDOWS_SSPI
+  | CURL_VERSION_SSPI
 #endif
 #ifdef HAVE_LIBZ
   | CURL_VERSION_LIBZ

@@ -2098,6 +2098,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           {"NTLM", CURL_VERSION_NTLM},
           {"SPNEGO", CURL_VERSION_SPNEGO},
           {"SSL",  CURL_VERSION_SSL},
+          {"SSPI",  CURL_VERSION_SSPI},
           {"krb4", CURL_VERSION_KERBEROS4},
           {"libz", CURL_VERSION_LIBZ}
         };
