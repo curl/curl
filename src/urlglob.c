@@ -45,6 +45,10 @@
 #include <curl/curl.h>
 #include "urlglob.h"
 
+#ifdef MALLOCDEBUG
+#include "../lib/memdebug.h"
+#endif
+
 char glob_buffer[URL_MAX_LENGTH];
 URLGlob *glob_expand;
 

@@ -80,6 +80,12 @@
 #include <fcntl.h>
 #endif
 
+/* The last #include file should be: */
+#ifdef MALLOCDEBUG
+/* this is low-level hard-hacking memory leak tracking shit */
+#include "../lib/memdebug.h"
+#endif
+
 typedef enum {
   HTTPREQ_UNSPEC,
   HTTPREQ_GET,
@@ -1140,6 +1146,7 @@ void progressbarinit(struct ProgressData *bar)
 int main(int argc, char *argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
+  char useragent[128]; /* buah, we don't want a larger default user agent */
   struct ProgressData progressbar;
 
   struct OutStruct outs;
@@ -1164,11 +1171,13 @@ int main(int argc, char *argv[])
 
   outs.stream = stdout;
 
+#ifdef MALLOCDEBUG
+  /* this sends all memory debug messages to a logfile named memdump */
+  curl_memdebug("memdump");
+#endif
+
   memset(&config, 0, sizeof(struct Configurable));
   
-  /* set non-zero default values: */
-  config.useragent= maprintf(CURL_NAME "/" CURL_VERSION " (" OS ") "
-                             "%s", curl_version());
   config.showerror=TRUE;
   config.conf=CONF_DEFAULT;
 #if 0
@@ -1243,6 +1252,12 @@ int main(int argc, char *argv[])
   if(!url) {
     helpf("no URL specified!\n");
     return CURLE_FAILED_INIT;
+  }
+  if(NULL == config.useragent) {
+    /* set non-zero default values: */
+    snprintf(useragent, sizeof(useragent),
+             CURL_NAME "/" CURL_VERSION " (" OS ") " "%s", curl_version());
+    config.useragent= useragent;
   }
 #if 0
   fprintf(stderr, "URL: %s PROXY: %s\n", url, config.proxy?config.proxy:"none");
