@@ -117,10 +117,10 @@ sub LIST_command {
 
     logmsg "$$: pass data to child pid\n";
     for(@ftpdir) {
-        print KID_TO_WRITE $_;
-        # print STDERR "PASS: $_";
+        print SOCK $_;
+        print STDERR "PASS: $_";
     }
-    close(KID_TO_WRITE);
+    close(SOCK);
     logmsg "$$: done passing data to child pid\n";
 
     print "226 ASCII transfer complete\r\n";
@@ -144,10 +144,10 @@ sub RETR_command {
 
         open(FILE, "<$filename");
         while(<FILE>) {
-            print KID_TO_WRITE $_;
-            # print STDERR "PASS: $_";
+            print SOCK $_;
         }
-        close(KID_TO_WRITE);
+        close(FILE);
+        close(SOCK);
 
         print "226 File transfer complete\r\n";
     }
@@ -176,21 +176,6 @@ sub RETR_command {
 #
 
 sub PASV_command {
-    $pid = open(KID_TO_WRITE, "|-");
-    $SIG{ALRM} = sub { die "whoops, pipe broke" };
-
-    if(0 == $pid) {
-        # the child process runs the child function
-        logmsg "$$ is a child PASV\n";
-    }
-    else {
-        # parent continues
- #       print STDERR "parent after fork!\n";
-        logmsg "$$ is a parent from PASV\n";
-        return; # continue please
-    }
-
-    my $port = 10000;
     socket(Server2, PF_INET, SOCK_STREAM, $proto) || die "socket: $!";
     setsockopt(Server2, SOL_SOCKET, SO_REUSEADDR,
                pack("l", 1)) || die "setsockopt: $!";
@@ -203,7 +188,7 @@ sub PASV_command {
     if(11000 == $port) {
         print "500 no free ports!\r\n";
         logmsg "couldn't find free port\n";
-        exit;
+        return 0;
     }
     listen(Server2,SOMAXCONN) || die "listen: $!";
 
@@ -213,71 +198,31 @@ sub PASV_command {
     my $waitedpid;
     my $paddr;
 
-    $paddr = accept(Client2, Server2);
+    $paddr = accept(SOCK, Server2);
     my($port,$iaddr) = sockaddr_in($paddr);
     my $name = gethostbyaddr($iaddr,AF_INET);
 
     logmsg "$$: data connection from $name [", inet_ntoa($iaddr), "] at port $port\n";
 
-    open(STDOUT, ">&Client2")   || die "can't dup client to stdout";
-
-    while(<STDIN>) {
-        print $_;
-    }
-
-    close(Client2);
-
-    logmsg "process dies here\n";
-    exit;
-
+    return \&SOCK;
 }
 
 sub PORT_command {
     my $arg = $_[0];
- #   print STDERR "fooo: $arg\n";
-
-    $pid = open(KID_TO_WRITE, "|-");
-    $SIG{ALRM} = sub { die "whoops, pipe broke" };
-
-    if(0 == $pid) {
-        # the child process runs the child function
-    }
-    else {
-        # parent continues
-  #      print STDERR "parent after fork!\n";
-        return; # continue please
-    }
-
-   # open(STDOUT, ">&Client")   || die "can't dup client to stdout";
 
     if($arg !~ /(\d+),(\d+),(\d+),(\d+),(\d+),(\d+)/) {
         logmsg "bad PORT-line: $arg\n";
         print "500 silly you, go away\r\n";
-        exit;
+        return 0;
     }
     my $iaddr = inet_aton("$1.$2.$3.$4");
     my $paddr = sockaddr_in(($5<<8)+$6, $iaddr);
     my $proto   = getprotobyname('tcp') || 6;
 
     socket(SOCK, PF_INET, SOCK_STREAM, $proto) || die "major failure";
- #   print STDERR "socket()\n";
-
     connect(SOCK, $paddr)    || return 1;
- #    print STDERR "connect()\n";
 
-    #while (defined($line = <SOCK>)) {
-    #print STDERR $line;
-    #}
- #   print STDERR "sending stdin to client\n";
-    while(<STDIN>) {
-        print SOCK $_;
- #       print STDERR "SEND: $_";
-    }
-    close(SOCK);
-
-  #  print STDERR "close(SOCK)\n";
-
-    exit; # we're a chiuld process who dies!
+    return \&SOCK;
 }
 
 $SIG{CHLD} = \&REAPER;
