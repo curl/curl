@@ -326,19 +326,15 @@ QNX
 ===
    (This section was graciously brought to us by David Bentham)
 
-   By setting FD_SETSIZE early in connect.c we override the QNX default value
-   and thus avoid a crash.
+   As QNX is targetted for resource constrained environments, the QNX headers
+   set conservative limits. This includes the FD_SETSIZE macro, set by default
+   to 32. Socket descriptors returned within the CURL library may exceed this,
+   resulting in memory faults/SIGSEGV crashes when passed into select(..)
+   calls using fd_set macros.
 
-   Fortunately in the QNX headers its defined as
-
-    #ifndef FD_SETSIZE
-      #define FD_SETSIZE 32
-    #endif
-
-   so its relatively easy to override without changing the original
-   definition. QNX claim posix compliance so this definition style could be
-   standard in other o/s's. Eg Microsoft Visual C++ 6 defines it similarly,
-   but its set to 64.
+   A good all-round solution to this is to override the default when building
+   libcurl, by overriding CFLAGS during configure, example
+   #  configure CFLAGS='-DFD_SETSIZE=64 -g -O2'
 
 CROSS COMPILE
 =============
