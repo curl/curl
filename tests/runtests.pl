@@ -668,6 +668,7 @@ sub checkcurl {
 
     unlink($memdump); # remove this if there was one left
 
+    my $feat;
     my $curl;
     my $libcurl;
     my @version=`$CURL --version 2>/dev/null`;
@@ -740,7 +741,7 @@ sub checkcurl {
             # at this point
         }
         elsif($_ =~ /^Features: (.*)/i) {
-            my $feat = $1;
+            $feat = $1;
             if($feat =~ /debug/i) {
                 # debug is a listed "feature", use that knowledge
                 $curl_debug = 1;
@@ -788,7 +789,7 @@ sub checkcurl {
     print "********* System characteristics ******** \n",
     "* $curl\n",
     "* $libcurl\n",
-    "* Features: $feat\n"
+    "* Features: $feat\n",
     "* Host: $hostname",
     "* System: $hosttype";
 
