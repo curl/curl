@@ -31,6 +31,7 @@ INCLUDES = -I$(top_srcdir)/lib -I$(top_srcdir)/include
 
 noinst_PROGRAMS = sws
 
-sws_SOURCES= sws.c getpart.c getpart.h
+sws_SOURCES= sws.c getpart.c getpart.h $(top_srcdir)/lib/strequal.c
 
 extra_DIST = config.h.in
+

@@ -55,6 +55,7 @@
 #include <netdb.h>
 #endif
 
+#include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 
 #ifndef FALSE
@@ -70,9 +71,6 @@
 #include <process.h>
 
 #define sleep(sec)   Sleep ((sec)*1000)
-#ifdef _MSC_VER
-#define strncasecmp  strnicmp
-#endif
 
 #define EINPROGRESS  WSAEINPROGRESS
 #define EWOULDBLOCK  WSAEWOULDBLOCK
@@ -371,7 +369,7 @@ int ProcessRequest(struct httprequest *req)
    */
 
   do {
-    if(!req->cl && !strncasecmp("Content-Length:", line, 15)) {
+    if(!req->cl && curlx_strnequal("Content-Length:", line, 15)) {
       /* If we don't ignore content-length, we read it and we read the whole
          request including the body before we return. If we've been told to
          ignore the content-length, we will return as soon as all headers
@@ -381,8 +379,8 @@ int ProcessRequest(struct httprequest *req)
       logmsg("Found Content-Legth: %d in the request", req->cl);
       break;
     }
-    else if(!strncasecmp("Transfer-Encoding: chunked", line,
-                         strlen("Transfer-Encoding: chunked"))) {
+    else if(curlx_strnequal("Transfer-Encoding: chunked", line,
+                            strlen("Transfer-Encoding: chunked"))) {
       /* chunked data coming in */
       chunked = TRUE;
     }
