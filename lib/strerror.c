@@ -488,7 +488,9 @@ get_winsock_error (int err, char *buf, size_t len)
 }
 #endif   /* WIN32 && !__CYGWIN__ */
 
+#ifndef WIN32
 extern int sys_nerr;
+#endif
 
 /*
  * Our thread-safe and smart strerror() replacement.
