@@ -70,6 +70,7 @@ int curl_fclose(FILE *file, int line, const char *source);
 
 #define socket(domain,type,protocol)\
  curl_socket(domain,type,protocol,__LINE__,__FILE__)
+#undef accept /* for those with accept as a macro */
 #define accept(sock,addr,len)\
  curl_accept(sock,addr,len,__LINE__,__FILE__)
 
