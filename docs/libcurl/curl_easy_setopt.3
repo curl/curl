@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "20 Aug 2002" "libcurl 7.9.9" "libcurl Manual"
+.TH curl_easy_setopt 3 "13 Sep 2002" "libcurl 7.10" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -572,11 +572,16 @@ redirections have been followed, the next redirect will cause an error
 \fICURLOPT_FOLLOWLOCATION\fP is used at the same time. (Added in 7.5)
 .TP
 .B CURLOPT_MAXCONNECTS
-Pass a long. The set number will be the persistant connection cache size. The
-set amount will be the maximum amount of simultaneous connections that libcurl
-may cache between file transfers. Default is 5, and there isn't much point in
-changing this value unless you are perfectly aware of how this work and
-changes libcurl's behaviour.
+Pass a long. The set number will be the persistent connection cache size. The
+set amount will be the maximum amount of simultaneously open connections that
+libcurl may cache. Default is 5, and there isn't much point in changing this
+value unless you are perfectly aware of how this work and changes libcurl's
+behaviour. This concerns connection using any of the protocols that support
+persistent connections.
+
+When reaching the maximum limit, curl uses the \fICURLOPT_CLOSEPOLICY\fP to
+figure out which of the existing connections to close to prevent the number of
+open connections to increase.
 
 \fBNOTE:\fP if you already have performed transfers with this curl handle,
 setting a smaller MAXCONNECTS than before may cause open connections to get
@@ -710,14 +715,14 @@ passed to the callback.
 Pass a long specifying your prefered size for the receive buffer in libcurl.
 The main point of this would be that the write callback gets called more often
 and with smaller chunks. This is just treated as a request, not an order. You
-cannot be guaranteed to actually get the given size. (Added in 7.9.9)
+cannot be guaranteed to actually get the given size. (Added in 7.10)
 .TP
 .B CURLOPT_NOSIGNAL
 Pass a long. If it is non-zero, libcurl will not use any functions that
 install signal handlers or any functions that cause signals to be sent to the
 process. This option is mainly here to allow multi-threaded unix applications
 to still set/use all timeout options etc, without risking getting signals.
-(Added in 7.9.9)
+(Added in 7.10)
 .PP
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, non-zero means an
