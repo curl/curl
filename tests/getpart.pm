@@ -184,8 +184,8 @@ sub loadarray {
 sub showdiff {
     my ($firstref, $secondref)=@_;
 
-    my $file1=".array1";
-    my $file2=".array2";
+    my $file1=".generated";
+    my $file2=".expected";
     
     open(TEMP, ">$file1");
     for(@$firstref) {
@@ -198,8 +198,7 @@ sub showdiff {
         print TEMP $_;
     }
     close(TEMP);
-
-    my @out = `diff $file1 $file2`;
+    my @out = `diff -u $file2 $file1`;
 
     unlink $file1, $file2;
     return @out;
