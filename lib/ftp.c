@@ -210,16 +210,6 @@ int Curl_GetFTPResponse(char *buf,
   if (ftpcode)
     *ftpcode = 0; /* 0 for errors */
 
-  if(data->set.timeout) {
-    /* if timeout is requested, find out how much remaining time we have */
-    timeout = data->set.timeout - /* timeout time */
-      Curl_tvdiff(Curl_tvnow(), conn->now)/1000; /* spent time */
-    if(timeout <=0 ) {
-      failf(data, "Transfer aborted due to timeout");
-      return -SELECT_TIMEOUT; /* already too little time */
-    }
-  }
-
   FD_ZERO (&readfd);		/* clear it */
   FD_SET (sockfd, &readfd);     /* read socket */
 
@@ -235,6 +225,17 @@ int Curl_GetFTPResponse(char *buf,
   keepon=TRUE;
 
   while((nread<BUFSIZE) && (keepon && !error)) {
+    /* check and reset timeout value every lap */
+    if(data->set.timeout) {
+      /* if timeout is requested, find out how much remaining time we have */
+      timeout = data->set.timeout - /* timeout time */
+        Curl_tvdiff(Curl_tvnow(), conn->now)/1000; /* spent time */
+      if(timeout <=0 ) {
+        failf(data, "Transfer aborted due to timeout");
+        return -SELECT_TIMEOUT; /* already too little time */
+      }
+    }
+
     if(!ftp->cache) {
       readfd = rkeepfd;		   /* set every lap */
       interval.tv_sec = timeout;
