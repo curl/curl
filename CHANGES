@@ -5,6 +5,12 @@
                              \___|\___/|_| \_\_____|
 
                                History of Changes
+Daniel (24 January 2001)
+- Robert Weaver posted a fix for the win32 section of the curl_getenv() code
+  that corrected a potential memory leak.
+
+- Added comments in a few files in a sudden attempt to make the sources more
+  easy to read and understand!
 
 Daniel (23 January 2001)
 - Added simple IPv6 detection in the configure script and made the version
