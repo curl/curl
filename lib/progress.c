@@ -113,7 +113,7 @@ void pgrsDone(struct UrlData *data)
   if(!(data->progress.flags & PGRS_HIDE)) {
     data->progress.lastshow=0;
     pgrsUpdate(data); /* the final (forced) update */
-    fprintf(stderr, "\n");
+    fprintf(data->err, "\n");
   }
 }
 
@@ -322,7 +322,7 @@ int pgrsUpdate(struct UrlData *data)
   if(total_expected_transfer)
     total_percen=(double)(total_transfer/total_expected_transfer)*100;
 
-  fprintf(stderr,
+  fprintf(data->err,
           "\r%3d %s  %3d %s  %3d %s  %s  %s %s %s %s %s",
           (int)total_percen,                            /* total % */
           max5data(total_expected_transfer, max5[2]),   /* total size */
