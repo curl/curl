@@ -3,7 +3,7 @@
 <reply>
 <data>
 foo
-   bar
+   bar swsclose
 bar
    foo
 moo
@@ -28,7 +28,7 @@ file://%PWD/log/test502.txt
 </command>
 <file name="log/test502.txt">
 foo
-   bar
+   bar swsclose
 bar
    foo
 moo

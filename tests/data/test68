@@ -6,6 +6,7 @@
 <data1001>
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
+Content-Length: 34
 Content-Type: text/html; charset=iso-8859-1
 WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 
@@ -18,6 +19,7 @@ This is not the real page either!
 HTTP/1.1 401 You give me wrong password
 Server: Microsoft-IIS/5.0
 WWW-Authenticate: NTLM
+Content-Length: 46
 Content-Type: text/html; charset=iso-8859-1
 
 Wrong password dude. Get it fixed and return.
@@ -26,12 +28,14 @@ Wrong password dude. Get it fixed and return.
 <datacheck>
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
+Content-Length: 34
 Content-Type: text/html; charset=iso-8859-1
 WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAAAGgoEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
 
 HTTP/1.1 401 You give me wrong password
 Server: Microsoft-IIS/5.0
 WWW-Authenticate: NTLM
+Content-Length: 46
 Content-Type: text/html; charset=iso-8859-1
 
 Wrong password dude. Get it fixed and return.

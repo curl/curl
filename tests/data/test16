@@ -6,6 +6,7 @@ Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
 Funny-head: yesyes
+Content-Length: 22
 
 the content goes here
 </data>

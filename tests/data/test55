@@ -1,25 +1,25 @@
 <reply>
 <data>
-HTTP/1.1 302 OK
+HTTP/1.1 302 OK swsclose
 Location: 550002
 Date: Thu, 09 Nov 2010 14:50:00 GMT
 Connection: close
 
 </data>
 <data2>
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:50:00 GMT
 Connection: close
 
 body
 </data2>
 <datacheck>
-HTTP/1.1 302 OK
+HTTP/1.1 302 OK swsclose
 Location: 550002
 Date: Thu, 09 Nov 2010 14:50:00 GMT
 Connection: close
 
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:50:00 GMT
 Connection: close
 

@@ -1,7 +1,7 @@
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 Mooo
+HTTP/1.1 200 Mooo swsclose
 Connection: close
 Set-Cookie: path=/; thewinneris=nowayyouwin;
 

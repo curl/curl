@@ -9,9 +9,9 @@ Set-Cookie: ckyPersistent=permanent; expires=Tue, 01-Jan-2010 05:00:00 GMT; path
 Set-Cookie: ckySession=temporary; path=/
 Set-Cookie: ASPSESSIONIDQGGQQSJJ=GKNBDIFAAOFDPDAIEAKDIBKE; path=/
 Cache-control: private
+Content-Length: 62
 
 This server reply is for testing a simple Location: following
-
 </data>
 </reply>
 

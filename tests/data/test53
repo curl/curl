@@ -6,6 +6,7 @@ Server: Microsoft-IIS/4.0
 Date: Tue, 25 Sep 2001 19:37:44 GMT
 Content-Type: text/html
 Connection: close
+Content-Length: 21
 
 This server says moo
 </data>

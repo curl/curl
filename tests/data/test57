@@ -1,7 +1,7 @@
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK swsclose
 Funny-head: yesyes
 Content-Type: text/html; charset=ISO-8859-4   
 

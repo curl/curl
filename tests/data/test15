@@ -5,6 +5,7 @@ HTTP/1.4 200 OK
 Fake: yes
 Fake: yes
 Fake: yes
+Content-Length: 26
 
 Repeated nonsense-headers
 </data>
@@ -30,6 +31,7 @@ HTTP/1.4 200 OK
 Fake: yes
 Fake: yes
 Fake: yes
+Content-Length: 26
 
 Repeated nonsense-headers
 http://127.0.0.1:8999/want/15 200 26

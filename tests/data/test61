@@ -11,6 +11,7 @@ Set-Cookie: test2=yes; domain=host.foo.com; expires=Tue Feb 1 11:56:27 MET 2007
 Set-Cookie: test3=maybe; domain=foo.com; path=/moo; secure
 Set-Cookie: test4=no; domain=nope.foo.com; path=/moo; secure
 Set-Cookie: test5=name; domain=anything.com; path=/ ; secure
+Content-Length: 4
 
 boo
 </data>

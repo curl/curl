@@ -2,7 +2,7 @@
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Type: text/html
@@ -21,7 +21,7 @@ https
 HTTPS GET with user and password
  </name>
  <command>
--k -u fake:user https://%HOSTIP:%HTTPSPORT/2
+-k -u fake:user https://%HOSTIP:%HTTPSPORT/301
 </command>
 </test>
 
@@ -32,7 +32,7 @@ HTTPS GET with user and password
 ^User-Agent:.*
 </strip>
 <protocol>
-GET /2 HTTP/1.1
+GET /301 HTTP/1.1
 Authorization: Basic ZmFrZTp1c2Vy
 Host: 127.0.0.1:8433
 Pragma: no-cache

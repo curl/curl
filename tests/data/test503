@@ -1,7 +1,7 @@
 # Server-side
 <reply>
 <data>
-HTTP/1.1 200 OK
+HTTP/1.1 200 OK swsclose
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -26,7 +26,7 @@ simple multi https:// through proxy with authentication info
  <command>
 http://%HOSTIP:%HTTPSPORT/503 localhost:%HOSTPORT
 </command>
-<file name="log/test502.txt">
+<file name="log/test503.txt">
 foo
    bar
 bar
