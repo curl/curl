@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "21 May 2001" "libcurl 7.7.4" "libcurl Manual"
+.TH curl_easy_setopt 3 "29 May 2001" "libcurl 7.8" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -109,7 +109,8 @@ this means, you probably don't want this tunnel option. (Added in libcurl 7.3)
 .TP
 .B CURLOPT_VERBOSE
 Set the parameter to non-zero to get the library to display a lot of verbose
-information about its operations.
+information about its operations. Very useful for libcurl and/or protocl
+debugging and understanding.
 .TP
 .B CURLOPT_HEADER
 A non-zero parameter tells the library to include the header in the
@@ -178,7 +179,10 @@ A non-zero parameter tells the library to use HTTP PUT a file. The file to put
 must be set with CURLOPT_INFILE and CURLOPT_INFILESIZE.
 .TP
 .B CURLOPT_MUTE
-A non-zero parameter tells the library to be completely quiet.
+A non-zero parameter tells the library to be completely quiet. This only
+affects error messages that occurs when there's no CURLOPT_ERRORBUFFER
+specified. If an error messaged is specifed, this option won't make any
+difference.
 .TP
 .B CURLOPT_USERPWD
 Pass a char * as parameter, which should be [username]:[password] to use for
