@@ -6,6 +6,24 @@
 
                                History of Changes
 
+Daniel (14 September 2001)
+- Added another 14 ftp tests.
+
+Daniel (13 September 2001)
+- Added curl_easy_duphandle() to the easy.h header file. It has now been
+  tested and proved to work in a real-world tests by T Bharath. We still need
+  to write up some docs for this function.
+
+- Added four more ftp tests to the test suite.
+
+Daniel (12 September 2001)
+- CURLOPT_SSL_CIPHER_LIST was added, and the curl tool option is named
+  --ciphers. Use them to specify a list of ciphers to use in the SSL
+  connection.
+
+- T. Bharath found a memory leak in libcurl's windows version. It turned out
+  to be the new duphandle() that didn't quite work yet.
+
 Daniel (11 September 2001)
 - Added verbose output for SSL connections that output the server
   certificate's start and expire dates. As suggested by Paul Harrington.
