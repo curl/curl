@@ -375,6 +375,7 @@ static void help(void)
   puts("    --stderr <file> Where to redirect stderr. - means stdout.\n"
        " -t/--telnet-option <OPT=val> Set telnet option\n"
        "    --trace <file>  Dump a network/debug trace to the given file\n"
+       "    --trace-ascii <file>  Like --trace but without the hex output\n"
        " -T/--upload-file <file> Transfer/upload <file> to remote site\n"
        "    --url <URL>     Another way to specify URL to work with");
   puts(" -u/--user <user[:password]> Specify user and password to use\n"
@@ -458,6 +459,7 @@ struct Configurable {
   char *trace_dump; /* file to dump the network trace to, or NULL */
   FILE *trace_stream;
   bool trace_fopened;
+  bool trace_ascii;
 
   long httpversion;
   bool progressmode;
@@ -968,6 +970,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5f", "environment", FALSE},
 #endif
     {"5g", "trace",      TRUE},
+    {"5h", "trace-ascii", TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1151,7 +1154,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 #endif
       case 'g': /* --trace */
         GetStr(&config->trace_dump, nextarg);
-        config->conf ^= CONF_VERBOSE; /* talk a lot */
+        break;
+      case 'h': /* --trace-ascii */
+        GetStr(&config->trace_dump, nextarg);
+        config->trace_ascii = TRUE;
         break;
       default: /* the URL! */
         {
@@ -1933,26 +1939,33 @@ void progressbarinit(struct ProgressData *bar,
 
 static
 void dump(const char *text,
-          FILE *stream, unsigned char *ptr, size_t size)
+          FILE *stream, unsigned char *ptr, size_t size,
+          bool nohex)
 {
   size_t i;
   size_t c;
 
-#define DUMP_BYTES 16 /* per line */
+  unsigned int width=0x10;
+
+  if(nohex)
+    /* without the hex output, we can fit more on screen */
+    width = 0x40;
 
   fprintf(stream, "%s %d (0x%x) bytes\n", text, size, size);
 
-  for(i=0; i<size; i+= DUMP_BYTES) {
+  for(i=0; i<size; i+= width) {
 
     fprintf(stream, "%04x: ", i);
 
-    for(c = 0; c < DUMP_BYTES; c++)
-      if(i+c < size)
-        fprintf(stream, "%02x ", ptr[i+c]);
-      else
-        fputs("   ", stream);
-
-    for(c = 0; (c < DUMP_BYTES) && (i+c < size); c++)
+    if(!nohex) {
+      /* hex not disabled, show it */
+      for(c = 0; c < width; c++)
+        if(i+c < size)
+          fprintf(stream, "%02x ", ptr[i+c]);
+        else
+          fputs("   ", stream);
+    }
+    for(c = 0; (c < width) && (i+c < size); c++)
       fprintf(stream, "%c",
               (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:'.');
     
@@ -1968,6 +1981,7 @@ int my_trace(CURL *handle, curl_infotype type,
 {
   struct Configurable *config = (struct Configurable *)userp;
   FILE *output=config->errors;
+  const char *text;
 
   (void)handle; /* prevent compiler warning */
 
@@ -1987,20 +2001,24 @@ int my_trace(CURL *handle, curl_infotype type,
   switch (type) {
   case CURLINFO_TEXT:
     fprintf(output, "== Info: %s", data);
-    break;
+  default: /* in case a new one is introduced to shock us */
+    return 0;
+
   case CURLINFO_HEADER_OUT:
-    dump("=> Send header", output, data, size);
+    text = "=> Send header";
     break;
   case CURLINFO_DATA_OUT:
-    dump("=> Send data ", output, data, size);
+    text = "=> Send data ";
     break;
   case CURLINFO_HEADER_IN:
-    dump("<= Recv header", output, data, size);
+    text = "<= Recv header";
     break;
   case CURLINFO_DATA_IN:
-    dump("<= Recv data", output, data, size);
+    text = "<= Recv data";
     break;
   }
+
+  dump(text, output, data, size, config->trace_ascii);
   return 0;
 }
 
@@ -2467,7 +2485,6 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);
       curl_easy_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
       curl_easy_setopt(curl, CURLOPT_PROXY, config->proxy); /* proxy to use */
-      curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
       curl_easy_setopt(curl, CURLOPT_HEADER, config->conf&CONF_HEADER);
       curl_easy_setopt(curl, CURLOPT_NOPROGRESS, config->conf&CONF_NOPROGRESS);
       curl_easy_setopt(curl, CURLOPT_NOBODY, config->conf&CONF_NOBODY);
@@ -2583,7 +2600,9 @@ operate(struct Configurable *config, int argc, char *argv[])
       if(config->trace_dump) {
         curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
         curl_easy_setopt(curl, CURLOPT_DEBUGDATA, config);
+        config->conf |= CONF_VERBOSE; /* force verbose */
       }
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
       
       res = curl_easy_perform(curl);
         
