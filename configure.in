@@ -481,9 +481,9 @@ else
         OPENSSL_ENABLED=1)
     fi
 
-    dnl Check for the OpenSSL engine header, it is kind of "separated"
-    dnl from the main SSL check
-    AC_CHECK_HEADERS(openssl/engine.h)
+    dnl If the ENGINE library seems to be around, check for the OpenSSL engine
+    dnl header, it is kind of "separated" from the main SSL check
+    AC_CHECK_FUNC(ENGINE_init, AC_CHECK_HEADERS(openssl/engine.h))
 
     AC_SUBST(OPENSSL_ENABLED)
 
@@ -509,34 +509,42 @@ dnl **********************************************************************
 
 dnl Check for & handle argument to --with-zlib.
 
-OPT_ZLIB="yes"
-AC_ARG_WITH(libz,
-AC_HELP_STRING([--with-libz=PATH], [where to look for zlib])
-AC_HELP_STRING([--without-libz], [disable zlib]),
-              [ OPT_ZLIB="$withval" ])
+_cppflags=$CPPFLAGS
+_ldflags=$LDFLAGS
+OPT_ZLIB="/usr/local"
+AC_ARG_WITH(zlib,
+  AC_HELP_STRING([--with-zlib=PATH], [search for zlib in PATH])
+  AC_HELP_STRING([--without-zlib], [disable use of zlib]),
+                 [OPT_ZLIB="$withval"])
 
-if test -n "$OPT_ZLIB"
-then
-  if test X"$OPT_ZLIB" != Xno
-  then
-    AC_MSG_CHECKING(for zlib in)
-    test X"$OPT_ZLIB" = Xyes && OPT_ZLIB=/usr/local
-    LIBS="$LIBS -L$OPT_ZLIB/lib"
-    CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
-    AC_MSG_RESULT([$OPT_ZLIB])
-  fi
-fi
+case "$OPT_ZLIB" in
+  no)
+    AC_MSG_WARN([zlib disabled]) ;;
+  *)
+    dnl check for the lib first without setting any new path, since many
+    dnl people have it in the default path
 
-if test X"$OPT_ZLIB" != Xno
-then
-  AC_CHECK_LIB(z, gzread, [AM_CONDITIONAL(CONTENT_ENCODING, true) 
-	  	          AC_DEFINE(HAVE_LIBZ)
-			  LIBS="$LIBS -lz"
-                          HAVE_LIBZ="1"
-                          AC_SUBST(HAVE_LIBZ)])
-else
-  AC_MSG_WARN([zlib usage deliberately disabled])
-fi
+    AC_CHECK_LIB(z, inflateEnd, ,
+                   [if test -d "$OPT_ZLIB"; then
+                      CPPFLAGS="$CPPFLAGS -I$OPT_ZLIB/include"
+                      LDFLAGS="$LDFLAGS -L$OPT_ZLIB/lib"
+                   fi])
+
+    AC_CHECK_HEADER(zlib.h,[
+      AC_CHECK_LIB(z, gzread,
+                   [AM_CONDITIONAL(CONTENT_ENCODING, true)
+                   HAVE_LIBZ="1"
+                   AC_SUBST(HAVE_LIBZ)
+                   LIBS="$LIBS -lz"
+                   AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
+                   AC_DEFINE(HAVE_LIBZ, 1, [If zlib is available])],
+                   [ CPPFLAGS=$_cppflags
+                   LDFLAGS=$_ldflags])],
+      [ CPPFLAGS=$_cppflags
+      LDFLAGS=$_ldflags]
+    )
+    ;;
+esac
 
 dnl Default is to try the thread-safe versions of a few functions
 OPT_THREAD=on
@@ -605,9 +613,6 @@ AC_CHECK_HEADERS( \
         sys/poll.h \
         setjmp.h
 )
-
-dnl Check for libz header
-AC_CHECK_HEADERS(zlib.h)
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -768,4 +773,3 @@ AC_CONFIG_FILES([Makefile \
            curl-config
 ])
 AC_OUTPUT
-
