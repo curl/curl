@@ -45,7 +45,7 @@
 #endif
 
 static
-char *GetEnv(const char *variable, bool do_expand)
+char *GetEnv(const char *variable, char do_expand)
 {
   char *env = NULL;
 #ifdef WIN32
