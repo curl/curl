@@ -6,8 +6,18 @@
 
                                   Changelog
 
+Daniel (30 November 2004)
+- Dan Fandrich's fix for libz 1.1 and "extra field" usage in a gzip stream
+
+- Dan also helped me with input data to create three more test cases for the
+  --compressed option.
+
 Daniel (29 November 2004)
-- As reported in Mandrake's bug tracker bug 12285
+- I improved the test suite to enable binary contents in the tests (by proving
+  it base64 encoded), like for testing decompress etc. Added test 220 and 221
+  for this purpose. Tests can now also depend on libz to run.
+
+- As reported by Reinout van Schouwen in Mandrake's bug tracker bug 12285
   (http://qa.mandrakesoft.com/show_bug.cgi?id=12285), when connecting to an
   IPv6 host with FTP, --disable-epsv (or --disable-eprt) effectively disables
   the ability to transfer a file. Now, when connected to an FTP server with
