@@ -5,7 +5,7 @@
 # Client-side
 <client>
 <server>
-file
+none
 </server>
 # tool is what to use instead of 'curl'
 <tool>
