@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -100,26 +100,31 @@ static int passwd_callback(char *buf, int num, int verify
       strcpy(buf, global_passwd);
       return (int)strlen(buf);
     }
-  }  
+  }
   return 0;
 }
 
-static
-bool seed_enough(int nread)
-{
-#ifdef HAVE_RAND_STATUS
-  nread = 0; /* to prevent compiler warnings */
+/*
+ * rand_enough() is a function that returns TRUE if we have seeded the random
+ * engine properly. We use some preprocessor magic to provide a seed_enough()
+ * macro to use, just to prevent a compiler warning on this function if we
+ * pass in an argument that is never used.
+ */
 
-  /* only available in OpenSSL 0.9.5a and later */
-  if(RAND_status())
-    return TRUE;
-#else
-  if(nread > 500)
-    /* this is a very silly decision to make */
-    return TRUE;
-#endif
-  return FALSE; /* not enough */
+#ifdef HAVE_RAND_STATUS
+#define seed_enough(x) rand_enough()
+static bool rand_enough(void)
+{
+  return RAND_status()?TRUE:FALSE;
 }
+#else
+#define seed_enough(x) rand_enough(x)
+static bool rand_enough(int nread)
+{
+  /* this is a very silly decision to make */
+  return (nread > 500)?TRUE:FALSE;
+}
+#endif
 
 static
 int random_the_seed(struct SessionHandle *data)
@@ -183,12 +188,12 @@ int random_the_seed(struct SessionHandle *data)
      * being dependent upon the algorithm used by Curl_FormBoundary(): N bytes
      * of a 7-bit ascii set. -- Richard Gorton, March 11 2003.
      */
-	
+
     do {
       area = Curl_FormBoundary();
       if(!area)
         return 3; /* out of memory */
-	
+
       len = (int)strlen(area);
       RAND_add(area, len, (len >> 1));
 
@@ -364,15 +369,15 @@ int cert_stuff(struct connectdata *conn,
 
     /* If we are using DSA, we can copy the parameters from
      * the private key */
-		
-    
+
+
     /* Now we know that a key and cert have been set against
      * the SSL context */
     if(!SSL_CTX_check_private_key(ctx)) {
       failf(data, "Private key does not match the certificate public key");
       return(0);
     }
-#ifndef HAVE_USERDATA_IN_PWD_CALLBACK    
+#ifndef HAVE_USERDATA_IN_PWD_CALLBACK
     /* erase it now */
     memset(global_passwd, 0, sizeof(global_passwd));
 #endif
@@ -432,7 +437,7 @@ void Curl_SSL_cleanup(void)
 
     /* Free the SSL error strings */
     ERR_free_strings();
-  
+
     /* EVP_cleanup() removes all ciphers and digests from the
        table. */
     EVP_cleanup();
@@ -483,11 +488,11 @@ void Curl_SSL_Close(struct connectdata *conn)
 
     for(i=0; i<2; i++) {
       struct ssl_connect_data *connssl = &conn->ssl[i];
-      
+
       if(connssl->handle) {
         (void)SSL_shutdown(connssl->handle);
         SSL_set_connect_state(connssl->handle);
-        
+
         SSL_free (connssl->handle);
         connssl->handle = NULL;
       }
@@ -590,11 +595,11 @@ int Curl_SSL_Close_All(struct SessionHandle *data)
 {
   int i;
 
-  if(data->state.session) {    
+  if(data->state.session) {
     for(i=0; i< data->set.ssl.numsessions; i++)
       /* the single-killer function handles empty table slots */
       Kill_Single_Session(&data->state.session[i]);
-    
+
     /* free the cache data */
     free(data->state.session);
   }
@@ -632,7 +637,7 @@ static int Store_SSL_Session(struct connectdata *conn,
 
   /* SSL_get1_session() will increment the reference
      count and the session will stay in memory until explicitly freed with
-     SSL_SESSION_free(3), regardless of its state. 
+     SSL_SESSION_free(3), regardless of its state.
      This function was introduced in openssl 0.9.5a. */
 #else
   ssl_sessionid = SSL_get_session(ssl->handle);
@@ -641,9 +646,9 @@ static int Store_SSL_Session(struct connectdata *conn,
      This is an inferior option because the session can be flushed
      at any time by openssl. It is included only so curl compiles
      under versions of openssl < 0.9.5a.
-     
+
      WARNING: How curl behaves if it's session is flushed is
-     untested. 
+     untested.
   */
 #endif
 
@@ -663,7 +668,7 @@ static int Store_SSL_Session(struct connectdata *conn,
     Kill_Single_Session(store);
   else
     store = &data->state.session[i]; /* use this slot */
-  
+
   /* now init the session struct wisely */
   store->sessionid = ssl_sessionid;
   store->age = data->state.sessionage;    /* set current age */
@@ -714,7 +719,7 @@ static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
   if((asn1_string[10] >= '0') && (asn1_string[10] <= '9') &&
      (asn1_string[11] >= '0') && (asn1_string[11] <= '9'))
     second= (asn1_string[10]-'0')*10+(asn1_string[11]-'0');
-  
+
   infof(data,
         "%s%04d-%02d-%02d %02d:%02d:%02d %s\n",
         prefix, year+1900, month, day, hour, minute, second, (gmt?"GMT":""));
@@ -722,7 +727,7 @@ static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
   return 0;
 }
 
-#endif  
+#endif
 
 /* ====================================================== */
 #ifdef USE_SSLEAY
@@ -731,7 +736,7 @@ cert_hostcheck(const char *certname, const char *hostname)
 {
   char *tmp;
   const char *certdomain;
-  
+
   if(!certname ||
      strlen(certname)<3 ||
      !hostname ||
@@ -745,7 +750,7 @@ cert_hostcheck(const char *certname, const char *hostname)
 
   if((certname[0] != '*') || (certdomain[0] != '.'))
     return 0; /* not a wildcard certificate, check failed */
-  
+
   if(!strchr(certdomain+1, '.'))
     return 0; /* the certificate must have at least another dot in its name */
 
@@ -797,9 +802,9 @@ static CURLcode verifyhost(struct connectdata *conn,
 #else
   struct in_addr addr;
 #endif
- 
+
 #ifdef ENABLE_IPV6
-  if(conn->bits.ipv6_ip && 
+  if(conn->bits.ipv6_ip &&
      Curl_inet_pton(AF_INET6, conn->host.name, &addr)) {
     target = GEN_IPADD;
     addrlen = sizeof(struct in6_addr);
@@ -810,17 +815,17 @@ static CURLcode verifyhost(struct connectdata *conn,
       target = GEN_IPADD;
       addrlen = sizeof(struct in_addr);
     }
-  
+
   /* get a "list" of alternative names */
   altnames = X509_get_ext_d2i(server_cert, NID_subject_alt_name, NULL, NULL);
-  
+
   if(altnames) {
     int hostlen = 0;
     int domainlen = 0;
     char *domain = NULL;
     int numalts;
     int i;
-        
+
     if(GEN_DNS == target) {
       hostlen = (int)strlen(conn->host.name);
       domain = strchr(conn->host.name, '.');
@@ -849,15 +854,15 @@ static CURLcode verifyhost(struct connectdata *conn,
           if((hostlen == altlen) &&
              curl_strnequal(conn->host.name, altptr, hostlen))
             matched = TRUE;
-        
+
           /* Is this a wildcard match? */
           else if((altptr[0] == '*') &&
                   (domainlen == altlen-1) &&
                   curl_strnequal(domain, altptr+1, domainlen))
             matched = TRUE;
           break;
-          
-        case GEN_IPADD: /* IP address comparison */          
+
+        case GEN_IPADD: /* IP address comparison */
           /* compare alternative IP address if the data chunk is the same size
              our server IP address is */
           if((altlen == addrlen) && !memcmp(altptr, &addr, altlen))
@@ -868,7 +873,7 @@ static CURLcode verifyhost(struct connectdata *conn,
     }
     GENERAL_NAMES_free(altnames);
   }
- 
+
   if(matched)
     /* an alternative name matched the server hostname */
     infof(data, "\t subjectAltName: %s matched\n", conn->host.dispname);
@@ -878,14 +883,14 @@ static CURLcode verifyhost(struct connectdata *conn,
     int j,i=-1 ;
 
 /* The following is done because of a bug in 0.9.6b */
-  
+
     unsigned char *nulstr = (unsigned char *)"";
     unsigned char *peer_CN = nulstr;
 
-    X509_NAME *name = X509_get_subject_name(server_cert) ;   
-    if (name) 
-      while ((j=X509_NAME_get_index_by_NID(name,NID_commonName,i))>=0) 
-        i=j; 
+    X509_NAME *name = X509_get_subject_name(server_cert) ;
+    if (name)
+      while ((j=X509_NAME_get_index_by_NID(name,NID_commonName,i))>=0)
+        i=j;
 
     /* we have the name entry and we will now convert this to a string
        that we can use for comparison. Doing this we support BMPstring,
@@ -896,7 +901,7 @@ static CURLcode verifyhost(struct connectdata *conn,
                               X509_NAME_ENTRY_get_data(
                                 X509_NAME_get_entry(name,i)));
     }
-   
+
     if (peer_CN == nulstr)
        peer_CN = NULL;
 
@@ -927,7 +932,7 @@ static CURLcode verifyhost(struct connectdata *conn,
       infof(data, "\t common name: %s (matched)\n", peer_CN);
       OPENSSL_free(peer_CN);
     }
-  } 
+  }
   return CURLE_OK;
 }
 #endif
@@ -977,7 +982,7 @@ Curl_SSLConnect(struct connectdata *conn,
     req_method = SSLv3_client_method();
     break;
   }
-    
+
   connssl->ctx = SSL_CTX_new(req_method);
 
   if(!connssl->ctx) {
@@ -994,7 +999,7 @@ Curl_SSLConnect(struct connectdata *conn,
 
   */
   SSL_CTX_set_options(connssl->ctx, SSL_OP_ALL);
-    
+
   if(data->set.cert) {
     if(!cert_stuff(conn,
                    connssl->ctx,
@@ -1109,10 +1114,10 @@ Curl_SSLConnect(struct connectdata *conn,
         timeout_ms = data->set.timeout*1000;
       else
         timeout_ms = data->set.connecttimeout*1000;
-      
+
       /* subtract the passed time */
       timeout_ms -= has_passed;
-      
+
       if(timeout_ms < 0) {
         /* a precaution, no need to continue if time already is up */
         failf(data, "SSL connection timeout");
@@ -1221,7 +1226,7 @@ Curl_SSLConnect(struct connectdata *conn,
     Store_SSL_Session(conn, connssl);
   }
 
-  
+
   /* Get server's certificate (note: beware of dynamic allocation) - opt */
   /* major serious hack alert -- we should check certificates
    * to authenticate the server; otherwise we risk man-in-the-middle
@@ -1234,7 +1239,7 @@ Curl_SSLConnect(struct connectdata *conn,
     return CURLE_SSL_PEER_CERTIFICATE;
   }
   infof (data, "Server certificate:\n");
-  
+
   str = X509_NAME_oneline(X509_get_subject_name(connssl->server_cert),
                           NULL, 0);
   if(!str) {
@@ -1271,7 +1276,7 @@ Curl_SSLConnect(struct connectdata *conn,
 
     /* We could do all sorts of certificate verification stuff here before
        deallocating the certificate. */
-    
+
     data->set.ssl.certverifyresult=SSL_get_verify_result(connssl->handle);
     if(data->set.ssl.certverifyresult != X509_V_OK) {
       if(data->set.ssl.verifypeer) {
