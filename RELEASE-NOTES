@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o cookies can now hold 4999 bytes of content
  o HTTP POST/PUT with NTLM/Digest/Negotiate to a URL returning 3XX
  o HTTPS POST/PUT over a proxy requiring NTLM/Digest/Negotiate works now
  o less restrictive libidn requirements, 0.4.1 or later is fine
@@ -45,6 +46,6 @@ advice from friends like these:
 
  Gisle Vanem, Vincent Bronner, Alexander Krasnostavsky, Chris Gaukroger,
  Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam,
- Luca Alteas, Jean-Louis Lemaire, David Byron
+ Luca Alteas, Jean-Louis Lemaire, David Byron, David Cohen
 
         Thanks! (and sorry if I forgot to mention someone)

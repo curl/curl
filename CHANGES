@@ -7,6 +7,15 @@
                                   Changelog
 
 Daniel (22 June 2004)
+- David Cohen pointed out that RFC2109 says clients should allow cookies to
+  contain least 4096 bytes while libcurl only allowed 2047. I raised the limit
+  to 4999 now and made the used buffer get malloc()ed instead of simply
+  allocated on stack as before. Extended test case 46 to include a cookie with
+  very huge content to verify the fix.
+
+- Günter Knauf fixed getdate.y to remove a few warnings. I removed the
+  ifdef'ed test we never ever use anyway.
+
 - Gisle Vanem fixed the certificate wildcard checks to support a '*'-letter
   anywhere in the wildcard string, support multiple '*'-letters in the
   wildcard and to allow the '*'-letter to match a string that includes a dot.
