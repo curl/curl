@@ -2952,6 +2952,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      * Store the old value to be able to set it back later!
      *************************************************************/
 
+#ifdef SIGALRM
 #ifdef HAVE_SIGACTION
     struct sigaction sigact;
     sigaction(SIGALRM, NULL, &sigact);
@@ -2964,12 +2965,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #endif
     /* now set the new struct */
     sigaction(SIGALRM, &sigact, NULL);
-#else
+#else /* HAVE_SIGACTION */
     /* no sigaction(), revert to the much lamer signal() */
 #ifdef HAVE_SIGNAL
     keep_sigact = signal(SIGALRM, alarmfunc);
 #endif
-#endif
+#endif /* HAVE_SIGACTION */
 
     /* We set the timeout on the name resolving phase first, separately from
      * the download/upload part to allow a maximum time on everything. This is
@@ -2986,8 +2987,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
        recently set in the beginning of this function and nothing slow
        has been done since then until now. */
 #endif
+#endif /* SIGALRM */
   }
-#endif
+#endif /* USE_ARES */
   
   /*************************************************************
    * Resolve the name of the server or proxy
@@ -3031,7 +3033,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
   *addr = hostaddr;
 
-#ifdef HAVE_ALARM
+#if defined(HAVE_ALARM) && defined(SIGALRM)
   if((data->set.timeout || data->set.connecttimeout) && !data->set.no_signal) {
 #ifdef HAVE_SIGACTION
     if(keep_copysig) {
@@ -3044,7 +3046,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* restore the previous SIGALRM handler */
     signal(SIGALRM, keep_sigact);
 #endif
-#endif
+#endif /* HAVE_SIGACTION */
+
     /* switch back the alarm() to either zero or to what it was before minus
        the time we spent until now! */
     if(prev_alarm) {
@@ -3090,24 +3093,6 @@ static CURLcode SetupConnection(struct connectdata *conn,
     /* There's nothing in this function to setup if we're only doing
        a file:// transfer */
     return result;
-
-  /*************************************************************
-   * Proxy authentication
-   *************************************************************/
-#if 0 /* This code is not needed anymore (moved to http.c) */
-  if(conn->bits.proxy_user_passwd) {
-    char *authorization;
-    snprintf(data->state.buffer, BUFSIZE, "%s:%s",
-             conn->proxyuser, conn->proxypasswd);
-    if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
-                          &authorization) >= 0) {
-      Curl_safefree(conn->allocptr.proxyuserpwd);
-      conn->allocptr.proxyuserpwd =
-        aprintf("Proxy-authorization: Basic %s\015\012", authorization);
-      free(authorization);
-    }
-  }
-#endif
 
   /*************************************************************
    * Send user-agent to HTTP proxies even if the target protocol
