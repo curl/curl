@@ -1531,12 +1531,15 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     }
     else
       rc = CURLE_OPERATION_TIMEDOUT;
+  }
 
-    destroy_thread_data(&conn->async);
+  destroy_thread_data(&conn->async);
+
+  if (CURLE_OK != rc)
     /* close the connection, since we can't return failure here without
        cleaning up this connection properly */
     Curl_disconnect(conn);
-  }
+
   return (rc);
 }
 

@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (23 April 2004)
+- Gisle Vanem found and fixed a memory leak when doing (failing) Windows
+  threaded name resolves.
+
 - I also added test case 163 just to make sure -F "var=<file" works fine and
   can pass on characters such as newlines, carriage-return and tabs.
 
