@@ -25,14 +25,16 @@ TODO
    [http://curl.haxx.se/dev/no_copy_callbacks.txt]
 
  * More data sharing. curl_share_* functions already exist and work, and they
-   can be extended to share more.
+   can be extended to share more. For example, enable sharing of the ares
+   channel.
+
+ * Introduce a new error code indicating authentication problems (for proxy
+   CONNECT error 407 for example). This cannot be an error code, we must not
+   return informational stuff as errors, consider a new info returned by
+   curl_easy_getinfo() #845941
 
  * Set the SO_KEEPALIVE socket option to make libcurl notice and disconnect
    very long time idle connections.
-
- * Go through the code and verify that libcurl deals with big files >2GB and
-   >4GB all over. Bug reports (and source reviews) show that it doesn't
-   currently work.
 
  LIBCURL - multi interface
 

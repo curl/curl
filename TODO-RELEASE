@@ -12,11 +12,6 @@ To get fixed in 7.11.1 (planned release in March 2004)
 To get fixed in 7.11.2 (planned release May/June 2004)
 ======================
 
-1. Introduce a new error code indicating authentication problems (for proxy
-   CONNECT error 407 for example). This cannot be an error code, we must not
-   return informational stuff as errors, consider a new info returned by
-   curl_easy_getinfo() #845941 UNASSIGNED
-
 6. REST fix for servers not behaving well on >2GB requests. This should fail
    if the server doesn't set the pointer to the requested index. The tricky
    part is to figure out if the server did the right thing or not.
@@ -28,7 +23,4 @@ To get fixed in 7.11.2 (planned release May/June 2004)
 
 23. Peter Sylvester's "Most Significant Common Name" patch. Feedback welcome.
     At least the UTF8 conversion and comparison should be done. Patch?
-    UNASSIGNED
-
-26. Make it possible to share the ares channel with the share interface.
     UNASSIGNED
