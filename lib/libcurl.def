@@ -31,6 +31,12 @@ EXPORTS
  	curl_mvfprintf @ 22 ;
 	curl_strequal @ 23 ;
 	curl_strnequal @ 24 ;
-        curl_easy_duphandle @ 25 ;
-        curl_formadd @ 26 ;
-
+	curl_easy_duphandle @ 25 ;
+	curl_formadd @ 26 ;
+	curl_multi_init @ 27;
+	curl_multi_add_handle @ 28;
+	curl_multi_remove_handle @ 29;
+	curl_multi_fdset @ 30;
+	curl_multi_perform @ 31;
+	curl_multi_cleanup @ 32;
+	curl_multi_info_read @ 33;
