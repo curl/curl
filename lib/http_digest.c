@@ -230,8 +230,6 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   }
   authp->done = TRUE;
 
-  ha1 = (unsigned char *)malloc(33); /* 32 digits and 1 zero byte */
-
   if(!d->nc)
     d->nc = 1;
 
@@ -239,8 +237,10 @@ CURLcode Curl_output_digest(struct connectdata *conn,
     /* Generate a cnonce */
     now = Curl_tvnow();
     snprintf(cnoncebuf, sizeof(cnoncebuf), "%06ld", now.tv_sec);
-    Curl_base64_encode(cnoncebuf, strlen(cnoncebuf), &cnonce);
-    d->cnonce = cnonce;
+    if(Curl_base64_encode(cnoncebuf, strlen(cnoncebuf), &cnonce))
+      d->cnonce = cnonce;
+    else
+      return CURLE_OUT_OF_MEMORY;
   }
 
   /*
@@ -256,15 +256,23 @@ CURLcode Curl_output_digest(struct connectdata *conn,
 
   md5this = (unsigned char *)
     aprintf("%s:%s:%s", conn->user, d->realm, conn->passwd);
+  if(!md5this)
+    return CURLE_OUT_OF_MEMORY;
   Curl_md5it(md5buf, md5this);
   free(md5this); /* free this again */
+
+  ha1 = (unsigned char *)malloc(33); /* 32 digits and 1 zero byte */
+  if(!ha1)
+    return CURLE_OUT_OF_MEMORY;
+
   md5_to_ascii(md5buf, ha1);
 
   if(d->algo == CURLDIGESTALGO_MD5SESS) {
     /* nonce and cnonce are OUTSIDE the hash */
     tmp = aprintf("%s:%s:%s", ha1, d->nonce, d->cnonce);
-
     free(ha1);
+    if(!tmp)
+      return CURLE_OUT_OF_MEMORY;
     ha1 = (unsigned char *)tmp;
   }
 
@@ -282,6 +290,11 @@ CURLcode Curl_output_digest(struct connectdata *conn,
   */
 
   md5this = (unsigned char *)aprintf("%s:%s", request, uripath);
+  if(!md5this) {
+    free(ha1);
+    return CURLE_OUT_OF_MEMORY;
+  }
+
   if (d->qop && strequal(d->qop, "auth-int")) {
     /* We don't support auth-int at the moment. I can't see a easy way to get
        entity-body here */
@@ -307,6 +320,8 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                                        ha2);
   }
   free(ha1);
+  if(!md5this)
+    return CURLE_OUT_OF_MEMORY;
 
   Curl_md5it(md5buf, md5this);
   free(md5this); /* free this again */
@@ -361,27 +376,34 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                uripath, /* this is the PATH part of the URL */
                request_digest);
   }
+  if(!*userp)
+    return CURLE_OUT_OF_MEMORY;
 
   /* Add optional fields */
   if(d->opaque) {
     /* append opaque */
-    tmp = aprintf(", opaque=\"%s\"", d->opaque);
-    *userp = (char*) realloc(*userp, strlen(*userp) + strlen(tmp) + 1);
-    strcat(*userp, tmp);
-    free(tmp);
+    tmp = aprintf("%s, opaque=\"%s\"", *userp, d->opaque);
+    if(!tmp)
+      return CURLE_OUT_OF_MEMORY;
+    free(*userp);
+    *userp = tmp;
   }
 
   if(d->algorithm) {
     /* append algorithm */
-    tmp = aprintf(", algorithm=\"%s\"", d->algorithm);
-    *userp = (char*) realloc(*userp, strlen(*userp) + strlen(tmp) + 1);
-    strcat(conn->allocptr.userpwd, tmp);
-    free(tmp);
+    tmp = aprintf("%s, algorithm=\"%s\"", *userp, d->algorithm);
+    if(!tmp)
+      return CURLE_OUT_OF_MEMORY;
+    free(*userp);
+    *userp = tmp;
   }
 
   /* append CRLF to the userpwd header */
-  *userp = (char*) realloc(*userp, strlen(*userp) + 3 + 1);
-  strcat(*userp, "\r\n");
+  tmp = (char*) realloc(*userp, strlen(*userp) + 3 + 1);
+  if(!tmp)
+    return CURLE_OUT_OF_MEMORY;
+  strcat(tmp, "\r\n");
+  *userp = tmp;
 
   return CURLE_OK;
 }
