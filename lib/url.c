@@ -1078,10 +1078,33 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
       struct Curl_share *set;
       set = va_arg(param, struct Curl_share *);
       if(data->share)
+      {
+        Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
+        
+        /* checking the dns cache stuff */
+        if(data->share->hostcache == data->hostcache)
+        {
+          data->hostcache = NULL;
+        }
+    
         data->share->dirty--;
-
+        
+        Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
+      }
+      
       data->share = set;
+
+      Curl_share_lock(data, CURL_LOCK_DATA_SHARE, CURL_LOCK_ACCESS_SINGLE);
+      
       data->share->dirty++;
+
+      if( data->hostcache )
+      {
+        Curl_hash_destroy(data->hostcache);
+        data->hostcache = data->share->hostcache;
+      }
+      
+      Curl_share_unlock(data, CURL_LOCK_DATA_SHARE);
     }
     break;
 
@@ -1518,7 +1541,7 @@ static int handleSock5Proxy(
       socksreq[6] = ((char*)hp->h_addr_list[0])[2];
       socksreq[7] = ((char*)hp->h_addr_list[0])[3];
 
-      Curl_resolv_unlock(dns); /* not used anymore from now on */
+      Curl_resolv_unlock(conn->data, dns); /* not used anymore from now on */
     }
     else {
       failf(conn->data, "Failed to resolve \"%s\" for SOCKS5 connect.",
@@ -2901,7 +2924,7 @@ CURLcode Curl_done(struct connectdata *conn)
   }
 
   if(conn->connect_addr)
-    Curl_resolv_unlock(conn->connect_addr); /* done with this */
+    Curl_resolv_unlock(conn->data, conn->connect_addr); /* done with this */
 
 #if defined(MALLOCDEBUG) && defined(AGGRESIVE_TEST)
   /* scan for DNS cache entries still marked as in use */

@@ -30,15 +30,24 @@
 /* this struct is libcurl-private, don't export details */
 struct Curl_share {
   unsigned int specifier;
-  unsigned int locked;
-  unsigned int dirty;
+  volatile unsigned int dirty;
   
   curl_lock_function lockfunc;
   curl_unlock_function unlockfunc;
   void *clientdata;
+
+  curl_hash *hostcache;
 };
 
-CURLSHcode Curl_share_aquire_lock (struct SessionHandle *, curl_lock_data);
-CURLSHcode Curl_share_release_lock (struct SessionHandle *, curl_lock_data);
+CURLSHcode Curl_share_lock (
+    struct SessionHandle *, 
+    curl_lock_data,
+    curl_lock_access
+    );
+
+CURLSHcode Curl_share_unlock (
+    struct SessionHandle *, 
+    curl_lock_data
+    );
 
 #endif /* __CURL_SHARE_H */

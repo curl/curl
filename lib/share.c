@@ -65,12 +65,53 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     /* this is a type this share will share */
     type = va_arg(param, int);
     share->specifier |= (1<<type);
+    switch( type )
+    {
+      case CURL_LOCK_DATA_DNS:
+        if (!share->hostcache) {
+          share->hostcache = Curl_hash_alloc(7, Curl_freednsinfo);
+        }
+        break;
+
+      case CURL_LOCK_DATA_COOKIE:
+        break;
+
+      case CURL_LOCK_DATA_SSL_SESSION:
+        break;
+
+      case CURL_LOCK_DATA_CONNECT:
+        break;
+
+      default:
+        return CURLSHE_BAD_OPTION;
+    }
     break;
 
   case CURLSHOPT_UNSHARE:
     /* this is a type this share will no longer share */
     type = va_arg(param, int);
     share->specifier &= ~(1<<type);
+    switch( type )
+    {
+      case CURL_LOCK_DATA_DNS:
+        if (share->hostcache) {
+          Curl_hash_destroy(share->hostcache);
+          share->hostcache = NULL;
+        }
+        break;
+
+      case CURL_LOCK_DATA_COOKIE:
+        break;
+
+      case CURL_LOCK_DATA_SSL_SESSION:
+        break;
+
+      case CURL_LOCK_DATA_CONNECT:
+        break;
+
+      default:
+        return CURLSHE_BAD_OPTION;
+    }
     break;
 
   case CURLSHOPT_LOCKFUNC:
@@ -108,7 +149,7 @@ CURLSHcode curl_share_cleanup(CURLSH *sh)
 
 
 CURLSHcode
-Curl_share_acquire_lock(struct SessionHandle *data, curl_lock_data type)
+Curl_share_lock(struct SessionHandle *data, curl_lock_data type, curl_lock_access access)
 {
   struct Curl_share *share = data->share;
 
@@ -116,8 +157,7 @@ Curl_share_acquire_lock(struct SessionHandle *data, curl_lock_data type)
     return CURLSHE_INVALID;
 
   if(share->specifier & (1<<type)) {
-    share->lockfunc (data, type, CURL_LOCK_ACCESS_SINGLE, share->clientdata);
-    share->locked |= (1<<type);
+    share->lockfunc (data, type, access, share->clientdata);
   }
   /* else if we don't share this, pretend successful lock */
 
@@ -125,7 +165,7 @@ Curl_share_acquire_lock(struct SessionHandle *data, curl_lock_data type)
 }
 
 CURLSHcode
-Curl_share_release_lock(struct SessionHandle *data, curl_lock_data type)
+Curl_share_unlock(struct SessionHandle *data, curl_lock_data type)
 {
   struct Curl_share *share = data->share;
 
@@ -134,7 +174,6 @@ Curl_share_release_lock(struct SessionHandle *data, curl_lock_data type)
 
   if(share->specifier & (1<<type)) {
     share->unlockfunc (data, type, share->clientdata);
-    share->locked &= ~(1<<type);
   }
 
   return CURLSHE_OK;

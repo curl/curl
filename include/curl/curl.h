@@ -902,10 +902,15 @@ typedef enum {
 /* Different data locks for a single share */
 typedef enum {
   CURL_LOCK_DATA_NONE = 0,
-  CURL_LOCK_DATA_COOKIE = 1,
-  CURL_LOCK_DATA_DNS = 2,
-  CURL_LOCK_DATA_SSL_SESSION = 3,
-  CURL_LOCK_DATA_CONNECT = 4,
+  /*  CURL_LOCK_DATA_SHARE is used internaly to say that
+   *  the locking is just made to change the internal state of the share
+   *  itself.
+   */
+  CURL_LOCK_DATA_SHARE, 
+  CURL_LOCK_DATA_COOKIE,
+  CURL_LOCK_DATA_DNS,
+  CURL_LOCK_DATA_SSL_SESSION,
+  CURL_LOCK_DATA_CONNECT,
   CURL_LOCK_DATA_LAST
 } curl_lock_data;
 

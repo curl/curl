@@ -59,7 +59,7 @@ struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
                                    int port);
 
 /* unlock a previously resolved dns entry */
-#define Curl_resolv_unlock(dns) dns->inuse--
+void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns);
 
 /* for debugging purposes only: */
 void Curl_scan_cache_used(void *user, void *ptr);
