@@ -1502,6 +1502,7 @@ Transfer(struct connectdata *conn)
 
 CURLcode Curl_pretransfer(struct SessionHandle *data)
 {
+  CURLcode res;
   if(!data->change.url)
     /* we can't do anything wihout URL */
     return CURLE_URL_MALFORMAT;
@@ -1510,7 +1511,11 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   /* Init the SSL session ID cache here. We do it here since we want to
      do it after the *_setopt() calls (that could change the size) but
      before any transfer. */
-  Curl_SSL_InitSessions(data, data->set.ssl.numsessions);
+  res = Curl_SSL_InitSessions(data, data->set.ssl.numsessions);
+  if(res)
+    return res;
+#else
+  (void)res;
 #endif
 
   data->set.followlocation=0; /* reset the location-follow counter */
