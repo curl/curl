@@ -1,5 +1,22 @@
   Changelog for the c-ares project
 
+* July 24
+
+- Made the lib get built static only if --enable-debug is used.
+
+- Gisle Vanem fixed:
+
+  Basically in loops like handle_errors(), 'query->next' was assigned a local
+  variable and then query was referenced after the memory was freed by
+  next_server(). I've changed that so next_server() and end_query() returns
+  the next query. So callers should use this ret-value.
+
+  The next problem was that 'server->tcp_buffer_pos' had a random value at
+  entry to 1st recv() (luckily causing Winsock to return ENOBUFS).
+
+  I've also added a ares_writev() for Windows to streamline the code a bit
+  more.
+
 * July 20
 - Fixed a few variable return types for some system calls. Made configure
   check for ssize_t to make it possible to use that when receiving the send()
