@@ -6,9 +6,45 @@
 
                                History of Changes
 
+Daniel (25 April 2002)
+- With Sterling Hughes' new DNS pruning, Jacky Lam asked if this wouldn't
+  cause problems since the pruning is only checking the entry time, and it
+  sure could cause problems. Therefor, I've now added and changed code so that
+  this should not be a problem. Nowhere in the code will be store name
+  resolved information around so that a sunsequent DNS cache prune should
+  cause a problem. This of course called for some mild internal changes.
+
+Daniel (23 April 2002)
+- Improved the 'no_proxy' check, as using port numbers in the URL confused it
+  previously. Reported by Erwan Legrand in bug report #547484.
+
+- The --interface option now works even on IPv6 enabled builds. Reported by
+  'thor'.
+
+Daniel (22 April 2002)
+- The #defines names starting with TIMECOND now has CURL_ prefixes. (The old
+  names are still #defined too.) Pointed out by Robert Olson.
+
+- Jacky Lam brought code that lets the name resolve function only use as much
+  memory as it actually needs. This only works on certain operating systems,
+  but is totally transparant to all users.
+
+Daniel (19 April 2002)
+- Bjorn Reese fixed pack_hostent to work properly with 64 bit pointers.
+
+Daniel (18 April 2002)
+- Sterling Hughes added code to prune old DNS cache entries, since Jacky Lam
+  experienced very big caches.
+
+Daniel (17 April 2002)
+- Dirk Manske patched the 301 response to work against the RFC but more like
+  common browsers do. If a POST get a 301 back, it'll switch to GET in the
+  next request (if location-following is enabled).
+
 Daniel (16 April 2002)
-- Dirk Manske brought a patch that introduced two new CURLINFO_* values:
-  CURLINFO_REDIRECT_TIME and CURLINFO_REDIRECT_COUNT.
+- Dirk Manske posted a patch originally written by Ingo Wilken that introduced
+  two new CURLINFO_* values: CURLINFO_REDIRECT_TIME and
+  CURLINFO_REDIRECT_COUNT.
 
 Daniel (15 April 2002)
 - Jonatan Lander patched the verbose text 'Disables POST, goes with GET' to
