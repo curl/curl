@@ -426,6 +426,35 @@ Pass a long. The set number will be the redirection limit. If that many
 redirections have been followed, the next redirect will cause an error. This
 option only makes sense if the CURLOPT_FOLLOWLOCATION is used at the same
 time. (Added in 7.5)
+.TP
+.B CURLOPT_MAXCONNECTS
+Pass a long. The set number will be the persistant connection cache size. The
+set amount will be the maximum amount of simultaneous connections that libcurl
+may cache between file transfers. Default is 5, and there isn't much point in
+changing this value unless you are perfectly aware of how this work and
+changes libcurl's behaviour. Note: if you have already performed transfers
+with this curl handle, setting a smaller MAXCONNECTS than before may cause
+open connections to unnecessarily get closed. (Added in 7.7)
+.TP
+.B CURLOPT_CLOSEPOLICY
+Pass a long. This must be one of the CURLCLOSEPOLICY_* defines. This is still
+not supported as of this writing. (Added in 7.7)
+.TP
+.B CURLOPT_FRESH_CONNECT
+Pass a long. Set to non-zero to make the next transfer use a new connection by
+force. If the connection cache is full before this connection, one of the
+existinf connections will be closed as according to the set policy. This
+option should be used with caution and only if you understand what it
+does. Set to 0 to have libcurl attempt re-use of an existing connection.
+(Added in 7.7)
+.TP
+.B CURLOPT_FORBID_REUSE
+Pass a long. Set to non-zero to make the next transfer explicitly close the
+connection when done. Normally, libcurl keep all connections alive when done
+with one transfer in case there comes a succeeding one that can re-use them.
+This option should be used with caution and only if you understand what it
+does. Set to 0 to have libcurl keep the connection open for possibly later
+re-use. (Added in 7.7)
 .PP
 .SH RETURN VALUE
 0 means the option was set properly, non-zero means an error as
