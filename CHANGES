@@ -6,6 +6,8 @@
 
                                History of Changes
 
+Version 7.7
+
 Daniel (22 March 2001)
 - The configure script now fails with an error message if gethostbyname_r() is
   detected but it couldn't figure out how to invoke it (what amount of
