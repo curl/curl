@@ -7,8 +7,42 @@
                                   Changelog
 
 
+Daniel (13 Dec)
+- Bug report #651460 by Christopher R. Palmer showed that when using libcurl
+  to for example go over a proxy on localhost, it would attempt to connect
+  through the proxy TWICE.
+
+  I added test case 503 with which I managed to repeat this problem and I
+  fixed the code to not re-attempt any connects (which also made it a nicer
+  fix for the #650941 bug mentioned below).
+
+  The sws server was extended to deal with CONNECT in order to make test
+  case 503 do good.
+
+- Evan Jordan posted bug report #650989 about a memory leak in the public key
+  retrieving code. He provided a suggested fix and I merely applied it!
+
+- Bug report #650941, posted by Christopher R. Palmer identified a problem
+  with the multi interface and getting file:// URLs. This was now fixed and
+  test case 502 was added to verify this.
+
+Daniel (12 Dec)
+- Test case 500 and 501 are the first ever libcurl test cases that run.
+
+- Made "configure --enable-debug" cut off all -O* options to the compiler
+
+- Finally fixed the test suite's ftp server so that test case 402 doesn't
+  cause the following test case to fail anymore!
+
+Daniel (11 Dec)
+- CURL_MAX_WRITE_SIZE is now decreased to 16KB since it makes the Windows
+  version perform uploads much faster!!!
+
+- Fixed the #include in curl/curl.h to include the other files outside the
+  extern "C" scope.
+
 Daniel (10 Dec)
-- Moved around more logic:
+- Moved around and added more logic:
 
   First, POST data is never sent as part of the request headers in the http.c
   code. It is always sent the "normal" read callback then send() way. This now
