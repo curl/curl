@@ -1,0 +1,46 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 Mooo
+Connection: close
+Set-Cookie: path=/; thewinneris=nowayyouwin;
+
+*flopp*
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+Get same cookie page several times
+ </name>
+ <command>
+'http://%HOSTIP:%HOSTPORT/want/{27,27,27}' -b none
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl.*
+</strip>
+<protocol>
+GET /want/27 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+GET /want/27 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Cookie: thewinneris=nowayyouwin
+
+GET /want/27 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Cookie: thewinneris=nowayyouwin
+
+</protocol>
+</verify>
