@@ -1,3 +1,4 @@
+$! $Id$
 $! DEFINES.COM
 $! Define where to look for the curl include directory, where to put the 
 $! exes and objects, and the openssl stuff.  If you have hp's SSL product 
