@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (30 March 2005)
+- Andres Garcia modified the configure script to check for libgdi32 before
+  libcrypto, to make the SSL check work fine on msys/mingw.
+
 Daniel (29 March 2005)
 - Tom Moers identified a flaw when you sent a POST with Digest authentication,
   as in the first request when curl sends a POST with Content-Length: 0, it

@@ -18,6 +18,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o configure's SSL-detection for msys/mingw
  o better connection keep-alive when POSTing with HTTP Digest
  o FTP-SSL
  o reading FTP server response in multiple reads
@@ -32,8 +33,8 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
- o the cURL projected is now over 7 years old
- o we now provide daily CVS windows-builds:
+ o the cURL project is now over 7 years old
+ o daily curl binary builds for Windows fresh from CVS:
    http://cool.haxx.se/curl-daily/
  o curl-tracker is a new mailinglist for "tracker" activities:
    http://cool.haxx.se/mailman/listinfo/curl-tracker
@@ -48,6 +49,6 @@ advice from friends like these:
  Dan Fandrich, Ignacio Vazquez-Abrams, Randy McMurchy, Dominick Meglio,
  Jean-Marc Ranger, Tor Arntsen, Nodak Sodak, David Houlder, Gisle Vanem,
  Christopher R. Palmer, Gwenole Beauchesne, Augustus Saunders, Jesper Jensen,
- Tom Moers
+ Tom Moers, Andres Garcia
 
         Thanks! (and sorry if I forgot to mention someone)
