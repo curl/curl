@@ -96,7 +96,7 @@ Packaging Instructions:
   FTP uploading, kerberos, HTTP form based upload, proxies, 
   cookies, user+password authentication, file transfer resume,
   http proxy tunneling and a busload of other useful tricks."
-  category: Web
+  category: Web Libs
   requires: cygwin openssl
 
   @ curl-devel
