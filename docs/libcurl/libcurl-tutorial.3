@@ -571,23 +571,19 @@ CURLOPT_PROGRESSDATA. libcurl won't touch it.
 There's basically only one thing to keep in mind when using C++ instead of C
 when interfacing libcurl:
 
- "The Callbacks Must Be Plain C"
+The callbacks CANNOT be non-static class member functions
 
-So if you want a write callback set in libcurl, you should put it within
-\&'extern'. Similar to this:
+Example C++ code:
 
 .nf
- extern "C" {
-    size_t write_data(void *ptr, size_t size, size_t nmemb,
-                      void *ourpointer)
+class AClass {
+    static size_t write_data(void *ptr, size_t size, size_t nmemb,
+                             void *ourpointer)
     {
       /* do what you want with the data */
     }
  }
 .fi
-
-This will of course effectively turn the callback code into C. There won't be
-any "this" pointer available etc.
 
 .SH "Proxies"
 
