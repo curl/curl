@@ -1,8 +1,27 @@
-.\" You can view this file with:
-.\" nroff -man curl-config.1
-.\" Written by Daniel Stenberg
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at http://curl.haxx.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * $Id$
+.\" **************************************************************************
 .\"
-.TH curl-config 1 "11 Dec 2004" "Curl 7.10" "curl-config manual"
+.TH curl-config 1 "24 Dec 2004" "Curl 7.12.4" "curl-config manual"
 .SH NAME
 curl-config \- Get information about a libcurl installation
 .SH SYNOPSIS
@@ -32,6 +51,12 @@ to link your application with libcurl.
 This is the prefix used when libcurl was installed. Libcurl is then installed
 in $prefix/lib and its header files are installed in $prefix/include and so
 on. The prefix is set with "configure --prefix".
+.IP "--protocols"
+Lists what particular protocols the installed libcurl was built to support. At
+the time of writing, this list may include HTTP, HTTPS, FTP, FTPS, GOPHER,
+FILE, TELNET, LDAP, DICT. Do not assume any particular order. The protocols
+will be listed using uppercase and are separated by newlines. There may be
+none, one or several protocols in the list.
 .IP "--version"
 Outputs version information about the installed libcurl.
 .IP "--vernum"
