@@ -19,7 +19,7 @@ OPENSSL_PATH = ../../openssl-0.9.5a
 ## Nothing more to do below this line!
 
 INCLUDES = -I. -I.. -I../include
-CFLAGS = -g -O2
+CFLAGS = -g -O2 -DMINGW32
 LDFLAGS = 
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@

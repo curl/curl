@@ -173,7 +173,7 @@
 /*************************************************
  * This section is for compiler specific defines.*
  *************************************************/
-#ifndef VC6 /* VC6 => Microsoft Visual C++ 6 */
+#ifdef MINGW32 /* Borland and MS don't have this */
 
 /* Define if you have the <unistd.h> header file.  */
 #define HAVE_UNISTD_H 1
