@@ -18,6 +18,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o the progress meter display now handles file sizes up to full 8 exabytes
+   (which is as high a signed 64 bit number can reach)
  o general HTTP authentication improvements
  o HTTP Digest authentication with the proxy works
  o mulipart formposting with -F and file names with spaces work again
@@ -29,11 +31,12 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
- o PycURL 7.11.2 was released: http://pycurl.sourceforge.net
+ o PycURL 7.11.3 was released: http://pycurl.sourceforge.net
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Gisle Vanem, Tommy Tam, Luca Altea, James Bursa, Mihai Ionescu
+ Gisle Vanem, Tommy Tam, Luca Altea, James Bursa, Mihai Ionescu, Michael
+ Benedict
 
         Thanks! (and sorry if I forgot to mention someone)

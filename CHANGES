@@ -6,6 +6,25 @@
 
                                   Changelog
 
+Daniel (6 May 2004)
+- Michael Benedict brought a fix that fills in the errorbuffer properly when
+  ares fails to resolve a name for a case not previously dealt with like this.
+
+Daniel (5 May 2004)
+- Joe Halpin fixed the annoying typecast warning in lib/ldap.c
+
+- Gisle Vanem fixes:
+  o memdebug to not access NULL on several places
+  o libcurl.def; curl_formparse is gone.
+  o progress.c; fixed the percent values being trunced to 0.
+  o if2ip.*; constified the 'interface' argument.
+
+- Tor Arntsen reported that many of his autobuilds froze and I found and fixed
+  a problem introduced with the HTTP auth overhaul that could lead to a
+  never-ending internal request-loop due to un-initialized variables!
+
+- Removed several compiler warnings on various compilers/platforms.
+
 Daniel (4 May 2004)
 - curl_formparse() has been removed from the library. It has been marked and
   mentioned as deprecated for several years.
