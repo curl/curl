@@ -2077,7 +2077,6 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   ssize_t write_len;
   char *sptr=s;
   CURLcode res = CURLE_OK;
-  size_t len;
 
   va_list ap;
   va_start(ap, fmt);
