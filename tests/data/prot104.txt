@@ -1,5 +1,6 @@
 USER anonymous
 PASS curl_by_daniel@haxx.se
 CWD a/path
+MDTM 103
 TYPE I
 SIZE 103
