@@ -30,7 +30,7 @@
 #define MAXNUM_SIZE 16
 
 typedef enum {
-  CHUNK_LOST, /* never use */
+  CHUNK_FIRST, /* never use */
 
   /* In this we await and buffer all hexadecimal digits until we get one
      that isn't a hexadecimal digit. When done, we go POSTHEX */
@@ -45,9 +45,16 @@ typedef enum {
      If the size given was zero, we set state to STOP and return. */
   CHUNK_CR,
 
-  /* We eat the amount of data specified. When done, we move back to the
-     HEX state. */
+  /* We eat the amount of data specified. When done, we move on to the
+     POST_CR state. */
   CHUNK_DATA,
+
+  /* POSTCR should get a CR and nothing else, then move to POSTLF */
+  CHUNK_POSTCR,
+
+  /* POSTLF should get a LF and nothing else, then move back to HEX as
+     the CRLF combination marks the end of a chunk */
+  CHUNK_POSTLF,
 
   /* This is mainly used to really mark that we're out of the game.
      NOTE: that there's a 'dataleft' field in the struct that will tell how
@@ -63,6 +70,7 @@ typedef enum {
   CHUNKE_OK = 0,
   CHUNKE_TOO_LONG_HEX = 1,
   CHUNKE_ILLEGAL_HEX,
+  CHUNKE_BAD_CHUNK,
   CHUNKE_WRITE_ERROR,
   CHUNKE_STATE_ERROR,
   CHUNKE_LAST

@@ -181,17 +181,43 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
       length -= piece;   /* decrease space left in this round */
 
       if(0 == ch->datasize)
-        /* end of data this round, go back to get a new size */
-        Curl_httpchunk_init(conn);
-
+        /* end of data this round, we now expect a trailing CRLF */
+        ch->state = CHUNK_POSTCR;
       break;
+
+    case CHUNK_POSTCR:
+      if(*datap == '\r') {
+        ch->state = CHUNK_POSTLF;
+        datap++;
+        length--;
+      }
+      else
+        return CHUNKE_BAD_CHUNK;
+      break;
+
+    case CHUNK_POSTLF:
+      if(*datap == '\n') {
+        /*
+         * The last one before we go back to hex state and start all
+         * over.
+         */
+        Curl_httpchunk_init(conn);
+        datap++;
+        length--;
+      }
+      else
+        return CHUNKE_BAD_CHUNK;
+      break;
+
     case CHUNK_STOP:
       /* If we arrive here, there is data left in the end of the buffer
          even if there's no more chunks to read */
       ch->dataleft = length;
       return CHUNKE_STOP; /* return stop */
+#if 0
     default:
       return CHUNKE_STATE_ERROR;
+#endif
     }
   }
   return CHUNKE_OK;
