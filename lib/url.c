@@ -139,16 +139,10 @@ static unsigned int ConnectionStore(struct SessionHandle *data,
 #define RETSIGTYPE void
 #endif
 static
-RETSIGTYPE sigintfunc(int signal)
-{
-  (void)signal; /* ignored */
-  return;
-}
 RETSIGTYPE alarmfunc(int signal)
 {
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void)signal;
-  kill(getpid(), SIGINT);
   return;
 }
 #endif
@@ -2261,16 +2255,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
 #ifdef HAVE_SIGACTION
     struct sigaction sigact;
-    sigaction(SIGINT, NULL, &sigact);
-    keep_sigact = sigact;
-    sigact.sa_handler = sigintfunc;
-#ifdef SA_RESTART
-    /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
-    sigact.sa_flags &= ~SA_RESTART;
-#endif
-    /* now set the new struct */
-    sigaction(SIGINT, &sigact, NULL);
-
     sigaction(SIGALRM, NULL, &sigact);
     keep_sigact = sigact;
     keep_copysig = TRUE; /* yes, we have a copy */
