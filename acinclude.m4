@@ -776,7 +776,7 @@ dnl standard dynamic library path.  If it is a symbolic link, the destination
 dnl of the link is used as the file name, after stripping off any minor
 dnl version numbers. If a library file can't be found, a guess is made.
 dnl This macro assumes AC_PROG_LIBTOOL has been called and requires perl
-dnl to be available.
+dnl to be available in the PATH, or $PERL to be set to its location.
 dnl
 dnl CURL_DLLIB_NAME(VARIABLE, library_name)
 dnl e.g. CURL_DLLIB_NAME(LDAP_NAME, ldap) on a Linux system might result
@@ -785,12 +785,13 @@ dnl in LDAP_NAME holding the string "libldap.so.2".
 AC_DEFUN([CURL_DLLIB_NAME],
 [
 AC_MSG_CHECKING([name of dynamic library $2])
-dnl Work around a bug in libtool ver. 1.5
+dnl Work around an apparent bug in libtool ver. 1.5
 test -z "$shared_ext" && shared_ext="$shrext_cmds"
 
 dnl Create the dynamic library name of the correct form for this platform
+LIBNAME_LINK_SPEC=`echo "$library_names_spec" | $SED 's/^.* //'`
 DLGUESSLIB=`name=$2 eval echo "$libname_spec"`
-DLGUESSFILE=`libname="$DLGUESSLIB" release="" major="" eval echo "$soname_spec"`
+DLGUESSFILE=`libname="$DLGUESSLIB" release="" major="" versuffix="" eval echo "$LIBNAME_LINK_SPEC"`
 
 if test "$cross_compiling" = yes; then
   dnl Can't look at filesystem when cross-compiling
@@ -800,12 +801,13 @@ else
 
   DLFOUNDFILE=""
   if test "$sys_lib_dlsearch_path_spec" ; then
+    dnl Search for the link library name and see what it points to.
     for direc in $sys_lib_dlsearch_path_spec ; do
       DLTRYFILE="$direc/$DLGUESSFILE"
       dnl Find where the symbolic link for this name points
       changequote(<<, >>)dnl
       <<
-      DLFOUNDFILE=`perl -e 'use File::Basename; (basename(readlink($ARGV[0])) =~ /^(.*[^\d]\.\d+)[\d\.]*$/ && print ${1}) || exit 1;' "$DLTRYFILE" 2>&5`
+      DLFOUNDFILE=`${PERL:-perl} -e 'use File::Basename; (basename(readlink($ARGV[0])) =~ /^(.*[^\d]\.\d+)[\d\.]*$/ && print ${1}) || exit 1;' "$DLTRYFILE" 2>&5`
       >>
       changequote([, ])dnl
       if test "$?" -eq "0"; then
@@ -816,7 +818,12 @@ else
   fi
 
   if test -z "$DLFOUNDFILE" ; then
-    DLFOUNDFILE="$DLGUESSFILE"
+    dnl Couldn't find a link library. Synthesize a likely dynamic name instead.
+    SO_NAME_SPEC="$soname_spec"
+    dnl soname_spec only exists if it's different from the first entry
+    dnl in library_names_spec
+    test -z "$SO_NAME_SPEC" && SO_NAME_SPEC=`echo "$library_names_spec" | $SED 's/ .*$//'`
+    DLFOUNDFILE=`libname="$DLGUESSLIB" release="" major="" versuffix="" eval echo "$SO_NAME_SPEC"`
   fi
 
   AC_DEFINE_UNQUOTED($1, "$DLFOUNDFILE", [$2 dynamic library file])
