@@ -61,6 +61,9 @@
 #ifdef HAVE_OPENSSL_ENGINE_H
 #include <openssl/engine.h>
 #endif
+#ifdef HAVE_OPENSSL_PKCS12_H
+#include <openssl/pkcs12.h>
+#endif
 #else
 #include "rsa.h"
 #include "crypto.h"
