@@ -526,7 +526,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     struct timeval *tvp, tv, store;
     int count;
 
-    store.tv_sec = timeout - elapsed;
+    store.tv_sec = (int)(timeout - elapsed);
     store.tv_usec = 0;
     
     FD_ZERO(&read_fds);
