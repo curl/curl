@@ -78,17 +78,27 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
+/* true globals */
+static unsigned int  initialized = 0;
+static long          init_flags  = 0;
+
 CURLcode curl_global_init(long flags)
 {
   if(flags & CURL_GLOBAL_SSL)
     Curl_SSL_init();
 
+  initialized = 1;
+  init_flags  = flags;
+  
   return CURLE_OK;
 }
 
 void curl_global_cleanup(void)
 {
-  Curl_SSL_cleanup();
+  if (init_flags & CURL_GLOBAL_SSL)
+    Curl_SSL_cleanup();
+
+  initialized = 0;
 }
 
 CURL *curl_easy_init(void)
@@ -97,7 +107,8 @@ CURL *curl_easy_init(void)
   struct UrlData *data;
 
   /* Make sure we inited the global SSL stuff */
-  Curl_SSL_init();
+  if (!initialized)
+    curl_global_init(CURL_GLOBAL_DEFAULT);
 
   /* We use curl_open() with undefined URL so far */
   res = Curl_open((CURL **)&data, NULL);
