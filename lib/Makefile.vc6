@@ -25,11 +25,11 @@
 LIB_NAME       = libcurl
 LIB_NAME_DEBUG = libcurld
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.7a
+OPENSSL_PATH   = ../../openssl-0.9.7d
 !ENDIF
 
 !IFNDEF ZLIB_PATH
-ZLIB_PATH  = ../../zlib-1.1.4
+ZLIB_PATH  = ../../zlib-1.2.1
 !ENDIF
 
 # Use the high resolution time by default.  Comment this out to use low
@@ -39,23 +39,23 @@ USEMM_LIBS = YES
 #############################################################
 ## Nothing more to do below this line!
 
-CCNODBG   = cl.exe /MD /O2 /D "NDEBUG"
-CCDEBUG   = cl.exe /MDd /Od /Gm /Zi  /D "_DEBUG" /GZ
-CFLAGSSSL = /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
+CCNODBG    = cl.exe /MD /O2 /D "NDEBUG"
+CCDEBUG    = cl.exe /MDd /Od /Gm /Zi  /D "_DEBUG" /GZ
+CFLAGSSSL  = /D "USE_SSLEAY" /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
 CFLAGSZLIB = /D "HAVE_ZLIB_H" /D "HAVE_ZLIB" /D "HAVE_LIBZ" /I "$(ZLIB_PATH)"
-CFLAGS = /I "." /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS" 
-LNKDLL    = link.exe /DLL  /def:libcurl.def
-LNKLIB    = link.exe /lib
-LFLAGS    = /nologo
-SSLLIBS   = libeay32.lib ssleay32.lib
+CFLAGS     = /I "." /I "../include" /nologo /W3 /GX /D "WIN32" /D "VC6" /D "_MBCS" /D "_LIB" /YX /FD /c /D "MSDOS" 
+LNKDLL     = link.exe /DLL  /def:libcurl.def
+LNKLIB     = link.exe /lib
+LFLAGS     = /nologo
+SSLLIBS    = libeay32.lib ssleay32.lib
 !IFDEF USEMM_LIBS
-WINLIBS   = wsock32.lib winmm.lib
+WINLIBS    = wsock32.lib winmm.lib
 !ELSE
-WINLIBS   = wsock32.lib 
-CFLAGS		= $(CFLAGS) /D "WITHOUT_MM_LIB"
+WINLIBS    = wsock32.lib 
+CFLAGS     = $(CFLAGS) /D "WITHOUT_MM_LIB"
 !ENDIF
 #  RSAglue.lib was formerly needed in the SSLLIBS
-CFGSET    = FALSE
+CFGSET     = FALSE
 
 ######################
 # release
