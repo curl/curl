@@ -72,9 +72,11 @@ int test(char *URL)
     /* always cleanup */
     curl_easy_cleanup(curl);
 
+  }
+
+  if(slist)
     /* clean up the headers list */
     curl_slist_free_all(slist);
 
-  }
   return res;
 }
