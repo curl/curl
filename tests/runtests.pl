@@ -507,6 +507,7 @@ sub singletest {
     unlink($STDOUT);
     unlink($STDERR);
 
+    unlink("$LOGDIR/upload.$NUMBER");  # remove upload leftovers
     unlink($CURLOUT); # remove the downloaded results
     unlink($FTPDCMD); # remove the instructions for this test
 
