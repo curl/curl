@@ -45,6 +45,7 @@ char *curl_escape(char *string, int length)
   int newlen = alloc;
   int index=0;
 
+  length = alloc-1;
   while(length--) {
     in = *string;
     if(' ' == in)
