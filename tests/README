@@ -18,8 +18,10 @@ Run:
   verbose output. Use -d to run the test servers with debug output enabled as
   well.
 
-  Use -s fort shorter output, or pass a string with test numbers to run
-  specific tests only (like ./runtests.pl "3 4" to test 3 and 4 only)
+  Use -s for shorter output, or pass test numbers to run specific tests only
+  (like "./runtests.pl 3 4" to test 3 and 4 only). It also supports test case
+  ranges with 'to'. As in "./runtests 3 to 9" which runs the seven tests from
+  3 to 9.
 
 Memory:
   The test script will check that all allocated memory is freed properly IF
