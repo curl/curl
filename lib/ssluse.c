@@ -1273,7 +1273,7 @@ Curl_SSLConnect(struct connectdata *conn,
       long has_passed;
 
       /* Evaluate in milliseconds how much time that has passed */
-      has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
+      has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
 
       /* get the most strict timeout of the ones converted to milliseconds */
       if(data->set.timeout &&

@@ -491,7 +491,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
   *connected = FALSE; /* a very negative world view is best */
 
   /* Evaluate in milliseconds how much time that has passed */
-  has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
+  has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
 
   /* subtract the most strict timeout of the ones */
   if(data->set.timeout && data->set.connecttimeout) {
@@ -716,7 +716,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     long has_passed;
 
     /* Evaluate in milliseconds how much time that has passed */
-    has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
+    has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
 
 #ifndef min
 #define min(a, b)   ((a) < (b) ? (a) : (b))

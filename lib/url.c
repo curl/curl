@@ -2259,11 +2259,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->range = data->set.set_range;              /* clone the range setting */
   conn->resume_from = data->set.set_resume_from;   /* inherite resume_from */
 
-  /* Set the start time temporary to this creation time to allow easier
-     timeout checks before the transfer has started for real. The start time
-     is later set "for real" using Curl_pgrsStartNow(). */
-  conn->data->progress.start = conn->created;
-
   conn->bits.user_passwd = data->set.userpwd?1:0;
   conn->bits.proxy_user_passwd = data->set.proxyuserpwd?1:0;
   conn->bits.no_body = data->set.opt_no_body;

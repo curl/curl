@@ -6,8 +6,22 @@
 
                                   Changelog
 
+Daniel (15 November 2004)
+- To test my fix for the CURLINFO_REDIRECT_TIME bug, I added time_redirect and
+  num_redirects support to the -w writeout option for the command line tool.
+
+- Wojciech Zwiefka found out that CURLINFO_REDIRECT_TIME didn't work as
+  documented.
+  
 Daniel (12 November 2004)
--                 *** New Behaviour Alert ***
+- Gisle Vanem modigied the MSVC and Netware makefiles to build without
+  libcurl.def
+
+- Dan Fandrich added the --disable-crypto-auth option to configure to allow
+  libcurl to build without Digest support. (I figure it should also explicitly
+  disable Negotiate and NTLM.)
+
+-                 *** Modified Behaviour Alert ***
 
   Setting CURLOPT_POSTFIELDS to NULL will no longer do a GET.
 
