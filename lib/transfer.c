@@ -97,15 +97,13 @@
 #include "ssluse.h"
 #include "http_digest.h"
 #include "http_ntlm.h"
-#ifdef GSSAPI
 #include "http_negotiate.h"
-#endif
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
@@ -368,6 +366,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             k->hbufp += full_length;
             k->hbuflen += full_length;
             *k->hbufp = 0;
+            k->end_ptr = k->hbufp;
               
             k->p = data->state.headerbuff;
               
@@ -724,53 +723,81 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               if(data->set.get_filetime)
                 data->info.filetime = k->timeofdoc;
             }
-#ifdef GSSAPI
-	    else if (Curl_compareheader(k->p, "WWW-Authenticate:",
-                                        "GSS-Negotiate") &&
-		     (401 == k->httpcode) &&
-		     (data->set.httpauth == CURLAUTH_GSSNEGOTIATE)) {
-	      int neg;
+            else if(checkprefix("WWW-Authenticate:", k->p) &&
+                    (401 == k->httpcode)) {
+              /*
+               * This page requires authentication
+               */
+              char *start = k->p+strlen("WWW-Authenticate:");
 
-	      neg = Curl_input_negotiate(conn,
-		    			 k->p+strlen("WWW-Authenticate:"));
-	      if (neg == 0)
-                /* simulate redirection to make curl send the request again */
-                conn->newurl = strdup(data->change.url);
-	    }
+              /* pass all white spaces */
+              while(*start && isspace((int)*start))
+                start++;
+
+#ifdef GSSAPI
+              if (checkprefix("GSS-Negotiate", start)) {
+                if(data->state.authwant == CURLAUTH_GSSNEGOTIATE) {
+                  /* if exactly this is wanted, go */
+                  int neg = Curl_input_negotiate(conn, start);
+                  if (neg == 0)
+                    conn->newurl = strdup(data->change.url);
+                }
+                else
+                  if(data->state.authwant & CURLAUTH_GSSNEGOTIATE)
+                    data->state.authavail |= CURLAUTH_GSSNEGOTIATE;
+              }
+              else
 #endif
 #ifdef USE_SSLEAY
             /* NTLM support requires the SSL crypto libs */
-            else if(Curl_compareheader(k->p,
-                                       "WWW-Authenticate:", "NTLM") &&
-                    (401 == k->httpcode) &&
-                    (data->set.httpauth == CURLAUTH_NTLM)
-                    /* NTLM authentication is activated */) {
-              CURLntlm ntlm =
-                Curl_input_ntlm(conn, k->p+strlen("WWW-Authenticate:"));
-
-              if(CURLNTLM_BAD != ntlm)
-                conn->newurl = strdup(data->change.url); /* clone string */
+              if(checkprefix("NTLM", start)) {
+                if(data->state.authwant == CURLAUTH_NTLM) {
+                  /* NTLM authentication is activated */
+                  CURLntlm ntlm =
+                    Curl_input_ntlm(conn, start);
+                  
+                  if(CURLNTLM_BAD != ntlm)
+                    conn->newurl = strdup(data->change.url); /* clone string */
+                  else
+                    infof(data, "Authentication problem. Ignoring this.\n");
+                }
+                else
+                  if(data->state.authwant & CURLAUTH_NTLM)
+                    data->state.authavail |= CURLAUTH_NTLM;
+              }
               else
-                infof(data, "Authentication problem. Ignoring this.\n");
-            }
 #endif
-            else if(Curl_compareheader(k->p,
-                                       "WWW-Authenticate:", "Digest") &&
-                    (401 == k->httpcode) &&
-                    (data->set.httpauth == CURLAUTH_DIGEST)
-                    /* Digest authentication is activated */) {
-              CURLdigest dig = CURLDIGEST_BAD;
+              if(checkprefix("Digest", start)) {
+                if(data->state.authwant == CURLAUTH_DIGEST) {
+                  /* Digest authentication is activated */
+                  CURLdigest dig = CURLDIGEST_BAD;
 
-              if(data->state.digest.nonce)
-                infof(data, "Authentication problem. Ignoring this.\n");
-              else
-                dig = Curl_input_digest(conn,
-                                        k->p+strlen("WWW-Authenticate:"));
+                  if(data->state.digest.nonce)
+                    infof(data, "Authentication problem. Ignoring this.\n");
+                  else
+                    dig = Curl_input_digest(conn, start);
 
-              if(CURLDIGEST_FINE == dig)
-                /* We act on it. Store our new url, which happens to be
-                   the same one we already use! */
-                conn->newurl = strdup(data->change.url); /* clone string */
+                  if(CURLDIGEST_FINE == dig)
+                    /* We act on it. Store our new url, which happens to be
+                       the same one we already use! */
+                    conn->newurl = strdup(data->change.url); /* clone string */
+                }
+                else
+                  if(data->state.authwant & CURLAUTH_DIGEST) {
+                    /* We don't know if Digest is what we're gonna use, but we
+                       call this function anyway to store the digest data that
+                       is provided on this line, to skip the extra round-trip
+                       we need to do otherwise. We must sure to free this
+                       data! */
+                    Curl_input_digest(conn, start);
+                    data->state.authavail |= CURLAUTH_DIGEST;
+                  }
+              }
+              else if(checkprefix("Basic", start)) {
+                if(data->state.authwant & CURLAUTH_BASIC) {
+                  data->state.authavail |= CURLAUTH_BASIC;
+                }
+              }
             }
             else if ((k->httpcode >= 300 && k->httpcode < 400) &&
                      checkprefix("Location:", k->p)) {
@@ -786,11 +813,17 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                    white spaces after the "Location:" keyword. */
                 while(*start && isspace((int)*start ))
                   start++;
-                ptr = start; /* start scanning here */
+                
+                /* Scan through the string from the end to find the last
+                   non-space. k->end_ptr points to the actual terminating zero
+                   letter, move pointer one letter back and start from
+                   there. This logic strips off trailing whitespace, but keeps
+                   any embedded whitespace. */
+                ptr = k->end_ptr-1;
+                while((ptr>=start) && isspace((int)*ptr))
+                  ptr--;
+                ptr++;
 
-                /* scan through the string to find the end */
-                while(*ptr && !isspace((int)*ptr))
-                  ptr++;
                 backup = *ptr; /* store the ending letter */
                 if(ptr != start) {
                   *ptr = '\0';   /* zero terminate */
@@ -852,6 +885,25 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                write a piece of the body */
             if(conn->protocol&PROT_HTTP) {
               /* HTTP-only checks */
+              
+              if(data->state.authavail) {
+                if(data->state.authavail & CURLAUTH_GSSNEGOTIATE)
+                  data->state.authwant = CURLAUTH_GSSNEGOTIATE;
+                else if(data->state.authavail & CURLAUTH_DIGEST)
+                  data->state.authwant = CURLAUTH_DIGEST;
+                else if(data->state.authavail & CURLAUTH_NTLM)
+                  data->state.authwant = CURLAUTH_NTLM;
+                else if(data->state.authavail & CURLAUTH_BASIC)
+                  data->state.authwant = CURLAUTH_BASIC;
+                else
+                  data->state.authwant = CURLAUTH_NONE; /* none */
+
+                if(data->state.authwant)
+                  conn->newurl = strdup(data->change.url); /* clone string */
+
+                data->state.authavail = CURLAUTH_NONE; /* clear it here */
+              }
+
               if (conn->newurl) {
                 if(conn->bits.close) {
                   /* Abort after the headers if "follow Location" is set
@@ -1442,6 +1494,10 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
 
+  /* set preferred authentication, default to basic */
+  data->state.authwant = data->set.httpauth?data->set.httpauth:CURLAUTH_BASIC;
+  data->state.authavail = CURLAUTH_NONE; /* nothing so far */
+
   /* If there was a list of cookie files to read and we haven't done it before,
      do it now! */
   if(data->change.cookielist) {
@@ -1488,6 +1544,60 @@ CURLcode Curl_posttransfer(struct SessionHandle *data)
   return CURLE_OK;
 }
 
+static int strlen_url(char *url)
+{
+  char *ptr;
+  int newlen=0;
+  bool left=TRUE; /* left side of the ? */
+
+  for(ptr=url; *ptr; ptr++) {
+    switch(*ptr) {
+    case '?':
+      left=FALSE;
+    default:
+      newlen++;
+      break;
+    case ' ':
+      if(left)
+        newlen+=3;
+      else
+        newlen++;
+      break;
+    }
+  }
+  return newlen;
+}
+
+static void strcpy_url(char *output, char *url)
+{
+  /* we must add this with whitespace-replacing */
+  bool left=TRUE;
+  char *iptr;
+  char *optr = output;
+  for(iptr = url;    /* read from here */
+      *iptr;         /* until zero byte */
+      iptr++) {
+    switch(*iptr) {
+    case '?':
+      left=FALSE;
+    default:
+      *optr++=*iptr;
+      break;
+    case ' ':
+      if(left) {
+        *optr++='%'; /* add a '%' */
+        *optr++='2'; /* add a '2' */
+        *optr++='0'; /* add a '0' */
+      }
+      else
+        *optr++='+'; /* add a '+' here */
+      break;
+    }
+  }
+  *optr=0; /* zero terminate output buffer */
+
+}
+
 CURLcode Curl_follow(struct SessionHandle *data,
                      char *newurl) /* this 'newurl' is the Location: string,
                                       and it must be malloc()ed before passed
@@ -1496,6 +1606,8 @@ CURLcode Curl_follow(struct SessionHandle *data,
   /* Location: redirect */
   char prot[16]; /* URL protocol string storage */
   char letter;   /* used for a silly sscanf */
+  int newlen;
+  char *newest;
   
   if (data->set.maxredirs &&
       (data->set.followlocation >= data->set.maxredirs)) {
@@ -1532,9 +1644,9 @@ CURLcode Curl_follow(struct SessionHandle *data,
     */
     char *protsep;
     char *pathsep;
-    char *newest;
 
     char *useurl = newurl;
+    int urllen;
 
     /* we must make our own copy of the URL to play with, as it may
        point to read-only data */
@@ -1607,30 +1719,62 @@ CURLcode Curl_follow(struct SessionHandle *data,
         *pathsep=0;
     }
 
-    newest=(char *)malloc( strlen(url_clone) +
-                           1 + /* possible slash */
-                           strlen(useurl) + 1/* zero byte */);
+    /* If the new part contains a space, this is a mighty stupid redirect
+       but we still make an effort to do "right". To the left of a '?'
+       letter we replace each space with %20 while it is replaced with '+'
+       on the right side of the '?' letter.
+    */
+    newlen = strlen_url(useurl);
+
+    urllen = strlen(url_clone);
+    
+    newest=(char *)malloc( urllen + 1 + /* possible slash */
+                           newlen + 1 /* zero byte */);
     
     if(!newest)
       return CURLE_OUT_OF_MEMORY; /* go out from this */
 
-    sprintf(newest, "%s%s%s", url_clone,
-            (('/' == useurl[0]) || (protsep && !*protsep))?"":"/",
-            useurl);
+    /* copy over the root url part */
+    memcpy(newest, url_clone, urllen);
+
+    /* check if we need to append a slash */
+    if(('/' == useurl[0]) || (protsep && !*protsep))
+      ;
+    else
+      newest[urllen++]='/';
+
+    /* then append the new piece on the right side */
+    strcpy_url(&newest[urllen], useurl);
+
     free(newurl); /* newurl is the allocated pointer */
     free(url_clone);
     newurl = newest;
   }
-  else
+  else {
     /* This is an absolute URL, don't allow the custom port number */
     data->state.allow_port = FALSE;
+
+    if(strchr(newurl, ' ')) {
+      /* This new URL contains at least one space, this is a mighty stupid
+         redirect but we still make an effort to do "right". */
+      newlen = strlen_url(newurl);
+
+      newest = malloc(newlen+1); /* get memory for this */
+      if(newest) {
+        strcpy_url(newest, newurl); /* create a space-free URL */
+
+        free(newurl); /* that was no good */
+        newurl = newest; /* use this instead now */
+      }
+    }
+
+  }
 
   if(data->change.url_alloc)
     free(data->change.url);
   else
     data->change.url_alloc = TRUE; /* the URL is allocated */
       
-  /* TBD: set the URL with curl_setopt() */
   data->change.url = newurl;
   newurl = NULL; /* don't free! */
 
