@@ -86,8 +86,10 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
                                      char *hostname,
                                      int port,
                                      int *waitp);
+#ifndef ENABLE_IPV6
 #if !defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES)
 static struct hostent* pack_hostent(char** buf, struct hostent* orig);
+#endif
 #endif
 
 void Curl_global_host_cache_init(void)
