@@ -678,7 +678,7 @@ Curl_SSLConnect(struct connectdata *conn)
   /* mark this is being ssl enabled from here on out. */
   conn->ssl.use = TRUE;
 
-  if(!ssl_seeded) {
+  if(!ssl_seeded || data->set.ssl.random_file || data->set.ssl.egdsocket) {
     /* Make funny stuff to get random input */
     random_the_seed(data);
 
