@@ -2134,12 +2134,16 @@ CURLcode Curl_ftp(struct connectdata *conn)
 
   /* parse the URL path into separate path components */
   while((slash_pos=strchr(cur_pos, '/'))) {
+    /* 1 or 0 to indicate absolute directory */
+    bool absolute_dir = (cur_pos - conn->ppath > 0) && (path_part == 0);
+
     /* seek out the next path component */
     if (slash_pos-cur_pos) {
       /* we skip empty path components, like "x//y" since the FTP command CWD
          requires a parameter and a non-existant parameter a) doesn't work on
          many servers and b) has no effect on the others. */
-      ftp->dirs[path_part] = curl_unescape(cur_pos,slash_pos-cur_pos);
+      ftp->dirs[path_part] = curl_unescape(cur_pos - absolute_dir,
+                                           slash_pos - cur_pos + absolute_dir);
     
       if (!ftp->dirs[path_part]) { /* run out of memory ... */
         failf(data, "no memory");
