@@ -7,7 +7,7 @@ AUTOMAKE_OPTIONS = foreign
 lib_LTLIBRARIES = libcurl.la
 
 # Some flags needed when trying to cause warnings ;-)
-# CFLAGS = -g -Wall #-pedantic
+# CFLAGS = -DMALLOCDEBUG -g # -Wall #-pedantic
 
 INCLUDES = -I$(top_srcdir)/include
 
@@ -24,7 +24,7 @@ download.h     getenv.c       ldap.h         ssluse.h       \
 escape.c       getenv.h       mprintf.c      telnet.c       \
 escape.h       getpass.c      netrc.c        telnet.h       \
 getinfo.c highlevel.c strequal.c strequal.h easy.c \
-security.h security.c krb4.c
+security.h security.c krb4.c memdebug.c memdebug.h
 
 # Say $(srcdir), so GNU make does not report an ambiguity with the .y.c rule.
 $(srcdir)/getdate.c: getdate.y
