@@ -523,10 +523,18 @@ CURLcode Curl_is_connected(struct connectdata *conn,
     }
   }
   else if(WAITCONN_TIMEOUT != rc) {
+    int error = 0;
+
     /* nope, not connected  */
+    if (WAITCONN_FDSET_ERROR == rc) {
+      verifyconnect(sockfd, &error);
+      infof(data, "%s\n",Curl_strerror(conn,error));
+    }
+    else
     infof(data, "Connection failed\n");
+
     if(trynextip(conn, sockindex, connected)) {
-      int error = Curl_ourerrno();
+      error = Curl_ourerrno();
       failf(data, "Failed connect to %s:%d; %s",
             conn->host.name, conn->port, Curl_strerror(conn,error));
       code = CURLE_COULDNT_CONNECT;
