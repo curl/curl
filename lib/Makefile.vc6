@@ -32,6 +32,10 @@ OPENSSL_PATH   = ../../openssl-0.9.7a
 ZLIB_PATH  = ../../zlib-1.1.4
 !ENDIF
 
+# Use the high resolution time by default.  Comment this out to use low
+# resolution time and not require winmm.lib
+USEMM_LIBS = YES
+
 #############################################################
 ## Nothing more to do below this line!
 
