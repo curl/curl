@@ -1136,10 +1136,8 @@ static int parseconfig(char *filename,
 struct OutStruct {
   char *filename;
   FILE *stream;
+  struct Configurable *config;
 };
-
-/* having this global is a bit dirty, but hey, who said we weren't? ;-) */
-struct Configurable config;
 
 int my_fwrite(void *buffer, size_t size, size_t nmemb, FILE *stream)
 {
@@ -1149,7 +1147,7 @@ int my_fwrite(void *buffer, size_t size, size_t nmemb, FILE *stream)
     out->stream=fopen(out->filename, "wb");
     if(!out->stream)
       return -1; /* failure */
-    if(config.nobuffer) {
+    if(out->config->nobuffer) {
       /* disable output buffering */
 #ifdef HAVE_SETVBUF
       setvbuf(out->stream, NULL, _IONBF, 0);
@@ -1274,6 +1272,8 @@ void free_config_fields(struct Configurable *confp)
     free(confp->headerfile);
   if(confp->outfile)
     free(confp->outfile);
+  if(confp->ftpport)
+    free(confp->ftpport);
   if(confp->infile)
     free(confp->infile);
   if(confp->range)
@@ -1292,7 +1292,7 @@ void free_config_fields(struct Configurable *confp)
 
 
 static int 
-operate(int argc, char *argv[])
+operate(struct Configurable *config, int argc, char *argv[])
 {
   char errorbuffer[CURL_ERROR_SIZE];
   char useragent[128]; /* buah, we don't want a larger default user agent */
@@ -1321,17 +1321,18 @@ operate(int argc, char *argv[])
   int i;
 
   outs.stream = stdout;
+  outs.config = config;
 
 #ifdef MALLOCDEBUG
   /* this sends all memory debug messages to a logfile named memdump */
   curl_memdebug("memdump");
 #endif
 
-  config.showerror=TRUE;
-  config.conf=CONF_DEFAULT;
+  config->showerror=TRUE;
+  config->conf=CONF_DEFAULT;
 #if 0
-  config.crlf=FALSE;
-  config.quote=NULL;
+  config->crlf=FALSE;
+  config->quote=NULL;
 #endif
 
   if(argc>1 &&
@@ -1347,12 +1348,12 @@ operate(int argc, char *argv[])
     ;
   }
   else {
-    res = parseconfig(NULL, &config);
+    res = parseconfig(NULL, config);
     if(res)
       return res;
   }
 
-  if ((argc < 2)  && !config.url) {
+  if ((argc < 2)  && !config->url) {
     helpf(NULL);
     return CURLE_FAILED_INIT;
   }
@@ -1374,7 +1375,7 @@ operate(int argc, char *argv[])
       else {
 	nextarg= (i < argc - 1)? argv[i+1]: NULL;
 
-	res = getparameter(flag, nextarg, &passarg, &config);
+	res = getparameter(flag, nextarg, &passarg, config);
 	if(res) {
           switch(res) {
           case PARAM_OPTION_AMBIGUOUS:
@@ -1411,23 +1412,23 @@ operate(int argc, char *argv[])
 
   /* if no URL was specified and there was one in the config file, get that
      one */
-  if(!url && config.url)
-    url = config.url;
+  if(!url && config->url)
+    url = config->url;
   
   if(!url) {
     helpf("no URL specified!\n");
     return CURLE_FAILED_INIT;
   }
-  if(NULL == config.useragent) {
+  if(NULL == config->useragent) {
     /* set non-zero default values: */
     snprintf(useragent, sizeof(useragent),
              CURL_NAME "/" CURL_VERSION " (" OS ") " "%s", curl_version());
-    config.useragent= useragent;
+    config->useragent= useragent;
   }
   else
     allocuseragent = TRUE;
 #if 0
-  fprintf(stderr, "URL: %s PROXY: %s\n", url, config.proxy?config.proxy:"none");
+  fprintf(stderr, "URL: %s PROXY: %s\n", url, config->proxy?config->proxy:"none");
 #endif
 
   /* expand '{...}' and '[...]' expressions and return total number of URLs
@@ -1437,9 +1438,9 @@ operate(int argc, char *argv[])
     return res;
 
   /* save outfile pattern befor expansion */
-  outfiles = config.outfile?strdup(config.outfile):NULL;
+  outfiles = config->outfile?strdup(config->outfile):NULL;
 
-  if (!outfiles && !config.remotefile && urlnum > 1) {
+  if (!outfiles && !config->remotefile && urlnum > 1) {
 #ifdef CURL_SEPARATORS
     /* multiple files extracted to stdout, insert separators! */
     separator = 1;
@@ -1453,62 +1454,62 @@ operate(int argc, char *argv[])
   }
   for (i = 0; (url = next_url(urls)); ++i) {
     if (outfiles) {
-      free(config.outfile);
-      config.outfile = outfiles;
+      free(config->outfile);
+      config->outfile = outfiles;
     }
  
-    if (config.outfile || config.remotefile) {
+    if (config->outfile || config->remotefile) {
       /* 
        * We have specified a file name to store the result in, or we have
        * decided we want to use the remote file name.
        */
       
-      if(!config.outfile && config.remotefile) {
+      if(!config->outfile && config->remotefile) {
         /* Find and get the remote file name */
-        config.outfile=strstr(url, "://");
-        if(config.outfile)
-          config.outfile+=3;
+        config->outfile=strstr(url, "://");
+        if(config->outfile)
+          config->outfile+=3;
         else
-          config.outfile=url;
-        config.outfile = strdup(strrchr(config.outfile, '/'));
-        if(!config.outfile || !strlen(++config.outfile)) {
+          config->outfile=url;
+        config->outfile = strdup(strrchr(config->outfile, '/'));
+        if(!config->outfile || !strlen(++config->outfile)) {
           helpf("Remote file name has no length!\n");
           return CURLE_WRITE_ERROR;
         }
       }
       else {
 	/* fill '#1' ... '#9' terms from URL pattern */
-        char *outfile = config.outfile;
-        config.outfile = match_url(config.outfile, *urls);
+        char *outfile = config->outfile;
+        config->outfile = match_url(config->outfile, *urls);
         free(outfile);
       }
       
-      if((0 == config.resume_from) && config.use_resume) {
+      if((0 == config->resume_from) && config->use_resume) {
         /* we're told to continue where we are now, then we get the size of the
            file as it is now and open it for append instead */
         struct stat fileinfo;
 
-        if(0 == stat(config.outfile, &fileinfo)) {
+        if(0 == stat(config->outfile, &fileinfo)) {
           /* set offset to current file size: */
-          config.resume_from = fileinfo.st_size;
+          config->resume_from = fileinfo.st_size;
         }
         /* else let offset remain 0 */
       }
       
-      if(config.resume_from) {
+      if(config->resume_from) {
         /* open file for output: */
-        outs.stream=(FILE *) fopen(config.outfile, config.resume_from?"ab":"wb");
+        outs.stream=(FILE *) fopen(config->outfile, config->resume_from?"ab":"wb");
         if (!outs.stream) {
-          helpf("Can't open '%s'!\n", config.outfile);
+          helpf("Can't open '%s'!\n", config->outfile);
           return CURLE_WRITE_ERROR;
         }
       }
       else {
-        outs.filename = config.outfile;
+        outs.filename = config->outfile;
         outs.stream = NULL; /* open when needed */
       }
     }
-    if (config.infile) {
+    if (config->infile) {
       /*
        * We have specified a file to upload
        */
@@ -1525,55 +1526,56 @@ operate(int argc, char *argv[])
         /* The URL has no file name part, add the local file name. In order to
            be able to do so, we have to create a new URL in another buffer.*/
 
-        urlbuffer=(char *)malloc(strlen(url) + strlen(config.infile) + 3);
+        urlbuffer=(char *)malloc(strlen(url) + strlen(config->infile) + 3);
         if(!urlbuffer) {
           helpf("out of memory\n");
           return CURLE_OUT_OF_MEMORY;
         }
         if(ptr)
           /* there is a trailing slash on the URL */
-          sprintf(urlbuffer, "%s%s", url, config.infile);
+          sprintf(urlbuffer, "%s%s", url, config->infile);
         else
           /* thers is no trailing slash on the URL */
-          sprintf(urlbuffer, "%s/%s", url, config.infile);
+          sprintf(urlbuffer, "%s/%s", url, config->infile);
         
         url = urlbuffer; /* use our new URL instead! */
       }
 
-      infd=(FILE *) fopen(config.infile, "rb");
-      if (!infd || stat(config.infile, &fileinfo)) {
-        helpf("Can't open '%s'!\n", config.infile);
+      infd=(FILE *) fopen(config->infile, "rb");
+      if (!infd || stat(config->infile, &fileinfo)) {
+        helpf("Can't open '%s'!\n", config->infile);
         return CURLE_READ_ERROR;
       }
       infilesize=fileinfo.st_size;
       
     }
-    if((config.conf&CONF_UPLOAD) &&
-       config.use_resume &&
-       (0==config.resume_from)) {
-      config.resume_from = -1; /* -1 will then force get-it-yourself */
+    if((config->conf&CONF_UPLOAD) &&
+       config->use_resume &&
+       (0==config->resume_from)) {
+      config->resume_from = -1; /* -1 will then force get-it-yourself */
     }
-    if(config.headerfile) {
+    if(config->headerfile) {
       /* open file for output: */
-      if(strcmp(config.headerfile,"-")) {
-        heads.filename = config.headerfile;
+      if(strcmp(config->headerfile,"-")) {
+        heads.filename = config->headerfile;
         headerfilep=NULL;
       }
       else
         headerfilep=stdout;
       heads.stream = headerfilep;
+      heads.config = config;
     }
     
     if(outs.stream && isatty(fileno(outs.stream)) &&
-       !(config.conf&(CONF_UPLOAD|CONF_HTTPPOST)))
+       !(config->conf&(CONF_UPLOAD|CONF_HTTPPOST)))
       /* we send the output to a tty and it isn't an upload operation,
          therefore we switch off the progress meter */
-      config.conf |= CONF_NOPROGRESS;
+      config->conf |= CONF_NOPROGRESS;
     
 
     if (urlnum > 1) {
       fprintf(stderr, "\n[%d/%d]: %s --> %s\n",
-              i+1, urlnum, url, config.outfile ? config.outfile : "<stdout>");
+              i+1, urlnum, url, config->outfile ? config->outfile : "<stdout>");
       if (separator) {
 #ifdef CURL_SEPARATORS
         printf("%s%s\n", CURLseparator, url);
@@ -1585,11 +1587,11 @@ operate(int argc, char *argv[])
       }
     }
 
-    if(!config.errors)
-      config.errors = stderr;
+    if(!config->errors)
+      config->errors = stderr;
 
 #ifdef WIN32
-    if(!config.outfile && !(config.conf & CONF_GETTEXT)) {
+    if(!config->outfile && !(config->conf & CONF_GETTEXT)) {
       /* We get the output to stdout and we have not got the ASCII/text flag,
          then set stdout to be binary */
       setmode( 1, O_BINARY );
@@ -1609,67 +1611,67 @@ operate(int argc, char *argv[])
       /* size of uploaded file: */
       curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);
       curl_easy_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
-      curl_easy_setopt(curl, CURLOPT_PROXY, config.proxy); /* proxy to use */
-      curl_easy_setopt(curl, CURLOPT_VERBOSE, config.conf&CONF_VERBOSE);
-      curl_easy_setopt(curl, CURLOPT_HEADER, config.conf&CONF_HEADER);
-      curl_easy_setopt(curl, CURLOPT_NOPROGRESS, config.conf&CONF_NOPROGRESS);
-      curl_easy_setopt(curl, CURLOPT_NOBODY, config.conf&CONF_NOBODY);
+      curl_easy_setopt(curl, CURLOPT_PROXY, config->proxy); /* proxy to use */
+      curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
+      curl_easy_setopt(curl, CURLOPT_HEADER, config->conf&CONF_HEADER);
+      curl_easy_setopt(curl, CURLOPT_NOPROGRESS, config->conf&CONF_NOPROGRESS);
+      curl_easy_setopt(curl, CURLOPT_NOBODY, config->conf&CONF_NOBODY);
       curl_easy_setopt(curl, CURLOPT_FAILONERROR,
-                       config.conf&CONF_FAILONERROR);
-      curl_easy_setopt(curl, CURLOPT_UPLOAD, config.conf&CONF_UPLOAD);
-      curl_easy_setopt(curl, CURLOPT_POST, config.conf&CONF_POST);
+                       config->conf&CONF_FAILONERROR);
+      curl_easy_setopt(curl, CURLOPT_UPLOAD, config->conf&CONF_UPLOAD);
+      curl_easy_setopt(curl, CURLOPT_POST, config->conf&CONF_POST);
       curl_easy_setopt(curl, CURLOPT_FTPLISTONLY,
-                       config.conf&CONF_FTPLISTONLY);
-      curl_easy_setopt(curl, CURLOPT_FTPAPPEND, config.conf&CONF_FTPAPPEND);
-      curl_easy_setopt(curl, CURLOPT_NETRC, config.conf&CONF_NETRC);
+                       config->conf&CONF_FTPLISTONLY);
+      curl_easy_setopt(curl, CURLOPT_FTPAPPEND, config->conf&CONF_FTPAPPEND);
+      curl_easy_setopt(curl, CURLOPT_NETRC, config->conf&CONF_NETRC);
       curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,
-                       config.conf&CONF_FOLLOWLOCATION);
-      curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config.conf&CONF_GETTEXT);
-      curl_easy_setopt(curl, CURLOPT_PUT, config.conf&CONF_PUT);
-      curl_easy_setopt(curl, CURLOPT_MUTE, config.conf&CONF_MUTE);
-      curl_easy_setopt(curl, CURLOPT_USERPWD, config.userpwd);
-      curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, config.proxyuserpwd);
-      curl_easy_setopt(curl, CURLOPT_RANGE, config.range);
+                       config->conf&CONF_FOLLOWLOCATION);
+      curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config->conf&CONF_GETTEXT);
+      curl_easy_setopt(curl, CURLOPT_PUT, config->conf&CONF_PUT);
+      curl_easy_setopt(curl, CURLOPT_MUTE, config->conf&CONF_MUTE);
+      curl_easy_setopt(curl, CURLOPT_USERPWD, config->userpwd);
+      curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
+      curl_easy_setopt(curl, CURLOPT_RANGE, config->range);
       curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
-      curl_easy_setopt(curl, CURLOPT_TIMEOUT, config.timeout);
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, config.postfields);
+      curl_easy_setopt(curl, CURLOPT_TIMEOUT, config->timeout);
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDS, config->postfields);
       
       /* new in libcurl 7.2: */
-      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, config.postfieldsize);
+      curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, config->postfieldsize);
 
-      curl_easy_setopt(curl, CURLOPT_REFERER, config.referer);
+      curl_easy_setopt(curl, CURLOPT_REFERER, config->referer);
       curl_easy_setopt(curl, CURLOPT_AUTOREFERER,
-                       config.conf&CONF_AUTO_REFERER);
-      curl_easy_setopt(curl, CURLOPT_USERAGENT, config.useragent);
-      curl_easy_setopt(curl, CURLOPT_FTPPORT, config.ftpport);
-      curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, config.low_speed_limit);
-      curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, config.low_speed_time);
+                       config->conf&CONF_AUTO_REFERER);
+      curl_easy_setopt(curl, CURLOPT_USERAGENT, config->useragent);
+      curl_easy_setopt(curl, CURLOPT_FTPPORT, config->ftpport);
+      curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, config->low_speed_limit);
+      curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, config->low_speed_time);
       curl_easy_setopt(curl, CURLOPT_RESUME_FROM,
-                       config.use_resume?config.resume_from:0);
-      curl_easy_setopt(curl, CURLOPT_COOKIE, config.cookie);
-      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, config.headers);
-      curl_easy_setopt(curl, CURLOPT_HTTPPOST, config.httppost);
-      curl_easy_setopt(curl, CURLOPT_SSLCERT, config.cert);
-      curl_easy_setopt(curl, CURLOPT_SSLCERTPASSWD, config.cert_passwd);
-      curl_easy_setopt(curl, CURLOPT_CRLF, config.crlf);
-      curl_easy_setopt(curl, CURLOPT_QUOTE, config.quote);
-      curl_easy_setopt(curl, CURLOPT_POSTQUOTE, config.postquote);
+                       config->use_resume?config->resume_from:0);
+      curl_easy_setopt(curl, CURLOPT_COOKIE, config->cookie);
+      curl_easy_setopt(curl, CURLOPT_HTTPHEADER, config->headers);
+      curl_easy_setopt(curl, CURLOPT_HTTPPOST, config->httppost);
+      curl_easy_setopt(curl, CURLOPT_SSLCERT, config->cert);
+      curl_easy_setopt(curl, CURLOPT_SSLCERTPASSWD, config->cert_passwd);
+      curl_easy_setopt(curl, CURLOPT_CRLF, config->crlf);
+      curl_easy_setopt(curl, CURLOPT_QUOTE, config->quote);
+      curl_easy_setopt(curl, CURLOPT_POSTQUOTE, config->postquote);
       curl_easy_setopt(curl, CURLOPT_WRITEHEADER,
-                       config.headerfile?&heads:NULL);
-      curl_easy_setopt(curl, CURLOPT_COOKIEFILE, config.cookiefile);
-      curl_easy_setopt(curl, CURLOPT_SSLVERSION, config.ssl_version);
-      curl_easy_setopt(curl, CURLOPT_TIMECONDITION, config.timecond);
-      curl_easy_setopt(curl, CURLOPT_TIMEVALUE, config.condtime);
-      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, config.customrequest);
-      curl_easy_setopt(curl, CURLOPT_STDERR, config.errors);
+                       config->headerfile?&heads:NULL);
+      curl_easy_setopt(curl, CURLOPT_COOKIEFILE, config->cookiefile);
+      curl_easy_setopt(curl, CURLOPT_SSLVERSION, config->ssl_version);
+      curl_easy_setopt(curl, CURLOPT_TIMECONDITION, config->timecond);
+      curl_easy_setopt(curl, CURLOPT_TIMEVALUE, config->condtime);
+      curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, config->customrequest);
+      curl_easy_setopt(curl, CURLOPT_STDERR, config->errors);
       
       /* three new ones in libcurl 7.3: */
-      curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config.proxytunnel);
-      curl_easy_setopt(curl, CURLOPT_INTERFACE, config.iface);
-      curl_easy_setopt(curl, CURLOPT_KRB4LEVEL, config.krb4level);
+      curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel);
+      curl_easy_setopt(curl, CURLOPT_INTERFACE, config->iface);
+      curl_easy_setopt(curl, CURLOPT_KRB4LEVEL, config->krb4level);
 
-      if((config.progressmode == CURL_PROGRESS_BAR) &&
-         !(config.conf&(CONF_NOPROGRESS|CONF_MUTE))) {
+      if((config->progressmode == CURL_PROGRESS_BAR) &&
+         !(config->conf&(CONF_NOPROGRESS|CONF_MUTE))) {
         /* we want the alternative style, then we have to implement it
            ourselves! */
         progressbarinit(&progressbar);
@@ -1679,34 +1681,34 @@ operate(int argc, char *argv[])
 
       res = curl_easy_perform(curl);
 
-      if(config.writeout) {
-        ourWriteOut(curl, config.writeout);
+      if(config->writeout) {
+        ourWriteOut(curl, config->writeout);
       }
 
       /* always cleanup */
       curl_easy_cleanup(curl);
 
-      if((res!=CURLE_OK) && config.showerror)
-        fprintf(config.errors, "curl: (%d) %s\n", res, errorbuffer);
+      if((res!=CURLE_OK) && config->showerror)
+        fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
     }
     else
-      fprintf(config.errors, "curl: failed to init libcurl!\n");
+      fprintf(config->errors, "curl: failed to init libcurl!\n");
 
     main_free();
 
-    if((config.errors != stderr) &&
-       (config.errors != stdout))
+    if((config->errors != stderr) &&
+       (config->errors != stdout))
       /* it wasn't directed to stdout or stderr so close the file! */
-      fclose(config.errors);
+      fclose(config->errors);
     
-    if(config.headerfile && !headerfilep && heads.stream)
+    if(config->headerfile && !headerfilep && heads.stream)
       fclose(heads.stream);
 
     if(urlbuffer)
       free(urlbuffer);
-    if (config.outfile && outs.stream)
+    if (config->outfile && outs.stream)
       fclose(outs.stream);
-    if (config.infile)
+    if (config->infile)
       fclose(infd);
     if(headerfilep)
       fclose(headerfilep);
@@ -1720,10 +1722,8 @@ operate(int argc, char *argv[])
     printf("--%s--\n", MIMEseparator);
 #endif
 
-  free_config_fields(&config);
-
   if(allocuseragent)
-    free(config.useragent);
+    free(config->useragent);
 
   /* cleanup memory used for URL globbing patterns */
   glob_cleanup(urls);
@@ -1735,9 +1735,10 @@ operate(int argc, char *argv[])
 int main(int argc, char *argv[])
 {
   int res;
+  struct Configurable config;
   memset(&config, 0, sizeof(struct Configurable));
   
-  res = operate(argc, argv);
+  res = operate(&config, argc, argv);
   free_config_fields(&config);
 
   return res;
