@@ -1,0 +1,1 @@
+ftp download with post- and pre-transfer delete operations

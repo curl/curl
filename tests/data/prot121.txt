@@ -1,0 +1,7 @@
+USER anonymous
+PASS curl_by_daniel@haxx.se
+DELE before_transfer
+PASV
+TYPE I
+RETR 106
+DELE after_transfer

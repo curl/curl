@@ -1,0 +1,1 @@
+ftp://%HOSTIP:%FTPPORT/106 -Q "-DELE after_transfer" -Q "DELE before_transfer"
