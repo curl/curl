@@ -21,8 +21,6 @@
  * $Id$
  ***************************************************************************/
 
-/* This file is only used in the NetWare build */
-
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
@@ -45,7 +43,7 @@ typedef struct
     int         y;
     int         z;
     void        *tenbytes;
-    NXKey_t     perthreadkey;           // if -1, no key obtained...
+    NXKey_t     perthreadkey;   /* if -1, no key obtained... */
     NXMutex_t   *lock;
 } libdata_t;
 
@@ -54,9 +52,7 @@ void        *gLibHandle = (void *) NULL;
 rtag_t      gAllocTag   = (rtag_t) NULL;
 NXMutex_t   *gLibLock   = (NXMutex_t *) NULL;
 
-
-
-// internal library function prototypes...
+/* internal library function prototypes... */
 int     DisposeLibraryData ( void * );
 void    DisposeThreadData ( void * );
 int     GetOrSetUpData ( int id, libdata_t **data, libthreaddata_t **threaddata );
@@ -129,18 +125,16 @@ int _NonAppStart
     return 0;
 }
 
-void _NonAppStop( void )
-{
 /*
 ** Here we clean up any resources we allocated. Resource tags is a big part
 ** of what we created, but NetWare doesn't ask us to free those.
 */
+void _NonAppStop( void )
+{
     (void) unregister_library(gLibId);
     NXMutexFree(gLibLock);
 }
 
-int  _NonAppCheckUnload( void )
-{
 /*
 ** This function cannot be the first in the file for if the file is linked
 ** first, then the check-unload function's offset will be nlmname.nlm+0
@@ -152,6 +146,8 @@ int  _NonAppCheckUnload( void )
 ** we return a non-zero value. Right now, there isn't any reason not to allow
 ** it.
 */
+int  _NonAppCheckUnload( void )
+{
     return 0;
 }
 
@@ -166,7 +162,6 @@ int GetOrSetUpData
     libdata_t           *app_data;
     libthreaddata_t *thread_data;
     NXKey_t             key;
-//  NXMutex_t           *lock;
     NX_LOCK_INFO_ALLOC(liblock, "Application Data Lock", 0);
 
     err         = 0;
@@ -231,10 +226,10 @@ int GetOrSetUpData
                     }
                     else
                     {
-                        // create key for thread-specific data...
+                        /* create key for thread-specific data... */
                         err = NXKeyCreate(DisposeThreadData, (void *) NULL, &key);
 
-                        if (err)                // (no more keys left?)
+                        if (err)                /* (no more keys left?) */
                             key = -1;
 
                         app_data->perthreadkey = key;
@@ -250,7 +245,7 @@ int GetOrSetUpData
     {
         key = app_data->perthreadkey;
 
-        if (     key != -1                  // couldn't create a key? no thread data
+        if (     key != -1                  /* couldn't create a key? no thread data */
             && !(err = NXKeyGetValue(key, (void **) &thread_data))
             && !thread_data)
         {
@@ -327,3 +322,5 @@ void DisposeThreadData
         free(data);
     }
 }
+
+
