@@ -875,7 +875,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
   struct curl_httppost *file;
   CURLcode result = CURLE_OK;
 
-  size_t size =0;
+  curl_off_t size =0;
   char *boundary;
   char *fileboundary=NULL;
   struct curl_slist* curList;
