@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "3 Aug 2001" "Curl 7.8" "Curl Manual"
+.TH curl 1 "16 Aug 2001" "Curl 7.8.1" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -233,6 +233,11 @@ you can specify URLs that contain the letters {}[] without having them being
 interpreted by curl itself. Note that these letters are not normal legal URL
 contents but they should be encoded according to the URI standard. (Option
 added in curl 7.6)
+.IP "-G/--get"
+When used, this option will make all data specified with -d/--data or
+--data-binary to be used in a HTTP GET request instead of the POST request
+that otherwise would be used. The data will be appended to the URL with a '?'
+separator.
 .IP "-h/--help"
 Usage help.
 .IP "-H/--header <header>"
