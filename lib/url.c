@@ -1399,6 +1399,8 @@ static CURLcode Connect(struct UrlData *data,
 #ifdef USE_SSLEAY
       else if(strnequal(conn->gname, "HTTPS", 5))
         strcpy(conn->protostr, "https");
+      else if(strnequal(conn->gname, "FTPS", 4))
+        strcpy(conn->protostr, "ftps");
 #endif /* USE_SSLEAY */
       else if(strnequal(conn->gname, "TELNET", 6))
         strcpy(conn->protostr, "telnet");
@@ -1668,8 +1670,19 @@ static CURLcode Connect(struct UrlData *data,
     conn->curl_done = Curl_http_done;
     conn->curl_close = Curl_http_close;
   }
-  else if(strequal(conn->protostr, "FTP")) {
+  else if(strequal(conn->protostr, "FTP") ||
+          strequal(conn->protostr, "FTPS")) {
     char *type;
+
+    if(strequal(conn->protostr, "FTPS")) {
+#ifdef USE_SSLEAY
+      conn->protocol |= PROT_FTPS;
+#else
+      failf(data, "libcurl was built with SSL disabled, ftps: not supported!");
+      return CURLE_UNSUPPORTED_PROTOCOL;
+#endif /* !USE_SSLEAY */
+    }
+
     conn->port = (data->use_port && allow_port)?data->use_port:PORT_FTP;
     conn->remote_port = PORT_FTP;
     conn->protocol |= PROT_FTP;
@@ -1678,6 +1691,12 @@ static CURLcode Connect(struct UrlData *data,
        !data->bits.tunnel_thru_httpproxy) {
       /* Unless we have asked to tunnel ftp operations through the proxy, we
          switch and use HTTP operations only */
+      if(conn->protocol & PROT_FTPS) {
+        /* FTPS is a hacked protocol and does not work through your
+           ordinary http proxy! */
+        failf(data, "ftps does not work through http proxy!");
+        return CURLE_UNSUPPORTED_PROTOCOL;
+      }
       conn->curl_do = Curl_http;
       conn->curl_done = Curl_http_done;
       conn->curl_close = Curl_http_close;

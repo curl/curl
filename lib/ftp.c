@@ -78,6 +78,7 @@
 #endif
 
 #include "strequal.h"
+#include "ssluse.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -316,6 +317,14 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
       return result;
   }
 
+  if(conn->protocol & PROT_FTPS) {
+    /* FTPS is simply ftp with SSL for the control channel */
+    /* now, perform the SSL initialization for this socket */
+    if(Curl_SSLConnect(conn))
+      return CURLE_SSL_CONNECT_ERROR;
+  }
+
+
   /* The first thing we do is wait for the "220*" line: */
   nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
   if(nread < 0)
@@ -336,8 +345,6 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
     /* We set private first as default, in case the line below fails to
        set a valid level */
     sec_request_prot(conn, data->krb4_level);
-
-    data->cmdchannel = fdopen(conn->firstsocket, "w");
 
     if(sec_login(conn) != 0)
       infof(data, "Logging in with password in cleartext!\n");
@@ -1702,16 +1709,9 @@ size_t Curl_ftpsendf(int fd, struct connectdata *conn, char *fmt, ...)
 
   strcat(s, "\r\n"); /* append a trailing CRLF */
 
-#ifdef KRB4
-  if(conn->sec_complete && conn->data->cmdchannel) {
-    bytes_written = sec_fprintf(conn, conn->data->cmdchannel, s);
-    fflush(conn->data->cmdchannel);
-  }
-  else
-#endif /* KRB4 */
-    {
-      bytes_written = swrite(fd, s, strlen(s));
-    }
+  bytes_written=0;
+  Curl_write(conn, fd, s, strlen(s), &bytes_written);
+
   return(bytes_written);
 }
 
