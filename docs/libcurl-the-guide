@@ -869,6 +869,35 @@ Cookies Without Chocolate Chips
  getting lost.
 
 
+FTP Peculiarities We Need
+
+ FTP transfers use a second TCP/IP connection for the data transfer. This is
+ usually a fact you can forget and ignore but at times this fact will come
+ back to haunt you. libcurl offers several different ways to custom how the
+ second connection is being made.
+
+ libcurl can either connect to the server a second time or tell the server to
+ connect back to it. The first option is the default and it is also what works
+ best for all the people behind firewals, NATs or ip-masquarading setups.
+ libcurl then tells the server to open up a new port and wait for a second
+ connection. This is by default attempted with EPSV first, and if that doesn't
+ work it tries PASV instead. (EPSV is an extension to the original FTP spec
+ and does not exist nor work on all FTP servers.)
+
+ You can prevent libcurl from first trying the EPSV command by setting
+ CURLOPT_FTP_USE_EPSV to FALSE.
+
+ In some cases, you will perfer to have the server connect back to you for the
+ second connection. This might be when the server is perhaps behind a firewall
+ or something and only allows connections on a single port. libcurl then
+ informs the remote server which IP address and port number to connect to.
+ This is made with the CURLOPT_FTPPORT option. If you set it to "-", libcurl
+ will use your system's "default IP address". If you want to use a particular
+ IP, you can set the full IP address, a host name to resolve to an IP address
+ or even a local network interface name that libcurl will get the IP address
+ from.
+
+
 Headers Equal Fun
 
  Some protocols provide "headers", meta-data separated from the normal
