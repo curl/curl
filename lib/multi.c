@@ -44,7 +44,7 @@
 #include "progress.h"
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
@@ -302,7 +302,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   easy=multi->easy.next;
   while(easy) {
 
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
     fprintf(stderr, "HANDLE %p: State: %x\n",
             (char *)easy, easy->state);
 #endif

@@ -35,7 +35,7 @@
 #include <unixlib.h>
 #endif
 
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 

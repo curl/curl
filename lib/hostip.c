@@ -74,7 +74,7 @@
 #endif
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
@@ -192,7 +192,7 @@ hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
                                  hostcache_timestamp_remove);
 }
 
-#if defined(MALLOCDEBUG) && defined(AGGRESIVE_TEST)
+#if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
 /* Called from Curl_done() to check that there's no DNS cache entry with
    a non-zero counter left. */
 void Curl_scan_cache_used(void *user, void *ptr)
@@ -282,7 +282,7 @@ struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
 
   dns->timestamp = now;
   dns->inuse++;         /* mark entry as in-use */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
   dns->entry_id = entry_id;
 #endif
 
@@ -337,7 +337,7 @@ void Curl_freednsinfo(void *freethis)
 
 #ifdef ENABLE_IPV6
 
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 /* These two are strictly for memory tracing and are using the same
  * style as the family otherwise present in memdebug.c. I put these ones
  * here since they require a bunch of struct types I didn't wanna include
@@ -631,7 +631,7 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
       step_size+=200;
     }
 
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
     infof(data, "gethostbyname_r() uses %d bytes\n", step_size);
 #endif
 
@@ -681,7 +681,7 @@ static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
     if(!h) /* failure */
       res=1;
     
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
     infof(data, "gethostbyname_r() uses %d bytes\n", step_size);
 #endif
     if(!res) {

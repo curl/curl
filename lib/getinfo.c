@@ -36,7 +36,7 @@
 #endif
 
 /* Make this the last #include */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #else
 #include <stdlib.h>

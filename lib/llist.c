@@ -28,7 +28,7 @@
 
 #include "llist.h"
 
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 /* this must be the last include file */
 #include "memdebug.h"
 #endif

@@ -41,7 +41,7 @@
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
@@ -106,6 +106,9 @@ CURLdigest Curl_input_digest(struct connectdata *conn,
         /* allow the list to be comma-separated */
         header++; 
     }
+
+    if(!data->state.digest.nonce)
+      return CURLDIGEST_BAD;
   }
   else 
     /* else not a digest, get out */

@@ -1,4 +1,4 @@
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 /***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -220,4 +220,4 @@ int curl_fclose(FILE *file, int line, const char *source)
 #ifdef VMS
 int VOID_VAR_MEMDEBUG;	
 #endif
-#endif /* MALLOCDEBUG */
+#endif /* CURLDEBUG */

@@ -46,7 +46,7 @@
 #include "strtok.h"
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
@@ -119,7 +119,7 @@ int Curl_parsenetrc(char *host,
 
   sprintf(netrcbuffer, "%s%s%s", home, DIR_CHAR, NETRC);
 
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
   {
     /* This is a hack to allow testing.
      * If compiled with --enable-debug and CURL_DEBUG_NETRC is defined,
@@ -141,7 +141,7 @@ int Curl_parsenetrc(char *host,
       free(override);
     }
   }
-#endif /* MALLOCDEBUG */
+#endif /* CURLDEBUG */
 
   file = fopen(netrcbuffer, "r");
   if(file) {

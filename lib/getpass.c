@@ -89,7 +89,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #endif
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
