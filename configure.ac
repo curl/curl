@@ -66,6 +66,7 @@ dnl initialize all the info variables
     curl_idn_msg="no      (--with-libidn)"
  curl_manual_msg="no      (--enable-manual)"
 curl_verbose_msg="enabled (--disable-verbose)"
+   curl_sspi_msg="no      (--enable-sspi)"
 
 dnl
 dnl Detect the canonical host and target build environment
@@ -1580,6 +1581,28 @@ AC_HELP_STRING([--disable-verbose],[Disable verbose strings]),
 )
 
 dnl ************************************************************
+dnl enable SSPI support
+dnl
+AC_MSG_CHECKING([whether to enable SSPI support (win32 builds only)])
+AC_ARG_ENABLE(sspi,
+AC_HELP_STRING([--enable-sspi],[Enable SSPI])
+AC_HELP_STRING([--disable-sspi],[Disable SSPI]),
+[ case "$enableval" in
+  yes)
+       AC_MSG_RESULT(yes)
+       AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
+       AC_SUBST(USE_WINDOWS_SSPI)
+       LIBS="$LIBS -lsecur32"
+       curl_sspi_msg="yes"
+       ;;
+  *)
+       AC_MSG_RESULT(no)
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
+
+dnl ************************************************************
 dnl lame option to switch on debug options
 dnl
 AC_MSG_CHECKING([whether to enable debug options])
@@ -1690,4 +1713,5 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   Build libcurl:   Shared=${enable_shared}, Static=${enable_static} 
   Built-in manual: ${curl_manual_msg}
   Verbose errors:  ${curl_verbose_msg}
+  SSPI support:    ${curl_sspi_msg}
 ])
