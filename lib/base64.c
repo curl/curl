@@ -32,9 +32,8 @@
  * This code will break if int is smaller than 32 bits
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
+#include "setup.h"
+
 #include <stdlib.h>
 #include <string.h>
 
