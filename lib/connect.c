@@ -176,10 +176,9 @@ int waitconnect(int sockfd, /* socket */
     /* timeout, no connect today */
     return 1;
 
-  if(FD_ISSET(sockfd, &errfd)) {
+  if(FD_ISSET(sockfd, &errfd))
     /* error condition caught */
     return 2;
-  }
 
   /* we have a connect! */
   return 0;
@@ -649,6 +648,15 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
               hostname, aliasindex+1, error);
         break;
       }
+    }
+
+    /* The '1 == rc' comes from the waitconnect(), and not from connect().
+       We can be sure of this since connect() cannot return 1. */
+    if((1 == rc) && (data->state.used_interface == Curl_if_multi)) {
+      /* Timeout when running the multi interface, we return here with a
+         CURLE_OK return code. */
+      rc = 0;
+      break;
     }
 
     if(0 == rc) {
