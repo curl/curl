@@ -1,6 +1,4 @@
 ########################################################
-# $Id: Makefile.am,v 1.20 2001/08/08 07:46:44 bagder Exp $
-#
 ## Makefile for building curl.exe with MSVC6
 ## Use: nmake -f makefile.vc6 [release | debug]
 ##      (default is release)
