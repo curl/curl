@@ -165,7 +165,7 @@ struct connectdata {
   char proto[64];  /* store the protocol string in this buffer */
   char gname[257]; /* store the hostname in this buffer */
   char *name;      /* host name pointer to fool around with */
-  char *path;      /* formerly staticly this size: URL_MAX_LENGTH */
+  char *path;      /* allocated buffer to store the URL's path part in */
   char *ppath;
   long bytecount;
   struct timeval now; /* current time */
