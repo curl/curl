@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_getinfo 3 "14 Dec 2004" "libcurl 7.12.3" "libcurl Manual"
+.TH curl_easy_getinfo 3 "22 Dec 2004" "libcurl 7.12.3" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - extract information from a curl handle
 .SH SYNOPSIS
@@ -27,7 +27,13 @@ The following information can be extracted:
 Pass a pointer to a 'char *' to receive the last used effective URL.
 .IP CURLINFO_RESPONSE_CODE
 Pass a pointer to a long to receive the last received HTTP or FTP code. This
-option was known as CURLINFO_HTTP_CODE in libcurl 7.10.7 and earlier.
+option was known as CURLINFO_HTTP_CODE in libcurl 7.10.7 and earlier. This
+will be zero if no server response code has been received. Note that a proxy's
+CONNECT response should be read with \fICURLINFO_HTTP_CONNECTCODE\fP and not
+this.
+.IP CURLINFO_HTTP_CONNECTCODE
+Pass a pointer to a long to receive the last received proxy response code to a
+CONNECT request.
 .IP CURLINFO_FILETIME
 Pass a pointer to a long to receive the remote time of the retrieved
 document. If you get -1, it can be because of many reasons (unknown, the
