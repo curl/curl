@@ -13,6 +13,7 @@ SUBDIRS = docs lib src include tests packages
 
 # create a root makefile in the distribution:
 dist-hook:
+	rm -rf $(top_builddir)/tests/log
 	cp $(srcdir)/Makefile.dist $(distdir)/Makefile
 
 html:
