@@ -276,4 +276,8 @@ typedef int curl_socket_t;
 
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
 
+#ifdef __UCLIBC_MAJOR__
+#define HAVE_INET_NTOA_R_2_ARGS 1
+#endif
+
 #endif /* __CONFIG_H */

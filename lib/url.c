@@ -104,7 +104,6 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "base64.h"
 #include "ssluse.h"
 #include "hostip.h"
-#include "if2ip.h"
 #include "transfer.h"
 #include "sendf.h"
 #include "progress.h"
