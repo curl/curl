@@ -20,7 +20,7 @@ int test(char *URL)
   int running;
   int max_fd;
   int rc;
-  int loop=100;
+  int loop=10;
 
   curl_global_init(CURL_GLOBAL_ALL);
   c = curl_easy_init();
@@ -44,7 +44,7 @@ int test(char *URL)
       interval.tv_usec = 0;
 
       fprintf(stderr, "curl_multi_perform()\n");
-    
+
       do {
         res = curl_multi_perform(m, &running);
       } while (res == CURLM_CALL_MULTI_PERFORM);
@@ -79,10 +79,10 @@ int test(char *URL)
       }
       rc = select(max_fd+1, &rd, &wr, &exc, &interval);
       fprintf(stderr, "select returned %d\n", rc);
-    
+
       /* we only allow a certain number of loops to avoid hanging here
          forever */
-    } while(rc && (--loop>0));
+    } while(--loop>0);
   }
 
   curl_multi_remove_handle(m, c);
