@@ -371,6 +371,9 @@ typedef enum {
      "[host]:[port]" */
   T(PROXYPORT, LONG, 59),
 
+  /* size of the POST input data, if strlen() is not good to use */
+  T(POSTFIELDSIZE, LONG, 60),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
