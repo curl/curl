@@ -22,13 +22,18 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	   \
-  Makefile.vc6 Makefile.riscos libcurl.def curllib.dsp curllib.dsw	   \
-  config-vms.h config-win32.h config-riscos.h config-mac.h config.h.in	   \
-  ca-bundle.crt README.encoding README.memoryleak README.ares README.curlx \
-  makefile.dj config.dj libcurl.framework.make libcurl.plist libcurl.rc	   \
-  config-amigaos.h amigaos.c amigaos.h makefile.amiga config-netware.h	   \
-  Makefile.netware nwlib.c libcurl.imp msvcproj.head msvcproj.foot
+DSP = curllib.dsp
+
+EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	\
+  Makefile.vc6 Makefile.riscos libcurl.def $(DSP) curllib.dsw		\
+  config-vms.h config-win32.h config-riscos.h config-mac.h config.h.in	\
+  ca-bundle.crt README.encoding README.memoryleak README.ares		\
+  README.curlx makefile.dj config.dj libcurl.framework.make		\
+  libcurl.plist libcurl.rc config-amigaos.h amigaos.c amigaos.h		\
+  makefile.amiga config-netware.h Makefile.netware nwlib.c libcurl.imp	\
+  msvcproj.head msvcproj.foot
+
+CLEANFILES = $(DSP)
 
 lib_LTLIBRARIES = libcurl.la
 
@@ -80,26 +85,29 @@ endif
 
 libcurl_la_LDFLAGS = $(UNDEF) $(VERSION) $(MIMPURE)
 
-libcurl_la_SOURCES = arpa_telnet.h file.c netrc.h timeval.c base64.c	\
-  file.h hostip.c progress.c timeval.h base64.h formdata.c hostip.h	\
-  progress.h cookie.c formdata.h http.c sendf.c cookie.h ftp.c http.h	\
-  sendf.h url.c dict.c ftp.h if2ip.c speedcheck.c url.h dict.h		\
-  getdate.c if2ip.h speedcheck.h urldata.h getdate.h ldap.c ssluse.c	\
-  version.c getenv.c ldap.h ssluse.h escape.c mprintf.c telnet.c	\
-  escape.h netrc.c telnet.h getinfo.c getinfo.h transfer.c strequal.c	\
-  strequal.h easy.c security.h security.c krb4.c krb4.h memdebug.c	\
-  memdebug.h inet_ntoa_r.h http_chunks.c http_chunks.h strtok.c		\
-  strtok.h connect.c connect.h llist.c llist.h hash.c hash.h multi.c	\
-  content_encoding.c content_encoding.h share.c share.h http_digest.c	\
-  md5.c md5.h http_digest.h http_negotiate.c http_negotiate.h		\
-  http_ntlm.c http_ntlm.h ca-bundle.h inet_pton.c inet_pton.h		\
-  strtoofft.c strtoofft.h strerror.c strerror.h hostares.c hostasyn.c	\
-  hostip4.c hostip6.c hostsyn.c hostthre.c inet_ntop.c inet_ntop.h	\
-  curlx.h
+HHEADERS = arpa_telnet.h netrc.h file.h timeval.h base64.h hostip.h	\
+  progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
+  if2ip.h speedcheck.h urldata.h getdate.h ldap.h ssluse.h escape.h	\
+  telnet.h getinfo.h strequal.h security.h krb4.h memdebug.h		\
+  inet_ntoa_r.h http_chunks.h strtok.h connect.h llist.h hash.h		\
+  content_encoding.h share.h md5.h http_digest.h http_negotiate.h	\
+  http_ntlm.hca-bundle.h inet_pton.h strtoofft.h strerror.h		\
+  inet_ntop.h curlx.h
 
-WIN32SOURCES = $(libcurl_la_SOURCES) config-win32.h
+CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
+  cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c	\
+  getdate.c ldap.c ssluse.c version.c getenv.c escape.c mprintf.c	\
+  telnet.c netrc.c getinfo.c transfer.c strequal.c easy.c security.c	\
+  krb4.c memdebug.c http_chunks.c strtok.c connect.c llist.c hash.c	\
+  multi.c content_encoding.c share.c http_digest.c md5.c		\
+  http_negotiate.c http_ntlm.c inet_pton.c strtoofft.c strerror.c	\
+  hostares.c hostasyn.c hostip4.c hostip6.c hostsyn.c hostthre.c	\
+  inet_ntop.c
 
-noinst_HEADERS = setup.h transfer.h
+libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
+
+WIN32SOURCES = $(CSOURCES)
+WIN32HEADERS = $(HHEADERS) config-win32.h
 
 BUILT_SOURCES = $(srcdir)/getdate.c $(top_builddir)/lib/ca-bundle.h
 
@@ -132,12 +140,25 @@ dist-hook:
 	chmod 0644 $(distdir)/ca-bundle.h
 	echo "/* ca bundle path set in here*/" > $(distdir)/ca-bundle.h
 
-curllib.dsp: msvcproj.head msvcproj.foot Makefile.am
-	cp msvcproj.head curllib.dsp
-	(for file in $(WIN32SOURCES); do \
-	echo "# Begin Source File" >> curllib.dsp; \
-	echo "" >> curllib.dsp; \
-	echo "SOURCE=.\\"$$file >> curllib.dsp; \
-	echo "# End Source File" >> curllib.dsp; \
+DSPOUT = | awk '{printf("%s\r\n", $$0)}' >> $(DSP)
+
+$(DSP): msvcproj.head msvcproj.foot Makefile.am
+	echo "creating $(DSP)"
+	@(cp msvcproj.head $(DSP); \
+	echo "# Begin Group \"Source Files\"" $(DSPOUT); \
+	for file in $(WIN32SOURCES); do \
+	echo "# Begin Source File" $(DSPOUT); \
+	echo "" $(DSPOUT); \
+	echo "SOURCE=.\\"$$file $(DSPOUT); \
+	echo "# End Source File" $(DSPOUT); \
 	done; \
-	cat msvcproj.foot >> curllib.dsp )
+	echo "# End Group" $(DSPOUT); \
+	echo "# Begin Group \"Header Files\"" $(DSPOUT); \
+	for file in $(WIN32HEADERS); do \
+	echo "# Begin Source File" $(DSPOUT); \
+	echo "" $(DSPOUT); \
+	echo "SOURCE=.\\"$$file $(DSPOUT); \
+	echo "# End Source File" $(DSPOUT); \
+	done; \
+	echo "# End Group" $(DSPOUT); \
+	cat msvcproj.foot $(DSPOUT) )

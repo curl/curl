@@ -90,6 +90,3 @@ LINK32=link.exe
 
 # Name "curllib - Win32 Release"
 # Name "curllib - Win32 Debug"
-# Begin Group "Source Files"
-
-# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
