@@ -628,7 +628,7 @@ CURLcode Curl_http(struct connectdata *conn)
   char *host = conn->name;
   const char *te = ""; /* tranfer-encoding */
   char *ptr;
-  unsigned char *request;
+  char *request;
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -650,11 +650,12 @@ CURLcode Curl_http(struct connectdata *conn)
     data->set.httpreq = HTTPREQ_PUT;
   }
 
-  request = data->set.customrequest?data->set.customrequest:
-    (data->set.no_body?"HEAD":
+  request = data->set.customrequest?
+    data->set.customrequest:
+    (data->set.no_body?(char *)"HEAD":
      ((HTTPREQ_POST == data->set.httpreq) ||
-      (HTTPREQ_POST_FORM == data->set.httpreq))?"POST":
-     (HTTPREQ_PUT == data->set.httpreq)?"PUT":"GET");
+      (HTTPREQ_POST_FORM == data->set.httpreq))?(char *)"POST":
+     (HTTPREQ_PUT == data->set.httpreq)?(char *)"PUT":(char *)"GET");
   
   /* The User-Agent string has been built in url.c already, because it might
      have been used in the proxy connect, but if we have got a header with
@@ -666,7 +667,9 @@ CURLcode Curl_http(struct connectdata *conn)
   }
 
   if(data->state.digest.nonce) {
-    result = Curl_output_digest(conn, request, (unsigned char *)ppath);
+    result = Curl_output_digest(conn,
+                                (unsigned char *)request,
+                                (unsigned char *)ppath);
     if(result)
       return result;
   }
