@@ -44,7 +44,7 @@ if [ -z "$desc" ]; then
   fixed="3"
 fi
 
-if [ -z "$desc" ]; then
+if [ -z "$confopts" ]; then
   echo "please enter your additional arguments to configure"
   echo "examples: --with-ssl --enable-debug --enable-ipv6 --with-krb4"
   read confopts
