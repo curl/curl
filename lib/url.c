@@ -1930,6 +1930,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #ifdef HAVE_SIGACTION
     struct sigaction sigact;
     sigaction(SIGALRM, NULL, &sigact);
+    keep_sigact = sigact;
     sigact.sa_handler = alarmfunc;
 #ifdef SA_RESTART
     /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
