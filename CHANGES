@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Version 7.10.8-pre1 (8 September 2003)
+
+Daniel (7 September)
+- Jurij Smakov found out that the non-OpenSSL MD5 code was not working on
+  Alpha (or ia64). Only the OpenSSL-version did. I made a fix I think corrects
+  the problem. 
+
 Daniel (5 September)
 - Kevin Fisk reported that configure --enable-thread didn't work. I fixed.
 
@@ -34,7 +41,7 @@ Daniel (3 September)
 - Peter Pentchev found and fixed two problems in the test suite's web server
   code, that made it segfault at times.
 
-- Joerg Mueller-Tolk improved the proxy user+password handling, especially
+- Jörg Mueller-Tolk improved the proxy user+password handling, especially
   when providing a blank password.
 
 Daniel (2 September)
