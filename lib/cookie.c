@@ -158,13 +158,10 @@ Curl_cookie_add(struct SessionHandle *data,
   bool badcookie = FALSE; /* cookies are good by default. mmmmm yummy */
 
   /* First, alloc and init a new struct for it */
-  co = (struct Cookie *)malloc(sizeof(struct Cookie));
+  co = (struct Cookie *)calloc(sizeof(struct Cookie), 1);
   if(!co)
     return NULL; /* bail out if we're this low on memory */
 
-  /* clear the whole struct first */
-  memset(co, 0, sizeof(struct Cookie));
-	    
   if(httpheader) {
     /* This line was read off a HTTP-header */
     char *sep;
