@@ -1,4 +1,4 @@
-EXTRA_DIST = ftpserver.pl httpserver.pl runtests.pl
+EXTRA_DIST = ftpserver.pl httpserver.pl runtests.pl ftpsserver.pl stunnel.pm
 
 SUBDIRS = data
 
