@@ -24,6 +24,7 @@ my $CURL="../src/curl"; # what curl executable to run on the tests
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
 my $LOGDIR="log";
 my $TESTDIR="data";
+my $LIBDIR="./libtest";
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
 my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
@@ -517,6 +518,14 @@ sub singletest {
         return 0; # look successful
     }
 
+    my @codepieces = getpart("client", "tool");
+
+    my $tool="";
+    if(@codepieces) {
+        $tool = $codepieces[0];
+        chomp $tool;
+    }
+
     # remove previous server output logfile
     unlink($SERVERIN);
 
@@ -579,8 +588,15 @@ sub singletest {
         }
     }
 
-    # run curl, add -v for debug information output
-    my $cmdargs="$out--include -v $cmd";
+    my $cmdargs;
+    if(!$tool) {
+        # run curl, add -v for debug information output
+        $cmdargs ="$out--include -v $cmd";
+    }
+    else {
+        $cmdargs = " $cmd"; # $cmd is the command line for the test file
+        $CURLOUT = $STDOUT; # sends received data to stdout
+    }
 
     my @stdintest = getpart("client", "stdin");
 
@@ -590,11 +606,20 @@ sub singletest {
 
         $cmdargs .= " <$stdinfile";
     }
-    my $CMDLINE="$CURL $cmdargs >$STDOUT 2>$STDERR";
+    my $CMDLINE;
+
+    if(!$tool) {
+        $CMDLINE="$CURL";
+    }
+    else {
+        $CMDLINE="$LIBDIR/$tool";
+    }
+
+    $CMDLINE .= "$cmdargs >$STDOUT 2>$STDERR";
 
     if($verbose) {
-        print "$CMDLINE\n";
-    }
+        print "$CMDLINE\n"; 
+   }
 
     print CMDLOG "$CMDLINE\n";
 
@@ -653,8 +678,7 @@ sub singletest {
     }
 
     my %replyattr = getpartattr("reply", "data");
-    if(!$replyattr{'nocheck'} &&
-       @reply) {
+    if(!$replyattr{'nocheck'} && @reply) {
         # verify the received data
         my @out = loadarray($CURLOUT);
         $res = compare(\@out, \@reply);
@@ -790,63 +814,90 @@ my %run;
 
 sub serverfortest {
     my ($testnum)=@_;
+    my @what;
 
     if($testnum< 100) {
         # 0 - 99 is for HTTP
-        if(!$run{'http'}) {
-            runhttpserver($verbose);
-            $run{'http'}=$HTTPPIDFILE;
-        }
+        push @what, "http";
     }
     elsif($testnum< 200) {
         # 100 - 199 is for FTP
-        if(!$run{'ftp'}) {
-            runftpserver($verbose);
-            $run{'ftp'}=$FTPPIDFILE;
-        }
+        push @what, "ftp";
     }
     elsif($testnum< 300) {
         # 200 - 299 is for FILE, no server!
-        $run{'file'}="moo";
+        push @what, "file";
     }
     elsif($testnum< 400) {
         # 300 - 399 is for HTTPS, two servers!
-
-        if(!$checkstunnel || !$ssl_version) {
-            # we can't run https tests without stunnel
-            # or if libcurl is SSL-less
-            return 1;
-        }
-
-        if(!$run{'http'}) {
-            runhttpserver($verbose);
-            $run{'http'}=$HTTPPIDFILE;
-        }
-        if(!$run{'https'}) {
-            runhttpsserver($verbose);
-            $run{'https'}=$HTTPSPIDFILE;
-        }
+        push @what, "http";
+        push @what, "https";
     }
     elsif($testnum< 500) {
         # 400 - 499 is for FTPS, also two servers
+        push @what, "ftp";
+        push @what, "ftps";
+    }
 
-        if(!$checkstunnel || !$ssl_version) {
-            # we can't run https tests without stunnel
-            # or if libcurl is SSL-less
-            return 1;
+    if(!@what) {
+        # load the test case file definition
+        if(loadtest("${TESTDIR}/test${testnum}")) {
+            if($verbose) {
+                # this is not a test
+                print "$testnum doesn't look like a test case!\n";
+            }
+            return 100;
         }
-        if(!$run{'ftp'}) {
-            runftpserver($verbose);
-            $run{'ftp'}=$FTPPIDFILE;
-        }
-        if(!$run{'ftps'}) {
-            runftpsserver($verbose);
-            $run{'ftps'}=$FTPSPIDFILE;
+        @what = getpart("client", "server");
+
+        if(!$what[0]) {
+            warn "Test case $testnum has no server(s) specified!";
+            return 100;
         }
     }
-    else {
-        print "Bad test number, no server available\n";
-        return 100;
+    for(@what) {
+        my $what = lc($_);
+        $what =~ s/[^a-z]//g;
+        if($what eq "ftp") {
+            if(!$run{'ftp'}) {
+                runftpserver($verbose);
+                $run{'ftp'}=$FTPPIDFILE;
+            }
+        }
+        elsif($what eq "http") {
+            if(!$run{'http'}) {
+                runhttpserver($verbose);
+                $run{'http'}=$HTTPPIDFILE;
+            }
+        }
+        elsif($what eq "ftps") {
+            if(!$checkstunnel || !$ssl_version) {
+                # we can't run https tests without stunnel
+                # or if libcurl is SSL-less
+                return 1;
+            }
+            if(!$run{'ftps'}) {
+                runftpsserver($verbose);
+                $run{'ftps'}=$FTPSPIDFILE;
+            }
+        }
+        elsif($what eq "file") {
+            # we support it but have no server!
+        }
+        elsif($what eq "https") {
+            if(!$checkstunnel || !$ssl_version) {
+                # we can't run https tests without stunnel
+                # or if libcurl is SSL-less
+                return 1;
+            }
+            if(!$run{'https'}) {
+                runhttpsserver($verbose);
+                $run{'https'}=$HTTPSPIDFILE;
+            }
+        }
+        else {
+            warn "we don't support a server for $what";
+        }
     }
     sleep 1; # give a second for the server(s) to startup
     return 0; # ok
