@@ -370,11 +370,11 @@ Version: 0.6
 
   In the HTTPS world, you use certificates to validate that you are the one
   you you claim to be, as an addition to normal passwords. Curl supports
-  client-side certificates. All certificates are locked with a PIN-code, why
-  you need to enter the unlock-code before the certificate can be used by
-  curl. The PIN-code can be specified on the command line or if not, entered
-  interactively when curl queries for it. Use a certificate with curl on a
-  HTTPS server like:
+  client-side certificates. All certificates are locked with a pass phrase,
+  which you need to enter before the certificate can be used by curl. The pass
+  phrase can be specified on the command line or if not, entered interactively
+  when curl queries for it. Use a certificate with curl on a HTTPS server
+  like:
 
         curl -E mycert.pem https://that.secure.server.com
 
