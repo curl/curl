@@ -529,21 +529,6 @@ typedef enum {
    before it can be included! */
 #include <curl/easy.h> /* nothing in curl is fun without the easy stuff */
 
-/*
- * NAME curl_getinfo()
- *
- * DESCRIPTION
- *
- * Request internal information from the curl session with this function.
- * The third argument MUST be a pointer to a long or a pointer to a char *.
- * The data pointed to will be filled in accordingly and can be relied upon
- * only if the function returns CURLE_OK.
- * This function is intended to get used *AFTER* a performed transfer, all
- * results are undefined before the transfer is completed.
- */
-CURLcode curl_getinfo(CURL *curl, CURLINFO info, ...);
-
-
 typedef enum {
   CURLCLOSEPOLICY_NONE, /* first, never use this */
 
