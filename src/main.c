@@ -126,6 +126,7 @@ static void help(void)
        " -U/--proxy-user <user:password> Specify Proxy authentication\n"
        " -v/--verbose       Makes the operation more talkative\n"
        " -V/--version       Outputs version number then quits\n"
+       " -w/--write-out [format] What to output after completion\n"
        " -x/--proxy <host>  Use proxy. (Default port is 1080)\n"
        " -X/--request <command> Specific request command to use\n"
        " -y/--speed-time    Time needed to trig speed-limit abort. Defaults to 30\n"
@@ -176,6 +177,8 @@ struct Configurable {
   char *cookiefile;
   char *customrequest;
   bool progressmode;
+
+  char *writeout; /* %-styled format string to output */
 
   FILE *errors; /* if stderr redirect is requested */
 
@@ -302,6 +305,7 @@ static int getparameter(char *flag, /* f or -long-flag */
     {"U", "proxy-user",  TRUE},
     {"v", "verbose",     FALSE},
     {"V", "version",     FALSE},
+    {"w", "write-out",   TRUE},
     {"x", "proxy",       TRUE},
     {"X", "request",     TRUE},
     {"X", "http-request", TRUE}, /* OBSOLETE VERSION */
@@ -648,6 +652,10 @@ static int getparameter(char *flag, /* f or -long-flag */
     case 'V':
       printf(CURL_ID "%s\n", curl_version());
       return URG_FAILED_INIT;
+    case 'w':
+      /* get the output string */
+      GetStr(&config->writeout, nextarg);
+      break;
     case 'x':
       /* proxy */
       if(!*nextarg) {
@@ -1040,10 +1048,10 @@ int main(int argc, char *argv[])
       headerfilep=stdout;
   }
 
-  /* This was previously done in urlget, but that was wrong place to do it */
-  if(outs.stream && isatty(fileno(outs.stream)))
-    /* we send the output to a tty, and therefor we switch off the progress
-       meter right away */
+  if(outs.stream && isatty(fileno(outs.stream)) &&
+     !(config.conf&(CONF_UPLOAD|CONF_HTTPPOST)))
+    /* we send the output to a tty and it isn't an upload operation, therefore
+       we switch off the progress meter */
     config.conf |= CONF_NOPROGRESS;
 
 #ifdef GLOBURL
