@@ -135,10 +135,11 @@ void Curl_infof(struct SessionHandle *data, const char *fmt, ...)
 {
   va_list ap;
   if(data->set.verbose) {
+    char print_buffer[1024 + 1];
     va_start(ap, fmt);
-    fputs("* ", data->set.err);
-    vfprintf(data->set.err, fmt, ap);
+    vsnprintf(print_buffer, 1024, fmt, ap);
     va_end(ap);
+    Curl_debug(data, CURLINFO_TEXT, print_buffer, strlen(print_buffer));
   }
 }
 
@@ -174,9 +175,6 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
   if(!s)
     return CURLE_OUT_OF_MEMORY; /* failure */
 
-  if(data->set.verbose)
-    fprintf(data->set.err, "> %s", s);
-
   bytes_written=0;
   write_len = strlen(s);
   sptr = s;
@@ -187,6 +185,9 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
 
     if(CURLE_OK != res)
       break;
+
+    if(data->set.verbose)
+      Curl_debug(data, CURLINFO_DATA_OUT, sptr, bytes_written);
 
     if(bytes_written != write_len) {
       /* if not all was written at once, we must advance the pointer, decrease
@@ -378,6 +379,27 @@ int Curl_read(struct connectdata *conn,
 #endif /* USE_SSLEAY */
   *n = nread;
   return CURLE_OK;
+}
+
+/* return 0 on success */
+int Curl_debug(struct SessionHandle *data, curl_infotype type,
+               char *ptr, size_t size)
+{
+  static const char * const s_infotype[CURLINFO_END] = {
+    "* ", "< ", "> ", "{ ", "} " };
+
+  if(data->set.fdebug)
+    return (*data->set.fdebug)(data, type, ptr, size,
+                               data->set.debugdata);
+
+  if(type >= CURLINFO_DATA_IN)
+    /* don't do the data parts now */
+    return 0;
+
+  fwrite(s_infotype[type], 2, 1, data->set.err);
+  fwrite(ptr, size, 1, data->set.err);
+
+  return 0;
 }
 
 

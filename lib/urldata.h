@@ -553,7 +553,8 @@ struct DynamicStatic {
  */
 
 struct UserDefined {
-  FILE *err;    /* the stderr writes goes here */
+  FILE *err;         /* the stderr user data goes here */
+  void *debugdata;   /* the data that will be passed to fdebug */
   char *errorbuffer; /* store failure messages in here */
   char *proxyuserpwd;  /* Proxy <user:password>, if used */
   long proxyport; /* If non-zero, use this port number by default. If the
@@ -584,6 +585,7 @@ struct UserDefined {
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_read_callback fread;          /* function that reads the input */
   curl_progress_callback fprogress;  /* function for progress information */
+  curl_debug_callback fdebug;      /* function that write informational data */
   void *progress_client; /* pointer to pass to the progress callback */
   curl_passwd_callback fpasswd;      /* call for password */
   void *passwd_client;               /* pass to the passwd callback */

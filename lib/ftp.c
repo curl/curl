@@ -301,11 +301,8 @@ int Curl_GetFTPResponse(char *buf,
             CURLcode result;
 
             /* output debug output if that is requested */
-            if(data->set.verbose) {
-              fputs("< ", data->set.err);
-              fwrite(line_start, perline, 1, data->set.err);
-              /* no need to output LF here, it is part of the data */
-            }
+            if(data->set.verbose)
+              Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline);
 
             /*
              * We pass all response-lines to the callback function registered
@@ -2080,15 +2077,13 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
   ssize_t write_len;
   char *sptr=s;
   CURLcode res = CURLE_OK;
+  size_t len;
 
   va_list ap;
   va_start(ap, fmt);
   vsnprintf(s, 250, fmt, ap);
   va_end(ap);
-
-  if(conn->data->set.verbose)
-    fprintf(conn->data->set.err, "> %s\n", s);
-
+  
   strcat(s, "\r\n"); /* append a trailing CRLF */
 
   bytes_written=0;
@@ -2100,6 +2095,9 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 
     if(CURLE_OK != res)
       break;
+
+    if(conn->data->set.verbose)
+      Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, bytes_written);
 
     if(bytes_written != write_len) {
       write_len -= bytes_written;

@@ -804,12 +804,29 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     data->set.set_resume_from = va_arg(param, long);
     break;
+  case CURLOPT_DEBUGFUNCTION:
+    /*
+     * stderr write callback.
+     */
+    data->set.fdebug = va_arg(param, curl_debug_callback);
+    /*
+     * if the callback provided is NULL, it'll use the default callback
+     */
+    break;
+  case CURLOPT_DEBUGDATA:
+    /*
+     * Set to a void * that should receive all error writes. This
+     * defaults to CURLOPT_STDERR for normal operations.
+     */
+    data->set.debugdata = va_arg(param, void *);
   case CURLOPT_STDERR:
     /*
      * Set to a FILE * that should receive all error writes. This
      * defaults to stderr for normal operations.
      */
     data->set.err = va_arg(param, FILE *);
+    if(!data->set.err)
+      data->set.err = stderr;
     break;
   case CURLOPT_HEADERFUNCTION:
     /*
@@ -2265,13 +2282,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   {
     struct in_addr in;
     (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
-    infof(data, "Connected to %s (%s)\n", conn->hostaddr->h_name,
+    infof(data, "Connected to %s (%s) port %d\n", conn->hostaddr->h_name,
 #if defined(HAVE_INET_NTOA_R)
-          inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf))
+          inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)),
 #else
-          inet_ntoa(in)
+          inet_ntoa(in),
 #endif
-          );
+          conn->port);
   }
 #endif
 

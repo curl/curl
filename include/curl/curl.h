@@ -101,6 +101,23 @@ typedef int (*curl_passwd_callback)(void *clientp,
                                     char *buffer,
                                     int buflen);
 
+/* the kind of data that is passed to information_callback*/
+typedef enum {
+  CURLINFO_TEXT = 0,
+  CURLINFO_HEADER_IN,    /* 1 */
+  CURLINFO_HEADER_OUT,   /* 2 */
+  CURLINFO_DATA_IN,      /* 3 */
+  CURLINFO_DATA_OUT,     /* 4 */
+  CURLINFO_END
+} curl_infotype;
+
+typedef int (*curl_debug_callback)
+       (CURL *handle,      /* the handle/transfer this concerns */
+        curl_infotype type, /* what kind of data */
+        char *data,        /* points to the data */
+        size_t size,       /* size of the data pointed to */
+        void *userp);      /* whatever the user please */
+  
 /* All possible error codes from all sorts of curl functions. Future versions
    may return other values, stay prepared.
 
@@ -512,6 +529,12 @@ typedef enum {
 
   /* send linked-list of pre-transfer QUOTE commands (Wesley Laxton)*/
   CINIT(PREQUOTE, OBJECTPOINT, 93),
+
+  /* set the debug function */
+  CINIT(DEBUGFUNCTION, FUNCTIONPOINT, 94),
+
+  /* set the data for the debug function */
+  CINIT(DEBUGDATA, OBJECTPOINT, 95),
   
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;

@@ -133,12 +133,6 @@ CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
   char *ptr;
   int size;
 
-  if(conn->data->set.verbose) {
-    fputs("> ", conn->data->set.err);
-    /* this data _may_ contain binary stuff */
-    fwrite(in->buffer, in->size_used, 1, conn->data->set.err);
-  }
-
   /* The looping below is required since we use non-blocking sockets, but due
      to the circumstances we will just loop and try again and again etc */
 
@@ -149,6 +143,10 @@ CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
 
     if(CURLE_OK != res)
       break;
+
+    if(conn->data->set.verbose)
+      /* this data _may_ contain binary stuff */
+      Curl_debug(conn->data, CURLINFO_DATA_OUT, ptr, amount);
 
     if(amount != size) {
       size -= amount;
@@ -364,11 +362,8 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
                the line isn't really terminated until the LF comes */
 
             /* output debug output if that is requested */
-            if(data->set.verbose) {
-              fputs("< ", data->set.err);
-              fwrite(line_start, perline, 1, data->set.err);
-              /* no need to output LF here, it is part of the data */
-            }
+            if(data->set.verbose)
+              Curl_debug(data, CURLINFO_DATA_IN, line_start, perline);
             
             if('\r' == line_start[0]) {
               /* end of headers */
