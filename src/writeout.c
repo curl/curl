@@ -21,8 +21,14 @@
  * $Id$
  *****************************************************************************/
 
+#include "setup.h"
+
 #include <stdio.h>
 #include <string.h>
+
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
 
 #include <curl/curl.h>
 
