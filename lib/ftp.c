@@ -2662,9 +2662,8 @@ CURLcode ftp_regular_transfer(struct connectdata *conn)
       /* we skip empty path components, like "x//y" since the FTP command CWD
          requires a parameter and a non-existant parameter a) doesn't work on
          many servers and b) has no effect on the others. */
-      ftp->dirs[ftp->dirdepth] = curl_unescape(cur_pos - absolute_dir,
-                                               slash_pos - cur_pos +
-                                               absolute_dir);
+      int len = (int)(slash_pos - cur_pos + absolute_dir);
+      ftp->dirs[ftp->dirdepth] = curl_unescape(cur_pos - absolute_dir, len);
 
       if (!ftp->dirs[ftp->dirdepth]) { /* run out of memory ... */
         failf(data, "no memory");

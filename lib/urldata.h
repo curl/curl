@@ -876,7 +876,7 @@ struct UserDefined {
 
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
 
-  int ip_version;
+  long ip_version;
 
   curl_off_t max_filesize; /* Maximum file size to download */
 

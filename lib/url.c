@@ -151,12 +151,12 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "memdebug.h"
 
 /* Local static prototypes */
-static int ConnectionKillOne(struct SessionHandle *data);
+static long ConnectionKillOne(struct SessionHandle *data);
 static bool ConnectionExists(struct SessionHandle *data,
                              struct connectdata *needle,
                              struct connectdata **usethis);
-static unsigned int ConnectionStore(struct SessionHandle *data,
-                                    struct connectdata *conn);
+static long ConnectionStore(struct SessionHandle *data,
+                            struct connectdata *conn);
 static bool safe_strequal(char* str1, char* str2);
 
 #ifndef USE_ARES
@@ -411,17 +411,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     {
       long newconnects= va_arg(param, long);
       struct connectdata **newptr;
+      long i;
 
       if(newconnects < data->state.numconnects) {
         /* Since this number is *decreased* from the existing number, we must
            close the possibly open connections that live on the indexes that
            are being removed! */
-        int i;
         for(i=newconnects; i< data->state.numconnects; i++)
           Curl_disconnect(data->state.connects[i]);
       }
       if(newconnects) {
-        int i;
         newptr= (struct connectdata **)
           realloc(data->state.connects,
                   sizeof(struct connectdata *) * newconnects);
@@ -577,7 +576,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * This is the value to compare with the remote document with the
      * method set with CURLOPT_TIMECONDITION
      */
-    data->set.timevalue = va_arg(param, long);
+    data->set.timevalue = (time_t)va_arg(param, long);
     break;
   case CURLOPT_SSLVERSION:
     /*
@@ -1633,14 +1632,14 @@ ConnectionExists(struct SessionHandle *data,
  * should take the previously set policy into account when deciding which
  * of the connections to kill.
  */
-static int
+static long
 ConnectionKillOne(struct SessionHandle *data)
 {
   long i;
   struct connectdata *conn;
-  int highscore=-1;
-  int connindex=-1;
-  int score;
+  long highscore=-1;
+  long connindex=-1;
+  long score;
   struct timeval now;
 
   now = Curl_tvnow();
@@ -1697,7 +1696,7 @@ ConnectionKillOne(struct SessionHandle *data)
  * The given connection should be unique. That must've been checked prior to
  * this call.
  */
-static unsigned int
+static long
 ConnectionStore(struct SessionHandle *data,
                 struct connectdata *conn)
 {
@@ -1787,8 +1786,8 @@ static int handleSock5Proxy(const char *proxy_name,
     /* Needs user name and password */
     int userlen, pwlen, len;
 
-    userlen = strlen(proxy_name);
-    pwlen = proxy_password?strlen(proxy_password):0;
+    userlen = (int)strlen(proxy_name);
+    pwlen = proxy_password?(int)strlen(proxy_password):0;
 
     /*   username/password request looks like
      * +----+------+----------+------+----------+
@@ -2108,7 +2107,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   CURLcode result=CURLE_OK;
   struct connectdata *conn;
   struct connectdata *conn_temp;
-  int urllen;
+  size_t urllen;
   struct Curl_dns_entry *hostaddr;
 #ifdef HAVE_ALARM
   unsigned int prev_alarm=0;
@@ -2407,7 +2406,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
       nope=no_proxy?strtok_r(no_proxy, ", ", &no_proxy_tok_buf):NULL;
       while(nope) {
-        unsigned int namelen;
+        size_t namelen;
         char *endptr = strchr(conn->host.name, ':');
         if(endptr)
           namelen=endptr-conn->host.name;
@@ -3290,7 +3289,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         failf(data, "Previous alarm fired off!");
       }
       else
-        alarm(alarm_set);
+        alarm((unsigned int)alarm_set);
     }
     else
       alarm(0); /* just shut it off */
