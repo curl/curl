@@ -148,7 +148,7 @@ struct HTTP {
 
   /* For FORM posting */
   struct Form form;
-  size_t (*storefread)(char *, size_t , size_t , FILE *);
+  curl_read_callback storefread;
   FILE *in;
 
   struct Curl_chunker chunk;
