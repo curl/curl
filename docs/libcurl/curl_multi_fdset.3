@@ -22,6 +22,7 @@ NOTE that once this call is made, you must not remove the sets you point to,
 as libcurl will need to be able to read them. It needs them after select()
 calls, to know if certain sockets are readable or writable.
 .SH RETURN VALUE
-CURLMcode type, general libcurl multi interface error code.
+CURLMcode type, general libcurl multi interface error code. See
+\fIlibcurl-errors.3\fP
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3)," curl_multi_init "(3)"

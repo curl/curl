@@ -32,7 +32,7 @@ complicated for the application.
 file descriptors simultaneous easily.
 .SH "ONE MULTI HANDLE MANY EASY HANDLES"
 To use the multi interface, you must first create a 'multi handle' with
-\fIcurl_multi_init\fP. This handle is then used as input to all further
+\fIcurl_multi_init(3)\fP. This handle is then used as input to all further
 curl_multi_* functions.
 
 Each single transfer is built up with an easy handle. You must create them,

@@ -2,7 +2,7 @@
 .\"
 .TH curl_multi_init 3 "1 March 2002" "libcurl 7.9.5" "libcurl Manual"
 .SH NAME
-curl_multi_init - Start a multi session
+curl_multi_init - create a multi handle
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
@@ -12,11 +12,10 @@ curl_multi_init - Start a multi session
 This function returns a CURLM handle to be used as input to all the other
 multi-functions, sometimes refered to as a multi handle on some places in the
 documentation. This init call MUST have a corresponding call to
-\fIcurl_multi_cleanup\fP when the operation is complete.
+\fIcurl_multi_cleanup(3)\fP when the operation is complete.
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the
 other curl functions.
 .SH "SEE ALSO"
 .BR curl_multi_cleanup "(3)," curl_global_init "(3)," curl_easy_init "(3)"
-.SH BUGS
-Surely there are some, you tell me!
+
