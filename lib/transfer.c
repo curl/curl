@@ -2038,6 +2038,8 @@ Curl_connect_host(struct SessionHandle *data,
       if(CURLE_OK == res)
         /* Resolved, continue with the connection */
         res = Curl_async_resolved(*conn);
+      else
+        (void)Curl_disconnect(*conn);
     }
     if(res)
       break;

@@ -249,7 +249,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
     /* close the connection, since we can't return failure here without
        cleaning up this connection properly */
-    Curl_disconnect(conn);
+    conn->bits.close = TRUE;
   }
 
   return rc;
