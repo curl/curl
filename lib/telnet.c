@@ -741,7 +741,7 @@ static void printsub(struct SessionHandle *data,
   }
 }
 
-static int check_telnet_options(struct connectdata *conn)
+static CURLcode check_telnet_options(struct connectdata *conn)
 {
   struct curl_slist *head;
   char option_keyword[128];
