@@ -29,7 +29,12 @@
 #include <string.h>
 #include <ctype.h>
 #include <curl/curl.h>
+
+#define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
+#include <curl/mprintf.h>
+
 #include "urlglob.h"
+
 
 #ifdef CURLDEBUG
 #include "../lib/memdebug.h"

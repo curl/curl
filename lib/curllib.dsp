@@ -389,6 +389,22 @@ SOURCE=.\url.h
 
 SOURCE=.\urldata.h
 # End Source File
+# Begin Source File
+
+SOURCE=.\http_digest.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\md5.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\http_digest.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\md5.h
+# End Source File
 # End Group
 # Begin Group "Resource Files"
 
