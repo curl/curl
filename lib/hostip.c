@@ -28,6 +28,7 @@
 
 #define _REENTRANT
 
+
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>
 #else
@@ -45,6 +46,10 @@
 #endif
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
+#ifdef	VMS
+#include <inet.h>
+#include <stdlib.h>
 #endif
 #endif
 

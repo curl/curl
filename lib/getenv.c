@@ -29,6 +29,10 @@
 #include <windows.h>
 #endif
 
+#ifdef VMS
+#include <unixlib.h>
+#endif
+
 #ifdef MALLOCDEBUG
 #include "memdebug.h"
 #endif
@@ -44,8 +48,16 @@ char *GetEnv(char *variable)
   if (temp != NULL)
     ExpandEnvironmentStrings(temp, env, sizeof(env));
 #else
+#ifdef	VMS
+  char *env = getenv(variable);
+  if (env && strcmp("HOME",variable) == 0) {
+	env = decc$translate_vms(env);
+  }
+/*  printf ("Getenv: %s=%s\n",variable,env); */
+#else
   /* no length control */
   char *env = getenv(variable);
+#endif
 #endif
   return (env && env[0])?strdup(env):NULL;
 }
