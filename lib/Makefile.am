@@ -24,13 +24,12 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 DSP = curllib.dsp
 
-EXTRA_DIST = Makefile.b32 Makefile.m32					\
-  Makefile.vc6 Makefile.riscos libcurl.def $(DSP) curllib.dsw		\
-  config-vms.h config-win32.h config-riscos.h config-mac.h config.h.in	\
-  ca-bundle.crt README.encoding README.memoryleak README.ares		\
-  README.curlx makefile.dj config.dj libcurl.framework.make		\
-  libcurl.plist libcurl.rc config-amigaos.h amigaos.c amigaos.h		\
-  makefile.amiga Makefile.netware nwlib.c libcurl.imp			\
+EXTRA_DIST = Makefile.b32 Makefile.m32 Makefile.vc6 Makefile.riscos $(DSP) \
+  curllib.dsw config-vms.h config-win32.h config-win32ce.h config-riscos.h \
+  config-mac.h config.h.in ca-bundle.crt README.encoding                   \
+  README.memoryleak README.ares README.curlx makefile.dj config.dj         \
+  libcurl.framework.make libcurl.plist libcurl.rc config-amigaos.h         \
+  amigaos.c amigaos.h makefile.amiga Makefile.netware nwlib.c libcurl.imp  \
   msvcproj.head msvcproj.foot config-win32ce.h
 
 CLEANFILES = $(DSP)
@@ -51,7 +50,7 @@ VERSION=-version-info 3:0:0
 # If either revision or age are omitted, they default to 0. Also note that age
 # must be less than or equal to the current interface number.
 #
-# Here are a set of rules to help you update your library version information: 
+# Here are a set of rules to help you update your library version information:
 #
 # 1.Start with version information of 0:0:0 for each libtool library.
 #
@@ -90,7 +89,7 @@ include Makefile.inc
 
 libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
 
-WIN32SOURCES = $(CSOURCES) libcurl.def
+WIN32SOURCES = $(CSOURCES)
 WIN32HEADERS = $(HHEADERS) config-win32.h
 
 BUILT_SOURCES = $(top_builddir)/lib/ca-bundle.h

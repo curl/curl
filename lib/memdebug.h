@@ -2,10 +2,10 @@
 #ifndef _CURL_MEDEBUG_H
 #define _CURL_MEDEBUG_H
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -13,7 +13,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -30,6 +30,8 @@
  */
 
 #include "setup.h"
+
+#include <curl/curl.h>
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -48,24 +50,24 @@
 extern FILE *logfile;
 
 /* memory functions */
-void *curl_domalloc(size_t size, int line, const char *source);
-void *curl_docalloc(size_t elements, size_t size, int line, const char *source);
-void *curl_dorealloc(void *ptr, size_t size, int line, const char *source);
-void curl_dofree(void *ptr, int line, const char *source);
-char *curl_dostrdup(const char *str, int line, const char *source);
-void curl_memdebug(const char *logname);
-void curl_memlimit(long limit);
+CURL_EXTERN void *curl_domalloc(size_t size, int line, const char *source);
+CURL_EXTERN void *curl_docalloc(size_t elements, size_t size, int line, const char *source);
+CURL_EXTERN void *curl_dorealloc(void *ptr, size_t size, int line, const char *source);
+CURL_EXTERN void curl_dofree(void *ptr, int line, const char *source);
+CURL_EXTERN char *curl_dostrdup(const char *str, int line, const char *source);
+CURL_EXTERN void curl_memdebug(const char *logname);
+CURL_EXTERN void curl_memlimit(long limit);
 
 /* file descriptor manipulators */
-int curl_socket(int domain, int type, int protocol, int line , const char *);
-int curl_sclose(int sockfd, int, const char *source);
-int curl_accept(int s, void *addr, void *addrlen,
-                int line, const char *source);
+CURL_EXTERN int curl_socket(int domain, int type, int protocol, int line , const char *);
+CURL_EXTERN int curl_sclose(int sockfd, int, const char *source);
+CURL_EXTERN int curl_accept(int s, void *addr, void *addrlen,
+                            int line, const char *source);
 
 /* FILE functions */
-FILE *curl_fopen(const char *file, const char *mode, int line,
-                 const char *source);
-int curl_fclose(FILE *file, int line, const char *source);
+CURL_EXTERN FILE *curl_fopen(const char *file, const char *mode, int line,
+                             const char *source);
+CURL_EXTERN int curl_fclose(FILE *file, int line, const char *source);
 
 #ifndef MEMDEBUG_NODEFINES
 

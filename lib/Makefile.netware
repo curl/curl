@@ -70,7 +70,7 @@ CP	= cp -afv
 MPKXDC	= mkxdc
 
 # Global flags for all compilers
-CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
+CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -DBUILDING_LIBCURL -nostdinc
 
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
@@ -164,9 +164,9 @@ OBJL	= $(OBJS) $(OBJDIR)/nwlib.o
 
 all: lib nlm
 
-nlm: prebuild $(TARGET).nlm 
+nlm: prebuild $(TARGET).nlm
 
-lib: prebuild $(TARGET).lib 
+lib: prebuild $(TARGET).lib
 
 prebuild: $(OBJDIR) $(OBJDIR)/version.inc config.h ca-bundle.h
 

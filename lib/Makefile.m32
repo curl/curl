@@ -18,15 +18,15 @@ endif
 
 CC = gcc
 AR = ar
-RM = rm -f 
+RM = rm -f
 RANLIB = ranlib
 STRIP = strip -g
 
 ########################################################
 ## Nothing more to do below this line!
 
-INCLUDES = -I. -I.. -I../include -I../src
-CFLAGS = -g -O2 -DMINGW32
+INCLUDES = -I. -I../include
+CFLAGS = -g -O2 -DMINGW32 -DBUILDING_LIBCURL
 ifdef SSL
   INCLUDES += -I"$(OPENSSL_PATH)/outinc" -I"$(OPENSSL_PATH)/outinc/openssl"
   CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
@@ -59,20 +59,14 @@ RESOURCE = libcurl.res
 
 # remove the last line above to keep debug info
 
-libcurl.dll libcurldll.a: libcurl.a libcurl.def $(RESOURCE)
+libcurl.dll libcurldll.a: $(libcurl_a_OBJECTS) $(RESOURCE)
 	$(RM) $@
-	dllwrap --dllname $@ --output-lib libcurldll.a --export-all --def libcurl.def $(libcurl_a_LIBRARIES) $(RESOURCE) $(DLL_LIBS) -lwsock32 -lws2_32 -lwinmm
-	$(STRIP) $@
+	$(CC) -s -shared -Wl,--out-implib,libcurldll.a -o libcurl.dll \
+	  $(libcurl_a_OBJECTS) $(RESOURCE) $(DLL_LIBS) -lws2_32 -lwinmm
 
-# remove the last line above to keep debug info
+# remove the above '-s' to keep debug info
 
 .c.o:
-	$(COMPILE) -c $<
-
-.s.o:
-	$(COMPILE) -c $<
-
-.S.o:
 	$(COMPILE) -c $<
 
 libcurl.res: libcurl.rc

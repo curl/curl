@@ -23,11 +23,15 @@
  * $Id$
  ***************************************************************************/
 
+#include <curl/curl.h>
+
+#if 0
 /*
- * These two actually are public functions.
+ * These two actually are public functions, which are in <curl/curl.h>
  */
 int curl_strequal(const char *first, const char *second);
 int curl_strnequal(const char *first, const char *second, size_t max);
+#endif
 
 #define strequal(a,b) curl_strequal(a,b)
 #define strnequal(a,b,c) curl_strnequal(a,b,c)
