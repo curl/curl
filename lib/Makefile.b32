@@ -61,6 +61,7 @@ SOURCES	   = \
 	strtok.c \
 	connect.c \
         hash.c \
+        share.c \
         llist.c \
         multi.c \
         content_encoding.c

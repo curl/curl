@@ -30,6 +30,7 @@
 +strtok.obj &
 +connect.obj &
 +hash.obj &
++share.obj &
 +llist.obj &
 +multi.obj &
 +content_encoding.obj

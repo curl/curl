@@ -200,6 +200,7 @@ X_OBJS= \
 	$(DIROBJ)\connect.obj \
 	$(DIROBJ)\hash.obj \
 	$(DIROBJ)\llist.obj \
+	$(DIROBJ)\share.obj \
 	$(DIROBJ)\multi.obj
 
 all : $(TARGET)
