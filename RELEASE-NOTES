@@ -2,6 +2,8 @@ Curl and libcurl 7.10.8 is out! A bugfix release.
 
 This release includes the following changes:
 
+ o we include a RELEASE-NOTES document in the release archive to summarize
+   the big and visible changes and bugfixes
  o CURLOPT_MAXFILESIZE was added, and --max-filesize.
  o CURLOPT_PASSWDFUNCTION and CURLOPT_PASSWDDATA are no longer supported.
  o IPv6 is now supported on Windows builds too
