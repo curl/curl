@@ -1169,7 +1169,7 @@ Curl_SSLConnect(struct connectdata *conn,
         return CURLE_OPERATION_TIMEDOUT;
       }
       else {
-#ifdef EINTR
+#if !defined(WIN32) && defined(EINTR)
         /* For platforms without EINTR all errnos are bad */
         if (errno == EINTR)
           continue; /* retry the select() */
