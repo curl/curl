@@ -247,7 +247,7 @@ CURLcode http_auth_headers(struct connectdata *conn,
       if((data->state.authwant == CURLAUTH_GSSNEGOTIATE) &&
          data->state.negotiate.context && 
          !GSS_ERROR(data->state.negotiate.status)) {
-        auth="GSS-Negotiate";
+        auth=(char *)"GSS-Negotiate";
         result = Curl_output_negotiate(conn);
         if (result)
           return result;
