@@ -2875,7 +2875,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      we only acknowledge this option if this is not a re-used connection
      already (which happens due to follow-location or during a HTTP
      authentication phase). */
-  if(data->set.reuse_fresh && !conn->bits.reuse)
+  if(data->set.reuse_fresh && !data->state.this_is_a_follow)
     reuse = FALSE;
   else 
     reuse = ConnectionExists(data, conn, &conn_temp);
