@@ -697,7 +697,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               /* Find the first non-space letter */
               for(start=k->p+13;
                   *start && isspace((int)*start);
-                  start++);
+                  start++)
+                ;  /* empty loop */
 
               end = strchr(start, '\r');
               if(!end)
@@ -705,7 +706,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               if(end) {
                 /* skip all trailing space letters */
-                for(; isspace((int)*end) && (end > start); end--);
+                for(; isspace((int)*end) && (end > start); end--)
+                  ;  /* empty loop */
 
                 /* get length of the type */
                 len = end-start+1;
@@ -796,7 +798,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               /* Find the first non-space letter */
               for(start=k->p+17;
                   *start && isspace((int)*start);
-                  start++);
+                  start++)
+                ;  /* empty loop */
 
               /* Record the content-encoding for later use */
               if (checkprefix("identity", start))

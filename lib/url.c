@@ -206,7 +206,8 @@ void Curl_safefree(void *ptr)
 CURLcode Curl_close(struct SessionHandle *data)
 {
   /* Loop through all open connections and kill them one by one */
-  while(-1 != ConnectionKillOne(data));
+  while(-1 != ConnectionKillOne(data))
+    ; /* empty loop */
 
   if ( ! (data->share && data->share->hostcache) ) {
     if ( !Curl_global_host_cache_use(data)) {
