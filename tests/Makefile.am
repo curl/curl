@@ -3,7 +3,7 @@ all:
 install:
 
 test:
-	./runtests.sh
+	./runtests.pl
 
 clean:
 	rm -rf log

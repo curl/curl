@@ -7,7 +7,7 @@
 The cURL Test Suite
 
 Requires:
-  perl, sh
+  perl (and some shell tools that still hasn't been written in pure perl)
 
 Run:
   'make test'. This invokes the 'runtests.sh' shell script. Edit the top
