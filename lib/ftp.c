@@ -1065,7 +1065,7 @@ again:;
         he = conn->hp;
 #endif
         connectport =
-          (unsigned short)data->port; /* we connect to the proxy's port */
+          (unsigned short)conn->port; /* we connect to the proxy's port */
       }
       else {
         /* normal, direct, ftp connection */

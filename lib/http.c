@@ -465,14 +465,14 @@ CURLcode Curl_http(struct connectdata *conn)
     /* if ptr_host is already set, it is OK since we only re-use connections
        to the very same host and port */
 
-    if(((conn->protocol&PROT_HTTPS) && (data->remote_port == PORT_HTTPS)) ||
-       (!(conn->protocol&PROT_HTTPS) && (data->remote_port == PORT_HTTP)) )
+    if(((conn->protocol&PROT_HTTPS) && (conn->remote_port == PORT_HTTPS)) ||
+       (!(conn->protocol&PROT_HTTPS) && (conn->remote_port == PORT_HTTP)) )
       /* If (HTTPS on port 443) OR (non-HTTPS on port 80) then don't include
          the port number in the host string */
       conn->allocptr.host = aprintf("Host: %s\r\n", host);
     else
       conn->allocptr.host = aprintf("Host: %s:%d\r\n", host,
-                                    data->remote_port);
+                                    conn->remote_port);
   }
 
   if(!checkheaders(data, "Pragma:"))

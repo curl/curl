@@ -378,7 +378,7 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     data->url = va_arg(param, char *);
     break;
   case CURLOPT_PORT:
-    data->port = va_arg(param, long);
+    data->use_port = va_arg(param, long);
     break;
   case CURLOPT_POST:
     /* Does this option serve a purpose anymore? */
@@ -704,7 +704,7 @@ static CURLcode ConnectPlease(struct UrlData *data,
   memcpy((char *)&(conn->serv_addr.sin_addr),
          conn->hp->h_addr, conn->hp->h_length);
   conn->serv_addr.sin_family = conn->hp->h_addrtype;
-  conn->serv_addr.sin_port = htons(data->port);
+  conn->serv_addr.sin_port = htons(conn->port);
 #else
   /* IPv6-style */
   struct addrinfo *ai;
@@ -910,7 +910,9 @@ static CURLcode ConnectPlease(struct UrlData *data,
 }
 
 
-static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
+static CURLcode _connect(CURL *curl,
+                         CURLconnect **in_connect,
+                         bool allow_port) /* allow data->use_port ? */
 {
   char *tmp;
   char *buf;
@@ -1275,9 +1277,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
    *************************************************************/
 
   if (strequal(conn->protostr, "HTTP")) {
-    if(!data->port)
-      data->port = PORT_HTTP;
-    data->remote_port = PORT_HTTP;
+    conn->port = (data->use_port && allow_port)?data->use_port:PORT_HTTP;
+    conn->remote_port = PORT_HTTP;
     conn->protocol |= PROT_HTTP;
     conn->curl_do = Curl_http;
     conn->curl_done = Curl_http_done;
@@ -1285,9 +1286,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   }
   else if (strequal(conn->protostr, "HTTPS")) {
 #ifdef USE_SSLEAY
-    if(!data->port)
-      data->port = PORT_HTTPS;
-    data->remote_port = PORT_HTTPS;
+
+    conn->port = (data->use_port && allow_port)?data->use_port:PORT_HTTPS;
+    conn->remote_port = PORT_HTTPS;
     conn->protocol |= PROT_HTTP;
     conn->protocol |= PROT_HTTPS;
 
@@ -1302,9 +1303,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 #endif /* !USE_SSLEAY */
   }
   else if (strequal(conn->protostr, "GOPHER")) {
-    if(!data->port)
-      data->port = PORT_GOPHER;
-    data->remote_port = PORT_GOPHER;
+    conn->port = (data->use_port && allow_port)?data->use_port:PORT_GOPHER;
+    conn->remote_port = PORT_GOPHER;
     /* Skip /<item-type>/ in path if present */
     if (isdigit((int)conn->path[1])) {
       conn->ppath = strchr(&conn->path[1], '/');
@@ -1318,9 +1318,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   }
   else if(strequal(conn->protostr, "FTP")) {
     char *type;
-    if(!data->port)
-      data->port = PORT_FTP;
-    data->remote_port = PORT_FTP;
+    conn->port = (data->use_port && allow_port)?data->use_port:PORT_FTP;
+    conn->remote_port = PORT_FTP;
     conn->protocol |= PROT_FTP;
 
     if(data->bits.httpproxy &&
@@ -1368,27 +1367,23 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   else if(strequal(conn->protostr, "TELNET")) {
     /* telnet testing factory */
     conn->protocol |= PROT_TELNET;
-    if(!data->port)
-      data->port = PORT_TELNET;
-    data->remote_port = PORT_TELNET;
 
+    conn->port = (data->use_port && allow_port)?data->use_port: PORT_TELNET;
+    conn->remote_port = PORT_TELNET;
     conn->curl_do = Curl_telnet;
     conn->curl_done = Curl_telnet_done;
-
   }
   else if (strequal(conn->protostr, "DICT")) {
     conn->protocol |= PROT_DICT;
-    if(!data->port)
-      data->port = PORT_DICT;
-    data->remote_port = PORT_DICT;
+    conn->port = (data->use_port && allow_port)?data->use_port:PORT_DICT;
+    conn->remote_port = PORT_DICT;
     conn->curl_do = Curl_dict;
     conn->curl_done = Curl_dict_done;
   }
   else if (strequal(conn->protostr, "LDAP")) {
     conn->protocol |= PROT_LDAP;
-    if(!data->port)
-      data->port = PORT_LDAP;
-    data->remote_port = PORT_LDAP;
+    conn->port = (data->use_port && allow_port)?data->use_port:PORT_LDAP;
+    conn->remote_port = PORT_LDAP;
     conn->curl_do = Curl_ldap;
     conn->curl_done = Curl_ldap_done;
   }
@@ -1516,12 +1511,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 
   if (tmp) {
     *tmp++ = '\0'; /* cut off the name there */
-    data->remote_port = atoi(tmp);
+    conn->remote_port = atoi(tmp);
   }
-
-  /* copy the port-specifics to the connection struct */
-  conn->port = data->port;
-  conn->remote_port = data->remote_port;
 
   /*************************************************************
    * Check the current list of connections to see if we can
@@ -1564,7 +1555,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   if(!data->bits.httpproxy) {
     /* If not connecting via a proxy, extract the port from the URL, if it is
      * there, thus overriding any defaults that might have been set above. */
-    data->port =  data->remote_port; /* it is the same port */
+    conn->port =  conn->remote_port; /* it is the same port */
 
     /* Resolve target host right on */
     if(!conn->hp) {
@@ -1621,12 +1612,12 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       *prox_portno = 0x0; /* cut off number from host name */
       prox_portno ++;
       /* now set the local port number */
-      data->port = atoi(prox_portno);
+      conn->port = atoi(prox_portno);
     }
     else if(data->proxyport) {
       /* None given in the proxy string, then get the default one if it is
          given */
-      data->port = data->proxyport;
+      conn->port = data->proxyport;
     }
 
     /* resolve proxy */
@@ -1741,13 +1732,14 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   return CURLE_OK;
 }
 
-CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
+CURLcode curl_connect(CURL *curl, CURLconnect **in_connect,
+                      bool allow_port)
 {
   CURLcode code;
   struct connectdata *conn;
 
   /* call the stuff that needs to be called */
-  code = _connect(curl, in_connect);
+  code = _connect(curl, in_connect, allow_port);
 
   if(CURLE_OK != code) {
     /* We're not allowed to return failure with memory left allocated

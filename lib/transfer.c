@@ -632,12 +632,13 @@ CURLcode curl_transfer(CURL *curl)
   CURLcode res;
   struct UrlData *data = curl;
   struct connectdata *c_connect=NULL;
+  bool port=TRUE; /* allow data->use_port to set port to use */
 
   Curl_pgrsStartNow(data);
 
   do {
     Curl_pgrsTime(data, TIMER_STARTSINGLE);
-    res = curl_connect(curl, (CURLconnect **)&c_connect);
+    res = curl_connect(curl, (CURLconnect **)&c_connect, port);
     if(res == CURLE_OK) {
       res = curl_do(c_connect);
       if(res == CURLE_OK) {
@@ -653,6 +654,9 @@ CURLcode curl_transfer(CURL *curl)
         */
         char prot[16]; /* URL protocol string storage */
         char letter;   /* used for a silly sscanf */
+
+        port=TRUE; /* by default we use the user set port number even after
+                      a Location: */
 
 	if (data->maxredirs && (data->followlocation >= data->maxredirs)) {
 	  failf(data,"Maximum (%d) redirects followed", data->maxredirs);
@@ -701,9 +705,10 @@ CURLcode curl_transfer(CURL *curl)
           if(!protsep)
             protsep=data->url;
           else {
-            /* TBD: set the port with curl_setopt() */
-            data->port=0; /* we got a full URL and then we should reset the
-                             port number here to re-initiate it later */
+            port=FALSE; /* we got a full URL and thus we should not obey the
+                           port number that might have been set by the user
+                           in data->use_port */
+
             protsep+=2; /* pass the slashes */
           }
 
@@ -740,9 +745,8 @@ CURLcode curl_transfer(CURL *curl)
           data->newurl = newest;
         }
         else {
-          /* This was an absolute URL, clear the port number! */
-          /* TBD: set the port with curl_setopt() */
-          data->port = 0;
+          /* This is an absolute URL, don't use the custom port number */
+          port = FALSE;
         }
 
         if(data->bits.urlstringalloc)
