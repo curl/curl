@@ -83,7 +83,7 @@ int Curl_parsenetrc(char *host,
   struct passwd *pw;
   pw= getpwuid(geteuid());
   if (pw)
-    strncat(netrcbuffer, pw->pw_dir, 255);
+    home = pw->pw_dir;
 #else
   void *pw=NULL;
 #endif
@@ -93,14 +93,15 @@ int Curl_parsenetrc(char *host,
     if(!home) {
       return -1;
     }
-
-    if(strlen(home)>(sizeof(netrcbuffer)-strlen(NETRC))) {
-      free(home);
-      return -1;
-    }
-
-    sprintf(netrcbuffer, "%s%s%s", home, DIR_CHAR, NETRC);
   }
+
+  if(strlen(home)>(sizeof(netrcbuffer)-strlen(NETRC))) {
+    if(NULL==pw)
+      free(home);
+    return -1;
+  }
+
+  sprintf(netrcbuffer, "%s%s%s", home, DIR_CHAR, NETRC);
 
   file = fopen(netrcbuffer, "r");
   if(file) {
@@ -164,7 +165,8 @@ int Curl_parsenetrc(char *host,
     fclose(file);
   }
 
-  free(home);
+  if(NULL==pw)
+    free(home);
 
   return retcode;
 }
