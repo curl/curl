@@ -8,7 +8,7 @@ README
 
   Curl is a command line tool for transfering data specified with URL
   syntax. Find out how to use Curl by reading the curl.1 man page or the
-  README.curl document. Find out how to install Curl by reading the INSTALL
+  MANUAL document. Find out how to install Curl by reading the INSTALL
   document.
 
   libcurl is a library that Curl is using to do its job. It is readily
