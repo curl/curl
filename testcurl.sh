@@ -42,7 +42,7 @@
 #                 perform a normal CVS build.
 
 # version of this script
-version="$Revision$"
+version='$Revision$'
 fixed=0
 
 # Determine if we're running from CVS or a canned copy of curl
