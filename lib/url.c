@@ -2109,7 +2109,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   struct connectdata *conn_temp;
   size_t urllen;
   struct Curl_dns_entry *hostaddr;
-#ifdef HAVE_ALARM
+#if defined(HAVE_ALARM) && !defined(USE_ARES)
   unsigned int prev_alarm=0;
 #endif
   char endbracket;
@@ -2118,6 +2118,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   int rc;
   bool reuse;
 
+#ifndef USE_ARES
 #ifdef SIGALRM
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
@@ -2125,9 +2126,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #else
 #ifdef HAVE_SIGNAL
   void *keep_sigact;              /* store the old handler here */
-#endif
-#endif
-#endif
+#endif /* HAVE_SIGNAL */
+#endif /* HAVE_SIGACTION */
+#endif /* SIGALRM */
+#endif /* USE_ARES */
 
   *addr = NULL; /* nothing yet */
   *async = FALSE;
@@ -3266,7 +3268,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
   *addr = hostaddr;
 
-#if defined(HAVE_ALARM) && defined(SIGALRM)
+#if defined(HAVE_ALARM) && defined(SIGALRM) && !defined(USE_ARES)
   if((data->set.timeout || data->set.connecttimeout) && !data->set.no_signal) {
 #ifdef HAVE_SIGACTION
     if(keep_copysig) {
