@@ -434,7 +434,8 @@ sub displaydata {
 
     unlink($memdump); # remove this if there was one left
 
-    my $version=`$CURL -V`;
+    my @version=`$CURL -V`;
+    my $version=$version[0];
     chomp $version;
 
     my $curl = $version;
