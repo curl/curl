@@ -115,7 +115,7 @@ static char table64[]=
  * went wrong, -1 is returned.
  *
  */
-int Curl_base64_encode(const void *inp, int insize, char **outptr)
+int Curl_base64_encode(const void *inp, size_t insize, char **outptr)
 {
   unsigned char ibuf[3];
   unsigned char obuf[4];
@@ -202,7 +202,7 @@ void *suck(int *);
 int main(int argc, char **argv, char **envp)
 {
   char *base64;
-  int base64Len;
+  size_t base64Len;
   unsigned char *data;
   int dataLen;
 	

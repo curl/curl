@@ -286,7 +286,7 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
   int hostlen = strlen(host);
   int hostoff; /* host name offset */
   int domoff;  /* domain name offset */
-  int size;
+  size_t size;
   char *base64=NULL;
   unsigned char ntlmbuf[256]; /* enough, unless the host/domain is very long */
 
