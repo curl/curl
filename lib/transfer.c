@@ -1159,10 +1159,6 @@ CURLcode Curl_perform(struct SessionHandle *data)
   if(newurl)
     free(newurl);
 
-  /* make absolutely sure the alarm is switched off! */
-  if(data->set.timeout || data->set.connecttimeout)
-    myalarm(0);
-
   return res;
 }
 

@@ -110,13 +110,13 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #define sclose(x) closesocket(x)
 #define sread(x,y,z) recv(x,y,z,0)
 #define swrite(x,y,z) (size_t)send(x,y,z,0)
-#define myalarm(x) /* win32 is a silly system */
+#undef HAVE_ALARM
 #else
      /* gcc-for-win is still good :) */
 #define sclose(x) close(x)
 #define sread(x,y,z) recv(x,y,z,0)
 #define swrite(x,y,z) send(x,y,z,0)
-#define myalarm(x) alarm(x)
+#define HAVE_ALARM
 #endif
 
 #define PATH_CHAR     ";"
@@ -127,7 +127,7 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #define sclose(x) close(x)
 #define sread(x,y,z) recv(x,y,z,0)
 #define swrite(x,y,z) send(x,y,z,0)
-#define myalarm(x) alarm(x)
+#define HAVE_ALARM
 
 #define PATH_CHAR     ":"
 #define DIR_CHAR      "/"
