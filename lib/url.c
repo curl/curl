@@ -2080,6 +2080,12 @@ static CURLcode Connect(struct UrlData *data,
         conn->bits.use_range = TRUE;        /* enable range download */
         conn->bits.rangestringalloc = TRUE; /* mark range string allocated */
     }
+    else if (data->set_range) {
+      /* There is a range, but is not a resume, useful for random ftp access */
+      conn->range = strdup(data->set_range);
+      conn->bits.rangestringalloc = TRUE; /* mark range string allocated */
+      conn->bits.use_range = TRUE;        /* enable range download */
+    }
     
     *in_connect = conn;      /* return this instead! */
 
