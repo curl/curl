@@ -42,21 +42,29 @@
 #include "memdebug.h"
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x00904100L
+#define HAVE_USERDATA_IN_PWD_CALLBACK 1
+#else
+#undef HAVE_USERDATA_IN_PWD_CALLBACK
+#endif
+
+#ifndef HAVE_USERDATA_IN_PWD_CALLBACK
 static char global_passwd[64];
+#endif
 
 static int passwd_callback(char *buf, int num, int verify
-#if OPENSSL_VERSION_NUMBER >= 0x00904100L
+#if HAVE_USERDATA_IN_PWD_CALLBACK
                            /* This was introduced in 0.9.4, we can set this
                               using SSL_CTX_set_default_passwd_cb_userdata()
                               */
-                           , void *userdata
+                           , void *global_passwd
 #endif
                            )
 {
   if(verify)
     fprintf(stderr, "%s\n", buf);
   else {
-    if(num > strlen(global_passwd)) {
+    if(num > (int)strlen((char *)global_passwd)) {
       strcpy(buf, global_passwd);
       return strlen(buf);
     }
@@ -68,7 +76,10 @@ static
 bool seed_enough(struct connectdata *conn, /* unused for now */
                  int nread)
 {
+  conn = NULL; /* to prevent compiler warnings */
 #ifdef HAVE_RAND_STATUS
+  nread = 0; /* to prevent compiler warnings */
+
   /* only available in OpenSSL 0.9.5a and later */
   if(RAND_status())
     return TRUE;
@@ -171,11 +182,18 @@ int cert_stuff(struct connectdata *conn,
     X509 *x509;
 
     if(data->cert_passwd) {
+#ifndef HAVE_USERDATA_IN_PWD_CALLBACK
       /*
        * If password has been given, we store that in the global
        * area (*shudder*) for a while:
        */
       strcpy(global_passwd, data->cert_passwd);
+#else
+      /*
+       * We set the password in the callback userdata
+       */
+      SSL_CTX_set_default_passwd_cb_userdata(conn->ssl.ctx, data->cert_passwd);
+#endif
       /* Set passwd callback: */
       SSL_CTX_set_default_passwd_cb(conn->ssl.ctx, passwd_callback);
     }
@@ -214,9 +232,10 @@ int cert_stuff(struct connectdata *conn,
       failf(data, "Private key does not match the certificate public key\n");
       return(0);
     }
-    
+#ifndef HAVE_USERDATA_IN_PWD_CALLBACK    
     /* erase it now */
     memset(global_passwd, 0, sizeof(global_passwd));
+#endif
   }
   return(1);
 }
