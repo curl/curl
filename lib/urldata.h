@@ -865,7 +865,6 @@ struct UserDefined {
   char *key;            /* private key */
   char *key_type;       /* format for private key (default: PEM) */
   char *key_passwd;     /* plain text private key password */
-  char *crypto_engine;  /* name of the crypto engine to use */
   char *cookiejar;      /* dump all cookies to this file */
   bool cookiesession;   /* new cookie session? */
   bool crlf;            /* convert crlf on ftp upload(?) */
