@@ -80,19 +80,16 @@ while(<STDIN>) {
     }
 }
 
-if(0 == $totalmem) {
-    print "No leak found\n";
-    exit;
-}
+if($totalmem) {
+    print "Leak detected: memory still allocated: $totalmem bytes\n";
 
-print "Leak detected: memory still allocated: $totalmem bytes\n";
-
-for(keys %sizeataddr) {
-    $addr = $_;
-    $size = $sizeataddr{$addr};
-    if($size) {
-        print "At $addr, there's $size bytes.\n";
-        print " allocated by ".$getmem{$addr}."\n";
+    for(keys %sizeataddr) {
+        $addr = $_;
+        $size = $sizeataddr{$addr};
+        if($size) {
+            print "At $addr, there's $size bytes.\n";
+            print " allocated by ".$getmem{$addr}."\n";
+        }
     }
 }
 
