@@ -26,7 +26,15 @@ man_MANS = \
 	curl_mprintf.3 \
 	curl_global_init.3 \
 	curl_global_cleanup.3 \
-	libcurl.3
+	libcurl.3 \
+	curl_multi_add_handle.3 \
+	curl_multi_cleanup.3 \
+	curl_multi_fdset.3 \
+	curl_multi_info_read.3 \
+	curl_multi_init.3 \
+	curl_multi_perform.3 \
+	curl_multi_remove_handle.3 \
+	libcurl-multi.3
 
 HTMLPAGES = \
 	curl_easy_cleanup.html \
@@ -51,6 +59,14 @@ HTMLPAGES = \
 	curl_global_init.html \
 	curl_global_cleanup.html \
 	libcurl.html \
+	curl_multi_add_handle.html \
+	curl_multi_cleanup.html \
+	curl_multi_fdset.html \
+	curl_multi_info_read.html \
+	curl_multi_init.html \
+	curl_multi_perform.html \
+	curl_multi_remove_handle.html \
+	libcurl-multi.html \
 	index.html
 
 EXTRA_DIST = $(man_MANS) $(HTMLPAGES)
