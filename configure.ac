@@ -707,44 +707,52 @@ else
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  dnl Detect the pkg-config tool, as it may have extra info about the openssl
-  dnl installation we can use. I *believe* this is what we are expected to do
-  dnl on really recent Redhat Linux hosts.
-
-  AC_PATH_PROG( PKGCONFIG, pkg-config, no, $PATH:/usr/bin:/usr/local/bin)
-  if test "$PKGCONFIG" != "no" ; then
-    AC_MSG_CHECKING([OpenSSL options with pkg-config])
-
-    $PKGCONFIG --exists openssl
-    SSL_EXISTS=$?
-
-    if test "$SSL_EXISTS" -eq "0"; then
-      SSL_LIBS=`$PKGCONFIG --libs-only-l openssl 2>/dev/null`
-      SSL_LDFLAGS=`$PKGCONFIG --libs-only-L openssl 2>/dev/null`
-      SSL_CPPFLAGS=`$PKGCONFIG --cflags-only-I openssl 2>/dev/null`
-
-      dnl use the values pkg-config reported
-      LIBS="$LIBS $SSL_LIBS"
-      CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
-      LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
-      AC_MSG_RESULT([found])
-    else
-      AC_MSG_RESULT([no])
-    fi
-  fi
-
   case "$OPT_SSL" in
   yes)
+    dnl --with-ssl (without path) used
+    PKGTEST="yes"
     EXTRA_SSL=/usr/local/ssl ;;
   off)
+    dnl no --with-ssl option given, just check default places
+    PKGTEST="yes"
     EXTRA_SSL= ;;
   *)
-    dnl check the given spot right away!
+    dnl check the given --with-ssl spot
+    PKGTEST="no"
     EXTRA_SSL=$OPT_SSL
     LDFLAGS="$LDFLAGS -L$EXTRA_SSL/lib$libsuff"
     CPPFLAGS="$CPPFLAGS -I$EXTRA_SSL/include/openssl -I$EXTRA_SSL/include"
     ;;
   esac
+
+  if test "$PKGTEST" = "yes"; then
+
+    dnl Detect the pkg-config tool, as it may have extra info about the
+    dnl openssl installation we can use. I *believe* this is what we are
+    dnl expected to do on really recent Redhat Linux hosts.
+
+    AC_PATH_PROG( PKGCONFIG, pkg-config, no, $PATH:/usr/bin:/usr/local/bin)
+    if test "$PKGCONFIG" != "no" ; then
+      AC_MSG_CHECKING([OpenSSL options with pkg-config])
+
+      $PKGCONFIG --exists openssl
+      SSL_EXISTS=$?
+
+      if test "$SSL_EXISTS" -eq "0"; then
+        SSL_LIBS=`$PKGCONFIG --libs-only-l openssl 2>/dev/null`
+        SSL_LDFLAGS=`$PKGCONFIG --libs-only-L openssl 2>/dev/null`
+        SSL_CPPFLAGS=`$PKGCONFIG --cflags-only-I openssl 2>/dev/null`
+
+        dnl use the values pkg-config reported
+        LIBS="$LIBS $SSL_LIBS"
+        CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
+        LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
+        AC_MSG_RESULT([found])
+      else
+        AC_MSG_RESULT([no])
+      fi
+    fi
+  fi
 
   AC_CHECK_LIB(crypto, CRYPTO_lock,[
      HAVECRYPTO="yes"
