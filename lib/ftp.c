@@ -209,40 +209,93 @@ static CURLcode AllowServerConnect(struct UrlData *data,
 			isdigit((int)line[2]) && (' ' == line[3]))
 
 int GetLastResponse(int sockfd, char *buf,
-			   struct UrlData *data)
+                    struct connectdata *conn)
 {
   int nread;
-  int read_rc=1;
+  int keepon=TRUE;
   char *ptr;
+  int timeout = 3600; /* in seconds */
+  struct timeval interval;
+  fd_set rkeepfd;
+  fd_set readfd;
+  struct UrlData *data = conn->data;
+
+#define SELECT_OK      0
+#define SELECT_ERROR   1
+#define SELECT_TIMEOUT 2
+  int error = SELECT_OK;
+
+  if(data->timeout) {
+    /* if timeout is requested, find out how much remaining time we have */
+    timeout = data->timeout - /* timeout time */
+      (tvlong(tvnow()) - tvlong(conn->now)); /* spent time */
+    if(timeout <=0 ) {
+      failf(data, "Transfer aborted due to timeout");
+      return -SELECT_TIMEOUT; /* already too little time */
+    }
+  }
+
+  FD_ZERO (&readfd);		/* clear it */
+  FD_SET (sockfd, &readfd);     /* read socket */
+
+  /* get this in a backup variable to be able to restore it on each lap in the
+     select() loop */
+  rkeepfd = readfd;
+
   do {
     ptr=buf;
 
     /* get us a full line, terminated with a newline */
-    for(nread=0;
-        (nread<BUFSIZE) && read_rc;
-        nread++, ptr++) {
-#ifdef USE_SSLEAY
-      if (data->use_ssl) {
-        read_rc = SSL_read(data->ssl, ptr, 1);
-      }
-      else {
-#endif
-        read_rc = sread(sockfd, ptr, 1);
-#ifdef USE_SSLEAY
-      }
-#endif /* USE_SSLEAY */
-      if (*ptr == '\n')
+    nread=0;
+    keepon=TRUE;
+    while((nread<BUFSIZE) && (keepon && !error)) {
+      readfd = rkeepfd;		   /* set every lap */
+      interval.tv_sec = timeout;
+      interval.tv_usec = 0;
+
+      switch (select (sockfd+1, &readfd, NULL, NULL, &interval)) {
+      case -1: /* select() error, stop reading */
+        error = SELECT_ERROR;
+        failf(data, "Transfer aborted due to select() error");
         break;
+      case 0: /* timeout */
+        error = SELECT_TIMEOUT;
+        infof(data, "Transfer aborted due to timeout\n");
+        failf(data, "Transfer aborted due to timeout");
+        break;
+      default:
+#ifdef USE_SSLEAY
+        if (data->use_ssl) {
+          keepon = SSL_read(data->ssl, ptr, 1);
+        }
+        else {
+#endif
+          keepon = sread(sockfd, ptr, 1);
+#ifdef USE_SSLEAY
+        }
+#endif /* USE_SSLEAY */
+
+        if ((*ptr == '\n') || (*ptr == '\r'))
+          keepon = FALSE;
+      }
+      if(keepon) {
+        nread++;
+        ptr++;
+      }
     }
     *ptr=0; /* zero terminate */
 
-    if(data->bits.verbose) {
+    if(data->bits.verbose && buf[0]) {
       fputs("< ", data->err);
       fwrite(buf, 1, nread, data->err);
       fputs("\n", data->err);
     }
-  } while(read_rc &&
+  } while(!error &&
 	  (nread<4 || !lastline(buf)) );
+  
+  if(error)
+    return -error;
+
   return nread;
 }
 
@@ -315,10 +368,12 @@ static char *URLfix(char *string)
 CURLcode ftp_connect(struct connectdata *conn)
 {
   /* this is FTP and no proxy */
-  size_t nread;
+  int nread;
   struct UrlData *data=conn->data;
   char *buf = data->buffer; /* this is our buffer */
   struct FTP *ftp;
+
+  myalarm(0); /* switch off the alarm stuff */
 
   ftp = (struct FTP *)malloc(sizeof(struct FTP));
   if(!ftp)
@@ -333,7 +388,9 @@ CURLcode ftp_connect(struct connectdata *conn)
   ftp->passwd = data->passwd;
 
   /* The first thing we do is wait for the "220*" line: */
-  nread = GetLastResponse(data->firstsocket, buf, data);
+  nread = GetLastResponse(data->firstsocket, buf, conn);
+  if(nread < 0)
+    return CURLE_OPERATION_TIMEOUTED;
   if(strncmp(buf, "220", 3)) {
     failf(data, "This doesn't seem like a nice ftp-server response");
     return CURLE_FTP_WEIRD_SERVER_REPLY;
@@ -343,7 +400,9 @@ CURLcode ftp_connect(struct connectdata *conn)
   sendf(data->firstsocket, data, "USER %s\r\n", ftp->user);
 
   /* wait for feedback */
-  nread = GetLastResponse(data->firstsocket, buf, data);
+  nread = GetLastResponse(data->firstsocket, buf, conn);
+  if(nread < 0)
+    return CURLE_OPERATION_TIMEOUTED;
 
   if(!strncmp(buf, "530", 3)) {
     /* 530 User ... access denied
@@ -355,7 +414,9 @@ CURLcode ftp_connect(struct connectdata *conn)
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
     sendf(data->firstsocket, data, "PASS %s\r\n", ftp->passwd);
-    nread = GetLastResponse(data->firstsocket, buf, data);
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
 
     if(!strncmp(buf, "530", 3)) {
       /* 530 Login incorrect.
@@ -421,7 +482,9 @@ CURLcode ftp_done(struct connectdata *conn)
     
   /* now let's see what the server says about the transfer we
      just performed: */
-  nread = GetLastResponse(data->firstsocket, buf, data);
+  nread = GetLastResponse(data->firstsocket, buf, conn);
+  if(nread < 0)
+    return CURLE_OPERATION_TIMEOUTED;
 
   /* 226 Transfer complete, 250 Requested file action okay, completed. */
   if(!strncmp(buf, "226", 3) && !strncmp(buf, "250", 3)) {
@@ -438,7 +501,9 @@ CURLcode ftp_done(struct connectdata *conn)
       if (qitem->data) {
         sendf(data->firstsocket, data, "%s\r\n", qitem->data);
 
-        nread = GetLastResponse(data->firstsocket, buf, data);
+        nread = GetLastResponse(data->firstsocket, buf, conn);
+        if(nread < 0)
+          return CURLE_OPERATION_TIMEOUTED;
 
         if (buf[0] != '2') {
           failf(data, "QUOT string not accepted: %s",
@@ -493,7 +558,9 @@ CURLcode _ftp(struct connectdata *conn)
       if (qitem->data) {
         sendf(data->firstsocket, data, "%s\r\n", qitem->data);
 
-        nread = GetLastResponse(data->firstsocket, buf, data);
+        nread = GetLastResponse(data->firstsocket, buf, conn);
+        if(nread < 0)
+          return CURLE_OPERATION_TIMEOUTED;
 
         if (buf[0] != '2') {
           failf(data, "QUOT string not accepted: %s",
@@ -514,7 +581,9 @@ CURLcode _ftp(struct connectdata *conn)
     int filesize;
     sendf(data->firstsocket, data, "SIZE %s\r\n", ftp->file);
 
-    nread = GetLastResponse(data->firstsocket, buf, data);
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
 
     if(strncmp(buf, "213", 3)) {
       failf(data, "Couldn't get file size: %s", buf+4);
@@ -623,7 +692,9 @@ CURLcode _ftp(struct connectdata *conn)
             porttouse & 255);
     }
 
-    nread = GetLastResponse(data->firstsocket, buf, data);
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
 
     if(strncmp(buf, "200", 3)) {
       failf(data, "Server does not grok PORT, try without it!");
@@ -634,7 +705,9 @@ CURLcode _ftp(struct connectdata *conn)
 
     sendf(data->firstsocket, data, "PASV\r\n");
 
-    nread = GetLastResponse(data->firstsocket, buf, data);
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
 
     if(strncmp(buf, "227", 3)) {
       failf(data, "Odd return code after PASV");
@@ -764,7 +837,9 @@ CURLcode _ftp(struct connectdata *conn)
 
   if(ftp->dir && ftp->dir[0]) {
     sendf(data->firstsocket, data, "CWD %s\r\n", ftp->dir);
-    nread = GetLastResponse(data->firstsocket, buf, data);
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
 
     if(strncmp(buf, "250", 3)) {
       failf(data, "Couldn't change to directory %s", ftp->dir);
@@ -778,7 +853,9 @@ CURLcode _ftp(struct connectdata *conn)
     sendf(data->firstsocket, data, "TYPE %s\r\n",
           (data->bits.ftp_ascii)?"A":"I");
 
-    nread = GetLastResponse(data->firstsocket, buf, data);
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
 
     if(strncmp(buf, "200", 3)) {
       failf(data, "Couldn't set %s mode",
@@ -807,7 +884,9 @@ CURLcode _ftp(struct connectdata *conn)
 
         sendf(data->firstsocket, data, "SIZE %s\r\n", ftp->file);
 
-        nread = GetLastResponse(data->firstsocket, buf, data);
+        nread = GetLastResponse(data->firstsocket, buf, conn);
+        if(nread < 0)
+          return CURLE_OPERATION_TIMEOUTED;
 
         if(strncmp(buf, "213", 3)) {
           failf(data, "Couldn't get file size: %s", buf+4);
@@ -828,7 +907,9 @@ CURLcode _ftp(struct connectdata *conn)
 
         sendf(data->firstsocket, data, "REST %d\r\n", data->resume_from);
 
-        nread = GetLastResponse(data->firstsocket, buf, data);
+        nread = GetLastResponse(data->firstsocket, buf, conn);
+        if(nread < 0)
+          return CURLE_OPERATION_TIMEOUTED;
 
         if(strncmp(buf, "350", 3)) {
           failf(data, "Couldn't use REST: %s", buf+4);
@@ -880,7 +961,9 @@ CURLcode _ftp(struct connectdata *conn)
     else
       sendf(data->firstsocket, data, "STOR %s\r\n", ftp->file);
 
-    nread = GetLastResponse(data->firstsocket, buf, data);
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
 
     if(atoi(buf)>=400) {
       failf(data, "Failed FTP upload:%s", buf+3);
@@ -964,7 +1047,9 @@ CURLcode _ftp(struct connectdata *conn)
       /* Set type to ASCII */
       sendf(data->firstsocket, data, "TYPE A\r\n");
 	
-      nread = GetLastResponse(data->firstsocket, buf, data);
+      nread = GetLastResponse(data->firstsocket, buf, conn);
+      if(nread < 0)
+        return CURLE_OPERATION_TIMEOUTED;
 	
       if(strncmp(buf, "200", 3)) {
         failf(data, "Couldn't set ascii mode");
@@ -984,7 +1069,9 @@ CURLcode _ftp(struct connectdata *conn)
       sendf(data->firstsocket, data, "TYPE %s\r\n",
             (data->bits.ftp_list_only)?"A":"I");
 
-      nread = GetLastResponse(data->firstsocket, buf, data);
+      nread = GetLastResponse(data->firstsocket, buf, conn);
+      if(nread < 0)
+        return CURLE_OPERATION_TIMEOUTED;
 
       if(strncmp(buf, "200", 3)) {
         failf(data, "Couldn't set %s mode",
@@ -1003,7 +1090,9 @@ CURLcode _ftp(struct connectdata *conn)
 
         sendf(data->firstsocket, data, "SIZE %s\r\n", ftp->file);
 
-        nread = GetLastResponse(data->firstsocket, buf, data);
+        nread = GetLastResponse(data->firstsocket, buf, conn);
+        if(nread < 0)
+          return CURLE_OPERATION_TIMEOUTED;
 
         if(strncmp(buf, "213", 3)) {
           infof(data, "server doesn't support SIZE: %s", buf+4);
@@ -1045,7 +1134,9 @@ CURLcode _ftp(struct connectdata *conn)
 
         sendf(data->firstsocket, data, "REST %d\r\n", data->resume_from);
 
-        nread = GetLastResponse(data->firstsocket, buf, data);
+        nread = GetLastResponse(data->firstsocket, buf, conn);
+        if(nread < 0)
+          return CURLE_OPERATION_TIMEOUTED;
 
         if(strncmp(buf, "350", 3)) {
           failf(data, "Couldn't use REST: %s", buf+4);
@@ -1056,7 +1147,9 @@ CURLcode _ftp(struct connectdata *conn)
       sendf(data->firstsocket, data, "RETR %s\r\n", ftp->file);
     }
 
-    nread = GetLastResponse(data->firstsocket, buf, data);
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
 
     if(!strncmp(buf, "150", 3) || !strncmp(buf, "125", 3)) {
 
@@ -1079,12 +1172,16 @@ CURLcode _ftp(struct connectdata *conn)
 
       int size=-1; /* default unknown size */
 
-      if(!dirlist && (-1 == downloadsize)) {
+      if(!dirlist &&
+         !data->bits.ftp_ascii &&
+         (-1 == downloadsize)) {
         /*
          * It seems directory listings either don't show the size or very
-         * often uses size 0 anyway.
-         * Example D above makes this parsing a little tricky
-         */
+         * often uses size 0 anyway. ASCII transfers may very well turn out
+         * that the transfered amount of data is not the same as this line
+         * tells, why using this number in those cases only confuses us.
+         *
+         * Example D above makes this parsing a little tricky */
         char *bytes;
         bytes=strstr(buf, " bytes");
         if(bytes--) {
