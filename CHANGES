@@ -6,7 +6,24 @@
 
                                   Changelog
 
+Daniel (23 March 2004)
+- The regular progress meter is now fixed to never wrap due to long lines. All
+  fields are now static sized. If the time in the time fields get a time value
+  that would represent a time that is 100 hours or more (if not, it remains
+  using a HH:MM:SS display), it switches first to a "NNNd NNh" display (for
+  days and hours) and if that isn't enough it switches to a "NNNd" display if
+  it is more than 999 days.
+
+  Several of the calculations were also moved to fixed-point math instead of
+  using doubles.
+
 Daniel (22 March 2004)
+- Glen Nakamura noticed CURLINFO_CONTENT_LENGTH_DOWNLOAD didn't work as it
+  used to do if CURLOPT_NOBODY is set TRUE.
+
+- Kevin Roth patched the cygwin package makefile and README to adjust to
+  new cygwin packaging guidelines.
+
 - Enabled "NT responses" in the NTLM authentication. Doing this simply means
   that we provide an extra chunk of data in each "type-3 message". The only
   reason for doing this is that it seems that using only the "Lanmanager hash"
