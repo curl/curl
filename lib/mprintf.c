@@ -931,7 +931,7 @@ static int dprintf_formatf(
 
 	/* NOTE NOTE NOTE!! Not all sprintf() implementations returns number
 	   of output characters */
-#if SIZEOF_LONG_DOUBLE
+#if 0 /*SIZEOF_LONG_DOUBLE*/
 	if (p->flags & FLAGS_LONG)
 	  /* This is for support of the 'long double' type */
 	  (sprintf)(work, formatbuf, p->data.ldnum);
