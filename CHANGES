@@ -6,7 +6,14 @@
 
                                History of Changes
 
-Version XX
+Version 6.5.1
+
+Daniel (20 March 2000):
+- An anynomous post on sourceforge correctly pointed out a possible buffer
+  overflow in the curl_unescape() function for URL convertions. The main
+  problem with this bug is that the ftp download uses that function and this
+  single- byte overflow could lead to very odd bugs (as one reported by Janne
+  Johansson).
 
 Daniel (19 March 2000):
 - Marco G. Salvagno <mgs@whiz.cjb.net> supplied me with a series of patches
