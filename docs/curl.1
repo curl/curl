@@ -267,7 +267,7 @@ If this option is used several times, the last one will be used.
 be set with the \fI-H/--header\fP flag of course.  When used with
 \fI-L/--location\fP you can append ";auto" to the referer URL to make curl
 automatically set the previous URL when it follows a Location: header. The
-";auto" string can be used alone, even if you don't set an initial referer.
+\&";auto" string can be used alone, even if you don't set an initial referer.
 
 If this option is used several times, the last one will be used.
 .IP "--engine <name>"
@@ -343,7 +343,7 @@ will instead attempt to create missing directories. (Added in 7.10.7)
 
 If this option is used twice, the second will again disable silent failure.
 .IP "--ftp-pasv"
-(FTP) Use PASV when transfering. PASV is the internal default behavior, but
+(FTP) Use PASV when transferring. PASV is the internal default behavior, but
 using this option can be used to override a previous --ftp-port option. (Added
 in 7.11.0)
 
@@ -702,7 +702,7 @@ instead of PORT by using \fI--disable-eprt\fP. EPRT is really PORT++.
 .IP "-q"
 If used as the first parameter on the command line, the \fI$HOME/.curlrc\fP
 file will not be read and used as a config file.
-.IP "-Q/--quote <comand>"
+.IP "-Q/--quote <command>"
 (FTP) Send an arbitrary command to the remote FTP server. Quote commands are
 sent BEFORE the transfer is taking place (just after the initial PWD command
 to be exact). To make commands take place after a successful transfer, prefix
