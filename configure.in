@@ -540,25 +540,37 @@ then
   AC_MSG_WARN(SSL/https support disabled)  
 else
 
-  dnl Check for & handle argument to --with-ssl.
-  AC_MSG_CHECKING(where to look for SSL)
-  if test X"$OPT_SSL" = Xoff
-  then
-  	AC_MSG_RESULT([defaults (or given in environment)])
-  else
-	test X"$OPT_SSL" = Xyes && OPT_SSL=/usr/local/ssl
-        dnl	LIBS="$LIBS -L$OPT_SSL/lib"
-        LDFLAGS="$LDFLAGS -L$OPT_SSL/lib"
-	CPPFLAGS="$CPPFLAGS -I$OPT_SSL/include/openssl -I$OPT_SSL/include"
-	AC_MSG_RESULT([$OPT_SSL])
-  fi
+  dnl Check for and handle argument to --with-ssl.
+  EXTRA_SSL=
 
-  dnl check for crypto libs (part of SSLeay)
-  AC_CHECK_LIB(crypto, CRYPTO_lock)
+  case "$OPT_SSL" in
+  yes)
+    EXTRA_SSL=/usr/local/ssl ;;
+  *)
+    EXTRA_SSL=$OPT_SSL ;;
+  esac
 
-  if test $ac_cv_lib_crypto_CRYPTO_lock = yes; then
+  AC_CHECK_LIB(crypto, CRYPTO_lock,[
+     HAVECRYPTO="yes"
+     ],[
+     OLDLDFLAGS="$LDFLAGS"
+     OLDCPPFLAGS="$CPPFLAGS"
+     LDFLAGS="$LDFLAGS -L$EXTRA_SSL/lib"
+     CPPFLAGS="$CPPFLAGS -I$EXTRA_SSL/include/openssl -I$EXTRA_SSL/include"
+     AC_CHECK_LIB(crypto, CRYPTO_add_lock,[
+       HAVECRYPTO="yes" ], [
+       LDFLAGS="$OLDLDFLAGS"
+       CPPFLAGS="$OLDCPPFLAGS"
+       ])
+    ])
+
+
+  if test "$HAVECRYPTO" = "yes"; then
     dnl This is only reasonable to do if crypto actually is there: check for
     dnl SSL libs NOTE: it is important to do this AFTER the crypto lib
+
+    LIBS="$LIBS -lcrypto"
+
     AC_CHECK_LIB(ssl, SSL_connect)
 
     if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
