@@ -266,7 +266,7 @@ static void help(void)
        " -v/--verbose       Makes the operation more talkative\n"
        " -V/--version       Outputs version number then quits\n"
        " -w/--write-out [format] What to output after completion\n"
-       " -x/--proxy <host>  Use proxy. (Default port is 1080)\n"
+       " -x/--proxy <host[:port]>  Use proxy. (Default port is 1080)\n"
        " -X/--request <command> Specific request command to use\n"
        " -y/--speed-time    Time needed to trig speed-limit abort. Defaults to 30\n"
        " -Y/--speed-limit   Stop transfer if below speed-limit for 'speed-time' secs\n"
