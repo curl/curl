@@ -1548,8 +1548,8 @@ sub displaylogs {
 
     print "== Contents of files in the log/ dir after test $testnum\n";
     foreach $log (sort @logs) {
-        # the log file contains more than zero bytes
-        if(-s "$LOGDIR/$log") {
+        # the log file is not "." or ".." and contains more than zero bytes
+        if(($log !~ /\.(\.|)$/) && -s "$LOGDIR/$log") {
             print "== Start of file $log\n";
             displaylogcontent("$LOGDIR/$log");
             print "== End of file $log\n";
