@@ -1799,7 +1799,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           {"libz", CURL_VERSION_LIBZ},
           {"NTLM", CURL_VERSION_NTLM},
           {"GSS-Negotiate", CURL_VERSION_GSSNEGOTIATE},
-          {"Debug", CURL_VERSION_DEBUG}
+          {"Debug", CURL_VERSION_DEBUG},
+          {"AsynchDNS", CURL_VERSION_ASYNCHDNS}
         };
         printf("Features: ");
         for(i=0; i<sizeof(feats)/sizeof(feats[0]); i++) {
