@@ -12,12 +12,21 @@ do {
     }
 } while (shift @ARGV);
 
+my $maxmem;
+
+sub newtotal {
+    my ($newtot)=@_;
+    # count a max here
+
+    if($newtot > $maxmem) {
+        $maxmem= $newtot;
+    }
+}
+
 while(<STDIN>) {
     chomp $_;
     $line = $_;
-    if($verbose) {
-        print "IN: $line\n";
-    }
+
     if($line =~ /^MEM ([^:]*):(\d*) (.*)/) {
         # generic match for the filename+linenumber
         $source = $1;
@@ -34,16 +43,38 @@ while(<STDIN>) {
                 print "FREE ERROR: Previously freed at: ".$getmem{$addr}."\n";
             }
             else {
+                if(0 && $verbose) {
+                    print "malloc at ".$getmem{$addr}." is freed again at $source:$linenum\n";
+                }
+
                 $totalmem -= $sizeataddr{$addr};
+
+                newtotal($totalmem);
+                $frees++;
+
                 $sizeataddr{$addr}=-1; # set -1 to mark as freed
                 $getmem{$addr}="$source:$linenum";
+
             }
         }
         elsif($function =~ /malloc\((\d*)\) = 0x([0-9a-f]*)/) {
             $size = $1;
             $addr = $2;
+
+            if($sizeataddr{$addr}>0) {
+                # this means weeeeeirdo
+                print "Fucked up debug compile, rebuild curl now\n";
+            }
+
             $sizeataddr{$addr}=$size;
             $totalmem += $size;
+
+            if(0 && $verbose) {
+                print "malloc($size) at $source:$linenum\n";
+            }
+
+            newtotal($totalmem);
+            $mallocs++;
 
             $getmem{$addr}="$source:$linenum";
         }
@@ -58,6 +89,9 @@ while(<STDIN>) {
             $totalmem += $newsize;
             $sizeataddr{$newaddr}=$newsize;
 
+            newtotal($totalmem);
+            $reallocs++;
+            
             $getmem{$oldaddr}="";
             $getmem{$newaddr}="$source:$linenum";
         }
@@ -71,6 +105,9 @@ while(<STDIN>) {
             $sizeataddr{$addr}=$size;
 
             $totalmem += $size;
+
+            newtotal($totalmem);
+            $strdups++;
         }
         else {
             print "Not recognized input line: $function\n";
@@ -134,9 +171,6 @@ while(<STDIN>) {
     else {
         print "Not recognized prefix line: $line\n";
     }
-    if($verbose) {
-        print "TOTAL: $totalmem\n";
-    }
 }
 
 if($totalmem) {
@@ -167,4 +201,13 @@ if($fopens) {
             print "fopen() called at ".$fopenfile{$_}."\n";
         }
     }
+}
+
+if($verbose) {
+    print "Mallocs: $mallocs\n",
+    "Reallocs: $reallocs\n",
+    "Strdups:  $strdups\n",
+    "Frees: $frees\n";
+
+    print "Maximum allocated: $maxmem\n";
 }
