@@ -51,3 +51,6 @@
 
 /* Define this to your Entropy Gathering Daemon socket pathname */
 #undef EGD_SOCKET
+
+/* Define if you have a working OpenSSL installation */
+#undef OPENSSL_ENABLED

@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "8 May 2001" "libcurl 7.7.3" "libcurl Manual"
+.TH curl_easy_setopt 3 "21 May 2001" "libcurl 7.7.4" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -276,7 +276,8 @@ of HTTP post structs as parameter.  The linked list should be a fully valid
 list of 'struct HttpPost' structs properly filled in. The best and most
 elegant way to do this, is to use
 .I curl_formparse(3)
-as documented.
+as documented. The data in this list must remained intact until you close this
+curl handle again with curl_easy_cleanup().
 .TP
 .B CURLOPT_SSLCERT
 Pass a pointer to a zero terminated string as parameter. The string should be

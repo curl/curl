@@ -6,6 +6,15 @@
 
                                History of Changes
 
+Daniel (22 May 2001)
+- Installed and made use of the following tool versions:
+    autoconf 2.50
+    libtool 1.4
+    automake 1.4-p1
+
+  I wouldn't recommend any developer to try to generate things with older
+  versions than these.
+
 Daniel (21 May 2001)
 - I made ftps:// work. Added test case 400 to the release archive, as the
   first ftps:// test case. Requires stunnel.

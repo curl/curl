@@ -1,7 +1,4 @@
 /* src/config.h.  Generated automatically by configure.  */
-/* Define if you have the strcasecmp function.  */
-#undef HAVE_STRCASECMP
-
 /* Define cpu-machine-OS */
 #undef OS
 

@@ -1,26 +1,29 @@
 dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(lib/urldata.h)
+AC_INIT
+AC_CONFIG_SRCDIR([lib/urldata.h])
 AM_CONFIG_HEADER(config.h src/config.h)
 
 VERSION=`sed -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curl.h`
 AM_INIT_AUTOMAKE(curl,$VERSION)
-AM_PROG_LIBTOOL
 
 dnl
 dnl Detect the canonical host and target build environment
 dnl
-AC_CANONICAL_HOST
-AC_CANONICAL_TARGET
 
-dnl Checks for programs.
-AC_PROG_CC
+dnl Get system canonical name
+AC_DEFINE_UNQUOTED(OS, "${host}")
 
 dnl Check for AIX weirdos
 AC_AIX
 
+dnl Checks for programs.
+AC_PROG_CC
+
 dnl check for how to do large files
 AC_SYS_LARGEFILE
+
+AM_PROG_LIBTOOL
 
 dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
@@ -751,11 +754,6 @@ if test "$socklen_t" != "yes"; then
   AC_CHECK_TYPE(socklen_t, int)
 fi
 
-
-dnl Get system canonical name
-AC_CANONICAL_HOST
-AC_DEFINE_UNQUOTED(OS, "${host}")
-
 dnl Checks for library functions.
 dnl AC_PROG_GCC_TRADITIONAL
 AC_TYPE_SIGNAL
@@ -811,7 +809,7 @@ dnl AC_PATH_PROG( RANLIB, ranlib, /usr/bin/ranlib,
 dnl   $PATH:/usr/bin/:/usr/local/bin )
 dnl AC_SUBST(RANLIB)
 
-AC_OUTPUT( Makefile \
+AC_CONFIG_FILES([Makefile \
 	   docs/Makefile \
            docs/examples/Makefile \
 	   include/Makefile \
@@ -831,5 +829,6 @@ AC_OUTPUT( Makefile \
            php/Makefile \
            php/examples/Makefile \
            curl-config
-)
+])
+AC_OUTPUT
 

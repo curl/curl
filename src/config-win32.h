@@ -1,7 +1,4 @@
-/* src/config.h.  Generated automatically by configure.  */
-/* Define if you have the strcasecmp function.  */
-/*#define HAVE_STRCASECMP 1*/
-
+/* src/config-win32.h.  manually created to look like a config.h.  */
 /* Define if you have the stricmp function.  */
 #define HAVE_STRICMP 1
 

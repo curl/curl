@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_formparse 3 "3 May 2001" "libcurl 7.7.2" "libcurl Manual"
+.TH curl_formparse 3 "21 May 2001" "libcurl 7.7.4" "libcurl Manual"
 .SH NAME
 curl_formparse - add a section to a multipart/formdata HTTP POST
 .SH SYNOPSIS
@@ -15,16 +15,21 @@ curl_formparse - add a section to a multipart/formdata HTTP POST
 curl_formparse() is used to append sections when building a multipart/formdata
 HTTP POST (sometimes refered to as rfc1867-style posts). Append one section at
 a time until you've added all the sections you want included and then you pass
-the \fI firstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST\fP.
+the \fIfirstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST\fP.
 \fIlastitem\fP is set after each call and on repeated invokes it should be
 left as set to allow repeated invokes to find the end of the list in a faster
 way.  \fIstring\fP must be a zero terminated string abiding to the syntax
 described in a section below
 
-The pointers \fIfirstitem\fP and \fIlastitem\fP point to, should both be
-pointers to NULL in the first call to this function. All list-data will be
-allocated by the function itself. You must call \fIcurl_formfree\fP after the
-form post has been done to free the resources again.
+The pointers \fI*firstitem\fP and \fI*lastitem\fP should both be pointing to
+NULL in the first call to this function. All list-data will be allocated by
+the function itself. You must call \fIcurl_formfree\fP after the form post has
+been done to free the resources again.
+
+This function will copy all input data and keep its own version of it
+allocated until you call \fIcurl_formfree\fP. When you've passed the pointer
+to \fIcurl_easy_setopt\fP, you must not free the list until after you've
+called \fIcurl_easy_cleanup\fP for the curl handle.
 
 See example below.
 .SH "FORM PARSE STRINGS"
@@ -73,7 +78,8 @@ Returns non-zero if an error occurs.
  curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
 
 .SH "SEE ALSO"
-.BR curl_easy_setopt "(3) "
+.BR curl_easy_setopt "(3), "
+.BR curl_formfree "(3)
 .SH BUGS
 Surely there are some, you tell me!
 
