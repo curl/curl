@@ -24,8 +24,9 @@ To do in a future release (random order):
  * Consider an interface to libcurl that allows applications to easier get to
    know what cookies that are sent back in the response headers.
 
- * HTTP PUT for files passed on stdin. Requires libcurl to send the file
-   with chunked content encoding. http://curl.haxx.se/dev/HTTP-PUT-stdin.txt
+ * HTTP PUT for files passed on stdin *OR* when the --crlf option is
+   used. Requires libcurl to send the file with chunked content
+   encoding. http://curl.haxx.se/dev/HTTP-PUT-stdin.txt
 
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
