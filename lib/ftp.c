@@ -105,6 +105,12 @@
 #include "memdebug.h"
 #endif
 
+#ifdef NI_WITHSCOPEID
+#define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID
+#else
+#define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV
+#endif
+
 /* Local API functions */
 static CURLcode ftp_sendquote(struct connectdata *conn,
                               struct curl_slist *quote);
@@ -1074,14 +1080,9 @@ ftp_pasv_verbose(struct connectdata *conn,
   char hbuf[NI_MAXHOST]; /* ~1KB */
   char nbuf[NI_MAXHOST]; /* ~1KB */
   char sbuf[NI_MAXSERV]; /* around 32 */
-#ifdef NI_WITHSCOPEID
-  const int niflags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
-#else
-  const int niflags = NI_NUMERICHOST | NI_NUMERICSERV;
-#endif
   (void)port; /* prevent compiler warning */
   if (getnameinfo(addr->ai_addr, addr->ai_addrlen,
-                  nbuf, sizeof(nbuf), sbuf, sizeof(sbuf), niflags)) {
+                  nbuf, sizeof(nbuf), sbuf, sizeof(sbuf), NIFLAGS)) {
     snprintf(nbuf, sizeof(nbuf), "?");
     snprintf(sbuf, sizeof(sbuf), "?");
   }
@@ -1127,11 +1128,6 @@ CURLcode ftp_use_port(struct connectdata *conn)
   char hbuf[NI_MAXHOST];
 
   struct sockaddr *sa=(struct sockaddr *)&ss;
-#ifdef NI_WITHSCOPEID
-#define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID
-#else
-#define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV
-#endif
   unsigned char *ap;
   unsigned char *pp;
   char portmsgbuf[4096], tmp[4096];
