@@ -1,0 +1,1 @@
+HTTP GET returns content-length 0 on persitent connection

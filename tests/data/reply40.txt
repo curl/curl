@@ -1,0 +1,8 @@
+HTTP/1.1 100 Continue weirdo message
+Server: heeee heeee
+
+HTTP/1.1 200 This is a weirdo text message
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 0
+
+*** This should not be received ***
