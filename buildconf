@@ -154,8 +154,10 @@ echo "buildconf: running autoconf"
 ${AUTOCONF:-autoconf}     || die "The command '${AUTOCONF:-autoconf}' failed"
 
 if test -d ares; then
-  echo "buildconf: running autoconf in the ares directory"
   cd ares
+  echo "buildconf: running aclocal in the ares directory"
+  ${ACLOCAL:-aclocal}     || die "The command '${ACLOCAL:-aclocal}' failed"
+  echo "buildconf: running autoconf in the ares directory"
   ${AUTOCONF:-autoconf}     || die "The command '${AUTOCONF:-autoconf}' failed"
   cd ..
 fi
