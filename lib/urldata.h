@@ -175,6 +175,9 @@ struct FTP {
   char *file;    /* decoded file */
 
   char *entrypath; /* the PWD reply when we logged on */
+
+  char *cache;       /* data cache between getresponse()-calls */
+  size_t cache_size; /* size of cache in bytes */                    
 };
 
 /****************************************************************************

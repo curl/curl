@@ -197,6 +197,8 @@ int Curl_GetFTPResponse(char *buf,
 #define SELECT_TIMEOUT 2
   int error = SELECT_OK;
 
+  struct FTP *ftp = conn->proto.ftp;
+
   if (ftpcode)
     *ftpcode = 0; /* 0 for errors */
 
@@ -229,23 +231,41 @@ int Curl_GetFTPResponse(char *buf,
     interval.tv_sec = timeout;
     interval.tv_usec = 0;
 
-    switch (select (sockfd+1, &readfd, NULL, NULL, &interval)) {
-    case -1: /* select() error, stop reading */
-      error = SELECT_ERROR;
-      failf(data, "Transfer aborted due to select() error");
-      break;
-    case 0: /* timeout */
-      error = SELECT_TIMEOUT;
-      failf(data, "Transfer aborted due to timeout");
-      break;
-    default:
+    if(!ftp->cache)
+      switch (select (sockfd+1, &readfd, NULL, NULL, &interval)) {
+      case -1: /* select() error, stop reading */
+        error = SELECT_ERROR;
+        failf(data, "Transfer aborted due to select() error");
+        break;
+      case 0: /* timeout */
+        error = SELECT_TIMEOUT;
+        failf(data, "Transfer aborted due to timeout");
+        break;
+      default:
+        error = SELECT_OK;
+        break;
+      }
+    if(SELECT_OK == error) {
       /*
        * This code previously didn't use the kerberos sec_read() code
        * to read, but when we use Curl_read() it may do so. Do confirm
        * that this is still ok and then remove this comment!
        */
-      if(CURLE_OK != Curl_read(conn, sockfd, ptr, BUFSIZE-nread, &gotbytes))
+      if(ftp->cache) {
+        /* we had data in the "cache", copy that instead of doing an actual
+           read */
+        memcpy(ptr, ftp->cache, ftp->cache_size);
+        gotbytes = ftp->cache_size;
+        free(ftp->cache);    /* free the cache */
+        ftp->cache = NULL;   /* clear the pointer */
+        ftp->cache_size = 0; /* zero the size just in case */
+      }
+      else if(CURLE_OK != Curl_read(conn, sockfd, ptr,
+                                    BUFSIZE-nread, &gotbytes))
         keepon = FALSE;
+
+      if(!keepon)
+        ;
       else if(gotbytes <= 0) {
         keepon = FALSE;
         error = SELECT_ERROR;
@@ -279,20 +299,35 @@ int Curl_GetFTPResponse(char *buf,
                * line to the start of the buffer and zero terminate,
                * for old times sake (and krb4)! */
               char *meow;
-              int i;
-              for(meow=line_start, i=0; meow<ptr; meow++, i++)
-                buf[i] = *meow;
+              int n;
+              for(meow=line_start, n=0; meow<ptr; meow++, n++)
+                buf[n] = *meow;
               *meow=0; /* zero terminate */
               keepon=FALSE;
+              line_start = ptr+1; /* advance pointer */
+              i++; /* skip this before getting out */
               break;
             }
             perline=0; /* line starts over here */
             line_start = ptr+1;
           }
         }
-      }
-      break;
-    } /* switch */
+        if(!keepon && (i != gotbytes)) {
+          /* We found the end of the response lines, but we didn't parse the
+             full chunk of data we have read from the server. We therefore
+             need to store the rest of the data to be checked on the next
+             invoke as it may actually contain another end of response
+             already!  Cleverly figured out by Eric Lavigne in December
+             2001. */
+          ftp->cache_size = gotbytes - i;
+          ftp->cache = (char *)malloc(ftp->cache_size);
+          if(ftp->cache)
+            memcpy(ftp->cache, line_start, ftp->cache_size);
+          else
+            return CURLE_OUT_OF_MEMORY; /**BANG**/
+        }
+      } /* there was data */
+    } /* if(no error) */
   } /* while there's buffer left and loop is requested */
 
   if(!error)
@@ -2028,6 +2063,8 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
   if(ftp) {
     if(ftp->entrypath)
       free(ftp->entrypath);
+    if(ftp->cache)
+      free(ftp->cache);
   }
   return CURLE_OK;
 }
