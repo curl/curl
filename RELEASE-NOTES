@@ -5,7 +5,8 @@ beginning.
 
 This release includes the following changes:
 
- o CURLOPT_FTPSSL and ftps:// now do ssl over FTP "The Right Way"
+ o CURLOPT_FTPSSL and ftps:// now do ssl over FTP "The Right Way" (the curl
+   tool now features the --ftp-ssl option)
  o The Windows DLLs are built with an added "resource file"
  o New LIBCURL_VERSION_* defines for easier checking version number
  o Included Mac OS X 'framework' makefile in the release archive
@@ -14,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o POST over proxy to https server failed
  o improved how libcurl deals with persistant connections over FTP when a
    transfer fails
  o accessing a proxy that requires Basic auth without password caused a hang
@@ -46,7 +48,8 @@ advice from friends like these:
  Kevin Roth, Troels Walsted Hansen, Matt Veenstra, Marty Kuhrt, Benjamin
  Gerard, Gisle Vanem, Ralph Mitchell, Sébastien Willemijns, Kang-Jin Lee,
  Peter Sylvester, Siddhartha Prakash Jain, Mathias Axelsson, Maciej
- W. Rozycki, Nicolas Croiset, Josh Kapell, Gaz Iqbal
+ W. Rozycki, Nicolas Croiset, Josh Kapell, Gaz Iqbal, Dave May, Markus Moeller,
+ James Clancy, 
  
  
         Thanks! (and sorry if I forgot to mention someone)
