@@ -604,6 +604,7 @@ AC_CHECK_HEADERS( \
         pwd.h \
         utime.h \
         sys/utime.h \
+        sys/poll.h \
         setjmp.h
 )
 
