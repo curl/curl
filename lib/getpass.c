@@ -76,7 +76,9 @@ char *getpass(const char *prompt)
   FILE *outfp;
   static char buf[INPUT_BUFFER];
   RETSIGTYPE (*sigint)();
+#ifndef __EMX__
   RETSIGTYPE (*sigtstp)();
+#endif
   size_t bytes_read;
   int infd;
   int outfd;
@@ -92,7 +94,11 @@ char *getpass(const char *prompt)
 #endif
 
   sigint = signal(SIGINT, SIG_IGN);
+  /* 20000318 mgs
+   * this is needed by the emx system, SIGTSTP is not a supported signal */
+#ifndef __EMX__
   sigtstp = signal(SIGTSTP, SIG_IGN);
+#endif
 
   if( (infp=fopen("/dev/tty", "r")) == NULL )
   {

@@ -118,10 +118,10 @@ UrgError file(struct UrlData *data, char *path, long *bytecountp)
   int fd;
   char *actual_path = curl_unescape(path);
 
-#ifdef WIN32
+#if defined(WIN32) || defined(__EMX__)
   int i;
 
-  /* change path separators from '/' to '\\' for Windows */
+  /* change path separators from '/' to '\\' for Windows and OS/2 */
   for (i=0; actual_path[i] != '\0'; ++i)
     if (actual_path[i] == '/')
       actual_path[i] = '\\';

@@ -48,6 +48,13 @@
 #include <time.h>
 #endif
 
+/* 20000318 mgs
+ * later we use _scrsize to determine the screen width, this emx library
+ * function needs stdlib.h to be included */
+#if defined(__EMX__)
+#include <stdlib.h>
+#endif
+
 #include <curl/curl.h>
 #include "urldata.h"
 
@@ -365,6 +372,11 @@ static int width = 0;
 
 void ProgressInit(struct UrlData *data, int max/*, int options, int moremax*/)
 {
+#ifdef __EMX__
+  /* 20000318 mgs */
+  int scr_size [2];
+#endif
+
   if(data->conf&(CONF_NOPROGRESS|CONF_MUTE))
     return;
 
@@ -372,10 +384,25 @@ void ProgressInit(struct UrlData *data, int max/*, int options, int moremax*/)
 
 /* TODO: get terminal width through ansi escapes or something similar.
          try to update width when xterm is resized... - 19990617 larsa */
+#ifndef __EMX__
+  /* 20000318 mgs
+   * OS/2 users most likely won't have this env var set, and besides that
+   * we're using our own way to determine screen width */
   if (curl_GetEnv("COLUMNS") != NULL)
     width = atoi(curl_GetEnv("COLUMNS"));
   else
     width = 79;
+#else
+  /* 20000318 mgs
+   * We use this emx library call to get the screen width, and subtract
+   * one from what we got in order to avoid a problem with the cursor
+   * advancing to the next line if we print a string that is as long as
+   * the screen is wide. */
+ 
+  _scrsize(scr_size);
+  width = scr_size[0] - 1;
+#endif
+
 
   progressmax = max;
   if(-1 == max)
