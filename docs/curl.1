@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "2 Dec 2003" "Curl 7.11.0" "Curl Manual"
+.TH curl 1 "30 Jan 2004" "Curl 7.11.1" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -657,6 +657,14 @@ If this option is used twice, the second will again disable mute.
 When used with -s it makes curl show error message if it fails.
 
 If this option is used twice, the second will again disable show error.
+.IP "--socks <host[:port]>"
+Use the specified SOCKS5 proxy. If the port number is not specified, it is
+assumed at port 1080. (Option added in 7.11.1)
+
+This option overrides any previous use of \fI-x/--proxy\fP, as they are
+mutually exclusive.
+
+If this option is used several times, the last one will be used.
 .IP "--stderr <file>"
 Redirect all writes to stderr to the specified file instead. If the file name
 is a plain '-', it is instead written to stdout. This option has no point when
