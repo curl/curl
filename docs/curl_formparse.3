@@ -1,0 +1,62 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by Daniel.Stenberg@haxx.nu
+.\"
+.TH curl_formparse 3 "6 June 2000" "Curl 7.0" "libcurl Manual"
+.SH NAME
+curl_formparse - add a section to a multipart/formdata HTTP POST
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "CURLcode *curl_formparse(char *" string, "struct HttpPost **" firstitem,
+.BI "struct HttpPost ** "lastitem ");"
+.ad
+.SH DESCRIPTION
+curl_formparse() is used to append sections when building a multipart/formdata
+HTTP POST. Append one section at a time until you've added all the sections
+you want included and then you pass the
+.I firstitem
+pointer as parameter to CURLOPT_HTTPPOST.
+.I lastitem
+is set after each call and on repeated invokes it should be left as set to
+allow repeated invokes to find the end of the list in a faster way.
+.I string
+must be a zero terminated string following the following syntax.
+.SH "FORM PARSE STRINGS"
+The
+.I string 
+parameter must be using one of the following patterns. Note that the []
+letters should not be included in the real-life string.
+.TP 0.8i
+.B [name]=[contents]
+Add a form field named 'name' with the contents 'contents'. This is the
+typcial contents of the HTML tag <input type=text>.
+.TP
+.B [name]=@[filename]
+Add a form field named 'name' with the contents as read from the local file
+named 'filename'. This is the typcial contents of the HTML tag <input
+type=file>.
+.TP
+.B [name]=@[filename1,filename2,...]
+Add a form field named 'name' with the contents as read from the local files
+named 'filename1' and 'filename2'. This is identical to the upper, except that
+you get the contents of several files in one section.
+.TP
+.B [name]=@[filename];[content-type]
+Whenever you specify a file to read from, you can optionally specify the
+content-type as well. The content-type is passed to the server together with
+the contents of the file. curl_formparse() will guess content-type for a
+number of well-known extensions and otherwise it will set it to binary. You
+can override the internal decision by using this option.
+.TP
+.B [name]=@[filename1,filename2,...];[content-type]
+When you specify several files to read the contents from, you can set the
+content-type for all of them in the same way as with a single file.
+.PP
+.SH RETURN VALUE
+Returns non-zero if an error occurs.
+.SH "SEE ALSO"
+.BR curl_easy_setopt "(3) "
+.SH BUGS
+Surely there are some, you tell me!
+
