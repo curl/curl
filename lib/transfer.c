@@ -573,7 +573,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
               if(end) {
                 /* skip all trailing space letters */
-                for(; isspace(*end) && (end > start); end--);
+                for(; isspace((int)*end) && (end > start); end--);
 
                 /* get length of the type */
                 len = end-start+1;
