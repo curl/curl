@@ -38,7 +38,7 @@ http://%HOSTIP:%HOSTPORT/36
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-26
+56
 </errocode>
 <strip>
 ^User-Agent:.*

@@ -18,7 +18,7 @@ HTTPS GET over HTTP proxy fails
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-26
+56
 </errorcode>
 <strip>
 ^User-Agent:.*
