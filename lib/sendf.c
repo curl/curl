@@ -180,6 +180,40 @@ size_t ssend(int fd, struct connectdata *conn, void *mem, size_t len)
   return bytes_written;
 }
 
+/* client_write() sends data to the write callback(s)
+
+   The bit pattern defines to what "streams" to write to. Body and/or header.
+   The defines are in sendf.h of course.
+ */
+CURLcode client_write(struct UrlData *data,
+                      int type,
+                      char *ptr,
+                      size_t len)
+{
+  size_t wrote;
+
+  if(0 == len)
+    len = strlen(ptr);
+
+  if(type & CLIENTWRITE_BODY) {
+    wrote = data->fwrite(ptr, 1, len, data->out);
+    if(wrote != len) {
+      failf (data, "Failed writing body");
+      return CURLE_WRITE_ERROR;
+    }
+  }
+  if((type & CLIENTWRITE_HEADER) && data->writeheader) {
+    wrote = data->fwrite(ptr, 1, len, data->writeheader);
+    if(wrote != len) {
+      failf (data, "Failed writing header");
+      return CURLE_WRITE_ERROR;
+    }
+  }
+  
+  return CURLE_OK;
+}
+
+
 /*
  * add_buffer_init() returns a fine buffer struct
  */
