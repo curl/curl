@@ -142,8 +142,8 @@ struct ssl_config_data {
 struct HTTP {
   struct FormData *sendit;
   int postsize;
-  char *p_pragma;      /* Pragma: string */
-  char *p_accept;      /* Accept: string */
+  const char *p_pragma;      /* Pragma: string */
+  const char *p_accept;      /* Accept: string */
   long readbytecount; 
   long writebytecount;
 
@@ -476,9 +476,9 @@ struct UrlData {
                         allocated */
   char *useragent;   /* User-Agent string */
   char *postfields; /* if POST, set the fields' values here */
-  long postfieldsize; /* if POST, this might have a size to use instead of
-                         strlen(), and then the data *may* be binary (contain
-                         zero bytes) */
+  size_t postfieldsize; /* if POST, this might have a size to use instead of
+                           strlen(), and then the data *may* be binary (contain
+                           zero bytes) */
 
   /* stuff related to FTP */
   char *ftpport; /* port to send with the PORT command */
@@ -565,7 +565,7 @@ struct UrlData {
   /* 'connects' will be an allocated array with pointers. If the pointer is
      set, it holds an allocated connection. */
   struct connectdata **connects;
-  size_t numconnects; /* size of the 'connects' array */
+  long numconnects; /* size of the 'connects' array */
   curl_closepolicy closepolicy;
 
 };
@@ -584,7 +584,7 @@ CURLcode Curl_getinfo(CURL *curl, CURLINFO info, ...);
  * and they're not meant for "public use" anymore.
  */
 
-CURLcode Curl_open(CURL **curl, char *url);
+CURLcode Curl_open(CURL **curl);
 CURLcode Curl_setopt(CURL *handle, CURLoption option, ...);
 CURLcode Curl_close(CURL *curl); /* the opposite of curl_open() */
 CURLcode Curl_connect(struct UrlData *,
