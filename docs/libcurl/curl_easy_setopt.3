@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "25 Feb 2004" "libcurl 7.11.1" "libcurl Manual"
+.TH curl_easy_setopt 3 "27 Feb 2004" "libcurl 7.11.1" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -281,6 +281,9 @@ Pass a long specifying your prefered size for the receive buffer in libcurl.
 The main point of this would be that the write callback gets called more often
 and with smaller chunks. This is just treated as a request, not an order. You
 cannot be guaranteed to actually get the given size. (Added in 7.10)
+.IP CURLOPT_PORT
+Pass a long specifying what remote port number to connect to, instead of the
+one specified in the URL or the default port for the used protocol.
 .SH NAMES and PASSWORDS OPTIONS (Authentication)
 .IP CURLOPT_NETRC
 This parameter controls the preference of libcurl between using user names and
@@ -389,6 +392,10 @@ round-trip. Set the actual name and password with the
 together the bits listed above for the \fICURLOPT_HTTPAUTH\fP option. As of
 this writing, only Basic and NTLM work. (Added in 7.10.7)
 .SH HTTP OPTIONS
+.IP CURLOPT_AUTOREFERER
+Pass a non-zero parameter to enable this. When enabled, libcurl will
+automaticly set the Referer: field in requests where it follows a Location:
+redirect.
 .IP CURLOPT_ENCODING
 Sets the contents of the Accept-Encoding: header sent in an HTTP
 request, and enables decoding of a response when a Content-Encoding:
@@ -534,6 +541,13 @@ curl_easy_cleanup() is called), libcurl will not and cannot report an error
 for this. Using \fICURLOPT_VERBOSE\fP or \fICURLOPT_DEBUGFUNCTION\fP will get
 a warning to display, but that is the only visible feedback you get about this
 possibly lethal situation.
+.IP CURLOPT_COOKIESESSION
+Pass a long set to non-zero to mark this as a new cookie "session". It will
+force libcurl to ignore all cookies it is about to load that are "session
+cookies" from the previous session. By default, libcurl always stores and
+loads all cookies, independent if they are session cookies are not. Session
+cookies are cookies without expiry date and they are meant to be alive and
+existing for this "session" only.
 .IP CURLOPT_HTTPGET
 Pass a long. If the long is non-zero, this forces the HTTP request to get back
 to GET. Only really usable if POST, PUT or a custom request have been used
@@ -616,6 +630,19 @@ curl is waiting for a response, this value overrides \fICURLOPT_TIMEOUT\fP. It
 is recommended that if used in conjunction with \fICURLOPT_TIMEOUT\fP, you set
 \fICURLOPT_FTP_RESPONSE_TIMEOUT\fP to a value smaller than
 \fICURLOPT_TIMEOUT\fP.  (Added in 7.10.8)
+.IP CURLOPT_FTP_SSL
+Pass a long using one of the values from below, to make libcurl use your
+desired level of SSL for the ftp transfer. (Added in 7.11.0)
+.RS
+.IP CURLFTPSSL_NONE
+Don't attempt to use SSL.
+.IP CURLFTPSSL_TRY
+Try using SSL, proceed as normal otherwise.
+.IP CURLFTPSSL_CONTROL
+Require SSL for the control connection or fail with \fICURLE_FTP_SSL_FAILED\fP.
+.IP CURLFTPSSL_ALL
+Require SSL for all communication or fail with \fICURLE_FTP_SSL_FAILED\fP.
+.RE
 .SH PROTOCOL OPTIONS
 .IP CURLOPT_TRANSFERTEXT
 A non-zero parameter tells the library to use ASCII mode for ftp transfers,
@@ -808,18 +835,18 @@ the format of your private key. Supported formats are "PEM", "DER" and "ENG".
 
 \fBNOTE:\fPThe format "ENG" enables you to load the private key from a crypto
 engine. in this case \fICURLOPT_SSLKEY\fP is used as an identifier passed to
-the engine. You have to set the crypto engine with \fICURLOPT_SSL_ENGINE\fP.
+the engine. You have to set the crypto engine with \fICURLOPT_SSLENGINE\fP.
 .IP CURLOPT_SSLKEYPASSWD
 Pass a pointer to a zero terminated string as parameter. It will be used as
 the password required to use the \fICURLOPT_SSLKEY\fP private key.
-.IP CURLOPT_SSL_ENGINE
+.IP CURLOPT_SSLENGINE
 Pass a pointer to a zero terminated string as parameter. It will be used as
 the identifier for the crypto engine you want to use for your private
 key.
 
 \fBNOTE:\fPIf the crypto device cannot be loaded,
 \fICURLE_SSL_ENGINE_NOTFOUND\fP is returned.
-.IP CURLOPT_SSL_ENGINEDEFAULT
+.IP CURLOPT_SSLENGINE_DEFAULT
 Sets the actual crypto engine as the default for (asymetric) crypto
 operations.
 
@@ -889,6 +916,12 @@ this curl handle use the data from the shared handle instead of keeping the
 data to itself. This enables several curl handles to share data. If the curl
 handles are used simultaneously, you \fBMUST\fP use the locking methods in the
 share handle. See \fIcurl_share_setopt(3)\fP for details.
+.SH TELNET OPTIONS
+.IP CURLOPT_TELNETOPTIONS
+Provide a pointer to a curl_slist with variables to pass to the telnet
+negotiations. The variables should be in the format <option=value>. libcurl
+supports the options 'TTYPE', 'XDISPLOC' and 'NEW_ENV'. See the TELNET
+standard for details.
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, non-zero means an
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP
