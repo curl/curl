@@ -67,6 +67,10 @@
 
 #include <curl/types.h>
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 struct HttpPost {
   struct HttpPost *next; /* next entry in the list */
   char *name;     /* pointer to allocated name */
@@ -172,7 +176,10 @@ typedef enum {
 /* name is uppercase CURLOPT_<name>,
    type is one of the defined CURLOPTTYPE_<type>
    number is unique identifier */
-#define T(name,type,number) CURLOPT_ ## name = CURLOPTTYPE_ ## type + number
+#ifdef CINIT
+#undef CINIT
+#endif
+#define CINIT(name,type,number) CURLOPT_ ## name = CURLOPTTYPE_ ## type + number
 
 /* long may be 32 or 64 bits, but we should never depend on anything else
    but 32 */
@@ -181,74 +188,74 @@ typedef enum {
 #define CURLOPTTYPE_FUNCTIONPOINT 20000
 
 typedef enum {
-  T(NOTHING, LONG, 0), /********* the first one is unused ************/
+  CINIT(NOTHING, LONG, 0), /********* the first one is unused ************/
   
   /* This is the FILE * the regular output should be written to. */
-  T(FILE, OBJECTPOINT, 1),
+  CINIT(FILE, OBJECTPOINT, 1),
 
   /* The full URL to get/put */
-  T(URL,  OBJECTPOINT, 2),
+  CINIT(URL,  OBJECTPOINT, 2),
 
   /* Port number to connect to, if other than default. Specify the CONF_PORT
      flag in the CURLOPT_FLAGS to activate this */
-  T(PORT, LONG, 3),
+  CINIT(PORT, LONG, 3),
 
   /* Name of proxy to use. Specify the CONF_PROXY flag in the CURLOPT_FLAGS to
      activate this */
-  T(PROXY, OBJECTPOINT, 4),
+  CINIT(PROXY, OBJECTPOINT, 4),
   
   /* Name and password to use when fetching. Specify the CONF_USERPWD flag in
      the CURLOPT_FLAGS to activate this */
-  T(USERPWD, OBJECTPOINT, 5),
+  CINIT(USERPWD, OBJECTPOINT, 5),
 
   /* Name and password to use with Proxy. Specify the CONF_PROXYUSERPWD 
      flag in the CURLOPT_FLAGS to activate this */
-  T(PROXYUSERPWD, OBJECTPOINT, 6),
+  CINIT(PROXYUSERPWD, OBJECTPOINT, 6),
 
   /* Range to get, specified as an ASCII string. Specify the CONF_RANGE flag
      in the CURLOPT_FLAGS to activate this */
-  T(RANGE, OBJECTPOINT, 7),
+  CINIT(RANGE, OBJECTPOINT, 7),
 
 #if 0
   /* Configuration flags */
-  T(FLAGS, LONG, 8),
+  CINIT(FLAGS, LONG, 8),
 #endif
   /* Specified file stream to upload from (use as input): */
-  T(INFILE, OBJECTPOINT, 9),
+  CINIT(INFILE, OBJECTPOINT, 9),
 
   /* Buffer to receive error messages in, must be at least CURL_ERROR_SIZE
    * bytes big. If this is not used, error messages go to stderr instead: */
-  T(ERRORBUFFER, OBJECTPOINT, 10),
+  CINIT(ERRORBUFFER, OBJECTPOINT, 10),
 
   /* Function that will be called to store the output (instead of fwrite). The
    * parameters will use fwrite() syntax, make sure to follow them. */
-  T(WRITEFUNCTION, FUNCTIONPOINT, 11),
+  CINIT(WRITEFUNCTION, FUNCTIONPOINT, 11),
 
   /* Function that will be called to read the input (instead of fread). The
    * parameters will use fread() syntax, make sure to follow them. */
-  T(READFUNCTION, FUNCTIONPOINT, 12),
+  CINIT(READFUNCTION, FUNCTIONPOINT, 12),
 
   /* Time-out the read operation after this amount of seconds */
-  T(TIMEOUT, LONG, 13),
+  CINIT(TIMEOUT, LONG, 13),
 
   /* If the CURLOPT_INFILE is used, this can be used to inform libcurl about
    * how large the file being sent really is. That allows better error
    * checking and better verifies that the upload was succcessful. -1 means
    * unknown size. */
-  T(INFILESIZE, LONG, 14),
+  CINIT(INFILESIZE, LONG, 14),
 
   /* POST input fields. */
-  T(POSTFIELDS, OBJECTPOINT, 15),
+  CINIT(POSTFIELDS, OBJECTPOINT, 15),
 
   /* Set the referer page (needed by some CGIs) */
-  T(REFERER, OBJECTPOINT, 16),
+  CINIT(REFERER, OBJECTPOINT, 16),
 
   /* Set the FTP PORT string (interface name, named or numerical IP address)
      Use i.e '-' to use default address. */
-  T(FTPPORT, OBJECTPOINT, 17),
+  CINIT(FTPPORT, OBJECTPOINT, 17),
 
   /* Set the User-Agent string (examined by some CGIs) */
-  T(USERAGENT, OBJECTPOINT, 18),
+  CINIT(USERAGENT, OBJECTPOINT, 18),
 
   /* If the download receives less than "low speed limit" bytes/second
    * during "low speed time" seconds, the operations is aborted.
@@ -257,122 +264,122 @@ typedef enum {
    */
 
   /* Set the "low speed limit" */
-  T(LOW_SPEED_LIMIT, LONG , 19),
+  CINIT(LOW_SPEED_LIMIT, LONG , 19),
 
   /* Set the "low speed time" */
-  T(LOW_SPEED_TIME, LONG, 20),
+  CINIT(LOW_SPEED_TIME, LONG, 20),
 
   /* Set the continuation offset */
-  T(RESUME_FROM, LONG, 21),
+  CINIT(RESUME_FROM, LONG, 21),
 
   /* Set cookie in request: */
-  T(COOKIE, OBJECTPOINT, 22),
+  CINIT(COOKIE, OBJECTPOINT, 22),
 
   /* This points to a linked list of headers, struct HttpHeader kind */
-  T(HTTPHEADER, OBJECTPOINT, 23),
+  CINIT(HTTPHEADER, OBJECTPOINT, 23),
 
   /* This points to a linked list of post entries, struct HttpPost */
-  T(HTTPPOST, OBJECTPOINT, 24),
+  CINIT(HTTPPOST, OBJECTPOINT, 24),
 
   /* name of the file keeping your private SSL-certificate */
-  T(SSLCERT, OBJECTPOINT, 25),
+  CINIT(SSLCERT, OBJECTPOINT, 25),
 
   /* password for the SSL-certificate */
-  T(SSLCERTPASSWD, OBJECTPOINT, 26),
+  CINIT(SSLCERTPASSWD, OBJECTPOINT, 26),
   
   /* send TYPE parameter? */
-  T(CRLF, LONG, 27),
+  CINIT(CRLF, LONG, 27),
 
   /* send linked-list of QUOTE commands */
-  T(QUOTE, OBJECTPOINT, 28),
+  CINIT(QUOTE, OBJECTPOINT, 28),
 
   /* send FILE * to store headers to */
-  T(WRITEHEADER, OBJECTPOINT, 29),
+  CINIT(WRITEHEADER, OBJECTPOINT, 29),
 
 #ifdef MULTIDOC
   /* send linked list of MoreDoc structs */
-  T(MOREDOCS, OBJECTPOINT, 30),
+  CINIT(MOREDOCS, OBJECTPOINT, 30),
 #endif
 
   /* point to a file to read the initial cookies from, also enables
      "cookie awareness" */
-  T(COOKIEFILE, OBJECTPOINT, 31),
+  CINIT(COOKIEFILE, OBJECTPOINT, 31),
 
   /* What version to specifly try to use.
      3 = SSLv3, 2 = SSLv2, all else makes it try v3 first then v2 */
-  T(SSLVERSION, LONG, 32),
+  CINIT(SSLVERSION, LONG, 32),
 
   /* What kind of HTTP time condition to use, see defines */
-  T(TIMECONDITION, LONG, 33),
+  CINIT(TIMECONDITION, LONG, 33),
 
   /* Time to use with the above condition. Specified in number of seconds
      since 1 Jan 1970 */
-  T(TIMEVALUE, LONG, 34),
+  CINIT(TIMEVALUE, LONG, 34),
 
   /* HTTP request, for odd commands like DELETE, TRACE and others */
   /* OBSOLETE DEFINE, left for tradition only */
-  T(HTTPREQUEST, OBJECTPOINT, 35),
+  CINIT(HTTPREQUEST, OBJECTPOINT, 35),
 
   /* Custom request, for customizing the get command like
      HTTP: DELETE, TRACE and others
      FTP: to use a different list command
      */
-  T(CUSTOMREQUEST, OBJECTPOINT, 36),
+  CINIT(CUSTOMREQUEST, OBJECTPOINT, 36),
 
   /* HTTP request, for odd commands like DELETE, TRACE and others */
-  T(STDERR, OBJECTPOINT, 37),
+  CINIT(STDERR, OBJECTPOINT, 37),
 
 #if 0
   /* Progress mode set alternative progress mode displays. Alternative
      ones should now be made by the client, not the lib! */     
-  T(PROGRESSMODE, LONG, 38),
+  CINIT(PROGRESSMODE, LONG, 38),
 #endif
   /* send linked-list of post-transfer QUOTE commands */
-  T(POSTQUOTE, OBJECTPOINT, 39),
+  CINIT(POSTQUOTE, OBJECTPOINT, 39),
 
   /* Pass a pointer to string of the output using full variable-replacement
      as described elsewhere. */
-  T(WRITEINFO, OBJECTPOINT, 40),
+  CINIT(WRITEINFO, OBJECTPOINT, 40),
 
   /* Previous FLAG bits */
-  T(VERBOSE, LONG, 41),      /* talk a lot */
-  T(HEADER, LONG, 42),       /* throw the header out too */
-  T(NOPROGRESS, LONG, 43),   /* shut off the progress meter */
-  T(NOBODY, LONG, 44),       /* use HEAD to get http document */
-  T(FAILONERROR, LONG, 45),  /* no output on http error codes >= 300 */
-  T(UPLOAD, LONG, 46),       /* this is an upload */
-  T(POST, LONG, 47),         /* HTTP POST method */
-  T(FTPLISTONLY, LONG, 48),  /* Use NLST when listing ftp dir */
+  CINIT(VERBOSE, LONG, 41),      /* talk a lot */
+  CINIT(HEADER, LONG, 42),       /* throw the header out too */
+  CINIT(NOPROGRESS, LONG, 43),   /* shut off the progress meter */
+  CINIT(NOBODY, LONG, 44),       /* use HEAD to get http document */
+  CINIT(FAILONERROR, LONG, 45),  /* no output on http error codes >= 300 */
+  CINIT(UPLOAD, LONG, 46),       /* this is an upload */
+  CINIT(POST, LONG, 47),         /* HTTP POST method */
+  CINIT(FTPLISTONLY, LONG, 48),  /* Use NLST when listing ftp dir */
 
-  T(FTPAPPEND, LONG, 50),    /* Append instead of overwrite on upload! */
-  T(NETRC, LONG, 51),        /* read user+password from .netrc */
-  T(FOLLOWLOCATION, LONG, 52),  /* use Location: Luke! */
+  CINIT(FTPAPPEND, LONG, 50),    /* Append instead of overwrite on upload! */
+  CINIT(NETRC, LONG, 51),        /* read user+password from .netrc */
+  CINIT(FOLLOWLOCATION, LONG, 52),  /* use Location: Luke! */
 
   /* This FTPASCII name is now obsolete, to be removed, use the TRANSFERTEXT
      instead. It goes for more protocols than just ftp... */
-  T(FTPASCII, LONG, 53),     /* use TYPE A for transfer */
+  CINIT(FTPASCII, LONG, 53),     /* use TYPE A for transfer */
 
-  T(TRANSFERTEXT, LONG, 53), /* transfer data in text/ASCII format */
-  T(PUT, LONG, 54),          /* PUT the input file */
-  T(MUTE, LONG, 55),         /* force NOPROGRESS */
+  CINIT(TRANSFERTEXT, LONG, 53), /* transfer data in text/ASCII format */
+  CINIT(PUT, LONG, 54),          /* PUT the input file */
+  CINIT(MUTE, LONG, 55),         /* force NOPROGRESS */
 
   /* Function that will be called instead of the internal progress display
    * function. This function should be defined as the curl_progress_callback
    * prototype defines. */
-  T(PROGRESSFUNCTION, FUNCTIONPOINT, 56),
+  CINIT(PROGRESSFUNCTION, FUNCTIONPOINT, 56),
 
   /* Data passed to the progress callback */
-  T(PROGRESSDATA, OBJECTPOINT, 57),
+  CINIT(PROGRESSDATA, OBJECTPOINT, 57),
 
   /* We want the referer field set automatically when following locations */
-  T(AUTOREFERER, LONG, 58),
+  CINIT(AUTOREFERER, LONG, 58),
 
   /* Port of the proxy, can be set in the proxy string as well with:
      "[host]:[port]" */
-  T(PROXYPORT, LONG, 59),
+  CINIT(PROXYPORT, LONG, 59),
 
   /* size of the POST input data, if strlen() is not good to use */
-  T(POSTFIELDSIZE, LONG, 60),
+  CINIT(POSTFIELDSIZE, LONG, 60),
 
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
@@ -422,8 +429,8 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.2"
-#define LIBCURL_VERSION_NUM 0x070200
+#define LIBCURL_VERSION "7.2.1"
+#define LIBCURL_VERSION_NUM 0x070201
 
 /* linked-list structure for the CURLOPT_QUOTE option */
 struct curl_slist {
@@ -621,5 +628,9 @@ CURLcode curl_disconnect(CURLconnect *connect);
  * etc.
  */
 time_t curl_getdate(const char *p, const time_t *now);
+
+#ifdef  __cplusplus
+}
+#endif
 
 #endif /* __CURL_CURL_H */
