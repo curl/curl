@@ -158,8 +158,6 @@ void hugehelp(void)
   z.zalloc = (alloc_func)Z_NULL;
   z.zfree = (free_func)Z_NULL;
   z.opaque = 0;
-  z.next_in = NULL;
-  z.avail_in = 0;
 
   if (inflateInit2(&z, -MAX_WBITS) != Z_OK)
     return;
