@@ -49,7 +49,7 @@ typedef int ares_socket_t;
 #endif
 
 #if !defined(HAVE_UNISTD_H) && !defined(_MSC_VER)
-#define HAVE_UNISTD_H
+#define HAVE_UNISTD_H 1
 #endif
 
 #if !defined(HAVE_SYS_UIO_H) && !defined(WIN32) && !defined(MSDOS)
