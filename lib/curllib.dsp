@@ -387,6 +387,22 @@ SOURCE=.\http_digest.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\http_ntlm.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\http_ntlm.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\inet_pton.c
+# End Source File
+# Begin Source File
+
+SOURCE=.\inet_pton.h
+# End Source File
+# Begin Source File
+
 SOURCE=.\md5.c
 # End Source File
 # Begin Source File
