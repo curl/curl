@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "26 July 2000" "Curl 7.0" "Curl Manual"
+.TH curl 1 "1 August 2000" "Curl 7.0" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -150,13 +150,14 @@ name should've been. This goes for both @ and < constructs.
 .IP "-h/--help"
 Usage help.
 .IP "-H/--header <header>"
-(HTTP)
-Extra header to use when getting a web page. You may specify any number of
-extra headers. Note that if you should add a custom header that has the same
-name as one of the internal ones curl would use, your externally set header
-will be used instead of the internal one. This allows you to make even
+(HTTP) Extra header to use when getting a web page. You may specify any number
+of extra headers. Note that if you should add a custom header that has the
+same name as one of the internal ones curl would use, your externally set
+header will be used instead of the internal one. This allows you to make even
 trickier stuff than curl would normally do. You should not replace internally
-set headers without knowing perfectly well what you're doing.
+set headers without knowing perfectly well what you're doing. Replacing an
+internal header with one without content on the right side of the colon will
+prevent that header from appearing.
 .IP "-i/--include"
 (HTTP)
 Include the HTTP-header in the output. The HTTP-header includes things
@@ -181,16 +182,16 @@ Especially useful if you want to machine-parse the contents of an FTP
 directory since the normal directory view doesn't use a standard look
 or format.
 .IP "-L/--location"
-(HTTP/HTTPS)
-If the server reports that the requested page has a different location
-(indicated with the header line Location:) this flag will let curl
-attempt to reattempt the get on the new place. If used together with
--i or -I, headers from all requested pages will be shown.
+(HTTP/HTTPS) If the server reports that the requested page has a different
+location (indicated with the header line Location:) this flag will let curl
+attempt to reattempt the get on the new place. If used together with -i or -I,
+headers from all requested pages will be shown. If this flag is used when
+making a HTTP POST, curl will automatically switch to GET after the initial
+POST has been done.
 .IP "-m/--max-time <seconds>"
-Maximum time in seconds that you allow the whole operation to take.
-This is useful for preventing your batch jobs from hanging for hours
-due to slow networks or links going down.
-This doesn't work properly in win32 systems.
+Maximum time in seconds that you allow the whole operation to take.  This is
+useful for preventing your batch jobs from hanging for hours due to slow
+networks or links going down.  This doesn't work fully in win32 systems.
 .IP "-M/--manual"
 Manual. Display the huge help text.
 .IP "-n/--netrc"
@@ -415,7 +416,9 @@ date, or one that has been modified before that time. The date expression can
 be all sorts of date strings or if it doesn't match any internal ones, it
 tries to get the time from a given file name instead! See the
 .BR "GNU date(1)"
-man page for date expression details.
+or
+.BR "curl_getdate(3)"
+man pages for date expression details.
 
 Start the date expression with a dash (-) to make it request for a document
 that is older than the given date/time, default is a document that is newer

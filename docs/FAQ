@@ -6,89 +6,50 @@
 
 FAQ
 
-1. Problems connecting to SSL servers.
+ 1. Install Related Problems
+  1.1 configure doesn't find OpenSSL even when it is installed
+   1.1.1. native linker doesn't find openssl
+   1.1.2. only the libssl lib is missing
+  1.2 Does curl work/build with other SSL libraries?
+  1.3 Where can I find a copy of LIBEAY32.DLL?
+  1.4 Does cURL support Socks (RFC 1928) ?
 
-  It took a very long time before I could sort out why curl had problems
-  to connect to certain SSL servers when using SSLeay or OpenSSL v0.9+.
-  The error sometimes showed up similar to:
+ 2. Usage problems
+  2.1 curl: (1) SSL is disabled, https: not supported
+  2.2 How do I tell curl to resume a transfer?
+  2.3 Why doesn't my posting using -F work?
+  2.4 How do I tell curl to run custom FTP commands?
+  2.5 How can I disable the Pragma: nocache header?
+  2.6 Does curl support javascript, ASP, XML, XHTML or HTML version Y?
+  2.7 Can I use curl to delete/rename a file through FTP?
 
-  16570:error:1407D071:SSL routines:SSL2_READ:bad mac decode:s2_pkt.c:233:
+ 3. Running Problems
+  3.1 Problems connecting to SSL servers.
+  3.2 Why do I get problems when I use & in the URL?
+  3.3 How can I use {, }, [ or ] to specify multiple URLs?
+  3.4 Why do I get downloaded data even though the web page doesn't exist?
+  3.5 Why do I get "HTTP/1.1 403 Forbidden" from a http server?
+  3.6 Can you tell me what error code 142 means?
 
-  It turned out to be because many older SSL servers don't deal with SSLv3
-  requests properly. To correct this problem, tell curl to select SSLv2 from
-  the command line (-2/--sslv2).
+ 4. libcurl issues
+  4.1 Is libcurl thread safe?
 
-  I have also seen examples where the remote server didn't like the SSLv2
-  request and instead you had to force curl to use SSLv3 with -3/--sslv3.
+ 5. license issues
+  5.1 I have a GPL program, can I use the libcurl library?
+  5.2 I have a closed-source program, can I use the libcurl library?
+  5.3 I have a program that uses LGPL libraries, can I use libcurl?
+  5.4 Can I modify curl/libcurl for my program and keep the changes secret?
+  5.5 Can you please change the curl/libcurl license to XXXX?
 
-2. curl: (1) SSL is disabled, https: not supported
+  
 
-  If you get this output when trying to get anything from a https:// server,
-  it means that the configure script couldn't find all libs and include files
-  it requires for SSL to work. If the configure script fails to find them,
-  curl is simply built without SSL support.
+1. Install Related Problems
 
-  To get the https:// support into a curl that was previously built but that
-  reports that https:// is not supported, you should dig through the document
-  and logs and check out why the configure script doesn't find the SSL libs
-  and/or include files.
-
-  Also, check out the other paragraph in this FAQ labeled "configure doesn't
-  find OpenSSL even when it is installed".
-
-3. Does curl support resume?
-
-  Yes. Both ways on FTP, download ways on HTTP.
-
-  Try the -c and -C options.
-
-4. Is libcurl thread safe?
-
-  As version seven is slowly marching in as the libcurl version to use, we
-  have made a serious attempt to address all places in the code where we could
-  forsee problems for multi-threaded programs. If your system has them, curl
-  will attempt to use threadsafe functions instead of non-safe ones.
-
-  I am very interested in once and for all getting some kind of report or
-  README file from those who have used libcurl in a threaded environment,
-  since I haven't and I get this question more and more frequently!
-
-5. Why doesn't my posting using -F work?
-
-  You can't simply use -F or -d at your choice. The web server that will
-  receive your post assumes one of the formats. If the form you're trying to
-  "fake" sets the type to 'multipart/form-data', than and only then you must
-  use the -F type. In all the most common cases, you should use -d which then
-  causes a posting with the type 'application/x-www-form-urlencoded'.
-
-  I have described this in some detail in the README.curl file, and if you
-  don't understand it the first time, read it again before you post questions
-  about this to the mailing list. I would also suggest that you read through
-  the mailing list archives for old postings and questions regarding this.
-
-6. Does curl support custom FTP commands?
-
-  Yes it does, you can tell curl to perform optional commands both before
-  and/or after a file transfer. Study the -Q/--quote option.
-
-  Since curl is used for file transfers, you don't use curl to just perform
-  ftp commands without transfering anything. Therefore you must always specify
-  a URL to transfer to/from even when doing custom FTP commands.
-
-7. Does curl work with other SSL libraries?
-
-  Curl has been written to use OpenSSL, although I doubt there would be much
-  problems using a different library. I just don't know any other free one and
-  that has limited my possibilities to develop against anything else.
-
-  If anyone does "port" curl to use a commercial SSL library, I am of course
-  very interested in getting the patch!
-
-8. configure doesn't find OpenSSL even when it is installed
+  1.1. configure doesn't find OpenSSL even when it is installed
 
   This may be because of several reasons.
 
-  8.1. native linker doesn't find openssl
+  1.1.1. native linker doesn't find openssl
 
     Platforms: Solaris (native cc compiler) and HPUX (native cc compiler)
 
@@ -106,7 +67,7 @@ FAQ
 
     Submitted by: Bob Allison <allisonb@users.sourceforge.net>
 
-  8.2. only the libssl lib is missing
+  1.1.2. only the libssl lib is missing
 
     If all include files and the libcrypto lib is present, with only the
     libssl being missing according to configure, this is mostly likely because
@@ -119,7 +80,120 @@ FAQ
     configure. Make sure that you remove the config.cache file before you
     rerun configure with the new flags.
 
-9. Why do I get problems when I use & in the URL?
+  1.2. Does curl work/build with other SSL libraries?
+
+  Curl has been written to use OpenSSL, although I doubt there would be much
+  problems using a different library. I just don't know any other free one and
+  that has limited my possibilities to develop against anything else.
+
+  If anyone does "port" curl to use a commercial SSL library, I am of course
+  very interested in getting the patch!
+
+  1.3. Where can I find a copy of LIBEAY32.DLL?
+
+  That is an OpenSSL binary built for Windows.
+
+  Curl uses OpenSSL to do the SSL stuff. The LIBEAY32.DLL is what curl needs
+  on a windows machine to do https://. Check out the curl web page to find
+  accurate and up-to-date pointers to recent OpenSSL DDLs and other binary
+  packages.
+
+  1.4. Does cURL support Socks (RFC 1928) ?
+
+  No. Nobody has wanted it that badly yet. I would appriciate patches that
+  brings this functionality.
+
+
+
+2. Usage problems
+
+  2.1. curl: (1) SSL is disabled, https: not supported
+
+  If you get this output when trying to get anything from a https:// server,
+  it means that the configure script couldn't find all libs and include files
+  it requires for SSL to work. If the configure script fails to find them,
+  curl is simply built without SSL support.
+
+  To get the https:// support into a curl that was previously built but that
+  reports that https:// is not supported, you should dig through the document
+  and logs and check out why the configure script doesn't find the SSL libs
+  and/or include files.
+
+  Also, check out the other paragraph in this FAQ labeled "configure doesn't
+  find OpenSSL even when it is installed".
+
+  2.2. How do I tell curl to resume a transfer?
+
+  Curl supports resume both ways on FTP, download ways on HTTP.
+
+  Try the -c and -C options.
+
+  2.3. Why doesn't my posting using -F work?
+
+  You can't simply use -F or -d at your choice. The web server that will
+  receive your post assumes one of the formats. If the form you're trying to
+  "fake" sets the type to 'multipart/form-data', than and only then you must
+  use the -F type. In all the most common cases, you should use -d which then
+  causes a posting with the type 'application/x-www-form-urlencoded'.
+
+  I have described this in some detail in the README.curl file, and if you
+  don't understand it the first time, read it again before you post questions
+  about this to the mailing list. I would also suggest that you read through
+  the mailing list archives for old postings and questions regarding this.
+
+  2.4. How do I tell curl to run custom FTP commands?
+
+  You can tell curl to perform optional commands both before and/or after a
+  file transfer. Study the -Q/--quote option.
+
+  Since curl is used for file transfers, you don't use curl to just perform
+  ftp commands without transfering anything. Therefore you must always specify
+  a URL to transfer to/from even when doing custom FTP commands.
+
+  2.5. How can I disable the Pragma: nocache header?
+
+  You can change all internally generated headers by adding a replacement with
+  the -H/--header option. By adding a header with empty contents you safely
+  disable that one. Use -H "Pragma:" to disable that specific header.
+
+  2.6. Does curl support javascript, ASP, XML, XHTML or HTML version Y?
+
+  To curl, all contents are alike. It doesn't matter how the page was
+  generated. It may be ASP, PHP, perl, shell-script, SSI or plain
+  HTML-files. There's no difference to curl and it doesn't even know what kind
+  of language that generated the page.
+
+  Javascript is slightly different since that is code embedded in the HTML
+  that is sent for the client to interpret and curl has no javascript
+  interpreter.
+
+  2.7. Can I use curl to delete/rename a file through FTP?
+
+  Yes. You specify custom ftp commands with -Q/--quote.
+
+  One example would be to delete a file after you have downloaded it:
+
+     curl -O ftp://download.com/coolfile -Q '-DELE coolfile'
+
+
+3. Running Problems
+
+  3.1. Problems connecting to SSL servers.
+
+  It took a very long time before I could sort out why curl had problems
+  to connect to certain SSL servers when using SSLeay or OpenSSL v0.9+.
+  The error sometimes showed up similar to:
+
+  16570:error:1407D071:SSL routines:SSL2_READ:bad mac decode:s2_pkt.c:233:
+
+  It turned out to be because many older SSL servers don't deal with SSLv3
+  requests properly. To correct this problem, tell curl to select SSLv2 from
+  the command line (-2/--sslv2).
+
+  I have also seen examples where the remote server didn't like the SSLv2
+  request and instead you had to force curl to use SSLv3 with -3/--sslv3.
+
+  3.2. Why do I get problems when I use & in the URL?
 
   In general unix shells, the & letter is treated special and when used it
   runs the specified command in the background. To safely send the & as a part
@@ -130,7 +204,7 @@ FAQ
 
      curl 'http://www.altavista.com/cgi-bin/query?text=yes&q=curl'
 
-10. How can I use {, }, [ or ] to specify multiple URLs?
+  3.3. How can I use {, }, [ or ] to specify multiple URLs?
 
   Because those letters have a special meaning to the shell, and to be used in
   a URL specified to curl you must quote them.
@@ -139,16 +213,7 @@ FAQ
 
     curl '{curl,www}.haxx.se'
 
-11. Where can I find a copy of LIBEAY32.DLL?
-
-  That is an OpenSSL binary built for Windows.
-
-  Curl uses OpenSSL to do the SSL stuff. The LIBEAY32.DLL is what curl needs
-  on a windows machine to do https://. Check out the curl web page to find
-  accurate and up-to-date pointers to recent OpenSSL DDLs and other binary
-  packages.
-
-12. Why do I get downloaded data even though the web page doesn't exist?
+  3.4. Why do I get downloaded data even though the web page doesn't exist?
 
   Curl asks remote servers for the page you specify. If the page doesn't exist
   at the server, the HTTP protocol defines how the server should respond and
@@ -158,11 +223,11 @@ FAQ
   By using the --fail option you can tell curl explicitly to not get any data
   if the HTTP return code doesn't say success.
 
-13. Why do I get "HTTP/1.1 403 Forbidden" from a http server?
+  3.5. Why do I get "HTTP/1.1 403 Forbidden" from a http server?
 
   RFC2616 clearly explains this return code:
 
-  10.4.4 403 Forbidden
+  "10.4.4 403 Forbidden"
 
   The server understood the request, but is refusing to fulfill it.
   Authorization will not help and the request SHOULD NOT be repeated.  If the
@@ -171,21 +236,15 @@ FAQ
   refusal in the entity.  If the server does not wish to make this information
   available to the client, the status code 404 (Not Found) can be used
   instead.
-
-14. How can I disable the Pragma: nocache header?
-
-  You can change all internally generated headers by adding a replacement with
-  the -H/--header option. By adding a header with empty contents you safelt
-  disables the headers. Use -H "Pragma:" to disable that specific header.
-
-15. Can you tell me what error code 142 means?
+ 
+  3.6. Can you tell me what error code 142 means?
 
   All error codes that are larger than the highest documented error code means
   that curl has existed due to a timeout. There is currentl no nice way for
   curl to abort from such a condition and that's why it gets this undocumented
   error. This is planned to change in a future release.
 
-16. How do I keep usernames and passwords secret in Curl command lines?
+  3.7. How do I keep usernames and passwords secret in Curl command lines?
 
   I see this problem as two parts:
 
@@ -199,31 +258,21 @@ FAQ
   at least hide them from being read by human eyes, but that is not what
   anyone would call security.
 
-17. Does curl support javascript, ASP, XML, XHTML or HTML version Y?
 
-  To curl, all contents are alike. It doesn't matter how the page was
-  generated. It may be ASP, PHP, perl, shell-script, SSI or plain
-  HTML-files. There's no difference to curl and it doesn't even know what kind
-  of language that generated the page.
+4. libcurl issues
 
-  Javascript is slightly different since that is code embedded in the HTML
-  that is sent for the client to interpret and curl has no javascript
-  interpreter.
+  4.1. Is libcurl thread safe?
 
-18. Does cURL support Socks (RFC 1928) ?
+  As version seven is slowly marching in as the libcurl version to use, we
+  have made a serious attempt to address all places in the code where we could
+  forsee problems for multi-threaded programs. If your system has them, curl
+  will attempt to use threadsafe functions instead of non-safe ones.
 
-  No. Nobody has wanted it that badly yet. I would appriciate patches that
-  brings this functionality.
+  I am very interested in once and for all getting some kind of report or
+  README file from those who have used libcurl in a threaded environment,
+  since I haven't and I get this question more and more frequently!
 
-19. Can I use curl to delete/rename a file through FTP?
-
-  Yes. You specify custom ftp commands with -Q/--quote.
-
-  One example would be to delete a file after you have downloaded it:
-
-     curl -O ftp://download.com/coolfile -Q '-DELE coolfile'
-
-20. Can I use curl/libcurl in my program licensed under XXX?
+5. license issues
 
   Curl and libcurl are released under the MPL, the Mozilla Public License. To
   get a really good answer to this or other licensing questions, you should
@@ -231,27 +280,27 @@ FAQ
   clashes yourself. This is a brief summary for a few cases for which we get
   questions:
 
-  I have a GPL program, can I use the libcurl library?
+  5.1. I have a GPL program, can I use the libcurl library?
 
     No. GPL'd software requires all parts of the final executable to be
     licensed under GPL.
 
-  I have a closed-source program, can I use the libcurl library?
+  5.2. I have a closed-source program, can I use the libcurl library?
 
     Yes, libcurl does not put any restrictions on the program that uses the
     library. If you end up doing changes to the library, only those changes
     must be made available, not the ones to your program.
 
-  I have a program that uses LGPL libraries, can I use libcurl?
+  5.3. I have a program that uses LGPL libraries, can I use libcurl?
 
     Yes you can. LGPL libraries don't spread to other libraries the same way
     GPL ones do.
 
-  Can I modify curl/libcurl for my own program and keep the changes secret?
+  5.4. Can I modify curl/libcurl for my program and keep the changes secret?
 
     No, you're not allowed to do that.
 
-  Can you please change the curl/libcurl license to XXXX?
+  5.5. Can you please change the curl/libcurl license to XXXX?
 
     No. We carefully picked this license years ago and a large amount of
     people have contributed with source code knowing that this is the license
