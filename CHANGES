@@ -7,6 +7,21 @@
                                History of Changes
 
 
+Daniel (12 March 2001)
+- The curl.haxx.se site, the main curl mailing list and my personal email are
+  all dead today due to power blackout in the area where the main servers are
+  located. Horrible.
+
+- I've made persistance work over a squid HTTP proxy. I find it disturbing
+  that it uses headers that aren't present in any HTTP standard though
+  (Proxy-Connection:) and that makes me feel that I'm now on the edge of what
+  the standard actually defines. I need to get this code excercised on a lot
+  of different HTTP proxies before I feel safe.
+
+  Now I'm facing the problem with my test suite servers (both FTP and HTTP)
+  not supporting persistant connections and libcurl is doing them now. I have
+  to fix the test servers to get all the test cases do OK.
+
 Daniel (8 March 2001)
 - "Transfer-Encoding: chunked" is no longer any trouble for libcurl. I've
   added two source files and I've run some test downloads that look fine.
