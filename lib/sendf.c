@@ -160,7 +160,7 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
                     const char *fmt, ...)
 {
   struct SessionHandle *data = conn->data;
-  size_t bytes_written;
+  ssize_t bytes_written;
   CURLcode result;
   char *s;
   va_list ap;
@@ -187,25 +187,30 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
  */
 CURLcode Curl_write(struct connectdata *conn, int sockfd,
                     void *mem, size_t len,
-                    size_t *written)
+                    ssize_t *written)
 {
-  size_t bytes_written;
+  ssize_t bytes_written;
 
 #ifdef USE_SSLEAY
   /* SSL_write() is said to return 'int' while write() and send() returns
      'size_t' */
-  int ssl_bytes;
   if (conn->ssl.use) {
-    int loop=100; /* just a precaution to never loop endlessly */
-    while(loop--) {
-      ssl_bytes = SSL_write(conn->ssl.handle, mem, len);
-      if((0 >= ssl_bytes) ||
-         (SSL_ERROR_WANT_WRITE != SSL_get_error(conn->ssl.handle,
-                                                ssl_bytes) )) {
-        /* this converts from signed to unsigned... */
-        bytes_written = ssl_bytes;
-        break;
+    int err;
+    int rc = SSL_write(conn->ssl.handle, mem, len);
+
+    if(rc < 0) {
+      err = SSL_get_error(conn->ssl.handle, rc);
+    
+      switch(err) {
+      case SSL_ERROR_WANT_READ:
+      case SSL_ERROR_WANT_WRITE:
+        /* this is basicly the EWOULDBLOCK equivalent */
+        *written = 0;
+        return CURLE_OK;
       }
+      /* a true error */
+      failf(conn->data, "SSL_write() return error %d\n", err);
+      return CURLE_WRITE_ERROR;
     }
   }
   else {
@@ -216,13 +221,27 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
     }
     else
 #endif /* KRB4 */
+    {
       bytes_written = swrite(sockfd, mem, len);
+    }
+    if(-1 == bytes_written) {
+#ifdef WIN32
+      if(EWOULDBLOCK == GetLastError())
+#else
+      if(EWOULDBLOCK == errno)
+#endif
+      {
+        /* this is just a case of EWOULDBLOCK */
+        *written=0;
+        return CURLE_OK;
+      }
+    }
 #ifdef USE_SSLEAY
   }
 #endif
 
   *written = bytes_written;
-  return (bytes_written==len)?CURLE_OK:CURLE_WRITE_ERROR;
+  return (-1 != bytes_written)?CURLE_OK:CURLE_WRITE_ERROR;
 }
 
 /* client_write() sends data to the write callback(s)
