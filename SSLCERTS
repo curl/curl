@@ -1,5 +1,6 @@
                       Peer SSL Certificate Verification
                       =================================
+
 Starting in 7.10, libcurl performs peer SSL certificate verification by
 default. This is done by installing a default CA cert bundle on 'make install'
 (or similar), that CA bundle package is used by default on operations against
