@@ -101,6 +101,12 @@ TODO
 
  SSL
 
+ * Add an interface to libcurl that enables "session IDs" to get
+   exported/imported. Cris Bailiff said: "OpenSSL has functions which can
+   serialise the current SSL state to a buffer of your choice, and
+   recover/reset the state from such a buffer at a later date - this is used
+   by mod_ssl for apache to implement and SSL session ID cache"
+
  * Make curl's SSL layer option capable of using other free SSL libraries.
    Such as the Mozilla Security Services
    (http://www.mozilla.org/projects/security/pki/nss/) and GNUTLS
