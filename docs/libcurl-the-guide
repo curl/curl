@@ -16,7 +16,7 @@ About this Document
 
  This document will refer to 'the user' as the person writing the source code
  that uses libcurl. That would probably be you or someone in your position.
- What will be generally refered to as 'the program' will be the collected
+ What will be generally referred to as 'the program' will be the collected
  source code that you write that is using libcurl for transfers. The program
  is outside libcurl and libcurl is outside of the program.
 
@@ -44,7 +44,7 @@ Building
     When having compiled the program, you need to link your object files to
     create a single executable. For that to succeed, you need to link with
     libcurl and possibly also with other libraries that libcurl itself depends
-    on. Like OpenSSL librararies, but even some standard OS libraries may be
+    on. Like OpenSSL libraries, but even some standard OS libraries may be
     needed on the command line. To figure out which flags to use, once again
     the 'curl-config' tool comes to the rescue:
 
@@ -88,22 +88,22 @@ Global Preparation
     curl_global_init()
 
  and it takes one parameter which is a bit pattern that tells libcurl what to
- intialize. Using CURL_GLOBAL_ALL will make it initialize all known internal
+ initialize. Using CURL_GLOBAL_ALL will make it initialize all known internal
  sub modules, and might be a good default option. The current two bits that
  are specified are:
 
   CURL_GLOBAL_WIN32 which only does anything on Windows machines. When used on
-  a Windows machine, it'll make libcurl intialize the win32 socket
+  a Windows machine, it'll make libcurl initialize the win32 socket
   stuff. Without having that initialized properly, your program cannot use
   sockets properly. You should only do this once for each application, so if
   your program already does this or of another library in use does it, you
   should not tell libcurl to do this as well.
 
   CURL_GLOBAL_SSL which only does anything on libcurls compiled and built
-  SSL-enabled. On these systems, this will make libcurl init OpenSSL properly
-  for this application. This is only needed to do once for each application so
-  if your program or another library already does this, this bit should not be
-  needed.
+  SSL-enabled. On these systems, this will make libcurl initialize OpenSSL
+  properly for this application. This is only needed to do once for each
+  application so if your program or another library already does this, this
+  bit should not be needed.
 
  libcurl has a default protection mechanism that detects if curl_global_init()
  hasn't been called by the time curl_easy_perform() is called and if that is
@@ -121,7 +121,7 @@ Global Preparation
 
 Features libcurl Provides
 
- It is considered best-practise to determine libcurl features run-time rather
+ It is considered best-practice to determine libcurl features run-time rather
  than build-time (if possible of course). By calling curl_version_info() and
  checking tout he details of the returned struct, your program can figure out
  exactly what the currently running libcurl supports.
@@ -138,7 +138,7 @@ Handle the Easy libcurl
  interface first, so please continue reading for better understanding.
 
  To use the easy interface, you must first create yourself an easy handle. You
- need one handle for each easy session you want to perform. Basicly, you
+ need one handle for each easy session you want to perform. Basically, you
  should use one handle for every thread you plan to use for transferring. You
  must never share the same handle in multiple threads.
 
@@ -155,7 +155,7 @@ Handle the Easy libcurl
  set in the handle until set again to something different. Alas, multiple
  requests using the same handle will use the same options.
 
- Many of the informationals you set in libcurl are "strings", pointers to data
+ Many of the options you set in libcurl are "strings", pointers to data
  terminated with a zero byte. Keep in mind that when you set strings with
  curl_easy_setopt(), libcurl will not copy the data. It will merely point to
  the data. You MUST make sure that the data remains available for libcurl to
@@ -167,7 +167,7 @@ Handle the Easy libcurl
 
     curl_easy_setopt(easyhandle, CURLOPT_URL, "http://curl.haxx.se/");
 
- Let's assume for a while that you want to receive data as the URL indentifies
+ Let's assume for a while that you want to receive data as the URL identifies
  a remote resource you want to get here. Since you write a sort of application
  that needs this transfer, I assume that you would like to get the data passed
  to you directly instead of simply getting it passed to stdout. So, you write
@@ -229,26 +229,21 @@ Handle the Easy libcurl
 Multi-threading issues
 
  libcurl is completely thread safe, except for two issues: signals and alarm
- handlers. Signals are needed for a SIGPIPE handler, and the alarm() syscall
- is used to catch timeouts (mostly during DNS lookup).
+ handlers. Signals are needed for a SIGPIPE handler, and the alarm() Bacall
+ is used to catch timeouts (mostly during ENS lookup).
 
  If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
  then of course using OpenSSL multi-threaded and it has itself a few
- requirements on this. Basicly, you need to provide one or two functions to
+ requirements on this. Basilio, you need to provide one or two functions to
  allow it to function properly. For all details, see this:
 
    http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
 
- When using multiple threads you should first ignore SIGPIPE in your main
- thread and set the CURLOPT_NOSIGNAL option to TRUE for all handles.
-
- Everything will work fine except that timeouts are not honored during the DNS
- lookup - which you can work around by building libcurl with ares-support.
- Ares is a library that provides asynchronous name resolves. Unfortunately,
- ares does not yet support IPv6.
-
- For SIGPIPE info see the UNIX Socket FAQ at
- http://www.unixguide.net/network/socketfaq/2.22.shtml
+ When using multiple threads you should set the CURLOPT_NOSIGNAL option to
+ TRUE for all handles. Everything will work fine except that timeouts are not
+ honored during the DNS lookup - which you can work around by building libcurl
+ with c-ares support. c-ares is a library that provides asynchronous name
+ resolves. Unfortunately, c-ares does not yet support IPv6.
 
  Also, note that CURLOPT_DNS_USE_GLOBAL_CACHE is not thread-safe.
 
@@ -261,10 +256,10 @@ When It Doesn't Work
 
  There's one golden rule when these things occur: set the CURLOPT_VERBOSE
  option to TRUE. It'll cause the library to spew out the entire protocol
- details it sends, some internal info and some received protcol data as well
+ details it sends, some internal info and some received protocol data as well
  (especially when using FTP). If you're using HTTP, adding the headers in the
  received output to study is also a clever way to get a better understanding
- wht the server behaves the way it does. Include headers in the normal body
+ why the server behaves the way it does. Include headers in the normal body
  output with CURLOPT_HEADER set TRUE.
 
  Of course there are bugs left. We need to get to know about them to be able
@@ -352,7 +347,7 @@ Passwords
         curl_easy_setopt(easyhandle, CURLOPT_USERPWD, "myname:thesecret");
 
  Another case where name and password might be needed at times, is for those
- users who need to athenticate themselves to a proxy they use. libcurl offers
+ users who need to authenticate themselves to a proxy they use. libcurl offers
  another option for this, the CURLOPT_PROXYUSERPWD. It is used quite similar
  to the CURLOPT_USERPWD option like this:
 
@@ -392,7 +387,7 @@ HTTP Authentication
  many different ways a client can provide those credentials to the server and
  you can control what way libcurl will (attempt to) use. The default HTTP
  authentication method is called 'Basic', which is sending the name and
- password in clear-text in the HTTP request, base64-encoded. This is unsecure.
+ password in clear-text in the HTTP request, base64-encoded. This is insecure.
 
  At the time of this writing libcurl can be built to use: Basic, Digest, NTLM,
  Negotiate, GSS-Negotiate and SPNEGO. You can tell libcurl which one to use
@@ -437,7 +432,7 @@ HTTP POSTing
     curl_easy_perform(easyhandle); /* post away! */
 
  Simple enough, huh? Since you set the POST options with the
- CURLOPT_POSTFIELDS, this automaticly switches the handle to use POST in the
+ CURLOPT_POSTFIELDS, this automatically switches the handle to use POST in the
  upcoming request.
 
  Ok, so what if you want to post binary data that also requires you to set the
@@ -464,12 +459,12 @@ HTTP POSTing
     curl_slist_free_all(headers); /* free the header list */
 
  While the simple examples above cover the majority of all cases where HTTP
- POST operations are required, they don't do multipart formposts. Multipart
+ POST operations are required, they don't do multi-part formposts. Multi-part
  formposts were introduced as a better way to post (possibly large) binary
- data and was first documented in the RFC1867. They're called multipart
+ data and was first documented in the RFC1867. They're called multi-part
  because they're built by a chain of parts, each being a single unit. Each
  part has its own name and contents. You can in fact create and post a
- multipart formpost with the regular libcurl POST support described above, but
+ multi-part formpost with the regular libcurl POST support described above, but
  that would require that you build a formpost yourself and provide to
  libcurl. To make that easier, libcurl provides curl_formadd(). Using this
  function, you add parts to the form. When you're done adding parts, you post
@@ -563,7 +558,7 @@ Showing Progress
 
 libcurl with C++
 
- There's basicly only one thing to keep in mind when using C++ instead of C
+ There's basically only one thing to keep in mind when using C++ instead of C
  when interfacing libcurl:
 
     "The Callbacks Must Be Plain C"
@@ -590,8 +585,8 @@ Proxies
  as a substitute for another".
 
  Proxies are exceedingly common these days. Companies often only offer
- internet access to employees through their HTTP proxies. Network clients or
- user-agents ask the proxy for docuements, the proxy does the actual request
+ Internet access to employees through their HTTP proxies. Network clients or
+ user-agents ask the proxy for documents, the proxy does the actual request
  and then it returns them.
 
  libcurl has full support for HTTP proxies, so when a given URL is wanted,
@@ -601,7 +596,7 @@ Proxies
  The fact that the proxy is a HTTP proxy puts certain restrictions on what can
  actually happen. A requested URL that might not be a HTTP URL will be still
  be passed to the HTTP proxy to deliver back to libcurl. This happens
- transparantly, and an application may not need to know. I say "may", because
+ transparently, and an application may not need to know. I say "may", because
  at times it is very important to understand that all operations over a HTTP
  proxy is using the HTTP protocol. For example, you can't invoke your own
  custom FTP commands or even proper FTP directory listings.
@@ -622,9 +617,9 @@ Proxies
 
   Environment Variables
 
-    libcurl automaticly checks and uses a set of environment variables to know
-    what proxies to use for certain protocols. The names of the variables are
-    following an ancient de facto standard and are built up as
+    libcurl automatically checks and uses a set of environment variables to
+    know what proxies to use for certain protocols. The names of the variables
+    are following an ancient de facto standard and are built up as
     "[protocol]_proxy" (note the lower casing). Which makes the variable
     'http_proxy' checked for a name of a proxy to use when the input URL is
     HTTP. Following the same rule, the variable named 'ftp_proxy' is checked
@@ -632,11 +627,12 @@ Proxies
     names of the variables simply allows different HTTP proxies to be used.
 
     The proxy environment variable contents should be in the format
-    "[protocol://]machine[:port]". Where the protocol:// part is simply
-    ignored if present (so http://proxy and bluerk://proxy will do the same)
-    and the optional port number specifies on which port the proxy operates on
-    the host. If not specified, the internal default port number will be used
-    and that is most likely *not* the one you would like it to be.
+    "[protocol://][user:password]machine[:port]". Where the protocol:// part
+    is simply ignored if present (so http://proxy and bluerk://proxy will do
+    the same) and the optional port number specifies on which port the proxy
+    operates on the host. If not specified, the internal default port number
+    will be used and that is most likely *not* the one you would like it to
+    be.
 
     There are two special environment variables. 'all_proxy' is what sets
     proxy for any URL in case the protocol specific variable wasn't set, and
@@ -647,7 +643,7 @@ Proxies
   SSL and Proxies
 
     SSL is for secure point-to-point connections. This involves strong
-    encryption and similar things, which effectivly makes it impossible for a
+    encryption and similar things, which effectively makes it impossible for a
     proxy to operate as a "man in between" which the proxy's task is, as
     previously discussed. Instead, the only way to have SSL work over a HTTP
     proxy is to ask the proxy to tunnel trough everything without being able
@@ -678,7 +674,7 @@ Proxies
     operations over a HTTP proxy. You can in fact use things such as FTP
     upload or FTP custom commands this way.
 
-    Again, this is often prevented by the adminstrators of proxies and is
+    Again, this is often prevented by the administrators of proxies and is
     rarely allowed.
 
     Tell libcurl to use proxy tunneling like this:
@@ -692,13 +688,13 @@ Proxies
 
   Proxy Auto-Config
 
-    Netscape first came up with this. It is basicly a web page (usually using
-    a .pac extension) with a javascript that when executed by the browser with
-    the requested URL as input, returns information to the browser on how to
-    connect to the URL. The returned information might be "DIRECT" (which
-    means no proxy should be used), "PROXY host:port" (to tell the browser
-    where the proxy for this particular URL is) or "SOCKS host:port" (to
-    direct the brower to a SOCKS proxy).
+    Netscape first came up with this. It is basically a web page (usually
+    using a .pac extension) with a javascript that when executed by the
+    browser with the requested URL as input, returns information to the
+    browser on how to connect to the URL. The returned information might be
+    "DIRECT" (which means no proxy should be used), "PROXY host:port" (to tell
+    the browser where the proxy for this particular URL is) or "SOCKS
+    host:port" (to direct the browser to a SOCKS proxy).
 
     libcurl has no means to interpret or evaluate javascript and thus it
     doesn't support this. If you get yourself in a position where you face
@@ -716,7 +712,7 @@ Proxies
     - Ask your admins to stop this, for a static proxy setup or similar.
 
 
-Persistancy Is The Way to Happiness
+Persistence Is The Way to Happiness
 
  Re-cycling the same easy handle several times when doing multiple requests is
  the way to go.
@@ -727,11 +723,11 @@ Persistancy Is The Way to Happiness
  reduces network impact a lot.
 
  Even if the connection is dropped, all connections involving SSL to the same
- host again, will benefit from libcurl's session ID cache that drasticly
+ host again, will benefit from libcurl's session ID cache that drastically
  reduces re-connection time.
 
  FTP connections that are kept alive saves a lot of time, as the command-
- response roundtrips are skipped, and also you don't risk getting blocked
+ response round-trips are skipped, and also you don't risk getting blocked
  without permission to login again like on many FTP servers only allowing N
  persons to be logged in at the same time.
 
@@ -757,13 +753,13 @@ Persistancy Is The Way to Happiness
   used for the longest time. This is the default behavior.
 
   CURLCLOSEPOLICY_OLDEST closes the oldest connection, the one that was
-  createst the longest time ago.
+  created the longest time ago.
 
  There are, or at least were, plans to support a close policy that would call
  a user-specified callback to let the user be able to decide which connection
  to dump when this is necessary and therefor is the CURLOPT_CLOSEFUNCTION an
  existing option still today. Nothing ever uses this though and this will not
- be used within the forseeable future either.
+ be used within the foreseeable future either.
 
  To force your upcoming request to not use an already existing connection (it
  will even close one first if there happens to be one alive to the same host
@@ -775,8 +771,8 @@ Persistancy Is The Way to Happiness
 
 HTTP Headers Used by libcurl
 
- When you use libcurl to do HTTP requeests, it'll pass along a series of
- headers automaticly. It might be good for you to know and understand these
+ When you use libcurl to do HTTP requests, it'll pass along a series of
+ headers automatically. It might be good for you to know and understand these
  ones.
 
   Host
@@ -787,7 +783,7 @@ HTTP Headers Used by libcurl
 
   Pragma
 
-    "no-cache". Tells a possible proxy to not grap a copy from the cache but
+    "no-cache". Tells a possible proxy to not grab a copy from the cache but
     to fetch a fresh one.
 
   Accept:
@@ -861,7 +857,7 @@ Customizing Operations
 
        headers = curl_slist_append(headers, "Accept:");
 
-    Both replacing and cancelling internal headers should be done with careful
+    Both replacing and canceling internal headers should be done with careful
     consideration and you should be aware that you may violate the HTTP
     protocol when doing so.
 
@@ -871,7 +867,7 @@ Customizing Operations
     chunked" when doing a non-GET HTTP operation, libcurl will switch over to
     "chunked" upload, even though the size of the data to upload might be
     known. By default, libcurl usually switches over to chunked upload
-    automaticly if the upload data size is unknown.
+    automatically if the upload data size is unknown.
 
   HTTP Version
 
@@ -891,10 +887,10 @@ Customizing Operations
     you want to make for example your FTP transfers to behave differently.
 
     Sending custom commands to a FTP server means that you need to send the
-    comands exactly as the FTP server expects them (RFC959 is a good guide
+    commands exactly as the FTP server expects them (RFC959 is a good guide
     here), and you can only use commands that work on the control-connection
     alone. All kinds of commands that requires data interchange and thus needs
-    a data-connection must be left to libcurl's own judgement. Also be aware
+    a data-connection must be left to libcurl's own judgment. Also be aware
     that libcurl will do its very best to change directory to the target
     directory before doing any transfer, so if you change directory (with CWD
     or similar) you might confuse libcurl and then it might not attempt to
@@ -958,16 +954,16 @@ Cookies Without Chocolate Chips
 
     curl_easy_setopt(easyhandle, CURLOPT_COOKIE, "name1=var1; name2=var2;");
 
- In many cases, that is not enough. You might want to dynamicly save whatever
- cookies the remote server passes to you, and make sure those cookies are then
- use accordingly on later requests.
+ In many cases, that is not enough. You might want to dynamically save
+ whatever cookies the remote server passes to you, and make sure those cookies
+ are then use accordingly on later requests.
 
  One way to do this, is to save all headers you receive in a plain file and
  when you make a request, you tell libcurl to read the previous headers to
  figure out which cookies to use. Set header file to read cookies from with
  CURLOPT_COOKIEFILE.
 
- The CURLOPT_COOKIEFILE option also automaticly enables the cookie parser in
+ The CURLOPT_COOKIEFILE option also automatically enables the cookie parser in
  libcurl. Until the cookie parser is enabled, libcurl will not parse or
  understand incoming cookies and they will just be ignored. However, when the
  parser is enabled the cookies will be understood and the cookies will be kept
@@ -980,7 +976,7 @@ Cookies Without Chocolate Chips
  If you rather use existing cookies that you've previously received with your
  Netscape or Mozilla browsers, you can make libcurl use that cookie file as
  input. The CURLOPT_COOKIEFILE is used for that too, as libcurl will
- automaticly find out what kind of file it is and act accordingly.
+ automatically find out what kind of file it is and act accordingly.
 
  The perhaps most advanced cookie operation libcurl offers, is saving the
  entire internal cookie state back into a Netscape/Mozilla formatted cookie
@@ -1000,7 +996,7 @@ FTP Peculiarities We Need
 
  libcurl can either connect to the server a second time or tell the server to
  connect back to it. The first option is the default and it is also what works
- best for all the people behind firewalls, NATs or IP-masquarading setups.
+ best for all the people behind firewalls, NATs or IP-masquerading setups.
  libcurl then tells the server to open up a new port and wait for a second
  connection. This is by default attempted with EPSV first, and if that doesn't
  work it tries PASV instead. (EPSV is an extension to the original FTP spec
@@ -1073,7 +1069,7 @@ Security Considerations
   .netrc
 
     .netrc is a pretty handy file/feature that allows you to login quickly and
-    automaticly to frequently visited sites. The file contains passwords in
+    automatically to frequently visited sites. The file contains passwords in
     clear text and is a real security risk. In some cases, your .netrc is also
     stored in a home directory that is NFS mounted or used on another network
     based file system, so the clear text password will fly through your
@@ -1087,8 +1083,8 @@ Security Considerations
     Many of the protocols libcurl supports send name and password unencrypted
     as clear text (HTTP Basic authentication, FTP, TELNET etc). It is very
     easy for anyone on your network or a network nearby yours, to just fire up
-    a network analyzer tool and evesdrop on your passwords. Don't let the fact
-    that HTTP uses base64 encoded passwords fool you. They may not look
+    a network analyzer tool and eavesdrop on your passwords. Don't let the
+    fact that HTTP uses base64 encoded passwords fool you. They may not look
     readable at a first glance, but they very easily "deciphered" by anyone
     within seconds.
 
@@ -1100,14 +1096,14 @@ Security Considerations
   Showing What You Do
 
     On a related issue, be aware that even in situations like when you have
-    problems with libcurl and ask somone for help, everything you reveal in
+    problems with libcurl and ask someone for help, everything you reveal in
     order to get best possible help might also impose certain security related
     risks. Host names, user names, paths, operating system specifics etc (not
     to mention passwords of course) may in fact be used by intruders to gain
     additional information of a potential target.
 
     To avoid this problem, you must of course use your common sense. Often,
-    you can just edit out the senstive data or just rearch/replace your true
+    you can just edit out the sensitive data or just search/replace your true
     information with faked data.
 
 
@@ -1152,8 +1148,8 @@ Multiple Transfers Using the multi Interface
  wants to do. Take note that libcurl does also feature some time-out code so
  we advice you to never use very long timeouts on select() before you call
  curl_multi_perform(), which thus should be called unconditionally every now
- and then even if none of its file descriptors have signalled ready. Another
- precation you should use: always call curl_multi_fdset() immediately before
+ and then even if none of its file descriptors have signaled ready. Another
+ precaution you should use: always call curl_multi_fdset() immediately before
  the select() call since the current set of file descriptors may change when
  calling a curl function.
 
@@ -1183,7 +1179,7 @@ Sharing Data Between Easy Handles
 Footnotes:
 
 [1] = libcurl 7.10.3 and later have the ability to switch over to chunked
-      Tranfer-Encoding in cases were HTTP uploads are done with data of an
+      Transfer-Encoding in cases were HTTP uploads are done with data of an
       unknown size.
 
 [2] = This happens on Windows machines when libcurl is built and used as a
