@@ -8,6 +8,24 @@
 
 Version XX
 
+Daniel (8 May 2000):
+- Been working lots on the new lib.
+- Together with Rich Gray <Rich.Gray@PlusTechnologies.com>, I've tried to
+  adjust the configure script to work better on the NCR MP-RAS Unix.
+
+Daniel (2 May 2000):
+- Albert Chin-A-Young pointed out that I had a few too many instructions in
+  configure.in that didn't do any good.
+
+Daniel (24 April 2000):
+- Added a new paragraph to the FAQ about what to do when configure can't
+  find OpenSSL even though it is installed. Supplied by Bob Allison
+  <allisonb@users.sourceforge.net>.
+
+Daniel (12 April 2000):
+- Started messing around big-time to convert the old library interface to a
+  better one...
+
 Daniel (8 April 2000):
 - Made the progress bar look better for file sizes between 9999 kilobytes
   and 100 megabytes. They're now displayed XX.XM.
@@ -19,6 +37,11 @@ Daniel (8 April 2000):
   build the ssl version of curl since I didn't install openssl from an rpm
   package so now the rpm crap thinks I don't have openssl and refuses to build
   a package that depends on ssl... Did I mention I don't get along with RPM?
+- Once again I received a bug report about autoconf not setting -L prior to -l
+  on the command line when checking for libs. In this case it made the native
+  cc compiler on Solaris 7 to fail the OpenSSL check. This has previously been
+  reported to cause problems on HP-UX and is a known flaw in autoconf 2.13. It
+  is a pity there's no newer release around...
 
 Daniel (4 April 2000):
 - Marco G. Salvagno <mgs@whiz.cjb.net> supplied me with two fixes that
