@@ -16,7 +16,7 @@ TODO
    know what cookies that are received. Pushing interface that calls a
    callback on each received cookie? Querying interface that asks about
    existing cookies? We probably need both. Enable applications to modify
-   existing cookies as well.
+   existing cookies as well. http://curl.haxx.se/dev/COOKIES
 
  * Make content encoding/decoding internally be made using a filter system.
 
@@ -50,10 +50,6 @@ TODO
    requested. That is, the download should not even begin but be aborted
    immediately.
 
- * Allow the http_proxy (and other) environment variables to contain user and
-   password as well in the style: http://proxyuser:proxypasswd@proxy:port
-   Berend Reitsma suggested.
-
  LIBCURL - multi interface
 
  * Make sure we don't ever loop because of non-blocking sockets return
@@ -82,46 +78,15 @@ TODO
  * Since USERPWD always override the user and password specified in URLs, we
    might need another way to specify user+password for anonymous ftp logins.
 
- * An option to only download remote FTP files if they're newer than the local
-   one is a good idea, and it would fit right into the same syntax as the
-   already working http dito works (-z). It of course requires that 'MDTM'
-   works, and it isn't a standard FTP command.
-
  * Add FTPS support with SSL for the data connection too.  This should be made
-   according to the specs written in draft-murray-auth-ftp-ssl-08.txt,
-   "Securing FTP with TLS"
-
- * --disable-epsv exists, but for active connections we have no --disable-eprt
-   (or even --disable-lprt).
+   according to the specs written in draft-murray-auth-ftp-ssl-11.txt,
+   "Securing FTP with TLS", valid until September 27th 2003.
+   http://curl.haxx.se/rfc/draft-murray-auth-ftp-ssl-11.txt
 
  HTTP
 
- * If the "body" of the POST is < MSS it really aught to be sent along with
-   the headers. More generally, if the last chunk of the POST body is < MSS,
-   it should be sent with the previous chunk (which may be the POST headers).
-   So long as any one send is larger than MSS (or there is only one send when
-   < MSS :), the Nagle Algorithm will not be a problem on any stack where
-   Nagle is implemented correctly. (pointed out by Rick Jones)
-
- * Authentication: NTLM. Support for that MS crap called NTLM
-   authentication. MS proxies and servers sometime require that. Since that
-   protocol is a proprietary one, it involves reverse engineering and network
-   sniffing. This should however be a library-based functionality. There are a
-   few different efforts "out there" to make open source HTTP clients support
-   this and it should be possible to take advantage of other people's hard
-   work. http://modntlm.sourceforge.net/ is one. There's a web page at
-   http://www.innovation.ch/java/ntlm.html that contains detailed reverse-
-   engineered info.
-
- * RFC2617 compliance, "Digest Access Authentication" A valid test page seem
-   to exist at: http://hopf.math.nwu.edu/testpage/digest/ And some friendly
-   person's server source code is available at
-   http://hopf.math.nwu.edu/digestauth/index.html Then there's the Apache
-   mod_digest source code too of course.  It seems as if Netscape doesn't
-   support this, and not many servers do. Although this is a lot better
-   authentication method than the more common "Basic". Basic sends the
-   password in cleartext over the network, this "Digest" method uses a
-   challange-response protocol which increases security quite a lot.
+ * Digest, NTLM and GSS-Negotiate support for HTTP proxies. They all work
+   on direct-connections to the server.
 
  * Pipelining. Sending multiple requests before the previous one(s) are done.
    This could possibly be implemented using the multi interface to queue
