@@ -145,7 +145,7 @@ if($totalmem) {
     for(keys %sizeataddr) {
         $addr = $_;
         $size = $sizeataddr{$addr};
-        if($size) {
+        if($size > 0) {
             print "At $addr, there's $size bytes.\n";
             print " allocated by ".$getmem{$addr}."\n";
         }
