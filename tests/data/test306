@@ -1,0 +1,51 @@
+#
+# Server-side
+<reply>
+<data>
+No headers at all, just data
+
+Let's get
+
+a little
+
+so that
+
+we
+
+have
+
+some
+
+test
+
+data to
+
+verify
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+ <name>
+HTTPS GET, receive no headers only data!
+ </name>
+ <command>
+-k https://%HOSTIP:%HTTPSPORT/306
+</command>
+</test>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+GET /306 HTTP/1.1
+Host: 127.0.0.1:8433
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
