@@ -558,7 +558,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   ssize_t nread;
   char *buf = data->state.buffer; /* this is our buffer */
   int ftpcode;
-  CURLcode result;
+  CURLcode result=CURLE_OK;
 
   if(data->set.upload) {
     if((-1 != data->set.infilesize) && (data->set.infilesize != *ftp->bytecountp)) {
