@@ -269,7 +269,7 @@ int SetHTTPrequest(HttpReq req, HttpReq *store)
   return 1;
 }
 
-static void helpf(char *fmt, ...)
+static void helpf(const char *fmt, ...)
 {
   va_list ap;
   if(fmt) {
@@ -363,8 +363,8 @@ static void help(void)
 }
 
 struct LongShort {
-  char *letter;
-  char *lname;
+  const char *letter;
+  const char *lname;
   bool extraparam;
 };
 
@@ -573,9 +573,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
   char letter;
   char subletter=0; /* subletters can only occur on long options */
 
-  char *parse=NULL;
+  const char *parse=NULL;
   int res;
-  int j;
+  unsigned int j;
   time_t now;
   int hit=-1;
   bool longopt=FALSE;
@@ -715,7 +715,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       return PARAM_OPTION_UNKNOWN;
     }    
     if(!longopt && aliases[hit].extraparam && parse[1]) {
-      nextarg=&parse[1]; /* this is the actual extra parameter */
+      nextarg=(char *)&parse[1]; /* this is the actual extra parameter */
       singleopt=TRUE;   /* don't loop anymore after this */
     }
     else if((!nextarg || !*nextarg) && aliases[hit].extraparam) {
@@ -1146,7 +1146,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       }
       now=time(NULL);
       config->condtime=curl_getdate(nextarg, &now);
-      if(((unsigned ) ~0) == config->condtime) {
+      if(-1 == (int)config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
         struct stat statbuf;
         if(-1 == stat(nextarg, &statbuf)) {
@@ -1311,10 +1311,10 @@ static int parseconfig(char *filename,
       if(res != PARAM_OK) {
         /* the help request isn't really an error */
         if(!strcmp(filename, "-")) {
-          filename="<stdin>";
+          filename=(char *)"<stdin>";
         }
         if(PARAM_HELP_REQUESTED != res) {
-          char *reason;
+          const char *reason;
           switch(res) {
           default:
           case PARAM_GOT_EXTRA_PARAMETER:
@@ -1623,7 +1623,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     else {
       bool used;
       /* just add the URL please */
-      res = getparameter("--url", argv[i], &used, config);
+      res = getparameter((char *)"--url", argv[i], &used, config);
       if(res)
         return res;
     }

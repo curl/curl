@@ -49,7 +49,7 @@ typedef enum {
 } replaceid;
 
 struct variable {
-  char *name;
+  const char *name;
   replaceid id;
 };
 
@@ -67,7 +67,7 @@ static struct variable replacements[]={
   {"size_upload", VAR_SIZE_UPLOAD},
   {"speed_download", VAR_SPEED_DOWNLOAD},
   {"speed_upload", VAR_SPEED_UPLOAD},
-  {NULL}
+  {NULL, 0}
 };
 
 void ourWriteOut(CURL *curl, char *writeinfo)

@@ -395,7 +395,7 @@ char *match_url(char *filename, URLGlob *glob)
   int stringlen=0;
   char numbuf[18];
   char *appendthis;
-  size_t appendlen;
+  int appendlen;
 
   /* We cannot use the glob_buffer for storage here since the filename may
    * be longer than the URL we use. We allocate a good start size, then
@@ -424,7 +424,7 @@ char *match_url(char *filename, URLGlob *glob)
       switch (pat.type) {
       case UPTSet:
 	appendthis = pat.content.Set.elements[pat.content.Set.ptr_s];
-	appendlen = strlen(pat.content.Set.elements[pat.content.Set.ptr_s]);
+	appendlen = (int)strlen(pat.content.Set.elements[pat.content.Set.ptr_s]);
 	break;
       case UPTCharRange:
         numbuf[0]=pat.content.CharRange.ptr_c;
@@ -435,7 +435,7 @@ char *match_url(char *filename, URLGlob *glob)
       case UPTNumRange:
 	sprintf(numbuf, "%0*d", pat.content.NumRange.padlength, pat.content.NumRange.ptr_n);
         appendthis = numbuf;
-        appendlen = strlen(numbuf);
+        appendlen = (int)strlen(numbuf);
 	break;
       default:
 	printf("internal error: invalid pattern type (%d)\n", pat.type);
