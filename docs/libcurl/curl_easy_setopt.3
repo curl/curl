@@ -332,7 +332,7 @@ want the transfer to start from.
 .B CURLOPT_COOKIE
 Pass a pointer to a zero terminated string as parameter. It will be used to
 set a cookie in the http request. The format of the string should be
-[NAME]=[CONTENTS]; Where NAME is the cookie name.
+\[NAME]=[CONTENTS]; Where NAME is the cookie name.
 
 If you need to set mulitple cookies, you need to set them all using a single
 option and thus you need to concat them all in one single string. Set multiple
@@ -398,7 +398,7 @@ the format of your private key. Supported formats are "PEM", "DER" and "ENG".
 engine. in this case \fICURLOPT_SSLKEY\fP is used as an identifier passed to
 the engine. You have to set the crypto engine with \fICURLOPT_SSL_ENGINE\fP.
 .TP
-.B CURLOPT_SSLKEYASSWD
+.B CURLOPT_SSLKEYPASSWD
 Pass a pointer to a zero terminated string as parameter. It will be used as
 the password required to use the \fICURLOPT_SSLKEY\fP private key. If the
 password is not supplied, you will be prompted for
