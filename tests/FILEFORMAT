@@ -1,0 +1,52 @@
+ The file format of the test suite is a very simple and extendable format. All
+data for a single test case resides in a single ASCII file. Labels mark the
+beginning and the end of all sections. Each label must be written in its own
+line and is resembling XML/HTML.
+
+ Each file is split up in three main sections: reply, client and verify. The
+reply section is used for the server to know what to send as a reply for the
+requests curl sends, the client section defines how the client should behave
+while the verify section defines how to verify that the data stored after a
+command has been run ended up correctly.
+
+ Each main section has a number of available subsections that can be
+specified, that will be checked/used if specified. This document includes all
+the subsections currently supported.
+
+<reply>
+<data>
+data to sent to the client on its request
+</data>
+<datacheck>
+if the data is sent but this is what should be checked afterwards
+</datacheck>
+<size>
+number to return on a ftp SIZE command
+</size>
+</reply>
+
+<client>
+<name>
+test case description
+</name>
+<command>
+command line to run, there's a bunch of %variables that get replaced
+accordingly. more about them elsewhere
+</command>
+<file name="log/filename">
+this creates the named file with this content before the test case is run
+which is useful if the test case needs a file to act on.
+</file>
+</client>
+
+<verify>
+<errorcode>
+numerical error code curl is supposed to return
+</errorcode>
+<protocol>
+the protocol dump curl should transmit
+</protocol>
+<upload>
+the contents of the upload data curl should have sent
+</upload>
+</verify>
