@@ -6,6 +6,34 @@
 
                                History of Changes
 
+Daniel (30 May 2001)
+- Cris Bailiff wrote a makefile for building Solaris packages.
+
+- Sterling Hughes brought fixes for 'buildconf' (the build-from-CVS tool) and
+  we discussed and added a few CURL_GLOBAL_* flags in include/curl.h
+
+- Kjetil Jacobsen privately announced his python interface to libcurl,
+  available at http://pycurl.sourceforge.net/
+
+Daniel (29 May 2001)
+- Sterling Hughes fixed a strtok() problem in libcurl. It is not a thread-
+  safe function. Now configure checks for a thread-safe version, and
+  lib/strtok.c offers one for the systems that don't come with one included!
+
+- Mettgut Jamalla correctly pointed out that the -# progress bar was written
+  to stderr even though --stderr redirection was used. This is now corrected.
+
+- I moved out the list of contributors from the curl.1 man page and made a
+  separate docs/THANKS file. It makes the list easier to find, and made it
+  easier for me to make a separate web page with that same information.
+
+  I really do want all you guys mentioned in there to feel you get the credit
+  you deserve.
+
+- lib/easy.c didn't compile properly in the 7.8-pre1 due to a silly mistake
+
+Version 7.8-pre1
+
 Daniel (28 May 2001)
 - curl-config now supports '--vernum' that outputs a plain hexadecimal version
   of the libcurl version number (using 8 bits for each 3 numbers). Version
@@ -24,12 +52,12 @@ Daniel (28 May 2001)
 
   *** UPGRADE NOTICE ***
 
-  If you write applications using libcurl, you really want to use two
+  If you write applications using libcurl, you really want to use the two
   functions mentioned above !!!
 
   I can't say I think this is a very beautiful solution, but as OpenSSL
-  insists on making lots of stuff on a "global" scope, we're forced to dance
-  to their pipe.
+  insists on making lots of stuff on a "global" scope, we're forced to walk
+  the path they point us to.
 
 - Moving more test cases into the new file format.
 
