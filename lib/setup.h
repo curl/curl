@@ -116,6 +116,15 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #endif
 #endif
 
+#ifdef HAVE_MSG_NOSIGNAL
+/* If we have the MSG_NOSIGNAL define, we make sure to use that in the forth
+   argument to send() and recv() */
+#define SEND_4TH_ARG MSG_NOSIGNAL
+#else
+#define SEND_4TH_ARG 0
+#endif
+
+
 /* Below we define four functions. They should
    1. close a socket
    2. read from a socket
@@ -139,14 +148,14 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 
 #if !defined(__GNUC__) || defined(__MINGW32__)
 #define sclose(x) closesocket(x)
-#define sread(x,y,z) recv(x,y,z,0)
-#define swrite(x,y,z) (size_t)send(x,y,z,0)
+#define sread(x,y,z) recv(x,y,z, SEND_4TH_ARG)
+#define swrite(x,y,z) (size_t)send(x,y,z, SEND_4TH_ARG)
 #undef HAVE_ALARM
 #else
      /* gcc-for-win is still good :) */
 #define sclose(x) close(x)
-#define sread(x,y,z) recv(x,y,z,0)
-#define swrite(x,y,z) send(x,y,z,0)
+#define sread(x,y,z) recv(x,y,z, SEND_4TH_ARG)
+#define swrite(x,y,z) send(x,y,z, SEND_4TH_ARG)
 #define HAVE_ALARM
 #endif
 
@@ -171,12 +180,12 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 
 #ifdef __BEOS__
 #define sclose(x) closesocket(x)
-#define sread(x,y,z) (ssize_t)recv(x,y,z,0)
-#define swrite(x,y,z) (ssize_t)send(x,y,z,0)
+#define sread(x,y,z) (ssize_t)recv(x,y,z, SEND_4TH_ARG)
+#define swrite(x,y,z) (ssize_t)send(x,y,z, SEND_4TH_ARG)
 #else
 #define sclose(x) close(x)
-#define sread(x,y,z) recv(x,y,z,0)
-#define swrite(x,y,z) send(x,y,z,0)
+#define sread(x,y,z) recv(x,y,z, SEND_4TH_ARG)
+#define swrite(x,y,z) send(x,y,z, SEND_4TH_ARG)
 #endif
 
 #define HAVE_ALARM
