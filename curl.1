@@ -297,14 +297,14 @@ HTTP 1.1 specification for details and explanations.
 (FTP)
 Specifies a custom FTP command to use instead of LIST when doing file lists
 with ftp.
-.IP "-y/--speed-time <speed>"
-Speed Limit. If a download is slower than this given speed, in bytes
-per second, for Speed Time seconds it gets aborted. Speed Time is set
-with -Y and is 30 if not set.
-.IP "-Y/--speed-limit <time>"
-Speed Time. If a download is slower than Speed Limit bytes per second
-during a Speed Time period, the download gets aborted. If Speed Time
-is used, the default Speed Limit will be 1 unless set with -y.
+.IP "-y/--speed-time <time>"
+If a download is slower than speed-limit bytes per second during a speed-time
+period, the download gets aborted. If speed-time is used, the default
+speed-limit will be 1 unless set with -y.
+.IP "-Y/--speed-limit <speed>"
+If a download is slower than this given speed, in bytes per second, for
+speed-time seconds it gets aborted. speed-time is set with -Y and is 30 if
+not set.
 .IP "-z/--time-cond <date expression>"
 (HTTP)
 Request to get a file that has been modified later than the given time and
