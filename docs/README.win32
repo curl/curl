@@ -17,3 +17,8 @@ README.win32
   freely available nroff binary for win32 (*pointers appriciated*), convert
   the files into plain-text on your neighbor's unix machine or run over to the
   curl web site and view them as plain HTML.
+
+  The main curl.1 man page is "built-in". Use a command line similar to this
+  in order to extract a separate text file:
+
+        curl -M >manual.txt
