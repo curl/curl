@@ -9,16 +9,16 @@ TODO
  Things to do in project cURL. Please tell me what you think, contribute and
  send me patches that improve things!
 
-To do for the next release:
-
- * Make sure SSL works even when IPv6 is enabled. We just can't connect to
-   IPv6 sites and use SSL, but we should detect that particular condition
-   and warn about it.
-
- * Make SSL session ids get used if multiple HTTPS documents from the same
-   host is requested.
 
 To do in a future release (random order):
+
+ * Make SSL session ids get used if multiple HTTPS documents from the same
+   host is requested. Note: is this really prioritized now with the persistent
+   connections?
+
+ * Make ftps:// work properly (test case 400+ in CVS)
+
+ * Suggested on the mailing list: CURLOPT_FTP_MKDIR...!
 
  * Rewrite parts of the test suite. Make a (XML?) format to store all
    test-data in a single for a single test case. The current system makes far
@@ -30,9 +30,8 @@ To do in a future release (random order):
    decrease footprint.  '--disable-[protocol]' where protocol is http, ftp,
    telnet, ldap, dict or file.
 
- * Extend the test suite to include telnet and https. The telnet could just do
-   ftp or http operations (for which we have test servers) and the https would
-   probably work against/with some of the openssl tools.
+ * Extend the test suite to include telnet. The telnet could just do ftp or
+   http operations (for which we have test servers).
 
  * Add a command line option that allows the output file to get the same time
    stamp as the remote file. libcurl already is capable of fetching the remote
@@ -45,8 +44,6 @@ To do in a future release (random order):
 
  * Add asynchronous name resolving, as this enables full timeout support for
    fork() systems.
-
- * Non-blocking connect(), also to make timeouts work on windows.
 
  * Move non-URL related functions that are used by both the lib and the curl
    application to a separate "portability lib".
