@@ -24,7 +24,7 @@ EXTRA_DIST = MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS SSLCERTS	\
 	     VERSIONS KNOWN_BUGS BINDINGS $(man_MANS) $(HTMLPAGES) \
 	     HISTORY INSTALL libcurl-the-guide $(PDFPAGES)
 
-MAN2HTML= gnroff -man $< | man2html >$@
+MAN2HTML= $(NROFF) -man $< | man2html >$@
 
 SUFFIXES = .1 .3 .html .pdf
 

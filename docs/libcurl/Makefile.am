@@ -122,7 +122,7 @@ CLEANFILES = $(HTMLPAGES) $(PDFPAGES)
 
 EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES)
 
-MAN2HTML= gnroff -man $< | man2html >$@
+MAN2HTML= $(NROFF) -man $< | man2html >$@
 
 SUFFIXES = .3 .html
 
