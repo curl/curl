@@ -125,6 +125,10 @@ this creates the named file with this content before the test case is run
 which is useful if the test case needs a file to act on.
 </file>
 
+<stdin>
+Pass this given data on stdin to the tool.
+</stdin>
+
 </client>
 
 <verify>
