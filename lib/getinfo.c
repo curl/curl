@@ -31,13 +31,31 @@
 #include <string.h>
 #include <stdarg.h>
 
-CURLcode Curl_getinfo(CURL *curl, CURLINFO info, ...)
+/*
+ * This is supposed to be called in the beginning of a permform() session
+ * and should reset all session-info variables
+ */
+CURLcode Curl_initinfo(struct UrlData *data)
+{
+  struct Progress *pro = &data->progress;
+
+  pro->t_nslookup = 0;
+  pro->t_connect = 0;
+  pro->t_pretransfer = 0;
+
+  pro->httpcode = 0;
+  pro->httpversion=0;
+  pro->filetime=0;
+
+  return CURLE_OK;
+}
+
+CURLcode Curl_getinfo(struct UrlData *data, CURLINFO info, ...)
 {
   va_list arg;
   long *param_longp;
   double *param_doublep;
   char **param_charp;
-  struct UrlData *data = (struct UrlData *)curl;
   va_start(arg, info);
 
   switch(info&CURLINFO_TYPEMASK) {
