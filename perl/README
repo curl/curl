@@ -11,7 +11,8 @@ elegantly used from within it. You can either invoke external curl command
 line or use the curl interface.
 
  Georg Horn's Perl interface to curl is available in the Curl_easy/
-subdirectory.
+subdirectory. Using the Curl::easy module is just straightforward and
+works much like using libcurl in a C programm, so please refer to the
+documentation of libcurl. Have a look at test.pl to get an idea of how
+to start.
 
- Unfortunately, we don't have any examples nor any documentation for it at
-this point.
