@@ -29,14 +29,9 @@
 #include <curl/curl.h>
 #include "urldata.h"
 
-char *curl_version(void)
-{
-  static char version[200];
-  char *ptr;
-  strcpy(version, LIBCURL_NAME "/" LIBCURL_VERSION );
-  ptr=strchr(version, '\0');
-
 #ifdef USE_SSLEAY
+static void getssl_version(char *ptr, long *num)
+{
 
 #if (SSLEAY_VERSION_NUMBER >= 0x905000)
   {
@@ -44,6 +39,7 @@ char *curl_version(void)
     unsigned long ssleay_value;
     sub[1]='\0';
     ssleay_value=SSLeay();
+    *num = ssleay_value;
     if(ssleay_value < 0x906000) {
       ssleay_value=SSLEAY_VERSION_NUMBER;
       sub[0]='\0';
@@ -64,6 +60,7 @@ char *curl_version(void)
   }
 
 #else
+  *num = SSLEAY_VERSION_NUMBER;
 #if (SSLEAY_VERSION_NUMBER >= 0x900000)
   sprintf(ptr, " OpenSSL/%lx.%lx.%lx",
           (SSLEAY_VERSION_NUMBER>>28)&0xff,
@@ -86,7 +83,23 @@ char *curl_version(void)
   }
 #endif
 #endif
-  ptr=strchr(ptr, '\0');
+}
+
+#endif
+
+char *curl_version(void)
+{
+  static char version[200];
+  char *ptr;
+  long num;
+  strcpy(version, LIBCURL_NAME "/" LIBCURL_VERSION );
+  ptr=strchr(version, '\0');
+
+#ifdef USE_SSLEAY
+  getssl_version(ptr, &num);
+  ptr=strchr(version, '\0');
+#else
+  (void)num; /* no compiler warning please */
 #endif
 
 #ifdef KRB4
@@ -141,14 +154,40 @@ static const curl_runtime_protocol_info protocols[] = {
   { NULL }
 };
 
-static const curl_version_info_data version_info = {
+static curl_version_info_data version_info = {
   LIBCURL_VERSION,
   LIBCURL_VERSION_NUM,
-  &protocols
+  0 /* features is 0 by default */
+#ifdef ENABLE_IPV6
+  | CURL_VERSION_IPV6
+#endif
+#ifdef KRB4
+  | CURL_VERSION_KERBEROS4
+#endif
+  ,
+  NULL, /* ssl_version */
+  0,    /* ssl_version_num */
+  NULL, /* zlib_version */
+  protocols
 };
 
 const curl_version_info_data *curl_version_info(void)
 {
+#ifdef USE_SSLEAY
+  static char ssl_buffer[80];
+  long num;
+  getssl_version(ssl_buffer, &num);
+
+  version_info.ssl_version = ssl_buffer;
+  version_info.ssl_version_num = num;
+  /* SSL stuff is left zero if undefined */
+#endif
+
+#ifdef HAVE_LIBZ
+  version_info.libz_version = zlibVersion();
+  /* libz left NULL if non-existing */
+#endif
+
   return &version_info;
 }
 
