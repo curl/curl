@@ -311,7 +311,7 @@ void Curl_krb_kauth(struct connectdata *conn)
 	
   int save;
 
-  save = set_command_prot(conn, prot_private);
+  save = Curl_set_command_prot(conn, prot_private);
 
   Curl_ftpsendf(conn->firstsocket, conn,
                 "SITE KAUTH %s", conn->data->user);
@@ -322,7 +322,7 @@ void Curl_krb_kauth(struct connectdata *conn)
     return /*CURLE_OPERATION_TIMEOUTED*/;
 
   if(/*ret != CONTINUE*/conn->data->buffer[0] != '3'){
-    set_command_prot(conn, save);
+    Curl_set_command_prot(conn, save);
     /*code = -1;***/
     return;
   }
@@ -330,7 +330,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   p = strstr(conn->data->buffer, "T=");
   if(!p) {
     printf("Bad reply from server.\n");
-    set_command_prot(conn, save);
+    Curl_set_command_prot(conn, save);
     return;
   }
 
@@ -338,7 +338,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   tmp = Curl_base64_decode(p, &tkt.dat);
   if(tmp < 0) {
     printf("Failed to decode base64 in reply.\n");
-    set_command_prot(conn, save);
+    Curl_set_command_prot(conn, save);
     return;
   }
   tkt.length = tmp;
@@ -347,7 +347,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   p = strstr(conn->data->buffer, "P=");
   if(!p) {
     printf("Bad reply from server.\n");
-    set_command_prot(conn, save);
+    Curl_set_command_prot(conn, save);
     return;
   }
   name = p + 2;
@@ -375,7 +375,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   memset(passwd, 0, sizeof(passwd));
   if(Curl_base64_encode(tktcopy.dat, tktcopy.length, &p) < 0) {
     failf(conn->data, "Out of memory base64-encoding.\n");
-    set_command_prot(conn, save);
+    Curl_set_command_prot(conn, save);
     return;
   }
   memset (tktcopy.dat, 0, tktcopy.length);
@@ -388,7 +388,7 @@ void Curl_krb_kauth(struct connectdata *conn)
   if(nread < 0)
     return /*CURLE_OPERATION_TIMEOUTED*/;
   free(p);
-  set_command_prot(conn, save);
+  Curl_set_command_prot(conn, save);
 }
 
 #endif /* KRB4 */
