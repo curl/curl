@@ -6,6 +6,13 @@
 
                                History of Changes
 
+Daniel (11 January 2001)
+- Short options to curl that requires parameters can now be specified without
+  having the option and its parameter space separated. -ofile works as good as
+  -o file. -m20 is equal to -m 20. Do note that this goes for single-letter
+  options only, verbose --long-style options still must be separated with
+  space from their parameters.
+
 Daniel (8 January 2001)
 - Francis Dagenais reported that the SCO compiler still fails when compiling
   curl due to that getpass_r() prototype. I've now put it around #ifndef

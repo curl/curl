@@ -16,10 +16,6 @@ For the future
  * Make SSL session ids get used if multiple HTTPS documents from the same
    host is requested.
 
- * Improve the command line option parser to accept '-m300' as well as the '-m
-   300' convention. It should be able to work if '-m300' is considered to be
-   space separated to the next option.
-
  * Make the curl tool support URLs that start with @ that would then mean that
    the following is a plain list with URLs to download. Thus @filename.txt
    reads a list of URLs from a local file. A fancy option would then be to
@@ -31,8 +27,8 @@ For the future
    noticable when there's a resume going on.
 
  * Add a command line option that allows the output file to get the same time
-   stamp as the remote file. This requires some fiddling on FTP but comes
-   almost free for HTTP.
+   stamp as the remote file. We already are capable of fetching the remote
+   file's date.
 
  * Make the SSL layer option capable of using the Mozilla Security Services as
    an alternative to OpenSSL:
@@ -43,6 +39,7 @@ For the future
 
  * Make the easy-interface support multiple file transfers. If they're done
    to the same host, they should use persistant connections or similar.
+   Figure out a nice design for this.
 
  * Add asynchronous name resolving, as this enables full timeout support for
    fork() systems.
