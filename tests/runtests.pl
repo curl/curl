@@ -42,6 +42,9 @@ my $HTTPSPIDFILE=".https.pid";
 my $FTPPIDFILE=".ftp.pid";
 my $FTPSPIDFILE=".ftps.pid";
 
+# invoke perl like this:
+my $perl="perl -I$srcdir";
+
 # this gets set if curl is compiled with memory debugging:
 my $memory_debug=0;
 
@@ -135,9 +138,10 @@ sub runhttpserver {
 
     if ($pid <= 0) {
         my $flag=$debugprotocol?"-v ":"";
-        system("perl $srcdir/httpserver.pl $flag $HOSTPORT &");
+        my $cmd="$perl $srcdir/httpserver.pl $flag $HOSTPORT &";
+        system($cmd);
         if($verbose) {
-            print "httpd started\n";
+            print "CMD: $cmd\n";
         }
     }
     else {
@@ -178,9 +182,10 @@ sub runhttpsserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    system("perl $srcdir/httpsserver.pl $flag -r $HOSTPORT $HTTPSPORT &");
+    my $cmd="$perl $srcdir/httpsserver.pl $flag -r $HOSTPORT $HTTPSPORT &";
+    system($cmd);
     if($verbose) {
-        print "httpd stunnel started\n";
+        print "CMD: $cmd\n";
     }
 }
 
@@ -206,15 +211,11 @@ sub runftpserver {
             exit;
         }
 
-        if($debugprotocol) {
-            print "* Starts ftp server verbose:\n";
-            print "perl $srcdir/ftpserver.pl $flag $FTPPORT &\n";
-        }
-        system("perl $srcdir/ftpserver.pl $flag $FTPPORT &");
-
+        my $cmd="$perl $srcdir/ftpserver.pl $flag $FTPPORT &";
         if($verbose) {
-            print "ftpd started\n";
+            print "CMD: $cmd\n";
         }
+        system($cmd);
     }
     else {
         if($verbose) {
@@ -255,10 +256,10 @@ sub runftpsserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="perl $srcdir/ftpsserver.pl $flag -r $FTPPORT $FTPSPORT &";
+    my $cmd="$perl $srcdir/ftpsserver.pl $flag -r $FTPPORT $FTPSPORT &";
     system($cmd);
     if($verbose) {
-        print "ftpd stunnel started\n";
+        print "CMD: $cmd\n";
     }
 }
 
@@ -315,8 +316,7 @@ sub filteroff {
 #
 
 sub compare {
-    # filter off the 4 pattern before compare!
-
+    # filter off patterns _before_ this comparison!
     my ($firstref, $secondref)=@_;
 
     my $result = compareparts($firstref, $secondref);
@@ -449,13 +449,26 @@ sub singletest {
         unlink($memdump);
     }
 
+    my @inputfile=getpart("client", "file");
+    if(@inputfile) {
+        # we need to generate a file before this test is invoked
+        my %hash = getpartattr("client", "file");
+
+        my $filename=$hash{'name'};
+        if(!$filename) {
+            print "ERROR: section client=>file has no name attribute!\n";
+            exit;
+        }
+        writearray($filename, \@inputfile);
+    }
+
     my $out="";
     if (!@validstdout) {
         $out="--output $CURLOUT ";
     }
 
     # run curl, add -v for debug information output
-    my $cmdargs="$out--include -v --silent $cmd";
+    my $cmdargs="$out--include -v $cmd";
 
     my @stdintest = getpart("verify", "stdin");
 
@@ -554,7 +567,9 @@ sub singletest {
         my @strip = getpart("verify", "strip");
         @out = striparray( $strip[0], \@out);
 
-        $res = compare(\@out, \@protocol);
+        my @protstrip= striparray($strip[0], \@protocol);
+
+        $res = compare(\@out, \@protstrip);
         if($res) {
             print " protocol FAILED";
             return 1;
@@ -562,6 +577,28 @@ sub singletest {
         if(!$short) {
             print " protocol OK";
         }
+    }
+
+    my @outfile=getpart("verify", "file");
+    if(@outfile) {
+        # we're supposed to verify a dynamicly generated file!
+        my %hash = getpartattr("verify", "file");
+
+        my $filename=$hash{'name'};
+        if(!$filename) {
+            print "ERROR: section verify=>file has no name attribute!\n";
+            exit;
+        }
+        my @generated=loadarray($filename);
+
+        $res = compare(\@generated, \@outfile);
+        if($res) {
+            print " output FAILED";
+            return 1;
+        }
+        if(!$short) {
+            print " output OK";
+        }        
     }
 
     if(!$keepoutfiles) {
@@ -856,4 +893,7 @@ else {
 }
 if($skipped) {
     print "$skipped tests were skipped due to restraints\n";
+}
+if($total && ($ok != $total)) {
+    exit 1;
 }
