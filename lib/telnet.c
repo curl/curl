@@ -1207,10 +1207,11 @@ CURLcode Curl_telnet(struct connectdata *conn)
       char *buffer = buf;
 
       for(;;) {
-        if(!PeekNamedPipe(stdin_handle,NULL,0,NULL,&nread,NULL)) {
+        if(!PeekNamedPipe(stdin_handle, NULL, 0, NULL, &readfile_read, NULL)) {
           keepon = FALSE;
           break;
         }
+        nread = readfile_read;
 
         if(!nread)
           break;
