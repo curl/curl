@@ -42,14 +42,16 @@
 
 #include "timeval.h"
 
-#if 0
-void ProgressInit(struct UrlData *data, int max);
-void ProgressShow(struct UrlData *data,
-                  int point, struct timeval start, struct timeval now, bool force);
-void ProgressEnd(struct UrlData *data);
-void ProgressMode(int mode);
-#endif
 
+typedef enum {
+  TIMER_NONE,
+  TIMER_NAMELOOKUP,
+  TIMER_CONNECT,
+  TIMER_PRETRANSFER,
+  TIMER_POSTRANSFER,
+  TIMER_LAST /* must be last */
+} timerid;
+  
 void pgrsMode(struct UrlData *data, int mode);
 void pgrsStartNow(struct UrlData *data);
 void pgrsSetDownloadSize(struct UrlData *data, double size);
@@ -57,6 +59,7 @@ void pgrsSetUploadSize(struct UrlData *data, double size);
 void pgrsSetDownloadCounter(struct UrlData *data, double size);
      void pgrsSetUploadCounter(struct UrlData *data, double size);
 void pgrsUpdate(struct UrlData *data);
+void pgrsTime(struct UrlData *data, timerid timer);
 
 
 /* Don't show progress for sizes smaller than: */
@@ -76,15 +79,5 @@ void pgrsUpdate(struct UrlData *data);
 
 #define PGRS_HEADERS_OUT (1<<7) /* set when the headers have been written */
 
-
-typedef enum {
-  TIMER_NONE,
-  TIMER_NAMELOOKUP,
-  TIMER_CONNECT,
-  TIMER_PRETRANSFER,
-  TIMER_POSTRANSFER,
-  TIMER_LAST /* must be last */
-} timerid;
-  
 
 #endif /* __PROGRESS_H */
