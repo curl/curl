@@ -20,9 +20,9 @@
 #
 # $Id$
 ###########################################################################
-EXTRA_DIST = ftpserver.pl httpserver.pl httpsserver.pl runtests.pl \
-	     ftpsserver.pl getpart.pm FILEFORMAT README \
-	     stunnel.pem memanalyze.pl testcurl.pl
+EXTRA_DIST = ftpserver.pl httpserver.pl httpsserver.pl runtests.pl	\
+ ftpsserver.pl getpart.pm FILEFORMAT README stunnel.pem memanalyze.pl	\
+ testcurl.pl valgrind.pm
 
 SUBDIRS = data server libtest
 
