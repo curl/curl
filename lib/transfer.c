@@ -158,8 +158,19 @@ compareheader(char *headerline, /* line to check */
   return FALSE; /* no match */
 }
 
-/* Parts of this function was written by the friendly Mark Butler
-   <butlerm@xmission.com>. */
+/*
+ * Transfer()
+ *
+ * This function is what performs the actual transfer. It is capable of
+ * doing both ways simultaneously.
+ * The transfer must already have been setup by a call to Curl_Transfer().
+ *
+ * Note that headers are created in a preallocated buffer of a default size.
+ * That buffer can be enlarged on demand, but it is never shrinken again.
+ *
+ * Parts of this function was once written by the friendly Mark Butler
+ * <butlerm@xmission.com>.
+ */
 
 CURLcode static
 Transfer(struct connectdata *c_conn)
@@ -316,7 +327,11 @@ Transfer(struct connectdata *c_conn)
                 /* no more complete header lines within buffer */
                 /* copy what is remaining into headerbuff */
                 int str_length = (int)strlen(str);
-                
+
+                /*
+                 * We enlarge the header buffer if it seems to be too
+                 * smallish
+                 */
                 if (hbuflen + (int)str_length >= data->headersize) {
                   char *newbuff;
                   long newsize=MAX((hbuflen+str_length)*3/2,
@@ -339,6 +354,12 @@ Transfer(struct connectdata *c_conn)
 
               str = end_ptr + 1;	/* move just past new line */
 
+              /*
+               * We're about to copy a chunk of data to the end of the
+               * already received header. We make sure that the full string
+               * fit in the allocated header buffer, or else we enlarge 
+               * it.
+               */
               if (hbuflen + (str - str_start) >= data->headersize) {
                 char *newbuff;
                 long newsize=MAX((hbuflen+(str-str_start))*3/2,
@@ -362,23 +383,17 @@ Transfer(struct connectdata *c_conn)
               
               p = data->headerbuff;
               
-              /* we now have a full line that p points to */
-              if (('\n' == *p) || ('\r' == *p)) {
-                /* Zero-length line means end of header! */
-#if 0
-                if (-1 != conn->size)	/* if known */
-                  conn->size += bytecount; /* we append the already read
-                                              size */
-#endif
+              /****
+               * We now have a FULL header line that p points to
+               *****/
 
+              if (('\n' == *p) || ('\r' == *p)) {
+                /* Zero-length header line means end of headers! */
 
                 if ('\r' == *p)
                   p++;		/* pass the \r byte */
                 if ('\n' == *p)
                   p++;		/* pass the \n byte */
-#if 0 /* headers are not included in the size */
-                Curl_pgrsSetDownloadSize(data, conn->size);
-#endif
 
                 if(100 == httpcode) {
                   /*
@@ -409,7 +424,7 @@ Transfer(struct connectdata *c_conn)
 
                 if(!header) {
                   /*
-                   * end-of-headers.
+                   * really end-of-headers.
                    *
                    * If we requested a "no body", this is a good time to get
                    * out and return home.
@@ -441,6 +456,10 @@ Transfer(struct connectdata *c_conn)
                 hbuflen = 0;
                 continue;
               }
+
+              /*
+               * Checks for special headers coming up.
+               */
               
               if (!headerline++) {
                 /* This is the first header, it MUST be the error code line
@@ -584,6 +603,10 @@ Transfer(struct connectdata *c_conn)
                 conn->newurl = strdup(start); /* clone string */
                 *ptr = backup; /* restore ending letter */
               }
+
+              /*
+               * End of header-checks. Write them to the client.
+               */
 
               writetype = CLIENTWRITE_HEADER;
               if (data->bits.http_include_header)
@@ -792,6 +815,12 @@ Transfer(struct connectdata *c_conn)
       }
     }
   }
+
+  /*
+   * The tranfer has been performed. Just make some general checks before
+   * returning.
+   */
+
   if(!(data->bits.no_body) && contentlength &&
      (bytecount != contentlength)) {
     failf(data, "transfer closed with %d bytes remaining to read",
