@@ -5,13 +5,14 @@ Curl is a tool for transferring files with URL syntax, supporting
   cookies, user+password authentication, file transfer resume,
   http proxy tunneling and a busload of other useful tricks.
 
-See /usr/doc/curl-<version>/FEATURES for more info.
+See /usr/doc/curl-$(VERSION)/FEATURES for more info.
 
 
 Dependencies:
   - Cygwin
   - OpenSSL 0.9.6b-2+ (*)
-  (*) cURL can be built without SSL support:  ./configure --without-ssl
+
+  (*) cURL can be built without SSL support, see below for details
 
 
 Canonical Homepage and Downloads:
@@ -24,14 +25,14 @@ Cygwin specific source files (a .README template and a Makefile
   CVS at: <srctop>/packages/Win32/cygwin/
 
 
-Build Instructions (as distributed via cygwin's setup.exe):
-  (NOTE: as of curl 7.9.1, compiles/tests 100% cleanly OOTB under cygwin)
-
-  Download the source, unpack it to a location of your choosing, and then:
+Build Instructions (to recompile from the cygwin source tarball):
+  ---STANDARD (with SSL) RELEASE---
+  Download the source (either the official release or the cygwin version),
+  unpack it (done for you if using setup.exe), then:
 
   $ ./configure --prefix=/usr 
   $ make
-  $ make test    # optional, requires perl
+  $ make test    # optional
   $ make install # (*)
 
   (*) LibTool 1.4.2 had a bug related to cygwin's use of ".exe" extensions,
@@ -39,33 +40,49 @@ Build Instructions (as distributed via cygwin's setup.exe):
         http://mail.gnu.org/pipermail/libtool/2001-September/005549.html
       The copy of ltmain.sh that is distributed with cURL includes this patch.
 
+  As of curl 7.9.1, the official source compiles (under Cygwin) and tests 
+    100% cleanly OOTB (Out Of The Box)
+
+  ---NO SSL RELEASE---
+  Same as standard, except for the configure step, which changes to:
+
+  $ ./configure --prefix=/usr --without-ssl
+
+  NOTE: the standard release is what is available via Cygwin's setup.exe;
+    the no-ssl release is only available from the curl website
+
 
 Packaging Instructions:
   ---BINARY---
-  Compile cleanly (./configure + make). Then:
+  Compile cleanly as described above, then:
 
   $ make cygwinbin CYGBUILD=n
 
-  where n is the cygwin release number (e.g. the "1" in curl-7.9-1).
-  If you leave off "CYGBUILD=n", n defaults to 1.
+  where n is the cygwin release number (e.g. the "1" in curl-7.9-1),
+  and "CYGBUILD=n" is optional (n defaults to 1 if not specified)
   
-  Assuming everything worked properly, you'll find your binary tarball
-  in the packages/Win32/cygwin/ sub-directory.
+  Assuming everything worked, you'll find your binary tarballs in
+   $(buildtop)/packages/Win32/cygwin/
 
   ---SOURCE---
-  1. unpack the pristine source into an otherwise empty directory
+  1. download & unpack the pristine source
   2. rename the source dir to add the "-$(REL)" suffix, e.g.:
      $ mv curl-7.9 curl-7.9-1
+  3. unpack the pristine source once more, so you'll end up
+     with 2 directories: "curl-7.9" and "curl-7.9-1" in this example
   3. add a CYGWIN-PATCHES directory, and add this readme to it
-     $ cd curl-7.9-$(REL); mkdir CYGWIN-PATCHES
-     $ cp packages/Win32/cygwin/README CYGWIN-PATCHES/curl-7.9-$(REL).README
+     $ cd curl-7.9-1; mkdir CYGWIN-PATCHES
+     $ cp packages/Win32/cygwin/README CYGWIN-PATCHES/curl-7.9-1.README
   4. if applicable, document any changes in the README file
-  5. create a patch which, when applied (patch -p1 < curl-7.9-$(REL).patch) 
-     will remove any patches you've applied:
+  5. create a patch which, when applied 
+     (using `patch -p1 < curl-7.9-$(REL).patch`) 
+     will remove any changes you've made to the pristine source:
      $ cd ..
-     $ diff -Nrup (patched-src-dir) (pristine-src-dir) > curl-7.9-$(REL).patch
+     $ diff -Nrup curl-7.9-1 curl-7.9 > curl-7.9-1.patch
      and then move it into the CYGWIN-PATCHES directory
-  6. repack
+     $ mv curl-7.9-1.patch curl-7.9-1/CYGWIN-PATCHES
+  6. pack the new source dir into a tar.bz2 file:
+     $ tar cfj curl-7.9-1-src.tar.bz2 curl-7.9-1
 
   ---SETUP.HINT---
   sdesc: "a client that groks URLs"
@@ -80,6 +97,7 @@ Packaging Instructions:
 
 
 Cygwin port maintained by:
-  Kevin Roth <kproth at bigfoot dot com>
+  Kevin Roth <kproth @ users . sourceforge . net>
   Questions about cURL should be directed to curl@contactor.se.
-  Questions about its cygwin package should be directed to cygwin@cygwin.com.
+  Questions about this cygwin package go to cygwin@cygwin.com.
+
