@@ -32,16 +32,12 @@
 **  This code is in the public domain and has no copyright.
 */
 
+#include "setup.h"
+
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 # ifdef HAVE_ALLOCA_H
 #  include <alloca.h>
-# endif
-
-# ifdef NEED_REENTRANT
-# define _REENTRANT /* Necessary to use in Solaris, since the silly guys at
-                       Sun made the localtime_r() prototype dependent on it
-                       (or _POSIX_C_SOURCE or _POSIX_PTHREAD_SEMANTICS) */
 # endif
 
 # ifdef HAVE_TIME_H
@@ -227,7 +223,7 @@ static int	yyRelSeconds;
 static int	yyRelYear;
 
 
-#line 210 "getdate.y"
+#line 206 "getdate.y"
 typedef union {
     int			Number;
     enum _MERIDIAN	Meridian;
@@ -310,11 +306,11 @@ static const short yyrhs[] = {    -1,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-   226,   227,   230,   233,   236,   239,   242,   245,   248,   254,
-   260,   269,   275,   287,   290,   293,   299,   303,   307,   313,
-   317,   335,   341,   347,   351,   356,   360,   367,   375,   378,
-   381,   384,   387,   390,   393,   396,   399,   402,   405,   408,
-   411,   414,   417,   420,   423,   426,   429,   434,   467,   471
+   222,   223,   226,   229,   232,   235,   238,   241,   244,   250,
+   256,   265,   271,   283,   286,   289,   295,   299,   303,   309,
+   313,   331,   337,   343,   347,   352,   356,   363,   371,   374,
+   377,   380,   383,   386,   389,   392,   395,   398,   401,   404,
+   407,   410,   413,   416,   419,   422,   425,   430,   463,   467
 };
 #endif
 
@@ -395,7 +391,7 @@ static const short yycheck[] = {     0,
     56
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
-#line 3 "/usr/lib/bison.simple"
+#line 3 "/usr/local/share/bison.simple"
 /* This file comes from bison-1.28.  */
 
 /* Skeleton output parser for bison,
@@ -609,7 +605,7 @@ __yy_memcpy (char *to, char *from, unsigned int count)
 #endif
 #endif
 
-#line 217 "/usr/lib/bison.simple"
+#line 217 "/usr/local/share/bison.simple"
 
 /* The user can define YYPARSE_PARAM as the name of an argument to be passed
    into yyparse.  The argument should have type void *.
@@ -938,37 +934,37 @@ yyreduce:
   switch (yyn) {
 
 case 3:
-#line 230 "getdate.y"
+#line 226 "getdate.y"
 {
 	    yyHaveTime++;
 	;
     break;}
 case 4:
-#line 233 "getdate.y"
+#line 229 "getdate.y"
 {
 	    yyHaveZone++;
 	;
     break;}
 case 5:
-#line 236 "getdate.y"
+#line 232 "getdate.y"
 {
 	    yyHaveDate++;
 	;
     break;}
 case 6:
-#line 239 "getdate.y"
+#line 235 "getdate.y"
 {
 	    yyHaveDay++;
 	;
     break;}
 case 7:
-#line 242 "getdate.y"
+#line 238 "getdate.y"
 {
 	    yyHaveRel++;
 	;
     break;}
 case 9:
-#line 248 "getdate.y"
+#line 244 "getdate.y"
 {
 	    yyHour = yyvsp[-1].Number;
 	    yyMinutes = 0;
@@ -977,7 +973,7 @@ case 9:
 	;
     break;}
 case 10:
-#line 254 "getdate.y"
+#line 250 "getdate.y"
 {
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
@@ -986,7 +982,7 @@ case 10:
 	;
     break;}
 case 11:
-#line 260 "getdate.y"
+#line 256 "getdate.y"
 {
 	    yyHour = yyvsp[-3].Number;
 	    yyMinutes = yyvsp[-1].Number;
@@ -998,7 +994,7 @@ case 11:
 	;
     break;}
 case 12:
-#line 269 "getdate.y"
+#line 265 "getdate.y"
 {
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
@@ -1007,7 +1003,7 @@ case 12:
 	;
     break;}
 case 13:
-#line 275 "getdate.y"
+#line 271 "getdate.y"
 {
 	    yyHour = yyvsp[-5].Number;
 	    yyMinutes = yyvsp[-3].Number;
@@ -1020,53 +1016,53 @@ case 13:
 	;
     break;}
 case 14:
-#line 287 "getdate.y"
+#line 283 "getdate.y"
 {
 	    yyTimezone = yyvsp[0].Number;
 	;
     break;}
 case 15:
-#line 290 "getdate.y"
+#line 286 "getdate.y"
 {
 	    yyTimezone = yyvsp[0].Number - 60;
 	;
     break;}
 case 16:
-#line 294 "getdate.y"
+#line 290 "getdate.y"
 {
 	    yyTimezone = yyvsp[-1].Number - 60;
 	;
     break;}
 case 17:
-#line 299 "getdate.y"
+#line 295 "getdate.y"
 {
 	    yyDayOrdinal = 1;
 	    yyDayNumber = yyvsp[0].Number;
 	;
     break;}
 case 18:
-#line 303 "getdate.y"
+#line 299 "getdate.y"
 {
 	    yyDayOrdinal = 1;
 	    yyDayNumber = yyvsp[-1].Number;
 	;
     break;}
 case 19:
-#line 307 "getdate.y"
+#line 303 "getdate.y"
 {
 	    yyDayOrdinal = yyvsp[-1].Number;
 	    yyDayNumber = yyvsp[0].Number;
 	;
     break;}
 case 20:
-#line 313 "getdate.y"
+#line 309 "getdate.y"
 {
 	    yyMonth = yyvsp[-2].Number;
 	    yyDay = yyvsp[0].Number;
 	;
     break;}
 case 21:
-#line 317 "getdate.y"
+#line 313 "getdate.y"
 {
 	  /* Interpret as YYYY/MM/DD if $1 >= 1000, otherwise as MM/DD/YY.
 	     The goal in recognizing YYYY/MM/DD is solely to support legacy
@@ -1087,7 +1083,7 @@ case 21:
 	;
     break;}
 case 22:
-#line 335 "getdate.y"
+#line 331 "getdate.y"
 {
 	    /* ISO 8601 format.  yyyy-mm-dd.  */
 	    yyYear = yyvsp[-2].Number;
@@ -1096,7 +1092,7 @@ case 22:
 	;
     break;}
 case 23:
-#line 341 "getdate.y"
+#line 337 "getdate.y"
 {
 	    /* e.g. 17-JUN-1992.  */
 	    yyDay = yyvsp[-2].Number;
@@ -1105,14 +1101,14 @@ case 23:
 	;
     break;}
 case 24:
-#line 347 "getdate.y"
+#line 343 "getdate.y"
 {
 	    yyMonth = yyvsp[-1].Number;
 	    yyDay = yyvsp[0].Number;
 	;
     break;}
 case 25:
-#line 351 "getdate.y"
+#line 347 "getdate.y"
 {
 	    yyMonth = yyvsp[-3].Number;
 	    yyDay = yyvsp[-2].Number;
@@ -1120,14 +1116,14 @@ case 25:
 	;
     break;}
 case 26:
-#line 356 "getdate.y"
+#line 352 "getdate.y"
 {
 	    yyMonth = yyvsp[0].Number;
 	    yyDay = yyvsp[-1].Number;
 	;
     break;}
 case 27:
-#line 360 "getdate.y"
+#line 356 "getdate.y"
 {
 	    yyMonth = yyvsp[-1].Number;
 	    yyDay = yyvsp[-2].Number;
@@ -1135,7 +1131,7 @@ case 27:
 	;
     break;}
 case 28:
-#line 367 "getdate.y"
+#line 363 "getdate.y"
 {
 	    yyRelSeconds = -yyRelSeconds;
 	    yyRelMinutes = -yyRelMinutes;
@@ -1146,115 +1142,115 @@ case 28:
 	;
     break;}
 case 30:
-#line 378 "getdate.y"
+#line 374 "getdate.y"
 {
 	    yyRelYear += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 31:
-#line 381 "getdate.y"
+#line 377 "getdate.y"
 {
 	    yyRelYear += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 32:
-#line 384 "getdate.y"
+#line 380 "getdate.y"
 {
 	    yyRelYear += yyvsp[0].Number;
 	;
     break;}
 case 33:
-#line 387 "getdate.y"
+#line 383 "getdate.y"
 {
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 34:
-#line 390 "getdate.y"
+#line 386 "getdate.y"
 {
 	    yyRelMonth += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 35:
-#line 393 "getdate.y"
+#line 389 "getdate.y"
 {
 	    yyRelMonth += yyvsp[0].Number;
 	;
     break;}
 case 36:
-#line 396 "getdate.y"
+#line 392 "getdate.y"
 {
 	    yyRelDay += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 37:
-#line 399 "getdate.y"
+#line 395 "getdate.y"
 {
 	    yyRelDay += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 38:
-#line 402 "getdate.y"
+#line 398 "getdate.y"
 {
 	    yyRelDay += yyvsp[0].Number;
 	;
     break;}
 case 39:
-#line 405 "getdate.y"
+#line 401 "getdate.y"
 {
 	    yyRelHour += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 40:
-#line 408 "getdate.y"
+#line 404 "getdate.y"
 {
 	    yyRelHour += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 41:
-#line 411 "getdate.y"
+#line 407 "getdate.y"
 {
 	    yyRelHour += yyvsp[0].Number;
 	;
     break;}
 case 42:
-#line 414 "getdate.y"
+#line 410 "getdate.y"
 {
 	    yyRelMinutes += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 43:
-#line 417 "getdate.y"
+#line 413 "getdate.y"
 {
 	    yyRelMinutes += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 44:
-#line 420 "getdate.y"
+#line 416 "getdate.y"
 {
 	    yyRelMinutes += yyvsp[0].Number;
 	;
     break;}
 case 45:
-#line 423 "getdate.y"
+#line 419 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 46:
-#line 426 "getdate.y"
+#line 422 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[-1].Number * yyvsp[0].Number;
 	;
     break;}
 case 47:
-#line 429 "getdate.y"
+#line 425 "getdate.y"
 {
 	    yyRelSeconds += yyvsp[0].Number;
 	;
     break;}
 case 48:
-#line 435 "getdate.y"
+#line 431 "getdate.y"
 {
 	    if (yyHaveTime && yyHaveDate && !yyHaveRel)
 	      yyYear = yyvsp[0].Number;
@@ -1287,20 +1283,20 @@ case 48:
 	  ;
     break;}
 case 49:
-#line 468 "getdate.y"
+#line 464 "getdate.y"
 {
 	    yyval.Meridian = MER24;
 	  ;
     break;}
 case 50:
-#line 472 "getdate.y"
+#line 468 "getdate.y"
 {
 	    yyval.Meridian = yyvsp[0].Meridian;
 	  ;
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
-#line 543 "/usr/lib/bison.simple"
+#line 543 "/usr/local/share/bison.simple"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1520,7 +1516,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 477 "getdate.y"
+#line 473 "getdate.y"
 
 
 /* Include this file down here because bison inserts code above which
