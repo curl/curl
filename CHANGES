@@ -7,6 +7,11 @@
                                History of Changes
 
 Daniel (3 October 2001)
+- I accidentally ruined Georg's curl_formadd(). Uh, bad me. Corrected now.
+
+Version 7.9.1-pre1
+
+Daniel (3 October 2001)
 - Georg Huettenegger once again made an effort beyond the call of duty and not
   only improved the curl_formadd() function, but also took care of adjusting
   the curl command line client to use this new function instead of the
