@@ -2375,22 +2375,23 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
       if((ftpcode == 234) || (ftpcode == 334)) {
         /* Curl_SSLConnect is BLOCKING */
         result = Curl_SSLConnect(conn, FIRSTSOCKET);
-        if(result)
-          return result;
-        conn->protocol |= PROT_FTPS;
-        conn->ssl[SECONDARYSOCKET].use = FALSE; /* clear-text data */
+        if(CURLE_OK == result) {
+          conn->protocol |= PROT_FTPS;
+          conn->ssl[SECONDARYSOCKET].use = FALSE; /* clear-text data */
+          result = ftp_state_user(conn);
+        }
       }
       else if(ftp->count3 < 1) {
         ftp->count3++;
         ftp->count1 += ftp->count2; /* get next attempt */
-        NBFTPSENDF(conn, "AUTH %s", ftpauth[ftp->count1]);
+        result = Curl_nbftpsendf(conn, "AUTH %s", ftpauth[ftp->count1]);
         /* remain in this same state */
       }
-      else {
+      else
         result = ftp_state_user(conn);
-        if(result)
-          return result;
-      }
+
+      if(result)
+        return result;
       break;
 
     case FTP_USER:
