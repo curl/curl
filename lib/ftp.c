@@ -94,7 +94,7 @@
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
+#ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
 
@@ -2061,7 +2061,7 @@ CURLcode ftp_perform(struct connectdata *conn,
       struct tm buffer;
       tm = (struct tm *)localtime_r(&data->info.filetime, &buffer);
 #else
-      tm = localtime((unsigned long *)&data->info.filetime);
+      tm = localtime(&data->info.filetime);
 #endif
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
       strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S GMT\r\n",
