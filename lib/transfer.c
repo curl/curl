@@ -769,7 +769,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 if(data->state.authwant == CURLAUTH_NTLM) {
                   /* NTLM authentication is activated */
                   CURLntlm ntlm =
-                    Curl_input_ntlm(conn, k->httpcode == 407, start);
+                    Curl_input_ntlm(conn, (bool)(k->httpcode == 407), start);
                   
                   if(CURLNTLM_BAD != ntlm)
                     conn->newurl = strdup(data->change.url); /* clone string */
