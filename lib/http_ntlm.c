@@ -317,10 +317,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
 
   /* not set means empty */
   if(!userp)
-    userp="";
+    userp=(char *)"";
 
   if(!passwdp)
-    passwdp="";
+    passwdp=(char *)"";
   
   switch(ntlm->state) {
   case NTLMSTATE_TYPE1:
