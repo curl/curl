@@ -602,39 +602,26 @@ static int AllocAndCopy (char **buffer, int buffer_length)
  * CURLFORM_FILE, "filename1", CURLFORM_FILE, "filename2", CURLFORM_END);
  *
  * Returns:
- * FORMADD_OK             on success
- * FORMADD_MEMORY         if the FormInfo allocation fails
- * FORMADD_OPTION_TWICE   if one option is given twice for one Form
- * FORMADD_NULL           if a null pointer was given for a char
- * FORMADD_MEMORY         if the allocation of a FormInfo struct failed
- * FORMADD_UNKNOWN_OPTION if an unknown option was used
- * FORMADD_INCOMPLETE     if the some FormInfo is not complete (or an error)
- * FORMADD_MEMORY         if a HttpPost struct cannot be allocated
- * FORMADD_MEMORY         if some allocation for string copying failed.
- * FORMADD_ILLEGAL_ARRAY  if an illegal option is used in an array
+ * CURL_FORMADD_OK             on success
+ * CURL_FORMADD_MEMORY         if the FormInfo allocation fails
+ * CURL_FORMADD_OPTION_TWICE   if one option is given twice for one Form
+ * CURL_FORMADD_NULL           if a null pointer was given for a char
+ * CURL_FORMADD_MEMORY         if the allocation of a FormInfo struct failed
+ * CURL_FORMADD_UNKNOWN_OPTION if an unknown option was used
+ * CURL_FORMADD_INCOMPLETE     if the some FormInfo is not complete (or an error)
+ * CURL_FORMADD_MEMORY         if a HttpPost struct cannot be allocated
+ * CURL_FORMADD_MEMORY         if some allocation for string copying failed.
+ * CURL_FORMADD_ILLEGAL_ARRAY  if an illegal option is used in an array
  *
  ***************************************************************************/
 
-typedef enum {
-  FORMADD_OK, /* first, no error */
-
-  FORMADD_MEMORY,
-  FORMADD_OPTION_TWICE,
-  FORMADD_NULL,
-  FORMADD_UNKNOWN_OPTION,
-  FORMADD_INCOMPLETE,
-  FORMADD_ILLEGAL_ARRAY,
-
-  FORMADD_LAST /* last */
-} FORMcode;
-
 static
-FORMcode FormAdd(struct curl_httppost **httppost,
-                 struct curl_httppost **last_post,
-                 va_list params)
+CURLFORMcode FormAdd(struct curl_httppost **httppost,
+                     struct curl_httppost **last_post,
+                     va_list params)
 {
   FormInfo *first_form, *current_form, *form;
-  FORMcode return_value = FORMADD_OK;
+  CURLFORMcode return_value = CURL_FORMADD_OK;
   const char *prevtype = NULL;
   struct curl_httppost *post = NULL;
   CURLformoption option;
@@ -655,7 +642,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
     current_form = first_form;
   }
   else
-    return FORMADD_MEMORY;
+    return CURL_FORMADD_MEMORY;
 
   /*
    * Loop through all the options set.
@@ -663,7 +650,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
   while (1) {
 
     /* break if we have an error to report */
-    if (return_value != FORMADD_OK)
+    if (return_value != CURL_FORMADD_OK)
       break;
 
     /* first see if we have more parts of the array param */
@@ -690,13 +677,13 @@ FORMcode FormAdd(struct curl_httppost **httppost,
     case CURLFORM_ARRAY:
       if(array_state)
         /* we don't support an array from within an array */
-        return_value = FORMADD_ILLEGAL_ARRAY;
+        return_value = CURL_FORMADD_ILLEGAL_ARRAY;
       else {
         forms = va_arg(params, struct curl_forms *);
         if (forms)
           array_state = TRUE;
         else
-          return_value = FORMADD_NULL;
+          return_value = CURL_FORMADD_NULL;
       }
       break;
 
@@ -707,19 +694,19 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       current_form->flags |= HTTPPOST_PTRNAME; /* fall through */
     case CURLFORM_COPYNAME:
       if (current_form->name)
-        return_value = FORMADD_OPTION_TWICE;
+        return_value = CURL_FORMADD_OPTION_TWICE;
       else {
         char *name = array_state?
           array_value:va_arg(params, char *);
         if (name)
           current_form->name = name; /* store for the moment */
         else
-          return_value = FORMADD_NULL;
+          return_value = CURL_FORMADD_NULL;
       }
       break;
     case CURLFORM_NAMELENGTH:
       if (current_form->namelength)
-        return_value = FORMADD_OPTION_TWICE;
+        return_value = CURL_FORMADD_OPTION_TWICE;
       else
         current_form->namelength =
           array_state?(long)array_value:va_arg(params, long);
@@ -732,19 +719,19 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       current_form->flags |= HTTPPOST_PTRCONTENTS; /* fall through */
     case CURLFORM_COPYCONTENTS:
       if (current_form->value)
-        return_value = FORMADD_OPTION_TWICE;
+        return_value = CURL_FORMADD_OPTION_TWICE;
       else {
         char *value =
           array_state?array_value:va_arg(params, char *);
         if (value)
           current_form->value = value; /* store for the moment */
         else
-          return_value = FORMADD_NULL;
+          return_value = CURL_FORMADD_NULL;
       }
       break;
     case CURLFORM_CONTENTSLENGTH:
       if (current_form->contentslength)
-        return_value = FORMADD_OPTION_TWICE;
+        return_value = CURL_FORMADD_OPTION_TWICE;
       else
         current_form->contentslength =
           array_state?(long)array_value:va_arg(params, long);
@@ -753,7 +740,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
       /* Get contents from a given file name */
     case CURLFORM_FILECONTENT:
       if (current_form->flags != 0)
-        return_value = FORMADD_OPTION_TWICE;
+        return_value = CURL_FORMADD_OPTION_TWICE;
       else {
         char *filename = array_state?
           array_value:va_arg(params, char *);
@@ -762,7 +749,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
           current_form->flags |= HTTPPOST_READFILE;
         }
         else
-          return_value = FORMADD_NULL;
+          return_value = CURL_FORMADD_NULL;
       }
       break;
 
@@ -777,19 +764,19 @@ FORMcode FormAdd(struct curl_httppost **httppost,
             if (filename) {
               if (!(current_form = AddFormInfo(strdup(filename),
                                                NULL, current_form)))
-                return_value = FORMADD_MEMORY;
+                return_value = CURL_FORMADD_MEMORY;
             }
             else
-              return_value = FORMADD_NULL;
+              return_value = CURL_FORMADD_NULL;
           }
           else
-            return_value = FORMADD_OPTION_TWICE;
+            return_value = CURL_FORMADD_OPTION_TWICE;
         }
         else {
           if (filename)
             current_form->value = strdup(filename);
           else
-            return_value = FORMADD_NULL;
+            return_value = CURL_FORMADD_NULL;
           current_form->flags |= HTTPPOST_FILENAME;
         }
         break;
@@ -804,19 +791,19 @@ FORMcode FormAdd(struct curl_httppost **httppost,
               if (!(current_form = AddFormInfo(NULL,
                                                strdup(contenttype),
                                                current_form)))
-                return_value = FORMADD_MEMORY;
+                return_value = CURL_FORMADD_MEMORY;
             }
 	    else
-	      return_value = FORMADD_NULL;
+	      return_value = CURL_FORMADD_NULL;
           }
           else
-            return_value = FORMADD_OPTION_TWICE;
+            return_value = CURL_FORMADD_OPTION_TWICE;
         }
         else {
 	  if (contenttype)
 	    current_form->contenttype = strdup(contenttype);
 	  else
-	    return_value = FORMADD_NULL;
+	    return_value = CURL_FORMADD_NULL;
 	}
         break;
       }
@@ -829,7 +816,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
           va_arg(params, struct curl_slist*);
         
         if( current_form->contentheader )
-          return_value = FORMADD_OPTION_TWICE;
+          return_value = CURL_FORMADD_OPTION_TWICE;
         else
           current_form->contentheader = list;
         
@@ -840,17 +827,17 @@ FORMcode FormAdd(struct curl_httppost **httppost,
         char *filename = array_state?array_value:
           va_arg(params, char *);
         if( current_form->showfilename )
-          return_value = FORMADD_OPTION_TWICE;
+          return_value = CURL_FORMADD_OPTION_TWICE;
         else
           current_form->showfilename = strdup(filename);
         break;
       }
     default:
-      return_value = FORMADD_UNKNOWN_OPTION;
+      return_value = CURL_FORMADD_UNKNOWN_OPTION;
     }
   }
 
-  if(FORMADD_OK == return_value) {
+  if(CURL_FORMADD_OK == return_value) {
     /* go through the list, check for copleteness and if everything is
      * alright add the HttpPost item otherwise set return_value accordingly */
     
@@ -866,7 +853,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
            ( (form->flags & HTTPPOST_READFILE) &&
              (form->flags & HTTPPOST_PTRCONTENTS) )
            ) {
-        return_value = FORMADD_INCOMPLETE;
+        return_value = CURL_FORMADD_INCOMPLETE;
         break;
       }
       else {
@@ -880,7 +867,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
              (form == first_form) ) {
           /* copy name (without strdup; possibly contains null characters) */
           if (AllocAndCopy(&form->name, form->namelength)) {
-            return_value = FORMADD_MEMORY;
+            return_value = CURL_FORMADD_MEMORY;
             break;
           }
         }
@@ -889,7 +876,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
              !(form->flags & HTTPPOST_PTRCONTENTS) ) {
           /* copy value (without strdup; possibly contains null characters) */
           if (AllocAndCopy(&form->value, form->contentslength)) {
-            return_value = FORMADD_MEMORY;
+            return_value = CURL_FORMADD_MEMORY;
             break;
           }
         }
@@ -901,7 +888,7 @@ FORMcode FormAdd(struct curl_httppost **httppost,
                            last_post);
         
         if(!post)
-          return_value = FORMADD_MEMORY;
+          return_value = CURL_FORMADD_MEMORY;
 
         if (form->contenttype)
           prevtype = form->contenttype;
@@ -922,12 +909,12 @@ FORMcode FormAdd(struct curl_httppost **httppost,
   return return_value;
 }
 
-int curl_formadd(struct curl_httppost **httppost,
+CURLFORMcode curl_formadd(struct curl_httppost **httppost,
                  struct curl_httppost **last_post,
                  ...)
 {
   va_list arg;
-  int result;
+  CURLFORMcode result;
   va_start(arg, last_post);
   result = FormAdd(httppost, last_post, arg);
   va_end(arg);

@@ -656,7 +656,35 @@ struct curl_forms {
 };
 
 /* use this for multipart formpost building */
-int curl_formadd(struct curl_httppost **httppost,
+/* Returns code for curl_formadd()
+ * 
+ * Returns:
+ * CURL_FORMADD_OK             on success
+ * CURL_FORMADD_MEMORY         if the FormInfo allocation fails
+ * CURL_FORMADD_OPTION_TWICE   if one option is given twice for one Form
+ * CURL_FORMADD_NULL           if a null pointer was given for a char
+ * CURL_FORMADD_MEMORY         if the allocation of a FormInfo struct failed
+ * CURL_FORMADD_UNKNOWN_OPTION if an unknown option was used
+ * CURL_FORMADD_INCOMPLETE     if the some FormInfo is not complete (or error)
+ * CURL_FORMADD_MEMORY         if a HttpPost struct cannot be allocated
+ * CURL_FORMADD_MEMORY         if some allocation for string copying failed.
+ * CURL_FORMADD_ILLEGAL_ARRAY  if an illegal option is used in an array
+ *
+ ***************************************************************************/
+typedef enum {
+  CURL_FORMADD_OK, /* first, no error */
+
+  CURL_FORMADD_MEMORY,
+  CURL_FORMADD_OPTION_TWICE,
+  CURL_FORMADD_NULL,
+  CURL_FORMADD_UNKNOWN_OPTION,
+  CURL_FORMADD_INCOMPLETE,
+  CURL_FORMADD_ILLEGAL_ARRAY,
+
+  CURL_FORMADD_LAST /* last */
+} CURLFORMcode;
+
+CURLFORMcode curl_formadd(struct curl_httppost **httppost,
                  struct curl_httppost **last_post,
                  ...);
 
