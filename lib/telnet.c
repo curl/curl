@@ -856,8 +856,8 @@ static void suboption(struct connectdata *conn)
 {
   struct curl_slist *v;
   unsigned char temp[2048];
-  int len;
-  int tmplen;
+  size_t len;
+  size_t tmplen;
   char varname[128];
   char varval[128];
   struct SessionHandle *data = conn->data;
