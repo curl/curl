@@ -1166,13 +1166,16 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
   }
 
   if(conn->curl_connect) {
-    /* is there a post-connect() procedure? */
+    /* is there a connect() procedure? */
+    conn->now = tvnow(); /* set this here for timeout purposes in the
+                            connect procedure, it is later set again for the
+                            progress meter purpose */
     result = conn->curl_connect(conn);
     if(result != CURLE_OK)
       return result; /* pass back errors */
   }
 
-  pgrsTime(data, TIMER_CONNECT);
+  pgrsTime(data, TIMER_CONNECT); /* we're connected */
 
   conn->now = tvnow(); /* time this *after* the connect is done */
   conn->bytecount = 0;
