@@ -77,6 +77,8 @@
 #include "krb4.h"
 #endif
 
+#include "strequal.h"
+
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
@@ -549,13 +551,14 @@ CURLcode _ftp(struct connectdata *conn)
   char *buf = data->buffer; /* this is our buffer */
   /* for the ftp PORT mode */
   int portsock=-1;
-  struct sockaddr_in serv_addr;
-  char hostent_buf[8192];
 #if defined (HAVE_INET_NTOA_R)
   char ntoa_buf[64];
 #endif
 #ifdef ENABLE_IPV6
   struct addrinfo *ai;
+#else
+  struct sockaddr_in serv_addr;
+  char hostent_buf[8192];
 #endif
 
   struct curl_slist *qitem; /* QUOTE item */
@@ -715,20 +718,20 @@ CURLcode _ftp(struct connectdata *conn)
 #ifdef ENABLE_IPV6
     struct addrinfo hints, *res, *ai;
     struct sockaddr_storage ss;
-    int sslen;
+    socklen_t sslen;
     char hbuf[NI_MAXHOST];
-    char *localaddr;
+
     struct sockaddr *sa=(struct sockaddr *)&ss;
 #ifdef NI_WITHSCOPEID
     const int niflags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
 #else
     const int niflags = NI_NUMERICHOST | NI_NUMERICSERV;
 #endif
-    unsigned char *ap;
-    unsigned char *pp;
+    char *ap;
+    char *pp;
     int alen, plen;
     char portmsgbuf[4096], tmp[4096];
-    char *p;
+
     char *mode[] = { "EPRT", "LPRT", "PORT", NULL };
     char **modep;
 
@@ -761,13 +764,13 @@ CURLcode _ftp(struct connectdata *conn)
 	continue;
 
       if (bind(portsock, ai->ai_addr, ai->ai_addrlen) < 0) {
-	close(portsock);
+	sclose(portsock);
 	portsock = -1;
 	continue;
       }
 
       if (listen(portsock, 1) < 0) {
-	close(portsock);
+	sclose(portsock);
 	portsock = -1;
 	continue;
       }
@@ -878,7 +881,7 @@ again:;
     }
 
     if (!*modep) {
-      close(portsock);
+      sclose(portsock);
       freeaddrinfo(res);
       return CURLE_FTP_PORT_FAILED;
     }
@@ -1027,9 +1030,10 @@ again:;
       struct addrinfo *res;
 #else
       struct hostent *he;
-#endif
-      char *str=buf,*ip_addr;
       char *hostdataptr=NULL;
+      char *ip_addr;
+#endif
+      char *str=buf;
 
       /*
        * New 227-parser June 3rd 1999.
