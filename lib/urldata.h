@@ -173,6 +173,7 @@ struct digestdata {
   char *cnonce;
   char *realm;
   int algo;
+  bool stale; /* set true for re-negotiation */
 };
 
 typedef enum {
