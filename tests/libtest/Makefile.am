@@ -11,7 +11,7 @@ LIBDIR = ../../lib
 SUPPORTFILES = first.c test.h
 
 # here are all tools used for running libcurl tests
-noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505
+noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505 lib506
 
 lib500_SOURCES = lib500.c $(SUPPORTFILES)
 lib500_LDADD = $(LIBDIR)/libcurl.la
@@ -36,3 +36,8 @@ lib504_DEPENDENCIES = $(LIBDIR)/libcurl.la
 lib505_SOURCES = lib505.c $(SUPPORTFILES)
 lib505_LDADD = $(LIBDIR)/libcurl.la
 lib505_DEPENDENCIES = $(LIBDIR)/libcurl.la
+
+lib506_SOURCES = lib506.c $(SUPPORTFILES)
+lib506_LDADD = $(LIBDIR)/libcurl.la
+lib506_DEPENDENCIES = $(LIBDIR)/libcurl.la
+
