@@ -602,6 +602,15 @@ sub singletest {
 
         my @protstrip=@protocol;
 
+        # check if there's any attributes on the verify/protocol section
+        my %hash = getpartattr("verify", "protocol");
+
+        if($hash{'nonewline'}) {
+            # Yes, we must cut off the final newline from the final line
+            # of the protocol data
+            chomp($protstrip[$#protstrip]);
+        }
+
         for(@strip) {
             # strip all patterns from both arrays
             @out = striparray( $_, \@out);

@@ -62,8 +62,10 @@ One regex per line that is removed from the protocol dumps before the
 comparison is made. This is very useful to remove dependencies on dynamicly
 changing protocol data such as port numbers or user-agent strings.
 </strip>
-<protocol>
-the protocol dump curl should transmit
+<protocol [nonewline=yes]>
+the protocol dump curl should transmit, if 'nonewline' is set, we will cut
+off the trailing newline of this given data before comparing with the one
+actually sent by the client
 </protocol>
 <stdout>
 This verfies that this data was passed to stdout.
