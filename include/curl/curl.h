@@ -48,6 +48,21 @@ extern "C" {
 #endif
 
 /*
+ * Decorate exportable functions for Win32 and Netware DLL linking.
+ * This avoids using a .def file for building libcurl.dll.
+ */
+#if (defined(WIN32) || defined(_WIN32) || defined(NETWARE)) && \
+   !defined(CURL_STATICLIB)
+#if defined(BUILDING_LIBCURL)
+#define CURL_EXTERN  __declspec(dllexport)
+#else
+#define CURL_EXTERN  __declspec(dllimport)
+#endif
+#else
+#define CURL_EXTERN
+#endif
+
+/*
  * We want the typedef curl_off_t setup for large file support on all
  * platforms. We also provide a CURL_FORMAT_OFF_T define to use in *printf
  * format strings when outputting a variable of type curl_off_t.
@@ -921,8 +936,8 @@ typedef enum {
 
 /* curl_strequal() and curl_strnequal() are subject for removal in a future
    libcurl, see lib/README.curlx for details */
-extern int (curl_strequal)(const char *s1, const char *s2);
-extern int (curl_strnequal)(const char *s1, const char *s2, size_t n);
+CURL_EXTERN int (curl_strequal)(const char *s1, const char *s2);
+CURL_EXTERN int (curl_strnequal)(const char *s1, const char *s2, size_t n);
 
 /* name is uppercase CURLFORM_<name> */
 #ifdef CFINIT
@@ -1011,9 +1026,9 @@ typedef enum {
  * adds one part that together construct a full post. Then use
  * CURLOPT_HTTPPOST to send it off to libcurl.
  */
-CURLFORMcode curl_formadd(struct curl_httppost **httppost,
-                          struct curl_httppost **last_post,
-                          ...);
+CURL_EXTERN CURLFORMcode curl_formadd(struct curl_httppost **httppost,
+                                      struct curl_httppost **last_post,
+                                      ...);
 
 /*
  * NAME curl_formfree()
@@ -1022,7 +1037,7 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
  *
  * Free a multipart formpost previously built with curl_formadd().
  */
-void curl_formfree(struct curl_httppost *form);
+CURL_EXTERN void curl_formfree(struct curl_httppost *form);
 
 /*
  * NAME curl_getenv()
@@ -1032,7 +1047,7 @@ void curl_formfree(struct curl_httppost *form);
  * Returns a malloc()'ed string that MUST be curl_free()ed after usage is
  * complete. DEPRECATED - see lib/README.curlx
  */
-char *curl_getenv(const char *variable);
+CURL_EXTERN char *curl_getenv(const char *variable);
 
 /*
  * NAME curl_version()
@@ -1041,7 +1056,7 @@ char *curl_getenv(const char *variable);
  *
  * Returns a static ascii string of the libcurl version.
  */
-char *curl_version(void);
+CURL_EXTERN char *curl_version(void);
 
 /*
  * NAME curl_escape()
@@ -1052,7 +1067,7 @@ char *curl_version(void);
  * %XX versions). This function returns a new allocated string or NULL if an
  * error occurred.
  */
-char *curl_escape(const char *string, int length);
+CURL_EXTERN char *curl_escape(const char *string, int length);
 
 /*
  * NAME curl_unescape()
@@ -1063,7 +1078,7 @@ char *curl_escape(const char *string, int length);
  * versions). This function returns a new allocated string or NULL if an error
  * occurred.
  */
-char *curl_unescape(const char *string, int length);
+CURL_EXTERN char *curl_unescape(const char *string, int length);
 
 /*
  * NAME curl_free()
@@ -1073,7 +1088,7 @@ char *curl_unescape(const char *string, int length);
  * Provided for de-allocation in the same translation unit that did the
  * allocation. Added in libcurl 7.10
  */
-void curl_free(void *p);
+CURL_EXTERN void curl_free(void *p);
 
 /*
  * NAME curl_global_init()
@@ -1083,7 +1098,7 @@ void curl_free(void *p);
  * curl_global_init() should be invoked exactly once for each application that
  * uses libcurl
  */
-CURLcode curl_global_init(long flags);
+CURL_EXTERN CURLcode curl_global_init(long flags);
 
 /*
  * NAME curl_global_init_mem()
@@ -1098,12 +1113,12 @@ CURLcode curl_global_init(long flags);
  * callback routines with be invoked by this library instead of the system
  * memory management routines like malloc, free etc.
  */
-CURLcode curl_global_init_mem(long flags,
-                              curl_malloc_callback m,
-                              curl_free_callback f,
-                              curl_realloc_callback r,
-                              curl_strdup_callback s,
-                              curl_calloc_callback c);
+CURL_EXTERN CURLcode curl_global_init_mem(long flags,
+                                          curl_malloc_callback m,
+                                          curl_free_callback f,
+                                          curl_realloc_callback r,
+                                          curl_strdup_callback s,
+                                          curl_calloc_callback c);
 
 /*
  * NAME curl_global_cleanup()
@@ -1113,7 +1128,7 @@ CURLcode curl_global_init_mem(long flags,
  * curl_global_cleanup() should be invoked exactly once for each application
  * that uses libcurl
  */
-void curl_global_cleanup(void);
+CURL_EXTERN void curl_global_cleanup(void);
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
@@ -1129,7 +1144,8 @@ struct curl_slist {
  * Appends a string to a linked list. If no list exists, it will be created
  * first. Returns the new list, after appending.
  */
-struct curl_slist *curl_slist_append(struct curl_slist *, const char *);
+CURL_EXTERN struct curl_slist *curl_slist_append(struct curl_slist *,
+                                                 const char *);
 
 /*
  * NAME curl_slist_free_all()
@@ -1138,7 +1154,7 @@ struct curl_slist *curl_slist_append(struct curl_slist *, const char *);
  *
  * free a previously built curl_slist.
  */
-void curl_slist_free_all(struct curl_slist *);
+CURL_EXTERN void curl_slist_free_all(struct curl_slist *);
 
 /*
  * NAME curl_getdate()
@@ -1150,7 +1166,7 @@ void curl_slist_free_all(struct curl_slist *);
  * where the specified time is relative now, like 'two weeks' or 'tomorrow'
  * etc.
  */
-time_t curl_getdate(const char *p, const time_t *now);
+CURL_EXTERN time_t curl_getdate(const char *p, const time_t *now);
 
 #define CURLINFO_STRING   0x100000
 #define CURLINFO_LONG     0x200000
@@ -1271,9 +1287,9 @@ typedef enum {
   CURLSHOPT_LAST  /* never use */
 } CURLSHoption;
 
-CURLSH *curl_share_init(void);
-CURLSHcode curl_share_setopt(CURLSH *, CURLSHoption option, ...);
-CURLSHcode curl_share_cleanup(CURLSH *);
+CURL_EXTERN CURLSH *curl_share_init(void);
+CURL_EXTERN CURLSHcode curl_share_setopt(CURLSH *, CURLSHoption option, ...);
+CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *);
 
 /****************************************************************************
  * Structures for querying information about the curl library at runtime.
@@ -1333,7 +1349,7 @@ typedef struct {
  * This function returns a pointer to a static copy of the version info
  * struct. See above.
  */
-curl_version_info_data *curl_version_info(CURLversion);
+CURL_EXTERN curl_version_info_data *curl_version_info(CURLversion);
 
 /*
  * NAME curl_easy_strerror()
@@ -1344,7 +1360,7 @@ curl_version_info_data *curl_version_info(CURLversion);
  * into the equivalent human readable error string.  This is useful
  * for printing meaningful error messages.
  */
-const char *curl_easy_strerror(CURLcode);
+CURL_EXTERN const char *curl_easy_strerror(CURLcode);
 
 /*
  * NAME curl_share_strerror()
@@ -1355,7 +1371,7 @@ const char *curl_easy_strerror(CURLcode);
  * into the equivalent human readable error string.  This is useful
  * for printing meaningful error messages.
  */
-const char *curl_share_strerror(CURLSHcode);
+CURL_EXTERN const char *curl_share_strerror(CURLSHcode);
 
 #ifdef  __cplusplus
 }

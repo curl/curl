@@ -113,7 +113,7 @@ typedef struct CURLMsg CURLMsg;
  * Desc:    inititalize multi-style curl usage
  * Returns: a new CURLM handle to use in all 'curl_multi' functions.
  */
-CURLM *curl_multi_init(void);
+CURL_EXTERN CURLM *curl_multi_init(void);
 
 /*
  * Name:    curl_multi_add_handle()
@@ -121,8 +121,8 @@ CURLM *curl_multi_init(void);
  * Desc:    add a standard curl handle to the multi stack
  * Returns: CURLMcode type, general multi error code.
  */
-CURLMcode curl_multi_add_handle(CURLM *multi_handle,
-                                CURL *curl_handle);
+CURL_EXTERN CURLMcode curl_multi_add_handle(CURLM *multi_handle,
+                                            CURL *curl_handle);
 
  /*
   * Name:    curl_multi_remove_handle()
@@ -130,8 +130,8 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
   * Desc:    removes a curl handle from the multi stack again
   * Returns: CURLMcode type, general multi error code.
   */
-CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
-                                   CURL *curl_handle);
+CURL_EXTERN CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
+                                               CURL *curl_handle);
 
  /*
   * Name:    curl_multi_fdset()
@@ -141,11 +141,11 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
   *          them are ready.
   * Returns: CURLMcode type, general multi error code.
   */
-CURLMcode curl_multi_fdset(CURLM *multi_handle,
-                           fd_set *read_fd_set,
-                           fd_set *write_fd_set,
-                           fd_set *exc_fd_set,
-                           int *max_fd);
+CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
+                                       fd_set *read_fd_set,
+                                       fd_set *write_fd_set,
+                                       fd_set *exc_fd_set,
+                                       int *max_fd);
 
  /*
   * Name:    curl_multi_perform()
@@ -163,8 +163,8 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
   *          still have occurred problems on invidual transfers even when this
   *          returns OK.
   */
-CURLMcode curl_multi_perform(CURLM *multi_handle,
-                             int *running_handles);
+CURL_EXTERN CURLMcode curl_multi_perform(CURLM *multi_handle,
+                                         int *running_handles);
 
  /*
   * Name:    curl_multi_cleanup()
@@ -175,7 +175,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle,
   *          in the middle of a transfer.
   * Returns: CURLMcode type, general multi error code.
   */
-CURLMcode curl_multi_cleanup(CURLM *multi_handle);
+CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
 
 /*
  * Name:    curl_multi_info_read()
@@ -205,8 +205,8 @@ CURLMcode curl_multi_cleanup(CURLM *multi_handle);
  *          queue (after this read) in the integer the second argument points
  *          to.
  */
-CURLMsg *curl_multi_info_read(CURLM *multi_handle,
-                              int *msgs_in_queue);
+CURL_EXTERN CURLMsg *curl_multi_info_read(CURLM *multi_handle,
+                                          int *msgs_in_queue);
 
 /*
  * NAME curl_multi_strerror()
@@ -217,7 +217,7 @@ CURLMsg *curl_multi_info_read(CURLM *multi_handle,
  * into the equivalent human readable error string.  This is useful
  * for printing meaningful error messages.
  */
-const char *curl_multi_strerror(CURLMcode);
+CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
 
 #ifdef __cplusplus
 } /* end of extern "C" */
