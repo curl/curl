@@ -124,3 +124,5 @@ November 2003: curl 7.10.8 is released. 45000 lines of code. ~55000 unique
 visitors to the curl.haxx.se site. Five official web mirrors.
 
 December 2003, full-fledged SSL for FTP is supported.
+
+January 2004: curl 7.11.0 introduced large file support.
