@@ -339,7 +339,7 @@ static void help(void)
     "    --key <key>     Private key file name (SSL)",
     "    --key-type <type> Private key file type (DER/PEM/ENG) (SSL)",
     "    --pass  <pass>  Pass phrase for the private key (SSL)",
-    "    --engine <eng>  Crypto engine to use (SSL)",
+    "    --engine <eng>  Crypto engine to use (SSL). \"--engine list\" for list",
     "    --cacert <file> CA certificate to verify peer against (SSL)",
     "    --capath <directory> CA directory (made using c_rehash) to verify",
     "                    peer against (SSL)",
@@ -488,6 +488,7 @@ struct Configurable {
   char *key_type;
   char *key_passwd;
   char *engine;
+  bool list_engines;
   bool crlf;
   char *customrequest;
   char *krb4level;
@@ -738,6 +739,19 @@ static void FreeMultiInfo (struct multi_files *multi_start)
     multi_start = multi_start->next;
     free (multi);
   }
+}
+
+/* Print list of OpenSSL engines supported.
+ */
+static void list_engines (const struct curl_slist *engines)
+{
+  puts ("Build-time engines:");
+  if (!engines) {
+    puts ("  <none>");
+    return;
+  }
+  for ( ; engines; engines = engines->next)
+    printf ("  %s\n", engines->data);
 }
 
 /***************************************************************************
@@ -1721,6 +1735,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'f': /* crypto engine */
         GetStr(&config->engine, nextarg);
+        if (config->engine && curlx_strequal(config->engine,"list"))
+           config->list_engines = TRUE;
         break;
       case 'g': /* CA info PEM file */
         /* CA cert directory */
@@ -2946,7 +2962,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     }
   }
 
-  if(!config->url_list || !config->url_list->url) {
+  if((!config->url_list || !config->url_list->url) && !config->list_engines) {
     clean_getout(config);
     helpf("no URL specified!\n");
     return CURLE_FAILED_INIT;
@@ -3009,6 +3025,16 @@ operate(struct Configurable *config, int argc, char *argv[])
   if(!curl) {
     clean_getout(config);
     return CURLE_FAILED_INIT;
+  }
+
+
+  if (config->list_engines) {
+    const struct curl_slist *engines = NULL;
+
+    curl_easy_getinfo(curl, CURLINFO_SSL_ENGINES, &engines);
+    list_engines(engines);
+    res = CURLE_OK;
+    goto quit_curl;
   }
 
   /* After this point, we should call curl_easy_cleanup() if we decide to bail
@@ -3345,9 +3371,6 @@ operate(struct Configurable *config, int argc, char *argv[])
         if(1 == config->tcp_nodelay)
           curl_easy_setopt(curl, CURLOPT_TCP_NODELAY, 1);
 
-        curl_easy_setopt(curl, CURLOPT_SSLENGINE, config->engine);
-        curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1);
-
         /* where to store */
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, (FILE *)&outs);
         /* what call to write */
@@ -3525,6 +3548,17 @@ operate(struct Configurable *config, int argc, char *argv[])
         }
         curl_easy_setopt(curl, CURLOPT_VERBOSE, config->conf&CONF_VERBOSE);
 
+        res = CURLE_OK;
+
+        /* new in curl ?? */
+        if (config->engine) {
+          res = curl_easy_setopt(curl, CURLOPT_SSLENGINE, config->engine);
+          curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1);
+        }
+
+        if (res != CURLE_OK)
+           goto show_error;
+
         /* new in curl 7.10 */
         curl_easy_setopt(curl, CURLOPT_ENCODING,
                          (config->encoding) ? "" : NULL);
@@ -3685,6 +3719,8 @@ operate(struct Configurable *config, int argc, char *argv[])
           ourWriteEnv(curl);
 #endif
 
+show_error:
+
 #ifdef  VMS
         if (!config->showerror)  {
           vms_show = VMSSTS_HIDE;
@@ -3790,6 +3826,10 @@ operate(struct Configurable *config, int argc, char *argv[])
     urlnode = nextnode;
 
   } /* while-loop through all URLs */
+
+quit_curl:
+  if (config->engine)
+    free(config->engine);
 
   if(config->headerfile && !headerfilep && heads.stream)
     fclose(heads.stream);
