@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "20 August 2001" "libcurl 7.8.1" "libcurl Manual"
+.TH curl_easy_setopt 3 "22 August 2001" "libcurl 7.8.1" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -140,7 +140,9 @@ CURLOPT_INFILE and CURLOPT_INFILESIZE are also interesting for uploads.
 A non-zero parameter tells the library to do a regular HTTP post. This is a
 normal application/x-www-form-urlencoded kind, which is the most commonly used
 one by HTML forms. See the CURLOPT_POSTFIELDS option for how to specify the
-data to post and CURLOPT_POSTFIELDSIZE in how to set the data size.
+data to post and CURLOPT_POSTFIELDSIZE in how to set the data size. Starting
+with libcurl 7.8, this option is obsolete. Using the CURLOPT_POSTFIELDS option
+will imply this option.
 .TP
 .B CURLOPT_FTPLISTONLY
 A non-zero parameter tells the library to just list the names of an ftp
@@ -211,7 +213,8 @@ that this does not work in multi-threaded programs!
 .TP
 .B CURLOPT_POSTFIELDS
 Pass a char * as parameter, which should be the full data to post in a HTTP
-post operation. See also the CURLOPT_POST.
+post operation. See also the CURLOPT_POST. Since 7.8, using CURLOPT_POSTFIELDS
+implies CURLOPT_POST.
 .TP
 .B CURLOPT_POSTFIELDSIZE
 If you want to post data to the server without letting libcurl do a strlen()
