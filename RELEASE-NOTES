@@ -19,6 +19,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o improved config file parsing for options with required parameters
+ o using --trace with a bad file name could crash
  o release archive contains compressed help text
  o the win32 password prompting supports backspace
  o builds natively on AmigaOS (without unix emulation)
