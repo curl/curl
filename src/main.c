@@ -1016,7 +1016,7 @@ static int parseconfig(char *filename,
         res = getparameter(tok1 + 1, tok2, &usedarg, config);
         free(tok1);
         if (!usedarg) {
-          if ('-' != tok2[0]) {
+          if (tok2 && ('-' != tok2[0])) {
             /* this is not an option, this is a URL */
             if (config->url)
               free(config->url);
