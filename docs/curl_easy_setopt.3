@@ -51,13 +51,13 @@ NOTE: If you're using libcurl as a win32 DLL, you MUST use the
 \fICURLOPT_WRITEFUNCTION\fP if you set this option.
 .TP
 .B CURLOPT_WRITEFUNCTION
-Function pointer that should match the following prototype:
-.BI "size_t function( void *ptr, size_t size, size_t nmemb, void *stream);"
-This function gets called by libcurl as soon as there is received data that
-needs to be written down. The size of the data pointed to by \fIptr\fP is
-\fIsize\fP multiplied with \fInmemb\fP.  Return the number of bytes actually
-written or return -1 to signal error to the library (it will cause it to abort
-the transfer with CURLE_WRITE_ERROR).
+Function pointer that should match the following prototype: \fBsize_t
+function( void *ptr, size_t size, size_t nmemb, void *stream);\fP This
+function gets called by libcurl as soon as there is received data that needs
+to be written down. The size of the data pointed to by \fIptr\fP is \fIsize\fP
+multiplied with \fInmemb\fP.  Return the number of bytes actually written or
+return -1 to signal error to the library (it will cause it to abort the
+transfer with CURLE_WRITE_ERROR).
 
 Set the \fIstream\fP argument with the \fBCURLOPT_FILE\fP option.
 .TP
