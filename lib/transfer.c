@@ -660,9 +660,11 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             while(*ptr && !isspace((int)*ptr))
               ptr++;
             backup = *ptr; /* store the ending letter */
-            *ptr = '\0';   /* zero terminate */
-            conn->newurl = strdup(start); /* clone string */
-            *ptr = backup; /* restore ending letter */
+            if(ptr != start) {
+              *ptr = '\0';   /* zero terminate */
+              conn->newurl = strdup(start); /* clone string */
+              *ptr = backup; /* restore ending letter */
+            }
           }
 
           /*
