@@ -243,6 +243,10 @@ UrgError dict(struct UrlData *data, char *path, long *bytecount)
     }
   }
 
+#if 0
   ProgressEnd(data);
+#endif
+  pgrsDone(data);
+
   return URG_OK;
 }

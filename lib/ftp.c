@@ -752,7 +752,10 @@ UrgError _ftp(struct UrlData *data,
     /* When we know we're uploading a specified file, we can get the file
        size prior to the actual upload. */
 
+    pgrsSetUploadSize(data, data->infilesize);
+#if 0
     ProgressInit(data, data->infilesize);
+#endif
     result = Transfer(data, -1, -1, FALSE, NULL, /* no download */
                       data->secondarysocket, bytecountp);
     if(result)
@@ -999,7 +1002,10 @@ UrgError _ftp(struct UrlData *data,
 	
   }
   /* end of transfer */
+#if 0
   ProgressEnd(data);
+#endif
+  pgrsDone(data);
 
   /* shut down the socket to inform the server we're done */
   sclose(data->secondarysocket);

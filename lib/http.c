@@ -317,8 +317,11 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
         sendf(data->firstsocket, data,
               "Content-Length: %d\r\n",
               postsize-2);
-	
+
+	pgrsSetUploadSize(data, postsize);
+#if 0
         ProgressInit(data, postsize);
+#endif
 
         result = Transfer(data, data->firstsocket, -1, TRUE, &readbytecount,
                           data->firstsocket, &writebytecount);
@@ -348,8 +351,11 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
       else
         sendf(data->firstsocket, data,
               "\015\012");
-        
+
+#if 0        
       ProgressInit(data, data->infilesize);
+#endif
+      pgrsSetUploadSize(data, data->infilesize);
 
       result = Transfer(data, data->firstsocket, -1, TRUE, &readbytecount,
                         data->firstsocket, &writebytecount);
@@ -370,8 +376,12 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
     }
     if(result)
       return result;
-      
+
+#if 0      
     ProgressEnd(data);
+#endif
+    pgrsDone(data);
+
   } while (0); /* this is just a left-over from the multiple document download
                   attempts */
 

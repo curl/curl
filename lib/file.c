@@ -145,7 +145,12 @@ UrgError file(struct UrlData *data, char *path, long *bytecountp)
      this is both more efficient than the former call to download() and
      it avoids problems with select() and recv() on file descriptors
      in Winsock */
+#if 0
   ProgressInit (data, expected_size);
+#endif
+  if(expected_size != -1)
+    pgrsSetDownloadSize(data, expected_size);
+
   while (1) {
     nread = read(fd, buf, BUFSIZE-1);
 
@@ -164,10 +169,16 @@ UrgError file(struct UrlData *data, char *path, long *bytecountp)
       return URG_WRITE_ERROR;
     }
     now = tvnow();
+    pgrsUpdate(data);
+#if 0
     ProgressShow (data, bytecount, start, now, FALSE);
+#endif
   }
   now = tvnow();
+#if 0
   ProgressShow (data, bytecount, start, now, TRUE);
+#endif
+  pgrsUpdate(data);
 
   close(fd);
 
