@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "26 September 2000" "Curl 7.3" "Curl Manual"
+.TH curl 1 "26 October 2000" "Curl 7.4.2" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -93,11 +93,16 @@ HTTP resume is only possible with HTTP/1.1 or later servers.
 that the data is sent exactly as specified with no extra processing (with all
 newlines cut off).  The data is expected to be "url-encoded". This will cause
 curl to pass the data to the server using the content-type
-application/x-www-form-urlencoded. Compare to -F.
+application/x-www-form-urlencoded. Compare to -F. If more than one -d/--data
+option is used on the same command line, the data pieces specified will be
+merged together with a separating &-letter. Thus, using '-d name=daniel -d
+skill=lousy' would generate a post chunk that looks like
+'name=daniel&skill=lousy'.
 
 If you start the data with the letter @, the rest should be a file name to
-read the data from, or - if you want curl to read the data from stdin.
-The contents of the file must already be url-encoded.
+read the data from, or - if you want curl to read the data from stdin.  The
+contents of the file must already be url-encoded. Multiple files can also be
+specified.
 
 To post data purely binary, you should instead use the --data-binary option.
 
