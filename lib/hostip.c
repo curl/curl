@@ -117,7 +117,7 @@ static int _num_chars(int i)
     chars++;
 
     i = (int) i / 10;
-  } while (i > 1);
+  } while (i >= 1);
 
   return chars;
 }
