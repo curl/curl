@@ -56,7 +56,8 @@ HTMLPAGES = \
 	curl_mprintf.html \
 	curl_global_init.html \
 	curl_global_cleanup.html \
-	libcurl.html
+	libcurl.html \
+	index.html
 
 EXTRA_DIST = $(man_MANS) \
 	MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS \
