@@ -6,6 +6,15 @@
 
                                History of Changes
 
+Version 7.9.1
+
+Daniel (4 November 2001)
+- I've added a number of new test cases the last few days. A few of them since
+  I got reports that hinted on problems on timeouts, so I added four tests
+  with timeouts for all sorts of protocols and stuff. I also came to think of
+  a few other error scenarios that we currently didn't test properly, so I
+  wrote up tests for a few of those too.
+
 Daniel (2 November 2001)
 - Replaced read() and write() with recv() and send() for socket operations
   even under normal unixes.
