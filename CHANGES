@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (4 August 2004)
+- Gisle Vanem provided a fix for the multi interface and connecting to a host
+  using multiple IP (bad) addresses.
+
+- Dylan Salisbury made libcurl no longer accept cookies set to a TLD only (it
+  previously allowed that on the seven three-letter domains).
+
 Daniel (31 July 2004)
 - Joel Chen reported that the digest code assumed quotes around the contents a
   bit too much.
