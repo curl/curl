@@ -245,6 +245,7 @@ struct FTP {
 };
 
 struct Configbits {
+  bool tunnel_thru_httpproxy;
   bool ftp_append;
   bool ftp_ascii;
   bool ftp_list_only;

@@ -437,6 +437,9 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     data->proxy = va_arg(param, char *);
     data->bits.httpproxy = data->proxy?1:0;
     break;
+  case CURLOPT_HTTPPROXYTUNNEL:
+    data->bits.tunnel_thru_httpproxy = va_arg(param, long)?TRUE:FALSE;
+    break;
   case CURLOPT_PROXYPORT:
     data->proxyport = va_arg(param, long);
     break;
@@ -618,6 +621,7 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
 
   return CURLE_OK;
 }
+
 
 /*
  * NAME curl_connect()
@@ -948,7 +952,10 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
     data->remote_port = PORT_FTP;
     conn->protocol |= PROT_FTP;
 
-    if(data->bits.httpproxy) {
+    if(data->bits.httpproxy &&
+       !data->bits.tunnel_thru_httpproxy) {
+      /* Unless we have asked to tunnel ftp operations through the proxy, we
+         switch and use HTTP operations only */
       conn->curl_do = http;
       conn->curl_done = http_done;
       conn->curl_close = http_close;

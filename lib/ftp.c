@@ -372,6 +372,7 @@ CURLcode ftp_connect(struct connectdata *conn)
   struct UrlData *data=conn->data;
   char *buf = data->buffer; /* this is our buffer */
   struct FTP *ftp;
+  CURLcode result;
 
   myalarm(0); /* switch off the alarm stuff */
 
@@ -386,6 +387,13 @@ CURLcode ftp_connect(struct connectdata *conn)
   ftp->bytecountp = &conn->bytecount;
   ftp->user = data->user;
   ftp->passwd = data->passwd;
+
+  if (data->bits.tunnel_thru_httpproxy) {
+    /* We want "seamless" FTP operations through HTTP proxy tunnel */
+    result = GetHTTPProxyTunnel(data, data->firstsocket);
+    if(CURLE_OK != result)
+      return result;
+  }
 
   /* The first thing we do is wait for the "220*" line: */
   nread = GetLastResponse(data->firstsocket, buf, conn);
@@ -860,11 +868,17 @@ CURLcode _ftp(struct connectdata *conn)
         }
         return CURLE_FTP_CANT_RECONNECT;
       }
-    }
 
+      if (data->bits.tunnel_thru_httpproxy) {
+        /* We want "seamless" FTP operations through HTTP proxy tunnel */
+        result = GetHTTPProxyTunnel(data, data->secondarysocket);
+        if(CURLE_OK != result)
+          return result;
+      }
+    }
   }
   /* we have the (new) data connection ready */
-  infof(data, "Connected!\n");
+  infof(data, "Connected the data stream!\n");
 
   if(data->bits.upload) {
 
