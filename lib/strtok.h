@@ -24,21 +24,14 @@
 #ifndef _CURL_STRTOK_R_H
 #define _CURL_STRTOK_R_H
 
-#include <stddef.h>
 #include "setup.h"
+#include <stddef.h>
 
 #ifndef HAVE_STRTOK_R
 char *Curl_strtok_r(char *s, const char *delim, char **last);
 #define strtok_r Curl_strtok_r
 #else
 #include <string.h>
-/* If your system, such as Solaris 2.7, lacks the strtok_r() prototype in
-   string.h, then you'll face a bunch of warnings on all instances
-   where strtok_r() is used.
-
-   There's not much we can do about it. Adding a prototype here screws
-   everything up on other platforms! :-(
-*/
 #endif
 
 #endif
