@@ -31,7 +31,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#include <sys/errno.h> /* NICO */
+#include <sys/errno.h>
 
 #include <curl/curl.h>
 
@@ -486,7 +486,7 @@ struct Configurable {
   bool globoff;
   bool use_httpget;
   bool insecure_ok; /* set TRUE to allow insecure SSL connects */
-  bool create_dirs; /* NICO */
+  bool create_dirs;
 
   char *writeout; /* %-styled format string to output */
   bool writeenv; /* write results to environment, if available */
@@ -526,7 +526,7 @@ struct Configurable {
 static int parseconfig(const char *filename,
 		       struct Configurable *config);
 static char *my_get_line(FILE *fp);
-static int create_dir_hierarchy(char *outfile); /* NICO */
+static int create_dir_hierarchy(char *outfile);
 
 static void GetStr(char **string,
 		   char *value)
@@ -1073,7 +1073,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"z", "time-cond",   TRUE},
     {"Z", "max-redirs",   TRUE},
     {"#", "progress-bar",FALSE},
-    {"@", "create-dirs", FALSE}, /* NICO */
+    {"@", "create-dirs", FALSE},
   };
 
   if(('-' != flag[0]) ||
@@ -1710,7 +1710,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
 
     case '@':
-      /* NICO */
       config->create_dirs = TRUE;
       break;
 
@@ -2343,7 +2342,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   config->showerror=TRUE;
   config->conf=CONF_DEFAULT;
   config->use_httpget=FALSE;
-  config->create_dirs=FALSE; /* NICO */
+  config->create_dirs=FALSE;
 
   if(argc>1 &&
      (!strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
@@ -2569,8 +2568,9 @@ operate(struct Configurable *config, int argc, char *argv[])
         /* Create the directory hierarchy, if not pre-existant to a multiple
            file output call */
         
-        if(config->create_dirs)  /* NICO */
-          create_dir_hierarchy(outfile);
+        if(config->create_dirs)
+          if (-1 == create_dir_hierarchy(outfile))
+            return CURLE_WRITE_ERROR;
         
         if(config->resume_from_current) {
           /* We're told to continue from where we are now. Get the
@@ -3065,8 +3065,7 @@ static int create_dir_hierarchy(char *outfile)
       if (strlen(dirbuildup) > 0)
         sprintf(dirbuildup,"%s%s%s",dirbuildup, DIR_CHAR, tempdir);
       else {
-        /* TODO: BEEEP this is not portable, we need to fix the '/' here! */
-        if (outdup[0] != '/')
+        if (0 != strncmp(outdup, DIR_CHAR, 1))
           sprintf(dirbuildup,"%s",tempdir);
         else
           sprintf(dirbuildup,"%s%s", DIR_CHAR, tempdir);
