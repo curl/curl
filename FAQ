@@ -65,3 +65,21 @@ Does curl work with other SSL libraries?
 
   If anyone does "port" curl to use a commercial SSL library, I am of course
   very interested in getting the patch!
+
+configre doesn't find OpenSSL even when it is installed
+=======================================================
+
+  Platforms: Solaris (native cc compiler) and HPUX (native cc compiler)
+
+  When configuring curl, I specify --with-ssl. OpenSSL is installed in
+  /usr/local/ssl Configure reports SSL in /usr/local/ssl, but fails to find
+  CRYPTO_lock in -lcrypto 
+
+  Cause: The cc for this test places the -L/usr/local/ssl/lib AFTER -lcrypto,
+  so ld can't find the library. This is due to a bug in the GNU autoconf tool.
+
+  Workaround: Specifying "LDFLAGS=-L/usr/local/ssl/lib" in front of ./configure
+  places the -L/usr/local/ssl/lib early enough in the command line to make
+  things work
+
+  Submitted by: Bob Allison <allisonb@users.sourceforge.net>
