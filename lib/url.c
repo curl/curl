@@ -2886,9 +2886,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
         if(user[0]) {
           char *newname=curl_unescape(user, 0);
-          if(strlen(newname) < sizeof(user)) {
+          if(!newname)
+            return CURLE_OUT_OF_MEMORY;
+          if(strlen(newname) < sizeof(user))
             strcpy(user, newname);
-          }
+
           /* if the new name is longer than accepted, then just use
              the unconverted name, it'll be wrong but what the heck */
           free(newname);
@@ -2896,9 +2898,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         if (passwd[0]) {
           /* we have a password found in the URL, decode it! */
           char *newpasswd=curl_unescape(passwd, 0);
-          if(strlen(newpasswd) < sizeof(passwd)) {
+          if(!newpasswd)
+            return CURLE_OUT_OF_MEMORY;
+          if(strlen(newpasswd) < sizeof(passwd))
             strcpy(passwd, newpasswd);
-          }
+
           free(newpasswd);
         }
       }
