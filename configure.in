@@ -446,9 +446,6 @@ then
 Set to explicitly specify we don't want to use thread-safe functions)
 else
 
-  dnl check that 'localhost' resolves first
-  CURL_CHECK_WORKING_RESOLVER
-
   dnl dig around for gethostbyname_r()
   CURL_CHECK_GETHOSTBYNAME_R()
 

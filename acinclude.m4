@@ -246,7 +246,6 @@ AC_DEFUN(CURL_CHECK_INET_NTOA_R,
 	AC_DEFINE(NEED_REENTRANT)
 	AC_MSG_RESULT(yes)],
 	AC_MSG_RESULT(no))])])
-
 ])
 
 AC_DEFUN(CURL_CHECK_GETHOSTBYADDR_R,
@@ -324,8 +323,6 @@ rc = gethostbyaddr_r(address, length, type, &h,
 	    ac_cv_gethostbyaddr_args=8],[
 	    AC_MSG_RESULT(no)
 	    have_missing_r_funcs="$have_missing_r_funcs gethostbyaddr_r"])])])])])
-
-
 ])
 
 AC_DEFUN(CURL_CHECK_GETHOSTBYNAME_R,
@@ -333,28 +330,21 @@ AC_DEFUN(CURL_CHECK_GETHOSTBYNAME_R,
   dnl check for number of arguments to gethostbyname_r. it might take
   dnl either 3, 5, or 6 arguments.
   AC_CHECK_FUNCS(gethostbyname_r,[
-    AC_MSG_CHECKING(if gethostbyname_r takes 3 arguments)
-    AC_TRY_RUN([
+    AC_MSG_CHECKING([if gethostbyname_r takes 3 arguments])
+    AC_TRY_COMPILE([
 #include <string.h>
 #include <sys/types.h>
 #include <netdb.h>
 
 int
-main () {
-struct hostent h;
-struct hostent_data hdata;
-char *name = "localhost";
-int rc;
-memset(&h, 0, sizeof(struct hostent));
-memset(&hdata, 0, sizeof(struct hostent_data));
-rc = gethostbyname_r(name, &h, &hdata);
-exit (rc != 0 ? 1 : 0); }],[
+gethostbyname_r(const char *, struct hostent *, struct hostent_data *);],[
+gethostbyname_r(NULL, NULL, NULL);],[
       AC_MSG_RESULT(yes)
       AC_DEFINE(HAVE_GETHOSTBYNAME_R_3)
       ac_cv_gethostbyname_args=3],[
       AC_MSG_RESULT(no)
-      AC_MSG_CHECKING(if gethostbyname_r with -D_REENTRANT takes 3 arguments)
-      AC_TRY_RUN([
+      AC_MSG_CHECKING([if gethostbyname_r with -D_REENTRANT takes 3 arguments])
+      AC_TRY_COMPILE([
 #define _REENTRANT
 
 #include <string.h>
@@ -362,53 +352,34 @@ exit (rc != 0 ? 1 : 0); }],[
 #include <netdb.h>
 
 int
-main () {
-struct hostent h;
-struct hostent_data hdata;
-char *name = "localhost";
-int rc;
-memset(&h, 0, sizeof(struct hostent));
-memset(&hdata, 0, sizeof(struct hostent_data));
-rc = gethostbyname_r(name, &h, &hdata);
-exit (rc != 0 ? 1 : 0); }],[
+gethostbyname_r(const char *,struct hostent *, struct hostent_data *);],[
+gethostbyname_r(NULL, NULL, NULL);],[
 	AC_MSG_RESULT(yes)
 	AC_DEFINE(HAVE_GETHOSTBYNAME_R_3)
 	AC_DEFINE(NEED_REENTRANT)
 	ac_cv_gethostbyname_args=3],[
 	AC_MSG_RESULT(no)
-	AC_MSG_CHECKING(if gethostbyname_r takes 5 arguments)
-	AC_TRY_RUN([
+	AC_MSG_CHECKING([if gethostbyname_r takes 5 arguments])
+	AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netdb.h>
 
-int
-main () {
-struct hostent *hp;
-struct hostent h;
-char *name = "localhost";
-char buffer[8192];
-int h_errno;
-hp = gethostbyname_r(name, &h, buffer, 8192, &h_errno);
-exit (hp == NULL ? 1 : 0); }],[
+struct hostent *
+gethostbyname_r(const char *, struct hostent *, char *, int, int *);],[
+gethostbyname_r(NULL, NULL, NULL, 0, NULL);],[
 	  AC_MSG_RESULT(yes)
 	  AC_DEFINE(HAVE_GETHOSTBYNAME_R_5)
           ac_cv_gethostbyname_args=5],[
 	  AC_MSG_RESULT(no)
-	  AC_MSG_CHECKING(if gethostbyname_r takes 6 arguments)
-	  AC_TRY_RUN([
+	  AC_MSG_CHECKING([if gethostbyname_r takes 6 arguments])
+	  AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netdb.h>
 
 int
-main () {
-struct hostent h;
-struct hostent *hp;
-char *name = "localhost";
-char buf[8192];
-int rc;
-int h_errno;
-rc = gethostbyname_r(name, &h, buf, 8192, &hp, &h_errno);
-exit (rc != 0 ? 1 : 0); }],[
+gethostbyname_r(const char *, struct hostent *, char *, size_t,
+struct hostent **, int *);],[
+gethostbyname_r(NULL, NULL, NULL, 0, NULL, NULL);],[
 	    AC_MSG_RESULT(yes)
 	    AC_DEFINE(HAVE_GETHOSTBYNAME_R_6)
             ac_cv_gethostbyname_args=6],[
