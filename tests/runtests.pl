@@ -356,7 +356,7 @@ sub singletest {
     if(! -r $CURLCMD) {
         # this is not a test
         print "$NUMBER doesn't look like a test case!\n";
-        next;
+        return -1;
     }
 
     # remove previous server output logfile
@@ -567,6 +567,8 @@ sub singletest {
 # Check options to this test program
 #
 
+my $number=0;
+my $fromnum=-1;
 my @testthis;
 do {
     if ($ARGV[0] eq "-v") {
@@ -605,7 +607,19 @@ EOHELP
         exit;
     }
     elsif($ARGV[0] =~ /^(\d+)/) {
-        push @testthis, $1;
+        $number = $1;
+        if($fromnum >= 0) {
+            for($fromnum .. $number) {
+                push @testthis, $_;
+            }
+            $fromnum = -1;
+        }
+        else {
+            push @testthis, $1;
+        }
+    }
+    elsif($ARGV[0] =~ /^to$/i) {
+        $fromnum = $number;
     }
 } while(shift @ARGV);
 
@@ -670,9 +684,12 @@ my $ok=0;
 my $total=0;
 foreach $testnum (split(" ", $TESTCASES)) {
 
-    $total++;
     my $error = singletest($testnum);
-    if($error && !$anyway) {
+    if(-1 != $error) {
+        # valid test case number
+        $total++;
+    }
+    if(($error>0) && !$anyway) {
         # a test failed, abort
         print "\n - abort tests\n";
         last;
@@ -696,4 +713,9 @@ close(CMDLOG);
 stopserver($FTPPIDFILE);
 stopserver($PIDFILE);
 
-print "$ok tests out of $total reported OK\n";
+if($total) {
+    print "$ok tests out of $total reported OK\n";
+}
+else {
+    print "No tests were performed!\n";
+}
