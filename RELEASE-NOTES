@@ -14,6 +14,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o fixed HTTP POST or PUT with Digest/Negotiate/NTLM when the server didn't
+   require any authentication
  o win32 file:// transfer free memory bug
  o configure --disable-http builds a libcurl without HTTP support
  o CURLOPT_FILETIME had wrong type, it expects a long argument
@@ -28,12 +30,14 @@ Other curl-related news since the previous public release:
 
  o James Hu took over after Kevin Roth as maintainer of the curl package on
    cygwin. Many saludos to Kevin for a work well done during many years.
+ o Gambas binding for libcurl: http://gambas.sf.net/
  o pycurl 7.12.0 was released http://pycyrl.sf.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, Vincent Bronner, Alexander Krasnostavsky, Chris Gaukroger,
- Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam
+ Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam,
+ Luca Alteas
 
         Thanks! (and sorry if I forgot to mention someone)

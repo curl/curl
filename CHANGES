@@ -6,6 +6,13 @@
 
                                   Changelog
 
+Daniel (15 June 2004)
+- Luca Alteas reported a problem that I fixed: if you did a POST with
+  CURLAUTH_DIGEST set but the server didn't require any authentication,
+  libcurl would repeatedly send HEAD lots of times until it gives up. This was
+  actually the case for all multi-pass authentications. Added test case 174,
+  175 and 176 to verify this.
+
 Daniel (14 June 2004)
 - Multipart formposts uploading files no longer inserts the files themselves
   into the huge prebuilt chunk. This enables libcurl to formpost files that is
