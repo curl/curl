@@ -6,6 +6,21 @@
 
                                   Changelog
 
+
+Daniel (11 Nov 2002)
+- Dave Halbakken added curl_version_info to lib/libcurl.def to make libcurl
+  properly build with MSVC on Windows.
+
+Daniel (8 Nov 2002)
+- Doing HTTP PUT without a specified file size now makes libcurl use
+  Transfer-Encoding: chunked.
+
+Daniel (7 Nov 2002)
+- Bug report #634625 identified how curl returned timeout immediately when
+  CURLOPT_CONNECTTIMEOUT was used and provided a fix.
+
+Version 7.10.2-pre4 (6 Nov 2002)
+
 Daniel (5 Nov 2002)
 - Lehel Bernadt found out and fixed. libcurl sent error message to the debug
   output when it stored the error message.
@@ -23,7 +38,8 @@ Daniel (5 Nov 2002)
 Version 7.10.2-pre3
 
 Daniel (31 Oct 2002)
-- Downgraded automake to 1.6.3 in an attempt to fix cygwin problems.
+- Downgraded automake to 1.6.3 in an attempt to fix cygwin problems. (It
+  turned out this didn't help though.)
 
 - Disable the DNS cache (by setting the timeout to 0) made libcurl leak
   memory. Avery Fay brought the example code that proved this.
