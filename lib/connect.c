@@ -103,6 +103,7 @@ int Curl_nonblock(int socket,    /* operate on this */
 {
 #undef SETBLOCK
 #ifdef HAVE_O_NONBLOCK
+  /* most recent unix versions */
   int flags;
 
   flags = fcntl(socket, F_GETFL, 0);
@@ -114,6 +115,7 @@ int Curl_nonblock(int socket,    /* operate on this */
 #endif
 
 #ifdef HAVE_FIONBIO
+  /* older unix versions */
   int flags;
 
   flags = nonblock;
@@ -122,6 +124,7 @@ int Curl_nonblock(int socket,    /* operate on this */
 #endif
 
 #ifdef HAVE_IOCTLSOCKET
+  /* Windows? */
   int flags;
   flags = nonblock;
   return ioctlsocket(socket, FIONBIO, &flags);
@@ -129,13 +132,21 @@ int Curl_nonblock(int socket,    /* operate on this */
 #endif
 
 #ifdef HAVE_IOCTLSOCKET_CASE
+  /* presumably for Amiga */
   return IoctlSocket(socket, FIONBIO, (long)nonblock);
 #define SETBLOCK 4
 #endif
 
+#ifdef HAVE_SO_NONBLOCK
+  /* BeOS */
+  long b = nonblock ? 1 : 0;
+  return setsockopt(socket, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
+#define SETBLOCK 5
+#endif
+
 #ifdef HAVE_DISABLED_NONBLOCKING
   return 0; /* returns success */
-#define SETBLOCK 5
+#define SETBLOCK 6
 #endif
 
 #ifndef SETBLOCK
@@ -348,11 +359,11 @@ int socketerror(int sockfd)
 {
   int err = 0;
   socklen_t errSize = sizeof(err);
-
+#ifdef SO_ERROR
   if( -1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR,
                        (void *)&err, &errSize))
     err = Curl_ourerrno();
-  
+#endif
   return err;
 }
 
