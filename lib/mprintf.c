@@ -82,7 +82,13 @@ static const char lower_digits[] = "0123456789abcdefghijklmnopqrstuvwxyz";
 /* Upper-case digits.  */
 static const char upper_digits[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-#define	OUTCHAR(x) done+=(stream(x, (FILE *)data)==-1?0:1)
+#define	OUTCHAR(x) \
+  do{ \
+    if(stream((unsigned char)(x), (FILE *)data) != -1) \
+      done++; \
+    else \
+     return done; /* return immediately on failure */ \
+  } while(0)
 
 /* Data type to read from the arglist */
 typedef enum  {
@@ -582,12 +588,12 @@ static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
 }
 
 static int dprintf_formatf(
-             void *data, /* untouched by format(), just sent to the
-                            stream() function in the first argument */
-	     int (*stream)(int, FILE *), /* function pointer called for each
-					    output character */
-	     const char *format,    /* %-formatted string */
-	     va_list ap_save) /* list of parameters */
+  void *data, /* untouched by format(), just sent to the stream() function in
+                 the second argument */
+  /* function pointer called for each output character */
+  int (*stream)(int, FILE *),
+  const char *format,    /* %-formatted string */
+  va_list ap_save) /* list of parameters */
 {
   /* Base-36 digits for numbers.  */
   const char *digits = lower_digits;
@@ -983,13 +989,14 @@ static int dprintf_formatf(
 static int addbyter(int output, FILE *data)
 {
   struct nsprintf *infop=(struct nsprintf *)data;
+  unsigned char outc = (unsigned char)output;
  
   if(infop->length < infop->max) {
     /* only do this if we haven't reached max length yet */
-    infop->buffer[0] = (char)output; /* store */
+    infop->buffer[0] = outc; /* store */
     infop->buffer++; /* increase pointer */
     infop->length++; /* we are now one byte larger */
-    return output; /* fputc() returns like this on success */
+    return outc;     /* fputc() returns like this on success */
   }
   return -1;
 }
@@ -1030,6 +1037,7 @@ int curl_msnprintf(char *buffer, size_t maxlength, const char *format, ...)
 static int alloc_addbyter(int output, FILE *data)
 {
   struct asprintf *infop=(struct asprintf *)data;
+  unsigned char outc = (unsigned char)output;
  
   if(!infop->buffer) {
     infop->buffer=(char *)malloc(32);
@@ -1053,11 +1061,11 @@ static int alloc_addbyter(int output, FILE *data)
     infop->alloc *= 2;
   }
 
-  infop->buffer[ infop->len ] = (char)output;
+  infop->buffer[ infop->len ] = outc;
 
   infop->len++;
 
-  return output; /* fputc() returns like this on success */
+  return outc; /* fputc() returns like this on success */
 }
 
 char *curl_maprintf(const char *format, ...)
@@ -1115,9 +1123,10 @@ char *curl_mvaprintf(const char *format, va_list ap_save)
 static int storebuffer(int output, FILE *data)
 {
   char **buffer = (char **)data;
-  **buffer = (char)output;
+  unsigned char outc = (unsigned char)output;
+  **buffer = outc;
   (*buffer)++;
-  return output; /* act like fputc() ! */
+  return outc; /* act like fputc() ! */
 }
 
 int curl_msprintf(char *buffer, const char *format, ...)
