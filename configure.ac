@@ -1254,7 +1254,6 @@ AC_CHECK_FUNCS( strtoll \
                 strdup \
                 strstr \
                 strtok_r \
-                strftime \
                 uname \
                 strcasecmp \
                 stricmp \
