@@ -26,23 +26,21 @@ EXTRA_DIST = MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS SSLCERTS	\
 
 MAN2HTML= $(NROFF) -man $< | man2html >$@
 
-SUFFIXES = .1 .3 .html .pdf
+SUFFIXES = .1 .html .pdf
 
 html: $(HTMLPAGES)
 	cd libcurl; make html
 
-.3.html:
-	$(MAN2HTML)
+pdf: $(PDFPAGES)
+	cd libcurl; make pdf
 
 .1.html:
 	$(MAN2HTML)
 
-MAN2PDF = groff -Tps -man curl.1 $< >$@
+.1.pdf:
+	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
+	groff -Tps -man $< >$$foo.ps; \
+	ps2pdf $$foo.ps $@; \
+	rm $$foo.ps; \
+	echo "converted $< to $@")
 
-pdf:
-	for file in $(man_MANS); do \
-	  foo=`echo $$file | sed -e 's/\.[0-9]$$//g'`; \
-	  groff -Tps -man $$file >$$foo.ps; \
-	  ps2pdf $$foo.ps $$foo.pdf; \
-	done
-	cd libcurl; make pdf
