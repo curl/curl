@@ -179,6 +179,7 @@ static CURLcode win32_init(void) { return CURLE_OK; }
  */
 CURLcode main_init(void)
 {
+  curl_global_init();
   return win32_init();
 }
 
@@ -189,6 +190,7 @@ CURLcode main_init(void)
 void main_free(void)
 {
   win32_cleanup();
+  curl_global_cleanup();
 }
 
 int SetHTTPrequest(HttpReq req, HttpReq *store)
@@ -1458,7 +1460,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   curl_memdebug("memdump");
 #endif
 
-  main_init(); /* inits winsock crap for windows */
+  main_init(); /* inits */
 
   config->showerror=TRUE;
   config->conf=CONF_DEFAULT;
@@ -1901,7 +1903,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   /* cleanup the curl handle! */
   curl_easy_cleanup(curl);
 
-  main_free(); /* cleanup the winsock stuff for windows */
+  main_free(); /* cleanup */
 
   return res;
 }
