@@ -12,6 +12,7 @@ docs/FEATURES
 docs/INSTALL
 docs/INTERNALS
 docs/README.curl
+docs/README.win32
 docs/README.libcurl
 docs/RESOURCES
 docs/TODO
