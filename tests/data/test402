@@ -5,13 +5,16 @@ moooooooo
 
 # Client-side
 <client>
+<killserver>
+ftp
+</killserver>
  <name>
 FTPS operation to FTP port
  </name>
  <command>
 -k ftps://%HOSTIP:%FTPPORT/path/to/file/402
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>
