@@ -1049,7 +1049,11 @@ static int str2offset(curl_off_t *val, char *str)
 static void checkpasswd(const char *kind, /* for what purpose */
                         char **userpwd) /* pointer to allocated string */
 {
-  char *ptr = strchr(*userpwd, ':');
+  char *ptr;
+  if(!*userpwd)
+    return;
+
+  ptr = strchr(*userpwd, ':');
   if(!ptr) {
     /* no password present, prompt for one */
     char passwd[256]="";
