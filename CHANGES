@@ -6,13 +6,17 @@
 
                                History of Changes
 
-Version XX
 
 Daniel (22 May 2000)
+- Jörn Hartroth brought me fixes to make the win32 version compile properly as
+  well as a rename of the 'interface' field in the urldata struct, as it seems
+  to be reserved in some gcc versions!
+
 - Rich Gray struck back with yet some portability reports. Data General DG/UX
   needed a little fix in lib/ldap.c since it doesn't have RTLD_GLOBAL defined.
   More fixes are expected as a result of Richies very helpful work.
 
+Version 7.0.1beta released
 
 Daniel (21 May 2000)
 - Updated lots of #defines, enums and variable type names in the library. No
