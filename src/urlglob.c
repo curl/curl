@@ -35,9 +35,8 @@
 
 #include "urlglob.h"
 
-
-#ifdef CURLDEBUG
-#include "../lib/memdebug.h"
+#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
+#include "memdebug.h"
 #endif
 
 typedef enum {

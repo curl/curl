@@ -94,8 +94,8 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #endif
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
-#include "../lib/memdebug.h"
+#if defined(CURLDEBUG) && defined(CURLTOOLDEBUG)
+#include "memdebug.h"
 #endif
 
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
