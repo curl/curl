@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o connect failures properly writes error message in errorbuffer
  o Rare Location:-following problem with bad original URL
  o -F can now add Content-Type on non-file sections
  o double Host: header when following Location: with replaced Host: fixed
@@ -39,6 +40,6 @@ advice from friends like these:
 
  Casey O'Donnell, Roland Krikava, Alex, Alexander Krasnostavsky, Kjetil
  Jacobsen, Ling Thio, Roman Koifman, Harshal Pradhan, Jonas Forsman, David
- Tarendash, Daniel at touchtunes, Bertrand Demiddelaer
+ Tarendash, Daniel at touchtunes, Bertrand Demiddelaer, Andreas Rieke
 
         Thanks! (and sorry if I forgot to mention someone)
