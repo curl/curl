@@ -396,8 +396,13 @@ CURLcode Curl_http_auth(struct connectdata *conn,
     if(data->state.authwant == CURLAUTH_GSSNEGOTIATE) {
       /* if exactly this is wanted, go */
       int neg = Curl_input_negotiate(conn, start);
-      if (neg == 0)
+      if (neg == 0) {
         conn->newurl = strdup(data->change.url);
+        data->state.authproblem = (conn->newurl == NULL);
+      else {
+        infof(data, "Authentication problem. Ignoring this.\n");
+        data->state.authproblem = TRUE;
+      }
     }
     else
       if(data->state.authwant & CURLAUTH_GSSNEGOTIATE)
@@ -414,10 +419,14 @@ CURLcode Curl_http_auth(struct connectdata *conn,
         CURLntlm ntlm =
           Curl_input_ntlm(conn, (bool)(httpcode == 407), start);
                   
-        if(CURLNTLM_BAD != ntlm)
+        if(CURLNTLM_BAD != ntlm) {
           conn->newurl = strdup(data->change.url); /* clone string */
-        else
+          data->state.authproblem = (conn->newurl == NULL);
+        }
+        else {
           infof(data, "Authentication problem. Ignoring this.\n");
+          data->state.authproblem = TRUE;
+        }
       }
       else
         if(data->state.authwant & CURLAUTH_NTLM)
@@ -431,12 +440,16 @@ CURLcode Curl_http_auth(struct connectdata *conn,
           /* Digest authentication is activated */
           CURLdigest dig = Curl_input_digest(conn, start);
           
-          if(CURLDIGEST_FINE == dig)
+          if(CURLDIGEST_FINE == dig) {
             /* We act on it. Store our new url, which happens to be
                the same one we already use! */
             conn->newurl = strdup(data->change.url); /* clone string */
-          else
+            data->state.authproblem = (conn->newurl == NULL);
+          }
+          else {
             infof(data, "Authentication problem. Ignoring this.\n");
+            data->state.authproblem = TRUE;
+          }
         }
         else
           if(data->state.authwant & CURLAUTH_DIGEST) {
@@ -458,9 +471,17 @@ CURLcode Curl_http_auth(struct connectdata *conn,
              valid. */
           data->state.authavail = CURLAUTH_NONE;
           infof(data, "Authentication problem. Ignoring this.\n");
+          data->state.authproblem = TRUE;
         }
         else if(data->state.authwant & CURLAUTH_BASIC) {
           data->state.authavail |= CURLAUTH_BASIC;
+        } else {
+            /*
+            ** We asked for something besides basic but got
+            ** Basic anyway.  This is no good.
+            */
+            infof(data, "Server expects Basic auth, but we're doing something else.\n");
+            data->state.authproblem = TRUE;
         }
       }
   return CURLE_OK;
@@ -531,13 +552,17 @@ int Curl_http_should_fail(struct connectdata *conn)
   */
 #if 0 /* set to 1 when debugging this functionality */
   infof(data,"%s: authstage = %d\n",__FUNCTION__,data->state.authstage);
+  infof(data,"%s: authwant = 0x%08x\n",__FUNCTION__,data->state.authwant);
+  infof(data,"%s: authavail = 0x%08x\n",__FUNCTION__,data->state.authavail);
   infof(data,"%s: httpcode = %d\n",__FUNCTION__,k->httpcode);
   infof(data,"%s: authdone = %d\n",__FUNCTION__,data->state.authdone);
+  infof(data,"%s: newurl = %s\n",__FUNCTION__,conn->newurl ? conn->newurl : "(null)");
+  infof(data,"%s: authproblem = %d\n",__FUNCTION__,data->state.authproblem);
 #endif
 
   if (data->state.authstage &&
       (data->state.authstage == k->httpcode))
-    return data->state.authdone;
+    return (data->state.authdone || data->state.authproblem);
 
   /*
   ** Either we're not authenticating, or we're supposed to

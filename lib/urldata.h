@@ -725,6 +725,7 @@ struct UrlState {
                      depending on authstage) */
   long authavail; /* what the server reports */
 
+  bool authproblem; /* TRUE if there's some problem authenticating */
   bool authdone; /* TRUE when the auth phase is done and ready
                     to do the *actual* request */
 #ifdef USE_ARES

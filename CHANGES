@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel (22 April 2004)
+- David Byron found and fixed a small bug with the --fail and authentication
+  stuff added a few weeks ago.  Turns out that if you specify --proxy-ntlm and
+  communicate with a proxy that requires basic authentication, the proxy
+  properly returns a 407, but the failure detection code doesn't realize it
+  should give up, so curl returns with exit code 0. Test case 162 added to
+  verify the functionality.
+
 - If a transfer is found out to be only partial, libcurl will now treat that
   as a problem serious enough to skip the final QUIT command before closing
   the control connection. To avoid the risk that it will "hang" waiting for

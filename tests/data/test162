@@ -1,0 +1,45 @@
+# Server-side
+<reply>
+<data1001 nocheck=1>
+HTTP/1.0 407 BAD BOY
+Proxy-Authenticate: Basic realm="Squid proxy-caching web server"
+Server: swsclose
+Content-Type: text/html
+
+Even though it's the response code that triggers authentication, we're
+using NTLM and the server isn't, so we should fail.  We know the server
+isn't because there's no Proxy-Authorization: NTLM header
+</data1001>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP GET asking for --proxy-ntlm when some other authentication is required
+ </name>
+ <command>
+http://%HOSTIP:%HOSTPORT/162 --proxy http://%HOSTIP:%HOSTPORT --proxy-user foo:bar --proxy-ntlm --fail
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol>
+GET http://127.0.0.1:8999/162 HTTP/1.1
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+User-Agent: curl/7.8.1-pre3 (sparc-sun-solaris2.7) libcurl 7.8.1-pre3 (OpenSSL 0.9.6a) (krb4 enabled)
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: */*
+
+</protocol>
+<errorcode>
+22
+</errorcode>
+</verify>

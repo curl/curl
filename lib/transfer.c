@@ -1499,6 +1499,7 @@ CURLcode Curl_pretransfer(struct SessionHandle *data)
   /* set preferred authentication, default to basic */
 
   data->state.authstage = 0; /* initialize authentication later */
+  data->state.authproblem = FALSE;
 
   /* If there was a list of cookie files to read and we haven't done it before,
      do it now! */
