@@ -19,7 +19,7 @@ http
 HTTP PUT from file with weird letters
 </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/ -T log/58te[]st.txt
+http://%HOSTIP:%HOSTPORT/we/want/ -T log/58te[]st.txt -g
 </command>
 <file name="log/58te[]st.txt">
 a few bytes
