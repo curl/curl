@@ -9,6 +9,7 @@
 my $mallocs=0;
 my $reallocs=0;
 my $strdups=0;
+my $showlimit;
 
 while(1) {
     if($ARGV[0] eq "-v") {
@@ -19,7 +20,14 @@ while(1) {
         $trace=1;
         shift @ARGV;
     }
-    last;
+    elsif($ARGV[0] eq "-l") {
+        # only show what alloc that caused a memlimit failure
+        $showlimit=1;
+        shift @ARGV;
+    }
+    else {
+        last;
+    }
 }
 
 my $maxmem;
@@ -38,12 +46,26 @@ my $file = $ARGV[0];
 if(! -f $file) {
     print "Usage: memanalyze.pl [options] <dump file>\n",
     "Options:\n",
+    " -l  memlimit failure displayed\n",
     " -v  Verbose\n",
     " -t  Trace\n";
     exit;
 }
 
 open(FILE, "<$file");
+
+if($showlimit) {
+    while(<FILE>) {
+        if(/^LIMIT.*memlimit$/) {
+            print $_;
+            last;
+        }
+    }
+    close(FILE);
+    exit;
+}
+
+
 
 while(<FILE>) {
     chomp $_;
