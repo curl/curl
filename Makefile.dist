@@ -82,8 +82,12 @@ amiga:
 	cd ./src && make -f makefile.amiga
 
 netware:
-	cd lib && make -f Makefile.netware
-	cd src && make -f Makefile.netware
+	$(MAKE) -C lib -f Makefile.netware
+	$(MAKE) -C src -f Makefile.netware
+
+netware-ssl:
+	$(MAKE) -C lib -f Makefile.netware SSL=1
+	$(MAKE) -C src -f Makefile.netware SSL=1
 
 unix: all
 
