@@ -1,8 +1,14 @@
+This package is built on ares 1.1.1 by Daniel Stenberg. I've decided to put
+together and release my own ares archives since the ares maintainer doesn't
+want these improvements.
+
+Changes made to ares 1.1.1 included in this package:
+
 - James Bursa made it run on RISC OS
 
 - Dominick Meglio made it run fine on NT4
 
-- Duncan Wilcox made it fine on Mac OS X
+- Duncan Wilcox made it work fine on Mac OS X
 
 - Daniel Stenberg adjusted the windows port
 
