@@ -95,6 +95,20 @@
    of need. */
 #define HEADERSIZE 256
 
+struct Progress {
+  double size_dl;
+  double size_ul;
+  double downloaded;
+  double uploaded;
+
+  double current_speed; /* uses the currently fastest transfer */
+
+  int mode;  /* what kind of progress meter to display */
+  int width; /* screen width at download start */
+  int flags; /* see progress.h */
+  struct timeval start;
+};
+
 struct UrlData {
   FILE *out;    /* the fetched file goes here */
   FILE *in;     /* the uploaded file is read from here */
@@ -186,7 +200,8 @@ struct UrlData {
 
   char *headerbuff; /* allocated buffer to store headers in */
   int headersize;   /* size of the allocation */
-  int progressmode; /* what kind of progress meter to display */
+
+  struct Progress progress;
 
 #define MAX_CURL_USER_LENGTH 128
 #define MAX_CURL_PASSWORD_LENGTH 128
