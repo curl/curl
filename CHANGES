@@ -7,6 +7,8 @@
                                   Changelog
 
 
+Version 7.13.2 (5 April 2005)
+
 Daniel (4 April 2005)
 - Marcelo Juchem fixed the MSVC makefile for libcurl
 
