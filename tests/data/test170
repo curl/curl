@@ -7,6 +7,9 @@
 <server>
 http
 </server>
+<features>
+SSL
+</features>
  <name>
 HTTP POST with --proxy-ntlm and no SSL with no response
  </name>
