@@ -102,6 +102,9 @@ void WriteOut(struct UrlData *data)
               case VAR_EFFECTIVE_URL:
                 fprintf(stream, "%s", data->url?data->url:"");
                 break;
+              case VAR_HTTP_CODE:
+                fprintf(stream, "%03d", data->progress.httpcode);
+                break;
               case VAR_TOTAL_TIME:
                 fprintf(stream, "%.3f", data->progress.timespent);
                 break;
