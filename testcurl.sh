@@ -38,6 +38,10 @@ export LANG
 
 die(){
     echo "testcurl: ENDING HERE"
+    if test -n "$build"; then
+      # we have a build directory name, remove the dir
+      rm -rf $build
+    fi
     exit 1
 }
 
