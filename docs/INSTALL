@@ -178,9 +178,9 @@ Win32
         For VC++ 6, there's an included Makefile.vc6 that should be possible
         to use out-of-the-box.
 
-        Microsoft note: add /Zm200 to the compiler options to increase the 
-		compiler's memory allocation limit, as the hugehelp.c won't compile
-		due to "too long puts string".
+        Microsoft note: add /Zm200 to the compiler options to increase the
+        compiler's memory allocation limit, as the hugehelp.c won't compile
+        due to "too long puts string".
 
 
    With SSL:
@@ -321,6 +321,24 @@ VMS
    So far for porting notes as of:
    13-jul-2001
    N. Baggus
+
+QNX
+===
+   (This section was graciously brought to us by David Bentham)
+
+   By setting FD_SETSIZE early in connect.c we override the QNX default value
+   and thus avoid a crash.
+
+   Fortunately in the QNX headers its defined as
+
+    #ifndef FD_SETSIZE
+      #define FD_SETSIZE 32
+    #endif
+
+   so its relatively easy to override without changing the original
+   definition. QNX claim posix compliance so this definition style could be
+   standard in other o/s's. Eg Microsoft Visual C++ 6 defines it similarly,
+   but its set to 64.
 
 CROSS COMPILE
 =============
