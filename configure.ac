@@ -1,9 +1,7 @@
 dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 
-dnl Ensure that this file is processed with autoconf 2.50 or newer
-dnl Don't even think about removing this check!
-AC_PREREQ(2.50)
+AC_PREREQ(2.57)
 
 dnl We don't know the version number "staticly" so we use a dash here
 AC_INIT(curl, [-], [curl-bug@haxx.se])
@@ -829,15 +827,14 @@ AC_C_CONST
 AC_TYPE_SIZE_T
 AC_HEADER_TIME
 
-# mprintf() checks:
+AC_CHECK_SIZEOF(off_t)
 
-# check for 'long double'
-# AC_CHECK_SIZEOF(long double, 8)
-# check for 'long long'
-# AC_CHECK_SIZEOF(long long, 4)
+AC_CHECK_TYPE(long long,
+   [AC_DEFINE(HAVE_LONGLONG, 1, [if your compiler supports 'long long'])])
 
 # check for ssize_t
-AC_CHECK_TYPE(ssize_t, int)
+AC_CHECK_TYPE(ssize_t, ,
+   AC_DEFINE(ssize_t, int, [the signed version of size_t]))
 
 TYPE_SOCKLEN_T
 TYPE_IN_ADDR_T
@@ -966,7 +963,7 @@ AC_HELP_STRING([--disable-ares],[Disable using ares for name lookups]),
        ;;
   *)   AC_MSG_RESULT(yes)
 
-       if test "$IPV6_ENABLED" -eq 1; then
+       if test "x$IPV6_ENABLED" = "x1"; then
          AC_MSG_ERROR([ares doesn't work with ipv6, disable ipv6 to use ares])
        fi
 
