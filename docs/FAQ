@@ -1,4 +1,4 @@
-Updated: December 20, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: December 21, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -387,7 +387,7 @@ FAQ
 
   There is one exception to this rule, and that is if you can "tunnel through"
   the given HTTP proxy. Proxy tunneling is enabled with a special option (-p)
-  and is generally not available as proxy admins usuable disable tunneling to
+  and is generally not available as proxy admins usually disable tunneling to
   other ports than 443 (which is used for HTTPS access through proxies).
 
 4. Running Problems
