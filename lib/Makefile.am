@@ -7,15 +7,15 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 noinst_LIBRARIES = libcurl.a
 
 # Some flags needed when trying to cause warnings ;-)
-# CFLAGS = -Wall -pedantic
+CFLAGS = -g #-Wall -pedantic
 
 INCLUDES = -I$(top_srcdir)/include
 
 libcurl_a_SOURCES = \
 arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c \
 base64.c       file.h         hostip.c       progress.c     timeval.h \
-base64.h       formdata.c     hostip.h       progress.h     upload.c \
-cookie.c       formdata.h     http.c         sendf.c        upload.h \
+base64.h       formdata.c     hostip.h       progress.h     \
+cookie.c       formdata.h     http.c         sendf.c        \
 cookie.h       ftp.c          http.h         sendf.h        url.c \
 dict.c         ftp.h          if2ip.c        speedcheck.c   url.h \
 dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h \
