@@ -267,7 +267,7 @@ struct FTP {
 /****************************************************************************
  * FILE unique setup
  ***************************************************************************/
-struct FILE {
+struct FILEPROTO {
   int fd; /* open file descriptor to read from! */
 };
 
@@ -539,7 +539,7 @@ struct connectdata {
     struct HTTP *gopher; /* alias, just for the sake of being more readable */
     struct HTTP *https;  /* alias, just for the sake of being more readable */
     struct FTP *ftp;
-    struct FILE *file;
+    struct FILEPROTO *file;
     void *telnet;        /* private for telnet.c-eyes only */
 #if 0 /* no need for special ones for these: */
     struct LDAP *ldap;
