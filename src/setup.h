@@ -66,7 +66,6 @@ int fileno( FILE *stream);
 #endif
 
 #ifdef WIN32
-#define PATH_CHAR     ";"
 #define DIR_CHAR      "\\"
 #define DOT_CHAR      "_"
 #else
@@ -74,17 +73,21 @@ int fileno( FILE *stream);
 /* 20000318 mgs
  * OS/2 supports leading dots in filenames if the volume is formatted
  * with JFS or HPFS. */
-#define PATH_CHAR     ";"
 #define DIR_CHAR      "\\"
 #define DOT_CHAR      "."
 #else
 
-#define PATH_CHAR     ":"
+#ifdef DJGPP
+#define DIR_CHAR      "/"
+#define DOT_CHAR      "_"
+#else
+
 #define DIR_CHAR      "/"
 #define DOT_CHAR      "."
 
-#endif
-#endif
+#endif /* !DJGPP */
+#endif /* !__EMX__ */
+#endif /* !WIN32 */
 
 #ifdef __riscos__
 #define USE_ENVIRONMENT

@@ -1,0 +1,56 @@
+#
+# Common defines for curl (djgpp/Watt-32)
+#
+# Assumes you've unpacked cURL with short-file names
+# I.e use "set LFN=n" before untaring on Win9x/XP.
+# Requires sed, yacc, rm and the usual stuff.
+#
+
+.SUFFIXES: .exe .y
+
+MAKEFILE = Makefile.dj
+
+#
+# OpenSSL is available from www.openssl.org and builds okay
+# with djgpp/Watt-32. Set to 0 if you don't need https URLs
+# (reduces curl.exe with approx 700 kB)
+#
+USE_SSL = 1
+
+default: all
+
+#
+# Root directory for Waterloo tcp/ip. WATT_ROOT should be set
+# during Watt-32 install.
+#
+WATT32_ROOT  = $(subst \,/,$(WATT_ROOT))
+OPENSSL_ROOT = /net/openssl.098
+ZLIB_ROOT    = $(DJDIR)/contrib/zlib
+
+CC   = gcc
+YACC = bison -y
+
+CFLAGS = -g -O2 -I. -I../include -Wall -DHAVE_CONFIG_H
+
+ifeq ($(USE_SSL),1)
+  CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
+endif
+
+#
+# Generated dependencies; Due to some hacks in gcc 2.95+ and djgpp 2.03
+# we must prevent "$(DJDIR)/bin/../include/sys/version.h" from beeing
+# included in dependency output (or else this makefile cannot be used on
+# another machine). We therefore use a special 'specs' file during
+# pre-processing.
+#
+MM_SPECS = $(TMPDIR)/specs
+
+depend: $(DEPEND_PREREQ)
+	@echo Generating dependencies..
+	@copy $(MAKEFILE) Makefile.bak
+	@echo "*cpp: %(cpp_cpu) %{posix:-D_POSIX_SOURCE} -remap" > $(MM_SPECS)
+	sed -e "/^# DO NOT DELETE THIS LINE/,$$d" < Makefile.bak > $(MAKEFILE)
+	echo "# DO NOT DELETE THIS LINE"                        >> $(MAKEFILE)
+	$(CC) -MM -specs=$(MM_SPECS) $(CFLAGS) $(SOURCES)       >> $(MAKEFILE)
+	rm -f $(MM_SPECS)
+

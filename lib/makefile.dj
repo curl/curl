@@ -1,0 +1,157 @@
+#
+#  Adapted for djgpp2 / Watt-32 / DOS by
+#  Gisle Vanem <giva@bgnett.no>
+#
+
+DEPEND_PREREQ = config.h getdate.c
+
+include ../packages/DOS/common.dj
+
+ifeq ($(USE_SSL),1)
+  CFLAGS += -I$(OPENSSL_ROOT)
+endif
+
+SOURCES = base64.c   connect.c  content_.c cookie.c   dict.c   \
+          easy.c     escape.c   file.c     formdata.c ftp.c    \
+          getdate.c  getenv.c   getinfo.c  getpass.c  hash.c   \
+          hostip.c   http.c     http_chu.c if2ip.c    krb4.c   \
+          ldap.c     llist.c    memdebug.c mprintf.c  multi.c  \
+          netrc.c    progress.c security.c sendf.c    share.c  \
+          speedche.c ssluse.c   strequal.c strtok.c   telnet.c \
+          timeval.c  transfer.c url.c      version.c
+
+OBJECTS  = $(SOURCES:.c=.o)
+CURL_LIB = libcurl.a
+
+all: config.h $(CURL_LIB)
+
+$(CURL_LIB): $(OBJECTS)
+	ar rs $@ $?
+
+config.h: config.dj
+	@echo '#include "./config.dj"' > $@
+
+getdate.c: getdate.y
+	$(YACC) -o $@ $^
+
+clean:
+	- rm -f $(OBJECTS) $(CURL_LIB) Makefile.bak config.h getdate.c
+
+# DO NOT DELETE THIS LINE
+base64.o: base64.c setup.h config.h config.dj ../include/curl/mprintf.h \
+  base64.h
+connect.o: connect.c setup.h config.h config.dj urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h sendf.h if2ip.h
+content_.o: content_.c setup.h config.h config.dj
+cookie.o: cookie.c setup.h config.h config.dj cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h getdate.h strequal.h strtok.h
+dict.o: dict.c setup.h config.h config.dj urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h transfer.h sendf.h progress.h strequal.h \
+  ../include/curl/mprintf.h
+easy.o: easy.c setup.h config.h config.dj strequal.h urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h transfer.h ssluse.h url.h getinfo.h \
+  ../include/curl/mprintf.h
+escape.o: escape.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h
+file.o: file.c setup.h config.h config.dj urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h progress.h sendf.h escape.h ../include/curl/mprintf.h
+formdata.o: formdata.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  formdata.h strequal.h
+ftp.o: ftp.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  urldata.h cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h \
+  llist.h sendf.h if2ip.h progress.h transfer.h escape.h http.h ftp.h \
+  strequal.h ssluse.h connect.h ../include/curl/mprintf.h
+getdate.o: getdate.c setup.h config.h config.dj getdate.h
+getenv.o: getenv.c setup.h config.h config.dj
+getinfo.o: getinfo.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  urldata.h cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h \
+  llist.h
+getpass.o: getpass.c setup.h config.h config.dj
+hash.o: hash.c setup.h config.h config.dj hash.h llist.h
+hostip.o: hostip.c setup.h config.h config.dj urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h sendf.h share.h ../include/curl/mprintf.h
+http.o: http.c setup.h config.h config.dj urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h transfer.h sendf.h progress.h base64.h strequal.h \
+  ssluse.h ../include/curl/mprintf.h
+http_chu.o: http_chu.c setup.h config.h config.dj urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h sendf.h content_encoding.h ../include/curl/mprintf.h
+if2ip.o: if2ip.c setup.h config.h config.dj
+krb4.o: krb4.c setup.h config.h config.dj
+ldap.o: ldap.c setup.h config.h config.dj urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h sendf.h escape.h transfer.h ../include/curl/mprintf.h
+llist.o: llist.c setup.h config.h config.dj llist.h
+memdebug.o: memdebug.c
+mprintf.o: mprintf.c setup.h config.h config.dj
+multi.o: multi.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  urldata.h cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h \
+  llist.h transfer.h url.h connect.h progress.h
+netrc.o: netrc.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  strequal.h strtok.h
+progress.o: progress.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  urldata.h cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h \
+  llist.h sendf.h progress.h ../include/curl/mprintf.h
+security.o: security.c setup.h config.h config.dj
+sendf.o: sendf.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  urldata.h cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h \
+  llist.h sendf.h connect.h ../include/curl/mprintf.h
+share.o: share.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  urldata.h cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h \
+  llist.h share.h
+speedche.o: speedche.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  urldata.h cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h \
+  llist.h sendf.h speedcheck.h
+ssluse.o: ssluse.c setup.h config.h config.dj urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h sendf.h url.h
+strequal.o: strequal.c setup.h config.h config.dj
+strtok.o: strtok.c setup.h config.h config.dj
+telnet.o: telnet.c setup.h config.h config.dj urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h transfer.h sendf.h ../include/curl/mprintf.h \
+  arpa_telnet.h
+timeval.o: timeval.c timeval.h setup.h config.h config.dj
+transfer.o: transfer.c setup.h config.h config.dj strequal.h urldata.h \
+  cookie.h ../include/curl/curl.h ../include/curl/types.h \
+  ../include/curl/easy.h ../include/curl/multi.h formdata.h timeval.h \
+  http_chunks.h hostip.h hash.h llist.h netrc.h content_encoding.h \
+  transfer.h sendf.h speedcheck.h getpass.h progress.h getdate.h http.h \
+  url.h getinfo.h ssluse.h ../include/curl/mprintf.h
+url.o: url.c setup.h config.h config.dj urldata.h cookie.h \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h formdata.h timeval.h http_chunks.h hostip.h \
+  hash.h llist.h netrc.h base64.h ssluse.h if2ip.h transfer.h sendf.h \
+  getpass.h progress.h strequal.h escape.h strtok.h share.h \
+  content_encoding.h ftp.h dict.h telnet.h http.h file.h ldap.h url.h \
+  connect.h ca-bundle.h ../include/curl/mprintf.h
+version.o: version.c setup.h config.h config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  urldata.h cookie.h formdata.h timeval.h http_chunks.h hostip.h hash.h \
+  llist.h

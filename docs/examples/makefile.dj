@@ -1,0 +1,31 @@
+#
+#  Adapted for djgpp / Watt-32 / DOS by
+#  Gisle Vanem <giva@bgnett.no>
+#
+
+include ../../packages/DOS/common.dj
+
+CFLAGS += -I../../include
+
+LIBS = ../../lib/libcurl.a
+
+ifeq ($(USE_SSL),1)
+  LIBS += $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
+endif
+
+LIBS += $(WATT32_ROOT)/lib/libwatt.a $(ZLIB_ROOT)/libz.a
+
+PROGRAMS  = fopen.exe ftpget.exe ftpgetre.exe ftpuploa.exe getinmem.exe \
+            http-pos.exe httpput.exe multi-ap.exe multi-do.exe          \
+            multi-po.exe multi-si.exe persista.exe post-cal.exe         \
+            postit2.exe sepheade.exe simple.exe simpless.exe
+
+all: $(PROGRAMS)
+
+.c.exe:
+	$(CC) $(CFLAGS) -o $@ $^ $(LIBS)
+	@echo
+
+clean:
+	rm -f $(PROGRAMS)
+

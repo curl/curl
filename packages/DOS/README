@@ -1,0 +1,4 @@
+Gisle Vanem made curl build fine on DOS (and MingW) with djgpp, OpenSSL and his
+Watt-32 stack.
+
+'make djgpp' in the root curl dir should build it fine.

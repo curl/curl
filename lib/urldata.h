@@ -564,6 +564,8 @@ typedef enum {
  * Session-data MUST be put in the connectdata struct and here.  */
 #define MAX_CURL_USER_LENGTH 256
 #define MAX_CURL_PASSWORD_LENGTH 256
+#define MAX_CURL_USER_LENGTH_TXT "255"
+#define MAX_CURL_PASSWORD_LENGTH_TXT "255"
 
 struct UrlState {
   enum {

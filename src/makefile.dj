@@ -1,0 +1,48 @@
+#
+#  Adapted for djgpp2 / Watt-32 / DOS by
+#  Gisle Vanem <giva@bgnett.no>
+#
+
+DEPEND_PREREQ = config.h
+
+include ../packages/DOS/common.dj
+
+ifeq ($(USE_SSL),1)
+  EX_LIBS = $(OPENSSL_ROOT)/lib/libssl.a $(OPENSSL_ROOT)/lib/libcrypt.a
+endif
+
+EX_LIBS += $(WATT32_ROOT)/lib/libwatt.a $(ZLIB_ROOT)/libz.a
+
+BIN     = ../curl.exe
+SOURCES = hugehelp.c main.c urlglob.c writeenv.c writeout.c
+OBJECTS = $(SOURCES:.c=.o)
+
+all: config.h $(BIN)
+
+$(BIN): $(OBJECTS) ../lib/libcurl.a
+	$(CC) -o $@ $^ $(EX_LIBS)
+
+config.h:
+	@echo '#include "../lib/config.dj"' > $@
+
+hugehelp.c: ../docs/curl.1
+	groff -man $^ | perl mkhelp.pl ../readme > $@
+
+clean:
+	- rm -f $(OBJECTS) Makefile.bak config.h
+
+vclean: clean
+	- rm -f $(BIN) hugehelp.c
+
+# DO NOT DELETE THIS LINE
+hugehelp.o: hugehelp.c
+main.o: main.c setup.h config.h ../lib/config.dj ../include/curl/curl.h \
+  ../include/curl/types.h ../include/curl/easy.h ../include/curl/multi.h \
+  ../include/curl/mprintf.h urlglob.h writeout.h version.h
+urlglob.o: urlglob.c setup.h config.h ../lib/config.dj \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h urlglob.h
+writeenv.o: writeenv.c setup.h config.h ../lib/config.dj
+writeout.o: writeout.c setup.h config.h ../lib/config.dj \
+  ../include/curl/curl.h ../include/curl/types.h ../include/curl/easy.h \
+  ../include/curl/multi.h ../include/curl/mprintf.h writeout.h

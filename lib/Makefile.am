@@ -7,7 +7,8 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	    \
        Makefile.vc6 Makefile.riscos libcurl.def curllib.dsp	    \
        curllib.dsw config-vms.h config-win32.h config-riscos.h config-mac.h \
-       config.h.in ca-bundle.crt README.encoding README.memoryleak
+       config.h.in ca-bundle.crt README.encoding README.memoryleak \
+       makefile.dj config.dj
 
 lib_LTLIBRARIES = libcurl.la
 

@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (21 May)
+- Gisle Vanem made curl build with djgpp on DOS.
+
+- Gisle Vanem improved the mkhelp.pl script to make a nicer manual that is
+  shown with curl -M.
+
+Daniel (20 May)
+- Gisle Vanem provided a fix that makes libcurl more conservative, not
+  expecting h_aliases of the hostent struct to always be non-NULL.
+
 Daniel (19 May)
 - As requested by Martin Michlmayr in Debian bug report #193630, libcurl now
   supports user name and password in the proxy environment variables. Added
