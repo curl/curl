@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (1 September)
+- Henrik Storner made libcurl work fine with OpenLDAP 2.1.22 (current).
+
+- Jeff Pohlmeyer added a proper error message for non-resolving hosts when
+  using ares for lookups.
+
 Daniel (19 August)
 - I made curl support multiple -T options, as well as -T "{file1,file2}"
   style globbing. One -T for each URL is supported.
