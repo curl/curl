@@ -6,6 +6,15 @@
 
                                History of Changes
 
+Daniel (27 April 2002)
+- I think I fixed the DNS cache prune crach Jacky Lam found and reported.
+
+- I cleaned up the name prefix stuff in the hash and llist modules.
+
+- FTP responses should now be better on timing out properly. The timeout value
+  is maximum timeout for the entire request operation, but before this, the
+  timeout was used as a maximum allowed time between two reads...
+
 Daniel (26 April 2002)
 - Fixed the test suite http server to not use snprintf() anymore due to better
   portability.
