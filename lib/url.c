@@ -342,11 +342,6 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
       /* If this is HTTP, PUT is what's needed to "upload" */
       data->httpreq = HTTPREQ_PUT;
     break;
-  case CURLOPT_POST:
-    data->bits.http_post = va_arg(param, long)?TRUE:FALSE;
-    if(data->bits.http_post)
-      data->httpreq = HTTPREQ_POST;
-    break;
   case CURLOPT_FILETIME:
     data->bits.get_filetime = va_arg(param, long)?TRUE:FALSE;
     break;
@@ -437,8 +432,17 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
   case CURLOPT_PORT:
     data->port = va_arg(param, long);
     break;
+  case CURLOPT_POST:
+    /* Does this option serve a purpose anymore? */
+    data->bits.http_post = va_arg(param, long)?TRUE:FALSE;
+    if(data->bits.http_post)
+      data->httpreq = HTTPREQ_POST;
+    break;
   case CURLOPT_POSTFIELDS:
     data->postfields = va_arg(param, char *);
+    data->bits.http_post = data->postfields?TRUE:FALSE;
+    if(data->bits.http_post)
+      data->httpreq = HTTPREQ_POST;
     break;
   case CURLOPT_POSTFIELDSIZE:
     data->postfieldsize = va_arg(param, long);
