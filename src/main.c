@@ -31,7 +31,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include <curl/curl.h>
 
@@ -3051,7 +3051,6 @@ static int create_dir_hierarchy(char *outfile)
   char *outdup;
   char *dirbuildup;
   int result=0;
-  extern int errno;
   
   outdup = strdup(outfile);
   dirbuildup = malloc(sizeof(char) * strlen(outfile));
