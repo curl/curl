@@ -119,6 +119,15 @@ filled with at most \fIsize\fP multiplied with \fInmemb\fP number of
 bytes. Your function must return the actual number of bytes that you stored in
 that memory area. Returning 0 will signal end-of-file to the library and cause
 it to stop the current transfer.
+
+If you stop the current transfer by returning 0 "pre-maturely" (i.e before the
+server expected it, like when you've told you will upload N bytes and you
+upload less than N bytes), you may experience that the server "hangs" waiting
+for the rest of the data that won't come.
+
+In libcurl 7.12.1 and later, the read callback may return
+\fICURL_READFUNC_ABORT\fP to stop the current operation at once, with a
+\fICURLE_ABORTED_BY_CALLBACK\fP error code from the transfer.
 .IP CURLOPT_READDATA
 Data pointer to pass to the file read function. Note that if you specify the
 \fICURLOPT_READFUNCTION\fP, this is the pointer you'll get as input. If you
