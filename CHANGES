@@ -6,6 +6,14 @@
 
                                   Changelog
 
+Daniel (3 August)
+- When proxy authentication is used in a CONNECT request (as used for all SSL
+  connects and otherwise enforced tunnel-thru-proxy requests), the same
+  authentication header is also wrongly sent to the remote host.
+
+  This is a rather significant info leak. I've fixed it now and mailed a patch
+  and warning to the mailing lists.
+
 Daniel (1 August)
 - David Byron provided a patch to make 7.10.6 build correctly with the
   compressed hugehelp.c source file.
