@@ -1325,15 +1325,15 @@ CURLcode Curl_disconnect(struct connectdata *conn)
        we shall forget. */
     conn->data->state.authstage = 0;
 
+  if(conn->curl_disconnect)
+    /* This is set if protocol-specific cleanups should be made */
+    conn->curl_disconnect(conn);
+
   if(-1 != conn->connectindex) {
     /* unlink ourselves! */
     infof(conn->data, "Closing connection #%d\n", conn->connectindex);
     conn->data->state.connects[conn->connectindex] = NULL;
   }
-
-  if(conn->curl_disconnect)
-    /* This is set if protocol-specific cleanups should be made */
-    conn->curl_disconnect(conn);
 
   Curl_safefree(conn->proto.generic);
   Curl_safefree(conn->newurl);
