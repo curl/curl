@@ -1,4 +1,4 @@
-Updated: August 18, 2004 (http://curl.haxx.se/docs/faq.html)
+Updated: December 21, 2004 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -42,6 +42,7 @@ FAQ
   3.14 Does curl support javascript or pac (automated proxy config)?
   3.15 Can I do recursive fetches with curl?
   3.16 What certificates do I need when I use SSL?
+  3.17 How do I list the root dir of an FTP server?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
@@ -519,6 +520,18 @@ FAQ
     certs in a CA cert bundle that can be used to verify a server certificate
     that was signed by one of the authorities in the bundle. curl comes with a
     default CA cert bundle. You can override the default.
+
+  3.17 How do I list the root dir of an FTP server?
+
+  There are two ways. The way defined in the RFC is to use an encoded slash
+  in the first path part. List the "/tmp" dir like this:
+
+     curl ftp://ftp.sunet.se/%2ftmp/
+
+  or the not-quite-kosher-but-more-readable way, by simply starting the path
+  section of the URL with a slash:
+
+     curl ftp://ftp.sunet.se//tmp/
 
 
 4. Running Problems
