@@ -146,7 +146,7 @@ CURLcode GetHTTPProxyTunnel(struct UrlData *data, int tunnelsocket,
   int httperror=0;
   int subversion=0;
 
-  infof(data, "Establish HTTP proxy tunnel\n");
+  infof(data, "Establish HTTP proxy tunnel to %s:%d\n", hostname, remote_port);
 
   /* OK, now send the connect statment */
   sendf(tunnelsocket, data,

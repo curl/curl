@@ -743,7 +743,8 @@ CURLcode _ftp(struct connectdata *conn)
     else {
       int ip[4];
       int port[2];
-      unsigned short newport;
+      unsigned short newport; /* remote port, not necessary the local one */
+      unsigned short connectport; /* the local port connect() should use! */
       char newhost[32];
       struct hostent *he;
       char *str=buf,*ip_addr;
@@ -771,6 +772,8 @@ CURLcode _ftp(struct connectdata *conn)
 	 return CURLE_FTP_WEIRD_227_FORMAT;
       }
 
+      sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+      newport = (port[0]<<8) + port[1];
       if(data->bits.httpproxy) {
         /*
          * This is a tunnel through a http proxy and we need to connect to the
@@ -778,30 +781,25 @@ CURLcode _ftp(struct connectdata *conn)
          * previous lookup.
          */
         he = conn->hp;
+        connectport = data->port; /* we connect to the proxy's port */
       }
       else {
         /* normal, direct, ftp connection */
-        sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
         he = GetHost(data, newhost, hostent_buf, sizeof(hostent_buf));
         if(!he) {
           failf(data, "Can't resolve new host %s", newhost);
           return CURLE_FTP_CANT_GET_HOST;
         }
+        connectport = newport; /* we connect to the remote port */
       }
 	
-      newport = (port[0]<<8) + port[1];
       data->secondarysocket = socket(AF_INET, SOCK_STREAM, 0);
 
       memset((char *) &serv_addr, '\0', sizeof(serv_addr));
       memcpy((char *)&(serv_addr.sin_addr), he->h_addr, he->h_length);
       serv_addr.sin_family = he->h_addrtype;
 
-      if(data->bits.httpproxy)
-        /* connect to the http proxy's port number */
-        serv_addr.sin_port = htons(data->port);
-      else
-        /* direct connection to remote host's PASV port */
-        serv_addr.sin_port = htons(newport);
+      serv_addr.sin_port = htons(connectport);
 
       if(data->bits.verbose) {
         struct in_addr in;
@@ -863,7 +861,7 @@ CURLcode _ftp(struct connectdata *conn)
 #else
               ip_addr = inet_ntoa(in),
 #endif
-              newport);
+              connectport);
       }
 	
       if (connect(data->secondarysocket, (struct sockaddr *) &serv_addr,
