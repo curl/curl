@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* June 30
+- Gisle Vanem made it build with djgpp and run fine with the Watt-32 stack.
+
 * June 10
 - Gisle Vanem's init patch for Windows:
 
