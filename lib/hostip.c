@@ -366,10 +366,11 @@ Curl_cache_addr(struct SessionHandle *data,
  *
  * Return codes:
  *
- * -1 = error, no pointer
- * 0 = OK, pointer provided
- * 1 = waiting for response, no pointer
+ * CURLRESOLV_ERROR   (-1) = error, no pointer
+ * CURLRESOLV_RESOLVED (0) = OK, pointer provided
+ * CURLRESOLV_PENDING  (1) = waiting for response, no pointer
  */
+
 int Curl_resolv(struct connectdata *conn,
                 char *hostname,
                 int port,
@@ -383,7 +384,7 @@ int Curl_resolv(struct connectdata *conn,
   CURLcode result;
 
   /* default to failure */
-  int rc = -1;
+  int rc = CURLRESOLV_ERROR;
   *entry = NULL;
 
 #ifdef HAVE_SIGSETJMP
@@ -392,7 +393,7 @@ int Curl_resolv(struct connectdata *conn,
   if(!data->set.no_signal && sigsetjmp(curl_jmpenv, 1)) {
     /* this is coming from a siglongjmp() */
     failf(data, "name lookup timed out");
-    return -1;
+    return CURLRESOLV_ERROR;
   }
 #endif
 
@@ -400,7 +401,7 @@ int Curl_resolv(struct connectdata *conn,
   entry_id = create_hostcache_id(hostname, port, &entry_len);
   /* If we can't create the entry id, fail */
   if (!entry_id)
-    return -1;
+    return CURLRESOLV_ERROR;
 
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
@@ -422,7 +423,7 @@ int Curl_resolv(struct connectdata *conn,
     /* Check what IP specifics the app has requested and if we can provide it.
      * If not, bail out. */
     if(!Curl_ipvalid(data))
-      return -1;
+      return CURLRESOLV_ERROR;
 
     /* If Curl_getaddrinfo() returns NULL, 'wait' might be set to a non-zero
        value indicating that we need to wait for the response to the resolve
@@ -436,11 +437,11 @@ int Curl_resolv(struct connectdata *conn,
         /* First, check that we haven't received the info by now */
         result = Curl_is_resolved(conn, &dns);
         if(result) /* error detected */
-          return -1;
+          return CURLRESOLV_ERROR;
         if(dns)
-          rc = 0; /* pointer provided */
+          rc = CURLRESOLV_RESOLVED; /* pointer provided */
         else
-          rc = 1; /* no info yet */
+          rc = CURLRESOLV_PENDING; /* no info yet */
       }
     }
     else {
@@ -457,12 +458,12 @@ int Curl_resolv(struct connectdata *conn,
         /* returned failure, bail out nicely */
         Curl_freeaddrinfo(addr);
       else
-        rc = 0;
+        rc = CURLRESOLV_RESOLVED;
     }
   }
   else {
     dns->inuse++; /* we use it! */
-    rc = 0;
+    rc = CURLRESOLV_RESOLVED;
   }
 
   *entry = dns;

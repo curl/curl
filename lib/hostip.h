@@ -51,10 +51,12 @@ struct Curl_dns_entry {
  * The returned data *MUST* be "unlocked" with Curl_resolv_unlock() after
  * use, or we'll leak memory!
  */
-int Curl_resolv(struct connectdata *conn,
-                char *hostname,
-                int port,
-                struct Curl_dns_entry **dnsentry);
+/* return codes */
+#define CURLRESOLV_ERROR    -1
+#define CURLRESOLV_RESOLVED  0
+#define CURLRESOLV_PENDING   1
+int Curl_resolv(struct connectdata *conn, char *hostname,
+                int port, struct Curl_dns_entry **dnsentry);
 
 /*
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
@@ -199,6 +201,10 @@ Curl_cache_addr(struct SessionHandle *data, Curl_addrinfo *addr,
 
 #ifndef CURLRES_ASYNCH
 #define CURLRES_SYNCH
+#endif
+
+#ifndef USE_LIBIDN
+#define CURLRES_IDN
 #endif
 
 /* Allocate enough memory to hold the full name information structs and

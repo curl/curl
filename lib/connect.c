@@ -263,7 +263,7 @@ static CURLcode bindlocal(struct connectdata *conn,
        * We now have the numerical IPv4-style x.y.z.w in the 'myhost' buffer
        */
       rc = Curl_resolv(conn, myhost, 0, &h);
-      if(rc == 1)
+      if(rc == CURLRESOLV_PENDING)
         (void)Curl_wait_for_resolv(conn, &h);
 
       if(h)
@@ -276,7 +276,7 @@ static CURLcode bindlocal(struct connectdata *conn,
        * or IP number
        */
       rc = Curl_resolv(conn, data->set.device, 0, &h);
-      if(rc == 1)
+      if(rc == CURLRESOLV_PENDING)
         (void)Curl_wait_for_resolv(conn, &h);
 
       if(h)

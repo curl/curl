@@ -1367,14 +1367,14 @@ CURLcode ftp_use_port(struct connectdata *conn)
     if((in == CURL_INADDR_NONE) &&
        Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
       rc = Curl_resolv(conn, myhost, 0, &h);
-      if(rc == 1)
+      if(rc == CURLRESOLV_PENDING)
         rc = Curl_wait_for_resolv(conn, &h);
     }
     else {
       size_t len = strlen(data->set.ftpport);
       if(len>1) {
         rc = Curl_resolv(conn, data->set.ftpport, 0, &h);
-        if(rc == 1)
+        if(rc == CURLRESOLV_PENDING)
           rc = Curl_wait_for_resolv(conn, &h);
       }
       if(h)
@@ -1642,7 +1642,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
      * now, instead we remake the lookup here and now!
      */
     rc = Curl_resolv(conn, conn->proxyhost, conn->port, &addr);
-    if(rc == 1)
+    if(rc == CURLRESOLV_PENDING)
       rc = Curl_wait_for_resolv(conn, &addr);
 
     connectport =
@@ -1652,7 +1652,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   else {
     /* normal, direct, ftp connection */
     rc = Curl_resolv(conn, newhostp, newport, &addr);
-    if(rc == 1)
+    if(rc == CURLRESOLV_PENDING)
       rc = Curl_wait_for_resolv(conn, &addr);
 
     if(!addr) {
