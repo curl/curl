@@ -1318,7 +1318,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           else
             postdata = file2string(file);
           if(file && (file != stdin))
-            fclose(stdin);
+            fclose(file);
         }
         else {
           GetStr(&postdata, nextarg);
@@ -1626,7 +1626,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
           file = fopen(nextarg, "r");
         config->writeout = file2string(file);
         if(file && (file != stdin))
-          fclose(stdin);
+          fclose(file);
       }
       else 
         GetStr(&config->writeout, nextarg);
