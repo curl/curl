@@ -360,7 +360,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* Figure out the estimated time of arrival for the upload */
   if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
-     (data->progress.ulspeed > 0)) {
+     (data->progress.ulspeed > 100)) {
     ulestimate = (long)(data->progress.size_ul / data->progress.ulspeed);
     ulpercen = (long)(100*(data->progress.uploaded/100) /
                       (data->progress.size_ul/100) );
@@ -368,7 +368,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* ... and the download */
   if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
-     (data->progress.dlspeed > 0)) {
+     (data->progress.dlspeed > 100)) {
     dlestimate = (long)(data->progress.size_dl / data->progress.dlspeed);
     dlpercen = (long)(100*(data->progress.downloaded/100) /
                       (data->progress.size_dl/100));
@@ -394,7 +394,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   total_transfer = data->progress.downloaded + data->progress.uploaded;
 
   /* Get the percentage of data transfered so far */
-  if(total_expected_transfer > 0)
+  if(total_expected_transfer > 100)
     total_percen=(int)(100*(total_transfer/100) /
                        (total_expected_transfer/100) );
 
