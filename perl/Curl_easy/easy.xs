@@ -252,19 +252,19 @@ CODE:
     switch (option & CURLINFO_TYPEMASK) {
 	case CURLINFO_STRING: {
 	    char * value = (char *)SvPV(ST(2), PL_na);
-	    RETVAL = curl_getinfo(curl, option, &value);
+	    RETVAL = curl_easy_getinfo(curl, option, &value);
 	    sv_setpv(ST(2), value);
 	    break;
 	}
 	case CURLINFO_LONG: {
 	    long value = (long)SvIV(ST(2));
-	    RETVAL = curl_getinfo(curl, option, &value);
+	    RETVAL = curl_easy_getinfo(curl, option, &value);
 	    sv_setiv(ST(2), value);
 	    break;
 	}
 	case CURLINFO_DOUBLE: {
 	    double value = (double)SvNV(ST(2));
-	    RETVAL = curl_getinfo(curl, option, &value);
+	    RETVAL = curl_easy_getinfo(curl, option, &value);
 	    sv_setnv(ST(2), value);
 	    break;
 	}
