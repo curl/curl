@@ -22,7 +22,11 @@
  *
  * $Id$
  ***************************************************************************/
-typedef enum {UPTSet=1,UPTCharRange,UPTNumRange} URLPatternType;
+typedef enum {
+  UPTSet=1,
+  UPTCharRange,
+  UPTNumRange
+} URLPatternType;
 
 typedef struct {
   URLPatternType type;
