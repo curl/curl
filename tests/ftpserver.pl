@@ -221,6 +221,7 @@ sub RETR_command {
         if($verbose) {
             print STDERR "FTPD: We returned proof we are the test server\n";
         }
+        logmsg "we returned proof that we are the test server\n";
         return 0;
     }
 
