@@ -23,5 +23,5 @@
  * $Id$
  ***************************************************************************/
 size_t Curl_base64_encode(const char *input, size_t size, char **str);
-size_t Curl_base64_decode(char *dest, const char *source);
+size_t Curl_base64_decode(const char *source, char *dest);
 #endif
