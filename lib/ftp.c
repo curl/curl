@@ -765,23 +765,29 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
   bool was_ctl_valid = ftp->ctl_valid;
   size_t flen;
   size_t dlen;
+  char *path;
 
   /* now store a copy of the directory we are in */
   if(ftp->prevpath)
     free(ftp->prevpath);
 
-  flen = ftp->file?strlen(ftp->file):0;
-  dlen = conn->path?strlen(conn->path)-flen:0;
+  path = curl_unescape(conn->path, 0); /* get the "raw" path */
+  if(!path)
+    CURLE_OUT_OF_MEMORY;
+
+  flen = ftp->file?strlen(ftp->file):0; /* file is "raw" already */
+  dlen = strlen(path)-flen;
   if(dlen) {
     ftp->prevpath = malloc(dlen + 1);
     if(!ftp->prevpath)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(ftp->prevpath, conn->path, dlen);
+    memcpy(ftp->prevpath, path, dlen);
     ftp->prevpath[dlen]=0; /* terminate */
     infof(data, "Remembering we are in dir %s\n", ftp->prevpath);
   }
   else
     ftp->prevpath = NULL; /* no path */
+  free(path);
 
   /* free the dir tree and file parts */
   freedirs(ftp);
@@ -2771,14 +2777,20 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 
   ftp->cwddone = FALSE; /* default to not done */
 
-  dlen = conn->path?strlen(conn->path):0;
-  if(dlen && ftp->prevpath) {
-    dlen -= ftp->file?strlen(ftp->file):0;
+  if(ftp->prevpath) {
+    /* prevpath is "raw" so we convert the input path before we compare the
+       strings */
+    char *path = curl_unescape(conn->path, 0);
+    if(!path)
+      return CURLE_OUT_OF_MEMORY;
+
+    dlen = strlen(path) - (ftp->file?strlen(ftp->file):0);
     if((dlen == strlen(ftp->prevpath)) &&
-       curl_strnequal(conn->path, ftp->prevpath, dlen)) {
+       curl_strnequal(path, ftp->prevpath, dlen)) {
       infof(data, "Request has same path as previous transfer\n");
       ftp->cwddone = TRUE;
     }
+    free(path);
   }
 
   return retcode;
