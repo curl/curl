@@ -1279,10 +1279,23 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       config->conf ^= CONF_HEADER; /* include the HTTP header as well */
       break;
     case 'I':
-      config->conf ^= CONF_HEADER; /* include the HTTP header in the output */
-      config->conf ^= CONF_NOBODY; /* don't fetch the body at all */
-      if(SetHTTPrequest(HTTPREQ_HEAD, &config->httpreq))
-        return PARAM_BAD_USE;
+      /*
+       * This is a bit tricky. We either SET both bits, or we clear both
+       * bits. Let's not make any other outcomes from this.
+       */
+      if((CONF_HEADER|CONF_NOBODY) !=
+         (config->conf&(CONF_HEADER|CONF_NOBODY)) ) {
+        /* one of them weren't set, set both */
+        config->conf |= (CONF_HEADER|CONF_NOBODY);
+        if(SetHTTPrequest(HTTPREQ_HEAD, &config->httpreq))
+          return PARAM_BAD_USE;
+      }
+      else {
+        /* both were set, clear both */
+        config->conf &= ~(CONF_HEADER|CONF_NOBODY);
+        if(SetHTTPrequest(HTTPREQ_GET, &config->httpreq))
+          return PARAM_BAD_USE;
+      }
       break;
     case 'K':
       res = parseconfig(nextarg, config);
