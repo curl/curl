@@ -167,13 +167,17 @@ sub torture {
     print " CMD: $testcmd\n" if($verbose);
         
     # memanalyze -v is our friend, get the number of allocations made
-    my $count;
+    my $count=0;
     my @out = `$memanalyze -v $memdump`;
     for(@out) {
         if(/^Allocations: (\d+)/) {
             $count = $1;
             last;
         }
+    }
+    if(!$count) {
+        print " found no allocs to make fail\n";
+        return 0;
     }
 
     print " $count allocations to make fail\n";
@@ -187,7 +191,7 @@ sub torture {
             next;
         }
 
-        print "Fail alloc no: $limit\r" if(!$gdbthis);
+        print "Fail alloc no: $limit\r" if($verbose);
             
         # make the memory allocation function number $limit return failure
         $ENV{'CURL_MEMLIMIT'} = $limit;
@@ -204,6 +208,9 @@ sub torture {
         else {
             $ret = system($testcmd);
         }
+
+        # Now clear the variable again
+        $ENV{'CURL_MEMLIMIT'} = undef;
 
         if(-r "core") {
             # there's core file present now!
@@ -243,8 +250,11 @@ sub torture {
         }
     }
 
-    stopservers();
-    exit; # for now, we stop after these tests
+    print "torture OK\n";
+    return 0;
+
+    #stopservers();
+    #exit; # for now, we stop after these tests
 }
 
 #######################################################################
@@ -304,7 +314,7 @@ sub runhttpserver {
     $pid = checkserver ($HTTPPIDFILE);
 
     # verify if our/any server is running on this port
-    my $cmd = "$CURL -o log/verifiedserver --silent -i $HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null";
+    my $cmd = "$CURL -o log/verifiedserver http://$HOSTIP:$HOSTPORT/verifiedserver 2>/dev/null";
     print "CMD; $cmd\n" if ($verbose);
     my $res = system($cmd);
 
@@ -1039,8 +1049,8 @@ sub singletest {
     }
     # run the command line we built
     if ($torture) {
-        torture($CMDLINE,
-                "gdb --directory libtest $DBGCURL -x log/gdbcmd");
+        return torture($CMDLINE,
+                       "gdb --directory libtest $DBGCURL -x log/gdbcmd");
     }
     elsif($gdbthis) {
         system("gdb --directory libtest $DBGCURL -x log/gdbcmd");
@@ -1334,6 +1344,7 @@ sub startservers {
                 if($pid <= 0) {
                     return 2; # error starting it
                 }
+                printf ("* pid ftp => %-5d\n", $pid) if($verbose);
                 $run{'ftp'}=$pid;
             }
             if(!$run{'ftps'}) {
@@ -1361,6 +1372,7 @@ sub startservers {
                 if($pid <= 0) {
                     return 2; # problems starting server
                 }
+                printf ("* pid http => %-5d\n", $pid) if($verbose);
                 $run{'http'}=$pid;
             }
             if(!$run{'https'}) {
@@ -1373,6 +1385,7 @@ sub startservers {
             }
         }
         elsif($what eq "none") {
+            print "* starts no server\n" if ($verbose);
         }
         else {
             warn "we don't support a server for $what";
@@ -1456,6 +1469,8 @@ do {
         if($xtra =~ s/(\d+)$//) {
             $tortalloc = $1;
         }
+        # we undef valgrind to make this fly in comparison
+        undef $valgrind;
     }
     elsif($ARGV[0] eq "-a") {
         # continue anyway, even if a test fail
