@@ -13,3 +13,5 @@ stuff supported.
  The interface is not set yet, bring your suggestions!
 
  Feel free to grab the source files in here and help out!
+
+ The 'test.java' is the actual program that uses the curl stuff.
