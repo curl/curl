@@ -28,7 +28,7 @@ CURLcode Curl_ftp_done(struct connectdata *conn);
 CURLcode Curl_ftp_connect(struct connectdata *conn);
 CURLcode Curl_ftp_disconnect(struct connectdata *conn);
 
-size_t Curl_ftpsendf(struct connectdata *, const char *fmt, ...);
+CURLcode Curl_ftpsendf(struct connectdata *, const char *fmt, ...);
 
 /* The kerberos stuff needs this: */
 int Curl_GetFTPResponse(char *buf, struct connectdata *conn,
