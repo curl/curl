@@ -8,6 +8,16 @@
 
 
 Daniel (14 March 2005)
+- Added a few missing features to the curl-config --features list
+
+- Modified testcurl.pl to now offer
+  1 - command line options for all info it previously only read from
+      file: --name, --email, --desc and --configure
+  2 - --nocvsup makes it not attempt to do cvs update
+  3 - --crosscompile informs it and makes it not attempt things it can't do
+
+- Fixed numerous win32 compiler warnings.
+
 - Removed the lib/security.h file since it shadowed the mingw/win32 header
   with the same name which is needed for SSPI builds. The contents of the
   former security.h is now i krb4.h
