@@ -9,3 +9,6 @@ config.status
 curl-config
 autom4te.cache
 depcomp
+config.guess
+config.sub
+ltmain.sh
