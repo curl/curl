@@ -14,6 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl_getdate() crash fixed
  o downloading empty files now calls the write callback properly
  o no more reverse DNS lookups when getting ip-only address with ipv6-enabled
    libcurl
@@ -24,6 +25,7 @@ This release includes the following bugfixes:
 
 Other curl-related news since the previous public release:
 
+ o AdacURL version 7.12.1 http://www.almroth.com/adacurl/index.html
  o pycurl version 7.12.1 http://pycurl.sourceforge.net/
 
 This release would not have looked like this without help, code, reports and
