@@ -1519,8 +1519,8 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
 
   /* newhost must be able to hold a full IP-style address in ASCII, which
      in the IPv6 case means 5*8-1 = 39 letters */
-  char newhost[48];
-  char *newhostp=NULL;
+#define NEWHOST_BUFSIZE 48
+  char newhost[NEWHOST_BUFSIZE];
 
 #ifdef PF_INET6
   if(!conn->bits.ftp_use_epsv &&
@@ -1584,7 +1584,6 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
 
     snprintf(newhost, sizeof(newhost),
              "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
-    newhostp = newhost;
     newport = (port[0]<<8) + port[1];
   }
   else if (229 == results[modeoff]) {
@@ -1613,8 +1612,8 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
         if(ptr) {
           newport = num;
 
-          /* we should use the same host we already are connected to */
-          newhostp = conn->host.name;
+          /* We must use the same IP we are already connected to */
+          Curl_printable_address(conn->ip_addr, newhost, NEWHOST_BUFSIZE);
         }
       }
       else
@@ -1646,12 +1645,12 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   }
   else {
     /* normal, direct, ftp connection */
-    rc = Curl_resolv(conn, newhostp, newport, &addr);
+    rc = Curl_resolv(conn, newhost, newport, &addr);
     if(rc == CURLRESOLV_PENDING)
       rc = Curl_wait_for_resolv(conn, &addr);
 
     if(!addr) {
-      failf(data, "Can't resolve new host %s:%d", newhostp, newport);
+      failf(data, "Can't resolve new host %s:%d", newhost, newport);
       return CURLE_FTP_CANT_GET_HOST;
     }
     connectport = newport; /* we connect to the remote port */
@@ -1676,13 +1675,13 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
 
   if(data->set.verbose)
     /* this just dumps information about this second connection */
-    ftp_pasv_verbose(conn, conninfo, newhostp, connectport);
+    ftp_pasv_verbose(conn, conninfo, newhost, connectport);
 
 #ifndef CURL_DISABLE_HTTP
   if(conn->bits.tunnel_proxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
     result = Curl_ConnectHTTPProxyTunnel(conn, SECONDARYSOCKET,
-                                         newhostp, newport);
+                                         newhost, newport);
     if(CURLE_OK != result)
       return result;
   }
