@@ -7,6 +7,15 @@
                                   Changelog
 
 
+
+Daniel (22 February 2004)
+- Applied the final pieces of Gisle Vanem's patch that brings a working name
+  resolve timeout to the windows versions of curl!
+
+Daniel (21 February 2004)
+- David Byron's fix to allow the speed-limit logic work even if you set
+  limit-rate. It does work on the expense of the rate limiter.
+
 Daniel (20 February 2004)
 - configure --enable-debug with gcc now also tries to detect the icc compiler
   (which somehow gets treated as if it is a gcc) to stop using all the gcc
