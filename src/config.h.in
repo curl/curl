@@ -10,3 +10,9 @@
 
 /* Define if you have strdup() */
 #undef HAVE_STRDUP
+
+/* Define if you have utime() */
+#undef HAVE_UTIME
+
+/* Define if you have utime.h */
+#undef HAVE_UTIME_H
