@@ -422,6 +422,29 @@ RISC OS
    where riscos-gcc and riscos-ar are links to the gccsdk tools.
    You can then link your program with curl/lib/.libs/libcurl.a
 
+
+AmigaOS
+=======
+   (This section was graciously brought to us by Diego Casorran)
+
+   To build cURL/libcurl on AmigaOS just type 'make amiga' ...
+
+   What you need is:    (not tested with others versions)
+
+        GeekGadgets / gcc 2.95.3 (http://www.geekgadgets.org/)
+
+        AmiTCP SDK v4.3 (http://www.aminet.net/comm/tcp/AmiTCP-SDK-4.3.lha)
+
+        Native Developer Kit (http://www.amiga.com/3.9/download/NDK3.9.lha)
+
+   As no ixemul.library is required you will be able to build it for
+   WarpOS/PowerPC (not tested by me), as well a MorphOS version should be
+   possible with no problems.
+
+   To enable SSL support, you need a OpenSSL native version (without ixemul),
+   you can find a precompiled package at http://amiga.sourceforge.net/OpenSSL/
+
+
 PORTS
 =====
    This is a probably incomplete list of known hardware and operating systems
