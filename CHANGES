@@ -7,6 +7,10 @@
                                History of Changes
 
 Daniel (25 June 2001)
+- Björn Stenberg correctly identified a problem that occurred when downloading
+  several files with curl, and using resume. The first file's resume index was
+  then used for all files, resulting in weird results...
+
 - Anton Kalmykov provided a fix that makes curl work with form field names
   with spaces like when -F is used.
 
