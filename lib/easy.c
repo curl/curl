@@ -162,3 +162,13 @@ void curl_easy_cleanup(CURL *curl)
   curl_close(curl);
   curl_free();
 }
+
+CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ...)
+{
+  va_list arg;
+  void *paramp;
+  va_start(arg, info);
+  paramp = va_arg(arg, void *);
+
+  return curl_getinfo(curl, info, paramp);
+}
