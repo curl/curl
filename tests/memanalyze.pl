@@ -30,7 +30,7 @@ while(<STDIN>) {
     chomp $_;
     $line = $_;
 
-    if($line =~ /^MEM ([^:]*):(\d*) (.*)/) {
+    if($line =~ /^MEM ([^ ]*):(\d*) (.*)/) {
         # generic match for the filename+linenumber
         $source = $1;
         $linenum = $2;
@@ -130,7 +130,7 @@ while(<STDIN>) {
         }        
     }
     # FD url.c:1282 socket() = 5
-    elsif($_ =~ /^FD ([^:]*):(\d*) (.*)/) {
+    elsif($_ =~ /^FD ([^ ]*):(\d*) (.*)/) {
         # generic match for the filename+linenumber
         $source = $1;
         $linenum = $2;
@@ -157,7 +157,7 @@ while(<STDIN>) {
         }
     }
     # FILE url.c:1282 fopen("blabla") = 0x5ddd
-    elsif($_ =~ /^FILE ([^:]*):(\d*) (.*)/) {
+    elsif($_ =~ /^FILE ([^ ]*):(\d*) (.*)/) {
         # generic match for the filename+linenumber
         $source = $1;
         $linenum = $2;
@@ -185,7 +185,7 @@ while(<STDIN>) {
         }
     }
     # ADDR url.c:1282 getaddrinfo() = 0x5ddd
-    elsif($_ =~ /^ADDR ([^:]*):(\d*) (.*)/) {
+    elsif($_ =~ /^ADDR ([^ ]*):(\d*) (.*)/) {
         # generic match for the filename+linenumber
         $source = $1;
         $linenum = $2;
