@@ -2,6 +2,20 @@
 
 * September 26
 
+- Henrik Stoerner: found out that C-ARES does not look at the /etc/host.conf
+  file to determine the sequence in which to search /etc/hosts and DNS.  So on
+  systems where this order is defined by /etc/host.conf instead of a "lookup"
+  entry in /etc/resolv.conf, C-ARES will always default to looking in DNS
+  first, and /etc/hosts second.
+
+  c-ares now looks at
+
+  1) resolv.conf (for the "lookup" line);
+  2) nsswitch.fon (for the "hosts:" line);
+  3) host.conf (for the "order" line).
+
+  First match wins.
+
 - Dominick Meglio patched: C-ares on Windows assumed that the HOSTS file is
   located in a static location. It assumed
   C:\Windows\System32\Drivers\Etc. This is a poor assumption to make. In fact,

@@ -55,7 +55,8 @@ static int init_by_environment(ares_channel channel);
 static int init_by_resolv_conf(ares_channel channel);
 static int init_by_defaults(ares_channel channel);
 static int config_domain(ares_channel channel, char *str);
-static int config_lookup(ares_channel channel, const char *str);
+static int config_lookup(ares_channel channel, const char *str,
+                         const char *bindch, const char *filech);
 static int config_nameserver(struct server_state **servers, int *nservers,
 			     char *str);
 static int config_sortlist(struct apattern **sortlist, int *nsort,
@@ -549,7 +550,7 @@ DhcpNameServer
       if ((p = try_config(line, "domain")))
         status = config_domain(channel, p);
       else if ((p = try_config(line, "lookup")) && !channel->lookups)
-        status = config_lookup(channel, p);
+        status = config_lookup(channel, p, "bind", "file");
       else if ((p = try_config(line, "search")))
         status = set_search(channel, p);
       else if ((p = try_config(line, "nameserver")) && channel->nservers == -1)
@@ -563,9 +564,33 @@ DhcpNameServer
       if (status != ARES_SUCCESS)
         break;
     }
+    fclose(fp);
+
+    if (!channel->lookups) {
+      fp = fopen("/etc/nsswitch.conf", "r");
+      if (fp) {
+        while ((status = ares__read_line(fp, &line, &linesize)) == ARES_SUCCESS)
+        {
+          if ((p = try_config(line, "hosts:")) && !channel->lookups)
+            status = config_lookup(channel, p, "dns", "files");
+        }
+        fclose(fp);
+      }
+    }
+    if (!channel->lookups) {
+      fp = fopen("/etc/host.conf", "r");
+      if (fp) {
+        while ((status = ares__read_line(fp, &line, &linesize)) == ARES_SUCCESS)
+        {
+          if ((p = try_config(line, "order")) && !channel->lookups)
+            status = config_lookup(channel, p, "bind", "hosts");
+        }
+        fclose(fp);
+      }
+    }
+
     if(line)
       free(line);
-    fclose(fp);
   }
 
 #endif
@@ -679,7 +704,8 @@ static int config_domain(ares_channel channel, char *str)
   return set_search(channel, str);
 }
 
-static int config_lookup(ares_channel channel, const char *str)
+static int config_lookup(ares_channel channel, const char *str,
+                         const char *bindch, const char *filech)
 {
   char lookups[3], *l;
   const char *p;
@@ -692,11 +718,13 @@ static int config_lookup(ares_channel channel, const char *str)
   p = str;
   while (*p)
     {
-      if ((*p == 'b' || *p == 'f') && l < lookups + 2)
-	*l++ = *p;
-      while (*p && !isspace((unsigned char)*p))
+      if ((*p == *bindch || *p == *filech) && l < lookups + 2) {
+	if (*p == *bindch) *l++ = 'b';
+        else *l++ = 'f';
+      }
+      while (*p && !isspace((unsigned char)*p) && (*p != ','))
 	p++;
-      while (isspace((unsigned char)*p))
+      while (*p && (isspace((unsigned char)*p) || (*p == ',')))
 	p++;
     }
   *l = 0;
