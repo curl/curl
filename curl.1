@@ -205,6 +205,11 @@ to allow curl to ftp to the machine host.domain.com with user name
 'myself' and password 'secret' should look similar to:
 
 .B "machine host.domain.com user myself password secret"
+.IP "-N/--no-buffer"
+Disables the buffering of the output stream. In normal work situations, curl
+will use a standard buffered output stream that will have the effect that it
+will output the data in chunks, not necessarily exactly when the data arrives.
+Using this option will disable that buffering.
 .IP "-o/--output <file>"
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
 multiple documents, you can use #<num> in the <file> specifier. That variable
@@ -294,6 +299,62 @@ starting with '*' means additional info provided by curl.
 .IP "-V/--version"
 Displays the full version of curl, libcurl and other 3rd party libraries
 linked with the executable.
+.IP "-w/--write-out <format>"
+Defines what to display after a completed and successful operation. The format
+is a string that may contain plain text mixed with any number of variables. The
+string can be specified as "string", to get read from a particular file you
+specify it "@filename" and to tell curl to read the format from stdin you
+write "@-".
+
+The variables present in the output format will be substituted by the value or
+text that curl thinks fit, as described below. All variables are specified
+like %{variable_name} and to output a normal % you just write them like
+%%. You can output a newline by using \\n, a carrige return with \\r and a tab
+space with \\t.
+
+.B NOTE:
+The %-letter is a special letter in the win32-environment, where all
+occurrences of % must be doubled when using this option.
+
+Available variables are at this point:
+.RS
+.TP 15
+.B url_effective
+The URL that was fetched last. This is mostly meaningful if you've told curl
+to follow location: headers.
+.TP
+.B http_code
+The numerical code that was found in the last retrieved HTTP(S) page.
+.TP
+.B time_total
+The total time, in seconds, that the full operation lasted. The time will be
+displayed with millisecond resolution.
+.TP
+.B time_namelookup
+The time, in seconds, it took from the start until the name resolving was
+completed.
+.TP
+.B time_connect
+The time, in seconds, it took from the start until the connect to the remote
+host (or proxy) was completed.
+.TP
+.B time_pretransfer
+The time, in seconds, it took from the start until the file transfer is just
+about to begin. This includes all pre-transfer commands and negotiations that
+are specific to the particular protocol(s) involved.
+.TP
+.B size_download
+The total amount of bytes that were downloaded.
+.TP
+.B size_upload
+The total amount of bytes that were uploaded.
+.TP
+.B speed_download
+The average download speed that curl measured for the complete download.
+.TP
+.B speed_upload
+The average upload speed that curl measured for the complete download.
+.RE
 .IP "-x/--proxy <proxyhost[:port]>"
 Use specified proxy. If the port number is not specified, it is assumed at
 port 1080.
@@ -497,6 +558,8 @@ If you do find any (or have other suggestions), mail Daniel Stenberg
  - Ron Zapp <rzapper@yahoo.com>
  - Paul Marquis <pmarquis@iname.com>
  - Ellis Pritchard <ellis@citria.com>
+ - Damien Adant <dams@usa.net>
+ - Chris <cbayliss@csc.come>
 .SH WWW
 http://curl.haxx.nu
 .SH FTP
