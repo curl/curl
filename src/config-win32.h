@@ -21,10 +21,12 @@
 #define HAVE_FCNTL_H 1
 
 /* Define if you have utime() */
+#if !defined(__BORLANDC__)
 #define HAVE_UTIME 1
 
 /* Define if you have the <sys/utime.h> header file */
 #define HAVE_SYS_UTIME_H 1
+#endif
 
 /* Define if you have the <locale.h> header file */
 #define HAVE_LOCALE_H 1
