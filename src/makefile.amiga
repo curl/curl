@@ -1,0 +1,22 @@
+#
+# $VER: cURL Makefile for AmigaOS ...
+#
+
+# change the follow to where you have the AmiTCP SDK v4.3 includes:
+
+ATCPSDKI=	/GG/netinclude
+
+
+CC	=	gcc
+CFLAGS	=	-I$(ATCPSDKI) -m68020-60 -noixemul -I. -I../include -W -Wall
+LIBS	=	../lib/libcurl.a -lsslnix -lcryptonix -lz
+
+OBJS	=	getpass.c homedir.c hugehelp.c main.c urlglob.c writeenv.c writeout.c 
+
+
+all:	$(OBJS:.c=.o)
+	$(CC) $(CFLAGS) -s -o cURL $(OBJS:.c=.o) $(LIBS)
+
+install:
+	$(INSTALL) -c cURL /c/cURL
+
