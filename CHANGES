@@ -6,6 +6,35 @@
 
                                History of Changes
 
+Daniel (6 December 2000)
+- Massimo Squillace correctly described how libcurl could use session ids when
+  doing SSL connections.
+
+- James Griffiths found out that curl would crash if the file you specify with
+  -o is shorter than the URL! This took some hours to fully hunt down, but it
+  is fixed now.
+
+Daniel (5 December 2000)
+- Jaepil Kim sent us makefiles that build curl using the free windows borland
+  compiler. The root makefile now accepts 'make borland' to build curl with
+  that compiler.
+
+- Stefan Radman pointed out that the test makefiles didn't use the PERL
+  variable that the configure scripts figure out. Actually, you still need
+  perl in the path for the test suite to run ok.
+
+- Rich Gray found numerous portability problems:
+  * The SCO compiler got an error on the getpass_r() prototype in getpass.h
+    since the curl one differed from the SCO one
+  * The HPUX compiler got an error because of how curl did the sigaction
+    stuff and used a define HPUX doesn't have (or need).
+  * A few more problems remain to be researched.
+
+- Paul Harrington experienced a core dump using https. Not much details yet.
+
+Daniel (4 December 2000)
+- Jörn Hartroth fixed a problem with multiple URLs and -o/-O.
+
 Version 7.5
 
 Daniel (1 December 2000)
