@@ -1047,6 +1047,21 @@ if test "x$RECENTAIX" = "xyes"; then
   AC_CHECK_FUNCS( gmtime_r )
 
   AC_DEFINE(_THREAD_SAFE, 1, [define this if you need it to compile thread-safe code])
+
+  dnl check if this is the IMB xlc compiler
+  dnl Details thanks to => http://predef.sourceforge.net/
+  AC_MSG_CHECKING([if this is the xlc compiler])
+  AC_EGREP_CPP([^__xlC__], [__xlC__],
+         dnl action if the text is found, this it has not been replaced by the
+         dnl cpp
+         XLC="no"
+         AC_MSG_RESULT([no]),
+         dnl the text was not found, it was replaced by the cpp
+         XLC="yes"
+         AC_MSG_RESULT([yes])
+         CFLAGS="$CFLAGS -qthreaded"
+       )
+
 fi
 
 
