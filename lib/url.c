@@ -480,9 +480,9 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
     break;
   case CURLOPT_WRITEHEADER:
     /*
-     * Callback function for header data
+     * Custom pointer to pass the header write callback function
      */
-    data->writeheader = (FILE *)va_arg(param, FILE *);
+    data->writeheader = (void *)va_arg(param, void *);
     break;
   case CURLOPT_COOKIE:
     /*
