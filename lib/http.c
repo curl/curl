@@ -849,9 +849,11 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
             if(*ptr=='\n') {
               char letter;
               /* Newlines are CRLF, so the CR is ignored as the line isn't
-                 really terminated until the LF comes */
+                 really terminated until the LF comes. Treat a following CR
+                 as end-of-headers as well.*/
 
-              if('\r' == line_start[0]) {
+              if(('\r' == line_start[0]) ||
+                 ('\n' == line_start[0])) {
                 /* end of response-headers from the proxy */
                 keepon=FALSE;
                 break; /* breaks out of for-loop, not switch() */
