@@ -171,6 +171,7 @@ void pgrsUpdate(struct UrlData *data)
 
   switch(data->progress.mode) {
   case CURL_PROGRESS_STATS:
+  default:
     {
       char max5[6][6];
       double dlpercen=0;
@@ -180,10 +181,6 @@ void pgrsUpdate(struct UrlData *data)
       double total_transfer;
       double total_expected_transfer;
 
-      double timespent;
-      double dlspeed;
-      double ulspeed;
-      
 #define CURR_TIME 5
 
       static double speeder[ CURR_TIME ];
@@ -208,13 +205,13 @@ void pgrsUpdate(struct UrlData *data)
       data->progress.lastshow = now.tv_sec;
 
       /* The exact time spent so far */
-      timespent = tvdiff (now, data->progress.start);
+      data->progress.timespent = tvdiff (now, data->progress.start);
 
       /* The average download speed this far */
-      dlspeed = data->progress.downloaded/(timespent!=0.0?timespent:1.0);
+      data->progress.dlspeed = data->progress.downloaded/(data->progress.timespent!=0.0?data->progress.timespent:1.0);
 
       /* The average upload speed this far */
-      ulspeed = data->progress.uploaded/(timespent!=0.0?timespent:1.0);
+      data->progress.ulspeed = data->progress.uploaded/(data->progress.timespent!=0.0?data->progress.timespent:1.0);
 
       /* Let's do the "current speed" thing, which should use the fastest
          of the dl/ul speeds */
@@ -234,17 +231,17 @@ void pgrsUpdate(struct UrlData *data)
 
       /* Figure out the estimated time of arrival for the upload */
       if(data->progress.flags & PGRS_UL_SIZE_KNOWN) {
-        if(!ulspeed)
-          ulspeed=1;
-        ulestimate = data->progress.size_ul / ulspeed;
+        if(!data->progress.ulspeed)
+          data->progress.ulspeed=1;
+        ulestimate = data->progress.size_ul / data->progress.ulspeed;
         ulpercen = (data->progress.uploaded / data->progress.size_ul)*100;
       }
 
       /* ... and the download */
       if(data->progress.flags & PGRS_DL_SIZE_KNOWN) {
-        if(!dlspeed)
-          dlspeed=1;
-        dlestimate = data->progress.size_dl / dlspeed;
+        if(!data->progress.dlspeed)
+          data->progress.dlspeed=1;
+        dlestimate = data->progress.size_dl / data->progress.dlspeed;
         dlpercen = (data->progress.downloaded / data->progress.size_dl)*100;
       }
     
@@ -255,7 +252,7 @@ void pgrsUpdate(struct UrlData *data)
       /* If we have a total estimate, we can display that and the expected
          time left */
       if(total_estimate) {
-        time2str(time_left, total_estimate-(int) timespent); 
+        time2str(time_left, total_estimate-(int) data->progress.timespent); 
         time2str(time_total, total_estimate);
       }
       else {
@@ -264,7 +261,7 @@ void pgrsUpdate(struct UrlData *data)
         strcpy(time_total, "--:--:--");
       }
       /* The time spent so far is always known */
-      time2str(time_current, timespent);
+      time2str(time_current, data->progress.timespent);
 
       /* Get the total amount of data expected to get transfered */
       total_expected_transfer = 
@@ -290,16 +287,47 @@ void pgrsUpdate(struct UrlData *data)
               (int)ulpercen,                        /* xfer % */
               max5data(data->progress.uploaded, max5[1]), /* xfer size */
 
-              max5data(dlspeed, max5[3]),           /* avrg dl speed */
-              max5data(ulspeed, max5[4]),           /* avrg ul speed */
+              max5data(data->progress.dlspeed, max5[3]),           /* avrg dl speed */
+              max5data(data->progress.ulspeed, max5[4]),           /* avrg ul speed */
               time_total,                           /* total time */
               time_current,                         /* current time */
               time_left,                            /* time left */
               max5data(data->progress.current_speed, max5[5]) /* current speed */
               );
     }
-
-
+    break;
+#if 0
+  case CURL_PROGRESS_BAR:
+    /* original progress bar code by Lars Aas */
+    if (progressmax == -1) {
+      int prevblock = prev / 1024;
+      int thisblock = point / 1024;
+      while ( thisblock > prevblock ) {
+        fprintf( data->err, "#" );
+        prevblock++;
+      }
+        prev = point;
+    }
+    else {
+      char line[256];
+      char outline[256];
+      char format[40];
+      float frac = (float) point / (float) progressmax;
+      float percent = frac * 100.0f;
+      int barwidth = width - 7;
+      int num = (int) (((float)barwidth) * frac);
+        int i = 0;
+        for ( i = 0; i < num; i++ ) {
+          line[i] = '#';
+        }
+        line[i] = '\0';
+        sprintf( format, "%%-%ds %%5.1f%%%%", barwidth );
+        sprintf( outline, format, line, percent );
+        fprintf( data->err, "\r%s", outline );
+    }
+    prev = point;
+    break;
+#endif
   }
 }
 
