@@ -94,7 +94,7 @@ static int passwd_callback(char *buf, int num, int verify
   else {
     if(num > (int)strlen((char *)global_passwd)) {
       strcpy(buf, global_passwd);
-      return strlen(buf);
+      return (int)strlen(buf);
     }
   }  
   return 0;
@@ -185,7 +185,7 @@ int random_the_seed(struct SessionHandle *data)
       if(!area)
         return 3; /* out of memory */
 	
-      len = strlen(area);
+      len = (int)strlen(area);
       RAND_add(area, len, (len >> 1));
 
       free(area); /* now remove the random junk */
@@ -818,10 +818,10 @@ static CURLcode verifyhost(struct connectdata *conn,
     int i;
         
     if(GEN_DNS == target) {
-      hostlen = strlen(conn->hostname);
+      hostlen = (int)strlen(conn->hostname);
       domain = strchr(conn->hostname, '.');
       if(domain)
-        domainlen = strlen(domain);
+        domainlen = (int)strlen(domain);
     }
 
     /* get amount of alternatives, RFC2459 claims there MUST be at least
@@ -1070,7 +1070,7 @@ Curl_SSLConnect(struct connectdata *conn,
        and then how much time that has elapsed to know how much time we
        allow for the connect call */
     if(data->set.timeout || data->set.connecttimeout) {
-      double has_passed;
+      long has_passed;
 
       /* Evaluate in milliseconds how much time that has passed */
       has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.start);
@@ -1087,7 +1087,7 @@ Curl_SSLConnect(struct connectdata *conn,
         timeout_ms = data->set.connecttimeout*1000;
       
       /* subtract the passed time */
-      timeout_ms -= (long)has_passed;
+      timeout_ms -= has_passed;
       
       if(timeout_ms < 0) {
         /* a precaution, no need to continue if time already is up */
@@ -1117,14 +1117,15 @@ Curl_SSLConnect(struct connectdata *conn,
         FD_SET(sockfd, &writefd);
       else {
         /* untreated error */
+        unsigned long errdetail;
         char error_buffer[120]; /* OpenSSL documents that this must be at least
                                    120 bytes long. */
 
-        detail = ERR_get_error(); /* Gets the earliest error code from the
-                                     thread's error queue and removes the
-                                     entry. */
+        errdetail = ERR_get_error(); /* Gets the earliest error code from the
+                                        thread's error queue and removes the
+                                        entry. */
 
-        switch(detail) {
+        switch(errdetail) {
         case 0x1407E086:
           /* 1407E086:
              SSL routines:
@@ -1140,7 +1141,7 @@ Curl_SSLConnect(struct connectdata *conn,
           return CURLE_SSL_CACERT;
         default:
           /* detail is already set to the SSL error above */
-          failf(data, "SSL: %s", ERR_error_string(detail, error_buffer));
+          failf(data, "SSL: %s", ERR_error_string(errdetail, error_buffer));
           /* OpenSSL 0.9.6 and later has a function named
              ERRO_error_string_n() that takes the size of the buffer as a third
              argument, and we should possibly switch to using that one in the
