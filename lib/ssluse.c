@@ -43,7 +43,7 @@
  * Linas Vepstas <linas@linas.org> and Sampo Kellomaki <sampo@iki.fi>
  */
 
-
+#include "setup.h"
 #include <string.h>
 #include <stdlib.h>
 

@@ -38,6 +38,8 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+#include "setup.h"
+
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
@@ -49,7 +51,6 @@
 
 #include <errno.h>
 
-#include "setup.h"
 
 #ifdef NEED_REENTRANT
 #define _REENTRANT /* Necessary to use in Solaris, since the silly guys at Sun

@@ -38,6 +38,8 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+#include "setup.h"
+
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
@@ -48,8 +50,6 @@
 #include <sys/stat.h>
 
 #include <errno.h>
-
-#include "setup.h"
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>

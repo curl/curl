@@ -39,6 +39,9 @@
  ****************************************************************************/
 
 /* -- WIN32 approved -- */
+
+#include "setup.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -49,7 +52,6 @@
 
 #include <errno.h>
 
-#include "setup.h"
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #include <winsock.h>

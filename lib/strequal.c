@@ -38,9 +38,9 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
-#include <string.h>
-
 #include "setup.h"
+
+#include <string.h>
 
 int strequal(const char *first, const char *second)
 {

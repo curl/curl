@@ -38,8 +38,9 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
-#include <string.h>
 #include "setup.h"
+
+#include <string.h>
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 #if defined(__MINGW32__)

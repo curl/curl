@@ -38,10 +38,11 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+#include "setup.h"
+
 #include <string.h>
 #include <stdio.h>
 
-#include "setup.h"
 #include <curl/curl.h>
 #include "urldata.h"
 

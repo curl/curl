@@ -55,12 +55,13 @@ Example set of cookies:
     13-Jun-1988 03:04:55 GMT; domain=.fidelity.com; path=/; secure
 ****/
 
+#include "setup.h"
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 
 #include "cookie.h"
-#include "setup.h"
 #include "getdate.h"
 #include "strequal.h"
 

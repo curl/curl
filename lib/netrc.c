@@ -50,11 +50,12 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+#include "setup.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "setup.h"
 #include "getenv.h"
 #include "strequal.h"
 

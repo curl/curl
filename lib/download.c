@@ -38,11 +38,11 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+#include "setup.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-#include "setup.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>

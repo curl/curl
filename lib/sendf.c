@@ -38,11 +38,11 @@
  * ------------------------------------------------------------
  ****************************************************************************/
 
+#include "setup.h"
+
 #include <stdio.h>
 #include <stdarg.h>
 #include <stdlib.h>
-
-#include "setup.h"
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
