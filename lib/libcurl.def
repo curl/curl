@@ -7,26 +7,29 @@ LIBRARY		LIBCURL
 DESCRIPTION	'curl libcurl - http://curl.haxx.se'
 
 EXPORTS
-	curl_easy_cleanup @ 1 ; 
-	curl_easy_getinfo @ 2 ; 
-	curl_easy_init @ 3 ; 
-	curl_easy_perform @ 4 ; 
-	curl_easy_setopt @ 5 ; 
-	curl_escape @ 6 ; 
-	curl_formparse @ 7 ; 
-	curl_formfree @ 8 ; 
-	curl_getdate @ 9 ; 
-	curl_getenv @ 10 ; 
-	curl_slist_append @ 11 ; 
-	curl_slist_free_all @ 12 ; 
-	curl_unescape @ 13 ; 
-	curl_version @ 14 ; 
-	curl_maprintf @ 15 ; 
- 	curl_mfprintf @ 16 ;
-	curl_mprintf @ 17 ;
- 	curl_msprintf @ 18 ;
- 	curl_msnprintf @ 19 ;
- 	curl_mvfprintf @ 20 ;
-	curl_strequal @ 21 ; 
-	curl_strnequal @ 22 ; 
+	curl_easy_cleanup @ 1 ;
+	curl_easy_getinfo @ 2 ;
+	curl_easy_init @ 3 ;
+	curl_easy_perform @ 4 ;
+	curl_easy_setopt @ 5 ;
+	curl_escape @ 6 ;
+	curl_unescape @ 7;
+	curl_formparse @ 8 ;
+	curl_formfree @ 9 ;
+	curl_getdate @ 10 ;
+	curl_getenv @ 11 ;
+	curl_global_cleanup @ 12 ;
+	curl_global_init @ 13 ;
+	curl_slist_append @ 14 ;
+	curl_slist_free_all @ 15 ;
+	curl_unescape @ 16 ;
+	curl_version @ 17 ;
+	curl_maprintf @ 18 ;
+ 	curl_mfprintf @ 19 ;
+	curl_mprintf @ 20 ;
+ 	curl_msprintf @ 21 ;
+ 	curl_msnprintf @ 22 ;
+ 	curl_mvfprintf @ 23 ;
+	curl_strequal @ 24 ;
+	curl_strnequal @ 25 ;
 

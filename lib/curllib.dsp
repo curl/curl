@@ -209,6 +209,10 @@ SOURCE=.\strequal.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\strtok.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\telnet.c
 # End Source File
 # Begin Source File
@@ -338,6 +342,10 @@ SOURCE=.\ssluse.h
 # Begin Source File
 
 SOURCE=.\strequal.h
+# End Source File
+# Begin Source File
+
+SOURCE=.\strtok.h
 # End Source File
 # Begin Source File
 
