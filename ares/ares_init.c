@@ -661,7 +661,7 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
       q = str;
       while (*q && *q != '/' && *q != ';' && !isspace((unsigned char)*q))
 	q++;
-      if (ip_addr(str, q - str, &pat.addr) == 0)
+      if (ip_addr(str, (int)(q - str), &pat.addr) == 0)
 	{
 	  /* We have a pattern address; now determine the mask. */
 	  if (*q == '/')
@@ -770,7 +770,7 @@ static int set_options(ares_channel channel, const char *str)
 
 static char *try_config(char *s, const char *opt)
 {
-  int len;
+  size_t len;
 
   len = strlen(opt);
   if (strncmp(s, opt, len) != 0 || !isspace((unsigned char)s[len]))
