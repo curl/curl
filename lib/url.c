@@ -87,8 +87,17 @@
 #ifdef USE_LIBIDN
 #include <idna.h>
 #include <stringprep.h>
+#ifdef HAVE_IDN_FREE_H
+#include <idn-free.h>
+#else
 void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
                               libidn 0.4.5's make install! */
+#endif
+#ifndef HAVE_IDN_FREE
+/* if idn_free() was not found in this version of libidn, use plain free()
+   instead */
+#define idn_free(x) (free)(x)
+#endif
 #endif
 
 #ifdef HAVE_OPENSSL_ENGINE_H
