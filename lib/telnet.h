@@ -23,7 +23,8 @@
  *
  * $Id$
  *****************************************************************************/
+#ifndef CURL_DISABLE_TELNET
 CURLcode Curl_telnet(struct connectdata *conn);
 CURLcode Curl_telnet_done(struct connectdata *conn);
-
+#endif
 #endif

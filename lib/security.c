@@ -40,6 +40,7 @@
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_FTP
 #ifdef KRB4
 
 #define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
@@ -552,6 +553,7 @@ Curl_sec_end(struct connectdata *conn)
 }
 
 #endif /* KRB4 */
+#endif /* CURL_DISABLE_FTP */
 
 /*
  * local variables:

@@ -22,7 +22,7 @@
  *
  * $Id$
  *****************************************************************************/
-
+#ifndef CURL_DISABLE_TELNET
 /*
  * Telnet option defines. Add more here if in need.
  */
@@ -97,5 +97,5 @@ static const char *telnetcmds[]=
 #define TELCMD_OK(x) ( ((unsigned int)(x) >= TELCMD_MINIMUM) && \
                        ((unsigned int)(x) <= TELCMD_MAXIMUM) )
 #define TELCMD(x)    telnetcmds[(x)-TELCMD_MINIMUM]
-
+#endif
 #endif

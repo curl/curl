@@ -23,6 +23,7 @@
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_HTTP
 /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
@@ -987,3 +988,4 @@ CURLcode Curl_http(struct connectdata *conn)
  * vim600: fdm=marker
  * vim: et sw=2 ts=2 sts=2 tw=78
  */
+#endif

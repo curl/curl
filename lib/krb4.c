@@ -40,6 +40,7 @@
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_FTP
 #ifdef KRB4
 
 #include "security.h"
@@ -391,6 +392,7 @@ void Curl_krb_kauth(struct connectdata *conn)
 }
 
 #endif /* KRB4 */
+#endif /* CURL_DISABLE_FTP */
 
 /*
  * local variables:

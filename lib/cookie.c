@@ -79,6 +79,8 @@ Example set of cookies:
 
 #include "setup.h"
 
+#ifndef CURL_DISABLE_HTTP
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
@@ -760,6 +762,8 @@ int main(int argc, char **argv)
 }
 
 #endif
+
+#endif /* CURL_DISABLE_HTTP */
 
 /*
  * local variables:

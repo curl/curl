@@ -23,6 +23,8 @@
 
 #include "setup.h"
 
+/* MN 06/07/02 */
+#ifndef CURL_DISABLE_FTP
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -2141,3 +2143,5 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
  * vim600: fdm=marker
  * vim: et sw=2 ts=2 sts=2 tw=78
  */
+
+#endif /* CURL_DISABLE_FTP */

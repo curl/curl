@@ -139,10 +139,16 @@ static unsigned int ConnectionStore(struct SessionHandle *data,
 #define RETSIGTYPE void
 #endif
 static
+RETSIGTYPE sigintfunc(int signal)
+{
+  (void)signal; /* ignored */
+  return;
+}
 RETSIGTYPE alarmfunc(int signal)
 {
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
   (void)signal;
+  kill(getpid(), SIGINT);
   return;
 }
 #endif
@@ -182,11 +188,13 @@ CURLcode Curl_close(struct SessionHandle *data)
   if(data->state.headerbuff)
     free(data->state.headerbuff);
 
+#ifndef CURL_DISABLE_HTTP
   if(data->set.cookiejar)
     /* we have a "destination" for all the cookies to get dumped to */
     Curl_cookie_output(data->cookies, data->set.cookiejar);
     
   Curl_cookie_cleanup(data->cookies);
+#endif
 
   /* free the connection cache */
   free(data->state.connects);
@@ -514,6 +522,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.cookiesession = (bool)va_arg(param, long);
     break;
 
+#ifndef CURL_DISABLE_HTTP
   case CURLOPT_COOKIEFILE:
     /*
      * Set cookie file to read and parse. Can be used multiple times.
@@ -537,6 +546,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->cookies = Curl_cookie_init(NULL, data->cookies,
                                      data->set.cookiesession);
     break;
+#endif
+
   case CURLOPT_WRITEHEADER:
     /*
      * Custom pointer to pass the header write callback function
@@ -1712,6 +1723,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->protocol &= ~PROT_MISSING; /* switch that one off again */
   }
 
+#ifndef CURL_DISABLE_HTTP
   /************************************************************
    * RESUME on a HTTP page is a tricky business. First, let's just check that
    * 'range' isn't used, then set the range parameter and leave the resume as
@@ -1730,12 +1742,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       conn->bits.use_range = 1; /* switch on range usage */
     }
   }
-
+#endif
   /*************************************************************
    * Setup internals depending on protocol
    *************************************************************/
 
   if (strequal(conn->protostr, "HTTP")) {
+#ifndef CURL_DISABLE_HTTP
     conn->port = (data->set.use_port && data->state.allow_port)?
       data->set.use_port:PORT_HTTP;
     conn->remote_port = PORT_HTTP;
@@ -1743,9 +1756,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->curl_do = Curl_http;
     conn->curl_done = Curl_http_done;
     conn->curl_connect = Curl_http_connect;
+#else
+    failf(data, LIBCURL_NAME
+          " was built with HTTP disabled, http: not supported!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
+#endif
   }
   else if (strequal(conn->protostr, "HTTPS")) {
-#ifdef USE_SSLEAY
+#if defined(USE_SSLEAY) && !defined(CURL_DISABLE_HTTP)
 
     conn->port = (data->set.use_port && data->state.allow_port)?
       data->set.use_port:PORT_HTTPS;
@@ -1763,6 +1781,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #endif /* !USE_SSLEAY */
   }
   else if (strequal(conn->protostr, "GOPHER")) {
+#ifndef CURL_DISABLE_GOPHER
     conn->port = (data->set.use_port && data->state.allow_port)?
       data->set.use_port:PORT_GOPHER;
     conn->remote_port = PORT_GOPHER;
@@ -1775,9 +1794,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->protocol |= PROT_GOPHER;
     conn->curl_do = Curl_http;
     conn->curl_done = Curl_http_done;
+#else
+    failf(data, LIBCURL_NAME
+          " was built with GOPHER disabled, gopher: not supported!");
+#endif
   }
   else if(strequal(conn->protostr, "FTP") ||
           strequal(conn->protostr, "FTPS")) {
+
+/* MN 06/07/02 */
+#ifndef CURL_DISABLE_FTP
     char *type;
 
     if(strequal(conn->protostr, "FTPS")) {
@@ -1805,8 +1831,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         failf(data, "ftps does not work through http proxy!");
         return CURLE_UNSUPPORTED_PROTOCOL;
       }
+#ifndef CURL_DISABLE_HTTP
       conn->curl_do = Curl_http;
       conn->curl_done = Curl_http_done;
+#else
+      failf(data, "FTP over http proxy requires HTTP support built-in!");
+      return CURLE_UNSUPPORTED_PROTOCOL;
+#endif
     }
     else {
       conn->curl_do = Curl_ftp;
@@ -1841,8 +1872,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 	break;
       }
     }
+
+/* MN 06/07/02 */
+#else /* CURL_DISABLE_FTP */
+    failf(data, LIBCURL_NAME
+          " was built with FTP disabled, ftp/ftps: not supported!");
+    return CURLE_UNSUPPORTED_PROTOCOL;
+#endif
   }
   else if(strequal(conn->protostr, "TELNET")) {
+#ifndef CURL_DISABLE_TELNET
     /* telnet testing factory */
     conn->protocol |= PROT_TELNET;
 
@@ -1851,24 +1890,39 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->remote_port = PORT_TELNET;
     conn->curl_do = Curl_telnet;
     conn->curl_done = Curl_telnet_done;
+#else
+    failf(data, LIBCURL_NAME
+          " was built with TELNET disabled!");
+#endif
   }
   else if (strequal(conn->protostr, "DICT")) {
+#ifndef CURL_DISABLE_DICT
     conn->protocol |= PROT_DICT;
     conn->port = (data->set.use_port && data->state.allow_port)?
       data->set.use_port:PORT_DICT;
     conn->remote_port = PORT_DICT;
     conn->curl_do = Curl_dict;
     conn->curl_done = NULL; /* no DICT-specific done */
+#else
+    failf(data, LIBCURL_NAME
+          " was built with DICT disabled!");
+#endif
   }
   else if (strequal(conn->protostr, "LDAP")) {
+#ifndef CURL_DISABLE_LDAP
     conn->protocol |= PROT_LDAP;
     conn->port = (data->set.use_port && data->state.allow_port)?
       data->set.use_port:PORT_LDAP;
     conn->remote_port = PORT_LDAP;
     conn->curl_do = Curl_ldap;
     conn->curl_done = NULL; /* no LDAP-specific done */
+#else
+    failf(data, LIBCURL_NAME
+          " was built with LDAP disabled!");
+#endif
   }
   else if (strequal(conn->protostr, "FILE")) {
+#ifndef CURL_DISABLE_FILE
     conn->protocol |= PROT_FILE;
 
     conn->curl_do = Curl_file;
@@ -1885,6 +1939,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
 
     return result;
+#else
+    failf(data, LIBCURL_NAME
+          " was built with FILE disabled!");
+#endif
   }
   else {
     /* We fell through all checks and thus we don't support the specified
@@ -2203,6 +2261,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
 #ifdef HAVE_SIGACTION
     struct sigaction sigact;
+    sigaction(SIGINT, NULL, &sigact);
+    keep_sigact = sigact;
+    sigact.sa_handler = sigintfunc;
+#ifdef SA_RESTART
+    /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
+    sigact.sa_flags &= ~SA_RESTART;
+#endif
+    /* now set the new struct */
+    sigaction(SIGINT, &sigact, NULL);
+
     sigaction(SIGALRM, NULL, &sigact);
     keep_sigact = sigact;
     keep_copysig = TRUE; /* yes, we have a copy */

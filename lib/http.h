@@ -23,7 +23,7 @@
  *
  * $Id$
  *****************************************************************************/
-
+#ifndef CURL_DISABLE_HTTP
 /* ftp can use this as well */
 CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
                                      int tunnelsocket,
@@ -38,5 +38,5 @@ CURLcode Curl_http_connect(struct connectdata *conn);
 void Curl_httpchunk_init(struct connectdata *conn);
 CHUNKcode Curl_httpchunk_read(struct connectdata *conn, char *datap,
                               ssize_t length, ssize_t *wrote);
-
+#endif
 #endif

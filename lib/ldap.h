@@ -23,7 +23,8 @@
  *
  * $Id$
  *****************************************************************************/
+#ifndef CURL_DISABLE_LDAP
 CURLcode Curl_ldap(struct connectdata *conn);
 CURLcode Curl_ldap_done(struct connectdata *conn);
-
+#endif
 #endif /* __LDAP_H */

@@ -23,7 +23,8 @@
  *
  * $Id$
  *****************************************************************************/
+#ifndef CURL_DISABLE_DICT
 CURLcode Curl_dict(struct connectdata *conn);
 CURLcode Curl_dict_done(struct connectdata *conn);
-
+#endif
 #endif

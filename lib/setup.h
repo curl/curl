@@ -23,7 +23,17 @@
  * $Id$
  *****************************************************************************/
 
-
+/* MN 06/07/02 */
+/* #define HTTP_ONLY
+*/
+#ifdef HTTP_ONLY
+#define CURL_DISABLE_FTP
+#define CURL_DISABLE_LDAP
+#define CURL_DISABLE_TELNET
+#define CURL_DISABLE_DICT
+#define CURL_DISABLE_FILE
+#define CURL_DISABLE_GOPHER
+#endif
 
 #if !defined(WIN32) && defined(_WIN32)
 /* This _might_ be a good Borland fix. Please report whether this works or
