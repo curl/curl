@@ -298,13 +298,6 @@ CURLcode curl_open(CURL **curl, char *url)
 
     data-> headersize=HEADERSIZE;
 
-#if 0
-    /* Let's set some default values: */
-    curl_setopt(data, CURLOPT_FILE, stdout); /* default output to stdout */
-    curl_setopt(data, CURLOPT_INFILE, stdin);  /* default input from stdin */
-    curl_setopt(data, CURLOPT_STDERR, stderr);  /* default stderr to stderr! */
-#endif
-
     data->out = stdout; /* default output to stdout */
     data->in  = stdin;  /* default input from stdin */
     data->err  = stderr;  /* default stderr to stderr */
@@ -521,11 +514,6 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
   case CURLOPT_WRITEFUNCTION:
     data->fwrite = va_arg(param, curl_write_callback);
     break;
-#if 0
-  case CURLOPT_WRITEINFO:
-    data->writeinfo = va_arg(param, char *);
-    break;
-#endif
   case CURLOPT_READFUNCTION:
     data->fread = va_arg(param, curl_read_callback);
     break;
@@ -1161,12 +1149,6 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
        user+password pair in a string like:
        ftp://user:password@ftp.my.site:8021/README */
     char *ptr=NULL; /* assign to remove possible warnings */
-#if 0
-    if(':' == *conn->name) {
-      failf(data, "URL malformat: user can't be zero length");
-      return CURLE_URL_MALFORMAT_USER;
-    }
-#endif
     if((ptr=strchr(conn->name, '@'))) {
       /* there's a user+password given here, to the left of the @ */
 
@@ -1396,23 +1378,6 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
           case ENOMEM:
             failf(data, "Insufficient kernel memory was available: %d", errno);
             break;
-#if 0
-          case EROFS:
-            failf(data,
-                  "Socket inode would reside on a read-only file system: %d",
-                  errno);
-            break;
-          case ENOENT:
-            failf(data, "File does not exist: %d", errno);
-            break;
-          case ENOTDIR:
-            failf(data, "Component of path prefix is not a directory: %d",
-                  errno);
-            break;
-          case ELOOP:
-            failf(data,"Too many symbolic links encountered: %d",errno);
-            break;
-#endif
           default:
             failf(data,"errno %d\n");
           } /* end of switch */
@@ -1481,17 +1446,6 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     case EINTR:
       failf(data, "Connection timeouted");
       break;
-#if 0
-    case EAFNOSUPPORT:
-      failf(data, "Incorrect address family: %d",errno);
-      break;
-    case ENOTSOCK:
-      failf(data, "File descriptor is not a socket: %d",errno);
-      break;
-    case EBADF:
-      failf(data, "File descriptor is not a valid index in descriptor table: %d",errno);
-      break;
-#endif
     default:
       failf(data, "Can't connect to server: %d", errno);
       break;
@@ -1537,10 +1491,6 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     (void) memcpy(&in.s_addr, *conn->hp->h_addr_list, sizeof (in.s_addr));
     infof(data, "Connected to %s (%s)\n", conn->hp->h_name, inet_ntoa(in));
   }
-
-#if 0 /* Kerberos experiements! Beware! Take cover! */
-  kerberos_connect(data, name);
-#endif
 
 #ifdef __EMX__
   /* 20000330 mgs
@@ -1654,13 +1604,6 @@ CURLcode curl_do(CURLconnect *in_conn)
 
   conn->state = CONN_DO; /* we have entered this state */
 
-#if 0
-  if(conn->bytecount) {
-    double ittook = tvdiff (tvnow(), conn->now);
-    infof(data, "%i bytes transfered in %.3lf seconds (%.0lf bytes/sec).\n",
-          conn->bytecount, ittook, (double)conn->bytecount/(ittook!=0.0?ittook:1));
-  }
-#endif
   return CURLE_OK;
 }
 
