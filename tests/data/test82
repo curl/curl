@@ -16,7 +16,6 @@ This is not the real page either!
 # Client-side
 <client>
 <features>
-SSL
 </features>
 <server>
 http
