@@ -1,16 +1,29 @@
 Curl and libcurl 7.11.1. A bugfix release.
 
-The 79th public curl release. Release number 106 counted from the very
-beginning.
+ Public curl release number:               79
+ Releases counted from the very beginning: 106
+ Available command line options:           94
+ Available curl_easy_setopt() options:     117
 
 This release includes the following changes:
 
+ o asynch dns lookups now require the c-ares library
  o curl --socks can be used to set a SOCKS5 proxy to use
- o response-headers received after a (proxy) CONNECT request are now passd
+ o response-headers received after a (proxy) CONNECT request are now passed
    to the header callback just like other headers
 
 This release includes the following bugfixes:
 
+ o configure with mingw detects gethostbyname
+ o setting a Host: header is no longer affecting the Host: header used when
+   libcurl follows a Location:
+ o fixed numerous compiler warnings on several operating systems and compilers
+ o PUTing from stdin couldn't disable chunked transfer-encoding
+ o corrected the mingw makefiles
+ o improved the configure libz detection
+ o improved EPRT use when doing FTP on ipv6-enabled AIX hosts
+ o *nroff commands that only support -mandoc and not -man are now supported
+   (for the built-in manual text in the command line tool)
  o fixed the unconditional #include of config.h in hugehelp.c
  o builds fine on MPE/iX
  o upload using chunked transfer-encoding now sends the last chunk properly
@@ -20,15 +33,19 @@ This release includes the following bugfixes:
  o the socks5 code segfaulted if no username/password was set
  o the *_LARGE options now take curl_off_t types as parameters and this will
    make it possible to handle large files on windows too
+ o builds with large file support even on systems without strtoll()
 
 Other curl-related news since the previous public release:
 
- o 
+ o c-ares 1.0.0 was relased: http://daniel.haxx.se/projects/c-ares/
+ o TclCurl 0.11.0 was released:
+   http://personal1.iddeo.es/andresgarci/tclcurl/english/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, Vincent Bronner, Richard Bramante, Dirk Manske, Dan Fandrich,
- Ken Hirsch, Stadler Stephan
+ Ken Hirsch, Stadler Stephan, Domenico Andreoli, Patrick Smith, Tor Arntsen,
+ Andrés García, Tim Baker, Len Krause, Gilad
 
         Thanks! (and sorry if I forgot to mention someone)
