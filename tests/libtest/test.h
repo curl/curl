@@ -1,7 +1,9 @@
 #ifdef HAVE_CONFIG_H
-/* Now include the config.h file from libcurl's private libdir, so that we
-   get good in-depth knowledge about the system we're building this on */
-#include "config.h"
+/* Now include the setup.h file from libcurl's private libdir (the source
+   version, but that might include "config.h" from the build dir so we need
+   both of them in the include path), so that we get good in-depth knowledge
+   about the system we're building this on */
+#include "setup.h"
 #endif
 
 #include <curl.h>
