@@ -19,10 +19,12 @@ PROGRAM_NAME = curl.exe
 ## Release
 CCR = cl.exe /MD /O2 /D "NDEBUG"
 LINKR = link.exe /incremental:no /libpath:"../lib"
+RCR = rc.exe /dCURLDEBUG=0
 
 ## Debug
 CCD = cl.exe /MDd /Gm /ZI /Od /D "_DEBUG" /GZ
 LINKD = link.exe /incremental:yes /debug /libpath:"../lib"
+RCD = rc.exe /dCURLDEBUG=1
 
 !IFNDEF ZLIB_PATH
 ZLIB_PATH  = ../../zlib-1.1.4
@@ -30,6 +32,7 @@ ZLIB_PATH  = ../../zlib-1.1.4
 
 CFLAGS = /I "../lib" /I "../include" /I "$(ZLIB_PATH)" /nologo /W3 /GX /D "WIN32" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 LFLAGS = /nologo /libpath:"$(ZLIB_PATH)" /out:$(PROGRAM_NAME) /subsystem:console /machine:I386
+RESFLAGS = /i "../include"
 LINKLIBS = wsock32.lib libcurl.lib winmm.lib zlib.lib
 LINKLIBS_DEBUG = wsock32.lib libcurld.lib winmm.lib zlib.lib
 
@@ -39,7 +42,8 @@ RELEASE_OBJS= \
 	urlglobr.obj \
 	getpassr.obj \
 	homedirr.obj \
-	mainr.obj
+	mainr.obj \
+	curlr.res
 
 DEBUG_OBJS= \
 	hugehelpd.obj \
@@ -47,7 +51,8 @@ DEBUG_OBJS= \
 	urlglobd.obj \
 	getpassd.obj \
 	homedird.obj \
-	maind.obj
+	maind.obj \
+	curld.res
 	
 ######################
 # release-ssl
@@ -63,7 +68,7 @@ LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
 LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS)
 LFLAGS = $(LFLAGS) $(LFLAGSSSL)
 !ENDIF
- 
+
 all : release
 
 release: $(RELEASE_OBJS)
@@ -85,6 +90,8 @@ homedirr.obj: homedir.c
 	$(CCR) $(CFLAGS) /Fo"$@" homedir.c
 mainr.obj: main.c
 	$(CCR) $(CFLAGS) /Fo"$@" main.c
+curlr.res : curl.rc
+	$(RCR) $(RESFLAGS) /Fo"$@" curl.rc
 
 ## Debug
 hugehelpd.obj: hugehelp.c
@@ -99,6 +106,8 @@ homedird.obj: homedir.c
 	$(CCD) $(CFLAGS) /Fo"$@" homedir.c
 maind.obj: main.c
 	$(CCD) $(CFLAGS) /Fo"$@" main.c
+curld.res : curl.rc
+	$(RCD) $(RESFLAGS) /Fo"$@" curl.rc
 
 clean:
 	-@erase $(RELEASE_OBJS)
