@@ -7,8 +7,8 @@ WWW-Authenticate: Negotiate
 WWW-Authenticate: NTLM
 WWW-Authenticate: Basic realm="daniel"
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
 
-This is not the real page
 </data>
 
 # This is supposed to be returned when the server gets a first
@@ -40,6 +40,7 @@ WWW-Authenticate: Negotiate
 WWW-Authenticate: NTLM
 WWW-Authenticate: Basic realm="daniel"
 Content-Type: text/html; charset=iso-8859-1
+Content-Length: 0
 
 HTTP/1.1 401 Now gimme that second request of crap
 Server: Microsoft-IIS/5.0
@@ -66,7 +67,7 @@ SSL
 http
 </server>
  <name>
-HTTP with NTLM/Negotiate/Basic, anyauth and user with domain
+HTTP with NTLM/Negotiate/Basic, anyauth and user with domain, with size 0
  </name>
  <command>
 http://%HOSTIP:%HOSTPORT/91 --anyauth -u mydomain\\myself:secret
