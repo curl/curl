@@ -629,6 +629,10 @@ typedef enum {
      attempted before the good old traditional PORT command. */     
   CINIT(FTP_USE_EPRT, LONG, 106),
 
+  /* Set this to a non-zero value to enable HTTP Digest Authentication.
+     You should use this in combination with CURLOPT_USERPWD. */
+  CINIT(HTTPDIGEST, LONG, 107),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 
@@ -819,8 +823,8 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.10.5"
-#define LIBCURL_VERSION_NUM 0x070a05
+#define LIBCURL_VERSION "7.10.6-pre1"
+#define LIBCURL_VERSION_NUM 0x070a06
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
