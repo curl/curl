@@ -555,7 +555,7 @@ static char *file2memory(FILE *file, long *size)
   char buffer[1024];
   char *string=NULL;
   char *newstring=NULL;
-  long len=0;
+  size_t len=0;
   long stringlen=0;
 
   if(file) {
