@@ -26,7 +26,7 @@ BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c
 NROFF=@NROFF@
 
-EXTRA_DIST = mkhelp.pl config-win32.h \
+EXTRA_DIST = mkhelp.pl config-win32.h curlmsg.msg\
 	Makefile.vc6 Makefile.b32 Makefile.m32 config.h.in
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
