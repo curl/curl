@@ -6,7 +6,7 @@ The package is called 'arescurl' for now since I (Daniel Stenberg) want this
 for use within the curl project. If you can think of a better and more witty
 name, please speak up.
 
-Version 1.0 (8 October 2003)
+Version 1.0-pre1 (8 October 2003)
 
 - James Bursa made it run on RISC OS
 
