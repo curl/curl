@@ -282,8 +282,10 @@ int Curl_GetFTPResponse(int sockfd, char *buf,
          */
         if(CURLE_OK != Curl_read(conn, sockfd, ptr, 1, &keepon))
           keepon = FALSE;
-        else if(keepon <= 0)
+        else if(keepon <= 0) {
           error = SELECT_ERROR;
+          failf(data, "Connection aborted");
+        }
         else if ((*ptr == '\n') || (*ptr == '\r'))
           keepon = FALSE;
       }
