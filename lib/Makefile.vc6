@@ -65,6 +65,18 @@ CFGSET = TRUE
 !ENDIF
 
 ######################
+# release-zlib
+
+!IF "$(CFG)" == "release-zlib"
+TARGET   =$(LIB_NAME).lib
+DIROBJ   =.\$(CFG)
+LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
+LNK      = $(LNKLIB) $(LFLAGSZLIB) /out:$(TARGET)
+CC       = $(CCNODBG) $(CFLAGSZLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
 # release-dll
 
 !IF "$(CFG)" == "release-dll"
@@ -161,6 +173,17 @@ CFGSET   = TRUE
 !ENDIF
 
 ######################
+# debug-zlib
+!IF "$(CFG)" == "debug-zlib"
+TARGET   = $(LIB_NAME_DEBUG).lib
+DIROBJ   =.\$(CFG)
+LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
+LNK      = $(LNKLIB) $(LFLAGSZLIB) /out:$(TARGET)
+CC       = $(CCDEBUG) $(CFLAGSZLIB)
+CFGSET   = TRUE
+!ENDIF
+
+######################
 # debug-ssl-dll
 
 !IF "$(CFG)" == "debug-ssl-dll"
@@ -181,12 +204,14 @@ RESOURCE = $(DIROBJ)\libcurl.res
 !MESSAGE where <config> is one of:
 !MESSAGE   release          - release static library
 !MESSAGE   release-dll      - release dll
+!MESSAGE   release-zlib     - release static library with zlib
 !MESSAGE   release-ssl      - release static library with ssl
 !MESSAGE   release-ssl-zlib - release static library with ssl and zlib
 !MESSAGE   release-ssl-dll  - release dll library with ssl
 !MESSAGE   release-libcurl-ssl-dll - static libcurl with shared ssl
 !MESSAGE   debug            - debug static library
 !MESSAGE   debug-dll        - debug dll
+!MESSAGE   debug-zlib       - debug static library with zlib
 !MESSAGE   debug-ssl        - debug static library with ssl
 !MESSAGE   debug-ssl-dll    - debug dll library with ssl
 !MESSAGE <target> can be left blank in which case all is assumed
