@@ -85,3 +85,7 @@
 
 /* If zlib is available */
 #undef HAVE_LIBZ
+
+/* Define if you have the <limits.h> header file */
+#undef HAVE_LIMITS_H
+
