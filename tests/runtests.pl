@@ -160,7 +160,8 @@ sub torture {
     my $c;
 
     my @test=('http://%HOSTIP:%HOSTPORT/1',
-              'ftp://%HOSTIP:%FTPPORT/');
+              'ftp://%HOSTIP:%FTPPORT/1',
+              'http://%HOSTIP:%HOSTPORT/3 -d "poo"');
     
     # loop over the different tests commands
     for(@test) {
