@@ -1657,6 +1657,11 @@ CURLcode Curl_posttransfer(struct SessionHandle *data)
   (void)data; /* unused parameter */
 #endif
 
+  if(!(data->progress.flags & PGRS_HIDE) &&
+     !data->progress.callback)
+    /* only output if we don't use a progress callback and we're not hidden */
+    fprintf(data->set.err, "\n");
+
   return CURLE_OK;
 }
 

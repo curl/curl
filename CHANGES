@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (26 November 2004)
+- As reported in Mandrake's bug tracker bug 12289
+  (http://qa.mandrakesoft.com/show_bug.cgi?id=12289), curl would print a
+  newline to "finish" the progress meter after each redirect and not only
+  after a completed transfer.
+
 Daniel (25 November 2004)
 - FTP improvements:
 
