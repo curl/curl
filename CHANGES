@@ -6,11 +6,16 @@
 
                                History of Changes
 
+Version 7.9.8
+
+Daniel (13 Jun 2002)
+- Time to let this baby go.
+
 Daniel (12 Jun 2002)
-- Chris Combes provided a patch that added three new options for
-  curl_formadd(): CURLFORM_BUFFER, CURLFORM_BUFFERPTR, CURLFORM_BUFFERLENGTH
-  They are used to create a multipart that appears as a regular file upload,
-  but the data is provided with a pointer and length.
+- Chris Combes added three new options for curl_formadd(): CURLFORM_BUFFER,
+  CURLFORM_BUFFERPTR, CURLFORM_BUFFERLENGTH.  They are used to create a
+  multipart that appears as a regular file upload, but the data is provided
+  with a pointer and length.
   
 - Nico Baggus made the VMS version use sigsetjmp() too.
 
