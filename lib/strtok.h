@@ -28,8 +28,8 @@
 #include "setup.h"
 
 #ifndef HAVE_STRTOK_R
-char *curl_strtok_r(char *s, const char *delim, char **last);
-#define strtok_r curl_strtok_r
+char *Curl_strtok_r(char *s, const char *delim, char **last);
+#define strtok_r Curl_strtok_r
 #endif
 
 #endif
