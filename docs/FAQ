@@ -636,7 +636,10 @@ FAQ
 
   4.6 Can you tell me what error code 142 means?
 
-  All error codes that are larger than the highest documented error code means
+  All curl error codes are described at the end of the man page, in the
+  section called "EXIT CODES".
+
+  Error codes that are larger than the highest documented error code means
   that curl has exited due to a crash. This is a serious error, and we
   appreciate a detailed bug report from you that describes how we could go
   ahead and repeat this!
