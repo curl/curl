@@ -46,6 +46,7 @@ log() {
 die(){
     text=$1
     log "$text"
+    cd $pwd # cd back to the original root dir
 
     if test -n "$pwd/$build"; then
       # we have a build directory name, remove the dir
@@ -131,6 +132,7 @@ buildlog="buildlog-$$"
 
 # remove any previous left-overs
 rm -rf build-*
+rm -rf buildlog-*
 
 # create a dir to build in
 mkdir $build
