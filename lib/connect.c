@@ -160,6 +160,8 @@ int waitconnect(int sockfd, /* socket */
 
 CURLcode Curl_connecthost(struct connectdata *conn,
                           long timeout_ms,
+                          Curl_addrinfo *remotehost,
+                          int port,
                           int sockfd, /* input socket, or -1 if none */
                           int *socket)
 {
@@ -177,7 +179,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,
     /* don't use any previous one, it might be of wrong type */
     sclose(sockfd);
   sockfd = -1; /* none! */
-  for (ai = conn->hp; ai; ai = ai->ai_next) {
+  for (ai = remotehost; ai; ai = ai->ai_next) {
     sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
     if (sockfd < 0)
       continue;
@@ -219,6 +221,14 @@ CURLcode Curl_connecthost(struct connectdata *conn,
    * Connecting with IPv4-only support
    */
   int aliasindex;
+  struct sockaddr_in serv_addr;
+
+  if(-1 == sockfd)
+    /* create an ordinary socket if none was provided */
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+  if(-1 == sockfd)
+    return CURLE_COULDNT_CONNECT; /* big time error */
 
   /* non-block socket */
   nonblock(sockfd, TRUE);
@@ -226,20 +236,20 @@ CURLcode Curl_connecthost(struct connectdata *conn,
   /* This is the loop that attempts to connect to all IP-addresses we
      know for the given host. One by one. */
   for(rc=-1, aliasindex=0;
-      rc && (struct in_addr *)conn->hp->h_addr_list[aliasindex];
+      rc && (struct in_addr *)remotehost->h_addr_list[aliasindex];
       aliasindex++) {
 
     /* copy this particular name info to the conn struct as it might
        be used later in the krb4 "system" */
-    memset((char *) &conn->serv_addr, '\0', sizeof(conn->serv_addr));
-    memcpy((char *)&(conn->serv_addr.sin_addr),
-           (struct in_addr *)conn->hp->h_addr_list[aliasindex],
+    memset((char *) &serv_addr, '\0', sizeof(serv_addr));
+    memcpy((char *)&(serv_addr.sin_addr),
+           (struct in_addr *)remotehost->h_addr_list[aliasindex],
            sizeof(struct in_addr));
-    conn->serv_addr.sin_family = conn->hp->h_addrtype;
-    conn->serv_addr.sin_port = htons(conn->port);
+    serv_addr.sin_family = remotehost->h_addrtype;
+    serv_addr.sin_port = htons(port);
   
-    rc = connect(sockfd, (struct sockaddr *)&(conn->serv_addr),
-                 sizeof(conn->serv_addr));
+    rc = connect(sockfd, (struct sockaddr *)&serv_addr,
+                 sizeof(serv_addr));
 
     if(-1 == rc) {
       int error;
@@ -275,8 +285,13 @@ CURLcode Curl_connecthost(struct connectdata *conn,
       before = after;
       continue; /* try next address */
     }
-    else
-      break;
+    else {
+      /* copy this particular name info to the conn struct as it might
+         be used later in the krb4 "system" */
+      memcpy((char *) &conn->serv_addr, &serv_addr,
+             sizeof(conn->serv_addr));  
+    }
+    break;
   }
   if(-1 == rc) {
     /* no good connect was made */

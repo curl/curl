@@ -880,8 +880,8 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     free(conn->proto.generic);
 
 #ifdef ENABLE_IPV6
-  if(conn->hp) /* host name info */
-    freeaddrinfo(conn->hp);
+  if(conn->hostaddr) /* host name info */
+    freeaddrinfo(conn->hostaddr);
 #else
   if(conn->hostent_buf) /* host name info */
     free(conn->hostent_buf);
@@ -1276,6 +1276,8 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
    *************************************************************/
   return Curl_connecthost(conn,
                           max_time,
+                          conn->hostaddr,
+                          conn->port,
                           conn->firstsocket, /* might be bind()ed */
                           &conn->firstsocket);
 }
@@ -2086,26 +2088,26 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->port =  conn->remote_port; /* it is the same port */
 
     /* Resolve target host right on */
-    if(!conn->hp) {
+    if(!conn->hostaddr) {
       /* it might already be set if reusing a connection */
-      conn->hp = Curl_getaddrinfo(data, conn->name, conn->port,
+      conn->hostaddr = Curl_getaddrinfo(data, conn->name, conn->port,
                                   &conn->hostent_buf);
     }
-    if(!conn->hp) {
+    if(!conn->hostaddr) {
       failf(data, "Couldn't resolve host '%s'", conn->name);
       return CURLE_COULDNT_RESOLVE_HOST;
     }
   }
-  else if(!conn->hp) {
+  else if(!conn->hostaddr) {
     /* This is a proxy that hasn't been resolved yet. It may be resolved
        if we're reusing an existing connection. */
 
     /* resolve proxy */
     /* it might already be set if reusing a connection */
-    conn->hp = Curl_getaddrinfo(data, conn->proxyhost, conn->port,
+    conn->hostaddr = Curl_getaddrinfo(data, conn->proxyhost, conn->port,
                                 &conn->hostent_buf);
 
-    if(!conn->hp) {
+    if(!conn->hostaddr) {
       failf(data, "Couldn't resolve proxy '%s'", conn->proxyhost);
       return CURLE_COULDNT_RESOLVE_PROXY;
     }
@@ -2195,8 +2197,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #else
   {
     struct in_addr in;
-    (void) memcpy(&in.s_addr, *conn->hp->h_addr_list, sizeof (in.s_addr));
-    infof(data, "Connected to %s (%s)\n", conn->hp->h_name, inet_ntoa(in));
+    (void) memcpy(&in.s_addr, *conn->hostaddr->h_addr_list, sizeof (in.s_addr));
+    infof(data, "Connected to %s (%s)\n", conn->hostaddr->h_name, inet_ntoa(in));
   }
 #endif
 
