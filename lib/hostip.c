@@ -88,9 +88,19 @@
 #define ARES_SUCCESS CURLE_OK
 #endif
 
+/* These two symbols are for the global DNS cache */
 static curl_hash hostname_cache;
 static int host_cache_initialized;
 
+
+static void freednsentry(void *freethis);
+
+/*
+ * my_getaddrinfo() is the generic low-level name resolve API within this
+ * source file. There exist three versions of this function - for different
+ * name resolve layers (selected at build-time). They all take this same set
+ * of arguments
+ */
 static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
                                      char *hostname,
                                      int port,
@@ -123,19 +133,30 @@ struct thread_data {
 };
 #endif
 
+/*
+ * Curl_global_host_cache_init() initializes and sets up a global DNS cache.
+ * Global DNS cache is general badness. Do not use. This will be removed in
+ * a future version. Use the share interface instead!
+ */
 void Curl_global_host_cache_init(void)
 {
   if (!host_cache_initialized) {
-    Curl_hash_init(&hostname_cache, 7, Curl_freednsinfo);
+    Curl_hash_init(&hostname_cache, 7, freednsentry);
     host_cache_initialized = 1;
   }
 }
 
+/*
+ * Return a pointer to the global cache
+ */
 curl_hash *Curl_global_host_cache_get(void)
 {
   return &hostname_cache;
 }
 
+/*
+ * Destroy and cleanup the global DNS cache
+ */
 void Curl_global_host_cache_dtor(void)
 {
   if (host_cache_initialized) {
@@ -144,7 +165,10 @@ void Curl_global_host_cache_dtor(void)
   }
 }
 
-/* count the number of characters that an integer takes up */
+/*
+ * Minor utility-function:
+ * Count the number of characters that an integer takes up.
+ */
 static int _num_chars(int i)
 {
   int chars = 0;
@@ -165,7 +189,10 @@ static int _num_chars(int i)
   return chars;
 }
 
-/* Create a hostcache id */
+/*
+ * Minor utility-function:
+ * Create a hostcache id string for the DNS caching.
+ */
 static char *
 create_hostcache_id(char *server, int port, size_t *entry_len)
 {
@@ -192,6 +219,13 @@ struct hostcache_prune_data {
   time_t now;
 };
 
+/*
+ * This function is set as a callback to be called for every entry in the DNS
+ * cache when we want to prune old unused entries.
+ *
+ * Returning non-zero means remove the entry, return 0 to keep it in the
+ * cache.
+ */
 static int
 hostcache_timestamp_remove(void *datap, void *hc)
 {
@@ -209,6 +243,9 @@ hostcache_timestamp_remove(void *datap, void *hc)
   return 1;
 }
 
+/*
+ * Prune the DNS cache. This assumes that a lock has already been taken.
+ */
 static void
 hostcache_prune(curl_hash *hostcache, int cache_timeout, time_t now)
 {
@@ -222,6 +259,10 @@ hostcache_prune(curl_hash *hostcache, int cache_timeout, time_t now)
                                  hostcache_timestamp_remove);
 }
 
+/*
+ * Library-wide function for pruning the DNS cache. This function takes and
+ * returns the appropriate locks.
+ */
 void Curl_hostcache_prune(struct SessionHandle *data)
 {
   time_t now;
@@ -245,15 +286,22 @@ void Curl_hostcache_prune(struct SessionHandle *data)
 }
 
 #ifdef HAVE_SIGSETJMP
-/* Beware this is a global and unique instance */
+/* Beware this is a global and unique instance. This is used to store the
+   return address that we can jump back to from inside a signal handler. This
+   is not thread-safe stuff. */
 sigjmp_buf curl_jmpenv;
 #endif
 
 
-/* When calling Curl_resolv() has resulted in a response with a returned
-   address, we call this function to store the information in the dns
-   cache etc */
-
+/*
+ * cache_resolv_response() stores a 'Curl_addrinfo' struct in the DNS cache.
+ *
+ * When calling Curl_resolv() has resulted in a response with a returned
+ * address, we call this function to store the information in the dns
+ * cache etc
+ *
+ * Returns the Curl_dns_entry entry pointer or NULL if the storage failed.
+ */
 static struct Curl_dns_entry *
 cache_resolv_response(struct SessionHandle *data,
                       Curl_addrinfo *addr,
@@ -303,15 +351,22 @@ cache_resolv_response(struct SessionHandle *data,
   return dns;
 }
 
-/* Resolve a name and return a pointer in the 'entry' argument if one
-   is available.
-
-   Return codes:
-
-   -1 = error, no pointer
-   0 = OK, pointer provided
-   1 = waiting for response, no pointer
-*/
+/*
+ * Curl_resolv() is the main name resolve function within libcurl. It resolves
+ * a name and returns a pointer to the entry in the 'entry' argument (if one
+ * is provided). This function might return immediately if we're using asynch
+ * resolves. See the return codes.
+ *
+ * The cache entry we return will get its 'inuse' counter increased when this
+ * function is used. You MUST call Curl_resolv_unlock() later (when you're
+ * done using this struct) to decrease the counter again.
+ *
+ * Return codes:
+ *
+ * -1 = error, no pointer
+ * 0 = OK, pointer provided
+ * 1 = waiting for response, no pointer
+ */
 int Curl_resolv(struct connectdata *conn,
                 char *hostname,
                 int port,
@@ -405,6 +460,11 @@ int Curl_resolv(struct connectdata *conn,
   return rc;
 }
 
+/*
+ * Curl_resolv_unlock() unlocks the given cached DNS entry. When this has been
+ * made, the struct may be destroyed due to pruning. It is important that only
+ * one unlock is made for each Curl_resolv() call.
+ */
 void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns)
 {
   if(data->share)
@@ -438,15 +498,23 @@ void Curl_freeaddrinfo(Curl_addrinfo *p)
 }
 
 /*
- * Free a cache dns entry.
+ * File-internal: free a cache dns entry.
  */
-void Curl_freednsinfo(void *freethis)
+static void freednsentry(void *freethis)
 {
   struct Curl_dns_entry *p = (struct Curl_dns_entry *) freethis;
 
   Curl_freeaddrinfo(p->addr);
 
   free(p);
+}
+
+/*
+ * Curl_mk_dnscache() creates a new DNS cache and returns the handle for it.
+ */
+curl_hash *Curl_mk_dnscache(void)
+{
+  return Curl_hash_alloc(7, freednsentry);
 }
 
 /* --- resolve name or IP-number --- */
@@ -459,6 +527,15 @@ void Curl_freednsinfo(void *freethis)
 #define CURL_NAMELOOKUP_SIZE 9000
 
 #ifdef USE_ARES
+
+/*
+ * Curl_multi_ares_fdset() is called when someone from the outside world
+ * (using curl_multi_fdset()) wants to get our fd_set setup and we're talking
+ * with ares. The caller must make sure that this function is only called when
+ * we have a working ares channel.
+ *
+ * Returns: CURLE_OK always!
+ */
 
 CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
                                fd_set *read_fd_set,
@@ -473,7 +550,13 @@ CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
   return CURLE_OK;
 }
 
-/* called to check if the name is resolved now */
+/*
+ * Curl_is_resolved() is called repeatedly to check if a previous name resolve
+ * request has completed. It should also make sure to time-out if the
+ * operation seems to take too long.
+ *
+ * Returns normal CURLcode errors.
+ */
 CURLcode Curl_is_resolved(struct connectdata *conn,
                           struct Curl_dns_entry **dns)
 {
@@ -482,9 +565,20 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
   int count;
   struct SessionHandle *data = conn->data;
   int nfds;
+  long diff;
+
+  diff = Curl_tvdiff(Curl_tvnow(),
+                     data->progress.t_startsingle)/1000;
+
+  if(diff > 180) {
+    /* Waited >180 seconds, this is a name resolve timeout! */
+    failf(data, "Name resolve timeout after %ld seconds", diff);
+    return CURLE_OPERATION_TIMEDOUT;
+  }
 
   FD_ZERO(&read_fds);
   FD_ZERO(&write_fds);
+
   nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
 
   count = select(nfds, &read_fds, &write_fds, NULL,
@@ -505,14 +599,15 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
   return CURLE_OK;
 }
 
-/* This is a function that locks and waits until the name resolve operation
-   has completed.
-
-   If 'entry' is non-NULL, make it point to the resolved dns entry
-
-   Return CURLE_COULDNT_RESOLVE_HOST if the host was not resolved, and
-   CURLE_OPERATION_TIMEDOUT if a time-out occurred.
-*/
+/*
+ * Curl_wait_for_resolv() waits for a resolve to finish. This function should
+ * be avoided since using this risk getting the multi interface to "hang".
+ *
+ * If 'entry' is non-NULL, make it point to the resolved dns entry
+ *
+ * Returns CURLE_COULDNT_RESOLVE_HOST if the host was not resolved, and
+ * CURLE_OPERATION_TIMEDOUT if a time-out occurred.
+ */
 CURLcode Curl_wait_for_resolv(struct connectdata *conn,
                               struct Curl_dns_entry **entry)
 {
@@ -591,8 +686,16 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
 #if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
 
-/* this function gets called by ares/gethostbyname_thread() when we got
-   the name resolved or not */
+/*
+ * host_callback() gets called by ares/gethostbyname_thread() when we got the
+ * name resolved (or not!).
+ *
+ * If the status argument is ARES_SUCCESS, we must copy the hostent field
+ * since ares will free it when this function returns. This operation stores
+ * the resolved data in the DNS cache.
+ *
+ * The storage operation locks and unlocks the DNS cache.
+ */
 static void host_callback(void *arg, /* "struct connectdata *" */
                           int status,
                           struct hostent *hostent)
@@ -633,9 +736,11 @@ static void host_callback(void *arg, /* "struct connectdata *" */
 
 #ifdef USE_ARES
 /*
- * Return name information about the given hostname and port number. If
+ * my_getaddrinfo() when using ares for name resolves.
+ *
+ * Returns name information about the given hostname and port number. If
  * successful, the 'hostent' is returned and the forth argument will point to
- * memory we need to free after use. That meory *MUST* be freed with
+ * memory we need to free after use. That memory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
 static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
@@ -670,9 +775,14 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
 
 #if !defined(USE_ARES) && !defined(USE_THREADING_GETHOSTBYNAME)
 
-/* For builds without ARES and threaded gethostbyname, Curl_resolv() can never
-   return wait==TRUE, so this function will never be called. If it still gets
-   called, we return failure at once. */
+/*
+ * Curl_wait_for_resolv() for builds without ARES and threaded gethostbyname,
+ * Curl_resolv() can never return wait==TRUE, so this function will never be
+ * called. If it still gets called, we return failure at once.
+ *
+ * We provide this function only to allow multi.c to remain unaware if we are
+ * doing asynch resolves or not.
+ */
 CURLcode Curl_wait_for_resolv(struct connectdata *conn,
                               struct Curl_dns_entry **entry)
 {
@@ -681,6 +791,13 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   return CURLE_COULDNT_RESOLVE_HOST;
 }
 
+/*
+ * This function will never be called when built with ares or threaded
+ * resolves. If it still gets called, we return failure at once.
+ *
+ * We provide this function only to allow multi.c to remain unaware if we are
+ * doing asynch resolves or not.
+ */
 CURLcode Curl_is_resolved(struct connectdata *conn,
                           struct Curl_dns_entry **dns)
 {
@@ -692,6 +809,12 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 #endif
 
 #if !defined(USE_ARES)
+/*
+ * Non-ares build.
+ *
+ * We provide this function only to allow multi.c to remain unaware if we are
+ * doing asynch resolves or not.
+ */
 CURLcode Curl_multi_ares_fdset(struct connectdata *conn,
                                fd_set *read_fd_set,
                                fd_set *write_fd_set,
@@ -745,9 +868,11 @@ void curl_freeaddrinfo(struct addrinfo *freethis,
 #endif
 
 /*
- * Return name information about the given hostname and port number. If
+ * my_getaddrinfo() when built ipv6-enabled.
+ *
+ * Returns name information about the given hostname and port number. If
  * successful, the 'addrinfo' is returned and the forth argument will point to
- * memory we need to free after use. That meory *MUST* be freed with
+ * memory we need to free after use. That memory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
 static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
@@ -809,9 +934,11 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
 
 #if !defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME)
 static void hostcache_fixoffset(struct hostent *h, long offset);
+
 /*
- * Performs a "deep" copy of a hostent into a buffer (returns a pointer to the
- * copy). Make absolutely sure the destination buffer is big enough!
+ * pack_hostent() is a file-local function that performs a "deep" copy of a
+ * hostent into a buffer (returns a pointer to the copy). Make absolutely sure
+ * the destination buffer is big enough!
  */
 static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 {
@@ -901,6 +1028,12 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 }
 #endif
 
+/*
+ * hostcache_fixoffset() is a utility-function that corrects all pointers in
+ * the given hostent struct according to the offset. This is typically used
+ * when a hostent has been reallocated and needs to be setup properly on the
+ * new address.
+ */
 static void hostcache_fixoffset(struct hostent *h, long offset)
 {
   int i=0;
@@ -925,6 +1058,11 @@ static void hostcache_fixoffset(struct hostent *h, long offset)
 
 #ifndef USE_ARES
 
+/*
+ * MakeIP() converts the input binary ipv4-address to an ascii string in the
+ * dotted numerical format. 'addr' is a pointer to a buffer that is 'addr_len'
+ * bytes big. 'num' is the 32 bit IP number.
+ */
 static char *MakeIP(unsigned long num, char *addr, int addr_len)
 {
 #if defined(HAVE_INET_NTOA) || defined(HAVE_INET_NTOA_R)
@@ -946,9 +1084,13 @@ static char *MakeIP(unsigned long num, char *addr, int addr_len)
   return (addr);
 }
 
-/* The original code to this function was once stolen from the Dancer source
-   code, written by Bjorn Reese, it has since been patched and modified
-   considerably. */
+/*
+ * my_getaddrinfo() - the ipv4 "traditional" version.
+ *
+ * The original code to this function was once stolen from the Dancer source
+ * code, written by Bjorn Reese, it has since been patched and modified
+ * considerably.
+ */
 static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
                                      char *hostname,
                                      int port,
@@ -1148,9 +1290,10 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
   else {
 
 #ifdef USE_THREADING_GETHOSTBYNAME
+    /* fire up a new resolver thread! */
     if (init_gethostbyname_thread(conn,hostname,port)) {
-       *waitp = TRUE;  /* please wait for the response */
-       return NULL;
+      *waitp = TRUE;  /* please wait for the response */
+      return NULL;
     }
     infof(data, "init_gethostbyname_thread() failed for %s; code %lu\n",
           hostname, GetLastError());
@@ -1194,7 +1337,11 @@ static void trace_it (const char *fmt, ...)
 }
 #endif
 
-/* For builds without ARES/USE_IPV6, create a resolver thread and wait on it.
+/*
+ * gethostbyname_thread() resolves a name, calls the host_callback and then
+ * exits.
+ *
+ * For builds without ARES/USE_IPV6, create a resolver thread and wait on it.
  */
 static DWORD WINAPI gethostbyname_thread (void *arg)
 {
@@ -1223,13 +1370,17 @@ static DWORD WINAPI gethostbyname_thread (void *arg)
 static void destroy_thread_data (struct connectdata *conn)
 {
   if (conn->async.hostname)
-     free(conn->async.hostname);
+    free(conn->async.hostname);
   if (conn->async.os_specific)
-     free(conn->async.os_specific);
+    free(conn->async.os_specific);
   conn->async.hostname = NULL;
   conn->async.os_specific = NULL;
 }
 
+/*
+ * init_gethostbyname_thread() starts a new thread that performs
+ * the actual resolve. This function returns before the resolve is done.
+ */
 static bool init_gethostbyname_thread (struct connectdata *conn,
                                        const char *hostname, int port)
 {
@@ -1265,7 +1416,14 @@ static bool init_gethostbyname_thread (struct connectdata *conn,
   return (1);
 }
 
-/* called to check if the name is resolved now */
+/*
+ * Curl_wait_for_resolv() waits for a resolve to finish. This function should
+ * be avoided since using this risk getting the multi interface to "hang".
+ *
+ * If 'entry' is non-NULL, make it point to the resolved dns entry
+ *
+ * This is the version for resolves-in-a-thread.
+ */
 CURLcode Curl_wait_for_resolv(struct connectdata *conn,
                               struct Curl_dns_entry **entry)
 {
@@ -1326,6 +1484,11 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   return (rc);
 }
 
+/*
+ * Curl_is_resolved() is called repeatedly to check if a previous name resolve
+ * request has completed. It should also make sure to time-out if the
+ * operation seems to take too long.
+ */
 CURLcode Curl_is_resolved(struct connectdata *conn,
                           struct Curl_dns_entry **entry)
 {
