@@ -527,10 +527,11 @@ AC_CHECK_FUNCS( socket \
                 tcsetattr \
                 tcgetattr \
                 perror \
-                getpass \
                 closesocket \
                 setvbuf
 )
+
+dnl removed 'getpass' check on October 26, 2000
 
 if test "$ac_cv_func_select" != "yes"; then
   AC_MSG_ERROR(Can't work without an existing socket() function)
