@@ -1,0 +1,30 @@
+.\" $Id$
+.\"
+.TH curl_multi_perform 3 "1 March 2002" "libcurl 7.9.5" "libcurl Manual"
+.SH NAME
+curl_multi_perform - add an easy handle to a multi session
+.SH SYNOPSIS
+#include <curl/curl.h>
+
+CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles);
+.ad
+.SH DESCRIPTION
+When the app thinks there's data available for the multi_handle, it should
+call this function to read/write whatever there is to read or write right
+now. curl_multi_perform() returns as soon as the reads/writes are done. This
+function does not require that there actually is any data available for
+reading or that data can be written, it can be called just in case. It will
+write the number of handles that still transfer data in the second argument's
+integer-pointer.
+.SH "RETURN VALUE"
+CURLMcode type, general libcurl multi interface error code.
+
+NOTE that this only returns errors etc regarding the whole multi stack. There
+might still have occurred problems on invidual transfers even when this
+function returns OK.
+.SH "TYPICAL USAGE"
+Most application will use \fIcurl_multi_fdset\fP to get the multi_handle's
+file descriptors, then it'll wait for action on them using select() and as
+soon as one or more of them are ready, \fIcurl_multi_perform\fP gets called.
+.SH "SEE ALSO"
+.BR curl_multi_cleanup "(3)," curl_multi_init "(3)"
