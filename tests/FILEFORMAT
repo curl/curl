@@ -38,6 +38,16 @@ reply is sent
 </reply>
 
 <client>
+<server>
+protocols as in 'http' 'ftp' etc. Give only one per line. Used for test cases
+500+ (at this point) to specify which servers the test case requires. In the
+future all test cases should use this. Makes us independent of the test
+case number.
+</server
+<tool>
+Name of tool to use instead of "curl". This tool must be built and exist
+in the libtest/ directory.
+</tool>
 <name>
 test case description
 </name>
