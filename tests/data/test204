@@ -1,0 +1,32 @@
+# no Server-side
+
+# Client-side
+<client>
+<server>
+none
+</server>
+ <name>
+"upload" with file://
+ </name>
+ <command>
+file://localhost/%PWD/log/result204.txt -T log/upload204.txt
+</command>
+<file name="log/upload204.txt">
+data
+in
+file
+to
+write
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<file name="log/result204.txt">
+data
+in
+file
+to
+write
+</file>
+</verify>

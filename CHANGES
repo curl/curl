@@ -7,6 +7,8 @@
                                   Changelog
 
 Daniel (24 May 2004)
+- libcurl now supports "uploading" to file:// URLs.
+
 - Simon Josefsson added a idn_free() function in libidn 0.4.5 as a reaction to
   Gisle's previous mail. We now use this function, and thus we require libidn
   0.4.5 or later. No earler version will do.

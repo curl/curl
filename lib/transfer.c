@@ -125,8 +125,7 @@ static struct timeval notimeout={0,0};
  * This function will call the read callback to fill our buffer with data
  * to upload.
  */
-static int fillbuffer(struct connectdata *conn,
-                      int bytes)
+int Curl_fillreadbuffer(struct connectdata *conn, int bytes)
 {
   int buffersize = bytes;
   int nread;
@@ -1124,7 +1123,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               break;
             }
 
-            nread = fillbuffer(conn, BUFSIZE);
+            nread = Curl_fillreadbuffer(conn, BUFSIZE);
           }
           else
             nread = 0; /* we're done uploading/reading */

@@ -2711,7 +2711,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->protocol |= PROT_FILE;
 
     conn->curl_do = Curl_file;
-    /* no done() function */
+    conn->curl_done = Curl_file_done;
 
     /* anyway, this is supposed to be the connect function so we better
        at least check that the file is present here! */

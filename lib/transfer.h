@@ -1,10 +1,10 @@
 #ifndef __TRANSFER_H
 #define __TRANSFER_H
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -12,7 +12,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -27,15 +27,17 @@ CURLcode Curl_pretransfer(struct SessionHandle *data);
 CURLcode Curl_posttransfer(struct SessionHandle *data);
 CURLcode Curl_follow(struct SessionHandle *data, char *newurl);
 CURLcode Curl_readwrite(struct connectdata *conn, bool *done);
-void Curl_single_fdset(struct connectdata *conn, 
+void Curl_single_fdset(struct connectdata *conn,
                        fd_set *read_fd_set,
                        fd_set *write_fd_set,
                        fd_set *exc_fd_set,
                        int *max_fd);
 CURLcode Curl_readwrite_init(struct connectdata *conn);
 
+int Curl_fillreadbuffer(struct connectdata *conn, int bytes);
+
 /* This sets up a forthcoming transfer */
-CURLcode 
+CURLcode
 Curl_Transfer (struct connectdata *data,
                int sockindex,    	/* socket index to read from or -1 */
                curl_off_t size,		/* -1 if unknown at this point */

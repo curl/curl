@@ -272,7 +272,10 @@ struct FTP {
  * FILE unique setup
  ***************************************************************************/
 struct FILEPROTO {
-  int fd; /* open file descriptor to read from! */
+  char *path; /* the path we operate on */
+  char *freepath; /* pointer to the allocated block we must free, this might
+                     differ from the 'path' pointer */
+  int fd;     /* open file descriptor to read from! */
 };
 
 /*
