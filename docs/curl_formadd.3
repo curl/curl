@@ -28,14 +28,17 @@ CURLFORM_COPYNAME or CURLFORM_PTRNAME followed by a string is used for
 the name of the section. Optionally one may use CURLFORM_NAMELENGTH to
 specify the length of the name (allowing null characters within the name).
 
-The three options for providing values are: CURLFORM_COPYCONTENTS,
-CURLFORM_PTRCONTENTS, or CURLFORM_FILE, followed by a char or void
-pointer (allowed for PTRCONTENTS).
+The four options for providing values are: CURLFORM_COPYCONTENTS,
+CURLFORM_PTRCONTENTS, CURLFORM_FILE, or CURLFORM_FILECONTENT followed
+by a char or void pointer (allowed for PTRCONTENTS).
+
+CURLFORM_FILECONTENT does a normal post like CURLFORM_COPYCONTENTS but
+the actual value is read from the filename given as a string.
 
 Other arguments may be CURLFORM_CONTENTTYPE if the
 user wishes to specify one (for FILE if no type is given the library
 tries to provide the correct one; for CONTENTS no Content-Type is sent
-in this case)
+in this case).
 
 For CURLFORM_PTRCONTENTS or CURLFORM_COPYNAME the user may also add
 CURLFORM_CONTENTSLENGTH followed by the length as a long (if not given
@@ -44,6 +47,16 @@ the library will use strlen to determine the length).
 For CURLFORM_FILE the user may send multiple files in one section by
 providing multiple CURLFORM_FILE arguments each followed by the filename
 (and each FILE is allowed to have a CONTENTTYPE).
+
+Another possibility to send single or multiple files in one section is
+to use CURLFORM_ARRAY that gets a struct curl_forms array as its
+value. Each structure element has a CURLformoption and a char
+pointer. For the options only CURLFORM_FILE, CURLFORM_CONTENTTYPE, and
+CURLFORM_END (that is used to determine the end of the array and thus
+must be the option of the last and no other element of the curl_forms
+array) are allowed. The effect of this parameter is the same as giving
+multiple CURLFORM_FILE options possibly with CURLFORM_CONTENTTYPE
+after or before each CURLFORM_FILE option.
 
 The last argument always is CURLFORM_END.
 
@@ -74,6 +87,9 @@ Returns non-zero if an error occurs.
  char buffer[] = "test buffer";
  char htmlbuffer[] = "<HTML>test buffer</HTML>";
  long htmlbufferlength = strlen(htmlbuffer);
+ struct curl_forms forms[3];
+ char file1[] = "my-face.jpg";
+ char file2[] = "your-face.jpg";
  /* add null character into htmlbuffer, to demonstrate that
     transfers of buffers containing null characters actually work
  */
@@ -109,6 +125,18 @@ Returns non-zero if an error occurs.
  curl_formadd(&post, &last, CURLFORM_COPYNAME, "pictures",
               CURLFORM_FILE, "my-face.jpg",
               CURLFORM_FILE, "your-face.jpg", CURLFORM_END);
+ /* Add two file section using CURLFORM_ARRAY */
+ forms[0].option = CURLFORM_FILE;
+ forms[0].value  = file1;
+ forms[1].option = CURLFORM_FILE;
+ forms[1].value  = file2;
+ forms[2].value  = CURLFORM_END;
+ /* no option needed for the end marker */
+ curl_formadd(&post, &last, CURLFORM_COPYNAME, "pictures",
+              CURLFORM_ARRAY, forms, CURLFORM_END);
+ /* Add the content of a file as a normal post text value */
+ curl_formadd(&post, &last, CURLFORM_COPYNAME, "filecontent",
+              CURLFORM_FILECONTENT, ".bashrc", CURLFORM_END);
  /* Set the form info */
  curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
 
