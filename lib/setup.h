@@ -113,11 +113,7 @@ typedef unsigned char bool;
 #endif
 
 #ifndef OS
-#ifdef WIN32
-#define OS "win32"
-#else
-#define OS "unknown"
-#endif
+#error "There is no OS string defined!"
 #endif
 
 #if defined(HAVE_X509_H) && defined(HAVE_SSL_H) && defined(HAVE_RSA_H) && \
