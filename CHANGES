@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (13 January 2004)
+- Dan Fandrich fixed the hugehelp source file to contain both a compressed and
+  an uncompressed version in the distribution, so that more people easier can
+  build curl with the compressed version.
+
+- Diego Casorran brought another AmigaOS build patch for native Amiga builds.
+
 - Matt Veenstra updated the Mac OS X framework files.
 
 - Brian R Duffy brought a section to the INSTALL file on how to build a
