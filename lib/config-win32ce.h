@@ -171,7 +171,7 @@
 /* #define HAVE_SYS_SOCKIO_H 1 */
 
 /* Define if you have the <sys/stat.h> header file.  */
-//#define HAVE_SYS_STAT_H 1
+#define HAVE_SYS_STAT_H 1
 
 /* Define if you have the <sys/utime.h> header file */
 #define HAVE_SYS_UTIME_H 1
