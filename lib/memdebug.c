@@ -152,21 +152,24 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   return mem;
 }
 
+/* We provide a realloc() that accepts a NULL as pointer, which then
+   performs a malloc(). In order to work with ares. */
 void *curl_dorealloc(void *ptr, size_t wantedsize,
                      int line, const char *source)
 {
-  struct memdebug *mem;
+  struct memdebug *mem=NULL;
 
   size_t size = sizeof(struct memdebug)+wantedsize;
 
   if(countcheck("realloc", line, source))
     return NULL;
 
-  mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
+  if(ptr)
+    mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
 
   mem=(struct memdebug *)(realloc)(mem, size);
   if(logfile)
-    fprintf(logfile, "MEM %s:%d realloc(%p, %d) = %p\n",
+    fprintf(logfile, "MEM %s:%d realloc(0x%x, %d) = %p\n",
             source, line, ptr, wantedsize, mem?mem->mem:NULL);
 
   if(mem) {
