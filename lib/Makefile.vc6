@@ -33,7 +33,7 @@
 LIB_NAME       = libcurl
 LIB_NAME_DEBUG = libcurld
 !IFNDEF OPENSSL_PATH
-OPENSSL_PATH   = ../../openssl-0.9.6
+OPENSSL_PATH   = ../../openssl-0.9.7a
 !ENDIF
 
 #############################################################
@@ -48,7 +48,8 @@ LNKDLL    = link.exe /DLL  /def:libcurl.def
 LNKLIB    = link.exe -lib
 LFLAGS    = /nologo
 LINKLIBS  = ws2_32.lib winmm.lib
-SSLLIBS   = libeay32.lib ssleay32.lib RSAglue.lib
+SSLLIBS   = libeay32.lib ssleay32.lib
+#  RSAglue.lib was formerly needed in the SSLLIBS
 CFGSET    = FALSE
 
 ######################
