@@ -1,3 +1,12 @@
+* February 16, 2004
+- Modified ares_private.h to include libcurl's memory debug header if
+  CURLDEBUG is set. This makes all the ares-functions supervised properly by
+  the curl test suite. This also forced me to add inclusion of the
+  ares_private.h header in a few more files that are using some kind of
+  memory-related resources.
+
+- Made the makefile only build ahost and adig if 'make demos' is used.
+
 * February 10, 2004
 - Dirk Manske made ares_version.h installed with 'make install'
 
