@@ -12,6 +12,8 @@ TODO
 
 To do in a future release (random order):
 
+ * Add an interface that enables a user to select prefered SSL ciphers to use.
+
  * Make curl deal with cookies better. libcurl should be able to maintain a
    "cookie jar". Updating it with cookies that is received, and using it to
    pass cookies to the servers that have matching cookies in the jar.
