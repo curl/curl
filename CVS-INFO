@@ -1,4 +1,4 @@
-								  _   _ ____  _     
+                                  _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
                             | (__| |_| |  _ <| |___ 
@@ -13,6 +13,9 @@ inner sanctum.
 Use autoconf 2.50 and no earlier. Also, try having automake 1.4 and libtool
 1.4 at least.
 
+You will need perl to generate the src/hugehelp.c file. The file
+src/hugehelp.c.cvs is a one-shot file that you can rename to src/hugehelp.c if
+you really can't generate the true file yourself!
 
   CHANGES.0     contains ancient changes.
 
@@ -25,7 +28,7 @@ Use autoconf 2.50 and no earlier. Also, try having automake 1.4 and libtool
 
   perl/contrib/ is a subdirectory with various perl scripts
 
-  java          is a subdirectory with the Java interface to libcurl
+  java/         is a subdirectory with the Java interface to libcurl
 
 To build after having extracted everything from CVS, do this:
 
