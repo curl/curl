@@ -71,11 +71,13 @@ else
   die
 fi
 
+build="build-$$"
+
 # remove any previous left-overs
-rm -rf build
+rm -rf $build
 
 # create a dir to build in
-mkdir build
+mkdir $build
 
 # get in the curl source tree root
 cd curl
@@ -99,7 +101,7 @@ else
 fi
 
 # change to build dir
-cd ../build
+cd "../$build"
 
 # run configure script
 ../curl/configure $1 2>&1
@@ -134,6 +136,6 @@ fi
 cd ..
 
 # delete build dir
-rm -rf build
+rm -rf "$build"
 
 die
