@@ -244,23 +244,20 @@ static CURLcode bindlocal(struct connectdata *conn,
 
       if(h)
         was_iface = TRUE;
-
     }
-    else {
-      if(strlen(data->set.device)>1) {
-        /*
-         * This was not an interface, resolve the name as a host name
-         * or IP number
-         */
-        rc = Curl_resolv(conn, data->set.device, 0, &h);
-        if(rc == 1)
-          (void)Curl_wait_for_resolv(conn, &h);
 
-        if(h)
-          /* we know data->set.device is shorter than the myhost array */
-          strcpy(myhost, data->set.device);
+    if(!was_iface) {
+      /*
+       * This was not an interface, resolve the name as a host name
+       * or IP number
+       */
+      rc = Curl_resolv(conn, data->set.device, 0, &h);
+      if(rc == 1)
+        (void)Curl_wait_for_resolv(conn, &h);
 
-      }
+      if(h)
+        /* we know data->set.device is shorter than the myhost array */
+        strcpy(myhost, data->set.device);
     }
 
     if(! *myhost) {
