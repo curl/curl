@@ -9,6 +9,13 @@ Content-Length: 0
 
 this is data even though Content-Length is set to zero
 </data>
+<datacheck>
+HTTP/1.0 200 OK
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 0
+
+</datacheck>
 </reply>
 
 #
@@ -18,7 +25,7 @@ this is data even though Content-Length is set to zero
 http
 </server>
  <name>
-HTTP POST with user and password
+HTTP POST with auth and contents but with content-length set to 0
  </name>
  <command>
  -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HOSTPORT/3
