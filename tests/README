@@ -59,6 +59,10 @@ Data:
     uploadN.txt: if this file is present, it should contain the same data as
                the log/upload.N does, after a curl upload has been performed.
 
+    ftpdN.txt: this file may contain instructions how to modify the behaviour
+               of the ftp server. It uses a simple syntax that is left to
+               describe here!
+
 FIX:
 
   * Make httpserver.pl work when we PUT without Content-Length:
