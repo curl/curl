@@ -247,7 +247,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
     }
   }
 
-  if(1 == inet_pton(pf, addrbuf, sizeof(addrbuf))) {
+  if(1 == inet_pton(pf, hostname, addrbuf)) {
     /* the given address is numerical only, prevent a reverse lookup */
     ai_flags = AI_NUMERICHOST;
   }
