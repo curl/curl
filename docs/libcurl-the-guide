@@ -630,14 +630,156 @@ Proxies
 
 Persistancy Is The Way to Happiness
 
- [ re-use connections, options that control/disable this, the effect on
-   protocols such as FTP, why this is Good For You ]
+ Re-cycling the same easy handle several times when doing multiple requests is
+ the way to go.
+
+ After each single curl_easy_perform() operation, libcurl will keep the
+ connection alive and open. A subsequent request using the same easy handle to
+ the same host might just be able to use the already open connection! This
+ reduces network impact a lot.
+
+ Even if the connection is dropped, all connections involving SSL to the same
+ host again, will benefit from libcurl's session ID cache that drasticly
+ reduces re-connection time.
+
+ FTP connections that are kept alive saves a lot of time, as the command-
+ response roundtrips are skipped, and also you don't risk getting blocked
+ without permission to login again like on many FTP servers only allowing N
+ persons to be logged in at the same time.
+
+ libcurl caches DNS name resolving results, to make lookups of a previously
+ looked up name a lot faster.
+
+ Other interesting details that improve performance for subsequent requests
+ may also be added in the future.
+
+ Each easy handle will attempt to keep the last few connections alive for a
+ while in case they are to be used again. You can set the size of this "cache"
+ with the CURLOPT_MAXCONNECTS option. Default is 5. It is very seldom any
+ point in changing this value, and if you think of changing this it is often
+ just a matter of thinking again.
+
+ When the connection cache gets filled, libcurl must close an existing
+ connection in order to get room for the new one. To know which connection to
+ close, libcurl uses a "close policy" that you can affect with the
+ CURLOPT_CLOSEPOLICY option. There's only two polices implemented as of this
+ writing (libcurl 7.9.4) and they are:
+
+  CURLCLOSEPOLICY_LEAST_RECENTLY_USED simply close the one that hasn't been
+  used for the longest time. This is the default behavior.
+
+  CURLCLOSEPOLICY_OLDEST closes the oldest connection, the one that was
+  createst the longest time ago.
+
+ There are, or at least were, plans to support a close policy that would call
+ a user-specified callback to let the user be able to decide which connection
+ to dump when this is necessary and therefor is the CURLOPT_CLOSEFUNCTION an
+ existing option still today. Nothing ever uses this though and this will not
+ be used within the forseeable future either.
+
+ To force your upcoming request to not use an already existing connection (it
+ will even close one first if there happens to be one alive to the same host
+ you're about to operate on), you can do that by setting CURLOPT_FRESH_CONNECT
+ to TRUE. In a similar spirit, you can also forbid the upcoming request to be
+ "lying" around and possibly get re-used after the request by setting
+ CURLOPT_FORBID_REUSE to TRUE.
 
 
 Customizing Operations
 
- [ custom requests, custom headers, replacing headers, custom FTP commands
-   before transfer, after transfer and without transfer ]
+ There is an ongoing development today where more and more protocols are built
+ upon HTTP for transport. This has obvious benefits as HTTP is a tested and
+ reliable protocol that is widely deployed and have excellent proxy-support.
+
+ When you use one of these protocols, and even when doing other kinds of
+ programming you may need to change the traditional HTTP (or FTP or...)
+ manners. You may need to change words, headers or various data.
+
+ libcurl is your friend here too.
+
+ If just changing the actual HTTP request keyword is what you want, like when
+ GET, HEAD or POST is not good enough for you, CURLOPT_CUSTOMREQUEST is there
+ for you. It is very simple to use:
+
+    curl_easy_setopt(easyhandle, CURLOPT_CUSTOMREQUEST, "MYOWNRUQUEST");
+
+ When using the custom request, you change the request keyword of the actual
+ request you are performing. Thus, by default you make GET request but you can
+ also make a POST operation (as described before) and then replace the POST
+ keyword if you want to. You're the boss.
+
+ HTTP-like protocols pass a series of headers to the server when doing the
+ request, and you're free to pass any amount of extra headers that you think
+ fit. Adding headers are this easy:
+
+    struct curl_slist *headers;
+
+    headers = curl_slist_append(headers, "Hey-server-hey: how are you?");
+    headers = curl_slist_append(headers, "X-silly-content: yes");
+
+    /* pass our list of custom made headers */
+    curl_easy_setopt(easyhandle, CURLOPT_HTTPHEADER, headers);
+
+    curl_easy_perform(easyhandle); /* transfer http */
+
+    curl_slist_free_all(headers); /* free the header list */
+
+ ... and if you think some of the internally generated headers, such as
+ User-Agent:, Accept: or Host: don't contain the data you want them to
+ contain, you can replace them by simply setting them too:
+
+    headers = curl_slist_append(headers, "User-Agent: 007");
+    headers = curl_slist_append(headers, "Host: munged.host.line");
+
+ If you replace an existing header with one with no contents, you will prevent
+ the header from being sent. Like if you want to completely prevent the
+ "Accept:" header to be sent, you can disable it with code similar to this:
+
+    headers = curl_slist_append(headers, "Accept:");
+
+ Both replacing and cancelling internal headers should be done with careful
+ consideration and you should be aware that you may violate the HTTP protocol
+ when doing so.
+
+ Not all protocols are HTTP-like, and thus the above may not help you when you
+ want to make for example your FTP transfers to behave differently.
+
+ Sending custom commands to a FTP server means that you need to send the
+ comands exactly as the FTP server expects them (RFC959 is a good guide here),
+ and you can only use commands that work on the control-connection alone. All
+ kinds of commands that requires data interchange and thus needs a
+ data-connection must be left to libcurl's own judgement. Also be aware that
+ libcurl will do its very best to change directory to the target directory
+ before doing any transfer, so if you change directory (with CWD or similar)
+ you might confuse libcurl and then it might not attempt to transfer the file
+ in the correct remote directory.
+
+ A little example that deletes a given file before an operation:
+
+    headers = curl_slist_append(headers, "DELE file-to-remove");
+
+    /* pass the list of custom commands to the handle */
+    curl_easy_setopt(easyhandle, CURLOPT_QUOTE, headers);
+
+    curl_easy_perform(easyhandle); /* transfer ftp data! */
+
+    curl_slist_free_all(headers); /* free the header list */
+
+ If you would instead want this operation (or chain of operations) to happen
+ _after_ the data transfer took place the option to curl_easy_setopt() would
+ instead be called CURLOPT_POSTQUOTE and used the exact same way.
+
+ The custom FTP command will be issued to the server in the same order they
+ are built in the list, and if a command gets an error code returned back from
+ the server no more commands will be issued and libcurl will bail out with an
+ error code. Note that if you use CURLOPT_QUOTE to send commands before a
+ transfer, no transfer will actually take place then.
+
+ [ custom FTP commands without transfer, FTP "header-only", HTTP 1.0 ]
+
+Cookies Without Chocolate Chips
+
+ [ set cookies, read cookies from file, cookie-jar ]
 
 
 Headers Equal Fun
