@@ -48,11 +48,9 @@ char *curl_escape(const char *string, int length)
   length = alloc-1;
   while(length--) {
     in = *string;
-    if(' ' == in)
-      ns[index++] = '+';
-    else if(!(in >= 'a' && in <= 'z') &&
-            !(in >= 'A' && in <= 'Z') &&
-            !(in >= '0' && in <= '9')) {
+    if(!(in >= 'a' && in <= 'z') &&
+       !(in >= 'A' && in <= 'Z') &&
+       !(in >= '0' && in <= '9')) {
       /* encode it */
       newlen += 2; /* the size grows with two, since this'll become a %XX */
       if(newlen > alloc) {
@@ -82,19 +80,10 @@ char *curl_unescape(const char *string, int length)
   unsigned char in;
   int index=0;
   unsigned int hex;
-  char querypart=FALSE; /* everything to the right of a '?' letter is
-                           the "query part" where '+' should become ' '.
-                           RFC 2316, section 3.10 */
   
   while(--alloc > 0) {
     in = *string;
-    if(querypart && ('+' == in))
-      in = ' ';
-    else if(!querypart && ('?' == in)) {
-      /* we have "walked in" to the query part */
-      querypart=TRUE;
-    }
-    else if('%' == in) {
+    if('%' == in) {
       /* encoded part */
       if(sscanf(string+1, "%02X", &hex)) {
         in = hex;
