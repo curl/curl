@@ -1373,7 +1373,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
       return CURLE_OUT_OF_MEMORY; /* go out from this */
 
     sprintf(newest, "%s%s%s", url_clone,
-            (('/' == useurl[0]) || !*protsep)?"":"/",
+            (('/' == useurl[0]) || (protsep && !*protsep))?"":"/",
             useurl);
     free(newurl); /* newurl is the allocated pointer */
     free(url_clone);
