@@ -102,7 +102,7 @@ struct Cookie *cookie_add(struct CookieInfo *c,
       /* we have a <what>=<this> pair or a 'secure' word here */
       if(strchr(ptr, '=')) {
         name[0]=what[0]=0; /* init the buffers */
-        if(2 == sscanf(ptr, "%" MAX_NAME_TXT "[^=]=%"
+        if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^=]=%"
                        MAX_COOKIE_LINE_TXT "[^\r\n]",
                        name, what)) {
           /* this is a legal <what>=<this> pair */
@@ -317,14 +317,21 @@ struct CookieInfo *cookie_init(char *file)
   char line[MAX_COOKIE_LINE];
   struct CookieInfo *c;
   FILE *fp;
-
+  bool fromfile=TRUE;
+  
   c = (struct CookieInfo *)malloc(sizeof(struct CookieInfo));
   if(!c)
     return NULL; /* failed to get memory */
   memset(c, 0, sizeof(struct CookieInfo));
   c->filename = strdup(file?file:"none"); /* copy the name just in case */
 
-  fp = file?fopen(file, "r"):NULL;
+  if(strequal(file, "-")) {
+    fp = stdin;
+    fromfile=FALSE;
+  }
+  else
+    fp = file?fopen(file, "r"):NULL;
+
   if(fp) {
     while(fgets(line, MAX_COOKIE_LINE, fp)) {
       if(strnequal("Set-Cookie:", line, 11)) {
@@ -344,7 +351,8 @@ struct CookieInfo *cookie_init(char *file)
         cookie_add(c, FALSE, lineptr);
       }
     }
-    fclose(fp);
+    if(fromfile)
+      fclose(fp);
   }
 
   return c;
