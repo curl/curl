@@ -53,16 +53,14 @@ TODO
    especially regular HTTP POST), the FTP command sending etc.
 
  * Go through the code and verify that libcurl deals with big files >2GB and
-   >4GB all over. Bug reports indicate that it doesn't currently work
-   properly.
+   >4GB all over. Bug reports (and source reviews) indicate that it doesn't
+   currently work properly.
 
  * Make the built-in progress meter use its own dedicated output stream, and
    make it possible to set it. Use stderr by default.
 
  DOCUMENTATION
 
- * Include documentation in the main archive about all the various libcurl
-   bindings.   
 
  FTP
 
@@ -77,7 +75,9 @@ TODO
    already working http dito works. It of course requires that 'MDTM' works,
    and it isn't a standard FTP command.
 
- * Add FTPS support with SSL for the data connection too.
+ * Add FTPS support with SSL for the data connection too.  This should be made
+   according to the specs written in draft-murray-auth-ftp-ssl-08.txt,
+   "Securing FTP with TLS"
 
  HTTP
 
