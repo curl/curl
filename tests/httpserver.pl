@@ -29,7 +29,9 @@ setsockopt(Server, SOL_SOCKET, SO_REUSEADDR,
 bind(Server, sockaddr_in($port, INADDR_ANY))|| die "bind: $!";
 listen(Server,SOMAXCONN) || die "listen: $!";
 
-print "HTTP server started on port $port\n";
+if($verbose) {
+    print "HTTP server started on port $port\n";
+}
 
 open(PID, ">.server.pid");
 print PID $$;
@@ -115,10 +117,13 @@ for ( $waitedpid = 0;
             my $testnum;
             if($path =~ /.*\/(\d*)/) {
                 $testnum=$1;
+
+                if($verbose) {
+                    print STDERR "sending reply $testnum\n";
+                }
             }
             else {
-                print STDERR "UKNOWN TEST CASE\n";
-                exit;
+                $testnum=0;
             }
             open(INPUT, ">log/server.input");
             for(@headers) {
@@ -126,12 +131,20 @@ for ( $waitedpid = 0;
             }
             close(INPUT);
             
-            # send a reply to the client
-            open(DATA, "<data/reply$testnum.txt");
-            while(<DATA>) {
-                print $_;
+            if(0 == $testnum ) {
+                print "HTTP/1.1 200 OK\r\n",
+                "header: yes\r\n",
+                "\r\n",
+                "You must select a test number to get good data back\r\n";
             }
-            close(DATA);
+            else {
+                # send a custom reply to the client
+                open(DATA, "<data/reply$testnum.txt");
+                while(<DATA>) {
+                    print $_;
+                }
+                close(DATA);
+            }
         }
      #   print "Hello there, $name, it's now ", scalar localtime, "\r\n";
     };

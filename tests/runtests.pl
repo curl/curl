@@ -44,6 +44,7 @@ my $memanalyze="../memanalyze.pl";
 
 my $short;
 my $verbose;
+my $anyway;
 
 #######################################################################
 # Return the pid of the http server as found in the pid file
@@ -66,7 +67,7 @@ sub stopserver {
         my $res = kill (9, $PID); # die!
         unlink $PIDFILE; # server is killed
 
-        if($res) {
+        if($res && $verbose) {
             print "TCP server signalled to die\n";
         }
     }
@@ -223,11 +224,15 @@ sub compare {
 
     $res = comparefiles($first, $sec);
     if ($res != 0) {
-        print " $text FAILED";
+        if(!$short) {
+            print " $text FAILED";
+        }
         return 1;
     }
 
-    print " $text OK";
+    if(!$short) {
+        print " $text OK";
+    }
     return 0;
 }
 
@@ -244,16 +249,17 @@ sub displaydata {
 
     print "Running tests on:\n",
     "* $version",
-    "* host $hostname",
-    "* system $hosttype";
+    "* Host: $hostname",
+    "* System: $hosttype";
 
     if( -r $memdump) {
         # if this exists, curl was compiled with memory debugging
         # enabled and we shall verify that no memory leaks exist
         # after each and every test!
         $memory_debug=1;
-        print "** Memory debugging ENABLED\n";
     }
+    printf("* Memory debugging: %s\n", $memory_debug?"ON":"OFF");
+
 }
 
 #######################################################################
@@ -399,10 +405,15 @@ sub singletest {
                     return 1;
                 }
                 else {
-                    print " memory OK";
+                    if(!$short) {
+                        print " memory OK";
+                    }
                 }
             }
         }
+    }
+    if($short) {
+        print "OK";
     }
     print "\n";
 
@@ -423,10 +434,15 @@ do {
         # short output
         $short=1;
     }
+    elsif($ARGV[0] eq "-a") {
+        # continue anyway, even if a test fail
+        $anyway=1;
+    }
     elsif($ARGV[0] eq "-h") {
         # show help text
         print <<EOHELP
 Usage: runtests.pl [-h][-s][-v][numbers]
+  -a       continue even if a test fails
   -h       this help text
   -s       short output
   -v       verbose output
@@ -487,7 +503,7 @@ if ( $TESTCASES eq "all") {
 my $testnum;
 foreach $testnum (split(" ", $TESTCASES)) {
 
-    if(singletest($testnum)) {
+    if(singletest($testnum) && !$anyway) {
         # a test failed, abort
         print "\n - abort tests\n";
         last;
