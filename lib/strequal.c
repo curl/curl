@@ -77,18 +77,33 @@ int Curl_strnequal(const char *first, const char *second, size_t max)
  * For strlcat() that means the initial length of dst plus the length of
  * src. While this may seem somewhat confusing it was done to make trunca-
  * tion detection simple.
+ *
+ * 
  */
 size_t strlcat(char *dst, const char *src, size_t size)
 {
-  size_t len = strlen(dst);
-  size_t orglen = len;
-  int index=0;
-  
-  while(src[index] && (len < (size-1)) ) {
-    dst[len++] = src[index++];
-  }
-  dst[len]=0;
+  char *d = dst;
+  const char *s = src;
+  size_t n = siz;
+  size_t dlen;
 
-  return orglen + strlen(src);
+  /* Find the end of dst and adjust bytes left but don't go past end */
+  while (n-- != 0 && *d != '\0')
+    d++;
+  dlen = d - dst;
+  n = siz - dlen;
+
+  if (n == 0)
+    return(dlen + strlen(s));
+  while (*s != '\0') {
+    if (n != 1) {
+      *d++ = *s;
+      n--;
+    }
+    s++;
+  }
+  *d = '\0';
+
+  return(dlen + (s - src));	/* count does not include NUL */
 }
 #endif
