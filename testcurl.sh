@@ -115,11 +115,11 @@ find . -name Entries -exec cat {} \; > "$newstat"
 if [ -r "$oldstat" ]; then
   # there is a previous cvs stat file to compare with
   if { cmp "$oldstat" "$newstat"; } then
-    echo "testcurl: there has been a change in the CVS"
-  else
     echo "testcurl: this is the same CVS status as before"
     echo "testcurl: ALREADY TESTED THIS SETUP BEFORE"
     #die
+  else
+    echo "testcurl: there has been a change in the CVS"
   fi
 fi
 
