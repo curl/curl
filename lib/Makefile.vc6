@@ -62,7 +62,6 @@ DIROBJ =.\$(CFG)
 LNK    = $(LNKLIB) /out:$(TARGET)
 CC     = $(CCNODBG)
 CFGSET = TRUE
-RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
@@ -88,7 +87,6 @@ LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
 LINKLIBS = $(LINKLIBS)
 CC       = $(CCNODBG) $(CFLAGSSSL)
 CFGSET   = TRUE
-RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
@@ -128,7 +126,6 @@ DIROBJ =.\$(CFG)
 LNK    = $(LNKLIB) /out:$(TARGET)
 CC     = $(CCDEBUG)
 CFGSET = TRUE
-RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
@@ -153,7 +150,6 @@ LNK      = $(LNKLIB) $(LFLAGSSSL) /out:$(TARGET)
 LINKLIBS = $(LINKLIBS)
 CC       = $(CCDEBUG) $(CFLAGSSSL)
 CFGSET   = TRUE
-RESOURCE = $(DIROBJ)\libcurl.res
 !ENDIF
 
 ######################
