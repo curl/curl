@@ -1262,13 +1262,33 @@ CURLcode Curl_perform(struct SessionHandle *data)
          */
         switch(data->info.httpcode) {
         case 300: /* Multiple Choices */
-        case 301: /* Moved Permanently */
         case 306: /* Not used */
         case 307: /* Temporary Redirect */
         default:  /* for all unknown ones */
           /* These are explicitly mention since I've checked RFC2616 and they
            * seem to be OK to POST to.
            */
+          break;
+        case 301: /* Moved Permanently */
+          /* (quote from RFC2616, section 10.3.2):
+           * 
+           *  Note: When automatically redirecting a POST request after
+           *  receiving a 301 status code, some existing HTTP/1.0 user agents
+           *  will erroneously change it into a GET request.
+           *
+           * ----
+           * Warning: Because most of importants user agents do this clear
+           * RFC2616 violation, many webservers expect this misbehavior. So
+           * these servers often answers to a POST request with an error page.
+           * To be sure that libcurl gets the page that most user agents
+           * would get, libcurl has to force GET:
+           */
+          if( data->set.httpreq == HTTPREQ_POST
+              || data->set.httpreq == HTTPREQ_POST_FORM) {
+            infof(data,
+                  "Violate RFC 2616/10.3.2 and switch from POST to GET\n");
+            data->set.httpreq = HTTPREQ_GET;
+          }
           break;
         case 302: /* Found */
           /* (From 10.3.3)
