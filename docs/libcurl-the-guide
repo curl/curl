@@ -238,9 +238,9 @@ When It Doesn't Work
  compiler name and version etc.
 
  Getting some in-depth knowledge about the protocols involved is never wrong,
- and if you're trying to funny things, you might very well understand libcurl
- and how to use it better if you study the appropriate RFC documents at least
- briefly.
+ and if you're trying to do funny things, you might very well understand
+ libcurl and how to use it better if you study the appropriate RFC documents
+ at least briefly.
 
 
 Upload Data to a Remote Site
@@ -558,22 +558,24 @@ Proxies
 
   SSL and Proxies
 
-    SSL is for secure point-to-point connections. This envolves strong
+    SSL is for secure point-to-point connections. This involves strong
     encryption and similar things, which effectivly makes it impossible for a
-    proxy to operate as a "man in between" which the proxy's task is as
+    proxy to operate as a "man in between" which the proxy's task is, as
     previously discussed. Instead, the only way to have SSL work over a HTTP
     proxy is to ask the proxy to tunnel trough everything without being able
-    to check the traffic.
+    to check or fiddle with the traffic.
 
     Opening an SSL connection over a HTTP proxy is therefor a matter of asking
     the proxy for a straight connection to the target host on a specified
-    port. This is made with the HTTP request CONNECT.
+    port. This is made with the HTTP request CONNECT. ("please mr proxy,
+    connect me to that remote host").
 
     Because of the nature of this operation, where the proxy has no idea what
-    kind of data that is passed in and out through this tunnel, this
-    effectively breaks some of the pros a proxy might offer, such as caching.
-    Many organizations prevent this kind of tunneling to other destination
-    port numbers than 443 (which is the default HTTPS port number).
+    kind of data that is passed in and out through this tunnel, this breaks
+    some of the very few advantages that come from using a proxy, such as
+    caching.  Many organizations prevent this kind of tunneling to other
+    destination port numbers than 443 (which is the default HTTPS port
+    number).
 
   Tunneling Through Proxy
 
@@ -594,6 +596,11 @@ Proxies
     Tell libcurl to use proxy tunneling like this:
 
        curl_easy_setopt(easyhandle, CURLOPT_HTTPPROXYTUNNEL, TRUE);
+
+    In fact, there might even be times when you want to do plain HTTP
+    operations using a tunnel like this, as it then enables you to operate on
+    the remote server instead of asking the proxy to do so. libcurl will not
+    stand in the way for such innovative actions either!
 
   Proxy Auto-Config
 
@@ -621,6 +628,28 @@ Proxies
     - Ask your admins to stop this, for a static proxy setup or similar.
 
 
+Persistancy Is The Way to Happiness
+
+ [ re-use connections, options that control/disable this, the effect on
+   protocols such as FTP, why this is Good For You ]
+
+
+Customizing Operations
+
+ [ custom requests, custom headers, replacing headers, custom FTP commands
+   before transfer, after transfer and without transfer ]
+
+
+Headers Equal Fun
+
+ [ use the header callback for HTTP, FTP etc ]
+
+
+Post Transfer Information
+
+ [ curl_easy_getinfo ]
+
+
 Security Considerations
 
  [ ps output, netrc plain text, plain text protocols / base64 ]
@@ -628,9 +657,12 @@ Security Considerations
 
 SSL, Certificates and Other Tricks
 
+ [ seeding, passwords, keys, certificates, ENGINE, ca certs ]
+
 
 Future
 
+ [ multi interface, sharing between handles, mutexes, pipelining ]
 
 
 -----
