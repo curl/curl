@@ -84,7 +84,7 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
   if (!k->zlib_init) {
     z->zalloc = (alloc_func)Z_NULL;
     z->zfree = (free_func)Z_NULL;
-    z->opaque = 0;              /* of dubious use 08/27/02 jhrg */
+    z->opaque = 0;
     z->next_in = NULL;
     z->avail_in = 0;
     if (inflateInit(z) != Z_OK)
@@ -228,7 +228,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
   if (!k->zlib_init) {
     z->zalloc = (alloc_func)Z_NULL;
     z->zfree = (free_func)Z_NULL;
-    z->opaque = 0;              /* of dubious use 08/27/02 jhrg */
+    z->opaque = 0;
     z->next_in = NULL;
     z->avail_in = 0;
     if (inflateInit2(z, -MAX_WBITS) != Z_OK)
@@ -237,10 +237,11 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
   }
 
   /* This next mess is to get around the potential case where there isn't
-  enough data passed in to skip over the gzip header.  If that happens,
-  we malloc a block and copy what we have then wait for the next call.  If
-  there still isn't enough (this is definitely a worst-case scenario), we
-  make the block bigger, copy the next part in and keep waiting. */
+   * enough data passed in to skip over the gzip header.  If that happens, we
+   * malloc a block and copy what we have then wait for the next call.  If
+   * there still isn't enough (this is definitely a worst-case scenario), we
+   * make the block bigger, copy the next part in and keep waiting.
+   */
 
   /* Skip over gzip header? */
   if (k->zlib_init == 1) {
@@ -255,12 +256,13 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
       break;
 
     case GZIP_UNDERFLOW:
-      /* We need more data so we can find the end of the gzip header.
-      It's possible that the memory block we malloc here will never be
-      freed if the transfer abruptly aborts after this point.  Since it's
-      unlikely that circumstances will be right for this code path to be
-      followed in the first place, and it's even more unlikely for a transfer
-      to fail immediately afterwards, it should seldom be a problem. */
+      /* We need more data so we can find the end of the gzip header.  It's
+       * possible that the memory block we malloc here will never be freed if
+       * the transfer abruptly aborts after this point.  Since it's unlikely
+       * that circumstances will be right for this code path to be followed in
+       * the first place, and it's even more unlikely for a transfer to fail
+       * immediately afterwards, it should seldom be a problem.
+       */
       z->avail_in = nread;
       z->next_in = malloc(z->avail_in);
       if (z->next_in == NULL) {
@@ -323,8 +325,8 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
     return CURLE_OK;
   }
 
-  /* because the buffer size is fixed, iteratively decompress
-     and transfer to the client via client_write. */
+  /* because the buffer size is fixed, iteratively decompress and transfer to
+     the client via client_write. */
   for (;;) {
     /* (re)set buffer for decompressed output for every iteration */
     z->next_out = (Bytef *)&decomp[0];
