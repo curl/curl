@@ -6,6 +6,54 @@
 
                                History of Changes
 
+** curl 7.7 DOES NOT currently WORK. **
+
+Daniel (20 February 2001)
+- Added the docs/examples/win32sockets.c file for our windows friends.
+
+- Linus Nielsen Feltzing provided brand new TELNET functionality and
+  improvements:
+
+  * Negotiation is now passive. Curl does not negotiate until the peer does.
+  * Possibility to set negotiation options on the command line, currently only
+    XDISPLOC, TTYPE and NEW_ENVIRON (called NEW_ENV).
+  * Now sends the USER environment variable if the -u switch is used.
+  * Use -t to set telnet options (Linus even updated the man page, awesome!)
+
+- Haven't done this big changes to curl for a while. Moved around a lot of
+  struct fields and stuff to make multiple connections get connection specific
+  data in separate structs so that they can co-exist in a nice way. See the
+  mailing lists for discussions around how this is gonna be implemented. Docs
+  and more will follow.
+
+  Studied the HTTP RFC to find out better how persistant connections should
+  work. Seems cool enough.
+
+Daniel (19 February 2001)
+- Bob Schader brought me two files that help set up a MS VC++ libcurl project
+  easier. He also provided me with an up-to-date libcurl.def file.
+
+- I moved a bunch of prototypes from the public <curl/curl.h> file to the
+  library private urldata.h. This is because of the upcoming changes. The
+  low level interface is no longer being planned to become reality.
+
+Daniel (15 February 2001)
+- CURLOPT_POST is not required anymore. Just setting the POST string with
+  CURLOPT_POSTFIELDS will switch on the HTTP POST. Most other things in
+  libcurl already works this way, i.e they require only the parameter to
+  switch on a feature so I think this works well with the rest. Setting a NULL
+  string switches off the POST again.
+
+- Excellent suggestions from Rich Gray, Rick Jones, Johan Nilsson and Bjorn
+  Reese helped me define a way how to incorporate persistant connections into
+  libcurl in a very smooth way. If done right, no change may have to be made
+  to older programs and they will just start using persistant connections when
+  applicable!
+
+Daniel (13 February 2001)
+- Changed the word 'timeouted' to 'timed out' in two different error messages.
+  Suggested by Larry Fahnoe.
+
 Version 7.6.1
 
 Daniel (9 February 2001)

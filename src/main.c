@@ -102,16 +102,13 @@ typedef enum {
 #define CONF_NOBODY   (1<<11) /* use HEAD to get http document */
 #define CONF_FAILONERROR (1<<12) /* no output on http error codes >= 300 */
 #define CONF_UPLOAD   (1<<14) /* this is an upload */
-#define CONF_POST     (1<<15) /* HTTP POST method */
 #define CONF_FTPLISTONLY (1<<16) /* Use NLST when listing ftp dir */
 #define CONF_FTPAPPEND (1<<20) /* Append instead of overwrite on upload! */
 #define CONF_NETRC    (1<<22)  /* read user+password from .netrc */
 #define CONF_FOLLOWLOCATION (1<<23) /* use Location: Luke! */
 #define CONF_GETTEXT  (1<<24) /* use ASCII/text for transfer */
 #define CONF_HTTPPOST (1<<25) /* multipart/form-data HTTP POST */
-#if 0
-#define CONF_PUT      (1<<27) /* PUT the input file */
-#endif
+
 #define CONF_MUTE     (1<<28) /* force NOPROGRESS */
 
 #ifndef HAVE_STRDUP
@@ -279,6 +276,7 @@ static void help(void)
        " -r/--range <range> Retrieve a byte range from a HTTP/1.1 or FTP server\n"
        " -s/--silent        Silent mode. Don't output anything\n"
        " -S/--show-error    Show error. With -s, make curl show errors when they occur\n"
+       " -t/--telnet-option <OPT=val> Set telnet option\n"
        " -T/--upload-file <file> Transfer/upload <file> to remote site\n"
        "    --url <URL>     Another way to specify URL to work with\n"
        " -u/--user <user[:password]> Specify user and password to use\n"
@@ -366,6 +364,8 @@ struct Configurable {
   struct HttpPost *httppost;
   struct HttpPost *last_post;
 
+  struct curl_slist *telnet_options;
+        
   HttpReq httpreq;
 };
 
@@ -565,7 +565,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"r", "range",       TRUE},
     {"s", "silent",      FALSE},
     {"S", "show-error",  FALSE},
-    {"t", "upload",      FALSE},
+    {"t", "telnet-options", TRUE},
     {"T", "upload-file", TRUE},
     {"u", "user",        TRUE},
     {"U", "proxy-user",  TRUE},
@@ -785,8 +785,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         else
           config->postfields=postdata;
       }
-      if(config->postfields)
-        config->conf |= CONF_POST;
+
       if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
         return PARAM_BAD_USE;
       break;
@@ -959,9 +958,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       config->showerror ^= TRUE; /* toggle on if used with -s */
       break;
     case 't':
-      /* we are uploading */
-      config->conf ^= CONF_UPLOAD;
-      fprintf(stderr, "-t is a deprecated switch, use '-T -' instead!\n");
+      /* Telnet options */
+      config->telnet_options = curl_slist_append(config->telnet_options, nextarg);
       break;
     case 'T':
       /* we are uploading */
@@ -1743,7 +1741,6 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_FAILONERROR,
                          config->conf&CONF_FAILONERROR);
         curl_easy_setopt(curl, CURLOPT_UPLOAD, config->conf&CONF_UPLOAD);
-        curl_easy_setopt(curl, CURLOPT_POST, config->conf&CONF_POST);
         curl_easy_setopt(curl, CURLOPT_FTPLISTONLY,
                          config->conf&CONF_FTPLISTONLY);
         curl_easy_setopt(curl, CURLOPT_FTPAPPEND, config->conf&CONF_FTPAPPEND);
@@ -1751,9 +1748,6 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,
                          config->conf&CONF_FOLLOWLOCATION);
         curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config->conf&CONF_GETTEXT);
-#if 0
-        curl_easy_setopt(curl, CURLOPT_PUT, config->conf&CONF_PUT);
-#endif
         curl_easy_setopt(curl, CURLOPT_MUTE, config->conf&CONF_MUTE);
         curl_easy_setopt(curl, CURLOPT_USERPWD, config->userpwd);
         curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
@@ -1823,6 +1817,9 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, myprogress);
           curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
         }
+        
+        /* new in libcurl 7.6.2: */
+        curl_easy_setopt(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
         
         res = curl_easy_perform(curl);
         

@@ -425,11 +425,14 @@ If this option is used twice, the second will again disable mute.
 When used with -s it makes curl show error message if it fails.
 
 If this option is used twice, the second will again disable show error.
-.IP "-t/--upload"
-.B Deprecated. Use '-T -' instead.
-Transfer the stdin data to the specified file. Curl will read
-everything from stdin until EOF and store with the supplied name. If
-this is used on a http(s) server, the PUT command will be used.
+.IP "-t/--telnet-option <OPT=val>"
+Pass options to the telnet protocol. Supported options are:
+
+TTYPE=<term> Sets the terminal type.
+
+XDISPLOC=<X display> Sets the X display location.
+
+NEW_ENV=<var,val> Sets an environment variable.
 .IP "-T/--upload-file <file>"
 Like -t, but this transfers the specified local file. If there is no
 file part in the specified URL, Curl will append the local file
@@ -758,7 +761,7 @@ If you do find bugs, mail them to curl-bug@haxx.se.
  - Lars J. Aas <larsa@sim.no>
  - Jörn Hartroth <Joern.Hartroth@computer.org>
  - Matthew Clarke <clamat@van.maves.ca>
- - Linus Nielsen <Linus.Nielsen@haxx.se>
+ - Linus Nielsen Feltzing <linus@haxx.se>
  - Felix von Leitner <felix@convergence.de>
  - Dan Zitter <dzitter@zitter.net>
  - Jongki Suwandi <Jongki.Suwandi@eng.sun.com>

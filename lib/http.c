@@ -325,21 +325,21 @@ CURLcode Curl_http_connect(struct connectdata *conn)
   if (conn->protocol & PROT_HTTPS) {
     if (data->bits.httpproxy) {
       /* HTTPS through a proxy can only be done with a tunnel */
-      result = Curl_ConnectHTTPProxyTunnel(conn, data->firstsocket,
-                                           data->hostname, data->remote_port);
+      result = Curl_ConnectHTTPProxyTunnel(conn, conn->firstsocket,
+                                           conn->hostname, conn->remote_port);
       if(CURLE_OK != result)
         return result;
     }
 
     /* now, perform the SSL initialization for this socket */
-    if(Curl_SSLConnect(data))
+    if(Curl_SSLConnect(conn))
       return CURLE_SSL_CONNECT_ERROR;
   }
 
   if(data->bits.user_passwd && !data->bits.this_is_a_follow) {
     /* Authorization: is requested, this is not a followed location, get the
        original host name */
-    data->auth_host = strdup(data->hostname);
+    data->auth_host = strdup(conn->hostname);
   }
 
   return CURLE_OK;
@@ -361,7 +361,7 @@ CURLcode Curl_http_done(struct connectdata *conn)
   struct HTTP *http;
 
   data=conn->data;
-  http=data->proto.http;
+  http=conn->proto.http;
 
   if(data->bits.http_formpost) {
     *bytecount = http->readbytecount + http->writebytecount;
@@ -394,7 +394,7 @@ CURLcode Curl_http(struct connectdata *conn)
   if(!http)
     return CURLE_OUT_OF_MEMORY;
   memset(http, 0, sizeof(struct HTTP));
-  data->proto.http = http;
+  conn->proto.http = http;
 
   if ( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
        data->bits.upload) {
@@ -417,7 +417,7 @@ CURLcode Curl_http(struct connectdata *conn)
        host due to a location-follow, we do some weirdo checks here */
     if(!data->bits.this_is_a_follow ||
        !data->auth_host ||
-       strequal(data->auth_host, data->hostname)) {
+       strequal(data->auth_host, conn->hostname)) {
       sprintf(data->buffer, "%s:%s", data->user, data->passwd);
       if(Curl_base64_encode(data->buffer, strlen(data->buffer),
                             &authorization) >= 0) {
@@ -690,10 +690,10 @@ CURLcode Curl_http(struct connectdata *conn)
       Curl_pgrsSetUploadSize(data, http->postsize);
 
       data->request_size = 
-        add_buffer_send(data->firstsocket, conn, req_buffer);
-      result = Curl_Transfer(conn, data->firstsocket, -1, TRUE,
+        add_buffer_send(conn->firstsocket, conn, req_buffer);
+      result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
                         &http->readbytecount,
-                          data->firstsocket,
+                          conn->firstsocket,
                         &http->writebytecount);
       if(result) {
         Curl_FormFree(http->sendit); /* free that whole lot */
@@ -716,12 +716,12 @@ CURLcode Curl_http(struct connectdata *conn)
 
       /* this sends the buffer and frees all the buffer resources */
       data->request_size = 
-        add_buffer_send(data->firstsocket, conn, req_buffer);
+        add_buffer_send(conn->firstsocket, conn, req_buffer);
 
       /* prepare for transfer */
-      result = Curl_Transfer(conn, data->firstsocket, -1, TRUE,
+      result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
                         &http->readbytecount,
-                        data->firstsocket,
+                        conn->firstsocket,
                         &http->writebytecount);
       if(result)
         return result;
@@ -762,10 +762,10 @@ CURLcode Curl_http(struct connectdata *conn)
 
       /* issue the request */
       data->request_size = 
-        add_buffer_send(data->firstsocket, conn, req_buffer);
+        add_buffer_send(conn->firstsocket, conn, req_buffer);
 
       /* HTTP GET/HEAD download: */
-      result = Curl_Transfer(conn, data->firstsocket, -1, TRUE, bytecount,
+      result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE, bytecount,
                         -1, NULL); /* nothing to upload */
     }
     if(result)

@@ -290,7 +290,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
     size_t nread;
     int l = sizeof(local_addr);
 
-    if(getsockname(conn->data->firstsocket,
+    if(getsockname(conn->firstsocket,
                    (struct sockaddr *)LOCAL_ADDR, &l) < 0)
 	perror("getsockname()");
 
@@ -339,9 +339,9 @@ krb4_auth(void *app_data, struct connectdata *conn)
 	return AUTH_CONTINUE;
     }
     /*ret = command("ADAT %s", p)*/
-    Curl_ftpsendf(conn->data->firstsocket, conn, "ADAT %s", p);
+    Curl_ftpsendf(conn->firstsocket, conn, "ADAT %s", p);
     /* wait for feedback */
-    nread = Curl_GetFTPResponse(conn->data->firstsocket,
+    nread = Curl_GetFTPResponse(conn->firstsocket,
                                 conn->data->buffer, conn, NULL);
     if(nread < 0)
 	return /*CURLE_OPERATION_TIMEOUTED*/-1;
@@ -409,10 +409,10 @@ void krb_kauth(struct connectdata *conn)
 
     save = set_command_prot(conn, prot_private);
     /*ret = command("SITE KAUTH %s", name);***/
-    Curl_ftpsendf(conn->data->firstsocket, conn,
+    Curl_ftpsendf(conn->firstsocket, conn,
              "SITE KAUTH %s", conn->data->user);
     /* wait for feedback */
-    nread = Curl_GetFTPResponse(conn->data->firstsocket, conn->data->buffer,
+    nread = Curl_GetFTPResponse(conn->firstsocket, conn->data->buffer,
                                 conn, NULL);
     if(nread < 0)
 	return /*CURLE_OPERATION_TIMEOUTED*/;
@@ -486,10 +486,10 @@ void krb_kauth(struct connectdata *conn)
     }
     memset (tktcopy.dat, 0, tktcopy.length);
     /*ret = command("SITE KAUTH %s %s", name, p);***/
-    Curl_ftpsendf(conn->data->firstsocket, conn,
+    Curl_ftpsendf(conn->firstsocket, conn,
              "SITE KAUTH %s %s", name, p);
     /* wait for feedback */
-    nread = Curl_GetFTPResponse(conn->data->firstsocket, conn->data->buffer,
+    nread = Curl_GetFTPResponse(conn->firstsocket, conn->data->buffer,
                                 conn, NULL);
     if(nread < 0)
 	return /*CURLE_OPERATION_TIMEOUTED*/;

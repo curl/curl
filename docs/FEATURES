@@ -20,6 +20,7 @@ Misc
  - compiles on win32
  - redirectable stderr
  - use selected network interface for outgoing traffic
+ - IPv6 support
 
 HTTP
  - GET
@@ -28,7 +29,7 @@ HTTP
  - POST
  - multipart POST
  - authentication
- - resume
+ - resume (both GET and PUT)
  - follow redirects
  - maximum amount of redirects to follow
  - custom HTTP request

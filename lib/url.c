@@ -113,10 +113,14 @@
 #include "memdebug.h"
 #endif
 
-/* -- -- */
+/* Local static prototypes */
+static int ConnectionKillOne(struct UrlData *data);
+static bool ConnectionExists(struct UrlData *data,
+                             struct connectdata *needle,
+                             struct connectdata **usethis);
+static unsigned int ConnectionStore(struct UrlData *data,
+                                    struct connectdata *conn);
 
-
-CURLcode _urlget(struct UrlData *data);
 
 /* does nothing, returns OK */
 CURLcode curl_init(void)
@@ -129,34 +133,12 @@ void curl_free(void)
 {
 }
 
-void static urlfree(struct UrlData *data, bool totally)
+CURLcode curl_close(CURL *curl)
 {
-#ifdef USE_SSLEAY
-  if (data->ssl.use) {
-    if(data->ssl.handle) {
-      (void)SSL_shutdown(data->ssl.handle);
-      SSL_set_connect_state(data->ssl.handle);
-
-      SSL_free (data->ssl.handle);
-      data->ssl.handle = NULL;
-    }
-    if(data->ssl.ctx) {
-      SSL_CTX_free (data->ssl.ctx);
-      data->ssl.ctx = NULL;
-    }
-    data->ssl.use = FALSE; /* get back to ordinary socket usage */
-  }
-#endif /* USE_SSLEAY */
-
-  /* close possibly still open sockets */
-  if(-1 != data->secondarysocket) {
-    sclose(data->secondarysocket);
-    data->secondarysocket = -1;	
-  }
-  if(-1 != data->firstsocket) {
-    sclose(data->firstsocket);
-    data->firstsocket=-1;
-  }
+  struct UrlData *data=(struct UrlData *)curl;
+  
+  /* Loop through all open connections and kill them one by one */
+  while(-1 != ConnectionKillOne(data));
 
   if(data->bits.proxystringalloc) {
     data->bits.proxystringalloc=FALSE;;
@@ -168,7 +150,8 @@ void static urlfree(struct UrlData *data, bool totally)
        switch off that knowledge again... */
     data->bits.httpproxy=FALSE;
   }
-  
+
+
   if(data->bits.rangestringalloc) {
     free(data->range);
     data->range=NULL;
@@ -204,44 +187,29 @@ void static urlfree(struct UrlData *data, bool totally)
     data->ptr_host=NULL;
   }
 
-  if(totally) {
-    /* we let the switch decide whether we're doing a part or total
-       cleanup */
+  /* check for allocated [URL] memory to free: */
+  if(data->freethis)
+    free(data->freethis);
 
-    /* check for allocated [URL] memory to free: */
-    if(data->freethis)
-      free(data->freethis);
+  if(data->headerbuff)
+    free(data->headerbuff);
 
-    if(data->headerbuff)
-      free(data->headerbuff);
+  if(data->free_referer)
+    free(data->referer);
 
-    if(data->free_referer)
-      free(data->referer);
+  if(data->bits.urlstringalloc)
+    /* the URL is allocated, free it! */
+    free(data->url);
 
-    if(data->bits.urlstringalloc)
-      /* the URL is allocated, free it! */
-      free(data->url);
+  Curl_cookie_cleanup(data->cookies);
 
-    Curl_cookie_cleanup(data->cookies);
+  /* free the connection cache */
+  free(data->connects);
 
-    free(data);
+  free(data);
 
-    /* global cleanup */
-    curl_free();
-  }
-}
-
-CURLcode curl_close(CURL *curl)
-{
-  struct UrlData *data=(struct UrlData *)curl;
-  
-  void *protocol = data->proto.generic;
-
-  /* total session cleanup (frees 'data' as well!)*/
-  urlfree(data, TRUE);
-
-  if(protocol)
-    free(protocol);
+  /* global cleanup */
+  curl_free();
 
   return CURLE_OK;
 }
@@ -284,9 +252,6 @@ CURLcode curl_open(CURL **curl, char *url)
     data->in  = stdin;  /* default input from stdin */
     data->err  = stderr;  /* default stderr to stderr */
 
-    data->firstsocket = -1; /* no file descriptor */
-    data->secondarysocket = -1; /* no file descriptor */
-
     /* use fwrite as default function to store output */
     data->fwrite = (size_t (*)(char *, size_t, size_t, FILE *))fwrite;
 
@@ -301,6 +266,18 @@ CURLcode curl_open(CURL **curl, char *url)
     data->current_speed = -1; /* init to negative == impossible */
 
     data->httpreq = HTTPREQ_GET; /* Default HTTP request */
+
+    /* create an array with connection data struct pointers */
+    data->numconnects = 5; /* hard-coded right now */
+    data->connects = (struct connectdata **)
+      malloc(sizeof(struct connectdata *) * data->numconnects);
+
+    if(!data->connects) {
+      free(data);
+      return CURLE_OUT_OF_MEMORY;
+    }
+
+    memset(data->connects, 0, sizeof(struct connectdata *)*data->numconnects);
 
     *curl = data;
     return CURLE_OK;
@@ -539,6 +516,9 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     data->ssl.CAfile = va_arg(param, char *);
     data->ssl.CApath = NULL; /*This does not work on windows.*/
     break;
+  case CURLOPT_TELNETOPTIONS:
+    data->telnet_options = va_arg(param, struct curl_slist *);
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     return CURLE_READ_ERROR; /* correct this */
@@ -563,11 +543,8 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
 {
   struct connectdata *conn = c_connect;
 
-  struct UrlData *data = conn->data;
-
-  if(data->proto.generic)
-    free(data->proto.generic);
-  data->proto.generic=NULL; /* it is gone */
+  if(conn->proto.generic)
+    free(conn->proto.generic);
 
 #ifdef ENABLE_IPV6
   if(conn->res) /* host name info */
@@ -580,13 +557,357 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
   if(conn->path) /* the URL path part */
     free(conn->path);
 
-  free(conn); /* free the connection oriented data */
+#ifdef USE_SSLEAY
+  if (conn->ssl.use) {
+    if(conn->ssl.handle) {
+      (void)SSL_shutdown(conn->ssl.handle);
+      SSL_set_connect_state(conn->ssl.handle);
 
-  /* clean up the sockets and SSL stuff from the previous "round" */
-  urlfree(data, FALSE);
+      SSL_free (conn->ssl.handle);
+      conn->ssl.handle = NULL;
+    }
+    if(conn->ssl.ctx) {
+      SSL_CTX_free (conn->ssl.ctx);
+      conn->ssl.ctx = NULL;
+    }
+    conn->ssl.use = FALSE; /* get back to ordinary socket usage */
+  }
+#endif /* USE_SSLEAY */
+
+  /* close possibly still open sockets */
+  if(-1 != conn->secondarysocket) {
+    sclose(conn->secondarysocket);
+    conn->secondarysocket = -1;	
+  }
+  if(-1 != conn->firstsocket) {
+    sclose(conn->firstsocket);
+    conn->firstsocket=-1;
+  }
+
+  free(conn); /* free all the connection oriented data */
 
   return CURLE_OK;
 }
+
+/*
+ * Given one filled in connection struct, this function should detect if there
+ * already is one that have all the significant details exactly the same and
+ * thus should be used instead.
+ */
+static bool
+ConnectionExists(struct UrlData *data,
+                 struct connectdata *needle,
+                 struct connectdata **usethis)
+{
+  size_t i;
+  struct connectdata *check;
+
+  for(i=0; i< data->numconnects; i++) {
+    /*
+     * Note that if we use a HTTP proxy, we check connections to that
+     * proxy and not to the actual remote server.
+     */
+    check = data->connects[i];
+    if(!check)
+      /* NULL pointer means not filled-in entry */
+      continue;
+    if(strequal(needle->protostr, check->protostr) &&
+       strequal(needle->name, check->name) &&
+       (needle->port == check->port) ) {
+      *usethis = check;
+      return TRUE; /* yes, we found one to use! */
+    }
+  }
+  return FALSE; /* no matching connecting exists */
+}
+
+/*
+ * This function frees/closes a connection in the connection cache. This
+ * should take the previously set policy into account when deciding which
+ * of the connections to kill.
+ */
+static int
+ConnectionKillOne(struct UrlData *data)
+{
+  size_t i;
+  struct connectdata *conn;
+  int highscore=-1;
+  int connindex=-1;
+  int score;
+  CURLcode result;
+
+  for(i=0; i< data->numconnects; i++) {
+    conn = data->connects[i];
+    
+    if(!conn)
+      continue;
+
+    /*
+     * By using the set policy, we score each connection.
+     */
+    switch(data->closepolicy) {
+    default:
+      score = 1; /* not implemented yet */
+      break;
+    }
+
+    if(score > highscore) {
+      highscore = score;
+      connindex = i;
+    }
+  }
+  if(connindex >= 0) {
+
+    /* the winner gets the honour of being disconnected */
+    result = curl_disconnect(data->connects[connindex]);
+
+    /* clean the array entry */
+    data->connects[connindex] = NULL;
+  }
+
+  return connindex; /* return the available index or -1 */
+}
+
+/*
+ * The given input connection struct pointer is to be stored. If the "cache"
+ * is already full, we must clean out the most suitable using the previously
+ * set policy.
+ *
+ * The given connection should be unique. That must've been checked prior to
+ * this call.
+ */
+static unsigned int
+ConnectionStore(struct UrlData *data,
+                struct connectdata *conn)
+{
+  size_t i;
+  for(i=0; i< data->numconnects; i++) {
+    if(!data->connects[i])
+      break;
+  }
+  if(i == data->numconnects)
+    /* there was no room available, kill one */
+    i = ConnectionKillOne(data);
+
+  data->connects[i] = conn; /* fill in this */
+  conn->connectindex = i; /* make the child know where the pointer to this
+                             particular data is stored */
+
+  return i;
+}
+
+static CURLcode ConnectPlease(struct UrlData *data,
+                              struct connectdata *conn)
+{
+
+#ifndef ENABLE_IPV6
+  conn->firstsocket = socket(AF_INET, SOCK_STREAM, 0);
+
+  memset((char *) &conn->serv_addr, '\0', sizeof(conn->serv_addr));
+  memcpy((char *)&(conn->serv_addr.sin_addr),
+         conn->hp->h_addr, conn->hp->h_length);
+  conn->serv_addr.sin_family = conn->hp->h_addrtype;
+  conn->serv_addr.sin_port = htons(data->port);
+#endif
+
+#if !defined(WIN32)||defined(__CYGWIN32__)
+  /* We don't generally like checking for OS-versions, we should make this
+     HAVE_XXXX based, although at the moment I don't have a decent test for
+     this! */
+
+#ifdef HAVE_INET_NTOA
+
+#ifndef INADDR_NONE
+#define INADDR_NONE (unsigned long) ~0
+#endif
+
+#ifndef ENABLE_IPV6
+  /*************************************************************
+   * Select device to bind socket to
+   *************************************************************/
+  if (data->device && (strlen(data->device)<255)) {
+    struct sockaddr_in sa;
+    struct hostent *h=NULL;
+    char *hostdataptr=NULL;
+    size_t size;
+    char myhost[256] = "";
+    unsigned long in;
+
+    if(Curl_if2ip(data->device, myhost, sizeof(myhost))) {
+      h = Curl_gethost(data, myhost, &hostdataptr);
+    }
+    else {
+      if(strlen(data->device)>1) {
+        h = Curl_gethost(data, data->device, &hostdataptr);
+      }
+      if(h) {
+        /* we know data->device is shorter than the myhost array */
+        strcpy(myhost, data->device);
+      }
+    }
+
+    if(! *myhost) {
+      /* need to fix this
+         h=Curl_gethost(data,
+         getmyhost(*myhost,sizeof(myhost)),
+         hostent_buf,
+         sizeof(hostent_buf));
+      */
+      printf("in here\n");
+    }
+
+    infof(data, "We connect from %s\n", myhost);
+
+    if ( (in=inet_addr(myhost)) != INADDR_NONE ) {
+
+      if ( h ) {
+        memset((char *)&sa, 0, sizeof(sa));
+        memcpy((char *)&sa.sin_addr,
+               h->h_addr,
+               h->h_length);
+        sa.sin_family = AF_INET;
+        sa.sin_addr.s_addr = in;
+        sa.sin_port = 0; /* get any port */
+	
+        if( bind(conn->firstsocket, (struct sockaddr *)&sa, sizeof(sa)) >= 0) {
+          /* we succeeded to bind */
+          struct sockaddr_in add;
+	
+          size = sizeof(add);
+          if(getsockname(conn->firstsocket, (struct sockaddr *) &add,
+                         (int *)&size)<0) {
+            failf(data, "getsockname() failed");
+            return CURLE_HTTP_PORT_FAILED;
+          }
+        }
+        else {
+          switch(errno) {
+          case EBADF:
+            failf(data, "Invalid descriptor: %d", errno);
+            break;
+          case EINVAL:
+            failf(data, "Invalid request: %d", errno);
+            break;
+          case EACCES:
+            failf(data, "Address is protected, user not superuser: %d", errno);
+            break;
+          case ENOTSOCK:
+            failf(data,
+                  "Argument is a descriptor for a file, not a socket: %d",
+                  errno);
+            break;
+          case EFAULT:
+            failf(data, "Inaccessable memory error: %d", errno);
+            break;
+          case ENAMETOOLONG:
+            failf(data, "Address too long: %d", errno);
+            break;
+          case ENOMEM:
+            failf(data, "Insufficient kernel memory was available: %d", errno);
+            break;
+          default:
+            failf(data,"errno %d\n");
+          } /* end of switch */
+	
+          return CURLE_HTTP_PORT_FAILED;
+        } /* end of else */
+	
+      } /* end of if  h */
+      else {
+	failf(data,"could't find my own IP address (%s)", myhost);
+	return CURLE_HTTP_PORT_FAILED;
+      }
+    } /* end of inet_addr */
+
+    else {
+      failf(data, "could't find my own IP address (%s)", myhost);
+      return CURLE_HTTP_PORT_FAILED;
+    }
+
+    if(hostdataptr)
+      free(hostdataptr); /* allocated by Curl_gethost() */
+
+  } /* end of device selection support */
+#endif  /* end of HAVE_INET_NTOA */
+#endif /* end of not WIN32 */
+#endif /*ENABLE_IPV6*/
+
+  /*************************************************************
+   * Connect to server/proxy
+   *************************************************************/
+#ifdef ENABLE_IPV6
+  data->firstsocket = -1;
+  for (ai = conn->res; ai; ai = ai->ai_next) {
+    data->firstsocket = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
+    if (data->firstsocket < 0)
+      continue;
+
+    if (connect(data->firstsocket, ai->ai_addr, ai->ai_addrlen) < 0) {
+      close(data->firstsocket);
+      data->firstsocket = -1;
+      continue;
+    }
+
+    break;
+  }
+  if (data->firstsocket < 0) {
+    failf(data, strerror(errno));
+    return CURLE_COULDNT_CONNECT;
+  }
+#else
+  if (connect(conn->firstsocket,
+              (struct sockaddr *) &(conn->serv_addr),
+              sizeof(conn->serv_addr)
+              ) < 0) {
+    switch(errno) {
+#ifdef ECONNREFUSED
+      /* this should be made nicer */
+    case ECONNREFUSED:
+      failf(data, "Connection refused");
+      break;
+    case EFAULT:
+      failf(data, "Invalid socket address: %d",errno);
+      break;
+    case EISCONN:
+      failf(data, "Socket already connected: %d",errno);
+      break;
+    case ETIMEDOUT:
+      failf(data, "Timeout while accepting connection, server busy: %d",errno);
+      break;
+    case ENETUNREACH:
+      failf(data, "Network is unreachable: %d",errno);
+      break;
+    case EADDRINUSE:
+      failf(data, "Local address already in use: %d",errno);
+      break;
+    case EINPROGRESS:
+      failf(data, "Socket is nonblocking and connection can not be completed immediately: %d",errno);
+      break;
+    case EALREADY:
+      failf(data, "Socket is nonblocking and a previous connection attempt not completed: %d",errno);
+      break;
+    case EAGAIN:
+      failf(data, "No more free local ports: %d",errno);
+      break;
+    case EACCES:
+    case EPERM:
+      failf(data, "Attempt to connect to broadcast address without socket broadcast flag or local firewall rule violated: %d",errno);
+      break;
+#endif
+    case EINTR:
+      failf(data, "Connection timed out");
+      break;
+    default:
+      failf(data, "Can't connect to server: %d", errno);
+      break;
+    }
+    return CURLE_COULDNT_CONNECT;
+  }
+#endif
+
+  return CURLE_OK;
+}
+
 
 static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 {
@@ -596,6 +917,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   char resumerange[40]="";
   struct UrlData *data = curl;
   struct connectdata *conn;
+  struct connectdata *conn_temp;
   char endbracket;
 #ifdef HAVE_SIGACTION
   struct sigaction sigact;
@@ -615,45 +937,27 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   if(!data->url)
     return CURLE_URL_MALFORMAT;
 
-  /*************************************************************
-   * Allocate and initiate a connection struct
-   *************************************************************/
+  /* First, split up the current URL in parts so that we can use the
+     parts for checking against the already present connections. In order
+     to not have to modify everything at once, we allocate a temporary
+     connection data struct and fill in for comparison purposes. */
+
   conn = (struct connectdata *)malloc(sizeof(struct connectdata));
   if(!conn) {
     *in_connect = NULL; /* clear the pointer */
     return CURLE_OUT_OF_MEMORY;
   }
-  *in_connect = conn;
-
+  /* we have to init the struct */
   memset(conn, 0, sizeof(struct connectdata));
-  conn->handle = STRUCT_CONNECT;
 
-  conn->data = data; /* remember our daddy */
-  conn->state = CONN_INIT;
-
-  conn->upload_bufsize = UPLOAD_BUFSIZE; /* the smallest upload buffer size
-                                            we use */
-
-  buf = data->buffer; /* this is our buffer */
-
-  /*************************************************************
-   * Set signal handler
-   *************************************************************/
-#ifdef HAVE_SIGACTION
-  sigaction(SIGALRM, NULL, &sigact);
-  sigact.sa_handler = alarmfunc;
-#ifdef SA_RESTART
-  /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
-  sigact.sa_flags &= ~SA_RESTART;
-#endif
-  sigaction(SIGALRM, &sigact, NULL);
-#else
-  /* no sigaction(), revert to the much lamer signal() */
-#ifdef HAVE_SIGNAL
-  signal(SIGALRM, alarmfunc);
-#endif
-
-#endif
+  /* and we setup a few fields in case we end up actually using this struct */
+  conn->handle = STRUCT_CONNECT; /* this is a connection handle */
+  conn->data = data;           /* remember our daddy */
+  conn->state = CONN_INIT;     /* init state */
+  conn->upload_bufsize = UPLOAD_BUFSIZE; /* default upload buffer size */
+  conn->firstsocket = -1;     /* no file descriptor */
+  conn->secondarysocket = -1; /* no file descriptor */
+  conn->connectindex = -1;    /* no index */
 
   /***********************************************************
    * We need to allocate memory to store the path in. We get the size of the
@@ -678,8 +982,8 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
    * url ...
    ************************************************************/
   if((2 == sscanf(data->url, "%64[^:]://%[^\n]",
-                  conn->proto,
-                  conn->path)) && strequal(conn->proto, "file")) {
+                  conn->protostr,
+                  conn->path)) && strequal(conn->protostr, "file")) {
     /*
      * we deal with file://<host>/<path> differently since it supports no
      * hostname other than "localhost" and "127.0.0.1", which is unique among
@@ -692,7 +996,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
        * quietly ommitted */
       strcpy(conn->path, &conn->path[10]);
 
-    strcpy(conn->proto, "file"); /* store protocol string lowercase */
+    strcpy(conn->protostr, "file"); /* store protocol string lowercase */
   }
   else {
     /* Set default host and default path */
@@ -701,7 +1005,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 
     if (2 > sscanf(data->url,
                    "%64[^\n:]://%256[^\n/]%[^\n]",
-                   conn->proto, conn->gname, conn->path)) {
+                   conn->protostr, conn->gname, conn->path)) {
       
       /*
        * The URL was badly formatted, let's try the browser-style _without_
@@ -722,27 +1026,48 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
        */
 
       if(strnequal(conn->gname, "FTP", 3)) {
-        strcpy(conn->proto, "ftp");
+        strcpy(conn->protostr, "ftp");
       }
       else if(strnequal(conn->gname, "GOPHER", 6))
-        strcpy(conn->proto, "gopher");
+        strcpy(conn->protostr, "gopher");
 #ifdef USE_SSLEAY
       else if(strnequal(conn->gname, "HTTPS", 5))
-        strcpy(conn->proto, "https");
+        strcpy(conn->protostr, "https");
 #endif /* USE_SSLEAY */
       else if(strnequal(conn->gname, "TELNET", 6))
-        strcpy(conn->proto, "telnet");
+        strcpy(conn->protostr, "telnet");
       else if (strnequal(conn->gname, "DICT", sizeof("DICT")-1))
-        strcpy(conn->proto, "DICT");
+        strcpy(conn->protostr, "DICT");
       else if (strnequal(conn->gname, "LDAP", sizeof("LDAP")-1))
-        strcpy(conn->proto, "LDAP");
+        strcpy(conn->protostr, "LDAP");
       else {
-        strcpy(conn->proto, "http");
+        strcpy(conn->protostr, "http");
       }
 
       conn->protocol |= PROT_MISSING; /* not given in URL */
     }
   }
+
+  buf = data->buffer; /* this is our buffer */
+
+  /*************************************************************
+   * Set signal handler
+   *************************************************************/
+#ifdef HAVE_SIGACTION
+  sigaction(SIGALRM, NULL, &sigact);
+  sigact.sa_handler = alarmfunc;
+#ifdef SA_RESTART
+  /* HPUX doesn't have SA_RESTART but defaults to that behaviour! */
+  sigact.sa_flags &= ~SA_RESTART;
+#endif
+  sigaction(SIGALRM, &sigact, NULL);
+#else
+  /* no sigaction(), revert to the much lamer signal() */
+#ifdef HAVE_SIGNAL
+  signal(SIGALRM, alarmfunc);
+#endif
+
+#endif
 
   /*************************************************************
    * Take care of user and password authentication stuff
@@ -803,7 +1128,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
    *************************************************************/
   conn->name = conn->gname;
   conn->ppath = conn->path;
-  data->hostname = conn->name;
+  conn->hostname = conn->name;
 
 
   /*************************************************************
@@ -854,7 +1179,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       }
       if(!nope) {
 	/* It was not listed as without proxy */
-	char *protop = conn->proto;
+	char *protop = conn->protostr;
 	char *envp = proxy_env;
 	char *prox;
 
@@ -905,7 +1230,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
        */
     char *reurl;
 
-    reurl = aprintf("%s://%s", conn->proto, data->url);
+    reurl = aprintf("%s://%s", conn->protostr, data->url);
 
     if(!reurl)
       return CURLE_OUT_OF_MEMORY;
@@ -951,7 +1276,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
    * Setup internals depending on protocol
    *************************************************************/
 
-  if (strequal(conn->proto, "HTTP")) {
+  if (strequal(conn->protostr, "HTTP")) {
     if(!data->port)
       data->port = PORT_HTTP;
     data->remote_port = PORT_HTTP;
@@ -960,7 +1285,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     conn->curl_done = Curl_http_done;
     conn->curl_close = Curl_http_close;
   }
-  else if (strequal(conn->proto, "HTTPS")) {
+  else if (strequal(conn->protostr, "HTTPS")) {
 #ifdef USE_SSLEAY
     if(!data->port)
       data->port = PORT_HTTPS;
@@ -978,7 +1303,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     return CURLE_UNSUPPORTED_PROTOCOL;
 #endif /* !USE_SSLEAY */
   }
-  else if (strequal(conn->proto, "GOPHER")) {
+  else if (strequal(conn->protostr, "GOPHER")) {
     if(!data->port)
       data->port = PORT_GOPHER;
     data->remote_port = PORT_GOPHER;
@@ -993,7 +1318,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     conn->curl_done = Curl_http_done;
     conn->curl_close = Curl_http_close;
   }
-  else if(strequal(conn->proto, "FTP")) {
+  else if(strequal(conn->protostr, "FTP")) {
     char *type;
     if(!data->port)
       data->port = PORT_FTP;
@@ -1041,7 +1366,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       }
     }
   }
-  else if(strequal(conn->proto, "TELNET")) {
+  else if(strequal(conn->protostr, "TELNET")) {
     /* telnet testing factory */
     conn->protocol |= PROT_TELNET;
     if(!data->port)
@@ -1052,7 +1377,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     conn->curl_done = Curl_telnet_done;
 
   }
-  else if (strequal(conn->proto, "DICT")) {
+  else if (strequal(conn->protostr, "DICT")) {
     conn->protocol |= PROT_DICT;
     if(!data->port)
       data->port = PORT_DICT;
@@ -1060,7 +1385,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     conn->curl_do = Curl_dict;
     conn->curl_done = Curl_dict_done;
   }
-  else if (strequal(conn->proto, "LDAP")) {
+  else if (strequal(conn->protostr, "LDAP")) {
     conn->protocol |= PROT_LDAP;
     if(!data->port)
       data->port = PORT_LDAP;
@@ -1068,7 +1393,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     conn->curl_do = Curl_ldap;
     conn->curl_done = Curl_ldap_done;
   }
-  else if (strequal(conn->proto, "FILE")) {
+  else if (strequal(conn->protostr, "FILE")) {
     conn->protocol |= PROT_FILE;
 
     conn->curl_do = file;
@@ -1082,7 +1407,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   else {
     /* We fell through all checks and thus we don't support the specified
        protocol */
-    failf(data, "Unsupported protocol: %s", conn->proto);
+    failf(data, "Unsupported protocol: %s", conn->protostr);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
@@ -1090,9 +1415,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
    * .netrc scanning coming up
    *************************************************************/
   if(data->bits.use_netrc) {
-    if(Curl_parsenetrc(data->hostname, data->user, data->passwd)) {
+    if(Curl_parsenetrc(conn->hostname, data->user, data->passwd)) {
       infof(data, "Couldn't find host %s in the .netrc file, using defaults",
-            data->hostname);
+            conn->hostname);
     }
     else
       data->bits.user_passwd = 1; /* enable user+password */
@@ -1195,6 +1520,39 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     data->remote_port = atoi(tmp);
   }
 
+  /* copy the port-specifics to the connection struct */
+  conn->port = data->port;
+  conn->remote_port = data->remote_port;
+
+  /*************************************************************
+   * Check the current list of connections to see if we can
+   * re-use an already existing one or if we have to create a
+   * new one.
+   *************************************************************/
+
+  if(ConnectionExists(data, conn, &conn_temp)) {
+    /*
+     * We already have a connection for this, we got the former connection
+     * in the conn_temp variable and thus we need to cleanup the one we
+     * just allocated before we can move along and use the previously
+     * existing one.
+     */
+    char *path = conn->path; /* setup the current path pointer properly */
+    free(conn);              /* we don't need this new one */
+    conn = conn_temp;        /* use this connection from now on */
+    free(conn->path);        /* free the previous path pointer */
+    conn->path = path;       /* use this one */
+    conn->ppath = path;      /* set this too */
+  }
+  else {
+    /*
+     * This is a brand new connection, so let's store it in the connection
+     * cache of ours!
+     */
+    ConnectionStore(data, conn);
+  }
+  *in_connect = conn;
+
   /*************************************************************
    * Resolve the name of the server or proxy
    *************************************************************/
@@ -1203,12 +1561,16 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
      * there, thus overriding any defaults that might have been set above. */
     data->port =  data->remote_port; /* it is the same port */
 
-    /* Connect to target host right on */
+    /* Resolve target host right on */
 #ifdef ENABLE_IPV6
-    conn->res = Curl_getaddrinfo(data, conn->name, data->port);
+    if(!conn->res)
+      /* it might already be set if reusing a connection */
+      conn->res = Curl_getaddrinfo(data, conn->name, data->port);
     if(!conn->res)
 #else
-    conn->hp = Curl_gethost(data, conn->name, &conn->hostent_buf);
+    if(!conn->hp)
+      /* it might already be set if reusing a connection */
+      conn->hp = Curl_gethost(data, conn->name, &conn->hostent_buf);
     if(!conn->hp)
 #endif
     {
@@ -1216,7 +1578,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       return CURLE_COULDNT_RESOLVE_HOST;
     }
   }
-  else {
+  else if(!conn->hp) {
+    /* This is a proxy that hasn't been resolved yet. It may be resolved
+       if we're reusing an existing connection. */
 #ifdef ENABLE_IPV6
     failf(data, "proxy yet to be supported");
     return CURLE_OUT_OF_MEMORY;
@@ -1261,7 +1625,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       data->port = data->proxyport;
     }
 
-    /* connect to proxy */
+    /* resolve proxy */
     conn->hp = Curl_gethost(data, proxyptr, &conn->hostent_buf);
     if(!conn->hp) {
       failf(data, "Couldn't resolve proxy '%s'", proxyptr);
@@ -1273,210 +1637,12 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   }
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
-#ifndef ENABLE_IPV6
-  data->firstsocket = socket(AF_INET, SOCK_STREAM, 0);
-
-  memset((char *) &conn->serv_addr, '\0', sizeof(conn->serv_addr));
-  memcpy((char *)&(conn->serv_addr.sin_addr),
-         conn->hp->h_addr, conn->hp->h_length);
-  conn->serv_addr.sin_family = conn->hp->h_addrtype;
-  conn->serv_addr.sin_port = htons(data->port);
-#endif
-
-#if !defined(WIN32)||defined(__CYGWIN32__)
-  /* We don't generally like checking for OS-versions, we should make this
-     HAVE_XXXX based, although at the moment I don't have a decent test for
-     this! */
-
-#ifdef HAVE_INET_NTOA
-
-#ifndef INADDR_NONE
-#define INADDR_NONE (unsigned long) ~0
-#endif
-
-#ifndef ENABLE_IPV6
-  /*************************************************************
-   * Select device to bind socket to
-   *************************************************************/
-  if (data->device && (strlen(data->device)<255)) {
-    struct sockaddr_in sa;
-    struct hostent *h=NULL;
-    char *hostdataptr=NULL;
-    size_t size;
-    char myhost[256] = "";
-    unsigned long in;
-
-    if(Curl_if2ip(data->device, myhost, sizeof(myhost))) {
-      h = Curl_gethost(data, myhost, &hostdataptr);
-    }
-    else {
-      if(strlen(data->device)>1) {
-        h = Curl_gethost(data, data->device, &hostdataptr);
-      }
-      if(h) {
-        /* we know data->device is shorter than the myhost array */
-        strcpy(myhost, data->device);
-      }
-    }
-
-    if(! *myhost) {
-      /* need to fix this
-         h=Curl_gethost(data,
-         getmyhost(*myhost,sizeof(myhost)),
-         hostent_buf,
-         sizeof(hostent_buf));
-      */
-      printf("in here\n");
-    }
-
-    infof(data, "We connect from %s\n", myhost);
-
-    if ( (in=inet_addr(myhost)) != INADDR_NONE ) {
-
-      if ( h ) {
-        memset((char *)&sa, 0, sizeof(sa));
-        memcpy((char *)&sa.sin_addr,
-               h->h_addr,
-               h->h_length);
-        sa.sin_family = AF_INET;
-        sa.sin_addr.s_addr = in;
-        sa.sin_port = 0; /* get any port */
-	
-        if( bind(data->firstsocket, (struct sockaddr *)&sa, sizeof(sa)) >= 0) {
-          /* we succeeded to bind */
-          struct sockaddr_in add;
-	
-          size = sizeof(add);
-          if(getsockname(data->firstsocket, (struct sockaddr *) &add,
-                         (int *)&size)<0) {
-            failf(data, "getsockname() failed");
-            return CURLE_HTTP_PORT_FAILED;
-          }
-        }
-        else {
-          switch(errno) {
-          case EBADF:
-            failf(data, "Invalid descriptor: %d", errno);
-            break;
-          case EINVAL:
-            failf(data, "Invalid request: %d", errno);
-            break;
-          case EACCES:
-            failf(data, "Address is protected, user not superuser: %d", errno);
-            break;
-          case ENOTSOCK:
-            failf(data,
-                  "Argument is a descriptor for a file, not a socket: %d",
-                  errno);
-            break;
-          case EFAULT:
-            failf(data, "Inaccessable memory error: %d", errno);
-            break;
-          case ENAMETOOLONG:
-            failf(data, "Address too long: %d", errno);
-            break;
-          case ENOMEM:
-            failf(data, "Insufficient kernel memory was available: %d", errno);
-            break;
-          default:
-            failf(data,"errno %d\n");
-          } /* end of switch */
-	
-          return CURLE_HTTP_PORT_FAILED;
-        } /* end of else */
-	
-      } /* end of if  h */
-      else {
-	failf(data,"could't find my own IP address (%s)", myhost);
-	return CURLE_HTTP_PORT_FAILED;
-      }
-    } /* end of inet_addr */
-
-    else {
-      failf(data, "could't find my own IP address (%s)", myhost);
-      return CURLE_HTTP_PORT_FAILED;
-    }
-
-    if(hostdataptr)
-      free(hostdataptr); /* allocated by Curl_gethost() */
-
-  } /* end of device selection support */
-#endif  /* end of HAVE_INET_NTOA */
-#endif /* end of not WIN32 */
-#endif /*ENABLE_IPV6*/
-
-  /*************************************************************
-   * Connect to server/proxy
-   *************************************************************/
-#ifdef ENABLE_IPV6
-  data->firstsocket = -1;
-  for (ai = conn->res; ai; ai = ai->ai_next) {
-    data->firstsocket = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-    if (data->firstsocket < 0)
-      continue;
-
-    if (connect(data->firstsocket, ai->ai_addr, ai->ai_addrlen) < 0) {
-      close(data->firstsocket);
-      data->firstsocket = -1;
-      continue;
-    }
-
-    break;
+  if(-1 == conn->firstsocket) {
+    /* Connect only if not already connected! */
+    result = ConnectPlease(data, conn);
+    if(CURLE_OK != result)
+      return result;
   }
-  if (data->firstsocket < 0) {
-    failf(data, strerror(errno));
-    return CURLE_COULDNT_CONNECT;
-  }
-#else
-  if (connect(data->firstsocket,
-              (struct sockaddr *) &(conn->serv_addr),
-              sizeof(conn->serv_addr)
-              ) < 0) {
-    switch(errno) {
-#ifdef ECONNREFUSED
-      /* this should be made nicer */
-    case ECONNREFUSED:
-      failf(data, "Connection refused");
-      break;
-    case EFAULT:
-      failf(data, "Invalid socket address: %d",errno);
-      break;
-    case EISCONN:
-      failf(data, "Socket already connected: %d",errno);
-      break;
-    case ETIMEDOUT:
-      failf(data, "Timeout while accepting connection, server busy: %d",errno);
-      break;
-    case ENETUNREACH:
-      failf(data, "Network is unreachable: %d",errno);
-      break;
-    case EADDRINUSE:
-      failf(data, "Local address already in use: %d",errno);
-      break;
-    case EINPROGRESS:
-      failf(data, "Socket is nonblocking and connection can not be completed immediately: %d",errno);
-      break;
-    case EALREADY:
-      failf(data, "Socket is nonblocking and a previous connection attempt not completed: %d",errno);
-      break;
-    case EAGAIN:
-      failf(data, "No more free local ports: %d",errno);
-      break;
-    case EACCES:
-    case EPERM:
-      failf(data, "Attempt to connect to broadcast address without socket broadcast flag or local firewall rule violated: %d",errno);
-      break;
-#endif
-    case EINTR:
-      failf(data, "Connection timed out");
-      break;
-    default:
-      failf(data, "Can't connect to server: %d", errno);
-      break;
-    }
-    return CURLE_COULDNT_CONNECT;
-  }
-#endif
 
   /*************************************************************
    * Proxy authentication
@@ -1621,6 +1787,7 @@ CURLcode curl_done(CURLconnect *c_connect)
   struct connectdata *conn = c_connect;
   struct UrlData *data;
   CURLcode result;
+  int index;
 
   if(!conn || (conn->handle!= STRUCT_CONNECT)) {
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1640,6 +1807,14 @@ CURLcode curl_done(CURLconnect *c_connect)
   Curl_pgrsDone(data); /* done with the operation */
 
   conn->state = CONN_DONE;
+
+  /* if bits.close is TRUE, it means that the connection should be closed
+     in spite of all our efforts to be nice */
+  if((CURLE_OK == result) && conn->bits.close) {
+    index = conn->connectindex;     /* get the index */
+    result = curl_disconnect(conn); /* close the connection */
+    data->connects[index]=NULL;     /* clear the pointer */
+  }
 
   return result;
 }

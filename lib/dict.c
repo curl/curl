@@ -141,7 +141,7 @@ CURLcode Curl_dict(struct connectdata *conn)
       nth = atoi(nthdef);
     }
       
-    Curl_sendf(data->firstsocket, conn,
+    Curl_sendf(conn->firstsocket, conn,
                "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                "MATCH "
                "%s "    /* database */
@@ -154,7 +154,7 @@ CURLcode Curl_dict(struct connectdata *conn)
                word
                );
     
-    result = Curl_Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
+    result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
                            -1, NULL); /* no upload */
       
     if(result)
@@ -191,7 +191,7 @@ CURLcode Curl_dict(struct connectdata *conn)
       nth = atoi(nthdef);
     }
       
-    Curl_sendf(data->firstsocket, conn,
+    Curl_sendf(conn->firstsocket, conn,
                "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                "DEFINE "
                "%s "     /* database */
@@ -202,7 +202,7 @@ CURLcode Curl_dict(struct connectdata *conn)
                word
                );
     
-    result = Curl_Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
+    result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
                            -1, NULL); /* no upload */
     
     if(result)
@@ -220,13 +220,13 @@ CURLcode Curl_dict(struct connectdata *conn)
         if (ppath[i] == ':')
           ppath[i] = ' ';
       }
-      Curl_sendf(data->firstsocket, conn,
+      Curl_sendf(conn->firstsocket, conn,
                  "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
                  "%s\n"
                  "QUIT\n",
                  ppath);
       
-      result = Curl_Transfer(conn, data->firstsocket, -1, FALSE, bytecount,
+      result = Curl_Transfer(conn, conn->firstsocket, -1, FALSE, bytecount,
                              -1, NULL);
       
       if(result)

@@ -158,6 +158,7 @@ void curl_slist_free_all(struct curl_slist *list)
 
 
 static CURLcode AllowServerConnect(struct UrlData *data,
+                                   struct connectdata *conn,
                                    int sock)
 {
   fd_set rdset;
@@ -199,7 +200,7 @@ static CURLcode AllowServerConnect(struct UrlData *data,
       }
       infof(data, "Connection accepted from server\n");
 
-      data->secondarysocket = s;
+      conn->secondarysocket = s;
     }
     break;
   }
@@ -362,7 +363,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
     return CURLE_OUT_OF_MEMORY;
 
   memset(ftp, 0, sizeof(struct FTP));
-  data->proto.ftp = ftp;
+  conn->proto.ftp = ftp;
 
   /* get some initial data into the ftp struct */
   ftp->bytecountp = &conn->bytecount;
@@ -371,14 +372,14 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
   if (data->bits.tunnel_thru_httpproxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
-    result = Curl_ConnectHTTPProxyTunnel(conn, data->firstsocket,
-                                         data->hostname, data->remote_port);
+    result = Curl_ConnectHTTPProxyTunnel(conn, conn->firstsocket,
+                                         conn->hostname, conn->remote_port);
     if(CURLE_OK != result)
       return result;
   }
 
   /* The first thing we do is wait for the "220*" line: */
-  nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+  nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
   if(nread < 0)
     return CURLE_OPERATION_TIMEOUTED;
 
@@ -398,7 +399,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
        set a valid level */
     sec_request_prot(conn, data->krb4_level);
 
-    data->cmdchannel = fdopen(data->firstsocket, "w");
+    data->cmdchannel = fdopen(conn->firstsocket, "w");
 
     if(sec_login(conn) != 0)
       infof(data, "Logging in with password in cleartext!\n");
@@ -408,10 +409,10 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 #endif
   
   /* send USER */
-  ftpsendf(data->firstsocket, conn, "USER %s", ftp->user);
+  ftpsendf(conn->firstsocket, conn, "USER %s", ftp->user);
 
   /* wait for feedback */
-  nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+  nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
   if(nread < 0)
     return CURLE_OPERATION_TIMEOUTED;
 
@@ -424,8 +425,8 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   else if(ftpcode == 331) {
     /* 331 Password required for ...
        (the server requires to send the user's password too) */
-    ftpsendf(data->firstsocket, conn, "PASS %s", ftp->passwd);
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+    ftpsendf(conn->firstsocket, conn, "PASS %s", ftp->passwd);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
@@ -477,7 +478,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 CURLcode Curl_ftp_done(struct connectdata *conn)
 {
   struct UrlData *data = conn->data;
-  struct FTP *ftp = data->proto.ftp;
+  struct FTP *ftp = conn->proto.ftp;
   size_t nread;
   char *buf = data->buffer; /* this is our buffer */
   struct curl_slist *qitem; /* QUOTE item */
@@ -502,16 +503,16 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
     }
   }
 #ifdef KRB4
-  sec_fflush_fd(conn, data->secondarysocket);
+  sec_fflush_fd(conn, conn->secondarysocket);
 #endif
   /* shut down the socket to inform the server we're done */
-  sclose(data->secondarysocket);
-  data->secondarysocket = -1;
+  sclose(conn->secondarysocket);
+  conn->secondarysocket = -1;
 
   if(!data->bits.no_body) {  
     /* now let's see what the server says about the transfer we
        just performed: */
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
@@ -529,9 +530,9 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
     while (qitem) {
       /* Send string */
       if (qitem->data) {
-        ftpsendf(data->firstsocket, conn, "%s", qitem->data);
+        ftpsendf(conn->firstsocket, conn, "%s", qitem->data);
 
-        nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+        nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
         if(nread < 0)
           return CURLE_OPERATION_TIMEOUTED;
 
@@ -571,7 +572,7 @@ CURLcode _ftp(struct connectdata *conn)
 
   struct curl_slist *qitem; /* QUOTE item */
   /* the ftp struct is already inited in ftp_connect() */
-  struct FTP *ftp = data->proto.ftp;
+  struct FTP *ftp = conn->proto.ftp;
 
   long *bytecountp = ftp->bytecountp;
   int ftpcode; /* for ftp status */
@@ -583,9 +584,9 @@ CURLcode _ftp(struct connectdata *conn)
     while (qitem) {
       /* Send string */
       if (qitem->data) {
-        ftpsendf(data->firstsocket, conn, "%s", qitem->data);
+        ftpsendf(conn->firstsocket, conn, "%s", qitem->data);
 
-        nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+        nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
         if(nread < 0)
           return CURLE_OPERATION_TIMEOUTED;
 
@@ -601,8 +602,8 @@ CURLcode _ftp(struct connectdata *conn)
 
   /* change directory first! */
   if(ftp->dir && ftp->dir[0]) {
-    ftpsendf(data->firstsocket, conn, "CWD %s", ftp->dir);
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+    ftpsendf(conn->firstsocket, conn, "CWD %s", ftp->dir);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
@@ -615,9 +616,9 @@ CURLcode _ftp(struct connectdata *conn)
   if(data->bits.get_filetime && ftp->file) {
     /* we have requested to get the modified-time of the file, this is yet
        again a grey area as the MDTM is not kosher RFC959 */
-    ftpsendf(data->firstsocket, conn, "MDTM %s", ftp->file);
+    ftpsendf(conn->firstsocket, conn, "MDTM %s", ftp->file);
 
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
@@ -651,10 +652,10 @@ CURLcode _ftp(struct connectdata *conn)
 
     /* Some servers return different sizes for different modes, and thus we
        must set the proper type before we check the size */
-    ftpsendf(data->firstsocket, conn, "TYPE %s",
+    ftpsendf(conn->firstsocket, conn, "TYPE %s",
              (data->bits.ftp_ascii)?"A":"I");
 
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
@@ -665,9 +666,9 @@ CURLcode _ftp(struct connectdata *conn)
         CURLE_FTP_COULDNT_SET_BINARY;
     }
 
-    ftpsendf(data->firstsocket, conn, "SIZE %s", ftp->file);
+    ftpsendf(conn->firstsocket, conn, "SIZE %s", ftp->file);
 
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
@@ -731,7 +732,7 @@ CURLcode _ftp(struct connectdata *conn)
      * I believe we should use the same address as the control connection.
      */
     sslen = sizeof(ss);
-    if (getsockname(data->firstsocket, (struct sockaddr *)&ss, &sslen) < 0)
+    if (getsockname(conn->firstsocket, (struct sockaddr *)&ss, &sslen) < 0)
       return CURLE_FTP_PORT_FAILED;
 
     if (getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL, 0,
@@ -819,7 +820,7 @@ CURLcode _ftp(struct connectdata *conn)
 	  if (q)
 	    *q = '\0';
 	}
-	ftpsendf(data->firstsocket, conn, "%s |%d|%s|%s|", *modep, eprtaf,
+	ftpsendf(conn->firstsocket, conn, "%s |%d|%s|%s|", *modep, eprtaf,
 	    portmsgbuf, tmp);
       } else if (strcmp(*modep, "LPRT") == 0 || strcmp(*modep, "PORT") == 0) {
 	int i;
@@ -856,10 +857,10 @@ CURLcode _ftp(struct connectdata *conn)
 	    goto again;
 	  }
 	}
-	ftpsendf(data->firstsocket, conn, "%s %s", *modep, portmsgbuf);
+	ftpsendf(conn->firstsocket, conn, "%s %s", *modep, portmsgbuf);
       }
 
-      nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+      nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
       if (nread < 0)
 	return CURLE_OPERATION_TIMEOUTED;
 
@@ -909,7 +910,7 @@ again:;
         /* we set the secondary socket variable to this for now, it
            is only so that the cleanup function will close it in case
            we fail before the true secondary stuff is made */
-        data->secondarysocket = portsock;
+        conn->secondarysocket = portsock;
 
         memset((char *)&sa, 0, sizeof(sa));
         memcpy((char *)&sa.sin_addr,
@@ -971,13 +972,13 @@ again:;
       sscanf( inet_ntoa(in), "%hu.%hu.%hu.%hu",
               &ip[0], &ip[1], &ip[2], &ip[3]);
 #endif
-      ftpsendf(data->firstsocket, conn, "PORT %d,%d,%d,%d,%d,%d",
+      ftpsendf(conn->firstsocket, conn, "PORT %d,%d,%d,%d,%d,%d",
             ip[0], ip[1], ip[2], ip[3],
             porttouse >> 8,
             porttouse & 255);
     }
 
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
@@ -998,8 +999,8 @@ again:;
     int modeoff;
 
     for (modeoff = 0; mode[modeoff]; modeoff++) {
-      ftpsendf(data->firstsocket, conn, mode[modeoff]);
-      nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+      ftpsendf(conn->firstsocket, conn, mode[modeoff]);
+      nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
       if(nread < 0)
 	return CURLE_OPERATION_TIMEOUTED;
 
@@ -1081,15 +1082,15 @@ again:;
       }
 	
 #ifdef ENABLE_IPV6
-      data->secondarysocket = -1;
+      conn->secondarysocket = -1;
       for (ai = res; ai; ai = ai->ai_next) {
 	/* XXX for now, we can do IPv4 only */
 	if (ai->ai_family != AF_INET)
 	  continue;
 
-	data->secondarysocket = socket(ai->ai_family, ai->ai_socktype,
+	conn->secondarysocket = socket(ai->ai_family, ai->ai_socktype,
 	    ai->ai_protocol);
-	if (data->secondarysocket < 0)
+	if (conn->secondarysocket < 0)
 	  continue;
 
 	if(data->bits.verbose) {
@@ -1114,21 +1115,21 @@ again:;
 	  }
 	}
 
-	if (connect(data->secondarysocket, ai->ai_addr, ai->ai_addrlen) < 0) {
-	  close(data->secondarysocket);
-	  data->secondarysocket = -1;
+	if (connect(conn->secondarysocket, ai->ai_addr, ai->ai_addrlen) < 0) {
+	  close(conn->secondarysocket);
+	  conn->secondarysocket = -1;
 	  continue;
 	}
 
 	break;
       }
 
-      if (data->secondarysocket < 0) {
+      if (conn->secondarysocket < 0) {
 	failf(data, strerror(errno));
         return CURLE_FTP_CANT_RECONNECT;
       }
 #else
-      data->secondarysocket = socket(AF_INET, SOCK_STREAM, 0);
+      conn->secondarysocket = socket(AF_INET, SOCK_STREAM, 0);
 
       memset((char *) &serv_addr, '\0', sizeof(serv_addr));
       memcpy((char *)&(serv_addr.sin_addr), he->h_addr, he->h_length);
@@ -1202,7 +1203,7 @@ again:;
       if(hostdataptr)
         free(hostdataptr);
 
-      if (connect(data->secondarysocket, (struct sockaddr *) &serv_addr,
+      if (connect(conn->secondarysocket, (struct sockaddr *) &serv_addr,
                   sizeof(serv_addr)) < 0) {
         switch(errno) {
 #ifdef ECONNREFUSED
@@ -1226,7 +1227,7 @@ again:;
 
       if (data->bits.tunnel_thru_httpproxy) {
         /* We want "seamless" FTP operations through HTTP proxy tunnel */
-        result = Curl_ConnectHTTPProxyTunnel(conn, data->secondarysocket,
+        result = Curl_ConnectHTTPProxyTunnel(conn, conn->secondarysocket,
                                              newhost, newport);
         if(CURLE_OK != result)
           return result;
@@ -1241,10 +1242,10 @@ again:;
   if(data->bits.upload) {
 
     /* Set type to binary (unless specified ASCII) */
-    ftpsendf(data->firstsocket, conn, "TYPE %s",
+    ftpsendf(conn->firstsocket, conn, "TYPE %s",
           (data->bits.ftp_ascii)?"A":"I");
 
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
@@ -1273,9 +1274,9 @@ again:;
         /* we could've got a specified offset from the command line,
            but now we know we didn't */
 
-        ftpsendf(data->firstsocket, conn, "SIZE %s", ftp->file);
+        ftpsendf(conn->firstsocket, conn, "SIZE %s", ftp->file);
 
-        nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+        nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
         if(nread < 0)
           return CURLE_OPERATION_TIMEOUTED;
 
@@ -1332,11 +1333,11 @@ again:;
     /* Send everything on data->in to the socket */
     if(data->bits.ftp_append)
       /* we append onto the file instead of rewriting it */
-      ftpsendf(data->firstsocket, conn, "APPE %s", ftp->file);
+      ftpsendf(conn->firstsocket, conn, "APPE %s", ftp->file);
     else
-      ftpsendf(data->firstsocket, conn, "STOR %s", ftp->file);
+      ftpsendf(conn->firstsocket, conn, "STOR %s", ftp->file);
 
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
@@ -1347,7 +1348,7 @@ again:;
     }
 
     if(data->bits.ftp_use_port) {
-      result = AllowServerConnect(data, portsock);
+      result = AllowServerConnect(data, conn, portsock);
       if( result )
         return result;
     }
@@ -1360,7 +1361,7 @@ again:;
     Curl_pgrsSetUploadSize(data, data->infilesize);
 
     result = Curl_Transfer(conn, -1, -1, FALSE, NULL, /* no download */
-                      data->secondarysocket, bytecountp);
+                      conn->secondarysocket, bytecountp);
     if(result)
       return result;
       
@@ -1414,9 +1415,9 @@ again:;
       dirlist = TRUE;
 
       /* Set type to ASCII */
-      ftpsendf(data->firstsocket, conn, "TYPE A");
+      ftpsendf(conn->firstsocket, conn, "TYPE A");
 	
-      nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+      nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
       if(nread < 0)
         return CURLE_OPERATION_TIMEOUTED;
 	
@@ -1429,16 +1430,16 @@ again:;
          better used since the LIST command output is not specified or
          standard in any way */
 
-      ftpsendf(data->firstsocket, conn, "%s",
+      ftpsendf(conn->firstsocket, conn, "%s",
             data->customrequest?data->customrequest:
             (data->bits.ftp_list_only?"NLST":"LIST"));
     }
     else {
       /* Set type to binary (unless specified ASCII) */
-      ftpsendf(data->firstsocket, conn, "TYPE %s",
+      ftpsendf(conn->firstsocket, conn, "TYPE %s",
                (data->bits.ftp_ascii)?"A":"I");
 
-      nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+      nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
       if(nread < 0)
         return CURLE_OPERATION_TIMEOUTED;
 
@@ -1457,9 +1458,9 @@ again:;
          * of the file we're gonna get. If we can get the size, this is by far
          * the best way to know if we're trying to resume beyond the EOF.  */
 
-        ftpsendf(data->firstsocket, conn, "SIZE %s", ftp->file);
+        ftpsendf(conn->firstsocket, conn, "SIZE %s", ftp->file);
 
-        nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+        nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
         if(nread < 0)
           return CURLE_OPERATION_TIMEOUTED;
 
@@ -1501,9 +1502,9 @@ again:;
         infof(data, "Instructs server to resume from offset %d\n",
               data->resume_from);
 
-        ftpsendf(data->firstsocket, conn, "REST %d", data->resume_from);
+        ftpsendf(conn->firstsocket, conn, "REST %d", data->resume_from);
 
-        nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+        nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
         if(nread < 0)
           return CURLE_OPERATION_TIMEOUTED;
 
@@ -1513,10 +1514,10 @@ again:;
         }
       }
 
-      ftpsendf(data->firstsocket, conn, "RETR %s", ftp->file);
+      ftpsendf(conn->firstsocket, conn, "RETR %s", ftp->file);
     }
 
-    nread = Curl_GetFTPResponse(data->firstsocket, buf, conn, &ftpcode);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
@@ -1580,7 +1581,7 @@ again:;
         size = downloadsize;
 
       if(data->bits.ftp_use_port) {
-        result = AllowServerConnect(data, portsock);
+        result = AllowServerConnect(data, conn, portsock);
         if( result )
           return result;
       }
@@ -1588,7 +1589,7 @@ again:;
       infof(data, "Getting file with size: %d\n", size);
 
       /* FTP download: */
-      result=Curl_Transfer(conn, data->secondarysocket, size, FALSE,
+      result=Curl_Transfer(conn, conn->secondarysocket, size, FALSE,
                       bytecountp,
                       -1, NULL); /* no upload here */
       if(result)
@@ -1617,7 +1618,7 @@ CURLcode Curl_ftp(struct connectdata *conn)
   int dirlength=0; /* 0 forces strlen() */
 
   /* the ftp struct is already inited in ftp_connect() */
-  ftp = data->proto.ftp;
+  ftp = conn->proto.ftp;
 
   /* We split the path into dir and file parts *before* we URLdecode
      it */

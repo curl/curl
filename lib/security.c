@@ -482,10 +482,10 @@ sec_prot_internal(struct connectdata *conn, int level)
     }
 
     if(level){
-      Curl_ftpsendf(conn->data->firstsocket, conn,
+      Curl_ftpsendf(conn->firstsocket, conn,
                     "PBSZ %u", s);
       /* wait for feedback */
-      nread = Curl_GetFTPResponse(conn->data->firstsocket,
+      nread = Curl_GetFTPResponse(conn->firstsocket,
                                   conn->data->buffer, conn, NULL);
       if(nread < 0)
         return /*CURLE_OPERATION_TIMEOUTED*/-1;
@@ -501,10 +501,10 @@ sec_prot_internal(struct connectdata *conn, int level)
         conn->buffer_size = s;
     }
 
-    Curl_ftpsendf(conn->data->firstsocket, conn,
+    Curl_ftpsendf(conn->firstsocket, conn,
                   "PROT %c", level["CSEP"]);
     /* wait for feedback */
-    nread = Curl_GetFTPResponse(conn->data->firstsocket,
+    nread = Curl_GetFTPResponse(conn->firstsocket,
                                 conn->data->buffer, conn, NULL);
     if(nread < 0)
       return /*CURLE_OPERATION_TIMEOUTED*/-1;
@@ -610,10 +610,10 @@ sec_login(struct connectdata *conn)
 	}
 	infof(data, "Trying %s...\n", (*m)->name);
 	/*ret = command("AUTH %s", (*m)->name);***/
-	Curl_ftpsendf(conn->data->firstsocket, conn,
+	Curl_ftpsendf(conn->firstsocket, conn,
                  "AUTH %s", (*m)->name);
 	/* wait for feedback */
-	nread = Curl_GetFTPResponse(conn->data->firstsocket,
+	nread = Curl_GetFTPResponse(conn->firstsocket,
                                     conn->data->buffer, conn, NULL);
 	if(nread < 0)
 	    return /*CURLE_OPERATION_TIMEOUTED*/-1;

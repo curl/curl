@@ -158,6 +158,9 @@ typedef enum {
   CURLE_BAD_PASSWORD_ENTERED, /* when the my_getpass() returns fail */
   CURLE_TOO_MANY_REDIRECTS , /* catch endless re-direct loops */
 
+  CURLE_UNKNOWN_TELNET_OPTION , /* User specified an unknown option */
+  CURLE_TELNET_OPTION_SYNTAX , /* Malformed telnet option */
+
   CURL_LAST
 } CURLcode;
 
@@ -406,6 +409,9 @@ typedef enum {
      document! Pass a NULL to shut it off. */
   CINIT(FILETIME, OBJECTPOINT, 69),
 
+  /* This points to a linked list of telnet options */
+  CINIT(TELNETOPTIONS, OBJECTPOINT, 70),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
@@ -452,8 +458,8 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.6.1"
-#define LIBCURL_VERSION_NUM 0x070601
+#define LIBCURL_VERSION "7.7-alpha1"
+#define LIBCURL_VERSION_NUM 0x070000
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
@@ -519,6 +525,20 @@ typedef enum {
  * results are undefined before the transfer is completed.
  */
 CURLcode curl_getinfo(CURL *curl, CURLINFO info, ...);
+
+
+typedef enum {
+  CURLCLOSEPOLICY_NONE, /* first, never use this */
+
+  CURLCLOSEPOLICY_OLDEST,
+  CURLCLOSEPOLICY_LEAST_RECENTLY_USED,
+  CURLCLOSEPOLICY_LEAST_TRAFFIC,
+  CURLCLOSEPOLICY_SLOWEST,
+  CURLCLOSEPOLICY_CALLBACK,
+ 
+  CURLCLOSEPOLICY_LAST /* last, never use this */
+} curl_closepolicy;
+
 
 #ifdef  __cplusplus
 }

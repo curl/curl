@@ -133,6 +133,61 @@ enum protection_level {
 };
 #endif
 
+/* struct for data related to SSL and SSL connections */
+struct ssl_connect_data {
+  bool use;              /* use ssl encrypted communications TRUE/FALSE */
+#ifdef USE_SSLEAY
+  /* these ones requires specific SSL-types */
+  SSL_CTX* ctx;
+  SSL*     handle;
+  X509*    server_cert;
+#endif /* USE_SSLEAY */
+};
+
+struct ssl_config_data {
+  long version;          /* what version the client wants to use */
+  long certverifyresult; /* result from the certificate verification */
+  long verifypeer;       /* set TRUE if this is desired */
+  char *CApath;          /* DOES NOT WORK ON WINDOWS */
+  char *CAfile;          /* cerficate to verify peer against */
+};
+
+/****************************************************************************
+ * HTTP unique setup
+ ***************************************************************************/
+struct HTTP {
+  struct FormData *sendit;
+  int postsize;
+  char *p_pragma;      /* Pragma: string */
+  char *p_accept;      /* Accept: string */
+  long readbytecount; 
+  long writebytecount;
+
+  /* For FORM posting */
+  struct Form form;
+  size_t (*storefread)(char *, size_t , size_t , FILE *);
+  FILE *in;
+};
+
+/****************************************************************************
+ * FTP unique setup
+ ***************************************************************************/
+struct FTP {
+  long *bytecountp;
+  char *user;    /* user name string */
+  char *passwd;  /* password string */
+  char *urlpath; /* the originally given path part of the URL */
+  char *dir;     /* decoded directory */
+  char *file;    /* decoded file */
+};
+
+/*
+ * Boolean values that concerns this connection.
+ */
+struct ConnectBits {
+  bool close; /* if set, we close the connection after this request */
+};
+
 /*
  * The connectdata struct contains all fields and variables that should be
  * unique for an entire connection.
@@ -144,6 +199,9 @@ struct connectdata {
      returned handles MUST have this initial 'Handle'. */
   Handle handle; /* struct identifier */
   struct UrlData *data; /* link to the root CURL struct */
+
+  int connectindex; /* what index in the connects index this particular
+                       struct has */
 
   /**** curl_connect() phase fields */
   ConnState state; /* for state dependent actions */
@@ -166,16 +224,26 @@ struct connectdata {
   struct hostent *hp;
   struct sockaddr_in serv_addr;
 #endif
-  char proto[64];  /* store the protocol string in this buffer */
+  char protostr[64];  /* store the protocol string in this buffer */
   char gname[257]; /* store the hostname in this buffer */
   char *name;      /* host name pointer to fool around with */
   char *path;      /* allocated buffer to store the URL's path part in */
+  char *hostname;  /* hostname to connect, as parsed from url */
+  long port;       /* which port to use locally */
+  unsigned short remote_port; /* what remote port to connect to,
+                                 not the proxy port! */
   char *ppath;
   long bytecount;
   struct timeval now; /* current time */
+  int firstsocket;     /* the main socket to use */
+  int secondarysocket; /* for i.e ftp transfers */
 
   long upload_bufsize; /* adjust as you see fit, never bigger than BUFSIZE
                           never smaller than UPLOAD_BUFSIZE */
+
+  struct ssl_connect_data ssl; /* this is for ssl-stuff */
+
+  struct ConnectBits bits;    /* various state-flags for this connection */
 
   /* These two functions MUST be set by the curl_connect() function to be
      be protocol dependent */
@@ -205,6 +273,7 @@ struct connectdata {
                             the same we read from. -1 disables */
   long *writebytecountp; /* return number of bytes written or NULL */
 
+
 #ifdef KRB4
 
   enum protection_level command_prot;
@@ -218,6 +287,24 @@ struct connectdata {
   void *app_data;
 
 #endif
+
+  /*************** Request - specific items ************/
+  /* previously this was in the urldata struct */
+  union {
+    struct HTTP *http;
+    struct HTTP *gopher; /* alias, just for the sake of being more readable */
+    struct HTTP *https;  /* alias, just for the sake of being more readable */
+    struct FTP *ftp;
+#if 0 /* no need for special ones for these: */
+    struct TELNET *telnet;
+    struct FILE *file;
+    struct LDAP *ldap;
+    struct DICT *dict;
+#endif
+    void *generic;
+  } proto;
+
+
 };
 
 struct Progress {
@@ -251,35 +338,6 @@ struct Progress {
 
   double speeder[ CURR_TIME ];
   int speeder_c;
-};
-
-/****************************************************************************
- * HTTP unique setup
- ***************************************************************************/
-struct HTTP {
-  struct FormData *sendit;
-  int postsize;
-  char *p_pragma;      /* Pragma: string */
-  char *p_accept;      /* Accept: string */
-  long readbytecount; 
-  long writebytecount;
-
-  /* For FORM posting */
-  struct Form form;
-  size_t (*storefread)(char *, size_t , size_t , FILE *);
-  FILE *in;
-};
-
-/****************************************************************************
- * FTP unique setup
- ***************************************************************************/
-struct FTP {
-  long *bytecountp;
-  char *user;    /* user name string */
-  char *passwd;  /* password string */
-  char *urlpath; /* the originally given path part of the URL */
-  char *dir;     /* decoded directory */
-  char *file;    /* decoded file */
 };
 
 typedef enum {
@@ -338,22 +396,6 @@ typedef enum {
   CURLI_LAST
 } CurlInterface;
 
-/* struct for data related to SSL and SSL connections */
-struct ssldata {
-  bool use;              /* use ssl encrypted communications TRUE/FALSE */
-  long version;          /* what version the client wants to use */
-  long certverifyresult; /* result from the certificate verification */
-  long verifypeer;       /* set TRUE if this is desired */
-  char *CApath;          /* DOES NOT WORK ON WINDOWS */
-  char *CAfile;          /* cerficate to verify peer against */
-#ifdef USE_SSLEAY
-  /* these ones requires specific SSL-types */
-  SSL_CTX* ctx;
-  SSL*     handle;
-  X509*    server_cert;
-#endif /* USE_SSLEAY */
-};
-
 /*
  * As of April 11, 2000 we're now trying to split up the urldata struct in
  * three different parts:
@@ -370,6 +412,9 @@ struct ssldata {
  * 3 - Request-specific. Variables that are of interest for this particular
  *     transfer being made right now.
  *
+ * In Febrary 2001, this is being done stricter. The 'connectdata' struct
+ * MUST have all the connection oriented stuff as we may now have several
+ * simultaneous connections and connection structs in memory.
  */
 
 struct UrlData {
@@ -381,7 +426,7 @@ struct UrlData {
   char *errorbuffer; /* store failure messages in here */
 
   /*************** Session - specific items ************/
-  char *proxy; /* if proxy, set it here, set CONF_PROXY to use this */
+  char *proxy; /* if proxy, set it here */
   char *proxyuserpwd;  /* Proxy <user:password>, if used */
   long proxyport; /* If non-zero, use this port number by default. If the
                      proxy string features a ":[port]" that one will override
@@ -391,33 +436,16 @@ struct UrlData {
   long header_size;  /* size of read header(s) in bytes */
   long request_size; /* the amount of bytes sent in the request(s) */
 
-  /*************** Request - specific items ************/
-
-  union {
-    struct HTTP *http;
-    struct HTTP *gopher; /* alias, just for the sake of being more readable */
-    struct HTTP *https;  /* alias, just for the sake of being more readable */
-    struct FTP *ftp;
-#if 0 /* no need for special ones for these: */
-    struct TELNET *telnet;
-    struct FILE *file;
-    struct LDAP *ldap;
-    struct DICT *dict;
-#endif
-    void *generic;
-  } proto;
-
   FILE *out;    /* the fetched file goes here */
   FILE *in;     /* the uploaded file is read from here */
   FILE *writeheader; /* write the header to this is non-NULL */
   char *url;   /* what to get */
   char *freethis; /* if non-NULL, an allocated string for the URL */
-  char *hostname; /* hostname to connect, as parsed from url */
-  long port; /* which port to use (if non-protocol bind) set
-                CONF_PORT to use this */
+  long port; /* which port to use (if non-protocol bind) */
   unsigned short remote_port; /* what remote port to connect to, not the proxy
 				 port! */
   struct Configbits bits; /* new-style (v7) flag data */
+  struct ssl_config_data ssl; /* this is for ssl-stuff */
 
   char *userpwd;  /* <user:password>, if used */
   char *range; /* range, if used. See README for detailed specification on
@@ -462,10 +490,6 @@ struct UrlData {
   long maxdownload; /* in bytes, the maximum amount of data to fetch, 0
                        means unlimited */
   
-  /* fields only set and used within _urlget() */
-  int firstsocket;     /* the main socket to use */
-  int secondarysocket; /* for i.e ftp transfers */
-
   char buffer[BUFSIZE+1]; /* buffer with size BUFSIZE */
 
   double current_speed;  /* the ProgressShow() funcion sets this */
@@ -488,11 +512,12 @@ struct UrlData {
 
   struct CookieInfo *cookies;
 
-  struct ssldata ssl; /* this is for ssl-stuff */
-
   long crlf;
   struct curl_slist *quote;     /* before the transfer */
   struct curl_slist *postquote; /* after the transfer */
+
+  /* Telnet negotiation options */
+  struct curl_slist *telnet_options; /* linked list of telnet options */
 
   TimeCond timecondition; /* kind of comparison */
   time_t timevalue;       /* what time to compare with */
@@ -503,12 +528,6 @@ struct UrlData {
 
   char *headerbuff; /* allocated buffer to store headers in */
   int headersize;   /* size of the allocation */
-
-#if 0
-  /* this was removed in libcurl 7.4 */
-  char *writeinfo;  /* if non-NULL describes what to output on a successful
-                       completion */
-#endif
 
   struct Progress progress; /* for all the progress meter data */
 
@@ -541,6 +560,13 @@ struct UrlData {
 #endif
 
   struct timeval keeps_speed; /* this should be request-specific */
+
+  /* 'connects' will be an allocated array with pointers. If the pointer is
+     set, it holds an allocated connection. */
+  struct connectdata **connects;
+  size_t numconnects; /* size of the 'connects' array */
+  curl_closepolicy closepolicy;
+
 };
 
 #define LIBCURL_NAME "libcurl"

@@ -111,15 +111,14 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
                     size_t *written)
 {
   size_t bytes_written;
-  struct UrlData *data=conn->data; /* conn knows data, not vice versa */
 
 #ifdef USE_SSLEAY
-  if (data->ssl.use) {
+  if (conn->ssl.use) {
     int loop=100; /* just a precaution to never loop endlessly */
     while(loop--) {
-      bytes_written = SSL_write(data->ssl.handle, mem, len);
+      bytes_written = SSL_write(conn->ssl.handle, mem, len);
       if((-1 != bytes_written) ||
-         (SSL_ERROR_WANT_WRITE != SSL_get_error(data->ssl.handle,
+         (SSL_ERROR_WANT_WRITE != SSL_get_error(conn->ssl.handle,
                                                 bytes_written) ))
         break;
     }
@@ -200,16 +199,15 @@ CURLcode Curl_read(struct connectdata *conn, int sockfd,
                    char *buf, size_t buffersize,
                    ssize_t *n)
 {
-  struct UrlData *data = conn->data;
   ssize_t nread;
 
 #ifdef USE_SSLEAY
-  if (data->ssl.use) {
+  if (conn->ssl.use) {
     int loop=100; /* just a precaution to never loop endlessly */
     while(loop--) {
-      nread = SSL_read(data->ssl.handle, buf, buffersize);
+      nread = SSL_read(conn->ssl.handle, buf, buffersize);
       if((-1 != nread) ||
-         (SSL_ERROR_WANT_READ != SSL_get_error(data->ssl.handle, nread) ))
+         (SSL_ERROR_WANT_READ != SSL_get_error(conn->ssl.handle, nread) ))
         break;
     }
   }
