@@ -7,6 +7,7 @@ AUTOMAKE_OPTIONS = foreign no-dependencies
 man_MANS = \
 	curl.1 \
 	curl_easy_cleanup.3 \
+	curl_easy_getinfo.3 \
 	curl_easy_init.3 \
 	curl_easy_perform.3 \
 	curl_easy_setopt.3 \
