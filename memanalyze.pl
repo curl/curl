@@ -26,13 +26,17 @@ while(<STDIN>) {
 
         if($function =~ /free\(0x([0-9a-f]*)/) {
             $addr = $1;
-            if($sizeataddr{$addr} <= 0) {
+            if($sizeataddr{$addr} == 0) {
                 print "FREE ERROR: No memory allocated: $line\n";
+            }
+            elsif(-1 == $sizeataddr{$addr}) {
+                print "FREE ERROR: Memory freed twice: $line\n";
+                print "FREE ERROR: Previously freed at: ".$getmem{$addr}."\n";
             }
             else {
                 $totalmem -= $sizeataddr{$addr};
-                $sizeataddr{$addr}=0;
-                $getmem{$addr}=""; # forget after a good free()
+                $sizeataddr{$addr}=-1; # set -1 to mark as freed
+                $getmem{$addr}="$source:$linenum";
             }
         }
         elsif($function =~ /malloc\((\d*)\) = 0x([0-9a-f]*)/) {
