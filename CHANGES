@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (25 October 2004)
+- Mohun Biswas found out that formposting a zero-byte file didn't work very
+  good. I fixed.
+
 Daniel (19 October 2004)
 - Alexander Krasnostavsky made it possible to make FTP 3rd party transfers
   with both source and destination being the same host. It can be useful if

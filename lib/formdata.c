@@ -1307,9 +1307,13 @@ size_t Curl_FormReader(char *buffer,
   if(!form->data)
     return 0; /* nothing, error, empty */
 
-  if(form->data->type == FORM_FILE)
-    return readfromfile(form, buffer, wantedsize);
+  if(form->data->type == FORM_FILE) {
+    gotsize = readfromfile(form, buffer, wantedsize);
 
+    if(gotsize)
+      /* If positive or -1, return. If zero, continue! */
+      return gotsize;
+  }
   do {
 
     if( (form->data->length - form->sent ) > wantedsize - gotsize) {
