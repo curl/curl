@@ -149,6 +149,7 @@ Curl_cookie_add(struct CookieInfo *c,
           }
           else if(strequal("domain", name)) {
             co->domain=strdup(what);
+            co->field1= (what[0]=='.')?2:1;
           }
           else if(strequal("version", name)) {
             co->version=strdup(what);
