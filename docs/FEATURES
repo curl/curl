@@ -21,6 +21,7 @@ Misc
  - redirectable stderr
  - use selected network interface for outgoing traffic
  - IPv6 support
+ - persistant connections
 
 HTTP
  - GET
@@ -72,6 +73,7 @@ FTP
 
 TELNET
  - connection negotiation
+ - custom telnet options
  - stdin/stdout I/O
 
 LDAP (*2)

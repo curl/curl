@@ -25,11 +25,15 @@ SIMPLE USAGE
 
   Get a list of the root directory of an FTP site:
 
-        curl ftp://ftp.fts.frontec.se/
+        curl ftp://cool.haxx.se/
 
   Get the definition of curl from a dictionary:
 
         curl dict://dict.org/m:curl
+
+  Fetch two documents at once:
+
+        curl ftp://cool.haxx.se/ http://www.weirdserver.com:8000/
 
 DOWNLOAD TO A FILE
 
@@ -42,6 +46,10 @@ DOWNLOAD TO A FILE
   will fail):
 
         curl -O http://www.netscape.com/index.html
+
+  Fetch two files and store them with their remote names:
+
+        curl -O www.haxx.se/index.html -O curl.haxx.se/download.html
 
 USING PASSWORDS
 
@@ -455,9 +463,13 @@ EXTRA HEADERS
 
         curl -H "X-you-and-me: yes" www.love.com
 
-  This can also be useful in case you want curl to send a different text in
-  a header than it normally does. The -H header you specify then replaces the
-  header curl would normally send.
+  This can also be useful in case you want curl to send a different text in a
+  header than it normally does. The -H header you specify then replaces the
+  header curl would normally send. If you replace an internal header with an
+  empty one, you prevent that header from being sent. To prevent the Host:
+  header from being used:
+
+        curl -H "Host:" www.server.com
 
 FTP and PATH NAMES
 
@@ -745,6 +757,24 @@ TELNET
   to track when the login prompt is received and send the username and
   password accordingly.
 
+PERSISTANT CONNECTIONS
+
+  Specifying multiple files on a single command line will make curl transfer
+  all of them, one after the other in the specified order.
+
+  libcurl will attempt to use persistant connections for the transfers so that
+  the second transfer to the same host can use the same connection that was
+  already initiated and was left open in the previous transfer. This greatly
+  decreases connection time for all but the first transfer and it makes a far
+  better use of the network.
+
+  Note that curl cannot use persistant connections for transfers that are used
+  in subsequence curl invokes. Try to stuff as many URLs as possible on the
+  same command line if they are using the same host, as that'll make the
+  transfers faster.
+
+  Persistant connections were introduced in curl 7.7.
+
 MAILING LISTS
 
   For your convenience, we have several open mailing lists to discuss curl,
@@ -753,10 +783,10 @@ MAILING LISTS
   To subscribe to the main curl list, mail curl-request@contactor.se with
   "subscribe <fill in your email address>" in the body.
 
-  To subscribe to the libcurl users list, follow the instructions at
-  http://curl.haxx.se/mail/
+  To subscribe to the curl-library users/deverlopers list, follow the
+  instructions at http://curl.haxx.se/mail/
 
-  To subscribe to the curl announce list, to only get information about new
+  To subscribe to the curl-announce list, to only get information about new
   releases, follow the instructions at http://curl.haxx.se/mail/
 
   To subscribe to the curl-and-PHP list in which curl using with PHP is
