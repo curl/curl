@@ -1,5 +1,5 @@
-#ifndef __HIGHLEVEL_H
-#define __HIGHLEVEL_H
+#ifndef __TRANSFER_H
+#define __TRANSFER_H
 /*****************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -23,4 +23,22 @@
  * $Id$
  *****************************************************************************/
 CURLcode curl_transfer(CURL *curl);
+
+CURLcode 
+Curl_Transfer (struct connectdata *data,
+               int sockfd,		/* socket to read from or -1 */
+               int size,		/* -1 if unknown at this point */
+               bool getheader,     	/* TRUE if header parsing is wanted */
+               long *bytecountp,	/* return number of bytes read */
+               int writesockfd,      /* socket to write to, it may very well be
+                                        the same we read from. -1 disables */
+               long *writebytecountp /* return number of bytes written */
+);
+
+#ifdef _OLDCURL
+/* "hackish" define to make sources compile without too much human editing.
+   Don't use "Tranfer()" anymore! */
+#define Transfer(a,b,c,d,e,f,g) Curl_Transfer(a,b,c,d,e,f,g)
+#endif
+
 #endif
