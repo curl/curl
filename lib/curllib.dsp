@@ -151,6 +151,10 @@ SOURCE=.\getpass.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\hash.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\hostip.c
 # End Source File
 # Begin Source File
@@ -176,6 +180,10 @@ SOURCE=.\ldap.c
 # Begin Source File
 
 SOURCE=.\libcurl.def
+# End Source File
+# Begin Source File
+
+SOURCE=.\llist.c
 # End Source File
 # Begin Source File
 
