@@ -1,0 +1,81 @@
+# Server-side
+<reply>
+
+# this is returned first since we get no proxy-auth
+<data>
+HTTP/1.1 407 Authorization Required to proxy me my dear
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+
+And you should ignore this data.
+</data>
+
+# this is returned when we get a GET!
+<data2>
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 7
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+daniel
+</data2>
+
+# then this is returned when we get proxý-auth
+<data1000>
+HTTP/1.1 200 OK swsbounce
+Server: no
+
+Nice proxy auth sir!
+</data1000>
+
+<datacheck>
+HTTP/1.1 407 Authorization Required to proxy me my dear
+Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
+
+HTTP/1.1 200 OK swsbounce
+Server: no
+
+HTTP/1.1 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Content-Length: 7
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+daniel
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP proxy CONNECT auth Digest
+ </name>
+ <command>
+http://test.remote.server.com:206/path/2060002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol>
+CONNECT test.remote.server.com:206 HTTP/1.0
+
+CONNECT test.remote.server.com:206 HTTP/1.0
+Proxy-Authorization: Digest username="silly", realm="weirdorealm", nonce="12345", uri="test.remote.server.com:206", response="5059a96c954981ceb94e17d667c8d3f8"
+
+GET /path/2060002 HTTP/1.1
+User-Agent: curl/7.12.3-CVS (i686-pc-linux-gnu) libcurl/7.12.3-CVS OpenSSL/0.9.6b zlib/1.1.4
+Host: test.remote.server.com:206
+Pragma: no-cache
+Accept: */*
+
+</protocol>
+</verify>
