@@ -546,12 +546,10 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
 #endif /* USE_SSLEAY */
 
   /* close possibly still open sockets */
-  if(-1 != conn->secondarysocket) {
+  if(-1 != conn->secondarysocket)
     sclose(conn->secondarysocket);
-  }
-  if(-1 != conn->firstsocket) {
+  if(-1 != conn->firstsocket)
     sclose(conn->firstsocket);
-  }
 
   if(conn->allocptr.proxyuserpwd)
     free(conn->allocptr.proxyuserpwd);
@@ -669,9 +667,11 @@ ConnectionStore(struct UrlData *data,
     if(!data->connects[i])
       break;
   }
-  if(i == data->numconnects)
+  if(i == data->numconnects) {
     /* there was no room available, kill one */
     i = ConnectionKillOne(data);
+    infof(data, "Connection (#%d) was killed to make room\n", i);
+  }
 
   data->connects[i] = conn; /* fill in this */
   conn->connectindex = i; /* make the child know where the pointer to this
