@@ -6,7 +6,52 @@
 
                                History of Changes
 
+Daniel (28 May 2001)
+- curl-config now supports '--vernum' that outputs a plain hexadecimal version
+  of the libcurl version number (using 8 bits for each 3 numbers). Version
+  7.7.4 appears as 070704
+
+- Wrote man pages for curl_global_init and curl_global_cleanup...
+
+- T. Bharath brought news about the usage of the OpenSSL interface that was
+  not previously taken into consideration and thus caused libcurl to leak
+  memory.  The only somewhat sane approach to fix this dilemma, is adding two
+  two new functions curl_global_init() and curl_global_cleanup() that should
+  be called *ONCE* by the application using libcurl. The init should be done
+  only at startup, no matter how many threads the application is gonna use,
+  and the cleanup should be called when the application has finished using
+  libcurl completely.
+
+  *** UPGRADE NOTICE ***
+
+  If you write applications using libcurl, you really want to use two
+  functions mentioned above !!!
+
+  I can't say I think this is a very beautiful solution, but as OpenSSL
+  insists on making lots of stuff on a "global" scope, we're forced to dance
+  to their pipe.
+
+- Moving more test cases into the new file format.
+
+Version 7.7.4-pre3
+
+Daniel (23 May 2001)
+- Introduced a new file format for storing test cases, and thus I had to
+  modify all the perl test scripts and more (I added a new one). I have not
+  "ported" all the old test cases to the new format yet, but it'll come.
+
+  The main advantage of this new format is that all test data for each test
+  case is stored in a single file. It gives a better overview for each test
+  case and a lot less files.
+
+- Andrés García brought a fix for the netscape/mozilla cookie file parsing
+  function, as it turns out it doesn't always store the path!
+
 Daniel (22 May 2001)
+- As was reported anonymously, when FAILONERROR was used, the httpcode was
+  not stored properly and thus wasn't possibly to read after a transfer with
+  the curl_easy_getinfo() function. This is now corrected.
+
 - Installed and made use of the following tool versions:
     autoconf 2.50
     libtool 1.4
@@ -18,6 +63,9 @@ Daniel (22 May 2001)
 
   As a result of this, the configure script grew to more than double its
   previous size!
+
+  Arkadiusz Miskiewicz helped me by pointing out I had to remove my
+  acinclude.m4 file before I could get it working!
 
 Daniel (21 May 2001)
 - I made ftps:// work. Added test case 400 to the release archive, as the
