@@ -335,6 +335,7 @@ static void help(void)
     " -R/--remote-time   Set the remote file's time on the local output",
     " -s/--silent        Silent mode. Don't output anything",
     " -S/--show-error    Show error. With -s, make curl show errors when they occur",
+    "    --socks <host[:port]> Use SOCKS5 proxy on given host + port",
     "    --stderr <file> Where to redirect stderr. - means stdout",
     " -t/--telnet-option <OPT=val> Set telnet option",
     "    --trace <file>  Dump a network/debug trace to the given file",
@@ -481,6 +482,8 @@ struct Configurable {
   size_t lastrecvsize;
 
   bool ftp_ssl;
+
+  char *socks5proxy;
 };
 
 /* global variable to hold info about libcurl */
@@ -1113,6 +1116,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"*z", "disable-eprt", FALSE},
     {"$a", "ftp-ssl",    FALSE},
     {"$b", "ftp-pasv",   FALSE},
+    {"$c", "socks5",     TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1432,6 +1436,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         if(config->ftpport)
           free(config->ftpport);
         config->ftpport = NULL;
+        break;
+      case 'c': /* --socks specifies a socks5 proxy to use */
+        GetStr(&config->socks5proxy, nextarg);
         break;
       }
       break;
@@ -3250,9 +3257,15 @@ operate(struct Configurable *config, int argc, char *argv[])
           curl_easy_setopt(curl, CURLOPT_MAXFILESIZE_LARGE,
                            config->max_filesize);
 
-        /* new in curl 7.10.9 */
+        /* new in curl 7.11.0 */
         if(config->ftp_ssl)
           curl_easy_setopt(curl, CURLOPT_FTP_SSL, CURLFTPSSL_TRY);
+
+        /* new in curl 7.11.1 */
+        if(config->socks5proxy) {
+          curl_easy_setopt(curl, CURLOPT_PROXY, config->socks5proxy);
+          curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_SOCKS5);
+        }
 
         res = curl_easy_perform(curl);
         

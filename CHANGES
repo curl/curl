@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel(30 January 2004)
+- Added --socks as a recognized option. It works just like --proxy but sets a
+  SOCKS5 proxy to use. SOCKS5 support has been available in libcurl for a
+  while, just not provided by the curl tool. This does not currently work for
+  IPv6-enabled libcurls.
+
 Daniel(29 January 2004)
 - Stadler Stephan pointed out that src/hugehelp.c included config.h without
   checking the define if its present...
