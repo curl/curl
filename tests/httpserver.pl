@@ -127,7 +127,7 @@ for ( $waitedpid = 0;
             else {
                 $testnum=0;
             }
-            open(INPUT, ">log/server.input");
+            open(INPUT, ">>log/server.input");
             for(@headers) {
                 print INPUT $_;
             }
