@@ -256,9 +256,6 @@ fi
 dnl socket lib?
 AC_CHECK_FUNC(connect, , AC_CHECK_LIB(socket, connect))
 
-dnl ucb lib?
-AC_CHECK_FUNC(gethostname, , AC_CHECK_LIB(ucb, gethostname))
-
 dnl dl lib?
 AC_CHECK_FUNC(dlclose, , AC_CHECK_LIB(dl, dlopen))
 
@@ -643,7 +640,6 @@ AC_CHECK_FUNCS( socket \
                 strcasecmp \
                 stricmp \
                 strcmpi \
-                gethostname \
                 gethostbyaddr \
                 gettimeofday \
                 inet_addr \
