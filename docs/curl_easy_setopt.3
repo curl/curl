@@ -8,7 +8,7 @@ curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "CURLcode curl_easy_setopt(CURL *" handle ", CURLoption "option ", ...);
+.BI "CURLcode curl_easy_setopt(CURL *" handle ", CURLoption "option ", ...);"
 .ad
 .SH DESCRIPTION
 curl_easy_setopt() is called to tell libcurl how to behave in a number of
@@ -355,7 +355,7 @@ name. (Added in libcurl 7.3)
 .B CURLOPT_KRB4LEVEL
 Pass a char * as parameter. Set the krb4 security level, this also enables
 krb4 awareness.  This is a string, 'clear', 'safe', 'confidential' or
-'private'.  If the string is set but doesn't match one of these, 'private'
+\&'private'.  If the string is set but doesn't match one of these, 'private'
 will be used. Set the string to NULL to disable kerberos4. The kerberos
 support only works for FTP. (Added in libcurl 7.3)
 .TP
