@@ -89,3 +89,5 @@
 /* Define if you have the <limits.h> header file */
 #undef HAVE_LIMITS_H
 
+/* type to use in place of socklen_t if not defined */
+#undef socklen_t
