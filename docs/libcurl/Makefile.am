@@ -19,6 +19,7 @@ man_MANS = \
 	curl_slist_append.3 \
 	curl_slist_free_all.3 \
 	curl_version.3 \
+	curl_version_info.3 \
 	curl_escape.3 \
 	curl_unescape.3 \
 	curl_free.3 \
@@ -53,6 +54,7 @@ HTMLPAGES = \
 	curl_slist_append.html \
 	curl_slist_free_all.html \
 	curl_version.html \
+	curl_version_info.html \
 	curl_escape.html \
 	curl_unescape.html \
 	curl_free.html \

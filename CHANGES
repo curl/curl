@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel (26 Sep 2002)
+- Extended curl_version_info() more and wrote a man page for it.
+
 Daniel (25 Sep 2002)
 - libcurl could leak memory when downloading multiple files using http ranges.
 

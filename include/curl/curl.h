@@ -916,29 +916,25 @@ CURLcode curl_share_destroy (curl_share *);
  * Structures for querying information about the curl library at runtime.
  */
 
-/* declared as a struct to allow future expansion while remaining backwards
- * and binary compatible; any new fields in these two structs must be added
- * after the existing fields */
-typedef struct {
-  const char *protoname;
-} curl_runtime_protocol_info;
-
 typedef struct {
   const char *version;      /* LIBCURL_VERSION */
   unsigned int version_num; /* LIBCURL_VERSION_NUM */
+  const char *host;         /* OS/host/cpu/machine when configured */
   int features;             /* bitmask, see defines below */
   char *ssl_version;        /* human readable string */
   long ssl_version_num;     /* number */
-  char *libz_version;       /* human readable string */
+  const char *libz_version;       /* human readable string */
   /* protocols is terminated by an entry with a NULL protoname */
-  const curl_runtime_protocol_info *protocols;
+  const char *protocols[1];
 } curl_version_info_data;
 
 #define CURL_VERSION_IPV6      (1<<0)
 #define CURL_VERSION_KERBEROS4 (1<<1)
+#define CURL_VERSION_SSL       (1<<2)
+#define CURL_VERSION_LIBZ      (1<<3)
 
 /* returns a pointer to a static copy of the version info struct */
-const curl_version_info_data *curl_version_info(void);
+curl_version_info_data *curl_version_info(void);
 
 #ifdef  __cplusplus
 }
