@@ -1209,6 +1209,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
   char *hostdataptr=NULL;
   unsigned short porttouse;
   char myhost[256] = "";
+  bool sa_filled_in = FALSE;
 
   if(data->set.ftpport) {
     if(Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
@@ -1223,12 +1224,20 @@ CURLcode ftp_use_port(struct connectdata *conn)
     }
   }
   if(! *myhost) {
-    char *tmp_host = getmyhost(myhost, sizeof(myhost));
-    h=Curl_resolv(data, tmp_host, 0);
+    /* pick a suitable default here */
+
+    socklen_t sslen;
+    
+    sslen = sizeof(sa);
+    if (getsockname(conn->firstsocket, &sa, &sslen) < 0) {
+      failf(data, "getsockname() failed");
+      return CURLE_FTP_PORT_FAILED;
+    }
+
+    sa_filled_in = TRUE; /* the sa struct is filled in */
   }
-  infof(data, "We connect from %s\n", myhost);
-  
-  if ( h ) {
+
+  if ( h || sa_filled_in) {
     if( (portsock = socket(AF_INET, SOCK_STREAM, 0)) >= 0 ) {
       int size;
       
@@ -1237,12 +1246,15 @@ CURLcode ftp_use_port(struct connectdata *conn)
          we fail before the true secondary stuff is made */
       conn->secondarysocket = portsock;
 
-      memset((char *)&sa, 0, sizeof(sa));
-      memcpy((char *)&sa.sin_addr,
-             h->h_addr,
-             h->h_length);
-      sa.sin_family = AF_INET;
-      sa.sin_addr.s_addr = INADDR_ANY;
+      if(!sa_filled_in) {
+        memset((char *)&sa, 0, sizeof(sa));
+        memcpy((char *)&sa.sin_addr,
+               h->h_addr,
+               h->h_length);
+        sa.sin_family = AF_INET;
+        sa.sin_addr.s_addr = INADDR_ANY;
+      }
+
       sa.sin_port = 0;
       size = sizeof(sa);
       
@@ -1286,7 +1298,8 @@ CURLcode ftp_use_port(struct connectdata *conn)
 #endif
     struct in_addr in;
     unsigned short ip[5];
-    (void) memcpy(&in.s_addr, *h->h_addr_list, sizeof (in.s_addr));
+    (void) memcpy(&in.s_addr,
+                  h?*h->h_addr_list:&sa.sin_addr.s_addr, sizeof (in.s_addr));
 #ifdef HAVE_INET_NTOA_R
     /* ignore the return code from inet_ntoa_r() as it is int or
        char * depending on system */
@@ -1297,6 +1310,9 @@ CURLcode ftp_use_port(struct connectdata *conn)
     sscanf( inet_ntoa(in), "%hu.%hu.%hu.%hu",
             &ip[0], &ip[1], &ip[2], &ip[3]);
 #endif
+    infof(data, "Telling server to connect to %d.%d.%d.%d:%d\n",
+          ip[0], ip[1], ip[2], ip[3], porttouse);
+  
     result=Curl_ftpsendf(conn, "PORT %d,%d,%d,%d,%d,%d",
                          ip[0], ip[1], ip[2], ip[3],
                          porttouse >> 8,
