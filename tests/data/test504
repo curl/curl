@@ -1,0 +1,29 @@
+rörl#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+file
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib504
+</tool>
+
+ <name>
+simple multi through local proxy without listener
+ </name>
+ <command>
+http://%HOSTIP:%HTTPSPORT/504 localhost:55555
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+100
+</errorcode>
+</verify>
