@@ -778,7 +778,7 @@ struct SessionHandle {
   struct UrlState state;       /* struct for fields used for state info and
                                   other dynamic purposes */
   struct PureInfo info;        /* stats, reports and info data */
-#ifdef HAVE_OPENSSL_ENGINE_H
+#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE*  engine;
 #endif /* USE_SSLEAY */
 };
