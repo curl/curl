@@ -17,6 +17,7 @@ my $TESTDIR="data";
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $CURLOUT="$LOGDIR/curl.out"; # curl output if not stdout
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
+my $FTPDCMD="$LOGDIR/ftpserver.cmd"; # copy ftp server instructions here
 
 # Normally, all test cases should be run, but at times it is handy to
 # simply run a particular one:
@@ -340,6 +341,9 @@ sub singletest {
     # if this file exists, we verify upload
     my $UPLOAD="$TESTDIR/upload$NUMBER.txt";
 
+    # if this file exists, it is FTP server instructions:
+    my $ftpservercmd="$TESTDIR/ftpd$NUMBER.txt";
+
     if(! -r $CURLCMD) {
         # this is not a test
         next;
@@ -347,6 +351,11 @@ sub singletest {
 
     # remove previous server output logfile
     unlink($SERVERIN);
+
+    if(-r $ftpservercmd) {
+        # copy the instruction file
+        system("cp $ftpservercmd $FTPDCMD");
+    }
 
     # name of the test
     open(N, "<$TESTDIR/name$NUMBER.txt") ||
@@ -383,7 +392,7 @@ sub singletest {
     }
 
     # run curl, add -v for debug information output
-    my $CMDLINE="$CURL $out--include --silent $cmd >$STDOUT 2>$STDERR";
+    my $CMDLINE="$CURL $out--include -v --silent $cmd >$STDOUT 2>$STDERR";
 
     my $STDINFILE="$TESTDIR/stdin$NUMBER.txt";
     if(-f $STDINFILE) {
@@ -487,11 +496,14 @@ sub singletest {
             }
         }
 
-        # remove the stdout and stderr files
-        unlink($STDOUT);
-        unlink($STDERR);
-
     }
+
+    # remove the stdout and stderr files
+    unlink($STDOUT);
+    unlink($STDERR);
+
+    unlink($FTPDCMD); # remove the instructions for this test
+
     if($memory_debug) {
         if(! -f $memdump) {
             print "\n** ALERT! memory debuggin without any output file?\n";
