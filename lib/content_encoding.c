@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2003, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -68,7 +68,7 @@ exit_zlib(z_stream *z, bool *zlib_init, CURLcode result)
 }
 
 CURLcode
-Curl_unencode_deflate_write(struct SessionHandle *data, 
+Curl_unencode_deflate_write(struct SessionHandle *data,
                             struct Curl_transfer_keeper *k,
                             ssize_t nread)
 {
@@ -76,7 +76,7 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
   int result;                   /* Curl_client_write status */
   char decomp[DSIZ];            /* Put the decompressed data here. */
   z_stream *z = &k->z;          /* zlib state structure */
-              
+
   /* Initialize zlib? */
   if (!k->zlib_init) {
     z->zalloc = (alloc_func)Z_NULL;
@@ -100,11 +100,12 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
 
     status = inflate(z, Z_SYNC_FLUSH);
     if (status == Z_OK || status == Z_STREAM_END) {
-      result = Curl_client_write(data, CLIENTWRITE_BODY, decomp, 
-                                 DSIZ - z->avail_out);
-      /* if !CURLE_OK, clean up, return */
-      if (result) {              
-        return exit_zlib(z, &k->zlib_init, result);
+      if (DSIZ - z->avail_out) {
+        result = Curl_client_write(data, CLIENTWRITE_BODY, decomp,
+                                   DSIZ - z->avail_out);
+        /* if !CURLE_OK, clean up, return */
+        if (result)
+          return exit_zlib(z, &k->zlib_init, result);
       }
 
       /* Done?; clean up, return */
@@ -116,7 +117,7 @@ Curl_unencode_deflate_write(struct SessionHandle *data,
       }
 
       /* Done with these bytes, exit */
-      if (status == Z_OK && z->avail_in == 0 && z->avail_out > 0) 
+      if (status == Z_OK && z->avail_in == 0 && z->avail_out > 0)
         return result;
     }
     else {                      /* Error; exit loop, handle below */
@@ -130,8 +131,7 @@ static enum {
   GZIP_OK,
   GZIP_BAD,
   GZIP_UNDERFLOW
-}
-check_gzip_header(unsigned char const *data, ssize_t len, ssize_t *headerlen)
+} check_gzip_header(unsigned char const *data, ssize_t len, ssize_t *headerlen)
 {
   int method, flags;
   const ssize_t totallen = len;
@@ -210,7 +210,7 @@ check_gzip_header(unsigned char const *data, ssize_t len, ssize_t *headerlen)
 }
 
 CURLcode
-Curl_unencode_gzip_write(struct SessionHandle *data, 
+Curl_unencode_gzip_write(struct SessionHandle *data,
                          struct Curl_transfer_keeper *k,
                          ssize_t nread)
 {
@@ -218,7 +218,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
   int result;                   /* Curl_client_write status */
   char decomp[DSIZ];            /* Put the decompressed data here. */
   z_stream *z = &k->z;          /* zlib state structure */
-              
+
   /* Initialize zlib? */
   if (!k->zlib_init) {
     z->zalloc = (alloc_func)Z_NULL;
@@ -320,11 +320,12 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
 
     status = inflate(z, Z_SYNC_FLUSH);
     if (status == Z_OK || status == Z_STREAM_END) {
-      result = Curl_client_write(data, CLIENTWRITE_BODY, decomp, 
-                                 DSIZ - z->avail_out);
-      /* if !CURLE_OK, clean up, return */
-      if (result) {              
-        return exit_zlib(z, &k->zlib_init, result);
+      if(DSIZ - z->avail_out) {
+        result = Curl_client_write(data, CLIENTWRITE_BODY, decomp,
+                                   DSIZ - z->avail_out);
+        /* if !CURLE_OK, clean up, return */
+        if (result)
+          return exit_zlib(z, &k->zlib_init, result);
       }
 
       /* Done?; clean up, return */
@@ -337,7 +338,7 @@ Curl_unencode_gzip_write(struct SessionHandle *data,
       }
 
       /* Done with these bytes, exit */
-      if (status == Z_OK && z->avail_in == 0 && z->avail_out > 0) 
+      if (status == Z_OK && z->avail_in == 0 && z->avail_out > 0)
         return result;
     }
     else {                      /* Error; exit loop, handle below */
