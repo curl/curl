@@ -140,7 +140,6 @@ int main(int argc, char **argv)
   struct hostent *hostent;
   fd_set read_fds, write_fds;
   struct timeval *tvp, tv;
-  char *errmem;
 
 #ifdef WIN32
   WORD wVersionRequested = MAKEWORD(1,1);
@@ -240,7 +239,6 @@ int main(int argc, char **argv)
     {
       fprintf(stderr, "ares_init_options: %s\n",
 	      ares_strerror(status));
-      ares_free_errmem(errmem);
       return 1;
     }
 
@@ -281,7 +279,7 @@ int main(int argc, char **argv)
 
 static void callback(void *arg, int status, unsigned char *abuf, int alen)
 {
-  char *name = (char *) arg, *errmem;
+  char *name = (char *) arg;
   int id, qr, opcode, aa, tc, rd, ra, rcode;
   unsigned int qdcount, ancount, nscount, arcount, i;
   const unsigned char *aptr;
@@ -296,7 +294,6 @@ static void callback(void *arg, int status, unsigned char *abuf, int alen)
   if (status != ARES_SUCCESS)
     {
       printf("%s\n", ares_strerror(status));
-      ares_free_errmem(errmem);
       if (!abuf)
 	return;
     }

@@ -44,7 +44,6 @@ int main(int argc, char **argv)
   int status, nfds;
   fd_set read_fds, write_fds;
   struct timeval *tvp, tv;
-  char *errmem;
   struct in_addr addr;
 
 #ifdef WIN32
@@ -60,7 +59,6 @@ int main(int argc, char **argv)
   if (status != ARES_SUCCESS)
     {
       fprintf(stderr, "ares_init: %s\n", ares_strerror(status));
-      ares_free_errmem(errmem);
       return 1;
     }
 
@@ -97,12 +95,11 @@ int main(int argc, char **argv)
 static void callback(void *arg, int status, struct hostent *host)
 {
   struct in_addr addr;
-  char *mem, **p;
+  char **p;
 
   if (status != ARES_SUCCESS)
     {
       fprintf(stderr, "%s: %s\n", (char *) arg, ares_strerror(status));
-      ares_free_errmem(mem);
       return;
     }
 
