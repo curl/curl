@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (15 December)
+- Giuseppe Attardi found and fixed a problem within libcurl that re-used
+  already freed memory.
+
 Daniel (10 December)
 - Gisle Vanem reported that the dict support was broken. I broke it during my
   ftps-changes overhaul. I've now added a 'curlassert' function that can be

@@ -3281,6 +3281,9 @@ CURLcode Curl_do(struct connectdata **connp)
 
       conn->bits.close = TRUE; /* enforce close of this connetion */
       result = Curl_done(conn);   /* we are so done with this */
+
+      /* conn is no longer a good pointer */
+
       if(CURLE_OK == result) {
         bool async;
         /* Now, redo the connect and get a new connection */
@@ -3288,6 +3291,7 @@ CURLcode Curl_do(struct connectdata **connp)
         if(CURLE_OK == result) {
           /* We have connected or sent away a name resolve query fine */
 
+          conn = *connp; /* setup conn to again point to something nice */
           if(async) {
             /* Now, if async is TRUE here, we need to wait for the name
                to resolve */
