@@ -180,6 +180,11 @@ cd $CURLDIR
 
 # Do the CVS thing, or not...
 if [ $CVS -eq 1 ]; then
+
+  # this is a temporary fix to make things work again, remove later
+  log "remove ares/aclocal.m4"
+  rm -f ares/aclocal.m4
+
   log "update from CVS"
 
   cvsup() {
