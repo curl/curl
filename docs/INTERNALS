@@ -14,14 +14,13 @@ INTERNALS
 
 SYMBOLS
 =======
- All symbols used internally must use a 'Curl_' prefix if they're used in
- more than a single file. Single file symbols must be made static. Public
- symbols must use a 'curl_' prefix. (There are exceptions, but they are
- destined to change to this pattern in the future.)
+ All symbols used internally must use a 'Curl_' prefix if they're used in more
+ than a single file. Single-file symbols must be made static. Public
+ (exported) symbols must use a 'curl_' prefix. (There are exceptions, but they
+ are destined to be changed to follow this pattern in the future.)
 
 CVS
 ===
-
  All changes to the sources are committed to the CVS repository as soon as
  they're somewhat verified to work. Changes shall be commited as independently
  as possible so that individual changes can be easier spotted and tracked
@@ -34,7 +33,7 @@ Windows vs Unix
 ===============
 
  There are a few differences in how to program curl the unix way compared to
- the Windows way. The four most notable details are:
+ the Windows way. The four perhaps most notable details are:
 
  1. Different function names for close(), read(), write()
  2. Windows requires a couple of init calls for the socket stuff
@@ -61,6 +60,9 @@ Windows vs Unix
  supposed to look exactly as a config.h file would have looked like on a
  Windows machine!
 
+ Generally speaking: always remember that this will be compiled on dozens of
+ operating systems. Don't walk on the edge.
+
 Library
 =======
 
@@ -75,6 +77,9 @@ Library
  rather small and easy-to-follow. All the ones prefixed with 'curl_easy' are
  put in the lib/easy.c file.
 
+ All printf()-style functions use the supplied clones in lib/mprintf.c. This
+ makes sure we stay absolutely platform independent.
+
  curl_easy_init() allocates an internal struct and makes some initializations.
  The returned handle does not revail internals.
 
@@ -84,27 +89,31 @@ Library
 
  curl_easy_perform() does a whole lot of things:
 
- The function analyzes the URL, get the different components and connects to
- the remote host. This may involve using a proxy and/or using SSL. The
- GetHost() function in lib/hostip.c is used for looking up host names.
+ It starts off in the lib/easy.c file by calling curl_transfer(), but the main
+ work is lib/url.c. The function first analyzes the URL, it separates the
+ different components and connects to the remote host. This may involve using
+ a proxy and/or using SSL. The Curl_gethost() function in lib/hostip.c is used
+ for looking up host names.
 
- When connected, the proper function is called. The functions are named after
- the protocols they handle. ftp(), http(), dict(), etc. They all reside in
- their respective files (ftp.c, http.c and dict.c).
+ When connected, the proper protocol-specific function is called. The
+ functions are named after the protocols they handle. Curl_ftp(), Curl_http(),
+ Curl_dict(), etc. They all reside in their respective files (ftp.c, http.c
+ and dict.c).
 
- The protocol-specific functions deal with protocol-specific negotiations and
- setup. They have access to the sendf() (from lib/sendf.c) function to send
- printf-style formatted data to the remote host and when they're ready to make
- the actual file transfer they call the Transfer() function (in
- lib/download.c) to do the transfer. All printf()-style functions use the
- supplied clones in lib/mprintf.c.
+ The protocol-specific functions of course deal with protocol-specific
+ negotiations and setup. They have access to the Curl_sendf() (from
+ lib/sendf.c) function to send printf-style formatted data to the remote host
+ and when they're ready to make the actual file transfer they call the
+ Curl_Transfer() function (in lib/transfer.c) to setup the transfer and
+ returns. curl_transfer() then calls _Tranfer() in lib/transfer.c that
+ performs the entire file transfer.
 
- While transfering, the progress functions in lib/progress.c are called at a
+ During transfer, the progress functions in lib/progress.c are called at a
  frequent interval (or at the user's choice, a specified callback might get
  called). The speedcheck functions in lib/speedcheck.c are also used to verify
  that the transfer is as fast as required.
 
- When completed curl_easy_cleanup() should be called to free up used
+ When completed, the curl_easy_cleanup() should be called to free up used
  resources.
 
  HTTP(S)
@@ -113,9 +122,8 @@ Library
  code. There is a special file (lib/formdata.c) that offers all the multipart
  post functions.
 
- base64-functions for user+password stuff is in (lib/base64.c) and all
- functions for parsing and sending cookies are found in
- (lib/cookie.c).
+ base64-functions for user+password stuff (and more) is in (lib/base64.c) and
+ all functions for parsing and sending cookies are found in (lib/cookie.c).
 
  HTTPS uses in almost every means the same procedure as HTTP, with only two
  exceptions: the connect procedure is different and the function used to read
@@ -125,9 +133,17 @@ Library
 
  FTP
 
- The if2ip() function can be used for getting the IP number of a specified
- network interface, and it resides in lib/if2ip.c. It is only used for the FTP
- PORT command.
+ The Curl_if2ip() function can be used for getting the IP number of a
+ specified network interface, and it resides in lib/if2ip.c.
+
+ Curl_ftpsendf() is used for sending FTP commands to the remote server. It was
+ made a separate function to prevent us programmers from forgetting that they
+ must be CRLF terminated. They must also be sent in one single write() to make
+ firewalls and similar happy.
+
+ Kerberos
+
+ The kerberos support is mainly in lib/krb4.c and lib/security.c.
 
  TELNET
 
@@ -146,21 +162,42 @@ Library
  URL encoding and decoding, called escaping and unescaping in the source code,
  is found in lib/escape.c.
 
- While transfering data in Transfer() a few functions might get
+ While transfering data in _Transfer() a few functions might get
  used. curl_getdate() in lib/getdate.c is for HTTP date comparisons (and
  more).
 
  lib/getenv.c offers curl_getenv() which is for reading environment variables
  in a neat platform independent way. That's used in the client, but also in
- lib/url.c when checking the proxy environment variables.
+ lib/url.c when checking the proxy environment variables. Note that contrary
+ to the normal unix getenv(), this returns an allocated buffer that must be
+ free()ed after use.
 
  lib/netrc.c holds the .netrc parser
 
  lib/timeval.c features replacement functions for systems that don't have
- gettimeofday().
+ gettimeofday() and a few support functions for timeval convertions.
  
  A function named curl_version() that returns the full curl version string is
  found in lib/version.c.
+
+ If authentication is requested but no password is given, a getpass_r() clone
+ exists in lib/getpass.c. libcurl offers a custom callback that can be used
+ instead of this, but it doesn't change much to us.
+
+Return Codes and Informationals
+===============================
+
+ I've made things simple. Almost every function in libcurl returns a CURLcode,
+ that must be CURLE_OK if everything is OK or otherwise a suitable error code
+ as the curl/curl.h include file defines. The very spot that detects an error
+ must use the Curl_failf() function to set the human-readable error
+ description.
+
+ In aiding the user to understand what's happening and to debug curl usage, we
+ must supply a fair amount of informational messages by using the Curl_infof()
+ function. Those messages are only displayed when the user explicitly asks for
+ them. They are best used when revealing information that isn't otherwise
+ obvious.
 
 Client
 ======
@@ -168,10 +205,11 @@ Client
  main() resides in src/main.c together with most of the client code.
  src/hugehelp.c is automatically generated by the mkhelp.pl perl script to
  display the complete "manual" and the src/urlglob.c file holds the functions
- used for the multiple-URL support.
+ used for the URL-"globbing" support. Globbing in the sense that the {} and []
+ expansion stuff is there.
 
- The client mostly mess around to setup its config struct properly, then it
- calls the curl_easy_*() functions of the library and when it gets back
+ The client mostly messes around to setup its 'config' struct properly, then
+ it calls the curl_easy_*() functions of the library and when it gets back
  control after the curl_easy_perform() it cleans up the library, checks status
  and exits.
 
@@ -180,10 +218,30 @@ Client
  curl_easy_getinfo() function to extract useful information from the curl
  session.
 
+ Recent versions may loop and do all that several times if many URLs were
+ specified on the command line or config file.
+
+Memory Debugging
+================
+
+ The file named lib/memdebug.c contains debug-versions of a few
+ functions. Functions such as malloc, free, fopen, fclose, etc that somehow
+ deal with resources that might give us problems if we "leak" them. The
+ functions in the memdebug system do nothing fancy, they do their normal
+ function and then log information about what they just did. The logged data
+ is then analyzed after a complete session,
+
+ memanalyze.pl is a perl script present only in CVS (not part of the release
+ archives) that analyzes a log file generated by the memdebug system. It
+ detects if resources are allocated but never freed and other kinds of errors
+ related to resource management.
+
+ Use -DMALLOCDEBUG when compiling to enable memory debugging.
+
 Test Suite
 ==========
 
- During November 2000, a test suite has evolved. It is placed in its own
+ Since November 2000, a test suite has evolved. It is placed in its own
  subdirectory directly off the root in the curl archive tree, and it contains
  a bunch of scripts and a lot of test case data.
 
@@ -193,3 +251,17 @@ Test Suite
 
  You'll find a complete description of the test case data files in the README
  file in the test directory.
+
+ The test suite automatically detects if curl was built with the memory
+ debugging enabled, and if it was it will detect memory leaks too.
+
+Building Releases
+=================
+
+ There's no magic to this. When you consider everything stable enough to be
+ released, run the 'maketgz' script (using 'make distcheck' will give you a
+ pretty good view on the status of the current sources). maketgz prompts for
+ version number of the client and the library before it creates a release
+ archive.
+
+ You must have autoconf installed to build release archives.
