@@ -291,7 +291,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             k->hbuflen += nread;
             if (!k->headerline && (k->hbuflen>5)) {
               /* make a first check that this looks like a HTTP header */
-              if(!strnequal(data->state.headerbuff, "HTTP/", 5)) {
+              if(!checkprefix(data->state.headerbuff, "HTTP/")) {
                 /* this is not the beginning of a HTTP first header line */
                 k->header = FALSE;
                 k->badheader = HEADER_ALLBAD;
@@ -345,7 +345,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           if(!k->headerline) {
             /* the first read header */
             if((k->hbuflen>5) &&
-               !strnequal(data->state.headerbuff, "HTTP/", 5)) {
+               !checkprefix(data->state.headerbuff, "HTTP/")) {
               /* this is not the beginning of a HTTP first header line */
               k->header = FALSE;
               k->badheader = HEADER_PARTHEADER;
@@ -521,13 +521,13 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           }
 
           /* check for Content-Length: header lines to get size */
-          if (strnequal("Content-Length:", k->p, 15) &&
+          if (checkprefix("Content-Length:", k->p) &&
               sscanf (k->p+15, " %ld", &k->contentlength)) {
             conn->size = k->contentlength;
             Curl_pgrsSetDownloadSize(data, k->contentlength);
             }
           /* check for Content-Type: header lines to get the mime-type */
-          else if (strnequal("Content-Type:", k->p, 13)) {
+          else if (checkprefix("Content-Type:", k->p)) {
             char *start;
             char *end;
             int len;
@@ -597,7 +597,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             /* init our chunky engine */
             Curl_httpchunk_init(conn);
           }
-          else if (strnequal("Content-Encoding:", k->p, 17) &&
+          else if (checkprefix("Content-Encoding:", k->p) &&
                    data->set.encoding) {
             /*
              * Process Content-Encoding. Look for the values: identity, gzip,
@@ -614,18 +614,18 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 start++);
 
             /* Record the content-encoding for later use. 08/27/02 jhrg */
-            if (strnequal("identity", start, 8))
+            if (checkprefix("identity", start))
               k->content_encoding = IDENTITY;
-            else if (strnequal("deflate", start, 7))
+            else if (checkprefix("deflate", start))
               k->content_encoding = DEFLATE;
-            else if (strnequal("gzip", start, 4) 
-                     || strnequal("x-gzip", start, 6))
+            else if (checkprefix("gzip", start) 
+                     || checkprefix("x-gzip", start))
               k->content_encoding = GZIP;
-            else if (strnequal("compress", start, 8) 
-                     || strnequal("x-compress", start, 10))
+            else if (checkprefix("compress", start) 
+                     || checkprefix("x-compress", start))
               k->content_encoding = COMPRESS;
           }
-          else if (strnequal("Content-Range:", k->p, 14)) {
+          else if (checkprefix("Content-Range:", k->p)) {
             if (sscanf (k->p+14, " bytes %d-", &k->offset) ||
                 sscanf (k->p+14, " bytes: %d-", &k->offset)) {
               /* This second format was added August 1st 2000 by Igor
@@ -638,11 +638,10 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             }
           }
           else if(data->cookies &&
-                  strnequal("Set-Cookie:", k->p, 11)) {
+                  checkprefix("Set-Cookie:", k->p)) {
             Curl_cookie_add(data->cookies, TRUE, k->p+11, conn->name);
           }
-          else if(strnequal("Last-Modified:", k->p,
-                            strlen("Last-Modified:")) &&
+          else if(checkprefix("Last-Modified:", k->p) &&
                   (data->set.timecondition || data->set.get_filetime) ) {
             time_t secs=time(NULL);
             k->timeofdoc = curl_getdate(k->p+strlen("Last-Modified:"),
@@ -652,7 +651,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           }
           else if ((k->httpcode >= 300 && k->httpcode < 400) &&
                    (data->set.http_follow_location) &&
-                   strnequal("Location:", k->p, 9)) {
+                   checkprefix("Location:", k->p)) {
             /* this is the URL that the server advices us to get instead */
             char *ptr;
             char *start=k->p;

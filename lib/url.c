@@ -1848,22 +1848,22 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       /* Note: if you add a new protocol, please update the list in
        * lib/version.c too! */
 
-      if(strnequal(conn->gname, "FTP", 3)) {
+      if(checkprefix("FTP", conn->gname)) {
         strcpy(conn->protostr, "ftp");
       }
-      else if(strnequal(conn->gname, "GOPHER", 6))
+      else if(checkprefix("GOPHER", conn->gname))
         strcpy(conn->protostr, "gopher");
 #ifdef USE_SSLEAY
-      else if(strnequal(conn->gname, "HTTPS", 5))
+      else if(checkprefix("HTTPS", conn->gname))
         strcpy(conn->protostr, "https");
-      else if(strnequal(conn->gname, "FTPS", 4))
+      else if(checkprefix("FTPS", conn->gname))
         strcpy(conn->protostr, "ftps");
 #endif /* USE_SSLEAY */
-      else if(strnequal(conn->gname, "TELNET", 6))
+      else if(checkprefix("TELNET", conn->gname))
         strcpy(conn->protostr, "telnet");
-      else if (strnequal(conn->gname, "DICT", sizeof("DICT")-1))
+      else if (checkprefix("DICT", conn->gname))
         strcpy(conn->protostr, "DICT");
-      else if (strnequal(conn->gname, "LDAP", sizeof("LDAP")-1))
+      else if (checkprefix("LDAP", conn->gname))
         strcpy(conn->protostr, "LDAP");
       else {
         strcpy(conn->protostr, "http");
@@ -1966,7 +1966,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         if(strlen(nope) <= namelen) {
           char *checkn=
             conn->name + namelen - strlen(nope);
-          if(strnequal(nope, checkn, strlen(nope))) {
+          if(checkprefix(nope, checkn)) {
             /* no proxy for this host! */
             break;
           }

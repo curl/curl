@@ -32,6 +32,10 @@ int curl_strnequal(const char *first, const char *second, size_t max);
 #define strequal(a,b) curl_strequal(a,b)
 #define strnequal(a,b,c) curl_strnequal(a,b,c)
 
+/* checkprefix() is a shorter version of the above, used when the first
+   argument is zero-byte terminated */
+#define checkprefix(a,b)    strnequal(a,b,strlen(a))
+
 #ifndef HAVE_STRLCAT
 #define strlcat(x,y,z) Curl_strlcat(x,y,z)
 size_t Curl_strlcat(char *dst, const char *src, size_t siz);

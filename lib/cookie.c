@@ -519,7 +519,7 @@ struct CookieInfo *Curl_cookie_init(char *file,
     char *lineptr;
     bool headerline;
     while(fgets(line, MAX_COOKIE_LINE, fp)) {
-      if(strnequal("Set-Cookie:", line, 11)) {
+      if(checkprefix("Set-Cookie:", line)) {
         /* This is a cookie line, get it! */
         lineptr=&line[11];
         headerline=TRUE;
@@ -587,8 +587,8 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
 
 	    /* now check the left part of the path with the cookies path
 	       requirement */
-	    if(!co->path ||
-	       strnequal(path, co->path, strlen(co->path))) {
+           if(!co->path ||
+              checkprefix(co->path, path) ) {
 
 	       /* and now, we know this is a match and we should create an
 		  entry for the return-linked-list */

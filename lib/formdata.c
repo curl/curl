@@ -1218,7 +1218,7 @@ CURLcode Curl_getFormData(struct FormData **finalform,
        */
       
       if(file->contenttype &&
-         !strnequal("text/", file->contenttype, 5)) {
+         !checkprefix("text/", file->contenttype)) {
         /* this is not a text content, mention our binary encoding */
         size += AddFormData(&form, "\r\nContent-Transfer-Encoding: binary", 0);
       }
