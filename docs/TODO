@@ -15,10 +15,10 @@ TODO
  LIBCURL
 
  * Introduce an interface to libcurl that allows applications to easier get to
-   know what cookies that are received. Pushing interface that calls a
-   callback on each received cookie? Querying interface that asks about
-   existing cookies? We probably need both. Enable applications to modify
-   existing cookies as well. http://curl.haxx.se/dev/COOKIES
+   know what cookies that are received. CURLINFO_COOKIELIST to get a
+   curl_slist with cookies (netscape/mozilla cookie file formatted), and
+   CURLOPT_COOKIELIST to set a list of cookies (using the same format).
+   http://curl.haxx.se/mail/lib-2004-12/0195.html
 
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
