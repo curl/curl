@@ -107,9 +107,11 @@ typedef void * (*dynafunc)(void *input);
 
 /***********************************************************************
  */
+#if defined(HAVE_DLOPEN) || defined(HAVE_LIBDL) || defined(WIN32)
 static void *libldap = NULL;
 #ifndef WIN32
 static void *liblber = NULL;
+#endif
 #endif
 
 static int DynaOpen(const char **mod_name)
@@ -140,6 +142,7 @@ static int DynaOpen(const char **mod_name)
   return (libldap != NULL);
 
 #else
+  (void) mod_name;
   return (0);
 #endif
 }
@@ -179,6 +182,8 @@ static dynafunc DynaGetFunction(const char *name)
   if (libldap) {
     func = (dynafunc)GetProcAddress((HINSTANCE)libldap, name);
   }
+#else
+  (void) name;
 #endif
   return func;
 }
