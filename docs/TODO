@@ -34,6 +34,8 @@ TODO
 
  * Add asynchronous name resolving. http://curl.haxx.se/dev/async-resolver.txt
 
+ * Strip any trailing CR from the error message when Curl_failf() is used.
+
  DOCUMENTATION
 
  * Document all CURLcode error codes, why they happen and what most likely
