@@ -472,6 +472,7 @@ char *glob_match_url(char *filename, URLGlob *glob)
           break;
         default:
           printf("internal error: invalid pattern type (%d)\n", pat.type);
+          free(target);
           return NULL;
         }
       }
