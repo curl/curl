@@ -455,7 +455,7 @@ CURLcode http(struct connectdata *conn)
         /* we require a colon for this to be a true header */
 
         ptr++; /* pass the colon */
-        while(*ptr && isspace(*ptr))
+        while(*ptr && isspace((int)*ptr))
           ptr++;
 
         if(*ptr) {
