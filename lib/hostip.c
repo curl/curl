@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -213,11 +213,11 @@ static int _num_chars(int i)
 {
   int chars = 0;
 
-  /* While the number divided by 10 is greater than one, 
-   * re-divide the number by 10, and increment the number of 
+  /* While the number divided by 10 is greater than one,
+   * re-divide the number by 10, and increment the number of
    * characters by 1.
    *
-   * this relies on the fact that for every multiple of 10, 
+   * this relies on the fact that for every multiple of 10,
    * a new digit is added onto every number
    */
   do {
@@ -242,7 +242,7 @@ create_hostcache_id(char *server, int port, size_t *entry_len)
   *entry_len = strlen(server) + /* Hostname length */
     1 +                         /* ':' seperator */
     _num_chars(port);     /* number of characters the port will take up */
-  
+
   /* Allocate the new entry id */
   id = malloc(*entry_len + 1); /* 1 extra for the zero terminator */
   if (!id)
@@ -269,16 +269,16 @@ struct hostcache_prune_data {
 static int
 hostcache_timestamp_remove(void *datap, void *hc)
 {
-  struct hostcache_prune_data *data = 
+  struct hostcache_prune_data *data =
     (struct hostcache_prune_data *) datap;
   struct Curl_dns_entry *c = (struct Curl_dns_entry *) hc;
-  
+
   if ((data->now - c->timestamp < data->cache_timeout) ||
       c->inuse) {
     /* please don't remove */
     return 0;
   }
-  
+
   /* fine, remove */
   return 1;
 }
@@ -294,8 +294,8 @@ hostcache_prune(curl_hash *hostcache, int cache_timeout, time_t now)
   user.cache_timeout = cache_timeout;
   user.now = now;
 
-  Curl_hash_clean_with_criterium(hostcache, 
-                                 (void *) &user, 
+  Curl_hash_clean_with_criterium(hostcache,
+                                 (void *) &user,
                                  hostcache_timestamp_remove);
 }
 
@@ -446,7 +446,7 @@ int Curl_resolv(struct connectdata *conn,
 
   /* See if its already in our dns cache */
   dns = Curl_hash_pick(data->hostcache, entry_id, entry_len+1);
-  
+
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
@@ -467,10 +467,10 @@ int Curl_resolv(struct connectdata *conn,
        value indicating that we need to wait for the response to the resolve
        call */
     addr = Curl_getaddrinfo(conn, hostname, port, &wait);
-    
+
     if (!addr) {
       if(wait) {
-        /* the response to our resolve call will come asynchronously at 
+        /* the response to our resolve call will come asynchronously at
            a later time, good or bad */
         /* First, check that we haven't received the info by now */
         result = Curl_is_resolved(conn, &dns);
@@ -488,7 +488,7 @@ int Curl_resolv(struct connectdata *conn,
 
       /* we got a response, store it in the cache */
       dns = Curl_cache_addr(data, addr, hostname, port);
-      
+
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
 
@@ -609,7 +609,7 @@ Curl_addrinfo *Curl_addrinfo_copy(Curl_addrinfo *orig)
 
   /* This must be aligned properly to work on many CPU architectures! */
   bufptr = MEMALIGN(bufptr);
-  
+
   copy->h_aliases = (char**)bufptr;
 
   /* Figure out how many aliases there are */
@@ -634,7 +634,7 @@ Curl_addrinfo *Curl_addrinfo_copy(Curl_addrinfo *orig)
 
   copy->h_addrtype = orig->h_addrtype;
   copy->h_length = orig->h_length;
-    
+
   /* align it for (at least) 32bit accesses */
   bufptr = MEMALIGN(bufptr);
 
