@@ -1268,6 +1268,28 @@ AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
          CPPFLAGS="$CPPFLAGS -I$enableval/include"
          LDFLAGS="$LDFLAGS -L$enableval/lib"
        fi
+
+       dnl verify that a sufficient c-ares is here
+       AC_MSG_CHECKING([that c-ares is good and recent enough])
+       AC_LINK_IFELSE( [
+#include <ares.h>
+/* provide a set of dummy functions in case c-ares was built with debug */
+void curl_dofree() { }
+void curl_sclose() { }
+void curl_domalloc() { }
+
+int main(void)
+{
+  ares_channel channel;
+  ares_cancel(channel);
+  return 0;
+}
+],
+        AC_MSG_RESULT(yes),
+        AC_MSG_RESULT(no)
+        AC_MSG_ERROR([c-ares library defective or too old])
+        )
+
        ;;
   esac ],
        AC_MSG_RESULT(no)
