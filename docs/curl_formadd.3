@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_formadd 3 "29 October 2001" "libcurl 7.9.1" "libcurl Manual"
+.TH curl_formadd 3 "1 Match 2002" "libcurl 7.9.1" "libcurl Manual"
 .SH NAME
 curl_formadd - add a section to a multipart/formdata HTTP POST
 .SH SYNOPSIS
@@ -87,8 +87,8 @@ Returns non-zero if an error occurs.
 .SH EXAMPLE
 .nf
 
- HttpPost* post = NULL;
- HttpPost* last = NULL;
+ struct HttpPost* post = NULL;
+ struct HttpPost* last = NULL;
  char namebuffer[] = "name buffer";
  long namelength = strlen(namebuffer);
  char buffer[] = "test buffer";
