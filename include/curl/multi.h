@@ -1,10 +1,10 @@
 #ifndef __CURL_MULTI_H
 #define __CURL_MULTI_H
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -12,7 +12,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -43,7 +43,7 @@
 
   o Enable the application to select() on its own file descriptors and curl's
     file descriptors simultaneous easily.
-  
+
 */
 #if defined(_WIN32) && !defined(WIN32)
 /* Chris Lewis mentioned that he doesn't get WIN32 defined, only _WIN32 so we
@@ -217,5 +217,5 @@ const char *curl_multi_strerror(CURLMcode);
 #ifdef __cplusplus
 } /* end of extern "C" */
 #endif
-  
+
 #endif
