@@ -1477,6 +1477,8 @@ CURLcode Curl_posttransfer(struct SessionHandle *data)
   /* restore the signal handler for SIGPIPE before we get back */
   if(!data->set.no_signal)
     signal(SIGPIPE, data->state.prev_signal);
+#else
+  (void)data; /* unused parameter */
 #endif  
 
   return CURLE_OK;

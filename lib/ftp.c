@@ -405,7 +405,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   return result;
 }
 
-static char *ftpauth[]= {
+static const char *ftpauth[]= {
   "SSL", "TLS", NULL
 };
 
