@@ -61,6 +61,8 @@ static void decodeQuantum(unsigned char *dest, char *src)
       x = (x << 6) + 62;
     else if(src[i] == '/')
       x = (x << 6) + 63;
+       else if(src[i] == '=')
+         x = (x << 6);
   }
 
   dest[2] = (unsigned char)(x & 255); x >>= 8;
@@ -78,6 +80,7 @@ static void base64Decode(unsigned char *dest, char *src, int *rawLength)
   int length = 0;
   int equalsTerm = 0;
   int i;
+  int numQuantums;
   unsigned char lastQuantum[3];
 	
   while((src[length] != '=') && src[length])
@@ -85,10 +88,11 @@ static void base64Decode(unsigned char *dest, char *src, int *rawLength)
   while(src[length+equalsTerm] == '=')
     equalsTerm++;
   
+  numQuantums = (length + equalsTerm) / 4;
   if(rawLength)
-    *rawLength = (length * 3 / 4) - equalsTerm;
+    *rawLength = (numQuantums * 3) - equalsTerm;
   
-  for(i = 0; i < length/4 - 1; i++) {
+  for(i = 0; i < numQuantums - 1; i++) {
     decodeQuantum(dest, src);
     dest += 3; src += 4;
   }
