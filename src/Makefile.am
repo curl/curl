@@ -27,12 +27,12 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # we use srcdir/lib for the client-private header files
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/src -I$(top_srcdir)/src
 
-bin_PROGRAMS = curl #memtest
+bin_PROGRAMS = curl
 
 curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c setup.h \
 	config-win32.h config-mac.h config-vms.h config-riscos.h \
 	urlglob.h version.h writeout.h writeenv.c writeenv.h \
-	getpass.c getpass.h homedir.c homedir.h
+	getpass.c getpass.h homedir.c homedir.h $(top_srcdir)/lib/strtoofft.c
 
 curl_LDADD = ../lib/libcurl.la
 curl_DEPENDENCIES = ../lib/libcurl.la
@@ -66,4 +66,3 @@ else
 hugehelp.c: $(README) $(MANPAGE)  mkhelp.pl
 	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) $(README) > hugehelp.c
 endif
-
