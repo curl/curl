@@ -70,6 +70,9 @@ void curl_memdebug(const char *logname)
 void *curl_domalloc(size_t size, int line, const char *source)
 {
   void *mem=(malloc)(size);
+  if(mem)
+    /* fill memory with junk */
+    memset(mem, 0xA5, size);
   if(logfile)
     fprintf(logfile, "MEM %s:%d malloc(%d) = %p\n",
             source, line, size, mem);
