@@ -370,8 +370,7 @@ FAQ
 
   Find out more about which languages that support curl directly, and how to
   install and use them, in the libcurl section of the curl web site:
-
-        http://curl.haxx.se/libcurl/
+  http://curl.haxx.se/libcurl/
 
   In February 2003, there are interfaces available for the following
   languages: Basic, C, C++, Cocoa, Dylan, Euphoria, Java, Lua, Object-Pascal,
@@ -444,15 +443,15 @@ FAQ
 
   Some work-arounds usually suggested to overcome this javascript dependency:
 
-    - Depending on the javascript complexity, write up a script that
-      translates it to another language and execute that.
+  - Depending on the javascript complexity, write up a script that
+    translates it to another language and execute that.
 
-    - Read the javascript code and rewrite the same logic in another language.
+  - Read the javascript code and rewrite the same logic in another language.
 
-    - Implement a javascript interpreter, people have successfully used the
-      Mozilla javascript engine in the past.
+  - Implement a javascript interpreter, people have successfully used the
+    Mozilla javascript engine in the past.
 
-    - Ask your admins to stop this, for a static proxy setup or similar.
+  - Ask your admins to stop this, for a static proxy setup or similar.
 
   3.15 Can I do recursive fetches with curl?
 
