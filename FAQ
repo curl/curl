@@ -83,3 +83,14 @@ configre doesn't find OpenSSL even when it is installed
   things work
 
   Submitted by: Bob Allison <allisonb@users.sourceforge.net>
+
+Will you write a script for me getting ZZZ from YYY?
+====================================================
+
+  No.
+
+  I try to help out to solve issues with curl and related stuff, but I really
+  do have a lot of stuff on my daily schedule and I'd prefer if you did not
+  ask me to do your jobs. Writing scripts is very easy. Using curl might be
+  tricky, but once you're past the initial mistakes the road to success is
+  very short and straight-forward.
