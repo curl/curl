@@ -1,0 +1,33 @@
+# Server-side
+<reply>
+<data>
+data in file
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP URL with ?-letters in username and password 
+ </name>
+ <command>
+"ftp://use?r:pass?word@%HOSTIP:%FTPPORT/191"
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+USER use?r
+PASS pass?word
+PWD
+EPSV
+TYPE I
+SIZE 191
+RETR 191
+QUIT
+</protocol>
+</verify>

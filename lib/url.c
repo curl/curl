@@ -2175,6 +2175,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
                                  bool *async)
 {
   char *tmp;
+  char *at;
   CURLcode result=CURLE_OK;
   struct connectdata *conn;
   struct connectdata *conn_temp;
@@ -2349,13 +2350,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* Set default path */
     strcpy(conn->path, "/");
 
-    /* We need to search for '/' OR '?' - whichever comes first after host
-     * name but before the path. We need to change that to handle things like
-     * http://example.com?param= (notice the missing '/'). Later we'll insert
-     * that missing slash at the beginning of the path.
-     */
     if (2 > sscanf(data->change.url,
-                   "%15[^\n:]://%[^\n/?]%[^\n]",
+                   "%15[^\n:]://%[^\n/]%[^\n]",
                    conn->protostr,
                    conn->host.name, conn->path)) {
 
@@ -2363,7 +2359,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
        */
-      if((1 > sscanf(data->change.url, "%[^\n/?]%[^\n]",
+      if((1 > sscanf(data->change.url, "%[^\n/]%[^\n]",
                      conn->host.name, conn->path)) ) {
         /*
          * We couldn't even get this format.
@@ -2402,6 +2398,27 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
       conn->protocol |= PROT_MISSING; /* not given in URL */
     }
+  }
+
+  /* We search for '?' in the host name (but only on the right side of a
+   * @-letter to allow ?-letters in username and password) to handle things
+   * like http://example.com?param= (notice the missing '/').
+   */
+  at = strchr(conn->host.name, '@');
+  if(at)
+    tmp = strchr(at+1, '?');
+  else
+    tmp = strchr(conn->host.name, '?');
+
+  if(tmp) {
+    /* The right part of the ?-letter needs to be moved to prefix
+       the current path buffer! */
+    size_t len = strlen(tmp);
+    /* move the existing path plus the zero byte */
+    memmove(conn->path+len+1, conn->path, strlen(conn->path)+1);
+    conn->path[0]='/'; /* prepend the missing slash */
+    memcpy(conn->path+1, tmp, len); /* now copy the prefix part */
+    *tmp=0; /* now cut off the hostname at the ? */
   }
 
   /* If the URL is malformatted (missing a '/' after hostname before path) we

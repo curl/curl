@@ -21,6 +21,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o URLs with ?-letters in the user name or password fields
  o libcurl error message is now provided when send() fails
  o no more SIGPIPE on Mac OS X and other SO_NOSIGPIPE-supporting platforms
  o HTTP resume was refused if redirected
@@ -61,6 +62,8 @@ Other curl-related news since the previous public release:
  o tclcurl version 0.12.1
    http://personal1.iddeo.es/andresgarci/tclcurl/english/
  o libcurl.NET was announce: http://www.seasideresearch.com/downloads.html
+ o Get your fresh Mozilla-extracted ca cert bundle here:
+   http://curl.haxx.se/docs/caextract.html
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
@@ -71,6 +74,6 @@ advice from friends like these:
  Jean-Claude Chauve, Dan Fandrich, Peter Sylvester, "Mekonikum", Jean-Philippe
  Barrette-LaPierre, Günter Knauf, Larry Campbell, Fedor Karpelevitch,
  Aleksandar Milivojevic, Gisle Vanem, Chris "Bob Bob", Chih-Chung Chang,
- Andy Cedilnik, Alan Pinstein
+ Andy Cedilnik, Alan Pinstein, Eric Vergnaud 
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (14 October 2004)
+- Eric Vergnaud pointed out that libcurl didn't treat ?-letters in the user
+  name and password fields properly in URLs, like
+  ftp://us?er:pass?word@site.com/. Added test 191 to verify the fix.
+
 Daniel (11 October 2004)
 - libcurl now uses SO_NOSIGPIPE for systems that support it (Mac OS X 10.2 or
   later is one) to inhibit the SIGPIPE signal when writing to a socket while
