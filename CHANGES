@@ -6,6 +6,12 @@
 
                                History of Changes
 
+Daniel (12 April 2002)
+- Jean-Philippe Barrette-LaPierre provided his patch that introduces
+  CURLOPT_DEBUGFUNCTION and CURLOPT_DEBUGDATA. They allow a program to a set a
+  callback to receive debug/information data. That includes headers and data
+  that is received and sent.
+
 Daniel (10 April 2002)
 - Sebastien Willemijns found out that -x didn't use the default port number as
   is documented. It does now.
@@ -22,7 +28,7 @@ Daniel (10 April 2002)
    to a remote server. CURLE_SEND_ERROR has now been added for the latter
    error.
 
- CURLE_READ_ERROR
+  CURLE_READ_ERROR
    This error was similarly returned *both* for errors when reading a local
    file, as well as when getting problems when reading network data.
    CURLE_RECV_ERROR has now been added for the latter error.
