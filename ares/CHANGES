@@ -1,20 +1,24 @@
 
-* February 2, 2004:
+* February 3, 2004
+- now we produce the libcares.a library instead of the previous libares.a
+  since we are no longer compatible
+
+* February 2, 2004
 
 - ares_strerror() has one argument less. This is the first official
   modification of the existing provided ares API.
 
-* January 29, 2004:
+* January 29, 2004
 
 - Dirk Manske fixed how the socket is set non-blocking.
 
-* January 4, 2004:
+* January 4, 2004
 
 - Dominick Meglio made the private gettimeofday() become ares_gettimeofday()
   instead in order to not pollute the name space and risk colliding with
   other libraries' versions of this function.
 
-* October 24, 2003. Daniel Stenberg:
+* October 24, 2003. Daniel Stenberg
 
   Added ares_version().
 
