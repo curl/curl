@@ -184,7 +184,5 @@ CURLcode file(struct connectdata *conn)
 
   close(fd);
 
-  free(actual_path);
-
   return res;
 }
