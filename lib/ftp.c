@@ -1122,9 +1122,9 @@ CURLcode ftp_use_port(struct connectdata *conn)
 
   struct sockaddr *sa=(struct sockaddr *)&ss;
 #ifdef NI_WITHSCOPEID
-  const int niflags = NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID;
+#define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV | NI_WITHSCOPEID
 #else
-  const int niflags = NI_NUMERICHOST | NI_NUMERICSERV;
+#define NIFLAGS NI_NUMERICHOST | NI_NUMERICSERV
 #endif
   unsigned char *ap;
   unsigned char *pp;
@@ -1146,7 +1146,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
   }
   
   rc = getnameinfo((struct sockaddr *)&ss, sslen, hbuf, sizeof(hbuf), NULL, 0,
-                   niflags);
+                   NIFLAGS);
   if(rc) {
     failf(data, "getnameinfo() returned %d\n", rc);
     return CURLE_FTP_PORT_FAILED;
@@ -1236,7 +1236,8 @@ CURLcode ftp_use_port(struct connectdata *conn)
       if (eprtaf < 0)
         continue;
       if (getnameinfo((struct sockaddr *)&ss, sslen,
-                      portmsgbuf, sizeof(portmsgbuf), tmp, sizeof(tmp), niflags))
+                      portmsgbuf, sizeof(portmsgbuf), tmp, sizeof(tmp),
+                      NIFLAGS))
         continue;
 
       /* do not transmit IPv6 scope identifier to the wire */
