@@ -819,6 +819,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * defaults to CURLOPT_STDERR for normal operations.
      */
     data->set.debugdata = va_arg(param, void *);
+    break;
   case CURLOPT_STDERR:
     /*
      * Set to a FILE * that should receive all error writes. This
