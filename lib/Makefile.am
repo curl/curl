@@ -33,7 +33,7 @@ EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	\
   makefile.amiga config-netware.h Makefile.netware nwlib.c libcurl.imp	\
   msvcproj.head msvcproj.foot
 
-CLEANFILES = $(DSP)
+CLEANFILES = $(DSP) getdate.c
 
 lib_LTLIBRARIES = libcurl.la
 
