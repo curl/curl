@@ -197,6 +197,9 @@ Transfer(struct connectdata *c_conn)
                                    Content-Range: header */
   int httpcode = 0;		/* error code from the 'HTTP/1.? XXX' line */
   int httpversion = -1;			/* the HTTP version*10 */
+  bool write_after_100_header = FALSE;  /* should we enable the write after
+                                           we received a 100-continue/timeout
+                                           or directly */
 
   /* for the low speed checks: */
   CURLcode urg;
@@ -263,8 +266,13 @@ Transfer(struct connectdata *c_conn)
 
     FD_ZERO (&writefd);		/* clear it */
     if(conn->writesockfd != -1) {
-      FD_SET (conn->writesockfd, &writefd); /* write socket */
-      keepon |= KEEP_WRITE;
+      if (data->bits.expect100header)
+        /* wait with write until we either got 100-continue or a timeout */
+        write_after_100_header = TRUE;
+      else {
+        FD_SET (conn->writesockfd, &writefd); /* write socket */
+        keepon |= KEEP_WRITE;
+      }
     }
 
     /* get these in backup variables to be able to restore them on each lap in
@@ -290,6 +298,12 @@ Transfer(struct connectdata *c_conn)
           keepon = 0; /* no more read or write */
 	continue;
       case 0:			/* timeout */
+        if (write_after_100_header) {
+          write_after_100_header = FALSE;
+          FD_SET (conn->writesockfd, &writefd); /* write socket */
+          keepon |= KEEP_WRITE;
+          wkeepfd = writefd;
+        }
 	break;
       default:
         if((keepon & KEEP_READ) && FD_ISSET(conn->sockfd, &readfd)) {
@@ -408,6 +422,13 @@ Transfer(struct connectdata *c_conn)
                    */
                   header = TRUE;
                   headerline = 0; /* we restart the header line counter */
+                  /* if we did wait for this do enable write now! */
+                  if (write_after_100_header) {
+                    write_after_100_header = FALSE;
+                    FD_SET (conn->writesockfd, &writefd); /* write socket */
+                    keepon |= KEEP_WRITE;
+                    wkeepfd = writefd;
+                  }
                 }
                 else
                   header = FALSE;	/* no more header to parse! */

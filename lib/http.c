@@ -703,6 +703,8 @@ CURLcode Curl_http(struct connectdata *conn)
     }
 
     if(HTTPREQ_POST_FORM == data->httpreq) {
+      char contentType[256];
+      int linelength=0;
       if(Curl_FormInit(&http->form, http->sendit)) {
         failf(data, "Internal HTTP POST error!\n");
         return CURLE_HTTP_POST_ERROR;
@@ -719,15 +721,40 @@ CURLcode Curl_http(struct connectdata *conn)
       add_bufferf(req_buffer,
                   "Content-Length: %d\r\n", http->postsize-2);
 
+      if(!checkheaders(data, "Expect:")) {
+        /* if not disabled explicitly we add a Expect: 100-continue
+           to the headers which actually speeds up post operations (as
+           there is one packet coming back from the web server) */
+        add_bufferf(req_buffer,
+                    "Expect: 100-continue\r\n");
+        data->bits.expect100header = TRUE;
+
+        /* Get Content-Type: line from Curl_FormReadOneLine, which happens
+           to always be the first line. We can know this for sure since
+           we always build the formpost linked list the same way! */
+        linelength = Curl_FormReadOneLine (contentType,
+                                           sizeof(contentType),
+                                           1,
+                                           (FILE *)&http->form);
+        if(linelength == -1) {
+          failf(data, "Could not get Content-Type header line!\n");
+          return CURLE_HTTP_POST_ERROR;
+        }
+        add_buffer(req_buffer, contentType, linelength);
+      }
+
       /* set upload size to the progress meter */
       Curl_pgrsSetUploadSize(data, http->postsize);
 
+      /* fire away the whole request to the server */
       data->request_size = 
         add_buffer_send(conn->firstsocket, conn, req_buffer);
+
+      /* setup variables for the upcoming transfer */
       result = Curl_Transfer(conn, conn->firstsocket, -1, TRUE,
-                        &http->readbytecount,
-                          conn->firstsocket,
-                        &http->writebytecount);
+                             &http->readbytecount,
+                             conn->firstsocket,
+                             &http->writebytecount);
       if(result) {
         Curl_formclean(http->sendit); /* free that whole lot */
         return result;

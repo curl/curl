@@ -4,7 +4,8 @@
 .\"
 .TH curl_formparse 3 "21 May 2001" "libcurl 7.7.4" "libcurl Manual"
 .SH NAME
-curl_formparse - add a section to a multipart/formdata HTTP POST
+curl_formparse - add a section to a multipart/formdata HTTP POST:
+deprecated (use curl_formadd instead)
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
@@ -79,6 +80,7 @@ Returns non-zero if an error occurs.
 
 .SH "SEE ALSO"
 .BR curl_easy_setopt "(3), "
+.BR curl_formadd "(3), "
 .BR curl_formfree "(3)
 .SH BUGS
 Surely there are some, you tell me!

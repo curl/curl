@@ -275,7 +275,7 @@ instruct what data to pass on to the server.  Pass a pointer to a linked list
 of HTTP post structs as parameter.  The linked list should be a fully valid
 list of 'struct HttpPost' structs properly filled in. The best and most
 elegant way to do this, is to use
-.I curl_formparse(3)
+.I curl_formadd(3)
 as documented. The data in this list must remained intact until you close this
 curl handle again with curl_easy_cleanup().
 .TP

@@ -53,11 +53,14 @@ portable environment variable reader
 .B curl_easy_getinfo()
 get information about a performed transfer
 .TP
-.B curl_formparse()
+.B curl_formadd()
 helps building a HTTP form POST
 .TP
+.B curl_formparse()
+helps building a HTTP form POST (deprecated since 7.9 use curl_formadd()!)
+.TP
 .B curl_formfree()
-free a list built with curl_formparse()
+free a list built with curl_formparse()/curl_formadd()
 .TP
 .B curl_slist_append()
 builds a linked list

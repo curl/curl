@@ -741,6 +741,11 @@ do {
         # verbose output
         $verbose=1;
     }
+    elsif ($ARGV[0] eq "-c") {
+        # use this path to curl instead of default        
+        $CURL=$ARGV[1];
+        shift @ARGV;
+    }
     elsif ($ARGV[0] eq "-d") {
         # have the servers display protocol output 
         $debugprotocol=1;

@@ -59,12 +59,15 @@ struct HttpPost {
   struct HttpPost *next; /* next entry in the list */
   char *name;     /* pointer to allocated name */
   char *contents; /* pointer to allocated data contents */
+  long contentslength; /* length of contents field */
   char *contenttype; /* Content-Type */
   struct HttpPost *more; /* if one field name has more than one file, this
 			    link should link to following files */
   long flags;     /* as defined below */
 #define HTTPPOST_FILENAME (1<<0) /* specified content is a file name */
 #define HTTPPOST_READFILE (1<<1) /* specified content is a file name */
+#define HTTPPOST_PTRCONTENTS (1<<2) /* contents is only stored pointer
+                                        do not free in formfree */
 };
 
 typedef int (*curl_progress_callback)(void *clientp,
@@ -483,6 +486,32 @@ int curl_formparse(char *string,
                    struct HttpPost **httppost,
                    struct HttpPost **last_post);
 
+/* name is uppercase CURLFORM_<name> */
+#ifdef CFINIT
+#undef CFINIT
+#endif
+#define CFINIT(name) CURLFORM_ ## name
+
+typedef enum {
+  CFINIT(NOTHING),        /********* the first one is unused ************/
+  
+  /*  */
+  CFINIT(COPYNAME),
+  CFINIT(COPYCONTENTS),
+  CFINIT(PTRCONTENTS),
+  CFINIT(CONTENTSLENGTH),
+  CFINIT(FILE),
+  CFINIT(CONTENTTYPE),
+  CFINIT(END),
+
+  CURLFORM_LASTENTRY /* the last unusued */
+} CURLformoption;
+
+/* new external form function */
+int curl_formadd(struct HttpPost **httppost,
+                 struct HttpPost **last_post,
+                 ...);
+
 /* cleanup a form: */
 void curl_formfree(struct HttpPost *form);
 
@@ -495,8 +524,8 @@ char *curl_version(void);
 
 /* Escape and unescape URL encoding in strings. The functions return a new
  * allocated string or NULL if an error occurred.  */
-char *curl_escape(char *string, int length);
-char *curl_unescape(char *string, int length);
+char *curl_escape(const char *string, int length);
+char *curl_unescape(const char *string, int length);
 
 /* curl_global_init() should be invoked exactly once for each application that
    uses libcurl */
@@ -507,8 +536,8 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.8.1"
-#define LIBCURL_VERSION_NUM 0x070801
+#define LIBCURL_VERSION "7.8.2-pre1"
+#define LIBCURL_VERSION_NUM 0x070802
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {

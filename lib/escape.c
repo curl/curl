@@ -37,7 +37,7 @@
 #include "memdebug.h"
 #endif
 
-char *curl_escape(char *string, int length)
+char *curl_escape(const char *string, int length)
 {
   int alloc = (length?length:(int)strlen(string))+1;  
   char *ns = malloc(alloc);
@@ -75,7 +75,7 @@ char *curl_escape(char *string, int length)
   return ns;
 }
 
-char *curl_unescape(char *string, int length)
+char *curl_unescape(const char *string, int length)
 {
   int alloc = (length?length:(int)strlen(string))+1;
   char *ns = malloc(alloc);

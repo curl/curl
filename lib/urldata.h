@@ -413,6 +413,8 @@ struct Configbits {
                             after use */
   bool reuse_fresh;      /* do not re-use an existing connection for this
                             transfer */
+  bool expect100header;  /* TRUE if we added Expect: 100-continue to the
+                            HTTP header */
 };
 
 /*

@@ -1,0 +1,114 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" $Id$
+.\"
+.TH curl_formadd 3 "19 August 2001" "libcurl 7.9" "libcurl Manual"
+.SH NAME
+curl_formadd - add a section to a multipart/formdata HTTP POST
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "CURLcode curl_formadd(struct HttpPost ** " firstitem,
+.BI "struct HttpPost ** " lastitem, " ...);"
+.ad
+.SH DESCRIPTION
+curl_formadd() is used to append sections when building a multipart/formdata
+HTTP POST (sometimes refered to as rfc1867-style posts). Append one section at
+a time until you've added all the sections you want included and then you pass
+the \fIfirstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST\fP.
+\fIlastitem\fP is set after each call and on repeated invokes it should be
+left as set to allow repeated invokes to find the end of the list in a faster
+way.
+
+After \fIlastitem\fP follow the real arguments that constitute the
+new section (if the following description confuses you jump directly
+to the examples):
+
+The first is always CURLFORM_COPYNAME followed by a string used for
+the name of the section.
+
+Afterwards one may use one of three arguments: CURLFORM_COPYCONTENTS,
+CURLFORM_PTRCONTENTS, or CURLFORM_FILE. followed by a char or void
+pointer (allowed for PTRCONTENTS).
+
+The next argument may be CURLFORM_CONTENTTYPE if the
+user wishes to specify one (for FILE if no type is given the library
+tries to provide the correct one; for CONTENTS no Content-Type is sent
+in this case)
+
+For CURLFORM_PTRCONTENTS the user may also add CURLFORM_CONTENTSLENGTH
+followed by the length as a long (if not given the library will use
+strlen to determine the length; for COPYCONTENTS this is always done).
+
+For CURLFORM_FILE the user may send multiple files in one section by
+providing multiple CURLFORM_FILE arguments each followed by the filename
+(and each FILE is allowed to have a CONTENTTYPE).
+
+The last argument always is CURLFORM_END.
+
+The pointers \fI*firstitem\fP and \fI*lastitem\fP should both be pointing to
+NULL in the first call to this function. All list-data will be allocated by
+the function itself. You must call \fIcurl_formfree\fP after the form post has
+been done to free the resources again.
+
+This function will copy all input data except the data pointed to by
+the argument after CURLFORM_PTRCONTENTS and keep its own
+version of it allocated until you call \fIcurl_formfree\fP. When
+you've passed the pointer to \fIcurl_easy_setopt\fP, you must not free
+the list until after you've called \fIcurl_easy_cleanup\fP for the
+curl handle. If you provide a pointer as an argument after
+CURLFORM_PTRCONTENTS you must ensure that the pointer stays valid
+until you call \fIcurl_form_free\fP and \fIcurl_easy_cleanup\fP.
+
+See example below.
+.SH RETURN VALUE
+Returns non-zero if an error occurs.
+.SH EXAMPLE
+.nf
+
+ HttpPost* post = NULL;
+ HttpPost* last = NULL;
+ char buffer[] = "test buffer";
+ char htmlbuffer[] = "<HTML>test buffer</HTML>";
+ long htmlbufferlength = strlen(htmlbuffer);
+ /* add null character into htmlbuffer, to demonstrate that
+    transfers of buffers containing null characters actually work
+ */
+ htmlbuffer[8] = '\\0';
+
+ /* Add simple name/content section */
+ curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
+              CURLFORM_COPYCONTENTS, "content", CURLFORM_END); 
+ /* Add simple name/content/contenttype section */
+ curl_formadd(&post, &last, CURLFORM_COPYNAME, "htmlcode",
+              CURLFORM_COPYCONTENTS, "<HTML></HTML>",
+              CURLFORM_CONTENTTYPE, "text/html", CURLFORM_END);
+ /* Add name/ptrcontent section */
+ curl_formadd(&post, &past, CURLFORM_COPYNAME, "name_for_ptrcontent",
+              CURLFORM_PTRCONTENTS, buffer, CURLFORM_END);
+ /* Add name/ptrcontent/contenttype section */
+ curl_formadd(&post, &last, CURLFORM_COPYNAME, "html_code_with_hole",
+              CURLFORM_PTRCONTENTS, htmlbuffer,
+              CURLFORM_CONTENTSLENGTH, htmlbufferlength,
+              CURLFORM_CONTENTTYPE, "text/html", CURLFORM_END);
+ /* Add simple file section */
+ curl_formadd(&post, &last, CURLFORM_COPYNAME, "picture",
+              CURLFORM_FILE, "my-face.jpg", CURLFORM_END);
+ /* Add file/contenttype section */
+ curl_formadd(&post, &last, CURLFORM_COPYNAME, "picture",
+              CURLFORM_FILE, "my-face.jpg",
+              CURLFORM_CONTENTTYPE, "image/jpeg", CURLFORM_END);
+ /* Add two file section */
+ curl_formadd(&post, &last, CURLFORM_COPYNAME, "pictures",
+              CURLFORM_FILE, "my-face.jpg",
+              CURLFORM_FILE, "your-face.jpg", CURLFORM_END);
+ /* Set the form info */
+ curl_easy_setopt(curl, CURLOPT_HTTPPOST, post);
+
+.SH "SEE ALSO"
+.BR curl_easy_setopt "(3), "
+.BR curl_formparse "(3) [deprecated], "
+.BR curl_formfree "(3)
+.SH BUGS
+Surely there are some, you tell me!
+

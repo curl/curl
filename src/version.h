@@ -1,3 +1,3 @@
 #define CURL_NAME "curl"
-#define CURL_VERSION "7.8.1"
+#define CURL_VERSION "7.8.2-pre1"
 #define CURL_ID CURL_NAME " " CURL_VERSION " (" OS ") "

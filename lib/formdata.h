@@ -47,8 +47,15 @@ int Curl_FormReader(char *buffer,
                     size_t nitems,
                     FILE *mydata);
 
+/* possible (old) fread() emulation that copies at most one line */
+int Curl_FormReadOneLine(char *buffer,
+                         size_t size,
+                         size_t nitems,
+                         FILE *mydata);
+
 char *Curl_FormBoundary(void);
 
 void Curl_formclean(struct FormData *);
 
 #endif
+
