@@ -2469,7 +2469,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   FILE *infd = stdin;
   FILE *headerfilep = NULL;
   char *urlbuffer=NULL;
-  int infilesize=-1; /* -1 means unknown */
+  long infilesize=-1; /* -1 means unknown */
   bool stillflags=TRUE;
 
   bool allocuseragent=FALSE;
