@@ -1590,7 +1590,7 @@ static int handleSock5Proxy(const char *proxy_name,
   Curl_nonblock(sock, FALSE);
 
   socksreq[0] = 5; /* version */
-  socksreq[1] = (char)(proxy_name[0] ? 2 : 1); /* number of methods (below) */
+  socksreq[1] = (char)(proxy_name ? 2 : 1); /* number of methods (below) */
   socksreq[2] = 0; /* no authentication */
   socksreq[3] = 2; /* username/password */
 
@@ -1620,7 +1620,7 @@ static int handleSock5Proxy(const char *proxy_name,
     int userlen, pwlen, len;
 
     userlen = strlen(proxy_name);
-    pwlen = strlen(proxy_password);
+    pwlen = proxy_password?strlen(proxy_password):0;
 
     /*   username/password request looks like
      * +----+------+----------+------+----------+
