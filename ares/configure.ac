@@ -7,8 +7,6 @@ AM_INIT_AUTOMAKE(c-ares, CVS)
 AC_PROG_CC
 AC_PROG_INSTALL
 
-AM_PROG_LIBTOOL
-
 case $host_os in
 solaris*)
 	AC_DEFINE(ETC_INET, 1, [if a /etc/inet dir is being used])
@@ -37,6 +35,9 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        ;;
   *)   AC_MSG_RESULT(yes)
 
+    dnl when doing the debug stuff, use static library only
+    AC_DISABLE_SHARED
+
     dnl Checks for standard header files, to make memdebug.h inclusions bettter
     AC_HEADER_STDC
 
@@ -52,12 +53,14 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 
+AC_PROG_LIBTOOL
+
 dnl check for a few basic system headers we need
-dnl AC_CHECK_HEADERS(
-dnl        sys/types.h \
-dnl        sys/time.h \
-dnl        sys/select.h \
-dnl        sys/socket.h \
-dnl        )
+AC_CHECK_HEADERS(
+       sys/types.h \
+       sys/time.h \
+       sys/select.h \
+       sys/socket.h \
+       )
 
 AC_OUTPUT(Makefile)
