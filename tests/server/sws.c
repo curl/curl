@@ -226,7 +226,7 @@ static void win32_perror (const char *msg)
 }
 #endif
 
-static char *test2file(int testno)
+static char *test2file(long testno)
 {
   static char filename[256];
   sprintf(filename, TEST_DATA_PATH, path, testno);
