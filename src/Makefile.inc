@@ -7,10 +7,10 @@ CURLX_ONES =  $(top_srcdir)/lib/strtoofft.c $(top_srcdir)/lib/timeval.c
 CURL_SOURCES = main.c hugehelp.c urlglob.c writeout.c writeenv.c \
 	getpass.c homedir.c
 
-CURL_HEADERS = hugehelp.h setup.h config-win32.h config-mac.h \
+CURL_HFILES = hugehelp.h setup.h config-win32.h config-mac.h \
 	config-vms.h config-riscos.h urlglob.h version.h \
 	writeout.h writeenv.h getpass.h homedir.h
 
-curl_SOURCES = $(CURL_SOURCES) $(CURLX_ONES) $(CURL_HEADERS)
+curl_SOURCES = $(CURL_SOURCES) $(CURLX_ONES) $(CURL_HFILES)
 
 
