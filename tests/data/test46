@@ -55,7 +55,7 @@ Cookie: mooo=indeed
 www.fake.come	FALSE	/	FALSE	1022144953	cookiecliente	si
 www.loser.com	FALSE	/	FALSE	1139150993	UID	99
 127.0.0.1	FALSE	/	FALSE	1139150993	mooo	indeed
-127.0.0.1	FALSE	/	FALSE	1014678000	ckyPersistent	permanent
+127.0.0.1	FALSE	/	FALSE	1262322000	ckyPersistent	permanent
 127.0.0.1	FALSE	/	FALSE	0	ckySession	temporary
 127.0.0.1	FALSE	/	FALSE	0	ASPSESSIONIDQGGQQSJJ	GKNBDIFAAOFDPDAIEAKDIBKE
 </file>

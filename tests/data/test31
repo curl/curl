@@ -51,6 +51,6 @@ Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
 127.0.0.1	FALSE	/	FALSE	0	partmatch	present
 moo.foo.moo	FALSE	/	FALSE	0	eat	this
 .foo.moo	TRUE	/	FALSE	0	eat	this-too
-127.0.0.1	FALSE	/	FALSE	1014678000	nodomain	value
+127.0.0.1	FALSE	/	FALSE	1391252187	nodomain	value
 </file>
 </verify>
