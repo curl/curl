@@ -530,7 +530,6 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   struct FTP *ftp = conn->proto.ftp;
   ssize_t nread;
   char *buf = data->buffer; /* this is our buffer */
-  struct curl_slist *qitem; /* QUOTE item */
   int ftpcode;
 
   if(data->bits.upload) {
@@ -610,7 +609,7 @@ CURLcode _ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
       }
     }
 
-    ítem = item->next;
+    item = item->next;
   }
 
   return CURLE_OK;
@@ -656,7 +655,6 @@ CURLcode _ftp(struct connectdata *conn)
   char hostent_buf[8192];
 #endif
 
-  struct curl_slist *qitem; /* QUOTE item */
   /* the ftp struct is already inited in ftp_connect() */
   struct FTP *ftp = conn->proto.ftp;
 
