@@ -64,3 +64,24 @@
 
 /* Define this to 'int' if in_addr_t is not an available typedefed type */
 #undef in_addr_t
+
+/* Define to disable DICT */
+#undef CURL_DISABLE_DICT
+
+/* Define to disable FILE */
+#undef CURL_DISABLE_FILE
+
+/* Define to disable FTP */
+#undef CURL_DISABLE_FTP
+
+/* Define to disable GOPHER */
+#undef CURL_DISABLE_GOPHER
+
+/* Define to disable HTTP */
+#undef CURL_DISABLE_HTTP
+
+/* Define to disable LDAP */
+#undef CURL_DISABLE_LDAP
+
+/* Define to disable TELNET */
+#undef CURL_DISABLE_TELNET
