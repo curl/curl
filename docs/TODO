@@ -49,10 +49,6 @@ To do in a future release (random order):
 
  * Make TELNET work on windows!
 
- * Add a command line option that allows the output file to get the same time
-   stamp as the remote file. libcurl already is capable of fetching the remote
-   file's date.
-
  * Make curl's SSL layer option capable of using other free SSL libraries.
    Such as the Mozilla Security Services
    (http://www.mozilla.org/projects/security/pki/nss/) and GNUTLS
