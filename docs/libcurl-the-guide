@@ -470,7 +470,30 @@ HTTP POSTing
 
 Showing Progress
 
- [ built-in progress meter, progress callback ]
+ For historical and traditional reasons, libcurl has a built-in progress meter
+ that can be switched on and then makes it presents a progress meter in your
+ terminal.
+
+ Switch on the progress meter by, oddly enough, set CURLOPT_NOPROGRESS to
+ FALSE. This option is set to TRUE by default.
+
+ For most applications however, the built-in progress meter is useless and
+ what instead is interesting is the ability to specify a progress
+ callback. The function pointer you pass to libcurl will then be called on
+ irregular intervals with information about the current transfer.
+
+ Set the progress callback by using CURLOPT_PROGRESSFUNCTION. And pass a
+ pointer to a function that matches this prototype:
+
+        int progress_callback(void *clientp,
+                              double dltotal,
+                              double dlnow,
+                              double ultotal,
+                              double ulnow);
+
+ If any of the input arguments is unknown, a 0 will be passed. The first
+ argument, the 'clientp' is the pointer you pass to libcurl with
+ CURLOPT_PROGRESSDATA. libcurl won't touch it.
 
 
 libcurl with C++
