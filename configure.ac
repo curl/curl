@@ -1254,6 +1254,7 @@ AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
        dnl ares so it should not be a problem.
        if test "x$enableval" = "xyes" ; then
          if test -d "$srcdir/ares"; then
+            aresembedded="yes"
             AC_CONFIG_SUBDIRS(ares)
             aresinc=`cd $srcdir/ares && pwd`
             CPPFLAGS="$CPPFLAGS -I$aresinc"
@@ -1269,9 +1270,12 @@ AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
          LDFLAGS="$LDFLAGS -L$enableval/lib"
        fi
 
-       dnl verify that a sufficient c-ares is here
-       AC_MSG_CHECKING([that c-ares is good and recent enough])
-       AC_LINK_IFELSE( [
+       if test -z "$aresembedded"; then
+         dnl verify that a sufficient c-ares is here if we have pointed one
+         dnl out and don't use the "embedded" ares dir (in which case we don't
+         dnl check it because it might not have been built yet)
+         AC_MSG_CHECKING([that c-ares is good and recent enough])
+         AC_LINK_IFELSE( [
 #include <ares.h>
 /* provide a set of dummy functions in case c-ares was built with debug */
 void curl_dofree() { }
@@ -1285,11 +1289,11 @@ int main(void)
   return 0;
 }
 ],
-        AC_MSG_RESULT(yes),
-        AC_MSG_RESULT(no)
-        AC_MSG_ERROR([c-ares library defective or too old])
-        )
-
+          AC_MSG_RESULT(yes),
+          AC_MSG_RESULT(no)
+          AC_MSG_ERROR([c-ares library defective or too old])
+          )
+       fi
        ;;
   esac ],
        AC_MSG_RESULT(no)
