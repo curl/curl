@@ -8,6 +8,10 @@
 
 
 Daniel (16 December 2004)
+- Gisle found and fixed a problem in the directory re-use for FTP.
+
+  I added test case 215 and 216 to better verify the functionality.
+
 - Dinar in bug report #1086121, found a file handle leak when a multipart
   formpost (including a file upload part) was aborted before the whole file
   was sent.
