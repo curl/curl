@@ -12,12 +12,34 @@ Daniel (1 September)
 - Jeff Pohlmeyer added a proper error message for non-resolving hosts when
   using ares for lookups.
 
+Daniel (25 August)
+- John McGowan reported that curl -k still failed if the HTTPS server's CN
+  field wasn't obtainable. This was due to the CURLOPT_SSL_VERIFYHOST being
+  set to 1, and libcurl failed if the CN was missing. Starting now, having it
+  set to 1 will simply output a warning if no CN could be obtained (as having
+  a mismatch is OK).
+
+Daniel (21 August)
+- Vincent Sanders provided a fix for name resolving when linked with uClibc.
+
+Daniel (20 August)
+- Gerd v. Egidy provided a patch that makes libcurl store the FTP response
+  code from ftp servers. Using curl_easy_getinfo() with CURLINFO_HTTP_CODE
+  returns that data. The option is therefore now also known as
+  CURLINFO_RESPONSE_CODE.
+
+- Antoine Calando found a segfault when doing multi-part/formpost using
+  the multi interface.
+
+- Antoine Calando pointed out that curl_multi_info_read() didn't set the
+  msgs_in_queue to 0 properly when returning NULL.
+
 Daniel (19 August)
 - I made curl support multiple -T options, as well as -T "{file1,file2}"
   style globbing. One -T for each URL is supported.
 
 - Jeff Pohlmeyer found a segfault when using ares-enabled libcurl and the
-  multi interface when trying a non-existing host name. Now 
+  multi interface when trying a non-existing host name.
 
 - Made the libcurl printf code support long longs if available.
 
@@ -27,7 +49,8 @@ Daniel (19 August)
 Daniel (17 August)
 - Setting CURLOPT_WRITEFUNCTION or CURLOPT_READFUNCTION to NULL will now make
   them get the internal defaults restored. Previously this could cause a
-  segfault.
+  segfault. We should aim at having all pointer-related options get restored
+  to default/safe values when set to NULL.
 
 Version 7.10.7 (15 August 2003)
 
