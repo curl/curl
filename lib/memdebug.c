@@ -151,4 +151,20 @@ int curl_sclose(int sockfd, int line, char *source)
   return sockfd;
 }
 
+FILE *curl_fopen(char *file, char *mode, int line, char *source)
+{
+  FILE *res=(fopen)(file, mode);
+  fprintf(logfile?logfile:stderr, "FILE %s:%d fopen(\"%s\") = %p\n",
+          source, line, file, res);
+  return res;
+}
+
+int curl_fclose(FILE *file, int line, char *source)
+{
+  int res=(fclose)(file);
+  fprintf(logfile?logfile:stderr, "FILE %s:%d fclose(%p)\n",
+          source, line, file);
+  return res;
+}
+
 #endif /* MALLOCDEBUG */

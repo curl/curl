@@ -1,4 +1,8 @@
 #ifdef MALLOCDEBUG
+
+#include <sys/socket.h>
+#include <stdio.h>
+
 /* memory functions */
 void *curl_domalloc(size_t size, int line, char *source);
 void *curl_dorealloc(void *ptr, size_t size, int line, char *source);
@@ -11,6 +15,10 @@ int curl_socket(int domain, int type, int protocol, int, char *);
 int curl_sclose(int sockfd, int, char *);
 int curl_accept(int s, struct sockaddr *addr, int *addrlen,
                 int line, char *source);
+
+/* FILE functions */
+FILE *curl_fopen(char *file, char *mode, int line, char *source);
+int curl_fclose(FILE *file, int line, char *source);
 
 /* Set this symbol on the command-line, recompile all lib-sources */
 #define strdup(ptr) curl_dostrdup(ptr, __LINE__, __FILE__)
@@ -26,5 +34,9 @@ int curl_accept(int s, struct sockaddr *addr, int *addrlen,
 /* sclose is probably already defined, redefine it! */
 #undef sclose
 #define sclose(sockfd) curl_sclose(sockfd,__LINE__,__FILE__)
+
+#undef fopen
+#define fopen(file,mode) curl_fopen(file,mode,__LINE__,__FILE__)
+#define fclose(file) curl_fclose(file,__LINE__,__FILE__)
 
 #endif
