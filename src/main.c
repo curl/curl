@@ -1035,8 +1035,32 @@ typedef enum {
   PARAM_HELP_REQUESTED,
   PARAM_GOT_EXTRA_PARAMETER,
   PARAM_BAD_NUMERIC,
+  PARAM_LIBCURL_DOESNT_SUPPORT,
   PARAM_LAST
 } ParameterError;
+
+static const char *param2text(ParameterError error)
+{
+  switch(error) {
+  case PARAM_GOT_EXTRA_PARAMETER:
+    return "had unsupported trailing garbage";
+  case PARAM_OPTION_UNKNOWN:
+    return "is unknown";
+  case PARAM_OPTION_AMBIGUOUS:
+    return "is ambiguous";
+  case PARAM_REQUIRES_PARAMETER:
+    return "requires parameter";
+  case PARAM_BAD_USE:
+    return "is badly used here";
+  case PARAM_BAD_NUMERIC:
+    return "expected a proper numerical parameter";
+  case PARAM_LIBCURL_DOESNT_SUPPORT:
+    return "the installed libcurl version doesn't support this";
+  default:
+    return "unknown error";
+  }
+  return NULL;
+}
 
 static void cleanarg(char *str)
 {
@@ -1367,11 +1391,17 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
  	break;
 
       case 'l': /* --negotiate */
-	config->authtype = CURLAUTH_GSSNEGOTIATE;
+        if(curlinfo->features & CURL_VERSION_GSSNEGOTIATE)
+          config->authtype = CURLAUTH_GSSNEGOTIATE;
+        else
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
 	break;
 
       case 'm': /* --ntlm */
-	config->authtype = CURLAUTH_NTLM;
+        if(curlinfo->features & CURL_VERSION_NTLM)
+          config->authtype = CURLAUTH_NTLM;
+        else
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
 	break;
 
       case 'n': /* --basic for completeness */
@@ -1424,7 +1454,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         break;
       case 'x': /* --krb4 */
         /* krb4 level string */
-        GetStr(&config->krb4level, nextarg);
+        if(curlinfo->features & CURL_VERSION_KERBEROS4)
+          GetStr(&config->krb4level, nextarg);
+        else
+          return PARAM_LIBCURL_DOESNT_SUPPORT;
         break;
       case 'y': /* --max-filesize */
         if(str2num(&config->max_filesize, nextarg))
@@ -2147,28 +2180,7 @@ static int parseconfig(const char *filename,
           filename=(char *)"<stdin>";
         }
         if(PARAM_HELP_REQUESTED != res) {
-          const char *reason;
-          switch(res) {
-          default:
-          case PARAM_GOT_EXTRA_PARAMETER:
-            reason = "had unsupported trailing garbage";
-            break;
-          case PARAM_OPTION_UNKNOWN:
-            reason = "is unknown";
-            break;
-          case PARAM_OPTION_AMBIGUOUS:
-            reason = "is ambiguous";
-            break;
-          case PARAM_REQUIRES_PARAMETER:
-            reason = "requires parameter";
-            break;
-          case PARAM_BAD_USE:
-            reason = "is badly used here";
-            break;
-          case PARAM_BAD_NUMERIC:
-            reason = "expected a proper numerical parameter";
-            break;
-          }
+          const char *reason = param2text(res);
           fprintf(stderr, "%s:%d: warning: '%s' %s\n",
                   filename, lineno, option, reason);
         }
@@ -2684,27 +2696,9 @@ operate(struct Configurable *config, int argc, char *argv[])
 
 	res = getparameter(flag, nextarg, &passarg, config);
 	if(res) {
-          switch(res) {
-          case PARAM_OPTION_AMBIGUOUS:
-            helpf("option %s is ambiguous\n", origopt);
-            break;
-          case PARAM_OPTION_UNKNOWN:
-            helpf("option %s is unknown\n", origopt);
-            break;
-          case PARAM_REQUIRES_PARAMETER:
-            helpf("option %s requires an extra argument!\n", origopt);
-            break;
-          case PARAM_BAD_USE:
-            helpf("option %s was wrongly used!\n", origopt);
-            break;
-          case PARAM_BAD_NUMERIC:
-            helpf("option %s expected a proper numerical parameter\n",
-                  origopt);
-            break;
-          case PARAM_HELP_REQUESTED:
-            /* no text */
-            break;
-          }
+          const char *reason = param2text(res);
+          if(res != PARAM_HELP_REQUESTED)
+            helpf("option %s: %s\n", origopt, reason);
           clean_getout(config);
 	  return CURLE_FAILED_INIT;
         }
