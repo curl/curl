@@ -97,6 +97,9 @@ CURLcode Curl_file_connect(struct connectdata *conn)
   char *actual_path = curl_unescape(conn->path, 0);
   struct FILE *file;
   int fd;
+#if defined(WIN32) || defined(__EMX__)
+  int i;
+#endif
 
   file = (struct FILE *)malloc(sizeof(struct FILE));
   if(!file)
@@ -106,8 +109,6 @@ CURLcode Curl_file_connect(struct connectdata *conn)
   conn->proto.file = file;
 
 #if defined(WIN32) || defined(__EMX__)
-  int i;
-
   /* change path separators from '/' to '\\' for Windows and OS/2 */
   for (i=0; actual_path[i] != '\0'; ++i)
     if (actual_path[i] == '/')
