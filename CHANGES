@@ -6,9 +6,23 @@
 
                                History of Changes
 
+Daniel (19 September 2001)
+- Vojtech Minarik set up a special-purpose test server and provided me with
+  test certificates in order for me to repeat the bug reports #440068 and
+  #440373. It turned out we didn't check all the error codes properly. We do
+  now, and connecting with a unacceptable certificate will make libcurl fail
+  to connect with an error code returned.
+
+- Ramana Mokkapati found a case when the Location: following code did wrong.
+  I wrote a test case for this (45).
+
+Version 7.9-pre7
+
 Daniel (17 September 2001)
 - Linus Nielsen Feltzing fixed telnet for win32. It makes libcurl require
   winsock 2.0.
+
+Version 7.9-pre6
 
 - libtool 1.4.2 is now in use!
 
