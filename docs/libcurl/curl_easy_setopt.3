@@ -36,7 +36,7 @@ The \fIhandle\fP is the return code from a \fIcurl_easy_init(3)\fP or
 .SH OPTIONS
 The options are listed in a sort of random order, but you'll figure it out!
 .TP 0.4i
-.B CURLOPT_FILE
+.B CURLOPT_WRITEDATA
 Data pointer to pass to the file write function. Note that if you specify the
 \fICURLOPT_WRITEFUNCTION\fP, this is the pointer you'll get as input. If you
 don't use a callback, you must pass a 'FILE *' as libcurl will pass this to
@@ -45,6 +45,8 @@ fwrite() when writing data.
 \fBNOTE:\fP If you're using libcurl as a win32 DLL, you MUST use the
 \fICURLOPT_WRITEFUNCTION\fP if you set this option or you will experience
 crashes.
+
+This option is also known with the older name \fBCURLOPT_FILE\fP.
 .TP
 .B CURLOPT_WRITEFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
@@ -63,13 +65,15 @@ you cannot possibly make any assumptions. It may be one byte, it may be
 thousands. The maximum amount of data that can be passed to the write callback
 is defined in the curl.h header file: CURL_MAX_WRITE_SIZE.
 .TP
-.B CURLOPT_INFILE
+.B CURLOPT_READDATA
 Data pointer to pass to the file read function. Note that if you specify the
 \fICURLOPT_READFUNCTION\fP, this is the pointer you'll get as input. If you
 don't specify a read callback, this must be a valid FILE *.
 
 \fBNOTE:\fP If you're using libcurl as a win32 DLL, you MUST use a
 \fICURLOPT_READFUNCTION\fP if you set this option.
+
+This option is also known with the older name \fBCURLOPT_INFILE\fP.
 .TP
 .B CURLOPT_READFUNCTION
 Function pointer that should match the following prototype: \fBsize_t
