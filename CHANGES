@@ -6,9 +6,11 @@
 
                                History of Changes
 
+Version 7.6.1
+
 Daniel (9 February 2001)
-- Frank Reid and Cain Hopwood provided information and research around a
-  HTTPS PUT problem we seem to have.
+- Frank Reid and Cain Hopwood provided information and research around a HTTPS
+  PUT/upload problem we seem to have. No solution found yet.
 
 Daniel (8 February 2001)
 - An interesting discussion is how to specify an empty password without having
