@@ -31,11 +31,15 @@
 //#define HAVE_STRICMP		1
 #define HAVE_SIGACTION		1
 
-#define USE_SSLEAY			1
-#define USE_OPENSSL			1
+#ifdef MACOS_SSL_SUPPORT
+#	define USE_SSLEAY			1
+#	define USE_OPENSSL			1
+#endif
+
 #define HAVE_RAND_STATUS	1
 #define HAVE_RAND_EGD		1
 
 #define HAVE_FIONBIO        1
 
-#include "GUSIExtra.h"
+#include <extra/stricmp.h>
+#include <extra/strdup.h>
