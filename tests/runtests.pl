@@ -1,4 +1,5 @@
 #!/usr/bin/perl
+# $Id$
 #
 # Main curl test script, in perl to run on more platforms
 #
@@ -342,6 +343,18 @@ do {
     elsif($ARGV[0] eq "-s") {
         # short output
         $short=1;
+    }
+    elsif($ARGV[0] eq "-h") {
+        # show help text
+        print <<EOHELP
+Usage: runtests.pl [-h][-s][-v][numbers]
+  -h       this help text
+  -s       short output
+  -v       verbose output
+  [num]    as string like "5 6 9" to run those tests only
+EOHELP
+    ;
+        exit;
     }
     elsif($ARGV[0] =~ /^(\d+)/) {
         $TESTCASES=$ARGV[0]; # run these tests
