@@ -567,6 +567,14 @@ Curl_SSLConnect(struct connectdata *conn)
     }
   }
 
+  if(data->set.ssl.cipher_list) {
+    if (!SSL_CTX_set_cipher_list(conn->ssl.ctx,
+                                 data->set.ssl.cipher_list)) {
+      failf(data, "failed setting cipher list\n");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+  }
+
   if(data->set.ssl.verifypeer){
     SSL_CTX_set_verify(conn->ssl.ctx,
                        SSL_VERIFY_PEER|SSL_VERIFY_FAIL_IF_NO_PEER_CERT|
