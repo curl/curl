@@ -11,6 +11,16 @@ Requires:
   diff (when a test fail, a diff is shown)
   stunnel (for HTTPS and FTPS tests)
 
+TCP ports used:
+
+  - 8999 on localhost for HTTP tests
+  - 8433 on localhost for HTTPS tests
+  - 8921 on localhost for FTP tests
+  - 8821 on localhost for FTPS tests (currently disabled)
+
+  The test suite runs simple FTP and HTTP servers on these ports to which
+  it makes requests.
+
 Run:
   'make test'. This invokes the 'runtests.pl' perl script. Edit the top
   variables of that script in case you have some specific needs.
