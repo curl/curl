@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.10-pre2
+
 Daniel (2 Sep 2002)
 - James Gallagher added Content-Encoding support to libcurl so now curl and
   libcurl-using apps can request compressed contents using the 'deflate'
