@@ -36,6 +36,10 @@ TODO
  * Option to set the SO_KEEPALIVE socket option to make libcurl notice and
    disconnect very long time idle connections.
 
+ * When posting multipart forms, we should _not_ create the whole data chunk
+   in memory before the upload starts but do it in a "streaming" manner to
+   allow uploads that are way larger than the amount of system memory.
+
  LIBCURL - multi interface
 
  * Add curl_multi_timeout() to make libcurl's ares-functionality better.
