@@ -60,7 +60,7 @@ char *GetEnv(char *variable)
   return env?strdup(env):NULL;
 }
 
-char *curl_GetEnv(char *v)
+char *curl_getenv(char *v)
 {
   return GetEnv(v);
 }
