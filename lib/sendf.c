@@ -236,6 +236,9 @@ CURLcode Curl_write(struct connectdata *conn,
      'size_t' */
   if (conn->ssl[num].use) {
     int err;
+    char error_buffer[120]; /* OpenSSL documents that this must be at least
+                               120 bytes long. */
+    int sslerror;
     int rc = SSL_write(conn->ssl[num].handle, mem, len);
 
     if(rc < 0) {
@@ -254,18 +257,12 @@ CURLcode Curl_write(struct connectdata *conn,
               Curl_ourerrno());
         return CURLE_SEND_ERROR;
       case SSL_ERROR_SSL:
-      {
-        /*  A failure in the SSL library occurred, usually a
-            protocol error.  The OpenSSL error queue contains more
-            information on the error. */
-        char error_buffer[120]; /* OpenSSL documents that this must be at least
-                                   120 bytes long. */
-        int sslerror = ERR_get_error();
+        /*  A failure in the SSL library occurred, usually a protocol error.
+            The OpenSSL error queue contains more information on the error. */
+        sslerror = ERR_get_error();
         failf(conn->data, "SSL_write() error: %s\n",
               ERR_error_string(sslerror, error_buffer));
         return CURLE_SEND_ERROR;
-      }
-        break;
       }
       /* a true error */
       failf(conn->data, "SSL_write() return error %d\n", err);
