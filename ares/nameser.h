@@ -5,6 +5,7 @@
    port build */
 
 #include <windows.h>
+#include <process.h> /* for the _getpid() proto */
 #include <sys/types.h>
 
 #define MAXHOSTNAMELEN 256
