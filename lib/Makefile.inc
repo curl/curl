@@ -13,7 +13,7 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h base64.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
   if2ip.h speedcheck.h urldata.h ldap.h ssluse.h escape.h telnet.h	\
-  getinfo.h strequal.h security.h krb4.h memdebug.h inet_ntoa_r.h	\
+  getinfo.h strequal.h krb4.h memdebug.h inet_ntoa_r.h \
   http_chunks.h strtok.h connect.h llist.h hash.h content_encoding.h	\
   share.h md5.h http_digest.h http_negotiate.h http_ntlm.h ca-bundle.h	\
   inet_pton.h strtoofft.h strerror.h inet_ntop.h curlx.h memory.h	\
