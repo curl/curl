@@ -505,7 +505,17 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
 
        if test "$ICC" = "yes"; then
          dnl this is icc, not gcc.
-         WARN = ""
+
+         dnl Warning 279 warns on static conditions in while expressions,
+         dnl ignore that.
+
+         WARN="-wd279"
+
+         if test "$gccnum" -gt "600"; then
+            dnl icc 6.0 and older doesn't have the -Wall flag, although it does
+            dnl have -wd<n>
+            WARN="-Wall $WARN"
+         fi
        else dnl $ICC = yes
          dnl 
          WARN="-W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wundef -Wpointer-arith -Wnested-externs -Winline -Wmissing-declarations -Wmissing-prototypes -Wsign-compare"
@@ -529,19 +539,19 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
            fi
          fi
 
-         NEWFLAGS=""
          for flag in $CPPFLAGS; do
            case "$flag" in
             -I*)
               dnl include path
               add=`echo $flag | sed 's/^-I/-isystem /g'`
-              NEWFLAGS="$NEWFLAGS $add"
+              WARN="$WARN $add"
               ;;
            esac
          done
 
-         CFLAGS="$CFLAGS $WARN $NEWFLAGS"
        fi dnl $ICC = no
+
+       CFLAGS="$CFLAGS $WARN"
 
     fi dnl $GCC = yes
 
