@@ -172,11 +172,15 @@ void urlfree(struct UrlData *data, bool totally)
   }
 
   if(data->bits.proxystringalloc) {
-    data->bits.proxystringalloc=0;
+    data->bits.proxystringalloc=FALSE;;
     free(data->proxy);
     data->proxy=NULL;
+
+    /* Since we allocated the string the previous round, it means that we
+       "discovered" the proxy in the environment variables and thus we must
+       switch off that knowledge again... */
+    data->bits.httpproxy=FALSE;
   }
-  
 
   if(data->ptr_proxyuserpwd) {
     free(data->ptr_proxyuserpwd);
