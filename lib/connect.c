@@ -567,13 +567,14 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     /* set socket non-blocking */
     Curl_nonblock(sockfd, TRUE);
 
-    rc = connect(sockfd,
+    /* do not use #ifdef within the function arguments below, as connect() is
+       a defined macro on some platforms and some compilers don't like to mix
+       #ifdefs with macro usage! (AmigaOS is one such platform) */
 #ifdef ENABLE_IPV6
-                 ai->ai_addr, ai->ai_addrlen
+    rc = connect(sockfd, ai->ai_addr, ai->ai_addrlen);
 #else
-                 (struct sockaddr *)&serv_addr, sizeof(serv_addr)
+    rc = connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr);
 #endif
-                 );
 
     if(-1 == rc) {
       int error=Curl_ourerrno();
