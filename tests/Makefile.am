@@ -20,15 +20,21 @@
 #
 # $Id$
 ###########################################################################
+
+HTMLPAGES = curl.html curl-config.html
+PDFPAGES = curl.pdf curl-config.pdf
+
 EXTRA_DIST = ftpserver.pl httpserver.pl httpsserver.pl runtests.pl	\
  ftpsserver.pl getpart.pm FILEFORMAT README stunnel.pem memanalyze.pl	\
- testcurl.pl valgrind.pm testcurl.1 runtests.1
+ testcurl.pl valgrind.pm testcurl.1 runtests.1 $(HTMLPAGES) $(PDFPAGES)
 
 SUBDIRS = data server libtest
 
 PERLFLAGS = -I$(srcdir)
 
 CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid
+
+MAN2HTML= roffit < $< >$@
 
 curl:
 	@cd $(top_builddir) && $(MAKE)
@@ -56,3 +62,13 @@ full-test: all
 
 torture-test: all
 	$(TEST) $(TEST_T)
+
+.1.html:
+	$(MAN2HTML)
+
+.1.pdf:
+	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
+	groff -Tps -man $< >$$foo.ps; \
+	ps2pdf $$foo.ps $@; \
+	rm $$foo.ps; \
+	echo "converted $< to $@")
