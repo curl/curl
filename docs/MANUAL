@@ -668,8 +668,14 @@ LDAP
   and offer ldap:// support.
 
   LDAP is a complex thing and writing an LDAP query is not an easy task. I do
-  advice you to dig up the syntax description for that elsewhere, RFC 1959 if
-  no other place is better.
+  advice you to dig up the syntax description for that elsewhere. Two places
+  that might suit you are:
+
+  Netscape's "Netscape Directory SDK 3.0 for C Programmer's Guide Chapter 10:
+  Working with LDAP URLs":
+  http://developer.netscape.com/docs/manuals/dirsdk/csdk30/url.htm
+
+  RFC 2255, "The LDAP URL Format" http://www.rfc-editor.org/rfc/rfc2255.txt
 
   To show you an example, this is now I can get all people from my local LDAP
   server that has a certain sub-domain in their email address:
