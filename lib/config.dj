@@ -27,6 +27,7 @@
 #define HAVE_IOCTLSOCKET       1
 #define HAVE_INET_PTON         1
 #define HAVE_INET_NTOP         1
+#define HAVE_LOCALE_H          1
 #define HAVE_LONGLONG          1
 #define HAVE_MALLOC_H          1
 #define HAVE_MEMORY_H          1
@@ -37,6 +38,7 @@
 #define HAVE_PERROR            1
 #define HAVE_SELECT            1
 #define HAVE_SETJMP_H          1
+#define HAVE_SETLOCALE         1
 #define HAVE_SETVBUF           1
 #define HAVE_SIGNAL            1
 #define HAVE_SIGACTION         1
