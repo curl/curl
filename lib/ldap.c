@@ -74,7 +74,7 @@ static void DynaOpen(void)
      * liblber.so automatically, but since it does not we will
      * handle it here by opening liblber.so as global.
      */
-    dlopen("liblber.so",
+    liblber = dlopen("liblber.so",
 #ifdef RTLD_LAZY_GLOBAL /* It turns out some systems use this: */
            RTLD_LAZY_GLOBAL
 #else
