@@ -5,8 +5,14 @@ dnl Ensure that this file is processed with autoconf 2.50 or newer
 dnl Don't even think about removing this check!
 AC_PREREQ(2.50)
 
-dnl First some basic init macros
-AC_INIT
+dnl We don't know the version number "staticly" so we use a dash here
+AC_INIT(curl, [-], [curl-bug@haxx.se])
+
+dnl configure script copyright
+AC_COPYRIGHT([Copyright (c) 1998 - 2003 Daniel Stenberg, <daniel@haxx.se>
+This configure script may be copied, distributed and modified under the 
+terms of the curl license; see COPYING for more details])
+
 AC_CONFIG_SRCDIR([lib/urldata.h])
 AM_CONFIG_HEADER(lib/config.h src/config.h tests/server/config.h lib/ca-bundle.h)
 AM_MAINTAINER_MODE
