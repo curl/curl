@@ -1,0 +1,35 @@
+#
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+# tool is what to use instead of 'curl'
+<tool>
+lib511
+</tool>
+
+ <name>
+FTP with FILETIME and NOBODY but missing file
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/511
+</command>
+<file name="log/ftpserver.cmd">
+REPLY MDTM 550 bluah you f00l!
+REPLY SIZE 550 bluah you f00l!
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+# CURLE_FTP_COULDNT_RETR_FILE
+<errorcode>
+19
+</errorcode>
+</verify>

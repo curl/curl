@@ -34,11 +34,12 @@ INCLUDES = -I$(top_srcdir)/include/curl \
 
 LIBDIR = $(top_builddir)/lib
 
+# these files are used in every single test program below
 SUPPORTFILES = first.c test.h
 
-# here are all tools used for running libcurl tests
+# These are all libcurl test programs
 noinst_PROGRAMS = lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 \
-  lib508 lib509 lib510
+  lib508 lib509 lib510 lib511
 
 lib500_SOURCES = lib500.c $(SUPPORTFILES)
 lib500_LDADD = $(LIBDIR)/libcurl.la
@@ -83,3 +84,7 @@ lib509_DEPENDENCIES = $(LIBDIR)/libcurl.la
 lib510_SOURCES = lib510.c $(SUPPORTFILES)
 lib510_LDADD = $(LIBDIR)/libcurl.la
 lib510_DEPENDENCIES = $(LIBDIR)/libcurl.la
+
+lib511_SOURCES = lib511.c $(SUPPORTFILES)
+lib511_LDADD = $(LIBDIR)/libcurl.la
+lib511_DEPENDENCIES = $(LIBDIR)/libcurl.la
