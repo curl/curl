@@ -30,7 +30,7 @@ contents
 http
 </server>
  <name>
-HTTP over proxy with both proxy and site authentication
+HTTP CONNECT with proxy and host Basic authentication
  </name>
  <command>
 http://%HOSTIP:%HOSTPORT/we/want/that/page/80 -p -x %HOSTIP:%HOSTPORT --user iam:myself --proxy-user youare:yourself
