@@ -443,6 +443,11 @@ typedef enum {
    * parameters will use fwrite() syntax, make sure to follow them. */
   CINIT(HEADERFUNCTION, FUNCTIONPOINT, 79),
 
+  /* Set this to force the HTTP request to get back to GET. Only really usable
+     if POST, PUT or a custom request have been used first.
+   */
+  CINIT(HTTPGET, LONG, 80),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
@@ -504,8 +509,8 @@ void curl_global_cleanup(void);
 
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.8"
-#define LIBCURL_VERSION_NUM 0x070800
+#define LIBCURL_VERSION "7.8.1-pre2"
+#define LIBCURL_VERSION_NUM 0x070801
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
