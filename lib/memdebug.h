@@ -58,7 +58,7 @@ void curl_memlimit(long limit);
 /* file descriptor manipulators */
 int curl_socket(int domain, int type, int protocol, int line , const char *);
 int curl_sclose(int sockfd, int, const char *source);
-int curl_accept(int s, void *addr, socklen_t *addrlen,
+int curl_accept(int s, void *addr, void *addrlen,
                 int line, const char *source);
 
 /* FILE functions */
