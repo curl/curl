@@ -339,6 +339,9 @@ CURLcode curl_setopt(CURL *curl, CURLoption option, ...)
     break;
   case CURLOPT_UPLOAD:
     data->bits.upload = va_arg(param, long)?TRUE:FALSE;
+    if(data->bits.upload)
+      /* If this is HTTP, PUT is what's needed to "upload" */
+      data->httpreq = HTTPREQ_PUT;
     break;
   case CURLOPT_POST:
     data->bits.http_post = va_arg(param, long)?TRUE:FALSE;
