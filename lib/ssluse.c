@@ -358,7 +358,7 @@ Curl_SSLConnect(struct connectdata *conn)
   X509_free(conn->ssl.server_cert);
 #else /* USE_SSLEAY */
   /* this is for "-ansi -Wall -pedantic" to stop complaining!   (rabe) */
-  (void) data;
+  (void) conn;
 #endif
   return 0;
 }
