@@ -6,6 +6,12 @@
 
                                History of Changes
 
+Daniel (17 January 2001)
+- Made the two former files lib/download.c and lib/highlevel.c become the new
+  lib/transfer.c which makes more sense. I also did the rename from Transfer()
+  to Curl_Transfer() in the other source files that use the transfer function
+  in the spirit of using Curl_ prefix for library-scoped global symbols.
+
 Daniel (11 January 2001)
 - Added -g/--globoff that switches OFF the URL globbing and thus enables {}[]
   letters to be part of the URL. Do note that RFC2396 section 2.4.3 explicitly
