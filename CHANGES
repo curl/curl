@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (2 July 2004)
+- Andrés García reported a curl_share_cleanup() crash that occurs when no
+  lock/unlock callbacks have been set and the share is cleaned up.
+
 Daniel (1 July 2004)
 - When using curl --trace or --trace-ascii, no trace messages that were sent
   by curl_easy_cleanup() were included in the trace file. This made the

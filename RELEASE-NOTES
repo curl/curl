@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl_share_cleanup() crash fixed
  o --trace files now get the final info lines too
  o multi interface connects fine to multi-IP resolving hosts
  o --limit-rate works on Mac OS X (and other systems with bad poll()s)
@@ -30,7 +31,7 @@ This release includes the following bugfixes:
    didn't require any authentication
  o win32 file:// transfer free memory bug
  o configure --disable-http builds a libcurl without HTTP support
- o CURLOPT_FILETIME had wrong type, it expects a long argument
+ o CURLOPT_FILETIME had wrong type in curl.h, it expects a long argument
  o builds fine with Borland on Windows again
  o the msvc curllib.dsp now builds the libcurl.lib file again
  o builds fine on VMS again
@@ -53,6 +54,6 @@ advice from friends like these:
  Gisle Vanem, Vincent Bronner, Alexander Krasnostavsky, Chris Gaukroger,
  Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam,
  Luca Alteas, Jean-Louis Lemaire, David Byron, David Cohen, Rob Stanzel,
- Niels van Tongeren
+ Niels van Tongeren, Andrés García
 
         Thanks! (and sorry if I forgot to mention someone)
