@@ -108,7 +108,7 @@ static CURLcode check_wsock2 ( struct SessionHandle *data );
 static
 void telrcv(struct connectdata *,
 	    unsigned char *inbuf,	/* Data received from socket */
-	    int count);			/* Number of bytes received */
+	    ssize_t count);		/* Number of bytes received */
 
 static void printoption(struct SessionHandle *data,
 			const char *direction,
@@ -899,7 +899,7 @@ static void suboption(struct connectdata *conn)
 static
 void telrcv(struct connectdata *conn,
             unsigned char *inbuf,	/* Data received from socket */
-            int count)			/* Number of bytes received */
+            ssize_t count)		/* Number of bytes received */
 {
   unsigned char c;
   int in = 0;
