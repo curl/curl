@@ -18,7 +18,7 @@ curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c setup.h \
 	config-win32.h config-mac.h config-vms.h config-riscos.h \
 	urlglob.h version.h writeout.h writeenv.c writeenv.h
 
-curl_LDADD = ../lib/libcurl.la -lz
+curl_LDADD = ../lib/libcurl.la
 curl_DEPENDENCIES = ../lib/libcurl.la
 BUILT_SOURCES = hugehelp.c
 CLEANFILES = hugehelp.c
