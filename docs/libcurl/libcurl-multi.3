@@ -42,14 +42,14 @@ and setup the appropriate options for each easy handle, as outlined in the
 When the easy handle is setup for a transfer, then instead of using
 \fIcurl_easy_perform(3)\fP (as when using the easy interface for transfers),
 you should instead add the easy handle to the multi handle using
-\fIcurl_easy_add_handle(3)\fP. The multi handle is sometimes referred to as a
+\fIcurl_multi_add_handle(3)\fP. The multi handle is sometimes referred to as a
 \'multi stack\' because of the fact that it may hold a large amount of easy
 handles.
 
 Should you change your mind, the easy handle is again removed from the multi
 stack using \fIcurl_multi_remove_handle(3)\fP. Once removed from the multi
 handle, you can again use other easy interface functions like
-\fIcurl_easy_perform\fP on the handle or whatever you think is necessary.
+\fIcurl_easy_perform(3)\fP on the handle or whatever you think is necessary.
 
 Adding the easy handle to the multi handle does not start the transfer.
 Remember that one of the main ideas with this interface is to let your
@@ -72,9 +72,9 @@ timeout every now and then, should you want that.
 A little note here about the return codes from the multi functions, and
 especially the \fIcurl_multi_perform(3)\fP: if you receive
 \fICURLM_CALL_MULTI_PERFORM\fP, this basicly means that you should call
-\fIcurl_multi_perform\fP again, before you select() on more actions. You don't
-have to do it immediately, but the return code means that libcurl may have
-more data available to return or that there may be more data to send off
+\fIcurl_multi_perform(3)\fP again, before you select() on more actions. You
+don't have to do it immediately, but the return code means that libcurl may
+have more data available to return or that there may be more data to send off
 before it is "satisfied".
 
 \fIcurl_multi_perform(3)\fP stores the number of still running transfers in
