@@ -834,6 +834,11 @@ AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
   fi
    ] )
 
+if test X"$OPT_SSL" = Xno
+then
+  ca="no"
+fi
+
 if test "x$ca" = "xno"; then
   dnl let's not keep "no" as path name, blank it instead
   ca=""
