@@ -55,6 +55,9 @@
 #define HAVE_WRITABLE_ARGV 1
 #define HAVE_ZLIB_H 1
 
+#define USE_OPENSSL 1
+#define USE_SSLEAY 1
+
 #define OS "AmigaOS"
 
 #define PACKAGE "curl"

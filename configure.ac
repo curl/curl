@@ -434,35 +434,6 @@ AC_HELP_STRING([--disable-nonblocking],[Disable non-blocking socket detection]),
 ])
 
 dnl **********************************************************************
-dnl Check for the random seed preferences 
-dnl **********************************************************************
-
-AC_ARG_WITH(egd-socket,
-AC_HELP_STRING([--with-egd-socket=FILE],
-               [Entropy Gathering Daemon socket pathname]),
-    [ EGD_SOCKET="$withval" ]
-)
-if test -n "$EGD_SOCKET" ; then
-	AC_DEFINE_UNQUOTED(EGD_SOCKET, "$EGD_SOCKET",
-        [your Entropy Gathering Daemon socket pathname] )
-fi
-
-dnl Check for user-specified random device
-AC_ARG_WITH(random,
-AC_HELP_STRING([--with-random=FILE],[read randomness from FILE (default=/dev/urandom)]),
-    [ RANDOM_FILE="$withval" ],
-    [
-        dnl Check for random device
-        AC_CHECK_FILE("/dev/urandom", [ RANDOM_FILE="/dev/urandom"] )
-    ]
-)
-if test -n "$RANDOM_FILE" ; then
-	AC_SUBST(RANDOM_FILE)
-	AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE",
-        [a suitable file to read random data from])
-fi
-
-dnl **********************************************************************
 dnl Check if the operating system allows programs to write to their own argv[]
 dnl **********************************************************************
 
@@ -781,7 +752,10 @@ else
     ])
 
 
-  if test "$HAVECRYPTO" = "yes"; then
+  if test X"$HAVECRYPTO" != X"yes"; then
+      AC_MSG_WARN([crypto lib was not found; SSL will be disabled])
+
+  else
     dnl This is only reasonable to do if crypto actually is there: check for
     dnl SSL libs NOTE: it is important to do this AFTER the crypto lib
 
@@ -815,26 +789,43 @@ else
         else
             AC_MSG_RESULT(yes)
         fi
-    fi
 
+    else
 
-    dnl Check for SSLeay headers
-    AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
-                     openssl/pem.h openssl/ssl.h openssl/err.h,
-      curl_ssl_msg="enabled"
-      OPENSSL_ENABLED=1)
-
-    if test $ac_cv_header_openssl_x509_h = no; then
-      AC_CHECK_HEADERS(x509.h rsa.h crypto.h pem.h ssl.h err.h,
+      dnl Have the libraries--check for SSLeay/OpenSSL headers
+      AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
+                       openssl/pem.h openssl/ssl.h openssl/err.h,
         curl_ssl_msg="enabled"
-        OPENSSL_ENABLED=1)
+        OPENSSL_ENABLED=1
+        AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use]))
+
+      if test $ac_cv_header_openssl_x509_h = no; then
+        AC_CHECK_HEADERS(x509.h rsa.h crypto.h pem.h ssl.h err.h,
+          curl_ssl_msg="enabled"
+          OPENSSL_ENABLED=1)
+      fi
     fi
 
+    USE_SSLEAY="$OPENSSL_ENABLED"
+    AC_DEFINE_UNQUOTED(USE_SSLEAY, $USE_SSLEAY, [if SSL is enabled])
+    AC_SUBST(USE_SSLEAY)
+    AC_SUBST(USE_OPENSSL)
+
+    if test X"$OPT_SSL" != Xoff &&
+       test "$OPENSSL_ENABLED" != "1"; then
+      AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
+    fi
+  fi
+
+
+dnl **********************************************************************
+dnl Check for the CA bundle
+dnl **********************************************************************
+
+  if test X"$OPENSSL_ENABLED" = X"1"; then
     dnl If the ENGINE library seems to be around, check for the OpenSSL engine
     dnl header, it is kind of "separated" from the main SSL check
     AC_CHECK_FUNC(ENGINE_init, [ AC_CHECK_HEADERS(openssl/engine.h) ])
-
-    AC_SUBST(OPENSSL_ENABLED)
 
     AC_MSG_CHECKING([CA cert bundle install path])
 
@@ -869,10 +860,7 @@ AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
 
   fi
 
-  if test X"$OPT_SSL" != Xoff &&
-     test "$OPENSSL_ENABLED" != "1"; then
-    AC_MSG_ERROR([OpenSSL libs and/or directories were not found where specified!])
-  elif test "$OPENSSL_ENABLED" = "1"; then
+  if test "$OPENSSL_ENABLED" = "1"; then
     dnl when the ssl shared libs were found in a path that the run-time linker
     dnl doesn't search through, we need to add it to LD_LIBRARY_PATH to
     dnl prevent further configure tests to fail due to this
@@ -883,6 +871,38 @@ AC_HELP_STRING([--without-ca-bundle], [Don't install the CA bundle]),
 fi
 
 AM_CONDITIONAL(CABUNDLE, test x$ca != xno)
+
+dnl **********************************************************************
+dnl Check for the random seed preferences 
+dnl **********************************************************************
+
+if test X"$OPENSSL_ENABLED" = X"1"; then
+  AC_ARG_WITH(egd-socket,
+  AC_HELP_STRING([--with-egd-socket=FILE],
+                 [Entropy Gathering Daemon socket pathname]),
+      [ EGD_SOCKET="$withval" ]
+  )
+  if test -n "$EGD_SOCKET" ; then
+          AC_DEFINE_UNQUOTED(EGD_SOCKET, "$EGD_SOCKET",
+          [your Entropy Gathering Daemon socket pathname] )
+  fi
+
+  dnl Check for user-specified random device
+  AC_ARG_WITH(random,
+  AC_HELP_STRING([--with-random=FILE],
+                 [read randomness from FILE (default=/dev/urandom)]),
+      [ RANDOM_FILE="$withval" ],
+      [
+          dnl Check for random device
+          AC_CHECK_FILE("/dev/urandom", [ RANDOM_FILE="/dev/urandom"] )
+      ]
+  )
+  if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno ; then
+          AC_SUBST(RANDOM_FILE)
+          AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE",
+          [a suitable file to read random data from])
+  fi
+fi
 
 dnl **********************************************************************
 dnl Check for the presence of ZLIB libraries and headers
@@ -1560,7 +1580,8 @@ AC_CONFIG_FILES([Makefile \
            packages/EPM/curl.list \
            packages/EPM/Makefile \
            packages/vms/Makefile \
-           curl-config
+           curl-config \
+           libcurl.pc
 ])
 AC_OUTPUT
 

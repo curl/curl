@@ -53,9 +53,6 @@
 /* Define this to your Entropy Gathering Daemon socket pathname */
 #undef EGD_SOCKET
 
-/* Define if you have a working OpenSSL installation */
-#undef OPENSSL_ENABLED
-
 /* Set to explicitly specify we don't want to use thread-safe functions */
 #define DISABLED_THREADSAFE
 

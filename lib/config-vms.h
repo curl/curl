@@ -343,8 +343,11 @@
 /* Define if you have the getpass function.  */
 #undef HAVE_GETPASS
 
-/* Define if you have a working OpenSSL installation */
-#define OPENSSL_ENABLED 1
+/* if OpenSSL is in use */
+#define USE_OPENSSL 1
+
+/* if SSL is enabled */
+#define USE_SSLEAY 1
 
 /* Define if you have the `dlopen' function. */
 #undef HAVE_DLOPEN

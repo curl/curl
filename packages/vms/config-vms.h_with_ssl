@@ -123,8 +123,11 @@
 /* OpenSSL section starts here */
 
 /* Define if you have a working OpenSSL installation */
-#define OPENSSL_ENABLED	1
-#ifdef OPENSSL_ENABLED
+#define USE_SSLEAY 1
+#ifdef USE_SSLEAY
+
+/* if OpenSSL is in use */
+#define USE_OPENSSL 1
 
 /* Define if you have the crypto library (-lcrypto).  */
 #define HAVE_LIBCRYPTO 1

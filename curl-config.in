@@ -45,19 +45,19 @@ while test $# -gt 0; do
 
     case "$1" in
     --ca)
-	echo @CURL_CA_BUNDLE@
+	echo "@CURL_CA_BUNDLE@"
 	;;
 
     --cc)
-	echo @CC@
+	echo "@CC@"
 	;;
 
     --prefix)
-	echo $prefix
+	echo "$prefix"
 	;;
 
     --feature)
-	if test "@OPENSSL_ENABLED@" = "1"; then
+	if test "@USE_SSLEAY@" = "1"; then
           echo "SSL"
         fi
 	if test "@KRB4_ENABLED@" = "1"; then

@@ -90,6 +90,7 @@
   #define HAVE_LIBSSL            1
   #define HAVE_LIBCRYPTO         1
   #define OPENSSL_NO_KRB5        1
+  #define USE_OPENSSL            1
 #endif
 
 /* Because djgpp <= 2.03 doesn't have snprintf() etc.
