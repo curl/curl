@@ -204,31 +204,18 @@ CURLcode add_buffer(send_buffer *in, const void *inptr, size_t size)
  */
 
 static
-int GetLine(int sockfd, char *buf, struct connectdata *conn)
+int GetLine(int sockfd, char *ptr, struct connectdata *conn)
 {
   ssize_t nread;
-  int read_rc=1;
-  char *ptr;
-  struct SessionHandle *data=conn->data;
-
-  ptr=buf;
 
   /* get us a full line, terminated with a newline */
-  for(nread=0;
-      (nread<BUFSIZE) && read_rc;
-      nread++, ptr++) {
+  for(nread=0; (nread<BUFSIZE); nread++, ptr++) {
     if((CURLE_OK != Curl_read(conn, sockfd, ptr, 1, &nread)) ||
-       (nread <= 0) ||
-       (*ptr == '\n'))
+       (nread <= 0) || (*ptr == '\n'))
       break;
   }
   *ptr=0; /* zero terminate */
   
-  if(data->set.verbose) {
-    fputs("< ", data->set.err);
-    fwrite(buf, 1, nread, data->set.err);
-    fputs("\n", data->set.err);
-  }
   return nread>0?nread:0;
 }
 
@@ -282,6 +269,9 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   while(GetLine(tunnelsocket, data->state.buffer, conn)) {
     if('\r' == data->state.buffer[0])
       break; /* end of headers */
+    if(data->set.verbose)
+      fprintf(data->set.err, "< %s\n", data->state.buffer);
+
     if(2 == sscanf(data->state.buffer, "HTTP/1.%d %d",
                    &subversion,
                    &httperror)) {
@@ -338,15 +328,6 @@ CURLcode Curl_http_connect(struct connectdata *conn)
     data->state.auth_host = strdup(conn->hostname);
   }
 
-  return CURLE_OK;
-}
-
-/* called from curl_close() when this struct is about to get wasted, free
-   protocol-specific resources */
-CURLcode Curl_http_close(struct connectdata *conn)
-{
-  if(conn->data->state.auth_host)
-    free(conn->data->state.auth_host);
   return CURLE_OK;
 }
 
