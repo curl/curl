@@ -6,6 +6,33 @@
 
                                   Changelog
 
+Daniel (4 Feb)
+- Peter Forret reported one of those error:00000000 cases in libcurl again
+  when connecting to a HTTPS site, and this time I did discover some oddities
+  in how curl reports SSL errors back. It could miss showing the actual error.
+
+Version 7.10.4-pre1 (3 Feb 2003)
+
+Daniel (3 Feb)
+- Removed things in the docs saying capath doesn't work on Windows, as Julian
+  Noble told us it works fine.
+
+Daniel (31 Jan)
+- Kevin Roth fixed the zlib build stuff in the Mingw32 makefile.
+
+Daniel (30 Jan)
+- Kevin Roth found out that curl on Windows always checked for the CA cert
+  bundle using the environment variable and the path scan, even though
+  -k/--insecure was used.
+
+- Hamish Mackenzie pointed out that curl only did strict host name verifying
+  if capath or cainfo was used. Now it'll always do it unless -k / --insecure
+  is used!
+
+- Pavel Cenek pointed out that the Content-Type extraction was done wrongly
+  as the full string was not fetched. Added test case 57 to verify that curl
+  does it right now.
+
 Daniel (29 Jan)
 - Jamie Wilkinson provided a patch that now makes curl attempt to clear out
   "sensitive" command line arguments so that they don't appear in ps outputs
@@ -14,7 +41,9 @@ Daniel (29 Jan)
 - John McGowan found out that the DEBUGFUNCTION could be called with bad
   arguments and thus cause the --trace outputs to go wrong.
 
-- Removed all the emacs local variables from all files.
+- Removed all the emacs local variables from all files. Mats Lidell provided
+  the new sample.emacs file (for a sample of what to include in your .emacs)
+  and the curl-style.el that sets a better c-style for editing curl sources.
 
 - Dave Halbakken found a problem with FTP downloads that could accidently
   return CURLE_PARTIAL_FILE when curl_easy_perform() was called with NOBODY
