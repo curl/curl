@@ -1272,6 +1272,50 @@ static CURLcode ConnectPlease(struct connectdata *conn)
   return result;
 }
 
+static void verboseconnect(struct connectdata *conn)
+{
+#ifdef HAVE_INET_NTOA_R
+  char ntoa_buf[64];
+#endif
+  struct SessionHandle *data = conn->data;
+
+  /* Figure out the ip-number and display the first host name it shows: */
+#ifdef ENABLE_IPV6
+  {
+    char hbuf[NI_MAXHOST];
+#ifdef NI_WITHSCOPEID
+    const int niflags = NI_NUMERICHOST | NI_WITHSCOPEID;
+#else
+    const int niflags = NI_NUMERICHOST;
+#endif
+    struct addrinfo *ai = conn->serv_addr;
+
+    if (getnameinfo(ai->ai_addr, ai->ai_addrlen, hbuf, sizeof(hbuf), NULL, 0,
+	niflags)) {
+      snprintf(hbuf, sizeof(hbuf), "?");
+    }
+    if (ai->ai_canonname) {
+      infof(data, "Connected to %s (%s) port %d\n", ai->ai_canonname, hbuf,
+            conn->port);
+    } else {
+      infof(data, "Connected to %s port %d\n", hbuf, conn->port);
+    }
+  }
+#else
+  {
+    struct in_addr in;
+    (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
+    infof(data, "Connected to %s (%s) port %d\n", conn->hostaddr->h_name,
+#if defined(HAVE_INET_NTOA_R)
+          inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)),
+#else
+          inet_ntoa(in),
+#endif
+          conn->port);
+  }
+#endif
+}
+
 static CURLcode CreateConnection(struct SessionHandle *data,
                                  struct connectdata **in_connect)
 {
@@ -1283,9 +1327,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   struct connectdata *conn_temp;
   char endbracket;
   int urllen;
-#ifdef HAVE_INET_NTOA_R
-  char ntoa_buf[64];
-#endif
 #ifdef HAVE_ALARM
   unsigned int prev_alarm;
 #endif
@@ -2229,14 +2270,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
   }
 
+  conn->bytecount = 0;
+  conn->headerbytecount = 0;
+  
   if(-1 == conn->firstsocket) {
     /* Connect only if not already connected! */
     result = ConnectPlease(conn);
     if(CURLE_OK != result)
       return result;
 
+    Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected */
+    if(data->set.verbose)
+      verboseconnect(conn);
+
     if(conn->curl_connect) {
-      /* is there a connect() procedure? */
+      /* is there a protocol-specific connect() procedure? */
 
       /* set start time here for timeout purposes in the
        * connect procedure, it is later set again for the
@@ -2249,48 +2297,14 @@ static CURLcode CreateConnection(struct SessionHandle *data,
         return result; /* pass back errors */
     }
   }
-
-  Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected */
-
-  conn->now = Curl_tvnow(); /* time this *after* the connect is done */
-  conn->bytecount = 0;
-  conn->headerbytecount = 0;
-  
-  /* Figure out the ip-number and display the first host name it shows: */
-#ifdef ENABLE_IPV6
-  {
-    char hbuf[NI_MAXHOST];
-#ifdef NI_WITHSCOPEID
-    const int niflags = NI_NUMERICHOST | NI_WITHSCOPEID;
-#else
-    const int niflags = NI_NUMERICHOST;
-#endif
-    struct addrinfo *ai = conn->serv_addr;
-
-    if (getnameinfo(ai->ai_addr, ai->ai_addrlen, hbuf, sizeof(hbuf), NULL, 0,
-	niflags)) {
-      snprintf(hbuf, sizeof(hbuf), "?");
-    }
-    if (ai->ai_canonname) {
-      infof(data, "Connected to %s (%s) port %d\n", ai->ai_canonname, hbuf,
-            conn->port);
-    } else {
-      infof(data, "Connected to %s port %d\n", hbuf, conn->port);
-    }
+  else {
+    Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
+    if(data->set.verbose)
+      verboseconnect(conn);
   }
-#else
-  {
-    struct in_addr in;
-    (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
-    infof(data, "Connected to %s (%s) port %d\n", conn->hostaddr->h_name,
-#if defined(HAVE_INET_NTOA_R)
-          inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)),
-#else
-          inet_ntoa(in),
-#endif
-          conn->port);
-  }
-#endif
+
+  conn->now = Curl_tvnow(); /* time this *after* the connect is done, we
+                               set this here perhaps a second time */
 
 #ifdef __EMX__
   /* 20000330 mgs
