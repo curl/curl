@@ -140,11 +140,11 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
       memcpy(hostent->h_addr_list[0], &addr, sizeof(struct in_addr));
       hostent->h_addr_list[1] = NULL;
       *host = hostent;
-      if(line)
-        free(line);
+      free(line);
       return ARES_SUCCESS;
     }
-  free(line);
+  if(line)
+    free(line);
 
   if (status == ARES_SUCCESS)
     {
@@ -160,7 +160,7 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
 	    }
           if(hostent->h_aliases)
             free(hostent->h_aliases);
-	  if (hostent->h_addr_list)
+	  if (hostent->h_addr_list && hostent->h_addr_list[0])
 	    free(hostent->h_addr_list[0]);
           if(hostent->h_addr_list)
             free(hostent->h_addr_list);
