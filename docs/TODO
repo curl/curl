@@ -52,6 +52,10 @@ TODO
    EWOULDBLOCK or similar. This concerns the HTTP request sending, the FTP
    command sending etc.
 
+ * Go through the code and verify that libcurl deals with big files >2GB and
+   >4GB all over. Bug reports indicate that it doesn't currently work
+   properly.
+
  DOCUMENTATION
 
  * Document all CURLcode error codes, why they happen and what most likely
