@@ -768,7 +768,6 @@ case "$OPT_ZLIB" in
       AC_CHECK_LIB(z, gzread,
                    [HAVE_LIBZ="1"
                    AC_SUBST(HAVE_LIBZ)
-                   LIBS="$LIBS -lz"
                    AC_DEFINE(HAVE_ZLIB_H, 1, [if you have the zlib.h header file])
                    AC_DEFINE(HAVE_LIBZ, 1, [If zlib is available])],
                    [ CPPFLAGS=$_cppflags
