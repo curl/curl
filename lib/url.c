@@ -3367,12 +3367,13 @@ CURLcode Curl_async_resolved(struct connectdata *conn)
 }
 
 
-CURLcode Curl_done(struct connectdata *conn,
+CURLcode Curl_done(struct connectdata **connp,
                    CURLcode status) /* an error if this is called after an
                                        error was detected */
 {
-  struct SessionHandle *data=conn->data;
   CURLcode result;
+  struct connectdata *conn = *connp;
+  struct SessionHandle *data=conn->data;
 
   /* cleanups done even if the connection is re-used */
 
@@ -3416,6 +3417,9 @@ CURLcode Curl_done(struct connectdata *conn,
     CURLcode res2;
     res2 = Curl_disconnect(conn); /* close the connection */
 
+    *connp = NULL; /* to make the caller of this function better detect that
+                      this was actually killed here */
+
     /* If we had an error already, make sure we return that one. But
        if we got a new error, return that. */
     if(!result && res2)
@@ -3452,9 +3456,9 @@ CURLcode Curl_do(struct connectdata **connp)
       infof(data, "Re-used connection seems dead, get a new one\n");
 
       conn->bits.close = TRUE; /* enforce close of this connection */
-      result = Curl_done(conn, result); /* we are so done with this */
+      result = Curl_done(&conn, result); /* we are so done with this */
 
-      /* conn is no longer a good pointer */
+      /* conn may no longer be a good pointer */
 
       if(CURLE_OK == result) {
         bool async;
