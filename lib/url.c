@@ -1360,9 +1360,11 @@ ConnectionExists(struct SessionHandle *data,
             continue;
           }
         }
-        if(needle->protocol & PROT_FTP) {
-          /* This is FTP, verify that we're using the same name and
-             password as well */
+        if((needle->protocol & PROT_FTP) ||
+           ((needle->protocol & PROT_HTTP) &&
+            (needle->data->state.authwant==CURLAUTH_NTLM))) {
+          /* This is FTP or HTTP+NTLM, verify that we're using the same name
+             and password as well */
           if(!strequal(needle->user, check->user) ||
              !strequal(needle->passwd, check->passwd)) {
             /* one of them was different */
