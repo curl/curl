@@ -1,4 +1,4 @@
-Updated: August 12, 2004 (http://curl.haxx.se/docs/faq.html)
+Updated: August 18, 2004 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -81,6 +81,11 @@ FAQ
   6.4 I have a program that uses LGPL libraries, can I use libcurl?
   6.5 Can I modify curl/libcurl for my program and keep the changes secret?
   6.6 Can you please change the curl/libcurl license to XXXX?
+
+ 7. PHP/CURL Issues
+  7.1 What is PHP/CURL?
+  7.2 Who write PHP/CURL?
+  7.3 Can I perform multiple requests using the same handle?
 
 ==============================================================================
 
@@ -867,3 +872,26 @@ FAQ
   we want on curl/libcurl and it does not spread to other programs or
   libraries that use it. It should be possible for everyone to use libcurl or
   curl in their projects, no matter what license they already have in use.
+
+7. PHP/CURL Issues
+
+  7.1 What is PHP/CURL?
+
+  The module for PHP that makes it possible for PHP programs to access curl-
+  functions from within PHP. We often call it PHP/CURL to differentiate from
+  curl the command line tool and libcurl the library.
+
+  7.2 Who write PHP/CURL?
+
+  PHP/CURL is a module that comes with the regular PHP package. It depends and
+  uses libcurl, so you need to have libcurl installed properly first before
+  PHP/CURL can be used. PHP/CURL is written by Sterling Hughes.
+
+  7.3 Can I perform multiple requests using the same handle?
+
+  With libcurl you can. With PHP/CURL you cannot. This is a limitation in the
+  PHP/CURL code. Therefore, you need to close each handle after each request
+  and create a new one for the following one.
+
+  I've heard rumours that this situation has been fixed in PHP5, but that is
+  unconfirmed.
