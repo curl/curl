@@ -361,7 +361,7 @@ struct Curl_transfer_keeper {
 
   char *buf;
   char *uploadbuf;
-  int maxfd;
+  curl_socket_t maxfd;
 
   /* pointers to the actual descriptors we check */
   fd_set *readfdp;
@@ -451,10 +451,10 @@ struct connectdata {
   
   struct timeval now;     /* "current" time */
   struct timeval created; /* creation time */
-  int sock[2];       /* two sockets, the second is used for the data transfer
-                        when doing FTP */
+  curl_socket_t sock[2]; /* two sockets, the second is used for the data
+                            transfer when doing FTP */
   curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch, 0
-                        means unlimited */
+                             means unlimited */
   
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
   struct ssl_config_data ssl_config;
@@ -490,13 +490,14 @@ struct connectdata {
   /**** curl_get() phase fields */
 
   /* READ stuff */
-  int sockfd;		  /* socket to read from or -1 */
+  curl_socket_t sockfd;	  /* socket to read from or CURL_SOCKET_BAD */
   curl_off_t size;	  /* -1 if unknown at this point */
   curl_off_t *bytecountp; /* return number of bytes read or NULL */
           
   /* WRITE stuff */
-  int writesockfd;       /* socket to write to, it may very
-                            well be the same we read from. -1 disables */
+  curl_socket_t writesockfd; /* socket to write to, it may very
+                                well be the same we read from.
+                                CURL_SOCKET_BAD disables */
   curl_off_t *writebytecountp; /* return number of bytes written or NULL */
 
   /** Dynamicly allocated strings, may need to be freed before this **/

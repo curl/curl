@@ -263,7 +263,7 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
         /* when we're waiting for a connect, we wait for the socket to
            become writable */
         struct connectdata *conn = easy->easy_conn;
-        int sockfd;
+        curl_socket_t sockfd;
 
         if(CURLM_STATE_WAITCONNECT == easy->state) {
           sockfd = conn->sock[FIRSTSOCKET];

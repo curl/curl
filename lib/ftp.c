@@ -132,7 +132,7 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
   fd_set rdset;
   struct timeval dt;
   struct SessionHandle *data = conn->data;
-  int sock = conn->sock[SECONDARYSOCKET];
+  curl_socket_t sock = conn->sock[SECONDARYSOCKET];
   struct timeval now = Curl_tvnow();
   long timespent = Curl_tvdiff(Curl_tvnow(), now)/1000;
   long timeout = data->set.connecttimeout?data->set.connecttimeout:
@@ -211,7 +211,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
    * Alas, read as much as possible, split up into lines, use the ending
    * line in a response or continue reading.  */
 
-  int sockfd = conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
   int perline; /* count bytes per line */
   bool keepon=TRUE;
   ssize_t gotbytes;
@@ -1103,7 +1103,7 @@ static
 CURLcode ftp_use_port(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
-  int portsock=-1;
+  curl_socket_t portsock= CURL_SOCKET_BAD;
   ssize_t nread;
   int ftpcode; /* receive FTP response codes in this */
   CURLcode result;
@@ -1166,7 +1166,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
     return CURLE_FTP_PORT_FAILED;
   }
   
-  portsock = -1;
+  portsock = CURL_SOCKET_BAD;
   for (ai = res; ai; ai = ai->ai_next) {
     /*
      * Workaround for AIX5 getaddrinfo() problem (it doesn't set ai_socktype):
@@ -1175,25 +1175,25 @@ CURLcode ftp_use_port(struct connectdata *conn)
       ai->ai_socktype = hints.ai_socktype;
 
     portsock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
-    if (portsock < 0)
+    if (portsock == CURL_SOCKET_BAD)
       continue;
 
     if (bind(portsock, ai->ai_addr, ai->ai_addrlen) < 0) {
       sclose(portsock);
-      portsock = -1;
+      portsock = CURL_SOCKET_BAD;
       continue;
     }
       
     if (listen(portsock, 1) < 0) {
       sclose(portsock);
-      portsock = -1;
+      portsock = CURL_SOCKET_BAD;
       continue;
     }
     
     break;
   }
   freeaddrinfo(res);
-  if (portsock < 0) {
+  if (portsock == CURL_SOCKET_BAD) {
     failf(data, "%s", strerror(errno));
     return CURLE_FTP_PORT_FAILED;
   }
@@ -1378,7 +1378,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
     Curl_resolv_unlock(data, h);
 
   if ( h || sa_filled_in) {
-    if( (portsock = socket(AF_INET, SOCK_STREAM, 0)) >= 0 ) {
+    if( (portsock = socket(AF_INET, SOCK_STREAM, 0)) != CURL_SOCKET_BAD ) {
       int size;
       
       /* we set the secondary socket variable to this for now, it

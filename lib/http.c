@@ -531,7 +531,7 @@ CURLcode add_buffer_send(send_buffer *in,
   size_t size;
   struct HTTP *http = conn->proto.http;
   size_t sendsize;
-  int sockfd = conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   /* The looping below is required since we use non-blocking sockets, but due
      to the circumstances we will just loop and try again and again etc */

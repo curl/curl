@@ -1079,7 +1079,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
 {
   CURLcode code;
   struct SessionHandle *data = conn->data;
-  int sockfd = conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 #ifdef WIN32
   HMODULE wsock2;
   WSOCK2_FUNC close_event_func;

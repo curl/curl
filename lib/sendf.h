@@ -38,7 +38,7 @@ CURLcode Curl_client_write(struct SessionHandle *data, int type, char *ptr,
                            size_t len);
 
 /* internal read-function, does plain socket, SSL and krb4 */
-int Curl_read(struct connectdata *conn, int sockfd,
+int Curl_read(struct connectdata *conn, curl_socket_t sockfd,
               char *buf, size_t buffersize,
               ssize_t *n);
 /* internal write-function, does plain socket, SSL and krb4 */

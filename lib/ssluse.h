@@ -23,7 +23,7 @@
  * $Id$
  ***************************************************************************/
 #include "urldata.h"
-CURLcode Curl_SSLConnect(struct connectdata *conn, int sockfd);
+CURLcode Curl_SSLConnect(struct connectdata *conn, curl_socket_t sockfd);
 
 void Curl_SSL_init(void);    /* Global SSL init */
 void Curl_SSL_cleanup(void); /* Global SSL cleanup */

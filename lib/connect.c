@@ -86,7 +86,7 @@
 #include "memdebug.h"
 #endif
 
-static bool verifyconnect(int sockfd);
+static bool verifyconnect(curl_socket_t sockfd);
 
 int Curl_ourerrno(void)
 {
@@ -104,7 +104,7 @@ int Curl_ourerrno(void)
  *  Set the socket to either blocking or non-blocking mode.
  */
 
-int Curl_nonblock(int sockfd,    /* operate on this */
+int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
                   int nonblock   /* TRUE or FALSE */)
 {
 #undef SETBLOCK
@@ -168,7 +168,7 @@ int Curl_nonblock(int sockfd,    /* operate on this */
  * 2    select() returned with an error condition
  */
 static
-int waitconnect(int sockfd, /* socket */
+int waitconnect(curl_socket_t sockfd, /* socket */
                 long timeout_msec)
 {
   fd_set fd;
@@ -212,7 +212,7 @@ int waitconnect(int sockfd, /* socket */
 }
 
 static CURLcode bindlocal(struct connectdata *conn,
-                          int sockfd)
+                          curl_socket_t sockfd)
 {
 #ifdef HAVE_INET_NTOA
   bool bindworked = FALSE;
@@ -401,7 +401,7 @@ static CURLcode bindlocal(struct connectdata *conn,
 /*
  * verifyconnect() returns TRUE if the connect really has happened.
  */
-static bool verifyconnect(int sockfd)
+static bool verifyconnect(curl_socket_t sockfd)
 {
 #if defined(SO_ERROR) && !defined(WIN32)
   int err = 0;
@@ -427,7 +427,7 @@ static bool verifyconnect(int sockfd)
  */
 
 CURLcode Curl_is_connected(struct connectdata *conn,
-                           int sockfd,
+                           curl_socket_t sockfd,
                            bool *connected)
 {
   int rc;
@@ -505,13 +505,13 @@ CURLcode Curl_is_connected(struct connectdata *conn,
 CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                           struct Curl_dns_entry *remotehost, /* use this one */
                           int port,                  /* connect to this */
-                          int *sockconn,             /* the connected socket */
+                          curl_socket_t *sockconn,   /* the connected socket */
                           Curl_ipconnect **addr,     /* the one we used */
                           bool *connected)           /* really connected? */
 {
   struct SessionHandle *data = conn->data;
   int rc;
-  int sockfd=-1;
+  curl_socket_t sockfd= CURL_SOCKET_BAD;
   int aliasindex=0;
   char *hostname;
 
@@ -587,7 +587,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
     /* create an IPv4 TCP socket */
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if(-1 == sockfd) {
+    if(CURL_SOCKET_BAD == sockfd) {
       failf(data, "couldn't create socket");
       return CURLE_COULDNT_CONNECT; /* big time error */
     }

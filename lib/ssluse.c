@@ -922,7 +922,7 @@ Curl_SSLConnect(struct connectdata *conn,
   SSL_METHOD *req_method;
   SSL_SESSION *ssl_sessionid=NULL;
   ASN1_TIME *certdate;
-  int sockfd = conn->sock[sockindex];
+  curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
 
   /* mark this is being ssl enabled from here on out. */

@@ -169,7 +169,7 @@ void Curl_failf(struct SessionHandle *data, const char *fmt, ...)
 }
 
 /* Curl_sendf() sends formated data to the server */
-CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
+CURLcode Curl_sendf(curl_socket_t sockfd, struct connectdata *conn,
                     const char *fmt, ...)
 {
   struct SessionHandle *data = conn->data;
@@ -217,11 +217,11 @@ CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
 /*
  * Curl_write() is an internal write function that sends plain (binary) data
  * to the server. Works with plain sockets, SSL or kerberos.
- *
  */
 CURLcode Curl_write(struct connectdata *conn,
-                    int sockfd,
-                    void *mem, size_t len,
+                    curl_socket_t sockfd,
+                    void *mem,
+                    size_t len,
                     ssize_t *written)
 {
   ssize_t bytes_written;
@@ -363,7 +363,7 @@ CURLcode Curl_client_write(struct SessionHandle *data,
  * a regular CURLcode value.
  */
 int Curl_read(struct connectdata *conn, /* connection data */
-              int sockfd,               /* read from this file handle */
+              curl_socket_t sockfd,     /* read from this socket */
               char *buf,                /* store read data here */
               size_t buffersize,        /* max amount to read */
               ssize_t *n)               /* amount bytes read */

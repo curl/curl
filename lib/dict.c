@@ -89,7 +89,7 @@ CURLcode Curl_dict(struct connectdata *conn)
                           by RFC 2229 */
   CURLcode result=CURLE_OK;
   struct SessionHandle *data=conn->data;
-  int sockfd = conn->sock[FIRSTSOCKET];
+  curl_socket_t sockfd = conn->sock[FIRSTSOCKET];
 
   char *path = conn->path;
   curl_off_t *bytecount = &conn->bytecount;

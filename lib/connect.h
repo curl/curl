@@ -23,17 +23,17 @@
  * $Id$
  ***************************************************************************/
 
-int Curl_nonblock(int sockfd,    /* operate on this */
+int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
                   int nonblock   /* TRUE or FALSE */);
 
 CURLcode Curl_is_connected(struct connectdata *conn,
-                           int sockfd,
+                           curl_socket_t sockfd,
                            bool *connected);
 
 CURLcode Curl_connecthost(struct connectdata *conn,
                           struct Curl_dns_entry *host, /* connect to this */
                           int port,       /* connect to this port number */
-                          int *sockconn,  /* not set if error is returned */
+                          curl_socket_t *sockconn, /* not set if error */
                           Curl_ipconnect **addr, /* the one we used */
                           bool *connected /* truly connected? */
                           );
