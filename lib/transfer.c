@@ -1777,8 +1777,10 @@ CURLcode Curl_follow(struct SessionHandle *data,
     newest=(char *)malloc( urllen + 1 + /* possible slash */
                            newlen + 1 /* zero byte */);
     
-    if(!newest)
+    if(!newest) {
+      free(url_clone); /* don't leak this */
       return CURLE_OUT_OF_MEMORY; /* go out from this */
+    }
 
     /* copy over the root url part */
     memcpy(newest, url_clone, urllen);
