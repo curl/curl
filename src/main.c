@@ -128,8 +128,8 @@ static void help(void)
        " -V/--version       Outputs version number then quits\n"
        " -x/--proxy <host>  Use proxy. (Default port is 1080)\n"
        " -X/--request <command> Specific request command to use\n"
-       " -y/--speed-limit   Stop transfer if below speed-limit for 'speed-time' secs\n"
-       " -Y/--speed-time    Time needed to trig speed-limit abort. Defaults to 30\n"
+       " -y/--speed-time    Time needed to trig speed-limit abort. Defaults to 30\n"
+       " -Y/--speed-limit   Stop transfer if below speed-limit for 'speed-time' secs\n"
        " -z/--time-cond <time> Includes a time condition to the server (H)\n"
        " -2/--sslv2         Force usage of SSLv2 (H)\n"
        " -3/--sslv3         Force usage of SSLv3 (H)\n"
@@ -303,8 +303,8 @@ static int getparameter(char *flag, /* f or -long-flag */
     {"x", "proxy",       TRUE},
     {"X", "request",     TRUE},
     {"X", "http-request", TRUE}, /* OBSOLETE VERSION */
-    {"y", "speed-time",  TRUE},
-    {"Y", "speed-limit", TRUE},
+    {"Y", "speed-limit",  TRUE},
+    {"y", "speed-time", TRUE},
     {"z", "time-cond",   TRUE},
     {"#", "progress-bar",FALSE},
   };
@@ -659,13 +659,13 @@ static int getparameter(char *flag, /* f or -long-flag */
       /* HTTP request */
       GetStr(&config->customrequest, nextarg);
       break;
-    case 'Y':
+    case 'y':
       /* low speed time */
       config->low_speed_time = atoi(nextarg);
       if(!config->low_speed_limit)
 	config->low_speed_limit = 1;
       break;
-    case 'y':
+    case 'Y':
       /* low speed limit */
       config->low_speed_limit = atoi(nextarg);
       if(!config->low_speed_time)
@@ -1126,6 +1126,7 @@ int main(int argc, char *argv[])
                     URGTAG_TIMEVALUE, config.condtime,
                     URGTAG_CUSTOMREQUEST, config.customrequest,
                     URGTAG_STDERR, config.errors,
+                    URGTAG_PROGRESSMODE, config.progressmode,
                     URGTAG_DONE); /* always terminate the list of tags */
   if((res!=URG_OK) && config.showerror)
     fprintf(config.errors, "curl: (%d) %s\n", res, errorbuffer);
