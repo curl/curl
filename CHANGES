@@ -7,8 +7,35 @@
                                   Changelog
 
 
+Daniel (7 Jan 2003)
+- Now using autoconf 2.57 and automake 1.7.2
+
+- Doing "curl -I ftp://domain/non-existing-file" still outputed a date!
+
+- The error message is now written properly with a newline in the --trace
+  file.
+
+Daniel (6 Jan 2003)
+- Sterling Hughes fixed a possible bug: previously, if you called
+  curl_easy_perform and then set the global dns cache, the global cache
+  wouldn't be used.
+
+- Matthew Blain's fixed the VC6 libcurl makefile to include better debug data
+  on debug builds.
+
+Daniel (27 Dec 2002)
+- Philippe Raoult reported a bug with HTTPS connections which I evidently
+  added in my 19 dec fix. I corrected it.
+
+Daniel (20 Dec)
+- Idea from the Debian latest patch: use AM_MAINTAINER_MODE in the configure
+  script to make the default makefile less confusing "to the casual
+  installer".
+
+Version 7.10.3-pre3 (20 Dec)
+
 Daniel (19 Dec)
-- Matthew B patched the Curl_base64_decode() function.
+- Matthew Blain patched the Curl_base64_decode() function.
 
 - Evan Jordan reported in bug report #653022 that the SSL_read() usage was
   wrong, and it certainly was. It could lead to curl using too much CPU due to
