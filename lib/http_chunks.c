@@ -186,10 +186,14 @@ CHUNKcode Curl_httpchunk_read(struct connectdata *conn,
           break;
 
         case DEFLATE: 
+          /* update conn->keep.str to point to the chunk data. */
+          conn->keep.str = datap;
           result = Curl_unencode_deflate_write(conn->data, &conn->keep, piece);
           break;
 
         case GZIP:
+          /* update conn->keep.str to point to the chunk data. */
+          conn->keep.str = datap;
           result = Curl_unencode_gzip_write(conn->data, &conn->keep, piece);
           break;
 
