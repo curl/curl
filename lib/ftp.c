@@ -1169,7 +1169,6 @@ CURLcode ftp_use_port(struct connectdata *conn)
   struct sockaddr_in sa;
   struct hostent *h=NULL;
   char *hostdataptr=NULL;
-  size_t size;
   unsigned short porttouse;
   char myhost[256] = "";
 
@@ -1193,6 +1192,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
   
   if ( h ) {
     if( (portsock = socket(AF_INET, SOCK_STREAM, 0)) >= 0 ) {
+      int size;
       
       /* we set the secondary socket variable to this for now, it
          is only so that the cleanup function will close it in case
