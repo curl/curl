@@ -97,8 +97,10 @@ if test "$1" = "$LIBTOOL_WANTED_MAJOR"; then
    if test "$2" -lt "$LIBTOOL_WANTED_MINOR"; then
       lt_status="bad"
    elif test ! -z "$LIBTOOL_WANTED_PATCH"; then
-       if test "$3" -lt "$LIBTOOL_WANTED_PATCH"; then
-           lt_status="bad"
+       if test -n "$3"; then
+          if test "$3" -lt "$LIBTOOL_WANTED_PATCH"; then
+             lt_status="bad"
+          fi
        fi
    fi
 fi
