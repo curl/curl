@@ -108,44 +108,44 @@
    then those parser generators need to be fixed instead of adding those
    names to this list. */
 
-#define yymaxdepth gd_maxdepth
-#define yyparse gd_parse
-#define yylex   gd_lex
-#define yyerror gd_error
-#define yylval  gd_lval
-#define yychar  gd_char
-#define yydebug gd_debug
-#define yypact  gd_pact
-#define yyr1    gd_r1
-#define yyr2    gd_r2
-#define yydef   gd_def
-#define yychk   gd_chk
-#define yypgo   gd_pgo
-#define yyact   gd_act
-#define yyexca  gd_exca
-#define yyerrflag gd_errflag
-#define yynerrs gd_nerrs
-#define yyps    gd_ps
-#define yypv    gd_pv
-#define yys     gd_s
-#define yy_yys  gd_yys
-#define yystate gd_state
-#define yytmp   gd_tmp
-#define yyv     gd_v
-#define yy_yyv  gd_yyv
-#define yyval   gd_val
-#define yylloc  gd_lloc
-#define yyreds  gd_reds          /* With YYDEBUG defined */
-#define yytoks  gd_toks          /* With YYDEBUG defined */
-#define yylhs   gd_yylhs
-#define yylen   gd_yylen
-#define yydefred gd_yydefred
-#define yydgoto gd_yydgoto
-#define yysindex gd_yysindex
-#define yyrindex gd_yyrindex
-#define yygindex gd_yygindex
-#define yytable  gd_yytable
-#define yycheck  gd_yycheck
+#define yymaxdepth Curl_gd_maxdepth
+#define yyparse Curl_gd_parse
+#define yylex   Curl_gd_lex
+#define yyerror Curl_gd_error
+#define yylval  Curl_gd_lval
+#define yychar  Curl_gd_char
+#define yydebug Curl_gd_debug
+#define yypact  Curl_gd_pact
+#define yyr1    Curl_gd_r1
+#define yyr2    Curl_gd_r2
+#define yydef   Curl_gd_def
+#define yychk   Curl_gd_chk
+#define yypgo   Curl_gd_pgo
+#define yyact   Curl_gd_act
+#define yyexca  Curl_gd_exca
+#define yyerrflag Curl_gd_errflag
+#define yynerrs Curl_gd_nerrs
+#define yyps    Curl_gd_ps
+#define yypv    Curl_gd_pv
+#define yys     Curl_gd_s
+#define yy_yys  Curl_gd_yys
+#define yystate Curl_gd_state
+#define yytmp   Curl_gd_tmp
+#define yyv     Curl_gd_v
+#define yy_yyv  Curl_gd_yyv
+#define yyval   Curl_gd_val
+#define yylloc  Curl_gd_lloc
+#define yyreds  Curl_gd_reds          /* With YYDEBUG defined */
+#define yytoks  Curl_gd_toks          /* With YYDEBUG defined */
+#define yylhs   Curl_gd_yylhs
+#define yylen   Curl_gd_yylen
+#define yydefred Curl_gd_yydefred
+#define yydgoto Curl_gd_yydgoto
+#define yysindex Curl_gd_yysindex
+#define yyrindex Curl_gd_yyrindex
+#define yygindex Curl_gd_yygindex
+#define yytable  Curl_gd_yytable
+#define yycheck  Curl_gd_yycheck
 
 static int yylex ();
 static int yyerror ();
