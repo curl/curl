@@ -33,7 +33,7 @@ typedef enum {
 } CURLntlm;
 
 /* this is for ntlm header input */
-CURLntlm Curl_input_ntlm(struct connectdata *conn, char *header);
+CURLntlm Curl_input_ntlm(struct connectdata *conn, bool proxy, char *header);
 
 /* this is for creating ntlm header output */
 CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy);
