@@ -3,14 +3,20 @@ Curl and libcurl 7.11.2. A bugfix release.
  Public curl release number:               80
  Releases counted from the very beginning: 107
  Available command line options:           94
- Available curl_easy_setopt() options:     112
+ Available curl_easy_setopt() options:     113
 
 This release includes the following changes:
 
+ o --tcp-nodelay and CURLOPT_TCP_NODELAY were added
  o curl/curlver.h contains the libcurl version info now
 
 This release includes the following bugfixes:
 
+ o better tread-safety thanks to the new strerror() replacement
+ o better tread-safety on AIX thanks to better function detection
+ o minor ipv6 build fix for windows
+ o the test suite runs fine with mingw-built curl
+ o the postit2.c example works now
  o better error message when --interface fails on windows
  o the progress meter now displays very long times better
  o CURLINFO_CONTENT_LENGTH_DOWNLOAD with CURLOPT_NOBODY set TRUE now works
@@ -26,6 +32,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Thomas Schwinge, Marty Kuhrt, Günter Knauf, Kevin Roth, Glen Nakamura,
- Gisle Vanem, Greg Hewgill
+ Gisle Vanem, Greg Hewgill, Joe Halpin, Tor Arntsen
 
         Thanks! (and sorry if I forgot to mention someone)
