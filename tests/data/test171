@@ -18,7 +18,7 @@ This server reply is for testing a simple Location: following
 http
 </server>
  <name>
-HTTP, get cookies and store in cookie jar
+HTTP, get cookie with dot prefixed full domain
  </name>
  <command>
 -c log/jar171 -x %HOSTIP:%HOSTPORT http://z.x.com/171
