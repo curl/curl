@@ -74,20 +74,23 @@ void curl_memdebug(const char *logname)
 
 void *curl_domalloc(size_t wantedsize, int line, const char *source)
 {
-  void *mem;
+  struct memdebug *mem;
   size_t size;
 
   /* alloc at least 64 bytes */
-  size = wantedsize>64?wantedsize:64;
+  size = sizeof(struct memdebug)+wantedsize;
 
-  mem=(malloc)(size);
-  if(mem)
+  mem=(struct memdebug *)(malloc)(size);
+  if(mem) {
     /* fill memory with junk */
-    memset(mem, 0xA5, size);
+    memset(mem->mem, 0xA5, wantedsize);
+    mem->size = wantedsize;
+  }
+
   if(logfile && source)
     fprintf(logfile, "MEM %s:%d malloc(%d) = %p\n",
-            source, line, wantedsize, mem);
-  return mem;
+            source, line, wantedsize, mem->mem);
+  return mem->mem;
 }
 
 char *curl_dostrdup(const char *str, int line, const char *source)
@@ -109,35 +112,48 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   if(logfile)
     fprintf(logfile, "MEM %s:%d strdup(%p) (%d) = %p\n",
             source, line, str, len, mem);
+
   return mem;
 }
 
 void *curl_dorealloc(void *ptr, size_t wantedsize,
                      int line, const char *source)
 {
-  void *mem;
+  struct memdebug *mem;
 
-  size_t size = wantedsize>64?wantedsize:64;
+  size_t size = sizeof(struct memdebug)+wantedsize;
 
-  mem=(realloc)(ptr, size);
+  mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
+
+  mem=(struct memdebug *)(realloc)(mem, size);
   if(logfile)
     fprintf(logfile, "MEM %s:%d realloc(%p, %d) = %p\n",
-            source, line, ptr, wantedsize, mem);
-  return mem;
+            source, line, ptr, wantedsize, mem?mem->mem:NULL);
+
+  if(mem) {
+    mem->size = wantedsize;
+    return mem->mem;
+  }
+
+  return NULL;
 }
 
 void curl_dofree(void *ptr, int line, const char *source)
 {
+  struct memdebug *mem;
+
   if(NULL == ptr) {
     fprintf(stderr, "ILLEGAL free() on NULL at %s:%d\n",
             source, line);
     exit(2);
   }
-  /* we know this is least 64 bytes, destroy this much */
-  memset(ptr, 0x13, 64);
+  mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
 
+  /* destroy  */
+  memset(mem->mem, 0x13, mem->size);
+  
   /* free for real */
-  (free)(ptr);
+  (free)(mem);
 
   if(logfile)
     fprintf(logfile, "MEM %s:%d free(%p)\n", source, line, ptr);
