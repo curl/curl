@@ -17,15 +17,9 @@ TODO
 
  * Make content encoding/decoding internally be made using a filter system.
 
- * Test the 'multi' interface more.
-
  * Introduce another callback interface for upload/download that makes one
    less copy of data and thus a faster operation.
    [http://curl.haxx.se/dev/no_copy_callbacks.txt]
-
- * Add configure options that disables certain protocols in libcurl to
-   decrease footprint.  '--disable-[protocol]' where protocol is http, ftp,
-   telnet, ldap, dict or file.
 
  * Add asynchronous name resolving. http://curl.haxx.se/dev/async-resolver.txt
    This should be made to work on most of the supported platforms, or
