@@ -726,7 +726,10 @@ CURLcode ftp_cwd(struct connectdata *conn, char *path)
   if (result)
     return result;
 
-  if (ftpcode != 250) {
+  /* According to RFC959, CWD is supposed to return 250 on success, but
+     there seem to be non-compliant FTP servers out there that return 200,
+     so we accept any '2xy' code here. */
+  if (ftpcode/100 != 2) {
     failf(conn->data, "Couldn't cd to %s", path);
     return CURLE_FTP_ACCESS_DENIED;
   }
