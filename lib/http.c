@@ -457,8 +457,8 @@ static size_t readmoredata(char *buffer,
   conn->bits.forbidchunk= (http->sending == HTTPSEND_REQUEST)?TRUE:FALSE;
 
   if(http->postsize <= fullsize) {
-    memcpy(buffer, http->postdata, http->postsize);
-    fullsize = http->postsize;
+    memcpy(buffer, http->postdata, (size_t)http->postsize);
+    fullsize = (size_t)http->postsize;
 
     if(http->backup.postsize) {
       /* move backup data into focus and continue on that */

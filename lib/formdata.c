@@ -1100,7 +1100,7 @@ void curl_formfree(struct curl_httppost *form)
 
 CURLcode Curl_getFormData(struct FormData **finalform,
                           struct curl_httppost *post,
-                          size_t *sizep)
+                          curl_off_t *sizep)
 {
   struct FormData *form = NULL;
   struct FormData *firstform;

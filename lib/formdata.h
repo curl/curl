@@ -57,7 +57,7 @@ int Curl_FormInit(struct Form *form, struct FormData *formdata );
 CURLcode
 Curl_getFormData(struct FormData **,
                  struct curl_httppost *post,
-                 size_t *size);
+                 curl_off_t *size);
 
 /* fread() emulation */
 size_t Curl_FormReader(char *buffer,
