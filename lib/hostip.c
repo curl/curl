@@ -446,6 +446,8 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
   *dns = NULL;
 
   if(conn->async.done) {
+    /* we're done, kill the ares handle */
+    ares_destroy(data->state.areschannel);
     if(!conn->async.dns)
       return CURLE_COULDNT_RESOLVE_HOST;
     *dns = conn->async.dns;
