@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (21 May 2004)
+- While talking to host a.b.c, libcurl did wrongly not accept cookies that
+  were set to the domain .a.b.c (that is with a dot prefix). This is now fixed
+  and test case 171 verifies it.
+
 Daniel (20 May 2004)
 - Jesse Noller reported that the upload speed info reported by libcurl was
   wrong. The same was true for the download speed. Fixed now.

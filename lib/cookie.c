@@ -261,6 +261,9 @@ Curl_cookie_add(struct SessionHandle *data,
               /* Now, we make sure that our host is within the given domain,
                  or the given domain is not valid and thus cannot be set. */
 
+              if('.' == whatptr[0])
+                whatptr++; /* ignore preceeding dot */
+
               if(!domain || tailmatch(whatptr, domain)) {
                 const char *tailptr=whatptr;
                 if(tailptr[0] == '.')
