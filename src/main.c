@@ -941,7 +941,7 @@ int my_fwrite(void *buffer, size_t size, size_t nmemb, FILE *stream)
 
 int main(int argc, char *argv[])
 {
-  char errorbuffer[URLGET_ERROR_SIZE];
+  char errorbuffer[CURL_ERROR_SIZE];
 
   struct OutStruct outs;
   struct OutStruct heads;
