@@ -25,7 +25,7 @@ EXTRA_DIST = mkhelp.pl Makefile.vc6
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
 MANPAGE=$(top_srcdir)/docs/curl.1
-README=$(top_srcdir)/docs/README.curl
+README=$(top_srcdir)/docs/MANUAL
 MKHELP=$(top_srcdir)/src/mkhelp.pl
 
 # This generates the hugehelp.c file
