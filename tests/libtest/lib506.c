@@ -148,13 +148,19 @@ int test(char *URL)
   /* prepare share */
   printf( "SHARE_INIT\n" );
   share = curl_share_init();
-  curl_share_setopt( share, CURLSHOPT_LOCKFUNC,   lock);
-  curl_share_setopt( share, CURLSHOPT_UNLOCKFUNC, unlock);
-  curl_share_setopt( share, CURLSHOPT_USERDATA,   &user);
+  scode = curl_share_setopt( share, CURLSHOPT_LOCKFUNC, lock);
+  scode += curl_share_setopt( share, CURLSHOPT_UNLOCKFUNC, unlock);
+  scode += curl_share_setopt( share, CURLSHOPT_USERDATA, &user);
   printf( "CURL_LOCK_DATA_COOKIE\n" );
-  curl_share_setopt( share, CURLSHOPT_SHARE,      CURL_LOCK_DATA_COOKIE);
+  scode += curl_share_setopt( share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
   printf( "CURL_LOCK_DATA_DNS\n" );
-  curl_share_setopt( share, CURLSHOPT_SHARE,      CURL_LOCK_DATA_DNS);
+  scode += curl_share_setopt( share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+
+  if(scode) {
+    curl_share_cleanup(share);
+    return 2;
+  }
+
   
   res = 0;
 

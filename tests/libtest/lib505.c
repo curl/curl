@@ -72,9 +72,14 @@ int test(char *URL)
   /* get a curl handle */
   curl = curl_easy_init();
   if(curl) {
+    struct curl_slist *hl;
     /* build a list of commands to pass to libcurl */
-    headerlist = curl_slist_append(headerlist, buf_1);
-    headerlist = curl_slist_append(headerlist, buf_2);
+    hl = curl_slist_append(headerlist, buf_1);
+    if(hl) {
+      headerlist = curl_slist_append(hl, buf_2);
+      if(hl)
+        headerlist = hl;
+    }
 
     /* enable uploading */
     curl_easy_setopt(curl, CURLOPT_UPLOAD, TRUE) ;

@@ -39,9 +39,10 @@ int test(char *URL)
     }
   }
   msg = curl_multi_info_read(multi, &still_running);
-  /* this should now contain a result code from the easy handle,
-     get it */
-  i = msg->data.result;
+  if(msg)
+    /* this should now contain a result code from the easy handle,
+       get it */
+    i = msg->data.result;
 
   curl_multi_cleanup(multi);
   curl_easy_cleanup(curls);

@@ -54,7 +54,7 @@ int test(char *URL)
       
       if (res != CURLM_OK) {
         fprintf(stderr, "not okay???\n");
-        return 80;
+        break;
       }
 
       FD_ZERO(&rd);
