@@ -56,7 +56,7 @@ CP	= cp -afv
 # RM	= rm -f
 # if you want to mark the target as MTSAFE you will need a tool for
 # generating the xdc data for the linker; here's a minimal tool:
-# http://www.gknw.de/development/prgtools/mkxdc.zip
+# http://www.gknw.com/development/prgtools/mkxdc.zip
 MPKXDC	= mkxdc
 
 # Global flags for all compilers
@@ -188,8 +188,8 @@ OBJS	= \
 all: $(OBJDIR) $(OBJDIR)/version.inc $(OBJDIR)/$(TARGET).nlm 
 
 $(OBJDIR)/%.o: %.c
-	@echo Compiling $<
-	@$(CC) $(CFLAGS) -c $< -o $@
+#	@echo Compiling $<
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)/version.inc: ../include/curl/curlver.h $(OBJDIR)
 	@echo Creating $@
