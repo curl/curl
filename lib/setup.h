@@ -92,10 +92,11 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 
 #ifndef STDC_HEADERS /* no standard C headers! */
 #ifdef	VMS
-#include "<curl/stdcheaders.h>
+#include "../include/curl/stdcheaders.h"
 #else
 #include <curl/stdcheaders.h>
 #endif
+
 #else
 #ifdef _AIX
 #include <curl/stdcheaders.h>
