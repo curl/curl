@@ -33,9 +33,9 @@ data blobb
 # Verify data after the test has been "shot"
 <verify>
 <strippart>
-s/^EPRT .*/EPRT stripped/
-s/^LPRT .*/LPRT stripped/
-s/^PORT .*/PORT stripped/
+s/^(EPRT \|1\|127.0.0.1).*/$1/
+s/^(LPRT 4,4,127,0,0,1,).*/$1/
+s/^(PORT 127,0,0,1,).*/$1/
 </strippart>
 <protocol>
 USER anonymous
@@ -43,13 +43,13 @@ PASS curl_by_daniel@haxx.se
 PWD
 CWD a
 CWD path
-EPRT stripped
-LPRT stripped
-PORT stripped
+EPRT |1|127.0.0.1
+LPRT 4,4,127,0,0,1,
+PORT 127,0,0,1,
 TYPE I
 SIZE 212
 RETR 212
-PORT stripped
+PORT 127,0,0,1,
 TYPE I
 SIZE 212
 RETR 212
