@@ -2033,6 +2033,7 @@ static CURLcode Connect(struct UrlData *data,
 
     /* re-use init */
     conn->bits.reuse = TRUE; /* yes, we're re-using here */
+    conn->bits.chunk = FALSE; /* always assume not chunked unless told otherwise */
     conn->maxdownload = -1;  /* might have been used previously! */
 
     free(old_conn);          /* we don't need this anymore */
