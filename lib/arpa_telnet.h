@@ -42,7 +42,7 @@
 static const char *telnetoptions[]=
 {
   "BINARY",      "ECHO",           "RCP",           "SUPPRESS GO AHEAD",
-  "NAME",        "STATUS"          "TIMING MARK",   "RCTE",
+  "NAME",        "STATUS",         "TIMING MARK",   "RCTE",
   "NAOL",        "NAOP",           "NAOCRD",        "NAOHTS",
   "NAOHTD",      "NAOFFD",         "NAOVTS",        "NAOVTD",
   "NAOLFD",      "EXTEND ASCII",   "LOGOUT",        "BYTE MACRO",
