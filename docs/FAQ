@@ -1,4 +1,4 @@
-Updated: October 27, 2000 (http://curl.haxx.se/docs/faq.shtml)
+Updated: November 22, 2000 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -48,6 +48,7 @@ FAQ
 
  5. libcurl Issues
   5.1 Is libcurl thread safe?
+  5.2 How can I receive all data into a large memory chunk?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -401,6 +402,40 @@ FAQ
   I am very interested in once and for all getting some kind of report or
   README file from those who have used libcurl in a threaded environment,
   since I haven't and I get this question more and more frequently!
+
+  5.2 How can I receive all data into a large memory chunk?
+
+  You are in full control of the callback function that gets called every time
+  there is data received from the remote server. You can make that callback do
+  whatever you want. You do not have to write the receivied data to a file.
+
+  One solution to this problem could be to have a pointer to a struct that you
+  pass to the callback function. You set the pointer using the
+  curl_easy_setopt(CURLOPT_FILE) function. Then that pointer will be passed to
+  the callback instead of a FILE * to a file:
+
+        /* imaginary struct */
+        struct MemoryStruct {
+          char *memory;
+          size_t size;
+        };
+
+        /* imaginary callback function */
+        size_t
+        WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
+        {
+          register int realsize = size * nmemb;
+          struct MemoryStruct *mem = (struct MemoryStruct *)data;
+        
+          mem->memory = (char *)realloc(mem->memory, mem->size + realsize + 1);
+          if (mem->memory) {
+            memcpy(&(mem->memory[mem->size]), ptr, realsize);
+            mem->size += realsize;
+            mem->memory[mem->size] = 0;
+          }
+          return realsize;
+        }
+
 
 6. License Issues
 
