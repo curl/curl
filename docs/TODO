@@ -57,6 +57,10 @@ TODO
 
  FTP
 
+ * Support GSS/Kerberos 5 for ftp file transfer. This will allow user
+   authentication and file encryption.  Possible libraries and example clients
+   are available from MIT or Heimdal. Requsted by Markus Moeller.
+
  * Optimize the way libcurl uses CWD on each new request over a persistent
    connection (on FTP) even if it doesn't have to.
 
