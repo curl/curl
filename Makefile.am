@@ -4,9 +4,14 @@
 
 AUTOMAKE_OPTIONS = foreign no-dependencies
 
-EXTRA_DIST = curl.spec curl-ssl.spec \
-	CHANGES FILES LEGAL MITX.txt MPL-1.1.txt \
-	config-win32.h reconf 
+EXTRA_DIST = \
+	CHANGES LEGAL maketgz MITX.txt MPL-1.1.txt \
+	config-win32.h reconf packages/README \
+	packages/Linux/RPM/README \
+	packages/Linux/RPM/curl-ssl.spec.in \
+	packages/Linux/RPM/curl.spec.in \
+	packages/Linux/RPM/make_curl_rpm \
+	packages/Win32/README
 
 SUBDIRS = docs lib src include tests
 
@@ -31,7 +36,7 @@ rpms:
 
 rpm:
 	RPM_TOPDIR=`rpm --showrc | $(PERL) -n -e 'print if(s/.*_topdir\s+(.*)/$$1/)'` ; \
-	cp $(srcdir)/$(RPMDIST).spec $$RPM_TOPDIR/SPECS ; \
+	cp $(srcdir)/packages/Linux/RPM/$(RPMDIST).spec $$RPM_TOPDIR/SPECS ; \
 	cp $(PACKAGE)-$(VERSION).tar.gz $$RPM_TOPDIR/SOURCES ; \
 	rpm -ba --clean --rmsource $$RPM_TOPDIR/SPECS/$(RPMDIST).spec ; \
 	mv $$RPM_TOPDIR/RPMS/i386/$(RPMDIST)-*.rpm . ; \

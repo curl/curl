@@ -58,7 +58,7 @@ download.h     getenv.c       ldap.h         ssluse.h       \
 escape.c       getenv.h       mprintf.c      telnet.c       \
 escape.h       getpass.c      netrc.c        telnet.h       \
 getinfo.c highlevel.c strequal.c strequal.h easy.c \
-security.h security.c krb4.c memdebug.c memdebug.h inet_ntoa_r.h
+security.h security.c krb4.c krb4.h memdebug.c memdebug.h inet_ntoa_r.h
 
 noinst_HEADERS = setup.h highlevel.h
 

@@ -609,14 +609,12 @@ dnl AC_SUBST(RANLIB)
 
 AC_OUTPUT( Makefile \
 	   docs/Makefile \
+           docs/examples/Makefile \
 	   include/Makefile \
 	   include/curl/Makefile \
 	   src/Makefile \
            lib/Makefile \
            tests/Makefile \
-	   curl.spec \
-	   curl-ssl.spec)
-dnl	   perl/checklinks.pl \
-dnl	   perl/getlinks.pl \
-dnl        perl/formfind.pl \
-dnl	   perl/recursiveftpget.pl  )
+	   packages/Linux/RPM/curl.spec \
+	   packages/Linux/RPM/curl-ssl.spec )
+

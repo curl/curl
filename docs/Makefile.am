@@ -21,5 +21,6 @@ man_MANS = \
 
 EXTRA_DIST = $(man_MANS) \
 	MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS \
-	LIBCURL README.win32 RESOURCES TODO TheArtOfHttpScripting \
-	examples/README examples/*.c
+	LIBCURL README.win32 RESOURCES TODO TheArtOfHttpScripting
+
+SUBDIRS = examples
