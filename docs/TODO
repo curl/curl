@@ -76,11 +76,8 @@ TODO
  * Make CURLOPT_FTPPORT support an additional port number on the IP/if/name,
    like "blabla:[port]" or possibly even "blabla:[portfirst]-[portsecond]".
 
- * FTP ASCII upload does not follow RFC959 section 3.1.1.1: "The sender
-   converts the data from an internal character representation to the standard
-   8-bit NVT-ASCII representation (see the Telnet specification).  The
-   receiver will convert the data from the standard form to his own internal
-   form."
+ * FTP ASCII transfers do not follow RFC959. They don't convert the data
+   accordingly.
 
  * Since USERPWD always override the user and password specified in URLs, we
    might need another way to specify user+password for anonymous ftp logins.
