@@ -952,6 +952,9 @@ else
   dnl is there a localtime_r()
   CURL_CHECK_LOCALTIME_R()
 
+  dnl is there a strerror_r()
+  CURL_CHECK_STRERROR_R()
+
   AC_CHECK_FUNCS( gmtime_r )
 
 fi

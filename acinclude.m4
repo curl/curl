@@ -279,7 +279,7 @@ fi
 
 AC_DEFUN([CURL_CHECK_LOCALTIME_R],
 [
-  dnl check for a few thread-safe functions
+  dnl check for localtime_r
   AC_CHECK_FUNCS(localtime_r,[
     AC_MSG_CHECKING(whether localtime_r is declared)
     AC_EGREP_CPP(localtime_r,[
@@ -290,6 +290,24 @@ AC_DEFUN([CURL_CHECK_LOCALTIME_R],
       AC_EGREP_CPP(localtime_r,[
 #define _REENTRANT
 #include <time.h>],[
+	AC_DEFINE(NEED_REENTRANT)
+	AC_MSG_RESULT(yes)],
+	AC_MSG_RESULT(no))])])
+])
+
+AC_DEFUN([CURL_CHECK_STRERROR_R],
+[
+  dnl determine of strerror_r is present
+  AC_CHECK_FUNCS(strerror_r,[
+    AC_MSG_CHECKING(whether strerror_r is declared)
+    AC_EGREP_CPP(strerror_r,[
+#include <string.h>],[
+      AC_MSG_RESULT(yes)],[
+      AC_MSG_RESULT(no)
+      AC_MSG_CHECKING(whether strerror_r with -D_REENTRANT is declared)
+      AC_EGREP_CPP(strerror_r,[
+#define _REENTRANT
+#include <string.h>],[
 	AC_DEFINE(NEED_REENTRANT)
 	AC_MSG_RESULT(yes)],
 	AC_MSG_RESULT(no))])])
