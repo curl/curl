@@ -1038,13 +1038,6 @@ dnl http://publibn.boulder.ibm.com/doc_link/en_US/a_doc_lib/aixprggd/ \
 dnl genprogc/thread_quick_ref.htm
 
 if test "x$RECENTAIX" = "xyes"; then
-  dnl is there a localtime_r()
-  CURL_CHECK_LOCALTIME_R()
-
-  dnl is there a strerror_r()
-  CURL_CHECK_STRERROR_R()
-
-  AC_CHECK_FUNCS( gmtime_r )
 
   AC_DEFINE(_THREAD_SAFE, 1, [define this if you need it to compile thread-safe code])
 
@@ -1062,6 +1055,14 @@ if test "x$RECENTAIX" = "xyes"; then
          CFLAGS="$CFLAGS -qthreaded"
        )
 
+
+  dnl is there a localtime_r()
+  CURL_CHECK_LOCALTIME_R()
+
+  dnl is there a strerror_r()
+  CURL_CHECK_STRERROR_R()
+
+  AC_CHECK_FUNCS( gmtime_r )
 fi
 
 
