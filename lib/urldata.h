@@ -88,7 +88,9 @@
 #endif
 #endif
 
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 
 #include "timeval.h"
 

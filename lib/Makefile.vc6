@@ -54,7 +54,10 @@ RELEASE_OBJS= \
 	urlr.obj \
 	filer.obj \
         writeoutr.obj \
-	versionr.obj
+	versionr.obj \
+        easyr.obj \
+        highlevelr.obj \
+        strequalr.obj
 
 DEBUG_OBJS= \
 	base64d.obj \
@@ -82,7 +85,10 @@ DEBUG_OBJS= \
 	urld.obj \
 	filed.obj \
         writeoutd.obj \
-	versiond.obj
+	versiond.obj  \
+        easyd.obj \
+        highleveld.obj \
+        strequald.obj
 
 RELEASE_SSL_OBJS= \
 	base64rs.obj \
@@ -110,7 +116,10 @@ RELEASE_SSL_OBJS= \
 	urlrs.obj \
 	filers.obj \
         writeouts.obj \
-	versionrs.obj
+	versionrs.obj \
+        easyrs.obj \
+        highlevelrs.obj \
+        strequalrs.obj
 
 LINK_OBJS= \
 	base64.obj \
@@ -138,7 +147,10 @@ LINK_OBJS= \
 	url.obj \
 	file.obj \
         writeout.obj \
-	version.obj
+	version.obj \
+        easy.obj \
+        highlevel.obj \
+        strequal.obj
 
 all : release
 

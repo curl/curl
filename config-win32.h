@@ -117,7 +117,7 @@
 #define HAVE_NETDB_H 1
 
 /* Define if you have the <netinet/in.h> header file.  */
-#define HAVE_NETINET_IN_H 1
+/*#define HAVE_NETINET_IN_H 1*/
 
 /* Define if you have the <sgtty.h> header file.  */
 /*#define HAVE_SGTTY_H 1*/
