@@ -36,7 +36,7 @@ FAQ
   3.9 How do I use curl in PHP, Perl, Tcl, Ruby or Java?
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
   3.11 How do I POST with a different Content-Type?
-  3.12 Why do FTP specific features over HTTP proxy fails?
+  3.12 Why do FTP specific features over HTTP proxy fail?
 
  4. Running Problems
   4.1 Problems connecting to SSL servers.
