@@ -24,6 +24,7 @@
 #include "setup.h"
 #include <stdarg.h>
 #include <stdlib.h>
+#include <string.h>
 #include <curl/curl.h>
 #include "urldata.h"
 #include "share.h"
