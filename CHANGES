@@ -7,9 +7,9 @@
                                   Changelog
 
 Daniel (27 June 2004)
-- Based on Bob's bug report #979480, I wrote a configure check that checks if
-  poll() can be used to wait on NULL as otherwise select() should be used to
-  do it. The select() usage was also fixed according to his report.
+- Based on Rob Stanzel's bug report #979480, I wrote a configure check that
+  checks if poll() can be used to wait on NULL as otherwise select() should be
+  used to do it. The select() usage was also fixed according to his report.
 
   Mac OS X 10.3 says "poll() functionality for Mac OS X is implemented via an
   emulation layer on top of select(), not in the kernel directly. It is
