@@ -14,6 +14,9 @@ Daniel (22 April 2004)
   should give up, so curl returns with exit code 0. Test case 162 added to
   verify the functionality.
 
+- allow newlines in the contents when doing -F "var=[contents]"
+  Robert Marlow reported.
+
 - If a transfer is found out to be only partial, libcurl will now treat that
   as a problem serious enough to skip the final QUIT command before closing
   the control connection. To avoid the risk that it will "hang" waiting for
