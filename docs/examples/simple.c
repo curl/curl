@@ -18,7 +18,6 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    /* what call to write: */
     curl_easy_setopt(curl, CURLOPT_URL, "curl.haxx.se");
     res = curl_easy_perform(curl);
 
