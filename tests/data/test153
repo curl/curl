@@ -86,7 +86,7 @@ Pragma: no-cache
 Accept: */*
 
 GET /1530002 HTTP/1.1
-Authorization: Digest username="testuser", realm="testrealm", nonce="999999", uri="/1530002", response="2f27c3218067948ccc8187cfe23881ee"
+Authorization: Digest username="testuser", realm="testrealm", nonce="999999", uri="/1530002", cnonce="MTA4MzIy", nc="00000001", qop="auth", response="25291c357671604a16c0242f56721c07", algorithm="MD5"
 User-Agent: curl/7.11.0-CVS (i686-pc-linux-gnu) libcurl/7.11.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 GSS
 Host: 127.0.0.1:8999
 Pragma: no-cache
