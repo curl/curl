@@ -1134,6 +1134,7 @@ typedef struct {
 #define CURL_VERSION_GSSNEGOTIATE (1<<5)
 #define CURL_VERSION_DEBUG     (1<<6) /* built with debug capabilities */
 #define CURL_VERSION_ASYNCHDNS (1<<7)
+#define CURL_VERSION_SPNEGO    (1<<8)
 
 /*
  * NAME curl_version_info()

@@ -24,7 +24,7 @@
  * $Id$
  ***************************************************************************/
 
-#ifdef GSSAPI
+#ifdef HAVE_GSSAPI
 
 /* this is for Negotiate header input */
 int Curl_input_negotiate(struct connectdata *conn, char *header);

@@ -86,8 +86,13 @@
 #include <zlib.h> 		/* for content-encoding */
 #endif
 
-#ifdef GSSAPI
+#ifdef HAVE_GSSAPI
+#ifdef HAVE_GSSMIT
+#include <gssapi/gssapi.h>
+#include <gssapi/gssapi_generic.h>
+#else
 #include <gssapi.h>
+#endif
 #endif
 
 #ifdef USE_ARES
@@ -184,7 +189,7 @@ struct ntlmdata {
   unsigned char nonce[8];
 };
 
-#ifdef GSSAPI
+#ifdef HAVE_GSSAPI
 struct negotiatedata {
   bool gss; /* Whether we're processing GSS-Negotiate or Negotiate */
   const char* protocol; /* "GSS-Negotiate" or "Negotiate" */
@@ -688,7 +693,7 @@ struct UrlState {
 
   struct digestdata digest;
 
-#ifdef GSSAPI
+#ifdef HAVE_GSSAPI
   struct negotiatedata negotiate;
 #endif
 

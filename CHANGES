@@ -6,6 +6,13 @@
 
                                   Changelog
 
+
+Daniel (19 September)
+- Applied Markus Moeller's patch that introduces SPNEGO support if libcurl
+  is built with the FBopenssl libraries. curl_version_info() now returns
+  info on SPNEGO availability. The patch also made the GSSAPI stuff work fine
+  with the MIT GSS-library (the Heimdal one still works too).
+
 Daniel (16 September)
 - Doing PUT with --digest failed, as reported in bug report #805853.
 

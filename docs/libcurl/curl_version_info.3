@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_version_info 3 "12 Aug 2003" "libcurl 7.10.7" "libcurl Manual"
+.TH curl_version_info 3 "19 Sep 2003" "libcurl 7.10.8" "libcurl Manual"
 .SH NAME
 curl_version_info - returns run-time libcurl version info
 .SH SYNOPSIS
@@ -84,6 +84,10 @@ interest for libcurl hackers. (added in 7.10.6)
 libcurl was built with support for asynchronous name lookups, which allows
 more exact timeouts (even on Windows) and less blocking when using the multi
 interface. (added in 7.10.7)
+.TP
+.B CURL_VERSION_SPNEGO
+libcurl was built with support for SPNEGO authentication (Simple and Protected
+GSS-API Negotiation Mechanism, defined in RFC 2478.) (added in 7.10.8)
 .PP
 \fIssl_version\fP is an ascii string for the OpenSSL version used. If libcurl
 has no SSL support, this is NULL.

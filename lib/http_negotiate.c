@@ -22,7 +22,10 @@
  ***************************************************************************/
 #include "setup.h"
 
-#ifdef GSSAPI
+#ifdef HAVE_GSSAPI
+#ifdef HAVE_GSSMIT
+#define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
+#endif
 
 #ifndef CURL_DISABLE_HTTP
 /* -- WIN32 approved -- */
@@ -171,6 +174,46 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
     if (rawlen < 0)
       return -1;
     input_token.length = rawlen;
+
+#ifdef SPNEGO /* Handle SPNEGO */
+    if (checkprefix("Negotiate", header)) {
+        ASN1_OBJECT *   object            = NULL;
+        int             rc                = 1;
+        unsigned char * spnegoToken       = NULL;
+        size_t          spnegoTokenLength = 0;
+        unsigned char * mechToken         = NULL;
+        size_t          mechTokenLength   = 0;
+
+        spnegoToken = malloc(input_token.length);
+        if (input_token.value == NULL)
+          return ENOMEM;
+        spnegoTokenLength = input_token.length;
+
+        object = OBJ_txt2obj ("1.2.840.113554.1.2.2", 1);
+        if (!parseSpnegoTargetToken(spnegoToken,
+                                    spnegoTokenLength,
+                                    NULL,
+                                    NULL,
+                                    &mechToken,
+                                    &mechTokenLength,
+                                    NULL,
+                                    NULL)) {
+          free(spnegoToken);
+          spnegoToken = NULL;
+          infof(conn->data, "Parse SPNEGO Target Token failed\n");
+        }
+        else {
+          free(input_token.value);
+          input_token.value = NULL;
+          input_token.value = malloc(mechTokenLength);
+          memcpy(input_token.value, mechToken,mechTokenLength);
+          input_token.length = mechTokenLength;
+          free(mechToken);
+          mechToken = NULL;
+          infof(conn->data, "Parse SPNEGO Target Token succeded\n");
+        }
+    }
+#endif
   }
 
   major_status = gss_init_sec_context(&minor_status,
@@ -212,9 +255,50 @@ CURLcode Curl_output_negotiate(struct connectdata *conn)
   struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
   OM_uint32 minor_status;
   char *encoded = NULL;
-  int len = Curl_base64_encode(neg_ctx->output_token.value,
-                               neg_ctx->output_token.length,
-                               &encoded);
+  int len;
+
+#ifdef SPNEGO /* Handle SPNEGO */
+  if (checkprefix("Negotiate",neg_ctx->protocol)) {
+    ASN1_OBJECT *   object            = NULL;
+    int             rc                = 1;
+    unsigned char * spnegoToken       = NULL;
+    size_t          spnegoTokenLength = 0;
+    unsigned char * responseToken       = NULL;
+    size_t          responseTokenLength = 0;
+    
+    responseToken = malloc(neg_ctx->output_token.length);
+    if ( responseToken == NULL)
+      return CURLE_OUT_OF_MEMORY;
+    memcpy(responseToken, neg_ctx->output_token.value,
+           neg_ctx->output_token.length);
+    responseTokenLength = neg_ctx->output_token.length;
+
+    object=OBJ_txt2obj ("1.2.840.113554.1.2.2", 1);
+    if (!makeSpnegoInitialToken (object,
+                                 responseToken,
+                                 responseTokenLength,
+                                 &spnegoToken,
+                                 &spnegoTokenLength)) {
+      free(responseToken);
+      responseToken = NULL;
+      infof(conn->data, "Make SPNEGO Initial Token failed\n");
+    }
+    else {
+      free(neg_ctx->output_token.value);
+      responseToken = NULL;
+      neg_ctx->output_token.value = malloc(spnegoTokenLength);
+      memcpy(neg_ctx->output_token.value, spnegoToken,spnegoTokenLength);
+      neg_ctx->output_token.length = spnegoTokenLength;
+      free(spnegoToken);
+      spnegoToken = NULL;
+      infof(conn->data, "Make SPNEGO Initial Token succeded\n");
+    }
+  }
+#endif
+  len = Curl_base64_encode(neg_ctx->output_token.value,
+                           neg_ctx->output_token.length,
+                           &encoded);
+
   if (len < 0)
     return CURLE_OUT_OF_MEMORY;
 

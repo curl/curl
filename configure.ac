@@ -458,6 +458,31 @@ else
 fi
 
 dnl **********************************************************************
+dnl Check for FBopenssl(SPNEGO) libraries
+dnl **********************************************************************
+
+AC_ARG_WITH(spnego,
+  AC_HELP_STRING([--with-spnego=DIR],
+                 [Specify location of SPNEGO library fbopenssl]),
+  [ SPNEGO_ROOT="$withval"
+    want_spnego="yes" ]
+)
+AC_MSG_CHECKING([if SPNEGO support is requested])
+if test x"$want_spnego" = xyes; then
+ 
+  if test -z "$SPNEGO_LIB_DIR"; then
+     LDFLAGS="$LDFLAGS -L$SPNEGO_ROOT $(wl)-R$SPNEGO_ROOT -lfbopenssl"
+  else
+     LDFLAGS="$LDFLAGS $SPNEGO_LIB_DIR"
+  fi
+ 
+  AC_DEFINE(HAVE_SPNEGO, 1, [Define this if you have the SPNEGO library fbopenssl])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
+dnl **********************************************************************
 dnl Check for GSS-API libraries
 dnl **********************************************************************
 
@@ -507,7 +532,12 @@ if test x"$want_gss" = xyes; then
   fi
 
   AC_MSG_RESULT(yes)
-  AC_DEFINE(GSSAPI, 1, [if you have the gssapi libraries])
+  AC_DEFINE(HAVE_GSSAPI, 1, [if you have the gssapi libraries])
+  if test -f "$GSSAPI_INCS/gssapi.h"; then
+      AC_DEFINE(HAVE_GSSHEIMDAL, 1, [if you have the Heimdal gssapi libraries])
+  else
+      AC_DEFINE(HAVE_GSSMIT, 1, [if you have the MIT gssapi libraries])
+  fi
   
 else
   AC_MSG_RESULT(no)
