@@ -335,11 +335,11 @@ int cert_stuff(struct connectdata *conn,
           return 0;
         }
       }
+      break;
 #else
       failf(data, "file type ENG for private key not supported\n");
       return 0;
 #endif
-      break;
     default:
       failf(data, "not supported file type for private key\n");
       return 0;
