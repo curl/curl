@@ -1,14 +1,17 @@
+
 /*
  * These are example functions doing socket init that Windows
  * require. If you don't use windows, you can safely ignore this crap.
  */
 
-static void win32_cleanup(void)
+#include <windows.h>
+
+void win32_cleanup(void)
 {
   WSACleanup();
 }
 
-static CURLcode win32_init(void)
+int win32_init(void)
 {
   WORD wVersionRequested;  
   WSADATA wsaData; 
