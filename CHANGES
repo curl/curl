@@ -6,6 +6,57 @@
 
                                History of Changes
 
+Version 7.9.8-pre3
+
+Daniel (11 Jun 2002)
+- James Cone brought the idea of using sigsetjmp() in the signal handler to
+  make the time-out of name lookups to work, even when the underlying name
+  resolver library traps EINTR. The use of sigsetjmp() and siglongjmp() for
+  this may be a bit drastic, and also not likely to exist on all platforms.  I
+  added careful checking for this in the configure script, even checks for it
+  being a macro (which seems to be the case in for example Linux).
+
+  sigsetjmp() seems to be mentioned in the Single Unix specification.
+
+- Miklos Nemeth brought a patch that allows libcurl to get built with specific
+  protocols disabled. This is done by running ./configure
+  --disable-[protocol].
+
+- FTP range downloads could make CURLE_FTP_WRITE_ERROR get returned. We now
+  make precautions to not return this for range downloads.
+
+  Added test case 135 that makes an ftp range download. Had to tweak the
+  runtests.pl script a bit too.
+
+- Bug report #566835 identified a strlen() on a NULL pointer. Added additional
+  check to prevent this.
+
+Daniel (10 Jun 2002)
+- Found and corrected a connect failure problem that didn't create a human
+  error text.
+
+- Added code to compile with OpenSSL 0.9.7. Based on patch from Jacob Meuser
+  and comments from Götz Babin-Ebell.
+
+- Gautam Mani found a socket descriptor leak that happened when FTP transfers
+  failed and you reinvoked curl_easy_perform().
+
+Daniel (5 Jun 2002)
+- Gustaf Hui corrected curl_multi_remove_handle() so that it won't crash no
+  matter when you decide to remove the CURL handle.
+
+- HAVE_RAND_STATUS was added to lib/config-win32.h by Andreas Olsson, as it
+  makes windows builds stop complaining about "weak seeding" when it in fact
+  isn't.
+
+- Another 64bit architecture crash that was introduced in 7.9.7 was now
+  removed, as bug report #564585 clarified. This happened due to our attempts
+  to only allocate only as much memory as is actually needed for name
+  resolving (using realloc) which called for a function that could 'move' a
+  hostent struct in memory.
+
+Version 7.9.8-pre2
+
 Daniel (3 Jun 2002)
 - T. Bharath fixed the CURLINFO_REDIRECT_TIME to return a correct time and
   made the CURLINFO_REQUEST_SIZE return the correct total request size. He
