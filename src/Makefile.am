@@ -16,9 +16,7 @@ bin_PROGRAMS = curl #memtest
 
 curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c setup.h \
 	config-win32.h config-mac.h config-vms.h config-riscos.h \
-	urlglob.h \
-	version.h \
-	writeout.h
+	urlglob.h version.h writeout.h writeenv.c writeenv.h
 
 curl_LDADD = ../lib/libcurl.la
 curl_DEPENDENCIES = ../lib/libcurl.la
@@ -27,7 +25,7 @@ CLEANFILES = hugehelp.c
 NROFF=@NROFF@
 
 EXTRA_DIST = mkhelp.pl curlmsg.msg \
-	Makefile.vc6 Makefile.b32 Makefile.m32 config.h.in \
+	Makefile.vc6 Makefile.b32 Makefile.m32 Makefile.riscos config.h.in \
 	macos/curl.mcp.xml.sit.hqx \
 	macos/MACINSTALL.TXT \
 	macos/src/curl_GUSIConfig.cpp \
