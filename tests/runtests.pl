@@ -49,6 +49,7 @@ my $memanalyze="../memanalyze.pl";
 
 my $short;
 my $verbose;
+my $debugprotocol;
 my $anyway;
 
 #######################################################################
@@ -109,7 +110,8 @@ sub runhttpserver {
     }
 
     if ($RUNNING != 1) {
-        system("perl $srcdir/httpserver.pl $HOSTPORT &");
+        my $flag=$debugprotocol?"-v ":"";
+        system("perl $srcdir/httpserver.pl $flag $HOSTPORT &");
         sleep 1; # give it a little time to start
     }
     else {
@@ -150,7 +152,8 @@ sub runftpserver {
     }
 
     if ($RUNNING != 1) {
-        system("perl $srcdir/ftpserver.pl $FTPPORT &");
+        my $flag=$debugprotocol?"-v ":"";
+        system("perl $srcdir/ftpserver.pl $flag $FTPPORT &");
         sleep 1; # give it a little time to start
     }
     else {
@@ -504,6 +507,7 @@ sub singletest {
     unlink($STDOUT);
     unlink($STDERR);
 
+    unlink($CURLOUT); # remove the downloaded results
     unlink($FTPDCMD); # remove the instructions for this test
 
     if($memory_debug) {
@@ -551,6 +555,10 @@ do {
         # verbose output
         $verbose=1;
     }
+    elsif ($ARGV[0] eq "-d") {
+        # have the servers display protocol output 
+        $debugprotocol=1;
+    }
     elsif($ARGV[0] eq "-s") {
         # short output
         $short=1;
@@ -564,6 +572,7 @@ do {
         print <<EOHELP
 Usage: runtests.pl [-h][-s][-v][numbers]
   -a       continue even if a test fails
+  -d       display server debug info
   -h       this help text
   -s       short output
   -v       verbose output
