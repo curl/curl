@@ -7,6 +7,9 @@ MOOOOO
 #
 # Client-side
 <client>
+<features>
+SSL
+</features>
 <server>
 https
 </server>
