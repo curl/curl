@@ -9,7 +9,7 @@ die(){
 	echo "$@" ; exit
 }
 
-aclocal -I .	|| die "ahhhhh"
-autoheader	|| die "ahhhhh"
-automake	|| die "ahhhhh"
-autoconf	|| die "ahhhhh"
+aclocal -I . || die "The command 'aclocal -I .' failed"
+autoheader   || die "The command 'autoheader' failed"
+automake     || die "The command 'automake' failed"
+autoconf     || die "The command 'autoconf' failed"
