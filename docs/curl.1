@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "7 May 2002" "Curl 7.9.7" "Curl Manual"
+.TH curl 1 "31 Jul 2002" "Curl 7.9.9" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -95,7 +95,7 @@ If this option is used twice, the second one will disable ASCII usage.
 must be using valid ciphers. Read up on SSL cipher list details on this URL:
 .I http://www.openssl.org/docs/apps/ciphers.html (Option added in curl 7.9)
 
-If this option is used severl times, the last one will override the others.
+If this option is used several times, the last one will override the others.
 .IP "--connect-timeout <seconds>"
 Maximum time in seconds that you allow the connection to the server to take.
 This only limits the connection phase, once curl has connected this option is
@@ -332,6 +332,19 @@ line. So, it could look similar to this:
 url = "http://curl.haxx.se/docs/"
 
 This option can be used multiple times.
+.IP "--limit-rate <speed>"
+Specify the maximum transfer rate you want curl to use. This feature is useful
+if you have a limited pipe and you'd prefer you have your transfer not use
+your entire bandwidth.
+
+The given speed is measured in bytes/second, unless a suffix is
+appended. Appending 'k' or 'K' will count the number as kilobytes, 'm' or M'
+makes it megabytes while 'g' or 'G' makes it gigabytes. Examples: 200K, 3m and
+1G.
+
+This option was introduced in curl 7.9.9.
+
+If this option is used several times, the last one will be used.
 .IP "-l/--list-only"
 (FTP)
 When listing an FTP directory, this switch forces a name-only view.
