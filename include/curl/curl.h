@@ -456,7 +456,7 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.6-pre1"
+#define LIBCURL_VERSION "7.6-pre2"
 #define LIBCURL_VERSION_NUM 0x070600
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
