@@ -370,9 +370,10 @@ static void help(void)
   puts(" -r/--range <range> Retrieve a byte range from a HTTP/1.1 or FTP server\n"
        " -R/--remote-time   Set the remote file's time on the local output\n"
        " -s/--silent        Silent mode. Don't output anything\n"
-       " -S/--show-error    Show error. With -s, make curl show errors when they occur\n"
-       "    --stderr <file> Where to redirect stderr. - means stdout.\n"
+       " -S/--show-error    Show error. With -s, make curl show errors when they occur");
+  puts("    --stderr <file> Where to redirect stderr. - means stdout.\n"
        " -t/--telnet-option <OPT=val> Set telnet option\n"
+       "    --trace <file>  Dump a network/debug trace to the given file\n"
        " -T/--upload-file <file> Transfer/upload <file> to remote site\n"
        "    --url <URL>     Another way to specify URL to work with");
   puts(" -u/--user <user[:password]> Specify user and password to use\n"
@@ -452,6 +453,8 @@ struct Configurable {
   bool crlf;
   char *customrequest;
   char *krb4level;
+  char *trace_dump; /* file to dump the network trace to, or NULL */
+  FILE *trace_stream;
   long httpversion;
   bool progressmode;
   bool nobuffer;
@@ -960,6 +963,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 #ifdef USE_ENVIRONMENT
     {"5f", "environment", FALSE},
 #endif
+    {"5g", "trace",      TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1140,6 +1144,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         config->writeenv ^= TRUE;
         break;
 #endif
+      case 'g': /* --trace */
+        GetStr(&config->trace_dump, nextarg);
+        config->conf ^= CONF_VERBOSE; /* talk a lot */
+        break;
       default: /* the URL! */
         {
           struct getout *url;
@@ -1504,7 +1512,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 't':
       /* Telnet options */
-      config->telnet_options = curl_slist_append(config->telnet_options, nextarg);
+      config->telnet_options =
+        curl_slist_append(config->telnet_options, nextarg);
       break;
     case 'T':
       /* we are uploading */
@@ -1912,6 +1921,73 @@ void progressbarinit(struct ProgressData *bar,
 #endif
 
   bar->out = config->errors;
+}
+
+static
+void dump(const char *text,
+          FILE *stream, unsigned char *ptr, size_t size)
+{
+  size_t i;
+  size_t c;
+
+#define DUMP_BYTES 16 /* per line */
+
+  fprintf(stream, "%s %d (0x%x) bytes\n", text, size, size);
+
+  for(i=0; i<size; i+= DUMP_BYTES) {
+
+    fprintf(stream, "%04x: ", i);
+
+    for(c = 0; c < DUMP_BYTES; c++)
+      if(i+c < size)
+        fprintf(stream, "%02x ", ptr[i+c]);
+      else
+        fputs("   ", stream);
+
+    for(c = 0; (c < DUMP_BYTES) && (i+c < size); c++)
+      fprintf(stream, "%c",
+              (ptr[i+c]>=0x20) && (ptr[i+c]<0x80)?ptr[i+c]:'.');
+    
+    fputc('\n', stream); /* newline */
+
+  }
+}
+
+static
+int my_trace(CURL *handle, curl_infotype type,
+             unsigned char *data, size_t size,
+             void *userp)
+{
+  struct Configurable *config = (struct Configurable *)userp;
+  FILE *output=config->errors;
+
+  (void)handle; /* prevent compiler warning */
+
+  if(!config->trace_stream)
+    /* open for append */
+    config->trace_stream = fopen(config->trace_dump, "w");
+
+  if(config->trace_stream)
+    output = config->trace_stream;
+
+  switch (type) {
+  case CURLINFO_TEXT:
+    fprintf(output, "== Info: %s", data);
+    break;
+  case CURLINFO_HEADER_OUT:
+    dump("=> Send header", output, data, size);
+    break;
+  case CURLINFO_DATA_OUT:
+    dump("=> Send data ", output, data, size);
+    break;
+  case CURLINFO_HEADER_IN:
+    dump("<= Recv header", output, data, size);
+    break;
+  case CURLINFO_DATA_IN:
+    dump("<= Recv data", output, data, size);
+    break;
+  }
+  return 0;
 }
 
 void free_config_fields(struct Configurable *config)
@@ -2485,6 +2561,12 @@ operate(struct Configurable *config, int argc, char *argv[])
       if(config->disable_epsv)
         /* disable it */
         curl_easy_setopt(curl, CURLOPT_FTP_USE_EPSV, FALSE);
+
+      /* new in curl 7.9.7 */
+      if(config->trace_dump) {
+        curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
+        curl_easy_setopt(curl, CURLOPT_DEBUGDATA, config);
+      }
       
       res = curl_easy_perform(curl);
         
@@ -2567,6 +2649,9 @@ operate(struct Configurable *config, int argc, char *argv[])
 
   if(config->headerfile && !headerfilep && heads.stream)
     fclose(heads.stream);
+
+  if(config->trace_stream)
+    fclose(config->trace_stream);
 
   if(allocuseragent)
     free(config->useragent);
