@@ -2,11 +2,11 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_init 3 "4 February 2001" "Curl 7.6.1" "libcurl Manual"
+.TH curl_easy_init 3 "5 March 2001" "libcurl 7.6.1" "libcurl Manual"
 .SH NAME
 curl_easy_getinfo - Extract information from a curl session (added in 7.4)
 .SH SYNOPSIS
-.B #include <curl/easy.h>
+.B #include <curl/curl.h>
 .sp
 .BI "CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );"
 .ad
@@ -83,8 +83,8 @@ verification that was requested (using the CURLOPT_SSL_VERIFYPEER option to
 curl_easy_setopt). (Added in 7.4.2)
 .TP
 .B CURLINFO_CONTENT_LENGTH_DOWNLOAD
-Pass a pointer to a double to receive the content-length of the download.
-(Added in 7.6.1)
+Pass a pointer to a double to receive the content-length of the download. This
+is the value read from the Content-Length: field.  (Added in 7.6.1)
 .TP
 .B CURLINFO_CONTENT_LENGTH_UPLOAD
 Pass a pointer to a double to receive the specified size of the upload.

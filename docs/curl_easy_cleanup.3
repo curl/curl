@@ -2,13 +2,13 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_cleanup 3 "22 May 2000" "Curl 7.0" "libcurl Manual"
+.TH curl_easy_cleanup 3 "5 March 2001" "libcurl 7.7" "libcurl Manual"
 .SH NAME
-curl_easy_cleanup - End a libcurl "easy" session
+curl_easy_cleanup - End a libcurl session
 .SH SYNOPSIS
-.B #include <curl/easy.h>
+.B #include <curl/curl.h>
 .sp
-.BI "curl_easy_cleanup(CURL *" handle ");
+.BI "curl_easy_cleanup(CURL *" handle ");"
 .ad
 .SH DESCRIPTION
 This function must be the last function to call for a curl session. It is the
@@ -17,6 +17,10 @@ opposite of the
 function and must be called with the same
 .I handle
 as input as the curl_easy_init call returned.
+
+This will effectively close all connections libcurl has been used and possibly
+has kept open until now. Don't call this function if you intend to transfer
+more files (libcurl 7.7 or later).
 .SH RETURN VALUE
 None
 .SH "SEE ALSO"

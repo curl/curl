@@ -2,11 +2,11 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_init 3 "26 September 2000" "Curl 7.0" "libcurl Manual"
+.TH curl_easy_init 3 "5 March 2001" "libcurl 7.7" "libcurl Manual"
 .SH NAME
-curl_easy_init - Start a libcurl "easy" session
+curl_easy_init - Start a libcurl session
 .SH SYNOPSIS
-.B #include <curl/easy.h>
+.B #include <curl/curl.h>
 .sp
 .BI "CURL *curl_easy_init( );"
 .ad
@@ -19,6 +19,10 @@ when the operation is complete.
 
 On win32 systems, you need to init the winsock stuff manually, libcurl will
 not do that for you. WSAStartup() and WSACleanup() should be used accordingly.
+
+Using libcurl 7.7 and later, you should perform all your sequential file
+transfers using the same curl handle. This enables libcurl to use persistant
+connections where possible.
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the
 other curl functions.

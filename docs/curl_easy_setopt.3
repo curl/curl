@@ -2,11 +2,11 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "2 February 2001" "Curl 7.5" "libcurl Manual"
+.TH curl_easy_setopt 3 "5 March 2001" "libcurl 7.5" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
-.B #include <curl/easy.h>
+.B #include <curl/curl.h>
 .sp
 .BI "CURLcode curl_easy_setopt(CURL *" handle ", CURLoption "option ", ...);
 .ad
@@ -20,7 +20,7 @@ followed by a parameter. That parameter can be a long, a function pointer or
 an object pointer, all depending on what the option in question expects. Read
 this manual carefully as bad input values may cause libcurl to behave badly!
 You can only set one option in each function call. A typical application uses
-many calls in the setup phase.
+many curl_easy_setopt() calls in the setup phase.
 
 The
 .I "handle"
