@@ -43,6 +43,9 @@
 static
 char *GetEnv(const char *variable)
 {
+#ifdef _WIN32_WCE
+  return NULL;
+#else
 #ifdef WIN32
   /* This shit requires windows.h (HUGE) to be included */
   char env[MAX_PATH]; /* MAX_PATH is from windef.h */
@@ -62,6 +65,7 @@ char *GetEnv(const char *variable)
 #endif
 #endif
   return (env && env[0])?strdup(env):NULL;
+#endif
 }
 
 char *curl_getenv(const char *v)

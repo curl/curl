@@ -156,6 +156,7 @@ int Curl_nonblock(curl_socket_t sockfd,    /* operate on this */
   /* Windows? */
   unsigned long flags;
   flags = nonblock;
+
   return ioctlsocket(sockfd, FIONBIO, &flags);
 #define SETBLOCK 3
 #endif
@@ -406,12 +407,24 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
    *
    *    Someone got to verify this on Win-NT 4.0, 2000."
    */
+
+#ifdef _WIN32_WCE
+  Sleep(0);
+#else
   SleepEx(0, FALSE);
+#endif
+
 #endif
 
   if( -1 == getsockopt(sockfd, SOL_SOCKET, SO_ERROR,
                        (void *)&err, &errSize))
     err = Curl_ourerrno();
+
+#ifdef _WIN32_WCE
+  /* Always returns this error, bug in CE? */
+  if(WSAENOPROTOOPT==err)
+    err=0;
+#endif
 
   if ((0 == err) || (EISCONN == err))
     /* we are connected, awesome! */

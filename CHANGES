@@ -6,6 +6,9 @@
 
                                   Changelog
 
+Daniel (2 November 2004)
+- Paul Nolan provided a patch to make libcurl build nicely on Windows CE.
+
 Daniel (1 November 2004)
 - When cross-compiling, the configure script no longer attempts to use
   pkg-config on the build host in order to detect OpenSSL compiler options.

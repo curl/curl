@@ -127,9 +127,9 @@ char *Curl_if2ip(const char *interface, char *buf, int buf_size)
 
 /* -- end of if2ip() -- */
 #else
-char *Curl_if2ip(const char *interface, char *buf, int buf_size)
+char *Curl_if2ip(const char *interf, char *buf, int buf_size)
 {
-    (void) interface;
+    (void) interf;
     (void) buf;
     (void) buf_size;
     return NULL;

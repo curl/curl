@@ -476,7 +476,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   char *buf = data->state.buffer; /* this is our buffer */
   struct FTP *ftp;
   CURLcode result;
-  int ftpcode, try;
+  int ftpcode, trynum;
 
   ftp = (struct FTP *)malloc(sizeof(struct FTP));
   if(!ftp)
@@ -564,9 +564,9 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
       return CURLE_FAILED_INIT; /* we don't know what to do */
     }
 
-    for (try = start; ftpauth[count]; try=trynext, count++) {
+    for (trynum = start; ftpauth[count]; trynum=trynext, count++) {
 
-      FTPSENDF(conn, "AUTH %s", ftpauth[try]);
+      FTPSENDF(conn, "AUTH %s", ftpauth[trynum]);
 
       result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
 
@@ -842,8 +842,15 @@ CURLcode Curl_ftp_done(struct connectdata *conn, CURLcode status)
 #ifdef HAVE_KRB4
   Curl_sec_fflush_fd(conn, conn->sock[SECONDARYSOCKET]);
 #endif
+
   /* shut down the socket to inform the server we're done */
+
+#ifdef _WIN32_WCE
+  shutdown(conn->sock[SECONDARYSOCKET],2);  /* SD_BOTH */
+#endif
+
   sclose(conn->sock[SECONDARYSOCKET]);
+
   conn->sock[SECONDARYSOCKET] = CURL_SOCKET_BAD;
 
   if(!ftp->no_transfer && !status) {

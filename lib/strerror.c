@@ -515,15 +515,29 @@ const char *Curl_strerror(struct connectdata *conn, int err)
   *buf = '\0';
 
 #if defined(WIN32) && !defined(__CYGWIN__)
+
+#if _WIN32_WCE
+  buf[0]=0;
+  {
+    wchar_t wbuf[256];
+
+    FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+                  LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL);
+    wcstombs(buf,wbuf,max);
+  }
+
+#else
+
   /* 'sys_nerr' is the maximum errno number, it is not widely portable */
   if (err >= 0 && err < sys_nerr)
     strncpy(buf, strerror(err), max);
   else {
-    if (!get_winsock_error (err, buf, max) &&
-        !FormatMessage (FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
-                        LANG_NEUTRAL, buf, max, NULL))
+    if (!get_winsock_error(err, buf, max) &&
+        !FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM, NULL, err,
+                       LANG_NEUTRAL, buf, max, NULL))
       snprintf(buf, max, "Unknown error %d (%#x)", err, err);
   }
+#endif
 #else /* not native Windows coming up */
 
   /* These should be atomic and hopefully thread-safe */

@@ -52,10 +52,16 @@ extern "C" {
  * platforms. We also provide a CURL_FORMAT_OFF_T define to use in *printf
  * format strings when outputting a variable of type curl_off_t.
  */
+
 #if defined(_MSC_VER) || defined(__LCC__)
 /* MSVC */
+#ifdef _WIN32_WCE
+  typedef long curl_off_t;
+#define CURL_FORMAT_OFF_T "%ld"
+#else
   typedef signed __int64 curl_off_t;
 #define CURL_FORMAT_OFF_T "%I64d"
+#endif
 #else /* _MSC_VER || __LCC__ */
 #if (defined(__GNUC__) && defined(WIN32)) || defined(__WATCOMC__)
 /* gcc on windows or Watcom */

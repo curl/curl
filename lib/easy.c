@@ -29,8 +29,12 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include <ctype.h>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
 
 #include <errno.h>
 
@@ -168,6 +172,11 @@ static long          init_flags  = 0;
  * If a memory-using function (like curl_getenv) is used before
  * curl_global_init() is called, we need to have these pointers set already.
  */
+
+#ifdef _WIN32_WCE
+#define strdup _strdup
+#endif
+
 curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
 curl_free_callback Curl_cfree = (curl_free_callback)free;
 curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
