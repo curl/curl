@@ -536,8 +536,6 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
     *entry = conn->async.dns;
     TRACE(("resolved okay, dns %p\n", *entry));
   }
-  else
-    TRACE(("not yet\n"));
   return CURLE_OK;
 }
 
