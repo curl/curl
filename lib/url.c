@@ -1307,7 +1307,8 @@ ConnectionStore(struct SessionHandle *data,
 }
 
 static CURLcode ConnectPlease(struct connectdata *conn,
-                              Curl_addrinfo *hostaddr)
+                              Curl_addrinfo *hostaddr,
+                              bool *connected)
 {
   CURLcode result;
   Curl_ipconnect *addr;
@@ -1319,7 +1320,8 @@ static CURLcode ConnectPlease(struct connectdata *conn,
                            hostaddr,
                            conn->port,
                            &conn->firstsocket,
-                           &addr);
+                           &addr,
+                           connected);
   if(CURLE_OK == result) {
     /* All is cool, then we store the current information from the hostaddr
        struct to the serv_addr, as it might be needed later. The address
@@ -1374,7 +1376,7 @@ static void verboseconnect(struct connectdata *conn,
     struct in_addr in;
     (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
     infof(data, "Connected to %s (%s) port %d\n",
-          hostaddr?hostaddr->h_name:"[re-used]",
+          hostaddr?hostaddr->h_name:"",
 #if defined(HAVE_INET_NTOA_R)
           inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)),
 #else
@@ -1383,6 +1385,42 @@ static void verboseconnect(struct connectdata *conn,
           conn->port);
   }
 #endif
+}
+
+/*
+ * We have discovered that the TCP connection has been successful, we can now
+ * proceed with some action.
+ *
+ * If we're using the multi interface, this host address pointer is most
+ * likely NULL at this point as we can't keep the resolved info around. This
+ * may call for some reworking, like a reference counter in the struct or
+ * something. The hostaddr is not used for very much though, we have the
+ * 'serv_addr' field in the connectdata struct for most of it.
+ */
+CURLcode Curl_protocol_connect(struct connectdata *conn,
+                               Curl_addrinfo *hostaddr)
+{
+  struct SessionHandle *data = conn->data;
+  CURLcode result;
+  
+  Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
+
+  if(data->set.verbose)
+    verboseconnect(conn, hostaddr);
+
+  if(conn->curl_connect) {
+    /* is there a protocol-specific connect() procedure? */
+
+    /* set start time here for timeout purposes in the
+     * connect procedure, it is later set again for the
+     * progress meter purpose */
+    conn->now = Curl_tvnow();
+
+    /* Call the protocol-specific connect function */
+    result = conn->curl_connect(conn);
+  }
+
+  return result; /* pass back status */
 }
 
 static CURLcode CreateConnection(struct SessionHandle *data,
@@ -1780,6 +1818,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->remote_port = PORT_HTTP;
     conn->protocol |= PROT_HTTP;
     conn->curl_do = Curl_http;
+    conn->curl_do_more = NULL;
     conn->curl_done = Curl_http_done;
     conn->curl_connect = Curl_http_connect;
 #else
@@ -1797,6 +1836,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->protocol |= PROT_HTTP|PROT_HTTPS|PROT_SSL;
 
     conn->curl_do = Curl_http;
+    conn->curl_do_more = NULL;
     conn->curl_done = Curl_http_done;
     conn->curl_connect = Curl_http_connect;
 
@@ -1819,6 +1859,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       }
     conn->protocol |= PROT_GOPHER;
     conn->curl_do = Curl_http;
+    conn->curl_do_more = NULL;
     conn->curl_done = Curl_http_done;
 #else
     failf(data, LIBCURL_NAME
@@ -1867,6 +1908,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     }
     else {
       conn->curl_do = Curl_ftp;
+      conn->curl_do_more = Curl_ftp_nextconnect;
       conn->curl_done = Curl_ftp_done;
       conn->curl_connect = Curl_ftp_connect;
       conn->curl_disconnect = Curl_ftp_disconnect;
@@ -2441,29 +2483,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->headerbytecount = 0;
   
   if(-1 == conn->firstsocket) {
+    bool connected;
+
     /* Connect only if not already connected! */
-    result = ConnectPlease(conn, hostaddr);
-    Curl_pgrsTime(data, TIMER_CONNECT); /* connect done, good or bad */
+    result = ConnectPlease(conn, hostaddr, &connected);
+
+    if(connected)
+      result = Curl_protocol_connect(conn, hostaddr);
 
     if(CURLE_OK != result)
       return result;
-
-    if(data->set.verbose)
-      verboseconnect(conn, hostaddr);
-
-    if(conn->curl_connect) {
-      /* is there a protocol-specific connect() procedure? */
-
-      /* set start time here for timeout purposes in the
-       * connect procedure, it is later set again for the
-       * progress meter purpose */
-      conn->now = Curl_tvnow();
-
-      /* Call the protocol-specific connect function */
-      result = conn->curl_connect(conn);
-      if(result != CURLE_OK)
-        return result; /* pass back errors */
-    }
   }
   else {
     Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
@@ -2558,6 +2587,8 @@ CURLcode Curl_do(struct connectdata **connp)
   struct connectdata *conn = *connp;
   struct SessionHandle *data=conn->data;
 
+  conn->do_more = FALSE; /* by default there's no curl_do_more() to use */
+
   if(conn->curl_do) {
     /* generic protocol-specific function pointer set in curl_connect() */
     result = conn->curl_do(conn);
@@ -2584,6 +2615,16 @@ CURLcode Curl_do(struct connectdata **connp)
       }
     }
   }
+  return result;
+}
+
+CURLcode Curl_do_more(struct connectdata *conn)
+{
+  CURLcode result=CURLE_OK;
+
+  if(conn->curl_do_more)
+    result = conn->curl_do_more(conn);
+
   return result;
 }
 

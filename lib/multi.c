@@ -29,6 +29,7 @@
 #include "urldata.h"
 #include "transfer.h"
 #include "url.h"
+#include "connect.h"
 
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
@@ -43,11 +44,13 @@ struct Curl_message {
 
 typedef enum {
   CURLM_STATE_INIT,
-  CURLM_STATE_CONNECT,
-  CURLM_STATE_DO,
-  CURLM_STATE_PERFORM,
-  CURLM_STATE_DONE,
-  CURLM_STATE_COMPLETED,
+  CURLM_STATE_CONNECT,     /* connect has been sent off */
+  CURLM_STATE_WAITCONNECT, /* we're awaiting the connect to finalize */
+  CURLM_STATE_DO,          /* send off the request (part 1) */
+  CURLM_STATE_DO_MORE,     /* send off the request (part 2) */
+  CURLM_STATE_PERFORM,     /* transfer data */
+  CURLM_STATE_DONE,        /* post data transfer operation */
+  CURLM_STATE_COMPLETED,   /* operation complete */
 
   CURLM_STATE_LAST /* not a true state, never use this */
 } CURLMstate;
@@ -224,6 +227,32 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
     switch(easy->state) {
     default:
       break;
+    case CURLM_STATE_WAITCONNECT:
+    case CURLM_STATE_DO_MORE:
+      {
+        /* when we're waiting for a connect, we wait for the socket to
+           become writable */
+        struct connectdata *conn = easy->easy_conn;
+        int sockfd;
+
+        if(CURLM_STATE_WAITCONNECT == easy->state) {
+          sockfd = conn->firstsocket;
+          FD_SET(sockfd, write_fd_set);
+        }
+        else {
+          /* When in DO_MORE state, we could be either waiting for us
+             to connect to a remote site, or we could wait for that site
+             to connect to us. It makes a difference in the way: if we
+             connect to the site we wait for the socket to become writable, if 
+             the site connects to us we wait for it to become readable */
+          sockfd = conn->secondarysocket;
+          FD_SET(sockfd, write_fd_set);
+        }
+
+        if(sockfd > *max_fd)
+          *max_fd = sockfd;
+      }
+      break;
     case CURLM_STATE_PERFORM:
       /* This should have a set of file descriptors for us to set.  */
       /* after the transfer is done, go DONE */
@@ -251,6 +280,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   bool done;
   CURLMcode result=CURLM_OK;
   struct Curl_message *msg = NULL;
+  bool connected;
 
   *running_handles = 0; /* bump this once for every living handle */
 
@@ -259,6 +289,12 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   easy=multi->easy.next;
   while(easy) {
+
+#ifdef MALLOCDEBUG
+    fprintf(stderr, "HANDLE %p: State: %x\n",
+            (char *)easy, easy->state);
+#endif
+
     switch(easy->state) {
     case CURLM_STATE_INIT:
       /* init this transfer. */
@@ -287,23 +323,80 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
       /* Connect. We get a connection identifier filled in. */
       easy->result = Curl_connect(easy->easy_handle, &easy->easy_conn);
 
-      /* after connect, go DO */
+      /* after the connect has been sent off, go WAITCONNECT */
       if(CURLE_OK == easy->result) {
-        easy->state = CURLM_STATE_DO;
+        easy->state = CURLM_STATE_WAITCONNECT;
         result = CURLM_CALL_MULTI_PERFORM; 
       }
       break;
+
+    case CURLM_STATE_WAITCONNECT:
+      {
+        bool connected;
+        easy->result = Curl_is_connected(easy->easy_conn,
+                                         easy->easy_conn->firstsocket,
+                                         &connected);
+        if(connected)
+          easy->result = Curl_protocol_connect(easy->easy_conn, NULL);
+
+        if(CURLE_OK != easy->result)
+          /* failure detected */
+          break;
+
+        if(connected) {
+          /* after the connect has completed, go DO */
+          easy->state = CURLM_STATE_DO;
+          result = CURLM_CALL_MULTI_PERFORM; 
+        }
+      }
+      break;
+
     case CURLM_STATE_DO:
       /* Do the fetch or put request */
       easy->result = Curl_do(&easy->easy_conn);
-      /* after do, go PERFORM */
       if(CURLE_OK == easy->result) {
-        if(CURLE_OK == Curl_readwrite_init(easy->easy_conn)) {
+
+        /* after do, go PERFORM... or DO_MORE */
+        if(easy->easy_conn->do_more) {
+          /* we're supposed to do more, but we need to sit down, relax
+             and wait a little while first */
+          easy->state = CURLM_STATE_DO_MORE;
+          result = CURLM_OK;
+        }
+        else {
+          /* we're done with the DO, now PERFORM */
+          easy->result = Curl_readwrite_init(easy->easy_conn);
+          if(CURLE_OK == easy->result) {
+            easy->state = CURLM_STATE_PERFORM;
+            result = CURLM_CALL_MULTI_PERFORM; 
+          }
+        }
+      }
+      break;
+
+    case CURLM_STATE_DO_MORE:
+      /*
+       * First, check if we really are ready to do more.
+       */
+      easy->result = Curl_is_connected(easy->easy_conn,
+                                       easy->easy_conn->secondarysocket,
+                                       &connected);
+      if(connected) {
+        /*
+         * When we are connected, DO MORE and then go PERFORM
+         */
+        easy->result = Curl_do_more(easy->easy_conn);
+
+        if(CURLE_OK == easy->result)
+          easy->result = Curl_readwrite_init(easy->easy_conn);
+
+        if(CURLE_OK == easy->result) {
           easy->state = CURLM_STATE_PERFORM;
           result = CURLM_CALL_MULTI_PERFORM; 
         }
       }
       break;
+
     case CURLM_STATE_PERFORM:
       /* read/write data if it is ready to do so */
       easy->result = Curl_readwrite(easy->easy_conn, &done);

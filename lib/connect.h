@@ -26,10 +26,15 @@
 int Curl_nonblock(int socket,    /* operate on this */
                   int nonblock   /* TRUE or FALSE */);
 
+CURLcode Curl_is_connected(struct connectdata *conn,
+                           int sockfd,
+                           bool *connected);
+
 CURLcode Curl_connecthost(struct connectdata *conn,
                           Curl_addrinfo *host, /* connect to this */
                           int port,       /* connect to this port number */
                           int *sockconn,  /* not set if error is returned */
-                          Curl_ipconnect **addr /* the one we used */
-                          ); /*  index we used */
+                          Curl_ipconnect **addr, /* the one we used */
+                          bool *connected /* truly connected? */
+                          );
 #endif
