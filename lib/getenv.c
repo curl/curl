@@ -38,7 +38,7 @@
 #endif
 
 static
-char *GetEnv(char *variable)
+char *GetEnv(const char *variable)
 {
 #ifdef WIN32
   /* This shit requires windows.h (HUGE) to be included */
@@ -62,7 +62,7 @@ char *GetEnv(char *variable)
   return (env && env[0])?strdup(env):NULL;
 }
 
-char *curl_getenv(char *v)
+char *curl_getenv(const char *v)
 {
   return GetEnv(v);
 }
