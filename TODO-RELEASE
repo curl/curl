@@ -17,4 +17,4 @@ To get fixed in 7.12.2 (planned release: mid October 2004)
 
 46 - Casey O'Donnell's multi.h winsock header fix
 
- Bugfixes reported until late November
+47 - Peter Sylvester's patch related to the new SRP on the TLS layer
