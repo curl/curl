@@ -510,6 +510,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
   time_t now;
   int hit=-1;
   bool longopt=FALSE;
+  bool singleopt=FALSE; /* when true means '-o foo' used '-ofoo' */
+
 
   /* single-letter,
      long-name,
@@ -640,7 +642,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     if(hit < 0) {
       return PARAM_OPTION_UNKNOWN;
     }    
-    if((!nextarg || !*nextarg) && aliases[hit].extraparam) {
+    if(!longopt && flag[1]) {
+      nextarg=&flag[1]; /* this is the actual extra parameter */
+      singleopt=TRUE;   /* don't loop anymore after this */
+    }
+    else if((!nextarg || !*nextarg) && aliases[hit].extraparam) {
       return PARAM_REQUIRES_PARAMETER;
     }
     else if(nextarg && aliases[hit].extraparam)
@@ -1056,7 +1062,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     }
     hit = -1;
 
-  } while(*++parse && !*usedarg);
+  } while(!singleopt && *++parse && !*usedarg);
 
   return PARAM_OK;
 }
