@@ -1571,16 +1571,16 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         nextarg++;
       default:
         /* If-Modified-Since: (section 14.28 in RFC2068) */
-        config->timecond = TIMECOND_IFMODSINCE;
+        config->timecond = CURL_TIMECOND_IFMODSINCE;
         break;
       case '-':
         /* If-Unmodified-Since:  (section 14.24 in RFC2068) */
-        config->timecond = TIMECOND_IFUNMODSINCE;
+        config->timecond = CURL_TIMECOND_IFUNMODSINCE;
         nextarg++;
         break;
       case '=':
         /* Last-Modified:  (section 14.29 in RFC2068) */
-        config->timecond = TIMECOND_LASTMOD;
+        config->timecond = CURL_TIMECOND_LASTMOD;
         nextarg++;
         break;
       }
@@ -1591,7 +1591,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         struct stat statbuf;
         if(-1 == stat(nextarg, &statbuf)) {
           /* failed, remove time condition */
-          config->timecond = TIMECOND_NONE;
+          config->timecond = CURL_TIMECOND_NONE;
         }
         else {
           /* pull the time out from the file */
