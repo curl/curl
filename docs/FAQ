@@ -175,20 +175,21 @@ FAQ
   Project cURL is entirely free and open. No person gets paid for developing
   curl. We do this voluntarily on our spare time.
 
-  We get some help from companies. Contactor Data hosts the curl web site and
-  the main mailing list, Haxx owns the curl web site's domain and
-  sourceforge.net hosts several project tools we take advantage from like the
-  bug tracker, mailing lists and more.
+  We get some help from companies. Contactor Data hosts the curl web site,
+  Haxx owns the curl web site's domain and sourceforge.net hosts several
+  project services we take advantage from, like the bug tracker, mailing lists
+  and more.
 
   If you want to support our project with a donation or similar, one way of
   doing that would be to buy "gift certificates" at useful online shopping
   sites, such as amazon.com or thinkgeek.com. Another way would be to sponsor
   us through a banner-program or even better: by helping us coding,
-  documenting, testing etc.
+  documenting, testing etc. You're welcome to send us a buck using paypal, as
+  described here: http://curl.haxx.se/donation.html
 
   1.7 What about CURL from curl.com?
 
-  During the summer 2001, curl.com has been busy advertising their client-side
+  During the summer 2001, curl.com was busy advertising their client-side
   programming language for the web, named CURL.
 
   We are in no way associated with curl.com or their CURL programming
@@ -203,17 +204,17 @@ FAQ
 
   1.8 I have a problem who do I mail?
 
-  Please do not attempt to mail any single individual unless you really need
-  to. Keep curl-related questions on a suitable mailing list. All available
-  mailing lists are listed in the MANUAL document and online at
+  Please do not mail any single individual unless you really need to. Keep
+  curl-related questions on a suitable mailing list. All available mailing
+  lists are listed in the MANUAL document and online at
   http://curl.haxx.se/mail/
 
-  Keeping curl-related questions and discussions on mailing lists allows others
-  to join in and help, to share their ideas, contribute their suggestions and
-  spread their wisdom. Keeping discussions on public mailing lists also allows
-  for others to learn from this (both current and future users thanks to the
-  web based archives of the mailing lists), thus saving us from having to
-  repeat ourselves even more. Thanks for respecting this.
+  Keeping curl-related questions and discussions on mailing lists allows
+  others to join in and help, to share their ideas, contribute their
+  suggestions and spread their wisdom. Keeping discussions on public mailing
+  lists also allows for others to learn from this (both current and future
+  users thanks to the web based archives of the mailing lists), thus saving us
+  from having to repeat ourselves even more. Thanks for respecting this.
 
 
 2. Install Related Problems
@@ -368,9 +369,10 @@ FAQ
 
         http://curl.haxx.se/libcurl/
 
-  In December 2001, there are interfaces available for the following
-  languages: C/C++, Cocoa, Dylan, Java, Perl, PHP, Python, Rexx, Ruby, Scheme
-  and Tcl. By the time you read this, additional ones may have appeared!
+  In February 2003, there are interfaces available for the following
+  languages: Basic, C, C++, Cocoa, Dylan, Euphoria, Java, Lua, Object-Pascal,
+  Pascal, Perl, PHP, PostgreSQL, Python, Rexx, Ruby, Scheme and Tcl. By the
+  time you read this, additional ones may have appeared!
 
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
@@ -379,8 +381,8 @@ FAQ
   XML-RPC are all such ones. You can use -X to set custom requests and -H to
   set custom headers (or replace internally generated ones).
 
-  Using libcurl or PHP's curl modules is just as fine and you'd just use the
-  proper library options to do the same.
+  Using libcurl is of course just as fine and you'd just use the proper
+  library options to do the same.
 
   3.11 How do I POST with a different Content-Type?
 
@@ -494,8 +496,7 @@ FAQ
     curl '{curl,www}.haxx.se'
 
   To be able to use those letters as actual parts of the URL (without using
-  them for the curl URL "globbing" system), use the -g/--globoff option (curl
-  7.6 and later):
+  them for the curl URL "globbing" system), use the -g/--globoff option:
 
     curl -g 'www.site.com/weirdname[].html'
 
@@ -682,20 +683,15 @@ FAQ
 
   5.3 How do I fetch multiple files with libcurl?
 
-  Starting with version 7.7, curl and libcurl will have excellent support for
-  transferring multiple files. You should just repeatedly set new URLs with
-  curl_easy_setopt() and then transfer it with curl_easy_perform(). The handle
-  you get from curl_easy_init() is not only reusable starting with libcurl
-  7.7, but also you're encouraged to reuse it if you can, as that will enable
-  libcurl to use persistent connections.
-
-  For libcurl prior to 7.7, there was no multiple file support. The only
-  available way to do multiple requests was to init/perform/cleanup for each
-  transfer.
+  libcurl has excellent support for transferring multiple files. You should
+  just repeatedly set new URLs with curl_easy_setopt() and then transfer it
+  with curl_easy_perform(). The handle you get from curl_easy_init() is not
+  only reusable, but you're even encouraged to reuse it if you can, as that
+  will enable libcurl to use persistent connections.
 
   5.4 Does libcurl do Winsock initialization on win32 systems?
 
-  Yes (since 7.8.1) if told to in the curl_global_init() call.
+  Yes, if told to in the curl_global_init() call.
 
   5.5 Does CURLOPT_FILE and CURLOPT_INFILE work on win32 ?
 
@@ -709,13 +705,11 @@ FAQ
 
   5.6 What about Keep-Alive or persistent connections?
 
-  Starting with version 7.7, curl and libcurl will have excellent support for
-  persistent connections when transferring several files from the same server.
-  Curl will attempt to reuse connections for all URLs specified on the same
-  command line/config file, and libcurl will reuse connections for all
-  transfers that are made using the same libcurl handle.
-
-  Previous versions had no persistent connection support.
+  curl and libcurl have excellent support for persistent connections when
+  transferring several files from the same server.  Curl will attempt to reuse
+  connections for all URLs specified on the same command line/config file, and
+  libcurl will reuse connections for all transfers that are made using the
+  same libcurl handle.
 
   5.7 Link errors when building libcurl on Windows!
 
