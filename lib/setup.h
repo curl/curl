@@ -208,7 +208,6 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 #define sread(x,y,z)      read_s(x,y,z)
 #define swrite(x,y,z)     write_s(x,y,z)
 #define select(n,r,w,x,t) select_s(n,r,w,x,t)
-#define ioctl(x,y,z) ioctlsocket(x,y,(char *)(z))
 #define IOCTL_3_ARGS
 #include <tcp.h>
 #ifdef word

@@ -211,16 +211,16 @@ CURLcode Curl_readrewind(struct connectdata *conn)
      (data->set.httpreq == HTTPREQ_POST_FORM))
     ; /* do nothing */
   else {
-    if(data->set.ioctrl) {
+    if(data->set.ioctl) {
       curlioerr err;
 
-      err = data->set.ioctrl(data, CURLIOCMD_RESTARTREAD,
-                             data->set.ioctrl_client);
-      infof(data, "the ioctrl callback returned %d\n", (int)err);
+      err = data->set.ioctl(data, CURLIOCMD_RESTARTREAD,
+                            data->set.ioctl_client);
+      infof(data, "the ioctl callback returned %d\n", (int)err);
 
       if(err) {
         /* FIXME: convert to a human readable error message */
-        failf(data, "ioctrl callback returned error %d\n", (int)err);
+        failf(data, "ioctl callback returned error %d\n", (int)err);
         return CURLE_SEND_FAIL_REWIND;
       }
     }
@@ -1424,7 +1424,7 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   /* we want header and/or body, if neither then don't do this! */
   if(conn->bits.getheader || !conn->bits.no_body) {
 
-    if(conn->sockfd != CURL_SOCKET_BAD) { 
+    if(conn->sockfd != CURL_SOCKET_BAD) {
       k->keepon |= KEEP_READ;
     }
 

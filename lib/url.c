@@ -1105,13 +1105,13 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * I/O control callback. Might be NULL.
      */
-    data->set.ioctrl = va_arg(param, curl_ioctl_callback);
+    data->set.ioctl = va_arg(param, curl_ioctl_callback);
     break;
   case CURLOPT_IOCTLDATA:
     /*
      * I/O control data pointer. Might be NULL.
      */
-    data->set.ioctrl_client = va_arg(param, void *);
+    data->set.ioctl_client = va_arg(param, void *);
     break;
   case CURLOPT_SSLCERT:
     /*
