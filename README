@@ -32,17 +32,18 @@ WEB SITE
 
         Sweden    -- http://curl.haxx.se/
         Australia -- http://curl.planetmirror.com/
+        Estonia   -- http://curl.dope-brothers.com/
         Germany   -- http://curl.mirror.at.stealer.net/
         Russia    -- http://curl.tsuren.net/
         Thailand  -- http://curl.siamu.ac.th/
         US (CA)   -- http://curl.mirror.redwire.net/
-        US (TX)   -- http://curl.cyberservers.net/
 
 DOWNLOAD
 
   The official download mirror sites are:
 
         Australia -- http://curl.planetmirror.com/download/
+        Estonia   -- http://curl.dope-brothers.com/download/
         Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
         Hongkong  -- http://www.execve.net/curl/
         Russia    -- http://curl.tsuren.net/download/
@@ -50,7 +51,6 @@ DOWNLOAD
         Sweden    -- http://cool.haxx.se/curl/
         Thailand  -- http://curl.siamu.ac.th/download/
         US (CA)   -- http://curl.mirror.redwire.net/download/
-        US (TX)   -- http://curl.cyberservers.net/download/
 
 CVS
 
