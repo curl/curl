@@ -15,11 +15,15 @@ NC=nc
 
 # Normally, all test cases should be run, but at times it is handy to
 # simply run a particular one:
-TESTCASES=" 1 2 3 4"
+TESTCASES="9"
+
+#######################################################################
+# No variables below this point should need to be modified
+#
+
+PIDFILE=".server.pid"
 
 stopserver() {
-  PIDFILE="$LOGDIR/server.pid"
-
   # check for pidfile
   if [ -f $PIDFILE ] ; then
       PID=`cat $PIDFILE`
@@ -28,8 +32,6 @@ stopserver() {
 }
 
 runserver () {
-  PIDFILE="$LOGDIR/server.pid"
-
   # check for pidfile
   if [ -f $PIDFILE ] ; then
       PID=`cat $PIDFILE`
@@ -48,6 +50,8 @@ runserver () {
   if [ $RUNNING != "1" ]; then
     ./httpserver.pl $HOSTPORT &
     sleep 1 # give it a little time to start
+  else
+    echo $STATUS
   fi
 }
 
@@ -89,17 +93,19 @@ singletest ()
   echo "test $NUMBER... [$DESC]"
 
   # get the command line options to use
-  cmd=`sed -e "s/%HOSTIP/$HOSTIP/g" -e "s/%HOSTPORT/$HOSTPORT/g" <$CURLCMD `
+  cmd=`sed -e "s/%HOSTIP/$HOSTIP/g" \
+           -e "s/%HOSTPORT/$HOSTPORT/g" \
+           -e "s/%HOSTNAME/$HOSTNAME/g" <$CURLCMD `
 
   # run curl
   CMDLINE="$CURL -o $CURLOUT -i --silent $cmd"
 
-  # we do it the eval way to deal with quotes and similar stuff
-  eval $CMDLINE
-
   if test -n "$verbose"; then
     echo "$CMDLINE"
   fi
+
+  # we do it the eval way to deal with quotes and similar stuff
+  eval $CMDLINE
 
   if [ $? != "0" ]; then
     echo "Failed to invoke curl for test $NUMBER"
@@ -114,7 +120,15 @@ singletest ()
     fi
 
     # verify the sent request
-    compare $SERVERIN $HTTP " command" "User-Agent:"
+    compare $SERVERIN $HTTP " command" \
+     "(User-Agent:|^--curl|Content-Type: multipart/form-data; boundary=)"
+
+    #
+    # The strip pattern above is for stripping off User-Agent: since that'll
+    # be different in all versions, and the lines in a RFC1876-post that are
+    # randomly generated and therefore are doomed to always differ!
+    #
+
 
     if [ $? != "0" ]; then
       exit;
@@ -150,10 +164,11 @@ fi
 # Output curl version being tested
 #
 VERSION=`$CURL -V`
+HOSTNAME=`hostname`
 
 echo "Running tests on:"
 echo $VERSION
-echo ""
+echo "host $HOSTNAME"
 
 #######################################################################
 # remove and recreate logging directory:
