@@ -345,6 +345,9 @@ sub singletest {
         next;
     }
 
+    # remove previous server output logfile
+    unlink($SERVERIN);
+
     # name of the test
     open(N, "<$TESTDIR/name$NUMBER.txt") ||
         print "** Couldn't read name on test $NUMBER\n";
@@ -464,22 +467,24 @@ sub singletest {
         }
 
 
-        if (! -r $PROT) {
-            print "** Missing protocol file for test $NUMBER",
-            ", should be similar to $SERVERIN\n";
-            return 1;
-        }
+        if(-r $SERVERIN) {
+            if(! -r $PROT) {
+                print "** Missing protocol file for test $NUMBER",
+                ", should be similar to $SERVERIN\n";
+                return 1;
+            }
 
-        # The strip pattern below is for stripping off User-Agent: since
-        # that'll be different in all versions, and the lines in a
-        # RFC1876-post that are randomly generated and therefore are doomed to
-        # always differ!
-
-        # verify the sent request
-        $res = compare($SERVERIN, $PROT, "protocol",
-                       "^(User-Agent:|--curl|Content-Type: multipart/form-data; boundary=|PORT ).*\r\n");
-        if($res) {
-            return 1;
+            # The strip pattern below is for stripping off User-Agent: since
+            # that'll be different in all versions, and the lines in a
+            # RFC1876-post that are randomly generated and therefore are
+            # doomed to always differ!
+            
+            # verify the sent request
+            $res = compare($SERVERIN, $PROT, "protocol",
+                           "^(User-Agent:|--curl|Content-Type: multipart/form-data; boundary=|PORT ).*\r\n");
+            if($res) {
+                return 1;
+            }
         }
 
         # remove the stdout and stderr files
