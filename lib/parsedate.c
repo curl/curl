@@ -42,9 +42,9 @@
 
   weird order:
 
-  1994 Nov 6 08:49:37  (curl_getdate() and GNU date fails)
+  1994 Nov 6 08:49:37  (GNU date fails)
   GMT 08:49:37 06-Nov-94 Sunday
-  94 6 Nov 08:49:37    (curl_getdate() and GNU date fails)
+  94 6 Nov 08:49:37    (GNU date fails)
 
   time left out:
 
@@ -67,6 +67,11 @@
   Sun, 12 Sep 2004 15:05:58 -0700
   Sat, 11 Sep 2004 21:32:11 +0200
 
+  compact numerical date strings ISO846-style:
+
+  20040912 15:05:58 -0700
+  20040911 +0200
+
 */
 #include "setup.h"
 #include <stdio.h>
@@ -79,8 +84,9 @@
 
 #include <curl/curl.h>
 
-
 #include "parsedate.h"
+
+static time_t Curl_parsedate(const char *date);
 
 static const char *wkday[] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
 static const char *weekday[] = { "Monday", "Tuesday", "Wednesday", "Thursday",
@@ -209,38 +215,13 @@ static void skip(const char **date)
     (*date)++;
 }
 
-#if 0
-#define TM_YEAR_ORIGIN 1900
-
-/* Yield A - B, measured in seconds. (from getdate.y)  */
-static long
-difftm (struct tm *a, struct tm *b)
-{
-  int ay = a->tm_year + (TM_YEAR_ORIGIN - 1);
-  int by = b->tm_year + (TM_YEAR_ORIGIN - 1);
-  long days = (
-  /* difference in day of year */
-                a->tm_yday - b->tm_yday
-  /* + intervening leap days */
-                + ((ay >> 2) - (by >> 2))
-                - (ay / 100 - by / 100)
-                + ((ay / 100 >> 2) - (by / 100 >> 2))
-  /* + difference in years * 365 */
-                + (long) (ay - by) * 365
-  );
-  return (60 * (60 * (24 * days + (a->tm_hour - b->tm_hour))
-                + (a->tm_min - b->tm_min))
-          + (a->tm_sec - b->tm_sec));
-}
-#endif
-
 enum assume {
   DATE_MDAY,
   DATE_YEAR,
   DATE_TIME
 };
 
-time_t Curl_parsedate(const char *date)
+static time_t Curl_parsedate(const char *date)
 {
   time_t t = 0;
   int wdaynum=-1;  /* day of the week number, 0-6 (mon-sun) */
@@ -305,10 +286,11 @@ time_t Curl_parsedate(const char *date)
       else {
         val = strtol(date, &end, 10);
 
-        if( ((end - date) == 4) &&
-            (val < 1300) &&
-            (indate< date) &&
-            ((date[-1] == '+' || date[-1] == '-'))) {
+        if((tzoff == -1) &&
+           ((end - date) == 4) &&
+           (val < 1300) &&
+           (indate< date) &&
+           ((date[-1] == '+' || date[-1] == '-'))) {
           /* four digits and a value less than 1300 and it is preceeded with
              a plus or minus. This is a time zone indication. */
           found = TRUE;
@@ -319,7 +301,18 @@ time_t Curl_parsedate(const char *date)
           tzoff = date[-1]=='+'?-tzoff:tzoff;
         }
 
-        if((dignext == DATE_MDAY) && (mdaynum == -1)) {
+        if(((end - date) == 8) &&
+           (yearnum == -1) &&
+           (monnum == -1) &&
+           (mdaynum == -1)) {
+          /* 8 digits, no year, month or day yet. This is YYYYMMDD */
+          found = TRUE;
+          yearnum = val/10000;
+          monnum = (val%10000)/100-1; /* month is 0 - 11 */
+          mdaynum = val%100;
+        }
+
+        if(!found && (dignext == DATE_MDAY) && (mdaynum == -1)) {
           if((val > 0) && (val<32)) {
             mdaynum = val;
             found = TRUE;
@@ -383,10 +376,6 @@ time_t Curl_parsedate(const char *date)
     gmt = (struct tm *)gmtime_r(&t, &keeptime2);
 #else
     gmt = gmtime(&t); /* use gmtime_r() if available */
-#endif
-#if 0
-    /* previous involved version (that bugs?) */
-    delta = difftm(&tm, gmt);
 #endif
 
     t2 = mktime(gmt);
