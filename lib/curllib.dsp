@@ -243,6 +243,10 @@ SOURCE=.\url.c
 # End Source File
 # Begin Source File
 
+SOURCE=.\share.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\version.c
 # End Source File
 # End Group
