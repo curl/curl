@@ -111,6 +111,28 @@ void pgrsMode(struct UrlData *data, int mode)
 
 }
 
+void pgrsTime(struct UrlData *data, timerid timer)
+{
+  switch(timer) {
+  default:
+  case TIMER_NONE:
+    /* mistake filter */
+    break;
+  case TIMER_NAMELOOKUP:
+    data->progress.t_nslookup = tvnow();
+    break;
+  case TIMER_CONNECT:
+    data->progress.t_connect = tvnow();
+    break;
+  case TIMER_PRETRANSFER:
+    data->progress.t_pretransfer = tvnow();
+    break;
+  case TIMER_POSTRANSFER:
+    /* this is the normal end-of-transfer thing */
+    break;
+  }
+}
+
 void pgrsStartNow(struct UrlData *data)
 {
   data->progress.start = tvnow();
@@ -280,15 +302,15 @@ void pgrsUpdate(struct UrlData *data)
 
       fprintf(stderr,
               "\r%3d %s  %3d %s  %3d %s  %s  %s %s %s %s %s",
-              (int)total_percen,                    /* total % */
-              max5data(total_expected_transfer, max5[2]),    /* total size */
-              (int)dlpercen,                        /* rcvd % */
+              (int)total_percen,                            /* total % */
+              max5data(total_expected_transfer, max5[2]),   /* total size */
+              (int)dlpercen,                                /* rcvd % */
               max5data(data->progress.downloaded, max5[0]), /* rcvd size */
-              (int)ulpercen,                        /* xfer % */
-              max5data(data->progress.uploaded, max5[1]), /* xfer size */
+              (int)ulpercen,                                /* xfer % */
+              max5data(data->progress.uploaded, max5[1]),   /* xfer size */
 
-              max5data(data->progress.dlspeed, max5[3]),           /* avrg dl speed */
-              max5data(data->progress.ulspeed, max5[4]),           /* avrg ul speed */
+              max5data(data->progress.dlspeed, max5[3]), /* avrg dl speed */
+              max5data(data->progress.ulspeed, max5[4]), /* avrg ul speed */
               time_total,                           /* total time */
               time_current,                         /* current time */
               time_left,                            /* time left */
