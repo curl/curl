@@ -754,7 +754,7 @@ static int check_telnet_options(struct connectdata *conn)
   if(conn->bits.user_passwd)
   {
     snprintf(option_arg, sizeof(option_arg), "USER,%s", conn->user);
-    tn->telnet_vars = curl_slist_append(tn->telnet_vars, buf);
+    tn->telnet_vars = curl_slist_append(tn->telnet_vars, option_arg);
 
     tn->us_preferred[CURL_TELOPT_NEW_ENVIRON] = CURL_YES;
   }
