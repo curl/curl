@@ -83,7 +83,7 @@
 #include "hash.h"
 
 #ifdef HAVE_ZLIB_H
-#include <zlib.h> 		/* for content-encoding 08/28/02 jhrg */
+#include <zlib.h> 		/* for content-encoding */
 #endif
 
 #ifdef GSSAPI
@@ -466,7 +466,7 @@ struct connectdata {
   struct dynamically_allocated_data {
     char *proxyuserpwd; /* free later if not NULL! */
     char *uagent; /* free later if not NULL! */
-    char *accept_encoding; /* free later if not NULL! 08/28/02 jhrg */
+    char *accept_encoding; /* free later if not NULL! */
     char *userpwd; /* free later if not NULL! */
     char *rangeline; /* free later if not NULL! */
     char *ref; /* free later if not NULL! */
@@ -525,9 +525,10 @@ struct connectdata {
 
   curl_read_callback fread; /* function that reads the input */
   void *fread_in;           /* pointer to pass to the fread() above */
+
 };
 
-/* The end of connectdata. 08/27/02 jhrg */
+/* The end of connectdata. */
 
 /*
  * Struct to keep statistical and informational data.
@@ -535,8 +536,8 @@ struct connectdata {
 struct PureInfo {
   int httpcode;
   int httpversion;
-  long filetime; /* If requested, this is might get set. Set to -1 if
-                    the time was unretrievable */
+  time_t filetime; /* If requested, this is might get set. Set to -1 if
+                      the time was unretrievable */
   long header_size;  /* size of read header(s) in bytes */
   long request_size; /* the amount of bytes sent in the request(s) */
 
@@ -660,6 +661,9 @@ struct UrlState {
 #ifdef GSSAPI
   struct negotiatedata negotiate;
 #endif
+
+  long authwant;  /* inherited from what the user set with CURLOPT_HTTPAUTH */
+  long authavail; /* what the server reports */
 };
 
 
@@ -704,9 +708,7 @@ struct UserDefined {
   char *set_proxy;   /* proxy to use */
   long use_port;     /* which port to use (when not using default) */
   char *userpwd;     /* <user:password>, if used */
-
-  curl_httpauth httpauth; /* what kind of HTTP authentication to use */
-
+  long httpauth;     /* what kind of HTTP authentication to use (bitmask) */
   char *set_range;   /* range, if used. See README for detailed specification
                         on this syntax. */
   long followlocation; /* as in HTTP Location: */
