@@ -162,11 +162,9 @@ sub SIZE_command {
 
     logmsg "SIZE number $testno\n";
 
-    my $filename = "data/reply$testno.txt";
+    my @data = getpart("reply", "size");
 
-    my ($dev,$ino,$mode,$nlink,$uid,$gid,$rdev,$size,
-        $atime,$mtime,$ctime,$blksize,$blocks)
-        = stat($filename);
+    my $size = $data[0];
 
     if($size) {
         print "213 $size\r\n";
@@ -198,7 +196,7 @@ sub RETR_command {
 
     my $size=0;
     for(@data) {
-        $size =+ length($_);
+        $size += length($_);
     }
 
     if($size) {
@@ -206,10 +204,16 @@ sub RETR_command {
         if($rest) {
             # move read pointer forward
             $size -= $rest;
+            if($verbose) {
+                print STDERR "** REST $rest was removed from size.\n";
+            }
         }
         print "150 Binary data connection for $testno () ($size bytes).\r\n";
         $rest=0; # reset rest again
 
+        if($verbose) {
+            print STDERR "150 Binary data connection for $testno ($size bytes).\n";
+        }
         for(@data) {
             print SOCK $_;
         }
@@ -219,6 +223,9 @@ sub RETR_command {
     }
     else {
         print "550 $testno: No such file or directory.\r\n";
+        if($verbose) {
+            print STDERR "550 $testno: no such file\n";
+        }
     }
     return 0;
 }
