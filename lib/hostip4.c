@@ -161,7 +161,7 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, char *hostname, int port)
   h->h_aliases = NULL;
 
   /* Now store the dotted version of the address */
-  snprintf(h->h_name, 16, "%s", hostname);
+  snprintf((char *)h->h_name, 16, "%s", hostname);
 
   ai = Curl_he2ai(h, port);
 
