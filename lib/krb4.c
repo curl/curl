@@ -1,8 +1,12 @@
-/* modified by Martin Hedenfalk <mhe@stacken.kth.se> for use in Curl
- * last modified 2000-09-18
- */
-
-/*
+/* This source code was modified by Martin Hedenfalk <mhe@stacken.kth.se> for
+ * use in Curl. His latest changes were done 2000-09-18.
+ *
+ * It has since been patched away like a madman by Daniel Stenberg
+ * <daniel@haxx.se> to make it better applied to curl conditions, and to make
+ * it not use globals, pollute name space and more. This source code awaits a
+ * rewrite to work around the paragraph 2 in the BSD licenses as explained
+ * below.
+ *
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  * All rights reserved.
@@ -32,8 +36,7 @@
  * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- */
+ * SUCH DAMAGE.  */
 
 #include "setup.h"
 
@@ -59,22 +62,10 @@
 #include "memdebug.h"
 #endif
 
-#ifdef FTP_SERVER
-#define LOCAL_ADDR ctrl_addr
-#define REMOTE_ADDR his_addr
-#else
-/*#define LOCAL_ADDR myctladdr***/
-/*#define REMOTE_ADDR hisctladdr***/
-#endif
-
-/*extern struct sockaddr *LOCAL_ADDR, *REMOTE_ADDR;***/
-
-#define LOCAL_ADDR (&local_addr)
+#define LOCAL_ADDR (&conn->local_addr)
 #define REMOTE_ADDR (&conn->serv_addr)
 #define myctladdr LOCAL_ADDR
 #define hisctladdr REMOTE_ADDR
-
-static struct sockaddr_in local_addr;
 
 struct krb4_data {
     des_cblock key;
@@ -167,95 +158,6 @@ krb4_encode(void *app_data, void *from, int length, int level, void **to,
 	return -1;
 }
 
-#ifdef FTP_SERVER
-
-static int
-krb4_adat(void *app_data, void *buf, size_t len)
-{
-    KTEXT_ST tkt;
-    AUTH_DAT auth_dat;
-    char *p;
-    int kerror;
-    u_int32_t cs;
-    char msg[35]; /* size of encrypted block */
-    int tmp_len;
-    struct krb4_data *d = app_data;
-    char inst[INST_SZ];
-    struct sockaddr_in *his_addr_sin = (struct sockaddr_in *)his_addr;
-
-    memcpy(tkt.dat, buf, len);
-    tkt.length = len;
-
-    k_getsockinst(0, inst, sizeof(inst));
-    kerror = krb_rd_req(&tkt, "ftp", inst, 
-			his_addr_sin->sin_addr.s_addr, &auth_dat, "");
-    if(kerror == RD_AP_UNDEC){
-	k_getsockinst(0, inst, sizeof(inst));
-	kerror = krb_rd_req(&tkt, "rcmd", inst, 
-			    his_addr_sin->sin_addr.s_addr, &auth_dat, "");
-    }
-
-    if(kerror){
-	reply(535, "Error reading request: %s.", krb_get_err_text(kerror));
-	return -1;
-    }
-    
-    memcpy(d->key, auth_dat.session, sizeof(d->key));
-    des_set_key(&d->key, d->schedule);
-
-    strlcpy(d->name, auth_dat.pname, sizeof(d->name));
-    strlcpy(d->instance, auth_dat.pinst, sizeof(d->instance));
-    strlcpy(d->realm, auth_dat.prealm, sizeof(d->instance));
-
-    cs = auth_dat.checksum + 1;
-    {
-	unsigned char tmp[4];
-	KRB_PUT_INT(cs, tmp, 4, sizeof(tmp));
-	tmp_len = krb_mk_safe(tmp, msg, 4, &d->key,
-			      (struct sockaddr_in *)LOCAL_ADDR,
-			      (struct sockaddr_in *)REMOTE_ADDR);
-    }
-    if(tmp_len < 0){
-	reply(535, "Error creating reply: %s.", strerror(errno));
-	return -1;
-    }
-    len = tmp_len;
-    if(base64_encode(msg, len, &p) < 0) {
-	reply(535, "Out of memory base64-encoding.");
-	return -1;
-    }
-    reply(235, "ADAT=%s", p);
-    sec_complete = 1;
-    free(p);
-    return 0;
-}
-
-static int
-krb4_userok(void *app_data, char *user)
-{
-    struct krb4_data *d = app_data;
-    return krb_kuserok(d->name, d->instance, d->realm, user);
-}
-
-struct sec_server_mech krb4_server_mech = {
-    "KERBEROS_V4",
-    sizeof(struct krb4_data),
-    NULL, /* init */
-    NULL, /* end */
-    krb4_check_prot,
-    krb4_overhead,
-    krb4_encode,
-    krb4_decode,
-    /* */
-    NULL,
-    krb4_adat,
-    NULL, /* pbsz */
-    NULL, /* ccc */
-    krb4_userok
-};
-
-#else /* FTP_SERVER */
-
 static int
 mk_auth(struct krb4_data *d, KTEXT adat, 
 	const char *service, char *host, int checksum)
@@ -292,12 +194,9 @@ krb4_auth(void *app_data, struct connectdata *conn)
   u_int32_t cs;
   struct krb4_data *d = app_data;
   struct sockaddr_in *localaddr  = (struct sockaddr_in *)LOCAL_ADDR;
-#if 0
-  struct sockaddr_in *remoteaddr = (struct sockaddr_in *)REMOTE_ADDR;
-#endif
   char *host = conn->hp->h_name;
   ssize_t nread;
-  int l = sizeof(local_addr);
+  int l = sizeof(conn->local_addr);
 
   if(getsockname(conn->firstsocket,
                  (struct sockaddr *)LOCAL_ADDR, &l) < 0)
@@ -387,7 +286,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   return AUTH_OK;
 }
 
-struct sec_client_mech krb4_client_mech = {
+struct Curl_sec_client_mech Curl_krb4_client_mech = {
     "KERBEROS_V4",
     sizeof(struct krb4_data),
     NULL, /* init */
@@ -399,9 +298,7 @@ struct sec_client_mech krb4_client_mech = {
     krb4_decode
 };
 
-#endif /* FTP_SERVER */
-
-void krb_kauth(struct connectdata *conn)
+void Curl_krb_kauth(struct connectdata *conn)
 {
   des_cblock key;
   des_key_schedule schedule;
