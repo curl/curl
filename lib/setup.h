@@ -46,10 +46,6 @@
 #endif
 #endif
 
-#ifdef NETWARE
-/* hand-modified NetWare config.h! */
-#include "config-netware.h"
-#endif
 #ifdef macintosh
 /* hand-modified MacOS config.h! */
 #include "config-mac.h"
