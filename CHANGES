@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (22 September 2004)
+- Dan Fandrich fixed three test cases to no longer use "localhost" but instead
+  use "127.0.0.1" to avoid requiring that localhost resolves nicely.
+
 - Jean-Claude Chauve fixed an LDAP crash when more than one record was
   retrieved.
 
