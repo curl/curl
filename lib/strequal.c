@@ -80,7 +80,7 @@ int curl_strnequal(const char *first, const char *second, size_t max)
  *
  * 
  */
-size_t strlcat(char *dst, const char *src, size_t siz)
+size_t Curl_strlcat(char *dst, const char *src, size_t siz)
 {
   char *d = dst;
   const char *s = src;
