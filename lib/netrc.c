@@ -157,7 +157,7 @@ int Curl_parsenetrc(char *host,
 	  }
 	  else if(state_password) {
 	    strncpy(password, tok, PASSWORDSIZE-1);
-#if _NETRC_DEBUG
+#ifdef _NETRC_DEBUG
 	    printf("PASSWORD: %s\n", password);
 #endif
 	    state_password=0;

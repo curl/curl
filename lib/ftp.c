@@ -358,7 +358,7 @@ int Curl_GetFTPResponse(char *buf,
   if(!error)
     code = atoi(buf);
 
-#if KRB4
+#ifdef KRB4
   /* handle the security-oriented responses 6xx ***/
   /* FIXME: some errorchecking perhaps... ***/
   switch(code) {
