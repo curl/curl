@@ -45,6 +45,10 @@
 
 #include "progress.h"
 
+#define _MPRINTF_REPLACE /* use our functions only */
+#include <curl/mprintf.h>
+
+
 static void time2str(char *r, int t)
 {
   int h = (t/3600);
