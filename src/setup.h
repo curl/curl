@@ -23,8 +23,6 @@
  * $Id$
  ***************************************************************************/
 
-#include <stdio.h>
-
 #if !defined(WIN32) && defined(__WIN32__)
 /* Borland fix */
 #define WIN32
@@ -49,6 +47,15 @@
 #include "config-riscos.h"
 #endif
 #endif
+
+#ifdef MALLOCDEBUG
+/* This is an ugly hack for MALLOCDEBUG conditions only. We need to include
+   the file here, since it might set the _FILE_OFFSET_BITS define, which must
+   be set BEFORE all normal system headers. */
+#include "../lib/setup.h"
+#endif
+
+#include <stdio.h>
 
 #ifndef OS
 #define OS "unknown"
