@@ -1488,7 +1488,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   else
     return CURLE_FTP_CANT_RECONNECT;
 
-  if(data->change.proxy) {
+  if(data->change.proxy && *data->change.proxy) {
     /*
      * This is a tunnel through a http proxy and we need to connect to the
      * proxy again here.
