@@ -1,8 +1,6 @@
-.\" You can view this file with:
-.\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_strequal 3 "20 April 2001" "libcurl 7.7.2" "libcurl Manual"
+.TH curl_strequal 3 "30 April 2004" "libcurl 7.12" "libcurl Manual"
 .SH NAME
 curl_strequal, curl_strnequal - case insensitive string comparisons
 .SH SYNOPSIS
@@ -24,6 +22,10 @@ first \fIlen\fP characters of \fIstr1\fP.
 These functions are provided by libcurl to enable applications to compare
 strings in a truly portable manner. There are no standard portable case
 insensitive string comparison functions. These two works on all platforms.
+.SH AVAILABILITY
+These functions will be removed from the public libcurl API in a near
+future. They will instead be made "available" by source code access only, and
+then as curlx_strequal() and curlx_strenqual().
 .SH RETURN VALUE
 Non-zero if the strings are identical. Zero if they're not.
 .SH "SEE ALSO"

@@ -1,8 +1,6 @@
-.\" You can view this file with:
-.\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_printf 3 "20 April 2001" "libcurl 7.7.2" "libcurl Manual"
+.TH curl_printf 3 "30 April 2004" "libcurl 7.12" "libcurl Manual"
 .SH NAME
 curl_maprintf, curl_mfprintf, curl_mprintf, curl_msnprintf, curl_msprintf
 curl_mvaprintf, curl_mvfprintf, curl_mvprintf, curl_mvsnprintf,
@@ -79,6 +77,10 @@ To easily use all these cloned functions instead of the normal ones, #define
 _MPRINTF_REPLACE before you include the <curl/mprintf.h> file. Then all the
 normal names like printf, fprintf, sprintf etc will use the curl-functions
 instead.
+.SH AVAILABILITY
+These function will be removed from the public libcurl API in a near
+future. They will instead be made "available" by source code access only, and
+then as curlx_-prefixed functions. See lib/README.curlx for further details.
 .SH RETURN VALUE
 The \fBcurl_maprintf\fP and \fBcurl_mvaprintf\fP functions return a pointer to
 a newly allocated string, or NULL it it failed.

@@ -1,8 +1,6 @@
-.\" You can view this file with:
-.\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_getenv 3 "15 August 2001" "libcurl 7.8.1" "libcurl Manual"
+.TH curl_getenv 3 "30 April 2004" "libcurl 7.12" "libcurl Manual"
 .SH NAME
 curl_getenv - return value for environment name
 .SH SYNOPSIS
@@ -14,6 +12,10 @@ curl_getenv - return value for environment name
 curl_getenv() is a portable wrapper for the getenv() function, meant to
 emulate its behaviour and provide an identical interface for all operating
 systems libcurl builds on (including win32).
+.SH AVAILABILITY
+This function will be removed from the public libcurl API in a near future. It
+will instead be made "available" by source code access only, and then as
+curlx_getenv().
 .SH RETURN VALUE
 If successful, curl_getenv() returns a pointer to the value of the specified
 environment. The memory it refers to is malloc()ed why the application must
