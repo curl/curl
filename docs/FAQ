@@ -76,6 +76,7 @@ FAQ
   5.8 libcurl.so.3: open failed: No such file or directory
   5.9 How does libcurl resolve host names?
   5.10 How do I prevent libcurl from writing the response to stdout?
+  5.11 How do I make libcurl not receive the whole HTTP response?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -891,6 +892,11 @@ FAQ
   libcurl provides a default built-in write function that writes received data
   to stdout. Set a WRITEFUNCTION to receive the data, or possibly set
   WRITEDATA to a different FILE * handle.
+
+  5.11 How do I make libcurl not receive the whole HTTP response?
+
+  You make the write callback (or progress callback) return an error and
+  libcurl will then abort the transfer.
 
 
 6. License Issues
