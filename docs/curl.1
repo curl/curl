@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "22 November 2000" "Curl 7.5" "Curl Manual"
+.TH curl 1 "4 January 2001" "Curl 7.5.2" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -43,12 +43,17 @@ supported at the moment:
 When used in a ftp upload, this will tell curl to append to the target
 file instead of overwriting it. If the file doesn't exist, it will
 be created.
+
+If this option is used twice, the second one will disable append mode again.
 .IP "-A/--user-agent <agent string>"
 (HTTP)
 Specify the User-Agent string to send to the HTTP server. Some badly done CGIs
 fail if its not set to "Mozilla/4.0".  To encode blanks in the string,
 surround the string with single quote marks.  This can also be set with the
 -H/--header flag of course.
+
+If this option is used more than once, the last one will be the one to be
+used.
 .IP "-b/--cookie <name=data>"
 (HTTP)
 Pass the data to the HTTP server as a cookie. It is supposedly the
@@ -67,10 +72,15 @@ format.
 that the file specified with -b/--cookie is only used as input. No cookies
 will be stored in the file. To store cookies, save the HTTP headers to a file
 using -D/--dump-header!
+
+If this option is used more than once, the last one will be the one to be
+used.
 .IP "-B/--use-ascii"
 Use ASCII transfer when getting an FTP file or LDAP info. For FTP, this can
 also be enforced by using an URL that ends with ";type=A". This option causes
 data sent to stdout to be in text mode for win32 systems.
+
+If this option is used twice, the second one will disable ASCII usage.
 .IP "-c/--continue"
 .B Deprecated. Use '-C -' instead.
 Continue/Resume a previous file transfer. This instructs curl to
@@ -88,6 +98,8 @@ to the destination.
 If used with uploads, the ftp server command SIZE will not be used by
 curl. Upload resume is for FTP only.
 HTTP resume is only possible with HTTP/1.1 or later servers.
+
+If this option is used serveral times, the last one will be used.
 .IP "-d/--data <data>"
 (HTTP) Sends the specified data in a POST request to the HTTP server. Note
 that the data is sent exactly as specified with no extra processing (with all
@@ -107,13 +119,19 @@ specified.
 To post data purely binary, you should instead use the --data-binary option.
 
 -d/--data is the same as --data-ascii.
+
+If this option is used serveral times, the last one will be used.
 .IP "--data-ascii <data>"
 (HTTP) This is an alias for the -d/--data option.
+
+If this option is used serveral times, the last one will be used.
 .IP "--data-binary <data>"
 (HTTP) This posts data in a similar manner as --data-ascii does, although when
 using this option the entire context of the posted data is kept as-is. If you
 want to post a binary file without the strip-newlines feature of the
 --data-ascii option, this is for you.
+
+If this option is used serveral times, the last one will be used.
 .IP "-D/--dump-header <file>"
 (HTTP/FTP)
 Write the HTTP headers to this file. Write the FTP file info to this
@@ -122,6 +140,8 @@ file if -I/--head is used.
 This option is handy to use when you want to store the cookies that a HTTP
 site sends to you. The cookies could then be read in a second curl invoke by
 using the -b/--cookie option!
+
+If this option is used serveral times, the last one will be used.
 .IP "-e/--referer <URL>"
 (HTTP) Sends the "Referer Page" information to the HTTP server. This can also
 be set with the -H/--header flag of course.  When used with
@@ -129,6 +149,8 @@ be set with the -H/--header flag of course.  When used with
 you can append ";auto" to the referer URL to make curl automatically set the
 previous URL when it follows a Location: header. The ";auto" string can be
 used alone, even if you don't set an initial referer.
+
+If this option is used serveral times, the last one will be used.
 .IP "-E/--cert <certificate[:password]>"
 (HTTPS)
 Tells curl to use the specified certificate file when getting a file
@@ -136,9 +158,13 @@ with HTTPS. The certificate must be in PEM format.
 If the optional password isn't specified, it will be queried for on
 the terminal. Note that this certificate is the private key and the private
 certificate concatenated!
+
+If this option is used serveral times, the last one will be used.
 .IP "--cacert <CA certificate>"
 (HTTPS) Tells curl to use the specified certificate file to verify the
 peer. The certificate must be in PEM format.
+
+If this option is used serveral times, the last one will be used.
 .IP "-f/--fail"
 (HTTP)
 Fail silently (no output at all) on server errors. This is mostly done
@@ -147,6 +173,8 @@ attempts. In normal cases when a HTTP server fails to deliver a
 document, it returns a HTML document stating so (which often also
 describes why and more). This flag will prevent curl from
 outputting that and fail silently instead.
+
+If this option is used twice, the second will again disable silent failure.
 .IP "-F/--form <name=content>"
 (HTTP) This lets curl emulate a filled in form in which a user has pressed the
 submit button. This causes curl to POST data using the content-type
@@ -166,6 +194,8 @@ input:
 
 To read the file's content from stdin insted of a file, use - where the file
 name should've been. This goes for both @ and < constructs.
+
+This option can be used multiple times.
 .IP "-h/--help"
 Usage help.
 .IP "-H/--header <header>"
@@ -177,38 +207,54 @@ trickier stuff than curl would normally do. You should not replace internally
 set headers without knowing perfectly well what you're doing. Replacing an
 internal header with one without content on the right side of the colon will
 prevent that header from appearing.
+
+This option can be used multiple times.
 .IP "-i/--include"
 (HTTP)
 Include the HTTP-header in the output. The HTTP-header includes things
 like server-name, date of the document, HTTP-version and more...
+
+If this option is used twice, the second will again disable header include.
 .IP "--interface <name>"
 Perform an operation using a specified interface. You can enter interface
 name, IP address or host name. An example could look like:
 
 .B "curl --interface eth0:1 http://www.netscape.com/"
+
+If this option is used serveral times, the last one will be used.
 .IP "-I/--head"
 (HTTP/FTP)
 Fetch the HTTP-header only! HTTP-servers feature the command HEAD
 which this uses to get nothing but the header of a document. When used
 on a FTP file, curl displays the file size only.
+
+If this option is used twice, the second will again disable header only.
 .IP "--krb4 <level>"
 (FTP) Enable kerberos4 authentication and use. The level must be entered and
 should be one of 'clear', 'safe', 'confidential' or 'private'. Should you use
 a level that is not one of these, 'private' will instead be used.
+
+If this option is used serveral times, the last one will be used.
 .IP "-K/--config <config file>"
-Specify which config file to read curl arguments from. The config
-file is a text file in which command line arguments can be written
-which then will be used as if they were written on the actual command
-line. If the first column of a config line is a '#' character, the
-rest of the line will be treated as a comment.
+Specify which config file to read curl arguments from. The config file is a
+text file in which command line arguments can be written which then will be
+used as if they were written on the actual command line. Options and their
+parameters must be specified on the same config file line. If the parameter is
+to contain white spaces, the parameter must be inclosed within quotes.  If the
+first column of a config line is a '#' character, the rest of the line will be
+treated as a comment.
 
 Specify the filename as '-' to make curl read the file from stdin.
+
+This option can be used multiple times.
 .IP "-l/--list-only"
 (FTP)
 When listing an FTP directory, this switch forces a name-only view.
 Especially useful if you want to machine-parse the contents of an FTP
 directory since the normal directory view doesn't use a standard look
 or format.
+
+If this option is used twice, the second will again disable list only.
 .IP "-L/--location"
 (HTTP/HTTPS) If the server reports that the requested page has a different
 location (indicated with the header line Location:) this flag will let curl
@@ -216,10 +262,14 @@ attempt to reattempt the get on the new place. If used together with -i or -I,
 headers from all requested pages will be shown. If this flag is used when
 making a HTTP POST, curl will automatically switch to GET after the initial
 POST has been done.
+
+If this option is used twice, the second will again disable location following.
 .IP "-m/--max-time <seconds>"
 Maximum time in seconds that you allow the whole operation to take.  This is
 useful for preventing your batch jobs from hanging for hours due to slow
 networks or links going down.  This doesn't work fully in win32 systems.
+
+If this option is used serveral times, the last one will be used.
 .IP "-M/--manual"
 Manual. Display the huge help text.
 .IP "-n/--netrc"
@@ -240,11 +290,15 @@ to allow curl to ftp to the machine host.domain.com with user name
 'myself' and password 'secret' should look similar to:
 
 .B "machine host.domain.com login myself password secret"
+
+If this option is used twice, the second will again disable netrc usage.
 .IP "-N/--no-buffer"
 Disables the buffering of the output stream. In normal work situations, curl
 will use a standard buffered output stream that will have the effect that it
 will output the data in chunks, not necessarily exactly when the data arrives.
 Using this option will disable that buffering.
+
+If this option is used twice, the second will again switch on buffering.
 .IP "-o/--output <file>"
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
 multiple documents, you can use '#' followed by a number in the <file>
@@ -256,15 +310,20 @@ being fetched. Like in:
 or use several variables like:
 
   curl http://{site,host}.host[1-5].com -o "#1_#2"
+
+If this option is used serveral times, the last one will be used.
 .IP "-O/--remote-name"
 Write output to a local file named like the remote file we get. (Only
 the file part of the remote file is used, the path is cut off.)
+
 .IP "-p/--proxytunnel"
 When an HTTP proxy is used, this option will cause non-HTTP protocols to
 attempt to tunnel through the proxy instead of merely using it to do HTTP-like
 operations. The tunnel approach is made with the HTTP proxy CONNECT request
 and requires that the proxy allows direct connect to the remote port number
 curl wants to tunnel through to.
+
+If this option is used twice, the second will again disable proxy tunnel.
 .IP "-P/--ftpport <address>"
 (FTP)
 Reverses the initiator/listener roles when connecting with ftp. This
@@ -286,6 +345,8 @@ i.e "my.host.domain" to specify machine
 .B "-"
 (any single-letter string) to make it pick the machine's default
 .RE
+
+If this option is used serveral times, the last one will be used.
 .IP "-q"
 If used as the first parameter on the command line, the
 .I $HOME/.curlrc
@@ -298,6 +359,8 @@ transfer is taking place. To make commands take place after a successful
 transfer, prefix them with a dash '-'. You may specify any amount of commands
 to be run before and after the transfer. If the server returns failure for one
 of the commands, the entire operation will be aborted.
+
+This option can be used multiple times.
 .IP "-r/--range <range>"
 (HTTP/FTP)
 Retrieve a byte range (i.e a partial document) from a HTTP/1.1 or FTP
@@ -335,11 +398,17 @@ document.
 
 FTP range downloads only support the simple syntax 'start-stop' (optionally
 with one of the numbers omitted). It depends on the non-RFC command SIZE.
+
+If this option is used serveral times, the last one will be used.
 .IP "-s/--silent"
 Silent mode. Don't show progress meter or error messages.  Makes
 Curl mute.
+
+If this option is used twice, the second will again disable mute.
 .IP "-S/--show-error"
 When used with -s it makes curl show error message if it fails.
+
+If this option is used twice, the second will again disable show error.
 .IP "-t/--upload"
 .B Deprecated. Use '-T -' instead.
 Transfer the stdin data to the specified file. Curl will read
@@ -353,21 +422,31 @@ really prove to Curl that there is no file name or curl will
 think that your last directory name is the remote file name to
 use. That will most likely cause the upload operation to fail. If
 this is used on a http(s) server, the PUT command will be used.
+
+If this option is used serveral times, the last one will be used.
 .IP "-u/--user <user:password>"
 Specify user and password to use when fetching. See README.curl for detailed
 examples of how to use this. If no password is specified, curl will
 ask for it interactively.
+
+If this option is used serveral times, the last one will be used.
 .IP "-U/--proxy-user <user:password>"
 Specify user and password to use for Proxy authentication. If no
 password is specified, curl will ask for it interactively.
+
+If this option is used serveral times, the last one will be used.
 .IP "--url <URL>"
 Set the URL to fetch. This option is mostly handy when you wanna specify URL
 in a config file.
+
+If this option is used serveral times, the last one will be used.
 .IP "-v/--verbose"
 Makes the fetching more verbose/talkative. Mostly usable for
 debugging. Lines starting with '>' means data sent by curl, '<'
 means data received by curl that is hidden in normal cases and lines
 starting with '*' means additional info provided by curl.
+
+If this option is used twice, the second will again disable verbose.
 .IP "-V/--version"
 Displays the full version of curl, libcurl and other 3rd party libraries
 linked with the executable.
@@ -433,9 +512,13 @@ The average download speed that curl measured for the complete download.
 .B speed_upload
 The average upload speed that curl measured for the complete upload.
 .RE
+
+If this option is used serveral times, the last one will be used.
 .IP "-x/--proxy <proxyhost[:port]>"
 Use specified proxy. If the port number is not specified, it is assumed at
 port 1080.
+
+If this option is used serveral times, the last one will be used.
 .IP "-X/--request <command>"
 (HTTP)
 Specifies a custom request to use when communicating with the HTTP server.
@@ -445,14 +528,20 @@ HTTP 1.1 specification for details and explanations.
 (FTP)
 Specifies a custom FTP command to use instead of LIST when doing file lists
 with ftp.
+
+If this option is used serveral times, the last one will be used.
 .IP "-y/--speed-time <time>"
 If a download is slower than speed-limit bytes per second during a speed-time
 period, the download gets aborted. If speed-time is used, the default
 speed-limit will be 1 unless set with -y.
+
+If this option is used serveral times, the last one will be used.
 .IP "-Y/--speed-limit <speed>"
 If a download is slower than this given speed, in bytes per second, for
 speed-time seconds it gets aborted. speed-time is set with -Y and is 30 if
 not set.
+
+If this option is used serveral times, the last one will be used.
 .IP "-z/--time-cond <date expression>"
 (HTTP)
 Request to get a file that has been modified later than the given time and
@@ -467,6 +556,8 @@ man pages for date expression details.
 Start the date expression with a dash (-) to make it request for a document
 that is older than the given date/time, default is a document that is newer
 than the specified date/time.
+
+If this option is used serveral times, the last one will be used.
 .IP "-3/--sslv3"
 (HTTPS)
 Forces curl to use SSL version 3 when negotiating with a remote SSL server.
@@ -476,12 +567,18 @@ Forces curl to use SSL version 2 when negotiating with a remote SSL server.
 .IP "-#/--progress-bar"
 Make curl display progress information as a progress bar instead of the
 default statistics.
+
+If this option is used twice, the second will again disable the progress bar.
 .IP "--crlf"
 (FTP) Convert LF to CRLF in upload. Useful for MVS (OS/390).
+
+If this option is used twice, the second will again disable crlf converting.
 .IP "--stderr <file>"
 Redirect all writes to stderr to the specified file instead. If the file name
 is a plain '-', it is instead written to stdout. This option has no point when
 you're using a shell with decent redirecting capabilities.
+
+If this option is used serveral times, the last one will be used.
 .SH FILES
 .I ~/.curlrc
 .RS
