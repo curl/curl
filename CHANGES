@@ -6,6 +6,42 @@
 
                                   Changelog
 
+Daniel (14 June 2004)
+- Multipart formposts uploading files no longer inserts the files themselves
+  into the huge prebuilt chunk. This enables libcurl to formpost files that is
+  larger than the amount of system memory. When the file given is passed on
+  stdin, libcurl still uses the old method of reading the full fill before the
+  upload takes place. This approach was selected in order to not alter the
+  behavior for existing applications, as when using stdin libcurl can't know
+  the size of the upload and chunked transfer-encoding can only be used on
+  HTTP 1.1 servers.
+
+Daniel (13 June 2004)
+- Gisle found out that we did wildcard cert name checks wrong, so that parts
+  of the check wrongly was case sensitive.
+
+Daniel (11 June 2004)
+- Tim Sneddon brought a minor VMS fix to make curl build properly on his VMS
+  machine. He also had some interesting libcurl patches... they might be able
+  to do in a slightly nicer way. Discussions are in progress.
+
+Daniel (10 June 2004)
+- Gisle Vanem brought code cleanupsm better verbose output and better connect
+  timeout handling when attempting to connect to a host that resolves to
+  multiple IP addresses.
+
+- Steven Bazyl and Seshubabu Pasam pointed out a bug on win32 when freeing the
+  path after a file:// transfer.
+
+Daniel (9 June 2004)
+- Alexander Krasnostavsky made 'configure --disable-http' work to build libcurl
+  without HTTP support. I added a new return code for curl_formadd() in case
+  libcurl is built with HTTP disable: CURL_FORMADD_DISABLED.
+
+- Alexander Krasnostavsky pointed out a missing file in the generated
+  curllib.dsp file, and now people building with this should get a libcurl.lib
+  file generated as it used to do before we generated this file.
+
 Daniel (8 June 2004)
 - Marty Kuhrt fixed a minor build problem for VMS.
 

@@ -8,11 +8,14 @@ Curl and libcurl 7.12.1
 
 This release includes the following changes:
 
+ o multipart formposts can upload files larger than system memory
  o the curl tool continues with the next URL even if one transfer fails
  o FTP 3rd party transfer support - seven new setopt() options
 
 This release includes the following bugfixes:
 
+ o win32 file:// transfer free memory bug
+ o configure --disable-http builds a libcurl without HTTP support
  o CURLOPT_FILETIME had wrong type, it expects a long argument
  o builds fine with Borland on Windows again
  o the msvc curllib.dsp now builds the libcurl.lib file again
@@ -31,6 +34,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Gisle Vanem, Vincent Bronner, Alexander Krasnostavsky, Chris Gaukroger,
- Günter Knauf, Marty Kuhrt, Kjetil Jacobsen
+ Günter Knauf, Marty Kuhrt, Kjetil Jacobsen, Steven Bazyl, Seshubabu Pasam
 
         Thanks! (and sorry if I forgot to mention someone)
