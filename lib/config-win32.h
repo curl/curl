@@ -107,7 +107,7 @@
 #define HAVE_STRSTR 1
 
 /* Define if you have the strtoll function.  */
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(__WATCOMC__)
 #define HAVE_STRTOLL 1
 #endif
 
