@@ -559,7 +559,7 @@ sub singletest {
         }
 
         $why = "lacks $f";
-        $serverproblem = 5; # set it here
+        $serverproblem = 15; # set it here
         last;
     }
 
@@ -570,7 +570,6 @@ sub singletest {
     if($serverproblem) {
         # there's a problem with the server, don't run
         # this particular server, but count it as "skipped"
-        my $why;
         if($serverproblem == 2) {
             $why = "server problems";
         }
@@ -579,6 +578,12 @@ sub singletest {
         }
         elsif($serverproblem == 99) {
             $why = "bad test";
+        }
+        elsif($serverproblem == 15) {
+            # set above, a lacking prereq
+        }
+        elsif($serverproblem == 1) {
+            $why = "no SSL-capable server";
         }
         else {
             $why = "unfulfilled requirements";
@@ -963,7 +968,7 @@ sub singletest {
 # 100 if this is not a test case
 # 99  if this test case has no servers specified
 # 2   if one of the required servers couldn't be started
-# 1   if this test is skipped due to unfulfilled requirements
+# 1   if this test is skipped due to unfulfilled SSL/stunnel-requirements
 
 sub serverfortest {
     my ($testnum)=@_;
@@ -1232,6 +1237,8 @@ for(keys %run) {
     stopserver($run{$_}); # the pid file is in the hash table
 }
 
+my $all = $total + $skipped;
+
 if($total) {
     printf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
            $ok/$total*100);
@@ -1243,14 +1250,18 @@ if($total) {
 else {
     print "TESTFAIL: No tests were performed!\n";
 }
+
+if($all) {
+    print "TESTDONE: $all tests were considered.\n";
+}
+
 if($skipped) {
     my $s=0;
     print "TESTINFO: $skipped tests were skipped due to these restraints:\n";
 
     for(keys %skipped) {
-        print ", " if($s);
         my $r = $_;
-        printf "TESTINFO: \"%s\" happened %d times (", $r, $skipped{$_};
+        printf "TESTINFO: \"%s\" %d times (", $r, $skipped{$_};
 
         # now show all test case numbers that had this reason for being
         # skipped
@@ -1264,7 +1275,6 @@ if($skipped) {
             }
         }
         print ")\n";
-        $s++;
     }
 }
 if($total && ($ok != $total)) {
