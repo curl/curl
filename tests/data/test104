@@ -29,5 +29,6 @@ CWD path
 MDTM 103
 TYPE I
 SIZE 103
+REST 0
 </protocol>
 </verify>

@@ -30,6 +30,7 @@ CWD blalbla
 MDTM 141
 TYPE I
 SIZE 141
+REST 0
 </protocol>
 <stdout>
 Last-Modified: Wed, 09 Apr 2003 10:26:59 GMT
