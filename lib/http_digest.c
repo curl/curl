@@ -36,6 +36,7 @@
 
 #include "md5.h"
 #include "http_digest.h"
+#include "url.h" /* for Curl_safefree() */
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
