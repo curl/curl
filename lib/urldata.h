@@ -338,16 +338,16 @@ struct hostname {
  */
 
 struct Curl_transfer_keeper {
-  curl_off_t bytecount;                /* total number of bytes read */
-  int writebytecount;           /* number of bytes written */
+  curl_off_t bytecount;         /* total number of bytes read */
+  curl_off_t writebytecount;    /* number of bytes written */
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
   bool header;	                /* incoming data has HTTP header */
   enum {
-    HEADER_NORMAL,      /* no bad header at all */
-    HEADER_PARTHEADER,  /* part of the chunk is a bad header, the rest is
-                           normal data */
-    HEADER_ALLBAD       /* all was believed to be header */
+    HEADER_NORMAL,              /* no bad header at all */
+    HEADER_PARTHEADER,          /* part of the chunk is a bad header, the rest
+                                   is normal data */
+    HEADER_ALLBAD               /* all was believed to be header */
   } badheader;		        /* the header was deemed bad and will be
                                    written as body */
   int headerline;		/* counts header lines to better track the
@@ -359,7 +359,7 @@ struct Curl_transfer_keeper {
   char *end_ptr;		/* within buf */
   char *p;			/* within headerbuff */
   bool content_range;      	/* set TRUE if Content-Range: was found */
-  curl_off_t offset;	                /* possible resume offset read from the
+  curl_off_t offset;	        /* possible resume offset read from the
                                    Content-Range: header */
   int httpcode;		        /* error code from the 'HTTP/1.? XXX' line */
   int httpversion;		/* the HTTP version*10 */
@@ -383,7 +383,6 @@ struct Curl_transfer_keeper {
   z_stream z;			/* State structure for zlib. */
 #endif
 
-  /* for the low speed checks: */
   time_t timeofdoc;
   long bodywrites;
 
