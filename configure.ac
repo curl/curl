@@ -914,6 +914,7 @@ AC_CONFIG_FILES([Makefile \
 	   packages/Linux/RPM/curl.spec \
 	   packages/Linux/RPM/curl-ssl.spec \
            packages/Solaris/Makefile \
+           packages/DOS/Makefile \
            packages/EPM/curl.list \
            packages/EPM/Makefile \
            curl-config
