@@ -411,6 +411,22 @@ SPEED LIMIT
 
         curl -m 1800 -Y 3000 -y 60 www.far-away-site.com
 
+  Forcing curl not to transfer data faster than a given rate is also possible,
+  which might be useful if you're using a limited bandwidth connection and you
+  don't want your transfer to use all of it.
+
+  Make curl transfer data no faster than 10 kilobytes per second:
+
+        curl --limit-rate 10K www.far-away-site.com
+
+    or
+
+        curl --limit-rate 10240 www.far-away-site.com
+
+  Or prevent curl from uploading data faster than 1 megabyte per second:
+
+        curl -T upload --limit-rate 1M ftp://uploadshereplease.com
+
 CONFIG FILE
 
   Curl automatically tries to read the .curlrc file (or _curlrc file on win32
@@ -567,8 +583,8 @@ HTTPS
 
   Many older SSL-servers have problems with SSLv3 or TLS, that newer versions
   of OpenSSL etc is using, therefore it is sometimes useful to specify what
-  SSL-version curl should use. Use -3 or -2 to specify that exact SSL version
-  to use:
+  SSL-version curl should use. Use -3, -2 or -1 to specify that exact SSL
+  version to use (for SSLv3, SSLv2 or TLSv1 respectively):
 
         curl -2 https://secure.site.com/
 
