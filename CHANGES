@@ -6,6 +6,12 @@
 
                                History of Changes
 
+Daniel (3 October 2001)
+- Georg Huettenegger once again made an effort beyond the call of duty and not
+  only improved the curl_formadd() function, but also took care of adjusting
+  the curl command line client to use this new function instead of the
+  obsoleted curl_formparse.
+
 Daniel (2 October 2001)
 - Major fix in how libcurl does TCP connects. It now does non-blocking
   connects to enable good timeouts without signals, and it now tries all IP
