@@ -179,6 +179,9 @@ CURLMcode curl_multi_remove_handle(CURLM *multi_handle,
     /* If the 'state' is not INIT or COMPLETED, we might need to do something
        nice to put the easy_handle in a good known state when this returns. */
 
+    /* clear out the usage of the shared DNS cache */
+    easy->easy_handle->hostcache = NULL;
+    
     /* make the previous node point to our next */
     if(easy->prev)
       easy->prev->next = easy->next;
