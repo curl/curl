@@ -209,6 +209,29 @@ AC_HELP_STRING([--disable-telnet],[Disable TELNET support]),
 )
 
 dnl **********************************************************************
+dnl Check for built-in manual
+dnl **********************************************************************
+
+AC_MSG_CHECKING([whether to provide built-in manual])
+AC_ARG_ENABLE(manual,
+AC_HELP_STRING([--enable-manual],[Enable built-in manual])
+AC_HELP_STRING([--disable-manual],[Disable built-in manual]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       USE_MANUAL="1"
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+       USE_MANUAL="1"
+)
+dnl The actual use of the USE_MANUAL variable is done much later in this
+dnl script to allow other actions to disable it as well.
+
+
+dnl **********************************************************************
 dnl Checks for libraries.
 dnl **********************************************************************
 
@@ -1089,6 +1112,18 @@ fi
 AC_SUBST(MANOPT)
 
 AC_PROG_YACC
+
+dnl *************************************************************************
+dnl If the manual variable still is set, then we go with providing a built-in
+dnl manual
+
+if test "$USE_MANUAL" = "1"; then
+  AC_DEFINE(USE_MANUAL, 1, [If you want to build curl with the built-in manual])
+fi
+
+dnl set variable for use in automakefile(s)
+AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
+
 
 dnl AC_PATH_PROG( RANLIB, ranlib, /usr/bin/ranlib, 
 dnl   $PATH:/usr/bin/:/usr/local/bin )
