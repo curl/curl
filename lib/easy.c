@@ -201,7 +201,8 @@ CURLcode curl_global_init(long flags)
   Curl_ccalloc = (curl_calloc_callback)calloc;
 
   if (flags & CURL_GLOBAL_SSL)
-    Curl_SSL_init();
+    if (!Curl_SSL_init())
+      return CURLE_FAILED_INIT;
 
   if (flags & CURL_GLOBAL_WIN32)
     if (win32_init() != CURLE_OK)

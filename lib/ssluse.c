@@ -169,7 +169,7 @@ int random_the_seed(struct SessionHandle *data)
     /* let the option override the define */
     nread += RAND_load_file((data->set.ssl.random_file?
                              data->set.ssl.random_file:RANDOM_FILE),
-                            16384);
+                            -1); /* -1 to read the entire file */
     if(seed_enough(nread))
       return nread;
   }
@@ -231,7 +231,7 @@ int random_the_seed(struct SessionHandle *data)
   RAND_file_name(buf, BUFSIZE);
   if(buf[0]) {
     /* we got a file name to try */
-    nread += RAND_load_file(buf, 16384);
+    nread += RAND_load_file(buf, -1);
     if(seed_enough(nread))
       return nread;
   }
@@ -450,6 +450,11 @@ int cert_stuff(struct connectdata *conn,
     }
 
     ssl=SSL_new(ctx);
+    if (NULL == ssl) {
+      failf(data,"unable to create an SSL structure\n");
+      return 0;
+    }
+
     x509=SSL_get_certificate(ssl);
 
     /* This version was provided by Evan Jordan and is supposed to not
@@ -515,15 +520,18 @@ static int init_ssl=0;
 static bool ssl_seeded = FALSE;
 #endif /* USE_SSLEAY */
 
-/* Global init */
-void Curl_SSL_init(void)
+/**
+ * Global SSL init
+ *
+ * @retval 0 error initializing SSL
+ * @retval 1 SSL initialized successfully
+ */
+int Curl_SSL_init(void)
 {
 #ifdef USE_SSLEAY
   /* make sure this is only done once */
   if(0 != init_ssl)
-    return;
-
-  init_ssl++; /* never again */
+    return 1;
 
 #ifdef HAVE_ENGINE_LOAD_BUILTIN_ENGINES
   ENGINE_load_builtin_engines();
@@ -533,10 +541,15 @@ void Curl_SSL_init(void)
   SSL_load_error_strings();
 
   /* Setup all the global SSL stuff */
-  SSLeay_add_ssl_algorithms();
+  if (!SSLeay_add_ssl_algorithms())
+    return 0;
 #else
   /* SSL disabled, do nothing */
 #endif
+
+  init_ssl++; /* never again */
+
+  return 1;
 }
 
 /* Global cleanup */
@@ -784,6 +797,7 @@ int Curl_SSL_Close_All(struct SessionHandle *data)
 
     /* free the cache data */
     free(data->state.session);
+    data->state.session = NULL;
   }
 #ifdef HAVE_OPENSSL_ENGINE_H
   if(data->state.engine) {
@@ -798,7 +812,7 @@ int Curl_SSL_Close_All(struct SessionHandle *data)
 /*
  * Extract the session id and store it in the session cache.
  */
-static int Store_SSL_Session(struct connectdata *conn,
+static CURLcode Store_SSL_Session(struct connectdata *conn,
                              struct ssl_connect_data *ssl)
 {
   SSL_SESSION *ssl_sessionid;
@@ -810,7 +824,7 @@ static int Store_SSL_Session(struct connectdata *conn,
 
   clone_host = strdup(conn->host.name);
   if(!clone_host)
-    return -1; /* bail out */
+    return CURLE_OUT_OF_MEMORY; /* bail out */
 
   /* ask OpenSSL, say please */
 
@@ -857,9 +871,10 @@ static int Store_SSL_Session(struct connectdata *conn,
   store->name = clone_host;               /* clone host name */
   store->remote_port = conn->remote_port; /* port number */
 
-  Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config);
+  if (!Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config))
+    return CURLE_OUT_OF_MEMORY;
 
-  return 0;
+  return CURLE_OK;
 }
 
 static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
@@ -1313,9 +1328,16 @@ Curl_SSLConnect(struct connectdata *conn,
 
 #ifdef SSL_CTRL_SET_MSG_CALLBACK
   if (data->set.fdebug) {
-    SSL_CTX_callback_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK,
-                          ssl_tls_trace);
-    SSL_CTX_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK_ARG, 0, conn);
+    if (!SSL_CTX_callback_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK,
+                               ssl_tls_trace)) {
+      failf(data, "SSL: couldn't set callback!");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
+
+    if (!SSL_CTX_ctrl(connssl->ctx, SSL_CTRL_SET_MSG_CALLBACK_ARG, 0, conn)) {
+      failf(data, "SSL: couldn't set callback argument!");
+      return CURLE_SSL_CONNECT_ERROR;
+    }
   }
 #endif
 
@@ -1409,6 +1431,10 @@ Curl_SSLConnect(struct connectdata *conn,
 
   /* Lets make an SSL structure */
   connssl->handle = SSL_new(connssl->ctx);
+  if (!connssl->handle) {
+    failf(data, "SSL: couldn't create a context (handle)!");
+    return CURLE_OUT_OF_MEMORY;
+  }
   SSL_set_connect_state(connssl->handle);
 
   connssl->server_cert = 0x0;
@@ -1418,14 +1444,22 @@ Curl_SSLConnect(struct connectdata *conn,
        can/should use here! */
     if(!Get_SSL_Session(conn, &ssl_sessionid)) {
       /* we got a session id, use it! */
-      SSL_set_session(connssl->handle, ssl_sessionid);
+        if (!SSL_set_session(connssl->handle, ssl_sessionid)) {
+          failf(data, "SSL: SSL_set_session failed: %s",
+                ERR_error_string(ERR_get_error(),NULL));
+          return CURLE_SSL_CONNECT_ERROR;
+        }
       /* Informational message */
       infof (data, "SSL re-using session ID\n");
     }
   }
 
   /* pass the raw socket into the SSL layers */
-  SSL_set_fd(connssl->handle, sockfd);
+  if (!SSL_set_fd(connssl->handle, sockfd)) {
+     failf(data, "SSL: SSL_set_fd failed: %s",
+           ERR_error_string(ERR_get_error(),NULL));
+     return CURLE_SSL_CONNECT_ERROR;
+  }
 
   while(1) {
     int writefd;
@@ -1563,7 +1597,11 @@ Curl_SSLConnect(struct connectdata *conn,
   if(!ssl_sessionid) {
     /* Since this is not a cached session ID, then we want to stach this one
        in the cache! */
-    Store_SSL_Session(conn, connssl);
+    retcode = Store_SSL_Session(conn, connssl);
+    if(retcode) {
+      failf(data,"failure to store ssl session");
+      return retcode;
+    }
   }
 
 
@@ -1585,6 +1623,7 @@ Curl_SSLConnect(struct connectdata *conn,
   if(!str) {
     failf(data, "SSL: couldn't get X509-subject!");
     X509_free(connssl->server_cert);
+    connssl->server_cert = NULL;
     return CURLE_SSL_CONNECT_ERROR;
   }
   infof(data, "\t subject: %s\n", str);
@@ -1600,6 +1639,7 @@ Curl_SSLConnect(struct connectdata *conn,
     retcode = verifyhost(conn, connssl->server_cert);
     if(retcode) {
       X509_free(connssl->server_cert);
+      connssl->server_cert = NULL;
       return retcode;
     }
   }
@@ -1637,6 +1677,7 @@ Curl_SSLConnect(struct connectdata *conn,
   }
 
   X509_free(connssl->server_cert);
+  connssl->server_cert = NULL;
 #else /* USE_SSLEAY */
   (void)conn;
   (void)sockindex;

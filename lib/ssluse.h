@@ -25,7 +25,7 @@
 #include "urldata.h"
 CURLcode Curl_SSLConnect(struct connectdata *conn, int sockindex);
 
-void Curl_SSL_init(void);    /* Global SSL init */
+int Curl_SSL_init(void);    /* Global SSL init */
 void Curl_SSL_cleanup(void); /* Global SSL cleanup */
 
 /* init the SSL session ID cache */
