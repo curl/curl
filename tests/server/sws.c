@@ -164,7 +164,6 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\n"
 #ifdef SIGPIPE
 static volatile int sigpipe;
 #endif
-static FILE *logfp;
 
 static void logmsg(const char *msg, ...)
 {
@@ -172,16 +171,21 @@ static void logmsg(const char *msg, ...)
   va_list ap;
   struct tm *curr_time = localtime(&t);
   char buffer[256]; /* possible overflow if you pass in a huge string */
+  FILE *logfp;
    
   va_start(ap, msg);
   vsprintf(buffer, msg, ap);
   va_end(ap);
 
-  fprintf(logfp, "%02d:%02d:%02d (%d) %s\n",
+  logfp = fopen(DEFAULT_LOGFILE, "a");
+
+  fprintf(logfp?logfp:stderr, /* write to stderr if the logfile doesn't open */
+          "%02d:%02d:%02d (%d) %s\n",
           curr_time->tm_hour,
           curr_time->tm_min,
           curr_time->tm_sec, (int)getpid(), buffer);
-  fflush(logfp);
+  if(logfp)
+    fclose(logfp);
 }
 
 
@@ -643,8 +647,7 @@ static void win32_init(void)
     
   if (err != 0) {
     perror("Winsock init failed");
-    fprintf(logfp, "Error initializing winsock -- aborting\n");
-    fclose(logfp);
+    logmsg("Error initializing winsock -- aborting\n");
     exit(1);
   }
     
@@ -653,8 +656,7 @@ static void win32_init(void)
  
     WSACleanup(); 
     perror("Winsock init failed");
-    fprintf(logfp, "No suitable winsock.dll found -- aborting\n");
-    fclose(logfp);
+    logmsg("No suitable winsock.dll found -- aborting\n");
     exit(1);
   }
 }
@@ -669,7 +671,6 @@ int main(int argc, char *argv[])
   struct sockaddr_in me;
   int sock, msgsock, flag;
   unsigned short port = DEFAULT_PORT;
-  const char *logfile = DEFAULT_LOGFILE;
   FILE *pidfile;
   struct httprequest req;
   
@@ -679,12 +680,6 @@ int main(int argc, char *argv[])
     if(argc>2) {
       path = argv[2];
     }
-  }
-
-  logfp = fopen(logfile, "a");
-  if (!logfp) {
-    perror(logfile);
-    exit(1);
   }
   
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
@@ -703,8 +698,7 @@ int main(int argc, char *argv[])
   sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
     perror("opening stream socket");
-    fprintf(logfp, "Error opening socket -- aborting\n");
-    fclose(logfp);
+    logmsg("Error opening socket -- aborting\n");
     exit(1);
   }
 
@@ -720,8 +714,7 @@ int main(int argc, char *argv[])
   me.sin_port = htons(port);
   if (bind(sock, (struct sockaddr *) &me, sizeof me) < 0) {
     perror("binding stream socket");
-    fprintf(logfp, "Error binding socket -- aborting\n");
-    fclose(logfp);
+    logmsg("Error binding socket -- aborting\n");
     exit(1);
   }
 
@@ -782,7 +775,6 @@ int main(int argc, char *argv[])
   }
   
   sclose(sock);
-  fclose(logfp);
   
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
   win32_cleanup();
