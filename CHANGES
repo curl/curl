@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (16 January 2004)
+- Gisle Vanem fixed a few issues where compilers warned about variables
+  possibly being used unassigned.
+
+- Minor Interix build problem fixed.
+
 Daniel (15 January 2004)
 - Peter Sylvester pointed out some necessary escaping needed in the
   acinclude.m4 file when automake 1.8 or later is used.
