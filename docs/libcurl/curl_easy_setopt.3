@@ -283,6 +283,10 @@ libcurl caches this info for 60 seconds.
 Pass a long. If the value is non-zero, it tells curl to use a global DNS cache
 that will survive between easy handle creations and deletions. This is not
 thread-safe and this will use a global varible.
+
+\fBWARNING:\fP this option is considered obsolete. Stop using it. Switch over
+to using the share interface instead! See \fICURLOPT_SHARE\fP and
+\fIcurl_share_init(3)\fP.
 .IP CURLOPT_BUFFERSIZE
 Pass a long specifying your prefered size for the receive buffer in libcurl.
 The main point of this would be that the write callback gets called more often
