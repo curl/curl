@@ -38,4 +38,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,
                           );
 
 int Curl_ourerrno(void);
+
+#define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
+
 #endif

@@ -1269,7 +1269,7 @@ Curl_SSLConnect(struct connectdata *conn,
     }
     else
       /* no particular time-out has been set */
-      timeout_ms=300000; /* milliseconds, default to five minutes */
+      timeout_ms= DEFAULT_CONNECT_TIMEOUT;
 
 
     FD_ZERO(&writefd);

@@ -101,8 +101,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
-
 static bool verifyconnect(curl_socket_t sockfd, int *error);
 
 static curl_socket_t
