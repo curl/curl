@@ -6,6 +6,32 @@
 
                                   Changelog
 
+Daniel (1 August)
+- David Byron provided a patch to make 7.10.6 build correctly with the
+  compressed hugehelp.c source file.
+
+Version 7.10.7-pre1 (31 July 2003)
+
+Daniel (30 July)
+- Jörg Müller-Tolk updated the VC makefile.
+
+- Daniel Noguerol made the ftp code output "Accept-Ranges: bytes" in similar
+  style like other faked HTTP headers when NOBODY and HEADER are used. I
+  updated two corresponding test cases too.
+
+- Marty Kuhrt pointed out a compilation problem on VMS due to my having
+  changed a type from long to time_t, and I'm now changing it back to work
+  more portably...
+
+  He also indicated that distributing the src/hugehelp.c in a compressed state
+  like I acccidentally did may not be the smartest move... I've now fixed the
+  distribute procudere to automaticly generate an uncompressed version when I
+  make release archives.
+
+Daniel (29 July)
+- Gisle Vanem brought changes to the mkhelp script for the generation of the
+  compressed help text on some platforms.
+
 Version 7.10.6 (28 July 2003)
 
 Daniel (28 July)
