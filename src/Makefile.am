@@ -1,7 +1,25 @@
+#############################################################################
+#                                  _   _ ____  _     
+#  Project                     ___| | | |  _ \| |    
+#                             / __| | | | |_) | |    
+#                            | (__| |_| |  _ <| |___ 
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# In order to be useful for every potential user, curl and libcurl are
+# dual-licensed under the MPL and the MIT/X-derivate licenses.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the MPL or the MIT/X-derivate
+# licenses. You may pick one of these licenses.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
 #
 # $Id$
-#
-
+#############################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
 # we use srcdir/include for the static global include files
@@ -10,17 +28,6 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 INCLUDES = -I$(top_srcdir)/include -I$(top_builddir)/src -I$(top_srcdir)/src
 
 bin_PROGRAMS = curl #memtest
-
-if HAVE_LIBZ
-# libz available, attempt to compress the help data
-MKHELPOPT=-c
-else
-# no libz, don't try to compress
-MKHELPOPT=
-endif
-
-#memtest_SOURCES = memtest.c
-#memtest_LDADD = $(top_srcdir)/lib/libcurl.la
 
 curl_SOURCES = main.c hugehelp.c urlglob.c writeout.c setup.h \
 	config-win32.h config-mac.h config-vms.h config-riscos.h \
@@ -45,12 +52,18 @@ MANPAGE=$(top_srcdir)/docs/curl.1
 README=$(top_srcdir)/docs/MANUAL
 MKHELP=$(top_srcdir)/src/mkhelp.pl
 
-# This generates the hugehelp.c file
+if HAVE_LIBZ
+# This generates the hugehelp.c file in both uncompressed and compressed formats
 hugehelp.c: $(README) $(MANPAGE)  mkhelp.pl
-	rm -f hugehelp.c
-	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) $(MKHELPOPT) $(README) > hugehelp.c
+	echo '#include "config.h"' > hugehelp.c
+	echo '#ifndef HAVE_LIBZ' >> hugehelp.c
+	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) $(README) >> hugehelp.c
+	echo '#else' >> hugehelp.c
+	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) -c $(README) >> hugehelp.c
+	echo '#endif /* HAVE_LIBZ */' >> hugehelp.c
+else
+# This generates the hugehelp.c file uncompressed only
+hugehelp.c: $(README) $(MANPAGE)  mkhelp.pl
+	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) $(README) > hugehelp.c
+endif
 
-# for distribution, generate an uncompressed help file!
-dist-hook:
-	chmod 0644 $(distdir)/hugehelp.c
-	$(NROFF) -man $(MANPAGE) | $(PERL) $(MKHELP) $(README) > $(distdir)/hugehelp.c
