@@ -90,17 +90,26 @@ if test -z "$lt_pversion"; then
   echo "            You need libtool version $LIBTOOL_WANTED_VERSION or newer installed"
   exit 1
 fi
-lt_version=`echo $lt_pversion` #|sed -e 's/\([a-z]*\)$/.\1/'`
+lt_version=`echo $lt_pversion|sed -e 's/\([a-z]*\)$//'`
 IFS=.; set $lt_version; IFS=' '
 lt_status="good"
-if test "$1" = "$LIBTOOL_WANTED_MAJOR"; then
-   if test "$2" -lt "$LIBTOOL_WANTED_MINOR"; then
+
+major=$1
+minor=$2
+patch=$3
+
+if test "$major" = "$LIBTOOL_WANTED_MAJOR"; then
+   if test "$minor" -lt "$LIBTOOL_WANTED_MINOR"; then
       lt_status="bad"
-   elif test ! -z "$LIBTOOL_WANTED_PATCH"; then
-       if test -n "$3"; then
-          if test "$3" -lt "$LIBTOOL_WANTED_PATCH"; then
+   elif test -n "$LIBTOOL_WANTED_PATCH"; then
+       if test "$minor" -gt "$LIBTOOL_WANTED_MINOR"; then
+         lt_status="good"
+       elif test -n "$patch"; then
+          if test "$patch" -lt "$LIBTOOL_WANTED_PATCH"; then
              lt_status="bad"
           fi
+       else
+          lt_status="bad"
        fi
    fi
 fi
