@@ -19,10 +19,9 @@ endif
 # Edit the vars below to change NLM target settings.
 TARGETS = adig.nlm ahost.nlm
 LTARGET = libcares.lib
-TARGET = test
-VERSION	= $(LIBCURL_VERSION)
+VERSION	= $(LIBCARES_VERSION)
 COPYR	= Copyright (c) 1996 - 2004, Daniel Stenberg, <daniel@haxx.se>
-DESCR	= cURL $(subst .def,,$(notdir $@)) $(LIBCURL_VERSION_STR) - http://curl.haxx.se
+DESCR	= cURL $(subst .def,,$(notdir $@)) $(LIBCARES_VERSION_STR) - http://curl.haxx.se
 MTSAFE	= YES
 STACK	= 64000
 SCREEN	= none
@@ -70,7 +69,6 @@ CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
 
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
-#LDFLAGS	= -nostdlib $(PRELUDE) $(OBJS) -o $(OBJDIR)/$(TARGET).nlm -commandfile
 LDFLAGS	= -nostdlib $(PRELUDE) $(OBJS) $(<:.def=.o) -o $@ -commandfile
 AR	= mwldnlm
 ARFLAGS	= -type library -w nocmdline $(OBJDIR)/*.o -o
@@ -100,23 +98,18 @@ else
 endif
 endif
 
-LDLIBS	=
-
 NDK_ROOT = $(NDKBASE)/ndk
 SDK_CLIB = $(NDK_ROOT)/nwsdk
 SDK_LIBC = $(NDK_ROOT)/libc
-SDK_LDAP = $(NDK_ROOT)/cldapsdk/netware
 
 ifeq ($(LIBARCH),LIBC)
 	INCLUDES += -I$(SDK_LIBC)/include -I$(SDK_LIBC)/include/nks
 	INCLUDES += -I$(SDK_LIBC)/include/winsock
-	# INCLUDES += -I$(SDK_LDAP)/libc/inc
 	CFLAGS += -D_POSIX_SOURCE
 #	CFLAGS += -D__ANSIC__
 else
 	INCLUDES += -I$(SDK_CLIB)/include/nlm -I$(SDK_CLIB)/include
 	# INCLUDES += -I$(SDK_CLIB)/include/nlm/obsolete
-	# INCLUDES += -I$(SDK_LDAP)/clib/inc
 	CFLAGS += -DNETDB_USE_INTERNET
 endif
 CFLAGS	+= -I. $(INCLUDES)
@@ -127,26 +120,19 @@ endif
 ifeq ($(MTSAFE),NO)
 	XDCOPT = -u
 endif
-ifdef XDCOPT
-	XDCDATA = $(OBJDIR)/$(TARGET).xdc
-endif
 
 ifeq ($(findstring linux,$(OSTYPE)),linux)
 DL	= '
 #-include $(NDKBASE)/nlmconv/ncpfs.inc
 endif
 
-.SUFFIXES:
-.SUFFIXES: .c .o .nlm
-
 OBJS	:= $(patsubst %.c,$(OBJDIR)/%.o,$(wildcard ares_*.c))
 
-all: prebuild $(LTARGET) $(TARGETS)
+.PHONY: lib nlm prebuild dist install clean
 
 lib: prebuild $(LTARGET)
 
 nlm: prebuild $(TARGETS) 
-#nlm: prebuild $(patsubst %,%.nlm,$(TARGETS)) 
 
 prebuild: $(OBJDIR) $(OBJDIR)/version.inc config.h arpa/nameser.h
 
@@ -171,11 +157,10 @@ clean:
 	@-$(RM) $@
 	@$(AR) $(ARFLAGS) $@ $^
 
-#$(TARGET).nlm: $(OBJNLM) $(OBJDIR)/$(TARGET).def $(XDCDATA)
 %.nlm: $(OBJDIR)/%.def $(OBJDIR)/%.o $(OBJDIR)/%.xdc $(OBJS)
 	@echo Linking $@
 	@-$(RM) $@
-	$(LD) $(LDFLAGS) $<
+	@$(LD) $(LDFLAGS) $<
 
 $(INSTDIR):
 	@mkdir $(INSTDIR)
@@ -187,7 +172,7 @@ $(OBJDIR)/%.o: %.c
 #	@echo Compiling $<
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(OBJDIR)/version.inc: ../include/curl/curlver.h $(OBJDIR)
+$(OBJDIR)/version.inc: ares_version.h $(OBJDIR)
 	@echo Creating $@
 	@awk -f ../packages/NetWare/get_ver.awk $< > $@
 
@@ -220,7 +205,7 @@ ifeq ($(DB),DEBUG)
 endif
 	@echo $(DL)threadname "$^"$(DL) >> $@
 ifdef XDCOPT
-	@echo $(DL)xdcdata $(<:.def=.xdc)$(DL) >> $@
+	@echo $(DL)xdcdata $(@:.def=.xdc)$(DL) >> $@
 endif
 ifeq ($(LDRING),0)
 	@echo $(DL)flag_on 16$(DL) >> $@
@@ -235,9 +220,6 @@ ifeq ($(LIBARCH),CLIB)
 	@echo $(DL)import @$(SDK_CLIB)/imports/threads.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_CLIB)/imports/nlmlib.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_CLIB)/imports/socklib.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapsdk.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapssl.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/clib/imports/ldapx.imp$(DL) >> $@
 	@echo $(DL)module clib$(DL) >> $@
 else
 	@echo $(DL)flag_on 64$(DL) >> $@
@@ -247,9 +229,6 @@ else
 	@echo $(DL)check _LibCCheckUnload$(DL) >> $@
 	@echo $(DL)import @$(SDK_LIBC)/imports/libc.imp$(DL) >> $@
 	@echo $(DL)import @$(SDK_LIBC)/imports/netware.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapsdk.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapssl.imp$(DL) >> $@
-#	@echo $(DL)import @$(SDK_LDAP)/libc/imports/lldapx.imp$(DL) >> $@
 	@echo $(DL)module libc$(DL) >> $@
 endif
 ifdef MODULES
@@ -264,7 +243,6 @@ endif
 ifeq ($(LD),nlmconv)
 	@echo $(DL)input $(OBJS)$(DL) >> $@
 	@echo $(DL)input $(PRELUDE)$(DL) >> $@
-#	@echo $(DL)output $(patsubst %.def,%.nlm,$(notdir $@))$(DL) >> $@
 	@echo $(DL)output $(notdir $(@:.def=.nlm))$(DL) >> $@
 endif
 
