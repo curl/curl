@@ -478,7 +478,8 @@ AC_CHECK_HEADERS( \
         time.h \
         io.h \
         pwd.h \
-        utime.h
+        utime.h \
+        sys/utime.h
 )
 
 dnl Check for libz header
