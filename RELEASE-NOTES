@@ -3,23 +3,25 @@ Curl and libcurl 7.12.1
  Public curl release number:               82
  Releases counted from the very beginning: 109
  Available command line options:           96
- Available curl_easy_setopt() options:     113
+ Available curl_easy_setopt() options:     120
  Number of public functions in libcurl:    36
 
 This release includes the following changes:
 
- o 
+ o FTP 3rd party transfer support - seven new setopt() options
 
 This release includes the following bugfixes:
 
- o 
+ o HTTP Digest authentication with proxies use correct user name + password
+ o now builds fine with lcc-win32
 
 Other curl-related news since the previous public release:
 
- o 
+ o pycurl 7.12.0 http://pycyrl.sf.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+ Gisle Vanem, Vincent Bronner
 
         Thanks! (and sorry if I forgot to mention someone)

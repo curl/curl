@@ -6,6 +6,40 @@
 
                                   Changelog
 
+Daniel (3 June 2004)
+- Chris Gaukroger pointed out that 'make test' attempts to run the tests even
+  if curl is built cross-compiled. I've now made it output a short message
+  instead, saying it isn't possible to do.
+  
+- Alexander Krasnostavsky brought FTP 3rd party transfer support to libcurl.
+  You can now use libcurl to transfer files between two remote hosts using
+  FTP. There are a bunch of new options to control this with:
+   CURLOPT_SOURCE_HOST
+   CURLOPT_SOURCE_USERPWD
+   CURLOPT_SOURCE_PATH
+   CURLOPT_SOURCE_PORT
+   CURLOPT_PASV_HOST
+   CURLOPT_SOURCE_PREQUOTE
+   CURLOPT_SOURCE_POSTQUOTE
+
+  (They still remain to be documented properly in the curl_easy_setopt man
+  page.)
+
+  When using this, the ordinary CURLOPT_URL specifies the target URL, and you
+  specify the source data with these additional options. ftp3rdparty.c is a
+  new example source code showing how to use this.
+
+- Vincent Bronner fixed the HTTP Digest code to use the proxy user name and
+  password when doing proxy authentication, it previously always used the host
+  user name and password!
+
+Daniel (2 June 2004)
+- CURLOPT_UPLOAD and CURLOPT_PUT now do the exact same thing internally, which
+  fixes some old confusions on when which of these should be used and what the
+  differences are.
+
+- Applied Gisle's fixes to make curl build fine with lcc-win32
+
 Version 7.12.0 (2 June 2004)
 
 Daniel (1 June 2004)
