@@ -132,7 +132,7 @@ UPLOADING
 
   Upload all data on stdin to a specified ftp site:
 
-        curl -t ftp://ftp.upload.com/myfile
+        curl -T - ftp://ftp.upload.com/myfile
 
   Upload data from a specified file, login with user and password:
 
@@ -157,7 +157,7 @@ UPLOADING
 
   Upload all data on stdin to a specified http site:
 
-        curl -t http://www.upload.com/myfile
+        curl -T - http://www.upload.com/myfile
 
   Note that the http server must've been configured to accept PUT before this
   can be done successfully.
@@ -755,6 +755,17 @@ TELNET
 
   You might want the -N/--no-buffer option to switch off the buffered output
   for slow connections or similar.
+
+  Pass options to the telnet protocol negotiation, by using the -t option. To
+  tell the server we use a vt100 terminal, try something like:
+
+        curl -tTTYPE=vt100 telnet://remote.server.com
+
+  Other interesting options for it -t include:
+
+   - XDISPLOC=<X display> Sets the X display location.
+
+   - NEW_ENV=<var,val> Sets an environment variable.
 
   NOTE: the telnet protocol does not specify any way to login with a specified
   user and password so curl can't do that automatically. To do that, you need
