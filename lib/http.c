@@ -1150,8 +1150,8 @@ CURLcode Curl_http(struct connectdata *conn)
   CURLcode result=CURLE_OK;
   struct HTTP *http;
   struct Cookie *co=NULL; /* no cookies from start */
-  char *ppath = conn->ppath; /* three previous function arguments */
-  char *host = conn->name;
+  char *ppath = conn->path;
+  char *host = conn->hostname;
   const char *te = ""; /* tranfer-encoding */
   char *ptr;
   char *request;

@@ -7,7 +7,8 @@ Curl and libcurl 7.11.2. A bugfix release.
 
 This release includes the following changes:
 
- o removed maximum dir depth limit in the FTP code
+ o removed maximum user+password+hostname size limit
+ o removed maximum dir depth limit for FTP
  o the ares build now requires c-ares 1.2.0 or later
  o --tcp-nodelay and CURLOPT_TCP_NODELAY were added
  o curl/curlver.h contains the libcurl version info now
@@ -53,6 +54,7 @@ Other curl-related news since the previous public release:
    http://q-lang.sourceforge.net/
  o New German web mirror: http://curl.netmirror.org/
  o c-ares 1.2.0 was released: http://daniel.haxx.se/projects/c-ares/
+ o New US web mirror: http://curl.signal42.com/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:

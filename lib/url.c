@@ -1360,7 +1360,8 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 
   Curl_safefree(conn->proto.generic);
   Curl_safefree(conn->newurl);
-  Curl_safefree(conn->path);  /* the URL path part */
+  Curl_safefree(conn->pathbuffer); /* the URL path buffer */
+  Curl_safefree(conn->namebuffer); /* the URL host name buffer */
   Curl_SSL_Close(conn);
 
   /* close possibly still open sockets */
@@ -1460,7 +1461,7 @@ ConnectionExists(struct SessionHandle *data,
         continue;
 
       if(strequal(needle->protostr, check->protostr) &&
-         strequal(needle->name, check->name) &&
+         strequal(needle->hostname, check->hostname) &&
          (needle->remote_port == check->remote_port) ) {
         if(needle->protocol & PROT_SSL) {
           /* This is SSL, verify that we're using the same
@@ -2096,9 +2097,15 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(urllen < LEAST_PATH_ALLOC)
     urllen=LEAST_PATH_ALLOC;
 
-  conn->path=(char *)malloc(urllen);
-  if(NULL == conn->path)
+  conn->pathbuffer=(char *)malloc(urllen);
+  if(NULL == conn->pathbuffer)
     return CURLE_OUT_OF_MEMORY; /* really bad error */
+  conn->path = conn->pathbuffer;
+
+  conn->namebuffer=(char *)malloc(urllen);
+  if(NULL == conn->namebuffer)
+    return CURLE_OUT_OF_MEMORY;
+  conn->hostname = conn->namebuffer;
 
   /*************************************************************
    * Parse the URL.
@@ -2160,7 +2167,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   }
   else {
     /* Set default host and default path */
-    strcpy(conn->gname, "curl.haxx.se");
+    strcpy(conn->namebuffer, "curl.haxx.se");
     strcpy(conn->path, "/");
     /* We need to search for '/' OR '?' - whichever comes first after host
      * name but before the path. We need to change that to handle things like
@@ -2168,15 +2175,16 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      * that missing slash at the beginning of the path.
      */
     if (2 > sscanf(data->change.url,
-                   "%64[^\n:]://%512[^\n/?]%[^\n]",
-                   conn->protostr, conn->gname, conn->path)) {
+                   "%64[^\n:]://%[^\n/?]%[^\n]",
+                   conn->protostr,
+                   conn->namebuffer, conn->path)) {
 
       /*
        * The URL was badly formatted, let's try the browser-style _without_
        * protocol specified like 'http://'.
        */
-      if((1 > sscanf(data->change.url, "%512[^\n/?]%[^\n]",
-                     conn->gname, conn->path)) ) {
+      if((1 > sscanf(data->change.url, "%[^\n/?]%[^\n]",
+                     conn->namebuffer, conn->path)) ) {
         /*
          * We couldn't even get this format.
          */
@@ -2192,21 +2200,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       /* Note: if you add a new protocol, please update the list in
        * lib/version.c too! */
 
-      if(checkprefix("GOPHER", conn->gname))
+      if(checkprefix("GOPHER", conn->namebuffer))
         strcpy(conn->protostr, "gopher");
 #ifdef USE_SSLEAY
-      else if(checkprefix("HTTPS", conn->gname))
+      else if(checkprefix("HTTPS", conn->namebuffer))
         strcpy(conn->protostr, "https");
-      else if(checkprefix("FTPS", conn->gname))
+      else if(checkprefix("FTPS", conn->namebuffer))
         strcpy(conn->protostr, "ftps");
 #endif /* USE_SSLEAY */
-      else if(checkprefix("FTP", conn->gname))
+      else if(checkprefix("FTP", conn->namebuffer))
         strcpy(conn->protostr, "ftp");
-      else if(checkprefix("TELNET", conn->gname))
+      else if(checkprefix("TELNET", conn->namebuffer))
         strcpy(conn->protostr, "telnet");
-      else if (checkprefix("DICT", conn->gname))
+      else if (checkprefix("DICT", conn->namebuffer))
         strcpy(conn->protostr, "DICT");
-      else if (checkprefix("LDAP", conn->gname))
+      else if (checkprefix("LDAP", conn->namebuffer))
         strcpy(conn->protostr, "LDAP");
       else {
         strcpy(conn->protostr, "http");
@@ -2231,7 +2239,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   /*
    * So if the URL was A://B/C,
    *   conn->protostr is A
-   *   conn->gname is B
+   *   conn->namebuffer is B
    *   conn->path is /C
    */
 
@@ -2255,13 +2263,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     if(!conn->proxypasswd)
       return CURLE_OUT_OF_MEMORY;
   }
-
-  /*************************************************************
-   * Set a few convenience pointers
-   *************************************************************/
-  conn->name = conn->gname;
-  conn->ppath = conn->path;
-  conn->hostname = conn->name;
 
   /*************************************************************
    * Detect what (if any) proxy to use
@@ -2301,15 +2302,15 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       nope=no_proxy?strtok_r(no_proxy, ", ", &no_proxy_tok_buf):NULL;
       while(nope) {
         unsigned int namelen;
-        char *endptr = strchr(conn->name, ':');
+        char *endptr = strchr(conn->hostname, ':');
         if(endptr)
-          namelen=endptr-conn->name;
+          namelen=endptr-conn->hostname;
         else
-          namelen=strlen(conn->name);
+          namelen=strlen(conn->hostname);
 
         if(strlen(nope) <= namelen) {
           char *checkn=
-            conn->name + namelen - strlen(nope);
+            conn->hostname + namelen - strlen(nope);
           if(checkprefix(nope, checkn)) {
             /* no proxy for this host! */
             break;
@@ -2501,10 +2502,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->remote_port = PORT_GOPHER;
     /* Skip /<item-type>/ in path if present */
     if (isdigit((int)conn->path[1])) {
-      conn->ppath = strchr(&conn->path[1], '/');
-      if (conn->ppath == NULL)
-	conn->ppath = conn->path;
-      }
+      conn->path = strchr(&conn->path[1], '/');
+      if (conn->path == NULL)
+	conn->path = conn->pathbuffer;
+    }
     conn->protocol |= PROT_GOPHER;
     conn->curl_do = Curl_http;
     conn->curl_do_more = NULL;
@@ -2566,13 +2567,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       conn->curl_disconnect = Curl_ftp_disconnect;
     }
 
-    conn->ppath++; /* don't include the initial slash */
+    conn->path++; /* don't include the initial slash */
 
     /* FTP URLs support an extension like ";type=<typecode>" that
      * we'll try to get now! */
-    type=strstr(conn->ppath, ";type=");
+    type=strstr(conn->path, ";type=");
     if(!type) {
-      type=strstr(conn->gname, ";type=");
+      type=strstr(conn->namebuffer, ";type=");
     }
     if(type) {
       char command;
@@ -2681,24 +2682,23 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * To be able to detect port number flawlessly, we must not confuse them
    * IPv6-specified addresses in the [0::1] style. (RFC2732)
    *
-   * The conn->name is currently [user:passwd@]host[:port] where host could
-   * be a hostname, IPv4 address or IPv6 address.
+   * The conn->hostname is currently [user:passwd@]host[:port] where host
+   * could be a hostname, IPv4 address or IPv6 address.
    *************************************************************/
-  if((1 == sscanf(conn->name, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
+  if((1 == sscanf(conn->hostname, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
      (']' == endbracket)) {
     /* this is a RFC2732-style specified IP-address */
     conn->bits.ipv6_ip = TRUE;
 
-    conn->name++; /* pass the starting bracket */
-    conn->hostname++;
-    tmp = strchr(conn->name, ']');
+    conn->hostname++; /* pass the starting bracket */
+    tmp = strchr(conn->hostname, ']');
     *tmp = 0; /* zero terminate */
     tmp++; /* pass the ending bracket */
     if(':' != *tmp)
       tmp = NULL; /* no port number available */
   }
   else
-    tmp = strrchr(conn->name, ':');
+    tmp = strrchr(conn->hostname, ':');
 
   if (tmp) {
     char *rest;
@@ -2805,12 +2805,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* This is a FTP or HTTP URL, we will now try to extract the possible
      * user+password pair in a string like:
      * ftp://user:password@ftp.my.site:8021/README */
-    char *ptr=strchr(conn->name, '@');
-    char *userpass = conn->name;
+    char *ptr=strchr(conn->hostname, '@');
+    char *userpass = conn->hostname;
     if(ptr != NULL) {
       /* there's a user+password given here, to the left of the @ */
 
-      conn->name = conn->hostname = ++ptr;
+      conn->hostname = ++ptr;
 
       /* So the hostname is sane.  Only bother interpreting the
        * results if we could care.  It could still be wasted
@@ -2924,8 +2924,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      * existing one.
      */
     struct connectdata *old_conn = conn;
-    char *path = old_conn->path; /* setup the current path pointer properly */
-    char *ppath = old_conn->ppath; /* this is the modified path pointer */
+
     if(old_conn->proxyhost)
       free(old_conn->proxyhost);
 
@@ -2943,20 +2942,13 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     /* get the newly set value, not the old one */
     conn->bits.no_body = old_conn->bits.no_body;
 
-    /* If we speak over a proxy, we need to copy the host name too, as it
-       might be another remote host even when re-using a connection */
-    strcpy(conn->gname, old_conn->gname); /* safe strcpy() */
+    free(conn->namebuffer); /* free the newly allocated name buffer */
+    conn->namebuffer = old_conn->namebuffer; /* use the old one */
+    conn->hostname = old_conn->hostname;
 
-    /* we need these pointers if we speak over a proxy */
-    conn->hostname = conn->gname;
-    conn->name = &conn->gname[old_conn->name - old_conn->gname];
-
-    free(conn->path);    /* free the previously allocated path pointer */
-
-    /* 'path' points to the allocated data, 'ppath' may have been advanced
-       to point somewhere within the 'path' area. */
-    conn->path = path;
-    conn->ppath = ppath;
+    free(conn->pathbuffer); /* free the newly allocated path pointer */
+    conn->pathbuffer = old_conn->pathbuffer; /* use the old one */
+    conn->path = old_conn->path;
 
     /* re-use init */
     conn->bits.reuse = TRUE; /* yes, we're re-using here */
@@ -3093,12 +3085,12 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->port =  conn->remote_port; /* it is the same port */
 
     /* Resolve target host right on */
-    rc = Curl_resolv(conn, conn->name, conn->port, &hostaddr);
+    rc = Curl_resolv(conn, conn->hostname, conn->port, &hostaddr);
     if(rc == 1)
       *async = TRUE;
 
     else if(!hostaddr) {
-      failf(data, "Couldn't resolve host '%s'", conn->name);
+      failf(data, "Couldn't resolve host '%s'", conn->hostname);
       result =  CURLE_COULDNT_RESOLVE_HOST;
       /* don't return yet, we need to clean up the timeout first */
     }

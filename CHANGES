@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (19 April 2004)
+- No more 512 byte limit for host name (inclusing name + password) in libcurl.
+  An added bonus is that we use less memory for the typical (shorter URL)
+  case.
+
+- Cleaned up the sources to better use the terms 'hostname' and 'path'
+  internally when referring to that data. The buffers used for keep that info
+  is called 'namebuffer' and 'pathbuffer'. Much easier to read and understand
+  than the previous mess.
+
 Daniel (15 April 2004)
 - Modified runtests.pl again to remove all log files in the log/ dir between
   each test, and then made -p display all non-zero byte files in the log dir.
@@ -19,7 +29,8 @@ Daniel (15 April 2004)
   Previously we had a fixed array for 100 levels, now we save space in each
   handle by allocating only for a few level by default and then enlarging that
   in case of need (with no maximum depth). Adjusted test case 142 to verify
-  that 150 dir levels work fine.
+  that 150 dir levels work fine.  An added bonus is that we use less memory
+  for the typical (not very deep) case.
 
 Daniel (14 April 2004)
 - Asking for CURL_IPRESOLVE_V6 when ipv6 addresses can't be resolved will

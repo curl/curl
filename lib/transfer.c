@@ -802,8 +802,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                               /* If there is a custom-set Host: name, use it
                                  here, or else use real peer host name. */
                               conn->allocptr.cookiehost?
-                              conn->allocptr.cookiehost:conn->name,
-                              conn->ppath);
+                              conn->allocptr.cookiehost:conn->hostname,
+                              conn->path);
               Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
             }
             else if(checkprefix("Last-Modified:", k->p) &&

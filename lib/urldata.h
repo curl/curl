@@ -427,14 +427,15 @@ struct connectdata {
   struct sockaddr_in serv_addr;
 #endif
   char protostr[64];  /* store the protocol string in this buffer */
-  char gname[513]; /* store the hostname in this buffer */
-  char *name;      /* host name pointer to fool around with */
-  char *path;      /* allocated buffer to store the URL's path part in */
-  char *hostname;  /* hostname to connect, as parsed from url */
+  char *namebuffer; /* allocated buffer to store the hostname in */
+  char *hostname;  /* hostname to use, as parsed from url. points to
+                      somewhere within the namebuffer[] area */
+  char *pathbuffer;/* allocated buffer to store the URL's path part in */
+  char *path;      /* path to use, points to somewhere within the pathbuffer
+                      area */
   long port;       /* which port to use locally */
   unsigned short remote_port; /* what remote port to connect to,
                                  not the proxy port! */
-  char *ppath;
   curl_off_t bytecount;
   long headerbytecount;  /* only count received headers */
   long deductheadercount; /* this amount of bytes doesn't count when we check
