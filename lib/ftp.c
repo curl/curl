@@ -2044,7 +2044,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         char *bytes;
         bytes=strstr(buf, " bytes");
         if(bytes--) {
-          int in=bytes-buf;
+          long in=bytes-buf;
           /* this is a hint there is size information in there! ;-) */
           while(--in) {
             /* scan for the parenthesis and break there */
@@ -2412,7 +2412,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
 {
   ssize_t bytes_written;
   char s[256];
-  ssize_t write_len;
+  size_t write_len;
   char *sptr=s;
   CURLcode res = CURLE_OK;
 
@@ -2436,7 +2436,7 @@ CURLcode Curl_ftpsendf(struct connectdata *conn,
     if(conn->data->set.verbose)
       Curl_debug(conn->data, CURLINFO_HEADER_OUT, sptr, bytes_written);
 
-    if(bytes_written != write_len) {
+    if(bytes_written != (ssize_t)write_len) {
       write_len -= bytes_written;
       sptr += bytes_written;
     }
