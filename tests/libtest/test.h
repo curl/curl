@@ -10,6 +10,18 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_SELECT_H
+/* since so many tests use select(), we can just as well include it here */
+#include <sys/select.h>
+#endif
+#ifdef HAVE_UNISTD_H
+/* at least somewhat oldish FreeBSD systems need this for select() */
+#include <unistd.h>
+#endif
+
 #ifndef FALSE
 #define FALSE 0
 #endif
