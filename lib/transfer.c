@@ -562,10 +562,14 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                    * message-body, and thus is always terminated by the first
                    * empty line after the header fields. */
                   /* FALLTHROUGH */
+                case 416: /* Requested Range Not Satisfiable, it has the
+                             Content-Length: set as the "real" document but no
+                             actual response is sent. */
                 case 304:
-                  /* (quote from RFC2616, section 10.3.5): The 304 response MUST
-                   * NOT contain a message-body, and thus is always terminated
-                   * by the first empty line after the header fields.  */
+                  /* (quote from RFC2616, section 10.3.5): The 304 response
+                   * MUST NOT contain a message-body, and thus is always
+                   * terminated by the first empty line after the header
+                   * fields.  */
                   conn->size=0;
                   conn->maxdownload=0;
                   break;
@@ -580,8 +584,12 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               }
             }
 
-            /* check for Content-Length: header lines to get size */
-            if (checkprefix("Content-Length:", k->p) &&
+            /* Check for Content-Length: header lines to get size. Ignore
+               the header completely if we get a 416 response as then we're
+               resuming a document that we don't get, and this header contains 
+               info about the true size of the document we didn't get now. */
+            if ((k->httpcode != 416) &&
+                checkprefix("Content-Length:", k->p) &&
                 sscanf (k->p+15, " %ld", &k->contentlength)) {
               if (data->set.max_filesize && k->contentlength > 
                   data->set.max_filesize) {
