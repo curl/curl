@@ -18,7 +18,7 @@ major=`echo $libversion |cut -d. -f1 | sed -e "s/[^0-9]//g"`
 minor=`echo $libversion |cut -d. -f2 | sed -e "s/[^0-9]//g"`
 patch=`echo $libversion |cut -d. -f3 | cut -d- -f1 | sed -e "s/[^0-9]//g"`
 
-numeric=`echo "obase=16; $major*256*256 + $minor*256 + $patch" | bc`
+numeric=`perl -e 'printf("%02x%02x%02x\n", '"$major, $minor, $patch);"`
 
 HEADER=include/curl/curlver.h
 CHEADER=src/version.h

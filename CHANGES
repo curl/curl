@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (9 December 2004)
+- Bryan Henderson pointed out in bug report #1081788 that the curl-config
+  --vernum output wasn't zero prefixed properly (as claimed in documentation).
+  This is fixed in maketgz now.
+  
 Daniel (8 December 2004)
 - Rene Bernhardt found and fixed a buffer overrun in the NTLM code, where
   libcurl always and unconditionally overwrote a stack-based array with 3 zero
