@@ -28,8 +28,45 @@ man_MANS = \
 	curl_global_cleanup.3 \
 	libcurl.3
 
+SUBDIRS = examples
+
+HTMLPAGES = \
+	curl.html \
+	curl-config.html \
+	curl_easy_cleanup.html \
+	curl_easy_getinfo.html \
+	curl_easy_init.html \
+	curl_easy_perform.html \
+	curl_easy_setopt.html \
+	curl_formparse.html \
+	curl_formfree.html \
+	curl_getdate.html \
+	curl_getenv.html \
+	curl_slist_append.html \
+	curl_slist_free_all.html \
+	curl_version.html \
+	curl_escape.html \
+	curl_unescape.html \
+	curl_strequal.html \
+	curl_strnequal.html \
+	curl_mprintf.html \
+	curl_global_init.html \
+	curl_global_cleanup.html \
+	libcurl.html
+
 EXTRA_DIST = $(man_MANS) \
 	MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS \
-	LIBCURL README.win32 RESOURCES TODO TheArtOfHttpScripting THANKS
+	LIBCURL README.win32 RESOURCES TODO TheArtOfHttpScripting THANKS \
+	$(HTMLPAGES)
 
-SUBDIRS = examples
+MAN2HTML= gnroff -man $< | man2html >$@
+
+SUFFIXES += .1 .3 .html
+
+html: $(HTMLPAGES)
+
+.3.html:
+	$(MAN2HTML)
+
+.1.html:
+	$(MAN2HTML)
