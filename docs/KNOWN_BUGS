@@ -3,6 +3,10 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+* --limit-rate using -d or -F does not work. This is because the limit logic
+  is provided by the curl app in its read/write callbacks, and when doing
+  -d/-F the callbacks aren't used!
+
 * Doing resumed upload over HTTP does not work with '-C -', because curl
   doesn't do a HEAD first to get the initial size. This needs to be done
   manually for HTTP PUT resume to work, and then '-C [index]'.
