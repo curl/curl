@@ -146,11 +146,12 @@ void Curl_failf(struct SessionHandle *data, const char *fmt, ...)
 }
 
 /* Curl_sendf() sends formated data to the server */
-size_t Curl_sendf(int sockfd, struct connectdata *conn,
-                  const char *fmt, ...)
+CURLcode Curl_sendf(int sockfd, struct connectdata *conn,
+                    const char *fmt, ...)
 {
   struct SessionHandle *data = conn->data;
   size_t bytes_written;
+  CURLcode result;
   char *s;
   va_list ap;
   va_start(ap, fmt);
@@ -162,11 +163,11 @@ size_t Curl_sendf(int sockfd, struct connectdata *conn,
     fprintf(data->set.err, "> %s", s);
 
   /* Write the buffer to the socket */
-  Curl_write(conn, sockfd, s, strlen(s), &bytes_written);
+  result = Curl_write(conn, sockfd, s, strlen(s), &bytes_written);
 
   free(s); /* free the output string */
 
-  return bytes_written;
+  return result;
 }
 
 /*
@@ -211,7 +212,7 @@ CURLcode Curl_write(struct connectdata *conn, int sockfd,
 #endif
 
   *written = bytes_written;
-  return CURLE_OK;
+  return (bytes_written==len)?CURLE_OK:CURLE_WRITE_ERROR;
 }
 
 /* client_write() sends data to the write callback(s)
