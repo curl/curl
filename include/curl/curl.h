@@ -205,6 +205,9 @@ typedef enum {
   CURL_LAST /* never use! */
 } CURLcode;
 
+/* Make a spelling correction for the operation timed-out define */
+#define CURLE_OPERATION_TIMEDOUT CURLE_OPERATION_TIMEOUTED
+
 typedef enum {
   CURLPROXY_HTTP = 0,
   CURLPROXY_SOCKS4 = 4,
@@ -800,7 +803,7 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.10.2-test"
+#define LIBCURL_VERSION "7.10.2-pre4"
 #define LIBCURL_VERSION_NUM 0x070a02
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
