@@ -26,7 +26,8 @@
 int ares_fds(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
 {
   struct server_state *server;
-  int i, nfds;
+  ares_socket_t nfds;
+  int i;
 
   /* No queries, no file descriptors. */
   if (!channel->queries)
@@ -37,19 +38,19 @@ int ares_fds(ares_channel channel, fd_set *read_fds, fd_set *write_fds)
     {
       server = &channel->servers[i];
       if (server->udp_socket != ARES_SOCKET_BAD)
-        {
-          FD_SET(server->udp_socket, read_fds);
-          if (server->udp_socket >= nfds)
-            nfds = server->udp_socket + 1;
-        }
+	{
+	  FD_SET(server->udp_socket, read_fds);
+	  if (server->udp_socket >= nfds)
+	    nfds = server->udp_socket + 1;
+	}
       if (server->tcp_socket != ARES_SOCKET_BAD)
-        {
-          FD_SET(server->tcp_socket, read_fds);
-          if (server->qhead)
-            FD_SET(server->tcp_socket, write_fds);
-          if (server->tcp_socket >= nfds)
-            nfds = server->tcp_socket + 1;
-        }
+	{
+	  FD_SET(server->tcp_socket, read_fds);
+	  if (server->qhead)
+	    FD_SET(server->tcp_socket, write_fds);
+	  if (server->tcp_socket >= nfds)
+	    nfds = server->tcp_socket + 1;
+	}
     }
-  return nfds;
+  return (int)nfds;
 }

@@ -39,28 +39,34 @@ ares_strcasecmp(const char *a, const char *b)
 }
 #endif
 
+/*
+ * Number of micro-seconds between the beginning of the Windows epoch
+ * (Jan. 1, 1601) and the Unix epoch (Jan. 1, 1970).
+ */
+#if defined(_MSC_VER) || defined(__WATCOMC__)
+#define EPOCH_FILETIME 11644473600000000Ui64
+#else
+#define EPOCH_FILETIME 11644473600000000ULL
+#endif
+
 int
 ares_gettimeofday(struct timeval *tv, struct timezone *tz)
 {
     FILETIME        ft;
     LARGE_INTEGER   li;
     __int64         t;
-    static int      tzflag;
 
     if (tv)
     {
         GetSystemTimeAsFileTime(&ft);
         li.LowPart  = ft.dwLowDateTime;
         li.HighPart = ft.dwHighDateTime;
-        t  = li.QuadPart;       /* In 100-nanosecond intervals */
-#if 0
-        t -= EPOCHFILETIME;     /* Offset to the Epoch time */
-#endif
-        t /= 10;                /* In microseconds */
+        t  = li.QuadPart / 10;   /* In micro-second intervals */
+        t -= EPOCH_FILETIME;     /* Offset to the Epoch time */
         tv->tv_sec  = (long)(t / 1000000);
         tv->tv_usec = (long)(t % 1000000);
     }
-
+    (void) tz;
     return 0;
 }
 
