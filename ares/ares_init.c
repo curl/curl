@@ -101,13 +101,13 @@ int ares_init_options(ares_channel *channelptr, struct ares_options *options,
       /* Something failed; clean up memory we may have allocated. */
       if (channel->nservers != -1)
 	free(channel->servers);
-      if (channel->ndomains != -1)
+      if (channel->domains)
 	{
 	  for (i = 0; i < channel->ndomains; i++)
 	    free(channel->domains[i]);
 	  free(channel->domains);
 	}
-      if (channel->nsort != -1)
+      if (channel->sortlist)
 	free(channel->sortlist);
       if(channel->lookups)
         free(channel->lookups);
@@ -454,7 +454,8 @@ DhcpNameServer
       if (status != ARES_SUCCESS)
         break;
     }
-    free(line);
+    if(line)
+      free(line);
     fclose(fp);
   }
 
