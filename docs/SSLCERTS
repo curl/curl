@@ -13,8 +13,8 @@ can be sure that the remote server really is the one it claims to be.
 
 If the remote server uses a self-signed certificate, if you don't install
 curl's CA cert bundle, if the server uses a certificate signed by a CA that
-isn't included in the bundle or if the remoste host is an imposter
-impersonating your favourite site, and you want to transfer files from this
+isn't included in the bundle or if the remote host is an impostor
+impersonating your favorite site, and you want to transfer files from this
 server, do one of the following:
 
  1. Tell libcurl to *not* verify the peer. With libcurl you disable with with
@@ -38,7 +38,7 @@ server, do one of the following:
     cert path by setting the environment variable CURL_CA_BUNDLE to the path
     of your choice.
 
-    If you're using the curl command line toll on Windows, curl will search
+    If you're using the curl command line tool on Windows, curl will search
     for a CA cert file named "curl-ca-bundle.crt" in these directories and in
     this order:
       1. application's directory
@@ -47,8 +47,8 @@ server, do one of the following:
       4. Windows Directory (e.g. C:\windows)
       5. all directories along %PATH%
 
-Neglecting to use one of the above menthods when dealing with a server using a
-certficate that isn't signed by one of the certficates in the installed CA
+Neglecting to use one of the above methods when dealing with a server using a
+certificate that isn't signed by one of the certificates in the installed CA
 cert bundle, will cause SSL to report an error ("certificate verify failed")
 during the handshake and SSL will then refuse further communication with that
 server.
