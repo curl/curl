@@ -6,6 +6,24 @@
 
                                   Changelog
 
+Daniel (24 June 2004)
+- Major reorganization in the host resolve code (again). This time, I've
+  modified the code to now always use a linked list of Curl_addrinfo structs
+  to return resolved info in, no matter what resolver method or support that
+  is available on the platform. It makes it a lot easier to write code that
+  uses or depends on resolved data.
+
+  Internally, this means amongst other things that we can stop doing the weird
+  "increase buffer size until it works" trick when resolving hosts on
+  ipv4-only with gethostbyname_r(), we support socks even on libcurls built
+  with ipv6 enabled (but only to socks servers that resolve to an ipv4
+  address) and we no longer deep-copy or relocate hostent structs (we create
+  Curl_addrinfo chains instead).
+
+  The new "hostent to Curl_addrinfo" converter function is named Curl_he2ai()
+  and is slightly naive and simple, yet I believe it is functional enough to
+  work for libcurl.
+
 Daniel (22 June 2004)
 - David Cohen pointed out that RFC2109 says clients should allow cookies to
   contain least 4096 bytes while libcurl only allowed 2047. I raised the limit
