@@ -48,6 +48,7 @@ extern char *strerror_r(int errnum, char *buf, size_t buflen);
 const char *
 curl_easy_strerror(CURLcode error)
 {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (error) {
   case CURLE_OK:
     return "no error";
@@ -252,11 +253,18 @@ curl_easy_strerror(CURLcode error)
    * is why it is here, and not at the start of the switch.
    */
   return "unknown error";
+#else
+  if (error == CURLE_OK)
+    return "no error";
+  else
+    return "error";
+#endif
 }
 
 const char *
 curl_multi_strerror(CURLMcode error)
 {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (error) {
   case CURLM_CALL_MULTI_PERFORM:
     return "please call curl_multi_perform() soon";
@@ -281,11 +289,18 @@ curl_multi_strerror(CURLMcode error)
   }
 
   return "unknown error";
+#else
+  if (error == CURLM_OK)
+    return "no error";
+  else
+    return "error";
+#endif
 }
 
 const char *
 curl_share_strerror(CURLSHcode error)
 {
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (error) {
   case CURLSHE_OK:
     return "no error";
@@ -307,6 +322,12 @@ curl_share_strerror(CURLSHcode error)
   }
 
   return "CURLSH unknown";
+#else
+  if (error == CURLSHE_OK)
+    return "no error";
+  else
+    return "error";
+#endif
 }
 
 #if defined(WIN32) && !defined(__CYGWIN__)
@@ -318,6 +339,7 @@ get_winsock_error (int err, char *buf, size_t len)
 {
   char *p;
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch (err) {
   case WSAEINTR:
     p = "Call interrupted.";
@@ -485,6 +507,12 @@ get_winsock_error (int err, char *buf, size_t len)
   default:
     return NULL;
   }
+#else
+  if (error == CURLE_OK)
+    return NULL;
+  else
+    p = "error";
+#endif
   strncpy (buf, p, len);
   buf [len-1] = '\0';
   return buf;
@@ -594,6 +622,7 @@ const char *Curl_idn_strerror (struct connectdata *conn, int err)
   buf = conn->syserr_buf;
   max = sizeof(conn->syserr_buf)-1;
 
+#ifndef CURL_DISABLE_VERBOSE_STRINGS
   switch ((Idna_rc)err) {
     case IDNA_SUCCESS:
       str = "No error";
@@ -636,6 +665,12 @@ const char *Curl_idn_strerror (struct connectdata *conn, int err)
       str = NULL;
       break;
   }
+#else
+  if ((Idna_rc)err == IDNA_SUCCESS)
+    str = "No error";
+  else
+    str = "error";
+#endif
   if (str)
     strncpy(buf, str, max);
   buf[max] = '\0';

@@ -55,16 +55,17 @@ AC_SUBST(PKGADD_NAME)
 AC_SUBST(PKGADD_VENDOR)
 
 dnl
-dnl initialize all the info variables to 'no'
-    curl_ssl_msg="no     (--with-ssl)"
-   curl_zlib_msg="no     (--with-zlib)"
-   curl_krb4_msg="no     (--with-krb4*)"
-    curl_gss_msg="no     (--with-gssapi)"
- curl_spnego_msg="no     (--with-spnego)"
-   curl_ares_msg="no     (--enable-ares)"
-   curl_ipv6_msg="no     (--enable-ipv6)"
-    curl_idn_msg="no     (--with-libidn)"
- curl_manual_msg="no     (--enable-manual)"
+dnl initialize all the info variables
+    curl_ssl_msg="no      (--with-ssl)"
+   curl_zlib_msg="no      (--with-zlib)"
+   curl_krb4_msg="no      (--with-krb4*)"
+    curl_gss_msg="no      (--with-gssapi)"
+ curl_spnego_msg="no      (--with-spnego)"
+   curl_ares_msg="no      (--enable-ares)"
+   curl_ipv6_msg="no      (--enable-ipv6)"
+    curl_idn_msg="no      (--with-libidn)"
+ curl_manual_msg="no      (--enable-manual)"
+curl_verbose_msg="enabled (--disable-verbose)"
 
 dnl
 dnl Detect the canonical host and target build environment
@@ -1427,6 +1428,26 @@ int main(void)
 )
 
 dnl ************************************************************
+dnl disable verbose text strings
+dnl
+AC_MSG_CHECKING([whether to enable verbose strings])
+AC_ARG_ENABLE(verbose,
+AC_HELP_STRING([--enable-verbose],[Enable verbose strings])
+AC_HELP_STRING([--disable-verbose],[Disable verbose strings]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       AC_DEFINE(CURL_DISABLE_VERBOSE_STRINGS, 1, [to disable verbose strings])
+       AC_SUBST(CURL_DISABLE_VERBOSE_STRINGS)
+       curl_verbose_msg="no"
+       ;;
+  *)   AC_MSG_RESULT(yes)
+       ;;
+  esac ],
+       AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
 dnl lame option to switch on debug options
 dnl
 AC_MSG_CHECKING([whether to enable debug options])
@@ -1497,4 +1518,5 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   IDN support:     ${curl_idn_msg}
   Build libcurl:   Shared=${enable_shared}, Static=${enable_static} 
   Built-in manual: ${curl_manual_msg}
+  Verbose errors:  ${curl_verbose_msg}
 ])

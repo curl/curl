@@ -220,7 +220,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
   if(ret == KDC_PR_UNKNOWN)
     ret = mk_auth(d, &adat, "rcmd", host, checksum);
   if(ret) {
-    Curl_infof(data, "%s\n", krb_get_err_text(ret));
+    infof(data, "%s\n", krb_get_err_text(ret));
     return AUTH_CONTINUE;
   }
 
@@ -232,7 +232,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
     if (krb_get_our_ip_for_realm(krb_realmofhost(host),
                                  &natAddr) != KSUCCESS
         && krb_get_our_ip_for_realm(NULL, &natAddr) != KSUCCESS)
-      Curl_infof(data, "Can't get address for realm %s\n",
+      infof(data, "Can't get address for realm %s\n",
                  krb_realmofhost(host));
     else {
       if (natAddr.s_addr != localaddr->sin_addr.s_addr) {
@@ -242,7 +242,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
 #else
         char *ip = (char *)inet_ntoa(natAddr);
 #endif
-        Curl_infof(data, "Using NAT IP address (%s) for kerberos 4\n", ip);
+        infof(data, "Using NAT IP address (%s) for kerberos 4\n", ip);
         localaddr->sin_addr = natAddr;
       }
     }

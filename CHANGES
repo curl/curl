@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (11 November 2004)
+- Dan Fandrich added --disable-verbose to the configure script to allow builds
+  without verbose strings in the code, to save some 12KB space. Makes sense
+  only for systems with very little memory resources.
+
 - Jeff Phillips found out that a date string with a year beyond 2038 could
   crash the new date parser on systems with 32bit time_t. We now check for
   this case and deal with it.

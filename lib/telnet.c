@@ -262,9 +262,9 @@ static void printoption(struct SessionHandle *data,
     if (cmd == CURL_IAC)
     {
       if (CURL_TELCMD_OK(option))
-        Curl_infof(data, "%s IAC %s\n", direction, CURL_TELCMD(option));
+        infof(data, "%s IAC %s\n", direction, CURL_TELCMD(option));
       else
-        Curl_infof(data, "%s IAC %d\n", direction, option);
+        infof(data, "%s IAC %d\n", direction, option);
     }
     else
     {
@@ -280,12 +280,12 @@ static void printoption(struct SessionHandle *data,
           opt = NULL;
 
         if(opt)
-          Curl_infof(data, "%s %s %s\n", direction, fmt, opt);
+          infof(data, "%s %s %s\n", direction, fmt, opt);
         else
-          Curl_infof(data, "%s %s %d\n", direction, fmt, option);
+          infof(data, "%s %s %d\n", direction, fmt, option);
       }
       else
-        Curl_infof(data, "%s %d %d\n", direction, cmd, option);
+        infof(data, "%s %d %d\n", direction, cmd, option);
     }
   }
 }
@@ -675,7 +675,7 @@ static void printsub(struct SessionHandle *data,
   {
     if (direction)
     {
-      Curl_infof(data, "%s IAC SB ", (direction == '<')? "RCVD":"SENT");
+      infof(data, "%s IAC SB ", (direction == '<')? "RCVD":"SENT");
       if (length >= 3)
       {
         int j;
@@ -685,27 +685,27 @@ static void printsub(struct SessionHandle *data,
 
         if (i != CURL_IAC || j != CURL_SE)
         {
-          Curl_infof(data, "(terminated by ");
+          infof(data, "(terminated by ");
           if (CURL_TELOPT_OK(i))
-            Curl_infof(data, "%s ", CURL_TELOPT(i));
+            infof(data, "%s ", CURL_TELOPT(i));
           else if (CURL_TELCMD_OK(i))
-            Curl_infof(data, "%s ", CURL_TELCMD(i));
+            infof(data, "%s ", CURL_TELCMD(i));
           else
-            Curl_infof(data, "%d ", i);
+            infof(data, "%d ", i);
           if (CURL_TELOPT_OK(j))
-            Curl_infof(data, "%s", CURL_TELOPT(j));
+            infof(data, "%s", CURL_TELOPT(j));
           else if (CURL_TELCMD_OK(j))
-            Curl_infof(data, "%s", CURL_TELCMD(j));
+            infof(data, "%s", CURL_TELCMD(j));
           else
-            Curl_infof(data, "%d", j);
-          Curl_infof(data, ", not IAC SE!) ");
+            infof(data, "%d", j);
+          infof(data, ", not IAC SE!) ");
         }
       }
       length -= 2;
     }
     if (length < 1)
     {
-      Curl_infof(data, "(Empty suboption?)");
+      infof(data, "(Empty suboption?)");
       return;
     }
 
@@ -714,28 +714,28 @@ static void printsub(struct SessionHandle *data,
         case CURL_TELOPT_TTYPE:
         case CURL_TELOPT_XDISPLOC:
         case CURL_TELOPT_NEW_ENVIRON:
-          Curl_infof(data, "%s", CURL_TELOPT(pointer[0]));
+          infof(data, "%s", CURL_TELOPT(pointer[0]));
           break;
         default:
-          Curl_infof(data, "%s (unsupported)", CURL_TELOPT(pointer[0]));
+          infof(data, "%s (unsupported)", CURL_TELOPT(pointer[0]));
           break;
       }
     }
     else
-      Curl_infof(data, "%d (unknown)", pointer[i]);
+      infof(data, "%d (unknown)", pointer[i]);
 
     switch(pointer[1]) {
       case CURL_TELQUAL_IS:
-        Curl_infof(data, " IS");
+        infof(data, " IS");
         break;
       case CURL_TELQUAL_SEND:
-        Curl_infof(data, " SEND");
+        infof(data, " SEND");
         break;
       case CURL_TELQUAL_INFO:
-        Curl_infof(data, " INFO/REPLY");
+        infof(data, " INFO/REPLY");
         break;
       case CURL_TELQUAL_NAME:
-        Curl_infof(data, " NAME");
+        infof(data, " NAME");
         break;
     }
 
@@ -743,21 +743,21 @@ static void printsub(struct SessionHandle *data,
       case CURL_TELOPT_TTYPE:
       case CURL_TELOPT_XDISPLOC:
         pointer[length] = 0;
-        Curl_infof(data, " \"%s\"", &pointer[2]);
+        infof(data, " \"%s\"", &pointer[2]);
         break;
       case CURL_TELOPT_NEW_ENVIRON:
         if(pointer[1] == CURL_TELQUAL_IS) {
-          Curl_infof(data, " ");
+          infof(data, " ");
           for(i = 3;i < length;i++) {
             switch(pointer[i]) {
               case CURL_NEW_ENV_VAR:
-                Curl_infof(data, ", ");
+                infof(data, ", ");
                 break;
               case CURL_NEW_ENV_VALUE:
-                Curl_infof(data, " = ");
+                infof(data, " = ");
                 break;
               default:
-                Curl_infof(data, "%c", pointer[i]);
+                infof(data, "%c", pointer[i]);
                 break;
             }
           }
@@ -765,13 +765,13 @@ static void printsub(struct SessionHandle *data,
         break;
       default:
         for (i = 2; i < length; i++)
-          Curl_infof(data, " %.2x", pointer[i]);
+          infof(data, " %.2x", pointer[i]);
         break;
     }
 
     if (direction)
     {
-      Curl_infof(data, "\n");
+      infof(data, "\n");
     }
   }
 }
