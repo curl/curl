@@ -2126,8 +2126,9 @@ CURLcode Curl_ftp(struct connectdata *conn)
     }
     else {
       cur_pos = slash_pos + 1; /* jump to the rest of the string */
-      if(++path_part >= CURL_MAX_FTP_DIRDEPTH) {
-        /* too deep */
+      if(++path_part >= (CURL_MAX_FTP_DIRDEPTH-1)) {
+        /* too deep, we need the last entry to be kept NULL at all
+           times to signal end of list */
         failf(data, "too deep dir hierarchy");
         retcode = CURLE_URL_MALFORMAT;
       }
