@@ -641,12 +641,19 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 #endif
   int urllen;
 
+  /*************************************************************
+   * Check input data
+   *************************************************************/
+
   if(!data || (data->handle != STRUCT_OPEN))
     return CURLE_BAD_FUNCTION_ARGUMENT; /* TBD: make error codes */
 
   if(!data->url)
     return CURLE_URL_MALFORMAT;
 
+  /*************************************************************
+   * Allocate and initiate a connection struct
+   *************************************************************/
   conn = (struct connectdata *)malloc(sizeof(struct connectdata));
   if(!conn) {
     *in_connect = NULL; /* clear the pointer */
@@ -665,6 +672,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 
   buf = data->buffer; /* this is our buffer */
 
+  /*************************************************************
+   * Set signal handler
+   *************************************************************/
 #ifdef HAVE_SIGACTION
   sigaction(SIGALRM, NULL, &sigact);
   sigact.sa_handler = alarmfunc;
@@ -681,9 +691,11 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 
 #endif
 
-  /* We need to allocate memory to store the path in. We get the size of the
-     full URL to be sure, and we need to make it at least 256 bytes since
-     other parts of the code will rely on this fact */
+  /***********************************************************
+   * We need to allocate memory to store the path in. We get the size of the
+   * full URL to be sure, and we need to make it at least 256 bytes since
+   * other parts of the code will rely on this fact
+   ***********************************************************/
 #define LEAST_PATH_ALLOC 256
   urllen=strlen(data->url);
   if(urllen < LEAST_PATH_ALLOC)
@@ -693,25 +705,30 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   if(NULL == conn->path)
     return CURLE_OUT_OF_MEMORY; /* really bad error */
 
-  /* Parse <url> */
-  /* We need to parse the url, even when using the proxy, because
-   * we will need the hostname and port in case we are trying
-   * to SSL connect through the proxy -- and we don't know if we
-   * will need to use SSL until we parse the url ...
-   */
+  /*************************************************************
+   * Parse the URL.
+   *
+   * We need to parse the url even when using the proxy, because we will need
+   * the hostname and port in case we are trying to SSL connect through the
+   * proxy -- and we don't know if we will need to use SSL until we parse the
+   * url ...
+   ************************************************************/
   if((2 == sscanf(data->url, "%64[^:]://%[^\n]",
                   conn->proto,
                   conn->path)) && strequal(conn->proto, "file")) {
-    /* we deal with file://<host>/<path> differently since it
-       supports no hostname other than "localhost" and "127.0.0.1",
-       which is unique among the protocols specified in RFC 1738 */
+    /*
+     * we deal with file://<host>/<path> differently since it supports no
+     * hostname other than "localhost" and "127.0.0.1", which is unique among
+     * the URL protocols specified in RFC 1738
+     */
+
     if (strnequal(conn->path, "localhost/", 10) ||
         strnequal(conn->path, "127.0.0.1/", 10))
-      /* ... since coincidentally both host strings are of equal length
-         otherwise, <host>/ is quietly ommitted */
+      /* If there's another host name than the one we support, <host>/ is
+       * quietly ommitted */
       strcpy(conn->path, &conn->path[10]);
 
-    strcpy(conn->proto, "file");
+    strcpy(conn->proto, "file"); /* store protocol string lowercase */
   }
   else {
     /* Set default host and default path */
@@ -722,12 +739,24 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
                    "%64[^\n:]://%256[^\n/]%[^\n]",
                    conn->proto, conn->gname, conn->path)) {
       
-      /* badly formatted, let's try the browser-style _without_ 'http://' */
+      /*
+       * The URL was badly formatted, let's try the browser-style _without_
+       * protocol specified like 'http://'.
+       */
       if((1 > sscanf(data->url, "%256[^\n/]%[^\n]",
                      conn->gname, conn->path)) ) {
+        /*
+         * We couldn't even get this format.
+         */
         failf(data, "<url> malformed");
         return CURLE_URL_MALFORMAT;
       }
+
+      /*
+       * Since there was no protocol part specified, we guess what protocol it
+       * is based on the first letters of the server name.
+       */
+
       if(strnequal(conn->gname, "FTP", 3)) {
         strcpy(conn->proto, "ftp");
       }
@@ -751,6 +780,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     }
   }
 
+  /*************************************************************
+   * Take care of user and password authentication stuff
+   *************************************************************/
 
   if(data->bits.user_passwd && !data->bits.use_netrc) {
     data->user[0] =0;
@@ -774,6 +806,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     }
   }
 
+  /*************************************************************
+   * Take care of proxy authentication stuff
+   *************************************************************/
   if(data->bits.proxy_user_passwd) {
     data->proxyuser[0] =0;
     data->proxypasswd[0]=0;
@@ -799,30 +834,36 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 
   }
 
+  /*************************************************************
+   * Set a few convenience pointers 
+   *************************************************************/
   conn->name = conn->gname;
   conn->ppath = conn->path;
   data->hostname = conn->name;
 
 
+  /*************************************************************
+   * Detect what (if any) proxy to use
+   *************************************************************/
   if(!data->bits.httpproxy) {
     /* If proxy was not specified, we check for default proxy environment
-       variables, to enable i.e Lynx compliance:
-
-       http_proxy=http://some.server.dom:port/
-       https_proxy=http://some.server.dom:port/
-       ftp_proxy=http://some.server.dom:port/
-       gopher_proxy=http://some.server.dom:port/
-       no_proxy=domain1.dom,host.domain2.dom
-                                 (a comma-separated list of hosts which should
-                                  not be proxied, or an asterisk to override
-                                  all proxy variables)
-       all_proxy=http://some.server.dom:port/
-                                 (seems to exist for the CERN www lib. Probably
-                                  the first to check for.)
-
-       For compatibility, the all-uppercase versions of these variables are
-       checked if the lowercase versions don't exist.
-       */
+     * variables, to enable i.e Lynx compliance:
+     *
+     * http_proxy=http://some.server.dom:port/
+     * https_proxy=http://some.server.dom:port/
+     * ftp_proxy=http://some.server.dom:port/
+     * gopher_proxy=http://some.server.dom:port/
+     * no_proxy=domain1.dom,host.domain2.dom
+     *   (a comma-separated list of hosts which should
+     *   not be proxied, or an asterisk to override
+     *   all proxy variables)
+     * all_proxy=http://some.server.dom:port/
+     *   (seems to exist for the CERN www lib. Probably
+     *   the first to check for.)
+     *
+     * For compatibility, the all-uppercase versions of these variables are
+     * checked if the lowercase versions don't exist.
+     */
     char *no_proxy=NULL;
     char *proxy=NULL;
     char proxy_env[128];
@@ -891,6 +932,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       free(no_proxy);
   } /* if not using proxy */
 
+  /*************************************************************
+   * No protocol but proxy usage needs attention
+   *************************************************************/
   if((conn->protocol&PROT_MISSING) && data->bits.httpproxy ) {
     /* We're guessing prefixes here and since we're told to use a proxy, we
        need to add the protocol prefix to the URL string before we continue!
@@ -910,13 +954,15 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     conn->protocol &= ~PROT_MISSING; /* switch that one off again */
   }
 
-  /* RESUME on a HTTP page is a tricky business. First, let's just check that
-     'range' isn't used, then set the range parameter and leave the resume as
-     it is to inform about this situation for later use. We will then
-     "attempt" to resume, and if we're talking to a HTTP/1.1 (or later)
-     server, we will get the document resumed. If we talk to a HTTP/1.0
-     server, we just fail since we can't rewind the file writing from within
-     this function. */
+  /************************************************************
+   * RESUME on a HTTP page is a tricky business. First, let's just check that
+   * 'range' isn't used, then set the range parameter and leave the resume as
+   * it is to inform about this situation for later use. We will then
+   * "attempt" to resume, and if we're talking to a HTTP/1.1 (or later)
+   * server, we will get the document resumed. If we talk to a HTTP/1.0
+   * server, we just fail since we can't rewind the file writing from within
+   * this function.
+   ***********************************************************/
   if(data->resume_from) {
     if(!data->bits.set_range) {
       /* if it already was in use, we just skip this */
@@ -927,19 +973,19 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     }
   }
 
-
+  /*************************************************************
+   * Set timeout if that is being used
+   *************************************************************/
   if(data->timeout) {
     /* We set the timeout on the connection/resolving phase first, separately
-       from the download/upload part to allow a maximum time on everything */
+     * from the download/upload part to allow a maximum time on everything */
     myalarm(data->timeout); /* this sends a signal when the timeout fires
 			       off, and that will abort system calls */
   }
 
-  /*
-   * Hmm, if we are using a proxy, then we can skip the GOPHER and the
-   * FTP steps, although we cannot skip the HTTPS step (since the proxy
-   * works differently, depending on whether its SSL or not).
-   */
+  /*************************************************************
+   * Setup internals depending on protocol
+   *************************************************************/
 
   if (strequal(conn->proto, "HTTP")) {
     if(!data->port)
@@ -1007,7 +1053,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     conn->ppath++; /* don't include the initial slash */
 
     /* FTP URLs support an extension like ";type=<typecode>" that
-       we'll try to get now! */
+     * we'll try to get now! */
     type=strstr(conn->ppath, ";type=");
     if(!type) {
       type=strstr(conn->gname, ";type=");
@@ -1069,12 +1115,16 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 
     return CURLE_OK;
   }
-
   else {
+    /* We fell through all checks and thus we don't support the specified
+       protocol */
     failf(data, "Unsupported protocol: %s", conn->proto);
     return CURLE_UNSUPPORTED_PROTOCOL;
   }
 
+  /*************************************************************
+   * .netrc scanning coming up
+   *************************************************************/
   if(data->bits.use_netrc) {
     if(Curl_parsenetrc(data->hostname, data->user, data->passwd)) {
       infof(data, "Couldn't find host %s in the .netrc file, using defaults",
@@ -1093,9 +1143,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   else if(!(data->bits.user_passwd) &&
 	  (conn->protocol & (PROT_FTP|PROT_HTTP)) ) {
     /* This is a FTP or HTTP URL, and we haven't got the user+password in
-       the extra parameter, we will now try to extract the possible
-       user+password pair in a string like:
-       ftp://user:password@ftp.my.site:8021/README */
+     * the extra parameter, we will now try to extract the possible
+     * user+password pair in a string like:
+     * ftp://user:password@ftp.my.site:8021/README */
     char *ptr=NULL; /* assign to remove possible warnings */
     if((ptr=strchr(conn->name, '@'))) {
       /* there's a user+password given here, to the left of the @ */
@@ -1147,12 +1197,16 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     }
   }
 
-  /* No matter if we use a proxy or not, we have to figure out the remote
-     port number of various reasons.
-     
-     To be able to detect port number flawlessly, we must not confuse them
-     IPv6-specified addresses in the [0::1] style.
-  */
+  /*************************************************************
+   * Figure out the remote port number
+   *
+   * No matter if we use a proxy or not, we have to figure out the remote
+   * port number of various reasons.
+   *
+   * To be able to detect port number flawlessly, we must not confuse them
+   * IPv6-specified addresses in the [0::1] style.
+   *************************************************************/
+
   if((1 == sscanf(conn->name, "[%*39[0-9a-fA-F:]%c", &endbracket)) &&
      (']' == endbracket)) {
     /* this is a IPv6-style specified IP-address */
@@ -1177,6 +1231,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     data->remote_port = atoi(tmp);
   }
 
+  /*************************************************************
+   * Resolve the name of the server or proxy
+   *************************************************************/
   if(!data->bits.httpproxy) {
     /* If not connecting via a proxy, extract the port from the URL, if it is
      * there, thus overriding any defaults that might have been set above. */
@@ -1254,15 +1311,15 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
      HAVE_XXXX based, although at the moment I don't have a decent test for
      this! */
 
-  /* sck 8/31/2000 add support for specifing device to bind socket to */
-  /* I am using this, but it may not work everywhere, only tested on
-     RedHat 6.2 */
 #ifdef HAVE_INET_NTOA
 
 #ifndef INADDR_NONE
 #define INADDR_NONE (unsigned long) ~0
 #endif
 
+  /*************************************************************
+   * Select device to bind socket to
+   *************************************************************/
   if (data->device && (strlen(data->device)<255)) {
     struct sockaddr_in sa;
     struct hostent *h=NULL;
@@ -1369,6 +1426,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 #endif  /* end of HAVE_INET_NTOA */
 #endif /* end of not WIN32 */
 
+  /*************************************************************
+   * Connect to server/proxy
+   *************************************************************/
   if (connect(data->firstsocket,
               (struct sockaddr *) &(conn->serv_addr),
               sizeof(conn->serv_addr)
@@ -1418,6 +1478,9 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     return CURLE_COULDNT_CONNECT;
   }
 
+  /*************************************************************
+   * Proxy authentication
+   *************************************************************/
   if(data->bits.proxy_user_passwd) {
     char *authorization;
     snprintf(data->buffer, BUFSIZE, "%s:%s",
@@ -1429,6 +1492,11 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
       free(authorization);
     }
   }
+
+  /*************************************************************
+   * Send user-agent to HTTP proxies even if the target protocol
+   * isn't HTTP.
+   *************************************************************/
   if((conn->protocol&PROT_HTTP) || data->bits.httpproxy) {
     if(data->useragent) {
       data->ptr_uagent =
@@ -1440,9 +1508,11 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     /* is there a connect() procedure? */
 
     /* set start time here for timeout purposes in the
-       connect procedure, it is later set again for the
-       progress meter purpose */
+     * connect procedure, it is later set again for the
+     * progress meter purpose */
     conn->now = Curl_tvnow();
+
+    /* Call the protocol-specific connect function */
     result = conn->curl_connect(conn);
     if(result != CURLE_OK)
       return result; /* pass back errors */
@@ -1453,7 +1523,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
   conn->now = Curl_tvnow(); /* time this *after* the connect is done */
   conn->bytecount = 0;
   
-  /* Figure out the ip-number and the first host name it shows: */
+  /* Figure out the ip-number and display the first host name it shows: */
   {
     struct in_addr in;
     (void) memcpy(&in.s_addr, *conn->hp->h_addr_list, sizeof (in.s_addr));
