@@ -805,17 +805,6 @@ typedef enum {
   CURL_TIMECOND_LAST
 } curl_TimeCond;
 
-/* for backwards compatibility */
-#ifndef TIMECOND_IFMODSINCE
-#define TIMECOND_IFMODSINCE CURL_TIMECOND_IFMODSINCE
-#endif
-#ifndef TIMECOND_IFUNMODSINCE
-#define TIMECOND_IFUNMODSINCE CURL_TIMECOND_IFUNMODSINCE
-#endif
-#ifndef TIMECOND_LASTMOD
-#define TIMECOND_LASTMOD CURL_TIMECOND_LASTMOD
-#endif
-
 #ifdef __BEOS__
 #include <support/SupportDefs.h>
 #endif
