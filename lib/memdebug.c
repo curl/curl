@@ -130,6 +130,32 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
   return mem->mem;
 }
 
+void *curl_docalloc(size_t wanted_elements, size_t wanted_size,
+                    int line, const char *source)
+{
+  struct memdebug *mem;
+  size_t size, user_size;
+
+  if(countcheck("calloc", line, source))
+    return NULL;
+
+  /* alloc at least 64 bytes */
+  user_size = wanted_size * wanted_elements;
+  size = sizeof(struct memdebug) + user_size;
+
+  mem = (struct memdebug *)(malloc)(size);
+  if(mem) {
+    /* fill memory with zeroes */
+    memset(mem->mem, 0, user_size);
+    mem->size = user_size;
+  }
+
+  if(logfile && source)
+    fprintf(logfile, "MEM %s:%d calloc(%u,%u) = %p\n",
+            source, line, wanted_elements, wanted_size, mem->mem);
+  return mem->mem;
+}
+
 char *curl_dostrdup(const char *str, int line, const char *source)
 {
   char *mem;
@@ -235,8 +261,8 @@ FILE *curl_fopen(const char *file, const char *mode,
 {
   FILE *res=(fopen)(file, mode);
   if(logfile)
-    fprintf(logfile, "FILE %s:%d fopen(\"%s\") = %p\n",
-            source, line, file, res);
+    fprintf(logfile, "FILE %s:%d fopen(\"%s\",\"%s\") = %p\n",
+            source, line, file, mode, res);
   return res;
 }
 
