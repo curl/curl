@@ -1,5 +1,7 @@
   Changelog for the c-ares project
 
+Version 1.2.1 (October 20, 2004)
+
 * September 29
 
 - Henrik Stoerner fix: got a report that Tru64 Unix (the unix from Digital
