@@ -221,7 +221,7 @@ typedef enum {
 #ifdef CINIT
 #undef CINIT
 #endif
-#if defined(__STDC__) || defined(_MSC_VER)
+#if defined(__STDC__) || defined(_MSC_VER) || defined(__cplusplus)
 #define CINIT(name,type,number) CURLOPT_ ## name = CURLOPTTYPE_ ## type + number
 #else
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
@@ -650,7 +650,7 @@ int curl_formparse(char *, struct curl_httppost **,
 #undef CFINIT
 #endif
 
-#if defined(__STDC__) || defined(_MSC_VER)
+#if defined(__STDC__) || defined(_MSC_VER) || defined(__cplusplus)
 #define CFINIT(name) CURLFORM_ ## name
 #else
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
