@@ -29,7 +29,7 @@
 
 /* This is the version number of the libcurl package from which this header
    file origins: */
-#define LIBCURL_VERSION "7.10.7-pre2"
+#define LIBCURL_VERSION "7.10.7-pre3"
 
 /* This is the numeric version of the libcurl version number, meant for easier
    parsing and comparions by programs. The LIBCURL_VERSION_NUM define will
@@ -671,6 +671,11 @@ typedef enum {
 
   /* FTP Option that causes missing dirs to be created on the remote server */
   CINIT(FTP_CREATE_MISSING_DIRS, LONG, 110),
+
+  /* Set this to a bitmask value to enable the particular authentications
+     methods you like. Use this in combination with CURLOPT_PROXYUSERPWD.
+     Note that setting multiple bits may cause extra network round-trips. */
+  CINIT(PROXYAUTH, LONG, 111),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
