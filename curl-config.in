@@ -49,7 +49,7 @@ while test $# -gt 0; do
 	;;
 
     --version)
-	echo curl @VERSION@
+	echo libcurl @VERSION@
 	exit 0
 	;;
 
