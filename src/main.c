@@ -244,6 +244,7 @@ static void help(void)
        " -i/--include       Include the HTTP-header in the output (H)\n"
        " -I/--head          Fetch document info only (HTTP HEAD/FTP SIZE)\n"
        "    --interface <interface> Specify the interface to be used\n"
+       "    --krb4 <level>  Enable krb4 with specified security level (F)\n"
        " -K/--config        Specify which config file to read\n"
        " -l/--list-only     List only names of an FTP directory (F)\n"
        " -L/--location      Follow Location: hints (H)\n"
@@ -300,7 +301,7 @@ struct Configurable {
   char *headerfile;
   char remotefile;
   char *ftpport;
-  char *interface;
+  char *iface;
   unsigned short porttouse;
   char *range;
   int low_speed_limit;
@@ -319,6 +320,7 @@ struct Configurable {
   bool crlf;
   char *cookiefile;
   char *customrequest;
+  char *krb4level;
   bool progressmode;
   bool nobuffer;
 
@@ -443,6 +445,7 @@ static int getparameter(char *flag, /* f or -long-flag */
     {"9", "crlf",        FALSE},
     {"8", "stderr",      TRUE},
     {"7", "interface",   TRUE},
+    {"6", "krb4",        TRUE},
 
     {"2", "sslv2",       FALSE},
     {"3", "sslv3",       FALSE},
@@ -614,7 +617,12 @@ static int getparameter(char *flag, /* f or -long-flag */
       break;
     case '7': /* there is no short letter for this */
       /* interface */
-      GetStr(&config->interface, nextarg);
+      GetStr(&config->iface, nextarg);
+      break;
+    case '6': /* there is no short letter for this */
+      /* krb4 level string */
+      GetStr(&config->krb4level, nextarg);
+      break;
     case '#': /* added 19990617 larsa */
       config->progressmode ^= CURL_PROGRESS_BAR;
       break;
@@ -1500,8 +1508,11 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, config.customrequest);
     curl_easy_setopt(curl, CURLOPT_STDERR, config.errors);
     curl_easy_setopt(curl, CURLOPT_WRITEINFO, config.writeout);
+
+    /* three new ones in libcurl 7.3: */
     curl_easy_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config.proxytunnel);
-    curl_easy_setopt(curl, CURLOPT_INTERFACE, config.interface);
+    curl_easy_setopt(curl, CURLOPT_INTERFACE, config.iface);
+    curl_easy_setopt(curl, CURLOPT_KRB4LEVEL, config.krb4level);
 
     if((config.progressmode == CURL_PROGRESS_BAR) &&
        !(config.conf&(CONF_NOPROGRESS|CONF_MUTE))) {
