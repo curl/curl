@@ -381,6 +381,9 @@ typedef enum {
   /* size of the POST input data, if strlen() is not good to use */
   CINIT(POSTFIELDSIZE, LONG, 60),
 
+  /* tunnel non-http operations through a HTTP proxy */
+  CINIT(HTTPPROXYTUNNEL, LONG, 61),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
