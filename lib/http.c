@@ -161,7 +161,7 @@ CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
     free(in->buffer);
   free(in);
 
-  *bytes_written = amount;
+  *bytes_written += amount;
 
   return res;
 }
