@@ -1391,6 +1391,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #ifdef HAVE_ALARM
   unsigned int prev_alarm;
 #endif
+  char endbracket;
 
 #ifdef HAVE_SIGACTION
   struct sigaction keep_sigact;   /* store the old struct here */
@@ -1980,8 +1981,19 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * The conn->name is currently [user:passwd@]host[:port] where host could
    * be a hostname, IPv4 address or IPv6 address.
    *************************************************************/
+  if((1 == sscanf(conn->name, "[%*39[0-9a-fA-F:.]%c", &endbracket)) &&
+     (']' == endbracket)) {
+    /* this is a RFC2732-style specified IP-address */
 
-  tmp = strrchr(conn->name, ':');
+    conn->name++; /* pass the starting bracket */ 
+    tmp = strchr(conn->name, ']');
+    *tmp = 0; /* zero terminate */
+    tmp++; /* pass the ending bracket */
+    if(':' != *tmp)
+      tmp = NULL; /* no port number available */
+  }
+  else
+    tmp = strrchr(conn->name, ':');
 
   if (tmp) {
     char *rest;
