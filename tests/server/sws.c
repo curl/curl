@@ -81,6 +81,9 @@
 static void win32_cleanup(void);
 #endif
 
+/* include memdebug.h last */
+#include "memdebug.h"
+
 #define REQBUFSIZ 150000
 #define REQBUFSIZ_TXT "149999"
 

@@ -29,9 +29,16 @@ AUTOMAKE_OPTIONS = foreign
 
 INCLUDES = -I$(top_srcdir)/lib -I$(top_srcdir)/include
 
-noinst_PROGRAMS = sws
+noinst_PROGRAMS = sws getpart
 
-sws_SOURCES= sws.c getpart.c getpart.h $(top_srcdir)/lib/strequal.c
+sws_SOURCES= sws.c getpart.c getpart.h $(top_srcdir)/lib/strequal.c	\
+ $(top_srcdir)/lib/base64.c $(top_srcdir)/lib/mprintf.c			\
+ $(top_srcdir)/lib/memdebug.c
 
-extra_DIST = config.h.in
+extra_DIST = base64.pl
 
+getpart_CPPFLAGS = -DGETPART_TEST
+
+getpart_SOURCES= getpart.c getpart.h $(top_srcdir)/lib/strequal.c	\
+ $(top_srcdir)/lib/base64.c $(top_srcdir)/lib/mprintf.c			\
+ $(top_srcdir)/lib/memdebug.c

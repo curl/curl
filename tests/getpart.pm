@@ -56,6 +56,7 @@ sub getpart {
 
     my @this;
     my $inside=0;
+    my $base64=0;
 
  #   print "Section: $section, part: $part\n";
 
@@ -65,6 +66,10 @@ sub getpart {
             $inside++;
         }
         elsif((1 ==$inside) && ($_ =~ /^ *\<$part[ \>]/)) {
+            if($_ =~ /$part .*base64=/) {
+                # attempt to detect base64 encoded parts
+                $base64=1;
+            }
             $inside++;
         }
         elsif((2 ==$inside) && ($_ =~ /^ *\<\/$part/)) {
@@ -76,6 +81,13 @@ sub getpart {
             }
             if(!@this && $warning) {
                 print STDERR "*** getpart.pm: $section/$part returned empty!\n";
+            }
+            if($base64) {
+                # decode the whole array before returning it!
+                for(@this) {
+                    my $decoded = decode_base64($_);
+                    $_ = $decoded;
+                }
             }
             return @this;
         }
@@ -138,16 +150,31 @@ sub compareparts {
  my $sizefirst=scalar(@$firstref);
  my $sizesecond=scalar(@$secondref);
 
+ my $first;
+ my $second;
+
  for(1 .. $sizefirst) {
      my $index = $_ - 1;
      if($firstref->[$index] ne $secondref->[$index]) {
          (my $aa = $firstref->[$index]) =~ s/\r+\n$/\n/;
          (my $bb = $secondref->[$index]) =~ s/\r+\n$/\n/;
-         if($aa ne $bb) {
-             return 1+$index;
-         }
+         
+         $first .= $firstref->[$index];
+         $second .= $secondref->[$index];
      }
  }
+
+ # we cannot compare arrays index per index since with the base64 chunks,
+ # they may not be "evenly" distributed
+
+ # NOTE: this no longer strips off carriage returns from the arrays. Is that
+ # really necessary? It ruins the testing of newlines. I believe it was once
+ # added to enable tests on win32.
+
+ if($first ne $second) {
+     return 1;
+ }
+
  return 0;
 }
 

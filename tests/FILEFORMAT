@@ -14,7 +14,7 @@ specified, that will be checked/used if specified. This document includes all
 the subsections currently supported.
 
 <reply>
-<data [nocheck=1] [sendzero=yes]>
+<data [nocheck=1] [sendzero=yes] [base64=yes]>
 §data to sent to the client on its request and later verified that it arrived
 safely. Set the nocheck=1 to prevent the test script to verify the arrival
 of this data.
@@ -31,6 +31,11 @@ for auth tests and similar.
 'sendzero' set to yes means that the (FTP) server will "send" the data even if
 the size is zero bytes. Used to verify curl's behaviour on zero bytes
 transfers.
+
+'base64' set to yes means that the data provided in the test-file is a chunk
+of data encoded with base64. It is the only way a test case can contain binary
+data. (This attribute can in fact be used on any section, but it doesn't make
+much sense for other sections than "data").
 </data>
 <dataNUM>
 Send back this contents instead of the <data> one. The num is set by:

@@ -23,6 +23,7 @@
 ###########################################################################
 # These should be the only variables that might be needed to get edited:
 
+use MIME::Base64;
 use strict;
 #use warnings;
 
