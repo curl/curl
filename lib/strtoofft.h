@@ -27,14 +27,13 @@
 #include "setup.h"
 #include <stddef.h>
 
-/* Determine what type of file offset conversion handling we wish
- * to use.  For systems with a 32-bit off_t type, we should use
- * strtol.  For systems with a 64-bit off_t type, we should use
- * strtoll if it exists, and if not, should try to emulate its
- * functionality.  At any rate, we define 'strtoofft' such that it
- * can be used to work with off_t's regardless.
+/* Determine what type of file offset conversion handling we wish to use.  For
+ * systems with a 32-bit curl_off_t type, we should use strtol.  For systems
+ * with a 64-bit curl_off_t type, we should use strtoll if it exists, and if
+ * not, should try to emulate its functionality.  At any rate, we define
+ * 'strtoofft' such that it can be used to work with curl_off_t's regardless.
  */
-#if SIZEOF_OFF_T > 4
+#if SIZEOF_CURL_OFF_T > 4
 #if HAVE_STRTOLL
 #define strtoofft strtoll
 #else

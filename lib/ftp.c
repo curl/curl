@@ -921,7 +921,7 @@ static CURLcode ftp_transfertype(struct connectdata *conn,
 
 static
 CURLcode ftp_getsize(struct connectdata *conn, char *file,
-                      off_t *size)
+                     curl_off_t *size)
 {
   struct SessionHandle *data = conn->data;
   int ftpcode;
@@ -1660,7 +1660,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 
   /* the ftp struct is already inited in Curl_ftp_connect() */
   struct FTP *ftp = conn->proto.ftp;
-  off_t *bytecountp = ftp->bytecountp;
+  curl_off_t *bytecountp = ftp->bytecountp;
 
   if(data->set.upload) {
 
@@ -1692,7 +1692,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       if(conn->resume_from < 0 ) {
         /* we could've got a specified offset from the command line,
            but now we know we didn't */
-        off_t gottensize;
+        curl_off_t gottensize;
 
         if(CURLE_OK != ftp_getsize(conn, ftp->file, &gottensize)) {
           failf(data, "Couldn't get remote file size");
@@ -1703,7 +1703,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
 
       if(conn->resume_from) {
         /* do we still game? */
-        off_t passed=0;
+        curl_off_t passed=0;
         /* enable append instead */
         data->set.ftp_append = 1;
 
@@ -1711,8 +1711,8 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
            input. If we knew it was a proper file we could've just
            fseek()ed but we only have a stream here */
         do {
-          off_t readthisamountnow = (conn->resume_from - passed);
-          off_t actuallyread;
+          curl_off_t readthisamountnow = (conn->resume_from - passed);
+          curl_off_t actuallyread;
 
           if(readthisamountnow > BUFSIZE)
             readthisamountnow = BUFSIZE;
@@ -1802,11 +1802,11 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
   else if(!data->set.no_body) {
     /* Retrieve file or directory */
     bool dirlist=FALSE;
-    off_t downloadsize=-1;
+    curl_off_t downloadsize=-1;
 
     if(conn->bits.use_range && conn->range) {
-      off_t from, to;
-      off_t totalsize=-1;
+      curl_off_t from, to;
+      curl_off_t totalsize=-1;
       char *ptr;
       char *ptr2;
 
@@ -1863,7 +1863,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
             (data->set.ftp_list_only?"NLST":"LIST"));
     }
     else {
-      off_t foundsize;
+      curl_off_t foundsize;
 
       /* Set type to binary (unless specified ASCII) */
       result = ftp_transfertype(conn, data->set.ftp_ascii);
@@ -1986,7 +1986,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
         E:
         125 Data connection already open; Transfer starting. */
 
-      off_t size=-1; /* default unknown size */
+      curl_off_t size=-1; /* default unknown size */
 
 
       /*
@@ -2170,7 +2170,7 @@ CURLcode ftp_perform(struct connectdata *conn,
     /* The SIZE command is _not_ RFC 959 specified, and therefor many servers
        may not support it! It is however the only way we have to get a file's
        size! */
-    off_t filesize;
+    curl_off_t filesize;
     ssize_t nread;
     int ftpcode;
 

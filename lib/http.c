@@ -1245,14 +1245,14 @@ CURLcode Curl_http(struct connectdata *conn)
 
     if(conn->resume_from) {
       /* do we still game? */
-      off_t passed=0;
+      curl_off_t passed=0;
 
       /* Now, let's read off the proper amount of bytes from the
          input. If we knew it was a proper file we could've just
          fseek()ed but we only have a stream here */
       do {
-        off_t readthisamountnow = (conn->resume_from - passed);
-        off_t actuallyread;
+        curl_off_t readthisamountnow = (conn->resume_from - passed);
+        curl_off_t actuallyread;
 
         if(readthisamountnow > BUFSIZE)
           readthisamountnow = BUFSIZE;
@@ -1299,7 +1299,8 @@ CURLcode Curl_http(struct connectdata *conn)
 
       if(conn->resume_from) {
         /* This is because "resume" was selected */
-        off_t total_expected_size= conn->resume_from + data->set.infilesize;
+        curl_off_t total_expected_size=
+          conn->resume_from + data->set.infilesize;
         conn->allocptr.rangeline =
 	    aprintf("Content-Range: bytes %s%Od/%Od\r\n",
 		    conn->range, total_expected_size-1,

@@ -38,6 +38,8 @@
 #include <ctype.h>
 #include <string.h>
 
+#include <curl/curl.h> /* for the curl_off_t type */
+
 #ifndef SIZEOF_LONG_DOUBLE
 #define SIZEOF_LONG_DOUBLE 0
 #endif
@@ -377,9 +379,10 @@ static int dprintf_Pass1(char *format, va_stack_t *vto, char **endpos, va_list a
 	    flags |= FLAGS_LONG;
 	  break;
 	case 'O':
-	  if (sizeof(off_t) > sizeof(unsigned long int)) {
+	  if (sizeof(curl_off_t) > sizeof(unsigned long int)) {
 	    flags |= FLAGS_LONGLONG;
-	  } else if (sizeof(off_t) > sizeof(unsigned int)) {
+	  }
+          else if (sizeof(curl_off_t) > sizeof(unsigned int)) {
 	    flags |= FLAGS_LONG;
 	  }
 	  break;

@@ -1955,14 +1955,14 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
 CURLcode 
 Curl_Transfer(struct connectdata *c_conn, /* connection data */
-              int sockindex,    /* socket index to read from or -1 */
-              off_t size,         /* -1 if unknown at this point */
-              bool getheader,   /* TRUE if header parsing is wanted */
-              off_t *bytecountp, /* return number of bytes read or NULL */
+              int sockindex,       /* socket index to read from or -1 */
+              curl_off_t size,     /* -1 if unknown at this point */
+              bool getheader,      /* TRUE if header parsing is wanted */
+              curl_off_t *bytecountp, /* return number of bytes read or NULL */
               int writesockindex,  /* socket index to write to, it may very
                                       well be the same we read from. -1
                                       disables */
-              off_t *writebytecountp /* return number of bytes written or
+              curl_off_t *writecountp /* return number of bytes written or
                                        NULL */
               )
 {
@@ -1978,7 +1978,7 @@ Curl_Transfer(struct connectdata *c_conn, /* connection data */
   conn->bits.getheader = getheader;
   conn->bytecountp = bytecountp;
   conn->writesockfd = writesockindex==-1?-1:conn->sock[writesockindex];
-  conn->writebytecountp = writebytecountp;
+  conn->writebytecountp = writecountp;
 
   return CURLE_OK;
 

@@ -38,11 +38,11 @@ CURLcode Curl_readwrite_init(struct connectdata *conn);
 CURLcode 
 Curl_Transfer (struct connectdata *data,
                int sockfd,		/* socket to read from or -1 */
-               off_t size,		/* -1 if unknown at this point */
+               curl_off_t size,		/* -1 if unknown at this point */
                bool getheader,     	/* TRUE if header parsing is wanted */
-               off_t *bytecountp,	/* return number of bytes read */
+               curl_off_t *bytecountp,	/* return number of bytes read */
                int writesockfd,      /* socket to write to, it may very well be
                                         the same we read from. -1 disables */
-               off_t *writebytecountp /* return number of bytes written */
+               curl_off_t *writecountp /* return number of bytes written */
 );
 #endif

@@ -69,7 +69,7 @@
 #define SELECT_TYPE_ARG1 int
 #define SELECT_TYPE_ARG234 (fd_set *)
 #define SELECT_TYPE_ARG5 (struct timeval *)
-#define SIZEOF_OFF_T 4
+#define SIZEOF_CURL_OFF_T 4
 
 #define STDC_HEADERS 1
 #define TIME_WITH_SYS_TIME 1

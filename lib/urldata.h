@@ -77,15 +77,15 @@
 
 #include "timeval.h"
 
+#ifdef HAVE_ZLIB_H
+#include <zlib.h> 		/* for content-encoding */
+#endif
+
 #include <curl/curl.h>
 
 #include "http_chunks.h" /* for the structs and enum stuff */
 #include "hostip.h"
 #include "hash.h"
-
-#ifdef HAVE_ZLIB_H
-#include <zlib.h> 		/* for content-encoding */
-#endif
 
 #ifdef HAVE_GSSAPI
 #ifdef HAVE_GSSMIT
@@ -211,8 +211,8 @@ struct HTTP {
 
   const char *p_pragma;      /* Pragma: string */
   const char *p_accept;      /* Accept: string */
-  off_t readbytecount; 
-  off_t writebytecount;
+  curl_off_t readbytecount; 
+  curl_off_t writebytecount;
 
   /* For FORM posting */
   struct Form form;
@@ -240,7 +240,7 @@ struct HTTP {
  * FTP unique setup
  ***************************************************************************/
 struct FTP {
-  off_t *bytecountp;
+  curl_off_t *bytecountp;
   char *user;    /* user name string */
   char *passwd;  /* password string */
   char *urlpath; /* the originally given path part of the URL */
@@ -250,7 +250,7 @@ struct FTP {
   char *entrypath; /* the PWD reply when we logged on */
 
   char *cache;       /* data cache between getresponse()-calls */
-  off_t cache_size; /* size of cache in bytes */
+  curl_off_t cache_size; /* size of cache in bytes */
   bool dont_check;  /* Set to TRUE to prevent the final (post-transfer)
                        file size and 226/250 status check. It should still
                        read the line, just ignore the result. */
@@ -305,7 +305,7 @@ struct ConnectBits {
  */
 
 struct Curl_transfer_keeper {
-  off_t bytecount;                /* total number of bytes read */
+  curl_off_t bytecount;                /* total number of bytes read */
   int writebytecount;           /* number of bytes written */
   struct timeval start;         /* transfer started at this time */
   struct timeval now;           /* current time */
@@ -326,7 +326,7 @@ struct Curl_transfer_keeper {
   char *end_ptr;		/* within buf */
   char *p;			/* within headerbuff */
   bool content_range;      	/* set TRUE if Content-Range: was found */
-  off_t offset;	                /* possible resume offset read from the
+  curl_off_t offset;	                /* possible resume offset read from the
                                    Content-Range: header */
   int httpcode;		        /* error code from the 'HTTP/1.? XXX' line */
   int httpversion;		/* the HTTP version*10 */
@@ -428,12 +428,12 @@ struct connectdata {
   unsigned short remote_port; /* what remote port to connect to,
                                  not the proxy port! */
   char *ppath;
-  off_t bytecount;
+  curl_off_t bytecount;
   long headerbytecount;  /* only count received headers */
 
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
-  off_t resume_from; /* continue [ftp] transfer from here */
+  curl_off_t resume_from; /* continue [ftp] transfer from here */
 
   char *proxyhost; /* name of the http proxy host */
 
@@ -447,7 +447,7 @@ struct connectdata {
   struct timeval created; /* creation time */
   int sock[2];       /* two sockets, the second is used for the data transfer
                         when doing FTP */
-  off_t maxdownload; /* in bytes, the maximum amount of data to fetch, 0
+  curl_off_t maxdownload; /* in bytes, the maximum amount of data to fetch, 0
                         means unlimited */
   
   struct ssl_connect_data ssl[2]; /* this is for ssl-stuff */
@@ -484,14 +484,14 @@ struct connectdata {
   /**** curl_get() phase fields */
 
   /* READ stuff */
-  int sockfd;		 /* socket to read from or -1 */
-  off_t size;		 /* -1 if unknown at this point */
-  off_t *bytecountp;	 /* return number of bytes read or NULL */
+  int sockfd;		  /* socket to read from or -1 */
+  curl_off_t size;	  /* -1 if unknown at this point */
+  curl_off_t *bytecountp; /* return number of bytes read or NULL */
           
   /* WRITE stuff */
   int writesockfd;       /* socket to write to, it may very
                             well be the same we read from. -1 disables */
-  off_t *writebytecountp; /* return number of bytes written or NULL */
+  curl_off_t *writebytecountp; /* return number of bytes written or NULL */
 
   /** Dynamicly allocated strings, may need to be freed before this **/
   /** struct is killed.                                             **/
@@ -785,10 +785,10 @@ struct UserDefined {
   long timeout;         /* in seconds, 0 means no timeout */
   long connecttimeout;  /* in seconds, 0 means no timeout */
   long ftp_response_timeout; /* in seconds, 0 means no timeout */
-  off_t infilesize;      /* size of file to upload, -1 means unknown */
+  curl_off_t infilesize;      /* size of file to upload, -1 means unknown */
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
-  off_t set_resume_from;  /* continue [ftp] transfer from here */
+  curl_off_t set_resume_from;  /* continue [ftp] transfer from here */
   char *cookie;         /* HTTP cookie string to send */
   struct curl_slist *headers; /* linked list of extra headers */
   struct curl_httppost *httppost;  /* linked list of POST data */
@@ -830,7 +830,7 @@ struct UserDefined {
 
   int ip_version; 
 
-  off_t max_filesize; /* Maximum file size to download */
+  curl_off_t max_filesize; /* Maximum file size to download */
   
 /* Here follows boolean settings that define how to behave during
    this session. They are STATIC, set by libcurl users or at least initially

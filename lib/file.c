@@ -163,12 +163,12 @@ CURLcode Curl_file(struct connectdata *conn)
   */
   CURLcode res = CURLE_OK;
   struct stat statbuf;
-  off_t expected_size=0;
+  curl_off_t expected_size=0;
   bool fstated=FALSE;
   ssize_t nread;
   struct SessionHandle *data = conn->data;
   char *buf = data->state.buffer;
-  off_t bytecount = 0;
+  curl_off_t bytecount = 0;
   struct timeval start = Curl_tvnow();
   struct timeval now = start;
   int fd;
