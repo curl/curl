@@ -6,6 +6,8 @@
 
                                   Changelog
 
+Version 7.11.0 (22 Januari 2004)
+
 Daniel (21 January 2004)
 - Removed the defines in the public header file with TIMECOND_ prefixes. They
   have been obsolete since April 22nd 2002, and if this causes anyone any
