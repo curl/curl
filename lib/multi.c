@@ -494,7 +494,6 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
                and then we continue to 'STATE_PROTOCONNECT'. If protocol
                connect is TRUE, we move on to STATE_DO. */
             multistate(easy, CURLM_STATE_PROTOCONNECT);
-            fprintf(stderr, "WAITCONNECT => PROTOCONNECT\n");
           }
           else {
             /* after the connect has completed, go DO */
