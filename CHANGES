@@ -6,6 +6,16 @@
 
                                   Changelog
 
+Daniel (16 July)
+- Cris Bailiff's bug report 768275 pointed out that using Basic auth with
+  wrong user+password caused an endless loop. Fixed now. He also found out that
+  we didn't properly authenticate connections with NTLM. Fixed too.
+
+- Dan Winship provided fixes for the NTLM code.
+
+Daniel (5 July)
+- Doug Kaufman provided additional fixes for the DOS port.
+
 Daniel (4 July)
 - Rick Richardson pointed out that using setvbuf() to achive non-buffering
   on output is no-good for SCO Xenix and other unixes. We switched over to
