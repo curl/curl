@@ -7,6 +7,19 @@
                                   Changelog
 
 
+Daniel (16 February 2004)
+- Fixed a problem when displaying verbose for ipv6-enabled libcurls and
+  re-used connections. Problem reported and fix verified by Grigory Entin.
+
+- Jeff Lawson fixed the version-check in the SOCKS5 code.
+
+Daniel (15 February 2004)
+- Fixed a case where a host cache entry was not flagged in-use properly when a
+  cached entry was used.
+
+- Andrés García's patch that checks for winmm in the configure script was
+  applied.
+
 Daniel (13 February 2004)
 - Ben Greear's SO_BINDTODEVICE patch for the binding of the local end to a
   specific network interface.
