@@ -98,7 +98,7 @@ int Curl_ourerrno(void)
  *  Set the socket to either blocking or non-blocking mode.
  */
 
-int Curl_nonblock(int socket,    /* operate on this */
+int Curl_nonblock(int sockfd,    /* operate on this */
                   int nonblock   /* TRUE or FALSE */)
 {
 #undef SETBLOCK
@@ -106,11 +106,11 @@ int Curl_nonblock(int socket,    /* operate on this */
   /* most recent unix versions */
   int flags;
 
-  flags = fcntl(socket, F_GETFL, 0);
+  flags = fcntl(sockfd, F_GETFL, 0);
   if (TRUE == nonblock)
-    return fcntl(socket, F_SETFL, flags | O_NONBLOCK);
+    return fcntl(sockfd, F_SETFL, flags | O_NONBLOCK);
   else
-    return fcntl(socket, F_SETFL, flags & (~O_NONBLOCK));
+    return fcntl(sockfd, F_SETFL, flags & (~O_NONBLOCK));
 #define SETBLOCK 1
 #endif
 
@@ -119,7 +119,7 @@ int Curl_nonblock(int socket,    /* operate on this */
   int flags;
 
   flags = nonblock;
-  return ioctl(socket, FIONBIO, &flags);
+  return ioctl(sockfd, FIONBIO, &flags);
 #define SETBLOCK 2
 #endif
 
@@ -127,20 +127,20 @@ int Curl_nonblock(int socket,    /* operate on this */
   /* Windows? */
   int flags;
   flags = nonblock;
-  return ioctlsocket(socket, FIONBIO, &flags);
+  return ioctlsocket(sockfd, FIONBIO, &flags);
 #define SETBLOCK 3
 #endif
 
 #ifdef HAVE_IOCTLSOCKET_CASE
   /* presumably for Amiga */
-  return IoctlSocket(socket, FIONBIO, (long)nonblock);
+  return IoctlSocket(sockfd, FIONBIO, (long)nonblock);
 #define SETBLOCK 4
 #endif
 
 #ifdef HAVE_SO_NONBLOCK
   /* BeOS */
   long b = nonblock ? 1 : 0;
-  return setsockopt(socket, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
+  return setsockopt(sockfd, SOL_SOCKET, SO_NONBLOCK, &b, sizeof(b));
 #define SETBLOCK 5
 #endif
 
