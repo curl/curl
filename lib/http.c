@@ -1626,16 +1626,22 @@ CURLcode Curl_http(struct connectdata *conn)
       while(co) {
         if(co->value) {
           if(0 == count) {
-            add_bufferf(req_buffer, "Cookie: ");
+            result = add_bufferf(req_buffer, "Cookie: ");
+            if(result)
+              return result;
           }
-          add_bufferf(req_buffer,
-                      "%s%s=%s", count?"; ":"", co->name, co->value);
+          result = add_bufferf(req_buffer,
+                               "%s%s=%s", count?"; ":"", co->name, co->value);
+          if(result)
+            return result;
           count++;
         }
         co = co->next; /* next cookie please */
       }
       if(count) {
-        add_buffer(req_buffer, "\r\n", 2);
+        result = add_buffer(req_buffer, "\r\n", 2);
+        if(result)
+          return result;
       }
       Curl_cookie_freelist(store); /* free the cookie list */
       co=NULL;
@@ -1669,18 +1675,20 @@ CURLcode Curl_http(struct connectdata *conn)
       switch(data->set.timecondition) {
       case CURL_TIMECOND_IFMODSINCE:
       default:
-        add_bufferf(req_buffer,
-                    "If-Modified-Since: %s\r\n", buf);
+        result = add_bufferf(req_buffer,
+                             "If-Modified-Since: %s\r\n", buf);
         break;
       case CURL_TIMECOND_IFUNMODSINCE:
-        add_bufferf(req_buffer,
-                    "If-Unmodified-Since: %s\r\n", buf);
+        result = add_bufferf(req_buffer,
+                             "If-Unmodified-Since: %s\r\n", buf);
         break;
       case CURL_TIMECOND_LASTMOD:
-        add_bufferf(req_buffer,
-                    "Last-Modified: %s\r\n", buf);
+        result = add_bufferf(req_buffer,
+                             "Last-Modified: %s\r\n", buf);
         break;
       }
+      if(result)
+        return result;
     }
 
     while(headers) {
@@ -1695,7 +1703,9 @@ CURLcode Curl_http(struct connectdata *conn)
         if(*ptr) {
           /* only send this if the contents was non-blank */
 
-          add_bufferf(req_buffer, "%s\r\n", headers->data);
+          result = add_bufferf(req_buffer, "%s\r\n", headers->data);
+          if(result)
+            return result;
         }
       }
       headers = headers->next;
@@ -1722,17 +1732,23 @@ CURLcode Curl_http(struct connectdata *conn)
 
       http->sending = HTTPSEND_BODY;
 
-      if(!conn->bits.upload_chunky)
+      if(!conn->bits.upload_chunky) {
         /* only add Content-Length if not uploading chunked */
-        add_bufferf(req_buffer,
-                    "Content-Length: %" FORMAT_OFF_T "\r\n", http->postsize);
+        result = add_bufferf(req_buffer,
+                             "Content-Length: %" FORMAT_OFF_T "\r\n",
+                             http->postsize);
+        if(result)
+          return result;
+      }
 
       if(!checkheaders(data, "Expect:")) {
         /* if not disabled explicitly we add a Expect: 100-continue
            to the headers which actually speeds up post operations (as
            there is one packet coming back from the web server) */
-        add_bufferf(req_buffer,
-                    "Expect: 100-continue\r\n");
+        result = add_bufferf(req_buffer,
+                             "Expect: 100-continue\r\n");
+        if(result)
+          return result;
         data->set.expect100header = TRUE;
       }
 
@@ -1753,11 +1769,15 @@ CURLcode Curl_http(struct connectdata *conn)
           failf(data, "Could not get Content-Type header line!");
           return CURLE_HTTP_POST_ERROR;
         }
-        add_buffer(req_buffer, contentType, linelength);
+        result = add_buffer(req_buffer, contentType, linelength);
+        if(result)
+          return result;
       }
 
       /* make the request end in a true CRLF */
-      add_buffer(req_buffer, "\r\n", 2);
+      result = add_buffer(req_buffer, "\r\n", 2);
+      if(result)
+        return result;
 
       /* set upload size to the progress meter */
       Curl_pgrsSetUploadSize(data, http->postsize);
@@ -1781,23 +1801,30 @@ CURLcode Curl_http(struct connectdata *conn)
 
     case HTTPREQ_PUT: /* Let's PUT the data to the server! */
 
-      if((data->set.infilesize>0) && !conn->bits.upload_chunky)
+      if((data->set.infilesize>0) && !conn->bits.upload_chunky) {
         /* only add Content-Length if not uploading chunked */
-        add_bufferf(req_buffer,
-                    "Content-Length: %" FORMAT_OFF_T "\r\n", /* size */
-                    data->set.infilesize );
+        result = add_bufferf(req_buffer,
+                             "Content-Length: %" FORMAT_OFF_T "\r\n", /* size */
+                             data->set.infilesize );
+        if(result)
+          return result;
+      }
 
       if(!checkheaders(data, "Expect:")) {
         /* if not disabled explicitly we add a Expect: 100-continue
            to the headers which actually speeds up post operations (as
            there is one packet coming back from the web server) */
-        add_bufferf(req_buffer,
-                    "Expect: 100-continue\r\n");
+        result = add_bufferf(req_buffer,
+                             "Expect: 100-continue\r\n");
+        if(result)
+          return result;
         data->set.expect100header = TRUE;
       }
 
-      add_buffer(req_buffer, "\r\n", 2); /* end of headers */
-
+      result = add_buffer(req_buffer, "\r\n", 2); /* end of headers */
+      if(result)
+        return result;
+      
       /* set the upload size to the progress meter */
       Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
@@ -1829,16 +1856,23 @@ CURLcode Curl_http(struct connectdata *conn)
            we don't upload data chunked, as RFC2616 forbids us to set both
            kinds of headers (Transfer-Encoding: chunked and Content-Length) */
 
-        if(!checkheaders(data, "Content-Length:"))
+        if(!checkheaders(data, "Content-Length:")) {
           /* we allow replacing this header, although it isn't very wise to
              actually set your own */
-          add_bufferf(req_buffer, "Content-Length: %" FORMAT_OFF_T"\r\n",
-                      postsize);
+          result = add_bufferf(req_buffer,
+                               "Content-Length: %" FORMAT_OFF_T"\r\n",
+                               postsize);
+          if(result)
+            return result;
+        }
       }
 
-      if(!checkheaders(data, "Content-Type:"))
-        add_bufferf(req_buffer,
-                    "Content-Type: application/x-www-form-urlencoded\r\n");
+      if(!checkheaders(data, "Content-Type:")) {
+        result = add_bufferf(req_buffer,
+                             "Content-Type: application/x-www-form-urlencoded\r\n");
+        if(result)
+          return result;
+      }
 
       if(data->set.postfields) {
 
