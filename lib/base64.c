@@ -65,9 +65,11 @@ static void decodeQuantum(unsigned char *dest, const char *src)
       x = (x << 6);
   }
 
-  dest[2] = (unsigned char)(x & 255); x >>= 8;
-  dest[1] = (unsigned char)(x & 255); x >>= 8;
-  dest[0] = (unsigned char)(x & 255); x >>= 8;
+  dest[2] = (unsigned char)(x & 255);
+  x >>= 8;
+  dest[1] = (unsigned char)(x & 255);
+  x >>= 8;
+  dest[0] = (unsigned char)(x & 255);
 }
 
 /*
