@@ -45,24 +45,17 @@ libcurl_la_LDFLAGS = -version-info 2:2:0
 # set age to 0.
 #
 
-# I could not get conditional compilation using LIBADD or LDADD and
-# EXTRA_..._SOURCES to work. 08/28/02 jhrg
-libcurl_la_SOURCES = \
-arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c \
-base64.c       file.h         hostip.c       progress.c     timeval.h \
-base64.h       formdata.c     hostip.h       progress.h     \
-cookie.c       formdata.h     http.c         sendf.c        \
-cookie.h       ftp.c          http.h         sendf.h        url.c \
-dict.c         ftp.h          if2ip.c        speedcheck.c   url.h \
-dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h \
-getdate.h      ldap.c         ssluse.c       version.c \
-getenv.c       ldap.h         ssluse.h       \
-escape.c       mprintf.c      telnet.c       \
-escape.h       getpass.c      netrc.c        telnet.h       \
-getinfo.c getinfo.h transfer.c strequal.c strequal.h easy.c \
-security.h security.c krb4.c krb4.h memdebug.c memdebug.h inet_ntoa_r.h \
-http_chunks.c http_chunks.h strtok.c strtok.h connect.c connect.h \
-llist.c llist.h hash.c hash.h multi.c content_encoding.c
+libcurl_la_SOURCES = arpa_telnet.h file.c getpass.h netrc.h timeval.c	\
+base64.c file.h hostip.c progress.c timeval.h base64.h formdata.c	\
+hostip.h progress.h cookie.c formdata.h http.c sendf.c cookie.h ftp.c	\
+http.h sendf.h url.c dict.c ftp.h if2ip.c speedcheck.c url.h dict.h	\
+getdate.c if2ip.h speedcheck.h urldata.h getdate.h ldap.c ssluse.c	\
+version.c getenv.c ldap.h ssluse.h escape.c mprintf.c telnet.c escape.h	\
+getpass.c netrc.c telnet.h getinfo.c getinfo.h transfer.c strequal.c	\
+strequal.h easy.c security.h security.c krb4.c krb4.h memdebug.c	\
+memdebug.h inet_ntoa_r.h http_chunks.c http_chunks.h strtok.c strtok.h	\
+connect.c connect.h llist.c llist.h hash.c hash.h multi.c		\
+content_encoding.c content_encoding.h
 
 noinst_HEADERS = setup.h transfer.h
 
@@ -77,3 +70,8 @@ install-data-hook:
 	  $(mkinstalldirs) `dirname $(DESTDIR)@CURL_CA_BUNDLE@`; \
 	  @INSTALL_DATA@ ca-bundle.crt $(DESTDIR)@CURL_CA_BUNDLE@; \
         fi
+
+# this hook is mainly for non-unix systems to build even if configure
+# isn't run
+dist-hook:
+	cp $(srcdir)/ca-bundle.h.in $(distdir)/ca-bundle.h
