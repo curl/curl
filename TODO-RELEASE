@@ -43,5 +43,3 @@ To get fixed in 7.11.1
 
 21. Send QUIT before closing an FTP connection. Joe Halpin has volunteered
     to provide a patch.
-
-22. Dan Fandrich's improvement for easier building with the compressed manual.
