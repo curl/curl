@@ -45,7 +45,7 @@ This release includes the following bugfixes:
  o curl finds the user's home dir slightly different and hopefully better on
    Windows
  o testcurl.sh can now be used to autotest daily tarballs
- o a couple of command line options now check that the underyling library
+ o a couple of command line options now check that the underlying library
    actually supports the features before trying to enable them
  o uninitialized variable fix
  o better html versions of the man pages
