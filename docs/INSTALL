@@ -485,7 +485,11 @@ NetWare
 
    Set a search path to your compiler, linker and tools, if you want to have
    zlib support then set the environment var ZLIB_PATH pointing to your zlib
-   sources, and finally type 'make netware' ...
+   sources, on Linux make sure the var OSTYPE contains the string 'linux';
+   and finally type 'make netware' from the top source directory...
+   I found on some Linux systems (RH9) that OS detection didnt work although
+   a 'set | grep OSTYPE' shows the var present and set; I simply overwrote it
+   with 'OSTYPE=linux-rh9-gnu' and the detection in the Makefile worked...;
    other options are currently not supported, although partly prepared.
    The Ares lib builds arlready fine, and both test tools work fine at least 
    when build with CodeWarrior...; dont know yet why they fail when build with
