@@ -27,7 +27,7 @@
 #define ssize_t int
 
 /* Define this to 'int' if socklen_t is not an available typedefed type */
-#if !defined(ENABLE_IPV6) && !defined(USE_SSLEAY)
+#if !defined(ENABLE_IPV6) && ((_MSC_VER < 1300) || !defined(USE_SSLEAY))
 #define socklen_t int
 #endif
 
