@@ -10,10 +10,10 @@ FAQ
  1. Philosophy
   1.1 What is cURL?
   1.2 What is libcurl?
-  1.3 What is cURL not?
+  1.3 What is curl not?
   1.4 When will you make curl do XXXX ?
-  1.5 Who makes cURL?
-  1.6 What do you get for making cURL?
+  1.5 Who makes curl?
+  1.6 What do you get for making curl?
   1.7 What about CURL from curl.com?
   1.8 I have a problem who do I mail?
 
@@ -23,7 +23,7 @@ FAQ
    2.1.2 only the libssl lib is missing
   2.2 Does curl work/build with other SSL libraries?
   2.3 Where can I find a copy of LIBEAY32.DLL?
-  2.4 Does cURL support Socks (RFC 1928) ?
+  2.4 Does curl support Socks (RFC 1928) ?
 
  3. Usage Problems
   3.1 curl: (1) SSL is disabled, https: not supported
@@ -93,18 +93,39 @@ FAQ
 
   1.1 What is cURL?
 
-  cURL (or simply just 'curl') is a command line tool for getting or sending
-  files using URL syntax. The name is a play on 'Client for URLs', originally
-  with URL spelled in uppercase to make it obvious it deals with URLs. The
-  fact it can also be pronounced 'see URL' also helped, it works as an
-  abbrivation for "Client URL Request Library" or why not the recursive
+  cURL is the name of the project. The name is a play on 'Client for URLs',
+  originally with URL spelled in uppercase to make it obvious it deals with
+  URLs. The fact it can also be pronounced 'see URL' also helped, it works as
+  an abbrivation for "Client URL Request Library" or why not the recursive
   version: "Curl URL Request Library".
 
-  Curl supports a range of common Internet protocols, currently including
-  HTTP, HTTPS, FTP, FTPS, GOPHER, LDAP, DICT, TELNET and FILE.
+  The cURL project produces two products:
 
-  We spell it cURL or just curl. We pronounce it with an initial k sound:
-  [kurl].
+  libcurl
+
+    A free and easy-to-use client-side URL transfer library, supporting FTP,
+    FTPS, HTTP, HTTPS, GOPHER, TELNET, DICT, FILE and LDAP.  libcurl supports
+    HTTPS certificates, HTTP POST, HTTP PUT, FTP uploading, kerberos, HTTP
+    form based upload, proxies, cookies, user+password authentication, file
+    transfer resume, http proxy tunneling and more!
+
+    libcurl is highly portable, it builds and works identically on numerous
+    platforms, including Solaris, NetBSD, FreeBSD, OpenBSD, Darwin, HPUX,
+    IRIX, AIX, Tru64, Linux, UnixWare, HURD, Windows, Amiga, OS/2, BeOs, Mac
+    OS X, Ultrix, QNX, OpenVMS, RISC OS, Novell NetWare, DOS and more...
+
+    libcurl is free, thread-safe, IPv6 compatible, feature rich, well
+    supported and fast.
+    
+  curl
+
+    A command line tool for getting or sending files using URL syntax.
+
+    Since curl uses libcurl, it supports a range of common Internet protocols,
+    currently including HTTP, HTTPS, FTP, FTPS, GOPHER, LDAP, DICT, TELNET and
+    FILE.
+
+  We pronounce curl and cURL with an initial k sound: [kurl].
 
   NOTE: there are numerous sub-projects and related projects that also use the
   word curl in the project names in various combinations, but you should take
@@ -120,7 +141,7 @@ FAQ
   You can use libcurl for free in your application, be it open source,
   commercial or closed-source.
 
-  1.3 What is cURL not?
+  1.3 What is curl not?
 
   Curl is *not* a wget clone. That is a common misconception.  Never, during
   curl's development, have we intended curl to replace wget or compete on its
@@ -135,7 +156,7 @@ FAQ
   script (or write a new program that interfaces libcurl) and do it.
 
   Curl is not a PHP tool, even though it works perfectly well when used from
-  or with PHP.
+  or with PHP (when using the PHP/CURL module).
 
   Curl is not a single-OS program. Curl exists, compiles, builds and runs
   under a wide range of operating systems, including all modern Unixes (and a
@@ -169,9 +190,9 @@ FAQ
   * If you write the code, chances are bigger that it will get into curl
     faster.
 
-  1.5 Who makes cURL?
+  1.5 Who makes curl?
 
-  cURL and libcurl are not made by any single individual. Sure, Daniel
+  curl and libcurl are not made by any single individual. Sure, Daniel
   Stenberg writes the major parts, but other persons' submissions are
   important and crucial. Anyone can contribute and post their changes and
   improvements and have them inserted in the main sources (of course on the
@@ -183,14 +204,16 @@ FAQ
 
   curl is developed by a community, with Daniel at the wheel.
 
-  1.6 What do you get for making cURL?
+  1.6 What do you get for making curl?
 
   Project cURL is entirely free and open. No person gets paid for developing
-  curl. We do this voluntarily on our spare time.
+  (lib)curl. We do this voluntarily on our spare time.
 
   We get some help from companies. Contactor Data hosts the curl web site,
   Haxx owns the curl web site's domain and sourceforge.net hosts project
-  services we take advantage from, like the bug tracker.
+  services we take advantage from, like the bug tracker. Also, some companies
+  have sponsored certain parts of the development in the past and I hope some
+  will continue to do so in the future.
 
   If you want to support our project with a donation or similar, one way of
   doing that would be to buy "gift certificates" at useful online shopping
@@ -286,7 +309,7 @@ FAQ
   accurate and up-to-date pointers to recent OpenSSL DLLs and other binary
   packages.
 
-  2.4 Does cURL support Socks (RFC 1928) ?
+  2.4 Does curl support Socks (RFC 1928) ?
 
   Yes, SOCKS5 is supported.
 
