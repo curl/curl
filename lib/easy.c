@@ -374,6 +374,14 @@ CURL *curl_easy_duphandle(CURL *incurl)
   /* start with clearing the entire new struct */
   memset(outcurl, 0, sizeof(struct SessionHandle));
 
+#ifdef USE_ARES
+  /* If we use ares, we need to setup a new ares channel for the new handle */
+  if(ARES_SUCCESS != ares_init(&outcurl->state.areschannel)) {
+    free(outcurl);
+    return NULL;
+  }
+#endif
+
   /*
    * We setup a few buffers we need. We should probably make them
    * get setup on-demand in the code, as that would probably decrease
