@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -117,13 +117,13 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
       break;
 
     case ']':				/* illegal closing bracket */
-      snprintf(glob->errormsg, sizeof(glob->errormsg), 
+      snprintf(glob->errormsg, sizeof(glob->errormsg),
                "illegal pattern at pos %d\n", (int)pos);
       return GLOB_ERROR;
 
     case '\\':				/* escaped character, skip '\' */
       if (*(buf+1) == '\0') {		/* but no escaping of '\0'! */
-        snprintf(glob->errormsg, sizeof(glob->errormsg), 
+        snprintf(glob->errormsg, sizeof(glob->errormsg),
                  "illegal pattern at pos %d\n", (int)pos);
 	return GLOB_ERROR;
       }
@@ -138,7 +138,8 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
   /* we never reach this point */
 }
 
-static GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
+static GlobCode glob_range(URLGlob *glob, char *pattern,
+                           size_t pos, int *amount)
 {
   /* processes a range expression with the point behind the opening '['
      - char range: e.g. "a-z]", "B-Q]"
@@ -149,7 +150,7 @@ static GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
   URLPattern *pat;
   char *c;
   int wordamount=1;
-  
+
   pat = (URLPattern*)&glob->pattern[glob->size / 2];
   /* patterns 0,1,2,... correspond to size=1,3,5,... */
   ++glob->size;
@@ -160,7 +161,7 @@ static GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
                &pat->content.CharRange.max_c) != 2 ||
 	pat->content.CharRange.min_c >= pat->content.CharRange.max_c ||
 	pat->content.CharRange.max_c - pat->content.CharRange.min_c > 'z' - 'a') {
-      /* the pattern is not well-formed */ 
+      /* the pattern is not well-formed */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
                "illegal pattern or range specification after pos %d\n", pos);
       return GLOB_ERROR;
@@ -186,14 +187,14 @@ static GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
                &pat->content.NumRange.min_n,
                &pat->content.NumRange.max_n) != 2 ||
 	pat->content.NumRange.min_n >= pat->content.NumRange.max_n) {
-      /* the pattern is not well-formed */ 
-      snprintf(glob->errormsg, sizeof(glob->errormsg), 
+      /* the pattern is not well-formed */
+      snprintf(glob->errormsg, sizeof(glob->errormsg),
                "error: illegal pattern or range specification after pos %d\n",
                pos);
       return GLOB_ERROR;
     }
     if (*pattern == '0') {		/* leading zero specified */
-      c = pattern;  
+      c = pattern;
       while (isdigit((int)*c++))
 	++pat->content.NumRange.padlength; /* padding length is set for all
                                               instances of this pattern */
@@ -211,14 +212,14 @@ static GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
 
     if(GLOB_ERROR == glob_word(glob, c, pos + (c - pattern), &wordamount))
       wordamount = 1;
-    
-    *amount = (pat->content.NumRange.max_n - 
+
+    *amount = (pat->content.NumRange.max_n -
                pat->content.NumRange.min_n + 1) *
       wordamount;
 
     return GLOB_OK;
   }
-  snprintf(glob->errormsg, sizeof(glob->errormsg), 
+  snprintf(glob->errormsg, sizeof(glob->errormsg),
            "illegal character in range specification at pos %d\n", pos);
   return GLOB_ERROR;
 }
@@ -228,7 +229,7 @@ static GlobCode glob_word(URLGlob *glob, char *pattern,
 {
   /* processes a literal string component of a URL
      special characters '{' and '[' branch to set/range processing functions
-   */ 
+   */
   char* buf = glob->glob_buffer;
   size_t litindex;
   GlobCode res = GLOB_OK;
@@ -328,9 +329,10 @@ int glob_url(URLGlob** glob, char* url, int *urlnum, FILE *error)
 
 void glob_cleanup(URLGlob* glob)
 {
-  int i, elem;
+  size_t i;
+  int elem;
 
-  for (i = glob->size - 1; i >= 0; --i) {
+  for (i = glob->size - 1; i < glob->size; --i) {
     if (!(i & 1)) {	/* even indexes contain literals */
       free(glob->literal[i/2]);
     }
@@ -354,7 +356,7 @@ char *glob_next_url(URLGlob *glob)
   char *buf = glob->glob_buffer;
   URLPattern *pat;
   char *lit;
-  int i;
+  size_t i;
   size_t j;
   int carry;
 
@@ -365,7 +367,7 @@ char *glob_next_url(URLGlob *glob)
 
     /* implement a counter over the index ranges of all patterns,
        starting with the rightmost pattern */
-    for (i = glob->size / 2 - 1; carry && i >= 0; --i) {
+    for (i = glob->size / 2 - 1; carry && i < glob->size; --i) {
       carry = 0;
       pat = &glob->pattern[i];
       switch (pat->type) {
@@ -414,7 +416,7 @@ char *glob_next_url(URLGlob *glob)
 	break;
       case UPTNumRange:
 	sprintf(buf, "%0*d",
-                pat->content.NumRange.padlength, pat->content.NumRange.ptr_n); 
+                pat->content.NumRange.padlength, pat->content.NumRange.ptr_n);
         buf += strlen(buf); /* make no sprint() return code assumptions */
 	break;
       default:
