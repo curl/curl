@@ -184,7 +184,7 @@ create_hostcache_id(char *server, int port, size_t *entry_len)
 
 struct hostcache_prune_data {
   int cache_timeout;
-  int now;
+  time_t now;
 };
 
 static int
@@ -205,7 +205,7 @@ hostcache_timestamp_remove(void *datap, void *hc)
 }
 
 static void
-hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
+hostcache_prune(curl_hash *hostcache, int cache_timeout, time_t now)
 {
   struct hostcache_prune_data user;
 
