@@ -6,6 +6,32 @@
 
                                   Changelog
 
+Daniel (22 Aug 2002)
+- Markus Oberhumer provided some documentation for his previously provided
+  CURLOPT_NOSIGNAL fix.
+
+- Patched the lib/Makefile.am to hopefully no longer complain on undefined
+  symbols that seemed to occur on builds with shared OpenSSL libraries on
+  Solaris lately...
+
+Daniel (20 Aug 2002)
+- Fixed compiler warnings on MSCV++ compiles. We're looking for help here:
+  remove the pragmas from lib/config-win32.h and adjust the sources where
+  the warnings occur. Hiding them with pragmas like this is not the correct
+  way of dealing with compiler warnings.
+
+Daniel (13 Aug 2002)
+- Ulrich Zadow made the global include files in curl/* include themselves
+  using "curl.h" instead of <curl/curl.h> which thus allows people to more
+  freely decide how to include curl and how to setup their include paths.
+
+- Sterling Hughes added the curl_share* interface, somewhat as descussed
+  previously.
+
+- Jörn Hartroth pointed out that poll() was used in the pre1 source code and
+  it isn't very portable, so now I check for it in the configure script and
+  work around it.
+
 Version 7.9.9-pre1
 
 Daniel (12 Aug 2002)
