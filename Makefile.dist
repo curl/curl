@@ -77,6 +77,12 @@ cygwin-ssl:
 	./configure --with-ssl
 	make
 
+amiga:
+	cd ./lib && make -f makefile.amiga
+	cd ./src && make -f makefile.amiga
+
+
+
 unix: all
 
 unix-ssl: ssl
