@@ -220,8 +220,6 @@ Transfer(struct connectdata *c_conn)
 
   hbufp = data->state.headerbuff;
 
-  myalarm (0);			/* switch off the alarm-style timeout */
-
   now = Curl_tvnow();
   start = now;
 
@@ -1127,7 +1125,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
   if(newurl)
     free(newurl);
 
-  /* make sure the alarm is switched off! */
+  /* make absolutely sure the alarm is switched off! */
   if(data->set.timeout || data->set.connecttimeout)
     myalarm(0);
 

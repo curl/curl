@@ -353,8 +353,6 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   CURLcode result;
   int ftpcode;
 
-  myalarm(0); /* switch off the alarm stuff */
-
   ftp = (struct FTP *)malloc(sizeof(struct FTP));
   if(!ftp)
     return CURLE_OUT_OF_MEMORY;
