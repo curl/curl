@@ -410,12 +410,15 @@ CURLcode Curl_is_connected(struct connectdata *conn,
       return CURLE_OK;
     }
     /* nope, not connected for real */
-    if(err)
-      return CURLE_COULDNT_CONNECT;
-  }
-  else if(1 != rc)
+    failf(data, "Connection failed, socket error: %d", err);
     return CURLE_COULDNT_CONNECT;
-
+  }
+  else if(1 != rc) {
+    int error = ourerrno();
+    failf(data, "Failed connect to %s:%d, errno: %d",
+          conn->hostname, conn->port, error);
+    return CURLE_COULDNT_CONNECT;
+  }
   /*
    * If the connection phase is "done" here, we should attempt to connect
    * to the "next address" in the Curl_hostaddr structure that we resolved
