@@ -112,6 +112,11 @@ cvs -Q up -dP 2>&1
 cvsstat=$?
 echo "testcurl: cvs returned: $cvsstat"
 
+if [ "$cvsstat" -ne "0" ]; then
+  echo "testcurl: failed to update from CVS, exiting"
+  die
+fi
+
 # figure out the current collected CVS status
 newstat="../allcvs.log"
 oldstat="../oldcvs.log"
