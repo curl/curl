@@ -777,7 +777,7 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
 #else /* following code is IPv4-only */
 
 #if !defined(HAVE_GETHOSTBYNAME_R) || defined(USE_ARES)
-static void hostcache_fixoffset(struct hostent *h, int offset);
+static void hostcache_fixoffset(struct hostent *h, long offset);
 /*
  * Performs a "deep" copy of a hostent into a buffer (returns a pointer to the
  * copy). Make absolutely sure the destination buffer is big enough!
@@ -856,11 +856,11 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 
   /* now, shrink the allocated buffer to the size we actually need, which
      most often is only a fraction of the original alloc */
-  newbuf=(char *)realloc(*buf, (int)bufptr-(int)(*buf));
+  newbuf=(char *)realloc(*buf, (long)bufptr-(long)(*buf));
 
   /* if the alloc moved, we need to adjust things again */
   if(newbuf != *buf)
-    hostcache_fixoffset((struct hostent*)newbuf, (int)newbuf-(int)*buf);
+    hostcache_fixoffset((struct hostent*)newbuf, (long)newbuf-(long)*buf);
 
   /* setup the return */
   *buf = newbuf;
@@ -870,7 +870,7 @@ static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 }
 #endif
 
-static void hostcache_fixoffset(struct hostent *h, int offset)
+static void hostcache_fixoffset(struct hostent *h, long offset)
 {
   int i=0;
 
