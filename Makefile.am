@@ -11,7 +11,7 @@ EXTRA_DIST =						\
 
 bin_SCRIPTS = curl-config
 
-SUBDIRS = docs lib src include tests packages
+SUBDIRS = docs lib src include tests packages multi
 
 # create a root makefile in the distribution:
 dist-hook:

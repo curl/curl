@@ -597,6 +597,7 @@ AC_CONFIG_FILES([Makefile \
 	   include/Makefile \
 	   include/curl/Makefile \
 	   src/Makefile \
+	   multi/Makefile \
            lib/Makefile \
            tests/Makefile \
            tests/data/Makefile \
