@@ -287,7 +287,7 @@ CURLcode http(struct connectdata *conn)
   }
 
   if((data->bits.user_passwd) && !checkheaders(data, "Authorization:")) {
-    char authorization[512];
+    char *authorization;
 
     /* To prevent the user+password to get sent to other than the original
        host due to a location-follow, we do some weirdo checks here */
@@ -295,9 +295,12 @@ CURLcode http(struct connectdata *conn)
        !data->auth_host ||
        strequal(data->auth_host, data->hostname)) {
       sprintf(data->buffer, "%s:%s", data->user, data->passwd);
-      base64Encode(data->buffer, authorization);
-      data->ptr_userpwd = maprintf( "Authorization: Basic %s\015\012",
-                                    authorization);
+      if(base64Encode(data->buffer, 0, /* size zero makes it do strlen() */
+                      &authorization) >= 0) {
+        data->ptr_userpwd = maprintf( "Authorization: Basic %s\015\012",
+                                      authorization);
+        free(authorization);
+      }
     }
   }
   if((data->bits.set_range) && !checkheaders(data, "Range:")) {
@@ -520,9 +523,9 @@ CURLcode http(struct connectdata *conn)
 
         /* and here comes the actual data */
         if(data->postfieldsize) {
-          ssend(data->firstsocket, data, "\r\n", 2);
-          ssend(data->firstsocket, data, data->postfields, data->postfieldsize);
-          ssend(data->firstsocket, data, "\r\n", 2);
+          ssend(data->firstsocket, conn, "\r\n", 2);
+          ssend(data->firstsocket, conn, data->postfields, data->postfieldsize);
+          ssend(data->firstsocket, conn, "\r\n", 2);
         }
         sendf(data->firstsocket, data,
               "\r\n"
