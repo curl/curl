@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (9 February 2005)
+- David Byron fixed his SSL problems, initially mentioned here:
+  http://curl.haxx.se/mail/lib-2005-01/0240.html. It turned out we didn't use
+  SSL_pending() as we should.
+
 - Converted lots of FTP code to a statemachine, so that the multi interface
   doesn't block while communicating commands-responses with an FTP server.
 
