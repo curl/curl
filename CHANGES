@@ -6,6 +6,17 @@
 
                                History of Changes
 
+Daniel (14 June 2000)
+- Applied Luong Dinh Dung's comments about a few win32 compile problems.
+
+- Applied Björn Stenberg's suggested fix that turns the win32 stdout to
+  binary. It won't do it if the -B / --use-ascii option is used. That option
+  is now an extended version of the previous -B /--ftp--ascii. The flag was
+  already in use be the ldap as well so the new name fits pretty good. The
+  libcyrl CURLOPT_TRANSFERTEXT was also introduced as an alias to the now
+  obsolete CURLOPT_FTPASCII. Can't verify this fix myself as I have no win32
+  compiler around.
+
 Daniel (13 June 2000)
 - Luong Dinh Dung <dung at sch.bme.hu> found a problem in curl_easy_cleanup()
   since it free()ed the main curl struct *twice*. This is now corrected.

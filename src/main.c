@@ -89,11 +89,10 @@
 #define CONF_FTPAPPEND (1<<20) /* Append instead of overwrite on upload! */
 #define CONF_NETRC    (1<<22)  /* read user+password from .netrc */
 #define CONF_FOLLOWLOCATION (1<<23) /* use Location: Luke! */
-#define CONF_FTPASCII (1<<24) /* use TYPE A for transfer */
+#define CONF_GETTEXT  (1<<24) /* use ASCII/text for transfer */
 #define CONF_HTTPPOST (1<<25) /* multipart/form-data HTTP POST */
 #define CONF_PUT      (1<<27) /* PUT the input file */
 #define CONF_MUTE     (1<<28) /* force NOPROGRESS */
-
 
 #ifndef HAVE_STRDUP
 /* Ultrix doesn't have strdup(), so make a quick clone: */
@@ -202,7 +201,7 @@ static void help(void)
        " -a/--append        Append to target file when uploading (F)\n"
        " -A/--user-agent <string> User-Agent to send to server (H)\n"
        " -b/--cookie <name=string/file> Cookie string or file to read cookies from (H)\n"
-       " -B/--ftp-ascii     Use ASCII transfer (F)\n"
+       " -B/--use-ascii     Use ASCII/text transfer\n"
        " -c/--continue      Resume a previous transfer where we left it\n"
        " -C/--continue-at <offset> Specify absolute resume offset\n"
        " -d/--data          POST data (H)\n"
@@ -384,7 +383,8 @@ static int getparameter(char *flag, /* f or -long-flag */
     {"a", "append",      FALSE},
     {"A", "user-agent",  TRUE},
     {"b", "cookie",      TRUE},
-    {"B", "ftp-ascii",   FALSE},
+    {"B", "ftp-ascii",   FALSE}, /* this long format is OBSOLETEE now! */
+    {"B", "use-ascii",   FALSE},
     {"c", "continue",    FALSE},
     {"C", "continue-at", TRUE},
     {"d", "data",        TRUE},
@@ -572,8 +572,8 @@ static int getparameter(char *flag, /* f or -long-flag */
       GetStr(&config->cookiefile, nextarg);
       break;
     case 'B':
-      /* use type ASCII when transfering ftp files */
-      config->conf ^= CONF_FTPASCII;
+      /* use ASCII/text when transfering */
+      config->conf ^= CONF_GETTEXT;
       break;
     case 'c':
       /* This makes us continue an ftp transfer */
@@ -1194,6 +1194,15 @@ int main(int argc, char *argv[])
   if(!config.errors)
     config.errors = stderr;
 
+#ifdef WIN32
+  if(!config.outfile && !(config.flags & CONF_GETTEXT)) {
+    /* We get the output to stdout and we have not got the ASCII/text flag,
+       then set stdout to be binary */
+    setmode( 1, O_BINARY );
+  }
+#endif
+
+
   main_init();
 
 #if 0
@@ -1262,7 +1271,7 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_FTPAPPEND, config.conf&CONF_FTPAPPEND);
     curl_easy_setopt(curl, CURLOPT_NETRC, config.conf&CONF_NETRC);
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, config.conf&CONF_FOLLOWLOCATION);
-    curl_easy_setopt(curl, CURLOPT_FTPASCII, config.conf&CONF_FTPASCII);
+    curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config.conf&CONF_GETTEXT);
 
     curl_easy_setopt(curl, CURLOPT_PUT, config.conf&CONF_PUT);
     curl_easy_setopt(curl, CURLOPT_MUTE, config.conf&CONF_MUTE);

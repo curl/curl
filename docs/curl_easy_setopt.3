@@ -137,11 +137,13 @@ server sends as part of a HTTP header. NOTE that this means that the library
 will resend the same request on the new location and follow new Location:
 headers all the way until no more such headers are returned.
 .TP
-.B CURLOPT_FTPASCII
+.B CURLOPT_TRANSFERTEXT
 A non-zero parameter tells the library to use ASCII mode for ftp transfers,
-instead of the default binary transfer. This will only be useable when
-transfering text data between system with different views on certain
-characters, such as newlines or similar.
+instead of the default binary transfer. For LDAP transfers it gets the data in
+plain text instead of HTML and for win32 systems it does not set the stdout to
+binary mode. This option can be useable when transfering text data between
+system with different views on certain characters, such as newlines or
+similar.
 .TP
 .B CURLOPT_PUT
 A non-zero parameter tells the library to use HTTP PUT a file. The file to put

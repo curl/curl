@@ -345,7 +345,12 @@ typedef enum {
   T(FTPAPPEND, LONG, 50),    /* Append instead of overwrite on upload! */
   T(NETRC, LONG, 51),        /* read user+password from .netrc */
   T(FOLLOWLOCATION, LONG, 52),  /* use Location: Luke! */
+
+  /* This FTPASCII name is now obsolete, to be removed, use the TRANSFERTEXT
+     instead. It goes for more protocols than just ftp... */
   T(FTPASCII, LONG, 53),     /* use TYPE A for transfer */
+
+  T(TRANSFERTEXT, LONG, 53), /* transfer data in text/ASCII format */
   T(PUT, LONG, 54),          /* PUT the input file */
   T(MUTE, LONG, 55),         /* force NOPROGRESS */
 
