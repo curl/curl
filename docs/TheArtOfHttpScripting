@@ -234,10 +234,10 @@ Version: 0.2
  make them look the best possible for their particular browsers. They usually
  also do different kinds of javascript, vbscript etc.
 
- At times, you will see that getting a page will curl will not return the very
- same page that you see when getting the page with your browser. Then you know
- it is time to set the User Agent field to fool the server into thinking
- you're one of those browsers.
+ At times, you will see that getting a page with curl will not return the same
+ page that you see when getting the page with your browser. Then you know it
+ is time to set the User Agent field to fool the server into thinking you're
+ one of those browsers.
 
  To make curl look like Internet Explorer on a Windows 2000 box:
 

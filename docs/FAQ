@@ -282,8 +282,12 @@ FAQ
 
   5.1. I have a GPL program, can I use the libcurl library?
 
-    No. GPL'd software requires all parts of the final executable to be
-    licensed under GPL.
+    No, you can't distribute your program as a binary and you cannot
+    distribute the (lib)curl code your code. GPL'd software requires all parts
+    of the final executable to be licensed under GPL.
+
+    However, nothing prevents you from distributing your program separately
+    from curl and libcurl and require the user to get it separately.
 
   5.2. I have a closed-source program, can I use the libcurl library?
 
