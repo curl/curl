@@ -9,8 +9,6 @@ TODO
 For version 7. Stuff I palnned to have included in curl for version
 seven. Let's do a serious attempt to include most of this.
 
-  Document the easy-interface completely
-
   Make sure the low-level interface works. highlevel.c should basically be
   possible to write using that interface.
 
@@ -18,8 +16,6 @@ seven. Let's do a serious attempt to include most of this.
 
   Add asynchronous name resolving, as this enables full timeout support for
   fork() systems.
-
-  Make sure you can set the progress callback
 
   Add libtool stuff
 

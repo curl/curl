@@ -6,6 +6,33 @@
 
                                History of Changes
 
+Daniel (8 June 2000)
+- So I finally added the progress callback to the *setopt() options and it
+  should work now. I don't have the energy to write any test program for it
+  right now.
+- Made the callback function typedefs public in curl/curl.h for comfort. Just
+  in case anyone wanna fiddle with such pointers.
+- Updated the curl_easy_setopt() man page accordingly.
+
+Version 7.0.4beta
+
+Daniel (2 June 2000)
+- I noticed that when doing Location: following, we lost custom headers in all
+  but the first request.
+- Removed the 'HttpPost' struct and moved the header stuff to the more generic
+  curl_slist.
+- Added some better slist-cleanups in src/main.c
+
+Version 7.0.3beta
+
+Daniel (31 May 2000)
+- So I discovered that I released the 7.0.2beta without it being able to
+  compile under Linux. gethostbyname_r() and gethostbyaddr_r() turned out to
+  feature a different amount of arguments on different systems so I had to add
+  a configure check for this and adjust the code slightly.
+
+Version 7.0.2beta
+
 Daniel (29 May 2000)
 - Corrected the bits.* assignments when using CURLOPT options that only
   toggles one of those bits.
@@ -27,7 +54,7 @@ Daniel (22 May 2000)
   needed a little fix in lib/ldap.c since it doesn't have RTLD_GLOBAL defined.
   More fixes are expected as a result of Richies very helpful work.
 
-Version 7.0.1beta released
+Version 7.0.1beta
 
 Daniel (21 May 2000)
 - Updated lots of #defines, enums and variable type names in the library. No
@@ -41,7 +68,7 @@ Daniel (21 May 2000)
   to use in upcoming versions of curl to be able to gracefully timeout name
   lookups.
 
-Version 7.0beta released
+Version 7.0beta
 
 Daniel (18 May 2000)
 - Introduced LIBCURL_VERSION_NUM to the curl.h include file to better allow
