@@ -2129,6 +2129,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       free(old_conn->proxyhost);
     conn = conn_temp;        /* use this connection from now on */
 
+    /* If we speak over a proxy, we need to copy the host name too, as it
+       might be another remote host even when re-using a connection */
+    strcpy(conn->gname, old_conn->gname); /* safe strcpy() */
+
     /* we need these pointers if we speak over a proxy */
     conn->hostname = conn->gname;
     conn->name = &conn->gname[old_conn->name - old_conn->gname];
