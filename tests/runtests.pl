@@ -52,7 +52,7 @@ my $memory_debug=0;
 my $memdump="memdump";
 
 # the path to the script that analyzes the memory debug output file:
-my $memanalyze="../memanalyze.pl";
+my $memanalyze="./memanalyze.pl";
 
 my $checkstunnel = &checkstunnel;
 
