@@ -8,10 +8,20 @@
 
 Version XX
 
+Daniel (14 May 2000)
+- FTP URLs are now treated slightly different, more according to RFC 1738.
+- FTP sessions are now performed differently, with CWD commands to change
+  directory instead of RETR/STOR/LIST with the full path. Discussions with
+  Rich Gray made me notice these problems.
+- Janne Johansson discovered and corrected a buffer overflow in the
+  src/usrglob.c file.
+- I had to add a lib/strequal.c file for doing case insensitive string
+  compares on all platforms.
+
 Daniel (8 May 2000):
 - Been working lots on the new lib.
-- Together with Rich Gray <Rich.Gray@PlusTechnologies.com>, I've tried to
-  adjust the configure script to work better on the NCR MP-RAS Unix.
+- Together with Rich Gray, I've tried to adjust the configure script to work
+  better on the NCR MP-RAS Unix.
 
 Daniel (2 May 2000):
 - Albert Chin-A-Young pointed out that I had a few too many instructions in
