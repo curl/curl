@@ -1,4 +1,4 @@
-Updated: March 6, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: March 13, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -112,29 +112,30 @@ FAQ
 
   1.4 When will you make curl do XXXX ?
 
-  I love suggestions of what to change in order to make curl and libcurl
-  better. I do however believe in a few rules when it comes to the future of
+  We love suggestions of what to change in order to make curl and libcurl
+  better. We do however believe in a few rules when it comes to the future of
   curl:
 
-  * It is to remain a command line tool. If you want GUIs or fancy scripting
+  * Curl is to remain a command line tool. If you want GUIs or fancy scripting
     capabilities, you're free to write another tool that uses libcurl and that
-    offers this. There's no point in having one single tool that does every
+    offers this. There's no point in having a single tool that does every
     imaginable thing. That's also one of the great advantages of having the
-    core of curl as a library: libcurl.
+    core of curl as a library.
 
-  * I do not add things to curl that other small and available tools already
+  * We do not add things to curl that other small and available tools already
     do very fine at the side. Curl's output is fine to pipe into another
     program or redirect to another file for the next program to interpret.
 
-  * I focus on protocol related issues and improvements. If you wanna do more
+  * We focus on protocol related issues and improvements. If you wanna do more
     magic with the supported protocols than curl currently does, chances are
     big I will agree. If you wanna add more protocols, I may very well
     agree.
 
-  * If you want me to make all the work while you wait for me to implement it
-    for you, that is not a very friendly attitude. I spend a considerable time
-    already on maintaining and developing curl. In order to get more out of
-    me, I trust you will offer some of your time and efforts in return.
+  * If you want someone else to make all the work while you wait for us to
+    implement it for you, that is not a very friendly attitude. We spend a
+    considerable time already on maintaining and developing curl. In order to
+    get more out of us, you should consider trading in some of your time and
+    efforts in return.
 
   * If you write the code, chances are bigger that it will get into curl
     faster.
@@ -182,23 +183,24 @@ FAQ
 
   2.2. Does curl work/build with other SSL libraries?
 
-  Curl has been written to use OpenSSL, although I doubt there would be much
+  Curl has been written to use OpenSSL, although there should not be much
   problems using a different library. If anyone does "port" curl to use a
-  different SSL library, I am of course very interested in getting the patch!
+  different SSL library, we are of course very interested in getting the
+  patch!
 
   2.3. Where can I find a copy of LIBEAY32.DLL?
 
   That is an OpenSSL binary built for Windows.
 
   Curl uses OpenSSL to do the SSL stuff. The LIBEAY32.DLL is what curl needs
-  on a windows machine to do https://. Check out the curl web page to find
+  on a windows machine to do https://. Check out the curl web site to find
   accurate and up-to-date pointers to recent OpenSSL DDLs and other binary
   packages.
 
   2.4. Does cURL support Socks (RFC 1928) ?
 
-  No. Nobody has wanted it that badly yet. I would appriciate patches that
-  brings this functionality.
+  No. Nobody has wanted it that badly yet. We appriciate patches that bring
+  this functionality.
 
 
 3. Usage problems
@@ -220,7 +222,7 @@ FAQ
 
   3.2. How do I tell curl to resume a transfer?
 
-  Curl supports resume both ways on FTP, download ways on HTTP.
+  Curl supports resumed transfers both ways on both FTP and HTTP.
 
   Try the -C option.
 
@@ -232,10 +234,10 @@ FAQ
   use the -F type. In all the most common cases, you should use -d which then
   causes a posting with the type 'application/x-www-form-urlencoded'.
 
-  I have described this in some detail in the README.curl file, and if you
-  don't understand it the first time, read it again before you post questions
-  about this to the mailing list. I would also suggest that you read through
-  the mailing list archives for old postings and questions regarding this.
+  This is described in some detail in the README.curl file, and if you don't
+  understand it the first time, read it again before you post questions about
+  this to the mailing list. Also, try reading through the mailing list
+  archives for old postings and questions regarding this.
 
   3.4. How do I tell curl to run custom FTP commands?
 
@@ -306,9 +308,9 @@ FAQ
 
   4.1. Problems connecting to SSL servers.
 
-  It took a very long time before I could sort out why curl had problems
-  to connect to certain SSL servers when using SSLeay or OpenSSL v0.9+.
-  The error sometimes showed up similar to:
+  It took a very long time before we could sort out why curl had problems to
+  connect to certain SSL servers when using SSLeay or OpenSSL v0.9+.  The
+  error sometimes showed up similar to:
 
   16570:error:1407D071:SSL routines:SSL2_READ:bad mac decode:s2_pkt.c:233:
 
@@ -316,12 +318,12 @@ FAQ
   requests properly. To correct this problem, tell curl to select SSLv2 from
   the command line (-2/--sslv2).
 
-  I have also seen examples where the remote server didn't like the SSLv2
+  There has also been examples where the remote server didn't like the SSLv2
   request and instead you had to force curl to use SSLv3 with -3/--sslv3.
 
   4.2. Why do I get problems when I use & or % in the URL?
 
-  In general unix shells, the & letter is treated special and when used it
+  In general unix shells, the & letter is treated special and when used, it
   runs the specified command in the background. To safely send the & as a part
   of a URL, you should qoute the entire URL by using single (') or double (")
   quotes around it.
@@ -346,8 +348,8 @@ FAQ
     curl '{curl,www}.haxx.se'
 
   To be able to use those letters as actual parts of the URL (without using
-  them for the curl URL "globbing" system), use the -g/--globoff option
-  (included in curl 7.6 and later):
+  them for the curl URL "globbing" system), use the -g/--globoff option (curl
+  7.6 and later):
 
     curl -g 'www.site.com/weirdname[].html'
 
@@ -363,8 +365,8 @@ FAQ
 
   4.5 Why do I get return code XXX from a HTTP server?
 
-  RFC2616 clearly explains the return codes. I'll make a short transcript
-  here. Go read the RFC for exact details:
+  RFC2616 clearly explains the return codes. This is a short transcript. Go
+  read the RFC for exact details:
 
     4.5.1 "400 Bad Request"
 
@@ -400,7 +402,7 @@ FAQ
 
   4.7. How do I keep usernames and passwords secret in Curl command lines?
 
-  I see this problem as two parts:
+  This problem has two sides:
 
   The first part is to avoid having clear-text passwords in the command line
   so that they don't appear in 'ps' outputs and similar. That is easily
@@ -447,9 +449,8 @@ FAQ
   programs. libcurl will use thread-safe functions instead of non-safe ones if
   your system has such.
 
-  I am very interested in once and for all getting some kind of report or
-  README file from those who have used libcurl in a threaded environment,
-  since I haven't and I get this question more and more frequently!
+  We would appriciate some kind of report or README file from those who have
+  used libcurl in a threaded environment.
 
   5.2 How can I receive all data into a large memory chunk?
 
@@ -487,11 +488,15 @@ FAQ
   5.3 How do I fetch multiple files with libcurl?
 
   Starting with version 7.7, curl and libcurl will have excellent support for
-  transferring multiple files.
+  transferring multiple files. You should just repeatedly set new URLs with
+  curl_easy_setopt() and then transfer it with curl_easy_perform(). The handle
+  you get from curl_easy_init() is not only reusable starting with libcurl
+  7.7, but also you're encouraged to reuse it if you can, as that will enable
+  libcurl to use persistant connections.
 
-  The easy interface of libcurl does not support multiple requests using the
-  same connection. The only available way to do multiple requests is to
-  init/perform/cleanup for each request.
+  For libcurl prior to 7.7, there was no multiple file support. The only
+  available way to do multiple requests was to init/perform/cleanup for each
+  transfer.
 
   5.4 Does libcurl do Winsock initing on win32 systems?
 
@@ -517,17 +522,13 @@ FAQ
 
   Starting with version 7.7, curl and libcurl will have excellent support for
   persistant connections when transferring several files from the same server.
+  Curl will attempt to reuse connections for all URLs specified on the same
+  command line/config file, and libcurl will reuse connections for all
+  transfers that are made using the same libcurl handle.
 
-  This is closely related to issue 5.3. Since libcurl has no real support
-  for doing multiple file transfers, there's no support for Keep-Alive or
-  persistant connections either.
-
-  This is of course subject to change as soon as libcurl gets support for
-  multiple files. Feel free to join in and make this change happen sooner!
+  Previous versions had no persistant connection support.
 
 6. License Issues
-
-  NOTE: This section concerns curl 7.5.2 or later!
 
   Curl and libcurl are released under a MIT/X derivate license *or* the MPL,
   the Mozilla Public License. To get a really good answer to your license
@@ -573,9 +574,10 @@ FAQ
 
   No.
 
-  We carefully picked this license years ago and a large amount of people have
-  contributed with source code knowing that this is the license we use. This
-  license puts the restrictions we want on curl/libcurl and it does not spread
-  to other programs or libraries that use it. The recent dual license
-  modification should make it possible for everyone to use libcurl or curl in
-  their projects, no matter what license they already have in use.
+  We have carefully picked this license after years of development and
+  discussions and a large amount of people have contributed with source code
+  knowing that this is the license we use. This license puts the restrictions
+  we want on curl/libcurl and it does not spread to other programs or
+  libraries that use it. The recent dual license modification should make it
+  possible for everyone to use libcurl or curl in their projects, no matter
+  what license they already have in use.
