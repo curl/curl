@@ -390,6 +390,7 @@ CURLcode http(struct connectdata *conn)
 
     if(co) {
       int count=0;
+      struct Cookie *store=co;
       /* now loop through all cookies that matched */
       while(co) {
         if(co->value && strlen(co->value)) {
@@ -405,7 +406,7 @@ CURLcode http(struct connectdata *conn)
       if(count) {
         add_buffer(req_buffer, "\r\n", 2);
       }
-      cookie_freelist(co); /* free the cookie list */
+      cookie_freelist(store); /* free the cookie list */
       co=NULL;
     }
 

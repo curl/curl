@@ -685,26 +685,7 @@ CURLcode curl_disconnect(CURLconnect *c_connect)
   return CURLE_OK;
 }
 
-
-/*
- * NAME curl_connect()
- *
- * DESCRIPTION
- *
- * Connects to the peer server and performs the initial setup. This function
- * writes a connect handle to its second argument that is a unique handle for
- * this connect. This allows multiple connects from the same handle returned
- * by curl_open().
- *
- * EXAMPLE
- *
- * CURLCode result;
- * CURL curl;
- * CURLconnect connect;
- * result = curl_connect(curl, &connect);
- */
-
-CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
+static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
 {
   char *tmp;
   char *buf;
@@ -1536,6 +1517,50 @@ CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
 
   return CURLE_OK;
 }
+
+CURLcode curl_connect(CURL *curl, CURLconnect **in_connect)
+{
+  CURLcode code;
+  struct connectdata *conn;
+
+  /* call the stuff that needs to be called */
+  code = _connect(curl, in_connect);
+
+  if(CURLE_OK != code) {
+    /* We're not allowed to return failure with memory left allocated
+       in the connectdata struct, free those here */
+    conn = (struct connectdata *)*in_connect;
+    if(conn) {
+      if(conn->hostent_buf)
+        free(conn->hostent_buf);
+      free(conn);
+      *in_connect=NULL;
+    }
+  }
+  return code;
+}
+
+
+/*
+ * NAME curl_connect()
+ *
+ * DESCRIPTION
+ *
+ * Connects to the peer server and performs the initial setup. This function
+ * writes a connect handle to its second argument that is a unique handle for
+ * this connect. This allows multiple connects from the same handle returned
+ * by curl_open().
+ *
+ * EXAMPLE
+ *
+ * CURLCode result;
+ * CURL curl;
+ * CURLconnect connect;
+ * result = curl_connect(curl, &connect);
+ */
+
+
+
 
 CURLcode curl_done(CURLconnect *c_connect)
 {

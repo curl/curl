@@ -620,7 +620,7 @@ CURLcode curl_transfer(CURL *curl)
 {
   CURLcode res;
   struct UrlData *data = curl;
-  struct connectdata *c_connect;
+  struct connectdata *c_connect=NULL;
 
   pgrsStartNow(data);
 
