@@ -44,6 +44,8 @@ Standards
 
   RFC 2229 - "A Dictionary Server Protocol"
 
+  RFC 2255 - Newer LDAP URL syntax document.
+
   RFC 2231 - "MIME Parameter Value and Encoded Word Extensions:
              Character Sets, Languages, and Continuations"
 
@@ -55,11 +57,14 @@ Standards
              it in this list.
 
   RFC 2428 - "FTP Extensions for IPv6 and NATs"
-             This should be considered when introducing IPv6 awareness.
 
-  RFC 2616 - HTTP 1.1
+  RFC 2616 - HTTP 1.1, the latest
 
   RFC 2617 - HTTP Authentication
+
+  RFC 2718 - "Guidelines for new URL Schemes"
+
+  RFC 2732 - "Format for Literal IPv6 Addresses in URL's"
 
 Compilers
 ---------
