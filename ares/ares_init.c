@@ -603,7 +603,7 @@ static int config_nameserver(struct server_state **servers, int *nservers,
   while (more)
   {
     more = 0;
-    while (*p && !isspace(*p) && *str != ',')
+    while (*p && !isspace(*p) && *p != ',')
       p++;
 
     if (*p)
