@@ -1713,8 +1713,21 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       config->conf ^= CONF_VERBOSE; /* talk a lot */
       break;
     case 'V':
+    {
+      curl_version_info_data *info;
+      const char **proto;
+
       printf(CURL_ID "%s\n", curl_version());
-      return PARAM_HELP_REQUESTED;
+      info = curl_version_info(CURLVERSION_NOW);
+      if (info->protocols) {
+        printf("Supported protocols: ");
+        for (proto=info->protocols; *proto; ++proto) {
+          printf("%s ", *proto);
+        }
+        printf("\n");
+      }
+    }
+    return PARAM_HELP_REQUESTED;
     case 'w':
       /* get the output string */
       if('@' == *nextarg) {
@@ -2990,11 +3003,11 @@ operate(struct Configurable *config, int argc, char *argv[])
 
       /* new in libcurl 7.10.6 (default is Basic) */
       if(config->digest)
-        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLHTTP_DIGEST);
+        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST);
       else if(config->negotiate)
-        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLHTTP_NEGOTIATE);
+        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_GSSNEGOTIATE);
       else if(config->ntlm)
-        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLHTTP_NTLM);
+        curl_easy_setopt(curl, CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
       
       /* new in curl 7.9.7 */
       if(config->trace_dump) {
