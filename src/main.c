@@ -35,9 +35,6 @@
 
 #include <curl/curl.h>
 
-#define _MPRINTF_REPLACE /* we want curl-functions instead of native ones */
-#include <curl/mprintf.h>
-
 #include "urlglob.h"
 #include "writeout.h"
 #include "getpass.h"
@@ -103,8 +100,10 @@
 #include <sys/poll.h>
 #endif
 
-#include <strtoofft.h> /* header from the libcurl directory */
-#include <timeval.h>   /* header from the libcurl directory */
+#define ENABLE_CURLX_PRINTF
+/* make the curlx header define all printf() functions to use the curlx_*
+   versions instead */
+#include <curlx.h> /* header from the libcurl directory */
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG
@@ -811,7 +810,7 @@ static int formparse(char *input,
             while(isspace((int)*ptr))
               ptr++;
 
-            if(curl_strnequal("type=", ptr, 5)) {
+            if(curlx_strnequal("type=", ptr, 5)) {
 
               /* set type pointer */
               type = &ptr[5];
@@ -831,7 +830,7 @@ static int formparse(char *input,
 
               ptr=sep+1;
             }
-            else if(curl_strnequal("filename=", ptr, 9)) {
+            else if(curlx_strnequal("filename=", ptr, 9)) {
               filename = &ptr[9];
               ptr=strchr(filename, FORM_TYPE_SEPARATOR);
               if(!ptr) {
@@ -898,9 +897,9 @@ static int formparse(char *input,
         }
         forms[count].option = CURLFORM_END;
         FreeMultiInfo (multi_start);
-        if (curl_formadd (httppost, last_post,
-                          CURLFORM_COPYNAME, name,
-                          CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {
+        if (curl_formadd(httppost, last_post,
+                         CURLFORM_COPYNAME, name,
+                         CURLFORM_ARRAY, forms, CURLFORM_END) != 0) {
           fprintf(stderr, "curl_formadd failed!\n");
           free(forms);
           free(contents);
@@ -911,18 +910,18 @@ static int formparse(char *input,
     }
     else {
       if( contp[0]=='<' ) {
-        if (curl_formadd (httppost, last_post,
-                          CURLFORM_COPYNAME, name,
-                          CURLFORM_FILECONTENT, contp+1, CURLFORM_END) != 0) {
+        if (curl_formadd(httppost, last_post,
+                         CURLFORM_COPYNAME, name,
+                         CURLFORM_FILECONTENT, contp+1, CURLFORM_END) != 0) {
           fprintf(stderr, "curl_formadd failed!\n");
           free(contents);
           return 6;
         }
       }
       else {
-        if (curl_formadd (httppost, last_post,
-                          CURLFORM_COPYNAME, name,
-                          CURLFORM_COPYCONTENTS, contp, CURLFORM_END) != 0) {
+        if (curl_formadd(httppost, last_post,
+                         CURLFORM_COPYNAME, name,
+                         CURLFORM_COPYCONTENTS, contp, CURLFORM_END) != 0) {
           fprintf(stderr, "curl_formadd failed!\n");
           free(contents);
           return 7;
@@ -1059,7 +1058,7 @@ static void checkpasswd(const char *kind, /* for what purpose */
     char *passptr;
 
     /* build a nice-looking prompt */
-    curl_msnprintf(prompt, sizeof(prompt),
+    curlx_msnprintf(prompt, sizeof(prompt),
                    "Enter %s password for user '%s':",
                    kind, *userpwd);
 
@@ -1218,10 +1217,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     size_t fnam=strlen(word);
     int numhits=0;
     for(j=0; j< sizeof(aliases)/sizeof(aliases[0]); j++) {
-      if(curl_strnequal(aliases[j].lname, word, fnam)) {
+      if(curlx_strnequal(aliases[j].lname, word, fnam)) {
         longopt = TRUE;
         numhits++;
-        if(curl_strequal(aliases[j].lname, word)) {
+        if(curlx_strequal(aliases[j].lname, word)) {
           parse = aliases[j].letter;
           hit = j;
           numhits = 1; /* a single unique hit */
@@ -1528,7 +1527,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'C':
       /* This makes us continue an ftp transfer at given position */
-      if(!curl_strequal(nextarg, "-")) {
+      if(!curlx_strequal(nextarg, "-")) {
         if(str2offset(&config->resume_from, nextarg))
           return PARAM_BAD_NUMERIC;
         config->resume_from_current = FALSE;
@@ -1551,7 +1550,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 
           nextarg++; /* pass the @ */
 
-          if(curl_strequal("-", nextarg))
+          if(curlx_strequal("-", nextarg))
             file = stdin;
           else 
             file = fopen(nextarg, "rb");
@@ -1944,7 +1943,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
            or - (stdin) follows */
         FILE *file;
         nextarg++; /* pass the @ */
-        if(curl_strequal("-", nextarg))
+        if(curlx_strequal("-", nextarg))
           file = stdin;
         else 
           file = fopen(nextarg, "r");
@@ -2452,7 +2451,7 @@ void progressbarinit(struct ProgressData *bar,
   /* 20000318 mgs
    * OS/2 users most likely won't have this env var set, and besides that
    * we're using our own way to determine screen width */
-  colp = curl_getenv("COLUMNS");
+  colp = curlx_getenv("COLUMNS");
   if (colp != NULL) {
     bar->width = atoi(colp);
     curl_free(colp);
@@ -2534,7 +2533,7 @@ int my_trace(CURL *handle, curl_infotype type,
 
   if(!config->trace_stream) {
     /* open for append */
-    if(curl_strequal("-", config->trace_dump))
+    if(curlx_strequal("-", config->trace_dump))
       config->trace_stream = stdout;
     else {
       config->trace_stream = fopen(config->trace_dump, "w");
@@ -2690,12 +2689,12 @@ operate(struct Configurable *config, int argc, char *argv[])
   char *env;
 #ifdef CURLDEBUG
   /* this sends all memory debug messages to a logfile named memdump */
-  env = curl_getenv("CURL_MEMDEBUG");
+  env = curlx_getenv("CURL_MEMDEBUG");
   if(env) {
     curl_free(env);
     curl_memdebug("memdump");
   }
-  env = curl_getenv("CURL_MEMLIMIT");
+  env = curlx_getenv("CURL_MEMLIMIT");
   if(env) {
     curl_memlimit(atoi(env));
     curl_free(env);
@@ -2722,7 +2721,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   config->lastsendtime = curlx_tvnow();
 
   if(argc>1 &&
-     (!curl_strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
+     (!curlx_strnequal("--", argv[1], 2) && (argv[1][0] == '-')) &&
      strchr(argv[1], 'q')) {
     /*
      * The first flag, that is not a verbose name, but a shortname
@@ -2749,7 +2748,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       
       char *flag = argv[i];
 
-      if(curl_strequal("--", argv[i]))
+      if(curlx_strequal("--", argv[i]))
 	/* this indicates the end of the flags and thus enables the
 	   following (URL) argument to start with -. */
 	stillflags=FALSE;
@@ -2804,7 +2803,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   if (!config->cacert &&
       !config->capath &&
       !config->insecure_ok) {
-    env = curl_getenv("CURL_CA_BUNDLE");
+    env = curlx_getenv("CURL_CA_BUNDLE");
     if(env) {
       GetStr(&config->cacert, env);
       curl_free(env);
@@ -2925,7 +2924,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         urlnum = 1; /* without globbing, this is a single URL */
 
       /* if multiple files extracted to stdout, insert separators! */
-      separator= ((!outfiles || curl_strequal(outfiles, "-")) && urlnum > 1);
+      separator= ((!outfiles || curlx_strequal(outfiles, "-")) && urlnum > 1);
 
       /* Here's looping around each globbed URL */
       for(i = 0;
@@ -2935,7 +2934,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         outfile = outfiles?strdup(outfiles):NULL;
         
         if((urlnode->flags&GETOUT_USEREMOTE) ||
-           (outfile && !curl_strequal("-", outfile)) ) {
+           (outfile && !curlx_strequal("-", outfile)) ) {
           
           /* 
            * We have specified a file name to store the result in, or we have
@@ -3026,7 +3025,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           }
         }
         infdfopen=FALSE;
-        if(uploadfile && !curl_strequal(uploadfile, "-")) {
+        if(uploadfile && !curlx_strequal(uploadfile, "-")) {
           /*
            * We have specified a file to upload and it isn't "-".
            */
@@ -3103,7 +3102,7 @@ operate(struct Configurable *config, int argc, char *argv[])
           uploadfilesize=fileinfo.st_size;
       
         }
-        else if(uploadfile && curl_strequal(uploadfile, "-")) {
+        else if(uploadfile && curlx_strequal(uploadfile, "-")) {
           infd = stdin;
         }
 
@@ -3425,7 +3424,7 @@ operate(struct Configurable *config, int argc, char *argv[])
         }
 #endif
 
-        if (outfile && !curl_strequal(outfile, "-") && outs.stream)
+        if (outfile && !curlx_strequal(outfile, "-") && outs.stream)
           fclose(outs.stream);
 
 #ifdef HAVE_UTIME
