@@ -1623,7 +1623,7 @@ CURLcode Curl_http(struct connectdata *conn)
             add_buffer(req_buffer, data->set.postfields, (size_t)postsize);
           else {
             /* Append the POST data chunky-style */
-            add_bufferf(req_buffer, "%x\r\n", postsize);
+            add_bufferf(req_buffer, "%x\r\n", (int)postsize);
             add_buffer(req_buffer, data->set.postfields, (size_t)postsize);
             add_buffer(req_buffer, "\r\n0\r\n\r\n", 7); /* end of a chunked
                                                            transfer stream */
