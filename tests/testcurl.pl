@@ -82,7 +82,7 @@ while ($ARGV[0]) {
 $gnulikebuild = 1;
 $confsuffix = '';
 $binext = '';
-$libext = '.a';
+$libext = '.la'; # .la since both libcurl and libcares are made with libtool
 if ($^O eq 'MSWin32' || $targetos ne '') {
   $gnulikebuild = 0;
   if ($targetos eq '') {
