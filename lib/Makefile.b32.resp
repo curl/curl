@@ -1,6 +1,6 @@
 +base64.obj &
 +cookie.obj &
-+download.obj &
++transfer.obj &
 +escape.obj &
 +formdata.obj &
 +ftp.obj &
@@ -25,5 +25,4 @@
 +getinfo.obj &
 +version.obj &
 +easy.obj &
-+highlevel.obj &
 +strequal.obj

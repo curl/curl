@@ -29,7 +29,7 @@ LIBCURLLIB = libcurl.lib
 SOURCES	   = \
 	base64.c \
 	cookie.c \
-	download.c \
+	transfer.c \
 	escape.c \
 	formdata.c \
 	ftp.c \
@@ -54,7 +54,6 @@ SOURCES	   = \
 	getinfo.c \
 	version.c \
 	easy.c \
-	highlevel.c \
 	strequal.c
 
 OBJECTS = $(SOURCES:.c=.obj)

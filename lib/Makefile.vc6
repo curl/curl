@@ -33,7 +33,7 @@ LINKSLIBS = libeay32.lib ssleay32.lib RSAglue.lib
 RELEASE_OBJS= \
 	base64r.obj \
 	cookier.obj \
-	downloadr.obj \
+	transferr.obj \
 	escaper.obj \
 	formdatar.obj \
 	ftpr.obj \
@@ -58,13 +58,12 @@ RELEASE_OBJS= \
 	getinfor.obj \
 	versionr.obj \
 	easyr.obj \
-	highlevelr.obj \
 	strequalr.obj
 
 DEBUG_OBJS= \
 	base64d.obj \
 	cookied.obj \
-	downloadd.obj \
+	transferd.obj \
 	escaped.obj \
 	formdatad.obj \
 	ftpd.obj \
@@ -89,13 +88,12 @@ DEBUG_OBJS= \
 	getinfod.obj \
 	versiond.obj  \
 	easyd.obj \
-	highleveld.obj \
 	strequald.obj
 
 RELEASE_SSL_OBJS= \
 	base64rs.obj \
 	cookiers.obj \
-	downloadrs.obj \
+	transferrs.obj \
 	escapers.obj \
 	formdatars.obj \
 	ftprs.obj \
@@ -120,13 +118,12 @@ RELEASE_SSL_OBJS= \
 	getinfors.obj \
 	versionrs.obj \
 	easyrs.obj \
-	highlevelrs.obj \
 	strequalrs.obj
 
 LINK_OBJS= \
 	base64.obj \
 	cookie.obj \
-	download.obj \
+	transfer.obj \
 	escape.obj \
 	formdata.obj \
 	ftp.obj \
@@ -151,7 +148,6 @@ LINK_OBJS= \
 	getinfo.obj \
 	version.obj \
 	easy.obj \
-	highlevel.obj \
 	strequal.obj
 
 all : release
@@ -170,8 +166,8 @@ base64r.obj: base64.c
 	$(CCR) $(CFLAGS) base64.c
 cookier.obj: cookie.c
 	$(CCR) $(CFLAGS) cookie.c
-downloadr.obj: download.c
-	$(CCR) $(CFLAGS) download.c
+transferr.obj: transfer.c
+	$(CCR) $(CFLAGS) transfer.c
 escaper.obj: escape.c
 	$(CCR) $(CFLAGS) escape.c
 formdatar.obj: formdata.c
@@ -220,8 +216,6 @@ versionr.obj: version.c
 	$(CCR) $(CFLAGS) version.c
 easyr.obj: easy.c
 	$(CCR) $(CFLAGS) easy.c
-highlevelr.obj: highlevel.c
-	$(CCR) $(CFLAGS) highlevel.c
 strequalr.obj: strequal.c
 	$(CCR) $(CFLAGS) strequal.c
 
@@ -230,8 +224,8 @@ base64d.obj: base64.c
 	$(CCD) $(CFLAGS) base64.c
 cookied.obj: cookie.c
 	$(CCD) $(CFLAGS) cookie.c
-downloadd.obj: download.c
-	$(CCD) $(CFLAGS) download.c
+transferd.obj: transfer.c
+	$(CCD) $(CFLAGS) transfer.c
 escaped.obj: escape.c
 	$(CCD) $(CFLAGS) escape.c
 formdatad.obj: formdata.c
@@ -280,8 +274,6 @@ versiond.obj: version.c
 	$(CCD) $(CFLAGS) version.c
 easyd.obj: easy.c
 	$(CCD) $(CFLAGS) easy.c
-highleveld.obj: highlevel.c
-	$(CCD) $(CFLAGS) highlevel.c
 strequald.obj: strequal.c
 	$(CCD) $(CFLAGS) strequal.c
 
@@ -291,8 +283,8 @@ base64rs.obj: base64.c
 	$(CCRS) $(CFLAGS) base64.c
 cookiers.obj: cookie.c
 	$(CCRS) $(CFLAGS) cookie.c
-downloadrs.obj: download.c
-	$(CCRS) $(CFLAGS) download.c
+transferrs.obj: transfer.c
+	$(CCRS) $(CFLAGS) transfer.c
 escapers.obj: escape.c
 	$(CCRS) $(CFLAGS) escape.c
 formdatars.obj: formdata.c
@@ -341,8 +333,6 @@ versionrs.obj: version.c
 	$(CCRS) $(CFLAGS) version.c
 easyrs.obj: easy.c
 	$(CCRS) $(CFLAGS) easy.c
-highlevelrs.obj: highlevel.c
-	$(CCRS) $(CFLAGS) highlevel.c
 strequalrs.obj: strequal.c
 	$(CCRS) $(CFLAGS) strequal.c
 

@@ -53,14 +53,14 @@ cookie.c       formdata.h     http.c         sendf.c        \
 cookie.h       ftp.c          http.h         sendf.h        url.c \
 dict.c         ftp.h          if2ip.c        speedcheck.c   url.h \
 dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h \
-download.c     getdate.h      ldap.c         ssluse.c       version.c \
-download.h     getenv.c       ldap.h         ssluse.h       \
+getdate.h      ldap.c         ssluse.c       version.c \
+getenv.c       ldap.h         ssluse.h       \
 escape.c       getenv.h       mprintf.c      telnet.c       \
 escape.h       getpass.c      netrc.c        telnet.h       \
-getinfo.c highlevel.c strequal.c strequal.h easy.c \
+getinfo.c transfer.c strequal.c strequal.h easy.c \
 security.h security.c krb4.c krb4.h memdebug.c memdebug.h inet_ntoa_r.h
 
-noinst_HEADERS = setup.h highlevel.h
+noinst_HEADERS = setup.h transfer.h
 
 # Say $(srcdir), so GNU make does not report an ambiguity with the .y.c rule.
 $(srcdir)/getdate.c: getdate.y

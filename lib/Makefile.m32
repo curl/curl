@@ -30,16 +30,16 @@ libcurl_a_SOURCES = arpa_telnet.h file.c getpass.h netrc.h timeval.c base64.c \
 	file.h hostip.c progress.c timeval.h base64.h formdata.c hostip.h progress.h	\
 	cookie.c formdata.h http.c sendf.c cookie.h ftp.c http.h sendf.h url.c dict.c	\
 	ftp.h if2ip.c speedcheck.c url.h dict.h getdate.c if2ip.h speedcheck.h		\
-	urldata.h download.c getdate.h ldap.c ssluse.c version.c download.h getenv.c	\
+	urldata.h transfer.c getdate.h ldap.c ssluse.c version.c transfer.h getenv.c	\
 	ldap.h ssluse.h escape.c getenv.h mprintf.c telnet.c escape.h getpass.c netrc.c	\
-	telnet.h getinfo.c highlevel.c strequal.c strequal.h easy.c security.h		\
+	telnet.h getinfo.c strequal.c strequal.h easy.c security.h		\
 	security.c krb4.c
 
 libcurl_a_OBJECTS =  file.o timeval.o base64.o hostip.o progress.o \
 	formdata.o cookie.o http.o sendf.o ftp.o url.o dict.o if2ip.o \
-	speedcheck.o getdate.o download.o ldap.o ssluse.o version.o \
+	speedcheck.o getdate.o transfer.o ldap.o ssluse.o version.o \
 	getenv.o escape.o mprintf.o telnet.o getpass.o netrc.o getinfo.o \
-	highlevel.o strequal.o easy.o security.o krb4.o
+	strequal.o easy.o security.o krb4.o
 
 LIBRARIES =  $(libcurl_a_LIBRARIES)
 SOURCES = $(libcurl_a_SOURCES)
