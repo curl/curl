@@ -410,11 +410,17 @@ The total amount of bytes that were downloaded.
 .B size_upload
 The total amount of bytes that were uploaded.
 .TP
+.B size_header
+The total amount of bytes of the downloaded headers.
+.TP
+.B size_request
+The total amount of bytes that were sent in the HTTP request.
+.TP
 .B speed_download
 The average download speed that curl measured for the complete download.
 .TP
 .B speed_upload
-The average upload speed that curl measured for the complete download.
+The average upload speed that curl measured for the complete upload.
 .RE
 .IP "-x/--proxy <proxyhost[:port]>"
 Use specified proxy. If the port number is not specified, it is assumed at
