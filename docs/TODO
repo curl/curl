@@ -22,10 +22,11 @@ For the future
  * Move non-URL related functions that are used by both the lib and the curl
    application to a separate "portability lib".
 
- * Add support for other languages than C (not important). C++ and perl comes
-   to mind. Python?
+ * Add support for other languages than C. C++ and perl comes to mind. Python?
 
- * Improve the -K config file parser.
+ * Improve the -K config file parser (the parameter following the flag should
+   be possible to get specified *exactly* as it is done on a shell command
+   line).
 
  * rtsp:// support -- "Real Time Streaming Protocol" (RFC 2326)
 
@@ -36,28 +37,13 @@ For the future
    started in October 1999 but halted again since it proved more work than we
    thought. It is still a good idea to implement though.
 
- * HTTP Pipelining/persistant connections
-
- - We should introduce HTTP "pipelining". Curl could be able to request for
-   several HTTP documents in one connect. It would be the beginning for
-   supporing more advanced functions in the future, like web site
-   mirroring. This will require that the urlget() function supports several
-   documents from a single HTTP server, which it doesn't today.
-
- - When curl supports fetching several documents from the same server using
-   pipelining, I'd like to offer that function to the command line. Anyone has
-   a good idea how? The current way of specifying one URL with the output sent
-   to the stdout or a file gets in the way. Imagine a syntax that supports
-   "additional documents from the same server" in a way similar to:
-
-     curl <main URL> --more-doc <path> --more-doc <path>
-
-   where --more-doc specifies another document on the same server. Where are
-   the output files gonna be put and how should they be named? Should each
-   "--more-doc" parameter require a local file name to store the result in?
-   Like "--more-file" as in:
-
-     curl <URL> --more-doc <path> --more-file <file>
+ * Authentication: NTLM. It would be cool to support that MS crap called NTLM
+   authentication. MS proxies and servers sometime require that. Since that
+   protocol is a proprietary one, it involves reverse engineering and network
+   sniffing. This should however be a library-based functionality. There are a
+   few different efforts "out there" to make open source HTTP clients support
+   this and it should be possible to take advantage of other people's hard
+   work.
 
  * RFC2617 compliance, "Digest Access Authentication"
    A valid test page seem to exist at:
@@ -93,6 +79,3 @@ For the future
 
  * Make curl capable of verifying the server's certificate when connecting
    with HTTPS://.
-
- * Kerberos-FTP, krb4-ftp
-

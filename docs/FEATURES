@@ -30,7 +30,7 @@ HTTP
  - follow redirects
  - custom HTTP request
  - cookie get/send
- - understands the netscape cookie file
+ - understands the netscape cookie file format
  - custom headers (that can replace/remove internally generated headers)
  - custom user-agent string
  - custom referer string
@@ -38,6 +38,7 @@ HTTP
  - proxy authentication
  - time conditions
  - via http-proxy
+ - specify interface device/port
 
 HTTPS (*1)
  - (all the HTTP features)
@@ -47,6 +48,7 @@ HTTPS (*1)
 FTP
  - download
  - authentication
+ - kerberos security
  - PORT or PASV
  - single file size information (compare to HTTP HEAD)
  - 'type=' URL support

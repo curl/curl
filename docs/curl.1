@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "15 August 2000" "Curl 7.3" "Curl Manual"
+.TH curl 1 "20 September 2000" "Curl 7.3" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -172,11 +172,20 @@ prevent that header from appearing.
 (HTTP)
 Include the HTTP-header in the output. The HTTP-header includes things
 like server-name, date of the document, HTTP-version and more...
+.IP "--interface <name>"
+Perform an operation using a specified interface. You can enter interface
+name, IP address or host name. An example could look like:
+
+.B "curl --interface eth0:1 http://www.netscape.com/"
 .IP "-I/--head"
 (HTTP/FTP)
 Fetch the HTTP-header only! HTTP-servers feature the command HEAD
 which this uses to get nothing but the header of a document. When used
 on a FTP file, curl displays the file size only.
+.IP "--krb4 <level>"
+(FTP) Enable kerberos4 authentication and use. The level must be entered and
+should be one of 'clear', 'safe', 'confidential' or 'private'. Should you use
+a level that is not one of these, 'private' will instead be used.
 .IP "-K/--config <config file>"
 Specify which config file to read curl arguments from. The config
 file is a text file in which command line arguments can be written
@@ -622,6 +631,9 @@ If you do find any (or have other suggestions), mail Daniel Stenberg
  - Fred Noz <FNoz@siac.com>
  - Caolan McNamara <caolan@csn.ul.ie>
  - Albert Chin-A-Young <china@thewrittenword.com>
+ - Stephen Kick <skick@epicrealm.com>
+ - Martin Hedenfalk <mhe@stacken.kth.se>
+ - Richard Prescott
 
 .SH WWW
 http://curl.haxx.se

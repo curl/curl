@@ -497,6 +497,16 @@ FTP and firewalls
 
         curl -P 192.168.0.10 ftp.download.com
 
+NETWORK INTERFACE
+
+  Get a web page from a server using a specified port for the interface:
+
+	curl --interface eth0:1 http://www.netscape.com/
+
+  or
+
+	curl --interface 192.168.1.10 http://www.netscape.com/
+
 HTTPS
 
   Secure HTTP requires SSL libraries to be installed and used when curl is
