@@ -41,7 +41,7 @@
 # include <time.h>
 #endif /* defined (vms) */
 
-#include "types.h"
+typedef void CURL;
 
 #ifdef  __cplusplus
 extern "C" {
