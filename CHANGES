@@ -7,6 +7,11 @@
                                   Changelog
 
 Daniel(22 January 2004)
+- Gisle Vanem made strtoll() get used when curl is built with the mingw
+  compiler.
+
+- Gisle Vanem fixed the compressed help text code to display properly.
+
 - Removed the '#define HttpPost' from the public header file, as curl_httppost
   is the proper name and it has been for quite some time now. Fixes another
   name space pollution.
