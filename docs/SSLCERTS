@@ -32,7 +32,25 @@ server, do one of the following:
     configure with the --with-ca-bundle option pointing out the path of your
     choice.
 
-    If you're using the curl command line tool, you can specify your own CA
+    To do this, you need to get the CA cert for your server in PEM format and
+    then append that to your CA cert bundle.
+
+    If you use Internet Explorer, this is one way to get extract the CA cert
+    for a particular server:
+
+     o View the certificate by double-clicking the padlock
+     o Find out where the CA certificate is kept (Certificate>
+       Authority Information Access>URL)
+     o Get a copy of the crt file using curl
+     o Convert it from crt to PEM using the openssl tool:
+       openssl x509 -inform DES -in yourdownloaded.crt \
+       -out outcert.pem -text
+     o Append the 'outcert.pem' to the CA cert bundle or use it stand-alone
+       as described below.
+
+     (Thanks to Frankie V for this description)
+
+ 4. If you're using the curl command line tool, you can specify your own CA
     cert path by setting the environment variable CURL_CA_BUNDLE to the path
     of your choice.
 
@@ -45,7 +63,7 @@ server, do one of the following:
       4. Windows Directory (e.g. C:\windows)
       5. all directories along %PATH%
 
- 4. Get a better/different/newer CA cert bundle! One option is to extract the
+ 5. Get a better/different/newer CA cert bundle! One option is to extract the
     one a recent Mozilla browser uses, by following the instruction found
     here:
 
@@ -56,9 +74,3 @@ certificate that isn't signed by one of the certificates in the installed CA
 cert bundle, will cause SSL to report an error ("certificate verify failed")
 during the handshake and SSL will then refuse further communication with that
 server.
-
-This procedure has been deemed The Right Thing even though it adds this extra
-trouble for some users, since it adds security to a majority of the SSL
-connections that previously weren't really secure. It turned out many people
-were using previous versions of curl/libcurl without realizing the need for
-the CA cert options to get truly secure SSL connections.
