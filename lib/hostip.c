@@ -812,11 +812,11 @@ static void hostcache_fixoffset(struct hostent *h, int offset)
   h->h_name=(char *)((long)h->h_name+offset);
   if(h->h_aliases) {
     /* only relocate aliases if there are any! */
-  h->h_aliases=(char **)((long)h->h_aliases+offset);
-  while(h->h_aliases[i]) {
-    h->h_aliases[i]=(char *)((long)h->h_aliases[i]+offset);
-    i++;
-  }
+    h->h_aliases=(char **)((long)h->h_aliases+offset);
+    while(h->h_aliases[i]) {
+      h->h_aliases[i]=(char *)((long)h->h_aliases[i]+offset);
+      i++;
+    }
   }
 
   h->h_addr_list=(char **)((long)h->h_addr_list+offset);
