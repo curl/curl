@@ -77,6 +77,37 @@ mingw32-clean:
 	$(MAKE) -C lib -f Makefile.m32 clean
 	$(MAKE) -C src -f Makefile.m32 clean
 
+vc-clean:
+	cd lib
+	nmake -f Makefile.vc6 clean
+	cd ..\src
+	nmake -f Makefile.vc6 clean
+
+vc-all:
+	cd lib
+	nmake -f Makefile.vc6 cfg=release
+	nmake -f Makefile.vc6 cfg=release-ssl
+	nmake -f Makefile.vc6 cfg=release-zlib
+	nmake -f Makefile.vc6 cfg=release-ssl-zlib
+	nmake -f Makefile.vc6 cfg=release-ssl-dll
+	nmake -f Makefile.vc6 cfg=release-zlib-dll
+	nmake -f Makefile.vc6 cfg=release-ssl-dll-zlib-dll
+	nmake -f Makefile.vc6 cfg=release-dll
+	nmake -f Makefile.vc6 cfg=release-dll-ssl-dll
+	nmake -f Makefile.vc6 cfg=release-dll-zlib-dll
+	nmake -f Makefile.vc6 cfg=release-dll-ssl-dll-zlib-dll
+	nmake -f Makefile.vc6 cfg=debug
+	nmake -f Makefile.vc6 cfg=debug-ssl
+	nmake -f Makefile.vc6 cfg=debug-zlib
+	nmake -f Makefile.vc6 cfg=debug-ssl-zlib
+	nmake -f Makefile.vc6 cfg=debug-ssl-dll
+	nmake -f Makefile.vc6 cfg=debug-zlib-dll
+	nmake -f Makefile.vc6 cfg=debug-ssl-dll-zlib-dll
+	nmake -f Makefile.vc6 cfg=debug-dll
+	nmake -f Makefile.vc6 cfg=debug-dll-ssl-dll
+	nmake -f Makefile.vc6 cfg=debug-dll-zlib-dll
+	nmake -f Makefile.vc6 cfg=debug-dll-ssl-dll-zlib-dll
+
 vc:
 	cd lib
 	nmake /f Makefile.vc6 cfg=release
@@ -105,13 +136,43 @@ vc-ssl-dll:
 	cd lib
 	nmake /f Makefile.vc6 cfg=release-ssl-dll
 	cd ..\src
-	nmake /f Makefile.vc6
+	nmake /f Makefile.vc6 cfg=release-ssl-dll
 
-vc-libcurl-ssl-dll:
+vc-dll-ssl-dll:
 	cd lib
-	nmake /f Makefile.vc6 cfg=release-libcurl-ssl-dll
+	nmake /f Makefile.vc6 cfg=release-dll-ssl-dll
 	cd ..\src
-	nmake /f Makefile.vc6
+	nmake /f Makefile.vc6 cfg=release-dll-ssl-dll
+
+vc-dll:
+	cd lib
+	nmake /f Makefile.vc6 cfg=release-dll
+	cd ..\src
+	nmake /f Makefile.vc6 cfg=release-dll
+
+vc-dll-zlib-dll:
+	cd lib
+	nmake /f Makefile.vc6 cfg=release-dll-zlib-dll
+	cd ..\src
+	nmake /f Makefile.vc6 cfg=release-dll-zlib-dll
+
+vc-dll-ssl-dll-zlib-dll:
+	cd lib
+	nmake /f Makefile.vc6 cfg=release-dll-ssl-dll-zlib-dll
+	cd ..\src
+	nmake /f Makefile.vc6 cfg=release-dll-ssl-dll-zlib-dll
+
+vc-ssl-dll-zlib-dll:
+	cd lib
+	nmake /f Makefile.vc6 cfg=release-ssl-dll-zlib-dll
+	cd ..\src
+	nmake /f Makefile.vc6 cfg=release-ssl-dll-zlib-dll
+
+vc-zlib-dll:
+	cd lib
+	nmake /f Makefile.vc6 cfg=release-zlib-dll
+	cd ..\src
+	nmake /f Makefile.vc6 cfg=release-zlib-dll
 
 djgpp:
 	$(MAKE) -C lib -f Makefile.dj

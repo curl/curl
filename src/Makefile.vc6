@@ -25,13 +25,15 @@ OPENSSL_PATH = ../../openssl-0.9.7e
 
 ########################################################
 ## Nothing more to do below this line!
-CFLAGSZLIB = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
-LFLAGSZLIB = "/LIBPATH:$(ZLIB_PATH)"
-ZLIBLIBS   = zlib.lib
-SSLINC     = /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
-CFLAGSSSL  = /DUSE_SSLEAY
-LFLAGSSSL  = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
-SSLLIBS    = libeay32.lib ssleay32.lib gdi32.lib
+ZLIB_CFLAGS   = /DHAVE_ZLIB_H /DHAVE_ZLIB /DHAVE_LIBZ /I "$(ZLIB_PATH)"
+ZLIB_LFLAGS   = "/LIBPATH:$(ZLIB_PATH)"
+ZLIB_LIBS     = zlib.lib
+ZLIB_IMP_LIBS = zdll.lib
+
+SSL_CFLAGS     = /DUSE_SSLEAY
+SSL_LFLAGS     = /LIBPATH:"$(OPENSSL_PATH)/out32"
+SSL_IMP_LFLAGS = /LIBPATH:"$(OPENSSL_PATH)/out32dll"
+SSL_LIBS       = libeay32.lib ssleay32.lib gdi32.lib
 
 ## Release
 CCR   = cl.exe /MD /O2 /DNDEBUG
@@ -71,52 +73,108 @@ DEBUG_OBJS= \
 	curld.res
 
 #################################################
-# release-zlib (static libcurl + zlib)
-
-!IF "$(CFG)" == "release-zlib"
-CFLAGS         = $(CFLAGS) $(CFLAGSZLIB) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(ZLIBLIBS)
-LINKLIBS_DEBUG = libcurld.lib $(ZLIBLIBS)
-LFLAGS         = $(LFLAGS) $(LFLAGSZLIB)
-!ENDIF
-
-#################################################
-# release-ssl (static libcurl + ssl)
-
-!IF "$(CFG)" == "release-ssl"
-CFLAGS         = $(CFLAGS) $(CFLAGSSSL) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(SSLLIBS)
-LINKLIBS_DEBUG = libcurld.lib $(SSLLIBS)
-LFLAGS         = $(LFLAGS) $(LFLAGSSSL)
-!ENDIF
-
-#################################################
-# release-libcurl-ssl-dll (libcurl.dll + ssl)
-
-!IF "$(CFG)" == "release-libcurl-ssl-dll"
-CFLAGS         = $(CFLAGS) $(CFLAGSSSL)
-LINKLIBS       = libcurl_imp.lib  $(SSLLIBS)
-LINKLIBS_DEBUG = libcurld_imp.lib $(SSLLIBS)
-LFLAGS         = $(LFLAGS) $(LFLAGSSSL)
-!ENDIF
-
-#################################################
-# release-ssl-zlib (static libcurl +  ssl + zlib)
-
-!IF "$(CFG)" == "release-ssl-zlib"
-CFLAGS         = $(CFLAGS) $(CFLAGSSSL) $(CFLAGSZLIB) /DCURL_STATICLIB
-LINKLIBS       = libcurl.lib  $(SSLLIBS) $(ZLIBLIBS)
-LINKLIBS_DEBUG = libcurld.lib $(SSLLIBS) $(ZLIBLIBS)
-LFLAGS         = $(LFLAGS) $(LFLAGSSSL) $(LFLAGSZLIB)
-!ENDIF
-
-#################################################
 # If CFG not specified, use static libs
 
-!IF "$(CFG)." == "."
 CFLAGS         = $(CFLAGS) /DCURL_STATICLIB
 LINKLIBS       = libcurl.lib
 LINKLIBS_DEBUG = libcurld.lib
+
+#################################################
+# release dynamic library
+
+!IF "$(CFG)" == "release-dll"
+LINKLIBS       = libcurl_imp.lib
+LINKLIBS_DEBUG = libcurld_imp.lib
+!ENDIF
+
+#################################################
+# release static library with zlib
+
+!IF "$(CFG)" == "release-zlib"
+CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = libcurl.lib  $(ZLIB_LIBS)
+LINKLIBS_DEBUG = libcurld.lib $(ZLIB_LIBS)
+LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with ssl
+
+!IF "$(CFG)" == "release-ssl"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = libcurl.lib  $(SSL_LIBS)
+LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_LFLAGS)
+!ENDIF
+
+#################################################
+# release dynamic library with dynamic ssl
+
+!IF "$(CFG)" == "release-dll-ssl-dll"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS)
+LINKLIBS       = libcurl_imp.lib  $(SSL_LIBS)
+LINKLIBS_DEBUG = libcurld_imp.lib $(SSL_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with ssl and zlib
+
+!IF "$(CFG)" == "release-ssl-zlib"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = libcurl.lib  $(SSL_LIBS) $(ZLIB_LIBS)
+LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS) $(ZLIB_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with dynamic ssl
+
+!IF "$(CFG)" == "release-ssl-dll"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = libcurl.lib  $(SSL_LIBS)
+LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with dynamic zlib
+
+!IF "$(CFG)" == "release-zlib-dll"
+CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = libcurl.lib  $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = libcurld.lib $(ZLIB_IMP_LIBS)
+LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release dynamic library with dynamic zlib
+
+!IF "$(CFG)" == "release-dll-zlib-dll"
+CFLAGS         = $(CFLAGS) $(ZLIB_CFLAGS)
+LINKLIBS       = libcurl_imp.lib  $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = libcurld_imp.lib $(ZLIB_IMP_LIBS)
+LFLAGS         = $(LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release static library with dynamic ssl and dynamic zlib
+
+!IF "$(CFG)" == "release-ssl-dll-zlib-dll"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS) /DCURL_STATICLIB
+LINKLIBS       = libcurl.lib  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = libcurld.lib $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
+!ENDIF
+
+#################################################
+# release dynamic library with dynamic ssl and dynamic zlib
+
+!IF "$(CFG)" == "release-dll-ssl-dll-zlib-dll"
+CFLAGS         = $(CFLAGS) $(SSL_CFLAGS) $(ZLIB_CFLAGS)
+LINKLIBS       = libcurl_imp.lib  $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LINKLIBS_DEBUG = libcurld_imp.lib $(SSL_LIBS) $(ZLIB_IMP_LIBS)
+LFLAGS         = $(LFLAGS) $(SSL_IMP_LFLAGS) $(ZLIB_LFLAGS)
 !ENDIF
 
 
@@ -172,15 +230,10 @@ curld.res : curl.rc
 	$(RCD) $(RESFLAGS) /Fo"$@" curl.rc
 
 clean:
-	-@erase $(RELEASE_OBJS)
-	-@erase $(DEBUG_OBJS)
-	-@erase vc60.idb
-	-@erase vc60.pdb
-	-@erase vc60.pch
-	-@erase vc70.idb
-	-@erase vc70.pch
-	-@erase curl.ilk
-	-@erase curl.pdb
-
-distrib: clean
-	-@erase $(PROGRAM_NAME)
+	@-erase $(PROGRAM_NAME) 2> NUL
+	@-erase $(RELEASE_OBJS) 2> NUL
+	@-erase $(DEBUG_OBJS) 2> NUL
+	@-erase *.idb 2> NUL
+	@-erase *.pdb 2> NUL
+	@-erase *.pch 2> NUL
+	@-erase *.ilk 2> NUL

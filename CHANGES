@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (18 January 2005)
+- Cody Jones' enhanced version of Samuel Díaz García's MSVC makefile patch was
+  applied.
+
 Daniel (16 January 2005)
 - Alex aka WindEagle pointed out that when doing "curl -v dictionary.com", curl
   assumed this used the DICT protocol. While guessing protocols will remain
