@@ -448,6 +448,7 @@ PORTS
         - StrongARM NetBSD 1.4.1
         - Ultrix 4.3a
         - i386 BeOS
+        - i386 DOS
         - i386 FreeBSD
         - i386 HURD
         - i386 Linux 1.3, 2.0, 2.2, 2.3, 2.4
