@@ -2754,10 +2754,9 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
 
   ftp->dirdepth = 0;
   ftp->diralloc = 5; /* default dir depth to allocate */
-  ftp->dirs = (char **)malloc(ftp->diralloc * sizeof(ftp->dirs[0]));
+  ftp->dirs = (char **)calloc(ftp->diralloc, sizeof(ftp->dirs[0]));
   if(!ftp->dirs)
     return CURLE_OUT_OF_MEMORY;
-  ftp->dirs[0] = NULL; /* to start with */
 
   /* parse the URL path into separate path components */
   while((slash_pos=strchr(cur_pos, '/'))) {
@@ -2795,6 +2794,7 @@ CURLcode ftp_parse_url_path(struct connectdata *conn)
         ftp->diralloc *= 2; /* double the size each time */
         bigger = realloc(ftp->dirs, ftp->diralloc * sizeof(ftp->dirs[0]));
         if(!bigger) {
+          ftp->dirdepth--;
           freedirs(ftp);
           return CURLE_OUT_OF_MEMORY;
         }
