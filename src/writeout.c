@@ -182,9 +182,7 @@ void ourWriteOut(CURL *curl, char *writeinfo)
                     curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &stringp))
                    && stringp)
                   fputs(stringp, stream);
-                break;
               default:
-                /* -Wunreachable-code wrongly complains on this */
                 break;
               }
               break;
