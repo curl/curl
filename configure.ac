@@ -955,6 +955,30 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 
+ares="no"
+AC_MSG_CHECKING([whether to enable ares])
+AC_ARG_ENABLE(ares,
+AC_HELP_STRING([--enable-ares],[Enable using ares for name lookups])
+AC_HELP_STRING([--disable-ares],[Disable using ares for name lookups]),
+[ case "$enableval" in
+  no)
+       AC_MSG_RESULT(no)
+       ;;
+  *)   AC_MSG_RESULT(yes)
+
+       if test "$IPV6_ENABLED" -eq 1; then
+         AC_MSG_ERROR([ares doesn't work with ipv6, disable ipv6 to use ares])
+       fi
+
+       CPPFLAGS="$CPPFLAGS -DUSE_ARES"
+       ares="yes"
+       ;;
+  esac ],
+       AC_MSG_RESULT(no)
+)
+
+AM_CONDITIONAL(ARES, test x$ares = xyes)
+
 AC_CONFIG_FILES([Makefile \
 	   docs/Makefile \
            docs/examples/Makefile \
