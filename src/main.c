@@ -365,7 +365,6 @@ static char *my_get_token(const char *line);
 static void GetStr(char **string,
 		   char *value)
 {
-  fprintf(stderr, "called\n");
   if(*string)
     free(*string);
   if(value && *value)
@@ -1404,7 +1403,7 @@ int main(int argc, char *argv[])
     return res;
 
   /* save outfile pattern befor expansion */
-  outfiles = strdup(config.outfile);
+  outfiles = config.outfile?strdup(config.outfile):NULL;
 
   if (!outfiles && !config.remotefile && urlnum > 1) {
 #ifdef CURL_SEPARATORS
