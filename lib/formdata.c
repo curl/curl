@@ -1319,7 +1319,7 @@ int Curl_FormReader(char *buffer,
   wantedsize = size * nitems;
 
   if(!form->data)
-    return -1; /* nothing, error, empty */
+    return 0; /* nothing, error, empty */
 
   do {
   
