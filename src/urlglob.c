@@ -426,8 +426,6 @@ char *glob_next_url(URLGlob *glob)
 char *glob_match_url(char *filename, URLGlob *glob)
 {
   char *target;
-  URLPattern pat;
-  int i;
   int allocsize;
   int stringlen=0;
   char numbuf[18];
@@ -443,44 +441,40 @@ char *glob_match_url(char *filename, URLGlob *glob)
   if(NULL == target)
     return NULL; /* major failure */
 
-  while (*filename != '\0') {
-    if (*filename == '#') {
-      if (!isdigit((int)*++filename) ||
-	  *filename == '0') {		/* only '#1' ... '#9' allowed */
-	/* printf("illegal matching expression\n");
-           exit(CURLE_URL_MALFORMAT);*/
-        continue;
+  while (*filename) {
+    if (*filename == '#' && isdigit((int)filename[1])) {
+      /* only '#1' ... '#9' allowed */
+      int i;
+      unsigned long num = strtoul(&filename[1], &filename, 10);
+
+      i = num-1;
+
+      if (num && (i <= glob->size / 2)) {
+        URLPattern pat = glob->pattern[i];
+        switch (pat.type) {
+        case UPTSet:
+          appendthis = pat.content.Set.elements[pat.content.Set.ptr_s];
+          appendlen =
+            (int)strlen(pat.content.Set.elements[pat.content.Set.ptr_s]);
+          break;
+        case UPTCharRange:
+          numbuf[0]=pat.content.CharRange.ptr_c;
+          numbuf[1]=0;
+          appendthis=numbuf;
+          appendlen=1;
+          break;
+        case UPTNumRange:
+          sprintf(numbuf, "%0*d",
+                  pat.content.NumRange.padlength,
+                  pat.content.NumRange.ptr_n);
+          appendthis = numbuf;
+          appendlen = (int)strlen(numbuf);
+          break;
+        default:
+          printf("internal error: invalid pattern type (%d)\n", pat.type);
+          return NULL;
+        }
       }
-      i = *filename - '1';
-      if (i + 1 > glob->size / 2) {
-	/*printf("match against nonexisting pattern\n");
-          exit(CURLE_URL_MALFORMAT);*/
-        continue;
-      }
-      pat = glob->pattern[i];
-      switch (pat.type) {
-      case UPTSet:
-	appendthis = pat.content.Set.elements[pat.content.Set.ptr_s];
-	appendlen = (int)strlen(pat.content.Set.elements[pat.content.Set.ptr_s]);
-	break;
-      case UPTCharRange:
-        numbuf[0]=pat.content.CharRange.ptr_c;
-        numbuf[1]=0;
-        appendthis=numbuf;
-        appendlen=1;
-	break;
-      case UPTNumRange:
-	sprintf(numbuf, "%0*d",
-                pat.content.NumRange.padlength,
-                pat.content.NumRange.ptr_n);
-        appendthis = numbuf;
-        appendlen = (int)strlen(numbuf);
-	break;
-      default:
-	printf("internal error: invalid pattern type (%d)\n", pat.type);
-        return NULL;
-      }
-      ++filename;
     }
     else {
       appendthis=filename++;
