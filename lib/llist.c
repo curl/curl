@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___ 
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 2001, Daniel Stenberg, <daniel@haxx.se>, et al
+ * Copyright (C) 2002, Daniel Stenberg, <daniel@haxx.se>, et al
  *
  * In order to be useful for every potential user, curl and libcurl are
  * dual-licensed under the MPL and the MIT/X-derivate licenses.
@@ -23,8 +23,8 @@
 
 #include "setup.h"
 
-
 #include <string.h>
+#include <stdlib.h>
 
 #include "llist.h"
 
