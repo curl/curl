@@ -34,7 +34,7 @@ README
 
      (just press enter when asked for password)
 
-        cvs -d :pserver:anonymous@cvs.curl.sourceforge.net:/cvsroot/curl co .
+        cvs -d :pserver:anonymous@cvs.curl.sourceforge.net:/cvsroot/curl co curl 
 
      (now, you'll get all the latest sources downloaded into your current
      directory. Note that this does NOT create a directory named curl or
