@@ -1109,6 +1109,7 @@ AC_CHECK_SIZEOF(curl_off_t, ,[
 #include <stdio.h>
 #include "$srcdir/include/curl/curl.h"
 ])
+AC_CHECK_SIZEOF(size_t)
 
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1, [if your compiler supports 'long long'])])
