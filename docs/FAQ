@@ -1,4 +1,4 @@
-Updated: November 20, 2002 (http://curl.haxx.se/docs/faq.html)
+Updated: January 13, 2003 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -275,8 +275,8 @@ FAQ
 
   2.4. Does cURL support Socks (RFC 1928) ?
 
-  No. Nobody has wanted it that badly yet. We appreciate patches that bring
-  this functionality.
+  There is limited support for SOCKS5 for curl built with IPv6 support
+  disabled.
 
 
 3. Usage problems
