@@ -20,5 +20,8 @@
 /* Define if you have the <sys/utime.h> header file */
 #undef HAVE_SYS_UTIME_H
 
+/* Define if you have the <sys/types.h> header file */
+#undef HAVE_SYS_TYPES_H
+
 /* Define if you have the <sys/select.h> header file */
 #undef HAVE_SYS_SELECT_H
