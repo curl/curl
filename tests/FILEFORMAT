@@ -84,14 +84,17 @@ case number.
 </server>
 
 <features>
-A list of features that must be present in the client/library for this test
-to be able to run. Features testable here are:
+A list of features that MUST be present in the client/library for this test to
+be able to run (if these features are not present, the test will be
+SKIPPED). Features testable here are:
+
 SSL
 netrc_debug
 large_file
 idn
 getrlimit
 ipv6
+libz
 </features>
 
 <killserver>
