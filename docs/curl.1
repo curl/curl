@@ -591,10 +591,13 @@ or the
 .I -O
 options.
 .IP "-v/--verbose"
-Makes the fetching more verbose/talkative. Mostly usable for
-debugging. Lines starting with '>' means data sent by curl, '<'
-means data received by curl that is hidden in normal cases and lines
-starting with '*' means additional info provided by curl.
+Makes the fetching more verbose/talkative. Mostly usable for debugging. Lines
+starting with '>' means data sent by curl, '<' means data received by curl
+that is hidden in normal cases and lines starting with '*' means additional
+info provided by curl.
+
+Note that if you want to see HTTP headers in the output, \fI-i/--include\fP
+might be option you're looking for.
 
 If this option is used twice, the second will again disable verbose.
 .IP "-V/--version"
