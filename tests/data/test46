@@ -8,6 +8,7 @@ Content-Type: text/html
 Set-Cookie: ckyPersistent=permanent; expires=Tue, 01-Jan-2010 05:00:00 GMT; path=/
 Set-Cookie: ckySession=temporary; path=/
 Set-Cookie: ASPSESSIONIDQGGQQSJJ=GKNBDIFAAOFDPDAIEAKDIBKE; path=/
+Set-Cookie: justaname=; path=/;
 Cache-control: private
 Content-Length: 62
 
@@ -34,6 +35,7 @@ HTTP, get cookies and store in cookie jar
 www.fake.come	FALSE	/	FALSE	1022144953	cookiecliente	si
 www.loser.com	FALSE	/	FALSE	1139150993	UID	99
 127.0.0.1	FALSE	/	FALSE	1139150993	mooo	indeed
+127.0.0.1	FALSE	/	FALSE	0	empty	
 </file>
 </client>
 
@@ -47,7 +49,7 @@ GET /want/46 HTTP/1.1
 Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
-Cookie: mooo=indeed
+Cookie: empty=; mooo=indeed
 
 </protocol>
 <file name="log/jar46">
@@ -58,8 +60,10 @@ Cookie: mooo=indeed
 www.fake.come	FALSE	/	FALSE	1022144953	cookiecliente	si
 www.loser.com	FALSE	/	FALSE	1139150993	UID	99
 127.0.0.1	FALSE	/	FALSE	1139150993	mooo	indeed
+127.0.0.1	FALSE	/	FALSE	0	empty	
 127.0.0.1	FALSE	/	FALSE	1262322000	ckyPersistent	permanent
 127.0.0.1	FALSE	/	FALSE	0	ckySession	temporary
 127.0.0.1	FALSE	/	FALSE	0	ASPSESSIONIDQGGQQSJJ	GKNBDIFAAOFDPDAIEAKDIBKE
+127.0.0.1	FALSE	/	FALSE	0	justaname	
 </file>
 </verify>
