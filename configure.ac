@@ -1188,72 +1188,14 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
   *)   AC_MSG_RESULT(yes)
 
     CPPFLAGS="$CPPFLAGS -DCURLDEBUG"
-    CFLAGS="$CFLAGS -g" 
-    if test "$GCC" = "yes"; then
+    CFLAGS="$CFLAGS -g"
 
-       dnl figure out gcc version!
-       AC_MSG_CHECKING([gcc version])
-       gccver=`$CC -dumpversion`
-       num1=`echo $gccver | cut -d . -f1`
-       num2=`echo $gccver | cut -d . -f2`
-       gccnum=`(expr $num1 "*" 100 + $num2) 2>/dev/null`
-       AC_MSG_RESULT($gccver)
-
-       if test "$gccnum" -lt "500"; then
-         dnl we only like gcc less than 5.0, since if it is above that it is
-         dnl likely just a compiler that looks like gcc (like icc 8.0)!
-         dnl here's the standard setup
-         WARN="-W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wundef -Wpointer-arith -Wnested-externs -Winline -Wmissing-declarations -Wmissing-prototypes -Wsign-compare"
-
-         dnl -Wcast-align is a bit too annoying ;-)
-
-         if test "$gccnum" -ge "296"; then
-           dnl gcc 2.96 or later
-           WARN="$WARN -Wfloat-equal"
-
-           if test "$gccnum" -gt "296"; then
-             dnl this option does not exist in 2.96
-             WARN="$WARN -Wno-format-nonliteral"
-           fi
-
-           dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
-           dnl on i686-Linux as it gives us heaps with false positives
-           if test "$gccnum" -ge "303"; then
-             dnl gcc 3.3 and later
-             WARN="$WARN -Wendif-labels -Wstrict-prototypes"
-           fi
-         fi
-
-         NEWFLAGS=""
-         for flag in $CPPFLAGS; do
-           case "$flag" in
-            -I*)
-              dnl include path
-              add=`echo $flag | sed 's/^-I/-isystem /g'`
-              NEWFLAGS="$NEWFLAGS $add"
-              ;;
-           esac
-         done
-
-         CFLAGS="$CFLAGS $WARN $NEWFLAGS"
-       fi
-
-    fi
-    dnl strip off optimizer flags
-    NEWFLAGS=""
-    for flag in $CFLAGS; do
-      case "$flag" in
-      -O*)
-        dnl echo "cut off $flag"
-        ;;
-      *)
-        NEWFLAGS="$NEWFLAGS $flag"
-        ;;
-      esac
-    done
-    CFLAGS=$NEWFLAGS
+    dnl set compiler "debug" options to become more picky, and remove
+    dnl optimize options from CFLAGS
+    CURL_CC_DEBUG_OPTS
        ;;
-  esac ],
+  esac
+ ],
        AC_MSG_RESULT(no)
 )
 
