@@ -1,0 +1,80 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by Daniel.Stenberg@haxx.nu
+.\"
+.TH curl_getdate 3 "2 June 2000" "Curl 7.0" "libcurl Manual"
+.SH NAME
+curl_getdate - Convert an date in a ASCII string to number of seconds since
+January 1, 1970
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "time_t curl_getdate(char *" datestring ", time_t *"now" );
+.ad
+.SH DESCRIPTION
+This function returns the number of seconds since January 1st 1970, for the
+date and time that the
+.I datestring
+parameter specifies. The 
+.I now
+parameter is there and should hold the current time to allow the datestring to
+specify relative dates/times. Read further in the date string parser section
+below.
+.SH PARSING DATES AND TIMES
+A "date" is a string, possibly empty, containing many items separated by
+whitespace.  The whitespace may be omitted when no ambiguity arises.  The
+empty string means the beginning of today (i.e., midnight).  Order of the
+items is immaterial.  A date string may contain many flavors of items:
+.TP 0.8i
+.B calendar date items
+This can be specified in a number of different ways. Including 1970-09-17, 70-9-17, 70-09-17, 9/17/72, 24 September 1972, 24 Sept 72, 24 Sep 72, Sep 24, 1972, 24-sep-72, 24sep72.
+The year can also be omitted, for example: 9/17 or "sep 17".
+.TP
+.B time of the day items
+This string specifies the time on a given day. Syntax supported includes:
+18:19:0, 18:19, 6:19pm, 18:19-0500 (for specifying the time zone as well).
+.TP
+.B time zone items
+Specifies international time zone. There are a few acronyms supported, but in
+general you should instead use the specific realtive time compared to
+UTC. Supported formats include: -1200, MST, +0100.
+.TP
+.B day of the week items
+Specifies a day of the week. If this is mentioned alone it means that day of
+the week in the future.
+
+Days of the week may be spelled out in full: `Sunday', `Monday', etc or they
+may be abbreviated to their first three letters, optionally followed by a
+period.  The special abbreviations `Tues' for `Tuesday', `Wednes' for
+`Wednesday' and `Thur' or `Thurs' for `Thursday' are also allowed.
+
+A number may precede a day of the week item to move forward supplementary
+weeks.  It is best used in expression like `third monday'.  In this context,
+`last DAY' or `next DAY' is also acceptable; they move one week before or
+after the day that DAY by itself would represent.
+.TP
+.B relative items
+A relative item adjusts a date (or the current date if none) forward or
+backward. Example syntax includes: "1 year", "1 year ago", "2 days", "4
+weeks".
+
+The string `tomorrow' is worth one day in the future (equivalent to `day'),
+the string `yesterday' is worth one day in the past (equivalent to `day ago').
+.TP
+.B pure numbers
+If the decimal number is of the form YYYYMMDD and no other calendar date item
+appears before it in the date string, then YYYY is read as the year, MM as the
+month number and DD as the day of the month, for the specified calendar date.
+.PP
+.SH RETURN VALUE
+This function returns zero when it fails to parse the date string. Otherwise
+it returns the number of seconds as described.
+.SH AUTHORS
+Originally written by Steven M. Bellovin <smb@research.att.com> while at the
+University of North Carolina at Chapel Hill.  Later tweaked by a couple of
+people on Usenet.  Completely overhauled by Rich $alz <rsalz@bbn.com> and Jim
+Berets <jberets@bbn.com> in August, 1990.
+.SH "SEE ALSO"
+.BR 
+.SH BUGS
+Surely there are some, you tell me!
