@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (22 September 2004)
+- Jean-Claude Chauve fixed an LDAP crash when more than one record was
+  retrieved.
+
 Daniel (19 September 2004)
 - Andreas Rieke pointed out that when attempting to connect to a host without
   a service on the specified port, curl_easy_perform() didn't properly provide

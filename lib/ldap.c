@@ -350,8 +350,8 @@ CURLcode Curl_ldap(struct connectdata *conn)
       Curl_client_write(data, CLIENTWRITE_BODY, (char *)"\n", 1);
 
       (*ldap_memfree)(attribute);
-      (*ldap_memfree)(dn);
     }
+    (*ldap_memfree)(dn);
     if (ber)
        (*ber_free)(ber, 0);
   }

@@ -15,7 +15,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o connect failures properly writes error message in errorbuffer
+ o LDAP crash when more than one record was received
+ o connect failures properly stores an error message in the errorbuffer
  o Rare Location:-following problem with bad original URL
  o -F can now add Content-Type on non-file sections
  o double Host: header when following Location: with replaced Host: fixed
