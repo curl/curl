@@ -146,7 +146,8 @@ typedef enum {
   CURLE_TOO_MANY_REDIRECTS ,     /* 47 - catch endless re-direct loops */
   CURLE_UNKNOWN_TELNET_OPTION,   /* 48 - User specified an unknown option */
   CURLE_TELNET_OPTION_SYNTAX ,   /* 49 - Malformed telnet option */
-  CURLE_ALREADY_COMPLETE,	 /* 50 - file to dowload is already complete */
+  CURLE_OBSOLETE,	         /* 50 - removed after 7.7.3 */
+  CURLE_SSL_PEER_CERTIFICATE,    /* 51 - peer's certificate wasn't ok */
   
   CURL_LAST /* never use! */
 } CURLcode;
