@@ -976,6 +976,8 @@ sub serverfortest {
                 $run{'https'}=$HTTPSPIDFILE;
             }
         }
+        elsif($what eq "none") {
+        }
         else {
             warn "we don't support a server for $what";
         }
