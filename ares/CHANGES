@@ -2,9 +2,12 @@ This package is built on ares 1.1.1 (written by Greg Hudson). I've decided to
 put together and release my own ares archives since the ares maintainer
 doesn't want these improvements.
 
-The package is called 'arescurl' for now since I (Daniel Stenberg) want this
-for use within the curl project. If you can think of a better and more witty
-name, please speak up.
+The package is called 'c-ares' for now since I (Daniel Stenberg) want this for
+use within the curl project (hence the letter C) and it makes a nice pun.
+
+* October 24, 2003. Daniel Stenberg:
+
+  Added ares_version().
 
 Version 1.0-pre1 (8 October 2003)
 
