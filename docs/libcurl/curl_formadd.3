@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_formadd 3 "15 June 2002" "libcurl 7.9.8" "libcurl Manual"
+.TH curl_formadd 3 "24 June 2002" "libcurl 7.9.8" "libcurl Manual"
 .SH NAME
 curl_formadd - add a section to a multipart/formdata HTTP POST
 .SH SYNOPSIS
@@ -63,15 +63,11 @@ until after curl_easy_cleanup is called.
 tells libcurl that the length of the buffer to upload is the value of the
 next parameter.
 
-Another possibility to send single or multiple files in one section is to use
-\fBCURLFORM_ARRAY\fP that gets a struct curl_forms array pointer as its
-value. Each structure element has a CURLformoption and a char pointer. For the
-options only \fBCURLFORM_FILE\fP, \fBCURLFORM_CONTENTTYPE\fP, and
-\fBCURLFORM_END\fP (that is used to determine the end of the array and thus
-must be the option of the last and no other element of the curl_forms array)
-are allowed. The effect of this parameter is the same as giving multiple
-\fBCURLFORM_FILE\fP options possibly with \fBCURLFORM_CONTENTTYPE\fP after or
-before each \fBCURLFORM_FILE\fP option.
+Another possibility to send options to curl_formadd() is the
+\fBCURLFORM_ARRAY\fP option, that passes a struct curl_forms array pointer as
+its value. Each curl_forms structure element has a CURLformoption and a char
+pointer. The final element in the array must be a CURLFORM_END. All available
+options can be used in an array, except the CURLFORM_ARRAY option itself!
 
 Should you need to specify extra headers for the form POST section, use
 \fBCURLFORM_CONTENTHEADER\fP. This takes a curl_slist prepared in the usual way
@@ -166,6 +162,7 @@ defines.
 
  /* Add a buffer to upload */
  curl_formadd(&post, &last,
+              CURLFORM_COPYNAME, "name",
               CURLFORM_BUFFER, "data",
               CURLFORM_BUFFERPTR, record,
               CURLFORM_BUFFERLENGTH, record_length,
