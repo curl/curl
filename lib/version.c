@@ -41,6 +41,7 @@ char *curl_version(void)
 #if (SSLEAY_VERSION_NUMBER >= 0x906000)
   {
     char sub[2];
+    sub[1]=0;
     if(SSLEAY_VERSION_NUMBER&0xff0) {
       sub[0]=((SSLEAY_VERSION_NUMBER>>4)&0xff) + 'a' -1;
     }
@@ -63,6 +64,7 @@ char *curl_version(void)
 #else
   {
     char sub[2];
+    sub[1]=0;
     if(SSLEAY_VERSION_NUMBER&0x0f) {
       sub[0]=(SSLEAY_VERSION_NUMBER&0x0f) + 'a' -1;
     }
