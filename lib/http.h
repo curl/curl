@@ -24,6 +24,10 @@
  * $Id$
  ***************************************************************************/
 #ifndef CURL_DISABLE_HTTP
+bool Curl_compareheader(char *headerline,     /* line to check */
+                        const char *header,   /* header keyword _with_ colon */
+                        const char *content); /* content string to find */
+
 /* ftp can use this as well */
 CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
                                      int tunnelsocket,
