@@ -42,7 +42,7 @@
 #define SIZEOF_LONG_DOUBLE 16
 
 /* The number of bytes in a long long.  */
-#define SIZEOF_LONG_LONG 8
+/* #define SIZEOF_LONG_LONG 8 */
 
 /* Define if you have the gethostbyaddr function.  */
 #define HAVE_GETHOSTBYADDR 1
