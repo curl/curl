@@ -43,7 +43,7 @@
 #define strtoofft strtoll
 #else
 curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
-#define strtoofft Curl_strtoll
+#define strtoofft curlx_strtoll
 #define NEED_CURL_STRTOLL
 #endif
 #else
