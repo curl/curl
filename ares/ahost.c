@@ -59,7 +59,7 @@ int main(int argc, char **argv)
   status = ares_init(&channel);
   if (status != ARES_SUCCESS)
     {
-      fprintf(stderr, "ares_init: %s\n", ares_strerror(status, &errmem));
+      fprintf(stderr, "ares_init: %s\n", ares_strerror(status));
       ares_free_errmem(errmem);
       return 1;
     }
@@ -101,7 +101,7 @@ static void callback(void *arg, int status, struct hostent *host)
 
   if (status != ARES_SUCCESS)
     {
-      fprintf(stderr, "%s: %s\n", (char *) arg, ares_strerror(status, &mem));
+      fprintf(stderr, "%s: %s\n", (char *) arg, ares_strerror(status));
       ares_free_errmem(mem);
       return;
     }

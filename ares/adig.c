@@ -239,7 +239,7 @@ int main(int argc, char **argv)
   if (status != ARES_SUCCESS)
     {
       fprintf(stderr, "ares_init_options: %s\n",
-	      ares_strerror(status, &errmem));
+	      ares_strerror(status));
       ares_free_errmem(errmem);
       return 1;
     }
@@ -295,7 +295,7 @@ static void callback(void *arg, int status, unsigned char *abuf, int alen)
    */
   if (status != ARES_SUCCESS)
     {
-      printf("%s\n", ares_strerror(status, &errmem));
+      printf("%s\n", ares_strerror(status));
       ares_free_errmem(errmem);
       if (!abuf)
 	return;
