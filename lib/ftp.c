@@ -77,7 +77,6 @@
 #include "if2ip.h"
 #include "hostip.h"
 #include "progress.h"
-#include "upload.h"
 #include "download.h"
 #include "escape.h"
 
