@@ -211,16 +211,16 @@ CURLcode Curl_readrewind(struct connectdata *conn)
      (data->set.httpreq == HTTPREQ_POST_FORM))
     ; /* do nothing */
   else {
-    if(data->set.ioctl) {
+    if(data->set.ioctrl) {
       curlioerr err;
 
-      err = data->set.ioctl(data, CURLIOCMD_RESTARTREAD,
-                            data->set.ioctl_client);
-      infof(data, "the ioctl callback returned %d\n", (int)err);
+      err = data->set.ioctrl(data, CURLIOCMD_RESTARTREAD,
+                             data->set.ioctrl_client);
+      infof(data, "the ioctrl callback returned %d\n", (int)err);
 
       if(err) {
         /* FIXME: convert to a human readable error message */
-        failf(data, "ioctl callback returned error %d\n", (int)err);
+        failf(data, "ioctrl callback returned error %d\n", (int)err);
         return CURLE_SEND_FAIL_REWIND;
       }
     }
