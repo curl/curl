@@ -72,5 +72,5 @@ $(srcdir)/getdate.c: getdate.y
 
 install-data-hook:
 	@if test -n "@CURL_CA_BUNDLE@"; then \
-	  @INSTALL_DATA@ ca-bundle.crt @CURL_CA_BUNDLE@; \
+	  @INSTALL_DATA@ ca-bundle.crt $(DESTDIR)@CURL_CA_BUNDLE@; \
         fi
