@@ -2,7 +2,7 @@ EXTRA_DIST = ftpserver.pl httpserver.pl httpsserver.pl runtests.pl \
 	     ftpsserver.pl stunnel.pm getpart.pm FILEFORMAT README \
 	     stunnel.pem
 
-SUBDIRS = data
+SUBDIRS = data server
 
 PERLFLAGS = -I$(srcdir)
 
@@ -12,11 +12,11 @@ install:
 curl:
 	@(cd ..; make)
 
-test:
+test: server/sws
 	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
 
-quiet-test:
+quiet-test: server/sws
 	@cd data && exec $(MAKE) test
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -s -a
 
@@ -24,3 +24,5 @@ clean:
 	rm -rf log
 	find . -name "*~" | xargs rm -f
 
+server/sws:
+	cd server; make sws
