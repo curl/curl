@@ -330,7 +330,6 @@ static CURLcode bindlocal(struct connectdata *conn,
         Curl_resolv_unlock(data, h);
         /* we don't need it anymore after this function has returned */
 
-#ifdef ENABLE_IPV6
         if( bind(sockfd, addr->ai_addr, addr->ai_addrlen) >= 0) {
           /* we succeeded to bind */
           struct sockaddr_in6 add;
@@ -344,31 +343,7 @@ static CURLcode bindlocal(struct connectdata *conn,
             return CURLE_HTTP_PORT_FAILED;
           }
         }
-#else
-        {
-          struct sockaddr_in sa;
 
-          memset((char *)&sa, 0, sizeof(sa));
-          memcpy((char *)&sa.sin_addr, addr->h_addr, addr->h_length);
-          sa.sin_family = AF_INET;
-          sa.sin_addr.s_addr = in;
-          sa.sin_port = 0; /* get any port */
-
-          if( bind(sockfd, (struct sockaddr *)&sa, sizeof(sa)) >= 0) {
-            /* we succeeded to bind */
-            struct sockaddr_in add;
-
-            bindworked = TRUE;
-
-            size = sizeof(add);
-            if(getsockname(sockfd, (struct sockaddr *) &add,
-                           (socklen_t *)&size)<0) {
-              failf(data, "getsockname() failed");
-              return CURLE_HTTP_PORT_FAILED;
-            }
-          }
-        }
-#endif
         if(!bindworked) {
           failf(data, "%s", Curl_strerror(conn, Curl_ourerrno()));
           return CURLE_HTTP_PORT_FAILED;
@@ -540,9 +515,8 @@ static void tcpnodelay(struct connectdata *conn,
 
 CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
                           struct Curl_dns_entry *remotehost, /* use this one */
-                          int port,                  /* connect to this */
                           curl_socket_t *sockconn,   /* the connected socket */
-                          Curl_ipconnect **addr,     /* the one we used */
+                          Curl_addrinfo **addr,      /* the one we used */
                           bool *connected)           /* really connected? */
 {
   struct SessionHandle *data = conn->data;
@@ -552,8 +526,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   int num_addr;
   bool conected;
   char addr_buf[256];
+  Curl_addrinfo *ai;
+  Curl_addrinfo *curr_addr;
 
-  Curl_ipconnect *curr_addr;
   struct timeval after;
   struct timeval before = Curl_tvnow();
 
@@ -601,48 +576,24 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   num_addr = Curl_num_addresses(remotehost->addr);
   timeout_per_addr = timeout_ms / num_addr;
 
+  ai = remotehost->addr;
+
   /* Below is the loop that attempts to connect to all IP-addresses we
    * know for the given host. One by one until one IP succeedes.
    */
-#ifdef ENABLE_IPV6
+
   /*
    * Connecting with a getaddrinfo chain
    */
-  (void)port; /* the port number is already included in the getaddrinfo
-                 struct */
-  for (curr_addr = remotehost->addr, aliasindex=0; curr_addr;
+  for (curr_addr = ai, aliasindex=0; curr_addr;
        curr_addr = curr_addr->ai_next, aliasindex++) {
+
     sockfd = socket(curr_addr->ai_family, curr_addr->ai_socktype,
                     curr_addr->ai_protocol);
     if (sockfd == CURL_SOCKET_BAD) {
       timeout_per_addr += timeout_per_addr / (num_addr - aliasindex);
       continue;
     }
-
-#else
-  /*
-   * Connecting with old style IPv4-only support
-   */
-  curr_addr = (Curl_ipconnect*)remotehost->addr->h_addr_list[0];
-  for(aliasindex=0; curr_addr;
-      curr_addr=(Curl_ipconnect*)remotehost->addr->h_addr_list[++aliasindex]) {
-    struct sockaddr_in serv_addr;
-
-    /* create an IPv4 TCP socket */
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if(CURL_SOCKET_BAD == sockfd) {
-      failf(data, "couldn't create socket");
-      return CURLE_COULDNT_CONNECT; /* big time error */
-    }
-
-    /* nasty address work before connect can be made */
-    memset((char *) &serv_addr, '\0', sizeof(serv_addr));
-    memcpy((char *)&(serv_addr.sin_addr), curr_addr,
-           sizeof(struct in_addr));
-    serv_addr.sin_family = remotehost->addr->h_addrtype;
-    serv_addr.sin_port = htons((unsigned short)port);
-#endif
-
 
     Curl_printable_address(curr_addr, addr_buf, sizeof(addr_buf));
     infof(data, "  Trying %s... ", addr_buf);
@@ -664,11 +615,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     /* do not use #ifdef within the function arguments below, as connect() is
        a defined macro on some platforms and some compilers don't like to mix
        #ifdefs with macro usage! (AmigaOS is one such platform) */
-#ifdef ENABLE_IPV6
+
     rc = connect(sockfd, curr_addr->ai_addr, curr_addr->ai_addrlen);
-#else
-    rc = connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
-#endif
 
     if(-1 == rc) {
       error = Curl_ourerrno();

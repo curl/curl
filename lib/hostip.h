@@ -26,6 +26,85 @@
 #include "setup.h"
 #include "hash.h"
 
+/*
+ * Setup comfortable CURLRES_* defines to use in the host*.c sources.
+ */
+
+#ifdef USE_ARES
+#define CURLRES_ASYNCH
+#define CURLRES_ARES
+#endif
+
+#ifdef USE_THREADING_GETHOSTBYNAME
+#define CURLRES_ASYNCH
+#define CURLRES_THREADED
+#endif
+
+#ifdef USE_THREADING_GETADDRINFO
+#define CURLRES_ASYNCH
+#define CURLRES_THREADED
+#endif
+
+#ifdef ENABLE_IPV6
+#define CURLRES_IPV6
+#else
+#define CURLRES_IPV4
+#endif
+
+#ifdef CURLRES_IPV4
+#if !defined(HAVE_GETHOSTBYNAME_R) || defined(CURLRES_ASYNCH)
+/* If built for ipv4 and missing gethostbyname_r(), or if using async name
+   resolve, we need the Curl_addrinfo_copy() function (which itself needs the
+   Curl_hostent_relocate() function)) */
+#define CURLRES_ADDRINFO_COPY
+#endif
+#endif /* IPv4-only */
+
+#ifndef CURLRES_ASYNCH
+#define CURLRES_SYNCH
+#endif
+
+#ifndef USE_LIBIDN
+#define CURLRES_IDN
+#endif
+
+/* Allocate enough memory to hold the full name information structs and
+ * everything. OSF1 is known to require at least 8872 bytes. The buffer
+ * required for storing all possible aliases and IP numbers is according to
+ * Stevens' Unix Network Programming 2nd edition, p. 304: 8192 bytes!
+ */
+#define CURL_HOSTENT_SIZE 9000
+
+#define CURL_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
+                                    many seconds for a name resolve */
+
+#ifdef CURLRES_ARES
+#define CURL_ASYNC_SUCCESS ARES_SUCCESS
+#else
+#define CURL_ASYNC_SUCCESS CURLE_OK
+#endif
+
+/*
+ * Curl_addrinfo MUST be used for all name resolved info.
+ */
+#ifdef CURLRES_IPV6
+typedef struct addrinfo Curl_addrinfo;
+#else
+/* OK, so some ipv4-only include tree probably have the addrinfo struct, but
+   to work even on those that don't, we provide our own look-alike! */
+struct Curl_addrinfo {
+  int     ai_flags;
+  int     ai_family;
+  int     ai_socktype;
+  int     ai_protocol;
+  size_t  ai_addrlen;
+  struct sockaddr *ai_addr;
+  char   *ai_canonname;
+  struct Curl_addrinfo *ai_next;
+};
+typedef struct Curl_addrinfo Curl_addrinfo;
+#endif
+
 struct addrinfo;
 struct hostent;
 struct SessionHandle;
@@ -119,28 +198,37 @@ int curl_dogetnameinfo(const struct sockaddr *sa, socklen_t salen,
 #endif
 
 /* This is the callback function that is used when we build with asynch
-   resolve */
-void Curl_addrinfo_callback(void *arg,
+   resolve, ipv4 */
+void Curl_addrinfo4_callback(void *arg,
                             int status,
-                            Curl_addrinfo *hostent);
+                            struct hostent *hostent);
+/* This is the callback function that is used when we build with asynch
+   resolve, ipv6 */
+void Curl_addrinfo6_callback(void *arg,
+                            int status,
+                            struct hostent *hostent);
 
-/* This is a utility-function for ipv4-builds to create a hostent struct
-   from a numerical-only IP address */
-Curl_addrinfo *Curl_ip2addr(in_addr_t num, char *hostname);
+
+/* [ipv4 only] Creates a Curl_addrinfo struct from a numerical-only IP
+   address */
+Curl_addrinfo *Curl_ip2addr(in_addr_t num, char *hostname, int port);
+
+/* [ipv4 only] Curl_he2ai() converts a struct hostent to a Curl_addrinfo chain
+   and returns it */
+Curl_addrinfo *Curl_he2ai(struct hostent *, unsigned short port);
 
 /* relocate a hostent struct */
 void Curl_hostent_relocate(struct hostent *h, long offset);
 
-/* copy a Curl_addrinfo struct, currently this only supports copying
-   a hostent (ipv4-style) struct */
-Curl_addrinfo *Curl_addrinfo_copy(Curl_addrinfo *orig);
+/* Clone a Curl_addrinfo struct, works protocol independently */
+Curl_addrinfo *Curl_addrinfo_copy(void *orig, int port);
 
 /*
  * Curl_printable_address() returns a printable version of the 1st address
  * given in the 'ip' argument. The result will be stored in the buf that is
  * bufsize bytes big.
  */
-const char *Curl_printable_address(const Curl_ipconnect *ip,
+const char *Curl_printable_address(const Curl_addrinfo *ip,
                                    char *buf, size_t bufsize);
 
 /*
@@ -158,71 +246,7 @@ Curl_cache_addr(struct SessionHandle *data, Curl_addrinfo *addr,
 #define CURL_INADDR_NONE INADDR_NONE
 #endif
 
-/*
- * Setup comfortable CURLRES_* defines to use in the host*.c sources.
- */
 
-#ifdef USE_ARES
-#define CURLRES_ASYNCH
-#define CURLRES_ARES
-#endif
 
-#ifdef USE_THREADING_GETHOSTBYNAME
-#define CURLRES_ASYNCH
-#define CURLRES_THREADED
-#endif
-
-#ifdef USE_THREADING_GETADDRINFO
-#define CURLRES_ASYNCH
-#define CURLRES_THREADED
-#endif
-
-#ifdef ENABLE_IPV6
-#define CURLRES_IPV6
-#else
-#define CURLRES_IPV4
-#endif
-
-#ifdef CURLRES_IPV4
-#if !defined(HAVE_GETHOSTBYNAME_R) || defined(CURLRES_ASYNCH)
-/* If built for ipv4 and missing gethostbyname_r(), or if using async name
-   resolve, we need the Curl_addrinfo_copy() function (which itself needs the
-   Curl_hostent_relocate() function)) */
-#define CURLRES_ADDRINFO_COPY
-#define CURLRES_HOSTENT_RELOCATE
-#endif
-#endif /* IPv4-only */
-
-#ifdef HAVE_GETHOSTBYNAME_R_6
-#define CURLRES_HOSTENT_RELOCATE
-#endif
-
-#ifdef HAVE_GETHOSTBYNAME_R_5
-#define CURLRES_HOSTENT_RELOCATE
-#endif
-
-#ifndef CURLRES_ASYNCH
-#define CURLRES_SYNCH
-#endif
-
-#ifndef USE_LIBIDN
-#define CURLRES_IDN
-#endif
-
-/* Allocate enough memory to hold the full name information structs and
- * everything. OSF1 is known to require at least 8872 bytes. The buffer
- * required for storing all possible aliases and IP numbers is according to
- * Stevens' Unix Network Programming 2nd edition, p. 304: 8192 bytes!
- */
-#define CURL_HOSTENT_SIZE 9000
-
-#define CURL_TIMEOUT_RESOLVE 300 /* when using asynch methods, we allow this
-                                    many seconds for a name resolve */
-
-#ifdef CURLRES_ARES
-#define CURL_ASYNC_SUCCESS ARES_SUCCESS
-#else
-#define CURL_ASYNC_SUCCESS CURLE_OK
-#endif
 
 #endif

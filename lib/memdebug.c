@@ -1,9 +1,9 @@
 #ifdef CURLDEBUG
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -11,7 +11,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -99,12 +99,12 @@ static bool countcheck(const char *func, int line, const char *source)
     }
     else
       memsize--; /* countdown */
-    
+
     /* log the countdown */
     if(logfile && source)
       fprintf(logfile, "LIMIT %s:%d %ld ALLOCS left\n",
               source, line, memsize);
-    
+
   }
 
   return FALSE; /* allow this */
@@ -166,7 +166,7 @@ char *curl_dostrdup(const char *str, int line, const char *source)
   size_t len;
 
   curlassert(str != NULL);
-  
+
   if(countcheck("strdup", line, source))
     return NULL;
 
@@ -221,7 +221,7 @@ void curl_dofree(void *ptr, int line, const char *source)
 
   /* destroy  */
   memset(mem->mem, 0x13, mem->size);
-  
+
   /* free for real */
   (Curl_cfree)(mem);
 
@@ -285,7 +285,7 @@ int curl_fclose(FILE *file, int line, const char *source)
 }
 #else
 #ifdef VMS
-int VOID_VAR_MEMDEBUG;	
+int VOID_VAR_MEMDEBUG;
 #else
 /* we provide a fake do-nothing function here to avoid compiler warnings */
 void curl_memdebug(void) {}

@@ -270,19 +270,6 @@ typedef int curl_socket_t;
 #endif
 #endif
 
-/*
- * Curl_addrinfo MUST be used for name resolving information.
- * Information regarding a single IP witin a Curl_addrinfo MUST be stored in
- * a Curl_ipconnect struct.
- */
-#ifdef ENABLE_IPV6
-typedef struct addrinfo Curl_addrinfo;
-typedef struct addrinfo Curl_ipconnect;
-#else
-typedef struct hostent Curl_addrinfo;
-typedef struct in_addr Curl_ipconnect;
-#endif
-
 #ifdef mpeix
 #define IOCTL_3_ARGS
 #endif

@@ -469,7 +469,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
           hostname, port, Curl_strerror(conn,WSAGetLastError()));
     return NULL;
   }
-  return h;
+  return Curl_he2ai(h, port);
 }
 #endif /* CURLRES_IPV4 */
 

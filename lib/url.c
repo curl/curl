@@ -273,12 +273,10 @@ CURLcode Curl_open(struct SessionHandle **curl)
   CURLcode res = CURLE_OK;
   struct SessionHandle *data;
   /* Very simple start-up: alloc the struct, init it with zeroes and return */
-  data = (struct SessionHandle *)malloc(sizeof(struct SessionHandle));
+  data = (struct SessionHandle *)calloc(1, sizeof(struct SessionHandle));
   if(!data)
     /* this is a very serious error */
     return CURLE_OUT_OF_MEMORY;
-
-  memset(data, 0, sizeof(struct SessionHandle));
 
 #ifdef USE_ARES
   if(ARES_SUCCESS != ares_init(&data->state.areschannel)) {
@@ -1859,7 +1857,6 @@ static int handleSock5Proxy(const char *proxy_name,
   socksreq[3] = 1; /* IPv4 = 1 */
 
   {
-#ifndef ENABLE_IPV6
     struct Curl_dns_entry *dns;
     Curl_addrinfo *hp=NULL;
     int rc = Curl_resolv(conn, conn->host.name, conn->remote_port, &dns);
@@ -1877,24 +1874,28 @@ static int handleSock5Proxy(const char *proxy_name,
      */
     if(dns)
       hp=dns->addr;
-    if (hp && hp->h_addr_list[0]) {
-      socksreq[4] = ((char*)hp->h_addr_list[0])[0];
-      socksreq[5] = ((char*)hp->h_addr_list[0])[1];
-      socksreq[6] = ((char*)hp->h_addr_list[0])[2];
-      socksreq[7] = ((char*)hp->h_addr_list[0])[3];
+    if (hp) {
+      char buf[64];
+      unsigned short ip[4];
+      Curl_printable_address(hp, buf, sizeof(buf));
+
+      if(4 == sscanf( buf, "%hu.%hu.%hu.%hu",
+                      &ip[0], &ip[1], &ip[2], &ip[3])) {
+        socksreq[4] = ip[0];
+        socksreq[5] = ip[1];
+        socksreq[6] = ip[2];
+        socksreq[7] = ip[3];
+      }
+      else
+        hp = NULL; /* fail! */
 
       Curl_resolv_unlock(conn->data, dns); /* not used anymore from now on */
     }
-    else {
+    if(!hp) {
       failf(conn->data, "Failed to resolve \"%s\" for SOCKS5 connect.",
             conn->host.name);
       return 1;
     }
-#else
-    failf(conn->data,
-          "%s:%d has an internal error and needs to be fixed to work",
-          __FILE__, __LINE__);
-#endif
   }
 
   *((unsigned short*)&socksreq[8]) = htons(conn->remote_port);
@@ -1939,7 +1940,7 @@ static CURLcode ConnectPlease(struct connectdata *conn,
                               bool *connected)
 {
   CURLcode result;
-  Curl_ipconnect *addr;
+  Curl_addrinfo *addr;
   struct SessionHandle *data = conn->data;
   char *hostname = data->change.proxy?conn->proxy.name:conn->host.name;
 
@@ -1951,25 +1952,13 @@ static CURLcode ConnectPlease(struct connectdata *conn,
    *************************************************************/
   result= Curl_connecthost(conn,
                            hostaddr,
-                           conn->port,
                            &conn->sock[FIRSTSOCKET],
                            &addr,
                            connected);
   if(CURLE_OK == result) {
-    /* All is cool, then we store the current information from the hostaddr
-       struct to the serv_addr, as it might be needed later. The address
-       returned from the function above is crucial here. */
-    conn->connect_addr = hostaddr;
-
-#ifdef ENABLE_IPV6
-    conn->serv_addr = addr;
-#else
-    memset((char *) &conn->serv_addr, '\0', sizeof(conn->serv_addr));
-    memcpy((char *)&(conn->serv_addr.sin_addr),
-           (struct in_addr *)addr, sizeof(struct in_addr));
-    conn->serv_addr.sin_family = hostaddr->addr->h_addrtype;
-    conn->serv_addr.sin_port = htons((unsigned short)conn->port);
-#endif
+    /* All is cool, then we store the current information */
+    conn->dns_entry = hostaddr;
+    conn->ip_addr = addr;
 
     if (conn->data->set.proxytype == CURLPROXY_SOCKS5) {
       return handleSock5Proxy(conn->proxyuser,
@@ -1995,15 +1984,10 @@ static CURLcode ConnectPlease(struct connectdata *conn,
 static void verboseconnect(struct connectdata *conn)
 {
   struct SessionHandle *data = conn->data;
-  char addrbuf[256] = "";
-#ifdef ENABLE_IPV6
-  const Curl_ipconnect *addr = conn->serv_addr;
-#else
-  const Curl_ipconnect *addr = &conn->serv_addr.sin_addr;
-#endif
+  char addrbuf[256];
 
   /* Get a printable version of the network address. */
-  Curl_printable_address(addr, addrbuf, sizeof(addrbuf));
+  Curl_printable_address(conn->ip_addr, addrbuf, sizeof(addrbuf));
   infof(data, "Connected to %s (%s) port %d\n",
         conn->bits.httpproxy ? conn->proxy.dispname : conn->host.dispname,
         addrbuf[0] ? addrbuf : "??", conn->port);
@@ -3221,8 +3205,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(conn->bits.reuse) {
     /* re-used connection, no resolving is necessary */
     hostaddr = NULL;
-    conn->connect_addr = NULL; /* we don't connect now so we don't have any
-                                  fresh connect_addr struct to point to */
+    conn->dns_entry = NULL; /* we don't connect now so we don't have any fresh
+                               dns entry struct to point to */
   }
   else {
     /* this is a fresh connect */
@@ -3476,8 +3460,8 @@ CURLcode Curl_done(struct connectdata **connp,
     conn->newurl = NULL;
   }
 
-  if(conn->connect_addr)
-    Curl_resolv_unlock(conn->data, conn->connect_addr); /* done with this */
+  if(conn->dns_entry)
+    Curl_resolv_unlock(conn->data, conn->dns_entry); /* done with this */
 
 #if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
   /* scan for DNS cache entries still marked as in use */

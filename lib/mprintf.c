@@ -142,9 +142,6 @@ typedef struct {
     LONG_LONG lnum;
 #endif
     double dnum;
-#if 0 /*SIZEOF_LONG_DOUBLE */
-    long double ldnum;
-#endif
   } data;
 } va_stack_t;
 
@@ -227,7 +224,7 @@ int dprintf_Pass1Report(va_stack_t *vto, int max)
       break;
     case FORMAT_LONGDOUBLE:
       type = "long double";
-      break;      
+      break;
     }
 
 
@@ -317,7 +314,7 @@ static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
       /* Handle the positional case (N$) */
 
       param_num++;
-      
+
       this_param = dprintf_DollarString(fmt, &fmt);
       if (0 == this_param)
 	/* we got no positional, get the next counter */
@@ -418,7 +415,7 @@ static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
 	case '*':  /* Special case */
 	  flags |= FLAGS_WIDTHPARAM;
 	  param_num++;
-	  
+
 	  i = dprintf_DollarString(fmt, &fmt);
 	  if(i)
 	    width = i;
@@ -471,7 +468,7 @@ static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
       case 'c':
 	vto[i].type = FORMAT_INT;
 	flags |= FLAGS_CHAR;
-	break;	
+	break;
       case 'f':
 	vto[i].type = FORMAT_DOUBLE;
 	break;
@@ -486,11 +483,11 @@ static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
       case 'g':
 	vto[i].type = FORMAT_DOUBLE;
 	flags |= FLAGS_FLOATG;
-	break;	
+	break;
       case 'G':
 	vto[i].type = FORMAT_DOUBLE;
 	flags |= FLAGS_FLOATG|FLAGS_UPPER;
-	break;	
+	break;
       default:
 	vto[i].type = FORMAT_UNKNOWN;
 	break;
@@ -499,7 +496,7 @@ static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
       vto[i].flags = flags;
       vto[i].width = width;
       vto[i].precision = precision;
-      
+
       if (flags & FLAGS_WIDTHPARAM) {
 	/* we have the width specified from a parameter, so we make that
 	   parameter's info setup properly */
@@ -508,7 +505,7 @@ static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
 	vto[i].type = FORMAT_WIDTH;
 	vto[i].flags = FLAGS_NEW;
 	vto[i].precision = vto[i].width = 0; /* can't use width or precision
-						of width! */	
+						of width! */
       }
       if (flags & FLAGS_PRECPARAM) {
 	/* we have the precision specified from a parameter, so we make that
@@ -543,13 +540,13 @@ static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
       case FORMAT_STRING:
 	vto[i].data.str = va_arg(arglist, char *);
 	break;
-	
+
       case FORMAT_INTPTR:
       case FORMAT_UNKNOWN:
       case FORMAT_PTR:
 	vto[i].data.ptr = va_arg(arglist, void *);
 	break;
-	
+
       case FORMAT_INT:
 #ifdef ENABLE_64BIT
 	if(vto[i].flags & FLAGS_LONGLONG)
@@ -561,23 +558,18 @@ static long dprintf_Pass1(char *format, va_stack_t *vto, char **endpos,
 	else
 	  vto[i].data.num = va_arg(arglist, int);
 	break;
-	
+
       case FORMAT_DOUBLE:
-#if 0 /*SIZEOF_LONG_DOUBLE */
-	if(vto[i].flags & FLAGS_LONG)
-	  vto[i].data.ldnum = va_arg(arglist, long double);
-	else
-#endif
-	  vto[i].data.dnum = va_arg(arglist, double);
+        vto[i].data.dnum = va_arg(arglist, double);
 	break;
-	
+
       case FORMAT_WIDTH:
 	/* Argument has been read. Silently convert it into an integer
 	 * for later use
 	 */
 	vto[i].type = FORMAT_INT;
 	break;
-	
+
       default:
 	break;
       }
@@ -620,21 +612,21 @@ static int dprintf_formatf(
 
   end = &endpos[0]; /* the initial end-position from the list dprintf_Pass1()
                        created for us */
-  
+
   f = (char *)format;
   while (*f != '\0') {
     /* Format spec modifiers.  */
     char alt;
-    
+
     /* Width of a field.  */
     long width;
 
     /* Precision of a field.  */
     long prec;
-    
+
     /* Decimal integer is negative.  */
     char is_neg;
-    
+
     /* Base of a number to be written.  */
     long base;
 
@@ -645,7 +637,7 @@ static int dprintf_formatf(
     unsigned long num;
 #endif
     long signed_num;
-    
+
     if (*f != '%') {
       /* This isn't a format spec, so write everything out until the next one
 	 OR end of string is reached.  */
@@ -654,9 +646,9 @@ static int dprintf_formatf(
       } while(*++f && ('%' != *f));
       continue;
     }
-    
+
     ++f;
-    
+
     /* Check for "%%".  Note that although the ANSI standard lists
        '%' as a conversion specifier, it says "The complete format
        specification shall be `%%'," so we can avoid all the width
@@ -675,7 +667,7 @@ static int dprintf_formatf(
       param = param_num;
     else
       --param;
-    
+
     param_num++; /* increase this always to allow "%2$s %1$s %s" and then the
 		    third %s will pick the 3rd argument */
 
@@ -696,7 +688,7 @@ static int dprintf_formatf(
       prec = -1;
 
     alt = (p->flags & FLAGS_ALT)?TRUE:FALSE;
-    
+
     switch (p->type) {
     case FORMAT_INT:
       num = p->data.num;
@@ -742,26 +734,26 @@ static int dprintf_formatf(
 #endif
       {
 	signed_num = (long) num;
-      
+
 	is_neg = signed_num < 0;
 	num = is_neg ? (- signed_num) : signed_num;
       }
       goto number;
-      
+
     unsigned_number:;
       /* Unsigned number of base BASE.  */
       is_neg = 0;
-      
+
     number:;
       /* Number of base BASE.  */
       {
 	char *workend = &work[sizeof(work) - 1];
 	char *w;
-	
+
 	/* Supply a default precision if none was given.  */
 	if (prec == -1)
 	  prec = 1;
-	
+
 	/* Put the number in WORK.  */
 	w = workend;
 	while (num > 0) {
@@ -770,35 +762,35 @@ static int dprintf_formatf(
 	}
 	width -= workend - w;
 	prec -= workend - w;
-	
+
 	if (alt && base == 8 && prec <= 0) {
 	  *w-- = '0';
 	  --width;
 	}
-	
+
 	if (prec > 0) {
 	  width -= prec;
 	  while (prec-- > 0)
 	    *w-- = '0';
 	}
-	
+
 	if (alt && base == 16)
 	  width -= 2;
-	
+
 	if (is_neg || (p->flags & FLAGS_SHOWSIGN) || (p->flags & FLAGS_SPACE))
 	  --width;
-	
+
 	if (!(p->flags & FLAGS_LEFT) && !(p->flags & FLAGS_PAD_NIL))
 	  while (width-- > 0)
 	    OUTCHAR(' ');
-	
+
 	if (is_neg)
 	  OUTCHAR('-');
 	else if (p->flags & FLAGS_SHOWSIGN)
 	  OUTCHAR('+');
 	else if (p->flags & FLAGS_SPACE)
 	  OUTCHAR(' ');
-	
+
 	if (alt && base == 16) {
 	  OUTCHAR('0');
 	  if(p->flags & FLAGS_UPPER)
@@ -810,25 +802,25 @@ static int dprintf_formatf(
 	if (!(p->flags & FLAGS_LEFT) && (p->flags & FLAGS_PAD_NIL))
 	  while (width-- > 0)
 	    OUTCHAR('0');
-	
+
 	/* Write the number.  */
 	while (++w <= workend) {
 	  OUTCHAR(*w);
 	}
-	
+
 	if (p->flags & FLAGS_LEFT)
 	  while (width-- > 0)
 	    OUTCHAR(' ');
       }
       break;
-      
+
     case FORMAT_STRING:
 	    /* String.  */
       {
 	static char null[] = "(nil)";
 	char *str;
 	size_t len;
-	
+
 	str = (char *) p->data.str;
 	if ( str == NULL) {
 	  /* Write null[] if there's space.  */
@@ -845,7 +837,7 @@ static int dprintf_formatf(
 	}
 	else
 	  len = strlen(str);
-	
+
 	if (prec != -1 && (size_t) prec < len)
 	  len = prec;
 	width -= len;
@@ -856,7 +848,7 @@ static int dprintf_formatf(
 	if (!(p->flags&FLAGS_LEFT))
 	  while (width-- > 0)
 	    OUTCHAR(' ');
-	
+
 	while (len-- > 0)
 	  OUTCHAR(*str++);
 	if (p->flags&FLAGS_LEFT)
@@ -867,7 +859,7 @@ static int dprintf_formatf(
 	  OUTCHAR('"');
       }
       break;
-      
+
     case FORMAT_PTR:
       /* Generic pointer.  */
       {
@@ -886,7 +878,7 @@ static int dprintf_formatf(
 	  /* Write "(nil)" for a nil pointer.  */
 	  static char strnil[] = "(nil)";
 	  char *point;
-	  
+
 	  width -= sizeof(strnil) - 1;
 	  if (p->flags & FLAGS_LEFT)
 	    while (width-- > 0)
@@ -904,7 +896,7 @@ static int dprintf_formatf(
       {
 	char formatbuf[32]="%";
 	char *fptr;
-	
+
 	width = -1;
 	if (p->flags & FLAGS_WIDTH)
 	  width = p->width;
@@ -948,13 +940,7 @@ static int dprintf_formatf(
 
 	/* NOTE NOTE NOTE!! Not all sprintf() implementations returns number
 	   of output characters */
-#if 0 /*SIZEOF_LONG_DOUBLE*/
-	if (p->flags & FLAGS_LONG)
-	  /* This is for support of the 'long double' type */
-	  (sprintf)(work, formatbuf, p->data.ldnum);
-	else
-#endif
-	  (sprintf)(work, formatbuf, p->data.dnum);
+        (sprintf)(work, formatbuf, p->data.dnum);
 
 	for(fptr=work; *fptr; fptr++)
 	  OUTCHAR(*fptr);
@@ -990,7 +976,7 @@ static int addbyter(int output, FILE *data)
 {
   struct nsprintf *infop=(struct nsprintf *)data;
   unsigned char outc = (unsigned char)output;
- 
+
   if(infop->length < infop->max) {
     /* only do this if we haven't reached max length yet */
     infop->buffer[0] = outc; /* store */
@@ -1038,7 +1024,7 @@ static int alloc_addbyter(int output, FILE *data)
 {
   struct asprintf *infop=(struct asprintf *)data;
   unsigned char outc = (unsigned char)output;
- 
+
   if(!infop->buffer) {
     infop->buffer=(char *)malloc(32);
     if(!infop->buffer) {
@@ -1195,7 +1181,7 @@ int main()
 #endif
 
   curl_mprintf("%3d %5d\n", 10, 1998);
-  
+
   ptr=curl_maprintf("test this then baby %s%s%s%s%s%s %d %d %d loser baby get a hit in yer face now!", "", "pretty long string pretty long string pretty long string pretty long string pretty long string", "/", "/", "/", "pretty long string", 1998, 1999, 2001);
 
   puts(ptr);

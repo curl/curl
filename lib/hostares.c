@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -204,7 +204,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
     store.tv_sec = (int)timeout/1000;
     store.tv_usec = (timeout%1000)*1000;
-    
+
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
     nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
@@ -229,7 +229,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
   /* Operation complete, if the lookup was successful we now have the entry
      in the cache. */
-    
+
   if(entry)
     *entry = conn->async.dns;
 
@@ -251,7 +251,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
        cleaning up this connection properly */
     Curl_disconnect(conn);
   }
-  
+
   return rc;
 }
 
@@ -273,10 +273,11 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   in_addr_t in = inet_addr(hostname);
 
   *waitp = FALSE;
-  
-  if (in != CURL_INADDR_NONE)
+
+  if (in != CURL_INADDR_NONE) {
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(in, hostname);
+    return Curl_ip2addr(in, hostname, port);
+  }
 
   bufp = strdup(hostname);
 
@@ -290,8 +291,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 
     /* areschannel is already setup in the Curl_open() function */
     ares_gethostbyname(data->state.areschannel, hostname, PF_INET,
-                       Curl_addrinfo_callback, conn);
-      
+                       Curl_addrinfo4_callback, conn);
+
     *waitp = TRUE; /* please wait for the response */
   }
   return NULL; /* no struct yet */

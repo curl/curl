@@ -870,13 +870,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                     return CURLE_OUT_OF_MEMORY;
                 }
               }
-#if 0 /* for consideration */
-              else {
-                /* This is a Location: but we have not been instructed to
-                   follow it */
-                infof(data, "We ignore this location header as instructed\n");
-              }
-#endif
             }
 #endif   /* CURL_DISABLE_HTTP */
 

@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -47,7 +47,7 @@ hash_str(const char *key, size_t key_length)
   return h;
 }
 
-static void 
+static void
 hash_element_dtor(void *user, void *element)
 {
   curl_hash         *h = (curl_hash *) user;
@@ -70,7 +70,7 @@ Curl_hash_init(curl_hash *h, int slots, curl_hash_dtor dtor)
 
   h->dtor = dtor;
   h->size = 0;
-  h->slots = slots;  
+  h->slots = slots;
 
   h->table = (curl_llist **) malloc(slots * sizeof(curl_llist *));
   if(h->table) {
@@ -106,10 +106,10 @@ Curl_hash_alloc(int slots, curl_hash_dtor dtor)
   return h;
 }
 
-static int 
+static int
 hash_key_compare(char *key1, size_t key1_len, char *key2, size_t key2_len)
 {
-  if (key1_len == key2_len && 
+  if (key1_len == key2_len &&
       *key1 == *key2 &&
       memcmp(key1, key2, key1_len) == 0) {
     return 1;
@@ -180,29 +180,6 @@ Curl_hash_add(curl_hash *h, char *key, size_t key_len, void *p)
   return NULL; /* failure */
 }
 
-#if 0
-int 
-Curl_hash_delete(curl_hash *h, char *key, size_t key_len)
-{
-  curl_hash_element  *he;
-  curl_llist_element *le;
-  curl_llist *l = FETCH_LIST(h, key, key_len);
-
-  for (le = l->head;
-       le;
-       le = le->next) {
-    he = le->ptr;
-    if (hash_key_compare(he->key, he->key_len, key, key_len)) {
-      Curl_llist_remove(l, le, (void *) h);
-      --h->size;
-      return 1;
-    }
-  }
-
-  return 0;
-}
-#endif
-
 void *
 Curl_hash_pick(curl_hash *h, char *key, size_t key_len)
 {
@@ -223,7 +200,7 @@ Curl_hash_pick(curl_hash *h, char *key, size_t key_len)
 }
 
 #if defined(CURLDEBUG) && defined(AGGRESIVE_TEST)
-void 
+void
 Curl_hash_apply(curl_hash *h, void *user,
                 void (*cb)(void *user, void *ptr))
 {
@@ -278,15 +255,7 @@ Curl_hash_clean_with_criterium(curl_hash *h, void *user,
   }
 }
 
-#if 0
-int
-Curl_hash_count(curl_hash *h)
-{
-  return h->size;
-}
-#endif
-
-void 
+void
 Curl_hash_destroy(curl_hash *h)
 {
   if (!h)

@@ -446,13 +446,9 @@ struct connectdata {
 #define PROT_SSL     (1<<10) /* protocol requires SSL */
 
   /* the particular host we use, in two different ways */
-  struct Curl_dns_entry *connect_addr;
+  struct Curl_dns_entry *dns_entry;
+  Curl_addrinfo *ip_addr; /* the particular IP we connected to */
 
-#ifdef ENABLE_IPV6
-  struct addrinfo *serv_addr;
-#else
-  struct sockaddr_in serv_addr;
-#endif
   char protostr[16];  /* store the protocol string in this buffer */
 
   struct hostname host;
@@ -574,10 +570,6 @@ struct connectdata {
     struct FTP *ftp;
     struct FILEPROTO *file;
     void *telnet;        /* private for telnet.c-eyes only */
-#if 0 /* no need for special ones for these: */
-    struct LDAP *ldap;
-    struct DICT *dict;
-#endif
     void *generic;
   } proto;
 

@@ -93,6 +93,7 @@
 #include "connect.h"
 #include "strerror.h"
 #include "memory.h"
+#include "inet_ntop.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
@@ -1022,121 +1023,13 @@ CURLcode ftp_getsize(struct connectdata *conn, char *file,
  */
 static void
 ftp_pasv_verbose(struct connectdata *conn,
-                 Curl_ipconnect *addr,
+                 Curl_addrinfo *ai,
                  char *newhost, /* ascii version */
                  int port)
 {
-#ifndef ENABLE_IPV6
-  /*****************************************************************
-   *
-   * IPv4-only code section
-   */
-
-  struct in_addr in;
-  struct hostent * answer;
-
-#ifdef HAVE_INET_NTOA_R
-  char ntoa_buf[64];
-#endif
-  /* The array size trick below is to make this a large chunk of memory
-     suitably 8-byte aligned on 64-bit platforms. This was thoughtfully
-     suggested by Philip Gladstone. */
-  long bigbuf[9000 / sizeof(long)];
-
-#if defined(HAVE_INET_ADDR)
-  in_addr_t address;
-# if defined(HAVE_GETHOSTBYADDR_R)
-  int h_errnop;
-# endif
-  char *hostent_buf = (char *)bigbuf; /* get a char * to the buffer */
-
-  address = inet_addr(newhost);
-# ifdef HAVE_GETHOSTBYADDR_R
-
-#  ifdef HAVE_GETHOSTBYADDR_R_5
-  /* AIX, Digital Unix (OSF1, Tru64) style:
-     extern int gethostbyaddr_r(char *addr, size_t len, int type,
-     struct hostent *htent, struct hostent_data *ht_data); */
-
-  /* Fred Noz helped me try this out, now it at least compiles! */
-
-  /* Bjorn Reese (November 28 2001):
-     The Tru64 man page on gethostbyaddr_r() says that
-     the hostent struct must be filled with zeroes before the call to
-     gethostbyaddr_r().
-
-     ... as must be struct hostent_data Craig Markwardt 19 Sep 2002. */
-
-  memset(hostent_buf, 0, sizeof(struct hostent)+sizeof(struct hostent_data));
-
-  if(gethostbyaddr_r((char *) &address,
-                     sizeof(address), AF_INET,
-                     (struct hostent *)hostent_buf,
-                     (struct hostent_data *)(hostent_buf + sizeof(*answer))))
-    answer=NULL;
-  else
-    answer=(struct hostent *)hostent_buf;
-
-#  endif
-#  ifdef HAVE_GETHOSTBYADDR_R_7
-  /* Solaris and IRIX */
-  answer = gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
-                           (struct hostent *)bigbuf,
-                           hostent_buf + sizeof(*answer),
-                           sizeof(bigbuf) - sizeof(*answer),
-                           &h_errnop);
-#  endif
-#  ifdef HAVE_GETHOSTBYADDR_R_8
-  /* Linux style */
-  if(gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
-                     (struct hostent *)hostent_buf,
-                     hostent_buf + sizeof(*answer),
-                     sizeof(bigbuf) - sizeof(*answer),
-                     &answer,
-                     &h_errnop))
-    answer=NULL; /* error */
-#  endif
-
-# else
-  (void)hostent_buf; /* avoid compiler warning */
-  answer = gethostbyaddr((char *) &address, sizeof(address), AF_INET);
-# endif
-#else
-  answer = NULL;
-#endif
-  (void) memcpy(&in.s_addr, addr, sizeof (Curl_ipconnect));
-  infof(conn->data, "Connecting to %s (%s) port %u\n",
-        answer?answer->h_name:newhost,
-#if defined(HAVE_INET_NTOA_R)
-        inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf)),
-#else
-        inet_ntoa(in),
-#endif
-        port);
-
-#else
-  /*****************************************************************
-   *
-   * IPv6-only code section
-   */
-  char hbuf[NI_MAXHOST]; /* ~1KB */
-  char nbuf[NI_MAXHOST]; /* ~1KB */
-  char sbuf[NI_MAXSERV]; /* around 32 */
-  (void)port; /* prevent compiler warning */
-  if (getnameinfo(addr->ai_addr, addr->ai_addrlen,
-                  nbuf, sizeof(nbuf), sbuf, sizeof(sbuf), NIFLAGS)) {
-    snprintf(nbuf, sizeof(nbuf), "?");
-    snprintf(sbuf, sizeof(sbuf), "?");
-  }
-
-  if (getnameinfo(addr->ai_addr, addr->ai_addrlen,
-                  hbuf, sizeof(hbuf), NULL, 0, 0)) {
-    infof(conn->data, "Connecting to %s (%s) port %s\n", nbuf, newhost, sbuf);
-  }
-  else {
-    infof(conn->data, "Connecting to %s (%s) port %s\n", hbuf, nbuf, sbuf);
-  }
-#endif
+  char buf[256];
+  Curl_printable_address(ai, buf, sizeof(buf));
+  infof(conn->data, "Connecting to %s (%s) port %d\n", newhost, buf, port);
 }
 
 /***********************************************************************
@@ -1381,36 +1274,44 @@ CURLcode ftp_use_port(struct connectdata *conn)
    *
    */
   struct sockaddr_in sa;
-  struct Curl_dns_entry *h=NULL;
   unsigned short porttouse;
   char myhost[256] = "";
   bool sa_filled_in = FALSE;
+  Curl_addrinfo *addr = NULL;
+  unsigned short ip[4];
 
   if(data->set.ftpport) {
     in_addr_t in;
-    int rc;
 
     /* First check if the given name is an IP address */
     in=inet_addr(data->set.ftpport);
 
-    if((in == CURL_INADDR_NONE) &&
-       Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
-      rc = Curl_resolv(conn, myhost, 0, &h);
-      if(rc == CURLRESOLV_PENDING)
-        rc = Curl_wait_for_resolv(conn, &h);
-    }
+    if(in != CURL_INADDR_NONE)
+      /* this is an IPv4 address */
+      addr = Curl_ip2addr(in, data->set.ftpport, 0);
     else {
-      size_t len = strlen(data->set.ftpport);
-      if(len>1) {
-        rc = Curl_resolv(conn, data->set.ftpport, 0, &h);
+      if(Curl_if2ip(data->set.ftpport, myhost, sizeof(myhost))) {
+        /* The interface to IP conversion provided a dotted address */
+        in=inet_addr(myhost);
+        addr = Curl_ip2addr(in, myhost, 0);
+      }
+      else if(strlen(data->set.ftpport)> 1) {
+        /* might be a host name! */
+        struct Curl_dns_entry *h=NULL;
+        int rc = Curl_resolv(conn, myhost, 0, &h);
         if(rc == CURLRESOLV_PENDING)
           rc = Curl_wait_for_resolv(conn, &h);
-      }
-      if(h)
-        strcpy(myhost, data->set.ftpport); /* buffer overflow risk */
-    }
-  }
-  if(! *myhost) {
+        if(h) {
+          addr = h->addr;
+          /* when we return from this function, we can forget about this entry
+             to we can unlock it now already */
+          Curl_resolv_unlock(data, h);
+        } /* (h) */
+      } /* strlen */
+    } /* CURL_INADDR_NONE */
+  } /* data->set.ftpport */
+
+  if(!addr) {
     /* pick a suitable default here */
 
     socklen_t sslen;
@@ -1425,12 +1326,9 @@ CURLcode ftp_use_port(struct connectdata *conn)
     sa_filled_in = TRUE; /* the sa struct is filled in */
   }
 
-  if(h)
-    /* when we return from here, we can forget about this */
-    Curl_resolv_unlock(data, h);
-
-  if ( h || sa_filled_in) {
-    if( (portsock = socket(AF_INET, SOCK_STREAM, 0)) != CURL_SOCKET_BAD ) {
+  if (addr || sa_filled_in) {
+    portsock = socket(AF_INET, SOCK_STREAM, 0);
+    if(CURL_SOCKET_BAD != portsock) {
       int size;
 
       /* we set the secondary socket variable to this for now, it
@@ -1439,11 +1337,7 @@ CURLcode ftp_use_port(struct connectdata *conn)
       conn->sock[SECONDARYSOCKET] = portsock;
 
       if(!sa_filled_in) {
-        memset((char *)&sa, 0, sizeof(sa));
-        memcpy((char *)&sa.sin_addr,
-               h->addr->h_addr,
-               h->addr->h_length);
-        sa.sin_family = AF_INET;
+        memcpy(&sa, addr->ai_addr, sizeof(sa));
         sa.sin_addr.s_addr = INADDR_ANY;
       }
 
@@ -1478,29 +1372,19 @@ CURLcode ftp_use_port(struct connectdata *conn)
     }
   }
   else {
-    failf(data, "could't find my own IP address (%s)", myhost);
+    failf(data, "could't find IP address to use");
     return CURLE_FTP_PORT_FAILED;
   }
-  {
-#ifdef HAVE_INET_NTOA_R
-    char ntoa_buf[64];
-#endif
-    struct in_addr in;
-    unsigned short ip[5];
-    (void) memcpy(&in.s_addr,
-                  h?*h->addr->h_addr_list:(char *)&sa.sin_addr.s_addr,
-                  sizeof (in.s_addr));
 
-#ifdef HAVE_INET_NTOA_R
-    /* ignore the return code from inet_ntoa_r() as it is int or
-       char * depending on system */
-    inet_ntoa_r(in, ntoa_buf, sizeof(ntoa_buf));
-    sscanf( ntoa_buf, "%hu.%hu.%hu.%hu",
-            &ip[0], &ip[1], &ip[2], &ip[3]);
-#else
-    sscanf( inet_ntoa(in), "%hu.%hu.%hu.%hu",
-            &ip[0], &ip[1], &ip[2], &ip[3]);
-#endif
+  if(sa_filled_in)
+    Curl_inet_ntop(AF_INET, &((struct sockaddr_in *)&sa)->sin_addr,
+                   myhost, sizeof(myhost));
+  else
+    Curl_printable_address(addr, myhost, sizeof(myhost));
+
+  if(4 == sscanf(myhost, "%hu.%hu.%hu.%hu",
+                 &ip[0], &ip[1], &ip[2], &ip[3])) {
+
     infof(data, "Telling server to connect to %d.%d.%d.%d:%d\n",
           ip[0], ip[1], ip[2], ip[3], porttouse);
 
@@ -1510,7 +1394,12 @@ CURLcode ftp_use_port(struct connectdata *conn)
                          porttouse & 255);
     if(result)
       return result;
+
   }
+  else
+    return CURLE_FTP_PORT_FAILED;
+
+  Curl_freeaddrinfo(addr);
 
   result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
   if(result)
@@ -1544,7 +1433,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   int ftpcode; /* receive FTP response codes in this */
   CURLcode result;
   struct Curl_dns_entry *addr=NULL;
-  Curl_ipconnect *conninfo;
+  Curl_addrinfo *conninfo;
   int rc;
 
   /*
@@ -1693,7 +1582,6 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
 
   result = Curl_connecthost(conn,
                             addr,
-                            connectport,
                             &conn->sock[SECONDARYSOCKET],
                             &conninfo,
                             connected);

@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -96,36 +96,36 @@ static void win32_cleanup(void)
    stack to allow networking */
 static CURLcode win32_init(void)
 {
-  WORD wVersionRequested;  
-  WSADATA wsaData; 
-  int err; 
+  WORD wVersionRequested;
+  WSADATA wsaData;
+  int err;
 
 #ifdef ENABLE_IPV6
   wVersionRequested = MAKEWORD(2, 0);
 #else
   wVersionRequested = MAKEWORD(1, 1);
 #endif
-    
-  err = WSAStartup(wVersionRequested, &wsaData); 
-    
-  if (err != 0) 
-    /* Tell the user that we couldn't find a useable */ 
-    /* winsock.dll.     */ 
-    return CURLE_FAILED_INIT; 
-    
-  /* Confirm that the Windows Sockets DLL supports what we need.*/ 
-  /* Note that if the DLL supports versions greater */ 
-  /* than wVersionRequested, it will still return */ 
+
+  err = WSAStartup(wVersionRequested, &wsaData);
+
+  if (err != 0)
+    /* Tell the user that we couldn't find a useable */
+    /* winsock.dll.     */
+    return CURLE_FAILED_INIT;
+
+  /* Confirm that the Windows Sockets DLL supports what we need.*/
+  /* Note that if the DLL supports versions greater */
+  /* than wVersionRequested, it will still return */
   /* wVersionRequested in wVersion. wHighVersion contains the */
   /* highest supported version. */
 
-  if ( LOBYTE( wsaData.wVersion ) != LOBYTE(wVersionRequested) || 
-       HIBYTE( wsaData.wVersion ) != HIBYTE(wVersionRequested) ) { 
-    /* Tell the user that we couldn't find a useable */ 
+  if ( LOBYTE( wsaData.wVersion ) != LOBYTE(wVersionRequested) ||
+       HIBYTE( wsaData.wVersion ) != HIBYTE(wVersionRequested) ) {
+    /* Tell the user that we couldn't find a useable */
 
-    /* winsock.dll. */ 
-    WSACleanup(); 
-    return CURLE_FAILED_INIT; 
+    /* winsock.dll. */
+    WSACleanup();
+    return CURLE_FAILED_INIT;
   }
   /* The Windows Sockets DLL is acceptable. Proceed. */
   return CURLE_OK;
@@ -207,7 +207,7 @@ CURLcode curl_global_init(long flags)
 
   initialized = 1;
   init_flags  = flags;
-  
+
   return CURLE_OK;
 }
 
@@ -292,7 +292,7 @@ CURL *curl_easy_init(void)
   return data;
 }
 
-/* 
+/*
  * curl_easy_setopt() is the external interface for setting options on an
  * easy handle.
  */
@@ -373,9 +373,9 @@ CURLcode curl_easy_perform(CURL *curl)
            screwed up and we should bail out! */
         return CURLE_OUT_OF_MEMORY;
     }
-    
+
   }
-  
+
   return Curl_perform(data);
 }
 

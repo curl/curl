@@ -10,22 +10,22 @@
  * Copyright (c) 1995, 1996, 1997, 1998, 1999 Kungliga Tekniska Högskolan
  * (Royal Institute of Technology, Stockholm, Sweden).
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
- * 
+ *
  * 1. Redistributions of source code must retain the above copyright
  *    notice, this list of conditions and the following disclaimer.
- * 
+ *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- * 
+ *
  * 3. Neither the name of the Institute nor the names of its contributors
  *    may be used to endorse or promote products derived from this software
  *    without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -70,7 +70,7 @@
 #include "memdebug.h"
 
 #define LOCAL_ADDR (&conn->local_addr)
-#define REMOTE_ADDR (&conn->serv_addr)
+#define REMOTE_ADDR conn->ip_addr->ai_addr
 #define myctladdr LOCAL_ADDR
 #define hisctladdr REMOTE_ADDR
 
@@ -120,13 +120,13 @@ krb4_decode(void *app_data, void *buf, int len, int level,
   MSG_DAT m;
   int e;
   struct krb4_data *d = app_data;
-  
+
   if(level == prot_safe)
     e = krb_rd_safe(buf, len, &d->key,
                     (struct sockaddr_in *)REMOTE_ADDR,
                     (struct sockaddr_in *)LOCAL_ADDR, &m);
   else
-    e = krb_rd_priv(buf, len, d->schedule, &d->key, 
+    e = krb_rd_priv(buf, len, d->schedule, &d->key,
                     (struct sockaddr_in *)REMOTE_ADDR,
                     (struct sockaddr_in *)LOCAL_ADDR, &m);
   if(e) {
@@ -155,11 +155,11 @@ krb4_encode(void *app_data, void *from, int length, int level, void **to,
   struct krb4_data *d = app_data;
   *to = malloc(length + 31);
   if(level == prot_safe)
-    return krb_mk_safe(from, *to, length, &d->key, 
+    return krb_mk_safe(from, *to, length, &d->key,
                        (struct sockaddr_in *)LOCAL_ADDR,
                        (struct sockaddr_in *)REMOTE_ADDR);
   else if(level == prot_private)
-    return krb_mk_priv(from, *to, length, d->schedule, &d->key, 
+    return krb_mk_priv(from, *to, length, d->schedule, &d->key,
                        (struct sockaddr_in *)LOCAL_ADDR,
                        (struct sockaddr_in *)REMOTE_ADDR);
   else
@@ -167,7 +167,7 @@ krb4_encode(void *app_data, void *from, int length, int level, void **to,
 }
 
 static int
-mk_auth(struct krb4_data *d, KTEXT adat, 
+mk_auth(struct krb4_data *d, KTEXT adat,
 	const char *service, char *host, int checksum)
 {
   int ret;
@@ -223,7 +223,7 @@ krb4_auth(void *app_data, struct connectdata *conn)
     Curl_infof(data, "%s\n", krb_get_err_text(ret));
     return AUTH_CONTINUE;
   }
-  
+
 #ifdef HAVE_KRB_GET_OUR_IP_FOR_REALM
   if (krb_get_config_bool("nat_in_use")) {
     struct sockaddr_in *localaddr  = (struct sockaddr_in *)LOCAL_ADDR;
@@ -281,11 +281,11 @@ krb4_auth(void *app_data, struct connectdata *conn)
     return AUTH_ERROR;
   }
   adat.length = len;
-  ret = krb_rd_safe(adat.dat, adat.length, &d->key, 
-                    (struct sockaddr_in *)hisctladdr, 
+  ret = krb_rd_safe(adat.dat, adat.length, &d->key,
+                    (struct sockaddr_in *)hisctladdr,
                     (struct sockaddr_in *)myctladdr, &msg_data);
   if(ret) {
-    Curl_failf(data, "Error reading reply from server: %s", 
+    Curl_failf(data, "Error reading reply from server: %s",
                krb_get_err_text(ret));
     return AUTH_ERROR;
   }
@@ -354,7 +354,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
   }
   tkt.length = tmp;
   tktcopy.length = tkt.length;
-    
+
   p = strstr(conn->data->state.buffer, "P=");
   if(!p) {
     Curl_failf(conn->data, "Bad reply from server");
@@ -367,7 +367,7 @@ CURLcode Curl_krb_kauth(struct connectdata *conn)
 
   des_string_to_key (conn->passwd, &key);
   des_key_sched(&key, schedule);
-    
+
   des_pcbc_encrypt((void *)tkt.dat, (void *)tktcopy.dat,
                    tkt.length,
                    schedule, &key, DES_DECRYPT);

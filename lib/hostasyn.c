@@ -108,9 +108,9 @@
  *
  * The storage operation locks and unlocks the DNS cache.
  */
-void Curl_addrinfo_callback(void *arg, /* "struct connectdata *" */
-                            int status,
-                            Curl_addrinfo *hostent)
+static void addrinfo_callback(void *arg, /* "struct connectdata *" */
+                              int status,
+                              void *addr)
 {
   struct connectdata *conn = (struct connectdata *)arg;
   struct Curl_dns_entry *dns = NULL;
@@ -126,19 +126,19 @@ void Curl_addrinfo_callback(void *arg, /* "struct connectdata *" */
      *
      * IPv6: Curl_addrinfo_copy() returns the input pointer!
      */
-    Curl_addrinfo *he = Curl_addrinfo_copy(hostent);
-    if(he) {
+    Curl_addrinfo *ai = Curl_addrinfo_copy(addr, conn->async.port);
+    if(ai) {
       struct SessionHandle *data = conn->data;
 
       if(data->share)
         Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);
 
-      dns = Curl_cache_addr(data, he,
+      dns = Curl_cache_addr(data, ai,
                             conn->async.hostname,
                             conn->async.port);
       if(!dns)
         /* failed to store, cleanup and return error */
-        Curl_freeaddrinfo(he);
+        Curl_freeaddrinfo(ai);
 
       if(data->share)
         Curl_share_unlock(data, CURL_LOCK_DATA_DNS);
@@ -150,5 +150,21 @@ void Curl_addrinfo_callback(void *arg, /* "struct connectdata *" */
   /* ipv4: The input hostent struct will be freed by ares when we return from
      this function */
 }
+
+void Curl_addrinfo4_callback(void *arg, /* "struct connectdata *" */
+                             int status,
+                             struct hostent *hostent)
+{
+  addrinfo_callback(arg, status, hostent);
+}
+
+#ifdef CURLRES_IPV6
+void Curl_addrinfo6_callback(void *arg, /* "struct connectdata *" */
+                             int status,
+                             struct addrinfo *hostent)
+{
+  addrinfo_callback(arg, status, hostent);
+}
+#endif
 
 #endif /* CURLRES_ASYNC */

@@ -174,14 +174,8 @@ void Curl_global_host_cache_dtor(void)
 int Curl_num_addresses(const Curl_addrinfo *addr)
 {
   int i;
-
-#ifdef ENABLE_IPV6
-  for (i = 0; addr; addr = addr->ai_next, i++)
-#else
-  for (i = 0; addr->h_addr_list[i]; i++)
-#endif
-      ;
-  return (i);
+  for (i = 0; addr; addr = addr->ai_next, i++);
+  return i;
 }
 
 /*
@@ -191,18 +185,18 @@ int Curl_num_addresses(const Curl_addrinfo *addr)
  *
  * If the conversion fails, it returns NULL.
  */
-const char *Curl_printable_address(const Curl_ipconnect *ip,
+const char *Curl_printable_address(const Curl_addrinfo *ip,
                                    char *buf, size_t bufsize)
 {
-#ifdef CURLRES_IPV6
   const void *ip4 = &((const struct sockaddr_in*)ip->ai_addr)->sin_addr;
-  const void *ip6 = &((const struct sockaddr_in6*)ip->ai_addr)->sin6_addr;
   int af = ip->ai_family;
-
-  return Curl_inet_ntop(af, af == AF_INET6 ? ip6 : ip4, buf, bufsize);
+#ifdef CURLRES_IPV6
+  const void *ip6 = &((const struct sockaddr_in6*)ip->ai_addr)->sin6_addr;
 #else
-  return Curl_inet_ntop(AF_INET, ip, buf, bufsize);
+  const void *ip6 = NULL;
 #endif
+
+  return Curl_inet_ntop(af, af == AF_INET ? ip4 : ip6, buf, bufsize);
 }
 
 /*
@@ -547,35 +541,6 @@ curl_hash *Curl_mk_dnscache(void)
   return Curl_hash_alloc(7, freednsentry);
 }
 
-#ifdef CURLRES_HOSTENT_RELOCATE
-/*
- * Curl_hostent_relocate() ajusts all pointers in the given hostent struct
- * according to the offset. This is typically used when a hostent has been
- * reallocated and needs to be setup properly on the new address.
- */
-void Curl_hostent_relocate(struct hostent *h, long offset)
-{
-  int i=0;
-
-  h->h_name=(char *)((long)h->h_name+offset);
-  if(h->h_aliases) {
-    /* only relocate aliases if there are any! */
-    h->h_aliases=(char **)((long)h->h_aliases+offset);
-    while(h->h_aliases[i]) {
-      h->h_aliases[i]=(char *)((long)h->h_aliases[i]+offset);
-      i++;
-    }
-  }
-
-  h->h_addr_list=(char **)((long)h->h_addr_list+offset);
-  i=0;
-  while(h->h_addr_list[i]) {
-    h->h_addr_list[i]=(char *)((long)h->h_addr_list[i]+offset);
-    i++;
-  }
-}
-#endif /* CURLRES_HOSTENT_RELOCATE */
-
 #ifdef CURLRES_ADDRINFO_COPY
 
 /* align on even 64bit boundaries */
@@ -586,94 +551,10 @@ void Curl_hostent_relocate(struct hostent *h, long offset)
  * returns a pointer to the malloc()ed copy. You need to call free() on the
  * returned buffer when you're done with it.
  */
-Curl_addrinfo *Curl_addrinfo_copy(Curl_addrinfo *orig)
+Curl_addrinfo *Curl_addrinfo_copy(void *org, int port)
 {
-  char *newbuf;
-  Curl_addrinfo *copy;
-  int i;
-  char *str;
-  size_t len;
-  char *aptr = (char *)malloc(CURL_HOSTENT_SIZE);
-  char *bufptr = aptr;
+  struct hostent *orig = org;
 
-  if(!bufptr)
-    return NULL; /* major bad */
-
-  copy = (Curl_addrinfo *)bufptr;
-
-  bufptr += sizeof(Curl_addrinfo);
-  copy->h_name = bufptr;
-  len = strlen(orig->h_name) + 1;
-  strncpy(bufptr, orig->h_name, len);
-  bufptr += len;
-
-  /* This must be aligned properly to work on many CPU architectures! */
-  bufptr = MEMALIGN(bufptr);
-
-  copy->h_aliases = (char**)bufptr;
-
-  /* Figure out how many aliases there are */
-  for (i = 0; orig->h_aliases && orig->h_aliases[i]; ++i);
-
-  /* Reserve room for the array */
-  bufptr += (i + 1) * sizeof(char*);
-
-  /* Clone all known aliases */
-  if(orig->h_aliases) {
-    for(i = 0; (str = orig->h_aliases[i]); i++) {
-      len = strlen(str) + 1;
-      strncpy(bufptr, str, len);
-      copy->h_aliases[i] = bufptr;
-      bufptr += len;
-    }
-  }
-  /* if(!orig->h_aliases) i was already set to 0 */
-
-  /* Terminate the alias list with a NULL */
-  copy->h_aliases[i] = NULL;
-
-  copy->h_addrtype = orig->h_addrtype;
-  copy->h_length = orig->h_length;
-
-  /* align it for (at least) 32bit accesses */
-  bufptr = MEMALIGN(bufptr);
-
-  copy->h_addr_list = (char**)bufptr;
-
-  /* Figure out how many addresses there are */
-  for (i = 0; orig->h_addr_list[i] != NULL; ++i);
-
-  /* Reserve room for the array */
-  bufptr += (i + 1) * sizeof(char*);
-
-  i = 0;
-  len = orig->h_length;
-  str = orig->h_addr_list[i];
-  while (str != NULL) {
-    memcpy(bufptr, str, len);
-    copy->h_addr_list[i] = bufptr;
-    bufptr += len;
-    str = orig->h_addr_list[++i];
-  }
-  copy->h_addr_list[i] = NULL;
-
-  /* now, shrink the allocated buffer to the size we actually need, which
-     most often is only a fraction of the original alloc */
-  newbuf=(char *)realloc(aptr, (long)(bufptr-aptr));
-
-  if(!newbuf) {
-    /* serious error, but since this is shrinking only requested, we can
-       still use the previous memory block */
-    newbuf = aptr;
-  }
-
-  /* if the alloc moved, we need to adjust the hostent struct */
-  else if(newbuf != aptr)
-    Curl_hostent_relocate((struct hostent*)newbuf, (long)(newbuf-aptr));
-
-  /* setup the return */
-  copy = (Curl_addrinfo *)newbuf;
-
-  return copy;
+  return Curl_he2ai(orig, port);
 }
 #endif /* CURLRES_ADDRINFO_COPY */

@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -97,13 +97,19 @@
 #ifdef CURLRES_IPV4 /* plain ipv4 code coming up */
 
 /*
- * This is a wrapper function for freeing name information in a protocol
- * independent way. This takes care of using the appropriate underlying
- * function.
+ * This is a function for freeing name information in a protocol independent
+ * way.
  */
-void Curl_freeaddrinfo(Curl_addrinfo *p)
+void Curl_freeaddrinfo(Curl_addrinfo *ai)
 {
-  free(p); /* works fine for the ARES case too */
+  Curl_addrinfo *next;
+
+  /* walk over the list and free all entries */
+  while(ai) {
+    next = ai->ai_next;
+    free(ai);
+    ai = next;
+  }
 }
 
 /*
@@ -119,28 +125,29 @@ bool Curl_ipvalid(struct SessionHandle *data)
   return TRUE; /* OK, proceed */
 }
 
+struct namebuf {
+  struct hostent hostentry;
+  char *h_addr_list[2];
+  struct in_addr addrentry;
+  char h_name[16]; /* 123.123.123.123 = 15 letters is maximum */
+};
+
 /*
  * Curl_ip2addr() takes a 32bit ipv4 internet address as input parameter
  * together with a pointer to the string version of the address, and it
- * retruns a malloc()ed version of a hostent struct filled in correctly with
- * information for this address/host.
+ * returns a Curl_addrinfo chain filled in correctly with information for this
+ * address/host.
  *
  * The input parameters ARE NOT checked for validity but they are expected
  * to have been checked already when this is called.
  */
-Curl_addrinfo *Curl_ip2addr(in_addr_t num, char *hostname)
+Curl_addrinfo *Curl_ip2addr(in_addr_t num, char *hostname, int port)
 {
+  Curl_addrinfo *ai;
   struct hostent *h;
   struct in_addr *addrentry;
-  struct namebuf {
-    struct hostent hostentry;
-    char *h_addr_list[2];
-    struct in_addr addrentry;
-    char h_name[16]; /* 123.123.123.123 = 15 letters is maximum */
-  } *buf = (struct namebuf *)malloc(sizeof(struct namebuf));
-
-  if(!buf)
-    return NULL; /* major failure */
+  struct namebuf buffer;
+  struct namebuf *buf = &buffer;
 
   h = &buf->hostentry;
   h->h_addr_list = &buf->h_addr_list[0];
@@ -156,7 +163,9 @@ Curl_addrinfo *Curl_ip2addr(in_addr_t num, char *hostname)
   /* Now store the dotted version of the address */
   snprintf(h->h_name, 16, "%s", hostname);
 
-  return h;
+  ai = Curl_he2ai(h, port);
+
+  return ai;
 }
 
 #ifdef CURLRES_SYNCH /* the functions below are for synchronous resolves */
@@ -183,6 +192,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int port,
                                 int *waitp)
 {
+  Curl_addrinfo *ai = NULL;
   struct hostent *h = NULL;
   in_addr_t in;
   struct SessionHandle *data = conn->data;
@@ -191,9 +201,10 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   *waitp = 0; /* don't wait, we act synchronously */
 
   in=inet_addr(hostname);
-  if (in != CURL_INADDR_NONE)
+  if (in != CURL_INADDR_NONE) {
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(in, hostname);
+    return Curl_ip2addr(in, hostname, port);
+  }
 
 #if defined(HAVE_GETHOSTBYNAME_R)
   /*
@@ -204,7 +215,6 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   else {
     int h_errnop;
     int res=ERANGE;
-    int step_size=200;
     int *buf = (int *)calloc(CURL_HOSTENT_SIZE, 1);
     if(!buf)
       return NULL; /* major failure */
@@ -217,99 +227,64 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
 #ifdef HAVE_GETHOSTBYNAME_R_5
     /* Solaris, IRIX and more */
     (void)res; /* prevent compiler warning */
-    while(!h) {
-      h = gethostbyname_r(hostname,
-                          (struct hostent *)buf,
-                          (char *)buf + sizeof(struct hostent),
-                          step_size - sizeof(struct hostent),
-                          &h_errnop);
+    h = gethostbyname_r(hostname,
+                        (struct hostent *)buf,
+                        (char *)buf + sizeof(struct hostent),
+                        CURL_HOSTENT_SIZE - sizeof(struct hostent),
+                        &h_errnop);
 
-      /* If the buffer is too small, it returns NULL and sets errno to
-       * ERANGE. The errno is thread safe if this is compiled with
-       * -D_REENTRANT as then the 'errno' variable is a macro defined to get
-       * used properly for threads.
-       */
-
-      if(h || (errno != ERANGE))
-        break;
-      
-      step_size+=200;
-    }
-
-#ifdef CURLDEBUG
-    infof(data, "gethostbyname_r() uses %d bytes\n", step_size);
-#endif
+    /* If the buffer is too small, it returns NULL and sets errno to
+     * ERANGE. The errno is thread safe if this is compiled with
+     * -D_REENTRANT as then the 'errno' variable is a macro defined to get
+     * used properly for threads.
+     */
 
     if(h) {
-      int offset;
-      h=(struct hostent *)realloc(buf, step_size);
-      offset=(long)h-(long)buf;
-      Curl_hostent_relocate(h, offset);
-      buf=(int *)h;
+      ;
     }
     else
 #endif /* HAVE_GETHOSTBYNAME_R_5 */
 #ifdef HAVE_GETHOSTBYNAME_R_6
     /* Linux */
-    do {
-      res=gethostbyname_r(hostname,
-			  (struct hostent *)buf,
-			  (char *)buf + sizeof(struct hostent),
-			  step_size - sizeof(struct hostent),
-			  &h, /* DIFFERENCE */
-			  &h_errnop);
-      /* Redhat 8, using glibc 2.2.93 changed the behavior. Now all of a
-       * sudden this function returns EAGAIN if the given buffer size is too
-       * small. Previous versions are known to return ERANGE for the same
-       * problem.
-       *
-       * This wouldn't be such a big problem if older versions wouldn't
-       * sometimes return EAGAIN on a common failure case. Alas, we can't
-       * assume that EAGAIN *or* ERANGE means ERANGE for any given version of
-       * glibc.
-       *
-       * For now, we do that and thus we may call the function repeatedly and
-       * fail for older glibc versions that return EAGAIN, until we run out of
-       * buffer size (step_size grows beyond CURL_HOSTENT_SIZE).
-       *
-       * If anyone has a better fix, please tell us!
-       *
-       * -------------------------------------------------------------------
-       *
-       * On October 23rd 2003, Dan C dug up more details on the mysteries of
-       * gethostbyname_r() in glibc:
-       *
-       * In glibc 2.2.5 the interface is different (this has also been
-       * discovered in glibc 2.1.1-6 as shipped by Redhat 6). What I can't
-       * explain, is that tests performed on glibc 2.2.4-34 and 2.2.4-32
-       * (shipped/upgraded by Redhat 7.2) don't show this behavior!
-       *
-       * In this "buggy" version, the return code is -1 on error and 'errno'
-       * is set to the ERANGE or EAGAIN code. Note that 'errno' is not a
-       * thread-safe variable.
-       */
 
-      if(((ERANGE == res) || (EAGAIN == res)) ||
-         ((res<0) && ((ERANGE == errno) || (EAGAIN == errno))))
-	step_size+=200;
-      else
-        break;
-    } while(step_size <= CURL_HOSTENT_SIZE);
+    res=gethostbyname_r(hostname,
+                        (struct hostent *)buf,
+                        (char *)buf + sizeof(struct hostent),
+                        CURL_HOSTENT_SIZE - sizeof(struct hostent),
+                        &h, /* DIFFERENCE */
+                        &h_errnop);
+    /* Redhat 8, using glibc 2.2.93 changed the behavior. Now all of a
+     * sudden this function returns EAGAIN if the given buffer size is too
+     * small. Previous versions are known to return ERANGE for the same
+     * problem.
+     *
+     * This wouldn't be such a big problem if older versions wouldn't
+     * sometimes return EAGAIN on a common failure case. Alas, we can't
+     * assume that EAGAIN *or* ERANGE means ERANGE for any given version of
+     * glibc.
+     *
+     * For now, we do that and thus we may call the function repeatedly and
+     * fail for older glibc versions that return EAGAIN, until we run out of
+     * buffer size (step_size grows beyond CURL_HOSTENT_SIZE).
+     *
+     * If anyone has a better fix, please tell us!
+     *
+     * -------------------------------------------------------------------
+     *
+     * On October 23rd 2003, Dan C dug up more details on the mysteries of
+     * gethostbyname_r() in glibc:
+     *
+     * In glibc 2.2.5 the interface is different (this has also been
+     * discovered in glibc 2.1.1-6 as shipped by Redhat 6). What I can't
+     * explain, is that tests performed on glibc 2.2.4-34 and 2.2.4-32
+     * (shipped/upgraded by Redhat 7.2) don't show this behavior!
+     *
+     * In this "buggy" version, the return code is -1 on error and 'errno'
+     * is set to the ERANGE or EAGAIN code. Note that 'errno' is not a
+     * thread-safe variable.
+     */
 
     if(!h) /* failure */
-      res=1;
-    
-#ifdef CURLDEBUG
-    infof(data, "gethostbyname_r() uses %d bytes\n", step_size);
-#endif
-    if(!res) {
-      int offset;
-      h=(struct hostent *)realloc(buf, step_size);
-      offset=(long)h-(long)buf;
-      Curl_hostent_relocate(h, offset);
-      buf=(int *)h;
-    }
-    else
 #endif/* HAVE_GETHOSTBYNAME_R_6 */
 #ifdef HAVE_GETHOSTBYNAME_R_3
     /* AIX, Digital Unix/Tru64, HPUX 10, more? */
@@ -361,7 +336,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
        * calling Curl_addrinfo_copy() that subsequent realloc()s down the new
        * memory area to the actually used amount.
        */
-    }    
+    }
     else
 #endif /* HAVE_GETHOSTBYNAME_R_3 */
       {
@@ -386,14 +361,95 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
        * between threads, which thus the copying here them allows the app to
        * do.
        */
-      h = Curl_addrinfo_copy(h);
+      return Curl_addrinfo_copy(h);
     }
 #endif /*HAVE_GETHOSTBYNAME_R */
   }
 
-  return h;
+  if(h) {
+    ai = Curl_he2ai(h, port);
+
+    free(h);
+  }
+
+  return ai;
 }
 
 #endif /* CURLRES_SYNCH */
+
+/*
+ * Curl_he2ai() translates from a hostent struct to a Curl_addrinfo struct.
+ * The Curl_addrinfo is meant to work like the addrinfo struct does for IPv6
+ * stacks, but for all hosts and environments.
+
+struct Curl_addrinfo {
+  int     ai_flags;
+  int     ai_family;
+  int     ai_socktype;
+  int     ai_protocol;
+  size_t  ai_addrlen;
+  struct sockaddr *ai_addr;
+  char   *ai_canonname;
+  struct addrinfo *ai_next;
+};
+
+struct hostent {
+  char    *h_name;        * official name of host *
+  char    **h_aliases;    * alias list *
+  int     h_addrtype;     * host address type *
+  int     h_length;       * length of address *
+  char    **h_addr_list;  * list of addresses *
+}
+#define h_addr  h_addr_list[0]  * for backward compatibility *
+
+*/
+
+Curl_addrinfo *Curl_he2ai(struct hostent *he, unsigned short port)
+{
+  Curl_addrinfo *ai;
+  Curl_addrinfo *prevai = NULL;
+  Curl_addrinfo *firstai = NULL;
+  struct sockaddr_in *addr;
+  int i;
+  struct in_addr *curr;
+
+  if(!he)
+    /* no input == no output! */
+    return NULL;
+
+  for(i=0; (curr = (struct in_addr *)he->h_addr_list[i]); i++) {
+
+    ai = calloc(1, sizeof(struct addrinfo) + sizeof(struct sockaddr_in));
+
+    if(!ai)
+      break;
+
+    if(!firstai)
+      /* store the pointer we want to return from this function */
+      firstai = ai;
+
+    if(prevai)
+      /* make the previous entry point to this */
+      prevai->ai_next = ai;
+
+    ai->ai_family = AF_INET;              /* we only support this */
+    ai->ai_socktype = SOCK_STREAM;        /* we only support this */
+    ai->ai_addrlen = sizeof(struct sockaddr_in);
+    /* make the ai_addr point to the address immediately following this struct
+       and use that area to store the address */
+    ai->ai_addr = (struct sockaddr *) ((char*)ai + sizeof(struct addrinfo));
+
+    /* leave the rest of the struct filled with zero */
+
+    addr = (struct sockaddr_in *)ai->ai_addr; /* storage area for this info */
+
+    memcpy((char *)&(addr->sin_addr), curr, sizeof(struct in_addr));
+    addr->sin_family = he->h_addrtype;
+    addr->sin_port = htons((unsigned short)port);
+
+    prevai = ai;
+  }
+  return firstai;
+}
 
 #endif /* CURLRES_IPV4 */
