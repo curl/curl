@@ -36,10 +36,11 @@ WEB SITE
         Russia    -- http://curl.tsuren.net/
         US (CA)   -- http://curl.sf.net/
         US (TX)   -- http://curl.cyberservers.net/
+        US (CA)   -- http://curl.mirror.redwire.net/
 
 DOWNLOAD
 
-  The official download sites are:
+  The official download mirror sites are:
 
         Australia -- http://curl.planetmirror.com/download/
         Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
@@ -49,6 +50,7 @@ DOWNLOAD
         Sweden    -- http://cool.haxx.se/curl/
         US (CA)   -- http://curl.sourceforge.net/download/
         US (TX)   -- http://curl.cyberservers.net/download/
+        US (CA)   -- http://curl.mirror.redwire.net/download/
 
 CVS
 
