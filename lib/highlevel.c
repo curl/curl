@@ -614,6 +614,21 @@ CURLcode curl_transfer(CURL *curl)
         char prot[16];
         char path[URL_MAX_LENGTH];
 
+        if(data->bits.http_auto_referer) {
+          /* We are asked to automatically set the previous URL as the
+             referer when we get the next URL. We pick the ->url field,
+             which may or may not be 100% correct */
+
+          if(data->free_referer) {
+            /* If we already have an allocated referer, free this first */
+            free(data->referer);
+          }
+
+          data->referer = strdup(data->url);
+          data->free_referer = TRUE; /* yes, free this later */
+          data->bits.http_set_referer = TRUE; /* might have been false */
+        }
+
         if(2 != sscanf(data->newurl, "%15[^:]://%" URL_MAX_LENGTH_TXT
                        "s", prot, path)) {
           /***
@@ -680,6 +695,11 @@ CURLcode curl_transfer(CURL *curl)
         /* TBD: set the URL with curl_setopt() */
         data->url = data->newurl;
         data->newurl = NULL; /* don't show! */
+
+        /* Disable both types of POSTs, since doing a second POST when
+           following isn't what anyone would want! */
+        data->bits.http_post = FALSE;
+        data->bits.http_formpost = FALSE;
 
         infof(data, "Follows Location: to new URL: '%s'\n", data->url);
 

@@ -82,6 +82,8 @@
 
 /* Just a set of bits */
 #define CONF_DEFAULT  0
+
+#define CONF_AUTO_REFERER (1<<4) /* the automatic referer-system please! */
 #define CONF_VERBOSE  (1<<5) /* talk a lot */
 #define CONF_HEADER   (1<<8) /* throw the header out too */
 #define CONF_NOPROGRESS (1<<10) /* shut off the progress meter */
@@ -614,7 +616,16 @@ static int getparameter(char *flag, /* f or -long-flag */
       GetStr(&config->headerfile, nextarg);
       break;
     case 'e':
-      GetStr(&config->referer, nextarg);
+      {
+        char *ptr = strstr(nextarg, ";auto");
+        if(ptr) {
+          /* Automatic referer requested, this may be combined with a
+             set initial one */
+          config->conf |= CONF_AUTO_REFERER;
+          *ptr = 0; /* zero terminate here */
+        }
+        GetStr(&config->referer, nextarg);
+      }
       break;
     case 'E':
       {
@@ -1353,14 +1364,13 @@ int main(int argc, char *argv[])
   curl = curl_easy_init();
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_FILE, (FILE *)&outs);  /* where to store */
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite); /* what call to write */
+    /* what call to write: */
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
     curl_easy_setopt(curl, CURLOPT_INFILE, infd); /* for uploads */
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize); /* size of uploaded file */
+    /* size of uploaded file: */
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);
     curl_easy_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
     curl_easy_setopt(curl, CURLOPT_PROXY, config.proxy); /* proxy to use */
-#if 0
-    curl_easy_setopt(curl, CURLOPT_FLAGS, config.conf); /* flags */
-#else
     curl_easy_setopt(curl, CURLOPT_VERBOSE, config.conf&CONF_VERBOSE);
     curl_easy_setopt(curl, CURLOPT_HEADER, config.conf&CONF_HEADER);
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, config.conf&CONF_NOPROGRESS);
@@ -1371,26 +1381,25 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_FTPLISTONLY, config.conf&CONF_FTPLISTONLY);
     curl_easy_setopt(curl, CURLOPT_FTPAPPEND, config.conf&CONF_FTPAPPEND);
     curl_easy_setopt(curl, CURLOPT_NETRC, config.conf&CONF_NETRC);
-    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, config.conf&CONF_FOLLOWLOCATION);
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,
+                     config.conf&CONF_FOLLOWLOCATION);
     curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config.conf&CONF_GETTEXT);
-
     curl_easy_setopt(curl, CURLOPT_PUT, config.conf&CONF_PUT);
     curl_easy_setopt(curl, CURLOPT_MUTE, config.conf&CONF_MUTE);
-#endif
-
-
-    curl_easy_setopt(curl, CURLOPT_USERPWD, config.userpwd); /* user + passwd */
-    curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, config.proxyuserpwd); /* Proxy user + passwd */
-    curl_easy_setopt(curl, CURLOPT_RANGE, config.range); /* range of document */
+    curl_easy_setopt(curl, CURLOPT_USERPWD, config.userpwd);
+    curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, config.proxyuserpwd);
+    curl_easy_setopt(curl, CURLOPT_RANGE, config.range);
     curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, errorbuffer);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, config.timeout);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, config.postfields);
     curl_easy_setopt(curl, CURLOPT_REFERER, config.referer);
+    curl_easy_setopt(curl, CURLOPT_AUTOREFERER, config.conf&CONF_AUTO_REFERER);
     curl_easy_setopt(curl, CURLOPT_USERAGENT, config.useragent);
     curl_easy_setopt(curl, CURLOPT_FTPPORT, config.ftpport);
     curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, config.low_speed_limit);
     curl_easy_setopt(curl, CURLOPT_LOW_SPEED_TIME, config.low_speed_time);
-    curl_easy_setopt(curl, CURLOPT_RESUME_FROM, config.use_resume?config.resume_from:0);
+    curl_easy_setopt(curl, CURLOPT_RESUME_FROM,
+                     config.use_resume?config.resume_from:0);
     curl_easy_setopt(curl, CURLOPT_COOKIE, config.cookie);
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, config.headers);
     curl_easy_setopt(curl, CURLOPT_HTTPPOST, config.httppost);
@@ -1408,9 +1417,6 @@ int main(int argc, char *argv[])
     curl_easy_setopt(curl, CURLOPT_STDERR, config.errors);
     curl_easy_setopt(curl, CURLOPT_WRITEINFO, config.writeout);
 
-#if 0 /* old-style */
-    curl_easy_setopt(curl, CURLOPT_PROGRESSMODE, config.progressmode);
-#else
     if((config.progressmode == CURL_PROGRESS_BAR) &&
        !(config.conf&(CONF_NOPROGRESS|CONF_MUTE))) {
       /* we want the alternative style, then we have to implement it
@@ -1419,7 +1425,6 @@ int main(int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, myprogress);
       curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, &progressbar);
     }
-#endif
 
     res = curl_easy_perform(curl);
 
