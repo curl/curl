@@ -192,9 +192,12 @@ int Curl_GetFTPResponse(char *buf,
   char *line_start;
   int code=0; /* default "error code" to return */
 
-#define SELECT_OK      0
-#define SELECT_ERROR   1
-#define SELECT_TIMEOUT 2
+#define SELECT_OK       0
+#define SELECT_ERROR    1 /* select() problems */
+#define SELECT_TIMEOUT  2 /* took too long */
+#define SELECT_MEMORY   3 /* no available memory */
+#define SELECT_CALLBACK 4 /* aborted by callback */
+
   int error = SELECT_OK;
 
   struct FTP *ftp = conn->proto.ftp;
@@ -283,6 +286,7 @@ int Curl_GetFTPResponse(char *buf,
           if(*ptr=='\n') {
             /* a newline is CRLF in ftp-talk, so the CR is ignored as
                the line isn't really terminated until the LF comes */
+            CURLcode result;
 
             /* output debug output if that is requested */
             if(data->set.verbose) {
@@ -291,6 +295,16 @@ int Curl_GetFTPResponse(char *buf,
               /* no need to output LF here, it is part of the data */
             }
 
+            /*
+             * We pass all response-lines to the callback function registered
+             * for "headers". The response lines can be seen as a kind of
+             * headers.
+             */
+            result = Curl_client_write(data, CLIENTWRITE_HEADER,
+                                       line_start, perline);
+            if(result)
+              return -SELECT_CALLBACK;
+                                       
 #define lastline(line) (isdigit((int)line[0]) && isdigit((int)line[1]) && \
 			isdigit((int)line[2]) && (' ' == line[3]))
 
@@ -324,7 +338,7 @@ int Curl_GetFTPResponse(char *buf,
           if(ftp->cache)
             memcpy(ftp->cache, line_start, ftp->cache_size);
           else
-            return CURLE_OUT_OF_MEMORY; /**BANG**/
+            return -SELECT_MEMORY; /**BANG**/
         }
       } /* there was data */
     } /* if(no error) */
