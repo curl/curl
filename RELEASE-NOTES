@@ -27,7 +27,6 @@ This release includes the following bugfixes:
  o the test suite runs fine with valgrind 2.1.x
  o negative Content-Length is now ignored
  o test 505 runs fine on windows now
- o builds fine with Borland again
  o curl_share_cleanup() crash fixed
  o --trace files now get the final info lines too
  o multi interface connects fine to multi-IP resolving hosts
