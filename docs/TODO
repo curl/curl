@@ -202,6 +202,9 @@ TODO
 
  TEST SUITE
 
+ * If perl wasn't found by the configure script, don't attempt to run the
+   tests but explain something nice why it doesn't.
+
  * Extend the test suite to include more protocols. The telnet could just do
    ftp or http operations (for which we have test servers).
 
