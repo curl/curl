@@ -254,7 +254,7 @@ PORTS
    This is a probably incomplete list of known hardware and
    operating systems that curl has been compiled for:
 
-        - Ultrix
+        - Ultrix 4.3a
         - SINIX-Z v5
         - Alpha DEC OSF 4
         - Alpha Digital UNIX v3.2
