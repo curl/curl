@@ -8,7 +8,17 @@
 
 
 Daniel (24 October)
-- Based on David Hull's fix in bug report 804599, we now check for solaris and
+- David Hull filed bug report #829827. It identified a problem with -C - if
+  the full file already was downloaded and thus the server responded with a
+  416. libcurl would then wrongly use the Content-Length: header and expect
+  that size to get transfer, causing a "hang" until the server closed the
+  connection and then an error 18 ("still N bytes data left of the transfer").
+
+  Now we don't return any error at all, but I think libcurl should perhaps
+  return some kind of info since the requested range was out of the size of
+  the document.
+
+- Based on David Hull's fix in bug report #804599, we now check for solaris and
   gcc in configure and set the -mimpure-text link flag for linking the lib
   better.
 

@@ -24,7 +24,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
- o builds better on Solaris 8+
+ o HTTP-resuming an already downloaded file works better
+ o builds better on Solaris 8+ with gcc
  o --disable-eprt works now
  o improved CA cert verification
  o --anyauth could bug when the first response had no body contents
