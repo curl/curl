@@ -7,6 +7,17 @@
                                History of Changes
 
 
+Daniel (31 January 2001)
+- Curl_read() and curl_read() now return a ssize_t for the size, as it had to
+  be able to return -1. The telnet support crashed due to this and there was
+  a possibility to weird behaviour all over.
+
+Daniel (30 January 2001)
+- I finally took a stab at the long-term FIXME item I've had on myself, and
+  now libcurl will properly work when doing a HTTP range-request that follows
+  a Location:. Previously that would make libcurl fail saying that the server
+  doesn't seem to support range requests.
+
 Daniel (29 January 2001)
 - I added a test case for the HTTP PUT resume thing (test case 33).
 

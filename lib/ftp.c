@@ -221,7 +221,7 @@ int Curl_GetFTPResponse(int sockfd, char *buf,
                         int *ftpcode)
 {
   int nread;
-  size_t keepon=TRUE;
+  ssize_t keepon=TRUE;
   char *ptr;
   int timeout = 3600; /* in seconds */
   struct timeval interval;

@@ -833,7 +833,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
 
   bool keepon = TRUE;
   char *buf = data->buffer;
-  size_t nread;
+  ssize_t nread;
 
   init_telnet(data);
    

@@ -554,7 +554,7 @@ CURLcode curl_setopt(CURL *handle, CURLoption option, ...);
 CURLcode curl_close(CURL *curl); /* the opposite of curl_open() */
 
 CURLcode curl_read(CURLconnect *c_conn, char *buf, size_t buffersize,
-                   size_t *n);
+                   ssize_t *n);
 CURLcode curl_write(CURLconnect *c_conn, char *buf, size_t amount,
                     size_t *n);
 

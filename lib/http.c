@@ -214,7 +214,7 @@ CURLcode add_buffer(send_buffer *in, void *inptr, size_t size)
 static
 int GetLine(int sockfd, char *buf, struct connectdata *conn)
 {
-  size_t nread;
+  ssize_t nread;
   int read_rc=1;
   char *ptr;
   struct UrlData *data=conn->data;

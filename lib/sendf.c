@@ -198,10 +198,10 @@ CURLcode Curl_client_write(struct UrlData *data,
  */
 CURLcode Curl_read(struct connectdata *conn, int sockfd,
                    char *buf, size_t buffersize,
-                   size_t *n)
+                   ssize_t *n)
 {
   struct UrlData *data = conn->data;
-  size_t nread;
+  ssize_t nread;
 
 #ifdef USE_SSLEAY
   if (data->ssl.use) {
@@ -234,7 +234,7 @@ CURLcode Curl_read(struct connectdata *conn, int sockfd,
  */
 
 CURLcode curl_read(CURLconnect *c_conn, char *buf, size_t buffersize,
-                   size_t *n)
+                   ssize_t *n)
 {
   struct connectdata *conn = (struct connectdata *)c_conn;
 
