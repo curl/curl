@@ -27,13 +27,13 @@ OBJS=	ares__close_sockets.o ares__get_hostent.o ares__read_line.o \
 	ares_parse_ptr_reply.o ares_process.o ares_query.o ares_search.o \
 	ares_send.o ares_strerror.o ares_timeout.o ares_version.o
 
-all: $(LIB)
-
-demos: adig ahost
-
 $(LIB): ${OBJS}
 	ar cru $@ ${OBJS}
 	${RANLIB} $@
+
+all: $(LIB) demos
+
+demos: adig ahost
 
 tags:
 	etags *.[ch]
