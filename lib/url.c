@@ -1298,6 +1298,13 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     conn->bits.rangestringalloc = FALSE;
   }
 
+  if((conn->ntlm.state != NTLMSTATE_NONE) ||
+     (conn->proxyntlm.state != NTLMSTATE_NONE))
+    /* Authentication data is a mix of connection-related and sessionhandle-
+       related stuff. NTLM is connection-related so when we close the shop
+       we shall forget. */
+    conn->data->state.authstage = 0;
+
   if(-1 != conn->connectindex) {
     /* unlink ourselves! */
     infof(conn->data, "Closing connection #%d\n", conn->connectindex);
