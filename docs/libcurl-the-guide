@@ -413,8 +413,8 @@ HTTP POSTing
  The following example sets two simple text parts with plain textual contents,
  and then a file with binary contents and upload the whole thing.
 
-    struct HttpPost *post=NULL;
-    struct HttpPost *last=NULL;
+    struct curl_httppost *post=NULL;
+    struct curl_httppost *last=NULL;
     curl_formadd(&post, &last,
                  CURLFORM_COPYNAME, "name",
                  CURLFORM_COPYCONTENTS, "daniel", CURLFORM_END);
@@ -871,7 +871,25 @@ Cookies Without Chocolate Chips
 
 Headers Equal Fun
 
- [ use the header callback for HTTP, FTP etc ]
+ Some protocols provide "headers", meta-data separated from the normal
+ data. These headers are by default not included in the normal data stream,
+ but you can make them appear in the data stream by setting CURLOPT_HEADER to
+ TRUE.
+
+ What might be even more useful, is libcurl's ability to separate the headers
+ from the data and thus make the callbacks differ. You can for example set a
+ different pointer to pass to the ordinary write callback by setting
+ CURLOPT_WRITEHEADER.
+
+ Or, you can set an entirely separate function to receive the headers, by
+ using CURLOPT_HEADERFUNCTION.
+
+ The headers are passed to the callback function one by one, and you can
+ depend on that fact. It makes it easier for you to add custom header parsers
+ etc.
+
+ "Headers" for FTP transfers equal all the FTP server responses. They aren't
+ actually true headers, but in this case we pretend they are! ;-)
 
 
 Post Transfer Information
@@ -881,7 +899,61 @@ Post Transfer Information
 
 Security Considerations
 
- [ ps output, netrc plain text, plain text protocols / base64 ]
+ libcurl is in itself not insecure. If used the right way, you can use libcurl
+ to transfer data pretty safely.
+
+ There are of course many things to consider that may loosen up this
+ situation:
+
+  Command Lines
+
+    If you use a command line tool (such as curl) that uses libcurl, and you
+    give option to the tool on the command line those options can very likely
+    get read by other users of your system when they use 'ps' or other tools
+    to list currently running processes.
+
+    To avoid this problem, never feed sensitive things to programs using
+    command line options.
+
+  .netrc
+
+    .netrc is a pretty handy file/feature that allows you to login quickly and
+    automaticly to frequently visited sites. The file contains passwords in
+    clear text and is a real security risk. In some cases, your .netrc is also
+    stored in a home directory that is NFS mounter or used on another network
+    based file system, so the clear text password will fly through your
+    network every time anyone reads that file!
+
+    To avoid this problem, don't use .netrc files and never store passwords as
+    plain text anywhere.
+
+  Clear Text Passwords
+
+    Many of the protocols libcurl supports send name and password unencrypted
+    as clear text (HTTP Basic authentication, FTP, TELNET etc). It is very
+    easy for anyone on your network or a network nearby yours, to just fire up
+    a network analyzer tool and evesdrop on your passwords. Don't let the fact
+    that HTTP uses base64 encoded passwords fool you. They may not look
+    readable at a first glance, but they very easily "deciphered" by anyone
+    within seconds.
+
+    To avoid this problem, use protocols that don't let snoopers see your
+    password: HTTPS, FTPS and FTP-kerberos are a few examples. HTTP Digest
+    authentication allows this too, but isn't supported by libcurl as of this
+    writing.
+
+  Showing What You Do
+
+    On a related issue, be aware that even in situations like when you have
+    problems with libcurl and ask somone for help, everything you reveal in
+    order to get best possible help might also impose certain security related
+    risks. Host names, user names, paths, operating system specifics etc (not
+    to mention passwords of course) may in fact be used by intruders to gain
+    additional information of a potential target.
+
+    To avoid this problem, you must of course use your common sense. Often,
+    you can just edit out the senstive data or just rearch/replace your true
+    information with faked data.
 
 
 SSL, Certificates and Other Tricks
