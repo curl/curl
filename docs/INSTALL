@@ -79,8 +79,18 @@ UNIX
        env CPPFLAGS="-I/path/to/ssl/include" LDFLAGS="-L/path/to/ssl/lib" \
        ./configure
 
-   If your SSL library was compiled with rsaref (usually for use in the United
-   States), you may also need to set:
+   If you have shared SSL libs installed in a directory where your run-time
+   linker doesn't find them (which usually causes configure failures), you can
+   provide the -R option to ld on some operating systems to set a hard-coded
+   path to the run-time linker:
+
+        LDFLAGS=-R/usr/local/ssl/lib ./configure --with-ssl
+
+   Another option to the previous trick, is to set LD_LIBRARY_PATH or edit the
+   /etc/ld.so.conf file.
+
+   If your SSL library was compiled with rsaref (this was common in the past
+   when used in the United States), you may also need to set:
 
      LIBS=-lRSAglue -lrsaref
      (as suggested by Doug Kaufman)
