@@ -39,6 +39,10 @@
 #include <sys/wait.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#ifdef _XOPEN_SOURCE_EXTENDED
+/* This define is "almost" required to build on HPUX 11 */
+#include <arpa/inet.h> 
+#endif
 #include <netdb.h>
 
 #ifndef FALSE
