@@ -8,6 +8,26 @@
 
 ** curl 7.7 DOES NOT currently WORK. **
 
+Daniel (2 March 2001)
+- Now they work intermixed as well. Major coolness!
+
+- More fiddling around, my 'tiny' client I have for testing purposes now has
+  proved to download both FTP and HTTP with persistant connections. They do
+  not work intermixed yet though.
+
+Daniel (1 March 2001)
+- Wilfredo Sanchez pointed out a minor spelling mistake in a man page and that
+  curl_slist_append() should take a const char * as second argument. It does
+  now.
+
+Daniel (22 February 2001)
+- The persistant connections start to look good for HTTP. On a subsequent
+  request, it seems that libcurl now can pick an already existing connection
+  if a suitable one exists, or it opens a new one.
+
+- Douglas R. Horner mailed me corrections to the curl_formparse() man page
+  that I applied.
+
 Daniel (20 February 2001)
 - Added the docs/examples/win32sockets.c file for our windows friends.
 
