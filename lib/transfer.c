@@ -2136,7 +2136,7 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
     if(res == CURLE_OK) {
       if (data->set.source_url) /* 3rd party transfer */
-        res = Curl_pretransfersec(conn);
+        res = Curl_second_connect(conn);
       else
         conn->sec_conn = NULL;
     }
@@ -2250,10 +2250,10 @@ Curl_Transfer(struct connectdata *c_conn, /* connection data */
 }
 
 /*
- * Curl_pretransfersec() prepares the secondary connection (used for 3rd party
+ * Curl_second_connect() makes the secondary connection (used for 3rd party
  * FTP transfers).
  */
-CURLcode Curl_pretransfersec(struct connectdata *conn)
+CURLcode Curl_second_connect(struct connectdata *conn)
 {
   CURLcode status = CURLE_OK;
   struct SessionHandle *data = conn->data;

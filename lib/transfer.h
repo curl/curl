@@ -24,7 +24,7 @@
  ***************************************************************************/
 CURLcode Curl_perform(struct SessionHandle *data);
 CURLcode Curl_pretransfer(struct SessionHandle *data);
-CURLcode Curl_pretransfersec(struct connectdata *conn);
+CURLcode Curl_second_connect(struct connectdata *conn);
 CURLcode Curl_posttransfer(struct SessionHandle *data);
 CURLcode Curl_follow(struct SessionHandle *data, char *newurl, bool retry);
 CURLcode Curl_readwrite(struct connectdata *conn, bool *done);
