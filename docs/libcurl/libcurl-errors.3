@@ -12,7 +12,12 @@ Why they occur and possibly what you can do to fix the problem.
 Almost all "easy" interface functions return a CURLcode error code. No matter
 what, using \fICURLOPT_ERRORBUFFER\fP is a good idea as it will give you a
 human readable error string that may offer more details about the error cause
-than just the error code does. CURLcode is one of the following:
+than just the error code does.
+
+This man page is meant to describe libcurl 7.9.6 and later. Earlier versions
+might have had quirks not mentioned here.
+
+CURLcode is one of the following:
 .RS 1
 .TP 5
 .B CURLE_OK (0)
@@ -104,11 +109,8 @@ This is returned if CURLOPT_FAILONERROR is set TRUE and the HTTP server
 returns an error code that is >= 400.
 .TP
 .B CURLE_WRITE_ERROR (23)
-This error message is in fact used for two different kinds of write
-errors. (This fact should be corrected in future versions of libcurl.) The
-first kind of write this error code might refer to, is for errors that occurs
-when writing received data to a local file, the other kind is when we get
-problems writing data to a remote server.
+An error occurred when writing received data to a local file, or an error was
+returned to libcurl from a write callback.
 .TP
 .B CURLE_MALFORMAT_USER (24)
 Malformat user. User name badly specified. *Not currently used*
@@ -118,8 +120,8 @@ FTP couldn't STOR file. The server denied the STOR operation. The error buffer
 usually contains the server's explanation to this.
 .TP
 .B CURLE_READ_ERROR (26)
-This error is returned both for errors when reading a local file, as well as
-when getting problems when reading network data.
+There was a problem reading a local file or an error returned by the read
+callback.
 .TP
 .B CURLE_OUT_OF_MEMORY (27)
 Out of memory. A memory allocation request failed. This is serious badness and
@@ -221,7 +223,12 @@ The specified crypto engine wasn't found.
 .TP
 .B CURLE_SSL_ENGINE_SETFAILED (54)
 Failed setting the selected SSL crypto engine as default!
-
+.TP
+.B CURLE_SEND_ERROR (55)
+Failed sending network data.
+.TP
+.B CURLE_RECV_ERROR (56)
+Failure with receiving network data.
 .TP
 .B CURL_LAST
 This is not an error, but in the curl/curl.h file this can be used to know how
