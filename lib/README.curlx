@@ -13,9 +13,8 @@ part of the official libcurl API, but the source files might be useful for
 others so apps can optionally compile/build with these sources to gain
 additional functions.
 
-
-strtoofft.[ch]
-==============
+We provide them through a single header file for easy access for apps:
+"curlx.h"
 
  curlx_strtoofft()
 
@@ -25,14 +24,6 @@ strtoofft.[ch]
    strtoll() (or equivalent) function exist on your platform. If curl_off_t
    is only a 32 bit number on your platform, this macro uses strtol().
 
-timeval.[ch]
-============
-
- Provides a 'struct timeval' for platforms that don't have one already, and
- includes the proper include files for those that have one. Using this will
- make the output require the 'winmm' lib on Windows (unless WITHOUT_MM_LIB
- is defined at compile-time).
-
  curlx_tvnow()
 
    returns a struct timeval for the current time.
@@ -41,3 +32,31 @@ timeval.[ch]
 
    returns the difference between two timeval structs, in number of
    milliseconds.
+
+ curlx_tvdiff_secs()
+
+   returns the same as curlx_tvdiff but with full usec resolution (as a
+   double)
+
+FUTURE
+======
+
+ Several functions will be removed from the public curl_ name space in a
+ future libcurl release. They will then only become available as curlx_
+ functions instead. To make the transition easier, we already today provide
+ these functions with the curlx_ prefix to allow sources to get built properly
+ with the new function names. The functions this concerns are:
+
+      curlx_getenv
+      curlx_strequal
+      curlx_strnequal
+      curlx_mvsnprintf
+      curlx_msnprintf
+      curlx_maprintf
+      curlx_mvaprintf
+      curlx_msprintf
+      curlx_mprintf
+      curlx_mfprintf
+      curlx_mvsprintf
+      curlx_mvprintf
+      curlx_mvfprintf
