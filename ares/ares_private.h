@@ -57,7 +57,7 @@
 struct send_request {
   /* Remaining data to send */
   const unsigned char *data;
-  int len;
+  size_t len;
 
   /* Next request in queue */
   struct send_request *next;

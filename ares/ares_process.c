@@ -119,7 +119,7 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
 	  while (count)
 	    {
 	      sendreq = server->qhead;
-	      if (count >= sendreq->len)
+	      if ((size_t)count >= sendreq->len)
 		{
 		  count -= sendreq->len;
 		  server->qhead = sendreq->next;
@@ -150,7 +150,7 @@ static void write_tcp_data(ares_channel channel, fd_set *write_fds, time_t now)
 	    }
 
 	  /* Advance the send queue by as many bytes as we sent. */
-	  if (count == sendreq->len)
+	  if ((size_t)count == sendreq->len)
 	    {
 	      server->qhead = sendreq->next;
 	      if (server->qhead == NULL)
