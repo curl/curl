@@ -866,7 +866,14 @@ CURLcode Curl_perform(CURL *curl)
     if(res == CURLE_OK) {
       res = Curl_do(conn);
       if(res == CURLE_OK) {
+        if(conn->protocol&PROT_FTPS)
+          /* FTPS, disable ssl while transfering data */
+          conn->ssl.use = FALSE;
         res = Transfer(conn); /* now fetch that URL please */
+        if(conn->protocol&PROT_FTPS)
+          /* FTPS, enable ssl again after havving transferred data */
+          conn->ssl.use = TRUE;
+
         if(res == CURLE_OK) {
           /*
            * We must duplicate the new URL here as the connection data
