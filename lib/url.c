@@ -559,8 +559,11 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Set a custom string to use as request
      */
     data->set.customrequest = va_arg(param, char *);
-    if(data->set.customrequest)
-      data->set.httpreq = HTTPREQ_CUSTOM;
+
+    /* we don't set
+       data->set.httpreq = HTTPREQ_CUSTOM;
+       here, we continue as if we were using the already set type
+       and this just changes the actual request keyword */
     break;
   case CURLOPT_HTTPPOST:
     /*
