@@ -8,9 +8,6 @@
  * $Id$
  */
 
-/* to make this work under windows, use the win32-functions from the
-   win32socket.c file as well */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -32,6 +29,8 @@ int main(int argc, char **argv)
   FILE *headerfile;
   char *bodyfilename = "body.out";
   FILE *bodyfile;
+
+  curl_global_init(CURL_GLOBAL_ALL);
 
   /* init the curl session */
   curl_handle = curl_easy_init();
