@@ -1,3 +1,7 @@
+* February 22, 2004
+- Dominick Meglio made ares init support multiple name servers in the
+  NameServer key on Windows.
+
 * February 16, 2004
 - Modified ares_private.h to include libcurl's memory debug header if
   CURLDEBUG is set. This makes all the ares-functions supervised properly by
