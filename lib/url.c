@@ -432,10 +432,10 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
     break;
   case CURLOPT_PUT:
     /*
-     * Use the HTTP PUT request to transfer data.
+     * Use the HTTP PUT request to transfer data if this is TRUE.  If this is
+     * FALSE, don't set the httpreq. We can't know what to revert it to!
      */
-    data->bits.http_put = va_arg(param, long)?TRUE:FALSE;
-    if(data->bits.http_put)
+    if(va_arg(param, long))
       data->httpreq = HTTPREQ_PUT;
     break;
 #if 0
@@ -529,10 +529,18 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
      * Set to make us do HTTP POST
      */
     data->httppost = va_arg(param, struct HttpPost *);
-    data->bits.http_formpost = data->httppost?1:0;
-    if(data->bits.http_formpost)
+    if(data->httppost)
       data->httpreq = HTTPREQ_POST_FORM;
     break;
+
+  case CURLOPT_HTTPGET:
+    /*
+     * Set to force us do HTTP GET
+     */
+    if(va_arg(param, long))
+      data->httpreq = HTTPREQ_GET;
+    break;
+
   case CURLOPT_INFILE:
     /*
      * FILE pointer to read the file to be uploaded from. Or possibly
@@ -575,8 +583,8 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
     break;
   case CURLOPT_POST:
     /* Does this option serve a purpose anymore? */
-    data->bits.http_post = va_arg(param, long)?TRUE:FALSE;
-    if(data->bits.http_post)
+
+    if(va_arg(param, long))
       data->httpreq = HTTPREQ_POST;
     break;
   case CURLOPT_POSTFIELDS:
@@ -584,8 +592,7 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
      * A string with POST data. Makes curl HTTP POST.
      */
     data->postfields = va_arg(param, char *);
-    data->bits.http_post = data->postfields?TRUE:FALSE;
-    if(data->bits.http_post)
+    if(data->postfields)
       data->httpreq = HTTPREQ_POST;
     break;
   case CURLOPT_POSTFIELDSIZE:

@@ -1046,10 +1046,8 @@ CURLcode Curl_perform(CURL *curl)
         case 303: /* See Other */
           /* Disable both types of POSTs, since doing a second POST when
            * following isn't what anyone would want! */
-          data->bits.http_post = FALSE;
-          data->bits.http_formpost = FALSE;
-          data->httpreq = HTTPREQ_GET; /* enfore GET request */
-          infof(data, "Disables POST\n");
+          data->httpreq = HTTPREQ_GET; /* enforce GET request */
+          infof(data, "Disables POST, goes with GET\n");
           break;
         case 304: /* Not Modified */
           /* 304 means we did a conditional request and it was "Not modified".

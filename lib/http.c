@@ -361,7 +361,7 @@ CURLcode Curl_http_done(struct connectdata *conn)
   data=conn->data;
   http=conn->proto.http;
 
-  if(data->bits.http_formpost) {
+  if(HTTPREQ_POST_FORM == data->httpreq) {
     *bytecount = http->readbytecount + http->writebytecount;
       
     Curl_FormFree(http->sendit); /* Now free that whole lot */
@@ -369,7 +369,7 @@ CURLcode Curl_http_done(struct connectdata *conn)
     data->fread = http->storefread; /* restore */
     data->in = http->in; /* restore */
   }
-  else if(data->bits.http_put) {
+  else if(HTTPREQ_PUT == data->httpreq) {
     *bytecount = http->readbytecount + http->writebytecount;
   }
 
@@ -405,7 +405,7 @@ CURLcode Curl_http(struct connectdata *conn)
 
   if ( (conn->protocol&(PROT_HTTP|PROT_FTP)) &&
        data->bits.upload) {
-    data->bits.http_put=1;
+    data->httpreq = HTTPREQ_PUT;
   }
   
   /* The User-Agent string has been built in url.c already, because it might
@@ -457,7 +457,7 @@ CURLcode Curl_http(struct connectdata *conn)
     /* The path sent to the proxy is in fact the entire URL */
     ppath = data->url;
   }
-  if(data->bits.http_formpost) {
+  if(HTTPREQ_POST_FORM == data->httpreq) {
     /* we must build the whole darned post sequence first, so that we have
        a size of the whole shebang before we start to send it */
     http->sendit = Curl_getFormData(data->httppost, &http->postsize);
@@ -488,9 +488,9 @@ CURLcode Curl_http(struct connectdata *conn)
   if(!checkheaders(data, "Accept:"))
     http->p_accept = "Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*\r\n";
 
-  if((data->bits.http_post ||
-      data->bits.http_formpost ||
-      data->bits.http_put) &&
+  if(( (HTTPREQ_POST == data->httpreq) ||
+       (HTTPREQ_POST_FORM == data->httpreq) ||
+       (HTTPREQ_PUT == data->httpreq) ) &&
      conn->resume_from) {
     /**********************************************************************
      * Resuming upload in HTTP means that we PUT or POST and that we have
@@ -597,8 +597,9 @@ CURLcode Curl_http(struct connectdata *conn)
 
                 data->customrequest?data->customrequest:
                 (data->bits.no_body?"HEAD":
-                 (data->bits.http_post || data->bits.http_formpost)?"POST":
-                 (data->bits.http_put)?"PUT":"GET"),
+                 ((HTTPREQ_POST == data->httpreq) ||
+                  (HTTPREQ_POST_FORM == data->httpreq))?"POST":
+                 (HTTPREQ_PUT == data->httpreq)?"PUT":"GET"),
                 ppath,
                 (conn->bits.proxy_user_passwd &&
                  conn->allocptr.proxyuserpwd)?conn->allocptr.proxyuserpwd:"",
@@ -703,7 +704,7 @@ CURLcode Curl_http(struct connectdata *conn)
       headers = headers->next;
     }
 
-    if(data->bits.http_formpost) {
+    if(HTTPREQ_POST_FORM == data->httpreq) {
       if(Curl_FormInit(&http->form, http->sendit)) {
         failf(data, "Internal HTTP POST error!\n");
         return CURLE_HTTP_POST_ERROR;
@@ -734,7 +735,7 @@ CURLcode Curl_http(struct connectdata *conn)
         return result;
       }
     }
-    else if(data->bits.http_put) {
+    else if(HTTPREQ_PUT == data->httpreq) {
       /* Let's PUT the data to the server! */
 
       if(data->infilesize>0) {
@@ -762,7 +763,7 @@ CURLcode Curl_http(struct connectdata *conn)
       
     }
     else {
-      if(data->bits.http_post) {
+      if(HTTPREQ_POST == data->httpreq) {
         /* this is the simple POST, using x-www-form-urlencoded style */
 
         if(!checkheaders(data, "Content-Length:"))

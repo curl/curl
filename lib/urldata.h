@@ -382,12 +382,6 @@ typedef enum {
 /* This struct is for boolean settings that define how to behave during
    this session. */
 struct Configbits {
-  /* these four request types mirror the httpreq field */
-  bool http_formpost;
-  bool http_post;
-  bool http_put;
-  bool http_get;
-
   bool get_filetime;
   bool tunnel_thru_httpproxy;
   bool ftp_append;
