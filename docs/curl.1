@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "4 January 2001" "Curl 7.5.2" "Curl Manual"
+.TH curl 1 "5 January 2001" "Curl 7.5.2" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -120,11 +120,13 @@ To post data purely binary, you should instead use the --data-binary option.
 
 -d/--data is the same as --data-ascii.
 
-If this option is used serveral times, the last one will be used.
+If this option is used serveral times, the ones following the first will
+append data.
 .IP "--data-ascii <data>"
 (HTTP) This is an alias for the -d/--data option.
 
-If this option is used serveral times, the last one will be used.
+If this option is used serveral times, the ones following the first will
+append data.
 .IP "--data-binary <data>"
 (HTTP) This posts data in a similar manner as --data-ascii does, although when
 using this option the entire context of the posted data is kept as-is. If you
@@ -132,6 +134,9 @@ want to post a binary file without the strip-newlines feature of the
 --data-ascii option, this is for you.
 
 If this option is used serveral times, the last one will be used.
+
+If this option is used serveral times, the ones following the first will
+append data.
 .IP "-D/--dump-header <file>"
 (HTTP/FTP)
 Write the HTTP headers to this file. Write the FTP file info to this
