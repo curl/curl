@@ -39,6 +39,8 @@ open(PID, ">.http.pid");
 print PID $$;
 close(PID);
 
+my $PID=$$;
+
 my $waitedpid = 0;
 my $paddr;
 
@@ -119,7 +121,7 @@ for ( $waitedpid = 0;
         elsif($path =~ /verifiedserver/) {
             # this is a hard-coded query-string for the test script
             # to verify that this is the server actually running!
-            print "HTTP/1.1 999 WE ROOLZ: $$\r\n";
+            print "HTTP/1.1 999 WE ROOLZ: $PID\r\n";
             exit;
         }
         else {
