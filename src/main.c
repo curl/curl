@@ -295,7 +295,9 @@ static void help(void)
        " -3/--sslv3         Force usage of SSLv3 (H)");
   puts(" -#/--progress-bar  Display transfer progress as a progress bar\n"
        "    --crlf          Convert LF to CRLF in upload. Useful for MVS (OS/390)\n"
-       "    --stderr <file> Where to redirect stderr. - means stdout.");
+       "    --stderr <file> Where to redirect stderr. - means stdout.\n"
+       "    --random-file <file> File to use for reading random data from (SSL)\n"
+       "    --egd-file <file> EGD socket path for random data (SSL)");
 }
 
 struct LongShort {
@@ -305,6 +307,8 @@ struct LongShort {
 };
 
 struct Configurable {
+  char *random_file;
+  char *egd_file;
   char *useragent;
   char *cookie;
   bool use_resume;
@@ -524,6 +528,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"7", "interface",   TRUE},
     {"6", "krb4",        TRUE},
     {"5", "url",         TRUE},
+    {"5a", "random-file", TRUE},
+    {"5b", "egd-file",   TRUE},
 
     {"2", "sslv2",       FALSE},
     {"3", "sslv3",       FALSE},
@@ -673,29 +679,37 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       GetStr(&config->krb4level, nextarg);
       break;
     case '5':
-      /* the URL! */
-      {
-        struct getout *url;
-        if(config->url_get || (config->url_get=config->url_list)) {
-          /* there's a node here, if it already is filled-in continue to find
-             an "empty" node */
-          while(config->url_get && (config->url_get->flags&GETOUT_URL))
-            config->url_get = config->url_get->next;
-        }
+      switch(subletter) {
+      case 'a': /* random-file */
+        GetStr(&config->random_file, nextarg);
+        break;
+      case 'b': /* egd-file */
+        GetStr(&config->egd_file, nextarg);
+        break;
+      default: /* the URL! */
+        {
+          struct getout *url;
+          if(config->url_get || (config->url_get=config->url_list)) {
+            /* there's a node here, if it already is filled-in continue to find
+               an "empty" node */
+            while(config->url_get && (config->url_get->flags&GETOUT_URL))
+              config->url_get = config->url_get->next;
+          }
 
-        /* now there might or might not be an available node to fill in! */
+          /* now there might or might not be an available node to fill in! */
 
-        if(config->url_get)
-          /* existing node */
-          url = config->url_get;
-        else
-          /* there was no free node, create one! */
-          url=new_getout(config);
-
-        if(url) {
-          /* fill in the URL */
-          GetStr(&url->url, nextarg);
-          url->flags |= GETOUT_URL;
+          if(config->url_get)
+            /* existing node */
+            url = config->url_get;
+          else
+            /* there was no free node, create one! */
+            url=new_getout(config);
+          
+          if(url) {
+            /* fill in the URL */
+            GetStr(&url->url, nextarg);
+            url->flags |= GETOUT_URL;
+          }
         }
       }
       break;
@@ -1367,6 +1381,10 @@ void progressbarinit(struct ProgressData *bar)
 
 void free_config_fields(struct Configurable *config)
 {
+  if(config->random_file)
+    free(config->random_file);
+  if(config->egd_file)
+    free(config->egd_file);
   if(config->userpwd)
     free(config->userpwd);
   if(config->postfields)
@@ -1819,6 +1837,10 @@ operate(struct Configurable *config, int argc, char *argv[])
         
       /* new in libcurl 7.6.2: */
       curl_easy_setopt(curl, CURLOPT_TELNETOPTIONS, config->telnet_options);
+
+      /* new in libcurl 7.7: */
+      curl_easy_setopt(curl, CURLOPT_RANDOM_FILE, config->random_file);
+      curl_easy_setopt(curl, CURLOPT_EGDSOCKET, config->egd_file);
       
       res = curl_easy_perform(curl);
         

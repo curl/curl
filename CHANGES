@@ -8,6 +8,13 @@
 
 
 Daniel (12 March 2001)
+- Added CURLOPT_RANDOM_FILE and CURLOPT_EGDSOCKET to libcurl for seeding the
+  SSL random engine. The random seeding support was also brought to the curl
+  client with the new options --random-file <file> and --egd-file <file>. I
+  need some people to really test this to know they work as supposed. Remember
+  that libcurl now informs (if verbose is on) if the random seed is considered
+  weak (HTTPS connections).
+
 - Made the chunked transfer-encoding engine detected bad formatted data length
   and return error if so (we can't possibly extract sensible data if this is
   the case). Added a test case that detects this. Number 36. Now there are 60
