@@ -228,24 +228,10 @@ static int _num_chars(int i)
  * the DNS caching.
  */
 static char *
-create_hostcache_id(char *server, int port, size_t *entry_len)
+create_hostcache_id(char *server, int port)
 {
-  char *id = NULL;
-
-  /* Get the length of the new entry id */
-  *entry_len = strlen(server) + /* Hostname length */
-    1 +                         /* ':' seperator */
-    _num_chars(port);     /* number of characters the port will take up */
-
-  /* Allocate the new entry id */
-  id = malloc(*entry_len + 1); /* 1 extra for the zero terminator */
-  if (!id)
-    return NULL;
-
-  /* Create the new entry */
-  sprintf(id, "%s:%d", server, port);
-
-  return id; /* return pointer to the string */
+  /* create and return the new allocated entry */
+  return aprintf("%s:%d", server, port);
 }
 
 struct hostcache_prune_data {
@@ -349,10 +335,11 @@ Curl_cache_addr(struct SessionHandle *data,
   time_t now;
 
   /* Create an entry id, based upon the hostname and port */
-  entry_id = create_hostcache_id(hostname, port, &entry_len);
+  entry_id = create_hostcache_id(hostname, port);
   /* If we can't create the entry id, fail */
   if (!entry_id)
     return NULL;
+  entry_len = strlen(entry_id);
 
   /* Create a new cache entry */
   dns = (struct Curl_dns_entry *) malloc(sizeof(struct Curl_dns_entry));
@@ -430,10 +417,12 @@ int Curl_resolv(struct connectdata *conn,
 #endif
 
   /* Create an entry id, based upon the hostname and port */
-  entry_id = create_hostcache_id(hostname, port, &entry_len);
+  entry_id = create_hostcache_id(hostname, port);
   /* If we can't create the entry id, fail */
   if (!entry_id)
     return CURLRESOLV_ERROR;
+
+  entry_len = strlen(entry_id);
 
   if(data->share)
     Curl_share_lock(data, CURL_LOCK_DATA_DNS, CURL_LOCK_ACCESS_SINGLE);

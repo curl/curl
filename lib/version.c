@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -29,6 +29,9 @@
 #include <curl/curl.h>
 #include "urldata.h"
 
+#define _MPRINTF_REPLACE /* use the internal *printf() functions */
+#include <curl/mprintf.h>
+
 #ifdef USE_ARES
 #include <ares_version.h>
 #endif
@@ -38,7 +41,7 @@
 #endif
 
 #ifdef USE_SSLEAY
-static void getssl_version(char *ptr, long *num)
+static int getssl_version(char *ptr, size_t left, long *num)
 {
 
 #if (SSLEAY_VERSION_NUMBER >= 0x905000)
@@ -60,20 +63,20 @@ static void getssl_version(char *ptr, long *num)
         sub[0]='\0';
     }
 
-    sprintf(ptr, " OpenSSL/%lx.%lx.%lx%s",
-            (ssleay_value>>28)&0xf,
-            (ssleay_value>>20)&0xff,
-            (ssleay_value>>12)&0xff,
-            sub);
+    return snprintf(ptr, left, " OpenSSL/%lx.%lx.%lx%s",
+                    (ssleay_value>>28)&0xf,
+                    (ssleay_value>>20)&0xff,
+                    (ssleay_value>>12)&0xff,
+                    sub);
   }
 
 #else
   *num = SSLEAY_VERSION_NUMBER;
 #if (SSLEAY_VERSION_NUMBER >= 0x900000)
-  sprintf(ptr, " OpenSSL/%lx.%lx.%lx",
-          (SSLEAY_VERSION_NUMBER>>28)&0xff,
-          (SSLEAY_VERSION_NUMBER>>20)&0xff,
-          (SSLEAY_VERSION_NUMBER>>12)&0xf);
+  return snprintf(ptr, left, " OpenSSL/%lx.%lx.%lx",
+                  (SSLEAY_VERSION_NUMBER>>28)&0xff,
+                  (SSLEAY_VERSION_NUMBER>>20)&0xff,
+                  (SSLEAY_VERSION_NUMBER>>12)&0xf);
 #else
   {
     char sub[2];
@@ -84,10 +87,10 @@ static void getssl_version(char *ptr, long *num)
     else
       sub[0]='\0';
 
-    sprintf(ptr, " SSL/%x.%x.%x%s",
-            (SSLEAY_VERSION_NUMBER>>12)&0xff,
-            (SSLEAY_VERSION_NUMBER>>8)&0xf,
-            (SSLEAY_VERSION_NUMBER>>4)&0xf, sub);
+    return snprintf(ptr, left, " SSL/%x.%x.%x%s",
+                    (SSLEAY_VERSION_NUMBER>>12)&0xff,
+                    (SSLEAY_VERSION_NUMBER>>8)&0xf,
+                    (SSLEAY_VERSION_NUMBER>>4)&0xf, sub);
   }
 #endif
 #endif
@@ -99,42 +102,37 @@ char *curl_version(void)
 {
   static char version[200];
   char *ptr=version;
+  int len;
+  size_t left = sizeof(version);
   strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION );
   ptr=strchr(ptr, '\0');
+  left -= strlen(ptr);
 
 #ifdef USE_SSLEAY
   {
     long num;
-    getssl_version(ptr, &num);
-    ptr=strchr(version, '\0');
+    len = getssl_version(ptr, left, &num);
+    left -= len;
+    ptr += len;
   }
 #endif
 
-#ifdef HAVE_KRB4
-  sprintf(ptr, " krb4");
-  ptr += strlen(ptr);
-#endif
-#ifdef ENABLE_IPV6
-  sprintf(ptr, " ipv6");
-  ptr += strlen(ptr);
-#endif
 #ifdef HAVE_LIBZ
-  sprintf(ptr, " zlib/%s", zlibVersion());
-  ptr += strlen(ptr);
-#endif
-#ifdef HAVE_GSSAPI
-  sprintf(ptr, " GSS");
-  ptr += strlen(ptr);
+  len = snprintf(ptr, left, " zlib/%s", zlibVersion());
+  left -= len;
+  ptr += len;
 #endif
 #ifdef USE_ARES
   /* this function is only present in c-ares, not in the original ares */
-  sprintf(ptr, " c-ares/%s", ares_version(NULL));
-  ptr += strlen(ptr);
+  len = snprintf(ptr, left, " c-ares/%s", ares_version(NULL));
+  left -= len;
+  ptr += len;
 #endif
 #ifdef USE_LIBIDN
   if(stringprep_check_version(LIBIDN_REQUIRED_VERSION)) {
-    sprintf(ptr, " libidn/%s", stringprep_check_version(NULL));
-    ptr += strlen(ptr);
+    len = snprintf(ptr, left, " libidn/%s", stringprep_check_version(NULL));
+    left -= len;
+    ptr += len;
   }
 #endif
 
@@ -226,7 +224,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #ifdef USE_SSLEAY
   static char ssl_buffer[80];
   long num;
-  getssl_version(ssl_buffer, &num);
+  getssl_version(ssl_buffer, sizeof(ssl_buffer), &num);
 
   version_info.ssl_version = ssl_buffer;
   version_info.ssl_version_num = num;

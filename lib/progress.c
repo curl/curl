@@ -51,20 +51,21 @@ static void time2str(char *r, long t)
   if(h <= 99) {
     long m = (t-(h*3600))/60;
     long s = (t-(h*3600)-(m*60));
-    sprintf(r, "%2ld:%02ld:%02ld",h,m,s);
+    snprintf(r, 9, "%2ld:%02ld:%02ld",h,m,s);
   }
   else {
     /* this equals to more than 99 hours, switch to a more suitable output
        format to fit within the limits. */
     if(h/24 <= 999)
-      sprintf(r, "%3ldd %02ldh", h/24, h-(h/24)*24);
+      snprintf(r, 9, "%3ldd %02ldh", h/24, h-(h/24)*24);
     else
-      sprintf(r, "%7ldd", h/24);
+      snprintf(r, 9, "%7ldd", h/24);
   }
 }
 
 /* The point of this function would be to return a string of the input data,
-   but never longer than 5 columns. Add suffix k, M, G when suitable... */
+   but never longer than 5 columns (+ one zero byte).
+   Add suffix k, M, G when suitable... */
 static char *max5data(curl_off_t bytes, char *max5)
 {
 #define ONE_KILOBYTE 1024
@@ -74,38 +75,38 @@ static char *max5data(curl_off_t bytes, char *max5)
 #define ONE_PETABYTE ((curl_off_t)1024* ONE_TERRABYTE)
 
   if(bytes < 100000) {
-    sprintf(max5, "%5" FORMAT_OFF_T, bytes);
+    snprintf(max5, 6, "%5" FORMAT_OFF_T, bytes);
   }
   else if(bytes < (10000*ONE_KILOBYTE)) {
-    sprintf(max5, "%4" FORMAT_OFF_T "k", (curl_off_t)(bytes/ONE_KILOBYTE));
+    snprintf(max5, 6, "%4" FORMAT_OFF_T "k", (curl_off_t)(bytes/ONE_KILOBYTE));
   }
   else if(bytes < (100*ONE_MEGABYTE)) {
     /* 'XX.XM' is good as long as we're less than 100 megs */
-    sprintf(max5, "%2d.%0dM",
-            (int)(bytes/ONE_MEGABYTE),
-            (int)(bytes%ONE_MEGABYTE)/(ONE_MEGABYTE/10) );
+    snprintf(max5, 6, "%2d.%0dM",
+             (int)(bytes/ONE_MEGABYTE),
+             (int)(bytes%ONE_MEGABYTE)/(ONE_MEGABYTE/10) );
   }
 #if SIZEOF_CURL_OFF_T > 4
   else if(bytes < ( (curl_off_t)10000*ONE_MEGABYTE))
     /* 'XXXXM' is good until we're at 10000MB or above */
-    sprintf(max5, "%4" FORMAT_OFF_T "M", (curl_off_t)(bytes/ONE_MEGABYTE));
+    snprintf(max5, 6, "%4" FORMAT_OFF_T "M", (curl_off_t)(bytes/ONE_MEGABYTE));
 
   else if(bytes < (curl_off_t)100*ONE_GIGABYTE)
     /* 10000 MB - 100 GB, we show it as XX.XG */
-    sprintf(max5, "%2d.%0dG",
-            (int)(bytes/ONE_GIGABYTE),
-            (int)(bytes%ONE_GIGABYTE)/(ONE_GIGABYTE/10) );
+    snprintf(max5, 6, "%2d.%0dG",
+             (int)(bytes/ONE_GIGABYTE),
+             (int)(bytes%ONE_GIGABYTE)/(ONE_GIGABYTE/10) );
 
   else if(bytes < (curl_off_t)10000 * ONE_GIGABYTE)
     /* up to 10000GB, display without decimal: XXXXG */
-    sprintf(max5, "%4dG", (int)(bytes/ONE_GIGABYTE));
+    snprintf(max5, 6, "%4dG", (int)(bytes/ONE_GIGABYTE));
 
   else if(bytes < (curl_off_t)10000 * ONE_TERRABYTE)
     /* up to 10000TB, display without decimal: XXXXT */
-    sprintf(max5, "%4dT", (int)(bytes/ONE_TERRABYTE));
+    snprintf(max5, 6, "%4dT", (int)(bytes/ONE_TERRABYTE));
   else {
     /* up to 10000PB, display without decimal: XXXXP */
-    sprintf(max5, "%4dP", (int)(bytes/ONE_PETABYTE));
+    snprintf(max5, 6, "%4dP", (int)(bytes/ONE_PETABYTE));
 
     /* 16384 petabytes (16 exabytes) is maximum a 64 bit number can hold,
        but this type is signed so 8192PB will be max.*/
@@ -113,7 +114,7 @@ static char *max5data(curl_off_t bytes, char *max5)
 
 #else
   else
-    sprintf(max5, "%4" FORMAT_OFF_T "M", (curl_off_t)(bytes/ONE_MEGABYTE));
+    snprintf(max5, 6, "%4" FORMAT_OFF_T "M", (curl_off_t)(bytes/ONE_MEGABYTE));
 #endif
 
   return max5;

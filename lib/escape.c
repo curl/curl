@@ -68,7 +68,7 @@ char *curl_escape(const char *string, int length)
           ns = testing_ptr;
         }
       }
-      sprintf(&ns[strindex], "%%%02X", in);
+      snprintf(&ns[strindex], 4, "%%%02X", in);
 
       strindex+=3;
     }

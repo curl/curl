@@ -932,8 +932,9 @@ CURLcode ftp_getfiletime(struct connectdata *conn, char *file)
                      &year, &month, &day, &hour, &minute, &second)) {
         /* we have a time, reformat it */
         time_t secs=time(NULL);
-        sprintf(buf, "%04d%02d%02d %02d:%02d:%02d GMT",
-                year, month, day, hour, minute, second);
+        snprintf(buf, sizeof(conn->data->state.buffer),
+                 "%04d%02d%02d %02d:%02d:%02d GMT",
+                 year, month, day, hour, minute, second);
         /* now, convert this into a time() value: */
         conn->data->info.filetime = curl_getdate(buf, &secs);
       }
@@ -1506,7 +1507,8 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
       return CURLE_FTP_WEIRD_227_FORMAT;
     }
 
-    sprintf(newhost, "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
+    snprintf(newhost, sizeof(newhost),
+             "%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3]);
     newhostp = newhost;
     newport = (port[0]<<8) + port[1];
   }
@@ -2161,7 +2163,8 @@ CURLcode ftp_perform(struct connectdata *conn,
     result = ftp_getsize(conn, ftp->file, &filesize);
 
     if(CURLE_OK == result) {
-      sprintf(buf, "Content-Length: %" FORMAT_OFF_T "\r\n", filesize);
+      snprintf(buf, sizeof(data->state.buffer),
+               "Content-Length: %" FORMAT_OFF_T "\r\n", filesize);
       result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
       if(result)
         return result;

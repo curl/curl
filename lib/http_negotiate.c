@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -28,7 +28,7 @@
 #endif
 
 #ifndef CURL_DISABLE_HTTP
-/* -- WIN32 approved -- */
+ /* -- WIN32 approved -- */
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
@@ -64,8 +64,8 @@ get_gss_name(struct connectdata *conn, gss_name_t *server)
      Change following lines if you want to use GSI */
 
   /* IIS uses the <service>@<fqdn> form but uses 'http' as the service name */
-  
-  if (neg_ctx->gss) 
+
+  if (neg_ctx->gss)
     service = "khttp";
   else
     service = "http";
@@ -73,7 +73,8 @@ get_gss_name(struct connectdata *conn, gss_name_t *server)
   token.length = strlen(service) + 1 + strlen(conn->host.name) + 1;
   if (token.length + 1 > sizeof(name))
     return EMSGSIZE;
-  sprintf(name, "%s@%s", service, conn->host.name);
+
+  snprintf(name, sizeof(name), "%s@%s", service, conn->host.name);
 
   token.value = (void *) name;
   major_status = gss_import_name(&minor_status,
@@ -102,8 +103,9 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
                                    GSS_C_NO_OID,
                                    &msg_ctx,
                                    &status_string);
-    if (sizeof(buf) > len + status_string.length + 1) {
-      sprintf(buf + len, ": %s", (char*) status_string.value);
+      if (sizeof(buf) > len + status_string.length + 1) {
+        snprintf(buf + len, sizeof(buf) - len,
+                 ": %s", (char*) status_string.value);
       len += status_string.length;
     }
     gss_release_buffer(&min_stat, &status_string);
@@ -113,7 +115,7 @@ log_gss_error(struct connectdata *conn, OM_uint32 error_status, char *prefix)
 }
 
 int Curl_input_negotiate(struct connectdata *conn, char *header)
-{ 
+{
   struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
   OM_uint32 major_status, minor_status, minor_status2;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
@@ -145,7 +147,7 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
     neg_ctx->protocol = protocol;
     neg_ctx->gss = gss;
   }
-    
+
   if (neg_ctx->context && neg_ctx->status == GSS_S_COMPLETE) {
     /* We finished succesfully our part of authentication, but server
      * rejected it (since we're again here). Exit with an error since we
@@ -247,10 +249,10 @@ int Curl_input_negotiate(struct connectdata *conn, char *header)
 
   return 0;
 }
-   
+
 
 CURLcode Curl_output_negotiate(struct connectdata *conn)
-{ 
+{
   struct negotiatedata *neg_ctx = &conn->data->state.negotiate;
   OM_uint32 minor_status;
   char *encoded = NULL;
@@ -264,7 +266,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn)
     size_t          spnegoTokenLength = 0;
     unsigned char * responseToken       = NULL;
     size_t          responseTokenLength = 0;
-    
+
     responseToken = malloc(neg_ctx->output_token.length);
     if ( responseToken == NULL)
       return CURLE_OUT_OF_MEMORY;
@@ -309,7 +311,7 @@ CURLcode Curl_output_negotiate(struct connectdata *conn)
 }
 
 void Curl_cleanup_negotiate(struct SessionHandle *data)
-{ 
+{
   OM_uint32 minor_status;
   struct negotiatedata *neg_ctx = &data->state.negotiate;
 
@@ -321,7 +323,7 @@ void Curl_cleanup_negotiate(struct SessionHandle *data)
 
   if (neg_ctx->server_name != GSS_C_NO_NAME)
     gss_release_name(&minor_status, &neg_ctx->server_name);
-  
+
   memset(neg_ctx, 0, sizeof(*neg_ctx));
 }
 

@@ -201,7 +201,7 @@ static void md5_to_ascii(unsigned char *source, /* 16 bytes */
 {
   int i;
   for(i=0; i<16; i++)
-    sprintf((char *)&dest[i*2], "%02x", source[i]);
+    snprintf((char *)&dest[i*2], 3, "%02x", source[i]);
 }
 
 CURLcode Curl_output_digest(struct connectdata *conn,

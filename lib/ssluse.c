@@ -1056,8 +1056,8 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
   msg_type = *(char*)buf;
   msg_name = ssl_msg_type(ssl_ver, msg_type);
 
-  txt_len = 1 + sprintf(ssl_buf, "SSLv%c, %s%s (%d):\n",
-                        ver, tls_rt_name, msg_name, msg_type);
+  txt_len = 1 + snprintf(ssl_buf, sizeof(ssl_buf), "SSLv%c, %s%s (%d):\n",
+                         ver, tls_rt_name, msg_name, msg_type);
   Curl_debug(data, CURLINFO_TEXT, ssl_buf, txt_len, NULL);
 
   Curl_debug(data, (direction == 1) ? CURLINFO_SSL_DATA_OUT :
