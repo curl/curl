@@ -42,7 +42,6 @@ CONNECT 127.0.0.1:8433 HTTP/1.0
 Proxy-authorization: Basic dGVzdDppbmc=
 
 GET /503 HTTP/1.1
-Proxy-authorization: Basic dGVzdDppbmc=
 Authorization: Basic dGVzdDppbmc=
 Host: 127.0.0.1:8433
 Pragma: no-cache
