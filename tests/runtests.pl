@@ -6,7 +6,7 @@
 #######################################################################
 # These should be the only variables that might be needed to get edited:
 
-#use strict;
+use strict;
 #use warnings;
 
 @INC=(@INC, $ENV{'srcdir'}, ".");
@@ -449,6 +449,7 @@ sub singletest {
         my $requires = $hash{'requires'};
 
         if (defined($requires)) {
+            no strict "refs";
             my $value=${$requires};
 #            print "This test requires '$requires' with value '$value' \n";
 
