@@ -661,6 +661,23 @@ CURLcode _ftp(struct connectdata *conn)
        may not support it! It is however the only way we have to get a file's
        size! */
     int filesize;
+
+    /* Some servers return different sizes for different modes, and thus we
+       must set the proper type before we check the size */
+    ftpsendf(data->firstsocket, conn, "TYPE %s",
+             (data->bits.ftp_ascii)?"A":"I");
+
+    nread = GetLastResponse(data->firstsocket, buf, conn);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
+
+    if(strncmp(buf, "200", 3)) {
+      failf(data, "Couldn't set %s mode",
+            (data->bits.ftp_ascii)?"ASCII":"binary");
+      return (data->bits.ftp_ascii)? CURLE_FTP_COULDNT_SET_ASCII:
+        CURLE_FTP_COULDNT_SET_BINARY;
+    }
+
     ftpsendf(data->firstsocket, conn, "SIZE %s", ftp->file);
 
     nread = GetLastResponse(data->firstsocket, buf, conn);
