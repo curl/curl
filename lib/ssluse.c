@@ -660,7 +660,10 @@ Curl_SSLConnect(struct connectdata *conn)
 
   if (data->set.ssl.verifyhost) {
     char peer_CN[257];
-    if (X509_NAME_get_text_by_NID(X509_get_subject_name(conn->ssl.server_cert), NID_commonName, peer_CN, sizeof(peer_CN)) < 0) {
+    if (X509_NAME_get_text_by_NID(X509_get_subject_name(conn->ssl.server_cert),
+                                  NID_commonName,
+                                  peer_CN,
+                                  sizeof(peer_CN)) < 0) {
       failf(data, "SSL: unable to obtain common name from peer certificate");
       X509_free(conn->ssl.server_cert);
       return CURLE_SSL_PEER_CERTIFICATE;
@@ -668,13 +671,16 @@ Curl_SSLConnect(struct connectdata *conn)
 
     if (!strequal(peer_CN, conn->hostname)) {
       if (data->set.ssl.verifyhost > 1) {
-        failf(data, "SSL: certificate subject name '%s' does not match target host name '%s'",
-            peer_CN, conn->hostname);
+        failf(data, "SSL: certificate subject name '%s' does not match "
+              "target host name '%s'",
+              peer_CN, conn->hostname);
         X509_free(conn->ssl.server_cert);
         return CURLE_SSL_PEER_CERTIFICATE;
       }
       else
-        infof(data, "\t common name: %s (does not match '%s')\n", peer_CN, conn->hostname);
+        infof(data,
+              "\t common name: %s (does not match '%s')\n",
+              peer_CN, conn->hostname);
     }
     else
       infof(data, "\t common name: %s (matched)\n", peer_CN);
