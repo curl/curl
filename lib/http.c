@@ -1381,10 +1381,6 @@ CURLcode Curl_http(struct connectdata *conn)
 #else
       thistime = gmtime(&data->set.timevalue);
 #endif
-      if(NULL == thistime) {
-        failf(data, "localtime() failed!");
-        return CURLE_OUT_OF_MEMORY;
-      }
 
 #ifdef HAVE_STRFTIME
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
