@@ -53,7 +53,7 @@ gettimeofday (struct timeval *tp, void *nothing)
 #endif
 #endif
 
-struct timeval Curl_tvnow ()
+struct timeval Curl_tvnow (void)
 {
  struct timeval now;
 #ifdef HAVE_GETTIMEOFDAY
