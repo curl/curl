@@ -591,7 +591,6 @@ CURLcode add_buffer_send(send_buffer *in,
 static
 CURLcode add_bufferf(send_buffer *in, const char *fmt, ...)
 {
-  CURLcode result = CURLE_OUT_OF_MEMORY;
   char *s;
   va_list ap;
   va_start(ap, fmt);
@@ -599,10 +598,16 @@ CURLcode add_bufferf(send_buffer *in, const char *fmt, ...)
   va_end(ap);
 
   if(s) {
-    result = add_buffer(in, s, strlen(s));
+    CURLcode result = add_buffer(in, s, strlen(s));
     free(s);
+    if(CURLE_OK == result)
+      return CURLE_OK;
   }
-  return result;
+  /* If we failed, we cleanup the whole buffer and return error */
+  if(in->buffer)
+    free(in->buffer);
+  free(in);
+  return CURLE_OUT_OF_MEMORY;
 }
 
 /*
@@ -1152,6 +1157,10 @@ CURLcode Curl_http(struct connectdata *conn)
                                     host,
                                     conn->bits.ipv6_ip?"]":"",
                                     conn->remote_port);
+
+    if(!conn->allocptr.host)
+      /* without Host: we can't make a nice request */
+      return CURLE_OUT_OF_MEMORY;
   }
 
   if(data->cookies) {
@@ -1290,21 +1299,25 @@ CURLcode Curl_http(struct connectdata *conn)
     /* initialize a dynamic send-buffer */
     req_buffer = add_buffer_init();
 
+    if(!req_buffer)
+      return CURLE_OUT_OF_MEMORY;
+
     /* add the main request stuff */
-    add_bufferf(req_buffer,
-                "%s " /* GET/HEAD/POST/PUT */
-                "%s HTTP/%s\r\n" /* path + HTTP version */
-                "%s" /* proxyuserpwd */
-                "%s" /* userpwd */
-                "%s" /* range */
-                "%s" /* user agent */
-                "%s" /* cookie */
-                "%s" /* host */
-                "%s" /* pragma */
-                "%s" /* accept */
-                "%s" /* accept-encoding */
-                "%s" /* referer */
-                "%s",/* transfer-encoding */
+    result =
+      add_bufferf(req_buffer,
+                  "%s " /* GET/HEAD/POST/PUT */
+                  "%s HTTP/%s\r\n" /* path + HTTP version */
+                  "%s" /* proxyuserpwd */
+                  "%s" /* userpwd */
+                  "%s" /* range */
+                  "%s" /* user agent */
+                  "%s" /* cookie */
+                  "%s" /* host */
+                  "%s" /* pragma */
+                  "%s" /* accept */
+                  "%s" /* accept-encoding */
+                  "%s" /* referer */
+                  "%s",/* transfer-encoding */
 
                 request,
                 ppath,
@@ -1325,6 +1338,9 @@ CURLcode Curl_http(struct connectdata *conn)
                 (data->change.referer && conn->allocptr.ref)?conn->allocptr.ref:"" /* Referer: <data> <CRLF> */,
                 te
                 );
+
+    if(result)
+      return result;
 
     if(co) {
       int count=0;
