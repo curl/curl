@@ -1179,9 +1179,10 @@ typedef enum {
   CURLINFO_HTTPAUTH_AVAIL   = CURLINFO_LONG   + 23,
   CURLINFO_PROXYAUTH_AVAIL  = CURLINFO_LONG   + 24,
   CURLINFO_OS_ERRNO         = CURLINFO_LONG   + 25,
+  CURLINFO_NUM_CONNECTS     = CURLINFO_LONG   + 26,
   /* Fill in new entries below here! */
 
-  CURLINFO_LASTONE          = 26
+  CURLINFO_LASTONE          = 27
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

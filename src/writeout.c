@@ -56,6 +56,7 @@ typedef enum {
   VAR_REQUEST_SIZE,
   VAR_EFFECTIVE_URL,
   VAR_CONTENT_TYPE,
+  VAR_NUM_CONNECTS,
   VAR_NUM_OF_VARS /* must be the last */
 } replaceid;
 
@@ -80,6 +81,7 @@ static struct variable replacements[]={
   {"speed_download", VAR_SPEED_DOWNLOAD},
   {"speed_upload", VAR_SPEED_UPLOAD},
   {"content_type", VAR_CONTENT_TYPE},
+  {"num_connects", VAR_NUM_CONNECTS},
   {NULL, VAR_NONE}
 };
 
@@ -129,6 +131,11 @@ void ourWriteOut(CURL *curl, char *writeinfo)
               case VAR_REQUEST_SIZE:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_REQUEST_SIZE, &longinfo))
+                  fprintf(stream, "%ld", longinfo);
+                break;
+              case VAR_NUM_CONNECTS:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &longinfo))
                   fprintf(stream, "%ld", longinfo);
                 break;
               case VAR_TOTAL_TIME:

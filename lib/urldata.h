@@ -624,6 +624,8 @@ struct PureInfo {
   long proxyauthavail;
   long httpauthavail;
 
+  long numconnects; /* how many new connection did libcurl created */
+
   char *contenttype; /* the content type of the object */
 };
 

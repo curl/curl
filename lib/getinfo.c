@@ -38,7 +38,7 @@
 #include "memdebug.h"
 
 /*
- * This is supposed to be called in the beginning of a permform() session
+ * This is supposed to be called in the beginning of a perform() session
  * and should reset all session-info variables
  */
 CURLcode Curl_initinfo(struct SessionHandle *data)
@@ -63,6 +63,7 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
 
   info->header_size = 0;
   info->request_size = 0;
+  info->numconnects = 0;
   return CURLE_OK;
 }
 
@@ -169,6 +170,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     break;
   case CURLINFO_OS_ERRNO:
     *param_longp = data->state.os_errno;
+    break;
+  case CURLINFO_NUM_CONNECTS:
+    *param_longp = data->info.numconnects;
     break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;

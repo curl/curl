@@ -113,6 +113,13 @@ method(s) available for your proxy authentication.  (Added in 7.10.8)
 .IP CURLINFO_OS_ERRNO
 Pass a pointer to a long to receive the errno variable from a connect failure.
 (Added in 7.12.2)
+.IP CURLINFO_NUM_CONNECTS
+Pass a pointer to a long to receive how many new connections libcurl had to
+create to achieve the previous transfer (only the successful connects are
+counted).  Combined with \fICURLINFO_REDIRECT_COUNT\fP you are able to know
+how many times libcurl successfully reused existing connection(s) or not.  See
+the Connection Options of \fIcurl_easy_setopt(3)\fP to see how libcurl tries
+to make persistent connections to save time.  (Added in 7.12.3)
 .SH RETURN VALUE
 If the operation was successful, CURLE_OK is returned. Otherwise an
 appropriate error code will be returned.

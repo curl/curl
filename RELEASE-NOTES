@@ -10,18 +10,21 @@ Curl and libcurl 7.12.3
 
 This release includes the following changes:
 
- o 
+ o added CURLINFO_NUM_CONNECTS
 
 This release includes the following bugfixes:
 
- o 
+ o test 165 works with older iconv versions as well
+ o use setlocale() for better IDN functionality by default
 
 Other curl-related news since the previous public release:
 
- o 
+ o pycurl 7.12.2: http://pycurl.sf.net/
+ o TclCurl 0.12.2: http://personal1.iddeo.es/andresgarci/tclcurl/english/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
+ Peter Wullinger, Guillaume Arluison
 
         Thanks! (and sorry if I forgot to mention someone)

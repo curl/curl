@@ -7,6 +7,12 @@
                                   Changelog
 
 Daniel (19 October 2004)
+- Guillaume Arluison added CURLINFO_NUM_CONNECTS to allow an app to figure
+  out how many new connects a previous transfer required.
+
+  I added %{num_connects} to the curl tool and added test case 192 and 193
+  to verify the new code.
+
 - Test case 165 modified to use a charset define older iconv versions
   understand. ISO-8859-1 instead of ISO8859-1. Bug report #1049275 (anonymous)
 

@@ -784,5 +784,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   if(sockconn)
     *sockconn = sockfd;    /* the socket descriptor we've connected */
 
+  data->info.numconnects++; /* to track the number of connections made */
+
   return CURLE_OK;
 }
