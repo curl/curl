@@ -31,6 +31,10 @@
 #include <string.h>
 #include <stdarg.h>
 
+#ifdef	VMS
+#include	<stdlib.h>
+#endif
+
 /*
  * This is supposed to be called in the beginning of a permform() session
  * and should reset all session-info variables
@@ -44,6 +48,7 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   pro->t_connect = 0;
   pro->t_pretransfer = 0;
   pro->t_starttransfer = 0;
+  pro->timespent = 0;
 
   info->httpcode = 0;
   info->httpversion=0;

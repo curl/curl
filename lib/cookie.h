@@ -38,7 +38,7 @@ struct Cookie {
   char *value;       /* name = <this> */
   char *path;	      /* path = <this> */
   char *domain;      /* domain = <this> */
-  time_t expires;    /* expires = <this> */
+  long expires;    /* expires = <this> */
   char *expirestr;   /* the plain text version */
 
   char field1;       /* read from a cookie file, 1 => FALSE, 2=> TRUE */

@@ -48,6 +48,10 @@
 #include <stdlib.h> /* required for free() prototype, without it, this crashes
                        on macos 68K */
 #endif
+#ifdef	VMS
+#include <in.h>
+#include <inet.h>
+#endif
 
 #endif
 #include <stdio.h>

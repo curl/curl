@@ -221,22 +221,22 @@
 #define HAVE_NETINET_IN_H 1
 
 /* Define if you have the <openssl/crypto.h> header file.  */
-#undef HAVE_OPENSSL_CRYPTO_H
+#define HAVE_OPENSSL_CRYPTO_H 1
 
 /* Define if you have the <openssl/err.h> header file.  */
-#undef HAVE_OPENSSL_ERR_H
+#define HAVE_OPENSSL_ERR_H	1
 
 /* Define if you have the <openssl/pem.h> header file.  */
-#undef HAVE_OPENSSL_PEM_H
+#define HAVE_OPENSSL_PEM_H	1
 
 /* Define if you have the <openssl/rsa.h> header file.  */
-#undef HAVE_OPENSSL_RSA_H
+#define HAVE_OPENSSL_RSA_H 1
 
 /* Define if you have the <openssl/ssl.h> header file.  */
-#undef HAVE_OPENSSL_SSL_H
+#define HAVE_OPENSSL_SSL_H	1
 
 /* Define if you have the <openssl/x509.h> header file.  */
-#undef HAVE_OPENSSL_X509_H
+#define HAVE_OPENSSL_X509_H	1
 
 /* Define if you have the <pem.h> header file.  */
 #undef HAVE_PEM_H
@@ -296,7 +296,7 @@
 #undef HAVE_X509_H
 
 /* Define if you have the crypto library (-lcrypto).  */
-#undef HAVE_LIBCRYPTO
+#define HAVE_LIBCRYPTO 1
 
 /* Define if you have the dl library (-ldl).  */
 #undef HAVE_LIBDL
@@ -314,7 +314,7 @@
 #define HAVE_LIBSOCKET 1
 
 /* Define if you have the ssl library (-lssl).  */
-#undef HAVE_LIBSSL
+#define HAVE_LIBSSL	1
 
 /* Define if you have the ucb library (-lucb).  */
 #undef HAVE_LIBUCB
@@ -346,7 +346,7 @@
 #undef HAVE_GETPASS
 
 /* Define if you have a working OpenSSL installation */
-#undef OPENSSL_ENABLED
+#define OPENSSL_ENABLED	1
 
 /* Define if you have the `dlopen' function. */
 #undef HAVE_DLOPEN
@@ -365,3 +365,4 @@
 
 #define HAVE_MEMORY_H   1
 
+#define HAVE_FIONBIO	1

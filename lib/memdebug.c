@@ -168,7 +168,10 @@ int curl_fclose(FILE *file, int line, const char *source)
             source, line, file);
   return res;
 }
-
+#else
+#ifdef VMS
+int VOID_VAR_MEMDEBUG;	
+#endif
 #endif /* MALLOCDEBUG */
 
 /*

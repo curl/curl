@@ -7,9 +7,7 @@
 **  This code is in the public domain and has no copyright.
 */
 
-#if HAVE_CONFIG_H
-# include <config.h>
-#endif
+# include "setup.h"
 
 #ifndef PARAMS
 # if defined PROTOTYPES || (defined __STDC__ && __STDC__)

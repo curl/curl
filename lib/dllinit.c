@@ -81,6 +81,10 @@ DllMain (
     }
   return TRUE;
 }
+#else
+#ifdef VMS
+int VOID_VAR_DLLINIT;	
+#endif
 #endif
 
 /*

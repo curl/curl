@@ -10,8 +10,6 @@
 
 #include "setup.h"
 
-#ifdef HAVE_CONFIG_H
-# include "config.h"
 # ifdef HAVE_ALLOCA_H
 #  include <alloca.h>
 # endif
@@ -19,7 +17,6 @@
 # ifdef HAVE_TIME_H
 #  include <time.h>
 # endif
-#endif
 
 #ifndef YYDEBUG
   /* to satisfy gcc -Wundef, we set this to 0 */
