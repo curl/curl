@@ -233,17 +233,16 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     if((k->keepon & KEEP_READ) &&
        (FD_ISSET(conn->sockfd, readfdp))) {
 
-      bool readdone = FALSE;
+      bool readdone = TRUE;
 
       /* This is where we loop until we have read everything there is to
          read or we get a EWOULDBLOCK */
       do {
+        int buffersize = data->set.buffer_size?
+          data->set.buffer_size:BUFSIZE -1;
 
-        /* read! */
-        result = Curl_read(conn, conn->sockfd, k->buf,
-                           data->set.buffer_size?
-                           data->set.buffer_size:BUFSIZE -1,
-                           &nread);
+        /* receive data from the network! */
+        result = Curl_read(conn, conn->sockfd, k->buf, buffersize, &nread);
 
         if(0>result)
           break; /* get out of loop */
