@@ -50,6 +50,22 @@ server, do one of the following:
 
      (Thanks to Frankie V for this description)
 
+    If you use the 'openssl' tool, this is one way to get extract the CA cert
+    for a particular server:
+
+     o openssl s_client -connect xxxxx.com:443 |tee logfile
+     o type "QUIT", followed by the "ENTER" key
+     o The certificate will have "BEGIN CERTIFICATE" and "END CERTIFICATE"
+       markers.
+     o If you want to see the data in the certificate, you can do: "openssl
+       x509 -inform PEM -in certfile -text -out certdata" where certfile is
+       the cert you extracted from logfile. Look in certdata.
+     o If you want to trust the certificate, you can append it to your
+       cert_bundle or use it stand-alone as described. Just remember that the
+       security is no better than the way you obtained the certificate.
+
+     (Thanks to Doug Kaufman for this description)
+
  4. If you're using the curl command line tool, you can specify your own CA
     cert path by setting the environment variable CURL_CA_BUNDLE to the path
     of your choice.
