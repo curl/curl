@@ -106,6 +106,7 @@
 #include "escape.h"
 #include "strtok.h"
 #include "share.h"
+#include "content_encoding.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -825,8 +826,16 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
   case CURLOPT_ENCODING:
     /*
      * String to use at the value of Accept-Encoding header. 08/28/02 jhrg
+     *
+     * If the encoding is set to "" we use an Accept-Encoding header that
+     * encompasses all the encodings we support.
+     * If the encoding is set to NULL we don't send an Accept-Encoding header
+     * and ignore an received Content-Encoding header.
+     *
      */
     data->set.encoding = va_arg(param, char *);
+    if(data->set.encoding && !*data->set.encoding)
+      data->set.encoding = (char*)ALL_CONTENT_ENCODINGS;
     break;
 
   case CURLOPT_USERPWD:

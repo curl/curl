@@ -893,7 +893,9 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if(k->badheader < HEADER_ALLBAD) {
               /* This switch handles various content encodings. If there's an
                  error here, be sure to check over the almost identical code
-                 in http_chunks.c. 08/29/02 jhrg */
+                 in http_chunks.c. 08/29/02 jhrg
+                 Make sure that ALL_CONTENT_ENCODINGS contains all the
+                 encodings handled here. */
 #ifdef HAVE_LIBZ
               switch (k->content_encoding) {
               case IDENTITY:

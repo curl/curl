@@ -42,7 +42,9 @@ Currently, libcurl only understands how to process responses that use the
 that will work (besides "identity," which does nothing) are "deflate" and
 "gzip" If a response is encoded using the "compress" or methods, libcurl will
 return an error indicating that the response could not be decoded.  If
-<string> is NULL or empty no Accept-Encoding header is generated.
+<string> is NULL no Accept-Encoding header is generated.  If <string> is a
+zero-length string, then an Accept-Encoding header containing all supported
+encodings will be generated.
 
 The CURLOPT_ENCODING must be set to any non-NULL value for content to be
 automatically decoded.  If it is not set and the server still sends encoded

@@ -20,6 +20,16 @@
  *
  * $Id$
  ***************************************************************************/
+#include "setup.h"
+
+/*
+ * Comma-separated list all supported Content-Encodings ('identity' is implied)
+ */
+#ifdef HAVE_LIBZ
+#define ALL_CONTENT_ENCODINGS "deflate, gzip"
+#else
+#define ALL_CONTENT_ENCODINGS "identity"
+#endif
 
 CURLcode Curl_unencode_deflate_write(struct SessionHandle *data, 
                                      struct Curl_transfer_keeper *k, 
