@@ -14,7 +14,7 @@
 PROGRAM_NAME = curl.exe
 
 !IFNDEF ZLIB_PATH
-ZLIB_PATH = ../../zlib-1.1.4
+ZLIB_PATH = ../../zlib-1.2.1
 !ENDIF
 
 !IFNDEF OPENSSL_PATH
@@ -29,7 +29,7 @@ ZLIBLIBS   = zlib.lib
 SSLINC     = /I "$(OPENSSL_PATH)/inc32" /I "$(OPENSSL_PATH)/inc32/openssl"
 CFLAGSSSL  = /D "USE_SSLEAY"
 LFLAGSSSL  = /LIBPATH:"$(OPENSSL_PATH)/out32"
-SSLLIBS    = libeay32.lib ssleay32.lib gdi32.lib 
+SSLLIBS    = libeay32.lib ssleay32.lib gdi32.lib
 
 ## Release
 CCR = cl.exe /MD /O2 /D "NDEBUG"
@@ -73,7 +73,7 @@ DEBUG_OBJS= \
 # release-zlib
 
 !IF "$(CFG)" == "release-zlib"
-CFLAGS = $(CFLAGS) $(CFLAGSZLIB)
+CFLAGS = $(CFLAGS) $(CFLAGSZLIB) /DCURL_STATICLIB
 LINKLIBS = $(LINKLIBS) $(ZLIBLIBS)
 LINKLIBS_DEBUG = $(LINKLIBS_DEBUG) $(ZLIBLIBS)
 LFLAGS = $(LFLAGS) $(LFLAGSZLIB)
@@ -81,9 +81,9 @@ LFLAGS = $(LFLAGS) $(LFLAGSZLIB)
 
 ######################
 # release-ssl
- 
+
 !IF "$(CFG)" == "release-ssl"
-CFLAGS = $(CFLAGS) $(CFLAGSSSL)
+CFLAGS = $(CFLAGS) $(CFLAGSSSL) /DCURL_STATICLIB
 LINKLIBS  = $(LINKLIBS) $(SSLLIBS)
 LINKLIBS_DEBUG  = $(LINKLIBS_DEBUG) $(SSLLIBS)
 LFLAGS = $(LFLAGS) $(LFLAGSSSL)
@@ -101,7 +101,7 @@ LFLAGS = $(LFLAGS) $(LFLAGSSSL)
 
 ######################
 # release-ssl-zlib
- 
+
 !IF "$(CFG)" == "release-ssl-zlib"
 CFLAGS = $(CFLAGS) $(CFLAGSSSL) $(CFLAGSZLIB)
 LINKLIBS  = $(LINKLIBS) $(SSLLIBS) $(ZLIBLIBS)
