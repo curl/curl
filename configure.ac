@@ -115,30 +115,6 @@ esac
 AC_MSG_RESULT($mimpure)
 AM_CONDITIONAL(MIMPURE, test x$mimpure = xyes)
 
-AC_MSG_CHECKING([if we need _XOPEN_SOURCE defined to 500])
-xopen=no
-case $host in
-  mips-sgi-irix*)
-    if test "$GCC" != "yes"; then
-      xopen="yes"
-
-      # "Applications should ensure that the feature test macro _XOPEN_SOURCE
-      # is defined with the value 500 before inclusion of any header. This is
-      # needed to enable the functionality described in this specification,
-      # and possibly to enable functionality defined elsewhere in the Common
-      # Applications Environment."
-
-      # So far, we've only detected this to be strictly necessary if not using
-      # gcc on SGI IRIX. And this only to avoid warnings.
-
-      AC_DEFINE(_XOPEN_SOURCE, 500, [ensure SUSV2 compatibility])
-    fi
-    ;;
-  *)
-    ;;
-esac
-AC_MSG_RESULT($xopen)
-
 dnl The install stuff has already been taken care of by the automake stuff
 dnl AC_PROG_INSTALL
 AC_PROG_MAKE_SET
