@@ -2004,6 +2004,8 @@ static void fix_hostname(struct connectdata *conn, struct hostname *host)
       host->name = host->encalloc;
     }
   }
+#else
+  (void)conn; /* never used */
 #endif
 }
 
