@@ -34,6 +34,10 @@ sed -e 's/^#define LIBCURL_VERSION .*/#define LIBCURL_VERSION "'$libversion'"/g'
 # Replace version number in header file:
 sed 's/#define CURL_VERSION .*/#define CURL_VERSION "'$curlversion'"/g' $CHEADER >$CHEADER.dist
 
+# Replace version number in plist file:
+PLIST=lib/libcurl.plist
+sed "s/7\.12\.3/$libversion/g" $PLIST > $PLIST.dist
+
 echo "curl version $curlversion"
 echo "libcurl version $libversion"
 echo "libcurl numerical $numeric"
