@@ -88,75 +88,6 @@
 /* easy-to-use macro: */
 #define ftpsendf Curl_ftpsendf
 
-/* returns last node in linked list */
-static struct curl_slist *slist_get_last(struct curl_slist *list)
-{
-	struct curl_slist	*item;
-
-	/* if caller passed us a NULL, return now */
-	if (!list)
-		return NULL;
-
-	/* loop through to find the last item */
-	item = list;
-	while (item->next) {
-		item = item->next;
-	}
-	return item;
-}
-
-/* append a struct to the linked list. It always retunrs the address of the
- * first record, so that you can sure this function as an initialization
- * function as well as an append function. If you find this bothersome,
- * then simply create a separate _init function and call it appropriately from
- * within the proram. */
-struct curl_slist *curl_slist_append(struct curl_slist *list, char *data)
-{
-	struct curl_slist	*last;
-	struct curl_slist	*new_item;
-
-	new_item = (struct curl_slist *) malloc(sizeof(struct curl_slist));
-	if (new_item) {
-		new_item->next = NULL;
-		new_item->data = strdup(data);
-	}
-	else {
-		fprintf(stderr, "Cannot allocate memory for QUOTE list.\n");
-		return NULL;
-	}
-
-	if (list) {
-		last = slist_get_last(list);
-		last->next = new_item;
-		return list;
-	}
-
-	/* if this is the first item, then new_item *is* the list */
-	return new_item;
-}
-
-/* be nice and clean up resources */
-void curl_slist_free_all(struct curl_slist *list)
-{
-	struct curl_slist	*next;
-	struct curl_slist	*item;
-
-	if (!list)
-		return;
-
-	item = list;
-	do {
-		next = item->next;
-		
-		if (item->data) {
-			free(item->data);
-		}
-		free(item);
-		item = next;
-	} while (next);
-}
-
-
 static CURLcode AllowServerConnect(struct UrlData *data,
                                    struct connectdata *conn,
                                    int sock)
@@ -367,8 +298,10 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
 
   /* get some initial data into the ftp struct */
   ftp->bytecountp = &conn->bytecount;
-  ftp->user = data->user;
-  ftp->passwd = data->passwd;
+
+  /* duplicate to keep them even when the data struct changes */
+  ftp->user = strdup(data->user);
+  ftp->passwd = strdup(data->passwd);
 
   if (data->bits.tunnel_thru_httpproxy) {
     /* We want "seamless" FTP operations through HTTP proxy tunnel */
@@ -468,6 +401,58 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
   else {
     failf(data, "Odd return code after USER");
     return CURLE_FTP_WEIRD_USER_REPLY;
+  }
+
+  /* send PWD to discover our entry point */
+  ftpsendf(conn->firstsocket, conn, "PWD");
+
+  /* wait for feedback */
+  nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
+  if(nread < 0)
+    return CURLE_OPERATION_TIMEOUTED;
+
+  if(ftpcode == 257) {
+    char *dir = (char *)malloc(nread+1);
+    char *store=dir;
+    char *ptr=&buf[4]; /* start on the first letter */
+    
+    /* Reply format is like
+       257<space>"<directory-name>"<space><commentary> and the RFC959 says
+
+       The directory name can contain any character; embedded double-quotes
+       should be escaped by double-quotes (the "quote-doubling" convention).
+    */
+    if('\"' == *ptr) {
+      /* it started good */
+      ptr++;
+      while(ptr && *ptr) {
+        if('\"' == *ptr) {
+          if('\"' == ptr[1]) {
+            /* "quote-doubling" */
+            *store = ptr[1];
+            ptr++;
+          }
+          else {
+            /* end of path */
+            *store = '\0'; /* zero terminate */
+            break; /* get out of this loop */
+          }
+        }
+        else
+          *store = *ptr;
+        store++;
+        ptr++;
+      }
+      ftp->entrypath =dir; /* remember this */
+      infof(data, "Entry path is '%s'\n", ftp->entrypath);
+    }
+    else {
+      /* couldn't get the path */
+    }
+
+  }
+  else {
+    /* We couldn't read the PWD response! */
   }
 
   return CURLE_OK;
@@ -599,6 +584,23 @@ CURLcode _ftp(struct connectdata *conn)
       qitem = qitem->next;
     }
   }
+
+  if(conn->bits.reuse) {
+    /* This is a re-used connection. Since we change directory to where the
+       transfer is taking place, we must now get back to the original dir
+       where we ended up after login: */
+    ftpsendf(conn->firstsocket, conn, "CWD %s", ftp->entrypath);
+    nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
+    
+    if(ftpcode != 250) {
+      failf(data, "Couldn't change back to directory %s", ftp->entrypath);
+      return CURLE_FTP_ACCESS_DENIED;
+    }
+  }
+
+
 
   /* change directory first! */
   if(ftp->dir && ftp->dir[0]) {
@@ -1707,3 +1709,16 @@ size_t Curl_ftpsendf(int fd, struct connectdata *conn, char *fmt, ...)
 }
 
 
+CURLcode Curl_ftp_disconnect(struct connectdata *conn)
+{
+  struct FTP *ftp= conn->proto.ftp;
+
+  if(ftp->user)
+    free(ftp->user);
+  if(ftp->passwd)
+    free(ftp->passwd);
+  if(ftp->entrypath)
+    free(ftp->entrypath);
+
+  return CURLE_OK;
+}
