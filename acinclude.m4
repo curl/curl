@@ -518,32 +518,41 @@ AC_DEFUN([CURL_CC_DEBUG_OPTS],
             WARN="-Wall $WARN"
          fi
        else dnl $ICC = yes
-         dnl 
-         WARN="-W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wundef -Wpointer-arith -Wnested-externs -Winline -Wmissing-declarations -Wmissing-prototypes -Wsign-compare"
+         dnl this is a set of options we believe *ALL* gcc versions support:
+         WARN="-W -Wall -Wwrite-strings -pedantic -Wno-long-long -Wpointer-arith -Wnested-externs -Winline -Wmissing-declarations -Wmissing-prototypes -Wsign-compare"
 
-         dnl -Wcast-align is a bit too annoying ;-)
+         dnl -Wcast-align is a bit too annoying on all gcc versions ;-)
+
+         if test "$gccnum" -gt "295"; then
+           dnl only if the compiler is newer than 2.95 since we got lots of
+           dnl "`_POSIX_C_SOURCE' is not defined" in system headers with
+           dnl gcc 2.95.4 on FreeBSD 4.9!
+           WARN="$WARN -Wundef"
+         fi
 
          if test "$gccnum" -ge "296"; then
            dnl gcc 2.96 or later
            WARN="$WARN -Wfloat-equal"
+         fi
 
-           if test "$gccnum" -gt "296"; then
-             dnl this option does not exist in 2.96
-             WARN="$WARN -Wno-format-nonliteral"
-           fi
+         if test "$gccnum" -gt "296"; then
+           dnl this option does not exist in 2.96
+           WARN="$WARN -Wno-format-nonliteral"
+         fi
 
-           dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
-           dnl on i686-Linux as it gives us heaps with false positives
-           if test "$gccnum" -ge "303"; then
-             dnl gcc 3.3 and later
-             WARN="$WARN -Wendif-labels -Wstrict-prototypes"
-           fi
+         dnl -Wunreachable-code seems totally unreliable on my gcc 3.3.2 on
+         dnl on i686-Linux as it gives us heaps with false positives
+         if test "$gccnum" -ge "303"; then
+           dnl gcc 3.3 and later
+           WARN="$WARN -Wendif-labels -Wstrict-prototypes"
          fi
 
          for flag in $CPPFLAGS; do
            case "$flag" in
             -I*)
-              dnl include path
+              dnl Include path, provide a -isystem option for the same dir
+              dnl to prevent warnings in those dirs. The -isystem was not very
+              dnl reliable on earlier gcc versions.
               add=`echo $flag | sed 's/^-I/-isystem /g'`
               WARN="$WARN $add"
               ;;
