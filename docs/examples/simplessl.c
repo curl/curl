@@ -66,7 +66,7 @@ int main(int argc, char **argv)
   curl = curl_easy_init();
   if(curl) {
     /* what call to write: */
-    curl_easy_setopt(curl, CURLOPT_URL, "HTTPS://curl.haxx.se");
+    curl_easy_setopt(curl, CURLOPT_URL, "HTTPS://your.favourite.ssl.site");
     curl_easy_setopt(curl, CURLOPT_WRITEHEADER, headerfile);
 
     while(1)                    /* do some ugly short cut... */
