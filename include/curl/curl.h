@@ -27,31 +27,7 @@
    http://curl.haxx.se/libcurl/
 */
 
-/* This is the version number of the libcurl package from which this header
-   file origins: */
-#define LIBCURL_VERSION "7.11.0-CVS"
-
-/* This is the numeric version of the libcurl version number, meant for easier
-   parsing and comparions by programs. The LIBCURL_VERSION_NUM define will
-   always follow this syntax:
-
-         0xXXYYZZ
-
-   Where XX, YY and ZZ are the main version, release and patch numbers in
-   hexadecimal. All three numbers are always represented using two digits.  1.2
-   would appear as "0x010200" while version 9.11.7 appears as "0x090b07".
-
-   This 6-digit hexadecimal number does not show pre-release number, and it is
-   always a greater number in a more recent release. It makes comparisons with
-   greater than and less than work.
-*/
-#define LIBCURL_VERSION_NUM 0x070b00
-
-/* The numeric version number is also available "in parts" by using these
-   defines: */
-#define LIBCURL_VERSION_MAJOR 7
-#define LIBCURL_VERSION_MINOR 11
-#define LIBCURL_VERSION_PATCH 0
+#include "curlver.h" /* the libcurl version defines */
 
 #include <stdio.h>
 #include <limits.h>

@@ -20,7 +20,7 @@ patch=`echo $libversion |cut -d. -f3 | cut -d- -f1 | sed -e "s/[^0-9]//g"`
 
 numeric=`echo "obase=16; $major*256*256 + $minor*256 + $patch" | bc`
 
-HEADER=include/curl/curl.h
+HEADER=include/curl/curlver.h
 CHEADER=src/version.h
 
 # Replace version number in header file:
