@@ -556,8 +556,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Set to force us do HTTP GET
      */
-    if(va_arg(param, long))
+    if(va_arg(param, long)) {
       data->set.httpreq = HTTPREQ_GET;
+      data->set.upload = FALSE; /* switch off upload */
+    }
     break;
 
   case CURLOPT_INFILE:
