@@ -138,6 +138,7 @@ struct ssl_config_data {
   char *CAfile;          /* cerficate to verify peer against */
   char *random_file;     /* path to file containing "random" data */
   char *egdsocket;       /* path to file containing the EGD daemon socket */
+  char *cipher_list;     /* list of ciphers to use */
 
   long numsessions;                 /* SSL session id cache size */
 };
