@@ -1,6 +1,6 @@
 #
 # Server-side
-<reply name="1">
+<reply>
 <data>
 HTTP/1.1 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
@@ -29,6 +29,11 @@ getrlimit
 <tool>
 lib518
 </tool>
+# precheck is a command line to run before the test, to see if we can execute
+# the test or not
+<precheck>
+./libtest/lib518 check
+</precheck>
 
  <name>
 HTTP GET with more than FD_SETSIZE descriptors open
