@@ -55,7 +55,6 @@ char *GetEnv(const char *variable)
   if (env && strcmp("HOME",variable) == 0) {
 	env = decc$translate_vms(env);
   }
-/*  printf ("Getenv: %s=%s\n",variable,env); */
 #else
   /* no length control */
   char *env = getenv(variable);
