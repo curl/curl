@@ -28,7 +28,7 @@
   (setq tab-width 8
 	indent-tabs-mode nil		; Use spaces. Not tabs.
 	comment-column 40
-	c-font-lock-extra-types (append '("bool" "CURL" "CURLcode" "ssize_t" "size_t" "socklen_t" "fd_set" "time_t" "curl_off_t" "curl_socket_t" "in_addr_t" "CURLSHcode" "CURLMcode"))
+	c-font-lock-extra-types (append '("bool" "CURL" "CURLcode" "ssize_t" "size_t" "socklen_t" "fd_set" "time_t" "curl_off_t" "curl_socket_t" "in_addr_t" "CURLSHcode" "CURLMcode" "Curl_addrinfo"))
 	)
   ;; keybindings for C, C++, and Objective-C.  We can put these in
   ;; c-mode-base-map because of inheritance ...
