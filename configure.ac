@@ -1026,11 +1026,10 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
        AC_MSG_RESULT(no)
 )
 
-ares="no"
 AC_MSG_CHECKING([whether to enable ares])
 AC_ARG_ENABLE(ares,
-AC_HELP_STRING([--enable-ares],[Enable using ares for name lookups])
-AC_HELP_STRING([--disable-ares],[Disable using ares for name lookups]),
+AC_HELP_STRING([--enable-ares=PATH],[Enable ares for name lookups])
+AC_HELP_STRING([--disable-ares],[Disable ares for name lookups]),
 [ case "$enableval" in
   no)
        AC_MSG_RESULT(no)
@@ -1045,13 +1044,25 @@ AC_HELP_STRING([--disable-ares],[Disable using ares for name lookups]),
        dnl substitute HAVE_ARES for curl-config and similar
        HAVE_ARES="1"
        AC_SUBST(HAVE_ARES)
-       ares="yes"
+
+       LIBS="$LIBS -lares"
+
+       dnl For backwards compatibility default to includes/lib in srcdir/ares
+       dnl If a value is specified it is assumed that the libs are in $val/lib
+       dnl and the includes are in $val/include. This is the default setup for
+       dnl ares so it should not be a problem.
+       if test "x$enableval" = "xyes" ; then
+         aresdir=`cd $srcdir/ares && pwd`
+         CPPFLAGS="$CPPFLAGS -I$aresdir"
+         LDFLAGS="$LDFLAGS -L$aresdir"
+       else
+         CPPFLAGS="$CPPFLAGS -I$enableval/include"
+         LDFLAGS="$LDFLAGS -L$enableval/lib"
+       fi
        ;;
   esac ],
        AC_MSG_RESULT(no)
 )
-
-AM_CONDITIONAL(ARES, test x$ares = xyes)
 
 AC_CONFIG_FILES([Makefile \
 	   docs/Makefile \
