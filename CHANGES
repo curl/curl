@@ -7,6 +7,9 @@
                                   Changelog
 
 Daniel (21 June 2004)
+- testcurl.sh is now removed completely, tests/testcurl.pl is the script to
+  use when autobuilding curl!
+
 - Kjetil Jacobsen brought my attention to the fact that you cannot properly
   abort an upload with the readfunction callback, since returning 0 or -1 only
   stops the upload and libcurl will continue waiting for downloaded data and
@@ -15,6 +18,10 @@ Daniel (21 June 2004)
   Thus, I've now added the ability for read callbacks to return
   CURL_READFUNC_ABORT to abort an upload from a read callback. This will stop
   the transfer immediately with a CURLE_ABORTED_BY_CALLBACK return code.
+
+  Test case 513 was added to verify that it works. I had to improve the test
+  HTTP server too to dump the request to a file even when the client
+  disconnects prematurely.
   
 Daniel (19 June 2004)
 - Luca Alteas provided a test case with a failing curl operation: when we POST
