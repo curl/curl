@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (24 November 2004)
+- Andrés García fixed the configure script to detect select properly when run
+  with Msys/Mingw on Windows.
+
 Daniel (22 November 2004)
 - David Phillips enhanced test 518. I made it depend on a "feature" so that
   systems without getrlimit() won't attempt to test 518. configure now checks

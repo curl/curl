@@ -1260,6 +1260,20 @@ dnl if not found, $ac_func is the name we check for
 
 )
 
+dnl For some reason, the check above doesn't properly detect select() with
+dnl Msys/Mingw
+if test "$ac_cv_func_select" != "yes"; then
+  AC_MSG_CHECKING([for select in ws2_32])
+  AC_TRY_LINK([#include <winsock2.h>],
+               [select(0,(fd_set *)NULL,(fd_set *)NULL,(fd_set *)NULL,(struct timeval *)NULL);],
+               [ dnl worked!
+               AC_MSG_RESULT([yes])
+               HAVE_SELECT="1"
+               AC_DEFINE_UNQUOTED(HAVE_SELECT,1)],
+               [AC_MSG_ERROR(You can't compile without a select)]
+             )
+fi
+
 dnl sigsetjmp() might be a macro and no function so if it isn't found already
 dnl we make an extra check here!
 if test "$ac_cv_func_sigsetjmp" != "yes"; then
