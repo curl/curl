@@ -376,7 +376,7 @@ FAQ
 
         curl -d "datatopost" -H "Content-Type: text/xml" [URL]
 
-  3.12 Why do FTP specific features over HTTP proxy fails?
+  3.12 Why do FTP specific features over HTTP proxy fail?
 
   Because when you use a HTTP proxy, the protocol spoken on the network will
   be HTTP, even if you specify a FTP URL. This effectively means that you
