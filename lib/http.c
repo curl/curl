@@ -1333,7 +1333,7 @@ CURLcode Curl_http(struct connectdata *conn)
 
     send_buffer *req_buffer;
     struct curl_slist *headers=data->set.headers;
-    size_t postsize;
+    curl_off_t postsize; /* off_t type to be able to hold a large file size */
 
     /* initialize a dynamic send-buffer */
     req_buffer = add_buffer_init();
@@ -1596,7 +1596,8 @@ CURLcode Curl_http(struct connectdata *conn)
         if(!checkheaders(data, "Content-Length:"))
           /* we allow replacing this header, although it isn't very wise to
              actually set your own */
-          add_bufferf(req_buffer, "Content-Length: %d\r\n", postsize);
+          add_bufferf(req_buffer, "Content-Length: %" FORMAT_OFF_T"\r\n",
+                      postsize);
       }
 
       if(!checkheaders(data, "Content-Type:"))
