@@ -17,11 +17,12 @@ Misc
  - progress bar/time specs while downloading
  - "standard" proxy environment variables support
  - config file support
- - compiles on win32 (reported built on 29 operating systems)
+ - compiles on win32 (reported built on 40+ operating systems)
  - redirectable stderr
  - use selected network interface for outgoing traffic
  - IPv6 support
  - persistant connections
+ - socks5 support
 
 HTTP
  - HTTP/1.1 compliant
@@ -30,13 +31,13 @@ HTTP
  - HEAD
  - POST
  - multipart POST
- - authentication
+ - authentication (Basic and Digest)
  - resume (both GET and PUT)
  - follow redirects
  - maximum amount of redirects to follow
  - custom HTTP request
  - cookie get/send fully parsed
- - understands the netscape cookie file format
+ - reads/writes the netscape cookie file format
  - custom headers (that can replace/remove internally generated headers)
  - custom user-agent string
  - custom referer string
@@ -45,12 +46,15 @@ HTTP
  - time conditions
  - via http-proxy
  - retrieve file modification date
+ - Content-Encoding support for deflate and gzip
+ - Transfer-Encoding: chunked support for "uploads"
 
 HTTPS (*1)
  - (all the HTTP features)
  - using certificates
  - verify server certificate
  - via http-proxy
+ - select desired encryption
 
 FTP
  - download
