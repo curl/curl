@@ -14,11 +14,13 @@ To get fixed in 7.11.2 (planned release May/June 2004)
    part is to figure out if the server did the right thing or not.
    UNASSIGNED
 
-10. Anton Fedorov's "dumpcert" patch (only mailed to me privately) UNASSIGNED
+10. Anton Fedorov's "dumpcert" patch UNASSIGNED
+    http://curl.haxx.se/mail/lib-2004-03/0088.html
 
 14. Evaluate/apply Gertjan van Wingerde's SSL patches, UNASSIGNED
+    http://curl.haxx.se/mail/lib-2004-03/0087.html
 
-23. Peter Sylvester's "Most Significant Common Name" patch. Feedback welcome.
+23. Peter Sylvester's "Most Significant Common Name" change. Feedback welcome.
     At least the UTF8 conversion and comparison should be done. Patch?
     UNASSIGNED
 
