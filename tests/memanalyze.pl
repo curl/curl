@@ -88,7 +88,7 @@ while(<FILE>) {
 
         if($function =~ /free\(0x([0-9a-f]*)/) {
             $addr = $1;
-            if($sizeataddr{$addr} == 0) {
+            if(!exists $sizeataddr{$addr}) {
                 print "FREE ERROR: No memory allocated: $line\n";
             }
             elsif(-1 == $sizeataddr{$addr}) {
