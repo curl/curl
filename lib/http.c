@@ -224,20 +224,74 @@ CURLcode add_buffer(send_buffer *in, const void *inptr, size_t size)
 /* ------------------------------------------------------------------------- */
 
 /*
+ * Curl_compareheader()
+ *
+ * Returns TRUE if 'headerline' contains the 'header' with given 'content'.
+ * Pass headers WITH the colon.
+ */
+bool
+Curl_compareheader(char *headerline,    /* line to check */
+                   const char *header,  /* header keyword _with_ colon */
+                   const char *content) /* content string to find */
+{
+  /* RFC2616, section 4.2 says: "Each header field consists of a name followed
+   * by a colon (":") and the field value. Field names are case-insensitive.
+   * The field value MAY be preceded by any amount of LWS, though a single SP
+   * is preferred." */
+
+  size_t hlen = strlen(header);
+  size_t clen;
+  size_t len;
+  char *start;
+  char *end;
+
+  if(!strnequal(headerline, header, hlen))
+    return FALSE; /* doesn't start with header */
+
+  /* pass the header */
+  start = &headerline[hlen];
+
+  /* pass all white spaces */
+  while(*start && isspace((int)*start))
+    start++;
+
+  /* find the end of the header line */
+  end = strchr(start, '\r'); /* lines end with CRLF */
+  if(!end) {
+    /* in case there's a non-standard compliant line here */
+    end = strchr(start, '\n');
+
+    if(!end)
+      /* hm, there's no line ending here, use the zero byte! */
+      end = strchr(start, '\0');
+  }
+
+  len = end-start; /* length of the content part of the input line */
+  clen = strlen(content); /* length of the word to find */
+
+  /* find the content string in the rest of the line */
+  for(;len>=clen;len--, start++) {
+    if(strnequal(start, content, clen))
+      return TRUE; /* match! */
+  }
+
+  return FALSE; /* no match */
+}
+
+/*
  * This function checks the linked list of custom HTTP headers for a particular
  * header (prefix).
  */
-static bool checkheaders(struct SessionHandle *data, const char *thisheader)
+static char *checkheaders(struct SessionHandle *data, const char *thisheader)
 {
   struct curl_slist *head;
   size_t thislen = strlen(thisheader);
 
   for(head = data->set.headers; head; head=head->next) {
-    if(strnequal(head->data, thisheader, thislen)) {
-      return TRUE;
-    }
+    if(strnequal(head->data, thisheader, thislen))
+      return head->data;
   }
-  return FALSE;
+  return NULL;
 }
 
 /*
@@ -527,7 +581,7 @@ CURLcode Curl_http(struct connectdata *conn)
        host due to a location-follow, we do some weirdo checks here */
     if(!data->state.this_is_a_follow ||
        !data->state.auth_host ||
-       strequal(data->state.auth_host, conn->hostname)) {
+       curl_strequal(data->state.auth_host, conn->hostname)) {
       sprintf(data->state.buffer, "%s:%s",
               data->state.user, data->state.passwd);
       if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
@@ -551,12 +605,25 @@ CURLcode Curl_http(struct connectdata *conn)
     conn->allocptr.cookie = aprintf("Cookie: %s\015\012", data->set.cookie);
   }
 
+  if(!conn->bits.upload_chunky && (data->set.httpreq != HTTPREQ_GET)) {
+    /* not a chunky transfer but data is to be sent */
+    char *ptr = checkheaders(data, "Transfer-Encoding:");
+    if(ptr) {
+      /* Some kind of TE is requested, check if 'chunked' is chosen */
+      if(Curl_compareheader(ptr, "Transfer-Encoding:", "chunked"))
+        /* we have been told explicitly to upload chunky so deal with it! */
+        conn->bits.upload_chunky = TRUE;
+    }
+  }
+
   if(conn->bits.upload_chunky) {
     if(!checkheaders(data, "Transfer-Encoding:")) {
       te = "Transfer-Encoding: chunked\r\n";
     }
-    /* else
-       our header was already added, what to do now? */
+    else {
+      /* The "Transfer-Encoding:" header was already added. */
+      te = "";
+    }
   }
 
   if(data->cookies) {
