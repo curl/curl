@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "12 Sep 2001" "Curl 7.9" "Curl Manual"
+.TH curl 1 "5 Oct 2001" "Curl 7.9.1" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -589,8 +589,13 @@ The average upload speed that curl measured for the complete upload.
 
 If this option is used several times, the last one will be used.
 .IP "-x/--proxy <proxyhost[:port]>"
-Use specified proxy. If the port number is not specified, it is assumed at
-port 1080.
+Use specified HTTP proxy. If the port number is not specified, it is assumed
+at port 1080.
+
+\fBNote\fP that all operations that are performed over a HTTP proxy will
+transparantly be converted to HTTP. It means that certain protocol specific
+operations might not be available. This is not the case if you can tunnel
+through the proxy, as done with the \fI-p/--proxytunnel\fP option.
 
 If this option is used several times, the last one will be used.
 .IP "-X/--request <command>"
