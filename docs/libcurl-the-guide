@@ -753,7 +753,7 @@ Customizing Operations
  request, and you're free to pass any amount of extra headers that you think
  fit. Adding headers are this easy:
 
-    struct curl_slist *headers;
+    struct curl_slist *headers=NULL; /* init to NULL is important */
 
     headers = curl_slist_append(headers, "Hey-server-hey: how are you?");
     headers = curl_slist_append(headers, "X-silly-content: yes");
