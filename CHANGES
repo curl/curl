@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (25 April 2004)
+- Erwin Authried pointed out that configure --disable-manual didn't do right
+  if you already had a src/hugehelp.c source file present (which most people
+  do I guess). It now uses the USE_MANUAL define properly.
+
 Daniel (23 April 2004)
 - Gisle Vanem found and fixed a memory leak when doing (failing) Windows
   threaded name resolves.

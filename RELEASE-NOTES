@@ -15,6 +15,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o configure --disable-manual works better
  o removed a memory leak when doing a windows threaded resolve and it failed
  o --proxy-ntlm now checks if libcurl supports NTLM before using it
  o minor --fail with authentication bugfix
@@ -66,6 +67,8 @@ advice from friends like these:
 
  Thomas Schwinge, Marty Kuhrt, Günter Knauf, Kevin Roth, Glen Nakamura, Gisle
  Vanem, Greg Hewgill, Joe Halpin, Tor Arntsen, Dirk Manske, Roy Shan, Mitz
- Wark, Andrés García, Robin Kay, Alan Pinstein, David Byron, Nathan O'Sullivan
+ Wark, Andrés García, Robin Kay, Alan Pinstein, David Byron, Nathan
+ O'Sullivan, Erwin Authried
+ 
 
         Thanks! (and sorry if I forgot to mention someone)
