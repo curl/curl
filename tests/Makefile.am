@@ -22,7 +22,7 @@
 ###########################################################################
 EXTRA_DIST = ftpserver.pl httpserver.pl httpsserver.pl runtests.pl \
 	     ftpsserver.pl getpart.pm FILEFORMAT README \
-	     stunnel.pem memanalyze.pl
+	     stunnel.pem memanalyze.pl testcurl.pl
 
 SUBDIRS = data server libtest
 
