@@ -111,14 +111,15 @@ HTTP resume is only possible with HTTP/1.1 or later servers.
 
 If this option is used serveral times, the last one will be used.
 .IP "-d/--data <data>"
-(HTTP) Sends the specified data in a POST request to the HTTP server. Note
-that the data is sent exactly as specified with no extra processing (with all
-newlines cut off).  The data is expected to be "url-encoded". This will cause
-curl to pass the data to the server using the content-type
-application/x-www-form-urlencoded. Compare to -F. If more than one -d/--data
-option is used on the same command line, the data pieces specified will be
-merged together with a separating &-letter. Thus, using '-d name=daniel -d
-skill=lousy' would generate a post chunk that looks like
+(HTTP) Sends the specified data in a POST request to the HTTP server, in a way
+that can emulate as if a user has filled in a HTML form and pressed the submit
+button. Note that the data is sent exactly as specified with no extra
+processing (with all newlines cut off).  The data is expected to be
+"url-encoded". This will cause curl to pass the data to the server using the
+content-type application/x-www-form-urlencoded. Compare to -F. If more than
+one -d/--data option is used on the same command line, the data pieces
+specified will be merged together with a separating &-letter. Thus, using '-d
+name=daniel -d skill=lousy' would generate a post chunk that looks like
 'name=daniel&skill=lousy'.
 
 If you start the data with the letter @, the rest should be a file name to
