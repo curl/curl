@@ -8,8 +8,8 @@ curl_formadd - add a section to a multipart/formdata HTTP POST
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "CURLFORMcode curl_formadd(struct HttpPost ** " firstitem,
-.BI "struct HttpPost ** " lastitem, " ...);"
+.BI "CURLFORMcode curl_formadd(struct curl_httppost ** " firstitem,
+.BI "struct curl_httppost ** " lastitem, " ...);"
 .ad
 .SH DESCRIPTION
 curl_formadd() is used to append sections when building a multipart/formdata

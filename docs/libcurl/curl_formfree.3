@@ -8,7 +8,7 @@ curl_formfree - free a previously build multipart/formdata HTTP POST chain
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "void curl_formfree(struct HttpPost *" form);
+.BI "void curl_formfree(struct curl_httppost *" form);
 .ad
 .SH DESCRIPTION
 curl_formfree() is used to clean up data previously built/appended with
