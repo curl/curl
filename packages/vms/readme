@@ -1,3 +1,4 @@
+$Id$
                              _   _ ____  _
                          ___| | | |  _ \| |
                         / __| | | | |_) | |
@@ -9,6 +10,7 @@ History:
 
  9-MAR-2004, Created this readme. file.  Marty Kuhrt (MSK).
 15-MAR-2004, MSK, Updated to reflect the new files in this directory.
+14-FEB-2005, MSK, removed config-vms.h_with* file comments
 
 
 Prerequisites:
@@ -27,8 +29,7 @@ BUILD_VMS.COM            - The brute force build procedure that sets
                            up the config files, and builds all the C 
                            and MSG files in the lib and src
                            subdirectories.
-CONFIG-VMS.H_WITHOUT_SSL - The config file used for non-SSL builds.
-CONFIG-VMS.H_WITH_SSL    - The config file used for SSL builds.
+CONFIG-VMS.H             - The config file used for all builds.
 CURLMSG.H                - Created with SDL/ALPHA/LANGUAGE=CC CURLMSG.SDL
                            (Needs freeware SDL tool)
 CURLMSG.MSG              - Source for .SDL and .H as well as the 
