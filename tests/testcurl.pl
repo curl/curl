@@ -1,4 +1,4 @@
-#!/usr/bin/env perl -w
+#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -45,6 +45,9 @@
 use strict;
 
 use Cwd;
+
+# Turn on warnings (equivalent to -w, which can't be used with /usr/bin/env)
+BEGIN { $^W = 1; }
 
 use vars qw($version $fixed $infixed $CURLDIR $CVS $pwd $build $buildlog $buildlogname $gnulikebuild);
 use vars qw($name $email $desc $confopts);
