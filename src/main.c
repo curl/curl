@@ -109,6 +109,7 @@ typedef enum {
 /* Just a set of bits */
 #define CONF_DEFAULT  0
 
+#define CONF_USEREMOTETIME (1<<0) /* set the remote time on the local file */
 #define CONF_AUTO_REFERER (1<<4) /* the automatic referer-system please! */
 #define CONF_VERBOSE  (1<<5) /* talk a lot */
 #define CONF_HEADER   (1<<8) /* throw the header out too */
@@ -252,6 +253,7 @@ static void help(void)
        " -D/--dump-header <file> Write the headers to this file\n"
        " -e/--referer       Referer page (H)\n"
        " -E/--cert <cert:passwd> Specifies your certificate file and password (HTTPS)\n"
+       "    --cacert <file> CA certifciate to verify peer against (HTTPS)\n"
        " -f/--fail          Fail silently (no output at all) on errors (H)\n"
        " -F/--form <name=content> Specify HTTP POST data (H)\n"
 
@@ -332,6 +334,7 @@ struct Configurable {
   long conf;
   char *url;
   char *cert;
+  char *cacert;
   char *cert_passwd;
   bool crlf;
   char *cookiefile;
@@ -489,6 +492,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"D", "dump-header", TRUE},
     {"e", "referer",     TRUE},
     {"E", "cert",        TRUE},
+    {"Ea", "cacert",     TRUE},
     {"f", "fail",        FALSE},
     {"F", "form",        TRUE},
 
@@ -760,7 +764,11 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       }
       break;
     case 'E':
-      {
+      if(subletter == 'a') {
+        /* CA info PEM file */
+        GetStr(&config->cacert, nextarg);
+      }
+      else {
 	char *ptr = strchr(nextarg, ':');
 	if(ptr) {
 	  /* we have a password too */
@@ -1250,44 +1258,46 @@ void progressbarinit(struct ProgressData *bar)
 
 }
 
-void free_config_fields(struct Configurable *confp)
+void free_config_fields(struct Configurable *config)
 {
-  if(confp->url)
-    free(confp->url);
-  if(confp->userpwd)
-    free(confp->userpwd);
-  if(confp->postfields)
-    free(confp->postfields);
-  if(confp->proxy)
-    free(confp->proxy);
-  if(confp->proxyuserpwd)
-    free(confp->proxyuserpwd);
-  if(confp->cookie)
-    free(confp->cookie);
-  if(confp->cookiefile)
-    free(confp->cookiefile);
-  if(confp->krb4level)
-    free(confp->krb4level);
-  if(confp->headerfile)
-    free(confp->headerfile);
-  if(confp->outfile)
-    free(confp->outfile);
-  if(confp->ftpport)
-    free(confp->ftpport);
-  if(confp->infile)
-    free(confp->infile);
-  if(confp->range)
-    free(confp->range);
-  if(confp->customrequest)
-    free(confp->customrequest);
-  if(confp->writeout)
-    free(confp->writeout);
-  if(confp->httppost)
-    curl_formfree(confp->httppost);
+  if(config->url)
+    free(config->url);
+  if(config->userpwd)
+    free(config->userpwd);
+  if(config->postfields)
+    free(config->postfields);
+  if(config->proxy)
+    free(config->proxy);
+  if(config->proxyuserpwd)
+    free(config->proxyuserpwd);
+  if(config->cookie)
+    free(config->cookie);
+  if(config->cookiefile)
+    free(config->cookiefile);
+  if(config->krb4level)
+    free(config->krb4level);
+  if(config->headerfile)
+    free(config->headerfile);
+  if(config->outfile)
+    free(config->outfile);
+  if(config->ftpport)
+    free(config->ftpport);
+  if(config->infile)
+    free(config->infile);
+  if(config->range)
+    free(config->range);
+  if(config->customrequest)
+    free(config->customrequest);
+  if(config->writeout)
+    free(config->writeout);
+  if(config->httppost)
+    curl_formfree(config->httppost);
+  if(config->cacert)
+    free(config->cacert);
 
-  curl_slist_free_all(confp->quote); /* the checks for confp->quote == NULL */
-  curl_slist_free_all(confp->postquote); /*  */
-  curl_slist_free_all(confp->headers); /*  */
+  curl_slist_free_all(config->quote); /* checks for config->quote == NULL */
+  curl_slist_free_all(config->postquote); /*  */
+  curl_slist_free_all(config->headers); /*  */
 }
 
 
@@ -1653,6 +1663,19 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_HTTPPOST, config->httppost);
       curl_easy_setopt(curl, CURLOPT_SSLCERT, config->cert);
       curl_easy_setopt(curl, CURLOPT_SSLCERTPASSWD, config->cert_passwd);
+
+      if(config->cacert) {
+        /* available from libcurl 7.5: */
+        curl_easy_setopt(curl, CURLOPT_CAINFO, config->cacert);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, TRUE);
+      }
+
+      if(config->conf&(CONF_NOBODY|CONF_USEREMOTETIME)) {
+        /* no body or use remote time */
+        /* new in 7.5 */
+        curl_easy_setopt(curl, CURLOPT_FILETIME, TRUE);
+      }
+
       curl_easy_setopt(curl, CURLOPT_CRLF, config->crlf);
       curl_easy_setopt(curl, CURLOPT_QUOTE, config->quote);
       curl_easy_setopt(curl, CURLOPT_POSTQUOTE, config->postquote);
