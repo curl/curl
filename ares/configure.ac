@@ -41,7 +41,7 @@ AC_HELP_STRING([--disable-debug],[Disable debug options]),
     dnl Checks for standard header files, to make memdebug.h inclusions bettter
     AC_HEADER_STDC
 
-    CPPFLAGS="$CPPFLAGS -DCURLDEBUG -I../include"
+    CPPFLAGS="$CPPFLAGS -DCURLDEBUG -I$srcdir/../include"
     CFLAGS="$CFLAGS -g" 
 
     dnl set compiler "debug" options to become more picky, and remove
