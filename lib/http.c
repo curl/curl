@@ -735,7 +735,7 @@ CURLcode Curl_http(struct connectdata *conn)
        * equal to UTC (Coordinated Universal Time)." (see page 20 of RFC2616).
        */
 
-#ifdef HAVE_LOCALTIME_R
+#ifdef HAVE_GMTIME_R
       /* thread-safe version */
       /* We assume that the presense of localtime_r() proves the presense
          of gmtime_r() which is a bit ugly but might work */
