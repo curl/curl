@@ -306,7 +306,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
       else if(gotbytes <= 0) {
         keepon = FALSE;
         result = CURLE_RECV_ERROR;
-        failf(data, "Connection aborted");
+        failf(data, "FTP response reading failed");
       }
       else {
         /* we got a whole chunk of data, which can be anything from one
