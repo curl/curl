@@ -6,8 +6,7 @@
 
 FAQ
 
-Problems connecting to SSL servers.
-===================================
+1. Problems connecting to SSL servers.
 
   It took a very long time before I could sort out why curl had problems
   to connect to certain SSL servers when using SSLeay or OpenSSL v0.9+.
@@ -22,23 +21,37 @@ Problems connecting to SSL servers.
   I have also seen examples where the remote server didn't like the SSLv2
   request and instead you had to force curl to use SSLv3 with -3/--sslv3.
 
-Does curl support resume?
-=========================
+2. curl: (1) SSL is disabled, https: not supported
+
+  If you get this output when trying to get anything from a https:// server,
+  it means that the configure script couldn't find all libs and include files
+  it requires for SSL to work. If the configure script fails to find them,
+  curl is simply built without SSL support.
+
+  To get the https:// support into a curl that was previously built but that
+  reports that https:// is not supported, you should dig through the document
+  and logs and check out why the configure script doesn't find the SSL libs
+  and/or include files.
+
+  Also, check out the other paragraph in this FAQ labeled "configure doesn't
+  find OpenSSL even when it is installed".
+
+3. Does curl support resume?
 
   Yes. Both ways on FTP, download ways on HTTP.
 
-Is libcurl thread safe?
-=======================
+4. Is libcurl thread safe?
 
-  Yes, as far as curl's own code goes. It does use system calls that often
-  aren't thread safe in most environments, such as gethostbyname().
+  As version seven is slowly marching in as the libcurl version to use, we
+  have made a serious attempt to address all places in the code where we could
+  forsee problems for multi-threaded programs. If your system has them, curl
+  will attempt to use threadsafe functions instead of non-safe ones.
 
   I am very interested in once and for all getting some kind of report or
   README file from those who have used libcurl in a threaded environment,
   since I haven't and I get this question more and more frequently!
 
-Why doesn't my posting using -F work?
-=====================================
+5. Why doesn't my posting using -F work?
 
   You can't simply use -F or -d at your choice. The web server that will
   receive your post assumes one of the formats. If the form you're trying to
@@ -46,8 +59,12 @@ Why doesn't my posting using -F work?
   use the -F type. In all the most common cases, you should use -d which then
   causes a posting with the type 'application/x-www-form-urlencoded'.
 
-Does curl support custom FTP commands?
-======================================
+  I have described this in some detail in the README.curl file, and if you
+  don't understand it the first time, read it again before you post questions
+  about this to the mailing list. I would also suggest that you read through
+  the mailing list archives for old postings and questions regarding this.
+
+6. Does curl support custom FTP commands?
 
   Yes it does, you can tell curl to perform optional commands both before
   and/or after a file transfer. Study the -Q/--quote option.
@@ -56,8 +73,7 @@ Does curl support custom FTP commands?
   ftp commands without transfering anything. Therefore you must always specify
   a URL to transfer to/from even when doing custom FTP commands.
 
-Does curl work with other SSL libraries?
-========================================
+7. Does curl work with other SSL libraries?
 
   Curl has been written to use OpenSSL, although I doubt there would be much
   problems using a different library. I just don't know any other free one and
@@ -66,20 +82,38 @@ Does curl work with other SSL libraries?
   If anyone does "port" curl to use a commercial SSL library, I am of course
   very interested in getting the patch!
 
-configre doesn't find OpenSSL even when it is installed
-=======================================================
+8. configure doesn't find OpenSSL even when it is installed
 
-  Platforms: Solaris (native cc compiler) and HPUX (native cc compiler)
+  This may be because of several reasons.
 
-  When configuring curl, I specify --with-ssl. OpenSSL is installed in
-  /usr/local/ssl Configure reports SSL in /usr/local/ssl, but fails to find
-  CRYPTO_lock in -lcrypto 
+  8.1. native linker doesn't find openssl
 
-  Cause: The cc for this test places the -L/usr/local/ssl/lib AFTER -lcrypto,
-  so ld can't find the library. This is due to a bug in the GNU autoconf tool.
+    Platforms: Solaris (native cc compiler) and HPUX (native cc compiler)
 
-  Workaround: Specifying "LDFLAGS=-L/usr/local/ssl/lib" in front of ./configure
-  places the -L/usr/local/ssl/lib early enough in the command line to make
-  things work
+    When configuring curl, I specify --with-ssl. OpenSSL is installed in
+    /usr/local/ssl Configure reports SSL in /usr/local/ssl, but fails to find
+    CRYPTO_lock in -lcrypto
 
-  Submitted by: Bob Allison <allisonb@users.sourceforge.net>
+    Cause: The cc for this test places the -L/usr/local/ssl/lib AFTER
+    -lcrypto, so ld can't find the library. This is due to a bug in the GNU
+    autoconf tool.
+
+    Workaround: Specifying "LDFLAGS=-L/usr/local/ssl/lib" in front of
+    ./configure places the -L/usr/local/ssl/lib early enough in the command
+    line to make things work
+
+    Submitted by: Bob Allison <allisonb@users.sourceforge.net>
+
+  8.2. only the libssl lib is missing
+
+    If all include files and the libcrypto lib is present, with only the
+    libssl being missing according to configure, this is mostly likely because
+    a few functions are left out from the libssl.
+
+    If the function names missing include RSA or RSAREF you can be certain
+    that this is because libssl requires the RSA and RSASEF libs to build.
+
+    See the INSTALL file section that explains how to add those libs to
+    configure. Make sure that you remove the config.cache file before you
+    rerun configure with the new flags.
+
