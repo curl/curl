@@ -359,6 +359,7 @@ PORTS
         - ia64 Linux 2.3.99
         - m68k AmigaOS 3
         - m68k OpenBSD
+        - StrongARM Linux 2.4
         - StrongARM NetBSD 1.4.1
         - StrongARM (and other ARM) RISC OS 3.1, 4.02
 
