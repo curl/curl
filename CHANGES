@@ -6,6 +6,41 @@
 
                                History of Changes
 
+Daniel (2 October 2001)
+- Major fix in how libcurl does TCP connects. It now does non-blocking
+  connects to enable good timeouts without signals, and it now tries all IP
+  addresses for any given host (if it resolves more than one and the first
+  one(s) don't connect). Added a new source file 'connect.c' to deal with all
+  the TCP connect stuff.
+
+- We now support IPv4-style IP-addresses in rfc2732-format, to better support
+  people writing scripts without knowing what address there is.
+
+Daniel (28 September 2001)
+- Cleanups in the FTP source code. Divided the code into even more smaller
+  functions and generally tried to make the differences between IPv4 and IPv6
+  get less noticable in the sources.
+
+- If the remote file time is not readable/accessable/understood by libcurl,
+  libcurl now returns -1 in the CURLINFO_FILETIME data, not 0 as it previously
+  did. This should make curl not touch the file data unless there was a known
+  remote date when -R is used.
+
+Daniel (27 September 2001)
+- Working on getting non-blocking connects working platform independent. We
+  will also make curl try all IPs for a given host if the first one should
+  fail.
+
+Daniel (26 September 2001)
+- Kevin Roth provided a cookie example that proved the cookie jar
+  functionality wasn't working properly. I added test case 46 and made it
+  work.
+
+Daniel (25 September 2001)
+- Jörn Hartroth updated the mingw32 makefiles.
+
+Version 7.9
+
 Daniel (23 September 2001)
 - Found and removed a 'socket leak' that would occur on IPv6 enabled hosts
   when FTP RETR failed.
