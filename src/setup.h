@@ -23,6 +23,8 @@
  * $Id$
  ***************************************************************************/
 
+#define CURL_NO_OLDIES
+
 #if !defined(WIN32) && defined(__WIN32__)
 /* Borland fix */
 #define WIN32
