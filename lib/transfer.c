@@ -1846,13 +1846,13 @@ CURLcode Curl_perform(struct SessionHandle *data)
          to the new URL */
       urlchanged = data->change.url_changed;
       if ((CURLE_OK == res) && urlchanged) {
-        char *newurl;
+        char *gotourl;
         res = Curl_done(conn);
         if(CURLE_OK == res) {
           newurl = strdup(data->change.url);
-          res = Curl_follow(data, newurl);
+          res = Curl_follow(data, gotourl);
           if(res)
-            free(newurl);
+            free(gotourl);
         }
       }
     } while (urlchanged && res == CURLE_OK) ; 
@@ -1861,8 +1861,6 @@ CURLcode Curl_perform(struct SessionHandle *data)
       res = Curl_do(&conn);
 
       if(res == CURLE_OK) {
-        CURLcode res2; /* just a local extra result container */
-
         if(conn->protocol&PROT_FTPS)
           /* FTPS, disable ssl while transfering data */
           conn->ssl.use = FALSE;
