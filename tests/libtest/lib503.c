@@ -14,7 +14,7 @@
  * auth info.
  */
 
-CURLcode test(char *URL)
+int test(char *URL)
 {
   CURL *c;
   CURLM *m;
@@ -82,6 +82,6 @@ CURLcode test(char *URL)
   curl_easy_cleanup(c);
   curl_multi_cleanup(m);
 	
-  return 0;
+  return CURLE_OK;
 }
 

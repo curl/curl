@@ -1,6 +1,6 @@
 #include "test.h"
 
-CURLcode test(char *URL)
+int test(char *URL)
 {
   CURLcode res;
   CURL *curl = curl_easy_init();

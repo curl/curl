@@ -6,7 +6,7 @@ extern void curl_memdebug(const char *);
 #endif
 
 /* test is provided in the test code file */
-CURLcode test(char *url);
+int test(char *url);
 
 char *arg2=NULL;
 

@@ -1,6 +1,6 @@
 #include "test.h"
 
-CURLcode test(char *URL)
+int test(char *URL)
 {
   CURL* curls;
   CURLM* multi;

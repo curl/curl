@@ -159,8 +159,7 @@ static CURLcode sslctxfun(CURL * curl, void * sslctx, void * parm)
   return CURLE_OK ;
 }
 
-
-CURLcode test(char *URL)
+int test(char *URL)
 {
   CURLM* multi;
   sslctxparm p;

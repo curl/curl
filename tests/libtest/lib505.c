@@ -34,7 +34,7 @@
  * Example based on source code provided by Erick Nuwendam. Thanks!
  */
 
-CURLcode test(char *URL)
+int test(char *URL)
 {
   CURL *curl;
   CURLcode res;

@@ -127,7 +127,7 @@ char *suburl(char *base, int i)
 
 
 /* test function */
-CURLcode test(char *URL)
+int test(char *URL)
 {
   CURLcode res;
   CURLSHcode scode;
