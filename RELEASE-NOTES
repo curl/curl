@@ -10,7 +10,7 @@ Curl and libcurl 7.12.2
 
 This release includes the following changes:
 
- o 
+ o curl_getdate() completely rewritten, which may affect curl -z use cases.
 
 This release includes the following bugfixes:
 

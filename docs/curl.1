@@ -976,15 +976,11 @@ not set.
 
 If this option is used several times, the last one will be used.
 .IP "-z/--time-cond <date expression>"
-(HTTP)
-Request to get a file that has been modified later than the given time and
+(HTTP) Request a file that has been modified later than the given time and
 date, or one that has been modified before that time. The date expression can
 be all sorts of date strings or if it doesn't match any internal ones, it
 tries to get the time from a given file name instead! See the
-.BR "GNU date(1)"
-or
-.BR "curl_getdate(3)"
-man pages for date expression details.
+\fIcurl_getdate(3)\fP man pages for date expression details.
 
 Start the date expression with a dash (-) to make it request for a document
 that is older than the given date/time, default is a document that is newer
