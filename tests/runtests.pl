@@ -899,6 +899,7 @@ sub singletest {
 
     my @what;
     my $why;
+    my %feature;
 
     # load the test case file definition
     if(loadtest("${TESTDIR}/test${testnum}")) {
@@ -915,6 +916,8 @@ sub singletest {
     for(@what) {
         my $f = $_;
         $f =~ s/\s//g;
+
+        $feature{$f}=$f; # we require this feature
 
         if($f eq "SSL") {
             if($ssl_version) {
@@ -1435,7 +1438,9 @@ sub singletest {
             }
             my $leak;
             my $invalidread;
+            my $uninitedvar;
             my $error;
+            my $partial;
 
             open(VAL, "<log/$l");
             while(<VAL>) {
@@ -1446,10 +1451,25 @@ sub singletest {
                     }
                     last;
                 }
-                if($_ =~ /Invalid read of size (\d+)/) {
+                elsif($_ =~ /Invalid read of size (\d+)/) {
                     $invalidread = $1;
                     $error++;
                     last;
+                }
+                elsif($_ =~ /Conditional jump or move/) {
+                    # If we require SSL, this test case most probaly makes
+                    # us use OpenSSL. OpenSSL produces numerous valgrind
+                    # errors of this kind, rendering it impossible for us to
+                    # detect (valid) reports on actual curl or libcurl code.
+
+                    if(!$feature{'SSL'}) {
+                        $uninitedvar = 1;
+                        $error++;
+                        last;
+                    }
+                    else {
+                        $partial=1;
+                    }
                 }
             }
             close(VAL);
@@ -1461,10 +1481,13 @@ sub singletest {
                 if($invalidread) {
                     print "\n Read $invalidread invalid bytes\n";
                 }
+                if($uninitedvar) {
+                    print "\n Conditional jump or move depends on uninitialised value(s)\n";
+                }
                 return 1;
             }
             elsif(!$short) {
-                print " valgrind OK";
+                printf " valgrind %s", $partial?"PARTIAL":"OK";
             }
         }
         else {
