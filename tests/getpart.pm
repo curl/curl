@@ -92,8 +92,15 @@ sub getpart {
 sub loadtest {
     my ($file)=@_;
 
+    my $dir;
+    $dir = $ENV{'srcdir'};
+    if(!$dir) {
+        $dir=".";
+    }
+    
+
     undef @xml;
-    open(XML, "<$file") ||
+    open(XML, "<$dir/$file") ||
         return 1; # failure!
     binmode XML; # for crapage systems, use binary
     while(<XML>) {

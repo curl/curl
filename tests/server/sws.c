@@ -70,7 +70,10 @@ spitout(FILE *stream,
 #define REQUEST_DUMP  "log/server.input"
 #define RESPONSE_DUMP "log/server.response"
 
-#define TEST_DATA_PATH "data/test%d"
+#define TEST_DATA_PATH "%s/data/test%d"
+
+/* global variable, where to find the 'data' dir */
+char *path=".";
 
 enum {
   DOCNUMBER_QUIT    = -6,
@@ -442,7 +445,7 @@ static int send_doc(int sock,
     if(0 != part_no)
       sprintf(partbuf, "data%d", part_no);
 
-    sprintf(filename, TEST_DATA_PATH, doc);
+    sprintf(filename, TEST_DATA_PATH, path, doc);
 
     stream=fopen(filename, "rb");
     if(!stream) {
@@ -537,8 +540,13 @@ int main(int argc, char *argv[])
   int part_no;
   FILE *pidfile;
   
-  if(argc>1)
+  if(argc>1) {
     port = atoi(argv[1]);
+
+    if(argc>2) {
+      path = argv[2];
+    }
+  }
 
   logfp = fopen(logfile, "a");
   if (!logfp) {

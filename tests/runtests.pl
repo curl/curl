@@ -39,7 +39,7 @@ my $FTPSPORT=8821;  # this is the FTPS server port
 my $CURL="../src/curl"; # what curl executable to run on the tests
 my $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
 my $LOGDIR="log";
-my $TESTDIR="data";
+my $TESTDIR="$srcdir/data";
 my $LIBDIR="./libtest";
 my $SERVERIN="$LOGDIR/server.input"; # what curl sent the server
 my $CURLLOG="$LOGDIR/curl.log"; # all command lines run
@@ -354,6 +354,10 @@ sub runhttpserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
+    my $dir=$ENV{'srcdir'};
+    if($dir) {
+        $flag .= "-d \"$dir\" ";
+    }
     $cmd="$perl $srcdir/httpserver.pl $flag $HOSTPORT &";
     system($cmd);
     if($verbose) {
@@ -690,6 +694,9 @@ sub checkcurl {
                 $ssl_version=1;
             }
         }
+    }
+    if(!$curl) {
+        die "couldn't run curl!"
     }
 
     my $hostname=`hostname`;
