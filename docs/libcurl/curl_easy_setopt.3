@@ -534,14 +534,6 @@ curl_easy_cleanup() is called), libcurl will not and cannot report an error
 for this. Using \fICURLOPT_VERBOSE\fP or \fICURLOPT_DEBUGFUNCTION\fP will get
 a warning to display, but that is the only visible feedback you get about this
 possibly lethal situation.
-.IP CURLOPT_TIMECONDITION
-Pass a long as parameter. This defines how the \fICURLOPT_TIMEVALUE\fP time
-value is treated. You can set this parameter to \fICURL_TIMECOND_IFMODSINCE\fP
-or \fICURL_TIMECOND_IFUNMODSINCE\fP. This is a HTTP-only feature.
-.IP CURLOPT_TIMEVALUE
-Pass a long as parameter. This should be the time in seconds since 1 jan 1970,
-and the time will be used in a condition as specified with
-\fICURLOPT_TIMECONDITION\fP.
 .IP CURLOPT_HTTPGET
 Pass a long. If the long is non-zero, this forces the HTTP request to get back
 to GET. Only really usable if POST, PUT or a custom request have been used
@@ -700,6 +692,18 @@ returned. (Added in 7.11.0)
 NOTE: The file size is not always known prior to download, and for such files
 this option has no effect even if the file transfer ends up being larger than
 this given limit. This concerns both FTP and HTTP transfers.
+.IP CURLOPT_TIMECONDITION
+Pass a long as parameter. This defines how the \fICURLOPT_TIMEVALUE\fP time
+value is treated. You can set this parameter to \fICURL_TIMECOND_IFMODSINCE\fP
+or \fICURL_TIMECOND_IFUNMODSINCE\fP. This feature applies to HTTP and FTP.
+
+NOTE: The last modification time of a file is not always known and in such
+instances this feature will have no effect even if the given time condition
+would have not been met.
+.IP CURLOPT_TIMEVALUE
+Pass a long as parameter. This should be the time in seconds since 1 jan 1970,
+and the time will be used in a condition as specified with 
+\fICURLOPT_TIMECONDITION\fP.
 .SH CONNECTION OPTIONS
 .IP CURLOPT_TIMEOUT
 Pass a long as parameter containing the maximum time in seconds that you allow
