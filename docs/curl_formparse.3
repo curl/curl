@@ -2,26 +2,31 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_formparse 3 "5 March 2001" "libcurl 7.0" "libcurl Manual"
+.TH curl_formparse 3 "23 April 2001" "libcurl 7.7.2" "libcurl Manual"
 .SH NAME
 curl_formparse - add a section to a multipart/formdata HTTP POST
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "CURLcode curl_formparse(char *" string, "struct HttpPost **" firstitem,
-.BI "struct HttpPost ** "lastitem ");"
+.BI "CURLcode curl_formparse(char * " string, " struct HttpPost ** " firstitem,
+.BI "struct HttpPost ** " lastitem ");"
 .ad
 .SH DESCRIPTION
 curl_formparse() is used to append sections when building a multipart/formdata
-HTTP POST. Append one section at a time until you've added all the sections
-you want included and then you pass the
-.I firstitem
-pointer as parameter to CURLOPT_HTTPPOST.
-.I lastitem
-is set after each call and on repeated invokes it should be left as set to
-allow repeated invokes to find the end of the list in a faster way.
-.I string
-must be a zero terminated string following the following syntax.
+HTTP POST (sometimes refered to as rfc1867-style posts). Append one section at
+a time until you've added all the sections you want included and then you pass
+the \fI firstitem\fP pointer as parameter to \fBCURLOPT_HTTPPOST\fP.
+\fIlastitem\fP is set after each call and on repeated invokes it should be
+left as set to allow repeated invokes to find the end of the list in a faster
+way.  \fIstring\fP must be a zero terminated string following the following
+syntax.
+
+The pointers \fIfirstitem\fP and \fIlastitem\fP point to, should both be
+pointers to NULL in the first call to this function. All list-data will be
+allocated by the function itself. You must call \fIcurl_formfree\fP after the
+form has been done to free the resources again.
+
+See example below.
 .SH "FORM PARSE STRINGS"
 The
 .I string 
@@ -55,6 +60,18 @@ content-type for all of them in the same way as with a single file.
 .PP
 .SH RETURN VALUE
 Returns non-zero if an error occurs.
+.SH EXAMPLE
+
+ HttpPost* post = NULL;
+ HttpPost* last = NULL;
+
+ /* Add an image section */
+ curl_formparse("picture=@my-face.jpg", &post, &last);
+ /* Add a normal text section */
+ curl_formparse("name=FooBar", &post, &last);
+ /* Set the form info */
+ curl_easy_setopt(curl, CURLOPT_HTTPPOST, &post);
+
 .SH "SEE ALSO"
 .BR curl_easy_setopt "(3) "
 .SH BUGS
