@@ -947,7 +947,7 @@ char *basename(char *path)
   else if(s1)
     path = s1 + 1;
   else if(s2)
-    path = s1 + 1;
+    path = s2 + 1;
 
   return path;
 }
