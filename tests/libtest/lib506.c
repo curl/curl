@@ -14,20 +14,27 @@ struct Tdata {
   char *url;
 };
 
+struct userdata {
+  char *text;
+  int counter;
+};
 
 /* lock callback */
 void lock(CURL *handle, curl_lock_data data, curl_lock_access access,
           void *useptr )
 {
   const char *what;
+  struct userdata *user = (struct userdata *)useptr;
+
   (void)handle;
   (void)access;
+
   switch ( data ) {
     case CURL_LOCK_DATA_SHARE:
-      what = "share ";  
+      what = "share";  
       break;
     case CURL_LOCK_DATA_DNS:
-      what = "dns   ";  
+      what = "dns";  
       break;
     case CURL_LOCK_DATA_COOKIE:
       what = "cookie";  
@@ -36,20 +43,22 @@ void lock(CURL *handle, curl_lock_data data, curl_lock_access access,
       fprintf(stderr, "lock: no such data: %d\n",data);
       return;
   }
-  printf("lock:   %s  <%s>\n", what, (char *)useptr); 
+  printf("lock:   %-6s <%s>: %d\n", what, user->text, user->counter);
+  user->counter++;
 }
 
 /* unlock callback */
 void unlock(CURL *handle, curl_lock_data data, void *useptr )
 {
   const char *what;
+  struct userdata *user = (struct userdata *)useptr;
   (void)handle;
   switch ( data ) {
     case CURL_LOCK_DATA_SHARE:
-      what = "share ";  
+      what = "share";  
       break;
     case CURL_LOCK_DATA_DNS:
-      what = "dns   ";  
+      what = "dns";  
       break;
     case CURL_LOCK_DATA_COOKIE:
       what = "cookie";  
@@ -58,7 +67,8 @@ void unlock(CURL *handle, curl_lock_data data, void *useptr )
       fprintf(stderr, "unlock: no such data: %d\n",data);
       return;
   }
-  printf("unlock: %s  <%s>\n", what, (char *)useptr); 
+  printf("unlock: %-6s <%s>: %d\n", what, user->text, user->counter);
+  user->counter++;
 }
 
 
@@ -127,6 +137,10 @@ CURLcode test(char *URL)
   CURLSH *share;
   struct curl_slist *headers;
   int i;
+  struct userdata user;
+
+  user.text = (char *)"Pigs in space";
+  user.counter = 0;
   
   printf( "GLOBAL_INIT\n" );
   curl_global_init( CURL_GLOBAL_ALL );
@@ -136,7 +150,7 @@ CURLcode test(char *URL)
   share = curl_share_init();
   curl_share_setopt( share, CURLSHOPT_LOCKFUNC,   lock);
   curl_share_setopt( share, CURLSHOPT_UNLOCKFUNC, unlock);
-  curl_share_setopt( share, CURLSHOPT_USERDATA,   "Pigs in space");
+  curl_share_setopt( share, CURLSHOPT_USERDATA,   &user);
   printf( "CURL_LOCK_DATA_COOKIE\n" );
   curl_share_setopt( share, CURLSHOPT_SHARE,      CURL_LOCK_DATA_COOKIE);
   printf( "CURL_LOCK_DATA_DNS\n" );
