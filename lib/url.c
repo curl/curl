@@ -1316,7 +1316,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Enable or disable TCP_NODELAY, which will disable/enable the Nagle
      * algorithm
      */
-    data->set.tcp_nodelay = va_arg(param, long);
+    data->set.tcp_nodelay = (bool)va_arg(param, long);
     break;
 
   default:
