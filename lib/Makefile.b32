@@ -23,7 +23,7 @@ INCDIRS    = -I$(CURNTDIR);$(TOPDIR)/include/
 # 'BCCDIR' has to be set up in your c:\autoexec.bat
 # i.e. SET BCCDIR = c:\Borland\BCC55
 # where c:\Borland\BCC55 is the compiler is installed
-LINKLIB	   = $(BCCDIR)/lib/psdk/wsock32.lib
+LINKLIB	   = $(BCCDIR)/lib/psdk/ws2_32.lib
 LIBCURLLIB = libcurl.lib
 
 .SUFFIXES: .c
