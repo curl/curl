@@ -537,6 +537,7 @@ struct connectdata {
   struct ntlmdata ntlm;     /* NTLM differs from other authentication schemes
                                because it authenticates connections, not
                                single requests! */
+  struct ntlmdata proxyntlm; /* NTLM data for proxy */
 };
 
 /* The end of connectdata. */
