@@ -335,6 +335,8 @@ AC_DEFUN(CURL_CHECK_GETHOSTBYNAME_R,
 #include <string.h>
 #include <sys/types.h>
 #include <netdb.h>
+#undef NULL
+#define NULL (void *)0
 
 int
 gethostbyname_r(const char *, struct hostent *, struct hostent_data *);],[
@@ -350,6 +352,8 @@ gethostbyname_r(NULL, NULL, NULL);],[
 #include <string.h>
 #include <sys/types.h>
 #include <netdb.h>
+#undef NULL
+#define NULL (void *)0
 
 int
 gethostbyname_r(const char *,struct hostent *, struct hostent_data *);],[
@@ -363,6 +367,8 @@ gethostbyname_r(NULL, NULL, NULL);],[
 	AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netdb.h>
+#undef NULL
+#define NULL (void *)0
 
 struct hostent *
 gethostbyname_r(const char *, struct hostent *, char *, int, int *);],[
@@ -375,6 +381,8 @@ gethostbyname_r(NULL, NULL, NULL, 0, NULL);],[
 	  AC_TRY_COMPILE([
 #include <sys/types.h>
 #include <netdb.h>
+#undef NULL
+#define NULL (void *)0
 
 int
 gethostbyname_r(const char *, struct hostent *, char *, size_t,
