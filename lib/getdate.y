@@ -25,7 +25,12 @@
 # undef static
 #endif
 
+#ifdef __APPLE__
+#include <sys/types.h>
+#include <sys/malloc.h>
+#else
 #include <malloc.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
