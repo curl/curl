@@ -1,0 +1,191 @@
+#!/usr/bin/env perl
+#
+# formfind.pl
+#
+# This script gets a HTML page from the specified URL and presents form
+# information you may need in order to machine-make a respond to the form.
+#
+# Written to use 'curl' for URL fetching.
+#
+# Author: Daniel Stenberg <daniel@haxx.se>
+# Version: 0.2 Nov 18, 2002
+#
+# HISTORY
+#
+# 0.1 - Nov 12 1998 - Created now!
+# 0.2 - Nov 18 2002 - Enhanced. Removed URL support, use only stdin.
+#
+
+$in="";
+
+$usestdin = 1;
+
+if($ARGV[0] eq "-h") {
+    print  "Usage: $0 < HTML\n";
+    exit;
+}
+# If you need a proxy for web access, edit your .curlrc file to feature
+# -x <proxy:port>
+
+# linkchecker, URL will be appended to the right of this command line
+# this is the one using HEAD:
+$linkcheck = "curl -s -m 20 -I";
+
+# as a second attempt, this will be used. This is not using HEAD but will
+# get the whole frigging document!
+$linkcheckfull = "curl -s -m 20 -i";
+
+# htmlget, URL will be appended to the right of this command line
+$htmlget = "curl -s";
+
+# urlget, URL will be appended to the right of this command line
+# this stores the file with the remote file name in the current dir
+$urlget = "curl -O -s";
+
+sub namevalue {
+    my ($tag)=@_;
+    my $name=$tag;
+    if($name =~ /name *=/i) {
+        $name=~ s/.*name *= *(\"|)([^ \">]*).*/$2/gi;
+    }
+    else {
+        # no name given
+        $name="";
+    }
+    # get value tag
+    my $value= $tag;
+    if($value =~ /value *=/i) {
+        $value=~ s/.*value *= *(\"|)([^ \">]*).*/$2/gi;
+    }
+    else {
+        $value="";
+    }
+    return ($name, $value);
+}
+
+
+while(<STDIN>) {
+    $line = $_;
+    push @indoc, $line;
+    $line=~ s/\n//g;
+    $line=~ s/\r//g;
+    $in=$in.$line;
+}
+
+while($in =~ /[^<]*(<[^>]+>)/g ) {
+    # we have a tag in $1
+    $tag = $1;
+	
+    if($tag =~ /^<!--/) {
+        # this is a comment tag, ignore it 
+    }
+    else {
+        if(!$form &&
+           ($tag =~ /^< *form/i )) {
+            $method= $tag;
+            if($method =~ /method *=/i) {
+                $method=~ s/.*method *= *(\"|)([^ \">]*).*/$2/gi;
+            }
+            else {
+                $method="get"; # default method
+            }
+            $action= $tag;
+            $action=~ s/.*action *= *(\"|)([^ \">]*).*/$2/gi;
+            
+            $method=uc($method);
+            
+            $enctype=$tag;
+            if ($enctype =~ /enctype *=/) {
+                $enctype=~ s/.*enctype *= *(\'|\"|)([^ \"\'>]*).*/$2/gi;
+                
+                if($enctype eq "multipart/form-data") {
+                    $enctype="multipart form upload [use -F]"
+		    }
+                $enctype = "\n--- type: $enctype";
+            }
+            else {
+                $enctype="";
+            }
+
+            print "--- FORM report. Uses $method to URL \"$action\"$enctype\n";
+            $form=1;
+        }
+        elsif($form &&
+              ($tag =~ /< *\/form/i )) {
+
+            print "--- end of FORM\n";
+            $form=0;
+            if( 0 ) {
+                print "*** Fill in all or any of these: (default assigns may be shown)\n";
+                for(@vars) {
+                    $var = $_;
+                    $def = $value{$var};
+                    print "$var=$def\n";
+                }
+                print "*** Pick one of these:\n";
+                for(@alts) {
+                    print "$_\n";
+                }
+            }
+            undef @vars;
+            undef @alts;
+        }
+        elsif($form &&
+              ($tag =~ /^< *(input|select)/i)) {
+            $mtag = $1;
+            
+            ($name, $value)=namevalue($tag);
+		
+            if($mtag =~ /select/i) {
+                print "Select: $name\n";
+                push @vars, "$name";
+                $select = 1;
+            }
+            else {
+                $type=$tag;
+                if($type =~ /type *=/i) {
+                    $type =~ s/.*type *= *(\"|)([^ \">]*).*/$2/gi;
+                }
+                else {
+                    $type="text"; # default type
+                }
+                $type=uc($type);
+                if(lc($type) eq "reset") {
+                    # reset types are for UI only, ignore.
+                }
+                elsif($name eq "") {
+                    # let's read the value parameter
+                    
+                    print "Button: \"$value\" ($type)\n";
+                    push @alts, "$value";
+                }
+                else {
+                    $info="";
+                    if($value ne "") {
+                        $info="=$value";
+                    }
+                    print "Input: $name$info ($type)\n";
+                    push @vars, "$name";
+                    # store default value:
+                    $value{$name}=$value;
+                }
+            }
+        }
+        elsif($form &&
+              ($tag =~ /^< *textarea/i)) {
+            my ($name, $value)=namevalue($tag);
+            
+            print "Textarea: $name\n";
+        }
+        elsif($select) {
+            if($tag =~ /^< *\/ *select/i) {
+                print "[end of select]\n";
+                $select = 0;
+            }
+            elsif($tag =~ /[^\/] *option/i ) {
+                my ($name, $value)=namevalue($tag);
+                print "  One option (name \"$name\") = \"$value\"\n";
+            }
+        }
+    }
+}
