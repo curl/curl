@@ -171,6 +171,10 @@ will imply this option.
 A non-zero parameter tells the library to just list the names of an ftp
 directory, instead of doing a full directory listing that would include file
 sizes, dates etc.
+
+This causes an FTP NLST command to be sent.  Beware that some FTP servers
+list only files in their response to NLST; they do not include
+subdirectories and symbolic links.
 .TP
 .B CURLOPT_FTPAPPEND
 A non-zero parameter tells the library to append to the remote file instead of

@@ -329,6 +329,10 @@ Especially useful if you want to machine-parse the contents of an FTP
 directory since the normal directory view doesn't use a standard look
 or format.
 
+This option causes an FTP NLST command to be sent.  Some FTP servers
+list only files in their response to NLST; they do not include
+subdirectories and symbolic links.
+
 If this option is used twice, the second will again disable list only.
 .IP "-L/--location"
 (HTTP/HTTPS) If the server reports that the requested page has a different
