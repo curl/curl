@@ -7,9 +7,18 @@
                                History of Changes
 
 Daniel (5 January 2001)
+- Huge client-side hack: now multiple URLs are supported. Any number of URLs
+  can be specified on the command line, and they'll all be downloaded. There
+  must be a corresponding -o or -O for each URL or the data will be written to
+  stdout. This needs more testing, time to release a 7.6-pre package.
+
 - The krb4 support was broken in the release. Fixed now.
 
-- Huge internal symbol rename operation. 
+- Huge internal symbol rename operation. All non-static but still lib-internal
+  symbols should now be prefixed with 'Curl_' to prevent collisions with other
+  libs. All public symbols should be prefixed with 'curl_' and the rest should
+  be static and thus invisible to the outside world. I updated the INTERNALS
+  document to say this as well.
 
 Version 7.5.2
 
