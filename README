@@ -11,7 +11,7 @@ README
   README.curl document. Find out how to install Curl by reading the INSTALL
   document.
 
-  libcurl is a link-library that Curl is using to do its job. It is readily
+  libcurl is a library that Curl is using to do its job. It is readily
   available to be used by your software. Read the README.libcurl document to
   find out how!
 
@@ -25,7 +25,6 @@ README
 
         Sweden --  ftp://ftp.sunet.se/pub/www/utilities/curl/
         Germany -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
-        China --   http://www.pshowing.com/curl/
 
   To download the very latest source off the CVS server do this:
 

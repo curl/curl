@@ -10,12 +10,6 @@
 /* Define to empty if the keyword does not work.  */
 #undef const
 
-/* Define if you don't have vprintf but do have _doprnt.  */
-#undef HAVE_DOPRNT
-
-/* Define if you have the vprintf function.  */
-#undef HAVE_VPRINTF
-
 /* Define as the return type of signal handlers (int or void).  */
 #undef RETSIGTYPE
 

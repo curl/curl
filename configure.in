@@ -2,7 +2,7 @@ dnl $Id$
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(lib/urldata.h)
 AM_CONFIG_HEADER(config.h src/config.h)
-AM_INIT_AUTOMAKE(curl,"7.1")
+AM_INIT_AUTOMAKE(curl,"7.1.1")
 AM_PROG_LIBTOOL
 
 dnl
@@ -184,13 +184,12 @@ dnl check for a few thread-safe functions
 #include <sys/types.h>
 #include <netdb.h>],
             [
-struct hostent *hp;
 struct hostent h;
+struct hostent_data hdata;
 char *name;
-char buffer[10];
-int  h_errno;
-hp = gethostbyname_r(name, &h, buffer, 10, &h_errno);],
-            ac_cv_gethostbyname_args=5)
+int  rc;
+rc = gethostbyname_r(name, &h, &hdata);],
+            ac_cv_gethostbyname_args=3)
     fi
     if test -z "$ac_cv_gethostbyname_args"; then
         AC_TRY_COMPILE(
@@ -198,12 +197,13 @@ hp = gethostbyname_r(name, &h, buffer, 10, &h_errno);],
 #include <sys/types.h>
 #include <netdb.h>],
             [
+struct hostent *hp;
 struct hostent h;
-struct hostent_data hdata;
 char *name;
-int  rc;
-rc = gethostbyname_r(name, &h, &hdata);],
-            ac_cv_gethostbyname_args=3)
+char buffer[10];
+int  h_errno;
+hp = gethostbyname_r(name, &h, buffer, 10, &h_errno);],
+            ac_cv_gethostbyname_args=5)
     fi
     if test -z "$ac_cv_gethostbyname_args"; then
         AC_TRY_COMPILE(

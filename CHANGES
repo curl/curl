@@ -6,6 +6,28 @@
 
                                History of Changes
 
+Version 7.1.1
+
+Daniel (21 August 2000)
+- Got more people involved in the gethostbyname_r() mess. Caolan McNamara sent
+  me configure-code that turned out to be very similar to my existing tests
+  which only make me more sure I'm on the right path. I changed the order of
+  the tests slightly, as it seems that some compilers don't yell error if a
+  function is used with too many parameters. Thus, the first tested function
+  will seem ok... Let's hope more compilers think of too-few parameters as bad
+  manners, as we're now trying the functions in that order; fewer first. I
+  should also add that Lars Hecking mailed me and volunteered to run tests on
+  a few odd systems. Coalan is keeping his work over at
+  http://www.csn.ul.ie/~caolan/publink/gethostbyname_r/. Might be handy in the
+  future as well.
+
+Daniel (18 August 2000)
+- I noticed I hadn't increased the name lookup buffer in lib/ftp.c. I don't
+  think this is the reason for the continued trouble though.
+
+Daniel (17 August 2000)
+- Fred Noz corrected my stupid mistakes in the gethostbyname_r() fluff. It
+  should affect some AIX, Digital Unix and HPUX 10 systems.
 
 Daniel (15 August 2000)
 - Mathieu Legare compiled and build 7.1 without errors on both AIX 4.2 as well
@@ -16,19 +38,21 @@ Daniel (15 August 2000)
   screwed up!
 
 Daniel (11 August 2000)
-- Jason Priebe and an anynomous friend found some host names the Linux version
+- Jason Priebe and an anonymous friend found some host names the Linux version
   of curl could not resolve. It turned out the buffer used to retrieve that
   information was too small. Fixed. One could argue about the usefulness of
   not having the slightest trace of a man page for gethostbyname_r() on my
   Linux Redhat installation...
 
 Daniel (10 August 2000)
-- Balaji S Rao missed the possibility of replacing the Content-Type: and
-  Content-Length: headers when doing -d posts. I added the possibility just now
+- Balaji S Rao was first in line to note the missing possibility to replace
+  the Content-Type: and Content-Length: headers when doing -d posts. I added
+  the possibility just now. It seems some people wants to do standard posts
+  using custom Content-Types.
 
 Daniel (8 August 2000)
-- Mike Dowell correctly discovered that curl did not approve URLs with no user
-  name but password. As in 'http://:foo@haxx.se'. I corrected this.
+- Mike Dowell correctly discovered that curl did not approve of URLs with no
+  user name but password. As in 'http://:foo@haxx.se'. I corrected this.
 
 Version 7.1
 

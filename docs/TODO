@@ -6,26 +6,6 @@
 
 TODO
 
-For version 7. Stuff I palnned to have included in curl for version
-seven. Let's do a serious attempt to include most of this. (I do keep a task
-list over at the sourceforge.net project space, reachable from
-curl.sourceforge.net, it might be more up-to-date than this.)
-
-  Make sure the low-level interface works. highlevel.c should basically be
-  possible to write using that interface.
-
-  Document the low-level interface
-
-  Add asynchronous name resolving, as this enables full timeout support for
-  fork() systems.
-
-  Move non-URL related functions that are used by both the lib and the curl
-  application to a separate "portability lib".
-
-  Add support for other languages than C (not important)
-
-  Improve the -K config file parser.
-
 For the future
 
  Ok, this is what I wanna do with Curl. Please tell me what you think, and
@@ -33,9 +13,20 @@ For the future
  product! (Yes, you may add things not mentioned here, these are just a
  few teasers...)
 
- * rtsp:// support -- "Real Time Streaming Protocol"
+ * Make sure the low-level interface works. highlevel.c should basically be
+   possible to write using that interface. Document the low-level interface
 
-   RFC 2326
+ * Add asynchronous name resolving, as this enables full timeout support for
+   fork() systems.
+
+ * Move non-URL related functions that are used by both the lib and the curl
+   application to a separate "portability lib".
+
+ * Add support for other languages than C (not important)
+
+ * Improve the -K config file parser.
+
+ * rtsp:// support -- "Real Time Streaming Protocol" (RFC 2326)
 
  * "Content-Encoding: compress/gzip/zlib"
 
@@ -101,9 +92,6 @@ For the future
    RFC 2428 "FTP Extensions for IPv6 and NATs" will be interesting. PORT
    should be replaced with EPRT for IPv6, and EPSV instead of PASV.
 
- * An automatic RPM package maker
-   Please, write me a script that makes it. It'd make my day.
-
  * SSL for more protocols, like SSL-FTP...
    (http://search.ietf.org/internet-drafts/draft-murray-auth-ftp-ssl-05.txt)
 
@@ -111,4 +99,6 @@ For the future
 
  * Make curl capable of verifying the server's certificate when connecting
    with HTTPS://.
+
+ * Kerberos-FTP
 
