@@ -1,3 +1,5 @@
+# to build Mac OS X framework call the following line with the directory set properly to lib
+# make build -e -f libcurl.framework.make
 TMP_DIR = ../lib/.lib
 LIB_DIR = ../lib
 
@@ -12,11 +14,7 @@ C_OPTIONS = \
 	-I../include \
 	-Wall
 
-# The 2 -framework tags are the needed Mac OS X sytem libs
-# must link to version 0.9 of libssl to run on Mac OS X 10.2.  10.1 is not tested but should work.
-LIBRARIES = -framework CoreFoundation \
-	-framework CoreServices \
-	/usr/lib/libssl.dylib \
+LIBRARIES = /usr/lib/libssl.dylib \
 	/usr/lib/libcrypto.dylib \
 	-lz 
 
@@ -30,7 +28,7 @@ LIBRARIES = -framework CoreFoundation \
 LINK_OPTIONS = -prebind \
 	-seg1addr 0x10400000 \
 	-dynamiclib \
-	-install_name @executable_path/../frameworks/libcurl.framework/libcurl
+	-install_name @executable_path/../Frameworks/libcurl.framework/libcurl
 
 # This is the file list.  It is not dynamically generated so this must be updated if new files are added to the build.
 OBJECTS = $(TMP_DIR)/base64.o \
@@ -43,17 +41,23 @@ OBJECTS = $(TMP_DIR)/base64.o \
 	$(TMP_DIR)/file.o \
 	$(TMP_DIR)/formdata.o \
 	$(TMP_DIR)/ftp.o \
-	$(TMP_DIR)/getdate.o \
 	$(TMP_DIR)/getenv.o \
 	$(TMP_DIR)/getinfo.o \
 	$(TMP_DIR)/hash.o \
+	$(TMP_DIR)/hostares.o \
+	$(TMP_DIR)/hostasyn.o \
 	$(TMP_DIR)/hostip.o \
+	$(TMP_DIR)/hostip4.o \
+	$(TMP_DIR)/hostip6.o \
+	$(TMP_DIR)/hostsyn.o \
+	$(TMP_DIR)/hostthre.o \
 	$(TMP_DIR)/http.o \
 	$(TMP_DIR)/http_chunks.o \
 	$(TMP_DIR)/http_digest.o \
 	$(TMP_DIR)/http_negotiate.o \
 	$(TMP_DIR)/http_ntlm.o \
 	$(TMP_DIR)/if2ip.o \
+	$(TMP_DIR)/inet_ntop.o \
 	$(TMP_DIR)/inet_pton.o \
 	$(TMP_DIR)/krb4.o \
 	$(TMP_DIR)/ldap.o \
@@ -63,6 +67,7 @@ OBJECTS = $(TMP_DIR)/base64.o \
 	$(TMP_DIR)/mprintf.o \
 	$(TMP_DIR)/multi.o \
 	$(TMP_DIR)/netrc.o \
+	$(TMP_DIR)/parsedate.o \
 	$(TMP_DIR)/progress.o \
 	$(TMP_DIR)/security.o \
 	$(TMP_DIR)/sendf.o \
@@ -70,7 +75,9 @@ OBJECTS = $(TMP_DIR)/base64.o \
 	$(TMP_DIR)/speedcheck.o \
 	$(TMP_DIR)/ssluse.o \
 	$(TMP_DIR)/strequal.o \
+	$(TMP_DIR)/strerror.o \
 	$(TMP_DIR)/strtok.o \
+	$(TMP_DIR)/strtoofft.o \
 	$(TMP_DIR)/telnet.o \
 	$(TMP_DIR)/timeval.o \
 	$(TMP_DIR)/transfer.o \
