@@ -36,7 +36,7 @@ curlpkg.bat:
 curldevpkg.bat:
 	zip -9 %1 curl.exe include\README include\curl\*.h CHANGES docs\* \
 	  curl.spec curl-ssl.spec LEGAL lib/Makefile.m32 src/Makefile.m32 \
-	  libcurl.a libcurl.def libcurl.dll libcurldll.a MPL-1.0.txt README
+	  libcurl.a libcurl.dll libcurldll.a MPL-1.0.txt README
 
 PROCEDURE_EXAMPLE
 
