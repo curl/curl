@@ -422,6 +422,18 @@ Transfer(struct connectdata *c_conn)
                 conn->bits.close = FALSE; /* don't close when done */
                 infof(data, "HTTP/1.0 proxy connection set to keep alive!\n");
               }
+              else if((httpversion == 0) &&
+                      strnequal("Connection: keep-alive", p,
+                                strlen("Connection: keep-alive"))) {
+                /*
+                 * A HTTP/1.0 reply with the 'Connection: keep-alive' line
+                 * tells us the connection will be kept alive for our
+                 * pleasure.  Default action for 1.0 is to close.
+                 *
+                 * [RFC2068, section 19.7.1] */
+                conn->bits.close = FALSE; /* don't close when done */
+                infof(data, "HTTP/1.0 connection set to keep alive!\n");
+              }
               else if (strnequal("Connection: close", p,
                                  strlen("Connection: close"))) {
                 /*
