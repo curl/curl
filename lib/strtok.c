@@ -25,6 +25,7 @@
 
 #ifndef HAVE_STRTOK_R
 #include <stddef.h>
+#include <string.h>
 
 char *
 Curl_strtok_r(char *ptr, const char *sep, char **end)
@@ -51,7 +52,7 @@ Curl_strtok_r(char *ptr, const char *sep, char **end)
 
     if (**end) {
       /* the end is not a null byte */
-      **end = '\0';, /* zero terminate it! */
+      **end = '\0';  /* zero terminate it! */
       ++*end;        /* advance the last pointer to beyond the null byte */
     }
 
