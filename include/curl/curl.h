@@ -51,8 +51,7 @@ extern "C" {
  * Decorate exportable functions for Win32 and Netware DLL linking.
  * This avoids using a .def file for building libcurl.dll.
  */
-#if (defined(WIN32) || defined(_WIN32) || defined(NETWARE)) && \
-   !defined(CURL_STATICLIB)
+#if (defined(WIN32) || defined(_WIN32)) && !defined(CURL_STATICLIB)
 #if defined(BUILDING_LIBCURL)
 #define CURL_EXTERN  __declspec(dllexport)
 #else

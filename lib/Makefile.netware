@@ -70,7 +70,7 @@ CP	= cp -afv
 MPKXDC	= mkxdc
 
 # Global flags for all compilers
-CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -DBUILDING_LIBCURL -nostdinc
+CFLAGS	= $(OPT) -D$(DB) -DNETWARE -DHAVE_CONFIG_H -nostdinc
 
 ifeq ($(CC),mwccnlm)
 LD	= mwldnlm
