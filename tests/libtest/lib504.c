@@ -20,6 +20,7 @@ int test(char *URL)
   int running;
   int max_fd;
   int rc;
+  int loop=100;
 
   curl_global_init(CURL_GLOBAL_ALL);
   c = curl_easy_init();
@@ -78,7 +79,9 @@ int test(char *URL)
     rc = select(max_fd+1, &rd, &wr, &exc, &interval);
     fprintf(stderr, "select returned %d\n", rc);
     
-  } while(rc);
+    /* we only allow a certain number of loops to avoid hanging here
+       forever */
+  } while(rc && (--loop>0));
 
   curl_multi_remove_handle(m, c);
   curl_easy_cleanup(c);
