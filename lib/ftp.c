@@ -234,6 +234,17 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
   return CURLE_OK;
 }
 
+/* initialize stuff to prepare for reading a fresh new response */
+static void ftp_respinit(struct connectdata *conn)
+{
+  struct FTP *ftp = conn->proto.ftp;
+  ftp->nread_resp = 0;
+  ftp->linestart_resp = conn->data->state.buffer;
+}
+
+/* macro to check for the last line in an FTP server response */
+#define lastline(line) (isdigit((int)line[0]) && isdigit((int)line[1]) && \
+                        isdigit((int)line[2]) && (' ' == line[3]))
 
 static CURLcode ftp_readresp(curl_socket_t sockfd,
                              struct connectdata *conn,
@@ -245,7 +256,6 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
   ssize_t gotbytes;
   char *ptr;
   struct SessionHandle *data = conn->data;
-  char *line_start;
   char *buf = data->state.buffer;
   CURLcode result = CURLE_OK;
   struct FTP *ftp = conn->proto.ftp;
@@ -254,10 +264,10 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
   if (ftpcode)
     *ftpcode = 0; /* 0 for errors or not done */
 
-  ptr=buf;
-  line_start = buf;
+  ptr=buf + ftp->nread_resp;
 
-  perline=0;
+  perline= ptr-ftp->linestart_resp; /* number of bytes in the current line,
+                                       so far */
   keepon=TRUE;
 
   while((ftp->nread_resp<BUFSIZE) && (keepon && !result)) {
@@ -312,7 +322,8 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
 
           /* output debug output if that is requested */
           if(data->set.verbose)
-            Curl_debug(data, CURLINFO_HEADER_IN, line_start, perline, conn);
+            Curl_debug(data, CURLINFO_HEADER_IN,
+                       ftp->linestart_resp, perline, conn);
 
           /*
            * We pass all response-lines to the callback function registered
@@ -320,24 +331,21 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
            * headers.
            */
           result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                                     line_start, perline);
+                                     ftp->linestart_resp, perline);
           if(result)
             return result;
 
-#define lastline(line) (isdigit((int)line[0]) && isdigit((int)line[1]) && \
-                        isdigit((int)line[2]) && (' ' == line[3]))
-
-          if(perline>3 && lastline(line_start)) {
+          if(perline>3 && lastline(ftp->linestart_resp)) {
             /* This is the end of the last line, copy the last line to the
                start of the buffer and zero terminate, for old times sake (and
                krb4)! */
             char *meow;
             int n;
-            for(meow=line_start, n=0; meow<ptr; meow++, n++)
+            for(meow=ftp->linestart_resp, n=0; meow<ptr; meow++, n++)
               buf[n] = *meow;
             *meow=0; /* zero terminate */
             keepon=FALSE;
-            line_start = ptr+1; /* advance pointer */
+            ftp->linestart_resp = ptr+1; /* advance pointer */
             i++; /* skip this before getting out */
 
             *size = ftp->nread_resp; /* size of the response */
@@ -345,7 +353,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
             break;
           }
           perline=0; /* line starts over here */
-          line_start = ptr+1;
+          ftp->linestart_resp = ptr+1;
         }
       }
       if(!keepon && (i != gotbytes)) {
@@ -356,7 +364,7 @@ static CURLcode ftp_readresp(curl_socket_t sockfd,
         ftp->cache_size = gotbytes - i;
         ftp->cache = (char *)malloc((int)ftp->cache_size);
         if(ftp->cache)
-          memcpy(ftp->cache, line_start, (int)ftp->cache_size);
+          memcpy(ftp->cache, ftp->linestart_resp, (int)ftp->cache_size);
         else
           return CURLE_OUT_OF_MEMORY; /**BANG**/
       }
@@ -548,9 +556,6 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
                                        line_start, perline);
             if(result)
               return result;
-
-#define lastline(line) (isdigit((int)line[0]) && isdigit((int)line[1]) && \
-                        isdigit((int)line[2]) && (' ' == line[3]))
 
             if(perline>3 && lastline(line_start)) {
               /* This is the end of the last line, copy the last
@@ -2166,7 +2171,7 @@ static CURLcode ftp_state_loggedin(struct connectdata *conn)
     if(conn->sec_complete)
       /* BLOCKING */
       Curl_sec_set_protection_level(conn);
-    
+
     /* We may need to issue a KAUTH here to have access to the files
      * do it if user supplied a password
      */
@@ -2749,6 +2754,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn,
 
   /* When we connect, we start in the state where we await the 220
      response */
+  ftp_respinit(conn); /* init the response reader stuff */
   state(conn, FTP_WAIT220);
   ftp->response = Curl_tvnow(); /* start response time-out now! */
 
@@ -3220,6 +3226,8 @@ CURLcode Curl_nbftpsendf(struct connectdata *conn,
 
   bytes_written=0;
   write_len = strlen(s);
+
+  ftp_respinit(conn);
 
   res = Curl_write(conn, conn->sock[FIRSTSOCKET], sptr, write_len,
                    &bytes_written);
