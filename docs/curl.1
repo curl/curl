@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "19 January 2001" "Curl 7.6" "Curl Manual"
+.TH curl 1 "12 March 2001" "Curl 7.7" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -41,6 +41,12 @@ supported at the moment:
 
 Starting with curl 7.6, you can specify any amount of URLs on the command
 line. They will be fetched in a sequential manner in the specified order.
+
+Starting with curl 7.7, curl will attempt to re-use connections for multiple
+file transfers, so that getting many files from the same server will not do
+multiple connects/handshakes. This improves speed. Of course this is only done
+on files specified on a single command line and cannot be used between
+separate curl invokes.
 .SH OPTIONS
 .IP "-a/--append"
 (FTP)
