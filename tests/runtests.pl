@@ -222,7 +222,7 @@ sub runhttpsserver {
     }
 
     my $flag=$debugprotocol?"-v ":"";
-    my $cmd="$perl $srcdir/httpsserver.pl $flag -r $HOSTPORT $HTTPSPORT &";
+    my $cmd="$perl $srcdir/httpsserver.pl $flag -d $srcdir -r $HOSTPORT $HTTPSPORT &";
     system($cmd);
     if($verbose) {
         print "CMD: $cmd\n";
