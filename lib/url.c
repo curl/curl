@@ -2901,6 +2901,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(conn->bits.reuse) {
     /* re-used connection, no resolving is necessary */
     hostaddr = NULL;
+    conn->connect_addr = NULL; /* we don't connect now so we don't have any
+                                  fresh connect_addr struct to point to */
   }
   else if(!data->change.proxy || !*data->change.proxy) {
     /* If not connecting via a proxy, extract the port from the URL, if it is
