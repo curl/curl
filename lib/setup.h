@@ -52,7 +52,7 @@
 #endif
 
 #ifndef __cplusplus        /* (rabe) */
-typedef char bool;
+typedef unsigned char bool;
 #define typedef_bool
 #endif                     /* (rabe) */
 
