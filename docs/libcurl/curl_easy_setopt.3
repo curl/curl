@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_easy_setopt 3 "22 Apr 2002" "libcurl 7.9.6" "libcurl Manual"
+.TH curl_easy_setopt 3 "30 Apr 2002" "libcurl 7.9.6" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -293,6 +293,13 @@ want the transfer to start from.
 Pass a pointer to a zero terminated string as parameter. It will be used to
 set a cookie in the http request. The format of the string should be
 [NAME]=[CONTENTS]; Where NAME is the cookie name.
+
+If you need to set mulitple cookies, you need to set them all using a single
+option and thus you need to concat them all in one single string. Set multiple
+cookies in one string like this: "name1=content1; name2=content2;" etc.
+
+Using this option multiple times will only make the latest string override the
+previously ones.
 .TP
 .B CURLOPT_HTTPHEADER
 Pass a pointer to a linked list of HTTP headers to pass to the server in your
