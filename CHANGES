@@ -6,7 +6,16 @@
 
                                   Changelog
 
+Daniel (8 June 2004)
+- Marty Kuhrt fixed a minor build problem for VMS.
+
+Daniel (7 June 2004)
+- Reverted the configure check from the 4th since it obviously didn't work.
+  Remade it in a different manner that hopefully works better.
+
 Daniel (4 June 2004)
+- Günter Knauf brought patches to make curl build fine on NetWare again.
+
 - Made the configure checks for strerror_r() not exit the configure script
   when built for cross-compiling.
 

@@ -8,20 +8,29 @@ Curl and libcurl 7.12.1
 
 This release includes the following changes:
 
+ o the curl tool continues with the next URL even if one transfer fails
  o FTP 3rd party transfer support - seven new setopt() options
 
 This release includes the following bugfixes:
 
+ o CURLOPT_FILETIME had wrong type, it expects a long argument
+ o builds fine with Borland on Windows again
+ o the msvc curllib.dsp now builds the libcurl.lib file again
+ o builds fine on VMS again
+ o builds fine on NetWare again
  o HTTP Digest authentication with proxies use correct user name + password
  o now builds fine with lcc-win32
 
 Other curl-related news since the previous public release:
 
- o pycurl 7.12.0 http://pycyrl.sf.net/
+ o James Hu took over after Kevin Roth as maintainer of the curl package on
+   cygwin. Many saludos to Kevin for a work well done during many years.
+ o pycurl 7.12.0 was released http://pycyrl.sf.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Gisle Vanem, Vincent Bronner
+ Gisle Vanem, Vincent Bronner, Alexander Krasnostavsky, Chris Gaukroger,
+ Günter Knauf, Marty Kuhrt, Kjetil Jacobsen
 
         Thanks! (and sorry if I forgot to mention someone)
