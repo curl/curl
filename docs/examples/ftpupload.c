@@ -11,6 +11,9 @@
 #include <stdio.h>
 
 #include <curl/curl.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 /*
  * This example shows an FTP upload, with a rename of the file just after
