@@ -8,6 +8,12 @@
 
 
 Daniel (14 March 2001)
+- Made curl grok IPv6 with HTTP proxies and got everything to compile nicely
+  again when ENABLE_IPV6 is set.
+
+  I need to remake things in the test suite. I can't test the FTP parts with
+  curl built for IPv6 as it uses a different set of FTP commands then!
+
 - I fell onto a bug report on php.net that obiously was better directed to our
   project. Anyway, it said the .netrc parsing didn't work as supposed, and as
   I agreed I made the netrc parser use getpwuid() to figure out the home
