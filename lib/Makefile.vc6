@@ -36,6 +36,7 @@ RELEASE_OBJS= \
 	formdatar.obj \
 	ftpr.obj \
 	httpr.obj \
+	ldapr.obj \
 	dictr.obj \
 	telnetr.obj \
 	getdater.obj \
@@ -50,11 +51,10 @@ RELEASE_OBJS= \
 	speedcheckr.obj \
 	ssluser.obj \
 	timevalr.obj \
-	uploadr.obj \
 	urlr.obj \
 	filer.obj \
-	versionr.obj \
-	ldapr.obj
+        writeoutr.obj \
+	versionr.obj
 
 DEBUG_OBJS= \
 	base64d.obj \
@@ -64,6 +64,7 @@ DEBUG_OBJS= \
 	formdatad.obj \
 	ftpd.obj \
 	httpd.obj \
+        ldapd.obj \
 	dictd.obj \
 	telnetd.obj \
 	getdated.obj \
@@ -78,9 +79,9 @@ DEBUG_OBJS= \
 	speedcheckd.obj \
 	sslused.obj \
 	timevald.obj \
-	uploadd.obj \
 	urld.obj \
 	filed.obj \
+        writeoutd.obj \
 	versiond.obj
 
 RELEASE_SSL_OBJS= \
@@ -91,6 +92,7 @@ RELEASE_SSL_OBJS= \
 	formdatars.obj \
 	ftprs.obj \
 	httprs.obj \
+        ldaprs.obj \
 	dictrs.obj \
 	telnetrs.obj \
 	getdaters.obj \
@@ -105,9 +107,9 @@ RELEASE_SSL_OBJS= \
 	speedcheckrs.obj \
 	sslusers.obj \
 	timevalrs.obj \
-	uploadrs.obj \
 	urlrs.obj \
 	filers.obj \
+        writeouts.obj \
 	versionrs.obj
 
 LINK_OBJS= \
@@ -118,6 +120,7 @@ LINK_OBJS= \
 	formdata.obj \
 	ftp.obj \
 	http.obj \
+        ldap.obj \
 	dict.obj \
 	telnet.obj \
 	getdate.obj \
@@ -132,9 +135,9 @@ LINK_OBJS= \
 	speedcheck.obj \
 	ssluse.obj \
 	timeval.obj \
-	upload.obj \
 	url.obj \
 	file.obj \
+        writeout.obj \
 	version.obj
 
 all : release
@@ -164,6 +167,8 @@ ftpr.obj: ftp.c
 	$(CCR) $(CFLAGS) ftp.c
 httpr.obj: http.c
 	$(CCR) $(CFLAGS) http.c
+ldapr.obj: ldap.c
+	$(CCR) $(CFLAGS) ldap.c
 dictr.obj: dict.c
 	$(CCR) $(CFLAGS) dict.c
 telnetr.obj: telnet.c
@@ -192,16 +197,14 @@ ssluser.obj: ssluse.c
 	$(CCR) $(CFLAGS) ssluse.c
 timevalr.obj: timeval.c
 	$(CCR) $(CFLAGS) timeval.c
-uploadr.obj: upload.c
-	$(CCR) $(CFLAGS) upload.c
 urlr.obj: url.c
 	$(CCR) $(CFLAGS) url.c
 filer.obj: file.c
 	$(CCR) $(CFLAGS) file.c
+writeoutr.obj: writeout.c
+        $(CCR) $(CFLAGS) writeout.c
 versionr.obj: version.c
 	$(CCR) $(CFLAGS) version.c
-ldapr.obj: ldap.c
-	$(CCR) $(CFLAGS) ldap.c
 
 ## Debug
 base64d.obj: base64.c
@@ -218,6 +221,8 @@ ftpd.obj: ftp.c
 	$(CCD) $(CFLAGS) ftp.c
 httpd.obj: http.c
 	$(CCD) $(CFLAGS) http.c
+ldapd.obj: ldap.c
+	$(CCR) $(CFLAGS) ldap.c
 dictd.obj: dict.c
 	$(CCD) $(CFLAGS) dict.c
 telnetd.obj: telnet.c
@@ -246,12 +251,12 @@ sslused.obj: ssluse.c
 	$(CCD) $(CFLAGS) ssluse.c
 timevald.obj: timeval.c
 	$(CCD) $(CFLAGS) timeval.c
-uploadd.obj: upload.c
-	$(CCD) $(CFLAGS) upload.c
 urld.obj: url.c
 	$(CCD) $(CFLAGS) url.c
 filed.obj: file.c
 	$(CCD) $(CFLAGS) file.c
+writeoutd.obj: writeout.c
+        $(CCR) $(CFLAGS) writeout.c
 versiond.obj: version.c
 	$(CCD) $(CFLAGS) version.c
 
@@ -271,6 +276,8 @@ ftprs.obj: ftp.c
 	$(CCRS) $(CFLAGS) ftp.c
 httprs.obj: http.c
 	$(CCRS) $(CFLAGS) http.c
+ldaprs.obj: ldap.c
+	$(CCR) $(CFLAGS) ldap.c
 dictrs.obj: dict.c
 	$(CCRS) $(CFLAGS) dict.c
 telnetrs.obj: telnet.c
@@ -299,12 +306,12 @@ sslusers.obj: ssluse.c
 	$(CCRS) $(CFLAGS) ssluse.c
 timevalrs.obj: timeval.c
 	$(CCRS) $(CFLAGS) timeval.c
-uploadrs.obj: upload.c
-	$(CCRS) $(CFLAGS) upload.c
 urlrs.obj: url.c
 	$(CCRS) $(CFLAGS) url.c
 filers.obj: file.c
 	$(CCRS) $(CFLAGS) file.c
+writeoutrs.obj: writeout.c
+        $(CCR) $(CFLAGS) writeout.c
 versionrs.obj: version.c
 	$(CCRS) $(CFLAGS) version.c
 
