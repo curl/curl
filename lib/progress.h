@@ -42,13 +42,39 @@
 
 #include "timeval.h"
 
+#if 0
 void ProgressInit(struct UrlData *data, int max);
 void ProgressShow(struct UrlData *data,
                   int point, struct timeval start, struct timeval now, bool force);
 void ProgressEnd(struct UrlData *data);
 void ProgressMode(int mode);
+#endif
+
+void pgrsMode(struct UrlData *data, int mode);
+void pgrsStartNow(struct UrlData *data);
+void pgrsSetDownloadSize(struct UrlData *data, double size);
+void pgrsSetUploadSize(struct UrlData *data, double size);
+void pgrsSetDownloadCounter(struct UrlData *data, double size);
+     void pgrsSetUploadCounter(struct UrlData *data, double size);
+void pgrsUpdate(struct UrlData *data);
+
 
 /* Don't show progress for sizes smaller than: */
 #define LEAST_SIZE_PROGRESS BUFSIZE
+
+#define PROGRESS_DOWNLOAD (1<<0)
+#define PROGRESS_UPLOAD   (1<<1)
+#define PROGRESS_DOWN_AND_UP (PROGRESS_UPLOAD | PROGRESS_DOWNLOAD)
+
+#define PGRS_SHOW_DL (1<<0)
+#define PGRS_SHOW_UL (1<<1)
+#define PGRS_DONE_DL (1<<2)
+#define PGRS_DONE_UL (1<<3)
+#define PGRS_HIDE    (1<<4)
+#define PGRS_UL_SIZE_KNOWN (1<<5)
+#define PGRS_DL_SIZE_KNOWN (1<<6)
+
+#define PGRS_HEADERS_OUT (1<<7) /* set when the headers have been written */
+
 
 #endif /* __PROGRESS_H */
