@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (20 May 2004)
+- Jesse Noller reported that the upload speed info reported by libcurl was
+  wrong. The same was true for the download speed. Fixed now.
+
 Daniel (19 May 2004)
 - David Byron added test case 170 - this used to crash the previous version of 
   curl.
