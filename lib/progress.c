@@ -165,17 +165,17 @@ void Curl_pgrsStartNow(struct SessionHandle *data)
   data->progress.start = Curl_tvnow();
 }
 
-void Curl_pgrsSetDownloadCounter(struct SessionHandle *data, double size)
+void Curl_pgrsSetDownloadCounter(struct SessionHandle *data, curl_off_t size)
 {
   data->progress.downloaded = size;
 }
 
-void Curl_pgrsSetUploadCounter(struct SessionHandle *data, double size)
+void Curl_pgrsSetUploadCounter(struct SessionHandle *data, curl_off_t size)
 {
   data->progress.uploaded = size;
 }
 
-void Curl_pgrsSetDownloadSize(struct SessionHandle *data, double size)
+void Curl_pgrsSetDownloadSize(struct SessionHandle *data, curl_off_t size)
 {
   data->progress.size_dl = size;
   if(size > 0)
@@ -184,7 +184,7 @@ void Curl_pgrsSetDownloadSize(struct SessionHandle *data, double size)
     data->progress.flags &= ~PGRS_DL_SIZE_KNOWN;
 }
 
-void Curl_pgrsSetUploadSize(struct SessionHandle *data, double size)
+void Curl_pgrsSetUploadSize(struct SessionHandle *data, curl_off_t size)
 {
   data->progress.size_ul = size;
   if(size > 0)
@@ -211,8 +211,8 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   double ulpercen=0;
   double total_percen=0;
 
-  double total_transfer;
-  double total_expected_transfer;
+  curl_off_t total_transfer;
+  curl_off_t total_expected_transfer;
   double timespent;
 
   struct SessionHandle *data = conn->data;
@@ -259,7 +259,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* The average download speed this far */
   data->progress.dlspeed =
-    data->progress.downloaded/(timespent>0.01?timespent:1);
+    data->progress.downloaded/(timespent>0.01?timespent:1.0);
 
   /* The average upload speed this far */
   data->progress.ulspeed =
@@ -324,10 +324,10 @@ int Curl_pgrsUpdate(struct connectdata *conn)
     /* There's a callback set, so we call that instead of writing
        anything ourselves. This really is the way to go. */
     result= data->set.fprogress(data->set.progress_client,
-                                data->progress.size_dl,
-                                data->progress.downloaded,
-                                data->progress.size_ul,
-                                data->progress.uploaded);
+                                (double)data->progress.size_dl,
+                                (double)data->progress.downloaded,
+                                (double)data->progress.size_ul,
+                                (double)data->progress.uploaded);
     if(result)
       failf(data, "Callback aborted");
     return result;
@@ -336,15 +336,15 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   /* Figure out the estimated time of arrival for the upload */
   if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
      (data->progress.ulspeed > 0)) {
-    ulestimate = data->progress.size_ul / data->progress.ulspeed;
-    ulpercen = (data->progress.uploaded / data->progress.size_ul)*100;
+    ulestimate = (double)data->progress.size_ul / data->progress.ulspeed;
+    ulpercen = ((double)data->progress.uploaded / data->progress.size_ul)*100;
   }
 
   /* ... and the download */
   if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
      (data->progress.dlspeed > 0)) {
-    dlestimate = data->progress.size_dl / data->progress.dlspeed;
-    dlpercen = (data->progress.downloaded / data->progress.size_dl)*100;
+    dlestimate = (double)data->progress.size_dl / data->progress.dlspeed;
+    dlpercen = ((double)data->progress.downloaded / data->progress.size_dl)*100;
   }
     
   /* Now figure out which of them that is slower and use for the for
@@ -378,7 +378,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
 
   /* Get the percentage of data transfered so far */
   if(total_expected_transfer > 0)
-    total_percen=(double)(total_transfer/total_expected_transfer)*100;
+    total_percen=((double)total_transfer/total_expected_transfer)*100;
 
   fprintf(data->set.err,
           "\r%3d %s  %3d %s  %3d %s  %s  %s %s %s %s %s",

@@ -604,10 +604,10 @@ struct PureInfo {
 struct Progress {
   long lastshow; /* time() of the last displayed progress meter or NULL to
                     force redraw at next call */
-  double size_dl;
-  double size_ul;
-  double downloaded;
-  double uploaded;
+  curl_off_t size_dl; /* total expected size */
+  curl_off_t size_ul; /* total expected size */
+  curl_off_t downloaded; /* transfered so far */
+  curl_off_t uploaded; /* transfered so far */
 
   double current_speed; /* uses the currently fastest transfer */
 
@@ -630,7 +630,7 @@ struct Progress {
   struct timeval t_startsingle;
 #define CURR_TIME (5+1) /* 6 entries for 5 seconds */
 
-  double speeder[ CURR_TIME ];
+  curl_off_t speeder[ CURR_TIME ];
   struct timeval speeder_time[ CURR_TIME ];
   int speeder_c;
 };

@@ -985,7 +985,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
 
           k->bytecount += nread;
 
-          Curl_pgrsSetDownloadCounter(data, (double)k->bytecount);
+          Curl_pgrsSetDownloadCounter(data, k->bytecount);
             
           if(!conn->bits.chunk && (nread || k->badheader)) {
             /* If this is chunky transfer, it was already written */
@@ -1188,7 +1188,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
         }
 
         k->writebytecount += bytes_written;
-        Curl_pgrsSetUploadCounter(data, (double)k->writebytecount);
+        Curl_pgrsSetUploadCounter(data, k->writebytecount);
 
       } while(!writedone); /* loop until we're done writing! */
       
@@ -1306,7 +1306,7 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   if (!conn->bits.getheader) {
     k->header = FALSE;
     if(conn->size > 0)
-      Curl_pgrsSetDownloadSize(data, (double)conn->size);
+      Curl_pgrsSetDownloadSize(data, conn->size);
   }
   /* we want header and/or body, if neither then don't do this! */
   if(conn->bits.getheader || !data->set.no_body) {

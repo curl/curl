@@ -1821,7 +1821,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
     /* When we know we're uploading a specified file, we can get the file
        size prior to the actual upload. */
 
-    Curl_pgrsSetUploadSize(data, (double)data->set.infilesize);
+    Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
     result = Curl_Transfer(conn, -1, -1, FALSE, NULL, /* no download */
                            SECONDARYSOCKET, bytecountp);

@@ -1563,7 +1563,7 @@ CURLcode Curl_http(struct connectdata *conn)
       add_buffer(req_buffer, "\r\n", 2); /* end of headers */
 
       /* set the upload size to the progress meter */
-      Curl_pgrsSetUploadSize(data, (double)data->set.infilesize);
+      Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
       /* this sends the buffer and frees all the buffer resources */
       result = add_buffer_send(req_buffer, conn,
@@ -1657,7 +1657,7 @@ CURLcode Curl_http(struct connectdata *conn)
         add_buffer(req_buffer, "\r\n", 2); /* end of headers! */
 
         /* set the upload size to the progress meter */
-        Curl_pgrsSetUploadSize(data, (double)data->set.infilesize);
+        Curl_pgrsSetUploadSize(data, data->set.infilesize);
 
         /* set the pointer to mark that we will send the post body using
            the read callback */

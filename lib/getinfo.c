@@ -135,10 +135,10 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_doublep = data->progress.t_starttransfer;
     break;
   case CURLINFO_SIZE_UPLOAD:
-    *param_doublep =  data->progress.uploaded;
+    *param_doublep =  (double)data->progress.uploaded;
     break;
   case CURLINFO_SIZE_DOWNLOAD:
-    *param_doublep = data->progress.downloaded;
+    *param_doublep = (double)data->progress.downloaded;
     break;
   case CURLINFO_SPEED_DOWNLOAD:
     *param_doublep =  data->progress.dlspeed;
@@ -150,10 +150,10 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_longp = data->set.ssl.certverifyresult;
     break;
   case CURLINFO_CONTENT_LENGTH_DOWNLOAD:
-    *param_doublep = data->progress.size_dl;
+    *param_doublep = (double)data->progress.size_dl;
     break;
   case CURLINFO_CONTENT_LENGTH_UPLOAD:
-    *param_doublep = data->progress.size_ul;
+    *param_doublep = (double)data->progress.size_ul;
     break;
   case CURLINFO_REDIRECT_TIME:
     *param_doublep =  data->progress.t_redirect;
