@@ -221,4 +221,7 @@
                                    been initialized */
 #pragma warning (disable: 4715)	/* ToHour' : not all control paths return a
                                    value */
+#pragma warning (disable: 4115) /* warning C4115: '_RPC_ASYNC_STATE' : named
+                                   type definition in parentheses */
+#pragma warning (disable: 4206) /* this does what? */
 #endif
