@@ -40,7 +40,10 @@ CURLcode test(char *URL)
     while(!done) {
       fd_set rd, wr, exc;
       int max_fd;
-      struct timeval interval={1,0};
+      struct timeval interval;
+
+      interval.tv_sec = 1;
+      interval.tv_usec = 0;
 
       while (res == CURLM_CALL_MULTI_PERFORM) {
         res = curl_multi_perform(m, &running);

@@ -39,7 +39,10 @@ CURLcode test(char *URL)
   if(res && (res != CURLM_CALL_MULTI_PERFORM))
     return 1; /* major failure */
   do {
-    struct timeval interval={1,0};
+    struct timeval interval;
+
+    interval.tv_sec = 1;
+    interval.tv_usec = 0;
 
     fprintf(stderr, "curl_multi_perform()\n");
     
