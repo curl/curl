@@ -1579,7 +1579,19 @@ static CURLcode Connect(struct UrlData *data,
 	/* read the protocol proxy: */
 	prox=curl_getenv(proxy_env);
 
-	if(!prox) {
+        /*
+         * We don't try the uppercase version of HTTP_PROXY because of
+         * security reasons:
+         *
+         * When curl is used in a webserver application
+         * environment (cgi or php), this environment variable can
+         * be controlled by the web server user by setting the
+         * http header 'Proxy:' to some value.
+         * 
+         * This can cause 'internal' http/ftp requests to be
+         * arbitrarily redirected by any external attacker.
+         */
+	if(!prox && !strequal("http_proxy", proxy_env)) {
           /* There was no lowercase variable, try the uppercase version: */
 	  for(envp = proxy_env; *envp; envp++)
 	    *envp = toupper(*envp);
