@@ -1,0 +1,1 @@
+HTTP GET fail silently on HTTP error return
