@@ -2,3 +2,4 @@ Makefile
 Makefile.in
 memdump
 log
+*.pid
