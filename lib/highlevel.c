@@ -375,11 +375,16 @@ _Transfer(struct connectdata *c_conn)
               if (strnequal("Content-Length", p, 14) &&
                   sscanf (p+14, ": %ld", &contentlength))
                 conn->size = contentlength;
-              else if (strnequal("Content-Range", p, 13) &&
-                       sscanf (p+13, ": bytes %d-", &offset)) {
-                if (data->resume_from == offset) {
-                  /* we asked for a resume and we got it */
-                  content_range = TRUE;
+              else if (strnequal("Content-Range", p, 13)) {
+                if (sscanf (p+13, ": bytes %d-", &offset) ||
+                    sscanf (p+13, ": bytes: %d-", &offset)) {
+                  /* This second format was added August 1st by Igor
+                     Khristophorov since Sun's webserver JavaWebServer/1.1.1
+                     obviously sends the header this way! :-( */
+                  if (data->resume_from == offset) {
+                    /* we asked for a resume and we got it */
+                    content_range = TRUE;
+                  }
                 }
               }
               else if(data->cookies &&
