@@ -113,14 +113,6 @@ typedef unsigned char bool;
 #endif
 #endif
 
-#ifdef WIN32
-typedef SOCKET curl_socket_t;
-#define CURL_SOCKET_BAD INVALID_SOCKET
-#else
-typedef int curl_socket_t;
-#define CURL_SOCKET_BAD -1
-#endif
-
 #if defined(HAVE_X509_H) && defined(HAVE_SSL_H) && defined(HAVE_RSA_H) && \
 defined(HAVE_PEM_H) && defined(HAVE_ERR_H) && defined(HAVE_CRYPTO_H) && \
 defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
@@ -249,6 +241,15 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 int fileno( FILE *stream);
 #endif
 
+#endif
+
+/* now typedef our socket type */
+#ifdef WIN32
+typedef SOCKET curl_socket_t;
+#define CURL_SOCKET_BAD INVALID_SOCKET
+#else
+typedef int curl_socket_t;
+#define CURL_SOCKET_BAD -1
 #endif
 
 #if defined(ENABLE_IPV6) && defined(USE_ARES)
