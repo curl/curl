@@ -42,7 +42,9 @@
 #include "writeout.h"
 #include "getpass.h"
 #include "homedir.h"
+#ifdef USE_MANUAL
 #include "hugehelp.h"
+#endif
 #ifdef USE_ENVIRONMENT
 #include "writeenv.h"
 #endif
@@ -409,7 +411,6 @@ struct Configurable {
   char *userpwd;
   char *proxyuserpwd;
   char *proxy;
-  bool configread;
   bool proxytunnel;
   long conf;
 
@@ -489,8 +490,8 @@ struct Configurable {
 /* global variable to hold info about libcurl */
 static curl_version_info_data *curlinfo;
 
-static int parseconfig(const char *filename,
-		       struct Configurable *config);
+static void parseconfig(const char *filename,
+                        struct Configurable *config);
 static char *my_get_line(FILE *fp);
 static int create_dir_hierarchy(char *outfile);
 
@@ -1069,7 +1070,6 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
   char subletter=0; /* subletters can only occur on long options */
 
   const char *parse=NULL;
-  int res;
   unsigned int j;
   time_t now;
   int hit=-1;
@@ -1689,10 +1689,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       config->insecure_ok ^= TRUE;
       break;
     case 'K': /* parse config file */
-      res = parseconfig(nextarg, config);
-      config->configread = TRUE;
-      if(res)
-	return res;
+      parseconfig(nextarg, config);
       break;
     case 'l':
       config->conf ^= CONF_FTPLISTONLY; /* only list the names of the FTP dir */
@@ -1713,8 +1710,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         return PARAM_BAD_NUMERIC;
       break;
     case 'M': /* M for manual, huge help */
+#ifdef USE_MANUAL
       hugehelp();
       return PARAM_HELP_REQUESTED;
+#else
+      helpf("built-in manual was disabled and build-time!\n");
+      return PARAM_OPTION_UNKNOWN;
+#endif
     case 'n':
       switch(subletter) {
       case 'o': /* CA info PEM file */
@@ -1989,8 +1991,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 }
 
 
-static int parseconfig(const char *filename,
-		       struct Configurable *config)
+static void parseconfig(const char *filename,
+                        struct Configurable *config)
 {
   int res;
   FILE *file;
@@ -2163,7 +2165,6 @@ static int parseconfig(const char *filename,
     if(file != stdin)
       fclose(file);
   }
-  return 0;
 }
 
 static void go_sleep(long ms)
@@ -2637,9 +2638,7 @@ operate(struct Configurable *config, int argc, char *argv[])
     ;
   }
   else {
-    res = parseconfig(NULL, config);
-    if(res)
-      return res;
+    parseconfig(NULL, config);
   }
 
   if ((argc < 2)  && !config->url_list) {

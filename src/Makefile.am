@@ -53,6 +53,9 @@ README=$(top_srcdir)/docs/MANUAL
 MKHELP=$(top_srcdir)/src/mkhelp.pl
 HUGE=hugehelp.c
 
+if USE_MANUAL
+# Here are the stuff to create a built-in manual
+
 if HAVE_LIBZ
 # This generates the hugehelp.c file in both uncompressed and compressed formats
 $(HUGE): $(README) $(MANPAGE)  mkhelp.pl
@@ -64,8 +67,14 @@ $(HUGE): $(README) $(MANPAGE)  mkhelp.pl
 	echo '#else' >> $(HUGE)
 	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) -c $(README) >> $(HUGE)
 	echo '#endif /* HAVE_LIBZ */' >> $(HUGE)
-else
+else # HAVE_LIBZ
 # This generates the hugehelp.c file uncompressed only
 $(HUGE): $(README) $(MANPAGE)  mkhelp.pl
 	$(NROFF) $(MANPAGE) | $(PERL) $(MKHELP) $(README) > $(HUGE)
+endif
+
+else # USE_MANUAL
+# built-in manual has been disabled, make a blank file
+$(HUGE):
+	echo "/* explicitly disabled */" >$(HUGE)
 endif
