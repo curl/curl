@@ -84,7 +84,6 @@ Example set of cookies:
 
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
 
 #include "urldata.h"
 #include "cookie.h"
@@ -97,6 +96,8 @@ Example set of cookies:
 #ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
+
+#define my_isspace(x) ((x == ' ') || (x == '\t'))
 
 static void freecookie(struct Cookie *co)
 {
@@ -175,7 +176,7 @@ Curl_cookie_add(struct SessionHandle *data,
 
     semiptr=strchr(lineptr, ';'); /* first, find a semicolon */
 
-    while(*lineptr && isspace((int)*lineptr))
+    while(*lineptr && my_isspace(*lineptr))
       lineptr++;
 
     ptr = lineptr;
@@ -198,14 +199,14 @@ Curl_cookie_add(struct SessionHandle *data,
 
           /* Strip off trailing whitespace from the 'what' */
           size_t len=strlen(what);
-          while(len && isspace((int)what[len-1])) {
+          while(len && my_isspace(what[len-1])) {
             what[len-1]=0;
             len--;
           }
 
           /* Skip leading whitespace from the 'what' */
           whatptr=what;
-          while(isspace((int)*whatptr)) {
+          while(my_isspace(*whatptr)) {
             whatptr++;
           }
 
@@ -347,7 +348,7 @@ Curl_cookie_add(struct SessionHandle *data,
       }
 
       ptr=semiptr+1;
-      while(ptr && *ptr && isspace((int)*ptr))
+      while(ptr && *ptr && my_isspace(*ptr))
         ptr++;
       semiptr=strchr(ptr, ';'); /* now, find the next semicolon */
 
@@ -667,7 +668,7 @@ struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
           lineptr=line;
           headerline=FALSE;
         }
-        while(*lineptr && isspace((int)*lineptr))
+        while(*lineptr && my_isspace(*lineptr))
           lineptr++;
 
         Curl_cookie_add(data, c, headerline, lineptr, NULL, NULL);
