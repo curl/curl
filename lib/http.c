@@ -128,8 +128,10 @@ static
 CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
                          long *bytes_written)
 {
-  size_t amount;
-  CURLcode result;
+  ssize_t amount;
+  CURLcode res;
+  char *ptr;
+  int size;
 
   if(conn->data->set.verbose) {
     fputs("> ", conn->data->set.err);
@@ -137,7 +139,25 @@ CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
     fwrite(in->buffer, in->size_used, 1, conn->data->set.err);
   }
 
-  result = Curl_write(conn, sockfd, in->buffer, in->size_used, &amount);
+  /* The looping below is required since we use non-blocking sockets, but due
+     to the circumstances we will just loop and try again and again etc */
+
+  ptr = in->buffer;
+  size = in->size_used;
+  do {
+    res = Curl_write(conn, sockfd, ptr, size, &amount);
+
+    if(CURLE_OK != res)
+      break;
+
+    if(amount != size) {
+      size += amount;
+      ptr += amount;
+    }
+    else
+      break;
+
+  } while(1);
 
   if(in->buffer)
     free(in->buffer);
@@ -145,7 +165,7 @@ CURLcode add_buffer_send(int sockfd, struct connectdata *conn, send_buffer *in,
 
   *bytes_written = amount;
 
-  return result;
+  return res;
 }
 
 
