@@ -197,6 +197,8 @@ static CURLcode AllowServerConnect(struct UrlData *data,
       getsockname(sock, (struct sockaddr *) &add, (int *)&size);
       s=accept(sock, (struct sockaddr *) &add, (int *)&size);
 
+      sclose(sock); /* close the first socket */
+
       if( -1 == s) {
 	/* DIE! */
 	failf(data, "Error accept()ing server connect");

@@ -84,6 +84,11 @@ while(<STDIN>) {
             $getfile{$1}="$source:$linenum";
             $openfile++;
         }
+        elsif($function =~ /accept\(\) = (\d*)/) {
+            $filedes{$1}=1;
+            $getfile{$1}="$source:$linenum";
+            $openfile++;
+        }
         elsif($function =~ /sclose\((\d*)\)/) {
             if($filedes{$1} != 1) {
                 print "Close without open: $line\n";

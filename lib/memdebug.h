@@ -9,6 +9,8 @@ void curl_memdebug(char *logname);
 /* file descriptor manipulators */
 int curl_socket(int domain, int type, int protocol, int, char *);
 int curl_sclose(int sockfd, int, char *);
+int curl_accept(int s, struct sockaddr *addr, int *addrlen,
+                int line, char *source);
 
 /* Set this symbol on the command-line, recompile all lib-sources */
 #define strdup(ptr) curl_dostrdup(ptr, __LINE__, __FILE__)
@@ -18,6 +20,8 @@ int curl_sclose(int sockfd, int, char *);
 
 #define socket(domain,type,protocol)\
  curl_socket(domain,type,protocol,__LINE__,__FILE__)
+#define accept(sock,addr,len)\
+ curl_accept(sock,addr,len,__LINE__,__FILE__)
 
 /* sclose is probably already defined, redefine it! */
 #undef sclose

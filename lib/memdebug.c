@@ -133,6 +133,15 @@ int curl_socket(int domain, int type, int protocol, int line, char *source)
   return sockfd;
 }
 
+int curl_accept(int s, struct sockaddr *addr, int *addrlen,
+                int line, char *source)
+{
+  int sockfd=(accept)(s, addr, addrlen);
+  fprintf(logfile?logfile:stderr, "FD %s:%d accept() = %d\n",
+          source, line, sockfd);
+  return sockfd;
+}
+
 /* this is our own defined way to close sockets on *ALL* platforms */
 int curl_sclose(int sockfd, int line, char *source)
 {
