@@ -183,7 +183,7 @@ typedef enum {
   NTLMSTATE_LAST
 } curlntlm;
 
-/* Struct used for Digest challenge-response authentication */
+/* Struct used for NTLM challenge-response authentication */
 struct ntlmdata {
   curlntlm state;
   unsigned char nonce[8];
