@@ -23,8 +23,9 @@ README
 
   The official download mirror sites are:
 
-        Sweden --  ftp://ftp.sunet.se/pub/www/utilities/curl/
-        Germany -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
+        Sweden    -- ftp://ftp.sunet.se/pub/www/utilities/curl/
+        Germany   -- ftp://ftp.fu-berlin.de/pub/unix/network/curl/
+        Australia -- http://curl.linuxworx.com.au/
 
   To download the very latest source off the CVS server do this:
 
