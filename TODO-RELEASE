@@ -10,10 +10,6 @@ To get fixed in 7.13.2 (planned release: April 2005)
      Awaits OpenSSL support for this, no need to support this in libcurl before
      there's an OpenSSL release that does it.
 
-58 - SSPI for libcurl on Windows
-
-59 - --form-string and --form-file as discussed on curl-users list
-
 To get fixed in 7.14.0
 ======================
 
@@ -32,3 +28,5 @@ To get fixed in 7.14.0
      handle. One idea: http://curl.haxx.se/mail/lib-2004-12/0195.html the
      older idea: http://curl.haxx.se/dev/COOKIES. We need to settle on some
      middle ground I guess.
+
+60 - 
