@@ -438,7 +438,7 @@ struct connectdata {
 #else
   struct sockaddr_in serv_addr;
 #endif
-  char protostr[64];  /* store the protocol string in this buffer */
+  char protostr[16];  /* store the protocol string in this buffer */
 
   struct hostname host;
   struct hostname proxy;

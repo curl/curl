@@ -2148,7 +2148,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * proxy -- and we don't know if we will need to use SSL until we parse the
    * url ...
    ************************************************************/
-  if((2 == sscanf(data->change.url, "%64[^:]:%[^\n]",
+  if((2 == sscanf(data->change.url, "%15[^:]:%[^\n]",
                   conn->protostr,
                   conn->path)) && strequal(conn->protostr, "file")) {
     if(conn->path[0] == '/' && conn->path[1] == '/') {
@@ -2208,7 +2208,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
      * that missing slash at the beginning of the path.
      */
     if (2 > sscanf(data->change.url,
-                   "%64[^\n:]://%[^\n/?]%[^\n]",
+                   "%15[^\n:]://%[^\n/?]%[^\n]",
                    conn->protostr,
                    conn->host.name, conn->path)) {
 
