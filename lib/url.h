@@ -37,4 +37,9 @@ CURLcode Curl_done(struct connectdata *);
 CURLcode Curl_disconnect(struct connectdata *);
 CURLcode Curl_protocol_connect(struct connectdata *conn,
                                struct Curl_dns_entry *dns);
+bool Curl_ssl_config_matches(struct ssl_config_data* data,
+                             struct ssl_config_data* needle);
+bool Curl_clone_ssl_config(struct ssl_config_data* source,
+                           struct ssl_config_data* dest);
+void Curl_free_ssl_config(struct ssl_config_data* sslc);
 #endif

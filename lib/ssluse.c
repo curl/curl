@@ -40,6 +40,7 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "formdata.h" /* for the boundary function */
+#include "url.h" /* for the ssl config check function */
 
 #ifdef USE_SSLEAY
 #include <openssl/rand.h>
@@ -522,7 +523,8 @@ static int Get_SSL_Session(struct connectdata *conn,
       /* not session ID means blank entry */
       continue;
     if(curl_strequal(conn->name, check->name) &&
-       (conn->remote_port == check->remote_port) ) {
+       (conn->remote_port == check->remote_port) &&
+       Curl_ssl_config_matches(&conn->ssl_config, &check->ssl_config)) {
       /* yes, we have a session ID! */
       data->state.sessionage++;            /* increase general age */
       check->age = data->state.sessionage; /* set this as used in this age */
@@ -546,6 +548,9 @@ static int Kill_Single_Session(struct curl_ssl_session *session)
     SSL_SESSION_free(session->sessionid);
     session->sessionid=NULL;
     session->age = 0; /* fresh */
+
+    Curl_free_ssl_config(&session->ssl_config);
+
     free(session->name);
     session->name = NULL; /* no name */
 
@@ -636,6 +641,8 @@ static int Store_SSL_Session(struct connectdata *conn)
   store->age = data->state.sessionage;      /* set current age */
   store->name = strdup(conn->name);       /* clone host name */
   store->remote_port = conn->remote_port; /* port number */
+
+  Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config);
 
   return 0;
 }

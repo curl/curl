@@ -143,12 +143,7 @@ static bool ConnectionExists(struct SessionHandle *data,
                              struct connectdata **usethis);
 static unsigned int ConnectionStore(struct SessionHandle *data,
                                     struct connectdata *conn);
-static bool ssl_config_matches(struct ssl_config_data* data,
-                               struct ssl_config_data* needle);
-static bool init_ssl_config(struct SessionHandle* data,
-                            struct connectdata* conn);
 static bool safe_strequal(char* str1, char* str2);
-static void free_ssl_config(struct ssl_config_data* sslc);
 
 #if !defined(WIN32)||defined(__CYGWIN32__)
 #ifndef RETSIGTYPE
@@ -1224,7 +1219,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   if(conn->proxyhost)
     free(conn->proxyhost);
 
-  free_ssl_config(&conn->ssl_config);
+  Curl_free_ssl_config(&conn->ssl_config);
 
   free(conn); /* free all the connection oriented data */
 
@@ -1300,7 +1295,8 @@ ConnectionExists(struct SessionHandle *data,
         if(needle->protocol & PROT_SSL) {
           /* This is SSL, verify that we're using the same
              ssl options as well */
-          if(!ssl_config_matches(&needle->ssl_config, &check->ssl_config)) {
+          if(!Curl_ssl_config_matches(&needle->ssl_config,
+                                      &check->ssl_config)) {
             continue;
           }
         }
@@ -2713,7 +2709,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     ConnectionStore(data, conn);
   }
 
-  if(!init_ssl_config(data, conn))
+  if(!Curl_clone_ssl_config(&data->set.ssl, &conn->ssl_config))
     return CURLE_OUT_OF_MEMORY;
 
   /* Continue connectdata initialization here.
@@ -3066,9 +3062,9 @@ static bool safe_strequal(char* str1, char* str2)
     return (!str1 && !str2);
 }
 
-static bool
-ssl_config_matches(struct ssl_config_data* data,
-                   struct ssl_config_data* needle)
+bool
+Curl_ssl_config_matches(struct ssl_config_data* data,
+                        struct ssl_config_data* needle)
 {
   if((data->version == needle->version) &&
      (data->verifypeer == needle->verifypeer) &&
@@ -3083,47 +3079,48 @@ ssl_config_matches(struct ssl_config_data* data,
   return FALSE;
 }
 
-static bool
-init_ssl_config(struct SessionHandle* data, struct connectdata* conn)
+bool
+Curl_clone_ssl_config(struct ssl_config_data *source,
+                      struct ssl_config_data *dest)
 {
-  conn->ssl_config.verifyhost = data->set.ssl.verifyhost;
-  conn->ssl_config.verifypeer = data->set.ssl.verifypeer;
-  conn->ssl_config.version = data->set.ssl.version;
+  dest->verifyhost = source->verifyhost;
+  dest->verifypeer = source->verifypeer;
+  dest->version = source->version;
 
-  if(data->set.ssl.CAfile) {
-    conn->ssl_config.CAfile = strdup(data->set.ssl.CAfile);
-    if(!conn->ssl_config.CAfile)
+  if(source->CAfile) {
+    dest->CAfile = strdup(source->CAfile);
+    if(!dest->CAfile)
       return FALSE;
   }
 
-  if(data->set.ssl.CApath) {
-    conn->ssl_config.CApath = strdup(data->set.ssl.CApath);
-    if(!conn->ssl_config.CApath)
+  if(source->CApath) {
+    dest->CApath = strdup(source->CApath);
+    if(!dest->CApath)
       return FALSE;
   }
 
-  if(data->set.ssl.cipher_list) {
-    conn->ssl_config.cipher_list = strdup(data->set.ssl.cipher_list);
-    if(!conn->ssl_config.cipher_list)
+  if(source->cipher_list) {
+    dest->cipher_list = strdup(source->cipher_list);
+    if(!dest->cipher_list)
       return FALSE;
   }
 
-  if(data->set.ssl.egdsocket) {
-    conn->ssl_config.egdsocket = strdup(data->set.ssl.egdsocket);
-    if(!conn->ssl_config.egdsocket)
+  if(source->egdsocket) {
+    dest->egdsocket = strdup(source->egdsocket);
+    if(!dest->egdsocket)
       return FALSE;
   }
 
-  if(data->set.ssl.random_file) {
-    conn->ssl_config.random_file = strdup(data->set.ssl.random_file);
-    if(!conn->ssl_config.random_file)
+  if(source->random_file) {
+    dest->random_file = strdup(source->random_file);
+    if(!dest->random_file)
       return FALSE;
   }
 
   return TRUE;
 }
 
-static void free_ssl_config(struct ssl_config_data* sslc)
+void Curl_free_ssl_config(struct ssl_config_data* sslc)
 {
   if(sslc->CAfile)
     free(sslc->CAfile);
