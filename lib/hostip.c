@@ -614,9 +614,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
   CURLcode rc=CURLE_OK;
   struct SessionHandle *data = conn->data;
   struct timeval now = Curl_tvnow();
-  bool timedout = FALSE;
   long timeout = 300; /* default name resolve timeout in seconds */
-  long elapsed = 0; /* time taken so far */
 
   /* now, see if there's a connect timeout or a regular timeout to
      use instead of the default one */
@@ -626,33 +624,29 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
     timeout = conn->data->set.timeout;
 
   /* Wait for the name resolve query to complete. */
-  while (1) {
+  while (timeout > 0) {
     int nfds=0;
     fd_set read_fds, write_fds;
     struct timeval *tvp, tv, store;
     int count;
 
-    store.tv_sec = (int)(timeout - elapsed);
+    store.tv_sec = (int)timeout;
     store.tv_usec = 0;
     
     FD_ZERO(&read_fds);
     FD_ZERO(&write_fds);
     nfds = ares_fds(data->state.areschannel, &read_fds, &write_fds);
     if (nfds == 0)
+      /* no file descriptors means we're done waiting */
       break;
-    tvp = ares_timeout(data->state.areschannel,
-                       &store, &tv);
+    tvp = ares_timeout(data->state.areschannel, &store, &tv);
     count = select(nfds, &read_fds, &write_fds, NULL, tvp);
     if (count < 0 && errno != EINVAL)
       break;
-    else if(!count) {
-      /* timeout */
-      timedout = TRUE;
-      break;
-    }
+
     ares_process(data->state.areschannel, &read_fds, &write_fds);
 
-    elapsed = Curl_tvdiff(Curl_tvnow(), now)/1000; /* spent time */
+    timeout -= Curl_tvdiff(Curl_tvnow(), now)/1000; /* spent time */
   }
 
   /* Operation complete, if the lookup was successful we now have the entry
@@ -663,7 +657,7 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
 
   if(!conn->async.dns) {
     /* a name was not resolved */
-    if(timedout || (conn->async.status == ARES_ETIMEOUT)) {
+    if((timeout < 0) || (conn->async.status == ARES_ETIMEOUT)) {
       failf(data, "Resolving host timed out: %s", conn->name);
       rc = CURLE_OPERATION_TIMEDOUT;
     }
