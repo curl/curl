@@ -28,11 +28,10 @@
 #include <curl/curl.h>
 #include "urldata.h"
 #include "share.h"
+#include "memory.h"
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 CURLSH *
 curl_share_init(void)

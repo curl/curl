@@ -56,13 +56,12 @@
 #include "strequal.h"
 #include "strtok.h"
 #include "ldap.h"
+#include "memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 /* WLdap32.dll functions are *not* stdcall. Must call these via __cdecl
  * pointers in case libcurl was compiled as fastcall (-Gr).

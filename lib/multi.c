@@ -42,11 +42,10 @@
 #include "url.h"
 #include "connect.h"
 #include "progress.h"
+#include "memory.h"
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 struct Curl_message {
   /* the 'CURLMsg' is the part that is visible to the external user */

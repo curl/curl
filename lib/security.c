@@ -58,11 +58,10 @@
 #include "base64.h"
 #include "sendf.h"
 #include "ftp.h"
+#include "memory.h"
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 #define min(a, b)   ((a) < (b) ? (a) : (b))
 

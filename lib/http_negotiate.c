@@ -41,14 +41,13 @@
 #include "strequal.h"
 #include "base64.h"
 #include "http_negotiate.h"
+#include "memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 static int
 get_gss_name(struct connectdata *conn, gss_name_t *server)

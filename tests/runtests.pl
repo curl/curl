@@ -635,7 +635,7 @@ sub checkcurl {
 
     my $curl;
     my $libcurl;
-    my @version=`$CURL -V 2>/dev/null`;
+    my @version=`strace $CURL --version 2>fump`;
     for(@version) {
         chomp;
 
@@ -727,7 +727,7 @@ sub checkcurl {
         }
     }
     if(!$curl) {
-        die "couldn't run curl!"
+        die "couldn't run '$CURL'"
     }
 
     my $hostname=`hostname`;

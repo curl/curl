@@ -31,17 +31,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
-
-#ifdef	VMS
-#include	<stdlib.h>
-#endif
+#include <stdlib.h>
+#include "memory.h"
 
 /* Make this the last #include */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#else
-#include <stdlib.h>
-#endif
 
 /*
  * This is supposed to be called in the beginning of a permform() session

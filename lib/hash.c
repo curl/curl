@@ -28,12 +28,10 @@
 
 #include "hash.h"
 #include "llist.h"
+#include "memory.h"
 
-#ifdef CURLDEBUG
 /* this must be the last include file */
 #include "memdebug.h"
-#endif
-
 
 static unsigned long
 hash_str(const char *key, size_t key_length)

@@ -134,11 +134,10 @@
 #ifdef HAVE_KRB4
 #include "security.h"
 #endif
+#include "memory.h"
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 /* Local static prototypes */
 static int ConnectionKillOne(struct SessionHandle *data);

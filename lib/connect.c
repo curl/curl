@@ -96,11 +96,10 @@
 #include "if2ip.h"
 #include "strerror.h"
 #include "connect.h"
+#include "memory.h"
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 static bool verifyconnect(curl_socket_t sockfd);
 

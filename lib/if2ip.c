@@ -73,11 +73,10 @@
 #endif
 
 #include "if2ip.h"
+#include "memory.h"
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 #define SYS_ERROR -1
 

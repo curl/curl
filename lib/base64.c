@@ -41,10 +41,11 @@
 #include <curl/mprintf.h>
 
 #include "base64.h"
+#include "memory.h"
 
-#ifdef CURLDEBUG
+/* include memdebug.h last */
 #include "memdebug.h"
-#endif
+
 
 static void decodeQuantum(unsigned char *dest, const char *src)
 {

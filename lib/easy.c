@@ -76,14 +76,13 @@
 #include "getinfo.h"
 #include "hostip.h"
 #include "share.h"
+#include "memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 /* win32_cleanup() is for win32 socket cleanup functionality, the opposite
@@ -164,6 +163,16 @@ static void idna_init (void)
 static unsigned int  initialized = 0;
 static long          init_flags  = 0;
 
+/*
+ * If a memory-using function (like curl_getenv) is used before
+ * curl_global_init() is called, we need to have these pointers set already.
+ */
+curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
+curl_free_callback Curl_cfree = (curl_free_callback)free;
+curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
+curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)strdup;
+curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
+
 /**
  * curl_global_init() globally initializes cURL given a bitwise set of the
  * different features of what to initialize.
@@ -172,6 +181,13 @@ CURLcode curl_global_init(long flags)
 {
   if (initialized)
     return CURLE_OK;
+
+  /* Setup the default memory functions here (again) */
+  Curl_cmalloc = (curl_malloc_callback)malloc;
+  Curl_cfree = (curl_free_callback)free;
+  Curl_crealloc = (curl_realloc_callback)realloc;
+  Curl_cstrdup = (curl_strdup_callback)strdup;
+  Curl_ccalloc = (curl_calloc_callback)calloc;
 
   if (flags & CURL_GLOBAL_SSL)
     Curl_SSL_init();
@@ -193,6 +209,37 @@ CURLcode curl_global_init(long flags)
   init_flags  = flags;
   
   return CURLE_OK;
+}
+
+/*
+ * curl_global_init_mem() globally initializes cURL and also registers the
+ * user provided callback routines.
+ */
+CURLcode curl_global_init_mem(long flags, curl_malloc_callback m,
+                              curl_free_callback f, curl_realloc_callback r,
+                              curl_strdup_callback s, curl_calloc_callback c)
+{
+  CURLcode code = CURLE_OK;
+
+  /* Invalid input, return immediately */
+  if (!m || !f || !r || !s || !c)
+    return CURLE_FAILED_INIT;
+
+  /* Already initialized, don't do it again */
+  if ( initialized )
+    return CURLE_OK;
+
+  /* Call the actual init function first */
+  code = curl_global_init(flags);
+  if (code == CURLE_OK) {
+    Curl_cmalloc = m;
+    Curl_cfree = f;
+    Curl_cstrdup = s;
+    Curl_crealloc = r;
+    Curl_ccalloc = c;
+  }
+
+  return code;
 }
 
 /**

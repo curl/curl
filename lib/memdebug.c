@@ -42,6 +42,7 @@
 #endif
 
 #define MEMDEBUG_NODEFINES /* don't redefine the standard functions */
+#include "memory.h"
 #include "memdebug.h"
 
 struct memdebug {
@@ -120,7 +121,7 @@ void *curl_domalloc(size_t wantedsize, int line, const char *source)
   /* alloc at least 64 bytes */
   size = sizeof(struct memdebug)+wantedsize;
 
-  mem=(struct memdebug *)(malloc)(size);
+  mem=(struct memdebug *)(Curl_cmalloc)(size);
   if(mem) {
     /* fill memory with junk */
     memset(mem->mem, 0xA5, wantedsize);
@@ -146,7 +147,7 @@ void *curl_docalloc(size_t wanted_elements, size_t wanted_size,
   user_size = wanted_size * wanted_elements;
   size = sizeof(struct memdebug) + user_size;
 
-  mem = (struct memdebug *)(malloc)(size);
+  mem = (struct memdebug *)(Curl_cmalloc)(size);
   if(mem) {
     /* fill memory with zeroes */
     memset(mem->mem, 0, user_size);
@@ -197,7 +198,7 @@ void *curl_dorealloc(void *ptr, size_t wantedsize,
   if(ptr)
     mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
 
-  mem=(struct memdebug *)(realloc)(mem, size);
+  mem=(struct memdebug *)(Curl_crealloc)(mem, size);
   if(logfile)
     fprintf(logfile, "MEM %s:%d realloc(0x%x, %zd) = %p\n",
             source, line, ptr, wantedsize, mem?mem->mem:NULL);
@@ -222,7 +223,7 @@ void curl_dofree(void *ptr, int line, const char *source)
   memset(mem->mem, 0x13, mem->size);
   
   /* free for real */
-  (free)(mem);
+  (Curl_cfree)(mem);
 
   if(logfile)
     fprintf(logfile, "MEM %s:%d free(%p)\n", source, line, ptr);

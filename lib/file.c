@@ -73,7 +73,6 @@
 #include <fcntl.h>
 #endif
 
-
 #endif
 
 #include "urldata.h"
@@ -85,14 +84,13 @@
 #include "speedcheck.h"
 #include "getinfo.h"
 #include "transfer.h" /* for Curl_readwrite_init() */
+#include "memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 /*
  * Curl_file_connect() gets called from Curl_protocol_connect() to allow us to

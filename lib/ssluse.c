@@ -50,10 +50,10 @@
 #include <openssl/rand.h>
 #include <openssl/x509v3.h>
 
+#include "memory.h"
+
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x0090581fL
 #define HAVE_SSL_GET1_SESSION 1

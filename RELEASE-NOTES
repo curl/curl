@@ -8,10 +8,12 @@ Curl and libcurl 7.12.0.
 
 This release includes the following changes:
 
+ o added curl_global_init_mem()
+ o removed curl_formparse()
  o the MSVC project file in the release archive is automatically built
  o curl --proxy-digest is a new command line option
  o the Windows version of libcurl can use wldap32.dll for LDAP
- o curl_easy_strerror(), curl_multi_strerror() and curl_share_strerror()
+ o added curl_easy_strerror(), curl_multi_strerror() and curl_share_strerror()
  o IPv6-enabled Windows hosts now resolves names threaded/asynch as well
  o configure --with-libidn can be used to point out the root dir of a libidn
    installation for curl to use, then libcurl can resolve and use IDNA names

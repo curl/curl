@@ -60,15 +60,14 @@
 #include "ftp.h"
 #include "sendf.h"
 #include "krb4.h"
+#include "memory.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
 #endif
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 #define LOCAL_ADDR (&conn->local_addr)
 #define REMOTE_ADDR (&conn->serv_addr)

@@ -87,10 +87,10 @@
 #include "inet_ntoa_r.h"
 #endif
 
+#include "memory.h"
+
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 /***********************************************************************
  * Only for ares-enabled builds

@@ -27,11 +27,11 @@
 #include <stdlib.h>
 
 #include "llist.h"
+#include "memory.h"
 
-#ifdef CURLDEBUG
 /* this must be the last include file */
 #include "memdebug.h"
-#endif
+
 void 
 Curl_llist_init(curl_llist *l, curl_llist_dtor dtor)
 {

@@ -74,7 +74,6 @@
 #include <sys/select.h>
 #endif
 
-
 #endif
 
 #include "urldata.h"
@@ -94,14 +93,13 @@
 #include "share.h"
 #include "hostip.h"
 #include "http.h"
+#include "memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 /*
  * checkheaders() checks the linked list of custom HTTP headers for a

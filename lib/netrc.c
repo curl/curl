@@ -45,14 +45,13 @@
 
 #include "strequal.h"
 #include "strtok.h"
+#include "memory.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 /* Debug this single source file with:
    'make netrc' then run './netrc'!

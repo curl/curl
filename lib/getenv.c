@@ -36,10 +36,9 @@
 #endif
 
 #include <curl/curl.h>
+#include "memory.h"
 
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 static
 char *GetEnv(const char *variable)

@@ -52,10 +52,9 @@
 #include "security.h"
 #endif
 #include <string.h>
+#include "memory.h"
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 /* returns last node in linked list */
 static struct curl_slist *slist_get_last(struct curl_slist *list)

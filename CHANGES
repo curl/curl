@@ -7,6 +7,10 @@
                                   Changelog
 
 Daniel (11 May 2004)
+- Seshubabu Pasam provided a patch that introduces curl_global_init_mem() -
+  like normal curl_global_init() but allows the app to replace all memory
+  functions with its own set. I modified it slightly.
+
 - Based on Luca Alteas' comments, I modified the curllib.dsp generation code.
 
 Daniel (10 May 2004)

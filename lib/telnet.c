@@ -81,11 +81,10 @@
 #define  TELCMDS
 
 #include "arpa_telnet.h"
+#include "memory.h"
 
 /* The last #include file should be: */
-#ifdef CURLDEBUG
 #include "memdebug.h"
-#endif
 
 #define SUBBUFSIZE 512
 

@@ -92,6 +92,7 @@ Example set of cookies:
 #include "strequal.h"
 #include "strtok.h"
 #include "sendf.h"
+#include "memory.h"
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG

@@ -81,10 +81,9 @@
 # include <string.h>
 #endif
 
+#include "memory.h"
 /* The last #include file should be: */
-#ifdef MALLOCDEBUG
 #include "memdebug.h"
-#endif
 
 #ifndef YYMAXDEPTH
 #define YYMAXDEPTH 0

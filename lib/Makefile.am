@@ -91,8 +91,8 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h base64.h hostip.h	\
   telnet.h getinfo.h strequal.h security.h krb4.h memdebug.h		\
   inet_ntoa_r.h http_chunks.h strtok.h connect.h llist.h hash.h		\
   content_encoding.h share.h md5.h http_digest.h http_negotiate.h	\
-  http_ntlm.hca-bundle.h inet_pton.h strtoofft.h strerror.h		\
-  inet_ntop.h curlx.h
+  http_ntlm.h ca-bundle.h inet_pton.h strtoofft.h strerror.h		\
+  inet_ntop.h curlx.h memory.h
 
 CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   cookie.c http.c sendf.c ftp.c url.c dict.c if2ip.c speedcheck.c	\
