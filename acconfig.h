@@ -54,3 +54,11 @@
 
 /* Define if you have a working OpenSSL installation */
 #undef OPENSSL_ENABLED
+
+/* Define the one correct non-blocking socket method below */
+#undef HAVE_FIONBIO
+#undef HAVE_IOCTLSOCKET
+#undef HAVE_IOCTLSOCKET_CASE
+#undef HAVE_O_NONBLOCK
+#undef HAVE_DISABLED_NONBLOCKING
+
