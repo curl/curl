@@ -6,15 +6,29 @@
 
                                History of Changes
 
+Version 7.9.2-pre8
+
+Daniel (2 December 2001)
+- Bug report #487825 correctly identified a problem when using a proxy and
+  following a redirection from HTTP to HTTPS. libcurl then re-used the same
+  proxy connection but without doing a proper HTTPS request.
+
+- Fixed win32 compiling quirks.
+
+Version 7.9.2-pre7
+
+Daniel (30 November 2001)
+- Documented --disable-epsv and CURLOPT_FTP_USE_EPSV.
+
 Daniel (29 November 2001)
 - Added --disable-epsv as an option. When used, curl won't attempt to use the
-  EPSV command when doing passive FTP downloads.
+  EPSV command when doing passive FTP downloads. Wrote a test case for it.
 
 - Eric provided a few more fixes for building on Macs. He also pointed out
   a flaw in the signal handler restoration code.
 
 Daniel (28 November 2001)
-- Fiddled with some Tru64 problems reported by Dimitris Sarris. They appear
+- Fiddled with some Tru64 problems reported by Dimitris Sarris. They appeared
   only when using VERBOSE ftp transfers. Do we use a too small buffer for
   gethostbyaddr_r(), was the lack of using in_addr_t wrong or is it that the
   hostent struct must be blanked before use? With Dimitris help and these
