@@ -143,6 +143,8 @@ Transfer (struct UrlData *data,
 #define KEEP_READ  1
 #define KEEP_WRITE 2
 
+  pgrsTime(data, TIMER_PRETRANSFER);
+
   if (!getheader) {
     header = FALSE;
     if(size > 0)
@@ -341,6 +343,7 @@ Transfer (struct UrlData *data,
                     failf (data, "The requested file was not found");
                     return URG_HTTP_NOT_FOUND;
                   }
+                  data->progress.httpcode = code;
                 }
                 else {
                   header = FALSE;	/* this is not a header line */
