@@ -26,6 +26,9 @@
 /* Define this to 'int' if ssize_t is not an available typedefed type */
 #define ssize_t int
 
+/* Define this to 'int' if socklen_t is not an available typedefed type */
+#define socklen_t int
+
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
 
