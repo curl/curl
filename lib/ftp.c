@@ -656,18 +656,19 @@ CURLcode Curl_ftp_done(struct connectdata *conn)
   sclose(conn->secondarysocket);
   conn->secondarysocket = -1;
 
-  /* now let's see what the server says about the transfer we
-     just performed: */
-  nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
-  if(nread < 0)
-    return CURLE_OPERATION_TIMEOUTED;
+  if(!data->set.no_body) {
+    /* now let's see what the server says about the transfer we just
+       performed: */
+    nread = Curl_GetFTPResponse(buf, conn, &ftpcode);
+    if(nread < 0)
+      return CURLE_OPERATION_TIMEOUTED;
 
-  if(!data->set.no_body && !conn->bits.resume_done) {  
-
-    /* 226 Transfer complete, 250 Requested file action okay, completed. */
-    if((ftpcode != 226) && (ftpcode != 250)) {
-      failf(data, "server did not report OK, got %d", ftpcode);
-      return CURLE_FTP_WRITE_ERROR;
+    if(!conn->bits.resume_done) {  
+      /* 226 Transfer complete, 250 Requested file action okay, completed. */
+      if((ftpcode != 226) && (ftpcode != 250)) {
+        failf(data, "server did not report OK, got %d", ftpcode);
+        return CURLE_FTP_WRITE_ERROR;
+      }
     }
   }
 
