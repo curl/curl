@@ -935,12 +935,11 @@ CURLcode Curl_http(struct connectdata *conn)
           add_buffer(req_buffer, "\r\n", 2);
           add_buffer(req_buffer, data->set.postfields,
                      data->set.postfieldsize);
-          add_buffer(req_buffer, "\r\n", 2);
         }
         else {
           add_bufferf(req_buffer,
                       "\r\n"
-                      "%s\r\n",
+                      "%s",
                       data->set.postfields );
         }
       }
