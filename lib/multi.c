@@ -339,9 +339,12 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         if(connected)
           easy->result = Curl_protocol_connect(easy->easy_conn, NULL);
 
-        if(CURLE_OK != easy->result)
+        if(CURLE_OK != easy->result) {
           /* failure detected */
+          Curl_disconnect(easy->easy_conn); /* close the connection */
+          easy->easy_conn = NULL;           /* no more connection */
           break;
+        }
 
         if(connected) {
           /* after the connect has completed, go DO */
