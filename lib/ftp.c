@@ -2060,6 +2060,7 @@ CURLcode Curl_ftp(struct connectdata *conn)
 
   /* the ftp struct is already inited in ftp_connect() */
   ftp = conn->proto.ftp;
+  conn->size = -1; /* make sure this is unknown at this point */
 
   /* We split the path into dir and file parts *before* we URLdecode
      it */
