@@ -23,6 +23,9 @@
 /* Define to `unsigned' if <sys/types.h> doesn't define.  */
 /* #undef size_t */
 
+/* Define this to 'int' if ssize_t is not an available typedefed type */
+#define ssize_t int
+
 /* Define if you have the ANSI C header files.  */
 #define STDC_HEADERS 1
 
