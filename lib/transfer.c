@@ -960,6 +960,10 @@ CURLcode Curl_perform(CURL *curl)
     conn->newurl = NULL;
   }
 
+  /* make sure the alarm is switched off! */
+  if(data->timeout || data->connecttimeout)
+    myalarm(0);
+
   return res;
 }
 
