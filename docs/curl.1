@@ -270,6 +270,11 @@ automatically set the previous URL when it follows a Location: header. The
 ";auto" string can be used alone, even if you don't set an initial referer.
 
 If this option is used several times, the last one will be used.
+.IP "--engine <name>"
+Select the OpenSSL crypto engine to use for cipher
+operations. Use \fI--engine list\fP to print a list of build-time supported
+engines. Note that not all (or none) of the engines may be available at
+run-time.
 .IP "--environment"
 (RISC OS ONLY) Sets a range of environment variables, using the names the -w
 option supports, to easier allow extraction of useful information after having

@@ -89,6 +89,11 @@ than one request if FOLLOWLOCATION is true.
 Pass a pointer to a long to receive the result of the certification
 verification that was requested (using the CURLOPT_SSL_VERIFYPEER option to
 \fIcurl_easy_setopt(3)\fP).
+.IP CURLINFO_SSL_ENGINES
+Pass the address of a 'struct curl_slist *' to receive a linked-list of
+OpenSSL crypto-engines supported. Note that engines are normally implemented
+in separate dynamic libraries. Hence not all the returned engines may be
+available at run-time.
 .IP CURLINFO_CONTENT_LENGTH_DOWNLOAD
 Pass a pointer to a double to receive the content-length of the download. This
 is the value read from the Content-Length: field.
