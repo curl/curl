@@ -398,12 +398,9 @@ int curl_formparse(char *input,
  *
  ***************************************************************************/
 static struct curl_httppost *
-AddHttpPost(char * name, long namelength,
-            char * value, long contentslength,
-
-            /* CMC: Added support for buffer uploads */
-            char * buffer, long bufferlength,
-
+AddHttpPost(char * name, size_t namelength,
+            char * value, size_t contentslength,
+            char * buffer, size_t bufferlength,
             char *contenttype,
             long flags,
             struct curl_slist* contentHeader,
@@ -417,14 +414,11 @@ AddHttpPost(char * name, long namelength,
   if(post) {
     memset(post, 0, sizeof(struct curl_httppost));
     post->name = name;
-    post->namelength = name?(namelength?namelength:(long)strlen(name)):0;
+    post->namelength = (long)(name?(namelength?namelength:strlen(name)):0);
     post->contents = value;
     post->contentslength = contentslength;
-
-    /* CMC: Added support for buffer uploads */
     post->buffer = buffer;
     post->bufferlength = bufferlength;
-
     post->contenttype = contenttype;
     post->contentheader = contentHeader;
     post->showfilename = showfilename;
@@ -794,7 +788,6 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         break;
       }
 
-    /* CMC: Added support for buffer uploads */
     case CURLFORM_BUFFER:
       {
         char *filename = array_state?array_value:
@@ -823,7 +816,6 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         break;
       }
       
-    /* CMC: Added support for buffer uploads */
     case CURLFORM_BUFFERPTR:
         current_form->flags |= HTTPPOST_PTRBUFFER;
       if (current_form->buffer)
@@ -838,7 +830,6 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       }
       break;
 
-    /* CMC: Added support for buffer uploads */
     case CURLFORM_BUFFERLENGTH:
       if (current_form->bufferlength)
         return_value = CURL_FORMADD_OPTION_TWICE;
@@ -917,7 +908,6 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
            ( (form->flags & HTTPPOST_FILENAME) &&
              (form->flags & HTTPPOST_PTRCONTENTS) ) ||
 
-           /* CMC: Added support for buffer uploads */
            ( (!form->buffer) &&
              (form->flags & HTTPPOST_BUFFER) &&
              (form->flags & HTTPPOST_PTRBUFFER) ) ||
@@ -947,8 +937,6 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         if ( !(form->flags & HTTPPOST_FILENAME) &&
              !(form->flags & HTTPPOST_READFILE) && 
              !(form->flags & HTTPPOST_PTRCONTENTS) &&
-
-             /* CMC: Added support for buffer uploads */
              !(form->flags & HTTPPOST_PTRBUFFER) ) {
 
           /* copy value (without strdup; possibly contains null characters) */
@@ -959,10 +947,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         }
         post = AddHttpPost(form->name, form->namelength,
                            form->value, form->contentslength,
-
-                           /* CMC: Added support for buffer uploads */
                            form->buffer, form->bufferlength,
-
                            form->contenttype, form->flags,
                            form->contentheader, form->showfilename,
                            post, httppost,
@@ -1188,8 +1173,6 @@ CURLcode Curl_getFormData(struct FormData **finalform,
                               file->contents));
       }
       else if((post->flags & HTTPPOST_FILENAME) ||
-
-              /* CMC: Added support for buffer uploads */
               (post->flags & HTTPPOST_BUFFER)) {
 
         size += AddFormDataf(&form,
@@ -1258,8 +1241,8 @@ CURLcode Curl_getFormData(struct FormData **finalform,
           return CURLE_READ_ERROR;
         }
 
-        /* CMC: Added support for buffer uploads */
-      } else if (post->flags & HTTPPOST_BUFFER) {
+      } 
+      else if (post->flags & HTTPPOST_BUFFER) {
           /* include contents of buffer */
           size += AddFormData(&form, post->buffer, post->bufferlength);
       }
