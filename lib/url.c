@@ -941,6 +941,9 @@ ConnectionKillOne(struct UrlData *data)
   int connindex=-1;
   int score;
   CURLcode result;
+  struct timeval now;
+
+  now = Curl_tvnow();
 
   for(i=0; i< data->numconnects; i++) {
     conn = data->connects[i];
@@ -952,8 +955,20 @@ ConnectionKillOne(struct UrlData *data)
      * By using the set policy, we score each connection.
      */
     switch(data->closepolicy) {
+    case CURLCLOSEPOLICY_LEAST_RECENTLY_USED:
     default:
-      score = 1; /* not implemented yet */
+      /*
+       * Set higher score for the age passed since the connection
+       * was used.
+       */
+      score = Curl_tvlong(now) - Curl_tvlong(conn->now);
+      break;
+    case CURLCLOSEPOLICY_OLDEST:
+      /*
+       * Set higher score for the age passed since the connection
+       * was created.
+       */
+      score = Curl_tvlong(now) - Curl_tvlong(conn->created);
       break;
     }
 
@@ -1269,11 +1284,13 @@ static CURLcode Connect(struct UrlData *data,
   conn->connectindex = -1;    /* no index */
   conn->bits.httpproxy = data->bits.httpproxy; /* proxy-or-not status */
 
-  /* Default protocol-indepent behaveiour doesn't support persistant
+  /* Default protocol-independent behavior doesn't support persistant
      connections, so we set this to force-close. Protocols that support
      this need to set this to FALSE in their "curl_do" functions. */
   conn->bits.close = TRUE;
 
+  /* Store creation time to help future close decision making */
+  conn->created = Curl_tvnow();
 
   /***********************************************************
    * We need to allocate memory to store the path in. We get the size of the
