@@ -1,0 +1,42 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Funny-head: yesyes
+
+This is the proof it works
+</data>
+</reply>
+
+# Client-side
+<client>
+ <name>
+HTTP with config file on stdin
+ </name>
+ <stdin>
+#
+# Use a silly request without '--':
+request MOOO
+#
+# Set the user-agent using a short-option:
+-A "agent007 license to drill\t"
+#
+# long option *with* '--':
+--max-time 180
+ </stdin>
+ <command>
+-K - %HOSTIP:%HOSTPORT/that.site.com/17
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+MOOO /that.site.com/17 HTTP/1.1
+User-Agent: agent007 license to drill	
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+
+</protocol>
+</verify>
