@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" $Id$
 .\"
-.TH curl_slist_append 3 "21 Feb 2003" "libcurl 7.10.4" "libcurl Manual"
+.TH curl_slist_append 3 "19 Jun 2003" "libcurl 7.10.4" "libcurl Manual"
 .SH NAME
 curl_slist_append - add a string to an slist
 .SH SYNOPSIS
@@ -15,7 +15,8 @@ curl_slist_append - add a string to an slist
 curl_slist_append() appends a specified string to a linked list of
 strings. The existing \fIlist\fP should be passed as the first argument while
 the new list is returned from this function. The specified \fIstring\fP has
-been appended when this function returns.
+been appended when this function returns. curl_slist_append() copies the
+string.
 
 The list should be freed again (after usage) with \fBcurl_slist_free_all()\fP.
 .SH RETURN VALUE
