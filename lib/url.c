@@ -1190,7 +1190,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     /* Connect to target host right on */
     conn->hp = GetHost(data, conn->name, &conn->hostent_buf);
     if(!conn->hp) {
-      failf(data, "Couldn't resolv host '%s'", conn->name);
+      failf(data, "Couldn't resolve host '%s'", conn->name);
       return CURLE_COULDNT_RESOLVE_HOST;
     }
   }
@@ -1246,7 +1246,7 @@ static CURLcode _connect(CURL *curl, CURLconnect **in_connect)
     /* connect to proxy */
     conn->hp = GetHost(data, proxyptr, &conn->hostent_buf);
     if(!conn->hp) {
-      failf(data, "Couldn't resolv proxy '%s'", proxyptr);
+      failf(data, "Couldn't resolve proxy '%s'", proxyptr);
       return CURLE_COULDNT_RESOLVE_PROXY;
     }
 
