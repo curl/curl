@@ -86,6 +86,9 @@
 /* The size of a `curl_off_t', as computed by sizeof. */
 #undef SIZEOF_CURL_OFF_T
 
+/* The size of a `long', as computed by sizeof. */
+#undef SIZEOF_LONG
+
 /* If zlib is available */
 #undef HAVE_LIBZ
 
