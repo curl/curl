@@ -55,6 +55,15 @@
 #undef HAVE_USERDATA_IN_PWD_CALLBACK
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x00907001L
+/* ENGINE_load_private_key() takes four arguments */
+#define HAVE_ENGINE_LOAD_FOUR_ARGS
+#else
+/* ENGINE_load_private_key() takes three arguments */
+#undef HAVE_ENGINE_LOAD_FOUR_ARGS
+#endif
+
+
 #ifndef HAVE_USERDATA_IN_PWD_CALLBACK
 static char global_passwd[64];
 #endif
@@ -275,11 +284,17 @@ int cert_stuff(struct connectdata *conn,
       {                         /* XXXX still needs some work */
         EVP_PKEY *priv_key = NULL;
         if (conn && conn->data && conn->data->engine) {
+#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
+          UI_METHOD *ui_method = UI_OpenSSL();
+#endif
           if (!key_file || !key_file[0]) {
             failf(data, "no key set to load from crypto engine\n");
             return 0;
           }
           priv_key = ENGINE_load_private_key(conn->data->engine,key_file,
+#ifdef HAVE_ENGINE_LOAD_FOUR_ARGS
+                                             ui_method,
+#endif
                                              data->set.key_passwd);
           if (!priv_key) {
             failf(data, "failed to load private key from crypto engine\n");
