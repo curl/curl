@@ -4,8 +4,6 @@
                             | (__| |_| |  _ <| |___ 
                              \___|\___/|_| \_\_____|
 
-CONTRIBUTE
-
 To Think About When Contributing Source Code
 
  This document is intended to offer some guidelines that can be useful to keep
@@ -15,15 +13,13 @@ To Think About When Contributing Source Code
 The License Issue
 
  When contributing with code, you agree to put your changes and new code under
- the same license curl and libcurl is already using. Curl uses the MozPL, the
- Mozilla Public License, which is *NOT* compatible with the well known GPL,
- GNU Public License. We can never re-use sources from a GPL program in curl.
+ the same license curl and libcurl is already using.
+
  If you add a larger piece of code, you can opt to make that file or set of
  files to use a different license as long as they don't enfore any changes to
  the rest of the package and they make sense. Such "separate parts" can not be
- GPL either (although they should use "GPL compatible" licenses).
-
- Curl and libcurl will soon become dual licensed, MozPL/MITX!
+ GPL (as we don't want the FPL virus to attack users of libcurl) but they must
+ use "GPL compatible" licenses.
 
 Naming
 
@@ -71,6 +67,13 @@ Separate Patches Doing Different Things
  correct different problems should be in their own patch with an attached
  description exactly what they correct so that all patches can be selectively
  applied by the maintainer or other interested parties.
+
+Patch Against Recent Sources
+
+ Please try to get the latest available sources to make your patches
+ against. It makes my life so much easier. The very best is if you get the
+ most up-to-date sources from the CVS repository, but the latest release
+ archive is quite OK as well!
 
 Document
 
