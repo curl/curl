@@ -62,7 +62,8 @@ RELEASE_OBJS= \
 	versionr.obj \
 	easyr.obj \
 	strequalr.obj \
-	strtokr.obj
+	strtokr.obj \
+	connectr.obj
 
 DEBUG_OBJS= \
 	base64d.obj \
@@ -94,7 +95,8 @@ DEBUG_OBJS= \
 	versiond.obj  \
 	easyd.obj \
 	strequald.obj \
-	strtokd.obj
+	strtokd.obj \
+	connectd.obj
 
 RELEASE_SSL_OBJS= \
 	base64rs.obj \
@@ -126,7 +128,8 @@ RELEASE_SSL_OBJS= \
 	versionrs.obj \
 	easyrs.obj \
 	strequalrs.obj \
-	strtokrs.obj
+	strtokrs.obj \
+	connectrs.obj
 
 LINK_OBJS= \
 	base64.obj \
@@ -158,7 +161,8 @@ LINK_OBJS= \
 	version.obj \
 	easy.obj \
 	strequal.obj \
-	strtok.obj
+	strtok.obj \
+	connect.obj
 
 all : release
 
@@ -232,6 +236,8 @@ strequalr.obj: strequal.c
 	$(CCR) $(CFLAGS) strequal.c
 strtokr.obj:strtok.c
 	$(CCR) $(CFLAGS) strtok.c
+connectr.obj:connect.c
+	$(CCR) $(CFLAGS) connect.c
 
 ## Debug
 base64d.obj: base64.c
@@ -294,6 +300,8 @@ strequald.obj: strequal.c
 	$(CCD) $(CFLAGS) strequal.c
 strtokd.obj:strtok.c
 	$(CCD) $(CFLAGS) strtok.c
+connectd.obj:connect.c
+	$(CCR) $(CFLAGS) connect.c
 
 ## Release SSL
 base64rs.obj: base64.c
@@ -356,7 +364,8 @@ strequalrs.obj: strequal.c
 	$(CCRS) $(CFLAGS) strequal.c
 strtokrs.obj:strtok.c
 	$(CCRS) $(CFLAGS) strtok.c
-
+connectrs.obj:connect.c
+	$(CCR) $(CFLAGS) connect.c
 
 clean:
 	-@erase *.obj
