@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (30 August 2004)
+- Make "Proxy-Connection: close" close the current proxy connection, as Roman
+  Koifman found out.
+
 Daniel (24 August 2004)
 - Fixed a getdate problem by post-replacing the getdate.c file after the
   bison/yacc process to add the fix Harshal Pradhan suggested. The problem
