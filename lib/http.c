@@ -751,7 +751,7 @@ CURLcode Curl_http(struct connectdata *conn)
 
 #ifdef HAVE_STRFTIME
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-      strftime(buf, BUFSIZE-1, "%a, %d %b %Y %H:%M:%S %Z", thistime);
+      strftime(buf, BUFSIZE-1, "%a, %d %b %Y %H:%M:%S GMT", thistime);
 #else
       /* TODO: Right, we *could* write a replacement here */
       strcpy(buf, "no strftime() support");
