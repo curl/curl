@@ -1,4 +1,4 @@
-                                       Updated for curl 7.8 on May 29, 2001
+                                    Updated for curl 7.9.1 on November 2, 2001
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -78,15 +78,15 @@ Library
  makes sure we stay absolutely platform independent.
 
  curl_easy_init() allocates an internal struct and makes some initializations.
- The returned handle does not reveal internals. This is the 'UrlData' struct
- which works as a global "anchor" struct. All connections performed will get
- connect-specific data allocated that should be used for things related to
- particular connections/requests.
+ The returned handle does not reveal internals. This is the 'SessionHandle'
+ struct which works as an "anchor" struct for all curl_easy functions. All
+ connections performed will get connect-specific data allocated that should be
+ used for things related to particular connections/requests.
 
  curl_easy_setopt() takes three arguments, where the option stuff must be
  passed in pairs: the parameter-ID and the parameter-value. The list of
  options is documented in the man page. This function mainly sets things in
- the 'UrlData' struct.
+ the 'SessionHandle' struct.
 
  curl_easy_perform() does a whole lot of things:
 
@@ -106,7 +106,7 @@ Library
    This function makes sure there's an allocated and initiated 'connectdata'
    struct that is used for this particular connection only (although there may
    be several requests performed on the same connect). A bunch of things are
-   inited/inherited from the UrlData struct.
+   inited/inherited from the SessionHandle struct.
 
  o Curl_do()
 
@@ -122,6 +122,13 @@ Library
    host and when they're ready to make the actual file transfer they call the
    Curl_Transfer() function (in lib/transfer.c) to setup the transfer and
    returns.
+
+   Starting in 7.9.1, if this DO function fails and the connection is being
+   re-used, libcurl will then close this connection, setup a new connection
+   and re-issue the DO request on that. This is because there is no way to be
+   perfectly sure that we have discovered a dead connection before the DO
+   function and thus we might wrongly be re-using a connection that was closed
+   by the remote peer.
 
  o Transfer()
 
@@ -144,7 +151,7 @@ Library
  o Curl_disconnect()
 
    When doing normal connections and transfers, no one ever tries to close any
-   connection so this is not normally called when curl_easy_perform() is
+   connections so this is not normally called when curl_easy_perform() is
    used. This function is only used when we are certain that no more transfers
    is going to be made on the connection. It can be also closed by force, or
    it can be called to make sure that libcurl doesn't keep too many
@@ -258,12 +265,12 @@ Persistent Connections
  The persistent connection support in libcurl requires some considerations on
  how to do things inside of the library.
 
- o The 'UrlData' struct returned in the curl_easy_init() call must never
-   hold connection-oriented data. It is meant to hold the root data as well
-   as all the options etc that the library-user may choose.
- o The 'UrlData' struct holds the "connection cache" (an array of pointers to
-   'connectdata' structs). There's one connectdata struct allocated for each
-   connection that libcurl knows about.
+ o The 'SessionHandle' struct returned in the curl_easy_init() call must never
+   hold connection-oriented data. It is meant to hold the root data as well as
+   all the options etc that the library-user may choose.
+ o The 'SessionHandle' struct holds the "connection cache" (an array of
+   pointers to 'connectdata' structs). There's one connectdata struct
+   allocated for each connection that libcurl knows about.
  o This also enables the 'curl handle' to be reused on subsequent transfers,
    something that was illegal before libcurl 7.7.
  o When we are about to perform a transfer with curl_easy_perform(), we first
