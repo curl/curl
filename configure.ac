@@ -465,10 +465,10 @@ if test "$PKGCONFIG" != "no" ; then
   if test "$SSL_EXISTS" -eq "0"; then
     SSL_LIBS=`$PKGCONFIG --libs-only-l openssl 2>/dev/null`
     SSL_LDFLAGS=`$PKGCONFIG --libs-only-L openssl 2>/dev/null`
-    SSL_CFLAGS=`$PKGCONFIG --cflags openssl 2>/dev/null`
+    SSL_CPPFLAGS=`$PKGCONFIG --cflags-only-I openssl 2>/dev/null`
 
     LIBS="$LIBS $SSL_LIBS"
-    CFLAGS="$CFLAGS $SSL_CFLAGS"
+    CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
     LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
 
     AC_MSG_RESULT([yes])
