@@ -49,25 +49,23 @@
 #include "../lib/memdebug.h"
 #endif
 
-char *glob_buffer;
-URLGlob *glob_expand;
+int glob_word(URLGlob *, char*, int);
 
-int glob_word(char*, int);
-
-int glob_set(char *pattern, int pos) {
+int glob_set(URLGlob *glob, char *pattern, int pos)
+{
   /* processes a set expression with the point behind the opening '{'
      ','-separated elements are collected until the next closing '}'
   */
-  char* buf = glob_buffer;
+  char* buf = glob->glob_buffer;
   URLPattern *pat;
 
-  pat = (URLPattern*)&glob_expand->pattern[glob_expand->size / 2];
+  pat = (URLPattern*)&glob->pattern[glob->size / 2];
   /* patterns 0,1,2,... correspond to size=1,3,5,... */
   pat->type = UPTSet;
   pat->content.Set.size = 0;
   pat->content.Set.ptr_s = 0;
   pat->content.Set.elements = (char**)malloc(0);
-  ++glob_expand->size;
+  ++glob->size;
 
   while (1) {
     switch (*pattern) {
@@ -81,19 +79,22 @@ int glob_set(char *pattern, int pos) {
     case ',':
     case '}':				/* set element completed */
       *buf = '\0';
-      pat->content.Set.elements = realloc(pat->content.Set.elements, (pat->content.Set.size + 1) * sizeof(char*));
+      pat->content.Set.elements =
+        realloc(pat->content.Set.elements,
+                (pat->content.Set.size + 1) * sizeof(char*));
       if (!pat->content.Set.elements) {
 	printf("out of memory in set pattern\n");
 	exit(CURLE_OUT_OF_MEMORY);
       }
-      pat->content.Set.elements[pat->content.Set.size] = strdup(glob_buffer);
+      pat->content.Set.elements[pat->content.Set.size] =
+        strdup(glob->glob_buffer);
       ++pat->content.Set.size;
 
       if (*pattern == '}')		/* entire set pattern completed */
 	/* always check for a literal (may be "") between patterns */
-	return pat->content.Set.size * glob_word(++pattern, ++pos);
+	return pat->content.Set.size * glob_word(glob, ++pattern, ++pos);
 
-      buf = glob_buffer;
+      buf = glob->glob_buffer;
       ++pattern;
       ++pos;
       break;
@@ -115,7 +116,8 @@ int glob_set(char *pattern, int pos) {
   exit (CURLE_FAILED_INIT);
 }
 
-int glob_range(char *pattern, int pos) {
+int glob_range(URLGlob *glob, char *pattern, int pos)
+{
   /* processes a range expression with the point behind the opening '['
      - char range: e.g. "a-z]", "B-Q]"
      - num range: e.g. "0-9]", "17-2000]"
@@ -125,9 +127,9 @@ int glob_range(char *pattern, int pos) {
   URLPattern *pat;
   char *c;
   
-  pat = (URLPattern*)&glob_expand->pattern[glob_expand->size / 2];
+  pat = (URLPattern*)&glob->pattern[glob->size / 2];
   /* patterns 0,1,2,... correspond to size=1,3,5,... */
-  ++glob_expand->size;
+  ++glob->size;
 
   if (isalpha((int)*pattern)) {		/* character range detected */
     pat->type = UPTCharRange;
@@ -141,7 +143,7 @@ int glob_range(char *pattern, int pos) {
     pat->content.CharRange.ptr_c = pat->content.CharRange.min_c;
     /* always check for a literal (may be "") between patterns */
     return (pat->content.CharRange.max_c - pat->content.CharRange.min_c + 1) *
-      glob_word(pattern + 4, pos + 4);
+      glob_word(glob, pattern + 4, pos + 4);
   }
   if (isdigit((int)*pattern)) {		/* numeric range detected */
     pat->type = UPTNumRange;
@@ -162,17 +164,18 @@ int glob_range(char *pattern, int pos) {
     c = (char*)(strchr(pattern, ']') + 1);	/* continue after next ']' */
     /* always check for a literal (may be "") between patterns */
     return (pat->content.NumRange.max_n - pat->content.NumRange.min_n + 1) *
-      glob_word(c, pos + (c - pattern));
+      glob_word(glob, c, pos + (c - pattern));
   }
   printf("error: illegal character in range specification at pos %d\n", pos);
   exit (CURLE_URL_MALFORMAT);
 }
 
-int glob_word(char *pattern, int pos) {
+int glob_word(URLGlob *glob, char *pattern, int pos)
+{
   /* processes a literal string component of a URL
      special characters '{' and '[' branch to set/range processing functions
    */ 
-  char* buf = glob_buffer;
+  char* buf = glob->glob_buffer;
   int litindex;
 
   while (*pattern != '\0' && *pattern != '{' && *pattern != '[') {
@@ -192,17 +195,17 @@ int glob_word(char *pattern, int pos) {
     ++pos;
   }
   *buf = '\0';
-  litindex = glob_expand->size / 2;
+  litindex = glob->size / 2;
   /* literals 0,1,2,... correspond to size=0,2,4,... */
-  glob_expand->literal[litindex] = strdup(glob_buffer);
-  ++glob_expand->size;
+  glob->literal[litindex] = strdup(glob->glob_buffer);
+  ++glob->size;
   if (*pattern == '\0')
     return 1;				/* singular URL processed  */
   if (*pattern == '{') {
-    return glob_set(++pattern, ++pos);	/* process set pattern */
+    return glob_set(glob, ++pattern, ++pos);	/* process set pattern */
   }
   if (*pattern == '[') {
-    return glob_range(++pattern, ++pos);/* process range pattern */
+    return glob_range(glob, ++pattern, ++pos);/* process range pattern */
   }
   printf("internal error\n");
   exit (CURLE_FAILED_INIT);
@@ -214,18 +217,26 @@ int glob_url(URLGlob** glob, char* url, int *urlnum)
    * We can deal with any-size, just make a buffer with the same length
    * as the specified URL!
    */
-  glob_buffer=(char *)malloc(strlen(url)+1);
+  URLGlob *glob_expand;
+  char *glob_buffer=(char *)malloc(strlen(url)+1);
   if(NULL == glob_buffer)
     return CURLE_OUT_OF_MEMORY;
 
   glob_expand = (URLGlob*)malloc(sizeof(URLGlob));
+  if(NULL == glob_expand) {
+    free(glob_buffer);
+    return CURLE_OUT_OF_MEMORY;
+  }
   glob_expand->size = 0;
-  *urlnum = glob_word(url, 1);
+  glob_expand->urllen = strlen(url);
+  glob_expand->glob_buffer = glob_buffer;
+  *urlnum = glob_word(glob_expand, url, 1);
   *glob = glob_expand;
   return CURLE_OK;
 }
 
-void glob_cleanup(URLGlob* glob) {
+void glob_cleanup(URLGlob* glob)
+{
   int i, elem;
 
   for (i = glob->size - 1; i >= 0; --i) {
@@ -240,14 +251,14 @@ void glob_cleanup(URLGlob* glob) {
       }
     }
   }
+  free(glob->glob_buffer);
   free(glob);
-  free(glob_buffer);
 }
 
 char *next_url(URLGlob *glob)
 {
   static int beenhere = 0;
-  char *buf = glob_buffer;
+  char *buf = glob->glob_buffer;
   URLPattern *pat;
   char *lit;
   signed int i;
@@ -318,48 +329,83 @@ char *next_url(URLGlob *glob)
     }
   }
   *buf = '\0';
-  return strdup(glob_buffer);
+  return strdup(glob->glob_buffer);
 }
 
-char *match_url(char *filename, URLGlob glob) {
-  char *buf = glob_buffer;
+char *match_url(char *filename, URLGlob *glob)
+{
+  char *target;
   URLPattern pat;
   int i;
+  int allocsize;
+  int stringlen=0;
+  char numbuf[18];
+  char *appendthis;
+  size_t appendlen;
+
+  /* We cannot use the glob_buffer for storage here since the filename may
+   * be longer than the URL we use. We allocate a good start size, then
+   * we need to realloc in case of need.
+   */
+  allocsize=strlen(filename);
+  target = malloc(allocsize);
+  if(NULL == target)
+    return NULL; /* major failure */
 
   while (*filename != '\0') {
     if (*filename == '#') {
       if (!isdigit((int)*++filename) ||
 	  *filename == '0') {		/* only '#1' ... '#9' allowed */
-	printf("illegal matching expression\n");
-	exit(CURLE_URL_MALFORMAT);
+	/* printf("illegal matching expression\n");
+           exit(CURLE_URL_MALFORMAT);*/
+        continue;
       }
       i = *filename - '1';
-      if (i + 1 > glob.size / 2) {
-	printf("match against nonexisting pattern\n");
-	exit(CURLE_URL_MALFORMAT);
+      if (i + 1 > glob->size / 2) {
+	/*printf("match against nonexisting pattern\n");
+          exit(CURLE_URL_MALFORMAT);*/
+        continue;
       }
-      pat = glob.pattern[i];
+      pat = glob->pattern[i];
       switch (pat.type) {
       case UPTSet:
-	strcpy(buf, pat.content.Set.elements[pat.content.Set.ptr_s]);
-	buf += strlen(pat.content.Set.elements[pat.content.Set.ptr_s]);
+	appendthis = pat.content.Set.elements[pat.content.Set.ptr_s];
+	appendlen = strlen(pat.content.Set.elements[pat.content.Set.ptr_s]);
 	break;
       case UPTCharRange:
-	*buf++ = pat.content.CharRange.ptr_c;
+        numbuf[0]=pat.content.CharRange.ptr_c;
+        numbuf[1]=0;
+        appendthis=numbuf;
+        appendlen=1;
 	break;
       case UPTNumRange:
-	sprintf(buf, "%0*d", pat.content.NumRange.padlength, pat.content.NumRange.ptr_n);
-        buf += strlen(buf);
+	sprintf(numbuf, "%0*d", pat.content.NumRange.padlength, pat.content.NumRange.ptr_n);
+        appendthis = numbuf;
+        appendlen = strlen(numbuf);
 	break;
       default:
 	printf("internal error: invalid pattern type (%d)\n", pat.type);
-	exit (CURLE_FAILED_INIT);
+        return NULL;
       }
       ++filename;
     }
-    else
-      *buf++ = *filename++;
+    else {
+      appendthis=filename++;
+      appendlen=1;
+    }
+    if(appendlen + stringlen >= allocsize) {
+      char *newstr;
+      allocsize = (appendlen + stringlen)*2;
+      newstr=realloc(target, allocsize);
+      if(NULL ==newstr) {
+        free(target);
+        return NULL;
+      }
+      target=newstr;
+    }
+    memcpy(&target[stringlen], appendthis, appendlen);
+    stringlen += appendlen;
   }
-  *buf = '\0';
-  return strdup(glob_buffer);
+  target[stringlen]= '\0';
+  return target;
 }

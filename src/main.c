@@ -1500,7 +1500,7 @@ operate(struct Configurable *config, int argc, char *argv[])
       else {
 	/* fill '#1' ... '#9' terms from URL pattern */
         char *outfile = config->outfile;
-        config->outfile = match_url(config->outfile, *urls);
+        config->outfile = match_url(config->outfile, urls);
         free(outfile);
       }
       

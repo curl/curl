@@ -65,11 +65,13 @@ typedef struct {
   char* literal[10];
   URLPattern pattern[9];
   int size;
+  int urllen;
+  char *glob_buffer;
 } URLGlob;
 
 int glob_url(URLGlob**, char*, int *);
 char* next_url(URLGlob*);
-char* match_url(char*, URLGlob); 
+char* match_url(char*, URLGlob *); 
 void glob_cleanup(URLGlob* glob);
 
 #endif
