@@ -573,7 +573,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 #ifdef ENABLE_IPV6
     rc = connect(sockfd, ai->ai_addr, ai->ai_addrlen);
 #else
-    rc = connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr);
+    rc = connect(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 #endif
 
     if(-1 == rc) {
