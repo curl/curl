@@ -278,10 +278,6 @@ static bool init_resolve_thread (struct connectdata *conn,
 
   Curl_safefree(conn->async.hostname);
   conn->async.hostname = strdup(hostname);
-#ifdef USE_LIBIDN
-  if (conn->ace_hostname)
-    TRACE(("ACE name '%s'\n", conn->ace_hostname));
-#endif
   if (!conn->async.hostname) {
     free(td);
     SetLastError(ENOMEM);
