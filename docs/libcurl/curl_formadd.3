@@ -26,6 +26,9 @@ NULL in the first call to this function. All list-data will be allocated by
 the function itself. You must call \fIcurl_formfree\fP after the form post has
 been done to free the resources again.
 
+Using POST with HTTP 1.1 implies the use of a "Expect: 100-continue" header.
+You can disable this header with \fICURLOPT_HTTPHEADER\fP as usual.
+
 First, there are some basics you need to understand about multipart/formdata
 posts. Each part consists of at least a NAME and a CONTENTS part. If the part
 is made for file upload, there are also a stored CONTENT-TYPE and a
