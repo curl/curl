@@ -395,13 +395,14 @@ CROSS COMPILE
 PORTS
 =====
    This is a probably incomplete list of known hardware and operating systems
-   that curl has been compiled for. If you know one system curl compiles and
+   that curl has been compiled for. If you know a system curl compiles and
    runs on, that isn't listed, please let us know!
 
         - Alpha DEC OSF 4
         - Alpha Digital UNIX v3.2
-        - Alpha FreeBSD 4.1
-        - Alpha Linux 2.2.16
+        - Alpha FreeBSD 4.1, 4.5
+        - Alpha Linux 2.2, 2.4
+        - Alpha NetBSD 1.5.2
         - Alpha OpenVMS V7.1-1H2
         - Alpha Tru64 v5.0 5.1
         - HP-PA HP-UX 9.X 10.X 11.X
