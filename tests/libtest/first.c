@@ -1,4 +1,4 @@
-#include <curl.h>
+#include "test.h"
 
 #ifdef MALLOCDEBUG
 /* provide a proto for this debug function */
