@@ -56,4 +56,12 @@ Does curl support custom FTP commands?
   ftp commands without transfering anything. Therefore you must always specify
   a URL to transfer to/from even when doing custom FTP commands.
 
-  
+Does curl work with other SSL libraries?
+========================================
+
+  Curl has been written to use OpenSSL, although I doubt there would be much
+  problems using a different library. I just don't know any other free one and
+  that has limited my possibilities to develop against anything else.
+
+  If anyone does "port" curl to use a commercial SSL library, I am of course
+  very interested in getting the patch!
