@@ -7,6 +7,30 @@
                                History of Changes
 
 
+Daniel (11 March 2002)
+- CURLFORM_FILENAME was added. This can be set when creating a file upload
+  part, to set the 'filename' field to a custom value. If this isn't used,
+  the actually used filename will be included instead (as libcurl always has
+  done). curl was adjusted accordingly, and now -F accepts a 'filename=' field
+  too, and allows constructs such as:
+
+    -F 'name=@filename;filename=/dev/null'
+
+  and this can be combined with type= too, in a manner similar to:
+
+   -F "file=@log/test39.txt;filename=fakerfile;type=moo/foobar"
+
+Daniel (8 March 2002)
+- Clifford also discovered that if the client code failed early, as when doing
+  "curl -O" only, it would do fclose(NULL) which caused a segmentation fault
+  on some systems.
+
+- Clifford Wolf provided a patch that made --progress-bar work again.
+
+- I closed bug report #527032 by making sure that we add a newline after a
+  transfer when --progress-bar has been used. Before, without the newline, it
+  made the subsequent text come out wrong.
+
 Version 7.9.5
 
 Daniel (7 March 2002)
