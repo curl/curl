@@ -350,6 +350,10 @@ for ( $waitedpid = 0;
     &customize(); # read test control instructions
 
     print @welcome;
+    if($verbose) {
+        print STDERR "OUT:\n";
+        print STDERR @welcome;
+    }
     my $state="fresh";
 
     while(1) {
