@@ -161,6 +161,12 @@ _Transfer(struct connectdata *c_conn)
   Curl_pgrsTime(data, TIMER_PRETRANSFER);
   Curl_speedinit(data);
 
+  if((conn->sockfd == -1) &&
+     (conn->writesockfd == -1)) {
+    /* nothing to read, nothing to write, we're already OK! */
+    return CURLE_OK;
+  }
+
   if (!conn->getheader) {
     header = FALSE;
     if(conn->size > 0)

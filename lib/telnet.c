@@ -872,20 +872,22 @@ CURLcode Curl_telnet(struct connectdata *conn)
         }
       }
 
-      if(FD_ISSET(sockfd, &readfd))
+      if(FD_ISSET(sockfd, &readfd)) {
         Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
 
-      /* if we receive 0 or less here, the server closed the connection and
-         we bail out from this! */
-      if (nread <= 0) {
-        keepon = FALSE;
-        break;
-      }
+        /* if we receive 0 or less here, the server closed the connection and
+           we bail out from this! */
+        if (nread <= 0) {
+          keepon = FALSE;
+          break;
+        }
 
-      telrcv(data, (unsigned char *)buf, nread);
+        telrcv(data, (unsigned char *)buf, nread);
+      }
     }
   }
-  return CURLE_OK;
+  /* mark this as "no further transfer wanted" */
+  return Curl_Transfer(conn, -1, -1, FALSE, NULL, -1, NULL);
 }
 
 
