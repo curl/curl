@@ -669,17 +669,8 @@ sub singletest {
     # make some nice replace operations
     $cmd =~ s/\n//g; # no newlines please
 
+    # substitute variables in the command line
     subVariables \$cmd;
-
-#    $cmd =~ s/%HOSTIP/$HOSTIP/g;
-#    $cmd =~ s/%HOSTPORT/$HOSTPORT/g;
-#    $cmd =~ s/%HTTPSPORT/$HTTPSPORT/g;
-#    $cmd =~ s/%FTPPORT/$FTPPORT/g;
-#    $cmd =~ s/%FTPSPORT/$FTPSPORT/g;
-#    $cmd =~ s/%SRCDIR/$srcdir/g;
-#    $cmd =~ s/%PWD/$pwd/g;
-
-    #$cmd =~ s/%HOSTNAME/$HOSTNAME/g;
 
     if($curl_debug) {
         unlink($memdump);
@@ -709,10 +700,8 @@ sub singletest {
 
     my $out="";
 
-    if($cmdhash{'option'} eq "no-output") {
-        #print "*** We don't slap on --output\n";
-    }
-    else {
+    if($cmdhash{'option'} !~ /no-output/) {
+        #We may slap on --output!
         if (!@validstdout) {
             $out=" --output $CURLOUT ";
         }
@@ -746,7 +735,7 @@ sub singletest {
         $DBGCURL=$CMDLINE;
     }
 
-    $CMDLINE .= "$cmdargs >$STDOUT 2>$STDERR";
+    $CMDLINE .= "$cmdargs >>$STDOUT 2>>$STDERR";
 
     if($verbose) {
         print "$CMDLINE\n"; 
