@@ -262,11 +262,17 @@ Example, to send your password file to the server, where
 \&'password' is the name of the form-field to which /etc/passwd will be the
 input:
 
-.B curl
--F password=@/etc/passwd www.mypasswords.com
+\fBcurl\fP -F password=@/etc/passwd www.mypasswords.com
 
 To read the file's content from stdin insted of a file, use - where the file
 name should've been. This goes for both @ and < constructs.
+
+You can also tell curl what Content-Type to use for the file upload part, by
+using 'type=', in a manner similar to:
+
+\fBcurl\fP -F "web=@index.html;type=text/html" url.com
+
+See further examples and details in the MANUAL.
 
 This option can be used multiple times.
 .IP "-g/--globoff"
