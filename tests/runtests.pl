@@ -129,17 +129,31 @@ sub torture {
     
     # loop over the different tests commands
     for(@test) {
-        my $testcmd = "$CURL $_ >log/torture.stdout 2>log/torture.stderr";
-
-        subVariables(\$testcmd);
-
-        # First get  test server, ignore the output/result
-        system($testcmd);
+        my $cmdargs = "$_";
 
         $c++;
 
         if($tortnum && ($tortnum != $c)) {
             next;
+        }
+        print "We want test $c\n";
+
+        my $redir=">log/torture.stdout 2>log/torture.stderr";
+
+        subVariables(\$cmdargs);
+
+        my $testcmd = "$CURL $cmdargs $redir";
+
+        # First get URL from test server, ignore the output/result
+        system($testcmd);
+
+        # Set up gdb-stuff if desired
+        if($gdbthis) {
+            open(GDBCMD, ">log/gdbcmd");
+            print GDBCMD "set args $cmdargs\n";
+            print GDBCMD "show args\n";
+            close(GDBCMD);
+            $testcmd = "gdb $CURL -x log/gdbcmd";
         }
 
         print "Torture test $c starting up\n",
@@ -147,7 +161,7 @@ sub torture {
         
         # memanalyze -v is our friend, get the number of allocations made
         my $count;
-        my @out = `$memanalyze -v memdump`;
+        my @out = `$memanalyze -v $memdump`;
         for(@out) {
             if(/^Allocations: (\d+)/) {
                 $count = $1;
@@ -156,6 +170,7 @@ sub torture {
         }
         if(!$count) {
             # hm, no allocations in this fetch, ignore and get next
+            print "BEEEP, no allocs found for test $c!!!\n";
             next;
         }
         print " $count allocations to excersize\n";
@@ -167,12 +182,16 @@ sub torture {
             if($tortalloc && ($tortalloc != $limit)) {
                 next;
             }
+
+            print "Alloc no: $limit\r" if(!$gdbthis);
             
             # make the memory allocation function number $limit return failure
             $ENV{'CURL_MEMLIMIT'} = $limit;
 
             # remove memdump first to be sure we get a new nice and clean one
-            unlink("memdump");
+            unlink($memdump);
+            
+            print "**> Alloc number $limit is now set to fail <**\n" if($gdbthis);
 
             my $ret = system($testcmd);
 
@@ -195,6 +214,7 @@ sub torture {
                 if($leak) {
                     print "** MEMORY FAILURE\n";
                     print @memdata;
+                    print `$memanalyze -l $memdump`;
                     $fail = 1;
                 }
             }
@@ -205,10 +225,12 @@ sub torture {
                 exit 1;
             }
         }
-        print " torture test $c did GOOD\n";
+        print "\n torture test $c did GOOD\n";
 
         # all is well, now test a different kind of URL
     }
+    stopservers();
+    exit; # for now, we stop after these tests
 }
 
 #######################################################################
@@ -1075,9 +1097,9 @@ sub singletest {
 #######################################################################
 # Stop all running test servers
 sub stopservers {
-    print "Shutting down test suite servers:\n" if (!$short);
+    print "Shutting down test suite servers:\n" if ($verbose);
     for(keys %run) {
-        printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if(!$short);
+        printf ("* kill pid for %-5s => %-5d\n", $_, $run{$_}) if($verbose);
         stopserver($run{$_}); # the pid file is in the hash table
     }
 }
@@ -1097,6 +1119,7 @@ sub startservers {
                 if($pid <= 0) {
                     return 2; # error starting it
                 }
+                printf ("* pid ftp => %-5d\n", $pid) if($verbose);
                 $run{'ftp'}=$pid;
             }
         }
@@ -1105,7 +1128,8 @@ sub startservers {
                 $pid = runhttpserver($verbose);
                 if($pid <= 0) {
                     return 2; # error starting
-                }
+                } 
+                printf ("* pid http => %-5d\n", $pid) if($verbose);
                 $run{'http'}=$pid;
             }
         }
@@ -1127,6 +1151,7 @@ sub startservers {
                 if($pid <= 0) {
                     return 2;
                 }
+                printf ("* pid ftps => %-5d\n", $pid) if($verbose);
                 $run{'ftps'}=$pid;
             }
         }
@@ -1151,6 +1176,7 @@ sub startservers {
                 if($pid <= 0) {
                     return 2;
                 }
+                printf ("* pid https => %-5d\n", $pid) if($verbose);
                 $run{'https'}=$pid;
             }
         }
@@ -1229,8 +1255,11 @@ do {
         # torture
         $torture=1;
         my $xtra = $1;
-        if($xtra =~ /(\d+),(\d+)/) {
-            ($tortnum, $tortalloc)= ($1, $2);
+        if($xtra =~ s/^(\d+)//) {
+            $tortnum = $1;
+        }
+        if($xtra =~ s/(\d+)$//) {
+            $tortalloc = $1;
         }
     }
     elsif($ARGV[0] eq "-a") {
@@ -1331,7 +1360,6 @@ open(CMDLOG, ">$CURLLOG") ||
 #
 if($torture) {
     &torture();
-    exit; # for now, we stop after these tests
 }
 #######################################################################
 # The main test-loop
