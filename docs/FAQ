@@ -1,4 +1,4 @@
-Updated: January 29, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: February 2, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -53,7 +53,7 @@ FAQ
   5.2 How can I receive all data into a large memory chunk?
   5.3 How do I fetch multiple files with libcurl?
   5.4 Does libcurl do Winsock initing on win32 systems?
-  5.5 Does CURLOPT_FILE work on win32 ?
+  5.5 Does CURLOPT_FILE and CURLOPT_INFILE work on win32 ?
   5.6 What about Keep-Alive or persistant connections?
 
  6. License Issues
@@ -491,14 +491,15 @@ FAQ
   use several different libraries and parts, and there's no reason for every
   single library to do this.
 
-  5.5 Does CURLOPT_FILE work on win32 ?
+  5.5 Does CURLOPT_FILE and CURLOPT_INFILE work on win32 ?
 
   Yes, but you cannot open a FILE * and pass the pointer to a DLL and have
-  that DLL use the FILE *. You must use CURLOPT_WRITEFUNCTION as well to set a
-  function that writes the file, even if that simply writes the data to the
-  specified FILE*.
+  that DLL use the FILE *. If you set CURLOPT_FILE you must also use
+  CURLOPT_WRITEFUNCTION as well to set a function that writes the file, even
+  if that simply writes the data to the specified FILE*. Similarly, if you use
+  CURLOPT_INFILE you must also specify CURLOPT_READFUNCTION.
 
-  (provided by Joel DeYoung)
+  (Provided by Joel DeYoung and Bob Schader)
 
   5.6 What about Keep-Alive or persistant connections?
 
