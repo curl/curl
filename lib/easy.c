@@ -333,7 +333,8 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
     /* This is a function pointer type */
     param_func = va_arg(arg, func_T );
     ret = Curl_setopt(data, tag, param_func);
-  } else {
+  }
+  else {
     /* This is a curl_off_t type */
     param_offset = va_arg(arg, curl_off_t);
     ret = Curl_setopt(data, tag, param_offset);
