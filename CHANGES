@@ -6,6 +6,17 @@
 
                                History of Changes
 
+Daniel (1 June 2001)
+- Sterling provided some new PHP examples.
+
+- Changed the CVS hierarchy and the older checkout instruction does no longer
+  work. We moved the entire source code into a CVS module named 'curl'.
+
+Daniel (31 May 2001)
+- CURLOPT_MUTE does not exist anymore. It is still present in the include file
+  to not cause compiler errors for applications using it, but it isn't used
+  anywhere in the library.
+
 Version 7.8-pre3
 
 Daniel (31 May 2001)
