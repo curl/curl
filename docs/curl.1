@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "31 Jul 2002" "Curl 7.9.9" "Curl Manual"
+.TH curl 1 "11 Sep 2002" "Curl 7.10" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -308,6 +308,10 @@ as if a new session is started. Typical browsers always discard session
 cookies when they're closed down. (Added in 7.9.7)
 
 If this option is used several times, each occurrence will toggle this on/off.
+.IP "-k/--insecure"
+(SSL)
+
+If this option is used twice, the second time will again disable it.
 .IP "--krb4 <level>"
 (FTP) Enable kerberos4 authentication and use. The level must be entered and
 should be one of 'clear', 'safe', 'confidential' or 'private'. Should you use
@@ -700,6 +704,9 @@ If this option is used several times, the last one will be used.
 If a download is slower than speed-limit bytes per second during a speed-time
 period, the download gets aborted. If speed-time is used, the default
 speed-limit will be 1 unless set with -y.
+
+This option controls transfers and thus will not affect slow connects etc. If
+this is a concern for you, try the \fI--connect-timeout\fP option.
 
 If this option is used several times, the last one will be used.
 .IP "-Y/--speed-limit <speed>"
