@@ -22,14 +22,13 @@ EXPORTS
 	curl_global_init @ 13 ;
 	curl_slist_append @ 14 ;
 	curl_slist_free_all @ 15 ;
-	curl_unescape @ 16 ;
-	curl_version @ 17 ;
-	curl_maprintf @ 18 ;
- 	curl_mfprintf @ 19 ;
-	curl_mprintf @ 20 ;
- 	curl_msprintf @ 21 ;
- 	curl_msnprintf @ 22 ;
- 	curl_mvfprintf @ 23 ;
-	curl_strequal @ 24 ;
-	curl_strnequal @ 25 ;
+	curl_version @ 16 ;
+	curl_maprintf @ 17 ;
+ 	curl_mfprintf @ 18 ;
+	curl_mprintf @ 19 ;
+ 	curl_msprintf @ 20 ;
+ 	curl_msnprintf @ 21 ;
+ 	curl_mvfprintf @ 22 ;
+	curl_strequal @ 23 ;
+	curl_strnequal @ 24 ;
 
