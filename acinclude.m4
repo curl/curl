@@ -322,8 +322,24 @@ dnl program worked:
 [ ac_cv_working_ni_withscopeid="yes" ],
 dnl program failed:
 [ ac_cv_working_ni_withscopeid="no" ],
-dnl we cross-compile:
-[ ac_cv_working_ni_withscopeid="yes" ]
+dnl we cross-compile, check the headers using the preprocessor
+[
+
+ AC_EGREP_CPP(WORKS,
+[
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netdb.h>
+
+#ifdef NI_WITHSCOPEID
+WORKS
+#endif
+],
+  ac_cv_working_ni_withscopeid="yes",
+  ac_cv_working_ni_withscopeid="no" )
+
+ ]
 ) dnl end of AC_RUN_IFELSE
 
 ]) dnl end of AC_CACHE_CHECK
