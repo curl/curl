@@ -141,9 +141,17 @@ Curl_cookie_add(struct CookieInfo *c,
 
         name[0]=what[0]=0; /* init the buffers */
         if(1 <= sscanf(ptr, "%" MAX_NAME_TXT "[^;=]=%"
-                       MAX_COOKIE_LINE_TXT "[^;\r\n ]",
+                       MAX_COOKIE_LINE_TXT "[^;\r\n]",
                        name, what)) {
-          /* this is a legal <what>=<this> pair */
+          /* this is a <name>=<what> pair */
+
+          /* Strip off trailing whitespace from the 'what' */
+          int len=strlen(what);
+          while(len && isspace((int)what[len-1])) {
+            what[len-1]=0;
+            len--;
+          }
+
           if(strequal("path", name)) {
             co->path=strdup(what);
           }
@@ -166,7 +174,7 @@ Curl_cookie_add(struct CookieInfo *c,
              */
             co->maxage = strdup(what);
             co->expires =
-              atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]);
+              atoi((*co->maxage=='\"')?&co->maxage[1]:&co->maxage[0]) + now;
           }
           else if(strequal("expires", name)) {
             co->expirestr=strdup(what);
