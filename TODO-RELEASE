@@ -2,7 +2,7 @@ Fix before releasing 7.11.0
 ===========================
 (Issues not sorted in any particular order)
 
-3. Apply Peter Sylvester's multi patches (awaiting updated patch)
+3. Apply Peter Sylvester's multi patches (work in progress)
 
 6. REST fix for servers not behaving well on >2GB requests (some outstanding
    issues, Dave Meyer works on this)
@@ -10,9 +10,10 @@ Fix before releasing 7.11.0
 8. Resolve the occational test case 91 failure. This still has no
    resolution. (David Byron has done lots of research, no resolution yet)
 
-12. The "PUT and (NTLM/Digest) auth" bug (no progress yet) #862835
+12. The "PUT and (NTLM/Digest) auth" bug (test-patch posted, awaiting
+    feedback/response) #862835
 
-17. Diego Casorran's AmigaOS patch (feedback sent to Diego, awaiting updates)
+17. Diego Casorran's AmigaOS patch (feedback sent to Diego, awaiting response)
 
 To get fixed in 7.11.1
 ======================
