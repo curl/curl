@@ -233,8 +233,11 @@ static void helpf(const char *fmt, ...)
     vfprintf(stderr, fmt, ap);
     va_end(ap);
   }
-  fprintf(stderr, "curl: try 'curl --help' or "
-          "'curl --manual' for more information\n");
+  fprintf(stderr, "curl: try 'curl --help' "
+#ifdef USE_MANUAL
+          "or 'curl --manual' "
+#endif
+          "for more information\n");
 }
 
 /*
@@ -1714,7 +1717,8 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       hugehelp();
       return PARAM_HELP_REQUESTED;
 #else
-      helpf("built-in manual was disabled and build-time!\n");
+      fprintf(stderr,
+              "curl: built-in manual was disabled at build-time!\n");
       return PARAM_OPTION_UNKNOWN;
 #endif
     case 'n':
