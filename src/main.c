@@ -351,7 +351,8 @@ static void help(void)
   puts(" -h/--help          This help text\n"
        " -H/--header <line> Custom header to pass to server. (H)\n"
        " -i/--include       Include the HTTP-header in the output (H)\n"
-       " -I/--head          Fetch document info only (HTTP HEAD/FTP SIZE)\n"
+       " -I/--head          Fetch document info only (HTTP HEAD/FTP SIZE)");
+  puts(" -j/--junk-session-cookies Ignore session cookies read from file (H)\n"
        "    --interface <interface> Specify the interface to be used\n"
        "    --krb4 <level>  Enable krb4 with specified security level (F)\n"
        " -K/--config        Specify which config file to read\n"
@@ -410,6 +411,7 @@ struct Configurable {
   char *cookie;     /* single line with specified cookies */
   char *cookiejar;  /* write to this file */
   char *cookiefile; /* read from this file */
+  bool cookiesession; /* new session? */
   bool use_resume;
   bool resume_from_current;
   bool disable_epsv;
@@ -455,6 +457,8 @@ struct Configurable {
   char *krb4level;
   char *trace_dump; /* file to dump the network trace to, or NULL */
   FILE *trace_stream;
+  bool trace_fopened;
+
   long httpversion;
   bool progressmode;
   bool nobuffer;
@@ -995,6 +999,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"H", "header",      TRUE},
     {"i", "include",     FALSE},
     {"I", "head",        FALSE},
+    {"j", "junk-session-cookies", FALSE},
     {"K", "config",      TRUE},
     {"l", "list-only",   FALSE},
     {"L", "location",    FALSE},
@@ -1379,6 +1384,9 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case 'i':
       config->conf ^= CONF_HEADER; /* include the HTTP header as well */
+      break;
+    case 'j':
+      config->cookiesession ^= TRUE;
       break;
     case 'I':
       /*
@@ -1963,9 +1971,15 @@ int my_trace(CURL *handle, curl_infotype type,
 
   (void)handle; /* prevent compiler warning */
 
-  if(!config->trace_stream)
+  if(!config->trace_stream) {
     /* open for append */
-    config->trace_stream = fopen(config->trace_dump, "w");
+    if(strequal("-", config->trace_dump))
+      config->trace_stream = stdout;
+    else {
+      config->trace_stream = fopen(config->trace_dump, "w");
+      config->trace_fopened = TRUE;
+    }
+  }
 
   if(config->trace_stream)
     output = config->trace_stream;
@@ -2523,6 +2537,9 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_COOKIEFILE, config->cookiefile);
       /* cookie jar was added in 7.9 */
       curl_easy_setopt(curl, CURLOPT_COOKIEJAR, config->cookiejar);
+      /* cookie session added in 7.9.7 */
+      curl_easy_setopt(curl, CURLOPT_COOKIESESSION, config->cookiesession);
+
       curl_easy_setopt(curl, CURLOPT_SSLVERSION, config->ssl_version);
       curl_easy_setopt(curl, CURLOPT_TIMECONDITION, config->timecond);
       curl_easy_setopt(curl, CURLOPT_TIMEVALUE, config->condtime);
@@ -2650,7 +2667,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   if(config->headerfile && !headerfilep && heads.stream)
     fclose(heads.stream);
 
-  if(config->trace_stream)
+  if(config->trace_fopened)
     fclose(config->trace_stream);
 
   if(allocuseragent)

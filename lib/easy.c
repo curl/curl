@@ -312,7 +312,8 @@ CURL *curl_easy_duphandle(CURL *incurl)
     /* If cookies are enabled in the parent handle, we enable them
        in the clone as well! */
     outcurl->cookies = Curl_cookie_init(data->cookies->filename,
-                                        outcurl->cookies);
+                                        outcurl->cookies,
+                                        data->set.cookiesession);
 
   /* duplicate all values in 'change' */
   if(data->change.url) {

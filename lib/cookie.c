@@ -93,6 +93,21 @@ Example set of cookies:
 #include "memdebug.h"
 #endif
 
+static void
+free_cookiemess(struct Cookie *co)
+{
+  if(co->domain)
+    free(co->domain);
+  if(co->path)
+    free(co->path);
+  if(co->name)
+    free(co->name);
+  if(co->value)
+    free(co->value);
+
+  free(co);
+}
+
 /****************************************************************************
  *
  * Curl_cookie_add()
@@ -326,20 +341,17 @@ Curl_cookie_add(struct CookieInfo *c,
     if(7 != fields) {
       /* we did not find the sufficient number of fields to recognize this
          as a valid line, abort and go home */
-
-      if(co->domain)
-        free(co->domain);
-      if(co->path)
-        free(co->path);
-      if(co->name)
-        free(co->name);
-      if(co->value)
-        free(co->value);
-
-      free(co);
+      free_cookiemess(co);
       return NULL;
     }
 
+  }
+
+  if(!c->running &&    /* read from a file */
+     c->newsession &&  /* clean session cookies */
+     !co->expires) {   /* this is a session cookie since it doesn't expire! */
+    free_cookiemess(co);
+    return NULL;
   }
 
   co->livecookie = c->running;
@@ -462,8 +474,12 @@ Curl_cookie_add(struct CookieInfo *c,
  * Inits a cookie struct to read data from a local file. This is always
  * called before any cookies are set. File may be NULL.
  *
+ * If 'newsession' is TRUE, discard all "session cookies" on read from file.
+ *
  ****************************************************************************/
-struct CookieInfo *Curl_cookie_init(char *file, struct CookieInfo *inc)
+struct CookieInfo *Curl_cookie_init(char *file,
+                                    struct CookieInfo *inc,
+                                    bool newsession)
 {
   char line[MAX_COOKIE_LINE];
   struct CookieInfo *c;
@@ -491,6 +507,8 @@ struct CookieInfo *Curl_cookie_init(char *file, struct CookieInfo *inc)
   else
     fp = file?fopen(file, "r"):NULL;
 
+  c->newsession = newsession; /* new session? */
+
   if(fp) {
     char *lineptr;
     bool headerline;
@@ -513,7 +531,7 @@ struct CookieInfo *Curl_cookie_init(char *file, struct CookieInfo *inc)
       fclose(fp);
   }
 
-  c->running = TRUE; /* now, we're running */
+  c->running = TRUE;          /* now, we're running */
 
   return c;
 }

@@ -537,9 +537,17 @@ typedef enum {
 
   /* set the data for the debug function */
   CINIT(DEBUGDATA, OBJECTPOINT, 95),
+
+  /* mark this as start of a cookie session */
+  CINIT(COOKIESESSION, LONG, 96),
   
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
+
+  /* two convenient "aliases" that follow the name scheme better */
+#define CURLOPT_WRITEDATA CURLOPT_FILE
+#define CURLOPT_READDATA  CURLOPT_INFILE 
+
 
   /* These enums are for use with the CURLOPT_HTTP_VERSION option. */
 enum {
@@ -676,8 +684,8 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.9.6"
-#define LIBCURL_VERSION_NUM 0x070906
+#define LIBCURL_VERSION "7.9.7-pre1"
+#define LIBCURL_VERSION_NUM 0x070907
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {

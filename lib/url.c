@@ -495,13 +495,33 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     data->set.ssl.version = va_arg(param, long);
     break;
 
+  case CURLOPT_COOKIESESSION:
+    /*
+     * Set this option to TRUE to start a new "cookie session". It will
+     * prevent the forthcoming read-cookies-from-file actions to accept
+     * cookies that are marked as being session cookies, as they belong to a
+     * previous session.
+     *
+     * In the original Netscape cookie spec, "session cookies" are cookies
+     * with no expire date set. RFC2109 describes the same action if no
+     * 'Max-Age' is set and RFC2965 includes the RFC2109 description and adds
+     * a 'Discard' action that can enforce the discard even for cookies that
+     * have a Max-Age.
+     *
+     * We run mostly with the original cookie spec, as hardly anyone implements
+     * anything else.
+     */
+    data->set.cookiesession = (bool)va_arg(param, long);
+    break;
+
   case CURLOPT_COOKIEFILE:
     /*
      * Set cookie file to read and parse. Can be used multiple times.
      */
     cookiefile = (char *)va_arg(param, void *);
     if(cookiefile)
-      data->cookies = Curl_cookie_init(cookiefile, data->cookies);
+      data->cookies = Curl_cookie_init(cookiefile, data->cookies,
+                                       data->set.cookiesession);
     break;
 
   case CURLOPT_COOKIEJAR:
@@ -514,7 +534,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      * Activate the cookie parser. This may or may not already
      * have been made.
      */
-    data->cookies = Curl_cookie_init(NULL, data->cookies);
+    data->cookies = Curl_cookie_init(NULL, data->cookies,
+                                     data->set.cookiesession);
     break;
   case CURLOPT_WRITEHEADER:
     /*
