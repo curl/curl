@@ -848,35 +848,34 @@ CURLcode _ftp(struct connectdata *conn)
     if(nread < 0)
       return CURLE_OPERATION_TIMEOUTED;
 
-    if(ftpcode != 213) {
-      failf(data, "Couldn't get file size: %s", buf+4);
-      return CURLE_FTP_COULDNT_GET_SIZE;
-    }
-    /* get the size from the ascii string: */
-    filesize = atoi(buf+4);
+    if(ftpcode == 213) {
 
-    sprintf(buf, "Content-Length: %d\r\n", filesize);
-    result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
-    if(result)
-      return result;
+      /* get the size from the ascii string: */
+      filesize = atoi(buf+4);
 
-#ifdef HAVE_STRFTIME
-    if(data->bits.get_filetime && data->progress.filetime) {
-      struct tm *tm;
-#ifdef HAVE_LOCALTIME_R
-      struct tm buffer;
-      tm = (struct tm *)localtime_r(&data->progress.filetime, &buffer);
-#else
-      tm = localtime(&data->progress.filetime);
-#endif
-      /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-      strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S %Z\r\n",
-               tm);
+      sprintf(buf, "Content-Length: %d\r\n", filesize);
       result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
       if(result)
         return result;
-    }
+
+#ifdef HAVE_STRFTIME
+      if(data->bits.get_filetime && data->progress.filetime) {
+        struct tm *tm;
+#ifdef HAVE_LOCALTIME_R
+        struct tm buffer;
+        tm = (struct tm *)localtime_r(&data->progress.filetime, &buffer);
+#else
+        tm = localtime(&data->progress.filetime);
 #endif
+        /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
+        strftime(buf, BUFSIZE-1, "Last-Modified: %a, %d %b %Y %H:%M:%S %Z\r\n",
+                 tm);
+        result = Curl_client_write(data, CLIENTWRITE_BOTH, buf, 0);
+        if(result)
+          return result;
+      }
+#endif
+    }
 
     return CURLE_OK;
   }
