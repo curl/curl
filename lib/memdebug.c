@@ -64,7 +64,7 @@ void curl_memdebug(char *logname)
 }
 
 
-void *curl_domalloc(size_t size, int line, char *source)
+void *curl_domalloc(size_t size, int line, const char *source)
 {
   void *mem=(malloc)(size);
   fprintf(logfile?logfile:stderr, "MEM %s:%d malloc(%d) = %p\n",
@@ -72,7 +72,7 @@ void *curl_domalloc(size_t size, int line, char *source)
   return mem;
 }
 
-char *curl_dostrdup(const char *str, int line, char *source)
+char *curl_dostrdup(const char *str, int line, const char *source)
 {
   char *mem;
   size_t len;
@@ -90,7 +90,7 @@ char *curl_dostrdup(const char *str, int line, char *source)
   return mem;
 }
 
-void *curl_dorealloc(void *ptr, size_t size, int line, char *source)
+void *curl_dorealloc(void *ptr, size_t size, int line, const char *source)
 {
   void *mem=(realloc)(ptr, size);
   fprintf(logfile?logfile:stderr, "MEM %s:%d realloc(%p, %d) = %p\n",
@@ -98,7 +98,7 @@ void *curl_dorealloc(void *ptr, size_t size, int line, char *source)
   return mem;
 }
 
-void curl_dofree(void *ptr, int line, char *source)
+void curl_dofree(void *ptr, int line, const char *source)
 {
   if(NULL == ptr) {
     fprintf(stderr, "ILLEGAL free() on NULL at %s:%d\n",
@@ -121,7 +121,7 @@ int curl_socket(int domain, int type, int protocol, int line, char *source)
 }
 
 int curl_accept(int s, struct sockaddr *addr, socklen_t *addrlen,
-                int line, char *source)
+                int line, const char *source)
 {
   int sockfd=(accept)(s, addr, addrlen);
   fprintf(logfile?logfile:stderr, "FD %s:%d accept() = %d\n",
@@ -138,7 +138,8 @@ int curl_sclose(int sockfd, int line, char *source)
   return res;
 }
 
-FILE *curl_fopen(char *file, char *mode, int line, char *source)
+FILE *curl_fopen(const char *file, const char *mode,
+                 int line, const char *source)
 {
   FILE *res=(fopen)(file, mode);
   fprintf(logfile?logfile:stderr, "FILE %s:%d fopen(\"%s\") = %p\n",
@@ -146,7 +147,7 @@ FILE *curl_fopen(char *file, char *mode, int line, char *source)
   return res;
 }
 
-int curl_fclose(FILE *file, int line, char *source)
+int curl_fclose(FILE *file, int line, const char *source)
 {
   int res=(fclose)(file);
   fprintf(logfile?logfile:stderr, "FILE %s:%d fclose(%p)\n",
