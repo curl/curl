@@ -34,11 +34,13 @@ CURLcode test(char *URL)
 
   m = curl_multi_init();
 
+  res = curl_multi_add_handle(m, c);
+  if(res && (res != CURLM_CALL_MULTI_PERFORM))
+	 return 1; /* major failure */
   do {
-    res = curl_multi_add_handle(m, c);
-    while (res == CURLM_CALL_MULTI_PERFORM)
+    do {
       res = curl_multi_perform(m, &running);
-
+	} while (res == CURLM_CALL_MULTI_PERFORM);
     if(!running) {
       /* This is where this code is expected to reach */
       int numleft;
@@ -50,6 +52,7 @@ CURLcode test(char *URL)
         ret = 99; /* not correct */
       break;
     }
+	fprintf(stderr, "running %d res %d\n", running, res);
 
     if (res != CURLM_OK) {
       fprintf(stderr, "not okay???\n");
@@ -62,16 +65,17 @@ CURLcode test(char *URL)
     FD_ZERO(&exc);
     max_fd = 0;
 
+	fprintf(stderr, "_fdset()\n");
     if (curl_multi_fdset(m, &rd, &wr, &exc, &max_fd) != CURLM_OK) {
       fprintf(stderr, "unexpected failured of fdset.\n");
       ret = 3;
       break;
     }
-
+	fprintf(stderr, "select\n");
     select(max_fd+1, &rd, &wr, &exc, NULL);
 
-    fprintf(stderr, "not reached!\n");
-  } while(0);
+    fprintf(stderr, "loop!\n");
+  } while(1);
 
   curl_multi_remove_handle(m, c);
   curl_easy_cleanup(c);
