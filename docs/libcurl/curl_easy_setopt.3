@@ -376,6 +376,17 @@ This is a convenience macro that sets all bits except Basic and thus makes
 libcurl pick any it finds suitable. libcurl will automaticly select the one it
 finds most secure.
 .RE
+.TP
+.B CURLOPT_PROXYAUTH
+Pass a long as parameter, which is set to a bitmask, to tell libcurl what
+authentication method(s) you want it to use for your proxy authentication.  If
+more than one bit is set, libcurl will first query the site to see what
+authentication methods it supports and then pick the best one you allow it to
+use. Note that for some methods, this will induce an extra network
+round-trip. Set the actual name and password with the
+\fICURLOPT_PROXYUSERPWD\fP option. The bitmask can be constructed by or'ing
+together the bits listed above for the \fICURLOPT_HTTPAUTH\fP option. As of
+this writing, only Basic and NTLM work. (Added in 7.10.7)
 .PP
 .SH HTTP OPTIONS
 .TP 0.4i
