@@ -95,6 +95,7 @@
 #include "url.h"
 #include "getinfo.h"
 #include "ssluse.h"
+#include "http_digest.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -701,31 +702,51 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               if(data->set.get_filetime)
                 data->info.filetime = k->timeofdoc;
             }
-            else if ((k->httpcode >= 300 && k->httpcode < 400) &&
-                     (data->set.http_follow_location) &&
-                     checkprefix("Location:", k->p)) {
-              /* this is the URL that the server advices us to get instead */
-              char *ptr;
-              char *start=k->p;
-              char backup;
-
-              start += 9; /* pass "Location:" */
-
-              /* Skip spaces and tabs. We do this to support multiple
-                 white spaces after the "Location:" keyword. */
-              while(*start && isspace((int)*start ))
-                start++;
-              ptr = start; /* start scanning here */
-
-              /* scan through the string to find the end */
-              while(*ptr && !isspace((int)*ptr))
-                ptr++;
-              backup = *ptr; /* store the ending letter */
-              if(ptr != start) {
-                *ptr = '\0';   /* zero terminate */
-                conn->newurl = strdup(start); /* clone string */
-                *ptr = backup; /* restore ending letter */
+            else if(checkprefix("WWW-Authenticate:", k->p) &&
+                    (401 == k->httpcode) &&
+                    1 /* TODO: replace with a check for Digest authentication
+                         activated */) {
+              CURLdigest dig = Curl_input_digest(conn, k->p+
+                                                 strlen("WWW-Authenticate:"));
+              if(CURLDIGEST_FINE == dig) {
+                /* We act on it. Store our new url, which happens to be
+                   the same one we already use! */
+                conn->newurl = strdup(data->change.url); /* clone string */
               }
+            }
+            else if ((k->httpcode >= 300 && k->httpcode < 400) &&
+                     checkprefix("Location:", k->p)) {
+              if(data->set.http_follow_location) {
+                /* this is the URL that the server advices us to get instead */
+                char *ptr;
+                char *start=k->p;
+                char backup;
+
+                start += 9; /* pass "Location:" */
+
+                /* Skip spaces and tabs. We do this to support multiple
+                   white spaces after the "Location:" keyword. */
+                while(*start && isspace((int)*start ))
+                  start++;
+                ptr = start; /* start scanning here */
+
+                /* scan through the string to find the end */
+                while(*ptr && !isspace((int)*ptr))
+                  ptr++;
+                backup = *ptr; /* store the ending letter */
+                if(ptr != start) {
+                  *ptr = '\0';   /* zero terminate */
+                  conn->newurl = strdup(start); /* clone string */
+                  *ptr = backup; /* restore ending letter */
+                }
+              }
+#if 0 /* for consideration */
+              else {
+                /* This is a Location: but we have not been instructed to
+                   follow it */
+                infof(data, "We ignore this location header as instructed\n");
+              }
+#endif
             }
 
             /*
@@ -1554,8 +1575,15 @@ CURLcode Curl_follow(struct SessionHandle *data,
    * differently based on exactly what return code there was.
    * Discussed on the curl mailing list and posted about on the 26th
    * of January 2001.
+   *
+   * News from 7.10.6: we can also get here on a 401, in case we need to
+   * do Digest authentication.
    */
   switch(data->info.httpcode) {
+  case 401:
+    /* Act on a digest authentication, we keep on moving and do the
+       Authorization: Digest header in the HTTP request code snippet */
+    break;
   case 300: /* Multiple Choices */
   case 306: /* Not used */
   case 307: /* Temporary Redirect */

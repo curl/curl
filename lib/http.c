@@ -89,6 +89,7 @@
 #include "cookie.h"
 #include "strequal.h"
 #include "ssluse.h"
+#include "http_digest.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -627,6 +628,7 @@ CURLcode Curl_http(struct connectdata *conn)
   char *host = conn->name;
   const char *te = ""; /* tranfer-encoding */
   char *ptr;
+  unsigned char *request;
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */
@@ -647,6 +649,12 @@ CURLcode Curl_http(struct connectdata *conn)
        data->set.upload) {
     data->set.httpreq = HTTPREQ_PUT;
   }
+
+  request = data->set.customrequest?data->set.customrequest:
+    (data->set.no_body?"HEAD":
+     ((HTTPREQ_POST == data->set.httpreq) ||
+      (HTTPREQ_POST_FORM == data->set.httpreq))?"POST":
+     (HTTPREQ_PUT == data->set.httpreq)?"PUT":"GET");
   
   /* The User-Agent string has been built in url.c already, because it might
      have been used in the proxy connect, but if we have got a header with
@@ -657,7 +665,12 @@ CURLcode Curl_http(struct connectdata *conn)
     conn->allocptr.uagent=NULL;
   }
 
-  if((conn->bits.user_passwd) && !checkheaders(data, "Authorization:")) {
+  if(data->state.digest.nonce) {
+    result = Curl_output_digest(conn, request, (unsigned char *)ppath);
+    if(result)
+      return result;
+  }
+  else if((conn->bits.user_passwd) && !checkheaders(data, "Authorization:")) {
     char *authorization;
 
     /* To prevent the user+password to get sent to other than the original
@@ -902,7 +915,7 @@ CURLcode Curl_http(struct connectdata *conn)
     /* add the main request stuff */
     add_bufferf(req_buffer,
                 "%s " /* GET/HEAD/POST/PUT */
-                "%s HTTP/%s\r\n" /* path */
+                "%s HTTP/%s\r\n" /* path + HTTP version */
                 "%s" /* proxyuserpwd */
                 "%s" /* userpwd */
                 "%s" /* range */
@@ -915,16 +928,12 @@ CURLcode Curl_http(struct connectdata *conn)
                 "%s" /* referer */
                 "%s",/* transfer-encoding */
 
-                data->set.customrequest?data->set.customrequest:
-                (data->set.no_body?"HEAD":
-                 ((HTTPREQ_POST == data->set.httpreq) ||
-                  (HTTPREQ_POST_FORM == data->set.httpreq))?"POST":
-                 (HTTPREQ_PUT == data->set.httpreq)?"PUT":"GET"),
-                ppath, httpstring,
+                request,
+                ppath,
+                httpstring,
                 (conn->bits.proxy_user_passwd &&
                  conn->allocptr.proxyuserpwd)?conn->allocptr.proxyuserpwd:"",
-                (conn->bits.user_passwd && conn->allocptr.userpwd)?
-                conn->allocptr.userpwd:"",
+                conn->allocptr.userpwd?conn->allocptr.userpwd:"",
                 (conn->bits.use_range && conn->allocptr.rangeline)?
                 conn->allocptr.rangeline:"",
                 (data->set.useragent && *data->set.useragent && conn->allocptr.uagent)?
