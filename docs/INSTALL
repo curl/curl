@@ -448,6 +448,7 @@ PORTS
         - m68k Linux
         - m68k OpenBSD
         - s390 Linux 
+        - XScale/PXA250 Linux 2.4
 
 OpenSSL
 =======
