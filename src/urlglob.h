@@ -67,7 +67,7 @@ typedef struct {
   int size;
 } URLGlob;
 
-int glob_url(URLGlob**, char*);
+int glob_url(URLGlob**, char*, int *);
 char* next_url(URLGlob*);
 char* match_url(char*, URLGlob); 
 

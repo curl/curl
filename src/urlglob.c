@@ -204,17 +204,22 @@ int glob_word(char *pattern, int pos) {
   exit (URG_FAILED_INIT);
 }
 
-int glob_url(URLGlob** glob, char* url) {
-  int urlnum;		/* counts instances of a globbed pattern */
+int glob_url(URLGlob** glob, char* url, int *urlnum)
+{
+  if (strlen(url)>URL_MAX_LENGTH) {
+    printf("Illegally sized URL\n");
+    return URG_URL_MALFORMAT;
+  }
 
   glob_expand = (URLGlob*)malloc(sizeof(URLGlob));
   glob_expand->size = 0;
-  urlnum = glob_word(url, 1);
+  *urlnum = glob_word(url, 1);
   *glob = glob_expand;
-  return urlnum;
+  return URG_OK;
 }
 
-char *next_url(URLGlob *glob) {
+char *next_url(URLGlob *glob)
+{
   static int beenhere = 0;
   char *buf = glob_buffer;
   URLPattern *pat;
