@@ -28,6 +28,12 @@ server, do one of the following:
 
     With the curl command tool: --cacert [file]
 
+ 3. Add the CA cert for your server to the existing default CA cert bundle.
+    The default path of the CA bundle installed with the curl package is:
+    /usr/local/share/curl/curl-ca-bundle.crt, which can be changed by running
+    configure with the --with-ca-bundle option pointing out the path of your
+    choice.
+
 Neglecting to use one of the above menthods when dealing with a server using a
 certficate that isn't signed by one of the certficates in the installed CA
 cert bundle, will cause SSL to report an error ("certificate verify failed")
@@ -40,7 +46,3 @@ connections that previously weren't really secure. It turned out many people
 were using previous versions of curl/libcurl without realizing the need for
 the CA cert options to get truly secure SSL connections.
 
-The default path of the CA bundle installed with the curl package is:
-/usr/local/share/curl/curl-ca-bundle.crt, which can be changed by running
-configure with the --with-ca-bundle option pointing out the path of your
-choice.
