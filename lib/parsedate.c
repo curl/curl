@@ -350,6 +350,12 @@ static time_t Curl_parsedate(const char *date)
     /* lacks vital info, fail */
     return -1;
 
+#if SIZEOF_TIME_T < 5
+  /* 32 bit time_t can only hold dates to the beginning of 2038 */
+  if(yearnum > 2037)
+    return 0x7fffffff;
+#endif
+
   tm.tm_sec = secnum;
   tm.tm_min = minnum;
   tm.tm_hour = hournum;

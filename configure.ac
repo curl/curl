@@ -1171,6 +1171,7 @@ AC_CHECK_SIZEOF(curl_off_t, ,[
 ])
 AC_CHECK_SIZEOF(size_t)
 AC_CHECK_SIZEOF(long)
+AC_CHECK_SIZEOF(time_t)
 
 AC_CHECK_TYPE(long long,
    [AC_DEFINE(HAVE_LONGLONG, 1, [if your compiler supports long long])]

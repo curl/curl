@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (11 November 2004)
+- Jeff Phillips found out that a date string with a year beyond 2038 could
+  crash the new date parser on systems with 32bit time_t. We now check for
+  this case and deal with it.
+
 Daniel (10 November 2004)
 - I installed Heimdal on my Debian box (using the debian package) and noticed
   that configure --with-gssapi failed to create a nice build. Fixed now.

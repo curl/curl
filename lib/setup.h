@@ -287,6 +287,11 @@ typedef int curl_socket_t;
 #define USE_LIBIDN
 #endif
 
+#ifndef SIZEOF_TIME_T
+/* assume default size of time_t to be 32 bit */
+#define SIZEOF_TIME_T 4
+#endif
+
 #define LIBIDN_REQUIRED_VERSION "0.4.1"
 
 #endif /* __CONFIG_H */
