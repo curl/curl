@@ -13,7 +13,7 @@ http
 attempt connect to non-existing host name
  </name>
  <command>
-non-existing-and-weeeeeeirdname
+non-existing-and-weeeeeeirdname.
 </command>
 </client>
 
