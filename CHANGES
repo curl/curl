@@ -6,6 +6,21 @@
 
                                History of Changes
 
+Daniel (18 January 2002)
+- Played around with stricter compiler warnings for gcc (when ./configure
+  --enable-debug is used) and changed some minor things to stop the warnings.
+
+- Commented out the 'long long' and 'long double' checks in configure.in, as
+  we don't currently use them anyway and the code in lib/mprintf.c that use
+  them causes warnings.
+
+- Saul Good and jonatan pointed out Mac OS X build problems with pre3 and how
+  to correct them. Two compiler warnings were removed as well.
+
+- Andrés García fixed two minor mingw32 building problems.
+
+Version 7.9.3-pre3
+
 Daniel (17 January 2002)
 - docs/libcurl-the-guide is a new tutorial for our libcurl programming
   friends.
