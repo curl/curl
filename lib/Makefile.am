@@ -97,7 +97,7 @@ libcurl_la_SOURCES = arpa_telnet.h file.c netrc.h timeval.c base64.c	\
   hostip4.c hostip6.c hostsyn.c hostthre.c inet_ntop.c inet_ntop.h	\
   curlx.h
 
-WIN32_SOURCES = $(libcurl_la_SOURCES) config-win32.h
+WIN32SOURCES = $(libcurl_la_SOURCES) config-win32.h
 
 noinst_HEADERS = setup.h transfer.h
 
@@ -134,7 +134,7 @@ dist-hook:
 
 curllib.dsp: msvcproj.head msvcproj.foot Makefile.am
 	cp msvcproj.head curllib.dsp
-	(for file in $(WIN32_SOURCES); do \
+	(for file in $(WIN32SOURCES); do \
 	echo "# Begin Source File" >> curllib.dsp; \
 	echo "" >> curllib.dsp; \
 	echo "SOURCE=.\\"$$file >> curllib.dsp; \
