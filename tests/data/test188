@@ -42,7 +42,7 @@ HTTP GET with resume and redirect
  <command>
 http://%HOSTIP:%HTTPPORT/188 -C 50 -L
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

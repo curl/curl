@@ -19,7 +19,7 @@ ftp://%HOSTIP:%FTPPORT/CWD/STOR/RETR/108 -T log/upload108 -P -
 Moooooooooooo
  upload this
 </file>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -19,7 +19,7 @@ ftp://%HOSTIP:%FTPPORT/122 -C 5
 <file name="log/ftpserver.cmd">
 REPLY EPSV 500 no such command
 </file>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

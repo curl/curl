@@ -45,7 +45,7 @@ HTTP Location: following with extra spaces in header
  <command>
 http://%HOSTIP:%HTTPPORT/want/28 -L
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

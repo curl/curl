@@ -58,7 +58,7 @@ HTTP with NTLM authorization and wrong password
  <command>
 http://%HOSTIP:%HTTPPORT/68 -u testuser:testpass --ntlm
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -35,7 +35,7 @@ HTTP with proxy-requiring-Basic to site-requiring-Digest
  <command>
 http://data.from.server.requiring.digest.hohoho.com/167 --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --digest --user digest:alot
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -58,7 +58,7 @@ HTTP proxy CONNECT auth Digest
  <command>
 http://test.remote.server.com:206/path/2060002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-digest --proxytunnel
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -21,7 +21,7 @@ FTP RETR PORT with CWD
  <command>
 ftp://%HOSTIP:%FTPPORT/a/path/103 -P -
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -22,7 +22,7 @@ http
  <command>
 http://%HOSTIP:%HTTPPORT/want/15 --write-out '%{url_effective} %{http_code} %{size_download}\n'
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

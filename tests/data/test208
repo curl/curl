@@ -32,7 +32,7 @@ the
    PUT
       feature
 </file>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

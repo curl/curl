@@ -51,7 +51,7 @@ HTTP with Digest *OR* Basic authorization
  <command>
 http://%HOSTIP:%HTTPPORT/72 -u testuser:testpass --anyauth
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

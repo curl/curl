@@ -29,7 +29,7 @@ HTTP PUT with resume
  <command>
 http://%HOSTIP:%HTTPPORT/33 -Tlog/test33.txt -C 50
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

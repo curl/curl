@@ -23,7 +23,7 @@ HTTP with 2 secs timeout
  <command>
 http://%HOSTIP:%HTTPPORT/want/29 -m 2
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

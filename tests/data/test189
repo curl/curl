@@ -39,7 +39,7 @@ HTTP GET with resume and redirect (to a page that doesn't resume)
  <command>
 http://%HOSTIP:%HTTPPORT/189 -C 50 -L
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -54,7 +54,7 @@ HTTP with proxy using NTLM authorization
  <command>
 http://%HOSTIP:%HTTPPORT/81 --proxy-user testuser:testpass -x http://%HOSTIP:%HTTPPORT --proxy-ntlm
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

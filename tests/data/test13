@@ -20,7 +20,7 @@ HTTP custom request 'DELETE'
  <command>
 http://%HOSTIP:%HTTPPORT/want/13 -X DELETE
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

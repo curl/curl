@@ -15,7 +15,7 @@ attempt connect to non-existing host name
  <command>
 non-existing-and-weeeeeeirdname
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

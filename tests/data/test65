@@ -49,7 +49,7 @@ HTTP with Digest authorization with bad password
  <command>
 http://%HOSTIP:%HTTPPORT/65 -u testuser:test2pass --digest
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

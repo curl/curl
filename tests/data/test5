@@ -23,7 +23,7 @@ HTTP over proxy
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/5 -x %HOSTIP:%HTTPPORT
 </command>
-</test>
+</client>
 
 #
 # Verify data after the test has been "shot"

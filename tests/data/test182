@@ -18,7 +18,7 @@ FTP download an empty file
 <command>
 ftp://%HOSTIP:%FTPPORT/182
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -15,7 +15,7 @@ missing file:// file
  <command>
 file://localhost/%PWD/log/non-existant-file.txt
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

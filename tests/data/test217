@@ -21,7 +21,7 @@ HTTP proxy CONNECT to proxy returning 405
  <command>
 http://test.remote.server.com:217/path/2170002 --proxy http://%HOSTIP:%HTTPPORT --proxytunnel -w '%{http_code} %{http_connect}\n'
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

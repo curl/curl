@@ -21,11 +21,11 @@ FTP RETR PASV
  <command>
 ftp://%HOSTIP:%FTPPORT/102
 </command>
-</test>
+
 <file name="log/ftpserver.cmd">
 REPLY EPSV 500 no such command
 </file>
-
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

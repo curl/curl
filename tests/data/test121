@@ -21,7 +21,7 @@ ftp download with post- and pre-transfer delete operations
  <command>
 ftp://%HOSTIP:%FTPPORT/121 -Q "-DELE after_transfer" -Q "DELE before_transfer"
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -16,7 +16,6 @@ FTP with --ftp-create-dirs (failing CWD)
  <command>
 ftp://%HOSTIP:%FTPPORT/first/dir/here/147 --ftp-create-dirs
 </command>
-</test>
 <file name="log/ftpserver.cmd">
 REPLY CWD 550 I won't allow this on my server
 COUNT CWD 1

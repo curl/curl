@@ -22,7 +22,7 @@ with
 the
 --crlf option
 </file>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

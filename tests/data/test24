@@ -19,7 +19,7 @@ HTTP GET fail silently on HTTP error return
  <command>
 http://%HOSTIP:%HTTPPORT/24 --fail
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

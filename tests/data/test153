@@ -58,7 +58,7 @@ HTTP with Digest authorization with stale=true
  <command>
 http://%HOSTIP:%HTTPPORT/1530001 -u testuser:testpass --digest http://%HOSTIP:%HTTPPORT/1530002
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

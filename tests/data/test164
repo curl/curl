@@ -41,7 +41,7 @@ HTTP range with multiple ranges
  <command>
 http://%HOSTIP:%HTTPPORT/want/164 -r 0-10,12-15
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

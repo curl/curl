@@ -74,7 +74,7 @@ HTTP with NTLM/Negotiate/Basic, anyauth and user with domain, with size 0
  <command>
 http://%HOSTIP:%HTTPPORT/91 --anyauth -u mydomain\\myself:secret
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

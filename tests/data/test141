@@ -18,7 +18,7 @@ FTP download info with -I
  <command>
 ftp://%HOSTIP:%FTPPORT/blalbla/141 -I
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

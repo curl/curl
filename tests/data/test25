@@ -60,7 +60,7 @@ looping HTTP Location: following with --max-redirs, no persistance
  <command>
 http://%HOSTIP:%HTTPPORT/want/25 -L --max-redirs 5
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -13,7 +13,6 @@ FTP with --ftp-create-dirs (failing MKD)
  <command>
 ftp://%HOSTIP:%FTPPORT/attempt/to/get/this/148 --ftp-create-dirs
 </command>
-</test>
 <file name="log/ftpserver.cmd">
 REPLY CWD 550 I won't allow this on my server
 REPLY MKD 550 We will have no such thing

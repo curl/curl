@@ -29,7 +29,7 @@ HTTP over proxy with IDN host name
  <command>
 http://www.едц.se/page/165 -x %HOSTIP:%HTTPPORT
 </command>
-</test>
+</client>
 
 #
 # Verify data after the test has been "shot"

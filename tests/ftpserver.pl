@@ -125,6 +125,7 @@ my %commandok = (
                  'STOR' => 'twosock',
                  'APPE' => 'twosock',
                  'REST' => 'twosock',
+                 'ACCT' => 'loggedin',
                  'CWD'  => 'loggedin|twosock',
                  'SYST' => 'loggedin',
                  'SIZE' => 'loggedin|twosock',

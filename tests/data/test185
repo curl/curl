@@ -43,7 +43,7 @@ HTTP replace Host: when following Location: on the same host
  <command>
 http://deathstar.another.galaxy/185 -L -H "Host: another.visitor.stay.a.while.stay.foreeeeeever" --proxy http://%HOSTIP:%HTTPPORT
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -23,7 +23,7 @@ Replaced internal and added custom HTTP headers
  <command>
  -H "extra-header: here" -H "Accept: replaced" http://%HOSTIP:%HTTPPORT/4
 </command>
-</test>
+</client>
 
 #
 # Verify data after the test has been "shot"

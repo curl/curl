@@ -24,7 +24,7 @@ HTTP with cookie parser and header recording
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/7 -b none -D log/heads7.txt
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

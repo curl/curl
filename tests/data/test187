@@ -45,7 +45,7 @@ HTTP redirect with bad host name separation and slash in parameters
  <command>
 http://%HOSTIP:%HTTPPORT?oh=what-weird=test/187 -L
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

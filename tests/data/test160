@@ -31,7 +31,7 @@ HTTP with delayed close, conn reuse, connection reset and retry
  <command>
 http://%HOSTIP:%HTTPPORT/want/160 http://%HOSTIP:%HTTPPORT/wantmore/1600001
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

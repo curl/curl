@@ -72,7 +72,7 @@ HTTP proxy CONNECT auth NTLM and then POST
  <command>
 http://test.remote.server.com:213/path/2130002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel -d "postit"
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -30,7 +30,7 @@ header "Transfer-Encoding: chunked"
  <command>
 -K - %HOSTIP:%HTTPPORT/that.site.com/56
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

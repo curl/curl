@@ -122,7 +122,7 @@ HTTP with NTLM via --anyauth, and then follow-location with NTLM again
  <command>
 http://%HOSTIP:%HTTPPORT/90 -u testuser:testpass --anyauth -L
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

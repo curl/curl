@@ -35,7 +35,7 @@ HTTP GET with bad chunked Transfer-Encoding
  <command>
 http://%HOSTIP:%HTTPPORT/36
 </command>
-</test>
+</client>
 
 #
 # Verify data after the test has been "shot"

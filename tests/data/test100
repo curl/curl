@@ -1,6 +1,6 @@
 #
 # Server-side
-<reply name="1">
+<reply>
 <data>
 total 20
 drwxr-xr-x   8 98       98           512 Oct 22 13:06 .
@@ -28,7 +28,7 @@ FTP dir list PASV
  <command>
 ftp://%HOSTIP:%FTPPORT/
 </command>
-</test>
+</client>
 
 #
 # Verify data after the test has been "shot"

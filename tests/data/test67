@@ -56,7 +56,7 @@ HTTP with NTLM authorization
  <command>
 http://%HOSTIP:%HTTPPORT/67 -u testuser:testpass --ntlm
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

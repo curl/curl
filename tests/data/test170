@@ -16,7 +16,7 @@ HTTP POST with --proxy-ntlm and no SSL with no response
  <command>
 http://a.galaxy.far.far.away/170 --proxy http://%HOSTIP:%HTTPPORT --proxy-user foo:bar --proxy-ntlm -F "dummy=value"
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

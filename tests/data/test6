@@ -22,7 +22,7 @@ HTTP with simple cookie send
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/6 -b "name=contents;name2=content2"
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -56,7 +56,7 @@ HTTP with NTLM authorization when talking HTTP/1.0
  <command>
 http://%HOSTIP:%HTTPPORT/159 -u testuser:testpass --ntlm -0
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

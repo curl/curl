@@ -16,7 +16,7 @@ FTP --head to get file size only
  <command>
 ftp://%HOSTIP:%FTPPORT/a/path/103 --head
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -24,7 +24,7 @@ HTTP over proxy with site and proxy authentication
  <command>
 http://%HOSTIP:%HTTPPORT/we/want/that/page/85 -x %HOSTIP:%HTTPPORT --user iam:myself --proxy-user testing:this
 </command>
-</test>
+</client>
 
 #
 # Verify data after the test has been "shot"

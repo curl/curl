@@ -16,7 +16,7 @@ persistant FTP with different paths
  <command>
 ftp://%HOSTIP:%FTPPORT/first/dir/here/146 ftp://%HOSTIP:%FTPPORT/146
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -19,7 +19,7 @@ HTTP HEAD with Connection: close
  <command>
 http://%HOSTIP:%HTTPPORT/want/14 -i --head
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

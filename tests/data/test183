@@ -23,7 +23,7 @@ HTTP GET two URLs over a single proxy with persistent connection
  <command>
 http://deathstar.another.galaxy/183 http://a.galaxy.far.far.away/183 --proxy http://%HOSTIP:%HTTPPORT
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

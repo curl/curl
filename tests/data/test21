@@ -15,7 +15,7 @@ use curl with multiple request methods
  <command>
 -I -d FOOO -F moo=moo localhost
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

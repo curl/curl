@@ -20,7 +20,7 @@ specify more -o than URLs
  <command>
 http://%HOSTIP:%HTTPPORT/want/26 -o - -o -
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -88,7 +88,7 @@ HTTP with NTLM and follow-location
  <command>
 http://%HOSTIP:%HTTPPORT/89 -u testuser:testpass --ntlm -L
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

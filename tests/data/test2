@@ -23,7 +23,7 @@ HTTP GET with user and password
  <command>
  -u fake:user http://%HOSTIP:%HTTPPORT/2
 </command>
-</test>
+</client>
 
 #
 # Verify data after the test has been "shot"

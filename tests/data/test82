@@ -26,7 +26,7 @@ HTTP with proxy requiring NTLM, but we send Basic
  <command>
 http://%HOSTIP:%HTTPPORT/82 --proxy-user testuser:testpass -x http://%HOSTIP:%HTTPPORT
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

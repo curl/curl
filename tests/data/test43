@@ -45,7 +45,7 @@ HTTP Location: following over HTTP proxy
  <command>
 http://%HOSTIP:%HTTPPORT/want/43 -L -x %HOSTIP:%HTTPPORT
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

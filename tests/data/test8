@@ -32,7 +32,7 @@ Set-Cookie: mismatch=this; domain=127.0.0.1; path="/silly/";
 Set-Cookie: partmatch=present; domain=.0.0.1; path=/;
 
 </file>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

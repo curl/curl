@@ -18,7 +18,7 @@ ftp://%HOSTIP:%FTPPORT/ -P - -l
 <file name="log/ftpserver.cmd">
 REPLY NLST 450 No files found
 </file>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

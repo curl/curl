@@ -72,7 +72,7 @@ HTTP proxy CONNECT auth NTLM
  <command>
 http://test.remote.server.com:209/path/2090002 --proxy http://%HOSTIP:%HTTPPORT --proxy-user silly:person --proxy-ntlm --proxytunnel
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

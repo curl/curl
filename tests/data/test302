@@ -16,7 +16,7 @@ HTTPS GET over HTTP proxy fails
  <command>
 -k -U fake:user -x %HOSTIP:%HTTPPORT https://bad.fakeurl-to.test/slash/302
 </command>
-</test>
+</client>
 
 #
 # Verify data after the test has been "shot"

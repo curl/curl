@@ -26,7 +26,7 @@ FTP dir list, PORT with specified IP
  <command>
 ftp://%HOSTIP:%FTPPORT/ -P %HOSTIP
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

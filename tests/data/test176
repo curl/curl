@@ -48,7 +48,7 @@ HTTP POST --ntlm to server not requiring any auth at all
  <command>
 http://%HOSTIP:%HTTPPORT/176 -u auser:apasswd --ntlm -d "junkelijunk"
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -29,7 +29,7 @@ HTTP range support
  <command>
 http://%HOSTIP:%HTTPPORT/want/12 -r 100-200
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -16,7 +16,7 @@ ftp://%HOSTIP:%FTPPORT/195
 <file name="log/ftpserver.cmd">
 REPLY PASS 530 temporarily not available
 </file>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

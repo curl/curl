@@ -15,7 +15,7 @@ HTTP with no data in server reply
  <command>
 http://%HOSTIP:%HTTPPORT/want/30
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

@@ -30,7 +30,7 @@ HTTP POST with auth and contents but with content-length set to 0
  <command>
  -d "fooo=mooo&pooo=clue&doo=%20%20%20++++" -u "fake:-user" http://%HOSTIP:%HTTPPORT/3
 </command>
-</test>
+</client>
 
 #
 # Verify data after the test has been "shot"

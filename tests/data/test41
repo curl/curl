@@ -13,7 +13,7 @@ HTTP formpost with missing file
  <command>
 http://%HOSTIP:%HTTPPORT/want/41 -F moo=@boo
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>

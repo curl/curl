@@ -45,7 +45,7 @@ simple HTTP Location: without protocol in initial URL
  <command>
 %HOSTIP:%HTTPPORT/want/45 -L
 </command>
-</test>
+</client>
 
 # Verify data after the test has been "shot"
 <verify>
