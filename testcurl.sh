@@ -65,7 +65,7 @@ if [ -z "$email" ]; then
 fi
 
 if [ -z "$desc" ]; then
-  echo "please enter a one line system desrciption"
+  echo "please enter a one line system description"
   read desc
   fixed="3"
 fi
