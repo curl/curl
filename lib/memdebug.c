@@ -133,13 +133,9 @@ char *curl_dostrdup(const char *str, int line, const char *source)
 {
   char *mem;
   size_t len;
-  
-  if(NULL ==str) {
-    fprintf(stderr, "ILLEGAL strdup() on NULL at %s:%d\n",
-            source, line);
-    exit(2);
-  }
 
+  curlassert(str != NULL);
+  
   if(countcheck("strdup", line, source))
     return NULL;
 
@@ -184,11 +180,8 @@ void curl_dofree(void *ptr, int line, const char *source)
 {
   struct memdebug *mem;
 
-  if(NULL == ptr) {
-    fprintf(stderr, "ILLEGAL free() on NULL at %s:%d\n",
-            source, line);
-    exit(2);
-  }
+  curlassert(ptr != NULL);
+
   mem = (struct memdebug *)((char *)ptr - offsetof(struct memdebug, mem));
 
   /* destroy  */
@@ -244,11 +237,7 @@ int curl_fclose(FILE *file, int line, const char *source)
 {
   int res;
 
-  if(NULL == file) {
-    fprintf(stderr, "ILLEGAL flose() on NULL at %s:%d\n",
-            source, line);
-    exit(2);
-  }
+  curlassert(file != NULL);
 
   res=(fclose)(file);
   if(logfile)
