@@ -136,6 +136,7 @@ my %commandok = (
                  'RNTO'  => 'loggedin|twosock',
                  'DELE' => 'loggedin|twosock',
                  'MDTM' => 'loggedin|twosock',
+                 'NOOP' => 'loggedin|twosock',
                  );
 
 # initially, we're in 'fresh' state
@@ -162,6 +163,7 @@ my %displaytext = ('USER' => '331 We are happy you popped in!',
                    'DELE' => '200 OK OK OK whatever you say',
                    'RNFR' => '350 Received your order. Please provide more',
                    'RNTO' => '250 Ok, thanks. File renaming completed.',
+                   'NOOP' => '200 Yes, I\'m very good at doing nothing.',
                    );
 
 # callback functions for certain commands
