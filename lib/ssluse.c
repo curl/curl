@@ -1078,6 +1078,7 @@ Curl_SSLConnect(struct connectdata *conn,
 #ifdef USE_SSLEAY
   struct SessionHandle *data = conn->data;
   int err;
+  long lerr;
   int what;
   char * str;
   SSL_METHOD *req_method;
@@ -1440,18 +1441,20 @@ Curl_SSLConnect(struct connectdata *conn,
     /* We could do all sorts of certificate verification stuff here before
        deallocating the certificate. */
 
-    err = data->set.ssl.certverifyresult=SSL_get_verify_result(connssl->handle);
+    lerr = data->set.ssl.certverifyresult=
+      SSL_get_verify_result(connssl->handle);
     if(data->set.ssl.certverifyresult != X509_V_OK) {
       if(data->set.ssl.verifypeer) {
         /* We probably never reach this, because SSL_connect() will fail
            and we return earlyer if verifypeer is set? */
-        failf(data, "SSL certificate verify result: %s (%d)",
-              X509_verify_cert_error_string(err), err);
+        failf(data, "SSL certificate verify result: %s (%ld)",
+              X509_verify_cert_error_string(lerr), lerr);
         retcode = CURLE_SSL_PEER_CERTIFICATE;
       }
       else
-        infof(data, "SSL certificate verify result: %s (%d), continuing anyway.\n",
-              X509_verify_cert_error_string(err), err);
+        infof(data, "SSL certificate verify result: %s (%ld),"
+              " continuing anyway.\n",
+              X509_verify_cert_error_string(err), lerr);
     }
     else
       infof(data, "SSL certificate verify ok.\n");
