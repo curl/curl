@@ -123,8 +123,8 @@ else
   die
 fi
 
-echo "testcurl: now run make test"
-make test 2>&1 | sed -e "s:$pwd::g" | tee build.log
+echo "testcurl: now run make test-full"
+make test-full 2>&1 | sed -e "s:$pwd::g" | tee build.log
 
 if { grep "^TESTFAIL:" build.log; } then
   echo "testcurl: the tests were not successful"
