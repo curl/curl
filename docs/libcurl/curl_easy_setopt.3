@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH curl_easy_setopt 3 "7 Jan 2004" "libcurl 7.11.0" "libcurl Manual"
+.TH curl_easy_setopt 3 "15 Jan 2004" "libcurl 7.11.0" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - set options for a curl easy handle
 .SH SYNOPSIS
@@ -38,17 +38,16 @@ carefully as bad input values may cause libcurl to behave badly!  You can only
 set one option in each function call. A typical application uses many
 curl_easy_setopt() calls in the setup phase.
 
+Options set with this function call are valid for all forthcoming transfers
+performed using this \fIhandle\fP.  The options are not in any way reset
+between transfers, so if you want subsequent transfers with different options,
+you must change them between the transfers.
+
 \fBNOTE:\fP strings passed to libcurl as 'char *' arguments, will not be
 copied by the library. Instead you should keep them available until libcurl no
 longer needs them. Failing to do so will cause very odd behavior or even
 crashes. libcurl will need them until you call curl_easy_cleanup() or you set
 the same option again to use a different pointer.
-
-\fBNOTE2:\fP options set with this function call are valid for the forthcoming
-data transfers that are performed when you invoke \fIcurl_easy_perform\fP.
-The options are not in any way reset between transfers, so if you want
-subsequent transfers with different options, you must change them between the
-transfers.
 
 The \fIhandle\fP is the return code from a \fIcurl_easy_init(3)\fP or
 \fIcurl_easy_duphandle(3)\fP call.
@@ -186,6 +185,28 @@ The data is protocol data sent to the peer.
 Pass a pointer to whatever you want passed in to your
 \fICURLOPT_DEBUGFUNCTION\fP in the last void * argument. This pointer is not
 used by libcurl, it is only passed to the callback.
+.IP CURLOPT_SSL_CTX_FUNCTION
+Function pointer that should match the following prototype: \fBCURLcode
+sslctxfun(CURL *curl, void *sslctx, void *parm);\fP This function gets called
+by libcurl just before the initialization of an SSL connection after having
+processed all other SSL related options to give a last chance to an
+application to modify the behaviour of openssl's ssl initilaization. The
+\fIsslctx\fP parameter is actually a pointer to an openssl \fISSL_CTX\fP. If
+an error is returned no attempt to establish a connection is made and the
+perform operation will return the error code from this callback function.  Set
+the \fIparm\fP argument with the \fICURLOPT_SSL_CTX_DATA\fP option. This
+option was introduced in 7.11.0.
+
+\fBNOTE:\fP To use this properly, a non-trivial amount of knowledge of the
+openssl libraries is necessary. Using this function allows for example to use
+openssl callbacks to add additional validation code for certificates, and even
+to change the actual URI of an HTTPS request (example used in the lib509 test
+case).  See also the example section for a replacement of the key, certificate
+and trust file settings.
+.IP CURLOPT_SSL_CTX_DATA
+Data pointer to pass to the ssl context callback set by the option
+\fICURLOPT_SSL_CTX_FUNCTION\fP, this is the pointer you'll get as third
+parameter, otherwise \fBNULL\fP. (Added in 7.11.0)
 .SH ERROR OPTIONS
 .IP CURLOPT_ERRORBUFFER
 Pass a char * to a buffer that the libcurl may store human readable error
