@@ -432,9 +432,8 @@ if ($targetos ne '' && $targetos =~ /netware/) {
     system('../../curlver');
   }
 } else {
-logit "display curl$binext --version output";
-
-system("./src/curl$binext --version");
+  logit "display curl$binext --version output";
+  system("./src/curl$binext --version");
 }
 
 if ($gnulikebuild) {
@@ -465,7 +464,7 @@ if ($gnulikebuild) {
 }
 
 # create a tarball if we got that option.
-if ($mktarball ne '') {
+if (($mktarball ne '') && (-f $mktarball)) {
   system($mktarball);
 }
 
