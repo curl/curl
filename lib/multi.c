@@ -342,8 +342,11 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
             else
               free(gotourl);
           }
-          else
+          else {
             easy->result = CURLE_OUT_OF_MEMORY;
+            easy->state = CURLM_STATE_COMPLETED;
+            break;
+          }
         }
       }
 
