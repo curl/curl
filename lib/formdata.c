@@ -371,6 +371,7 @@ char *Curl_FormBoundary(void)
 void Curl_FormFree(struct FormData *form)
 {
   struct FormData *next;
+
   do {
     next=form->next;  /* the following form line */
     free(form->line); /* free the line */
@@ -383,6 +384,11 @@ void Curl_FormFree(struct FormData *form)
 void curl_formfree(struct HttpPost *form)
 {
   struct HttpPost *next;
+
+  if(!form)
+    /* no form to free, just get out of this */
+    return;
+
   do {
     next=form->next;  /* the following form line */
 
