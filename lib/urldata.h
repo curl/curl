@@ -252,6 +252,7 @@ struct Configbits {
   bool http_post;
   bool http_put;
   bool http_set_referer;
+  bool http_auto_referer; /* set "correct" referer when following location: */
   bool httpproxy;
   bool mute;
   bool no_body;
@@ -335,6 +336,9 @@ struct UrlData {
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
   char *postfields; /* if POST, set the fields' values here */
+
+  bool free_referer; /* set TRUE if 'referer' points to a string we
+                        allocated */
   char *referer;
   char *useragent;   /* User-Agent string */
 
