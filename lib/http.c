@@ -254,7 +254,7 @@ UrgError http(struct UrlData *data, char *ppath, char *host, long *bytecount)
       /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
       strftime(buf, BUFSIZE-1, "%a, %d %b %Y %H:%M:%S %Z", thistime);
 #else
-      /* Right, we *could* write a replacement here */
+      /* TODO: Right, we *could* write a replacement here */
       strcpy(buf, "no strftime() support");
 #endif
       switch(data->timecondition) {
