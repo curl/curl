@@ -60,12 +60,6 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-/* WLdcap.dll's ldap_search_s() return filter error with CURLDEBUG !?
- */
-#ifdef WIN32
-#undef CURLDEBUG
-#endif
-
 #ifdef CURLDEBUG
 #include "memdebug.h"
 #endif
@@ -78,7 +72,7 @@
 #endif
 
 #ifndef LDAP_SIZELIMIT_EXCEEDED
-#define LDAP_SIZELIMIT_EXCEEDED -1
+#define LDAP_SIZELIMIT_EXCEEDED 4
 #endif
 
 #define DLOPEN_MODE   RTLD_LAZY  /*! assume all dlopen() implementations have 
@@ -426,8 +420,6 @@ static char **split_str (char *str)
   for (i = 2, s = strchr(str,','); s; i++)
      s = strchr(++s,',');
 
-  LDAP_TRACE(("split_str: %d strings\n", i));
-
   res = calloc(i, sizeof(char*));
   if (!res)
     return NULL;
@@ -445,16 +437,6 @@ static bool unescape_elements (LDAPURLDesc *ludp)
 {
   int i;
 
-  if (ludp->lud_dn) {
-    char *dn = ludp->lud_dn;
-    char *new_dn = curl_unescape(dn, 0);
-
-    free(dn);
-    if (!new_dn)
-       return (FALSE);
-    ludp->lud_dn = new_dn;
-  }
-
   if (ludp->lud_filter) {
     ludp->lud_filter = curl_unescape(ludp->lud_filter, 0);
     if (!ludp->lud_filter)
@@ -471,6 +453,16 @@ static bool unescape_elements (LDAPURLDesc *ludp)
     ludp->lud_exts[i] = curl_unescape(ludp->lud_exts[i], 0);
     if (!ludp->lud_exts[i])
        return (FALSE);
+  }
+
+  if (ludp->lud_dn) {
+    char *dn = ludp->lud_dn;
+    char *new_dn = curl_unescape(dn, 0);
+
+    free(dn);
+    if (!new_dn)
+       return (FALSE);
+    ludp->lud_dn = new_dn;
   }
   return (TRUE);
 }
@@ -499,8 +491,6 @@ static int _ldap_url_parse2 (const struct connectdata *conn, LDAPURLDesc *ludp)
   ludp->lud_scope = LDAP_SCOPE_BASE;
   ludp->lud_port  = conn->remote_port;
   ludp->lud_host  = conn->host.name;
-
-  LDAP_TRACE (("host '%s'\n", ludp->lud_host));
 
   /* parse DN (Distinguished Name).
    */
