@@ -246,25 +246,25 @@ POST (HTTP)
   -F accepts parameters like -F "name=contents". If you want the contents to
   be read from a file, use <@filename> as contents. When specifying a file,
   you can also specify the file content type by appending ';type=<mime type>'
-  to the file name. You can also post the contents of several files in one field.
-  For example, the field name 'coolfiles' is used to send three  files, with
-  different content types using the following syntax:
+  to the file name. You can also post the contents of several files in one
+  field.  For example, the field name 'coolfiles' is used to send three files,
+  with different content types using the following syntax:
 
         curl -F "coolfiles=@fil1.gif;type=image/gif,fil2.txt,fil3.html" \
         http://www.post.com/postit.cgi
 
   If the content-type is not specified, curl will try to guess from the file
-  extension  (it only knows a few), or use the previously specified type
-  (from an earlier file if several files are specified in a list) or else it
-  will  using the default type 'text/plain'.
+  extension (it only knows a few), or use the previously specified type (from
+  an earlier file if several files are specified in a list) or else it will
+  using the default type 'text/plain'.
 
   Emulate a fill-in form with -F. Let's say you fill in three fields in a
   form. One field is a file name which to post, one field is your name and one
   field is a file description. We want to post the file we have written named
   "cooltext.txt". To let curl do the posting of this data instead of your
-  favourite browser, you have to read the HTML source of the form page and find
-  the names of the input fields. In our example, the input field names are
-  'file', 'yourname' and 'filedescription'.
+  favourite browser, you have to read the HTML source of the form page and
+  find the names of the input fields. In our example, the input field names
+  are 'file', 'yourname' and 'filedescription'.
 
         curl -F "file=@cooltext.txt" -F "yourname=Daniel" \
              -F "filedescription=Cool text file with cool text inside" \

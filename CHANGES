@@ -7,7 +7,18 @@
                                History of Changes
 
 
+Version 7.9.5
+
+Daniel (7 March 2002)
+- Added docs/KNOWN_BUGS to the release archive.
+
 Daniel (6 March 2002)
+- Kevin Roth corrected a flaw in the curl client globbing code that made it
+  mess up backslashes. This was most notable on windows (cygwin) machines when
+  using file://.
+
+- Brad provided another fix for building outside the source-tree.
+
 - Ralph Mitchell patched away a few compiler warnings in tests/server/sws.c
 
 Daniel (5 March 2002)

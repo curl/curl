@@ -1,6 +1,6 @@
 .\" $Id$
 .\"
-.TH curl_multi_add_handle 3 "1 March 2002" "libcurl 7.9.5" "libcurl Manual"
+.TH curl_multi_add_handle 3 "4 March 2002" "libcurl 7.9.5" "libcurl Manual"
 .SH NAME
 curl_multi_add_handle - add an easy handle to a multi session
 .SH SYNOPSIS
@@ -11,6 +11,9 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle, CURL *easy_handle);
 .SH DESCRIPTION
 Adds a standard easy handle to the multi stack. This will make this multi
 handle control the specified easy handle.
+
+When an easy handle has been added to a multi stack, you can not and you must
+not use curl_easy_perform() on that handle!
 .SH RETURN VALUE
 CURLMcode type, general libcurl multi interface error code.
 .SH "SEE ALSO"

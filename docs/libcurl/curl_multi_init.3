@@ -10,7 +10,8 @@ curl_multi_init - Start a multi session
 .ad
 .SH DESCRIPTION
 This function returns a CURLM handle to be used as input to all the other
-multi-functions. This init call MUST have a corresponding call to
+multi-functions, sometimes refered to as a multi handle on some places in the
+documentation. This init call MUST have a corresponding call to
 \fIcurl_multi_cleanup\fP when the operation is complete.
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the
