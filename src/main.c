@@ -363,6 +363,7 @@ static void help(void)
        " -Y/--speed-limit   Stop transfer if below speed-limit for 'speed-time' secs\n"
        " -z/--time-cond <time> Includes a time condition to the server (H)\n"
        " -Z/--max-redirs <num> Set maximum number of redirections allowed (H)\n"
+       " -0/--http1.0       Force usage of HTTP 1.0 (H)\n"
        " -2/--sslv2         Force usage of SSLv2 (H)\n"
        " -3/--sslv3         Force usage of SSLv3 (H)");
   puts(" -#/--progress-bar  Display transfer progress as a progress bar\n"
@@ -421,6 +422,7 @@ struct Configurable {
   bool crlf;
   char *customrequest;
   char *krb4level;
+  long httpversion;
   bool progressmode;
   bool nobuffer;
   bool globoff;
@@ -434,7 +436,7 @@ struct Configurable {
   struct curl_slist *postquote;
 
   long ssl_version;
-  TimeCond timecond;
+  curl_TimeCond timecond;
   time_t condtime;
 
   struct curl_slist *headers;
@@ -860,6 +862,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"5c", "connect-timeout", TRUE},
     {"5d", "ciphers",    TRUE},
 
+    {"0", "http1.0",     FALSE},
     {"2", "sslv2",       FALSE},
     {"3", "sslv3",       FALSE},
     {"a", "append",      FALSE},
@@ -1052,6 +1055,10 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       break;
     case '#': /* added 19990617 larsa */
       config->progressmode ^= CURL_PROGRESS_BAR;
+      break;
+    case '0': 
+      /* HTTP version 1.0 */
+      config->httpversion = CURL_HTTP_VERSION_1_0;
       break;
     case '2': 
       /* SSL version 2 */
@@ -2285,9 +2292,11 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_EGDSOCKET, config->egd_file);
       curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, config->connecttimeout);
 
-      /* debug */
       if(config->cipher_list)
         curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, config->cipher_list);
+
+      if(config->httpversion)
+        curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, config->httpversion);
       
       res = curl_easy_perform(curl);
         
