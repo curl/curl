@@ -329,7 +329,7 @@ CURLcode Curl_output_digest(struct connectdata *conn,
                "nonce=\"%s\", "
                "uri=\"%s\", "
                "cnonce=\"%s\", "
-               "nc=\"%08x\", "
+               "nc=%08x, "
                "qop=\"%s\", "
                "response=\"%s\"",
                proxy?"Proxy-":"",
