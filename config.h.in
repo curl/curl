@@ -37,6 +37,9 @@
 /* The number of bytes in a long long.  */
 #undef SIZEOF_LONG_LONG
 
+/* Define if you have the RAND_status function.  */
+#undef HAVE_RAND_STATUS
+
 /* Define if you have the closesocket function.  */
 #undef HAVE_CLOSESOCKET
 
@@ -66,6 +69,9 @@
 
 /* Define if you have the select function.  */
 #undef HAVE_SELECT
+
+/* Define if you have the setvbuf function.  */
+#undef HAVE_SETVBUF
 
 /* Define if you have the socket function.  */
 #undef HAVE_SOCKET
