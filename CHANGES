@@ -7,6 +7,13 @@
                                   Changelog
 
 
+Daniel (4 April 2005)
+- Hardeep Singh reported a problem doing HTTP POST with Digest. (It was
+  actually also affecting NTLM and Negotiate.) It turned out that if the
+  server responded with 100 Continue before the initial 401 response, libcurl
+  didn't take care of the response properly. Test case 245 and 246 added to
+  verify this.
+
 Daniel (30 March 2005)
 - Andres Garcia modified the configure script to check for libgdi32 before
   libcrypto, to make the SSL check work fine on msys/mingw.

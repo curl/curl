@@ -304,6 +304,10 @@ CURLcode Curl_http_auth_act(struct connectdata *conn)
   bool pickproxy = FALSE;
   CURLcode code = CURLE_OK;
 
+  if(100 == conn->keep.httpcode)
+    /* this is a transient response code, ignore */
+    return CURLE_OK;
+
   if(data->state.authproblem)
     return data->set.http_fail_on_error?CURLE_HTTP_RETURNED_ERROR:CURLE_OK;
 
