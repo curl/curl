@@ -56,6 +56,9 @@ Data:
     errorN.txt: if this file is present, it should contain the error number
                curl is supposed to return when this test is run.
 
+    uploadN.txt: if this file is present, it should contain the same data as
+               the log/upload.N does, after a curl upload has been performed.
+
 FIX:
 
   * Make httpserver.pl work when we PUT without Content-Length:
