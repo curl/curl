@@ -3,6 +3,12 @@ join in and help us correct one or more of these! Also be sure to check the
 changelog of the current development status, as one or more of these problems
 may have been fixed since this was written!
 
+22. Sending files to a FTP server using curl on VMS, might lead to curl
+  complaining on "unaligned file size" on completion. The problem is related
+  to VMS file structures and the perceived file sizes stat() returns. A
+  possible fix would involve sending a "STRU VMS" command.
+  http://sourceforge.net/support/tracker.php?aid=1156287
+  
 21. FTP ASCII transfers do not follow RFC959. They don't convert the data
    accordingly (not for sending nor for receiving). RFC 959 section 3.1.1.1
    clearly describes how this should be done:
