@@ -7,38 +7,37 @@
 libcurl \- client-side URL transfers
 .SH DESCRIPTION
 This is an overview on how to use libcurl in your C programs. There are
-specific man pages for each function mentioned in here. There's also the
-libcurl-the-guide document for a complete tutorial to programming with
-libcurl.
+specific man pages for each function mentioned in here. There are also the
+\fIlibcurl-easy\fP man page, the \fIlibcurl-multi\fP man page, the
+\fIlibcurl-share\fP man page and the \fIlibcurl-the-guide\fP document for
+further reading on how to do programming with libcurl.
 
-There are a dozen custom bindings that bring libcurl access to your favourite
-language. Look elsewhere for documentation on those.
+There exist more than a dozen custom bindings that bring libcurl access to
+your favourite language. Look elsewhere for documentation on those.
 
 All applications that use libcurl should call \fIcurl_global_init()\fP exactly
 once before any libcurl function can be used. After all usage of libcurl is
 complete, it \fBmust\fP call \fIcurl_global_cleanup()\fP. In between those two
 calls, you can use libcurl as described below.
 
-When using libcurl's "easy" interface you init your session and get a handle,
-which you use as input to the easy interface functions you use. Use
-\fIcurl_easy_init()\fP to get the handle. There is also the so called "multi"
-interface, try the \fIlibcurl-multi(3)\fP man page for an overview of that.
+To transfer files, you always set up an "easy handle" using
+\fIcurl_easy_init()\fP, but when you want the file(s) transfered you have the
+option of using the "easy" interface, or the "multi" interface.
 
-You continue by setting all the options you want in the upcoming transfer,
-most important among them is the URL itself (you can't transfer anything
-without a specified URL as you may have figured out yourself). You might want
-to set some callbacks as well that will be called from the library when data
-is available etc.  \fIcurl_easy_setopt()\fP is there for this.
+The easy interface is a synchronous interface with which you call
+\fIcurl_easy_perform\fP and let it perform the transfer. When it is completed,
+the function return and you can continue. More details are found in the
+\fIlibcurl-easy\fP man page.
 
-When all is setup, you tell libcurl to perform the transfer using
-\fIcurl_easy_perform()\fP.  It will then do the entire operation and won't
-return until it is done (successfully or not).
+The multi interface on the other hand is an asynchronous interface, that you
+call and that performs only a little piece of the tranfer on each invoke. It
+is perfect if you want to do things while the transfer is in progress, or
+similar. The multi interface allows you to select() on libcurl action, and
+even to easily download multiple files simultaneously using a single thread.
 
-After the transfer has been made, you can set new options and make another
-transfer, or if you're done, cleanup the session by calling
-\fIcurl_easy_cleanup()\fP.  If you want persistant connections, you don't
-cleanup immediately, but instead run ahead and perform other transfers using
-the same handle. See the chapter below for Persistant Connections.
+You can have multiple easy handles share certain data, even if they are used
+in different threads. This magic is setup using the share interface, as
+described in the \fIlibcurl-share\fP man page.
 
 There is also a series of other helpful functions to use. They are:
 
@@ -107,14 +106,15 @@ Persistent connections means that libcurl can re-use the same connection for
 several transfers, if the conditions are right.
 
 libcurl will *always* attempt to use persistent connections. Whenever you use
-curl_easy_perform(), libcurl will attempt to use an existing connection to do
-the transfer, and if none exists it'll open a new one that will be subject for
-re-use on a possible following call to curl_easy_perform().
+\fIcurl_easy_perform()\fP or \fIcurl_multi_perform()\fP, libcurl will attempt
+to use an existing connection to do the transfer, and if none exists it'll
+open a new one that will be subject for re-use on a possible following call to
+\fIcurl_easy_perform()\fP or \fIcurl_multi_perform()\fP.
 
 To allow libcurl to take full advantage of persistent connections, you should
 do as many of your file transfers as possible using the same curl handle. When
-you call curl_easy_cleanup(), all the possibly open connections held by
+you call \fIcurl_easy_cleanup()\fP, all the possibly open connections held by
 libcurl will be closed and forgotten.
 
-Note that the options set with curl_easy_setopt() will be used in on every
-repeat curl_easy_perform() call
+Note that the options set with \fIcurl_easy_setopt()\fP will be used in on
+every repeated \fIcurl_easy_perform()\fP call.
