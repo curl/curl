@@ -213,10 +213,10 @@ int SetHTTPrequest(HttpReq req, HttpReq *store)
   if((*store == HTTPREQ_UNSPEC) ||
      (*store == req)) {
     *store = req;
-    return CURLE_OK;
+    return 0;
   }
   fprintf(stderr, "You can only select one HTTP request!\n");
-  return CURLE_FAILED_INIT;
+  return 1;
 }
 
 static void helpf(char *fmt, ...)
@@ -433,11 +433,23 @@ static char *file2memory(FILE *file, long *size)
     return NULL; /* no string */
 }
 
-static int getparameter(char *flag, /* f or -long-flag */
-			char *nextarg, /* NULL if unset */
-			bool *usedarg, /* set to TRUE if the arg has been
-					  used */
-			struct Configurable *config)
+typedef enum {
+  PARAM_OK,
+  PARAM_OPTION_AMBIGUOUS,
+  PARAM_OPTION_UNKNOWN,
+  PARAM_REQUIRES_PARAMETER,  
+  PARAM_BAD_USE,
+  PARAM_HELP_REQUESTED,
+  PARAM_GOT_EXTRA_PARAMETER,
+
+  PARAM_LAST
+} ParameterError;
+
+static ParameterError getparameter(char *flag, /* f or -long-flag */
+                                   char *nextarg, /* NULL if unset */
+                                   bool *usedarg, /* set to TRUE if the arg
+                                                     has been used */
+                                   struct Configurable *config)
 {
   char letter;
   char subletter=0; /* subletters can only occur on long options */
@@ -458,6 +470,7 @@ static int getparameter(char *flag, /* f or -long-flag */
     {"8", "stderr",      TRUE},
     {"7", "interface",   TRUE},
     {"6", "krb4",        TRUE},
+    {"5", "url",         TRUE},
 
     {"2", "sslv2",       FALSE},
     {"3", "sslv3",       FALSE},
@@ -513,15 +526,17 @@ static int getparameter(char *flag, /* f or -long-flag */
     {"#", "progress-bar",FALSE},
   };
 
-  if('-' == flag[0]) {
-    /* try a long name */
-    int fnam=strlen(&flag[1]);
+  if(('-' != flag[0]) ||
+     (('-' == flag[0]) && ('-' == flag[1]))) {
+    /* this should be a long name */
+    char *word=('-' == flag[0])?flag+2:flag;
+    int fnam=strlen(word);
     int numhits=0;
     for(j=0; j< sizeof(aliases)/sizeof(aliases[0]); j++) {
-      if(strnequal(aliases[j].lname, &flag[1], fnam)) {
+      if(strnequal(aliases[j].lname, word, fnam)) {
         longopt = TRUE;
         numhits++;
-        if(strequal(aliases[j].lname, &flag[1])) {
+        if(strequal(aliases[j].lname, word)) {
           parse = aliases[j].letter;
           hit = j;
           numhits = 1; /* a single unique hit */
@@ -533,15 +548,14 @@ static int getparameter(char *flag, /* f or -long-flag */
     }
     if(numhits>1) {
       /* this is at least the second match! */
-      helpf("option --%s is ambiguous\n", &flag[1]);
-      return CURLE_FAILED_INIT;
+      return PARAM_OPTION_AMBIGUOUS;
     }
     if(hit < 0) {
-      helpf("unknown option -%s.\n", flag);
-      return CURLE_FAILED_INIT;
+      return PARAM_OPTION_UNKNOWN;
     }    
   }
   else {
+    flag++; /* prefixed with one dash, pass it */
     hit=-1;
     parse = flag;
   }
@@ -568,19 +582,14 @@ static int getparameter(char *flag, /* f or -long-flag */
 	}
       }
       if(hit < 0) {
-	helpf("unknown option -%c.\n", letter);
-	return CURLE_FAILED_INIT;      
+	return PARAM_OPTION_UNKNOWN;
       }
     }
     if(hit < 0) {
-      helpf("unknown option -%c.\n", letter);
-      return CURLE_FAILED_INIT;
+      return PARAM_OPTION_UNKNOWN;
     }    
-    if(!nextarg && aliases[hit].extraparam) {
-      helpf("option -%s/--%s requires an extra argument!\n",
-	    aliases[hit].letter,
-	    aliases[hit].lname);
-      return CURLE_FAILED_INIT;
+    if((!nextarg || !*nextarg) && aliases[hit].extraparam) {
+      return PARAM_REQUIRES_PARAMETER;
     }
     else if(nextarg && aliases[hit].extraparam)
       *usedarg = TRUE; /* mark it as used */
@@ -637,6 +646,10 @@ static int getparameter(char *flag, /* f or -long-flag */
     case '6': /* there is no short letter for this */
       /* krb4 level string */
       GetStr(&config->krb4level, nextarg);
+      break;
+    case '5':
+      /* the URL! */
+      GetStr(&config->url, nextarg);
       break;
     case '#': /* added 19990617 larsa */
       config->progressmode ^= CURL_PROGRESS_BAR;
@@ -727,7 +740,7 @@ static int getparameter(char *flag, /* f or -long-flag */
       if(config->postfields)
         config->conf |= CONF_POST;
       if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
-        return CURLE_FAILED_INIT;
+        return PARAM_BAD_USE;
       break;
     case 'D':
       /* dump-header to given file name */
@@ -767,14 +780,14 @@ static int getparameter(char *flag, /* f or -long-flag */
       if(curl_formparse(nextarg,
                         &config->httppost,
                         &config->last_post))
-	return CURLE_FAILED_INIT;    
+	return PARAM_BAD_USE;
       if(SetHTTPrequest(HTTPREQ_POST, &config->httpreq))
-        return CURLE_FAILED_INIT;
+        return PARAM_BAD_USE;
       break;
 
     case 'h': /* h for help */
       help();
-      return CURLE_FAILED_INIT;
+      return PARAM_HELP_REQUESTED;
     case 'H':
       /* A custom header to append to a list */
       config->headers = curl_slist_append(config->headers, nextarg);
@@ -786,7 +799,7 @@ static int getparameter(char *flag, /* f or -long-flag */
       config->conf ^= CONF_HEADER; /* include the HTTP header in the output */
       config->conf ^= CONF_NOBODY; /* don't fetch the body at all */
       if(SetHTTPrequest(HTTPREQ_HEAD, &config->httpreq))
-        return CURLE_FAILED_INIT;
+        return PARAM_BAD_USE;
       break;
     case 'K':
       res = parseconfig(nextarg, config);
@@ -806,7 +819,7 @@ static int getparameter(char *flag, /* f or -long-flag */
       break;
     case 'M': /* M for manual, huge help */
       hugehelp();
-      return CURLE_FAILED_INIT;
+      return PARAM_HELP_REQUESTED;
     case 'n':
       /* pick info from .netrc, if this is used for http, curl will
 	 automatically enfore user+password with the request */
@@ -889,7 +902,7 @@ static int getparameter(char *flag, /* f or -long-flag */
       break;
     case 'V':
       printf(CURL_ID "%s\n", curl_version());
-      return CURLE_FAILED_INIT;
+      return PARAM_HELP_REQUESTED;
     case 'w':
       /* get the output string */
       if('@' == *nextarg) {
@@ -916,7 +929,7 @@ static int getparameter(char *flag, /* f or -long-flag */
       /* HTTP request */
       GetStr(&config->customrequest, nextarg);
       if(SetHTTPrequest(HTTPREQ_CUSTOM, &config->httpreq))
-        return CURLE_FAILED_INIT;
+        return PARAM_BAD_USE;
       break;
     case 'y':
       /* low speed time */
@@ -932,17 +945,13 @@ static int getparameter(char *flag, /* f or -long-flag */
       break;
 
     default: /* unknown flag */
-      if(letter)	
-	helpf("Unknown option '%c'\n", letter);
-      else
-	helpf("Unknown option\n"); /* short help blurb */
-      return CURLE_FAILED_INIT;
+      return PARAM_OPTION_UNKNOWN;
     }
     hit = -1;
 
   } while(*++parse && !*usedarg);
 
-  return CURLE_OK;
+  return PARAM_OK;
 }
 
 
@@ -964,10 +973,10 @@ static int parseconfig(char *filename,
     home = curl_getenv("HOME"); /* portable environment reader */
 
     if(!home)
-      return CURLE_OK;
+      return 0;
     if(strlen(home)>(sizeof(filebuffer)-strlen(CURLRC))) {
       free(home);
-      return CURLE_OK;
+      return 0;
     }
 
     sprintf(filebuffer, "%s%s%s", home, DIR_CHAR, CURLRC);
@@ -982,66 +991,127 @@ static int parseconfig(char *filename,
   
   if(file) {
     char *line;
-    char *tok1;
-    char *tok2;
-    
-    while (NULL != (line = my_get_line(file))) {
+    char *aline;
+    char *option;
+    char *param;
+    int lineno=0;
+    bool alloced_param;
+
+#define isseparator(x) (((x)=='=') || ((x) == ':'))
+
+    while (NULL != (aline = my_get_line(file))) {
+      lineno++;
+      line = aline;
+      alloced_param=FALSE;
+
       /* lines with # in the fist column is a comment! */
-      if ('#' == line[0]) {
+      while(isspace(*line))
+        line++;
+
+      switch(*line) {
+      case '#':
+      case '/':
+      case '\r':
+      case '\n':
+      case '*':
+      case '\0':
         free(line);
         continue;
       }
 
-      if (NULL == (tok1 = my_get_token(line))) {
-        free(line);
-        continue;
-      }
-      if ('-' != tok1[0]) {
-        if (config->url)
-          free(config->url);
-        config->url = tok1;
-      }
+      /* the option keywords starts here */
+      option = line;
+      while(*line && !isspace(*line) && !isseparator(*line))
+        line++;
+      /* ... and has ended here */
 
-      while ((NULL != tok1) && ('-' == tok1[0])) {
-        tok2 = my_get_token(NULL);
-        while (NULL == tok2) {
-          free(line);
-          if (NULL == (line = my_get_line(file)))
-            break;
-          if ('#' == line[0])
-            continue;
-          tok2 = my_get_token(line);
+      *line++=0; /* zero terminate, we have a local copy of the data */
+
+#ifdef DEBUG_CONFIG
+      fprintf(stderr, "GOT: %s\n", option);
+#endif
+
+      /* pass spaces and separator(s) */
+      while(isspace(*line) || isseparator(*line))
+        line++;
+      
+      /* the parameter starts here (unless quoted) */
+      if(*line == '\"') {
+        char *ptr;
+        /* quoted parameter, do the qoute dance */
+        line++;
+        param=strdup(line); /* parameter */
+        alloced_param=TRUE;
+
+        ptr=param;
+        while(*line && (*line != '\"')) {
+          if(*line == '\\') {
+            line++;
+            if(!*line) {
+              break;
+            }
+          }
+          *ptr++=*line++;
         }
+        *ptr=0; /* always zero terminate */
 
-        res = getparameter(tok1 + 1, tok2, &usedarg, config);
-        free(tok1);
-        if (!usedarg) {
-          if (tok2 && ('-' != tok2[0])) {
-            /* this is not an option, this is a URL */
-            if (config->url)
-              free(config->url);
-            config->url = tok2;
+      }
+      else {
+        param=line; /* parameter starts here */
+        while(*line && !isspace(*line))
+          line++;
+        *line=0; /* zero terminate */
+      }
+#ifdef DEBUG_CONFIG
+      fprintf(stderr, "PARAM: \"%s\"\n", param);
+#endif
+      res = getparameter(option, param, &usedarg, config);
+
+      if(*param && !usedarg)
+        /* we passed in a parameter that wasn't used! */
+        res = PARAM_GOT_EXTRA_PARAMETER;
+
+      if(res != PARAM_OK) {
+        /* the help request isn't really an error */
+        if(!strcmp(filename, "-")) {
+          filename="<stdin>";
+        }
+        if(PARAM_HELP_REQUESTED != res) {
+          char *reason;
+          switch(res) {
+          default:
+          case PARAM_GOT_EXTRA_PARAMETER:
+            reason = "had unsupported trailing garbage";
+            break;
+          case PARAM_OPTION_UNKNOWN:
+            reason = "is unknown";
+            break;
+          case PARAM_OPTION_AMBIGUOUS:
+            reason = "is ambiguous";
+            break;
+          case PARAM_REQUIRES_PARAMETER:
+            reason = "requires parameter";
+            break;
+          case PARAM_BAD_USE:
+            reason = "is badly used here";
             break;
           }
-          else
-            tok1 = tok2;
+          fprintf(stderr, "%s:%d: warning: '%s' %s\n",
+                  filename, lineno, option, reason);
         }
-        else {
-          free(tok2);
-          break;
-        }
-        if(res)
-          break; /* error detected */
       }
 
-      free(line);
+      if(alloced_param)
+        free(param);
+
+      free(aline);
     }
     if(file != stdin)
       fclose(file);
   }
   if(home)
     free(home);
-  return CURLE_OK;
+  return 0;
 }
 
 struct OutStruct {
@@ -1236,8 +1306,9 @@ int main(int argc, char *argv[])
        ('-' == argv[i][0])) {
       char *nextarg;
       bool passarg;
+      char *origopt=argv[i];
       
-      char *flag = &argv[i][1];
+      char *flag = argv[i];
 
       if(strequal("--", argv[i]))
 	/* this indicates the end of the flags and thus enables the
@@ -1246,12 +1317,27 @@ int main(int argc, char *argv[])
       else {
 	nextarg= (i < argc - 1)? argv[i+1]: NULL;
 
-	res = getparameter ( flag,
-			     nextarg,
-			     &passarg,
-			   &config );
-	if(res)
-	  return res;
+	res = getparameter(flag, nextarg, &passarg, &config);
+	if(res) {
+          switch(res) {
+          case PARAM_OPTION_AMBIGUOUS:
+            helpf("option %s is ambiguous\n", origopt);
+            break;
+          case PARAM_OPTION_UNKNOWN:
+            helpf("option %s is unknown\n", origopt);
+            break;
+          case PARAM_REQUIRES_PARAMETER:
+            helpf("option %s requires an extra argument!\n", origopt);
+            break;
+          case PARAM_BAD_USE:
+            helpf("option %s was wrongly used!\n", origopt);
+            break;
+          case PARAM_HELP_REQUESTED:
+            /* no text */
+            break;
+          }
+	  return CURLE_FAILED_INIT;
+        }
 
 	if(passarg) /* we're supposed to skip this */
 	  i++;
@@ -1452,49 +1538,6 @@ int main(int argc, char *argv[])
 
   main_init();
 
-#if 0
-  /* This is code left from the pre-v7 time, left here mainly as a reminder
-     and possibly as a warning! ;-) */
-
-  res = curl_urlget(CURLOPT_FILE, (FILE *)&outs,  /* where to store */
-                    CURLOPT_WRITEFUNCTION, my_fwrite, /* what call to write */
-                    CURLOPT_INFILE, infd, /* for uploads */
-                    CURLOPT_INFILESIZE, infilesize, /* size of uploaded file */
-                    CURLOPT_URL, url,     /* what to fetch */
-                    CURLOPT_PROXY, config.proxy, /* proxy to use */
-                    CURLOPT_FLAGS, config.conf, /* flags */
-                    CURLOPT_USERPWD, config.userpwd, /* user + passwd */
-                    CURLOPT_PROXYUSERPWD, config.proxyuserpwd, /* Proxy user + passwd */
-                    CURLOPT_RANGE, config.range, /* range of document */
-                    CURLOPT_ERRORBUFFER, errorbuffer,
-                    CURLOPT_TIMEOUT, config.timeout,
-                    CURLOPT_POSTFIELDS, config.postfields,
-                    CURLOPT_REFERER, config.referer,
-                    CURLOPT_USERAGENT, config.useragent,
-                    CURLOPT_FTPPORT, config.ftpport,
-                    CURLOPT_LOW_SPEED_LIMIT, config.low_speed_limit,
-                    CURLOPT_LOW_SPEED_TIME, config.low_speed_time,
-                    CURLOPT_RESUME_FROM, config.use_resume?config.resume_from:0,
-                    CURLOPT_COOKIE, config.cookie,
-                    CURLOPT_HTTPHEADER, config.headers,
-                    CURLOPT_HTTPPOST, config.httppost,
-                    CURLOPT_SSLCERT, config.cert,
-                    CURLOPT_SSLCERTPASSWD, config.cert_passwd,
-                    CURLOPT_CRLF, config.crlf,
-                    CURLOPT_QUOTE, config.quote,
-                    CURLOPT_POSTQUOTE, config.postquote,
-                    CURLOPT_WRITEHEADER, config.headerfile?&heads:NULL,
-                    CURLOPT_COOKIEFILE, config.cookiefile,
-                    CURLOPT_SSLVERSION, config.ssl_version,
-                    CURLOPT_TIMECONDITION, config.timecond,
-                    CURLOPT_TIMEVALUE, config.condtime,
-                    CURLOPT_CUSTOMREQUEST, config.customrequest,
-                    CURLOPT_STDERR, config.errors,
-                    CURLOPT_PROGRESSMODE, config.progressmode,
-                    CURLOPT_WRITEINFO, config.writeout,
-                    CURLOPT_DONE); /* always terminate the list of tags */
-
-#endif
   /* The new, v7-style easy-interface! */
   curl = curl_easy_init();
   if(curl) {
