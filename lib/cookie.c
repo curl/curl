@@ -86,10 +86,12 @@ Example set of cookies:
 #include <string.h>
 #include <ctype.h>
 
+#include "urldata.h"
 #include "cookie.h"
 #include "getdate.h"
 #include "strequal.h"
 #include "strtok.h"
+#include "sendf.h"
 
 /* The last #include file should be: */
 #ifdef CURLDEBUG
@@ -131,7 +133,12 @@ static bool tailmatch(const char *little, const char *bigone)
  ***************************************************************************/
 
 struct Cookie *
-Curl_cookie_add(struct CookieInfo *c,
+Curl_cookie_add(struct SessionHandle *data,
+                /* The 'data' pointer here may be NULL at times, and thus
+                   must only be used very carefully for things that can deal
+                   with data being NULL. Such as infof() and similar */
+                
+                struct CookieInfo *c,
                 bool httpheader, /* TRUE if HTTP header-style line */
                 char *lineptr,   /* first character of the line */
                 char *domain,    /* default domain */
@@ -244,6 +251,8 @@ Curl_cookie_add(struct CookieInfo *c,
               /* Received and skipped a cookie with a domain using too few
                  dots. */
               badcookie=TRUE; /* mark this as a bad cookie */
+              infof(data, "skipped cookie with illegal dotcount domain: %s",
+                    whatptr);
             }
             else {
               /* Now, we make sure that our host is within the given domain,
@@ -262,6 +271,8 @@ Curl_cookie_add(struct CookieInfo *c,
                    is not a domain to which the current host belongs. Mark as
                    bad. */
                 badcookie=TRUE;
+                infof(data, "skipped cookie with bad tailmatch domain: %s",
+                      whatptr);
               }
             }
           }
@@ -437,13 +448,16 @@ Curl_cookie_add(struct CookieInfo *c,
       }
     }
 
-    if(7 != fields) {
+    if(6 == fields) {
+      /* we got a cookie with blank contents, fix it */
+      co->value = strdup("");
+    }
+    else if(7 != fields) {
       /* we did not find the sufficient number of fields to recognize this
          as a valid line, abort and go home */
       free_cookiemess(co);
       return NULL;
     }
-
   }
 
   if(!c->running &&    /* read from a file */
@@ -548,6 +562,12 @@ Curl_cookie_add(struct CookieInfo *c,
     clist = clist->next;
   }
 
+  if(c->running)
+    /* Only show this when NOT reading the cookies from a file */
+    infof(data, "%s cookie %s=\"%s\" for domain %s, path %s, expire %d\n",
+          replace_old?"Replaced":"Added", co->name, co->value,
+          co->domain, co->path, co->expires);
+
   if(!replace_old) {
     /* then make the last item point on this new one */
     if(lastc)
@@ -570,7 +590,8 @@ Curl_cookie_add(struct CookieInfo *c,
  * If 'newsession' is TRUE, discard all "session cookies" on read from file.
  *
  ****************************************************************************/
-struct CookieInfo *Curl_cookie_init(char *file,
+struct CookieInfo *Curl_cookie_init(struct SessionHandle *data,
+                                    char *file,
                                     struct CookieInfo *inc,
                                     bool newsession)
 {
@@ -618,7 +639,7 @@ struct CookieInfo *Curl_cookie_init(char *file,
       while(*lineptr && isspace((int)*lineptr))
         lineptr++;
 
-      Curl_cookie_add(c, headerline, lineptr, NULL, NULL);
+      Curl_cookie_add(data, c, headerline, lineptr, NULL, NULL);
     }
     if(fromfile)
       fclose(fp);
@@ -826,32 +847,5 @@ int Curl_cookie_output(struct CookieInfo *c, char *dumphere)
 
   return 0;
 }
-
-#ifdef CURL_COOKIE_DEBUG
-
-/*
- * On my Solaris box, this command line builds this test program:
- *
- * gcc -g -o cooktest -DCURL_COOKIE_DEBUG -DHAVE_CONFIG_H -I.. -I../include cookie.c strequal.o getdate.o memdebug.o mprintf.o strtok.o -lnsl -lsocket
- *
- */
-
-int main(int argc, char **argv)
-{
-  struct CookieInfo *c=NULL;
-  if(argc>1) {
-    c = Curl_cookie_init(argv[1], c);
-    Curl_cookie_add(c, TRUE, "PERSONALIZE=none;expires=Monday, 13-Jun-1988 03:04:55 GMT; domain=.fidelity.com; path=/ftgw; secure");
-    Curl_cookie_add(c, TRUE, "foobar=yes; domain=.haxx.se; path=/looser;");
-    c = Curl_cookie_init(argv[1], c);
-
-    Curl_cookie_output(c);
-    Curl_cookie_cleanup(c);
-    return 0;
-  }
-  return 1;
-}
-
-#endif
 
 #endif /* CURL_DISABLE_HTTP */
