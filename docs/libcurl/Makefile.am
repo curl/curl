@@ -124,20 +124,18 @@ EXTRA_DIST = $(man_MANS) $(HTMLPAGES) index.html $(PDFPAGES)
 
 MAN2HTML= gnroff -man $< | man2html >$@
 
-SUFFIXES = .1 .3 .html
+SUFFIXES = .3 .html
 
 html: $(HTMLPAGES)
 
 .3.html:
 	$(MAN2HTML)
 
-.1.html:
-	$(MAN2HTML)
+pdf: $(PDFPAGES)
 
-pdf:
-	for file in $(man_MANS); do \
-	  foo=`echo $$file | sed -e 's/\.[0-9]$$//g'`; \
-	  groff -Tps -man $$file >$$foo.ps; \
-	  ps2pdf $$foo.ps $$foo.pdf; \
-	  rm $$foo.ps; \
-	done
+.3.pdf:
+	@(foo=`echo $@ | sed -e 's/\.[0-9]$$//g'`; \
+	groff -Tps -man $< >$$foo.ps; \
+	ps2pdf $$foo.ps $@; \
+	rm $$foo.ps; \
+	echo "converted $< to $@")
