@@ -116,7 +116,7 @@
 #include "ldap.h"
 #include "url.h"
 #include "connect.h"
-#include "ca-bundle.h"
+#include <ca-bundle.h>
 
 #include <curl/types.h>
 
