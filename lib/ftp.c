@@ -267,9 +267,16 @@ int Curl_GetFTPResponse(char *buf,
         ftp->cache = NULL;   /* clear the pointer */
         ftp->cache_size = 0; /* zero the size just in case */
       }
-      else if(CURLE_OK != Curl_read(conn, sockfd, ptr,
-                                    BUFSIZE-nread, &gotbytes))
-        keepon = FALSE;
+      else {
+        int res = Curl_read(conn, sockfd, ptr,
+                            BUFSIZE-nread, &gotbytes);
+        if(res < 0)
+          /* EWOULDBLOCK */
+          continue; /* go looping again */
+
+        if(CURLE_OK != res)
+          keepon = FALSE;
+      }
 
       if(!keepon)
         ;

@@ -266,14 +266,18 @@ CURLcode Curl_client_write(struct SessionHandle *data,
   return CURLE_OK;
 }
 
-
 /*
  * Internal read-from-socket function. This is meant to deal with plain
  * sockets, SSL sockets and kerberos sockets.
+ *
+ * If the read would block (EWOULDBLOCK) we return -1. Otherwise we return
+ * a regular CURLcode value.
  */
-CURLcode Curl_read(struct connectdata *conn, int sockfd,
-                   char *buf, size_t buffersize,
-                   ssize_t *n)
+int Curl_read(struct connectdata *conn,
+              int sockfd,
+              char *buf,
+              size_t buffersize,
+              ssize_t *n)
 {
   ssize_t nread;
 
@@ -300,7 +304,9 @@ CURLcode Curl_read(struct connectdata *conn, int sockfd,
         /* if there's data pending, then we re-invoke SSL_read() */
         break;
       }
-    } while(loop && SSL_pending(conn->ssl.handle));
+    } while(0);
+    if(loop && SSL_pending(conn->ssl.handle))
+      return -1; /* basicly EWOULDBLOCK */
   }
   else {
 #endif
@@ -310,6 +316,16 @@ CURLcode Curl_read(struct connectdata *conn, int sockfd,
     else
 #endif
       nread = sread (sockfd, buf, buffersize);
+
+    if(-1 == nread) {
+#ifdef WIN32
+      if(EWOULDBLOCK == GetLastError())
+#else
+      if(EWOULDBLOCK == errno)
+#endif
+        return -1;
+    }
+
 #ifdef USE_SSLEAY
   }
 #endif /* USE_SSLEAY */

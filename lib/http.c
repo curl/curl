@@ -235,6 +235,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   int subversion=0;
   struct SessionHandle *data=conn->data;
   CURLcode result;
+  int res;
 
   int nread;   /* total size read */
   int perline; /* count bytes per line */
@@ -317,8 +318,12 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
        * to read, but when we use Curl_read() it may do so. Do confirm
        * that this is still ok and then remove this comment!
        */
-      if(CURLE_OK != Curl_read(conn, tunnelsocket, ptr, BUFSIZE-nread,
-                               &gotbytes))
+      res= Curl_read(conn, tunnelsocket, ptr, BUFSIZE-nread,
+                     &gotbytes);
+      if(res< 0)
+        /* EWOULDBLOCK */
+        continue; /* go loop yourself */
+      else if(res)
         keepon = FALSE;
       else if(gotbytes <= 0) {
         keepon = FALSE;

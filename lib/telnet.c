@@ -1116,6 +1116,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
         {
           if(events.lNetworkEvents & FD_READ)
           {
+            /* This reallu OUGHT to check its return code. */
             Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
             
             telrcv(conn, (unsigned char *)buf, nread);
@@ -1176,6 +1177,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
       }
 
       if(FD_ISSET(sockfd, &readfd)) {
+        /* This OUGHT to check the return code... */
         Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
 
         /* if we receive 0 or less here, the server closed the connection and
