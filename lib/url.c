@@ -249,7 +249,7 @@ CURLcode curl_open(CURL **curl, char *url)
   if(data) {
     memset(data, 0, sizeof(struct UrlData));
     data->handle = STRUCT_OPEN;
-    data->interface = CURLI_NORMAL; /* normal interface by default */
+    data->interf = CURLI_NORMAL; /* normal interface by default */
 
     /* We do some initial setup here, all those fields that can't be just 0 */
 

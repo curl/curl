@@ -107,7 +107,7 @@ CURL *curl_easy_init(void)
   if(res != CURLE_OK)
     return NULL;
 
-  data->interface = CURLI_EASY; /* mark it as an easy one */
+  data->interf = CURLI_EASY; /* mark it as an easy one */
   return data;
 }
 

@@ -306,7 +306,7 @@ typedef enum {
 
 struct UrlData {
   Handle handle; /* struct identifier */
-  CurlInterface interface;
+  CurlInterface interf; /* created by WHAT interface? */
 
   /*************** Global - specific items  ************/
   FILE *err;    /* the stderr writes goes here */

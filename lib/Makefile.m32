@@ -9,7 +9,7 @@
 CC = gcc
 AR = ar
 RANLIB = ranlib
-OPENSSL_PATH = ../../openssl-0.9.4
+OPENSSL_PATH = ../../openssl-0.9.5a
 
 ########################################################
 ## Nothing more to do below this line!
@@ -31,12 +31,14 @@ urldata.h formdata.c hostip.h netrc.h stdcheaders.h formdata.h \
 if2ip.c progress.c sendf.c sendf.h speedcheck.c speedcheck.h \
 ftp.c ftp.h getpass.c getpass.h version.c timeval.c  timeval.h cookie.c \
 cookie.h escape.c escape.h getdate.c getdate.h dict.h dict.c http.c \
-http.h telnet.c telnet.h file.c file.h ldap.c ldap.h writeout.c writeout.h
+http.h telnet.c telnet.h file.c file.h ldap.c ldap.h writeout.c writeout.h \
+highlevel.c strequal.c strequal.h easy.c
 
 libcurl_a_OBJECTS =  base64.o getenv.o mprintf.o url.o download.o \
 getpass.o ssluse.o hostip.o netrc.o formdata.o if2ip.o progress.o \
 sendf.o speedcheck.o ftp.o getpass.o version.o timeval.o \
-cookie.o escape.o getdate.o dict.o http.o telnet.o file.o ldap.o writeout.o
+cookie.o escape.o getdate.o dict.o http.o telnet.o file.o ldap.o writeout.o \
+highlevel.o strequal.o easy.o
 
 LIBRARIES =  $(libcurl_a_LIBRARIES)
 SOURCES = $(libcurl_a_SOURCES)
@@ -63,5 +65,6 @@ clean:
 	-@erase $(libcurl_a_OBJECTS)
 
 distrib: clean
+	
 	-@erase $(libcurl_a_LIBRARIES)
 	
