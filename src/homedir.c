@@ -40,6 +40,8 @@
 #include <unixlib.h>
 #endif
 
+#include "homedir.h"
+
 #ifdef CURLDEBUG
 #include "../lib/memdebug.h"
 #endif

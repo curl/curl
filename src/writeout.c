@@ -184,6 +184,7 @@ void ourWriteOut(CURL *curl, char *writeinfo)
                   fputs(stringp, stream);
                 break;
               default:
+                /* -Wunreachable-code wrongly complains on this */
                 break;
               }
               break;

@@ -36,6 +36,8 @@
 
 #ifndef HAVE_GETPASS_R
 
+#include "getpass.h"
+
 #ifndef WIN32
 #ifdef	VMS
 #include <stdio.h>
@@ -101,9 +103,9 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   FILE *infp;
   char infp_fclose = 0;
   FILE *outfp;
-  RETSIGTYPE (*sigint)();
+  RETSIGTYPE (*sigint)(int);
 #ifdef SIGTSTP
-  RETSIGTYPE (*sigtstp)();
+  RETSIGTYPE (*sigtstp)(int);
 #endif
   size_t bytes_read;
   int infd;

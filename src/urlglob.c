@@ -136,8 +136,11 @@ static GlobCode glob_set(URLGlob *glob, char *pattern, int pos, int *amount)
       ++pos;
     }
   }
+  /* we never reach this point */
+#if 0
   snprintf(globerrormsg, sizeof(globerrormsg), "malformatted pattern");
   return GLOB_ERROR;
+#endif
 }
 
 static GlobCode glob_range(URLGlob *glob, char *pattern, int pos, int *amount)
