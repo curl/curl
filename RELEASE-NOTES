@@ -5,6 +5,7 @@ beginning.
 
 This release includes the following changes:
 
+ o allows the URL to be set by a callback when using the multi interface
  o large file support was added. Use one of the new options: INFILESIZE_LARGE,
    RESUME_FROM_LARGE and MAXFILESIZE_LARGE
  o the new --ftp-pasv overrides a previous --ftpport
@@ -18,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o builds natively on AmigaOS (without unix emulation)
  o ftps:// now uses port 990 by default
  o the "configure --with-spnego" action was improved
  o fixed a rare follow-redirect problem
@@ -77,6 +79,6 @@ advice from friends like these:
  W. Rozycki, Nicolas Croiset, Josh Kapell, Gaz Iqbal, Dave May, Markus
  Moeller, James Clancy, Giuseppe Attardi, swalkaus at yahoo.com, Steve Green,
  Marty Kuhrt, Dominick Meglio, Diego Casorran, David Byron, John McGowan,
- David J Meyer, Dan Fandrich, Pierre
+ David J Meyer, Dan Fandrich, Pierre, Brian R Duffy
  
         Thanks! (and sorry if I forgot to mention someone)
