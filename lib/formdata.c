@@ -318,6 +318,7 @@ static int AddFormData(struct FormData **formp,
   newform->line = (char *)malloc(length+1);
   memcpy(newform->line, line, length+1);
   newform->length = length;
+  newform->line[length]=0; /* zero terminate for easier debugging */
   
   if(*formp) {
     (*formp)->next = newform;
@@ -517,12 +518,20 @@ int FormInit(struct Form *form, struct FormData *formdata )
 {
   if(!formdata)
     return 1; /* error */
-  
-  /* First, make sure that we'll send a nice terminating sequence at the end
+
+#if 0  
+  struct FormData *lastnode=formdata;
+
+  /* find the last node in the list */
+  while(lastnode->next) {
+    lastnode = lastnode->next;
+  }
+
+  /* Now, make sure that we'll send a nice terminating sequence at the end
    * of the post. We *DONT* add this string to the size of the data since this
    * is actually AFTER the data. */
-  AddFormDataf(&formdata, "\r\n\r\n");
-
+  AddFormDataf(&lastnode, "\r\n\r\n");
+#endif
   form->data = formdata;
   form->sent = 0;
 
@@ -544,7 +553,7 @@ int FormReader(char *buffer,
   wantedsize = size * nitems;
 
   if(!form->data)
-    return 0; /* nothing, error, empty */
+    return -1; /* nothing, error, empty */
 
   do {
   
