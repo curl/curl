@@ -617,7 +617,7 @@ if test x"$want_gss" = xyes; then
      if test -f "$GSSAPI_ROOT/bin/krb5-config"; then
         GSSAPI_INCS=`$GSSAPI_ROOT/bin/krb5-config --cflags gssapi`
      else
-        GSSAPI_INCS=="-I$GSSAPI_ROOT/include"
+        GSSAPI_INCS="-I$GSSAPI_ROOT/include"
      fi
   fi
   CPPFLAGS="$CPPFLAGS $GSSAPI_INCS"
@@ -627,7 +627,7 @@ if test x"$want_gss" = xyes; then
         gss_ldflags=`$GSSAPI_ROOT/bin/krb5-config --libs gssapi`
 	LDFLAGS="$LDFLAGS $gss_ldflags"
      else
-        LDFLAGS="$LDFLAGS $GSSAPI_ROOT/lib -lgssapi"
+        LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib -lgssapi"
      fi
   else
      LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
