@@ -3071,10 +3071,17 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->bits.user_passwd = old_conn->bits.user_passwd;
     conn->bits.proxy_user_passwd = old_conn->bits.proxy_user_passwd;
 
+    /* host can change, when doing keepalive with a proxy ! */
+    if (conn->bits.httpproxy) {
+      free(conn->host.rawalloc);
+      conn->host=old_conn->host;
+    }
+
     /* get the newly set value, not the old one */
     conn->bits.no_body = old_conn->bits.no_body;
 
-    free(old_conn->host.rawalloc); /* free the newly allocated name buffer */
+    if (!conn->bits.httpproxy)
+      free(old_conn->host.rawalloc); /* free the newly allocated name buffer */
 
     free(conn->pathbuffer); /* free the newly allocated path pointer */
     conn->pathbuffer = old_conn->pathbuffer; /* use the old one */
@@ -3126,7 +3133,8 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     *in_connect = conn;      /* return this instead! */
 
     infof(data, "Re-using existing connection! (#%ld) with host %s\n",
-          conn->connectindex, conn->host.dispname);
+          conn->connectindex,
+	  conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
   }
   else {
     /*
@@ -3211,6 +3219,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     hostaddr = NULL;
     conn->dns_entry = NULL; /* we don't connect now so we don't have any fresh
                                dns entry struct to point to */
+
+    if (conn->bits.httpproxy)
+      fix_hostname(conn, &conn->host);
   }
   else {
     /* this is a fresh connect */
@@ -3503,7 +3514,8 @@ CURLcode Curl_done(struct connectdata **connp,
   }
   else
     infof(data, "Connection #%ld to host %s left intact\n",
-          conn->connectindex, conn->host.dispname);
+          conn->connectindex,
+	  conn->bits.httpproxy?conn->proxy.dispname:conn->host.dispname);
 
   return result;
 }
