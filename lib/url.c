@@ -639,6 +639,8 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
        callback! */
     if(va_arg(param, long))
       data->set.httpreq = HTTPREQ_POST;
+    else
+      data->set.httpreq = HTTPREQ_GET;
     break;
 
   case CURLOPT_POSTFIELDS:
