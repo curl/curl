@@ -49,6 +49,9 @@
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>	/* required for free() prototypes */
 #endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>     /* for the close() proto */
+#endif
 #ifdef	VMS
 #include <in.h>
 #include <inet.h>
