@@ -310,7 +310,7 @@ int Curl_read(struct connectdata *conn,
     do {
       nread = SSL_read(conn->ssl.handle, buf, buffersize);
 
-      if(nread > 0)
+      if(nread >= 0)
         /* successful read */
         break;
 
