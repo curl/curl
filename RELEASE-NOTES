@@ -10,6 +10,7 @@ Curl and libcurl 7.12.3
 
 This release includes the following changes:
 
+ o PKCS12 certificate support added
  o added CURLINFO_SSL_ENGINES (and "--engine list")
  o new configure options: --disable-cookies, --disable-crypto-auth and
    --disable-verbose
@@ -26,6 +27,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o curl -E on windows accepts "c:/path" with forward-slash
  o various improvements for large file support on windows
  o file handle leak in aborted multipart formpost file upload
  o -T upload multiple files with backslashes in file names
@@ -69,10 +71,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Peter Wullinger, Guillaume Arluison, Alexander Krasnostavsky, Mohun Biswas,
- Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia,
- Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips,
+ Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia, Tim
+ Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips,
  Wojciech Zwiefka, David Phillips, Reinout van Schouwen, Maurice Barnum,
  Richard Atterer, Rene Bernhardt, Matt Veenstra, Bryan Henderson, Ton Voon,
- Kai Sommerfeld, David Byron, Harshal Pradhan, Tom Lee, Dinar
+ Kai Sommerfeld, David Byron, Harshal Pradhan, Tom Lee, Dinar, Jean-Marc
+ Ranger, Samuel Listopad
 
         Thanks! (and sorry if I forgot to mention someone)

@@ -90,6 +90,16 @@
 #undef HAVE_ENGINE_LOAD_FOUR_ARGS
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x00903001L
+/* OpenSSL has PKCS 12 support */
+#define HAVE_PKCS12_SUPPORT
+#include <openssl/pkcs12.h>
+#else
+/* OpenSSL/SSLEay does not have PKCS12 support */
+#undef HAVE_PKCS12_SUPPORT
+#endif
+
+
 #if OPENSSL_VERSION_NUMBER >= 0x00906001L
 #define HAVE_ERR_ERROR_STRING_N 1
 #endif
@@ -234,6 +244,9 @@ int random_the_seed(struct SessionHandle *data)
 #ifndef SSL_FILETYPE_ENGINE
 #define SSL_FILETYPE_ENGINE 42
 #endif
+#ifndef SSL_FILETYPE_PKCS12
+#define SSL_FILETYPE_PKCS12 43
+#endif
 static int do_file_type(const char *type)
 {
   if(!type || !type[0])
@@ -244,6 +257,8 @@ static int do_file_type(const char *type)
     return SSL_FILETYPE_ASN1;
   if(curl_strequal(type, "ENG"))
     return SSL_FILETYPE_ENGINE;
+  if(curl_strequal(type, "P12"))
+    return SSL_FILETYPE_PKCS12;
   return -1;
 }
 
@@ -261,6 +276,7 @@ int cert_stuff(struct connectdata *conn,
   if(cert_file != NULL) {
     SSL *ssl;
     X509 *x509;
+    int cert_done = 0;
 
     if(data->set.key_passwd) {
 #ifndef HAVE_USERDATA_IN_PWD_CALLBACK
@@ -312,6 +328,56 @@ int cert_stuff(struct connectdata *conn,
       failf(data, "file type ENG for certificate not implemented");
       return 0;
 
+    case SSL_FILETYPE_PKCS12:
+    {
+#ifdef HAVE_PKCS12_SUPPORT
+      FILE *f;
+      PKCS12 *p12;
+      EVP_PKEY *pri;
+
+      f = fopen(cert_file,"rb");
+      if (!f) {
+        failf(data, "could not open PKCS12 file '%s'", cert_file);
+        return 0;
+      }
+      p12 = d2i_PKCS12_fp(f, NULL);
+      fclose(f);
+
+      PKCS12_PBE_add();
+
+      if (!PKCS12_parse(p12, data->set.key_passwd, &pri, &x509, NULL)) {
+        failf(data,
+              "could not parse PKCS12 file, check password, OpenSSL error %s",
+              ERR_error_string(ERR_get_error(), NULL) );
+        return 0;
+      }
+
+      PKCS12_free(p12);
+
+      if(SSL_CTX_use_certificate(ctx, x509) != 1) {
+        failf(data, SSL_CLIENT_CERT_ERR);
+        EVP_PKEY_free(pri);
+        X509_free(x509);
+        return 0;
+      }
+
+      if(SSL_CTX_use_PrivateKey(ctx, pri) != 1) {
+        failf(data, "unable to use private key from PKCS12 file '%s'",
+              cert_file);
+        EVP_PKEY_free(pri);
+        X509_free(x509);
+        return 0;
+      }
+
+      EVP_PKEY_free(pri);
+      X509_free(x509);
+      cert_done = 1;
+      break;
+#else
+      failf(data, "file type P12 for certificate not supported");
+      return 0;
+#endif
+    }
     default:
       failf(data, "not supported file type '%s' for certificate", cert_type);
       return 0;
@@ -321,6 +387,8 @@ int cert_stuff(struct connectdata *conn,
 
     switch(file_type) {
     case SSL_FILETYPE_PEM:
+      if(cert_done)
+        break;
       if(key_file == NULL)
         /* cert & key can only be in PEM case in the same file */
         key_file=cert_file;
@@ -371,6 +439,12 @@ int cert_stuff(struct connectdata *conn,
       failf(data, "file type ENG for private key not supported\n");
       return 0;
 #endif
+    case SSL_FILETYPE_PKCS12:
+      if(!cert_done) {
+	failf(data, "file type P12 for private key not supported\n");
+	return 0;
+      }
+      break;
     default:
       failf(data, "not supported file type for private key\n");
       return 0;

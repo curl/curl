@@ -7,6 +7,11 @@
                                   Changelog
 
 
+Daniel (18 December 2004)
+- Samuel Listopad added support for PKCS12 formatted certificates.
+
+- Samuel Listopad fixed -E to support "C:/path" (with forward slash) as well.
+  
 Daniel (16 December 2004)
 - Gisle found and fixed a problem in the directory re-use for FTP.
 
