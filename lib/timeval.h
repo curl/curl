@@ -32,7 +32,7 @@
 #endif
 
 #ifndef HAVE_GETTIMEOFDAY
-#if !defined(_WINSOCKAPI_) && !defined(__MINGW32__)
+#if !defined(_WINSOCKAPI_) && !defined(__MINGW32__) && !defined(_AMIGASF)
 struct timeval {
  long tv_sec;
  long tv_usec;

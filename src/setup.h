@@ -46,6 +46,9 @@
 #ifdef __riscos__
 #include "config-riscos.h"
 #endif
+#ifdef __amigaos__
+#include "config-amigaos.h"
+#endif
 #endif
 
 #ifdef CURLDEBUG

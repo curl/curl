@@ -1,4 +1,7 @@
 
+#ifndef LIBCURL_CONFIG_AMIGAOS_H
+#define LIBCURL_CONFIG_AMIGAOS_H
+
 #define HAVE_ARPA_INET_H 1
 #define HAVE_GETHOSTBYADDR 1
 #define HAVE_INET_ADDR 1
@@ -60,6 +63,7 @@
 #define PACKAGE_STRING "curl -"
 #define PACKAGE_TARNAME "curl"
 #define PACKAGE_VERSION "-"
+#define CURL_CA_BUNDLE "s:curl-ca-bundle.crt"
 
 #define RETSIGTYPE void
 #define SELECT_TYPE_ARG1 int
@@ -77,3 +81,4 @@
 # define O_RDONLY 0x0000
 #endif
 
+#endif /* LIBCURL_CONFIG_AMIGAOS_H */

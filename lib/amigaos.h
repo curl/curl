@@ -21,8 +21,8 @@
  * $Id$
  ***************************************************************************/
 
-#ifndef CURL_AMIGAOS_H
-#define CURL_AMIGAOS_H
+#ifndef LIBCURL_AMIGAOS_H
+#define LIBCURL_AMIGAOS_H
 
 #ifndef __ixemul__
 
@@ -34,12 +34,19 @@
 
 #include <bsdsocket.h>
 
-#define select(args...) WaitSelect( args, NULL)
+#include "config-amigaos.h"
+
+#define select(args...)	WaitSelect( args, NULL)
 #define inet_ntoa(x)	Inet_NtoA( x ## .s_addr)
+#define ioctl(a,b,c,d)	IoctlSocket( (LONG)a, (ULONG)b, (char*)c)
+#define _AMIGASF	1
+
+extern void amiga_cleanup();
+extern BOOL amiga_init();
 
 #else /* __ixemul__ */
 
 #warning compiling with ixemul...
 
 #endif /* __ixemul__ */
-#endif /* CURL_AMIGAOS_H */
+#endif /* LIBCURL_AMIGAOS_H */

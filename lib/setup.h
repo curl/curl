@@ -54,6 +54,9 @@
 /* hand-modified MacOS config.h! */
 #include "config-mac.h"
 #endif
+#ifdef AMIGA
+#include "amigaos.h"
+#endif
 
 #endif
 
@@ -202,6 +205,12 @@ defined(HAVE_LIBSSL) && defined(HAVE_LIBCRYPTO)
 
 #define HAVE_ALARM
 
+#endif
+
+#ifdef _AMIGASF
+#undef HAVE_ALARM
+#undef sclose
+#define sclose(x) CloseSocket(x)
 #endif
 
 #define DIR_CHAR      "/"
