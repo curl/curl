@@ -370,6 +370,11 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
              to the WAITCONNECT state */
           easy->result = Curl_async_resolved(easy->easy_conn);
 
+          if(CURLE_OK != easy->result)
+            /* if Curl_async_resolved() returns failure, the connection struct
+               is already freed and gone */
+            easy->easy_conn = NULL;           /* no more connection */
+
           easy->state = CURLM_STATE_WAITCONNECT;
         }
         
