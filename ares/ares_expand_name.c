@@ -54,7 +54,7 @@ static int name_length(const unsigned char *encoded, const unsigned char *abuf,
  */
 
 int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
-		     int alen, char **s, int *enclen)
+		     int alen, char **s, long *enclen)
 {
   int len, indir = 0;
   char *q;

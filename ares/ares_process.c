@@ -525,7 +525,7 @@ static int same_questions(const unsigned char *qbuf, int qlen,
     const unsigned char *p;
     int qdcount;
     char *name;
-    int namelen;
+    long namelen;
     int type;
     int dnsclass;
   } q, a;

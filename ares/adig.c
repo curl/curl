@@ -370,7 +370,8 @@ static const unsigned char *display_question(const unsigned char *aptr,
 					     int alen)
 {
   char *name;
-  int type, dnsclass, status, len;
+  int type, dnsclass, status;
+  long len;
 
   /* Parse the question name. */
   status = ares_expand_name(aptr, abuf, alen, &name, &len);
@@ -408,7 +409,8 @@ static const unsigned char *display_rr(const unsigned char *aptr,
 {
   const unsigned char *p;
   char *name;
-  int type, dnsclass, ttl, dlen, status, len;
+  int type, dnsclass, ttl, dlen, status;
+  long len;
   struct in_addr addr;
 
   /* Parse the RR name. */

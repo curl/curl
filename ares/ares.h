@@ -117,7 +117,7 @@ void ares_process(ares_channel channel, fd_set *read_fds, fd_set *write_fds);
 int ares_mkquery(const char *name, int dnsclass, int type, unsigned short id,
 		 int rd, unsigned char **buf, int *buflen);
 int ares_expand_name(const unsigned char *encoded, const unsigned char *abuf,
-		     int alen, char **s, int *enclen);
+		     int alen, char **s, long *enclen);
 int ares_parse_a_reply(const unsigned char *abuf, int alen,
 		       struct hostent **host);
 int ares_parse_ptr_reply(const unsigned char *abuf, int alen, const void *addr,
