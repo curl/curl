@@ -20,6 +20,7 @@ acconfig.h
 aclocal.m4
 config.guess
 config.h.in
+config-win32.h
 config.sub
 configure
 configure.in
