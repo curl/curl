@@ -2,4 +2,4 @@
 .deps
 Makefile
 Makefile.in
-lib50[0-9]
+lib5[0-9][0-9]
