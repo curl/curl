@@ -1,0 +1,39 @@
+# Server-side
+<reply>
+<data>
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+ <name>
+FTP NLST dir list without contents, using PORT
+ </name>
+ <command>
+ftp://%HOSTIP:%FTPPORT/ -P - -l
+</command>
+<file name="log/ftpserver.cmd">
+REPLY NLST 450 No files found
+</file>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+# strip all kinds of PORT, EPRT and LPRT curl can do
+<strip>
+^PORT 127,0,0,1,.*
+^EPRT.*
+^LPRT.*
+</strip>
+<protocol>
+USER anonymous
+PASS curl_by_daniel@haxx.se
+PWD
+PORT 127,0,0,1,243,212
+TYPE A
+NLST
+</protocol>
+</verify>
