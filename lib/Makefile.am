@@ -30,7 +30,7 @@ EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	\
   ca-bundle.crt README.encoding README.memoryleak README.ares		\
   README.curlx makefile.dj config.dj libcurl.framework.make		\
   libcurl.plist libcurl.rc config-amigaos.h amigaos.c amigaos.h		\
-  makefile.amiga config-netware.h Makefile.netware nwlib.c libcurl.imp	\
+  makefile.amiga Makefile.netware nwlib.c libcurl.imp	\
   msvcproj.head msvcproj.foot
 
 CLEANFILES = $(DSP) getdate.c
