@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (26 July 2004)
+- Made "curl [URL] -o name#2" work as expected. If there's no globbing for the
+  #-number, it will simply be used as #2 in the file name.
+
 Daniel (24 July 2004)
 - I fixed the autobuilds with ares, since they now need to have buildconf run
   in the ares dir before the configure script is run.
