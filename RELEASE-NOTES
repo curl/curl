@@ -12,7 +12,7 @@ This release includes the following changes:
 
  o Added --form-string
  o libcurl can be built with SSPI support. curl_version_info() then returns
-   a new feature bit: CURL_VERSION_SSPI
+   a new feature bit: CURL_VERSION_SSPI. configure --enable-sspi added
 
 This release includes the following bugfixes:
 
@@ -32,6 +32,6 @@ advice from friends like these:
 
  Dan Fandrich, Ignacio Vazquez-Abrams, Randy McMurchy, Dominick Meglio,
  Jean-Marc Ranger, Tor Arntsen, Nodak Sodak, David Houlder, Gisle Vanem,
- Christopher R. Palmer
+ Christopher R. Palmer, Gwenole Beauchesne
 
         Thanks! (and sorry if I forgot to mention someone)

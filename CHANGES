@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel (14 March 2005)
+- Removed the lib/security.h file since it shadowed the mingw/win32 header
+  with the same name which is needed for SSPI builds. The contents of the
+  former security.h is now i krb4.h
+
+- configure --enable-sspi now enables SSPI in the build. It only works for
+  windows builds (including cross-compiles for windows).
+
 Daniel (12 March 2005)
 - David Houlder added --form-string that adds that string to a multipart
   formpost part, without special characters having special meanings etc like
@@ -33,7 +41,8 @@ Daniel (9 March 2005)
   year 2038. For 32 bit time_t it returns 0x7fffffff but for 64bit time_t it
   returns either the correct value or even -1 on some systems that still seem
   to not deal with this properly. Tor Arntsen found a 64bit AIX system for us
-  that did the latter.
+  that did the latter. Gwenole Beauchesne's Mandrake patch put the lights on
+  this problem in the first place.
 
 Daniel (8 March 2005)
 - Dominick Meglio reported that using CURLOPT_FILETIME when transferring a FTP
