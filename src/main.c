@@ -109,7 +109,9 @@ typedef enum {
 #define CONF_FOLLOWLOCATION (1<<23) /* use Location: Luke! */
 #define CONF_GETTEXT  (1<<24) /* use ASCII/text for transfer */
 #define CONF_HTTPPOST (1<<25) /* multipart/form-data HTTP POST */
+#if 0
 #define CONF_PUT      (1<<27) /* PUT the input file */
+#endif
 #define CONF_MUTE     (1<<28) /* force NOPROGRESS */
 
 #ifndef HAVE_STRDUP
@@ -1749,7 +1751,9 @@ operate(struct Configurable *config, int argc, char *argv[])
         curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,
                          config->conf&CONF_FOLLOWLOCATION);
         curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config->conf&CONF_GETTEXT);
+#if 0
         curl_easy_setopt(curl, CURLOPT_PUT, config->conf&CONF_PUT);
+#endif
         curl_easy_setopt(curl, CURLOPT_MUTE, config->conf&CONF_MUTE);
         curl_easy_setopt(curl, CURLOPT_USERPWD, config->userpwd);
         curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
