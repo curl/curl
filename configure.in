@@ -298,13 +298,12 @@ char * address;
 int length;
 int type;
 struct hostent h;
-char buffer[10];
-int buflen;
+char buffer[8192];
 int h_errnop;
 struct hostent * hp;
 
 hp = gethostbyaddr_r(address, length, type, &h,
-                     buffer, buflen, &h_errnop);],[
+                     buffer, 8192, &h_errnop);],[
 	  AC_MSG_RESULT(yes)
 	  AC_DEFINE(HAVE_GETHOSTBYADDR_R_7)
 	  ac_cv_gethostbyaddr_args=7],[
@@ -317,14 +316,13 @@ char * address;
 int length;
 int type;
 struct hostent h;
-char buffer[10];
-int buflen;
+char buffer[8192];
 int h_errnop;
 struct hostent * hp;
 int rc;
 
 rc = gethostbyaddr_r(address, length, type, &h,
-                     buffer, buflen, &hp, &h_errnop);],[
+                     buffer, 8192, &hp, &h_errnop);],[
 	    AC_MSG_RESULT(yes)
 	    AC_DEFINE(HAVE_GETHOSTBYADDR_R_8)
 	    ac_cv_gethostbyaddr_args=8],[
