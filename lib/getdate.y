@@ -742,10 +742,10 @@ ToYear (int Year)
 static int
 LookupWord (YYSTYPE *yylval, char *buff)
 {
-  register char *p;
-  register char *q;
-  register const TABLE *tp;
-  int i;
+  char *p;
+  char *q;
+  const TABLE *tp;
+  size_t i;
   int abbrev;
 
   /* Make it lowercase. */
