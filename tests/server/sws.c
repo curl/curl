@@ -604,7 +604,7 @@ int main(int argc, char *argv[])
       if(open)
         logmsg("persistant connection, awaits new request");
       /* if we got a CONNECT, loop and get another request as well! */
-    } while(open);
+    } while(open || (doc == DOCNUMBER_CONNECT));
 
     logmsg("Closing client connection");
     close(msgsock);
