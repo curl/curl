@@ -154,7 +154,7 @@ void Curl_failf(struct SessionHandle *data, const char *fmt, ...)
     if(data->set.verbose) {
       int len = strlen(data->set.errorbuffer);
       bool doneit=FALSE;
-      if(len < CURL_ERROR_SIZE) {
+      if(len < CURL_ERROR_SIZE - 1) {
         doneit = TRUE;
         data->set.errorbuffer[len] = '\n';
         data->set.errorbuffer[++len] = '\0';
