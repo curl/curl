@@ -30,8 +30,10 @@ ssl:
 	make
 
 borland:
-	cd lib & make -f Makefile.b32
-	cd src & make -f Makefile.b32
+	cd lib
+	make -f Makefile.b32
+	cd ..\src
+	make -f Makefile.b32
 
 mingw32:
 	cd lib & make -f Makefile.m32 ZLIB=1
