@@ -256,4 +256,14 @@ typedef struct in_addr Curl_ipconnect;
 #define IOCTL_3_ARGS
 #endif
 
+#ifndef ECONNRESET
+#ifdef WSAECONNRESET
+#define ECONNRESET WSAECONNRESET
+#else
+/* This will effectively prevent the code from working in this particular
+   aspect, but it still compile fine! */
+#define ECONNRESET 10000
+#endif
+#endif
+
 #endif /* __CONFIG_H */

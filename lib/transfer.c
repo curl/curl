@@ -1896,12 +1896,26 @@ CURLcode Curl_perform(struct SessionHandle *data)
 
       if(res == CURLE_OK) {
         res = Transfer(conn); /* now fetch that URL please */
-        if(res == CURLE_OK)
-          /*
-           * We must duplicate the new URL here as the connection data
-           * may be free()ed in the Curl_done() function.
-           */
-          newurl = conn->newurl?strdup(conn->newurl):NULL;
+        if(res == CURLE_OK) {
+
+          if((conn->keep.bytecount == 0) &&
+             (conn->sockerror == ECONNRESET) &&
+             conn->bits.reuse) {
+            /* We got no data, the connection was reset and we did attempt
+               to re-use a connection. This smells like we were too fast to
+               re-use a connection that was closed when we wanted to read
+               from it. Bad luck. Let's simulate a redirect to the same URL
+               to retry! */
+            infof(data, "Connection reset, retrying a fresh connect\n");
+            newurl = strdup(conn->data->change.url);
+          }
+          else
+            /*
+             * We must duplicate the new URL here as the connection data
+             * may be free()ed in the Curl_done() function.
+             */
+            newurl = conn->newurl?strdup(conn->newurl):NULL;
+        }
         else {
           /* The transfer phase returned error, we mark the connection to get
            * closed to prevent being re-used. This is becasue we can't

@@ -563,6 +563,8 @@ struct connectdata {
                                single requests! */
   struct ntlmdata proxyntlm; /* NTLM data for proxy */
 
+  int sockerror; /* errno stored by Curl_read() if the underlying layer returns
+                    error */
 #ifdef USE_ARES
   /* data used for the asynch name resolve callback */
   struct Curl_async async;
