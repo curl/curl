@@ -1,4 +1,4 @@
-Updated: August 7, 2001 (http://curl.haxx.se/docs/faq.shtml)
+Updated: August 23, 2001 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -467,9 +467,9 @@ FAQ
   4.6. Can you tell me what error code 142 means?
 
   All error codes that are larger than the highest documented error code means
-  that curl has existed due to a timeout. There was no nice way for curl to
-  abort from such a condition and that's why it got this undocumented
-  error. This should not occur in releases after 7.4.1.
+  that curl has exited due to a crash. This is a serious error, and we
+  appriciate a detailed bug report from you that describes how we could go
+  ahead and repeat this!
 
   4.7. How do I keep user names and passwords secret in Curl command lines?
 
