@@ -392,7 +392,7 @@ UrgError curl_urlget(UrgTag tag, ...)
         data->postfields = (char *)param_obj;
         break;
       case URGTAG_PROGRESSMODE:
-        data->progressmode = (long)param_long;
+        data->progress.mode = (long)param_long;
         break;
       case URGTAG_REFERER:
         data->referer = (char *)param_obj;
@@ -455,6 +455,8 @@ UrgError curl_urlget(UrgTag tag, ...)
     }
 
     va_end(arg);
+
+    pgrsMode(data, data->progress.mode);
 
     data-> headerbuff=(char*)malloc(HEADERSIZE);
     if(!data->headerbuff)
