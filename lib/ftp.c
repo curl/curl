@@ -391,6 +391,9 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   if(ftpcode)
     *ftpcode=code; /* return the initial number like this */
 
+  /* store the latest code for later retrieval */
+  conn->data->info.httpcode=code;
+
   return result;
 }
 

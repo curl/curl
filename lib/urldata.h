@@ -565,7 +565,7 @@ struct connectdata {
  * Struct to keep statistical and informational data.
  */
 struct PureInfo {
-  int httpcode;
+  int httpcode;  /* Recent HTTP or FTP response code */
   int httpproxycode;
   int httpversion;
   long filetime; /* If requested, this is might get set. Set to -1 if the time
