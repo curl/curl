@@ -61,20 +61,8 @@
 #define OS "unknown"
 #endif
 
-#ifdef HAVE_STRCASECMP
-#define strnequal(x,y,z) !(strncasecmp)(x,y,z)
-#define strequal(x,y) !(strcasecmp)(x,y)
-
-/* this is for "-ansi -Wall -pedantic" to stop complaining! */
-extern int (strcasecmp)(const char *s1, const char *s2);
-extern int (strncasecmp)(const char *s1, const char *s2, size_t n);
 #ifndef fileno /* sunos 4 have this as a macro! */
 int fileno( FILE *stream);
-#endif
-
-#else
-#define strnequal(x,y,z) !strnicmp(x,y,z)
-#define strequal(x,y) !stricmp(x,y)
 #endif
 
 #ifdef WIN32
