@@ -231,6 +231,11 @@ CURLcode Curl_open(CURL **curl, char *url)
 
     data->httpreq = HTTPREQ_GET; /* Default HTTP request */
 
+    /* make libcurl quiet by default: */
+    data->bits.mute = TRUE; /* CURLOPT_MUTE changes this */
+    data->bits.hide_progress = TRUE;  /* CURLOPT_NOPROGRESS changes these */
+    data->progress.flags |= PGRS_HIDE;
+
     /* create an array with connection data struct pointers */
     data->numconnects = 5; /* hard-coded right now */
     data->connects = (struct connectdata **)
@@ -363,6 +368,8 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
     data->bits.hide_progress = va_arg(param, long)?TRUE:FALSE;
     if(data->bits.hide_progress)
       data->progress.flags |= PGRS_HIDE;
+    else
+      data->progress.flags &= ~PGRS_HIDE;
     break;
   case CURLOPT_NOBODY:
     /*
