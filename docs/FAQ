@@ -823,12 +823,12 @@ FAQ
   add -DCURL_STATICLIB to your CFLAGS. Otherwise the linker will look for
   dynamic import symbols. If you get linker error like "unknown symbol
   __imp__curl_easy_init ..." you have linked against the wrong (static)
-  library.  If you want to use the curl.dll and import lib, you don't need any
-  extra CFLAGS, but use one of the import libraries below. These are the
+  library.  If you want to use the libcurl.dll and import lib, you don't need
+  any extra CFLAGS, but use one of the import libraries below. These are the
   libraries produced by the various lib/Makefile.* files:
 
-  Target:          static lib.   import lib for curl*.dll.
-  --------------------------------------------------------
+  Target:          static lib.   import lib for libcurl*.dll.
+  -----------------------------------------------------------
   MingW:           libcurl.a     libcurldll.a
   MSVC (release):  libcurl.lib   libcurl_imp.lib
   MSVC (debug):    libcurld.lib  libcurld_imp.lib
