@@ -547,8 +547,8 @@ CURLcode Curl_output_ntlm(struct connectdata *conn,
     }
 #endif
 
-    ntlmbuf[56] = size & 0xff;
-    ntlmbuf[57] = size >> 8;
+    ntlmbuf[56] = (unsigned char)(size & 0xff);
+    ntlmbuf[57] = (unsigned char)(size >> 8);
 
     /* convert the binary blob into base64 */
     size = Curl_base64_encode((char *)ntlmbuf, size, &base64);
