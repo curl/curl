@@ -136,35 +136,45 @@ sub checkserver {
 sub runhttpserver {
     my $verbose = $_[0];
     my $RUNNING;
+    my $pid;
 
-    my $pid = checkserver($HTTPPIDFILE );
+    # verify if our/any server is running on this port
+    my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver`;
 
-    if ($pid <= 0) {
-        my $flag=$debugprotocol?"-v ":"";
-        my $cmd="$perl $srcdir/httpserver.pl $flag $HOSTPORT &";
-        system($cmd);
+    if ( $data =~ /WE ROOLZ(: |)(\d*)/ ) {
+        $pid = 0+$2;
         if($verbose) {
-            print "CMD: $cmd\n";
+            print "Test server already running with pid $pid, killing it...\n";
         }
+    }
+    elsif($data ne "") {
+        print "An alien HTTP server is running on port $HOSTPORT\n",
+        "Edit runtests.pl to use another port and rerun the test script\n";
+        exit;
     }
     else {
-        if($pid > 0) {
-            print "httpd ($pid) runs\n";
-        }
-
-        # verify that our server is one one running on this port:
-        my $data=`$CURL --silent -i $HOSTIP:$HOSTPORT/verifiedserver`;
-
-        if ( $data !~ /WE ROOLZ/ ) {
-            print "Another HTTP server is running on port $HOSTPORT\n",
-            "Edit runtests.pl to use another port and rerun the test script\n";
-            exit;
-        }
-
         if($verbose) {
-            print "The running HTTP server has been verified to be our server\n";
+            print "No server running, start it\n";
         }
     }
+
+    if($pid) {
+        my $res = kill (9, $pid); # die!
+        if(!$res) {
+            print "Failed to kill our HTTP test server, do it manually and",
+            " restart the tests.\n";
+            exit;
+        }
+        sleep(2);
+    }
+
+    my $flag=$debugprotocol?"-v ":"";
+    my $cmd="$perl $srcdir/httpserver.pl $flag $HOSTPORT &";
+    system($cmd);
+    if($verbose) {
+        print "CMD: $cmd\n";
+    }
+
 }
 
 #######################################################################

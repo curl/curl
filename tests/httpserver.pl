@@ -3,7 +3,7 @@ use Socket;
 use Carp;
 use FileHandle;
 
-use strict;
+#use strict;
 
 require "getpart.pm";
 
@@ -119,7 +119,7 @@ for ( $waitedpid = 0;
         elsif($path =~ /verifiedserver/) {
             # this is a hard-coded query-string for the test script
             # to verify that this is the server actually running!
-            print "HTTP/1.1 999 WE ROOLZ\r\n";
+            print "HTTP/1.1 999 WE ROOLZ: $$\r\n";
             exit;
         }
         else {
