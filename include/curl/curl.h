@@ -67,12 +67,6 @@
 
 #include <curl/types.h>
 
-
-struct HttpHeader {
-  struct HttpHeader *next; /* next entry in the list */
-  char *header; /* pointer to allocated line without newline */
-};
-
 struct HttpPost {
   struct HttpPost *next; /* next entry in the list */
   char *name;     /* pointer to allocated name */
@@ -83,6 +77,22 @@ struct HttpPost {
   long flags;     /* as defined below */
 #define HTTPPOST_FILENAME (1<<0) /* specified content is a file name */
 };
+
+typedef int (*curl_progress_callback)(void *clientp,
+                                      size_t dltotal,
+                                      size_t dlnow,
+                                      size_t ultotal,
+                                      size_t ulnow);
+
+typedef size_t (*curl_write_callback)(char *buffer,
+                                      size_t size,
+                                      size_t nitems,
+                                      FILE *outstream);
+
+typedef size_t (*curl_read_callback)(char *buffer,
+                                     size_t size,
+                                     size_t nitems,
+                                     FILE *instream);
 
 /* All possible error codes from this version of urlget(). Future versions
    may return other values, stay prepared. */
@@ -339,6 +349,13 @@ typedef enum {
   T(PUT, LONG, 54),          /* PUT the input file */
   T(MUTE, LONG, 55),         /* force NOPROGRESS */
 
+  /* Function that will be called instead of the internal progress display
+   * function. This function should be defined as the curl_progress_callback
+   * prototype defines. */
+  T(PROGRESSFUNCTION, FUNCTIONPOINT, 56),
+
+  T(PROGRESSDATA, OBJECTPOINT, 57),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
@@ -370,19 +387,20 @@ UrgError curl_urlget(UrgTag, ...);
 #endif
 
 /* external form function */
-int curl_FormParse(char *string,
+int curl_formparse(char *string,
                    struct HttpPost **httppost,
                    struct HttpPost **last_post);
 
-/* Unix and Win32 getenv function call */
-char *curl_GetEnv(char *variable);
+/* Unix and Win32 getenv function call, this returns a malloc()'ed string that
+   MUST be free()ed after usage is complete. */
+char *curl_getenv(char *variable);
 
 /* returns ascii string of the libcurl version */
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.0.1beta"
-#define LIBCURL_VERSION_NUM 0x070001
+#define LIBCURL_VERSION "7.0.4beta"
+#define LIBCURL_VERSION_NUM 0x070004
 
 /* linked-list structure for the CURLOPT_QUOTE option */
 struct curl_slist {
