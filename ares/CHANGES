@@ -1,5 +1,8 @@
   Changelog for the c-ares project
 
+* June 8
+- James Bursa fixed an init issue for RISC OS.
+
 * May 11
 - Nico Stappenbelt reported that when processing domain and search lines in
   the resolv.conf file, the first entry encountered is processed and used as
