@@ -926,11 +926,8 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
 {
   struct hostent *h = NULL;
   in_addr_t in;
-  int ret; /* this variable is unused on several platforms but used on some */
   struct SessionHandle *data = conn->data;
-
   (void)port; /* unused in IPv4 code */
-  ret = 0; /* to prevent the compiler warning */
 
   *waitp = 0; /* don't wait, we act synchronously */
 
@@ -1067,7 +1064,7 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
     else
 #endif/* HAVE_GETHOSTBYNAME_R_6 */
 #ifdef HAVE_GETHOSTBYNAME_R_3
-    /* AIX, Digital Unix, HPUX 10, more? */
+    /* AIX, Digital Unix/Tru64, HPUX 10, more? */
 
     /* For AIX 4.3 or later, we don't use gethostbyname_r() at all, because of
        the plain fact that it does not return unique full buffers on each
@@ -1083,23 +1080,34 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
        Troels Walsted Hansen helped us work this out on March 3rd, 2003. */
 
     if(CURL_NAMELOOKUP_SIZE >=
-       (sizeof(struct hostent)+sizeof(struct hostent_data)))
+       (sizeof(struct hostent)+sizeof(struct hostent_data))) {
 
       /* August 22nd, 2000: Albert Chin-A-Young brought an updated version
        * that should work! September 20: Richard Prescott worked on the buffer
        * size dilemma. */
 
-      ret = gethostbyname_r(hostname,
+      res = gethostbyname_r(hostname,
                             (struct hostent *)buf,
                             (struct hostent_data *)((char *)buf +
                                                     sizeof(struct hostent)));
+      h_errnop= errno; /* we don't deal with this, but set it anyway */
+    }
     else
-      ret = -1; /* failure, too smallish buffer size */
-    
-    /* result expected in h */
-    h = (struct hostent*)buf;
-    h_errnop= errno; /* we don't deal with this, but set it anyway */
-    if(ret)
+      res = -1; /* failure, too smallish buffer size */
+
+    if(!res) { /* success */
+
+      h = (struct hostent*)buf; /* result expected in h */
+
+      /* This is the worst kind of the different gethostbyname_r() interfaces.
+         Since we don't know how big buffer this particular lookup required,
+         we can't realloc down the huge alloc without doing closer analysis of
+         the returned data. Thus, we always use CURL_NAMELOOKUP_SIZE for every
+         name lookup. Fixing this would require an extra malloc() and then
+         calling pack_hostent() that subsequent realloc()s down the new memory
+         area to the actually used amount. */
+    }    
+    else
 #endif /* HAVE_GETHOSTBYNAME_R_3 */
       {
       infof(data, "gethostbyname_r(2) failed for %s\n", hostname);
@@ -1108,21 +1116,20 @@ static Curl_addrinfo *my_getaddrinfo(struct connectdata *conn,
     }
 #else /* HAVE_GETHOSTBYNAME_R */
   else {
-    if ((h = gethostbyname(hostname)) == NULL ) {
+    h = gethostbyname(hostname);
+    if (!h)
       infof(data, "gethostbyname(2) failed for %s\n", hostname);
-    }
-    else 
-    {
+    else {
       char *buf=(char *)malloc(CURL_NAMELOOKUP_SIZE);
-      /* we make a copy of the hostent right now, right here, as the
-         static one we got a pointer to might get removed when we don't
-         want/expect that */
+      /* we make a copy of the hostent right now, right here, as the static
+         one we got a pointer to might get removed when we don't want/expect
+         that */
       h = pack_hostent(&buf, h);
     }
 #endif /*HAVE_GETHOSTBYNAME_R */
   }
 
-  return (h);
+  return h;
 }
 
 #endif /* end of IPv4-specific code */
