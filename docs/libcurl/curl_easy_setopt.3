@@ -276,8 +276,8 @@ considerable time and limiting operations to less than a few minutes risk
 aborting perfectly normal operations. This option will cause curl to use the
 SIGALRM to enable time-outing system calls.
 
-\fBNOTE:\fP this does not work in Unix multi-threaded programs, as it uses
-signals.
+\fBNOTE:\fP this is not recommended to use in unix multi-threaded programs, as
+it uses signals unless CURLOPT_NOSIGNAL (see below) is set.
 .TP
 .B CURLOPT_POSTFIELDS
 Pass a char * as parameter, which should be the full data to post in a HTTP
@@ -625,8 +625,8 @@ it has connected, this option is of no more use. Set to zero to disable
 connection timeout (it will then only timeout on the system's internal
 timeouts). See also the \fICURLOPT_TIMEOUT\fP option.
 
-\fBNOTE:\fP this does not work in unix multi-threaded programs, as it uses
-signals.
+\fBNOTE:\fP this is not recommended to use in unix multi-threaded programs, as
+it uses signals unless CURLOPT_NOSIGNAL (see below) is set.
 .TP
 .B CURLOPT_HTTPGET
 Pass a long. If the long is non-zero, this forces the HTTP request to get back
