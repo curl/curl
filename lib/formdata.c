@@ -1065,6 +1065,9 @@ struct FormData *Curl_getFormData(struct HttpPost *post,
   
   do {
 
+    if(size)
+      size += AddFormDataf(&form, "\r\n");
+
     /* boundary */
     size += AddFormDataf(&form, "--%s\r\n", boundary);
 
