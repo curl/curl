@@ -1167,6 +1167,12 @@ CURLcode ftp_use_port(struct connectdata *conn)
   
   portsock = -1;
   for (ai = res; ai; ai = ai->ai_next) {
+    /*
+     * Workaround for AIX5 getaddrinfo() problem (it doesn't set ai_socktype):
+     */
+    if (ai->ai_socktype == 0)
+      ai->ai_socktype = hints.ai_socktype;
+
     portsock = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
     if (portsock < 0)
       continue;
