@@ -477,20 +477,24 @@ sub runhttpsserver {
     if($verbose) {
         print "CMD: $cmd\n";
     }
-    sleep(1);
 
     for(1 .. 30) {
-        $pid=checkserver($HTTPSPIDFILE);
-
-        if($pid <= 0) {
-            if($verbose) {
-                print STDERR "RUN: waiting one sec for HTTPS server\n";
-            }
-            sleep(1);
+        # verify that our HTTPS server is up and running:
+        $cmd="$CURL --silent --insecure \"https://$HOSTIP:$HTTPSPORT/verifiedserver\" 2>/dev/null";
+        if($verbose) {
+            print "CMD: $cmd\n";
         }
-        else {
+
+        my $data=`$cmd`;
+
+        if ( $data =~ /WE ROOLZ: (\d+)/ ) {
+            $pid = 0+$1;
             last;
         }
+        if($verbose) {
+            print STDERR "RUN: waiting one sec for HTTPS server\n";
+        }
+        sleep(1);
     }
 
     return $pid;
