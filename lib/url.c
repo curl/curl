@@ -183,6 +183,9 @@ CURLcode Curl_close(struct SessionHandle *data)
   if (data->share)
     data->share->dirty--;
 
+  if(data->change.cookielist) /* clean up list if any */
+    curl_slist_free_all(data->change.cookielist);
+
   if(data->state.auth_host)
     free(data->state.auth_host);
 
@@ -552,8 +555,10 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     cookiefile = (char *)va_arg(param, void *);
     if(cookiefile)
-      data->cookies = Curl_cookie_init(cookiefile, data->cookies,
-                                       data->set.cookiesession);
+      /* append the cookie file name to the list of file names, and deal with
+         them later */
+      data->change.cookielist =
+        curl_slist_append(data->change.cookielist, cookiefile);
     break;
 
   case CURLOPT_COOKIEJAR:

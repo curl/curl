@@ -582,6 +582,8 @@ struct DynamicStatic {
   bool proxy_alloc; /* http proxy string is malloc()'ed */
   char *referer;    /* referer string */
   bool referer_alloc; /* referer sting is malloc()ed */
+  struct curl_slist *cookielist; /* list of cookie files set by
+                                    curl_easy_setopt(COOKIEFILE) calls */
 };
 
 /*
