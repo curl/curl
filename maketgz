@@ -61,7 +61,8 @@ findprog()
 # Enforce a rerun of configure (updates the VERSION)
 #
 
-./config.status --recheck
+echo "Re-running config.status"
+./config.status --recheck >/dev/null
 
 ############################################################################
 #
@@ -73,7 +74,7 @@ if { findprog automake >/dev/null 2>/dev/null; } then
   echo "- Could not find or run automake, I hope you know what you're doing!"
 else
   echo "Runs automake --include-deps"
-  automake --include-deps Makefile
+  automake --include-deps Makefile >/dev/null
 fi
 
 ############################################################################
@@ -84,7 +85,44 @@ make html
 
 ############################################################################
 #
-# Now run make dist
+# Now run make dist to generate a tar.gz archive
 #
 
+targz="curl-$version.tar.gz"
 make dist
+
+############################################################################
+#
+# Now make a bz2 archive from the tar.gz original
+#
+
+bzip2="curl-$version.tar.bz2"
+echo "Generating $bzip2"
+gzip -dc $targz | bzip2 - > $bzip2
+
+############################################################################
+#
+# Now make a zip archive from the tar.gz original
+#
+makezip ()
+{
+  rm -rf $tempdir
+  mkdir $tempdir
+  cd $tempdir
+  gzip -dc ../$targz | tar -xf -
+  find . | zip $zip -@ >/dev/null
+  mv $zip ../
+  cd ..
+  rm -rf $tempdir
+}
+
+zip="curl-$version.zip"
+echo "Generating $zip"
+tempdir=".builddir"
+makezip
+
+echo "------------------"
+echo "maketgz report:"
+echo ""
+ls -l $targz $bzip2 $zip
+
