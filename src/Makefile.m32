@@ -32,7 +32,7 @@ CFLAGS = -g -O2 -DMINGW32
 ifdef SSL
   CFLAGS += -DUSE_SSLEAY -DHAVE_OPENSSL_ENGINE_H
 endif
-LDFLAGS = 
+LDFLAGS =
 COMPILE = $(CC) $(INCLUDES) $(CFLAGS)
 LINK = $(CC) $(CFLAGS) $(LDFLAGS) -o $@
 
@@ -43,6 +43,7 @@ ifdef DYN
 else
   curl_DEPENDENCIES = ../lib/libcurl.a
   curl_LDADD = -L../lib -lcurl
+  COMPILE += -DCURL_STATICLIB
 endif
 curl_LDADD += -lwsock32 -lws2_32 -lwinmm -L$(ZLIB_PATH) -lz
 ifdef SSL
@@ -52,7 +53,7 @@ endif
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
-curl_OBJECTS := $(patsubst %.c,%.o,$(strip $(CURL_SOURCES)))
+curl_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURL_SOURCES) ../lib/timeval.c)))
 # curlx_OBJECTS := $(patsubst %.c,%.o,$(notdir $(strip $(CURLX_ONES))))
 # vpath %.c ../lib
 
@@ -63,6 +64,9 @@ curl.exe: $(curl_OBJECTS) $(curl_DEPENDENCIES)
 	$(RM) $@
 	$(LINK) $(curl_OBJECTS) $(curl_LDADD)
 	$(STRIP) $@
+
+timeval.o: ../lib/timeval.c
+	$(COMPILE) -c $<
 
 # We don't have nroff normally under win32
 # hugehelp.c: ../README.curl ../curl.1 mkhelp.pl
