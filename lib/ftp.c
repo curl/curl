@@ -2114,7 +2114,7 @@ CURLcode ftp_perform(struct connectdata *conn,
   else {
     /* We have chosen (this is default) to use the PASV command */
     result = ftp_use_pasv(conn, connected);
-    if(connected)
+    if(!result && *connected)
       infof(data, "Connected the data stream with PASV!\n");
   }
   
