@@ -38,9 +38,12 @@
 #include <time.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/wait.h>
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
+#endif
 #ifdef _XOPEN_SOURCE_EXTENDED
 /* This define is "almost" required to build on HPUX 11 */
 #include <arpa/inet.h> 
@@ -56,7 +59,35 @@
 #define TRUE 1
 #endif
 
-int ProcessRequest(char *request);
+#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+#include <windows.h>
+#include <winsock2.h>
+#define EINPROGRESS  WSAEINPROGRESS
+#define EWOULDBLOCK  WSAEWOULDBLOCK
+#define EISCONN      WSAEISCONN
+#define ENOTSOCK     WSAENOTSOCK
+#define ECONNREFUSED WSAECONNREFUSED
+#endif
+
+#define REQBUFSIZ 150000
+#define REQBUFSIZ_TXT "149999"
+
+struct httprequest {
+  char reqbuf[REQBUFSIZ]; /* buffer area for the incoming request */
+  int offset;     /* size of the incoming request */
+  int testno;     /* test number found in the request */
+  int partno;     /* part number found in the request */
+  int open;       /* keep connection open info, as found in the request */
+  bool auth_req;  /* authentication required, don't wait for body unless
+                     there's an Authorization header */
+
+  bool auth;      /* Authorization header present in the incoming request */
+  size_t cl;      /* Content-Length of the incoming request */
+  bool digest;    /* Authorization digest header found */
+  bool ntlm;      /* Authorization ntlm header found */
+};
+
+int ProcessRequest(struct httprequest *req);
 void storerequest(char *reqbuf);
 
 #define DEFAULT_PORT 8999
@@ -72,10 +103,19 @@ void storerequest(char *reqbuf);
 
 #define TEST_DATA_PATH "%s/data/test%d"
 
+/* very-big-path support */
+#define MAXDOCNAMELEN 140000
+#define MAXDOCNAMELEN_TXT "139999"
+
+#define REQUEST_KEYWORD_SIZE 256
+
+#define CMD_AUTH_REQUIRED "auth_required"
+
 /* global variable, where to find the 'data' dir */
 const char *path=".";
 
 enum {
+  DOCNUMBER_NOTHING = -7,
   DOCNUMBER_QUIT    = -6,
   DOCNUMBER_BADCONNECT = -5,
   DOCNUMBER_INTERNAL= -4,
@@ -114,32 +154,31 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\n"
     "The requested URL was not found on this server.\n"
     "<P><HR><ADDRESS>" SWSVERSION "</ADDRESS>\n" "</BODY></HTML>\n";
 
-#ifdef HAVE_SIGNAL
+#ifdef SIGPIPE
 static volatile int sigpipe;
 #endif
 static FILE *logfp;
-
 
 static void logmsg(const char *msg, ...)
 {
   time_t t = time(NULL);
   va_list ap;
   struct tm *curr_time = localtime(&t);
-  char loctime[80];
   char buffer[256]; /* possible overflow if you pass in a huge string */
    
   va_start(ap, msg);
   vsprintf(buffer, msg, ap);
   va_end(ap);
 
-  strcpy(loctime, asctime(curr_time));
-  loctime[strlen(loctime) - 1] = '\0';
-  fprintf(logfp, "%s: %d: %s\n", loctime, (int)getpid(), buffer);
+  fprintf(logfp, "%02d:%02d:%02d (%d) %s\n",
+          curr_time->tm_hour,
+          curr_time->tm_min,
+          curr_time->tm_sec, (int)getpid(), buffer);
   fflush(logfp);
 }
 
 
-#ifdef HAVE_SIGNAL
+#ifdef SIGPIPE
 static void sigpipe_handler(int sig)
 {
   (void)sig; /* prevent warning */
@@ -147,16 +186,134 @@ static void sigpipe_handler(int sig)
 }
 #endif
 
-int ProcessRequest(char *request)
-{
-  char *line=request;
-  unsigned long contentlength=0;
-  char chunked=FALSE;
-
 #define END_OF_HEADERS "\r\n\r\n"
 
+static char *test2file(int testno)
+{
+  static char filename[256];
+  sprintf(filename, TEST_DATA_PATH, path, testno);
+  return filename;
+}
+
+
+int ProcessRequest(struct httprequest *req)
+{
+  char *line=req->reqbuf;
+  char chunked=FALSE;
+  static char request[REQUEST_KEYWORD_SIZE];
+  static char doc[MAXDOCNAMELEN];
+  char logbuf[256];
+  int prot_major, prot_minor;
   char *end;
-  end = strstr(request, END_OF_HEADERS);
+  end = strstr(req->reqbuf, END_OF_HEADERS);
+
+  /* try to figure out the request characteristics as soon as possible, but
+     only once! */
+  if((req->testno == DOCNUMBER_NOTHING) &&
+     sscanf(line, "%" REQBUFSIZ_TXT"s %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
+            request,
+            doc,
+            &prot_major,
+            &prot_minor) == 4) {
+    char *ptr;
+
+    /* find the last slash */
+    ptr = strrchr(doc, '/');
+
+    /* get the number after it */
+    if(ptr) {
+      FILE *stream;
+      char *filename;
+      char *cmd = NULL;
+      int cmdsize = 0;
+
+      if((strlen(doc) + strlen(request)) < 200)
+        sprintf(logbuf, "Got request: %s %s HTTP/%d.%d",
+                request, doc, prot_major, prot_minor);
+      else
+        sprintf(logbuf, "Got a *HUGE* request HTTP/%d.%d",
+                prot_major, prot_minor);
+      logmsg(logbuf);
+      
+      if(!strncmp("/verifiedserver", ptr, 15)) {
+        logmsg("Are-we-friendly question received");
+        req->testno = DOCNUMBER_WERULEZ;
+        return 1; /* done */
+      }
+
+      if(!strncmp("/quit", ptr, 15)) {
+        logmsg("Request-to-quit received");
+        req->testno = DOCNUMBER_QUIT;
+        return 1; /* done */
+      }
+
+      ptr++; /* skip the slash */
+
+      req->testno = strtol(ptr, &ptr, 10);
+
+      if(req->testno > 10000) {
+        req->partno = req->testno % 10000;
+        req->testno /= 10000;
+      }
+      else
+        req->partno = 0;
+
+      sprintf(logbuf, "Reqested test number %d part %d",
+              req->testno, req->partno);
+
+      logmsg(logbuf);
+
+      filename = test2file(req->testno);
+
+      stream=fopen(filename, "rb");
+      if(!stream) {
+        logmsg("Couldn't open test file %d", req->testno);
+        return 0;
+      }
+      else {    
+        /* get the custom server control "commands" */
+        cmd = (char *)spitout(stream, "reply", "servercmd", &cmdsize);
+        fclose(stream);
+
+        if(cmdsize) {
+          logmsg("Found a reply-servercmd section!");
+
+          if(!strncmp(CMD_AUTH_REQUIRED, cmd, strlen(CMD_AUTH_REQUIRED))) {
+            logmsg("instructed to require authorization header");
+            req->auth_req = TRUE;
+          }
+        }
+      }
+    }
+    else {
+      if(sscanf(req->reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
+                doc, &prot_major, &prot_minor) == 3) {
+        sprintf(logbuf, "Receiced a CONNECT %s HTTP/%d.%d request", 
+                doc, prot_major, prot_minor);
+        logmsg(logbuf);
+
+        if(prot_major*10+prot_minor == 10)
+          req->open = FALSE; /* HTTP 1.0 closes connection by default */
+
+        if(!strncmp(doc, "bad", 3))
+          /* if the host name starts with bad, we fake an error here */
+          req->testno = DOCNUMBER_BADCONNECT;
+        else if(!strncmp(doc, "test", 4)) {
+          char *ptr = strchr(doc, ':');
+          if(ptr)
+            req->testno = atoi(ptr+1);
+          else
+            req->testno = DOCNUMBER_CONNECT;
+        }
+        else
+          req->testno = DOCNUMBER_CONNECT;
+      }
+      else {
+        logmsg("Did not find test number in PATH");
+        req->testno = DOCNUMBER_404;
+      }
+    }
+  }
 
   if(!end)
     /* we don't have a complete request yet! */
@@ -174,8 +331,14 @@ int ProcessRequest(char *request)
    */
 
   do {
-    if(!strncasecmp("Content-Length:", line, 15)) {
-      contentlength = strtol(line+15, &line, 10);
+    if(!req->cl && !strncasecmp("Content-Length:", line, 15)) {
+      /* If we don't ignore content-length, we read it and we read the whole
+         request including the body before we return. If we've been told to
+         ignore the content-length, we will return as soon as all headers
+         have been received */
+      req->cl = strtol(line+15, &line, 10);
+
+      logmsg("Found Content-Legth: %d in the request", req->cl);
       break;
     }
     else if(!strncasecmp("Transfer-Encoding: chunked", line,
@@ -185,7 +348,7 @@ int ProcessRequest(char *request)
     }
 
     if(chunked) {
-      if(strstr(request, "\r\n0\r\n"))
+      if(strstr(req->reqbuf, "\r\n0\r\n"))
         /* end of chunks reached */
         return 1; /* done */
       else
@@ -197,8 +360,39 @@ int ProcessRequest(char *request)
       line++;
   } while(line);
 
-  if(contentlength > 0 ) {
-    if(contentlength <= strlen(end+strlen(END_OF_HEADERS)))
+  if(!req->auth && strstr(req->reqbuf, "Authorization:")) {
+    req->auth = TRUE; /* Authorization: header present! */
+    if(req->auth_req)
+      logmsg("Authorization header found, as required");
+  }
+
+  if(!req->digest && strstr(req->reqbuf, "Authorization: Digest")) {
+    /* If the client is passing this Digest-header, we set the part number
+       to 1000. Not only to spice up the complexity of this, but to make
+       Digest stuff to work in the test suite. */
+    req->partno += 1000;
+    req->digest = TRUE; /* header found */
+    logmsg("Received Digest request, sending back data %d", req->partno);
+  }
+  else if(!req->ntlm &&
+          strstr(req->reqbuf, "Authorization: NTLM TlRMTVNTUAAD")) {
+    /* If the client is passing this type-3 NTLM header */
+    req->partno += 1002;
+    req->ntlm = TRUE; /* NTLM found */
+    logmsg("Received NTLM type-3, sending back data %d", req->partno);
+  }
+  else if(!req->ntlm &&
+          strstr(req->reqbuf, "Authorization: NTLM TlRMTVNTUAAB")) {
+    /* If the client is passing this type-1 NTLM header */
+    req->partno += 1001;
+    req->ntlm = TRUE; /* NTLM found */
+    logmsg("Received NTLM type-1, sending back data %d", req->partno);
+  }
+  if(strstr(req->reqbuf, "Connection: close"))
+    req->open = FALSE; /* close connection after this request */
+  
+  if(req->cl && (req->auth || !req->auth_req)) {
+    if(req->cl <= strlen(end+strlen(END_OF_HEADERS)))
       return 1; /* done */
     else
       return 0; /* not complete yet */
@@ -223,29 +417,25 @@ void storerequest(char *reqbuf)
   }
 }
 
-
-#define REQBUFSIZ 150000
-#define REQBUFSIZ_TXT "149999"
-
-/* very-big-path support */
-#define MAXDOCNAMELEN 140000
-#define MAXDOCNAMELEN_TXT "139999"
-
-#define REQUEST_KEYWORD_SIZE 256
-static int get_request(int sock, int *part, int *open)
+/* return 0 on success, non-zero on failure */
+static int get_request(int sock, struct httprequest *req)
 {
-  static char reqbuf[REQBUFSIZ], doc[MAXDOCNAMELEN];
-  static char request[REQUEST_KEYWORD_SIZE];
-  unsigned int offset = 0;
-  int prot_major, prot_minor;
-  char logbuf[256];
+  int fail= FALSE;
+  char *reqbuf = req->reqbuf;
 
-  *part = 0; /* part zero equals none */
+  /*** Init the httpreqest structure properly for the upcoming request ***/
 
-  *open = TRUE; /* connection should remain open and wait for more commands */
+  memset(req, 0, sizeof(struct httprequest));
 
-  while (offset < REQBUFSIZ) {
-    int got = sread(sock, reqbuf + offset, REQBUFSIZ - offset);
+  /* here's what should not be 0 from the start */
+  req->testno = DOCNUMBER_NOTHING; /* safe default */
+  req->open = TRUE; /* connection should remain open and wait for more
+                       commands */
+
+  /*** end of httprequest init ***/
+
+  while (req->offset < REQBUFSIZ) {
+    int got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
     if (got <= 0) {
       if (got < 0) {
         perror("recv");
@@ -255,137 +445,31 @@ static int get_request(int sock, int *part, int *open)
       logmsg("Connection closed by client");
       return DOCNUMBER_INTERNAL;
     }
-    offset += got;
+    req->offset += got;
 
-    reqbuf[offset] = 0;
+    reqbuf[req->offset] = 0;
 
-    if(ProcessRequest(reqbuf))
+    if(ProcessRequest(req))
       break;
   }
 
-  if (offset >= REQBUFSIZ) {
+  if (req->offset >= REQBUFSIZ) {
     logmsg("Request buffer overflow, closing connection");
-    /* dump the request to an external file anyway */
     reqbuf[REQBUFSIZ-1]=0;
-    storerequest(reqbuf);
-
-    return DOCNUMBER_INTERNAL;
+    fail = TRUE;
+    /* dump the request to an external file anyway */
   }
-  reqbuf[offset]=0;
+  else
+    reqbuf[req->offset]=0;
   
   /* dump the request to an external file */
   storerequest(reqbuf);
 
-  if(sscanf(reqbuf, "%" REQBUFSIZ_TXT"s %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
-            request,
-            doc,
-            &prot_major,
-            &prot_minor) == 4) {
-    char *ptr;
-    int test_no=0;
-
-    /* find the last slash */
-    ptr = strrchr(doc, '/');
-
-    /* get the number after it */
-    if(ptr) {
-
-      if((strlen(doc) + strlen(request)) < 200)
-        sprintf(logbuf, "Got request: %s %s HTTP/%d.%d",
-                request, doc, prot_major, prot_minor);
-      else
-        sprintf(logbuf, "Got a *HUGE* request HTTP/%d.%d",
-                prot_major, prot_minor);
-      logmsg(logbuf);
-      
-      if(!strncmp("/verifiedserver", ptr, 15)) {
-        logmsg("Are-we-friendly question received");
-        return DOCNUMBER_WERULEZ;
-      }
-
-      if(!strncmp("/quit", ptr, 15)) {
-        logmsg("Request-to-quit received");
-        return DOCNUMBER_QUIT;
-      }
-
-      ptr++; /* skip the slash */
-
-      test_no = strtol(ptr, &ptr, 10);
-
-      if(test_no > 10000) {
-        *part = test_no % 10000;
-        test_no /= 10000;
-      }
-      else
-        *part = 0;
-
-      sprintf(logbuf, "Found test number %d in path", test_no);
-      logmsg(logbuf);
-
-      if(strstr(reqbuf, "Authorization: Digest")) {
-        /* If the client is passing this Digest-header, we set the part number
-           to 1000. Not only to spice up the complexity of this, but to make
-           Digest stuff to work in the test suite. */
-        *part += 1000;
-        logmsg("Received Digest request, sending back data %d", *part);
-      }
-      else if(strstr(reqbuf, "Authorization: NTLM TlRMTVNTUAAD")) {
-        /* If the client is passing this type-3 NTLM header */
-        *part += 1002;
-        logmsg("Received NTLM type-3, sending back data %d", *part);
-      }
-      else if(strstr(reqbuf, "Authorization: NTLM TlRMTVNTUAAB")) {
-        /* If the client is passing this type-1 NTLM header */
-        *part += 1001;
-        logmsg("Received NTLM type-1, sending back data %d", *part);
-      }
-
-      if(strstr(reqbuf, "Connection: close"))
-        *open = FALSE; /* close connection after this request */
-    }
-    else {
-      if(sscanf(reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
-                doc,
-                &prot_major, &prot_minor) == 3) {
-        sprintf(logbuf, "Receiced a CONNECT %s HTTP/%d.%d request", 
-                doc, prot_major, prot_minor);
-        logmsg(logbuf);
-
-        if(prot_major*10+prot_minor == 10)
-          *open = FALSE; /* HTTP 1.0 closes connection by default */
-
-        if(!strncmp(doc, "bad", 3))
-          /* if the host name starts with bad, we fake an error here */
-          test_no = DOCNUMBER_BADCONNECT;
-        else if(!strncmp(doc, "test", 4)) {
-          char *ptr = strchr(doc, ':');
-          if(ptr)
-            test_no = atoi(ptr+1);
-          else
-            test_no = DOCNUMBER_CONNECT;
-        }
-        else
-          test_no = DOCNUMBER_CONNECT;
-      }
-      else {
-        logmsg("Did not find test number in PATH");
-        test_no = DOCNUMBER_404;
-      }
-    }
-
-    return test_no;
-  }
-  
-  logmsg("Got illegal request");
-  fprintf(stderr, "Got illegal request\n");
-  return DOCNUMBER_404;
+  return fail; /* success */
 }
 
 /* returns -1 on failure */
-static int send_doc(int sock,
-                    int doc,
-                    int part_no,
-                    int *alive) /* keep the connection alive or not */
+static int send_doc(int sock, struct httprequest *req)
 {
   int written;
   int count;
@@ -399,13 +483,14 @@ static int send_doc(int sock,
 
   static char weare[256];
 
-  char filename[256];
   char partbuf[80]="data";
 
-  *alive = FALSE;
+  req->open = FALSE;
 
-  if(doc < 0) {
-    switch(doc) {
+  logmsg("Send response number %d part %d", req->testno, req->partno);
+
+  if(req->testno < 0) {
+    switch(req->testno) {
     case DOCNUMBER_QUIT:
       logmsg("Replying to QUIT");
       buffer = docquit;
@@ -440,12 +525,10 @@ static int send_doc(int sock,
     count = strlen(buffer);
   }
   else {
-    logmsg("Fetch response data, test %d part %d", doc, part_no);
+    char *filename = test2file(req->testno);
 
-    if(0 != part_no)
-      sprintf(partbuf, "data%d", part_no);
-
-    sprintf(filename, TEST_DATA_PATH, path, doc);
+    if(0 != req->partno)
+      sprintf(partbuf, "data%d", req->partno);
 
     stream=fopen(filename, "rb");
     if(!stream) {
@@ -526,10 +609,43 @@ static int send_doc(int sock,
   if(cmd)
     free(cmd);
 
-  *alive = persistant;
+  req->open = persistant;
 
   return 0;
 }
+
+#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+static void win32_init(void)
+{
+  WORD wVersionRequested;  
+  WSADATA wsaData; 
+  int err; 
+  wVersionRequested = MAKEWORD(2, 0); 
+    
+  err = WSAStartup(wVersionRequested, &wsaData); 
+    
+  if (err != 0) {
+    perror("Winsock init failed");
+    fprintf(logfp, "Error initializing winsock -- aborting\n");
+    fclose(logfp);
+    exit(1);
+  }
+    
+  if ( LOBYTE( wsaData.wVersion ) != 2 || 
+       HIBYTE( wsaData.wVersion ) != 0 ) { 
+ 
+    WSACleanup(); 
+    perror("Winsock init failed");
+    fprintf(logfp, "No suitable winsock.dll found -- aborting\n");
+    fclose(logfp);
+    exit(1);
+  }
+}
+static void win32_cleanup(void)
+{
+  WSACleanup();
+}
+#endif
 
 int main(int argc, char *argv[])
 {
@@ -537,8 +653,8 @@ int main(int argc, char *argv[])
   int sock, msgsock, flag;
   unsigned short port = DEFAULT_PORT;
   const char *logfile = DEFAULT_LOGFILE;
-  int part_no;
   FILE *pidfile;
+  struct httprequest req;
   
   if(argc>1) {
     port = atoi(argv[1]);
@@ -553,12 +669,18 @@ int main(int argc, char *argv[])
     perror(logfile);
     exit(1);
   }
+  
+#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  win32_init();
+#endif
 
+#ifdef SIGPIPE
 #ifdef HAVE_SIGNAL
   signal(SIGPIPE, sigpipe_handler);
 #endif
 #ifdef HAVE_SIGINTERRUPT
   siginterrupt(SIGPIPE, 1);
+#endif
 #endif
 
   sock = socket(AF_INET, SOCK_STREAM, 0);
@@ -598,48 +720,48 @@ int main(int argc, char *argv[])
   listen(sock, 5);
 
   while (1) {
-    int doc;
-    int open;
-    int alive;
-    
     msgsock = accept(sock, NULL, NULL);
     
     if (msgsock == -1)
       continue;
     
-    logmsg("New client connected");
+    logmsg("** New client connected");
 
     do {
+      if(get_request(msgsock, &req))
+        /* non-zero means error, break out of loop */
+        break;
 
-      doc = get_request(msgsock, &part_no, &open);
-      logmsg("Received request, now send response number %d part %d",
-             doc, part_no);
-      send_doc(msgsock, doc, part_no, &alive);
+      send_doc(msgsock, &req);
 
-      if((doc < 0) && (doc != DOCNUMBER_CONNECT)) {
+      if((req.testno < 0) && (req.testno != DOCNUMBER_CONNECT)) {
         logmsg("special request received, no persistancy");
         break;
       }
-      if(!alive) {
+      if(!req.open) {
         logmsg("instructed to close connection after server-reply");
         break;
       }
 
-      if(open)
+      if(req.open)
         logmsg("persistant connection, awaits new request");
       /* if we got a CONNECT, loop and get another request as well! */
-    } while(open || (doc == DOCNUMBER_CONNECT));
+    } while(req.open || (req.testno == DOCNUMBER_CONNECT));
 
-    logmsg("Closing client connection");
+    logmsg("** Closing client connection");
     sclose(msgsock);
 
-    if (doc == DOCNUMBER_QUIT)
+    if (req.testno == DOCNUMBER_QUIT)
       break;
   }
   
   sclose(sock);
   fclose(logfp);
   
+#if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
+  win32_cleanup();
+#endif
+
   return 0;
 }
 
