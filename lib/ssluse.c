@@ -921,9 +921,25 @@ static CURLcode verifyhost(struct connectdata *conn,
        UTF8 etc. */
 
     if (i>=0) {
-      j = ASN1_STRING_to_UTF8(&peer_CN,
-                              X509_NAME_ENTRY_get_data(
-                                X509_NAME_get_entry(name,i)));
+      ASN1_STRING *tmp = X509_NAME_ENTRY_get_data(X509_NAME_get_entry(name,i));
+
+      /* In OpenSSL 0.9.7d and earlier, ASN1_STRING_to_UTF8 fails if the input
+         is already UTF-8 encoded. We check for this case and copy the raw
+         string manually to avoid the problem. This code can be made
+         conditional in the future when OpenSSL has been fixed. Work-around
+         brought by Alexis S. L. Carvalho. */
+      if (tmp && ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
+        j = ASN1_STRING_length(tmp);
+        if (j >= 0) {
+          peer_CN = OPENSSL_malloc(j+1);
+          if (peer_CN) {
+            memcpy(peer_CN, ASN1_STRING_data(tmp), j);
+            peer_CN[j] = '\0';
+          }
+        }
+      }
+      else /* not a UTF8 name */
+        j = ASN1_STRING_to_UTF8(&peer_CN, tmp);
     }
 
     if (peer_CN == nulstr)
