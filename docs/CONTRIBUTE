@@ -20,7 +20,10 @@ The License Issue
  GNU Public License. We can never re-use sources from a GPL program in curl.
  If you add a larger piece of code, you can opt to make that file or set of
  files to use a different license as long as they don't enfore any changes to
- the rest of the package. Such "separate parts" can not be GPL either.
+ the rest of the package and they make sense. Such "separate parts" can not be
+ GPL either (although they should use "GPL compatible" licenses).
+
+ Curl and libcurl will soon become dual licensed, MozPL/MITX!
 
 Naming
 
@@ -82,3 +85,12 @@ Write Access to CVS Repository
  course get write access to the CVS repository and then you'll be able to
  check-in all your changes straight into the CVS tree instead of sending all
  changes by mail as patches. Just ask if this is what you'd want.
+
+Test Cases
+
+ Since the introduction of the test suite, we will get the possibility to
+ quickly verify that the main features are working as supposed to. To maintain
+ this situation and improve it, all new features and functions that are added
+ need tro be tested. Every feature that is added should get at least one valid
+ test case that verifies that it works as documented. If every submitter also
+ post a few test cases, it won't end up as a heavy burden on a single person!
