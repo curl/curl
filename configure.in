@@ -9,6 +9,7 @@ dnl First some basic init macros
 AC_INIT
 AC_CONFIG_SRCDIR([lib/urldata.h])
 AM_CONFIG_HEADER(lib/config.h src/config.h tests/server/config.h lib/ca-bundle.h)
+AM_MAINTAINER_MODE
 
 dnl figure out the libcurl version
 VERSION=`sed -ne 's/^#define LIBCURL_VERSION "\(.*\)"/\1/p' ${srcdir}/include/curl/curl.h`
