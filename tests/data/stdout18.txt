@@ -1,5 +1,5 @@
 --_curl_--127.0.0.1:8999/3
-HTTP/1.1 200 OK
+HTTP/1.0 200 OK
 Server: test-server/fake
 Content-Type: text/html
 Content-Length: 0
@@ -8,7 +8,7 @@ this is data even though Content-Length is set to zero
 
 
 --_curl_--127.0.0.1:8999/10
-HTTP/1.1 200 OK
+HTTP/1.0 200 OK
 Date: Thu, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
