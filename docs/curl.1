@@ -669,7 +669,19 @@ this is used on a http(s) server, the PUT command will be used.
 
 Use the file name "-" (a single dash) to use stdin instead of a given file.
 
-If this option is used several times, the last one will be used.
+Before 7.10.8, when this option was used several times, the last one was used.
+
+In curl 7.10.8 and later, you can specify one -T for each URL on the command
+line. Each -T + URL pair specifies what to upload and to where. curl also
+supports "globbing" of the -T argument, meaning that you can upload multiple
+files to a single URL by using the same URL globbing style supported in the
+URL, like this:
+
+curl -T "{file1,file2}" http://www.uploadtothissite.com
+
+or even
+
+curl -T "img[1-1000].png" ftp://ftp.picturemania.com/upload/
 .IP "--trace <file>"
 Enables a full trace dump of all incoming and outgoing data, including
 descriptive information, to the given output file. Use "-" as filename to have
