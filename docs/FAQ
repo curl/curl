@@ -33,7 +33,7 @@ FAQ
   3.6 Does curl support javascript, ASP, XML, XHTML or HTML version Y?
   3.7 Can I use curl to delete/rename a file through FTP?
   3.8 How do I tell curl to follow HTTP redirects?
-  3.9 How do I use curl in PHP, Perl, Tcl, Ruby or Java?
+  3.9 How do I use curl in my favourite programming language?
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
   3.11 How do I POST with a different Content-Type?
   3.12 Why do FTP specific features over HTTP proxy fail?
@@ -335,11 +335,12 @@ FAQ
 
      curl -L http://redirector.com
 
-  3.9 How do I use curl in PHP, Perl, Tcl, Ruby or Java?
+  3.9 How do I use curl in my favourite programming language?
 
-  There exist many language-interfaces for curl that integrates it better with
-  various languages. If you are fluid in a script language, you may very well
-  opt to use such an interface instead of using the command line tool.
+  There exist many language interfaces/bindings for curl that integrates it
+  better with various languages. If you are fluid in a script language, you
+  may very well opt to use such an interface instead of using the command line
+  tool.
 
   At the time of writing, there are bindings for the five language mentioned
   above, but chances are there are even more by the time you read this. Or you
@@ -349,17 +350,10 @@ FAQ
   install and use them, in the libcurl section of the curl web site:
 
         http://curl.haxx.se/libcurl/
-  
-  PHP4 has the ability to use libcurl as an internal module if built with that
-  option enabled. You then get a set of extra functions that can be used
-  within your PHP programs. You find all details about those functions in the
-  curl section in the PHP manual, see the online version at:
 
-        http://www.php.net/manual/ref.curl.php
-
-  PHP also offers the option to run a command line, and then you can of course
-  invoke the curl tool using a command line. This is the way to use curl if
-  you're using PHP3 or PHP4 built without curl module support.
+  In December 2001, there are interfaces available for the following
+  languages: C/C++, Cocoa, Dylan, Java, Perl, PHP, Python, Rexx, Ruby, Scheme
+  and Tcl. By the time you read this, additional ones may have appeared!
 
   3.10 What about SOAP, WebDAV, XML-RPC or similar protocols over HTTP?
 
