@@ -101,7 +101,10 @@ curl_hash_alloc(int slots, curl_hash_dtor dtor)
 {
   curl_hash *h;
 
-  h = malloc(sizeof(curl_hash));
+  h = (curl_hash *)malloc(sizeof(curl_hash));
+  if(NULL = h)
+    return NULL;
+
   curl_hash_init(h, slots, dtor);
 
   return h;

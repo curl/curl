@@ -46,7 +46,10 @@ curl_llist_alloc(curl_llist_dtor dtor)
 {
   curl_llist *list;
 
-  list = malloc(sizeof(curl_llist));
+  list = (curl_llist *)malloc(sizeof(curl_llist));
+  if(NULL == list)
+    return NULL;
+
   curl_llist_init(list, dtor);
 
   return list;
