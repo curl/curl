@@ -221,9 +221,6 @@ TODO
  * Make the test servers able to serve multiple running test suites. Like if
    two users run 'make test' at once.
 
- * Make runtests.pl capable of changing port numbers for the servers. This was
-   the intention from the start, but in practise it is now hard.
-
  * If perl wasn't found by the configure script, don't attempt to run the
    tests but explain something nice why it doesn't.
 
