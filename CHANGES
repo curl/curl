@@ -6,12 +6,15 @@
 
                                History of Changes
 
+Daniel (29 November 2001)
+- Eric provided a few more fixes for building on Macs.
+
 Daniel (28 November 2001)
 - Fiddled with some Tru64 problems reported by Dimitris Sarris. They appear
   only when using VERBOSE ftp transfers. Do we use a too small buffer for
   gethostbyaddr_r(), was the lack of using in_addr_t wrong or is it that the
-  hostent struct must be blanked before use? I hope Dimitris will found out
-  and tell us.
+  hostent struct must be blanked before use? With Dimitris help and these
+  patches, the problems seem to be history.
 
 - CURLOPT_FTP_USE_EPSV was added and can be set to FALSE to prevent libcurl
   from using the EPSV command before trying the normal PASV. Heikki Korpela
