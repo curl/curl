@@ -794,7 +794,15 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   }
               }
               else if(checkprefix("Basic", start)) {
-                if(data->state.authwant & CURLAUTH_BASIC) {
+                if((data->state.authwant == CURLAUTH_BASIC) &&
+                   (k->httpcode == 401)) {
+                  /* We asked for Basic authentication but got a 401 back
+                     anyway, which basicly means our name+password isn't
+                     valid. */
+                  data->state.authavail = CURLAUTH_NONE;
+                  infof(data, "Authentication problem. Ignoring this.\n");
+                }
+                else if(data->state.authwant & CURLAUTH_BASIC) {
                   data->state.authavail |= CURLAUTH_BASIC;
                 }
               }
