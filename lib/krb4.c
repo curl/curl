@@ -46,8 +46,9 @@
 #include "security.h"
 #include "base64.h"
 #include <stdlib.h>
+#ifdef HAVE_NETDB_H
 #include <netdb.h>
-#include <syslog.h>
+#endif
 #include <string.h>
 #include <krb.h>
 #include <des.h>
@@ -74,11 +75,11 @@
 #define hisctladdr REMOTE_ADDR
 
 struct krb4_data {
-    des_cblock key;
-    des_key_schedule schedule;
-    char name[ANAME_SZ];
-    char instance[INST_SZ];
-    char realm[REALM_SZ];
+  des_cblock key;
+  des_key_schedule schedule;
+  char name[ANAME_SZ];
+  char instance[INST_SZ];
+  char realm[REALM_SZ];
 };
 
 #ifndef HAVE_STRLCPY
@@ -86,18 +87,18 @@ struct krb4_data {
 static size_t
 strlcpy (char *dst, const char *src, size_t dst_sz)
 {
-    size_t n;
-    char *p;
+  size_t n;
+  char *p;
 
-    for (p = dst, n = 0;
-	 n + 1 < dst_sz && *src != '\0';
-	 ++p, ++src, ++n)
-	*p = *src;
-    *p = '\0';
-    if (*src == '\0')
-	return n;
-    else
-	return n + strlen (src);
+  for (p = dst, n = 0;
+       n + 1 < dst_sz && *src != '\0';
+       ++p, ++src, ++n)
+    *p = *src;
+  *p = '\0';
+  if (*src == '\0')
+    return n;
+  else
+    return n + strlen (src);
 }
 #else
 size_t strlcpy (char *dst, const char *src, size_t dst_sz);
@@ -116,24 +117,25 @@ static int
 krb4_decode(void *app_data, void *buf, int len, int level,
 	    struct connectdata *conn)
 {
-    MSG_DAT m;
-    int e;
-    struct krb4_data *d = app_data;
-    
-    if(level == prot_safe)
-	e = krb_rd_safe(buf, len, &d->key,
-			(struct sockaddr_in *)REMOTE_ADDR,
-			(struct sockaddr_in *)LOCAL_ADDR, &m);
-    else
-	e = krb_rd_priv(buf, len, d->schedule, &d->key, 
-			(struct sockaddr_in *)REMOTE_ADDR,
-			(struct sockaddr_in *)LOCAL_ADDR, &m);
-    if(e){
-	syslog(LOG_ERR, "krb4_decode: %s", krb_get_err_text(e));
-	return -1;
-    }
-    memmove(buf, m.app_data, m.app_length);
-    return m.app_length;
+  MSG_DAT m;
+  int e;
+  struct krb4_data *d = app_data;
+  
+  if(level == prot_safe)
+    e = krb_rd_safe(buf, len, &d->key,
+                    (struct sockaddr_in *)REMOTE_ADDR,
+                    (struct sockaddr_in *)LOCAL_ADDR, &m);
+  else
+    e = krb_rd_priv(buf, len, d->schedule, &d->key, 
+                    (struct sockaddr_in *)REMOTE_ADDR,
+                    (struct sockaddr_in *)LOCAL_ADDR, &m);
+  if(e) {
+    struct SessionHandle *data = conn->data;
+    infof(data, "krb4_decode: %s\n", krb_get_err_text(e));
+    return -1;
+  }
+  memmove(buf, m.app_data, m.app_length);
+  return m.app_length;
 }
 
 static int
@@ -150,42 +152,42 @@ static int
 krb4_encode(void *app_data, void *from, int length, int level, void **to,
 	    struct connectdata *conn)
 {
-    struct krb4_data *d = app_data;
-    *to = malloc(length + 31);
-    if(level == prot_safe)
-	return krb_mk_safe(from, *to, length, &d->key, 
-			   (struct sockaddr_in *)LOCAL_ADDR,
-			   (struct sockaddr_in *)REMOTE_ADDR);
-    else if(level == prot_private)
-	return krb_mk_priv(from, *to, length, d->schedule, &d->key, 
-			   (struct sockaddr_in *)LOCAL_ADDR,
-			   (struct sockaddr_in *)REMOTE_ADDR);
-    else
-	return -1;
+  struct krb4_data *d = app_data;
+  *to = malloc(length + 31);
+  if(level == prot_safe)
+    return krb_mk_safe(from, *to, length, &d->key, 
+                       (struct sockaddr_in *)LOCAL_ADDR,
+                       (struct sockaddr_in *)REMOTE_ADDR);
+  else if(level == prot_private)
+    return krb_mk_priv(from, *to, length, d->schedule, &d->key, 
+                       (struct sockaddr_in *)LOCAL_ADDR,
+                       (struct sockaddr_in *)REMOTE_ADDR);
+  else
+    return -1;
 }
 
 static int
 mk_auth(struct krb4_data *d, KTEXT adat, 
 	const char *service, char *host, int checksum)
 {
-    int ret;
-    CREDENTIALS cred;
-    char sname[SNAME_SZ], inst[INST_SZ], realm[REALM_SZ];
+  int ret;
+  CREDENTIALS cred;
+  char sname[SNAME_SZ], inst[INST_SZ], realm[REALM_SZ];
 
-    strlcpy(sname, service, sizeof(sname));
-    strlcpy(inst, krb_get_phost(host), sizeof(inst));
-    strlcpy(realm, krb_realmofhost(host), sizeof(realm));
-    ret = krb_mk_req(adat, sname, inst, realm, checksum);
-    if(ret)
-	return ret;
-    strlcpy(sname, service, sizeof(sname));
-    strlcpy(inst, krb_get_phost(host), sizeof(inst));
-    strlcpy(realm, krb_realmofhost(host), sizeof(realm));
-    ret = krb_get_cred(sname, inst, realm, &cred);
-    memmove(&d->key, &cred.session, sizeof(des_cblock));
-    des_key_sched(&d->key, d->schedule);
-    memset(&cred, 0, sizeof(cred));
+  strlcpy(sname, service, sizeof(sname));
+  strlcpy(inst, krb_get_phost(host), sizeof(inst));
+  strlcpy(realm, krb_realmofhost(host), sizeof(realm));
+  ret = krb_mk_req(adat, sname, inst, realm, checksum);
+  if(ret)
     return ret;
+  strlcpy(sname, service, sizeof(sname));
+  strlcpy(inst, krb_get_phost(host), sizeof(inst));
+  strlcpy(realm, krb_realmofhost(host), sizeof(realm));
+  ret = krb_get_cred(sname, inst, realm, &cred);
+  memmove(&d->key, &cred.session, sizeof(des_cblock));
+  des_key_sched(&d->key, d->schedule);
+  memset(&cred, 0, sizeof(cred));
+  return ret;
 }
 
 #ifdef HAVE_KRB_GET_OUR_IP_FOR_REALM
