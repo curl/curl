@@ -7,6 +7,33 @@
                                History of Changes
 
 
+Daniel (14 March 2001)
+- I increased the interface number for libcurl as I've removed the low level
+  functions from the interface. I also took this opportunity to rename the
+  Curl_strequal function to curl_strequal and Curl_strnequal to curl_strnequal,
+  as they're public libcurl functions (even if they're still undocumented).
+
+  This will make older programs not capable of using the new libcurl with
+  just a drop-in replacement.
+
+- Jörn Hartroth updated stuff for win32 compiles:
+  o config-win32.h was fixed for socklen_t
+  o lib/ssluse.c had a bad #endif placement
+  o lib/file.c was made to compile on win32 again
+  o lib/Makefile.m32 was updated with the new files
+
+Daniel (13 March 2001)
+- It only took an hour or so before Jörn Hartroth found a problem in the
+  chunked transfer-encoding. Given his fine example-site, I could easily spot
+  the problem and when I re-read the spec (the part I have pasted in the top
+  of the http_chunks.h file), I realized I had made my state-machine slightly
+  wrong and didn't expect/handle the trailing CRLF that comes after the data
+  in each chunk (and those extra two bytes sure feel wasted).
+
+  Had to modify test case 34 to match this as well.
+
+Version 7.7-beta2
+
 Daniel (13 March 2001)
 - Added the policy stuff to the curl_easy_setopt man page for the two supported
   policies.
