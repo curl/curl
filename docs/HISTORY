@@ -54,7 +54,7 @@ OpenSSL took over where SSLeay was abandoned.
 May 1999, first Debian package.
 
 August 1999, LDAP:// and FILE:// support added. The curl web site gets 1300
-visits daily.
+visits weekly.
 
 Released curl 6.0 in September. 15000 lines of code.
 
@@ -67,7 +67,7 @@ the easy interface and turned out to be the beginning of actually getting
 other software and programs to get based on and powered by libcurl. Almost
 20000 lines of code.
 
-August 2000, the curl web site gets 4000 visits daily.
+August 2000, the curl web site gets 4000 visits weekly.
 
 The PHP guys adopted libcurl already the same month, when the first ever third
 party libcurl binding showed up. CURL has been a supported module in PHP since
@@ -92,7 +92,7 @@ code.
 
 August 2001. curl is bundled in Mac OS X, 10.1. It was already becoming more
 and more of a standard utility of Linux distributions and a regular in the BSD
-ports collections. The curl web site gets 8000 visits daily. Curl Corporation
+ports collections. The curl web site gets 8000 visits weekly. Curl Corporation
 contacted Daniel to discuss "the name issue". After Daniel's reply, they have
 never since got in touch again.
 
@@ -100,7 +100,7 @@ September 2001, libcurl 7.9 introduces cookie jar and curl_formadd(). During
 the forthcoming 7.9.x releases, we introduced the multi interface slowly and
 without much whistles.
 
-June 2002, the curl web site gets 13000 visits daily. curl and libcurl is
+June 2002, the curl web site gets 13000 visits weekly. curl and libcurl is
 35000 lines of code. Reported successful compiles on more than 40 combinations
 of CPUs and operating systems.
 
@@ -111,3 +111,6 @@ distributions and otherwise retrieved as part of other software.
 
 September 2002, with the release of curl 7.10 it is released under the MIT
 license only.
+
+February 2003, the curl site averages at 20000 visits weekly. At any given
+moment, there's an average of 3 people browsing the curl.haxx.se site.
