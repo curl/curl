@@ -13,13 +13,13 @@ blablabla
 # Client-side
 <client>
  <name>
-HTTP RFC1867-type formposting
+HTTP RFC1867-type formposting without Expect: header
  </name>
  <command>
-http://%HOSTIP:%HOSTPORT/we/want/9 -F name=daniel -F tool=curl -F file=@log/test9.txt
+http://%HOSTIP:%HOSTPORT/we/want/44 -F name=daniel -F tool=curl -F file=@log/test44.txt -H 'Expect:'
 </command>
 # We create this file before the command is invoked!
-<file name="log/test9.txt">
+<file name="log/test44.txt">
 foo-
 This is a moo-
 bar
@@ -32,12 +32,11 @@ bar
 ^(User-Agent:|Content-Type: multipart/form-data;|--curl).*
 </strip>
 <protocol>
-POST /we/want/9 HTTP/1.1
+POST /we/want/44 HTTP/1.1
 Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
-Content-Length: 375
-Expect: 100-continue
+Content-Length: 376
 Content-Type: multipart/form-data; boundary=curluczemxkcWWsxptLlAImrFQHwQ3W
 
 --curluczemxkcWWsxptLlAImrFQHwQ3W
@@ -49,7 +48,7 @@ Content-Disposition: form-data; name="tool"
 
 curl
 --curluczemxkcWWsxptLlAImrFQHwQ3W
-Content-Disposition: form-data; name="file"; filename="log/test9.txt"
+Content-Disposition: form-data; name="file"; filename="log/test44.txt"
 Content-Type: text/plain
 
 foo-
