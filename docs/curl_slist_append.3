@@ -1,0 +1,29 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by Daniel.Stenberg@haxx.nu
+.\"
+.TH curl_slist_append 3 "2 June 2000" "Curl 7.0" "libcurl Manual"
+.SH NAME
+curl_slist_append - add a string to an slist
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "struct curl_slist *curl_slist_append(struct curl_slit *" list,
+.BI "char * "string ");"
+.ad
+.SH DESCRIPTION
+curl_slist_append() appends a specified string to a linked list of
+strings. The existing
+.I list
+should be passed as the first argument while the new list is returned from
+this function. The specified
+.I string
+has been appended when this function returns.
+.SH RETURN VALUE
+A null pointer is returned if anything went wrong, otherwise the new list
+pointer is returned.
+.SH "SEE ALSO"
+.BR curl_slist_free_all "(3), "
+.SH BUGS
+Surely there are some, you tell me!
+
