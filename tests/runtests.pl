@@ -78,7 +78,7 @@ my $perl="perl -I$srcdir";
 my $curl_debug=0;
 
 # name of the file that the memory debugging creates:
-my $memdump="memdump";
+my $memdump="$LOGDIR/memdump";
 
 # the path to the script that analyzes the memory debug output file:
 my $memanalyze="./memanalyze.pl";
@@ -135,7 +135,7 @@ my $tortalloc;
 chomp($pwd = `pwd`);
 
 # enable memory debugging if curl is compiled with it
-$ENV{'CURL_MEMDEBUG'} = 1;
+$ENV{'CURL_MEMDEBUG'} = $memdump;
 $ENV{'HOME'}=$pwd;
 
 ##########################################################################

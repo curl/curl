@@ -2933,8 +2933,9 @@ operate(struct Configurable *config, int argc, char *argv[])
   /* this sends all memory debug messages to a logfile named memdump */
   env = curlx_getenv("CURL_MEMDEBUG");
   if(env) {
+    /* use the value as file name */
+    curl_memdebug(env);
     curl_free(env);
-    curl_memdebug("memdump");
   }
   env = curlx_getenv("CURL_MEMLIMIT");
   if(env) {
