@@ -73,15 +73,29 @@
 #include "urldata.h"
 #include <curl/curl.h>
 #include "transfer.h"
-#include <curl/types.h>
+#include "ssluse.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
+
+CURLcode curl_global_init(void)
+{
+  Curl_SSL_init();
+  return CURLE_OK;
+}
+
+void curl_global_cleanup(void)
+{
+  Curl_SSL_cleanup();
+}
 
 CURL *curl_easy_init(void)
 {
   CURLcode res;
   struct UrlData *data;
+
+  /* Make sure we inited the global SSL stuff */
+  Curl_SSL_init();
 
   /* We use curl_open() with undefined URL so far */
   res = Curl_open((CURL **)&data, NULL);

@@ -235,6 +235,40 @@ int cert_verify_callback(int ok, X509_STORE_CTX *ctx)
 
 #endif
 
+/* Global init */
+void Curl_SSL_init(void)
+{
+#ifdef USE_SSLEAY
+  static int only_once=0;
+
+  /* make sure this is only done once */
+  if(0 != only_once)
+    return;
+
+  only_once++; /* never again */
+
+  /* Lets get nice error messages */
+  SSL_load_error_strings();
+
+  /* Setup all the global SSL stuff */
+  SSLeay_add_ssl_algorithms();
+#endif
+}
+
+/* Global cleanup */
+void Curl_SSL_cleanup(void)
+{
+#ifdef USE_SSLEAY
+  /* Free the SSL error strings */
+  ERR_free_strings();
+  
+  /* EVP_cleanup() removes all ciphers and digests from the
+     table. */
+  EVP_cleanup();
+#endif  
+}
+
+
 /* ====================================================== */
 CURLcode
 Curl_SSLConnect(struct connectdata *conn)
@@ -250,15 +284,9 @@ Curl_SSLConnect(struct connectdata *conn)
   /* mark this is being ssl enabled from here on out. */
   conn->ssl.use = TRUE;
 
-  /* Lets get nice error messages */
-  SSL_load_error_strings();
-
   /* Make funny stuff to get random input */
   random_the_seed(conn);
     
-  /* Setup all the global SSL stuff */
-  SSLeay_add_ssl_algorithms();
-
   switch(data->ssl.version) {
   default:
     req_method = SSLv23_client_method();

@@ -24,4 +24,8 @@
  *****************************************************************************/
 #include "urldata.h"
 CURLcode Curl_SSLConnect(struct connectdata *conn);
+/* Global SSL init */
+void Curl_SSL_init(void);
+/* Global SSL cleanup */
+void Curl_SSL_cleanup(void);
 #endif
