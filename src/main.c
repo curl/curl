@@ -124,6 +124,119 @@ char *strdup(char *str)
 }
 #endif 
 
+#ifdef	VMS
+int	vms_show = 0;
+#define	FAC_CURL	0xC01
+#define	FAC_SYSTEM	0
+#define	MSG_NORMAL	0
+#define	VMS_STS(c,f,e,s) (((c&0xF)<<28)|((f&0xFFF)<<16)|((e&0x1FFF)<3)|(s&7))
+#define	VMSSTS_HIDE	VMS_STS(1,0,0,0)
+#define	SEV_WARNING	0
+#define	SEV_SUCCESS	1
+#define	SEV_ERROR	2
+#define	SEV_INFO	3	/* success, with an extra hint */
+#define	SEV_FATAL	4
+globalvalue int  CURL_UNSUPPROTO;		/* these are from curlmsg.msg file..... */
+globalvalue int  CURL_FAILINIT;
+globalvalue int  CURL_BADURLSYN;
+globalvalue int  CURL_BADURLUSER;
+globalvalue int  CURL_BADPROXY;
+globalvalue int  CURL_BADHOST;
+globalvalue int  CURL_FAILHOST;
+globalvalue int  CURL_FTPUNKREPLY;
+globalvalue int  CURL_FTPNOACC;
+globalvalue int  CURL_FTPUSRPW;
+globalvalue int  CURL_FTPBADPASS;
+globalvalue int  CURL_FTPBADUSER;
+globalvalue int  CURL_FTPBADPASV;
+globalvalue int  CURL_FTPBAD227;
+globalvalue int  CURL_FTPBADHOST227;
+globalvalue int  CURL_FTPNORECONN;
+globalvalue int  CURL_FTPNOBIN;
+globalvalue int  CURL_PARTIALFILE;
+globalvalue int  CURL_FTPNORETR;
+globalvalue int  CURL_FTPWRITERR;
+globalvalue int  CURL_FTPNOQUOTE;
+globalvalue int  CURL_HTTPPNF;
+globalvalue int  CURL_WRITERR;
+globalvalue int  CURL_BADUSER;
+globalvalue int  CURL_FTPNOSTOR;
+globalvalue int  CURL_READERR;
+globalvalue int  CURL_OUTOFMEM;
+globalvalue int  CURL_TIMEOUT;
+globalvalue int  CURL_FTPNOASCII;
+globalvalue int  CURL_FTPNOPORT;
+globalvalue int  CURL_FTPNOREST;
+globalvalue int  CURL_FTPNOSIZE;
+globalvalue int  CURL_HTTPRNGERR;
+globalvalue int  CURL_HTTPPOSTERR;
+globalvalue int  CURL_SSLNOCONN;
+globalvalue int  CURL_FTPBADRESUME;
+globalvalue int  CURL_FILENOACC;
+globalvalue int  CURL_LDAPNOBIND;
+globalvalue int  CURL_LDAPNOSRCH;
+globalvalue int  CURL_LDAPNOLIB;
+globalvalue int  CURL_LDAPNOFUNC;
+globalvalue int  CURL_ABORTCB;
+globalvalue int  CURL_BADPARAM;
+globalvalue int  CURL_BADORDER;
+globalvalue int  CURL_BADPWD;
+globalvalue int  CURL_MNYREDIR;
+long	vms_cond[] = {
+	VMS_STS(1,FAC_SYSTEM,MSG_NORMAL,SEV_SUCCESS),
+	CURL_UNSUPPROTO,		/* these are from curlmsg.msg file..... */
+	CURL_FAILINIT,
+	CURL_BADURLSYN,
+	CURL_BADURLUSER,
+	CURL_BADPROXY,
+	CURL_BADHOST,
+	CURL_FAILHOST,
+	CURL_FTPUNKREPLY,
+	CURL_FTPNOACC,
+	CURL_FTPUSRPW,
+	CURL_FTPBADPASS,
+	CURL_FTPBADUSER,
+	CURL_FTPBADPASV,
+	CURL_FTPBAD227,
+	CURL_FTPBADHOST227,
+	CURL_FTPNORECONN,
+	CURL_FTPNOBIN,
+	CURL_PARTIALFILE,
+	CURL_FTPNORETR,
+	CURL_FTPWRITERR,
+	CURL_FTPNOQUOTE,
+	CURL_HTTPPNF,
+	CURL_WRITERR,
+	CURL_BADUSER,
+	CURL_FTPNOSTOR,
+	CURL_READERR,
+	CURL_OUTOFMEM,
+	CURL_TIMEOUT,
+	CURL_FTPNOASCII,
+	CURL_FTPNOPORT,
+	CURL_FTPNOREST,
+	CURL_FTPNOSIZE,
+	CURL_HTTPRNGERR,
+	CURL_HTTPPOSTERR,
+	CURL_SSLNOCONN,
+	CURL_FTPBADRESUME,
+	CURL_FILENOACC,
+	CURL_LDAPNOBIND,
+	CURL_LDAPNOSRCH,
+	CURL_LDAPNOLIB,
+	CURL_LDAPNOFUNC,
+	CURL_ABORTCB,
+	CURL_BADPARAM,
+	CURL_BADORDER,
+	CURL_BADPWD,
+	CURL_MNYREDIR
+};
+
+
+#endif
+
+
+
 extern void hugehelp(void);
 
 /*
@@ -1017,7 +1130,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       }
       now=time(NULL);
       config->condtime=curl_getdate(nextarg, &now);
-      if(-1 == config->condtime) {
+      if(((unsigned ) ~0) == config->condtime) {
         /* now let's see if it is a file name to get the time from instead! */
         struct stat statbuf;
         if(-1 == stat(nextarg, &statbuf)) {
@@ -1061,7 +1174,6 @@ static int parseconfig(char *filename,
 #define CURLRC DOT_CHAR "curlrc"
 
     home = curl_getenv("HOME"); /* portable environment reader */
-
     if(!home)
       return 0;
     if(strlen(home)>(sizeof(filebuffer)-strlen(CURLRC))) {
@@ -1604,6 +1716,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
           struct stat fileinfo;
 
+/*VMS?? -- Danger, the filesize is only valid for stream files */
           if(0 == stat(outfile, &fileinfo)) {
             /* set offset to current file size: */
             config->resume_from = fileinfo.st_size;
@@ -1656,6 +1769,15 @@ operate(struct Configurable *config, int argc, char *argv[])
           
           url = urlbuffer; /* use our new URL instead! */
         }
+/*VMS??-- Reading binary from files can be a problem... */
+/*VMS??   Only FIXED, VAR etc WITHOUT implied CC will work */
+/*VMS??   Others need a \n appended to a line */
+/*VMS??-- Stat gives a size but this is UNRELIABLE in VMS */
+/*VMS??   As a f.e. a fixed file with implied CC needs to have a byte added */
+/*VMS??   for every record processed, this can by derived from Filesize & recordsize */
+/*VMS??   for VARiable record files the records need to be counted! */
+/*VMS??   for every record add 1 for linefeed and subtract 2 for the record header */
+/*VMS??   for VARIABLE header files only the bare record data needs to be considered with one appended if implied CC */
 
         infd=(FILE *) fopen(config->infile, "rb");
         if (!infd || stat(config->infile, &fileinfo)) {
@@ -1813,8 +1935,14 @@ operate(struct Configurable *config, int argc, char *argv[])
         ourWriteOut(curl, config->writeout);
       }
         
+#ifdef	VMS
+	if (!config->showerror)  {
+		vms_show = VMSSTS_HIDE;
+	}
+#else
       if((res!=CURLE_OK) && config->showerror)
         fprintf(config->errors, "curl: (%d) %s\n", res, errorbuffer);
+#endif
 
       if((config->errors != stderr) &&
          (config->errors != stdout))
@@ -1880,7 +2008,11 @@ int main(int argc, char *argv[])
   res = operate(&config, argc, argv);
   free_config_fields(&config);
 
+#ifdef	VMS
+  return (vms_cond[res]|vms_show);
+#else
   return res;
+#endif
 }
 
 static char *my_get_line(FILE *fp)
