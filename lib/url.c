@@ -682,7 +682,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
     /*
      * Set to make us do HTTP POST
      */
-    data->set.httppost = va_arg(param, struct HttpPost *);
+    data->set.httppost = va_arg(param, struct curl_httppost *);
     if(data->set.httppost)
       data->set.httpreq = HTTPREQ_POST_FORM;
     break;

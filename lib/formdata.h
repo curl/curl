@@ -59,7 +59,7 @@ int Curl_FormInit(struct Form *form, struct FormData *formdata );
 
 CURLcode
 Curl_getFormData(struct FormData **,
-                 struct HttpPost *post,
+                 struct curl_httppost *post,
                  int *size);
 
 /* fread() emulation */

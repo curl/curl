@@ -791,7 +791,7 @@ struct UserDefined {
   off_t set_resume_from;  /* continue [ftp] transfer from here */
   char *cookie;         /* HTTP cookie string to send */
   struct curl_slist *headers; /* linked list of extra headers */
-  struct HttpPost *httppost;  /* linked list of POST data */
+  struct curl_httppost *httppost;  /* linked list of POST data */
   char *cert;           /* certificate */
   char *cert_type;      /* format for certificate (default: PEM) */
   char *key;            /* private key */
