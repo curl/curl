@@ -2834,6 +2834,8 @@ operate(struct Configurable *config, int argc, char *argv[])
           break;
         }
       }
+      else
+        urlnum = 1; /* without globbing, this is a single URL */
 
       /* if multiple files extracted to stdout, insert separators! */
       separator= ((!outfiles || curl_strequal(outfiles, "-")) && urlnum > 1);
