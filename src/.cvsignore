@@ -3,3 +3,4 @@ Makefile.in
 .deps
 .libs
 curl
+stamp-h2*
