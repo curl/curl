@@ -1,0 +1,36 @@
+# Server-side
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+ <name>
+HTTP POST with --proxy-ntlm and no SSL with no response
+ </name>
+ <command>
+http://a.galaxy.far.far.away/170 --proxy http://%HOSTIP:%HOSTPORT --proxy-user foo:bar --proxy-ntlm -F "dummy=value"
+</command>
+</test>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent: curl/.*
+</strip>
+<protocol>
+HEAD http://a.galaxy.far.far.away/170 HTTP/1.1
+Proxy-Authorization: NTLM TlRMTVNTUAABAAAAAgIAAAAAAAAgAAAAAAAAACAAAAA=
+User-Agent: curl/7.12.0-CVS (i686-pc-linux-gnu) libcurl/7.12.0-CVS OpenSSL/0.9.6b ipv6 zlib/1.1.4 libidn/0.4.3
+Host: a.galaxy.far.far.away
+Pragma: no-cache
+Accept: */*
+
+</protocol>
+# 52 is CURLE_GOT_NOTHING
+<errorcode>
+52
+</errorcode>
+</verify>
