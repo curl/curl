@@ -299,6 +299,7 @@ int main(int argc, char *argv[])
   unsigned short port = DEFAULT_PORT;
   char *logfile = DEFAULT_LOGFILE;
   int part_no;
+  FILE *pidfile;
   
   if(argc>1)
     port = atoi(argv[1]);
@@ -345,10 +346,18 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
+  pidfile = fopen(".http.pid", "w");
+  if(pidfile) {
+    fprintf(pidfile, "%d\n", (int)getpid());
+    fclose(pidfile);
+  }
+  else
+    fprintf(stderr, "Couldn't write pid file\n");
+
   /* start accepting connections */
   listen(sock, 5);
 
-  printf("*** %s listening on port %u ***\n", VERSION, port);
+  fprintf(stderr, "*** %s listening on port %u ***\n", VERSION, port);
 
   while (!sigterm) {
     int doc;
