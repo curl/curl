@@ -1766,13 +1766,11 @@ CURLcode Curl_http(struct connectdata *conn)
       }
 
       if(!checkheaders(data, "Content-Type:")) {
-        /* Get Content-Type: line from Curl_formpostheader, which happens
-           to always be the first line. We can know this for sure since
-           we always build the formpost linked list the same way!
+        /* Get Content-Type: line from Curl_formpostheader.
 
            The Content-Type header line also contains the MIME boundary
            string etc why disabling this header is likely to not make things
-           work, but we support it anyway.
+           work, but we support disabling it anyway.
         */
         char *contentType;
         size_t linelength=0;
