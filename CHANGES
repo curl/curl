@@ -6,6 +6,17 @@
 
                                History of Changes
 
+Daniel (5 November 2001)
+- Detlef Schmier reported that curl didn't compile using Solaris 8 with the
+  native cc compiler. It was due to a bad function prototype. Fixed now.
+  Unfortunately, I can't enable the -Wstrict-prototypes in my debug builds
+  though, as gcc then complains like crazy on OpenSSL include files... :-(
+
+- John Lask provided SSL over HTTP proxy fixes.
+
+- Ramana Mokkapati brought some clever insights on the LDAP failures, and his
+  suggested changes are now applied.
+
 Version 7.9.1
 
 Daniel (4 November 2001)
