@@ -17,22 +17,27 @@ archives, but must be downloaded and installed separately.
 
 Ada95
 
-  Writtten by Andreas Almroth.
+  Writtten by Andreas Almroth
   http://www.almroth.com/adacurl/index.html
 
 Basic
 
-  ScriptBasic bindings to libcurl. Writtten by Peter Verhas.
+  ScriptBasic bindings to libcurl. Writtten by Peter Verhas
   http://scriptbasic.com/
 
 C++
 
-  Written by Jean-Philippe Barrette-LaPierre.
+  Written by Jean-Philippe Barrette-LaPierre
   http://www.sourceforge.net/projects/curlpp
+
+Ch
+
+  Written by Stephen Nestinger and Jonathan Rogado
+  http://chcurl.sourceforge.net/
 
 Cocoa
 
-  Written by Dan Wood.
+  Written by Dan Wood
   http://curlhandle.sourceforge.net/
 
 D
@@ -42,25 +47,33 @@ D
 
 Dylan
 
-  Written by Chris Double.
+  Written by Chris Double
   http://dylanlibs.sourceforge.net/
 
 Euphoria
 
-  Written by Ray Smith.
+  Written by Ray Smith
   http://rays-web.com/eulibcurl.htm
 
 Ferite
+  Written by Paul Querna
   http://www.ferite.org/
+
+Gambas
+  http://gambas.sourceforge.net
+
+glib/GTK+
+  Written by Richard Atterer
+  http://atterer.net/glibcurl/
 
 Java
 
-  Written by Daniel Stenberg.
+  Written by Daniel Stenberg
   http://curl.haxx.se/libcurl/java/
 
 Lua
 
-  Written by Steve Dekorte.
+  Written by Steve Dekorte
   http://curl.haxx.se/libcurl/lua/
 
 Object-Pascal
@@ -70,7 +83,7 @@ Object-Pascal
 
 O'Caml
 
-  Written by Lars Nilsson.
+  Written by Lars Nilsson
   http://sourceforge.net/projects/ocurl/
 
 Pascal
@@ -80,40 +93,49 @@ Pascal
 
 Perl
 
-  Maintained by Cris Bailiff.
+  Maintained by Cris Bailiff
   http://curl.haxx.se/libcurl/perl/
 
 PHP
 
-  Written by Sterling Hughes.
+  Written by Sterling Hughes
   http://curl.haxx.se/libcurl/php/
 
 PostgreSQL
 
-  Written by Gian Paolo Ciceri.
+  Written by Gian Paolo Ciceri
   http://gborg.postgresql.org/project/pgcurl/projdisplay.php
 
 Python
 
-  Written by Kjetil Jacobsen.
+  Written by Kjetil Jacobsen
   http://pycurl.sourceforge.net/
 
 Rexx
 
-  Written Mark Hessling. 
+  Written Mark Hessling
   http://rexxcurl.sourceforge.net/
 
 Ruby
 
-  Written by Hirotaka Matsuyuki. 
+  Written by Hirotaka Matsuyuki
   http://www.d1.dion.ne.jp/~matuyuki/ruby.html
 
 Scheme
 
-  Bigloo binding written by Kirill Lisovsky.
+  Bigloo binding written by Kirill Lisovsky
   http://curl.haxx.se/libcurl/scheme/
 
 Tcl
 
-  Written by Andrés García. 
+  Written by Andrés García
   http://personal1.iddeo.es/andresgarci/tclcurl/english/docs.html
+
+Q
+
+  http://q-lang.sourceforge.net/
+
+wxWidgets
+
+  Written by Casey O'Donnell
+  http://homepage.mac.com/codonnell/wxcurldav/
