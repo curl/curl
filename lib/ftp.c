@@ -1618,6 +1618,12 @@ CURLcode ftp_perform(struct connectdata *conn)
     if(result)
       return result;
 
+    /* Send any PREQUOTE strings after transfer type is set? (Wesley Laxton)*/
+    if(data->set.prequote) {
+      if ((result = ftp_sendquote(conn, data->set.prequote)) != CURLE_OK)
+        return result;
+    }
+
     if(conn->resume_from) {
       /* we're about to continue the uploading of a file */
       /* 1. get already existing file's size. We use the SIZE
@@ -1802,6 +1808,12 @@ CURLcode ftp_perform(struct connectdata *conn)
       result = ftp_transfertype(conn, data->set.ftp_ascii);
       if(result)
         return result;
+
+      /* Send any PREQUOTE strings after transfer type is set? (Wesley Laxton)*/
+      if(data->set.prequote) {
+        if ((result = ftp_sendquote(conn, data->set.prequote)) != CURLE_OK)
+          return result;
+      }
 
       /* Attempt to get the size, it'll be useful in some cases: for resumed
          downloads and when talking to servers that don't give away the size

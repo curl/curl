@@ -493,6 +493,9 @@ typedef enum {
 
   /* DNS cache timeout */
   CINIT(DNS_CACHE_TIMEOUT, LONG, 92),
+
+  /* send linked-list of pre-transfer QUOTE commands (Wesley Laxton)*/
+  CINIT(PREQUOTE, OBJECTPOINT, 93),
   
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;

@@ -604,8 +604,9 @@ struct UserDefined {
   char *crypto_engine;  /* name of the crypto engine to use */
   char *cookiejar;      /* dump all cookies to this file */
   bool crlf;            /* convert crlf on ftp upload(?) */
-  struct curl_slist *quote;     /* before the transfer */
+  struct curl_slist *quote;     /* after connection is established */
   struct curl_slist *postquote; /* after the transfer */
+  struct curl_slist *prequote; /* before the transfer, after type (Wesley Laxton)*/
   struct curl_slist *telnet_options; /* linked list of telnet options */
   curl_TimeCond timecondition; /* kind of time/date comparison */
   time_t timevalue;       /* what time to compare with */
