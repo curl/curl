@@ -1142,7 +1142,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
 #else
   FD_ZERO (&readfd);		/* clear it */
   FD_SET (sockfd, &readfd);
-  FD_SET (1, &readfd);
+  FD_SET (0, &readfd);
 
   keepfd = readfd;
 
@@ -1156,13 +1156,13 @@ CURLcode Curl_telnet(struct connectdata *conn)
     case 0:			/* timeout */
       break;
     default:			/* read! */
-      if(FD_ISSET(1, &readfd)) { /* read from stdin */
+      if(FD_ISSET(0, &readfd)) { /* read from stdin */
         unsigned char outbuf[2];
         int out_count = 0;
         size_t bytes_written;
         char *buffer = buf;
         
-        nread = read(1, buf, 255);
+        nread = read(0, buf, 255);
 
         while(nread--) {
           outbuf[0] = *buffer++;
