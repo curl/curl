@@ -297,6 +297,14 @@ static int get_request(int sock, int *part)
            Digest stuff to work in the test suite. */
         *part = 1000;
       }
+      else if(strstr(reqbuf, "Authorization: NTLM TlRMTVNTUAAD")) {
+        /* If the client is passing this type-3 NTLM header */
+        *part = 1002;
+      }
+      else if(strstr(reqbuf, "Authorization: NTLM TlRMTVNTUAAB")) {
+        /* If the client is passing this type-1 NTLM header */
+        *part = 1001;
+      }
     }
     else {
       if(sscanf(reqbuf, "CONNECT %" MAXDOCNAMELEN_TXT "s HTTP/%d.%d",
