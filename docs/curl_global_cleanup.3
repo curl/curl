@@ -1,0 +1,25 @@
+.\" You can view this file with:
+.\" nroff -man [file]
+.\" Written by daniel@haxx.se
+.\"
+.TH curl_global_cleanup 3 "28 May 2001" "libcurl 7.8" "libcurl Manual"
+.SH NAME
+curl_global_cleanup - Global libcurl cleanup
+.SH SYNOPSIS
+.B #include <curl/curl.h>
+.sp
+.BI "void curl_global_cleanup(void);"
+.ad
+.SH DESCRIPTION
+curl_global_cleanup must be called once (no matter how many threads or libcurl
+sessions that'll be used) by every application that uses libcurl, after all
+uses of libcurl is complete.
+
+This is the opposite of \fIcurl_global_init\fP.
+
+Not calling this function may result in memory leaks.
+.SH "SEE ALSO"
+.BR curl_global_init "(3), "
+.SH BUGS
+None?
+

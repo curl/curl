@@ -24,6 +24,8 @@ man_MANS = \
 	curl_strequal.3 \
 	curl_strnequal.3 \
 	curl_mprintf.3 \
+	curl_global_init.3 \
+	curl_global_cleanup.3 \
 	libcurl.5
 
 EXTRA_DIST = $(man_MANS) \

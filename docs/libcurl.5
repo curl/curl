@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by Daniel Stenberg
 .\"
-.TH libcurl 5 "15 May 2001" "libcurl 7.7.3" "libcurl overview"
+.TH libcurl 5 "28 May 2001" "libcurl 7.8" "libcurl overview"
 .SH NAME
 libcurl \- client-side URL transfers
 .SH DESCRIPTION
@@ -12,30 +12,30 @@ specific man pages for each function mentioned in here.
 libcurl can also be used directly from within your Java, PHP, Perl, Ruby or
 Tcl programs as well, look elsewhere for documentation on this!
 
-When using libcurl's easy interface, you init your session and get a handle,
-which you use as input to the following interface functions you use. Use
-.B curl_easy_init()
+All applications that use libcurl should call \fIcurl_global_init()\fP exactly
+once before any libcurl function can be used. After all usage of libcurl is
+complete, it \fBmust\fP call \fIcurl_global_cleanup()\fP. In between those two
+calls, you can use libcurl as described below.
+
+When using libcurl you init your session and get a handle, which you use as
+input to the following interface functions you use. Use \fIcurl_easy_init()\fP
 to get the handle.
 
 You continue by setting all the options you want in the upcoming transfer,
 most important among them is the URL itself (you can't transfer anything
 without a specified URL as you may have figured out yourself). You might want
 to set some callbacks as well that will be called from the library when data
-is available etc.
-.B curl_easy_setopt()
-is there for this.
+is available etc.  \fIcurl_easy_setopt()\fP is there for this.
 
 When all is setup, you tell libcurl to perform the transfer using
-.B curl_easy_perform().
-It will then do the entire operation and won't return until it is done
-(successfully or not).
+\fIcurl_easy_perform()\fP.  It will then do the entire operation and won't
+return until it is done (successfully or not).
 
 After the transfer has been made, you can set new options and make another
 transfer, or if you're done, cleanup the session by calling
-.B curl_easy_cleanup().
-If you want persistant connections, you don't cleanup immediately, but instead
-run ahead and perform other transfers using the same handle. See the chapter
-below for Persistant Connections.
+\fIcurl_easy_cleanup()\fP.  If you want persistant connections, you don't
+cleanup immediately, but instead run ahead and perform other transfers using
+the same handle. See the chapter below for Persistant Connections.
 
 There is also a series of other helpful functions to use. They are:
 
