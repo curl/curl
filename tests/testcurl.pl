@@ -212,7 +212,7 @@ rmtree "buildlog-*";
 foreach (glob("$CURLDIR/buildlog-*")) { unlink $_; }
 
 # create a dir to build in
-mkdir $build;
+mkdir $build, 0777;
 
 if (-d $build) {
   logit "build dir $build was created fine";
