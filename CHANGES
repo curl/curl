@@ -6,6 +6,21 @@
 
                                   Changelog
 
+Version 7.10.7 (15 August 2003)
+
+Daniel (14 August)
+- I modified the memdebug system to return failure on memory allocation
+  functions after a set amount of successful ones. This enables us to test
+  out-of-memory situations in a controlled manner and we can make sure that
+  curl/libcurl behaves good in those.
+
+  This made me find and fix several spots where we did not cleanup properly
+  when bailing out due to errors (low memory).
+
+- Corrected test case 74. Made using -o with bad #[num] codes complain and
+  bail out. Made #[num] support numbers larger than 9 as well. Added test
+  case 86 for a proper range globbing test as well.
+
 Version 7.10.7-pre4 (12 August 2003)
 
 Daniel (12 August)
