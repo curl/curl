@@ -77,13 +77,13 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
     switch (*pattern) {
     case '\0':			/* URL ended while set was still open */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
-               "unmatched brace at pos %d\n", pos);
+               "unmatched brace at pos %d\n", (int)pos);
       return GLOB_ERROR;
 
     case '{':
     case '[':			/* no nested expressions at this time */
       snprintf(glob->errormsg, sizeof(glob->errormsg),
-               "nested braces not supported at pos %d\n", pos);
+               "nested braces not supported at pos %d\n", (int)pos);
       return GLOB_ERROR;
 
     case ',':
@@ -119,13 +119,13 @@ static GlobCode glob_set(URLGlob *glob, char *pattern,
 
     case ']':				/* illegal closing bracket */
       snprintf(glob->errormsg, sizeof(glob->errormsg), 
-               "illegal pattern at pos %d\n", pos);
+               "illegal pattern at pos %d\n", (int)pos);
       return GLOB_ERROR;
 
     case '\\':				/* escaped character, skip '\' */
       if (*(buf+1) == '\0') {		/* but no escaping of '\0'! */
         snprintf(glob->errormsg, sizeof(glob->errormsg), 
-                 "illegal pattern at pos %d\n", pos);
+                 "illegal pattern at pos %d\n", (int)pos);
 	return GLOB_ERROR;
       }
       ++pattern;
