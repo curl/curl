@@ -29,9 +29,15 @@
 /*************************************************
  * This section is for compiler specific defines.*
  *************************************************/
-#ifdef MINGW32 /* Borland and MS don't have this */
+/* Borland and MS don't have this */
+#if defined(MINGW32) || defined(__WATCOMC__) || defined(__LCC__)
 
 /* Define if you have the <unistd.h> header file.  */
 #define HAVE_UNISTD_H 1
+
+#else
+
+/* MSVC needs an underscore */
+#define snprintf _snprintf
 
 #endif

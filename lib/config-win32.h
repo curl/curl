@@ -232,6 +232,11 @@
 /* Define if you have the <unistd.h> header file.  */
 #define HAVE_UNISTD_H 1
 
+#else
+
+/* MSVC needs an underscore */
+#define snprintf _snprintf
+
 #endif
 
 #endif
