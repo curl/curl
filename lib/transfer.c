@@ -296,7 +296,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           do {
             int hbufp_index;
             int rest_length;
-            int full_length;
+            size_t full_length;
             int writetype;
               
             /* str_start is start of line within buf */
@@ -356,8 +356,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             if (k->hbuflen + full_length >=
                 data->state.headersize) {
               char *newbuff;
-              long newsize=CURLMAX((k->hbuflen+full_length)*3/2,
-                                   data->state.headersize*2);
+              size_t newsize=CURLMAX((k->hbuflen+full_length)*3/2,
+                                     data->state.headersize*2);
               hbufp_index = k->hbufp - data->state.headerbuff;
               newbuff = (char *)realloc(data->state.headerbuff, newsize);
               if(!newbuff) {
@@ -667,7 +667,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             else if (checkprefix("Content-Type:", k->p)) {
               char *start;
               char *end;
-              int len;
+              size_t len;
               
               /* Find the first non-space letter */
               for(start=k->p+13;
@@ -1643,7 +1643,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
   /* Location: redirect */
   char prot[16]; /* URL protocol string storage */
   char letter;   /* used for a silly sscanf */
-  int newlen;
+  size_t newlen;
   char *newest;
   
   if (data->set.maxredirs &&
@@ -1683,7 +1683,7 @@ CURLcode Curl_follow(struct SessionHandle *data,
     char *pathsep;
 
     char *useurl = newurl;
-    int urllen;
+    size_t urllen;
 
     /* we must make our own copy of the URL to play with, as it may
        point to read-only data */

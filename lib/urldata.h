@@ -337,7 +337,7 @@ struct Curl_transfer_keeper {
   int headerline;		/* counts header lines to better track the
                                    first one */
   char *hbufp;			/* points at *end* of header line */
-  int hbuflen;
+  size_t hbuflen;
   char *str;			/* within buf */
   char *str_start;		/* within buf */
   char *end_ptr;		/* within buf */
@@ -704,7 +704,7 @@ struct UrlState {
   long numconnects; /* size of the 'connects' array */
 
   char *headerbuff; /* allocated buffer to store headers in */
-  int headersize;   /* size of the allocation */
+  size_t headersize;   /* size of the allocation */
 
   char buffer[BUFSIZE+1]; /* download buffer */
   char uploadbuffer[BUFSIZE+1]; /* upload buffer */
