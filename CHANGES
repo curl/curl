@@ -7,7 +7,13 @@
                                   Changelog
 
 
+Daniel (6 March 2005)
+- Randy McMurchy was the first to report that valgrind.pm was missing from the
+  release archive and thus 'make test' fails.
+
 Daniel (5 March 2005)
+- Dan Fandrich added HAVE_FTRUNCATE to several config-*.h files.
+
 - Added test case 235 that makes a resumed upload of a file that isn't present
   on the remote side. This then converts the operation to an ordinary STOR
   upload. This was requested/pointed out by Ignacio Vazquez-Abrams.
