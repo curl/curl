@@ -51,9 +51,15 @@
 #include "select.h"
 
 #ifdef WIN32
-#define VALID_SOCK(s) (1)  /* Win-sockets are not in range [0..FD_SETSIZE> */
+#define VERIFY_SOCK(x)  /* Win-sockets are not in range [0..FD_SETSIZE> */
 #else
 #define VALID_SOCK(s) (((s) >= 0) && ((s) < FD_SETSIZE))
+#define VERIFY_SOCK(x) do { \
+  if(!VALID_SOCK(x)) { \
+    errno = EINVAL; \
+    return -1; \
+  } \
+} while(0)
 #endif
 
 /*
@@ -129,10 +135,7 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 
   FD_ZERO(&fds_read);
   if (readfd != CURL_SOCKET_BAD) {
-    if (!VALID_SOCK(readfd)) {
-      errno = EINVAL;
-      return -1;
-    }
+    VERIFY_SOCK(readfd);
     FD_SET(readfd, &fds_read);
     FD_SET(readfd, &fds_err);
     maxfd = readfd;
@@ -140,13 +143,10 @@ int Curl_select(curl_socket_t readfd, curl_socket_t writefd, int timeout_ms)
 
   FD_ZERO(&fds_write);
   if (writefd != CURL_SOCKET_BAD) {
-    if (!VALID_SOCK(writefd)) {
-      errno = EINVAL;
-      return -1;
-    }
+    VERIFY_SOCK(writefd);
     FD_SET(writefd, &fds_write);
     FD_SET(writefd, &fds_err);
-    if (writefd > maxfd)
+    if (writefd > maxfd)s
       maxfd = writefd;
   }
 
