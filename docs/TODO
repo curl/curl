@@ -19,8 +19,6 @@ seven. Let's do a serious attempt to include most of this.
   Add asynchronous name resolving, as this enables full timeout support for
   fork() systems.
 
-  Make the resolving threadsafe(er).
-
   Make sure you can set the progress callback
 
   Add libtool stuff
