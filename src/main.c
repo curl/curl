@@ -1249,9 +1249,13 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
         else
           config->postfields=postdata;
       }
+      /*
+        We can't set the request type here, as this data might be used in
+        a simple GET if -G is used. Already or soon.
 
-      if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
-        return PARAM_BAD_USE;
+        if(SetHTTPrequest(HTTPREQ_SIMPLEPOST, &config->httpreq))
+          return PARAM_BAD_USE;
+      */
       break;
     case 'D':
       /* dump-header to given file name */
