@@ -8,6 +8,16 @@
 
 
 
+Daniel (25 February 2004)
+- Based on a patch by Greg Hewgill I modified how long long is used in the
+  mprintf code, as we can use a 64bit type with MSVC that is a long long
+  equivalent. This corrects some weird large file behaviors on windows.
+
+- Tor Arntsen helped me work out --enable-debug to work better with different
+  versions of the gcc and icc compilers.
+
+- Added CURLOPT_SHARE to the curl_easy_setopt.3 man page.
+
 Daniel (22 February 2004)
 - Applied the final pieces of Gisle Vanem's patch that brings a working name
   resolve timeout to the windows versions of curl!
