@@ -81,7 +81,6 @@
 
 CURLcode Curl_dict(struct connectdata *conn)
 {
-  int nth;
   char *word;
   char *ppath;
   char *database = NULL;
@@ -129,12 +128,6 @@ CURLcode Curl_dict(struct connectdata *conn)
     if ((strategy == NULL) || (*strategy == (char)0)) {
       strategy = (char *)".";
     }
-    if ((nthdef == NULL) || (*nthdef == (char)0)) {
-      nth = 0;
-    }
-    else {
-      nth = atoi(nthdef);
-    }
       
     result = Curl_sendf(sockfd, conn,
                         "CLIENT " LIBCURL_NAME " " LIBCURL_VERSION "\n"
@@ -178,12 +171,6 @@ CURLcode Curl_dict(struct connectdata *conn)
     }
     if ((database == NULL) || (*database == (char)0)) {
       database = (char *)"!";
-    }
-    if ((nthdef == NULL) || (*nthdef == (char)0)) {
-      nth = 0;
-    }
-    else {
-      nth = atoi(nthdef);
     }
       
     result = Curl_sendf(sockfd, conn,
