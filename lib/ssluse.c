@@ -46,6 +46,7 @@
 #include "ssluse.h"
 #include "connect.h" /* Curl_ourerrno() proto */
 #include "strequal.h"
+#include "select.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -1260,9 +1261,8 @@ Curl_SSLConnect(struct connectdata *conn,
   SSL_set_fd(connssl->handle, sockfd);
 
   while(1) {
-    fd_set writefd;
-    fd_set readfd;
-    struct timeval interval;
+    int writefd;
+    int readfd;
     long timeout_ms;
 
     /* Find out if any timeout is set. If not, use 300 seconds.
@@ -1296,8 +1296,8 @@ Curl_SSLConnect(struct connectdata *conn,
       timeout_ms= DEFAULT_CONNECT_TIMEOUT;
 
 
-    FD_ZERO(&writefd);
-    FD_ZERO(&readfd);
+    readfd = CURL_SOCKET_BAD;
+    writefd = CURL_SOCKET_BAD;
 
     err = SSL_connect(connssl->handle);
 
@@ -1308,9 +1308,9 @@ Curl_SSLConnect(struct connectdata *conn,
       int detail = SSL_get_error(connssl->handle, err);
 
       if(SSL_ERROR_WANT_READ == detail)
-        FD_SET(sockfd, &readfd);
+        readfd = sockfd;
       else if(SSL_ERROR_WANT_WRITE == detail)
-        FD_SET(sockfd, &writefd);
+        writefd = sockfd;
       else {
         /* untreated error */
         unsigned long errdetail;
@@ -1373,13 +1373,8 @@ Curl_SSLConnect(struct connectdata *conn,
       /* we have been connected fine, get out of the connect loop */
       break;
 
-    interval.tv_sec = (int)(timeout_ms/1000);
-    timeout_ms -= interval.tv_sec*1000;
-
-    interval.tv_usec = timeout_ms*1000;
-
     while(1) {
-      what = select(sockfd+1, &readfd, &writefd, NULL, &interval);
+      what = Curl_select(readfd, writefd, timeout_ms);
       if(what > 0)
         /* reabable or writable, go loop in the outer loop */
         break;

@@ -64,10 +64,6 @@
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-
 
 #endif
 
@@ -85,6 +81,7 @@
 
 #include "arpa_telnet.h"
 #include "memory.h"
+#include "select.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -1088,8 +1085,8 @@ CURLcode Curl_telnet(struct connectdata *conn)
   DWORD waitret;
   DWORD readfile_read;
 #else
-  fd_set readfd;
-  fd_set keepfd;
+  int interval_ms;
+  struct pollfd pfd[2];
 #endif
   ssize_t nread;
   bool keepon = TRUE;
@@ -1308,27 +1305,21 @@ CURLcode Curl_telnet(struct connectdata *conn)
   if (!FreeLibrary(wsock2))
     infof(data,"FreeLibrary(wsock2) failed (%d)",GetLastError());
 #else
-  FD_ZERO (&readfd);            /* clear it */
-  FD_SET (sockfd, &readfd);
-  FD_SET (0, &readfd);
-
-  keepfd = readfd;
+  pfd[0].fd = sockfd;
+  pfd[0].events = POLLIN;
+  pfd[1].fd = 0;
+  pfd[1].events = POLLIN;
+  interval_ms = 1 * 1000;
 
   while (keepon) {
-    struct timeval interval;
-
-    readfd = keepfd;            /* set this every lap in the loop */
-    interval.tv_sec = 1;
-    interval.tv_usec = 0;
-
-    switch (select (sockfd + 1, &readfd, NULL, NULL, &interval)) {
+    switch (Curl_poll(pfd, 2, interval_ms)) {
     case -1:                    /* error, stop reading */
       keepon = FALSE;
       continue;
     case 0:                     /* timeout */
       break;
     default:                    /* read! */
-      if(FD_ISSET(0, &readfd)) { /* read from stdin */
+      if(pfd[1].revents & POLLIN) { /* read from stdin */
         unsigned char outbuf[2];
         int out_count = 0;
         ssize_t bytes_written;
@@ -1347,7 +1338,7 @@ CURLcode Curl_telnet(struct connectdata *conn)
         }
       }
 
-      if(FD_ISSET(sockfd, &readfd)) {
+      if(pfd[0].revents & POLLIN) {
         /* This OUGHT to check the return code... */
         (void)Curl_read(conn, sockfd, buf, BUFSIZE - 1, &nread);
 

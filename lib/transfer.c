@@ -75,9 +75,6 @@
 #include <sys/select.h>
 #endif
 
-#ifndef HAVE_SELECT
-#error "We can't compile without select() support!"
-#endif
 #ifndef HAVE_SOCKET
 #error "We can't compile without socket() support!"
 #endif
@@ -103,6 +100,7 @@
 #include "http_negotiate.h"
 #include "share.h"
 #include "memory.h"
+#include "select.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -117,10 +115,6 @@ enum {
   KEEP_READ,
   KEEP_WRITE
 };
-
-/* We keep this static and global since this is read-only and NEVER
-   changed. It should just remain a blanked-out timeout value. */
-static struct timeval notimeout={0,0};
 
 /*
  * This function will call the read callback to fill our buffer with data
@@ -213,43 +207,28 @@ CURLcode Curl_readwrite(struct connectdata *conn,
   ssize_t nread; /* number of bytes read */
   int didwhat=0;
 
-  /* These two are used only if no other select() or _fdset() have been
-     invoked before this. This typicly happens if you use the multi interface
-     and call curl_multi_perform() without calling curl_multi_fdset()
-     first. */
-  fd_set extrareadfd;
-  fd_set extrawritefd;
+  int fd_read;
+  int fd_write;
+  int select_res;
 
-  fd_set *readfdp = k->readfdp;
-  fd_set *writefdp = k->writefdp;
   curl_off_t contentlength;
 
-  if((k->keepon & KEEP_READ) && !readfdp) {
-    /* reading is requested, but no socket descriptor pointer was set */
-    FD_ZERO(&extrareadfd);
-    FD_SET(conn->sockfd, &extrareadfd);
-    readfdp = &extrareadfd;
+  if(k->keepon & KEEP_READ)
+    fd_read = conn->sockfd;
+  else
+    fd_read = CURL_SOCKET_BAD;
 
-    /* no write, no exceptions, no timeout */
-    select(conn->sockfd+1, readfdp, NULL, NULL, &notimeout);
-  }
-  if((k->keepon & KEEP_WRITE) && !writefdp) {
-    /* writing is requested, but no socket descriptor pointer was set */
-    FD_ZERO(&extrawritefd);
-    FD_SET(conn->writesockfd, &extrawritefd);
-    writefdp = &extrawritefd;
+  if(k->keepon & KEEP_WRITE)
+    fd_write = conn->writesockfd;
+  else
+    fd_write = CURL_SOCKET_BAD;
 
-    /* no read, no exceptions, no timeout */
-    select(conn->writesockfd+1, NULL, writefdp, NULL, &notimeout);
-  }
+  select_res = Curl_select(fd_read, fd_write, 0);
 
   do {
     /* If we still have reading to do, we check if we have a readable
-       socket. Sometimes the reafdp is NULL, if no fd_set was done using
-       the multi interface and then we can do nothing but to attempt a
-       read to be sure. */
-    if((k->keepon & KEEP_READ) &&
-       (!readfdp || FD_ISSET(conn->sockfd, readfdp))) {
+       socket. */
+    if((k->keepon & KEEP_READ) && (select_res & CSELECT_IN)) {
 
       bool is_empty_data = FALSE;
 
@@ -291,7 +270,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
            we bail out from this! */
         else if (0 >= nread) {
           k->keepon &= ~KEEP_READ;
-          FD_ZERO(&k->rkeepfd);
           break;
         }
 
@@ -436,7 +414,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 if (k->write_after_100_header) {
 
                   k->write_after_100_header = FALSE;
-                  FD_SET (conn->writesockfd, &k->writefd); /* write */
                   k->keepon |= KEEP_WRITE;
                   k->wkeepfd = k->writefd;
                 }
@@ -453,7 +430,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  */
                 k->write_after_100_header = FALSE;
                 k->keepon &= ~KEEP_WRITE;
-                FD_ZERO(&k->wkeepfd);
               }
 
 #ifndef CURL_DISABLE_HTTP
@@ -550,7 +526,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 if(stop_reading) {
                   /* we make sure that this socket isn't read more now */
                   k->keepon &= ~KEEP_READ;
-                  FD_ZERO(&k->rkeepfd);
                 }
 
                 break;          /* exit header line loop */
@@ -951,7 +926,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                   /* Abort after the headers if "follow Location" is set
                      and we're set to close anyway. */
                   k->keepon &= ~KEEP_READ;
-                  FD_ZERO(&k->rkeepfd);
                   *done = TRUE;
                   return CURLE_OK;
                 }
@@ -1040,7 +1014,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
             else if(CHUNKE_STOP == res) {
               /* we're done reading chunks! */
               k->keepon &= ~KEEP_READ; /* read no more */
-              FD_ZERO(&k->rkeepfd);
 
               /* There are now possibly N number of bytes at the end of the
                  str buffer that weren't written to the client, but we don't
@@ -1057,7 +1030,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
               nread = 0;
 
             k->keepon &= ~KEEP_READ; /* we're done reading */
-            FD_ZERO(&k->rkeepfd);
           }
 
           k->bytecount += nread;
@@ -1125,7 +1097,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           /* if we received nothing, the server closed the connection and we
              are done */
           k->keepon &= ~KEEP_READ;
-          FD_ZERO(&k->rkeepfd);
         }
 
       } while(0);
@@ -1133,11 +1104,8 @@ CURLcode Curl_readwrite(struct connectdata *conn,
     } /* if( read from socket ) */
 
     /* If we still have writing to do, we check if we have a writable
-       socket. Sometimes the writefdp is NULL, if no fd_set was done using
-       the multi interface and then we can do nothing but to attempt a
-       write to be sure. */
-    if((k->keepon & KEEP_WRITE) &&
-       (!writefdp || FD_ISSET(conn->writesockfd, writefdp)) ) {
+       socket. */
+    if((k->keepon & KEEP_WRITE) && (select_res & CSELECT_OUT)) {
       /* write */
 
       int i, si;
@@ -1173,7 +1141,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                  go into the Expect: 100 state and await such a header */
               k->wait100_after_headers = FALSE; /* headers sent */
               k->write_after_100_header = TRUE; /* wait for the header */
-              FD_ZERO (&k->writefd);            /* clear it */
               k->wkeepfd = k->writefd;          /* set the keeper variable */
               k->keepon &= ~KEEP_WRITE;         /* disable writing */
               k->start100 = Curl_tvnow();       /* timeout count starts now */
@@ -1195,7 +1162,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           if (nread<=0) {
             /* done */
             k->keepon &= ~KEEP_WRITE; /* we're done writing */
-            FD_ZERO(&k->wkeepfd);
             writedone = TRUE;
             break;
           }
@@ -1271,7 +1237,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
           if(k->upload_done) {
             /* switch off writing, we're done! */
             k->keepon &= ~KEEP_WRITE; /* we're done writing */
-            FD_ZERO(&k->wkeepfd);
             writedone = TRUE;
           }
         }
@@ -1313,7 +1278,6 @@ CURLcode Curl_readwrite(struct connectdata *conn,
       if(ms > CURL_TIMEOUT_EXPECT_100) {
         /* we've waited long enough, continue anyway */
         k->write_after_100_header = FALSE;
-        FD_SET (conn->writesockfd, &k->writefd); /* write socket */
         k->keepon |= KEEP_WRITE;
         k->wkeepfd = k->writefd;
       }
@@ -1405,13 +1369,10 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
   /* we want header and/or body, if neither then don't do this! */
   if(conn->bits.getheader || !conn->bits.no_body) {
 
-    FD_ZERO (&k->readfd);               /* clear it */
-    if(conn->sockfd != CURL_SOCKET_BAD) {
-      FD_SET (conn->sockfd, &k->readfd); /* read socket */
+    if(conn->sockfd != CURL_SOCKET_BAD) { 
       k->keepon |= KEEP_READ;
     }
 
-    FD_ZERO (&k->writefd);              /* clear it */
     if(conn->writesockfd != CURL_SOCKET_BAD) {
       /* HTTP 1.1 magic:
 
@@ -1433,7 +1394,6 @@ CURLcode Curl_readwrite_init(struct connectdata *conn)
           /* when we've sent off the rest of the headers, we must await a
              100-continue */
           k->wait100_after_headers = TRUE;
-        FD_SET (conn->writesockfd, &k->writefd); /* write socket */
         k->keepon |= KEEP_WRITE;
       }
     }
@@ -1521,13 +1481,23 @@ Transfer(struct connectdata *conn)
   k->readfdp = &k->readfd;   /* store the address of the set */
 
   while (!done) {
-    struct timeval interval;
-    k->readfd = k->rkeepfd;  /* set these every lap in the loop */
-    k->writefd = k->wkeepfd;
-    interval.tv_sec = 1;
-    interval.tv_usec = 0;
+    int fd_read;
+    int fd_write;
+    int interval_ms;
 
-    switch (select (k->maxfd, k->readfdp, k->writefdp, NULL, &interval)) {
+    interval_ms = 1 * 1000;
+
+    if(k->keepon & KEEP_READ)
+      fd_read = conn->sockfd;
+    else
+      fd_read = CURL_SOCKET_BAD;
+
+    if(k->keepon & KEEP_WRITE)
+      fd_write = conn->writesockfd;
+    else
+      fd_write = CURL_SOCKET_BAD;
+
+    switch (Curl_select(fd_read, fd_write, interval_ms)) {
     case -1: /* select() error, stop reading */
 #ifdef EINTR
       /* The EINTR is not serious, and it seems you might get this more

@@ -19,6 +19,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o now gracefully bails out when exceeding FD_SETSIZE file descriptors
  o CURLINFO_REDIRECT_TIME works
  o building with gssapi libs and hdeaders in the default dirs
  o curl_getdate() parsing of dates later than year 2037 with 32 bit time_t
@@ -43,6 +44,7 @@ advice from friends like these:
 
  Peter Wullinger, Guillaume Arluison, Alexander Krasnostavsky, Mohun Biswas,
  Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia,
- Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips
+ Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips,
+ Wojciech Zwiefka, David Phillips
 
         Thanks! (and sorry if I forgot to mention someone)

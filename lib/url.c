@@ -64,10 +64,6 @@
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-
 #ifdef VMS
 #include <in.h>
 #include <inet.h>
@@ -77,9 +73,6 @@
 #include <setjmp.h>
 #endif
 
-#ifndef HAVE_SELECT
-#error "We can't compile without select() support!"
-#endif
 #ifndef HAVE_SOCKET
 #error "We can't compile without socket() support!"
 #endif
@@ -127,6 +120,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 #include "content_encoding.h"
 #include "http_digest.h"
 #include "http_negotiate.h"
+#include "select.h"
 
 /* And now for the protocols */
 #include "ftp.h"
@@ -1552,16 +1546,8 @@ static bool SocketIsDead(curl_socket_t sock)
 {
   int sval;
   bool ret_val = TRUE;
-  fd_set check_set;
-  struct timeval to;
 
-  FD_ZERO(&check_set);
-  FD_SET(sock, &check_set);
-
-  to.tv_sec = 0;
-  to.tv_usec = 0;
-
-  sval = select(sock + 1, &check_set, 0, 0, &to);
+  sval = Curl_select(sock, CURL_SOCKET_BAD, 0);
   if(sval == 0)
     /* timeout */
     ret_val = FALSE;

@@ -7,7 +7,8 @@ CSOURCES = file.c timeval.c base64.c hostip.c progress.c formdata.c	\
   memdebug.c http_chunks.c strtok.c connect.c llist.c hash.c multi.c	\
   content_encoding.c share.c http_digest.c md5.c http_negotiate.c	\
   http_ntlm.c inet_pton.c strtoofft.c strerror.c hostares.c hostasyn.c	\
-  hostip4.c hostip6.c hostsyn.c hostthre.c inet_ntop.c parsedate.c
+  hostip4.c hostip6.c hostsyn.c hostthre.c inet_ntop.c parsedate.c	\
+  select.c
 
 HHEADERS = arpa_telnet.h netrc.h file.h timeval.h base64.h hostip.h	\
   progress.h formdata.h cookie.h http.h sendf.h ftp.h url.h dict.h	\
@@ -16,4 +17,4 @@ HHEADERS = arpa_telnet.h netrc.h file.h timeval.h base64.h hostip.h	\
   http_chunks.h strtok.h connect.h llist.h hash.h content_encoding.h	\
   share.h md5.h http_digest.h http_negotiate.h http_ntlm.h ca-bundle.h	\
   inet_pton.h strtoofft.h strerror.h inet_ntop.h curlx.h memory.h	\
-  setup.h transfer.h
+  setup.h transfer.h select.h

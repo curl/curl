@@ -6,6 +6,10 @@
 
                                   Changelog
 
+Daniel (18 November 2004)
+- David Phillips fixed libcurl to not crash anymore when more than FD_SETSIZE
+  file descriptors are in use. Test case 518 added to verify.
+
 Daniel (15 November 2004)
 - To test my fix for the CURLINFO_REDIRECT_TIME bug, I added time_redirect and
   num_redirects support to the -w writeout option for the command line tool.
@@ -178,7 +182,7 @@ Daniel (11 October 2004)
   send() on other systems. Alan Pinstein verified the fix.
 
 Daniel (10 October 2004)
-- Systems with 64bit longs no longeruse strtoll() or our strtoll- replacement
+- Systems with 64bit longs no longer use strtoll() or our strtoll- replacement
   to parse 64 bit numbers. strtol() works fine. Added a configure check to
   detect if [constant]LL works and if so, use that in the strtoll replacement
   code to work around compiler warnings reported by Andy Cedilnik.

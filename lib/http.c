@@ -74,10 +74,6 @@
 #include <sys/param.h>
 #endif
 
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
-
 #endif
 
 #include "urldata.h"
@@ -98,6 +94,7 @@
 #include "hostip.h"
 #include "http.h"
 #include "memory.h"
+#include "select.h"
 
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
@@ -935,9 +932,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
   ssize_t gotbytes;
   char *ptr;
   long timeout = 3600; /* default timeout in seconds */
-  struct timeval interval;
-  fd_set rkeepfd;
-  fd_set readfd;
+  int interval_ms;
   char *line_start;
   char *host_port;
   curl_socket_t tunnelsocket = conn->sock[sockindex];
@@ -985,13 +980,6 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
     if(result)
       return result;
 
-    FD_ZERO (&readfd);          /* clear it */
-    FD_SET (tunnelsocket, &readfd);     /* read socket */
-
-    /* get this in a backup variable to be able to restore it on each lap in
-       the select() loop */
-    rkeepfd = readfd;
-
     ptr=data->state.buffer;
     line_start = ptr;
 
@@ -1000,9 +988,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
     keepon=TRUE;
 
     while((nread<BUFSIZE) && (keepon && !error)) {
-      readfd = rkeepfd;     /* set every lap */
-      interval.tv_sec = 1;  /* timeout each second and check the timeout */
-      interval.tv_usec = 0;
+      interval_ms = 1;  /* timeout each second and check the timeout */
 
       if(data->set.timeout) {
         /* if timeout is requested, find out how much remaining time we have */
@@ -1015,7 +1001,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
         }
       }
 
-      switch (select (tunnelsocket+1, &readfd, NULL, NULL, &interval)) {
+      switch (Curl_select(tunnelsocket, CURL_SOCKET_BAD, interval_ms)) {
       case -1: /* select() error, stop reading */
         error = SELECT_ERROR;
         failf(data, "Proxy CONNECT aborted due to select() error");

@@ -97,6 +97,7 @@
 #include "strerror.h"
 #include "connect.h"
 #include "memory.h"
+#include "select.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -202,9 +203,6 @@ static
 int waitconnect(curl_socket_t sockfd, /* socket */
                 long timeout_msec)
 {
-  fd_set fd;
-  fd_set errfd;
-  struct timeval interval;
   int rc;
 #ifdef mpeix
   /* Call this function once now, and ignore the results. We do this to
@@ -214,18 +212,7 @@ int waitconnect(curl_socket_t sockfd, /* socket */
 #endif
 
   /* now select() until we get connect or timeout */
-  FD_ZERO(&fd);
-  FD_SET(sockfd, &fd);
-
-  FD_ZERO(&errfd);
-  FD_SET(sockfd, &errfd);
-
-  interval.tv_sec = (int)(timeout_msec/1000);
-  timeout_msec -= interval.tv_sec*1000;
-
-  interval.tv_usec = timeout_msec*1000;
-
-  rc = select(sockfd+1, NULL, &fd, &errfd, &interval);
+  rc = Curl_select(CURL_SOCKET_BAD, sockfd, timeout_msec);
   if(-1 == rc)
     /* error, no connect here, try next */
     return WAITCONN_SELECT_ERROR;
@@ -234,7 +221,7 @@ int waitconnect(curl_socket_t sockfd, /* socket */
     /* timeout, no connect today */
     return WAITCONN_TIMEOUT;
 
-  if(FD_ISSET(sockfd, &errfd))
+  if(rc & CSELECT_ERR)
     /* error condition caught */
     return WAITCONN_FDSET_ERROR;
 

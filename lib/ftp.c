@@ -34,9 +34,6 @@
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#endif
 
 #if defined(WIN32) && !defined(__GNUC__) || defined(__MINGW32__)
 
@@ -96,6 +93,7 @@
 #include "strerror.h"
 #include "memory.h"
 #include "inet_ntop.h"
+#include "select.h"
 
 #if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
 #include "inet_ntoa_r.h"
@@ -162,18 +160,13 @@ static void freedirs(struct FTP *ftp)
  */
 static CURLcode AllowServerConnect(struct connectdata *conn)
 {
-  fd_set rdset;
-  struct timeval dt;
+  int timeout_ms;
   struct SessionHandle *data = conn->data;
   curl_socket_t sock = conn->sock[SECONDARYSOCKET];
   struct timeval now = Curl_tvnow();
   long timespent = Curl_tvdiff(Curl_tvnow(), now)/1000;
   long timeout = data->set.connecttimeout?data->set.connecttimeout:
     (data->set.timeout?data->set.timeout: 0);
-
-  FD_ZERO(&rdset);
-
-  FD_SET(sock, &rdset);
 
   if(timeout) {
     timeout -= timespent;
@@ -184,10 +177,9 @@ static CURLcode AllowServerConnect(struct connectdata *conn)
   }
 
   /* we give the server 60 seconds to connect to us, or a custom timeout */
-  dt.tv_sec = (int)(timeout?timeout:60);
-  dt.tv_usec = 0;
+  timeout_ms = (timeout?timeout:60) * 1000;
 
-  switch (select(sock+1, &rdset, NULL, NULL, &dt)) {
+  switch (Curl_select(sock, CURL_SOCKET_BAD, timeout_ms)) {
   case -1: /* error */
     /* let's die here */
     failf(data, "Error while waiting for server connect");
@@ -250,9 +242,7 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
   ssize_t gotbytes;
   char *ptr;
   long timeout;              /* timeout in seconds */
-  struct timeval interval;
-  fd_set rkeepfd;
-  fd_set readfd;
+  int interval_ms;
   struct SessionHandle *data = conn->data;
   char *line_start;
   int code=0; /* default ftp "error code" to return */
@@ -263,13 +253,6 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
 
   if (ftpcode)
     *ftpcode = 0; /* 0 for errors */
-
-  FD_ZERO (&readfd);            /* clear it */
-  FD_SET (sockfd, &readfd);     /* read socket */
-
-  /* get this in a backup variable to be able to restore it on each lap in the
-     select() loop */
-  rkeepfd = readfd;
 
   ptr=buf;
   line_start = buf;
@@ -304,11 +287,9 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
     }
 
     if(!ftp->cache) {
-      readfd = rkeepfd;            /* set every lap */
-      interval.tv_sec = 1; /* use 1 second timeout intervals */
-      interval.tv_usec = 0;
+      interval_ms = 1 * 1000;  /* use 1 second timeout intervals */
 
-      switch (select (sockfd+1, &readfd, NULL, NULL, &interval)) {
+      switch (Curl_select(sockfd, CURL_SOCKET_BAD, interval_ms)) {
       case -1: /* select() error, stop reading */
         result = CURLE_RECV_ERROR;
         failf(data, "FTP response aborted due to select() error: %d", errno);
