@@ -7,6 +7,9 @@
                                   Changelog
 
 
+Daniel (27 November)
+- Markus Moeller improvied the SPNEGO detection in the configure script.
+
 Daniel (25 November)
 - 'Dave' filed bug report #848371, identifying that if you'd do POST over a
   proxy to a https server, libcurl didn't POST at all, it just made a GET! It
