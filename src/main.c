@@ -413,6 +413,7 @@ static void help(void)
        " -2/--sslv2         Force usage of SSLv2 (H)\n"
        " -3/--sslv3         Force usage of SSLv3 (H)");
   puts(" -#/--progress-bar  Display transfer progress as a progress bar");
+}
 
 struct LongShort {
   const char *letter;
