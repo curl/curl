@@ -25,6 +25,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o URLs with username and IPv6 numerical addresses
  o configure works better with SSL libs in a "non-standard ld.so dir"
  o curl-config --vernum zero prefixed
  o bad memory access in the NTLM code
@@ -64,6 +65,7 @@ advice from friends like these:
  Tomas Pospisek, Gisle Vanem, Dan Fandrich, Paul Nolan, Andres Garcia,
  Tim Sneddon, Ian Gulliver, Jean-Philippe Barrette-LaPierre, Jeff Phillips,
  Wojciech Zwiefka, David Phillips, Reinout van Schouwen, Maurice Barnum,
- Richard Atterer, Rene Bernhardt, Matt Veenstra, Bryan Henderson, Ton Voon
+ Richard Atterer, Rene Bernhardt, Matt Veenstra, Bryan Henderson, Ton Voon,
+ Kai Sommerfeld
 
         Thanks! (and sorry if I forgot to mention someone)

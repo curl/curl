@@ -6,6 +6,12 @@
 
                                   Changelog
 
+
+Daniel (10 December 2004)
+- When providing user name in the URL and a IPv6-style IP-address (like in
+  "ftp://user@[::1]/tmp"), the URL parser didn't get the host extracted
+  properly.  Reported and fixed by Kai Sommerfeld.
+
 Daniel (9 December 2004)
 - Ton Voon provided a configure fix that should fix the notorious (mostly
   reported on Solaris) problem where the size_t check fails due to the SSL
