@@ -385,6 +385,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
   }
 
+  infof(data, "About to connect() to %s:%d\n",
+        data->change.proxy?conn->proxyhost:conn->hostname, port);
+
 #ifdef ENABLE_IPV6
   /*
    * Connecting with IPv6 support is so much easier and cleanly done
@@ -424,7 +427,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         case ECONNREFUSED: /* no one listening */
         default:
           /* unknown error, fallthrough and try another address! */
-          failf(data, "Failed to connect");
+          failf(data, "Failed to connect: %d", error);
           break;
         }
       }
@@ -529,7 +532,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
         break;
       default:
         /* unknown error, fallthrough and try another address! */
-        failf(data, "Failed to connect to IP number %d", aliasindex+1);
+        failf(data, "Failed to connect to IP number %d: %d",
+              aliasindex+1, error);
         break;
       }
     }
