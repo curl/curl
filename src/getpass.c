@@ -212,5 +212,5 @@ char *getpass_r(const char *prompt, /* prompt to display */
   return password; /* return pointer to buffer */
 }
 
-#endif /* HAVE_GETPASS */
+#endif /* DONE */
 #endif /* HAVE_GETPASS_R */
