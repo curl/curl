@@ -25,18 +25,18 @@ ftp://%HOSTIP:%FTPPORT/a/path/103 -P -
 
 # Verify data after the test has been "shot"
 <verify>
-<strip>
-^PORT .*
-^EPRT.*
-^LPRT.*
-</strip>
+<strippart>
+s/^LPRT.*[\n]//
+s/^EPRT.*[\n]//
+s/^(PORT 127,0,0,1,)([0-9,]+)/$1/
+</strippart>
 <protocol>
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
 CWD a
 CWD path
-PORT 127,0,0,1,246,33
+PORT 127,0,0,1,
 TYPE I
 SIZE 103
 RETR 103
