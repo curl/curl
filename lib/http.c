@@ -924,8 +924,9 @@ CURLcode Curl_http(struct connectdata *conn)
            actually set your own */
         add_bufferf(req_buffer,
                     "Content-Length: %d\r\n",
-                    (data->set.postfieldsize?data->set.postfieldsize:
-                     strlen(data->set.postfields)) );
+                    data->set.postfieldsize?
+                    data->set.postfieldsize:
+                    (data->set.postfields?strlen(data->set.postfields):0) );
 
       if(!checkheaders(data, "Content-Type:"))
         add_bufferf(req_buffer,
