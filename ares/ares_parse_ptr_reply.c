@@ -13,8 +13,6 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id$";
-
 #include <sys/types.h>
 
 #ifdef WIN32

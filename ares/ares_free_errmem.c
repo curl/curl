@@ -13,8 +13,6 @@
  * without express or implied warranty.
  */
 
-static const char rcsid[] = "$Id$";
-
 #include "ares.h"
 
 /* Do nothing, for now.  A future implementation may want to deal with
