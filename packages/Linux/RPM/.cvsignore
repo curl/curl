@@ -1,2 +1,4 @@
 Makefile
 Makefile.in
+curl-ssl.spec
+curl.spec

@@ -4,3 +4,5 @@ Makefile
 *.in
 .deps
 .libs
+config.h
+stamp-h1
