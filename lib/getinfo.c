@@ -141,10 +141,10 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_doublep = (double)data->progress.downloaded;
     break;
   case CURLINFO_SPEED_DOWNLOAD:
-    *param_doublep =  data->progress.dlspeed;
+    *param_doublep =  (double)data->progress.dlspeed;
     break;
   case CURLINFO_SPEED_UPLOAD:
-    *param_doublep = data->progress.ulspeed;
+    *param_doublep = (double)data->progress.ulspeed;
     break;
   case CURLINFO_SSL_VERIFYRESULT:
     *param_longp = data->set.ssl.certverifyresult;
