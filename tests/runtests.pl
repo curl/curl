@@ -912,7 +912,8 @@ for(keys %run) {
 }
 
 if($total) {
-    print "$ok tests out of $total reported OK\n";
+    printf("$ok tests out of $total reported OK: %d%%\n",
+           $ok/$total*100);
 
     if($ok != $total) {
         print "These test cases failed: $failed\n";
