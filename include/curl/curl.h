@@ -96,7 +96,9 @@ typedef int (*curl_progress_callback)(void *clientp,
                                       double ultotal,
                                       double ulnow);
 
-#define CURL_MAX_WRITE_SIZE 20480
+  /* Tests have proven that 20K is a very bad buffer size for uploads on
+     Windows, while 16K for some odd reason performed a lot better. */
+#define CURL_MAX_WRITE_SIZE 16384
 
 typedef size_t (*curl_write_callback)(char *buffer,
                                       size_t size,
@@ -870,11 +872,6 @@ typedef enum {
   CURLINFO_LASTONE          = 22
 } CURLINFO;
 
-/* unfortunately, the easy.h and multi.h include files need options and info
-  stuff before they can be included! */
-#include "easy.h" /* nothing in curl is fun without the easy stuff */
-#include "multi.h"
-
 typedef enum {
   CURLCLOSEPOLICY_NONE, /* first, never use this */
 
@@ -968,5 +965,10 @@ curl_version_info_data *curl_version_info(CURLversion);
 #ifdef  __cplusplus
 }
 #endif
+
+/* unfortunately, the easy.h and multi.h include files need options and info
+  stuff before they can be included! */
+#include "easy.h" /* nothing in curl is fun without the easy stuff */
+#include "multi.h"
 
 #endif /* __CURL_CURL_H */
