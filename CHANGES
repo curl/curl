@@ -6,6 +6,11 @@
 
                                History of Changes
 
+Daniel (3 April 2001)
+- Puneet Pawaia pointed out two serious problems. Libcurl would attempt to
+  read bad memory during situations when an (ftp) connection attempt failed.
+  Also, the lib/Makefile.vc6 was corrected.
+
 Daniel (29 March 2001)
 - Georg Horn mailed me some corrections for the Curl::easy perl interface.
 
