@@ -195,7 +195,7 @@ typedef enum _MERIDIAN {
 } MERIDIAN;
 
 /* parse results and input string */
-typedef struct _CONTEXT {
+typedef struct _CURL_CONTEXT {
     const char	*yyInput;
     int		yyDayOrdinal;
     int		yyDayNumber;
@@ -218,14 +218,14 @@ typedef struct _CONTEXT {
     int		yyRelMonth;
     int		yyRelSeconds;
     int		yyRelYear;
-} CONTEXT;
+} CURL_CONTEXT;
 
 /* enable use of extra argument to yyparse and yylex which can be used to pass
-**  in a user defined value (CONTEXT struct in our case)
+**  in a user defined value (CURL_CONTEXT struct in our case)
 */
 #define YYPARSE_PARAM cookie
 #define YYLEX_PARAM cookie
-#define context ((CONTEXT *) cookie)
+#define context ((CURL_CONTEXT *) cookie)
 
 #line 215 "getdate.y"
 typedef union {
@@ -397,7 +397,7 @@ static const short yycheck[] = {     0,
 #define YYPURE 1
 
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
-#line 3 "/usr/local/share/bison.simple"
+#line 3 "/usr/lib/bison.simple"
 /* This file comes from bison-1.28.  */
 
 /* Skeleton output parser for bison,
@@ -611,7 +611,7 @@ __yy_memcpy (char *to, char *from, unsigned int count)
 #endif
 #endif
 
-#line 217 "/usr/local/share/bison.simple"
+#line 217 "/usr/lib/bison.simple"
 
 /* The user can define YYPARSE_PARAM as the name of an argument to be passed
    into yyparse.  The argument should have type void *.
@@ -1303,7 +1303,7 @@ case 50:
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
-#line 543 "/usr/local/share/bison.simple"
+#line 543 "/usr/lib/bison.simple"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -1988,7 +1988,7 @@ curl_getdate (const char *p, const time_t *now)
 {
   struct tm tm, tm0, *tmp;
   time_t Start;
-  CONTEXT cookie;
+  CURL_CONTEXT cookie;
 #ifdef HAVE_LOCALTIME_R
   struct tm keeptime;
 #endif
