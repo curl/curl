@@ -69,6 +69,11 @@
 #ifdef HAVE_SYS_UTIME_H
 #include <sys/utime.h>
 #endif
+
+#endif
+
+#ifdef HAVE_SYS_POLL_H
+#include <sys/poll.h>
 #endif
 
 /* The last #include file should be: */
@@ -361,7 +366,8 @@ static void help(void)
        "    --interface <interface> Specify the interface to be used\n"
        "    --krb4 <level>  Enable krb4 with specified security level (F)\n"
        " -K/--config        Specify which config file to read\n"
-       " -l/--list-only     List only names of an FTP directory (F)");
+       " -l/--list-only     List only names of an FTP directory (F)\n"
+       "   /--limit-rate <rate> Limit how fast transfers to allow");
   puts(" -L/--location      Follow Location: hints (H)\n"
        " -m/--max-time <seconds> Maximum time allowed for the transfer\n"
        " -M/--manual        Display huge help text\n"
@@ -497,6 +503,17 @@ struct Configurable {
   struct curl_slist *telnet_options;
         
   HttpReq httpreq;
+
+  /* for bandwidth limiting features: */
+
+  size_t sendpersecond; /* send to peer */
+  size_t recvpersecond; /* receive from peer */
+
+  time_t lastsendtime;
+  size_t lastsendsize;
+
+  time_t lastrecvtime;
+  size_t lastrecvsize;
 };
 
 static int parseconfig(const char *filename,
@@ -979,6 +996,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
 #endif
     {"5g", "trace",      TRUE},
     {"5h", "trace-ascii", TRUE},
+    {"5i", "limit-rate", TRUE},
     {"0", "http1.0",     FALSE},
     {"1", "tlsv1",       FALSE},
     {"2", "sslv2",       FALSE},
@@ -1168,6 +1186,29 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       case 'h': /* --trace-ascii */
         GetStr(&config->trace_dump, nextarg);
         config->trace_ascii = TRUE;
+        break;
+      case 'i': /* --limit-rate */
+        {
+          /* We support G, M, K too */
+          char *unit;
+          unsigned long value = strtol(nextarg, &unit, 0);
+          switch(nextarg[strlen(nextarg)-1]) {
+          case 'G':
+          case 'g':
+            value *= 1024*1024*1024;
+            break;
+          case 'M':
+          case 'm':
+            value *= 1024*1024;
+            break;
+          case 'K':
+          case 'k':
+            value *= 1024;
+            break;
+          }
+          config->recvpersecond = value;
+          config->sendpersecond = value;
+        }
         break;
       default: /* the URL! */
         {
@@ -1835,6 +1876,12 @@ static int parseconfig(const char *filename,
   return 0;
 }
 
+static void go_sleep(long ms)
+{
+  /* portable subsecond "sleep" */
+  poll((void *)0, 0, ms);
+}
+
 struct OutStruct {
   char *filename;
   FILE *stream;
@@ -1844,19 +1891,85 @@ struct OutStruct {
 int my_fwrite(void *buffer, size_t size, size_t nmemb, void *stream)
 {
   struct OutStruct *out=(struct OutStruct *)stream;
+  struct Configurable *config = out->config;
   if(out && !out->stream) {
     /* open file for writing */
     out->stream=fopen(out->filename, "wb");
     if(!out->stream)
       return -1; /* failure */
-    if(out->config->nobuffer) {
+    if(config->nobuffer) {
       /* disable output buffering */
 #ifdef HAVE_SETVBUF
       setvbuf(out->stream, NULL, _IONBF, 0);
 #endif
     }
   }
+
+  if(config->recvpersecond) {
+    /*
+     * We know when we received data the previous time. We know how much data
+     * we get now. Make sure that this is not faster than we are told to run.
+     * If we're faster, sleep a while *before* doing the fwrite() here.
+     */
+
+    time_t timediff;
+    time_t now;
+
+    now = time(NULL);
+    timediff = now - config->lastrecvtime;
+    if( size*nmemb > config->recvpersecond*timediff) {
+      /* figure out how many milliseconds to rest */
+      go_sleep ( (size*nmemb)*1000/config->recvpersecond - timediff*1000 );
+      now = time(NULL);
+    }
+    config->lastrecvtime = now;
+  }
+
   return fwrite(buffer, size, nmemb, out->stream);
+}
+
+struct InStruct {
+  FILE *stream;
+  struct Configurable *config;
+};
+
+int my_fread(void *buffer, size_t size, size_t nmemb, void *userp)
+{
+  struct InStruct *in=(struct InStruct *)userp;
+
+  struct Configurable *config = in->config;
+
+  if(config->sendpersecond) {
+    /*
+     * We know when we sent data the previous time. We know how much data
+     * we sent. Make sure that this was not faster than we are told to run.
+     * If we're faster, sleep a while *before* doing the fread() here.
+     * Also, make no larger fread() than should be sent this second!
+     */
+
+    time_t timediff;
+    time_t now;
+
+    now = time(NULL);
+    timediff = now - config->lastsendtime;
+    if( config->lastsendsize > config->sendpersecond*timediff) {
+      /* figure out how many milliseconds to rest */
+      go_sleep ( config->lastsendsize*1000/config->sendpersecond -
+                 timediff*1000 );
+      now = time(NULL);
+    }
+    config->lastsendtime = now;
+
+    if(size*nmemb > config->sendpersecond) {
+      /* lower the size to actually read */
+      nmemb = config->sendpersecond;
+      size = 1;
+    }
+    config->lastsendsize = size*nmemb;    
+  }
+
+
+  return fread(buffer, size, nmemb, in->stream);
 }
 
 struct ProgressData {
@@ -2112,6 +2225,7 @@ operate(struct Configurable *config, int argc, char *argv[])
 
   struct OutStruct outs;
   struct OutStruct heads;
+  struct InStruct input;
 
   char *url = NULL;
 
@@ -2511,10 +2625,24 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_SSLENGINE, config->engine);
       curl_easy_setopt(curl, CURLOPT_SSLENGINE_DEFAULT, 1);
 
-      curl_easy_setopt(curl, CURLOPT_FILE, (FILE *)&outs); /* where to store */
-      /* what call to write: */
+      /* where to store */
+      curl_easy_setopt(curl, CURLOPT_WRITEDATA, (FILE *)&outs);
+      /* what call to write */
       curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, my_fwrite);
-      curl_easy_setopt(curl, CURLOPT_INFILE, infd); /* for uploads */
+
+      /* for uploads */
+      input.stream = infd;
+      input.config = config;
+      curl_easy_setopt(curl, CURLOPT_READDATA, &input);
+      /* what call to read */
+      curl_easy_setopt(curl, CURLOPT_READFUNCTION, my_fread);
+
+      if(config->recvpersecond) {
+        /* tell libcurl to use a smaller sized buffer as it allows us to
+           make better sleeps! 7.9.9 stuff! */
+        curl_easy_setopt(curl, CURLOPT_BUFFERSIZE, config->recvpersecond);
+      }
+
       /* size of uploaded file: */
       curl_easy_setopt(curl, CURLOPT_INFILESIZE, infilesize);
       curl_easy_setopt(curl, CURLOPT_URL, url);     /* what to fetch */
