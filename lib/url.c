@@ -167,6 +167,11 @@ RETSIGTYPE alarmfunc(int signal)
 }
 #endif
 
+void Curl_safefree(void *ptr)
+{
+  if(ptr)
+    free(ptr);
+}
 
 /*
  * This is the internal function curl_easy_cleanup() calls. This should
@@ -194,11 +199,8 @@ CURLcode Curl_close(struct SessionHandle *data)
   if(data->change.cookielist) /* clean up list if any */
     curl_slist_free_all(data->change.cookielist);
 
-  if(data->state.auth_host)
-    free(data->state.auth_host);
-
-  if(data->state.scratch)
-    free(data->state.scratch);
+  Curl_safefree(data->state.auth_host);
+  Curl_safefree(data->state.scratch);
 
   if(data->change.proxy_alloc)
     free(data->change.proxy);
@@ -209,8 +211,7 @@ CURLcode Curl_close(struct SessionHandle *data)
   if(data->change.url_alloc)
     free(data->change.url);
 
-  if(data->state.headerbuff)
-    free(data->state.headerbuff);
+  Curl_safefree(data->state.headerbuff);
 
 #ifndef CURL_DISABLE_HTTP
   if(data->set.cookiejar) {
@@ -225,8 +226,7 @@ CURLcode Curl_close(struct SessionHandle *data)
   /* free the connection cache */
   free(data->state.connects);
 
-  if(data->info.contenttype)
-    free(data->info.contenttype);
+  Curl_safefree(data->info.contenttype);
 
   Curl_digest_cleanup(data);
 
@@ -1233,14 +1233,9 @@ CURLcode Curl_disconnect(struct connectdata *conn)
     /* This is set if protocol-specific cleanups should be made */
     conn->curl_disconnect(conn);
 
-  if(conn->proto.generic)
-    free(conn->proto.generic);
-
-  if(conn->newurl)
-    free(conn->newurl);
-
-  if(conn->path) /* the URL path part */
-    free(conn->path);
+  Curl_safefree(conn->proto.generic);
+  Curl_safefree(conn->newurl);
+  Curl_safefree(conn->path);  /* the URL path part */
 
 #ifdef USE_SSLEAY
   Curl_SSL_Close(conn);
@@ -1252,32 +1247,20 @@ CURLcode Curl_disconnect(struct connectdata *conn)
   if(-1 != conn->firstsocket)
     sclose(conn->firstsocket);
 
-  if(conn->user)
-    free(conn->user);
-  if(conn->passwd)
-    free(conn->passwd);
-
-  if(conn->allocptr.proxyuserpwd)
-    free(conn->allocptr.proxyuserpwd);
-  if(conn->allocptr.uagent)
-    free(conn->allocptr.uagent);
-  if(conn->allocptr.userpwd)
-    free(conn->allocptr.userpwd);
-  if(conn->allocptr.accept_encoding)
-    free(conn->allocptr.accept_encoding);
-  if(conn->allocptr.rangeline)
-    free(conn->allocptr.rangeline);
-  if(conn->allocptr.ref)
-    free(conn->allocptr.ref);
-  if(conn->allocptr.cookie)
-    free(conn->allocptr.cookie);
-  if(conn->allocptr.host)
-    free(conn->allocptr.host);
-  if(conn->allocptr.cookiehost)
-    free(conn->allocptr.cookiehost);
-
-  if(conn->proxyhost)
-    free(conn->proxyhost);
+  Curl_safefree(conn->user);
+  Curl_safefree(conn->passwd);
+  Curl_safefree(conn->proxyuser);
+  Curl_safefree(conn->proxypasswd);
+  Curl_safefree(conn->allocptr.proxyuserpwd);
+  Curl_safefree(conn->allocptr.uagent);
+  Curl_safefree(conn->allocptr.userpwd);
+  Curl_safefree(conn->allocptr.accept_encoding);
+  Curl_safefree(conn->allocptr.rangeline);
+  Curl_safefree(conn->allocptr.ref);
+  Curl_safefree(conn->allocptr.cookie);
+  Curl_safefree(conn->allocptr.host);
+  Curl_safefree(conn->allocptr.cookiehost);
+  Curl_safefree(conn->proxyhost);
 
   Curl_free_ssl_config(&conn->ssl_config);
 
@@ -1722,8 +1705,8 @@ static CURLcode ConnectPlease(struct connectdata *conn,
 #endif
 
     if (conn->data->set.proxytype == CURLPROXY_SOCKS5) {
-      return handleSock5Proxy(conn->data->state.proxyuser,
-                              conn->data->state.proxypasswd,
+      return handleSock5Proxy(conn->proxyuser,
+                              conn->proxypasswd,
                               conn,
                               conn->firstsocket) ?
         CURLE_COULDNT_CONNECT : CURLE_OK;
@@ -2065,29 +2048,36 @@ static CURLcode CreateConnection(struct SessionHandle *data,
    * Take care of proxy authentication stuff
    *************************************************************/
   if(conn->bits.proxy_user_passwd) {
-    data->state.proxyuser[0] =0;
-    data->state.proxypasswd[0]=0;
+    char proxyuser[MAX_CURL_USER_LENGTH]="";
+    char proxypasswd[MAX_CURL_PASSWORD_LENGTH]="";
 
     if(*data->set.proxyuserpwd != ':') {
       /* the name is given, get user+password */
       sscanf(data->set.proxyuserpwd, "%127[^:]:%127[^\n]",
-             data->state.proxyuser, data->state.proxypasswd);
+             proxyuser, proxypasswd);
       }
     else
       /* no name given, get the password only */
-      sscanf(data->set.proxyuserpwd+1, "%127[^\n]", data->state.proxypasswd);
+      sscanf(data->set.proxyuserpwd+1, "%127[^\n]", proxypasswd);
 
     /* check for password, if no ask for one */
-    if( !data->state.proxypasswd[0] ) {
+    if( !proxypasswd[0] ) {
       if(data->set.fpasswd( data->set.passwd_client,
                             "proxy password:",
-                            data->state.proxypasswd,
-                            sizeof(data->state.proxypasswd))) {
+                            proxypasswd,
+                            sizeof(proxypasswd))) {
         failf(data, "Bad password from password callback");
         return CURLE_BAD_PASSWORD_ENTERED;
       }
     }
 
+    conn->proxyuser = strdup(proxyuser);
+    if(!conn->proxyuser)
+      return CURLE_OUT_OF_MEMORY;
+    
+    conn->proxypasswd = strdup(proxypasswd);
+    if(!conn->proxypasswd)
+      return CURLE_OUT_OF_MEMORY;
   }
 
   /*************************************************************
@@ -2096,7 +2086,6 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   conn->name = conn->gname;
   conn->ppath = conn->path;
   conn->hostname = conn->name;
-
 
   /*************************************************************
    * Detect what (if any) proxy to use
@@ -2215,8 +2204,20 @@ static CURLcode CreateConnection(struct SessionHandle *data,
                                  "%" MAX_CURL_PASSWORD_LENGTH_TXT "[^@]",
                                  user, passwd))) {
             /* found user and password, rip them out */
-            strcpy(data->state.proxyuser, user);
-            strcpy(data->state.proxypasswd, passwd);
+            if(conn->proxyuser)
+              free(conn->proxyuser);
+            conn->proxyuser = strdup(user);
+
+            if(!conn->proxyuser)
+              return CURLE_OUT_OF_MEMORY;
+            
+            if(conn->proxypasswd)
+              free(conn->proxypasswd);
+            conn->proxypasswd = strdup(passwd);
+
+            if(!conn->proxypasswd)
+              return CURLE_OUT_OF_MEMORY;
+            
             conn->bits.proxy_user_passwd = TRUE; /* enable it */
 
             ptr = strdup(ptr+1);
@@ -2976,7 +2977,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   if(conn->bits.proxy_user_passwd) {
     char *authorization;
     snprintf(data->state.buffer, BUFSIZE, "%s:%s",
-             data->state.proxyuser, data->state.proxypasswd);
+             conn->proxyuser, conn->proxypasswd);
     if(Curl_base64_encode(data->state.buffer, strlen(data->state.buffer),
                           &authorization) >= 0) {
       if(conn->allocptr.proxyuserpwd)

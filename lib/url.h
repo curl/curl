@@ -42,4 +42,5 @@ bool Curl_ssl_config_matches(struct ssl_config_data* data,
 bool Curl_clone_ssl_config(struct ssl_config_data* source,
                            struct ssl_config_data* dest);
 void Curl_free_ssl_config(struct ssl_config_data* sslc);
+void Curl_safefree(void *ptr);
 #endif

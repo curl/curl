@@ -732,7 +732,7 @@ CURLcode Curl_http(struct connectdata *conn)
 #endif
 #ifdef USE_SSLEAY
     if(data->state.authwant == CURLAUTH_NTLM) {
-      result = Curl_output_ntlm(conn);
+      result = Curl_output_ntlm(conn, FALSE);
       if(result)
         return result;
     }
