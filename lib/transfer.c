@@ -107,7 +107,7 @@
    <butlerm@xmission.com>. */
 
 CURLcode static
-_Transfer(struct connectdata *c_conn)
+Transfer(struct connectdata *c_conn)
 {
   ssize_t nread;                /* number of bytes read */
   int bytecount = 0;            /* total number of bytes read */
@@ -142,9 +142,6 @@ _Transfer(struct connectdata *c_conn)
   char *buf;
   int maxfd;
 
-  if(!conn || (conn->handle != STRUCT_CONNECT))
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  
   data = conn->data; /* there's the root struct */
   buf = data->buffer;
   maxfd = (conn->sockfd>conn->writesockfd?conn->sockfd:conn->writesockfd)+1;
@@ -446,7 +443,7 @@ _Transfer(struct connectdata *c_conn)
                   ptr++;
                 backup = *ptr; /* store the ending letter */
                 *ptr = '\0';   /* zero terminate */
-                data->newurl = strdup(start); /* clone string */
+                conn->newurl = strdup(start); /* clone string */
                 *ptr = backup; /* restore ending letter */
               }
 
@@ -490,9 +487,9 @@ _Transfer(struct connectdata *c_conn)
                  write a piece of the body */
               if(conn->protocol&PROT_HTTP) {
                 /* HTTP-only checks */
-                if (data->newurl) {
+                if (conn->newurl) {
                   /* abort after the headers if "follow Location" is set */
-                  infof (data, "Follow to new URL: %s\n", data->newurl);
+                  infof (data, "Follow to new URL: %s\n", conn->newurl);
                   return CURLE_OK;
                 }
                 else if (data->resume_from &&
@@ -530,7 +527,8 @@ _Transfer(struct connectdata *c_conn)
                     } /* switch */
                   } /* two valid time strings */
                 } /* we have a time condition */
-                if(!conn->bits.close && (httpversion == 1)) {
+
+                if(!conn->bits.close) {
                   /* If this is not the last request before a close, we must
                      set the maximum download size to the size of the expected
                      document or else, we won't know when to stop reading! */
@@ -681,27 +679,27 @@ _Transfer(struct connectdata *c_conn)
   return CURLE_OK;
 }
 
-CURLcode curl_transfer(CURL *curl)
+CURLcode Curl_perform(CURL *curl)
 {
   CURLcode res;
-  struct UrlData *data = curl;
-  struct connectdata *c_connect=NULL;
+  struct UrlData *data = (struct UrlData *)curl;
+  struct connectdata *conn=NULL;
   bool port=TRUE; /* allow data->use_port to set port to use */
 
   Curl_pgrsStartNow(data);
 
   do {
     Curl_pgrsTime(data, TIMER_STARTSINGLE);
-    res = curl_connect(curl, (CURLconnect **)&c_connect, port);
+    res = Curl_connect(data, &conn, port);
     if(res == CURLE_OK) {
-      res = curl_do(c_connect);
+      res = Curl_do(conn);
       if(res == CURLE_OK) {
-        res = _Transfer(c_connect); /* now fetch that URL please */
+        res = Transfer(conn); /* now fetch that URL please */
         if(res == CURLE_OK)
-          res = curl_done(c_connect);
+          res = Curl_done(conn);
       }
 
-      if((res == CURLE_OK) && data->newurl) {
+      if((res == CURLE_OK) && conn->newurl) {
         /* Location: redirect
  
            This is assumed to happen for HTTP(S) only!
@@ -741,7 +739,7 @@ CURLcode curl_transfer(CURL *curl)
           data->bits.http_set_referer = TRUE; /* might have been false */
         }
 
-        if(2 != sscanf(data->newurl, "%15[^:]://%c", prot, &letter)) {
+        if(2 != sscanf(conn->newurl, "%15[^:]://%c", prot, &letter)) {
           /***
            *DANG* this is an RFC 2068 violation. The URL is supposed
            to be absolute and this doesn't seem to be that!
@@ -766,7 +764,7 @@ CURLcode curl_transfer(CURL *curl)
             protsep+=2; /* pass the slashes */
           }
 
-          if('/' != data->newurl[0]) {
+          if('/' != conn->newurl[0]) {
             /* First we need to find out if there's a ?-letter in the URL,
                and cut it and the right-side of that off */
             pathsep = strrchr(protsep, '?');
@@ -789,14 +787,14 @@ CURLcode curl_transfer(CURL *curl)
 
           newest=(char *)malloc( strlen(data->url) +
                                  1 + /* possible slash */
-                                 strlen(data->newurl) + 1/* zero byte */);
+                                 strlen(conn->newurl) + 1/* zero byte */);
 
           if(!newest)
             return CURLE_OUT_OF_MEMORY;
-          sprintf(newest, "%s%s%s", data->url, ('/' == data->newurl[0])?"":"/",
-                  data->newurl);
-          free(data->newurl);
-          data->newurl = newest;
+          sprintf(newest, "%s%s%s", data->url, ('/' == conn->newurl[0])?"":"/",
+                  conn->newurl);
+          free(conn->newurl);
+          conn->newurl = newest;
         }
         else {
           /* This is an absolute URL, don't use the custom port number */
@@ -807,8 +805,8 @@ CURLcode curl_transfer(CURL *curl)
           free(data->url);
       
         /* TBD: set the URL with curl_setopt() */
-        data->url = data->newurl;
-        data->newurl = NULL; /* don't show! */
+        data->url = conn->newurl;
+        conn->newurl = NULL; /* don't show! */
         data->bits.urlstringalloc = TRUE; /* the URL is allocated */
 
         infof(data, "Follows Location: to new URL: '%s'\n", data->url);
@@ -867,8 +865,10 @@ CURLcode curl_transfer(CURL *curl)
 
   } while(1); /* loop if Location: */
 
-  if(data->newurl)
-    free(data->newurl);
+  if(conn->newurl) {
+    free(conn->newurl);
+    conn->newurl = NULL;
+  }
 
   return res;
 }
