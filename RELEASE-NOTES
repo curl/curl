@@ -14,6 +14,7 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o "Proxy-Connection: close" is now understood and properly dealt with
  o curl_getdate() crash fixed
  o downloading empty files now calls the write callback properly
  o no more reverse DNS lookups when getting ip-only address with ipv6-enabled
@@ -32,6 +33,6 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
  Casey O'Donnell, Roland Krikava, Alex, Alexander Krasnostavsky, Kjetil
- Jacobsen, Ling Thio
+ Jacobsen, Ling Thio, Roman Koifman, Harshal Pradhan
 
         Thanks! (and sorry if I forgot to mention someone)
