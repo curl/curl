@@ -131,13 +131,14 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
   }
 
   /* Create a new cache entry */
-  p = (struct curl_dns_cache_entry *) malloc(sizeof(struct curl_dns_cache_entry));
-  if (!p) {
+  p = (struct curl_dns_cache_entry *)
+    malloc(sizeof(struct curl_dns_cache_entry));
+  if (!p)
     return NULL;
-  }
 
   p->addr = Curl_getaddrinfo(data, hostname, port, bufp);
   if (!p->addr) {
+    free(p);
     return NULL;
   }
   p->timestamp = now;
