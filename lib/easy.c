@@ -307,6 +307,9 @@ CURLcode curl_easy_setopt(CURL *curl, CURLoption tag, ...)
   struct SessionHandle *data = curl;
   CURLcode ret=CURLE_FAILED_INIT;
 
+  if(!curl)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   va_start(arg, tag);
 
   /* PORTING NOTE:
@@ -348,6 +351,9 @@ CURLcode curl_easy_perform(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
 
+  if(!data)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
   if ( ! (data->share && data->share->hostcache) ) {
 
     if (Curl_global_host_cache_use(data) &&
@@ -379,6 +385,10 @@ CURLcode curl_easy_perform(CURL *curl)
 void curl_easy_cleanup(CURL *curl)
 {
   struct SessionHandle *data = (struct SessionHandle *)curl;
+
+  if(!data)
+    return;
+
   if ( ! (data->share && data->share->hostcache) ) {
     if ( !Curl_global_host_cache_use(data)) {
       Curl_hash_destroy(data->hostcache);
