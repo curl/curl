@@ -6,12 +6,10 @@
 
                                 How To Compile
 
-Curl has been compiled and built on numerous different operating systems. The
-way to proceed is mainly divided in two different ways: the unix way or the 
-windows way.
+Curl has been compiled and built on numerous different operating systems.
 
-If you're using Windows (95/98/NT/ME/2000 or whatever) or OS/2, you should
-continue reading from the Win32 or OS/2 headers further down. All other
+If you're using Windows (95/98/NT/ME/2000 or whatever), VMS, RISC OS or OS/2,
+you should continue reading from one the paragraphs further down. All other
 systems should be capable of being installed as described below.
 
 UNIX
@@ -255,6 +253,78 @@ IBM OS/2
    If you're getting huge binaries, probably your makefiles have the -g in
    CFLAGS.
 
+VMS
+===
+   (The VMS section is in whole contributed by the friendly Nico Baggus)
+
+   This is the first attempt at porting cURL to VMS.
+
+   Curl seems to work with FTP & HTTP other protocols are not tested.  (the
+   perl http/ftp testing server supplied as testing too cannot work on VMS
+   because vms has no concept of fork(). [ I tried to give it a whack, but
+   thats of no use.
+
+   SSL stuff has not been ported.
+
+   Telnet has about the same issues as for Win32. When the changes for Win32
+   are clear maybe they'l work for VMS too. The basic problem is that select
+   ONLY works for sockets.
+
+   Marked instances of fopen/[f]stat that might become a problem, especially
+   for non stream files. In this regard, the files opened for writing will be
+   created stream/lf and will thus be safe. Just keep in mind that non-binary
+   read/wring from/to files will have a records size limit of 32767 bytes
+   imposed.
+
+   Stat to get the size of the files is again only safe for stream files &
+   fixed record files without implied CC.
+
+   -- My guess is that only allowing access to stream files is the quickest
+   way to get around the most issues. Therefore all files need to to be
+   checked to be sure they will be stream/lf before processing them.  This is
+   the easiest way out, I know. The reason for this is that code that needs to
+   report the filesize will become a pain in the ass otherwise.
+
+   Exit status.... Well we needed something done here,
+
+   VMS has a structured exist status:
+   | 3  |       2    |     1       |  0|
+   |1098|765432109876|5432109876543|210|
+   +----+------------+-------------+---+
+   |Ctrl|  Facility  | Error code  |sev|
+   +----+------------+-------------+---+
+
+   With the Ctrl-bits an application can tell if part or the whole message has
+   allready been printed from the program, DCL doesn't need to print it again.
+
+   Facility - basicaly the program ID. A code assigned to the program
+   the name can be fetched from external or internal message libraries
+   Errorcode - the errodes assigned by the application
+   Sev. - severity: Even = error, off = non error
+		0 = Warning
+		1 = Success
+		2 = Error
+		3 = Information
+		4 = Fatal 
+		<5-7> reserved.
+
+   This all presents itself with:
+   %<FACILITY>-<SeV>-<Errorname>, <Error message>
+
+   See also the src/curlmsg.msg file, it has the source for the messages In
+   src/main.c a section is devoted to message status values, the globalvalues
+   create symbols with certain values, referenced from a compiled message
+   file. Have all exit function use a exit status derived from a translation
+   table with the compiled message codes.
+
+   This was all compiled with:
+
+	Compaq C V6.2-003 on OpenVMS Alpha V7.1-1H2
+
+   So far for porting notes as of:
+   13-jul-2001
+   N. Baggus
+
 PORTS
 =====
    This is a probably incomplete list of known hardware and operating systems
@@ -268,7 +338,6 @@ PORTS
         - Alpha Linux 2.2.16
         - Alpha OpenVMS V7.1-1H2
         - Alpha Tru64 v5.0 5.1
-        - ARM RISC OS
         - HP-PA HP-UX 9.X 10.X 11.X
         - MIPS IRIX 6.2, 6.5
         - Power AIX 4.2, 4.3.1, 4.3.2
@@ -291,6 +360,7 @@ PORTS
         - m68k AmigaOS 3
         - m68k OpenBSD
         - StrongARM NetBSD 1.4.1
+        - StrongARM (and other ARM) RISC OS 3.1, 4.02
 
 OpenSSL
 =======
