@@ -479,9 +479,13 @@ application/x-www-form-urlencoded" header. (This is by far the most commonly
 used POST method).
 
 Use the \fICURLOPT_POSTFIELDS\fP option to specify what data to post and
-\fICURLOPT_POSTFIELDSIZE\fP to set the data size. Optionally, you can provide
-data to POST using the \fICURLOPT_READFUNCTION\fP and \fICURLOPT_READDATA\fP
-options.
+\fICURLOPT_POSTFIELDSIZE\fP to set the data size.
+
+Optionally, you can provide data to POST using the \fICURLOPT_READFUNCTION\fP
+and \fICURLOPT_READDATA\fP options but then you must make sure to not set
+\fICURLOPT_POSTFIELDS\fP to anything but NULL. When providing data with a
+callback, you must transmit it using chunked transfer-encoding or you must set
+the size of the data with the \fICURLOPT_POSTFIELDSIZE\f option.
 
 You can override the default POST Content-Type: header by setting your own
 with \fICURLOPT_HTTPHEADER\fP.
@@ -518,7 +522,7 @@ the \fICURLOPT_HTTPPOST\fP option.
 If you want to post data to the server without letting libcurl do a strlen()
 to measure the data size, this option must be used. When this option is used
 you can post fully binary data, which otherwise is likely to fail. If this
-size is set to zero, the library will use strlen() to get the size.
+size is set to -1, the library will use strlen() to get the size.
 .IP CURLOPT_POSTFIELDSIZE_LARGE
 Pass a curl_off_t as parameter. Use this to set the size of the
 \fICURLOPT_POSTFIELDS\fP data to prevent libcurl from doing strlen() on the
