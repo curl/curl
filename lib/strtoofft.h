@@ -40,22 +40,22 @@
  */
 #if SIZEOF_CURL_OFF_T > 4
 #if HAVE_STRTOLL
-#define strtoofft strtoll
+#define curlx_strtoofft strtoll
 #else /* HAVE_STRTOLL */
 
 /* For MSVC7 we can use _strtoi64() which seems to be a strtoll() clone */
 #if defined(_MSC_VER) && (_MSC_VER >= 1300)
-#define strtoofft _strtoi64
+#define curlx_strtoofft _strtoi64
 #else /* MSVC7 or later */
 curl_off_t curlx_strtoll(const char *nptr, char **endptr, int base);
-#define strtoofft curlx_strtoll
+#define curlx_strtoofft curlx_strtoll
 #define NEED_CURL_STRTOLL
 #endif /* MSVC7 or later */
 
 #endif /* HAVE_STRTOLL */
 #else /* SIZEOF_CURL_OFF_T > 4 */
 /* simply use strtol() to get 32bit numbers */
-#define strtoofft strtol
+#define curlx_strtoofft strtol
 #endif
 
 #endif

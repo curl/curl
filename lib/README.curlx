@@ -1,0 +1,43 @@
+$Id$
+                                  _   _ ____  _     
+                              ___| | | |  _ \| |    
+                             / __| | | | |_) | |    
+                            | (__| |_| |  _ <| |___ 
+                             \___|\___/|_| \_\_____|
+
+                     Source Code Functions Apps Might Use
+                     ====================================
+
+The libcurl source code offers a few functions by source only. They are not
+part of the official libcurl API, but the source files might be useful for
+others so apps can optionally compile/build with these sources to gain
+additional functions.
+
+
+strtoofft.[ch]
+==============
+
+ curlx_strtoofft()
+
+   A macro that converts a string containing a number to a curl_off_t number.
+   This might use the curlx_strtoll() function which is provided as source
+   code in strtoofft.c. Note that the function is only provided if no
+   strtoll() (or equivalent) function exist on your platform. If curl_off_t
+   is only a 32 bit number on your platform, this macro uses strtol().
+
+timeval.[ch]
+============
+
+ Provides a 'struct timeval' for platforms that don't have one already, and
+ includes the proper include files for those that have one. Using this will
+ make the output require the 'winmm' lib on Windows (unless WITHOUT_MM_LIB
+ is defined at compile-time).
+
+ curlx_tvnow()
+
+   returns a struct timeval for the current time.
+
+ curlx_tvdiff()
+
+   returns the difference between two timeval structs, in number of
+   milliseconds.

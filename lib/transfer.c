@@ -651,7 +651,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                info about the true size of the document we didn't get now. */
             if ((k->httpcode != 416) &&
                 checkprefix("Content-Length:", k->p)) {
-              contentlength = strtoofft(k->p+15, NULL, 10);
+              contentlength = curlx_strtoofft(k->p+15, NULL, 10);
               if (data->set.max_filesize && contentlength > 
                   data->set.max_filesize) {
                 failf(data, "Maximum file size exceeded");
@@ -784,7 +784,7 @@ CURLcode Curl_readwrite(struct connectdata *conn,
                 /* stupid colon skip */
                 ptr++;
 
-              k->offset = strtoofft(ptr, NULL, 10);
+              k->offset = curlx_strtoofft(ptr, NULL, 10);
               
               if (conn->resume_from == k->offset)
                 /* we asked for a resume and we got it */

@@ -22,13 +22,13 @@
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	\
-  Makefile.vc6 Makefile.riscos libcurl.def curllib.dsp curllib.dsw	\
-  config-vms.h config-win32.h config-riscos.h config-mac.h config.h.in	\
-  ca-bundle.crt README.encoding README.memoryleak README.ares		\
-  makefile.dj config.dj libcurl.framework.make libcurl.plist		\
-  libcurl.rc config-amigaos.h amigaos.c amigaos.h makefile.amiga	\
-  config-netware.h Makefile.netware nwlib.c libcurl.imp
+EXTRA_DIST = getdate.y Makefile.b32 Makefile.b32.resp Makefile.m32	   \
+  Makefile.vc6 Makefile.riscos libcurl.def curllib.dsp curllib.dsw	   \
+  config-vms.h config-win32.h config-riscos.h config-mac.h config.h.in	   \
+  ca-bundle.crt README.encoding README.memoryleak README.ares README.curlx \
+  makefile.dj config.dj libcurl.framework.make libcurl.plist libcurl.rc	   \
+  config-amigaos.h amigaos.c amigaos.h makefile.amiga config-netware.h	   \
+  Makefile.netware nwlib.c libcurl.imp
 
 lib_LTLIBRARIES = libcurl.la
 

@@ -961,7 +961,7 @@ CURLcode ftp_getsize(struct connectdata *conn, char *file,
 
   if(ftpcode == 213) {
     /* get the size from the ascii string: */
-    *size = strtoofft(buf+4, NULL, 0);
+    *size = curlx_strtoofft(buf+4, NULL, 0);
   }
   else
     return CURLE_FTP_COULDNT_GET_SIZE;
@@ -1849,10 +1849,10 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
       char *ptr;
       char *ptr2;
 
-      from=strtoofft(conn->range, &ptr, 0);
+      from=curlx_strtoofft(conn->range, &ptr, 0);
       while(ptr && *ptr && (isspace((int)*ptr) || (*ptr=='-')))
         ptr++;
-      to=strtoofft(ptr, &ptr2, 0);
+      to=curlx_strtoofft(ptr, &ptr2, 0);
       if(ptr == ptr2) {
         /* we didn't get any digit */
         to=-1;
@@ -2071,7 +2071,7 @@ CURLcode Curl_ftp_nextconnect(struct connectdata *conn)
           /* only if we have nothing but digits: */
           if(bytes++) {
             /* get the number! */
-            size = strtoofft(bytes, NULL, 0);
+            size = curlx_strtoofft(bytes, NULL, 0);
           }
             
         }
