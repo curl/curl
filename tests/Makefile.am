@@ -33,14 +33,11 @@ CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid
 curl:
 	@cd $(top_builddir) && $(MAKE)
 
-test: sws
+test: all
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
 
-quiet-test: sws
+quiet-test: all
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -s -a
 
-full-test: sws
+full-test: all
 	srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl -a
-
-sws:
-	@cd server && $(MAKE)
