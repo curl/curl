@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "30 March 2001" "libcurl 7.7" "libcurl Manual"
+.TH curl_easy_setopt 3 "7 April 2001" "libcurl 7.7" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -473,7 +473,7 @@ Pass a char * to a zero terminated file name. The file will be used to read
 from to seed the random engine for SSL. The more random the specified file is,
 the more secure will the SSL connection become.
 .TP
-.B CURLOPT_FORBID_REUSE
+.B CURLOPT_EGDSOCKET
 Pass a char * to the zero terminated path name to the Entropy Gathering Daemon
 socket. It will be used to seed the random engine for SSL.
 .TP
