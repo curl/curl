@@ -728,11 +728,12 @@ int main(int argc, char *argv[])
   int sock, msgsock, flag;
   unsigned short port = DEFAULT_PORT;
   FILE *pidfile;
+  char *pidname= (char *)".http.pid";
   struct httprequest req;
   int rc;
+  int arg=1;
 
-  if(argc>1) {
-    int arg=1;
+  while(argc>arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("sws IPv4%s\n",
 #ifdef ENABLE_IPV6
@@ -743,20 +744,24 @@ int main(int argc, char *argv[])
              );
       return 0;
     }
-    if(!strcmp("--ipv6", argv[arg])) {
+    else if(!strcmp("--pidfile", argv[arg])) {
+      arg++;
+      if(argc>arg)
+        pidname = argv[arg++];
+    }
+    else if(!strcmp("--ipv6", argv[arg])) {
 #ifdef ENABLE_IPV6
       use_ipv6=TRUE;
 #endif
       arg++;
     }
-    if(argc>arg) {
+    else if(argc>arg) {
 
       if(atoi(argv[arg]))
         port = (unsigned short)atoi(argv[arg++]);
 
       if(argc>arg)
-        path = argv[arg];
-
+        path = argv[arg++];
     }
   }
 
@@ -820,7 +825,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
 
-  pidfile = fopen(".http.pid", "w");
+  pidfile = fopen(pidname, "w");
   if(pidfile) {
     fprintf(pidfile, "%d\n", (int)getpid());
     fclose(pidfile);

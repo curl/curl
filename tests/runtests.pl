@@ -346,7 +346,6 @@ sub runhttpserver {
         $nameext="-ipv6";
     }
 
-
     $pid = checkserver($pidfile);
 
     # verify if our/any server is running on this port
@@ -391,7 +390,7 @@ sub runhttpserver {
     if($dir) {
         $flag .= "-d \"$dir\" ";
     }
-    $cmd="$perl $srcdir/httpserver.pl $flag $port $ipv6 &";
+    $cmd="$perl $srcdir/httpserver.pl -p $pidfile $flag $port $ipv6 &";
     system($cmd);
     if($verbose) {
         print "CMD: $cmd\n";
