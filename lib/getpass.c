@@ -7,7 +7,7 @@
  *   2) The prototype for getpass is not changed from:
  *      int getpass_r(const char *prompt, char *buffer, int buflen)
  *   3) This source code is not used outside of this(getpass.c) file.
- *   3) Any changes to this(getpass.c) source code are made publicly available.
+ *   4) Any changes to this(getpass.c) source code are made publicly available.
  *
  * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED WARRANTIES,
  * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
@@ -112,25 +112,25 @@ int getpass_r(const char *prompt, char *buffer, int buflen)
 #ifdef HAVE_TERMIOS_H
   if(tcgetattr(outfd, &orig) != 0)
   {
-    perror("tcgetattr");
+    ; /*perror("tcgetattr");*/
   }
   noecho = orig;
   noecho.c_lflag &= ~ECHO;
   if(tcsetattr(outfd, TCSANOW, &noecho) != 0)
   {
-    perror("tcgetattr");
+    ; /*perror("tcgetattr");*/
   }
 #else
 #  ifdef HAVE_TERMIO_H
   if(ioctl(outfd, TCGETA, &orig) != 0)
   {
-    perror("ioctl");
+    ; /*perror("ioctl");*/
   }
   noecho = orig;
   noecho.c_lflag &= ~ECHO;
   if(ioctl(outfd, TCSETA, &noecho) != 0)
   {
-    perror("ioctl");
+    ; /*perror("ioctl");*/
   }
 #  else
 #  endif
@@ -159,13 +159,13 @@ int getpass_r(const char *prompt, char *buffer, int buflen)
 #ifdef HAVE_TERMIOS_H
   if(tcsetattr(outfd, TCSAFLUSH, &orig) != 0)
   {
-    perror("tcgetattr");
+    ; /*perror("tcgetattr");*/
   }
 #else
 #  ifdef HAVE_TERMIO_H
   if(ioctl(outfd, TCSETA, &orig) != 0)
   {
-    perror("ioctl");
+    ; /*perror("ioctl");*/
   }
 #  else
 #  endif
