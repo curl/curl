@@ -1062,8 +1062,8 @@ CURLcode _ftp(struct connectdata *conn)
           data->infilesize -= data->resume_from;
 
           if(data->infilesize <= 0) {
-            infof(data, "File already completely uploaded\n");
-            return CURLE_OK;
+            failf(data, "File already completely uploaded\n");
+            return CURLE_FTP_COULDNT_STOR_FILE;
           }
         }
         /* we've passed, proceed as normal */
