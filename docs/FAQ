@@ -85,7 +85,7 @@ FAQ
   transfer library.
 
   Any application is free to use libcurl, even commercial or closed-source
-  ones. Just make sure changes to the lib itself are made public.
+  ones.
 
   1.3 What is cURL not?
   
@@ -401,8 +401,7 @@ FAQ
   you have.
 
   If there is a bug, post a bug report in the Curl Bug Track System over at
-  http://sourceforge.net/bugs/?group_id=976 or mail a detailed bug description
-  to curl-bug@haxx.se.
+  http://sourceforge.net/bugs/?group_id=976
 
   Always include as many details you can think of, including curl version,
   operating system name and version and complete instructions how to repeat
