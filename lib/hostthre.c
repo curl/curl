@@ -379,7 +379,9 @@ static bool init_resolve_thread (struct connectdata *conn,
   td->stderr_file = stderr;
 
 #ifdef _WIN32_WCE
-  td->thread_hnd=(HANDLE) CreateThread(NULL,0,(LPTHREAD_START_ROUTINE) THREAD_FUNC,conn,0,&td->thread_id);
+  td->thread_hnd = (HANDLE) CreateThread(NULL, 0,
+                                         (LPTHREAD_START_ROUTINE) THREAD_FUNC,
+                                         conn, 0, &td->thread_id);
 #else
 
   td->thread_hnd = (HANDLE) _beginthreadex(NULL, 0, THREAD_FUNC,
@@ -459,8 +461,9 @@ CURLcode Curl_wait_for_resolv(struct connectdata *conn,
       TRACE(("%s() thread stuck?!, ", THREAD_NAME));
     }
     else {
-      /* Thread finished before timeout; propagate Winsock error to this thread.
-       * 'conn->async.done = TRUE' is set in Curl_addrinfo4/6_callback().
+      /* Thread finished before timeout; propagate Winsock error to this
+       * thread.  'conn->async.done = TRUE' is set in
+       * Curl_addrinfo4/6_callback().
        */
       WSASetLastError(conn->async.status);
       GetExitCodeThread(td->thread_hnd, &td->thread_status);
