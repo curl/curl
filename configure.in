@@ -613,7 +613,9 @@ AC_OUTPUT( Makefile \
 	   include/curl/Makefile \
 	   src/Makefile \
            lib/Makefile \
-           tests/Makefile)
+           tests/Makefile \
+	   curl.spec \
+	   curl-ssl.spec)
 dnl	   perl/checklinks.pl \
 dnl	   perl/getlinks.pl \
 dnl        perl/formfind.pl \

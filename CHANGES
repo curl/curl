@@ -6,6 +6,12 @@
 
                                History of Changes
 
+Loic Dachary (6 January 2001)
+- Automated generation of rpm packages, no need to be root.
+
+- make distcheck generates a proper distribution (EXTRA_DIST
+  in all Makefile.am modified to match FILES).
+
 Daniel (5 January 2001)
 - Huge client-side hack: now multiple URLs are supported. Any number of URLs
   can be specified on the command line, and they'll all be downloaded. There

@@ -1,3 +1,4 @@
+EXTRA_DIST = data/*.txt ftpserver.pl httpserver.pl runtests.pl
 
 all:
 install:

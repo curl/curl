@@ -79,6 +79,9 @@ YACC = @YACC@
 
 AUTOMAKE_OPTIONS = foreign
 
+EXTRA_DIST = getdate.y        Makefile.b32 Makefile.b32.resp Makefile.m32 Makefile.vc6        libcurl.def dllinit.c
+
+
 lib_LTLIBRARIES = libcurl.la
 
 # Some flags needed when trying to cause warnings ;-)
@@ -115,8 +118,10 @@ libcurl_la_LDFLAGS = -version-info 1:0:0
 # set age to 0.
 #
 
-libcurl_la_SOURCES =  arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c base64.c       file.h         hostip.c       progress.c     timeval.h base64.h       formdata.c     hostip.h       progress.h     cookie.c       formdata.h     http.c         sendf.c        cookie.h       ftp.c          http.h         sendf.h        url.c dict.c         ftp.h          if2ip.c        speedcheck.c   url.h dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h download.c     getdate.h      ldap.c         ssluse.c       version.c download.h     getenv.c       ldap.h         ssluse.h       escape.c       getenv.h       mprintf.c      telnet.c       escape.h       getpass.c      netrc.c        telnet.h       getinfo.c highlevel.c strequal.c strequal.h easy.c security.h security.c krb4.c memdebug.c memdebug.h
+libcurl_la_SOURCES =  arpa_telnet.h  file.c         getpass.h      netrc.h        timeval.c base64.c       file.h         hostip.c       progress.c     timeval.h base64.h       formdata.c     hostip.h       progress.h     cookie.c       formdata.h     http.c         sendf.c        cookie.h       ftp.c          http.h         sendf.h        url.c dict.c         ftp.h          if2ip.c        speedcheck.c   url.h dict.h         getdate.c      if2ip.h        speedcheck.h   urldata.h download.c     getdate.h      ldap.c         ssluse.c       version.c download.h     getenv.c       ldap.h         ssluse.h       escape.c       getenv.h       mprintf.c      telnet.c       escape.h       getpass.c      netrc.c        telnet.h       getinfo.c highlevel.c strequal.c strequal.h easy.c security.h security.c krb4.c memdebug.c memdebug.h inet_ntoa_r.h
 
+
+noinst_HEADERS = setup.h highlevel.h
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = ../config.h ../src/config.h
 CONFIG_CLEAN_FILES = 
@@ -138,6 +143,8 @@ COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CF
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@
+HEADERS =  $(noinst_HEADERS)
+
 DIST_COMMON =  Makefile.am Makefile.in
 
 
@@ -288,7 +295,7 @@ install-am: all-am
 install: install-am
 uninstall-am: uninstall-libLTLIBRARIES
 uninstall: uninstall-am
-all-am: Makefile $(LTLIBRARIES)
+all-am: Makefile $(LTLIBRARIES) $(HEADERS)
 all-redirect: all-am
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) AM_INSTALL_PROGRAM_FLAGS=-s install

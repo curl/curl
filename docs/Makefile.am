@@ -12,11 +12,14 @@ man_MANS = \
 	curl_easy_perform.3 \
 	curl_easy_setopt.3 \
 	curl_formparse.3 \
+	curl_formfree.3 \
 	curl_getdate.3 \
 	curl_getenv.3 \
 	curl_slist_append.3 \
 	curl_slist_free_all.3 \
 	curl_version.3
 
-EXTRA_DIST = $(man_MANS)
-
+EXTRA_DIST = $(man_MANS) \
+	MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS \
+	LIBCURL README.win32 RESOURCES TODO TheArtOfHttpScripting \
+	examples/README examples/*.c

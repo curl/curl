@@ -4,6 +4,10 @@
 
 AUTOMAKE_OPTIONS = foreign
 
+EXTRA_DIST = getdate.y \
+       Makefile.b32 Makefile.b32.resp Makefile.m32 Makefile.vc6 \
+       libcurl.def dllinit.c
+
 lib_LTLIBRARIES = libcurl.la
 
 # Some flags needed when trying to cause warnings ;-)
@@ -54,7 +58,9 @@ download.h     getenv.c       ldap.h         ssluse.h       \
 escape.c       getenv.h       mprintf.c      telnet.c       \
 escape.h       getpass.c      netrc.c        telnet.h       \
 getinfo.c highlevel.c strequal.c strequal.h easy.c \
-security.h security.c krb4.c memdebug.c memdebug.h
+security.h security.c krb4.c memdebug.c memdebug.h inet_ntoa_r.h
+
+noinst_HEADERS = setup.h highlevel.h
 
 # Say $(srcdir), so GNU make does not report an ambiguity with the .y.c rule.
 $(srcdir)/getdate.c: getdate.y
