@@ -92,6 +92,8 @@ LIB32_OBJS= \
 	"$(INTDIR)\ares_process.obj" \
 	"$(INTDIR)\ares_query.obj" \
 	"$(INTDIR)\ares_search.obj" \
+	"$(INTDIR)\ares_cancel.obj" \
+	"$(INTDIR)\ares_version.obj" \
 	"$(INTDIR)\ares_send.obj" \
 	"$(INTDIR)\ares_strerror.obj" \
 	"$(INTDIR)\ares_timeout.obj" \
@@ -131,6 +133,8 @@ CLEAN :
 	-@erase "$(INTDIR)\ares_process.obj"
 	-@erase "$(INTDIR)\ares_query.obj"
 	-@erase "$(INTDIR)\ares_search.obj"
+	-@erase "$(INTDIR)\ares_cancel.obj"
+	-@erase "$(INTDIR)\ares_version.obj"
 	-@erase "$(INTDIR)\ares_send.obj"
 	-@erase "$(INTDIR)\ares_strerror.obj"
 	-@erase "$(INTDIR)\ares_timeout.obj"
@@ -319,6 +323,18 @@ SOURCE=..\..\ares_query.c
 SOURCE=..\..\ares_search.c
 
 "$(INTDIR)\ares_search.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\ares_version.c
+
+"$(INTDIR)\ares_version.obj" : $(SOURCE) "$(INTDIR)"
+	$(CPP) $(CPP_PROJ) $(SOURCE)
+
+
+SOURCE=..\..\ares_cancel.c
+
+"$(INTDIR)\ares_cancel.obj" : $(SOURCE) "$(INTDIR)"
 	$(CPP) $(CPP_PROJ) $(SOURCE)
 
 

@@ -153,6 +153,14 @@ SOURCE=..\..\ares_search.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\ares_cancel.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ares_version.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\ares_send.c
 # End Source File
 # Begin Source File
@@ -178,6 +186,10 @@ SOURCE=..\..\ares.h
 # Begin Source File
 
 SOURCE=..\..\ares_dns.h
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\ares_version.h
 # End Source File
 # Begin Source File
 
