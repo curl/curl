@@ -1,0 +1,345 @@
+Author:  Daniel Stenberg <daniel@haxx.se>
+Date:    August 7, 2000
+Version: 0.2
+
+                The Art Of Scripting HTTP Requests Using Curl
+                =============================================
+
+ This document will assume that you're familiar with HTML and general
+ networking.
+
+ The possibility to write scripts is essential to make a good computer
+ system. Unix' capability to be extended by shell scripts and various tools to
+ run various automated commands and scripts is one reason why it has succeeded
+ so well.
+
+ The increasing amount of applications moving to the web has made "HTTP
+ Scripting" more frequently requested and wanted. To be able to automatically
+ extract information from the web, to fake users, to post or upload data to
+ web servers are all important tasks today.
+
+ Curl is a command line tool for doing all sorts of URL manipulations and
+ transfers, but this particular document will focus on how to use it when
+ doing HTTP requests for fun and profit. I'll assume that you know how to
+ invoke 'curl --help' or 'curl --manual' to get basic information about it.
+
+ Curl is not written to do everything for you. It makes the requests, it gets
+ the data, it sends data and it retrieves the information. You probably need
+ to glue everything together using some kind of script language or repeated
+ manual invokes.
+
+1. The HTTP Protocol
+
+ HTTP is the protocol used to fetch data from web servers. It is a very simple
+ protocol that is built upon TCP/IP. The protocol also allow information to
+ get sent to the server from the client using a few different methods, as will
+ be shown here.
+
+ HTTP is plain ASCII text lines being sent by the client to a server to
+ request a particular action, and then the server replies a few text lines
+ before the actual requested content is sent to the client.
+
+ Using curl's option -v will display what kind of commands curl sends to the
+ server, as well as a few other informational texts. -v is the single most
+ useful option when it comes to debug or even understand the curl<->server
+ interaction.
+
+2. URL
+
+ The Uniform Resource Locator format is how you specify the address of a
+ particular resource on the internet. You know these, you've seen URLs like
+ http://curl.haxx.se or https://yourbank.com a million times.
+
+3. GET a page
+
+ The simplest and most common request/operation made using HTTP is to get a
+ URL. The URL could itself refer to a web page, an image or a file. The client
+ issues a GET request to the server and receives the document it asked for.
+ If you isse the command line
+
+        curl http://curl.haxx.se
+
+ you get a web page returned in your terminal window. The entire HTML document
+ that that URL holds.
+
+ All HTTP replies contain a set of headers that are normally hidden, use
+ curl's -i option to display them as well as the rest of the document. You can
+ also ask the remote server for ONLY the headers by using the -I option.
+
+4. Forms
+
+ Forms are the general way a web site can present a HTML page with fields for
+ the user to enter data in, and then press some kind of 'OK' or 'submit'
+ button to get that data sent to the server. The server then typically uses
+ the posted data to decide how to act. Like using the entered words to search
+ in a database, or to add the info in a bug track system, display the entered
+ address on a map or using the info as a login-prompt verifying that the user
+ is allowed to see what it is about to see.
+
+ Of course there has to be some kind of program in the server end to receive
+ the data you send. You cannot just invent something out of the air.
+
+ 4.1 GET
+
+  A GET-form uses the method GET, as specified in HTML like:
+
+        <form method="GET" action="junk.cgi">
+          <input type=text name="birthyear">
+          <input type=submit name=press value="OK">
+        </form>
+
+  In your favourite browser, this form will appear with a text box to fill in
+  and a press-button labeled "OK". If you fill in '1905' and press the OK
+  button, your browser will then create a new URL to get for you. The URL will
+  get "junk.cgi?birthyear=1905&press=OK" appended to the path part of the
+  previous URL.
+
+  If the original form was seen on the page "www.hotmail.com/when/birth.html",
+  the second page you'll get will become
+  "www.hotmail.com/when/junk.cgi?birthyear=1905&press=OK".
+
+  Most search engines work this way.
+
+  To make curl do the GET form post for you, just enter the expected created
+  URL:
+
+        curl "www.hotmail.com/when/junk.cgi?birthyear=1905&press=OK"
+
+ 4.2 POST
+
+  The GET method makes all input field names get displayed in the URL field of
+  your browser. That's generally a good thing when you want to be able to
+  bookmark that page with your given data, but it is an obvious disadvantage
+  if you entered secret information in one of the fields or if there are a
+  large amount of fields creating a very long and unreadable URL.
+
+  The HTTP protocol then offers the POST method. This way the client sends the
+  data separated from the URL and thus you won't see any of it in the URL
+  address field.
+
+  The form would look very similar to the previous one:
+
+        <form method="POST" action="junk.cgi">
+          <input type=text name="birthyear">
+          <input type=submit name=press value="OK">
+        </form>
+
+  And to use curl to post this form with the same data filled in as before, we
+  could do it like:
+
+        curl -d "birthyear=1905&press=OK" www.hotmail.com/when/junk.cgi
+
+  This kind of POST will use the Content-Type
+  application/x-www-form-urlencoded and is the most widly used POST kind.
+
+ 4.3 FILE UPLOAD POST
+
+  Back in late 1995 they defined a new to post data over HTTP. It was
+  documented in the RFC 1867, why this method sometimes are refered to as
+  a rfc1867-posting.
+
+  This method is mainly designed to better support file uploads. A form that
+  allows a user to upload a file could be written like this in HTML:
+
+    <form method="POST" enctype='multipart/form-data' action="upload.cgi">
+      <input type=file name=upload>
+      <input type=submit name=press value="OK">
+    </form>
+
+  This clearly shows that the Content-Type about to be sent is
+  multipart/form-data.
+
+  To post to a form like this with curl, you enter a command line like:
+
+        curl -F upload=@localfilename -F press=OK [URL]
+
+ 4.4 HIDDEN FIELDS
+
+  A very common way for HTML based application to pass state information
+  between pages is to add hidden fields to the forms. Hidden fields are
+  already filled in, they aren't displayed to the user and they get passed
+  along just as all the other fields.
+
+  A similar example form with one visible field, one hidden field and one
+  submit button could look like:
+
+    <form method="POST" action="foobar.cgi">
+      <input type=text name="birthyear">
+      <input type=text name="person" value="daniel">
+      <input type=submit name="press" value="OK">
+    </form>
+
+  To post this with curl, you won't have to think about if the fields are
+  hidden or not. To curl they're all the same:
+
+        curl -d "birthyear=1905&press=OK&person=daniel" [URL]
+
+5. PUT
+
+ The perhaps best way to upload data to a HTTP server is to use PUT. Then
+ again, this of course requires that someone put a program or script on the
+ server end that knows how to receive a HTTP PUT stream.
+
+ Put a file to a HTTP server with curl:
+
+        curl -t uploadfile www.uploadhttp.com/receive.cgi
+
+6. AUTHENTICATION
+
+ Authentication is the ability to tell the server your username and password
+ so that it can verify that you're allowed to do the request you're doing. The
+ basic authentication used in HTTP is *plain* *text* based, which means it
+ sends username and password only slightly obfuscated, but still fully
+ readable by anyone that sniffs on the network between you and the remote
+ server.
+
+ To tell curl to use a user and password for authentication:
+
+        curl -u name:password www.secrets.com
+ 
+ Sometimes your HTTP access is only available through the use of a HTTP
+ proxy. This seems to be especially common at various companies. A HTTP proxy
+ may require its own user and password to allow the client to get through to
+ the internet. To specify those with curl, run something like:
+
+        curl -U proxyuser:proxypassword curl.haxx.se
+
+ If you use any one these user+password options but leave out the password
+ part, curl will prompt for the password interactively.
+
+ Do note that when a program is run, its parameters are possible to see when
+ listing the running processes of the system. Thus, other users may be able to
+ watch your passwords if you pass them as plain command line options.
+
+7. REFERER
+
+ A HTTP request has the ability to feature a 'referer' field, which can be
+ used to tell which URL that causes the client to get this particular
+ resource. Some programs/scripts check the referer field of requests to verify
+ that this wasn't arriving from an external site or unknown page. While this
+ is a stupid way to check something so easily forged, many scripts still do
+ it. Using curl, you can put anything you want in the referer-field and thus
+ more easily being able to fool the server into serving your request.
+
+ Use curl to set the referer field with:
+
+        curl -e http://curl.haxx.se daniel.haxx.se
+
+8. USER AGENT
+
+ Very similar to the referer field, all HTTP requests may set the User-Agent
+ field. It names what user agent (client) that is being used. Many
+ applications use this information to decide how to display pages. Silly web
+ programmers try to make different pages for users of different browsers to
+ make them look the best possible for their particular browsers. They usually
+ also do different kinds of javascript, vbscript etc.
+
+ At times, you will see that getting a page will curl will not return the very
+ same page that you see when getting the page with your browser. Then you know
+ it is time to set the User Agent field to fool the server into thinking
+ you're one of those browsers.
+
+ To make curl look like Internet Explorer on a Windows 2000 box:
+
+        curl -A "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" [URL]
+
+ Or why not look like you're using Netscape 4.73 on a Linux (PIII) box:
+
+        curl -A "Mozilla/4.73 [en] (X11; U; Linux 2.2.15 i686)" [URL]
+
+9. REDIRECTS
+
+ When a resource is requested from a server, the reply from the server may
+ include a hint about where the browser should go next to find this page, or a
+ new page keeping newly generated output. The header that tells the browser
+ to redirect is Location:.
+
+ Curl does not follow Location: headers by default, but will simply display
+ such pages in the same manner it display all HTTP replies. It does however
+ feature an option that will make it attempt to follow the Location: pointers.
+
+ To tell curl to follow a Location: 
+ 
+        curl -L www.sitethatredirects.com
+
+ If you use curl to POST to a site that immediately redirects you to another
+ page, you can safely use -L and -d/-F together. Curl will only use POST in
+ the first request, and then revert to GET in the following operations.
+
+10. COOKIES
+
+ The way the web browsers do "client side state control" is by using
+ cookies. Cookies are just names with associated contents. The cookies are
+ sent to the client by the server. The server tells the client for what path
+ and host name it wants the cookie sent back, and it also sends an expiration
+ date and a few more properties.
+
+ When a client communicates with a server with a name and path as previously
+ specified in a received cookie, the client sends back the cookies and their
+ contents to the server, unless of course they are expired.
+
+ Many applications and server use this method to connect a series of request
+ into a single logical session. To be able to use curl in such occations, we
+ must be able to record and send back cookies in the way that the web
+ application expects them. The same way browsers deal with them.
+
+ The simplest way to send a few cookies to the server when getting a page with
+ curl is to add them on the command line like:
+
+        curl -b "name=Daniel" www.cookiesite.com
+
+
+ Cookies are sent as common HTTP headers. This is practical as it allows curl
+ to record cookies simply by recording headers. Record cookies with curl by
+ using the -D option like:
+
+        curl -D headers_and_cookies www.cookiesite.com
+
+ Curl has a full blown cookie parsing engine built-in that comes to use if you
+ want to reconnect to a server and use cookies that were stored from a
+ previous connection (or handicrafted manually to fool the server into
+ believing you had a previous connection). To use previously stored cookies,
+ you run curl like:
+
+        curl -b stored_cookies_in_file www.cookiesite.com
+
+11. HTTPS
+
+ There are a few ways to do secure HTTP transfers. The by far most common
+ protocol for doing this is what is generally known as HTTPS, HTTP over
+ SSL. SSL encrypts all the data that is send and received over the network and
+ thus makes it harder for attackers to spy on sensitive information.
+
+ SSL (or TLS as the latest version of the standard is called) offers a
+ truckload of advanced features to allow all those encryptions and key
+ infrastructure mechanisms ecnrypted HTTP requires.
+
+ Curl supports enscrypted fetches thanks to the freely available OpenSSL
+ libraries. To get a pafe from a https server, simply run curl like:
+
+        curl https://that.secure.server.com
+
+ 11.1 CERTIFICATES
+
+  In the HTTPS world, you use certificates to validate that you are the one
+  you you claim to be, as an addition to normal passwords. Curl supports
+  client-side certificates. All certificates are locked with a PIN-code, why
+  you need to enter the unlock-code before the certificate can be used by
+  curl. The PIN-code can be specified on the command line or if not, entered
+  interactively when curl queries for it. Use a certificate with curl on a
+  https server like:
+
+        curl -E mycert.pem https://that.secure.server.com
+
+12. REFERENCES
+
+ RFC 2616 is a must to read if you want in-depth understanding of the HTTP
+ protocol.
+
+ RFC 2396 explains the URL syntax
+
+ RFC 2109 defines how cookies are supposed to work.
+
+ http://www.openssl.org is the home of the OpenSSL project
+
+ http://curl.haxx.se is the home of the cURL project
