@@ -26,8 +26,6 @@
 /* This file is for lib internal stuff */
 
 #include "setup.h"
-#include "hostip.h"
-#include "hash.h"
 
 #define PORT_FTP 21
 #define PORT_TELNET 23
@@ -81,6 +79,8 @@
 #include <curl/curl.h>
 
 #include "http_chunks.h" /* for the structs and enum stuff */
+#include "hostip.h"
+#include "hash.h"
 
 #ifdef HAVE_ZLIB_H
 #include <zlib.h> 		/* for content-encoding 08/28/02 jhrg */
@@ -311,8 +311,11 @@ struct connectdata {
 #define PROT_FTPS    (1<<9)
 #define PROT_SSL     (1<<10) /* protocol requires SSL */
 
+  /* the particular host we use, in two different ways */
+  struct Curl_dns_entry *connect_addr;
+
 #ifdef ENABLE_IPV6
-  struct addrinfo *serv_addr;   /* the particular host we use */
+  struct addrinfo *serv_addr;
 #else
   struct sockaddr_in serv_addr;
 #endif

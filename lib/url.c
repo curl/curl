@@ -1484,18 +1484,23 @@ static int handleSock5Proxy(
   socksreq[3] = 1; /* IPv4 = 1 */
     
   {
-    Curl_addrinfo *hp;
-    hp = Curl_resolv(conn->data, conn->hostname, conn->remote_port);
+#ifndef ENABLE_IPV6
+    struct Curl_dns_entry *dns;
+    Curl_addrinfo *hp=NULL;
+    dns = Curl_resolv(conn->data, conn->hostname, conn->remote_port);
     /*
      * We cannot use 'hostent' as a struct that Curl_resolv() returns.  It
      * returns a Curl_addrinfo pointer that may not always look the same.
      */
-#ifndef ENABLE_IPV6
+    if(dns)
+      hp=dns->addr;
     if (hp && hp->h_addr_list[0]) {
       socksreq[4] = ((char*)hp->h_addr_list[0])[0];
       socksreq[5] = ((char*)hp->h_addr_list[0])[1];
       socksreq[6] = ((char*)hp->h_addr_list[0])[2];
       socksreq[7] = ((char*)hp->h_addr_list[0])[3];
+
+      dns->inuse--; /* not used anymore from now on */
     }
     else {
       failf(conn->data, "Failed to resolve \"%s\" for SOCKS5 connect.",
@@ -1548,7 +1553,7 @@ static int handleSock5Proxy(
 }
 
 static CURLcode ConnectPlease(struct connectdata *conn,
-                              Curl_addrinfo *hostaddr,
+                              struct Curl_dns_entry *hostaddr,
                               bool *connected)
 {
   CURLcode result;
@@ -1567,6 +1572,8 @@ static CURLcode ConnectPlease(struct connectdata *conn,
     /* All is cool, then we store the current information from the hostaddr
        struct to the serv_addr, as it might be needed later. The address
        returned from the function above is crucial here. */
+    conn->connect_addr = hostaddr;
+
 #ifdef ENABLE_IPV6
     conn->serv_addr = addr;
 #else
@@ -1597,7 +1604,7 @@ static CURLcode ConnectPlease(struct connectdata *conn,
 }
 
 static void verboseconnect(struct connectdata *conn,
-                           Curl_addrinfo *hostaddr)
+                           struct Curl_dns_entry *dns)
 {
 #ifdef HAVE_INET_NTOA_R
   char ntoa_buf[64];
@@ -1606,7 +1613,7 @@ static void verboseconnect(struct connectdata *conn,
 
   /* Figure out the ip-number and display the first host name it shows: */
 #ifdef ENABLE_IPV6
-  (void)hostaddr; /* not used in the IPv6 enabled version */
+  (void)dns; /* not used in the IPv6 enabled version */
   {
     char hbuf[NI_MAXHOST];
 #ifdef NI_WITHSCOPEID
@@ -1629,6 +1636,7 @@ static void verboseconnect(struct connectdata *conn,
   }
 #else
   {
+    Curl_addrinfo *hostaddr=dns->addr;
     struct in_addr in;
     (void) memcpy(&in.s_addr, &conn->serv_addr.sin_addr, sizeof (in.s_addr));
     infof(data, "Connected to %s (%s) port %d\n",
@@ -1654,7 +1662,7 @@ static void verboseconnect(struct connectdata *conn,
  * 'serv_addr' field in the connectdata struct for most of it.
  */
 CURLcode Curl_protocol_connect(struct connectdata *conn,
-                               Curl_addrinfo *hostaddr)
+                               struct Curl_dns_entry *hostaddr)
 {
   struct SessionHandle *data = conn->data;
   CURLcode result=CURLE_OK;
@@ -1689,7 +1697,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
   struct connectdata *conn;
   struct connectdata *conn_temp;
   int urllen;
-  Curl_addrinfo *hostaddr;
+  struct Curl_dns_entry *hostaddr;
 #ifdef HAVE_ALARM
   unsigned int prev_alarm=0;
 #endif
@@ -2811,7 +2819,6 @@ CURLcode Curl_connect(struct SessionHandle *data,
   return code;
 }
 
-
 CURLcode Curl_done(struct connectdata *conn)
 {
   struct SessionHandle *data=conn->data;
@@ -2829,7 +2836,16 @@ CURLcode Curl_done(struct connectdata *conn)
     free(conn->newurl);
     conn->newurl = NULL;
   }
- 
+
+  if(conn->connect_addr)
+    conn->connect_addr->inuse--; /* done with this */
+
+#ifdef MALLOCDEBUG
+  /* scan for DNS cache entries still marked as in use */
+  Curl_hash_apply(data->hostcache,
+                  NULL, Curl_scan_cache_used);
+#endif
+
   /* this calls the protocol-specific function pointer previously set */
   if(conn->curl_done)
     result = conn->curl_done(conn);

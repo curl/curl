@@ -80,6 +80,11 @@
 static curl_hash hostname_cache;
 static int host_cache_initialized;
 
+static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
+                                       char *hostname,
+                                       int port,
+                                       char **bufp);
+
 void Curl_global_host_cache_init(void)
 {
   if (!host_cache_initialized) {
@@ -100,11 +105,6 @@ void Curl_global_host_cache_dtor(void)
     host_cache_initialized = 0;
   }
 }
-
-struct curl_dns_cache_entry {
-  Curl_addrinfo *addr;
-  time_t timestamp;
-};
 
 /* count the number of characters that an integer takes up */
 static int _num_chars(int i)
@@ -129,7 +129,7 @@ static int _num_chars(int i)
 
 /* Create a hostcache id */
 static char *
-_create_hostcache_id(char *server, int port, ssize_t *entry_len)
+create_hostcache_id(char *server, int port, ssize_t *entry_len)
 {
   char *id = NULL;
 
@@ -162,16 +162,19 @@ struct hostcache_prune_data {
 };
 
 static int
-_curl_hostcache_timestamp_remove(void *datap, void *hc)
+hostcache_timestamp_remove(void *datap, void *hc)
 {
   struct hostcache_prune_data *data = 
     (struct hostcache_prune_data *) datap;
-  struct curl_dns_cache_entry *c = (struct curl_dns_cache_entry *) hc;
+  struct Curl_dns_entry *c = (struct Curl_dns_entry *) hc;
   
-  if (data->now - c->timestamp < data->cache_timeout) {
+  if ((data->now - c->timestamp < data->cache_timeout) ||
+      c->inuse) {
+    /* please don't remove */
     return 0;
   }
   
+  /* fine, remove */
   return 1;
 }
 
@@ -185,14 +188,30 @@ hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
   
   Curl_hash_clean_with_criterium(hostcache, 
                                  (void *) &user, 
-                                 _curl_hostcache_timestamp_remove);
+                                 hostcache_timestamp_remove);
 }
 
+#ifdef MALLOCDEBUG
+/* Called from Curl_done() to check that there's no DNS cache entry with
+   a non-zero counter left. */
+void Curl_scan_cache_used(void *user, void *ptr)
+{
+  struct Curl_dns_entry *e = ptr;
+  (void)user; /* prevent compiler warning */
+  if(e->inuse) {
+    fprintf(stderr, "*** WARNING: locked DNS cache entry detected: %s\n",
+            e->entry_id);
+    /* perform a segmentation fault to draw attention */
+    *(void **)0 = 0;
+  }
+}
+#endif
+
 /* Macro to save redundant free'ing of entry_id */
-#define _hostcache_return(__v) \
+#define HOSTCACHE_RETURN(dns) \
 { \
   free(entry_id); \
-  return (__v); \
+  return dns; \
 }
 
 #ifdef HAVE_SIGSETJMP
@@ -200,72 +219,69 @@ hostcache_prune(curl_hash *hostcache, int cache_timeout, int now)
 sigjmp_buf curl_jmpenv;
 #endif
 
-Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
-                           char *hostname,
-                           int port)
+struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
+                                   char *hostname,
+                                   int port)
 {
   char *entry_id = NULL;
-  struct curl_dns_cache_entry *p = NULL;
+  struct Curl_dns_entry *dns = NULL;
   ssize_t entry_len;
   time_t now;
   char *bufp;
 
 #ifdef HAVE_SIGSETJMP
-  if(sigsetjmp(curl_jmpenv, 1) != 0) {
+  /* this allows us to time-out from the name resolver, as the timeout
+     will generate a signal and we will siglongjmp() from that here */
+  if(!data->set.no_signal && sigsetjmp(curl_jmpenv, 1)) {
     /* this is coming from a siglongjmp() */
     failf(data, "name lookup time-outed");
     return NULL;
   }
 #endif
 
-#if 0
-  /* If the host cache timeout is 0, we don't do DNS cach'ing
-     so fall through */
-  if (data->set.dns_cache_timeout == 0) {
-    return Curl_getaddrinfo(data, hostname, port, &bufp);
-  }
-#endif
+  /* Create an entry id, based upon the hostname and port */
+  entry_len = strlen(hostname);
+  entry_id = create_hostcache_id(hostname, port, &entry_len);
+  /* If we can't create the entry id, fail */
+  if (!entry_id)
+    return NULL;
+  
+  /* See if its already in our dns cache */
+  dns = Curl_hash_pick(data->hostcache, entry_id, entry_len+1);
 
+  if (!dns) {
+    Curl_addrinfo *addr = my_getaddrinfo(data, hostname, port, &bufp);
+    
+    if (!addr) {
+      HOSTCACHE_RETURN(NULL);
+    }
+
+    /* Create a new cache entry */
+    dns = (struct Curl_dns_entry *) malloc(sizeof(struct Curl_dns_entry));
+    if (!dns) {
+      Curl_freeaddrinfo(addr);
+      HOSTCACHE_RETURN(NULL);
+    }
+
+    dns->inuse = 0;
+    dns->addr = addr;
+    /* Save it in our host cache */
+    Curl_hash_add(data->hostcache, entry_id, entry_len+1, (const void *) dns);
+  }
   time(&now);
 
-  /* Remove outdated entries from the hostcache */
+  dns->timestamp = now;
+  dns->inuse++;         /* mark entry as in-use */
+#ifdef MALLOCDEBUG
+  dns->entry_id = entry_id;
+#endif
+
+  /* Remove outdated and unused entries from the hostcache */
   hostcache_prune(data->hostcache, 
                   data->set.dns_cache_timeout, 
                   now);
 
-  /* Create an entry id, based upon the hostname and port */
-  entry_len = strlen(hostname);
-  entry_id = _create_hostcache_id(hostname, port, &entry_len);
-  /* If we can't create the entry id, don't cache, just fall-through
-     to the plain Curl_getaddrinfo() */
-  if (!entry_id) {
-    return Curl_getaddrinfo(data, hostname, port, &bufp);
-  }
-  
-  /* See if its already in our dns cache */
-  if (entry_id &&
-      Curl_hash_find(data->hostcache, entry_id, entry_len+1, (void **) &p)) {
-    _hostcache_return(p->addr);
-  }
-
-  /* Create a new cache entry */
-  p = (struct curl_dns_cache_entry *)
-    malloc(sizeof(struct curl_dns_cache_entry));
-  if (!p) {
-   _hostcache_return(NULL);
-  }
-
-  p->addr = Curl_getaddrinfo(data, hostname, port, &bufp);
-  if (!p->addr) {
-    free(p);
-    _hostcache_return(NULL);
-  }
-  p->timestamp = now;
-
-  /* Save it in our host cache */
-  Curl_hash_update(data->hostcache, entry_id, entry_len+1, (const void *) p);
-
-  _hostcache_return(p->addr);
+  HOSTCACHE_RETURN(dns);
 }
 
 /*
@@ -275,7 +291,7 @@ Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
  */
 void Curl_freeaddrinfo(void *freethis)
 {
-  struct curl_dns_cache_entry *p = (struct curl_dns_cache_entry *) freethis;
+  struct Curl_dns_entry *p = (struct Curl_dns_entry *) freethis;
 
 #ifdef ENABLE_IPV6
   freeaddrinfo(p->addr);
@@ -333,10 +349,10 @@ void curl_freeaddrinfo(struct addrinfo *freethis,
  * memory we need to free after use. That meory *MUST* be freed with
  * Curl_freeaddrinfo(), nothing else.
  */
-Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
-                                char *hostname,
-                                int port,
-                                char **bufp)
+static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
+                                     char *hostname,
+                                     int port,
+                                     char **bufp)
 {
   struct addrinfo hints, *res;
   int error;
@@ -509,10 +525,10 @@ static void hostcache_fixoffset(struct hostent *h, int offset)
 /* The original code to this function was once stolen from the Dancer source
    code, written by Bjorn Reese, it has since been patched and modified
    considerably. */
-Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
-                                char *hostname,
-                                int port,
-                                char **bufp)
+static Curl_addrinfo *my_getaddrinfo(struct SessionHandle *data,
+                                     char *hostname,
+                                     int port,
+                                     char **bufp)
 {
   struct hostent *h = NULL;
   in_addr_t in;

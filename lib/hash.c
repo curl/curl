@@ -25,6 +25,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+
 #include "hash.h"
 #include "llist.h"
 
@@ -128,7 +129,6 @@ _mk_hash_element (curl_hash_element **e, char *key, size_t key_len, const void *
   (*e)->key = strdup(key);
   (*e)->key_len = key_len;
   (*e)->ptr = (void *) p;
-
   return 0;
 }
 /* }}} */
@@ -195,10 +195,10 @@ Curl_hash_delete(curl_hash *h, char *key, size_t key_len)
 }
 /* }}} */
 
-/* {{{ int curl_hash_find (curl_hash *, char *, size_t, void **)
+/* {{{ int curl_hash_pick (curl_hash *, char *, size_t, void **)
  */
-int 
-Curl_hash_find(curl_hash *h, char *key, size_t key_len, void **p)
+void *
+Curl_hash_pick(curl_hash *h, char *key, size_t key_len)
 {
   curl_llist_element *le;
   curl_hash_element  *he;
@@ -209,12 +209,11 @@ Curl_hash_find(curl_hash *h, char *key, size_t key_len, void **p)
        le = CURL_LLIST_NEXT(le)) {
     he = CURL_LLIST_VALP(le);
     if (_hash_key_compare(he->key, he->key_len, key, key_len)) {
-      *p = he->ptr;
-      return 1;
+      return he->ptr;
     }
   }
 
-  return 0;
+  return NULL;
 }
 /* }}} */
 
@@ -222,7 +221,7 @@ Curl_hash_find(curl_hash *h, char *key, size_t key_len, void **p)
  */
 void 
 Curl_hash_apply(curl_hash *h, void *user,
-                void (*cb)(void *, curl_hash_element *))
+                void (*cb)(void *user, void *ptr))
 {
   curl_llist_element  *le;
   int                  i;
@@ -231,7 +230,8 @@ Curl_hash_apply(curl_hash *h, void *user,
     for (le = CURL_LLIST_HEAD(h->table[i]);
          le != NULL;
          le = CURL_LLIST_NEXT(le)) {
-      cb(user, (curl_hash_element *) CURL_LLIST_VALP(le));
+      curl_hash_element *el = CURL_LLIST_VALP(le);
+      cb(user, el->ptr);
     }
   }
 }

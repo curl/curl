@@ -206,7 +206,7 @@ static CURLcode bindlocal(struct connectdata *conn,
    *************************************************************/
   if (strlen(data->set.device)<255) {
     struct sockaddr_in sa;
-    Curl_addrinfo *h=NULL;
+    struct Curl_dns_entry *h=NULL;
     size_t size;
     char myhost[256] = "";
     in_addr_t in;
@@ -247,12 +247,17 @@ static CURLcode bindlocal(struct connectdata *conn,
     if (INADDR_NONE != in) {
 
       if ( h ) {
+        Curl_addrinfo *addr = h->addr;
+
+        h->inuse--; /* decrease the use-counter, we don't need it anymore
+                       after this function has returned */
+
         memset((char *)&sa, 0, sizeof(sa));
 #ifdef ENABLE_IPV6
-        memcpy((char *)&sa.sin_addr, h->ai_addr, h->ai_addrlen);        
-        sa.sin_family = h->ai_family;
+        memcpy((char *)&sa.sin_addr, addr->ai_addr, addr->ai_addrlen);        
+        sa.sin_family = addr->ai_family;
 #else
-        memcpy((char *)&sa.sin_addr, h->h_addr, h->h_length);
+        memcpy((char *)&sa.sin_addr, addr->h_addr, addr->h_length);
         sa.sin_family = AF_INET;
 #endif
         sa.sin_addr.s_addr = in;
@@ -410,7 +415,7 @@ CURLcode Curl_is_connected(struct connectdata *conn,
  */
 
 CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
-                          Curl_addrinfo *remotehost, /* use one in here */
+                          struct Curl_dns_entry *remotehost, /* use this one */
                           int port,                  /* connect to this */
                           int *sockconn,             /* the connected socket */
                           Curl_ipconnect **addr,     /* the one we used */
@@ -479,7 +484,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     struct addrinfo *ai;
     port =0; /* prevent compiler warning */
 
-    for (ai = remotehost; ai; ai = ai->ai_next, aliasindex++) {
+    for (ai = remotehost->addr; ai; ai = ai->ai_next, aliasindex++) {
       sockfd = socket(ai->ai_family, ai->ai_socktype, ai->ai_protocol);
       if (sockfd < 0)
         continue;

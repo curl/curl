@@ -23,6 +23,7 @@
  * $Id$
  ***************************************************************************/
 
+#include "setup.h"
 #include "hash.h"
 
 struct addrinfo;
@@ -35,15 +36,23 @@ curl_hash *Curl_global_host_cache_get(void);
 
 #define Curl_global_host_cache_use(__p) ((__p)->set.global_dns_cache)
 
-Curl_addrinfo *Curl_resolv(struct SessionHandle *data,
-			   char *hostname,
-			   int port);
+struct Curl_dns_entry {
+  Curl_addrinfo *addr;
+  time_t timestamp;
+  long inuse;      /* use-counter, make very sure you decrease this
+                      when you're done using the address you received */
+#ifdef MALLOCDEBUG
+  char *entry_id;
+#endif
+};
 
-/* Get name info */
-Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
-                                char *hostname,
-                                int port,
-                                char **bufp);
+struct Curl_dns_entry *Curl_resolv(struct SessionHandle *data,
+                                   char *hostname,
+                                   int port);
+
+/* for debugging purposes only: */
+void Curl_scan_cache_used(void *user, void *ptr);
+
 /* free name info */
 void Curl_freeaddrinfo(void *freethis);
 

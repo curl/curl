@@ -1184,7 +1184,6 @@ CURLcode ftp_use_port(struct connectdata *conn)
    */
   struct sockaddr_in sa;
   struct hostent *h=NULL;
-  char *hostdataptr=NULL;
   unsigned short porttouse;
   char myhost[256] = "";
   bool sa_filled_in = FALSE;
@@ -1214,6 +1213,9 @@ CURLcode ftp_use_port(struct connectdata *conn)
 
     sa_filled_in = TRUE; /* the sa struct is filled in */
   }
+
+  if(h)
+    h->inuse--; /* when we return from here, we can forget about this */
 
   if ( h || sa_filled_in) {
     if( (portsock = socket(AF_INET, SOCK_STREAM, 0)) >= 0 ) {
@@ -1250,19 +1252,16 @@ CURLcode ftp_use_port(struct connectdata *conn)
         
         if ( listen(portsock, 1) < 0 ) {
           failf(data, "listen(2) failed on socket");
-          free(hostdataptr);
           return CURLE_FTP_PORT_FAILED;
         }
       }
       else {
         failf(data, "bind(2) failed on socket");
-        free(hostdataptr);
         return CURLE_FTP_PORT_FAILED;
       }
     }
     else {
       failf(data, "socket(2) failed (%s)");
-      free(hostdataptr);
       return CURLE_FTP_PORT_FAILED;
     }
   }
@@ -1332,7 +1331,7 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
   char *buf = data->state.buffer; /* this is our buffer */
   int ftpcode; /* receive FTP response codes in this */
   CURLcode result;
-  Curl_addrinfo *addr=NULL;
+  struct Curl_dns_entry *addr=NULL;
   Curl_ipconnect *conninfo;
 
   /*
@@ -1479,6 +1478,8 @@ CURLcode ftp_use_pasv(struct connectdata *conn,
                             &conn->secondarysocket,
                             &conninfo,
                             connected);
+
+  addr->inuse--; /* we're done using this address */
 
   /*
    * When this is used from the multi interface, this might've returned with

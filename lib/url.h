@@ -36,5 +36,5 @@ CURLcode Curl_do_more(struct connectdata *);
 CURLcode Curl_done(struct connectdata *);
 CURLcode Curl_disconnect(struct connectdata *);
 CURLcode Curl_protocol_connect(struct connectdata *conn,
-                               Curl_addrinfo *hostaddr);
+                               struct Curl_dns_entry *dns);
 #endif
