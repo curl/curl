@@ -140,7 +140,7 @@ CURLcode Curl_file(struct connectdata *conn)
   */
   CURLcode res = CURLE_OK;
   struct stat statbuf;
-  ssize_t expected_size=-1;
+  double expected_size=-1;
   ssize_t nread;
   struct SessionHandle *data = conn->data;
   char *buf = data->state.buffer;
@@ -155,7 +155,7 @@ CURLcode Curl_file(struct connectdata *conn)
 /*VMS?? -- This only works reliable for STREAMLF files */
   if( -1 != fstat(fd, &statbuf)) {
     /* we could stat it, then read out the size */
-    expected_size = statbuf.st_size;
+    expected_size = (double)statbuf.st_size;
   }
 
   /* The following is a shortcut implementation of file reading
