@@ -20,34 +20,39 @@ push @out, "                             / __| | | | |_) | |    \n";
 push @out, "                            | (__| |_| |  _ <| |___ \n";
 push @out, "                             \\___|\\___/|_| \\_\\_____|\n";
 
-my $head=0;
-
 while (<STDIN>) {
-    $line = $_;
+    my $line = $_;
 
-    # this kind should be removed first:
-    $line =~ s/_//g;
+    # this should be removed:
+    $line =~ s/(.|_)//g;
 
-    # then this:
-    $line =~ s/.//g;
-
-    if($line =~ /^curl/i) {
-	# cut off the page headers
-        $head=1;
-	next;
-    } 
-
-    if($line =~ /^[ \t]*\n/) {
-	$wline++;
-	# we only make one empty line max
+    if($line =~ /^([ \t]*\n|curl)/i) {
+        # cut off headers and empty lines
+	$wline++; # count number of cut off lines
 	next;
     }
+
+    my $text = $line;
+    $text =~ s/^\s+//g; # cut off preceeding...
+    $text =~ s/\s+$//g; # and trailing whitespaces
+
+    $tlen = length($text);
+
+    if($wline && ($olen == $tlen)) {
+        # if the previous line with contents was exactly as long as
+        # this line, then we ignore the newlines!
+
+        # We do this magic because a header may abort a paragraph at
+        # any line, but we don't want that to be noticed in the output
+        # here
+        $wline=0;
+    }
+    $olen = $tlen;
+
     if($wline) {
+	# we only make one empty line max
 	$wline = 0;
-        if(!$head) {
-            push @out, "\n";
-        }
-        $head =0;
+        push @out, "\n";
     }
     push @out, $line;
 }
@@ -101,9 +106,17 @@ print <<HEAD
 HEAD
     ;
 if($c) {
-    print "/* gzip shrunk this data from $gzip to $gzipped bytes */\n",
-    "#include <zlib.h>\nstatic const unsigned char hugehelpgz[] = {\n  ";
+    print <<HEAD
+#include <zlib.h>
+static const unsigned char hugehelpgz[] = {
+  /* This mumbo-jumbo is the huge help text compressed with gzip.
+     Thanks to this operation, the size of this data shrunk from $gzip
+     to $gzipped bytes. You can disable the use of compressed help
+     texts by NOT passing -c to the mkhelp.pl tool. */
+HEAD
+;
     my $c=0;
+    print "  ";
     for(@gzip) {
         my @all=split(//, $_);
         for(@all) {
