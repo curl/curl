@@ -6,6 +6,39 @@
 
                                History of Changes
 
+Daniel (14 August 2001)
+- Nico Baggus provided more feedback from his VMS porting efforts and a few
+  minor changes were necessary.
+
+- I modified configure.in so that --enable-debug sets more picky gcc options.
+  I then removed almost all the new warnings that appeared, and by doing so I
+  corrected the size_t-treated-as-signed problem that has been discussed on
+  the mailing list previously. I also removed a bunch of the just recently
+  added #ifdef VMS lines.
+
+- I removed the use of a global variable in the SSL code. It was once
+  necessary but hasn't been needed since OpenSSL 0.9.4. The old code should
+  (hopefully) still work if libcurl is built against an ancient version of
+  OpenSSL.
+
+Daniel (13 August 2001)
+- Peter Todd posted a patch that now allows non-file rc1867-style form posts
+  to be larger than 4K.
+
+Daniel (10 August 2001)
+- S. Moonesamy fixed bugs for building debug and SSL lib in VC makefile
+
+Daniel (9 August 2001)
+- The redirected error stream was closed before the curl_easy_cleanup() call
+  was made, and when VERBOSE was enabled, the cleanup function tried to use
+  the stream. It could lead to a segmentation fault. Also, the stream was
+  closed even if we looped to get more files.  Corrects Dustin Boswell's bug
+  report #441610
+
+- Now generates the release configure script with autoconf 2.52
+
+Version 7.8.1-pre4
+
 Daniel (8 August 2001)
 - curl -E uses a colon to separate a file name from a passphrase. This turned
   out really bad for the windows people who wants to include a drive letter in
