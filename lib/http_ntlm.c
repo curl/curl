@@ -376,19 +376,27 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
 #ifdef USE_NTRESPONSES
     unsigned char ntresp[0x18]; /* fixed-size */
 #endif
-    int userlen = strlen(data->state.user);
-    
+    const char *user;
+    int userlen;
+
+    user = strchr(data->state.user, '\\');
+    if(!user)
+      user = strchr(data->state.user, '/');
+
+    if (user) {
+      domain = data->state.user;
+      domlen = user - domain;
+      user++;
+    }
+    else
+      user = data->state.user;
+    userlen = strlen(user);
+
     mkhash(data->state.passwd, &data->state.ntlm.nonce[0], lmresp
 #ifdef USE_NTRESPONSES
            , ntresp
 #endif
-
-);
-
-    /* these are going unicode */
-    domlen *= 2;
-    userlen *= 2;
-    hostlen *= 2;
+      );
 
     domoff = 64; /* always */
     useroff = domoff + domlen;
@@ -478,7 +486,10 @@ CURLcode Curl_output_ntlm(struct connectdata *conn)
     size=64;
     ntlm[62]=ntlm[63]=0;
 
-    memcpy(&ntlm[size], data->state.user, userlen);
+    memcpy(&ntlm[size], domain, domlen);
+    size += domlen;
+
+    memcpy(&ntlm[size], user, userlen);
     size += userlen;
 
     /* we append the binary hashes to the end of the blob */
