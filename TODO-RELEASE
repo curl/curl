@@ -1,0 +1,52 @@
+Fix before releasing 7.11
+=========================
+(Issues not sorted in any particular order)
+
+3. Apply Peter Sylvester's multi patches (awaiting updated patch)
+
+5. Large-file support (patch is almost complete, work by Dave Meyer)
+
+6. REST fix for servers not behaving well on >2GB requests (some outstanding
+   issues, Dave Meyer works on this)
+
+8. Resolve the occational test case 91 failure. This still has no
+   resolution. (David Byron has done lots of research)
+
+12. The "PUT and (NTLM/Digest) auth" bug (Jacob Swed's report #862835)
+
+17. Diego Casorran's AmigaOS patch
+
+To get fixed in 7.11.1
+======================
+
+1. Introduce a new error code indicating authentication problems (for proxy
+   CONNECT error 407 for example) (no progress yet) #845941
+
+2. Make the proxy CONNECT headers get passed to the callbacks just like other
+   headers are (no progress yet) #845941
+
+4. Multi-threaded OpenSSL usage needs to be addressed (patch anyone?)
+
+9. Modify ares to do 'files bind' order instead of 'bind files' by default
+   (not actually part of libcurl) See details by Frank Ticheler posted here:
+   http://curl.haxx.se/mail/archive-2003-11/0020.html
+
+10. Anton Fedorov's "dumpcert" patch (only mailed to me privately)
+
+14. Evaluate/apply Gertjan van Wingerde's SSL patches
+
+16. Tony Blakie's bug report about getting a 302 and Location: back from a
+    proxy after a CONNECT request. (correct behavior on this is not certain)
+
+Fixed in 7.11
+=============
+
+7. Apply Gisle Vanem's djgpp patches
+
+11. building for Windows with SSL on MSVC (patched by David Byron)
+
+13. Andrés García's CURLOPT_IPRESOLVE problem
+
+15. RBramante's inactivity timeout on Win2k problem (problem fixed in more
+    recent versions)
+
