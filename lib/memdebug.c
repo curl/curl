@@ -74,8 +74,17 @@ void *curl_domalloc(size_t size, int line, char *source)
 
 char *curl_dostrdup(char *str, int line, char *source)
 {
-  char *mem=(strdup)(str);
-  size_t len=strlen(str)+1;
+  char *mem;
+  size_t len;
+  
+  if(NULL ==str) {
+    fprintf(stderr, "ILLEGAL strdup() on NULL at %s:%d\n",
+            source, line);
+    exit(2);
+  }
+
+  mem=(strdup)(str);
+  len=strlen(str)+1;
   fprintf(logfile?logfile:stderr, "MEM %s:%d strdup(%p) (%d) = %p\n",
           source, line, str, len, mem);
   return mem;
@@ -91,7 +100,14 @@ void *curl_dorealloc(void *ptr, size_t size, int line, char *source)
 
 void curl_dofree(void *ptr, int line, char *source)
 {
+  if(NULL == ptr) {
+    fprintf(stderr, "ILLEGAL free() on NULL at %s:%d\n",
+            source, line);
+    exit(2);
+  }
+
   (free)(ptr);
+
   fprintf(logfile?logfile:stderr, "MEM %s:%d free(%p)\n",
           source, line, ptr);
 }
