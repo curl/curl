@@ -5,7 +5,7 @@
 .\" *                            | (__| |_| |  _ <| |___
 .\" *                             \___|\___/|_| \_\_____|
 .\" *
-.\" * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
 .\" *
 .\" * This software is licensed as described in the file COPYING, which
 .\" * you should have received as part of this distribution. The terms
@@ -21,7 +21,7 @@
 .\" * $Id$
 .\" **************************************************************************
 .\"
-.TH libcurl-tutorial 3 "18 Jun 2004" "libcurl" "libcurl programming"
+.TH libcurl-tutorial 3 "22 Jan 2005" "libcurl" "libcurl programming"
 .SH NAME
 libcurl-tutorial \- libcurl programming tutorial
 .SH "Objective"
@@ -94,9 +94,9 @@ use the library. Once for your program's entire life time. This is done using
  curl_global_init()
 
 and it takes one parameter which is a bit pattern that tells libcurl what to
-initialize. Using CURL_GLOBAL_ALL will make it initialize all known internal
-sub modules, and might be a good default option. The current two bits that
-are specified are:
+initialize. Using \fICURL_GLOBAL_ALL\fP will make it initialize all known
+internal sub modules, and might be a good default option. The current two bits
+that are specified are:
 .RS
 .IP "CURL_GLOBAL_WIN32"
 which only does anything on Windows machines. When used on
@@ -113,17 +113,19 @@ application so if your program or another library already does this, this
 bit should not be needed.
 .RE
 
-libcurl has a default protection mechanism that detects if curl_global_init()
-hasn't been called by the time curl_easy_perform() is called and if that is
-the case, libcurl runs the function itself with a guessed bit pattern. Please
-note that depending solely on this is not considered nice nor very good.
+libcurl has a default protection mechanism that detects if
+\fIcurl_global_init(3)\fP hasn't been called by the time
+\fIcurl_easy_perform(3)\fP is called and if that is the case, libcurl runs the
+function itself with a guessed bit pattern. Please note that depending solely
+on this is not considered nice nor very good.
 
-When the program no longer uses libcurl, it should call curl_global_cleanup(),
-which is the opposite of the init call. It will then do the reversed
-operations to cleanup the resources the curl_global_init() call initialized.
+When the program no longer uses libcurl, it should call
+\fIcurl_global_cleanup(3)\fP, which is the opposite of the init call. It will
+then do the reversed operations to cleanup the resources the
+\fIcurl_global_init(3)\fP call initialized.
 
-Repeated calls to curl_global_init() and curl_global_cleanup() should be
-avoided. They should only be called once each.
+Repeated calls to \fIcurl_global_init(3)\fP and \fIcurl_global_cleanup(3)\fP
+should be avoided. They should only be called once each.
 
 .SH "Features libcurl Provides"
 It is considered best-practice to determine libcurl features run-time rather
@@ -153,17 +155,18 @@ It returns an easy handle. Using that you proceed to the next step: setting
 up your preferred actions. A handle is just a logic entity for the upcoming
 transfer or series of transfers.
 
-You set properties and options for this handle using curl_easy_setopt(). They
-control how the subsequent transfer or transfers will be made. Options remain
-set in the handle until set again to something different. Alas, multiple
-requests using the same handle will use the same options.
+You set properties and options for this handle using
+\fIcurl_easy_setopt(3)\fP. They control how the subsequent transfer or
+transfers will be made. Options remain set in the handle until set again to
+something different. Alas, multiple requests using the same handle will use
+the same options.
 
 Many of the options you set in libcurl are "strings", pointers to data
 terminated with a zero byte. Keep in mind that when you set strings with
-curl_easy_setopt(), libcurl will not copy the data. It will merely point to
-the data. You MUST make sure that the data remains available for libcurl to
-use until finished or until you use the same option again to point to
-something else.
+\fIcurl_easy_setopt(3)\fP, libcurl will not copy the data. It will merely
+point to the data. You MUST make sure that the data remains available for
+libcurl to use until finished or until you use the same option again to point
+to something else.
 
 One of the most basic properties to set in the handle is the URL. You set
 your preferred URL to transfer with CURLOPT_URL in a manner similar to:
@@ -188,11 +191,11 @@ similar to this:
 You can control what data your function get in the forth argument by setting
 another property:
 
-    curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, &internal_struct);
+ curl_easy_setopt(easyhandle, CURLOPT_WRITEDATA, &internal_struct);
 
 Using that property, you can easily pass local data between your application
 and the function that gets invoked by libcurl. libcurl itself won't touch the
-data you pass with CURLOPT_WRITEDATA.
+data you pass with \fICURLOPT_WRITEDATA\fP.
 
 libcurl offers its own default internal callback that'll take care of the data
 if you don't set the callback with \fICURLOPT_WRITEFUNCTION\fP. It will then
@@ -219,14 +222,13 @@ of them later. Let's instead continue to the actual transfer:
 
  success = curl_easy_perform(easyhandle);
 
-The \fIcurl_easy_perform(3)\fP will connect to the remote site, do the
-necessary commands and receive the transfer. Whenever it receives data, it
-calls the callback function we previously set. The function may get one byte
-at a time, or it may get many kilobytes at once. libcurl delivers as much as
-possible as often as possible. Your callback function should return the number
-of bytes it "took care of". If that is not the exact same amount of bytes that
-was passed to it, libcurl will abort the operation and return with an error
-code.
+\fIcurl_easy_perform(3)\fP will connect to the remote site, do the necessary
+commands and receive the transfer. Whenever it receives data, it calls the
+callback function we previously set. The function may get one byte at a time,
+or it may get many kilobytes at once. libcurl delivers as much as possible as
+often as possible. Your callback function should return the number of bytes it
+\&"took care of". If that is not the exact same amount of bytes that was
+passed to it, libcurl will abort the operation and return with an error code.
 
 When the transfer is complete, the function returns a return code that informs
 you if it succeeded in its mission or not. If a return code isn't enough for
@@ -240,12 +242,12 @@ previous
 
 .SH "Multi-threading Issues"
 libcurl is completely thread safe, except for two issues: signals and alarm
-handlers. Signals are needed for a SIGPIPE handler, and the alarm() Bacall
-is used to catch timeouts (mostly during ENS lookup).
+handlers. Signals are needed for a SIGPIPE handler, and the alarm() call is
+used to deal with timeouts (during DNS lookup).
 
 If you are accessing HTTPS or FTPS URLs in a multi-threaded manner, you are
 then of course using OpenSSL multi-threaded and it has itself a few
-requirements on this. Basilio, you need to provide one or two functions to
+requirements on this. Basically, you need to provide one or two functions to
 allow it to function properly. For all details, see this:
 
  http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
@@ -326,12 +328,12 @@ CURLOPT_INFILESIZE_LARGE for all known file sizes like this[1]:
  curl_easy_setopt(easyhandle, CURLOPT_INFILESIZE_LARGE, file_size);
 .fi
 
-When you call curl_easy_perform() this time, it'll perform all the necessary
-operations and when it has invoked the upload it'll call your supplied
-callback to get the data to upload. The program should return as much data as
-possible in every invoke, as that is likely to make the upload perform as
-fast as possible. The callback should return the number of bytes it wrote in
-the buffer. Returning 0 will signal the end of the upload.
+When you call \fIcurl_easy_perform(3)\fP this time, it'll perform all the
+necessary operations and when it has invoked the upload it'll call your
+supplied callback to get the data to upload. The program should return as much
+data as possible in every invoke, as that is likely to make the upload perform
+as fast as possible. The callback should return the number of bytes it wrote
+in the buffer. Returning 0 will signal the end of the upload.
 
 .SH "Passwords"
 Many protocols use or even require that user name and password are provided
@@ -470,15 +472,14 @@ then passing that list to libcurl.
 
 While the simple examples above cover the majority of all cases where HTTP
 POST operations are required, they don't do multi-part formposts. Multi-part
-formposts were introduced as a better way to post (possibly large) binary
-data and was first documented in the RFC1867. They're called multi-part
-because they're built by a chain of parts, each being a single unit. Each
-part has its own name and contents. You can in fact create and post a
-multi-part formpost with the regular libcurl POST support described above, but
-that would require that you build a formpost yourself and provide to
-libcurl. To make that easier, libcurl provides curl_formadd(). Using this
-function, you add parts to the form. When you're done adding parts, you post
-the whole form.
+formposts were introduced as a better way to post (possibly large) binary data
+and was first documented in the RFC1867. They're called multi-part because
+they're built by a chain of parts, each being a single unit. Each part has its
+own name and contents. You can in fact create and post a multi-part formpost
+with the regular libcurl POST support described above, but that would require
+that you build a formpost yourself and provide to libcurl. To make that
+easier, libcurl provides \fIcurl_formadd(3)\fP. Using this function, you add
+parts to the form. When you're done adding parts, you post the whole form.
 
 The following example sets two simple text parts with plain textual contents,
 and then a file with binary contents and upload the whole thing.
@@ -531,10 +532,10 @@ post handle:
 .fi
 
 Since all options on an easyhandle are "sticky", they remain the same until
-changed even if you do call curl_easy_perform(), you may need to tell curl to
-go back to a plain GET request if you intend to do such a one as your next
-request. You force an easyhandle to back to GET by using the CURLOPT_HTTPGET
-option:
+changed even if you do call \fIcurl_easy_perform(3)\fP, you may need to tell
+curl to go back to a plain GET request if you intend to do such a one as your
+next request. You force an easyhandle to back to GET by using the
+CURLOPT_HTTPGET option:
 
  curl_easy_setopt(easyhandle, CURLOPT_HTTPGET, TRUE);
 
@@ -723,7 +724,7 @@ Mozilla javascript engine in the past.
 Re-cycling the same easy handle several times when doing multiple requests is
 the way to go.
 
-After each single curl_easy_perform() operation, libcurl will keep the
+After each single \fIcurl_easy_perform(3)\fP operation, libcurl will keep the
 connection alive and open. A subsequent request using the same easy handle to
 the same host might just be able to use the already open connection! This
 reduces network impact a lot.
@@ -907,8 +908,8 @@ A little example that deletes a given file before an operation:
 .fi
 
 If you would instead want this operation (or chain of operations) to happen
-_after_ the data transfer took place the option to curl_easy_setopt() would
-instead be called CURLOPT_POSTQUOTE and used the exact same way.
+_after_ the data transfer took place the option to \fIcurl_easy_setopt(3)\fP
+would instead be called CURLOPT_POSTQUOTE and used the exact same way.
 
 The custom FTP command will be issued to the server in the same order they are
 added to the list, and if a command gets an error code returned back from the
@@ -977,9 +978,9 @@ The perhaps most advanced cookie operation libcurl offers, is saving the
 entire internal cookie state back into a Netscape/Mozilla formatted cookie
 file. We call that the cookie-jar. When you set a file name with
 CURLOPT_COOKIEJAR, that file name will be created and all received cookies
-will be stored in it when curl_easy_cleanup() is called. This enabled cookies
-to get passed on properly between multiple handles without any information
-getting lost.
+will be stored in it when \fIcurl_easy_cleanup(3)\fP is called. This enabled
+cookies to get passed on properly between multiple handles without any
+information getting lost.
 
 .SH "FTP Peculiarities We Need"
 
@@ -1107,46 +1108,47 @@ of how to use the easy interface. The multi interface is simply a way to make
 multiple transfers at the same time, by adding up multiple easy handles in to
 a "multi stack".
 
-You create the easy handles you want and you set all the options just like
-you have been told above, and then you create a multi handle with
-curl_multi_init() and add all those easy handles to that multi handle with
-curl_multi_add_handle().
+You create the easy handles you want and you set all the options just like you
+have been told above, and then you create a multi handle with
+\fIcurl_multi_init(3)\fP and add all those easy handles to that multi handle
+with \fIcurl_multi_add_handle(3)\fP.
 
 When you've added the handles you have for the moment (you can still add new
-ones at any time), you start the transfers by call curl_multi_perform().
+ones at any time), you start the transfers by call
+\fIcurl_multi_perform(3)\fP.
 
-curl_multi_perform() is asynchronous. It will only execute as little as
-possible and then return back control to your program. It is designed to
-never block. If it returns CURLM_CALL_MULTI_PERFORM you better call it again
-soon, as that is a signal that it still has local data to send or remote data
-to receive.
+\fIcurl_multi_perform(3)\fP is asynchronous. It will only execute as little as
+possible and then return back control to your program. It is designed to never
+block. If it returns CURLM_CALL_MULTI_PERFORM you better call it again soon,
+as that is a signal that it still has local data to send or remote data to
+receive.
 
 The best usage of this interface is when you do a select() on all possible
 file descriptors or sockets to know when to call libcurl again. This also
-makes it easy for you to wait and respond to actions on your own
-application's sockets/handles. You figure out what to select() for by using
-curl_multi_fdset(), that fills in a set of fd_set variables for you with the
-particular file descriptors libcurl uses for the moment.
+makes it easy for you to wait and respond to actions on your own application's
+sockets/handles. You figure out what to select() for by using
+\fIcurl_multi_fdset(3)\fP, that fills in a set of fd_set variables for you
+with the particular file descriptors libcurl uses for the moment.
 
 When you then call select(), it'll return when one of the file handles signal
-action and you then call curl_multi_perform() to allow libcurl to do what it
-wants to do. Take note that libcurl does also feature some time-out code so
-we advice you to never use very long timeouts on select() before you call
-curl_multi_perform(), which thus should be called unconditionally every now
-and then even if none of its file descriptors have signaled ready. Another
-precaution you should use: always call curl_multi_fdset() immediately before
-the select() call since the current set of file descriptors may change when
-calling a curl function.
+action and you then call \fIcurl_multi_perform(3)\fP to allow libcurl to do
+what it wants to do. Take note that libcurl does also feature some time-out
+code so we advice you to never use very long timeouts on select() before you
+call \fIcurl_multi_perform(3)\fP, which thus should be called unconditionally
+every now and then even if none of its file descriptors have signaled
+ready. Another precaution you should use: always call
+\fIcurl_multi_fdset(3)\fP immediately before the select() call since the
+current set of file descriptors may change when calling a curl function.
 
 If you want to stop the transfer of one of the easy handles in the stack, you
-can use curl_multi_remove_handle() to remove individual easy
-handles. Remember that easy handles should be curl_easy_cleanup()ed.
+can use \fIcurl_multi_remove_handle(3)\fP to remove individual easy
+handles. Remember that easy handles should be \fIcurl_easy_cleanup(3)\fPed.
 
 When a transfer within the multi stack has finished, the counter of running
-transfers (as filled in by curl_multi_perform()) will decrease. When the
-number reaches zero, all transfers are done.
+transfers (as filled in by \fIcurl_multi_perform(3)\fP) will decrease. When
+the number reaches zero, all transfers are done.
 
-curl_multi_info_read() can be used to get information about completed
+\fIcurl_multi_info_read(3)\fP can be used to get information about completed
 transfers. It then returns the CURLcode for each easy transfer, to allow you
 to figure out success on each individual transfer.
 
