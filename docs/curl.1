@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "24 August 2000" "Curl 7.2" "Curl Manual"
+.TH curl 1 "15 August 2000" "Curl 7.3" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -241,6 +241,12 @@ or use several variables like:
 .IP "-O/--remote-name"
 Write output to a local file named like the remote file we get. (Only
 the file part of the remote file is used, the path is cut off.)
+.IP "-p/--proxytunnel"
+When an HTTP proxy is used, this option will cause non-HTTP protocols to
+attempt to tunnel through the proxy instead of merely using it to do HTTP-like
+operations. The tunnel approach is made with the HTTP proxy CONNECT request
+and requires that the proxy allows direct connect to the remote port number
+curl wants to tunnel through to.
 .IP "-P/--ftpport <address>"
 (FTP)
 Reverses the initiator/listener roles when connecting with ftp. This

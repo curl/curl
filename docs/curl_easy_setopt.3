@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "24 August 2000" "Curl 7.2" "libcurl Manual"
+.TH curl_easy_setopt 3 "15 September 2000" "Curl 7.3" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -86,6 +86,12 @@ the end of the host name. The proxy string may be prefixed with
 .B CURLOPT_PROXYPORT
 Set this long with this option to set the proxy port to use unless it is
 specified in the proxy string CURLOPT_PROXY.
+.TP
+.B CURLOPT_HTTPPROXYTUNNEL
+Set the parameter to non-zero to get the library to tunnel all non-HTTP
+operations through the given HTTP proxy. Do note that there is a big
+difference to use a proxy and to tunnel through it. If you don't know what
+this means, you probably don't want this tunnel option. (Added in libcurl 7.3)
 .TP
 .B CURLOPT_VERBOSE
 Set the parameter to non-zero to get the library to display a lot of verbose
@@ -194,7 +200,8 @@ post operation. See also the CURLOPT_POST.
 If you want to post data to the server without letting libcurl do a strlen()
 to measure the data size, this option must be used. Also, when this option is
 used, you can post fully binary data which otherwise is likely to fail. If
-this size is set to zero, the library will use strlen() to get the data size.
+this size is set to zero, the library will use strlen() to get the data
+size. (Added in libcurl 7.2)
 .TP
 .B CURLOPT_REFERER
 Pass a pointer to a zero terminated string as parameter. It will be used to
