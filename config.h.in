@@ -43,6 +43,12 @@
 /* Define if you have the gethostbyname_r() function with 6 arguments */
 #undef HAVE_GETHOSTBYNAME_R_6
 
+/* Define if you have the inet_ntoa_r function declared. */
+#undef HAVE_INET_NTOA_R_DECL
+
+/* Define if you need the _REENTRANT define for some functions */
+#undef NEED_REENTRANT
+
 /* The number of bytes in a long double.  */
 #undef SIZEOF_LONG_DOUBLE
 
@@ -163,6 +169,9 @@
 /* Define if you have the <netdb.h> header file.  */
 #undef HAVE_NETDB_H
 
+/* Define if you have the <netinet/if_ether.h> header file.  */
+#undef HAVE_NETINET_IF_ETHER_H
+
 /* Define if you have the <netinet/in.h> header file.  */
 #undef HAVE_NETINET_IN_H
 
@@ -264,6 +273,15 @@
 
 /* Version number of package */
 #undef VERSION
+
+/* Number of bits in a file offset, on hosts where this is settable. */
+#undef _FILE_OFFSET_BITS
+
+/* Define to make ftello visible on some hosts (e.g. HP-UX 10.20). */
+#undef _LARGEFILE_SOURCE
+
+/* Define for large files, on AIX-style hosts. */
+#undef _LARGE_FILES
 
 /* Set to explicitly specify we don't want to use thread-safe functions */
 #undef DISABLED_THREADSAFE

@@ -422,8 +422,8 @@ char *curl_getenv(char *variable);
 char *curl_version(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.1.1"
-#define LIBCURL_VERSION_NUM 0x070101
+#define LIBCURL_VERSION "7.2"
+#define LIBCURL_VERSION_NUM 0x070200
 
 /* linked-list structure for the CURLOPT_QUOTE option */
 struct curl_slist {

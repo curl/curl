@@ -9,8 +9,7 @@ die(){
 	echo "$@" ; exit
 }
 
-aclocal    || die "ahhhhh"
-autoheader || die "ahhhhh"
-automake   || die "ahhhhh"
-autoconf   || die "ahhhhh"
-
+aclocal -I .	|| die "ahhhhh"
+autoheader	|| die "ahhhhh"
+automake	|| die "ahhhhh"
+autoconf	|| die "ahhhhh"
