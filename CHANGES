@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (18 August 2004)
+- Ling Thio pointed out that when libcurl is built ipv6-enabled, it still did
+  reverse DNS lookups when fed with a numerical IP-address (like
+  http://127.0.0.1/), although it doesn't when built ipv6-disabled. libcurl
+  should never do reverse lookups.
+
 Daniel (17 August 2004)
 - Kjetil Jacobsen noticed that when transferring a file:// URL pointing to an
   empty file, libcurl would return with the file still open.

@@ -14,6 +14,9 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o no more reverse DNS lookups when getting ip-only address with ipv6-enabled
+   libcurl
+ o libcurl works better multi-threaded on AIX (when built with xlc)
  o cookies over proxy didn't match the path properly
  o MSVC makefile fixes to build better
  o FTP response 530 on 'PASS' now sends back a better error message
@@ -25,6 +28,7 @@ Other curl-related news since the previous public release:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
- Casey O'Donnell, Roland Krikava, Alex
+ Casey O'Donnell, Roland Krikava, Alex, Alexander Krasnostavsky, Kjetil
+ Jacobsen, Ling Thio
 
         Thanks! (and sorry if I forgot to mention someone)

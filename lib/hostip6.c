@@ -1,8 +1,8 @@
 /***************************************************************************
- *                                  _   _ ____  _     
- *  Project                     ___| | | |  _ \| |    
- *                             / __| | | | |_) | |    
- *                            | (__| |_| |  _ <| |___ 
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
  * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
@@ -10,7 +10,7 @@
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
  * are also available at http://curl.haxx.se/docs/copyright.html.
- * 
+ *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
  * furnished to do so, under the terms of the COPYING file.
@@ -208,9 +208,11 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
   struct addrinfo hints, *res;
   int error;
   char sbuf[NI_MAXSERV];
+  char addrbuf[128];
   curl_socket_t s;
   int pf;
   struct SessionHandle *data = conn->data;
+  int ai_flags;
 
   *waitp=0; /* don't wait, we have the response now */
 
@@ -244,15 +246,22 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
       break;
     }
   }
- 
+
+  if(1 == inet_pton(pf, addrbuf, sizeof(addrbuf))) {
+    /* the given address is numerical only, prevent a reverse lookup */
+    ai_flags = AI_NUMERICHOST;
+  }
+  else
+    ai_flags = AI_CANONNAME;
+
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
   hints.ai_socktype = SOCK_STREAM;
-  hints.ai_flags = AI_CANONNAME;
+  hints.ai_flags = ai_flags;
   snprintf(sbuf, sizeof(sbuf), "%d", port);
   error = getaddrinfo(hostname, sbuf, &hints, &res);
   if (error) {
-    infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);    
+    infof(data, "getaddrinfo(3) failed for %s:%d\n", hostname, port);
     return NULL;
   }
 
