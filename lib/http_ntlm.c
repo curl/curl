@@ -46,6 +46,15 @@
 
 #include <openssl/des.h>
 #include <openssl/md4.h>
+#include <openssl/ssl.h>
+
+#if OPENSSL_VERSION_NUMBER < 0x00907001L
+#define DES_key_schedule des_key_schedule
+#define DES_cblock des_cblock
+#define DES_set_odd_parity des_set_odd_parity
+#define DES_set_key des_set_key
+#define DES_ecb_encrypt des_ecb_encrypt
+#endif
 
 /* The last #include file should be: */
 #ifdef MALLOCDEBUG
