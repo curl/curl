@@ -96,3 +96,5 @@ for(@entries) {
 `gzip -9 $name-$version.tar`;
 # remove the dir
 `rm -rf $name-$version`;
+
+print "NOTE: now cvs tag this release!\n";
