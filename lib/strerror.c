@@ -568,6 +568,7 @@ const char *Curl_strerror(struct connectdata *conn, int err)
 const char *Curl_idn_strerror (struct connectdata *conn, int err)
 {
 #ifdef HAVE_IDNA_STRERROR
+  (void)conn;
   return idna_strerror((Idna_rc) err);
 #else
   const char *str;
