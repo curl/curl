@@ -418,6 +418,13 @@ typedef enum {
      makes the operation slower and is less friendly for the network. */
   CINIT(FORBID_REUSE, LONG, 75),
 
+  /* Set to a file name that contains random data for libcurl to use to
+     seed the random engine when doing SSL connects. */
+  CINIT(RANDOM_FILE, OBJECTPOINT, 76),
+
+  /* Set to the Entropy Gathering Daemon socket pathname */
+  CINIT(EGDSOCKET, OBJECTPOINT, 77),
+
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
 
