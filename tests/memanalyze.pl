@@ -7,6 +7,7 @@
 # MEM sendf.c:232 free(f6520)
 
 my $mallocs=0;
+my $callocs=0;
 my $reallocs=0;
 my $strdups=0;
 my $showlimit;
@@ -342,10 +343,10 @@ if($addrinfos) {
 if($verbose) {
     print "Mallocs: $mallocs\n",
     "Reallocs: $reallocs\n",
-    "Callocs: $callcs\n",
+    "Callocs: $callocs\n",
     "Strdups:  $strdups\n",
     "Frees: $frees\n",
-    "Allocations: ".($mallocs + $reallocs + $strdups)."\n";
+    "Allocations: ".($mallocs + $callocs + $reallocs + $strdups)."\n";
 
     print "Maximum allocated: $maxmem\n";
 }
