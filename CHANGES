@@ -7,6 +7,13 @@
                                   Changelog
 
 Daniel (1 October 2004)
+- Aleksandar Milivojevic reported a problem in the Redhat bugzilla (see
+  https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=134133) and not to
+  anyone involved in the curl project! This happens when you try to curl a
+  file from a proftpd site using SSL. It seems proftpd sends a somewhat
+  unorthodox response code (232 instead of 230). I relaxed the response code
+  check to deal with this and similar cases.
+
 - Based on Fedor Karpelevitch's formpost path basename patch, file parts in
   formposts no longer include the path part. If you _really_ want them, you
   must provide your preferred full file name with CURLFORM_FILENAME.

@@ -618,9 +618,11 @@ CURLcode Curl_ftp_connect(struct connectdata *conn)
       failf(data, "not logged in: %s", &buf[4]);
       return CURLE_FTP_USER_PASSWORD_INCORRECT;
     }
-    else if(ftpcode == 230) {
+    else if(ftpcode/100 == 2) {
       /* 230 User ... logged in.
-         (user successfully logged in) */
+         (user successfully logged in)
+
+         Apparently, proftpd with SSL returns 232 here at times. */
 
       infof(data, "We have successfully logged in\n");
     }
