@@ -749,7 +749,20 @@ AC_CHECK_FUNCS( socket \
                 dlopen \
                 utime \
                 sigsetjmp \
-                poll
+                poll,
+dnl if found
+[],
+dnl if not found, $ac_func is the name we check for
+  func="$ac_func"
+  AC_MSG_CHECKING([deeper for $func])
+  AC_TRY_LINK( [],
+               [ $func ();],
+               AC_MSG_RESULT(yes!)
+               def=`echo "HAVE_$func" | tr 'a-z' 'A-Z'`
+               AC_DEFINE($def, 1, [If you have $func]),
+               AC_MSG_RESULT(but still no)
+               )
+
 )
 
 dnl sigsetjmp() might be a macro and no function so if it isn't found already
