@@ -1068,7 +1068,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
                    "%s"
                    "\r\n",
                    hostname, remote_port,
-                   conn->bits.proxy_user_passwd?
+                   conn->allocptr.proxyuserpwd?
                    conn->allocptr.proxyuserpwd:"",
                    data->set.useragent?conn->allocptr.uagent:""
                    );
