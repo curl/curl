@@ -1014,7 +1014,7 @@ else
     CURL_CHECK_GETHOSTBYNAME_R()
 
     dnl dig around for gethostbyaddr_r()
-    CURL_CHECK_GETHOSTBYADDR_R()
+    dnl CURL_CHECK_GETHOSTBYADDR_R()
   fi
 
   dnl poke around for inet_ntoa_r()
