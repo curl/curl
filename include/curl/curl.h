@@ -460,9 +460,25 @@ typedef enum {
 
   /* Specify which SSL ciphers to use */
   CINIT(SSL_CIPHER_LIST, OBJECTPOINT, 83),
+
+  /* Specify which HTTP version to use! This must be set to one of the
+     CURL_HTTP_VERSION* enums set below. */
+  CINIT(HTTP_VERSION, LONG, 84),
   
   CURLOPT_LASTENTRY /* the last unusued */
 } CURLoption;
+
+  /* These enums are for use with the CURLOPT_HTTP_VERSION option. */
+enum {
+  CURL_HTTP_VERSION_NONE, /* setting this means we don't care, and that we'd
+                             like the library to choose the best possible
+                             for us! */
+  CURL_HTTP_VERSION_1_0,  /* please use HTTP 1.0 in the request */
+  CURL_HTTP_VERSION_1_1,  /* please use HTTP 1.1 in the request */
+  
+  CURL_HTTP_VERSION_LAST /* *ILLEGAL* http version */
+};
+
 
 typedef enum {
   TIMECOND_NONE,
@@ -472,7 +488,7 @@ typedef enum {
   TIMECOND_LASTMOD,
 
   TIMECOND_LAST
-} TimeCond;
+} curl_TimeCond;
 
 #ifdef __BEOS__
 #include <support/SupportDefs.h>
@@ -558,7 +574,7 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.9.1-pre1"
+#define LIBCURL_VERSION "7.9.1-pre2"
 #define LIBCURL_VERSION_NUM 0x070901
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
