@@ -117,6 +117,9 @@ typedef enum {
 
 #define CONF_MUTE     (1<<28) /* force NOPROGRESS */
 
+#define CONF_NETRC_OPT (1<<29)  /* read user+password from either
+                                 * .netrc or URL*/
+
 #ifndef HAVE_STRDUP
 /* Ultrix doesn't have strdup(), so make a quick clone: */
 char *strdup(char *str)
@@ -360,7 +363,8 @@ static void help(void)
   puts(" -L/--location      Follow Location: hints (H)\n"
        " -m/--max-time <seconds> Maximum time allowed for the transfer\n"
        " -M/--manual        Display huge help text\n"
-       " -n/--netrc         Read .netrc for user name and password\n"
+       " -n/--netrc         Must read .netrc for user name and password\n"
+       "    --netrc-optional  Use either .netrc or URL; overrides -n\n"
        " -N/--no-buffer     Disables the buffering of the output stream");
   puts(" -o/--output <file> Write output to <file> instead of stdout\n"
        " -O/--remote-name   Write output to a file named as the remote file\n"
@@ -379,10 +383,11 @@ static void help(void)
        " -T/--upload-file <file> Transfer/upload <file> to remote site\n"
        "    --url <URL>     Another way to specify URL to work with");
   puts(" -u/--user <user[:password]> Specify user and password to use\n"
+       "                    Overrides -n and --netrc-optional\n"
        " -U/--proxy-user <user[:password]> Specify Proxy authentication\n"
        " -v/--verbose       Makes the operation more talkative\n"
-       " -V/--version       Outputs version number then quits\n"
-       " -w/--write-out [format] What to output after completion\n"
+       " -V/--version       Outputs version number then quits");
+  puts(" -w/--write-out [format] What to output after completion\n"
        " -x/--proxy <host[:port]>  Use proxy. (Default port is 1080)\n"
        "    --random-file <file> File to use for reading random data from (SSL)\n"
        " -X/--request <command> Specific request command to use");
@@ -1009,6 +1014,7 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
     {"m", "max-time",    TRUE},
     {"M", "manual",      FALSE},
     {"n", "netrc",       FALSE},
+    {"no", "netrc-optional", FALSE},
     {"N", "no-buffer",   FALSE},
     {"o", "output",      TRUE},
     {"O", "remote-name", FALSE},
@@ -1433,9 +1439,17 @@ static ParameterError getparameter(char *flag, /* f or -long-flag */
       hugehelp();
       return PARAM_HELP_REQUESTED;
     case 'n':
-      /* pick info from .netrc, if this is used for http, curl will
-	 automatically enfore user+password with the request */
-      config->conf ^= CONF_NETRC;
+      switch(subletter) {
+      case 'o': /* CA info PEM file */
+        /* use .netrc or URL */
+        config->conf ^= CONF_NETRC_OPT;
+        break;
+      default:
+        /* pick info from .netrc, if this is used for http, curl will
+           automatically enfore user+password with the request */
+        config->conf ^= CONF_NETRC;
+        break;
+      }
       break;
     case 'N':
       /* disable the output I/O buffering */
@@ -2504,7 +2518,14 @@ operate(struct Configurable *config, int argc, char *argv[])
       curl_easy_setopt(curl, CURLOPT_FTPLISTONLY,
                        config->conf&CONF_FTPLISTONLY);
       curl_easy_setopt(curl, CURLOPT_FTPAPPEND, config->conf&CONF_FTPAPPEND);
-      curl_easy_setopt(curl, CURLOPT_NETRC, config->conf&CONF_NETRC);
+
+      if (config->conf&CONF_NETRC_OPT)
+        curl_easy_setopt(curl, CURLOPT_NETRC, CURL_NETRC_OPTIONAL);
+      else if (config->conf&CONF_NETRC)
+        curl_easy_setopt(curl, CURLOPT_NETRC, CURL_NETRC_REQUIRED);
+      else
+        curl_easy_setopt(curl, CURLOPT_NETRC, CURL_NETRC_IGNORED);
+
       curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION,
                        config->conf&CONF_FOLLOWLOCATION);
       curl_easy_setopt(curl, CURLOPT_TRANSFERTEXT, config->conf&CONF_GETTEXT);
