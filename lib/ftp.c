@@ -731,36 +731,6 @@ CURLcode ftp_sendquote(struct connectdata *conn, struct curl_slist *quote)
 
 /***********************************************************************
  *
- * ftp_cwd()
- *
- * Send 'CWD' to the remote server to Change Working Directory.
- * It is the ftp version of the unix 'cd' command.
- */
-static 
-CURLcode ftp_cwd(struct connectdata *conn, char *path)
-{
-  ssize_t nread;
-  int     ftpcode;
-  CURLcode result;
-  
-  FTPSENDF(conn, "CWD %s", path);
-  result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
-  if (result)
-    return result;
-
-  /* According to RFC959, CWD is supposed to return 250 on success, but
-     there seem to be non-compliant FTP servers out there that return 200,
-     so we accept any '2xy' code here. */
-  if (ftpcode/100 != 2) {
-    failf(conn->data, "Couldn't cd to %s", path);
-    return CURLE_FTP_ACCESS_DENIED;
-  }
-
-  return CURLE_OK;
-}
-
-/***********************************************************************
- *
  * ftp_getfiletime()
  *
  * Get the timestamp of the given file.
@@ -2340,6 +2310,8 @@ CURLcode Curl_ftp_disconnect(struct connectdata *conn)
  * ftp_mkd()
  *
  * Makes a directory on the FTP server.
+ *
+ * Calls failf()
  */
 CURLcode ftp_mkd(struct connectdata *conn, char *path)
 {
@@ -2357,14 +2329,48 @@ CURLcode ftp_mkd(struct connectdata *conn, char *path)
   switch(ftpcode) {
   case 257:
     /* success! */
-    infof( conn->data , "Created Remote Directory %s\n" , path );
+    infof( conn->data , "Created remote directory %s\n" , path );
+    break;
+  case 550:
+    failf(conn->data, "Permission denied to make directory %s", path);
+    result = CURLE_FTP_ACCESS_DENIED;
     break;
   default:
-    infof(conn->data, "unrecognized MKD response %d\n", result );
-    result = ~CURLE_OK;
+    failf(conn->data, "unrecognized MKD response: %d", ftpcode );
+    result = CURLE_FTP_ACCESS_DENIED;
     break;
   }
   return  result;
+}
+
+/***********************************************************************
+ *
+ * ftp_cwd()
+ *
+ * Send 'CWD' to the remote server to Change Working Directory.  It is the ftp
+ * version of the unix 'cd' command. This function is only called from the
+ * cwd_and_mkd() function these days.
+ *
+ * This function does NOT call failf().
+ */
+static 
+CURLcode ftp_cwd(struct connectdata *conn, char *path)
+{
+  ssize_t nread;
+  int     ftpcode;
+  CURLcode result;
+  
+  FTPSENDF(conn, "CWD %s", path);
+  result = Curl_GetFTPResponse(&nread, conn, &ftpcode);
+  if (!result) {
+    /* According to RFC959, CWD is supposed to return 250 on success, but
+       there seem to be non-compliant FTP servers out there that return 200,
+       so we accept any '2xy' code here. */
+    if (ftpcode/100 != 2)
+      result = CURLE_FTP_ACCESS_DENIED;
+  }
+
+  return result;
 }
 
 /***********************************************************************
@@ -2373,17 +2379,23 @@ CURLcode ftp_mkd(struct connectdata *conn, char *path)
  *
  * Change to the given directory.  If the directory is not present, and we
  * have been told to allow it, then create the directory and cd to it.
+ *
  */
 static CURLcode cwd_and_mkd(struct connectdata *conn, char *path)
 {
   CURLcode result;
   
   result = ftp_cwd(conn, path);
-  if ((CURLE_OK != result) && conn->data->set.ftp_create_missing_dirs) {
-    result = ftp_mkd(conn, path);
-    if ( CURLE_OK != result)
-      return result;
-    result = ftp_cwd(conn, path);
+  if (result) {
+    if(conn->data->set.ftp_create_missing_dirs) {
+      result = ftp_mkd(conn, path);
+      if (result)
+        /* ftp_mkd() calls failf() itself */
+        return result;
+      result = ftp_cwd(conn, path);
+    }
+    if(result)
+      failf(conn->data, "Couldn't cd to %s", path);
   }
   return result;
 }
