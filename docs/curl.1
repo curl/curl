@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "28 Jan 2003" "Curl 7.10" "Curl Manual"
+.TH curl 1 "14 Feb 2003" "Curl 7.10.3" "Curl Manual"
 .SH NAME
 curl \- transfer a URL
 .SH SYNOPSIS
@@ -216,6 +216,14 @@ If this option is used several times, the last one will be used.
 (HTTPS) Tells curl to use the specified certificate file to verify the
 peer. The file may contain multiple CA certificates. The certificate(s) must
 be in PEM format.
+
+curl recognizes the environment variable named 'CURL_CA_BUNDLE' if that is
+set, and uses the given path as a path to a CA cert bundle. This option
+overrides that variable.
+
+The windows version of curl will automatically look for a CA certs file named
+\'curl-ca-bundle.crt\', either in the same directory as curl.exe, or in the
+Current Working Directory, or in any folder along your PATH.
 
 If this option is used several times, the last one will be used.
 .IP "--capath <CA certificate directory>"
