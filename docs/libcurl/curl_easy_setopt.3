@@ -964,5 +964,9 @@ standard for details.
 CURLE_OK (zero) means that the option was set properly, non-zero means an
 error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP
 man page for the full list with descriptions.
+
+If you try to set an option that libcurl doesn't know about, perhaps because
+the library is too old to support it or the option was removed in a recent
+version, this function will return \fICURLE_FAILED_INIT\fP.
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_cleanup "(3), "
