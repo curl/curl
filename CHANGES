@@ -7,6 +7,8 @@
                                   Changelog
 
 
+Version 7.12.3 (20 December 2004)
+
 Daniel (19 December 2004)
 - I investigated our PKCS12 build problem on Solaris 2.7 with OpenSSL 0.9.7e,
   and it turned out to be the fault of the zlib 1.1.4 headers doing a typedef
