@@ -356,6 +356,8 @@ CURLcode Curl_GetFTPResponse(ssize_t *nreadp, /* return number of bytes read */
          * line */
         int i;
 
+        conn->headerbytecount += gotbytes;
+
         *nreadp += gotbytes;
         for(i = 0; i < gotbytes; ptr++, i++) {
           perline++;
