@@ -315,6 +315,9 @@ struct connectdata {
   int sec_complete;
   void *app_data;
 
+  struct Curl_sec_client_mech *mech;
+  struct sockaddr_in local_addr;
+
 #endif
 
   /*************** Request - specific items ************/
