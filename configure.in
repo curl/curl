@@ -3,6 +3,7 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(lib/urldata.h)
 AM_CONFIG_HEADER(config.h src/config.h)
 AM_INIT_AUTOMAKE(curl,"7.0.8beta")
+AM_PROG_LIBTOOL
 
 dnl
 dnl Detect the canonical host and target build environment
@@ -327,7 +328,6 @@ AC_PATH_PROGS( NROFF, gnroff nroff, ,
   $PATH:/usr/bin/:/usr/local/bin )
 AC_SUBST(NROFF)
 
-AC_PROG_RANLIB
 AC_PROG_YACC
 
 dnl AC_PATH_PROG( RANLIB, ranlib, /usr/bin/ranlib, 
@@ -337,6 +337,7 @@ dnl AC_SUBST(RANLIB)
 AC_OUTPUT( Makefile \
            curl.spec \
            curl-ssl.spec \
+	   docs/Makefile \
 	   src/Makefile \
            lib/Makefile )
 dnl	   perl/checklinks.pl \

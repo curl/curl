@@ -1,6 +1,7 @@
 #! /bin/sh
 # Attempt to guess a canonical system name.
-#   Copyright (C) 1992, 93, 94, 95, 96, 97, 1998 Free Software Foundation, Inc.
+#   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000
+#   Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -22,8 +23,7 @@
 # the same distribution terms that you use for the rest of that program.
 
 # Written by Per Bothner <bothner@cygnus.com>.
-# The master version of this file is at the FSF in /home/gd/gnu/lib.
-# Please send patches to the Autoconf mailing list <autoconf@gnu.org>.
+# Please send patches to <config-patches@gnu.org>.
 #
 # This script attempts to guess a canonical system name similar to
 # config.sub.  If it succeeds, it prints the system name on stdout, and
@@ -35,6 +35,20 @@
 # Only a few systems have been added to this list; please add others
 # (but try to keep the structure clean).
 #
+
+# Use $HOST_CC if defined. $CC may point to a cross-compiler
+if test x"$CC_FOR_BUILD" = x; then
+  if test x"$HOST_CC" != x; then
+    CC_FOR_BUILD="$HOST_CC"
+  else
+    if test x"$CC" != x; then
+      CC_FOR_BUILD="$CC"
+    else
+      CC_FOR_BUILD=cc
+    fi
+  fi
+fi
+
 
 # This is needed to find uname on a Pyramid OSx when run in the BSD universe.
 # (ghazi@noc.rutgers.edu 8/24/94.)
@@ -53,6 +67,43 @@ trap 'rm -f $dummy.c $dummy.o $dummy; exit 1' 1 2 15
 # Note: order is significant - the case branches are not exclusive.
 
 case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
+    *:NetBSD:*:*)
+	# Netbsd (nbsd) targets should (where applicable) match one or
+	# more of the tupples: *-*-netbsdelf*, *-*-netbsdaout*,
+	# *-*-netbsdecoff* and *-*-netbsd*.  For targets that recently
+	# switched to ELF, *-*-netbsd* would select the old
+	# object file format.  This provides both forward
+	# compatibility and a consistent mechanism for selecting the
+	# object file format.
+	# Determine the machine/vendor (is the vendor relevant).
+	case "${UNAME_MACHINE}" in
+	    amiga) machine=m68k-cbm ;;
+	    arm32) machine=arm-unknown ;;
+	    atari*) machine=m68k-atari ;;
+	    sun3*) machine=m68k-sun ;;
+	    mac68k) machine=m68k-apple ;;
+	    macppc) machine=powerpc-apple ;;
+	    hp3[0-9][05]) machine=m68k-hp ;;
+	    ibmrt|romp-ibm) machine=romp-ibm ;;
+	    *) machine=${UNAME_MACHINE}-unknown ;;
+	esac
+	# The Operating System including object format.
+	if echo __ELF__ | $CC_FOR_BUILD -E - 2>/dev/null \
+		| grep __ELF__ >/dev/null
+	then
+	    # Once all utilities can be ECOFF (netbsdecoff) or a.out (netbsdaout).
+	    # Return netbsd for either.  FIX?
+	    os=netbsd
+	else
+	    os=netbsdelf
+	fi
+	# The OS release
+	release=`echo ${UNAME_RELEASE}|sed -e 's/[-_].*/\./'`
+	# Since CPU_TYPE-MANUFACTURER-KERNEL-OPERATING_SYSTEM:
+	# contains redundant information, the shorter form:
+	# CPU_TYPE-MANUFACTURER-OPERATING_SYSTEM is used.
+	echo "${machine}-${os}${release}"
+	exit 0 ;;
     alpha:OSF1:*:*)
 	if test $UNAME_RELEASE = "V4.0"; then
 		UNAME_RELEASE=`/usr/sbin/sizer -v | awk '{print $3}'`
@@ -62,45 +113,61 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	# A Xn.n version is an unreleased experimental baselevel.
 	# 1.2 uses "1.2" for uname -r.
 	cat <<EOF >$dummy.s
+	.data
+\$Lformat:
+	.byte 37,100,45,37,120,10,0	# "%d-%x\n"
+
+	.text
 	.globl main
+	.align 4
 	.ent main
 main:
-	.frame \$30,0,\$26,0
-	.prologue 0
-	.long 0x47e03d80 # implver $0
-	lda \$2,259
-	.long 0x47e20c21 # amask $2,$1
-	srl \$1,8,\$2
-	sll \$2,2,\$2
-	sll \$0,3,\$0
-	addl \$1,\$0,\$0
-	addl \$2,\$0,\$0
-	ret \$31,(\$26),1
+	.frame \$30,16,\$26,0
+	ldgp \$29,0(\$27)
+	.prologue 1
+	.long 0x47e03d80 # implver \$0
+	lda \$2,-1
+	.long 0x47e20c21 # amask \$2,\$1
+	lda \$16,\$Lformat
+	mov \$0,\$17
+	not \$1,\$18
+	jsr \$26,printf
+	ldgp \$29,0(\$26)
+	mov 0,\$16
+	jsr \$26,exit
 	.end main
 EOF
-	${CC-cc} $dummy.s -o $dummy 2>/dev/null
+	$CC_FOR_BUILD $dummy.s -o $dummy 2>/dev/null
 	if test "$?" = 0 ; then
-		./$dummy
-		case "$?" in
-			7)
+		case `./$dummy` in
+			0-0)
 				UNAME_MACHINE="alpha"
 				;;
-			15)
+			1-0)
 				UNAME_MACHINE="alphaev5"
 				;;
-			14)
+			1-1)
 				UNAME_MACHINE="alphaev56"
 				;;
-			10)
+			1-101)
 				UNAME_MACHINE="alphapca56"
 				;;
-			16)
+			2-303)
 				UNAME_MACHINE="alphaev6"
+				;;
+			2-307)
+				UNAME_MACHINE="alphaev67"
 				;;
 		esac
 	fi
 	rm -f $dummy.s $dummy
-	echo ${UNAME_MACHINE}-dec-osf`echo ${UNAME_RELEASE} | sed -e 's/^[VTX]//' | tr [[A-Z]] [[a-z]]`
+	echo ${UNAME_MACHINE}-dec-osf`echo ${UNAME_RELEASE} | sed -e 's/^[VTX]//' | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz'`
+	exit 0 ;;
+    Alpha\ *:Windows_NT*:*)
+	# How do we know it's Interix rather than the generic POSIX subsystem?
+	# Should we change UNAME_MACHINE based on the output of uname instead
+	# of the specific Alpha model?
+	echo alpha-pc-interix
 	exit 0 ;;
     21064:Windows_NT:50:3)
 	echo alpha-dec-winnt3.5
@@ -108,9 +175,6 @@ EOF
     Amiga*:UNIX_System_V:4.0:*)
 	echo m68k-cbm-sysv4
 	exit 0;;
-    amiga:NetBSD:*:*)
-      echo m68k-cbm-netbsd${UNAME_RELEASE}
-      exit 0 ;;
     amiga:OpenBSD:*:*)
 	echo m68k-unknown-openbsd${UNAME_RELEASE}
 	exit 0 ;;
@@ -135,16 +199,16 @@ EOF
     wgrisc:OpenBSD:*:*)
 	echo mipsel-unknown-openbsd${UNAME_RELEASE}
 	exit 0 ;;
+    *:OS/390:*:*)
+	echo i370-ibm-openedition
+	exit 0 ;;
     arm:RISC*:1.[012]*:*|arm:riscix:1.[012]*:*)
 	echo arm-acorn-riscix${UNAME_RELEASE}
 	exit 0;;
-    arm32:NetBSD:*:*)
-	echo arm-unknown-netbsd`echo ${UNAME_RELEASE}|sed -e 's/[-_].*/\./'`
-	exit 0 ;;
     SR2?01:HI-UX/MPP:*:*)
 	echo hppa1.1-hitachi-hiuxmpp
 	exit 0;;
-    Pyramid*:OSx*:*:*|MIS*:OSx*:*:*|MIS*:SMP_DC-OSx*:*:*)
+    Pyramid*:OSx*:*:* | MIS*:OSx*:*:* | MIS*:SMP_DC-OSx*:*:*)
 	# akee@wpdis03.wpafb.af.mil (Earle F. Ake) contributed MIS and NILE.
 	if test "`(/bin/universe) 2>/dev/null`" = att ; then
 		echo pyramid-pyramid-sysv3
@@ -197,20 +261,37 @@ EOF
     aushp:SunOS:*:*)
 	echo sparc-auspex-sunos${UNAME_RELEASE}
 	exit 0 ;;
-    atari*:NetBSD:*:*)
-	echo m68k-atari-netbsd${UNAME_RELEASE}
-	exit 0 ;;
     atari*:OpenBSD:*:*)
 	echo m68k-unknown-openbsd${UNAME_RELEASE}
 	exit 0 ;;
-    sun3*:NetBSD:*:*)
-	echo m68k-sun-netbsd${UNAME_RELEASE}
+    # The situation for MiNT is a little confusing.  The machine name
+    # can be virtually everything (everything which is not
+    # "atarist" or "atariste" at least should have a processor
+    # > m68000).  The system name ranges from "MiNT" over "FreeMiNT"
+    # to the lowercase version "mint" (or "freemint").  Finally
+    # the system name "TOS" denotes a system which is actually not
+    # MiNT.  But MiNT is downward compatible to TOS, so this should
+    # be no problem.
+    atarist[e]:*MiNT:*:* | atarist[e]:*mint:*:* | atarist[e]:*TOS:*:*)
+        echo m68k-atari-mint${UNAME_RELEASE}
 	exit 0 ;;
+    atari*:*MiNT:*:* | atari*:*mint:*:* | atarist[e]:*TOS:*:*)
+	echo m68k-atari-mint${UNAME_RELEASE}
+        exit 0 ;;
+    *falcon*:*MiNT:*:* | *falcon*:*mint:*:* | *falcon*:*TOS:*:*)
+        echo m68k-atari-mint${UNAME_RELEASE}
+	exit 0 ;;
+    milan*:*MiNT:*:* | milan*:*mint:*:* | *milan*:*TOS:*:*)
+        echo m68k-milan-mint${UNAME_RELEASE}
+        exit 0 ;;
+    hades*:*MiNT:*:* | hades*:*mint:*:* | *hades*:*TOS:*:*)
+        echo m68k-hades-mint${UNAME_RELEASE}
+        exit 0 ;;
+    *:*MiNT:*:* | *:*mint:*:* | *:*TOS:*:*)
+        echo m68k-unknown-mint${UNAME_RELEASE}
+        exit 0 ;;
     sun3*:OpenBSD:*:*)
 	echo m68k-unknown-openbsd${UNAME_RELEASE}
-	exit 0 ;;
-    mac68k:NetBSD:*:*)
-	echo m68k-apple-netbsd${UNAME_RELEASE}
 	exit 0 ;;
     mac68k:OpenBSD:*:*)
 	echo m68k-unknown-openbsd${UNAME_RELEASE}
@@ -224,9 +305,6 @@ EOF
     powerpc:machten:*:*)
 	echo powerpc-apple-machten${UNAME_RELEASE}
 	exit 0 ;;
-    macppc:NetBSD:*:*)
-        echo powerpc-apple-netbsd${UNAME_RELEASE}
-        exit 0 ;;
     RISC*:Mach:*:*)
 	echo mips-dec-mach_bsd4.3
 	exit 0 ;;
@@ -236,12 +314,13 @@ EOF
     VAX*:ULTRIX*:*:*)
 	echo vax-dec-ultrix${UNAME_RELEASE}
 	exit 0 ;;
-    2020:CLIX:*:*)
+    2020:CLIX:*:* | 2430:CLIX:*:*)
 	echo clipper-intergraph-clix${UNAME_RELEASE}
 	exit 0 ;;
     mips:*:*:UMIPS | mips:*:*:RISCos)
 	sed 's/^	//' << EOF >$dummy.c
 #ifdef __cplusplus
+#include <stdio.h>  /* for printf() prototype */
 	int main (int argc, char *argv[]) {
 #else
 	int main (argc, argv) int argc; char *argv[]; {
@@ -260,7 +339,7 @@ EOF
 	  exit (-1);
 	}
 EOF
-	${CC-cc} $dummy.c -o $dummy \
+	$CC_FOR_BUILD $dummy.c -o $dummy \
 	  && ./$dummy `echo "${UNAME_RELEASE}" | sed -n 's/\([0-9]*\).*/\1/p'` \
 	  && rm $dummy.c $dummy && exit 0
 	rm -f $dummy.c $dummy
@@ -281,15 +360,18 @@ EOF
     AViiON:dgux:*:*)
         # DG/UX returns AViiON for all architectures
         UNAME_PROCESSOR=`/usr/bin/uname -p`
-        if [ $UNAME_PROCESSOR = mc88100 -o $UNAME_PROCESSOR = mc88110 ] ; then
-	if [ ${TARGET_BINARY_INTERFACE}x = m88kdguxelfx \
-	     -o ${TARGET_BINARY_INTERFACE}x = x ] ; then
+	if [ $UNAME_PROCESSOR = mc88100 ] || [ $UNAME_PROCESSOR = mc88110 ]
+	then
+	    if [ ${TARGET_BINARY_INTERFACE}x = m88kdguxelfx ] || \
+	       [ ${TARGET_BINARY_INTERFACE}x = x ]
+	    then
 		echo m88k-dg-dgux${UNAME_RELEASE}
-	else
+	    else
 		echo m88k-dg-dguxbcs${UNAME_RELEASE}
+	    fi
+	else
+	    echo i586-dg-dgux${UNAME_RELEASE}
 	fi
-        else echo i586-dg-dgux${UNAME_RELEASE}
-        fi
  	exit 0 ;;
     M88*:DolphinOS:*:*)	# DolphinOS (SVR3)
 	echo m88k-dolphin-sysv3
@@ -326,7 +408,7 @@ EOF
 			exit(0);
 			}
 EOF
-		${CC-cc} $dummy.c -o $dummy && ./$dummy && rm $dummy.c $dummy && exit 0
+		$CC_FOR_BUILD $dummy.c -o $dummy && ./$dummy && rm $dummy.c $dummy && exit 0
 		rm -f $dummy.c $dummy
 		echo rs6000-ibm-aix3.2.5
 	elif grep bos324 /usr/include/stdio.h >/dev/null 2>&1; then
@@ -355,7 +437,7 @@ EOF
     ibmrt:4.4BSD:*|romp-ibm:BSD:*)
 	echo romp-ibm-bsd4.4
 	exit 0 ;;
-    ibmrt:*BSD:*|romp-ibm:BSD:*)            # covers RT/PC NetBSD and
+    ibmrt:*BSD:*|romp-ibm:BSD:*)            # covers RT/PC BSD and
 	echo romp-ibm-bsd${UNAME_RELEASE}   # 4.3 with uname added to
 	exit 0 ;;                           # report: romp-ibm BSD 4.3
     *:BOSX:*:*)
@@ -374,8 +456,10 @@ EOF
 	case "${UNAME_MACHINE}" in
 	    9000/31? )            HP_ARCH=m68000 ;;
 	    9000/[34]?? )         HP_ARCH=m68k ;;
-	    9000/6?? | 9000/7?? | 9000/80[024] | 9000/8?[136790] | 9000/892 )
+	    9000/[678][0-9][0-9])
               sed 's/^              //' << EOF >$dummy.c
+
+              #define _HPUX_SOURCE
               #include <stdlib.h>
               #include <unistd.h>
 
@@ -406,7 +490,7 @@ EOF
                   exit (0);
               }
 EOF
-	(${CC-cc} $dummy.c -o $dummy 2>/dev/null ) && HP_ARCH=`./$dummy`
+	(CCOPTS= $CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null ) && HP_ARCH=`./$dummy`
 	rm -f $dummy.c $dummy
 	esac
 	HPUX_REV=`echo ${UNAME_RELEASE}|sed -e 's/[^.]*.[0B]*//'`
@@ -438,7 +522,7 @@ EOF
 	  exit (0);
 	}
 EOF
-	${CC-cc} $dummy.c -o $dummy && ./$dummy && rm $dummy.c $dummy && exit 0
+	$CC_FOR_BUILD $dummy.c -o $dummy && ./$dummy && rm $dummy.c $dummy && exit 0
 	rm -f $dummy.c $dummy
 	echo unknown-hitachi-hiuxwe2
 	exit 0 ;;
@@ -448,10 +532,7 @@ EOF
     9000/8??:4.3bsd:*:*)
 	echo hppa1.0-hp-bsd
 	exit 0 ;;
-    *9??*:MPE*:*:*)
-	echo hppa1.0-hp-mpeix
-	exit 0 ;;
-    *9??*:MPE*:*:*)
+    *9??*:MPE/iX:*:*)
 	echo hppa1.0-hp-mpeix
 	exit 0 ;;
     hp7??:OSF1:*:* | hp8?[79]:OSF1:*:* )
@@ -469,6 +550,9 @@ EOF
 	exit 0 ;;
     parisc*:Lites*:*:*)
 	echo hppa1.1-hp-lites
+	exit 0 ;;
+    hppa*:OpenBSD:*:*)
+	echo hppa-unknown-openbsd
 	exit 0 ;;
     C1*:ConvexOS:*:* | convex:ConvexOS:C1*:*)
 	echo c1-convex-bsd
@@ -500,48 +584,39 @@ EOF
 	      -e y/ABCDEFGHIJKLMNOPQRSTUVWXYZ/abcdefghijklmnopqrstuvwxyz/
 	exit 0 ;;
     CRAY*TS:*:*:*)
-	echo t90-cray-unicos${UNAME_RELEASE}
+	echo t90-cray-unicos${UNAME_RELEASE} | sed -e 's/\.[^.]*$/.X/'
 	exit 0 ;;
     CRAY*T3E:*:*:*)
-	echo t3e-cray-unicosmk${UNAME_RELEASE}
+	echo alpha-cray-unicosmk${UNAME_RELEASE} | sed -e 's/\.[^.]*$/.X/'
+	exit 0 ;;
+    CRAY*SV1:*:*:*)
+	echo sv1-cray-unicos${UNAME_RELEASE} | sed -e 's/\.[^.]*$/.X/'
 	exit 0 ;;
     CRAY-2:*:*:*)
 	echo cray2-cray-unicos
         exit 0 ;;
     F300:UNIX_System_V:*:*)
-        FUJITSU_SYS=`uname -p | tr [A-Z] [a-z] | sed -e 's/\///'`
+        FUJITSU_SYS=`uname -p | tr 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' 'abcdefghijklmnopqrstuvwxyz' | sed -e 's/\///'`
         FUJITSU_REL=`echo ${UNAME_RELEASE} | sed -e 's/ /_/'`
         echo "f300-fujitsu-${FUJITSU_SYS}${FUJITSU_REL}"
         exit 0 ;;
     F301:UNIX_System_V:*:*)
        echo f301-fujitsu-uxpv`echo $UNAME_RELEASE | sed 's/ .*//'`
        exit 0 ;;
-    hp3[0-9][05]:NetBSD:*:*)
-	echo m68k-hp-netbsd${UNAME_RELEASE}
-	exit 0 ;;
     hp300:OpenBSD:*:*)
 	echo m68k-unknown-openbsd${UNAME_RELEASE}
 	exit 0 ;;
+    i?86:BSD/386:*:* | i?86:BSD/OS:*:* | *:Ascend\ Embedded/OS:*:*)
+	echo ${UNAME_MACHINE}-pc-bsdi${UNAME_RELEASE}
+	exit 0 ;;
     sparc*:BSD/OS:*:*)
 	echo sparc-unknown-bsdi${UNAME_RELEASE}
-	exit 0 ;;
-    i?86:BSD/386:*:* | i?86:BSD/OS:*:*)
-	echo ${UNAME_MACHINE}-pc-bsdi${UNAME_RELEASE}
 	exit 0 ;;
     *:BSD/OS:*:*)
 	echo ${UNAME_MACHINE}-unknown-bsdi${UNAME_RELEASE}
 	exit 0 ;;
     *:FreeBSD:*:*)
-	if test -x /usr/bin/objformat; then
-	    if test "elf" = "`/usr/bin/objformat`"; then
-		echo ${UNAME_MACHINE}-unknown-freebsdelf`echo ${UNAME_RELEASE}|sed -e 's/[-_].*//'`
-		exit 0
-	    fi
-	fi
 	echo ${UNAME_MACHINE}-unknown-freebsd`echo ${UNAME_RELEASE}|sed -e 's/[-(].*//'`
-	exit 0 ;;
-    *:NetBSD:*:*)
-	echo ${UNAME_MACHINE}-unknown-netbsd`echo ${UNAME_RELEASE}|sed -e 's/[-_].*/\./'`
 	exit 0 ;;
     *:OpenBSD:*:*)
 	echo ${UNAME_MACHINE}-unknown-openbsd`echo ${UNAME_RELEASE}|sed -e 's/[-_].*/\./'`
@@ -551,6 +626,15 @@ EOF
 	exit 0 ;;
     i*:MINGW*:*)
 	echo ${UNAME_MACHINE}-pc-mingw32
+	exit 0 ;;
+    i*:Windows_NT*:* | Pentium*:Windows_NT*:*)
+	# How do we know it's Interix rather than the generic POSIX subsystem?
+	# It also conflicts with pre-2.0 versions of AT&T UWIN. Should we
+	# UNAME_MACHINE based on the output of uname instead of i386?
+	echo i386-pc-interix
+	exit 0 ;;
+    i*:UWIN*:*)
+	echo ${UNAME_MACHINE}-pc-uwin
 	exit 0 ;;
     p*:CYGWIN*:*)
 	echo powerpcle-unknown-cygwin
@@ -562,16 +646,11 @@ EOF
 	echo `echo ${UNAME_MACHINE}|sed -e 's,[-/].*$,,'`-unknown-gnu`echo ${UNAME_RELEASE}|sed -e 's,/.*$,,'`
 	exit 0 ;;
     *:Linux:*:*)
-#	# uname on the ARM produces all sorts of strangeness, and we need to
-#	# filter it out.
-#	case "$UNAME_MACHINE" in
-#	  armv*)		      UNAME_MACHINE=$UNAME_MACHINE ;;
-#	  arm* | sa110*)	      UNAME_MACHINE="arm" ;;
-#	esac
 
 	# The BFD linker knows what the default object file format is, so
-	# first see if it will tell us.
-	ld_help_string=`ld --help 2>&1`
+	# first see if it will tell us. cd to the root directory to prevent
+	# problems with other programs or directories called `ld' in the path.
+	ld_help_string=`cd /; ld --help 2>&1`
 	ld_supported_emulations=`echo $ld_help_string \
 			 | sed -ne '/supported emulations:/!d
 				    s/[ 	][ 	]*/ /g
@@ -579,52 +658,123 @@ EOF
 				    s/ .*//
 				    p'`
         case "$ld_supported_emulations" in
-	  i?86linux)  echo "${UNAME_MACHINE}-pc-linux-gnuaout"      ; exit 0 ;;
-	  i?86coff)   echo "${UNAME_MACHINE}-pc-linux-gnucoff"      ; exit 0 ;;
-	  sparclinux) echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  armlinux)   echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  m68klinux)  echo "${UNAME_MACHINE}-unknown-linux-gnuaout" ; exit 0 ;;
-	  elf32arm)   echo "${UNAME_MACHINE}-unknown-linux-gnu"     ; exit 0 ;;
-	  elf32ppc)   echo "powerpc-unknown-linux-gnu"              ; exit 0 ;;
+	  *ia64)
+		echo "${UNAME_MACHINE}-unknown-linux"
+		exit 0
+		;;
+	  i?86linux)
+		echo "${UNAME_MACHINE}-pc-linux-gnuaout"
+		exit 0
+		;;
+	  elf_i?86)
+		echo "${UNAME_MACHINE}-pc-linux"
+		exit 0
+		;;
+	  i?86coff)
+		echo "${UNAME_MACHINE}-pc-linux-gnucoff"
+		exit 0
+		;;
+	  sparclinux)
+		echo "${UNAME_MACHINE}-unknown-linux-gnuaout"
+		exit 0
+		;;
+	  armlinux)
+		echo "${UNAME_MACHINE}-unknown-linux-gnuaout"
+		exit 0
+		;;
+	  elf32arm*)
+		echo "${UNAME_MACHINE}-unknown-linux-gnuoldld"
+		exit 0
+		;;
+	  armelf_linux*)
+		echo "${UNAME_MACHINE}-unknown-linux-gnu"
+		exit 0
+		;;
+	  m68klinux)
+		echo "${UNAME_MACHINE}-unknown-linux-gnuaout"
+		exit 0
+		;;
+	  elf32ppc | elf32ppclinux)
+		# Determine Lib Version
+		cat >$dummy.c <<EOF
+#include <features.h>
+#if defined(__GLIBC__)
+extern char __libc_version[];
+extern char __libc_release[];
+#endif
+main(argc, argv)
+     int argc;
+     char *argv[];
+{
+#if defined(__GLIBC__)
+  printf("%s %s\n", __libc_version, __libc_release);
+#else
+  printf("unkown\n");
+#endif
+  return 0;
+}
+EOF
+		LIBC=""
+		$CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null
+		if test "$?" = 0 ; then
+			./$dummy | grep 1\.99 > /dev/null
+			if test "$?" = 0 ; then
+				LIBC="libc1"
+			fi
+		fi
+		rm -f $dummy.c $dummy
+		echo powerpc-unknown-linux-gnu${LIBC}
+		exit 0
+		;;
 	esac
 
 	if test "${UNAME_MACHINE}" = "alpha" ; then
-		sed 's/^	//'  <<EOF >$dummy.s
-		.globl main
-		.ent main
-	main:
-		.frame \$30,0,\$26,0
-		.prologue 0
-		.long 0x47e03d80 # implver $0
-		lda \$2,259
-		.long 0x47e20c21 # amask $2,$1
-		srl \$1,8,\$2
-		sll \$2,2,\$2
-		sll \$0,3,\$0
-		addl \$1,\$0,\$0
-		addl \$2,\$0,\$0
-		ret \$31,(\$26),1
-		.end main
+		cat <<EOF >$dummy.s
+			.data
+		\$Lformat:
+			.byte 37,100,45,37,120,10,0	# "%d-%x\n"
+
+			.text
+			.globl main
+			.align 4
+			.ent main
+		main:
+			.frame \$30,16,\$26,0
+			ldgp \$29,0(\$27)
+			.prologue 1
+			.long 0x47e03d80 # implver \$0
+			lda \$2,-1
+			.long 0x47e20c21 # amask \$2,\$1
+			lda \$16,\$Lformat
+			mov \$0,\$17
+			not \$1,\$18
+			jsr \$26,printf
+			ldgp \$29,0(\$26)
+			mov 0,\$16
+			jsr \$26,exit
+			.end main
 EOF
 		LIBC=""
-		${CC-cc} $dummy.s -o $dummy 2>/dev/null
+		$CC_FOR_BUILD $dummy.s -o $dummy 2>/dev/null
 		if test "$?" = 0 ; then
-			./$dummy
-			case "$?" in
-			7)
+			case `./$dummy` in
+			0-0)
 				UNAME_MACHINE="alpha"
 				;;
-			15)
+			1-0)
 				UNAME_MACHINE="alphaev5"
 				;;
-			14)
+			1-1)
 				UNAME_MACHINE="alphaev56"
 				;;
-			10)
+			1-101)
 				UNAME_MACHINE="alphapca56"
 				;;
-			16)
+			2-303)
 				UNAME_MACHINE="alphaev6"
+				;;
+			2-307)
+				UNAME_MACHINE="alphaev67"
 				;;
 			esac
 
@@ -639,6 +789,7 @@ EOF
 	elif test "${UNAME_MACHINE}" = "mips" ; then
 	  cat >$dummy.c <<EOF
 #ifdef __cplusplus
+#include <stdio.h>  /* for printf() prototype */
 	int main (int argc, char *argv[]) {
 #else
 	int main (argc, argv) int argc; char *argv[]; {
@@ -652,8 +803,10 @@ EOF
   return 0;
 }
 EOF
-	  ${CC-cc} $dummy.c -o $dummy 2>/dev/null && ./$dummy "${UNAME_MACHINE}" && rm $dummy.c $dummy && exit 0
+	  $CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null && ./$dummy "${UNAME_MACHINE}" && rm $dummy.c $dummy && exit 0
 	  rm -f $dummy.c $dummy
+	elif test "${UNAME_MACHINE}" = "s390"; then
+	  echo s390-ibm-linux && exit 0
 	else
 	  # Either a pre-BFD a.out linker (linux-gnuoldld)
 	  # or one that does not give us useful --help.
@@ -675,6 +828,7 @@ EOF
 	  cat >$dummy.c <<EOF
 #include <features.h>
 #ifdef __cplusplus
+#include <stdio.h>  /* for printf() prototype */
 	int main (int argc, char *argv[]) {
 #else
 	int main (argc, argv) int argc; char *argv[]; {
@@ -695,7 +849,7 @@ EOF
   return 0;
 }
 EOF
-	  ${CC-cc} $dummy.c -o $dummy 2>/dev/null && ./$dummy "${UNAME_MACHINE}" && rm $dummy.c $dummy && exit 0
+	  $CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null && ./$dummy "${UNAME_MACHINE}" && rm $dummy.c $dummy && exit 0
 	  rm -f $dummy.c $dummy
 	fi ;;
 # ptx 4.0 does uname -s correctly, with DYNIX/ptx in there.  earlier versions
@@ -712,10 +866,20 @@ EOF
 	echo ${UNAME_MACHINE}-pc-sysv4.2uw${UNAME_VERSION}
 	exit 0 ;;
     i?86:*:4.*:* | i?86:SYSTEM_V:4.*:*)
+	UNAME_REL=`echo ${UNAME_RELEASE} | sed 's/\/MP$//'`
 	if grep Novell /usr/include/link.h >/dev/null 2>/dev/null; then
-		echo ${UNAME_MACHINE}-univel-sysv${UNAME_RELEASE}
+		echo ${UNAME_MACHINE}-univel-sysv${UNAME_REL}
 	else
-		echo ${UNAME_MACHINE}-pc-sysv${UNAME_RELEASE}
+		echo ${UNAME_MACHINE}-pc-sysv${UNAME_REL}
+	fi
+	exit 0 ;;
+    i?86:*:5:7*)
+        # Fixed at (any) Pentium or better
+        UNAME_MACHINE=i586
+        if [ ${UNAME_SYSTEM} = "UnixWare" ] ; then
+	    echo ${UNAME_MACHINE}-sco-sysv${UNAME_RELEASE}uw${UNAME_VERSION}
+	else
+	    echo ${UNAME_MACHINE}-pc-sysv${UNAME_RELEASE}
 	fi
 	exit 0 ;;
     i?86:*:3.2:*)
@@ -727,19 +891,20 @@ EOF
 		(/bin/uname -X|egrep i80486 >/dev/null) && UNAME_MACHINE=i486
 		(/bin/uname -X|egrep '^Machine.*Pentium' >/dev/null) \
 			&& UNAME_MACHINE=i586
+		(/bin/uname -X|egrep '^Machine.*Pent ?II' >/dev/null) \
+			&& UNAME_MACHINE=i686
+		(/bin/uname -X|egrep '^Machine.*Pentium Pro' >/dev/null) \
+			&& UNAME_MACHINE=i686
 		echo ${UNAME_MACHINE}-pc-sco$UNAME_REL
 	else
 		echo ${UNAME_MACHINE}-pc-sysv32
 	fi
 	exit 0 ;;
-    i?86:UnixWare:*:*)
-	if /bin/uname -X 2>/dev/null >/dev/null ; then
-	  (/bin/uname -X|egrep '^Machine.*Pentium' >/dev/null) \
-	    && UNAME_MACHINE=i586
-	fi
-	echo ${UNAME_MACHINE}-unixware-${UNAME_RELEASE}-${UNAME_VERSION}
+    i?86:*DOS:*:*)
+	echo ${UNAME_MACHINE}-pc-msdosdjgpp
 	exit 0 ;;
     pc:*:*:*)
+	# Left here for compatibility:
         # uname -m prints for DJGPP always 'pc', but it prints nothing about
         # the processor, so we play safe by assuming i386.
 	echo i386-pc-msdosdjgpp
@@ -825,7 +990,7 @@ EOF
     news*:NEWS-OS:*:6*)
 	echo mips-sony-newsos6
 	exit 0 ;;
-    R[34]000:*System_V*:*:* | R4000:UNIX_SYSV:*:* | R4000:UNIX_SV:*:*)
+    R[34]000:*System_V*:*:* | R4000:UNIX_SYSV:*:* | R*000:UNIX_SV:*:*)
 	if [ -d /usr/nec ]; then
 	        echo mips-nec-sysv${UNAME_RELEASE}
 	else
@@ -852,6 +1017,27 @@ EOF
 	exit 0 ;;
     *:Rhapsody:*:*)
 	echo ${UNAME_MACHINE}-apple-rhapsody${UNAME_RELEASE}
+	exit 0 ;;
+    *:Darwin:*:*)
+	echo `uname -p`-apple-darwin${UNAME_RELEASE}
+	exit 0 ;;
+    *:procnto*:*:* | *:QNX:[0123456789]*:*)
+	if test "${UNAME_MACHINE}" = "x86pc"; then
+		UNAME_MACHINE=pc
+	fi
+	echo `uname -p`-${UNAME_MACHINE}-nto-qnx
+	exit 0 ;;
+    *:QNX:*:4*)
+	echo i386-pc-qnx
+	exit 0 ;;
+    NSR-W:NONSTOP_KERNEL:*:*)
+	echo nsr-tandem-nsk${UNAME_RELEASE}
+	exit 0 ;;
+    BS2000:POSIX*:*:*)
+	echo bs2000-siemens-sysv
+	exit 0 ;;
+    DS/*:UNIX_System_V:*:*)
+	echo ${UNAME_MACHINE}-${UNAME_SYSTEM}-${UNAME_RELEASE}
 	exit 0 ;;
 esac
 
@@ -959,7 +1145,7 @@ main ()
 }
 EOF
 
-${CC-cc} $dummy.c -o $dummy 2>/dev/null && ./$dummy && rm $dummy.c $dummy && exit 0
+$CC_FOR_BUILD $dummy.c -o $dummy 2>/dev/null && ./$dummy && rm $dummy.c $dummy && exit 0
 rm -f $dummy.c $dummy
 
 # Apollos put the system type in the environment.
