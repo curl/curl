@@ -305,6 +305,8 @@ else
   case "$OPT_SSL" in
   yes)
     EXTRA_SSL=/usr/local/ssl ;;
+  off)
+    EXTRA_SSL= ;;
   *)
     dnl check the given spot right away!
     EXTRA_SSL=$OPT_SSL
