@@ -6,8 +6,34 @@
 
                                History of Changes
 
+
+Daniel (29 July 2000)
+- It struck me that the lib used localtime() which is not thread-safe, so now
+  I use localtime_r() in the systems that has it.
+
+- I went through this entire document and removed all email addresses and left
+  names only. I've really made an effort to always note who brought be bug
+  reports or fixes, but more and more people ask me to remove the email
+  addresses since they become victims for spams this way.
+
+Daniel (27 July 2000)
+- Jörn Hartroth found out that when you specified a HTTP proxy in an
+  environment variable and used -L, curl failed in the second fetch. I
+  corrected this problem and posted a patch to the list. No need for an extra
+  beta release just for this.
+
+Version 7.0.10beta
+
+Daniel (27 July 2000)
+- So, libtool replaced two of my files with symbolic links and I forgot to add
+  the two new libtool files to the release archive (and they were added as
+  symlinks as well!) This of course lead to that the configure script failed
+  on 7.0.9...
+
+Version 7.0.9beta
+
 Daniel (25 July 2000)
-- Kristian Köhntopp <kris at koehntopp.de> brought be a fix that makes libcurl
+- Kristian Köhntopp <kris at koehntopp.de> brought a fix that makes libcurl
   libtoolified, just as we've wanted for a while now. He also made the
   recently added man pages get installed properly on 'make install' and some
   other nice cleanups.
@@ -278,7 +304,6 @@ Daniel (2 May 2000):
 Daniel (24 April 2000):
 - Added a new paragraph to the FAQ about what to do when configure can't
   find OpenSSL even though it is installed. Supplied by Bob Allison
-  <allisonb@users.sourceforge.net>.
 
 Daniel (12 April 2000):
 - Started messing around big-time to convert the old library interface to a
@@ -289,7 +314,7 @@ Daniel (8 April 2000):
   and 100 megabytes. They're now displayed XX.XM.
 - I also noticed that ftp fetches through HTTP proxies didn't add the user
   agent string. It does now.
-- Habibie <habibie@MailandNews.com> supplied a pretty good way to build RPMs
+- Habibie <habibie at MailandNews.com> supplied a pretty good way to build RPMs
   on a Linux machine. It still a) requires me to be root to do it, b) leaves
   the rpm packages laying at some odd place on my disk c) doesn't work to
   build the ssl version of curl since I didn't install openssl from an rpm
@@ -302,7 +327,7 @@ Daniel (8 April 2000):
   is a pity there's no newer release around...
 
 Daniel (4 April 2000):
-- Marco G. Salvagno <mgs@whiz.cjb.net> supplied me with two fixes that
+- Marco G. Salvagno supplied me with two fixes that
   appearantly makes the OS/2 port work better with multiple URLs.
 
 Daniel (2 April 2000):
@@ -310,20 +335,20 @@ Daniel (2 April 2000):
   followed a location with an absolute URL to another port, it misbehaved.
 
 Daniel (27 March 2000):
-- H. Daphne Luong <daphne@tellme.com> pointed out that curl was wrongly
+- H. Daphne Luong pointed out that curl was wrongly
   messing up the proxy string when fetching a document through a http proxy,
   which screwed up multiple fetches such as in location: followings.
 
 Daniel (23 March 2000):
-- Marco G. Salvagno <mgs@whiz.cjb.net> corrected my badly applied patch he
+- Marco G. Salvagno corrected my badly applied patch he
   actually already told me about!
 
-- H. Daphne Luong <daphne@tellme.com> brought me a fix that now makes curl
+- H. Daphne Luong brought me a fix that now makes curl
   ignore select() errors in the download if errno is EINTR, which turns out to
   happen every now and then when using libcurl multi-threaded...
 
 Daniel (22 March 2000):
-- Wham Bang <wham_bang@yahoo.com> supplied a couple of win32 fixes. HAVE_UNAME
+- Wham Bang supplied a couple of win32 fixes. HAVE_UNAME
   was accidentally #defined in config-win32.h, which it shouldn't have been.
   The HAVE_UNISTD_H is not defined when compiling with the Makefile.vc6
   makefile for MS VC++.
@@ -336,7 +361,7 @@ Daniel (21 March 2000):
 Version 6.5.2
 
 Daniel (21 March 2000):
-- Paul Harrington <paul@pizza.org> quickly pointed out to me that 6.5.1
+- Paul Harrington quickly pointed out to me that 6.5.1
   crashes hard. I upload 6.5.2 now as quickly as possible! The problem was
   the -D adjustments in src/main.c.
 
@@ -350,12 +375,12 @@ Daniel (20 March 2000):
   Johansson).
 
 Daniel (19 March 2000):
-- Marco G. Salvagno <mgs@whiz.cjb.net> supplied me with a series of patches
+- Marco G. Salvagno supplied me with a series of patches
   that now allows curl to get compiled on OS/2. It even includes a section in
   the INSTALL file. Very nice job!
 
 Daniel (17 March 2000):
-- Wham Bang <wham_bang@yahoo.com> supplied a patch for the lib/Makefile.vc6
+- Wham Bang supplied a patch for the lib/Makefile.vc6
   file. We still need some fixes for the config-win32.h since it appears that
   VC++ and mingw32 have different opinions about (at least) unistd.h's
   existence.
@@ -370,14 +395,14 @@ Daniel (15 March 2000):
   Added the classic HTTP POST question to the FAQ, removed some #ifdef WIN32
   stuff from the sources (they're covered by the config-win32.h now).
 
-- Pascal Gaudette <pascal@gaudette.org> fixed a missing ldap.c problem in the
+- Pascal Gaudette fixed a missing ldap.c problem in the
   Makefile.vc6 file. He also addressed a problem in src/config-win32.h.
 
 Daniel (14 March 2000):
 - Paul Harrington pointed out that the 'http_code' variable in the -w output
   was never written. I fixed it now.
 
-- Janne Johansson <jj@dynarc.se> reported the complaints that OpenBSD does
+- Janne Johansson reported the complaints that OpenBSD does
   when getdate.c #includes malloc.h. It claims stdlib.h should be included
   instead. I added #ifdef HAVE_MALLOC_H code in getdate.y and two checks in
   the configure.in for malloc.h and stdlib.h.
@@ -385,7 +410,7 @@ Daniel (14 March 2000):
 Version 6.5
 
 Daniel (13 March 2000):
-- <curl@spam.wolvesbane.net> pointed out that the way curl sent cookies in a
+- <curl at spam.wolvesbane.net> pointed out that the way curl sent cookies in a
   single line wasn't enjoyed by IIS4.0 servers. In my view, that is not what
   the standards say, but I added a white space between the name/value pairs to
   perhaps make them work better.
@@ -409,7 +434,7 @@ Daniel (2 March 2000):
 - Added the -w and -N stuff to the man page. Documented the new progress meter
   display in README.curl.
 
-- Jörn Hartroth <Joern.Hartroth@telekom.de>, Chris <cbayliss@csc.come> and Ulf
+- Jörn Hartroth, Chris <cbayliss at csc.come> and Ulf
   Möller from the openssl development team helped bringing me the details for
   fixing an OpenSSL usage flaw. It became apparent when they released openssl
   0.9.5 since that barfed on curl's bad behavior (not seeding a random number
@@ -417,11 +442,10 @@ Daniel (2 March 2000):
 
 - Yet another option: -N/--no-buffer disables buffering in the output stream.
   Probably most useful for very slow transfers when you really want to get
-  every byte curl receives within some preferred time. Andrew <tmr@gci.net>
+  every byte curl receives within some preferred time. Andrew <tmr at gci.net>
   suggested this.
 
-- Damien Adant <dams@usa.net> mailed me his fixes for making curl compile
-  on Ultrix.
+- Damien Adant mailed me his fixes for making curl compile on Ultrix.
 
 Daniel (24 February 2000):
 - Applied Jörn Hartroth's fixes for config-win32.h and lib/Makefile.w32.
@@ -479,24 +503,24 @@ Daniel (15 February 2000):
   is working ok and everything is tested, but we're reaching there. Slowly!
 
 Daniel (11 February 2000):
-- Paul Marquis <pmarquis@iname.com> fixed the config file parsing of curl to
+- Paul Marquis fixed the config file parsing of curl to
   deal with any-length lines, removing the previous limit of 4K.
 
-- Eetu Ojanen <esojanen@jyu.fi>'s suggestion of supporting the @-style for -b
+- Eetu Ojanen's suggestion of supporting the @-style for -b
   is implemented. Now -b@<filename> works as well as the old style. -b@- also
   similarly reads the cookies from stdin.
 
 - Reminder: -D should not write to the file until it needs to, in the same way
   -o does. That would enable curl to use -b and -D on the same file...
 
-- Ellis Pritchard <ellis@citria.com> made getdate.y work for MacOS X.
+- Ellis Pritchard made getdate.y work for MacOS X.
 
-- Paul Harrington <paul@pizza.org> helped me out finding the crash in the
+- Paul Harrington helped me out finding the crash in the
   cookie parser. He also pointed out curl's habit of sending empty cookies to
   the server.
 
 Daniel (8 February 2000):
- - Ron Zapp <rzapper@yahoo.com> corrected a problem in src/urlglob.c that
+ - Ron Zapp corrected a problem in src/urlglob.c that
    prevented curl from getting compiled on sunos 4. The problem had to do
    with the difference in sprintf() return code types.
 
@@ -504,7 +528,7 @@ Daniel (8 February 2000):
    do some progress meter fixes later this week.
 
 Daniel (31 January 2000):
- - Paul Harrington <paul@pizza.org> found another core dump in the cookie
+ - Paul Harrington found another core dump in the cookie
    parser. Curl doesn't properly recognize the 'version' keyword and I think
    that is what caused this. I need to refresh some specs on cookies and see
    what else curl lacks to improve this a bit more once and for all.
@@ -512,7 +536,7 @@ Daniel (31 January 2000):
    RFC 2109 clearly specifies how cookies should be dealt with when they are
    compliant with that spec. I don't think many servers are though...
 
- - Mark W. Eichin <eichin@thok.org> found that while curl is uploading a form
+ - Mark W. Eichin found that while curl is uploading a form
    to a web site, it doesn't read incoming data why it'll hang after a while
    since the socket "pipe" becomes full.
 
@@ -521,24 +545,24 @@ Daniel (31 January 2000):
    of course... I should get the header-sending together in a kind of queue
    and let them get "uploaded" in Transfer() as well.
 
- - Zhibiao Wu <wuzb@erols.com> pointed out a curl bug in the location: area,
+ - Zhibiao Wu pointed out a curl bug in the location: area,
    although I did not get a reproducible way to do this why I have to wait
    with fixing anything.
 
- - Bob Schader <rschader@product-des.com> suggested I should implement resume
+ - Bob Schader suggested I should implement resume
    support for the HTTP PUT operation, and as I think it is a valid suggestion
    I'll work on it.
 
 Daniel (25 January 2000):
- - M Travis Obenhaus <Travis.Obenhaus@aud.alcatel.com> pointed out a manual
-   mixup with -y and -Y that was corrected.
+ - M Travis Obenhaus pointed out a manual mixup with -y and -Y that was
+   corrected.
 
- - Jens Schleusener <Jens.Schleusener@dlr.de> pointed out a problem to compile
+ - Jens Schleusener pointed out a problem to compile
    curl on AIX 4.1.4 and gave me a solution. This problem was already fixed
    by Jörn's recent #include modifications!
 
 Daniel (19 January 2000):
- - Oskar Liljeblad <osk@hem.passagen.se> pointed out and corrected a problem
+ - Oskar Liljeblad pointed out and corrected a problem
    in the Location: following system that made curl following a location: to a
    different protocol to fail.
 
@@ -547,7 +571,7 @@ Daniel (19 January 2000):
    again for further research and debugging. (It disabled location: following
    on server not running on default ports.)
 
- - Jörn Hartroth <Joern.Hartroth@telekom.de> brought a fix that once again
+ - Jörn Hartroth brought a fix that once again
    made it possible to select progress bar.
 
  - Jörn also fixed a few include problems.
@@ -555,7 +579,7 @@ Daniel (19 January 2000):
 Version 6.4
 
 Daniel (17 January 2000):
- - Based on suggestions from Björn Stenberg (bjorn@haxx.nu), I made the
+ - Based on suggestions from Björn Stenberg, I made the
    progress deal better with larger files and added a "Time" field which shows
    the time spent on the download so far.
  - I'm now using the CVS repository on sourceforge.net, which also allows web
@@ -574,13 +598,13 @@ Daniel (10 January 2000):
    on the man page! So, in order to make the solaris configure script find a
    better result I made gnroff get checked prior to the regular nroff.
  - Added all the curl exit codes to the man page.
- - Jim Gallagher <jmgallag@usa.net> properly tracked down a bug in autoconf
+ - Jim Gallagher properly tracked down a bug in autoconf
    2.13. The AC_CHECK_LIB() macro wrongfully uses the -l flag before the -L
    flag to 'ld' which causes the HP-UX 10.20 flavour to fail on all libchecks
    and therefore you can't make the configure script find the openssl libs!
 
 Daniel (28 December 1999):
- - Tim Verhoeven <dj@walhalla.sin.khk.be> correctly identified that curl
+ - Tim Verhoeven correctly identified that curl
    doesn't support URL formatted file names when getting ftp. Now, there's a
    problem with getting very weird file names off FTP servers. RFC 959 defines
    that the file name syntax to use should be the same as in the native OS of
@@ -591,8 +615,7 @@ Daniel (28 December 1999):
 Daniel (27 December 1999):
  - When curl parsed cookies straight off a remote site, it corrupted the input
    data, which, if the downloaded headers were stored made very odd characters
-   in the saved data. Correctly identified and reported by Paul Harrington
-   <paul@pizza.org>.
+   in the saved data. Correctly identified and reported by Paul Harrington.
 
 Daniel (13 December 1999):
  - General cleanups in the library interface. There had been some bad kludges
@@ -600,13 +623,13 @@ Daniel (13 December 1999):
    both regarding the lib API as well as include file confusions.
 
 Daniel (3 December 1999):
- - A small --stderr bug was reported by Eetu Ojanen <esojanen@jyu.fi>...
+ - A small --stderr bug was reported by Eetu Ojanen...
 
  - who also brought the suggestion of extending the -X flag to ftp list as
    well. So, now it is and the long option is now --request instead. It is
    only for ftp list for now (and the former http stuff too of course).
 
-Lars J. Aas <larsa@sim.no> (24 November 1999):
+Lars J. Aas (24 November 1999):
  - Patched curl to compile and build under BeOS. Doesn't work yet though!
 
  - Corrected the Makefile.am files to allow putting object files in
@@ -620,21 +643,21 @@ Daniel (23 November 1999):
    things I've done are either backed up elsewhere or stored in this CVS
    server!
 
- - Michael S. Steuer <michael@steuer.com> pointed out a bug in the -F handling
+ - Michael S. Steuer pointed out a bug in the -F handling
    that made curl hang if you posted an empty variable such as '-F name='. It
    was one of those old bugs that never have worked properly...
 
- - Jason Baietto <jason@durians.com> pointed out a general flaw in the HTTP
+ - Jason Baietto pointed out a general flaw in the HTTP
    download. Curl didn't complain if it was prematurely aborted before the
    entire download was completed. It does now.
 
 Daniel (19 November 1999):
- - Chris Maltby <chris@aurema.com> very accurately criticized the lack of
+ - Chris Maltby very accurately criticized the lack of
    return code checks on the fwrite() calls. I did a thorough check for all
    occurrences and corrected this.
 
 Daniel (17 November 1999):
- - Paul Harrington <paul@pizza.org> pointed out that the -m/--max-time option
+ - Paul Harrington pointed out that the -m/--max-time option
    doesn't work for the slow system calls like gethostbyname()... I don't have
    any good fix yet, just a slightly less bad one that makes curl exit hard
    when the timeout is reached.
@@ -656,11 +679,10 @@ Version 6.3
    my own check as well. If curl thinks the condition isn't met, the transfer
    is aborted prematurely (after all the headers have been received).
 
- - After comments from Robert Linden <robert.linden@postcom.deutschepost.de> I
-   also rewrote some parts of the man page to better describe how the -F
-   works.
+ - After comments from Robert Linden I also rewrote some parts of the man page
+   to better describe how the -F works.
 
- - Michael Anti <anti@pshowing.com> put up a new curl download mirror in
+ - Michael Anti put up a new curl download mirror in
    China:  http://www.pshowing.com/curl/
 
  - I added the list of download mirrors to the README file
@@ -680,7 +702,7 @@ Version 6.3
    be the lower number, though you may omit one of the numbers. Use the -r/
    --range switch (previously HTTP-only).
 
- - Sebastiaan van Erk <sebster@sebster.com> suggested that curl should be
+ - Sebastiaan van Erk suggested that curl should be
    able to show the file size of a specified file. I think this is a splendid
    idea and the -I flag is now working for FTP. It displays the file size in
    this manner:
@@ -699,14 +721,13 @@ Version 6.3
 
  - Many HTTP/1.1 servers do not support ranges. Don't ask me why. I did add
    some text about this in the man page for the range option. The thread in
-   the mailing list that started this was initiated by Michael Anti
-   <anti@pshowing.com>.
+   the mailing list that started this was initiated by Michael Anti.
 
  - I get reports about nroff crashes on solaris 2.6+ when displaying the curl
    man page. Switch to gnroff instead, it is reported to work(!). Adam Barclay
-   <adam@oz.org> reported and brought the suggestion.
+   reported and brought the suggestion.
 
- - In a dialogue with Johannes G. Kristinsson <d98is@dtek.chalmers.se> we came
+ - In a dialogue with Johannes G. Kristinsson we came
    up with the idea to let -H/--header specified headers replace the
    internally generated headers, if you happened to select to add a header
    that curl normally uses by itself. The advantage with this is not entirely
@@ -714,9 +735,9 @@ Version 6.3
    the one curl would set.
 
  Daniel (27 October 1999):
- - Jongki Suwandi <Jongki.Suwandi@eng.sun.com> brought a nice patch for
-   (yet another) crash when following a location:. This time you had to
-   follow a https:// server's redirect to get the core.
+ - Jongki Suwandi brought a nice patch for (yet another) crash when following
+   a location:. This time you had to follow a https:// server's redirect to
+   get the core.
 
 Version 6.2
 
@@ -728,27 +749,27 @@ Version 6.2
    when moving to the next URL! (The protocol part has to be added to the
    URL when going through a proxy since it has no protocol-guessing system
    such as curl has.)
- - Benjamin Ritcey <ritcey@tfn.com> reported a core dump under solaris 2.6
+ - Benjamin Ritcey reported a core dump under solaris 2.6
    with OpenSSL 0.9.4. It turned out this was due to a bad free() in main.c
    that occurred after the download was done and completed.
  - Benjamin found ftp downloads to show the first line of the download meter
    to get written twice, and I removed that problem. It was introduced with
    the multiple URL support.
- - Dan Zitter <dzitter@zitter.net> correctly pointed out that curl 6.1 and
-   earlier versions didn't honor RFC 2616 chapter 4 section 2, "Message
-   Headers": "...Field names are case-insensitive..."
-   HTTP header parsing assumed a certain casing. Dan also provided me with
-   a patch that corrected this, which I took the liberty of editing slightly.
+ - Dan Zitter correctly pointed out that curl 6.1 and earlier versions didn't
+   honor RFC 2616 chapter 4 section 2, "Message Headers": "...Field names are
+   case-insensitive..."  HTTP header parsing assumed a certain casing. Dan
+   also provided me with a patch that corrected this, which I took the liberty
+   of editing slightly.
  - Dan Zitter also provided a nice patch for config.guess to better recognize
    the Mac OS X
  - Dan also corrected a minor problem in the lib/Makefile that caused linking
    to fail on OS X.
 
  Daniel (19 October 1999):
- - Len Marinaccio <len@goodnet.com> came up with some problems with curl.
-   Since Windows has a crippled shell, it can't redirect stderr and that
-   causes trouble. I added --stderr today which allows the user to redirect
-   the stderr stream to a file or stdout.
+ - Len Marinaccio came up with some problems with curl.  Since Windows has a
+   crippled shell, it can't redirect stderr and that causes trouble. I added
+   --stderr today which allows the user to redirect the stderr stream to a
+   file or stdout.
 
  Daniel (18 October 1999):
  - The configure script now understands the '--without-ssl' flag, which now
@@ -793,10 +814,10 @@ Version 6.1
 Version 6.1beta
 
  Daniel (6 October 1999):
- - Douglas E. Wegscheid <wegscd@whirlpool.com> sent me a patch that made the
-   exact same thing as I just made: the -d switch is now capable of reading
-   post data from a named file or stdin.  Use it similarly to the -F. To read
-   the post data from a given file:
+ - Douglas E. Wegscheid sent me a patch that made the exact same thing as I
+   just made: the -d switch is now capable of reading post data from a named
+   file or stdin.  Use it similarly to the -F. To read the post data from a
+   given file:
 
         curl -d @path/to/filename www.postsite.com
 
@@ -813,9 +834,9 @@ Version 6.1beta
  - Updated curl.1 with multiple URL info.
 
  Daniel (30 September 1999):
- - Felix von Leitner <felix@convergence.de> brought openssl-check fixes
-   for configure.in to work out-of-the-box when the openssl files are
-   installed in the system default dirs.
+ - Felix von Leitner brought openssl-check fixes for configure.in to work
+   out-of-the-box when the openssl files are installed in the system default
+   dirs.
 
  Daniel (28 September 1999)
  - Added libz functionality. This should enable decompressing gzip, compress
@@ -841,10 +862,10 @@ Version 6.0
  - Applied Douglas' mingw32-fixes for the makefiles.
 
  Daniel (10 September 1999)
- - Douglas E. Wegscheid <wegscd@whirlpool.com> pointed out a problem. Curl
-   didn't check the FTP servers return code properly after the --quote
-   commands were issued. It took anything non 200 as an error, when all 2XX
-   codes should be accepted as OK.
+ - Douglas E. Wegscheid pointed out a problem. Curl didn't check the FTP
+   servers return code properly after the --quote commands were issued. It
+   took anything non 200 as an error, when all 2XX codes should be accepted as
+   OK.
 
  - Sending cookies to the same site in multiple lines like curl used to do
    turned out to be bad and breaking the cookie specs. Curl now sends all
@@ -856,28 +877,28 @@ Version 6.0
 
  Daniel (7 September 1999)
  - FTP upload through proxy is now turned into a HTTP PUT. Requested by
-   Stefan Kanthak <Stefan.Kanthak@mchp.siemens.de>.
+   Stefan Kanthak.
 
  - Added the ldap files to the .m32 makefile.
 
  Daniel (3 September 1999)
  - Made cookie matching work while using HTTP proxy.
 
- Bjorn Reese <breese@mail1.stofanet.dk> (31 August 1999)
+ Bjorn Reese (31 August 1999)
  - Passed his ldap:// patch. Note that this requires the openldap shared
    library to be installed and that LD_LIBRARY_PATH points to the
    directory where the lib will be found when curl is run with a
    ldap:// URL.
 
- Jörn Hartroth <Joern.Hartroth@telekom.de> (31 August 1999)
+ Jörn Hartroth (31 August 1999)
  - Made the Mingw32 makefiles into single files.
  - Made file:// work for Win32. The same code is now used for unix as well for
    performance reasons.
 
- Douglas E. Wegscheid <wegscd@whirlpool.com> (30 August 1999)
+ Douglas E. Wegscheid (30 August 1999)
  - Patched the Mingw32 makefiles for SSL builds.
 
- Matthew Clarke <clamat@van.maves.ca> (30 August 1999)
+ Matthew Clarke (30 August 1999)
  - Made a cool patch for configure.in to allow --with-ssl to specify the
    root dir of the openssl installation, as in
 
@@ -885,14 +906,14 @@ Version 6.0
 
  - Corrected the 'reconf' script to work better with some shells.
 
- Jörn Hartroth <Joern.Hartroth@telekom.de> (26 August 1999)
+ Jörn Hartroth (26 August 1999)
  - Fixed the Mingw32 makefiles in lib/ and corrected the file.c for win32
    compiles.
 
 Version 5.11
 
  Daniel (25 August 1999)
- - John Weismiller <johnweis@home.com> pointed out a bug in the header-line
+ - John Weismiller pointed out a bug in the header-line
    realloc() system in download.c.
 
  - I added lib/file.[ch] to offer a first, simple, file:// support. It
@@ -911,9 +932,8 @@ Version 5.11
 
  - Corrected the NO_PROXY usage. It is a list of substrings that if one of
    them matches the tail of the host name it should connect to, curl should
-   not use a proxy to connect there. Pointed out to me by Douglas E. Wegscheid
-   <wegscd@whirlpool.com>. I also changed the README text a little regarding
-   this.
+   not use a proxy to connect there. Pointed out to me by Douglas
+   E. Wegscheid.  I also changed the README text a little regarding this.
 
  Daniel (16 August 1999)
  - Fixed a memory bug with http-servers that sent Location: to a Location:
@@ -921,7 +941,7 @@ Version 5.11
 
  - Made cookies work a lot better. Setting the same cookie name several times
    used to add more cookies instead of replacing the former one which it
-   should've. Nusu <nus@intergorj.ro> brought me an URL that made this
+   should've. Nusu <nus at intergorj.ro> brought me an URL that made this
    painfully visible...
 
  Troy (15 August 1999)
@@ -961,12 +981,12 @@ Version 5.10
    configure.in that is supposed to be better for IRIX users.
 
  Daniel (10 August 1999)
- - Albert Chin-A-Young <china@thewrittenword.com> helped me with some stupid
-   Makefile things, as well as some fiddling with the getdate.c
-   stuff that he had problems with under HP-UX v10. getdate.y will now be
-   compiled into getdate.c if the appropriate yacc or bison is found by the
-   configure script. Since this is slightly new, we need to test the output
-   getdate.c with win32 systems to make sure it still compiles there.
+ - Albert Chin-A-Young helped me with some stupid Makefile things, as well as
+   some fiddling with the getdate.c stuff that he had problems with under
+   HP-UX v10. getdate.y will now be compiled into getdate.c if the appropriate
+   yacc or bison is found by the configure script. Since this is slightly new,
+   we need to test the output getdate.c with win32 systems to make sure it
+   still compiles there.
 
  Daniel (5 August 1999)
  - I've just setup a new mailing list with the intention to keep discussions
@@ -981,18 +1001,18 @@ Version 5.10
    started to archive this mailing list and have put the libcurl web page at
    www.fts.frontec.se/~dast/libcurl/.
 
- - Stefan Kanthak <Stefan.Kanthak@mchp.siemens.de> contacted me regarding a
-   few problems in the configure script which he discovered when trying to
-   make curl compile and build under Siemens SINIX-Z V5.42B2004!
+ - Stefan Kanthak contacted me regarding a few problems in the configure
+   script which he discovered when trying to make curl compile and build under
+   Siemens SINIX-Z V5.42B2004!
 
- - Marcus Klein <m.klein@in-olpe.de> very accurately informed me that
-   src/version.h was not present in the CVS repository. Oh, how silly...
+ - Marcus Klein very accurately informed me that src/version.h was not present
+   in the CVS repository. Oh, how silly...
 
- - Linus Nielsen <Linus.Nielsen@sth.frontec.se> rewrote the telnet:// part and
-   now curl offers limited telnet support. If you run curl like 'curl
-   telnet://host' you'll get all output on the screen and curl will read input
-   from stdin. You'll be able to login and run commands etc, but since the
-   output is buffered, expect to get a little weird output.
+ - Linus Nielsen rewrote the telnet:// part and now curl offers limited telnet
+   support. If you run curl like 'curl telnet://host' you'll get all output on
+   the screen and curl will read input from stdin. You'll be able to login and
+   run commands etc, but since the output is buffered, expect to get a little
+   weird output.
 
    This is still in its infancy and it might get changed. We need your
    feed-back and input in how this is best done.
@@ -1000,10 +1020,9 @@ Version 5.10
    WIN32 NOTE: I bet we'll get problems when trying to compile the current
    lib/telnet.c on win32, but I think we can sort them out in time.
 
- - David Sanderson <david@transarc.com> reported that FORCE_ALLOCA_H or
-   HAVE_ALLOCA_H must be defined for getdate.c to compile properly on HP-UX
-   11.0. I updated the configure script to check for alloca.h which should
-   make it.
+ - David Sanderson reported that FORCE_ALLOCA_H or HAVE_ALLOCA_H must be
+   defined for getdate.c to compile properly on HP-UX 11.0. I updated the
+   configure script to check for alloca.h which should make it.
 
  Daniel (4 August 1999)
  - I finally got to understand Marcus Klein's ftp download resume problem,
@@ -1015,10 +1034,10 @@ Version 5.10
  - Added text about file transfer resuming to README.curl.
 
  Daniel (2 August 1999)
- - Applied a progress-bar patch from Lars J. Aas <larsa@sim.no>. It offers
+ - Applied a progress-bar patch from Lars J. Aas. It offers
    a new styled progress bar enabled with -#/--progress-bar. 
 
- T. Yamada <tai@imasy.or.jp> (30 July 1999)
+ T. Yamada <tai at imasy.or.jp> (30 July 1999)
  - It breaks with segfault when 1) curl is using .netrc to obtain
    username/password (option '-n'), and 2) is automatically redirected to
    another location (option '-L').
@@ -1033,46 +1052,44 @@ Version 5.10
 Version 5.9.1
 
  Daniel (30 July 1999)
- - Steve Walch <swalch@cisoft.com> pointed out that there is a memory leak in
-   the formdata functions. I added a FormFree() function that is now used and
-   supposed to correct this flaw.
+ - Steve Walch pointed out that there is a memory leak in the formdata
+   functions. I added a FormFree() function that is now used and supposed to
+   correct this flaw.
 
- - Mark Wotton <mwotton@black.ug.cs.usyd.edu.au> reported:
+ - Mark Wotton reported:
    'curl -L https://www.cwa.com.au/' core dumps.  I managed to cure this by
    correcting the cleanup procedure. The bug seems to be gone with my OpenSSL
    0.9.2b, although still occurs when I run the ~100 years old SSLeay 0.8.0. I
    don't know whether it is curl or SSLeay that is to blame for that.
 
- - Marcus Klein <m.klein@in-olpe.de>:
+ - Marcus Klein:
    Reported an FTP upload resume bug that I really can't repeat nor understand.
    I leave it here so that it won't be forgotten.
 
  Daniel (29 July 1999)
- - Costya Shulyupin <costya@trivnet.com> suggested support for longer URLs
-   when following Location: and I could only agree and fix it!
+ - Costya Shulyupin suggested support for longer URLs when following Location:
+   and I could only agree and fix it!
 
- - Leigh Purdie <leighp@defcen.gov.au> found a problem in the upload/POST
-   department. It turned out that http.c accidentaly cleared the pointer
-   instead of the byte counter when supposed to.
+ - Leigh Purdie found a problem in the upload/POST department. It turned out
+   that http.c accidentaly cleared the pointer instead of the byte counter
+   when supposed to.
 
- - Costya Shulyupin <costya@trivnet.com> pointed out a problem with port
-   numbers and Location:. If you had a server at a non-standard port that
-   redirected to an URL using a standard port number, curl still used that
-   first port number.
+ - Costya Shulyupin pointed out a problem with port numbers and Location:. If
+   you had a server at a non-standard port that redirected to an URL using a
+   standard port number, curl still used that first port number.
 
- - Ralph Beckmann <rabe@uni-paderborn.de> pointed out a problem when using both
-   CONF_FOLLOWLOCATION and CONF_FAILONERROR simultaneously. Since the
-   CONF_FAILONERROR exits on the 302-code that the follow location header
-   outputs it will never show any html on location: pages. I have now made it
-   look for >=400 codes if CONF_FOLLOWLOCATION is set.
+ - Ralph Beckmann pointed out a problem when using both CONF_FOLLOWLOCATION
+   and CONF_FAILONERROR simultaneously. Since the CONF_FAILONERROR exits on
+   the 302-code that the follow location header outputs it will never show any
+   html on location: pages. I have now made it look for >=400 codes if
+   CONF_FOLLOWLOCATION is set.
 
  - 'struct slist' is now renamed to 'struct curl_slist' (as suggested by Ralph
    Beckmann).
 
- - Joshua Swink <jpswink@hotmail.com> and Rick Welykochy <rick@praxis.com.au>
-   were the first to point out to me that the latest OpenSSL package now have
-   moved the standard include path. It is now in
-   /usr/local/ssl/include/openssl and I have now modified the --enable-ssl
+ - Joshua Swink and Rick Welykochy were the first to point out to me that the
+   latest OpenSSL package now have moved the standard include path. It is now
+   in /usr/local/ssl/include/openssl and I have now modified the --enable-ssl
    option for the configure script to use that as the primary path, and I
    leave the former path too to work with older packages of OpenSSL too.
 
@@ -1084,28 +1101,25 @@ Version 5.9.1
  - I adjusted the FTP reply 227 parser to make the PASV command work better
    with more ftp servers. Appearantly the Roxen Challanger server replied
    something curl 5.9 could deal with! :-( Reported by Ashley Reid-Montanaro
-   <ashley@compsoc.man.ac.uk> and Mark Butler <butlerm@xmission.com> brought a
-   solution for it.
+   and Mark Butler brought a solution for it.
 
  Daniel (26 May 1999)
  - Rearranged. README is new, the old one is now README.curl and I added a
-   README.libcurl with text I got from Ralph Beckmann <rabe@uni-paderborn.de>.
+   README.libcurl with text I got from Ralph Beckmann.
 
  - I also updated the INSTALL text.
 
  Daniel (25 May 1999)
- - David Jonathan Lowsky <dlowsky@leland.stanford.edu> correctly pointed out
-   that curl didn't properly deal with form posting where the variable 
-   shouldn't have any content, as in curl -F "form=" www.site.com. It was
-   now fixed.
+ - David Jonathan Lowsky correctly pointed out that curl didn't properly deal
+   with form posting where the variable shouldn't have any content, as in curl
+   -F "form=" www.site.com. It was now fixed.
 
 Version 5.9
 
  Daniel (22 May 1999)
- - I've got a bug report from Aaron Scarisbrick <aaronsca@hotmail.com> in
-   which he states he has some problems with -L under FreeBSD 3.0. I have
-   previously got another bug report from Stefan Grether
-   <stefan.grether@ubs.com> which points at an error with similar sympthoms
+ - I've got a bug report from Aaron Scarisbrick in which he states he has some
+   problems with -L under FreeBSD 3.0. I have previously got another bug
+   report from Stefan Grether which points at an error with similar sympthoms
    when using win32. I made the allocation of the new url string a bit faster
    and different, don't know if it actually improves anything though...
 
@@ -1113,17 +1127,17 @@ Version 5.9
  - Made the cookie parser deal with CRLF newlines too.
 
  Daniel (19 May 1999)
- - Download() didn't properly deal with failing return codes from the
-   sread() function. Adam Coyne <adam@gamespy.com> found the problem in the
-   win32 version, and Troy Engel helped me out isolating it.
+ - Download() didn't properly deal with failing return codes from the sread()
+   function. Adam Coyne found the problem in the win32 version, and Troy Engel
+   helped me out isolating it.
 
  Daniel (16 May 1999)
- - Richard Adams <Richard@Slayford.com> pointed out a bug I introduced in
-   5.8. --dump-header doesn't work anymore! :-/ I fixed it now.
+ - Richard Adams pointed out a bug I introduced in 5.8. --dump-header doesn't
+   work anymore! :-/ I fixed it now.
 
- - After a suggestion by Joshua Swink <jpswink@hotmail.com> I added -S /
-   --show-error to force curl to display the error message in case of an
-   error, even if -s/--silent was used.
+ - After a suggestion by Joshua Swink I added -S / --show-error to force curl
+   to display the error message in case of an error, even if -s/--silent was
+   used.
 
  Daniel (10 May 1999)
  - I moved the stuff concerning HTTP, DICT and TELNET it their own source
@@ -1131,9 +1145,9 @@ Version 5.9
    layer all those protocols better to enable more to be added easier in the
    future!
 
- - Leon Breedt <ljb@debian.org> sent me some files I've not put into the main
-   curl archive. They're for creating the Debian package thingie. He also sent
-   me a debian package that I've made available for download at the web page
+ - Leon Breedt sent me some files I've not put into the main curl
+   archive. They're for creating the Debian package thingie. He also sent me a
+   debian package that I've made available for download at the web page
 
  Daniel (9 May 1999)
  - Made it compile on cygwin too.
@@ -1156,9 +1170,8 @@ Version 5.8
    there are problems all over.
 
    I've got like five different bug reports on this only the last
-   week... Claudio Neves <claudio@nextis.com> and Federico Bianchi
-   <bianchi@pc-arte2.arte.unipi.it> and root <duggerj001@hawaii.rr.com> are
-   some of them reporting this.
+   week... Claudio Neves and Federico Bianchi and root <duggerj001 at
+   hawaii.rr.com> are some of them reporting this.
 
    Currently, I have no really good fix since I want to use automake myself to
    generate the Makefile.in files. I've found out that the @SHELL@-problems
@@ -1183,26 +1196,26 @@ Version 5.8
 
  - Corrected a bug in the SSLv2/v3 selection.
 
- - Felix von Leitner <leitner@math.fu-berlin.de> requested that curl should
-   be able to send "If-Modified-Since" headers, which indeed is a fair idea.
-   I implemented it right away! Try -z <expression> where expression is a full
-   GNU date expression or a file name to get the date from!
+ - Felix von Leitner requested that curl should be able to send
+   "If-Modified-Since" headers, which indeed is a fair idea.  I implemented it
+   right away! Try -z <expression> where expression is a full GNU date
+   expression or a file name to get the date from!
 
- Stephan Lagerholm <stephan@unilog.se> (30 Apr 1999)
+ Stephan Lagerholm (30 Apr 1999)
  - Pointed out a problem with the src/Makefile for FreeBSD. The RM variable
    isn't set and causes the make to fail.
 
  Daniel (26 April 1999)
- - Am I silly or what? <Irving_Wolfe@wolfe.net> pointed out to me that the
-   curl version number was not set properly. Hasn't been since 5.6. This was
-   due to a bug in my maketgz script!
+ - Am I silly or what? Irving Wolfe pointed out to me that the curl version
+   number was not set properly. Hasn't been since 5.6. This was due to a bug
+   in my maketgz script!
 
- David Eriksson <david@2good.com> (25 Apr 1999)
+ David Eriksson (25 Apr 1999)
  - Found a bug in cookies.c that made it crash at times.
 
 Version 5.7.1
 
- Doug Kaufman <dkaufman@rahul.net> (23 Apr 1999)
+ Doug Kaufman (23 Apr 1999)
  - Brought two sunos 4 fixes. One of them being the hostip.c fix mentioned
    below and the other one a correction in include/stdcheaders.h
 
@@ -1213,7 +1226,7 @@ Version 5.7.1
  - New mailing list address. Info updated on the web page as well as in the
    README file
 
- Greg Onufer <Greg.Onufer@Eng.Sun.COM> (20 Apr 1999)
+ Greg Onufer (20 Apr 1999)
  - hostip.c didn't compile properly on SunOS 5.5.1.
    It needs an #include <sys/types.h>
 
@@ -1228,7 +1241,7 @@ Version 5.7
  - Added the FAQ file to the archive. Still a bit smallish, but it is a
    start.
 
- Eric Thelin <eric@generation-i.com> (15 Apr 1999)
+ Eric Thelin (15 Apr 1999)
  - Made -D accept '-' instead of filename to write to stdout.
 
 Version 5.6.3beta
@@ -1249,17 +1262,17 @@ Version 5.6.3beta
    use v2 at all times using a modern OpenSSL version, but we don't really
    want such a crippled solution.
  
- - Marc Boucher <marc@mbsi.ca> sent me a patch that corrected a math error
-   for the "Curr.Speed" progress meter.
+ - Marc Boucher sent me a patch that corrected a math error for the
+   "Curr.Speed" progress meter.
 
- - Eric Thelin <eric@generation-i.com> sent me a patch that enables '-K -'
-   to read a config file from stdin.
+ - Eric Thelin sent me a patch that enables '-K -' to read a config file from
+   stdin.
 
  - I found out we didn't close the file properly before so I added it!
 
  Daniel (Apr 9 1999)
- - Yu Xin <is@isee.za.net> pointed out a problem with ftp download resume.
-   It didn't work at all! ;-O
+ - Yu Xin pointed out a problem with ftp download resume.  It didn't work at
+   all! ;-O
 
  Daniel (Apr 6 1999)
  - Corrected the version string part generated for the SSL version.
@@ -1295,7 +1308,7 @@ Version 5.6.2beta
 
  - Better "Location:" following.
 
- Douglas E. Wegscheid <wegscd@whirlpool.com> (Tue, 30 Mar 1999)
+ Douglas E. Wegscheid (Tue, 30 Mar 1999)
  - A subsecond display patch.
 
  Daniel (Mar 14 1999)
@@ -1318,10 +1331,9 @@ Version 5.6.2beta
 Version 5.6beta
 
  Daniel (Mar 13 1999)
- - Since I've changed so much, I thought I'd just go ahead and implement
-   the suggestion from Douglas E. Wegscheid <wegscd@whirlpool.com>. -D or
-   --dump-header is now storing HTTP headers separately in the specified
-   file.
+ - Since I've changed so much, I thought I'd just go ahead and implement the
+   suggestion from Douglas E. Wegscheid. -D or --dump-header is now storing
+   HTTP headers separately in the specified file.
 
  - Added new text to INSTALL on what to do to build this on win32 now.
 
@@ -1346,9 +1358,9 @@ Version 5.6beta
 
 
  Daniel (Mar 1 1999)
- - Todd Kaufmann <tkaufmann@adforce.com> sent me a good link to Netscape's
-   cookie spec as well as the info that RFC 2109 specifies how to use them.
-   The link is now in the README and the RFC in the RESOURCES.
+ - Todd Kaufmann sent me a good link to Netscape's cookie spec as well as the
+   info that RFC 2109 specifies how to use them.  The link is now in the
+   README and the RFC in the RESOURCES.
 
  Daniel (Feb 23 1999)
  - Finally made configure accept --with-ssl to look for SSL libs and includes
@@ -1358,19 +1370,18 @@ Version 5.6beta
  - Verified that curl linked fine with OpenSSL 0.9.1c which seems to be
    the most recent.
 
- Henri Gomez <gomez@slib.fr> (Fri Feb  5 1999)
+ Henri Gomez (Fri Feb  5 1999)
  - Sent in an updated curl-ssl.spec. I still miss the script that builds an
    RPM automatically...
 
 Version 5.5.1
 
- Mark Butler <butlerm@xmission.com> (27 Jan 1999)
+ Mark Butler (27 Jan 1999)
  - Corrected problems in Download().
 
  Danitel Stenberg (25 Jan 1999)
- - Jeremie Petit <Jeremie.Petit@Digital.com> pointed out a few flaws in the
-   source that prevented it from compile warning free with the native
-   compiler under Digital Unix v4.0d.
+ - Jeremie Petit pointed out a few flaws in the source that prevented it from
+   compile warning free with the native compiler under Digital Unix v4.0d.
 
 Version 5.5
 
@@ -1378,11 +1389,11 @@ Version 5.5
  - Added Bjorns small text to the README about the DICT protocol.
 
  Daniel Stenberg (11 Jan 1999)
- - <jswink@softcom.net> reported about the win32-versioin: "Doesn't use
+ - <jswink at softcom.net> reported about the win32-versioin: "Doesn't use
    ALL_PROXY environment variable". Turned out to be because of the static-
    buffer nature of the win32 environment variable calls!
 
- Bjorn Reese <breese@imada.ou.dk> (10 Jan 1999)
+ Bjorn Reese (10 Jan 1999)
  - I have attached a simple addition for the DICT protocol (RFC 2229).
    It performs dictionary lookups. The output still needs to be better
    formatted.
@@ -1394,7 +1405,7 @@ Version 5.5
         dict://dict.org/m:hello::soundex
 
 
- Vicente Garcia <verot@redestb.es> (10 Jan 1999)
+ Vicente Garcia (10 Jan 1999)
  - Corrected the progress meter for files larger than 20MB.
 
  Daniel Stenberg (7 Jan 1999)
@@ -1404,26 +1415,25 @@ Version 5.4
 
  Daniel Stenberg
  (7 Jan 1999)
- - <Irving_Wolfe@Wolfe.Net> reported that curl -s didn't always supress the
-   progress reporting. It was the form post that autoamtically always switched
-   it on again. This is now corrected!
+ - Irving Wolfe reported that curl -s didn't always supress the progress
+   reporting. It was the form post that autoamtically always switched it on
+   again. This is now corrected!
 
  (4 Jan 1999)
- - Andreas Kostyrka <andreas@mtg.co.at> suggested I'd add PUT and he helped me
-   out to test it. If you use -t or -T now on a http or https server, PUT will
-   be used for file upload.
+ - Andreas Kostyrka suggested I'd add PUT and he helped me out to test it. If
+   you use -t or -T now on a http or https server, PUT will be used for file
+   upload.
 
    I removed the former use of -T with HTTP. I doubt anyone ever really used
    that.
 
  (4 Jan 1999)
- - Erik Jacobsen <erik@mint.com> found a width bug in the mprintf() function.
-   I corrected it now.
+ - Erik Jacobsen found a width bug in the mprintf() function.  I corrected it
+   now.
 
  (4 Jan 1999)
- - As John V. Chow <johnchow@brooklinetech.com> pointed out to me, curl
-   accepted very limited URL sizes. It should now accept path parts that are
-   up to at least 4096 bytes.
+ - As John V. Chow pointed out to me, curl accepted very limited URL sizes. It
+   should now accept path parts that are up to at least 4096 bytes.
 
  - Somehow I screwed up when applying the AIX fix from Gilbert Ramirez, so
    I redid that now.
@@ -1449,27 +1459,26 @@ Version 5.3
 
  - Made it compile smoothly on AIX.
 
- Gilbert Ramirez Jr. <gram@verdict.uthscsa.edu> (18 Dec 1998)
+ Gilbert Ramirez Jr. (18 Dec 1998)
  - Brought an MVS patch: -3/--mvs, for ftp upload to the MVS ftp server.
 
- Troy Engel <tengel@sonic.net> (17 Dec 1998)
+ Troy Engel (17 Dec 1998)
  - Brought a correction that fixes the win32 curl bug.
 
  Daniel Stenberg
- - A bug, pointed out to me by Dr H. T. Leung <htl10@cus.cam.ac.uk>, caused
-   curl to crash on the -A flag on certain systems. Actually, all systems
-   should've!
+ - A bug, pointed out to me by Dr H. T. Leung, caused curl to crash on the -A
+   flag on certain systems. Actually, all systems should've!
 
  - Added a few defines to make directories/file names get build nicer (with _
    instead of . and \ instead of / in win32).
 
- - steve <fisk@polar.bowdoin.edu> reported a weird bug that occured if the
+ - steve <fisk at polar.bowdoin.edu> reported a weird bug that occured if the
    ftp server response line had a parenthesis on the line before the (size)
    info. I hope it works better now!
 
 Version 5.2.1
 
- Steven G. Johnson <stevenj@alum.mit.edu> (Dec 14, 1998)
+ Steven G. Johnson (Dec 14, 1998)
  - Brought a fix that corrected a crash in 5.2 due to bad treatment of the
    environment variables.
 
@@ -1524,11 +1533,11 @@ Version 5.1 (not publicly released)
  - Ah, I should mention I've compiled and built curl successfully under
    solaris 2.6 with gcc now, gcc 2.7.2 won't work but 2.8.1 did ok.
 
- Oren Tirosh <oren@hishome.net> (Dec 3, 1998)
+ Oren Tirosh (Dec 3, 1998)
  - Brought two .spec files, to use when creating (Linux) Redhat style RPM
    packages. They're named curl.spec and curl-ssl.spec.
 
- Troy Engel <tengel@sonic.net>
+ Troy Engel
  - Supplied the src/Makefile.vc6 for easy compiling with VC++ under Win32.
 
 Version 5.0
@@ -1588,7 +1597,7 @@ Version 5.0 beta 24
    variable sizes. I think it makes it a little more portable. This proves
    to compile warning free with the problematic IRIX compiler!
  - Win32 compiled with a silly error. Corrected now.
- - Brian Chaplin <bchaplin@capital-mkts.com> reported yet another problem in
+ - Brian Chaplin reported yet another problem in
    multiline FTP responses. I've tried to correct it. I mailed him a new
    version and I hope he gets back soon with positive feedback!
  - Improved the 'maketgz' to create a temporary directory tree which it makes
@@ -1625,8 +1634,7 @@ Version 5.0 beta 21
 
  Daniel Stenberg (Nov 12, 1998)
  - We may have removed the silly warnings from url.c when compiled under IRIX.
-   Thanks again to Bjorn Reese <breese@imada.ou.dk> and Martin Staael
-   <martin@netgroup.dk>.
+   Thanks again to Bjorn Reese and Martin Staael.
  - Wrote formfind.pl which is a new perl script intended to help you find out
    how a FORM submission should be done. This needs a little more work to get
    really good.
@@ -1679,7 +1687,7 @@ Version 5.0 beta 21
    setup.h.
  - The RESOURCES and TODO files have been added to the archive.
 
- Angus Mackay <amackay@gus.ml.org> (Nov 5, 1998)
+ Angus Mackay (Nov 5, 1998)
  - Fixed getpass.c and various configure stuff
 
  Daniel Stenberg (Nov 3, 1998)
@@ -1694,13 +1702,13 @@ Version 5.0 beta 21
    .curlrc file anyway.
  - Introducing the new -F flag for HTTP POST. It supports multipart/form-data
    which means it is gonna be possible to upload files etc through HTTP POST.
-   Shiraz Kanga <skanga@bigfoot.com> asked for the feature and my brother,
-   Björn Stenberg <Bjorn.Stenberg@sth.frontec.se> helped me design the user
+   Shiraz Kanga asked for the feature and my brother,
+   Björn Stenberg helped me design the user
    interface for this beast.  This feature requires quite some docs,
    since it has turned out not only quite capable, but also complicated! :-)
  - A note here, since I've received mail about it. SSLeay versions prior to
    0.8 will *not* work with curl!
- - Wil Langford <wil@langford.net> reported a bug that occurred since curl
+ - Wil Langford reported a bug that occurred since curl
    did not properly use CRLF when issuing ftp commands. I fixed it.
  - Rearranged the order config files are read. .curlrc is now *always* read
    first and before the command line flags. -K config files then act as
@@ -1712,7 +1720,7 @@ Version 5.0 beta 21
  - I'm thinking of dropping the -p support. Its really not useful since ports
    could (and should?) be specified as :<port> appended on the host name
    instead, both in URLs and to proxy host names.
- - Martin Staael <martin@netgroup.dk> reports curl -L bugs under Windows NT
+ - Martin Staael reports curl -L bugs under Windows NT
    (test with URL http://come.to/scsde). This bug is not present in this
    version anymore.
  - Added support for the weird FTP URL type= thing. You can download a file
@@ -1720,12 +1728,12 @@ Version 5.0 beta 21
    available types are type=D for dir-list (NLST) and type=I for binary
    transfer. I can't say I've ever seen anyone use this kind of URL though!
    :-)
- - Troy Engel <tengel@palladium.net> pointed out a bug in my getenv("HOME")
+ - Troy Engel pointed out a bug in my getenv("HOME")
    usage for win32 systems. I introduce getenv.c to better cope with
    this. Mr Engel helps me with the details around that...
  - A little note to myself and others, I should make the win32-binary built
    with SSL support...
- - r-y-a-n/n-e-l-s-o-n <ryan@inch.com> sent me comments about building curl
+ - Ryan Nelson sent me comments about building curl
    with SSL under FreeBSD. See the Makefile for details. Using the configure
    script, it should work better and automatically now...
  - Cleaned up in the port number mess in the source. No longer stores and uses
@@ -1758,12 +1766,12 @@ Version 5.0 beta 21
    https-port when accessing through a proxy, it didn't use that number
    correctly. I also rewrote the code that parses the stuff read from the
    proxy when you wanna connect through it with SSL.
- - Bjorn Reese <breese@imada.ou.dk> helped me work around one of the compiler
+ - Bjorn Reese helped me work around one of the compiler
    warnings on IRIX native cc compiles.
 
 Version 4.10 (Oct 26, 1998)
  Daniel Stenberg
- - John A. Bristor <jbristor@bellsouth.net> suggested a config file switch,
+ - John A. Bristor suggested a config file switch,
    and since I've been having that idea kind of in the background for a long
    time I rewrote the parameter parsing function a little and now I introduce
    the -K/--config flag. I also made curl *always* (unless -K is used) try to
@@ -1772,7 +1780,7 @@ Version 4.10 (Oct 26, 1998)
    -h' or the README.
  - I removed the -k option. Keep-alive isn't really anything anyone would
    want to enable with curl anyway.
- - Martin Staael <Martin@Staael.dk> helped me add the 'irix' target. Now
+ - Martin Staael helped me add the 'irix' target. Now
    "make irix" should build curl successfully on non-gcc SGI machines.
  - Single switches now toggle behaviours. I.e if you use -v -v the second
    will switch off the verbose mode the first one enabled. This is so that
@@ -1780,10 +1788,10 @@ Version 4.10 (Oct 26, 1998)
 
 Version 4.9 (Oct 7, 1998)
  Daniel Stenberg
- - Martin Staael <Martin@Staael.dk> suggested curl would support cookies.
+ - Martin Staael suggested curl would support cookies.
    I added -b/--cookie to enable free-text cookie data to be passed. There's
    also a little blurb about general cookie stuff in the README/help text.
- - dmh <dmh@jet.es> suggested HTTP resume capabilities. Although you could
+ - dmh <dmh at jet.es> suggested HTTP resume capabilities. Although you could
    manually get curl to resume HTTP documents, I made the -c resume flag work
    for HTTP too (unless -r is used too, which would be very odd anyway).
  - Added checklinks.pl to the archive. It is a still experimental perl script
@@ -1798,58 +1806,51 @@ Version 4.9 (Oct 7, 1998)
    to offer the world the source to that too.
  - Curl did not like HTTP servers that sent no headers at all on a GET
    request.  It is a violation of RFC2068 but appearantly some servers do
-   that anyway.  Thanks to Gordon Beaton <gordon@erix.ericsson.se> for the
-   report!
- - -L/--location was added after a suggestion from Martin Staael
-   <Martin@Staael.dk>. This makes curl ATTEMPT to follow the Location:
-   redirect if one is present in the HTTP headers. If -i or -I is used with
-   this flag, you will see headers from all sites the Location: points to. Do
-   note that the first server can point to a second that points to a third
-   etc. It seems the Location: parameter (said to be an AbsoluteURI in
-   RFC2068) isn't always absolute.. :-/ Anyway, I've made curl ATTEMPT to do
-   the best it can to deal with the reality.
+   that anyway.  Thanks to Gordon Beaton for the report!
+ - -L/--location was added after a suggestion from Martin Staael. This makes
+   curl ATTEMPT to follow the Location: redirect if one is present in the HTTP
+   headers. If -i or -I is used with this flag, you will see headers from all
+   sites the Location: points to. Do note that the first server can point to a
+   second that points to a third etc. It seems the Location: parameter (said
+   to be an AbsoluteURI in RFC2068) isn't always absolute.. :-/ Anyway, I've
+   made curl ATTEMPT to do the best it can to deal with the reality.
  - Added getlinks.pl to the archive. getlinks.pl selectively downloads
    files that a web page links to.
 
 Version 4.8.4
  Daniel Stenberg
- - As Julian Romero Nieto <jromero@anaya.es> reported, curl reported wrong
-   version number.
- - As Teemu Yli-Elsila <tylielsi@mail.student.oulu.fi> pointed out,
-   the win32 version of 4.8 (and probably all other versions for win32)
-   didn't work with binary files since I'm too used to the UNIX style
-   fopen() where binary and text don't differ...
- - Ralph Beckmann <rabe@uni-paderborn.de> brought me some changes that lets
-   curl compile error and warning free with -Wall -pedantic with
-   g++. I also took the opportunity to clean off some unused variables
-   and similar.
- - Ralph Beckmann <rabe@uni-paderborn.de> made me aware of a really odd bug
-   now corrected. When curl read a set of headers from a HTTP server, divided
-   into more than one read and the first read showed a full line *exactly*
-   (i.e ending with a newline), curl did not behave well.
+ - As Julian Romero Nieto reported, curl reported wrong version number.
+ - As Teemu Yli-Elsila pointed out, the win32 version of 4.8 (and probably all
+   other versions for win32) didn't work with binary files since I'm too used
+   to the UNIX style fopen() where binary and text don't differ...
+ - Ralph Beckmann brought me some changes that lets curl compile error and
+   warning free with -Wall -pedantic with g++. I also took the opportunity to
+   clean off some unused variables and similar.
+ - Ralph Beckmann made me aware of a really odd bug now corrected. When curl
+   read a set of headers from a HTTP server, divided into more than one read
+   and the first read showed a full line *exactly* (i.e ending with a
+   newline), curl did not behave well.
 
 Version 4.8.3
  Daniel Stenberg
  - I was too quick to release 4.8.2 with too little testing. One of the
    changes is now reverted slightly to the 4.8.1 way since 4.8.2 couldn't
    upload files. I still think both problems corrected in 4.8.2 remain
-   corrected.  Reported by Julian Romero Nieto <jromero@anaya.es>.
+   corrected.  Reported by Julian Romero Nieto.
 
 Version 4.8.2
  Daniel Stenberg
- - Bernhard Iselborn <biselbor@rhrk.uni-kl.de> reported two FTP protocol
-   errors curl did. They're now corrected. Both appeared when getting files
-   from a MS FTP server! :-)
+ - Bernhard Iselborn reported two FTP protocol errors curl did. They're now
+   corrected. Both appeared when getting files from a MS FTP server! :-)
 
 Version 4.8.1
  Daniel Stenberg
  - Added a last update of the progress meter when the transfer is done. The
    final output on the screen didn't have to be the final size transfered
    which made it sometimes look odd.
- - Thanks to David Long <long@research.bell-labs.com> I got rid of a silly
-   bug that happened if a HTTP-page had nothing but header. Appearantly
-   Solaris deals with negative sizes in fwrite() calls a lot better than
-   Linux does... =B-]
+ - Thanks to David Long I got rid of a silly bug that happened if a HTTP-page
+   had nothing but header. Appearantly Solaris deals with negative sizes in
+   fwrite() calls a lot better than Linux does... =B-]
 
 Version 4.8
  Daniel Stenberg
@@ -1882,8 +1883,7 @@ Version 4.6
    verbose flag set. Gary W. Swearingen found it.
  - Now using alarm() to enable second-precision timeout even on the name
    resolving/connecting phase. The timeout is although reset after that first
-   sequence. (This should be corrected.) Gary W. Swearingen <swear@aa.net>
-   reported.
+   sequence. (This should be corrected.) Gary W. Swearingen reported.
  - Now spells "Unknown" properly, as in "Unknown option 'z'"... :-)
  - Added bug report email address in the README.
  - Added a "current speed" field to the progress meter. It shows the average
@@ -1899,7 +1899,7 @@ Version 4.5.1
  - Made the -A work when SSL-through-proxy.
 
 Version 4.5
- Linas Vepstas <linas@linas.org>
+ Linas Vepstas
  - More SSL corrections
  - I've added a port to AIX.
  - running SSL through a proxy causes a chunk of code to be executred twice.
@@ -1909,7 +1909,7 @@ Version 4.5
  - Made -i and -I work again
 
 Version 4.4
- Linas Vepstas <linas@us.ibm.com>
+ Linas Vepstas
  - -x can now also specify proxyport when used as in 'proxyhost:proxyport'
  - SSL fixes
 
@@ -1968,7 +1968,7 @@ Version 3.12
  Daniel Stenberg
  - End-of-header tracking still lacked support for \r\n or just \n at the
    end of the last header line.
- Sergio Barresi <sbarresi@imispa.it>
+ Sergio Barresi
  - Added PROXY authentication.
  Rafael Sagula
  - Fixed some little bugs.
@@ -2198,29 +2198,29 @@ Version 1.2
    now replaced with fwrite(). (Daniel's note: this also fixed the buffer
    overwrite problem I found in the previous version.)
 
- Rafael Sagula <sagula@inf.ufrgs.br>
+ Rafael Sagula
  - Let "-p" before "-x".
 
- Daniel Stenberg <Daniel.Stenberg@sth.frontec.se>
+ Daniel Stenberg
  - Bugfixed the proxy usage. It should *NOT* use nor strip the port number
    from the URL but simply pass that information to the proxy. This also
    made the user/password fields possible to use in proxy [ftp-] URLs.
    (like in ftp://user:password@ftp.my.site:8021/README)
 
- Johan Andersson <johan@homemail.com>
+ Johan Andersson
  - Implemented HTTP proxy support.
  - Receive byte counter added.
 
- Bjorn Reese <breese@imada.ou.dk>
+ Bjorn Reese
  - Implemented URLs (and skipped the old syntax).
  - Output is written to stdout, so to achieve the above example, do:
    httpget http://143.54.10.6/info_logo.gif > test.gif
 
 Version 1.1
- Daniel Stenberg <Daniel.Stenberg@sth.frontec.se>
+ Daniel Stenberg
  - Adjusted it slightly to accept named hosts on the command line. We
    wouldn't wanna use IP numbers for the rest of our lifes, would we?
 
 Version 1.0
-  Rafael Sagula <sagula@inf.ufrgs.br>
+  Rafael Sagula
   - Wrote the initial httpget, which started all this!

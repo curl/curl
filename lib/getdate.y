@@ -9,9 +9,12 @@
 */
 
 #ifdef HAVE_CONFIG_H
-# include <config.h>
+# include "config.h"
 # ifdef HAVE_ALLOCA_H
 #  include <alloca.h>
+# endif
+# ifdef HAVE_TIME_H
+#  include <time.h>
 # endif
 #endif
 
@@ -468,6 +471,7 @@ o_merid	: /* NULL */
 
 extern struct tm	*gmtime ();
 extern struct tm	*localtime ();
+extern struct tm	*localtime_r (time_t *, struct tm *);
 extern time_t		mktime ();
 
 /* Month and day table. */
@@ -918,10 +922,16 @@ curl_getdate (const char *p, const time_t *now)
 {
   struct tm tm, tm0, *tmp;
   time_t Start;
-
+#ifdef HAVE_LOCALTIME_R
+  struct tm keeptime;
+#endif
   yyInput = p;
   Start = now ? *now : time ((time_t *) NULL);
+#ifdef HAVE_LOCALTIME_R
+  tmp = localtime_r(&Start, &keeptime);
+#else
   tmp = localtime (&Start);
+#endif
   if (!tmp)
     return -1;
   yyYear = tmp->tm_year + TM_YEAR_ORIGIN;
