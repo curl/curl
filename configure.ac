@@ -1045,6 +1045,8 @@ if test "x$RECENTAIX" = "xyes"; then
   CURL_CHECK_STRERROR_R()
 
   AC_CHECK_FUNCS( gmtime_r )
+
+  AC_DEFINE(_THREAD_SAFE, 1, [define this if you need it to compile thread-safe code])
 fi
 
 
