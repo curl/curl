@@ -21,13 +21,13 @@ HTTP and -F upload in config file
 <stdin>
 -F name=daniel
 -F tool=curl
--F file=@log/test9.txt
+-F file=@log/test71.txt
 </stdin>
  <command>
 http://%HOSTIP:%HOSTPORT/we/want/71 -K -
 </command>
 # We create this file before the command is invoked!
-<file name="log/test9.txt">
+<file name="log/test71.txt">
 foo-
 This is a moo-
 bar
@@ -45,7 +45,7 @@ User-Agent: curl/7.10.4 (i686-pc-linux-gnu) libcurl/7.10.4 OpenSSL/0.9.7a ipv6 z
 Host: 127.0.0.1:8999
 Pragma: no-cache
 Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
-Content-Length: 411
+Content-Length: 412
 Expect: 100-continue
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
 
@@ -58,7 +58,7 @@ Content-Disposition: form-data; name="tool"
 
 curl
 ------------------------------9ef8d6205763
-Content-Disposition: form-data; name="file"; filename="log/test9.txt"
+Content-Disposition: form-data; name="file"; filename="log/test71.txt"
 Content-Type: text/plain
 
 foo-
