@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_easy_setopt 3 "7 April 2001" "libcurl 7.7" "libcurl Manual"
+.TH curl_easy_setopt 3 "10 April 2001" "libcurl 7.7.2" "libcurl Manual"
 .SH NAME
 curl_easy_setopt - Set curl easy-session options
 .SH SYNOPSIS
@@ -54,7 +54,7 @@ if you set the
 option.
 .TP
 .B CURLOPT_WRITEFUNCTION
-Function pointer that should use match the following prototype:
+Function pointer that should match the following prototype:
 .BI "size_t function( void *ptr, size_t size, size_t nmemb, FILE *stream);"
 This function gets called by libcurl as soon as there is received data that
 needs to be written down. The size of the data pointed to by
@@ -78,7 +78,7 @@ if you set the
 option.
 .TP
 .B CURLOPT_READFUNCTION
-Function pointer that should use match the following prototype:
+Function pointer that should match the following prototype:
 .BI "size_t function( void *ptr, size_t size, size_t nmemb, FILE *stream);"
 This function gets called by libcurl as soon as it needs to read data in order
 to send it to the peer. The data area pointed at by the pointer
@@ -319,7 +319,32 @@ struct curl_slist structs properly filled in as described for
 .B CURLOPT_WRITEHEADER
 Pass a FILE * to be used to write the header part of the received data to. The
 headers are guaranteed to be written one-by-one to this file handle and only
-complete lines are written. Parsing headers should be easy enough using this.
+complete lines are written. Parsing headers should be easy enough using
+this. See also the
+.I CURLOPT_HEADERFUNCTION
+option.
+.TP
+.B CURLOPT_HEADERFUNCTION
+Function pointer that should match the following prototype:
+.BI "size_t function( void *ptr, size_t size, size_t nmemb, FILE *stream);"
+This function gets called by libcurl as soon as there is received header data
+that needs to be written down. The function will be called once for each
+header with a complete header line in each invoke. The size of the data
+pointed to by
+.I ptr 
+is
+.I size
+multiplied with
+.I nmemb.
+The pointer named
+.I stream
+will be the one you passed to libcurl with the
+.I CURLOPT_WRITEHEADER
+option.
+Return the number of bytes actually written or return -1 to signal error to
+the library (it will cause it to abort the transfer with a
+.I CURLE_WRITE_ERROR
+return code). (Added in libcurl 7.7.2)
 .TP
 .B CURLOPT_COOKIEFILE
 Pass a pointer to a zero terminated string as parameter. It should contain the
