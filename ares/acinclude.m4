@@ -125,19 +125,17 @@ dnl CARES_CHECK_CONSTANT(headers, constant name, if found, [if not found])
 
 AC_DEFUN([CARES_CHECK_CONSTANT], [
   AC_MSG_CHECKING([for $2])
-  AC_TRY_RUN( 
-    [
+  AC_EGREP_CPP(VARIABLEWASDEFINED,
+   [
       $1
 
-      int main()
-      {
-        #ifdef $2
-          return 0;
-        #else
-          return 1;
-        #endif
-      }
-    ], ac_constant="yes", ac_constant="no")
+      #ifdef $2
+        VARIABLEWASDEFINED
+      #else
+        NJET
+      #endif
+    ], ac_constant="yes", ac_constant="no"
+  )
   if test "$ac_constant" = "yes" ; then
     AC_MSG_RESULT(yes)
     $3
