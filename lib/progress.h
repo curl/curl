@@ -53,7 +53,6 @@ typedef enum {
 } timerid;
   
 void pgrsDone(struct UrlData *data);
-void pgrsMode(struct UrlData *data, int mode);
 void pgrsStartNow(struct UrlData *data);
 void pgrsSetDownloadSize(struct UrlData *data, double size);
 void pgrsSetUploadSize(struct UrlData *data, double size);
