@@ -53,7 +53,8 @@ RELEASE_OBJS= \
 	uploadr.obj \
 	urlr.obj \
 	filer.obj \
-	versionr.obj
+	versionr.obj \
+	ldapr.obj
 
 DEBUG_OBJS= \
 	base64d.obj \
@@ -199,6 +200,8 @@ filer.obj: file.c
 	$(CCR) $(CFLAGS) file.c
 versionr.obj: version.c
 	$(CCR) $(CFLAGS) version.c
+ldapr.obj: ldap.c
+	$(CCR) $(CFLAGS) ldap.c
 
 ## Debug
 base64d.obj: base64.c
