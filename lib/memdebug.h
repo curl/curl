@@ -1,4 +1,6 @@
 #ifdef CURLDEBUG
+#ifndef _CURL_MEDEBUG_H
+#define _CURL_MEDEBUG_H
 /***************************************************************************
  *                                  _   _ ____  _     
  *  Project                     ___| | | |  _ \| |    
@@ -21,6 +23,11 @@
  *
  * $Id$
  ***************************************************************************/
+
+/*
+ * CAUTION: this header is designed to work when included by the app-side
+ * as well as the library. Do not mix with library internals!
+ */
 
 #include "setup.h"
 
@@ -51,7 +58,7 @@ void curl_memlimit(long limit);
 /* file descriptor manipulators */
 int curl_socket(int domain, int type, int protocol, int line , const char *);
 int curl_sclose(int sockfd, int, const char *source);
-int curl_accept(int s, struct sockaddr *addr, socklen_t *addrlen,
+int curl_accept(int s, void *addr, socklen_t *addrlen,
                 int line, const char *source);
 
 /* FILE functions */
@@ -92,4 +99,5 @@ int curl_fclose(FILE *file, int line, const char *source);
 
 #endif /* MEMDEBUG_NODEFINES */
 
-#endif
+#endif /* _CURL_MEDEBUG_H */
+#endif /* CURLDEBUG */

@@ -208,9 +208,10 @@ int curl_socket(int domain, int type, int protocol, int line,
   return sockfd;
 }
 
-int curl_accept(int s, struct sockaddr *addr, socklen_t *addrlen,
+int curl_accept(int s, void *saddr, socklen_t *addrlen,
                 int line, const char *source)
 {
+  struct sockaddr *addr = (struct sockaddr *)saddr;
   int sockfd=(accept)(s, addr, addrlen);
   if(logfile)
     fprintf(logfile, "FD %s:%d accept() = %d\n",
