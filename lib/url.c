@@ -107,6 +107,7 @@
 #include "file.h"
 #include "ldap.h"
 #include "url.h"
+#include "connect.h"
 
 #include <curl/types.h>
 
@@ -1123,12 +1124,6 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
 
 #ifndef ENABLE_IPV6
   conn->firstsocket = socket(AF_INET, SOCK_STREAM, 0);
-
-  memset((char *) &conn->serv_addr, '\0', sizeof(conn->serv_addr));
-  memcpy((char *)&(conn->serv_addr.sin_addr),
-         conn->hp->h_addr, conn->hp->h_length);
-  conn->serv_addr.sin_family = conn->hp->h_addrtype;
-  conn->serv_addr.sin_port = htons(conn->port);
 #else
   /* IPv6-style */
   struct addrinfo *ai;
@@ -1259,108 +1254,14 @@ static CURLcode ConnectPlease(struct SessionHandle *data,
   /*************************************************************
    * Connect to server/proxy
    *************************************************************/
-#ifdef ENABLE_IPV6
-  conn->firstsocket = -1;
-  for (ai = conn->hp; ai; ai = ai->ai_next) {
-    conn->firstsocket = socket(ai->ai_family,
-                               ai->ai_socktype,
-                               ai->ai_protocol);
-    if (conn->firstsocket < 0)
-      continue;
-
-    if (connect(conn->firstsocket, ai->ai_addr, ai->ai_addrlen) < 0) {
-      sclose(conn->firstsocket);
-      conn->firstsocket = -1;
-      continue;
-    }
-
-    break;
-  }
-  conn->ai = ai;
-  if (conn->firstsocket < 0) {
-    failf(data, strerror(errno));
-    return CURLE_COULDNT_CONNECT;
-  }
-#else
-  /* non-zero nonblock value sets socket as nonblocking under Win32 */
-#if defined(WIN32)
-  FD_ZERO (&connectfd);
-  FD_SET(conn->firstsocket, &connectfd);
-  if (conn->data->set.connecttimeout > 0) {
-    nonblock = 1;
-  }
-  ioctlsocket(conn->firstsocket, FIONBIO, &nonblock);
-#endif
-  if (connect(conn->firstsocket,
-              (struct sockaddr *) &(conn->serv_addr),
-              sizeof(conn->serv_addr)
-              ) < 0) {
-#if defined(WIN32)
-    conntimeout.tv_sec = conn->data->set.connecttimeout;
-    conntimeout.tv_usec = 0;	
-    if(-1 != select (conn->firstsocket + 1, NULL, &connectfd, NULL, &conntimeout)) {
-      if (FD_ISSET(conn->firstsocket, &connectfd)) {
-        /* shut off non-blocking again */
-        nonblock = 0;
-        ioctlsocket(conn->firstsocket, FIONBIO, &nonblock);
-        return CURLE_OK;
-      }
-      else
-        errno = EINTR;
-    }
-#endif
-    switch(errno) {
-#ifdef ECONNREFUSED
-      /* this should be made nicer */
-    case ECONNREFUSED:
-      failf(data, "Connection refused");
-      break;
-    case EFAULT:
-      failf(data, "Invalid socket address: %d",errno);
-      break;
-    case EISCONN:
-      failf(data, "Socket already connected: %d",errno);
-      break;
-    case ETIMEDOUT:
-      failf(data, "Timeout while accepting connection, server busy: %d",errno);
-      break;
-    case ENETUNREACH:
-      failf(data, "Network is unreachable: %d",errno);
-      break;
-    case EADDRINUSE:
-      failf(data, "Local address already in use: %d",errno);
-      break;
-    case EINPROGRESS:
-      failf(data, "Socket is nonblocking and connection can not be completed immediately: %d",errno);
-      break;
-    case EALREADY:
-      failf(data, "Socket is nonblocking and a previous connection attempt not completed: %d",errno);
-      break;
-    case EAGAIN:
-      failf(data, "No more free local ports: %d",errno);
-      break;
-    case EACCES:
-    case EPERM:
-      failf(data, "Attempt to connect to broadcast address without socket broadcast flag or local firewall rule violated: %d",errno);
-      break;
-#endif
-    case EINTR:
-      failf(data, "Connection timed out");
-      break;
-    default:
-      failf(data, "Can't connect to server: %d", errno);
-      break;
-    }
-    return CURLE_COULDNT_CONNECT;
-  }
-#endif
-
-  return CURLE_OK;
+  return Curl_connecthost(conn,
+                          conn->firstsocket, /* might be bind()ed */
+                          &conn->firstsocket);
 }
 
-static CURLcode Connect(struct SessionHandle *data,
-                        struct connectdata **in_connect,
-                        bool allow_port) /* allow data->set.use_port ? */
+static CURLcode CreateConnection(struct SessionHandle *data,
+                                 struct connectdata **in_connect,
+                                 bool allow_port) /* allow set.use_port? */
 {
   char *tmp;
   char *buf;
@@ -2296,7 +2197,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
   struct connectdata *conn;
 
   /* call the stuff that needs to be called */
-  code = Connect(data, in_connect, allow_port);
+  code = CreateConnection(data, in_connect, allow_port);
 
   if(CURLE_OK != code) {
     /* We're not allowed to return failure with memory left allocated
