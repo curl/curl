@@ -7,6 +7,10 @@
                                   Changelog
 
 
+Daniel (8 October)
+- Frank Ticheler provided a patch that fixes how libcurl connects to multiple
+  addresses, if one of them fails (ipv4-code).
+
 Daniel (7 October)
 - Neil Dunbar provided a patch that now makes libcurl check SSL
   subjectAltNames when matching certs. This is apparently detailed in RFC2818

@@ -620,23 +620,6 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     failf(data, "no address available");
     return CURLE_COULDNT_CONNECT;
   }
-  /* create an IPv4 TCP socket */
-  sockfd = socket(AF_INET, SOCK_STREAM, 0);
-  if(-1 == sockfd) {
-    failf(data, "couldn't create socket");
-    return CURLE_COULDNT_CONNECT; /* big time error */
-  }
-  
-  if(conn->data->set.device) {
-    /* user selected to bind the outgoing socket to a specified "device"
-       before doing connect */
-    CURLcode res = bindlocal(conn, sockfd);
-    if(res)
-      return res;
-  }
-
-  /* Convert socket to non-blocking type */
-  Curl_nonblock(sockfd, TRUE);
 
   /* This is the loop that attempts to connect to all IP-addresses we
      know for the given host. One by one. */
@@ -644,6 +627,24 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
       rc && (struct in_addr *)remotehost->addr->h_addr_list[aliasindex];
       aliasindex++) {
     struct sockaddr_in serv_addr;
+
+    /* create an IPv4 TCP socket */
+    sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    if(-1 == sockfd) {
+      failf(data, "couldn't create socket");
+      return CURLE_COULDNT_CONNECT; /* big time error */
+    }
+  
+    if(conn->data->set.device) {
+      /* user selected to bind the outgoing socket to a specified "device"
+         before doing connect */
+      CURLcode res = bindlocal(conn, sockfd);
+      if(res)
+        return res;
+    }
+
+    /* Convert socket to non-blocking type */
+    Curl_nonblock(sockfd, TRUE);
 
     /* do this nasty work to do the connect */
     memset((char *) &serv_addr, '\0', sizeof(serv_addr));
@@ -706,6 +707,7 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
 
     if(0 != rc) {
       /* get a new timeout for next attempt */
+      sclose(sockfd);
       after = Curl_tvnow();
       timeout_ms -= Curl_tvdiff(after, before);
       if(timeout_ms < 0) {
@@ -717,9 +719,9 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
     }
     break;
   }
+
   if(0 != rc) {
     /* no good connect was made */
-    sclose(sockfd);
     *sockconn = -1;
     failf(data, "Connect failed");
     return CURLE_COULDNT_CONNECT;
