@@ -145,29 +145,27 @@ Win32
       MingW32 (GCC-2.95) style
       ------------------------
         Run the 'mingw32.bat' file to get the proper environment variables
-        set, then run 'make -f Makefile.m32' in the lib/ dir and then
-        'make -f Makefile.m32' in the src/ dir.
+        set, then run 'make mingw32' in the root dir.
 
-        If you have any problems linking libraries or finding header files,
-        be sure to look at the provided "Makefile.m32" files for the proper
+        If you have any problems linking libraries or finding header files, be
+        sure to verify that the provided "Makefile.m32" files use the proper
         paths, and adjust as necessary.
 
       Cygwin style
       ------------
-        Almost identical to the unix installation. Run the configure script
-        in the curl root with 'sh configure'. Make sure you have the sh
-        executable in /bin/ or you'll see the configure fail towards the
-        end.
+        Almost identical to the unix installation. Run the configure script in
+        the curl root with 'sh configure'. Make sure you have the sh
+        executable in /bin/ or you'll see the configure fail towards the end.
 
         Run 'make'
 
       Microsoft command line style
       ----------------------------
         Run the 'vcvars32.bat' file to get the proper environment variables
-        set, then run 'nmake -f Makefile.vc6' in the lib/ dir and then
-        'nmake -f Makefile.vc6' in the src/ dir.
+        set, then run 'nmake vc' in the root dir.
 
-        The vcvars32.bat file is part of the Microsoft development environment.
+        The vcvars32.bat file is part of the Microsoft development
+        environment.
 
       IDE-style
       -------------------------
@@ -195,26 +193,24 @@ Win32
       MingW32 (GCC-2.95) style
       ------------------------
         Run the 'mingw32.bat' file to get the proper environment variables
-        set, then run 'make -f Makefile.m32 SSL=1' in the lib/ dir and then
-        'make -f Makefile.m32 SSL=1' in the src/ dir.
+        set, then run 'make mingw32-ssl' in the root dir.
 
-        If you have any problems linking libraries or finding header files,
-        be sure to look at the provided "Makefile.m32" files for the proper
+        If you have any problems linking libraries or finding header files, be
+        sure to look at the provided "Makefile.m32" files for the proper
         paths, and adjust as necessary.
 
       Cygwin style
       ------------
-
         Haven't done, nor got any reports on how to do. It should although be
         identical to the unix setup for the same purpose. See above.
 
       Microsoft command line style
       ----------------------------
         Run the 'vcvars32.bat' file to get the proper environment variables
-        set, then run 'nmake -f Makefile.vc6 release-ssl' in the lib/ dir and
-        then 'nmake -f Makefile.vc6' in the src/ dir.
+        set, then run 'nmake vc-ssl' in the root dir.
 
-        The vcvars32.bat file is part of the Microsoft development environment.
+        The vcvars32.bat file is part of the Microsoft development
+        environment.
 
       Microsoft / Borland style
       -------------------------
