@@ -7,6 +7,19 @@
                                   Changelog
 
 
+Daniel (20 November)
+- Joshua Kapell filed bug report #845247 as he found an endless loop when
+  getting a 407 back from a proxy when no user+password was given.
+
+Daniel (19 November)
+- Kevin Roth fixed a progress-bar problem on Windows.
+
+- While working with Nicolas Croiset's bug report #843739, I noticed two minor
+  problems related to ftp partial downloads: if a partial transfer is
+  detected, we must close the connection as we cannot know in what state it is
+  anymore. This looks like a ProFTPD bug:
+  http://curl.haxx.se/mail/lib-2003-11/0079.html
+
 Daniel (17 November)
 - Maciej W. Rozycki made the script use a cache variable for the writable argv
   test. This way, the default can be overridden better (for cross-compiles
