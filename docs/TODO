@@ -209,3 +209,10 @@ TODO
    fork()s and it should become even more portable.
 
  * Introduce a test suite that tests libcurl better and more explicitly.
+
+NEXT MAJOR RELEASE
+
+ * curl_easy_cleanup() returns void, but curl_multi_cleanup() returns a
+   CURLMcode. These should be changed to be the same.
+
+ * curl_formparse() should be removed
