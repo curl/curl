@@ -2,7 +2,7 @@
 .\" nroff -man [file]
 .\" Written by daniel@haxx.se
 .\"
-.TH curl_formfree 3 "5 March 2001" "libcurl 7.5" "libcurl Manual"
+.TH curl_formfree 3 "6 April 2001" "libcurl 7.7.1" "libcurl Manual"
 .SH NAME
 curl_formfree - free a previously build multipart/formdata HTTP POST chain
 .SH SYNOPSIS
@@ -19,5 +19,7 @@ None
 .SH "SEE ALSO"
 .BR curl_formparse "(3) "
 .SH BUGS
-Surely there are some, you tell me!
+libcurl 7.7.1 and earlier versions does not allow a NULL pointer to be used as
+argument.
+
 
