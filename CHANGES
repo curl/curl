@@ -6,7 +6,40 @@
 
                                History of Changes
 
+Daniel (22 November 2001)
+- Andrés García helped me out to track down the roots of bug report #479537,
+  which was concerning curl returning the wrong error code when failing to
+  connect. This didn't happen on all systems, and more specificly I've so far
+  only seen this happen on IPv4-only Linux hosts.
+
+- I applied the fixes for the two bugs Eric Lavigne found when doing his MacOS
+  port. A missing comma in arpa_telnet.h and a pretty wild write in the FTP
+  response reader function. The latter write is however likely to occur in our
+  own buffer unless very big FTP server replies (>25K) are read. I've never
+  seen such a reply ever, so I think this is a relatively minor risk.
+
+Daniel (21 November 2001)
+- Moonesamy provided code to prevent junk from being output when libcurl
+  returns an error code but no error description and that corrects how make is
+  run in the Makefile.dist file (that appears as root Makefile in release
+  archives).
+
+- Eric Lavigne mailed me bugfixes and patches for building libcurl on MacOS
+  (non-X). He'll get back with more updated patches soon.
+
+- Kevin Roth modified the cygwin files once again, now to build against the
+  shared OpenSSL DLLs.
+
+Version 7.9.2-pre4
+
+Daniel (20 November 2001)
+- Georg Horn brought a patch that introduced CURLINFO_STARTTRANSFER_TIME,
+  complete with man page updates!
+
 Daniel (19 November 2001)
+- Miklos Nemeth provided details enough to update the Borland makefile
+  properly.
+
 - Lars M Gustafsson found a case with a bad free(). In fact, it was so bad I'm
   amazed we never saw this before!
 
