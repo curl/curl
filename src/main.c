@@ -2904,7 +2904,7 @@ operate(struct Configurable *config, int argc, char *argv[])
   }
 
   /* loop through the list of given URLs */
-  while(urlnode && !res) {
+  while(urlnode) {
     char *dourl;
 
     /* get the full URL (it might be NULL) */
