@@ -29,9 +29,6 @@
 /* Define if you have the <sys/poll.h> header file */
 #undef HAVE_SYS_POLL_H
 
-/* Define if you have the `setvbuf' function. */
-#undef HAVE_SETVBUF
-
 /* Define if you have the `poll' function. */
 #undef HAVE_POLL
 
