@@ -26,7 +26,7 @@ man_MANS = \
 	curl_mprintf.3 \
 	curl_global_init.3 \
 	curl_global_cleanup.3 \
-	libcurl.5
+	libcurl.3
 
 EXTRA_DIST = $(man_MANS) \
 	MANUAL BUGS CONTRIBUTE FAQ FEATURES INTERNALS \
