@@ -339,7 +339,7 @@ static int send_doc(int sock, int doc, int part_no)
       /* we got a "friends?" question, reply back that we sure are */
       logmsg("Identifying ourselves as friends");
       sprintf(weare, "HTTP/1.1 200 OK\r\n\r\nWE ROOLZ: %d\r\n",
-              getpid());
+              (int)getpid());
       buffer = weare;
       break;
     case DOCNUMBER_INTERNAL:
