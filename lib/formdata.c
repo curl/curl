@@ -176,7 +176,7 @@ int FormParse(char *input,
 	      struct curl_httppost **httppost,
 	      struct curl_httppost **last_post)
 {
-  /* nextarg MUST be a string in the format 'name=contents' and we'll
+  /* 'input' MUST be a string in the format 'name=contents' and we'll
      build a linked list with the info */
   char name[256];
   char *contents;
@@ -975,9 +975,13 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   return return_value;
 }
 
+/*
+ * curl_formadd() is a public API to add a section to the multipart formpost.
+ */
+
 CURLFORMcode curl_formadd(struct curl_httppost **httppost,
-                 struct curl_httppost **last_post,
-                 ...)
+                          struct curl_httppost **last_post,
+                          ...)
 {
   va_list arg;
   CURLFORMcode result;
@@ -987,6 +991,9 @@ CURLFORMcode curl_formadd(struct curl_httppost **httppost,
   return result;
 }
 
+/*
+ * AddFormData() adds a chunk of data to the FormData linked list.
+ */
 static size_t AddFormData(struct FormData **formp,
                           const void *line,
                           size_t length)
@@ -1014,9 +1021,12 @@ static size_t AddFormData(struct FormData **formp,
   return length;
 }
 
+/*
+ * AddFormDataf() adds printf()-style formatted data to the formdata chain.
+ */
 
 static size_t AddFormDataf(struct FormData **formp,
-                        const char *fmt, ...)
+                           const char *fmt, ...)
 {
   char s[4096];
   va_list ap;
@@ -1027,7 +1037,10 @@ static size_t AddFormDataf(struct FormData **formp,
   return AddFormData(formp, s, 0);
 }
 
-
+/*
+ * Curl_FormBoundary() creates a suitable boundary string and returns an
+ * allocated one.
+ */
 char *Curl_FormBoundary(void)
 {
   char *retstring;
@@ -1056,7 +1069,10 @@ char *Curl_FormBoundary(void)
   return retstring;
 }
 
-/* Used from http.c, this cleans a built FormData linked list */ 
+/*
+ * Curl_formclean() is used from http.c, this cleans a built FormData linked
+ * list
+ */ 
 void Curl_formclean(struct FormData *form)
 {
   struct FormData *next;
@@ -1069,7 +1085,10 @@ void Curl_formclean(struct FormData *form)
   } while((form=next)); /* continue */
 }
 
-/* external function to free up a whole form post chain */
+/*
+ * curl_formfree() is an external function to free up a whole form post
+ * chain
+ */
 void curl_formfree(struct curl_httppost *form)
 {
   struct curl_httppost *next;
@@ -1097,6 +1116,13 @@ void curl_formfree(struct curl_httppost *form)
 
   } while((form=next)); /* continue */
 }
+
+/*
+ * Curl_getFormData() converts a linked list of "meta data" into a complete
+ * (possibly huge) multipart formdata. The input list is in 'post', while the
+ * output resulting linked lists gets stored in '*finalform'. *sizep will get
+ * the total size of the whole POST.
+ */
 
 CURLcode Curl_getFormData(struct FormData **finalform,
                           struct curl_httppost *post,
@@ -1278,6 +1304,10 @@ CURLcode Curl_getFormData(struct FormData **finalform,
   return result;
 }
 
+/*
+ * Curl_FormInit() inits the struct 'form' points to with the 'formdata'
+ * and resets the 'sent' counter.
+ */
 int Curl_FormInit(struct Form *form, struct FormData *formdata )
 {
   if(!formdata)
@@ -1289,7 +1319,10 @@ int Curl_FormInit(struct Form *form, struct FormData *formdata )
   return 0;
 }
 
-/* fread() emulation */
+/*
+ * Curl_FormReader() is the fread() emulation function that will be used to
+ * deliver the formdata to the transfer loop and then sent away to the peer.
+ */
 size_t Curl_FormReader(char *buffer,
                        size_t size,
                        size_t nitems,
@@ -1335,48 +1368,25 @@ size_t Curl_FormReader(char *buffer,
   return gotsize;
 }
 
-/* possible (old) fread() emulation that copies at most one line */
-size_t Curl_FormReadOneLine(char *buffer,
-                            size_t size,
-                            size_t nitems,
-                            FILE *mydata)
+/*
+ * Curl_formpostheader() returns the first line of the formpost, the
+ * request-header part (which is not part of the request-body like the rest of
+ * the post).
+ */
+char *Curl_formpostheader(void *formp, size_t *len)
 {
-  struct Form *form;
-  size_t wantedsize;
-  size_t gotsize;
-
-  form=(struct Form *)mydata;
-
-  wantedsize = size * nitems;
+  char *header;
+  struct Form *form=(struct Form *)formp;
 
   if(!form->data)
-    return 0; /* nothing, error, empty */
+    return 0; /* nothing, ERROR! */
 
-  do {
-  
-    if( (form->data->length - form->sent ) > wantedsize ) {
+  header = form->data->line;
+  *len = form->data->length;
 
-      memcpy(buffer, form->data->line + form->sent, wantedsize);
+  form->data = form->data->next; /* advance */
 
-      form->sent += wantedsize;
-
-      return wantedsize;
-    }
-
-    memcpy(buffer,
-           form->data->line + form->sent,
-           gotsize = (form->data->length - form->sent) );
-
-    form->sent = 0;
-
-    form->data = form->data->next; /* advance */
-
-  } while(!gotsize && form->data);
-  /* If we got an empty line and we have more data, we proceed to the next
-     line immediately to avoid returning zero before we've reached the end.
-     This is the bug reported November 22 1999 on curl 6.3. (Daniel) */
-
-  return gotsize;
+  return header;
 }
 
 

@@ -1686,7 +1686,7 @@ CURLcode Curl_http(struct connectdata *conn)
       }
 
       if(!checkheaders(data, "Content-Type:")) {
-        /* Get Content-Type: line from Curl_FormReadOneLine, which happens
+        /* Get Content-Type: line from Curl_formpostheader, which happens
            to always be the first line. We can know this for sure since
            we always build the formpost linked list the same way!
 
@@ -1694,13 +1694,11 @@ CURLcode Curl_http(struct connectdata *conn)
            string etc why disabling this header is likely to not make things
            work, but we support it anyway.
         */
-        char contentType[256];
+        char *contentType;
         size_t linelength=0;
-        linelength = Curl_FormReadOneLine(contentType,
-                                          sizeof(contentType),
-                                          1,
-                                          (FILE *)&http->form);
-        if(!linelength) {
+        contentType = Curl_formpostheader((void *)&http->form,
+                                          &linelength);
+        if(!contentType) {
           failf(data, "Could not get Content-Type header line!");
           return CURLE_HTTP_POST_ERROR;
         }

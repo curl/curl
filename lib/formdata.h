@@ -65,11 +65,12 @@ size_t Curl_FormReader(char *buffer,
                        size_t nitems,
                        FILE *mydata);
 
-/* possible (old) fread() emulation that copies at most one line */
-size_t Curl_FormReadOneLine(char *buffer,
-                            size_t size,
-                            size_t nitems,
-                            FILE *mydata);
+/*
+ * Curl_formpostheader() returns the first line of the formpost, the
+ * request-header part (which is not part of the request-body like the rest of
+ * the post).
+ */
+char *Curl_formpostheader(void *formp, size_t *len);
 
 char *Curl_FormBoundary(void);
 
