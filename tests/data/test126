@@ -24,7 +24,8 @@ RETRWEIRDO
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-CWD blalbla/lululul
+CWD blalbla
+CWD lululul
 EPSV
 TYPE I
 SIZE 126

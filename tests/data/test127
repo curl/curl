@@ -21,7 +21,9 @@ ftp://%HOSTIP:%FTPPORT/path/to/file/127 --disable-epsv
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-CWD path/to/file
+CWD path
+CWD to
+CWD file
 PASV
 TYPE I
 SIZE 127

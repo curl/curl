@@ -31,7 +31,8 @@ ftp://%HOSTIP:%FTPPORT/a/path/103 -P -
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-CWD a/path
+CWD a
+CWD path
 PORT 127,0,0,1,246,33
 TYPE I
 SIZE 103

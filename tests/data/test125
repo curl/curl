@@ -24,6 +24,6 @@ REPLY CWD 314 bluah you f00l!
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-CWD path/to/file
+CWD path
 </protocol>
 </verify>

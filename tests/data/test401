@@ -25,6 +25,6 @@ DELAY CWD 15
 USER anonymous
 PASS curl_by_daniel@haxx.se
 PWD
-CWD path/to/file
+CWD path
 </protocol>
 </verify>
