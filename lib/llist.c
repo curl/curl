@@ -83,6 +83,7 @@ Curl_llist_insert_next(curl_llist *list, curl_llist_element *e, const void *p)
   return 1;
 }
 
+#if 0
 int 
 Curl_llist_insert_prev(curl_llist *list, curl_llist_element *e, const void *p)
 {
@@ -109,6 +110,7 @@ Curl_llist_insert_prev(curl_llist *list, curl_llist_element *e, const void *p)
 
   return 1;
 }
+#endif
 
 int 
 Curl_llist_remove(curl_llist *list, curl_llist_element *e, void *user)
@@ -138,6 +140,7 @@ Curl_llist_remove(curl_llist *list, curl_llist_element *e, void *user)
   return 1;
 }
 
+#if 0
 int 
 Curl_llist_remove_next(curl_llist *list, curl_llist_element *e, void *user)
 {
@@ -155,6 +158,7 @@ Curl_llist_count(curl_llist *list)
 {
   return list->size;
 }
+#endif
 
 void 
 Curl_llist_destroy(curl_llist *list, void *user)
