@@ -534,6 +534,8 @@ The first line in a request (usually containing a GET or POST) is not a header
 and cannot be replaced using this option. Only the lines following the
 request-line are headers.
 
+Pass a NULL to this to reset back to no custom headers.
+
 \fBNOTE:\fP The most commonly replaced headers have "shortcuts" in the options
 \fICURLOPT_COOKIE\fP, \fICURLOPT_USERAGENT\fP and \fICURLOPT_REFERER\fP.
 .IP CURLOPT_HTTP200ALIASES
