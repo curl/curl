@@ -24,6 +24,7 @@
 #include "setup.h"
 
 #include <string.h>
+#include <ctype.h>
 
 int curl_strequal(const char *first, const char *second)
 {

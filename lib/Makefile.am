@@ -10,9 +10,6 @@ EXTRA_DIST = getdate.y \
 
 lib_LTLIBRARIES = libcurl.la
 
-# Some flags needed when trying to cause warnings ;-)
-# CFLAGS = -DMALLOCDEBUG -g # -Wall #-pedantic
-
 INCLUDES = -I$(top_srcdir)/include
 
 

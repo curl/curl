@@ -246,7 +246,7 @@ struct connectdata {
 
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
-  int resume_from; /* continue [ftp] transfer from here */
+  ssize_t resume_from; /* continue [ftp] transfer from here */
 
   char *proxyhost; /* name of the http proxy host */
 

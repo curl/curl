@@ -41,9 +41,14 @@
 
 #else
 #ifdef WIN32
-/* include the hand-modified win32 adjusted config.h! */
+/* hand-modified win32 config.h! */
 #include "../config-win32.h"
 #endif
+#ifdef macintosh
+/* hand-modified MacOS config.h! */
+#include "config-mac.h"
+#endif
+
 #endif
 
 #ifndef __cplusplus        /* (rabe) */
