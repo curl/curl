@@ -909,6 +909,27 @@ CURLcode curl_share_set_unlock_function (curl_share *, curl_unlock_function);
 CURLcode curl_share_set_lock_data (curl_share *, void *);
 CURLcode curl_share_destroy (curl_share *);
 
+/****************************************************************************
+ * Structures for querying information about the curl library at runtime.
+ */
+
+/* declared as a struct to allow future expansion while remaining backwards
+ * and binary compatible; any new fields in these two structs must be added
+ * after the existing fields */
+typedef struct {
+  const char *protoname;
+} curl_runtime_protocol_info;
+
+typedef struct {
+  const char *version;      /* LIBCURL_VERSION */
+  unsigned int version_num; /* LIBCURL_VERSION_NUM */
+  /* protocols is terminated by an entry with a NULL protoname */
+  curl_runtime_protocol_info *protocols;
+} curl_version_info_data;
+
+/* returns a pointer to a static copy of the version info struct */
+const curl_version_info_data *curl_version_info(void);
+
 #ifdef  __cplusplus
 }
 #endif

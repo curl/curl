@@ -1832,6 +1832,9 @@ static CURLcode CreateConnection(struct SessionHandle *data,
        * is based on the first letters of the server name.
        */
 
+      /* Note: if you add a new protocol, please update the list in
+       * lib/version.c too! */
+
       if(strnequal(conn->gname, "FTP", 3)) {
         strcpy(conn->protostr, "ftp");
       }

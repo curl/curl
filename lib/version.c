@@ -105,6 +105,53 @@ char *curl_version(void)
   return version;
 }
 
+/* data for curl_version_info */
+
+static const curl_runtime_protocol_info protocols[] = {
+#ifndef CURL_DISABLE_FTP
+  { "ftp" },
+#endif
+#ifndef CURL_DISABLE_GOPHER
+  { "gopher" },
+#endif
+#ifndef CURL_DISABLE_TELNET
+  { "telnet" },
+#endif
+#ifndef CURL_DISABLE_DICT
+  { "dict" },
+#endif
+#ifndef CURL_DISABLE_LDAP
+  { "ldap" },
+#endif
+#ifndef CURL_DISABLE_HTTP
+  { "http" },
+#endif
+#ifndef CURL_DISABLE_FILE
+  { "file" },
+#endif
+
+#ifdef USE_SSLEAY
+#ifndef CURL_DISABLE_HTTP
+  { "https" },
+#endif
+#ifndef CURL_DISABLE_FTP
+  { "ftps" },
+#endif
+#endif
+  { NULL }
+};
+
+static const curl_version_info_data version_info = {
+  LIBCURL_VERSION,
+  LIBCURL_VERSION_NUM,
+  &protocols
+};
+
+const curl_version_info_data *curl_version_info(void)
+{
+  return &version_info;
+}
+
 /*
  * local variables:
  * eval: (load-file "../curl-mode.el")
