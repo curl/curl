@@ -6,6 +6,18 @@
 
                                History of Changes
 
+Daniel (1 November 2001)
+- When an FTP transfer was aborted due to a timeout, it wasn't really aware of
+  how many bytes that had been transferred and the error text always said 0
+  bytes. I modified this to output the actually transferred amount! :-)
+
+- The FTP fixes in pre7 didn't compile on IPv6 enabled hosts. Does now. I also
+  added more comments in the lib/ftp.c source file.
+
+- Minor updates to the FAQ, added a brand new section to the web site about
+  the name issue (who owns "curl"? will someone sue us? etc etc):
+  http://curl.haxx.se/legal/thename.html
+
 Version 7.9.1-pre7
 
 Daniel (31 October 2001)
