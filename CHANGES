@@ -7,6 +7,12 @@
                                   Changelog
 
 
+Daniel (2 October)
+- James MacMillan's patch makes curl build on QNC 6.2.x.
+
+Daniel (26 September)
+- My daughter was born!
+
 Daniel (23 September)
 - Added support for -4/--ipv4 and -6/--ipv6 to force names to resolve to that
   particular IP version. They only work for IPv6-enabled libcurls.
