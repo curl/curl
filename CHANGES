@@ -7,6 +7,14 @@
                                   Changelog
 
 Daniel (15 April 2004)
+- Modified runtests.pl again to remove all log files in the log/ dir between
+  each test, and then made -p display all non-zero byte files in the log dir.
+  It should make that data more usable and contain less rubbish.
+
+- ftpserver.pl now produces log files more similar to how the sws ones look
+  and they now also contains a bit more details to help debugging ftp
+  problems.
+
 - Removed the fixed maximum amount of dir levels the FTP code supported.
   Previously we had a fixed array for 100 levels, now we save space in each
   handle by allocating only for a few level by default and then enlarging that
