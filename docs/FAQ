@@ -1,4 +1,4 @@
-Updated: November 22, 2000 (http://curl.haxx.se/docs/faq.shtml)
+Updated: December 14, 2000 (http://curl.haxx.se/docs/faq.shtml)
                                   _   _ ____  _     
                               ___| | | |  _ \| |    
                              / __| | | | |_) | |    
@@ -49,6 +49,7 @@ FAQ
  5. libcurl Issues
   5.1 Is libcurl thread safe?
   5.2 How can I receive all data into a large memory chunk?
+  5.3 How do a fetch multiple files with libcurl?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -436,6 +437,11 @@ FAQ
           return realsize;
         }
 
+  5.3 How do a fetch multiple files with libcurl?
+
+  The easy interface of libcurl does not support multiple requests using the
+  same connection. The only available way to do multiple requests is to
+  init/perform/cleanup for each request.
 
 6. License Issues
 
