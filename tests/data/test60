@@ -1,0 +1,44 @@
+# Server-side
+<reply>
+<data>
+HTTP/1.0 200 OK
+Date: Thu, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<name>
+HTTP PUT from stdin with wrong content-length
+</name>
+ <command>
+http://%HOSTIP:%HOSTPORT/bzz/60 -T - -H "Content-Length: 1" < log/60.txt
+</command>
+<file name="log/60.txt">
+more than one byte
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+^User-Agent:.*
+</strip>
+<protocol>
+PUT /bzz/60 HTTP/1.1
+Host: 127.0.0.1:8999
+Pragma: no-cache
+Accept: image/gif, image/x-xbitmap, image/jpeg, image/pjpeg, */*
+Transfer-Encoding: chunked
+Content-Length: 1
+
+13
+more than one byte
+
+0
+</protocol>
+</verify>
