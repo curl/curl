@@ -1861,7 +1861,7 @@ static int handleSock5Proxy(const char *proxy_name,
   {
     struct Curl_dns_entry *dns;
     Curl_addrinfo *hp=NULL;
-    int rc = Curl_resolv(conn, conn->host.name, conn->remote_port, &dns);
+    int rc = Curl_resolv(conn, conn->host.name, (int)conn->remote_port, &dns);
 
     if(rc == CURLRESOLV_ERROR)
       return 1;
@@ -3222,7 +3222,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       conn->port =  conn->remote_port; /* it is the same port */
 
       /* Resolve target host right on */
-      rc = Curl_resolv(conn, conn->host.name, conn->port, &hostaddr);
+      rc = Curl_resolv(conn, conn->host.name, (int)conn->port, &hostaddr);
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
 
@@ -3239,7 +3239,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       fix_hostname(conn, &conn->proxy);
 
       /* resolve proxy */
-      rc = Curl_resolv(conn, conn->proxy.name, conn->port, &hostaddr);
+      rc = Curl_resolv(conn, conn->proxy.name, (int)conn->port, &hostaddr);
 
       if(rc == CURLRESOLV_PENDING)
         *async = TRUE;
