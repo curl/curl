@@ -12,7 +12,7 @@ README
   document.
 
   libcurl is a library that Curl is using to do its job. It is readily
-  available to be used by your software. Read the LIBCURL document to
+  available to be used by your software. Read the libcurl.5 man page to
   find out how!
 
   You find answers to the most frequent questions we get in the FAQ document.
