@@ -68,3 +68,40 @@ $(OBJ_DIR)\timeval.obj: ..\lib\timeval.c
 	$(CC) $[@ $(CFLAGS) -fo=$@
 	@echo .
 
+#
+# Dependencies based on "gcc -MM .."
+#
+$(OBJ_DIR)/getpass.obj: getpass.c setup.h config-win32.h ..\lib\setup.h &
+  ..\lib\config-win32.h getpass.h ..\lib\memdebug.h ..\lib\setup.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h
+
+$(OBJ_DIR)/homedir.obj: homedir.c setup.h config-win32.h ..\lib\setup.h &
+  ..\lib\config-win32.h homedir.h ..\lib\memdebug.h ..\lib\setup.h &
+  ..\include\curl\curl.h ..\include\curl\curlver.h ..\include\curl\easy.h &
+  ..\include\curl\multi.h ..\include\curl\curl.h
+
+$(OBJ_DIR)/hugehelp.obj: hugehelp.c setup.h config-win32.h ..\lib\setup.h &
+  ..\lib\config-win32.h hugehelp.h ../../../zlib-1.2.1/zlib.h &
+  ../../../zlib-1.2.1/zconf.h
+
+$(OBJ_DIR)/main.obj: main.c setup.h config-win32.h ..\lib\setup.h &
+  ..\lib\config-win32.h ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
+  urlglob.h writeout.h getpass.h homedir.h hugehelp.h version.h &
+  ..\include\curl\curlver.h ..\lib\curlx.h ..\include\curl\mprintf.h &
+  ..\lib\strequal.h ..\lib\strtoofft.h ..\lib\setup.h ..\lib\timeval.h &
+  ..\lib\memdebug.h
+
+$(OBJ_DIR)/urlglob.obj: urlglob.c setup.h config-win32.h ..\lib\setup.h &
+  ..\lib\config-win32.h ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
+  ..\include\curl\mprintf.h urlglob.h ..\lib\memdebug.h ..\lib\setup.h
+
+$(OBJ_DIR)/writeenv.obj: writeenv.c setup.h config-win32.h ..\lib\setup.h &
+  ..\lib\config-win32.h
+
+$(OBJ_DIR)/writeout.obj: writeout.c setup.h config-win32.h ..\lib\setup.h &
+  ..\lib\config-win32.h ..\include\curl\curl.h ..\include\curl\curlver.h &
+  ..\include\curl\easy.h ..\include\curl\multi.h ..\include\curl\curl.h &
+  ..\include\curl\mprintf.h writeout.h
