@@ -84,7 +84,11 @@ $(srcdir)/getdate.c: getdate.y
 $(srcdir)/ca-bundle.h: Makefile.in Makefile
 	cd $(srcdir) && \
 	echo "/* The file is generated automaticly */" > $@
+if CABUNDLE
 	echo '#define CURL_CA_BUNDLE @CURL_CA_BUNDLE@' >> $@
+else
+	echo '#undef CURL_CA_BUNDLE /* unknown */' >> $@
+endif
 
 install-data-hook:
 	@if test -n "@CURL_CA_BUNDLE@"; then \
