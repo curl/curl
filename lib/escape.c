@@ -78,7 +78,7 @@ char *curl_unescape(char *string, int length)
    char *ns = malloc(alloc);
    unsigned char in;
    int index=0;
-   int hex;
+   unsigned int hex;
    char querypart=FALSE; /* everything to the right of a '?' letter is
                             the "query part" where '+' should become ' '.
                             RFC 2316, section 3.10 */
