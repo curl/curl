@@ -18,7 +18,8 @@ the new list is returned from this function. The specified \fIstring\fP has
 been appended when this function returns. curl_slist_append() copies the
 string.
 
-The list should be freed again (after usage) with \fBcurl_slist_free_all()\fP.
+The list should be freed again (after usage) with
+\fBcurl_slist_free_all(3)\fP.
 .SH RETURN VALUE
 A null pointer is returned if anything went wrong, otherwise the new list
 pointer is returned.
@@ -34,6 +35,3 @@ pointer is returned.
  curl_slist_free_all(slist); /* free the list again */
 .SH "SEE ALSO"
 .BR curl_slist_free_all "(3), "
-.SH BUGS
-None.
-

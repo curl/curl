@@ -46,8 +46,8 @@ you must change them between the transfers.
 \fBNOTE:\fP strings passed to libcurl as 'char *' arguments, will not be
 copied by the library. Instead you should keep them available until libcurl no
 longer needs them. Failing to do so will cause very odd behavior or even
-crashes. libcurl will need them until you call curl_easy_cleanup() or you set
-the same option again to use a different pointer.
+crashes. libcurl will need them until you call \fIcurl_easy_cleanup(3)\fP or
+you set the same option again to use a different pointer.
 
 The \fIhandle\fP is the return code from a \fIcurl_easy_init(3)\fP or
 \fIcurl_easy_duphandle(3)\fP call.
@@ -329,8 +329,8 @@ user.
 .IP CURLOPT_NETRC_FILE
 Pass a char * as parameter, pointing to a zero terminated string containing
 the full path name to the file you want libcurl to use as .netrc file. If this
-option is omitted, and CURLOPT_NETRC is set, libcurl will attempt to find the
-a .netrc file in the current user's home directory. (Added in 7.10.9)
+option is omitted, and \fICURLOPT_NETRC\fP is set, libcurl will attempt to
+find the a .netrc file in the current user's home directory. (Added in 7.10.9)
 .IP CURLOPT_USERPWD
 Pass a char * as parameter, which should be [user name]:[password] to use for
 the connection. Use \fICURLOPT_HTTPAUTH\fP to decide authentication method.
@@ -544,10 +544,10 @@ cookies for this session, so if you for example follow a location it will make
 matching cookies get sent accordingly.
 
 \fBNOTE:\fP If the cookie jar file can't be created or written to (when the
-curl_easy_cleanup() is called), libcurl will not and cannot report an error
-for this. Using \fICURLOPT_VERBOSE\fP or \fICURLOPT_DEBUGFUNCTION\fP will get
-a warning to display, but that is the only visible feedback you get about this
-possibly lethal situation.
+\fIcurl_easy_cleanup(3)\fP is called), libcurl will not and cannot report an
+error for this. Using \fICURLOPT_VERBOSE\fP or \fICURLOPT_DEBUGFUNCTION\fP
+will get a warning to display, but that is the only visible feedback you get
+about this possibly lethal situation.
 .IP CURLOPT_COOKIESESSION
 Pass a long set to non-zero to mark this as a new cookie "session". It will
 force libcurl to ignore all cookies it is about to load that are "session
@@ -914,8 +914,8 @@ support only works for FTP.
 .IP CURLOPT_PRIVATE
 Pass a char * as parameter, pointing to data that should be associated with
 this curl handle.  The pointer can subsequently be retrieved using
-\fIcurl_easy_getinfo\fP with the CURLINFO_PRIVATE option. libcurl itself does
-nothing with this data. (Added in 7.10.3)
+\fIcurl_easy_getinfo(3)\fP with the CURLINFO_PRIVATE option. libcurl itself
+does nothing with this data. (Added in 7.10.3)
 .IP CURLOPT_SHARE
 Pass a share handle as a parameter. The share handle must have been created by
 a previous call to \fIcurl_share_init(3)\fP. Setting this option, will make
@@ -931,7 +931,7 @@ supports the options 'TTYPE', 'XDISPLOC' and 'NEW_ENV'. See the TELNET
 standard for details.
 .SH RETURN VALUE
 CURLE_OK (zero) means that the option was set properly, non-zero means an
-error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors.3\fP
+error occurred as \fI<curl/curl.h>\fP defines. See the \fIlibcurl-errors(3)\fP
 man page for the full list with descriptions.
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_cleanup "(3), "

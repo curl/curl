@@ -12,8 +12,8 @@ curl_easy_cleanup - End a libcurl easy session
 
 .SH DESCRIPTION
 This function must be the last function to call for an easy session. It is the
-opposite of the \fIcurl_easy_init\fP function and must be called with the same
-\fIhandle\fP as input that the curl_easy_init call returned.
+opposite of the \fIcurl_easy_init(3)\fP function and must be called with the
+same \fIhandle\fP as input that the curl_easy_init call returned.
 
 This will effectively close all connections this handle has used and possibly
 has kept open until now. Don't call this function if you intend to transfer

@@ -8,7 +8,7 @@ curl_getenv - return value for environment name
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "char *curl_getenv(const char *" name ");
+.BI "char *curl_getenv(const char *" name ");"
 .ad
 .SH DESCRIPTION
 curl_getenv() is a portable wrapper for the getenv() function, meant to
@@ -18,7 +18,7 @@ systems libcurl builds on (including win32).
 If successful, curl_getenv() returns a pointer to the value of the specified
 environment. The memory it refers to is malloc()ed why the application must
 free() this when the data has completed to serve its purpose. When
-.I curl_getenv()
+.I curl_getenv(3)
 fails to find the specified name, it returns a null pointer.
 .SH NOTE
 Under unix operating systems, there isn't any point in returning an allocated
@@ -27,6 +27,3 @@ unix implementation thus have to suffer slightly from the drawbacks of other
 systems.
 .SH "SEE ALSO"
 .BR getenv "(3C), "
-.SH BUGS
-Surely there are some, you tell me!
-

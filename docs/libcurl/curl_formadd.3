@@ -92,8 +92,8 @@ name field in the content header.
 .B CURLFORM_BUFFERPTR
 followed by a pointer to a data area, tells libcurl the address of the buffer
 containing data to upload (as indicated with \fICURLFORM_BUFFER\fP). The
-buffer containing this data must not be freed until after curl_easy_cleanup is
-called.
+buffer containing this data must not be freed until after
+\fIcurl_easy_cleanup(3)\fP is called.
 
 .B CURLFORM_BUFFERLENGTH
 followed by a long with the size of the \fICURLFORM_BUFFERPTR\fP data area,
@@ -114,9 +114,9 @@ of headers to those libcurl automatically generates. The list must exist while
 the POST occurs, if you free it before the post completes you may experience
 problems.
 
-When you've passed the HttpPost pointer to \fIcurl_easy_setopt\fP (using the
-\fICURLOPT_HTTPPOST\fP option), you must not free the list until after you've
-called \fIcurl_easy_cleanup\fP for the curl handle.
+When you've passed the HttpPost pointer to \fIcurl_easy_setopt(3)\fP (using
+the \fICURLOPT_HTTPPOST\fP option), you must not free the list until after
+you've called \fIcurl_easy_cleanup(3)\fP for the curl handle.
 
 See example below.
 .SH RETURN VALUE
@@ -207,6 +207,3 @@ defines.
 .BR curl_easy_setopt "(3), "
 .BR curl_formparse "(3) [deprecated], "
 .BR curl_formfree "(3)"
-.SH BUGS
-Surely there are some, you tell me!
-

@@ -8,31 +8,26 @@ curl_easy_perform - Perform a file transfer
 .SH SYNOPSIS
 .B #include <curl/curl.h>
 .sp
-.BI "CURLcode curl_easy_perform(CURL *" handle ");
+.BI "CURLcode curl_easy_perform(CURL *" handle ");"
 .ad
 .SH DESCRIPTION
-This function is called after the init and all the curl_easy_setopt() calls
-are made, and will perform the transfer as described in the options.
-It must be called with the same
+This function is called after the init and all the \fIcurl_easy_setopt(3)\fP
+calls are made, and will perform the transfer as described in the options.  It
+must be called with the same
 .I handle
 as input as the curl_easy_init call returned.
 
-libcurl version 7.7 or later (for older versions see below): You can do any
-amount of calls to curl_easy_perform() while using the same handle. If you
-intend to transfer more than one file, you are even encouraged to do
-so. libcurl will then attempt to re-use the same connection for the following
-transfers, thus making the operations faster, less CPU intense and using less
-network resources. Just note that you will have to use
-.I curl_easy_setopt
-between the invokes to set options for the following curl_easy_perform.
+You can do any amount of calls to \fIcurl_easy_perform(3)\fP while using the
+same handle. If you intend to transfer more than one file, you are even
+encouraged to do so. libcurl will then attempt to re-use the same connection
+for the following transfers, thus making the operations faster, less CPU
+intense and using less network resources. Just note that you will have to use
+\fIcurl_easy_setopt(3)\fP between the invokes to set options for the following
+curl_easy_perform.
 
 You must never call this function simultaneously from two places using the
 same handle. Let the function return first before invoking it another time. If
 you want parallel transfers, you must use several curl handles.
-
-Before libcurl version 7.7: You are only allowed to call this function once
-using the same handle. If you want to do repeated calls, you must call
-curl_easy_cleanup and curl_easy_init again first.
 .SH RETURN VALUE
 0 means everything was ok, non-zero means an error occurred as
 .I <curl/curl.h>
@@ -42,5 +37,4 @@ there will be a readable error message in the error buffer when non-zero is
 returned.
 .SH "SEE ALSO"
 .BR curl_easy_init "(3), " curl_easy_setopt "(3), "
-.SH BUGS
-Surely there are some, you tell me!
+

@@ -13,8 +13,8 @@ curl_easy_init - Start a libcurl easy session
 .SH DESCRIPTION
 This function must be the first function to call, and it returns a CURL easy
 handle that you must use as input to other easy-functions. curl_easy_init
-intializes curl and this call MUST have a corresponding call to
-\fIcurl_easy_cleanup\fP when the operation is complete.
+intializes curl and this call \fBMUST\fP have a corresponding call to
+\fIcurl_easy_cleanup(3)\fP when the operation is complete.
 
 .SH RETURN VALUE
 If this function returns NULL, something went wrong and you cannot use the

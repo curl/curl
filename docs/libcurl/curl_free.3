@@ -11,7 +11,8 @@ curl_free - reclaim memory that has been obtained through a libcurl call
 .BI "void curl_free( char *" ptr " );"
 .ad
 .SH DESCRIPTION
-curl_free reclaims memory that has been obtained through a libcurl call. 
-Use curl_free() instead of free() to avoid anomalies that can result from differences in memory management between your application and libcurl.
+curl_free reclaims memory that has been obtained through a libcurl call.  Use
+curl_free() instead of free() to avoid anomalies that can result from
+differences in memory management between your application and libcurl.
 .SH "SEE ALSO"
-.I curl_unescape()
+.I curl_unescape(3)
