@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1065,7 +1065,7 @@ CURLcode Curl_telnet_done(struct connectdata *conn, CURLcode status)
   return CURLE_OK;
 }
 
-CURLcode Curl_telnet(struct connectdata *conn)
+CURLcode Curl_telnet(struct connectdata *conn, bool *done)
 {
   CURLcode code;
   struct SessionHandle *data = conn->data;
@@ -1092,6 +1092,8 @@ CURLcode Curl_telnet(struct connectdata *conn)
   bool keepon = TRUE;
   char *buf = data->state.buffer;
   struct TELNET *tn;
+
+  *done = TRUE; /* uncontionally */
 
   code = init_telnet(conn);
   if(code)

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -99,7 +99,7 @@
 #ifdef CURLRES_ARES
 
 /*
- * Curl_fdset() is called when someone from the outside world (using
+ * Curl_resolv_fdset() is called when someone from the outside world (using
  * curl_multi_fdset()) wants to get our fd_set setup and we're talking with
  * ares. The caller must make sure that this function is only called when we
  * have a working ares channel.
@@ -107,10 +107,10 @@
  * Returns: CURLE_OK always!
  */
 
-CURLcode Curl_fdset(struct connectdata *conn,
-                    fd_set *read_fd_set,
-                    fd_set *write_fd_set,
-                    int *max_fdp)
+CURLcode Curl_resolv_fdset(struct connectdata *conn,
+                           fd_set *read_fd_set,
+                           fd_set *write_fd_set,
+                           int *max_fdp)
 
 {
   int max = ares_fds(conn->data->state.areschannel,

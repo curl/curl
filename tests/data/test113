@@ -21,7 +21,7 @@ REPLY USER 314 bluah you fewl!
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-12
+67
 </errorcode>
 <protocol>
 USER anonymous

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -85,7 +85,7 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-CURLcode Curl_dict(struct connectdata *conn)
+CURLcode Curl_dict(struct connectdata *conn, bool *done)
 {
   char *word;
   char *ppath;
@@ -99,6 +99,8 @@ CURLcode Curl_dict(struct connectdata *conn)
 
   char *path = conn->path;
   curl_off_t *bytecount = &conn->bytecount;
+
+  *done = TRUE; /* unconditionally */
 
   if(conn->bits.user_passwd) {
     /* AUTH is missing */

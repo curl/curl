@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1989,41 +1989,117 @@ static void verboseconnect(struct connectdata *conn)
         conn->ip_addr_str, conn->port);
 }
 
+CURLcode Curl_protocol_fdset(struct connectdata *conn,
+                             fd_set *read_fd_set,
+                             fd_set *write_fd_set,
+                             int *max_fdp)
+{
+  CURLcode res = CURLE_OK;
+  if(conn->curl_proto_fdset)
+    res = conn->curl_proto_fdset(conn, read_fd_set, write_fd_set, max_fdp);
+  return res;
+}
+
+CURLcode Curl_doing_fdset(struct connectdata *conn,
+                          fd_set *read_fd_set,
+                          fd_set *write_fd_set,
+                          int *max_fdp)
+{
+  CURLcode res = CURLE_OK;
+  if(conn && conn->curl_doing_fdset)
+    res = conn->curl_doing_fdset(conn, read_fd_set, write_fd_set, max_fdp);
+  return res;
+}
+
+/*
+ * We are doing protocol-specific connecting and this is being called over and
+ * over from the multi interface until the connection phase is done on
+ * protocol layer.
+ */
+
+CURLcode Curl_protocol_connecting(struct connectdata *conn, bool *done)
+{
+  CURLcode result=CURLE_OK;
+
+  if(conn && conn->curl_connecting) {
+    *done = FALSE;
+    result = conn->curl_connecting(conn, done);
+  }
+  else
+    *done = TRUE;
+
+  return result;
+}
+
+/*
+ * We are DOING this is being called over and over from the multi interface
+ * until the DOING phase is done on protocol layer.
+ */
+
+CURLcode Curl_protocol_doing(struct connectdata *conn, bool *done)
+{
+  CURLcode result=CURLE_OK;
+
+  if(conn && conn->curl_doing) {
+    *done = FALSE;
+    result = conn->curl_doing(conn, done);
+  }
+  else
+    *done = TRUE;
+
+  return result;
+}
+
 /*
  * We have discovered that the TCP connection has been successful, we can now
  * proceed with some action.
  *
- * If we're using the multi interface, this host address pointer is most
- * likely NULL at this point as we can't keep the resolved info around. This
- * may call for some reworking, like a reference counter in the struct or
- * something.
  */
-CURLcode Curl_protocol_connect(struct connectdata *conn)
+CURLcode Curl_protocol_connect(struct connectdata *conn, bool *protocol_done)
 {
   struct SessionHandle *data = conn->data;
   CURLcode result=CURLE_OK;
 
-  if(conn->bits.tcpconnect)
+  *protocol_done = FALSE;
+
+  if(conn->bits.tcpconnect && conn->bits.protoconnstart) {
     /* We already are connected, get back. This may happen when the connect
        worked fine in the first call, like when we connect to a local server
-       or proxy. */
+       or proxy. Note that we don't know if the protocol is actually done.
+
+       Unless this protocol doesn't have any protocol-connect callback, as
+       then we know we're done. */
+    if(!conn->curl_connecting)
+      *protocol_done = TRUE;
+
     return CURLE_OK;
+  }
 
-  Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
+  if(!conn->bits.tcpconnect) {
 
-  if(data->set.verbose)
-    verboseconnect(conn);
+    Curl_pgrsTime(data, TIMER_CONNECT); /* connect done */
 
-  if(conn->curl_connect) {
-    /* is there a protocol-specific connect() procedure? */
+    if(data->set.verbose)
+      verboseconnect(conn);
+  }
 
-    /* set start time here for timeout purposes in the
-     * connect procedure, it is later set again for the
-     * progress meter purpose */
-    conn->now = Curl_tvnow();
+  if(!conn->bits.protoconnstart) {
+    if(conn->curl_connect) {
+      /* is there a protocol-specific connect() procedure? */
 
-    /* Call the protocol-specific connect function */
-    result = conn->curl_connect(conn);
+      /* Set start time here for timeout purposes in the connect procedure, it
+         is later set again for the progress meter purpose */
+      conn->now = Curl_tvnow();
+
+      /* Call the protocol-specific connect function */
+      result = conn->curl_connect(conn, protocol_done);
+    }
+    else
+      *protocol_done = TRUE;
+
+    /* it has started, possibly even completed but that knowledge isn't stored
+       in this bit! */
+    conn->bits.protoconnstart = TRUE;
   }
 
   return result; /* pass back status */
@@ -2733,6 +2809,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       conn->curl_do_more = Curl_ftp_nextconnect;
       conn->curl_done = Curl_ftp_done;
       conn->curl_connect = Curl_ftp_connect;
+      conn->curl_connecting = Curl_ftp_multi_statemach;
+      conn->curl_doing = Curl_ftp_doing;
+      conn->curl_proto_fdset = Curl_ftp_fdset;
+      conn->curl_doing_fdset = Curl_ftp_fdset;
       conn->curl_disconnect = Curl_ftp_disconnect;
     }
 
@@ -3385,17 +3465,21 @@ static CURLcode CreateConnection(struct SessionHandle *data,
  */
 
 static CURLcode SetupConnection(struct connectdata *conn,
-                                struct Curl_dns_entry *hostaddr)
+                                struct Curl_dns_entry *hostaddr,
+                                bool *protocol_done)
 {
   struct SessionHandle *data = conn->data;
   CURLcode result=CURLE_OK;
 
   Curl_pgrsTime(data, TIMER_NAMELOOKUP);
 
-  if(conn->protocol & PROT_FILE)
+  if(conn->protocol & PROT_FILE) {
     /* There's nothing in this function to setup if we're only doing
        a file:// transfer */
+    *protocol_done = TRUE;
     return result;
+  }
+  *protocol_done = FALSE; /* default to not done */
 
   /*************************************************************
    * Send user-agent to HTTP proxies even if the target protocol
@@ -3416,13 +3500,13 @@ static CURLcode SetupConnection(struct connectdata *conn,
   conn->headerbytecount = 0;
 
   if(CURL_SOCKET_BAD == conn->sock[FIRSTSOCKET]) {
-    bool connected;
+    bool connected = FALSE;
 
     /* Connect only if not already connected! */
     result = ConnectPlease(conn, hostaddr, &connected);
 
     if(connected) {
-      result = Curl_protocol_connect(conn);
+      result = Curl_protocol_connect(conn, protocol_done);
       if(CURLE_OK == result)
         conn->bits.tcpconnect = TRUE;
     }
@@ -3436,6 +3520,7 @@ static CURLcode SetupConnection(struct connectdata *conn,
   else {
     Curl_pgrsTime(data, TIMER_CONNECT); /* we're connected already */
     conn->bits.tcpconnect = TRUE;
+    *protocol_done = TRUE;
     if(data->set.verbose)
       verboseconnect(conn);
   }
@@ -3460,7 +3545,8 @@ static CURLcode SetupConnection(struct connectdata *conn,
 
 CURLcode Curl_connect(struct SessionHandle *data,
                       struct connectdata **in_connect,
-                      bool *asyncp)
+                      bool *asyncp,
+                      bool *protocol_done)
 {
   CURLcode code;
   struct Curl_dns_entry *dns;
@@ -3476,7 +3562,7 @@ CURLcode Curl_connect(struct SessionHandle *data,
       /* If an address is available it means that we already have the name
          resolved, OR it isn't async.
          If so => continue connecting from here */
-      code = SetupConnection(*in_connect, dns);
+      code = SetupConnection(*in_connect, dns, protocol_done);
     /* else
          response will be received and treated async wise */
   }
@@ -3494,12 +3580,16 @@ CURLcode Curl_connect(struct SessionHandle *data,
 }
 
 /* Call this function after Curl_connect() has returned async=TRUE and
-   then a successful name resolve has been received */
-CURLcode Curl_async_resolved(struct connectdata *conn)
+   then a successful name resolve has been received.
+
+   Note: this function disconnects and frees the conn data in case of
+   resolve failure */
+CURLcode Curl_async_resolved(struct connectdata *conn,
+                             bool *protocol_done)
 {
 #if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
     defined(USE_THREADING_GETADDRINFO)
-  CURLcode code = SetupConnection(conn, conn->async.dns);
+  CURLcode code = SetupConnection(conn, conn->async.dns, protocol_done);
 
   if(code)
     /* We're not allowed to return failure with memory left allocated
@@ -3573,7 +3663,7 @@ CURLcode Curl_done(struct connectdata **connp,
   return result;
 }
 
-CURLcode Curl_do(struct connectdata **connp)
+CURLcode Curl_do(struct connectdata **connp, bool *done)
 {
   CURLcode result=CURLE_OK;
   struct connectdata *conn = *connp;
@@ -3583,7 +3673,7 @@ CURLcode Curl_do(struct connectdata **connp)
 
   if(conn->curl_do) {
     /* generic protocol-specific function pointer set in curl_connect() */
-    result = conn->curl_do(conn);
+    result = conn->curl_do(conn, done);
 
     /* This was formerly done in transfer.c, but we better do it here */
 
@@ -3603,8 +3693,10 @@ CURLcode Curl_do(struct connectdata **connp)
 
       if(CURLE_OK == result) {
         bool async;
+        bool protocol_done = TRUE;
+
         /* Now, redo the connect and get a new connection */
-        result = Curl_connect(data, connp, &async);
+        result = Curl_connect(data, connp, &async, &protocol_done);
         if(CURLE_OK == result) {
           /* We have connected or sent away a name resolve query fine */
 
@@ -3617,13 +3709,13 @@ CURLcode Curl_do(struct connectdata **connp)
               return result;
 
             /* Resolved, continue with the connection */
-            result = Curl_async_resolved(conn);
+            result = Curl_async_resolved(conn, &protocol_done);
             if(result)
               return result;
           }
 
           /* ... finally back to actually retry the DO phase */
-          result = conn->curl_do(conn);
+          result = conn->curl_do(conn, done);
         }
       }
     }

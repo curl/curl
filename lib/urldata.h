@@ -243,6 +243,42 @@ struct HTTP {
 /****************************************************************************
  * FTP unique setup
  ***************************************************************************/
+typedef enum {
+  FTP_STOP,    /* do nothing state, stops the state machine */
+  FTP_WAIT220, /* waiting for the inintial 220 response immediately after
+                  a connect */
+  FTP_AUTH,
+  FTP_USER,
+  FTP_PASS,
+  FTP_ACCT,
+  FTP_PBSZ,
+  FTP_PROT,
+  FTP_PWD,
+  FTP_QUOTE, /* waiting for a response to a command sent in a quote list */
+  FTP_RETR_PREQUOTE,
+  FTP_STOR_PREQUOTE,
+  FTP_POSTQUOTE,
+  FTP_CWD,  /* change dir */
+  FTP_MKD,  /* if the dir didn't exist */
+  FTP_MDTM, /* to figure out the datestamp */
+  FTP_TYPE, /* to set type when doing a head-like request */
+  FTP_LIST_TYPE, /* set type when about to do a dir list */
+  FTP_RETR_TYPE, /* set type when about to RETR a file */
+  FTP_STOR_TYPE, /* set type when about to STOR a file */
+  FTP_SIZE, /* get the remote file's size for head-like request */
+  FTP_RETR_SIZE, /* get the remote file's size for RETR */
+  FTP_STOR_SIZE, /* get the size for (resumed) STOR */
+  FTP_REST, /* when used to check if the server supports it in head-like */
+  FTP_RETR_REST, /* when asking for "resume" in for RETR */
+  FTP_PORT, /* generic state for PORT, LPRT and EPRT, check count1 */
+  FTP_PASV, /* generic state for PASV and EPSV, check count1 */
+  FTP_LIST, /* generic state for LIST, NLST or a custom list command */
+  FTP_RETR,
+  FTP_STOR, /* generic state for STOR and APPE */
+  FTP_QUIT,
+  FTP_LAST  /* never used */
+} ftpstate;
+
 struct FTP {
   curl_off_t *bytecountp;
   char *user;    /* user name string */
@@ -271,6 +307,18 @@ struct FTP {
   bool cwddone;     /* if it has been determined that the proper CWD combo
                        already has been done */
   char *prevpath;   /* conn->path from the previous transfer */
+  size_t nread_resp; /* number of bytes currently read of a server response */
+  int count1; /* general purpose counter for the state machine */
+  int count2; /* general purpose counter for the state machine */
+  int count3; /* general purpose counter for the state machine */
+  char *sendthis; /* allocated pointer to a buffer that is to be sent to the
+                     ftp server */
+  size_t sendleft; /* number of bytes left to send from the sendthis buffer */
+  size_t sendsize; /* total size of the sendthis buffer */
+  struct timeval response; /* set to Curl_tvnow() when a command has been sent
+                              off, used to time-out response reading */
+  ftpstate state; /* always use ftp.c:state() to change state! */
+  curl_off_t downloadsize;
 };
 
 /****************************************************************************
@@ -309,9 +357,12 @@ struct ConnectBits {
   bool forbidchunk;   /* used only to explicitly forbid chunk-upload for
                          specific upload buffers. See readmoredata() in
                          http.c for details. */
-  bool tcpconnect;    /* the tcp stream (or simimlar) is connected, this
-                         is set the first time on the first connect function
-                         call */
+
+  bool tcpconnect;    /* the TCP layer (or simimlar) is connected, this is set
+                         the first time on the first connect function call */
+  bool protoconnstart;/* the protocol layer has STARTED its operation after
+                         the TCP layer connect */
+
   bool retry;         /* this connection is about to get closed and then
                          re-attempted at another connection. */
   bool no_body;       /* CURLOPT_NO_BODY (or similar) was set */
@@ -510,7 +561,7 @@ struct connectdata {
 
   /* These two functions MUST be set by the curl_connect() function to be
      be protocol dependent */
-  CURLcode (*curl_do)(struct connectdata *);
+  CURLcode (*curl_do)(struct connectdata *, bool *done);
   CURLcode (*curl_done)(struct connectdata *, CURLcode);
 
   /* If the curl_do() function is better made in two halves, this
@@ -521,8 +572,29 @@ struct connectdata {
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * after the connect() and everything is done, as a step in the connection.
+   * The 'done' pointer points to a bool that should be set to TRUE if the
+   * function completes before return. If it doesn't complete, the caller
+   * should call the curl_connecting() function until it is.
    */
-  CURLcode (*curl_connect)(struct connectdata *);
+  CURLcode (*curl_connect)(struct connectdata *, bool *done);
+
+  /* See above. Currently only used for FTP. */
+  CURLcode (*curl_connecting)(struct connectdata *, bool *done);
+  CURLcode (*curl_doing)(struct connectdata *, bool *done);
+
+  /* Called from the multi interface during the PROTOCONNECT phase, and it
+     should then return a proper fd set */
+  CURLcode (*curl_proto_fdset)(struct connectdata *conn,
+                               fd_set *read_fd_set,
+                               fd_set *write_fd_set,
+                               int *max_fdp);
+
+  /* Called from the multi interface during the DOING phase, and it should
+     then return a proper fd set */
+  CURLcode (*curl_doing_fdset)(struct connectdata *conn,
+                               fd_set *read_fd_set,
+                               fd_set *write_fd_set,
+                               int *max_fdp);
 
   /* This function *MAY* be set to a protocol-dependent function that is run
    * by the curl_disconnect(), as a step in the disconnection.

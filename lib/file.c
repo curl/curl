@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -266,7 +266,7 @@ static CURLcode file_upload(struct connectdata *conn)
  * opposed to sockets) we instead perform the whole do-operation in this
  * function.
  */
-CURLcode Curl_file(struct connectdata *conn)
+CURLcode Curl_file(struct connectdata *conn, bool *done)
 {
   /* This implementation ignores the host name in conformance with
      RFC 1738. Only local files (reachable via the standard file system)
@@ -285,6 +285,8 @@ CURLcode Curl_file(struct connectdata *conn)
   curl_off_t bytecount = 0;
   int fd;
   struct timeval now = Curl_tvnow();
+
+  *done = TRUE; /* unconditionally */
 
   Curl_readwrite_init(conn);
   Curl_initinfo(data);

@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -1222,7 +1222,7 @@ CURLcode Curl_ConnectHTTPProxyTunnel(struct connectdata *conn,
  * Curl_http_connect() performs HTTP stuff to do at connect-time, called from
  * the generic Curl_connect().
  */
-CURLcode Curl_http_connect(struct connectdata *conn)
+CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
 {
   struct SessionHandle *data;
   CURLcode result;
@@ -1260,6 +1260,8 @@ CURLcode Curl_http_connect(struct connectdata *conn)
 
     data->state.first_host = strdup(conn->host.name);
   }
+
+  *done = TRUE;
 
   return CURLE_OK;
 }
@@ -1328,7 +1330,7 @@ CURLcode Curl_http_done(struct connectdata *conn,
  * request is to be performed. This creates and sends a properly constructed
  * HTTP request.
  */
-CURLcode Curl_http(struct connectdata *conn)
+CURLcode Curl_http(struct connectdata *conn, bool *done)
 {
   struct SessionHandle *data=conn->data;
   char *buf = data->state.buffer; /* this is a short cut to the buffer */
@@ -1341,6 +1343,11 @@ CURLcode Curl_http(struct connectdata *conn)
   char *request;
   Curl_HttpReq httpreq = data->set.httpreq;
   char *addcookies = NULL;
+
+  /* Always consider the DO phase done after this function call, even if there
+     may be parts of the request that is not yet sent, since we can deal with
+     the rest of the request in the PERFORM phase. */
+  *done = TRUE;
 
   if(!conn->proto.http) {
     /* Only allocate this struct if we don't already have it! */

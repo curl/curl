@@ -27,5 +27,4 @@
  * Prototypes for library-wide functions provided by multi.c
  */
 void Curl_multi_rmeasy(void *multi, CURL *data);
-
 #endif /* __MULTIIF_H */

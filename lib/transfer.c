@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -2027,9 +2027,11 @@ Curl_connect_host(struct SessionHandle *data,
 
   do {
     bool async;
+    bool protocol_done=TRUE; /* will be TRUE always since this is only used
+                                within the easy interface */
     Curl_pgrsTime(data, TIMER_STARTSINGLE);
     data->change.url_changed = FALSE;
-    res = Curl_connect(data, conn, &async);
+    res = Curl_connect(data, conn, &async, &protocol_done);
 
     if((CURLE_OK == res) && async) {
       /* Now, if async is TRUE here, we need to wait for the name
@@ -2037,8 +2039,9 @@ Curl_connect_host(struct SessionHandle *data,
       res = Curl_wait_for_resolv(*conn, NULL);
       if(CURLE_OK == res)
         /* Resolved, continue with the connection */
-        res = Curl_async_resolved(*conn);
+        res = Curl_async_resolved(*conn, &protocol_done);
       else
+        /* if we can't resolve, we kill this "connection" now */
         (void)Curl_disconnect(*conn);
     }
     if(res)
@@ -2126,8 +2129,8 @@ CURLcode Curl_perform(struct SessionHandle *data)
     }
 
     if(res == CURLE_OK) {
-
-      res = Curl_do(&conn);
+      bool do_done;
+      res = Curl_do(&conn, &do_done);
 
       /* for non 3rd party transfer only */
       if(res == CURLE_OK && !data->set.source_url) {

@@ -9,7 +9,6 @@ int test(char *URL)
   curl_easy_setopt(curl, CURLOPT_NOBODY, 1);
   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
   res = curl_easy_perform(curl);
-  curl_easy_cleanup(curl);  
+  curl_easy_cleanup(curl);
   return (int)res;
 }
-

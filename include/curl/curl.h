@@ -245,7 +245,9 @@ typedef enum {
   CURLE_COULDNT_RESOLVE_HOST,    /* 6 */
   CURLE_COULDNT_CONNECT,         /* 7 */
   CURLE_FTP_WEIRD_SERVER_REPLY,  /* 8 */
-  CURLE_FTP_ACCESS_DENIED,       /* 9 */
+  CURLE_FTP_ACCESS_DENIED,       /* 9 a service was denied by the FTP server
+                                    due to lack of access - when login fails
+                                    this is not returned. */
   CURLE_FTP_USER_PASSWORD_INCORRECT, /* 10 */
   CURLE_FTP_WEIRD_PASS_REPLY,    /* 11 */
   CURLE_FTP_WEIRD_USER_REPLY,    /* 12 */
@@ -305,6 +307,8 @@ typedef enum {
   CURLE_SEND_FAIL_REWIND,        /* 65 - Sending the data requires a rewind
                                     that failed */
   CURLE_SSL_ENGINE_INITFAILED,   /* 66 - failed to initialise ENGINE */
+  CURLE_LOGIN_DENIED,            /* 67 - user, password or similar was not
+                                    accepted and we failed to login */
   CURL_LAST /* never use! */
 } CURLcode;
 

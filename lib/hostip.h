@@ -159,13 +159,13 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
 CURLcode Curl_wait_for_resolv(struct connectdata *conn,
                               struct Curl_dns_entry **dnsentry);
 
-/* Curl_fdset() is a generic function that exists in multiple versions
+/* Curl_resolv_fdset() is a generic function that exists in multiple versions
    depending on what name resolve technology we've built to use. The function
    is called from the curl_multi_fdset() function */
-CURLcode Curl_fdset(struct connectdata *conn,
-                    fd_set *read_fd_set,
-                    fd_set *write_fd_set,
-                    int *max_fdp);
+CURLcode Curl_resolv_fdset(struct connectdata *conn,
+                           fd_set *read_fd_set,
+                           fd_set *write_fd_set,
+                           int *max_fdp);
 /* unlock a previously resolved dns entry */
 void Curl_resolv_unlock(struct SessionHandle *data, struct Curl_dns_entry *dns);
 

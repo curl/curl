@@ -21,7 +21,7 @@ REPLY PASS 314 bluah you f00l!
 # Verify data after the test has been "shot"
 <verify>
 <errorcode>
-11
+67
 </errorcode>
 <protocol>
 USER anonymous

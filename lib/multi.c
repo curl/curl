@@ -45,6 +45,7 @@
 #include "memory.h"
 #include "easyif.h"
 #include "multiif.h"
+#include "sendf.h"
 
 /* The last #include file should be: */
 #include "memdebug.h"
@@ -56,11 +57,14 @@ struct Curl_message {
 };
 
 typedef enum {
-  CURLM_STATE_INIT,
+  CURLM_STATE_INIT,        /* start in this state */
   CURLM_STATE_CONNECT,     /* resolve/connect has been sent off */
-  CURLM_STATE_WAITRESOLVE, /* we're awaiting the resolve to finalize */
-  CURLM_STATE_WAITCONNECT, /* we're awaiting the connect to finalize */
-  CURLM_STATE_DO,          /* send off the request (part 1) */
+  CURLM_STATE_WAITRESOLVE, /* awaiting the resolve to finalize */
+  CURLM_STATE_WAITCONNECT, /* awaiting the connect to finalize */
+  CURLM_STATE_PROTOCONNECT, /* completing the protocol-specific connect
+                               phase */
+  CURLM_STATE_DO,          /* start send off the request (part 1) */
+  CURLM_STATE_DOING,       /* sending off the request (part 1) */
   CURLM_STATE_DO_MORE,     /* send off the request (part 2) */
   CURLM_STATE_PERFORM,     /* transfer data */
   CURLM_STATE_DONE,        /* post data transfer operation */
@@ -111,6 +115,33 @@ struct Curl_multi {
   struct curl_hash *hostcache;
 };
 
+/* always use this function to change state, to make debugging easier */
+static void multistate(struct Curl_one_easy *easy, CURLMstate state)
+{
+#ifdef CURLDEBUG
+  const char *statename[]={
+    "INIT",
+    "CONNECT",
+    "WAITRESOLVE",
+    "WAITCONNECT",
+    "PROTOCONNECT",
+    "DO",
+    "DOING",
+    "DO_MORE",
+    "PERFORM",
+    "DONE",
+    "COMPLETED",
+  };
+  CURLMstate oldstate = easy->state;
+#endif
+  easy->state = state;
+
+#ifdef CURLDEBUG
+  infof(easy->easy_handle,
+        "STATE: %s => %s handle %p: \n",
+        statename[oldstate], statename[easy->state], (char *)easy);
+#endif
+}
 
 CURLM *curl_multi_init(void)
 {
@@ -158,7 +189,7 @@ CURLMcode curl_multi_add_handle(CURLM *multi_handle,
 
   /* set the easy handle */
   easy->easy_handle = easy_handle;
-  easy->state = CURLM_STATE_INIT;
+  multistate(easy, CURLM_STATE_INIT);
 
   /* for multi interface connections, we share DNS cache automaticly */
   easy->easy_handle->hostcache = multi->hostcache;
@@ -258,7 +289,22 @@ CURLMcode curl_multi_fdset(CURLM *multi_handle,
       break;
     case CURLM_STATE_WAITRESOLVE:
       /* waiting for a resolve to complete */
-      Curl_fdset(easy->easy_conn, read_fd_set, write_fd_set, &this_max_fd);
+      Curl_resolv_fdset(easy->easy_conn, read_fd_set, write_fd_set,
+                        &this_max_fd);
+      if(this_max_fd > *max_fd)
+        *max_fd = this_max_fd;
+      break;
+
+    case CURLM_STATE_PROTOCONNECT:
+      Curl_protocol_fdset(easy->easy_conn, read_fd_set, write_fd_set,
+                          &this_max_fd);
+      if(this_max_fd > *max_fd)
+        *max_fd = this_max_fd;
+      break;
+
+    case CURLM_STATE_DOING:
+      Curl_doing_fdset(easy->easy_conn, read_fd_set, write_fd_set,
+                       &this_max_fd);
       if(this_max_fd > *max_fd)
         *max_fd = this_max_fd;
       break;
@@ -318,6 +364,8 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
   struct Curl_message *msg = NULL;
   bool connected;
   bool async;
+  bool protocol_connect;
+  bool dophase_done;
 
   *running_handles = 0; /* bump this once for every living handle */
 
@@ -326,10 +374,6 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
   easy=multi->easy.next;
   while(easy) {
-#if 0
-    fprintf(stderr, "HANDLE %p: State: %x\n",
-            (char *)easy, easy->state);
-#endif
     do {
       if (CURLM_STATE_WAITCONNECT <= easy->state &&
           easy->state <= CURLM_STATE_DO &&
@@ -344,13 +388,13 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
             easy->easy_handle->change.url_changed = FALSE;
             easy->result = Curl_follow(easy->easy_handle, gotourl, FALSE);
             if(CURLE_OK == easy->result)
-              easy->state = CURLM_STATE_CONNECT;
+              multistate(easy, CURLM_STATE_CONNECT);
             else
               free(gotourl);
           }
           else {
             easy->result = CURLE_OUT_OF_MEMORY;
-            easy->state = CURLM_STATE_COMPLETED;
+            multistate(easy, CURLM_STATE_COMPLETED);
             break;
           }
         }
@@ -365,7 +409,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
         if(CURLE_OK == easy->result) {
           /* after init, go CONNECT */
-          easy->state = CURLM_STATE_CONNECT;
+          multistate(easy, CURLM_STATE_CONNECT);
           result = CURLM_CALL_MULTI_PERFORM;
 
           easy->easy_handle->state.used_interface = Curl_if_multi;
@@ -376,16 +420,22 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         /* Connect. We get a connection identifier filled in. */
         Curl_pgrsTime(easy->easy_handle, TIMER_STARTSINGLE);
         easy->result = Curl_connect(easy->easy_handle, &easy->easy_conn,
-                                    &async);
+                                    &async, &protocol_connect);
 
         if(CURLE_OK == easy->result) {
           if(async)
             /* We're now waiting for an asynchronous name lookup */
-            easy->state = CURLM_STATE_WAITRESOLVE;
+            multistate(easy, CURLM_STATE_WAITRESOLVE);
           else {
-            /* after the connect has been sent off, go WAITCONNECT */
-            easy->state = CURLM_STATE_WAITCONNECT;
+            /* after the connect has been sent off, go WAITCONNECT unless the
+               protocol connect is already done and we can go directly to
+               DO! */
             result = CURLM_CALL_MULTI_PERFORM;
+
+            if(protocol_connect)
+              multistate(easy, CURLM_STATE_DO);
+            else
+              multistate(easy, CURLM_STATE_WAITCONNECT);
           }
         }
         break;
@@ -401,14 +451,17 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         if(dns) {
           /* Perform the next step in the connection phase, and then move on
              to the WAITCONNECT state */
-          easy->result = Curl_async_resolved(easy->easy_conn);
+          easy->result = Curl_async_resolved(easy->easy_conn,
+                                             &protocol_connect);
 
           if(CURLE_OK != easy->result)
             /* if Curl_async_resolved() returns failure, the connection struct
                is already freed and gone */
             easy->easy_conn = NULL;           /* no more connection */
-
-          easy->state = CURLM_STATE_WAITCONNECT;
+          else {
+            /* FIX: what if protocol_connect is TRUE here?! */
+            multistate(easy, CURLM_STATE_WAITCONNECT);
+          }
         }
 
         if(CURLE_OK != easy->result) {
@@ -425,7 +478,8 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         easy->result = Curl_is_connected(easy->easy_conn, FIRSTSOCKET,
                                          &connected);
         if(connected)
-          easy->result = Curl_protocol_connect(easy->easy_conn);
+          easy->result = Curl_protocol_connect(easy->easy_conn,
+                                               &protocol_connect);
 
         if(CURLE_OK != easy->result) {
           /* failure detected */
@@ -435,29 +489,64 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         }
 
         if(connected) {
+          if(!protocol_connect) {
+            /* We have a TCP connection, but 'protocol_connect' may be false
+               and then we continue to 'STATE_PROTOCONNECT'. If protocol
+               connect is TRUE, we move on to STATE_DO. */
+            multistate(easy, CURLM_STATE_PROTOCONNECT);
+            fprintf(stderr, "WAITCONNECT => PROTOCONNECT\n");
+          }
+          else {
+            /* after the connect has completed, go DO */
+            multistate(easy, CURLM_STATE_DO);
+            result = CURLM_CALL_MULTI_PERFORM;
+          }
+        }
+        break;
+
+      case CURLM_STATE_PROTOCONNECT:
+        /* protocol-specific connect phase */
+        easy->result = Curl_protocol_connecting(easy->easy_conn,
+                                                &protocol_connect);
+        if(protocol_connect) {
           /* after the connect has completed, go DO */
-          easy->state = CURLM_STATE_DO;
+          multistate(easy, CURLM_STATE_DO);
           result = CURLM_CALL_MULTI_PERFORM;
+        }
+        else if(easy->result) {
+          /* failure detected */
+          Curl_posttransfer(easy->easy_handle);
+          Curl_done(&easy->easy_conn, easy->result);
+          Curl_disconnect(easy->easy_conn); /* close the connection */
+          easy->easy_conn = NULL;           /* no more connection */
         }
         break;
 
       case CURLM_STATE_DO:
-        /* Do the fetch or put request */
-        easy->result = Curl_do(&easy->easy_conn);
+        /* Perform the protocol's DO action */
+        easy->result = Curl_do(&easy->easy_conn, &dophase_done);
+
         if(CURLE_OK == easy->result) {
 
-          /* after do, go PERFORM... or DO_MORE */
-          if(easy->easy_conn->bits.do_more) {
+          if(!dophase_done) {
+            /* DO was not completed in one function call, we must continue
+               DOING... */
+            multistate(easy, CURLM_STATE_DOING);
+            result = CURLM_OK;
+          }
+
+          /* after DO, go PERFORM... or DO_MORE */
+          else if(easy->easy_conn->bits.do_more) {
             /* we're supposed to do more, but we need to sit down, relax
                and wait a little while first */
-            easy->state = CURLM_STATE_DO_MORE;
+            multistate(easy, CURLM_STATE_DO_MORE);
             result = CURLM_OK;
           }
           else {
             /* we're done with the DO, now PERFORM */
             easy->result = Curl_readwrite_init(easy->easy_conn);
             if(CURLE_OK == easy->result) {
-              easy->state = CURLM_STATE_PERFORM;
+              multistate(easy, CURLM_STATE_PERFORM);
               result = CURLM_CALL_MULTI_PERFORM;
             }
           }
@@ -471,10 +560,39 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
         }
         break;
 
+      case CURLM_STATE_DOING:
+        /* we continue DOING until the DO phase is complete */
+        easy->result = Curl_protocol_doing(easy->easy_conn, &dophase_done);
+        if(CURLE_OK == easy->result) {
+          if(dophase_done) {
+            /* after DO, go PERFORM... or DO_MORE */
+            if(easy->easy_conn->bits.do_more) {
+              /* we're supposed to do more, but we need to sit down, relax
+                 and wait a little while first */
+              multistate(easy, CURLM_STATE_DO_MORE);
+              result = CURLM_OK;
+            }
+            else {
+              /* we're done with the DO, now PERFORM */
+              easy->result = Curl_readwrite_init(easy->easy_conn);
+              if(CURLE_OK == easy->result) {
+                multistate(easy, CURLM_STATE_PERFORM);
+                result = CURLM_CALL_MULTI_PERFORM;
+              }
+            }
+          } /* dophase_done */
+        }
+        else {
+          /* failure detected */
+          Curl_posttransfer(easy->easy_handle);
+          Curl_done(&easy->easy_conn, easy->result);
+          Curl_disconnect(easy->easy_conn); /* close the connection */
+          easy->easy_conn = NULL;           /* no more connection */
+        }
+        break;
+
       case CURLM_STATE_DO_MORE:
-        /*
-         * First, check if we really are ready to do more.
-         */
+        /* Ready to do more? */
         easy->result = Curl_is_connected(easy->easy_conn, SECONDARYSOCKET,
                                          &connected);
         if(connected) {
@@ -487,7 +605,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
             easy->result = Curl_readwrite_init(easy->easy_conn);
 
           if(CURLE_OK == easy->result) {
-            easy->state = CURLM_STATE_PERFORM;
+            multistate(easy, CURLM_STATE_PERFORM);
             result = CURLM_CALL_MULTI_PERFORM;
           }
         }
@@ -532,7 +650,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
             if(easy->result == CURLE_OK)
               easy->result = Curl_follow(easy->easy_handle, newurl, retry);
             if(CURLE_OK == easy->result) {
-              easy->state = CURLM_STATE_CONNECT;
+              multistate(easy, CURLM_STATE_CONNECT);
               result = CURLM_CALL_MULTI_PERFORM;
             }
             else
@@ -542,7 +660,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
           }
           else {
             /* after the transfer is done, go DONE */
-            easy->state = CURLM_STATE_DONE;
+            multistate(easy, CURLM_STATE_DONE);
             result = CURLM_CALL_MULTI_PERFORM;
           }
         }
@@ -553,7 +671,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
         /* after we have DONE what we're supposed to do, go COMPLETED, and
            it doesn't matter what the Curl_done() returned! */
-        easy->state = CURLM_STATE_COMPLETED;
+        multistate(easy, CURLM_STATE_COMPLETED);
         break;
 
       case CURLM_STATE_COMPLETED:
@@ -571,7 +689,7 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
           /*
            * If an error was returned, and we aren't in completed state now,
            * then we go to completed and consider this transfer aborted.  */
-          easy->state = CURLM_STATE_COMPLETED;
+          multistate(easy, CURLM_STATE_COMPLETED);
         }
         else
           /* this one still lives! */
@@ -600,7 +718,6 @@ CURLMcode curl_multi_perform(CURLM *multi_handle, int *running_handles)
 
       multi->num_msgs++; /* increase message counter */
     }
-
     easy = easy->next; /* operate on next handle */
   }
 

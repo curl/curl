@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2004, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -155,7 +155,7 @@ struct thread_data {
   HANDLE thread_hnd;
   unsigned thread_id;
   DWORD  thread_status;
-  curl_socket_t dummy_sock;   /* dummy for Curl_fdset() */
+  curl_socket_t dummy_sock;   /* dummy for Curl_resolv_fdset() */
   FILE *stderr_file;
   HANDLE mutex_waiting;  /* marks that we are still waiting for a resolve */
   HANDLE event_resolved; /* marks that the thread obtained the information */
@@ -404,9 +404,9 @@ static bool init_resolve_thread (struct connectdata *conn,
      destroy_thread_data(&conn->async);
      return FALSE;
   }
-  /* This socket is only to keep Curl_fdset() and select() happy; should never
-   * become signalled for read/write since it's unbound but Windows needs
-   * atleast 1 socket in select().
+  /* This socket is only to keep Curl_resolv_fdset() and select() happy;
+   * should never become signalled for read/write since it's unbound but
+   * Windows needs atleast 1 socket in select().
    */
   td->dummy_sock = socket(AF_INET, SOCK_DGRAM, 0);
   return TRUE;
@@ -541,10 +541,10 @@ CURLcode Curl_is_resolved(struct connectdata *conn,
   return CURLE_OK;
 }
 
-CURLcode Curl_fdset(struct connectdata *conn,
-                    fd_set *read_fd_set,
-                    fd_set *write_fd_set,
-                    int *max_fdp)
+CURLcode Curl_resolv_fdset(struct connectdata *conn,
+                           fd_set *read_fd_set,
+                           fd_set *write_fd_set,
+                           int *max_fdp)
 {
   const struct thread_data *td =
     (const struct thread_data *) conn->async.os_specific;
