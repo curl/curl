@@ -37,7 +37,7 @@
 #if HAVE_STRTOLL
 #define strtoofft strtoll
 #else
-long long Curl_strtoll(const char *nptr, char **endptr, int base);
+curl_off_t Curl_strtoll(const char *nptr, char **endptr, int base);
 #define strtoofft Curl_strtoll
 #define NEED_CURL_STRTOLL
 #endif
