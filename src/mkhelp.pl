@@ -75,18 +75,18 @@ for(@out) {
 
     $new = $_;
 
-    $outsize += length($new);
+    $outsize += length($new)+1; # one for the newline
 
     $new =~ s/\\/\\\\/g;
     $new =~ s/\"/\\\"/g;
 
-    printf("\"%s\\n\"\n", $new);
-
-    if($outsize > 10000) {
+    # gcc 2.96 claims ISO C89 only is required to support 509 letter strings
+    if($outsize > 500) {
         # terminate and make another puts() call here
         print ");\n puts(\n";
-        $outsize=0;
+        $outsize=length($new)+1;
     }
+    printf("\"%s\\n\"\n", $new);
 
 }
 
