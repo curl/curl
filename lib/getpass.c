@@ -42,6 +42,30 @@
 #ifndef HAVE_GETPASS_R
 
 #ifndef WIN32
+#ifdef	VMS
+#include <stdio.h>
+#include <string.h>
+#include descrip
+#include starlet
+#include iodef
+#include iosbdef
+char *getpass_r(const char *prompt, char *buffer, size_t buflen)
+{
+	long sts;
+	short chan;
+	struct _iosb iosb;
+	$DESCRIPTOR(ttdesc, "TT");
+
+	buffer[0]='\0';
+	if ((sts = sys$assign(&ttdesc, &chan,0,0)) & 1) {
+		if (((sts = sys$qiow(0, chan, IO$_READPROMPT | IO$M_NOECHO, &iosb, 0, 0, buffer, buflen, 0, 0, prompt, strlen(prompt))) & 1) && (iosb.iosb$w_status&1)) {
+			buffer[iosb.iosb$w_bcnt] = '\0';
+		} 
+		sts = sys$dassgn(chan);
+	}
+	return buffer; /* we always return success */
+}
+#else /* VMS */
 #ifdef HAVE_TERMIOS_H
 #  if !defined(HAVE_TCGETATTR) && !defined(HAVE_TCSETATTR) 
 #    undef HAVE_TERMIOS_H
@@ -186,6 +210,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 
   return buffer; /* we always return success */
 }
+#endif /* VMS */
 #else /* WIN32 */
 #include <stdio.h>
 #include <conio.h>
