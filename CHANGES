@@ -6,6 +6,12 @@
 
                                   Changelog
 
+Daniel (12 January 2004)
+- Extended the time we retry servers in the test script, and I also made it
+  retry the https and ftps servers before they are considered bad. I believe
+  the previous approach could turn problematic on really slow hosts.
+
+Version 7.11.0-pre1 (12 January 2004)
 
 Daniel (11 January 2004)
 - Dominick Meglio pointed out FTPS should use default port 990 according to
