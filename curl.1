@@ -2,7 +2,7 @@
 .\" nroff -man curl.1
 .\" Written by Daniel Stenberg
 .\"
-.TH curl 1 "10 Janurary 2000" "Curl 6.4" "Curl Manual"
+.TH curl 1 "13 March 2000" "Curl 6.5" "Curl Manual"
 .SH NAME
 curl \- get a URL with FTP, TELNET, LDAP, GOPHER, DICT, FILE, HTTP or
 HTTPS syntax.
@@ -212,7 +212,7 @@ will output the data in chunks, not necessarily exactly when the data arrives.
 Using this option will disable that buffering.
 .IP "-o/--output <file>"
 Write output to <file> instead of stdout. If you are using {} or [] to fetch
-multiple documents, you can use #<num> in the <file> specifier. That variable
+multiple documents, you can use #[num] in the <file> specifier. That variable
 will be replaced with the current string for the URL being fetched. Like in:
 
   curl http://{one,two}.site.com -o "file_#1.txt"
@@ -225,15 +225,25 @@ Write output to a local file named like the remote file we get. (Only
 the file part of the remote file is used, the path is cut off.)
 .IP "-P/--ftpport <address>"
 (FTP)
-Reverses the initiator/listenor roles when connecting with ftp. This
+Reverses the initiator/listener roles when connecting with ftp. This
 switch makes Curl use the PORT command instead of PASV. In
 practice, PORT tells the server to connect to the client's specified
 address and port, while PASV asks the server for an ip address and
 port to connect to. <address> should be one of:
- interface - i.e "eth0" to specify which interface's IP address you want to use  (Unix only)
- IP address - i.e "192.168.10.1" to specify exact IP number
- host name - i.e "my.host.domain" to specify machine
- "-"       - (any single-letter string) to make it pick the machine's default
+.RS
+.TP 12
+.B interface
+i.e "eth0" to specify which interface's IP address you want to use  (Unix only)
+.TP
+.B "IP address"
+i.e "192.168.10.1" to specify exact IP number
+.TP
+.B "host name"
+i.e "my.host.domain" to specify machine
+.TP
+.B "-"
+(any single-letter string) to make it pick the machine's default
+.RE
 .IP "-q"
 If used as the first parameter on the command line, the
 .I $HOME/.curlrc
@@ -250,13 +260,29 @@ of the commands, the entire operation will be aborted.
 (HTTP/FTP)
 Retrieve a byte range (i.e a partial document) from a HTTP/1.1 or FTP
 server. Ranges can be specified in a number of ways.
- 0-499           - specifies the first 500 bytes
- 500-999         - specifies the second 500 bytes
- -500            - specifies the last 500 bytes
- 9500-           - specifies the bytes from offset 9500 and forward
- 0-0,-1          - specifies the first and last byte only(*)(H)
- 500-700,600-799 - specifies 300 bytes from offset 500(H)
- 100-199,500-599 - specifies two separate 100 bytes ranges(*)(H)
+.RS
+.TP 10
+.B 0-499
+specifies the first 500 bytes
+.TP
+.B 500-999
+specifies the second 500 bytes
+.TP
+.B -500
+specifies the last 500 bytes
+.TP
+.B 9500
+specifies the bytes from offset 9500 and forward
+.TP
+.B 0-0,-1
+specifies the first and last byte only(*)(H)
+.TP
+.B 500-700,600-799
+specifies 300 bytes from offset 500(H)
+.TP
+.B 100-199,500-599
+specifies two separate 100 bytes ranges(*)(H)
+.RE
 
 (*) = NOTE that this will cause the server to reply with a multipart
 response!
