@@ -8,11 +8,11 @@ Fix before releasing 7.11.0
    issues, Dave Meyer works on this)
 
 8. Resolve the occational test case 91 failure. This still has no
-   resolution. (David Byron has done lots of research)
+   resolution. (David Byron has done lots of research, no resolution yet)
 
-12. The "PUT and (NTLM/Digest) auth" bug (Jacob Swed's report #862835)
+12. The "PUT and (NTLM/Digest) auth" bug (no progress yet) #862835
 
-17. Diego Casorran's AmigaOS patch
+17. Diego Casorran's AmigaOS patch (feedback sent to Diego, awaiting updates)
 
 To get fixed in 7.11.1
 ======================
@@ -36,19 +36,4 @@ To get fixed in 7.11.1
 16. Tony Blakie's bug report about getting a 302 and Location: back from a
     proxy after a CONNECT request. (correct behavior on this is not certain)
 
-18. Remove the Accept: line from the default HTTP request
-
-Fixed in 7.11
-=============
-
-5. Large-file support (work by Dave Meyer)
-
-7. Apply Gisle Vanem's djgpp patches
-
-11. building for Windows with SSL on MSVC (patched by David Byron)
-
-13. Andrés García's CURLOPT_IPRESOLVE problem
-
-15. RBramante's inactivity timeout on Win2k problem (problem fixed in more
-    recent versions)
-
+18. Modified Accept: header in the default HTTP request (being discussed)
