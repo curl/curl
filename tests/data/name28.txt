@@ -1,0 +1,1 @@
+--globoff with {][} in URL

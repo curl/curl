@@ -1,0 +1,5 @@
+HTTP/1.1 200 OK
+Server: fake
+
+{}[] in the URL is not legal
+
