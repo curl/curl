@@ -358,7 +358,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
  *
  * Keith McGuigan 
  * 10/3/2001 */
-static struct hostent* pack_hostent(char* buf, struct hostent* orig)
+static struct hostent* pack_hostent(char** buf, struct hostent* orig)
 {
   char* bufptr;
   struct hostent* copy;
@@ -367,7 +367,7 @@ static struct hostent* pack_hostent(char* buf, struct hostent* orig)
   char* str;
   int len;
 
-  bufptr = buf;
+  bufptr = *buf;
   copy = (struct hostent*)bufptr;
 
   bufptr += sizeof(struct hostent);
@@ -425,6 +425,7 @@ static struct hostent* pack_hostent(char* buf, struct hostent* orig)
   }
   copy->h_addr_list[i] = NULL;
 
+  *buf=(char *)realloc(*buf, (int)bufptr-(int)(*buf));
   return copy;
 }
 #endif
@@ -472,16 +473,15 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
    * everything. OSF1 is known to require at least 8872 bytes. The buffer
    * required for storing all possible aliases and IP numbers is according to
    * Stevens' Unix Network Programming 2nd editor, p. 304: 8192 bytes! */
-  int *buf = (int *)malloc(CURL_NAMELOOKUP_SIZE);
-  if(!buf)
-    return NULL; /* major failure */
-  *bufp = (char *)buf;
-
   port=0; /* unused in IPv4 code */
   ret = 0; /* to prevent the compiler warning */
 
   if ( (in=inet_addr(hostname)) != INADDR_NONE ) {
     struct in_addr *addrentry;
+    int *buf = (int *)malloc(128);
+    if(!buf)
+      return NULL; /* major failure */
+    *bufp = (char *)buf;
 
     h = (struct hostent*)buf;
     h->h_addr_list = (char**)(buf + sizeof(*h));
@@ -493,30 +493,70 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
     h->h_length = sizeof(*addrentry);
     h->h_name = *(h->h_addr_list) + h->h_length;
     /* bad one h->h_name = (char*)(h->h_addr_list + h->h_length); */
-    MakeIP(ntohl(in),h->h_name, CURL_NAMELOOKUP_SIZE - (long)(h->h_name) + (long)buf);
+    MakeIP(ntohl(in),h->h_name, 128 - (long)(h->h_name) + (long)buf);
   }
 #if defined(HAVE_GETHOSTBYNAME_R)
   else {
     int h_errnop;
+    int res=ERANGE;
+    int step_size=200;
+    int *buf = (int *)malloc(CURL_NAMELOOKUP_SIZE);
+    if(!buf)
+      return NULL; /* major failure */
+    *bufp=(char *)buf;
+
      /* Workaround for gethostbyname_r bug in qnx nto. It is also _required_
         for some of these functions. */
     memset(buf, 0, CURL_NAMELOOKUP_SIZE);
 #ifdef HAVE_GETHOSTBYNAME_R_5
     /* Solaris, IRIX and more */
-    if ((h = gethostbyname_r(hostname,
-                             (struct hostent *)buf,
-                             (char *)buf + sizeof(struct hostent),
-                             CURL_NAMELOOKUP_SIZE - sizeof(struct hostent),
-                             &h_errnop)) == NULL )
+    while(!h) {
+      h = gethostbyname_r(hostname,
+                          (struct hostent *)buf,
+                          (char *)buf + sizeof(struct hostent),
+                          step_size - sizeof(struct hostent),
+                          &h_errnop);
+
+      /* If the buffer is too small, it returns NULL and sets errno to
+         ERANGE. The errno is thread safe if this is compiled with
+         -D_REENTRANT as then the 'errno' variable is a macro defined to
+         get used properly for threads. */
+
+      if(h || (errno != ERANGE))
+        break;
+      
+      step_size+=200;
+    }
+
+#ifdef MALLOCDEBUG
+    infof(data, "gethostbyname_r() uses %d bytes\n", step_size);
+#endif
+
+    if(h) {
+      buf=(int *)realloc(buf, step_size);
+      *bufp=(char *)buf;
+    }
+    else
 #endif
 #ifdef HAVE_GETHOSTBYNAME_R_6
     /* Linux */
-    if( gethostbyname_r(hostname,
-                        (struct hostent *)buf,
-                        (char *)buf + sizeof(struct hostent),
-                        CURL_NAMELOOKUP_SIZE - sizeof(struct hostent),
-                        &h, /* DIFFERENCE */
-                        &h_errnop))
+    while((res=gethostbyname_r(hostname,
+                               (struct hostent *)buf,
+                               (char *)buf + sizeof(struct hostent),
+                               step_size - sizeof(struct hostent),
+                               &h, /* DIFFERENCE */
+                               &h_errnop))==ERANGE) {
+      step_size+=200;
+    }
+    
+#ifdef MALLOCDEBUG
+    infof(data, "gethostbyname_r() uses %d bytes\n", step_size);
+#endif
+    if(!res) {
+      buf=(int *)realloc(buf, step_size);
+      *bufp=(char *)buf;
+    }
+    else
 #endif
 #ifdef HAVE_GETHOSTBYNAME_R_3
     /* AIX, Digital Unix, HPUX 10, more? */
@@ -529,8 +569,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
        * size dilemma. */
 
       ret = gethostbyname_r(hostname,
-                          (struct hostent *)buf,
-                          (struct hostent_data *)(buf + sizeof(struct hostent)));
+                            (struct hostent *)buf,
+                            (struct hostent_data *)(buf + sizeof(struct hostent)));
     else
       ret = -1; /* failure, too smallish buffer size */
     
@@ -549,14 +589,17 @@ Curl_addrinfo *Curl_getaddrinfo(struct SessionHandle *data,
   else {
     if ((h = gethostbyname(hostname)) == NULL ) {
       infof(data, "gethostbyname(2) failed for %s\n", hostname);
-      free(buf);
       *bufp=NULL;
     }
     else 
+    {
+      char *buf=(char *)malloc(CURL_NAMELOOKUP_SIZE);
       /* we make a copy of the hostent right now, right here, as the
          static one we got a pointer to might get removed when we don't
          want/expect that */
-      h = pack_hostent((char *)buf, h);
+      h = pack_hostent(&buf, h);
+      *bufp=(char *)buf;
+    }
 #endif
   }
   return (h);
