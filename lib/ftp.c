@@ -158,6 +158,7 @@ static CURLcode AllowServerConnect(struct SessionHandle *data,
       infof(data, "Connection accepted from server\n");
 
       conn->secondarysocket = s;
+      Curl_nonblock(s, TRUE); /* enable non-blocking */
     }
     break;
   }
