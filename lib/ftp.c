@@ -911,7 +911,7 @@ ftp_pasv_verbose(struct connectdata *conn,
 #  ifdef HAVE_GETHOSTBYADDR_R_7
   /* Solaris and IRIX */
   answer = gethostbyaddr_r((char *) &address, sizeof(address), AF_INET,
-                           (struct hostent *)hostent_buf,
+                           (struct hostent *)bigbuf,
                            hostent_buf + sizeof(*answer),
                            sizeof(hostent_buf) - sizeof(*answer),
                            &h_errnop);
