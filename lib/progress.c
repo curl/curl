@@ -91,11 +91,12 @@ static char *max5data(double bytes, char *max5)
 
 */
 
-void Curl_pgrsDone(struct UrlData *data)
+void Curl_pgrsDone(struct connectdata *conn)
 {
+  struct UrlData *data = conn->data;
   if(!(data->progress.flags & PGRS_HIDE)) {
     data->progress.lastshow=0;
-    Curl_pgrsUpdate(data); /* the final (forced) update */
+    Curl_pgrsUpdate(conn); /* the final (forced) update */
     fprintf(data->err, "\n");
   }
 }
@@ -172,7 +173,7 @@ void Curl_pgrsSetUploadSize(struct UrlData *data, double size)
 
  */
 
-int Curl_pgrsUpdate(struct UrlData *data)
+int Curl_pgrsUpdate(struct connectdata *conn)
 {
   struct timeval now;
   int result;
@@ -184,6 +185,8 @@ int Curl_pgrsUpdate(struct UrlData *data)
 
   double total_transfer;
   double total_expected_transfer;
+
+  struct UrlData *data = conn->data;
 
   int nowindex = data->progress.speeder_c% CURR_TIME;
   int checkindex;
@@ -198,15 +201,16 @@ int Curl_pgrsUpdate(struct UrlData *data)
   
   double total_estimate;
 
+
   if(data->progress.flags & PGRS_HIDE)
     ; /* We do enter this function even if we don't wanna see anything, since
          this is were lots of the calculations are being made that will be used
          even when not displayed! */
   else if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
     if (!data->progress.callback) {
-      if(data->resume_from)
+      if(conn->resume_from)
         fprintf(data->err, "** Resuming transfer from byte position %d\n",
-                data->resume_from);
+                conn->resume_from);
       fprintf(data->err,
               "  %% Total    %% Received %% Xferd  Average Speed          Time             Curr.\n"
               "                                 Dload  Upload Total    Current  Left    Speed\n");

@@ -153,13 +153,6 @@ CURLcode Curl_close(CURL *curl)
     data->bits.httpproxy=FALSE;
   }
 
-
-  if(data->bits.rangestringalloc) {
-    free(data->range);
-    data->range=NULL;
-    data->bits.rangestringalloc=0; /* free now */
-  }
-
   /* check for allocated [URL] memory to free: */
   if(data->freethis)
     free(data->freethis);
@@ -703,14 +696,14 @@ CURLcode Curl_setopt(CURL *curl, CURLoption option, ...)
     /*
      * What range of the file you want to transfer
      */
-    data->range = va_arg(param, char *);
-    data->bits.set_range = data->range?1:0;
+    data->set_range = va_arg(param, char *);
+    data->bits.set_range = data->set_range?1:0;
     break;
   case CURLOPT_RESUME_FROM:
     /*
      * Resume transfer at the give file position
      */
-    data->resume_from = va_arg(param, long);
+    data->set_resume_from = va_arg(param, long);
     break;
   case CURLOPT_STDERR:
     /*
@@ -800,6 +793,16 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 {
   if(!conn)
     return CURLE_OK; /* this is closed and fine already */
+
+  /*
+   * The range string is usually freed in curl_done(), but we might
+   * get here *instead* if we fail prematurely. Thus we need to be able
+   * to free this resource here as well.
+   */
+  if(conn->bits.rangestringalloc) {
+    free(conn->range);
+    conn->bits.rangestringalloc = FALSE;
+  }
 
   if(-1 != conn->connectindex) {
     /* unlink ourselves! */
@@ -1348,6 +1351,9 @@ static CURLcode Connect(struct UrlData *data,
   conn->secondarysocket = -1; /* no file descriptor */
   conn->connectindex = -1;    /* no index */
   conn->bits.httpproxy = data->bits.httpproxy; /* proxy-or-not status */
+  conn->bits.use_range = data->bits.set_range; /* range status */
+  conn->range = data->set_range;               /* clone the range setting */
+  conn->resume_from = data->set_resume_from;   /* inherite resume_from */
 
   /* Default protocol-independent behavior doesn't support persistant
      connections, so we set this to force-close. Protocols that support
@@ -1650,13 +1656,13 @@ static CURLcode Connect(struct UrlData *data,
    * server, we just fail since we can't rewind the file writing from within
    * this function.
    ***********************************************************/
-  if(data->resume_from) {
-    if(!data->bits.set_range) {
+  if(conn->resume_from) {
+    if(!conn->bits.use_range) {
       /* if it already was in use, we just skip this */
-      snprintf(resumerange, sizeof(resumerange), "%d-", data->resume_from);
-      data->range=strdup(resumerange); /* tell ourselves to fetch this range */
-      data->bits.rangestringalloc = TRUE; /* mark as allocated */
-      data->bits.set_range = 1; /* switch on range usage */
+      snprintf(resumerange, sizeof(resumerange), "%d-", conn->resume_from);
+      conn->range=strdup(resumerange); /* tell ourselves to fetch this range */
+      conn->bits.rangestringalloc = TRUE; /* mark as allocated */
+      conn->bits.use_range = 1; /* switch on range usage */
     }
   }
 
@@ -2210,13 +2216,20 @@ CURLcode Curl_done(struct connectdata *conn)
   struct UrlData *data=conn->data;
   CURLcode result;
 
+  /* cleanups done even if the connection is re-used */
+
+  if(conn->bits.rangestringalloc) {
+    free(conn->range);
+    conn->bits.rangestringalloc = FALSE;
+  }
+
   /* this calls the protocol-specific function pointer previously set */
   if(conn->curl_done)
     result = conn->curl_done(conn);
   else
     result = CURLE_OK;
 
-  Curl_pgrsDone(data); /* done with the operation */
+  Curl_pgrsDone(conn); /* done with the operation */
 
   /* if data->bits.reuse_forbid is TRUE, it means the libcurl client has
      forced us to close this no matter what we think.

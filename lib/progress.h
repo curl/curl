@@ -36,13 +36,13 @@ typedef enum {
   TIMER_LAST /* must be last */
 } timerid;
   
-void Curl_pgrsDone(struct UrlData *data);
+void Curl_pgrsDone(struct connectdata *);
 void Curl_pgrsStartNow(struct UrlData *data);
 void Curl_pgrsSetDownloadSize(struct UrlData *data, double size);
 void Curl_pgrsSetUploadSize(struct UrlData *data, double size);
 void Curl_pgrsSetDownloadCounter(struct UrlData *data, double size);
 void Curl_pgrsSetUploadCounter(struct UrlData *data, double size);
-int Curl_pgrsUpdate(struct UrlData *data);
+int Curl_pgrsUpdate(struct connectdata *);
 void Curl_pgrsTime(struct UrlData *data, timerid timer);
 
 

@@ -497,7 +497,7 @@ CURLcode Curl_http(struct connectdata *conn)
   if((data->bits.http_post ||
       data->bits.http_formpost ||
       data->bits.http_put) &&
-     data->resume_from) {
+     conn->resume_from) {
     /**********************************************************************
      * Resuming upload in HTTP means that we PUT or POST and that we have
      * got a resume_from value set. The resume value has already created
@@ -506,15 +506,15 @@ CURLcode Curl_http(struct connectdata *conn)
      * file size before we continue this venture in the dark lands of HTTP.
      *********************************************************************/
    
-    if(data->resume_from < 0 ) {
+    if(conn->resume_from < 0 ) {
       /*
        * This is meant to get the size of the present remote-file by itself.
        * We don't support this now. Bail out!
        */
-       data->resume_from = 0;
+       conn->resume_from = 0;
     }
 
-    if(data->resume_from) {
+    if(conn->resume_from) {
       /* do we still game? */
       int passed=0;
 
@@ -522,7 +522,7 @@ CURLcode Curl_http(struct connectdata *conn)
          input. If we knew it was a proper file we could've just
          fseek()ed but we only have a stream here */
       do {
-        int readthisamountnow = (data->resume_from - passed);
+        int readthisamountnow = (conn->resume_from - passed);
         int actuallyread;
 
         if(readthisamountnow > BUFSIZE)
@@ -537,11 +537,11 @@ CURLcode Curl_http(struct connectdata *conn)
                 passed);
           return CURLE_READ_ERROR;
         }
-      } while(passed != data->resume_from); /* loop until done */
+      } while(passed != conn->resume_from); /* loop until done */
 
       /* now, decrease the size of the read */
       if(data->infilesize>0) {
-        data->infilesize -= data->resume_from;
+        data->infilesize -= conn->resume_from;
 
         if(data->infilesize <= 0) {
           failf(data, "File already completely uploaded\n");
@@ -551,7 +551,7 @@ CURLcode Curl_http(struct connectdata *conn)
       /* we've passed, proceed as normal */
     }
   }
-  if(data->bits.set_range) {
+  if(conn->bits.use_range) {
     /*
      * A range is selected. We use different headers whether we're downloading
      * or uploading and we always let customized headers override our internal
@@ -559,23 +559,23 @@ CURLcode Curl_http(struct connectdata *conn)
      */
     if((data->httpreq == HTTPREQ_GET) &&
        !checkheaders(data, "Range:")) {
-      conn->allocptr.rangeline = aprintf("Range: bytes=%s\r\n", data->range);
+      conn->allocptr.rangeline = aprintf("Range: bytes=%s\r\n", conn->range);
     }
     else if((data->httpreq != HTTPREQ_GET) &&
             !checkheaders(data, "Content-Range:")) {
 
-      if(data->resume_from) {
+      if(conn->resume_from) {
         /* This is because "resume" was selected */
-        long total_expected_size= data->resume_from + data->infilesize;
+        long total_expected_size= conn->resume_from + data->infilesize;
         conn->allocptr.rangeline = aprintf("Content-Range: bytes %s%ld/%ld\r\n",
-                                      data->range, total_expected_size-1,
+                                      conn->range, total_expected_size-1,
                                       total_expected_size);
       }
       else {
         /* Range was selected and then we just pass the incoming range and 
            append total size */
         conn->allocptr.rangeline = aprintf("Content-Range: bytes %s/%d\r\n",
-                                      data->range, data->infilesize);
+                                      conn->range, data->infilesize);
       }
     }
   }
@@ -610,7 +610,7 @@ CURLcode Curl_http(struct connectdata *conn)
                  conn->allocptr.proxyuserpwd)?conn->allocptr.proxyuserpwd:"",
                 (conn->bits.user_passwd && conn->allocptr.userpwd)?
                 conn->allocptr.userpwd:"",
-                (data->bits.set_range && conn->allocptr.rangeline)?
+                (conn->bits.use_range && conn->allocptr.rangeline)?
                 conn->allocptr.rangeline:"",
                 (data->useragent && *data->useragent && conn->allocptr.uagent)?
                 conn->allocptr.uagent:"",

@@ -465,7 +465,7 @@ Transfer(struct connectdata *c_conn)
                   /* This second format was added August 1st 2000 by Igor
                      Khristophorov since Sun's webserver JavaWebServer/1.1.1
                      obviously sends the header this way! :-( */
-                  if (data->resume_from == offset) {
+                  if (conn->resume_from == offset) {
                     /* we asked for a resume and we got it */
                     content_range = TRUE;
                   }
@@ -547,7 +547,7 @@ Transfer(struct connectdata *c_conn)
                   infof (data, "Follow to new URL: %s\n", conn->newurl);
                   return CURLE_OK;
                 }
-                else if (data->resume_from &&
+                else if (conn->resume_from &&
                          !content_range &&
                          (data->httpreq==HTTPREQ_GET)) {
                   /* we wanted to resume a download, although the server
@@ -557,7 +557,7 @@ Transfer(struct connectdata *c_conn)
                          "byte ranges. Cannot resume.");
                   return CURLE_HTTP_RANGE_ERROR;
                 }
-                else if(data->timecondition && !data->range) {
+                else if(data->timecondition && !conn->range) {
                   /* A time condition has been set AND no ranges have been
                      requested. This seems to be what chapter 13.3.4 of
                      RFC 2616 defines to be the correct action for a
@@ -696,7 +696,7 @@ Transfer(struct connectdata *c_conn)
       }
 
       now = Curl_tvnow();
-      if(Curl_pgrsUpdate(data))
+      if(Curl_pgrsUpdate(conn))
         urg = CURLE_ABORTED_BY_CALLBACK;
       else
         urg = Curl_speedcheck (data, now);
@@ -730,7 +730,7 @@ Transfer(struct connectdata *c_conn)
           conn->proto.http->chunk.datasize);
     return CURLE_PARTIAL_FILE;
   }
-  if(Curl_pgrsUpdate(data))
+  if(Curl_pgrsUpdate(conn))
     return CURLE_ABORTED_BY_CALLBACK;
 
   if(conn->bytecountp)

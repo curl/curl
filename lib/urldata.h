@@ -185,6 +185,9 @@ struct ConnectBits {
   bool httpproxy; /* if set, this transfer is done through a http proxy */
   bool user_passwd;       /* do we use user+password for this connection? */
   bool proxy_user_passwd; /* user+password for the proxy? */
+
+  bool use_range;
+  bool rangestringalloc; /* the range string is malloc()'ed */
 };
 
 /*
@@ -227,6 +230,10 @@ struct connectdata {
                                  not the proxy port! */
   char *ppath;
   long bytecount;
+
+  char *range; /* range, if used. See README for detailed specification on
+                  this syntax. */
+  int resume_from; /* continue [ftp] transfer from here */
 
   char *proxyhost; /* name of the http proxy host */
 
@@ -401,7 +408,6 @@ struct Configbits {
   bool this_is_a_follow; /* this is a followed Location: request */
   bool krb4; /* kerberos4 connection requested */
   bool proxystringalloc; /* the http proxy string is malloc()'ed */
-  bool rangestringalloc; /* the range string is malloc()'ed */
   bool urlstringalloc;   /* the URL string is malloc()'ed */
   bool reuse_forbid;     /* if this is forbidden to be reused, close 
                             after use */
@@ -460,8 +466,8 @@ struct UrlData {
   struct ssl_config_data ssl; /* this is for ssl-stuff */
 
   char *userpwd;  /* <user:password>, if used */
-  char *range; /* range, if used. See README for detailed specification on
-                  this syntax. */
+  char *set_range; /* range, if used. See README for detailed specification on
+                      this syntax. */
 
   /* stuff related to HTTP */
 
@@ -510,7 +516,7 @@ struct UrlData {
   long low_speed_limit; /* bytes/second */
   long low_speed_time;  /* number of seconds */
 
-  int resume_from;    /* continue [ftp] transfer from here */
+  int set_resume_from;    /* continue [ftp] transfer from here */
 
   char *cookie;       /* HTTP cookie string to send */
 

@@ -183,11 +183,11 @@ CURLcode Curl_file(struct connectdata *conn)
       return res;
 
     now = Curl_tvnow();
-    if(Curl_pgrsUpdate(data))
+    if(Curl_pgrsUpdate(conn))
       res = CURLE_ABORTED_BY_CALLBACK;
   }
   now = Curl_tvnow();
-  if(Curl_pgrsUpdate(data))
+  if(Curl_pgrsUpdate(conn))
     res = CURLE_ABORTED_BY_CALLBACK;
 
   close(fd);

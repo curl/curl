@@ -1272,7 +1272,7 @@ again:;
         CURLE_FTP_COULDNT_SET_BINARY;
     }
 
-    if(data->resume_from) {
+    if(conn->resume_from) {
       /* we're about to continue the uploading of a file */
       /* 1. get already existing file's size. We use the SIZE
          command for this which may not exist in the server!
@@ -1286,7 +1286,7 @@ again:;
       /* 4. lower the infilesize counter */
       /* => transfer as usual */
 
-      if(data->resume_from < 0 ) {
+      if(conn->resume_from < 0 ) {
         /* we could've got a specified offset from the command line,
            but now we know we didn't */
 
@@ -1302,10 +1302,10 @@ again:;
         }
 
         /* get the size from the ascii string: */
-        data->resume_from = atoi(buf+4);
+        conn->resume_from = atoi(buf+4);
       }
 
-      if(data->resume_from) {
+      if(conn->resume_from) {
         /* do we still game? */
         int passed=0;
         /* enable append instead */
@@ -1315,7 +1315,7 @@ again:;
            input. If we knew it was a proper file we could've just
            fseek()ed but we only have a stream here */
         do {
-          int readthisamountnow = (data->resume_from - passed);
+          int readthisamountnow = (conn->resume_from - passed);
           int actuallyread;
 
           if(readthisamountnow > BUFSIZE)
@@ -1331,11 +1331,11 @@ again:;
             return CURLE_FTP_COULDNT_USE_REST;
           }
         }
-        while(passed != data->resume_from);
+        while(passed != conn->resume_from);
 
         /* now, decrease the size of the read */
         if(data->infilesize>0) {
-          data->infilesize -= data->resume_from;
+          data->infilesize -= conn->resume_from;
 
           if(data->infilesize <= 0) {
             failf(data, "File already completely uploaded\n");
@@ -1387,13 +1387,13 @@ again:;
     bool dirlist=FALSE;
     long downloadsize=-1;
 
-    if(data->bits.set_range && data->range) {
+    if(conn->bits.use_range && conn->range) {
       long from, to;
       int totalsize=-1;
       char *ptr;
       char *ptr2;
 
-      from=strtol(data->range, &ptr, 0);
+      from=strtol(conn->range, &ptr, 0);
       while(ptr && *ptr && (isspace((int)*ptr) || (*ptr=='-')))
         ptr++;
       to=strtol(ptr, &ptr2, 0);
@@ -1403,22 +1403,23 @@ again:;
       }
       if((-1 == to) && (from>=0)) {
         /* X - */
-        data->resume_from = from;
+        conn->resume_from = from;
         infof(data, "FTP RANGE %d to end of file\n", from);
       }
       else if(from < 0) {
         /* -Y */
         totalsize = -from;
         conn->maxdownload = -from;
-        data->resume_from = from;
+        conn->resume_from = from;
         infof(data, "FTP RANGE the last %d bytes\n", totalsize);
       }
       else {
         /* X-Y */
         totalsize = to-from;
         conn->maxdownload = totalsize+1; /* include the last mentioned byte */
-        data->resume_from = from;
-        infof(data, "FTP RANGE from %d getting %d bytes\n", from, conn->maxdownload);
+        conn->resume_from = from;
+        infof(data, "FTP RANGE from %d getting %d bytes\n", from,
+              conn->maxdownload);
       }
       infof(data, "range-download from %d to %d, totally %d bytes\n",
             from, to, totalsize);
@@ -1466,7 +1467,7 @@ again:;
           CURLE_FTP_COULDNT_SET_BINARY;
       }
 
-      if(data->resume_from) {
+      if(conn->resume_from) {
 
         /* Daniel: (August 4, 1999)
          *
@@ -1491,26 +1492,26 @@ again:;
           int foundsize=atoi(buf+4);
           /* We got a file size report, so we check that there actually is a
              part of the file left to get, or else we go home.  */
-          if(data->resume_from< 0) {
+          if(conn->resume_from< 0) {
             /* We're supposed to download the last abs(from) bytes */
-            if(foundsize < -data->resume_from) {
+            if(foundsize < -conn->resume_from) {
               failf(data, "Offset (%d) was beyond file size (%d)",
-                    data->resume_from, foundsize);
+                    conn->resume_from, foundsize);
               return CURLE_FTP_BAD_DOWNLOAD_RESUME;
             }
             /* convert to size to download */
-            downloadsize = -data->resume_from;
+            downloadsize = -conn->resume_from;
             /* download from where? */
-            data->resume_from = foundsize - downloadsize;
+            conn->resume_from = foundsize - downloadsize;
           }
           else {
-            if(foundsize < data->resume_from) {
+            if(foundsize < conn->resume_from) {
               failf(data, "Offset (%d) was beyond file size (%d)",
-                    data->resume_from, foundsize);
+                    conn->resume_from, foundsize);
               return CURLE_FTP_BAD_DOWNLOAD_RESUME;
             }
             /* Now store the number of bytes we are expected to download */
-            downloadsize = foundsize-data->resume_from;
+            downloadsize = foundsize-conn->resume_from;
           }
         }
 
@@ -1521,9 +1522,9 @@ again:;
 	
         /* Set resume file transfer offset */
         infof(data, "Instructs server to resume from offset %d\n",
-              data->resume_from);
+              conn->resume_from);
 
-        ftpsendf(conn->firstsocket, conn, "REST %d", data->resume_from);
+        ftpsendf(conn->firstsocket, conn, "REST %d", conn->resume_from);
 
         nread = Curl_GetFTPResponse(conn->firstsocket, buf, conn, &ftpcode);
         if(nread < 0)
