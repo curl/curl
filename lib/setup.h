@@ -193,6 +193,21 @@ typedef struct hostent Curl_addrinfo;
 typedef struct in_addr Curl_ipconnect;
 #endif
 
+#if 0
+#if (SIZEOF_OFF_T > 4)
+/* off_t is bigger than 4 bytes, and that makes it our prefered variable
+   type for filesizes */
+typedef off_t filesize_t;
+#else
+#ifdef HAVE_LONGLONG
+/* we have long long, use this for filesizes internally */
+typedef long long filesize_t;
+#else
+/* small off_t and no long long, no support for large files :-( */
+typedef long filesize_t;
+#endif /* didn't have long long */
+#endif /* sizeof wasn't bigger than 4 */
 
+#endif /* 0 */
 
 #endif /* __CONFIG_H */
