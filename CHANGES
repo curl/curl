@@ -7,6 +7,14 @@
                                   Changelog
 
 
+Daniel (15 November)
+- Mathias Axelsson found out libcurl sometimes freed the server certificate
+  twice, leading to crashes!
+
+Daniel (14 November)
+- Siddhartha Prakash Jain found a case with a bad resolve that we didn't
+  properly bail out from, when using ares.
+
 Daniel (13 November)
 - Default Content-Type for parts in multipart formposts has changed to
   "application/octet-stream".  This seems more appropriate, and I believe
