@@ -1,4 +1,5 @@
 #!/bin/sh
+
 ###########################
 #  What is This Script?
 ###########################
@@ -11,11 +12,25 @@
 # curl site, at http://curl.haxx.se/auto/
 
 # USAGE:
-# testcurl.sh > output
+# testcurl.sh [curl-daily-name] > output
+
+# Updated: 
+# v1.1 6-Nov-03 - to take an optional parameter, the name of a daily-build
+#                 directory.  If present, build from that directory, otherwise
+#                 perform a normal CVS build.
 
 # version of this script
-version=1
+version=1.1
 fixed=0
+
+# Determine if we're running from CVS or a canned copy of curl
+if [ "$#" -ge "1" -a "$1" ]; then
+  CURLDIR=$1
+  CVS=0
+else
+  CURLDIR="curl"
+  CVS=1
+fi
 
 LANG="C"
 
@@ -29,6 +44,8 @@ die(){
 if [ -f setup ]; then
   . "./setup"
   infixed="$fixed"
+else
+  infixed=0		# so that "additional args to configure" works properly first time...
 fi
 
 if [ -z "$name" ]; then
@@ -80,13 +97,16 @@ echo "testcurl: date = `date -u`"
 ipwd=`pwd` 
 pwd=`echo $ipwd | sed -e 's/$//g'`
 
-if [ -d curl -a -d curl/CVS ]; then
-  echo "testcurl: curl is verified to be a fine source dir"
-else
-  echo "testcurl: curl is not a source dir checked out from CVS!"
-  die
+if [ -d "$CURLDIR" ]; then
+  if [ $CVS -eq 1 -a -d $CURLDIR/CVS ]; then
+    echo "testcurl: curl is verified to be a fine source dir"
+  elif [ $CVS -eq 0 -a -f $CURLDIR/testcurl.sh ]; then
+    echo "testcurl: curl is verified to be a fine daily source dir"
+  else
+    echo "testcurl: curl is not a daily source dir or checked out from CVS!"
+    die
+  fi
 fi
-
 build="build-$$"
 
 # remove any previous left-overs
@@ -103,62 +123,65 @@ else
 fi
 
 # get in the curl source tree root
-cd curl
+cd $CURLDIR
 
-echo "testcurl: update from CVS"
+# Do the CVS thing, or not...
+if [ $CVS -eq 1 ]; then
+  echo "testcurl: update from CVS"
 
-cvsup() {
-  # update quietly to the latest CVS
-  echo "testcurl: run cvs up"
-  cvs -Q up -dP 2>&1
+  cvsup() {
+    # update quietly to the latest CVS
+    echo "testcurl: run cvs up"
+    cvs -Q up -dP 2>&1
 
-  cvsstat=$?
+    cvsstat=$?
 
-  # return (1 - RETURNVALUE) so that errors return 0 while goodness
-  # returns 1
-  return `expr 1 - $cvsstat`
-}
+    # return (1 - RETURNVALUE) so that errors return 0 while goodness
+    # returns 1
+    return `expr 1 - $cvsstat`
+  }
 
-att="0"
-while cvsup; do
-  att=`expr $att + 1`
-  echo "testcurl: failed CVS update attempt number $att."
-  if [ $att -gt 10 ]; then
-    cvsstat="111"
-    break # get out of the loop
+  att="0"
+  while cvsup; do
+    att=`expr $att + 1`
+    echo "testcurl: failed CVS update attempt number $att."
+    if [ $att -gt 10 ]; then
+      cvsstat="111"
+      break # get out of the loop
+    fi
+    sleep 5
+  done
+  
+  echo "testcurl: cvs returned: $cvsstat"
+  
+  if [ "$cvsstat" -ne "0" ]; then
+    echo "testcurl: failed to update from CVS, exiting"
+    die
   fi
-  sleep 5
-done
-
-echo "testcurl: cvs returned: $cvsstat"
-
-if [ "$cvsstat" -ne "0" ]; then
-  echo "testcurl: failed to update from CVS, exiting"
-  die
-fi
-
-# figure out the current collected CVS status
-newstat="../allcvs.log"
-oldstat="../oldcvs.log"
-find . -name Entries -exec cat {} \; > "$newstat"
-
-if [ -r "$oldstat" ]; then
-  # there is a previous cvs stat file to compare with
-  if { cmp "$oldstat" "$newstat"; } then
-    echo "testcurl: this is the same CVS status as before"
-    echo "testcurl: ALREADY TESTED THIS SETUP BEFORE"
-    #die
-  else
-    echo "testcurl: there has been a change in the CVS"
+  
+  # figure out the current collected CVS status
+  newstat="../allcvs.log"
+  oldstat="../oldcvs.log"
+  find . -name Entries -exec cat {} \; > "$newstat"
+  
+  if [ -r "$oldstat" ]; then
+    # there is a previous cvs stat file to compare with
+    if { cmp "$oldstat" "$newstat"; } then
+      echo "testcurl: this is the same CVS status as before"
+      echo "testcurl: ALREADY TESTED THIS SETUP BEFORE"
+      #die
+    else
+      echo "testcurl: there has been a change in the CVS"
+    fi
   fi
+
+  # remove possible left-overs from the past
+  rm -f configure
+  rm -rf autom4te.cache
+
+  # generate the build files
+  ./buildconf 2>&1
 fi
-
-# remove possible left-overs from the past
-rm -f configure
-rm -rf autom4te.cache
-
-# generate the build files
-./buildconf 2>&1
 
 if [ -f configure ]; then
   echo "testcurl: configure created"
@@ -171,7 +194,7 @@ fi
 cd "../$build"
 
 # run configure script
-../curl/configure $confopts 2>&1
+../$CURLDIR/configure $confopts 2>&1
 
 if [ -f lib/Makefile ]; then
   echo "testcurl: configure seems to have finished fine"
@@ -191,7 +214,7 @@ if { grep USE_ARES lib/config.h; } then
 
   # run the ares configure
   cd ares
-  ../../curl/ares/configure 2>&1
+  ../../$CURLDIR/ares/configure 2>&1
 
   echo "testcurl: build ares"
   make
@@ -220,8 +243,10 @@ else
   echo "testcurl: the tests were successful!"  
 fi
 
-# store the cvs status for the next time
-mv $newstat $oldstat
+if [ $CVS -eq 1 ]; then
+  # store the cvs status for the next time
+  mv $newstat $oldstat
+fi
 
 # get out of dir
 cd ..
