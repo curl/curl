@@ -67,7 +67,7 @@ print "/* NEVER EVER edit this manually, fix the mkhelp script instead! */\n"
 print "#include <stdio.h>\n";
 print "void hugehelp(void)\n";
 print "{\n";
-print "puts (\n";
+print " fputs (\n";
 
 $outsize=0;
 for(@out) {
@@ -82,13 +82,13 @@ for(@out) {
 
     # gcc 2.96 claims ISO C89 only is required to support 509 letter strings
     if($outsize > 500) {
-        # terminate and make another puts() call here
-        print ");\n puts(\n";
+        # terminate and make another fputs() call here
+        print ", stdout);\n fputs(\n";
         $outsize=length($new)+1;
     }
     printf("\"%s\\n\"\n", $new);
 
 }
 
-print " ) ;\n}\n"
+print ", stdout) ;\n}\n"
     
