@@ -5,10 +5,9 @@
                              \___|\___/|_| \_\_____|
 
 
-This document has been introduced in order to let you find documents that
-specify standards used by curl, software that extends curl, web pages with
-"competing" utilities and information pages that describe some of the tools
-that we use to build/compile/develop curl.
+This document lists documents that specify standards used by curl, software
+that extends curl, web pages with similar utilities and information pages that
+describe some of the tools that we use to build/compile/develop curl.
 
 Standards
 ---------
