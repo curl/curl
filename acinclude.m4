@@ -7,7 +7,7 @@ dnl There are two known platforms (AIX 3.x and SunOS 4.1.x) where the
 dnl O_NONBLOCK define is found but does not work. This condition is attempted
 dnl to get caught in this script by using an excessive number of #ifdefs...
 dnl
-AC_DEFUN(CURL_CHECK_NONBLOCKING_SOCKET,
+AC_DEFUN([CURL_CHECK_NONBLOCKING_SOCKET],
 [
   AC_MSG_CHECKING([non-blocking sockets style])
 
@@ -215,7 +215,7 @@ dnl check for "localhost", if it doesn't exist, we can't do the
 dnl gethostbyname_r tests!
 dnl 
 
-AC_DEFUN(CURL_CHECK_WORKING_RESOLVER,[
+AC_DEFUN([CURL_CHECK_WORKING_RESOLVER],[
 AC_MSG_CHECKING([if "localhost" resolves])
 AC_TRY_RUN([
 #include <string.h>
@@ -238,7 +238,7 @@ exit (h == NULL ? 1 : 0); }],[
 dnl ************************************************************
 dnl check for working getaddrinfo()
 dnl
-AC_DEFUN(CURL_CHECK_WORKING_GETADDRINFO,[
+AC_DEFUN([CURL_CHECK_WORKING_GETADDRINFO],[
   AC_CACHE_CHECK(for working getaddrinfo, ac_cv_working_getaddrinfo,[
   AC_TRY_RUN( [
 #include <netdb.h>
@@ -277,7 +277,7 @@ fi
 ])
 
 
-AC_DEFUN(CURL_CHECK_LOCALTIME_R,
+AC_DEFUN([CURL_CHECK_LOCALTIME_R],
 [
   dnl check for a few thread-safe functions
   AC_CHECK_FUNCS(localtime_r,[
@@ -295,7 +295,7 @@ AC_DEFUN(CURL_CHECK_LOCALTIME_R,
 	AC_MSG_RESULT(no))])])
 ])
 
-AC_DEFUN(CURL_CHECK_INET_NTOA_R,
+AC_DEFUN([CURL_CHECK_INET_NTOA_R],
 [
   dnl determine if function definition for inet_ntoa_r exists.
   AC_CHECK_FUNCS(inet_ntoa_r,[
@@ -315,7 +315,7 @@ AC_DEFUN(CURL_CHECK_INET_NTOA_R,
 	AC_MSG_RESULT(no))])])
 ])
 
-AC_DEFUN(CURL_CHECK_GETHOSTBYADDR_R,
+AC_DEFUN([CURL_CHECK_GETHOSTBYADDR_R],
 [
   dnl check for number of arguments to gethostbyaddr_r. it might take
   dnl either 5, 7, or 8 arguments.
@@ -392,7 +392,7 @@ rc = gethostbyaddr_r(address, length, type, &h,
 	    have_missing_r_funcs="$have_missing_r_funcs gethostbyaddr_r"])])])])])
 ])
 
-AC_DEFUN(CURL_CHECK_GETHOSTBYNAME_R,
+AC_DEFUN([CURL_CHECK_GETHOSTBYNAME_R],
 [
   dnl check for number of arguments to gethostbyname_r. it might take
   dnl either 3, 5, or 6 arguments.
