@@ -33,8 +33,8 @@ int main(int argc, char *argv[])
   CURL *curl;
   CURLcode res;
 
-  struct HttpPost *formpost=NULL;
-  struct HttpPost *lastptr=NULL;
+  struct curl_httppost *formpost=NULL;
+  struct curl_httppost *lastptr=NULL;
   struct curl_slist *headerlist=NULL;
   char buf[] = "Expect:";
 
