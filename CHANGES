@@ -6,7 +6,38 @@
 
                                   Changelog
 
+Daniel (1 March 2004)
+- We offer a CURL_FORMAT_OFF_T define in the public header, which can be used
+  to printf() curl_off_t variables. We also modified the libcurl sources to
+  use this define instead of the previous %Od approach (although I've left the
+  O-flag functional in the code). This should also prevent compilers to warn
+  on the home-grown option.
 
+- Fixed the resume-check code to test for a working resume at the end of the
+  headers and not at the first body-byte.
+
+- CURLOPT_DNS_USE_GLOBAL_CACHE is now considered obsolete. Stop using it. If
+  you need a global DNS cache for whatever reason, use the share interface and
+  you'll get a global cache that works the way it should work. You can even
+  have any number of global caches, all at your command. This is now also
+  mentioned in the docs.
+
+- Made the *printf code support the z-flag to enable size_t printf() in a
+  manner similar to how glibc allows it. To make printfing of this work on
+  platforms with 64bit size_t and 32bit ints. If there even are any! ;-)
+
+- Christopher R. Palmer discovered that if you CURLOPT_FRESH_CONNECT and
+  CURLAUTH_NTLM (or CURLAUTH_ANY and libcurl then picked NTLM), libcurl would
+  loop without succeeding to authenticate due to the new connection that was
+  made for all round-trips in the authentication. Now, the FRESH_CONNECT is
+  remade to only matter for the first connection made with curl_easy_perform()
+  and all the rest that might follow due to FOLLOWLOCATION or HTTP
+  authentication are now ignoring that option.
+
+- Adjusted the QUIT code slightly since it could core-dump.
+
+- Corrected the test suite's FTP server to provide a correct size to the
+  'verifiedserver' request.
 
 Daniel (27 February 2004)
 - Joe Halpin made the FTP code send QUIT on the control connection before
