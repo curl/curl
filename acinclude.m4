@@ -396,6 +396,17 @@ AC_DEFUN([CURL_CHECK_STRERROR_R],
 	AC_MSG_RESULT(no))])])
 
   if test "x$strerror_r" = "xyes"; then
+
+    dnl check if strerror_r is properly declared in the headers
+    AC_CHECK_DECL(strerror_r, ,
+     AC_DEFINE(HAVE_NO_STRERROR_R_DECL, 1, [we have no strerror_r() proto])
+,
+[#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
+])
+
     dnl determine if this strerror_r() is glibc or POSIX
     AC_MSG_CHECKING([for a glibc strerror_r API])
     AC_TRY_RUN([
