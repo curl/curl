@@ -194,6 +194,11 @@ Curl_cookie_add(struct CookieInfo *c,
       while(ptr && *ptr && isspace((int)*ptr))
         ptr++;
       semiptr=strchr(ptr, ';'); /* now, find the next semicolon */
+
+      if(!semiptr && *ptr)
+        /* There are no more semicolons, but there's a final name=value pair
+           coming up */
+        semiptr=ptr;
     } while(semiptr);
 
     if(NULL == co->domain)
