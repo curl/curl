@@ -608,6 +608,8 @@ CURLcode Curl_connecthost(struct connectdata *conn,  /* context */
   /*
    * Connecting with a getaddrinfo chain
    */
+  (void)port; /* the port number is already included in the getaddrinfo
+                 struct */
   for (curr_addr = remotehost->addr, aliasindex=0; curr_addr;
        curr_addr = curr_addr->ai_next, aliasindex++) {
     sockfd = socket(curr_addr->ai_family, curr_addr->ai_socktype,
