@@ -111,6 +111,17 @@ free_cookiemess(struct Cookie *co)
   free(co);
 }
 
+static bool tailmatch(const char *little, const char *bigone)
+{
+  unsigned int littlelen = strlen(little);
+  unsigned int biglen = strlen(bigone);
+
+  if(littlelen > biglen)
+    return FALSE;
+
+  return strequal(little, bigone+biglen-littlelen);
+}
+
 /****************************************************************************
  *
  * Curl_cookie_add()
@@ -123,7 +134,10 @@ struct Cookie *
 Curl_cookie_add(struct CookieInfo *c,
                 bool httpheader, /* TRUE if HTTP header-style line */
                 char *lineptr,   /* first character of the line */
-                char *domain)    /* default domain */
+                char *domain,    /* default domain */
+                char *path)      /* full path used when this cookie is set,
+                                    used to get default path for the cookie
+                                    unless set */
 {
   struct Cookie *clist;
   char what[MAX_COOKIE_LINE];
@@ -134,6 +148,7 @@ Curl_cookie_add(struct CookieInfo *c,
   struct Cookie *lastc=NULL;
   time_t now = time(NULL);
   bool replace_old = FALSE;
+  bool badcookie = FALSE; /* cookies are good by default. mmmmm yummy */
 
   /* First, alloc and init a new struct for it */
   co = (struct Cookie *)malloc(sizeof(struct Cookie));
@@ -186,8 +201,58 @@ Curl_cookie_add(struct CookieInfo *c,
             co->path=strdup(whatptr);
           }
           else if(strequal("domain", name)) {
-            co->domain=strdup(whatptr);
-            co->field1= (whatptr[0]=='.')?2:1;
+            /* note that this name may or may not have a preceeding dot, but
+               we don't care about that, we treat the names the same anyway */
+
+            char *ptr=whatptr;
+            int dotcount=1;
+            unsigned int i;
+
+            static const char *seventhree[]= {
+              "com", "edu", "net", "org", "gov", "mil", "int"
+            };
+
+            /* Count the dots, we need to make sure that there are THREE dots
+               in the normal domains, or TWO in the seventhree-domains. */
+
+            if('.' == whatptr[0])
+              /* don't count the initial dot, assume it */
+              ptr++;
+
+            do {
+              ptr = strchr(ptr, '.');
+              if(ptr) {
+                ptr++;
+                dotcount++;
+              }
+            } while(ptr);
+
+            for(i=0;
+                i<sizeof(seventhree)/sizeof(seventhree[0]); i++) {
+              if(tailmatch(seventhree[i], whatptr)) {
+                dotcount++; /* we allow one dot less for these */
+                break;
+              }
+            }
+            if(dotcount < 3)
+              /* Received and skipped a cookie with a domain using too few
+                 dots. */
+              badcookie=TRUE; /* mark this as a bad cookie */
+            else {
+              /* Now, we make sure that our host is within the given domain,
+                 or the given domain is not valid and thus cannot be set. */
+
+              if(!domain || tailmatch(whatptr, domain)) {
+                co->domain=strdup(whatptr);
+                co->tailmatch=TRUE; /* we always do that if the domain name was
+                                       given */
+              }
+              else
+                /* we did not get a tailmatch and then the attempted set domain
+                   is not a domain to which the current host belongs. Mark as
+                   bad. */
+                badcookie=TRUE;
+            }
           }
           else if(strequal("version", name)) {
             co->version=strdup(whatptr);
@@ -249,8 +314,11 @@ Curl_cookie_add(struct CookieInfo *c,
         semiptr=strchr(ptr, '\0');
     } while(semiptr);
 
-    if(NULL == co->name) {
-      /* we didn't get a cookie name, this is an illegal line, bail out */
+    if(badcookie || (NULL == co->name)) {
+      /* we didn't get a cookie name or a bad one,
+         this is an illegal line, bail out */
+      if(co->expirestr)
+        free(co->expirestr);
       if(co->domain)
         free(co->domain);
       if(co->path)
@@ -264,8 +332,20 @@ Curl_cookie_add(struct CookieInfo *c,
     }
 
     if(NULL == co->domain)
-      /* no domain given in the header line, set the default now */
+      /* no domain was given in the header line, set the default now */
       co->domain=domain?strdup(domain):NULL;
+    if((NULL == co->path) && path) {
+      /* no path was given in the header line, set the default now */
+      char *endslash = strrchr(path, '/');
+      if(endslash) {
+        int pathlen = endslash-path+1; /* include the ending slash */
+        co->path=malloc(pathlen+1); /* one extra for the zero byte */
+        if(co->path) {
+          memcpy(co->path, path, pathlen);
+          co->path[pathlen]=0; /* zero terminate */
+        }
+      }
+    }
   }
   else {
     /* This line is NOT a HTTP header style line, we do offer support for
@@ -297,7 +377,8 @@ Curl_cookie_add(struct CookieInfo *c,
 
     /* Now loop through the fields and init the struct we already have
        allocated */
-    for(ptr=firstptr, fields=0; ptr; ptr=strtok_r(NULL, "\t", &tok_buf), fields++) {
+    for(ptr=firstptr, fields=0; ptr;
+        ptr=strtok_r(NULL, "\t", &tok_buf), fields++) {
       switch(fields) {
       case 0:
         co->domain = strdup(ptr);
@@ -312,10 +393,8 @@ Curl_cookie_add(struct CookieInfo *c,
 
            As far as I can see, it is set to true when the cookie says
            .domain.com and to false when the domain is complete www.domain.com
-
-           We don't currently take advantage of this knowledge.
         */
-        co->field1=strequal(ptr, "TRUE")+1; /* store information */
+        co->tailmatch=strequal(ptr, "TRUE"); /* store information */
         break;
       case 2:
         /* It turns out, that sometimes the file format allows the path
@@ -375,10 +454,11 @@ Curl_cookie_add(struct CookieInfo *c,
 
       if(clist->domain && co->domain) {
         if(strequal(clist->domain, co->domain) ||
-           (clist->domain[0]=='.' &&
-            strequal(&(clist->domain[1]), co->domain)) ||
-           (co->domain[0]=='.' &&
-            strequal(clist->domain, &(co->domain[1]))) )
+           (co->tailmatch && /* only do the dot magic if tailmatching is OK */
+            ((clist->domain[0]=='.' &&
+              strequal(&(clist->domain[1]), co->domain)) ||
+             (co->domain[0]=='.' &&
+              strequal(clist->domain, &(co->domain[1]))))) )
           /* The domains are identical, or at least identical if you skip the
              preceeding dot */
           replace_old=TRUE;
@@ -532,7 +612,7 @@ struct CookieInfo *Curl_cookie_init(char *file,
       while(*lineptr && isspace((int)*lineptr))
         lineptr++;
 
-      Curl_cookie_add(c, headerline, lineptr, NULL);
+      Curl_cookie_add(c, headerline, lineptr, NULL, NULL);
     }
     if(fromfile)
       fclose(fp);
@@ -561,9 +641,6 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
    struct Cookie *newco;
    struct Cookie *co;
    time_t now = time(NULL);
-   int hostlen=strlen(host);
-   int domlen;
-
    struct Cookie *mainco=NULL;
 
    if(!c || !c->cookies)
@@ -572,43 +649,42 @@ struct Cookie *Curl_cookie_getlist(struct CookieInfo *c,
    co = c->cookies;
 
    while(co) {
-      /* only process this cookie if it is not expired or had no expire
-	 date AND that if the cookie requires we're secure we must only
-	 continue if we are! */
+     /* only process this cookie if it is not expired or had no expire
+        date AND that if the cookie requires we're secure we must only
+        continue if we are! */
      if( (co->expires<=0 || (co->expires> now)) &&
          (co->secure?secure:TRUE) ) {
+       
+       /* now check if the domain is correct */
+       if(!co->domain ||
+          (co->tailmatch && tailmatch(co->domain, host)) ||
+          (!co->tailmatch && strequal(host, co->domain)) ) {
+         /* the right part of the host matches the domain stuff in the
+            cookie data */
+         
+         /* now check the left part of the path with the cookies path
+            requirement */
+         if(!co->path ||
+            checkprefix(co->path, path) ) {
 
-	 /* now check if the domain is correct */
-	 domlen=co->domain?strlen(co->domain):0;
-	 if(!co->domain ||
-	    ((domlen<=hostlen) &&
-	     strequal(host+(hostlen-domlen), co->domain)) ) {
-	    /* the right part of the host matches the domain stuff in the
-	       cookie data */
+           /* and now, we know this is a match and we should create an
+              entry for the return-linked-list */
+           
+           newco = (struct Cookie *)malloc(sizeof(struct Cookie));
+           if(newco) {
+             /* first, copy the whole source cookie: */
+             memcpy(newco, co, sizeof(struct Cookie));
 
-	    /* now check the left part of the path with the cookies path
-	       requirement */
-           if(!co->path ||
-              checkprefix(co->path, path) ) {
-
-	       /* and now, we know this is a match and we should create an
-		  entry for the return-linked-list */
-
-	       newco = (struct Cookie *)malloc(sizeof(struct Cookie));
-	       if(newco) {
-		  /* first, copy the whole source cookie: */
-		  memcpy(newco, co, sizeof(struct Cookie));
-
-		  /* then modify our next */
-		  newco->next = mainco;
-
-		  /* point the main to us */
-		  mainco = newco;
-	       }
-	    }
-	 }
-      }
-      co = co->next;
+             /* then modify our next */
+             newco->next = mainco;
+             
+             /* point the main to us */
+             mainco = newco;
+           }
+         }
+       }
+     }
+     co = co->next;
    }
 
    return mainco; /* return the new list */
@@ -716,15 +792,19 @@ int Curl_cookie_output(struct CookieInfo *c, char *dumphere)
      
     while(co) {
       fprintf(out,
-              "%s\t" /* domain */
-              "%s\t" /* field1 */
+              "%s%s\t" /* domain */
+              "%s\t" /* tailmatch */
               "%s\t" /* path */
               "%s\t" /* secure */
               "%u\t" /* expires */
               "%s\t" /* name */
               "%s\n", /* value */
+
+              /* Make sure all domains are prefixed with a dot if they allow
+                 tailmatching. This is Mozilla-style. */
+              (co->tailmatch && co->domain && co->domain[0] != '.')? ".":"",
               co->domain?co->domain:"unknown",
-              co->field1==2?"TRUE":"FALSE",
+              co->tailmatch?"TRUE":"FALSE",
               co->path?co->path:"/",
               co->secure?"TRUE":"FALSE",
               (unsigned int)co->expires,
