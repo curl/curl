@@ -2657,19 +2657,28 @@ operate(struct Configurable *config, int argc, char *argv[])
           else
             filep = config->infile;
 
-          urlbuffer=(char *)malloc(strlen(url) + strlen(filep) + 3);
-          if(!urlbuffer) {
-            helpf("out of memory\n");
-            return CURLE_OUT_OF_MEMORY;
+          /* URL encode the file name */
+          filep = curl_escape(filep, 0 /* use strlen */);
+
+          if(filep) {
+
+            urlbuffer=(char *)malloc(strlen(url) + strlen(filep) + 3);
+            if(!urlbuffer) {
+              helpf("out of memory\n");
+              return CURLE_OUT_OF_MEMORY;
+            }
+            if(ptr)
+              /* there is a trailing slash on the URL */
+              sprintf(urlbuffer, "%s%s", url, filep);
+            else
+              /* thers is no trailing slash on the URL */
+              sprintf(urlbuffer, "%s/%s", url, filep);
+            
+            curl_free(filep);
+
+            free(url);
+            url = urlbuffer; /* use our new URL instead! */
           }
-          if(ptr)
-            /* there is a trailing slash on the URL */
-            sprintf(urlbuffer, "%s%s", url, filep);
-          else
-            /* thers is no trailing slash on the URL */
-            sprintf(urlbuffer, "%s/%s", url, filep);
-          
-          url = urlbuffer; /* use our new URL instead! */
         }
 /*VMS??-- Reading binary from files can be a problem... */
 /*VMS??   Only FIXED, VAR etc WITHOUT implied CC will work */
