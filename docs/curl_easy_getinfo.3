@@ -52,6 +52,12 @@ start until the file transfer is just about to begin. This includes all
 pre-transfer commands and negotiations that are specific to the particular
 protocol(s) involved.
 .TP
+.B CURLINFO_STARTTRANSFER_TIME
+Pass a pointer to a double to receive the time, in seconds, it took from the
+start until the first byte is just about to be transfered. This includes
+CURLINFO_PRETRANSFER_TIME and also the time the server needs to calculate
+the result.
+.TP
 .B CURLINFO_SIZE_UPLOAD
 Pass a pointer to a double to receive the total amount of bytes that were
 uploaded.

@@ -374,7 +374,7 @@ struct Progress {
   int width; /* screen width at download start */
   int flags; /* see progress.h */
 
-  long timespent;
+  double timespent;
 
   double dlspeed;
   double ulspeed;
@@ -382,6 +382,7 @@ struct Progress {
   double t_nslookup;
   double t_connect;
   double t_pretransfer;
+  double t_starttransfer;
 
   struct timeval start;
   struct timeval t_startsingle;

@@ -111,22 +111,24 @@ void Curl_pgrsTime(struct SessionHandle *data, timerid timer)
     /* mistake filter */
     break;
   case TIMER_STARTSINGLE:
-    /* This is set at the start of a single fetch, there may be several
-       fetches within an operation, why we add all other times relative
-       to this one */
+    /* This is set at the start of a single fetch */
     data->progress.t_startsingle = Curl_tvnow();
     break;
 
   case TIMER_NAMELOOKUP:
-    data->progress.t_nslookup +=
+    data->progress.t_nslookup =
       (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000.0;
     break;
   case TIMER_CONNECT:
-    data->progress.t_connect +=
+    data->progress.t_connect =
       (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000.0;
     break;
   case TIMER_PRETRANSFER:
-    data->progress.t_pretransfer +=
+    data->progress.t_pretransfer =
+      (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000.0;
+    break;
+  case TIMER_STARTTRANSFER:
+    data->progress.t_starttransfer =
       (double)Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle)/1000.0;
     break;
   case TIMER_POSTRANSFER:
@@ -227,7 +229,7 @@ int Curl_pgrsUpdate(struct connectdata *conn)
   /* The exact time spent so far (from the start) */
   timespent = (double)Curl_tvdiff (now, data->progress.start)/1000;
 
-  data->progress.timespent = (long)timespent;
+  data->progress.timespent = timespent;
 
   /* The average download speed this far */
   data->progress.dlspeed =

@@ -43,6 +43,7 @@ CURLcode Curl_initinfo(struct SessionHandle *data)
   pro->t_nslookup = 0;
   pro->t_connect = 0;
   pro->t_pretransfer = 0;
+  pro->t_starttransfer = 0;
 
   info->httpcode = 0;
   info->httpversion=0;
@@ -106,6 +107,9 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     break;
   case CURLINFO_PRETRANSFER_TIME:
     *param_doublep =  data->progress.t_pretransfer;
+    break;
+  case CURLINFO_STARTTRANSFER_TIME:
+    *param_doublep = data->progress.t_starttransfer;
     break;
   case CURLINFO_SIZE_UPLOAD:
     *param_doublep =  data->progress.uploaded;

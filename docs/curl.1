@@ -569,6 +569,11 @@ The time, in seconds, it took from the start until the file transfer is just
 about to begin. This includes all pre-transfer commands and negotiations that
 are specific to the particular protocol(s) involved.
 .TP
+.B time_starttransfer
+The time, in seconds, it took from the start until the first byte is just about
+to be transfered. This includes time_pretransfer and also the time the
+server needs to calculate the result.
+.TP
 .B size_download
 The total amount of bytes that were downloaded.
 .TP

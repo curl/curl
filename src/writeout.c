@@ -37,6 +37,7 @@ typedef enum {
   VAR_NAMELOOKUP_TIME,
   VAR_CONNECT_TIME,
   VAR_PRETRANSFER_TIME,
+  VAR_STARTTRANSFER_TIME,
   VAR_SIZE_DOWNLOAD,
   VAR_SIZE_UPLOAD,
   VAR_SPEED_DOWNLOAD,
@@ -61,6 +62,7 @@ static struct variable replacements[]={
   {"time_namelookup", VAR_NAMELOOKUP_TIME},
   {"time_connect", VAR_CONNECT_TIME},
   {"time_pretransfer", VAR_PRETRANSFER_TIME},
+  {"time_starttransfer", VAR_STARTTRANSFER_TIME},
   {"size_header", VAR_HEADER_SIZE},
   {"size_request", VAR_REQUEST_SIZE},
   {"size_download", VAR_SIZE_DOWNLOAD},
@@ -136,6 +138,11 @@ void ourWriteOut(CURL *curl, char *writeinfo)
               case VAR_PRETRANSFER_TIME:
                 if(CURLE_OK ==
                    curl_easy_getinfo(curl, CURLINFO_PRETRANSFER_TIME, &doubleinfo))
+                  fprintf(stream, "%.3f", doubleinfo);
+                break;
+              case VAR_STARTTRANSFER_TIME:
+                if(CURLE_OK ==
+                   curl_easy_getinfo(curl, CURLINFO_STARTTRANSFER_TIME, &doubleinfo))
                   fprintf(stream, "%.3f", doubleinfo);
                 break;
               case VAR_SIZE_UPLOAD:

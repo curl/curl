@@ -584,8 +584,8 @@ CURLcode curl_global_init(long flags);
 void curl_global_cleanup(void);
 
 /* This is the version number */
-#define LIBCURL_VERSION "7.9.1"
-#define LIBCURL_VERSION_NUM 0x070901
+#define LIBCURL_VERSION "7.9.2-pre3"
+#define LIBCURL_VERSION_NUM 0x070902
 
 /* linked-list structure for the CURLOPT_QUOTE option (and other) */
 struct curl_slist {
@@ -635,7 +635,9 @@ typedef enum {
   CURLINFO_CONTENT_LENGTH_DOWNLOAD   = CURLINFO_DOUBLE + 15,
   CURLINFO_CONTENT_LENGTH_UPLOAD     = CURLINFO_DOUBLE + 16,
 
-  CURLINFO_LASTONE          = 17
+  CURLINFO_STARTTRANSFER_TIME = CURLINFO_DOUBLE + 17,
+
+  CURLINFO_LASTONE          = 18
 } CURLINFO;
 
 /* unfortunately, the easy.h include file needs the options and info stuff
