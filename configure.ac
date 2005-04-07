@@ -56,7 +56,7 @@ AC_SUBST(PKGADD_VENDOR)
 
 dnl
 dnl initialize all the info variables
-    curl_ssl_msg="no      (--with-ssl)"
+    curl_ssl_msg="no      (--with-ssl / --with-gnutls)"
    curl_zlib_msg="no      (--with-zlib)"
    curl_krb4_msg="no      (--with-krb4*)"
     curl_gss_msg="no      (--with-gssapi)"
@@ -747,11 +747,7 @@ AC_HELP_STRING([--with-ssl=PATH],[where to look for SSL, PATH points to the SSL 
 AC_HELP_STRING([--without-ssl], [disable SSL]),
   OPT_SSL=$withval)
 
-if test X"$OPT_SSL" = Xno
-then
-  AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more])  
-else
-
+if test X"$OPT_SSL" != Xno; then
   dnl backup the pre-ssl variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
@@ -868,13 +864,13 @@ else
       dnl Have the libraries--check for SSLeay/OpenSSL headers
       AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
                        openssl/pem.h openssl/ssl.h openssl/err.h,
-        curl_ssl_msg="enabled"
+        curl_ssl_msg="enabled (OpenSSL)"
         OPENSSL_ENABLED=1
         AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use]))
 
       if test $ac_cv_header_openssl_x509_h = no; then
         AC_CHECK_HEADERS(x509.h rsa.h crypto.h pem.h ssl.h err.h,
-          curl_ssl_msg="enabled"
+          curl_ssl_msg="enabled (OpenSSL)"
           OPENSSL_ENABLED=1)
       fi
     fi
@@ -989,6 +985,66 @@ if test X"$OPENSSL_ENABLED" = X"1"; then
   fi
 fi
 
+dnl ----------------------------------------------------
+dnl FIX: only check for GnuTLS if OpenSSL is not enabled
+dnl ----------------------------------------------------
+
+dnl Default to compiler & linker defaults for GnuTLS files & libraries.
+OPT_GNUTLS=off
+
+AC_ARG_WITH(gnutls,dnl
+AC_HELP_STRING([--with-gnutls=PATH],[where to look for GnuTLS, PATH points to the installation root (default: /usr/local/)])
+AC_HELP_STRING([--without-gnutls], [disable GnuTLS detection]),
+  OPT_GNUTLS=$withval)
+
+if test "$OPENSSL_ENABLED" != "1"; then
+
+  if test X"$OPT_GNUTLS" != Xoff; then
+    if test "x$OPT_GNUTLS" = "xyes"; then
+     check=`libgnutls-config --version 2>/dev/null`
+     if test -n "$check"; then
+       addlib=`libgnutls-config --libs`
+       addcflags=`libgnutls-config --cflags`
+       version=`libgnutls-config --version`
+     fi
+    else
+      addlib="-L$OPT_GNUTLS/lib -lgnutls"
+      addcflags="-I$OPT_GNUTLS/include"
+      version=`$OPT_GNUTLS/bin/libgnutls-config --version`
+    fi
+
+    CLEANLDFLAGS="$LDFLAGS"
+    CLEANCPPFLAGS="$CPPFLAGS"
+  
+    LDFLAGS="$LDFLAGS $addlib"
+    if test "$addcflags" != "-I/usr/include"; then
+       CPPFLAGS="$CPPFLAGS $addcflags"
+    fi
+  
+    AC_CHECK_LIB(gnutls, gnutls_check_version,
+       [
+       AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
+       AC_SUBST(USE_GNUTLS, [1])
+       USE_GNUTLS="yes"
+     curl_ssl_msg="enabled (GnuTLS)"
+       ],
+       [
+         LDFLAGS="$CLEANLDFLAGS"
+         CPPFLAGS="$CLEANCPPFLAGS"
+       ])
+  
+    if test "x$USE_GNUTLS" = "xyes"; then
+      AC_MSG_NOTICE([detected GnuTLS version $version])
+    fi
+  fi dnl GNUTLS not disabled
+
+  if test X"$USE_GNUTLS" != "Xyes"; then
+    AC_MSG_WARN([SSL disabled, you will not be able to use HTTPS, FTPS, NTLM and more.])
+    AC_MSG_WARN([Use --with-ssl or --with-gnutls to address this.])
+  fi
+
+fi dnl OPENSSL != 1
+  
 dnl **********************************************************************
 dnl Check for the presence of ZLIB libraries and headers
 dnl **********************************************************************
