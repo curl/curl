@@ -1006,11 +1006,13 @@ if test "$OPENSSL_ENABLED" != "1"; then
        addlib=`libgnutls-config --libs`
        addcflags=`libgnutls-config --cflags`
        version=`libgnutls-config --version`
+       gtlsprefix=`libgnutls-config --prefix`
      fi
     else
       addlib="-L$OPT_GNUTLS/lib -lgnutls"
       addcflags="-I$OPT_GNUTLS/include"
       version=`$OPT_GNUTLS/bin/libgnutls-config --version`
+      gtlsprefix=$OPT_GNUTLS
     fi
 
     CLEANLDFLAGS="$LDFLAGS"
@@ -1035,6 +1037,14 @@ if test "$OPENSSL_ENABLED" != "1"; then
   
     if test "x$USE_GNUTLS" = "xyes"; then
       AC_MSG_NOTICE([detected GnuTLS version $version])
+
+      dnl when shared libs were found in a path that the run-time
+      dnl linker doesn't search through, we need to add it to
+      dnl LD_LIBRARY_PATH to prevent further configure tests to fail
+      dnl due to this
+
+      LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$gtlsprefix/lib$libsuff"
+      export LD_LIBRARY_PATH
     fi
   fi dnl GNUTLS not disabled
 
