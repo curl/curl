@@ -1,10 +1,6 @@
 Things to fix for the GnuTLS support
 ====================================
 
-* set LD_LIBRARY_PATH in configure when the GnuTLS lib was found, to fix link
-  problems that othwerwise might happen within configure. Compare with OpenSSL
-  stuff.
-
 * make the configure --with-ssl option first check for OpenSSL and then for
   GnuTLS if OpenSSL wasn't detected.
 
