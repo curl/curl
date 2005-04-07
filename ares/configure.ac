@@ -69,7 +69,15 @@ AC_CHECK_HEADERS(
        netinet/in.h \
        arpa/nameser.h \
        arpa/nameser_compat.h \
-       arpa/inet.h
+       arpa/inet.h, , ,
+[
+dnl We do this default-include simply to make sure that the nameser_compat.h
+dnl header *REALLY* can be include after the new nameser.h. It seems AIX 5.1
+dnl (and others?) is not designed to allow this.
+#ifdef HAVE_ARPA_NAMESER_H
+#include <arpa/nameser.h>
+#endif
+]
   )
 
 dnl check for AF_INET6
