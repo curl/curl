@@ -6,6 +6,19 @@
 
                                   Changelog
 
+Daniel (7 April 2005)
+- Added ability to build and run with GnuTLS as an alternative to OpenSSL for
+  the secure layer. configure --with-gnutls enables with. Note that the
+  previous OpenSSL check still has preference and if it first detects OpenSSL,
+  it will not check for GnuTLS. You may need to explictly diable OpenSSL with
+  --without-ssl.
+
+  This work has been sponsored by The Written Word.
+
+Daniel (5 April 2005)
+- Christophe Legry fixed the post-upload check for FTP to not complain if the
+  upload was skipped due to a time-condition as set with
+  CURLOPT_TIMECONDITION. I added test case 247 and 248 to verify.
 
 Version 7.13.2 (5 April 2005)
 

@@ -10,15 +10,16 @@ Curl and libcurl 7.13.3
 
 This release includes the following changes:
 
- o 
+ o GnuTLS support, use configure --with-gnutls. Work on this was sponsored
+   by The Written Word.
 
 This release includes the following bugfixes:
 
- o 
+ o time-conditioned FTP uploads
 
 Other curl-related news since the previous public release:
 
- o 
+ o pycurl 7.13.2: http://pycurl.sf.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
