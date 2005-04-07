@@ -85,6 +85,14 @@ fi
 
 echo "buildconf: automake version $am_version (ok)"
 
+ac=`findtool aclocal`
+
+if test -z "$ac"; then
+  echo "buildconf: aclocal not found. Weird automake installation!"
+  exit 1
+else
+  echo "buildconf: aclocal found"
+fi
 
 #--------------------------------------------------------------------------
 # libtool check
@@ -141,6 +149,13 @@ if test $lt_status != "good"; then
 fi
 
 echo "buildconf: libtool version $lt_version (ok)"
+
+if test -f "$LIBTOOLIZE"; then
+  echo "buildconf: libtoolize found"
+else
+  echo "buildconf: libtoolize not found. Weird libtool installation!"
+  exit 1
+fi
 
 #--------------------------------------------------------------------------
 # m4 check
