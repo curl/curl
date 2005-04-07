@@ -933,6 +933,9 @@ SPNEGO Negotiate authentication is supported.
 This curl supports transfers of large files, files larger than 2GB.
 .IP "IDN"
 This curl supports IDN - international domain names.
+.IP "SSPI"
+SSPI is supported. If you use NTLM and set a blank user name, curl will
+authenticate with your current user and password.
 .RE
 .IP "-w/--write-out <format>"
 Defines what to display after a completed and successful operation. The format
