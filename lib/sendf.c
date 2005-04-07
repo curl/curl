@@ -44,13 +44,18 @@
 #include "urldata.h"
 #include "sendf.h"
 #include "connect.h" /* for the Curl_ourerrno() proto */
+#include "sslgen.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
 
 #ifdef HAVE_KRB4
 #include "krb4.h"
+#else
+#define Curl_sec_write(a,b,c,d) -1
+#define Curl_sec_read(a,b,c,d) -1
 #endif
+
 #include <string.h>
 #include "memory.h"
 #include "strerror.h"
@@ -233,63 +238,18 @@ CURLcode Curl_write(struct connectdata *conn,
 {
   ssize_t bytes_written;
   CURLcode retcode;
-
-#ifdef USE_SSLEAY
-  /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
-     If it is the second socket, we set num to 1. Otherwise to 0. This lets
-     us use the correct ssl handle. */
   int num = (sockfd == conn->sock[SECONDARYSOCKET]);
-  /* SSL_write() is said to return 'int' while write() and send() returns
-     'size_t' */
-  if (conn->ssl[num].use) {
-    int err;
-    char error_buffer[120]; /* OpenSSL documents that this must be at least
-                               120 bytes long. */
-    unsigned long sslerror;
-    int rc = SSL_write(conn->ssl[num].handle, mem, (int)len);
 
-    if(rc < 0) {
-      err = SSL_get_error(conn->ssl[num].handle, rc);
-
-      switch(err) {
-      case SSL_ERROR_WANT_READ:
-      case SSL_ERROR_WANT_WRITE:
-        /* The operation did not complete; the same TLS/SSL I/O function
-           should be called again later. This is basicly an EWOULDBLOCK
-           equivalent. */
-        *written = 0;
-        return CURLE_OK;
-      case SSL_ERROR_SYSCALL:
-        failf(conn->data, "SSL_write() returned SYSCALL, errno = %d\n",
-              Curl_ourerrno());
-        return CURLE_SEND_ERROR;
-      case SSL_ERROR_SSL:
-        /*  A failure in the SSL library occurred, usually a protocol error.
-            The OpenSSL error queue contains more information on the error. */
-        sslerror = ERR_get_error();
-        failf(conn->data, "SSL_write() error: %s\n",
-              ERR_error_string(sslerror, error_buffer));
-        return CURLE_SEND_ERROR;
-      }
-      /* a true error */
-      failf(conn->data, "SSL_write() return error %d\n", err);
-      return CURLE_SEND_ERROR;
-    }
-    bytes_written = rc;
-  }
+  if (conn->ssl[num].use)
+    /* only TRUE if SSL enabled */
+    bytes_written = Curl_ssl_send(conn, num, mem, len);
   else {
-#else
-  (void)conn;
-#endif
-#ifdef HAVE_KRB4
-    if(conn->sec_complete) {
+    if(conn->sec_complete)
+      /* only TRUE if krb4 enabled */
       bytes_written = Curl_sec_write(conn, sockfd, mem, len);
-    }
     else
-#endif /* HAVE_KRB4 */
-    {
       bytes_written = (ssize_t)swrite(sockfd, mem, len);
-    }
+
     if(-1 == bytes_written) {
       int err = Curl_ourerrno();
 
@@ -311,10 +271,7 @@ CURLcode Curl_write(struct connectdata *conn,
         failf(conn->data, "Send failure: %s",
               Curl_strerror(conn, err));
     }
-#ifdef USE_SSLEAY
   }
-#endif
-
   *written = bytes_written;
   retcode = (-1 != bytes_written)?CURLE_OK:CURLE_SEND_ERROR;
 
@@ -376,7 +333,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
               ssize_t *n)               /* amount bytes read */
 {
   ssize_t nread;
-#ifdef USE_SSLEAY
+
   /* Set 'num' to 0 or 1, depending on which socket that has been sent here.
      If it is the second socket, we set num to 1. Otherwise to 0. This lets
      us use the correct ssl handle. */
@@ -384,45 +341,17 @@ int Curl_read(struct connectdata *conn, /* connection data */
 
   *n=0; /* reset amount to zero */
 
-  if (conn->ssl[num].use) {
-    nread = (ssize_t)SSL_read(conn->ssl[num].handle, buf, (int)buffersize);
+  if(conn->ssl[num].use) {
+    nread = Curl_ssl_recv(conn, num, buf, buffersize);
 
-    if(nread < 0) {
-      /* failed SSL_read */
-      int err = SSL_get_error(conn->ssl[num].handle, (int)nread);
-
-      switch(err) {
-      case SSL_ERROR_NONE: /* this is not an error */
-      case SSL_ERROR_ZERO_RETURN: /* no more data */
-        break;
-      case SSL_ERROR_WANT_READ:
-      case SSL_ERROR_WANT_WRITE:
-        /* there's data pending, re-invoke SSL_read() */
-        return -1; /* basicly EWOULDBLOCK */
-      default:
-        /* openssl/ssl.h says "look at error stack/return value/errno" */
-        {
-          char error_buffer[120]; /* OpenSSL documents that this must be at
-                                     least 120 bytes long. */
-          unsigned long sslerror = ERR_get_error();
-          failf(conn->data, "SSL read: %s, errno %d",
-                ERR_error_string(sslerror, error_buffer),
-                Curl_ourerrno() );
-        }
-        return CURLE_RECV_ERROR;
-      }
-    }
+    if(nread == -1)
+      return -1; /* -1 from Curl_ssl_recv() means EWOULDBLOCK */
   }
   else {
-#else
-    (void)conn;
-#endif
     *n=0; /* reset amount to zero */
-#ifdef HAVE_KRB4
     if(conn->sec_complete)
       nread = Curl_sec_read(conn, sockfd, buf, buffersize);
     else
-#endif
       nread = sread(sockfd, buf, buffersize);
 
     if(-1 == nread) {
@@ -434,10 +363,7 @@ int Curl_read(struct connectdata *conn, /* connection data */
 #endif
         return -1;
     }
-
-#ifdef USE_SSLEAY
   }
-#endif /* USE_SSLEAY */
   *n = nread;
   return CURLE_OK;
 }

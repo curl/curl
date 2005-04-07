@@ -33,7 +33,7 @@
 #include <stdarg.h>
 #include <stdlib.h>
 #include "memory.h"
-#include "ssluse.h"
+#include "sslgen.h"
 
 /* Make this the last #include */
 #include "memdebug.h"
@@ -182,7 +182,7 @@ CURLcode Curl_getinfo(struct SessionHandle *data, CURLINFO info, ...)
     *param_longp = data->info.numconnects;
     break;
   case CURLINFO_SSL_ENGINES:
-    *param_slistp = Curl_SSL_engines_list(data);
+    *param_slistp = Curl_ssl_engines_list(data);
     break;
   default:
     return CURLE_BAD_FUNCTION_ARGUMENT;

@@ -30,8 +30,7 @@
 */
 
 #ifndef CURL_DISABLE_HTTP
-#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
-/* We need OpenSSL for the crypto lib to provide us with MD4 and DES */
+#ifdef USE_NTLM
 
 /* -- WIN32 approved -- */
 #include <stdio.h>
@@ -769,5 +768,5 @@ Curl_ntlm_cleanup(struct connectdata *conn)
 #endif
 }
 
-#endif /* USE_SSLEAY */
+#endif /* USE_NTLM */
 #endif /* !CURL_DISABLE_HTTP */

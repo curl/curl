@@ -75,7 +75,7 @@
 #include "urldata.h"
 #include <curl/curl.h>
 #include "transfer.h"
-#include "ssluse.h"
+#include "sslgen.h"
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
@@ -201,7 +201,7 @@ CURLcode curl_global_init(long flags)
   Curl_ccalloc = (curl_calloc_callback)calloc;
 
   if (flags & CURL_GLOBAL_SSL)
-    if (!Curl_SSL_init())
+    if (!Curl_ssl_init())
       return CURLE_FAILED_INIT;
 
   if (flags & CURL_GLOBAL_WIN32)
@@ -266,7 +266,7 @@ void curl_global_cleanup(void)
   Curl_global_host_cache_dtor();
 
   if (init_flags & CURL_GLOBAL_SSL)
-    Curl_SSL_cleanup();
+    Curl_ssl_cleanup();
 
   if (init_flags & CURL_GLOBAL_WIN32)
     win32_cleanup();

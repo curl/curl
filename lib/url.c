@@ -102,7 +102,7 @@ void idn_free (void *ptr); /* prototype from idn-free.h, not provided by
 
 #include "formdata.h"
 #include "base64.h"
-#include "ssluse.h"
+#include "sslgen.h"
 #include "hostip.h"
 #include "transfer.h"
 #include "sendf.h"
@@ -154,7 +154,6 @@ static bool ConnectionExists(struct SessionHandle *data,
                              struct connectdata **usethis);
 static long ConnectionStore(struct SessionHandle *data,
                             struct connectdata *conn);
-static bool safe_strequal(char* str1, char* str2);
 
 #ifndef USE_ARES
 /* not for Win32, unless it is cygwin
@@ -211,11 +210,8 @@ CURLcode Curl_close(struct SessionHandle *data)
     }
   }
 
-#ifdef USE_SSLEAY
   /* Close down all open SSL info and sessions */
-  Curl_SSL_Close_All(data);
-#endif
-
+  Curl_ssl_close_all(data);
   Curl_safefree(data->state.first_host);
   Curl_safefree(data->state.scratch);
 
@@ -832,7 +828,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
   {
     long auth = va_arg(param, long);
     /* switch off bits we can't support */
-#if ! defined(USE_SSLEAY) && !defined(USE_WINDOWS_SSPI)
+#ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
 #ifndef HAVE_GSSAPI
@@ -852,7 +848,7 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
   {
     long auth = va_arg(param, long);
     /* switch off bits we can't support */
-#ifndef USE_SSLEAY
+#ifndef USE_NTLM
     auth &= ~CURLAUTH_NTLM; /* no NTLM without SSL */
 #endif
 #ifndef HAVE_GSSAPI
@@ -1153,14 +1149,14 @@ CURLcode Curl_setopt(struct SessionHandle *data, CURLoption option, ...)
      */
     argptr = va_arg(param, char *);
     if (argptr && argptr[0])
-       result = Curl_SSL_set_engine(data, argptr);
+       result = Curl_ssl_set_engine(data, argptr);
     break;
 
   case CURLOPT_SSLENGINE_DEFAULT:
     /*
      * flag to set engine as default.
      */
-    result = Curl_SSL_set_engine_default(data);
+    result = Curl_ssl_set_engine_default(data);
     break;
   case CURLOPT_CRLF:
     /*
@@ -1450,9 +1446,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
 
     data->state.authproblem = FALSE;
 
-#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
     Curl_ntlm_cleanup(conn);
-#endif
   }
 
   if(conn->curl_disconnect)
@@ -1481,7 +1475,7 @@ CURLcode Curl_disconnect(struct connectdata *conn)
                                        freed with idn_free() since this was
                                        allocated by libidn */
 #endif
-  Curl_SSL_Close(conn);
+  Curl_ssl_close(conn);
 
   /* close possibly still open sockets */
   if(CURL_SOCKET_BAD != conn->sock[SECONDARYSOCKET])
@@ -2419,10 +2413,10 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 
       if(checkprefix("GOPHER.", conn->host.name))
         strcpy(conn->protostr, "gopher");
-#ifdef USE_SSLEAY
+#ifdef USE_SSL
       else if(checkprefix("FTPS", conn->host.name))
         strcpy(conn->protostr, "ftps");
-#endif /* USE_SSLEAY */
+#endif /* USE_SSL */
       else if(checkprefix("FTP.", conn->host.name))
         strcpy(conn->protostr, "ftp");
       else if(checkprefix("TELNET.", conn->host.name))
@@ -2728,7 +2722,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
 #endif
   }
   else if (strequal(conn->protostr, "HTTPS")) {
-#if defined(USE_SSLEAY) && !defined(CURL_DISABLE_HTTP)
+#if defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
 
     conn->port = (data->set.use_port && data->state.allow_port)?
       data->set.use_port:PORT_HTTPS;
@@ -2740,11 +2734,11 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     conn->curl_done = Curl_http_done;
     conn->curl_connect = Curl_http_connect;
 
-#else /* USE_SSLEAY */
+#else /* USE_SS */
     failf(data, LIBCURL_NAME
           " was built with SSL disabled, https: not supported!");
     return CURLE_UNSUPPORTED_PROTOCOL;
-#endif /* !USE_SSLEAY */
+#endif /* !USE_SSL */
   }
   else if (strequal(conn->protostr, "GOPHER")) {
 #ifndef CURL_DISABLE_GOPHER
@@ -2774,7 +2768,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
     int port = PORT_FTP;
 
     if(strequal(conn->protostr, "FTPS")) {
-#ifdef USE_SSLEAY
+#ifdef USE_SSL
       conn->protocol |= PROT_FTPS|PROT_SSL;
       conn->ssl[SECONDARYSOCKET].use = TRUE; /* send data securely */
       port = PORT_FTPS;
@@ -2782,7 +2776,7 @@ static CURLcode CreateConnection(struct SessionHandle *data,
       failf(data, LIBCURL_NAME
             " was built with SSL disabled, ftps: not supported!");
       return CURLE_UNSUPPORTED_PROTOCOL;
-#endif /* !USE_SSLEAY */
+#endif /* !USE_SSL */
     }
 
     conn->port = (data->set.use_port && data->state.allow_port)?
@@ -3737,91 +3731,5 @@ CURLcode Curl_do_more(struct connectdata *conn)
     result = conn->curl_do_more(conn);
 
   return result;
-}
-
-static bool safe_strequal(char* str1, char* str2)
-{
-  if(str1 && str2)
-    /* both pointers point to something then compare them */
-    return strequal(str1, str2);
-  else
-    /* if both pointers are NULL then treat them as equal */
-    return (!str1 && !str2);
-}
-
-bool
-Curl_ssl_config_matches(struct ssl_config_data* data,
-                        struct ssl_config_data* needle)
-{
-  if((data->version == needle->version) &&
-     (data->verifypeer == needle->verifypeer) &&
-     (data->verifyhost == needle->verifyhost) &&
-     safe_strequal(data->CApath, needle->CApath) &&
-     safe_strequal(data->CAfile, needle->CAfile) &&
-     safe_strequal(data->random_file, needle->random_file) &&
-     safe_strequal(data->egdsocket, needle->egdsocket) &&
-     safe_strequal(data->cipher_list, needle->cipher_list))
-    return TRUE;
-
-  return FALSE;
-}
-
-bool
-Curl_clone_ssl_config(struct ssl_config_data *source,
-                      struct ssl_config_data *dest)
-{
-  dest->verifyhost = source->verifyhost;
-  dest->verifypeer = source->verifypeer;
-  dest->version = source->version;
-
-  if(source->CAfile) {
-    dest->CAfile = strdup(source->CAfile);
-    if(!dest->CAfile)
-      return FALSE;
-  }
-
-  if(source->CApath) {
-    dest->CApath = strdup(source->CApath);
-    if(!dest->CApath)
-      return FALSE;
-  }
-
-  if(source->cipher_list) {
-    dest->cipher_list = strdup(source->cipher_list);
-    if(!dest->cipher_list)
-      return FALSE;
-  }
-
-  if(source->egdsocket) {
-    dest->egdsocket = strdup(source->egdsocket);
-    if(!dest->egdsocket)
-      return FALSE;
-  }
-
-  if(source->random_file) {
-    dest->random_file = strdup(source->random_file);
-    if(!dest->random_file)
-      return FALSE;
-  }
-
-  return TRUE;
-}
-
-void Curl_free_ssl_config(struct ssl_config_data* sslc)
-{
-  if(sslc->CAfile)
-    free(sslc->CAfile);
-
-  if(sslc->CApath)
-    free(sslc->CApath);
-
-  if(sslc->cipher_list)
-    free(sslc->cipher_list);
-
-  if(sslc->egdsocket)
-    free(sslc->egdsocket);
-
-  if(sslc->random_file)
-    free(sslc->random_file);
 }
 

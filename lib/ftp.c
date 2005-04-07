@@ -87,7 +87,7 @@
 
 #include "strtoofft.h"
 #include "strequal.h"
-#include "ssluse.h"
+#include "sslgen.h"
 #include "connect.h"
 #include "strerror.h"
 #include "memory.h"
@@ -2013,7 +2013,7 @@ static CURLcode ftp_state_stor_resp(struct connectdata *conn,
        do the TLS stuff */
     infof(data, "Doing the SSL/TLS handshake on the data stream\n");
     /* BLOCKING */
-    result = Curl_SSLConnect(conn, SECONDARYSOCKET);
+    result = Curl_ssl_connect(conn, SECONDARYSOCKET);
     if(result)
       return result;
   }
@@ -2121,7 +2121,7 @@ static CURLcode ftp_state_get_resp(struct connectdata *conn,
       /* since we only have a plaintext TCP connection here, we must now
          do the TLS stuff */
       infof(data, "Doing the SSL/TLS handshake on the data stream\n");
-      result = Curl_SSLConnect(conn, SECONDARYSOCKET);
+      result = Curl_ssl_connect(conn, SECONDARYSOCKET);
       if(result)
         return result;
     }
@@ -2373,8 +2373,8 @@ static CURLcode ftp_statemach_act(struct connectdata *conn)
        */
 
       if((ftpcode == 234) || (ftpcode == 334)) {
-        /* Curl_SSLConnect is BLOCKING */
-        result = Curl_SSLConnect(conn, FIRSTSOCKET);
+        /* Curl_ssl_connect is BLOCKING */
+        result = Curl_ssl_connect(conn, FIRSTSOCKET);
         if(CURLE_OK == result) {
           conn->protocol |= PROT_FTPS;
           conn->ssl[SECONDARYSOCKET].use = FALSE; /* clear-text data */
@@ -2748,7 +2748,7 @@ CURLcode Curl_ftp_connect(struct connectdata *conn,
     /* BLOCKING */
     /* FTPS is simply ftp with SSL for the control channel */
     /* now, perform the SSL initialization for this socket */
-    result = Curl_SSLConnect(conn, FIRSTSOCKET);
+    result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(result)
       return result;
   }

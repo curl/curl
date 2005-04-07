@@ -50,7 +50,6 @@
 #include "formdata.h"
 
 #ifdef USE_SSLEAY
-/* SSLeay stuff usually in /usr/local/ssl/include */
 #ifdef USE_OPENSSL
 #include "openssl/rsa.h"
 #include "openssl/crypto.h"
@@ -64,14 +63,18 @@
 #ifdef HAVE_OPENSSL_PKCS12_H
 #include <openssl/pkcs12.h>
 #endif
-#else
+#else /* SSLeay-style includes */
 #include "rsa.h"
 #include "crypto.h"
 #include "x509.h"
 #include "pem.h"
 #include "ssl.h"
 #include "err.h"
-#endif
+#endif /* USE_OPENSSL */
+#endif /* USE_SSLEAY */
+
+#ifdef USE_GNUTLS
+#include <gnutls/gnutls.h>
 #endif
 
 #ifdef HAVE_NETINET_IN_H
@@ -139,6 +142,10 @@ struct ssl_connect_data {
   SSL*     handle;
   X509*    server_cert;
 #endif /* USE_SSLEAY */
+#ifdef USE_GNUTLS
+  gnutls_session session;
+  gnutls_anon_client_credentials cred;
+#endif /* USE_GNUTLS */
 };
 
 struct ssl_config_data {
@@ -162,6 +169,7 @@ struct ssl_config_data {
 struct curl_ssl_session {
   char *name;       /* host name for which this ID was used */
   void *sessionid;  /* as returned from the SSL layer */
+  size_t idsize;    /* if known, otherwise 0 */
   long age;         /* just a number, the higher the more recent */
   unsigned short remote_port; /* remote port to connect to */
   struct ssl_config_data ssl_config; /* setup for this session */
@@ -659,20 +667,16 @@ struct connectdata {
   char *newurl; /* This can only be set if a Location: was in the
                    document headers */
 
+  int sec_complete; /* if krb4 is enabled for this connection */
 #ifdef HAVE_KRB4
   enum protection_level command_prot;
   enum protection_level data_prot;
   enum protection_level request_data_prot;
-
   size_t buffer_size;
-
   struct krb4buffer in_buffer, out_buffer;
-  int sec_complete;
   void *app_data;
-
   const struct Curl_sec_client_mech *mech;
   struct sockaddr_in local_addr;
-
 #endif
 
   /*************** Request - specific items ************/

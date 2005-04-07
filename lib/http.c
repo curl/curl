@@ -85,7 +85,7 @@
 #include "base64.h"
 #include "cookie.h"
 #include "strequal.h"
-#include "ssluse.h"
+#include "sslgen.h"
 #include "http_digest.h"
 #include "http_ntlm.h"
 #include "http_negotiate.h"
@@ -416,7 +416,7 @@ Curl_http_output_auth(struct connectdata *conn,
   /* Send proxy authentication header if needed */
   if (conn->bits.httpproxy &&
       (conn->bits.tunnel_proxy == proxytunnel)) {
-#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
+#ifdef USE_NTLM
     if(authproxy->picked == CURLAUTH_NTLM) {
       auth=(char *)"NTLM";
       result = Curl_output_ntlm(conn, TRUE);
@@ -484,7 +484,7 @@ Curl_http_output_auth(struct connectdata *conn,
       }
       else
 #endif
-#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
+#ifdef USE_NTLM
       if(authhost->picked == CURLAUTH_NTLM) {
         auth=(char *)"NTLM";
         result = Curl_output_ntlm(conn, FALSE);
@@ -597,7 +597,7 @@ CURLcode Curl_http_input_auth(struct connectdata *conn,
   }
   else
 #endif
-#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
+#ifdef USE_NTLM
     /* NTLM support requires the SSL crypto libs */
     if(checkprefix("NTLM", start)) {
       *availp |= CURLAUTH_NTLM;
@@ -1268,8 +1268,8 @@ CURLcode Curl_http_connect(struct connectdata *conn, bool *done)
   }
 
   if(conn->protocol & PROT_HTTPS) {
-    /* now, perform the SSL initialization for this socket */
-    result = Curl_SSLConnect(conn, FIRSTSOCKET);
+    /* perform SSL initialization for this socket */
+    result = Curl_ssl_connect(conn, FIRSTSOCKET);
     if(result)
       return result;
   }

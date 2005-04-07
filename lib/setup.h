@@ -280,4 +280,12 @@ typedef int curl_socket_t;
 #define HAVE_INET_NTOA_R_2_ARGS 1
 #endif
 
+#if defined(USE_GNUTLS) || defined(USE_SSLEAY)
+#define USE_SSL    /* Either OpenSSL || GnuTLS */
+#endif
+
+#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
+#define USE_NTLM
+#endif
+
 #endif /* __CONFIG_H */

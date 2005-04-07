@@ -94,7 +94,7 @@
 #include "http.h"
 #include "url.h"
 #include "getinfo.h"
-#include "ssluse.h"
+#include "sslgen.h"
 #include "http_digest.h"
 #include "http_ntlm.h"
 #include "http_negotiate.h"
@@ -243,6 +243,7 @@ CURLcode Curl_readrewind(struct connectdata *conn)
 }
 
 #ifdef USE_SSLEAY
+/* FIX: this is nasty OpenSSL-specific code that really shouldn't be here */
 static int data_pending(struct connectdata *conn)
 {
   if(conn->ssl[FIRSTSOCKET].handle)
@@ -1597,20 +1598,17 @@ Transfer(struct connectdata *conn)
  */
 CURLcode Curl_pretransfer(struct SessionHandle *data)
 {
+  CURLcode res;
   if(!data->change.url)
     /* we can't do anything wihout URL */
     return CURLE_URL_MALFORMAT;
 
-#ifdef USE_SSLEAY
-  {
-    /* Init the SSL session ID cache here. We do it here since we want to do
-       it after the *_setopt() calls (that could change the size of the cache)
-       but before any transfer takes place. */
-    CURLcode res = Curl_SSL_InitSessions(data, data->set.ssl.numsessions);
-    if(res)
-      return res;
-  }
-#endif
+  /* Init the SSL session ID cache here. We do it here since we want to do it
+     after the *_setopt() calls (that could change the size of the cache) but
+     before any transfer takes place. */
+  res = Curl_ssl_initsessions(data, data->set.ssl.numsessions);
+  if(res)
+    return res;
 
   data->set.followlocation=0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */

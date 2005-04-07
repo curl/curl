@@ -28,6 +28,7 @@
 
 #include <curl/curl.h>
 #include "urldata.h"
+#include "sslgen.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -40,87 +41,20 @@
 #include <stringprep.h>
 #endif
 
-#ifdef USE_SSLEAY
-static int getssl_version(char *ptr, size_t left, long *num)
-{
-
-#if (SSLEAY_VERSION_NUMBER >= 0x905000)
-  {
-    char sub[2];
-    unsigned long ssleay_value;
-    sub[1]='\0';
-    ssleay_value=SSLeay();
-    *num = (long)ssleay_value;
-    if(ssleay_value < 0x906000) {
-      ssleay_value=SSLEAY_VERSION_NUMBER;
-      sub[0]='\0';
-    }
-    else {
-      if(ssleay_value&0xff0) {
-        sub[0]=(char)((ssleay_value>>4)&0xff) + 'a' -1;
-      }
-      else
-        sub[0]='\0';
-    }
-
-    return snprintf(ptr, left, " OpenSSL/%lx.%lx.%lx%s",
-                    (ssleay_value>>28)&0xf,
-                    (ssleay_value>>20)&0xff,
-                    (ssleay_value>>12)&0xff,
-                    sub);
-  }
-
-#else
-  *num = SSLEAY_VERSION_NUMBER;
-#if (SSLEAY_VERSION_NUMBER >= 0x900000)
-  return snprintf(ptr, left, " OpenSSL/%lx.%lx.%lx",
-                  (SSLEAY_VERSION_NUMBER>>28)&0xff,
-                  (SSLEAY_VERSION_NUMBER>>20)&0xff,
-                  (SSLEAY_VERSION_NUMBER>>12)&0xf);
-#else
-  {
-    char sub[2];
-    sub[1]='\0';
-    if(SSLEAY_VERSION_NUMBER&0x0f) {
-      sub[0]=(SSLEAY_VERSION_NUMBER&0x0f) + 'a' -1;
-    }
-    else
-      sub[0]='\0';
-
-    return snprintf(ptr, left, " SSL/%x.%x.%x%s",
-                    (SSLEAY_VERSION_NUMBER>>12)&0xff,
-                    (SSLEAY_VERSION_NUMBER>>8)&0xf,
-                    (SSLEAY_VERSION_NUMBER>>4)&0xf, sub);
-  }
-#endif
-#endif
-}
-
-#endif
 
 char *curl_version(void)
 {
   static char version[200];
   char *ptr=version;
-  /* to prevent compier warnings, we only declare len if we have code
-     that uses it */
-#if defined(USE_SSLEAY) || defined(HAVE_LIBZ) || defined(USE_ARES) || \
-  defined(USE_LIBIDN)
-  int len;
-#endif
+  size_t len;
   size_t left = sizeof(version);
   strcpy(ptr, LIBCURL_NAME "/" LIBCURL_VERSION );
   ptr=strchr(ptr, '\0');
   left -= strlen(ptr);
 
-#ifdef USE_SSLEAY
-  {
-    long num;
-    len = getssl_version(ptr, left, &num);
-    left -= len;
-    ptr += len;
-  }
-#endif
+  len = Curl_ssl_version(ptr, left);
+  left -= len;
+  ptr += len;
 
 #ifdef HAVE_LIBZ
   len = snprintf(ptr, left, " zlib/%s", zlibVersion());
@@ -169,7 +103,7 @@ static const char * const protocols[] = {
   "file",
 #endif
 
-#ifdef USE_SSLEAY
+#ifdef USE_SSL
 #ifndef CURL_DISABLE_HTTP
   "https",
 #endif
@@ -192,10 +126,10 @@ static curl_version_info_data version_info = {
 #ifdef HAVE_KRB4
   | CURL_VERSION_KERBEROS4
 #endif
-#ifdef USE_SSLEAY
+#ifdef USE_SSL
   | CURL_VERSION_SSL
 #endif
-#if defined(USE_SSLEAY) || defined(USE_WINDOWS_SSPI)
+#ifdef USE_NTLM
   | CURL_VERSION_NTLM
 #endif
 #ifdef USE_WINDOWS_SSPI
@@ -221,7 +155,7 @@ static curl_version_info_data version_info = {
 #endif
   ,
   NULL, /* ssl_version */
-  0,    /* ssl_version_num */
+  0,    /* ssl_version_num, this is kept at zero */
   NULL, /* zlib_version */
   protocols,
   NULL, /* c-ares version */
@@ -231,14 +165,10 @@ static curl_version_info_data version_info = {
 
 curl_version_info_data *curl_version_info(CURLversion stamp)
 {
-#ifdef USE_SSLEAY
+#ifdef USE_SSL
   static char ssl_buffer[80];
-  long num;
-  getssl_version(ssl_buffer, sizeof(ssl_buffer), &num);
-
+  Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
   version_info.ssl_version = ssl_buffer;
-  version_info.ssl_version_num = num;
-  /* SSL stuff is left zero if undefined */
 #endif
 
 #ifdef HAVE_LIBZ

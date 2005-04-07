@@ -1,5 +1,5 @@
-#ifndef __SSLUSE_H
-#define __SSLUSE_H
+#ifndef __GTLS_H
+#define __GTLS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -22,43 +22,24 @@
  *
  * $Id$
  ***************************************************************************/
+int Curl_gtls_init(void);
+int Curl_gtls_cleanup(void);
+CURLcode Curl_gtls_connect(struct connectdata *conn, int sockindex);
 
-/*
- * This header should only be needed to get included by sslgen.c and ssluse.c
- */
-
-#include "urldata.h"
-CURLcode Curl_ossl_connect(struct connectdata *conn, int sockindex);
-void Curl_ossl_close(struct connectdata *conn); /* close a SSL connection */
-/* tell OpenSSL to close down all open information regarding connections (and
+/* tell GnuTLS to close down all open information regarding connections (and
    thus session ID caching etc) */
-int Curl_ossl_close_all(struct SessionHandle *data);
-/* Sets an OpenSSL engine */
-CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine);
+void Curl_gtls_close_all(struct SessionHandle *data);
+void Curl_gtls_close(struct connectdata *conn); /* close a SSL connection */
 
-/* function provided for the generic SSL-layer, called when a session id
-   should be freed */
-void Curl_ossl_session_free(void *ptr);
-
-/* Sets engine as default for all SSL operations */
-CURLcode Curl_ossl_set_engine_default(struct SessionHandle *data);
-
-/* Build list of OpenSSL engines */
-struct curl_slist *Curl_ossl_engines_list(struct SessionHandle *data);
-
-int Curl_ossl_init(void);
-void Curl_ossl_cleanup(void);
-
-int Curl_ossl_send(struct connectdata *conn,
-                   int sockindex,
-                   void *mem,
-                   size_t len);
-ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
+/* return number of sent (non-SSL) bytes */
+int Curl_gtls_send(struct connectdata *conn, int sockindex,
+                   void *mem, size_t len);
+ssize_t Curl_gtls_recv(struct connectdata *conn, /* connection data */
                        int num,                  /* socketindex */
                        char *buf,                /* store read data here */
                        size_t buffersize,        /* max amount to read */
                        bool *wouldblock);
-
-size_t Curl_ossl_version(char *buffer, size_t size);
+void Curl_gtls_session_free(void *ptr);
+size_t Curl_gtls_version(char *buffer, size_t size);
 
 #endif

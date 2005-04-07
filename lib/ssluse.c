@@ -22,8 +22,13 @@
  ***************************************************************************/
 
 /*
- * The original SSL code for curl was written by
- * Linas Vepstas <linas@linas.org> and Sampo Kellomaki <sampo@iki.fi>
+ * Source file for all OpenSSL-specific code for the TLS/SSL layer. No code
+ * but sslgen.c should ever call or use these functions.
+ */
+
+/*
+ * The original SSLeay-using code for curl was written by Linas Vepstas and
+ * Sampo Kellomaki 1998.
  */
 
 #include "setup.h"
@@ -47,6 +52,7 @@
 #include "connect.h" /* Curl_ourerrno() proto */
 #include "strequal.h"
 #include "select.h"
+#include "sslgen.h"
 
 #define _MPRINTF_REPLACE /* use the internal *printf() functions */
 #include <curl/mprintf.h>
@@ -447,8 +453,8 @@ int cert_stuff(struct connectdata *conn,
 #endif
     case SSL_FILETYPE_PKCS12:
       if(!cert_done) {
-	failf(data, "file type P12 for private key not supported\n");
-	return 0;
+        failf(data, "file type P12 for private key not supported\n");
+        return 0;
       }
       break;
     default:
@@ -519,27 +525,20 @@ static char *SSL_strerror(unsigned long error, char *buf, size_t size)
   return (buf);
 }
 
-/* "global" init done? */
-static int init_ssl=0;
-
 /* we have the "SSL is seeded" boolean global for the application to
    prevent multiple time-consuming seedings in vain */
 static bool ssl_seeded = FALSE;
 #endif /* USE_SSLEAY */
 
+#ifdef USE_SSLEAY
 /**
  * Global SSL init
  *
  * @retval 0 error initializing SSL
  * @retval 1 SSL initialized successfully
  */
-int Curl_SSL_init(void)
+int Curl_ossl_init(void)
 {
-#ifdef USE_SSLEAY
-  /* make sure this is only done once */
-  if(init_ssl)
-    return 1;
-
 #ifdef HAVE_ENGINE_LOAD_BUILTIN_ENGINES
   ENGINE_load_builtin_engines();
 #endif
@@ -551,57 +550,39 @@ int Curl_SSL_init(void)
   if (!SSLeay_add_ssl_algorithms())
     return 0;
 
-  init_ssl++; /* never again */
-
-#else
-  /* SSL disabled, do nothing */
-#endif
-
   return 1;
 }
 
-/* Global cleanup */
-void Curl_SSL_cleanup(void)
-{
+#endif /* USE_SSLEAY */
+
 #ifdef USE_SSLEAY
-  if(init_ssl) {
-    /* only cleanup if we did a previous init */
 
-    /* Free the SSL error strings */
-    ERR_free_strings();
+/* Global cleanup */
+void Curl_ossl_cleanup(void)
+{
+  /* Free the SSL error strings */
+  ERR_free_strings();
 
-    /* EVP_cleanup() removes all ciphers and digests from the
-       table. */
-    EVP_cleanup();
+  /* EVP_cleanup() removes all ciphers and digests from the
+     table. */
+  EVP_cleanup();
 
 #ifdef HAVE_ENGINE_cleanup
-    ENGINE_cleanup();
+  ENGINE_cleanup();
 #endif
 
 #ifdef HAVE_CRYPTO_CLEANUP_ALL_EX_DATA
-    /* this function was not present in 0.9.6b, but was added sometimes
-       later */
-    CRYPTO_cleanup_all_ex_data();
-#endif
-
-    init_ssl=0; /* not inited any more */
-  }
-#else
-  /* SSL disabled, do nothing */
+  /* this function was not present in 0.9.6b, but was added sometimes
+     later */
+  CRYPTO_cleanup_all_ex_data();
 #endif
 }
 
-#ifndef USE_SSLEAY
-void Curl_SSL_Close(struct connectdata *conn)
-{
-  (void)conn;
-}
-#endif
-
+#endif /* USE_SSLEAY */
 
 /* Selects an OpenSSL crypto engine
  */
-CURLcode Curl_SSL_set_engine(struct SessionHandle *data, const char *engine)
+CURLcode Curl_ossl_set_engine(struct SessionHandle *data, const char *engine)
 {
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
   ENGINE *e = ENGINE_by_id(engine);
@@ -633,11 +614,12 @@ CURLcode Curl_SSL_set_engine(struct SessionHandle *data, const char *engine)
 #endif
 }
 
-/* Sets above engine as default for all SSL operations
+#ifdef USE_SSLEAY
+/* Sets engine as default for all SSL operations
  */
-CURLcode Curl_SSL_set_engine_default(struct SessionHandle *data)
+CURLcode Curl_ossl_set_engine_default(struct SessionHandle *data)
 {
-#if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
+#ifdef HAVE_OPENSSL_ENGINE_H
   if (data->state.engine) {
     if (ENGINE_set_default(data->state.engine, ENGINE_METHOD_ALL) > 0) {
       infof(data,"set default crypto engine %s\n", data->state.engine);
@@ -650,12 +632,13 @@ CURLcode Curl_SSL_set_engine_default(struct SessionHandle *data)
 #else
   (void) data;
 #endif
-  return (CURLE_OK);
+  return CURLE_OK;
 }
+#endif /* USE_SSLEAY */
 
 /* Return list of OpenSSL crypto engine names.
  */
-struct curl_slist *Curl_SSL_engines_list(struct SessionHandle *data)
+struct curl_slist *Curl_ossl_engines_list(struct SessionHandle *data)
 {
   struct curl_slist *list = NULL;
 #if defined(USE_SSLEAY) && defined(HAVE_OPENSSL_ENGINE_H)
@@ -674,139 +657,50 @@ struct curl_slist *Curl_SSL_engines_list(struct SessionHandle *data)
 /*
  * This function is called when an SSL connection is closed.
  */
-void Curl_SSL_Close(struct connectdata *conn)
+void Curl_ossl_close(struct connectdata *conn)
 {
-  if(conn->ssl[FIRSTSOCKET].use) {
-    int i;
-    /*
-      ERR_remove_state() frees the error queue associated with
-      thread pid.  If pid == 0, the current thread will have its
-      error queue removed.
+  int i;
+  /*
+    ERR_remove_state() frees the error queue associated with
+    thread pid.  If pid == 0, the current thread will have its
+    error queue removed.
 
-      Since error queue data structures are allocated
-      automatically for new threads, they must be freed when
-      threads are terminated in oder to avoid memory leaks.
-    */
-    ERR_remove_state(0);
+    Since error queue data structures are allocated
+    automatically for new threads, they must be freed when
+    threads are terminated in oder to avoid memory leaks.
+  */
+  ERR_remove_state(0);
 
-    for(i=0; i<2; i++) {
-      struct ssl_connect_data *connssl = &conn->ssl[i];
+  for(i=0; i<2; i++) {
+    struct ssl_connect_data *connssl = &conn->ssl[i];
 
-      if(connssl->handle) {
-        (void)SSL_shutdown(connssl->handle);
-        SSL_set_connect_state(connssl->handle);
+    if(connssl->handle) {
+      (void)SSL_shutdown(connssl->handle);
+      SSL_set_connect_state(connssl->handle);
 
-        SSL_free (connssl->handle);
-        connssl->handle = NULL;
-      }
-      if(connssl->ctx) {
-        SSL_CTX_free (connssl->ctx);
-        connssl->ctx = NULL;
-      }
-      connssl->use = FALSE; /* get back to ordinary socket usage */
+      SSL_free (connssl->handle);
+      connssl->handle = NULL;
     }
-  }
-}
-
-
-/*
- * This sets up a session cache to the specified size.
- */
-CURLcode Curl_SSL_InitSessions(struct SessionHandle *data, long amount)
-{
-  struct curl_ssl_session *session;
-
-  if(data->state.session)
-    /* this is just a precaution to prevent multiple inits */
-    return CURLE_OK;
-
-  session = (struct curl_ssl_session *)
-    malloc(amount * sizeof(struct curl_ssl_session));
-  if(!session)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* "blank out" the newly allocated memory */
-  memset(session, 0, amount * sizeof(struct curl_ssl_session));
-
-  /* store the info in the SSL section */
-  data->set.ssl.numsessions = amount;
-  data->state.session = session;
-  data->state.sessionage = 1; /* this is brand new */
-
-  return CURLE_OK;
-}
-
-/*
- * Check if there's a session ID for the given connection in the cache,
- * and if there's one suitable, it is returned.
- */
-static int Get_SSL_Session(struct connectdata *conn,
-                           SSL_SESSION **ssl_sessionid)
-{
-  struct curl_ssl_session *check;
-  struct SessionHandle *data = conn->data;
-  long i;
-
-  for(i=0; i< data->set.ssl.numsessions; i++) {
-    check = &data->state.session[i];
-    if(!check->sessionid)
-      /* not session ID means blank entry */
-      continue;
-    if(curl_strequal(conn->host.name, check->name) &&
-       (conn->remote_port == check->remote_port) &&
-       Curl_ssl_config_matches(&conn->ssl_config, &check->ssl_config)) {
-      /* yes, we have a session ID! */
-      data->state.sessionage++;            /* increase general age */
-      check->age = data->state.sessionage; /* set this as used in this age */
-      *ssl_sessionid = check->sessionid;
-      return FALSE;
+    if(connssl->ctx) {
+      SSL_CTX_free (connssl->ctx);
+      connssl->ctx = NULL;
     }
+    connssl->use = FALSE; /* get back to ordinary socket usage */
   }
-  *ssl_sessionid = (SSL_SESSION *)NULL;
-  return TRUE;
 }
 
-/*
- * Kill a single session ID entry in the cache.
- */
-static int Kill_Single_Session(struct curl_ssl_session *session)
+void Curl_ossl_session_free(void *ptr)
 {
-  if(session->sessionid) {
-    /* defensive check */
-
-    /* free the ID */
-    SSL_SESSION_free(session->sessionid);
-    session->sessionid=NULL;
-    session->age = 0; /* fresh */
-
-    Curl_free_ssl_config(&session->ssl_config);
-
-    Curl_safefree(session->name);
-    session->name = NULL; /* no name */
-
-    return 0; /* ok */
-  }
-  else
-    return 1;
+  /* free the ID */
+  SSL_SESSION_free(ptr);
 }
 
 /*
  * This function is called when the 'data' struct is going away. Close
  * down everything and free all resources!
  */
-int Curl_SSL_Close_All(struct SessionHandle *data)
+int Curl_ossl_close_all(struct SessionHandle *data)
 {
-  int i;
-
-  if(data->state.session) {
-    for(i=0; i< data->set.ssl.numsessions; i++)
-      /* the single-killer function handles empty table slots */
-      Kill_Single_Session(&data->state.session[i]);
-
-    /* free the cache data */
-    free(data->state.session);
-    data->state.session = NULL;
-  }
 #ifdef HAVE_OPENSSL_ENGINE_H
   if(data->state.engine) {
     ENGINE_finish(data->state.engine);
@@ -815,74 +709,6 @@ int Curl_SSL_Close_All(struct SessionHandle *data)
   }
 #endif
   return 0;
-}
-
-/*
- * Extract the session id and store it in the session cache.
- */
-static CURLcode Store_SSL_Session(struct connectdata *conn,
-                             struct ssl_connect_data *ssl)
-{
-  SSL_SESSION *ssl_sessionid;
-  int i;
-  struct SessionHandle *data=conn->data; /* the mother of all structs */
-  struct curl_ssl_session *store = &data->state.session[0];
-  long oldest_age=data->state.session[0].age; /* zero if unused */
-  char *clone_host;
-
-  clone_host = strdup(conn->host.name);
-  if(!clone_host)
-    return CURLE_OUT_OF_MEMORY; /* bail out */
-
-  /* ask OpenSSL, say please */
-
-#ifdef HAVE_SSL_GET1_SESSION
-  ssl_sessionid = SSL_get1_session(ssl->handle);
-
-  /* SSL_get1_session() will increment the reference
-     count and the session will stay in memory until explicitly freed with
-     SSL_SESSION_free(3), regardless of its state.
-     This function was introduced in openssl 0.9.5a. */
-#else
-  ssl_sessionid = SSL_get_session(ssl->handle);
-
-  /* if SSL_get1_session() is unavailable, use SSL_get_session().
-     This is an inferior option because the session can be flushed
-     at any time by openssl. It is included only so curl compiles
-     under versions of openssl < 0.9.5a.
-
-     WARNING: How curl behaves if it's session is flushed is
-     untested.
-  */
-#endif
-
-  /* Now we should add the session ID and the host name to the cache, (remove
-     the oldest if necessary) */
-
-  /* find an empty slot for us, or find the oldest */
-  for(i=1; (i<data->set.ssl.numsessions) &&
-        data->state.session[i].sessionid; i++) {
-    if(data->state.session[i].age < oldest_age) {
-      oldest_age = data->state.session[i].age;
-      store = &data->state.session[i];
-    }
-  }
-  if(i == data->set.ssl.numsessions)
-    /* cache is full, we must "kill" the oldest entry! */
-    Kill_Single_Session(store);
-  else
-    store = &data->state.session[i]; /* use this slot */
-
-  /* now init the session struct wisely */
-  store->sessionid = ssl_sessionid;
-  store->age = data->state.sessionage;    /* set current age */
-  store->name = clone_host;               /* clone host name */
-  store->remote_port = conn->remote_port; /* port number */
-
-  if (!Curl_clone_ssl_config(&conn->ssl_config, &store->ssl_config))
-    return CURLE_OUT_OF_MEMORY;
-
-  return CURLE_OK;
 }
 
 static int Curl_ASN1_UTCTIME_output(struct connectdata *conn,
@@ -1280,27 +1106,24 @@ static void ssl_tls_trace(int direction, int ssl_ver, int content_type,
 }
 #endif
 
+#ifdef USE_SSLEAY
 /* ====================================================== */
 CURLcode
-Curl_SSLConnect(struct connectdata *conn,
-                int sockindex)
+Curl_ossl_connect(struct connectdata *conn,
+                  int sockindex)
 {
   CURLcode retcode = CURLE_OK;
 
-#ifdef USE_SSLEAY
   struct SessionHandle *data = conn->data;
   int err;
   long lerr;
   int what;
   char * str;
   SSL_METHOD *req_method;
-  SSL_SESSION *ssl_sessionid=NULL;
+  void *ssl_sessionid=NULL;
   ASN1_TIME *certdate;
   curl_socket_t sockfd = conn->sock[sockindex];
   struct ssl_connect_data *connssl = &conn->ssl[sockindex];
-
-  /* mark this is being ssl enabled from here on out. */
-  connssl->use = TRUE;
 
   if(!ssl_seeded || data->set.ssl.random_file || data->set.ssl.egdsocket) {
     /* Make funny stuff to get random input */
@@ -1447,19 +1270,16 @@ Curl_SSLConnect(struct connectdata *conn,
 
   connssl->server_cert = 0x0;
 
-  if(!conn->bits.reuse) {
-    /* We're not re-using a connection, check if there's a cached ID we
-       can/should use here! */
-    if(!Get_SSL_Session(conn, &ssl_sessionid)) {
-      /* we got a session id, use it! */
-        if (!SSL_set_session(connssl->handle, ssl_sessionid)) {
-          failf(data, "SSL: SSL_set_session failed: %s",
-                ERR_error_string(ERR_get_error(),NULL));
-          return CURLE_SSL_CONNECT_ERROR;
-        }
-      /* Informational message */
-      infof (data, "SSL re-using session ID\n");
+  /* Check if there's a cached ID we can/should use here! */
+  if(!Curl_ssl_getsessionid(conn, &ssl_sessionid, NULL)) {
+    /* we got a session id, use it! */
+    if (!SSL_set_session(connssl->handle, ssl_sessionid)) {
+      failf(data, "SSL: SSL_set_session failed: %s",
+            ERR_error_string(ERR_get_error(),NULL));
+      return CURLE_SSL_CONNECT_ERROR;
     }
+    /* Informational message */
+    infof (data, "SSL re-using session ID\n");
   }
 
   /* pass the raw socket into the SSL layers */
@@ -1473,16 +1293,13 @@ Curl_SSLConnect(struct connectdata *conn,
     int writefd;
     int readfd;
     long timeout_ms;
+    long has_passed;
 
     /* Find out if any timeout is set. If not, use 300 seconds.
        Otherwise, figure out the most strict timeout of the two possible one
        and then how much time that has elapsed to know how much time we
        allow for the connect call */
     if(data->set.timeout || data->set.connecttimeout) {
-      long has_passed;
-
-      /* Evaluate in milliseconds how much time that has passed */
-      has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
 
       /* get the most strict timeout of the ones converted to milliseconds */
       if(data->set.timeout &&
@@ -1490,20 +1307,22 @@ Curl_SSLConnect(struct connectdata *conn,
         timeout_ms = data->set.timeout*1000;
       else
         timeout_ms = data->set.connecttimeout*1000;
-
-      /* subtract the passed time */
-      timeout_ms -= has_passed;
-
-      if(timeout_ms < 0) {
-        /* a precaution, no need to continue if time already is up */
-        failf(data, "SSL connection timeout");
-        return CURLE_OPERATION_TIMEOUTED;
-      }
     }
     else
       /* no particular time-out has been set */
       timeout_ms= DEFAULT_CONNECT_TIMEOUT;
 
+    /* Evaluate in milliseconds how much time that has passed */
+    has_passed = Curl_tvdiff(Curl_tvnow(), data->progress.t_startsingle);
+
+    /* subtract the passed time */
+    timeout_ms -= has_passed;
+
+    if(timeout_ms < 0) {
+      /* a precaution, no need to continue if time already is up */
+      failf(data, "SSL connection timeout");
+      return CURLE_OPERATION_TIMEOUTED;
+    }
 
     readfd = CURL_SOCKET_BAD;
     writefd = CURL_SOCKET_BAD;
@@ -1586,12 +1405,7 @@ Curl_SSLConnect(struct connectdata *conn,
         return CURLE_OPERATION_TIMEDOUT;
       }
       else {
-#if !defined(WIN32) && defined(EINTR)
-        /* For platforms without EINTR all errnos are bad */
-        if (errno == EINTR)
-          continue; /* retry the select() */
-#endif
-        /* anything other than the unimportant EINTR is fatally bad */
+        /* anything that gets here is fatally bad */
         failf(data, "select on SSL socket, errno: %d", Curl_ourerrno());
         return CURLE_SSL_CONNECT_ERROR;
       }
@@ -1605,9 +1419,30 @@ Curl_SSLConnect(struct connectdata *conn,
   if(!ssl_sessionid) {
     /* Since this is not a cached session ID, then we want to stach this one
        in the cache! */
-    retcode = Store_SSL_Session(conn, connssl);
+    SSL_SESSION *ssl_sessionid;
+#ifdef HAVE_SSL_GET1_SESSION
+    ssl_sessionid = SSL_get1_session(connssl->handle);
+
+    /* SSL_get1_session() will increment the reference
+       count and the session will stay in memory until explicitly freed with
+       SSL_SESSION_free(3), regardless of its state.
+       This function was introduced in openssl 0.9.5a. */
+#else
+    ssl_sessionid = SSL_get_session(connssl->handle);
+
+    /* if SSL_get1_session() is unavailable, use SSL_get_session().
+       This is an inferior option because the session can be flushed
+       at any time by openssl. It is included only so curl compiles
+       under versions of openssl < 0.9.5a.
+
+       WARNING: How curl behaves if it's session is flushed is
+       untested.
+    */
+#endif
+    retcode = Curl_ssl_addsessionid(conn, ssl_sessionid,
+                                    0 /* unknown size */);
     if(retcode) {
-      failf(data,"failure to store ssl session");
+      failf(data, "failed to store ssl session");
       return retcode;
     }
   }
@@ -1686,9 +1521,145 @@ Curl_SSLConnect(struct connectdata *conn,
 
   X509_free(connssl->server_cert);
   connssl->server_cert = NULL;
-#else /* USE_SSLEAY */
-  (void)conn;
-  (void)sockindex;
-#endif
   return retcode;
 }
+
+/* return number of sent (non-SSL) bytes */
+int Curl_ossl_send(struct connectdata *conn,
+                   int sockindex,
+                   void *mem,
+                   size_t len)
+{
+  /* SSL_write() is said to return 'int' while write() and send() returns
+     'size_t' */
+  int err;
+  char error_buffer[120]; /* OpenSSL documents that this must be at least 120
+                             bytes long. */
+  unsigned long sslerror;
+  int rc = SSL_write(conn->ssl[sockindex].handle, mem, (int)len);
+
+  if(rc < 0) {
+    err = SSL_get_error(conn->ssl[sockindex].handle, rc);
+
+    switch(err) {
+    case SSL_ERROR_WANT_READ:
+    case SSL_ERROR_WANT_WRITE:
+      /* The operation did not complete; the same TLS/SSL I/O function
+         should be called again later. This is basicly an EWOULDBLOCK
+         equivalent. */
+      return 0;
+    case SSL_ERROR_SYSCALL:
+      failf(conn->data, "SSL_write() returned SYSCALL, errno = %d\n",
+            Curl_ourerrno());
+      return -1;
+    case SSL_ERROR_SSL:
+      /*  A failure in the SSL library occurred, usually a protocol error.
+          The OpenSSL error queue contains more information on the error. */
+      sslerror = ERR_get_error();
+      failf(conn->data, "SSL_write() error: %s\n",
+            ERR_error_string(sslerror, error_buffer));
+      return -1;
+    }
+    /* a true error */
+    failf(conn->data, "SSL_write() return error %d\n", err);
+    return -1;
+  }
+  return rc; /* number of bytes */
+}
+
+/*
+ * If the read would block we return -1 and set 'wouldblock' to TRUE.
+ * Otherwise we return the amount of data read. Other errors should return -1
+ * and set 'wouldblock' to FALSE.
+ */
+ssize_t Curl_ossl_recv(struct connectdata *conn, /* connection data */
+                       int num,                  /* socketindex */
+                       char *buf,                /* store read data here */
+                       size_t buffersize,        /* max amount to read */
+                       bool *wouldblock)
+{
+  char error_buffer[120]; /* OpenSSL documents that this must be at
+                             least 120 bytes long. */
+  unsigned long sslerror;
+  ssize_t nread = (ssize_t)SSL_read(conn->ssl[num].handle, buf,
+                                    (int)buffersize);
+  *wouldblock = FALSE;
+  if(nread < 0) {
+    /* failed SSL_read */
+    int err = SSL_get_error(conn->ssl[num].handle, (int)nread);
+
+    switch(err) {
+    case SSL_ERROR_NONE: /* this is not an error */
+    case SSL_ERROR_ZERO_RETURN: /* no more data */
+      break;
+    case SSL_ERROR_WANT_READ:
+    case SSL_ERROR_WANT_WRITE:
+      /* there's data pending, re-invoke SSL_read() */
+      *wouldblock = TRUE;
+      return -1; /* basically EWOULDBLOCK */
+    default:
+      /* openssl/ssl.h says "look at error stack/return value/errno" */
+      sslerror = ERR_get_error();
+      failf(conn->data, "SSL read: %s, errno %d",
+            ERR_error_string(sslerror, error_buffer),
+            Curl_ourerrno() );
+      return -1;
+    }
+  }
+  return nread;
+}
+
+size_t Curl_ossl_version(char *buffer, size_t size)
+{
+#if (SSLEAY_VERSION_NUMBER >= 0x905000)
+  {
+    char sub[2];
+    unsigned long ssleay_value;
+    sub[1]='\0';
+    ssleay_value=SSLeay();
+    if(ssleay_value < 0x906000) {
+      ssleay_value=SSLEAY_VERSION_NUMBER;
+      sub[0]='\0';
+    }
+    else {
+      if(ssleay_value&0xff0) {
+        sub[0]=(char)((ssleay_value>>4)&0xff) + 'a' -1;
+      }
+      else
+        sub[0]='\0';
+    }
+
+    return snprintf(buffer, size, " OpenSSL/%lx.%lx.%lx%s",
+                    (ssleay_value>>28)&0xf,
+                    (ssleay_value>>20)&0xff,
+                    (ssleay_value>>12)&0xff,
+                    sub);
+  }
+
+#else /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
+
+#if (SSLEAY_VERSION_NUMBER >= 0x900000)
+  return snprintf(buffer, size, " OpenSSL/%lx.%lx.%lx",
+                  (SSLEAY_VERSION_NUMBER>>28)&0xff,
+                  (SSLEAY_VERSION_NUMBER>>20)&0xff,
+                  (SSLEAY_VERSION_NUMBER>>12)&0xf);
+
+#else /* (SSLEAY_VERSION_NUMBER >= 0x900000) */
+  {
+    char sub[2];
+    sub[1]='\0';
+    if(SSLEAY_VERSION_NUMBER&0x0f) {
+      sub[0]=(SSLEAY_VERSION_NUMBER&0x0f) + 'a' -1;
+    }
+    else
+      sub[0]='\0';
+
+    return snprintf(buffer, size, " SSL/%x.%x.%x%s",
+                    (SSLEAY_VERSION_NUMBER>>12)&0xff,
+                    (SSLEAY_VERSION_NUMBER>>8)&0xf,
+                    (SSLEAY_VERSION_NUMBER>>4)&0xf, sub);
+  }
+#endif /* (SSLEAY_VERSION_NUMBER >= 0x900000) */
+#endif /* SSLEAY_VERSION_NUMBER is less than 0.9.5 */
+}
+#endif /* USE_SSLEAY */

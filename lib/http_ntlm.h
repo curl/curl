@@ -39,6 +39,9 @@ CURLntlm Curl_input_ntlm(struct connectdata *conn, bool proxy, char *header);
 CURLcode Curl_output_ntlm(struct connectdata *conn, bool proxy);
 
 void Curl_ntlm_cleanup(struct connectdata *conn);
+#if !defined(USE_SSLEAY) && !defined(USE_WINDOWS_SSPI)
+#define Curl_ntlm_cleanup(x)
+#endif
 
 
 /* Flag bits definitions based on http://davenport.sourceforge.net/ntlm.html */
