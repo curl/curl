@@ -32,7 +32,15 @@ OpenSSL http://www.openssl.org/source/license.html
         makes it "incompatible" with GPL. You are not allowed to ship binaries
         that link with OpenSSL that includes GPL code (unless that specific
         GPL code includes an exception for OpenSSL - a habit that is growing
-        more and more common).
+        more and more common). If OpenSSL's licensing is a problem for you,
+        consider using GnuTLS instead.
+
+GnuTLS  http://www.gnutls.org/
+
+        Uses the LGPL[3] license. If this is a problem for you, consider using
+        OpenSSL instead. Also note that GnuTLS itself depends on and uses
+        other libs (libgcrypt and libgpg-error) and they too are LGPL- or
+        GPL-licensed.
 
 c-ares  http://daniel.haxx.se/projects/c-ares/license.html
 
@@ -84,3 +92,5 @@ OpenLDAP http://www.openldap.org/software/release/license.html
 [1] = GPL - GNU General Public License: http://www.gnu.org/licenses/gpl.html
 [2] = http://www.fsf.org/licenses/gpl-faq.html#GPLIncompatibleLibs details on
       how to write such an exception to the GPL
+[3] = LGPL - GNU Lesser General Public License:
+      http://www.gnu.org/licenses/lgpl.html
