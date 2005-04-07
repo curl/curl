@@ -428,6 +428,7 @@ X_OBJS= \
 	$(DIROBJ)\telnet.obj \
 	$(DIROBJ)\parsedate.obj \
 	$(DIROBJ)\getenv.obj \
+	$(DIROBJ)\gtls.obj \
 	$(DIROBJ)\inet_pton.obj \
 	$(DIROBJ)\hostip.obj \
 	$(DIROBJ)\hostasyn.obj \
@@ -443,6 +444,7 @@ X_OBJS= \
 	$(DIROBJ)\progress.obj \
 	$(DIROBJ)\sendf.obj \
 	$(DIROBJ)\speedcheck.obj \
+	$(DIROBJ)\sslgen.obj \
 	$(DIROBJ)\ssluse.obj \
 	$(DIROBJ)\timeval.obj \
 	$(DIROBJ)\url.obj \
