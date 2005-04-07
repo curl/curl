@@ -1358,8 +1358,8 @@ typedef struct {
   const char *host;         /* OS/host/cpu/machine when configured */
   int features;             /* bitmask, see defines below */
   const char *ssl_version;  /* human readable string */
-  long ssl_version_num;     /* number */
-  const char *libz_version;       /* human readable string */
+  long ssl_version_num;     /* not used anymore, always 0 */
+  const char *libz_version; /* human readable string */
   /* protocols is terminated by an entry with a NULL protoname */
   const char * const *protocols;
 
