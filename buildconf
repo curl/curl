@@ -170,6 +170,10 @@ else
   exit 1
 fi
 
+#--------------------------------------------------------------------------
+# perl check
+#
+PERL=`findtool perl`
 
 # ------------------------------------------------------------
 
@@ -179,8 +183,13 @@ echo "buildconf: running libtoolize"
 ${LIBTOOLIZE:-libtoolize} --copy --automake --force || die "The libtool command failed"
 echo "buildconf: running aclocal"
 ${ACLOCAL:-aclocal} $ACLOCAL_FLAGS || die "The aclocal command line failed"
-echo "buildconf: running aclocal hack to convert all mv to mv -f"
-perl -i.bak -pe 's/\bmv +([^-\s])/mv -f $1/g' aclocal.m4
+if test -n "$PERL"; then
+  echo "buildconf: running aclocal hack to convert all mv to mv -f"
+  $PERL -i.bak -pe 's/\bmv +([^-\s])/mv -f $1/g' aclocal.m4
+else
+  echo "buildconf: perl not found"
+  exit 1
+fi
 echo "buildconf: running autoheader"
 ${AUTOHEADER:-autoheader} || die "The autoheader command failed"
 echo "buildconf: cp lib/config.h.in src/config.h.in"
