@@ -43,7 +43,8 @@ OBJS = $(OBJ_DIR)\transfer.obj         $(OBJ_DIR)\file.obj       &
        $(OBJ_DIR)\hostip4.obj          $(OBJ_DIR)\hostthre.obj   &
        $(OBJ_DIR)\hostip6.obj          $(OBJ_DIR)\inet_ntop.obj  &
        $(OBJ_DIR)\hostsyn.obj          $(OBJ_DIR)\parsedate.obj  &
-       $(OBJ_DIR)\select.obj
+       $(OBJ_DIR)\select.obj           $(OBJ_DIR)\sslgen.obj     &
+       $(OBJ_DIR)\gtls.obj
 
 RESOURCE = $(OBJ_DIR)\libcurl.res
 
@@ -355,3 +356,9 @@ $(OBJ_DIR)\parsedate.obj: parsedate.c setup.h config-win32.h ..\include\curl\cur
   ..\include\curl\multi.h ..\include\curl\curl.h
 
 $(OBJ_DIR)\select.obj: select.c setup.h config-win32.h select.h
+
+$(OBJ_DIR)\gtls.obj: gtls.c setup.h config-win32.h
+
+$(OBJ_DIR)\sslgen.obj: sslgen.c setup.h config-win32.h urldata.h cookie.h &
+  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h sslgen.h &
+  ssluse.h gtls.h sendf.h strequal.h url.h memory.h memdebug.h

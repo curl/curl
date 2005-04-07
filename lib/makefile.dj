@@ -272,3 +272,7 @@ $(OBJ_DIR)/parsedate.o: parsedate.c setup.h config.h ../include/curl/curl.h \
   ../include/curl/curlver.h ../include/curl/easy.h \
   ../include/curl/multi.h
 $(OBJ_DIR)/select.o: select.c setup.h config.h select.h
+$(OBJ_DIR)/gtls.obj: gtls.c setup.h config-win32.h
+$(OBJ_DIR)/sslgen.obj: sslgen.c setup.h config-win32.h urldata.h cookie.h \
+  formdata.h timeval.h http_chunks.h hostip.h hash.h llist.h sslgen.h \
+  ssluse.h gtls.h sendf.h strequal.h url.h memory.h memdebug.h

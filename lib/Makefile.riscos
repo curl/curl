@@ -12,7 +12,7 @@ objs =	o.base64 o.connect o.cookie o.dict \
 	o.memdebug o.mprintf o.netrc o.parsedate o.progress \
 	o.security o.select o.sendf o.speedcheck o.ssluse \
 	o.strequal o.strtok o.telnet o.timeval \
-	o.transfer o.url o.version o.strtoofft
+	o.transfer o.url o.version o.strtoofft o.sslgen o.gtls
 
 # Compile options:
 linkopts	= -o libcurl
@@ -118,6 +118,12 @@ o.sendf:	c.sendf
 
 o.speedcheck:	c.speedcheck
 		gcc $(compileropts) -c -o speedcheck.o c.speedcheck
+
+o.gtls:	c.gtls
+		gcc $(compileropts) -c -o gtls.o c.gtls
+
+o.sslgen:	c.sslgen
+		gcc $(compileropts) -c -o sslgen.o c.sslgen
 
 o.ssluse:	c.ssluse
 		gcc $(compileropts) -c -o ssluse.o c.ssluse
