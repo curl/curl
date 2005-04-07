@@ -43,6 +43,7 @@ OBJECTS = $(TMP_DIR)/base64.o \
 	$(TMP_DIR)/ftp.o \
 	$(TMP_DIR)/getenv.o \
 	$(TMP_DIR)/getinfo.o \
+	$(TMP_DIR)/gtls.o \
 	$(TMP_DIR)/hash.o \
 	$(TMP_DIR)/hostares.o \
 	$(TMP_DIR)/hostasyn.o \
@@ -73,6 +74,7 @@ OBJECTS = $(TMP_DIR)/base64.o \
 	$(TMP_DIR)/sendf.o \
 	$(TMP_DIR)/share.o \
 	$(TMP_DIR)/speedcheck.o \
+	$(TMP_DIR)/sslgen.o \
 	$(TMP_DIR)/ssluse.o \
 	$(TMP_DIR)/strequal.o \
 	$(TMP_DIR)/strerror.o \
