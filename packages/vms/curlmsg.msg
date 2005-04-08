@@ -4,13 +4,16 @@
 ! file and putting all the CURLE_* enum stuff into this file, 
 ! CURLMSG.MSG.  An .SDL file is created from this file with 
 ! MESSAGE/SDL.  The .H file is created using the freeware SDL tool
-! against the .SDL file. 
+! against the .SDL file with SDL/ALPHA/LANG=CC command.
 !
 ! With the exception of CURLE_OK, all of the messages are at 
 ! the error severity level.  With the exception of 
 ! FTP_USER_PWD_INCORRECT, which is a shortened form of 
 ! FTP_USER_PASSWORD_INCORRECT, these are the same names as the 
-! CURLE_ ones in include/curl.h
+! CURLE_ ones in include/curl.h.  The Message Utility manual states
+! "The combined length of the prefix and the message symbol name cannot 
+! exceed 31 characters."  With a prefix of five that leaves us with 26
+! for the message name.
 ! 
 ! If you update this file also update curlmsg_vms.h so that they are in sync
 ! 
