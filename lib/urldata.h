@@ -494,6 +494,8 @@ struct Curl_transfer_keeper {
                        and we're uploading the last chunk */
 
   bool ignorebody;  /* we read a response-body but we ignore it! */
+  bool ignorecl;    /* This HTTP response has no body so we ignore the Content-
+                       Length: header */
 };
 
 #if defined(USE_ARES) || defined(USE_THREADING_GETHOSTBYNAME) || \
