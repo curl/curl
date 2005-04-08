@@ -33,6 +33,7 @@
 
 #include "ares.h"
 #include "ares_private.h"
+#include "inet_net_pton.h"
 
 #ifdef WATT32
 #undef WIN32

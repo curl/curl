@@ -2,6 +2,11 @@
 
 * April 8
 
+- Added preliminary IPv6 support to ares_gethostbyname. Currently, sortlist
+  does not work with IPv6. Also provided an implementation of bitncmp from
+  BIND for systems that do not supply this function. This will be used to add
+  IPv6 support to sortlist.
+
 - Made ares_gethostbyaddr support IPv6 by specifying AF_INET6 as the family.
   The function can lookup IPv6 addresses both from files (/etc/hosts) and
   DNS lookups.

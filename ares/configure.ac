@@ -232,5 +232,7 @@ AC_CHECK_SIZEOF(struct in_addr, ,
 ]
 )
 
+AC_CHECK_FUNCS(bitncmp)
+
 
 AC_OUTPUT(Makefile)
