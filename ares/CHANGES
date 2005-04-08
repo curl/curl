@@ -1,6 +1,13 @@
   Changelog for the c-ares project
 
+* April 8
+
+- Made ares_gethostbyaddr support IPv6 by specifying AF_INET6 as the family.
+  The function can lookup IPv6 addresses both from files (/etc/hosts) and
+  DNS lookups.
+
 * April 7
+
 - Tupone Alfredo fixed includes of arpa/nameser_compat.h to build fine on Mac
   OS X.
 

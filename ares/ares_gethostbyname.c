@@ -255,7 +255,7 @@ static int file_lookup(const char *name, struct hostent **host)
   if (!fp)
     return ARES_ENOTFOUND;
 
-  while ((status = ares__get_hostent(fp, host)) == ARES_SUCCESS)
+  while ((status = ares__get_hostent(fp, AF_INET, host)) == ARES_SUCCESS)
     {
       if (strcasecmp((*host)->h_name, name) == 0)
         break;

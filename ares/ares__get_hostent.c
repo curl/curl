@@ -31,11 +31,13 @@
 #include "ares.h"
 #include "ares_private.h"
 
-int ares__get_hostent(FILE *fp, struct hostent **host)
+int ares__get_hostent(FILE *fp, int family, struct hostent **host)
 {
   char *line = NULL, *p, *q, *canonical, **alias;
   int status, linesize, end_at_hostname, naliases;
   struct in_addr addr;
+  struct in6_addr addr6;
+  int addrlen = sizeof(struct in_addr);
   struct hostent *hostent = NULL;
 
   while ((status = ares__read_line(fp, &line, &linesize)) == ARES_SUCCESS)
@@ -56,6 +58,17 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
       *p = 0;
       addr.s_addr = inet_addr(line);
       if (addr.s_addr == INADDR_NONE)
+       {
+          if (ares_inet_pton(AF_INET6, line, &addr6) > 0)
+            {
+              if (family != AF_INET6)
+                continue;
+              addrlen = sizeof(struct in6_addr);
+            }
+          else
+            continue;
+       }
+      else if (family != AF_INET)
         continue;
 
       /* Get the canonical hostname. */
@@ -100,7 +113,7 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
       hostent->h_addr_list = malloc(2 * sizeof(char *));
       if (!hostent->h_addr_list)
         break;
-      hostent->h_addr_list[0] = malloc(sizeof(struct in_addr));
+      hostent->h_addr_list[0] = malloc(addrlen);
       if (!hostent->h_addr_list[0])
         break;
       hostent->h_aliases = malloc((naliases + 1) * sizeof(char *));
@@ -134,9 +147,12 @@ int ares__get_hostent(FILE *fp, struct hostent **host)
         }
       hostent->h_aliases[naliases] = NULL;
 
-      hostent->h_addrtype = AF_INET;
-      hostent->h_length = sizeof(struct in_addr);
-      memcpy(hostent->h_addr_list[0], &addr, sizeof(struct in_addr));
+      hostent->h_addrtype = family;
+      hostent->h_length = addrlen;
+      if (family == AF_INET)
+        memcpy(hostent->h_addr_list[0], &addr, addrlen);
+      else if (family == AF_INET6)
+        memcpy(hostent->h_addr_list[0], &addr6, addrlen);
       hostent->h_addr_list[1] = NULL;
       *host = hostent;
       free(line);

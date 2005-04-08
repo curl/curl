@@ -156,7 +156,7 @@ struct ares_channeldata {
 
 void ares__send_query(ares_channel channel, struct query *query, time_t now);
 void ares__close_sockets(struct server_state *server);
-int ares__get_hostent(FILE *fp, struct hostent **host);
+int ares__get_hostent(FILE *fp, int family, struct hostent **host);
 int ares__read_line(FILE *fp, char **buf, int *bufsize);
 
 #ifdef CURLDEBUG
