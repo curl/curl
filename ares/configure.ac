@@ -71,6 +71,9 @@ AC_CHECK_HEADERS(
        arpa/nameser_compat.h \
        arpa/inet.h, , ,
 [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
 dnl We do this default-include simply to make sure that the nameser_compat.h
 dnl header *REALLY* can be include after the new nameser.h. It seems AIX 5.1
 dnl (and others?) is not designed to allow this.
