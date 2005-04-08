@@ -110,7 +110,7 @@ char *Curl_if2ip(const char *interface, char *buf, int buf_size)
 
       struct sockaddr_in *s = (struct sockaddr_in *)&req.ifr_dstaddr;
       memcpy(&in, &(s->sin_addr.s_addr), sizeof(in));
-      ip = Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
+      ip = (char *) Curl_inet_ntop(s->sin_family, &in, buf, buf_size);
     }
     sclose(dummy);
   }
