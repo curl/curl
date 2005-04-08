@@ -170,10 +170,9 @@ int Curl_ssl_init(void)
   return Curl_gtls_init();
 #else
   /* no SSL support */
+  return 1;
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
-
-  return 1;
 }
 
 
@@ -384,12 +383,14 @@ CURLcode Curl_ssl_set_engine(struct SessionHandle *data, const char *engine)
   /* FIX: add code here */
   (void)data;
   (void)engine;
+  return CURLE_FAILED_INIT;
 #else
+  /* no SSL layer */
   (void)data;
   (void)engine;
+  return CURLE_FAILED_INIT;
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
-  return CURLE_FAILED_INIT;
 }
 
 /* Selects an (Open?)SSL crypto engine
@@ -402,11 +403,13 @@ CURLcode Curl_ssl_set_engine_default(struct SessionHandle *data)
 #ifdef USE_GNUTLS
   /* FIX: add code here */
   (void)data;
+  return CURLE_FAILED_INIT;
 #else
+  /* No SSL layer */
   (void)data;
+  return CURLE_FAILED_INIT;
 #endif /* USE_GNUTLS */
 #endif /* USE_SSLEAY */
-  return CURLE_FAILED_INIT;
 }
 
 /* Return list of OpenSSL crypto engine names. */
