@@ -67,11 +67,11 @@
  *	Paul Vixie (ISC), June 1996
  */
 static int
-inet_net_pton_ipv4(const char *src, u_char *dst, size_t size) {
+inet_net_pton_ipv4(const char *src, unsigned char *dst, size_t size) {
 	static const char xdigits[] = "0123456789abcdef";
 	static const char digits[] = "0123456789";
 	int n, ch, tmp = 0, dirty, bits;
-	const u_char *odst = dst;
+	const unsigned char *odst = dst;
 
 	ch = *src++;
 	if (ch == '0' && (src[0] == 'x' || src[0] == 'X')
@@ -93,14 +93,14 @@ inet_net_pton_ipv4(const char *src, u_char *dst, size_t size) {
 			if (++dirty == 2) {
 				if (size-- <= 0U)
 					goto emsgsize;
-				*dst++ = (u_char) tmp;
+				*dst++ = (unsigned char) tmp;
 				dirty = 0;
 			}
 		}
 		if (dirty) {  /* Odd trailing nybble? */
 			if (size-- <= 0U)
 				goto emsgsize;
-			*dst++ = (u_char) (tmp << 4);
+			*dst++ = (unsigned char) (tmp << 4);
 		}
 	} else if (isascii(ch) && isdigit(ch)) {
 		/* Decimal: eat dotted digit string. */
@@ -116,7 +116,7 @@ inet_net_pton_ipv4(const char *src, u_char *dst, size_t size) {
 				 isascii(ch) && isdigit(ch));
 			if (size-- <= 0U)
 				goto emsgsize;
-			*dst++ = (u_char) tmp;
+			*dst++ = (unsigned char) tmp;
 			if (ch == '\0' || ch == '/')
 				break;
 			if (ch != '.')
@@ -222,11 +222,11 @@ getbits(const char *src, int *bitsp) {
 }
 
 static int
-getv4(const char *src, u_char *dst, int *bitsp) {
+getv4(const char *src, unsigned char *dst, int *bitsp) {
 	static const char digits[] = "0123456789";
-	u_char *odst = dst;
+	unsigned char *odst = dst;
 	int n;
-	u_int val;
+	unsigned int val;
 	char ch;
 
 	val = 0;
@@ -265,13 +265,13 @@ getv4(const char *src, u_char *dst, int *bitsp) {
 }
 
 static int
-inet_net_pton_ipv6(const char *src, u_char *dst, size_t size) {
+inet_net_pton_ipv6(const char *src, unsigned char *dst, size_t size) {
 	static const char xdigits_l[] = "0123456789abcdef",
 			  xdigits_u[] = "0123456789ABCDEF";
-	u_char tmp[NS_IN6ADDRSZ], *tp, *endp, *colonp;
+	unsigned char tmp[NS_IN6ADDRSZ], *tp, *endp, *colonp;
 	const char *xdigits, *curtok;
 	int ch, saw_xdigit;
-	u_int val;
+	unsigned int val;
 	int digits;
 	int bits;
 	size_t bytes;
@@ -315,8 +315,8 @@ inet_net_pton_ipv6(const char *src, u_char *dst, size_t size) {
 				goto enoent;
 			if (tp + NS_INT16SZ > endp)
 				return (0);
-			*tp++ = (u_char) (val >> 8) & 0xff;
-			*tp++ = (u_char) val & 0xff;
+			*tp++ = (unsigned char) (val >> 8) & 0xff;
+			*tp++ = (unsigned char) val & 0xff;
 			saw_xdigit = 0;
 			digits = 0;
 			val = 0;
@@ -336,8 +336,8 @@ inet_net_pton_ipv6(const char *src, u_char *dst, size_t size) {
 	if (saw_xdigit) {
 		if (tp + NS_INT16SZ > endp)
 			goto enoent;
-		*tp++ = (u_char) (val >> 8) & 0xff;
-		*tp++ = (u_char) val & 0xff;
+		*tp++ = (unsigned char) (val >> 8) & 0xff;
+		*tp++ = (unsigned char) val & 0xff;
 	}
 	if (bits == -1)
 		bits = 128;

@@ -36,7 +36,7 @@
  */
 int
 ares_bitncmp(const void *l, const void *r, int n) {
-	u_int lb, rb;
+	unsigned int lb, rb;
 	int x, b;
 
 	b = n / 8;
@@ -44,8 +44,8 @@ ares_bitncmp(const void *l, const void *r, int n) {
 	if (x)
 		return (x);
 
-	lb = ((const u_char *)l)[b];
-	rb = ((const u_char *)r)[b];
+	lb = ((const unsigned char *)l)[b];
+	rb = ((const unsigned char *)r)[b];
 	for (b = n % 8; b > 0; b--) {
 		if ((lb & 0x80) != (rb & 0x80)) {
 			if (lb & 0x80)
