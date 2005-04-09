@@ -57,10 +57,25 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* Enable GnuTLS debugging by defining GTLSDEBUG */
+/*#define GTLSDEBUG */
+
+#ifdef GTLSDEBUG
+static void tls_log_func(int level, const char *str)
+{
+    fprintf(stderr, "|<%d>| %s", level, str);
+}
+#endif
+
+
 /* Global GnuTLS init, called from Curl_ssl_init() */
 int Curl_gtls_init(void)
 {
   gnutls_global_init();
+#ifdef GTLSDEBUG
+  gnutls_global_set_log_function(tls_log_func);
+  gnutls_global_set_log_level(2);
+#endif
   return 1;
 }
 
@@ -95,7 +110,6 @@ static void showtime(struct SessionHandle *data,
   infof(data, "%s", data->state.buffer);
 }
 
-
 /*
  * This function is called after the TCP connect has completed. Setup the TLS
  * layer and do all necessary magic.
@@ -105,7 +119,7 @@ Curl_gtls_connect(struct connectdata *conn,
                   int sockindex)
 
 {
-  const int cert_type_priority[3] = { GNUTLS_CRT_X509, 0 };
+  const int cert_type_priority[] = { GNUTLS_CRT_X509, 0 };
   struct SessionHandle *data = conn->data;
   gnutls_session session;
   int rc;
@@ -135,25 +149,13 @@ Curl_gtls_connect(struct connectdata *conn,
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-  if(data->set.ssl.CAfile) {
-    /* set the trusted CA cert bundle file */
-
-    /*
-     * Unfortunately, if a file name is set here and this function fails for
-     * whatever reason (missing file, bad file, etc), gnutls will no longer
-     * handshake properly but it just loops forever. Therefore, we must return
-     * error here if we get an error when setting the CA cert file name.
-     *
-     * (Question/report posted to the help-gnutls mailing list, April 8 2005)
-     */
-    rc = gnutls_certificate_set_x509_trust_file(conn->ssl[sockindex].cred,
-                                                data->set.ssl.CAfile,
-                                                GNUTLS_X509_FMT_PEM);
-    if(rc) {
-      failf(data, "error reading the ca cert file %s",
-            data->set.ssl.CAfile);
-      return CURLE_SSL_CACERT;
-    }
+  /* set the trusted CA cert bundle file */
+  rc = gnutls_certificate_set_x509_trust_file(conn->ssl[sockindex].cred,
+                                              data->set.ssl.CAfile,
+                                              GNUTLS_X509_FMT_PEM);
+  if(rc) {
+    infof(data, "error reading the ca cert file %s",
+          data->set.ssl.CAfile);
   }
 
   /* Initialize TLS session as a client */
