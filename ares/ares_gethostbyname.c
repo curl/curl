@@ -12,7 +12,7 @@
  * this software for any purpose.  It is provided "as is"
  * without express or implied warranty.
  */
-/* TODO: IPv6 sortlist */
+
 #include "setup.h"
 #include <sys/types.h>
 
@@ -60,7 +60,11 @@ static int fake_hostent(const char *name, int family, ares_host_callback callbac
 static int file_lookup(const char *name, int family, struct hostent **host);
 static void sort_addresses(struct hostent *host, struct apattern *sortlist,
                            int nsort);
+static void sort6_addresses(struct hostent *host, struct apattern *sortlist,
+                           int nsort);
 static int get_address_index(struct in_addr *addr, struct apattern *sortlist,
+                             int nsort);
+static int get6_address_index(struct in6_addr *addr, struct apattern *sortlist,
                              int nsort);
 
 void ares_gethostbyname(ares_channel channel, const char *name, int family,
@@ -154,10 +158,8 @@ static void host_callback(void *arg, int status, unsigned char *abuf, int alen)
       else if (hquery->family == AF_INET6)
         {
           status = ares_parse_aaaa_reply(abuf, alen, &host);
-#if 0
           if (host && channel->nsort)
-            sort_addresses(host, channel->sortlist, channel->nsort);
-#endif
+            sort6_addresses(host, channel->sortlist, channel->nsort);
         }
       end_hquery(hquery, status, host);
     }
@@ -331,12 +333,66 @@ static int get_address_index(struct in_addr *addr, struct apattern *sortlist,
 
   for (i = 0; i < nsort; i++)
     {
-      if (sortlist[i].type = PATTERN_MASK)
-        if ((addr->s_addr & sortlist[i].mask.addr.s_addr) == sortlist[i].addr.s_addr)
-          break;
+      if (sortlist[i].family != AF_INET)
+        continue;
+      if (sortlist[i].type == PATTERN_MASK)
+        {
+          if ((addr->s_addr & sortlist[i].mask.addr.addr4.s_addr) 
+              == sortlist[i].addr.addr4.s_addr)
+            break;
+        }
       else
-        if (!ares_bitncmp(&addr->s_addr, &sortlist[i].addr.s_addr, sortlist[i].mask.bits))
+        {
+          if (!ares_bitncmp(&addr->s_addr, &sortlist[i].addr.addr4.s_addr, 
+                            sortlist[i].mask.bits))
+            break;
+        }
+    }
+  return i;
+}
+
+static void sort6_addresses(struct hostent *host, struct apattern *sortlist,
+                           int nsort)
+{
+  struct in6_addr a1, a2;
+  int i1, i2, ind1, ind2;
+
+  /* This is a simple insertion sort, not optimized at all.  i1 walks
+   * through the address list, with the loop invariant that everything
+   * to the left of i1 is sorted.  In the loop body, the value at i1 is moved
+   * back through the list (via i2) until it is in sorted order.
+   */
+  for (i1 = 0; host->h_addr_list[i1]; i1++)
+    {
+      memcpy(&a1, host->h_addr_list[i1], sizeof(struct in6_addr));
+      ind1 = get6_address_index(&a1, sortlist, nsort);
+      for (i2 = i1 - 1; i2 >= 0; i2--)
+        {
+          memcpy(&a2, host->h_addr_list[i2], sizeof(struct in6_addr));
+          ind2 = get6_address_index(&a2, sortlist, nsort);
+          if (ind2 <= ind1)
+            break;
+          memcpy(host->h_addr_list[i2 + 1], &a2, sizeof(struct in6_addr));
+        }
+      memcpy(host->h_addr_list[i2 + 1], &a1, sizeof(struct in6_addr));
+    }
+}
+
+/* Find the first entry in sortlist which matches addr.  Return nsort
+ * if none of them match.
+ */
+static int get6_address_index(struct in6_addr *addr, struct apattern *sortlist,
+                             int nsort)
+{
+  int i;
+
+  for (i = 0; i < nsort; i++)
+    {
+      if (sortlist[i].family != AF_INET6)
+        continue;
+        if (!ares_bitncmp(&addr->s6_addr, &sortlist[i].addr.addr6.s6_addr, sortlist[i].mask.bits))
           break;
     }
   return i;
 }
+

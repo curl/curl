@@ -830,7 +830,7 @@ static int config_nameserver(struct server_state **servers, int *nservers,
 static int config_sortlist(struct apattern **sortlist, int *nsort,
                            const char *str)
 {
-  struct apattern pat, *newsort;
+  struct apattern pat;
   const char *q;
 
   /* Add sortlist entries. */
@@ -857,26 +857,39 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
       else
         ipbufpfx[0] = 0;
       /* Lets see if it is CIDR */
-      if (ipbufpfx && 
-          (bits = ares_inet_net_pton(AF_INET, ipbufpfx, &pat.addr, sizeof(pat.addr))) > 0)
+      /* First we'll try IPv6 */
+      if ((bits = ares_inet_net_pton(AF_INET6, ipbufpfx ? ipbufpfx : ipbuf, &pat.addr.addr6, 
+                                     sizeof(pat.addr.addr6))) > 0)
         {
           pat.type = PATTERN_CIDR;
           pat.mask.bits = bits;
+          pat.family = AF_INET6;
+          if (!sortlist_alloc(sortlist, nsort, &pat))
+            return ARES_ENOMEM;
+        }
+      if (ipbufpfx && 
+          (bits = ares_inet_net_pton(AF_INET, ipbufpfx, &pat.addr.addr4, 
+                                     sizeof(pat.addr.addr4))) > 0)
+        {
+          pat.type = PATTERN_CIDR;
+          pat.mask.bits = bits;
+          pat.family = AF_INET;
           if (!sortlist_alloc(sortlist, nsort, &pat))
             return ARES_ENOMEM;
         }
       /* See if it is just a regular IP */
-      else if (ip_addr(ipbuf, (int)(q-str), &pat.addr) == 0)
+      else if (ip_addr(ipbuf, (int)(q-str), &pat.addr.addr4) == 0)
         {
           if (ipbufpfx)
             {
               memcpy(ipbuf, str, (int)(q-str));
               ipbuf[(int)(q-str)] = 0;
-              if (ip_addr(ipbuf, (int)(q - str), &pat.mask.addr) != 0)
+              if (ip_addr(ipbuf, (int)(q - str), &pat.mask.addr.addr4) != 0)
                 natural_mask(&pat);
             }
           else
             natural_mask(&pat);
+          pat.family = AF_INET;
 	  pat.type = PATTERN_MASK;
           if (!sortlist_alloc(sortlist, nsort, &pat))
             return ARES_ENOMEM;
@@ -1030,16 +1043,16 @@ static void natural_mask(struct apattern *pat)
   /* Store a host-byte-order copy of pat in a struct in_addr.  Icky,
    * but portable.
    */
-  addr.s_addr = ntohl(pat->addr.s_addr);
+  addr.s_addr = ntohl(pat->addr.addr4.s_addr);
 
   /* This is out of date in the CIDR world, but some people might
    * still rely on it.
    */
   if (IN_CLASSA(addr.s_addr))
-    pat->mask.addr.s_addr = htonl(IN_CLASSA_NET);
+    pat->mask.addr.addr4.s_addr = htonl(IN_CLASSA_NET);
   else if (IN_CLASSB(addr.s_addr))
-    pat->mask.addr.s_addr = htonl(IN_CLASSB_NET);
+    pat->mask.addr.addr4.s_addr = htonl(IN_CLASSB_NET);
   else
-    pat->mask.addr.s_addr = htonl(IN_CLASSC_NET);
+    pat->mask.addr.addr4.s_addr = htonl(IN_CLASSC_NET);
 }
 #endif

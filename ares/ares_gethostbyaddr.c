@@ -39,11 +39,6 @@
 #undef WIN32
 #endif
 
-union ares_addr {
-  struct in_addr addr4;
-  struct in6_addr addr6;
-};
-
 struct addr_query {
   /* Arguments passed to ares_gethostbyaddr() */
   ares_channel channel;

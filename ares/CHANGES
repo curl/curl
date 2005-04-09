@@ -2,6 +2,8 @@
 
 * April 9
 
+- Made sortlist support IPv6 (this can probably use some testing).
+
 - Made sortlist support CIDR matching for IPv4.
 
 * April 8

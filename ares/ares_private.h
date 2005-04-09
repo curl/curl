@@ -127,13 +127,19 @@ struct query {
 #define PATTERN_MASK 0x1
 #define PATTERN_CIDR 0x2
 
+union ares_addr {
+  struct in_addr addr4;
+  struct in6_addr addr6;
+};
+
 struct apattern {
-  struct in_addr addr;
+  union ares_addr addr;
   union
   {
-    struct in_addr addr;
+    union ares_addr addr;
     unsigned short bits;
   } mask;
+  int family;
   unsigned short type;
 };
 
