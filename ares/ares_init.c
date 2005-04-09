@@ -27,6 +27,10 @@
 #include <sys/time.h>
 #endif
 
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <netdb.h>
@@ -47,6 +51,7 @@
 #include <errno.h>
 #include "ares.h"
 #include "ares_private.h"
+#include "inet_net_pton.h"
 
 #ifdef WATT32
 #undef WIN32  /* Redefined in MingW/MSVC headers */
@@ -63,6 +68,7 @@ static int config_nameserver(struct server_state **servers, int *nservers,
 static int set_search(ares_channel channel, const char *str);
 static int set_options(ares_channel channel, const char *str);
 static const char *try_option(const char *p, const char *q, const char *opt);
+static int sortlist_alloc(struct apattern **sortlist, int *nsort, struct apattern *pat);
 #ifndef WIN32
 static int ip_addr(const char *s, int len, struct in_addr *addr);
 static void natural_mask(struct apattern *pat);
@@ -830,30 +836,50 @@ static int config_sortlist(struct apattern **sortlist, int *nsort,
   /* Add sortlist entries. */
   while (*str && *str != ';')
     {
+      int bits;
+      char ipbuf[16], ipbufpfx[32];
+      /* Find just the IP */
       q = str;
       while (*q && *q != '/' && *q != ';' && !isspace((unsigned char)*q))
         q++;
-      if (ip_addr(str, (int)(q - str), &pat.addr) == 0)
+      memcpy(ipbuf, str, (int)(q-str));
+      ipbuf[(int)(q-str)] = 0;      
+      /* Find the prefix */
+      if (*q == '/')
         {
-          /* We have a pattern address; now determine the mask. */
-          if (*q == '/')
+          const char *str2 = q+1;
+          while (*q && *q != ';' && !isspace((unsigned char)*q))
+            q++;
+          memcpy(ipbufpfx, str, (int)(q-str));
+          ipbufpfx[(int)(q-str)] = 0;
+          str = str2;
+        }
+      else
+        ipbufpfx[0] = 0;
+      /* Lets see if it is CIDR */
+      if (ipbufpfx && 
+          (bits = ares_inet_net_pton(AF_INET, ipbufpfx, &pat.addr, sizeof(pat.addr))) > 0)
+        {
+          pat.type = PATTERN_CIDR;
+          pat.mask.bits = bits;
+          if (!sortlist_alloc(sortlist, nsort, &pat))
+            return ARES_ENOMEM;
+        }
+      /* See if it is just a regular IP */
+      else if (ip_addr(ipbuf, (int)(q-str), &pat.addr) == 0)
+        {
+          if (ipbufpfx)
             {
-              str = q + 1;
-              while (*q && *q != ';' && !isspace((unsigned char)*q))
-                q++;
-              if (ip_addr(str, (int)(q - str), &pat.mask) != 0)
+              memcpy(ipbuf, str, (int)(q-str));
+              ipbuf[(int)(q-str)] = 0;
+              if (ip_addr(ipbuf, (int)(q - str), &pat.mask.addr) != 0)
                 natural_mask(&pat);
             }
           else
             natural_mask(&pat);
-
-          /* Add this pattern to our list. */
-          newsort = realloc(*sortlist, (*nsort + 1) * sizeof(struct apattern));
-          if (!newsort)
+	  pat.type = PATTERN_MASK;
+          if (!sortlist_alloc(sortlist, nsort, &pat))
             return ARES_ENOMEM;
-          newsort[*nsort] = pat;
-          *sortlist = newsort;
-          (*nsort)++;
         }
       else
         {
@@ -971,16 +997,25 @@ static const char *try_option(const char *p, const char *q, const char *opt)
   return ((size_t)(q - p) > len && !strncmp(p, opt, len)) ? &p[len] : NULL;
 }
 
-#ifndef WIN32
-static int ip_addr(const char *s, int len, struct in_addr *addr)
+static int sortlist_alloc(struct apattern **sortlist, int *nsort, struct apattern *pat)
 {
-  char ipbuf[16];
+  struct apattern *newsort;
+  newsort = realloc(*sortlist, (*nsort + 1) * sizeof(struct apattern));
+  if (!newsort)
+    return 0;
+  newsort[*nsort] = *pat;
+  *sortlist = newsort;
+  (*nsort)++;
+  return 1;
+}
+
+#ifndef WIN32
+static int ip_addr(const char *ipbuf, int len, struct in_addr *addr)
+{
 
   /* Four octets and three periods yields at most 15 characters. */
   if (len > 15)
     return -1;
-  memcpy(ipbuf, s, len);
-  ipbuf[len] = 0;
 
   addr->s_addr = inet_addr(ipbuf);
   if (addr->s_addr == INADDR_NONE && strcmp(ipbuf, "255.255.255.255") != 0)
@@ -1001,10 +1036,10 @@ static void natural_mask(struct apattern *pat)
    * still rely on it.
    */
   if (IN_CLASSA(addr.s_addr))
-    pat->mask.s_addr = htonl(IN_CLASSA_NET);
+    pat->mask.addr.s_addr = htonl(IN_CLASSA_NET);
   else if (IN_CLASSB(addr.s_addr))
-    pat->mask.s_addr = htonl(IN_CLASSB_NET);
+    pat->mask.addr.s_addr = htonl(IN_CLASSB_NET);
   else
-    pat->mask.s_addr = htonl(IN_CLASSC_NET);
+    pat->mask.addr.s_addr = htonl(IN_CLASSC_NET);
 }
 #endif

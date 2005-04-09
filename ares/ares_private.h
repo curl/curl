@@ -124,9 +124,17 @@ struct query {
 };
 
 /* An IP address pattern; matches an IP address X if X & mask == addr */
+#define PATTERN_MASK 0x1
+#define PATTERN_CIDR 0x2
+
 struct apattern {
   struct in_addr addr;
-  struct in_addr mask;
+  union
+  {
+    struct in_addr addr;
+    unsigned short bits;
+  } mask;
+  unsigned short type;
 };
 
 struct ares_channeldata {

@@ -1,5 +1,9 @@
   Changelog for the c-ares project
 
+* April 9
+
+- Made sortlist support CIDR matching for IPv4.
+
 * April 8
 
 - Added preliminary IPv6 support to ares_gethostbyname. Currently, sortlist

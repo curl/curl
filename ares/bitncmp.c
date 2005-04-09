@@ -19,6 +19,7 @@
 
 #include <sys/types.h>
 #include <string.h>
+#include <stdlib.h>
 #include "bitncmp.h"
 
 /*

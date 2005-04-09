@@ -34,6 +34,7 @@
 #include "ares.h"
 #include "ares_private.h"
 #include "inet_net_pton.h"
+#include "bitncmp.h"
 
 #ifdef WATT32
 #undef WIN32
@@ -189,10 +190,7 @@ static void end_hquery(struct host_query *hquery, int status,
 static int fake_hostent(const char *name, int family, ares_host_callback callback,
                         void *arg)
 {
-  struct in_addr addr;
-  struct in6_addr addr6;
   struct hostent hostent;
-  const char *p;
   char *aliases[1] = { NULL };
   char *addrs[2];
   int result = 0;
@@ -333,8 +331,12 @@ static int get_address_index(struct in_addr *addr, struct apattern *sortlist,
 
   for (i = 0; i < nsort; i++)
     {
-      if ((addr->s_addr & sortlist[i].mask.s_addr) == sortlist[i].addr.s_addr)
-        break;
+      if (sortlist[i].type = PATTERN_MASK)
+        if ((addr->s_addr & sortlist[i].mask.addr.s_addr) == sortlist[i].addr.s_addr)
+          break;
+      else
+        if (!ares_bitncmp(&addr->s_addr, &sortlist[i].addr.s_addr, sortlist[i].mask.bits))
+          break;
     }
   return i;
 }
