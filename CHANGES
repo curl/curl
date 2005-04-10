@@ -6,6 +6,11 @@
 
                                   Changelog
 
+Daniel (8 April 2005)
+- Cory Nelson reported a problem with a HTTP server that responded with a 304
+  response containing an "illegal" Content-Length: header, which was not
+  properly ignored by libcurl. Now it is. Test case 249 verifies.
+
 Daniel (7 April 2005)
 - Added ability to build and run with GnuTLS as an alternative to OpenSSL for
   the secure layer. configure --with-gnutls enables with. Note that the

@@ -5,7 +5,7 @@ Curl and libcurl 7.13.3
  Available command line options:           106
  Available curl_easy_setopt() options:     122
  Number of public functions in libcurl:    46
- Amount of public web site mirrors:        20
+ Amount of public web site mirrors:        21
  Number of known libcurl bindings:         31
 
 This release includes the following changes:
@@ -15,15 +15,17 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o HTTP 304 response with Content-Length: header
  o time-conditioned FTP uploads
 
 Other curl-related news since the previous public release:
 
+ o http://curl.mirroring.de/ is a new german curl mirror
  o pycurl 7.13.2: http://pycurl.sf.net/
 
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-
+ Christophe Legry,Cory Nelson 
 
         Thanks! (and sorry if I forgot to mention someone)
