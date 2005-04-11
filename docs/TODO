@@ -26,7 +26,7 @@ TODO
 
  * More data sharing. curl_share_* functions already exist and work, and they
    can be extended to share more. For example, enable sharing of the ares
-   channel.
+   channel and the connection cache.
 
  * Introduce a new error code indicating authentication problems (for proxy
    CONNECT error 407 for example). This cannot be an error code, we must not
@@ -35,16 +35,15 @@ TODO
 
  * Use 'struct lifreq' and SIOCGLIFADDR instead of 'struct ifreq' and
    SIOCGIFADDR on newer Solaris versions as they claim the latter is obsolete.
+   To support ipv6 interface addresses properly.
 
  * Add the following to curl_easy_getinfo(): GET_HTTP_IP, GET_FTP_IP and
    GET_FTP_DATA_IP. Return a string with the used IP. Suggested by Alan.
 
  LIBCURL - multi interface
 
- * Add a curl_multi_fdset() alternative that returns only two arrays with file
-   desrciptors for reading and writing to allow the app to use whatever
-   function it prefers. Plus, this allows apps to avoid the FD_SETSIZE problem
-   with select().
+ * Add a curl_multi_fdset() alternative. this allows apps to avoid the
+   FD_SETSIZE problem with select().
 
  * Add curl_multi_timeout() to make libcurl's ares-functionality better.
 
@@ -67,9 +66,6 @@ TODO
 
  * Make the detection of (bad) %0d and %0a codes in FTP url parts earlier in
    the process to avoid doing a resolve and connect in vain.
-
- * Code overhaul to make it more state-machine like and to _never_ block on
-   waiting for server responses when used with the multi interface.
 
  * Support GSS/Kerberos 5 for ftp file transfer. This will allow user
    authentication and file encryption.  Possible libraries and example clients
@@ -146,14 +142,9 @@ TODO
    it be? There's so much that could be done if it were! (brought by Chris
    Clark)
 
- * Make curl's SSL layer option capable of using other free SSL libraries.
-   Such as the Mozilla Security Services
-   (http://www.mozilla.org/projects/security/pki/nss/) and GnuTLS
-   (http://www.gnu.org/software/gnutls/) This subject has been brought up
-   again recently since GPL-licensed applications that link with libcurl MAY
-   NOT distribute binaries that use OpenSSL without adding an exception clause
-   to the GPL license. See the LICENSE-MIXING document and this:
-   http://www.gnome.org/~markmc/openssl-and-the-gpl.html
+ * Make curl's SSL layer capable of using other free SSL libraries.  Such as
+   the Mozilla Security Services:
+   http://www.mozilla.org/projects/security/pki/nss/
 
  LDAP
 
