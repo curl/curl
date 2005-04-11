@@ -1,4 +1,4 @@
-Updated: April 5, 2005 (http://curl.haxx.se/docs/faq.html)
+Updated: April 11, 2005 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -77,6 +77,7 @@ FAQ
   5.9 How does libcurl resolve host names?
   5.10 How do I prevent libcurl from writing the response to stdout?
   5.11 How do I make libcurl not receive the whole HTTP response?
+  5.12 Can I make libcurl fake or hide my real IP address?
 
  6. License Issues
   6.1 I have a GPL program, can I use the libcurl library?
@@ -897,6 +898,20 @@ FAQ
 
   You make the write callback (or progress callback) return an error and
   libcurl will then abort the transfer.
+
+  5.12 Can I make libcurl fake or hide my real IP address?
+
+  No. libcurl operates on a higher level than so. Besides, faking IP address
+  would imply sending IP packages with a made-up source address, and then you
+  normally get a problem with intercepting the packages sent back as they
+  would then not be routed to you!
+
+  If you use a proxy to access remote sites, the sites will not see your local
+  IP address but instead the address of the proxy.
+
+  Also note that on many networks NATs or other IP-munging techniques are used
+  that makes you see and use a different IP address locally than what the
+  remote server will see you coming from.
 
 
 6. License Issues
