@@ -12,7 +12,7 @@ MSVCFILES = vc/adig/adig.dep vc/adig/adig.dsp vc/adig/adig.mak	\
 # adig and ahost are just sample programs and thus not mentioned with the
 # regular sources and headers
 EXTRA_DIST = CHANGES README.cares Makefile.inc adig.c ahost.c $(man_MANS) \
- $(MSVCFILES)
+ $(MSVCFILES) AUTHORS
 
 
 VER=-version-info 0:0:0
