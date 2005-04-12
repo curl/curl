@@ -21,6 +21,7 @@ https
 </server>
 <features>
 SSL
+OpenSSL
 </features>
 <tool>
 lib509
