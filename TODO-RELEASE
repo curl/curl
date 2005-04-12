@@ -1,6 +1,6 @@
 Issues not sorted in any particular order.
 
-To get fixed in 7.13.3 (planned release: June 2005)
+To get fixed in 7.14.1 (planned release: June 2005)
 ======================
 
 58 - Fix KNOWN_BUGS #19: "FTP 3rd party transfers with the multi interface
@@ -10,7 +10,7 @@ To get fixed in 7.13.3 (planned release: June 2005)
      Awaits OpenSSL support for this, no need to support this in libcurl before
      there's an OpenSSL release that does it.
 
-To get fixed in 7.14.0
+To get fixed in 7.15.0
 ======================
 
 55 - Add a function to the multi interface that gets file descriptors, as an
@@ -24,7 +24,7 @@ To get fixed in 7.14.0
      internally use and assume the multi interface. The select()-loop should
      use the new function from (55).
 
-To get fixed in 7.15.0
+To get fixed in 7.16.0
 ======================
 
 57 - Add an interface to libcurl for getting and setting cookies from an easy
