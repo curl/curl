@@ -116,6 +116,8 @@ my $has_ipv6;    # set if libcurl is built with IPv6 support
 my $has_libz;    # set if libcurl is built with libz support
 my $has_getrlimit;  # set if system has getrlimit()
 my $has_ntlm;    # set if libcurl is built with NTLM support
+my $has_openssl; # set if libcurl is built with OpenSSL
+my $has_gnutls;  # set if libcurl is built with GnuTLS
 
 my $skipped=0;  # number of tests skipped; reported in main loop
 my %skipped;    # skipped{reason}=counter, reasons for skip
@@ -774,8 +776,7 @@ sub checkcurl {
                 }
                 $pwd =~ s#\\#/#g;
             }
-            elsif ($curl =~ /win32/)
-            {
+            elsif ($curl =~ /win32/) {
                # Native Windows builds don't understand the
                # output of cygwin's pwd.  It will be
                # something like /cygdrive/c/<some path>.
@@ -788,6 +789,14 @@ sub checkcurl {
                # have to escape them to get them to curl
                # through a shell.
                chomp($pwd = `cygpath -m $pwd`);
+           }
+           elsif ($curl =~ /openssl/i) {
+               # OpenSSL in use
+               $has_openssl=1;
+           }
+           elsif ($curl =~ /gnutls/i) {
+               # GnuTLS in use
+               $has_gnutls=1;
            }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
@@ -940,6 +949,16 @@ sub singletest {
 
         if($f eq "SSL") {
             if($ssl_version) {
+                next;
+            }
+        }
+        elsif($f eq "OpenSSL") {
+            if($has_openssl) {
+                next;
+            }
+        }
+        elsif($f eq "GnuTLS") {
+            if($has_gnutls) {
                 next;
             }
         }
