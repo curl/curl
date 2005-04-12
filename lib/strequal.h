@@ -25,14 +25,6 @@
 
 #include <curl/curl.h>
 
-#if 0
-/*
- * These two actually are public functions, which are in <curl/curl.h>
- */
-int curl_strequal(const char *first, const char *second);
-int curl_strnequal(const char *first, const char *second, size_t max);
-#endif
-
 #define strequal(a,b) curl_strequal(a,b)
 #define strnequal(a,b,c) curl_strnequal(a,b,c)
 
@@ -45,7 +37,7 @@ char *Curl_strcasestr(const char *haystack, const char *needle);
 
 #ifndef HAVE_STRLCAT
 #define strlcat(x,y,z) Curl_strlcat(x,y,z)
-size_t Curl_strlcat(char *dst, const char *src, size_t siz);
 #endif
+size_t strlcat(char *dst, const char *src, size_t siz);
 
 #endif
