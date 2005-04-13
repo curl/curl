@@ -707,6 +707,8 @@ int Curl_ossl_close_all(struct SessionHandle *data)
     ENGINE_free(data->state.engine);
     data->state.engine = NULL;
   }
+#else
+  (void)data;
 #endif
   return 0;
 }
