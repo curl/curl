@@ -101,7 +101,7 @@ FAQ
   cURL is the name of the project. The name is a play on 'Client for URLs',
   originally with URL spelled in uppercase to make it obvious it deals with
   URLs. The fact it can also be pronounced 'see URL' also helped, it works as
-  an abbrivation for "Client URL Request Library" or why not the recursive
+  an abbreviation for "Client URL Request Library" or why not the recursive
   version: "Curl URL Request Library".
 
   The cURL project produces two products:
@@ -300,8 +300,8 @@ FAQ
 
   2.2 Does curl work/build with other SSL libraries?
 
-  Curl has been written to use OpenSSL, although there should not be much
-  problems using a different library. If anyone does "port" curl to use a
+  Curl has been written to use OpenSSL or GnuTLS, although there should not be
+  many problems using a different library. If anyone does "port" curl to use a
   different SSL library, we are of course very interested in getting the
   patch!
 
@@ -507,9 +507,9 @@ FAQ
     If the server doesn't require this, you don't need a client certificate.
 
   - Server certificate. The server you communicate with has a server
-    certificate. You can and should verify this certficate to make sure that
+    certificate. You can and should verify this certificate to make sure that
     you are truly talking to the real server and not a server impersonating
-    it. The server certificate verifaction process is made by using a
+    it. The server certificate verification process is made by using a
     Certificate Authority certificate ("CA cert") that was used to sign the
     server certificate. Server certificate verification is enabled by default
     in curl and libcurl and is often the reason for problems as explained in
@@ -741,7 +741,7 @@ FAQ
 
   Yes.
 
-  We have written the libcurl code specificly adjusted for multi-threaded
+  We have written the libcurl code specifically adjusted for multi-threaded
   programs. libcurl will use thread-safe functions instead of non-safe ones if
   your system has such.
 
