@@ -145,28 +145,18 @@ Curl_gtls_connect(struct connectdata *conn,
   /* allocate a cred struct */
   rc = gnutls_certificate_allocate_credentials(&conn->ssl[sockindex].cred);
   if(rc < 0) {
-    failf(data, "gnutls_cert_all_cred() failed: %d", rc);
+    failf(data, "gnutls_cert_all_cred() failed: %s", gnutls_strerror(rc));
     return CURLE_SSL_CONNECT_ERROR;
   }
 
   if(data->set.ssl.CAfile) {
     /* set the trusted CA cert bundle file */
-
-    /*
-     * Unfortunately, if a file name is set here and this function fails for
-     * whatever reason (missing file, bad file, etc), gnutls will no longer
-     * handshake properly but it just loops forever. Therefore, we must return
-     * error here if we get an error when setting the CA cert file name.
-     *
-     * (Question/report posted to the help-gnutls mailing list, April 8 2005)
-     */
     rc = gnutls_certificate_set_x509_trust_file(conn->ssl[sockindex].cred,
                                                 data->set.ssl.CAfile,
                                                 GNUTLS_X509_FMT_PEM);
     if(rc) {
-      failf(data, "error reading the ca cert file %s",
-            data->set.ssl.CAfile);
-      return CURLE_SSL_CACERT;
+      infof(data, "error reading ca cert file %s (%s)",
+            data->set.ssl.CAfile, gnutls_strerror(rc));
     }
   }
 
