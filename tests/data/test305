@@ -16,7 +16,7 @@ https
 insecure HTTPS without permission
  </name>
  <command>
-https://%HOSTIP:%HTTPPORT/want/305 --cacert moooo
+https://%HOSTIP:%HTTPSPORT/want/305 --cacert moooo
 </command>
 </client>
 
