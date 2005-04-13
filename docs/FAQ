@@ -1,4 +1,4 @@
-Updated: April 11, 2005 (http://curl.haxx.se/docs/faq.html)
+Updated: April 13, 2005 (http://curl.haxx.se/docs/faq.html)
                                   _   _ ____  _
                               ___| | | |  _ \| |
                              / __| | | | |_) | |
@@ -745,8 +745,16 @@ FAQ
   programs. libcurl will use thread-safe functions instead of non-safe ones if
   your system has such.
 
-  We would appreciate some kind of report or README file from those who have
-  used libcurl in a threaded environment.
+  If you use a OpenSSL-powered libcurl in a multi-threaded environment, you
+  need to provide one or two locking functions:
+
+    http://www.openssl.org/docs/crypto/threads.html#DESCRIPTION
+
+  If you use a GnuTLS-powered libcurl in a multi-threaded environment, you
+  need to provide locking function(s) for libgcrypt (which is used by GnuTLS
+  for the crypto functions).
+
+    [informative link missing]
 
   5.2 How can I receive all data into a large memory chunk?
 
