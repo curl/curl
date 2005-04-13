@@ -139,3 +139,7 @@ August 2004:
  Number of public functions in libcurl:    36
  Amount of public web site mirrors:        12
  Number of known libcurl bindings:         26
+
+April 2005:
+
+GnuTLS can now optionally be used for the secure layer when curl is built.
