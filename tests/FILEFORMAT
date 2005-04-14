@@ -57,18 +57,22 @@ number to return on a ftp SIZE command (set to -1 to make this command fail)
 what to send back if the client sends a (FTP) MDTM command, set to -1 to
 have it return that the file doesn't exist
 </mdtm>
-<servercmd>
-special purpose server-command to control its behavior *before* the
-reply is sent:
-
-auth_required - server fails if no auth is provided
-</servercmd>
 <postcmd>
 special purpose server-command to control its behavior *after* the
 reply is sent
 </postcmd>
 <servercmd>
- equivalent to <cmd> but for HTTP, one specified command is supported:
+Special-commands for the server.
+For FTP, these are supported:
+REPLY
+COUNT
+DELAY
+RETRWEIRDO
+RETRNOSIZE
+NOSAVE
+SLOWDOWN
+
+For HTTP, one specified command is supported:
  "auth_required" - if this is set and a POST/PUT is made without auth, the
  server will NOT wait for the full request body to get sent
 </servercmd>

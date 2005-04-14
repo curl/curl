@@ -1067,8 +1067,8 @@ sub singletest {
     # if this section exists, we verify upload
     my @upload = getpart("verify", "upload");
 
-    # if this section exists, it is FTP server instructions:
-    my @ftpservercmd = getpart("server", "instruction");
+    # if this section exists, it might be FTP server instructions:
+    my @ftpservercmd = getpart("reply", "servercmd");
 
     my $CURLOUT="$LOGDIR/curl$testnum.out"; # curl output if not stdout
 

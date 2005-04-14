@@ -118,7 +118,7 @@ sub sendcontrol {
 
         for(@a) {
             print $_;
-            select(undef, undef, undef, 0.1);
+            select(undef, undef, undef, 0.02);
         }
     }
 
@@ -544,6 +544,7 @@ sub customize {
     undef %customreply;
 
     $nosave = 0; # default is to save as normal
+    $controldelay = 0; # default is no delaying the responses
 
     open(CUSTOM, "<log/ftpserver.cmd") ||
         return 1;
@@ -564,6 +565,10 @@ sub customize {
         elsif($_ =~ /DELAY ([A-Z]+) (\d*)/) {
             $delayreply{$1}=$2;
             logmsg "FTPD: delay reply for $1 with $2 seconds\n";
+        }
+        elsif($_ =~ /SLOWDOWN/) {
+            $controldelay=1;
+            logmsg "FTPD: send response with 0.1 sec delay between each byte\n";
         }
         elsif($_ =~ /RETRWEIRDO/) {
             logmsg "FTPD: instructed to use RETRWEIRDO\n";
