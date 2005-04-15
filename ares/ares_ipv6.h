@@ -14,18 +14,30 @@
  * without express or implied warranty.
  */
 
-#ifndef INET_NET_PTON_H
-#define INET_NET_PTON_H
+#ifndef ARES_IPV6_H
+#define ARES_IPV6_H
 
-#if defined(HAVE_INET_PTON) && defined(HAVE_INET_PTON_IPV6)
-#define ares_inet_pton(x,y,z) inet_pton(x,y,z)
-#else
-int ares_inet_pton(int af, const char *src, void *dst);
-#endif
-#if defined(HAVE_INET_NET_PTON) && defined(HAVE_INET_NET_PTON_IPV6)
-#define ares_inet_net_pton(w,x,y,z) inet_net_pton(w,x,y,z)
-#else
-int ares_inet_net_pton(int af, const char *src, void *dst, size_t size);
+#ifndef HAVE_PF_INET6
+#define PF_INET6 AF_INET6
 #endif
 
-#endif /* INET_NET_PTON_H */
+#ifndef HAVE_STRUCT_IN6_ADDR
+struct in6_addr
+{
+  unsigned char s6_addr[16];
+};
+#endif
+
+#ifndef NS_IN6ADDRSZ
+#define NS_IN6ADDRSZ SIZEOF_STRUCT_IN6_ADDR
+#endif
+
+#ifndef NS_INADDRSZ
+#define NS_INADDRSZ SIZEOF_STRUCT_IN_ADDR
+#endif
+
+#ifndef NS_INT16SZ
+#define NS_INT16SZ 2
+#endif
+
+#endif /* ARES_IPV6_H */

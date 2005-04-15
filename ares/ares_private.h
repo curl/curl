@@ -69,6 +69,8 @@
 
 #endif
 
+#include "ares_ipv6.h"
+
 struct send_request {
   /* Remaining data to send */
   const unsigned char *data;
